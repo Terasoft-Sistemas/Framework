@@ -2,7 +2,7 @@ unit Terasoft.Framework.ListaSimples.Impl;
 
 interface
   uses
-    Terasoft.Framework.Types,
+    Terasoft.Framework.SimpleTypes,
     Spring.Collections,
     Terasoft.Framework.ListaSimples;
 
@@ -107,13 +107,15 @@ end;
 
 function TEnumeratorSimples<TValue>.GetCurrent: TValue;
 begin
-  Result := fLista.get(position);
+  if not (position<0) then
+    Result := fLista.get(position);
 end;
 
 function TEnumeratorSimples<TValue>.MoveNext: Boolean;
 begin
-  Result := position < fLista.count;
-  inc(position);
+  Result := (position > -1) and (position < fLista.count);
+  if(Result) then
+    inc(position);
 end;
 
 end.

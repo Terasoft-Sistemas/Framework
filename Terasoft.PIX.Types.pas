@@ -4,7 +4,7 @@ interface
 
   uses
     SysUtils,Classes,
-    Terasoft.Framework.Types,
+    Terasoft.Framework.SimpleTypes,
     Terasoft.Framework.ListaSimples;
 
 type

@@ -2,7 +2,7 @@ unit Terasoft.Framework.ListaSimples;
 
 interface
   uses
-    Terasoft.Framework.Types;
+    Terasoft.Framework.SimpleTypes;
 
   type
     IEnumeratorSimples<TValue> = interface(IInvokable)
