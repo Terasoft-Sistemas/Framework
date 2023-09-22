@@ -113,9 +113,8 @@ end;
 
 function TEnumeratorSimples<TValue>.MoveNext: Boolean;
 begin
-  Result := (position > -1) and (position < fLista.count);
-  if(Result) then
-    inc(position);
+  inc(position);
+  Result := position < fLista.count;
 end;
 
 end.
