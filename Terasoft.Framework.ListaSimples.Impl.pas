@@ -3,6 +3,7 @@ unit Terasoft.Framework.ListaSimples.Impl;
 interface
   uses
     Terasoft.Framework.SimpleTypes,
+    Terasoft.Framework.Types,
     Spring.Collections,
     Terasoft.Framework.ListaSimples;
 

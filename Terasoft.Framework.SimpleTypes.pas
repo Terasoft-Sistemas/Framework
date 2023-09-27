@@ -3,6 +3,8 @@
 unit Terasoft.Framework.SimpleTypes;
 
 interface
+  uses
+    SysUtils,Classes;
 
   type
 
