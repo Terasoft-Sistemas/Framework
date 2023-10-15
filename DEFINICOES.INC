@@ -614,3 +614,11 @@
   {$ifend}
 {$ifend}
 
+
+{$if not defined(__NO_LOG_THREAD__)}
+  {$if defined(__BPL__)}
+    {$define __NO_LOG_THREAD__}
+  {$ifend}
+{$ifend}
+
+
