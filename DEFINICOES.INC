@@ -1,3 +1,10 @@
+
+{$if defined(RELEASE)}
+  {$if not defined(__RELEASE__)}
+    {$define __RELEASE__}
+  {$ifend}
+{$ifend}
+
 {$I c:\Windows\DEFINICOESMACHINE.INC}
 
 {$I DEFINICOESLOCAIS.INC}
