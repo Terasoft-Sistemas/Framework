@@ -11,12 +11,15 @@ uses
 
 type
   TBaseForm = class(TForm)
+    procedure FormShow(Sender: TObject);
   private
     { Private declarations }
   protected
     procedure doView; virtual;
+    procedure doAfterShow; virtual;
   public
     procedure view; virtual;
+    procedure show; reintroduce;
     function ShowModal: Integer; override;
     { Public declarations }
   end;
@@ -30,9 +33,24 @@ implementation
 
 { TBaseForm }
 
+procedure TBaseForm.doAfterShow;
+begin
+  //
+end;
+
 procedure TBaseForm.doView;
 begin
+  //
+end;
 
+procedure TBaseForm.FormShow(Sender: TObject);
+begin
+  doAfterShow;
+end;
+
+procedure TBaseForm.show;
+begin
+  view;
 end;
 
 function TBaseForm.ShowModal: Integer;
@@ -43,9 +61,10 @@ end;
 
 procedure TBaseForm.view;
 begin
-  doView;
-  if not visible then
-    show;
+  if not visible then begin
+    doView;
+    inherited show;
+  end;
 end;
 
 end.
