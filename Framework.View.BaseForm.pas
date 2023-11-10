@@ -15,11 +15,12 @@ type
   private
     { Private declarations }
   protected
+    primeiroFoco: TWinControl;
     procedure doView; virtual;
     procedure doAfterShow; virtual;
   public
     procedure view; virtual;
-    procedure show; reintroduce;
+    procedure show;
     function ShowModal: Integer; override;
     { Public declarations }
   end;
@@ -35,7 +36,8 @@ implementation
 
 procedure TBaseForm.doAfterShow;
 begin
-  //
+  if assigned(primeiroFoco) then
+    primeiroFoco.SetFocus;
 end;
 
 procedure TBaseForm.doView;
