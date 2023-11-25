@@ -12,25 +12,25 @@ type
   TResumoDataTipo = (dtemissao, dtrecebimento, dtvencimento);
 
   TRetornoConsultaPixIndividual = record
-    erro: String;
+    erro: TipoWideStringFramework;
     Status,
     EndToEndId,
     IdentificadorId,
     Sender_Nome,
-    Sender_Cpf_Cnpj: String;
+    Sender_Cpf_Cnpj: TipoWideStringFramework;
     Sender_Data: TDate;
     Sender_Valor: Real;
   end;
 
   TRetornoConsultaPixLote = record
-    erro: String;
+    erro: TipoWideStringFramework;
     TransacaoId,
     TransacaoTipo,
     Status,
     EndToEndId,
     IdentificadorId,
     Sender_Nome,
-    Sender_Cpf_Cnpj: String;
+    Sender_Cpf_Cnpj: TipoWideStringFramework;
     Sender_Data,
     Expired_Data: TDate;
     Sender_Valor: Real;
@@ -39,7 +39,7 @@ type
   TListaRetornoConsultaPixLote = IListaSimples<TRetornoConsultaPixLote>;
 
   TRetornoExtrato = record
-    erro: String;
+    erro: TipoWideStringFramework;
     valido: boolean;
     TransacaoId,
     TransacaoTipo,
@@ -52,21 +52,21 @@ type
   TListaRetornoExtrato = IListaSimples<TRetornoExtrato>;
 
   TRetornoPixRecebimento = record
-     erro  : String;
+     erro  : TipoWideStringFramework;
      valido: boolean;
      id,
      data  : TipoWideStringFramework;
   end;
 
   TRetornoSaldo = record
-    erro: String;
+    erro: TipoWideStringFramework;
     SaldoTotal,
     SaldoDisponivel,
     SaldoBloqueado: Real;
   end;
 
   TRetornoRetirada = record
-    erro  : String;
+    erro  : TipoWideStringFramework;
     valido: boolean;
     TransacaoId,
     EndToEndId,
@@ -132,7 +132,7 @@ type
       function Retirada(pParametros: TParametros): TRetornoRetirada; stdcall;
       function Extrato(pParametros: TParametros): TListaRetornoExtrato; stdcall;
       function gerarPIX(pParametros: TParametros): TRetornoPixRecebimento; stdcall;
-      function ConsultarPIX(pParametros: TParametros): String; stdcall;
+      function ConsultarPIX(pParametros: TParametros): TipoWideStringFramework; stdcall;
       procedure recria(pParametros: TParametrosPixCobranca);
   end;
 
