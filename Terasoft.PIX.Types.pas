@@ -19,7 +19,7 @@ type
     Sender_Nome,
     Sender_Cpf_Cnpj: TipoWideStringFramework;
     Sender_Data: TDate;
-    Sender_Valor: Real;
+    Sender_Valor: Extended;
   end;
 
   TRetornoConsultaPixLote = record
@@ -33,7 +33,7 @@ type
     Sender_Cpf_Cnpj: TipoWideStringFramework;
     Sender_Data,
     Expired_Data: TDate;
-    Sender_Valor: Real;
+    Sender_Valor: Extended;
   end;
 
   TListaRetornoConsultaPixLote = IListaSimples<TRetornoConsultaPixLote>;
@@ -43,10 +43,10 @@ type
     valido: boolean;
     TransacaoId,
     TransacaoTipo,
-    Descricao,
-    Data,
-    Valor,
-    Tipo: Variant;
+    Tipo,
+    Descricao: TipoWideStringFramework;
+    Data: TDateTime;
+    Valor: Extended;
   end;
 
   TListaRetornoExtrato = IListaSimples<TRetornoExtrato>;
@@ -62,7 +62,7 @@ type
     erro: TipoWideStringFramework;
     SaldoTotal,
     SaldoDisponivel,
-    SaldoBloqueado: Real;
+    SaldoBloqueado: Extended;
   end;
 
   TRetornoRetirada = record
@@ -91,7 +91,7 @@ type
      SecretKey,
      Mensagem,
      ID         : TipoWideStringFramework;
-     Valor      : Real;
+     Valor      : Extended;
      Tempo      : Integer;
      DataInicio,
      DataFim    : TDate;
@@ -115,7 +115,7 @@ type
     Multa_Valor,
     Desconto_Valor,
     Valor,
-    Juros_Valor: Real;
+    Juros_Valor: Extended;
     Juros_Tipo,
     Multa_Tipo,
     Desconto_Tipo,
