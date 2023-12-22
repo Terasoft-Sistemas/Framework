@@ -1,3 +1,4 @@
+
 {$i definicoes.inc}
 
 unit Terasoft.Framework.SimpleTypes;
@@ -7,7 +8,6 @@ interface
     SysUtils,Classes;
 
   type
-
     TipoVariantJS = Variant;
 
     TipoOleString = OleVariant;
@@ -21,8 +21,6 @@ interface
     {$ifend}
 
     TipoWideStringFramework = WideString;
-
-
 
 implementation
 
