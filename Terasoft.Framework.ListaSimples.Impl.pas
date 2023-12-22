@@ -27,6 +27,12 @@ interface
       fUseLock: boolean;
       fSecaoCritica: TCriticalSection;
 
+      function me: IListaSimples<T>;
+
+      function clone: IListaSimples<T>;
+      function addFrom(const pFrom: IListaSimples<T>): IListaSimples<T>;
+      function addTo(pTo: IListaSimples<T>): IListaSimples<T>;
+
       //Queue
       procedure enqueue(const pValue: T);
       function dequeue(out pValue: T; pRemove: boolean): boolean;
@@ -45,7 +51,7 @@ interface
       procedure add(const pValue: T);
       function getTo(pIndex: Integer; out pValue: T; pRemove: boolean): boolean;
       function get(pIndex: Integer; pRemove: boolean): T;
-      procedure clear;
+      function clear: IListaSimples<T>;
       function count: Integer;
       procedure lock;
       procedure unlock;
@@ -69,6 +75,8 @@ interface
       function getItem(pIndex: Integer; out pValue: TPair<T,X>; pRemove: boolean ): boolean;
       function getRandom(out pValue: TPair<T,X>; pRemove: boolean ): boolean;
 
+      function me: IDicionarioSimples<T,X>;
+
       procedure lock;
       procedure unlock;
       function tryLock(pTimeout: Integer): boolean;
@@ -76,9 +84,13 @@ interface
       function getValues: IListaSimples<X>;
       function getKeys: IListaSimples<T>;
 
+      function clone: IDicionarioSimples<T,X>;
+      function addFrom(const pFrom: IDicionarioSimples<T,X>): IDicionarioSimples<T,X>;
+      function addTo(pTo: IDicionarioSimples<T,X>): IDicionarioSimples<T,X>;
+
       procedure add(pKey: T; pValue: X);
       function get(pKey: T; out pValue: X; pRemove: boolean ): boolean;
-      procedure clear;
+      function clear: IDicionarioSimples<T,X>;
       function count: Integer;
     public
       constructor Create;
@@ -139,8 +151,9 @@ begin
   end;
 end;
 
-procedure TListaSimples<T>.clear;
+function TListaSimples<T>.clear;
 begin
+  Result := self;
   if(fUseLock) then
     lock;
   try
@@ -150,6 +163,60 @@ begin
       unlock;
   end;
 end;
+
+function TListaSimples<T>.addFrom;
+  var
+    p: T;
+begin
+  Result := self;
+  if(pFrom=nil) or (pFrom=me) then
+    exit;
+  if(fUseLock) then
+    lock;
+  try
+    for p in pFrom do
+      fLista.add(p);
+  finally
+    if(fUseLock) then
+      unlock;
+  end;
+end;
+
+function TListaSimples<T>.addTo;
+  var
+    p: T;
+begin
+  Result := pTo;
+  if(pTo=nil) or (pTo=me) then
+    exit;
+  if(fUseLock) then
+    lock;
+  try
+    for p in fLista do
+      pTo.add(p);
+  finally
+    if(fUseLock) then
+      unlock;
+  end;
+end;
+
+function TListaSimples<T>.clone: IListaSimples<T>;
+  var
+    p: T;
+begin
+  if(fUseLock) then
+    lock;
+  try
+    Result := TListaSimplesCreator.CreateList<T>;
+    for p in fLista do
+      Result.add(p);
+    Result.useLock := fUseLock;
+  finally
+    if(fUseLock) then
+      unlock;
+  end;
+end;
+
 function TListaSimples<T>.count: Integer;
 begin
   if(fUseLock) then
@@ -267,6 +334,11 @@ begin
   fSecaoCritica.Enter;
 end;
 
+function TListaSimples<T>.me: IListaSimples<T>;
+begin
+  Result := self;
+end;
+
 function TListaSimples<T>.pop;
 begin
   Result := getLast(pValue,pRemove);
@@ -373,12 +445,66 @@ begin
   end;
 end;
 
-procedure TDicionarioSimples<T, X>.clear;
+function TDicionarioSimples<T, X>.addFrom(const pFrom: IDicionarioSimples<T, X>): IDicionarioSimples<T, X>;
+  var
+    par: TPair<T,X>;
 begin
+  Result := self;
+  if(pFrom=nil) or (pFrom=me) then
+    exit;
+  if(fUseLock) then
+    lock;
+  try
+    for par in pFrom do
+      fDicionario.AddOrSetValue(par.Key,par.Value);
+  finally
+    if(fUseLock) then
+      unlock;
+  end;
+end;
+
+function TDicionarioSimples<T, X>.addTo(pTo: IDicionarioSimples<T, X>): IDicionarioSimples<T, X>;
+  var
+    par: TPair<T,X>;
+begin
+  Result := pTo;
+  if(pTo=nil) or (pTo=me) then
+    exit;
+  if(fUseLock) then
+    lock;
+  try
+    for par in fDicionario do
+      pTo.Add(par.Key,par.Value);
+  finally
+    if(fUseLock) then
+      unlock;
+  end;
+end;
+
+function TDicionarioSimples<T, X>.clear;
+begin
+  Result := self;
   if(fUseLock) then
     lock;
   try
     fDicionario.Clear;
+  finally
+    if(fUseLock) then
+      unlock;
+  end;
+end;
+
+function TDicionarioSimples<T, X>.clone: IDicionarioSimples<T, X>;
+  var
+    par: TPair<T,X>;
+begin
+  if(fUseLock) then
+    lock;
+  try
+    Result := TListaSimplesCreator.CreateDictionary<T,X>;
+    for par in fDicionario do
+      Result.add(par.Key,par.Value);
+    Result.useLock := fUseLock;
   finally
     if(fUseLock) then
       unlock;
@@ -517,6 +643,11 @@ begin
   fSecaoCritica.Enter;
 end;
 
+function TDicionarioSimples<T, X>.me: IDicionarioSimples<T, X>;
+begin
+  Result := self;
+end;
+
 function TDicionarioSimples<T, X>.tryLock(pTimeout: Integer): boolean;
 begin
   Result := fSecaoCritica.TryEnter;
@@ -551,7 +682,6 @@ begin
   inc(position);
   Result := fLista.getItem(position,fCurrent);
 end;
-
 
 end.
 

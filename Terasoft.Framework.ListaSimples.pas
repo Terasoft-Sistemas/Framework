@@ -29,7 +29,7 @@ interface
       procedure add(const pValue: T);
       function getTo(pIndex: Integer; out value: T; pRemove: boolean = false): boolean;
       function get(pIndex: Integer; pRemove: boolean = false): T;
-      procedure clear;
+      function clear: IListaSimples<T>;
       function count: Integer;
       function GetEnumerator: IEnumeratorSimples<T>;
       procedure lock;
@@ -38,6 +38,10 @@ interface
       function getFirst(out pValue: T; pRemove: boolean = false): boolean;
       function getLast(out pValue: T; pRemove: boolean = false): boolean;
       function getRandom(out pValue: T; pRemove: boolean = true ): boolean;
+
+      function clone: IListaSimples<T>;
+      function addFrom(const pFrom: IListaSimples<T>): IListaSimples<T>;
+      function addTo(pTo: IListaSimples<T>): IListaSimples<T>;
 
       //Stacks
       procedure push(const pValue: T);
@@ -59,10 +63,14 @@ interface
 
       function GetEnumerator: IEnumeratorPair<T,X>;
 
+      function clone: IDicionarioSimples<T,X>;
+      function addFrom(const pFrom: IDicionarioSimples<T,X>): IDicionarioSimples<T,X>;
+      function addTo(pTo: IDicionarioSimples<T,X>): IDicionarioSimples<T,X>;
+
       procedure add(pKey: T; pValue: X);
       function get(pKey: T; out pValue: X; pRemove: boolean = false ): boolean;
       function getItem(pIndex: Integer; out pValue: TPair<T,X>; pRemove: boolean = false ): boolean;
-      procedure clear;
+      function clear: IDicionarioSimples<T,X>;
       function count: Integer;
 
       function getRandom(out pValue: TPair<T,X>; pRemove: boolean = true ): boolean;
@@ -94,11 +102,11 @@ implementation
 
 procedure testes;
   var
-    listaA: IListaSimples<Cardinal>;
+    listaA, listaB: IListaSimples<Cardinal>;
     b: Cardinal;
     i: Integer;
 
-    dicA: IDicionarioSimples<Cardinal,Cardinal>;
+    dicA,dicB: IDicionarioSimples<Cardinal,Cardinal>;
     par: TPair<Cardinal,Cardinal>;
     listaPar: IListaSimples<TPair<Cardinal,Cardinal>>;
 
@@ -108,6 +116,10 @@ begin
 
   for i := 0 to 10 do
     listaA.enqueue(i);
+
+  listaB := listaA.clone;
+  listaA.addFrom(listaB);
+  listaA := listaB.addTo(listaA);
 
   i := 0;
   while listaA.dequeue(b) do begin
@@ -134,8 +146,10 @@ begin
   for i := 0 to 10 do
     dicA.add(i,i);
 
+  dicB := dicA.clone;
+
   i := 0;
-  for par in dicA do
+  for par in dicB do
     inc(i,par.Value);
 
   listaPar := dicA.getList;
@@ -149,6 +163,18 @@ begin
   while listaPar.getRandom(par) do begin
     inc(i,par.Value);
   end;
+
+  dicA.clear;
+  for i := 0 to 10 do
+    dicA.add(i,i);
+
+  dicB := dicA.clone.clear;
+  dicB.addFrom(dicA);
+
+  i := 0;
+  for par in dicB do
+    inc(i,par.Value);
+
 
 
 end;
