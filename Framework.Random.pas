@@ -1,3 +1,6 @@
+
+{$i definicoes.inc}
+
 unit Framework.Random;
 
 interface
@@ -8,7 +11,7 @@ interface
   function randomWord: Word;
   function randomUINT32: UInt32;
   function randomInt64: UInt64;
-  function randomBytes(tamanho: Word): TBytes;
+  function randomBytes(tamanho: Word=0): TBytes;
 
 implementation
   uses
@@ -31,10 +34,12 @@ begin
   b := randomBytes(sizeof(UINT32));
   Result := PUINT32(b)^;
 end;
+
 function randomByte;
 begin
   Result := randomBytes(1)[0];
 end;
+
 function randomWord;
   var
     b: TBytes;
@@ -42,12 +47,13 @@ begin
   b := randomBytes(2);
   Result := PWORD(b)^;
 end;
+
 function randomBytes(tamanho: Word): TBytes;
   var
     hProv : HCRYPTPROV;
 begin
   if(tamanho<1) then
-    tamanho := 1;
+    tamanho := randomWord;
   if not CryptAcquireContext(hProv,
                              nil,
                              MS_ENHANCED_PROV,
