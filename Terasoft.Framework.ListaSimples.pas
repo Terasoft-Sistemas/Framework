@@ -134,6 +134,10 @@ begin
   for i := 0 to 10 do
     dicA.add(i,i);
 
+  i := 0;
+  for par in dicA do
+    inc(i,par.Value);
+
   listaPar := dicA.getList;
 
   i := 0;
