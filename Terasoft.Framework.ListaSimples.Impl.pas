@@ -121,12 +121,10 @@ interface
       destructor Destroy; override;
     end;
 
-
 implementation
   uses
     Framework.Random,
     SysUtils;
-
 
 { TListaSimples<T> }
 procedure TListaSimples<T>.setUseLock(const PValue: boolean);

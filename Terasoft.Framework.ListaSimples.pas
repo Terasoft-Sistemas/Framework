@@ -6,6 +6,7 @@ interface
 
   uses
     SysUtils,Classes,
+    Spring.Collections,
     System.Generics.Collections, Terasoft.Framework.SimpleTypes;
 
   type
@@ -89,6 +90,13 @@ interface
       property useLock: boolean read getUseLock write setUseLock;
     end;
 
+    TListaSimplesConverter = class
+    public
+      class function ToList<T>(const pOrigem: IListaSimples<T>): IList<T>; static;
+      class function ToDictionary<T,X>(const pOrigem: IDicionarioSimples<T,X>): IDictionary<T,X>; static;
+    end;
+
+
 {$if defined(__DEBUG_ANTONIO_BALLOON__)}
     procedure testes;
 {$ifend}
@@ -110,6 +118,9 @@ procedure testes;
     par: TPair<Cardinal,Cardinal>;
     listaPar: IListaSimples<TPair<Cardinal,Cardinal>>;
 
+    lista1: IList<Cardinal>;
+    dic1: IDictionary<Cardinal,Cardinal>;
+
 begin
 
   listaA := TListaSimplesCreator.CreateList<Cardinal>;
@@ -117,17 +128,21 @@ begin
   for i := 0 to 10 do
     listaA.enqueue(i);
 
+  lista1 := TListaSimplesConverter.ToList<Cardinal>(listaA);
+  i:=0;
+  for b in lista1 do
+    inc(i,b);
+
   listaB := listaA.clone;
   listaA.addFrom(listaB);
   listaA := listaB.addTo(listaA);
+
 
   i := 0;
   while listaA.dequeue(b) do begin
     inc(i,b);
   end;
 
-  for i := 0 to 10 do
-    listaA.push(i);
 
   i := 0;
   while listaA.pop(b) do begin
@@ -168,6 +183,11 @@ begin
   for i := 0 to 10 do
     dicA.add(i,i);
 
+  dic1 := TListaSimplesConverter.ToDictionary<Cardinal,Cardinal>(dicA);
+  i := 0;
+  for par in dicB do
+    inc(i,par.Value);
+
   dicB := dicA.clone.clear;
   dicB.addFrom(dicA);
 
@@ -175,9 +195,25 @@ begin
   for par in dicB do
     inc(i,par.Value);
 
-
-
 end;
 {$ifend}
+
+{ TListaSimplesConverter }
+
+class function TListaSimplesConverter.toList<T>(const pOrigem: IListaSimples<T>): IList<T>;
+  var
+    p: T;
+begin
+  Result := TCollections.CreateList<t>;
+  if(pOrigem=nil) then
+    exit;
+  for p in pOrigem do
+    Result.Add(p);
+end;
+
+class function TListaSimplesConverter.ToDictionary<T, X>(const pOrigem: IDicionarioSimples<T, X>): IDictionary<T, X>;
+begin
+
+end;
 
 end.
