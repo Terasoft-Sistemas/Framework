@@ -32,6 +32,7 @@ interface
       function clone: IListaSimples<T>;
       function addFrom(const pFrom: IListaSimples<T>): IListaSimples<T>;
       function addTo(pTo: IListaSimples<T>): IListaSimples<T>;
+      function addFromArray(const pArray: array of T): IListaSimples<T>;
 
       //Queue
       procedure enqueue(const pValue: T);
@@ -87,6 +88,7 @@ interface
       function clone: IDicionarioSimples<T,X>;
       function addFrom(const pFrom: IDicionarioSimples<T,X>): IDicionarioSimples<T,X>;
       function addTo(pTo: IDicionarioSimples<T,X>): IDicionarioSimples<T,X>;
+      function addFromArray(const pArray: array of TPair<T,X>): IDicionarioSimples<T,X>;
 
       procedure add(pKey: T; pValue: X);
       function get(pKey: T; out pValue: X; pRemove: boolean ): boolean;
@@ -174,6 +176,22 @@ begin
   try
     for p in pFrom do
       fLista.add(p);
+  finally
+    if(fUseLock) then
+      unlock;
+  end;
+end;
+
+function TListaSimples<T>.addFromArray(const pArray: array of T): IListaSimples<T>;
+  var
+    i: Integer;
+begin
+  Result := self;
+  if(fUseLock) then
+    lock;
+  try
+    for i := Low(pArray) to High(pArray) do
+      fLista.Add(pArray[i]);
   finally
     if(fUseLock) then
       unlock;
@@ -455,6 +473,22 @@ begin
   try
     for par in pFrom do
       fDicionario.AddOrSetValue(par.Key,par.Value);
+  finally
+    if(fUseLock) then
+      unlock;
+  end;
+end;
+
+function TDicionarioSimples<T, X>.addFromArray(const pArray: array of TPair<T, X>): IDicionarioSimples<T, X>;
+  var
+    i: Integer;
+begin
+  Result := self;
+  if(fUseLock) then
+    lock;
+  try
+    for i := low(pArray) to high(pArray) do
+      fDicionario.AddOrSetValue(pArray[i].Key, pArray[i].Value);
   finally
     if(fUseLock) then
       unlock;

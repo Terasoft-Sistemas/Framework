@@ -36,6 +36,8 @@ interface
       procedure lock;
       procedure unlock;
 
+      function addFromArray(const pArray: array of T): IListaSimples<T>;
+
       function getFirst(out pValue: T; pRemove: boolean = false): boolean;
       function getLast(out pValue: T; pRemove: boolean = false): boolean;
       function getRandom(out pValue: T; pRemove: boolean = true ): boolean;
@@ -67,6 +69,7 @@ interface
       function clone: IDicionarioSimples<T,X>;
       function addFrom(const pFrom: IDicionarioSimples<T,X>): IDicionarioSimples<T,X>;
       function addTo(pTo: IDicionarioSimples<T,X>): IDicionarioSimples<T,X>;
+      function addFromArray(const pArray: array of TPair<T,X>): IDicionarioSimples<T,X>;
 
       procedure add(pKey: T; pValue: X);
       function get(pKey: T; out pValue: X; pRemove: boolean = false ): boolean;
@@ -125,8 +128,11 @@ begin
 
   listaA := TListaSimplesCreator.CreateList<Cardinal>;
 
-  for i := 0 to 10 do
+{  for i := 0 to 10 do
     listaA.enqueue(i);
+
+}
+  listaA.addFromArray([0,1,2,3,4,5,6,7,8,9,10]);
 
   lista1 := TListaSimplesConverter.ToList<Cardinal>(listaA);
   i:=0;
