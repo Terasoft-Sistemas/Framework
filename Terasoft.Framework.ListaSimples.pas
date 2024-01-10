@@ -109,7 +109,7 @@ implementation
 {$if defined(__DEBUG_ANTONIO_BALLOON__)}
   uses
     Framework.Random,
-    Terasoft.FRamework.ListaSimples.Impl;
+    Terasoft.Framework.ListaSimples.Impl;
 
 procedure testes;
   var
