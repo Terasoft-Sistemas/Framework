@@ -170,7 +170,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FFuncionariosLista.Add(TFuncionarioModel.Create);
+      FFuncionariosLista.Add(TFuncionarioModel.Create(vIConexao));
 
       i := FFuncionariosLista.Count -1;
 

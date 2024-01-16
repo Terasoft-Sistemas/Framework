@@ -9,7 +9,7 @@ uses
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
-  System.Variants
+  System.Variants,
   Interfaces.Conexao;
 
 type
@@ -40,7 +40,7 @@ type
     function montaCondicaoQuery: String;
 
   public
-    constructor Create(pIconexao : IConexao);
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property AdmCartaoTaxasLista: TObjectList<TAdmCartaoTaxaModel> read FAdmCartaoTaxasLista write SetAdmCartaoTaxasLista;
@@ -226,7 +226,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FAdmCartaoTaxasLista.Add(TAdmCartaoTaxaModel.Create);
+      FAdmCartaoTaxasLista.Add(TAdmCartaoTaxaModel.Create(vIConexao));
 
       i := FAdmCartaoTaxasLista.Count -1;
 

@@ -183,7 +183,7 @@ function TTEFModel.carregaClasse(pId: String): TTEFModel;
 var
   lTEFDao: TTEFDao;
 begin
-  lTEFDao := TTEFDao.Create;
+  lTEFDao := TTEFDao.Create(vIConexao);
   try
     Result := lTEFDao.carregaClasse(pId);
   finally
@@ -206,7 +206,7 @@ procedure TTEFModel.obterLista;
 var
   lTEFLista: TTEFDao;
 begin
-  lTEFLista := TTEFDao.Create;
+  lTEFLista := TTEFDao.Create(vIConexao);
 
   try
     lTEFLista.TotalRecords    := FTotalRecords;
@@ -231,7 +231,7 @@ function TTEFModel.Salvar: String;
 var
   lTEFDao: TTEFDao;
 begin
-  lTEFDao := TTEFDao.Create;
+  lTEFDao := TTEFDao.Create(vIConexao);
 
   Result := '';
 

@@ -276,7 +276,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FContassLista.Add(TContasModel.Create);
+      FContassLista.Add(TContasModel.Create(vIConexao));
 
       i := FContassLista.Count -1;
 

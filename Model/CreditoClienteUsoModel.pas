@@ -102,7 +102,7 @@ procedure TCreditoClienteUsoModel.obterLista;
 var
   lCreditoClienteUsoLista: TCreditoClienteUsoDao;
 begin
-  lCreditoClienteUsoLista := TCreditoClienteUsoDao.Create;
+  lCreditoClienteUsoLista := TCreditoClienteUsoDao.Create(vIConexao);
 
   try
     lCreditoClienteUsoLista.TotalRecords    := FTotalRecords;
@@ -127,7 +127,7 @@ function TCreditoClienteUsoModel.Salvar: String;
 var
   lCreditoClienteUsoDao: TCreditoClienteUsoDao;
 begin
-  lCreditoClienteUsoDao := TCreditoClienteUsoDao.Create;
+  lCreditoClienteUsoDao := TCreditoClienteUsoDao.Create(vIConexao);
 
   Result := '';
 

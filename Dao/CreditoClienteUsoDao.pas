@@ -239,7 +239,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FCreditoClienteUsosLista.Add(TCreditoClienteUsoModel.Create);
+      FCreditoClienteUsosLista.Add(TCreditoClienteUsoModel.Create(vIConexao));
 
       i := FCreditoClienteUsosLista.Count -1;
 

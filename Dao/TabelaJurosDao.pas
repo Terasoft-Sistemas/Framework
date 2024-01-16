@@ -74,7 +74,7 @@ var
   lModel: TTabelaJurosModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TTabelaJurosModel.Create;
+  lModel   := TTabelaJurosModel.Create(vIConexao);
   Result   := lModel;
 
   try
@@ -254,7 +254,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FTabelaJurossLista.Add(TTabelaJurosModel.Create);
+      FTabelaJurossLista.Add(TTabelaJurosModel.Create(vIConexao));
 
       i := FTabelaJurossLista.Count -1;
 

@@ -239,7 +239,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FRecebimentoCartaosLista.Add(TRecebimentoCartaoModel.Create);
+      FRecebimentoCartaosLista.Add(TRecebimentoCartaoModel.Create(vIConexao));
 
       i := FRecebimentoCartaosLista.Count -1;
 

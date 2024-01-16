@@ -186,7 +186,7 @@ var
   lModel: TPedidoWebModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TPedidoWebModel.Create;
+  lModel   := TPedidoWebModel.Create(vIConexao);
   Result   := lModel;
 
   try
@@ -390,7 +390,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FPedidoWebsLista.Add(TPedidoWebModel.Create);
+      FPedidoWebsLista.Add(TPedidoWebModel.Create(vIConexao));
 
       i := FPedidoWebsLista.Count -1;
 

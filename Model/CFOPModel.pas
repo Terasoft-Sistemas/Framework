@@ -200,7 +200,7 @@ function TCFOPModel.carregaClasse(pId: String): TCFOPModel;
 var
   lCFOPDao: TCFOPDao;
 begin
-  lCFOPDao := TCFOPDao.Create;
+  lCFOPDao := TCFOPDao.Create(vIConexao);
   try
     Result := lCFOPDao.carregaClasse(pId);
   finally
@@ -223,7 +223,7 @@ function TCFOPModel.obterCFOP(pIdCFOP: String): String;
 var
   lCFOPDao: TCFOPDao;
 begin
-  lCFOPDao := TCFOPDao.Create;
+  lCFOPDao := TCFOPDao.Create(vIConexao);
   try
     Result := lCFOPDao.obterCFOP(pIdCFOP);
   finally
@@ -235,7 +235,7 @@ procedure TCFOPModel.obterLista;
 var
   lCFOPLista: TCFOPDao;
 begin
-  lCFOPLista := TCFOPDao.Create;
+  lCFOPLista := TCFOPDao.Create(vIConexao);
 
   try
     lCFOPLista.TotalRecords    := FTotalRecords;
@@ -260,7 +260,7 @@ function TCFOPModel.Salvar: String;
 var
   lCFOPDao: TCFOPDao;
 begin
-  lCFOPDao := TCFOPDao.Create;
+  lCFOPDao := TCFOPDao.Create(vIConexao);
 
   Result := '';
 

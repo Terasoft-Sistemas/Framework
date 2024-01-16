@@ -83,7 +83,7 @@ function TTabelaJurosModel.carregaClasse(pId: Integer): TTabelaJurosModel;
 var
   lTabelaJurosDao: TTabelaJurosDao;
 begin
-  lTabelaJurosDao := TTabelaJurosDao.Create;
+  lTabelaJurosDao := TTabelaJurosDao.Create(vIConexao);
 
   try
     Result := lTabelaJurosDao.carregaClasse(pId);
@@ -107,7 +107,7 @@ procedure TTabelaJurosModel.obterLista;
 var
   lTabelaJurosLista: TTabelaJurosDao;
 begin
-  lTabelaJurosLista := TTabelaJurosDao.Create;
+  lTabelaJurosLista := TTabelaJurosDao.Create(vIConexao);
 
   try
     lTabelaJurosLista.TotalRecords    := FTotalRecords;
@@ -132,7 +132,7 @@ function TTabelaJurosModel.Salvar: String;
 var
   lTabelaJurosDao: TTabelaJurosDao;
 begin
-  lTabelaJurosDao := TTabelaJurosDao.Create;
+  lTabelaJurosDao := TTabelaJurosDao.Create(vIConexao);
 
   Result := '';
 

@@ -105,7 +105,7 @@ procedure TRecebimentoCartaoModel.obterLista;
 var
   lRecebimentoCartaoLista: TRecebimentoCartaoDao;
 begin
-  lRecebimentoCartaoLista := TRecebimentoCartaoDao.Create;
+  lRecebimentoCartaoLista := TRecebimentoCartaoDao.Create(vIConexao);
 
   try
     lRecebimentoCartaoLista.TotalRecords    := FTotalRecords;
@@ -130,7 +130,7 @@ function TRecebimentoCartaoModel.Salvar: String;
 var
   lRecebimentoCartaoDao: TRecebimentoCartaoDao;
 begin
-  lRecebimentoCartaoDao := TRecebimentoCartaoDao.Create;
+  lRecebimentoCartaoDao := TRecebimentoCartaoDao.Create(vIConexao);
 
   Result := '';
 

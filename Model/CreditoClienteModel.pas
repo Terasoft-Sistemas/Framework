@@ -119,7 +119,7 @@ procedure TCreditoClienteModel.creditosAbertos(pCliente: String);
 var
   lCreditoClienteLista: TCreditoClienteDao;
 begin
-  lCreditoClienteLista := TCreditoClienteDao.Create;
+  lCreditoClienteLista := TCreditoClienteDao.Create(vIConexao);
   try
     lCreditoClienteLista.creditosAbertos(pCliente);
     FCreditoClientesLista := lCreditoClienteLista.CreditoClientesLista;
@@ -138,7 +138,7 @@ procedure TCreditoClienteModel.obterLista;
 var
   lCreditoClienteLista: TCreditoClienteDao;
 begin
-  lCreditoClienteLista := TCreditoClienteDao.Create;
+  lCreditoClienteLista := TCreditoClienteDao.Create(vIConexao);
 
   try
     lCreditoClienteLista.TotalRecords    := FTotalRecords;
@@ -163,7 +163,7 @@ function TCreditoClienteModel.Salvar: String;
 var
   lCreditoClienteDao: TCreditoClienteDao;
 begin
-  lCreditoClienteDao := TCreditoClienteDao.Create;
+  lCreditoClienteDao := TCreditoClienteDao.Create(vIConexao);
 
   Result := '';
 

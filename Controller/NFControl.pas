@@ -4,7 +4,8 @@ interface
 
 uses
   NFModel,
-  FireDAC.Comp.Client;
+  FireDAC.Comp.Client,
+  Interfaces.Conexao;
 
 type
     TNFContol = class
@@ -13,7 +14,7 @@ type
     FNFModel: TNFModel;
 
   public
-    constructor Create(ID: String);
+    constructor Create(ID: String; pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: Boolean;
@@ -31,11 +32,10 @@ begin
   Result := FNFModel.carregaClasse(ID);
 end;
 
-constructor TNFContol.Create(ID: String);
+constructor TNFContol.Create(ID: String; pIConexao : IConexao);
 begin
-  FNFModel := TNFModel.Create;
-
-  if ID <> '' then
+  FNFModel := TNFModel.Create(pIConexao);
+if ID <> '' then
    FNFModel := FNFModel.carregaClasse(ID);
 end;
 

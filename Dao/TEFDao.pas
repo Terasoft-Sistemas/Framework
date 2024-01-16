@@ -75,8 +75,8 @@ var
   lQry: TFDQuery;
   lModel: TTEFModel;
 begin
-  lQry     := xConexao.CriarQuery;
-  lModel   := TTEFModel.Create;
+  lQry     := vIConexao.CriarQuery;
+  lModel   := TTEFModel.Create(vIConexao);
   Result   := lModel;
 
   try
@@ -149,7 +149,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL :=   '   insert into tef (id,                               '+SLineBreak+
             '                    nome_rede,                        '+SLineBreak+
@@ -233,7 +233,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := xConexao.Generetor('GEN_TEF');
+    lQry.ParamByName('id').Value := vIConexao.Generetor('GEN_TEF');
     setParams(lQry, ATEFModel);
     lQry.Open;
 
@@ -250,7 +250,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL :=  '    update tef                                                              '+SLineBreak+
            '       set nome_rede = :nome_rede,                                          '+SLineBreak+
@@ -311,7 +311,7 @@ function TTEFDao.excluir(ATEFModel: TTEFModel): String;
 var
   lQry: TFDQuery;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from tef where ID = :ID',[ATEFModel.ID]);
@@ -344,7 +344,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From tef where 1=1 ';
 
@@ -365,7 +365,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FTEFsLista := TObjectList<TTEFModel>.Create;
 
@@ -391,7 +391,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FTEFsLista.Add(TTEFModel.Create);
+      FTEFsLista.Add(TTEFModel.Create(vIConexao));
 
       i := FTEFsLista.Count -1;
 

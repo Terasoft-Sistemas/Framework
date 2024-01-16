@@ -265,7 +265,7 @@ var
   lContasReceberModel: TContasReceberModel;
 begin
   lContasReceberModel := TContasReceberModel.Create(vIConexao);
-  lCaixaModel         := TCaixaModel.Create;
+  lCaixaModel         := TCaixaModel.Create(vIConexao);
 
   try
     lCaixaModel.Acao := tacIncluir;
@@ -319,8 +319,8 @@ var
   lRestante,
   lBaixa                  : Double;
 begin
-  lCreditoClienteUsoModel := TCreditoClienteUsoModel.Create;
-  lCreditoClienteModel    := TCreditoClienteModel.Create;
+  lCreditoClienteUsoModel := TCreditoClienteUsoModel.Create(vIConexao);
+  lCreditoClienteModel    := TCreditoClienteModel.Create(vIConexao);
   lRestante := pValor;
 
   try
@@ -370,7 +370,7 @@ var
   lContaCorrenteModel: TContaCorrenteModel;
   lContasReceberModel: TContasReceberModel;
 begin
-  lContaCorrenteModel := TContaCorrenteModel.Create;
+  lContaCorrenteModel := TContaCorrenteModel.Create(vIConexao);
   lContasReceberModel := TContasReceberModel.Create(vIConexao);
   try
     lHistorico := 'FC PIX: '+ self.FPACELA_REC+'/'+self.FTOTALPARCELAS_REC+
@@ -424,11 +424,11 @@ var
   lRecebimentoCartaoModel, lRecebimentoExclusao: TRecebimentoCartaoModel;
   i: Integer;
 begin
-  lCaixaModel             := TCaixaModel.Create;
-  lVendaCartaoModel       := TVendaCartaoModel.Create;
-  lVendaCartaoExclusao    := TVendaCartaoModel.Create;
-  lRecebimentoCartaoModel := TRecebimentoCartaoModel.Create;
-  lRecebimentoExclusao    := TRecebimentoCartaoModel.Create;
+  lCaixaModel             := TCaixaModel.Create(vIConexao);
+  lVendaCartaoModel       := TVendaCartaoModel.Create(vIConexao);
+  lVendaCartaoExclusao    := TVendaCartaoModel.Create(vIConexao);
+  lRecebimentoCartaoModel := TRecebimentoCartaoModel.Create(vIConexao);
+  lRecebimentoExclusao    := TRecebimentoCartaoModel.Create(vIConexao);
 
   try
     lCaixaModel.WhereView := ' and caixa.status <> ''X'' '+
@@ -485,7 +485,7 @@ var
 begin
   lContasReceberItensInserir := TContasReceberItensModel.Create(vIConexao);
   lContasReceberModel        := TContasReceberModel.Create(vIConexao);
-  lAdmCartaoModel            := TAdmCartaoModel.Create;
+  lAdmCartaoModel            := TAdmCartaoModel.Create(vIConexao);
 
   try
     lContasReceberModel := lContasReceberModel.carregaClasse(self.FFATURA_REC);
@@ -568,7 +568,7 @@ begin
     CriaException('ID do cartão não informado');
   if self.FIDPedidoCartao = '' then
     CriaException('ID do pedido não informado');
-  lVendaCartaoModel := TVendaCartaoModel.Create;
+  lVendaCartaoModel := TVendaCartaoModel.Create(vIConexao);
   try
     lVendaCartaoModel.Acao := tacIncluir;
     lVendaCartaoModel.NUMERO_CAR      := '1';
@@ -594,7 +594,7 @@ function TContasReceberItensModel.lancarContaCorrente(pValor, pPortador, pConta,
 var
   lContaCorrenteModel: TContaCorrenteModel;
 begin
-  lContaCorrenteModel := TContaCorrenteModel.Create;
+  lContaCorrenteModel := TContaCorrenteModel.Create(vIConexao);
   try
     lContaCorrenteModel.Acao           := tacIncluir;
     lContaCorrenteModel.CONCILIADO_COR := '.';
@@ -695,7 +695,7 @@ function TContasReceberItensModel.recebimentoCartao(pValor, pIdAdmCartao, pVenci
 var
   lRecebimentoCartaoModel: TRecebimentoCartaoModel;
 begin
-  lRecebimentoCartaoModel := TRecebimentoCartaoModel.Create;
+  lRecebimentoCartaoModel := TRecebimentoCartaoModel.Create(vIConexao);
   try
     lRecebimentoCartaoModel.Acao := tacIncluir;
     if pIdTef <> '' then

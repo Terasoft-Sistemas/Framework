@@ -727,8 +727,8 @@ begin
   if pModelo = '' then
     CriaException('Modelo não informado');
   lPedidoItensModel := TPedidoItensModel.Create(vIConexao);
-  lNFItensModel     := TNFItensModel.Create;
-  lNFModel          := TNFModel.Create;
+  lNFItensModel     := TNFItensModel.Create(vIConexao);
+  lNFModel          := TNFModel.Create(vIConexao);
   try
     self.RecalcularImpostos(self.NUMERO_PED);
     lNFModel.Acao := tacIncluir;
@@ -990,7 +990,7 @@ var
   lPedidoVendaModel      : TPedidoVendaModel;
 begin
   lPedidoVendaLista      := TPedidoVendaDao.Create(vIConexao);
-  lCalcularImpostosModel := TCalcularImpostosModel.Create;
+  lCalcularImpostosModel := TCalcularImpostosModel.Create(vIConexao);
   lPedidoItensModal      := TPedidoItensModel.Create(vIConexao);
   try
     lPedidoVendaLista.obterUpdateImpostos(pNumeroPedido);

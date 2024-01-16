@@ -270,7 +270,7 @@ procedure TPedidoWebItensModel.obterLista;
 var
   lPedidoWebItensLista: TPedidoWebItensDao;
 begin
-  lPedidoWebItensLista := TPedidoWebItensDao.Create;
+  lPedidoWebItensLista := TPedidoWebItensDao.Create(vIConexao);
 
   try
     lPedidoWebItensLista.TotalRecords    := FTotalRecords;
@@ -296,7 +296,7 @@ procedure TPedidoWebItensModel.obterListaVendaAssistidaItens;
 var
   lPedidoWebItensLista: TPedidoWebItensDao;
 begin
-  lPedidoWebItensLista := TPedidoWebItensDao.Create;
+  lPedidoWebItensLista := TPedidoWebItensDao.Create(vIConexao);
 
   try
     lPedidoWebItensLista.TotalRecords    := FTotalRecords;
@@ -322,7 +322,7 @@ function TPedidoWebItensModel.Salvar: String;
 var
   lPedidoWebItensDao: TPedidoWebItensDao;
 begin
-  lPedidoWebItensDao := TPedidoWebItensDao.Create;
+  lPedidoWebItensDao := TPedidoWebItensDao.Create(vIConexao);
 
   Result := '';
 

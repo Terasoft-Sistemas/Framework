@@ -262,7 +262,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FCaixaControlesLista.Add(TCaixaControleModel.Create);
+      FCaixaControlesLista.Add(TCaixaControleModel.Create(vIConexao));
 
       i := FCaixaControlesLista.Count -1;
 
@@ -405,7 +405,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FCaixaControlesLista.Add(TCaixaControleModel.Create);
+      FCaixaControlesLista.Add(TCaixaControleModel.Create(vIConexao));
 
       i := FCaixaControlesLista.Count -1;
 

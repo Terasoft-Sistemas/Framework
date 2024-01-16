@@ -132,7 +132,7 @@ procedure TPromocaoModel.obterLista;
 var
   lPromocaoLista: TPromocaoDao;
 begin
-  lPromocaoLista := TPromocaoDao.Create;
+  lPromocaoLista := TPromocaoDao.Create(vIConexao);
 
   try
     lPromocaoLista.TotalRecords    := FTotalRecords;
@@ -157,7 +157,7 @@ function TPromocaoModel.Salvar: String;
 var
   lPromocaoDao: TPromocaoDao;
 begin
-  lPromocaoDao := TPromocaoDao.Create;
+  lPromocaoDao := TPromocaoDao.Create(vIConexao);
 
   Result := '';
 

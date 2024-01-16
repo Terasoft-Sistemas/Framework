@@ -220,7 +220,7 @@ begin
 
   lContasReceberItensModel      := TContasReceberItensModel.Create(vIConexao);
   lContasReceberitensAtualizar  := TContasReceberItensModel.Create(vIConexao);
-  lPortadorModel                := TPortadorModel.Create;
+  lPortadorModel                := TPortadorModel.Create(vIConexao);
 
   try
     if not self.FRECEBIMENTO_CONCLUIDO then begin
@@ -330,8 +330,8 @@ var
 begin
   if self.FPEDIDO_REC = '' then
     CriaException('Pedido da fatura não informado.');
-  lVendaCartaoExclusao := TVendaCartaoModel.Create;
-  lVendaCartaoModel    := TVendaCartaoModel.Create;
+  lVendaCartaoExclusao := TVendaCartaoModel.Create(vIConexao);
+  lVendaCartaoModel    := TVendaCartaoModel.Create(vIConexao);
   try
     lVendaCartaoModel.WhereView := ' and vendacartao.numero_venda = ' + QuotedStr(self.FPEDIDO_REC);
     lVendaCartaoModel.obterLista;
@@ -718,8 +718,8 @@ begin
     CriaException('Informe a fatura do contas a receber');
 
   lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
-  lPortadorModel           := TPortadorModel.Create;
-  lTefModel                := TTefModel.Create;
+  lPortadorModel           := TPortadorModel.Create(vIConexao);
+  lTefModel                := TTefModel.Create(vIConexao);
 
   try
     lPortadorModel := lPortadorModel.carregaClasse(self.FCODIGO_POR);

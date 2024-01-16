@@ -75,7 +75,7 @@ var
   lModel: TCFOPModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TCFOPModel.Create;
+  lModel   := TCFOPModel.Create(vIConexao);
   Result   := lModel;
 
   try
@@ -415,7 +415,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FCFOPsLista.Add(TCFOPModel.Create);
+      FCFOPsLista.Add(TCFOPModel.Create(vIConexao));
 
       i := FCFOPsLista.Count -1;
 

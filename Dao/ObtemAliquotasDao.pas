@@ -66,7 +66,7 @@ var
   lUF_BASE: String;
 begin
   lQry := vIConexao.CriarQuery;
-  lObtemAliquotasModel := TObtemAliquotasModel.Create;
+  lObtemAliquotasModel := TObtemAliquotasModel.Create(vIConexao);
 
   try
     if FMODELO_NF = '65' then

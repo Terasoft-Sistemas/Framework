@@ -387,10 +387,10 @@ begin
   if not (pIdVendaAssistida <> 0) then
     exit;
 
-  lPedidoWebModel        := TPedidoWebModel.Create;
-  lPedidoVendaModel      := TPedidoVendaModel.Create(xConexaoLocal);
-  lPedidoWebItensModel   := TPedidoWebItensModel.Create;
-  lPedidoItensModel      := TPedidoItensModel.Create(xConexaoLocal);
+  lPedidoWebModel        := TPedidoWebModel.Create(vIConexao);
+  lPedidoVendaModel      := TPedidoVendaModel.Create(vIConexao);
+  lPedidoWebItensModel   := TPedidoWebItensModel.Create(vIConexao);
+  lPedidoItensModel      := TPedidoItensModel.Create(vIConexao);
 
   try
 
@@ -516,7 +516,7 @@ function TPedidoWebModel.carregaClasse(pId: String): TPedidoWebModel;
 var
   lPedidoWebDao: TPedidoWebDao;
 begin
-  lPedidoWebDao := TPedidoWebDao.Create;
+  lPedidoWebDao := TPedidoWebDao.Create(vIConexao);
   try
     Result := lPedidoWebDao.carregaClasse(pId);
   finally
@@ -539,7 +539,7 @@ procedure TPedidoWebModel.obterListaVendaAssistida;
 var
   lPedidoWebLista: TPedidoWebDao;
 begin
-  lPedidoWebLista := TPedidoWebDao.Create;
+  lPedidoWebLista := TPedidoWebDao.Create(vIConexao);
 
   try
     lPedidoWebLista.TotalRecords    := FTotalRecords;
@@ -564,7 +564,7 @@ function TPedidoWebModel.Salvar: String;
 var
   lPedidoWebDao: TPedidoWebDao;
 begin
-  lPedidoWebDao := TPedidoWebDao.Create;
+  lPedidoWebDao := TPedidoWebDao.Create(vIConexao);
 
   Result := '';
 

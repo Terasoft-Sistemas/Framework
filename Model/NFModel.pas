@@ -496,7 +496,7 @@ function TNFModel.carregaClasse(ID: String): TNFModel;
 var
   lNFDao: TNFDao;
 begin
-  lNFDao := TNFDao.Create;
+  lNFDao := TNFDao.Create(vIConexao);
   try
     Result := lNFDao.carregaClasse(ID);
   finally
@@ -520,7 +520,7 @@ var
   lNFDao: TNFDao;
 begin
   Result := '';
-  lNFDao := TNFDao.Create;
+  lNFDao := TNFDao.Create(vIConexao);
 
    try
     case FAcao of
@@ -538,7 +538,7 @@ procedure TNFModel.obterLista;
 var
   lNFLista: TNFDao;
 begin
-  lNFLista := TNFDao.Create;
+  lNFLista := TNFDao.Create(vIConexao);
 
   try
     lNFLista.TotalRecords    := FTotalRecords;
@@ -564,7 +564,7 @@ procedure TNFModel.obterListaNFe;
 var
   lNFLista: TNFDao;
 begin
-  lNFLista := TNFDao.Create;
+  lNFLista := TNFDao.Create(vIConexao);
 
   try
     lNFLista.TotalRecords    := FTotalRecords;

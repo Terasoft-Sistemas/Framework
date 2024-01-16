@@ -94,7 +94,7 @@ procedure TAdmCartaoTaxaModel.obterLista;
 var
   lAdmCartaoTaxaLista: TAdmCartaoTaxaDao;
 begin
-  lAdmCartaoTaxaLista := TAdmCartaoTaxaDao.Create;
+  lAdmCartaoTaxaLista := TAdmCartaoTaxaDao.Create(vIConexao);
 
   try
     lAdmCartaoTaxaLista.TotalRecords    := FTotalRecords;
@@ -119,7 +119,7 @@ function TAdmCartaoTaxaModel.Salvar: String;
 var
   lAdmCartaoTaxaDao: TAdmCartaoTaxaDao;
 begin
-  lAdmCartaoTaxaDao := TAdmCartaoTaxaDao.Create;
+  lAdmCartaoTaxaDao := TAdmCartaoTaxaDao.Create(vIConexao);
 
   Result := '';
 

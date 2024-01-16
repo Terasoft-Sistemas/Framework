@@ -86,7 +86,7 @@ var
   ANFModel: TNFModel;
 begin
   lQry := vIConexao.CriarQuery;
-  ANFModel := TNFModel.Create;
+  ANFModel := TNFModel.Create(vIConexao);
   Result   := ANFModel;
 
   try
@@ -767,7 +767,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FNFLista.Add(TNFModel.Create);
+      FNFLista.Add(TNFModel.Create(vIConexao));
 
       i := FNFLista.Count -1;
       FNFLista[i].NUMERO_NF                   := lQry.FieldByName('NUMERO_NF').AsString;
@@ -856,7 +856,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FNFLista.Add(TNFModel.Create);
+      FNFLista.Add(TNFModel.Create(vIConexao));
 
       i := FNFLista.Count -1;
       FNFLista[i].NUMERO_NF                   := lQry.FieldByName('NUMERO_NF').AsString;

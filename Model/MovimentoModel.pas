@@ -119,7 +119,7 @@ function TMovimentoModel.carregaClasse(pId: String): TMovimentoModel;
 var
   lMovimentoDao: TMovimentoDao;
 begin
-  lMovimentoDao := TMovimentoDao.Create;
+  lMovimentoDao := TMovimentoDao.Create(vIConexao);
   try
     Result := lMovimentoDao.carregaClasse(pId);
   finally
@@ -142,7 +142,7 @@ procedure TMovimentoModel.obterLista;
 var
   lMovimentoLista: TMovimentoDao;
 begin
-  lMovimentoLista := TMovimentoDao.Create;
+  lMovimentoLista := TMovimentoDao.Create(vIConexao);
 
   try
     lMovimentoLista.TotalRecords    := FTotalRecords;
@@ -167,7 +167,7 @@ function TMovimentoModel.Salvar: String;
 var
   lMovimentoDao: TMovimentoDao;
 begin
-  lMovimentoDao := TMovimentoDao.Create;
+  lMovimentoDao := TMovimentoDao.Create(vIConexao);
 
   Result := '';
 

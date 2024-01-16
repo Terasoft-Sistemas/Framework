@@ -108,7 +108,7 @@ var
   vEventosNFeDao: TEventosNFeDao;
 begin
   Result := False;
-  vEventosNFeDao := TEventosNFeDao.Create;
+  vEventosNFeDao := TEventosNFeDao.Create(vIConexao);
 
    try
 

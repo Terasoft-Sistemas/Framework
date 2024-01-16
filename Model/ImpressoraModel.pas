@@ -105,7 +105,7 @@ function TImpressoraModel.carregaClasse(pId: Integer): TImpressoraModel;
 var
   lImpressoraDao: TImpressoraDao;
 begin
-  lImpressoraDao := TImpressoraDao.Create;
+  lImpressoraDao := TImpressoraDao.Create(vIConexao);
   try
     Result := lImpressoraDao.carregaClasse(pId);
   finally
@@ -128,7 +128,7 @@ procedure TImpressoraModel.obterLista;
 var
   lImpressoraLista: TImpressoraDao;
 begin
-  lImpressoraLista := TImpressoraDao.Create;
+  lImpressoraLista := TImpressoraDao.Create(vIConexao);
 
   try
     lImpressoraLista.TotalRecords    := FTotalRecords;
@@ -153,7 +153,7 @@ function TImpressoraModel.Salvar: String;
 var
   lImpressoraDao: TImpressoraDao;
 begin
-  lImpressoraDao := TImpressoraDao.Create;
+  lImpressoraDao := TImpressoraDao.Create(vIConexao);
 
   Result := '';
 

@@ -270,7 +270,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FVendaCartaosLista.Add(TVendaCartaoModel.Create);
+      FVendaCartaosLista.Add(TVendaCartaoModel.Create(vIConexao));
 
       i := FVendaCartaosLista.Count -1;
 

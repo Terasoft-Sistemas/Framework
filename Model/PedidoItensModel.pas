@@ -470,8 +470,8 @@ var
   lMovimentoModel, lModel: TMovimentoModel;
   lProdutosModel: TProdutosModel;
 begin
-  lMovimentoModel := TMovimentoModel.Create;
-  lProdutosModel  := TProdutosModel.Create;
+  lMovimentoModel := TMovimentoModel.Create(vIConexao);
+  lProdutosModel  := TProdutosModel.Create(vIConexao);
   try
     lMovimentoModel.WhereView := ' and movimento.status <> ''X''                 '+
                                  ' and movimento.tipo_doc = ''P''                '+
@@ -522,8 +522,8 @@ var
   lMovimentoModel   : TMovimentoModel;
   lProdutosModel    : TProdutosModel;
 begin
-  lMovimentoModel   := TMovimentoModel.Create;
-  lProdutosModel    := TProdutosModel.Create;
+  lMovimentoModel   := TMovimentoModel.Create(vIConexao);
+  lProdutosModel    := TProdutosModel.Create(vIConexao);
 
   try
     lMovimentoModel.Acao := tacIncluir;

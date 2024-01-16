@@ -179,7 +179,7 @@ function TCaixaModel.carregaClasse(pIdCaixa: String): TCaixaModel;
 var
   lCaixaDao: TCaixaDao;
 begin
-  lCaixaDao := TCaixaDao.Create;
+  lCaixaDao := TCaixaDao.Create(vIConexao);
 
   try
     Result := lCaixaDao.carregaClasse(pIdCaixa);
@@ -209,8 +209,8 @@ var
   lCaixaAlterar, lCaixaExclusao: TCaixaModel;
 begin
 
-  lCaixaAlterar  := TCaixaModel.Create;
-  lCaixaExclusao := TCaixaModel.Create;
+  lCaixaAlterar  := TCaixaModel.Create(vIConexao);
+  lCaixaExclusao := TCaixaModel.Create(vIConexao);
 
   try
     lCaixaAlterar  := self.carregaClasse(pIdRegistro);
@@ -235,7 +235,7 @@ procedure TCaixaModel.obterLista;
 var
   lCaixaLista: TCaixaDao;
 begin
-  lCaixaLista := TCaixaDao.Create;
+  lCaixaLista := TCaixaDao.Create(vIConexao);
 
   try
     lCaixaLista.TotalRecords    := FTotalRecords;
@@ -260,7 +260,7 @@ function TCaixaModel.Salvar: String;
 var
   lCaixaDao: TCaixaDao;
 begin
-  lCaixaDao := TCaixaDao.Create;
+  lCaixaDao := TCaixaDao.Create(vIConexao);
 
   Result := '';
 

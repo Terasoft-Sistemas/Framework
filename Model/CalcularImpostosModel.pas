@@ -267,7 +267,7 @@ function TCalcularImpostosModel.obterAliquotas: TCalcularImpostosModel;
 var
   lCalcularImpostosDao: TCalcularImpostosDao;
 begin
-  lCalcularImpostosDao := TCalcularImpostosDao.Create;
+  lCalcularImpostosDao := TCalcularImpostosDao.Create(vIConexao);
 
   if (FCODIGO_PRODUTO = '') or (FMODELO_NF = '') or (FDESTINATARIO_UF = '') or (FEMITENTE_UF = '')  then
     CriaException('Produto/modelo nf/uf emitente/uf destinatario devem ser informdos.');

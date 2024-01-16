@@ -65,7 +65,7 @@ implementation
 
 { TPromocao }
 
-constructor TPromocaoDao.Create(vIConexao : IConexao);
+constructor TPromocaoDao.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -176,7 +176,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FPromocaosLista.Add(TPromocaoModel.Create);
+      FPromocaosLista.Add(TPromocaoModel.Create(vIConexao));
 
       i := FPromocaosLista.Count -1;
 

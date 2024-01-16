@@ -11,7 +11,8 @@ uses
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  Terasoft.FuncoesTexto;
+  Terasoft.FuncoesTexto,
+  Interfaces.Conexao;
 
 type
   TPixDao = class
@@ -76,7 +77,7 @@ var
   lModel: TPixModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TPixModel.Create;
+  lModel   := TPixModel.Create(vIConexao);
   Result   := lModel;
 
   try
@@ -317,7 +318,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FPixsLista.Add(TPixModel.Create);
+      FPixsLista.Add(TPixModel.Create(vIConexao));
 
       i := FPixsLista.Count -1;
 

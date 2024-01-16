@@ -76,7 +76,7 @@ var
   lFuncionarioDao: TFuncionarioDao;
 begin
 
-  lFuncionarioDao := TFuncionarioDao.Create;
+  lFuncionarioDao := TFuncionarioDao.Create(vIConexao);
 
   try
     Result := lFuncionarioDao.comissaoVendedor(pIdVendedor, pIdTipoVenda);
@@ -101,7 +101,7 @@ procedure TFuncionarioModel.obterLista;
 var
   lFuncionarioLista: TFuncionarioDao;
 begin
-  lFuncionarioLista := TFuncionarioDao.Create;
+  lFuncionarioLista := TFuncionarioDao.Create(vIConexao);
 
   try
     lFuncionarioLista.TotalRecords    := FTotalRecords;
@@ -126,7 +126,7 @@ function TFuncionarioModel.Salvar: String;
 var
   lFuncionarioDao: TFuncionarioDao;
 begin
-  lFuncionarioDao := TFuncionarioDao.Create;
+  lFuncionarioDao := TFuncionarioDao.Create(vIConexao);
 
   Result := '';
 

@@ -76,7 +76,7 @@ var
   lModel: TContaCorrenteModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TContaCorrenteModel.Create;
+  lModel   := TContaCorrenteModel.Create(vIConexao);
   Result   := lModel;
 
   try
@@ -381,7 +381,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FContaCorrentesLista.Add(TContaCorrenteModel.Create);
+      FContaCorrentesLista.Add(TContaCorrenteModel.Create(vIConexao));
 
       i := FContaCorrentesLista.Count -1;
 

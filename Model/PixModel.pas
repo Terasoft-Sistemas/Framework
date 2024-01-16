@@ -133,7 +133,7 @@ function TPixModel.carregaClasse(pId: String): TPixModel;
 var
   lPixDao: TPixDao;
 begin
-  lPixDao := TPixDao.Create;
+  lPixDao := TPixDao.Create(vIConexao);
 
   try
     Result := lPixDao.carregaClasse(pId);
@@ -162,7 +162,7 @@ procedure TPixModel.obterLista;
 var
   lPixLista: TPixDao;
 begin
-  lPixLista := TPixDao.Create;
+  lPixLista := TPixDao.Create(vIConexao);
 
   try
     lPixLista.TotalRecords    := FTotalRecords;
@@ -187,7 +187,7 @@ function TPixModel.Salvar: String;
 var
   lPixDao: TPixDao;
 begin
-  lPixDao := TPixDao.Create;
+  lPixDao := TPixDao.Create(vIConexao);
 
   Result := '';
 

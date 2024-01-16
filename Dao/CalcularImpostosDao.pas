@@ -66,7 +66,7 @@ var
   lUF_BASE: String;
 begin
   lQry := vIConexao.CriarQuery;
-  lCalcularImpostosModel := TCalcularImpostosModel.Create;
+  lCalcularImpostosModel := TCalcularImpostosModel.Create(vIConexao);
 
   try
     if FMODELO_NF = '65' then

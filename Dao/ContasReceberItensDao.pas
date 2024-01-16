@@ -385,7 +385,7 @@ var
   lQry          : TFDQuery;
   lResultado    : TContaClienteRetorno;
 begin
-  lLojasModel := TLojasModel.Create;
+  lLojasModel := TLojasModel.Create(vIConexao);
   Result      := TListaSimplesCreator.CreateList<TContaClienteRetorno>;
 
   try

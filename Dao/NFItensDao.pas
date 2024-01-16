@@ -74,7 +74,7 @@ var
   lModel: TNFItensModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TNFItensModel.Create;
+  lModel   := TNFItensModel.Create(vIConexao);
   Result   := lModel;
 
   try
@@ -239,7 +239,7 @@ begin
   end;
 end;
 
-constructor TNFItensDao.Create(vIConexao : IConexao);
+constructor TNFItensDao.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -801,7 +801,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FNFItenssLista.Add(TNFItensModel.Create);
+      FNFItenssLista.Add(TNFItensModel.Create(vIConexao));
 
       i := FNFItenssLista.Count -1;
 

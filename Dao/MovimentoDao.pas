@@ -73,8 +73,8 @@ var
   lQry: TFDQuery;
   lModel: TMovimentoModel;
 begin
-  lQry     := xConexao.CriarQuery;
-  lModel   := TMovimentoModel.Create;
+  lQry     := vIConexao.CriarQuery;
+  lModel   := TMovimentoModel.Create(vIConexao);
   Result   := lModel;
 
   try
@@ -302,7 +302,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FMovimentosLista.Add(TMovimentoModel.Create);
+      FMovimentosLista.Add(TMovimentoModel.Create(vIConexao));
 
       i := FMovimentosLista.Count -1;
 

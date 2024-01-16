@@ -145,7 +145,7 @@ procedure TContasModel.obterLista;
 var
   lContasLista: TContasDao;
 begin
-  lContasLista := TContasDao.Create;
+  lContasLista := TContasDao.Create(vIConexao);
 
   try
     lContasLista.TotalRecords    := FTotalRecords;
@@ -170,7 +170,7 @@ function TContasModel.Salvar: String;
 var
   lContasDao: TContasDao;
 begin
-  lContasDao := TContasDao.Create;
+  lContasDao := TContasDao.Create(vIConexao);
 
   Result := '';
 

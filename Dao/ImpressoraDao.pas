@@ -73,7 +73,7 @@ var
   lModel: TImpressoraModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TImpressoraModel.Create;
+  lModel   := TImpressoraModel.Create(vIConexao);
   Result   := lModel;
 
   try
@@ -283,7 +283,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FImpressorasLista.Add(TImpressoraModel.Create);
+      FImpressorasLista.Add(TImpressoraModel.Create(vIConexao));
 
       i := FImpressorasLista.Count -1;
 

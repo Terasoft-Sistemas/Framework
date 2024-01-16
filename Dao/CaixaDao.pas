@@ -76,7 +76,7 @@ var
   lModel: TCaixaModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TCaixaModel.Create;
+  lModel   := TCaixaModel.Create(vIConexao);
   Result   := lModel;
 
   try
@@ -376,7 +376,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FCaixasLista.Add(TCaixaModel.Create);
+      FCaixasLista.Add(TCaixaModel.Create(vIConexao));
 
       i := FCaixasLista.Count -1;
 

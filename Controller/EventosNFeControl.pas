@@ -4,7 +4,8 @@ interface
 
 uses
   EventosNFeModel,
-  FireDAC.Comp.Client;
+  FireDAC.Comp.Client,
+  Interfaces.Conexao;
 
 type
     TEventosNFeControl = class
@@ -13,7 +14,7 @@ type
     FEventosNFeModel: TEventosNFeModel;
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: Boolean;
@@ -25,9 +26,9 @@ implementation
 
 { TEventosNFeControl }
 
-constructor TEventosNFeControl.Create;
+constructor TEventosNFeControl.Create(pIConexao : IConexao);
 begin
-  FEventosNFeModel := TEventosNFeModel.Create;
+  FEventosNFeModel := TEventosNFeModel.Create(pIConexao);
 end;
 
 destructor TEventosNFeControl.Destroy;

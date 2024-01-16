@@ -274,7 +274,7 @@ procedure TBancoModel.obterLista;
 var
   lBancoLista: TBancoDao;
 begin
-  lBancoLista := TBancoDao.Create;
+  lBancoLista := TBancoDao.Create(vIConexao);
 
   try
     lBancoLista.TotalRecords    := FTotalRecords;
@@ -299,7 +299,7 @@ function TBancoModel.Salvar: String;
 var
   lBancoDao: TBancoDao;
 begin
-  lBancoDao := TBancoDao.Create;
+  lBancoDao := TBancoDao.Create(vIConexao);
 
   Result := '';
 

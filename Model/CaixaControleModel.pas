@@ -111,7 +111,7 @@ function TCaixaControleModel.CaixaAberto(pUsuario: String): String;
 var
   lCaixaControleDao: TCaixaControleDao;
 begin
-  lCaixaControleDao := TCaixaControleDao.Create;
+  lCaixaControleDao := TCaixaControleDao.Create(vIConexao);
   try
     lCaixaControleDao.WhereView := ' and caixa_ctr.status = ''I''     '+
                                    ' and caixa_ctr.data_fecha is null '+
@@ -145,7 +145,7 @@ function TCaixaControleModel.dataFechamento(pIdCaixa, pUsuario: String): String;
 var
   lCaixaControleDao : TCaixaControleDao;
 begin
-  lCaixaControleDao := TCaixaControleDao.Create;
+  lCaixaControleDao := TCaixaControleDao.Create(vIConexao);
   try
     Result := lCaixaControleDao.dataFechamento(pIdCaixa, pUsuario);
   finally
@@ -165,9 +165,9 @@ var
   lCaixaAberto,
   lCaixaFechamento   : TCaixaControleModel;
 begin
-  lCaixaControleDao  := TCaixaControleDao.Create;
-  lCaixaAberto       := TCaixaControleModel.Create;
-  lCaixaFechamento   := TCaixaControleModel.Create;
+  lCaixaControleDao  := TCaixaControleDao.Create(vIConexao);
+  lCaixaAberto       := TCaixaControleModel.Create(vIConexao);
+  lCaixaFechamento   := TCaixaControleModel.Create(vIConexao);
 
   try
     lCaixaControleDao.WhereView := ' and caixa_ctr.status = ''I''     '+
@@ -211,7 +211,7 @@ begin
   self.HORA    := TimeToStr(xConexao.HoraServer);
   self.Salvar;
 
-  lCaixaModel := TCaixaModel.Create;
+  lCaixaModel := TCaixaModel.Create(vIConexao);
 
   try
     lCaixaModel.CODIGO_CTA        := '500000';
@@ -249,7 +249,7 @@ procedure TCaixaControleModel.obterLista;
 var
   lCaixaControleLista: TCaixaControleDao;
 begin
-  lCaixaControleLista := TCaixaControleDao.Create;
+  lCaixaControleLista := TCaixaControleDao.Create(vIConexao);
 
   try
     lCaixaControleLista.TotalRecords    := FTotalRecords;
@@ -274,7 +274,7 @@ function TCaixaControleModel.Salvar: String;
 var
   lCaixaControleDao: TCaixaControleDao;
 begin
-  lCaixaControleDao := TCaixaControleDao.Create;
+  lCaixaControleDao := TCaixaControleDao.Create(vIConexao);
 
   Result := '';
 
@@ -294,7 +294,7 @@ procedure TCaixaControleModel.Sangria(pValor: Double);
 var
   lCaixaModel : TCaixaModel;
 begin
-  lCaixaModel := TCaixaModel.Create;
+  lCaixaModel := TCaixaModel.Create(vIConexao);
 
   try
     lCaixaModel.CODIGO_CTA          := '400000';
@@ -435,7 +435,7 @@ procedure TCaixaControleModel.Suprimento(pValor: Double);
 var
   lCaixaModel : TCaixaModel;
 begin
-  lCaixaModel := TCaixaModel.Create;
+  lCaixaModel := TCaixaModel.Create(vIConexao);
 
   try
     lCaixaModel.CODIGO_CTA          := '400000';
@@ -471,7 +471,7 @@ function TCaixaControleModel.ultimoCaixa(pUsuario: String): String;
 var
   lCaixaControleDao : TCaixaControleDao;
 begin
-  lCaixaControleDao := TCaixaControleDao.Create;
+  lCaixaControleDao := TCaixaControleDao.Create(vIConexao);
   try
     Result := lCaixaControleDao.ultimoCaixa(pUsuario);
   finally
@@ -483,7 +483,7 @@ procedure TCaixaControleModel.ultimosCaixa(pUsuario: String);
 var
   lCaixaControleLista: TCaixaControleDao;
 begin
-  lCaixaControleLista := TCaixaControleDao.Create;
+  lCaixaControleLista := TCaixaControleDao.Create(vIConexao);
   try
     lCaixaControleLista.ultimosCaixa(pUsuario);
     FCaixaControlesLista := lCaixaControleLista.CaixaControlesLista;

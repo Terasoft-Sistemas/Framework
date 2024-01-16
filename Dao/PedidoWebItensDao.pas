@@ -161,7 +161,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FPedidoWebItenssLista.Add(TPedidoWebItensModel.Create);
+      FPedidoWebItenssLista.Add(TPedidoWebItensModel.Create(vIConexao));
 
       i := FPedidoWebItenssLista.Count -1;
 
@@ -229,7 +229,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FPedidoWebItenssLista.Add(TPedidoWebItensModel.Create);
+      FPedidoWebItenssLista.Add(TPedidoWebItensModel.Create(vIConexao));
 
       i := FPedidoWebItenssLista.Count -1;
 

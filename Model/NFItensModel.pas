@@ -508,7 +508,7 @@ function TNFItensModel.carregaClasse(pId: String): TNFItensModel;
 var
   lNFItensDao: TNFItensDao;
 begin
-  lNFItensDao := TNFItensDao.Create;
+  lNFItensDao := TNFItensDao.Create(vIConexao);
   try
     Result := lNFItensDao.carregaClasse(pId);
   finally
@@ -531,7 +531,7 @@ procedure TNFItensModel.obterLista;
 var
   lNFItensLista: TNFItensDao;
 begin
-  lNFItensLista := TNFItensDao.Create;
+  lNFItensLista := TNFItensDao.Create(vIConexao);
 
   try
     lNFItensLista.TotalRecords    := FTotalRecords;
@@ -556,7 +556,7 @@ function TNFItensModel.Salvar: String;
 var
   lNFItensDao: TNFItensDao;
 begin
-  lNFItensDao := TNFItensDao.Create;
+  lNFItensDao := TNFItensDao.Create(vIConexao);
 
   Result := '';
 

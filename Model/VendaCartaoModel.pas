@@ -135,7 +135,7 @@ procedure TVendaCartaoModel.obterLista;
 var
   lVendaCartaoLista: TVendaCartaoDao;
 begin
-  lVendaCartaoLista := TVendaCartaoDao.Create;
+  lVendaCartaoLista := TVendaCartaoDao.Create(vIConexao);
 
   try
     lVendaCartaoLista.TotalRecords    := FTotalRecords;
@@ -160,7 +160,7 @@ function TVendaCartaoModel.Salvar: String;
 var
   lVendaCartaoDao: TVendaCartaoDao;
 begin
-  lVendaCartaoDao := TVendaCartaoDao.Create;
+  lVendaCartaoDao := TVendaCartaoDao.Create(vIConexao);
 
   Result := '';
 

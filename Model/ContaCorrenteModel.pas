@@ -178,7 +178,7 @@ var
   lContaCorrenteDao: TContaCorrenteDao;
 begin
 
-  lContaCorrenteDao := TContaCorrenteDao.Create;
+  lContaCorrenteDao := TContaCorrenteDao.Create(vIConexao);
   try
     Result := lContaCorrenteDao.carregaClasse(pId);
   finally
@@ -202,8 +202,8 @@ var
   lContaCorrenteAlterar, lContaCorrenteExclusao: TContaCorrenteModel;
 begin
 
-  lContaCorrenteAlterar  := TContaCorrenteModel.Create;
-  lContaCorrenteExclusao := TContaCorrenteModel.Create;
+  lContaCorrenteAlterar  := TContaCorrenteModel.Create(vIConexao);
+  lContaCorrenteExclusao := TContaCorrenteModel.Create(vIConexao);
 
   try
     lContaCorrenteAlterar  := self.carregaClasse(pIdRegistro);
@@ -229,7 +229,7 @@ procedure TContaCorrenteModel.obterLista;
 var
   lContaCorrenteLista: TContaCorrenteDao;
 begin
-  lContaCorrenteLista := TContaCorrenteDao.Create;
+  lContaCorrenteLista := TContaCorrenteDao.Create(vIConexao);
 
   try
     lContaCorrenteLista.TotalRecords    := FTotalRecords;
@@ -254,7 +254,7 @@ function TContaCorrenteModel.Salvar: String;
 var
   lContaCorrenteDao: TContaCorrenteDao;
 begin
-  lContaCorrenteDao := TContaCorrenteDao.Create;
+  lContaCorrenteDao := TContaCorrenteDao.Create(vIConexao);
 
   Result := '';
 
