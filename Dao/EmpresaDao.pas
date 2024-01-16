@@ -4,29 +4,32 @@ interface
 uses
   EmpresaModel,
   FireDAC.Comp.Client,
-  System.SysUtils, Conexao;
+  System.SysUtils,
+  Interfaces.Conexao;
 
 type
   TEmpresaDao = class
 
+  private
+    vIConexao : IConexao;
+
   public
     procedure carregar(pEmpresaModel: TEmpresaModel);
 
+    constructor Create(pIConexao : IConexao);
+    destructor Destroy; override;
   end;
 
-  implementation
-
-uses VariaveisGlobais;
+implementation
 
 procedure TEmpresaDao.carregar(pEmpresaModel: TEmpresaModel);
 var
   lQry: TFDQuery;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
    try
-
       lQry.Open(' select * from empresa ');
 
       try
@@ -64,5 +67,16 @@ begin
    end;
 end;
 
+
+constructor TEmpresaDao.Create(pIConexao: IConexao);
+begin
+  vIConexao := pIConexao;
+end;
+
+destructor TEmpresaDao.Destroy;
+begin
+
+  inherited;
+end;
 
 end.
