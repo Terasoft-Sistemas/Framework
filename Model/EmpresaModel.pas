@@ -105,7 +105,7 @@ procedure TEmpresaModel.Carregar;
 var
   VEmpresaDao: TEmpresaDao;
 begin
-  VEmpresaDao := TEmpresaDao.Create;
+  VEmpresaDao := TEmpresaDao.Create(vIConexao);
   try
     VEmpresaDao.carregar(Self);
   finally
