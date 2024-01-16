@@ -40,7 +40,7 @@ type
     procedure SetIDRecordView(const Value: String);
 
   public
-    constructor Create(pIConexao : IConexao;);
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property PrecoVendaProdutosLista: TObjectList<TPrecoVendaProdutoModel> read FPrecoVendaProdutosLista write SetPrecoVendaProdutosLista;
@@ -65,7 +65,7 @@ implementation
 
 { TPrecoVendaProduto }
 
-constructor TPrecoVendaProdutoDao.Create(pIConexao : IConexao;);
+constructor TPrecoVendaProdutoDao.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -176,7 +176,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FPrecoVendaProdutosLista.Add(TPrecoVendaProdutoModel.Create);
+      FPrecoVendaProdutosLista.Add(TPrecoVendaProdutoModel.Create(vIConexao));
 
       i := FPrecoVendaProdutosLista.Count -1;
 

@@ -89,7 +89,7 @@ procedure TLojasModel.obterLista;
 var
   lLojasLista: TLojasDao;
 begin
-  lLojasLista := TLojasDao.Create;
+  lLojasLista := TLojasDao.Create(vIConexao);
 
   try
     lLojasLista.TotalRecords    := FTotalRecords;
@@ -115,7 +115,7 @@ function TLojasModel.Salvar: String;
 var
   lLojasDao: TLojasDao;
 begin
-  lLojasDao := TLojasDao.Create;
+  lLojasDao := TLojasDao.Create(vIConexao);
 
   Result := '';
 

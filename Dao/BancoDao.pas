@@ -407,7 +407,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FBancosLista.Add(TBancoModel.Create);
+      FBancosLista.Add(TBancoModel.Create(vIConexao));
 
       i := FBancosLista.Count -1;
 

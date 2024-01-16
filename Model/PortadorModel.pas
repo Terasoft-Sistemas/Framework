@@ -158,7 +158,7 @@ function TPortadorModel.carregaClasse(pId: String): TPortadorModel;
 var
   lPortadorDao: TPortadorDao;
 begin
-  lPortadorDao := TPortadorDao.Create;
+  lPortadorDao := TPortadorDao.Create(vIConexao);
 
   try
     Result := lPortadorDao.carregaClasse(pId);
@@ -182,7 +182,7 @@ procedure TPortadorModel.obterLista;
 var
   lPortadorLista: TPortadorDao;
 begin
-  lPortadorLista := TPortadorDao.Create;
+  lPortadorLista := TPortadorDao.Create(vIConexao);
 
   try
     lPortadorLista.TotalRecords    := FTotalRecords;
@@ -207,7 +207,7 @@ function TPortadorModel.possuiBandeira(pPortador: String): Boolean;
 var
   lAdmCartaoDao: TAdmCartaoDao;
 begin
-  lAdmCartaoDao := TAdmCartaoDao.Create;
+  lAdmCartaoDao := TAdmCartaoDao.Create(vIConexao);
   try
     lAdmCartaoDao.WhereView := 'and coalesce(status,''A'') = ''A'' and portador_id = ' + QuotedStr(pPortador);
     lAdmCartaoDao.obterTotalRegistros;
@@ -222,7 +222,7 @@ function TPortadorModel.Salvar: String;
 var
   lPortadorDao: TPortadorDao;
 begin
-  lPortadorDao := TPortadorDao.Create;
+  lPortadorDao := TPortadorDao.Create(vIConexao);
 
   Result := '';
 

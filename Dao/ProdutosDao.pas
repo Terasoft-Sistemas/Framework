@@ -79,7 +79,7 @@ var
   lModel: TProdutosModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TProdutosModel.Create;
+  lModel   := TProdutosModel.Create(vIConexao);
   Result   := lModel;
 
   try
@@ -358,7 +358,7 @@ begin
 
 end;
 
-constructor TProdutosDao.Create(vIConexao : IConexao);
+constructor TProdutosDao.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -503,7 +503,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FProdutossLista.Add(TProdutosModel.Create);
+      FProdutossLista.Add(TProdutosModel.Create(vIConexao));
 
       i := FProdutossLista.Count -1;
 

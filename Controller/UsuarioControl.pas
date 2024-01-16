@@ -2,7 +2,10 @@ unit UsuarioControl;
 
 interface
 
-uses UsuarioModel, FireDAC.Comp.Client;
+  uses
+    UsuarioModel,
+    FireDAC.Comp.Client,
+    Interfaces.Conexao;
 
 type
     TUsuarioControl = class
@@ -11,7 +14,7 @@ type
     FUsuarioModel: TUsuarioModel;
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -24,9 +27,9 @@ implementation
 
 { TClienteContol }
 
-constructor TUsuarioControl.Create;
+constructor TUsuarioControl.Create(pIConexao : IConexao);
 begin
-  FUsuarioModel := TUsuarioModel.Create;
+  FUsuarioModel := TUsuarioModel.Create(pIConexao);
 end;
 
 destructor TUsuarioControl.Destroy;

@@ -176,7 +176,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FPrecoVendasLista.Add(TPrecoVendaModel.Create);
+      FPrecoVendasLista.Add(TPrecoVendaModel.Create(vIConexao));
 
       i := FPrecoVendasLista.Count -1;
 

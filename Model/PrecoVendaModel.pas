@@ -99,7 +99,7 @@ procedure TPrecoVendaModel.obterLista;
 var
   lPrecoVendaLista: TPrecoVendaDao;
 begin
-  lPrecoVendaLista := TPrecoVendaDao.Create;
+  lPrecoVendaLista := TPrecoVendaDao.Create(vIConexao);
 
   try
     lPrecoVendaLista.TotalRecords    := FTotalRecords;
@@ -124,7 +124,7 @@ function TPrecoVendaModel.Salvar: String;
 var
   lPrecoVendaDao: TPrecoVendaDao;
 begin
-  lPrecoVendaDao := TPrecoVendaDao.Create;
+  lPrecoVendaDao := TPrecoVendaDao.Create(vIConexao);
 
   Result := '';
 

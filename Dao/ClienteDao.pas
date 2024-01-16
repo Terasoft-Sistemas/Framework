@@ -72,7 +72,7 @@ var
   lModel: TClienteModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TClienteModel.Create;
+  lModel   := TClienteModel.Create(vIConexao);
   Result   := lModel;
   try
     lQry.Open('select * from clientes where codigo_cli = '+ QuotedStr(pId));
@@ -504,7 +504,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FClientesLista.Add(TClienteModel.Create);
+      FClientesLista.Add(TClienteModel.Create(vIConexao));
       i := FClientesLista.Count -1;
       FClientesLista[i].codigo_cli                 := lQry.FieldByName('CODIGO_CLI').AsString;
       FClientesLista[i].fantasia_cli               := lQry.FieldByName('FANTASIA_CLI').AsString;

@@ -87,7 +87,7 @@ procedure TPrecoClienteModel.obterLista;
 var
   lPrecoClienteLista: TPrecoClienteDao;
 begin
-  lPrecoClienteLista := TPrecoClienteDao.Create;
+  lPrecoClienteLista := TPrecoClienteDao.Create(vIConexao);
 
   try
     lPrecoClienteLista.TotalRecords    := FTotalRecords;
@@ -112,7 +112,7 @@ function TPrecoClienteModel.Salvar: String;
 var
   lPrecoClienteDao: TPrecoClienteDao;
 begin
-  lPrecoClienteDao := TPrecoClienteDao.Create;
+  lPrecoClienteDao := TPrecoClienteDao.Create(vIConexao);
 
   Result := '';
 

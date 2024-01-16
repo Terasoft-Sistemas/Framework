@@ -845,7 +845,7 @@ procedure TProdutosModel.adicionarSaldo(pIdProduto: String; pSaldo: Double);
 var
   lProdutoDao: TProdutosDao;
 begin
-  lProdutoDao := TProdutosDao.Create;
+  lProdutoDao := TProdutosDao.Create(vIConexao);
   try
     lProdutoDao.adicionarSaldo(pIdProduto, pSaldo);
   finally
@@ -857,7 +857,7 @@ function TProdutosModel.carregaClasse(pId: String): TProdutosModel;
 var
   lProdutosDao: TProdutosDao;
 begin
-  lProdutosDao := TProdutosDao.Create;
+  lProdutosDao := TProdutosDao.Create(vIConexao);
   try
     Result := lProdutosDao.carregaClasse(pId);
   finally
@@ -878,7 +878,7 @@ function TProdutosModel.obterCodigoBarras(pIdProduto: String): String;
 var
   lProdutosDao: TProdutosDao;
 begin
-  lProdutosDao := TProdutosDao.Create;
+  lProdutosDao := TProdutosDao.Create(vIConexao);
   try
     Result := lProdutosDao.obterCodigoBarras(pIdProduto);
   finally
@@ -889,7 +889,7 @@ procedure TProdutosModel.obterLista;
 var
   lProdutosLista: TProdutosDao;
 begin
-  lProdutosLista := TProdutosDao.Create;
+  lProdutosLista := TProdutosDao.Create(vIConexao);
   try
     lProdutosLista.TotalRecords    := FTotalRecords;
     lProdutosLista.WhereView       := FWhereView;
@@ -909,7 +909,7 @@ function TProdutosModel.obterSaldo(pIdProduto: String): Double;
 var
   lProdutoDao: TProdutosDao;
 begin
-  lProdutoDao := TProdutosDao.Create;
+  lProdutoDao := TProdutosDao.Create(vIConexao);
   try
     Result := lProdutoDao.obterSaldo(pIdProduto);
   finally
@@ -921,7 +921,7 @@ function TProdutosModel.Salvar: String;
 var
   lProdutosDao: TProdutosDao;
 begin
-  lProdutosDao := TProdutosDao.Create;
+  lProdutosDao := TProdutosDao.Create(vIConexao);
   Result := '';
   try
     case FAcao of
@@ -2019,7 +2019,7 @@ procedure TProdutosModel.subtrairSaldo(pIdProduto: String; pSaldo: Double);
 var
   lProdutoDao: TProdutosDao;
 begin
-  lProdutoDao := TProdutosDao.Create;
+  lProdutoDao := TProdutosDao.Create(vIConexao);
   try
     lProdutoDao.subtrairSaldo(pIdProduto, pSaldo);
   finally
@@ -2031,7 +2031,7 @@ function TProdutosModel.valorVenda(pIdProduto: String): Variant;
 var
   lProdutoDao: TProdutosDao;
 begin
-  lProdutoDao := TProdutosDao.Create;
+  lProdutoDao := TProdutosDao.Create(vIConexao);
   try
     Result := lProdutoDao.valorVenda(pIdProduto);
   finally

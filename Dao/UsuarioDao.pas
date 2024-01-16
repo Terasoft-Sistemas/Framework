@@ -83,7 +83,7 @@ var
   lModel: TUsuarioModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TUsuarioModel.Create;
+  lModel   := TUsuarioModel.Create(vIConexao);
   Result   := lModel;
 
   try
@@ -244,7 +244,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FUsuariosLista.Add(TUsuarioModel.Create);
+      FUsuariosLista.Add(TUsuarioModel.Create(vIConexao));
 
       i := FUsuariosLista.Count -1;
 

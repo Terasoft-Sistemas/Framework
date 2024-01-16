@@ -69,7 +69,7 @@ var
   lModel: TPortadorModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TPortadorModel.Create;
+  lModel   := TPortadorModel.Create(vIConexao);
   Result   := lModel;
 
   try
@@ -200,7 +200,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FPortadorsLista.Add(TPortadorModel.Create);
+      FPortadorsLista.Add(TPortadorModel.Create(vIConexao));
 
       i := FPortadorsLista.Count -1;
 

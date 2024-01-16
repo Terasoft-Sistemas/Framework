@@ -147,7 +147,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FConsultasLista.Add(TConsultaModel.Create);
+      FConsultasLista.Add(TConsultaModel.Create(vIConexao));
 
       i := FConsultasLista.Count -1;
 

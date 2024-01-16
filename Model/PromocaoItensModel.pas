@@ -96,7 +96,7 @@ procedure TPromocaoItensModel.obterLista;
 var
   lPromocaoItensLista: TPromocaoItensDao;
 begin
-  lPromocaoItensLista := TPromocaoItensDao.Create;
+  lPromocaoItensLista := TPromocaoItensDao.Create(vIConexao);
 
   try
     lPromocaoItensLista.TotalRecords    := FTotalRecords;
@@ -121,7 +121,7 @@ function TPromocaoItensModel.Salvar: String;
 var
   lPromocaoItensDao: TPromocaoItensDao;
 begin
-  lPromocaoItensDao := TPromocaoItensDao.Create;
+  lPromocaoItensDao := TPromocaoItensDao.Create(vIConexao);
 
   Result := '';
 

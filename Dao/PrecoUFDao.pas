@@ -40,7 +40,7 @@ type
     function montaCondicaoQuery: String;
 
   public
-    constructor Create(pIConexao : IConexao;);
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property PrecoUFsLista: TObjectList<TPrecoUFModel> read FPrecoUFsLista write SetPrecoUFsLista;
@@ -65,7 +65,7 @@ implementation
 
 { TPrecoUF }
 
-constructor TPrecoUFDao.Create(pIConexao : IConexao;);
+constructor TPrecoUFDao.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -179,7 +179,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FPrecoUFsLista.Add(TPrecoUFModel.Create);
+      FPrecoUFsLista.Add(TPrecoUFModel.Create(vIConexao));
 
       i := FPrecoUFsLista.Count -1;
 

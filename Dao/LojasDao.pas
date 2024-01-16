@@ -141,7 +141,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FLojassLista.Add(TLojasModel.Create);
+      FLojassLista.Add(TLojasModel.Create(vIConexao));
 
       i := FLojassLista.Count -1;
 

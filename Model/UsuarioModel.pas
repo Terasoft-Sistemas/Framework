@@ -110,7 +110,7 @@ function TUsuarioModel.carregaClasse(ID: String): TUsuarioModel;
 var
   lUsuarioLista: TUsuarioDao;
 begin
-  lUsuarioLista := TUsuarioDao.Create;
+  lUsuarioLista := TUsuarioDao.Create(vIConexao);
   try
     Result := lUsuarioLista.carregaClasse(ID);
   finally
@@ -133,7 +133,7 @@ function TUsuarioModel.nomeUsuario(pIdUsuario: String): String;
 var
   lUsuarioDao: TUsuarioDao;
 begin
-  lUsuarioDao := TUsuarioDao.Create;
+  lUsuarioDao := TUsuarioDao.Create(vIConexao);
   try
     Result := lUsuarioDao.nomeUsuario(pIdUsuario);
   finally
@@ -145,7 +145,7 @@ procedure TUsuarioModel.obterLista;
 var
   lUsuariosLista: TUsuarioDao;
 begin
-  lUsuariosLista := TUsuarioDao.Create;
+  lUsuariosLista := TUsuarioDao.Create(vIConexao);
 
   try
 
@@ -171,7 +171,7 @@ var
   lUsuarioDao: TUsuarioDao;
 begin
   try
-    lUsuarioDao := TUsuarioDao.Create;
+    lUsuarioDao := TUsuarioDao.Create(vIConexao);
     
     lUsuarioDao.validaLogin(user,pass);
 
@@ -194,7 +194,7 @@ function TUsuarioModel.vendedorUsuario(pIdUsuario: String): String;
 var
   lUsuarioDao: TUsuarioDao;
 begin
-  lUsuarioDao := TUsuarioDao.Create;
+  lUsuarioDao := TUsuarioDao.Create(vIConexao);
   try
     Result := lUsuarioDao.vendedorUsuario(pIdUsuario);
   finally
@@ -206,7 +206,7 @@ function TUsuarioModel.Salvar: String;
 var
   lUsuarioDao: TUsuarioDao;
 begin
-  lUsuarioDao := TUsuarioDao.Create;
+  lUsuarioDao := TUsuarioDao.Create(vIConexao);
 
   Result := '';
 

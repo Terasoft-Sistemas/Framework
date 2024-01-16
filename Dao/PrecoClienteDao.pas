@@ -218,7 +218,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FPrecoClientesLista.Add(TPrecoClienteModel.Create);
+      FPrecoClientesLista.Add(TPrecoClienteModel.Create(vIConexao));
 
       i := FPrecoClientesLista.Count -1;
 

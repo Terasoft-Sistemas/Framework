@@ -96,7 +96,7 @@ procedure TPrecoUFModel.obterLista;
 var
   lPrecoUFLista: TPrecoUFDao;
 begin
-  lPrecoUFLista := TPrecoUFDao.Create;
+  lPrecoUFLista := TPrecoUFDao.Create(vIConexao);
 
   try
     lPrecoUFLista.TotalRecords    := FTotalRecords;
@@ -121,7 +121,7 @@ function TPrecoUFModel.Salvar: String;
 var
   lPrecoUFDao: TPrecoUFDao;
 begin
-  lPrecoUFDao := TPrecoUFDao.Create;
+  lPrecoUFDao := TPrecoUFDao.Create(vIConexao);
 
   Result := '';
 

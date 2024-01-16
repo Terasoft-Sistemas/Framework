@@ -180,7 +180,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FPromocaoItenssLista.Add(TPromocaoItensModel.Create);
+      FPromocaoItenssLista.Add(TPromocaoItensModel.Create(vIConexao));
 
       i := FPromocaoItenssLista.Count -1;
 

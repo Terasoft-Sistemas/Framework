@@ -960,7 +960,7 @@ function TClienteModel.carregaClasse(pId: String): TClienteModel;
 var
   lClienteDao: TClienteDao;
 begin
-  lClienteDao := TClienteDao.Create;
+  lClienteDao := TClienteDao.Create(vIConexao);
   try
     Result := lClienteDao.carregaClasse(pId);
   finally
@@ -983,7 +983,7 @@ var
   lClienteDao: TClienteDao;
   lDataVencimento: TDate;
 begin
-  lClienteDao := TClienteDao.Create;
+  lClienteDao := TClienteDao.Create(vIConexao);
   try
     lDataVencimento := lClienteDao.diasAtraso(pCodigoCliente);
 
@@ -1003,7 +1003,7 @@ function TClienteModel.nomeCliente(pId: String): Variant;
 var
   lClienteDao: TClienteDao;
 begin
-  lClienteDao := TClienteDao.Create;
+  lClienteDao := TClienteDao.Create(vIConexao);
   try
     Result := lClienteDao.nomeCliente(pId);
   finally
@@ -1015,7 +1015,7 @@ procedure TClienteModel.obterLista;
 var
   lClienteLista: TClienteDao;
 begin
-  lClienteLista := TClienteDao.Create;
+  lClienteLista := TClienteDao.Create(vIConexao);
   try
     lClienteLista.TotalRecords    := FTotalRecords;
     lClienteLista.WhereView       := FWhereView;
@@ -1036,7 +1036,7 @@ function TClienteModel.Salvar: String;
 var
   lClienteDao: TClienteDao;
 begin
-  lClienteDao := TClienteDao.Create;
+  lClienteDao := TClienteDao.Create(vIConexao);
   Result := '';
   try
     case FAcao of
@@ -2585,7 +2585,7 @@ function TClienteModel.ufCliente(pId: String): Variant;
 var
   lClienteDao: TClienteDao;
 begin
-  lClienteDao := TClienteDao.Create;
+  lClienteDao := TClienteDao.Create(vIConexao);
   try
     Result := lClienteDao.ufCliente(pId);
   finally

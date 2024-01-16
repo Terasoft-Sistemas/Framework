@@ -236,7 +236,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FConfiguracoessLista.Add(TConfiguracoesModel.Create);
+      FConfiguracoessLista.Add(TConfiguracoesModel.Create(vIConexao));
       i := FConfiguracoessLista.Count -1;
       FConfiguracoessLista[i].ID             := lQry.FieldByName('ID').AsString;
       FConfiguracoessLista[i].TAG            := lQry.FieldByName('TAG').AsString;

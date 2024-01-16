@@ -113,7 +113,7 @@ procedure TConfiguracoesModel.obterLista;
 var
   lConfiguracoesLista: TConfiguracoesDao;
 begin
-  lConfiguracoesLista := TConfiguracoesDao.Create;
+  lConfiguracoesLista := TConfiguracoesDao.Create(vIConexao);
 
   try
     lConfiguracoesLista.TotalRecords    := FTotalRecords;
@@ -138,7 +138,7 @@ function TConfiguracoesModel.Salvar: String;
 var
   lConfiguracoesDao: TConfiguracoesDao;
 begin
-  lConfiguracoesDao := TConfiguracoesDao.Create;
+  lConfiguracoesDao := TConfiguracoesDao.Create(vIConexao);
 
   Result := '';
 

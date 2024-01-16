@@ -86,7 +86,7 @@ procedure TConsultaModel.obterLista;
 var
   lConsultaLista: TConsultaDao;
 begin
-  lConsultaLista := TConsultaDao.Create;
+  lConsultaLista := TConsultaDao.Create(vIConexao);
 
   try
     lConsultaLista.TotalRecords     := FTotalRecords;
