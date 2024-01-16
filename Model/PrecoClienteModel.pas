@@ -4,12 +4,14 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TPrecoClienteModel = class
 
   private
+    vIConexao : IConexao;
     FPrecoClientesLista: TObjectList<TPrecoClienteModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -45,7 +47,7 @@ type
     property ID: Variant read FID write SetID;
     property SYSTIME: Variant read FSYSTIME write SetSYSTIME;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -70,9 +72,9 @@ uses
 
 { TPrecoClienteModel }
 
-constructor TPrecoClienteModel.Create;
+constructor TPrecoClienteModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TPrecoClienteModel.Destroy;

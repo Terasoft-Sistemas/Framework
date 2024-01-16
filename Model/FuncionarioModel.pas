@@ -4,12 +4,14 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TFuncionarioModel = class
 
   private
+    vIConexao : IConexao;
     FFuncionariosLista: TObjectList<TFuncionarioModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -43,7 +45,7 @@ type
     property CODIGO_FUN: Variant read FCODIGO_FUN write SetCODIGO_FUN;
     property NOME_FUN: Variant read FNOME_FUN write SetNOME_FUN;
 
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -84,9 +86,9 @@ begin
 
 end;
 
-constructor TFuncionarioModel.Create;
+constructor TFuncionarioModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TFuncionarioModel.Destroy;

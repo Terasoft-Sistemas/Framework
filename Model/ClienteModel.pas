@@ -2,10 +2,15 @@ unit ClienteModel;
 interface
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
+
 type
   TClienteModel = class
+
   private
+    vIConexao : IConexao;
+
     FClientesLista: TObjectList<TClienteModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -926,7 +931,7 @@ type
     property percentual_desconto: Variant read Fpercentual_desconto write Setpercentual_desconto;
     property sacador_avalista_id: Variant read Fsacador_avalista_id write Setsacador_avalista_id;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -963,8 +968,9 @@ begin
   end;
 end;
 
-constructor TClienteModel.Create;
+constructor TClienteModel.Create(pIConexao : IConexao);
 begin
+  vIConexao := pIConexao;
 end;
 
 destructor TClienteModel.Destroy;

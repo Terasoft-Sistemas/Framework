@@ -5,12 +5,14 @@ interface
 uses
   Terasoft.Enumerado,
   FireDAC.Comp.Client,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TNFModel = class
 
   private
+    vIConexao : IConexao;
     FAcao: TAcao;
     FVFCPUFDEST: Variant;
     FDATA_NF: Variant;
@@ -472,7 +474,7 @@ type
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property IDPedidoView: Integer read FIDPedidoView write SetIDPedidoView;
 
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -502,9 +504,9 @@ begin
   end;
 end;
 
-constructor TNFModel.Create;
+constructor TNFModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TNFModel.Destroy;

@@ -4,19 +4,20 @@ interface
 
 uses
   VendaCartaoModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  Terasoft.FuncoesTexto;
+  Terasoft.FuncoesTexto,
+  Interfaces.Conexao;
 
 type
   TVendaCartaoDao = class
 
   private
+    vIConexao : IConexao;
     FVendaCartaosLista: TObjectList<TVendaCartaoModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -42,7 +43,7 @@ type
     procedure setParams(var pQry: TFDQuery; pVendaCartaoModel: TVendaCartaoModel);
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property VendaCartaosLista: TObjectList<TVendaCartaoModel> read FVendaCartaosLista write SetVendaCartaosLista;
@@ -67,11 +68,9 @@ implementation
 
 { TVendaCartao }
 
-uses VariaveisGlobais;
-
-constructor TVendaCartaoDao.Create;
+constructor TVendaCartaoDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TVendaCartaoDao.Destroy;
@@ -85,7 +84,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL := '	  insert into vendacartao (id,                     '+SLineBreak+
           '							               numero_car,             '+SLineBreak+
@@ -131,7 +130,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := xConexao.Generetor('GEN_VENDACARTAO');
+    lQry.ParamByName('id').Value := vIConexao.Generetor('GEN_VENDACARTAO');
     setParams(lQry, AVendaCartaoModel);
     lQry.Open;
 
@@ -148,7 +147,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL := '   update vendacartao                                   '+SLineBreak+
           '      set numero_car = :numero_car,                     '+SLineBreak+
@@ -190,7 +189,7 @@ function TVendaCartaoDao.excluir(AVendaCartaoModel: TVendaCartaoModel): String;
 var
   lQry: TFDQuery;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from vendacartao where ID = :ID',[AVendaCartaoModel.ID]);
@@ -223,7 +222,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From vendacartao where 1=1 ';
 
@@ -244,7 +243,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FVendaCartaosLista := TObjectList<TVendaCartaoModel>.Create;
 

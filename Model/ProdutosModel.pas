@@ -2,10 +2,14 @@ unit ProdutosModel;
 interface
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
+
 type
   TProdutosModel = class
+
   private
+    vIConexao : IConexao;
     FProdutossLista: TObjectList<TProdutosModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -809,7 +813,7 @@ type
     property PERCENTUAL_PERDA_MATERIA_PRIMA: Variant read FPERCENTUAL_PERDA_MATERIA_PRIMA write SetPERCENTUAL_PERDA_MATERIA_PRIMA;
     property EXTIPI: Variant read FEXTIPI write SetEXTIPI;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -860,9 +864,12 @@ begin
     lProdutosDao.Free;
   end;
 end;
-constructor TProdutosModel.Create;
+
+constructor TProdutosModel.Create(pIConexao : IConexao);
 begin
+  vIConexao := pIConexao;
 end;
+
 destructor TProdutosModel.Destroy;
 begin
   inherited;

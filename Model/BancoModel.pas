@@ -4,12 +4,15 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TBancoModel = class
 
   private
+    vIConexao : IConexao;
+
     FBancosLista: TObjectList<TBancoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -231,7 +234,7 @@ type
     property caracteristica_titulo: Variant read Fcaracteristica_titulo write Setcaracteristica_titulo;
 
     
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -256,9 +259,9 @@ uses
 
 { TBancoModel }
 
-constructor TBancoModel.Create;
+constructor TBancoModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TBancoModel.Destroy;

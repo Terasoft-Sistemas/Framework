@@ -3,12 +3,15 @@ unit  EventosNFeModel;
 interface
 
 uses
-  Terasoft.Enumerado, FireDAC.Comp.Client;
+  Terasoft.Enumerado,
+  FireDAC.Comp.Client,
+  Interfaces.Conexao;
 
 type
   TEventosNFeModel = class
 
   private
+    vIConexao : IConexao;
     FAcao: TAcao;
     FRETORNO_SEFAZ: Variant;
     FPROTOCOLO_RETORNO: Variant;
@@ -53,6 +56,8 @@ type
     procedure SetXML(const Value: Variant);
 
   public
+    constructor Create(pIConexao : IConexao);
+    destructor Destroy; override;
 
     property    ID                :Variant read FID write SetID;
     property    ID_NFE            :Variant read FID_NFE write SetID_NFE;
@@ -86,6 +91,17 @@ uses EventosNFeDao;
 
 { TEventosNFe }
 
+
+constructor TEventosNFeModel.Create(pIConexao : IConexao);
+begin
+  vIConexao := pIConexao;
+end;
+
+destructor TEventosNFeModel.Destroy;
+begin
+
+  inherited;
+end;
 
 function TEventosNFeModel.Salvar: Boolean;
 var

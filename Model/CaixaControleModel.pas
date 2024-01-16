@@ -7,12 +7,15 @@ uses
   System.Generics.Collections,
   Terasoft.Utils,
   VariaveisGlobais,
-  CaixaModel;
+  CaixaModel,
+  Interfaces.Conexao;
 
 type
   TCaixaControleModel = class
 
   private
+    vIConexao : IConexao;
+
     FCaixaControlesLista: TObjectList<TCaixaControleModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -69,7 +72,7 @@ type
     property systime: Variant read Fsystime write Setsystime;
     property hora_fecha: Variant read Fhora_fecha write Sethora_fecha;
 
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -133,9 +136,9 @@ begin
   Result := self.CaixaAberto(VariaveisGlobais.xUsuarioID) <> '';
 end;
 
-constructor TCaixaControleModel.Create;
+constructor TCaixaControleModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 function TCaixaControleModel.dataFechamento(pIdCaixa, pUsuario: String): String;

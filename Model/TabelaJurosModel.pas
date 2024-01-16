@@ -4,12 +4,14 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TTabelaJurosModel = class
 
   private
+    vIConexao : IConexao;
     FTabelaJurossLista: TObjectList<TTabelaJurosModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -51,7 +53,7 @@ type
     property PORTADOR_ID: Variant read FPORTADOR_ID write SetPORTADOR_ID;
     property SYSTIME: Variant read FSYSTIME write SetSYSTIME;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -90,9 +92,9 @@ begin
   end;
 end;
 
-constructor TTabelaJurosModel.Create;
+constructor TTabelaJurosModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TTabelaJurosModel.Destroy;

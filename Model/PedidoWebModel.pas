@@ -5,12 +5,14 @@ interface
 uses
   Terasoft.Enumerado,
   System.Generics.Collections,
-  Terasoft.FuncoesTexto, Conexao;
+  Terasoft.FuncoesTexto,
+  Interfaces.Conexao;
 
 type
   TPedidoWebModel = class
 
   private
+    vIConexao : IConexao;
     FPedidoWebsLista: TObjectList<TPedidoWebModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -331,7 +333,7 @@ type
     property TIPO_COMISSAO: Variant read FTIPO_COMISSAO write SetTIPO_COMISSAO;
     property GERENTE_ID: Variant read FGERENTE_ID write SetGERENTE_ID;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -522,9 +524,9 @@ begin
   end;
 end;
 
-constructor TPedidoWebModel.Create;
+constructor TPedidoWebModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TPedidoWebModel.Destroy;

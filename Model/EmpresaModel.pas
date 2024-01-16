@@ -1,11 +1,16 @@
 unit EmpresaModel;
 
 interface
+
 uses
-  System.SysUtils;
+  System.SysUtils,
+  Interfaces.Conexao;
+
 type
   TEmpresaModel = class
+
   private
+    vIConexao : IConexao;
     FINSCRICAO_MUNICIPAL: Variant;
     FCNPJ: Variant;
     FFANTASIA: Variant;
@@ -58,8 +63,9 @@ type
     procedure SetJUROS_BOL(const Value: Variant);
     procedure SetLOJA(const Value: Variant);
     procedure SetLIMITE_ATRASO(const Value: Variant);
-
   public
+    constructor Create(pIConexao : IConexao);
+    destructor Destroy; override;
 
     property ID                  :Variant read FID write SetID;
     property SYSTIME             :Variant read FSYSTIME write SetSYSTIME;
@@ -87,9 +93,10 @@ type
     property LIMITE_ATRASO       :Variant read FLIMITE_ATRASO write SetLIMITE_ATRASO;
 
     procedure Carregar;
-
   end;
+
 implementation
+
 { TEmpresa }
 
 uses EmpresaDao;
@@ -106,92 +113,85 @@ begin
   end;
 end;
 
+constructor TEmpresaModel.Create(pIConexao : IConexao);
+begin
+  vIConexao := pIConexao;
+end;
+
+destructor TEmpresaModel.Destroy;
+begin
+
+  inherited;
+end;
 
 procedure TEmpresaModel.SetBAIRRO(const Value: Variant);
 begin
   FBAIRRO := Value;
 end;
-
 procedure TEmpresaModel.SetCEP(const Value: Variant);
 begin
   FCEP := Value;
 end;
-
 procedure TEmpresaModel.SetCIDADE(const Value: Variant);
 begin
   FCIDADE := Value;
 end;
-
 procedure TEmpresaModel.SetCNPJ(const Value: Variant);
 begin
   FCNPJ := Value;
 end;
-
 procedure TEmpresaModel.SetCODIGO(const Value: Variant);
 begin
   FCODIGO := Value;
 end;
-
 procedure TEmpresaModel.SetCODIGO_MUNUCIPIO(const Value: Variant);
 begin
   FCODIGO_MUNUCIPIO := Value;
 end;
-
 procedure TEmpresaModel.SetCOMPLEMENTO(const Value: Variant);
 begin
   FCOMPLEMENTO := Value;
 end;
-
 procedure TEmpresaModel.SetCONTATO(const Value: Variant);
 begin
   FCONTATO := Value;
 end;
-
 procedure TEmpresaModel.SetCONTRIBUINTE_IPI(const Value: Variant);
 begin
   FCONTRIBUINTE_IPI := Value;
 end;
-
 procedure TEmpresaModel.SetDATA_CADASTRO(const Value: Variant);
 begin
   FDATA_CADASTRO := Value;
 end;
-
 procedure TEmpresaModel.SetEMAIL(const Value: Variant);
 begin
   FEMAIL := Value;
 end;
-
 procedure TEmpresaModel.SetENDERECO(const Value: Variant);
 begin
   FENDERECO := Value;
 end;
-
 procedure TEmpresaModel.SetFANTASIA(const Value: Variant);
 begin
   FFANTASIA := Value;
 end;
-
 procedure TEmpresaModel.SetID(const Value: Variant);
 begin
   FID := Value;
 end;
-
 procedure TEmpresaModel.SetINSCRICAO_ESTADUAL(const Value: Variant);
 begin
   FINSCRICAO_ESTADUAL := Value;
 end;
-
 procedure TEmpresaModel.SetINSCRICAO_MUNICIPAL(const Value: Variant);
 begin
   FINSCRICAO_MUNICIPAL := Value;
 end;
-
 procedure TEmpresaModel.SetJUROS_BOL(const Value: Variant);
 begin
   FJUROS_BOL := Value;
 end;
-
 procedure TEmpresaModel.SetLIMITE_ATRASO(const Value: Variant);
 begin
   FLIMITE_ATRASO := Value;
@@ -201,40 +201,32 @@ procedure TEmpresaModel.SetLOJA(const Value: Variant);
 begin
   FLOJA := Value;
 end;
-
 procedure TEmpresaModel.SetNUMERO(const Value: Variant);
 begin
   FNUMERO := Value;
 end;
-
 procedure TEmpresaModel.SetRAZAO_SOCIAL(const Value: Variant);
 begin
   FRAZAO_SOCIAL := Value;
 end;
-
 procedure TEmpresaModel.SetREGIME_TRIBUTARIO(const Value: Variant);
 begin
   FREGIME_TRIBUTARIO := Value;
 end;
-
 procedure TEmpresaModel.SetSYSTIME(const Value: Variant);
 begin
   FSYSTIME := Value;
 end;
-
 procedure TEmpresaModel.SetTELEFONE(const Value: Variant);
 begin
   FTELEFONE := Value;
 end;
-
 procedure TEmpresaModel.SetUF(const Value: Variant);
 begin
   FUF := Value;
 end;
-
 procedure TEmpresaModel.SetURL(const Value: Variant);
 begin
   FURL := Value;
 end;
-
 end.

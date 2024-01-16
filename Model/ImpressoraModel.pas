@@ -4,12 +4,14 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TImpressoraModel = class
 
   private
+    vIConexao : IConexao;
     FImpressorasLista: TObjectList<TImpressoraModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -73,7 +75,7 @@ type
     property MODELO: Variant read FMODELO write SetMODELO;
     property RECIBO: Variant read FRECIBO write SetRECIBO;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -111,9 +113,9 @@ begin
   end;
 end;
 
-constructor TImpressoraModel.Create;
+constructor TImpressoraModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TImpressoraModel.Destroy;

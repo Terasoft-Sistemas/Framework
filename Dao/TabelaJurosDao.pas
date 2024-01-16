@@ -4,18 +4,19 @@ interface
 
 uses
   TabelaJurosModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
-  System.Variants;
+  System.Variants,
+  Interfaces.Conexao;
 
 type
   TTabelaJurosDao = class
 
   private
+    vIConexao : IConexao;
     FTabelaJurossLista: TObjectList<TTabelaJurosModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -39,7 +40,7 @@ type
     function montaCondicaoQuery: String;
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property TabelaJurossLista: TObjectList<TTabelaJurosModel> read FTabelaJurossLista write SetTabelaJurossLista;
@@ -67,14 +68,12 @@ implementation
 
 { TTabelaJuros }
 
-uses VariaveisGlobais;
-
 function TTabelaJurosDao.carregaClasse(pId: Integer): TTabelaJurosModel;
 var
   lQry: TFDQuery;
   lModel: TTabelaJurosModel;
 begin
-  lQry     := xConexao.CriarQuery;
+  lQry     := vIConexao.CriarQuery;
   lModel   := TTabelaJurosModel.Create;
   Result   := lModel;
 
@@ -99,9 +98,9 @@ begin
   end;
 end;
 
-constructor TTabelaJurosDao.Create;
+constructor TTabelaJurosDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TTabelaJurosDao.Destroy;
@@ -115,7 +114,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL := '     insert into tabelajuros (codigo,      '+SLineBreak+
           '                              indce,       '+SLineBreak+
@@ -147,7 +146,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL := '   update tabelajuros                   '+SLineBreak+
           '      set codigo = :codigo,             '+SLineBreak+
@@ -175,7 +174,7 @@ function TTabelaJurosDao.excluir(ATabelaJurosModel: TTabelaJurosModel): String;
 var
   lQry: TFDQuery;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from tabelajuros where ID = :ID',[ATabelaJurosModel.ID]);
@@ -208,7 +207,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From tabelajuros where 1=1 ';
 
@@ -229,7 +228,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FTabelaJurossLista := TObjectList<TTabelaJurosModel>.Create;
 

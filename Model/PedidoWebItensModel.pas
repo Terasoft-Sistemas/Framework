@@ -4,12 +4,14 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TPedidoWebItensModel = class
 
   private
+    vIConexao : IConexao;
     FPedidoWebItenssLista: TObjectList<TPedidoWebItensModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -226,7 +228,7 @@ type
     property CUSTOMEDIO_PRO: Variant read FCUSTOMEDIO_PRO write SetCUSTOMEDIO_PRO;
     property VALOR_MONTADOR: Variant read FVALOR_MONTADOR write SetVALOR_MONTADOR;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -253,9 +255,9 @@ uses
 
 { TPedidoWebItensModel }
 
-constructor TPedidoWebItensModel.Create;
+constructor TPedidoWebItensModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TPedidoWebItensModel.Destroy;

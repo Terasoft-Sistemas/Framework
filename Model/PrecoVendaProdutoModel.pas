@@ -4,12 +4,14 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TPrecoVendaProdutoModel = class
 
   private
+    vIConexao : IConexao;
     FPrecoVendaProdutosLista: TObjectList<TPrecoVendaProdutoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -45,7 +47,7 @@ type
     property VALOR_VENDA: Variant read FVALOR_VENDA write SetVALOR_VENDA;
     property SYSTIME: Variant read FSYSTIME write SetSYSTIME;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -70,9 +72,9 @@ uses
 
 { TPrecoVendaProdutoModel }
 
-constructor TPrecoVendaProdutoModel.Create;
+constructor TPrecoVendaProdutoModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TPrecoVendaProdutoModel.Destroy;

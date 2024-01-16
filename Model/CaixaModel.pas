@@ -4,12 +4,15 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TCaixaModel = class
 
   private
+    vIConexao : IConexao;
+
     FCaixasLista: TObjectList<TCaixaModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -142,7 +145,7 @@ type
     property PEDIDO_ID: Variant read FPEDIDO_ID write SetPEDIDO_ID;
     property ID: Variant read FID write SetID;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -190,9 +193,9 @@ begin
   Result := self.FCaixasLista[pIndex];
 end;
 
-constructor TCaixaModel.Create;
+constructor TCaixaModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TCaixaModel.Destroy;

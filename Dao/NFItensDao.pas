@@ -4,19 +4,20 @@ interface
 
 uses
   NFItensModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  Terasoft.FuncoesTexto;
+  Terasoft.FuncoesTexto,
+  Interfaces.Conexao;
 
 type
   TNFItensDao = class
 
   private
+    vIConexao : IConexao;
     FNFItenssLista: TObjectList<TNFItensModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -40,7 +41,7 @@ type
     function montaCondicaoQuery: String;
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property NFItenssLista: TObjectList<TNFItensModel> read FNFItenssLista write SetNFItenssLista;
@@ -67,14 +68,12 @@ implementation
 
 { TNFItens }
 
-uses VariaveisGlobais;
-
 function TNFItensDao.carregaClasse(pId: String): TNFItensModel;
 var
   lQry: TFDQuery;
   lModel: TNFItensModel;
 begin
-  lQry     := xConexao.CriarQuery;
+  lQry     := vIConexao.CriarQuery;
   lModel   := TNFItensModel.Create;
   Result   := lModel;
 
@@ -240,9 +239,9 @@ begin
   end;
 end;
 
-constructor TNFItensDao.Create;
+constructor TNFItensDao.Create(vIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TNFItensDao.Destroy;
@@ -256,7 +255,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL := 'insert into nfitens (numero_nf,                     '+SLineBreak+
           '                     serie_nf,                      '+SLineBreak+
@@ -562,7 +561,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL := '    update nfitens                                                                                                       '+SLineBreak+
           '       set valorunitario_nf = :valorunitario_nf,                                                                         '+SLineBreak+
@@ -722,7 +721,7 @@ function TNFItensDao.excluir(ANFItensModel: TNFItensModel): String;
 var
   lQry: TFDQuery;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from nfitens where ID = :ID',[ANFItensModel.ID]);
@@ -755,7 +754,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From nfitens where 1=1 ';
 
@@ -776,7 +775,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FNFItenssLista := TObjectList<TNFItensModel>.Create;
 

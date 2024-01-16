@@ -2,7 +2,6 @@ unit PedidoItensDao;
 interface
 uses
   PedidoItensModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
@@ -10,7 +9,6 @@ uses
   System.Generics.Collections,
   System.Variants,
   Interfaces.Conexao;
-
 
 type
   TPedidoItensDao = class
@@ -82,7 +80,7 @@ implementation
 
 { TPedidoItens }
 
-uses Terasoft.FuncoesTexto, VariaveisGlobais;
+uses Terasoft.FuncoesTexto;
 
 function TPedidoItensDao.carregaClasse(pId: String): TPedidoItensModel;
 var

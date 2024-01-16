@@ -4,19 +4,20 @@ interface
 
 uses
   PedidoWebModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  Terasoft.FuncoesTexto;
+  Terasoft.FuncoesTexto,
+  Interfaces.Conexao;
 
 type
   TPedidoWebDao = class
 
   private
+    vIConexao : IConexao;
     FPedidoWebsLista: TObjectList<TPedidoWebModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -42,7 +43,7 @@ type
     procedure setParams(var pQry: TFDQuery; pPedidoWebModel: TPedidoWebModel);
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property PedidoWebsLista: TObjectList<TPedidoWebModel> read FPedidoWebsLista write SetPedidoWebsLista;
@@ -65,14 +66,12 @@ implementation
 
 { TPedidoWeb }
 
-uses VariaveisGlobais;
-
 function TPedidoWebDao.alterar(APedidoWebModel: TPedidoWebModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL := '    update web_pedido                                                             '+SLineBreak+
           '       set loja = :loja,                                                          '+SLineBreak+
@@ -186,7 +185,7 @@ var
   lQry: TFDQuery;
   lModel: TPedidoWebModel;
 begin
-  lQry     := xConexao.CriarQuery;
+  lQry     := vIConexao.CriarQuery;
   lModel   := TPedidoWebModel.Create;
   Result   := lModel;
 
@@ -297,9 +296,9 @@ begin
   end;
 end;
 
-constructor TPedidoWebDao.Create;
+constructor TPedidoWebDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TPedidoWebDao.Destroy;
@@ -329,7 +328,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From web_pedido where 1=1 ';
 
@@ -350,7 +349,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FPedidoWebsLista := TObjectList<TPedidoWebModel>.Create;
 

@@ -4,12 +4,14 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TTEFModel = class
 
   private
+    vIConexao : IConexao;
     FTEFsLista: TObjectList<TTEFModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -150,7 +152,7 @@ type
     property CNPJ_CREDENCIADORA: Variant read FCNPJ_CREDENCIADORA write SetCNPJ_CREDENCIADORA;
     property CODIGO_CREDENCIADORA: Variant read FCODIGO_CREDENCIADORA write SetCODIGO_CREDENCIADORA;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -189,9 +191,9 @@ begin
   end;
 end;
 
-constructor TTEFModel.Create;
+constructor TTEFModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TTEFModel.Destroy;

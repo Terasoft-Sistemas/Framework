@@ -4,12 +4,14 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TConsultaModel = class
 
   private
+    vIConexao : IConexao;
     FConsultasLista: TObjectList<TConsultaModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -42,7 +44,7 @@ type
     property CODIGO: Variant read FCODIGO write SetCODIGO;
     property DESCRICAO: Variant read FDESCRICAO write SetDESCRICAO;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     procedure obterLista;
@@ -69,9 +71,9 @@ uses
 
 { TConsultaModel }
 
-constructor TConsultaModel.Create;
+constructor TConsultaModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TConsultaModel.Destroy;

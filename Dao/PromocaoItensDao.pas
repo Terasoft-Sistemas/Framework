@@ -4,18 +4,19 @@ interface
 
 uses
   PromocaoItensModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
-  System.Variants;
+  System.Variants,
+  Interfaces.Conexao;
 
 type
   TPromocaoItensDao = class
 
   private
+    vIConexao : IConexao;
     FPromocaoItenssLista: TObjectList<TPromocaoItensModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -39,7 +40,7 @@ type
     function montaCondicaoQuery: String;
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property PromocaoItenssLista: TObjectList<TPromocaoItensModel> read FPromocaoItenssLista write SetPromocaoItenssLista;
@@ -64,11 +65,9 @@ implementation
 
 { TPromocaoItens }
 
-uses VariaveisGlobais;
-
-constructor TPromocaoItensDao.Create;
+constructor TPromocaoItensDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TPromocaoItensDao.Destroy;
@@ -97,7 +96,7 @@ function TPromocaoItensDao.excluir(APromocaoItensModel: TPromocaoItensModel): St
 var
   lQry: TFDQuery;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from promocaoitens where ID = :ID',[APromocaoItensModel.ID]);
@@ -130,7 +129,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := '  select count(*) records                                         '+
             '    From promocaoitens                                            '+
@@ -154,7 +153,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FPromocaoItenssLista := TObjectList<TPromocaoItensModel>.Create;
 

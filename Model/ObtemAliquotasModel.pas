@@ -3,12 +3,14 @@ unit ObtemAliquotasModel;
 interface
 
 uses
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TObtemAliquotasModel = class
 
   private
+    vIConexao : IConexao;
     FDESTINATARIO_UF: String;
     FICMS_SOMA_FRETE_BASE: String;
     FICMS_REDUCAO: Real;
@@ -109,7 +111,7 @@ type
     property DESTINATARIO_UF : String read FDESTINATARIO_UF write SetDESTINATARIO_UF;
     property MODELO_NF       : String read FMODELO_NF write SetMODELO_NF;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function obterImpostos: TObtemAliquotasModel;
@@ -119,15 +121,15 @@ type
 implementation
 
 uses
-  ObtemAliquotasDao, mcibr.utils, Terasoft.Utils;
+  ObtemAliquotasDao,
+  mcibr.utils,
+  Terasoft.Utils;
 
 { TObtemAliquotasModel }
 
-
-
-constructor TObtemAliquotasModel.Create;
+constructor TObtemAliquotasModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TObtemAliquotasModel.Destroy;

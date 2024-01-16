@@ -4,12 +4,14 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TCreditoClienteUsoModel = class
 
   private
+    vIConexao : IConexao;
     FCreditoClienteUsosLista: TObjectList<TCreditoClienteUsoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -60,7 +62,7 @@ type
     property DATAHORA: Variant read FDATAHORA write SetDATAHORA;
     property SYSTIME: Variant read FSYSTIME write SetSYSTIME;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -85,9 +87,9 @@ uses
 
 { TCreditoClienteUsoModel }
 
-constructor TCreditoClienteUsoModel.Create;
+constructor TCreditoClienteUsoModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TCreditoClienteUsoModel.Destroy;

@@ -4,12 +4,14 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TPromocaoItensModel = class
 
   private
+    vIConexao : IConexao;
     FPromocaoItenssLista: TObjectList<TPromocaoItensModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -54,7 +56,7 @@ type
     property preco_venda_id: Variant read Fpreco_venda_id write Setpreco_venda_id;
     property cliente_id: Variant read Fcliente_id write Setcliente_id;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -79,9 +81,9 @@ uses
 
 { TPromocaoItensModel }
 
-constructor TPromocaoItensModel.Create;
+constructor TPromocaoItensModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TPromocaoItensModel.Destroy;

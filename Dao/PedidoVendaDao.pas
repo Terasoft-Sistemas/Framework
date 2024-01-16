@@ -4,7 +4,6 @@ interface
 
 uses
   PedidoVendaModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
@@ -79,8 +78,6 @@ end;
 implementation
 
 { TPedidoVenda }
-
-uses VariaveisGlobais;
 
 procedure TPedidoVendaDao.obterUpdateImpostos(pNumeroPedido: String);
 var

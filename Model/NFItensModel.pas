@@ -5,12 +5,14 @@ interface
 uses
   Terasoft.Enumerado,
   System.Generics.Collections,
-  FireDAC.Comp.Client;
+  FireDAC.Comp.Client,
+  Interfaces.Conexao;
 
 type
   TNFItensModel = class
 
   private
+    vIConexao : IConexao;
     FNFItenssLista: TObjectList<TNFItensModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -476,7 +478,7 @@ type
     property QEXPORT: Variant read FQEXPORT write SetQEXPORT;
     property EXTIPI: Variant read FEXTIPI write SetEXTIPI;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -514,9 +516,9 @@ begin
   end;
 end;
 
-constructor TNFItensModel.Create;
+constructor TNFItensModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TNFItensModel.Destroy;

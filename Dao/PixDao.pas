@@ -5,7 +5,6 @@ interface
 
 uses
   PixModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
@@ -18,6 +17,7 @@ type
   TPixDao = class
 
   private
+    vIConexao : IConexao;
     FPixsLista: TObjectList<TPixModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -41,7 +41,7 @@ type
     function montaCondicaoQuery: String;
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property PixsLista: TObjectList<TPixModel> read FPixsLista write SetPixsLista;
@@ -70,14 +70,12 @@ implementation
 
 { TPix }
 
-uses VariaveisGlobais;
-
 function TPixDao.carregaClasse(pId: String): TPixModel;
 var
   lQry: TFDQuery;
   lModel: TPixModel;
 begin
-  lQry     := xConexao.CriarQuery;
+  lQry     := vIConexao.CriarQuery;
   lModel   := TPixModel.Create;
   Result   := lModel;
 
@@ -118,9 +116,9 @@ begin
   end;
 end;
 
-constructor TPixDao.Create;
+constructor TPixDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TPixDao.Destroy;
@@ -134,7 +132,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL := '   insert into pix (cliente_id,                 '+SLineBreak+
           '                    valor,                      '+SLineBreak+
@@ -196,7 +194,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL :=   '   update pix                                             '+SLineBreak+
             '      set cliente_id = :cliente_id,                       '+SLineBreak+
@@ -239,7 +237,7 @@ function TPixDao.excluir(APixModel: TPixModel): String;
 var
   lQry: TFDQuery;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from pix where ID = :ID',[APixModel.ID]);
@@ -272,7 +270,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From pix where 1=1 ';
 
@@ -293,7 +291,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FPixsLista := TObjectList<TPixModel>.Create;
 

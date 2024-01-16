@@ -4,19 +4,19 @@ interface
 
 uses
   LojasModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  VariaveisGlobais;
+  Interfaces.Conexao;
 
 type
   TLojasDao = class
 
   private
+    vIConexao: IConexao;
     FLojassLista: TObjectList<TLojasModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -42,7 +42,7 @@ type
     procedure SetLojaView(const Value: String);
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property LojassLista: TObjectList<TLojasModel> read FLojassLista write SetLojassLista;
@@ -64,9 +64,9 @@ implementation
 
 { TLojas }
 
-constructor TLojasDao.Create;
+constructor TLojasDao.Create(pIConexao: IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TLojasDao.Destroy;
@@ -96,7 +96,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From loja2 where loja2.server is not null ';
 
@@ -117,7 +117,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FLojassLista := TObjectList<TLojasModel>.Create;
 

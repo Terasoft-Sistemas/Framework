@@ -4,19 +4,20 @@ interface
 
 uses
   FireDAC.Comp.Client,
-  Conexao,
   NFModel,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
   Terasoft.Utils,
-  Terasoft.FuncoesTexto;
+  Terasoft.FuncoesTexto,
+  Interfaces.Conexao;
 
 type
   TNFDao = class
 
   private
+    vIConexao : IConexao;
     FNFLista: TObjectList<TNFModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -50,7 +51,7 @@ type
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property IDPedidoView: Integer read FIDPedidoView write SetIDPedidoView;
 
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function incluir(ANFModel: TNFModel): String;
@@ -68,11 +69,9 @@ implementation
 
 { TNFDao }
 
-uses VariaveisGlobais;
-
-constructor TNFDao.Create;
+constructor TNFDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TNFDao.Destroy;
@@ -86,7 +85,7 @@ var
   lQry: TFDQuery;
   ANFModel: TNFModel;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
   ANFModel := TNFModel.Create;
   Result   := ANFModel;
 
@@ -251,7 +250,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL :=
         ' insert into nf (numero_nf,                   '+#13+
@@ -538,12 +537,12 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('numero_nf').Value  := xConexao.Generetor('gen_nf');
+    lQry.ParamByName('numero_nf').Value  := vIConexao.Generetor('gen_nf');
 
     if ANFModel.MODELO = '65' then
-      lQry.ParamByName('numero_ecf').Value := xConexao.Generetor('GEN_NFCe')
+      lQry.ParamByName('numero_ecf').Value := vIConexao.Generetor('GEN_NFCe')
     else if ANFModel.MODELO = '55' then
-      lQry.ParamByName('numero_ecf').Value := xConexao.Generetor('GEN_NF2');
+      lQry.ParamByName('numero_ecf').Value := vIConexao.Generetor('GEN_NF2');
 
     setParams(lQry, ANFModel);
 
@@ -560,7 +559,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL :=
         ' update nf                                                           '+#13+
@@ -726,7 +725,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FNFLista := TObjectList<TNFModel>.Create;
 
@@ -797,7 +796,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FNFLista := TObjectList<TNFModel>.Create;
 
@@ -887,7 +886,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := '  select count(*) records                                      '+#13+
             '    From NF                                                    '+#13+

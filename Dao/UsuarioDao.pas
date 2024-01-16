@@ -4,14 +4,16 @@ interface
 
 uses
   FireDAC.Comp.Client,
-  Conexao,
   System.SysUtils,
   UsuarioModel,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
+
 type
   TUsuarioDao = class
 
   private
+    vIConexao : IConexao;
     FUsuariosLista: TObjectList<TUsuarioModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -39,7 +41,7 @@ type
     procedure SetPerfil(const Value: Variant);
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property ID: String read FID write SetID;
@@ -73,14 +75,14 @@ implementation
 uses
   Terasoft.Utils,
   System.Variants,
-  Terasoft.FuncoesTexto, VariaveisGlobais;
+  Terasoft.FuncoesTexto;
 
 function TUsuarioDao.carregaClasse(ID: String): TUsuarioModel;
 var
   lQry: TFDQuery;
   lModel: TUsuarioModel;
 begin
-  lQry     := xConexao.CriarQuery;
+  lQry     := vIConexao.CriarQuery;
   lModel   := TUsuarioModel.Create;
   Result   := lModel;
 
@@ -105,9 +107,9 @@ begin
   end;
 end;
 
-constructor TUsuarioDao.Create;
+constructor TUsuarioDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TUsuarioDao.Destroy;
@@ -120,7 +122,7 @@ function TUsuarioDao.incluir(AUsuarioModel: TUsuarioModel): String;
 var
   lQry: TFDQuery;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
 
@@ -150,7 +152,7 @@ function TUsuarioDao.nomeUsuario(pIdUsuario: String): String;
 var
   lConexao: TFDConnection;
 begin
-  lConexao := xConexao.getConnection;
+  lConexao := vIConexao.getConnection;
   Result   := lConexao.ExecSQLScalar('select u.fantasia from usuario u where u.id = '+ QuotedStr(pIdUsuario));
 end;
 
@@ -158,7 +160,7 @@ function TUsuarioDao.alterar(AUsuarioModel: TUsuarioModel): String;
 var
   lQry: TFDQuery;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
 
@@ -175,7 +177,7 @@ function TUsuarioDao.excluir(AUsuarioModel: TUsuarioModel): String;
 var
   lQry: TFDQuery;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   Result := '';
 
@@ -193,7 +195,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL := ' select count(*) records ' +
           ' from Usuario ' +
@@ -217,7 +219,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FUsuariosLista := TObjectList<TUsuarioModel>.Create;
 
@@ -323,7 +325,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
     lSQL := ' Select ID, FANTASIA, NOME, SENHA, STATUS, PERFIL_NEW_ID From Usuario Where FANTASIA = ' + QuotedStr(user) + ' and SENHA = ' + QuotedStr(pass);
@@ -353,7 +355,7 @@ function TUsuarioDao.vendedorUsuario(pIdUsuario: String): String;
 var
   lConexao: TFDConnection;
 begin
-  lConexao := xConexao.getConnection;
+  lConexao := vIConexao.getConnection;
   Result   := lConexao.ExecSQLScalar('select codigo_fun from funcionario where tipo_ven = '+QuotedStr('S')+' and cod_user = '+ QuotedStr(pIdUsuario));
 end;
 

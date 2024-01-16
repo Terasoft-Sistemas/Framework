@@ -4,12 +4,14 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TContaCorrenteModel = class
 
   private
+    vIConexao : IConexao;
     FContaCorrentesLista: TObjectList<TContaCorrenteModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -144,7 +146,7 @@ type
     property PEDIDO_ID: Variant read FPEDIDO_ID write SetPEDIDO_ID;
     property IUGU_ID: Variant read FIUGU_ID write SetIUGU_ID;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -184,9 +186,9 @@ begin
   end;
 end;
 
-constructor TContaCorrenteModel.Create;
+constructor TContaCorrenteModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TContaCorrenteModel.Destroy;

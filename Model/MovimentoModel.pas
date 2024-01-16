@@ -4,12 +4,14 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TMovimentoModel = class
 
   private
+    vIConexao : IConexao;
     FMovimentosLista: TObjectList<TMovimentoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -87,7 +89,7 @@ type
     property TABELA_ORIGEM: Variant read FTABELA_ORIGEM write SetTABELA_ORIGEM;
     property ID_ORIGEM: Variant read FID_ORIGEM write SetID_ORIGEM;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -125,9 +127,9 @@ begin
   end;
 end;
 
-constructor TMovimentoModel.Create;
+constructor TMovimentoModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TMovimentoModel.Destroy;

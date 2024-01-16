@@ -4,18 +4,19 @@ interface
 
 uses
   PortadorModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
-  System.Variants;
+  System.Variants,
+  Interfaces.Conexao;
 
 type
   TPortadorDao = class
 
   private
+    vIConexao : IConexao;
     FPortadorsLista: TObjectList<TPortadorModel>;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -39,7 +40,7 @@ type
     procedure SetIDRecordView(const Value: String);
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property PortadorsLista: TObjectList<TPortadorModel> read FPortadorsLista write SetPortadorsLista;
@@ -62,14 +63,12 @@ implementation
 
 { TPortador }
 
-uses VariaveisGlobais;
-
 function TPortadorDao.carregaClasse(pId: String): TPortadorModel;
 var
   lQry: TFDQuery;
   lModel: TPortadorModel;
 begin
-  lQry     := xConexao.CriarQuery;
+  lQry     := vIConexao.CriarQuery;
   lModel   := TPortadorModel.Create;
   Result   := lModel;
 
@@ -119,9 +118,9 @@ begin
 
 end;
 
-constructor TPortadorDao.Create;
+constructor TPortadorDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TPortadorDao.Destroy;
@@ -151,7 +150,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From portador where 1=1 ';
 
@@ -172,7 +171,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FPortadorsLista := TObjectList<TPortadorModel>.Create;
 

@@ -4,19 +4,20 @@ interface
 
 uses
   RecebimentoCartaoModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  Terasoft.FuncoesTexto;
+  Terasoft.FuncoesTexto,
+  Interfaces.Conexao;
 
 type
   TRecebimentoCartaoDao = class
 
   private
+    vIConexao : IConexao;
     FRecebimentoCartaosLista: TObjectList<TRecebimentoCartaoModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -40,7 +41,7 @@ type
     function montaCondicaoQuery: String;
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property RecebimentoCartaosLista: TObjectList<TRecebimentoCartaoModel> read FRecebimentoCartaosLista write SetRecebimentoCartaosLista;
@@ -67,11 +68,9 @@ implementation
 
 { TRecebimentoCartao }
 
-uses VariaveisGlobais;
-
-constructor TRecebimentoCartaoDao.Create;
+constructor TRecebimentoCartaoDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TRecebimentoCartaoDao.Destroy;
@@ -85,7 +84,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL := '  insert into recebimento_cartao (id,             '+SLineBreak+
           '			   			              		   usuario_id,     '+SLineBreak+
@@ -111,7 +110,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := xConexao.Generetor('GEN_RECEBIMENTO_CARTAO');
+    lQry.ParamByName('id').Value := vIConexao.Generetor('GEN_RECEBIMENTO_CARTAO');
     setParams(lQry, ARecebimentoCartaoModel);
     lQry.Open;
 
@@ -128,7 +127,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL :=  '  update recebimento_cartao              '+SLineBreak+
            '     set usuario_id = :usuario_id,       '+SLineBreak+
@@ -160,7 +159,7 @@ function TRecebimentoCartaoDao.excluir(ARecebimentoCartaoModel: TRecebimentoCart
 var
   lQry: TFDQuery;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from recebimento_cartao where ID = :ID',[ARecebimentoCartaoModel.ID]);
@@ -193,7 +192,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From recebimento_cartao where 1=1 ';
 
@@ -214,7 +213,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FRecebimentoCartaosLista := TObjectList<TRecebimentoCartaoModel>.Create;
 

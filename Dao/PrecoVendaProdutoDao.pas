@@ -4,18 +4,19 @@ interface
 
 uses
   PrecoVendaProdutoModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
-  System.Variants;
+  System.Variants,
+  Interfaces.Conexao;
 
 type
   TPrecoVendaProdutoDao = class
 
   private
+    vIConexao : IConexao;
     FPrecoVendaProdutosLista: TObjectList<TPrecoVendaProdutoModel>;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -39,7 +40,7 @@ type
     procedure SetIDRecordView(const Value: String);
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao;);
     destructor Destroy; override;
 
     property PrecoVendaProdutosLista: TObjectList<TPrecoVendaProdutoModel> read FPrecoVendaProdutosLista write SetPrecoVendaProdutosLista;
@@ -64,11 +65,9 @@ implementation
 
 { TPrecoVendaProduto }
 
-uses VariaveisGlobais;
-
-constructor TPrecoVendaProdutoDao.Create;
+constructor TPrecoVendaProdutoDao.Create(pIConexao : IConexao;);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TPrecoVendaProdutoDao.Destroy;
@@ -97,7 +96,7 @@ function TPrecoVendaProdutoDao.excluir(APrecoVendaProdutoModel: TPrecoVendaProdu
 var
   lQry: TFDQuery;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from preco_venda_produto where ID = :ID',[APrecoVendaProdutoModel.ID]);
@@ -130,7 +129,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From preco_venda_produto where 1=1 ';
 
@@ -151,7 +150,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FPrecoVendaProdutosLista := TObjectList<TPrecoVendaProdutoModel>.Create;
 

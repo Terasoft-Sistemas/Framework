@@ -4,12 +4,14 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TPortadorModel = class
 
   private
+    vIConexao : IConexao;
     FPortadorsLista: TObjectList<TPortadorModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -123,7 +125,7 @@ type
     property PIX_CHAVE: Variant read FPIX_CHAVE write SetPIX_CHAVE;
     property XPAG_NFE: Variant read FXPAG_NFE write SetXPAG_NFE;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -165,9 +167,9 @@ begin
   end;
 end;
 
-constructor TPortadorModel.Create;
+constructor TPortadorModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TPortadorModel.Destroy;

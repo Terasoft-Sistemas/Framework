@@ -4,19 +4,20 @@ interface
 
 uses
   MovimentoModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  Terasoft.FuncoesTexto;
+  Terasoft.FuncoesTexto,
+  Interfaces.Conexao;
 
 type
   TMovimentoDao = class
 
   private
+    vIConexao : IConexao;
     FMovimentosLista: TObjectList<TMovimentoModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -40,7 +41,7 @@ type
     function montaCondicaoQuery: String;
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property MovimentosLista: TObjectList<TMovimentoModel> read FMovimentosLista write SetMovimentosLista;
@@ -56,7 +57,7 @@ type
     function incluir(AMovimentoModel: TMovimentoModel): String;
     function alterar(AMovimentoModel: TMovimentoModel): String;
     function excluir(AMovimentoModel: TMovimentoModel): String;
-	
+
     procedure obterLista;
     function carregaClasse(pId: String): TMovimentoModel;
     procedure setParams(var pQry: TFDQuery; pMovimentoModel: TMovimentoModel);
@@ -64,9 +65,6 @@ type
 end;
 
 implementation
-
-uses
-  VariaveisGlobais;
 
 { TMovimento }
 
@@ -112,9 +110,9 @@ begin
   end;
 end;
 
-constructor TMovimentoDao.Create;
+constructor TMovimentoDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TMovimentoDao.Destroy;
@@ -127,10 +125,8 @@ function TMovimentoDao.incluir(AMovimentoModel: TMovimentoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL := '  insert into movimento (documento_mov,      '+SLineBreak+
           '                         codigo_pro,         '+SLineBreak+
@@ -178,7 +174,6 @@ begin
   finally
     lSQL := '';
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -186,10 +181,8 @@ function TMovimentoDao.alterar(AMovimentoModel: TMovimentoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL :=   '  update movimento                           '+SLineBreak+
             '     set documento_mov = :documento_mov,     '+SLineBreak+
@@ -222,17 +215,14 @@ begin
   finally
     lSQL := '';
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
 function TMovimentoDao.excluir(AMovimentoModel: TMovimentoModel): String;
 var
   lQry: TFDQuery;
-  lConexao: TConexao;
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from movimento where ID = :ID',[AMovimentoModel.ID]);
@@ -241,7 +231,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -264,11 +253,9 @@ procedure TMovimentoDao.obterTotalRegistros;
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
 begin
   try
-    lConexao := TConexao.Create;
-    lQry := lConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From movimento where 1=1 ';
 
@@ -280,7 +267,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -289,10 +275,8 @@ var
   lQry: TFDQuery;
   lSQL:String;
   i: INteger;
-  lConexao: TConexao;
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FMovimentosLista := TObjectList<TMovimentoModel>.Create;
 
@@ -349,7 +333,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 

@@ -4,18 +4,19 @@ interface
 
 uses
   PrecoClienteModel,
-  Conexao,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  Terasoft.Utils;
+  Terasoft.Utils,
+  Interfaces.Conexao;
 
 type
   TPrecoClienteDao = class
 
   private
+    vIConexao : IConexao;
     FPrecoClientesLista: TObjectList<TPrecoClienteModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -39,7 +40,7 @@ type
     function montaCondicaoQuery: String;
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property PrecoClientesLista: TObjectList<TPrecoClienteModel> read FPrecoClientesLista write SetPrecoClientesLista;
@@ -64,11 +65,9 @@ implementation
 
 { TPrecoCliente }
 
-uses VariaveisGlobais;
-
-constructor TPrecoClienteDao.Create;
+constructor TPrecoClienteDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TPrecoClienteDao.Destroy;
@@ -82,7 +81,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL := '     insert into preco_cliente (produto,   '+SLineBreak+
           '                                cliente,   '+SLineBreak+
@@ -112,7 +111,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL := '   update preco_cliente                                  '+SLineBreak+
           '      set valor = :valor,                                '+SLineBreak+
@@ -139,7 +138,7 @@ function TPrecoClienteDao.excluir(APrecoClienteModel: TPrecoClienteModel): Strin
 var
   lQry: TFDQuery;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from preco_cliente where ID = :ID',[APrecoClienteModel.ID]);
@@ -172,7 +171,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From preco_cliente where 1=1 ';
 
@@ -193,7 +192,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FPrecoClientesLista := TObjectList<TPrecoClienteModel>.Create;
 

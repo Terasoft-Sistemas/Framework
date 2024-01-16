@@ -4,12 +4,14 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TPixModel = class
 
   private
+    vIConexao : IConexao;
     FPixsLista: TObjectList<TPixModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -99,7 +101,7 @@ type
     property data_pagamento: Variant read Fdata_pagamento write Setdata_pagamento;
     property contasreceberitens_id: Variant read Fcontasreceberitens_id write Setcontasreceberitens_id;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -145,9 +147,9 @@ begin
   Result := FPixsLista[pIndex];
 end;
 
-constructor TPixModel.Create;
+constructor TPixModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TPixModel.Destroy;

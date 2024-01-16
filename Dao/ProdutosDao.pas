@@ -4,19 +4,20 @@ interface
 
 uses
   ProdutosModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  Terasoft.FuncoesTexto;
+  Terasoft.FuncoesTexto,
+  Interfaces.Conexao;
 
 type
   TProdutosDao = class
 
   private
+    vIConexao : IConexao;
     FProdutossLista: TObjectList<TProdutosModel>;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -40,7 +41,7 @@ type
     procedure SetIDRecordView(const Value: String);
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property ProdutossLista: TObjectList<TProdutosModel> read FProdutossLista write SetProdutossLista;
@@ -72,14 +73,12 @@ implementation
 
 { TProdutos }
 
-uses VariaveisGlobais;
-
 function TProdutosDao.carregaClasse(pId: String): TProdutosModel;
 var
   lQry: TFDQuery;
   lModel: TProdutosModel;
 begin
-  lQry     := xConexao.CriarQuery;
+  lQry     := vIConexao.CriarQuery;
   lModel   := TProdutosModel.Create;
   Result   := lModel;
 
@@ -359,9 +358,9 @@ begin
 
 end;
 
-constructor TProdutosDao.Create;
+constructor TProdutosDao.Create(vIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TProdutosDao.Destroy;
@@ -383,7 +382,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL := ' update produto                                     '+SLineBreak+
           '    set saldo_pro = coalesce(saldo_pro, 0) + :saldo '+SLineBreak+
@@ -411,7 +410,7 @@ function TProdutosDao.excluir(AProdutosModel: TProdutosModel): String;
 var
   lQry: TFDQuery;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from produto where codigo_pro = :CODIGO_PRO',[AProdutosModel.CODIGO_PRO]);
@@ -444,7 +443,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From produto where 1=1 ';
 
@@ -463,7 +462,7 @@ function TProdutosDao.obterCodigobarras(pIdProduto: String): String;
 var
   lConexao: TFDConnection;
 begin
-  lConexao := xConexao.getConnection;
+  lConexao := vIConexao.getConnection;
   Result   := lConexao.ExecSQLScalar('select barras_pro from produto where codigo_pro = '+ QuotedStr(pIdProduto));
 end;
 
@@ -473,7 +472,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FProdutossLista := TObjectList<TProdutosModel>.Create;
 
@@ -528,7 +527,7 @@ function TProdutosDao.obterSaldo(pIdProduto: String): Double;
 var
   lConexao: TFDConnection;
 begin
-  lConexao := xConexao.getConnection;
+  lConexao := vIConexao.getConnection;
   Result   := lConexao.ExecSQLScalar('select saldo_pro from produto where codigo_pro = '+ QuotedStr(pIdProduto));
 end;
 
@@ -582,7 +581,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL := ' update produto                                     '+SLineBreak+
           '    set saldo_pro = coalesce(saldo_pro, 0) - :saldo '+SLineBreak+
@@ -602,7 +601,7 @@ function TProdutosDao.valorVenda(pIdProduto: String): Variant;
 var
   lConexao: TFDConnection;
 begin
-  lConexao := xConexao.getConnection;
+  lConexao := vIConexao.getConnection;
   Result   := lConexao.ExecSQLScalar('select venda_pro from produto where codigo_pro = '+ QuotedStr(pIdProduto));
 end;
 

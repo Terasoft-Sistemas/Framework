@@ -5,12 +5,15 @@ interface
 uses
   Terasoft.Enumerado,
   System.Generics.Collections,
-  FireDAC.Comp.Client;
+  FireDAC.Comp.Client,
+  Interfaces.Conexao;
 
 type
   TConfiguracoesModel = class
 
   private
+    vIConexao : IConexao;
+
     FConfiguracoessLista: TObjectList<TConfiguracoesModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -70,7 +73,7 @@ type
     property VALORDATAHORA: Variant read FVALORDATAHORA write SetVALORDATAHORA;
     property SYSTIME: Variant read FSYSTIME write SetSYSTIME;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -95,9 +98,9 @@ uses
 
 { TConfiguracoesModel }
 
-constructor TConfiguracoesModel.Create;
+constructor TConfiguracoesModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TConfiguracoesModel.Destroy;

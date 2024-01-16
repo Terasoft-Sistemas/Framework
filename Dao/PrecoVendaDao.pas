@@ -4,18 +4,19 @@ interface
 
 uses
   PrecoVendaModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
-  System.Variants;
+  System.Variants,
+  Interfaces.Conexao;
 
 type
   TPrecoVendaDao = class
 
   private
+    vIConexao : IConexao;
     FPrecoVendasLista: TObjectList<TPrecoVendaModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -39,7 +40,7 @@ type
     function montaCondicaoQuery: String;
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property PrecoVendasLista: TObjectList<TPrecoVendaModel> read FPrecoVendasLista write SetPrecoVendasLista;
@@ -64,11 +65,9 @@ implementation
 
 { TPrecoVenda }
 
-uses VariaveisGlobais;
-
-constructor TPrecoVendaDao.Create;
+constructor TPrecoVendaDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TPrecoVendaDao.Destroy;
@@ -97,7 +96,7 @@ function TPrecoVendaDao.excluir(APrecoVendaModel: TPrecoVendaModel): String;
 var
   lQry: TFDQuery;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from preco_venda where ID = :ID',[APrecoVendaModel.ID]);
@@ -130,7 +129,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From preco_venda where 1=1 ';
 
@@ -151,7 +150,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FPrecoVendasLista := TObjectList<TPrecoVendaModel>.Create;
 

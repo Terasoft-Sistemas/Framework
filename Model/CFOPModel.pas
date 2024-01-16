@@ -4,12 +4,15 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TCFOPModel = class
 
   private
+    vIConexao : IConexao;
+
     FCFOPsLista: TObjectList<TCFOPModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -165,7 +168,7 @@ type
     property DESCONTO_ICMS_BASE_PIS_COFINS: Variant read FDESCONTO_ICMS_BASE_PIS_COFINS write SetDESCONTO_ICMS_BASE_PIS_COFINS;
     property OUTRAS_DESPESAS_ENTRADA: Variant read FOUTRAS_DESPESAS_ENTRADA write SetOUTRAS_DESPESAS_ENTRADA;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -205,9 +208,9 @@ begin
   end;
 end;
 
-constructor TCFOPModel.Create;
+constructor TCFOPModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TCFOPModel.Destroy;

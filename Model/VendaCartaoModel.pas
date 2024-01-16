@@ -4,12 +4,14 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TVendaCartaoModel = class
 
   private
+    vIConexao : IConexao;
     FVendaCartaosLista: TObjectList<TVendaCartaoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -93,7 +95,7 @@ type
     property PARCELA_TEF: Variant read FPARCELA_TEF write SetPARCELA_TEF;
     property PARCELAS_TEF: Variant read FPARCELAS_TEF write SetPARCELAS_TEF;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -118,9 +120,9 @@ uses
 
 { TVendaCartaoModel }
 
-constructor TVendaCartaoModel.Create;
+constructor TVendaCartaoModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TVendaCartaoModel.Destroy;

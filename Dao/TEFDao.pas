@@ -4,19 +4,20 @@ interface
 
 uses
   TEFModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  Terasoft.FuncoesTexto;
+  Terasoft.FuncoesTexto,
+  Interfaces.Conexao;
 
 type
   TTEFDao = class
 
   private
+    vIConexao : IConexao;
     FTEFsLista: TObjectList<TTEFModel>;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -40,7 +41,7 @@ type
     procedure SetIDRecordView(const Value: String);
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property TEFsLista: TObjectList<TTEFModel> read FTEFsLista write SetTEFsLista;
@@ -68,8 +69,6 @@ end;
 implementation
 
 { TTEF }
-
-uses VariaveisGlobais;
 
 function TTEFDao.carregaClasse(pId: String): TTEFModel;
 var
@@ -134,9 +133,9 @@ begin
   end;
 end;
 
-constructor TTEFDao.Create;
+constructor TTEFDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TTEFDao.Destroy;

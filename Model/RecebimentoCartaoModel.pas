@@ -4,12 +4,14 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TRecebimentoCartaoModel = class
 
   private
+    vIConexao : IConexao;
     FRecebimentoCartaosLista: TObjectList<TRecebimentoCartaoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -63,7 +65,7 @@ type
     property TEF_ID: Variant read FTEF_ID write SetTEF_ID;
     property SYSTIME: Variant read FSYSTIME write SetSYSTIME;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -88,9 +90,9 @@ uses
 
 { TRecebimentoCartaoModel }
 
-constructor TRecebimentoCartaoModel.Create;
+constructor TRecebimentoCartaoModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TRecebimentoCartaoModel.Destroy;

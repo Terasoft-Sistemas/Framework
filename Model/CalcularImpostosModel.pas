@@ -14,12 +14,15 @@ uses
   mcibr.produto,
   mcibr.enum.ipi,
   mcibr.enum.tipo.venda,
-  mcibr.utils;
+  mcibr.utils,
+  Interfaces.Conexao;
 
 type
   TCalcularImpostosModel = class
 
   private
+    vIConexao : IConexao;
+
     FDESTINATARIO_UF: String;
     FICMS_SOMA_FRETE_BASE: String;
     FICMS_REDUCAO: Real;
@@ -227,7 +230,7 @@ type
     property DESCONTO_ITEM  : Real read FDESCONTO_ITEM write SetDESCONTO_ITEM;
     property ACRESCIMO_ITEM : Real read FACRESCIMO_ITEM write SetACRESCIMO_ITEM;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Processar: TCalcularImpostosModel;
@@ -248,9 +251,10 @@ uses
 
 { TCalcularImpostosModel }
 
-constructor TCalcularImpostosModel.Create;
+constructor TCalcularImpostosModel.Create(pIConexao : IConexao);
 begin
-  lMotor := TImpostoMotor.New;
+  lMotor    := TImpostoMotor.New;
+  vIConexao := pIConexao;
 end;
 
 destructor TCalcularImpostosModel.Destroy;

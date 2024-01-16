@@ -4,12 +4,14 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TPrecoUFModel = class
 
   private
+    vIConexao : IConexao;
     FPrecoUFsLista: TObjectList<TPrecoUFModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -54,7 +56,7 @@ type
     property SYSTIME: Variant read FSYSTIME write SetSYSTIME;
     property TOTAL: Variant read FTOTAL write SetTOTAL;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -79,9 +81,9 @@ uses
 
 { TPrecoUFModel }
 
-constructor TPrecoUFModel.Create;
+constructor TPrecoUFModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TPrecoUFModel.Destroy;

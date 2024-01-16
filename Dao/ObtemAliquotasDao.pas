@@ -4,18 +4,19 @@ interface
 
 uses
   ObtemAliquotasModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
-  System.Variants;
+  System.Variants,
+  Interfaces.Conexao;
 
 type
   TObtemAliquotasDao = class
 
   private
+    vIConexao : IConexao;
     FDESTINATARIO_UF: String;
     FCODIGO_CLIENTE: String;
     FEMITENTE_UF: String;
@@ -35,7 +36,7 @@ type
     property DESTINATARIO_UF : String read FDESTINATARIO_UF write SetDESTINATARIO_UF;
     property MODELO_NF       : String read FMODELO_NF write SetMODELO_NF;
 
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function obterImpostos: TObtemAliquotasModel;
@@ -46,12 +47,9 @@ implementation
 
 { TObtemAliquotas }
 
-uses VariaveisGlobais;
-
-
-constructor TObtemAliquotasDao.Create;
+constructor TObtemAliquotasDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TObtemAliquotasDao.Destroy;
@@ -67,7 +65,7 @@ var
   lObtemAliquotasModel: TObtemAliquotasModel;
   lUF_BASE: String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
   lObtemAliquotasModel := TObtemAliquotasModel.Create;
 
   try

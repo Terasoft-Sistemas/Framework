@@ -4,18 +4,19 @@ interface
 
 uses
   PedidoWebItensModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
-  System.Variants;
+  System.Variants,
+  Interfaces.Conexao;
 
 type
   TPedidoWebItensDao = class
 
   private
+    vIConexao : IConexao;
     FPedidoWebItenssLista: TObjectList<TPedidoWebItensModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -40,7 +41,7 @@ type
     procedure SetIDPedidoWebView(const Value: Integer);
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property PedidoWebItenssLista: TObjectList<TPedidoWebItensModel> read FPedidoWebItenssLista write SetPedidoWebItenssLista;
@@ -62,11 +63,9 @@ implementation
 
 { TPedidoWebItens }
 
-uses VariaveisGlobais;
-
-constructor TPedidoWebItensDao.Create;
+constructor TPedidoWebItensDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TPedidoWebItensDao.Destroy;
@@ -99,7 +98,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From web_pedidoitens where 1=1 ';
 
@@ -120,7 +119,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FPedidoWebItenssLista := TObjectList<TPedidoWebItensModel>.Create;
 
@@ -198,7 +197,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FPedidoWebItenssLista := TObjectList<TPedidoWebItensModel>.Create;
 

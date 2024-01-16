@@ -4,12 +4,14 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TLojasModel = class
 
   private
+    vIConexao : IConexao;
     FLojassLista: TObjectList<TLojasModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -47,7 +49,7 @@ type
     property PORT: Variant read FPORT write SetPORT;
     property DATABASE: Variant read FDATABASE write SetDATABASE;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -72,9 +74,9 @@ uses
 
 { TLojasModel }
 
-constructor TLojasModel.Create;
+constructor TLojasModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TLojasModel.Destroy;

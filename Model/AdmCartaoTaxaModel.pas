@@ -4,12 +4,15 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TAdmCartaoTaxaModel = class
 
   private
+    vIConexao : IConexao;
+
     FAdmCartaoTaxasLista: TObjectList<TAdmCartaoTaxaModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -51,7 +54,7 @@ type
     property DIAS_VENCIMENTO: Variant read FDIAS_VENCIMENTO write SetDIAS_VENCIMENTO;
     property CONCILIADORA_ID: Variant read FCONCILIADORA_ID write SetCONCILIADORA_ID;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -76,9 +79,9 @@ uses
 
 { TAdmCartaoTaxaModel }
 
-constructor TAdmCartaoTaxaModel.Create;
+constructor TAdmCartaoTaxaModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TAdmCartaoTaxaModel.Destroy;

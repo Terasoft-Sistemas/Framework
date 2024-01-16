@@ -4,12 +4,14 @@ interface
 
 uses
   Terasoft.Enumerado,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TContasModel = class
 
   private
+    vIConexao : IConexao;
     FContassLista: TObjectList<TContasModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -103,7 +105,7 @@ type
     property credito_cliente_cta: Variant read Fcredito_cliente_cta write Setcredito_cliente_cta;
     property credito_fornecedor_cta: Variant read Fcredito_fornecedor_cta write Setcredito_fornecedor_cta;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -128,9 +130,9 @@ uses
 
 { TContasModel }
 
-constructor TContasModel.Create;
+constructor TContasModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TContasModel.Destroy;

@@ -6,12 +6,14 @@ uses
   Terasoft.Enumerado,
   FireDAC.Comp.Client,
   System.SysUtils,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Interfaces.Conexao;
 
 type
   TUsuarioModel = class
 
   private
+    vIConexao : IConexao;
     FUsuariosLista: TObjectList<TUsuarioModel>;
     FAcao: TAcao;
     FDESCONTO: Variant;
@@ -86,7 +88,7 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function vendedorUsuario(pIdUsuario: String): String;
@@ -116,9 +118,9 @@ begin
   end;
 end;
 
-constructor TUsuarioModel.Create;
+constructor TUsuarioModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TUsuarioModel.Destroy;

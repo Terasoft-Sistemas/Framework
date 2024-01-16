@@ -4,18 +4,19 @@ interface
 
 uses
   PrecoUFModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
-  System.Variants;
+  System.Variants,
+  Interfaces.Conexao;
 
 type
   TPrecoUFDao = class
 
   private
+    vIConexao : IConexao;
     FPrecoUFsLista: TObjectList<TPrecoUFModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -39,7 +40,7 @@ type
     function montaCondicaoQuery: String;
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao;);
     destructor Destroy; override;
 
     property PrecoUFsLista: TObjectList<TPrecoUFModel> read FPrecoUFsLista write SetPrecoUFsLista;
@@ -64,11 +65,9 @@ implementation
 
 { TPrecoUF }
 
-uses VariaveisGlobais;
-
-constructor TPrecoUFDao.Create;
+constructor TPrecoUFDao.Create(pIConexao : IConexao;);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TPrecoUFDao.Destroy;
@@ -97,7 +96,7 @@ function TPrecoUFDao.excluir(APrecoUFModel: TPrecoUFModel): String;
 var
   lQry: TFDQuery;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from preco_uf where ID = :ID',[APrecoUFModel.ID]);
@@ -130,7 +129,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From preco_uf where 1=1 ';
 
@@ -151,7 +150,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FPrecoUFsLista := TObjectList<TPrecoUFModel>.Create;
 
