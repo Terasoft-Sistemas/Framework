@@ -4,7 +4,6 @@ interface
 
 uses
   ContasReceberItensModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
@@ -50,7 +49,7 @@ type
     procedure SetParcelaView(const Value: String);
 
   public
-    constructor Create(pConexao: IConexao);
+    constructor Create(pIConexao: IConexao);
     destructor Destroy; override;
     property ContasReceberItenssLista: TObjectList<TContasReceberItensModel> read FContasReceberItenssLista write SetContasReceberItenssLista;
     property RecebimentoContasReceberLista: TObjectList<TRecebimentoContasReceber> read FRecebimentoContasReceberLista write SetRecebimentoContasReceberLista;
@@ -83,8 +82,6 @@ end;
 implementation
 
 { TContasReceberItens }
-
-uses VariaveisGlobais, Data.DB;
 
 function TContasReceberItensDao.carregaClasse(pId: String): TContasReceberItensModel;
 var
@@ -144,9 +141,9 @@ begin
   end;
 end;
 
-constructor TContasReceberItensDao.Create(pConexao: IConexao);
+constructor TContasReceberItensDao.Create(pIConexao: IConexao);
 begin
-  vIConexao := pConexao;
+  vIConexao := pIConexao;
 end;
 
 destructor TContasReceberItensDao.Destroy;

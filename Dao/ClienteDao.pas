@@ -4,17 +4,18 @@ interface
 
 uses
   ClienteModel,
-  Conexao,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
-  System.Variants;
+  System.Variants,
+  Interfaces.Conexao;
 
 type
   TClienteDao = class
 
   private
+    vIConexao : Iconexao;
     FClientesLista: TObjectList<TClienteModel>;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -37,7 +38,7 @@ type
     procedure SetIDRecordView(const Value: String);
 
   public
-    constructor Create;
+    constructor Create(pIConexao : Iconexao);
     destructor Destroy; override;
     property ClientesLista: TObjectList<TClienteModel> read FClientesLista write SetClientesLista;
     property ID :Variant read FID write SetID;
@@ -65,14 +66,12 @@ implementation
 
 { TCliente }
 
-uses VariaveisGlobais;
-
 function TClienteDao.carregaClasse(pId: String): TClienteModel;
 var
   lQry: TFDQuery;
   lModel: TClienteModel;
 begin
-  lQry     := xConexao.CriarQuery;
+  lQry     := vIConexao.CriarQuery;
   lModel   := TClienteModel.Create;
   Result   := lModel;
   try
@@ -384,8 +383,9 @@ begin
   end;
 end;
 
-constructor TClienteDao.Create;
+constructor TClienteDao.Create(pIConexao : Iconexao);
 begin
+  vIConexao := pIConexao;
 end;
 
 destructor TClienteDao.Destroy;
@@ -395,7 +395,7 @@ end;
 
 function TClienteDao.diasAtraso(pCodigoCliente: String): Variant;
 begin
-  Result := xConexao
+  Result := vIConexao
               .getConnection
               .ExecSQLScalar('SELECT R.VENCIMENTO_REC                                  '+
                              '  FROM CONTASRECEBERITENS R,                             '+
@@ -433,7 +433,7 @@ function TClienteDao.excluir(AClienteModel: TClienteModel): String;
 var
   lQry: TFDQuery;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
   try
    lQry.ExecSQL('delete from clientes where CODIGO_CLI = :CODIGO_CLI',[AClienteModel.CODIGO_CLI]);
    lQry.ExecSQL;
@@ -459,7 +459,7 @@ function TClienteDao.nomeCliente(pId: String): Variant;
 var
   lConexao: TFDConnection;
 begin
-  lConexao := xConexao.getConnection;
+  lConexao := vIConexao.getConnection;
   Result   := lConexao.ExecSQLScalar('select coalesce(razao_cli, fantasia_cli) from clientes where codigo_cli = '+ QuotedStr(pId));
 end;
 
@@ -469,7 +469,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
     lSql := 'select count(*) records From clientes where 1=1 ';
     lSql := lSql + montaCondicaoQuery;
     lQry.Open(lSQL);
@@ -485,7 +485,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
   FClientesLista := TObjectList<TClienteModel>.Create;
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -863,7 +863,7 @@ function TClienteDao.ufCliente(pId: String): Variant;
 var
   lConexao: TFDConnection;
 begin
-  lConexao := xConexao.getConnection;
+  lConexao := vIConexao.getConnection;
   Result   := lConexao.ExecSQLScalar('select uf_cli from clientes where codigo_cli = '+ QuotedStr(pId));
 end;
 

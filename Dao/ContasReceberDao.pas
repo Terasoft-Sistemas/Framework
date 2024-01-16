@@ -4,7 +4,6 @@ interface
 
 uses
   ContasReceberModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
@@ -43,7 +42,7 @@ type
     procedure SetIDRecordView(const Value: String);
 
   public
-    constructor Create(pConexao : IConexao);
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
     property ContasRecebersLista: TObjectList<TContasReceberModel> read FContasRecebersLista write SetContasRecebersLista;
 
@@ -73,8 +72,6 @@ end;
 implementation
 
 { TContasReceber }
-
-uses VariaveisGlobais;
 
 function TContasReceberDao.carregaClasse(pFatura: String): TContasReceberModel;
 var
@@ -141,9 +138,9 @@ begin
   Result := lModel;
 end;
 
-constructor TContasReceberDao.Create(pConexao : IConexao);
+constructor TContasReceberDao.Create(pIConexao : IConexao);
 begin
-  vIConexao := pConexao;
+  vIConexao := pIConexao;
 end;
 
 destructor TContasReceberDao.Destroy;

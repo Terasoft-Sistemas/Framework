@@ -4,18 +4,19 @@ interface
 
 uses
   CFOPModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
-  System.Variants;
+  System.Variants,
+  Interfaces.Conexao;
 
 type
   TCFOPDao = class
 
   private
+    vIConexao : IConexao;
     FCFOPsLista: TObjectList<TCFOPModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -41,7 +42,7 @@ type
     procedure setParams(var pQry: TFDQuery; pCFOPModel: TCFOPModel);
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property CFOPsLista: TObjectList<TCFOPModel> read FCFOPsLista write SetCFOPsLista;
@@ -68,14 +69,12 @@ implementation
 
 { TCFOP }
 
-uses VariaveisGlobais;
-
 function TCFOPDao.carregaClasse(pId: String): TCFOPModel;
 var
   lQry: TFDQuery;
   lModel: TCFOPModel;
 begin
-  lQry     := xConexao.CriarQuery;
+  lQry     := vIConexao.CriarQuery;
   lModel   := TCFOPModel.Create;
   Result   := lModel;
 
@@ -138,9 +137,9 @@ begin
   end;
 end;
 
-constructor TCFOPDao.Create;
+constructor TCFOPDao.Create(pIConexao :IConexao);
 begin
-
+   vIConexao := pIConexao;
 end;
 
 destructor TCFOPDao.Destroy;
@@ -154,7 +153,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL := '  insert into cfop (cfop,                            '+SLineBreak+
           '                    descricao,                       '+SLineBreak+
@@ -262,7 +261,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL :=  '  update cfop                                                                 '+SLineBreak+
            '     set cfop = :cfop,                                                        '+SLineBreak+
@@ -328,7 +327,7 @@ function TCFOPDao.excluir(ACFOPModel: TCFOPModel): String;
 var
   lQry: TFDQuery;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from cfop where ID = :ID',[ACFOPModel.ID]);
@@ -361,7 +360,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From cfop where 1=1 ';
 
@@ -380,7 +379,7 @@ function TCFOPDao.obterCFOP(pIdCFOP: String): String;
 var
   lConexao: TFDConnection;
 begin
-  lConexao := xConexao.getConnection;
+  lConexao := vIConexao.getConnection;
   Result   := lConexao.ExecSQLScalar('select cfop from cfop where id = '+ pIdCFOP);
 end;
 
@@ -390,7 +389,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FCFOPsLista := TObjectList<TCFOPModel>.Create;
 

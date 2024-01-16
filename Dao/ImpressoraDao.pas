@@ -4,18 +4,19 @@ interface
 
 uses
   ImpressoraModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
-  System.Variants;
+  System.Variants,
+  Interfaces.Conexao;
 
 type
   TImpressoraDao = class
 
   private
+    vIConexao : IConexao;
     FImpressorasLista: TObjectList<TImpressoraModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -40,7 +41,7 @@ type
     procedure setParams(var pQry: TFDQuery; pImpressoraModel: TImpressoraModel);
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property ImpressorasLista: TObjectList<TImpressoraModel> read FImpressorasLista write SetImpressorasLista;
@@ -66,14 +67,12 @@ implementation
 
 { TImpressora }
 
-uses VariaveisGlobais;
-
 function TImpressoraDao.carregaClasse(pId: Integer): TImpressoraModel;
 var
   lQry: TFDQuery;
   lModel: TImpressoraModel;
 begin
-  lQry     := xConexao.CriarQuery;
+  lQry     := vIConexao.CriarQuery;
   lModel   := TImpressoraModel.Create;
   Result   := lModel;
 
@@ -104,9 +103,9 @@ begin
   end;
 end;
 
-constructor TImpressoraDao.Create;
+constructor TImpressoraDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TImpressoraDao.Destroy;
@@ -120,7 +119,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL := '    insert into impressora (id,                 '+SLineBreak+
           '                            nome,               '+SLineBreak+
@@ -152,7 +151,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := xConexao.Generetor('GEN_IMPRESSORA');
+    lQry.ParamByName('id').Value := vIConexao.Generetor('GEN_IMPRESSORA');
     setParams(lQry, AImpressoraModel);
     lQry.Open;
 
@@ -169,7 +168,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL :=  '  update impressora                            '+SLineBreak+
            '     set nome = :nome,                         '+SLineBreak+
@@ -204,7 +203,7 @@ function TImpressoraDao.excluir(AImpressoraModel: TImpressoraModel): String;
 var
   lQry: TFDQuery;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from impressora where ID = :ID',[AImpressoraModel.ID]);
@@ -237,7 +236,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From impressora where 1=1 ';
 
@@ -258,7 +257,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FImpressorasLista := TObjectList<TImpressoraModel>.Create;
 

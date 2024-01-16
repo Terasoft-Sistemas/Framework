@@ -4,19 +4,20 @@ interface
 
 uses
   CaixaModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  Terasoft.FuncoesTexto;
+  Terasoft.FuncoesTexto,
+  Interfaces.Conexao;
 
 type
   TCaixaDao = class
 
   private
+    vIconexao : Iconexao;
     FCaixasLista: TObjectList<TCaixaModel>;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -40,7 +41,7 @@ type
     procedure SetIDRecordView(const Value: String);
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property CaixasLista: TObjectList<TCaixaModel> read FCaixasLista write SetCaixasLista;
@@ -68,14 +69,13 @@ implementation
 
 { TCaixa }
 
-uses VariaveisGlobais;
 
 function TCaixaDao.carregaClasse(pIdCaixa: String): TCaixaModel;
 var
   lQry: TFDQuery;
   lModel: TCaixaModel;
 begin
-  lQry     := xConexao.CriarQuery;
+  lQry     := vIConexao.CriarQuery;
   lModel   := TCaixaModel.Create;
   Result   := lModel;
 
@@ -130,9 +130,9 @@ begin
   end;
 end;
 
-constructor TCaixaDao.Create;
+constructor TCaixaDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TCaixaDao.Destroy;
@@ -146,7 +146,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
 lSQL :=   '       insert into caixa (numero_cai,                   '+SLineBreak+
           '                          codigo_cta,                   '+SLineBreak+
@@ -222,7 +222,7 @@ lSQL :=   '       insert into caixa (numero_cai,                   '+SLineBreak+
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('numero_cai').Value := xConexao.Generetor('GEN_CAIXA');
+    lQry.ParamByName('numero_cai').Value := vIConexao.Generetor('GEN_CAIXA');
     setParams(lQry, ACaixaModel);
     lQry.Open;
 
@@ -239,7 +239,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL := '    update caixa                                               '+SLineBreak+
           '       set codigo_cta = :codigo_cta,                           '+SLineBreak+
@@ -296,7 +296,7 @@ function TCaixaDao.excluir(ACaixaModel: TCaixaModel): String;
 var
   lQry: TFDQuery;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from caixa where numero_cai = :NUMERO_CAI',[ACaixaModel.NUMERO_CAI]);
@@ -329,7 +329,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From caixa where 1=1 ';
 
@@ -350,7 +350,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FCaixasLista := TObjectList<TCaixaModel>.Create;
 

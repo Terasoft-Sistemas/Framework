@@ -4,18 +4,19 @@ interface
 
 uses
   ContasModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
-  System.Variants;
+  System.Variants,
+  Interfaces.Conexao;
 
 type
   TContasDao = class
 
   private
+    vIConexao : IConexao;
     FContassLista: TObjectList<TContasModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -39,7 +40,7 @@ type
     function montaCondicaoQuery: String;
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property ContassLista: TObjectList<TContasModel> read FContassLista write SetContassLista;
@@ -65,9 +66,9 @@ implementation
 
 { TContas }
 
-constructor TContasDao.Create;
+constructor TContasDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TContasDao.Destroy;
@@ -80,10 +81,9 @@ function TContasDao.incluir(AContasModel: TContasModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+
+  lQry := vIConexao.CriarQuery;
 
   lSQL := '   insert into contas (classificacao,                '+SLineBreak+
           '                       codigo_cta,                   '+SLineBreak+
@@ -141,7 +141,6 @@ begin
   finally
     lSQL := '';
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -149,10 +148,9 @@ function TContasDao.alterar(AContasModel: TContasModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+
+  lQry := vIConexao.CriarQuery;
 
   lSQL :=   '  update contas                                                     '+SLineBreak+
             '     set classificacao = :classificacao,                            '+SLineBreak+
@@ -188,17 +186,15 @@ begin
   finally
     lSQL := '';
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
 function TContasDao.excluir(AContasModel: TContasModel): String;
 var
   lQry: TFDQuery;
-  lConexao: TConexao;
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from contas where ID = :ID',[AContasModel.ID]);
@@ -207,7 +203,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -230,11 +225,10 @@ procedure TContasDao.obterTotalRegistros;
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
 begin
   try
-    lConexao := TConexao.Create;
-    lQry := lConexao.CriarQuery;
+
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From contas where 1=1 ';
 
@@ -246,7 +240,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -255,10 +248,9 @@ var
   lQry: TFDQuery;
   lSQL:String;
   i: INteger;
-  lConexao: TConexao;
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+
+  lQry := vIConexao.CriarQuery;
 
   FContassLista := TObjectList<TContasModel>.Create;
 
@@ -320,7 +312,7 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
+
   end;
 end;
 

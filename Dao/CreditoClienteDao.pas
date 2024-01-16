@@ -4,19 +4,20 @@ interface
 
 uses
   CreditoClienteModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  Terasoft.FuncoesTexto;
+  Terasoft.FuncoesTexto,
+  Interfaces.Conexao;
 
 type
   TCreditoClienteDao = class
 
   private
+    vIConexao : IConexao;
     FCreditoClientesLista: TObjectList<TCreditoClienteModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -40,7 +41,7 @@ type
     function montaCondicaoQuery: String;
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property CreditoClientesLista: TObjectList<TCreditoClienteModel> read FCreditoClientesLista write SetCreditoClientesLista;
@@ -67,9 +68,9 @@ implementation
 
 { TCreditoCliente }
 
-constructor TCreditoClienteDao.Create;
+constructor TCreditoClienteDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 procedure TCreditoClienteDao.creditosAbertos(pCliente: String);
@@ -77,10 +78,10 @@ var
   lQry: TFDQuery;
   lSQL:String;
   i: INteger;
-  lConexao: TConexao;
+
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+
+  lQry := vIConexao.CriarQuery;
 
   FCreditoClientesLista := TObjectList<TCreditoClienteModel>.Create;
 
@@ -128,7 +129,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -142,10 +142,9 @@ function TCreditoClienteDao.incluir(ACreditoClienteModel: TCreditoClienteModel):
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+
+  lQry := vIConexao.CriarQuery;
 
   lSQL := '     insert into credito_cliente (cliente_id,              '+SLineBreak+
           '                                  devolucao_id,            '+SLineBreak+
@@ -185,7 +184,7 @@ begin
   finally
     lSQL := '';
     lQry.Free;
-    lConexao.Free;
+
   end;
 end;
 
@@ -193,10 +192,10 @@ function TCreditoClienteDao.alterar(ACreditoClienteModel: TCreditoClienteModel):
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
+
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+
+  lQry := vIConexao.CriarQuery;
 
   lSQL :=  ' update credito_cliente                                        '+SLineBreak+
            '       set cliente_id = :cliente_id,                           '+SLineBreak+
@@ -225,17 +224,15 @@ begin
   finally
     lSQL := '';
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
 function TCreditoClienteDao.excluir(ACreditoClienteModel: TCreditoClienteModel): String;
 var
   lQry: TFDQuery;
-  lConexao: TConexao;
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from credito_cliente where ID = :ID',[ACreditoClienteModel.ID]);
@@ -244,7 +241,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -267,11 +263,10 @@ procedure TCreditoClienteDao.obterTotalRegistros;
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
 begin
   try
-    lConexao := TConexao.Create;
-    lQry := lConexao.CriarQuery;
+
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From credito_cliente where 1=1 ';
 
@@ -283,7 +278,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -292,10 +286,8 @@ var
   lQry: TFDQuery;
   lSQL:String;
   i: INteger;
-  lConexao: TConexao;
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FCreditoClientesLista := TObjectList<TCreditoClienteModel>.Create;
 
@@ -348,7 +340,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 

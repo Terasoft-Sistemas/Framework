@@ -4,19 +4,20 @@ interface
 
 uses
   ConfiguracoesModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  VariaveisGlobais;
+  VariaveisGlobais,
+  Interfaces.Conexao;
 
 type
   TConfiguracoesDao = class
 
   private
+    vIConexao : IConexao;
     FConfiguracoessLista: TObjectList<TConfiguracoesModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -40,7 +41,7 @@ type
     function montaCondicaoQuery: String;
 
   public
-    constructor Create;
+    constructor Create(pIConexao : Iconexao);
     destructor Destroy; override;
 
     property ConfiguracoessLista: TObjectList<TConfiguracoesModel> read FConfiguracoessLista write SetConfiguracoessLista;
@@ -66,9 +67,9 @@ implementation
 
 { TConfiguracoes }
 
-constructor TConfiguracoesDao.Create;
+constructor TConfiguracoesDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TConfiguracoesDao.Destroy;
@@ -81,10 +82,10 @@ function TConfiguracoesDao.incluir(AConfiguracoesModel: TConfiguracoesModel): St
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
+
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+
+  lQry := vIConexao.CriarQuery;
 
   lSQL := '   insert into configuracoes (tag,                '+SLineBreak+
           '                              fid,                '+SLineBreak+
@@ -120,7 +121,6 @@ begin
   finally
     lSQL := '';
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -128,10 +128,9 @@ function TConfiguracoesDao.alterar(AConfiguracoesModel: TConfiguracoesModel): St
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+
+  lQry := vIConexao.CriarQuery;
 
   lSQL :=  '    update configuracoes                      '+SLineBreak+
            '       set perfil_id = :perfil_id,            '+SLineBreak+
@@ -155,17 +154,15 @@ begin
   finally
     lSQL := '';
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
 function TConfiguracoesDao.excluir(AConfiguracoesModel: TConfiguracoesModel): String;
 var
   lQry: TFDQuery;
-  lConexao: TConexao;
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from configuracoes where ID = :ID',[AConfiguracoesModel.ID]);
@@ -174,7 +171,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -197,11 +193,9 @@ procedure TConfiguracoesDao.obterTotalRegistros;
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
 begin
   try
-    lConexao := TConexao.Create;
-    lQry := lConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From configuracoes where 1=1 ';
 
@@ -213,7 +207,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 

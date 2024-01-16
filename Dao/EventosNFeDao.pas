@@ -3,15 +3,19 @@ unit EventosNFeDao;
 interface
 
 uses
-  FireDAC.Comp.Client, Conexao, EventosNFeModel, System.SysUtils;
+  FireDAC.Comp.Client,
+  EventosNFeModel,
+  System.SysUtils,
+  Interfaces.Conexao;
 
 type
   TEventosNFeDao = class
 
   private
+  vIConexao : IConexao;
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
 
@@ -24,7 +28,7 @@ end;
 implementation
 
 uses
-  System.StrUtils, VariaveisGlobais;//, SistemaControl;
+  System.StrUtils;//, SistemaControl;
 { TEventosNFeDao }
 
 function TEventosNFeDao.alterar(AEventosNFeModel: TEventosNFeModel): Boolean;
@@ -32,9 +36,9 @@ begin
 
 end;
 
-constructor TEventosNFeDao.Create;
+constructor TEventosNFeDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TEventosNFeDao.Destroy;
@@ -49,7 +53,7 @@ var
   lQry: TFDQuery;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
   finally
     lQry.Free;
@@ -63,7 +67,7 @@ var
   lQry: TFDQuery;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSQL :=
     ' insert into eventos_nfe (id,               '+#13+
@@ -108,7 +112,7 @@ begin
     '       :justificativa)                      '+#13;
 
     lQry.SQL.Add(LSQL);
-    lQry.ParamByName('ID').Value                := xConexao.Generetor('GEN_EVENTOS').ToInteger;
+    lQry.ParamByName('ID').Value                := vIConexao.Generetor('GEN_EVENTOS').ToInteger;
     lQry.ParamByName('ID_NFE').Value            := AEventosNFeModel.ID_NFE;
     lQry.ParamByName('DATAHORA').Value          := AEventosNFeModel.DATAHORA;
     lQry.ParamByName('EVENTO').Value            := AEventosNFeModel.EVENTO;

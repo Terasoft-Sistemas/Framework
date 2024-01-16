@@ -4,19 +4,19 @@ interface
 
 uses
   BancoModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  VariaveisGlobais;
+  Interfaces.Conexao;
 
 type
   TBancoDao = class
 
   private
+    vIConexao : Iconexao;
     FBancosLista: TObjectList<TBancoModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -40,7 +40,7 @@ type
     function montaCondicaoQuery: String;
 
   public
-    constructor Create;
+    constructor Create(pIConexao : Iconexao);
     destructor Destroy; override;
 
     property BancosLista: TObjectList<TBancoModel> read FBancosLista write SetBancosLista;
@@ -66,9 +66,9 @@ implementation
 
 { TBanco }
 
-constructor TBancoDao.Create;
+constructor TBancoDao.Create(pIConexao : Iconexao);
 begin
-
+  vIconexao := pIconexao;
 end;
 
 destructor TBancoDao.Destroy;
@@ -81,10 +81,10 @@ function TBancoDao.incluir(ABancoModel: TBancoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
+
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+
+  lQry := vIconexao.CriarQuery;
 
   lSQL :=    '   insert into banco (numero_ban,                          '+SLineBreak+
              '                      nome_ban,                            '+SLineBreak+
@@ -216,7 +216,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('numero_ban').Value := xConexao.Generetor('GEN_BANCO');
+    lQry.ParamByName('numero_ban').Value := vIconexao.Generetor('GEN_BANCO');
     setParams(lQry, ABancoModel);
     lQry.Open;
 
@@ -225,7 +225,6 @@ begin
   finally
     lSQL := '';
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -233,10 +232,10 @@ function TBancoDao.alterar(ABancoModel: TBancoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
+
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+
+  lQry := vIconexao.CriarQuery;
 
   lSQL :=   '    update banco                                                         '+SLineBreak+
             '       set nome_ban = :nome_ban,                                         '+SLineBreak+
@@ -314,17 +313,17 @@ begin
   finally
     lSQL := '';
     lQry.Free;
-    lConexao.Free;
+
   end;
 end;
 
 function TBancoDao.excluir(ABancoModel: TBancoModel): String;
 var
   lQry: TFDQuery;
-  lConexao: TConexao;
+
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+
+  lQry := vIconexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from banco where ID = :ID',[ABancoModel.ID]);
@@ -333,7 +332,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -356,11 +354,11 @@ procedure TBancoDao.obterTotalRegistros;
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
+
 begin
   try
-    lConexao := TConexao.Create;
-    lQry := lConexao.CriarQuery;
+
+    lQry := vIconexao.CriarQuery;
 
     lSql := 'select count(*) records From banco where 1=1 ';
 
@@ -372,7 +370,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -381,10 +378,10 @@ var
   lQry: TFDQuery;
   lSQL:String;
   i: INteger;
-  lConexao: TConexao;
+
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+
+  lQry := vIconexao.CriarQuery;
 
   FBancosLista := TObjectList<TBancoModel>.Create;
 
@@ -487,7 +484,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 

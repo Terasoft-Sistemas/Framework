@@ -4,18 +4,19 @@ interface
 
 uses
   FuncionarioModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
-  System.Variants;
+  System.Variants,
+  Interfaces.Conexao;
 
 type
   TFuncionarioDao = class
 
   private
+    vIConexao : IConexao;
     FFuncionariosLista: TObjectList<TFuncionarioModel>;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -39,7 +40,7 @@ type
     procedure SetIDRecordView(const Value: String);
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property FuncionariosLista: TObjectList<TFuncionarioModel> read FFuncionariosLista write SetFuncionariosLista;
@@ -61,15 +62,13 @@ implementation
 
 { TFuncionario }
 
-uses VariaveisGlobais;
-
 function TFuncionarioDao.comissaoVendedor(pIdVendedor, pIdTipoComissao: String): Double;
 var
   lQry: TFDQuery;
   lSQL: String;
 begin
   try
-    lQry     := xConexao.CriarQuery;
+    lQry     := vIConexao.CriarQuery;
 
     lSql := '  select distinct coalesce(comissao, 0) comissao  '+
             '    from comissao_vendedor                        '+
@@ -88,9 +87,9 @@ begin
 
 end;
 
-constructor TFuncionarioDao.Create;
+constructor TFuncionarioDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TFuncionarioDao.Destroy;
@@ -120,7 +119,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From funcionario where 1=1 ';
 
@@ -141,7 +140,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FFuncionariosLista := TObjectList<TFuncionarioModel>.Create;
 

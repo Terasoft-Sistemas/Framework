@@ -4,19 +4,20 @@ interface
 
 uses
   ContaCorrenteModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  Terasoft.FuncoesTexto;
+  Terasoft.FuncoesTexto,
+  Interfaces.Conexao;
 
 type
   TContaCorrenteDao = class
 
   private
+    vIConexao : IConexao;
     FContaCorrentesLista: TObjectList<TContaCorrenteModel>;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -40,7 +41,7 @@ type
     procedure SetIDRecordView(const Value: String);
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property ContaCorrentesLista: TObjectList<TContaCorrenteModel> read FContaCorrentesLista write SetContaCorrentesLista;
@@ -68,14 +69,13 @@ implementation
 
 { TContaCorrente }
 
-uses VariaveisGlobais;
 
 function TContaCorrenteDao.carregaClasse(pId: String): TContaCorrenteModel;
 var
   lQry: TFDQuery;
   lModel: TContaCorrenteModel;
 begin
-  lQry     := xConexao.CriarQuery;
+  lQry     := vIConexao.CriarQuery;
   lModel   := TContaCorrenteModel.Create;
   Result   := lModel;
 
@@ -131,9 +131,9 @@ begin
   end;
 end;
 
-constructor TContaCorrenteDao.Create;
+constructor TContaCorrenteDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TContaCorrenteDao.Destroy;
@@ -147,7 +147,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL :=   '   insert into contacorrente (numero_cor,                 '+SLineBreak+
             '                              data_cor,                   '+SLineBreak+
@@ -225,7 +225,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('numero_cor').Value := xConexao.Generetor('GEN_CONTACORRENTE');
+    lQry.ParamByName('numero_cor').Value := vIConexao.Generetor('GEN_CONTACORRENTE');
     setParams(lQry, AContaCorrenteModel);
     lQry.Open;
 
@@ -242,7 +242,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL := '    update contacorrente                                    '+SLineBreak+
           '       set data_cor = :data_cor,                            '+SLineBreak+
@@ -300,7 +300,7 @@ function TContaCorrenteDao.excluir(AContaCorrenteModel: TContaCorrenteModel): St
 var
   lQry: TFDQuery;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from contacorrente where numero_cor = :numero_cor',[AContaCorrenteModel.NUMERO_COR]);
@@ -333,7 +333,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From contacorrente where 1=1 ';
 
@@ -354,7 +354,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FContaCorrentesLista := TObjectList<TContaCorrenteModel>.Create;
 

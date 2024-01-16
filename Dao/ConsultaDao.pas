@@ -4,18 +4,19 @@ interface
 
 uses
   ConsultaModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
-  System.Variants;
+  System.Variants,
+  Interfaces.Conexao;
 
 type
   TConsultaDao = class
 
   private
+    vIConexao : IConexao;
     FConsultasLista: TObjectList<TConsultaModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -45,7 +46,7 @@ type
     procedure SetDescricaoView(const Value: String);
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property ConsultasLista: TObjectList<TConsultaModel> read FConsultasLista write SetConsultasLista;
@@ -69,9 +70,9 @@ implementation
 
 { TConsulta }
 
-constructor TConsultaDao.Create;
+constructor TConsultaDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TConsultaDao.Destroy;
@@ -96,11 +97,9 @@ procedure TConsultaDao.obterTotalRegistros;
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
 begin
   try
-    lConexao := TConexao.Create;
-    lQry := lConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From '+FTabelaView+' where 1=1 ';
 
@@ -112,7 +111,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -121,10 +119,8 @@ var
   lQry: TFDQuery;
   lSQL:String;
   i: INteger;
-  lConexao: TConexao;
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FConsultasLista := TObjectList<TConsultaModel>.Create;
 
@@ -165,7 +161,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 

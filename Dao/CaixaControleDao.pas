@@ -4,20 +4,20 @@ interface
 
 uses
   CaixaControleModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  VariaveisGlobais,
-  Terasoft.FuncoesTexto;
+  Terasoft.FuncoesTexto,
+  Interfaces.Conexao;
 
 type
   TCaixaControleDao = class
 
   private
+    vIConexao : IConexao;
     FCaixaControlesLista: TObjectList<TCaixaControleModel>;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -41,7 +41,7 @@ type
     procedure SetIDRecordView(const Value: String);
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property CaixaControlesLista: TObjectList<TCaixaControleModel> read FCaixaControlesLista write SetCaixaControlesLista;
@@ -70,9 +70,9 @@ implementation
 
 { TCaixaControle }
 
-constructor TCaixaControleDao.Create;
+constructor TCaixaControleDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 function TCaixaControleDao.dataFechamento(pIdCaixa, pUsuario: String): String;
@@ -85,7 +85,7 @@ begin
           '    and c.usuario = ' + QuotedStr(pUsuario)                    +
           '  order by 1 ';
 
-  Result := xConexao.getConnection.ExecSQLScalar(lSql);
+  Result := vIConexao.getConnection.ExecSQLScalar(lSql);
 end;
 
 destructor TCaixaControleDao.Destroy;
@@ -98,10 +98,10 @@ function TCaixaControleDao.incluir(ACaixaControleModel: TCaixaControleModel): St
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
+
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+
+  lQry := vIConexao.CriarQuery;
 
   lSQL := '    insert into caixa_ctr (id,                   '+SLineBreak+
           '                           data,                 '+SLineBreak+
@@ -127,7 +127,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := StrToInt(xConexao.Generetor('GEN_CAIXA_CTR')).ToString;
+    lQry.ParamByName('id').Value := StrToInt(vIConexao.Generetor('GEN_CAIXA_CTR')).ToString;
     setParams(lQry, ACaixaControleModel);
     lQry.Open;
 
@@ -136,7 +136,6 @@ begin
   finally
     lSQL := '';
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -144,10 +143,10 @@ function TCaixaControleDao.alterar(ACaixaControleModel: TCaixaControleModel): St
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
+
 begin
-  lConexao := TConexao.Create;
-  lQry     := lConexao.CriarQuery;
+
+  lQry     := vIConexao.CriarQuery;
 
   lSQL :=  '   update caixa_ctr                                    '+SLineBreak+
            '      set data = :data,                                '+SLineBreak+
@@ -172,17 +171,16 @@ begin
   finally
     lSQL := '';
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
 function TCaixaControleDao.excluir(ACaixaControleModel: TCaixaControleModel): String;
 var
   lQry: TFDQuery;
-  lConexao: TConexao;
+
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from caixa_ctr where ID = :ID',[ACaixaControleModel.ID]);
@@ -191,7 +189,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -214,11 +211,9 @@ procedure TCaixaControleDao.obterTotalRegistros;
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
 begin
   try
-    lConexao := TConexao.Create;
-    lQry := lConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From caixa_ctr where 1=1 ';
 
@@ -230,7 +225,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -239,10 +233,10 @@ var
   lQry: TFDQuery;
   lSQL:String;
   i: INteger;
-  lConexao: TConexao;
+
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+
+  lQry := vIConexao.CriarQuery;
 
   FCaixaControlesLista := TObjectList<TCaixaControleModel>.Create;
 
@@ -291,7 +285,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -358,7 +351,7 @@ var
   lConexao : TFDConnection;
   lSql     : String;
 begin
-  lConexao := xConexao.getConnection;
+  lConexao := vIConexao.getConnection;
 
   lSql := ' select caixa_ctr.id                                                        '+
           '   from caixa_ctr                                                           '+
@@ -379,10 +372,10 @@ var
   lQry      : TFDQuery;
   lSQL      : String;
   i         : INteger;
-  lConexao  : TConexao;
+
 begin
-  lConexao := TConexao.Create;
-  lQry := lConexao.CriarQuery;
+
+  lQry := vIConexao.CriarQuery;
 
   FCaixaControlesLista := TObjectList<TCaixaControleModel>.Create;
 
@@ -429,7 +422,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 

@@ -4,18 +4,19 @@ interface
 
 uses
   AdmCartaoTaxaModel,
-  Conexao,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
-  System.Variants;
+  System.Variants
+  Interfaces.Conexao;
 
 type
   TAdmCartaoTaxaDao = class
 
   private
+    vIConexao : IConexao;
     FAdmCartaoTaxasLista: TObjectList<TAdmCartaoTaxaModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -39,7 +40,7 @@ type
     function montaCondicaoQuery: String;
 
   public
-    constructor Create;
+    constructor Create(pIconexao : IConexao);
     destructor Destroy; override;
 
     property AdmCartaoTaxasLista: TObjectList<TAdmCartaoTaxaModel> read FAdmCartaoTaxasLista write SetAdmCartaoTaxasLista;
@@ -55,7 +56,7 @@ type
     function incluir(AAdmCartaoTaxaModel: TAdmCartaoTaxaModel): String;
     function alterar(AAdmCartaoTaxaModel: TAdmCartaoTaxaModel): String;
     function excluir(AAdmCartaoTaxaModel: TAdmCartaoTaxaModel): String;
-	
+
     procedure obterLista;
 
     procedure setParams(var pQry: TFDQuery; pCartaoTaxaModel: TAdmCartaoTaxaModel);
@@ -66,11 +67,9 @@ implementation
 
 { TAdmCartaoTaxa }
 
-uses VariaveisGlobais;
-
-constructor TAdmCartaoTaxaDao.Create;
+constructor TAdmCartaoTaxaDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TAdmCartaoTaxaDao.Destroy;
@@ -84,7 +83,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL := '    insert into admcartao_taxa (id,               '+SLineBreak+
           '                                adm_id,           '+SLineBreak+
@@ -102,7 +101,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := xConexao.Generetor('GEN_ADMCARTAO_TAXA');
+    lQry.ParamByName('id').Value := vIConexao.Generetor('GEN_ADMCARTAO_TAXA');
     setParams(lQry, AAdmCartaoTaxaModel);
     lQry.Open;
 
@@ -119,7 +118,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   lSQL :=  '  update admcartao_taxa                        '+SLineBreak+
            '     set adm_id = :adm_id,                     '+SLineBreak+
@@ -147,7 +146,7 @@ function TAdmCartaoTaxaDao.excluir(AAdmCartaoTaxaModel: TAdmCartaoTaxaModel): St
 var
   lQry: TFDQuery;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from admcartao_taxa where ID = :ID',[AAdmCartaoTaxaModel.ID]);
@@ -180,7 +179,7 @@ var
   lSQL:String;
 begin
   try
-    lQry := xConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From admcartao_taxa where 1=1 ';
 
@@ -201,7 +200,7 @@ var
   lSQL:String;
   i: INteger;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FAdmCartaoTaxasLista := TObjectList<TAdmCartaoTaxaModel>.Create;
 
