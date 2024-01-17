@@ -1,7 +1,7 @@
 unit PedidoVendaModel;
 interface
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types.Acao,
   System.Generics.Collections,
   Terasoft.FuncoesTexto,
   Terasoft.Utils,

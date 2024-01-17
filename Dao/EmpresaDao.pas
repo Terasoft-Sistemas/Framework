@@ -1,37 +1,28 @@
 unit EmpresaDao;
-
 interface
 uses
   EmpresaModel,
   FireDAC.Comp.Client,
   System.SysUtils,
   Interfaces.Conexao;
-
 type
   TEmpresaDao = class
-
   private
     vIConexao : IConexao;
-
   public
     procedure carregar(pEmpresaModel: TEmpresaModel);
-
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
   end;
-
 implementation
-
 procedure TEmpresaDao.carregar(pEmpresaModel: TEmpresaModel);
 var
   lQry: TFDQuery;
   i: INteger;
 begin
   lQry := vIConexao.CriarQuery;
-
    try
       lQry.Open(' select * from empresa ');
-
       try
         pEmpresaModel.ID                    := lQry.fieldByName('ID').AsString;
         pEmpresaModel.SYSTIME               := lQry.fieldByName('SYSTIME').AsString;
@@ -57,16 +48,13 @@ begin
         pEmpresaModel.JUROS_BOL             := lQry.fieldByName('JUROS_BOL').AsString;
         pEmpresaModel.LOJA                  := lQry.fieldByName('LOJA').AsString;
         pEmpresaModel.LIMITE_ATRASO         := lQry.fieldByName('LIMITE_ATRAZO').AsString;
-
       finally
         lQry.Close;
       end;
-
    finally
      lQry.Free;
    end;
 end;
-
 
 constructor TEmpresaDao.Create(pIConexao: IConexao);
 begin

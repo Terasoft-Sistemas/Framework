@@ -1,7 +1,10 @@
 unit ContasReceberModel;
+
 interface
+
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types.Acao,
+  Terasoft.Types.ContasReceber,
   System.Generics.Collections,
   Terasoft.FuncoesTexto,
   ContasReceberItensDao,

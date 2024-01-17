@@ -4,20 +4,21 @@ interface
 
 uses
   AdmCartaoModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
-  Interfaces.Conexao;
+  Interfaces.Conexao,
+  Terasoft.ConstrutorDao;
 
 type
   TAdmCartaoDao = class
 
   private
-    vIConexao : IConexao;
+    vIConexao  : IConexao;
+    vContrutor : TConstrutorDao;
 
     FAdmCartaosLista: TObjectList<TAdmCartaoModel>;
     FLengthPageView: String;
@@ -38,7 +39,7 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
 
-    function montaCondicaoQuery: String;
+    function where: String;
 
   public
     constructor Create(pIConexao: IConexao);
@@ -110,7 +111,8 @@ end;
 
 constructor TAdmCartaoDao.Create(pIConexao: IConexao);
 begin
-  vIConexao := pIConexao;
+  vIConexao  := pIConexao;
+  vContrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TAdmCartaoDao.Destroy;
@@ -126,37 +128,7 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL :=       '   insert into admcartao (id,                        '+SLineBreak+
-                '                          nome_adm,                  '+SLineBreak+
-                '                          credito_adm,               '+SLineBreak+
-                '                          debito_adm,                '+SLineBreak+
-                '                          parcelado_adm,             '+SLineBreak+
-                '                          status,                    '+SLineBreak+
-                '                          comissao_adm,              '+SLineBreak+
-                '                          loja,                      '+SLineBreak+
-                '                          gerenciador,               '+SLineBreak+
-                '                          vencimento_dia_semana,     '+SLineBreak+
-                '                          portador_id,               '+SLineBreak+
-                '                          imagem,                    '+SLineBreak+
-                '                          taxa,                      '+SLineBreak+
-                '                          nome_web,                  '+SLineBreak+
-                '                          conciliadora_id)           '+SLineBreak+
-                '   values (:id,                                      '+SLineBreak+
-                '           :nome_adm,                                '+SLineBreak+
-                '           :credito_adm,                             '+SLineBreak+
-                '           :debito_adm,                              '+SLineBreak+
-                '           :parcelado_adm,                           '+SLineBreak+
-                '           :status,                                  '+SLineBreak+
-                '           :comissao_adm,                            '+SLineBreak+
-                '           :loja,                                    '+SLineBreak+
-                '           :gerenciador,                             '+SLineBreak+
-                '           :vencimento_dia_semana,                   '+SLineBreak+
-                '           :portador_id,                             '+SLineBreak+
-                '           :imagem,                                  '+SLineBreak+
-                '           :taxa,                                    '+SLineBreak+
-                '           :nome_web,                                '+SLineBreak+
-                '           :conciliadora_id)                         '+SLineBreak+
-                ' returning ID                                        '+SLineBreak;
+  lSQL := vContrutor.gerarInsert('ADMCARTAO', 'ID', true);
 
   try
     lQry.SQL.Add(lSQL);
@@ -179,26 +151,11 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := '   update admcartao                                        '+SLineBreak+
-          '      set nome_adm = :nome_adm,                            '+SLineBreak+
-          '          credito_adm = :credito_adm,                      '+SLineBreak+
-          '          debito_adm = :debito_adm,                        '+SLineBreak+
-          '          parcelado_adm = :parcelado_adm,                  '+SLineBreak+
-          '          status = :status,                                '+SLineBreak+
-          '          comissao_adm = :comissao_adm,                    '+SLineBreak+
-          '          loja = :loja,                                    '+SLineBreak+
-          '          gerenciador = :gerenciador,                      '+SLineBreak+
-          '          vencimento_dia_semana = :vencimento_dia_semana,  '+SLineBreak+
-          '          portador_id = :portador_id,                      '+SLineBreak+
-          '          imagem = :imagem,                                '+SLineBreak+
-          '          taxa = :taxa,                                    '+SLineBreak+
-          '          nome_web = :nome_web,                            '+SLineBreak+
-          '          conciliadora_id = :conciliadora_id               '+SLineBreak+
-          '    where (id = :id)                                       '+SLineBreak;
+  lSQL := vContrutor.gerarUpdate('ADMCARTAO', 'ID');
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value   := IIF(AAdmCartaoModel.ID   = '', Unassigned, AAdmCartaoModel.ID);
+    lQry.ParamByName('id').Value   := ifThen(AAdmCartaoModel.ID   = '', Unassigned, AAdmCartaoModel.ID);
     setParams(lQry, AAdmCartaoModel);
     lQry.ExecSQL;
 
@@ -226,7 +183,7 @@ begin
   end;
 end;
 
-function TAdmCartaoDao.montaCondicaoQuery: String;
+function TAdmCartaoDao.where: String;
 var
   lSQL : String;
 begin
@@ -251,7 +208,7 @@ begin
 
     lSql := 'select count(*) records From admcartao where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -284,7 +241,7 @@ begin
 	    '  from admcartao         '+
       ' where 1=1               ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -358,20 +315,20 @@ end;
 
 procedure TAdmCartaoDao.setParams(var pQry: TFDQuery; pAdmCartaoModel: TAdmCartaoModel);
 begin
-  pQry.ParamByName('nome_adm').Value               := IIF(pAdmCartaoModel.NOME_ADM               = '', Unassigned, pAdmCartaoModel.NOME_ADM);
-  pQry.ParamByName('credito_adm').Value            := IIF(pAdmCartaoModel.CREDITO_ADM            = '', Unassigned, pAdmCartaoModel.CREDITO_ADM);
-  pQry.ParamByName('debito_adm').Value             := IIF(pAdmCartaoModel.DEBITO_ADM             = '', Unassigned, pAdmCartaoModel.DEBITO_ADM);
-  pQry.ParamByName('parcelado_adm').Value          := IIF(pAdmCartaoModel.PARCELADO_ADM          = '', Unassigned, pAdmCartaoModel.PARCELADO_ADM);
-  pQry.ParamByName('status').Value                 := IIF(pAdmCartaoModel.STATUS                 = '', Unassigned, pAdmCartaoModel.STATUS);
-  pQry.ParamByName('comissao_adm').Value           := IIF(pAdmCartaoModel.COMISSAO_ADM           = '', Unassigned, FormataFloatFireBird(pAdmCartaoModel.COMISSAO_ADM));
-  pQry.ParamByName('loja').Value                   := IIF(pAdmCartaoModel.LOJA                   = '', Unassigned, pAdmCartaoModel.LOJA);
-  pQry.ParamByName('gerenciador').Value            := IIF(pAdmCartaoModel.GERENCIADOR            = '', Unassigned, pAdmCartaoModel.GERENCIADOR);
-  pQry.ParamByName('vencimento_dia_semana').Value  := IIF(pAdmCartaoModel.VENCIMENTO_DIA_SEMANA  = '', Unassigned, pAdmCartaoModel.VENCIMENTO_DIA_SEMANA);
-  pQry.ParamByName('portador_id').Value            := IIF(pAdmCartaoModel.PORTADOR_ID            = '', Unassigned, pAdmCartaoModel.PORTADOR_ID);
-  pQry.ParamByName('imagem').Value                 := IIF(pAdmCartaoModel.IMAGEM                 = '', Unassigned, pAdmCartaoModel.IMAGEM);
-  pQry.ParamByName('taxa').Value                   := IIF(pAdmCartaoModel.TAXA                   = '', Unassigned, FormataFloatFireBird(pAdmCartaoModel.TAXA));
-  pQry.ParamByName('nome_web').Value               := IIF(pAdmCartaoModel.NOME_WEB               = '', Unassigned, pAdmCartaoModel.NOME_WEB);
-  pQry.ParamByName('conciliadora_id').Value        := IIF(pAdmCartaoModel.CONCILIADORA_ID        = '', Unassigned, pAdmCartaoModel.CONCILIADORA_ID);
+  pQry.ParamByName('nome_adm').Value               := ifThen(pAdmCartaoModel.NOME_ADM               = '', Unassigned, pAdmCartaoModel.NOME_ADM);
+  pQry.ParamByName('credito_adm').Value            := ifThen(pAdmCartaoModel.CREDITO_ADM            = '', Unassigned, pAdmCartaoModel.CREDITO_ADM);
+  pQry.ParamByName('debito_adm').Value             := ifThen(pAdmCartaoModel.DEBITO_ADM             = '', Unassigned, pAdmCartaoModel.DEBITO_ADM);
+  pQry.ParamByName('parcelado_adm').Value          := ifThen(pAdmCartaoModel.PARCELADO_ADM          = '', Unassigned, pAdmCartaoModel.PARCELADO_ADM);
+  pQry.ParamByName('status').Value                 := ifThen(pAdmCartaoModel.STATUS                 = '', Unassigned, pAdmCartaoModel.STATUS);
+  pQry.ParamByName('comissao_adm').Value           := ifThen(pAdmCartaoModel.COMISSAO_ADM           = '', Unassigned, FormataFloatFireBird(pAdmCartaoModel.COMISSAO_ADM));
+  pQry.ParamByName('loja').Value                   := ifThen(pAdmCartaoModel.LOJA                   = '', Unassigned, pAdmCartaoModel.LOJA);
+  pQry.ParamByName('gerenciador').Value            := ifThen(pAdmCartaoModel.GERENCIADOR            = '', Unassigned, pAdmCartaoModel.GERENCIADOR);
+  pQry.ParamByName('vencimento_dia_semana').Value  := ifThen(pAdmCartaoModel.VENCIMENTO_DIA_SEMANA  = '', Unassigned, pAdmCartaoModel.VENCIMENTO_DIA_SEMANA);
+  pQry.ParamByName('portador_id').Value            := ifThen(pAdmCartaoModel.PORTADOR_ID            = '', Unassigned, pAdmCartaoModel.PORTADOR_ID);
+  pQry.ParamByName('imagem').Value                 := ifThen(pAdmCartaoModel.IMAGEM                 = '', Unassigned, pAdmCartaoModel.IMAGEM);
+  pQry.ParamByName('taxa').Value                   := ifThen(pAdmCartaoModel.TAXA                   = '', Unassigned, FormataFloatFireBird(pAdmCartaoModel.TAXA));
+  pQry.ParamByName('nome_web').Value               := ifThen(pAdmCartaoModel.NOME_WEB               = '', Unassigned, pAdmCartaoModel.NOME_WEB);
+  pQry.ParamByName('conciliadora_id').Value        := ifThen(pAdmCartaoModel.CONCILIADORA_ID        = '', Unassigned, pAdmCartaoModel.CONCILIADORA_ID);
 end;
 
 procedure TAdmCartaoDao.SetStartRecordView(const Value: String);

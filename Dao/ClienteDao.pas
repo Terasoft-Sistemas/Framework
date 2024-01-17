@@ -76,8 +76,10 @@ begin
   Result   := lModel;
   try
     lQry.Open('select * from clientes where codigo_cli = '+ QuotedStr(pId));
+
     if lQry.IsEmpty then
       Exit;
+
     lModel.CODIGO_CLI                  := lQry.FieldByName('CODIGO_CLI').AsString;
     lModel.FANTASIA_CLI                := lQry.FieldByName('FANTASIA_CLI').AsString;
     lModel.RAZAO_CLI                   := lQry.FieldByName('RAZAO_CLI').AsString;
