@@ -3,7 +3,7 @@ unit PromocaoModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao;
 
@@ -163,9 +163,9 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lPromocaoDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lPromocaoDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lPromocaoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lPromocaoDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lPromocaoDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lPromocaoDao.excluir(Self);
     end;
 
   finally

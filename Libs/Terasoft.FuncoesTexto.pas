@@ -4,7 +4,7 @@ interface
 
 uses
   Classes,
-  //Terasoft.Enumerado,
+  Terasoft.Types,
   DB;
 
   function textoEntreTags ( Texto, TagInicio, TagFim: String; PrimeiraOcorrencia: PInteger = nil; caseSensitive: boolean = true ): string;

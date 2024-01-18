@@ -3,7 +3,7 @@ unit PrecoUFModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao;
 
@@ -127,9 +127,9 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lPrecoUFDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lPrecoUFDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lPrecoUFDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lPrecoUFDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lPrecoUFDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lPrecoUFDao.excluir(Self);
     end;
 
   finally

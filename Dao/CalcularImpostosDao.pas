@@ -165,12 +165,35 @@ begin
 
     lQry.Open(lSQL);
 
-    lCalcularImpostosModel.PIS_CST         := ifThen(lQry.FieldByName('cfop_cst_pis').AsString         <> '', lQry.FieldByName('cfop_cst_pis').Value,         lCalcularImpostosModel.PIS_CST);
-    lCalcularImpostosModel.PIS_ALIQUOTA    := ifThen(lQry.FieldByName('cfop_pis_aliquota').AsFloat     > 0 , lQry.FieldByName('cfop_pis_aliquota').Value,    lCalcularImpostosModel.PIS_ALIQUOTA);
-    lCalcularImpostosModel.COFINS_CST      := ifThen(lQry.FieldByName('cfop_cst_cofins').AsString      <> '', lQry.FieldByName('cfop_cst_cofins').Value,      lCalcularImpostosModel.COFINS_CST);
-    lCalcularImpostosModel.COFINS_ALIQUOTA := ifThen(lQry.FieldByName('cfop_cofins_aliquota').AsFloat  > 0 , lQry.FieldByName('cfop_cofins_aliquota').Value, lCalcularImpostosModel.COFINS_ALIQUOTA);
-    lCalcularImpostosModel.IPI_CST         := ifThen(lQry.FieldByName('cfop_cst_ipi').AsString         <> '', lQry.FieldByName('cfop_cst_ipi').Value,         lCalcularImpostosModel.IPI_CST);
-    lCalcularImpostosModel.IPI_ALIQUOTA    := ifThen(lQry.FieldByName('cfop_ipi_aliquota').AsFloat     > 0 , lQry.FieldByName('cfop_ipi_aliquota').Value,    lCalcularImpostosModel.IPI_ALIQUOTA);
+    if lQry.FieldByName('cfop_cst_pis').AsString <> '' then
+      lCalcularImpostosModel.PIS_CST := lQry.FieldByName('cfop_cst_pis').Value
+    else
+      lCalcularImpostosModel.PIS_CST := lCalcularImpostosModel.PIS_CST;
+
+    if lQry.FieldByName('cfop_pis_aliquota').AsFloat > 0 then
+      lCalcularImpostosModel.PIS_ALIQUOTA := lQry.FieldByName('cfop_pis_aliquota').AsFloat
+    else
+      lCalcularImpostosModel.PIS_ALIQUOTA := lCalcularImpostosModel.PIS_ALIQUOTA;
+
+    if lQry.FieldByName('cfop_cst_cofins').AsString <> '' then
+      lCalcularImpostosModel.COFINS_CST := lQry.FieldByName('cfop_cst_cofins').Value
+    else
+      lCalcularImpostosModel.COFINS_CST := lCalcularImpostosModel.COFINS_CST;
+
+    if lQry.FieldByName('cfop_cofins_aliquota').AsFloat > 0 then
+      lCalcularImpostosModel.COFINS_ALIQUOTA := lQry.FieldByName('cfop_cofins_aliquota').AsFloat
+    else
+      lCalcularImpostosModel.COFINS_ALIQUOTA := lCalcularImpostosModel.COFINS_ALIQUOTA;
+
+    if lQry.FieldByName('cfop_cst_ipi').AsString <> '' then
+      lCalcularImpostosModel.IPI_CST := lQry.FieldByName('cfop_cst_ipi').Value
+    else
+      lCalcularImpostosModel.IPI_CST := lCalcularImpostosModel.IPI_CST;
+
+    if lQry.FieldByName('cfop_ipi_aliquota').AsFloat > 0 then
+      lCalcularImpostosModel.IPI_ALIQUOTA := lQry.FieldByName('cfop_ipi_aliquota').AsFloat
+    else
+      lCalcularImpostosModel.IPI_ALIQUOTA := lCalcularImpostosModel.IPI_ALIQUOTA;
 
     Result := lCalcularImpostosModel;
 

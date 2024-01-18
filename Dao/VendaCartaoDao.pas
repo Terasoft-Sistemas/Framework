@@ -4,20 +4,22 @@ interface
 
 uses
   VendaCartaoModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
-  Interfaces.Conexao;
+  Interfaces.Conexao,
+  Terasoft.ConstrutorDao;
 
 type
   TVendaCartaoDao = class
 
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
+
     FVendaCartaosLista: TObjectList<TVendaCartaoModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -70,7 +72,8 @@ implementation
 
 constructor TVendaCartaoDao.Create(pIConexao : IConexao);
 begin
-  vIConexao := pIConexao;
+  vIConexao   := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TVendaCartaoDao.Destroy;
@@ -86,47 +89,7 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := '	  insert into vendacartao (id,                     '+SLineBreak+
-          '							               numero_car,             '+SLineBreak+
-          '							               autorizacao_car,        '+SLineBreak+
-          '							               parcela_car,            '+SLineBreak+
-          '							               parcelas_car,           '+SLineBreak+
-          '							               valor_car,              '+SLineBreak+
-          '							               codigo_cli,             '+SLineBreak+
-          '							               adm_car,                '+SLineBreak+
-          '							               venda_car,              '+SLineBreak+
-          '							               parcelado_car,          '+SLineBreak+
-          '							               vencimento_car,         '+SLineBreak+
-          '							               numero_venda,           '+SLineBreak+
-          '							               loja,                   '+SLineBreak+
-          '							               numero_os,              '+SLineBreak+
-          '							               fatura_id,              '+SLineBreak+
-          '							               cancelamento_data,      '+SLineBreak+
-          '							               cancelamento_codigo,    '+SLineBreak+
-          '							               taxa,                   '+SLineBreak+
-          '							               parcela_tef,            '+SLineBreak+
-          '							               parcelas_tef)           '+SLineBreak+
-          '	  values (:id,                                     '+SLineBreak+
-          '			      :numero_car,                             '+SLineBreak+
-          '			      :autorizacao_car,                        '+SLineBreak+
-          '   			  :parcela_car,                            '+SLineBreak+
-          '	    		  :parcelas_car,                           '+SLineBreak+
-          '	    		  :valor_car,                              '+SLineBreak+
-          '		    	  :codigo_cli,                             '+SLineBreak+
-          '			      :adm_car,                                '+SLineBreak+
-          '   			  :venda_car,                              '+SLineBreak+
-          '	    		  :parcelado_car,                          '+SLineBreak+
-          '	    		  :vencimento_car,                         '+SLineBreak+
-          '		    	  :numero_venda,                           '+SLineBreak+
-          '		    	  :loja,                                   '+SLineBreak+
-          '		    	  :numero_os,                              '+SLineBreak+
-          '			      :fatura_id,                              '+SLineBreak+
-          '			      :cancelamento_data,                      '+SLineBreak+
-          '	    		  :cancelamento_codigo,                    '+SLineBreak+
-          '	    		  :taxa,                                   '+SLineBreak+
-          '	    		  :parcela_tef,                            '+SLineBreak+
-          '		    	  :parcelas_tef)                           '+SLineBreak+
-          ' returning ID                                       '+SLineBreak;
+  lSQL := vConstrutor.gerarInsert('VENDACARTAO', 'ID', true);
 
   try
     lQry.SQL.Add(lSQL);
@@ -149,31 +112,11 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := '   update vendacartao                                   '+SLineBreak+
-          '      set numero_car = :numero_car,                     '+SLineBreak+
-          '          autorizacao_car = :autorizacao_car,           '+SLineBreak+
-          '          parcela_car = :parcela_car,                   '+SLineBreak+
-          '          parcelas_car = :parcelas_car,                 '+SLineBreak+
-          '          valor_car = :valor_car,                       '+SLineBreak+
-          '          codigo_cli = :codigo_cli,                     '+SLineBreak+
-          '          adm_car = :adm_car,                           '+SLineBreak+
-          '          venda_car = :venda_car,                       '+SLineBreak+
-          '          parcelado_car = :parcelado_car,               '+SLineBreak+
-          '          vencimento_car = :vencimento_car,             '+SLineBreak+
-          '          numero_venda = :numero_venda,                 '+SLineBreak+
-          '          loja = :loja,                                 '+SLineBreak+
-          '          numero_os = :numero_os,                       '+SLineBreak+
-          '          fatura_id = :fatura_id,                       '+SLineBreak+
-          '          cancelamento_data = :cancelamento_data,       '+SLineBreak+
-          '          cancelamento_codigo = :cancelamento_codigo,   '+SLineBreak+
-          '          taxa = :taxa,                                 '+SLineBreak+
-          '          parcela_tef = :parcela_tef,                   '+SLineBreak+
-          '          parcelas_tef = :parcelas_tef                  '+SLineBreak+
-          '      where (id = :id)                                  '+SLineBreak;
+  lSQL := vConstrutor.gerarUpdate('VENDACARTAO', 'ID');
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := IIF(AVendaCartaoModel.ID = '', Unassigned, AVendaCartaoModel.ID);
+    lQry.ParamByName('id').Value := ifThen(AVendaCartaoModel.ID = '', Unassigned, AVendaCartaoModel.ID);
     setParams(lQry, AVendaCartaoModel);
     lQry.ExecSQL;
 
@@ -338,25 +281,25 @@ end;
 
 procedure TVendaCartaoDao.setParams(var pQry: TFDQuery; pVendaCartaoModel: TVendaCartaoModel);
 begin
-  pQry.ParamByName('numero_car').Value           := IIF(pVendaCartaoModel.NUMERO_CAR           = '', Unassigned, pVendaCartaoModel.NUMERO_CAR);
-  pQry.ParamByName('autorizacao_car').Value      := IIF(pVendaCartaoModel.AUTORIZACAO_CAR      = '', Unassigned, pVendaCartaoModel.AUTORIZACAO_CAR);
-  pQry.ParamByName('parcela_car').Value          := IIF(pVendaCartaoModel.PARCELA_CAR          = '', Unassigned, pVendaCartaoModel.PARCELA_CAR);
-  pQry.ParamByName('parcelas_car').Value         := IIF(pVendaCartaoModel.PARCELAS_CAR         = '', Unassigned, pVendaCartaoModel.PARCELAS_CAR);
-  pQry.ParamByName('valor_car').Value            := IIF(pVendaCartaoModel.VALOR_CAR            = '', Unassigned, FormataFloatFireBird(pVendaCartaoModel.VALOR_CAR));
-  pQry.ParamByName('codigo_cli').Value           := IIF(pVendaCartaoModel.CODIGO_CLI           = '', Unassigned, pVendaCartaoModel.CODIGO_CLI);
-  pQry.ParamByName('adm_car').Value              := IIF(pVendaCartaoModel.ADM_CAR              = '', Unassigned, pVendaCartaoModel.ADM_CAR);
-  pQry.ParamByName('venda_car').Value            := IIF(pVendaCartaoModel.VENDA_CAR            = '', Unassigned, transformaDataFireBird(pVendaCartaoModel.VENDA_CAR));
-  pQry.ParamByName('parcelado_car').Value        := IIF(pVendaCartaoModel.PARCELADO_CAR        = '', Unassigned, pVendaCartaoModel.PARCELADO_CAR);
-  pQry.ParamByName('vencimento_car').Value       := IIF(pVendaCartaoModel.VENCIMENTO_CAR       = '', Unassigned, transformaDataFireBird(pVendaCartaoModel.VENCIMENTO_CAR));
-  pQry.ParamByName('numero_venda').Value         := IIF(pVendaCartaoModel.NUMERO_VENDA         = '', Unassigned, pVendaCartaoModel.NUMERO_VENDA);
-  pQry.ParamByName('loja').Value                 := IIF(pVendaCartaoModel.LOJA                 = '', Unassigned, pVendaCartaoModel.LOJA);
-  pQry.ParamByName('numero_os').Value            := IIF(pVendaCartaoModel.NUMERO_OS            = '', Unassigned, pVendaCartaoModel.NUMERO_OS);
-  pQry.ParamByName('fatura_id').Value            := IIF(pVendaCartaoModel.FATURA_ID            = '', Unassigned, pVendaCartaoModel.FATURA_ID);
-  pQry.ParamByName('cancelamento_data').Value    := IIF(pVendaCartaoModel.CANCELAMENTO_DATA    = '', Unassigned, transformaDataFireBird(pVendaCartaoModel.CANCELAMENTO_DATA));
-  pQry.ParamByName('cancelamento_codigo').Value  := IIF(pVendaCartaoModel.CANCELAMENTO_CODIGO  = '', Unassigned, pVendaCartaoModel.CANCELAMENTO_CODIGO);
-  pQry.ParamByName('taxa').Value                 := IIF(pVendaCartaoModel.TAXA                 = '', Unassigned, FormataFloatFireBird(pVendaCartaoModel.TAXA));
-  pQry.ParamByName('parcela_tef').Value          := IIF(pVendaCartaoModel.PARCELA_TEF          = '', Unassigned, pVendaCartaoModel.PARCELA_TEF);
-  pQry.ParamByName('parcelas_tef').Value         := IIF(pVendaCartaoModel.PARCELAS_TEF         = '', Unassigned, pVendaCartaoModel.PARCELAS_TEF);
+  pQry.ParamByName('numero_car').Value           := ifThen(pVendaCartaoModel.NUMERO_CAR           = '', Unassigned, pVendaCartaoModel.NUMERO_CAR);
+  pQry.ParamByName('autorizacao_car').Value      := ifThen(pVendaCartaoModel.AUTORIZACAO_CAR      = '', Unassigned, pVendaCartaoModel.AUTORIZACAO_CAR);
+  pQry.ParamByName('parcela_car').Value          := ifThen(pVendaCartaoModel.PARCELA_CAR          = '', Unassigned, pVendaCartaoModel.PARCELA_CAR);
+  pQry.ParamByName('parcelas_car').Value         := ifThen(pVendaCartaoModel.PARCELAS_CAR         = '', Unassigned, pVendaCartaoModel.PARCELAS_CAR);
+  pQry.ParamByName('valor_car').Value            := ifThen(pVendaCartaoModel.VALOR_CAR            = '', Unassigned, FormataFloatFireBird(pVendaCartaoModel.VALOR_CAR));
+  pQry.ParamByName('codigo_cli').Value           := ifThen(pVendaCartaoModel.CODIGO_CLI           = '', Unassigned, pVendaCartaoModel.CODIGO_CLI);
+  pQry.ParamByName('adm_car').Value              := ifThen(pVendaCartaoModel.ADM_CAR              = '', Unassigned, pVendaCartaoModel.ADM_CAR);
+  pQry.ParamByName('venda_car').Value            := ifThen(pVendaCartaoModel.VENDA_CAR            = '', Unassigned, transformaDataFireBird(pVendaCartaoModel.VENDA_CAR));
+  pQry.ParamByName('parcelado_car').Value        := ifThen(pVendaCartaoModel.PARCELADO_CAR        = '', Unassigned, pVendaCartaoModel.PARCELADO_CAR);
+  pQry.ParamByName('vencimento_car').Value       := ifThen(pVendaCartaoModel.VENCIMENTO_CAR       = '', Unassigned, transformaDataFireBird(pVendaCartaoModel.VENCIMENTO_CAR));
+  pQry.ParamByName('numero_venda').Value         := ifThen(pVendaCartaoModel.NUMERO_VENDA         = '', Unassigned, pVendaCartaoModel.NUMERO_VENDA);
+  pQry.ParamByName('loja').Value                 := ifThen(pVendaCartaoModel.LOJA                 = '', Unassigned, pVendaCartaoModel.LOJA);
+  pQry.ParamByName('numero_os').Value            := ifThen(pVendaCartaoModel.NUMERO_OS            = '', Unassigned, pVendaCartaoModel.NUMERO_OS);
+  pQry.ParamByName('fatura_id').Value            := ifThen(pVendaCartaoModel.FATURA_ID            = '', Unassigned, pVendaCartaoModel.FATURA_ID);
+  pQry.ParamByName('cancelamento_data').Value    := ifThen(pVendaCartaoModel.CANCELAMENTO_DATA    = '', Unassigned, transformaDataFireBird(pVendaCartaoModel.CANCELAMENTO_DATA));
+  pQry.ParamByName('cancelamento_codigo').Value  := ifThen(pVendaCartaoModel.CANCELAMENTO_CODIGO  = '', Unassigned, pVendaCartaoModel.CANCELAMENTO_CODIGO);
+  pQry.ParamByName('taxa').Value                 := ifThen(pVendaCartaoModel.TAXA                 = '', Unassigned, FormataFloatFireBird(pVendaCartaoModel.TAXA));
+  pQry.ParamByName('parcela_tef').Value          := ifThen(pVendaCartaoModel.PARCELA_TEF          = '', Unassigned, pVendaCartaoModel.PARCELA_TEF);
+  pQry.ParamByName('parcelas_tef').Value         := ifThen(pVendaCartaoModel.PARCELAS_TEF         = '', Unassigned, pVendaCartaoModel.PARCELAS_TEF);
 end;
 
 procedure TVendaCartaoDao.SetStartRecordView(const Value: String);

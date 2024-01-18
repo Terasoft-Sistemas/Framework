@@ -3,7 +3,7 @@ unit ConsultaModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao;
 

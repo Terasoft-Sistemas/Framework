@@ -4,19 +4,21 @@ interface
 
 uses
   PrecoVendaModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  Interfaces.Conexao;
+  Interfaces.Conexao,
+  Terasoft.ConstrutorDao;
 
 type
   TPrecoVendaDao = class
 
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
+
     FPrecoVendasLista: TObjectList<TPrecoVendaModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -36,8 +38,8 @@ type
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-
-    function montaCondicaoQuery: String;
+    procedure setParams(var pQry: TFDQuery; pPrecoVendaModel: TPrecoVendaModel);
+    function where: String;
 
   public
     constructor Create(pIConexao : IConexao);
@@ -53,9 +55,9 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(APrecoVendaModel: TPrecoVendaModel): String;
-    function alterar(APrecoVendaModel: TPrecoVendaModel): String;
-    function excluir(APrecoVendaModel: TPrecoVendaModel): String;
+    function incluir(pPrecoVendaModel: TPrecoVendaModel): String;
+    function alterar(pPrecoVendaModel: TPrecoVendaModel): String;
+    function excluir(pPrecoVendaModel: TPrecoVendaModel): String;
 	
     procedure obterLista;
 
@@ -67,7 +69,8 @@ implementation
 
 constructor TPrecoVendaDao.Create(pIConexao : IConexao);
 begin
-  vIConexao := pIConexao;
+  vIConexao   := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TPrecoVendaDao.Destroy;
@@ -76,39 +79,69 @@ begin
   inherited;
 end;
 
-function TPrecoVendaDao.incluir(APrecoVendaModel: TPrecoVendaModel): String;
+function TPrecoVendaDao.incluir(pPrecoVendaModel: TPrecoVendaModel): String;
 var
-  lQry: TFDQuery;
-  lSQL:String;
+  lQry : TFDQuery;
+  lSQL : String;
 begin
+  lQry := vIConexao.CriarQuery;
 
+  lSQL := vConstrutor.gerarInsert('PRECO_VENDA', 'ID', true);
+
+  try
+    lQry.SQL.Add(lSQL);
+    lQry.ParamByName('ID').Value := vIConexao.Generetor('GEN_PRECOVENDA');
+    setParams(lQry, pPrecoVendaModel);
+    lQry.Open;
+
+    Result := lQry.FieldByName('ID').AsString;
+
+  finally
+    lSQL := '';
+    lQry.Free;
+  end;
 end;
 
-function TPrecoVendaDao.alterar(APrecoVendaModel: TPrecoVendaModel): String;
+function TPrecoVendaDao.alterar(pPrecoVendaModel: TPrecoVendaModel): String;
 var
-  lQry: TFDQuery;
-  lSQL:String;
+  lQry : TFDQuery;
+  lSQL : String;
 begin
+  lQry := vIConexao.CriarQuery;
 
+  lSQL :=  vConstrutor.gerarUpdate('PRECO_VENDA', 'ID');
+
+  try
+    lQry.SQL.Add(lSQL);
+    lQry.ParamByName('ID').Value := ifThen(pPrecoVendaModel.ID = '', Unassigned, pPrecoVendaModel.ID);
+    setParams(lQry, pPrecoVendaModel);
+    lQry.ExecSQL;
+
+    Result := pPrecoVendaModel.ID;
+
+  finally
+    lSQL := '';
+    lQry.Free;
+  end;
 end;
 
-function TPrecoVendaDao.excluir(APrecoVendaModel: TPrecoVendaModel): String;
+function TPrecoVendaDao.excluir(pPrecoVendaModel: TPrecoVendaModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from preco_venda where ID = :ID',[APrecoVendaModel.ID]);
+   lQry.ExecSQL('delete from preco_venda where ID = :ID',[pPrecoVendaModel.ID]);
    lQry.ExecSQL;
-   Result := APrecoVendaModel.ID;
+   Result := pPrecoVendaModel.ID;
 
   finally
     lQry.Free;
   end;
 end;
 
-function TPrecoVendaDao.montaCondicaoQuery: String;
+function TPrecoVendaDao.where: String;
 var
   lSQL : String;
 begin
@@ -133,7 +166,7 @@ begin
 
     lSql := 'select count(*) records From preco_venda where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -165,7 +198,7 @@ begin
 	  '   from preco_venda              '+
     '  where 1=1                      ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -228,6 +261,17 @@ end;
 procedure TPrecoVendaDao.SetOrderView(const Value: String);
 begin
   FOrderView := Value;
+end;
+
+procedure TPrecoVendaDao.setParams(var pQry: TFDQuery; pPrecoVendaModel: TPrecoVendaModel);
+begin
+  pQry.ParamByName('NOME').Value                 := ifThen(pPrecoVendaModel.NOME                = '', Unassigned, pPrecoVendaModel.NOME);
+  pQry.ParamByName('ACRESCIMO_DESCONTO').Value   := ifThen(pPrecoVendaModel.ACRESCIMO_DESCONTO  = '', Unassigned, pPrecoVendaModel.ACRESCIMO_DESCONTO);
+  pQry.ParamByName('PERCENTUAL').Value           := ifThen(pPrecoVendaModel.PERCENTUAL          = '', Unassigned, pPrecoVendaModel.PERCENTUAL);
+  pQry.ParamByName('STATUS').Value               := ifThen(pPrecoVendaModel.STATUS              = '', Unassigned, pPrecoVendaModel.STATUS);
+  pQry.ParamByName('TIPO_CUSTO').Value           := ifThen(pPrecoVendaModel.TIPO_CUSTO          = '', Unassigned, pPrecoVendaModel.TIPO_CUSTO);
+  pQry.ParamByName('CONDICOES').Value            := ifThen(pPrecoVendaModel.CONDICOES           = '', Unassigned, pPrecoVendaModel.CONDICOES);
+  pQry.ParamByName('PRODUTOS_IGNORAR').Value     := ifThen(pPrecoVendaModel.PRODUTOS_IGNORAR    = '', Unassigned, pPrecoVendaModel.PRODUTOS_IGNORAR);
 end;
 
 procedure TPrecoVendaDao.SetStartRecordView(const Value: String);

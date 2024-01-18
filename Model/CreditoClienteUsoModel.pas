@@ -3,7 +3,7 @@ unit CreditoClienteUsoModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao;
 
@@ -133,9 +133,9 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lCreditoClienteUsoDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lCreditoClienteUsoDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lCreditoClienteUsoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lCreditoClienteUsoDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lCreditoClienteUsoDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lCreditoClienteUsoDao.excluir(Self);
     end;
 
   finally

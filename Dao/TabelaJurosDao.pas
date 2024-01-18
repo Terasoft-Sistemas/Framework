@@ -4,19 +4,21 @@ interface
 
 uses
   TabelaJurosModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
+  Terasoft.ConstrutorDao,
   Interfaces.Conexao;
 
 type
   TTabelaJurosDao = class
 
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
+
     FTabelaJurossLista: TObjectList<TTabelaJurosModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -37,14 +39,14 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
 
-    function montaCondicaoQuery: String;
+    function where: String;
 
   public
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property TabelaJurossLista: TObjectList<TTabelaJurosModel> read FTabelaJurossLista write SetTabelaJurossLista;
-    property ID :Variant read FID write SetID;
+    property ID: Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
     property CountView: String read FCountView write SetCountView;
@@ -100,7 +102,8 @@ end;
 
 constructor TTabelaJurosDao.Create(pIConexao : IConexao);
 begin
-  vIConexao := pIConexao;
+  vIConexao   := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TTabelaJurosDao.Destroy;
@@ -116,19 +119,8 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := '     insert into tabelajuros (codigo,      '+SLineBreak+
-          '                              indce,       '+SLineBreak+
-          '                              indceent,    '+SLineBreak+
-          '                              percentual,  '+SLineBreak+
-          '                              portador_id) '+SLineBreak+
-          '     values (:codigo,                      '+SLineBreak+
-          '             :indce,                       '+SLineBreak+
-          '             :indceent,                    '+SLineBreak+
-          '             :percentual,                  '+SLineBreak+
-          '             :portador_id)                 '+SLineBreak+
-          ' returning ID                              '+SLineBreak;
-
   try
+    lSQL := vConstrutor.gerarInsert('TABELAJUROS', 'ID');
     lQry.SQL.Add(lSQL);
     setParams(lQry, ATabelaJurosModel);
     lQry.Open;
@@ -148,17 +140,11 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := '   update tabelajuros                   '+SLineBreak+
-          '      set codigo = :codigo,             '+SLineBreak+
-          '          indce = :indce,               '+SLineBreak+
-          '          indceent = :indceent,         '+SLineBreak+
-          '          percentual = :percentual,     '+SLineBreak+
-          '          portador_id = :portador_id    '+SLineBreak+
-          '    where (id = :id)                    '+SLineBreak;
+  lSQL := vConstrutor.gerarUpdate('TABELAJUROS', 'ID');
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := IIF(ATabelaJurosModel.ID = '', Unassigned, ATabelaJurosModel.ID);
+    lQry.ParamByName('id').Value := ifThen(ATabelaJurosModel.ID = '', Unassigned, ATabelaJurosModel.ID);
     setParams(lQry, ATabelaJurosModel);
     lQry.ExecSQL;
 
@@ -186,7 +172,7 @@ begin
   end;
 end;
 
-function TTabelaJurosDao.montaCondicaoQuery: String;
+function TTabelaJurosDao.where: String;
 var
   lSQL : String;
 begin
@@ -211,7 +197,7 @@ begin
 
     lSql := 'select count(*) records From tabelajuros where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -243,7 +229,7 @@ begin
 	  '  from tabelajuros            '+
     ' where 1=1                    ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -308,11 +294,11 @@ end;
 
 procedure TTabelaJurosDao.setParams(var pQry: TFDQuery; pTabelaJurosModel: TTabelaJurosModel);
 begin
-  pQry.ParamByName('codigo').Value      := IIF(pTabelaJurosModel.CODIGO      = '', Unassigned, pTabelaJurosModel.CODIGO);
-  pQry.ParamByName('indce').Value       := IIF(pTabelaJurosModel.INDCE       = '', Unassigned, pTabelaJurosModel.INDCE);
-  pQry.ParamByName('indceent').Value    := IIF(pTabelaJurosModel.INDCEENT    = '', Unassigned, pTabelaJurosModel.INDCEENT);
-  pQry.ParamByName('percentual').Value  := IIF(pTabelaJurosModel.PERCENTUAL  = '', Unassigned, pTabelaJurosModel.PERCENTUAL);
-  pQry.ParamByName('portador_id').Value := IIF(pTabelaJurosModel.PORTADOR_ID = '', Unassigned, pTabelaJurosModel.PORTADOR_ID);
+  pQry.ParamByName('codigo').Value      := ifThen(pTabelaJurosModel.CODIGO      = '', Unassigned, pTabelaJurosModel.CODIGO);
+  pQry.ParamByName('indce').Value       := ifThen(pTabelaJurosModel.INDCE       = '', Unassigned, pTabelaJurosModel.INDCE);
+  pQry.ParamByName('indceent').Value    := ifThen(pTabelaJurosModel.INDCEENT    = '', Unassigned, pTabelaJurosModel.INDCEENT);
+  pQry.ParamByName('percentual').Value  := ifThen(pTabelaJurosModel.PERCENTUAL  = '', Unassigned, pTabelaJurosModel.PERCENTUAL);
+  pQry.ParamByName('portador_id').Value := ifThen(pTabelaJurosModel.PORTADOR_ID = '', Unassigned, pTabelaJurosModel.PORTADOR_ID);
 end;
 
 procedure TTabelaJurosDao.SetStartRecordView(const Value: String);

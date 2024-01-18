@@ -4,7 +4,6 @@ interface
 
 uses
   ObtemAliquotasModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
@@ -17,6 +16,7 @@ type
 
   private
     vIConexao : IConexao;
+
     FDESTINATARIO_UF: String;
     FCODIGO_CLIENTE: String;
     FEMITENTE_UF: String;
@@ -147,12 +147,12 @@ begin
 
     lQry.Open(lSQL);
 
-    lObtemAliquotasModel.PIS_CST         := IIF(lQry.FieldByName('cfop_cst_pis').AsString         <> '', lQry.FieldByName('cfop_cst_pis').Value,         lObtemAliquotasModel.PIS_CST);
-    lObtemAliquotasModel.PIS_ALIQUOTA    := IIF(lQry.FieldByName('cfop_pis_aliquota').AsFloat     > 0 , lQry.FieldByName('cfop_pis_aliquota').Value,    lObtemAliquotasModel.PIS_ALIQUOTA);
-    lObtemAliquotasModel.COFINS_CST      := IIF(lQry.FieldByName('cfop_cst_cofins').AsString      <> '', lQry.FieldByName('cfop_cst_cofins').Value,      lObtemAliquotasModel.COFINS_CST);
-    lObtemAliquotasModel.COFINS_ALIQUOTA := IIF(lQry.FieldByName('cfop_cofins_aliquota').AsFloat  > 0 , lQry.FieldByName('cfop_cofins_aliquota').Value, lObtemAliquotasModel.COFINS_ALIQUOTA);
-    lObtemAliquotasModel.IPI_CST         := IIF(lQry.FieldByName('cfop_cst_ipi').AsString         <> '', lQry.FieldByName('cfop_cst_ipi').Value,         lObtemAliquotasModel.IPI_CST);
-    lObtemAliquotasModel.IPI_ALIQUOTA    := IIF(lQry.FieldByName('cfop_ipi_aliquota').AsFloat     > 0 , lQry.FieldByName('cfop_ipi_aliquota').Value,    lObtemAliquotasModel.IPI_ALIQUOTA);
+    lObtemAliquotasModel.PIS_CST         := ifThen(lQry.FieldByName('cfop_cst_pis').AsString         <> '', lQry.FieldByName('cfop_cst_pis').Value,         lObtemAliquotasModel.PIS_CST);
+    lObtemAliquotasModel.PIS_ALIQUOTA    := StrToFloatDef(ifThen(lQry.FieldByName('cfop_pis_aliquota').AsFloat     > 0 , lQry.FieldByName('cfop_pis_aliquota').Value,    FloatToStr(lObtemAliquotasModel.PIS_ALIQUOTA)), 0);
+    lObtemAliquotasModel.COFINS_CST      := ifThen(lQry.FieldByName('cfop_cst_cofins').AsString      <> '', lQry.FieldByName('cfop_cst_cofins').Value,      lObtemAliquotasModel.COFINS_CST);
+    lObtemAliquotasModel.COFINS_ALIQUOTA := StrToFloatDef(ifThen(lQry.FieldByName('cfop_cofins_aliquota').AsFloat  > 0 , lQry.FieldByName('cfop_cofins_aliquota').Value, FloatToStr(lObtemAliquotasModel.COFINS_ALIQUOTA)), 0);
+    lObtemAliquotasModel.IPI_CST         := ifThen(lQry.FieldByName('cfop_cst_ipi').AsString         <> '', lQry.FieldByName('cfop_cst_ipi').AsString,         lObtemAliquotasModel.IPI_CST);
+    lObtemAliquotasModel.IPI_ALIQUOTA    := StrToFloatDef(ifThen(lQry.FieldByName('cfop_ipi_aliquota').AsFloat     > 0 , lQry.FieldByName('cfop_ipi_aliquota').Value,    FloatToStr(lObtemAliquotasModel.IPI_ALIQUOTA)), 0);
     lObtemAliquotasModel.ICMS_CSOSN      := lQry.FieldByName('cfop_csosn').Value;
 
     Result := lObtemAliquotasModel;

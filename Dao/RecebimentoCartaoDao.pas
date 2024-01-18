@@ -4,20 +4,22 @@ interface
 
 uses
   RecebimentoCartaoModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
-  Interfaces.Conexao;
+  Interfaces.Conexao,
+  Terasoft.ConstrutorDao;
 
 type
   TRecebimentoCartaoDao = class
 
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
+
     FRecebimentoCartaosLista: TObjectList<TRecebimentoCartaoModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -38,7 +40,7 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
 
-    function montaCondicaoQuery: String;
+    function where: String;
 
   public
     constructor Create(pIConexao : IConexao);
@@ -70,7 +72,8 @@ implementation
 
 constructor TRecebimentoCartaoDao.Create(pIConexao : IConexao);
 begin
-  vIConexao := pIConexao;
+  vIConexao   := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TRecebimentoCartaoDao.Destroy;
@@ -86,29 +89,8 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := '  insert into recebimento_cartao (id,             '+SLineBreak+
-          '			   			              		   usuario_id,     '+SLineBreak+
-          '								                   data_hora,      '+SLineBreak+
-          '								                   cliente_id,     '+SLineBreak+
-          '								                   fatura,         '+SLineBreak+
-          '								                   parcela,        '+SLineBreak+
-          '								                   valor,          '+SLineBreak+
-          '								                   bandeira_id,    '+SLineBreak+
-          '								                   vencimento,     '+SLineBreak+
-          '								                   tef_id)         '+SLineBreak+
-          '	  values (:id,                                   '+SLineBreak+
-          '		        :usuario_id,                           '+SLineBreak+
-          '		        :data_hora,                            '+SLineBreak+
-          '		        :cliente_id,                           '+SLineBreak+
-          '		        :fatura,                               '+SLineBreak+
-          '		        :parcela,                              '+SLineBreak+
-          '		        :valor,                                '+SLineBreak+
-          '		        :bandeira_id,                          '+SLineBreak+
-          '		        :vencimento,                           '+SLineBreak+
-          '		        :tef_id)                               '+SLineBreak+
-          ' returning ID                                     '+SLineBreak;
-
   try
+    lSQL := vConstrutor.gerarInsert('RECEBIMENTO_CARTAO', 'ID', true);
     lQry.SQL.Add(lSQL);
     lQry.ParamByName('id').Value := vIConexao.Generetor('GEN_RECEBIMENTO_CARTAO');
     setParams(lQry, ARecebimentoCartaoModel);
@@ -129,21 +111,11 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL :=  '  update recebimento_cartao              '+SLineBreak+
-           '     set usuario_id = :usuario_id,       '+SLineBreak+
-           '         data_hora = :data_hora,         '+SLineBreak+
-           '         cliente_id = :cliente_id,       '+SLineBreak+
-           '         fatura = :fatura,               '+SLineBreak+
-           '         parcela = :parcela,             '+SLineBreak+
-           '         valor = :valor,                 '+SLineBreak+
-           '         bandeira_id = :bandeira_id,     '+SLineBreak+
-           '         vencimento = :vencimento,       '+SLineBreak+
-           '         tef_id = :tef_id                '+SLineBreak+
-           '   where (id = :id)                      '+SLineBreak;
+  lSQL :=  vConstrutor.gerarUpdate('RECEBIMENTO_CARTAO', 'ID');
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value   := IIF(ARecebimentoCartaoModel.ID = '', Unassigned, ARecebimentoCartaoModel.ID);
+    lQry.ParamByName('id').Value   := ifThen(ARecebimentoCartaoModel.ID = '', Unassigned, ARecebimentoCartaoModel.ID);
     setParams(lQry, ARecebimentoCartaoModel);
     lQry.ExecSQL;
 
@@ -171,7 +143,7 @@ begin
   end;
 end;
 
-function TRecebimentoCartaoDao.montaCondicaoQuery: String;
+function TRecebimentoCartaoDao.where: String;
 var
   lSQL : String;
 begin
@@ -196,7 +168,7 @@ begin
 
     lSql := 'select count(*) records From recebimento_cartao where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -228,7 +200,7 @@ begin
 	    '  from recebimento_cartao        '+
       ' where 1=1                       ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -297,15 +269,15 @@ end;
 
 procedure TRecebimentoCartaoDao.setParams(var pQry: TFDQuery; pCaixaModel: TRecebimentoCartaoModel);
 begin
-  pQry.ParamByName('usuario_id').Value  := IIF(pCaixaModel.USUARIO_ID  = '', Unassigned, pCaixaModel.USUARIO_ID);
-  pQry.ParamByName('data_hora').Value   := IIF(pCaixaModel.DATA_HORA   = '', Unassigned, transformaDataHoraFireBird(pCaixaModel.DATA_HORA));
-  pQry.ParamByName('cliente_id').Value  := IIF(pCaixaModel.CLIENTE_ID  = '', Unassigned, pCaixaModel.CLIENTE_ID);
-  pQry.ParamByName('fatura').Value      := IIF(pCaixaModel.FATURA      = '', Unassigned, pCaixaModel.FATURA);
-  pQry.ParamByName('parcela').Value     := IIF(pCaixaModel.PARCELA     = '', Unassigned, pCaixaModel.PARCELA);
-  pQry.ParamByName('valor').Value       := IIF(pCaixaModel.VALOR       = '', Unassigned, FormataFloatFireBird(pCaixaModel.VALOR));
-  pQry.ParamByName('bandeira_id').Value := IIF(pCaixaModel.BANDEIRA_ID = '', Unassigned, pCaixaModel.BANDEIRA_ID);
-  pQry.ParamByName('vencimento').Value  := IIF(pCaixaModel.VENCIMENTO  = '', Unassigned, transformaDataFireBird(pCaixaModel.VENCIMENTO));
-  pQry.ParamByName('tef_id').Value      := IIF(pCaixaModel.TEF_ID      = '', Unassigned, pCaixaModel.TEF_ID);
+  pQry.ParamByName('usuario_id').Value  := ifThen(pCaixaModel.USUARIO_ID  = '', Unassigned, pCaixaModel.USUARIO_ID);
+  pQry.ParamByName('data_hora').Value   := ifThen(pCaixaModel.DATA_HORA   = '', Unassigned, transformaDataHoraFireBird(pCaixaModel.DATA_HORA));
+  pQry.ParamByName('cliente_id').Value  := ifThen(pCaixaModel.CLIENTE_ID  = '', Unassigned, pCaixaModel.CLIENTE_ID);
+  pQry.ParamByName('fatura').Value      := ifThen(pCaixaModel.FATURA      = '', Unassigned, pCaixaModel.FATURA);
+  pQry.ParamByName('parcela').Value     := ifThen(pCaixaModel.PARCELA     = '', Unassigned, pCaixaModel.PARCELA);
+  pQry.ParamByName('valor').Value       := ifThen(pCaixaModel.VALOR       = '', Unassigned, FormataFloatFireBird(pCaixaModel.VALOR));
+  pQry.ParamByName('bandeira_id').Value := ifThen(pCaixaModel.BANDEIRA_ID = '', Unassigned, pCaixaModel.BANDEIRA_ID);
+  pQry.ParamByName('vencimento').Value  := ifThen(pCaixaModel.VENCIMENTO  = '', Unassigned, transformaDataFireBird(pCaixaModel.VENCIMENTO));
+  pQry.ParamByName('tef_id').Value      := ifThen(pCaixaModel.TEF_ID      = '', Unassigned, pCaixaModel.TEF_ID);
 end;
 
 procedure TRecebimentoCartaoDao.SetStartRecordView(const Value: String);

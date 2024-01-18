@@ -1,11 +1,10 @@
-//Teste Git
 unit PixDao;
 
 interface
 
 uses
   PixModel,
-  Terasoft.Utils,
+  Terasoft.ConstrutorDao,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
@@ -18,7 +17,9 @@ type
   TPixDao = class
 
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
+
     FPixsLista: TObjectList<TPixModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -38,8 +39,8 @@ type
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-
-    function montaCondicaoQuery: String;
+    procedure setParams(var pQry: TFDQuery; pPixModel: TPixModel);
+    function where: String;
 
   public
     constructor Create(pIConexao : IConexao);
@@ -55,16 +56,13 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(APixModel: TPixModel): String;
-    function alterar(APixModel: TPixModel): String;
-    function excluir(APixModel: TPixModel): String;
+    function incluir(pPixModel: TPixModel): String;
+    function alterar(pPixModel: TPixModel): String;
+    function excluir(pPixModel: TPixModel): String;
 	
     procedure obterLista;
 
     function carregaClasse(pId: String): TPixModel;
-
-    procedure setParams(var pQry: TFDQuery; pPixModel: TPixModel);
-
 end;
 
 implementation
@@ -119,7 +117,8 @@ end;
 
 constructor TPixDao.Create(pIConexao : IConexao);
 begin
-  vIConexao := pIConexao;
+  vIConexao   := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TPixDao.Destroy;
@@ -128,58 +127,18 @@ begin
   inherited;
 end;
 
-function TPixDao.incluir(APixModel: TPixModel): String;
+function TPixDao.incluir(pPixModel: TPixModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := '   insert into pix (cliente_id,                 '+SLineBreak+
-          '                    valor,                      '+SLineBreak+
-          '                    vencimento,                 '+SLineBreak+
-          '                    expira,                     '+SLineBreak+
-          '                    mensagem,                   '+SLineBreak+
-          '                    documento,                  '+SLineBreak+
-          '                    juros_tipo,                 '+SLineBreak+
-          '                    juros_valor,                '+SLineBreak+
-          '                    multa_tipo,                 '+SLineBreak+
-          '                    multa_valor,                '+SLineBreak+
-          '                    desconto_tipo,              '+SLineBreak+
-          '                    desconto_valor,             '+SLineBreak+
-          '                    desconto_data,              '+SLineBreak+
-          '                    pix_id,                     '+SLineBreak+
-          '                    pix_data,                   '+SLineBreak+
-          '                    pix_url,                    '+SLineBreak+
-          '                    pix_tipo,                   '+SLineBreak+
-          '                    valor_recebido,             '+SLineBreak+
-          '                    data_pagamento,             '+SLineBreak+
-          '                    contasreceberitens_id)      '+SLineBreak+
-          '   values (:cliente_id,                         '+SLineBreak+
-          '           :valor,                              '+SLineBreak+
-          '           :vencimento,                         '+SLineBreak+
-          '           :expira,                             '+SLineBreak+
-          '           :mensagem,                           '+SLineBreak+
-          '           :documento,                          '+SLineBreak+
-          '           :juros_tipo,                         '+SLineBreak+
-          '           :juros_valor,                        '+SLineBreak+
-          '           :multa_tipo,                         '+SLineBreak+
-          '           :multa_valor,                        '+SLineBreak+
-          '           :desconto_tipo,                      '+SLineBreak+
-          '           :desconto_valor,                     '+SLineBreak+
-          '           :desconto_data,                      '+SLineBreak+
-          '           :pix_id,                             '+SLineBreak+
-          '           :pix_data,                           '+SLineBreak+
-          '           :pix_url,                            '+SLineBreak+
-          '           :pix_tipo,                           '+SLineBreak+
-          '           :valor_recebido,                     '+SLineBreak+
-          '           :data_pagamento,                     '+SLineBreak+
-          '           :contasreceberitens_id)              '+SLineBreak+
-          ' returning ID                                   '+SLineBreak;
+  lSQL := vConstrutor.gerarInsert('PIX', 'ID');
 
   try
     lQry.SQL.Add(lSQL);
-    setParams(lQry, APixModel);
+    setParams(lQry, pPixModel);
     lQry.Open;
 
     Result := lQry.FieldByName('ID').AsString;
@@ -190,43 +149,22 @@ begin
   end;
 end;
 
-function TPixDao.alterar(APixModel: TPixModel): String;
+function TPixDao.alterar(pPixModel: TPixModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL :=   '   update pix                                             '+SLineBreak+
-            '      set cliente_id = :cliente_id,                       '+SLineBreak+
-            '          valor = :valor,                                 '+SLineBreak+
-            '          vencimento = :vencimento,                       '+SLineBreak+
-            '          expira = :expira,                               '+SLineBreak+
-            '          mensagem = :mensagem,                           '+SLineBreak+
-            '          documento = :documento,                         '+SLineBreak+
-            '          juros_tipo = :juros_tipo,                       '+SLineBreak+
-            '          juros_valor = :juros_valor,                     '+SLineBreak+
-            '          multa_tipo = :multa_tipo,                       '+SLineBreak+
-            '          multa_valor = :multa_valor,                     '+SLineBreak+
-            '          desconto_tipo = :desconto_tipo,                 '+SLineBreak+
-            '          desconto_valor = :desconto_valor,               '+SLineBreak+
-            '          desconto_data = :desconto_data,                 '+SLineBreak+
-            '          pix_id = :pix_id,                               '+SLineBreak+
-            '          pix_data = :pix_data,                           '+SLineBreak+
-            '          pix_url = :pix_url,                             '+SLineBreak+
-            '          pix_tipo = :pix_tipo,                           '+SLineBreak+
-            '          valor_recebido = :valor_recebido,               '+SLineBreak+
-            '          data_pagamento = :data_pagamento,               '+SLineBreak+
-            '          contasreceberitens_id = :contasreceberitens_id  '+SLineBreak+
-            '    where (id = :id)                                      '+SLineBreak;
+  lSQL := vConstrutor.gerarUpdate('PIX', 'ID');
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value   := IIF(APixModel.ID   = '', Unassigned, APixModel.ID);
-    setParams(lQry, APixModel);
+    lQry.ParamByName('id').Value := ifThen(pPixModel.ID = '', Unassigned, pPixModel.ID);
+    setParams(lQry, pPixModel);
     lQry.ExecSQL;
 
-    Result := APixModel.ID;
+    Result := pPixModel.ID;
 
   finally
     lSQL := '';
@@ -234,23 +172,23 @@ begin
   end;
 end;
 
-function TPixDao.excluir(APixModel: TPixModel): String;
+function TPixDao.excluir(pPixModel: TPixModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from pix where ID = :ID',[APixModel.ID]);
+   lQry.ExecSQL('delete from pix where ID = :ID',[pPixModel.ID]);
    lQry.ExecSQL;
-   Result := APixModel.ID;
+   Result := pPixModel.ID;
 
   finally
     lQry.Free;
   end;
 end;
 
-function TPixDao.montaCondicaoQuery: String;
+function TPixDao.where: String;
 var
   lSQL : String;
 begin
@@ -275,7 +213,7 @@ begin
 
     lSql := 'select count(*) records From pix where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -307,7 +245,7 @@ begin
 	  '  from pix            '+
     ' where 1=1            ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -388,26 +326,26 @@ end;
 
 procedure TPixDao.setParams(var pQry: TFDQuery; pPixModel: TPixModel);
 begin
-  pQry.ParamByName('cliente_id').Value            := IIF(pPixModel.CLIENTE_ID            = '', Unassigned, pPixModel.CLIENTE_ID);
-  pQry.ParamByName('valor').Value                 := IIF(pPixModel.VALOR                 = '', Unassigned, FormataFloatFireBird(pPixModel.VALOR));
-  pQry.ParamByName('vencimento').Value            := IIF(pPixModel.VENCIMENTO            = '', Unassigned, transformaDataFireBird(pPixModel.VENCIMENTO));
-  pQry.ParamByName('expira').Value                := IIF(pPixModel.EXPIRA                = '', Unassigned, pPixModel.EXPIRA);
-  pQry.ParamByName('mensagem').Value              := IIF(pPixModel.MENSAGEM              = '', Unassigned, pPixModel.MENSAGEM);
-  pQry.ParamByName('documento').Value             := IIF(pPixModel.DOCUMENTO             = '', Unassigned, pPixModel.DOCUMENTO);
-  pQry.ParamByName('juros_tipo').Value            := IIF(pPixModel.JUROS_TIPO            = '', Unassigned, pPixModel.JUROS_TIPO);
-  pQry.ParamByName('juros_valor').Value           := IIF(pPixModel.JUROS_VALOR           = '', Unassigned, FormataFloatFireBird(pPixModel.JUROS_VALOR));
-  pQry.ParamByName('multa_tipo').Value            := IIF(pPixModel.MULTA_TIPO            = '', Unassigned, pPixModel.MULTA_TIPO);
-  pQry.ParamByName('multa_valor').Value           := IIF(pPixModel.MULTA_VALOR           = '', Unassigned, FormataFloatFireBird(pPixModel.MULTA_VALOR));
-  pQry.ParamByName('desconto_tipo').Value         := IIF(pPixModel.DESCONTO_TIPO         = '', Unassigned, pPixModel.DESCONTO_TIPO);
-  pQry.ParamByName('desconto_valor').Value        := IIF(pPixModel.DESCONTO_VALOR        = '', Unassigned, FormataFloatFireBird(pPixModel.DESCONTO_VALOR));
-  pQry.ParamByName('desconto_data').Value         := IIF(pPixModel.DESCONTO_DATA         = '', Unassigned, transformaDataFireBird(pPixModel.DESCONTO_DATA));
-  pQry.ParamByName('pix_id').Value                := IIF(pPixModel.PIX_ID                = '', Unassigned, pPixModel.PIX_ID);
-  pQry.ParamByName('pix_data').Value              := IIF(pPixModel.PIX_DATA              = '', Unassigned, pPixModel.PIX_DATA);
-  pQry.ParamByName('pix_url').Value               := IIF(pPixModel.PIX_URL               = '', Unassigned, pPixModel.PIX_URL);
-  pQry.ParamByName('pix_tipo').Value              := IIF(pPixModel.PIX_TIPO              = '', Unassigned, pPixModel.PIX_TIPO);
-  pQry.ParamByName('valor_recebido').Value        := IIF(pPixModel.VALOR_RECEBIDO        = '', Unassigned, FormataFloatFireBird(pPixModel.VALOR_RECEBIDO));
-  pQry.ParamByName('data_pagamento').Value        := IIF(pPixModel.DATA_PAGAMENTO        = '', Unassigned, transformaDataFireBird(pPixModel.DATA_PAGAMENTO));
-  pQry.ParamByName('contasreceberitens_id').Value := IIF(pPixModel.CONTASRECEBERITENS_ID = '', Unassigned, pPixModel.CONTASRECEBERITENS_ID);
+  pQry.ParamByName('cliente_id').Value            := ifThen(pPixModel.CLIENTE_ID            = '', Unassigned, pPixModel.CLIENTE_ID);
+  pQry.ParamByName('valor').Value                 := ifThen(pPixModel.VALOR                 = '', Unassigned, FormataFloatFireBird(pPixModel.VALOR));
+  pQry.ParamByName('vencimento').Value            := ifThen(pPixModel.VENCIMENTO            = '', Unassigned, transformaDataFireBird(pPixModel.VENCIMENTO));
+  pQry.ParamByName('expira').Value                := ifThen(pPixModel.EXPIRA                = '', Unassigned, pPixModel.EXPIRA);
+  pQry.ParamByName('mensagem').Value              := ifThen(pPixModel.MENSAGEM              = '', Unassigned, pPixModel.MENSAGEM);
+  pQry.ParamByName('documento').Value             := ifThen(pPixModel.DOCUMENTO             = '', Unassigned, pPixModel.DOCUMENTO);
+  pQry.ParamByName('juros_tipo').Value            := ifThen(pPixModel.JUROS_TIPO            = '', Unassigned, pPixModel.JUROS_TIPO);
+  pQry.ParamByName('juros_valor').Value           := ifThen(pPixModel.JUROS_VALOR           = '', Unassigned, FormataFloatFireBird(pPixModel.JUROS_VALOR));
+  pQry.ParamByName('multa_tipo').Value            := ifThen(pPixModel.MULTA_TIPO            = '', Unassigned, pPixModel.MULTA_TIPO);
+  pQry.ParamByName('multa_valor').Value           := ifThen(pPixModel.MULTA_VALOR           = '', Unassigned, FormataFloatFireBird(pPixModel.MULTA_VALOR));
+  pQry.ParamByName('desconto_tipo').Value         := ifThen(pPixModel.DESCONTO_TIPO         = '', Unassigned, pPixModel.DESCONTO_TIPO);
+  pQry.ParamByName('desconto_valor').Value        := ifThen(pPixModel.DESCONTO_VALOR        = '', Unassigned, FormataFloatFireBird(pPixModel.DESCONTO_VALOR));
+  pQry.ParamByName('desconto_data').Value         := ifThen(pPixModel.DESCONTO_DATA         = '', Unassigned, transformaDataFireBird(pPixModel.DESCONTO_DATA));
+  pQry.ParamByName('pix_id').Value                := ifThen(pPixModel.PIX_ID                = '', Unassigned, pPixModel.PIX_ID);
+  pQry.ParamByName('pix_data').Value              := ifThen(pPixModel.PIX_DATA              = '', Unassigned, pPixModel.PIX_DATA);
+  pQry.ParamByName('pix_url').Value               := ifThen(pPixModel.PIX_URL               = '', Unassigned, pPixModel.PIX_URL);
+  pQry.ParamByName('pix_tipo').Value              := ifThen(pPixModel.PIX_TIPO              = '', Unassigned, pPixModel.PIX_TIPO);
+  pQry.ParamByName('valor_recebido').Value        := ifThen(pPixModel.VALOR_RECEBIDO        = '', Unassigned, FormataFloatFireBird(pPixModel.VALOR_RECEBIDO));
+  pQry.ParamByName('data_pagamento').Value        := ifThen(pPixModel.DATA_PAGAMENTO        = '', Unassigned, transformaDataFireBird(pPixModel.DATA_PAGAMENTO));
+  pQry.ParamByName('contasreceberitens_id').Value := ifThen(pPixModel.CONTASRECEBERITENS_ID = '', Unassigned, pPixModel.CONTASRECEBERITENS_ID);
 end;
 
 procedure TPixDao.SetStartRecordView(const Value: String);

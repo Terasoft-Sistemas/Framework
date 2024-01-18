@@ -1,7 +1,7 @@
 ﻿unit PedidoItensModel;
 interface
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   mcibr.motor,
   mcibr.interfaces,
@@ -615,10 +615,10 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir     : Result := lPedidoItensDao.incluir(Self);
-      Terasoft.Enumerado.tacIncluirLote : Result := lPedidoItensDao.incluirLote(Self);
-      Terasoft.Enumerado.tacAlterar     : Result := lPedidoItensDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir     : Result := lPedidoItensDao.excluir(Self);
+      Terasoft.Types.tacIncluir     : Result := lPedidoItensDao.incluir(Self);
+      Terasoft.Types.tacIncluirLote : Result := lPedidoItensDao.incluirLote(Self);
+      Terasoft.Types.tacAlterar     : Result := lPedidoItensDao.alterar(Self);
+      Terasoft.Types.tacExcluir     : Result := lPedidoItensDao.excluir(Self);
     end;
 
   finally

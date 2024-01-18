@@ -2,7 +2,7 @@ unit PedidoItensDao;
 interface
 uses
   PedidoItensModel,
-  Terasoft.Utils,
+  Terasoft.ConstrutorDao,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
@@ -13,7 +13,8 @@ uses
 type
   TPedidoItensDao = class
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
 
     FPedidoItenssLista: TObjectList<TPedidoItensModel>;
     FLengthPageView: String;
@@ -38,18 +39,21 @@ type
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-    function montaCondicaoQuery: String;
     procedure SetIDRecordView(const Value: String);
-    procedure setParams(var pQry: TFDQuery; pPedidoItensModel: TPedidoItensModel);
-    procedure setParamsArray(var pQry: TFDQuery; pPedidoItensModel: TPedidoItensModel);
     procedure SetIDPedidoVendaView(const Value: String);
     procedure SetVALOR_TOTAL_DESCONTO(const Value: Variant);
     procedure SetVALOR_TOTAL_GARANTIA(const Value: Variant);
     procedure SetVALOR_TOTAL_ITENS(const Value: Variant);
     procedure SetVALOR_TOTAL(const Value: Variant);
+
+    procedure setParams(var pQry: TFDQuery; pPedidoItensModel: TPedidoItensModel);
+    procedure setParamsArray(var pQry: TFDQuery; pPedidoItensModel: TPedidoItensModel);
+    function where: String;
+
   public
     constructor Create(pConexao : IConexao);
     destructor Destroy; override;
+
     property PedidoItenssLista: TObjectList<TPedidoItensModel> read FPedidoItenssLista write SetPedidoItenssLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -65,10 +69,10 @@ type
     property VALOR_TOTAL_DESCONTO: Variant read FVALOR_TOTAL_DESCONTO write SetVALOR_TOTAL_DESCONTO;
     property VALOR_TOTAL: Variant read FVALOR_TOTAL write SetVALOR_TOTAL;
 
-    function incluir(APedidoItensModel: TPedidoItensModel): String;
-    function incluirLote(APedidoItensModel: TPedidoItensModel): String;
-    function alterar(APedidoItensModel: TPedidoItensModel): String;
-    function excluir(APedidoItensModel: TPedidoItensModel): String;
+    function incluir(pPedidoItensModel: TPedidoItensModel): String;
+    function incluirLote(pPedidoItensModel: TPedidoItensModel): String;
+    function alterar(pPedidoItensModel: TPedidoItensModel): String;
+    function excluir(pPedidoItensModel: TPedidoItensModel): String;
 
     procedure obterLista;
     procedure obterItensPedido(pNumeroPedido: String);
@@ -90,10 +94,13 @@ begin
   lQry     := vIConexao.CriarQuery;
   lModel   := TPedidoItensModel.Create(vIConexao);
   Result   := lModel;
+
   try
     lQry.Open('select * from pedidoitens where id = '+pId);
+
     if lQry.IsEmpty then
       Exit;
+
     lModel.ID                           := lQry.FieldByName('ID').AsString;
     lModel.CODIGO_CLI                   := lQry.FieldByName('CODIGO_CLI').AsString;
     lModel.NUMERO_PED                   := lQry.FieldByName('NUMERO_PED').AsString;
@@ -214,6 +221,7 @@ begin
     lModel.VDESC                        := lQry.FieldByName('VDESC').AsString;
     lModel.CSOSN                        := lQry.FieldByName('CSOSN').AsString;
     lModel.CFOP                         := lQry.FieldByName('CFOP').AsString;
+
     Result := lModel;
   finally
     lQry.Free;
@@ -222,7 +230,8 @@ end;
 
 constructor TPedidoItensDao.Create(pConexao : IConexao);
 begin
-  vIConexao := pConexao;
+  vIConexao   := pConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TPedidoItensDao.Destroy;
@@ -230,245 +239,17 @@ begin
   inherited;
 end;
 
-function TPedidoItensDao.incluir(APedidoItensModel: TPedidoItensModel): String;
+function TPedidoItensDao.incluir(pPedidoItensModel: TPedidoItensModel): String;
 var
-  lQry: TFDQuery;
-  lSQL:String;
+  lQry : TFDQuery;
+  lSQL : String;
 begin
-  lQry     := vIConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
-  lSQL :=  '     insert into pedidoitens (codigo_cli,                                   '+SLineBreak+
-           '                              numero_ped,                                   '+SLineBreak+
-           '                              codigo_pro,                                   '+SLineBreak+
-           '                              quantidade_ped,                               '+SLineBreak+
-           '                              quantidade_troca,                             '+SLineBreak+
-           '                              valorunitario_ped,                            '+SLineBreak+
-           '                              desconto_ped,                                 '+SLineBreak+
-           '                              desconto_uf,                                  '+SLineBreak+
-           '                              valor_ipi,                                    '+SLineBreak+
-           '                              valor_st,                                     '+SLineBreak+
-           '                              vlrvenda_pro,                                 '+SLineBreak+
-           '                              vlrcusto_pro,                                 '+SLineBreak+
-           '                              comissao_ped,                                 '+SLineBreak+
-           '                              tipo_nf,                                      '+SLineBreak+
-           '                              quantidade_tipo,                              '+SLineBreak+
-           '                              observacao,                                   '+SLineBreak+
-           '                              ctr_exportacao,                               '+SLineBreak+
-           '                              produto_referencia,                           '+SLineBreak+
-           '                              obs_item,                                     '+SLineBreak+
-           '                              reserva_id,                                   '+SLineBreak+
-           '                              loja,                                         '+SLineBreak+
-           '                              aliq_ipi,                                     '+SLineBreak+
-           '                              valor_restituicao_st,                         '+SLineBreak+
-           '                              cfop_id,                                      '+SLineBreak+
-           '                              cst,                                          '+SLineBreak+
-           '                              aliq_icms,                                    '+SLineBreak+
-           '                              aliq_icms_st,                                 '+SLineBreak+
-           '                              reducao_st,                                   '+SLineBreak+
-           '                              mva,                                          '+SLineBreak+
-           '                              reducao_icms,                                 '+SLineBreak+
-           '                              base_icms,                                    '+SLineBreak+
-           '                              valor_icms,                                   '+SLineBreak+
-           '                              base_st,                                      '+SLineBreak+
-           '                              desc_restituicao_st,                          '+SLineBreak+
-           '                              icms_suframa,                                 '+SLineBreak+
-           '                              pis_suframa,                                  '+SLineBreak+
-           '                              cofins_suframa,                               '+SLineBreak+
-           '                              ipi_suframa,                                  '+SLineBreak+
-           '                              aliq_pis,                                     '+SLineBreak+
-           '                              aliq_cofins,                                  '+SLineBreak+
-           '                              base_pis,                                     '+SLineBreak+
-           '                              base_cofins,                                  '+SLineBreak+
-           '                              valor_pis,                                    '+SLineBreak+
-           '                              valor_cofins,                                 '+SLineBreak+
-           '                              prevenda_id,                                  '+SLineBreak+
-           '                              avulso,                                       '+SLineBreak+
-           '                              quantidade_new,                               '+SLineBreak+
-           '                              balanca,                                      '+SLineBreak+
-           '                              ambiente_id,                                  '+SLineBreak+
-           '                              ambiente_obs,                                 '+SLineBreak+
-           '                              projeto_id,                                   '+SLineBreak+
-           '                              largura,                                      '+SLineBreak+
-           '                              altura,                                       '+SLineBreak+
-           '                              item,                                         '+SLineBreak+
-           '                              dun14,                                        '+SLineBreak+
-           '                              saidas_id,                                    '+SLineBreak+
-           '                              custo_drg,                                    '+SLineBreak+
-           '                              pos_venda_status,                             '+SLineBreak+
-           '                              pos_venda_retorno,                            '+SLineBreak+
-           '                              pos_venda_obs,                                '+SLineBreak+
-           '                              bonus,                                        '+SLineBreak+
-           '                              bonus_uso,                                    '+SLineBreak+
-           '                              funcionario_id,                               '+SLineBreak+
-           '                              producao_id,                                  '+SLineBreak+
-           '                              quantidade_kg,                                '+SLineBreak+
-           '                              reservado,                                    '+SLineBreak+
-           '                              descricao_produto,                            '+SLineBreak+
-           '                              comissao_percentual,                          '+SLineBreak+
-           '                              qtd_checagem,                                 '+SLineBreak+
-           '                              qtd_checagem_corte,                           '+SLineBreak+
-           '                              altura_m,                                     '+SLineBreak+
-           '                              largura_m,                                    '+SLineBreak+
-           '                              profundidade_m,                               '+SLineBreak+
-           '                              vbcufdest,                                    '+SLineBreak+
-           '                              pfcpufdest,                                   '+SLineBreak+
-           '                              picmsufdest,                                  '+SLineBreak+
-           '                              picmsinter,                                   '+SLineBreak+
-           '                              picmsinterpart,                               '+SLineBreak+
-           '                              vfcpufdest,                                   '+SLineBreak+
-           '                              vicmsufdest,                                  '+SLineBreak+
-           '                              vicmsufremet,                                 '+SLineBreak+
-           '                              combo_item,                                   '+SLineBreak+
-           '                              vlrvenda_minimo,                              '+SLineBreak+
-           '                              vlrvenda_maximo,                              '+SLineBreak+
-           '                              impresso,                                     '+SLineBreak+
-           '                              orcamento_tsb_id,                             '+SLineBreak+
-           '                              gerente_comissao_percentual,                  '+SLineBreak+
-           '                              xped,                                         '+SLineBreak+
-           '                              nitemped2,                                    '+SLineBreak+
-           '                              voutros,                                      '+SLineBreak+
-           '                              vfrete,                                       '+SLineBreak+
-           '                              original_pedido_id,                           '+SLineBreak+
-           '                              valor_venda_cadastro,                         '+SLineBreak+
-           '                              web_pedidoitens_id,                           '+SLineBreak+
-           '                              tipo_venda,                                   '+SLineBreak+
-           '                              entrega,                                      '+SLineBreak+
-           '                              vbcfcpst,                                     '+SLineBreak+
-           '                              pfcpst,                                       '+SLineBreak+
-           '                              vfcpst,                                       '+SLineBreak+
-           '                              valor_bonus_servico,                          '+SLineBreak+
-           '                              cbenef,                                       '+SLineBreak+
-           '                              vicmsdeson,                                   '+SLineBreak+
-           '                              motdesicms,                                   '+SLineBreak+
-           '                              valor_diferimento,                            '+SLineBreak+
-           '                              valor_montador,                               '+SLineBreak+
-           '                              montagem,                                     '+SLineBreak+
-           '                              pcred_presumido,                              '+SLineBreak+
-           '                              pedidocompraitens_id,                         '+SLineBreak+
-           '                              pedidoitens_id,                               '+SLineBreak+
-           '                              pis_cst,                                      '+SLineBreak+
-           '                              cofins_cst,                                   '+SLineBreak+
-           '                              ipi_cst,                                      '+SLineBreak+
-           '                              csosn,                                        '+SLineBreak+
-           '                              cfop)                                         '+SLineBreak+
-           '     values (:codigo_cli,                                                   '+SLineBreak+
-           '             :numero_ped,                                                   '+SLineBreak+
-           '             :codigo_pro,                                                   '+SLineBreak+
-           '             :quantidade_ped,                                               '+SLineBreak+
-           '             :quantidade_troca,                                             '+SLineBreak+
-           '             :valorunitario_ped,                                            '+SLineBreak+
-           '             :desconto_ped,                                                 '+SLineBreak+
-           '             :desconto_uf,                                                  '+SLineBreak+
-           '             :valor_ipi,                                                    '+SLineBreak+
-           '             :valor_st,                                                     '+SLineBreak+
-           '             :vlrvenda_pro,                                                 '+SLineBreak+
-           '             :vlrcusto_pro,                                                 '+SLineBreak+
-           '             :comissao_ped,                                                 '+SLineBreak+
-           '             :tipo_nf,                                                      '+SLineBreak+
-           '             :quantidade_tipo,                                              '+SLineBreak+
-           '             :observacao,                                                   '+SLineBreak+
-           '             :ctr_exportacao,                                               '+SLineBreak+
-           '             :produto_referencia,                                           '+SLineBreak+
-           '             :obs_item,                                                     '+SLineBreak+
-           '             :reserva_id,                                                   '+SLineBreak+
-           '             :loja,                                                         '+SLineBreak+
-           '             :aliq_ipi,                                                     '+SLineBreak+
-           '             :valor_restituicao_st,                                         '+SLineBreak+
-           '             :cfop_id,                                                      '+SLineBreak+
-           '             :cst,                                                          '+SLineBreak+
-           '             :aliq_icms,                                                    '+SLineBreak+
-           '             :aliq_icms_st,                                                 '+SLineBreak+
-           '             :reducao_st,                                                   '+SLineBreak+
-           '             :mva,                                                          '+SLineBreak+
-           '             :reducao_icms,                                                 '+SLineBreak+
-           '             :base_icms,                                                    '+SLineBreak+
-           '             :valor_icms,                                                   '+SLineBreak+
-           '             :base_st,                                                      '+SLineBreak+
-           '             :desc_restituicao_st,                                          '+SLineBreak+
-           '             :icms_suframa,                                                 '+SLineBreak+
-           '             :pis_suframa,                                                  '+SLineBreak+
-           '             :cofins_suframa,                                               '+SLineBreak+
-           '             :ipi_suframa,                                                  '+SLineBreak+
-           '             :aliq_pis,                                                     '+SLineBreak+
-           '             :aliq_cofins,                                                  '+SLineBreak+
-           '             :base_pis,                                                     '+SLineBreak+
-           '             :base_cofins,                                                  '+SLineBreak+
-           '             :valor_pis,                                                    '+SLineBreak+
-           '             :valor_cofins,                                                 '+SLineBreak+
-           '             :prevenda_id,                                                  '+SLineBreak+
-           '             :avulso,                                                       '+SLineBreak+
-           '             :quantidade_new,                                               '+SLineBreak+
-           '             :balanca,                                                      '+SLineBreak+
-           '             :ambiente_id,                                                  '+SLineBreak+
-           '             :ambiente_obs,                                                 '+SLineBreak+
-           '             :projeto_id,                                                   '+SLineBreak+
-           '             :largura,                                                      '+SLineBreak+
-           '             :altura,                                                       '+SLineBreak+
-           '             :item,                                                         '+SLineBreak+
-           '             :dun14,                                                        '+SLineBreak+
-           '             :saidas_id,                                                    '+SLineBreak+
-           '             :custo_drg,                                                    '+SLineBreak+
-           '             :pos_venda_status,                                             '+SLineBreak+
-           '             :pos_venda_retorno,                                            '+SLineBreak+
-           '             :pos_venda_obs,                                                '+SLineBreak+
-           '             :bonus,                                                        '+SLineBreak+
-           '             :bonus_uso,                                                    '+SLineBreak+
-           '             :funcionario_id,                                               '+SLineBreak+
-           '             :producao_id,                                                  '+SLineBreak+
-           '             :quantidade_kg,                                                '+SLineBreak+
-           '             :reservado,                                                    '+SLineBreak+
-           '             :descricao_produto,                                            '+SLineBreak+
-           '             :comissao_percentual,                                          '+SLineBreak+
-           '             :qtd_checagem,                                                 '+SLineBreak+
-           '             :qtd_checagem_corte,                                           '+SLineBreak+
-           '             :altura_m,                                                     '+SLineBreak+
-           '             :largura_m,                                                    '+SLineBreak+
-           '             :profundidade_m,                                               '+SLineBreak+
-           '             :vbcufdest,                                                    '+SLineBreak+
-           '             :pfcpufdest,                                                   '+SLineBreak+
-           '             :picmsufdest,                                                  '+SLineBreak+
-           '             :picmsinter,                                                   '+SLineBreak+
-           '             :picmsinterpart,                                               '+SLineBreak+
-           '             :vfcpufdest,                                                   '+SLineBreak+
-           '             :vicmsufdest,                                                  '+SLineBreak+
-           '             :vicmsufremet,                                                 '+SLineBreak+
-           '             :combo_item,                                                   '+SLineBreak+
-           '             :vlrvenda_minimo,                                              '+SLineBreak+
-           '             :vlrvenda_maximo,                                              '+SLineBreak+
-           '             :impresso,                                                     '+SLineBreak+
-           '             :orcamento_tsb_id,                                             '+SLineBreak+
-           '             :gerente_comissao_percentual,                                  '+SLineBreak+
-           '             :xped,                                                         '+SLineBreak+
-           '             :nitemped2,                                                    '+SLineBreak+
-           '             :voutros,                                                      '+SLineBreak+
-           '             :vfrete,                                                       '+SLineBreak+
-           '             :original_pedido_id,                                           '+SLineBreak+
-           '             :valor_venda_cadastro,                                         '+SLineBreak+
-           '             :web_pedidoitens_id,                                           '+SLineBreak+
-           '             :tipo_venda,                                                   '+SLineBreak+
-           '             :entrega,                                                      '+SLineBreak+
-           '             :vbcfcpst,                                                     '+SLineBreak+
-           '             :pfcpst,                                                       '+SLineBreak+
-           '             :vfcpst,                                                       '+SLineBreak+
-           '             :valor_bonus_servico,                                          '+SLineBreak+
-           '             :cbenef,                                                       '+SLineBreak+
-           '             :vicmsdeson,                                                   '+SLineBreak+
-           '             :motdesicms,                                                   '+SLineBreak+
-           '             :valor_diferimento,                                            '+SLineBreak+
-           '             :valor_montador,                                               '+SLineBreak+
-           '             :montagem,                                                     '+SLineBreak+
-           '             :pcred_presumido,                                              '+SLineBreak+
-           '             :pedidocompraitens_id,                                         '+SLineBreak+
-           '             :pedidoitens_id,                                               '+SLineBreak+
-           '             :pis_cst,                                                      '+SLineBreak+
-           '             :cofins_cst,                                                   '+SLineBreak+
-           '             :ipi_cst,                                                      '+SLineBreak+
-           '             :csosn,                                                        '+SLineBreak+
-           '             :cfop)                                                         '+SLineBreak+
-           ' returning ID                                                               '+SLineBreak;
+  lSQL := vConstrutor.gerarInsert('PEDIDOITENS', 'ID');
   try
     lQry.SQL.Add(lSQL);
-    setParams(lQry, APedidoItensModel);
+    setParams(lQry, pPedidoItensModel);
     lQry.Open;
     Result := lQry.FieldByName('ID').AsString;
   finally
@@ -476,245 +257,20 @@ begin
     lQry.Free;
   end;
 end;
-function TPedidoItensDao.incluirLote(APedidoItensModel: TPedidoItensModel): String;
+
+function TPedidoItensDao.incluirLote(pPedidoItensModel: TPedidoItensModel): String;
 var
-  lQry: TFDQuery;
-  lSQL:String;
+  lQry : TFDQuery;
+  lSQL : String;
 begin
-  lQry     := vIConexao.CriarQuery;
-  lSQL :=  '     insert into pedidoitens (codigo_cli,                                   '+SLineBreak+
-           '                              numero_ped,                                   '+SLineBreak+
-           '                              codigo_pro,                                   '+SLineBreak+
-           '                              quantidade_ped,                               '+SLineBreak+
-           '                              quantidade_troca,                             '+SLineBreak+
-           '                              valorunitario_ped,                            '+SLineBreak+
-           '                              desconto_ped,                                 '+SLineBreak+
-           '                              desconto_uf,                                  '+SLineBreak+
-           '                              valor_ipi,                                    '+SLineBreak+
-           '                              valor_st,                                     '+SLineBreak+
-           '                              vlrvenda_pro,                                 '+SLineBreak+
-           '                              vlrcusto_pro,                                 '+SLineBreak+
-           '                              comissao_ped,                                 '+SLineBreak+
-           '                              tipo_nf,                                      '+SLineBreak+
-           '                              quantidade_tipo,                              '+SLineBreak+
-           '                              observacao,                                   '+SLineBreak+
-           '                              ctr_exportacao,                               '+SLineBreak+
-           '                              produto_referencia,                           '+SLineBreak+
-           '                              obs_item,                                     '+SLineBreak+
-           '                              reserva_id,                                   '+SLineBreak+
-           '                              loja,                                         '+SLineBreak+
-           '                              aliq_ipi,                                     '+SLineBreak+
-           '                              valor_restituicao_st,                         '+SLineBreak+
-           '                              cfop_id,                                      '+SLineBreak+
-           '                              cst,                                          '+SLineBreak+
-           '                              aliq_icms,                                    '+SLineBreak+
-           '                              aliq_icms_st,                                 '+SLineBreak+
-           '                              reducao_st,                                   '+SLineBreak+
-           '                              mva,                                          '+SLineBreak+
-           '                              reducao_icms,                                 '+SLineBreak+
-           '                              base_icms,                                    '+SLineBreak+
-           '                              valor_icms,                                   '+SLineBreak+
-           '                              base_st,                                      '+SLineBreak+
-           '                              desc_restituicao_st,                          '+SLineBreak+
-           '                              icms_suframa,                                 '+SLineBreak+
-           '                              pis_suframa,                                  '+SLineBreak+
-           '                              cofins_suframa,                               '+SLineBreak+
-           '                              ipi_suframa,                                  '+SLineBreak+
-           '                              aliq_pis,                                     '+SLineBreak+
-           '                              aliq_cofins,                                  '+SLineBreak+
-           '                              base_pis,                                     '+SLineBreak+
-           '                              base_cofins,                                  '+SLineBreak+
-           '                              valor_pis,                                    '+SLineBreak+
-           '                              valor_cofins,                                 '+SLineBreak+
-           '                              prevenda_id,                                  '+SLineBreak+
-           '                              avulso,                                       '+SLineBreak+
-           '                              quantidade_new,                               '+SLineBreak+
-           '                              balanca,                                      '+SLineBreak+
-           '                              ambiente_id,                                  '+SLineBreak+
-           '                              ambiente_obs,                                 '+SLineBreak+
-           '                              projeto_id,                                   '+SLineBreak+
-           '                              largura,                                      '+SLineBreak+
-           '                              altura,                                       '+SLineBreak+
-           '                              item,                                         '+SLineBreak+
-           '                              dun14,                                        '+SLineBreak+
-           '                              saidas_id,                                    '+SLineBreak+
-           '                              custo_drg,                                    '+SLineBreak+
-           '                              pos_venda_status,                             '+SLineBreak+
-           '                              pos_venda_retorno,                            '+SLineBreak+
-           '                              pos_venda_obs,                                '+SLineBreak+
-           '                              bonus,                                        '+SLineBreak+
-           '                              bonus_uso,                                    '+SLineBreak+
-           '                              funcionario_id,                               '+SLineBreak+
-           '                              producao_id,                                  '+SLineBreak+
-           '                              quantidade_kg,                                '+SLineBreak+
-           '                              reservado,                                    '+SLineBreak+
-           '                              descricao_produto,                            '+SLineBreak+
-           '                              comissao_percentual,                          '+SLineBreak+
-           '                              qtd_checagem,                                 '+SLineBreak+
-           '                              qtd_checagem_corte,                           '+SLineBreak+
-           '                              altura_m,                                     '+SLineBreak+
-           '                              largura_m,                                    '+SLineBreak+
-           '                              profundidade_m,                               '+SLineBreak+
-           '                              vbcufdest,                                    '+SLineBreak+
-           '                              pfcpufdest,                                   '+SLineBreak+
-           '                              picmsufdest,                                  '+SLineBreak+
-           '                              picmsinter,                                   '+SLineBreak+
-           '                              picmsinterpart,                               '+SLineBreak+
-           '                              vfcpufdest,                                   '+SLineBreak+
-           '                              vicmsufdest,                                  '+SLineBreak+
-           '                              vicmsufremet,                                 '+SLineBreak+
-           '                              combo_item,                                   '+SLineBreak+
-           '                              vlrvenda_minimo,                              '+SLineBreak+
-           '                              vlrvenda_maximo,                              '+SLineBreak+
-           '                              impresso,                                     '+SLineBreak+
-           '                              orcamento_tsb_id,                             '+SLineBreak+
-           '                              gerente_comissao_percentual,                  '+SLineBreak+
-           '                              xped,                                         '+SLineBreak+
-           '                              nitemped2,                                    '+SLineBreak+
-           '                              voutros,                                      '+SLineBreak+
-           '                              vfrete,                                       '+SLineBreak+
-           '                              original_pedido_id,                           '+SLineBreak+
-           '                              valor_venda_cadastro,                         '+SLineBreak+
-           '                              web_pedidoitens_id,                           '+SLineBreak+
-           '                              tipo_venda,                                   '+SLineBreak+
-           '                              entrega,                                      '+SLineBreak+
-           '                              vbcfcpst,                                     '+SLineBreak+
-           '                              pfcpst,                                       '+SLineBreak+
-           '                              vfcpst,                                       '+SLineBreak+
-           '                              valor_bonus_servico,                          '+SLineBreak+
-           '                              cbenef,                                       '+SLineBreak+
-           '                              vicmsdeson,                                   '+SLineBreak+
-           '                              motdesicms,                                   '+SLineBreak+
-           '                              valor_diferimento,                            '+SLineBreak+
-           '                              valor_montador,                               '+SLineBreak+
-           '                              montagem,                                     '+SLineBreak+
-           '                              pcred_presumido,                              '+SLineBreak+
-           '                              pedidocompraitens_id,                         '+SLineBreak+
-           '                              pedidoitens_id,                               '+SLineBreak+
-           '                              pis_cst,                                      '+SLineBreak+
-           '                              cofins_cst,                                   '+SLineBreak+
-           '                              ipi_cst,                                      '+SLineBreak+
-           '                              csosn,                                        '+SLineBreak+
-           '                              cfop)                                         '+SLineBreak+
-           '     values (:codigo_cli,                                                   '+SLineBreak+
-           '             :numero_ped,                                                   '+SLineBreak+
-           '             :codigo_pro,                                                   '+SLineBreak+
-           '             :quantidade_ped,                                               '+SLineBreak+
-           '             :quantidade_troca,                                             '+SLineBreak+
-           '             :valorunitario_ped,                                            '+SLineBreak+
-           '             :desconto_ped,                                                 '+SLineBreak+
-           '             :desconto_uf,                                                  '+SLineBreak+
-           '             :valor_ipi,                                                    '+SLineBreak+
-           '             :valor_st,                                                     '+SLineBreak+
-           '             :vlrvenda_pro,                                                 '+SLineBreak+
-           '             :vlrcusto_pro,                                                 '+SLineBreak+
-           '             :comissao_ped,                                                 '+SLineBreak+
-           '             :tipo_nf,                                                      '+SLineBreak+
-           '             :quantidade_tipo,                                              '+SLineBreak+
-           '             :observacao,                                                   '+SLineBreak+
-           '             :ctr_exportacao,                                               '+SLineBreak+
-           '             :produto_referencia,                                           '+SLineBreak+
-           '             :obs_item,                                                     '+SLineBreak+
-           '             :reserva_id,                                                   '+SLineBreak+
-           '             :loja,                                                         '+SLineBreak+
-           '             :aliq_ipi,                                                     '+SLineBreak+
-           '             :valor_restituicao_st,                                         '+SLineBreak+
-           '             :cfop_id,                                                      '+SLineBreak+
-           '             :cst,                                                          '+SLineBreak+
-           '             :aliq_icms,                                                    '+SLineBreak+
-           '             :aliq_icms_st,                                                 '+SLineBreak+
-           '             :reducao_st,                                                   '+SLineBreak+
-           '             :mva,                                                          '+SLineBreak+
-           '             :reducao_icms,                                                 '+SLineBreak+
-           '             :base_icms,                                                    '+SLineBreak+
-           '             :valor_icms,                                                   '+SLineBreak+
-           '             :base_st,                                                      '+SLineBreak+
-           '             :desc_restituicao_st,                                          '+SLineBreak+
-           '             :icms_suframa,                                                 '+SLineBreak+
-           '             :pis_suframa,                                                  '+SLineBreak+
-           '             :cofins_suframa,                                               '+SLineBreak+
-           '             :ipi_suframa,                                                  '+SLineBreak+
-           '             :aliq_pis,                                                     '+SLineBreak+
-           '             :aliq_cofins,                                                  '+SLineBreak+
-           '             :base_pis,                                                     '+SLineBreak+
-           '             :base_cofins,                                                  '+SLineBreak+
-           '             :valor_pis,                                                    '+SLineBreak+
-           '             :valor_cofins,                                                 '+SLineBreak+
-           '             :prevenda_id,                                                  '+SLineBreak+
-           '             :avulso,                                                       '+SLineBreak+
-           '             :quantidade_new,                                               '+SLineBreak+
-           '             :balanca,                                                      '+SLineBreak+
-           '             :ambiente_id,                                                  '+SLineBreak+
-           '             :ambiente_obs,                                                 '+SLineBreak+
-           '             :projeto_id,                                                   '+SLineBreak+
-           '             :largura,                                                      '+SLineBreak+
-           '             :altura,                                                       '+SLineBreak+
-           '             :item,                                                         '+SLineBreak+
-           '             :dun14,                                                        '+SLineBreak+
-           '             :saidas_id,                                                    '+SLineBreak+
-           '             :custo_drg,                                                    '+SLineBreak+
-           '             :pos_venda_status,                                             '+SLineBreak+
-           '             :pos_venda_retorno,                                            '+SLineBreak+
-           '             :pos_venda_obs,                                                '+SLineBreak+
-           '             :bonus,                                                        '+SLineBreak+
-           '             :bonus_uso,                                                    '+SLineBreak+
-           '             :funcionario_id,                                               '+SLineBreak+
-           '             :producao_id,                                                  '+SLineBreak+
-           '             :quantidade_kg,                                                '+SLineBreak+
-           '             :reservado,                                                    '+SLineBreak+
-           '             :descricao_produto,                                            '+SLineBreak+
-           '             :comissao_percentual,                                          '+SLineBreak+
-           '             :qtd_checagem,                                                 '+SLineBreak+
-           '             :qtd_checagem_corte,                                           '+SLineBreak+
-           '             :altura_m,                                                     '+SLineBreak+
-           '             :largura_m,                                                    '+SLineBreak+
-           '             :profundidade_m,                                               '+SLineBreak+
-           '             :vbcufdest,                                                    '+SLineBreak+
-           '             :pfcpufdest,                                                   '+SLineBreak+
-           '             :picmsufdest,                                                  '+SLineBreak+
-           '             :picmsinter,                                                   '+SLineBreak+
-           '             :picmsinterpart,                                               '+SLineBreak+
-           '             :vfcpufdest,                                                   '+SLineBreak+
-           '             :vicmsufdest,                                                  '+SLineBreak+
-           '             :vicmsufremet,                                                 '+SLineBreak+
-           '             :combo_item,                                                   '+SLineBreak+
-           '             :vlrvenda_minimo,                                              '+SLineBreak+
-           '             :vlrvenda_maximo,                                              '+SLineBreak+
-           '             :impresso,                                                     '+SLineBreak+
-           '             :orcamento_tsb_id,                                             '+SLineBreak+
-           '             :gerente_comissao_percentual,                                  '+SLineBreak+
-           '             :xped,                                                         '+SLineBreak+
-           '             :nitemped2,                                                    '+SLineBreak+
-           '             :voutros,                                                      '+SLineBreak+
-           '             :vfrete,                                                       '+SLineBreak+
-           '             :original_pedido_id,                                           '+SLineBreak+
-           '             :valor_venda_cadastro,                                         '+SLineBreak+
-           '             :web_pedidoitens_id,                                           '+SLineBreak+
-           '             :tipo_venda,                                                   '+SLineBreak+
-           '             :entrega,                                                      '+SLineBreak+
-           '             :vbcfcpst,                                                     '+SLineBreak+
-           '             :pfcpst,                                                       '+SLineBreak+
-           '             :vfcpst,                                                       '+SLineBreak+
-           '             :valor_bonus_servico,                                          '+SLineBreak+
-           '             :cbenef,                                                       '+SLineBreak+
-           '             :vicmsdeson,                                                   '+SLineBreak+
-           '             :motdesicms,                                                   '+SLineBreak+
-           '             :valor_diferimento,                                            '+SLineBreak+
-           '             :valor_montador,                                               '+SLineBreak+
-           '             :montagem,                                                     '+SLineBreak+
-           '             :pcred_presumido,                                              '+SLineBreak+
-           '             :pedidocompraitens_id,                                         '+SLineBreak+
-           '             :pedidoitens_id,                                               '+SLineBreak+
-           '             :pis_cst,                                                      '+SLineBreak+
-           '             :cofins_cst,                                                   '+SLineBreak+
-           '             :ipi_cst,                                                      '+SLineBreak+
-           '             :csosn,                                                        '+SLineBreak+
-           '             :cfop)                                                         '+SLineBreak;
+  lQry := vIConexao.CriarQuery;
+  lSQL := vConstrutor.gerarInsert('PEDIDOITENS', 'ID');
+
   try
     lQry.SQL.Add(lSQL);
-    lQry.Params.ArraySize := APedidoItensModel.PedidoItenssLista.Count;
-    setParamsArray(lQry, APedidoItensModel);
-    lQry.Execute(APedidoItensModel.PedidoItenssLista.Count, 0);
+    lQry.Params.ArraySize := pPedidoItensModel.PedidoItenssLista.Count;
+    setParamsArray(lQry, pPedidoItensModel);
+    lQry.Execute(pPedidoItensModel.PedidoItenssLista.Count, 0);
     Result := '';
   finally
     lSQL := '';
@@ -722,156 +278,41 @@ begin
   end;
 end;
 
-function TPedidoItensDao.alterar(APedidoItensModel: TPedidoItensModel): String;
+function TPedidoItensDao.alterar(pPedidoItensModel: TPedidoItensModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := '     update pedidoitens                                                         '+SLineBreak+
-          '        set codigo_cli = :codigo_cli,                                           '+SLineBreak+
-          '            numero_ped = :numero_ped,                                           '+SLineBreak+
-          '            codigo_pro = :codigo_pro,                                           '+SLineBreak+
-          '            quantidade_ped = :quantidade_ped,                                   '+SLineBreak+
-          '            quantidade_troca = :quantidade_troca,                               '+SLineBreak+
-          '            valorunitario_ped = :valorunitario_ped,                             '+SLineBreak+
-          '            desconto_ped = :desconto_ped,                                       '+SLineBreak+
-          '            desconto_uf = :desconto_uf,                                         '+SLineBreak+
-          '            valor_ipi = :valor_ipi,                                             '+SLineBreak+
-          '            valor_st = :valor_st,                                               '+SLineBreak+
-          '            vlrvenda_pro = :vlrvenda_pro,                                       '+SLineBreak+
-          '            vlrcusto_pro = :vlrcusto_pro,                                       '+SLineBreak+
-          '            comissao_ped = :comissao_ped,                                       '+SLineBreak+
-          '            tipo_nf = :tipo_nf,                                                 '+SLineBreak+
-          '            quantidade_tipo = :quantidade_tipo,                                 '+SLineBreak+
-          '            observacao = :observacao,                                           '+SLineBreak+
-          '            ctr_exportacao = :ctr_exportacao,                                   '+SLineBreak+
-          '            produto_referencia = :produto_referencia,                           '+SLineBreak+
-          '            obs_item = :obs_item,                                               '+SLineBreak+
-          '            reserva_id = :reserva_id,                                           '+SLineBreak+
-          '            aliq_ipi = :aliq_ipi,                                               '+SLineBreak+
-          '            valor_restituicao_st = :valor_restituicao_st,                       '+SLineBreak+
-          '            cfop_id = :cfop_id,                                                 '+SLineBreak+
-          '            cst = :cst,                                                         '+SLineBreak+
-          '            aliq_icms = :aliq_icms,                                             '+SLineBreak+
-          '            aliq_icms_st = :aliq_icms_st,                                       '+SLineBreak+
-          '            reducao_st = :reducao_st,                                           '+SLineBreak+
-          '            mva = :mva,                                                         '+SLineBreak+
-          '            reducao_icms = :reducao_icms,                                       '+SLineBreak+
-          '            base_icms = :base_icms,                                             '+SLineBreak+
-          '            valor_icms = :valor_icms,                                           '+SLineBreak+
-          '            base_st = :base_st,                                                 '+SLineBreak+
-          '            desc_restituicao_st = :desc_restituicao_st,                         '+SLineBreak+
-          '            icms_suframa = :icms_suframa,                                       '+SLineBreak+
-          '            pis_suframa = :pis_suframa,                                         '+SLineBreak+
-          '            cofins_suframa = :cofins_suframa,                                   '+SLineBreak+
-          '            ipi_suframa = :ipi_suframa,                                         '+SLineBreak+
-          '            aliq_pis = :aliq_pis,                                               '+SLineBreak+
-          '            aliq_cofins = :aliq_cofins,                                         '+SLineBreak+
-          '            base_pis = :base_pis,                                               '+SLineBreak+
-          '            base_cofins = :base_cofins,                                         '+SLineBreak+
-          '            valor_pis = :valor_pis,                                             '+SLineBreak+
-          '            valor_cofins = :valor_cofins,                                       '+SLineBreak+
-          '            prevenda_id = :prevenda_id,                                         '+SLineBreak+
-          '            avulso = :avulso,                                                   '+SLineBreak+
-          '            quantidade_new = :quantidade_new,                                   '+SLineBreak+
-          '            balanca = :balanca,                                                 '+SLineBreak+
-          '            ambiente_id = :ambiente_id,                                         '+SLineBreak+
-          '            ambiente_obs = :ambiente_obs,                                       '+SLineBreak+
-          '            projeto_id = :projeto_id,                                           '+SLineBreak+
-          '            largura = :largura,                                                 '+SLineBreak+
-          '            altura = :altura,                                                   '+SLineBreak+
-          '            item = :item,                                                       '+SLineBreak+
-          '            dun14 = :dun14,                                                     '+SLineBreak+
-          '            saidas_id = :saidas_id,                                             '+SLineBreak+
-          '            custo_drg = :custo_drg,                                             '+SLineBreak+
-          '            pos_venda_status = :pos_venda_status,                               '+SLineBreak+
-          '            pos_venda_retorno = :pos_venda_retorno,                             '+SLineBreak+
-          '            pos_venda_obs = :pos_venda_obs,                                     '+SLineBreak+
-          '            bonus = :bonus,                                                     '+SLineBreak+
-          '            bonus_uso = :bonus_uso,                                             '+SLineBreak+
-          '            funcionario_id = :funcionario_id,                                   '+SLineBreak+
-          '            producao_id = :producao_id,                                         '+SLineBreak+
-          '            quantidade_kg = :quantidade_kg,                                     '+SLineBreak+
-          '            reservado = :reservado,                                             '+SLineBreak+
-          '            descricao_produto = :descricao_produto,                             '+SLineBreak+
-          '            comissao_percentual = :comissao_percentual,                         '+SLineBreak+
-          '            qtd_checagem = :qtd_checagem,                                       '+SLineBreak+
-          '            qtd_checagem_corte = :qtd_checagem_corte,                           '+SLineBreak+
-          '            altura_m = :altura_m,                                               '+SLineBreak+
-          '            largura_m = :largura_m,                                             '+SLineBreak+
-          '            profundidade_m = :profundidade_m,                                   '+SLineBreak+
-          '            vbcufdest = :vbcufdest,                                             '+SLineBreak+
-          '            pfcpufdest = :pfcpufdest,                                           '+SLineBreak+
-          '            picmsufdest = :picmsufdest,                                         '+SLineBreak+
-          '            picmsinter = :picmsinter,                                           '+SLineBreak+
-          '            picmsinterpart = :picmsinterpart,                                   '+SLineBreak+
-          '            vfcpufdest = :vfcpufdest,                                           '+SLineBreak+
-          '            vicmsufdest = :vicmsufdest,                                         '+SLineBreak+
-          '            vicmsufremet = :vicmsufremet,                                       '+SLineBreak+
-          '            combo_item = :combo_item,                                           '+SLineBreak+
-          '            vlrvenda_minimo = :vlrvenda_minimo,                                 '+SLineBreak+
-          '            vlrvenda_maximo = :vlrvenda_maximo,                                 '+SLineBreak+
-          '            impresso = :impresso,                                               '+SLineBreak+
-          '            orcamento_tsb_id = :orcamento_tsb_id,                               '+SLineBreak+
-          '            gerente_comissao_percentual = :gerente_comissao_percentual,         '+SLineBreak+
-          '            xped = :xped,                                                       '+SLineBreak+
-          '            nitemped2 = :nitemped2,                                             '+SLineBreak+
-          '            voutros = :voutros,                                                 '+SLineBreak+
-          '            vfrete = :vfrete,                                                   '+SLineBreak+
-          '            original_pedido_id = :original_pedido_id,                           '+SLineBreak+
-          '            valor_venda_cadastro = :valor_venda_cadastro,                       '+SLineBreak+
-          '            web_pedidoitens_id = :web_pedidoitens_id,                           '+SLineBreak+
-          '            tipo_venda = :tipo_venda,                                           '+SLineBreak+
-          '            entrega = :entrega,                                                 '+SLineBreak+
-          '            vbcfcpst = :vbcfcpst,                                               '+SLineBreak+
-          '            pfcpst = :pfcpst,                                                   '+SLineBreak+
-          '            vfcpst = :vfcpst,                                                   '+SLineBreak+
-          '            valor_bonus_servico = :valor_bonus_servico,                         '+SLineBreak+
-          '            cbenef = :cbenef,                                                   '+SLineBreak+
-          '            vicmsdeson = :vicmsdeson,                                           '+SLineBreak+
-          '            motdesicms = :motdesicms,                                           '+SLineBreak+
-          '            valor_diferimento = :valor_diferimento,                             '+SLineBreak+
-          '            valor_montador = :valor_montador,                                   '+SLineBreak+
-          '            montagem = :montagem,                                               '+SLineBreak+
-          '            pcred_presumido = :pcred_presumido,                                 '+SLineBreak+
-          '            pedidocompraitens_id = :pedidocompraitens_id,                       '+SLineBreak+
-          '            pedidoitens_id = :pedidoitens_id,                                   '+SLineBreak+
-          '            loja = :loja,                                                       '+SLineBreak+
-          '            pis_cst = :pis_cst,                                                 '+SLineBreak+
-          '            cofins_cst = :cofins_cst,                                           '+SLineBreak+
-          '            ipi_cst = :ipi_cst,                                                 '+SLineBreak+
-          '            csosn = :csosn,                                                     '+SLineBreak+
-          '            cfop = :cfop                                                        '+SLineBreak+
-          '      where (id = :id)                                                          '+SLineBreak;
+  lSQL := vConstrutor.gerarUpdate('PEDIDOITENS', 'ID');
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value   := IIF(APedidoItensModel.ID   = '', Unassigned, APedidoItensModel.ID);
-    setParams(lQry, APedidoItensModel);
+    lQry.ParamByName('id').Value := ifThen(pPedidoItensModel.ID = '', Unassigned, pPedidoItensModel.ID);
+    setParams(lQry, pPedidoItensModel);
     lQry.ExecSQL;
-    Result := APedidoItensModel.ID;
+    Result := pPedidoItensModel.ID;
   finally
     lSQL := '';
     lQry.Free;
   end;
 end;
 
-function TPedidoItensDao.excluir(APedidoItensModel: TPedidoItensModel): String;
+function TPedidoItensDao.excluir(pPedidoItensModel: TPedidoItensModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
   try
-   lQry.ExecSQL('delete from pedidoitens where ID = :ID',[APedidoItensModel.ID]);
+   lQry.ExecSQL('delete from pedidoitens where ID = :ID',[pPedidoItensModel.ID]);
    lQry.ExecSQL;
-   Result := APedidoItensModel.ID;
+   Result := pPedidoItensModel.ID;
   finally
     lQry.Free;
   end;
 end;
 
-function TPedidoItensDao.montaCondicaoQuery: String;
+function TPedidoItensDao.where: String;
 var
   lSQL : String;
 begin
@@ -917,7 +358,7 @@ begin
   try
     lQry := vIConexao.CriarQuery;
     lSql := 'select count(*) records From pedidoitens where 1=1 ';
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
     lQry.Open(lSQL);
     FTotalRecords := lQry.FieldByName('records').AsInteger;
   finally
@@ -941,7 +382,7 @@ begin
       '       pedidoitens.*      '+
 	    '  from pedidoitens        '+
       ' where 1=1                ';
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
     lQry.Open(lSQL);
@@ -1156,241 +597,242 @@ begin
 end;
 procedure TPedidoItensDao.setParams(var pQry: TFDQuery; pPedidoItensModel: TPedidoItensModel);
 begin
-  pQry.ParamByName('codigo_cli').Value                   := IIF(pPedidoItensModel.CODIGO_CLI                    = '', Unassigned, pPedidoItensModel.CODIGO_CLI);
-  pQry.ParamByName('numero_ped').Value                   := IIF(pPedidoItensModel.NUMERO_PED                    = '', Unassigned, pPedidoItensModel.NUMERO_PED);
-  pQry.ParamByName('codigo_pro').Value                   := IIF(pPedidoItensModel.CODIGO_PRO                    = '', Unassigned, pPedidoItensModel.CODIGO_PRO);
-  pQry.ParamByName('quantidade_ped').Value               := IIF(pPedidoItensModel.QUANTIDADE_PED                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.QUANTIDADE_PED));
-  pQry.ParamByName('quantidade_troca').Value             := IIF(pPedidoItensModel.QUANTIDADE_TROCA              = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.QUANTIDADE_TROCA));
-  pQry.ParamByName('valorunitario_ped').Value            := IIF(pPedidoItensModel.VALORUNITARIO_PED             = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALORUNITARIO_PED));
-  pQry.ParamByName('desconto_ped').Value                 := IIF(pPedidoItensModel.DESCONTO_PED                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.DESCONTO_PED));
-  pQry.ParamByName('desconto_uf').Value                  := IIF(pPedidoItensModel.DESCONTO_UF                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.DESCONTO_UF));
-  pQry.ParamByName('valor_ipi').Value                    := IIF(pPedidoItensModel.VALOR_IPI                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALOR_IPI));
-  pQry.ParamByName('valor_st').Value                     := IIF(pPedidoItensModel.VALOR_ST                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALOR_ST));
-  pQry.ParamByName('vlrvenda_pro').Value                 := IIF(pPedidoItensModel.VLRVENDA_PRO                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VLRVENDA_PRO));
-  pQry.ParamByName('vlrcusto_pro').Value                 := IIF(pPedidoItensModel.VLRCUSTO_PRO                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VLRCUSTO_PRO));
-  pQry.ParamByName('comissao_ped').Value                 := IIF(pPedidoItensModel.COMISSAO_PED                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.COMISSAO_PED));
-  pQry.ParamByName('tipo_nf').Value                      := IIF(pPedidoItensModel.TIPO_NF                       = '', Unassigned, pPedidoItensModel.TIPO_NF);
-  pQry.ParamByName('quantidade_tipo').Value              := IIF(pPedidoItensModel.QUANTIDADE_TIPO               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.QUANTIDADE_TIPO));
-  pQry.ParamByName('observacao').Value                   := IIF(pPedidoItensModel.OBSERVACAO                    = '', Unassigned, pPedidoItensModel.OBSERVACAO);
-  pQry.ParamByName('ctr_exportacao').Value               := IIF(pPedidoItensModel.CTR_EXPORTACAO                = '', Unassigned, pPedidoItensModel.CTR_EXPORTACAO);
-  pQry.ParamByName('produto_referencia').Value           := IIF(pPedidoItensModel.PRODUTO_REFERENCIA            = '', Unassigned, pPedidoItensModel.PRODUTO_REFERENCIA);
-  pQry.ParamByName('obs_item').Value                     := IIF(pPedidoItensModel.OBS_ITEM                      = '', Unassigned, pPedidoItensModel.OBS_ITEM);
-  pQry.ParamByName('reserva_id').Value                   := IIF(pPedidoItensModel.RESERVA_ID                    = '', Unassigned, pPedidoItensModel.RESERVA_ID);
-  pQry.ParamByName('loja').Value                         := IIF(pPedidoItensModel.LOJA                          = '', Unassigned, pPedidoItensModel.LOJA);
-  pQry.ParamByName('aliq_ipi').Value                     := IIF(pPedidoItensModel.ALIQ_IPI                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.ALIQ_IPI));
-  pQry.ParamByName('valor_restituicao_st').Value         := IIF(pPedidoItensModel.VALOR_RESTITUICAO_ST          = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALOR_RESTITUICAO_ST));
-  pQry.ParamByName('cfop_id').Value                      := IIF(pPedidoItensModel.CFOP_ID                       = '', Unassigned, pPedidoItensModel.CFOP_ID);
-  pQry.ParamByName('cst').Value                          := IIF(pPedidoItensModel.CST                           = '', Unassigned, pPedidoItensModel.CST);
-  pQry.ParamByName('aliq_icms').Value                    := IIF(pPedidoItensModel.ALIQ_ICMS                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.ALIQ_ICMS));
-  pQry.ParamByName('aliq_icms_st').Value                 := IIF(pPedidoItensModel.ALIQ_ICMS_ST                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.ALIQ_ICMS_ST));
-  pQry.ParamByName('reducao_st').Value                   := IIF(pPedidoItensModel.REDUCAO_ST                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.REDUCAO_ST));
-  pQry.ParamByName('mva').Value                          := IIF(pPedidoItensModel.MVA                           = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.MVA));
-  pQry.ParamByName('reducao_icms').Value                 := IIF(pPedidoItensModel.REDUCAO_ICMS                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.REDUCAO_ICMS));
-  pQry.ParamByName('base_icms').Value                    := IIF(pPedidoItensModel.BASE_ICMS                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.BASE_ICMS));
-  pQry.ParamByName('valor_icms').Value                   := IIF(pPedidoItensModel.VALOR_ICMS                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALOR_ICMS));
-  pQry.ParamByName('base_st').Value                      := IIF(pPedidoItensModel.BASE_ST                       = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.BASE_ST));
-  pQry.ParamByName('desc_restituicao_st').Value          := IIF(pPedidoItensModel.DESC_RESTITUICAO_ST           = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.DESC_RESTITUICAO_ST));
-  pQry.ParamByName('icms_suframa').Value                 := IIF(pPedidoItensModel.ICMS_SUFRAMA                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.ICMS_SUFRAMA));
-  pQry.ParamByName('pis_suframa').Value                  := IIF(pPedidoItensModel.PIS_SUFRAMA                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PIS_SUFRAMA));
-  pQry.ParamByName('cofins_suframa').Value               := IIF(pPedidoItensModel.COFINS_SUFRAMA                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.COFINS_SUFRAMA));
-  pQry.ParamByName('ipi_suframa').Value                  := IIF(pPedidoItensModel.IPI_SUFRAMA                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.IPI_SUFRAMA));
-  pQry.ParamByName('aliq_pis').Value                     := IIF(pPedidoItensModel.ALIQ_PIS                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.ALIQ_PIS));
-  pQry.ParamByName('aliq_cofins').Value                  := IIF(pPedidoItensModel.ALIQ_COFINS                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.ALIQ_COFINS));
-  pQry.ParamByName('base_pis').Value                     := IIF(pPedidoItensModel.BASE_PIS                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.BASE_PIS));
-  pQry.ParamByName('base_cofins').Value                  := IIF(pPedidoItensModel.BASE_COFINS                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.BASE_COFINS));
-  pQry.ParamByName('valor_pis').Value                    := IIF(pPedidoItensModel.VALOR_PIS                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALOR_PIS));
-  pQry.ParamByName('valor_cofins').Value                 := IIF(pPedidoItensModel.VALOR_COFINS                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALOR_COFINS));
-  pQry.ParamByName('prevenda_id').Value                  := IIF(pPedidoItensModel.PREVENDA_ID                   = '', Unassigned, pPedidoItensModel.PREVENDA_ID);
-  pQry.ParamByName('avulso').Value                       := IIF(pPedidoItensModel.AVULSO                        = '', Unassigned, pPedidoItensModel.AVULSO);
-  pQry.ParamByName('quantidade_new').Value               := IIF(pPedidoItensModel.QUANTIDADE_NEW                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.QUANTIDADE_NEW));
-  pQry.ParamByName('balanca').Value                      := IIF(pPedidoItensModel.BALANCA                       = '', Unassigned, pPedidoItensModel.BALANCA);
-  pQry.ParamByName('ambiente_id').Value                  := IIF(pPedidoItensModel.AMBIENTE_ID                   = '', Unassigned, pPedidoItensModel.AMBIENTE_ID);
-  pQry.ParamByName('ambiente_obs').Value                 := IIF(pPedidoItensModel.AMBIENTE_OBS                  = '', Unassigned, pPedidoItensModel.AMBIENTE_OBS);
-  pQry.ParamByName('projeto_id').Value                   := IIF(pPedidoItensModel.PROJETO_ID                    = '', Unassigned, pPedidoItensModel.PROJETO_ID);
-  pQry.ParamByName('largura').Value                      := IIF(pPedidoItensModel.LARGURA                       = '', Unassigned, pPedidoItensModel.LARGURA);
-  pQry.ParamByName('altura').Value                       := IIF(pPedidoItensModel.ALTURA                        = '', Unassigned, pPedidoItensModel.ALTURA);
-  pQry.ParamByName('item').Value                         := IIF(pPedidoItensModel.ITEM                          = '', Unassigned, pPedidoItensModel.ITEM);
-  pQry.ParamByName('dun14').Value                        := IIF(pPedidoItensModel.DUN14                         = '', Unassigned, pPedidoItensModel.DUN14);
-  pQry.ParamByName('saidas_id').Value                    := IIF(pPedidoItensModel.SAIDAS_ID                     = '', Unassigned, pPedidoItensModel.SAIDAS_ID);
-  pQry.ParamByName('custo_drg').Value                    := IIF(pPedidoItensModel.CUSTO_DRG                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.CUSTO_DRG));
-  pQry.ParamByName('pos_venda_status').Value             := IIF(pPedidoItensModel.POS_VENDA_STATUS              = '', Unassigned, pPedidoItensModel.POS_VENDA_STATUS);
-  pQry.ParamByName('pos_venda_retorno').Value            := IIF(pPedidoItensModel.POS_VENDA_RETORNO             = '', Unassigned, pPedidoItensModel.POS_VENDA_RETORNO);
-  pQry.ParamByName('pos_venda_obs').Value                := IIF(pPedidoItensModel.POS_VENDA_OBS                 = '', Unassigned, pPedidoItensModel.POS_VENDA_OBS);
-  pQry.ParamByName('bonus').Value                        := IIF(pPedidoItensModel.BONUS                         = '', Unassigned, pPedidoItensModel.BONUS);
-  pQry.ParamByName('bonus_uso').Value                    := IIF(pPedidoItensModel.BONUS_USO                     = '', Unassigned, pPedidoItensModel.BONUS_USO);
-  pQry.ParamByName('funcionario_id').Value               := IIF(pPedidoItensModel.FUNCIONARIO_ID                = '', Unassigned, pPedidoItensModel.FUNCIONARIO_ID);
-  pQry.ParamByName('producao_id').Value                  := IIF(pPedidoItensModel.PRODUCAO_ID                   = '', Unassigned, pPedidoItensModel.PRODUCAO_ID);
-  pQry.ParamByName('quantidade_kg').Value                := IIF(pPedidoItensModel.QUANTIDADE_KG                 = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.QUANTIDADE_KG));
-  pQry.ParamByName('reservado').Value                    := IIF(pPedidoItensModel.RESERVADO                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.RESERVADO));
-  pQry.ParamByName('descricao_produto').Value            := IIF(pPedidoItensModel.DESCRICAO_PRODUTO             = '', Unassigned, pPedidoItensModel.DESCRICAO_PRODUTO);
-  pQry.ParamByName('comissao_percentual').Value          := IIF(pPedidoItensModel.COMISSAO_PERCENTUAL           = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.COMISSAO_PERCENTUAL));
-  pQry.ParamByName('qtd_checagem').Value                 := IIF(pPedidoItensModel.QTD_CHECAGEM                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.QTD_CHECAGEM));
-  pQry.ParamByName('qtd_checagem_corte').Value           := IIF(pPedidoItensModel.QTD_CHECAGEM_CORTE            = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.QTD_CHECAGEM_CORTE));
-  pQry.ParamByName('altura_m').Value                     := IIF(pPedidoItensModel.ALTURA_M                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.ALTURA_M));
-  pQry.ParamByName('largura_m').Value                    := IIF(pPedidoItensModel.LARGURA_M                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.LARGURA_M));
-  pQry.ParamByName('profundidade_m').Value               := IIF(pPedidoItensModel.PROFUNDIDADE_M                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PROFUNDIDADE_M));
-  pQry.ParamByName('vbcufdest').Value                    := IIF(pPedidoItensModel.VBCUFDEST                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VBCUFDEST));
-  pQry.ParamByName('pfcpufdest').Value                   := IIF(pPedidoItensModel.PFCPUFDEST                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PFCPUFDEST));
-  pQry.ParamByName('picmsufdest').Value                  := IIF(pPedidoItensModel.PICMSUFDEST                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PICMSUFDEST));
-  pQry.ParamByName('picmsinter').Value                   := IIF(pPedidoItensModel.PICMSINTER                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PICMSINTER));
-  pQry.ParamByName('picmsinterpart').Value               := IIF(pPedidoItensModel.PICMSINTERPART                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PICMSINTERPART));
-  pQry.ParamByName('vfcpufdest').Value                   := IIF(pPedidoItensModel.VFCPUFDEST                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VFCPUFDEST));
-  pQry.ParamByName('vicmsufdest').Value                  := IIF(pPedidoItensModel.VICMSUFDEST                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VICMSUFDEST));
-  pQry.ParamByName('vicmsufremet').Value                 := IIF(pPedidoItensModel.VICMSUFREMET                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VICMSUFREMET));
-  pQry.ParamByName('combo_item').Value                   := IIF(pPedidoItensModel.COMBO_ITEM                    = '', Unassigned, pPedidoItensModel.COMBO_ITEM);
-  pQry.ParamByName('vlrvenda_minimo').Value              := IIF(pPedidoItensModel.VLRVENDA_MINIMO               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VLRVENDA_MINIMO));
-  pQry.ParamByName('vlrvenda_maximo').Value              := IIF(pPedidoItensModel.VLRVENDA_MAXIMO               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VLRVENDA_MAXIMO));
-  pQry.ParamByName('impresso').Value                     := IIF(pPedidoItensModel.IMPRESSO                      = '', Unassigned, pPedidoItensModel.IMPRESSO);
-  pQry.ParamByName('orcamento_tsb_id').Value             := IIF(pPedidoItensModel.ORCAMENTO_TSB_ID              = '', Unassigned, pPedidoItensModel.ORCAMENTO_TSB_ID);
-  pQry.ParamByName('gerente_comissao_percentual').Value  := IIF(pPedidoItensModel.GERENTE_COMISSAO_PERCENTUAL   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.GERENTE_COMISSAO_PERCENTUAL));
-  pQry.ParamByName('xped').Value                         := IIF(pPedidoItensModel.XPED                          = '', Unassigned, pPedidoItensModel.XPED);
-  pQry.ParamByName('nitemped2').Value                    := IIF(pPedidoItensModel.NITEMPED2                     = '', Unassigned, pPedidoItensModel.NITEMPED2);
-  pQry.ParamByName('voutros').Value                      := IIF(pPedidoItensModel.VOUTROS                       = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VOUTROS));
-  pQry.ParamByName('vfrete').Value                       := IIF(pPedidoItensModel.VFRETE                        = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VFRETE));
-  pQry.ParamByName('original_pedido_id').Value           := IIF(pPedidoItensModel.ORIGINAL_PEDIDO_ID            = '', Unassigned, pPedidoItensModel.ORIGINAL_PEDIDO_ID);
-  pQry.ParamByName('valor_venda_cadastro').Value         := IIF(pPedidoItensModel.VALOR_VENDA_CADASTRO          = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALOR_VENDA_CADASTRO));
-  pQry.ParamByName('web_pedidoitens_id').Value           := IIF(pPedidoItensModel.WEB_PEDIDOITENS_ID            = '', Unassigned, pPedidoItensModel.WEB_PEDIDOITENS_ID);
-  pQry.ParamByName('tipo_venda').Value                   := IIF(pPedidoItensModel.TIPO_VENDA                    = '', Unassigned, pPedidoItensModel.TIPO_VENDA);
-  pQry.ParamByName('entrega').Value                      := IIF(pPedidoItensModel.ENTREGA                       = '', Unassigned, pPedidoItensModel.ENTREGA);
-  pQry.ParamByName('vbcfcpst').Value                     := IIF(pPedidoItensModel.VBCFCPST                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VBCFCPST));
-  pQry.ParamByName('pfcpst').Value                       := IIF(pPedidoItensModel.PFCPST                        = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PFCPST));
-  pQry.ParamByName('vfcpst').Value                       := IIF(pPedidoItensModel.VFCPST                        = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VFCPST));
-  pQry.ParamByName('valor_bonus_servico').Value          := IIF(pPedidoItensModel.VALOR_BONUS_SERVICO           = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALOR_BONUS_SERVICO));
-  pQry.ParamByName('cbenef').Value                       := IIF(pPedidoItensModel.CBENEF                        = '', Unassigned, pPedidoItensModel.CBENEF);
-  pQry.ParamByName('vicmsdeson').Value                   := IIF(pPedidoItensModel.VICMSDESON                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VICMSDESON));
-  pQry.ParamByName('motdesicms').Value                   := IIF(pPedidoItensModel.MOTDESICMS                    = '', Unassigned, pPedidoItensModel.MOTDESICMS);
-  pQry.ParamByName('valor_diferimento').Value            := IIF(pPedidoItensModel.VALOR_DIFERIMENTO             = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALOR_DIFERIMENTO));
-  pQry.ParamByName('valor_montador').Value               := IIF(pPedidoItensModel.VALOR_MONTADOR                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALOR_MONTADOR));
-  pQry.ParamByName('montagem').Value                     := IIF(pPedidoItensModel.MONTAGEM                      = '', Unassigned, pPedidoItensModel.MONTAGEM);
-  pQry.ParamByName('pcred_presumido').Value              := IIF(pPedidoItensModel.PCRED_PRESUMIDO               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PCRED_PRESUMIDO));
-  pQry.ParamByName('pedidocompraitens_id').Value         := IIF(pPedidoItensModel.PEDIDOCOMPRAITENS_ID          = '', Unassigned, pPedidoItensModel.PEDIDOCOMPRAITENS_ID);
-  pQry.ParamByName('pedidoitens_id').Value               := IIF(pPedidoItensModel.PEDIDOITENS_ID                = '', Unassigned, pPedidoItensModel.PEDIDOITENS_ID);
-  pQry.ParamByName('pis_cst').Value                      := IIF(pPedidoItensModel.PIS_CST                       = '', Unassigned, pPedidoItensModel.PIS_CST);
-  pQry.ParamByName('cofins_cst').Value                   := IIF(pPedidoItensModel.COFINS_CST                    = '', Unassigned, pPedidoItensModel.COFINS_CST);
-  pQry.ParamByName('ipi_cst').Value                      := IIF(pPedidoItensModel.IPI_CST                       = '', Unassigned, pPedidoItensModel.IPI_CST);
-  pQry.ParamByName('csosn').Value                        := IIF(pPedidoItensModel.CSOSN                         = '', Unassigned, pPedidoItensModel.CSOSN);
-  pQry.ParamByName('cfop').Value                         := IIF(pPedidoItensModel.CFOP                          = '', Unassigned, pPedidoItensModel.CFOP);
+  pQry.ParamByName('codigo_cli').Value                   := ifThen(pPedidoItensModel.CODIGO_CLI                    = '', Unassigned, pPedidoItensModel.CODIGO_CLI);
+  pQry.ParamByName('numero_ped').Value                   := ifThen(pPedidoItensModel.NUMERO_PED                    = '', Unassigned, pPedidoItensModel.NUMERO_PED);
+  pQry.ParamByName('codigo_pro').Value                   := ifThen(pPedidoItensModel.CODIGO_PRO                    = '', Unassigned, pPedidoItensModel.CODIGO_PRO);
+  pQry.ParamByName('quantidade_ped').Value               := ifThen(pPedidoItensModel.QUANTIDADE_PED                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.QUANTIDADE_PED));
+  pQry.ParamByName('quantidade_troca').Value             := ifThen(pPedidoItensModel.QUANTIDADE_TROCA              = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.QUANTIDADE_TROCA));
+  pQry.ParamByName('valorunitario_ped').Value            := ifThen(pPedidoItensModel.VALORUNITARIO_PED             = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALORUNITARIO_PED));
+  pQry.ParamByName('desconto_ped').Value                 := ifThen(pPedidoItensModel.DESCONTO_PED                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.DESCONTO_PED));
+  pQry.ParamByName('desconto_uf').Value                  := ifThen(pPedidoItensModel.DESCONTO_UF                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.DESCONTO_UF));
+  pQry.ParamByName('valor_ipi').Value                    := ifThen(pPedidoItensModel.VALOR_IPI                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALOR_IPI));
+  pQry.ParamByName('valor_st').Value                     := ifThen(pPedidoItensModel.VALOR_ST                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALOR_ST));
+  pQry.ParamByName('vlrvenda_pro').Value                 := ifThen(pPedidoItensModel.VLRVENDA_PRO                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VLRVENDA_PRO));
+  pQry.ParamByName('vlrcusto_pro').Value                 := ifThen(pPedidoItensModel.VLRCUSTO_PRO                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VLRCUSTO_PRO));
+  pQry.ParamByName('comissao_ped').Value                 := ifThen(pPedidoItensModel.COMISSAO_PED                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.COMISSAO_PED));
+  pQry.ParamByName('tipo_nf').Value                      := ifThen(pPedidoItensModel.TIPO_NF                       = '', Unassigned, pPedidoItensModel.TIPO_NF);
+  pQry.ParamByName('quantidade_tipo').Value              := ifThen(pPedidoItensModel.QUANTIDADE_TIPO               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.QUANTIDADE_TIPO));
+  pQry.ParamByName('observacao').Value                   := ifThen(pPedidoItensModel.OBSERVACAO                    = '', Unassigned, pPedidoItensModel.OBSERVACAO);
+  pQry.ParamByName('ctr_exportacao').Value               := ifThen(pPedidoItensModel.CTR_EXPORTACAO                = '', Unassigned, pPedidoItensModel.CTR_EXPORTACAO);
+  pQry.ParamByName('produto_referencia').Value           := ifThen(pPedidoItensModel.PRODUTO_REFERENCIA            = '', Unassigned, pPedidoItensModel.PRODUTO_REFERENCIA);
+  pQry.ParamByName('obs_item').Value                     := ifThen(pPedidoItensModel.OBS_ITEM                      = '', Unassigned, pPedidoItensModel.OBS_ITEM);
+  pQry.ParamByName('reserva_id').Value                   := ifThen(pPedidoItensModel.RESERVA_ID                    = '', Unassigned, pPedidoItensModel.RESERVA_ID);
+  pQry.ParamByName('loja').Value                         := ifThen(pPedidoItensModel.LOJA                          = '', Unassigned, pPedidoItensModel.LOJA);
+  pQry.ParamByName('aliq_ipi').Value                     := ifThen(pPedidoItensModel.ALIQ_IPI                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.ALIQ_IPI));
+  pQry.ParamByName('valor_restituicao_st').Value         := ifThen(pPedidoItensModel.VALOR_RESTITUICAO_ST          = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALOR_RESTITUICAO_ST));
+  pQry.ParamByName('cfop_id').Value                      := ifThen(pPedidoItensModel.CFOP_ID                       = '', Unassigned, pPedidoItensModel.CFOP_ID);
+  pQry.ParamByName('cst').Value                          := ifThen(pPedidoItensModel.CST                           = '', Unassigned, pPedidoItensModel.CST);
+  pQry.ParamByName('aliq_icms').Value                    := ifThen(pPedidoItensModel.ALIQ_ICMS                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.ALIQ_ICMS));
+  pQry.ParamByName('aliq_icms_st').Value                 := ifThen(pPedidoItensModel.ALIQ_ICMS_ST                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.ALIQ_ICMS_ST));
+  pQry.ParamByName('reducao_st').Value                   := ifThen(pPedidoItensModel.REDUCAO_ST                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.REDUCAO_ST));
+  pQry.ParamByName('mva').Value                          := ifThen(pPedidoItensModel.MVA                           = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.MVA));
+  pQry.ParamByName('reducao_icms').Value                 := ifThen(pPedidoItensModel.REDUCAO_ICMS                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.REDUCAO_ICMS));
+  pQry.ParamByName('base_icms').Value                    := ifThen(pPedidoItensModel.BASE_ICMS                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.BASE_ICMS));
+  pQry.ParamByName('valor_icms').Value                   := ifThen(pPedidoItensModel.VALOR_ICMS                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALOR_ICMS));
+  pQry.ParamByName('base_st').Value                      := ifThen(pPedidoItensModel.BASE_ST                       = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.BASE_ST));
+  pQry.ParamByName('desc_restituicao_st').Value          := ifThen(pPedidoItensModel.DESC_RESTITUICAO_ST           = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.DESC_RESTITUICAO_ST));
+  pQry.ParamByName('icms_suframa').Value                 := ifThen(pPedidoItensModel.ICMS_SUFRAMA                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.ICMS_SUFRAMA));
+  pQry.ParamByName('pis_suframa').Value                  := ifThen(pPedidoItensModel.PIS_SUFRAMA                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PIS_SUFRAMA));
+  pQry.ParamByName('cofins_suframa').Value               := ifThen(pPedidoItensModel.COFINS_SUFRAMA                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.COFINS_SUFRAMA));
+  pQry.ParamByName('ipi_suframa').Value                  := ifThen(pPedidoItensModel.IPI_SUFRAMA                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.IPI_SUFRAMA));
+  pQry.ParamByName('aliq_pis').Value                     := ifThen(pPedidoItensModel.ALIQ_PIS                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.ALIQ_PIS));
+  pQry.ParamByName('aliq_cofins').Value                  := ifThen(pPedidoItensModel.ALIQ_COFINS                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.ALIQ_COFINS));
+  pQry.ParamByName('base_pis').Value                     := ifThen(pPedidoItensModel.BASE_PIS                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.BASE_PIS));
+  pQry.ParamByName('base_cofins').Value                  := ifThen(pPedidoItensModel.BASE_COFINS                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.BASE_COFINS));
+  pQry.ParamByName('valor_pis').Value                    := ifThen(pPedidoItensModel.VALOR_PIS                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALOR_PIS));
+  pQry.ParamByName('valor_cofins').Value                 := ifThen(pPedidoItensModel.VALOR_COFINS                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALOR_COFINS));
+  pQry.ParamByName('prevenda_id').Value                  := ifThen(pPedidoItensModel.PREVENDA_ID                   = '', Unassigned, pPedidoItensModel.PREVENDA_ID);
+  pQry.ParamByName('avulso').Value                       := ifThen(pPedidoItensModel.AVULSO                        = '', Unassigned, pPedidoItensModel.AVULSO);
+  pQry.ParamByName('quantidade_new').Value               := ifThen(pPedidoItensModel.QUANTIDADE_NEW                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.QUANTIDADE_NEW));
+  pQry.ParamByName('balanca').Value                      := ifThen(pPedidoItensModel.BALANCA                       = '', Unassigned, pPedidoItensModel.BALANCA);
+  pQry.ParamByName('ambiente_id').Value                  := ifThen(pPedidoItensModel.AMBIENTE_ID                   = '', Unassigned, pPedidoItensModel.AMBIENTE_ID);
+  pQry.ParamByName('ambiente_obs').Value                 := ifThen(pPedidoItensModel.AMBIENTE_OBS                  = '', Unassigned, pPedidoItensModel.AMBIENTE_OBS);
+  pQry.ParamByName('projeto_id').Value                   := ifThen(pPedidoItensModel.PROJETO_ID                    = '', Unassigned, pPedidoItensModel.PROJETO_ID);
+  pQry.ParamByName('largura').Value                      := ifThen(pPedidoItensModel.LARGURA                       = '', Unassigned, pPedidoItensModel.LARGURA);
+  pQry.ParamByName('altura').Value                       := ifThen(pPedidoItensModel.ALTURA                        = '', Unassigned, pPedidoItensModel.ALTURA);
+  pQry.ParamByName('item').Value                         := ifThen(pPedidoItensModel.ITEM                          = '', Unassigned, pPedidoItensModel.ITEM);
+  pQry.ParamByName('dun14').Value                        := ifThen(pPedidoItensModel.DUN14                         = '', Unassigned, pPedidoItensModel.DUN14);
+  pQry.ParamByName('saidas_id').Value                    := ifThen(pPedidoItensModel.SAIDAS_ID                     = '', Unassigned, pPedidoItensModel.SAIDAS_ID);
+  pQry.ParamByName('custo_drg').Value                    := ifThen(pPedidoItensModel.CUSTO_DRG                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.CUSTO_DRG));
+  pQry.ParamByName('pos_venda_status').Value             := ifThen(pPedidoItensModel.POS_VENDA_STATUS              = '', Unassigned, pPedidoItensModel.POS_VENDA_STATUS);
+  pQry.ParamByName('pos_venda_retorno').Value            := ifThen(pPedidoItensModel.POS_VENDA_RETORNO             = '', Unassigned, pPedidoItensModel.POS_VENDA_RETORNO);
+  pQry.ParamByName('pos_venda_obs').Value                := ifThen(pPedidoItensModel.POS_VENDA_OBS                 = '', Unassigned, pPedidoItensModel.POS_VENDA_OBS);
+  pQry.ParamByName('bonus').Value                        := ifThen(pPedidoItensModel.BONUS                         = '', Unassigned, pPedidoItensModel.BONUS);
+  pQry.ParamByName('bonus_uso').Value                    := ifThen(pPedidoItensModel.BONUS_USO                     = '', Unassigned, pPedidoItensModel.BONUS_USO);
+  pQry.ParamByName('funcionario_id').Value               := ifThen(pPedidoItensModel.FUNCIONARIO_ID                = '', Unassigned, pPedidoItensModel.FUNCIONARIO_ID);
+  pQry.ParamByName('producao_id').Value                  := ifThen(pPedidoItensModel.PRODUCAO_ID                   = '', Unassigned, pPedidoItensModel.PRODUCAO_ID);
+  pQry.ParamByName('quantidade_kg').Value                := ifThen(pPedidoItensModel.QUANTIDADE_KG                 = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.QUANTIDADE_KG));
+  pQry.ParamByName('reservado').Value                    := ifThen(pPedidoItensModel.RESERVADO                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.RESERVADO));
+  pQry.ParamByName('descricao_produto').Value            := ifThen(pPedidoItensModel.DESCRICAO_PRODUTO             = '', Unassigned, pPedidoItensModel.DESCRICAO_PRODUTO);
+  pQry.ParamByName('comissao_percentual').Value          := ifThen(pPedidoItensModel.COMISSAO_PERCENTUAL           = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.COMISSAO_PERCENTUAL));
+  pQry.ParamByName('qtd_checagem').Value                 := ifThen(pPedidoItensModel.QTD_CHECAGEM                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.QTD_CHECAGEM));
+  pQry.ParamByName('qtd_checagem_corte').Value           := ifThen(pPedidoItensModel.QTD_CHECAGEM_CORTE            = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.QTD_CHECAGEM_CORTE));
+  pQry.ParamByName('altura_m').Value                     := ifThen(pPedidoItensModel.ALTURA_M                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.ALTURA_M));
+  pQry.ParamByName('largura_m').Value                    := ifThen(pPedidoItensModel.LARGURA_M                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.LARGURA_M));
+  pQry.ParamByName('profundidade_m').Value               := ifThen(pPedidoItensModel.PROFUNDIDADE_M                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PROFUNDIDADE_M));
+  pQry.ParamByName('vbcufdest').Value                    := ifThen(pPedidoItensModel.VBCUFDEST                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VBCUFDEST));
+  pQry.ParamByName('pfcpufdest').Value                   := ifThen(pPedidoItensModel.PFCPUFDEST                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PFCPUFDEST));
+  pQry.ParamByName('picmsufdest').Value                  := ifThen(pPedidoItensModel.PICMSUFDEST                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PICMSUFDEST));
+  pQry.ParamByName('picmsinter').Value                   := ifThen(pPedidoItensModel.PICMSINTER                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PICMSINTER));
+  pQry.ParamByName('picmsinterpart').Value               := ifThen(pPedidoItensModel.PICMSINTERPART                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PICMSINTERPART));
+  pQry.ParamByName('vfcpufdest').Value                   := ifThen(pPedidoItensModel.VFCPUFDEST                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VFCPUFDEST));
+  pQry.ParamByName('vicmsufdest').Value                  := ifThen(pPedidoItensModel.VICMSUFDEST                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VICMSUFDEST));
+  pQry.ParamByName('vicmsufremet').Value                 := ifThen(pPedidoItensModel.VICMSUFREMET                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VICMSUFREMET));
+  pQry.ParamByName('combo_item').Value                   := ifThen(pPedidoItensModel.COMBO_ITEM                    = '', Unassigned, pPedidoItensModel.COMBO_ITEM);
+  pQry.ParamByName('vlrvenda_minimo').Value              := ifThen(pPedidoItensModel.VLRVENDA_MINIMO               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VLRVENDA_MINIMO));
+  pQry.ParamByName('vlrvenda_maximo').Value              := ifThen(pPedidoItensModel.VLRVENDA_MAXIMO               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VLRVENDA_MAXIMO));
+  pQry.ParamByName('impresso').Value                     := ifThen(pPedidoItensModel.IMPRESSO                      = '', Unassigned, pPedidoItensModel.IMPRESSO);
+  pQry.ParamByName('orcamento_tsb_id').Value             := ifThen(pPedidoItensModel.ORCAMENTO_TSB_ID              = '', Unassigned, pPedidoItensModel.ORCAMENTO_TSB_ID);
+  pQry.ParamByName('gerente_comissao_percentual').Value  := ifThen(pPedidoItensModel.GERENTE_COMISSAO_PERCENTUAL   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.GERENTE_COMISSAO_PERCENTUAL));
+  pQry.ParamByName('xped').Value                         := ifThen(pPedidoItensModel.XPED                          = '', Unassigned, pPedidoItensModel.XPED);
+  pQry.ParamByName('nitemped2').Value                    := ifThen(pPedidoItensModel.NITEMPED2                     = '', Unassigned, pPedidoItensModel.NITEMPED2);
+  pQry.ParamByName('voutros').Value                      := ifThen(pPedidoItensModel.VOUTROS                       = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VOUTROS));
+  pQry.ParamByName('vfrete').Value                       := ifThen(pPedidoItensModel.VFRETE                        = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VFRETE));
+  pQry.ParamByName('original_pedido_id').Value           := ifThen(pPedidoItensModel.ORIGINAL_PEDIDO_ID            = '', Unassigned, pPedidoItensModel.ORIGINAL_PEDIDO_ID);
+  pQry.ParamByName('valor_venda_cadastro').Value         := ifThen(pPedidoItensModel.VALOR_VENDA_CADASTRO          = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALOR_VENDA_CADASTRO));
+  pQry.ParamByName('web_pedidoitens_id').Value           := ifThen(pPedidoItensModel.WEB_PEDIDOITENS_ID            = '', Unassigned, pPedidoItensModel.WEB_PEDIDOITENS_ID);
+  pQry.ParamByName('tipo_venda').Value                   := ifThen(pPedidoItensModel.TIPO_VENDA                    = '', Unassigned, pPedidoItensModel.TIPO_VENDA);
+  pQry.ParamByName('entrega').Value                      := ifThen(pPedidoItensModel.ENTREGA                       = '', Unassigned, pPedidoItensModel.ENTREGA);
+  pQry.ParamByName('vbcfcpst').Value                     := ifThen(pPedidoItensModel.VBCFCPST                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VBCFCPST));
+  pQry.ParamByName('pfcpst').Value                       := ifThen(pPedidoItensModel.PFCPST                        = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PFCPST));
+  pQry.ParamByName('vfcpst').Value                       := ifThen(pPedidoItensModel.VFCPST                        = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VFCPST));
+  pQry.ParamByName('valor_bonus_servico').Value          := ifThen(pPedidoItensModel.VALOR_BONUS_SERVICO           = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALOR_BONUS_SERVICO));
+  pQry.ParamByName('cbenef').Value                       := ifThen(pPedidoItensModel.CBENEF                        = '', Unassigned, pPedidoItensModel.CBENEF);
+  pQry.ParamByName('vicmsdeson').Value                   := ifThen(pPedidoItensModel.VICMSDESON                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VICMSDESON));
+  pQry.ParamByName('motdesicms').Value                   := ifThen(pPedidoItensModel.MOTDESICMS                    = '', Unassigned, pPedidoItensModel.MOTDESICMS);
+  pQry.ParamByName('valor_diferimento').Value            := ifThen(pPedidoItensModel.VALOR_DIFERIMENTO             = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALOR_DIFERIMENTO));
+  pQry.ParamByName('valor_montador').Value               := ifThen(pPedidoItensModel.VALOR_MONTADOR                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.VALOR_MONTADOR));
+  pQry.ParamByName('montagem').Value                     := ifThen(pPedidoItensModel.MONTAGEM                      = '', Unassigned, pPedidoItensModel.MONTAGEM);
+  pQry.ParamByName('pcred_presumido').Value              := ifThen(pPedidoItensModel.PCRED_PRESUMIDO               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PCRED_PRESUMIDO));
+  pQry.ParamByName('pedidocompraitens_id').Value         := ifThen(pPedidoItensModel.PEDIDOCOMPRAITENS_ID          = '', Unassigned, pPedidoItensModel.PEDIDOCOMPRAITENS_ID);
+  pQry.ParamByName('pedidoitens_id').Value               := ifThen(pPedidoItensModel.PEDIDOITENS_ID                = '', Unassigned, pPedidoItensModel.PEDIDOITENS_ID);
+  pQry.ParamByName('pis_cst').Value                      := ifThen(pPedidoItensModel.PIS_CST                       = '', Unassigned, pPedidoItensModel.PIS_CST);
+  pQry.ParamByName('cofins_cst').Value                   := ifThen(pPedidoItensModel.COFINS_CST                    = '', Unassigned, pPedidoItensModel.COFINS_CST);
+  pQry.ParamByName('ipi_cst').Value                      := ifThen(pPedidoItensModel.IPI_CST                       = '', Unassigned, pPedidoItensModel.IPI_CST);
+  pQry.ParamByName('csosn').Value                        := ifThen(pPedidoItensModel.CSOSN                         = '', Unassigned, pPedidoItensModel.CSOSN);
+  pQry.ParamByName('cfop').Value                         := ifThen(pPedidoItensModel.CFOP                          = '', Unassigned, pPedidoItensModel.CFOP);
 end;
+
 procedure TPedidoItensDao.setParamsArray(var pQry: TFDQuery; pPedidoItensModel: TPedidoItensModel);
 var
   lCount: Integer;
 begin
   for lCount := 0 to Pred(pPedidoItensModel.PedidoItenssLista.Count) do
   begin
-    pQry.ParamByName('codigo_cli').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CODIGO_CLI                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CODIGO_CLI);
-    pQry.ParamByName('numero_ped').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].NUMERO_PED                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].NUMERO_PED);
-    pQry.ParamByName('codigo_pro').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CODIGO_PRO                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CODIGO_PRO);
-    pQry.ParamByName('quantidade_ped').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_PED                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_PED));
-    pQry.ParamByName('quantidade_troca').Values[lCount]             := IIF(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_TROCA              = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_TROCA));
-    pQry.ParamByName('valorunitario_ped').Values[lCount]            := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALORUNITARIO_PED             = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALORUNITARIO_PED));
-    pQry.ParamByName('desconto_ped').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].DESCONTO_PED                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].DESCONTO_PED));
-    pQry.ParamByName('desconto_uf').Values[lCount]                  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].DESCONTO_UF                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].DESCONTO_UF));
-    pQry.ParamByName('valor_ipi').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_IPI                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_IPI));
-    pQry.ParamByName('valor_st').Values[lCount]                     := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_ST                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_ST));
-    pQry.ParamByName('vlrvenda_pro').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VLRVENDA_PRO                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VLRVENDA_PRO));
-    pQry.ParamByName('vlrcusto_pro').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VLRCUSTO_PRO                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VLRCUSTO_PRO));
-    pQry.ParamByName('comissao_ped').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].COMISSAO_PED                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].COMISSAO_PED));
-    pQry.ParamByName('tipo_nf').Values[lCount]                      := IIF(pPedidoItensModel.PedidoItenssLista[lCount].TIPO_NF                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].TIPO_NF);
-    pQry.ParamByName('quantidade_tipo').Values[lCount]              := IIF(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_TIPO               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_TIPO));
-    pQry.ParamByName('observacao').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].OBSERVACAO                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].OBSERVACAO);
-    pQry.ParamByName('ctr_exportacao').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CTR_EXPORTACAO                = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CTR_EXPORTACAO);
-    pQry.ParamByName('produto_referencia').Values[lCount]           := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PRODUTO_REFERENCIA            = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PRODUTO_REFERENCIA);
-    pQry.ParamByName('obs_item').Values[lCount]                     := IIF(pPedidoItensModel.PedidoItenssLista[lCount].OBS_ITEM                      = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].OBS_ITEM);
-    pQry.ParamByName('reserva_id').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].RESERVA_ID                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].RESERVA_ID);
-    pQry.ParamByName('loja').Values[lCount]                         := IIF(pPedidoItensModel.PedidoItenssLista[lCount].LOJA                          = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].LOJA);
-    pQry.ParamByName('aliq_ipi').Values[lCount]                     := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_IPI                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_IPI));
-    pQry.ParamByName('valor_restituicao_st').Values[lCount]         := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_RESTITUICAO_ST          = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_RESTITUICAO_ST));
-    pQry.ParamByName('cfop_id').Values[lCount]                      := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CFOP_ID                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CFOP_ID);
-    pQry.ParamByName('cst').Values[lCount]                          := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CST                           = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CST);
-    pQry.ParamByName('aliq_icms').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_ICMS                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_ICMS));
-    pQry.ParamByName('aliq_icms_st').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_ICMS_ST                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_ICMS_ST));
-    pQry.ParamByName('reducao_st').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].REDUCAO_ST                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].REDUCAO_ST));
-    pQry.ParamByName('mva').Values[lCount]                          := IIF(pPedidoItensModel.PedidoItenssLista[lCount].MVA                           = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].MVA));
-    pQry.ParamByName('reducao_icms').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].REDUCAO_ICMS                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].REDUCAO_ICMS));
-    pQry.ParamByName('base_icms').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].BASE_ICMS                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].BASE_ICMS));
-    pQry.ParamByName('valor_icms').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_ICMS                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_ICMS));
-    pQry.ParamByName('base_st').Values[lCount]                      := IIF(pPedidoItensModel.PedidoItenssLista[lCount].BASE_ST                       = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].BASE_ST));
-    pQry.ParamByName('desc_restituicao_st').Values[lCount]          := IIF(pPedidoItensModel.PedidoItenssLista[lCount].DESC_RESTITUICAO_ST           = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].DESC_RESTITUICAO_ST));
-    pQry.ParamByName('icms_suframa').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ICMS_SUFRAMA                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].ICMS_SUFRAMA));
-    pQry.ParamByName('pis_suframa').Values[lCount]                  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PIS_SUFRAMA                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PIS_SUFRAMA));
-    pQry.ParamByName('cofins_suframa').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].COFINS_SUFRAMA                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].COFINS_SUFRAMA));
-    pQry.ParamByName('ipi_suframa').Values[lCount]                  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].IPI_SUFRAMA                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].IPI_SUFRAMA));
-    pQry.ParamByName('aliq_pis').Values[lCount]                     := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_PIS                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_PIS));
-    pQry.ParamByName('aliq_cofins').Values[lCount]                  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_COFINS                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_COFINS));
-    pQry.ParamByName('base_pis').Values[lCount]                     := IIF(pPedidoItensModel.PedidoItenssLista[lCount].BASE_PIS                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].BASE_PIS));
-    pQry.ParamByName('base_cofins').Values[lCount]                  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].BASE_COFINS                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].BASE_COFINS));
-    pQry.ParamByName('valor_pis').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_PIS                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_PIS));
-    pQry.ParamByName('valor_cofins').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_COFINS                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_COFINS));
-    pQry.ParamByName('prevenda_id').Values[lCount]                  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PREVENDA_ID                   = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PREVENDA_ID);
-    pQry.ParamByName('avulso').Values[lCount]                       := IIF(pPedidoItensModel.PedidoItenssLista[lCount].AVULSO                        = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].AVULSO);
-    pQry.ParamByName('quantidade_new').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_NEW                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_NEW));
-    pQry.ParamByName('balanca').Values[lCount]                      := IIF(pPedidoItensModel.PedidoItenssLista[lCount].BALANCA                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].BALANCA);
-    pQry.ParamByName('ambiente_id').Values[lCount]                  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].AMBIENTE_ID                   = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].AMBIENTE_ID);
-    pQry.ParamByName('ambiente_obs').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].AMBIENTE_OBS                  = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].AMBIENTE_OBS);
-    pQry.ParamByName('projeto_id').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PROJETO_ID                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PROJETO_ID);
-    pQry.ParamByName('largura').Values[lCount]                      := IIF(pPedidoItensModel.PedidoItenssLista[lCount].LARGURA                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].LARGURA);
-    pQry.ParamByName('altura').Values[lCount]                       := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ALTURA                        = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].ALTURA);
-    pQry.ParamByName('item').Values[lCount]                         := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ITEM                          = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].ITEM);
-    pQry.ParamByName('dun14').Values[lCount]                        := IIF(pPedidoItensModel.PedidoItenssLista[lCount].DUN14                         = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].DUN14);
-    pQry.ParamByName('saidas_id').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].SAIDAS_ID                     = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].SAIDAS_ID);
-    pQry.ParamByName('custo_drg').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_DRG                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_DRG));
-    pQry.ParamByName('pos_venda_status').Values[lCount]             := IIF(pPedidoItensModel.PedidoItenssLista[lCount].POS_VENDA_STATUS              = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].POS_VENDA_STATUS);
-    pQry.ParamByName('pos_venda_retorno').Values[lCount]            := IIF(pPedidoItensModel.PedidoItenssLista[lCount].POS_VENDA_RETORNO             = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].POS_VENDA_RETORNO);
-    pQry.ParamByName('pos_venda_obs').Values[lCount]                := IIF(pPedidoItensModel.PedidoItenssLista[lCount].POS_VENDA_OBS                 = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].POS_VENDA_OBS);
-    pQry.ParamByName('bonus').Values[lCount]                        := IIF(pPedidoItensModel.PedidoItenssLista[lCount].BONUS                         = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].BONUS);
-    pQry.ParamByName('bonus_uso').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].BONUS_USO                     = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].BONUS_USO);
-    pQry.ParamByName('funcionario_id').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].FUNCIONARIO_ID                = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].FUNCIONARIO_ID);
-    pQry.ParamByName('producao_id').Values[lCount]                  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PRODUCAO_ID                   = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PRODUCAO_ID);
-    pQry.ParamByName('quantidade_kg').Values[lCount]                := IIF(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_KG                 = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_KG));
-    pQry.ParamByName('reservado').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].RESERVADO                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].RESERVADO));
-    pQry.ParamByName('descricao_produto').Values[lCount]            := IIF(pPedidoItensModel.PedidoItenssLista[lCount].DESCRICAO_PRODUTO             = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].DESCRICAO_PRODUTO);
-    pQry.ParamByName('comissao_percentual').Values[lCount]          := IIF(pPedidoItensModel.PedidoItenssLista[lCount].COMISSAO_PERCENTUAL           = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].COMISSAO_PERCENTUAL));
-    pQry.ParamByName('qtd_checagem').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].QTD_CHECAGEM                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].QTD_CHECAGEM));
-    pQry.ParamByName('qtd_checagem_corte').Values[lCount]           := IIF(pPedidoItensModel.PedidoItenssLista[lCount].QTD_CHECAGEM_CORTE            = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].QTD_CHECAGEM_CORTE));
-    pQry.ParamByName('altura_m').Values[lCount]                     := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ALTURA_M                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].ALTURA_M));
-    pQry.ParamByName('largura_m').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].LARGURA_M                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].LARGURA_M));
-    pQry.ParamByName('profundidade_m').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PROFUNDIDADE_M                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PROFUNDIDADE_M));
-    pQry.ParamByName('vbcufdest').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VBCUFDEST                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VBCUFDEST));
-    pQry.ParamByName('pfcpufdest').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PFCPUFDEST                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PFCPUFDEST));
-    pQry.ParamByName('picmsufdest').Values[lCount]                  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PICMSUFDEST                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PICMSUFDEST));
-    pQry.ParamByName('picmsinter').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PICMSINTER                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PICMSINTER));
-    pQry.ParamByName('picmsinterpart').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PICMSINTERPART                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PICMSINTERPART));
-    pQry.ParamByName('vfcpufdest').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VFCPUFDEST                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VFCPUFDEST));
-    pQry.ParamByName('vicmsufdest').Values[lCount]                  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VICMSUFDEST                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VICMSUFDEST));
-    pQry.ParamByName('vicmsufremet').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VICMSUFREMET                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VICMSUFREMET));
-    pQry.ParamByName('combo_item').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].COMBO_ITEM                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].COMBO_ITEM);
-    pQry.ParamByName('vlrvenda_minimo').Values[lCount]              := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VLRVENDA_MINIMO               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VLRVENDA_MINIMO));
-    pQry.ParamByName('vlrvenda_maximo').Values[lCount]              := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VLRVENDA_MAXIMO               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VLRVENDA_MAXIMO));
-    pQry.ParamByName('impresso').Values[lCount]                     := IIF(pPedidoItensModel.PedidoItenssLista[lCount].IMPRESSO                      = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].IMPRESSO);
-    pQry.ParamByName('orcamento_tsb_id').Values[lCount]             := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ORCAMENTO_TSB_ID              = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].ORCAMENTO_TSB_ID);
-    pQry.ParamByName('gerente_comissao_percentual').Values[lCount]  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].GERENTE_COMISSAO_PERCENTUAL   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].GERENTE_COMISSAO_PERCENTUAL));
-    pQry.ParamByName('xped').Values[lCount]                         := IIF(pPedidoItensModel.PedidoItenssLista[lCount].XPED                          = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].XPED);
-    pQry.ParamByName('nitemped2').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].NITEMPED2                     = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].NITEMPED2);
-    pQry.ParamByName('voutros').Values[lCount]                      := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VOUTROS                       = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VOUTROS));
-    pQry.ParamByName('vfrete').Values[lCount]                       := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VFRETE                        = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VFRETE));
-    pQry.ParamByName('original_pedido_id').Values[lCount]           := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ORIGINAL_PEDIDO_ID            = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].ORIGINAL_PEDIDO_ID);
-    pQry.ParamByName('valor_venda_cadastro').Values[lCount]         := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_VENDA_CADASTRO          = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_VENDA_CADASTRO));
-    pQry.ParamByName('web_pedidoitens_id').Values[lCount]           := IIF(pPedidoItensModel.PedidoItenssLista[lCount].WEB_PEDIDOITENS_ID            = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].WEB_PEDIDOITENS_ID);
-    pQry.ParamByName('tipo_venda').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].TIPO_VENDA                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].TIPO_VENDA);
-    pQry.ParamByName('entrega').Values[lCount]                      := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ENTREGA                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].ENTREGA);
-    pQry.ParamByName('vbcfcpst').Values[lCount]                     := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VBCFCPST                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VBCFCPST));
-    pQry.ParamByName('pfcpst').Values[lCount]                       := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PFCPST                        = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PFCPST));
-    pQry.ParamByName('vfcpst').Values[lCount]                       := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VFCPST                        = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VFCPST));
-    pQry.ParamByName('valor_bonus_servico').Values[lCount]          := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_BONUS_SERVICO           = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_BONUS_SERVICO));
-    pQry.ParamByName('cbenef').Values[lCount]                       := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CBENEF                        = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CBENEF);
-    pQry.ParamByName('vicmsdeson').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VICMSDESON                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VICMSDESON));
-    pQry.ParamByName('motdesicms').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].MOTDESICMS                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].MOTDESICMS);
-    pQry.ParamByName('valor_diferimento').Values[lCount]            := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_DIFERIMENTO             = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_DIFERIMENTO));
-    pQry.ParamByName('valor_montador').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_MONTADOR                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_MONTADOR));
-    pQry.ParamByName('montagem').Values[lCount]                     := IIF(pPedidoItensModel.PedidoItenssLista[lCount].MONTAGEM                      = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].MONTAGEM);
-    pQry.ParamByName('pcred_presumido').Values[lCount]              := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PCRED_PRESUMIDO               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PCRED_PRESUMIDO));
-    pQry.ParamByName('pedidocompraitens_id').Values[lCount]         := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PEDIDOCOMPRAITENS_ID          = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PEDIDOCOMPRAITENS_ID);
-    pQry.ParamByName('pedidoitens_id').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PEDIDOITENS_ID                = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PEDIDOITENS_ID);
-    pQry.ParamByName('pis_cst').Values[lCount]                      := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PIS_CST                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PIS_CST);
-    pQry.ParamByName('cofins_cst').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].COFINS_CST                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].COFINS_CST);
-    pQry.ParamByName('ipi_cst').Values[lCount]                      := IIF(pPedidoItensModel.PedidoItenssLista[lCount].IPI_CST                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].IPI_CST);
-    pQry.ParamByName('csosn').Values[lCount]                        := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CSOSN                         = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CSOSN);
-    pQry.ParamByName('cfop').Values[lCount]                         := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CFOP                          = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CFOP);
+    pQry.ParamByName('codigo_cli').Values[lCount]                   := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].CODIGO_CLI                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CODIGO_CLI);
+    pQry.ParamByName('numero_ped').Values[lCount]                   := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].NUMERO_PED                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].NUMERO_PED);
+    pQry.ParamByName('codigo_pro').Values[lCount]                   := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].CODIGO_PRO                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CODIGO_PRO);
+    pQry.ParamByName('quantidade_ped').Values[lCount]               := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_PED                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_PED));
+    pQry.ParamByName('quantidade_troca').Values[lCount]             := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_TROCA              = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_TROCA));
+    pQry.ParamByName('valorunitario_ped').Values[lCount]            := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VALORUNITARIO_PED             = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALORUNITARIO_PED));
+    pQry.ParamByName('desconto_ped').Values[lCount]                 := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].DESCONTO_PED                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].DESCONTO_PED));
+    pQry.ParamByName('desconto_uf').Values[lCount]                  := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].DESCONTO_UF                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].DESCONTO_UF));
+    pQry.ParamByName('valor_ipi').Values[lCount]                    := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_IPI                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_IPI));
+    pQry.ParamByName('valor_st').Values[lCount]                     := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_ST                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_ST));
+    pQry.ParamByName('vlrvenda_pro').Values[lCount]                 := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VLRVENDA_PRO                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VLRVENDA_PRO));
+    pQry.ParamByName('vlrcusto_pro').Values[lCount]                 := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VLRCUSTO_PRO                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VLRCUSTO_PRO));
+    pQry.ParamByName('comissao_ped').Values[lCount]                 := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].COMISSAO_PED                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].COMISSAO_PED));
+    pQry.ParamByName('tipo_nf').Values[lCount]                      := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].TIPO_NF                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].TIPO_NF);
+    pQry.ParamByName('quantidade_tipo').Values[lCount]              := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_TIPO               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_TIPO));
+    pQry.ParamByName('observacao').Values[lCount]                   := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].OBSERVACAO                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].OBSERVACAO);
+    pQry.ParamByName('ctr_exportacao').Values[lCount]               := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].CTR_EXPORTACAO                = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CTR_EXPORTACAO);
+    pQry.ParamByName('produto_referencia').Values[lCount]           := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].PRODUTO_REFERENCIA            = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PRODUTO_REFERENCIA);
+    pQry.ParamByName('obs_item').Values[lCount]                     := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].OBS_ITEM                      = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].OBS_ITEM);
+    pQry.ParamByName('reserva_id').Values[lCount]                   := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].RESERVA_ID                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].RESERVA_ID);
+    pQry.ParamByName('loja').Values[lCount]                         := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].LOJA                          = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].LOJA);
+    pQry.ParamByName('aliq_ipi').Values[lCount]                     := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_IPI                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_IPI));
+    pQry.ParamByName('valor_restituicao_st').Values[lCount]         := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_RESTITUICAO_ST          = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_RESTITUICAO_ST));
+    pQry.ParamByName('cfop_id').Values[lCount]                      := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].CFOP_ID                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CFOP_ID);
+    pQry.ParamByName('cst').Values[lCount]                          := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].CST                           = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CST);
+    pQry.ParamByName('aliq_icms').Values[lCount]                    := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_ICMS                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_ICMS));
+    pQry.ParamByName('aliq_icms_st').Values[lCount]                 := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_ICMS_ST                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_ICMS_ST));
+    pQry.ParamByName('reducao_st').Values[lCount]                   := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].REDUCAO_ST                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].REDUCAO_ST));
+    pQry.ParamByName('mva').Values[lCount]                          := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].MVA                           = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].MVA));
+    pQry.ParamByName('reducao_icms').Values[lCount]                 := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].REDUCAO_ICMS                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].REDUCAO_ICMS));
+    pQry.ParamByName('base_icms').Values[lCount]                    := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].BASE_ICMS                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].BASE_ICMS));
+    pQry.ParamByName('valor_icms').Values[lCount]                   := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_ICMS                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_ICMS));
+    pQry.ParamByName('base_st').Values[lCount]                      := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].BASE_ST                       = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].BASE_ST));
+    pQry.ParamByName('desc_restituicao_st').Values[lCount]          := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].DESC_RESTITUICAO_ST           = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].DESC_RESTITUICAO_ST));
+    pQry.ParamByName('icms_suframa').Values[lCount]                 := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].ICMS_SUFRAMA                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].ICMS_SUFRAMA));
+    pQry.ParamByName('pis_suframa').Values[lCount]                  := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].PIS_SUFRAMA                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PIS_SUFRAMA));
+    pQry.ParamByName('cofins_suframa').Values[lCount]               := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].COFINS_SUFRAMA                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].COFINS_SUFRAMA));
+    pQry.ParamByName('ipi_suframa').Values[lCount]                  := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].IPI_SUFRAMA                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].IPI_SUFRAMA));
+    pQry.ParamByName('aliq_pis').Values[lCount]                     := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_PIS                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_PIS));
+    pQry.ParamByName('aliq_cofins').Values[lCount]                  := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_COFINS                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_COFINS));
+    pQry.ParamByName('base_pis').Values[lCount]                     := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].BASE_PIS                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].BASE_PIS));
+    pQry.ParamByName('base_cofins').Values[lCount]                  := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].BASE_COFINS                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].BASE_COFINS));
+    pQry.ParamByName('valor_pis').Values[lCount]                    := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_PIS                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_PIS));
+    pQry.ParamByName('valor_cofins').Values[lCount]                 := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_COFINS                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_COFINS));
+    pQry.ParamByName('prevenda_id').Values[lCount]                  := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].PREVENDA_ID                   = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PREVENDA_ID);
+    pQry.ParamByName('avulso').Values[lCount]                       := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].AVULSO                        = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].AVULSO);
+    pQry.ParamByName('quantidade_new').Values[lCount]               := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_NEW                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_NEW));
+    pQry.ParamByName('balanca').Values[lCount]                      := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].BALANCA                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].BALANCA);
+    pQry.ParamByName('ambiente_id').Values[lCount]                  := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].AMBIENTE_ID                   = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].AMBIENTE_ID);
+    pQry.ParamByName('ambiente_obs').Values[lCount]                 := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].AMBIENTE_OBS                  = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].AMBIENTE_OBS);
+    pQry.ParamByName('projeto_id').Values[lCount]                   := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].PROJETO_ID                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PROJETO_ID);
+    pQry.ParamByName('largura').Values[lCount]                      := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].LARGURA                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].LARGURA);
+    pQry.ParamByName('altura').Values[lCount]                       := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].ALTURA                        = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].ALTURA);
+    pQry.ParamByName('item').Values[lCount]                         := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].ITEM                          = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].ITEM);
+    pQry.ParamByName('dun14').Values[lCount]                        := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].DUN14                         = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].DUN14);
+    pQry.ParamByName('saidas_id').Values[lCount]                    := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].SAIDAS_ID                     = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].SAIDAS_ID);
+    pQry.ParamByName('custo_drg').Values[lCount]                    := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_DRG                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_DRG));
+    pQry.ParamByName('pos_venda_status').Values[lCount]             := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].POS_VENDA_STATUS              = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].POS_VENDA_STATUS);
+    pQry.ParamByName('pos_venda_retorno').Values[lCount]            := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].POS_VENDA_RETORNO             = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].POS_VENDA_RETORNO);
+    pQry.ParamByName('pos_venda_obs').Values[lCount]                := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].POS_VENDA_OBS                 = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].POS_VENDA_OBS);
+    pQry.ParamByName('bonus').Values[lCount]                        := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].BONUS                         = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].BONUS);
+    pQry.ParamByName('bonus_uso').Values[lCount]                    := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].BONUS_USO                     = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].BONUS_USO);
+    pQry.ParamByName('funcionario_id').Values[lCount]               := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].FUNCIONARIO_ID                = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].FUNCIONARIO_ID);
+    pQry.ParamByName('producao_id').Values[lCount]                  := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].PRODUCAO_ID                   = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PRODUCAO_ID);
+    pQry.ParamByName('quantidade_kg').Values[lCount]                := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_KG                 = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_KG));
+    pQry.ParamByName('reservado').Values[lCount]                    := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].RESERVADO                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].RESERVADO));
+    pQry.ParamByName('descricao_produto').Values[lCount]            := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].DESCRICAO_PRODUTO             = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].DESCRICAO_PRODUTO);
+    pQry.ParamByName('comissao_percentual').Values[lCount]          := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].COMISSAO_PERCENTUAL           = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].COMISSAO_PERCENTUAL));
+    pQry.ParamByName('qtd_checagem').Values[lCount]                 := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].QTD_CHECAGEM                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].QTD_CHECAGEM));
+    pQry.ParamByName('qtd_checagem_corte').Values[lCount]           := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].QTD_CHECAGEM_CORTE            = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].QTD_CHECAGEM_CORTE));
+    pQry.ParamByName('altura_m').Values[lCount]                     := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].ALTURA_M                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].ALTURA_M));
+    pQry.ParamByName('largura_m').Values[lCount]                    := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].LARGURA_M                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].LARGURA_M));
+    pQry.ParamByName('profundidade_m').Values[lCount]               := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].PROFUNDIDADE_M                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PROFUNDIDADE_M));
+    pQry.ParamByName('vbcufdest').Values[lCount]                    := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VBCUFDEST                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VBCUFDEST));
+    pQry.ParamByName('pfcpufdest').Values[lCount]                   := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].PFCPUFDEST                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PFCPUFDEST));
+    pQry.ParamByName('picmsufdest').Values[lCount]                  := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].PICMSUFDEST                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PICMSUFDEST));
+    pQry.ParamByName('picmsinter').Values[lCount]                   := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].PICMSINTER                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PICMSINTER));
+    pQry.ParamByName('picmsinterpart').Values[lCount]               := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].PICMSINTERPART                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PICMSINTERPART));
+    pQry.ParamByName('vfcpufdest').Values[lCount]                   := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VFCPUFDEST                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VFCPUFDEST));
+    pQry.ParamByName('vicmsufdest').Values[lCount]                  := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VICMSUFDEST                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VICMSUFDEST));
+    pQry.ParamByName('vicmsufremet').Values[lCount]                 := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VICMSUFREMET                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VICMSUFREMET));
+    pQry.ParamByName('combo_item').Values[lCount]                   := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].COMBO_ITEM                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].COMBO_ITEM);
+    pQry.ParamByName('vlrvenda_minimo').Values[lCount]              := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VLRVENDA_MINIMO               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VLRVENDA_MINIMO));
+    pQry.ParamByName('vlrvenda_maximo').Values[lCount]              := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VLRVENDA_MAXIMO               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VLRVENDA_MAXIMO));
+    pQry.ParamByName('impresso').Values[lCount]                     := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].IMPRESSO                      = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].IMPRESSO);
+    pQry.ParamByName('orcamento_tsb_id').Values[lCount]             := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].ORCAMENTO_TSB_ID              = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].ORCAMENTO_TSB_ID);
+    pQry.ParamByName('gerente_comissao_percentual').Values[lCount]  := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].GERENTE_COMISSAO_PERCENTUAL   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].GERENTE_COMISSAO_PERCENTUAL));
+    pQry.ParamByName('xped').Values[lCount]                         := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].XPED                          = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].XPED);
+    pQry.ParamByName('nitemped2').Values[lCount]                    := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].NITEMPED2                     = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].NITEMPED2);
+    pQry.ParamByName('voutros').Values[lCount]                      := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VOUTROS                       = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VOUTROS));
+    pQry.ParamByName('vfrete').Values[lCount]                       := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VFRETE                        = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VFRETE));
+    pQry.ParamByName('original_pedido_id').Values[lCount]           := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].ORIGINAL_PEDIDO_ID            = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].ORIGINAL_PEDIDO_ID);
+    pQry.ParamByName('valor_venda_cadastro').Values[lCount]         := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_VENDA_CADASTRO          = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_VENDA_CADASTRO));
+    pQry.ParamByName('web_pedidoitens_id').Values[lCount]           := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].WEB_PEDIDOITENS_ID            = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].WEB_PEDIDOITENS_ID);
+    pQry.ParamByName('tipo_venda').Values[lCount]                   := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].TIPO_VENDA                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].TIPO_VENDA);
+    pQry.ParamByName('entrega').Values[lCount]                      := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].ENTREGA                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].ENTREGA);
+    pQry.ParamByName('vbcfcpst').Values[lCount]                     := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VBCFCPST                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VBCFCPST));
+    pQry.ParamByName('pfcpst').Values[lCount]                       := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].PFCPST                        = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PFCPST));
+    pQry.ParamByName('vfcpst').Values[lCount]                       := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VFCPST                        = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VFCPST));
+    pQry.ParamByName('valor_bonus_servico').Values[lCount]          := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_BONUS_SERVICO           = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_BONUS_SERVICO));
+    pQry.ParamByName('cbenef').Values[lCount]                       := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].CBENEF                        = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CBENEF);
+    pQry.ParamByName('vicmsdeson').Values[lCount]                   := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VICMSDESON                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VICMSDESON));
+    pQry.ParamByName('motdesicms').Values[lCount]                   := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].MOTDESICMS                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].MOTDESICMS);
+    pQry.ParamByName('valor_diferimento').Values[lCount]            := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_DIFERIMENTO             = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_DIFERIMENTO));
+    pQry.ParamByName('valor_montador').Values[lCount]               := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_MONTADOR                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_MONTADOR));
+    pQry.ParamByName('montagem').Values[lCount]                     := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].MONTAGEM                      = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].MONTAGEM);
+    pQry.ParamByName('pcred_presumido').Values[lCount]              := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].PCRED_PRESUMIDO               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PCRED_PRESUMIDO));
+    pQry.ParamByName('pedidocompraitens_id').Values[lCount]         := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].PEDIDOCOMPRAITENS_ID          = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PEDIDOCOMPRAITENS_ID);
+    pQry.ParamByName('pedidoitens_id').Values[lCount]               := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].PEDIDOITENS_ID                = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PEDIDOITENS_ID);
+    pQry.ParamByName('pis_cst').Values[lCount]                      := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].PIS_CST                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PIS_CST);
+    pQry.ParamByName('cofins_cst').Values[lCount]                   := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].COFINS_CST                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].COFINS_CST);
+    pQry.ParamByName('ipi_cst').Values[lCount]                      := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].IPI_CST                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].IPI_CST);
+    pQry.ParamByName('csosn').Values[lCount]                        := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].CSOSN                         = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CSOSN);
+    pQry.ParamByName('cfop').Values[lCount]                         := ifThen(pPedidoItensModel.PedidoItenssLista[lCount].CFOP                          = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CFOP);
   end;
 end;
 

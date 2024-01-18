@@ -3,7 +3,7 @@ unit PrecoVendaModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao;
 
@@ -130,9 +130,9 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lPrecoVendaDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lPrecoVendaDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lPrecoVendaDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lPrecoVendaDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lPrecoVendaDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lPrecoVendaDao.excluir(Self);
     end;
 
   finally

@@ -3,8 +3,7 @@ unit ContasReceberModel;
 interface
 
 uses
-  Terasoft.Types.Acao,
-  Terasoft.Types.ContasReceber,
+  Terasoft.Types,
   System.Generics.Collections,
   Terasoft.FuncoesTexto,
   ContasReceberItensDao,
@@ -429,9 +428,9 @@ begin
   lContasReceberDao := TContasReceberDao.Create(vIConexao);
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lContasReceberDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lContasReceberDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lContasReceberDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lContasReceberDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lContasReceberDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lContasReceberDao.excluir(Self);
     end;
   finally
     lContasReceberDao.Free;

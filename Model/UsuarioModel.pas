@@ -3,7 +3,7 @@ unit UsuarioModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.Generics.Collections,
@@ -37,6 +37,21 @@ type
     FTotalRecords: Integer;
     FOTP: Variant;
     FNOME: Variant;
+    FHASH: Variant;
+    FCODIGO_ANTERIOR: Variant;
+    FUUID: Variant;
+    FPEDIDO_WEB: Variant;
+    FSENHA_WINDOWS: Variant;
+    FSQL_PRODUTO_FC: Variant;
+    FURL_WINDOWS: Variant;
+    FUSUARIO_WINDOWS: Variant;
+    FSYSTIME: Variant;
+    FPAGINA_INICIAL_WEB: Variant;
+    FATALHOS_WEB: Variant;
+    FUUIDALTERACAO: Variant;
+    FADM_PEDIDO_WEB: Variant;
+    FMENU_OCULTO_WEB: Variant;
+    FDATA_INC: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCAIXA(const Value: Variant);
     procedure SetCountView(const Value: String);
@@ -59,26 +74,57 @@ type
     procedure SetSTATUS(const Value: Variant);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
+    procedure SetADM_PEDIDO_WEB(const Value: Variant);
+    procedure SetATALHOS_WEB(const Value: Variant);
+    procedure SetCODIGO_ANTERIOR(const Value: Variant);
+    procedure SetDATA_INC(const Value: Variant);
+    procedure SetHASH(const Value: Variant);
+    procedure SetMENU_OCULTO_WEB(const Value: Variant);
+    procedure SetPAGINA_INICIAL_WEB(const Value: Variant);
+    procedure SetPEDIDO_WEB(const Value: Variant);
+    procedure SetSENHA_WINDOWS(const Value: Variant);
+    procedure SetSQL_PRODUTO_FC(const Value: Variant);
+    procedure SetSYSTIME(const Value: Variant);
+    procedure SetURL_WINDOWS(const Value: Variant);
+    procedure SetUSUARIO_WINDOWS(const Value: Variant);
+    procedure SetUUID(const Value: Variant);
+    procedure SetUUIDALTERACAO(const Value: Variant);
 
   public
 
-    property ID            :Variant read FID write SetID;
-    property STATUS        :Variant read FSTATUS write SetSTATUS;
-    property SENHA         :Variant read FSENHA write SetSENHA;
-    property NOME          :Variant read FNOME write SetNOME;
-    property FANTASIA      :Variant read FFANTASIA write SetFANTASIA;
-    property DPTO          :Variant read FDPTO write SetDPTO;
-    property NIVEL         :Variant read FNIVEL write SetNIVEL;
-    property DESCONTO      :Variant read FDESCONTO write SetDESCONTO;
-    property CAIXA         :Variant read FCAIXA write SetCAIXA;
-    property PERFIL_NEW_ID :Variant read FPERFIL_NEW_ID write SetPERFIL_NEW_ID;
-    property SENHA_PEDIDO  :Variant read FSENHA_PEDIDO write SetSENHA_PEDIDO;
-    property PRECO_ID      :Variant read FPRECO_ID write SetPRECO_ID;
-    property LOJA_ID       :Variant read FLOJA_ID write SetLOJA_ID;
-    property OTP           :Variant read FOTP write SetOTP;
+    property ID                  : Variant read FID write SetID;
+    property STATUS              : Variant read FSTATUS write SetSTATUS;
+    property SENHA               : Variant read FSENHA write SetSENHA;
+    property NOME                : Variant read FNOME write SetNOME;
+    property FANTASIA            : Variant read FFANTASIA write SetFANTASIA;
+    property DPTO                : Variant read FDPTO write SetDPTO;
+    property NIVEL               : Variant read FNIVEL write SetNIVEL;
+    property DESCONTO            : Variant read FDESCONTO write SetDESCONTO;
+    property CAIXA               : Variant read FCAIXA write SetCAIXA;
+    property PERFIL_NEW_ID       : Variant read FPERFIL_NEW_ID write SetPERFIL_NEW_ID;
+    property SENHA_PEDIDO        : Variant read FSENHA_PEDIDO write SetSENHA_PEDIDO;
+    property PRECO_ID            : Variant read FPRECO_ID write SetPRECO_ID;
+    property LOJA_ID             : Variant read FLOJA_ID write SetLOJA_ID;
+    property OTP                 : Variant read FOTP write SetOTP;
+    property DATA_INC            : Variant read FDATA_INC write SetDATA_INC;
+    property HASH                : Variant read FHASH write SetHASH;
+    property ADM_PEDIDO_WEB      : Variant read FADM_PEDIDO_WEB write SetADM_PEDIDO_WEB;
+    property SQL_PRODUTO_FC      : Variant read FSQL_PRODUTO_FC write SetSQL_PRODUTO_FC;
+    property UUID                : Variant read FUUID write SetUUID;
+    property UUIDALTERACAO       : Variant read FUUIDALTERACAO write SetUUIDALTERACAO;
+    property CODIGO_ANTERIOR     : Variant read FCODIGO_ANTERIOR write SetCODIGO_ANTERIOR;
+    property SYSTIME             : Variant read FSYSTIME write SetSYSTIME;
+    property ATALHOS_WEB         : Variant read FATALHOS_WEB write SetATALHOS_WEB;
+    property MENU_OCULTO_WEB     : Variant read FMENU_OCULTO_WEB write SetMENU_OCULTO_WEB;
+    property PEDIDO_WEB          : Variant read FPEDIDO_WEB write SetPEDIDO_WEB;
+    property USUARIO_WINDOWS     : Variant read FUSUARIO_WINDOWS write SetUSUARIO_WINDOWS;
+    property SENHA_WINDOWS       : Variant read FSENHA_WINDOWS write SetSENHA_WINDOWS;
+    property URL_WINDOWS         : Variant read FURL_WINDOWS write SetURL_WINDOWS;
+    property PAGINA_INICIAL_WEB  : Variant read FPAGINA_INICIAL_WEB write SetPAGINA_INICIAL_WEB;
 
-    property Acao          :TAcao   read FAcao write SetAcao;
-    property UsuariosLista: TObjectList<TUsuarioModel> read FUsuariosLista write FUsuariosLista;
+
+    property Acao          : TAcao                      read FAcao          write SetAcao;
+    property UsuariosLista : TObjectList<TUsuarioModel> read FUsuariosLista write FUsuariosLista;
 
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -213,9 +259,9 @@ begin
   try
 
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lUsuarioDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lUsuarioDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lUsuarioDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lUsuarioDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lUsuarioDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lUsuarioDao.excluir(Self);
     end;
 
   finally
@@ -228,14 +274,34 @@ begin
   FAcao := Value;
 end;
 
+procedure TUsuarioModel.SetADM_PEDIDO_WEB(const Value: Variant);
+begin
+  FADM_PEDIDO_WEB := Value;
+end;
+
+procedure TUsuarioModel.SetATALHOS_WEB(const Value: Variant);
+begin
+  FATALHOS_WEB := Value;
+end;
+
 procedure TUsuarioModel.SetCAIXA(const Value: Variant);
 begin
   FCAIXA := Value;
 end;
 
+procedure TUsuarioModel.SetCODIGO_ANTERIOR(const Value: Variant);
+begin
+  FCODIGO_ANTERIOR := Value;
+end;
+
 procedure TUsuarioModel.SetCountView(const Value: String);
 begin
   FCountView := Value;
+end;
+
+procedure TUsuarioModel.SetDATA_INC(const Value: Variant);
+begin
+  FDATA_INC := Value;
 end;
 
 procedure TUsuarioModel.SetDESCONTO(const Value: Variant);
@@ -251,6 +317,11 @@ end;
 procedure TUsuarioModel.SetFANTASIA(const Value: Variant);
 begin
   FFANTASIA := Value;
+end;
+
+procedure TUsuarioModel.SetHASH(const Value: Variant);
+begin
+  FHASH := Value;
 end;
 
 procedure TUsuarioModel.SetID(const Value: Variant);
@@ -273,6 +344,11 @@ begin
   FLOJA_ID := Value;
 end;
 
+procedure TUsuarioModel.SetMENU_OCULTO_WEB(const Value: Variant);
+begin
+  FMENU_OCULTO_WEB := Value;
+end;
+
 procedure TUsuarioModel.SetNIVEL(const Value: Variant);
 begin
   FNIVEL := Value;
@@ -291,6 +367,16 @@ end;
 procedure TUsuarioModel.SetOTP(const Value: Variant);
 begin
   FOTP := Value;
+end;
+
+procedure TUsuarioModel.SetPAGINA_INICIAL_WEB(const Value: Variant);
+begin
+  FPAGINA_INICIAL_WEB := Value;
+end;
+
+procedure TUsuarioModel.SetPEDIDO_WEB(const Value: Variant);
+begin
+  FPEDIDO_WEB := Value;
 end;
 
 procedure TUsuarioModel.SetPERFIL_NEW_ID(const Value: Variant);
@@ -313,6 +399,16 @@ begin
   FSENHA_PEDIDO := Value;
 end;
 
+procedure TUsuarioModel.SetSENHA_WINDOWS(const Value: Variant);
+begin
+  FSENHA_WINDOWS := Value;
+end;
+
+procedure TUsuarioModel.SetSQL_PRODUTO_FC(const Value: Variant);
+begin
+  FSQL_PRODUTO_FC := Value;
+end;
+
 procedure TUsuarioModel.SetStartRecordView(const Value: String);
 begin
   FStartRecordView := Value;
@@ -323,9 +419,34 @@ begin
   FSTATUS := Value;
 end;
 
+procedure TUsuarioModel.SetSYSTIME(const Value: Variant);
+begin
+  FSYSTIME := Value;
+end;
+
 procedure TUsuarioModel.SetTotalRecords(const Value: Integer);
 begin
   FTotalRecords := Value;
+end;
+
+procedure TUsuarioModel.SetURL_WINDOWS(const Value: Variant);
+begin
+  FURL_WINDOWS := Value;
+end;
+
+procedure TUsuarioModel.SetUSUARIO_WINDOWS(const Value: Variant);
+begin
+  FUSUARIO_WINDOWS := Value;
+end;
+
+procedure TUsuarioModel.SetUUID(const Value: Variant);
+begin
+  FUUID := Value;
+end;
+
+procedure TUsuarioModel.SetUUIDALTERACAO(const Value: Variant);
+begin
+  FUUIDALTERACAO := Value;
 end;
 
 procedure TUsuarioModel.SetWhereView(const Value: String);

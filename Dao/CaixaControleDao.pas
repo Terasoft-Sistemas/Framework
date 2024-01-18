@@ -73,8 +73,8 @@ implementation
 
 constructor TCaixaControleDao.Create(pIConexao : IConexao);
 begin
-  vIConexao := pIConexao;
-  vConstrutor := TConstrutorDao.Create(vConstrutor);
+  vIConexao   := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 function TCaixaControleDao.dataFechamento(pIdCaixa, pUsuario: String): String;

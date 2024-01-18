@@ -9,7 +9,7 @@ uses
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  Terasoft.Utils,
+  Terasoft.ConstrutorDao,
   Terasoft.FuncoesTexto,
   Interfaces.Conexao;
 
@@ -17,7 +17,9 @@ type
   TNFDao = class
 
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
+
     FNFLista: TObjectList<TNFModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -36,9 +38,9 @@ type
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-    function montaCondicaoQuery: String;
-    procedure obterTotalRegistros;
 
+    function where: String;
+    procedure obterTotalRegistros;
 
   public
     property NFLista: TObjectList<TNFModel> read FNFLista write SetNFLista;
@@ -54,8 +56,9 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function incluir(ANFModel: TNFModel): String;
-    function alterar(ANFModel: TNFModel): String;
+    function incluir(pNFModel: TNFModel): String;
+    function alterar(pNFModel: TNFModel): String;
+    function excluir(pNFModel: TNFModel): String;
 
     function carregaClasse(ID: String): TNFModel;
     procedure obterLista;
@@ -71,13 +74,30 @@ implementation
 
 constructor TNFDao.Create(pIConexao : IConexao);
 begin
-  vIConexao := pIConexao;
+  vIConexao   := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TNFDao.Destroy;
 begin
   inherited;
 
+end;
+
+function TNFDao.excluir(pNFModel: TNFModel): String;
+var
+  lQry: TFDQuery;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+   lQry.ExecSQL('delete from NF where NUMERO_NF = :NUMERO_NF',[pNFModel.NUMERO_NF]);
+   lQry.ExecSQL;
+   Result := pNFModel.NUMERO_NF;
+
+  finally
+    lQry.Free;
+  end;
 end;
 
 function TNFDao.carregaClasse(ID: String): TNFModel;
@@ -245,306 +265,25 @@ begin
   end;
 end;
 
-function TNFDao.incluir(ANFModel: TNFModel): String;
+function TNFDao.incluir(pNFModel: TNFModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL :=
-        ' insert into nf (numero_nf,                   '+#13+
-        '                 serie_nf,                    '+#13+
-        '                 codigo_cli,                  '+#13+
-        '                 codigo_ven,                  '+#13+
-        '                 codigo_port,                 '+#13+
-        '                 codigo_tip,                  '+#13+
-        '                 data_nf,                     '+#13+
-        '                 valor_nf,                    '+#13+
-        '                 desc_nf,                     '+#13+
-        '                 acres_nf,                    '+#13+
-        '                 total_nf,                    '+#13+
-        '                 bicms_nf,                    '+#13+
-        '                 vicms_nf,                    '+#13+
-        '                 icms_nf,                     '+#13+
-        '                 usuario_nf,                  '+#13+
-        '                 numero_ped,                  '+#13+
-        '                 tipo_nf,                     '+#13+
-        '                 status_nf,                   '+#13+
-        '                 desconto_nf,                 '+#13+
-        '                 cfop_nf,                     '+#13+
-        '                 fisco_nf,                    '+#13+
-        '                 obs_nf,                      '+#13+
-        '                 numero_ecf,                  '+#13+
-        '                 data_cancelamento,           '+#13+
-        '                 peso_liquido,                '+#13+
-        '                 peso_bruto,                  '+#13+
-        '                 valor_extenso,               '+#13+
-        '                 qtde_volume,                 '+#13+
-        '                 especie_volume,              '+#13+
-        '                 transportadora,              '+#13+
-        '                 data_saida,                  '+#13+
-        '                 frete,                       '+#13+
-        '                 condicoes_pagto,             '+#13+
-        '                 loja,                        '+#13+
-        '                 isenta_nf,                   '+#13+
-        '                 outros_nf,                   '+#13+
-        '                 base_st_nf,                  '+#13+
-        '                 icms_st,                     '+#13+
-        '                 ipi_nf,                      '+#13+
-        '                 id_nf3,                      '+#13+
-        '                 recibo_nfe,                  '+#13+
-        '                 protocolo_nfe,               '+#13+
-        '                 nfe,                         '+#13+
-        '                 autorizada,                  '+#13+
-        '                 modelo,                      '+#13+
-        '                 vlrentrada_nf,               '+#13+
-        '                 qtparcelas,                  '+#13+
-        '                 numero_serie_ecf,            '+#13+
-        '                 ccf_cupom,                   '+#13+
-        '                 email_nfe,                   '+#13+
-        '                 nome_xml,                    '+#13+
-        '                 status,                      '+#13+
-        '                 pcte,                        '+#13+
-        '                 hem,                         '+#13+
-        '                 dr,                          '+#13+
-        '                 aih,                         '+#13+
-        '                 vend,                        '+#13+
-        '                 conv,                        '+#13+
-        '                 id_info_complementar,        '+#13+
-        '                 tipo_frete,                  '+#13+
-        '                 transportadora_id,           '+#13+
-        '                 vcredicmssn,                 '+#13+
-        '                 vpis,                        '+#13+
-        '                 vcofins,                     '+#13+
-        '                 id,                          '+#13+
-        '                 vtottrib,                    '+#13+
-        '                 obs_fiscal,                  '+#13+
-        '                 info_complementar,           '+#13+
-        '                 cfop_id,                     '+#13+
-        '                 uf_embarque,                 '+#13+
-        '                 local_embarque,              '+#13+
-        '                 vseg,                        '+#13+
-        '                 vii,                         '+#13+
-        '                 valor_suframa,               '+#13+
-        '                 xml_nfe,                     '+#13+
-        '                 status_transmissao,          '+#13+
-        '                 hora_saida,                  '+#13+
-        '                 vtottrib_federal,            '+#13+
-        '                 vtottrib_estadual,           '+#13+
-        '                 vtottrib_municipal,          '+#13+
-        '                 ctr_impressao_nf,            '+#13+
-        '                 valor_pago,                  '+#13+
-        '                 xped,                        '+#13+
-        '                 cnpj_cpf_consumidor,         '+#13+
-        '                 devolucao_id,                '+#13+
-        '                 pedido_id,                   '+#13+
-        '                 os_id,                       '+#13+
-        '                 orcamento_id,                '+#13+
-        '                 saidas_id,                   '+#13+
-        '                 ref_cuf,                     '+#13+
-        '                 ref_aamm,                    '+#13+
-        '                 ref_cnpj,                    '+#13+
-        '                 ref_mod,                     '+#13+
-        '                 ref_serie,                   '+#13+
-        '                 ref_nnf,                     '+#13+
-        '                 vfcp,                        '+#13+
-        '                 vfcpst,                      '+#13+
-        '                 vfcpstret,                   '+#13+
-        '                 vfcpufdest,                  '+#13+
-        '                 vicmsufdest,                 '+#13+
-        '                 vicmsufremet,                '+#13+
-        '                 indpres,                     '+#13+
-        '                 gnre,                        '+#13+
-        '                 vdolar,                      '+#13+
-        '                 numero_processo,             '+#13+
-        '                 gnre_impresso,               '+#13+
-        '                 tra_placa,                   '+#13+
-        '                 tra_rntc,                    '+#13+
-        '                 tra_uf,                      '+#13+
-        '                 tra_marca,                   '+#13+
-        '                 tra_numeracao,               '+#13+
-        '                 transportadora_redespacho_id,'+#13+
-        '                 despesa_importacao,          '+#13+
-        '                 data_hora_autorizacao,       '+#13+
-        '                 vipidevol,                   '+#13+
-        '                 n_serie_sat,                 '+#13+
-        '                 caixa_sat,                   '+#13+
-        '                 agrupamento_fatura,          '+#13+
-        '                 consignado_id,               '+#13+
-        '                 consignado_status,           '+#13+
-        '                 peso_liquido_new,            '+#13+
-        '                 peso_bruto_new,              '+#13+
-        '                 status_pendente,             '+#13+
-        '                 cnf,                         '+#13+
-        '                 vicmsdeson,                  '+#13+
-        '                 vicmsstret,                  '+#13+
-        '                 entrada_id,                  '+#13+
-        '                 intermediador_cnpj,          '+#13+
-        '                 intermediador_nome,          '+#13+
-        '                 loja_origem,                 '+#13+
-        '                 entrega_endereco,            '+#13+
-        '                 entrega_complemento,         '+#13+
-        '                 entrega_numero,              '+#13+
-        '                 entrega_bairro,              '+#13+
-        '                 entrega_cidade,              '+#13+
-        '                 entrega_cep,                 '+#13+
-        '                 entrega_uf,                  '+#13+
-        '                 entrega_cod_municipio,       '+#13+
-        '                 web_pedido_id,               '+#13+
-        '                 transferencia_id)            '+#13+
-        ' values (:numero_nf,                          '+#13+
-        '         :serie_nf,                           '+#13+
-        '         :codigo_cli,                         '+#13+
-        '         :codigo_ven,                         '+#13+
-        '         :codigo_port,                        '+#13+
-        '         :codigo_tip,                         '+#13+
-        '         :data_nf,                            '+#13+
-        '         :valor_nf,                           '+#13+
-        '         :desc_nf,                            '+#13+
-        '         :acres_nf,                           '+#13+
-        '         :total_nf,                           '+#13+
-        '         :bicms_nf,                           '+#13+
-        '         :vicms_nf,                           '+#13+
-        '         :icms_nf,                            '+#13+
-        '         :usuario_nf,                         '+#13+
-        '         :numero_ped,                         '+#13+
-        '         :tipo_nf,                            '+#13+
-        '         :status_nf,                          '+#13+
-        '         :desconto_nf,                        '+#13+
-        '         :cfop_nf,                            '+#13+
-        '         :fisco_nf,                           '+#13+
-        '         :obs_nf,                             '+#13+
-        '         :numero_ecf,                         '+#13+
-        '         :data_cancelamento,                  '+#13+
-        '         :peso_liquido,                       '+#13+
-        '         :peso_bruto,                         '+#13+
-        '         :valor_extenso,                      '+#13+
-        '         :qtde_volume,                        '+#13+
-        '         :especie_volume,                     '+#13+
-        '         :transportadora,                     '+#13+
-        '         :data_saida,                         '+#13+
-        '         :frete,                              '+#13+
-        '         :condicoes_pagto,                    '+#13+
-        '         :loja,                               '+#13+
-        '         :isenta_nf,                          '+#13+
-        '         :outros_nf,                          '+#13+
-        '         :base_st_nf,                         '+#13+
-        '         :icms_st,                            '+#13+
-        '         :ipi_nf,                             '+#13+
-        '         :id_nf3,                             '+#13+
-        '         :recibo_nfe,                         '+#13+
-        '         :protocolo_nfe,                      '+#13+
-        '         :nfe,                                '+#13+
-        '         :autorizada,                         '+#13+
-        '         :modelo,                             '+#13+
-        '         :vlrentrada_nf,                      '+#13+
-        '         :qtparcelas,                         '+#13+
-        '         :numero_serie_ecf,                   '+#13+
-        '         :ccf_cupom,                          '+#13+
-        '         :email_nfe,                          '+#13+
-        '         :nome_xml,                           '+#13+
-        '         :status,                             '+#13+
-        '         :pcte,                               '+#13+
-        '         :hem,                                '+#13+
-        '         :dr,                                 '+#13+
-        '         :aih,                                '+#13+
-        '         :vend,                               '+#13+
-        '         :conv,                               '+#13+
-        '         :id_info_complementar,               '+#13+
-        '         :tipo_frete,                         '+#13+
-        '         :transportadora_id,                  '+#13+
-        '         :vcredicmssn,                        '+#13+
-        '         :vpis,                               '+#13+
-        '         :vcofins,                            '+#13+
-        '         :id,                                 '+#13+
-        '         :vtottrib,                           '+#13+
-        '         :obs_fiscal,                         '+#13+
-        '         :info_complementar,                  '+#13+
-        '         :cfop_id,                            '+#13+
-        '         :uf_embarque,                        '+#13+
-        '         :local_embarque,                     '+#13+
-        '         :vseg,                               '+#13+
-        '         :vii,                                '+#13+
-        '         :valor_suframa,                      '+#13+
-        '         :xml_nfe,                            '+#13+
-        '         :status_transmissao,                 '+#13+
-        '         :hora_saida,                         '+#13+
-        '         :vtottrib_federal,                   '+#13+
-        '         :vtottrib_estadual,                  '+#13+
-        '         :vtottrib_municipal,                 '+#13+
-        '         :ctr_impressao_nf,                   '+#13+
-        '         :valor_pago,                         '+#13+
-        '         :xped,                               '+#13+
-        '         :cnpj_cpf_consumidor,                '+#13+
-        '         :devolucao_id,                       '+#13+
-        '         :pedido_id,                          '+#13+
-        '         :os_id,                              '+#13+
-        '         :orcamento_id,                       '+#13+
-        '         :saidas_id,                          '+#13+
-        '         :ref_cuf,                            '+#13+
-        '         :ref_aamm,                           '+#13+
-        '         :ref_cnpj,                           '+#13+
-        '         :ref_mod,                            '+#13+
-        '         :ref_serie,                          '+#13+
-        '         :ref_nnf,                            '+#13+
-        '         :vfcp,                               '+#13+
-        '         :vfcpst,                             '+#13+
-        '         :vfcpstret,                          '+#13+
-        '         :vfcpufdest,                         '+#13+
-        '         :vicmsufdest,                        '+#13+
-        '         :vicmsufremet,                       '+#13+
-        '         :indpres,                            '+#13+
-        '         :gnre,                               '+#13+
-        '         :vdolar,                             '+#13+
-        '         :numero_processo,                    '+#13+
-        '         :gnre_impresso,                      '+#13+
-        '         :tra_placa,                          '+#13+
-        '         :tra_rntc,                           '+#13+
-        '         :tra_uf,                             '+#13+
-        '         :tra_marca,                          '+#13+
-        '         :tra_numeracao,                      '+#13+
-        '         :transportadora_redespacho_id,       '+#13+
-        '         :despesa_importacao,                 '+#13+
-        '         :data_hora_autorizacao,              '+#13+
-        '         :vipidevol,                          '+#13+
-        '         :n_serie_sat,                        '+#13+
-        '         :caixa_sat,                          '+#13+
-        '         :agrupamento_fatura,                 '+#13+
-        '         :consignado_id,                      '+#13+
-        '         :consignado_status,                  '+#13+
-        '         :peso_liquido_new,                   '+#13+
-        '         :peso_bruto_new,                     '+#13+
-        '         :status_pendente,                    '+#13+
-        '         :cnf,                                '+#13+
-        '         :vicmsdeson,                         '+#13+
-        '         :vicmsstret,                         '+#13+
-        '         :entrada_id,                         '+#13+
-        '         :intermediador_cnpj,                 '+#13+
-        '         :intermediador_nome,                 '+#13+
-        '         :loja_origem,                        '+#13+
-        '         :entrega_endereco,                   '+#13+
-        '         :entrega_complemento,                '+#13+
-        '         :entrega_numero,                     '+#13+
-        '         :entrega_bairro,                     '+#13+
-        '         :entrega_cidade,                     '+#13+
-        '         :entrega_cep,                        '+#13+
-        '         :entrega_uf,                         '+#13+
-        '         :entrega_cod_municipio,              '+#13+
-        '         :web_pedido_id,                      '+#13+
-        '         :transferencia_id)                   '+#13+
-        '   returning numero_nf ';
+  lSQL := vConstrutor.gerarInsert('NF', 'NUMERO_NF');
 
   try
     lQry.SQL.Add(lSQL);
     lQry.ParamByName('numero_nf').Value  := vIConexao.Generetor('gen_nf');
 
-    if ANFModel.MODELO = '65' then
+    if pNFModel.MODELO = '65' then
       lQry.ParamByName('numero_ecf').Value := vIConexao.Generetor('GEN_NFCe')
-    else if ANFModel.MODELO = '55' then
+    else if pNFModel.MODELO = '55' then
       lQry.ParamByName('numero_ecf').Value := vIConexao.Generetor('GEN_NF2');
 
-    setParams(lQry, ANFModel);
+    setParams(lQry, pNFModel);
 
     lQry.Open;
 
@@ -554,165 +293,22 @@ begin
   end;
 end;
 
-function TNFDao.alterar(ANFModel: TNFModel): String;
+function TNFDao.alterar(pNFModel: TNFModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
 begin
   lQry := vIConexao.CriarQuery;
-
-  lSQL :=
-        ' update nf                                                           '+#13+
-        ' set codigo_cli = :codigo_cli,                                       '+#13+
-        '     codigo_ven = :codigo_ven,                                       '+#13+
-        '     SERIE_NF = :SERIE_NF,                                           '+#13+
-        '     codigo_port = :codigo_port,                                     '+#13+
-        '     codigo_tip = :codigo_tip,                                       '+#13+
-        '     data_nf = :data_nf,                                             '+#13+
-        '     valor_nf = :valor_nf,                                           '+#13+
-        '     desc_nf = :desc_nf,                                             '+#13+
-        '     acres_nf = :acres_nf,                                           '+#13+
-        '     total_nf = :total_nf,                                           '+#13+
-        '     bicms_nf = :bicms_nf,                                           '+#13+
-        '     vicms_nf = :vicms_nf,                                           '+#13+
-        '     icms_nf = :icms_nf,                                             '+#13+
-        '     usuario_nf = :usuario_nf,                                       '+#13+
-        '     numero_ped = :numero_ped,                                       '+#13+
-        '     tipo_nf = :tipo_nf,                                             '+#13+
-        '     status_nf = :status_nf,                                         '+#13+
-        '     desconto_nf = :desconto_nf,                                     '+#13+
-        '     cfop_nf = :cfop_nf,                                             '+#13+
-        '     fisco_nf = :fisco_nf,                                           '+#13+
-        '     obs_nf = :obs_nf,                                               '+#13+
-        '     numero_ecf = :numero_ecf,                                       '+#13+
-        '     data_cancelamento = :data_cancelamento,                         '+#13+
-        '     peso_liquido = :peso_liquido,                                   '+#13+
-        '     peso_bruto = :peso_bruto,                                       '+#13+
-        '     valor_extenso = :valor_extenso,                                 '+#13+
-        '     qtde_volume = :qtde_volume,                                     '+#13+
-        '     especie_volume = :especie_volume,                               '+#13+
-        '     transportadora = :transportadora,                               '+#13+
-        '     data_saida = :data_saida,                                       '+#13+
-        '     frete = :frete,                                                 '+#13+
-        '     condicoes_pagto = :condicoes_pagto,                             '+#13+
-        '     loja = :loja,                                                   '+#13+
-        '     isenta_nf = :isenta_nf,                                         '+#13+
-        '     outros_nf = :outros_nf,                                         '+#13+
-        '     base_st_nf = :base_st_nf,                                       '+#13+
-        '     icms_st = :icms_st,                                             '+#13+
-        '     ipi_nf = :ipi_nf,                                               '+#13+
-        '     id_nf3 = :id_nf3,                                               '+#13+
-        '     recibo_nfe = :recibo_nfe,                                       '+#13+
-        '     protocolo_nfe = :protocolo_nfe,                                 '+#13+
-        '     nfe = :nfe,                                                     '+#13+
-        '     autorizada = :autorizada,                                       '+#13+
-        '     modelo = :modelo,                                               '+#13+
-        '     vlrentrada_nf = :vlrentrada_nf,                                 '+#13+
-        '     qtparcelas = :qtparcelas,                                       '+#13+
-        '     numero_serie_ecf = :numero_serie_ecf,                           '+#13+
-        '     ccf_cupom = :ccf_cupom,                                         '+#13+
-        '     email_nfe = :email_nfe,                                         '+#13+
-        '     nome_xml = :nome_xml,                                           '+#13+
-        '     status = :status,                                               '+#13+
-        '     pcte = :pcte,                                                   '+#13+
-        '     hem = :hem,                                                     '+#13+
-        '     dr = :dr,                                                       '+#13+
-        '     aih = :aih,                                                     '+#13+
-        '     vend = :vend,                                                   '+#13+
-        '     conv = :conv,                                                   '+#13+
-        '     id_info_complementar = :id_info_complementar,                   '+#13+
-        '     tipo_frete = :tipo_frete,                                       '+#13+
-        '     transportadora_id = :transportadora_id,                         '+#13+
-        '     vcredicmssn = :vcredicmssn,                                     '+#13+
-        '     vpis = :vpis,                                                   '+#13+
-        '     vcofins = :vcofins,                                             '+#13+
-        '     id = :id,                                                       '+#13+
-        '     vtottrib = :vtottrib,                                           '+#13+
-        '     obs_fiscal = :obs_fiscal,                                       '+#13+
-        '     info_complementar = :info_complementar,                         '+#13+
-        '     cfop_id = :cfop_id,                                             '+#13+
-        '     uf_embarque = :uf_embarque,                                     '+#13+
-        '     local_embarque = :local_embarque,                               '+#13+
-        '     vseg = :vseg,                                                   '+#13+
-        '     vii = :vii,                                                     '+#13+
-        '     valor_suframa = :valor_suframa,                                 '+#13+
-        '     xml_nfe = :xml_nfe,                                             '+#13+
-        '     status_transmissao = :status_transmissao,                       '+#13+
-        '     hora_saida = :hora_saida,                                       '+#13+
-        '     vtottrib_federal = :vtottrib_federal,                           '+#13+
-        '     vtottrib_estadual = :vtottrib_estadual,                         '+#13+
-        '     vtottrib_municipal = :vtottrib_municipal,                       '+#13+
-        '     ctr_impressao_nf = :ctr_impressao_nf,                           '+#13+
-        '     valor_pago = :valor_pago,                                       '+#13+
-        '     xped = :xped,                                                   '+#13+
-        '     cnpj_cpf_consumidor = :cnpj_cpf_consumidor,                     '+#13+
-        '     devolucao_id = :devolucao_id,                                   '+#13+
-        '     pedido_id = :pedido_id,                                         '+#13+
-        '     os_id = :os_id,                                                 '+#13+
-        '     orcamento_id = :orcamento_id,                                   '+#13+
-        '     saidas_id = :saidas_id,                                         '+#13+
-        '     ref_cuf = :ref_cuf,                                             '+#13+
-        '     ref_aamm = :ref_aamm,                                           '+#13+
-        '     ref_cnpj = :ref_cnpj,                                           '+#13+
-        '     ref_mod = :ref_mod,                                             '+#13+
-        '     ref_serie = :ref_serie,                                         '+#13+
-        '     ref_nnf = :ref_nnf,                                             '+#13+
-        '     vfcp = :vfcp,                                                   '+#13+
-        '     vfcpst = :vfcpst,                                               '+#13+
-        '     vfcpstret = :vfcpstret,                                         '+#13+
-        '     vfcpufdest = :vfcpufdest,                                       '+#13+
-        '     vicmsufdest = :vicmsufdest,                                     '+#13+
-        '     vicmsufremet = :vicmsufremet,                                   '+#13+
-        '     indpres = :indpres,                                             '+#13+
-        '     gnre = :gnre,                                                   '+#13+
-        '     vdolar = :vdolar,                                               '+#13+
-        '     numero_processo = :numero_processo,                             '+#13+
-        '     gnre_impresso = :gnre_impresso,                                 '+#13+
-        '     tra_placa = :tra_placa,                                         '+#13+
-        '     tra_rntc = :tra_rntc,                                           '+#13+
-        '     tra_uf = :tra_uf,                                               '+#13+
-        '     tra_marca = :tra_marca,                                         '+#13+
-        '     tra_numeracao = :tra_numeracao,                                 '+#13+
-        '     transportadora_redespacho_id = :transportadora_redespacho_id,   '+#13+
-        '     despesa_importacao = :despesa_importacao,                       '+#13+
-        '     data_hora_autorizacao = :data_hora_autorizacao,                 '+#13+
-        '     vipidevol = :vipidevol,                                         '+#13+
-        '     n_serie_sat = :n_serie_sat,                                     '+#13+
-        '     caixa_sat = :caixa_sat,                                         '+#13+
-        '     agrupamento_fatura = :agrupamento_fatura,                       '+#13+
-        '     consignado_id = :consignado_id,                                 '+#13+
-        '     consignado_status = :consignado_status,                         '+#13+
-        '     peso_liquido_new = :peso_liquido_new,                           '+#13+
-        '     peso_bruto_new = :peso_bruto_new,                               '+#13+
-        '     status_pendente = :status_pendente,                             '+#13+
-        '     cnf = :cnf,                                                     '+#13+
-        '     vicmsdeson = :vicmsdeson,                                       '+#13+
-        '     vicmsstret = :vicmsstret,                                       '+#13+
-        '     systime = :systime,                                             '+#13+
-        '     entrada_id = :entrada_id,                                       '+#13+
-        '     intermediador_cnpj = :intermediador_cnpj,                       '+#13+
-        '     intermediador_nome = :intermediador_nome,                       '+#13+
-        '     loja_origem = :loja_origem,                                     '+#13+
-        '     entrega_endereco = :entrega_endereco,                           '+#13+
-        '     entrega_complemento = :entrega_complemento,                     '+#13+
-        '     entrega_numero = :entrega_numero,                               '+#13+
-        '     entrega_bairro = :entrega_bairro,                               '+#13+
-        '     entrega_cidade = :entrega_cidade,                               '+#13+
-        '     entrega_cep = :entrega_cep,                                     '+#13+
-        '     entrega_uf = :entrega_uf,                                       '+#13+
-        '     entrega_cod_municipio = :entrega_cod_municipio,                 '+#13+
-        '     web_pedido_id = :web_pedido_id,                                 '+#13+
-        '     transferencia_id = :transferencia_id                            '+#13+
-        ' where (numero_nf = :numero_nf) ';
+  lSQL := vConstrutor.gerarUpdate('NF', 'NUMERO_NF');
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('numero_nf').Value  :=	ANFModel.NUMERO_NF;
-    lQry.ParamByName('numero_ecf').Value :=	ANFModel.NUMERO_ECF;
-    setParams(lQry, ANFModel);
+    lQry.ParamByName('numero_nf').Value  :=	pNFModel.NUMERO_NF;
+    lQry.ParamByName('numero_ecf').Value :=	pNFModel.NUMERO_ECF;
+    setParams(lQry, pNFModel);
     lQry.ExecSQL;
 
-    Result := ANFModel.NUMERO_NF;
+    Result := pNFModel.NUMERO_NF;
 
   finally
     lQry.Free;
@@ -756,7 +352,7 @@ begin
     '                                                                     '+#13+
     '   where 1=1                                                         '+#13;
 
-    lSQL := lSQL + montaCondicaoQuery;
+    lSQL := lSQL + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by ' + FOrderView;
@@ -844,7 +440,7 @@ begin
     ' where 1=1 ';
 
 
-    lSQL := lSQL + montaCondicaoQuery;
+    lSQL := lSQL + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by ' + FOrderView;
@@ -893,7 +489,7 @@ begin
             '    left join clientes on clientes.codigo_cli = NF.codigo_cli  '+#13+
             '   where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -904,7 +500,7 @@ begin
   end;
 end;
 
-function TNFDao.montaCondicaoQuery: String;
+function TNFDao.where: String;
 var
   lSql: String;
 begin
@@ -955,144 +551,144 @@ end;
 
 procedure TNFDao.setParams(var pQry: TFDQuery; pNFModel: TNFModel);
 begin
-  pQry.ParamByName('serie_nf').Value                     := IIF(pNFModel.SERIE_NF                      = '', Unassigned, pNFModel.SERIE_NF);
-  pQry.ParamByName('codigo_cli').Value                   := IIF(pNFModel.CODIGO_CLI                    = '', Unassigned, pNFModel.CODIGO_CLI);
-  pQry.ParamByName('codigo_ven').Value                   := IIF(pNFModel.CODIGO_VEN                    = '', Unassigned, pNFModel.CODIGO_VEN);
-  pQry.ParamByName('codigo_port').Value                  := IIF(pNFModel.CODIGO_PORT                   = '', Unassigned, pNFModel.CODIGO_PORT);
-  pQry.ParamByName('codigo_tip').Value                   := IIF(pNFModel.CODIGO_TIP                    = '', Unassigned, pNFModel.CODIGO_TIP);
-  pQry.ParamByName('data_nf').Value                      := IIF(pNFModel.DATA_NF                       = '', Unassigned, transformaDataFireBird(pNFModel.DATA_NF));
-  pQry.ParamByName('valor_nf').Value                     := IIF(pNFModel.VALOR_NF                      = '', Unassigned, FormataFloatFireBird(pNFModel.VALOR_NF));
-  pQry.ParamByName('desc_nf').Value                      := IIF(pNFModel.DESC_NF                       = '', Unassigned, FormataFloatFireBird(pNFModel.DESC_NF));
-  pQry.ParamByName('acres_nf').Value                     := IIF(pNFModel.ACRES_NF                      = '', Unassigned, FormataFloatFireBird(pNFModel.ACRES_NF));
-  pQry.ParamByName('total_nf').Value                     := IIF(pNFModel.TOTAL_NF                      = '', Unassigned, FormataFloatFireBird(pNFModel.TOTAL_NF));
-  pQry.ParamByName('bicms_nf').Value                     := IIF(pNFModel.BICMS_NF                      = '', Unassigned, FormataFloatFireBird(pNFModel.BICMS_NF));
-  pQry.ParamByName('vicms_nf').Value                     := IIF(pNFModel.VICMS_NF                      = '', Unassigned, FormataFloatFireBird(pNFModel.VICMS_NF));
-  pQry.ParamByName('icms_nf').Value                      := IIF(pNFModel.ICMS_NF                       = '', Unassigned, FormataFloatFireBird(pNFModel.ICMS_NF));
-  pQry.ParamByName('usuario_nf').Value                   := IIF(pNFModel.USUARIO_NF                    = '', Unassigned, pNFModel.USUARIO_NF);
-  pQry.ParamByName('numero_ped').Value                   := IIF(pNFModel.NUMERO_PED                    = '', Unassigned, pNFModel.NUMERO_PED);
-  pQry.ParamByName('tipo_nf').Value                      := IIF(pNFModel.TIPO_NF                       = '', Unassigned, pNFModel.TIPO_NF);
-  pQry.ParamByName('status_nf').Value                    := IIF(pNFModel.STATUS_NF                     = '', Unassigned, pNFModel.STATUS_NF);
-  pQry.ParamByName('desconto_nf').Value                  := IIF(pNFModel.DESCONTO_NF                   = '', Unassigned, FormataFloatFireBird(pNFModel.DESCONTO_NF));
-  pQry.ParamByName('cfop_nf').Value                      := IIF(pNFModel.CFOP_NF                       = '', Unassigned, pNFModel.CFOP_NF);
-  pQry.ParamByName('fisco_nf').Value                     := IIF(pNFModel.FISCO_NF                      = '', Unassigned, pNFModel.FISCO_NF);
-  pQry.ParamByName('obs_nf').Value                       := IIF(pNFModel.OBS_NF                        = '', Unassigned, pNFModel.OBS_NF);
-  pQry.ParamByName('data_cancelamento').Value            := IIF(pNFModel.DATA_CANCELAMENTO             = '', Unassigned, transformaDataFireBird(pNFModel.DATA_CANCELAMENTO));
-  pQry.ParamByName('peso_liquido').Value                 := IIF(pNFModel.PESO_LIQUIDO                  = '', Unassigned, FormataFloatFireBird(pNFModel.PESO_LIQUIDO));
-  pQry.ParamByName('peso_bruto').Value                   := IIF(pNFModel.PESO_BRUTO                    = '', Unassigned, FormataFloatFireBird(pNFModel.PESO_BRUTO));
-  pQry.ParamByName('valor_extenso').Value                := IIF(pNFModel.VALOR_EXTENSO                 = '', Unassigned, pNFModel.VALOR_EXTENSO);
-  pQry.ParamByName('qtde_volume').Value                  := IIF(pNFModel.QTDE_VOLUME                   = '', Unassigned, pNFModel.QTDE_VOLUME);
-  pQry.ParamByName('especie_volume').Value               := IIF(pNFModel.ESPECIE_VOLUME                = '', Unassigned, pNFModel.ESPECIE_VOLUME);
-  pQry.ParamByName('transportadora').Value               := IIF(pNFModel.TRANSPORTADORA                = '', Unassigned, pNFModel.TRANSPORTADORA);
-  pQry.ParamByName('data_saida').Value                   := IIF(pNFModel.DATA_SAIDA                    = '', Unassigned, transformaDataFireBird(pNFModel.DATA_SAIDA));
-  pQry.ParamByName('frete').Value                        := IIF(pNFModel.FRETE                         = '', Unassigned, FormataFloatFireBird(pNFModel.FRETE));
-  pQry.ParamByName('condicoes_pagto').Value              := IIF(pNFModel.CONDICOES_PAGTO               = '', Unassigned, pNFModel.CONDICOES_PAGTO);
-  pQry.ParamByName('loja').Value                         := IIF(pNFModel.LOJA                          = '', Unassigned, pNFModel.LOJA);
-  pQry.ParamByName('isenta_nf').Value                    := IIF(pNFModel.ISENTA_NF                     = '', Unassigned, FormataFloatFireBird(pNFModel.ISENTA_NF));
-  pQry.ParamByName('outros_nf').Value                    := IIF(pNFModel.OUTROS_NF                     = '', Unassigned, FormataFloatFireBird(pNFModel.OUTROS_NF));
-  pQry.ParamByName('base_st_nf').Value                   := IIF(pNFModel.BASE_ST_NF                    = '', Unassigned, FormataFloatFireBird(pNFModel.BASE_ST_NF));
-  pQry.ParamByName('icms_st').Value                      := IIF(pNFModel.ICMS_ST                       = '', Unassigned, FormataFloatFireBird(pNFModel.ICMS_ST));
-  pQry.ParamByName('ipi_nf').Value                       := IIF(pNFModel.IPI_NF                        = '', Unassigned, FormataFloatFireBird(pNFModel.IPI_NF));
-  pQry.ParamByName('id_nf3').Value                       := IIF(pNFModel.ID_NF3                        = '', Unassigned, pNFModel.ID_NF3);
-  pQry.ParamByName('recibo_nfe').Value                   := IIF(pNFModel.RECIBO_NFE                    = '', Unassigned, pNFModel.RECIBO_NFE);
-  pQry.ParamByName('protocolo_nfe').Value                := IIF(pNFModel.PROTOCOLO_NFE                 = '', Unassigned, pNFModel.PROTOCOLO_NFE);
-  pQry.ParamByName('nfe').Value                          := IIF(pNFModel.NFE                           = '', Unassigned, pNFModel.NFE);
-  pQry.ParamByName('autorizada').Value                   := IIF(pNFModel.AUTORIZADA                    = '', Unassigned, pNFModel.AUTORIZADA);
-  pQry.ParamByName('modelo').Value                       := IIF(pNFModel.MODELO                        = '', Unassigned, pNFModel.MODELO);
-  pQry.ParamByName('vlrentrada_nf').Value                := IIF(pNFModel.VLRENTRADA_NF                 = '', Unassigned, FormataFloatFireBird(pNFModel.VLRENTRADA_NF));
-  pQry.ParamByName('qtparcelas').Value                   := IIF(pNFModel.QTPARCELAS                    = '', Unassigned, pNFModel.QTPARCELAS);
-  pQry.ParamByName('numero_serie_ecf').Value             := IIF(pNFModel.NUMERO_SERIE_ECF              = '', Unassigned, pNFModel.NUMERO_SERIE_ECF);
-  pQry.ParamByName('ccf_cupom').Value                    := IIF(pNFModel.CCF_CUPOM                     = '', Unassigned, pNFModel.CCF_CUPOM);
-  pQry.ParamByName('email_nfe').Value                    := IIF(pNFModel.EMAIL_NFE                     = '', Unassigned, pNFModel.EMAIL_NFE);
-  pQry.ParamByName('nome_xml').Value                     := IIF(pNFModel.NOME_XML                      = '', Unassigned, pNFModel.NOME_XML);
-  pQry.ParamByName('status').Value                       := IIF(pNFModel.STATUS                        = '', Unassigned, pNFModel.STATUS);
-  pQry.ParamByName('pcte').Value                         := IIF(pNFModel.PCTE                          = '', Unassigned, pNFModel.PCTE);
-  pQry.ParamByName('hem').Value                          := IIF(pNFModel.HEM                           = '', Unassigned, pNFModel.HEM);
-  pQry.ParamByName('dr').Value                           := IIF(pNFModel.DR                            = '', Unassigned, pNFModel.DR);
-  pQry.ParamByName('aih').Value                          := IIF(pNFModel.AIH                           = '', Unassigned, pNFModel.AIH);
-  pQry.ParamByName('vend').Value                         := IIF(pNFModel.VEND                          = '', Unassigned, pNFModel.VEND);
-  pQry.ParamByName('conv').Value                         := IIF(pNFModel.CONV                          = '', Unassigned, pNFModel.CONV);
-  pQry.ParamByName('id_info_complementar').Value         := IIF(pNFModel.ID_INFO_COMPLEMENTAR          = '', Unassigned, pNFModel.ID_INFO_COMPLEMENTAR);
-  pQry.ParamByName('tipo_frete').Value                   := IIF(pNFModel.TIPO_FRETE                    = '', Unassigned, pNFModel.TIPO_FRETE);
-  pQry.ParamByName('transportadora_id').Value            := IIF(pNFModel.TRANSPORTADORA_ID             = '', Unassigned, pNFModel.TRANSPORTADORA_ID);
-  pQry.ParamByName('vcredicmssn').Value                  := IIF(pNFModel.VCREDICMSSN                   = '', Unassigned, pNFModel.VCREDICMSSN);
-  pQry.ParamByName('vpis').Value                         := IIF(pNFModel.VPIS                          = '', Unassigned, FormataFloatFireBird(pNFModel.VPIS));
-  pQry.ParamByName('vcofins').Value                      := IIF(pNFModel.VCOFINS                       = '', Unassigned, FormataFloatFireBird(pNFModel.VCOFINS));
-  pQry.ParamByName('id').Value                           := IIF(pNFModel.ID                            = '', Unassigned, pNFModel.ID);
-  pQry.ParamByName('vtottrib').Value                     := IIF(pNFModel.VTOTTRIB                      = '', Unassigned, FormataFloatFireBird(pNFModel.VTOTTRIB));
-  pQry.ParamByName('obs_fiscal').Value                   := IIF(pNFModel.OBS_FISCAL                    = '', Unassigned, pNFModel.OBS_FISCAL);
-  pQry.ParamByName('info_complementar').Value            := IIF(pNFModel.INFO_COMPLEMENTAR             = '', Unassigned, pNFModel.INFO_COMPLEMENTAR);
-  pQry.ParamByName('cfop_id').Value                      := IIF(pNFModel.CFOP_ID                       = '', Unassigned, pNFModel.CFOP_ID);
-  pQry.ParamByName('uf_embarque').Value                  := IIF(pNFModel.UF_EMBARQUE                   = '', Unassigned, pNFModel.UF_EMBARQUE);
-  pQry.ParamByName('local_embarque').Value               := IIF(pNFModel.LOCAL_EMBARQUE                = '', Unassigned, pNFModel.LOCAL_EMBARQUE);
-  pQry.ParamByName('vseg').Value                         := IIF(pNFModel.VSEG                          = '', Unassigned, FormataFloatFireBird(pNFModel.VSEG));
-  pQry.ParamByName('vii').Value                          := IIF(pNFModel.VII                           = '', Unassigned, FormataFloatFireBird(pNFModel.VII));
-  pQry.ParamByName('valor_suframa').Value                := IIF(pNFModel.VALOR_SUFRAMA                 = '', Unassigned, FormataFloatFireBird(pNFModel.VALOR_SUFRAMA));
-  pQry.ParamByName('xml_nfe').Value                      := IIF(pNFModel.XML_NFE                       = '', Unassigned, pNFModel.XML_NFE);
-  pQry.ParamByName('status_transmissao').Value           := IIF(pNFModel.STATUS_TRANSMISSAO            = '', Unassigned, pNFModel.STATUS_TRANSMISSAO);
-  pQry.ParamByName('hora_saida').Value                   := IIF(pNFModel.HORA_SAIDA                    = '', Unassigned, pNFModel.HORA_SAIDA);
-  pQry.ParamByName('vtottrib_federal').Value             := IIF(pNFModel.VTOTTRIB_FEDERAL              = '', Unassigned, FormataFloatFireBird(pNFModel.VTOTTRIB_FEDERAL));
-  pQry.ParamByName('vtottrib_estadual').Value            := IIF(pNFModel.VTOTTRIB_ESTADUAL             = '', Unassigned, FormataFloatFireBird(pNFModel.VTOTTRIB_ESTADUAL));
-  pQry.ParamByName('vtottrib_municipal').Value           := IIF(pNFModel.VTOTTRIB_MUNICIPAL            = '', Unassigned, FormataFloatFireBird(pNFModel.VTOTTRIB_MUNICIPAL));
-  pQry.ParamByName('ctr_impressao_nf').Value             := IIF(pNFModel.CTR_IMPRESSAO_NF              = '', Unassigned, pNFModel.CTR_IMPRESSAO_NF);
-  pQry.ParamByName('valor_pago').Value                   := IIF(pNFModel.VALOR_PAGO                    = '', Unassigned, FormataFloatFireBird(pNFModel.VALOR_PAGO));
-  pQry.ParamByName('xped').Value                         := IIF(pNFModel.XPED                          = '', Unassigned, pNFModel.XPED);
-  pQry.ParamByName('cnpj_cpf_consumidor').Value          := IIF(pNFModel.CNPJ_CPF_CONSUMIDOR           = '', Unassigned, pNFModel.CNPJ_CPF_CONSUMIDOR);
-  pQry.ParamByName('devolucao_id').Value                 := IIF(pNFModel.DEVOLUCAO_ID                  = '', Unassigned, pNFModel.DEVOLUCAO_ID);
-  pQry.ParamByName('pedido_id').Value                    := IIF(pNFModel.PEDIDO_ID                     = '', Unassigned, pNFModel.PEDIDO_ID);
-  pQry.ParamByName('os_id').Value                        := IIF(pNFModel.OS_ID                         = '', Unassigned, pNFModel.OS_ID);
-  pQry.ParamByName('orcamento_id').Value                 := IIF(pNFModel.ORCAMENTO_ID                  = '', Unassigned, pNFModel.ORCAMENTO_ID);
-  pQry.ParamByName('saidas_id').Value                    := IIF(pNFModel.SAIDAS_ID                     = '', Unassigned, pNFModel.SAIDAS_ID);
-  pQry.ParamByName('ref_cuf').Value                      := IIF(pNFModel.REF_CUF                       = '', Unassigned, pNFModel.REF_CUF);
-  pQry.ParamByName('ref_aamm').Value                     := IIF(pNFModel.REF_AAMM                      = '', Unassigned, pNFModel.REF_AAMM);
-  pQry.ParamByName('ref_cnpj').Value                     := IIF(pNFModel.REF_CNPJ                      = '', Unassigned, pNFModel.REF_CNPJ);
-  pQry.ParamByName('ref_mod').Value                      := IIF(pNFModel.REF_MOD                       = '', Unassigned, pNFModel.REF_MOD);
-  pQry.ParamByName('ref_serie').Value                    := IIF(pNFModel.REF_SERIE                     = '', Unassigned, pNFModel.REF_SERIE);
-  pQry.ParamByName('ref_nnf').Value                      := IIF(pNFModel.REF_NNF                       = '', Unassigned, pNFModel.REF_NNF);
-  pQry.ParamByName('vfcp').Value                         := IIF(pNFModel.VFCP                          = '', Unassigned, FormataFloatFireBird(pNFModel.VFCP));
-  pQry.ParamByName('vfcpst').Value                       := IIF(pNFModel.VFCPST                        = '', Unassigned, FormataFloatFireBird(pNFModel.VFCPST));
-  pQry.ParamByName('vfcpstret').Value                    := IIF(pNFModel.VFCPSTRET                     = '', Unassigned, FormataFloatFireBird(pNFModel.VFCPSTRET));
-  pQry.ParamByName('vfcpufdest').Value                   := IIF(pNFModel.VFCPUFDEST                    = '', Unassigned, FormataFloatFireBird(pNFModel.VFCPUFDEST));
-  pQry.ParamByName('vicmsufdest').Value                  := IIF(pNFModel.VICMSUFDEST                   = '', Unassigned, FormataFloatFireBird(pNFModel.VICMSUFDEST));
-  pQry.ParamByName('vicmsufremet').Value                 := IIF(pNFModel.VICMSUFREMET                  = '', Unassigned, FormataFloatFireBird(pNFModel.VICMSUFREMET));
-  pQry.ParamByName('indpres').Value                      := IIF(pNFModel.INDPRES                       = '', Unassigned, pNFModel.INDPRES);
-  pQry.ParamByName('gnre').Value                         := IIF(pNFModel.GNRE                          = '', Unassigned, pNFModel.GNRE);
-  pQry.ParamByName('vdolar').Value                       := IIF(pNFModel.VDOLAR                        = '', Unassigned, FormataFloatFireBird(pNFModel.VDOLAR));
-  pQry.ParamByName('numero_processo').Value              := IIF(pNFModel.NUMERO_PROCESSO               = '', Unassigned, pNFModel.NUMERO_PROCESSO);
-  pQry.ParamByName('gnre_impresso').Value                := IIF(pNFModel.GNRE_IMPRESSO                 = '', Unassigned, pNFModel.GNRE_IMPRESSO);
-  pQry.ParamByName('tra_placa').Value                    := IIF(pNFModel.TRA_PLACA                     = '', Unassigned, pNFModel.TRA_PLACA);
-  pQry.ParamByName('tra_rntc').Value                     := IIF(pNFModel.TRA_RNTC                      = '', Unassigned, pNFModel.TRA_RNTC);
-  pQry.ParamByName('tra_uf').Value                       := IIF(pNFModel.TRA_UF                        = '', Unassigned, pNFModel.TRA_UF);
-  pQry.ParamByName('tra_marca').Value                    := IIF(pNFModel.TRA_MARCA                     = '', Unassigned, pNFModel.TRA_MARCA);
-  pQry.ParamByName('tra_numeracao').Value                := IIF(pNFModel.TRA_NUMERACAO                 = '', Unassigned, pNFModel.TRA_NUMERACAO);
-  pQry.ParamByName('transportadora_redespacho_id').Value := IIF(pNFModel.TRANSPORTADORA_REDESPACHO_ID  = '', Unassigned, pNFModel.TRANSPORTADORA_REDESPACHO_ID);
-  pQry.ParamByName('despesa_importacao').Value           := IIF(pNFModel.DESPESA_IMPORTACAO            = '', Unassigned, pNFModel.DESPESA_IMPORTACAO);
-  pQry.ParamByName('data_hora_autorizacao').Value        := IIF(pNFModel.DATA_HORA_AUTORIZACAO         = '', Unassigned, transformaDataHoraFireBird(pNFModel.DATA_HORA_AUTORIZACAO));
-  pQry.ParamByName('vipidevol').Value                    := IIF(pNFModel.VIPIDEVOL                     = '', Unassigned, FormataFloatFireBird(pNFModel.VIPIDEVOL));
-  pQry.ParamByName('n_serie_sat').Value                  := IIF(pNFModel.N_SERIE_SAT                   = '', Unassigned, pNFModel.N_SERIE_SAT);
-  pQry.ParamByName('caixa_sat').Value                    := IIF(pNFModel.CAIXA_SAT                     = '', Unassigned, pNFModel.CAIXA_SAT);
-  pQry.ParamByName('agrupamento_fatura').Value           := IIF(pNFModel.AGRUPAMENTO_FATURA            = '', Unassigned, pNFModel.AGRUPAMENTO_FATURA);
-  pQry.ParamByName('consignado_id').Value                := IIF(pNFModel.CONSIGNADO_ID                 = '', Unassigned, pNFModel.CONSIGNADO_ID);
-  pQry.ParamByName('consignado_status').Value            := IIF(pNFModel.CONSIGNADO_STATUS             = '', Unassigned, pNFModel.CONSIGNADO_STATUS);
-  pQry.ParamByName('peso_liquido_new').Value             := IIF(pNFModel.PESO_LIQUIDO_NEW              = '', Unassigned, FormataFloatFireBird(pNFModel.PESO_LIQUIDO_NEW));
-  pQry.ParamByName('peso_bruto_new').Value               := IIF(pNFModel.PESO_BRUTO_NEW                = '', Unassigned, FormataFloatFireBird(pNFModel.PESO_BRUTO_NEW));
-  pQry.ParamByName('status_pendente').Value              := IIF(pNFModel.STATUS_PENDENTE               = '', Unassigned, pNFModel.STATUS_PENDENTE);
-  pQry.ParamByName('cnf').Value                          := IIF(pNFModel.CNF                           = '', Unassigned, pNFModel.CNF);
-  pQry.ParamByName('vicmsdeson').Value                   := IIF(pNFModel.VICMSDESON                    = '', Unassigned, FormataFloatFireBird(pNFModel.VICMSDESON));
-  pQry.ParamByName('vicmsstret').Value                   := IIF(pNFModel.VICMSSTRET                    = '', Unassigned, FormataFloatFireBird(pNFModel.VICMSSTRET));
-  pQry.ParamByName('entrada_id').Value                   := IIF(pNFModel.ENTRADA_ID                    = '', Unassigned, pNFModel.ENTRADA_ID);
-  pQry.ParamByName('intermediador_cnpj').Value           := IIF(pNFModel.INTERMEDIADOR_CNPJ            = '', Unassigned, pNFModel.INTERMEDIADOR_CNPJ);
-  pQry.ParamByName('intermediador_nome').Value           := IIF(pNFModel.INTERMEDIADOR_NOME            = '', Unassigned, pNFModel.INTERMEDIADOR_NOME);
-  pQry.ParamByName('loja_origem').Value                  := IIF(pNFModel.LOJA_ORIGEM                   = '', Unassigned, pNFModel.LOJA_ORIGEM);
-  pQry.ParamByName('entrega_endereco').Value             := IIF(pNFModel.ENTREGA_ENDERECO              = '', Unassigned, pNFModel.ENTREGA_ENDERECO);
-  pQry.ParamByName('entrega_complemento').Value          := IIF(pNFModel.ENTREGA_COMPLEMENTO           = '', Unassigned, pNFModel.ENTREGA_COMPLEMENTO);
-  pQry.ParamByName('entrega_numero').Value               := IIF(pNFModel.ENTREGA_NUMERO                = '', Unassigned, pNFModel.ENTREGA_NUMERO);
-  pQry.ParamByName('entrega_bairro').Value               := IIF(pNFModel.ENTREGA_BAIRRO                = '', Unassigned, pNFModel.ENTREGA_BAIRRO);
-  pQry.ParamByName('entrega_cidade').Value               := IIF(pNFModel.ENTREGA_CIDADE                = '', Unassigned, pNFModel.ENTREGA_CIDADE);
-  pQry.ParamByName('entrega_cep').Value                  := IIF(pNFModel.ENTREGA_CEP                   = '', Unassigned, pNFModel.ENTREGA_CEP);
-  pQry.ParamByName('entrega_uf').Value                   := IIF(pNFModel.ENTREGA_UF                    = '', Unassigned, pNFModel.ENTREGA_UF);
-  pQry.ParamByName('entrega_cod_municipio').Value        := IIF(pNFModel.ENTREGA_COD_MUNICIPIO         = '', Unassigned, pNFModel.ENTREGA_COD_MUNICIPIO);
-  pQry.ParamByName('web_pedido_id').Value                := IIF(pNFModel.WEB_PEDIDO_ID                 = '', Unassigned, pNFModel.WEB_PEDIDO_ID);
-  pQry.ParamByName('transferencia_id').Value             := IIF(pNFModel.TRANSFERENCIA_ID              = '', Unassigned, pNFModel.TRANSFERENCIA_ID);
+  pQry.ParamByName('serie_nf').Value                     := ifThen(pNFModel.SERIE_NF                      = '', Unassigned, pNFModel.SERIE_NF);
+  pQry.ParamByName('codigo_cli').Value                   := ifThen(pNFModel.CODIGO_CLI                    = '', Unassigned, pNFModel.CODIGO_CLI);
+  pQry.ParamByName('codigo_ven').Value                   := ifThen(pNFModel.CODIGO_VEN                    = '', Unassigned, pNFModel.CODIGO_VEN);
+  pQry.ParamByName('codigo_port').Value                  := ifThen(pNFModel.CODIGO_PORT                   = '', Unassigned, pNFModel.CODIGO_PORT);
+  pQry.ParamByName('codigo_tip').Value                   := ifThen(pNFModel.CODIGO_TIP                    = '', Unassigned, pNFModel.CODIGO_TIP);
+  pQry.ParamByName('data_nf').Value                      := ifThen(pNFModel.DATA_NF                       = '', Unassigned, transformaDataFireBird(pNFModel.DATA_NF));
+  pQry.ParamByName('valor_nf').Value                     := ifThen(pNFModel.VALOR_NF                      = '', Unassigned, FormataFloatFireBird(pNFModel.VALOR_NF));
+  pQry.ParamByName('desc_nf').Value                      := ifThen(pNFModel.DESC_NF                       = '', Unassigned, FormataFloatFireBird(pNFModel.DESC_NF));
+  pQry.ParamByName('acres_nf').Value                     := ifThen(pNFModel.ACRES_NF                      = '', Unassigned, FormataFloatFireBird(pNFModel.ACRES_NF));
+  pQry.ParamByName('total_nf').Value                     := ifThen(pNFModel.TOTAL_NF                      = '', Unassigned, FormataFloatFireBird(pNFModel.TOTAL_NF));
+  pQry.ParamByName('bicms_nf').Value                     := ifThen(pNFModel.BICMS_NF                      = '', Unassigned, FormataFloatFireBird(pNFModel.BICMS_NF));
+  pQry.ParamByName('vicms_nf').Value                     := ifThen(pNFModel.VICMS_NF                      = '', Unassigned, FormataFloatFireBird(pNFModel.VICMS_NF));
+  pQry.ParamByName('icms_nf').Value                      := ifThen(pNFModel.ICMS_NF                       = '', Unassigned, FormataFloatFireBird(pNFModel.ICMS_NF));
+  pQry.ParamByName('usuario_nf').Value                   := ifThen(pNFModel.USUARIO_NF                    = '', Unassigned, pNFModel.USUARIO_NF);
+  pQry.ParamByName('numero_ped').Value                   := ifThen(pNFModel.NUMERO_PED                    = '', Unassigned, pNFModel.NUMERO_PED);
+  pQry.ParamByName('tipo_nf').Value                      := ifThen(pNFModel.TIPO_NF                       = '', Unassigned, pNFModel.TIPO_NF);
+  pQry.ParamByName('status_nf').Value                    := ifThen(pNFModel.STATUS_NF                     = '', Unassigned, pNFModel.STATUS_NF);
+  pQry.ParamByName('desconto_nf').Value                  := ifThen(pNFModel.DESCONTO_NF                   = '', Unassigned, FormataFloatFireBird(pNFModel.DESCONTO_NF));
+  pQry.ParamByName('cfop_nf').Value                      := ifThen(pNFModel.CFOP_NF                       = '', Unassigned, pNFModel.CFOP_NF);
+  pQry.ParamByName('fisco_nf').Value                     := ifThen(pNFModel.FISCO_NF                      = '', Unassigned, pNFModel.FISCO_NF);
+  pQry.ParamByName('obs_nf').Value                       := ifThen(pNFModel.OBS_NF                        = '', Unassigned, pNFModel.OBS_NF);
+  pQry.ParamByName('data_cancelamento').Value            := ifThen(pNFModel.DATA_CANCELAMENTO             = '', Unassigned, transformaDataFireBird(pNFModel.DATA_CANCELAMENTO));
+  pQry.ParamByName('peso_liquido').Value                 := ifThen(pNFModel.PESO_LIQUIDO                  = '', Unassigned, FormataFloatFireBird(pNFModel.PESO_LIQUIDO));
+  pQry.ParamByName('peso_bruto').Value                   := ifThen(pNFModel.PESO_BRUTO                    = '', Unassigned, FormataFloatFireBird(pNFModel.PESO_BRUTO));
+  pQry.ParamByName('valor_extenso').Value                := ifThen(pNFModel.VALOR_EXTENSO                 = '', Unassigned, pNFModel.VALOR_EXTENSO);
+  pQry.ParamByName('qtde_volume').Value                  := ifThen(pNFModel.QTDE_VOLUME                   = '', Unassigned, pNFModel.QTDE_VOLUME);
+  pQry.ParamByName('especie_volume').Value               := ifThen(pNFModel.ESPECIE_VOLUME                = '', Unassigned, pNFModel.ESPECIE_VOLUME);
+  pQry.ParamByName('transportadora').Value               := ifThen(pNFModel.TRANSPORTADORA                = '', Unassigned, pNFModel.TRANSPORTADORA);
+  pQry.ParamByName('data_saida').Value                   := ifThen(pNFModel.DATA_SAIDA                    = '', Unassigned, transformaDataFireBird(pNFModel.DATA_SAIDA));
+  pQry.ParamByName('frete').Value                        := ifThen(pNFModel.FRETE                         = '', Unassigned, FormataFloatFireBird(pNFModel.FRETE));
+  pQry.ParamByName('condicoes_pagto').Value              := ifThen(pNFModel.CONDICOES_PAGTO               = '', Unassigned, pNFModel.CONDICOES_PAGTO);
+  pQry.ParamByName('loja').Value                         := ifThen(pNFModel.LOJA                          = '', Unassigned, pNFModel.LOJA);
+  pQry.ParamByName('isenta_nf').Value                    := ifThen(pNFModel.ISENTA_NF                     = '', Unassigned, FormataFloatFireBird(pNFModel.ISENTA_NF));
+  pQry.ParamByName('outros_nf').Value                    := ifThen(pNFModel.OUTROS_NF                     = '', Unassigned, FormataFloatFireBird(pNFModel.OUTROS_NF));
+  pQry.ParamByName('base_st_nf').Value                   := ifThen(pNFModel.BASE_ST_NF                    = '', Unassigned, FormataFloatFireBird(pNFModel.BASE_ST_NF));
+  pQry.ParamByName('icms_st').Value                      := ifThen(pNFModel.ICMS_ST                       = '', Unassigned, FormataFloatFireBird(pNFModel.ICMS_ST));
+  pQry.ParamByName('ipi_nf').Value                       := ifThen(pNFModel.IPI_NF                        = '', Unassigned, FormataFloatFireBird(pNFModel.IPI_NF));
+  pQry.ParamByName('id_nf3').Value                       := ifThen(pNFModel.ID_NF3                        = '', Unassigned, pNFModel.ID_NF3);
+  pQry.ParamByName('recibo_nfe').Value                   := ifThen(pNFModel.RECIBO_NFE                    = '', Unassigned, pNFModel.RECIBO_NFE);
+  pQry.ParamByName('protocolo_nfe').Value                := ifThen(pNFModel.PROTOCOLO_NFE                 = '', Unassigned, pNFModel.PROTOCOLO_NFE);
+  pQry.ParamByName('nfe').Value                          := ifThen(pNFModel.NFE                           = '', Unassigned, pNFModel.NFE);
+  pQry.ParamByName('autorizada').Value                   := ifThen(pNFModel.AUTORIZADA                    = '', Unassigned, pNFModel.AUTORIZADA);
+  pQry.ParamByName('modelo').Value                       := ifThen(pNFModel.MODELO                        = '', Unassigned, pNFModel.MODELO);
+  pQry.ParamByName('vlrentrada_nf').Value                := ifThen(pNFModel.VLRENTRADA_NF                 = '', Unassigned, FormataFloatFireBird(pNFModel.VLRENTRADA_NF));
+  pQry.ParamByName('qtparcelas').Value                   := ifThen(pNFModel.QTPARCELAS                    = '', Unassigned, pNFModel.QTPARCELAS);
+  pQry.ParamByName('numero_serie_ecf').Value             := ifThen(pNFModel.NUMERO_SERIE_ECF              = '', Unassigned, pNFModel.NUMERO_SERIE_ECF);
+  pQry.ParamByName('ccf_cupom').Value                    := ifThen(pNFModel.CCF_CUPOM                     = '', Unassigned, pNFModel.CCF_CUPOM);
+  pQry.ParamByName('email_nfe').Value                    := ifThen(pNFModel.EMAIL_NFE                     = '', Unassigned, pNFModel.EMAIL_NFE);
+  pQry.ParamByName('nome_xml').Value                     := ifThen(pNFModel.NOME_XML                      = '', Unassigned, pNFModel.NOME_XML);
+  pQry.ParamByName('status').Value                       := ifThen(pNFModel.STATUS                        = '', Unassigned, pNFModel.STATUS);
+  pQry.ParamByName('pcte').Value                         := ifThen(pNFModel.PCTE                          = '', Unassigned, pNFModel.PCTE);
+  pQry.ParamByName('hem').Value                          := ifThen(pNFModel.HEM                           = '', Unassigned, pNFModel.HEM);
+  pQry.ParamByName('dr').Value                           := ifThen(pNFModel.DR                            = '', Unassigned, pNFModel.DR);
+  pQry.ParamByName('aih').Value                          := ifThen(pNFModel.AIH                           = '', Unassigned, pNFModel.AIH);
+  pQry.ParamByName('vend').Value                         := ifThen(pNFModel.VEND                          = '', Unassigned, pNFModel.VEND);
+  pQry.ParamByName('conv').Value                         := ifThen(pNFModel.CONV                          = '', Unassigned, pNFModel.CONV);
+  pQry.ParamByName('id_info_complementar').Value         := ifThen(pNFModel.ID_INFO_COMPLEMENTAR          = '', Unassigned, pNFModel.ID_INFO_COMPLEMENTAR);
+  pQry.ParamByName('tipo_frete').Value                   := ifThen(pNFModel.TIPO_FRETE                    = '', Unassigned, pNFModel.TIPO_FRETE);
+  pQry.ParamByName('transportadora_id').Value            := ifThen(pNFModel.TRANSPORTADORA_ID             = '', Unassigned, pNFModel.TRANSPORTADORA_ID);
+  pQry.ParamByName('vcredicmssn').Value                  := ifThen(pNFModel.VCREDICMSSN                   = '', Unassigned, pNFModel.VCREDICMSSN);
+  pQry.ParamByName('vpis').Value                         := ifThen(pNFModel.VPIS                          = '', Unassigned, FormataFloatFireBird(pNFModel.VPIS));
+  pQry.ParamByName('vcofins').Value                      := ifThen(pNFModel.VCOFINS                       = '', Unassigned, FormataFloatFireBird(pNFModel.VCOFINS));
+  pQry.ParamByName('id').Value                           := ifThen(pNFModel.ID                            = '', Unassigned, pNFModel.ID);
+  pQry.ParamByName('vtottrib').Value                     := ifThen(pNFModel.VTOTTRIB                      = '', Unassigned, FormataFloatFireBird(pNFModel.VTOTTRIB));
+  pQry.ParamByName('obs_fiscal').Value                   := ifThen(pNFModel.OBS_FISCAL                    = '', Unassigned, pNFModel.OBS_FISCAL);
+  pQry.ParamByName('info_complementar').Value            := ifThen(pNFModel.INFO_COMPLEMENTAR             = '', Unassigned, pNFModel.INFO_COMPLEMENTAR);
+  pQry.ParamByName('cfop_id').Value                      := ifThen(pNFModel.CFOP_ID                       = '', Unassigned, pNFModel.CFOP_ID);
+  pQry.ParamByName('uf_embarque').Value                  := ifThen(pNFModel.UF_EMBARQUE                   = '', Unassigned, pNFModel.UF_EMBARQUE);
+  pQry.ParamByName('local_embarque').Value               := ifThen(pNFModel.LOCAL_EMBARQUE                = '', Unassigned, pNFModel.LOCAL_EMBARQUE);
+  pQry.ParamByName('vseg').Value                         := ifThen(pNFModel.VSEG                          = '', Unassigned, FormataFloatFireBird(pNFModel.VSEG));
+  pQry.ParamByName('vii').Value                          := ifThen(pNFModel.VII                           = '', Unassigned, FormataFloatFireBird(pNFModel.VII));
+  pQry.ParamByName('valor_suframa').Value                := ifThen(pNFModel.VALOR_SUFRAMA                 = '', Unassigned, FormataFloatFireBird(pNFModel.VALOR_SUFRAMA));
+  pQry.ParamByName('xml_nfe').Value                      := ifThen(pNFModel.XML_NFE                       = '', Unassigned, pNFModel.XML_NFE);
+  pQry.ParamByName('status_transmissao').Value           := ifThen(pNFModel.STATUS_TRANSMISSAO            = '', Unassigned, pNFModel.STATUS_TRANSMISSAO);
+  pQry.ParamByName('hora_saida').Value                   := ifThen(pNFModel.HORA_SAIDA                    = '', Unassigned, pNFModel.HORA_SAIDA);
+  pQry.ParamByName('vtottrib_federal').Value             := ifThen(pNFModel.VTOTTRIB_FEDERAL              = '', Unassigned, FormataFloatFireBird(pNFModel.VTOTTRIB_FEDERAL));
+  pQry.ParamByName('vtottrib_estadual').Value            := ifThen(pNFModel.VTOTTRIB_ESTADUAL             = '', Unassigned, FormataFloatFireBird(pNFModel.VTOTTRIB_ESTADUAL));
+  pQry.ParamByName('vtottrib_municipal').Value           := ifThen(pNFModel.VTOTTRIB_MUNICIPAL            = '', Unassigned, FormataFloatFireBird(pNFModel.VTOTTRIB_MUNICIPAL));
+  pQry.ParamByName('ctr_impressao_nf').Value             := ifThen(pNFModel.CTR_IMPRESSAO_NF              = '', Unassigned, pNFModel.CTR_IMPRESSAO_NF);
+  pQry.ParamByName('valor_pago').Value                   := ifThen(pNFModel.VALOR_PAGO                    = '', Unassigned, FormataFloatFireBird(pNFModel.VALOR_PAGO));
+  pQry.ParamByName('xped').Value                         := ifThen(pNFModel.XPED                          = '', Unassigned, pNFModel.XPED);
+  pQry.ParamByName('cnpj_cpf_consumidor').Value          := ifThen(pNFModel.CNPJ_CPF_CONSUMIDOR           = '', Unassigned, pNFModel.CNPJ_CPF_CONSUMIDOR);
+  pQry.ParamByName('devolucao_id').Value                 := ifThen(pNFModel.DEVOLUCAO_ID                  = '', Unassigned, pNFModel.DEVOLUCAO_ID);
+  pQry.ParamByName('pedido_id').Value                    := ifThen(pNFModel.PEDIDO_ID                     = '', Unassigned, pNFModel.PEDIDO_ID);
+  pQry.ParamByName('os_id').Value                        := ifThen(pNFModel.OS_ID                         = '', Unassigned, pNFModel.OS_ID);
+  pQry.ParamByName('orcamento_id').Value                 := ifThen(pNFModel.ORCAMENTO_ID                  = '', Unassigned, pNFModel.ORCAMENTO_ID);
+  pQry.ParamByName('saidas_id').Value                    := ifThen(pNFModel.SAIDAS_ID                     = '', Unassigned, pNFModel.SAIDAS_ID);
+  pQry.ParamByName('ref_cuf').Value                      := ifThen(pNFModel.REF_CUF                       = '', Unassigned, pNFModel.REF_CUF);
+  pQry.ParamByName('ref_aamm').Value                     := ifThen(pNFModel.REF_AAMM                      = '', Unassigned, pNFModel.REF_AAMM);
+  pQry.ParamByName('ref_cnpj').Value                     := ifThen(pNFModel.REF_CNPJ                      = '', Unassigned, pNFModel.REF_CNPJ);
+  pQry.ParamByName('ref_mod').Value                      := ifThen(pNFModel.REF_MOD                       = '', Unassigned, pNFModel.REF_MOD);
+  pQry.ParamByName('ref_serie').Value                    := ifThen(pNFModel.REF_SERIE                     = '', Unassigned, pNFModel.REF_SERIE);
+  pQry.ParamByName('ref_nnf').Value                      := ifThen(pNFModel.REF_NNF                       = '', Unassigned, pNFModel.REF_NNF);
+  pQry.ParamByName('vfcp').Value                         := ifThen(pNFModel.VFCP                          = '', Unassigned, FormataFloatFireBird(pNFModel.VFCP));
+  pQry.ParamByName('vfcpst').Value                       := ifThen(pNFModel.VFCPST                        = '', Unassigned, FormataFloatFireBird(pNFModel.VFCPST));
+  pQry.ParamByName('vfcpstret').Value                    := ifThen(pNFModel.VFCPSTRET                     = '', Unassigned, FormataFloatFireBird(pNFModel.VFCPSTRET));
+  pQry.ParamByName('vfcpufdest').Value                   := ifThen(pNFModel.VFCPUFDEST                    = '', Unassigned, FormataFloatFireBird(pNFModel.VFCPUFDEST));
+  pQry.ParamByName('vicmsufdest').Value                  := ifThen(pNFModel.VICMSUFDEST                   = '', Unassigned, FormataFloatFireBird(pNFModel.VICMSUFDEST));
+  pQry.ParamByName('vicmsufremet').Value                 := ifThen(pNFModel.VICMSUFREMET                  = '', Unassigned, FormataFloatFireBird(pNFModel.VICMSUFREMET));
+  pQry.ParamByName('indpres').Value                      := ifThen(pNFModel.INDPRES                       = '', Unassigned, pNFModel.INDPRES);
+  pQry.ParamByName('gnre').Value                         := ifThen(pNFModel.GNRE                          = '', Unassigned, pNFModel.GNRE);
+  pQry.ParamByName('vdolar').Value                       := ifThen(pNFModel.VDOLAR                        = '', Unassigned, FormataFloatFireBird(pNFModel.VDOLAR));
+  pQry.ParamByName('numero_processo').Value              := ifThen(pNFModel.NUMERO_PROCESSO               = '', Unassigned, pNFModel.NUMERO_PROCESSO);
+  pQry.ParamByName('gnre_impresso').Value                := ifThen(pNFModel.GNRE_IMPRESSO                 = '', Unassigned, pNFModel.GNRE_IMPRESSO);
+  pQry.ParamByName('tra_placa').Value                    := ifThen(pNFModel.TRA_PLACA                     = '', Unassigned, pNFModel.TRA_PLACA);
+  pQry.ParamByName('tra_rntc').Value                     := ifThen(pNFModel.TRA_RNTC                      = '', Unassigned, pNFModel.TRA_RNTC);
+  pQry.ParamByName('tra_uf').Value                       := ifThen(pNFModel.TRA_UF                        = '', Unassigned, pNFModel.TRA_UF);
+  pQry.ParamByName('tra_marca').Value                    := ifThen(pNFModel.TRA_MARCA                     = '', Unassigned, pNFModel.TRA_MARCA);
+  pQry.ParamByName('tra_numeracao').Value                := ifThen(pNFModel.TRA_NUMERACAO                 = '', Unassigned, pNFModel.TRA_NUMERACAO);
+  pQry.ParamByName('transportadora_redespacho_id').Value := ifThen(pNFModel.TRANSPORTADORA_REDESPACHO_ID  = '', Unassigned, pNFModel.TRANSPORTADORA_REDESPACHO_ID);
+  pQry.ParamByName('despesa_importacao').Value           := ifThen(pNFModel.DESPESA_IMPORTACAO            = '', Unassigned, pNFModel.DESPESA_IMPORTACAO);
+  pQry.ParamByName('data_hora_autorizacao').Value        := ifThen(pNFModel.DATA_HORA_AUTORIZACAO         = '', Unassigned, transformaDataHoraFireBird(pNFModel.DATA_HORA_AUTORIZACAO));
+  pQry.ParamByName('vipidevol').Value                    := ifThen(pNFModel.VIPIDEVOL                     = '', Unassigned, FormataFloatFireBird(pNFModel.VIPIDEVOL));
+  pQry.ParamByName('n_serie_sat').Value                  := ifThen(pNFModel.N_SERIE_SAT                   = '', Unassigned, pNFModel.N_SERIE_SAT);
+  pQry.ParamByName('caixa_sat').Value                    := ifThen(pNFModel.CAIXA_SAT                     = '', Unassigned, pNFModel.CAIXA_SAT);
+  pQry.ParamByName('agrupamento_fatura').Value           := ifThen(pNFModel.AGRUPAMENTO_FATURA            = '', Unassigned, pNFModel.AGRUPAMENTO_FATURA);
+  pQry.ParamByName('consignado_id').Value                := ifThen(pNFModel.CONSIGNADO_ID                 = '', Unassigned, pNFModel.CONSIGNADO_ID);
+  pQry.ParamByName('consignado_status').Value            := ifThen(pNFModel.CONSIGNADO_STATUS             = '', Unassigned, pNFModel.CONSIGNADO_STATUS);
+  pQry.ParamByName('peso_liquido_new').Value             := ifThen(pNFModel.PESO_LIQUIDO_NEW              = '', Unassigned, FormataFloatFireBird(pNFModel.PESO_LIQUIDO_NEW));
+  pQry.ParamByName('peso_bruto_new').Value               := ifThen(pNFModel.PESO_BRUTO_NEW                = '', Unassigned, FormataFloatFireBird(pNFModel.PESO_BRUTO_NEW));
+  pQry.ParamByName('status_pendente').Value              := ifThen(pNFModel.STATUS_PENDENTE               = '', Unassigned, pNFModel.STATUS_PENDENTE);
+  pQry.ParamByName('cnf').Value                          := ifThen(pNFModel.CNF                           = '', Unassigned, pNFModel.CNF);
+  pQry.ParamByName('vicmsdeson').Value                   := ifThen(pNFModel.VICMSDESON                    = '', Unassigned, FormataFloatFireBird(pNFModel.VICMSDESON));
+  pQry.ParamByName('vicmsstret').Value                   := ifThen(pNFModel.VICMSSTRET                    = '', Unassigned, FormataFloatFireBird(pNFModel.VICMSSTRET));
+  pQry.ParamByName('entrada_id').Value                   := ifThen(pNFModel.ENTRADA_ID                    = '', Unassigned, pNFModel.ENTRADA_ID);
+  pQry.ParamByName('intermediador_cnpj').Value           := ifThen(pNFModel.INTERMEDIADOR_CNPJ            = '', Unassigned, pNFModel.INTERMEDIADOR_CNPJ);
+  pQry.ParamByName('intermediador_nome').Value           := ifThen(pNFModel.INTERMEDIADOR_NOME            = '', Unassigned, pNFModel.INTERMEDIADOR_NOME);
+  pQry.ParamByName('loja_origem').Value                  := ifThen(pNFModel.LOJA_ORIGEM                   = '', Unassigned, pNFModel.LOJA_ORIGEM);
+  pQry.ParamByName('entrega_endereco').Value             := ifThen(pNFModel.ENTREGA_ENDERECO              = '', Unassigned, pNFModel.ENTREGA_ENDERECO);
+  pQry.ParamByName('entrega_complemento').Value          := ifThen(pNFModel.ENTREGA_COMPLEMENTO           = '', Unassigned, pNFModel.ENTREGA_COMPLEMENTO);
+  pQry.ParamByName('entrega_numero').Value               := ifThen(pNFModel.ENTREGA_NUMERO                = '', Unassigned, pNFModel.ENTREGA_NUMERO);
+  pQry.ParamByName('entrega_bairro').Value               := ifThen(pNFModel.ENTREGA_BAIRRO                = '', Unassigned, pNFModel.ENTREGA_BAIRRO);
+  pQry.ParamByName('entrega_cidade').Value               := ifThen(pNFModel.ENTREGA_CIDADE                = '', Unassigned, pNFModel.ENTREGA_CIDADE);
+  pQry.ParamByName('entrega_cep').Value                  := ifThen(pNFModel.ENTREGA_CEP                   = '', Unassigned, pNFModel.ENTREGA_CEP);
+  pQry.ParamByName('entrega_uf').Value                   := ifThen(pNFModel.ENTREGA_UF                    = '', Unassigned, pNFModel.ENTREGA_UF);
+  pQry.ParamByName('entrega_cod_municipio').Value        := ifThen(pNFModel.ENTREGA_COD_MUNICIPIO         = '', Unassigned, pNFModel.ENTREGA_COD_MUNICIPIO);
+  pQry.ParamByName('web_pedido_id').Value                := ifThen(pNFModel.WEB_PEDIDO_ID                 = '', Unassigned, pNFModel.WEB_PEDIDO_ID);
+  pQry.ParamByName('transferencia_id').Value             := ifThen(pNFModel.TRANSFERENCIA_ID              = '', Unassigned, pNFModel.TRANSFERENCIA_ID);
 
 end;
 

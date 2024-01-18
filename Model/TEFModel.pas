@@ -3,7 +3,7 @@ unit TEFModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao;
 
@@ -237,9 +237,9 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lTEFDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lTEFDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lTEFDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lTEFDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lTEFDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lTEFDao.excluir(Self);
     end;
 
   finally

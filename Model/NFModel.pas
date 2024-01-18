@@ -3,7 +3,7 @@ unit NFModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   FireDAC.Comp.Client,
   System.Generics.Collections,
   Interfaces.Conexao;
@@ -524,8 +524,8 @@ begin
 
    try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lNFDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lNFDao.alterar(Self);
+      Terasoft.Types.tacIncluir: Result := lNFDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lNFDao.alterar(Self);
     end;
 
    finally

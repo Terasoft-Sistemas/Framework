@@ -3,7 +3,7 @@ unit CaixaControleModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Terasoft.Utils,
   VariaveisGlobais,
@@ -280,9 +280,9 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lCaixaControleDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lCaixaControleDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lCaixaControleDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lCaixaControleDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lCaixaControleDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lCaixaControleDao.excluir(Self);
     end;
 
   finally

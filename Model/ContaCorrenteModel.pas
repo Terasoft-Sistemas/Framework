@@ -3,7 +3,7 @@ unit ContaCorrenteModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao;
 
@@ -260,9 +260,9 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lContaCorrenteDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lContaCorrenteDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lContaCorrenteDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lContaCorrenteDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lContaCorrenteDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lContaCorrenteDao.excluir(Self);
     end;
 
   finally

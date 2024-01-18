@@ -3,7 +3,7 @@ unit NFItensModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   FireDAC.Comp.Client,
   Interfaces.Conexao;
@@ -562,9 +562,9 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lNFItensDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lNFItensDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lNFItensDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lNFItensDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lNFItensDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lNFItensDao.excluir(Self);
     end;
 
   finally

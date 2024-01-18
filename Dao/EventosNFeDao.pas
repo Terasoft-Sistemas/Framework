@@ -32,7 +32,7 @@ end;
 implementation
 
 uses
-  System.StrUtils;//, SistemaControl;
+  System.StrUtils, System.Variants;//, SistemaControl;
 { TEventosNFeDao }
 
 function TEventosNFeDao.alterar(AEventosNFeModel: TEventosNFeModel): Boolean;
@@ -103,6 +103,34 @@ begin
   finally
 
   end;
+end;
+
+procedure TEventosNFeDao.setParams(var pQry: TFDQuery; pEventosNFeModel: TEventosNFeModel);
+begin
+  pQry.ParamByName('ID_NFE').Value              := ifThen(pEventosNFeModel.ID_NFE             = '', Unassigned, pEventosNFeModel.ID_NFE);
+  pQry.ParamByName('DATAHORA').Value            := ifThen(pEventosNFeModel.DATAHORA           = '', Unassigned, pEventosNFeModel.DATAHORA);
+  pQry.ParamByName('EVENTO').Value              := ifThen(pEventosNFeModel.EVENTO             = '', Unassigned, pEventosNFeModel.EVENTO);
+  pQry.ParamByName('ID_EVENTO').Value           := ifThen(pEventosNFeModel.ID_EVENTO          = '', Unassigned, pEventosNFeModel.ID_EVENTO);
+  pQry.ParamByName('CHNFE').Value               := ifThen(pEventosNFeModel.CHNFE              = '', Unassigned, pEventosNFeModel.CHNFE);
+  pQry.ParamByName('TPEVENTO').Value            := ifThen(pEventosNFeModel.TPEVENTO           = '', Unassigned, pEventosNFeModel.TPEVENTO);
+  pQry.ParamByName('NSEQEVENTO').Value          := ifThen(pEventosNFeModel.NSEQEVENTO         = '', Unassigned, pEventosNFeModel.NSEQEVENTO);
+  pQry.ParamByName('VEREVENTO').Value           := ifThen(pEventosNFeModel.VEREVENTO          = '', Unassigned, pEventosNFeModel.VEREVENTO);
+  pQry.ParamByName('DESCEVENTO').Value          := ifThen(pEventosNFeModel.DESCEVENTO         = '', Unassigned, pEventosNFeModel.DESCEVENTO);
+  pQry.ParamByName('XCORRECAO').Value           := ifThen(pEventosNFeModel.XCORRECAO          = '', Unassigned, pEventosNFeModel.XCORRECAO);
+  pQry.ParamByName('XCONDUSO').Value            := ifThen(pEventosNFeModel.XCONDUSO           = '', Unassigned, pEventosNFeModel.XCONDUSO);
+  pQry.ParamByName('TXT').Value                 := ifThen(pEventosNFeModel.TXT                = '', Unassigned, pEventosNFeModel.TXT);
+  pQry.ParamByName('XML').Value                 := ifThen(pEventosNFeModel.XML                = '', Unassigned, pEventosNFeModel.XML);
+  pQry.ParamByName('STATUS').Value              := ifThen(pEventosNFeModel.STATUS             = '', Unassigned, pEventosNFeModel.STATUS);
+  pQry.ParamByName('PROTOCOLO_RETORNO').Value   := ifThen(pEventosNFeModel.PROTOCOLO_RETORNO  = '', Unassigned, pEventosNFeModel.PROTOCOLO_RETORNO);
+  pQry.ParamByName('RETORNO_SEFAZ').Value       := ifThen(pEventosNFeModel.RETORNO_SEFAZ      = '', Unassigned, pEventosNFeModel.RETORNO_SEFAZ);
+  pQry.ParamByName('FILIAL').Value              := ifThen(pEventosNFeModel.FILIAL             = '', Unassigned, pEventosNFeModel.FILIAL);
+  pQry.ParamByName('EMPRESA').Value             := ifThen(pEventosNFeModel.EMPRESA            = '', Unassigned, pEventosNFeModel.EMPRESA);
+  pQry.ParamByName('JUSTIFICATIVA').Value       := ifThen(pEventosNFeModel.JUSTIFICATIVA      = '', Unassigned, pEventosNFeModel.JUSTIFICATIVA);
+end;
+
+function TEventosNFeDao.where: String;
+begin
+
 end;
 
 end.

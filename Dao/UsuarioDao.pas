@@ -5,15 +5,21 @@ interface
 uses
   FireDAC.Comp.Client,
   System.SysUtils,
+  System.StrUtils,
+  System.Variants,
+  Terasoft.FuncoesTexto,
   UsuarioModel,
   System.Generics.Collections,
-  Interfaces.Conexao;
+  Interfaces.Conexao,
+  Terasoft.ConstrutorDao;
 
 type
   TUsuarioDao = class
 
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
+
     FUsuariosLista: TObjectList<TUsuarioModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -37,8 +43,10 @@ type
     procedure SetStatus(const Value: String);
     procedure SetID(const Value: String);
 
-    function montaCondicaoQuery: String;
+    function where: String;
     procedure SetPerfil(const Value: Variant);
+
+    procedure setParams(var pQry: TFDQuery; pUsuarioModel: TUsuarioModel);
 
   public
     constructor Create(pIConexao : IConexao);
@@ -56,9 +64,9 @@ type
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property UsuariosLista: TObjectList<TUsuarioModel> read FUsuariosLista write SetUsuariosLista;
 
-    function incluir(AUsuarioModel: TUsuarioModel): String;
-    function alterar(AUsuarioModel: TUsuarioModel): String;
-    function excluir(AUsuarioModel: TUsuarioModel): String;
+    function incluir(pUsuarioModel: TUsuarioModel): String;
+    function alterar(pUsuarioModel: TUsuarioModel): String;
+    function excluir(pUsuarioModel: TUsuarioModel): String;
 
     function vendedorUsuario(pIdUsuario: String): String;
     function nomeUsuario(pIdUsuario: String): String;
@@ -71,11 +79,6 @@ end;
 implementation
 
 { TUsuarioDao }
-
-uses
-  Terasoft.Utils,
-  System.Variants,
-  Terasoft.FuncoesTexto;
 
 function TUsuarioDao.carregaClasse(ID: String): TUsuarioModel;
 var
@@ -109,7 +112,8 @@ end;
 
 constructor TUsuarioDao.Create(pIConexao : IConexao);
 begin
-  vIConexao := pIConexao;
+  vIConexao   := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TUsuarioDao.Destroy;
@@ -118,22 +122,29 @@ begin
 
 end;
 
-function TUsuarioDao.incluir(AUsuarioModel: TUsuarioModel): String;
+function TUsuarioDao.incluir(pUsuarioModel: TUsuarioModel): String;
 var
-  lQry: TFDQuery;
+  lQry : TFDQuery;
+  lSql : String;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
+    lSql := vConstrutor.gerarInsert('USUARIO', 'ID', true);
 
+    lQry.SQL.Add(lSQL);
+    lQry.ParamByName('id').Value := vIConexao.Generetor('GEN_VENDACARTAO');
+    setParams(lQry, pUsuarioModel);
+    lQry.Open;
 
-    Result := AUsuarioModel.ID;
+    Result := lQry.FieldByName('ID').AsString;
+    Result := pUsuarioModel.ID;
   finally
      lQry.Free;
   end;
 end;
 
-function TUsuarioDao.montaCondicaoQuery: String;
+function TUsuarioDao.where: String;
 var
   lSql: String;
 begin
@@ -156,24 +167,30 @@ begin
   Result   := lConexao.ExecSQLScalar('select u.fantasia from usuario u where u.id = '+ QuotedStr(pIdUsuario));
 end;
 
-function TUsuarioDao.alterar(AUsuarioModel: TUsuarioModel): String;
+function TUsuarioDao.alterar(pUsuarioModel: TUsuarioModel): String;
 var
-  lQry: TFDQuery;
+  lQry : TFDQuery;
+  lSql : String;
 begin
   lQry := vIConexao.CriarQuery;
 
+  lSQL := vConstrutor.gerarUpdate('VENDACARTAO', 'ID');
+
   try
+    lQry.SQL.Add(lSQL);
+    lQry.ParamByName('id').Value := ifThen(pUsuarioModel.ID = '', Unassigned, pUsuarioModel.ID);
+    setParams(lQry, pUsuarioModel);
+    lQry.ExecSQL;
 
-
-
-    Result := AUsuarioModel.ID;
+    Result := pUsuarioModel.ID;
 
   finally
+    lSQL := '';
     lQry.Free;
   end;
 end;
 
-function TUsuarioDao.excluir(AUsuarioModel: TUsuarioModel): String;
+function TUsuarioDao.excluir(pUsuarioModel: TUsuarioModel): String;
 var
   lQry: TFDQuery;
 begin
@@ -182,9 +199,9 @@ begin
   Result := '';
 
   try
-    lQry.ExecSQL('delete from Usuario where id = :id', [AUsuarioModel.ID]);
+    lQry.ExecSQL('delete from Usuario where id = :id', [pUsuarioModel.ID]);
 
-    Result := AUsuarioModel.ID;
+    Result := pUsuarioModel.ID;
   finally
     lQry.Free;
   end;
@@ -202,7 +219,7 @@ begin
           '     left join PERFIL_NEW on PERFIL_NEW.id = usuario.PERFIL_NEW_ID ' +
           ' where 1=1 ';
   try
-    lSQL := lSQL + montaCondicaoQuery;
+    lSQL := lSQL + where;
 
     lQry.Open(lSQL);
 
@@ -234,7 +251,7 @@ begin
 
     lSql := lSQL + '  where 1=1 ';
 
-    lSQL := lSQL + montaCondicaoQuery;
+    lSQL := lSQL + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by ' + FOrderView;
@@ -288,6 +305,38 @@ end;
 procedure TUsuarioDao.SetOrderView(const Value: String);
 begin
   FOrderView := Value;
+end;
+
+procedure TUsuarioDao.setParams(var pQry: TFDQuery; pUsuarioModel: TUsuarioModel);
+begin
+  pQry.ParamByName('status').Value                := ifThen(pUsuarioModel.STATUS               = '', Unassigned, pUsuarioModel.STATUS);
+  pQry.ParamByName('data_inc').Value              := ifThen(pUsuarioModel.DATA_INC             = '', Unassigned, pUsuarioModel.DATA_INC);
+  pQry.ParamByName('senha').Value                 := ifThen(pUsuarioModel.SENHA                = '', Unassigned, pUsuarioModel.SENHA);
+  pQry.ParamByName('hash').Value                  := ifThen(pUsuarioModel.HASH                 = '', Unassigned, pUsuarioModel.HASH);
+  pQry.ParamByName('nome').Value                  := ifThen(pUsuarioModel.NOME                 = '', Unassigned, pUsuarioModel.NOME);
+  pQry.ParamByName('fantasia').Value              := ifThen(pUsuarioModel.FANTASIA             = '', Unassigned, pUsuarioModel.FANTASIA);
+  pQry.ParamByName('dpto').Value                  := ifThen(pUsuarioModel.DPTO                 = '', Unassigned, pUsuarioModel.DPTO);
+  pQry.ParamByName('nivel').Value                 := ifThen(pUsuarioModel.NIVEL                = '', Unassigned, pUsuarioModel.NIVEL);
+  pQry.ParamByName('desconto').Value              := ifThen(pUsuarioModel.DESCONTO             = '', Unassigned, pUsuarioModel.DESCONTO);
+  pQry.ParamByName('caixa').Value                 := ifThen(pUsuarioModel.CAIXA                = '', Unassigned, pUsuarioModel.CAIXA);
+  pQry.ParamByName('perfil_new_id').Value         := ifThen(pUsuarioModel.PERFIL_NEW_ID        = '', Unassigned, pUsuarioModel.PERFIL_NEW_ID);
+  pQry.ParamByName('senha_pedido').Value          := ifThen(pUsuarioModel.SENHA_PEDIDO         = '', Unassigned, pUsuarioModel.SENHA_PEDIDO);
+  pQry.ParamByName('adm_pedido_web').Value        := ifThen(pUsuarioModel.ADM_PEDIDO_WEB       = '', Unassigned, pUsuarioModel.ADM_PEDIDO_WEB);
+  pQry.ParamByName('sql_produto_fc').Value        := ifThen(pUsuarioModel.SQL_PRODUTO_FC       = '', Unassigned, pUsuarioModel.SQL_PRODUTO_FC);
+  pQry.ParamByName('preco_id').Value              := ifThen(pUsuarioModel.PRECO_ID             = '', Unassigned, pUsuarioModel.PRECO_ID);
+  pQry.ParamByName('loja_id').Value               := ifThen(pUsuarioModel.LOJA_ID              = '', Unassigned, pUsuarioModel.LOJA_ID);
+  pQry.ParamByName('uuid').Value                  := ifThen(pUsuarioModel.UUID                 = '', Unassigned, pUsuarioModel.UUID);
+  pQry.ParamByName('uuidalteracao').Value         := ifThen(pUsuarioModel.UUIDALTERACAO        = '', Unassigned, pUsuarioModel.UUIDALTERACAO);
+  pQry.ParamByName('otp').Value                   := ifThen(pUsuarioModel.OTP                  = '', Unassigned, pUsuarioModel.OTP);
+  pQry.ParamByName('codigo_anterior').Value       := ifThen(pUsuarioModel.CODIGO_ANTERIOR      = '', Unassigned, pUsuarioModel.CODIGO_ANTERIOR);
+  pQry.ParamByName('systime').Value               := ifThen(pUsuarioModel.SYSTIME              = '', Unassigned, pUsuarioModel.SYSTIME);
+  pQry.ParamByName('atalhos_web').Value           := ifThen(pUsuarioModel.ATALHOS_WEB          = '', Unassigned, pUsuarioModel.ATALHOS_WEB);
+  pQry.ParamByName('menu_oculto_web').Value       := ifThen(pUsuarioModel.MENU_OCULTO_WEB      = '', Unassigned, pUsuarioModel.MENU_OCULTO_WEB);
+  pQry.ParamByName('pedido_web').Value            := ifThen(pUsuarioModel.PEDIDO_WEB           = '', Unassigned, pUsuarioModel.PEDIDO_WEB);
+  pQry.ParamByName('usuario_windows').Value       := ifThen(pUsuarioModel.USUARIO_WINDOWS      = '', Unassigned, pUsuarioModel.USUARIO_WINDOWS);
+  pQry.ParamByName('senha_windows').Value         := ifThen(pUsuarioModel.SENHA_WINDOWS        = '', Unassigned, pUsuarioModel.SENHA_WINDOWS);
+  pQry.ParamByName('url_windows').Value           := ifThen(pUsuarioModel.URL_WINDOWS          = '', Unassigned, pUsuarioModel.URL_WINDOWS);
+  pQry.ParamByName('pagina_inicial_web').Value    := ifThen(pUsuarioModel.PAGINA_INICIAL_WEB   = '', Unassigned, pUsuarioModel.PAGINA_INICIAL_WEB);
 end;
 
 procedure TUsuarioDao.SetPerfil(const Value: Variant);

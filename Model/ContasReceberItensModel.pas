@@ -1,7 +1,7 @@
 unit ContasReceberItensModel;
 interface
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Terasoft.Utils, FireDAC.Comp.Client,
   Interfaces.Conexao;
@@ -722,9 +722,9 @@ begin
   Result := '';
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lContasReceberItensDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lContasReceberItensDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lContasReceberItensDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lContasReceberItensDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lContasReceberItensDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lContasReceberItensDao.excluir(Self);
     end;
   finally
     lContasReceberItensDao.Free;

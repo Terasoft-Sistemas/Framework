@@ -3,7 +3,7 @@ unit ContasModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao;
 
@@ -176,9 +176,9 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lContasDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lContasDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lContasDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lContasDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lContasDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lContasDao.excluir(Self);
     end;
 
   finally

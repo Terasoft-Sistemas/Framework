@@ -4,7 +4,7 @@ interface
 
 uses
   PedidoWebItensModel,
-  Terasoft.Utils,
+  Terasoft.ConstrutorDao,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
@@ -16,7 +16,9 @@ type
   TPedidoWebItensDao = class
 
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
+
     FPedidoWebItenssLista: TObjectList<TPedidoWebItensModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -37,7 +39,9 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
 
-    function montaCondicaoQuery: String;
+    procedure setParams(var pQry: TFDQuery; pPedidoWebItensModel: TPedidoWebItensModel);
+
+    function where: String;
     procedure SetIDPedidoWebView(const Value: Integer);
 
   public
@@ -54,6 +58,10 @@ type
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property IDPedidoWebView: Integer read FIDPedidoWebView write SetIDPedidoWebView;
 
+    function incluir(pPedidoWebItensModel: TPedidoWebItensModel): String;
+    function alterar(pPedidoWebItensModel: TPedidoWebItensModel): String;
+    function excluir(pPedidoWebItensModel: TPedidoWebItensModel): String;
+
     procedure obterListaVendaAssistidaItens;
     procedure obterLista;
 
@@ -63,9 +71,33 @@ implementation
 
 { TPedidoWebItens }
 
+function TPedidoWebItensDao.alterar(pPedidoWebItensModel: TPedidoWebItensModel): String;
+var
+  lQry: TFDQuery;
+  lSQL:String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  lSQL := vConstrutor.gerarUpdate('WEB_PEDIDOITENS', 'ID');
+
+  try
+    lQry.SQL.Add(lSQL);
+    lQry.ParamByName('id').Value := ifThen(pPedidoWebItensModel.ID = '', Unassigned, pPedidoWebItensModel.ID);
+    setParams(lQry, pPedidoWebItensModel);
+    lQry.ExecSQL;
+
+    Result := pPedidoWebItensModel.ID;
+
+  finally
+    lSQL := '';
+    lQry.Free;
+  end;
+end;
+
 constructor TPedidoWebItensDao.Create(pIConexao : IConexao);
 begin
-  vIConexao := pIConexao;
+  vIConexao   := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TPedidoWebItensDao.Destroy;
@@ -74,7 +106,45 @@ begin
   inherited;
 end;
 
-function TPedidoWebItensDao.montaCondicaoQuery: String;
+function TPedidoWebItensDao.excluir(pPedidoWebItensModel: TPedidoWebItensModel): String;
+var
+  lQry: TFDQuery;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+   lQry.ExecSQL('delete from WEB_PEDIDOITENS where ID = :ID',[pPedidoWebItensModel.ID]);
+   lQry.ExecSQL;
+   Result := pPedidoWebItensModel.ID;
+
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TPedidoWebItensDao.incluir(pPedidoWebItensModel: TPedidoWebItensModel): String;
+var
+  lQry: TFDQuery;
+  lSQL:String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  lSQL := vConstrutor.gerarInsert('WEB_PEDIDOITENS', 'ID');
+
+  try
+    lQry.SQL.Add(lSQL);
+    setParams(lQry, pPedidoWebItensModel);
+    lQry.Open;
+
+    Result := lQry.FieldByName('ID').AsString;
+
+  finally
+    lSQL := '';
+    lQry.Free;
+  end;
+end;
+
+function TPedidoWebItensDao.where: String;
 var
   lSQL : String;
 begin
@@ -102,7 +172,7 @@ begin
 
     lSql := 'select count(*) records From web_pedidoitens where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -150,7 +220,7 @@ begin
       ' inner join produto on web_pedidoitens.produto_id = produto.codigo_pro '+SLineBreak+
       ' where 1=1 ';
 
-    lSQL := lSQL + montaCondicaoQuery;
+    lSQL := lSQL + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -218,7 +288,7 @@ begin
       '  inner join produto on web_pedidoitens.produto_id = produto.codigo_pro       '+SLineBreak+
       ' where 1=1 ';
 
-    lSQL := lSQL + montaCondicaoQuery;
+    lSQL := lSQL + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -282,6 +352,61 @@ end;
 procedure TPedidoWebItensDao.SetOrderView(const Value: String);
 begin
   FOrderView := Value;
+end;
+
+procedure TPedidoWebItensDao.setParams(var pQry: TFDQuery; pPedidoWebItensModel: TPedidoWebItensModel);
+begin
+  pQry.ParamByName('WEB_PEDIDO_ID').Value           := ifThen(pPedidoWebItensModel.WEB_PEDIDO_ID              = '', Unassigned, pPedidoWebItensModel.WEB_PEDIDO_ID);
+  pQry.ParamByName('PRODUTO_ID').Value              := ifThen(pPedidoWebItensModel.PRODUTO_ID                 = '', Unassigned, pPedidoWebItensModel.PRODUTO_ID);
+  pQry.ParamByName('QUANTIDADE').Value              := ifThen(pPedidoWebItensModel.QUANTIDADE                 = '', Unassigned, pPedidoWebItensModel.QUANTIDADE);
+  pQry.ParamByName('QUANTIDADE_TROCA').Value        := ifThen(pPedidoWebItensModel.QUANTIDADE_TROCA           = '', Unassigned, pPedidoWebItensModel.QUANTIDADE_TROCA);
+  pQry.ParamByName('VALOR_UNITARIO').Value          := ifThen(pPedidoWebItensModel.VALOR_UNITARIO             = '', Unassigned, pPedidoWebItensModel.VALOR_UNITARIO);
+  pQry.ParamByName('PERCENTUAL_DESCONTO').Value     := ifThen(pPedidoWebItensModel.PERCENTUAL_DESCONTO        = '', Unassigned, pPedidoWebItensModel.PERCENTUAL_DESCONTO);
+  pQry.ParamByName('VALOR_VENDA_ATUAL').Value       := ifThen(pPedidoWebItensModel.VALOR_VENDA_ATUAL          = '', Unassigned, pPedidoWebItensModel.VALOR_VENDA_ATUAL);
+  pQry.ParamByName('VALOR_CUSTO_ATUAL').Value       := ifThen(pPedidoWebItensModel.VALOR_CUSTO_ATUAL          = '', Unassigned, pPedidoWebItensModel.VALOR_CUSTO_ATUAL);
+  pQry.ParamByName('PERCENTUAL_COMISSAO').Value     := ifThen(pPedidoWebItensModel.PERCENTUAL_COMISSAO        = '', Unassigned, pPedidoWebItensModel.PERCENTUAL_COMISSAO);
+  pQry.ParamByName('OBSERVACAO').Value              := ifThen(pPedidoWebItensModel.OBSERVACAO                 = '', Unassigned, pPedidoWebItensModel.OBSERVACAO);
+  pQry.ParamByName('QUANTIDADE_OLD').Value          := ifThen(pPedidoWebItensModel.QUANTIDADE_OLD             = '', Unassigned, pPedidoWebItensModel.QUANTIDADE_OLD);
+  pQry.ParamByName('QUANTIDADE_TROCA_OLD').Value    := ifThen(pPedidoWebItensModel.QUANTIDADE_TROCA_OLD       = '', Unassigned, pPedidoWebItensModel.QUANTIDADE_TROCA_OLD);
+  pQry.ParamByName('AVULSO').Value                  := ifThen(pPedidoWebItensModel.AVULSO                     = '', Unassigned, pPedidoWebItensModel.AVULSO);
+  pQry.ParamByName('VALOR_ST').Value                := ifThen(pPedidoWebItensModel.VALOR_ST                   = '', Unassigned, pPedidoWebItensModel.VALOR_ST);
+  pQry.ParamByName('RESERVADO').Value               := ifThen(pPedidoWebItensModel.RESERVADO                  = '', Unassigned, pPedidoWebItensModel.RESERVADO);
+  pQry.ParamByName('TIPO_GARANTIA').Value           := ifThen(pPedidoWebItensModel.TIPO_GARANTIA              = '', Unassigned, pPedidoWebItensModel.TIPO_GARANTIA);
+  pQry.ParamByName('VLR_GARANTIA').Value            := ifThen(pPedidoWebItensModel.VLR_GARANTIA               = '', Unassigned, pPedidoWebItensModel.VLR_GARANTIA);
+  pQry.ParamByName('TIPO_ENTREGA').Value            := ifThen(pPedidoWebItensModel.TIPO_ENTREGA               = '', Unassigned, pPedidoWebItensModel.TIPO_ENTREGA);
+  pQry.ParamByName('MONTAGEM').Value                := ifThen(pPedidoWebItensModel.MONTAGEM                   = '', Unassigned, pPedidoWebItensModel.MONTAGEM);
+  pQry.ParamByName('ENTREGA').Value                 := ifThen(pPedidoWebItensModel.ENTREGA                    = '', Unassigned, pPedidoWebItensModel.ENTREGA);
+  pQry.ParamByName('TIPO').Value                    := ifThen(pPedidoWebItensModel.TIPO                       = '', Unassigned, pPedidoWebItensModel.TIPO);
+  pQry.ParamByName('QUANTIDADE_PENDENTE').Value     := ifThen(pPedidoWebItensModel.QUANTIDADE_PENDENTE        = '', Unassigned, pPedidoWebItensModel.QUANTIDADE_PENDENTE);
+  pQry.ParamByName('VALOR_VENDIDO').Value           := ifThen(pPedidoWebItensModel.VALOR_VENDIDO              = '', Unassigned, pPedidoWebItensModel.VALOR_VENDIDO);
+  pQry.ParamByName('QUANTIDADE_SEPARACAO').Value    := ifThen(pPedidoWebItensModel.QUANTIDADE_SEPARACAO       = '', Unassigned, pPedidoWebItensModel.QUANTIDADE_SEPARACAO);
+  pQry.ParamByName('ALIQ_IPI').Value                := ifThen(pPedidoWebItensModel.ALIQ_IPI                   = '', Unassigned, pPedidoWebItensModel.ALIQ_IPI);
+  pQry.ParamByName('VALOR_IPI').Value               := ifThen(pPedidoWebItensModel.VALOR_IPI                  = '', Unassigned, pPedidoWebItensModel.VALOR_IPI);
+  pQry.ParamByName('CFOP_ID').Value                 := ifThen(pPedidoWebItensModel.CFOP_ID                    = '', Unassigned, pPedidoWebItensModel.CFOP_ID);
+  pQry.ParamByName('CST').Value                     := ifThen(pPedidoWebItensModel.CST                        = '', Unassigned, pPedidoWebItensModel.CST);
+  pQry.ParamByName('VALOR_RESTITUICAO_ST').Value    := ifThen(pPedidoWebItensModel.VALOR_RESTITUICAO_ST       = '', Unassigned, pPedidoWebItensModel.VALOR_RESTITUICAO_ST);
+  pQry.ParamByName('ALIQ_ICMS').Value               := ifThen(pPedidoWebItensModel.ALIQ_ICMS                  = '', Unassigned, pPedidoWebItensModel.ALIQ_ICMS);
+  pQry.ParamByName('ALIQ_ICMS_ST').Value            := ifThen(pPedidoWebItensModel.ALIQ_ICMS_ST               = '', Unassigned, pPedidoWebItensModel.ALIQ_ICMS_ST);
+  pQry.ParamByName('REDUCAO_ST').Value              := ifThen(pPedidoWebItensModel.REDUCAO_ST                 = '', Unassigned, pPedidoWebItensModel.REDUCAO_ST);
+  pQry.ParamByName('MVA').Value                     := ifThen(pPedidoWebItensModel.MVA                        = '', Unassigned, pPedidoWebItensModel.MVA);
+  pQry.ParamByName('REDUCAO_ICMS').Value            := ifThen(pPedidoWebItensModel.REDUCAO_ICMS               = '', Unassigned, pPedidoWebItensModel.REDUCAO_ICMS);
+  pQry.ParamByName('BASE_ICMS').Value               := ifThen(pPedidoWebItensModel.BASE_ICMS                  = '', Unassigned, pPedidoWebItensModel.BASE_ICMS);
+  pQry.ParamByName('VALOR_ICMS').Value              := ifThen(pPedidoWebItensModel.VALOR_ICMS                 = '', Unassigned, pPedidoWebItensModel.VALOR_ICMS);
+  pQry.ParamByName('BASE_ST').Value                 := ifThen(pPedidoWebItensModel.BASE_ST                    = '', Unassigned, pPedidoWebItensModel.BASE_ST);
+  pQry.ParamByName('DESC_RESTITUICAO_ST').Value     := ifThen(pPedidoWebItensModel.DESC_RESTITUICAO_ST        = '', Unassigned, pPedidoWebItensModel.DESC_RESTITUICAO_ST);
+  pQry.ParamByName('ICMS_SUFRAMA').Value            := ifThen(pPedidoWebItensModel.ICMS_SUFRAMA               = '', Unassigned, pPedidoWebItensModel.ICMS_SUFRAMA);
+  pQry.ParamByName('PIS_SUFRAMA').Value             := ifThen(pPedidoWebItensModel.PIS_SUFRAMA                = '', Unassigned, pPedidoWebItensModel.PIS_SUFRAMA);
+  pQry.ParamByName('COFINS_SUFRAMA').Value          := ifThen(pPedidoWebItensModel.COFINS_SUFRAMA             = '', Unassigned, pPedidoWebItensModel.COFINS_SUFRAMA);
+  pQry.ParamByName('IPI_SUFRAMA').Value             := ifThen(pPedidoWebItensModel.IPI_SUFRAMA                = '', Unassigned, pPedidoWebItensModel.IPI_SUFRAMA);
+  pQry.ParamByName('ALIQ_PIS').Value                := ifThen(pPedidoWebItensModel.ALIQ_PIS                   = '', Unassigned, pPedidoWebItensModel.ALIQ_PIS);
+  pQry.ParamByName('ALIQ_COFINS').Value             := ifThen(pPedidoWebItensModel.ALIQ_COFINS                = '', Unassigned, pPedidoWebItensModel.ALIQ_COFINS);
+  pQry.ParamByName('BASE_PIS').Value                := ifThen(pPedidoWebItensModel.BASE_PIS                   = '', Unassigned, pPedidoWebItensModel.BASE_PIS);
+  pQry.ParamByName('BASE_COFINS').Value             := ifThen(pPedidoWebItensModel.BASE_COFINS                = '', Unassigned, pPedidoWebItensModel.BASE_COFINS);
+  pQry.ParamByName('VALOR_PIS').Value               := ifThen(pPedidoWebItensModel.VALOR_PIS                  = '', Unassigned, pPedidoWebItensModel.VALOR_PIS);
+  pQry.ParamByName('VALOR_COFINS').Value            := ifThen(pPedidoWebItensModel.VALOR_COFINS               = '', Unassigned, pPedidoWebItensModel.VALOR_COFINS);
+  pQry.ParamByName('VBCFCPST').Value                := ifThen(pPedidoWebItensModel.VBCFCPST                   = '', Unassigned, pPedidoWebItensModel.VBCFCPST);
+  pQry.ParamByName('PFCPST').Value                  := ifThen(pPedidoWebItensModel.PFCPST                     = '', Unassigned, pPedidoWebItensModel.PFCPST);
+  pQry.ParamByName('VFCPST').Value                  := ifThen(pPedidoWebItensModel.VFCPST                     = '', Unassigned, pPedidoWebItensModel.VFCPST);
 end;
 
 procedure TPedidoWebItensDao.SetStartRecordView(const Value: String);

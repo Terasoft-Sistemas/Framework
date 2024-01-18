@@ -3,7 +3,7 @@ unit MovimentoModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao;
 
@@ -173,9 +173,9 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lMovimentoDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lMovimentoDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lMovimentoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lMovimentoDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lMovimentoDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lMovimentoDao.excluir(Self);
     end;
 
   finally

@@ -3,7 +3,7 @@ unit  EventosNFeModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   FireDAC.Comp.Client,
   Interfaces.Conexao;
 
@@ -113,9 +113,9 @@ begin
    try
 
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := vEventosNFeDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := vEventosNFeDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := vEventosNFeDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := vEventosNFeDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := vEventosNFeDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := vEventosNFeDao.excluir(Self);
     end;
 
    finally

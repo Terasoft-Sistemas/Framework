@@ -3,7 +3,7 @@ unit AdmCartaoTaxaModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao;
 
@@ -125,9 +125,9 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lAdmCartaoTaxaDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lAdmCartaoTaxaDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lAdmCartaoTaxaDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lAdmCartaoTaxaDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lAdmCartaoTaxaDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lAdmCartaoTaxaDao.excluir(Self);
     end;
 
   finally

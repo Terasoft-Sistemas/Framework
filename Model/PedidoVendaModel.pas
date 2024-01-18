@@ -1,7 +1,7 @@
 unit PedidoVendaModel;
 interface
 uses
-  Terasoft.Types.Acao,
+  Terasoft.Types,
   System.Generics.Collections,
   Terasoft.FuncoesTexto,
   Terasoft.Utils,
@@ -1071,9 +1071,9 @@ begin
   Result := '';
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lPedidoVendaDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lPedidoVendaDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lPedidoVendaDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lPedidoVendaDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lPedidoVendaDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lPedidoVendaDao.excluir(Self);
     end;
   finally
     lPedidoVendaDao.Free;

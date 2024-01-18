@@ -4,7 +4,7 @@ interface
 
 uses
   LojasModel,
-  Terasoft.Utils,
+  Terasoft.ConstrutorDao,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
@@ -16,7 +16,9 @@ type
   TLojasDao = class
 
   private
-    vIConexao: IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
+
     FLojassLista: TObjectList<TLojasModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -38,7 +40,7 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
 
-    function montaCondicaoQuery: String;
+    function where: String;
     procedure SetLojaView(const Value: String);
 
   public
@@ -66,7 +68,8 @@ implementation
 
 constructor TLojasDao.Create(pIConexao: IConexao);
 begin
-  vIConexao := pIConexao;
+  vIConexao   := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TLojasDao.Destroy;
@@ -75,7 +78,7 @@ begin
   inherited;
 end;
 
-function TLojasDao.montaCondicaoQuery: String;
+function TLojasDao.where: String;
 var
   lSQL : String;
 begin
@@ -100,7 +103,7 @@ begin
 
     lSql := 'select count(*) records From loja2 where loja2.server is not null ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -131,7 +134,7 @@ begin
             '   from loja2                     ' + #13 +
             '  where loja2.server is not null  ' + #13;
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lSQL := lSQL + ' order by 1';
 

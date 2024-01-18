@@ -4,7 +4,7 @@ interface
 
 uses
   NFItensModel,
-  Terasoft.Utils,
+  Terasoft.ConstrutorDao,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
@@ -17,7 +17,9 @@ type
   TNFItensDao = class
 
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
+
     FNFItenssLista: TObjectList<TNFItensModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -38,7 +40,8 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
 
-    function montaCondicaoQuery: String;
+    procedure setParams(var pQry: TFDQuery; pNFItensModel: TNFItensModel);
+    function where: String;
 
   public
     constructor Create(pIConexao : IConexao);
@@ -54,14 +57,12 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(ANFItensModel: TNFItensModel): String;
-    function alterar(ANFItensModel: TNFItensModel): String;
-    function excluir(ANFItensModel: TNFItensModel): String;
+    function incluir(pNFItensModel: TNFItensModel): String;
+    function alterar(pNFItensModel: TNFItensModel): String;
+    function excluir(pNFItensModel: TNFItensModel): String;
 
     procedure obterLista;
     function carregaClasse(pId: String): TNFItensModel;
-
-    procedure setParams(var pQry: TFDQuery; pNFItensModel: TNFItensModel);
 end;
 
 implementation
@@ -241,7 +242,8 @@ end;
 
 constructor TNFItensDao.Create(pIConexao : IConexao);
 begin
-  vIConexao := pIConexao;
+  vIConexao   := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TNFItensDao.Destroy;
@@ -250,302 +252,18 @@ begin
   inherited;
 end;
 
-function TNFItensDao.incluir(ANFItensModel: TNFItensModel): String;
+function TNFItensDao.incluir(pNFItensModel: TNFItensModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := 'insert into nfitens (numero_nf,                     '+SLineBreak+
-          '                     serie_nf,                      '+SLineBreak+
-          '                     codigo_pro,                    '+SLineBreak+
-          '                     valorunitario_nf,              '+SLineBreak+
-          '                     quantidade_nf,                 '+SLineBreak+
-          '                     vlrvenda_nf,                   '+SLineBreak+
-          '                     vlrcusto_nf,                   '+SLineBreak+
-          '                     reducao_nf,                    '+SLineBreak+
-          '                     icms_nf,                       '+SLineBreak+
-          '                     ipi_nf,                        '+SLineBreak+
-          '                     item_nf,                       '+SLineBreak+
-          '                     unidade_nf,                    '+SLineBreak+
-          '                     loja,                          '+SLineBreak+
-          '                     valor_icms,                    '+SLineBreak+
-          '                     base_icms_st,                  '+SLineBreak+
-          '                     valor_ipi,                     '+SLineBreak+
-          '                     base_icms,                     '+SLineBreak+
-          '                     lote,                          '+SLineBreak+
-          '                     pmvast_n19,                    '+SLineBreak+
-          '                     predbcst_n20,                  '+SLineBreak+
-          '                     vbcst_n21,                     '+SLineBreak+
-          '                     picmsst_n22,                   '+SLineBreak+
-          '                     vicmsst_n23,                   '+SLineBreak+
-          '                     modbcst_n18,                   '+SLineBreak+
-          '                     cst_n12,                       '+SLineBreak+
-          '                     vbc_n15,                       '+SLineBreak+
-          '                     vicms_n17,                     '+SLineBreak+
-          '                     numero_serie_ecf,              '+SLineBreak+
-          '                     status,                        '+SLineBreak+
-          '                     predbc_n14,                    '+SLineBreak+
-          '                     cfop,                          '+SLineBreak+
-          '                     id_obs_lancamento,             '+SLineBreak+
-          '                     csosn,                         '+SLineBreak+
-          '                     pcredsn,                       '+SLineBreak+
-          '                     vcredicmssn,                   '+SLineBreak+
-          '                     ndi_i19,                       '+SLineBreak+
-          '                     ddi_i20,                       '+SLineBreak+
-          '                     xlocdesemb_i21,                '+SLineBreak+
-          '                     ufdesemb_i22,                  '+SLineBreak+
-          '                     ddesemb_i23,                   '+SLineBreak+
-          '                     cexportador_i24,               '+SLineBreak+
-          '                     nadicao_i26,                   '+SLineBreak+
-          '                     nseqadic_i27,                  '+SLineBreak+
-          '                     cfabricante_i28,               '+SLineBreak+
-          '                     vdescdi_i29,                   '+SLineBreak+
-          '                     vbc_p02,                       '+SLineBreak+
-          '                     vdespadu_p03,                  '+SLineBreak+
-          '                     vii_p04,                       '+SLineBreak+
-          '                     viof_p05,                      '+SLineBreak+
-          '                     cst_q06,                       '+SLineBreak+
-          '                     vbc_q07,                       '+SLineBreak+
-          '                     ppis_q08,                      '+SLineBreak+
-          '                     vpis_q09,                      '+SLineBreak+
-          '                     qbcprod_q10,                   '+SLineBreak+
-          '                     valiqprod_q11,                 '+SLineBreak+
-          '                     cst_s06,                       '+SLineBreak+
-          '                     vbc_s07,                       '+SLineBreak+
-          '                     pcofins_s08,                   '+SLineBreak+
-          '                     vcofins_s11,                   '+SLineBreak+
-          '                     qbcprod_s09,                   '+SLineBreak+
-          '                     valiqprod_s10,                 '+SLineBreak+
-          '                     vtottrib,                      '+SLineBreak+
-          '                     observacao,                    '+SLineBreak+
-          '                     cfop_id,                       '+SLineBreak+
-          '                     conta_contabil,                '+SLineBreak+
-          '                     vdesc,                         '+SLineBreak+
-          '                     vseg,                          '+SLineBreak+
-          '                     frete,                         '+SLineBreak+
-          '                     voutros,                       '+SLineBreak+
-          '                     cst_ipi,                       '+SLineBreak+
-          '                     valor_diferimento,             '+SLineBreak+
-          '                     obs_item,                      '+SLineBreak+
-          '                     icms_suframa,                  '+SLineBreak+
-          '                     pis_suframa,                   '+SLineBreak+
-          '                     cofins_suframa,                '+SLineBreak+
-          '                     ipi_suframa,                   '+SLineBreak+
-          '                     descricao_produto,             '+SLineBreak+
-          '                     estoque_2,                     '+SLineBreak+
-          '                     vtottrib_federal,              '+SLineBreak+
-          '                     vtottrib_estadual,             '+SLineBreak+
-          '                     vtottrib_municipal,            '+SLineBreak+
-          '                     pedido_id,                     '+SLineBreak+
-          '                     nitemped,                      '+SLineBreak+
-          '                     xped,                          '+SLineBreak+
-          '                     tpviatransp,                   '+SLineBreak+
-          '                     tpintermedio,                  '+SLineBreak+
-          '                     vafrmm_opc,                    '+SLineBreak+
-          '                     vbc_ipi,                       '+SLineBreak+
-          '                     aliquota_ii,                   '+SLineBreak+
-          '                     vbcufdest,                     '+SLineBreak+
-          '                     pfcpufdest,                    '+SLineBreak+
-          '                     picmsufdest,                   '+SLineBreak+
-          '                     picmsinter,                    '+SLineBreak+
-          '                     picmsinterpart,                '+SLineBreak+
-          '                     vfcpufdest,                    '+SLineBreak+
-          '                     vicmsufdest,                   '+SLineBreak+
-          '                     vicmsufremet,                  '+SLineBreak+
-          '                     cest,                          '+SLineBreak+
-          '                     saida_id,                      '+SLineBreak+
-          '                     pcredicms,                     '+SLineBreak+
-          '                     pcredpis,                      '+SLineBreak+
-          '                     pcredcofins,                   '+SLineBreak+
-          '                     destino,                       '+SLineBreak+
-          '                     ipi_cenq,                      '+SLineBreak+
-          '                     nitemped2,                     '+SLineBreak+
-          '                     utrib,                         '+SLineBreak+
-          '                     qtrib,                         '+SLineBreak+
-          '                     vuntrib,                       '+SLineBreak+
-          '                     vbcfcpufdest,                  '+SLineBreak+
-          '                     vbcfcpst,                      '+SLineBreak+
-          '                     pfcpst,                        '+SLineBreak+
-          '                     vfcpst,                        '+SLineBreak+
-          '                     vbccfp,                        '+SLineBreak+
-          '                     pfcp,                          '+SLineBreak+
-          '                     vfcp,                          '+SLineBreak+
-          '                     vbcfcpstret,                   '+SLineBreak+
-          '                     pfcpstret,                     '+SLineBreak+
-          '                     vfcpstret,                     '+SLineBreak+
-          '                     os_id,                         '+SLineBreak+
-          '                     cbenef,                        '+SLineBreak+
-          '                     indescala,                     '+SLineBreak+
-          '                     cnpjfab,                       '+SLineBreak+
-          '                     predbcefet,                    '+SLineBreak+
-          '                     vbcefet,                       '+SLineBreak+
-          '                     picmsefet,                     '+SLineBreak+
-          '                     vicmsefet,                     '+SLineBreak+
-          '                     cenq,                          '+SLineBreak+
-          '                     vbcstret,                      '+SLineBreak+
-          '                     vicmsstret,                    '+SLineBreak+
-          '                     picmsstret,                    '+SLineBreak+
-          '                     vicmssubistitutoret,           '+SLineBreak+
-          '                     vicmsdeson,                    '+SLineBreak+
-          '                     motdesicms,                    '+SLineBreak+
-          '                     valor_vip,                     '+SLineBreak+
-          '                     pcred_presumido,               '+SLineBreak+
-          '                     ndraw,                         '+SLineBreak+
-          '                     pprcomp,                       '+SLineBreak+
-          '                     vprcomp,                       '+SLineBreak+
-          '                     nre,                           '+SLineBreak+
-          '                     chnfe,                         '+SLineBreak+
-          '                     qexport,                       '+SLineBreak+
-          '                     extipi)                        '+SLineBreak+
-          'values (:numero_nf,                                 '+SLineBreak+
-          '        :serie_nf,                                  '+SLineBreak+
-          '        :codigo_pro,                                '+SLineBreak+
-          '        :valorunitario_nf,                          '+SLineBreak+
-          '        :quantidade_nf,                             '+SLineBreak+
-          '        :vlrvenda_nf,                               '+SLineBreak+
-          '        :vlrcusto_nf,                               '+SLineBreak+
-          '        :reducao_nf,                                '+SLineBreak+
-          '        :icms_nf,                                   '+SLineBreak+
-          '        :ipi_nf,                                    '+SLineBreak+
-          '        :item_nf,                                   '+SLineBreak+
-          '        :unidade_nf,                                '+SLineBreak+
-          '        :loja,                                      '+SLineBreak+
-          '        :valor_icms,                                '+SLineBreak+
-          '        :base_icms_st,                              '+SLineBreak+
-          '        :valor_ipi,                                 '+SLineBreak+
-          '        :base_icms,                                 '+SLineBreak+
-          '        :lote,                                      '+SLineBreak+
-          '        :pmvast_n19,                                '+SLineBreak+
-          '        :predbcst_n20,                              '+SLineBreak+
-          '        :vbcst_n21,                                 '+SLineBreak+
-          '        :picmsst_n22,                               '+SLineBreak+
-          '        :vicmsst_n23,                               '+SLineBreak+
-          '        :modbcst_n18,                               '+SLineBreak+
-          '        :cst_n12,                                   '+SLineBreak+
-          '        :vbc_n15,                                   '+SLineBreak+
-          '        :vicms_n17,                                 '+SLineBreak+
-          '        :numero_serie_ecf,                          '+SLineBreak+
-          '        :status,                                    '+SLineBreak+
-          '        :predbc_n14,                                '+SLineBreak+
-          '        :cfop,                                      '+SLineBreak+
-          '        :id_obs_lancamento,                         '+SLineBreak+
-          '        :csosn,                                     '+SLineBreak+
-          '        :pcredsn,                                   '+SLineBreak+
-          '        :vcredicmssn,                               '+SLineBreak+
-          '        :ndi_i19,                                   '+SLineBreak+
-          '        :ddi_i20,                                   '+SLineBreak+
-          '        :xlocdesemb_i21,                            '+SLineBreak+
-          '        :ufdesemb_i22,                              '+SLineBreak+
-          '        :ddesemb_i23,                               '+SLineBreak+
-          '        :cexportador_i24,                           '+SLineBreak+
-          '        :nadicao_i26,                               '+SLineBreak+
-          '        :nseqadic_i27,                              '+SLineBreak+
-          '        :cfabricante_i28,                           '+SLineBreak+
-          '        :vdescdi_i29,                               '+SLineBreak+
-          '        :vbc_p02,                                   '+SLineBreak+
-          '        :vdespadu_p03,                              '+SLineBreak+
-          '        :vii_p04,                                   '+SLineBreak+
-          '        :viof_p05,                                  '+SLineBreak+
-          '        :cst_q06,                                   '+SLineBreak+
-          '        :vbc_q07,                                   '+SLineBreak+
-          '        :ppis_q08,                                  '+SLineBreak+
-          '        :vpis_q09,                                  '+SLineBreak+
-          '        :qbcprod_q10,                               '+SLineBreak+
-          '        :valiqprod_q11,                             '+SLineBreak+
-          '        :cst_s06,                                   '+SLineBreak+
-          '        :vbc_s07,                                   '+SLineBreak+
-          '        :pcofins_s08,                               '+SLineBreak+
-          '        :vcofins_s11,                               '+SLineBreak+
-          '        :qbcprod_s09,                               '+SLineBreak+
-          '        :valiqprod_s10,                             '+SLineBreak+
-          '        :vtottrib,                                  '+SLineBreak+
-          '        :observacao,                                '+SLineBreak+
-          '        :cfop_id,                                   '+SLineBreak+
-          '        :conta_contabil,                            '+SLineBreak+
-          '        :vdesc,                                     '+SLineBreak+
-          '        :vseg,                                      '+SLineBreak+
-          '        :frete,                                     '+SLineBreak+
-          '        :voutros,                                   '+SLineBreak+
-          '        :cst_ipi,                                   '+SLineBreak+
-          '        :valor_diferimento,                         '+SLineBreak+
-          '        :obs_item,                                  '+SLineBreak+
-          '        :icms_suframa,                              '+SLineBreak+
-          '        :pis_suframa,                               '+SLineBreak+
-          '        :cofins_suframa,                            '+SLineBreak+
-          '        :ipi_suframa,                               '+SLineBreak+
-          '        :descricao_produto,                         '+SLineBreak+
-          '        :estoque_2,                                 '+SLineBreak+
-          '        :vtottrib_federal,                          '+SLineBreak+
-          '        :vtottrib_estadual,                         '+SLineBreak+
-          '        :vtottrib_municipal,                        '+SLineBreak+
-          '        :pedido_id,                                 '+SLineBreak+
-          '        :nitemped,                                  '+SLineBreak+
-          '        :xped,                                      '+SLineBreak+
-          '        :tpviatransp,                               '+SLineBreak+
-          '        :tpintermedio,                              '+SLineBreak+
-          '        :vafrmm_opc,                                '+SLineBreak+
-          '        :vbc_ipi,                                   '+SLineBreak+
-          '        :aliquota_ii,                               '+SLineBreak+
-          '        :vbcufdest,                                 '+SLineBreak+
-          '        :pfcpufdest,                                '+SLineBreak+
-          '        :picmsufdest,                               '+SLineBreak+
-          '        :picmsinter,                                '+SLineBreak+
-          '        :picmsinterpart,                            '+SLineBreak+
-          '        :vfcpufdest,                                '+SLineBreak+
-          '        :vicmsufdest,                               '+SLineBreak+
-          '        :vicmsufremet,                              '+SLineBreak+
-          '        :cest,                                      '+SLineBreak+
-          '        :saida_id,                                  '+SLineBreak+
-          '        :pcredicms,                                 '+SLineBreak+
-          '        :pcredpis,                                  '+SLineBreak+
-          '        :pcredcofins,                               '+SLineBreak+
-          '        :destino,                                   '+SLineBreak+
-          '        :ipi_cenq,                                  '+SLineBreak+
-          '        :nitemped2,                                 '+SLineBreak+
-          '        :utrib,                                     '+SLineBreak+
-          '        :qtrib,                                     '+SLineBreak+
-          '        :vuntrib,                                   '+SLineBreak+
-          '        :vbcfcpufdest,                              '+SLineBreak+
-          '        :vbcfcpst,                                  '+SLineBreak+
-          '        :pfcpst,                                    '+SLineBreak+
-          '        :vfcpst,                                    '+SLineBreak+
-          '        :vbccfp,                                    '+SLineBreak+
-          '        :pfcp,                                      '+SLineBreak+
-          '        :vfcp,                                      '+SLineBreak+
-          '        :vbcfcpstret,                               '+SLineBreak+
-          '        :pfcpstret,                                 '+SLineBreak+
-          '        :vfcpstret,                                 '+SLineBreak+
-          '        :os_id,                                     '+SLineBreak+
-          '        :cbenef,                                    '+SLineBreak+
-          '        :indescala,                                 '+SLineBreak+
-          '        :cnpjfab,                                   '+SLineBreak+
-          '        :predbcefet,                                '+SLineBreak+
-          '        :vbcefet,                                   '+SLineBreak+
-          '        :picmsefet,                                 '+SLineBreak+
-          '        :vicmsefet,                                 '+SLineBreak+
-          '        :cenq,                                      '+SLineBreak+
-          '        :vbcstret,                                  '+SLineBreak+
-          '        :vicmsstret,                                '+SLineBreak+
-          '        :picmsstret,                                '+SLineBreak+
-          '        :vicmssubistitutoret,                       '+SLineBreak+
-          '        :vicmsdeson,                                '+SLineBreak+
-          '        :motdesicms,                                '+SLineBreak+
-          '        :valor_vip,                                 '+SLineBreak+
-          '        :pcred_presumido,                           '+SLineBreak+
-          '        :ndraw,                                     '+SLineBreak+
-          '        :pprcomp,                                   '+SLineBreak+
-          '        :vprcomp,                                   '+SLineBreak+
-          '        :nre,                                       '+SLineBreak+
-          '        :chnfe,                                     '+SLineBreak+
-          '        :qexport,                                   '+SLineBreak+
-          '        :extipi)                                    '+SLineBreak+
-          ' returning ID                                       '+SLineBreak;
+  lSQL := vConstrutor.gerarInsert('NFITENS', 'ID');
 
   try
     lQry.SQL.Add(lSQL);
-    setParams(lQry, ANFItensModel);
+    setParams(lQry, pNFItensModel);
     lQry.Open;
 
     Result := lQry.FieldByName('ID').AsString;
@@ -556,160 +274,21 @@ begin
   end;
 end;
 
-function TNFItensDao.alterar(ANFItensModel: TNFItensModel): String;
+function TNFItensDao.alterar(pNFItensModel: TNFItensModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := '    update nfitens                                                                                                       '+SLineBreak+
-          '       set valorunitario_nf = :valorunitario_nf,                                                                         '+SLineBreak+
-          '           quantidade_nf = :quantidade_nf,                                                                               '+SLineBreak+
-          '           vlrvenda_nf = :vlrvenda_nf,                                                                                   '+SLineBreak+
-          '           vlrcusto_nf = :vlrcusto_nf,                                                                                   '+SLineBreak+
-          '           reducao_nf = :reducao_nf,                                                                                     '+SLineBreak+
-          '           icms_nf = :icms_nf,                                                                                           '+SLineBreak+
-          '           ipi_nf = :ipi_nf,                                                                                             '+SLineBreak+
-          '           unidade_nf = :unidade_nf,                                                                                     '+SLineBreak+
-          '           loja = :loja,                                                                                                 '+SLineBreak+
-          '           valor_icms = :valor_icms,                                                                                     '+SLineBreak+
-          '           base_icms_st = :base_icms_st,                                                                                 '+SLineBreak+
-          '           valor_ipi = :valor_ipi,                                                                                       '+SLineBreak+
-          '           base_icms = :base_icms,                                                                                       '+SLineBreak+
-          '           lote = :lote,                                                                                                 '+SLineBreak+
-          '           pmvast_n19 = :pmvast_n19,                                                                                     '+SLineBreak+
-          '           predbcst_n20 = :predbcst_n20,                                                                                 '+SLineBreak+
-          '           vbcst_n21 = :vbcst_n21,                                                                                       '+SLineBreak+
-          '           picmsst_n22 = :picmsst_n22,                                                                                   '+SLineBreak+
-          '           vicmsst_n23 = :vicmsst_n23,                                                                                   '+SLineBreak+
-          '           modbcst_n18 = :modbcst_n18,                                                                                   '+SLineBreak+
-          '           cst_n12 = :cst_n12,                                                                                           '+SLineBreak+
-          '           vbc_n15 = :vbc_n15,                                                                                           '+SLineBreak+
-          '           vicms_n17 = :vicms_n17,                                                                                       '+SLineBreak+
-          '           numero_serie_ecf = :numero_serie_ecf,                                                                         '+SLineBreak+
-          '           status = :status,                                                                                             '+SLineBreak+
-          '           predbc_n14 = :predbc_n14,                                                                                     '+SLineBreak+
-          '           cfop = :cfop,                                                                                                 '+SLineBreak+
-          '           id_obs_lancamento = :id_obs_lancamento,                                                                       '+SLineBreak+
-          '           csosn = :csosn,                                                                                               '+SLineBreak+
-          '           pcredsn = :pcredsn,                                                                                           '+SLineBreak+
-          '           vcredicmssn = :vcredicmssn,                                                                                   '+SLineBreak+
-          '           ndi_i19 = :ndi_i19,                                                                                           '+SLineBreak+
-          '           ddi_i20 = :ddi_i20,                                                                                           '+SLineBreak+
-          '           xlocdesemb_i21 = :xlocdesemb_i21,                                                                             '+SLineBreak+
-          '           ufdesemb_i22 = :ufdesemb_i22,                                                                                 '+SLineBreak+
-          '           ddesemb_i23 = :ddesemb_i23,                                                                                   '+SLineBreak+
-          '           cexportador_i24 = :cexportador_i24,                                                                           '+SLineBreak+
-          '           nadicao_i26 = :nadicao_i26,                                                                                   '+SLineBreak+
-          '           nseqadic_i27 = :nseqadic_i27,                                                                                 '+SLineBreak+
-          '           cfabricante_i28 = :cfabricante_i28,                                                                           '+SLineBreak+
-          '           vdescdi_i29 = :vdescdi_i29,                                                                                   '+SLineBreak+
-          '           vbc_p02 = :vbc_p02,                                                                                           '+SLineBreak+
-          '           vdespadu_p03 = :vdespadu_p03,                                                                                 '+SLineBreak+
-          '           vii_p04 = :vii_p04,                                                                                           '+SLineBreak+
-          '           viof_p05 = :viof_p05,                                                                                         '+SLineBreak+
-          '           cst_q06 = :cst_q06,                                                                                           '+SLineBreak+
-          '           vbc_q07 = :vbc_q07,                                                                                           '+SLineBreak+
-          '           ppis_q08 = :ppis_q08,                                                                                         '+SLineBreak+
-          '           vpis_q09 = :vpis_q09,                                                                                         '+SLineBreak+
-          '           qbcprod_q10 = :qbcprod_q10,                                                                                   '+SLineBreak+
-          '           valiqprod_q11 = :valiqprod_q11,                                                                               '+SLineBreak+
-          '           cst_s06 = :cst_s06,                                                                                           '+SLineBreak+
-          '           vbc_s07 = :vbc_s07,                                                                                           '+SLineBreak+
-          '           pcofins_s08 = :pcofins_s08,                                                                                   '+SLineBreak+
-          '           vcofins_s11 = :vcofins_s11,                                                                                   '+SLineBreak+
-          '           qbcprod_s09 = :qbcprod_s09,                                                                                   '+SLineBreak+
-          '           valiqprod_s10 = :valiqprod_s10,                                                                               '+SLineBreak+
-          '           vtottrib = :vtottrib,                                                                                         '+SLineBreak+
-          '           observacao = :observacao,                                                                                     '+SLineBreak+
-          '           cfop_id = :cfop_id,                                                                                           '+SLineBreak+
-          '           conta_contabil = :conta_contabil,                                                                             '+SLineBreak+
-          '           vdesc = :vdesc,                                                                                               '+SLineBreak+
-          '           vseg = :vseg,                                                                                                 '+SLineBreak+
-          '           frete = :frete,                                                                                               '+SLineBreak+
-          '           voutros = :voutros,                                                                                           '+SLineBreak+
-          '           cst_ipi = :cst_ipi,                                                                                           '+SLineBreak+
-          '           valor_diferimento = :valor_diferimento,                                                                       '+SLineBreak+
-          '           obs_item = :obs_item,                                                                                         '+SLineBreak+
-          '           icms_suframa = :icms_suframa,                                                                                 '+SLineBreak+
-          '           pis_suframa = :pis_suframa,                                                                                   '+SLineBreak+
-          '           cofins_suframa = :cofins_suframa,                                                                             '+SLineBreak+
-          '           ipi_suframa = :ipi_suframa,                                                                                   '+SLineBreak+
-          '           descricao_produto = :descricao_produto,                                                                       '+SLineBreak+
-          '           estoque_2 = :estoque_2,                                                                                       '+SLineBreak+
-          '           vtottrib_federal = :vtottrib_federal,                                                                         '+SLineBreak+
-          '           vtottrib_estadual = :vtottrib_estadual,                                                                       '+SLineBreak+
-          '           vtottrib_municipal = :vtottrib_municipal,                                                                     '+SLineBreak+
-          '           pedido_id = :pedido_id,                                                                                       '+SLineBreak+
-          '           nitemped = :nitemped,                                                                                         '+SLineBreak+
-          '           xped = :xped,                                                                                                 '+SLineBreak+
-          '           tpviatransp = :tpviatransp,                                                                                   '+SLineBreak+
-          '           tpintermedio = :tpintermedio,                                                                                 '+SLineBreak+
-          '           vafrmm_opc = :vafrmm_opc,                                                                                     '+SLineBreak+
-          '           vbc_ipi = :vbc_ipi,                                                                                           '+SLineBreak+
-          '           aliquota_ii = :aliquota_ii,                                                                                   '+SLineBreak+
-          '           vbcufdest = :vbcufdest,                                                                                       '+SLineBreak+
-          '           pfcpufdest = :pfcpufdest,                                                                                     '+SLineBreak+
-          '           picmsufdest = :picmsufdest,                                                                                   '+SLineBreak+
-          '           picmsinter = :picmsinter,                                                                                     '+SLineBreak+
-          '           picmsinterpart = :picmsinterpart,                                                                             '+SLineBreak+
-          '           vfcpufdest = :vfcpufdest,                                                                                     '+SLineBreak+
-          '           vicmsufdest = :vicmsufdest,                                                                                   '+SLineBreak+
-          '           vicmsufremet = :vicmsufremet,                                                                                 '+SLineBreak+
-          '           cest = :cest,                                                                                                 '+SLineBreak+
-          '           saida_id = :saida_id,                                                                                         '+SLineBreak+
-          '           pcredicms = :pcredicms,                                                                                       '+SLineBreak+
-          '           pcredpis = :pcredpis,                                                                                         '+SLineBreak+
-          '           pcredcofins = :pcredcofins,                                                                                   '+SLineBreak+
-          '           destino = :destino,                                                                                           '+SLineBreak+
-          '           ipi_cenq = :ipi_cenq,                                                                                         '+SLineBreak+
-          '           nitemped2 = :nitemped2,                                                                                       '+SLineBreak+
-          '           utrib = :utrib,                                                                                               '+SLineBreak+
-          '           qtrib = :qtrib,                                                                                               '+SLineBreak+
-          '           vuntrib = :vuntrib,                                                                                           '+SLineBreak+
-          '           vbcfcpufdest = :vbcfcpufdest,                                                                                 '+SLineBreak+
-          '           vbcfcpst = :vbcfcpst,                                                                                         '+SLineBreak+
-          '           pfcpst = :pfcpst,                                                                                             '+SLineBreak+
-          '           vfcpst = :vfcpst,                                                                                             '+SLineBreak+
-          '           vbccfp = :vbccfp,                                                                                             '+SLineBreak+
-          '           pfcp = :pfcp,                                                                                                 '+SLineBreak+
-          '           vfcp = :vfcp,                                                                                                 '+SLineBreak+
-          '           vbcfcpstret = :vbcfcpstret,                                                                                   '+SLineBreak+
-          '           pfcpstret = :pfcpstret,                                                                                       '+SLineBreak+
-          '           vfcpstret = :vfcpstret,                                                                                       '+SLineBreak+
-          '           os_id = :os_id,                                                                                               '+SLineBreak+
-          '           cbenef = :cbenef,                                                                                             '+SLineBreak+
-          '           indescala = :indescala,                                                                                       '+SLineBreak+
-          '           cnpjfab = :cnpjfab,                                                                                           '+SLineBreak+
-          '           predbcefet = :predbcefet,                                                                                     '+SLineBreak+
-          '           vbcefet = :vbcefet,                                                                                           '+SLineBreak+
-          '           picmsefet = :picmsefet,                                                                                       '+SLineBreak+
-          '           vicmsefet = :vicmsefet,                                                                                       '+SLineBreak+
-          '           cenq = :cenq,                                                                                                 '+SLineBreak+
-          '           vbcstret = :vbcstret,                                                                                         '+SLineBreak+
-          '           vicmsstret = :vicmsstret,                                                                                     '+SLineBreak+
-          '           picmsstret = :picmsstret,                                                                                     '+SLineBreak+
-          '           vicmssubistitutoret = :vicmssubistitutoret,                                                                   '+SLineBreak+
-          '           vicmsdeson = :vicmsdeson,                                                                                     '+SLineBreak+
-          '           motdesicms = :motdesicms,                                                                                     '+SLineBreak+
-          '           valor_vip = :valor_vip,                                                                                       '+SLineBreak+
-          '           pcred_presumido = :pcred_presumido,                                                                           '+SLineBreak+
-          '           ndraw = :ndraw,                                                                                               '+SLineBreak+
-          '           pprcomp = :pprcomp,                                                                                           '+SLineBreak+
-          '           vprcomp = :vprcomp,                                                                                           '+SLineBreak+
-          '           nre = :nre,                                                                                                   '+SLineBreak+
-          '           chnfe = :chnfe,                                                                                               '+SLineBreak+
-          '           qexport = :qexport,                                                                                           '+SLineBreak+
-          '           extipi = :extipi                                                                                              '+SLineBreak+
-          '     where (numero_nf = :numero_nf) and (serie_nf = :serie_nf) and (codigo_pro = :codigo_pro) and (item_nf = :item_nf)   '+SLineBreak;
+  lSQL := vConstrutor.gerarUpdate('NFITENS', 'ID');
 
   try
     lQry.SQL.Add(lSQL);
-    setParams(lQry, ANFItensModel);
+    setParams(lQry, pNFItensModel);
     lQry.ExecSQL;
 
-    Result := ANFItensModel.ID;
+    Result := pNFItensModel.ID;
 
   finally
     lSQL := '';
@@ -717,23 +296,23 @@ begin
   end;
 end;
 
-function TNFItensDao.excluir(ANFItensModel: TNFItensModel): String;
+function TNFItensDao.excluir(pNFItensModel: TNFItensModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from nfitens where ID = :ID',[ANFItensModel.ID]);
+   lQry.ExecSQL('delete from nfitens where ID = :ID',[pNFItensModel.ID]);
    lQry.ExecSQL;
-   Result := ANFItensModel.ID;
+   Result := pNFItensModel.ID;
 
   finally
     lQry.Free;
   end;
 end;
 
-function TNFItensDao.montaCondicaoQuery: String;
+function TNFItensDao.where: String;
 var
   lSQL : String;
 begin
@@ -758,7 +337,7 @@ begin
 
     lSql := 'select count(*) records From nfitens where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -790,7 +369,7 @@ begin
 	    '  from nfitens               '+
       ' where 1=1                   ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -996,148 +575,148 @@ end;
 
 procedure TNFItensDao.setParams(var pQry: TFDQuery; pNFItensModel: TNFItensModel);
 begin
-  pQry.ParamByName('numero_nf').Value           := IIF(pNFItensModel.NUMERO_NF            = '', Unassigned, pNFItensModel.NUMERO_NF);
-  pQry.ParamByName('serie_nf').Value            := IIF(pNFItensModel.SERIE_NF             = '', Unassigned, pNFItensModel.SERIE_NF);
-  pQry.ParamByName('codigo_pro').Value          := IIF(pNFItensModel.CODIGO_PRO           = '', Unassigned, pNFItensModel.CODIGO_PRO);
-  pQry.ParamByName('valorunitario_nf').Value    := IIF(pNFItensModel.VALORUNITARIO_NF     = '', Unassigned, FormataFloatFireBird(pNFItensModel.VALORUNITARIO_NF));
-  pQry.ParamByName('quantidade_nf').Value       := IIF(pNFItensModel.QUANTIDADE_NF        = '', Unassigned, FormataFloatFireBird(pNFItensModel.QUANTIDADE_NF));
-  pQry.ParamByName('vlrvenda_nf').Value         := IIF(pNFItensModel.VLRVENDA_NF          = '', Unassigned, FormataFloatFireBird(pNFItensModel.VLRVENDA_NF));
-  pQry.ParamByName('vlrcusto_nf').Value         := IIF(pNFItensModel.VLRCUSTO_NF          = '', Unassigned, FormataFloatFireBird(pNFItensModel.VLRCUSTO_NF));
-  pQry.ParamByName('reducao_nf').Value          := IIF(pNFItensModel.REDUCAO_NF           = '', Unassigned, FormataFloatFireBird(pNFItensModel.REDUCAO_NF));
-  pQry.ParamByName('icms_nf').Value             := IIF(pNFItensModel.ICMS_NF              = '', Unassigned, FormataFloatFireBird(pNFItensModel.ICMS_NF));
-  pQry.ParamByName('ipi_nf').Value              := IIF(pNFItensModel.IPI_NF               = '', Unassigned, FormataFloatFireBird(pNFItensModel.IPI_NF));
-  pQry.ParamByName('item_nf').Value             := IIF(pNFItensModel.ITEM_NF              = '', Unassigned, pNFItensModel.ITEM_NF);
-  pQry.ParamByName('unidade_nf').Value          := IIF(pNFItensModel.UNIDADE_NF           = '', Unassigned, pNFItensModel.UNIDADE_NF);
-  pQry.ParamByName('loja').Value                := IIF(pNFItensModel.LOJA                 = '', Unassigned, pNFItensModel.LOJA);
-  pQry.ParamByName('valor_icms').Value          := IIF(pNFItensModel.VALOR_ICMS           = '', Unassigned, FormataFloatFireBird(pNFItensModel.VALOR_ICMS));
-  pQry.ParamByName('base_icms_st').Value        := IIF(pNFItensModel.BASE_ICMS_ST         = '', Unassigned, FormataFloatFireBird(pNFItensModel.BASE_ICMS_ST));
-  pQry.ParamByName('valor_ipi').Value           := IIF(pNFItensModel.VALOR_IPI            = '', Unassigned, FormataFloatFireBird(pNFItensModel.VALOR_IPI));
-  pQry.ParamByName('base_icms').Value           := IIF(pNFItensModel.BASE_ICMS            = '', Unassigned, FormataFloatFireBird(pNFItensModel.BASE_ICMS));
-  pQry.ParamByName('lote').Value                := IIF(pNFItensModel.LOTE                 = '', Unassigned, pNFItensModel.LOTE);
-  pQry.ParamByName('pmvast_n19').Value          := IIF(pNFItensModel.PMVAST_N19           = '', Unassigned, FormataFloatFireBird(pNFItensModel.PMVAST_N19));
-  pQry.ParamByName('predbcst_n20').Value        := IIF(pNFItensModel.PREDBCST_N20         = '', Unassigned, FormataFloatFireBird(pNFItensModel.PREDBCST_N20));
-  pQry.ParamByName('vbcst_n21').Value           := IIF(pNFItensModel.VBCST_N21            = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBCST_N21));
-  pQry.ParamByName('picmsst_n22').Value         := IIF(pNFItensModel.PICMSST_N22          = '', Unassigned, FormataFloatFireBird(pNFItensModel.PICMSST_N22));
-  pQry.ParamByName('vicmsst_n23').Value         := IIF(pNFItensModel.VICMSST_N23          = '', Unassigned, FormataFloatFireBird(pNFItensModel.VICMSST_N23));
-  pQry.ParamByName('modbcst_n18').Value         := IIF(pNFItensModel.MODBCST_N18          = '', Unassigned, pNFItensModel.MODBCST_N18);
-  pQry.ParamByName('cst_n12').Value             := IIF(pNFItensModel.CST_N12              = '', Unassigned, pNFItensModel.CST_N12);
-  pQry.ParamByName('vbc_n15').Value             := IIF(pNFItensModel.VBC_N15              = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBC_N15));
-  pQry.ParamByName('vicms_n17').Value           := IIF(pNFItensModel.VICMS_N17            = '', Unassigned, FormataFloatFireBird(pNFItensModel.VICMS_N17));
-  pQry.ParamByName('numero_serie_ecf').Value    := IIF(pNFItensModel.NUMERO_SERIE_ECF     = '', Unassigned, pNFItensModel.NUMERO_SERIE_ECF);
-  pQry.ParamByName('status').Value              := IIF(pNFItensModel.STATUS               = '', Unassigned, pNFItensModel.STATUS);
-  pQry.ParamByName('predbc_n14').Value          := IIF(pNFItensModel.PREDBC_N14           = '', Unassigned, FormataFloatFireBird(pNFItensModel.PREDBC_N14));
-  pQry.ParamByName('cfop').Value                := IIF(pNFItensModel.CFOP                 = '', Unassigned, pNFItensModel.CFOP);
-  pQry.ParamByName('id_obs_lancamento').Value   := IIF(pNFItensModel.ID_OBS_LANCAMENTO    = '', Unassigned, pNFItensModel.ID_OBS_LANCAMENTO);
-  pQry.ParamByName('csosn').Value               := IIF(pNFItensModel.CSOSN                = '', Unassigned, pNFItensModel.CSOSN);
-  pQry.ParamByName('pcredsn').Value             := IIF(pNFItensModel.PCREDSN              = '', Unassigned, pNFItensModel.PCREDSN);
-  pQry.ParamByName('vcredicmssn').Value         := IIF(pNFItensModel.VCREDICMSSN          = '', Unassigned, pNFItensModel.VCREDICMSSN);
-  pQry.ParamByName('ndi_i19').Value             := IIF(pNFItensModel.NDI_I19              = '', Unassigned, pNFItensModel.NDI_I19);
-  pQry.ParamByName('ddi_i20').Value             := IIF(pNFItensModel.DDI_I20              = '', Unassigned, transformaDataFireBird(pNFItensModel.DDI_I20));
-  pQry.ParamByName('xlocdesemb_i21').Value      := IIF(pNFItensModel.XLOCDESEMB_I21       = '', Unassigned, pNFItensModel.XLOCDESEMB_I21);
-  pQry.ParamByName('ufdesemb_i22').Value        := IIF(pNFItensModel.UFDESEMB_I22         = '', Unassigned, pNFItensModel.UFDESEMB_I22);
-  pQry.ParamByName('ddesemb_i23').Value         := IIF(pNFItensModel.DDESEMB_I23          = '', Unassigned, transformaDataFireBird(pNFItensModel.DDESEMB_I23));
-  pQry.ParamByName('cexportador_i24').Value     := IIF(pNFItensModel.CEXPORTADOR_I24      = '', Unassigned, pNFItensModel.CEXPORTADOR_I24);
-  pQry.ParamByName('nadicao_i26').Value         := IIF(pNFItensModel.NADICAO_I26          = '', Unassigned, pNFItensModel.NADICAO_I26);
-  pQry.ParamByName('nseqadic_i27').Value        := IIF(pNFItensModel.NSEQADIC_I27         = '', Unassigned, pNFItensModel.NSEQADIC_I27);
-  pQry.ParamByName('cfabricante_i28').Value     := IIF(pNFItensModel.CFABRICANTE_I28      = '', Unassigned, pNFItensModel.CFABRICANTE_I28);
-  pQry.ParamByName('vdescdi_i29').Value         := IIF(pNFItensModel.VDESCDI_I29          = '', Unassigned, FormataFloatFireBird(pNFItensModel.VDESCDI_I29));
-  pQry.ParamByName('vbc_p02').Value             := IIF(pNFItensModel.VBC_P02              = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBC_P02));
-  pQry.ParamByName('vdespadu_p03').Value        := IIF(pNFItensModel.VDESPADU_P03         = '', Unassigned, FormataFloatFireBird(pNFItensModel.VDESPADU_P03));
-  pQry.ParamByName('vii_p04').Value             := IIF(pNFItensModel.VII_P04              = '', Unassigned, FormataFloatFireBird(pNFItensModel.VII_P04));
-  pQry.ParamByName('viof_p05').Value            := IIF(pNFItensModel.VIOF_P05             = '', Unassigned, FormataFloatFireBird(pNFItensModel.VIOF_P05));
-  pQry.ParamByName('cst_q06').Value             := IIF(pNFItensModel.CST_Q06              = '', Unassigned, pNFItensModel.CST_Q06);
-  pQry.ParamByName('vbc_q07').Value             := IIF(pNFItensModel.VBC_Q07              = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBC_Q07));
-  pQry.ParamByName('ppis_q08').Value            := IIF(pNFItensModel.PPIS_Q08             = '', Unassigned, FormataFloatFireBird(pNFItensModel.PPIS_Q08));
-  pQry.ParamByName('vpis_q09').Value            := IIF(pNFItensModel.VPIS_Q09             = '', Unassigned, FormataFloatFireBird(pNFItensModel.VPIS_Q09));
-  pQry.ParamByName('qbcprod_q10').Value         := IIF(pNFItensModel.QBCPROD_Q10          = '', Unassigned, FormataFloatFireBird(pNFItensModel.QBCPROD_Q10));
-  pQry.ParamByName('valiqprod_q11').Value       := IIF(pNFItensModel.VALIQPROD_Q11        = '', Unassigned, FormataFloatFireBird(pNFItensModel.VALIQPROD_Q11));
-  pQry.ParamByName('cst_s06').Value             := IIF(pNFItensModel.CST_S06              = '', Unassigned, pNFItensModel.CST_S06);
-  pQry.ParamByName('vbc_s07').Value             := IIF(pNFItensModel.VBC_S07              = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBC_S07));
-  pQry.ParamByName('pcofins_s08').Value         := IIF(pNFItensModel.PCOFINS_S08          = '', Unassigned, FormataFloatFireBird(pNFItensModel.PCOFINS_S08));
-  pQry.ParamByName('vcofins_s11').Value         := IIF(pNFItensModel.VCOFINS_S11          = '', Unassigned, FormataFloatFireBird(pNFItensModel.VCOFINS_S11));
-  pQry.ParamByName('qbcprod_s09').Value         := IIF(pNFItensModel.QBCPROD_S09          = '', Unassigned, FormataFloatFireBird(pNFItensModel.QBCPROD_S09));
-  pQry.ParamByName('valiqprod_s10').Value       := IIF(pNFItensModel.VALIQPROD_S10        = '', Unassigned, FormataFloatFireBird(pNFItensModel.VALIQPROD_S10));
-  pQry.ParamByName('vtottrib').Value            := IIF(pNFItensModel.VTOTTRIB             = '', Unassigned, FormataFloatFireBird(pNFItensModel.VTOTTRIB));
-  pQry.ParamByName('observacao').Value          := IIF(pNFItensModel.OBSERVACAO           = '', Unassigned, pNFItensModel.OBSERVACAO);
-  pQry.ParamByName('cfop_id').Value             := IIF(pNFItensModel.CFOP_ID              = '', Unassigned, pNFItensModel.CFOP_ID);
-  pQry.ParamByName('conta_contabil').Value      := IIF(pNFItensModel.CONTA_CONTABIL       = '', Unassigned, pNFItensModel.CONTA_CONTABIL);
-  pQry.ParamByName('vdesc').Value               := IIF(pNFItensModel.VDESC                = '', Unassigned, FormataFloatFireBird(pNFItensModel.VDESC));
-  pQry.ParamByName('vseg').Value                := IIF(pNFItensModel.VSEG                 = '', Unassigned, FormataFloatFireBird(pNFItensModel.VSEG));
-  pQry.ParamByName('frete').Value               := IIF(pNFItensModel.FRETE                = '', Unassigned, FormataFloatFireBird(pNFItensModel.FRETE));
-  pQry.ParamByName('voutros').Value             := IIF(pNFItensModel.VOUTROS              = '', Unassigned, FormataFloatFireBird(pNFItensModel.VOUTROS));
-  pQry.ParamByName('cst_ipi').Value             := IIF(pNFItensModel.CST_IPI              = '', Unassigned, pNFItensModel.CST_IPI);
-  pQry.ParamByName('valor_diferimento').Value   := IIF(pNFItensModel.VALOR_DIFERIMENTO    = '', Unassigned, FormataFloatFireBird(pNFItensModel.VALOR_DIFERIMENTO));
-  pQry.ParamByName('obs_item').Value            := IIF(pNFItensModel.OBS_ITEM             = '', Unassigned, pNFItensModel.OBS_ITEM);
-  pQry.ParamByName('icms_suframa').Value        := IIF(pNFItensModel.ICMS_SUFRAMA         = '', Unassigned, FormataFloatFireBird(pNFItensModel.ICMS_SUFRAMA));
-  pQry.ParamByName('pis_suframa').Value         := IIF(pNFItensModel.PIS_SUFRAMA          = '', Unassigned, FormataFloatFireBird(pNFItensModel.PIS_SUFRAMA));
-  pQry.ParamByName('cofins_suframa').Value      := IIF(pNFItensModel.COFINS_SUFRAMA       = '', Unassigned, FormataFloatFireBird(pNFItensModel.COFINS_SUFRAMA));
-  pQry.ParamByName('ipi_suframa').Value         := IIF(pNFItensModel.IPI_SUFRAMA          = '', Unassigned, FormataFloatFireBird(pNFItensModel.IPI_SUFRAMA));
-  pQry.ParamByName('descricao_produto').Value   := IIF(pNFItensModel.DESCRICAO_PRODUTO    = '', Unassigned, pNFItensModel.DESCRICAO_PRODUTO);
-  pQry.ParamByName('estoque_2').Value           := IIF(pNFItensModel.ESTOQUE_2            = '', Unassigned, pNFItensModel.ESTOQUE_2);
-  pQry.ParamByName('vtottrib_federal').Value    := IIF(pNFItensModel.VTOTTRIB_FEDERAL     = '', Unassigned, FormataFloatFireBird(pNFItensModel.VTOTTRIB_FEDERAL));
-  pQry.ParamByName('vtottrib_estadual').Value   := IIF(pNFItensModel.VTOTTRIB_ESTADUAL    = '', Unassigned, FormataFloatFireBird(pNFItensModel.VTOTTRIB_ESTADUAL));
-  pQry.ParamByName('vtottrib_municipal').Value  := IIF(pNFItensModel.VTOTTRIB_MUNICIPAL   = '', Unassigned, FormataFloatFireBird(pNFItensModel.VTOTTRIB_MUNICIPAL));
-  pQry.ParamByName('pedido_id').Value           := IIF(pNFItensModel.PEDIDO_ID            = '', Unassigned, pNFItensModel.PEDIDO_ID);
-  pQry.ParamByName('nitemped').Value            := IIF(pNFItensModel.NITEMPED             = '', Unassigned, pNFItensModel.NITEMPED);
-  pQry.ParamByName('xped').Value                := IIF(pNFItensModel.XPED                 = '', Unassigned, pNFItensModel.XPED);
-  pQry.ParamByName('tpviatransp').Value         := IIF(pNFItensModel.TPVIATRANSP          = '', Unassigned, pNFItensModel.TPVIATRANSP);
-  pQry.ParamByName('tpintermedio').Value        := IIF(pNFItensModel.TPINTERMEDIO         = '', Unassigned, pNFItensModel.TPINTERMEDIO);
-  pQry.ParamByName('vafrmm_opc').Value          := IIF(pNFItensModel.VAFRMM_OPC           = '', Unassigned, FormataFloatFireBird(pNFItensModel.VAFRMM_OPC));
-  pQry.ParamByName('vbc_ipi').Value             := IIF(pNFItensModel.VBC_IPI              = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBC_IPI));
-  pQry.ParamByName('aliquota_ii').Value         := IIF(pNFItensModel.ALIQUOTA_II          = '', Unassigned, FormataFloatFireBird(pNFItensModel.ALIQUOTA_II));
-  pQry.ParamByName('vbcufdest').Value           := IIF(pNFItensModel.VBCUFDEST            = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBCUFDEST));
-  pQry.ParamByName('pfcpufdest').Value          := IIF(pNFItensModel.PFCPUFDEST           = '', Unassigned, FormataFloatFireBird(pNFItensModel.PFCPUFDEST));
-  pQry.ParamByName('picmsufdest').Value         := IIF(pNFItensModel.PICMSUFDEST          = '', Unassigned, FormataFloatFireBird(pNFItensModel.PICMSUFDEST));
-  pQry.ParamByName('picmsinter').Value          := IIF(pNFItensModel.PICMSINTER           = '', Unassigned, FormataFloatFireBird(pNFItensModel.PICMSINTER));
-  pQry.ParamByName('picmsinterpart').Value      := IIF(pNFItensModel.PICMSINTERPART       = '', Unassigned, FormataFloatFireBird(pNFItensModel.PICMSINTERPART));
-  pQry.ParamByName('vfcpufdest').Value          := IIF(pNFItensModel.VFCPUFDEST           = '', Unassigned, FormataFloatFireBird(pNFItensModel.VFCPUFDEST));
-  pQry.ParamByName('vicmsufdest').Value         := IIF(pNFItensModel.VICMSUFDEST          = '', Unassigned, FormataFloatFireBird(pNFItensModel.VICMSUFDEST));
-  pQry.ParamByName('vicmsufremet').Value        := IIF(pNFItensModel.VICMSUFREMET         = '', Unassigned, FormataFloatFireBird(pNFItensModel.VICMSUFREMET));
-  pQry.ParamByName('cest').Value                := IIF(pNFItensModel.CEST                 = '', Unassigned, pNFItensModel.CEST);
-  pQry.ParamByName('saida_id').Value            := IIF(pNFItensModel.SAIDA_ID             = '', Unassigned, pNFItensModel.SAIDA_ID);
-  pQry.ParamByName('pcredicms').Value           := IIF(pNFItensModel.PCREDICMS            = '', Unassigned, FormataFloatFireBird(pNFItensModel.PCREDICMS));
-  pQry.ParamByName('pcredpis').Value            := IIF(pNFItensModel.PCREDPIS             = '', Unassigned, FormataFloatFireBird(pNFItensModel.PCREDPIS));
-  pQry.ParamByName('pcredcofins').Value         := IIF(pNFItensModel.PCREDCOFINS          = '', Unassigned, FormataFloatFireBird(pNFItensModel.PCREDCOFINS));
-  pQry.ParamByName('destino').Value             := IIF(pNFItensModel.DESTINO              = '', Unassigned, pNFItensModel.DESTINO);
-  pQry.ParamByName('ipi_cenq').Value            := IIF(pNFItensModel.IPI_CENQ             = '', Unassigned, pNFItensModel.IPI_CENQ);
-  pQry.ParamByName('nitemped2').Value           := IIF(pNFItensModel.NITEMPED2            = '', Unassigned, pNFItensModel.NITEMPED2);
-  pQry.ParamByName('utrib').Value               := IIF(pNFItensModel.UTRIB                = '', Unassigned, pNFItensModel.UTRIB);
-  pQry.ParamByName('qtrib').Value               := IIF(pNFItensModel.QTRIB                = '', Unassigned, FormataFloatFireBird(pNFItensModel.QTRIB));
-  pQry.ParamByName('vuntrib').Value             := IIF(pNFItensModel.VUNTRIB              = '', Unassigned, FormataFloatFireBird(pNFItensModel.VUNTRIB));
-  pQry.ParamByName('vbcfcpufdest').Value        := IIF(pNFItensModel.VBCFCPUFDEST         = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBCFCPUFDEST));
-  pQry.ParamByName('vbcfcpst').Value            := IIF(pNFItensModel.VBCFCPST             = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBCFCPST));
-  pQry.ParamByName('pfcpst').Value              := IIF(pNFItensModel.PFCPST               = '', Unassigned, FormataFloatFireBird(pNFItensModel.PFCPST));
-  pQry.ParamByName('vfcpst').Value              := IIF(pNFItensModel.VFCPST               = '', Unassigned, FormataFloatFireBird(pNFItensModel.VFCPST));
-  pQry.ParamByName('vbccfp').Value              := IIF(pNFItensModel.VBCCFP               = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBCCFP));
-  pQry.ParamByName('pfcp').Value                := IIF(pNFItensModel.PFCP                 = '', Unassigned, FormataFloatFireBird(pNFItensModel.PFCP));
-  pQry.ParamByName('vfcp').Value                := IIF(pNFItensModel.VFCP                 = '', Unassigned, FormataFloatFireBird(pNFItensModel.VFCP));
-  pQry.ParamByName('vbcfcpstret').Value         := IIF(pNFItensModel.VBCFCPSTRET          = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBCFCPSTRET));
-  pQry.ParamByName('pfcpstret').Value           := IIF(pNFItensModel.PFCPSTRET            = '', Unassigned, FormataFloatFireBird(pNFItensModel.PFCPSTRET));
-  pQry.ParamByName('vfcpstret').Value           := IIF(pNFItensModel.VFCPSTRET            = '', Unassigned, FormataFloatFireBird(pNFItensModel.VFCPSTRET));
-  pQry.ParamByName('os_id').Value               := IIF(pNFItensModel.OS_ID                = '', Unassigned, pNFItensModel.OS_ID);
-  pQry.ParamByName('cbenef').Value              := IIF(pNFItensModel.CBENEF               = '', Unassigned, pNFItensModel.CBENEF);
-  pQry.ParamByName('indescala').Value           := IIF(pNFItensModel.INDESCALA            = '', Unassigned, pNFItensModel.INDESCALA);
-  pQry.ParamByName('cnpjfab').Value             := IIF(pNFItensModel.CNPJFAB              = '', Unassigned, pNFItensModel.CNPJFAB);
-  pQry.ParamByName('predbcefet').Value          := IIF(pNFItensModel.PREDBCEFET           = '', Unassigned, FormataFloatFireBird(pNFItensModel.PREDBCEFET));
-  pQry.ParamByName('vbcefet').Value             := IIF(pNFItensModel.VBCEFET              = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBCEFET));
-  pQry.ParamByName('picmsefet').Value           := IIF(pNFItensModel.PICMSEFET            = '', Unassigned, FormataFloatFireBird(pNFItensModel.PICMSEFET));
-  pQry.ParamByName('vicmsefet').Value           := IIF(pNFItensModel.VICMSEFET            = '', Unassigned, FormataFloatFireBird(pNFItensModel.VICMSEFET));
-  pQry.ParamByName('cenq').Value                := IIF(pNFItensModel.CENQ                 = '', Unassigned, pNFItensModel.CENQ);
-  pQry.ParamByName('vbcstret').Value            := IIF(pNFItensModel.VBCSTRET             = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBCSTRET));
-  pQry.ParamByName('vicmsstret').Value          := IIF(pNFItensModel.VICMSSTRET           = '', Unassigned, FormataFloatFireBird(pNFItensModel.VICMSSTRET));
-  pQry.ParamByName('picmsstret').Value          := IIF(pNFItensModel.PICMSSTRET           = '', Unassigned, FormataFloatFireBird(pNFItensModel.PICMSSTRET));
-  pQry.ParamByName('vicmssubistitutoret').Value := IIF(pNFItensModel.VICMSSUBISTITUTORET  = '', Unassigned, FormataFloatFireBird(pNFItensModel.VICMSSUBISTITUTORET));
-  pQry.ParamByName('vicmsdeson').Value          := IIF(pNFItensModel.VICMSDESON           = '', Unassigned, FormataFloatFireBird(pNFItensModel.VICMSDESON));
-  pQry.ParamByName('motdesicms').Value          := IIF(pNFItensModel.MOTDESICMS           = '', Unassigned, pNFItensModel.MOTDESICMS);
-  pQry.ParamByName('valor_vip').Value           := IIF(pNFItensModel.VALOR_VIP            = '', Unassigned, FormataFloatFireBird(pNFItensModel.VALOR_VIP));
-  pQry.ParamByName('pcred_presumido').Value     := IIF(pNFItensModel.PCRED_PRESUMIDO      = '', Unassigned, FormataFloatFireBird(pNFItensModel.PCRED_PRESUMIDO));
-  pQry.ParamByName('ndraw').Value               := IIF(pNFItensModel.NDRAW                = '', Unassigned, pNFItensModel.NDRAW);
-  pQry.ParamByName('pprcomp').Value             := IIF(pNFItensModel.PPRCOMP              = '', Unassigned, FormataFloatFireBird(pNFItensModel.PPRCOMP));
-  pQry.ParamByName('vprcomp').Value             := IIF(pNFItensModel.VPRCOMP              = '', Unassigned, FormataFloatFireBird(pNFItensModel.VPRCOMP));
-  pQry.ParamByName('nre').Value                 := IIF(pNFItensModel.NRE                  = '', Unassigned, pNFItensModel.NRE);
-  pQry.ParamByName('chnfe').Value               := IIF(pNFItensModel.CHNFE                = '', Unassigned, pNFItensModel.CHNFE);
-  pQry.ParamByName('qexport').Value             := IIF(pNFItensModel.QEXPORT              = '', Unassigned, FormataFloatFireBird(pNFItensModel.QEXPORT));
-  pQry.ParamByName('extipi').Value              := IIF(pNFItensModel.EXTIPI               = '', Unassigned, pNFItensModel.EXTIPI);
+  pQry.ParamByName('numero_nf').Value           := ifThen(pNFItensModel.NUMERO_NF            = '', Unassigned, pNFItensModel.NUMERO_NF);
+  pQry.ParamByName('serie_nf').Value            := ifThen(pNFItensModel.SERIE_NF             = '', Unassigned, pNFItensModel.SERIE_NF);
+  pQry.ParamByName('codigo_pro').Value          := ifThen(pNFItensModel.CODIGO_PRO           = '', Unassigned, pNFItensModel.CODIGO_PRO);
+  pQry.ParamByName('valorunitario_nf').Value    := ifThen(pNFItensModel.VALORUNITARIO_NF     = '', Unassigned, FormataFloatFireBird(pNFItensModel.VALORUNITARIO_NF));
+  pQry.ParamByName('quantidade_nf').Value       := ifThen(pNFItensModel.QUANTIDADE_NF        = '', Unassigned, FormataFloatFireBird(pNFItensModel.QUANTIDADE_NF));
+  pQry.ParamByName('vlrvenda_nf').Value         := ifThen(pNFItensModel.VLRVENDA_NF          = '', Unassigned, FormataFloatFireBird(pNFItensModel.VLRVENDA_NF));
+  pQry.ParamByName('vlrcusto_nf').Value         := ifThen(pNFItensModel.VLRCUSTO_NF          = '', Unassigned, FormataFloatFireBird(pNFItensModel.VLRCUSTO_NF));
+  pQry.ParamByName('reducao_nf').Value          := ifThen(pNFItensModel.REDUCAO_NF           = '', Unassigned, FormataFloatFireBird(pNFItensModel.REDUCAO_NF));
+  pQry.ParamByName('icms_nf').Value             := ifThen(pNFItensModel.ICMS_NF              = '', Unassigned, FormataFloatFireBird(pNFItensModel.ICMS_NF));
+  pQry.ParamByName('ipi_nf').Value              := ifThen(pNFItensModel.IPI_NF               = '', Unassigned, FormataFloatFireBird(pNFItensModel.IPI_NF));
+  pQry.ParamByName('item_nf').Value             := ifThen(pNFItensModel.ITEM_NF              = '', Unassigned, pNFItensModel.ITEM_NF);
+  pQry.ParamByName('unidade_nf').Value          := ifThen(pNFItensModel.UNIDADE_NF           = '', Unassigned, pNFItensModel.UNIDADE_NF);
+  pQry.ParamByName('loja').Value                := ifThen(pNFItensModel.LOJA                 = '', Unassigned, pNFItensModel.LOJA);
+  pQry.ParamByName('valor_icms').Value          := ifThen(pNFItensModel.VALOR_ICMS           = '', Unassigned, FormataFloatFireBird(pNFItensModel.VALOR_ICMS));
+  pQry.ParamByName('base_icms_st').Value        := ifThen(pNFItensModel.BASE_ICMS_ST         = '', Unassigned, FormataFloatFireBird(pNFItensModel.BASE_ICMS_ST));
+  pQry.ParamByName('valor_ipi').Value           := ifThen(pNFItensModel.VALOR_IPI            = '', Unassigned, FormataFloatFireBird(pNFItensModel.VALOR_IPI));
+  pQry.ParamByName('base_icms').Value           := ifThen(pNFItensModel.BASE_ICMS            = '', Unassigned, FormataFloatFireBird(pNFItensModel.BASE_ICMS));
+  pQry.ParamByName('lote').Value                := ifThen(pNFItensModel.LOTE                 = '', Unassigned, pNFItensModel.LOTE);
+  pQry.ParamByName('pmvast_n19').Value          := ifThen(pNFItensModel.PMVAST_N19           = '', Unassigned, FormataFloatFireBird(pNFItensModel.PMVAST_N19));
+  pQry.ParamByName('predbcst_n20').Value        := ifThen(pNFItensModel.PREDBCST_N20         = '', Unassigned, FormataFloatFireBird(pNFItensModel.PREDBCST_N20));
+  pQry.ParamByName('vbcst_n21').Value           := ifThen(pNFItensModel.VBCST_N21            = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBCST_N21));
+  pQry.ParamByName('picmsst_n22').Value         := ifThen(pNFItensModel.PICMSST_N22          = '', Unassigned, FormataFloatFireBird(pNFItensModel.PICMSST_N22));
+  pQry.ParamByName('vicmsst_n23').Value         := ifThen(pNFItensModel.VICMSST_N23          = '', Unassigned, FormataFloatFireBird(pNFItensModel.VICMSST_N23));
+  pQry.ParamByName('modbcst_n18').Value         := ifThen(pNFItensModel.MODBCST_N18          = '', Unassigned, pNFItensModel.MODBCST_N18);
+  pQry.ParamByName('cst_n12').Value             := ifThen(pNFItensModel.CST_N12              = '', Unassigned, pNFItensModel.CST_N12);
+  pQry.ParamByName('vbc_n15').Value             := ifThen(pNFItensModel.VBC_N15              = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBC_N15));
+  pQry.ParamByName('vicms_n17').Value           := ifThen(pNFItensModel.VICMS_N17            = '', Unassigned, FormataFloatFireBird(pNFItensModel.VICMS_N17));
+  pQry.ParamByName('numero_serie_ecf').Value    := ifThen(pNFItensModel.NUMERO_SERIE_ECF     = '', Unassigned, pNFItensModel.NUMERO_SERIE_ECF);
+  pQry.ParamByName('status').Value              := ifThen(pNFItensModel.STATUS               = '', Unassigned, pNFItensModel.STATUS);
+  pQry.ParamByName('predbc_n14').Value          := ifThen(pNFItensModel.PREDBC_N14           = '', Unassigned, FormataFloatFireBird(pNFItensModel.PREDBC_N14));
+  pQry.ParamByName('cfop').Value                := ifThen(pNFItensModel.CFOP                 = '', Unassigned, pNFItensModel.CFOP);
+  pQry.ParamByName('id_obs_lancamento').Value   := ifThen(pNFItensModel.ID_OBS_LANCAMENTO    = '', Unassigned, pNFItensModel.ID_OBS_LANCAMENTO);
+  pQry.ParamByName('csosn').Value               := ifThen(pNFItensModel.CSOSN                = '', Unassigned, pNFItensModel.CSOSN);
+  pQry.ParamByName('pcredsn').Value             := ifThen(pNFItensModel.PCREDSN              = '', Unassigned, pNFItensModel.PCREDSN);
+  pQry.ParamByName('vcredicmssn').Value         := ifThen(pNFItensModel.VCREDICMSSN          = '', Unassigned, pNFItensModel.VCREDICMSSN);
+  pQry.ParamByName('ndi_i19').Value             := ifThen(pNFItensModel.NDI_I19              = '', Unassigned, pNFItensModel.NDI_I19);
+  pQry.ParamByName('ddi_i20').Value             := ifThen(pNFItensModel.DDI_I20              = '', Unassigned, transformaDataFireBird(pNFItensModel.DDI_I20));
+  pQry.ParamByName('xlocdesemb_i21').Value      := ifThen(pNFItensModel.XLOCDESEMB_I21       = '', Unassigned, pNFItensModel.XLOCDESEMB_I21);
+  pQry.ParamByName('ufdesemb_i22').Value        := ifThen(pNFItensModel.UFDESEMB_I22         = '', Unassigned, pNFItensModel.UFDESEMB_I22);
+  pQry.ParamByName('ddesemb_i23').Value         := ifThen(pNFItensModel.DDESEMB_I23          = '', Unassigned, transformaDataFireBird(pNFItensModel.DDESEMB_I23));
+  pQry.ParamByName('cexportador_i24').Value     := ifThen(pNFItensModel.CEXPORTADOR_I24      = '', Unassigned, pNFItensModel.CEXPORTADOR_I24);
+  pQry.ParamByName('nadicao_i26').Value         := ifThen(pNFItensModel.NADICAO_I26          = '', Unassigned, pNFItensModel.NADICAO_I26);
+  pQry.ParamByName('nseqadic_i27').Value        := ifThen(pNFItensModel.NSEQADIC_I27         = '', Unassigned, pNFItensModel.NSEQADIC_I27);
+  pQry.ParamByName('cfabricante_i28').Value     := ifThen(pNFItensModel.CFABRICANTE_I28      = '', Unassigned, pNFItensModel.CFABRICANTE_I28);
+  pQry.ParamByName('vdescdi_i29').Value         := ifThen(pNFItensModel.VDESCDI_I29          = '', Unassigned, FormataFloatFireBird(pNFItensModel.VDESCDI_I29));
+  pQry.ParamByName('vbc_p02').Value             := ifThen(pNFItensModel.VBC_P02              = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBC_P02));
+  pQry.ParamByName('vdespadu_p03').Value        := ifThen(pNFItensModel.VDESPADU_P03         = '', Unassigned, FormataFloatFireBird(pNFItensModel.VDESPADU_P03));
+  pQry.ParamByName('vii_p04').Value             := ifThen(pNFItensModel.VII_P04              = '', Unassigned, FormataFloatFireBird(pNFItensModel.VII_P04));
+  pQry.ParamByName('viof_p05').Value            := ifThen(pNFItensModel.VIOF_P05             = '', Unassigned, FormataFloatFireBird(pNFItensModel.VIOF_P05));
+  pQry.ParamByName('cst_q06').Value             := ifThen(pNFItensModel.CST_Q06              = '', Unassigned, pNFItensModel.CST_Q06);
+  pQry.ParamByName('vbc_q07').Value             := ifThen(pNFItensModel.VBC_Q07              = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBC_Q07));
+  pQry.ParamByName('ppis_q08').Value            := ifThen(pNFItensModel.PPIS_Q08             = '', Unassigned, FormataFloatFireBird(pNFItensModel.PPIS_Q08));
+  pQry.ParamByName('vpis_q09').Value            := ifThen(pNFItensModel.VPIS_Q09             = '', Unassigned, FormataFloatFireBird(pNFItensModel.VPIS_Q09));
+  pQry.ParamByName('qbcprod_q10').Value         := ifThen(pNFItensModel.QBCPROD_Q10          = '', Unassigned, FormataFloatFireBird(pNFItensModel.QBCPROD_Q10));
+  pQry.ParamByName('valiqprod_q11').Value       := ifThen(pNFItensModel.VALIQPROD_Q11        = '', Unassigned, FormataFloatFireBird(pNFItensModel.VALIQPROD_Q11));
+  pQry.ParamByName('cst_s06').Value             := ifThen(pNFItensModel.CST_S06              = '', Unassigned, pNFItensModel.CST_S06);
+  pQry.ParamByName('vbc_s07').Value             := ifThen(pNFItensModel.VBC_S07              = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBC_S07));
+  pQry.ParamByName('pcofins_s08').Value         := ifThen(pNFItensModel.PCOFINS_S08          = '', Unassigned, FormataFloatFireBird(pNFItensModel.PCOFINS_S08));
+  pQry.ParamByName('vcofins_s11').Value         := ifThen(pNFItensModel.VCOFINS_S11          = '', Unassigned, FormataFloatFireBird(pNFItensModel.VCOFINS_S11));
+  pQry.ParamByName('qbcprod_s09').Value         := ifThen(pNFItensModel.QBCPROD_S09          = '', Unassigned, FormataFloatFireBird(pNFItensModel.QBCPROD_S09));
+  pQry.ParamByName('valiqprod_s10').Value       := ifThen(pNFItensModel.VALIQPROD_S10        = '', Unassigned, FormataFloatFireBird(pNFItensModel.VALIQPROD_S10));
+  pQry.ParamByName('vtottrib').Value            := ifThen(pNFItensModel.VTOTTRIB             = '', Unassigned, FormataFloatFireBird(pNFItensModel.VTOTTRIB));
+  pQry.ParamByName('observacao').Value          := ifThen(pNFItensModel.OBSERVACAO           = '', Unassigned, pNFItensModel.OBSERVACAO);
+  pQry.ParamByName('cfop_id').Value             := ifThen(pNFItensModel.CFOP_ID              = '', Unassigned, pNFItensModel.CFOP_ID);
+  pQry.ParamByName('conta_contabil').Value      := ifThen(pNFItensModel.CONTA_CONTABIL       = '', Unassigned, pNFItensModel.CONTA_CONTABIL);
+  pQry.ParamByName('vdesc').Value               := ifThen(pNFItensModel.VDESC                = '', Unassigned, FormataFloatFireBird(pNFItensModel.VDESC));
+  pQry.ParamByName('vseg').Value                := ifThen(pNFItensModel.VSEG                 = '', Unassigned, FormataFloatFireBird(pNFItensModel.VSEG));
+  pQry.ParamByName('frete').Value               := ifThen(pNFItensModel.FRETE                = '', Unassigned, FormataFloatFireBird(pNFItensModel.FRETE));
+  pQry.ParamByName('voutros').Value             := ifThen(pNFItensModel.VOUTROS              = '', Unassigned, FormataFloatFireBird(pNFItensModel.VOUTROS));
+  pQry.ParamByName('cst_ipi').Value             := ifThen(pNFItensModel.CST_IPI              = '', Unassigned, pNFItensModel.CST_IPI);
+  pQry.ParamByName('valor_diferimento').Value   := ifThen(pNFItensModel.VALOR_DIFERIMENTO    = '', Unassigned, FormataFloatFireBird(pNFItensModel.VALOR_DIFERIMENTO));
+  pQry.ParamByName('obs_item').Value            := ifThen(pNFItensModel.OBS_ITEM             = '', Unassigned, pNFItensModel.OBS_ITEM);
+  pQry.ParamByName('icms_suframa').Value        := ifThen(pNFItensModel.ICMS_SUFRAMA         = '', Unassigned, FormataFloatFireBird(pNFItensModel.ICMS_SUFRAMA));
+  pQry.ParamByName('pis_suframa').Value         := ifThen(pNFItensModel.PIS_SUFRAMA          = '', Unassigned, FormataFloatFireBird(pNFItensModel.PIS_SUFRAMA));
+  pQry.ParamByName('cofins_suframa').Value      := ifThen(pNFItensModel.COFINS_SUFRAMA       = '', Unassigned, FormataFloatFireBird(pNFItensModel.COFINS_SUFRAMA));
+  pQry.ParamByName('ipi_suframa').Value         := ifThen(pNFItensModel.IPI_SUFRAMA          = '', Unassigned, FormataFloatFireBird(pNFItensModel.IPI_SUFRAMA));
+  pQry.ParamByName('descricao_produto').Value   := ifThen(pNFItensModel.DESCRICAO_PRODUTO    = '', Unassigned, pNFItensModel.DESCRICAO_PRODUTO);
+  pQry.ParamByName('estoque_2').Value           := ifThen(pNFItensModel.ESTOQUE_2            = '', Unassigned, pNFItensModel.ESTOQUE_2);
+  pQry.ParamByName('vtottrib_federal').Value    := ifThen(pNFItensModel.VTOTTRIB_FEDERAL     = '', Unassigned, FormataFloatFireBird(pNFItensModel.VTOTTRIB_FEDERAL));
+  pQry.ParamByName('vtottrib_estadual').Value   := ifThen(pNFItensModel.VTOTTRIB_ESTADUAL    = '', Unassigned, FormataFloatFireBird(pNFItensModel.VTOTTRIB_ESTADUAL));
+  pQry.ParamByName('vtottrib_municipal').Value  := ifThen(pNFItensModel.VTOTTRIB_MUNICIPAL   = '', Unassigned, FormataFloatFireBird(pNFItensModel.VTOTTRIB_MUNICIPAL));
+  pQry.ParamByName('pedido_id').Value           := ifThen(pNFItensModel.PEDIDO_ID            = '', Unassigned, pNFItensModel.PEDIDO_ID);
+  pQry.ParamByName('nitemped').Value            := ifThen(pNFItensModel.NITEMPED             = '', Unassigned, pNFItensModel.NITEMPED);
+  pQry.ParamByName('xped').Value                := ifThen(pNFItensModel.XPED                 = '', Unassigned, pNFItensModel.XPED);
+  pQry.ParamByName('tpviatransp').Value         := ifThen(pNFItensModel.TPVIATRANSP          = '', Unassigned, pNFItensModel.TPVIATRANSP);
+  pQry.ParamByName('tpintermedio').Value        := ifThen(pNFItensModel.TPINTERMEDIO         = '', Unassigned, pNFItensModel.TPINTERMEDIO);
+  pQry.ParamByName('vafrmm_opc').Value          := ifThen(pNFItensModel.VAFRMM_OPC           = '', Unassigned, FormataFloatFireBird(pNFItensModel.VAFRMM_OPC));
+  pQry.ParamByName('vbc_ipi').Value             := ifThen(pNFItensModel.VBC_IPI              = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBC_IPI));
+  pQry.ParamByName('aliquota_ii').Value         := ifThen(pNFItensModel.ALIQUOTA_II          = '', Unassigned, FormataFloatFireBird(pNFItensModel.ALIQUOTA_II));
+  pQry.ParamByName('vbcufdest').Value           := ifThen(pNFItensModel.VBCUFDEST            = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBCUFDEST));
+  pQry.ParamByName('pfcpufdest').Value          := ifThen(pNFItensModel.PFCPUFDEST           = '', Unassigned, FormataFloatFireBird(pNFItensModel.PFCPUFDEST));
+  pQry.ParamByName('picmsufdest').Value         := ifThen(pNFItensModel.PICMSUFDEST          = '', Unassigned, FormataFloatFireBird(pNFItensModel.PICMSUFDEST));
+  pQry.ParamByName('picmsinter').Value          := ifThen(pNFItensModel.PICMSINTER           = '', Unassigned, FormataFloatFireBird(pNFItensModel.PICMSINTER));
+  pQry.ParamByName('picmsinterpart').Value      := ifThen(pNFItensModel.PICMSINTERPART       = '', Unassigned, FormataFloatFireBird(pNFItensModel.PICMSINTERPART));
+  pQry.ParamByName('vfcpufdest').Value          := ifThen(pNFItensModel.VFCPUFDEST           = '', Unassigned, FormataFloatFireBird(pNFItensModel.VFCPUFDEST));
+  pQry.ParamByName('vicmsufdest').Value         := ifThen(pNFItensModel.VICMSUFDEST          = '', Unassigned, FormataFloatFireBird(pNFItensModel.VICMSUFDEST));
+  pQry.ParamByName('vicmsufremet').Value        := ifThen(pNFItensModel.VICMSUFREMET         = '', Unassigned, FormataFloatFireBird(pNFItensModel.VICMSUFREMET));
+  pQry.ParamByName('cest').Value                := ifThen(pNFItensModel.CEST                 = '', Unassigned, pNFItensModel.CEST);
+  pQry.ParamByName('saida_id').Value            := ifThen(pNFItensModel.SAIDA_ID             = '', Unassigned, pNFItensModel.SAIDA_ID);
+  pQry.ParamByName('pcredicms').Value           := ifThen(pNFItensModel.PCREDICMS            = '', Unassigned, FormataFloatFireBird(pNFItensModel.PCREDICMS));
+  pQry.ParamByName('pcredpis').Value            := ifThen(pNFItensModel.PCREDPIS             = '', Unassigned, FormataFloatFireBird(pNFItensModel.PCREDPIS));
+  pQry.ParamByName('pcredcofins').Value         := ifThen(pNFItensModel.PCREDCOFINS          = '', Unassigned, FormataFloatFireBird(pNFItensModel.PCREDCOFINS));
+  pQry.ParamByName('destino').Value             := ifThen(pNFItensModel.DESTINO              = '', Unassigned, pNFItensModel.DESTINO);
+  pQry.ParamByName('ipi_cenq').Value            := ifThen(pNFItensModel.IPI_CENQ             = '', Unassigned, pNFItensModel.IPI_CENQ);
+  pQry.ParamByName('nitemped2').Value           := ifThen(pNFItensModel.NITEMPED2            = '', Unassigned, pNFItensModel.NITEMPED2);
+  pQry.ParamByName('utrib').Value               := ifThen(pNFItensModel.UTRIB                = '', Unassigned, pNFItensModel.UTRIB);
+  pQry.ParamByName('qtrib').Value               := ifThen(pNFItensModel.QTRIB                = '', Unassigned, FormataFloatFireBird(pNFItensModel.QTRIB));
+  pQry.ParamByName('vuntrib').Value             := ifThen(pNFItensModel.VUNTRIB              = '', Unassigned, FormataFloatFireBird(pNFItensModel.VUNTRIB));
+  pQry.ParamByName('vbcfcpufdest').Value        := ifThen(pNFItensModel.VBCFCPUFDEST         = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBCFCPUFDEST));
+  pQry.ParamByName('vbcfcpst').Value            := ifThen(pNFItensModel.VBCFCPST             = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBCFCPST));
+  pQry.ParamByName('pfcpst').Value              := ifThen(pNFItensModel.PFCPST               = '', Unassigned, FormataFloatFireBird(pNFItensModel.PFCPST));
+  pQry.ParamByName('vfcpst').Value              := ifThen(pNFItensModel.VFCPST               = '', Unassigned, FormataFloatFireBird(pNFItensModel.VFCPST));
+  pQry.ParamByName('vbccfp').Value              := ifThen(pNFItensModel.VBCCFP               = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBCCFP));
+  pQry.ParamByName('pfcp').Value                := ifThen(pNFItensModel.PFCP                 = '', Unassigned, FormataFloatFireBird(pNFItensModel.PFCP));
+  pQry.ParamByName('vfcp').Value                := ifThen(pNFItensModel.VFCP                 = '', Unassigned, FormataFloatFireBird(pNFItensModel.VFCP));
+  pQry.ParamByName('vbcfcpstret').Value         := ifThen(pNFItensModel.VBCFCPSTRET          = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBCFCPSTRET));
+  pQry.ParamByName('pfcpstret').Value           := ifThen(pNFItensModel.PFCPSTRET            = '', Unassigned, FormataFloatFireBird(pNFItensModel.PFCPSTRET));
+  pQry.ParamByName('vfcpstret').Value           := ifThen(pNFItensModel.VFCPSTRET            = '', Unassigned, FormataFloatFireBird(pNFItensModel.VFCPSTRET));
+  pQry.ParamByName('os_id').Value               := ifThen(pNFItensModel.OS_ID                = '', Unassigned, pNFItensModel.OS_ID);
+  pQry.ParamByName('cbenef').Value              := ifThen(pNFItensModel.CBENEF               = '', Unassigned, pNFItensModel.CBENEF);
+  pQry.ParamByName('indescala').Value           := ifThen(pNFItensModel.INDESCALA            = '', Unassigned, pNFItensModel.INDESCALA);
+  pQry.ParamByName('cnpjfab').Value             := ifThen(pNFItensModel.CNPJFAB              = '', Unassigned, pNFItensModel.CNPJFAB);
+  pQry.ParamByName('predbcefet').Value          := ifThen(pNFItensModel.PREDBCEFET           = '', Unassigned, FormataFloatFireBird(pNFItensModel.PREDBCEFET));
+  pQry.ParamByName('vbcefet').Value             := ifThen(pNFItensModel.VBCEFET              = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBCEFET));
+  pQry.ParamByName('picmsefet').Value           := ifThen(pNFItensModel.PICMSEFET            = '', Unassigned, FormataFloatFireBird(pNFItensModel.PICMSEFET));
+  pQry.ParamByName('vicmsefet').Value           := ifThen(pNFItensModel.VICMSEFET            = '', Unassigned, FormataFloatFireBird(pNFItensModel.VICMSEFET));
+  pQry.ParamByName('cenq').Value                := ifThen(pNFItensModel.CENQ                 = '', Unassigned, pNFItensModel.CENQ);
+  pQry.ParamByName('vbcstret').Value            := ifThen(pNFItensModel.VBCSTRET             = '', Unassigned, FormataFloatFireBird(pNFItensModel.VBCSTRET));
+  pQry.ParamByName('vicmsstret').Value          := ifThen(pNFItensModel.VICMSSTRET           = '', Unassigned, FormataFloatFireBird(pNFItensModel.VICMSSTRET));
+  pQry.ParamByName('picmsstret').Value          := ifThen(pNFItensModel.PICMSSTRET           = '', Unassigned, FormataFloatFireBird(pNFItensModel.PICMSSTRET));
+  pQry.ParamByName('vicmssubistitutoret').Value := ifThen(pNFItensModel.VICMSSUBISTITUTORET  = '', Unassigned, FormataFloatFireBird(pNFItensModel.VICMSSUBISTITUTORET));
+  pQry.ParamByName('vicmsdeson').Value          := ifThen(pNFItensModel.VICMSDESON           = '', Unassigned, FormataFloatFireBird(pNFItensModel.VICMSDESON));
+  pQry.ParamByName('motdesicms').Value          := ifThen(pNFItensModel.MOTDESICMS           = '', Unassigned, pNFItensModel.MOTDESICMS);
+  pQry.ParamByName('valor_vip').Value           := ifThen(pNFItensModel.VALOR_VIP            = '', Unassigned, FormataFloatFireBird(pNFItensModel.VALOR_VIP));
+  pQry.ParamByName('pcred_presumido').Value     := ifThen(pNFItensModel.PCRED_PRESUMIDO      = '', Unassigned, FormataFloatFireBird(pNFItensModel.PCRED_PRESUMIDO));
+  pQry.ParamByName('ndraw').Value               := ifThen(pNFItensModel.NDRAW                = '', Unassigned, pNFItensModel.NDRAW);
+  pQry.ParamByName('pprcomp').Value             := ifThen(pNFItensModel.PPRCOMP              = '', Unassigned, FormataFloatFireBird(pNFItensModel.PPRCOMP));
+  pQry.ParamByName('vprcomp').Value             := ifThen(pNFItensModel.VPRCOMP              = '', Unassigned, FormataFloatFireBird(pNFItensModel.VPRCOMP));
+  pQry.ParamByName('nre').Value                 := ifThen(pNFItensModel.NRE                  = '', Unassigned, pNFItensModel.NRE);
+  pQry.ParamByName('chnfe').Value               := ifThen(pNFItensModel.CHNFE                = '', Unassigned, pNFItensModel.CHNFE);
+  pQry.ParamByName('qexport').Value             := ifThen(pNFItensModel.QEXPORT              = '', Unassigned, FormataFloatFireBird(pNFItensModel.QEXPORT));
+  pQry.ParamByName('extipi').Value              := ifThen(pNFItensModel.EXTIPI               = '', Unassigned, pNFItensModel.EXTIPI);
 end;
 
 procedure TNFItensDao.SetStartRecordView(const Value: String);

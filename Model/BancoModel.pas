@@ -3,7 +3,7 @@ unit BancoModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao;
 
@@ -305,9 +305,9 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lBancoDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lBancoDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lBancoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lBancoDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lBancoDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lBancoDao.excluir(Self);
     end;
 
   finally

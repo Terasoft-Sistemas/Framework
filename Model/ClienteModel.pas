@@ -1,7 +1,7 @@
 unit ClienteModel;
 interface
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao;
 
@@ -1040,9 +1040,9 @@ begin
   Result := '';
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lClienteDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lClienteDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lClienteDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lClienteDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lClienteDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lClienteDao.excluir(Self);
     end;
   finally
     lClienteDao.Free;

@@ -3,7 +3,7 @@ unit ImpressoraModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao;
 
@@ -159,9 +159,9 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lImpressoraDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lImpressoraDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lImpressoraDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lImpressoraDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lImpressoraDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lImpressoraDao.excluir(Self);
     end;
 
   finally

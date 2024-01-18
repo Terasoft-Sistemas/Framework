@@ -3,7 +3,7 @@ unit VendaCartaoModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao;
 
@@ -166,9 +166,9 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lVendaCartaoDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lVendaCartaoDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lVendaCartaoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lVendaCartaoDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lVendaCartaoDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lVendaCartaoDao.excluir(Self);
     end;
 
   finally

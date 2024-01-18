@@ -3,7 +3,7 @@ unit PedidoWebModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Terasoft.FuncoesTexto,
   Interfaces.Conexao;
@@ -570,7 +570,7 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacAlterar: Result := lPedidoWebDao.alterar(Self);
+      Terasoft.Types.tacAlterar: Result := lPedidoWebDao.alterar(Self);
     end;
   finally
     lPedidoWebDao.Free;

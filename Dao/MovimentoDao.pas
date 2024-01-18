@@ -4,7 +4,7 @@ interface
 
 uses
   MovimentoModel,
-  Terasoft.Utils,
+  Terasoft.ConstrutorDao,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
@@ -17,7 +17,9 @@ type
   TMovimentoDao = class
 
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
+
     FMovimentosLista: TObjectList<TMovimentoModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -38,7 +40,7 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
 
-    function montaCondicaoQuery: String;
+    function where: String;
 
   public
     constructor Create(pIConexao : IConexao);
@@ -54,9 +56,9 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(AMovimentoModel: TMovimentoModel): String;
-    function alterar(AMovimentoModel: TMovimentoModel): String;
-    function excluir(AMovimentoModel: TMovimentoModel): String;
+    function incluir(pMovimentoModel: TMovimentoModel): String;
+    function alterar(pMovimentoModel: TMovimentoModel): String;
+    function excluir(pMovimentoModel: TMovimentoModel): String;
 
     procedure obterLista;
     function carregaClasse(pId: String): TMovimentoModel;
@@ -112,7 +114,8 @@ end;
 
 constructor TMovimentoDao.Create(pIConexao : IConexao);
 begin
-  vIConexao := pIConexao;
+  vIConexao   := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TMovimentoDao.Destroy;
@@ -121,52 +124,18 @@ begin
   inherited;
 end;
 
-function TMovimentoDao.incluir(AMovimentoModel: TMovimentoModel): String;
+function TMovimentoDao.incluir(pMovimentoModel: TMovimentoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := '  insert into movimento (documento_mov,      '+SLineBreak+
-          '                         codigo_pro,         '+SLineBreak+
-          '                         codigo_for,         '+SLineBreak+
-          '                         obs_mov,            '+SLineBreak+
-          '                         tipo_doc,           '+SLineBreak+
-          '                         data_mov,           '+SLineBreak+
-          '                         data_doc,           '+SLineBreak+
-          '                         quantidade_mov,     '+SLineBreak+
-          '                         valor_mov,          '+SLineBreak+
-          '                         custo_atual,        '+SLineBreak+
-          '                         venda_atual,        '+SLineBreak+
-          '                         status,             '+SLineBreak+
-          '                         loja,               '+SLineBreak+
-          '                         usuario_id,         '+SLineBreak+
-          '                         datahora,           '+SLineBreak+
-          '                         tabela_origem,      '+SLineBreak+
-          '                         id_origem)          '+SLineBreak+
-          '  values (:documento_mov,                    '+SLineBreak+
-          '          :codigo_pro,                       '+SLineBreak+
-          '          :codigo_for,                       '+SLineBreak+
-          '          :obs_mov,                          '+SLineBreak+
-          '          :tipo_doc,                         '+SLineBreak+
-          '          :data_mov,                         '+SLineBreak+
-          '          :data_doc,                         '+SLineBreak+
-          '          :quantidade_mov,                   '+SLineBreak+
-          '          :valor_mov,                        '+SLineBreak+
-          '          :custo_atual,                      '+SLineBreak+
-          '          :venda_atual,                      '+SLineBreak+
-          '          :status,                           '+SLineBreak+
-          '          :loja,                             '+SLineBreak+
-          '          :usuario_id,                       '+SLineBreak+
-          '          :datahora,                         '+SLineBreak+
-          '          :tabela_origem,                    '+SLineBreak+
-          '          :id_origem)                        '+SLineBreak+
-          ' returning ID                                '+SLineBreak;
+  lSQL := vConstrutor.gerarInsert('MOVIMENTO', 'ID');
 
   try
     lQry.SQL.Add(lSQL);
-    setParams(lQry, AMovimentoModel);
+    setParams(lQry, pMovimentoModel);
     lQry.Open;
 
     Result := lQry.FieldByName('ID').AsString;
@@ -177,40 +146,22 @@ begin
   end;
 end;
 
-function TMovimentoDao.alterar(AMovimentoModel: TMovimentoModel): String;
+function TMovimentoDao.alterar(pMovimentoModel: TMovimentoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL :=   '  update movimento                           '+SLineBreak+
-            '     set documento_mov = :documento_mov,     '+SLineBreak+
-            '         codigo_pro = :codigo_pro,           '+SLineBreak+
-            '         codigo_for = :codigo_for,           '+SLineBreak+
-            '         obs_mov = :obs_mov,                 '+SLineBreak+
-            '         tipo_doc = :tipo_doc,               '+SLineBreak+
-            '         data_mov = :data_mov,               '+SLineBreak+
-            '         data_doc = :data_doc,               '+SLineBreak+
-            '         quantidade_mov = :quantidade_mov,   '+SLineBreak+
-            '         valor_mov = :valor_mov,             '+SLineBreak+
-            '         custo_atual = :custo_atual,         '+SLineBreak+
-            '         venda_atual = :venda_atual,         '+SLineBreak+
-            '         status = :status,                   '+SLineBreak+
-            '         usuario_id = :usuario_id,           '+SLineBreak+
-            '         datahora = :datahora,               '+SLineBreak+
-            '         tabela_origem = :tabela_origem,     '+SLineBreak+
-            '         id_origem = :id_origem,             '+SLineBreak+
-            '         loja = :loja                        '+SLineBreak+
-            '   where (id = :id)                          '+SLineBreak;
+  lSQL :=   vConstrutor.gerarUpdate('MOVIMENTO', 'ID');
 
   try
     lQry.SQL.Add(lSQL);
-    setParams(lQry, AMovimentoModel);
-    lQry.ParamByName('id').Value  := AMovimentoModel.ID;
+    setParams(lQry, pMovimentoModel);
+    lQry.ParamByName('id').Value  := pMovimentoModel.ID;
     lQry.ExecSQL;
 
-    Result := AMovimentoModel.ID;
+    Result := pMovimentoModel.ID;
 
   finally
     lSQL := '';
@@ -218,23 +169,23 @@ begin
   end;
 end;
 
-function TMovimentoDao.excluir(AMovimentoModel: TMovimentoModel): String;
+function TMovimentoDao.excluir(pMovimentoModel: TMovimentoModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from movimento where ID = :ID',[AMovimentoModel.ID]);
+   lQry.ExecSQL('delete from movimento where ID = :ID',[pMovimentoModel.ID]);
    lQry.ExecSQL;
-   Result := AMovimentoModel.ID;
+   Result := pMovimentoModel.ID;
 
   finally
     lQry.Free;
   end;
 end;
 
-function TMovimentoDao.montaCondicaoQuery: String;
+function TMovimentoDao.where: String;
 var
   lSQL : String;
 begin
@@ -259,7 +210,7 @@ begin
 
     lSql := 'select count(*) records From movimento where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -291,7 +242,7 @@ begin
 	    '  from movimento           '+
       ' where 1=1                 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -368,23 +319,23 @@ end;
 
 procedure TMovimentoDao.setParams(var pQry: TFDQuery; pMovimentoModel: TMovimentoModel);
 begin
-  pQry.ParamByName('documento_mov').Value  := IIF(pMovimentoModel.DOCUMENTO_MOV   = '', Unassigned, pMovimentoModel.DOCUMENTO_MOV);
-  pQry.ParamByName('codigo_pro').Value     := IIF(pMovimentoModel.CODIGO_PRO      = '', Unassigned, pMovimentoModel.CODIGO_PRO);
-  pQry.ParamByName('codigo_for').Value     := IIF(pMovimentoModel.CODIGO_FOR      = '', Unassigned, pMovimentoModel.CODIGO_FOR);
-  pQry.ParamByName('obs_mov').Value        := IIF(pMovimentoModel.OBS_MOV         = '', Unassigned, pMovimentoModel.OBS_MOV);
-  pQry.ParamByName('tipo_doc').Value       := IIF(pMovimentoModel.TIPO_DOC        = '', Unassigned, pMovimentoModel.TIPO_DOC);
-  pQry.ParamByName('data_mov').Value       := IIF(pMovimentoModel.DATA_MOV        = '', Unassigned, transformaDataFireBird(pMovimentoModel.DATA_MOV));
-  pQry.ParamByName('data_doc').Value       := IIF(pMovimentoModel.DATA_DOC        = '', Unassigned, transformaDataFireBird(pMovimentoModel.DATA_DOC));
-  pQry.ParamByName('quantidade_mov').Value := IIF(pMovimentoModel.QUANTIDADE_MOV  = '', Unassigned, FormataFloatFireBird(pMovimentoModel.QUANTIDADE_MOV));
-  pQry.ParamByName('valor_mov').Value      := IIF(pMovimentoModel.VALOR_MOV       = '', Unassigned, FormataFloatFireBird(pMovimentoModel.VALOR_MOV));
-  pQry.ParamByName('custo_atual').Value    := IIF(pMovimentoModel.CUSTO_ATUAL     = '', Unassigned, FormataFloatFireBird(pMovimentoModel.CUSTO_ATUAL));
-  pQry.ParamByName('venda_atual').Value    := IIF(pMovimentoModel.VENDA_ATUAL     = '', Unassigned, FormataFloatFireBird(pMovimentoModel.VENDA_ATUAL));
-  pQry.ParamByName('status').Value         := IIF(pMovimentoModel.STATUS          = '', Unassigned, pMovimentoModel.STATUS);
-  pQry.ParamByName('loja').Value           := IIF(pMovimentoModel.LOJA            = '', Unassigned, pMovimentoModel.LOJA);
-  pQry.ParamByName('usuario_id').Value     := IIF(pMovimentoModel.USUARIO_ID      = '', Unassigned, pMovimentoModel.USUARIO_ID);
-  pQry.ParamByName('datahora').Value       := IIF(pMovimentoModel.DATAHORA        = '', Unassigned, transformaDataHoraFireBird(pMovimentoModel.DATAHORA));
-  pQry.ParamByName('tabela_origem').Value  := IIF(pMovimentoModel.TABELA_ORIGEM   = '', Unassigned, pMovimentoModel.TABELA_ORIGEM);
-  pQry.ParamByName('id_origem').Value      := IIF(pMovimentoModel.ID_ORIGEM       = '', Unassigned, pMovimentoModel.ID_ORIGEM);
+  pQry.ParamByName('documento_mov').Value  := ifThen(pMovimentoModel.DOCUMENTO_MOV   = '', Unassigned, pMovimentoModel.DOCUMENTO_MOV);
+  pQry.ParamByName('codigo_pro').Value     := ifThen(pMovimentoModel.CODIGO_PRO      = '', Unassigned, pMovimentoModel.CODIGO_PRO);
+  pQry.ParamByName('codigo_for').Value     := ifThen(pMovimentoModel.CODIGO_FOR      = '', Unassigned, pMovimentoModel.CODIGO_FOR);
+  pQry.ParamByName('obs_mov').Value        := ifThen(pMovimentoModel.OBS_MOV         = '', Unassigned, pMovimentoModel.OBS_MOV);
+  pQry.ParamByName('tipo_doc').Value       := ifThen(pMovimentoModel.TIPO_DOC        = '', Unassigned, pMovimentoModel.TIPO_DOC);
+  pQry.ParamByName('data_mov').Value       := ifThen(pMovimentoModel.DATA_MOV        = '', Unassigned, transformaDataFireBird(pMovimentoModel.DATA_MOV));
+  pQry.ParamByName('data_doc').Value       := ifThen(pMovimentoModel.DATA_DOC        = '', Unassigned, transformaDataFireBird(pMovimentoModel.DATA_DOC));
+  pQry.ParamByName('quantidade_mov').Value := ifThen(pMovimentoModel.QUANTIDADE_MOV  = '', Unassigned, FormataFloatFireBird(pMovimentoModel.QUANTIDADE_MOV));
+  pQry.ParamByName('valor_mov').Value      := ifThen(pMovimentoModel.VALOR_MOV       = '', Unassigned, FormataFloatFireBird(pMovimentoModel.VALOR_MOV));
+  pQry.ParamByName('custo_atual').Value    := ifThen(pMovimentoModel.CUSTO_ATUAL     = '', Unassigned, FormataFloatFireBird(pMovimentoModel.CUSTO_ATUAL));
+  pQry.ParamByName('venda_atual').Value    := ifThen(pMovimentoModel.VENDA_ATUAL     = '', Unassigned, FormataFloatFireBird(pMovimentoModel.VENDA_ATUAL));
+  pQry.ParamByName('status').Value         := ifThen(pMovimentoModel.STATUS          = '', Unassigned, pMovimentoModel.STATUS);
+  pQry.ParamByName('loja').Value           := ifThen(pMovimentoModel.LOJA            = '', Unassigned, pMovimentoModel.LOJA);
+  pQry.ParamByName('usuario_id').Value     := ifThen(pMovimentoModel.USUARIO_ID      = '', Unassigned, pMovimentoModel.USUARIO_ID);
+  pQry.ParamByName('datahora').Value       := ifThen(pMovimentoModel.DATAHORA        = '', Unassigned, transformaDataHoraFireBird(pMovimentoModel.DATAHORA));
+  pQry.ParamByName('tabela_origem').Value  := ifThen(pMovimentoModel.TABELA_ORIGEM   = '', Unassigned, pMovimentoModel.TABELA_ORIGEM);
+  pQry.ParamByName('id_origem').Value      := ifThen(pMovimentoModel.ID_ORIGEM       = '', Unassigned, pMovimentoModel.ID_ORIGEM);
 end;
 
 procedure TMovimentoDao.SetStartRecordView(const Value: String);

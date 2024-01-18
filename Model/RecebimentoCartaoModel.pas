@@ -3,7 +3,7 @@ unit RecebimentoCartaoModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao;
 
@@ -136,9 +136,9 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lRecebimentoCartaoDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lRecebimentoCartaoDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lRecebimentoCartaoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lRecebimentoCartaoDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lRecebimentoCartaoDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lRecebimentoCartaoDao.excluir(Self);
     end;
 
   finally

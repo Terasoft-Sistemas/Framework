@@ -40,7 +40,7 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
 
-    function montaCondicaoQuery: String;
+    function where: String;
     procedure SetIDRecordView(const Value: String);
 
     procedure setParams(var pQry: TFDQuery; pPedidoVendaModel: TPedidoVendaModel);
@@ -59,10 +59,10 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
 
-    function incluir(APedidoVendaModel: TPedidoVendaModel): String;
-    function alterar(APedidoVendaModel: TPedidoVendaModel): String;
-    function excluir(APedidoVendaModel: TPedidoVendaModel): String;
-	
+    function incluir(pPedidoVendaModel: TPedidoVendaModel): String;
+    function alterar(pPedidoVendaModel: TPedidoVendaModel): String;
+    function excluir(pPedidoVendaModel: TPedidoVendaModel): String;
+
     procedure obterLista;
 
     function obterPedido(pNumeroPedido: String): TPedidoVendaModel;
@@ -76,6 +76,9 @@ type
 end;
 
 implementation
+
+uses
+  Vcl.Dialogs;
 
 { TPedidoVenda }
 
@@ -303,7 +306,7 @@ begin
   inherited;
 end;
 
-function TPedidoVendaDao.incluir(APedidoVendaModel: TPedidoVendaModel): String;
+function TPedidoVendaDao.incluir(pPedidoVendaModel: TPedidoVendaModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -314,18 +317,19 @@ begin
   try
     lQry.SQL.Add(lSQL);
     lQry.ParamByName('numero_ped').Value := vIConexao.Generetor('GEN_PEDIDOVENDA');
-    setParams(lQry, APedidoVendaModel);
+    setParams(lQry, pPedidoVendaModel);
     lQry.Open;
 
     Result := lQry.FieldByName('NUMERO_PED').AsString;
 
   finally
     lSQL := '';
+    ShowMessage(lQry.SQL.text);
     lQry.Free;
   end;
 end;
 
-function TPedidoVendaDao.alterar(APedidoVendaModel: TPedidoVendaModel): String;
+function TPedidoVendaDao.alterar(pPedidoVendaModel: TPedidoVendaModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -336,11 +340,11 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('numero_ped').Value := ifThen(APedidoVendaModel.NUMERO_PED = '', Unassigned, APedidoVendaModel.NUMERO_PED);
-    setParams(lQry, APedidoVendaModel);
+    lQry.ParamByName('numero_ped').Value := ifThen(pPedidoVendaModel.NUMERO_PED = '', Unassigned, pPedidoVendaModel.NUMERO_PED);
+    setParams(lQry, pPedidoVendaModel);
     lQry.ExecSQL;
 
-    Result := APedidoVendaModel.ID;
+    Result := pPedidoVendaModel.ID;
 
   finally
     lSQL := '';
@@ -348,23 +352,23 @@ begin
   end;
 end;
 
-function TPedidoVendaDao.excluir(APedidoVendaModel: TPedidoVendaModel): String;
+function TPedidoVendaDao.excluir(pPedidoVendaModel: TPedidoVendaModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from pedidovenda where NUMERO_PED = :NUMERO_PED',[APedidoVendaModel.NUMERO_PED]);
+   lQry.ExecSQL('delete from pedidovenda where NUMERO_PED = :NUMERO_PED',[pPedidoVendaModel.NUMERO_PED]);
    lQry.ExecSQL;
-   Result := APedidoVendaModel.NUMERO_PED;
+   Result := pPedidoVendaModel.NUMERO_PED;
 
   finally
     lQry.Free;
   end;
 end;
 
-function TPedidoVendaDao.montaCondicaoQuery: String;
+function TPedidoVendaDao.where: String;
 var
   lSQL : String;
 begin
@@ -391,7 +395,7 @@ begin
             '  left join clientes on clientes.codigo_cli = pedidovenda.codigo_cli '+#13+
             ' where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -428,7 +432,7 @@ begin
 
       ' where 1=1              ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -818,6 +822,7 @@ begin
   pQry.ParamByName('datahora_coleta').Value       := ifThen(pPedidoVendaModel.DATAHORA_COLETA       = '', Unassigned, pPedidoVendaModel.DATAHORA_COLETA);
   pQry.ParamByName('datahora_retirada').Value     := ifThen(pPedidoVendaModel.DATAHORA_RETIRADA     = '', Unassigned, pPedidoVendaModel.DATAHORA_RETIRADA);
   pQry.ParamByName('cfop_nf').Value               := ifThen(pPedidoVendaModel.CFOP_NF               = '', Unassigned, pPedidoVendaModel.CFOP_NF);
+  pQry.ParamByName('form').Value                  := ifThen(pPedidoVendaModel.FORM                  = '', Unassigned, pPedidoVendaModel.FORM);
 end;
 
 procedure TPedidoVendaDao.SetStartRecordView(const Value: String);

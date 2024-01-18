@@ -3,7 +3,7 @@ unit PrecoClienteModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao;
 
@@ -118,9 +118,9 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lPrecoClienteDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lPrecoClienteDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lPrecoClienteDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lPrecoClienteDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lPrecoClienteDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lPrecoClienteDao.excluir(Self);
     end;
 
   finally

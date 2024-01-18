@@ -3,7 +3,7 @@ unit PixModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao;
 
@@ -193,9 +193,9 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lPixDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lPixDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lPixDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lPixDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lPixDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lPixDao.excluir(Self);
     end;
 
   finally

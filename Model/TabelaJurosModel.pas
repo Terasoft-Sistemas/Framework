@@ -3,7 +3,7 @@ unit TabelaJurosModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao;
 
@@ -138,9 +138,9 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lTabelaJurosDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lTabelaJurosDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lTabelaJurosDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lTabelaJurosDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lTabelaJurosDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lTabelaJurosDao.excluir(Self);
     end;
 
   finally

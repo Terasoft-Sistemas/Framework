@@ -4,19 +4,21 @@ interface
 
 uses
   PrecoUFModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  Interfaces.Conexao;
+  Interfaces.Conexao,
+  Terasoft.ConstrutorDao;
 
 type
   TPrecoUFDao = class
 
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
+
     FPrecoUFsLista: TObjectList<TPrecoUFModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -37,7 +39,9 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
 
-    function montaCondicaoQuery: String;
+    procedure setParams(var pQry: TFDQuery; pPrecoUfModel: TPrecoUfModel);
+
+    function where: String;
 
   public
     constructor Create(pIConexao : IConexao);
@@ -53,9 +57,9 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(APrecoUFModel: TPrecoUFModel): String;
-    function alterar(APrecoUFModel: TPrecoUFModel): String;
-    function excluir(APrecoUFModel: TPrecoUFModel): String;
+    function incluir(pPrecoUFModel: TPrecoUFModel): String;
+    function alterar(pPrecoUFModel: TPrecoUFModel): String;
+    function excluir(pPrecoUFModel: TPrecoUFModel): String;
 	
     procedure obterLista;
 
@@ -67,7 +71,8 @@ implementation
 
 constructor TPrecoUFDao.Create(pIConexao : IConexao);
 begin
-  vIConexao := pIConexao;
+  vIConexao   := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TPrecoUFDao.Destroy;
@@ -76,39 +81,69 @@ begin
   inherited;
 end;
 
-function TPrecoUFDao.incluir(APrecoUFModel: TPrecoUFModel): String;
+function TPrecoUFDao.incluir(pPrecoUFModel: TPrecoUFModel): String;
 var
-  lQry: TFDQuery;
-  lSQL:String;
+  lQry : TFDQuery;
+  lSQL : String;
 begin
- 
+  lQry := vIConexao.CriarQuery;
+
+  lSQL := vConstrutor.gerarInsert('PRECO_UF', 'ID', true);
+
+  try
+    lQry.SQL.Add(lSQL);
+    lQry.ParamByName('ID').Value := vIConexao.Generetor('GEN_PRECO_UF');
+    setParams(lQry, pPrecoUFModel);
+    lQry.Open;
+
+    Result := lQry.FieldByName('ID').AsString;
+
+  finally
+    lSQL := '';
+    lQry.Free;
+  end;
 end;
 
-function TPrecoUFDao.alterar(APrecoUFModel: TPrecoUFModel): String;
+function TPrecoUFDao.alterar(pPrecoUFModel: TPrecoUFModel): String;
 var
-  lQry: TFDQuery;
-  lSQL:String;
+  lQry : TFDQuery;
+  lSQL : String;
 begin
-  
+  lQry := vIConexao.CriarQuery;
+
+  lSQL :=  vConstrutor.gerarUpdate('PRECO_UF', 'ID');
+
+  try
+    lQry.SQL.Add(lSQL);
+    lQry.ParamByName('ID').Value := ifThen(pPrecoUFModel.ID = '', Unassigned, pPrecoUFModel.ID);
+    setParams(lQry, pPrecoUFModel);
+    lQry.ExecSQL;
+
+    Result := pPrecoUFModel.ID;
+
+  finally
+    lSQL := '';
+    lQry.Free;
+  end;
 end;
 
-function TPrecoUFDao.excluir(APrecoUFModel: TPrecoUFModel): String;
+function TPrecoUFDao.excluir(pPrecoUFModel: TPrecoUFModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from preco_uf where ID = :ID',[APrecoUFModel.ID]);
+   lQry.ExecSQL('delete from preco_uf where ID = :ID',[pPrecoUFModel.ID]);
    lQry.ExecSQL;
-   Result := APrecoUFModel.ID;
+   Result := pPrecoUFModel.ID;
 
   finally
     lQry.Free;
   end;
 end;
 
-function TPrecoUFDao.montaCondicaoQuery: String;
+function TPrecoUFDao.where: String;
 var
   lSQL : String;
 begin
@@ -133,7 +168,7 @@ begin
 
     lSql := 'select count(*) records From preco_uf where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -168,7 +203,7 @@ begin
       ' inner join produto on preco_uf.produto_id = produto.codigo_pro '+
       ' where 1=1                                                      ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -232,6 +267,15 @@ end;
 procedure TPrecoUFDao.SetOrderView(const Value: String);
 begin
   FOrderView := Value;
+end;
+
+procedure TPrecoUFDao.setParams(var pQry: TFDQuery; pPrecoUfModel: TPrecoUfModel);
+begin
+  pQry.ParamByName('PRODUTO_ID').Value   := ifThen(pPrecoUfModel.PRODUTO_ID  = '', Unassigned, pPrecoUfModel.PRODUTO_ID);
+  pQry.ParamByName('UF').Value           := ifThen(pPrecoUfModel.UF          = '', Unassigned, pPrecoUfModel.UF);
+  pQry.ParamByName('COMISSAO').Value     := ifThen(pPrecoUfModel.COMISSAO    = '', Unassigned, pPrecoUfModel.COMISSAO);
+  pQry.ParamByName('SIMPLES').Value      := ifThen(pPrecoUfModel.SIMPLES     = '', Unassigned, pPrecoUfModel.SIMPLES);
+  pQry.ParamByName('ICMS_ST').Value      := ifThen(pPrecoUfModel.ICMS_ST     = '', Unassigned, pPrecoUfModel.ICMS_ST);
 end;
 
 procedure TPrecoUFDao.SetStartRecordView(const Value: String);

@@ -3,7 +3,7 @@ unit ConfiguracoesModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   FireDAC.Comp.Client,
   Interfaces.Conexao;
@@ -144,9 +144,9 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lConfiguracoesDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lConfiguracoesDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lConfiguracoesDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lConfiguracoesDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lConfiguracoesDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lConfiguracoesDao.excluir(Self);
     end;
 
   finally

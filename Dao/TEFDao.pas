@@ -4,20 +4,22 @@ interface
 
 uses
   TEFModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
-  Interfaces.Conexao;
+  Interfaces.Conexao,
+  Terasoft.ConstrutorDao;
 
 type
   TTEFDao = class
 
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
+
     FTEFsLista: TObjectList<TTEFModel>;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -36,10 +38,9 @@ type
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-
-    function montaCondicaoQuery: String;
     procedure SetIDRecordView(const Value: String);
 
+    function where: String;
   public
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -61,7 +62,6 @@ type
     procedure obterLista;
 
     function carregaClasse(pId: String): TTEFModel;
-
     procedure setParams(var pQry: TFDQuery; pTEFModel: TTEFModel);
 
 end;
@@ -135,7 +135,8 @@ end;
 
 constructor TTEFDao.Create(pIConexao : IConexao);
 begin
-  vIConexao := pIConexao;
+  vIConexao   := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TTEFDao.Destroy;
@@ -150,86 +151,7 @@ var
   lSQL:String;
 begin
   lQry := vIConexao.CriarQuery;
-
-  lSQL :=   '   insert into tef (id,                               '+SLineBreak+
-            '                    nome_rede,                        '+SLineBreak+
-            '                    valortotal,                       '+SLineBreak+
-            '                    tipo_transacao,                   '+SLineBreak+
-            '                    msu,                              '+SLineBreak+
-            '                    autorizacao,                      '+SLineBreak+
-            '                    numero_lote,                      '+SLineBreak+
-            '                    timestamp_host,                   '+SLineBreak+
-            '                    timestamp_local,                  '+SLineBreak+
-            '                    data,                             '+SLineBreak+
-            '                    status,                           '+SLineBreak+
-            '                    timestamp_cancelamento,           '+SLineBreak+
-            '                    documento_fiscal_vinculado,       '+SLineBreak+
-            '                    moeda,                            '+SLineBreak+
-            '                    tipo_pessoa,                      '+SLineBreak+
-            '                    documento_pessoa,                 '+SLineBreak+
-            '                    status_transacaoo,                '+SLineBreak+
-            '                    nome_administradora,              '+SLineBreak+
-            '                    codigo_autorizacao,               '+SLineBreak+
-            '                    tipo_parcelamento,                '+SLineBreak+
-            '                    quantidade_parcelas,              '+SLineBreak+
-            '                    parcela,                          '+SLineBreak+
-            '                    data_vencimento_parcela,          '+SLineBreak+
-            '                    valor_parcela,                    '+SLineBreak+
-            '                    nsu_parcela,                      '+SLineBreak+
-            '                    data_transacao_comprovante,       '+SLineBreak+
-            '                    hora_transacao_comprovante,       '+SLineBreak+
-            '                    nsu_cancelamento,                 '+SLineBreak+
-            '                    cliente_id,                       '+SLineBreak+
-            '                    contasreceber_fatura,             '+SLineBreak+
-            '                    contasreceber_parcela,            '+SLineBreak+
-            '                    pedido_id,                        '+SLineBreak+
-            '                    caixa_id,                         '+SLineBreak+
-            '                    contacorrente_id,                 '+SLineBreak+
-            '                    impressao,                        '+SLineBreak+
-            '                    retorno_completo,                 '+SLineBreak+
-            '                    chamada,                          '+SLineBreak+
-            '                    cnpj_credenciadora,               '+SLineBreak+
-            '                    codigo_credenciadora)             '+SLineBreak+
-            '   values (:id,                                       '+SLineBreak+
-            '           :nome_rede,                                '+SLineBreak+
-            '           :valortotal,                               '+SLineBreak+
-            '           :tipo_transacao,                           '+SLineBreak+
-            '           :msu,                                      '+SLineBreak+
-            '           :autorizacao,                              '+SLineBreak+
-            '           :numero_lote,                              '+SLineBreak+
-            '           :timestamp_host,                           '+SLineBreak+
-            '           :timestamp_local,                          '+SLineBreak+
-            '           :data,                                     '+SLineBreak+
-            '           :status,                                   '+SLineBreak+
-            '           :timestamp_cancelamento,                   '+SLineBreak+
-            '           :documento_fiscal_vinculado,               '+SLineBreak+
-            '           :moeda,                                    '+SLineBreak+
-            '           :tipo_pessoa,                              '+SLineBreak+
-            '           :documento_pessoa,                         '+SLineBreak+
-            '           :status_transacaoo,                        '+SLineBreak+
-            '           :nome_administradora,                      '+SLineBreak+
-            '           :codigo_autorizacao,                       '+SLineBreak+
-            '           :tipo_parcelamento,                        '+SLineBreak+
-            '           :quantidade_parcelas,                      '+SLineBreak+
-            '           :parcela,                                  '+SLineBreak+
-            '           :data_vencimento_parcela,                  '+SLineBreak+
-            '           :valor_parcela,                            '+SLineBreak+
-            '           :nsu_parcela,                              '+SLineBreak+
-            '           :data_transacao_comprovante,               '+SLineBreak+
-            '           :hora_transacao_comprovante,               '+SLineBreak+
-            '           :nsu_cancelamento,                         '+SLineBreak+
-            '           :cliente_id,                               '+SLineBreak+
-            '           :contasreceber_fatura,                     '+SLineBreak+
-            '           :contasreceber_parcela,                    '+SLineBreak+
-            '           :pedido_id,                                '+SLineBreak+
-            '           :caixa_id,                                 '+SLineBreak+
-            '           :contacorrente_id,                         '+SLineBreak+
-            '           :impressao,                                '+SLineBreak+
-            '           :retorno_completo,                         '+SLineBreak+
-            '           :chamada,                                  '+SLineBreak+
-            '           :cnpj_credenciadora,                       '+SLineBreak+
-            '           :codigo_credenciadora)                     '+SLineBreak+
-            ' returning ID                                         '+SLineBreak;
+  lSQL := vConstrutor.gerarInsert('TEF', 'ID', true);
 
   try
     lQry.SQL.Add(lSQL);
@@ -252,50 +174,11 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL :=  '    update tef                                                              '+SLineBreak+
-           '       set nome_rede = :nome_rede,                                          '+SLineBreak+
-           '           valortotal = :valortotal,                                        '+SLineBreak+
-           '           tipo_transacao = :tipo_transacao,                                '+SLineBreak+
-           '           msu = :msu,                                                      '+SLineBreak+
-           '           autorizacao = :autorizacao,                                      '+SLineBreak+
-           '           numero_lote = :numero_lote,                                      '+SLineBreak+
-           '           timestamp_host = :timestamp_host,                                '+SLineBreak+
-           '           timestamp_local = :timestamp_local,                              '+SLineBreak+
-           '           data = :data,                                                    '+SLineBreak+
-           '           status = :status,                                                '+SLineBreak+
-           '           timestamp_cancelamento = :timestamp_cancelamento,                '+SLineBreak+
-           '           documento_fiscal_vinculado = :documento_fiscal_vinculado,        '+SLineBreak+
-           '           moeda = :moeda,                                                  '+SLineBreak+
-           '           tipo_pessoa = :tipo_pessoa,                                      '+SLineBreak+
-           '           documento_pessoa = :documento_pessoa,                            '+SLineBreak+
-           '           status_transacaoo = :status_transacaoo,                          '+SLineBreak+
-           '           nome_administradora = :nome_administradora,                      '+SLineBreak+
-           '           codigo_autorizacao = :codigo_autorizacao,                        '+SLineBreak+
-           '           tipo_parcelamento = :tipo_parcelamento,                          '+SLineBreak+
-           '           quantidade_parcelas = :quantidade_parcelas,                      '+SLineBreak+
-           '           parcela = :parcela,                                              '+SLineBreak+
-           '           data_vencimento_parcela = :data_vencimento_parcela,              '+SLineBreak+
-           '           valor_parcela = :valor_parcela,                                  '+SLineBreak+
-           '           nsu_parcela = :nsu_parcela,                                      '+SLineBreak+
-           '           data_transacao_comprovante = :data_transacao_comprovante,        '+SLineBreak+
-           '           hora_transacao_comprovante = :hora_transacao_comprovante,        '+SLineBreak+
-           '           nsu_cancelamento = :nsu_cancelamento,                            '+SLineBreak+
-           '           cliente_id = :cliente_id,                                        '+SLineBreak+
-           '           contasreceber_fatura = :contasreceber_fatura,                    '+SLineBreak+
-           '           contasreceber_parcela = :contasreceber_parcela,                  '+SLineBreak+
-           '           pedido_id = :pedido_id,                                          '+SLineBreak+
-           '           caixa_id = :caixa_id,                                            '+SLineBreak+
-           '           contacorrente_id = :contacorrente_id,                            '+SLineBreak+
-           '           impressao = :impressao,                                          '+SLineBreak+
-           '           retorno_completo = :retorno_completo,                            '+SLineBreak+
-           '           chamada = :chamada,                                              '+SLineBreak+
-           '           cnpj_credenciadora = :cnpj_credenciadora,                        '+SLineBreak+
-           '           codigo_credenciadora = :codigo_credenciadora                     '+SLineBreak+
-           '     where (id = :id)                                                       '+SLineBreak;
+  lSQL := vConstrutor.gerarUpdate('TEF', 'ID');
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := IIF(ATEFModel.ID = '', Unassigned, ATEFModel.ID);
+    lQry.ParamByName('id').Value := ifThen(ATEFModel.ID = '', Unassigned, ATEFModel.ID);
     setParams(lQry, ATEFModel);
     lQry.ExecSQL;
 
@@ -323,7 +206,7 @@ begin
   end;
 end;
 
-function TTEFDao.montaCondicaoQuery: String;
+function TTEFDao.where: String;
 var
   lSQL : String;
 begin
@@ -348,7 +231,7 @@ begin
 
     lSql := 'select count(*) records From tef where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -380,7 +263,7 @@ begin
 	    '   from tef              '+
       '  where 1=1              ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -478,44 +361,44 @@ end;
 
 procedure TTEFDao.setParams(var pQry: TFDQuery; pTEFModel: TTEFModel);
 begin
-  pQry.ParamByName('nome_rede').Value                  := IIF(pTEFModel.NOME_REDE                  = '', Unassigned, pTEFModel.NOME_REDE);
-  pQry.ParamByName('valortotal').Value                 := IIF(pTEFModel.VALORTOTAL                 = '', Unassigned, FormataFloatFireBird(pTEFModel.VALORTOTAL));
-  pQry.ParamByName('tipo_transacao').Value             := IIF(pTEFModel.TIPO_TRANSACAO             = '', Unassigned, pTEFModel.TIPO_TRANSACAO);
-  pQry.ParamByName('msu').Value                        := IIF(pTEFModel.MSU                        = '', Unassigned, pTEFModel.MSU);
-  pQry.ParamByName('autorizacao').Value                := IIF(pTEFModel.AUTORIZACAO                = '', Unassigned, pTEFModel.AUTORIZACAO);
-  pQry.ParamByName('numero_lote').Value                := IIF(pTEFModel.NUMERO_LOTE                = '', Unassigned, pTEFModel.NUMERO_LOTE);
-  pQry.ParamByName('timestamp_host').Value             := IIF(pTEFModel.TIMESTAMP_HOST             = '', Unassigned, pTEFModel.TIMESTAMP_HOST);
-  pQry.ParamByName('timestamp_local').Value            := IIF(pTEFModel.TIMESTAMP_LOCAL            = '', Unassigned, transformaDataFireBird(pTEFModel.TIMESTAMP_LOCAL));
-  pQry.ParamByName('data').Value                       := IIF(pTEFModel.DATA                       = '', Unassigned, transformaDataFireBird(pTEFModel.DATA));
-  pQry.ParamByName('status').Value                     := IIF(pTEFModel.STATUS                     = '', Unassigned, pTEFModel.STATUS);
-  pQry.ParamByName('timestamp_cancelamento').Value     := IIF(pTEFModel.TIMESTAMP_CANCELAMENTO     = '', Unassigned, pTEFModel.TIMESTAMP_CANCELAMENTO);
-  pQry.ParamByName('documento_fiscal_vinculado').Value := IIF(pTEFModel.DOCUMENTO_FISCAL_VINCULADO = '', Unassigned, pTEFModel.DOCUMENTO_FISCAL_VINCULADO);
-  pQry.ParamByName('moeda').Value                      := IIF(pTEFModel.MOEDA                      = '', Unassigned, pTEFModel.MOEDA);
-  pQry.ParamByName('tipo_pessoa').Value                := IIF(pTEFModel.TIPO_PESSOA                = '', Unassigned, pTEFModel.TIPO_PESSOA);
-  pQry.ParamByName('documento_pessoa').Value           := IIF(pTEFModel.DOCUMENTO_PESSOA           = '', Unassigned, pTEFModel.DOCUMENTO_PESSOA);
-  pQry.ParamByName('status_transacaoo').Value          := IIF(pTEFModel.STATUS_TRANSACAOO          = '', Unassigned, pTEFModel.STATUS_TRANSACAOO);
-  pQry.ParamByName('nome_administradora').Value        := IIF(pTEFModel.NOME_ADMINISTRADORA        = '', Unassigned, pTEFModel.NOME_ADMINISTRADORA);
-  pQry.ParamByName('codigo_autorizacao').Value         := IIF(pTEFModel.CODIGO_AUTORIZACAO         = '', Unassigned, pTEFModel.CODIGO_AUTORIZACAO);
-  pQry.ParamByName('tipo_parcelamento').Value          := IIF(pTEFModel.TIPO_PARCELAMENTO          = '', Unassigned, pTEFModel.TIPO_PARCELAMENTO);
-  pQry.ParamByName('quantidade_parcelas').Value        := IIF(pTEFModel.QUANTIDADE_PARCELAS        = '', Unassigned, pTEFModel.QUANTIDADE_PARCELAS);
-  pQry.ParamByName('parcela').Value                    := IIF(pTEFModel.PARCELA                    = '', Unassigned, pTEFModel.PARCELA);
-  pQry.ParamByName('data_vencimento_parcela').Value    := IIF(pTEFModel.DATA_VENCIMENTO_PARCELA    = '', Unassigned, transformaDataFireBird(pTEFModel.DATA_VENCIMENTO_PARCELA));
-  pQry.ParamByName('valor_parcela').Value              := IIF(pTEFModel.VALOR_PARCELA              = '', Unassigned, FormataFloatFireBird(pTEFModel.VALOR_PARCELA));
-  pQry.ParamByName('nsu_parcela').Value                := IIF(pTEFModel.NSU_PARCELA                = '', Unassigned, pTEFModel.NSU_PARCELA);
-  pQry.ParamByName('data_transacao_comprovante').Value := IIF(pTEFModel.DATA_TRANSACAO_COMPROVANTE = '', Unassigned, transformaDataFireBird(pTEFModel.DATA_TRANSACAO_COMPROVANTE));
-  pQry.ParamByName('hora_transacao_comprovante').Value := IIF(pTEFModel.HORA_TRANSACAO_COMPROVANTE = '', Unassigned, pTEFModel.HORA_TRANSACAO_COMPROVANTE);
-  pQry.ParamByName('nsu_cancelamento').Value           := IIF(pTEFModel.NSU_CANCELAMENTO           = '', Unassigned, pTEFModel.NSU_CANCELAMENTO);
-  pQry.ParamByName('cliente_id').Value                 := IIF(pTEFModel.CLIENTE_ID                 = '', Unassigned, pTEFModel.CLIENTE_ID);
-  pQry.ParamByName('contasreceber_fatura').Value       := IIF(pTEFModel.CONTASRECEBER_FATURA       = '', Unassigned, pTEFModel.CONTASRECEBER_FATURA);
-  pQry.ParamByName('contasreceber_parcela').Value      := IIF(pTEFModel.CONTASRECEBER_PARCELA      = '', Unassigned, pTEFModel.CONTASRECEBER_PARCELA);
-  pQry.ParamByName('pedido_id').Value                  := IIF(pTEFModel.PEDIDO_ID                  = '', Unassigned, pTEFModel.PEDIDO_ID);
-  pQry.ParamByName('caixa_id').Value                   := IIF(pTEFModel.CAIXA_ID                   = '', Unassigned, pTEFModel.CAIXA_ID);
-  pQry.ParamByName('contacorrente_id').Value           := IIF(pTEFModel.CONTACORRENTE_ID           = '', Unassigned, pTEFModel.CONTACORRENTE_ID);
-  pQry.ParamByName('impressao').Value                  := IIF(pTEFModel.IMPRESSAO                  = '', Unassigned, pTEFModel.IMPRESSAO);
-  pQry.ParamByName('retorno_completo').Value           := IIF(pTEFModel.RETORNO_COMPLETO           = '', Unassigned, pTEFModel.RETORNO_COMPLETO);
-  pQry.ParamByName('chamada').Value                    := IIF(pTEFModel.CHAMADA                    = '', Unassigned, pTEFModel.CHAMADA);
-  pQry.ParamByName('cnpj_credenciadora').Value         := IIF(pTEFModel.CNPJ_CREDENCIADORA         = '', Unassigned, pTEFModel.CNPJ_CREDENCIADORA);
-  pQry.ParamByName('codigo_credenciadora').Value       := IIF(pTEFModel.CODIGO_CREDENCIADORA       = '', Unassigned, pTEFModel.CODIGO_CREDENCIADORA);
+  pQry.ParamByName('nome_rede').Value                  := ifThen(pTEFModel.NOME_REDE                  = '', Unassigned, pTEFModel.NOME_REDE);
+  pQry.ParamByName('valortotal').Value                 := ifThen(pTEFModel.VALORTOTAL                 = '', Unassigned, FormataFloatFireBird(pTEFModel.VALORTOTAL));
+  pQry.ParamByName('tipo_transacao').Value             := ifThen(pTEFModel.TIPO_TRANSACAO             = '', Unassigned, pTEFModel.TIPO_TRANSACAO);
+  pQry.ParamByName('msu').Value                        := ifThen(pTEFModel.MSU                        = '', Unassigned, pTEFModel.MSU);
+  pQry.ParamByName('autorizacao').Value                := ifThen(pTEFModel.AUTORIZACAO                = '', Unassigned, pTEFModel.AUTORIZACAO);
+  pQry.ParamByName('numero_lote').Value                := ifThen(pTEFModel.NUMERO_LOTE                = '', Unassigned, pTEFModel.NUMERO_LOTE);
+  pQry.ParamByName('timestamp_host').Value             := ifThen(pTEFModel.TIMESTAMP_HOST             = '', Unassigned, pTEFModel.TIMESTAMP_HOST);
+  pQry.ParamByName('timestamp_local').Value            := ifThen(pTEFModel.TIMESTAMP_LOCAL            = '', Unassigned, transformaDataFireBird(pTEFModel.TIMESTAMP_LOCAL));
+  pQry.ParamByName('data').Value                       := ifThen(pTEFModel.DATA                       = '', Unassigned, transformaDataFireBird(pTEFModel.DATA));
+  pQry.ParamByName('status').Value                     := ifThen(pTEFModel.STATUS                     = '', Unassigned, pTEFModel.STATUS);
+  pQry.ParamByName('timestamp_cancelamento').Value     := ifThen(pTEFModel.TIMESTAMP_CANCELAMENTO     = '', Unassigned, pTEFModel.TIMESTAMP_CANCELAMENTO);
+  pQry.ParamByName('documento_fiscal_vinculado').Value := ifThen(pTEFModel.DOCUMENTO_FISCAL_VINCULADO = '', Unassigned, pTEFModel.DOCUMENTO_FISCAL_VINCULADO);
+  pQry.ParamByName('moeda').Value                      := ifThen(pTEFModel.MOEDA                      = '', Unassigned, pTEFModel.MOEDA);
+  pQry.ParamByName('tipo_pessoa').Value                := ifThen(pTEFModel.TIPO_PESSOA                = '', Unassigned, pTEFModel.TIPO_PESSOA);
+  pQry.ParamByName('documento_pessoa').Value           := ifThen(pTEFModel.DOCUMENTO_PESSOA           = '', Unassigned, pTEFModel.DOCUMENTO_PESSOA);
+  pQry.ParamByName('status_transacaoo').Value          := ifThen(pTEFModel.STATUS_TRANSACAOO          = '', Unassigned, pTEFModel.STATUS_TRANSACAOO);
+  pQry.ParamByName('nome_administradora').Value        := ifThen(pTEFModel.NOME_ADMINISTRADORA        = '', Unassigned, pTEFModel.NOME_ADMINISTRADORA);
+  pQry.ParamByName('codigo_autorizacao').Value         := ifThen(pTEFModel.CODIGO_AUTORIZACAO         = '', Unassigned, pTEFModel.CODIGO_AUTORIZACAO);
+  pQry.ParamByName('tipo_parcelamento').Value          := ifThen(pTEFModel.TIPO_PARCELAMENTO          = '', Unassigned, pTEFModel.TIPO_PARCELAMENTO);
+  pQry.ParamByName('quantidade_parcelas').Value        := ifThen(pTEFModel.QUANTIDADE_PARCELAS        = '', Unassigned, pTEFModel.QUANTIDADE_PARCELAS);
+  pQry.ParamByName('parcela').Value                    := ifThen(pTEFModel.PARCELA                    = '', Unassigned, pTEFModel.PARCELA);
+  pQry.ParamByName('data_vencimento_parcela').Value    := ifThen(pTEFModel.DATA_VENCIMENTO_PARCELA    = '', Unassigned, transformaDataFireBird(pTEFModel.DATA_VENCIMENTO_PARCELA));
+  pQry.ParamByName('valor_parcela').Value              := ifThen(pTEFModel.VALOR_PARCELA              = '', Unassigned, FormataFloatFireBird(pTEFModel.VALOR_PARCELA));
+  pQry.ParamByName('nsu_parcela').Value                := ifThen(pTEFModel.NSU_PARCELA                = '', Unassigned, pTEFModel.NSU_PARCELA);
+  pQry.ParamByName('data_transacao_comprovante').Value := ifThen(pTEFModel.DATA_TRANSACAO_COMPROVANTE = '', Unassigned, transformaDataFireBird(pTEFModel.DATA_TRANSACAO_COMPROVANTE));
+  pQry.ParamByName('hora_transacao_comprovante').Value := ifThen(pTEFModel.HORA_TRANSACAO_COMPROVANTE = '', Unassigned, pTEFModel.HORA_TRANSACAO_COMPROVANTE);
+  pQry.ParamByName('nsu_cancelamento').Value           := ifThen(pTEFModel.NSU_CANCELAMENTO           = '', Unassigned, pTEFModel.NSU_CANCELAMENTO);
+  pQry.ParamByName('cliente_id').Value                 := ifThen(pTEFModel.CLIENTE_ID                 = '', Unassigned, pTEFModel.CLIENTE_ID);
+  pQry.ParamByName('contasreceber_fatura').Value       := ifThen(pTEFModel.CONTASRECEBER_FATURA       = '', Unassigned, pTEFModel.CONTASRECEBER_FATURA);
+  pQry.ParamByName('contasreceber_parcela').Value      := ifThen(pTEFModel.CONTASRECEBER_PARCELA      = '', Unassigned, pTEFModel.CONTASRECEBER_PARCELA);
+  pQry.ParamByName('pedido_id').Value                  := ifThen(pTEFModel.PEDIDO_ID                  = '', Unassigned, pTEFModel.PEDIDO_ID);
+  pQry.ParamByName('caixa_id').Value                   := ifThen(pTEFModel.CAIXA_ID                   = '', Unassigned, pTEFModel.CAIXA_ID);
+  pQry.ParamByName('contacorrente_id').Value           := ifThen(pTEFModel.CONTACORRENTE_ID           = '', Unassigned, pTEFModel.CONTACORRENTE_ID);
+  pQry.ParamByName('impressao').Value                  := ifThen(pTEFModel.IMPRESSAO                  = '', Unassigned, pTEFModel.IMPRESSAO);
+  pQry.ParamByName('retorno_completo').Value           := ifThen(pTEFModel.RETORNO_COMPLETO           = '', Unassigned, pTEFModel.RETORNO_COMPLETO);
+  pQry.ParamByName('chamada').Value                    := ifThen(pTEFModel.CHAMADA                    = '', Unassigned, pTEFModel.CHAMADA);
+  pQry.ParamByName('cnpj_credenciadora').Value         := ifThen(pTEFModel.CNPJ_CREDENCIADORA         = '', Unassigned, pTEFModel.CNPJ_CREDENCIADORA);
+  pQry.ParamByName('codigo_credenciadora').Value       := ifThen(pTEFModel.CODIGO_CREDENCIADORA       = '', Unassigned, pTEFModel.CODIGO_CREDENCIADORA);
 end;
 
 procedure TTEFDao.SetStartRecordView(const Value: String);

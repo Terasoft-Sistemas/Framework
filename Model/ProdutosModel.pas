@@ -1,7 +1,7 @@
 unit ProdutosModel;
 interface
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao;
 
@@ -925,9 +925,9 @@ begin
   Result := '';
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lProdutosDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lProdutosDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lProdutosDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lProdutosDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lProdutosDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lProdutosDao.excluir(Self);
     end;
   finally
     lProdutosDao.Free;

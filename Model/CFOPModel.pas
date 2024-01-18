@@ -3,7 +3,7 @@ unit CFOPModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao;
 
@@ -266,9 +266,9 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lCFOPDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lCFOPDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lCFOPDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lCFOPDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lCFOPDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lCFOPDao.excluir(Self);
     end;
 
   finally

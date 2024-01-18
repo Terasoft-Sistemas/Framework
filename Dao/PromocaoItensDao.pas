@@ -1,22 +1,19 @@
 unit PromocaoItensDao;
-
 interface
-
 uses
   PromocaoItensModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  Interfaces.Conexao;
-
+  Interfaces.Conexao,
+  Terasoft.ConstrutorDao;
 type
   TPromocaoItensDao = class
-
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
     FPromocaoItenssLista: TObjectList<TPromocaoItensModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -36,13 +33,11 @@ type
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-
     function montaCondicaoQuery: String;
-
+    procedure setParams(var pQry: TFDQuery; pPromocaoItensModel: TPromocaoItensModel);
   public
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
-
     property PromocaoItenssLista: TObjectList<TPromocaoItensModel> read FPromocaoItenssLista write SetPromocaoItenssLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -53,56 +48,77 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(APromocaoItensModel: TPromocaoItensModel): String;
-    function alterar(APromocaoItensModel: TPromocaoItensModel): String;
-    function excluir(APromocaoItensModel: TPromocaoItensModel): String;
+    function incluir(pPromocaoItensModel: TPromocaoItensModel): String;
+    function alterar(pPromocaoItensModel: TPromocaoItensModel): String;
+    function excluir(pPromocaoItensModel: TPromocaoItensModel): String;
 	
     procedure obterLista;
-
 end;
-
 implementation
-
 { TPromocaoItens }
-
 constructor TPromocaoItensDao.Create(pIConexao : IConexao);
 begin
-  vIConexao := pIConexao;
+  vIConexao   := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
-
 destructor TPromocaoItensDao.Destroy;
 begin
-
   inherited;
 end;
-
-function TPromocaoItensDao.incluir(APromocaoItensModel: TPromocaoItensModel): String;
+function TPromocaoItensDao.incluir(pPromocaoItensModel: TPromocaoItensModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
-begin
-
-end;
-
-function TPromocaoItensDao.alterar(APromocaoItensModel: TPromocaoItensModel): String;
-var
-  lQry: TFDQuery;
-  lSQL:String;
-begin
-
-end;
-
-function TPromocaoItensDao.excluir(APromocaoItensModel: TPromocaoItensModel): String;
-var
-  lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from promocaoitens where ID = :ID',[APromocaoItensModel.ID]);
-   lQry.ExecSQL;
-   Result := APromocaoItensModel.ID;
+    lSQL := vConstrutor.gerarInsert('PROMOCAOITENS', 'ID', true);
+    lQry.SQL.Add(lSQL);
+    lQry.ParamByName('id').Value := vIConexao.Generetor('GEN_PROMOCAOITENS');
+    setParams(lQry, pPromocaoItensModel);
+    lQry.Open;
 
+    Result := lQry.FieldByName('ID').AsString;
+
+  finally
+    lSQL := '';
+    lQry.Free;
+  end;
+end;
+
+function TPromocaoItensDao.alterar(pPromocaoItensModel: TPromocaoItensModel): String;
+var
+  lQry: TFDQuery;
+  lSQL:String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  lSQL :=  vConstrutor.gerarUpdate('PROMOCAOITENS', 'ID');
+
+  try
+    lQry.SQL.Add(lSQL);
+    lQry.ParamByName('id').Value := ifThen(pPromocaoItensModel.ID = '', Unassigned, pPromocaoItensModel.ID);
+    setParams(lQry, pPromocaoItensModel);
+    lQry.ExecSQL;
+
+    Result := pPromocaoItensModel.ID;
+
+  finally
+    lSQL := '';
+    lQry.Free;
+  end;
+end;
+
+function TPromocaoItensDao.excluir(pPromocaoItensModel: TPromocaoItensModel): String;
+var
+  lQry: TFDQuery;
+begin
+  lQry := vIConexao.CriarQuery;
+  try
+   lQry.ExecSQL('delete from promocaoitens where ID = :ID',[pPromocaoItensModel.ID]);
+   lQry.ExecSQL;
+   Result := pPromocaoItensModel.ID;
   finally
     lQry.Free;
   end;
@@ -113,16 +129,12 @@ var
   lSQL : String;
 begin
   lSQL := '';
-
   if not FWhereView.IsEmpty then
     lSQL := lSQL + FWhereView;
-
   if FIDRecordView <> 0  then
     lSQL := lSQL + ' and promocaoitens.id = '+IntToStr(FIDRecordView);
-
   Result := lSQL;
 end;
-
 procedure TPromocaoItensDao.obterTotalRegistros;
 var
   lQry: TFDQuery;
@@ -130,23 +142,17 @@ var
 begin
   try
     lQry := vIConexao.CriarQuery;
-
     lSql := '  select count(*) records                                         '+
             '    From promocaoitens                                            '+
             '   inner join promocao on promocaoitens.promocao_id = promocao.id '+
             '   where 1=1 ';
-
     lSql := lSql + montaCondicaoQuery;
-
     lQry.Open(lSQL);
-
     FTotalRecords := lQry.FieldByName('records').AsInteger;
-
   finally
     lQry.Free;
   end;
 end;
-
 procedure TPromocaoItensDao.obterLista;
 var
   lQry: TFDQuery;
@@ -154,91 +160,78 @@ var
   i: INteger;
 begin
   lQry := vIConexao.CriarQuery;
-
   FPromocaoItenssLista := TObjectList<TPromocaoItensModel>.Create;
-
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lSql := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
     else
       lSql := 'select ';
-
     lSQL := lSQL +
       '       promocaoitens.valor_promocao                             '+
       '       from promocaoitens                                       '+
       ' inner join promocao on promocaoitens.promocao_id = promocao.id '+
       ' where 1=1                                                      ';
-
     lSql := lSql + montaCondicaoQuery;
-
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
-
     lQry.Open(lSQL);
-
     i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
       FPromocaoItenssLista.Add(TPromocaoItensModel.Create(vIConexao));
-
       i := FPromocaoItenssLista.Count -1;
-
       FPromocaoItenssLista[i].VALOR_PROMOCAO := lQry.FieldByName('VALOR_PROMOCAO').AsString;
       
       lQry.Next;
     end;
-
     obterTotalRegistros;
-
   finally
     lQry.Free;
   end;
 end;
-
 procedure TPromocaoItensDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
 end;
-
 procedure TPromocaoItensDao.SetPromocaoItenssLista(const Value: TObjectList<TPromocaoItensModel>);
 begin
   FPromocaoItenssLista := Value;
 end;
-
 procedure TPromocaoItensDao.SetID(const Value: Variant);
 begin
   FID := Value;
 end;
-
 procedure TPromocaoItensDao.SetIDRecordView(const Value: Integer);
 begin
   FIDRecordView := Value;
 end;
-
 procedure TPromocaoItensDao.SetLengthPageView(const Value: String);
 begin
   FLengthPageView := Value;
 end;
-
 procedure TPromocaoItensDao.SetOrderView(const Value: String);
 begin
   FOrderView := Value;
+end;
+procedure TPromocaoItensDao.setParams(var pQry: TFDQuery; pPromocaoItensModel: TPromocaoItensModel);
+begin
+  pQry.ParamByName('promocao_id').Value     := ifThen(pPromocaoItensModel.PROMOCAO_ID       = '', Unassigned, pPromocaoItensModel.PROMOCAO_ID);
+  pQry.ParamByName('produto_id').Value      := ifThen(pPromocaoItensModel.PRODUTO_ID        = '', Unassigned, pPromocaoItensModel.PRODUTO_ID);
+  pQry.ParamByName('valor_promocao').Value  := ifThen(pPromocaoItensModel.VALOR_PROMOCAO    = '', Unassigned, pPromocaoItensModel.VALOR_PROMOCAO);
+  pQry.ParamByName('saldo').Value           := ifThen(pPromocaoItensModel.SALDO             = '', Unassigned, pPromocaoItensModel.SALDO);
 end;
 
 procedure TPromocaoItensDao.SetStartRecordView(const Value: String);
 begin
   FStartRecordView := Value;
 end;
-
 procedure TPromocaoItensDao.SetTotalRecords(const Value: Integer);
 begin
   FTotalRecords := Value;
 end;
-
 procedure TPromocaoItensDao.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
 end;
-
 end.
