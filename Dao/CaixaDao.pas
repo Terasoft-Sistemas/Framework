@@ -4,13 +4,13 @@ interface
 
 uses
   CaixaModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
+  Terasoft.ConstrutorDao,
   Interfaces.Conexao;
 
 type
@@ -18,6 +18,8 @@ type
 
   private
     vIconexao : Iconexao;
+    vConstrutor : TConstrutorDao;
+
     FCaixasLista: TObjectList<TCaixaModel>;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -37,7 +39,7 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
 
-    function montaCondicaoQuery: String;
+    function where: String;
     procedure SetIDRecordView(const Value: String);
 
   public
@@ -133,11 +135,11 @@ end;
 constructor TCaixaDao.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TCaixaDao.Destroy;
 begin
-
   inherited;
 end;
 
@@ -148,81 +150,11 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-lSQL :=   '       insert into caixa (numero_cai,                   '+SLineBreak+
-          '                          codigo_cta,                   '+SLineBreak+
-          '                          data_cai,                     '+SLineBreak+
-          '                          hora_cai,                     '+SLineBreak+
-          '                          historico_cai,                '+SLineBreak+
-          '                          valor_cai,                    '+SLineBreak+
-          '                          usuario_cai,                  '+SLineBreak+
-          '                          tipo_cai,                     '+SLineBreak+
-          '                          cliente_cai,                  '+SLineBreak+
-          '                          numero_ped,                   '+SLineBreak+
-          '                          fatura_cai,                   '+SLineBreak+
-          '                          parcela_cai,                  '+SLineBreak+
-          '                          status,                       '+SLineBreak+
-          '                          portador_cai,                 '+SLineBreak+
-          '                          conciliado_cai,               '+SLineBreak+
-          '                          data_con,                     '+SLineBreak+
-          '                          centro_custo,                 '+SLineBreak+
-          '                          loja,                         '+SLineBreak+
-          '                          recibo,                       '+SLineBreak+
-          '                          relatorio,                    '+SLineBreak+
-          '                          observacao,                   '+SLineBreak+
-          '                          dr,                           '+SLineBreak+
-          '                          troco,                        '+SLineBreak+
-          '                          carga_id,                     '+SLineBreak+
-          '                          tipo,                         '+SLineBreak+
-          '                          sub_id,                       '+SLineBreak+
-          '                          locacao_id,                   '+SLineBreak+
-          '                          funcionario_id,               '+SLineBreak+
-          '                          os_id,                        '+SLineBreak+
-          '                          placa,                        '+SLineBreak+
-          '                          transferencia_origem,         '+SLineBreak+
-          '                          transferencia_id,             '+SLineBreak+
-          '                          competencia,                  '+SLineBreak+
-          '                          loja_remoto,                  '+SLineBreak+
-          '                          pedido_id)                    '+SLineBreak+
-          '       values (:numero_cai,                             '+SLineBreak+
-          '               :codigo_cta,                             '+SLineBreak+
-          '               :data_cai,                               '+SLineBreak+
-          '               :hora_cai,                               '+SLineBreak+
-          '               :historico_cai,                          '+SLineBreak+
-          '               :valor_cai,                              '+SLineBreak+
-          '               :usuario_cai,                            '+SLineBreak+
-          '               :tipo_cai,                               '+SLineBreak+
-          '               :cliente_cai,                            '+SLineBreak+
-          '               :numero_ped,                             '+SLineBreak+
-          '               :fatura_cai,                             '+SLineBreak+
-          '               :parcela_cai,                            '+SLineBreak+
-          '               :status,                                 '+SLineBreak+
-          '               :portador_cai,                           '+SLineBreak+
-          '               :conciliado_cai,                         '+SLineBreak+
-          '               :data_con,                               '+SLineBreak+
-          '               :centro_custo,                           '+SLineBreak+
-          '               :loja,                                   '+SLineBreak+
-          '               :recibo,                                 '+SLineBreak+
-          '               :relatorio,                              '+SLineBreak+
-          '               :observacao,                             '+SLineBreak+
-          '               :dr,                                     '+SLineBreak+
-          '               :troco,                                  '+SLineBreak+
-          '               :carga_id,                               '+SLineBreak+
-          '               :tipo,                                   '+SLineBreak+
-          '               :sub_id,                                 '+SLineBreak+
-          '               :locacao_id,                             '+SLineBreak+
-          '               :funcionario_id,                         '+SLineBreak+
-          '               :os_id,                                  '+SLineBreak+
-          '               :placa,                                  '+SLineBreak+
-          '               :transferencia_origem,                   '+SLineBreak+
-          '               :transferencia_id,                       '+SLineBreak+
-          '               :competencia,                            '+SLineBreak+
-          '               :loja_remoto,                            '+SLineBreak+
-          '               :pedido_id)                              '+SLineBreak+
-          ' returning NUMERO_CAI                                   '+SLineBreak;
+  lSQL := vConstrutor.gerarInsert('CAIXA','NUMERO_CAI', True);
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('numero_cai').Value := vIConexao.Generetor('GEN_CAIXA');
+    lQry.ParamByName('NUMERO_CAI').Value := vIConexao.Generetor('GEN_CAIXA');
     setParams(lQry, ACaixaModel);
     lQry.Open;
 
@@ -241,46 +173,11 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := '    update caixa                                               '+SLineBreak+
-          '       set codigo_cta = :codigo_cta,                           '+SLineBreak+
-          '           data_cai = :data_cai,                               '+SLineBreak+
-          '           hora_cai = :hora_cai,                               '+SLineBreak+
-          '           historico_cai = :historico_cai,                     '+SLineBreak+
-          '           valor_cai = :valor_cai,                             '+SLineBreak+
-          '           usuario_cai = :usuario_cai,                         '+SLineBreak+
-          '           tipo_cai = :tipo_cai,                               '+SLineBreak+
-          '           cliente_cai = :cliente_cai,                         '+SLineBreak+
-          '           numero_ped = :numero_ped,                           '+SLineBreak+
-          '           fatura_cai = :fatura_cai,                           '+SLineBreak+
-          '           parcela_cai = :parcela_cai,                         '+SLineBreak+
-          '           status = :status,                                   '+SLineBreak+
-          '           portador_cai = :portador_cai,                       '+SLineBreak+
-          '           conciliado_cai = :conciliado_cai,                   '+SLineBreak+
-          '           data_con = :data_con,                               '+SLineBreak+
-          '           centro_custo = :centro_custo,                       '+SLineBreak+
-          '           loja = :loja,                                       '+SLineBreak+
-          '           recibo = :recibo,                                   '+SLineBreak+
-          '           relatorio = :relatorio,                             '+SLineBreak+
-          '           observacao = :observacao,                           '+SLineBreak+
-          '           dr = :dr,                                           '+SLineBreak+
-          '           troco = :troco,                                     '+SLineBreak+
-          '           carga_id = :carga_id,                               '+SLineBreak+
-          '           tipo = :tipo,                                       '+SLineBreak+
-          '           sub_id = :sub_id,                                   '+SLineBreak+
-          '           locacao_id = :locacao_id,                           '+SLineBreak+
-          '           funcionario_id = :funcionario_id,                   '+SLineBreak+
-          '           os_id = :os_id,                                     '+SLineBreak+
-          '           placa = :placa,                                     '+SLineBreak+
-          '           transferencia_origem = :transferencia_origem,       '+SLineBreak+
-          '           transferencia_id = :transferencia_id,               '+SLineBreak+
-          '           competencia = :competencia,                         '+SLineBreak+
-          '           loja_remoto = :loja_remoto,                         '+SLineBreak+
-          '           pedido_id = :pedido_id                              '+SLineBreak+
-          '     where (numero_cai = :numero_cai)                          '+SLineBreak;
+  lSQL := vConstrutor.gerarUpdate('CAIXA','NUMERO_CAI');
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('numero_cai').Value := IIF(ACaixaModel.NUMERO_CAI = '', Unassigned, ACaixaModel.NUMERO_CAI);
+    lQry.ParamByName('numero_cai').Value := ifThen(ACaixaModel.NUMERO_CAI = '', Unassigned, ACaixaModel.NUMERO_CAI);
     setParams(lQry, ACaixaModel);
     lQry.ExecSQL;
 
@@ -299,7 +196,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from caixa where numero_cai = :NUMERO_CAI',[ACaixaModel.NUMERO_CAI]);
+   lQry.ExecSQL('delete from CAIXA where NUMERO_CAI = :NUMERO_CAI',[ACaixaModel.NUMERO_CAI]);
    lQry.ExecSQL;
    Result := ACaixaModel.ID;
 
@@ -308,7 +205,7 @@ begin
   end;
 end;
 
-function TCaixaDao.montaCondicaoQuery: String;
+function TCaixaDao.where: String;
 var
   lSQL : String;
 begin
@@ -318,7 +215,7 @@ begin
     lSQL := lSQL + FWhereView;
 
   if FIDRecordView <> '' then
-    lSQL := lSQL + ' and caixa.numero_cai = '+ QuotedStr(FIDRecordView);
+    lSQL := lSQL + ' and CAIXA.NUMERO_CAI = '+ QuotedStr(FIDRecordView);
 
   Result := lSQL;
 end;
@@ -333,7 +230,7 @@ begin
 
     lSql := 'select count(*) records From caixa where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -365,7 +262,7 @@ begin
 	    '  from caixa           '+
       ' where 1=1             ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -443,7 +340,6 @@ begin
   FID := Value;
 end;
 
-
 procedure TCaixaDao.SetIDRecordView(const Value: String);
 begin
   FIDRecordView := Value;
@@ -461,40 +357,40 @@ end;
 
 procedure TCaixaDao.setParams(var pQry: TFDQuery; pCaixaModel: TCaixaModel);
 begin
-  pQry.ParamByName('codigo_cta').Value           := IIF(pCaixaModel.CODIGO_CTA           = '', Unassigned, pCaixaModel.CODIGO_CTA);
-  pQry.ParamByName('data_cai').Value             := IIF(pCaixaModel.DATA_CAI             = '', Unassigned, transformaDataFireBird(pCaixaModel.DATA_CAI));
-  pQry.ParamByName('hora_cai').Value             := IIF(pCaixaModel.HORA_CAI             = '', Unassigned, pCaixaModel.HORA_CAI);
-  pQry.ParamByName('historico_cai').Value        := IIF(pCaixaModel.HISTORICO_CAI        = '', Unassigned, pCaixaModel.HISTORICO_CAI);
-  pQry.ParamByName('valor_cai').Value            := IIF(pCaixaModel.VALOR_CAI            = '', Unassigned, FormataFloatFireBird(pCaixaModel.VALOR_CAI));
-  pQry.ParamByName('usuario_cai').Value          := IIF(pCaixaModel.USUARIO_CAI          = '', Unassigned, pCaixaModel.USUARIO_CAI);
-  pQry.ParamByName('tipo_cai').Value             := IIF(pCaixaModel.TIPO_CAI             = '', Unassigned, pCaixaModel.TIPO_CAI);
-  pQry.ParamByName('cliente_cai').Value          := IIF(pCaixaModel.CLIENTE_CAI          = '', Unassigned, pCaixaModel.CLIENTE_CAI);
-  pQry.ParamByName('numero_ped').Value           := IIF(pCaixaModel.NUMERO_PED           = '', Unassigned, pCaixaModel.NUMERO_PED);
-  pQry.ParamByName('fatura_cai').Value           := IIF(pCaixaModel.FATURA_CAI           = '', Unassigned, pCaixaModel.FATURA_CAI);
-  pQry.ParamByName('parcela_cai').Value          := IIF(pCaixaModel.PARCELA_CAI          = '', Unassigned, pCaixaModel.PARCELA_CAI);
-  pQry.ParamByName('status').Value               := IIF(pCaixaModel.STATUS               = '', Unassigned, pCaixaModel.STATUS);
-  pQry.ParamByName('portador_cai').Value         := IIF(pCaixaModel.PORTADOR_CAI         = '', Unassigned, pCaixaModel.PORTADOR_CAI);
-  pQry.ParamByName('conciliado_cai').Value       := IIF(pCaixaModel.CONCILIADO_CAI       = '', Unassigned, pCaixaModel.CONCILIADO_CAI);
-  pQry.ParamByName('data_con').Value             := IIF(pCaixaModel.DATA_CON             = '', Unassigned, transformaDataFireBird(pCaixaModel.DATA_CON));
-  pQry.ParamByName('centro_custo').Value         := IIF(pCaixaModel.CENTRO_CUSTO         = '', Unassigned, pCaixaModel.CENTRO_CUSTO);
-  pQry.ParamByName('loja').Value                 := IIF(pCaixaModel.LOJA                 = '', Unassigned, pCaixaModel.LOJA);
-  pQry.ParamByName('recibo').Value               := IIF(pCaixaModel.RECIBO               = '', Unassigned, pCaixaModel.RECIBO);
-  pQry.ParamByName('relatorio').Value            := IIF(pCaixaModel.RELATORIO            = '', Unassigned, pCaixaModel.RELATORIO);
-  pQry.ParamByName('observacao').Value           := IIF(pCaixaModel.OBSERVACAO           = '', Unassigned, pCaixaModel.OBSERVACAO);
-  pQry.ParamByName('dr').Value                   := IIF(pCaixaModel.DR                   = '', Unassigned, pCaixaModel.DR);
-  pQry.ParamByName('troco').Value                := IIF(pCaixaModel.TROCO                = '', Unassigned, pCaixaModel.TROCO);
-  pQry.ParamByName('carga_id').Value             := IIF(pCaixaModel.CARGA_ID             = '', Unassigned, pCaixaModel.CARGA_ID);
-  pQry.ParamByName('tipo').Value                 := IIF(pCaixaModel.TIPO                 = '', Unassigned, pCaixaModel.TIPO);
-  pQry.ParamByName('sub_id').Value               := IIF(pCaixaModel.SUB_ID               = '', Unassigned, pCaixaModel.SUB_ID);
-  pQry.ParamByName('locacao_id').Value           := IIF(pCaixaModel.LOCACAO_ID           = '', Unassigned, pCaixaModel.LOCACAO_ID);
-  pQry.ParamByName('funcionario_id').Value       := IIF(pCaixaModel.FUNCIONARIO_ID       = '', Unassigned, pCaixaModel.FUNCIONARIO_ID);
-  pQry.ParamByName('os_id').Value                := IIF(pCaixaModel.OS_ID                = '', Unassigned, pCaixaModel.OS_ID);
-  pQry.ParamByName('placa').Value                := IIF(pCaixaModel.PLACA                = '', Unassigned, pCaixaModel.PLACA);
-  pQry.ParamByName('transferencia_origem').Value := IIF(pCaixaModel.TRANSFERENCIA_ORIGEM = '', Unassigned, pCaixaModel.TRANSFERENCIA_ORIGEM);
-  pQry.ParamByName('transferencia_id').Value     := IIF(pCaixaModel.TRANSFERENCIA_ID     = '', Unassigned, pCaixaModel.TRANSFERENCIA_ID);
-  pQry.ParamByName('competencia').Value          := IIF(pCaixaModel.COMPETENCIA          = '', Unassigned, pCaixaModel.COMPETENCIA);
-  pQry.ParamByName('loja_remoto').Value          := IIF(pCaixaModel.LOJA_REMOTO          = '', Unassigned, pCaixaModel.LOJA_REMOTO);
-  pQry.ParamByName('pedido_id').Value            := IIF(pCaixaModel.PEDIDO_ID            = '', Unassigned, pCaixaModel.PEDIDO_ID);
+  pQry.ParamByName('codigo_cta').Value           := ifThen(pCaixaModel.CODIGO_CTA           = '', Unassigned, pCaixaModel.CODIGO_CTA);
+  pQry.ParamByName('data_cai').Value             := ifThen(pCaixaModel.DATA_CAI             = '', Unassigned, transformaDataFireBird(pCaixaModel.DATA_CAI));
+  pQry.ParamByName('hora_cai').Value             := ifThen(pCaixaModel.HORA_CAI             = '', Unassigned, pCaixaModel.HORA_CAI);
+  pQry.ParamByName('historico_cai').Value        := ifThen(pCaixaModel.HISTORICO_CAI        = '', Unassigned, pCaixaModel.HISTORICO_CAI);
+  pQry.ParamByName('valor_cai').Value            := ifThen(pCaixaModel.VALOR_CAI            = '', Unassigned, FormataFloatFireBird(pCaixaModel.VALOR_CAI));
+  pQry.ParamByName('usuario_cai').Value          := ifThen(pCaixaModel.USUARIO_CAI          = '', Unassigned, pCaixaModel.USUARIO_CAI);
+  pQry.ParamByName('tipo_cai').Value             := ifThen(pCaixaModel.TIPO_CAI             = '', Unassigned, pCaixaModel.TIPO_CAI);
+  pQry.ParamByName('cliente_cai').Value          := ifThen(pCaixaModel.CLIENTE_CAI          = '', Unassigned, pCaixaModel.CLIENTE_CAI);
+  pQry.ParamByName('numero_ped').Value           := ifThen(pCaixaModel.NUMERO_PED           = '', Unassigned, pCaixaModel.NUMERO_PED);
+  pQry.ParamByName('fatura_cai').Value           := ifThen(pCaixaModel.FATURA_CAI           = '', Unassigned, pCaixaModel.FATURA_CAI);
+  pQry.ParamByName('parcela_cai').Value          := ifThen(pCaixaModel.PARCELA_CAI          = '', Unassigned, pCaixaModel.PARCELA_CAI);
+  pQry.ParamByName('status').Value               := ifThen(pCaixaModel.STATUS               = '', Unassigned, pCaixaModel.STATUS);
+  pQry.ParamByName('portador_cai').Value         := ifThen(pCaixaModel.PORTADOR_CAI         = '', Unassigned, pCaixaModel.PORTADOR_CAI);
+  pQry.ParamByName('conciliado_cai').Value       := ifThen(pCaixaModel.CONCILIADO_CAI       = '', Unassigned, pCaixaModel.CONCILIADO_CAI);
+  pQry.ParamByName('data_con').Value             := ifThen(pCaixaModel.DATA_CON             = '', Unassigned, transformaDataFireBird(pCaixaModel.DATA_CON));
+  pQry.ParamByName('centro_custo').Value         := ifThen(pCaixaModel.CENTRO_CUSTO         = '', Unassigned, pCaixaModel.CENTRO_CUSTO);
+  pQry.ParamByName('loja').Value                 := ifThen(pCaixaModel.LOJA                 = '', Unassigned, pCaixaModel.LOJA);
+  pQry.ParamByName('recibo').Value               := ifThen(pCaixaModel.RECIBO               = '', Unassigned, pCaixaModel.RECIBO);
+  pQry.ParamByName('relatorio').Value            := ifThen(pCaixaModel.RELATORIO            = '', Unassigned, pCaixaModel.RELATORIO);
+  pQry.ParamByName('observacao').Value           := ifThen(pCaixaModel.OBSERVACAO           = '', Unassigned, pCaixaModel.OBSERVACAO);
+  pQry.ParamByName('dr').Value                   := ifThen(pCaixaModel.DR                   = '', Unassigned, pCaixaModel.DR);
+  pQry.ParamByName('troco').Value                := ifThen(pCaixaModel.TROCO                = '', Unassigned, pCaixaModel.TROCO);
+  pQry.ParamByName('carga_id').Value             := ifThen(pCaixaModel.CARGA_ID             = '', Unassigned, pCaixaModel.CARGA_ID);
+  pQry.ParamByName('tipo').Value                 := ifThen(pCaixaModel.TIPO                 = '', Unassigned, pCaixaModel.TIPO);
+  pQry.ParamByName('sub_id').Value               := ifThen(pCaixaModel.SUB_ID               = '', Unassigned, pCaixaModel.SUB_ID);
+  pQry.ParamByName('locacao_id').Value           := ifThen(pCaixaModel.LOCACAO_ID           = '', Unassigned, pCaixaModel.LOCACAO_ID);
+  pQry.ParamByName('funcionario_id').Value       := ifThen(pCaixaModel.FUNCIONARIO_ID       = '', Unassigned, pCaixaModel.FUNCIONARIO_ID);
+  pQry.ParamByName('os_id').Value                := ifThen(pCaixaModel.OS_ID                = '', Unassigned, pCaixaModel.OS_ID);
+  pQry.ParamByName('placa').Value                := ifThen(pCaixaModel.PLACA                = '', Unassigned, pCaixaModel.PLACA);
+  pQry.ParamByName('transferencia_origem').Value := ifThen(pCaixaModel.TRANSFERENCIA_ORIGEM = '', Unassigned, pCaixaModel.TRANSFERENCIA_ORIGEM);
+  pQry.ParamByName('transferencia_id').Value     := ifThen(pCaixaModel.TRANSFERENCIA_ID     = '', Unassigned, pCaixaModel.TRANSFERENCIA_ID);
+  pQry.ParamByName('competencia').Value          := ifThen(pCaixaModel.COMPETENCIA          = '', Unassigned, pCaixaModel.COMPETENCIA);
+  pQry.ParamByName('loja_remoto').Value          := ifThen(pCaixaModel.LOJA_REMOTO          = '', Unassigned, pCaixaModel.LOJA_REMOTO);
+  pQry.ParamByName('pedido_id').Value            := ifThen(pCaixaModel.PEDIDO_ID            = '', Unassigned, pCaixaModel.PEDIDO_ID);
 end;
 
 procedure TCaixaDao.SetStartRecordView(const Value: String);

@@ -4,19 +4,21 @@ interface
 
 uses
   CFOPModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  Interfaces.Conexao;
+  Interfaces.Conexao,
+  Terasoft.ConstrutorDao;
 
 type
   TCFOPDao = class
 
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
+
     FCFOPsLista: TObjectList<TCFOPModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -37,7 +39,7 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
 
-    function montaCondicaoQuery: String;
+    function where: String;
 
     procedure setParams(var pQry: TFDQuery; pCFOPModel: TCFOPModel);
 
@@ -139,7 +141,8 @@ end;
 
 constructor TCFOPDao.Create(pIConexao :IConexao);
 begin
-   vIConexao := pIConexao;
+   vIConexao    := pIConexao;
+   vConstrutor  := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TCFOPDao.Destroy;
@@ -155,93 +158,7 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := '  insert into cfop (cfop,                            '+SLineBreak+
-          '                    descricao,                       '+SLineBreak+
-          '                    tipo,                            '+SLineBreak+
-          '                    estoque,                         '+SLineBreak+
-          '                    icms,                            '+SLineBreak+
-          '                    cst,                             '+SLineBreak+
-          '                    obs,                             '+SLineBreak+
-          '                    pis,                             '+SLineBreak+
-          '                    cofins,                          '+SLineBreak+
-          '                    valor,                           '+SLineBreak+
-          '                    consignado,                      '+SLineBreak+
-          '                    csosn,                           '+SLineBreak+
-          '                    cfop_referencia,                 '+SLineBreak+
-          '                    conta_contabil,                  '+SLineBreak+
-          '                    cst_entrada,                     '+SLineBreak+
-          '                    reservado_fisco,                 '+SLineBreak+
-          '                    altera_custo,                    '+SLineBreak+
-          '                    ibpt,                            '+SLineBreak+
-          '                    operacao,                        '+SLineBreak+
-          '                    estoque_2,                       '+SLineBreak+
-          '                    cst_pis,                         '+SLineBreak+
-          '                    cst_cofins,                      '+SLineBreak+
-          '                    cst_ipi,                         '+SLineBreak+
-          '                    aliquota_pis,                    '+SLineBreak+
-          '                    aliquota_cofins,                 '+SLineBreak+
-          '                    aliquota_ipi,                    '+SLineBreak+
-          '                    somar_ipi_base_icms,             '+SLineBreak+
-          '                    status,                          '+SLineBreak+
-          '                    listar_ipi_sped,                 '+SLineBreak+
-          '                    aproveitamento_icms,             '+SLineBreak+
-          '                    reducao_aproveitamento_icms,     '+SLineBreak+
-          '                    desconto_sobre_ipi,              '+SLineBreak+
-          '                    somar_pis_cofins_em_outras,      '+SLineBreak+
-          '                    somar_icms_total_nf,             '+SLineBreak+
-          '                    cfop_devolucao,                  '+SLineBreak+
-          '                    motdesicms,                      '+SLineBreak+
-          '                    cbenef,                          '+SLineBreak+
-          '                    predbc_n14,                      '+SLineBreak+
-          '                    cenq,                            '+SLineBreak+
-          '                    pcred_presumido,                 '+SLineBreak+
-          '                    desconto_sobre_icms,             '+SLineBreak+
-          '                    desconto_icms_base_pis_cofins,   '+SLineBreak+
-          '                    outras_despesas_entrada)         '+SLineBreak+
-          '  values (:cfop,                                     '+SLineBreak+
-          '          :descricao,                                '+SLineBreak+
-          '          :tipo,                                     '+SLineBreak+
-          '          :estoque,                                  '+SLineBreak+
-          '          :icms,                                     '+SLineBreak+
-          '          :cst,                                      '+SLineBreak+
-          '          :obs,                                      '+SLineBreak+
-          '          :pis,                                      '+SLineBreak+
-          '          :cofins,                                   '+SLineBreak+
-          '          :valor,                                    '+SLineBreak+
-          '          :consignado,                               '+SLineBreak+
-          '          :csosn,                                    '+SLineBreak+
-          '          :cfop_referencia,                          '+SLineBreak+
-          '          :conta_contabil,                           '+SLineBreak+
-          '          :cst_entrada,                              '+SLineBreak+
-          '          :reservado_fisco,                          '+SLineBreak+
-          '          :altera_custo,                             '+SLineBreak+
-          '          :ibpt,                                     '+SLineBreak+
-          '          :operacao,                                 '+SLineBreak+
-          '          :estoque_2,                                '+SLineBreak+
-          '          :cst_pis,                                  '+SLineBreak+
-          '          :cst_cofins,                               '+SLineBreak+
-          '          :cst_ipi,                                  '+SLineBreak+
-          '          :aliquota_pis,                             '+SLineBreak+
-          '          :aliquota_cofins,                          '+SLineBreak+
-          '          :aliquota_ipi,                             '+SLineBreak+
-          '          :somar_ipi_base_icms,                      '+SLineBreak+
-          '          :status,                                   '+SLineBreak+
-          '          :listar_ipi_sped,                          '+SLineBreak+
-          '          :aproveitamento_icms,                      '+SLineBreak+
-          '          :reducao_aproveitamento_icms,              '+SLineBreak+
-          '          :desconto_sobre_ipi,                       '+SLineBreak+
-          '          :somar_pis_cofins_em_outras,               '+SLineBreak+
-          '          :somar_icms_total_nf,                      '+SLineBreak+
-          '          :cfop_devolucao,                           '+SLineBreak+
-          '          :motdesicms,                               '+SLineBreak+
-          '          :cbenef,                                   '+SLineBreak+
-          '          :predbc_n14,                               '+SLineBreak+
-          '          :cenq,                                     '+SLineBreak+
-          '          :pcred_presumido,                          '+SLineBreak+
-          '          :desconto_sobre_icms,                      '+SLineBreak+
-          '          :desconto_icms_base_pis_cofins,            '+SLineBreak+
-          '          :outras_despesas_entrada)                  '+SLineBreak+
-          ' returning ID                                        '+SLineBreak;
+  lSQL := vConstrutor.gerarInsert('CFOP','ID');
 
   try
     lQry.SQL.Add(lSQL);
@@ -263,55 +180,11 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL :=  '  update cfop                                                                 '+SLineBreak+
-           '     set cfop = :cfop,                                                        '+SLineBreak+
-           '         descricao = :descricao,                                              '+SLineBreak+
-           '         tipo = :tipo,                                                        '+SLineBreak+
-           '         estoque = :estoque,                                                  '+SLineBreak+
-           '         icms = :icms,                                                        '+SLineBreak+
-           '         cst = :cst,                                                          '+SLineBreak+
-           '         obs = :obs,                                                          '+SLineBreak+
-           '         pis = :pis,                                                          '+SLineBreak+
-           '         cofins = :cofins,                                                    '+SLineBreak+
-           '         valor = :valor,                                                      '+SLineBreak+
-           '         consignado = :consignado,                                            '+SLineBreak+
-           '         csosn = :csosn,                                                      '+SLineBreak+
-           '         cfop_referencia = :cfop_referencia,                                  '+SLineBreak+
-           '         conta_contabil = :conta_contabil,                                    '+SLineBreak+
-           '         cst_entrada = :cst_entrada,                                          '+SLineBreak+
-           '         reservado_fisco = :reservado_fisco,                                  '+SLineBreak+
-           '         altera_custo = :altera_custo,                                        '+SLineBreak+
-           '         ibpt = :ibpt,                                                        '+SLineBreak+
-           '         operacao = :operacao,                                                '+SLineBreak+
-           '         estoque_2 = :estoque_2,                                              '+SLineBreak+
-           '         cst_pis = :cst_pis,                                                  '+SLineBreak+
-           '         cst_cofins = :cst_cofins,                                            '+SLineBreak+
-           '         cst_ipi = :cst_ipi,                                                  '+SLineBreak+
-           '         aliquota_pis = :aliquota_pis,                                        '+SLineBreak+
-           '         aliquota_cofins = :aliquota_cofins,                                  '+SLineBreak+
-           '         aliquota_ipi = :aliquota_ipi,                                        '+SLineBreak+
-           '         somar_ipi_base_icms = :somar_ipi_base_icms,                          '+SLineBreak+
-           '         status = :status,                                                    '+SLineBreak+
-           '         listar_ipi_sped = :listar_ipi_sped,                                  '+SLineBreak+
-           '         aproveitamento_icms = :aproveitamento_icms,                          '+SLineBreak+
-           '         reducao_aproveitamento_icms = :reducao_aproveitamento_icms,          '+SLineBreak+
-           '         desconto_sobre_ipi = :desconto_sobre_ipi,                            '+SLineBreak+
-           '         somar_pis_cofins_em_outras = :somar_pis_cofins_em_outras,            '+SLineBreak+
-           '         somar_icms_total_nf = :somar_icms_total_nf,                          '+SLineBreak+
-           '         cfop_devolucao = :cfop_devolucao,                                    '+SLineBreak+
-           '         motdesicms = :motdesicms,                                            '+SLineBreak+
-           '         cbenef = :cbenef,                                                    '+SLineBreak+
-           '         predbc_n14 = :predbc_n14,                                            '+SLineBreak+
-           '         cenq = :cenq,                                                        '+SLineBreak+
-           '         pcred_presumido = :pcred_presumido,                                  '+SLineBreak+
-           '         desconto_sobre_icms = :desconto_sobre_icms,                          '+SLineBreak+
-           '         desconto_icms_base_pis_cofins = :desconto_icms_base_pis_cofins,      '+SLineBreak+
-           '         outras_despesas_entrada = :outras_despesas_entrada                   '+SLineBreak+
-           '   where (id = :id)                                                           '+SLineBreak;
+  lSQL := vConstrutor.gerarUpdate('CFOP', 'ID');
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := IIF(ACFOPModel.ID = '', Unassigned, ACFOPModel.ID);
+    lQry.ParamByName('id').Value := ifThen(ACFOPModel.ID = '', Unassigned, ACFOPModel.ID);
     setParams(lQry, ACFOPModel);
     lQry.ExecSQL;
 
@@ -339,7 +212,7 @@ begin
   end;
 end;
 
-function TCFOPDao.montaCondicaoQuery: String;
+function TCFOPDao.where: String;
 var
   lSQL : String;
 begin
@@ -364,7 +237,7 @@ begin
 
     lSql := 'select count(*) records From cfop where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -404,7 +277,7 @@ begin
 	    '  from cfop                '+
       ' where 1=1                 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -507,49 +380,49 @@ end;
 
 procedure TCFOPDao.setParams(var pQry: TFDQuery; pCFOPModel: TCFOPModel);
 begin
-  pQry.ParamByName('cfop').Value                          := IIF(pCFOPModel.CFOP                          = '', Unassigned, pCFOPModel.CFOP);
-  pQry.ParamByName('descricao').Value                     := IIF(pCFOPModel.DESCRICAO                     = '', Unassigned, pCFOPModel.DESCRICAO);
-  pQry.ParamByName('tipo').Value                          := IIF(pCFOPModel.TIPO                          = '', Unassigned, pCFOPModel.TIPO);
-  pQry.ParamByName('estoque').Value                       := IIF(pCFOPModel.ESTOQUE                       = '', Unassigned, pCFOPModel.ESTOQUE);
-  pQry.ParamByName('icms').Value                          := IIF(pCFOPModel.ICMS                          = '', Unassigned, pCFOPModel.ICMS);
-  pQry.ParamByName('cst').Value                           := IIF(pCFOPModel.CST                           = '', Unassigned, pCFOPModel.CST);
-  pQry.ParamByName('obs').Value                           := IIF(pCFOPModel.OBS                           = '', Unassigned, pCFOPModel.OBS);
-  pQry.ParamByName('pis').Value                           := IIF(pCFOPModel.PIS                           = '', Unassigned, pCFOPModel.PIS);
-  pQry.ParamByName('cofins').Value                        := IIF(pCFOPModel.COFINS                        = '', Unassigned, pCFOPModel.COFINS);
-  pQry.ParamByName('valor').Value                         := IIF(pCFOPModel.VALOR                         = '', Unassigned, pCFOPModel.VALOR);
-  pQry.ParamByName('consignado').Value                    := IIF(pCFOPModel.CONSIGNADO                    = '', Unassigned, pCFOPModel.CONSIGNADO);
-  pQry.ParamByName('csosn').Value                         := IIF(pCFOPModel.CSOSN                         = '', Unassigned, pCFOPModel.CSOSN);
-  pQry.ParamByName('cfop_referencia').Value               := IIF(pCFOPModel.CFOP_REFERENCIA               = '', Unassigned, pCFOPModel.CFOP_REFERENCIA);
-  pQry.ParamByName('conta_contabil').Value                := IIF(pCFOPModel.CONTA_CONTABIL                = '', Unassigned, pCFOPModel.CONTA_CONTABIL);
-  pQry.ParamByName('cst_entrada').Value                   := IIF(pCFOPModel.CST_ENTRADA                   = '', Unassigned, pCFOPModel.CST_ENTRADA);
-  pQry.ParamByName('reservado_fisco').Value               := IIF(pCFOPModel.RESERVADO_FISCO               = '', Unassigned, pCFOPModel.RESERVADO_FISCO);
-  pQry.ParamByName('altera_custo').Value                  := IIF(pCFOPModel.ALTERA_CUSTO                  = '', Unassigned, pCFOPModel.ALTERA_CUSTO);
-  pQry.ParamByName('ibpt').Value                          := IIF(pCFOPModel.IBPT                          = '', Unassigned, pCFOPModel.IBPT);
-  pQry.ParamByName('operacao').Value                      := IIF(pCFOPModel.OPERACAO                      = '', Unassigned, pCFOPModel.OPERACAO);
-  pQry.ParamByName('estoque_2').Value                     := IIF(pCFOPModel.ESTOQUE_2                     = '', Unassigned, pCFOPModel.ESTOQUE_2);
-  pQry.ParamByName('cst_pis').Value                       := IIF(pCFOPModel.CST_PIS                       = '', Unassigned, pCFOPModel.CST_PIS);
-  pQry.ParamByName('cst_cofins').Value                    := IIF(pCFOPModel.CST_COFINS                    = '', Unassigned, pCFOPModel.CST_COFINS);
-  pQry.ParamByName('cst_ipi').Value                       := IIF(pCFOPModel.CST_IPI                       = '', Unassigned, pCFOPModel.CST_IPI);
-  pQry.ParamByName('aliquota_pis').Value                  := IIF(pCFOPModel.ALIQUOTA_PIS                  = '', Unassigned, pCFOPModel.ALIQUOTA_PIS);
-  pQry.ParamByName('aliquota_cofins').Value               := IIF(pCFOPModel.ALIQUOTA_COFINS               = '', Unassigned, pCFOPModel.ALIQUOTA_COFINS);
-  pQry.ParamByName('aliquota_ipi').Value                  := IIF(pCFOPModel.ALIQUOTA_IPI                  = '', Unassigned, pCFOPModel.ALIQUOTA_IPI);
-  pQry.ParamByName('somar_ipi_base_icms').Value           := IIF(pCFOPModel.SOMAR_IPI_BASE_ICMS           = '', Unassigned, pCFOPModel.SOMAR_IPI_BASE_ICMS);
-  pQry.ParamByName('status').Value                        := IIF(pCFOPModel.STATUS                        = '', Unassigned, pCFOPModel.STATUS);
-  pQry.ParamByName('listar_ipi_sped').Value               := IIF(pCFOPModel.LISTAR_IPI_SPED               = '', Unassigned, pCFOPModel.LISTAR_IPI_SPED);
-  pQry.ParamByName('aproveitamento_icms').Value           := IIF(pCFOPModel.APROVEITAMENTO_ICMS           = '', Unassigned, pCFOPModel.APROVEITAMENTO_ICMS);
-  pQry.ParamByName('reducao_aproveitamento_icms').Value   := IIF(pCFOPModel.REDUCAO_APROVEITAMENTO_ICMS   = '', Unassigned, pCFOPModel.REDUCAO_APROVEITAMENTO_ICMS);
-  pQry.ParamByName('desconto_sobre_ipi').Value            := IIF(pCFOPModel.DESCONTO_SOBRE_IPI            = '', Unassigned, pCFOPModel.DESCONTO_SOBRE_IPI);
-  pQry.ParamByName('somar_pis_cofins_em_outras').Value    := IIF(pCFOPModel.SOMAR_PIS_COFINS_EM_OUTRAS    = '', Unassigned, pCFOPModel.SOMAR_PIS_COFINS_EM_OUTRAS);
-  pQry.ParamByName('somar_icms_total_nf').Value           := IIF(pCFOPModel.SOMAR_ICMS_TOTAL_NF           = '', Unassigned, pCFOPModel.SOMAR_ICMS_TOTAL_NF);
-  pQry.ParamByName('cfop_devolucao').Value                := IIF(pCFOPModel.CFOP_DEVOLUCAO                = '', Unassigned, pCFOPModel.CFOP_DEVOLUCAO);
-  pQry.ParamByName('motdesicms').Value                    := IIF(pCFOPModel.MOTDESICMS                    = '', Unassigned, pCFOPModel.MOTDESICMS);
-  pQry.ParamByName('cbenef').Value                        := IIF(pCFOPModel.CBENEF                        = '', Unassigned, pCFOPModel.CBENEF);
-  pQry.ParamByName('predbc_n14').Value                    := IIF(pCFOPModel.PREDBC_N14                    = '', Unassigned, pCFOPModel.PREDBC_N14);
-  pQry.ParamByName('cenq').Value                          := IIF(pCFOPModel.CENQ                          = '', Unassigned, pCFOPModel.CENQ);
-  pQry.ParamByName('pcred_presumido').Value               := IIF(pCFOPModel.PCRED_PRESUMIDO               = '', Unassigned, pCFOPModel.PCRED_PRESUMIDO);
-  pQry.ParamByName('desconto_sobre_icms').Value           := IIF(pCFOPModel.DESCONTO_SOBRE_ICMS           = '', Unassigned, pCFOPModel.DESCONTO_SOBRE_ICMS);
-  pQry.ParamByName('desconto_icms_base_pis_cofins').Value := IIF(pCFOPModel.DESCONTO_ICMS_BASE_PIS_COFINS = '', Unassigned, pCFOPModel.DESCONTO_ICMS_BASE_PIS_COFINS);
-  pQry.ParamByName('outras_despesas_entrada').Value       := IIF(pCFOPModel.OUTRAS_DESPESAS_ENTRADA       = '', Unassigned, pCFOPModel.OUTRAS_DESPESAS_ENTRADA);
+  pQry.ParamByName('cfop').Value                          := ifThen(pCFOPModel.CFOP                          = '', Unassigned, pCFOPModel.CFOP);
+  pQry.ParamByName('descricao').Value                     := ifThen(pCFOPModel.DESCRICAO                     = '', Unassigned, pCFOPModel.DESCRICAO);
+  pQry.ParamByName('tipo').Value                          := ifThen(pCFOPModel.TIPO                          = '', Unassigned, pCFOPModel.TIPO);
+  pQry.ParamByName('estoque').Value                       := ifThen(pCFOPModel.ESTOQUE                       = '', Unassigned, pCFOPModel.ESTOQUE);
+  pQry.ParamByName('icms').Value                          := ifThen(pCFOPModel.ICMS                          = '', Unassigned, pCFOPModel.ICMS);
+  pQry.ParamByName('cst').Value                           := ifThen(pCFOPModel.CST                           = '', Unassigned, pCFOPModel.CST);
+  pQry.ParamByName('obs').Value                           := ifThen(pCFOPModel.OBS                           = '', Unassigned, pCFOPModel.OBS);
+  pQry.ParamByName('pis').Value                           := ifThen(pCFOPModel.PIS                           = '', Unassigned, pCFOPModel.PIS);
+  pQry.ParamByName('cofins').Value                        := ifThen(pCFOPModel.COFINS                        = '', Unassigned, pCFOPModel.COFINS);
+  pQry.ParamByName('valor').Value                         := ifThen(pCFOPModel.VALOR                         = '', Unassigned, pCFOPModel.VALOR);
+  pQry.ParamByName('consignado').Value                    := ifThen(pCFOPModel.CONSIGNADO                    = '', Unassigned, pCFOPModel.CONSIGNADO);
+  pQry.ParamByName('csosn').Value                         := ifThen(pCFOPModel.CSOSN                         = '', Unassigned, pCFOPModel.CSOSN);
+  pQry.ParamByName('cfop_referencia').Value               := ifThen(pCFOPModel.CFOP_REFERENCIA               = '', Unassigned, pCFOPModel.CFOP_REFERENCIA);
+  pQry.ParamByName('conta_contabil').Value                := ifThen(pCFOPModel.CONTA_CONTABIL                = '', Unassigned, pCFOPModel.CONTA_CONTABIL);
+  pQry.ParamByName('cst_entrada').Value                   := ifThen(pCFOPModel.CST_ENTRADA                   = '', Unassigned, pCFOPModel.CST_ENTRADA);
+  pQry.ParamByName('reservado_fisco').Value               := ifThen(pCFOPModel.RESERVADO_FISCO               = '', Unassigned, pCFOPModel.RESERVADO_FISCO);
+  pQry.ParamByName('altera_custo').Value                  := ifThen(pCFOPModel.ALTERA_CUSTO                  = '', Unassigned, pCFOPModel.ALTERA_CUSTO);
+  pQry.ParamByName('ibpt').Value                          := ifThen(pCFOPModel.IBPT                          = '', Unassigned, pCFOPModel.IBPT);
+  pQry.ParamByName('operacao').Value                      := ifThen(pCFOPModel.OPERACAO                      = '', Unassigned, pCFOPModel.OPERACAO);
+  pQry.ParamByName('estoque_2').Value                     := ifThen(pCFOPModel.ESTOQUE_2                     = '', Unassigned, pCFOPModel.ESTOQUE_2);
+  pQry.ParamByName('cst_pis').Value                       := ifThen(pCFOPModel.CST_PIS                       = '', Unassigned, pCFOPModel.CST_PIS);
+  pQry.ParamByName('cst_cofins').Value                    := ifThen(pCFOPModel.CST_COFINS                    = '', Unassigned, pCFOPModel.CST_COFINS);
+  pQry.ParamByName('cst_ipi').Value                       := ifThen(pCFOPModel.CST_IPI                       = '', Unassigned, pCFOPModel.CST_IPI);
+  pQry.ParamByName('aliquota_pis').Value                  := ifThen(pCFOPModel.ALIQUOTA_PIS                  = '', Unassigned, pCFOPModel.ALIQUOTA_PIS);
+  pQry.ParamByName('aliquota_cofins').Value               := ifThen(pCFOPModel.ALIQUOTA_COFINS               = '', Unassigned, pCFOPModel.ALIQUOTA_COFINS);
+  pQry.ParamByName('aliquota_ipi').Value                  := ifThen(pCFOPModel.ALIQUOTA_IPI                  = '', Unassigned, pCFOPModel.ALIQUOTA_IPI);
+  pQry.ParamByName('somar_ipi_base_icms').Value           := ifThen(pCFOPModel.SOMAR_IPI_BASE_ICMS           = '', Unassigned, pCFOPModel.SOMAR_IPI_BASE_ICMS);
+  pQry.ParamByName('status').Value                        := ifThen(pCFOPModel.STATUS                        = '', Unassigned, pCFOPModel.STATUS);
+  pQry.ParamByName('listar_ipi_sped').Value               := ifThen(pCFOPModel.LISTAR_IPI_SPED               = '', Unassigned, pCFOPModel.LISTAR_IPI_SPED);
+  pQry.ParamByName('aproveitamento_icms').Value           := ifThen(pCFOPModel.APROVEITAMENTO_ICMS           = '', Unassigned, pCFOPModel.APROVEITAMENTO_ICMS);
+  pQry.ParamByName('reducao_aproveitamento_icms').Value   := ifThen(pCFOPModel.REDUCAO_APROVEITAMENTO_ICMS   = '', Unassigned, pCFOPModel.REDUCAO_APROVEITAMENTO_ICMS);
+  pQry.ParamByName('desconto_sobre_ipi').Value            := ifThen(pCFOPModel.DESCONTO_SOBRE_IPI            = '', Unassigned, pCFOPModel.DESCONTO_SOBRE_IPI);
+  pQry.ParamByName('somar_pis_cofins_em_outras').Value    := ifThen(pCFOPModel.SOMAR_PIS_COFINS_EM_OUTRAS    = '', Unassigned, pCFOPModel.SOMAR_PIS_COFINS_EM_OUTRAS);
+  pQry.ParamByName('somar_icms_total_nf').Value           := ifThen(pCFOPModel.SOMAR_ICMS_TOTAL_NF           = '', Unassigned, pCFOPModel.SOMAR_ICMS_TOTAL_NF);
+  pQry.ParamByName('cfop_devolucao').Value                := ifThen(pCFOPModel.CFOP_DEVOLUCAO                = '', Unassigned, pCFOPModel.CFOP_DEVOLUCAO);
+  pQry.ParamByName('motdesicms').Value                    := ifThen(pCFOPModel.MOTDESICMS                    = '', Unassigned, pCFOPModel.MOTDESICMS);
+  pQry.ParamByName('cbenef').Value                        := ifThen(pCFOPModel.CBENEF                        = '', Unassigned, pCFOPModel.CBENEF);
+  pQry.ParamByName('predbc_n14').Value                    := ifThen(pCFOPModel.PREDBC_N14                    = '', Unassigned, pCFOPModel.PREDBC_N14);
+  pQry.ParamByName('cenq').Value                          := ifThen(pCFOPModel.CENQ                          = '', Unassigned, pCFOPModel.CENQ);
+  pQry.ParamByName('pcred_presumido').Value               := ifThen(pCFOPModel.PCRED_PRESUMIDO               = '', Unassigned, pCFOPModel.PCRED_PRESUMIDO);
+  pQry.ParamByName('desconto_sobre_icms').Value           := ifThen(pCFOPModel.DESCONTO_SOBRE_ICMS           = '', Unassigned, pCFOPModel.DESCONTO_SOBRE_ICMS);
+  pQry.ParamByName('desconto_icms_base_pis_cofins').Value := ifThen(pCFOPModel.DESCONTO_ICMS_BASE_PIS_COFINS = '', Unassigned, pCFOPModel.DESCONTO_ICMS_BASE_PIS_COFINS);
+  pQry.ParamByName('outras_despesas_entrada').Value       := ifThen(pCFOPModel.OUTRAS_DESPESAS_ENTRADA       = '', Unassigned, pCFOPModel.OUTRAS_DESPESAS_ENTRADA);
 
 end;
 

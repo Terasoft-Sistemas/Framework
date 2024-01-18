@@ -4,19 +4,20 @@ interface
 
 uses
   ContasReceberModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
+  Terasoft.ConstrutorDao,
   Interfaces.Conexao;
 
 type
   TContasReceberDao = class
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
 
     FContasRecebersLista: TObjectList<TContasReceberModel>;
     FLengthPageView: String;
@@ -37,7 +38,6 @@ type
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-    function montaCondicaoQuery: String;
     procedure SetIDPedidoView(const Value: String);
     procedure SetIDRecordView(const Value: String);
 
@@ -62,9 +62,10 @@ type
 
     procedure obterLista;
     procedure obterContasReceberPedido;
-
-    function carregaClasse(pFatura: String): TContasReceberModel;
     procedure setParams(var pQry: TFDQuery; pContasReceberModel: TContasReceberModel);
+
+    function where: String;
+    function carregaClasse(pFatura: String): TContasReceberModel;
     function pedidoContasReceber(pFatura: String): String;
 
 end;
@@ -141,6 +142,7 @@ end;
 constructor TContasReceberDao.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TContasReceberDao.Destroy;
@@ -154,83 +156,12 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL :=         '   insert into contasreceber (fatura_rec,          '+SLineBreak+
-                  '                              codigo_cli,          '+SLineBreak+
-                  '                              codigo_cta,          '+SLineBreak+
-                  '                              dataemi_rec,         '+SLineBreak+
-                  '                              valor_rec,           '+SLineBreak+
-                  '                              obs_rec,             '+SLineBreak+
-                  '                              situacao_rec,        '+SLineBreak+
-                  '                              usuario_rec,         '+SLineBreak+
-                  '                              vendedor_rec,        '+SLineBreak+
-                  '                              tipo_rec,            '+SLineBreak+
-                  '                              os_rec,              '+SLineBreak+
-                  '                              pedido_rec,          '+SLineBreak+
-                  '                              codigo_por,          '+SLineBreak+
-                  '                              loja,                '+SLineBreak+
-                  '                              centercob,           '+SLineBreak+
-                  '                              avalista,            '+SLineBreak+
-                  '                              data_agendamento,    '+SLineBreak+
-                  '                              indice_juros_id,     '+SLineBreak+
-                  '                              juros_fixo,          '+SLineBreak+
-                  '                              primeiro_venc,       '+SLineBreak+
-                  '                              ultimo_dia_mes,      '+SLineBreak+
-                  '                              condicoes_pag,       '+SLineBreak+
-                  '                              sub_id,              '+SLineBreak+
-                  '                              locacao_id,          '+SLineBreak+
-                  '                              centro_custo,        '+SLineBreak+
-                  '                              obs_complementar,    '+SLineBreak+
-                  '                              ficha_id,            '+SLineBreak+
-                  '                              funcionario_id,      '+SLineBreak+
-                  '                              contrato,            '+SLineBreak+
-                  '                              conferido,           '+SLineBreak+
-                  '                              local_baixa,         '+SLineBreak+
-                  '                              saida_rec,           '+SLineBreak+
-                  '                              codigo_anterior,     '+SLineBreak+
-                  '                              desenvolvimento_id,  '+SLineBreak+
-                  '                              pedido_site,         '+SLineBreak+
-                  '                              acrescimo)           '+SLineBreak+
-                  '   values (:fatura_rec,                            '+SLineBreak+
-                  '           :codigo_cli,                            '+SLineBreak+
-                  '           :codigo_cta,                            '+SLineBreak+
-                  '           :dataemi_rec,                           '+SLineBreak+
-                  '           :valor_rec,                             '+SLineBreak+
-                  '           :obs_rec,                               '+SLineBreak+
-                  '           :situacao_rec,                          '+SLineBreak+
-                  '           :usuario_rec,                           '+SLineBreak+
-                  '           :vendedor_rec,                          '+SLineBreak+
-                  '           :tipo_rec,                              '+SLineBreak+
-                  '           :os_rec,                                '+SLineBreak+
-                  '           :pedido_rec,                            '+SLineBreak+
-                  '           :codigo_por,                            '+SLineBreak+
-                  '           :loja,                                  '+SLineBreak+
-                  '           :centercob,                             '+SLineBreak+
-                  '           :avalista,                              '+SLineBreak+
-                  '           :data_agendamento,                      '+SLineBreak+
-                  '           :indice_juros_id,                       '+SLineBreak+
-                  '           :juros_fixo,                            '+SLineBreak+
-                  '           :primeiro_venc,                         '+SLineBreak+
-                  '           :ultimo_dia_mes,                        '+SLineBreak+
-                  '           :condicoes_pag,                         '+SLineBreak+
-                  '           :sub_id,                                '+SLineBreak+
-                  '           :locacao_id,                            '+SLineBreak+
-                  '           :centro_custo,                          '+SLineBreak+
-                  '           :obs_complementar,                      '+SLineBreak+
-                  '           :ficha_id,                              '+SLineBreak+
-                  '           :funcionario_id,                        '+SLineBreak+
-                  '           :contrato,                              '+SLineBreak+
-                  '           :conferido,                             '+SLineBreak+
-                  '           :local_baixa,                           '+SLineBreak+
-                  '           :saida_rec,                             '+SLineBreak+
-                  '           :codigo_anterior,                       '+SLineBreak+
-                  '           :desenvolvimento_id,                    '+SLineBreak+
-                  '           :pedido_site,                           '+SLineBreak+
-                  '           :acrescimo)                             '+SLineBreak+
-                  ' returning FATURA_REC                              '+SLineBreak;
+  lSQL := vConstrutor.gerarInsert('CONTASRECEBER','FATURA_REC', True);
+
   try
 
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('fatura_rec').Value := vIConexao.Generetor('GEN_CRECEBER');
+    lQry.ParamByName('FATURA_REC').Value := vIConexao.Generetor('GEN_CRECEBER');
     setParams(lQry, AContasReceberModel);
     lQry.Open;
 
@@ -247,46 +178,10 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL :=  '   update contasreceber                              '+SLineBreak+
-           '      set codigo_cli = :codigo_cli,                  '+SLineBreak+
-           '          codigo_cta = :codigo_cta,                  '+SLineBreak+
-           '          dataemi_rec = :dataemi_rec,                '+SLineBreak+
-           '          valor_rec = :valor_rec,                    '+SLineBreak+
-           '          obs_rec = :obs_rec,                        '+SLineBreak+
-           '          situacao_rec = :situacao_rec,              '+SLineBreak+
-           '          usuario_rec = :usuario_rec,                '+SLineBreak+
-           '          vendedor_rec = :vendedor_rec,              '+SLineBreak+
-           '          tipo_rec = :tipo_rec,                      '+SLineBreak+
-           '          os_rec = :os_rec,                          '+SLineBreak+
-           '          pedido_rec = :pedido_rec,                  '+SLineBreak+
-           '          codigo_por = :codigo_por,                  '+SLineBreak+
-           '          loja = :loja,                              '+SLineBreak+
-           '          centercob = :centercob,                    '+SLineBreak+
-           '          avalista = :avalista,                      '+SLineBreak+
-           '          data_agendamento = :data_agendamento,      '+SLineBreak+
-           '          indice_juros_id = :indice_juros_id,        '+SLineBreak+
-           '          juros_fixo = :juros_fixo,                  '+SLineBreak+
-           '          primeiro_venc = :primeiro_venc,            '+SLineBreak+
-           '          ultimo_dia_mes = :ultimo_dia_mes,          '+SLineBreak+
-           '          condicoes_pag = :condicoes_pag,            '+SLineBreak+
-           '          sub_id = :sub_id,                          '+SLineBreak+
-           '          locacao_id = :locacao_id,                  '+SLineBreak+
-           '          centro_custo = :centro_custo,              '+SLineBreak+
-           '          obs_complementar = :obs_complementar,      '+SLineBreak+
-           '          ficha_id = :ficha_id,                      '+SLineBreak+
-           '          funcionario_id = :funcionario_id,          '+SLineBreak+
-           '          contrato = :contrato,                      '+SLineBreak+
-           '          conferido = :conferido,                    '+SLineBreak+
-           '          local_baixa = :local_baixa,                '+SLineBreak+
-           '          saida_rec = :saida_rec,                    '+SLineBreak+
-           '          codigo_anterior = :codigo_anterior,        '+SLineBreak+
-           '          desenvolvimento_id = :desenvolvimento_id,  '+SLineBreak+
-           '          pedido_site = :pedido_site,                '+SLineBreak+
-           '          acrescimo = :acrescimo                     '+SLineBreak+
-           '    where (fatura_rec = :fatura_rec) ';
+  lSQL := vConstrutor.gerarUpdate('CONTASRECEBER','FATURA_REC');
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('fatura_rec').Value  := IIF(AContasReceberModel.FATURA_REC   = '', Unassigned, AContasReceberModel.FATURA_REC);
+    lQry.ParamByName('fatura_rec').Value  := ifThen(AContasReceberModel.FATURA_REC   = '', Unassigned, AContasReceberModel.FATURA_REC);
     setParams(lQry, AContasReceberModel);
     lQry.ExecSQL;
     Result := AContasReceberModel.FATURA_REC;
@@ -309,7 +204,7 @@ begin
     lQry.Free;
   end;
 end;
-function TContasReceberDao.montaCondicaoQuery: String;
+function TContasReceberDao.where: String;
 var
   lSQL : String;
 begin
@@ -335,7 +230,7 @@ begin
             '  inner join portador on contasreceber.codigo_por = portador.codigo_port '+
             '  where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
     lQry.Open(lSQL);
 
     FTotalRecords := lQry.FieldByName('records').AsInteger;
@@ -360,7 +255,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   if FIDPedidoView = '' then
-    CriaException('ID do pedido não informado');
+  Abort;
 
   FContasRecebersLista := TObjectList<TContasReceberModel>.Create;
   try
@@ -419,7 +314,7 @@ begin
 	    '  from contasreceber                                                       '+
       ' inner join portador on contasreceber.codigo_por = portador.codigo_port    '+
       ' where 1=1                ';
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
     lQry.Open(lSQL);
@@ -504,41 +399,41 @@ begin
 end;
 procedure TContasReceberDao.setParams(var pQry: TFDQuery; pContasReceberModel: TContasReceberModel);
 begin
-  pQry.ParamByName('codigo_cli').Value            := IIF(pContasReceberModel.CODIGO_CLI          = '', Unassigned, pContasReceberModel.CODIGO_CLI);
-  pQry.ParamByName('codigo_cta').Value            := IIF(pContasReceberModel.CODIGO_CTA          = '', Unassigned, pContasReceberModel.CODIGO_CTA);
-  pQry.ParamByName('dataemi_rec').Value           := IIF(pContasReceberModel.DATAEMI_REC         = '', Unassigned, transformaDataFireBird(pContasReceberModel.DATAEMI_REC));
-  pQry.ParamByName('valor_rec').Value             := IIF(pContasReceberModel.VALOR_REC           = '', Unassigned, FormataFloatFireBird(pContasReceberModel.VALOR_REC));
-  pQry.ParamByName('obs_rec').Value               := IIF(pContasReceberModel.OBS_REC             = '', Unassigned, pContasReceberModel.OBS_REC);
-  pQry.ParamByName('situacao_rec').Value          := IIF(pContasReceberModel.SITUACAO_REC        = '', Unassigned, pContasReceberModel.SITUACAO_REC);
-  pQry.ParamByName('usuario_rec').Value           := IIF(pContasReceberModel.USUARIO_REC         = '', Unassigned, pContasReceberModel.USUARIO_REC);
-  pQry.ParamByName('vendedor_rec').Value          := IIF(pContasReceberModel.VENDEDOR_REC        = '', Unassigned, pContasReceberModel.VENDEDOR_REC);
-  pQry.ParamByName('tipo_rec').Value              := IIF(pContasReceberModel.TIPO_REC            = '', Unassigned, pContasReceberModel.TIPO_REC);
-  pQry.ParamByName('os_rec').Value                := IIF(pContasReceberModel.OS_REC              = '', Unassigned, pContasReceberModel.OS_REC);
-  pQry.ParamByName('pedido_rec').Value            := IIF(pContasReceberModel.PEDIDO_REC          = '', Unassigned, pContasReceberModel.PEDIDO_REC);
-  pQry.ParamByName('codigo_por').Value            := IIF(pContasReceberModel.CODIGO_POR          = '', Unassigned, pContasReceberModel.CODIGO_POR);
-  pQry.ParamByName('loja').Value                  := IIF(pContasReceberModel.LOJA                = '', Unassigned, pContasReceberModel.LOJA);
-  pQry.ParamByName('centercob').Value             := IIF(pContasReceberModel.CENTERCOB           = '', Unassigned, pContasReceberModel.CENTERCOB);
-  pQry.ParamByName('avalista').Value              := IIF(pContasReceberModel.AVALISTA            = '', Unassigned, pContasReceberModel.AVALISTA);
-  pQry.ParamByName('data_agendamento').Value      := IIF(pContasReceberModel.DATA_AGENDAMENTO    = '', Unassigned, transformaDataFireBird(pContasReceberModel.DATA_AGENDAMENTO));
-  pQry.ParamByName('indice_juros_id').Value       := IIF(pContasReceberModel.INDICE_JUROS_ID     = '', Unassigned, pContasReceberModel.INDICE_JUROS_ID);
-  pQry.ParamByName('juros_fixo').Value            := IIF(pContasReceberModel.JUROS_FIXO          = '', Unassigned, FormataFloatFireBird(pContasReceberModel.JUROS_FIXO));
-  pQry.ParamByName('primeiro_venc').Value         := IIF(pContasReceberModel.PRIMEIRO_VENC       = '', Unassigned, transformaDataFireBird(pContasReceberModel.PRIMEIRO_VENC));
-  pQry.ParamByName('ultimo_dia_mes').Value        := IIF(pContasReceberModel.ULTIMO_DIA_MES      = '', Unassigned, pContasReceberModel.ULTIMO_DIA_MES);
-  pQry.ParamByName('condicoes_pag').Value         := IIF(pContasReceberModel.CONDICOES_PAG       = '', Unassigned, pContasReceberModel.CONDICOES_PAG);
-  pQry.ParamByName('sub_id').Value                := IIF(pContasReceberModel.SUB_ID              = '', Unassigned, pContasReceberModel.SUB_ID);
-  pQry.ParamByName('locacao_id').Value            := IIF(pContasReceberModel.LOCACAO_ID          = '', Unassigned, pContasReceberModel.LOCACAO_ID);
-  pQry.ParamByName('centro_custo').Value          := IIF(pContasReceberModel.CENTRO_CUSTO        = '', Unassigned, pContasReceberModel.CENTRO_CUSTO);
-  pQry.ParamByName('obs_complementar').Value      := IIF(pContasReceberModel.OBS_COMPLEMENTAR    = '', Unassigned, pContasReceberModel.OBS_COMPLEMENTAR);
-  pQry.ParamByName('ficha_id').Value              := IIF(pContasReceberModel.FICHA_ID            = '', Unassigned, pContasReceberModel.FICHA_ID);
-  pQry.ParamByName('funcionario_id').Value        := IIF(pContasReceberModel.FUNCIONARIO_ID      = '', Unassigned, pContasReceberModel.FUNCIONARIO_ID);
-  pQry.ParamByName('contrato').Value              := IIF(pContasReceberModel.CONTRATO            = '', Unassigned, pContasReceberModel.CONTRATO);
-  pQry.ParamByName('conferido').Value             := IIF(pContasReceberModel.CONFERIDO           = '', Unassigned, pContasReceberModel.CONFERIDO);
-  pQry.ParamByName('local_baixa').Value           := IIF(pContasReceberModel.LOCAL_BAIXA         = '', Unassigned, pContasReceberModel.LOCAL_BAIXA);
-  pQry.ParamByName('saida_rec').Value             := IIF(pContasReceberModel.SAIDA_REC           = '', Unassigned, pContasReceberModel.SAIDA_REC);
-  pQry.ParamByName('codigo_anterior').Value       := IIF(pContasReceberModel.CODIGO_ANTERIOR     = '', Unassigned, pContasReceberModel.CODIGO_ANTERIOR);
-  pQry.ParamByName('desenvolvimento_id').Value    := IIF(pContasReceberModel.DESENVOLVIMENTO_ID  = '', Unassigned, pContasReceberModel.DESENVOLVIMENTO_ID);
-  pQry.ParamByName('pedido_site').Value           := IIF(pContasReceberModel.PEDIDO_SITE         = '', Unassigned, pContasReceberModel.PEDIDO_SITE);
-  pQry.ParamByName('acrescimo').Value             := IIF(pContasReceberModel.ACRESCIMO           = '', Unassigned, FormataFloatFireBird(pContasReceberModel.ACRESCIMO));
+  pQry.ParamByName('codigo_cli').Value            := ifThen(pContasReceberModel.CODIGO_CLI          = '', Unassigned, pContasReceberModel.CODIGO_CLI);
+  pQry.ParamByName('codigo_cta').Value            := ifThen(pContasReceberModel.CODIGO_CTA          = '', Unassigned, pContasReceberModel.CODIGO_CTA);
+  pQry.ParamByName('dataemi_rec').Value           := ifThen(pContasReceberModel.DATAEMI_REC         = '', Unassigned, transformaDataFireBird(pContasReceberModel.DATAEMI_REC));
+  pQry.ParamByName('valor_rec').Value             := ifThen(pContasReceberModel.VALOR_REC           = '', Unassigned, FormataFloatFireBird(pContasReceberModel.VALOR_REC));
+  pQry.ParamByName('obs_rec').Value               := ifThen(pContasReceberModel.OBS_REC             = '', Unassigned, pContasReceberModel.OBS_REC);
+  pQry.ParamByName('situacao_rec').Value          := ifThen(pContasReceberModel.SITUACAO_REC        = '', Unassigned, pContasReceberModel.SITUACAO_REC);
+  pQry.ParamByName('usuario_rec').Value           := ifThen(pContasReceberModel.USUARIO_REC         = '', Unassigned, pContasReceberModel.USUARIO_REC);
+  pQry.ParamByName('vendedor_rec').Value          := ifThen(pContasReceberModel.VENDEDOR_REC        = '', Unassigned, pContasReceberModel.VENDEDOR_REC);
+  pQry.ParamByName('tipo_rec').Value              := ifThen(pContasReceberModel.TIPO_REC            = '', Unassigned, pContasReceberModel.TIPO_REC);
+  pQry.ParamByName('os_rec').Value                := ifThen(pContasReceberModel.OS_REC              = '', Unassigned, pContasReceberModel.OS_REC);
+  pQry.ParamByName('pedido_rec').Value            := ifThen(pContasReceberModel.PEDIDO_REC          = '', Unassigned, pContasReceberModel.PEDIDO_REC);
+  pQry.ParamByName('codigo_por').Value            := ifThen(pContasReceberModel.CODIGO_POR          = '', Unassigned, pContasReceberModel.CODIGO_POR);
+  pQry.ParamByName('loja').Value                  := ifThen(pContasReceberModel.LOJA                = '', Unassigned, pContasReceberModel.LOJA);
+  pQry.ParamByName('centercob').Value             := ifThen(pContasReceberModel.CENTERCOB           = '', Unassigned, pContasReceberModel.CENTERCOB);
+  pQry.ParamByName('avalista').Value              := ifThen(pContasReceberModel.AVALISTA            = '', Unassigned, pContasReceberModel.AVALISTA);
+  pQry.ParamByName('data_agendamento').Value      := ifThen(pContasReceberModel.DATA_AGENDAMENTO    = '', Unassigned, transformaDataFireBird(pContasReceberModel.DATA_AGENDAMENTO));
+  pQry.ParamByName('indice_juros_id').Value       := ifThen(pContasReceberModel.INDICE_JUROS_ID     = '', Unassigned, pContasReceberModel.INDICE_JUROS_ID);
+  pQry.ParamByName('juros_fixo').Value            := ifThen(pContasReceberModel.JUROS_FIXO          = '', Unassigned, FormataFloatFireBird(pContasReceberModel.JUROS_FIXO));
+  pQry.ParamByName('primeiro_venc').Value         := ifThen(pContasReceberModel.PRIMEIRO_VENC       = '', Unassigned, transformaDataFireBird(pContasReceberModel.PRIMEIRO_VENC));
+  pQry.ParamByName('ultimo_dia_mes').Value        := ifThen(pContasReceberModel.ULTIMO_DIA_MES      = '', Unassigned, pContasReceberModel.ULTIMO_DIA_MES);
+  pQry.ParamByName('condicoes_pag').Value         := ifThen(pContasReceberModel.CONDICOES_PAG       = '', Unassigned, pContasReceberModel.CONDICOES_PAG);
+  pQry.ParamByName('sub_id').Value                := ifThen(pContasReceberModel.SUB_ID              = '', Unassigned, pContasReceberModel.SUB_ID);
+  pQry.ParamByName('locacao_id').Value            := ifThen(pContasReceberModel.LOCACAO_ID          = '', Unassigned, pContasReceberModel.LOCACAO_ID);
+  pQry.ParamByName('centro_custo').Value          := ifThen(pContasReceberModel.CENTRO_CUSTO        = '', Unassigned, pContasReceberModel.CENTRO_CUSTO);
+  pQry.ParamByName('obs_complementar').Value      := ifThen(pContasReceberModel.OBS_COMPLEMENTAR    = '', Unassigned, pContasReceberModel.OBS_COMPLEMENTAR);
+  pQry.ParamByName('ficha_id').Value              := ifThen(pContasReceberModel.FICHA_ID            = '', Unassigned, pContasReceberModel.FICHA_ID);
+  pQry.ParamByName('funcionario_id').Value        := ifThen(pContasReceberModel.FUNCIONARIO_ID      = '', Unassigned, pContasReceberModel.FUNCIONARIO_ID);
+  pQry.ParamByName('contrato').Value              := ifThen(pContasReceberModel.CONTRATO            = '', Unassigned, pContasReceberModel.CONTRATO);
+  pQry.ParamByName('conferido').Value             := ifThen(pContasReceberModel.CONFERIDO           = '', Unassigned, pContasReceberModel.CONFERIDO);
+  pQry.ParamByName('local_baixa').Value           := ifThen(pContasReceberModel.LOCAL_BAIXA         = '', Unassigned, pContasReceberModel.LOCAL_BAIXA);
+  pQry.ParamByName('saida_rec').Value             := ifThen(pContasReceberModel.SAIDA_REC           = '', Unassigned, pContasReceberModel.SAIDA_REC);
+  pQry.ParamByName('codigo_anterior').Value       := ifThen(pContasReceberModel.CODIGO_ANTERIOR     = '', Unassigned, pContasReceberModel.CODIGO_ANTERIOR);
+  pQry.ParamByName('desenvolvimento_id').Value    := ifThen(pContasReceberModel.DESENVOLVIMENTO_ID  = '', Unassigned, pContasReceberModel.DESENVOLVIMENTO_ID);
+  pQry.ParamByName('pedido_site').Value           := ifThen(pContasReceberModel.PEDIDO_SITE         = '', Unassigned, pContasReceberModel.PEDIDO_SITE);
+  pQry.ParamByName('acrescimo').Value             := ifThen(pContasReceberModel.ACRESCIMO           = '', Unassigned, FormataFloatFireBird(pContasReceberModel.ACRESCIMO));
 end;
 procedure TContasReceberDao.SetStartRecordView(const Value: String);
 begin

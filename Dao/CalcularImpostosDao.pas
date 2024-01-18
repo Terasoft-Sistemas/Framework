@@ -4,12 +4,12 @@ interface
 
 uses
   CalcularImpostosModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
+  Terasoft.ConstrutorDao,
   Interfaces.Conexao;
 
 type
@@ -17,6 +17,8 @@ type
 
   private
     vIConexao : IConexao;
+    vConstrutor : TConstrutorDao;
+
     FDESTINATARIO_UF: String;
     FCODIGO_CLIENTE: String;
     FEMITENTE_UF: String;
@@ -50,6 +52,7 @@ implementation
 constructor TCalcularImpostosDao.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TCalcularImpostosDao.Destroy;
@@ -162,12 +165,12 @@ begin
 
     lQry.Open(lSQL);
 
-    lCalcularImpostosModel.PIS_CST         := IIF(lQry.FieldByName('cfop_cst_pis').AsString         <> '', lQry.FieldByName('cfop_cst_pis').Value,         lCalcularImpostosModel.PIS_CST);
-    lCalcularImpostosModel.PIS_ALIQUOTA    := IIF(lQry.FieldByName('cfop_pis_aliquota').AsFloat     > 0 , lQry.FieldByName('cfop_pis_aliquota').Value,    lCalcularImpostosModel.PIS_ALIQUOTA);
-    lCalcularImpostosModel.COFINS_CST      := IIF(lQry.FieldByName('cfop_cst_cofins').AsString      <> '', lQry.FieldByName('cfop_cst_cofins').Value,      lCalcularImpostosModel.COFINS_CST);
-    lCalcularImpostosModel.COFINS_ALIQUOTA := IIF(lQry.FieldByName('cfop_cofins_aliquota').AsFloat  > 0 , lQry.FieldByName('cfop_cofins_aliquota').Value, lCalcularImpostosModel.COFINS_ALIQUOTA);
-    lCalcularImpostosModel.IPI_CST         := IIF(lQry.FieldByName('cfop_cst_ipi').AsString         <> '', lQry.FieldByName('cfop_cst_ipi').Value,         lCalcularImpostosModel.IPI_CST);
-    lCalcularImpostosModel.IPI_ALIQUOTA    := IIF(lQry.FieldByName('cfop_ipi_aliquota').AsFloat     > 0 , lQry.FieldByName('cfop_ipi_aliquota').Value,    lCalcularImpostosModel.IPI_ALIQUOTA);
+    lCalcularImpostosModel.PIS_CST         := ifThen(lQry.FieldByName('cfop_cst_pis').AsString         <> '', lQry.FieldByName('cfop_cst_pis').Value,         lCalcularImpostosModel.PIS_CST);
+    lCalcularImpostosModel.PIS_ALIQUOTA    := ifThen(lQry.FieldByName('cfop_pis_aliquota').AsFloat     > 0 , lQry.FieldByName('cfop_pis_aliquota').Value,    lCalcularImpostosModel.PIS_ALIQUOTA);
+    lCalcularImpostosModel.COFINS_CST      := ifThen(lQry.FieldByName('cfop_cst_cofins').AsString      <> '', lQry.FieldByName('cfop_cst_cofins').Value,      lCalcularImpostosModel.COFINS_CST);
+    lCalcularImpostosModel.COFINS_ALIQUOTA := ifThen(lQry.FieldByName('cfop_cofins_aliquota').AsFloat  > 0 , lQry.FieldByName('cfop_cofins_aliquota').Value, lCalcularImpostosModel.COFINS_ALIQUOTA);
+    lCalcularImpostosModel.IPI_CST         := ifThen(lQry.FieldByName('cfop_cst_ipi').AsString         <> '', lQry.FieldByName('cfop_cst_ipi').Value,         lCalcularImpostosModel.IPI_CST);
+    lCalcularImpostosModel.IPI_ALIQUOTA    := ifThen(lQry.FieldByName('cfop_ipi_aliquota').AsFloat     > 0 , lQry.FieldByName('cfop_ipi_aliquota').Value,    lCalcularImpostosModel.IPI_ALIQUOTA);
 
     Result := lCalcularImpostosModel;
 

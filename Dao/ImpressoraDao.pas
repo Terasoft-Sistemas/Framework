@@ -4,19 +4,21 @@ interface
 
 uses
   ImpressoraModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
+  Terasoft.ConstrutorDao,
   Interfaces.Conexao;
 
 type
   TImpressoraDao = class
 
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
+
     FImpressorasLista: TObjectList<TImpressoraModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -37,7 +39,7 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
 
-    function montaCondicaoQuery: String;
+    function where: String;
     procedure setParams(var pQry: TFDQuery; pImpressoraModel: TImpressoraModel);
 
   public
@@ -57,9 +59,9 @@ type
     function incluir(AImpressoraModel: TImpressoraModel): String;
     function alterar(AImpressoraModel: TImpressoraModel): String;
     function excluir(AImpressoraModel: TImpressoraModel): String;
-	
+	  function carregaClasse(pId: Integer): TImpressoraModel;
+
     procedure obterLista;
-    function carregaClasse(pId: Integer): TImpressoraModel;
 
 end;
 
@@ -77,7 +79,7 @@ begin
   Result   := lModel;
 
   try
-    lQry.Open('select * from impressora where id = '+pId.ToString);
+    lQry.Open('select * from IMPRESSORA where ID = '+pId.ToString);
 
     if lQry.IsEmpty then
       Exit;
@@ -121,37 +123,11 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := '    insert into impressora (id,                 '+SLineBreak+
-          '                            nome,               '+SLineBreak+
-          '                            caminho,            '+SLineBreak+
-          '                            vias,               '+SLineBreak+
-          '                            direta,             '+SLineBreak+
-          '                            lista_impressao,    '+SLineBreak+
-          '                            corte,              '+SLineBreak+
-          '                            cabecalho,          '+SLineBreak+
-          '                            corpo,              '+SLineBreak+
-          '                            rodape,             '+SLineBreak+
-          '                            porta,              '+SLineBreak+
-          '                            modelo,             '+SLineBreak+
-          '                            recibo)             '+SLineBreak+
-          '    values (:id,                                '+SLineBreak+
-          '            :nome,                              '+SLineBreak+
-          '            :caminho,                           '+SLineBreak+
-          '            :vias,                              '+SLineBreak+
-          '            :direta,                            '+SLineBreak+
-          '            :lista_impressao,                   '+SLineBreak+
-          '            :corte,                             '+SLineBreak+
-          '            :cabecalho,                         '+SLineBreak+
-          '            :corpo,                             '+SLineBreak+
-          '            :rodape,                            '+SLineBreak+
-          '            :porta,                             '+SLineBreak+
-          '            :modelo,                            '+SLineBreak+
-          '            :recibo)                            '+SLineBreak+
-          ' returning ID                                   '+SLineBreak;
+  lSQL := vConstrutor.gerarInsert('IMPRESSORA','ID');
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := vIConexao.Generetor('GEN_IMPRESSORA');
+    lQry.ParamByName('ID').Value := vIConexao.Generetor('GEN_IMPRESSORA');
     setParams(lQry, AImpressoraModel);
     lQry.Open;
 
@@ -170,24 +146,11 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL :=  '  update impressora                            '+SLineBreak+
-           '     set nome = :nome,                         '+SLineBreak+
-           '         caminho = :caminho,                   '+SLineBreak+
-           '         vias = :vias,                         '+SLineBreak+
-           '         direta = :direta,                     '+SLineBreak+
-           '         lista_impressao = :lista_impressao,   '+SLineBreak+
-           '         corte = :corte,                       '+SLineBreak+
-           '         cabecalho = :cabecalho,               '+SLineBreak+
-           '         corpo = :corpo,                       '+SLineBreak+
-           '         rodape = :rodape,                     '+SLineBreak+
-           '         porta = :porta,                       '+SLineBreak+
-           '         modelo = :modelo,                     '+SLineBreak+
-           '         recibo = :recibo                      '+SLineBreak+
-           '   where (id = :id)                            '+SLineBreak;
+  lSQL :=  vConstrutor.gerarUpdate('IMPRESSORA','ID');
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value   := IIF(AImpressoraModel.ID   = '', Unassigned, AImpressoraModel.ID);
+    lQry.ParamByName('ID').Value   := ifThen(AImpressoraModel.ID   = '', Unassigned, AImpressoraModel.ID);
     setParams(lQry, AImpressoraModel);
     lQry.ExecSQL;
 
@@ -206,7 +169,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from impressora where ID = :ID',[AImpressoraModel.ID]);
+   lQry.ExecSQL('delete from IMPRESSORA where ID = :ID',[AImpressoraModel.ID]);
    lQry.ExecSQL;
    Result := AImpressoraModel.ID;
 
@@ -215,7 +178,7 @@ begin
   end;
 end;
 
-function TImpressoraDao.montaCondicaoQuery: String;
+function TImpressoraDao.where: String;
 var
   lSQL : String;
 begin
@@ -225,7 +188,7 @@ begin
     lSQL := lSQL + FWhereView;
 
   if FIDRecordView <> 0  then
-    lSQL := lSQL + ' and impressora.id = '+IntToStr(FIDRecordView);
+    lSQL := lSQL + ' and IMPRESSORA.ID = '+IntToStr(FIDRecordView);
 
   Result := lSQL;
 end;
@@ -238,9 +201,9 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From impressora where 1=1 ';
+    lSql := 'select count(*) records From IMPRESSORA where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -272,7 +235,7 @@ begin
 	    '   from impressora              '+
       '  where 1=1                     ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -343,18 +306,18 @@ end;
 
 procedure TImpressoraDao.setParams(var pQry: TFDQuery; pImpressoraModel: TImpressoraModel);
 begin
-  pQry.ParamByName('nome').Value            := IIF(pImpressoraModel.NOME            = '', Unassigned, pImpressoraModel.NOME);
-  pQry.ParamByName('caminho').Value         := IIF(pImpressoraModel.CAMINHO         = '', Unassigned, pImpressoraModel.CAMINHO);
-  pQry.ParamByName('vias').Value            := IIF(pImpressoraModel.VIAS            = '', Unassigned, pImpressoraModel.VIAS);
-  pQry.ParamByName('direta').Value          := IIF(pImpressoraModel.DIRETA          = '', Unassigned, pImpressoraModel.DIRETA);
-  pQry.ParamByName('lista_impressao').Value := IIF(pImpressoraModel.LISTA_IMPRESSAO = '', Unassigned, pImpressoraModel.LISTA_IMPRESSAO);
-  pQry.ParamByName('corte').Value           := IIF(pImpressoraModel.CORTE           = '', Unassigned, pImpressoraModel.CORTE);
-  pQry.ParamByName('cabecalho').Value       := IIF(pImpressoraModel.CABECALHO       = '', Unassigned, pImpressoraModel.CABECALHO);
-  pQry.ParamByName('corpo').Value           := IIF(pImpressoraModel.CORPO           = '', Unassigned, pImpressoraModel.CORPO);
-  pQry.ParamByName('rodape').Value          := IIF(pImpressoraModel.RODAPE          = '', Unassigned, pImpressoraModel.RODAPE);
-  pQry.ParamByName('porta').Value           := IIF(pImpressoraModel.PORTA           = '', Unassigned, pImpressoraModel.PORTA);
-  pQry.ParamByName('modelo').Value          := IIF(pImpressoraModel.MODELO          = '', Unassigned, pImpressoraModel.MODELO);
-  pQry.ParamByName('recibo').Value          := IIF(pImpressoraModel.RECIBO          = '', Unassigned, pImpressoraModel.RECIBO);
+  pQry.ParamByName('nome').Value            := ifThen(pImpressoraModel.NOME            = '', Unassigned, pImpressoraModel.NOME);
+  pQry.ParamByName('caminho').Value         := ifThen(pImpressoraModel.CAMINHO         = '', Unassigned, pImpressoraModel.CAMINHO);
+  pQry.ParamByName('vias').Value            := ifThen(pImpressoraModel.VIAS            = '', Unassigned, pImpressoraModel.VIAS);
+  pQry.ParamByName('direta').Value          := ifThen(pImpressoraModel.DIRETA          = '', Unassigned, pImpressoraModel.DIRETA);
+  pQry.ParamByName('lista_impressao').Value := ifThen(pImpressoraModel.LISTA_IMPRESSAO = '', Unassigned, pImpressoraModel.LISTA_IMPRESSAO);
+  pQry.ParamByName('corte').Value           := ifThen(pImpressoraModel.CORTE           = '', Unassigned, pImpressoraModel.CORTE);
+  pQry.ParamByName('cabecalho').Value       := ifThen(pImpressoraModel.CABECALHO       = '', Unassigned, pImpressoraModel.CABECALHO);
+  pQry.ParamByName('corpo').Value           := ifThen(pImpressoraModel.CORPO           = '', Unassigned, pImpressoraModel.CORPO);
+  pQry.ParamByName('rodape').Value          := ifThen(pImpressoraModel.RODAPE          = '', Unassigned, pImpressoraModel.RODAPE);
+  pQry.ParamByName('porta').Value           := ifThen(pImpressoraModel.PORTA           = '', Unassigned, pImpressoraModel.PORTA);
+  pQry.ParamByName('modelo').Value          := ifThen(pImpressoraModel.MODELO          = '', Unassigned, pImpressoraModel.MODELO);
+  pQry.ParamByName('recibo').Value          := ifThen(pImpressoraModel.RECIBO          = '', Unassigned, pImpressoraModel.RECIBO);
 
 end;
 

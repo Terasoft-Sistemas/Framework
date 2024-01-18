@@ -18,7 +18,7 @@ type
 
   private
     vIConexao  : IConexao;
-    vContrutor : TConstrutorDao;
+    vConstrutor : TConstrutorDao;
 
     FAdmCartaosLista: TObjectList<TAdmCartaoModel>;
     FLengthPageView: String;
@@ -112,7 +112,7 @@ end;
 constructor TAdmCartaoDao.Create(pIConexao: IConexao);
 begin
   vIConexao  := pIConexao;
-  vContrutor := TConstrutorDao.Create(vIConexao);
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TAdmCartaoDao.Destroy;
@@ -128,11 +128,11 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := vContrutor.gerarInsert('ADMCARTAO', 'ID', true);
+  lSQL := vConstrutor.gerarInsert('ADMCARTAO', 'ID', true);
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := vIConexao.Generetor('GEN_ADMCARTAO');
+    lQry.ParamByName('ID').Value := vIConexao.Generetor('GEN_ADMCARTAO');
     setParams(lQry, AAdmCartaoModel);
     lQry.Open;
 
@@ -151,7 +151,7 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := vContrutor.gerarUpdate('ADMCARTAO', 'ID');
+  lSQL := vConstrutor.gerarUpdate('ADMCARTAO', 'ID');
 
   try
     lQry.SQL.Add(lSQL);

@@ -4,13 +4,12 @@ interface
 
 uses
   ConfiguracoesModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  VariaveisGlobais,
+  Terasoft.ConstrutorDao,
   Interfaces.Conexao;
 
 type
@@ -18,6 +17,8 @@ type
 
   private
     vIConexao : IConexao;
+    vConstrutor : TConstrutorDao;
+
     FConfiguracoessLista: TObjectList<TConfiguracoesModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -38,7 +39,7 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
 
-    function montaCondicaoQuery: String;
+    function where: String;
 
   public
     constructor Create(pIConexao : Iconexao);
@@ -69,7 +70,8 @@ implementation
 
 constructor TConfiguracoesDao.Create(pIConexao : IConexao);
 begin
-  vIConexao := pIConexao;
+  vIConexao   := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TConfiguracoesDao.Destroy;
@@ -87,29 +89,7 @@ begin
 
   lQry := vIConexao.CriarQuery;
 
-  lSQL := '   insert into configuracoes (tag,                '+SLineBreak+
-          '                              fid,                '+SLineBreak+
-          '                              perfil_id,          '+SLineBreak+
-          '                              valorinteiro,       '+SLineBreak+
-          '                              valorstring,        '+SLineBreak+
-          '                              valormemo,          '+SLineBreak+
-          '                              valornumerico,      '+SLineBreak+
-          '                              valorchar,          '+SLineBreak+
-          '                              valordata,          '+SLineBreak+
-          '                              valorhora,          '+SLineBreak+
-          '                              valordatahora)      '+SLineBreak+
-          '   values (:tag,                                  '+SLineBreak+
-          '           :fid,                                  '+SLineBreak+
-          '           :perfil_id,                            '+SLineBreak+
-          '           :valorinteiro,                         '+SLineBreak+
-          '           :valorstring,                          '+SLineBreak+
-          '           :valormemo,                            '+SLineBreak+
-          '           :valornumerico,                        '+SLineBreak+
-          '           :valorchar,                            '+SLineBreak+
-          '           :valordata,                            '+SLineBreak+
-          '           :valorhora,                            '+SLineBreak+
-          '           :valordatahora)                        '+SLineBreak+
-          ' returning ID                                     '+SLineBreak;
+  lSQL := vConstrutor.gerarInsert('CONFIGURACOES','ID');
 
   try
     lQry.SQL.Add(lSQL);
@@ -132,17 +112,7 @@ begin
 
   lQry := vIConexao.CriarQuery;
 
-  lSQL :=  '    update configuracoes                      '+SLineBreak+
-           '       set perfil_id = :perfil_id,            '+SLineBreak+
-           '           valorinteiro = :valorinteiro,      '+SLineBreak+
-           '           valorstring = :valorstring,        '+SLineBreak+
-           '           valormemo = :valormemo,            '+SLineBreak+
-           '           valornumerico = :valornumerico,    '+SLineBreak+
-           '           valorchar = :valorchar,            '+SLineBreak+
-           '           valordata = :valordata,            '+SLineBreak+
-           '           valorhora = :valorhora,            '+SLineBreak+
-           '           valordatahora = :valordatahora     '+SLineBreak+
-           '     where (tag = :tag) and (fid = :fid)      '+SLineBreak;
+  lSQL := vConstrutor.gerarUpdate('CONFIGURACOES','ID');
 
   try
     lQry.SQL.Add(lSQL);
@@ -174,7 +144,7 @@ begin
   end;
 end;
 
-function TConfiguracoesDao.montaCondicaoQuery: String;
+function TConfiguracoesDao.where: String;
 var
   lSQL : String;
 begin
@@ -199,7 +169,7 @@ begin
 
     lSql := 'select count(*) records From configuracoes where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -216,7 +186,7 @@ var
   lSQL:String;
   i : Integer;
 begin
-  lQry := xConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   FConfiguracoessLista := TObjectList<TConfiguracoesModel>.Create;
 
@@ -225,7 +195,7 @@ begin
 	          '   from configuracoes     '+
             '  where 1=1               ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -291,17 +261,17 @@ end;
 
 procedure TConfiguracoesDao.setParams(var pQry: TFDQuery; pConfiguracoesModel: TConfiguracoesModel);
 begin
-  pQry.ParamByName('tag').Value             := IIF(pConfiguracoesModel.TAG             = '', Unassigned, pConfiguracoesModel.TAG);
-  pQry.ParamByName('fid').Value             := IIF(pConfiguracoesModel.F_ID            = '', Unassigned, pConfiguracoesModel.F_ID);
-  pQry.ParamByName('perfil_id').Value       := IIF(pConfiguracoesModel.PERFIL_ID       = '', Unassigned, pConfiguracoesModel.PERFIL_ID);
-  pQry.ParamByName('valorinteiro').Value    := IIF(pConfiguracoesModel.VALORINTEIRO    = '', Unassigned, pConfiguracoesModel.VALORINTEIRO);
-  pQry.ParamByName('valorstring').Value     := IIF(pConfiguracoesModel.VALORSTRING     = '', Unassigned, pConfiguracoesModel.VALORSTRING);
-  pQry.ParamByName('valormemo').Value       := IIF(pConfiguracoesModel.VALORMEMO       = '', Unassigned, pConfiguracoesModel.VALORMEMO);
-  pQry.ParamByName('valornumerico').Value   := IIF(pConfiguracoesModel.VALORNUMERICO   = '', Unassigned, pConfiguracoesModel.VALORNUMERICO);
-  pQry.ParamByName('valorchar').Value       := IIF(pConfiguracoesModel.VALORCHAR       = '', Unassigned, pConfiguracoesModel.VALORCHAR);
-  pQry.ParamByName('valordata').Value       := IIF(pConfiguracoesModel.VALORDATA       = '', Unassigned, pConfiguracoesModel.VALORDATA);
-  pQry.ParamByName('valorhora').Value       := IIF(pConfiguracoesModel.VALORHORA       = '', Unassigned, pConfiguracoesModel.VALORHORA);
-  pQry.ParamByName('valordatahora').Value   := IIF(pConfiguracoesModel.VALORDATAHORA   = '', Unassigned, pConfiguracoesModel.VALORDATAHORA);
+  pQry.ParamByName('tag').Value             := ifThen(pConfiguracoesModel.TAG             = '', Unassigned, pConfiguracoesModel.TAG);
+  pQry.ParamByName('fid').Value             := ifThen(pConfiguracoesModel.F_ID            = '', Unassigned, pConfiguracoesModel.F_ID);
+  pQry.ParamByName('perfil_id').Value       := ifThen(pConfiguracoesModel.PERFIL_ID       = '', Unassigned, pConfiguracoesModel.PERFIL_ID);
+  pQry.ParamByName('valorinteiro').Value    := ifThen(pConfiguracoesModel.VALORINTEIRO    = '', Unassigned, pConfiguracoesModel.VALORINTEIRO);
+  pQry.ParamByName('valorstring').Value     := ifThen(pConfiguracoesModel.VALORSTRING     = '', Unassigned, pConfiguracoesModel.VALORSTRING);
+  pQry.ParamByName('valormemo').Value       := ifThen(pConfiguracoesModel.VALORMEMO       = '', Unassigned, pConfiguracoesModel.VALORMEMO);
+  pQry.ParamByName('valornumerico').Value   := ifThen(pConfiguracoesModel.VALORNUMERICO   = '', Unassigned, pConfiguracoesModel.VALORNUMERICO);
+  pQry.ParamByName('valorchar').Value       := ifThen(pConfiguracoesModel.VALORCHAR       = '', Unassigned, pConfiguracoesModel.VALORCHAR);
+  pQry.ParamByName('valordata').Value       := ifThen(pConfiguracoesModel.VALORDATA       = '', Unassigned, pConfiguracoesModel.VALORDATA);
+  pQry.ParamByName('valorhora').Value       := ifThen(pConfiguracoesModel.VALORHORA       = '', Unassigned, pConfiguracoesModel.VALORHORA);
+  pQry.ParamByName('valordatahora').Value   := ifThen(pConfiguracoesModel.VALORDATAHORA   = '', Unassigned, pConfiguracoesModel.VALORDATAHORA);
 end;
 
 procedure TConfiguracoesDao.SetStartRecordView(const Value: String);

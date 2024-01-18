@@ -4,13 +4,13 @@ interface
 
 uses
   CaixaControleModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
+  Terasoft.ConstrutorDao,
   Interfaces.Conexao;
 
 type
@@ -18,6 +18,7 @@ type
 
   private
     vIConexao : IConexao;
+    vConstrutor : TConstrutorDao;
     FCaixaControlesLista: TObjectList<TCaixaControleModel>;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -37,7 +38,7 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
 
-    function montaCondicaoQuery: String;
+    function where: String;
     procedure SetIDRecordView(const Value: String);
 
   public
@@ -73,6 +74,7 @@ implementation
 constructor TCaixaControleDao.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vConstrutor);
 end;
 
 function TCaixaControleDao.dataFechamento(pIdCaixa, pUsuario: String): String;
@@ -103,31 +105,11 @@ begin
 
   lQry := vIConexao.CriarQuery;
 
-  lSQL := '    insert into caixa_ctr (id,                   '+SLineBreak+
-          '                           data,                 '+SLineBreak+
-          '                           status,               '+SLineBreak+
-          '                           usuario,              '+SLineBreak+
-          '                           hora,                 '+SLineBreak+
-          '                           data_fecha,           '+SLineBreak+
-          '                           contagem_dinheiro,    '+SLineBreak+
-          '                           contagem_credito,     '+SLineBreak+
-          '                           contagem_debito,      '+SLineBreak+
-          '                           justificativa)        '+SLineBreak+
-          '    values (:id,                                 '+SLineBreak+
-          '            :data,                               '+SLineBreak+
-          '            :status,                             '+SLineBreak+
-          '            :usuario,                            '+SLineBreak+
-          '            :hora,                               '+SLineBreak+
-          '            :data_fecha,                         '+SLineBreak+
-          '            :contagem_dinheiro,                  '+SLineBreak+
-          '            :contagem_credito,                   '+SLineBreak+
-          '            :contagem_debito,                    '+SLineBreak+
-          '            :justificativa)                      '+SLineBreak+
-          ' returning ID                                    '+SLineBreak;
+  lSQL := vConstrutor.gerarInsert('CTR_CAIXA','ID', True);
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := StrToInt(vIConexao.Generetor('GEN_CAIXA_CTR')).ToString;
+    lQry.ParamByName('ID').Value := StrToInt(vIConexao.Generetor('GEN_CAIXA_CTR')).ToString;
     setParams(lQry, ACaixaControleModel);
     lQry.Open;
 
@@ -148,21 +130,11 @@ begin
 
   lQry     := vIConexao.CriarQuery;
 
-  lSQL :=  '   update caixa_ctr                                    '+SLineBreak+
-           '      set data = :data,                                '+SLineBreak+
-           '          status = :status,                            '+SLineBreak+
-           '          usuario = :usuario,                          '+SLineBreak+
-           '          hora = :hora,                                '+SLineBreak+
-           '          data_fecha = :data_fecha,                    '+SLineBreak+
-           '          contagem_dinheiro = :contagem_dinheiro,      '+SLineBreak+
-           '          contagem_credito = :contagem_credito,        '+SLineBreak+
-           '          contagem_debito = :contagem_debito,          '+SLineBreak+
-           '          justificativa = :justificativa               '+SLineBreak+
-           '      where (id = :id)                                 '+SLineBreak;
+  lSQL     := vConstrutor.gerarUpdate('CTR_CAIXA','ID');
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value   := IIF(ACaixaControleModel.ID = '', Unassigned, ACaixaControleModel.ID);
+    lQry.ParamByName('id').Value   := ifThen(ACaixaControleModel.ID = '', Unassigned, ACaixaControleModel.ID);
     setParams(lQry, ACaixaControleModel);
     lQry.ExecSQL;
 
@@ -192,7 +164,7 @@ begin
   end;
 end;
 
-function TCaixaControleDao.montaCondicaoQuery: String;
+function TCaixaControleDao.where: String;
 var
   lSQL : String;
 begin
@@ -217,7 +189,7 @@ begin
 
     lSql := 'select count(*) records From caixa_ctr where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -251,7 +223,7 @@ begin
 	    '  from caixa_ctr                '+
       ' where 1=1                      ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -320,15 +292,15 @@ end;
 
 procedure TCaixaControleDao.setParams(var pQry: TFDQuery; pCaixaControleModel: TCaixaControleModel);
 begin
-  pQry.ParamByName('data').Value              := IIF(pCaixaControleModel.DATA              = '', Unassigned, transformaDataFireBird(pCaixaControleModel.DATA));
-  pQry.ParamByName('status').Value            := IIF(pCaixaControleModel.STATUS            = '', Unassigned, pCaixaControleModel.STATUS);
-  pQry.ParamByName('usuario').Value           := IIF(pCaixaControleModel.USUARIO           = '', Unassigned, pCaixaControleModel.USUARIO);
-  pQry.ParamByName('hora').Value              := IIF(pCaixaControleModel.HORA              = '', Unassigned, pCaixaControleModel.HORA);
-  pQry.ParamByName('data_fecha').Value        := IIF(pCaixaControleModel.DATA_FECHA        = '', Unassigned, transformaDataFireBird(pCaixaControleModel.DATA_FECHA));
-  pQry.ParamByName('contagem_dinheiro').Value := IIF(pCaixaControleModel.CONTAGEM_DINHEIRO = '', Unassigned, pCaixaControleModel.CONTAGEM_DINHEIRO);
-  pQry.ParamByName('contagem_credito').Value  := IIF(pCaixaControleModel.CONTAGEM_CREDITO  = '', Unassigned, pCaixaControleModel.CONTAGEM_CREDITO);
-  pQry.ParamByName('contagem_debito').Value   := IIF(pCaixaControleModel.CONTAGEM_DEBITO   = '', Unassigned, pCaixaControleModel.CONTAGEM_DEBITO);
-  pQry.ParamByName('justificativa').Value     := IIF(pCaixaControleModel.JUSTIFICATIVA     = '', Unassigned, pCaixaControleModel.JUSTIFICATIVA);
+  pQry.ParamByName('data').Value              := ifThen(pCaixaControleModel.DATA              = '', Unassigned, transformaDataFireBird(pCaixaControleModel.DATA));
+  pQry.ParamByName('status').Value            := ifThen(pCaixaControleModel.STATUS            = '', Unassigned, pCaixaControleModel.STATUS);
+  pQry.ParamByName('usuario').Value           := ifThen(pCaixaControleModel.USUARIO           = '', Unassigned, pCaixaControleModel.USUARIO);
+  pQry.ParamByName('hora').Value              := ifThen(pCaixaControleModel.HORA              = '', Unassigned, pCaixaControleModel.HORA);
+  pQry.ParamByName('data_fecha').Value        := ifThen(pCaixaControleModel.DATA_FECHA        = '', Unassigned, transformaDataFireBird(pCaixaControleModel.DATA_FECHA));
+  pQry.ParamByName('contagem_dinheiro').Value := ifThen(pCaixaControleModel.CONTAGEM_DINHEIRO = '', Unassigned, pCaixaControleModel.CONTAGEM_DINHEIRO);
+  pQry.ParamByName('contagem_credito').Value  := ifThen(pCaixaControleModel.CONTAGEM_CREDITO  = '', Unassigned, pCaixaControleModel.CONTAGEM_CREDITO);
+  pQry.ParamByName('contagem_debito').Value   := ifThen(pCaixaControleModel.CONTAGEM_DEBITO   = '', Unassigned, pCaixaControleModel.CONTAGEM_DEBITO);
+  pQry.ParamByName('justificativa').Value     := ifThen(pCaixaControleModel.JUSTIFICATIVA     = '', Unassigned, pCaixaControleModel.JUSTIFICATIVA);
 end;
 
 procedure TCaixaControleDao.SetStartRecordView(const Value: String);

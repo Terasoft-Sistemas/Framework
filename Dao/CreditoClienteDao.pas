@@ -4,20 +4,22 @@ interface
 
 uses
   CreditoClienteModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
+  Terasoft.ConstrutorDao,
   Interfaces.Conexao;
 
 type
   TCreditoClienteDao = class
 
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
+
     FCreditoClientesLista: TObjectList<TCreditoClienteModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -38,7 +40,7 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
 
-    function montaCondicaoQuery: String;
+
 
   public
     constructor Create(pIConexao : IConexao);
@@ -58,6 +60,8 @@ type
     function alterar(ACreditoClienteModel: TCreditoClienteModel): String;
     function excluir(ACreditoClienteModel: TCreditoClienteModel): String;
 
+    function where: String;
+
     procedure obterLista;
     procedure creditosAbertos(pCliente : String);
     procedure setParams(var pQry: TFDQuery; pCreditoClienteModel: TCreditoClienteModel);
@@ -71,6 +75,7 @@ implementation
 constructor TCreditoClienteDao.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 procedure TCreditoClienteDao.creditosAbertos(pCliente: String);
@@ -146,33 +151,7 @@ begin
 
   lQry := vIConexao.CriarQuery;
 
-  lSQL := '     insert into credito_cliente (cliente_id,              '+SLineBreak+
-          '                                  devolucao_id,            '+SLineBreak+
-          '                                  data,                    '+SLineBreak+
-          '                                  valor,                   '+SLineBreak+
-          '                                  tipo,                    '+SLineBreak+
-          '                                  obs,                     '+SLineBreak+
-          '                                  entrada_id,              '+SLineBreak+
-          '                                  fornecedor_id,           '+SLineBreak+
-          '                                  fatura_id,               '+SLineBreak+
-          '                                  pedido_site,             '+SLineBreak+
-          '                                  contacorrente_id,        '+SLineBreak+
-          '                                  cliente_anterior_id,     '+SLineBreak+
-          '                                  venda_casada)            '+SLineBreak+
-          '     values (:cliente_id,                                  '+SLineBreak+
-          '             :devolucao_id,                                '+SLineBreak+
-          '             :data,                                        '+SLineBreak+
-          '             :valor,                                       '+SLineBreak+
-          '             :tipo,                                        '+SLineBreak+
-          '             :obs,                                         '+SLineBreak+
-          '             :entrada_id,                                  '+SLineBreak+
-          '             :fornecedor_id,                               '+SLineBreak+
-          '             :fatura_id,                                   '+SLineBreak+
-          '             :pedido_site,                                 '+SLineBreak+
-          '             :contacorrente_id,                            '+SLineBreak+
-          '             :cliente_anterior_id,                         '+SLineBreak+
-          '             :venda_casada)                                '+SLineBreak+
-          ' returning ID                                              '+SLineBreak;
+  lSQL := vConstrutor.gerarInsert('CREDITO_CLIENTE','ID');
 
   try
     lQry.SQL.Add(lSQL);
@@ -197,25 +176,11 @@ begin
 
   lQry := vIConexao.CriarQuery;
 
-  lSQL :=  ' update credito_cliente                                        '+SLineBreak+
-           '       set cliente_id = :cliente_id,                           '+SLineBreak+
-           '           devolucao_id = :devolucao_id,                       '+SLineBreak+
-           '           data = :data,                                       '+SLineBreak+
-           '           valor = :valor,                                     '+SLineBreak+
-           '           tipo = :tipo,                                       '+SLineBreak+
-           '           obs = :obs,                                         '+SLineBreak+
-           '           entrada_id = :entrada_id,                           '+SLineBreak+
-           '           fornecedor_id = :fornecedor_id,                     '+SLineBreak+
-           '           fatura_id = :fatura_id,                             '+SLineBreak+
-           '           pedido_site = :pedido_site,                         '+SLineBreak+
-           '           contacorrente_id = :contacorrente_id,               '+SLineBreak+
-           '           cliente_anterior_id = :cliente_anterior_id,         '+SLineBreak+
-           '           venda_casada = :venda_casada                        '+SLineBreak+
-           '       where (id = :id)                                        '+SLineBreak;
+  lSQL := vConstrutor.gerarUpdate('CREDITO_CLIENTE','ID');
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value   := IIF(ACreditoClienteModel.ID   = '', Unassigned, ACreditoClienteModel.ID);
+    lQry.ParamByName('ID').Value   := ifThen(ACreditoClienteModel.ID   = '', Unassigned, ACreditoClienteModel.ID);
     setParams(lQry, ACreditoClienteModel);
     lQry.ExecSQL;
 
@@ -235,7 +200,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from credito_cliente where ID = :ID',[ACreditoClienteModel.ID]);
+   lQry.ExecSQL('delete from CREDITO_CLIENTE where ID = :ID',[ACreditoClienteModel.ID]);
    lQry.ExecSQL;
    Result := ACreditoClienteModel.ID;
 
@@ -244,7 +209,7 @@ begin
   end;
 end;
 
-function TCreditoClienteDao.montaCondicaoQuery: String;
+function TCreditoClienteDao.where: String;
 var
   lSQL : String;
 begin
@@ -268,9 +233,9 @@ begin
 
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From credito_cliente where 1=1 ';
+    lSql := 'select count(*) records From CREDITO_CLIENTE where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -302,7 +267,7 @@ begin
 	    '  from credito_cliente          '+
       ' where 1=1                      ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -375,19 +340,19 @@ end;
 
 procedure TCreditoClienteDao.setParams(var pQry: TFDQuery; pCreditoClienteModel: TCreditoClienteModel);
 begin
-  pQry.ParamByName('cliente_id').Value           := IIF(pCreditoClienteModel.CLIENTE_ID           = '', Unassigned, pCreditoClienteModel.CLIENTE_ID);
-  pQry.ParamByName('devolucao_id').Value         := IIF(pCreditoClienteModel.DEVOLUCAO_ID         = '', Unassigned, pCreditoClienteModel.DEVOLUCAO_ID);
-  pQry.ParamByName('data').Value                 := IIF(pCreditoClienteModel.DATA                 = '', Unassigned, transformaDataFireBird(pCreditoClienteModel.DATA));
-  pQry.ParamByName('valor').Value                := IIF(pCreditoClienteModel.VALOR                = '', Unassigned, FormataFloatFireBird(pCreditoClienteModel.VALOR));
-  pQry.ParamByName('tipo').Value                 := IIF(pCreditoClienteModel.TIPO                 = '', Unassigned, pCreditoClienteModel.TIPO);
-  pQry.ParamByName('obs').Value                  := IIF(pCreditoClienteModel.OBS                  = '', Unassigned, pCreditoClienteModel.OBS);
-  pQry.ParamByName('entrada_id').Value           := IIF(pCreditoClienteModel.ENTRADA_ID           = '', Unassigned, pCreditoClienteModel.ENTRADA_ID);
-  pQry.ParamByName('fornecedor_id').Value        := IIF(pCreditoClienteModel.FORNECEDOR_ID        = '', Unassigned, pCreditoClienteModel.FORNECEDOR_ID);
-  pQry.ParamByName('fatura_id').Value            := IIF(pCreditoClienteModel.FATURA_ID            = '', Unassigned, pCreditoClienteModel.FATURA_ID);
-  pQry.ParamByName('pedido_site').Value          := IIF(pCreditoClienteModel.PEDIDO_SITE          = '', Unassigned, pCreditoClienteModel.PEDIDO_SITE);
-  pQry.ParamByName('contacorrente_id').Value     := IIF(pCreditoClienteModel.CONTACORRENTE_ID     = '', Unassigned, pCreditoClienteModel.CONTACORRENTE_ID);
-  pQry.ParamByName('cliente_anterior_id').Value  := IIF(pCreditoClienteModel.CLIENTE_ANTERIOR_ID  = '', Unassigned, pCreditoClienteModel.CLIENTE_ANTERIOR_ID);
-  pQry.ParamByName('venda_casada').Value         := IIF(pCreditoClienteModel.VENDA_CASADA         = '', Unassigned, pCreditoClienteModel.VENDA_CASADA);
+  pQry.ParamByName('cliente_id').Value           := ifThen(pCreditoClienteModel.CLIENTE_ID           = '', Unassigned, pCreditoClienteModel.CLIENTE_ID);
+  pQry.ParamByName('devolucao_id').Value         := ifThen(pCreditoClienteModel.DEVOLUCAO_ID         = '', Unassigned, pCreditoClienteModel.DEVOLUCAO_ID);
+  pQry.ParamByName('data').Value                 := ifThen(pCreditoClienteModel.DATA                 = '', Unassigned, transformaDataFireBird(pCreditoClienteModel.DATA));
+  pQry.ParamByName('valor').Value                := ifThen(pCreditoClienteModel.VALOR                = '', Unassigned, FormataFloatFireBird(pCreditoClienteModel.VALOR));
+  pQry.ParamByName('tipo').Value                 := ifThen(pCreditoClienteModel.TIPO                 = '', Unassigned, pCreditoClienteModel.TIPO);
+  pQry.ParamByName('obs').Value                  := ifThen(pCreditoClienteModel.OBS                  = '', Unassigned, pCreditoClienteModel.OBS);
+  pQry.ParamByName('entrada_id').Value           := ifThen(pCreditoClienteModel.ENTRADA_ID           = '', Unassigned, pCreditoClienteModel.ENTRADA_ID);
+  pQry.ParamByName('fornecedor_id').Value        := ifThen(pCreditoClienteModel.FORNECEDOR_ID        = '', Unassigned, pCreditoClienteModel.FORNECEDOR_ID);
+  pQry.ParamByName('fatura_id').Value            := ifThen(pCreditoClienteModel.FATURA_ID            = '', Unassigned, pCreditoClienteModel.FATURA_ID);
+  pQry.ParamByName('pedido_site').Value          := ifThen(pCreditoClienteModel.PEDIDO_SITE          = '', Unassigned, pCreditoClienteModel.PEDIDO_SITE);
+  pQry.ParamByName('contacorrente_id').Value     := ifThen(pCreditoClienteModel.CONTACORRENTE_ID     = '', Unassigned, pCreditoClienteModel.CONTACORRENTE_ID);
+  pQry.ParamByName('cliente_anterior_id').Value  := ifThen(pCreditoClienteModel.CLIENTE_ANTERIOR_ID  = '', Unassigned, pCreditoClienteModel.CLIENTE_ANTERIOR_ID);
+  pQry.ParamByName('venda_casada').Value         := ifThen(pCreditoClienteModel.VENDA_CASADA         = '', Unassigned, pCreditoClienteModel.VENDA_CASADA);
 end;
 
 procedure TCreditoClienteDao.SetStartRecordView(const Value: String);

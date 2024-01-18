@@ -4,19 +4,21 @@ interface
 
 uses
   ContasModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
+  Terasoft.ConstrutorDao,
   Interfaces.Conexao;
 
 type
   TContasDao = class
 
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor  : TConstrutorDao;
+
     FContassLista: TObjectList<TContasModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -37,7 +39,7 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
 
-    function montaCondicaoQuery: String;
+    function where: String;
 
   public
     constructor Create(pIConexao : IConexao);
@@ -69,6 +71,7 @@ implementation
 constructor TContasDao.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TContasDao.Destroy;
@@ -85,51 +88,7 @@ begin
 
   lQry := vIConexao.CriarQuery;
 
-  lSQL := '   insert into contas (classificacao,                '+SLineBreak+
-          '                       codigo_cta,                   '+SLineBreak+
-          '                       nome_cta,                     '+SLineBreak+
-          '                       tipo_cta,                     '+SLineBreak+
-          '                       dr_cta,                       '+SLineBreak+
-          '                       usuario_cta,                  '+SLineBreak+
-          '                       banco_cta,                    '+SLineBreak+
-          '                       baixapagar_cta,               '+SLineBreak+
-          '                       tiposemdr_cta,                '+SLineBreak+
-          '                       tiposemdr_cta_recebimento,    '+SLineBreak+
-          '                       grupo_cta,                    '+SLineBreak+
-          '                       subgrupo_cta,                 '+SLineBreak+
-          '                       centrocusto_cta,              '+SLineBreak+
-          '                       extrato_cta,                  '+SLineBreak+
-          '                       ordem,                        '+SLineBreak+
-          '                       loja,                         '+SLineBreak+
-          '                       emprestimo_cta,               '+SLineBreak+
-          '                       status,                       '+SLineBreak+
-          '                       credito_icms,                 '+SLineBreak+
-          '                       receitaxdespesas,             '+SLineBreak+
-          '                       credito_cliente_cta,          '+SLineBreak+
-          '                       credito_fornecedor_cta)       '+SLineBreak+
-          '   values (:classificacao,                           '+SLineBreak+
-          '           :codigo_cta,                              '+SLineBreak+
-          '           :nome_cta,                                '+SLineBreak+
-          '           :tipo_cta,                                '+SLineBreak+
-          '           :dr_cta,                                  '+SLineBreak+
-          '           :usuario_cta,                             '+SLineBreak+
-          '           :banco_cta,                               '+SLineBreak+
-          '           :baixapagar_cta,                          '+SLineBreak+
-          '           :tiposemdr_cta,                           '+SLineBreak+
-          '           :tiposemdr_cta_recebimento,               '+SLineBreak+
-          '           :grupo_cta,                               '+SLineBreak+
-          '           :subgrupo_cta,                            '+SLineBreak+
-          '           :centrocusto_cta,                         '+SLineBreak+
-          '           :extrato_cta,                             '+SLineBreak+
-          '           :ordem,                                   '+SLineBreak+
-          '           :loja,                                    '+SLineBreak+
-          '           :emprestimo_cta,                          '+SLineBreak+
-          '           :status,                                  '+SLineBreak+
-          '           :credito_icms,                            '+SLineBreak+
-          '           :receitaxdespesas,                        '+SLineBreak+
-          '           :credito_cliente_cta,                     '+SLineBreak+
-          '           :credito_fornecedor_cta)                  '+SLineBreak+
-          ' returning ID                                        '+SLineBreak;
+  lSQL := vConstrutor.gerarInsert('CONTAS','ID');
 
   try
     lQry.SQL.Add(lSQL);
@@ -152,29 +111,7 @@ begin
 
   lQry := vIConexao.CriarQuery;
 
-  lSQL :=   '  update contas                                                     '+SLineBreak+
-            '     set classificacao = :classificacao,                            '+SLineBreak+
-            '         nome_cta = :nome_cta,                                      '+SLineBreak+
-            '         tipo_cta = :tipo_cta,                                      '+SLineBreak+
-            '         dr_cta = :dr_cta,                                          '+SLineBreak+
-            '         usuario_cta = :usuario_cta,                                '+SLineBreak+
-            '         banco_cta = :banco_cta,                                    '+SLineBreak+
-            '         baixapagar_cta = :baixapagar_cta,                          '+SLineBreak+
-            '         tiposemdr_cta = :tiposemdr_cta,                            '+SLineBreak+
-            '         tiposemdr_cta_recebimento = :tiposemdr_cta_recebimento,    '+SLineBreak+
-            '         grupo_cta = :grupo_cta,                                    '+SLineBreak+
-            '         subgrupo_cta = :subgrupo_cta,                              '+SLineBreak+
-            '         centrocusto_cta = :centrocusto_cta,                        '+SLineBreak+
-            '         extrato_cta = :extrato_cta,                                '+SLineBreak+
-            '         ordem = :ordem,                                            '+SLineBreak+
-            '         loja = :loja,                                              '+SLineBreak+
-            '         emprestimo_cta = :emprestimo_cta,                          '+SLineBreak+
-            '         status = :status,                                          '+SLineBreak+
-            '         credito_icms = :credito_icms,                              '+SLineBreak+
-            '         receitaxdespesas = :receitaxdespesas,                      '+SLineBreak+
-            '         credito_cliente_cta = :credito_cliente_cta,                '+SLineBreak+
-            '         credito_fornecedor_cta = :credito_fornecedor_cta           '+SLineBreak+
-            '   where (codigo_cta = :codigo_cta)                                 '+SLineBreak;
+  lSQL := vConstrutor.gerarUpdate('CONTAS','ID');
 
   try
     lQry.SQL.Add(lSQL);
@@ -197,7 +134,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from contas where ID = :ID',[AContasModel.ID]);
+   lQry.ExecSQL('delete from CONTAS where ID = :ID',[AContasModel.ID]);
    lQry.ExecSQL;
    Result := AContasModel.ID;
 
@@ -206,7 +143,7 @@ begin
   end;
 end;
 
-function TContasDao.montaCondicaoQuery: String;
+function TContasDao.where: String;
 var
   lSQL : String;
 begin
@@ -230,9 +167,9 @@ begin
 
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From contas where 1=1 ';
+    lSql := 'select count(*) records From CONTAS where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -265,7 +202,7 @@ begin
 	    '  from contas                   '+
       ' where 1=1                      ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -348,28 +285,28 @@ end;
 
 procedure TContasDao.setParams(var pQry: TFDQuery; pContasModel: TContasModel);
 begin
-  pQry.ParamByName('classificacao').Value              := IIF(pContasModel.CLASSIFICACAO              = '', Unassigned, pContasModel.CLASSIFICACAO);
-  pQry.ParamByName('codigo_cta').Value                 := IIF(pContasModel.CODIGO_CTA                 = '', Unassigned, pContasModel.CODIGO_CTA);
-  pQry.ParamByName('nome_cta').Value                   := IIF(pContasModel.NOME_CTA                   = '', Unassigned, pContasModel.NOME_CTA);
-  pQry.ParamByName('tipo_cta').Value                   := IIF(pContasModel.TIPO_CTA                   = '', Unassigned, pContasModel.TIPO_CTA);
-  pQry.ParamByName('dr_cta').Value                     := IIF(pContasModel.DR_CTA                     = '', Unassigned, pContasModel.DR_CTA);
-  pQry.ParamByName('usuario_cta').Value                := IIF(pContasModel.USUARIO_CTA                = '', Unassigned, pContasModel.USUARIO_CTA);
-  pQry.ParamByName('banco_cta').Value                  := IIF(pContasModel.BANCO_CTA                  = '', Unassigned, pContasModel.BANCO_CTA);
-  pQry.ParamByName('baixapagar_cta').Value             := IIF(pContasModel.BAIXAPAGAR_CTA             = '', Unassigned, pContasModel.BAIXAPAGAR_CTA);
-  pQry.ParamByName('tiposemdr_cta').Value              := IIF(pContasModel.TIPOSEMDR_CTA              = '', Unassigned, pContasModel.TIPOSEMDR_CTA);
-  pQry.ParamByName('tiposemdr_cta_recebimento').Value  := IIF(pContasModel.TIPOSEMDR_CTA_RECEBIMENTO  = '', Unassigned, pContasModel.TIPOSEMDR_CTA_RECEBIMENTO);
-  pQry.ParamByName('grupo_cta').Value                  := IIF(pContasModel.GRUPO_CTA                  = '', Unassigned, pContasModel.GRUPO_CTA);
-  pQry.ParamByName('subgrupo_cta').Value               := IIF(pContasModel.SUBGRUPO_CTA               = '', Unassigned, pContasModel.SUBGRUPO_CTA);
-  pQry.ParamByName('centrocusto_cta').Value            := IIF(pContasModel.CENTROCUSTO_CTA            = '', Unassigned, pContasModel.CENTROCUSTO_CTA);
-  pQry.ParamByName('extrato_cta').Value                := IIF(pContasModel.EXTRATO_CTA                = '', Unassigned, pContasModel.EXTRATO_CTA);
-  pQry.ParamByName('ordem').Value                      := IIF(pContasModel.ORDEM                      = '', Unassigned, pContasModel.ORDEM);
-  pQry.ParamByName('loja').Value                       := IIF(pContasModel.LOJA                       = '', Unassigned, pContasModel.LOJA);
-  pQry.ParamByName('emprestimo_cta').Value             := IIF(pContasModel.EMPRESTIMO_CTA             = '', Unassigned, pContasModel.EMPRESTIMO_CTA);
-  pQry.ParamByName('status').Value                     := IIF(pContasModel.STATUS                     = '', Unassigned, pContasModel.STATUS);
-  pQry.ParamByName('credito_icms').Value               := IIF(pContasModel.CREDITO_ICMS               = '', Unassigned, pContasModel.CREDITO_ICMS);
-  pQry.ParamByName('receitaxdespesas').Value           := IIF(pContasModel.RECEITAXDESPESAS           = '', Unassigned, pContasModel.RECEITAXDESPESAS);
-  pQry.ParamByName('credito_cliente_cta').Value        := IIF(pContasModel.CREDITO_CLIENTE_CTA        = '', Unassigned, pContasModel.CREDITO_CLIENTE_CTA);
-  pQry.ParamByName('credito_fornecedor_cta').Value     := IIF(pContasModel.CREDITO_FORNECEDOR_CTA     = '', Unassigned, pContasModel.CREDITO_FORNECEDOR_CTA);
+  pQry.ParamByName('classificacao').Value              := ifThen(pContasModel.CLASSIFICACAO              = '', Unassigned, pContasModel.CLASSIFICACAO);
+  pQry.ParamByName('codigo_cta').Value                 := ifThen(pContasModel.CODIGO_CTA                 = '', Unassigned, pContasModel.CODIGO_CTA);
+  pQry.ParamByName('nome_cta').Value                   := ifThen(pContasModel.NOME_CTA                   = '', Unassigned, pContasModel.NOME_CTA);
+  pQry.ParamByName('tipo_cta').Value                   := ifThen(pContasModel.TIPO_CTA                   = '', Unassigned, pContasModel.TIPO_CTA);
+  pQry.ParamByName('dr_cta').Value                     := ifThen(pContasModel.DR_CTA                     = '', Unassigned, pContasModel.DR_CTA);
+  pQry.ParamByName('usuario_cta').Value                := ifThen(pContasModel.USUARIO_CTA                = '', Unassigned, pContasModel.USUARIO_CTA);
+  pQry.ParamByName('banco_cta').Value                  := ifThen(pContasModel.BANCO_CTA                  = '', Unassigned, pContasModel.BANCO_CTA);
+  pQry.ParamByName('baixapagar_cta').Value             := ifThen(pContasModel.BAIXAPAGAR_CTA             = '', Unassigned, pContasModel.BAIXAPAGAR_CTA);
+  pQry.ParamByName('tiposemdr_cta').Value              := ifThen(pContasModel.TIPOSEMDR_CTA              = '', Unassigned, pContasModel.TIPOSEMDR_CTA);
+  pQry.ParamByName('tiposemdr_cta_recebimento').Value  := ifThen(pContasModel.TIPOSEMDR_CTA_RECEBIMENTO  = '', Unassigned, pContasModel.TIPOSEMDR_CTA_RECEBIMENTO);
+  pQry.ParamByName('grupo_cta').Value                  := ifThen(pContasModel.GRUPO_CTA                  = '', Unassigned, pContasModel.GRUPO_CTA);
+  pQry.ParamByName('subgrupo_cta').Value               := ifThen(pContasModel.SUBGRUPO_CTA               = '', Unassigned, pContasModel.SUBGRUPO_CTA);
+  pQry.ParamByName('centrocusto_cta').Value            := ifThen(pContasModel.CENTROCUSTO_CTA            = '', Unassigned, pContasModel.CENTROCUSTO_CTA);
+  pQry.ParamByName('extrato_cta').Value                := ifThen(pContasModel.EXTRATO_CTA                = '', Unassigned, pContasModel.EXTRATO_CTA);
+  pQry.ParamByName('ordem').Value                      := ifThen(pContasModel.ORDEM                      = '', Unassigned, pContasModel.ORDEM);
+  pQry.ParamByName('loja').Value                       := ifThen(pContasModel.LOJA                       = '', Unassigned, pContasModel.LOJA);
+  pQry.ParamByName('emprestimo_cta').Value             := ifThen(pContasModel.EMPRESTIMO_CTA             = '', Unassigned, pContasModel.EMPRESTIMO_CTA);
+  pQry.ParamByName('status').Value                     := ifThen(pContasModel.STATUS                     = '', Unassigned, pContasModel.STATUS);
+  pQry.ParamByName('credito_icms').Value               := ifThen(pContasModel.CREDITO_ICMS               = '', Unassigned, pContasModel.CREDITO_ICMS);
+  pQry.ParamByName('receitaxdespesas').Value           := ifThen(pContasModel.RECEITAXDESPESAS           = '', Unassigned, pContasModel.RECEITAXDESPESAS);
+  pQry.ParamByName('credito_cliente_cta').Value        := ifThen(pContasModel.CREDITO_CLIENTE_CTA        = '', Unassigned, pContasModel.CREDITO_CLIENTE_CTA);
+  pQry.ParamByName('credito_fornecedor_cta').Value     := ifThen(pContasModel.CREDITO_FORNECEDOR_CTA     = '', Unassigned, pContasModel.CREDITO_FORNECEDOR_CTA);
 end;
 
 procedure TContasDao.SetStartRecordView(const Value: String);

@@ -4,20 +4,22 @@ interface
 
 uses
   ContaCorrenteModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
+  Terasoft.ConstrutorDao,
   Interfaces.Conexao;
 
 type
   TContaCorrenteDao = class
 
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
+
     FContaCorrentesLista: TObjectList<TContaCorrenteModel>;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -37,7 +39,7 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
 
-    function montaCondicaoQuery: String;
+    function where: String;
     procedure SetIDRecordView(const Value: String);
 
   public
@@ -133,7 +135,8 @@ end;
 
 constructor TContaCorrenteDao.Create(pIConexao : IConexao);
 begin
-  vIConexao := pIConexao;
+  vIConexao   := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TContaCorrenteDao.Destroy;
@@ -149,83 +152,11 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL :=   '   insert into contacorrente (numero_cor,                 '+SLineBreak+
-            '                              data_cor,                   '+SLineBreak+
-            '                              hora_cor,                   '+SLineBreak+
-            '                              codigo_cta,                 '+SLineBreak+
-            '                              codigo_ban,                 '+SLineBreak+
-            '                              observacao_cor,             '+SLineBreak+
-            '                              valor_cor,                  '+SLineBreak+
-            '                              tipo_cta,                   '+SLineBreak+
-            '                              status,                     '+SLineBreak+
-            '                              conciliado_cor,             '+SLineBreak+
-            '                              data_con,                   '+SLineBreak+
-            '                              cliente_cor,                '+SLineBreak+
-            '                              fatura_cor,                 '+SLineBreak+
-            '                              parcela_cor,                '+SLineBreak+
-            '                              centro_custo,               '+SLineBreak+
-            '                              loja,                       '+SLineBreak+
-            '                              numero_chq,                 '+SLineBreak+
-            '                              dr,                         '+SLineBreak+
-            '                              portador_cor,               '+SLineBreak+
-            '                              troco,                      '+SLineBreak+
-            '                              usuario_cor,                '+SLineBreak+
-            '                              tipo,                       '+SLineBreak+
-            '                              sub_id,                     '+SLineBreak+
-            '                              locacao_id,                 '+SLineBreak+
-            '                              emprestimo_receber_id,      '+SLineBreak+
-            '                              funcionario_id,             '+SLineBreak+
-            '                              os_new_id,                  '+SLineBreak+
-            '                              conciliacao_id,             '+SLineBreak+
-            '                              placa,                      '+SLineBreak+
-            '                              transferencia_origem,       '+SLineBreak+
-            '                              transferencia_id,           '+SLineBreak+
-            '                              competencia,                '+SLineBreak+
-            '                              pagarme_lote,               '+SLineBreak+
-            '                              loja_remoto,                '+SLineBreak+
-            '                              pedido_id,                  '+SLineBreak+
-            '                              iugu_id)                    '+SLineBreak+
-            '   values (:numero_cor,                                   '+SLineBreak+
-            '           :data_cor,                                     '+SLineBreak+
-            '           :hora_cor,                                     '+SLineBreak+
-            '           :codigo_cta,                                   '+SLineBreak+
-            '           :codigo_ban,                                   '+SLineBreak+
-            '           :observacao_cor,                               '+SLineBreak+
-            '           :valor_cor,                                    '+SLineBreak+
-            '           :tipo_cta,                                     '+SLineBreak+
-            '           :status,                                       '+SLineBreak+
-            '           :conciliado_cor,                               '+SLineBreak+
-            '           :data_con,                                     '+SLineBreak+
-            '           :cliente_cor,                                  '+SLineBreak+
-            '           :fatura_cor,                                   '+SLineBreak+
-            '           :parcela_cor,                                  '+SLineBreak+
-            '           :centro_custo,                                 '+SLineBreak+
-            '           :loja,                                         '+SLineBreak+
-            '           :numero_chq,                                   '+SLineBreak+
-            '           :dr,                                           '+SLineBreak+
-            '           :portador_cor,                                 '+SLineBreak+
-            '           :troco,                                        '+SLineBreak+
-            '           :usuario_cor,                                  '+SLineBreak+
-            '           :tipo,                                         '+SLineBreak+
-            '           :sub_id,                                       '+SLineBreak+
-            '           :locacao_id,                                   '+SLineBreak+
-            '           :emprestimo_receber_id,                        '+SLineBreak+
-            '           :funcionario_id,                               '+SLineBreak+
-            '           :os_new_id,                                    '+SLineBreak+
-            '           :conciliacao_id,                               '+SLineBreak+
-            '           :placa,                                        '+SLineBreak+
-            '           :transferencia_origem,                         '+SLineBreak+
-            '           :transferencia_id,                             '+SLineBreak+
-            '           :competencia,                                  '+SLineBreak+
-            '           :pagarme_lote,                                 '+SLineBreak+
-            '           :loja_remoto,                                  '+SLineBreak+
-            '           :pedido_id,                                    '+SLineBreak+
-            '           :iugu_id)                                      '+SLineBreak+
-            ' returning NUMERO_COR                                     '+SLineBreak;
+  lSQL := vConstrutor.gerarInsert('CONTACORRENTE','NUMERO_COR', True);
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('numero_cor').Value := vIConexao.Generetor('GEN_CONTACORRENTE');
+    lQry.ParamByName('NUMERO_COR').Value := vIConexao.Generetor('GEN_CONTACORRENTE');
     setParams(lQry, AContaCorrenteModel);
     lQry.Open;
 
@@ -244,47 +175,11 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := '    update contacorrente                                    '+SLineBreak+
-          '       set data_cor = :data_cor,                            '+SLineBreak+
-          '           hora_cor = :hora_cor,                            '+SLineBreak+
-          '           codigo_cta = :codigo_cta,                        '+SLineBreak+
-          '           codigo_ban = :codigo_ban,                        '+SLineBreak+
-          '           observacao_cor = :observacao_cor,                '+SLineBreak+
-          '           valor_cor = :valor_cor,                          '+SLineBreak+
-          '           tipo_cta = :tipo_cta,                            '+SLineBreak+
-          '           status = :status,                                '+SLineBreak+
-          '           conciliado_cor = :conciliado_cor,                '+SLineBreak+
-          '           data_con = :data_con,                            '+SLineBreak+
-          '           cliente_cor = :cliente_cor,                      '+SLineBreak+
-          '           fatura_cor = :fatura_cor,                        '+SLineBreak+
-          '           parcela_cor = :parcela_cor,                      '+SLineBreak+
-          '           centro_custo = :centro_custo,                    '+SLineBreak+
-          '           loja = :loja,                                    '+SLineBreak+
-          '           numero_chq = :numero_chq,                        '+SLineBreak+
-          '           dr = :dr,                                        '+SLineBreak+
-          '           portador_cor = :portador_cor,                    '+SLineBreak+
-          '           troco = :troco,                                  '+SLineBreak+
-          '           usuario_cor = :usuario_cor,                      '+SLineBreak+
-          '           tipo = :tipo,                                    '+SLineBreak+
-          '           sub_id = :sub_id,                                '+SLineBreak+
-          '           locacao_id = :locacao_id,                        '+SLineBreak+
-          '           emprestimo_receber_id = :emprestimo_receber_id,  '+SLineBreak+
-          '           funcionario_id = :funcionario_id,                '+SLineBreak+
-          '           os_new_id = :os_new_id,                          '+SLineBreak+
-          '           conciliacao_id = :conciliacao_id,                '+SLineBreak+
-          '           placa = :placa,                                  '+SLineBreak+
-          '           transferencia_origem = :transferencia_origem,    '+SLineBreak+
-          '           transferencia_id = :transferencia_id,            '+SLineBreak+
-          '           competencia = :competencia,                      '+SLineBreak+
-          '           pagarme_lote = :pagarme_lote,                    '+SLineBreak+
-          '           loja_remoto = :loja_remoto,                      '+SLineBreak+
-          '           pedido_id = :pedido_id,                          '+SLineBreak+
-          '           iugu_id = :iugu_id                               '+SLineBreak+
-          '     where (numero_cor = :numero_cor)                       '+SLineBreak;
+  lSQL := vConstrutor.gerarUpdate('CONTACORRENTE','NUMERO_COR');
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('numero_cor').Value := IIF(AContaCorrenteModel.DATA_COR = '', Unassigned, AContaCorrenteModel.DATA_COR);
+    lQry.ParamByName('NUMERO_COR').Value := ifThen(AContaCorrenteModel.DATA_COR = '', Unassigned, AContaCorrenteModel.DATA_COR);
     setParams(lQry, AContaCorrenteModel);
     lQry.ExecSQL;
 
@@ -303,7 +198,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from contacorrente where numero_cor = :numero_cor',[AContaCorrenteModel.NUMERO_COR]);
+   lQry.ExecSQL('delete from CONTACORRENTE where NUMERO_COR = :NUMERO_COR',[AContaCorrenteModel.NUMERO_COR]);
    lQry.ExecSQL;
    Result := AContaCorrenteModel.ID;
 
@@ -312,7 +207,7 @@ begin
   end;
 end;
 
-function TContaCorrenteDao.montaCondicaoQuery: String;
+function TContaCorrenteDao.where: String;
 var
   lSQL : String;
 begin
@@ -322,7 +217,7 @@ begin
     lSQL := lSQL + FWhereView;
 
   if FIDRecordView <> ''  then
-    lSQL := lSQL + ' and contacorrente.numero_cor = '+ QuotedStr(FIDRecordView);
+    lSQL := lSQL + ' and CONTACORRENTE.NUMERO_COR = '+ QuotedStr(FIDRecordView);
 
   Result := lSQL;
 end;
@@ -335,9 +230,9 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From contacorrente where 1=1 ';
+    lSql := 'select count(*) records From CONTACORRENTE where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -370,7 +265,7 @@ begin
 	    '  from contacorrente            '+
       ' where 1=1                      ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -466,41 +361,41 @@ end;
 
 procedure TContaCorrenteDao.setParams(var pQry: TFDQuery; pContaCorrenteModel: TContaCorrenteModel);
 begin
-  pQry.ParamByName('data_cor').Value              := IIF(pContaCorrenteModel.DATA_COR               = '', Unassigned, transformaDataFireBird(pContaCorrenteModel.DATA_COR));
-  pQry.ParamByName('hora_cor').Value              := IIF(pContaCorrenteModel.HORA_COR               = '', Unassigned, pContaCorrenteModel.HORA_COR);
-  pQry.ParamByName('codigo_cta').Value            := IIF(pContaCorrenteModel.CODIGO_CTA             = '', Unassigned, pContaCorrenteModel.CODIGO_CTA);
-  pQry.ParamByName('codigo_ban').Value            := IIF(pContaCorrenteModel.CODIGO_BAN             = '', Unassigned, pContaCorrenteModel.CODIGO_BAN);
-  pQry.ParamByName('observacao_cor').Value        := IIF(pContaCorrenteModel.OBSERVACAO_COR         = '', Unassigned, pContaCorrenteModel.OBSERVACAO_COR);
-  pQry.ParamByName('valor_cor').Value             := IIF(pContaCorrenteModel.VALOR_COR              = '', Unassigned, FormataFloatFireBird(pContaCorrenteModel.VALOR_COR));
-  pQry.ParamByName('tipo_cta').Value              := IIF(pContaCorrenteModel.TIPO_CTA               = '', Unassigned, pContaCorrenteModel.TIPO_CTA);
-  pQry.ParamByName('status').Value                := IIF(pContaCorrenteModel.STATUS                 = '', Unassigned, pContaCorrenteModel.STATUS);
-  pQry.ParamByName('conciliado_cor').Value        := IIF(pContaCorrenteModel.CONCILIADO_COR         = '', Unassigned, pContaCorrenteModel.CONCILIADO_COR);
-  pQry.ParamByName('data_con').Value              := IIF(pContaCorrenteModel.DATA_CON               = '', Unassigned, transformaDataFireBird(pContaCorrenteModel.DATA_CON));
-  pQry.ParamByName('cliente_cor').Value           := IIF(pContaCorrenteModel.CLIENTE_COR            = '', Unassigned, pContaCorrenteModel.CLIENTE_COR);
-  pQry.ParamByName('fatura_cor').Value            := IIF(pContaCorrenteModel.FATURA_COR             = '', Unassigned, pContaCorrenteModel.FATURA_COR);
-  pQry.ParamByName('parcela_cor').Value           := IIF(pContaCorrenteModel.PARCELA_COR            = '', Unassigned, pContaCorrenteModel.PARCELA_COR);
-  pQry.ParamByName('centro_custo').Value          := IIF(pContaCorrenteModel.CENTRO_CUSTO           = '', Unassigned, pContaCorrenteModel.CENTRO_CUSTO);
-  pQry.ParamByName('loja').Value                  := IIF(pContaCorrenteModel.LOJA                   = '', Unassigned, pContaCorrenteModel.LOJA);
-  pQry.ParamByName('numero_chq').Value            := IIF(pContaCorrenteModel.NUMERO_CHQ             = '', Unassigned, pContaCorrenteModel.NUMERO_CHQ);
-  pQry.ParamByName('dr').Value                    := IIF(pContaCorrenteModel.DR                     = '', Unassigned, pContaCorrenteModel.DR);
-  pQry.ParamByName('portador_cor').Value          := IIF(pContaCorrenteModel.PORTADOR_COR           = '', Unassigned, pContaCorrenteModel.PORTADOR_COR);
-  pQry.ParamByName('troco').Value                 := IIF(pContaCorrenteModel.TROCO                  = '', Unassigned, pContaCorrenteModel.TROCO);
-  pQry.ParamByName('usuario_cor').Value           := IIF(pContaCorrenteModel.USUARIO_COR            = '', Unassigned, pContaCorrenteModel.USUARIO_COR);
-  pQry.ParamByName('tipo').Value                  := IIF(pContaCorrenteModel.TIPO                   = '', Unassigned, pContaCorrenteModel.TIPO);
-  pQry.ParamByName('sub_id').Value                := IIF(pContaCorrenteModel.SUB_ID                 = '', Unassigned, pContaCorrenteModel.SUB_ID);
-  pQry.ParamByName('locacao_id').Value            := IIF(pContaCorrenteModel.LOCACAO_ID             = '', Unassigned, pContaCorrenteModel.LOCACAO_ID);
-  pQry.ParamByName('emprestimo_receber_id').Value := IIF(pContaCorrenteModel.EMPRESTIMO_RECEBER_ID  = '', Unassigned, pContaCorrenteModel.EMPRESTIMO_RECEBER_ID);
-  pQry.ParamByName('funcionario_id').Value        := IIF(pContaCorrenteModel.FUNCIONARIO_ID         = '', Unassigned, pContaCorrenteModel.FUNCIONARIO_ID);
-  pQry.ParamByName('os_new_id').Value             := IIF(pContaCorrenteModel.OS_NEW_ID              = '', Unassigned, pContaCorrenteModel.OS_NEW_ID);
-  pQry.ParamByName('conciliacao_id').Value        := IIF(pContaCorrenteModel.CONCILIACAO_ID         = '', Unassigned, pContaCorrenteModel.CONCILIACAO_ID);
-  pQry.ParamByName('placa').Value                 := IIF(pContaCorrenteModel.PLACA                  = '', Unassigned, pContaCorrenteModel.PLACA);
-  pQry.ParamByName('transferencia_origem').Value  := IIF(pContaCorrenteModel.TRANSFERENCIA_ORIGEM   = '', Unassigned, pContaCorrenteModel.TRANSFERENCIA_ORIGEM);
-  pQry.ParamByName('transferencia_id').Value      := IIF(pContaCorrenteModel.TRANSFERENCIA_ID       = '', Unassigned, pContaCorrenteModel.TRANSFERENCIA_ID);
-  pQry.ParamByName('competencia').Value           := IIF(pContaCorrenteModel.COMPETENCIA            = '', Unassigned, pContaCorrenteModel.COMPETENCIA);
-  pQry.ParamByName('pagarme_lote').Value          := IIF(pContaCorrenteModel.PAGARME_LOTE           = '', Unassigned, pContaCorrenteModel.PAGARME_LOTE);
-  pQry.ParamByName('loja_remoto').Value           := IIF(pContaCorrenteModel.LOJA_REMOTO            = '', Unassigned, pContaCorrenteModel.LOJA_REMOTO);
-  pQry.ParamByName('pedido_id').Value             := IIF(pContaCorrenteModel.PEDIDO_ID              = '', Unassigned, pContaCorrenteModel.PEDIDO_ID);
-  pQry.ParamByName('iugu_id').Value               := IIF(pContaCorrenteModel.IUGU_ID                = '', Unassigned, pContaCorrenteModel.IUGU_ID);
+  pQry.ParamByName('data_cor').Value              := ifThen(pContaCorrenteModel.DATA_COR               = '', Unassigned, transformaDataFireBird(pContaCorrenteModel.DATA_COR));
+  pQry.ParamByName('hora_cor').Value              := ifThen(pContaCorrenteModel.HORA_COR               = '', Unassigned, pContaCorrenteModel.HORA_COR);
+  pQry.ParamByName('codigo_cta').Value            := ifThen(pContaCorrenteModel.CODIGO_CTA             = '', Unassigned, pContaCorrenteModel.CODIGO_CTA);
+  pQry.ParamByName('codigo_ban').Value            := ifThen(pContaCorrenteModel.CODIGO_BAN             = '', Unassigned, pContaCorrenteModel.CODIGO_BAN);
+  pQry.ParamByName('observacao_cor').Value        := ifThen(pContaCorrenteModel.OBSERVACAO_COR         = '', Unassigned, pContaCorrenteModel.OBSERVACAO_COR);
+  pQry.ParamByName('valor_cor').Value             := ifThen(pContaCorrenteModel.VALOR_COR              = '', Unassigned, FormataFloatFireBird(pContaCorrenteModel.VALOR_COR));
+  pQry.ParamByName('tipo_cta').Value              := ifThen(pContaCorrenteModel.TIPO_CTA               = '', Unassigned, pContaCorrenteModel.TIPO_CTA);
+  pQry.ParamByName('status').Value                := ifThen(pContaCorrenteModel.STATUS                 = '', Unassigned, pContaCorrenteModel.STATUS);
+  pQry.ParamByName('conciliado_cor').Value        := ifThen(pContaCorrenteModel.CONCILIADO_COR         = '', Unassigned, pContaCorrenteModel.CONCILIADO_COR);
+  pQry.ParamByName('data_con').Value              := ifThen(pContaCorrenteModel.DATA_CON               = '', Unassigned, transformaDataFireBird(pContaCorrenteModel.DATA_CON));
+  pQry.ParamByName('cliente_cor').Value           := ifThen(pContaCorrenteModel.CLIENTE_COR            = '', Unassigned, pContaCorrenteModel.CLIENTE_COR);
+  pQry.ParamByName('fatura_cor').Value            := ifThen(pContaCorrenteModel.FATURA_COR             = '', Unassigned, pContaCorrenteModel.FATURA_COR);
+  pQry.ParamByName('parcela_cor').Value           := ifThen(pContaCorrenteModel.PARCELA_COR            = '', Unassigned, pContaCorrenteModel.PARCELA_COR);
+  pQry.ParamByName('centro_custo').Value          := ifThen(pContaCorrenteModel.CENTRO_CUSTO           = '', Unassigned, pContaCorrenteModel.CENTRO_CUSTO);
+  pQry.ParamByName('loja').Value                  := ifThen(pContaCorrenteModel.LOJA                   = '', Unassigned, pContaCorrenteModel.LOJA);
+  pQry.ParamByName('numero_chq').Value            := ifThen(pContaCorrenteModel.NUMERO_CHQ             = '', Unassigned, pContaCorrenteModel.NUMERO_CHQ);
+  pQry.ParamByName('dr').Value                    := ifThen(pContaCorrenteModel.DR                     = '', Unassigned, pContaCorrenteModel.DR);
+  pQry.ParamByName('portador_cor').Value          := ifThen(pContaCorrenteModel.PORTADOR_COR           = '', Unassigned, pContaCorrenteModel.PORTADOR_COR);
+  pQry.ParamByName('troco').Value                 := ifThen(pContaCorrenteModel.TROCO                  = '', Unassigned, pContaCorrenteModel.TROCO);
+  pQry.ParamByName('usuario_cor').Value           := ifThen(pContaCorrenteModel.USUARIO_COR            = '', Unassigned, pContaCorrenteModel.USUARIO_COR);
+  pQry.ParamByName('tipo').Value                  := ifThen(pContaCorrenteModel.TIPO                   = '', Unassigned, pContaCorrenteModel.TIPO);
+  pQry.ParamByName('sub_id').Value                := ifThen(pContaCorrenteModel.SUB_ID                 = '', Unassigned, pContaCorrenteModel.SUB_ID);
+  pQry.ParamByName('locacao_id').Value            := ifThen(pContaCorrenteModel.LOCACAO_ID             = '', Unassigned, pContaCorrenteModel.LOCACAO_ID);
+  pQry.ParamByName('emprestimo_receber_id').Value := ifThen(pContaCorrenteModel.EMPRESTIMO_RECEBER_ID  = '', Unassigned, pContaCorrenteModel.EMPRESTIMO_RECEBER_ID);
+  pQry.ParamByName('funcionario_id').Value        := ifThen(pContaCorrenteModel.FUNCIONARIO_ID         = '', Unassigned, pContaCorrenteModel.FUNCIONARIO_ID);
+  pQry.ParamByName('os_new_id').Value             := ifThen(pContaCorrenteModel.OS_NEW_ID              = '', Unassigned, pContaCorrenteModel.OS_NEW_ID);
+  pQry.ParamByName('conciliacao_id').Value        := ifThen(pContaCorrenteModel.CONCILIACAO_ID         = '', Unassigned, pContaCorrenteModel.CONCILIACAO_ID);
+  pQry.ParamByName('placa').Value                 := ifThen(pContaCorrenteModel.PLACA                  = '', Unassigned, pContaCorrenteModel.PLACA);
+  pQry.ParamByName('transferencia_origem').Value  := ifThen(pContaCorrenteModel.TRANSFERENCIA_ORIGEM   = '', Unassigned, pContaCorrenteModel.TRANSFERENCIA_ORIGEM);
+  pQry.ParamByName('transferencia_id').Value      := ifThen(pContaCorrenteModel.TRANSFERENCIA_ID       = '', Unassigned, pContaCorrenteModel.TRANSFERENCIA_ID);
+  pQry.ParamByName('competencia').Value           := ifThen(pContaCorrenteModel.COMPETENCIA            = '', Unassigned, pContaCorrenteModel.COMPETENCIA);
+  pQry.ParamByName('pagarme_lote').Value          := ifThen(pContaCorrenteModel.PAGARME_LOTE           = '', Unassigned, pContaCorrenteModel.PAGARME_LOTE);
+  pQry.ParamByName('loja_remoto').Value           := ifThen(pContaCorrenteModel.LOJA_REMOTO            = '', Unassigned, pContaCorrenteModel.LOJA_REMOTO);
+  pQry.ParamByName('pedido_id').Value             := ifThen(pContaCorrenteModel.PEDIDO_ID              = '', Unassigned, pContaCorrenteModel.PEDIDO_ID);
+  pQry.ParamByName('iugu_id').Value               := ifThen(pContaCorrenteModel.IUGU_ID                = '', Unassigned, pContaCorrenteModel.IUGU_ID);
 end;
 
 procedure TContaCorrenteDao.SetStartRecordView(const Value: String);

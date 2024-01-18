@@ -4,7 +4,6 @@ interface
 
 uses
   ContasReceberItensModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
@@ -14,6 +13,7 @@ uses
   Terasoft.Enumerado,
   LojasModel,
   Terasoft.Framework.ListaSimples.Impl,
+  Terasoft.ConstrutorDao,
   Interfaces.Conexao;
 
 type
@@ -21,6 +21,7 @@ type
 
   private
     vIConexao : IConexao;
+    vConstrutor : TConstrutorDao;
 
     FContasReceberItenssLista: TObjectList<TContasReceberItensModel>;
     FLengthPageView: String;
@@ -43,7 +44,6 @@ type
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-    function montaCondicaoQuery: String;
     procedure SetIDContasReceberView(const Value: String);
     procedure SetRecebimentoContasReceberLista(const Value: TObjectList<TRecebimentoContasReceber>);
     procedure SetParcelaView(const Value: String);
@@ -71,8 +71,8 @@ type
     procedure obterLista;
     procedure obterRecebimentoContasReceber;
     function obterContaCliente(pContaClienteParametros: TContaClienteParametros): TListaContaClienteRetorno;
-
     function carregaClasse(pId: String): TContasReceberItensModel;
+    function where: String;
 
     function gerarChamadaTEF(pFatura, pTefModalidade, pTefParcelamento, pTefAdquirente: String): String;
     procedure setParams(var pQry: TFDQuery; pContasReceberItensModel: TContasReceberItensModel);
@@ -144,6 +144,7 @@ end;
 constructor TContasReceberItensDao.Create(pIConexao: IConexao);
 begin
   vIConexao := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TContasReceberItensDao.Destroy;
@@ -158,80 +159,8 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL :=  '   insert into contasreceberitens (fatura_rec,                '+SLineBreak+
-           '                                   codigo_cli,                '+SLineBreak+
-           '                                   posicao_id,                '+SLineBreak+
-           '                                   vencimento_rec,            '+SLineBreak+
-           '                                   pacela_rec,                '+SLineBreak+
-           '                                   vlrparcela_rec,            '+SLineBreak+
-           '                                   valorrec_rec,              '+SLineBreak+
-           '                                   databaixa_rec,             '+SLineBreak+
-           '                                   situacao_rec,              '+SLineBreak+
-           '                                   totalparcelas_rec,         '+SLineBreak+
-           '                                   codigo_por,                '+SLineBreak+
-           '                                   codigo_con,                '+SLineBreak+
-           '                                   destitulo_rec,             '+SLineBreak+
-           '                                   nosso_numero,              '+SLineBreak+
-           '                                   cartao,                    '+SLineBreak+
-           '                                   observacao,                '+SLineBreak+
-           '                                   vencimento_boleto,         '+SLineBreak+
-           '                                   comissao,                  '+SLineBreak+
-           '                                   comissao_base,             '+SLineBreak+
-           '                                   loja,                      '+SLineBreak+
-           '                                   data_aceite,               '+SLineBreak+
-           '                                   usuario_aceite,            '+SLineBreak+
-           '                                   valor_pago,                '+SLineBreak+
-           '                                   nf_fatura,                 '+SLineBreak+
-           '                                   obs,                       '+SLineBreak+
-           '                                   vaucher_cliente_id,        '+SLineBreak+
-           '                                   valor_desconto_cartao,     '+SLineBreak+
-           '                                   valor_recebido_cartao,     '+SLineBreak+
-           '                                   fatura_recebida_cartao,    '+SLineBreak+
-           '                                   valor_juros_cartao,        '+SLineBreak+
-           '                                   tef_chamada,               '+SLineBreak+
-           '                                   tef_modalidade,            '+SLineBreak+
-           '                                   tef_parcelamento,          '+SLineBreak+
-           '                                   tef_adquirente,            '+SLineBreak+
-           '                                   pix_identificador,         '+SLineBreak+
-           '                                   pix_emv,                   '+SLineBreak+
-           '                                   pix_expiracao)             '+SLineBreak+
-           '   values (:fatura_rec,                                       '+SLineBreak+
-           '           :codigo_cli,                                       '+SLineBreak+
-           '           :posicao_id,                                       '+SLineBreak+
-           '           :vencimento_rec,                                   '+SLineBreak+
-           '           :pacela_rec,                                       '+SLineBreak+
-           '           :vlrparcela_rec,                                   '+SLineBreak+
-           '           :valorrec_rec,                                     '+SLineBreak+
-           '           :databaixa_rec,                                    '+SLineBreak+
-           '           :situacao_rec,                                     '+SLineBreak+
-           '           :totalparcelas_rec,                                '+SLineBreak+
-           '           :codigo_por,                                       '+SLineBreak+
-           '           :codigo_con,                                       '+SLineBreak+
-           '           :destitulo_rec,                                    '+SLineBreak+
-           '           :nosso_numero,                                     '+SLineBreak+
-           '           :cartao,                                           '+SLineBreak+
-           '           :observacao,                                       '+SLineBreak+
-           '           :vencimento_boleto,                                '+SLineBreak+
-           '           :comissao,                                         '+SLineBreak+
-           '           :comissao_base,                                    '+SLineBreak+
-           '           :loja,                                             '+SLineBreak+
-           '           :data_aceite,                                      '+SLineBreak+
-           '           :usuario_aceite,                                   '+SLineBreak+
-           '           :valor_pago,                                       '+SLineBreak+
-           '           :nf_fatura,                                        '+SLineBreak+
-           '           :obs,                                              '+SLineBreak+
-           '           :vaucher_cliente_id,                               '+SLineBreak+
-           '           :valor_desconto_cartao,                            '+SLineBreak+
-           '           :valor_recebido_cartao,                            '+SLineBreak+
-           '           :fatura_recebida_cartao,                           '+SLineBreak+
-           '           :valor_juros_cartao,                               '+SLineBreak+
-           '           :tef_chamada,                                      '+SLineBreak+
-           '           :tef_modalidade,                                   '+SLineBreak+
-           '           :tef_parcelamento,                                 '+SLineBreak+
-           '           :tef_adquirente,                                   '+SLineBreak+
-           '           :pix_identificador,                                '+SLineBreak+
-           '           :pix_emv,                                          '+SLineBreak+
-           '           :pix_expiracao)                                    '+SLineBreak;
+  lSQL := vConstrutor.gerarInsert('CONTASRECEBERITENS','FATURA_REC');
+
   try
     lQry.SQL.Add(lSQL);
     lQry.Params.ArraySize := AContasReceberItensModel.ContasReceberItenssLista.Count;
@@ -251,42 +180,7 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := '   update contasreceberitens                                                                          '+SLineBreak+
-          '      set posicao_id = :posicao_id,                                                                   '+SLineBreak+
-          '          vencimento_rec = :vencimento_rec,                                                           '+SLineBreak+
-          '          vlrparcela_rec = :vlrparcela_rec,                                                           '+SLineBreak+
-          '          valorrec_rec = :valorrec_rec,                                                               '+SLineBreak+
-          '          databaixa_rec = :databaixa_rec,                                                             '+SLineBreak+
-          '          situacao_rec = :situacao_rec,                                                               '+SLineBreak+
-          '          totalparcelas_rec = :totalparcelas_rec,                                                     '+SLineBreak+
-          '          codigo_por = :codigo_por,                                                                   '+SLineBreak+
-          '          codigo_con = :codigo_con,                                                                   '+SLineBreak+
-          '          destitulo_rec = :destitulo_rec,                                                             '+SLineBreak+
-          '          nosso_numero = :nosso_numero,                                                               '+SLineBreak+
-          '          cartao = :cartao,                                                                           '+SLineBreak+
-          '          observacao = :observacao,                                                                   '+SLineBreak+
-          '          vencimento_boleto = :vencimento_boleto,                                                     '+SLineBreak+
-          '          comissao = :comissao,                                                                       '+SLineBreak+
-          '          comissao_base = :comissao_base,                                                             '+SLineBreak+
-          '          loja = :loja,                                                                               '+SLineBreak+
-          '          data_aceite = :data_aceite,                                                                 '+SLineBreak+
-          '          usuario_aceite = :usuario_aceite,                                                           '+SLineBreak+
-          '          valor_pago = :valor_pago,                                                                   '+SLineBreak+
-          '          nf_fatura = :nf_fatura,                                                                     '+SLineBreak+
-          '          obs = :obs,                                                                                 '+SLineBreak+
-          '          vaucher_cliente_id = :vaucher_cliente_id,                                                   '+SLineBreak+
-          '          valor_desconto_cartao = :valor_desconto_cartao,                                             '+SLineBreak+
-          '          valor_recebido_cartao = :valor_recebido_cartao,                                             '+SLineBreak+
-          '          fatura_recebida_cartao = :fatura_recebida_cartao,                                           '+SLineBreak+
-          '          valor_juros_cartao = :valor_juros_cartao,                                                   '+SLineBreak+
-          '          tef_chamada = :tef_chamada,                                                                 '+SLineBreak+
-          '          tef_modalidade = :tef_modalidade,                                                           '+SLineBreak+
-          '          tef_parcelamento = :tef_parcelamento,                                                       '+SLineBreak+
-          '          tef_adquirente = :tef_adquirente,                                                           '+SLineBreak+
-          '          pix_identificador = :pix_identificador,                                                     '+SLineBreak+
-          '          pix_emv = :pix_emv,                                                                         '+SLineBreak+
-          '          pix_expiracao = :pix_expiracao                                                              '+SLineBreak+
-          '    where (fatura_rec = :fatura_rec) and (codigo_cli = :codigo_cli) and (pacela_rec = :pacela_rec)    '+SLineBreak;
+  lSQL := vConstrutor.gerarUpdate('CONTASRECEBERITENS','FATURA_REC');
   try
     lQry.SQL.Add(lSQL);
     setParams(lQry, AContasReceberItensModel);

@@ -4,19 +4,21 @@ interface
 
 uses
   AdmCartaoTaxaModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  Interfaces.Conexao;
+  Interfaces.Conexao,
+  Terasoft.ConstrutorDao;
 
 type
   TAdmCartaoTaxaDao = class
 
   private
     vIConexao : IConexao;
+    vConstrutor : TConstrutorDao;
+
     FAdmCartaoTaxasLista: TObjectList<TAdmCartaoTaxaModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -37,7 +39,7 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
 
-    function montaCondicaoQuery: String;
+    function where: String;
 
   public
     constructor Create(pIConexao : IConexao);
@@ -70,11 +72,11 @@ implementation
 constructor TAdmCartaoTaxaDao.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
+  vConstrutor := TConstrutorDAO.Create(vIConexao);
 end;
 
 destructor TAdmCartaoTaxaDao.Destroy;
 begin
-
   inherited;
 end;
 
@@ -85,23 +87,11 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := '    insert into admcartao_taxa (id,               '+SLineBreak+
-          '                                adm_id,           '+SLineBreak+
-          '                                parcela,          '+SLineBreak+
-          '                                taxa,             '+SLineBreak+
-          '                                dias_vencimento,  '+SLineBreak+
-          '                                conciliadora_id)  '+SLineBreak+
-          '    values (:id,                                  '+SLineBreak+
-          '            :adm_id,                              '+SLineBreak+
-          '            :parcela,                             '+SLineBreak+
-          '            :taxa,                                '+SLineBreak+
-          '            :dias_vencimento,                     '+SLineBreak+
-          '            :conciliadora_id)                     '+SLineBreak+
-          ' returning ID                                     '+SLineBreak;
+  lSQL := vConstrutor.gerarInsert('ADMCARTAO_TAXA', 'ID', True);
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := vIConexao.Generetor('GEN_ADMCARTAO_TAXA');
+    lQry.ParamByName('ID').Value := vIConexao.Generetor('GEN_ADMCARTAO_TAXA');
     setParams(lQry, AAdmCartaoTaxaModel);
     lQry.Open;
 
@@ -120,17 +110,11 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL :=  '  update admcartao_taxa                        '+SLineBreak+
-           '     set adm_id = :adm_id,                     '+SLineBreak+
-           '         parcela = :parcela,                   '+SLineBreak+
-           '         taxa = :taxa,                         '+SLineBreak+
-           '         dias_vencimento = :dias_vencimento,   '+SLineBreak+
-           '         conciliadora_id = :conciliadora_id    '+SLineBreak+
-           '   where (id = :id)                            '+SLineBreak;
+  lSQL :=  vConstrutor.gerarUpdate('ADMCARTAO_TAXA','ID');
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := IIF(AAdmCartaoTaxaModel.ID = '', Unassigned, AAdmCartaoTaxaModel.ID);
+    lQry.ParamByName('ID').Value := ifThen(AAdmCartaoTaxaModel.ID = '', Unassigned, AAdmCartaoTaxaModel.ID);
     setParams(lQry, AAdmCartaoTaxaModel);
     lQry.ExecSQL;
 
@@ -149,7 +133,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from admcartao_taxa where ID = :ID',[AAdmCartaoTaxaModel.ID]);
+   lQry.ExecSQL('delete from ADMCARTAO_TAXA where ID = :ID',[AAdmCartaoTaxaModel.ID]);
    lQry.ExecSQL;
    Result := AAdmCartaoTaxaModel.ID;
 
@@ -158,7 +142,7 @@ begin
   end;
 end;
 
-function TAdmCartaoTaxaDao.montaCondicaoQuery: String;
+function TAdmCartaoTaxaDao.where: String;
 var
   lSQL : String;
 begin
@@ -181,9 +165,9 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From admcartao_taxa where 1=1 ';
+    lSql := 'select count(*) records From ADMCARTAO_TAXA where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -215,7 +199,7 @@ begin
 	    '  from admcartao_taxa           '+
       ' where 1=1                      ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -280,11 +264,11 @@ end;
 
 procedure TAdmCartaoTaxaDao.setParams(var pQry: TFDQuery; pCartaoTaxaModel: TAdmCartaoTaxaModel);
 begin
-  pQry.ParamByName('adm_id').Value          := IIF(pCartaoTaxaModel.ADM_ID          = '', Unassigned, pCartaoTaxaModel.ADM_ID);
-  pQry.ParamByName('parcela').Value         := IIF(pCartaoTaxaModel.PARCELA         = '', Unassigned, pCartaoTaxaModel.PARCELA);
-  pQry.ParamByName('taxa').Value            := IIF(pCartaoTaxaModel.TAXA            = '', Unassigned, pCartaoTaxaModel.TAXA);
-  pQry.ParamByName('dias_vencimento').Value := IIF(pCartaoTaxaModel.DIAS_VENCIMENTO = '', Unassigned, pCartaoTaxaModel.DIAS_VENCIMENTO);
-  pQry.ParamByName('conciliadora_id').Value := IIF(pCartaoTaxaModel.CONCILIADORA_ID = '', Unassigned, pCartaoTaxaModel.CONCILIADORA_ID);
+  pQry.ParamByName('adm_id').Value          := ifThen(pCartaoTaxaModel.ADM_ID          = '', Unassigned, pCartaoTaxaModel.ADM_ID);
+  pQry.ParamByName('parcela').Value         := ifThen(pCartaoTaxaModel.PARCELA         = '', Unassigned, pCartaoTaxaModel.PARCELA);
+  pQry.ParamByName('taxa').Value            := ifThen(pCartaoTaxaModel.TAXA            = '', Unassigned, pCartaoTaxaModel.TAXA);
+  pQry.ParamByName('dias_vencimento').Value := ifThen(pCartaoTaxaModel.DIAS_VENCIMENTO = '', Unassigned, pCartaoTaxaModel.DIAS_VENCIMENTO);
+  pQry.ParamByName('conciliadora_id').Value := ifThen(pCartaoTaxaModel.CONCILIADORA_ID = '', Unassigned, pCartaoTaxaModel.CONCILIADORA_ID);
 end;
 
 procedure TAdmCartaoTaxaDao.SetStartRecordView(const Value: String);

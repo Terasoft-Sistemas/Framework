@@ -4,19 +4,21 @@ interface
 
 uses
   ConsultaModel,
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
+  Terasoft.ConstrutorDao,
   Interfaces.Conexao;
 
 type
   TConsultaDao = class
 
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
+
     FConsultasLista: TObjectList<TConsultaModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -40,7 +42,7 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
 
-    function montaCondicaoQuery: String;
+    function where: String;
     procedure SetTabelaView(const Value: String);
     procedure SetCodigoView(const Value: String);
     procedure SetDescricaoView(const Value: String);
@@ -73,6 +75,7 @@ implementation
 constructor TConsultaDao.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TConsultaDao.Destroy;
@@ -81,7 +84,7 @@ begin
   inherited;
 end;
 
-function TConsultaDao.montaCondicaoQuery: String;
+function TConsultaDao.where: String;
 var
   lSQL : String;
 begin
@@ -103,7 +106,7 @@ begin
 
     lSql := 'select count(*) records From '+FTabelaView+' where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     lQry.Open(lSQL);
 
@@ -136,7 +139,7 @@ begin
 	    '  from '+FTabelaView +
       ' where 1=1 ';
 
-    lSql := lSql + montaCondicaoQuery;
+    lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
