@@ -464,6 +464,7 @@ type
     property CODIGO_PRO        :Variant read FCODIGO_PRO write SetCODIGO_PRO;
     property QUANTIDADE_PED    :Variant read FQUANTIDADE_PED write SetQUANTIDADE_PED;
     property VALORUNITARIO_PED :Variant read FVALORUNITARIO_PED write SetVALORUNITARIO_PED;
+
     property PedidoVendasLista: TObjectList<TPedidoVendaModel> read FPedidoVendasLista write SetPedidoVendasLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;

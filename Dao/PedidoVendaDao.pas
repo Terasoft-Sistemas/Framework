@@ -1,7 +1,5 @@
 unit PedidoVendaDao;
-
 interface
-
 uses
   PedidoVendaModel,
   FireDAC.Comp.Client,
@@ -12,7 +10,8 @@ uses
   Terasoft.FuncoesTexto,
   Terasoft.Framework.ListaSimples.Impl,
   Terasoft.ConstrutorDao,
-  Interfaces.Conexao;
+  Interfaces.Conexao,
+  Terasoft.Utils;
 
 type
   TPedidoVendaDao = class
@@ -39,16 +38,13 @@ type
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-
     function where: String;
     procedure SetIDRecordView(const Value: String);
-
     procedure setParams(var pQry: TFDQuery; pPedidoVendaModel: TPedidoVendaModel);
 
   public
     constructor Create(pConexao : IConexao);
     destructor Destroy; override;
-
     property PedidoVendasLista: TObjectList<TPedidoVendaModel> read FPedidoVendasLista write SetPedidoVendasLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -68,20 +64,14 @@ type
     function obterPedido(pNumeroPedido: String): TPedidoVendaModel;
     function carregaClasse(pId: String): TPedidoVendaModel;
     function statusPedido(pId: String): String;
-
     procedure obterUpdateImpostos(pNumeroPedido: String);
 
-
-
 end;
-
 implementation
 
 uses
-  Vcl.Dialogs;
-
+  Vcl.Dialogs, System.Rtti;
 { TPedidoVenda }
-
 procedure TPedidoVendaDao.obterUpdateImpostos(pNumeroPedido: String);
 var
   lQry: TFDQuery;
@@ -89,9 +79,7 @@ var
   i: INteger;
 begin
   lQry := vIConexao.CriarQuery;
-
   FPedidoVendasLista := TObjectList<TPedidoVendaModel>.Create;
-
   try
     lSQL :=
     ' select                                                   '+#13+
@@ -113,17 +101,13 @@ begin
     '                                                          '+#13+
     ' where                                                    '+#13+
     '     p.numero_ped = '+QuotedStr(pNumeroPedido);
-
     lQry.Open(lSQL);
-
     i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
       FPedidoVendasLista.Add(TPedidoVendaModel.Create(vIConexao));
-
       i := FPedidoVendasLista.Count -1;
-
       FPedidoVendasLista[i].PEDIDOITENS_ID    := lQry.FieldByName('PEDIDOITENS_ID').AsString;
       FPedidoVendasLista[i].VALOR_PED         := lQry.FieldByName('VALOR_PED').AsString;
       FPedidoVendasLista[i].DESC_PED          := lQry.FieldByName('DESC_PED').AsString;
@@ -132,15 +116,12 @@ begin
       FPedidoVendasLista[i].CODIGO_PRO        := lQry.FieldByName('CODIGO_PRO').AsString;
       FPedidoVendasLista[i].QUANTIDADE_PED    := lQry.FieldByName('QUANTIDADE_PED').AsString;
       FPedidoVendasLista[i].VALORUNITARIO_PED := lQry.FieldByName('VALORUNITARIO_PED').AsString;
-
       lQry.Next;
     end;
-
   finally
     lQry.Free;
   end;
 end;
-
 function TPedidoVendaDao.carregaClasse(pId: String): TPedidoVendaModel;
 var
   lQry: TFDQuery;
@@ -149,13 +130,10 @@ begin
   lQry     := vIConexao.CriarQuery;
   lModel   := TPedidoVendaModel.Create(vIConexao);
   Result   := lModel;
-
   try
     lQry.Open('select * from pedidovenda where numero_ped = '+pId);
-
     if lQry.IsEmpty then
       Exit;
-
     lModel.NUMERO_PED              := lQry.FieldByName('NUMERO_PED').AsString;
     lModel.CODIGO_CLI              := lQry.FieldByName('CODIGO_CLI').AsString;
     lModel.CODIGO_VEN              := lQry.FieldByName('CODIGO_VEN').AsString;
@@ -302,29 +280,26 @@ end;
 
 destructor TPedidoVendaDao.Destroy;
 begin
-
   inherited;
 end;
 
 function TPedidoVendaDao.incluir(pPedidoVendaModel: TPedidoVendaModel): String;
 var
-  lQry: TFDQuery;
-  lSQL:String;
+  lQry : TFDQuery;
+  lSQL : String;
 begin
   lQry := vIConexao.CriarQuery;
-
   lSQL := vConstrutor.gerarInsert('PEDIDOVENDA', 'NUMERO_PED');
+
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('numero_ped').Value := vIConexao.Generetor('GEN_PEDIDOVENDA');
+    pPedidoVendaModel.NUMERO_PED := vIConexao.Generetor('GEN_PEDIDOVENDA');
     setParams(lQry, pPedidoVendaModel);
     lQry.Open;
 
     Result := lQry.FieldByName('NUMERO_PED').AsString;
-
   finally
     lSQL := '';
-    ShowMessage(lQry.SQL.text);
     lQry.Free;
   end;
 end;
@@ -335,17 +310,13 @@ var
   lSQL:String;
 begin
   lQry := vIConexao.CriarQuery;
-
   lSQL := vConstrutor.gerarUpdate('PEDIDOVENDA', 'NUMERO_PED');
-
   try
     lQry.SQL.Add(lSQL);
     lQry.ParamByName('numero_ped').Value := ifThen(pPedidoVendaModel.NUMERO_PED = '', Unassigned, pPedidoVendaModel.NUMERO_PED);
     setParams(lQry, pPedidoVendaModel);
     lQry.ExecSQL;
-
     Result := pPedidoVendaModel.ID;
-
   finally
     lSQL := '';
     lQry.Free;
@@ -357,32 +328,25 @@ var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
-
   try
    lQry.ExecSQL('delete from pedidovenda where NUMERO_PED = :NUMERO_PED',[pPedidoVendaModel.NUMERO_PED]);
    lQry.ExecSQL;
    Result := pPedidoVendaModel.NUMERO_PED;
-
   finally
     lQry.Free;
   end;
 end;
-
 function TPedidoVendaDao.where: String;
 var
   lSQL : String;
 begin
   lSQL := '';
-
   if not FWhereView.IsEmpty then
     lSQL := lSQL + FWhereView;
-
   if FIDRecordView <> ''  then
     lSQL := lSQL + ' and pedidovenda.numero_ped = '+FIDRecordView;
-
   Result := lSQL;
 end;
-
 procedure TPedidoVendaDao.obterTotalRegistros;
 var
   lQry: TFDQuery;
@@ -390,22 +354,16 @@ var
 begin
   try
     lQry := vIConexao.CriarQuery;
-
     lSql := 'select count(*) records From pedidovenda  '+
             '  left join clientes on clientes.codigo_cli = pedidovenda.codigo_cli '+#13+
             ' where 1=1 ';
-
     lSql := lSql + where;
-
     lQry.Open(lSQL);
-
     FTotalRecords := lQry.FieldByName('records').AsInteger;
-
   finally
     lQry.Free;
   end;
 end;
-
 procedure TPedidoVendaDao.obterLista;
 var
   lQry: TFDQuery;
@@ -413,40 +371,28 @@ var
   i: INteger;
 begin
   lQry := vIConexao.CriarQuery;
-
   FPedidoVendasLista := TObjectList<TPedidoVendaModel>.Create;
-
   try
-
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lSql := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
     else
       lSql := 'select ';
-
     lSQL := lSQL +
       '       pedidovenda.*,           '+#13+
       '       clientes.fantasia_cli    '+#13+
 	    '  from pedidovenda              '+#13+
-
       '  left join clientes on clientes.codigo_cli = pedidovenda.codigo_cli '+#13+
-
       ' where 1=1              ';
-
     lSql := lSql + where;
-
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
-
     lQry.Open(lSQL);
-
     i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
       FPedidoVendasLista.Add(TPedidoVendaModel.Create(vIConexao));
-
       i := FPedidoVendasLista.Count -1;
-
       FPedidoVendasLista[i].ID                        := lQry.FieldByName('ID').AsString;
       FPedidoVendasLista[i].NUMERO_PED                := lQry.FieldByName('NUMERO_PED').AsString;
       FPedidoVendasLista[i].CODIGO_CLI                := lQry.FieldByName('CODIGO_CLI').AsString;
@@ -583,14 +529,11 @@ begin
       FPedidoVendasLista[i].CFOP_NF                   := lQry.FieldByName('CFOP_NF').AsString;
       lQry.Next;
     end;
-
     obterTotalRegistros;
-
   finally
     lQry.Free;
   end;
 end;
-
 function TPedidoVendaDao.obterPedido(pNumeroPedido: String): TPedidoVendaModel;
 var
   lQry: TFDQuery;
@@ -599,9 +542,7 @@ var
 begin
   lQry := vIConexao.CriarQuery;
   lPedidoVendaModel := TPedidoVendaModel.Create(vIConexao);
-
   try
-
     lSql :=
           ' select                                                 '+#13+
           '     p.numero_ped,                                      '+#13+
@@ -632,9 +573,7 @@ begin
           '                                                        '+#13+
           ' where                                                  '+#13+
           '     p.numero_ped = '+QuotedStr(pNumeroPedido);
-
     lQry.Open(lSQL);
-
     lPedidoVendaModel.NUMERO_PED     :=  lQry.FieldByName('NUMERO_PED').AsString;
     lPedidoVendaModel.CODIGO_CLI     :=  lQry.FieldByName('CODIGO_CLI').AsString;
     lPedidoVendaModel.CODIGO_PORT    :=  lQry.FieldByName('CODIGO_PORT').AsString;
@@ -654,197 +593,76 @@ begin
     lPedidoVendaModel.TOTAL_PED      :=  lQry.FieldByName('TOTAL_PED').AsString;
     lPedidoVendaModel.STATUS_PED     :=  lQry.FieldByName('STATUS_PED').AsString;
     lPedidoVendaModel.NOME_VENDEDOR  :=  lQry.FieldByName('NOME_FUN').AsString;
-
     Result := lPedidoVendaModel;
-
   finally
     lQry.Free;
   end;
 end;
-
 procedure TPedidoVendaDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
 end;
-
 procedure TPedidoVendaDao.SetPedidoVendasLista(const Value: TObjectList<TPedidoVendaModel>);
 begin
   FPedidoVendasLista := Value;
 end;
-
 procedure TPedidoVendaDao.SetID(const Value: Variant);
 begin
   FID := Value;
 end;
-
 procedure TPedidoVendaDao.SetIDRecordView(const Value: String);
 begin
   FIDRecordView := Value;
 end;
-
 procedure TPedidoVendaDao.SetLengthPageView(const Value: String);
 begin
   FLengthPageView := Value;
 end;
-
 procedure TPedidoVendaDao.SetOrderView(const Value: String);
 begin
   FOrderView := Value;
 end;
 
 procedure TPedidoVendaDao.setParams(var pQry: TFDQuery; pPedidoVendaModel: TPedidoVendaModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('codigo_cli').Value            := ifThen(pPedidoVendaModel.CODIGO_CLI            = '', Unassigned, pPedidoVendaModel.CODIGO_CLI);
-  pQry.ParamByName('codigo_ven').Value            := ifThen(pPedidoVendaModel.CODIGO_VEN            = '', Unassigned, pPedidoVendaModel.CODIGO_VEN);
-  pQry.ParamByName('codigo_port').Value           := ifThen(pPedidoVendaModel.CODIGO_PORT           = '', Unassigned, pPedidoVendaModel.CODIGO_PORT);
-  pQry.ParamByName('codigo_tip').Value            := ifThen(pPedidoVendaModel.CODIGO_TIP            = '', Unassigned, pPedidoVendaModel.CODIGO_TIP);
-  pQry.ParamByName('data_ped').Value              := ifThen(pPedidoVendaModel.DATA_PED              = '', Unassigned, transformaDataFireBird(pPedidoVendaModel.DATA_PED));
-  pQry.ParamByName('valor_ped').Value             := ifThen(pPedidoVendaModel.VALOR_PED             = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.VALOR_PED));
-  pQry.ParamByName('desc_ped').Value              := ifThen(pPedidoVendaModel.DESC_PED              = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.DESC_PED));
-  pQry.ParamByName('acres_ped').Value             := ifThen(pPedidoVendaModel.ACRES_PED             = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.ACRES_PED));
-  pQry.ParamByName('total_ped').Value             := ifThen(pPedidoVendaModel.TOTAL_PED             = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.TOTAL_PED));
-  pQry.ParamByName('usuario_ped').Value           := ifThen(pPedidoVendaModel.USUARIO_PED           = '', Unassigned, pPedidoVendaModel.USUARIO_PED);
-  pQry.ParamByName('numero_orc').Value            := ifThen(pPedidoVendaModel.NUMERO_ORC            = '', Unassigned, pPedidoVendaModel.NUMERO_ORC);
-  pQry.ParamByName('informacoes_ped').Value       := ifThen(pPedidoVendaModel.INFORMACOES_PED       = '', Unassigned, pPedidoVendaModel.INFORMACOES_PED);
-  pQry.ParamByName('tipo_ped').Value              := ifThen(pPedidoVendaModel.TIPO_PED              = '', Unassigned, pPedidoVendaModel.TIPO_PED);
-  pQry.ParamByName('indce_ped').Value             := ifThen(pPedidoVendaModel.INDCE_PED             = '', Unassigned, pPedidoVendaModel.INDCE_PED);
-  pQry.ParamByName('cfop_id').Value               := ifThen(pPedidoVendaModel.CFOP_ID               = '', Unassigned, pPedidoVendaModel.CFOP_ID);
-  pQry.ParamByName('primeirovenc_ped').Value      := ifThen(pPedidoVendaModel.PRIMEIROVENC_PED      = '', Unassigned, transformaDataFireBird(pPedidoVendaModel.PRIMEIROVENC_PED));
-  pQry.ParamByName('valorentada_ped').Value       := ifThen(pPedidoVendaModel.VALORENTADA_PED       = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.VALORENTADA_PED));
-  pQry.ParamByName('parcelas_ped').Value          := ifThen(pPedidoVendaModel.PARCELAS_PED          = '', Unassigned, pPedidoVendaModel.PARCELAS_PED);
-  pQry.ParamByName('parcela_ped').Value           := ifThen(pPedidoVendaModel.PARCELA_PED           = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.PARCELA_PED));
-  pQry.ParamByName('status_ped').Value            := ifThen(pPedidoVendaModel.STATUS_PED            = '', Unassigned, pPedidoVendaModel.STATUS_PED);
-  pQry.ParamByName('tabjuros_ped').Value          := ifThen(pPedidoVendaModel.TABJUROS_PED          = '', Unassigned, pPedidoVendaModel.TABJUROS_PED);
-  pQry.ParamByName('contato_ped').Value           := ifThen(pPedidoVendaModel.CONTATO_PED           = '', Unassigned, pPedidoVendaModel.CONTATO_PED);
-  pQry.ParamByName('desconto_ped').Value          := ifThen(pPedidoVendaModel.DESCONTO_PED          = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.DESCONTO_PED));
-  pQry.ParamByName('ctr_impressao_ped').Value     := ifThen(pPedidoVendaModel.CTR_IMPRESSAO_PED     = '', Unassigned, pPedidoVendaModel.CTR_IMPRESSAO_PED);
-  pQry.ParamByName('frete_ped').Value             := ifThen(pPedidoVendaModel.FRETE_PED             = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.FRETE_PED));
-  pQry.ParamByName('condicoes_pag').Value         := ifThen(pPedidoVendaModel.CONDICOES_PAG         = '', Unassigned, pPedidoVendaModel.CONDICOES_PAG);
-  pQry.ParamByName('total1_ped').Value            := ifThen(pPedidoVendaModel.TOTAL1_PED            = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.TOTAL1_PED));
-  pQry.ParamByName('total2_ped').Value            := ifThen(pPedidoVendaModel.TOTAL2_PED            = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.TOTAL2_PED));
-  pQry.ParamByName('local_ped').Value             := ifThen(pPedidoVendaModel.LOCAL_PED             = '', Unassigned, pPedidoVendaModel.LOCAL_PED);
-  pQry.ParamByName('televenda_ped').Value         := ifThen(pPedidoVendaModel.TELEVENDA_PED         = '', Unassigned, pPedidoVendaModel.TELEVENDA_PED);
-  pQry.ParamByName('peso_ped').Value              := ifThen(pPedidoVendaModel.PESO_PED              = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.PESO_PED));
-  pQry.ParamByName('primeirovenc2_ped').Value     := ifThen(pPedidoVendaModel.PRIMEIROVENC2_PED     = '', Unassigned, transformaDataFireBird(pPedidoVendaModel.PRIMEIROVENC2_PED));
-  pQry.ParamByName('parcelas2_ped').Value         := ifThen(pPedidoVendaModel.PARCELAS2_PED         = '', Unassigned, pPedidoVendaModel.PARCELAS2_PED);
-  pQry.ParamByName('valor_ipi').Value             := ifThen(pPedidoVendaModel.VALOR_IPI             = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.VALOR_IPI));
-  pQry.ParamByName('condicoes2_pag').Value        := ifThen(pPedidoVendaModel.CONDICOES2_PAG        = '', Unassigned, pPedidoVendaModel.CONDICOES2_PAG);
-  pQry.ParamByName('loja').Value                  := ifThen(pPedidoVendaModel.LOJA                  = '', Unassigned, pPedidoVendaModel.LOJA);
-  pQry.ParamByName('dolar').Value                 := ifThen(pPedidoVendaModel.DOLAR                 = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.DOLAR));
-  pQry.ParamByName('ctr_exportacao').Value        := ifThen(pPedidoVendaModel.CTR_EXPORTACAO        = '', Unassigned, pPedidoVendaModel.CTR_EXPORTACAO);
-  pQry.ParamByName('numero_cf').Value             := ifThen(pPedidoVendaModel.NUMERO_CF             = '', Unassigned, pPedidoVendaModel.NUMERO_CF);
-  pQry.ParamByName('cf_aberto').Value             := ifThen(pPedidoVendaModel.CF_ABERTO             = '', Unassigned, pPedidoVendaModel.CF_ABERTO);
-  pQry.ParamByName('nao_fiscal_aberto').Value     := ifThen(pPedidoVendaModel.NAO_FISCAL_ABERTO     = '', Unassigned, pPedidoVendaModel.NAO_FISCAL_ABERTO);
-  pQry.ParamByName('hora_ped').Value              := ifThen(pPedidoVendaModel.HORA_PED              = '', Unassigned, pPedidoVendaModel.HORA_PED);
-  pQry.ParamByName('tipo_frete').Value            := ifThen(pPedidoVendaModel.TIPO_FRETE            = '', Unassigned, pPedidoVendaModel.TIPO_FRETE);
-  pQry.ParamByName('valor_pago').Value            := ifThen(pPedidoVendaModel.VALOR_PAGO            = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.VALOR_PAGO));
-  pQry.ParamByName('status').Value                := ifThen(pPedidoVendaModel.STATUS                = '', Unassigned, pPedidoVendaModel.STATUS);
-  pQry.ParamByName('data_faturado').Value         := ifThen(pPedidoVendaModel.DATA_FATURADO         = '', Unassigned, transformaDataFireBird(pPedidoVendaModel.DATA_FATURADO));
-  pQry.ParamByName('numero_nf').Value             := ifThen(pPedidoVendaModel.NUMERO_NF             = '', Unassigned, pPedidoVendaModel.NUMERO_NF);
-  pQry.ParamByName('valor_suframa').Value         := ifThen(pPedidoVendaModel.VALOR_SUFRAMA         = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.VALOR_SUFRAMA));
-  pQry.ParamByName('carga_id').Value              := ifThen(pPedidoVendaModel.CARGA_ID              = '', Unassigned, pPedidoVendaModel.CARGA_ID);
-  pQry.ParamByName('lista_noiva_id').Value        := ifThen(pPedidoVendaModel.LISTA_NOIVA_ID        = '', Unassigned, pPedidoVendaModel.LISTA_NOIVA_ID);
-  pQry.ParamByName('valor_restituicao').Value     := ifThen(pPedidoVendaModel.VALOR_RESTITUICAO     = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.VALOR_RESTITUICAO));
-  pQry.ParamByName('desconto_drg').Value          := ifThen(pPedidoVendaModel.DESCONTO_DRG          = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.DESCONTO_DRG));
-  pQry.ParamByName('status_id').Value             := ifThen(pPedidoVendaModel.STATUS_ID             = '', Unassigned, pPedidoVendaModel.STATUS_ID);
-  pQry.ParamByName('preco_venda_id').Value        := ifThen(pPedidoVendaModel.PRECO_VENDA_ID        = '', Unassigned, pPedidoVendaModel.PRECO_VENDA_ID);
-  pQry.ParamByName('rntrc').Value                 := ifThen(pPedidoVendaModel.RNTRC                 = '', Unassigned, pPedidoVendaModel.RNTRC);
-  pQry.ParamByName('placa').Value                 := ifThen(pPedidoVendaModel.PLACA                 = '', Unassigned, pPedidoVendaModel.PLACA);
-  pQry.ParamByName('peso_liquido').Value          := ifThen(pPedidoVendaModel.PESO_LIQUIDO          = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.PESO_LIQUIDO));
-  pQry.ParamByName('peso_bruto').Value            := ifThen(pPedidoVendaModel.PESO_BRUTO            = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.PESO_BRUTO));
-  pQry.ParamByName('qtde_volume').Value           := ifThen(pPedidoVendaModel.QTDE_VOLUME           = '', Unassigned, pPedidoVendaModel.QTDE_VOLUME);
-  pQry.ParamByName('especie_volume').Value        := ifThen(pPedidoVendaModel.ESPECIE_VOLUME        = '', Unassigned, pPedidoVendaModel.ESPECIE_VOLUME);
-  pQry.ParamByName('uf_transportadora').Value     := ifThen(pPedidoVendaModel.UF_TRANSPORTADORA     = '', Unassigned, pPedidoVendaModel.UF_TRANSPORTADORA);
-  pQry.ParamByName('producao_id').Value           := ifThen(pPedidoVendaModel.PRODUCAO_ID           = '', Unassigned, pPedidoVendaModel.PRODUCAO_ID);
-  pQry.ParamByName('regiao_id').Value             := ifThen(pPedidoVendaModel.REGIAO_ID             = '', Unassigned, pPedidoVendaModel.REGIAO_ID);
-  pQry.ParamByName('ordem').Value                 := ifThen(pPedidoVendaModel.ORDEM                 = '', Unassigned, pPedidoVendaModel.ORDEM);
-  pQry.ParamByName('cnpj_cpf_consumidor').Value   := ifThen(pPedidoVendaModel.CNPJ_CPF_CONSUMIDOR   = '', Unassigned, pPedidoVendaModel.CNPJ_CPF_CONSUMIDOR);
-  pQry.ParamByName('pedido_compra').Value         := ifThen(pPedidoVendaModel.PEDIDO_COMPRA         = '', Unassigned, pPedidoVendaModel.PEDIDO_COMPRA);
-  pQry.ParamByName('data_finalizado').Value       := ifThen(pPedidoVendaModel.DATA_FINALIZADO       = '', Unassigned, transformaDataFireBird(pPedidoVendaModel.DATA_FINALIZADO));
-  pQry.ParamByName('numero_senha').Value          := ifThen(pPedidoVendaModel.NUMERO_SENHA          = '', Unassigned, pPedidoVendaModel.NUMERO_SENHA);
-  pQry.ParamByName('arquiteto_id').Value          := ifThen(pPedidoVendaModel.ARQUITETO_ID          = '', Unassigned, pPedidoVendaModel.ARQUITETO_ID);
-  pQry.ParamByName('arquiteto_comissao').Value    := ifThen(pPedidoVendaModel.ARQUITETO_COMISSAO    = '', Unassigned, pPedidoVendaModel.ARQUITETO_COMISSAO);
-  pQry.ParamByName('lote_carga_id').Value         := ifThen(pPedidoVendaModel.LOTE_CARGA_ID         = '', Unassigned, pPedidoVendaModel.LOTE_CARGA_ID);
-  pQry.ParamByName('entrega').Value               := ifThen(pPedidoVendaModel.ENTREGA               = '', Unassigned, pPedidoVendaModel.ENTREGA);
-  pQry.ParamByName('valor_despesa_venda').Value   := ifThen(pPedidoVendaModel.VALOR_DESPESA_VENDA   = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.VALOR_DESPESA_VENDA));
-  pQry.ParamByName('entrega_endereco').Value      := ifThen(pPedidoVendaModel.ENTREGA_ENDERECO      = '', Unassigned, pPedidoVendaModel.ENTREGA_ENDERECO);
-  pQry.ParamByName('entrega_complemento').Value   := ifThen(pPedidoVendaModel.ENTREGA_COMPLEMENTO   = '', Unassigned, pPedidoVendaModel.ENTREGA_COMPLEMENTO);
-  pQry.ParamByName('entrega_numero').Value        := ifThen(pPedidoVendaModel.ENTREGA_NUMERO        = '', Unassigned, pPedidoVendaModel.ENTREGA_NUMERO);
-  pQry.ParamByName('entrega_bairro').Value        := ifThen(pPedidoVendaModel.ENTREGA_BAIRRO        = '', Unassigned, pPedidoVendaModel.ENTREGA_BAIRRO);
-  pQry.ParamByName('entrega_cidade').Value        := ifThen(pPedidoVendaModel.ENTREGA_CIDADE        = '', Unassigned, pPedidoVendaModel.ENTREGA_CIDADE);
-  pQry.ParamByName('entrega_cep').Value           := ifThen(pPedidoVendaModel.ENTREGA_CEP           = '', Unassigned, pPedidoVendaModel.ENTREGA_CEP);
-  pQry.ParamByName('entrega_uf').Value            := ifThen(pPedidoVendaModel.ENTREGA_UF            = '', Unassigned, pPedidoVendaModel.ENTREGA_UF);
-  pQry.ParamByName('entrega_cod_municipio').Value := ifThen(pPedidoVendaModel.ENTREGA_COD_MUNICIPIO = '', Unassigned, pPedidoVendaModel.ENTREGA_COD_MUNICIPIO);
-  pQry.ParamByName('entrega_telefone').Value      := ifThen(pPedidoVendaModel.ENTREGA_TELEFONE      = '', Unassigned, pPedidoVendaModel.ENTREGA_TELEFONE);
-  pQry.ParamByName('entrega_celular').Value       := ifThen(pPedidoVendaModel.ENTREGA_CELULAR       = '', Unassigned, pPedidoVendaModel.ENTREGA_CELULAR);
-  pQry.ParamByName('entrega_observacao').Value    := ifThen(pPedidoVendaModel.ENTREGA_OBSERVACAO    = '', Unassigned, pPedidoVendaModel.ENTREGA_OBSERVACAO);
-  pQry.ParamByName('entrega_hora').Value          := ifThen(pPedidoVendaModel.ENTREGA_HORA          = '', Unassigned, pPedidoVendaModel.ENTREGA_HORA);
-  pQry.ParamByName('entrega_contato').Value       := ifThen(pPedidoVendaModel.ENTREGA_CONTATO       = '', Unassigned, pPedidoVendaModel.ENTREGA_CONTATO);
-  pQry.ParamByName('entrega_agenda_id').Value     := ifThen(pPedidoVendaModel.ENTREGA_AGENDA_ID     = '', Unassigned, pPedidoVendaModel.ENTREGA_AGENDA_ID);
-  pQry.ParamByName('entrega_regiao_id').Value     := ifThen(pPedidoVendaModel.ENTREGA_REGIAO_ID     = '', Unassigned, pPedidoVendaModel.ENTREGA_REGIAO_ID);
-  pQry.ParamByName('entregador_id').Value         := ifThen(pPedidoVendaModel.ENTREGADOR_ID         = '', Unassigned, pPedidoVendaModel.ENTREGADOR_ID);
-  pQry.ParamByName('fatura_id').Value             := ifThen(pPedidoVendaModel.FATURA_ID             = '', Unassigned, pPedidoVendaModel.FATURA_ID);
-  pQry.ParamByName('datahora_impresso').Value     := ifThen(pPedidoVendaModel.DATAHORA_IMPRESSO     = '', Unassigned, pPedidoVendaModel.DATAHORA_IMPRESSO);
-  pQry.ParamByName('ctr_impressao_itens').Value   := ifThen(pPedidoVendaModel.CTR_IMPRESSAO_ITENS   = '', Unassigned, pPedidoVendaModel.CTR_IMPRESSAO_ITENS);
-  pQry.ParamByName('reservado').Value             := ifThen(pPedidoVendaModel.RESERVADO             = '', Unassigned, pPedidoVendaModel.RESERVADO);
-  pQry.ParamByName('patrimonio_observacao').Value := ifThen(pPedidoVendaModel.PATRIMONIO_OBSERVACAO = '', Unassigned, pPedidoVendaModel.PATRIMONIO_OBSERVACAO);
-  pQry.ParamByName('obs_geral').Value             := ifThen(pPedidoVendaModel.OBS_GERAL             = '', Unassigned, pPedidoVendaModel.OBS_GERAL);
-  pQry.ParamByName('sms').Value                   := ifThen(pPedidoVendaModel.SMS                   = '', Unassigned, pPedidoVendaModel.SMS);
-  pQry.ParamByName('imp_ticket').Value            := ifThen(pPedidoVendaModel.IMP_TICKET            = '', Unassigned, pPedidoVendaModel.IMP_TICKET);
-  pQry.ParamByName('comanda').Value               := ifThen(pPedidoVendaModel.COMANDA               = '', Unassigned, pPedidoVendaModel.COMANDA);
-  pQry.ParamByName('valor_taxa_servico').Value    := ifThen(pPedidoVendaModel.VALOR_TAXA_SERVICO    = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.VALOR_TAXA_SERVICO));
-  pQry.ParamByName('vfcpufdest').Value            := ifThen(pPedidoVendaModel.VFCPUFDEST            = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.VFCPUFDEST));
-  pQry.ParamByName('vicmsufdest').Value           := ifThen(pPedidoVendaModel.VICMSUFDEST           = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.VICMSUFDEST));
-  pQry.ParamByName('vicmsufremet').Value          := ifThen(pPedidoVendaModel.VICMSUFREMET          = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.VICMSUFREMET));
-  pQry.ParamByName('entregue').Value              := ifThen(pPedidoVendaModel.ENTREGUE              = '', Unassigned, pPedidoVendaModel.ENTREGUE);
-  pQry.ParamByName('indicacao_id').Value          := ifThen(pPedidoVendaModel.INDICACAO_ID          = '', Unassigned, pPedidoVendaModel.INDICACAO_ID);
-  pQry.ParamByName('zerar_st').Value              := ifThen(pPedidoVendaModel.ZERAR_ST              = '', Unassigned, pPedidoVendaModel.ZERAR_ST);
-  pQry.ParamByName('pedido_vidracaria').Value     := ifThen(pPedidoVendaModel.PEDIDO_VIDRACARIA     = '', Unassigned, pPedidoVendaModel.PEDIDO_VIDRACARIA);
-  pQry.ParamByName('chave_xml_nf').Value          := ifThen(pPedidoVendaModel.CHAVE_XML_NF          = '', Unassigned, pPedidoVendaModel.CHAVE_XML_NF);
-  pQry.ParamByName('arquivo_xml_nf').Value        := ifThen(pPedidoVendaModel.ARQUIVO_XML_NF        = '', Unassigned, pPedidoVendaModel.ARQUIVO_XML_NF);
-  pQry.ParamByName('gerente_id').Value            := ifThen(pPedidoVendaModel.GERENTE_ID            = '', Unassigned, pPedidoVendaModel.GERENTE_ID);
-  pQry.ParamByName('entrada_portador_id').Value   := ifThen(pPedidoVendaModel.ENTRADA_PORTADOR_ID   = '', Unassigned, pPedidoVendaModel.ENTRADA_PORTADOR_ID);
-  pQry.ParamByName('data_cotacao').Value          := ifThen(pPedidoVendaModel.DATA_COTACAO          = '', Unassigned, transformaDataFireBird(pPedidoVendaModel.DATA_COTACAO));
-  pQry.ParamByName('tipo_comissao').Value         := ifThen(pPedidoVendaModel.TIPO_COMISSAO         = '', Unassigned, pPedidoVendaModel.TIPO_COMISSAO);
-  pQry.ParamByName('gerente_tipo_comissao').Value := ifThen(pPedidoVendaModel.GERENTE_TIPO_COMISSAO = '', Unassigned, pPedidoVendaModel.GERENTE_TIPO_COMISSAO);
-  pQry.ParamByName('pos_venda').Value             := ifThen(pPedidoVendaModel.POS_VENDA             = '', Unassigned, pPedidoVendaModel.POS_VENDA);
-  pQry.ParamByName('vlr_garantia').Value          := ifThen(pPedidoVendaModel.VLR_GARANTIA          = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.VLR_GARANTIA));
-  pQry.ParamByName('web_pedido_id').Value         := ifThen(pPedidoVendaModel.WEB_PEDIDO_ID         = '', Unassigned, pPedidoVendaModel.WEB_PEDIDO_ID);
-  pQry.ParamByName('laca_ou_glass').Value         := ifThen(pPedidoVendaModel.LACA_OU_GLASS         = '', Unassigned, pPedidoVendaModel.LACA_OU_GLASS);
-  pQry.ParamByName('vfcpst').Value                := ifThen(pPedidoVendaModel.VFCPST                = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.VFCPST));
-  pQry.ParamByName('montagem_data').Value         := ifThen(pPedidoVendaModel.MONTAGEM_DATA         = '', Unassigned, transformaDataFireBird(pPedidoVendaModel.MONTAGEM_DATA));
-  pQry.ParamByName('montagem_hora').Value         := ifThen(pPedidoVendaModel.MONTAGEM_HORA         = '', Unassigned, pPedidoVendaModel.MONTAGEM_HORA);
-  pQry.ParamByName('vicmsdeson').Value            := ifThen(pPedidoVendaModel.VICMSDESON            = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.VICMSDESON));
-  pQry.ParamByName('qtdeitens').Value             := ifThen(pPedidoVendaModel.QTDEITENS             = '', Unassigned, FormataFloatFireBird(pPedidoVendaModel.QTDEITENS));
-  pQry.ParamByName('ctr_envio_pedido').Value      := ifThen(pPedidoVendaModel.CTR_ENVIO_PEDIDO      = '', Unassigned, pPedidoVendaModel.CTR_ENVIO_PEDIDO);
-  pQry.ParamByName('ctr_envio_boleto').Value      := ifThen(pPedidoVendaModel.CTR_ENVIO_BOLETO      = '', Unassigned, pPedidoVendaModel.CTR_ENVIO_BOLETO);
-  pQry.ParamByName('ctr_envio_nfe').Value         := ifThen(pPedidoVendaModel.CTR_ENVIO_NFE         = '', Unassigned, pPedidoVendaModel.CTR_ENVIO_NFE);
-  pQry.ParamByName('datahora_coleta').Value       := ifThen(pPedidoVendaModel.DATAHORA_COLETA       = '', Unassigned, pPedidoVendaModel.DATAHORA_COLETA);
-  pQry.ParamByName('datahora_retirada').Value     := ifThen(pPedidoVendaModel.DATAHORA_RETIRADA     = '', Unassigned, pPedidoVendaModel.DATAHORA_RETIRADA);
-  pQry.ParamByName('cfop_nf').Value               := ifThen(pPedidoVendaModel.CFOP_NF               = '', Unassigned, pPedidoVendaModel.CFOP_NF);
-  pQry.ParamByName('form').Value                  := ifThen(pPedidoVendaModel.FORM                  = '', Unassigned, pPedidoVendaModel.FORM);
+  lTabela := vConstrutor.getColumns('PEDIDOVENDA');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TPedidoVendaModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPedidoVendaModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pPedidoVendaModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TPedidoVendaDao.SetStartRecordView(const Value: String);
 begin
   FStartRecordView := Value;
 end;
-
 procedure TPedidoVendaDao.SetTotalRecords(const Value: Integer);
 begin
   FTotalRecords := Value;
 end;
-
 procedure TPedidoVendaDao.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
 end;
-
 function TPedidoVendaDao.statusPedido(pId: String): String;
 begin
   Result := vIConexao
               .getConnection
               .ExecSQLScalar('select status_ped from pedidovenda where numero_ped = '+ QuotedStr(pId));
 end;
-
 end.

@@ -1,0 +1,169 @@
+﻿unit Terasoft.Utils;
+
+interface
+
+uses
+  Classes,
+  StrUtils,
+  SysUtils,
+  MaskUtils,
+  Vcl.Imaging.pngimage,
+  Vcl.ExtCtrls,
+  Soap.EncdDecd,
+  IdHTTP,
+  IdBaseComponent,
+  IdComponent,
+  IdTCPConnection,
+  IdTCPClient,
+  Winapi.Windows,
+  Vcl.Graphics,
+  Vcl.StdCtrls,
+  JPeg,
+  Data.DB,
+  FireDAC.Comp.Client,
+  GIFImage;
+
+  function IIF(Expressao: Variant; ParteTRUE, ParteFALSE: Variant): Variant;
+  procedure Base64ToImage(data, path: string);
+  function CheckFileOnlineExists(const OnlineFile: string; var Size: Int64): Boolean;
+  function CalculaMargem(pCusto, pVenda: Double): Double;
+  function IgualZero(pValue: Variant): Boolean;
+  function DiferenteZero(pValue: Variant): Boolean;
+  function MaiorQueZero(pValue: Variant): Boolean;
+  procedure CriaException(pMSG: String);
+  function Base64ToImagePNG(pBase64PNG: string):TMemoryStream;
+
+implementation
+
+uses
+  {$IFDEF VCL}
+    LbString,
+  {$ENDIF}
+  Terasoft.Types;
+
+function Base64ToImagePNG(pBase64PNG: string):TMemoryStream;
+var
+  stream: TMemoryStream;
+  bytes: TBytes;
+  png: TPNGImage;
+  x: integer;
+  d: string;
+begin
+
+  try
+    x := pos(',', pBase64PNG);
+    d := copy(pBase64PNG, x + 1, Length(pBase64PNG));
+    bytes := decodebase64(d);
+
+    if Length(bytes) > 0 then
+    begin
+      stream := TMemoryStream.Create;
+      stream.WriteData(bytes, Length(bytes));
+      stream.Position := 0;
+      png := TPNGImage.Create;
+      png.LoadFromStream(stream);
+      png.SaveToFile('c:\sci\teste.png');
+      png.SaveToStream(Result);
+     // Result := stream;
+    end;
+
+  finally
+   png.Destroy;
+   stream.Free;
+  end;
+
+end;
+
+function MaiorQueZero(pValue: Variant): Boolean;
+begin
+  Result := pValue > 0;
+end;
+
+function DiferenteZero(pValue: Variant): Boolean;
+begin
+  Result := pValue <> 0;
+end;
+
+function IgualZero(pValue: Variant): Boolean;
+begin
+  Result := pValue = 0;
+end;
+
+procedure CriaException(pMSG: String);
+begin
+  raise Exception.Create(pMSG);
+end;
+
+function CalculaMargem(pCusto, pVenda: Double): Double;
+begin
+  if (pVenda > 0) and (pCusto > 0) then
+    Result := (pCusto * 100) / pVenda
+  else
+    Result := 0;
+end;
+
+
+function IIF(Expressao: Variant; ParteTRUE, ParteFALSE: Variant): Variant;
+begin
+  if Expressao then
+   Result := ParteTRUE
+  else
+   Result := ParteFALSE;
+end;
+
+procedure Base64ToImage(data, path: string);
+var
+  stream: TMemoryStream;
+  bytes: TBytes;
+  png: TPNGImage;
+  x: integer;
+  d: string;
+begin
+  x := pos(',', data);
+  d := copy(data, x + 1, 9165536);
+  bytes := decodebase64(d);
+
+  if Length(bytes) > 0 then
+  begin
+    stream := TMemoryStream.Create;
+    stream.WriteData(bytes, Length(bytes));
+    stream.Position := 0;
+    png := TPNGImage.Create;
+    png.LoadFromStream(stream);
+    png.SaveToFile(path);
+    png.Destroy;
+  end;
+  stream.Free;
+end;
+
+
+function CheckFileOnlineExists(const OnlineFile: string; var Size: Int64): Boolean;
+var
+ IdHttp: TIdHTTP;
+begin
+  try
+    IdHttp := TIdHTTP.Create(nil);
+    try
+      IdHttp.Head(OnlineFile);
+      Size := IdHttp.Response.ContentLength;
+      if Size > 0 then
+        Result := True
+      else
+        Result := False;
+
+    except on E: EIdHTTPProtocolException do
+      begin
+        // Fazer algo aqui caso você queira tratar alguma exceção do IdHttp
+        Result := False;
+      end;
+    end;
+
+  finally
+    IdHttp.Free;
+  end;
+end;
+
+
+end.
+
+

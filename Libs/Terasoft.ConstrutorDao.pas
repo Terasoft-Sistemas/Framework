@@ -6,6 +6,7 @@ uses
   FireDAC.Comp.Client,
   System.Classes,
   Data.DB,
+  Terasoft.FuncoesTexto,
   Interfaces.Conexao;
 
 type
@@ -23,6 +24,8 @@ type
     procedure atribuirRegistros(pSource: TDataSet; var pDest: TFDMemTable); overload;
     function atribuirRegistros(pSource: TDataSet): TFDMemTable; overload;
     function getColumns(pTabela: String): TFDMemTable;
+    function getValue(pTabela: TFDMemTable; pColumn: String; pValue: String ): String;
+    function getSQL(pSource: TFDQuery): String;
 
   	constructor Create(pIConexao: IConexao);
     destructor Destroy; override;
@@ -31,7 +34,7 @@ type
 implementation
 
 uses
-  System.SysUtils, System.StrUtils;
+  System.SysUtils, System.StrUtils, Vcl.Dialogs;
 
 { TGeradorModel }
 
@@ -69,7 +72,8 @@ begin
   pQry.First;
   while not pQry.eof do
   begin
-    if (pQry.FieldByName('NOME').AsString <> 'SYSTIME') and (pQry.FieldByName('COMPUTED').AsString = 'N') and
+    if not AnsiMatchStr(pQry.FieldByName('NOME').AsString, ['SYSTIME', 'FORM']) and
+       (pQry.FieldByName('COMPUTED').AsString = 'N') and
        ((pQry.FieldByName('NOME').AsString <> 'ID') or (pGerarID = true)) then
 
       lFields.Add(pQry.FieldByName('NOME').AsString);
@@ -188,6 +192,39 @@ begin
   finally
     lQry.Free;
   end;
+end;
+
+function TConstrutorDao.getSQL(pSource: TFDQuery): String;
+var
+  lSql  : String;
+  i     : Integer;
+
+begin
+  lSql := pSource.SQL.Text;
+
+  for i := 0 to pSource.Params.Count -1 do
+  begin
+    lSql := StringReplace(lSql, ':'+pSource.Params[i].Name+',', QuotedStr(pSource.Params[i].Value)+',', []);
+  end;
+  ShowMessage('Query: ' + lSql);
+  Result := lSql;
+end;
+
+function TConstrutorDao.getValue(pTabela: TFDMemTable; pColumn, pValue: String): String;
+begin
+  if pTabela.Locate('NOME', pColumn) then
+  begin
+    if AnsiMatchStr(pTabela.FieldByName('TIPO').AsString, ['INT64', 'FLOAT', 'NUMERIC']) then
+      Result := FormataFloatFireBird(pValue)
+    else if pTabela.FieldByName('TIPO').AsString = 'DATE' then
+      Result := transformaDataFireBird(pValue)
+    else if pTabela.FieldByName('TIPO').AsString = 'TIMESTAMP' then
+      Result := transformaDataHoraFireBird(pValue)
+    else
+      Result := pValue;
+  end
+  else
+    Result := pValue;
 end;
 
 function TConstrutorDao.queryTabela(pTabela: String): String;
