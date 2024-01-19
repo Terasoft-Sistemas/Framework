@@ -11,7 +11,8 @@ uses
   System.Variants,
   Terasoft.FuncoesTexto,
   Interfaces.Conexao,
-  Terasoft.ConstrutorDao;
+  Terasoft.ConstrutorDao,
+  Terasoft.Utils;
 
 type
   TAdmCartaoDao = class
@@ -68,6 +69,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TAdmCartao }
 
@@ -314,21 +318,27 @@ begin
 end;
 
 procedure TAdmCartaoDao.setParams(var pQry: TFDQuery; pAdmCartaoModel: TAdmCartaoModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('nome_adm').Value               := ifThen(pAdmCartaoModel.NOME_ADM               = '', Unassigned, pAdmCartaoModel.NOME_ADM);
-  pQry.ParamByName('credito_adm').Value            := ifThen(pAdmCartaoModel.CREDITO_ADM            = '', Unassigned, pAdmCartaoModel.CREDITO_ADM);
-  pQry.ParamByName('debito_adm').Value             := ifThen(pAdmCartaoModel.DEBITO_ADM             = '', Unassigned, pAdmCartaoModel.DEBITO_ADM);
-  pQry.ParamByName('parcelado_adm').Value          := ifThen(pAdmCartaoModel.PARCELADO_ADM          = '', Unassigned, pAdmCartaoModel.PARCELADO_ADM);
-  pQry.ParamByName('status').Value                 := ifThen(pAdmCartaoModel.STATUS                 = '', Unassigned, pAdmCartaoModel.STATUS);
-  pQry.ParamByName('comissao_adm').Value           := ifThen(pAdmCartaoModel.COMISSAO_ADM           = '', Unassigned, FormataFloatFireBird(pAdmCartaoModel.COMISSAO_ADM));
-  pQry.ParamByName('loja').Value                   := ifThen(pAdmCartaoModel.LOJA                   = '', Unassigned, pAdmCartaoModel.LOJA);
-  pQry.ParamByName('gerenciador').Value            := ifThen(pAdmCartaoModel.GERENCIADOR            = '', Unassigned, pAdmCartaoModel.GERENCIADOR);
-  pQry.ParamByName('vencimento_dia_semana').Value  := ifThen(pAdmCartaoModel.VENCIMENTO_DIA_SEMANA  = '', Unassigned, pAdmCartaoModel.VENCIMENTO_DIA_SEMANA);
-  pQry.ParamByName('portador_id').Value            := ifThen(pAdmCartaoModel.PORTADOR_ID            = '', Unassigned, pAdmCartaoModel.PORTADOR_ID);
-  pQry.ParamByName('imagem').Value                 := ifThen(pAdmCartaoModel.IMAGEM                 = '', Unassigned, pAdmCartaoModel.IMAGEM);
-  pQry.ParamByName('taxa').Value                   := ifThen(pAdmCartaoModel.TAXA                   = '', Unassigned, FormataFloatFireBird(pAdmCartaoModel.TAXA));
-  pQry.ParamByName('nome_web').Value               := ifThen(pAdmCartaoModel.NOME_WEB               = '', Unassigned, pAdmCartaoModel.NOME_WEB);
-  pQry.ParamByName('conciliadora_id').Value        := ifThen(pAdmCartaoModel.CONCILIADORA_ID        = '', Unassigned, pAdmCartaoModel.CONCILIADORA_ID);
+  lTabela := vConstrutor.getColumns('ADMCARTAO');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TAdmCartaoModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pAdmCartaoModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pAdmCartaoModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TAdmCartaoDao.SetStartRecordView(const Value: String);
