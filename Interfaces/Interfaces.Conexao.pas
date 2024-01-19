@@ -13,6 +13,8 @@ interface
       function Generetor(pValue: String)               : String;
       function getConnection                           : TFDConnection;
       function getLojaConectada                        : String;
+      function DataServer                              : TDate;
+      function HoraServer                              : TTime;
     end;
 
 implementation

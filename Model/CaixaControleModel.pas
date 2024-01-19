@@ -6,7 +6,6 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Terasoft.Utils,
-  VariaveisGlobais,
   CaixaModel,
   Interfaces.Conexao;
 
@@ -79,12 +78,12 @@ type
     procedure obterLista;
     procedure ultimosCaixa(pUsuario: String);
 
-    procedure InicializarCaixa(pValor: Double);
-    function FecharCaixa : String;
-    function CaixaAberto(pUsuario: String): String; overload;
-    function CaixaAberto: Boolean; overload;
-    procedure Sangria(pValor: Double);
-    procedure Suprimento(pValor: Double);
+    procedure InicializarCaixa(pValor: Double; pUsuario: String; pLoja: String);
+    function FecharCaixa(pUsuario: String) : String;
+    function CaixaAberto(pUsuario: String): String;
+    function VerificaCaixaAberto(pUsuario: String): Boolean;
+    procedure Sangria(pValor: Double; pUsuario: String; pLoja: String);
+    procedure Suprimento(pValor: Double; pUsuario: String; pLoja: String);
 
     function ultimoCaixa(pUsuario: String) : String;
     function dataFechamento(pIdCaixa, pUsuario: String): String;
@@ -103,7 +102,7 @@ type
 implementation
 
 uses
-  CaixaControleDao, System.SysUtils;
+  CaixaControleDao, System.SysUtils, UsuarioModel;
 
 { TCaixaControleModel }
 
@@ -131,9 +130,9 @@ begin
   end;
 end;
 
-function TCaixaControleModel.CaixaAberto: Boolean;
+function TCaixaControleModel.VerificaCaixaAberto(pUsuario: String): Boolean;
 begin
-  Result := self.CaixaAberto(VariaveisGlobais.xUsuarioID) <> '';
+  Result := self.CaixaAberto(pUsuario) <> '';
 end;
 
 constructor TCaixaControleModel.Create(pIConexao : IConexao);
@@ -159,7 +158,7 @@ begin
   inherited;
 end;
 
-function TCaixaControleModel.FecharCaixa : String;
+function TCaixaControleModel.FecharCaixa(pUsuario: String) : String;
 var
   lCaixaControleDao  : TCaixaControleDao;
   lCaixaAberto,
@@ -172,7 +171,7 @@ begin
   try
     lCaixaControleDao.WhereView := ' and caixa_ctr.status = ''I''     '+
                                    ' and caixa_ctr.data_fecha is null '+
-                                   ' and caixa_ctr.usuario = '+ QuotedStr(VariaveisGlobais.xUsuarioID);
+                                   ' and caixa_ctr.usuario = '+ QuotedStr(pUsuario);
     lCaixaControleDao.obterLista;
 
     if lCaixaControleDao.TotalRecords = 0 then
@@ -181,14 +180,14 @@ begin
     lCaixaAberto := lCaixaControleDao.CaixaControlesLista[0];
 
     lCaixaAberto.Acao       := tacAlterar;
-    lCaixaAberto.data_fecha := DateToStr(xConexao.DataServer);
+    lCaixaAberto.data_fecha := DateToStr(vIConexao.DataServer);
     lCaixaAberto.Salvar;
 
     lCaixaFechamento.Acao    := tacIncluir;
-    lCaixaFechamento.data    := DateToStr(xConexao.DataServer);
+    lCaixaFechamento.data    := DateToStr(vIConexao.DataServer);
     lCaixaFechamento.status  := 'F';
-    lCaixaFechamento.usuario := VariaveisGlobais.xUsuarioID;
-    lCaixaFechamento.hora    := TimeToStr(xConexao.HoraServer);
+    lCaixaFechamento.usuario := pUsuario;
+    lCaixaFechamento.hora    := TimeToStr(vIConexao.HoraServer);
     lCaixaFechamento.Salvar;
 
     Result := lCaixaAberto.id;
@@ -200,25 +199,31 @@ begin
   end;
 end;
 
-procedure TCaixaControleModel.InicializarCaixa(pValor: Double);
+procedure TCaixaControleModel.InicializarCaixa(pValor: Double; pUsuario: String; pLoja: String);
 var
-  lCaixaModel : TCaixaModel;
+  lCaixaModel   : TCaixaModel;
+  lUsuarioModel : TUsuarioModel;
+  lNomeUsuario  : String;
+
 begin
   self.Acao    := tacIncluir;
-  self.DATA    := DateToStr(xConexao.DataServer);
+  self.DATA    := DateToStr(vIConexao.DataServer);
   self.STATUS  := 'I';
-  self.USUARIO := VariaveisGLobais.xUsuarioID;
-  self.HORA    := TimeToStr(xConexao.HoraServer);
+  self.USUARIO := pUsuario;
+  self.HORA    := TimeToStr(vIConexao.HoraServer);
   self.Salvar;
 
-  lCaixaModel := TCaixaModel.Create(vIConexao);
+  lCaixaModel   := TCaixaModel.Create(vIConexao);
+  lUsuarioModel := TUsuarioModel.Create(vIConexao);
 
   try
+    lNomeUsuario := lUsuarioModel.nomeUsuario(pUsuario);
+
     lCaixaModel.CODIGO_CTA        := '500000';
-    lCaixaModel.DATA_CAI          := DateToStr(xConexao.DataServer);
-    lCaixaModel.HISTORICO_CAI     := 'Inicialização '+ VariaveisGLobais.xUsuarioNome +' '+ TimeToStr(xConexao.HoraServer);
+    lCaixaModel.DATA_CAI          := DateToStr(vIConexao.DataServer);
+    lCaixaModel.HISTORICO_CAI     := 'Inicialização '+ lNomeUsuario +' '+ TimeToStr(vIConexao.HoraServer);
     lCaixaModel.VALOR_CAI         := FloatToStr(pValor);
-    lCaixaModel.USUARIO_CAI       := VariaveisGLobais.xUsuarioID;
+    lCaixaModel.USUARIO_CAI       := pUsuario;
     lCaixaModel.TIPO_CAI          := 'C';
     lCaixaModel.CLIENTE_CAI       := '';
     lCaixaModel.NUMERO_PED        := '999999';
@@ -227,12 +232,12 @@ begin
     lCaixaModel.STATUS            := '';
     lCaixaModel.PORTADOR_CAI      := '000004';
     lCaixaModel.CONCILIADO_CAI    := '.';
-    lCaixaModel.LOJA              := VariaveisGLobais.xEmpresaLoja;
+    lCaixaModel.LOJA              := pLoja;
 
     lCaixaModel.Acao := tacIncluir;
     lCaixaModel.Salvar;
 
-    lCaixaModel.HISTORICO_CAI     := 'Transferencia '+ VariaveisGLobais.xUsuarioNome +' '+ TimeToStr(xConexao.HoraServer);
+    lCaixaModel.HISTORICO_CAI     := 'Transferencia '+ lNomeUsuario +' '+ TimeToStr(vIConexao.HoraServer);
     lCaixaModel.USUARIO_CAI       := '000000';
     lCaixaModel.TIPO_CAI          := 'D';
 
@@ -241,6 +246,7 @@ begin
 
   finally
     lCaixaModel.Free;
+    lUsuarioModel.Free;
   end;
 
 end;
@@ -290,18 +296,20 @@ begin
   end;
 end;
 
-procedure TCaixaControleModel.Sangria(pValor: Double);
+procedure TCaixaControleModel.Sangria(pValor: Double; pUsuario: String; pLoja: String);
 var
-  lCaixaModel : TCaixaModel;
+  lCaixaModel   : TCaixaModel;
+  lUsuarioModel : TUsuarioModel;
 begin
-  lCaixaModel := TCaixaModel.Create(vIConexao);
+  lCaixaModel   := TCaixaModel.Create(vIConexao);
+  lUsuarioModel := TUsuarioModel.Create(vIConexao);
 
   try
     lCaixaModel.CODIGO_CTA          := '400000';
-    lCaixaModel.DATA_CAI            := DateToStr(xConexao.DataServer);
-    lCaixaModel.HISTORICO_CAI       := 'Sangria '+ VariaveisGlobais.xUsuarioNome + ' ' + TimeToStr(xConexao.HoraServer);
+    lCaixaModel.DATA_CAI            := DateToStr(vIConexao.DataServer);
+    lCaixaModel.HISTORICO_CAI       := 'Sangria '+ lUsuarioModel.nomeUsuario(pUsuario) + ' ' + TimeToStr(vIConexao.HoraServer);
     lCaixaModel.VALOR_CAI           := FloatToStr(pValor);
-    lCaixaModel.USUARIO_CAI         := VariaveisGlobais.xUsuarioID;
+    lCaixaModel.USUARIO_CAI         := pUsuario;
     lCaixaModel.TIPO_CAI            := 'D';
     lCaixaModel.CLIENTE_CAI         := '';
     lCaixaModel.NUMERO_PED          := '999999';
@@ -310,7 +318,7 @@ begin
     lCaixaModel.STATUS              := '';
     lCaixaModel.PORTADOR_CAI        := '000004';
     lCaixaModel.CONCILIADO_CAI      := '.';
-    lCaixaModel.LOJA                := VariaveisGlobais.xEmpresaLoja;
+    lCaixaModel.LOJA                := pLoja;
 
     lCaixaModel.Acao := tacIncluir;
     lCaixaModel.Salvar;
@@ -323,6 +331,7 @@ begin
 
   finally
     lCaixaModel.Free;
+    lUsuarioModel.Free;
   end;
 end;
 
@@ -431,18 +440,20 @@ begin
   FWhereView := Value;
 end;
 
-procedure TCaixaControleModel.Suprimento(pValor: Double);
+procedure TCaixaControleModel.Suprimento(pValor: Double; pUsuario: String; pLoja: String);
 var
-  lCaixaModel : TCaixaModel;
+  lCaixaModel   : TCaixaModel;
+  lUsuarioModel : TUsuarioModel;
 begin
-  lCaixaModel := TCaixaModel.Create(vIConexao);
+  lCaixaModel   := TCaixaModel.Create(vIConexao);
+  lUsuarioModel := TUsuarioModel.Create(vIConexao);
 
   try
     lCaixaModel.CODIGO_CTA          := '400000';
-    lCaixaModel.DATA_CAI            := DateToStr(xConexao.DataServer);
-    lCaixaModel.HISTORICO_CAI       := 'Suprimento '+ VariaveisGlobais.xUsuarioNome + ' ' + TimeToStr(xConexao.HoraServer);
+    lCaixaModel.DATA_CAI            := DateToStr(vIConexao.DataServer);
+    lCaixaModel.HISTORICO_CAI       := 'Suprimento '+ lUsuarioModel.nomeUsuario(pUsuario) + ' ' + TimeToStr(vIConexao.HoraServer);
     lCaixaModel.VALOR_CAI           := FloatToStr(pValor);
-    lCaixaModel.USUARIO_CAI         := VariaveisGlobais.xUsuarioID;
+    lCaixaModel.USUARIO_CAI         := pUsuario;
     lCaixaModel.TIPO_CAI            := 'C';
     lCaixaModel.CLIENTE_CAI         := '';
     lCaixaModel.NUMERO_PED          := '999999';
@@ -451,7 +462,7 @@ begin
     lCaixaModel.STATUS              := '';
     lCaixaModel.PORTADOR_CAI        := '000004';
     lCaixaModel.CONCILIADO_CAI      := '.';
-    lCaixaModel.LOJA                := VariaveisGlobais.xEmpresaLoja;
+    lCaixaModel.LOJA                := pLoja;
 
     lCaixaModel.Acao := tacIncluir;
     lCaixaModel.Salvar;
@@ -464,6 +475,7 @@ begin
 
   finally
     lCaixaModel.Free;
+    lUsuarioModel.Free;
   end;
 end;
 

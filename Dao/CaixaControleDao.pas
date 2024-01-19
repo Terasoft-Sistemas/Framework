@@ -109,7 +109,7 @@ begin
 
   lQry := vIConexao.CriarQuery;
 
-  lSQL := vConstrutor.gerarInsert('CTR_CAIXA','ID', True);
+  lSQL := vConstrutor.gerarInsert('CAIXA_CTR','ID', True);
 
   try
     lQry.SQL.Add(lSQL);
@@ -134,7 +134,7 @@ begin
 
   lQry     := vIConexao.CriarQuery;
 
-  lSQL     := vConstrutor.gerarUpdate('CTR_CAIXA','ID');
+  lSQL     := vConstrutor.gerarUpdate('CAIXA_CTR','ID');
 
   try
     lQry.SQL.Add(lSQL);
@@ -159,7 +159,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from CTR_CAIXA where ID = :ID',[ACaixaControleModel.ID]);
+   lQry.ExecSQL('delete from caixa_ctr where ID = :ID',[ACaixaControleModel.ID]);
    lQry.ExecSQL;
    Result := ACaixaControleModel.ID;
 
@@ -191,7 +191,7 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From CTR_CAIXA where 1=1 ';
+    lSql := 'select count(*) records From caixa_ctr where 1=1 ';
 
     lSql := lSql + where;
 
@@ -301,7 +301,7 @@ var
   lProp   : TRttiProperty;
   i       : Integer;
 begin
-  lTabela := vConstrutor.getColumns('CTR_CAIXA');
+  lTabela := vConstrutor.getColumns('CAIXA_CTR');
 
   lCtx := TRttiContext.Create;
   try
