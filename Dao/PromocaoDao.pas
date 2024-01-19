@@ -10,7 +10,8 @@ uses
   System.Generics.Collections,
   System.Variants,
   Interfaces.Conexao,
-  Terasoft.ConstrutorDao;
+  Terasoft.ConstrutorDao,
+  Terasoft.Utils;
 
 type
   TPromocaoDao = class
@@ -66,6 +67,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TPromocao }
 
@@ -276,25 +280,27 @@ begin
 end;
 
 procedure TPromocaoDao.setParams(var pQry: TFDQuery; pPromocaoModel: TPromocaoModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('DESCRICAO').Value        := ifThen(pPromocaoModel.DESCRICAO        = '', Unassigned, pPromocaoModel.DESCRICAO);
-  pQry.ParamByName('DATA').Value             := ifThen(pPromocaoModel.DATA             = '', Unassigned, pPromocaoModel.DATA);
-  pQry.ParamByName('DATAINICIO').Value       := ifThen(pPromocaoModel.DATAINICIO       = '', Unassigned, pPromocaoModel.DATAINICIO);
-  pQry.ParamByName('DATAFIM').Value          := ifThen(pPromocaoModel.DATAFIM          = '', Unassigned, pPromocaoModel.DATAFIM);
-  pQry.ParamByName('CLIENTE_ID').Value       := ifThen(pPromocaoModel.CLIENTE_ID       = '', Unassigned, pPromocaoModel.CLIENTE_ID);
-  pQry.ParamByName('PRECO_VENDA_ID').Value   := ifThen(pPromocaoModel.PRECO_VENDA_ID   = '', Unassigned, pPromocaoModel.PRECO_VENDA_ID);
-  pQry.ParamByName('HORAINICIO').Value       := ifThen(pPromocaoModel.HORAINICIO       = '', Unassigned, pPromocaoModel.HORAINICIO);
-  pQry.ParamByName('HORAFIM').Value          := ifThen(pPromocaoModel.HORAFIM          = '', Unassigned, pPromocaoModel.HORAFIM);
-  pQry.ParamByName('DOMINGO').Value          := ifThen(pPromocaoModel.DOMINGO          = '', Unassigned, pPromocaoModel.DOMINGO);
-  pQry.ParamByName('SEGUNDA').Value          := ifThen(pPromocaoModel.SEGUNDA          = '', Unassigned, pPromocaoModel.SEGUNDA);
-  pQry.ParamByName('TERCA').Value            := ifThen(pPromocaoModel.TERCA            = '', Unassigned, pPromocaoModel.TERCA);
-  pQry.ParamByName('QUARTA').Value           := ifThen(pPromocaoModel.QUARTA           = '', Unassigned, pPromocaoModel.QUARTA);
-  pQry.ParamByName('QUINTA').Value           := ifThen(pPromocaoModel.QUINTA           = '', Unassigned, pPromocaoModel.QUINTA);
-  pQry.ParamByName('SEXTA').Value            := ifThen(pPromocaoModel.SEXTA            = '', Unassigned, pPromocaoModel.SEXTA);
-  pQry.ParamByName('SABADO').Value           := ifThen(pPromocaoModel.SABADO           = '', Unassigned, pPromocaoModel.SABADO);
-  pQry.ParamByName('PORTADOR_ID').Value      := ifThen(pPromocaoModel.PORTADOR_ID      = '', Unassigned, pPromocaoModel.PORTADOR_ID);
-  pQry.ParamByName('LOJA').Value             := ifThen(pPromocaoModel.LOJA             = '', Unassigned, pPromocaoModel.LOJA);
-  pQry.ParamByName('TIPO_ABATIMENTO').Value  := ifThen(pPromocaoModel.TIPO_ABATIMENTO  = '', Unassigned, pPromocaoModel.TIPO_ABATIMENTO);
+  lTabela := vConstrutor.getColumns('PROMOCAO');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TPromocaoModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPromocaoModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pPromocaoModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TPromocaoDao.SetStartRecordView(const Value: String);

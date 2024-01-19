@@ -1,7 +1,5 @@
 unit PortadorDao;
-
 interface
-
 uses
   PortadorModel,
   Terasoft.ConstrutorDao,
@@ -10,11 +8,11 @@ uses
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
+  Terasoft.Utils,
   Interfaces.Conexao;
 
 type
   TPortadorDao = class
-
   private
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
@@ -37,12 +35,9 @@ type
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-
     procedure setParams(var pQry: TFDQuery; pPortadorModel: TPortadorModel);
-
     function where: String;
     procedure SetIDRecordView(const Value: String);
-
   public
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -62,32 +57,26 @@ type
     function excluir(pPortdorModel: TPortadorModel): String;
 
     procedure obterLista;
-
     function carregaClasse(pId: String): TPortadorModel;
-
 end;
-
 implementation
 
+uses
+  System.Rtti;
 { TPortador }
-
 function TPortadorDao.alterar(pPortdorModel: TPortadorModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
 begin
   lQry := vIConexao.CriarQuery;
-
   lSQL := vConstrutor.gerarUpdate('PORTADOR', 'CODIGO_PORT');
-
   try
     lQry.SQL.Add(lSQL);
     setParams(lQry, pPortdorModel);
     lQry.ParamByName('CODIGO_PORT').Value := ifThen(pPortdorModel.CODIGO_PORT = '', Unassigned, pPortdorModel.CODIGO_PORT);
     lQry.ExecSQL;
-
     Result := pPortdorModel.CODIGO_PORT;
-
   finally
     lSQL := '';
     lQry.Free;
@@ -102,13 +91,10 @@ begin
   lQry     := vIConexao.CriarQuery;
   lModel   := TPortadorModel.Create(vIConexao);
   Result   := lModel;
-
   try
     lQry.Open('select * from portador where codigo_port = '+pId);
-
     if lQry.IsEmpty then
       Exit;
-
     lModel.CODIGO_PORT              := lQry.FieldByName('CODIGO_PORT').AsString;
     lModel.NOME_PORT                := lQry.FieldByName('NOME_PORT').AsString;
     lModel.VR_PORT                  := lQry.FieldByName('VR_PORT').AsString;
@@ -140,38 +126,29 @@ begin
     lModel.TEF_ADQUIRENTE           := lQry.FieldByName('TEF_ADQUIRENTE').AsString;
     lModel.PIX_CHAVE                := lQry.FieldByName('PIX_CHAVE').AsString;
     lModel.XPAG_NFE                 := lQry.FieldByName('XPAG_NFE').AsString;
-
     Result := lModel;
-
   finally
     lQry.Free;
   end;
-
 end;
-
 constructor TPortadorDao.Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
-
 destructor TPortadorDao.Destroy;
 begin
-
   inherited;
 end;
-
 function TPortadorDao.excluir(pPortdorModel: TPortadorModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
-
   try
    lQry.ExecSQL('delete from portador where CODIGO_PORT = :CODIGO_PORT',[pPortdorModel.CODIGO_PORT]);
    lQry.ExecSQL;
    Result := pPortdorModel.CODIGO_PORT;
-
   finally
     lQry.Free;
   end;
@@ -183,16 +160,12 @@ var
   lSQL:String;
 begin
   lQry := vIConexao.CriarQuery;
-
   lSQL := vConstrutor.gerarInsert('PORTADOR', 'CODIGO_PORT');
-
   try
     lQry.SQL.Add(lSQL);
     setParams(lQry, pPortdorModel);
     lQry.Open;
-
     Result := lQry.FieldByName('CODIGO_PORT').AsString;
-
   finally
     lSQL := '';
     lQry.Free;
@@ -204,16 +177,12 @@ var
   lSQL : String;
 begin
   lSQL := '';
-
   if not FWhereView.IsEmpty then
     lSQL := lSQL + FWhereView;
-
   if FIDRecordView <> '' then
     lSQL := lSQL + ' and portador.codigo_port = '+ QuotedStr(FIDRecordView);
-
   Result := lSQL;
 end;
-
 procedure TPortadorDao.obterTotalRegistros;
 var
   lQry: TFDQuery;
@@ -221,20 +190,14 @@ var
 begin
   try
     lQry := vIConexao.CriarQuery;
-
     lSql := 'select count(*) records From portador where 1=1 ';
-
     lSql := lSql + where;
-
     lQry.Open(lSQL);
-
     FTotalRecords := lQry.FieldByName('records').AsInteger;
-
   finally
     lQry.Free;
   end;
 end;
-
 procedure TPortadorDao.obterLista;
 var
   lQry: TFDQuery;
@@ -242,15 +205,12 @@ var
   i: INteger;
 begin
   lQry := vIConexao.CriarQuery;
-
   FPortadorsLista := TObjectList<TPortadorModel>.Create;
-
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lSql := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
     else
       lSql := 'select ';
-
     lSQL := lSQL +
       '       portador.codigo_port,         '+
       '       portador.nome_port,           '+
@@ -258,47 +218,35 @@ begin
       '       portador.receita_conta_id     '+
 	    '  from portador                      '+
       ' where 1=1                           ';
-
     lSql := lSql + where;
-
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
-
     lQry.Open(lSQL);
-
     i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
       FPortadorsLista.Add(TPortadorModel.Create(vIConexao));
-
       i := FPortadorsLista.Count -1;
-
       FPortadorsLista[i].CODIGO_PORT          := lQry.FieldByName('CODIGO_PORT').AsString;
       FPortadorsLista[i].BANCO_BAIXA_DIRETA   := lQry.FieldByName('BANCO_BAIXA_DIRETA').AsString;
       FPortadorsLista[i].RECEITA_CONTA_ID     := lQry.FieldByName('RECEITA_CONTA_ID').AsString;
       FPortadorsLista[i].NOME_PORT            := lQry.FieldByName('NOME_PORT').AsString;
-
       lQry.Next;
     end;
-
     obterTotalRegistros;
-
   finally
     lQry.Free;
   end;
 end;
-
 procedure TPortadorDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
 end;
-
 procedure TPortadorDao.SetPortadorsLista(const Value: TObjectList<TPortadorModel>);
 begin
   FPortadorsLista := Value;
 end;
-
 procedure TPortadorDao.SetID(const Value: Variant);
 begin
   FID := Value;
@@ -320,50 +268,39 @@ begin
 end;
 
 procedure TPortadorDao.setParams(var pQry: TFDQuery; pPortadorModel: TPortadorModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('NOME_PORT').Value                 := ifThen(pPortadorModel.NOME_PORT                 = '', Unassigned, pPortadorModel.NOME_PORT);
-  pQry.ParamByName('VR_PORT').Value                   := ifThen(pPortadorModel.VR_PORT                   = '', Unassigned, pPortadorModel.VR_PORT);
-  pQry.ParamByName('DESCONTO_PORT').Value             := ifThen(pPortadorModel.DESCONTO_PORT             = '', Unassigned, pPortadorModel.DESCONTO_PORT);
-  pQry.ParamByName('USUARIO_PORT').Value              := ifThen(pPortadorModel.USUARIO_PORT              = '', Unassigned, pPortadorModel.USUARIO_PORT);
-  pQry.ParamByName('TIPO').Value                      := ifThen(pPortadorModel.TIPO                      = '', Unassigned, pPortadorModel.TIPO);
-  pQry.ParamByName('CONDICOES_PAG').Value             := ifThen(pPortadorModel.CONDICOES_PAG             = '', Unassigned, pPortadorModel.CONDICOES_PAG);
-  pQry.ParamByName('OBS').Value                       := ifThen(pPortadorModel.OBS                       = '', Unassigned, pPortadorModel.OBS);
-  pQry.ParamByName('RECEITA_CONTA_ID').Value          := ifThen(pPortadorModel.RECEITA_CONTA_ID          = '', Unassigned, pPortadorModel.RECEITA_CONTA_ID);
-  pQry.ParamByName('CUSTO_CONTA_ID').Value            := ifThen(pPortadorModel.CUSTO_CONTA_ID            = '', Unassigned, pPortadorModel.CUSTO_CONTA_ID);
-  pQry.ParamByName('DF_CONTA_ID').Value               := ifThen(pPortadorModel.DF_CONTA_ID               = '', Unassigned, pPortadorModel.DF_CONTA_ID);
-  pQry.ParamByName('RECEBIMENTO_CONTA_ID').Value      := ifThen(pPortadorModel.RECEBIMENTO_CONTA_ID      = '', Unassigned, pPortadorModel.RECEBIMENTO_CONTA_ID);
-  pQry.ParamByName('STATUS').Value                    := ifThen(pPortadorModel.STATUS                    = '', Unassigned, pPortadorModel.STATUS);
-  pQry.ParamByName('DIA_VENCIMENTO').Value            := ifThen(pPortadorModel.DIA_VENCIMENTO            = '', Unassigned, pPortadorModel.DIA_VENCIMENTO);
-  pQry.ParamByName('PERCENTUAL_DESPESA_VENDA').Value  := ifThen(pPortadorModel.PERCENTUAL_DESPESA_VENDA  = '', Unassigned, pPortadorModel.PERCENTUAL_DESPESA_VENDA);
-  pQry.ParamByName('DIRETO').Value                    := ifThen(pPortadorModel.DIRETO                    = '', Unassigned, pPortadorModel.DIRETO);
-  pQry.ParamByName('PEDIR_VENCIMENTO').Value          := ifThen(pPortadorModel.PEDIR_VENCIMENTO          = '', Unassigned, pPortadorModel.PEDIR_VENCIMENTO);
-  pQry.ParamByName('TELA_RECEBIMENTO').Value          := ifThen(pPortadorModel.TELA_RECEBIMENTO          = '', Unassigned, pPortadorModel.TELA_RECEBIMENTO);
-  pQry.ParamByName('TPAG_NFE').Value                  := ifThen(pPortadorModel.TPAG_NFE                  = '', Unassigned, pPortadorModel.TPAG_NFE);
-  pQry.ParamByName('CREDITO_CONTA_ID').Value          := ifThen(pPortadorModel.CREDITO_CONTA_ID          = '', Unassigned, pPortadorModel.CREDITO_CONTA_ID);
-  pQry.ParamByName('CONTAGEM').Value                  := ifThen(pPortadorModel.CONTAGEM                  = '', Unassigned, pPortadorModel.CONTAGEM);
-  pQry.ParamByName('PERCENTUAL_COMISSAO').Value       := ifThen(pPortadorModel.PERCENTUAL_COMISSAO       = '', Unassigned, pPortadorModel.PERCENTUAL_COMISSAO);
-  pQry.ParamByName('SITUACAO_CLIENTE').Value          := ifThen(pPortadorModel.SITUACAO_CLIENTE          = '', Unassigned, pPortadorModel.SITUACAO_CLIENTE);
-  pQry.ParamByName('BANCO_BAIXA_DIRETA').Value        := ifThen(pPortadorModel.BANCO_BAIXA_DIRETA        = '', Unassigned, pPortadorModel.BANCO_BAIXA_DIRETA);
-  pQry.ParamByName('TEF_MODALIDADE').Value            := ifThen(pPortadorModel.TEF_MODALIDADE            = '', Unassigned, pPortadorModel.TEF_MODALIDADE);
-  pQry.ParamByName('TEF_PARCELAMENTO').Value          := ifThen(pPortadorModel.TEF_PARCELAMENTO          = '', Unassigned, pPortadorModel.TEF_PARCELAMENTO);
-  pQry.ParamByName('TEF_ADQUIRENTE').Value            := ifThen(pPortadorModel.TEF_ADQUIRENTE            = '', Unassigned, pPortadorModel.TEF_ADQUIRENTE);
-  pQry.ParamByName('PIX_CHAVE').Value                 := ifThen(pPortadorModel.PIX_CHAVE                 = '', Unassigned, pPortadorModel.PIX_CHAVE);
-  pQry.ParamByName('XPAG_NFE').Value                  := ifThen(pPortadorModel.XPAG_NFE                  = '', Unassigned, pPortadorModel.XPAG_NFE);
+  lTabela := vConstrutor.getColumns('PORTADOR');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TPortadorModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPortadorModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pPortadorModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TPortadorDao.SetStartRecordView(const Value: String);
 begin
   FStartRecordView := Value;
 end;
-
 procedure TPortadorDao.SetTotalRecords(const Value: Integer);
 begin
   FTotalRecords := Value;
 end;
-
 procedure TPortadorDao.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
 end;
-
 end.

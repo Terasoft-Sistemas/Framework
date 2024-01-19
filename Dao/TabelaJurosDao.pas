@@ -10,7 +10,8 @@ uses
   System.Generics.Collections,
   System.Variants,
   Terasoft.ConstrutorDao,
-  Interfaces.Conexao;
+  Interfaces.Conexao,
+  Terasoft.Utils;
 
 type
   TTabelaJurosDao = class
@@ -60,13 +61,16 @@ type
     function incluir(ATabelaJurosModel: TTabelaJurosModel): String;
     function alterar(ATabelaJurosModel: TTabelaJurosModel): String;
     function excluir(ATabelaJurosModel: TTabelaJurosModel): String;
-	
+
     procedure obterLista;
     function carregaClasse(pId: Integer): TTabelaJurosModel;
 
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TTabelaJuros }
 
@@ -293,12 +297,27 @@ begin
 end;
 
 procedure TTabelaJurosDao.setParams(var pQry: TFDQuery; pTabelaJurosModel: TTabelaJurosModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('codigo').Value      := ifThen(pTabelaJurosModel.CODIGO      = '', Unassigned, pTabelaJurosModel.CODIGO);
-  pQry.ParamByName('indce').Value       := ifThen(pTabelaJurosModel.INDCE       = '', Unassigned, pTabelaJurosModel.INDCE);
-  pQry.ParamByName('indceent').Value    := ifThen(pTabelaJurosModel.INDCEENT    = '', Unassigned, pTabelaJurosModel.INDCEENT);
-  pQry.ParamByName('percentual').Value  := ifThen(pTabelaJurosModel.PERCENTUAL  = '', Unassigned, pTabelaJurosModel.PERCENTUAL);
-  pQry.ParamByName('portador_id').Value := ifThen(pTabelaJurosModel.PORTADOR_ID = '', Unassigned, pTabelaJurosModel.PORTADOR_ID);
+  lTabela := vConstrutor.getColumns('TABELAJUROS');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TTabelaJurosModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pTabelaJurosModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pTabelaJurosModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TTabelaJurosDao.SetStartRecordView(const Value: String);
