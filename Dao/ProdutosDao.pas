@@ -1,7 +1,5 @@
 unit ProdutosDao;
-
 interface
-
 uses
   ProdutosModel,
   FireDAC.Comp.Client,
@@ -11,11 +9,11 @@ uses
   System.Variants,
   Terasoft.FuncoesTexto,
   Interfaces.Conexao,
+  Terasoft.Utils,
   Terasoft.ConstrutorDao;
 
 type
   TProdutosDao = class
-
   private
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
@@ -38,16 +36,13 @@ type
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-
     function where: String;
     procedure SetIDRecordView(const Value: String);
-
     procedure setParams(var pQry: TFDQuery; pProdutoModel: TProdutosModel);
 
   public
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
-
     property ProdutossLista: TObjectList<TProdutosModel> read FProdutossLista write SetProdutossLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -66,17 +61,15 @@ type
     function obterSaldo(pIdProduto: String): Double;
     procedure subtrairSaldo(pIdProduto: String; pSaldo: Double);
     procedure adicionarSaldo(pIdProduto: String; pSaldo: Double);
-
     function valorVenda(pIdProduto: String): Variant;
-
     function obterCodigobarras(pIdProduto: String): String;
     function carregaClasse(pId: String): TProdutosModel;
 end;
-
 implementation
 
+uses
+  System.Rtti;
 { TProdutos }
-
 function TProdutosDao.carregaClasse(pId: String): TProdutosModel;
 var
   lQry: TFDQuery;
@@ -85,13 +78,10 @@ begin
   lQry     := vIConexao.CriarQuery;
   lModel   := TProdutosModel.Create(vIConexao);
   Result   := lModel;
-
   try
     lQry.Open('select * from produto where codigo_pro = '+ QuotedStr(pId));
-
     if lQry.IsEmpty then
       Exit;
-
     lModel.UUID                             := lQry.FieldByName('UUID').AsString;
     lModel.CODIGO_PRO                       := lQry.FieldByName('CODIGO_PRO').AsString;
     lModel.CODIGO_GRU                       := lQry.FieldByName('CODIGO_GRU').AsString;
@@ -353,27 +343,20 @@ begin
     lModel.CONVERSAO_FRACIONADA_FILHO       := lQry.FieldByName('CONVERSAO_FRACIONADA_FILHO').AsString;
     lModel.PERCENTUAL_PERDA_MATERIA_PRIMA   := lQry.FieldByName('PERCENTUAL_PERDA_MATERIA_PRIMA').AsString;
     lModel.EXTIPI                           := lQry.FieldByName('EXTIPI').AsString;
-
     Result := lModel;
-
   finally
     lQry.Free;
   end;
-
 end;
-
 constructor TProdutosDao.Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
-
 destructor TProdutosDao.Destroy;
 begin
-
   inherited;
 end;
-
 function TProdutosDao.incluir(pProdutosModel: TProdutosModel): String;
 var
   lQry : TFDQuery;
@@ -396,14 +379,12 @@ begin
     lQry.Free;
   end;
 end;
-
 procedure TProdutosDao.adicionarSaldo(pIdProduto: String; pSaldo: Double);
 var
   lQry: TFDQuery;
   lSQL:String;
 begin
   lQry := vIConexao.CriarQuery;
-
   lSQL := ' update produto                                     '+SLineBreak+
           '    set saldo_pro = coalesce(saldo_pro, 0) + :saldo '+SLineBreak+
           '  where codigo_pro = :codigo                        '+SLineBreak;
@@ -417,7 +398,6 @@ begin
     lQry.Free;
   end;
 end;
-
 function TProdutosDao.alterar(pProdutosModel: TProdutosModel): String;
 var
   lQry : TFDQuery;
@@ -440,38 +420,30 @@ begin
     lQry.Free;
   end;
 end;
-
 function TProdutosDao.excluir(pProdutosModel: TProdutosModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
-
   try
    lQry.ExecSQL('delete from produto where codigo_pro = :CODIGO_PRO',[pProdutosModel.CODIGO_PRO]);
    lQry.ExecSQL;
    Result := pProdutosModel.CODIGO_PRO;
-
   finally
     lQry.Free;
   end;
 end;
-
 function TProdutosDao.where: String;
 var
   lSQL : String;
 begin
   lSQL := '';
-
   if not FWhereView.IsEmpty then
     lSQL := lSQL + FWhereView;
-
   if FIDRecordView <> ''  then
     lSQL := lSQL + ' and produto.codigo_pro = '+ QuotedStr(FIDRecordView);
-
   Result := lSQL;
 end;
-
 procedure TProdutosDao.obterTotalRegistros;
 var
   lQry: TFDQuery;
@@ -479,20 +451,14 @@ var
 begin
   try
     lQry := vIConexao.CriarQuery;
-
     lSql := 'select count(*) records From produto where 1=1 ';
-
     lSql := lSql + where;
-
     lQry.Open(lSQL);
-
     FTotalRecords := lQry.FieldByName('records').AsInteger;
-
   finally
     lQry.Free;
   end;
 end;
-
 function TProdutosDao.obterCodigobarras(pIdProduto: String): String;
 var
   lConexao: TFDConnection;
@@ -500,7 +466,6 @@ begin
   lConexao := vIConexao.getConnection;
   Result   := lConexao.ExecSQLScalar('select barras_pro from produto where codigo_pro = '+ QuotedStr(pIdProduto));
 end;
-
 procedure TProdutosDao.obterLista;
 var
   lQry: TFDQuery;
@@ -508,15 +473,12 @@ var
   i: INteger;
 begin
   lQry := vIConexao.CriarQuery;
-
   FProdutossLista := TObjectList<TProdutosModel>.Create;
-
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lSql := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
     else
       lSql := 'select ';
-
     lSQL := lSQL +
       '       produto.nome_pro,             '+
       '       produto.barras_pro,           '+
@@ -526,22 +488,16 @@ begin
       '       produto.nfce_cfop             '+
 	    '  from produto                       '+
       ' where 1=1                           ';
-
     lSql := lSql + where;
-
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
-
     lQry.Open(lSQL);
-
     i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
       FProdutossLista.Add(TProdutosModel.Create(vIConexao));
-
       i := FProdutossLista.Count -1;
-
       FProdutossLista[i].CODIGO_PRO      := lQry.FieldByName('CODIGO_PRO').AsString;
       FProdutossLista[i].NOME_PRO        := lQry.FieldByName('NOME_PRO').AsString;
       FProdutossLista[i].BARRAS_PRO      := lQry.FieldByName('BARRAS_PRO').AsString;
@@ -550,14 +506,11 @@ begin
       FProdutossLista[i].NFCE_CFOP       := lQry.FieldByName('NFCE_CFOP').AsString;
       lQry.Next;
     end;
-
     obterTotalRegistros;
-
   finally
     lQry.Free;
   end;
 end;
-
 function TProdutosDao.obterSaldo(pIdProduto: String): Double;
 var
   lConexao: TFDConnection;
@@ -565,22 +518,18 @@ begin
   lConexao := vIConexao.getConnection;
   Result   := lConexao.ExecSQLScalar('select saldo_pro from produto where codigo_pro = '+ QuotedStr(pIdProduto));
 end;
-
 procedure TProdutosDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
 end;
-
 procedure TProdutosDao.SetProdutossLista(const Value: TObjectList<TProdutosModel>);
 begin
   FProdutossLista := Value;
 end;
-
 procedure TProdutosDao.SetID(const Value: Variant);
 begin
   FID := Value;
 end;
-
 procedure TProdutosDao.SetIDRecordView(const Value: String);
 begin
   FIDRecordView := Value;
@@ -597,289 +546,47 @@ begin
 end;
 
 procedure TProdutosDao.setParams(var pQry: TFDQuery; pProdutoModel: TProdutosModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('CODIGO_PRO').Value                           := ifThen(pProdutoModel.CODIGO_PRO                        = '', Unassigned, pProdutoModel.CODIGO_PRO);
-  pQry.ParamByName('CODIGO_GRU').Value                           := ifThen(pProdutoModel.CODIGO_GRU                        = '', Unassigned, pProdutoModel.CODIGO_GRU);
-  pQry.ParamByName('CODIGO_FOR').Value                           := ifThen(pProdutoModel.CODIGO_FOR                        = '', Unassigned, pProdutoModel.CODIGO_FOR);
-  pQry.ParamByName('NOME_PRO').Value                             := ifThen(pProdutoModel.NOME_PRO                          = '', Unassigned, pProdutoModel.NOME_PRO);
-  pQry.ParamByName('UNIDADE_PRO').Value                          := ifThen(pProdutoModel.UNIDADE_PRO                       = '', Unassigned, pProdutoModel.UNIDADE_PRO);
-  pQry.ParamByName('SALDO_PRO').Value                            := ifThen(pProdutoModel.SALDO_PRO                         = '', Unassigned, pProdutoModel.SALDO_PRO);
-  pQry.ParamByName('SALDOMIN_PRO').Value                         := ifThen(pProdutoModel.SALDOMIN_PRO                      = '', Unassigned, pProdutoModel.SALDOMIN_PRO);
-  pQry.ParamByName('CUSTOMEDIO_PRO').Value                       := ifThen(pProdutoModel.CUSTOMEDIO_PRO                    = '', Unassigned, pProdutoModel.CUSTOMEDIO_PRO);
-  pQry.ParamByName('CUSTOULTIMO_PRO').Value                      := ifThen(pProdutoModel.CUSTOULTIMO_PRO                   = '', Unassigned, pProdutoModel.CUSTOULTIMO_PRO);
-  pQry.ParamByName('CUSTOLIQUIDO_PRO').Value                     := ifThen(pProdutoModel.CUSTOLIQUIDO_PRO                  = '', Unassigned, pProdutoModel.CUSTOLIQUIDO_PRO);
-  pQry.ParamByName('CUSTODOLAR_PRO').Value                       := ifThen(pProdutoModel.CUSTODOLAR_PRO                    = '', Unassigned, pProdutoModel.CUSTODOLAR_PRO);
-  pQry.ParamByName('MARGEM_PRO').Value                           := ifThen(pProdutoModel.MARGEM_PRO                        = '', Unassigned, pProdutoModel.MARGEM_PRO);
-  pQry.ParamByName('VENDA_PRO').Value                            := ifThen(pProdutoModel.VENDA_PRO                         = '', Unassigned, pProdutoModel.VENDA_PRO);
-  pQry.ParamByName('VENDAPRAZO_PRO').Value                       := ifThen(pProdutoModel.VENDAPRAZO_PRO                    = '', Unassigned, pProdutoModel.VENDAPRAZO_PRO);
-  pQry.ParamByName('VENDAPROMOCAO_PRO').Value                    := ifThen(pProdutoModel.VENDAPROMOCAO_PRO                 = '', Unassigned, pProdutoModel.VENDAPROMOCAO_PRO);
-  pQry.ParamByName('PESO_PRO').Value                             := ifThen(pProdutoModel.PESO_PRO                          = '', Unassigned, pProdutoModel.PESO_PRO);
-  pQry.ParamByName('VENDAMINIMA_PRO').Value                      := ifThen(pProdutoModel.VENDAMINIMA_PRO                   = '', Unassigned, pProdutoModel.VENDAMINIMA_PRO);
-  pQry.ParamByName('VENDAWEB_PRO').Value                         := ifThen(pProdutoModel.VENDAWEB_PRO                      = '', Unassigned, pProdutoModel.VENDAWEB_PRO);
-  pQry.ParamByName('MARCA_PRO').Value                            := ifThen(pProdutoModel.MARCA_PRO                         = '', Unassigned, pProdutoModel.MARCA_PRO);
-  pQry.ParamByName('APLICACAO_PRO').Value                        := ifThen(pProdutoModel.APLICACAO_PRO                     = '', Unassigned, pProdutoModel.APLICACAO_PRO);
-  pQry.ParamByName('IMAGEM_PRO').Value                           := ifThen(pProdutoModel.IMAGEM_PRO                        = '', Unassigned, pProdutoModel.IMAGEM_PRO);
-  pQry.ParamByName('CODIGO_MAR').Value                           := ifThen(pProdutoModel.CODIGO_MAR                        = '', Unassigned, pProdutoModel.CODIGO_MAR);
-  pQry.ParamByName('COMISSAO_PRO').Value                         := ifThen(pProdutoModel.COMISSAO_PRO                      = '', Unassigned, pProdutoModel.COMISSAO_PRO);
-  pQry.ParamByName('CODIGO_SUB').Value                           := ifThen(pProdutoModel.CODIGO_SUB                        = '', Unassigned, pProdutoModel.CODIGO_SUB);
-  pQry.ParamByName('DATADOLAR_PRO').Value                        := ifThen(pProdutoModel.DATADOLAR_PRO                     = '', Unassigned, pProdutoModel.DATADOLAR_PRO);
-  pQry.ParamByName('VALORDOLAR_PRO').Value                       := ifThen(pProdutoModel.VALORDOLAR_PRO                    = '', Unassigned, pProdutoModel.VALORDOLAR_PRO);
-  pQry.ParamByName('GARANTIA_PRO').Value                         := ifThen(pProdutoModel.GARANTIA_PRO                      = '', Unassigned, pProdutoModel.GARANTIA_PRO);
-  pQry.ParamByName('NOVIDADE_PRO').Value                         := ifThen(pProdutoModel.NOVIDADE_PRO                      = '', Unassigned, pProdutoModel.NOVIDADE_PRO);
-  pQry.ParamByName('BARRAS_PRO').Value                           := ifThen(pProdutoModel.BARRAS_PRO                        = '', Unassigned, pProdutoModel.BARRAS_PRO);
-  pQry.ParamByName('USUARIO_PRO').Value                          := ifThen(pProdutoModel.USUARIO_PRO                       = '', Unassigned, pProdutoModel.USUARIO_PRO);
-  pQry.ParamByName('IPI_PRO').Value                              := ifThen(pProdutoModel.IPI_PRO                           = '', Unassigned, pProdutoModel.IPI_PRO);
-  pQry.ParamByName('FRETE_PRO').Value                            := ifThen(pProdutoModel.FRETE_PRO                         = '', Unassigned, pProdutoModel.FRETE_PRO);
-  pQry.ParamByName('ULTIMAVENDA_PRO').Value                      := ifThen(pProdutoModel.ULTIMAVENDA_PRO                   = '', Unassigned, pProdutoModel.ULTIMAVENDA_PRO);
-  pQry.ParamByName('QTDEDIAS_PRO').Value                         := ifThen(pProdutoModel.QTDEDIAS_PRO                      = '', Unassigned, pProdutoModel.QTDEDIAS_PRO);
-  pQry.ParamByName('CODLISTA_COD').Value                         := ifThen(pProdutoModel.CODLISTA_COD                      = '', Unassigned, pProdutoModel.CODLISTA_COD);
-  pQry.ParamByName('ICMS_PRO').Value                             := ifThen(pProdutoModel.ICMS_PRO                          = '', Unassigned, pProdutoModel.ICMS_PRO);
-  pQry.ParamByName('DESCRICAO').Value                            := ifThen(pProdutoModel.DESCRICAO                         = '', Unassigned, pProdutoModel.DESCRICAO);
-  pQry.ParamByName('PRODUTO_FINAL').Value                        := ifThen(pProdutoModel.PRODUTO_FINAL                     = '', Unassigned, pProdutoModel.PRODUTO_FINAL);
-  pQry.ParamByName('QTDE_PRODUZIR').Value                        := ifThen(pProdutoModel.QTDE_PRODUZIR                     = '', Unassigned, pProdutoModel.QTDE_PRODUZIR);
-  pQry.ParamByName('PRINCIPIO_ATIVO').Value                      := ifThen(pProdutoModel.PRINCIPIO_ATIVO                   = '', Unassigned, pProdutoModel.PRINCIPIO_ATIVO);
-  pQry.ParamByName('CODIGO_FORNECEDOR').Value                    := ifThen(pProdutoModel.CODIGO_FORNECEDOR                 = '', Unassigned, pProdutoModel.CODIGO_FORNECEDOR);
-  pQry.ParamByName('STATUS_PRO').Value                           := ifThen(pProdutoModel.STATUS_PRO                        = '', Unassigned, pProdutoModel.STATUS_PRO);
-  pQry.ParamByName('LOJA').Value                                 := ifThen(pProdutoModel.LOJA                              = '', Unassigned, pProdutoModel.LOJA);
-  pQry.ParamByName('ECF_PRO').Value                              := ifThen(pProdutoModel.ECF_PRO                           = '', Unassigned, pProdutoModel.ECF_PRO);
-  pQry.ParamByName('LISTA').Value                                := ifThen(pProdutoModel.LISTA                             = '', Unassigned, pProdutoModel.LISTA);
-  pQry.ParamByName('COMIS_PRO').Value                            := ifThen(pProdutoModel.COMIS_PRO                         = '', Unassigned, pProdutoModel.COMIS_PRO);
-  pQry.ParamByName('DESCONTO_PRO').Value                         := ifThen(pProdutoModel.DESCONTO_PRO                      = '', Unassigned, pProdutoModel.DESCONTO_PRO);
-  pQry.ParamByName('PMC_PRO').Value                              := ifThen(pProdutoModel.PMC_PRO                           = '', Unassigned, pProdutoModel.PMC_PRO);
-  pQry.ParamByName('PRECO_FABRICANTE').Value                     := ifThen(pProdutoModel.PRECO_FABRICANTE                  = '', Unassigned, pProdutoModel.PRECO_FABRICANTE);
-  pQry.ParamByName('SALDO').Value                                := ifThen(pProdutoModel.SALDO                             = '', Unassigned, pProdutoModel.SALDO);
-  pQry.ParamByName('CLAS_FISCAL_PRO').Value                      := ifThen(pProdutoModel.CLAS_FISCAL_PRO                   = '', Unassigned, pProdutoModel.CLAS_FISCAL_PRO);
-  pQry.ParamByName('TABELA_VENDA').Value                         := ifThen(pProdutoModel.TABELA_VENDA                      = '', Unassigned, pProdutoModel.TABELA_VENDA);
-  pQry.ParamByName('PRODUTO_REFERENTE').Value                    := ifThen(pProdutoModel.PRODUTO_REFERENTE                 = '', Unassigned, pProdutoModel.PRODUTO_REFERENTE);
-  pQry.ParamByName('TABICMS_PRO').Value                          := ifThen(pProdutoModel.TABICMS_PRO                       = '', Unassigned, pProdutoModel.TABICMS_PRO);
-  pQry.ParamByName('VALIDADE_PRO').Value                         := ifThen(pProdutoModel.VALIDADE_PRO                      = '', Unassigned, pProdutoModel.VALIDADE_PRO);
-  pQry.ParamByName('PESQUISA').Value                             := ifThen(pProdutoModel.PESQUISA                          = '', Unassigned, pProdutoModel.PESQUISA);
-  pQry.ParamByName('METROSBARRAS_PRO').Value                     := ifThen(pProdutoModel.METROSBARRAS_PRO                  = '', Unassigned, pProdutoModel.METROSBARRAS_PRO);
-  pQry.ParamByName('ALIQUOTA_PIS').Value                         := ifThen(pProdutoModel.ALIQUOTA_PIS                      = '', Unassigned, pProdutoModel.ALIQUOTA_PIS);
-  pQry.ParamByName('ALIQUOTA_COFINS').Value                      := ifThen(pProdutoModel.ALIQUOTA_COFINS                   = '', Unassigned, pProdutoModel.ALIQUOTA_COFINS);
-  pQry.ParamByName('CST_COFINS').Value                           := ifThen(pProdutoModel.CST_COFINS                        = '', Unassigned, pProdutoModel.CST_COFINS);
-  pQry.ParamByName('CST_PIS').Value                              := ifThen(pProdutoModel.CST_PIS                           = '', Unassigned, pProdutoModel.CST_PIS);
-  pQry.ParamByName('CSOSN').Value                                := ifThen(pProdutoModel.CSOSN                             = '', Unassigned, pProdutoModel.CSOSN);
-  pQry.ParamByName('QUTDE_MAXIMA').Value                         := ifThen(pProdutoModel.QUTDE_MAXIMA                      = '', Unassigned, pProdutoModel.QUTDE_MAXIMA);
-  pQry.ParamByName('ULTIMA_ALTERACAO_PRO').Value                 := ifThen(pProdutoModel.ULTIMA_ALTERACAO_PRO              = '', Unassigned, pProdutoModel.ULTIMA_ALTERACAO_PRO);
-  pQry.ParamByName('LOCALIZACAO').Value                          := ifThen(pProdutoModel.LOCALIZACAO                       = '', Unassigned, pProdutoModel.LOCALIZACAO);
-  pQry.ParamByName('PRODUTO_NFE').Value                          := ifThen(pProdutoModel.PRODUTO_NFE                       = '', Unassigned, pProdutoModel.PRODUTO_NFE);
-  pQry.ParamByName('CNPJ_PRODUTO_NFE').Value                     := ifThen(pProdutoModel.CNPJ_PRODUTO_NFE                  = '', Unassigned, pProdutoModel.CNPJ_PRODUTO_NFE);
-  pQry.ParamByName('MATERIAL').Value                             := ifThen(pProdutoModel.MATERIAL                          = '', Unassigned, pProdutoModel.MATERIAL);
-  pQry.ParamByName('PEDIDO_MENSAL').Value                        := ifThen(pProdutoModel.PEDIDO_MENSAL                     = '', Unassigned, pProdutoModel.PEDIDO_MENSAL);
-  pQry.ParamByName('QUANT_PECA_BARRA').Value                     := ifThen(pProdutoModel.QUANT_PECA_BARRA                  = '', Unassigned, pProdutoModel.QUANT_PECA_BARRA);
-  pQry.ParamByName('QUANT_BARRA_USADAS').Value                   := ifThen(pProdutoModel.QUANT_BARRA_USADAS                = '', Unassigned, pProdutoModel.QUANT_BARRA_USADAS);
-  pQry.ParamByName('VALOR_MP').Value                             := ifThen(pProdutoModel.VALOR_MP                          = '', Unassigned, pProdutoModel.VALOR_MP);
-  pQry.ParamByName('QUANT_PECA_HORA').Value                      := ifThen(pProdutoModel.QUANT_PECA_HORA                   = '', Unassigned, pProdutoModel.QUANT_PECA_HORA);
-  pQry.ParamByName('SERRA').Value                                := ifThen(pProdutoModel.SERRA                             = '', Unassigned, pProdutoModel.SERRA);
-  pQry.ParamByName('FURADEIRA').Value                            := ifThen(pProdutoModel.FURADEIRA                         = '', Unassigned, pProdutoModel.FURADEIRA);
-  pQry.ParamByName('ROSQUEADEIRA').Value                         := ifThen(pProdutoModel.ROSQUEADEIRA                      = '', Unassigned, pProdutoModel.ROSQUEADEIRA);
-  pQry.ParamByName('TORNO').Value                                := ifThen(pProdutoModel.TORNO                             = '', Unassigned, pProdutoModel.TORNO);
-  pQry.ParamByName('GALVANIZACAO').Value                         := ifThen(pProdutoModel.GALVANIZACAO                      = '', Unassigned, pProdutoModel.GALVANIZACAO);
-  pQry.ParamByName('TEMPERA').Value                              := ifThen(pProdutoModel.TEMPERA                           = '', Unassigned, pProdutoModel.TEMPERA);
-  pQry.ParamByName('FREZADORA').Value                            := ifThen(pProdutoModel.FREZADORA                         = '', Unassigned, pProdutoModel.FREZADORA);
-  pQry.ParamByName('FRETE').Value                                := ifThen(pProdutoModel.FRETE                             = '', Unassigned, pProdutoModel.FRETE);
-  pQry.ParamByName('MARGEM_LUCRO').Value                         := ifThen(pProdutoModel.MARGEM_LUCRO                      = '', Unassigned, pProdutoModel.MARGEM_LUCRO);
-  pQry.ParamByName('PORCENTAGEM_NFE').Value                      := ifThen(pProdutoModel.PORCENTAGEM_NFE                   = '', Unassigned, pProdutoModel.PORCENTAGEM_NFE);
-  pQry.ParamByName('HORA_MAQUINA').Value                         := ifThen(pProdutoModel.HORA_MAQUINA                      = '', Unassigned, pProdutoModel.HORA_MAQUINA);
-  pQry.ParamByName('CODIGO_FORNECEDOR2').Value                   := ifThen(pProdutoModel.CODIGO_FORNECEDOR2                = '', Unassigned, pProdutoModel.CODIGO_FORNECEDOR2);
-  pQry.ParamByName('CODIGO_FORNECEDOR3').Value                   := ifThen(pProdutoModel.CODIGO_FORNECEDOR3                = '', Unassigned, pProdutoModel.CODIGO_FORNECEDOR3);
-  pQry.ParamByName('REFERENCIA_NEW').Value                       := ifThen(pProdutoModel.REFERENCIA_NEW                    = '', Unassigned, pProdutoModel.REFERENCIA_NEW);
-  pQry.ParamByName('MULTIPLOS').Value                            := ifThen(pProdutoModel.MULTIPLOS                         = '', Unassigned, pProdutoModel.MULTIPLOS);
-  pQry.ParamByName('CST_CREDITO_PIS').Value                      := ifThen(pProdutoModel.CST_CREDITO_PIS                   = '', Unassigned, pProdutoModel.CST_CREDITO_PIS);
-  pQry.ParamByName('CST_CREDITO_COFINS').Value                   := ifThen(pProdutoModel.CST_CREDITO_COFINS                = '', Unassigned, pProdutoModel.CST_CREDITO_COFINS);
-  pQry.ParamByName('ALIQ_CREDITO_COFINS').Value                  := ifThen(pProdutoModel.ALIQ_CREDITO_COFINS               = '', Unassigned, pProdutoModel.ALIQ_CREDITO_COFINS);
-  pQry.ParamByName('ALIQ_CREDITO_PIS').Value                     := ifThen(pProdutoModel.ALIQ_CREDITO_PIS                  = '', Unassigned, pProdutoModel.ALIQ_CREDITO_PIS);
-  pQry.ParamByName('CFOP_ESTADUAL_ID').Value                     := ifThen(pProdutoModel.CFOP_ESTADUAL_ID                  = '', Unassigned, pProdutoModel.CFOP_ESTADUAL_ID);
-  pQry.ParamByName('CFOP_INTERESTADUAL_ID').Value                := ifThen(pProdutoModel.CFOP_INTERESTADUAL_ID             = '', Unassigned, pProdutoModel.CFOP_INTERESTADUAL_ID);
-  pQry.ParamByName('CST_IPI').Value                              := ifThen(pProdutoModel.CST_IPI                           = '', Unassigned, pProdutoModel.CST_IPI);
-  pQry.ParamByName('IPI_SAI').Value                              := ifThen(pProdutoModel.IPI_SAI                           = '', Unassigned, pProdutoModel.IPI_SAI);
-  pQry.ParamByName('VALIDAR_CAIXA').Value                        := ifThen(pProdutoModel.VALIDAR_CAIXA                     = '', Unassigned, pProdutoModel.VALIDAR_CAIXA);
-  pQry.ParamByName('USAR_INSC_ST').Value                         := ifThen(pProdutoModel.USAR_INSC_ST                      = '', Unassigned, pProdutoModel.USAR_INSC_ST);
-  pQry.ParamByName('FORNECEDOR_CODIGO').Value                    := ifThen(pProdutoModel.FORNECEDOR_CODIGO                 = '', Unassigned, pProdutoModel.FORNECEDOR_CODIGO);
-  pQry.ParamByName('CONTROLE_SERIAL').Value                      := ifThen(pProdutoModel.CONTROLE_SERIAL                   = '', Unassigned, pProdutoModel.CONTROLE_SERIAL);
-  pQry.ParamByName('DESMEMBRAR_KIT').Value                       := ifThen(pProdutoModel.DESMEMBRAR_KIT                    = '', Unassigned, pProdutoModel.DESMEMBRAR_KIT);
-  pQry.ParamByName('CALCULO_MARGEM').Value                       := ifThen(pProdutoModel.CALCULO_MARGEM                    = '', Unassigned, pProdutoModel.CALCULO_MARGEM);
-  pQry.ParamByName('PESO_LIQUIDO').Value                         := ifThen(pProdutoModel.PESO_LIQUIDO                      = '', Unassigned, pProdutoModel.PESO_LIQUIDO);
-  pQry.ParamByName('CONTA_CONTABIL').Value                       := ifThen(pProdutoModel.CONTA_CONTABIL                    = '', Unassigned, pProdutoModel.CONTA_CONTABIL);
-  pQry.ParamByName('LINK').Value                                 := ifThen(pProdutoModel.LINK                              = '', Unassigned, pProdutoModel.LINK);
-  pQry.ParamByName('EAN_14').Value                               := ifThen(pProdutoModel.EAN_14                            = '', Unassigned, pProdutoModel.EAN_14);
-  pQry.ParamByName('VALIDADE').Value                             := ifThen(pProdutoModel.VALIDADE                          = '', Unassigned, pProdutoModel.VALIDADE);
-  pQry.ParamByName('USAR_BALANCA').Value                         := ifThen(pProdutoModel.USAR_BALANCA                      = '', Unassigned, pProdutoModel.USAR_BALANCA);
-  pQry.ParamByName('VENDA_WEB').Value                            := ifThen(pProdutoModel.VENDA_WEB                         = '', Unassigned, pProdutoModel.VENDA_WEB);
-  pQry.ParamByName('OBS_GERAL').Value                            := ifThen(pProdutoModel.OBS_GERAL                         = '', Unassigned, pProdutoModel.OBS_GERAL);
-  pQry.ParamByName('MULTIPLICADOR').Value                        := ifThen(pProdutoModel.MULTIPLICADOR                     = '', Unassigned, pProdutoModel.MULTIPLICADOR);
-  pQry.ParamByName('DIVIZOR').Value                              := ifThen(pProdutoModel.DIVIZOR                           = '', Unassigned, pProdutoModel.DIVIZOR);
-  pQry.ParamByName('ARREDONDAMENTO').Value                       := ifThen(pProdutoModel.ARREDONDAMENTO                    = '', Unassigned, pProdutoModel.ARREDONDAMENTO);
-  pQry.ParamByName('OBS_NF').Value                               := ifThen(pProdutoModel.OBS_NF                            = '', Unassigned, pProdutoModel.OBS_NF);
-  pQry.ParamByName('DESTAQUE').Value                             := ifThen(pProdutoModel.DESTAQUE                          = '', Unassigned, pProdutoModel.DESTAQUE);
-  pQry.ParamByName('MARGEM_PROMOCAO').Value                      := ifThen(pProdutoModel.MARGEM_PROMOCAO                   = '', Unassigned, pProdutoModel.MARGEM_PROMOCAO);
-  pQry.ParamByName('TIPO_ID').Value                              := ifThen(pProdutoModel.TIPO_ID                           = '', Unassigned, pProdutoModel.TIPO_ID);
-  pQry.ParamByName('PART_NUMBER').Value                          := ifThen(pProdutoModel.PART_NUMBER                       = '', Unassigned, pProdutoModel.PART_NUMBER);
-  pQry.ParamByName('NFCE_CST').Value                             := ifThen(pProdutoModel.NFCE_CST                          = '', Unassigned, pProdutoModel.NFCE_CST);
-  pQry.ParamByName('NFCE_CSOSN').Value                           := ifThen(pProdutoModel.NFCE_CSOSN                        = '', Unassigned, pProdutoModel.NFCE_CSOSN);
-  pQry.ParamByName('NFCE_ICMS').Value                            := ifThen(pProdutoModel.NFCE_ICMS                         = '', Unassigned, pProdutoModel.NFCE_ICMS);
-  pQry.ParamByName('NFCE_CFOP').Value                            := ifThen(pProdutoModel.NFCE_CFOP                         = '', Unassigned, pProdutoModel.NFCE_CFOP);
-  pQry.ParamByName('ETIQUETA_NOME').Value                        := ifThen(pProdutoModel.ETIQUETA_NOME                     = '', Unassigned, pProdutoModel.ETIQUETA_NOME);
-  pQry.ParamByName('ETIQUETA_NOME_CIENTIFICO').Value             := ifThen(pProdutoModel.ETIQUETA_NOME_CIENTIFICO          = '', Unassigned, pProdutoModel.ETIQUETA_NOME_CIENTIFICO);
-  pQry.ParamByName('ETIQUETA_PESO_LIQUIDO').Value                := ifThen(pProdutoModel.ETIQUETA_PESO_LIQUIDO             = '', Unassigned, pProdutoModel.ETIQUETA_PESO_LIQUIDO);
-  pQry.ParamByName('ETIQUETA_PESO_BRUTO').Value                  := ifThen(pProdutoModel.ETIQUETA_PESO_BRUTO               = '', Unassigned, pProdutoModel.ETIQUETA_PESO_BRUTO);
-  pQry.ParamByName('ETIQUETA_SIGLA').Value                       := ifThen(pProdutoModel.ETIQUETA_SIGLA                    = '', Unassigned, pProdutoModel.ETIQUETA_SIGLA);
-  pQry.ParamByName('ETIQUETA_PORCAO').Value                      := ifThen(pProdutoModel.ETIQUETA_PORCAO                   = '', Unassigned, pProdutoModel.ETIQUETA_PORCAO);
-  pQry.ParamByName('IMPRESSAO_COZINHA').Value                    := ifThen(pProdutoModel.IMPRESSAO_COZINHA                 = '', Unassigned, pProdutoModel.IMPRESSAO_COZINHA);
-  pQry.ParamByName('IMPRESSAO_BALCAO').Value                     := ifThen(pProdutoModel.IMPRESSAO_BALCAO                  = '', Unassigned, pProdutoModel.IMPRESSAO_BALCAO);
-  pQry.ParamByName('WEB_NOME_PRO').Value                         := ifThen(pProdutoModel.WEB_NOME_PRO                      = '', Unassigned, pProdutoModel.WEB_NOME_PRO);
-  pQry.ParamByName('WEB_GERENCIA_ESTOQUE').Value                 := ifThen(pProdutoModel.WEB_GERENCIA_ESTOQUE              = '', Unassigned, pProdutoModel.WEB_GERENCIA_ESTOQUE);
-  pQry.ParamByName('WEB_PRECO_VENDA').Value                      := ifThen(pProdutoModel.WEB_PRECO_VENDA                   = '', Unassigned, pProdutoModel.WEB_PRECO_VENDA);
-  pQry.ParamByName('WEB_PRECO_PROMOCAO').Value                   := ifThen(pProdutoModel.WEB_PRECO_PROMOCAO                = '', Unassigned, pProdutoModel.WEB_PRECO_PROMOCAO);
-  pQry.ParamByName('WEB_PESO').Value                             := ifThen(pProdutoModel.WEB_PESO                          = '', Unassigned, pProdutoModel.WEB_PESO);
-  pQry.ParamByName('WEB_ALTURA').Value                           := ifThen(pProdutoModel.WEB_ALTURA                        = '', Unassigned, pProdutoModel.WEB_ALTURA);
-  pQry.ParamByName('WEB_LARGURA').Value                          := ifThen(pProdutoModel.WEB_LARGURA                       = '', Unassigned, pProdutoModel.WEB_LARGURA);
-  pQry.ParamByName('WEB_PROFUNDIDADE').Value                     := ifThen(pProdutoModel.WEB_PROFUNDIDADE                  = '', Unassigned, pProdutoModel.WEB_PROFUNDIDADE);
-  pQry.ParamByName('CONSERVADORA').Value                         := ifThen(pProdutoModel.CONSERVADORA                      = '', Unassigned, pProdutoModel.CONSERVADORA);
-  pQry.ParamByName('CLIENTE_CONSERVADORA').Value                 := ifThen(pProdutoModel.CLIENTE_CONSERVADORA              = '', Unassigned, pProdutoModel.CLIENTE_CONSERVADORA);
-  pQry.ParamByName('VOLTAGEM').Value                             := ifThen(pProdutoModel.VOLTAGEM                          = '', Unassigned, pProdutoModel.VOLTAGEM);
-  pQry.ParamByName('ANO_FABRICACAO').Value                       := ifThen(pProdutoModel.ANO_FABRICACAO                    = '', Unassigned, pProdutoModel.ANO_FABRICACAO);
-  pQry.ParamByName('PROPRIEDADE').Value                          := ifThen(pProdutoModel.PROPRIEDADE                       = '', Unassigned, pProdutoModel.PROPRIEDADE);
-  pQry.ParamByName('MODELO').Value                               := ifThen(pProdutoModel.MODELO                            = '', Unassigned, pProdutoModel.MODELO);
-  pQry.ParamByName('TIPO_CONSERVADORA').Value                    := ifThen(pProdutoModel.TIPO_CONSERVADORA                 = '', Unassigned, pProdutoModel.TIPO_CONSERVADORA);
-  pQry.ParamByName('FICHA_TECNICA').Value                        := ifThen(pProdutoModel.FICHA_TECNICA                     = '', Unassigned, pProdutoModel.FICHA_TECNICA);
-  pQry.ParamByName('DESCRICAO_TECNICA').Value                    := ifThen(pProdutoModel.DESCRICAO_TECNICA                 = '', Unassigned, pProdutoModel.DESCRICAO_TECNICA);
-  pQry.ParamByName('IMAGEM_TECNICA').Value                       := ifThen(pProdutoModel.IMAGEM_TECNICA                    = '', Unassigned, pProdutoModel.IMAGEM_TECNICA);
-  pQry.ParamByName('CUSTO_MEDIDA').Value                         := ifThen(pProdutoModel.CUSTO_MEDIDA                      = '', Unassigned, pProdutoModel.CUSTO_MEDIDA);
-  pQry.ParamByName('IMAGEM').Value                               := ifThen(pProdutoModel.IMAGEM                            = '', Unassigned, pProdutoModel.IMAGEM);
-  pQry.ParamByName('POS_VENDA_DIAS').Value                       := ifThen(pProdutoModel.POS_VENDA_DIAS                    = '', Unassigned, pProdutoModel.POS_VENDA_DIAS);
-  pQry.ParamByName('WEB_DESCONTO').Value                         := ifThen(pProdutoModel.WEB_DESCONTO                      = '', Unassigned, pProdutoModel.WEB_DESCONTO);
-  pQry.ParamByName('WEB_CARACTERISTICA').Value                   := ifThen(pProdutoModel.WEB_CARACTERISTICA                = '', Unassigned, pProdutoModel.WEB_CARACTERISTICA);
-  pQry.ParamByName('BONUS').Value                                := ifThen(pProdutoModel.BONUS                             = '', Unassigned, pProdutoModel.BONUS);
-  pQry.ParamByName('LW').Value                                   := ifThen(pProdutoModel.LW                                = '', Unassigned, pProdutoModel.LW);
-  pQry.ParamByName('OH').Value                                   := ifThen(pProdutoModel.OH                                = '', Unassigned, pProdutoModel.OH);
-  pQry.ParamByName('TW').Value                                   := ifThen(pProdutoModel.TW                                = '', Unassigned, pProdutoModel.TW);
-  pQry.ParamByName('TH').Value                                   := ifThen(pProdutoModel.TH                                = '', Unassigned, pProdutoModel.TH);
-  pQry.ParamByName('TIPO_VENDA_COMISSAO_ID').Value               := ifThen(pProdutoModel.TIPO_VENDA_COMISSAO_ID            = '', Unassigned, pProdutoModel.TIPO_VENDA_COMISSAO_ID);
-  pQry.ParamByName('DIFERENCA_CORTE').Value                      := ifThen(pProdutoModel.DIFERENCA_CORTE                   = '', Unassigned, pProdutoModel.DIFERENCA_CORTE);
-  pQry.ParamByName('USAR_CONTROLE_KG').Value                     := ifThen(pProdutoModel.USAR_CONTROLE_KG                  = '', Unassigned, pProdutoModel.USAR_CONTROLE_KG);
-  pQry.ParamByName('CEST').Value                                 := ifThen(pProdutoModel.CEST                              = '', Unassigned, pProdutoModel.CEST);
-  pQry.ParamByName('SUGESTAO_COMPRA').Value                      := ifThen(pProdutoModel.SUGESTAO_COMPRA                   = '', Unassigned, pProdutoModel.SUGESTAO_COMPRA);
-  pQry.ParamByName('STATUS_LINHA').Value                         := ifThen(pProdutoModel.STATUS_LINHA                      = '', Unassigned, pProdutoModel.STATUS_LINHA);
-  pQry.ParamByName('CONTROLEALTERACAO').Value                    := ifThen(pProdutoModel.CONTROLEALTERACAO                 = '', Unassigned, pProdutoModel.CONTROLEALTERACAO);
-  pQry.ParamByName('PRECO_DOLAR').Value                          := ifThen(pProdutoModel.PRECO_DOLAR                       = '', Unassigned, pProdutoModel.PRECO_DOLAR);
-  pQry.ParamByName('EMBALAGEM_ID').Value                         := ifThen(pProdutoModel.EMBALAGEM_ID                      = '', Unassigned, pProdutoModel.EMBALAGEM_ID);
-  pQry.ParamByName('CUSTO_MANUAL').Value                         := ifThen(pProdutoModel.CUSTO_MANUAL                      = '', Unassigned, pProdutoModel.CUSTO_MANUAL);
-  pQry.ParamByName('ETIQUETA_LINHA_1').Value                     := ifThen(pProdutoModel.ETIQUETA_LINHA_1                  = '', Unassigned, pProdutoModel.ETIQUETA_LINHA_1);
-  pQry.ParamByName('ETIQUETA_LINHA_2').Value                     := ifThen(pProdutoModel.ETIQUETA_LINHA_2                  = '', Unassigned, pProdutoModel.ETIQUETA_LINHA_2);
-  pQry.ParamByName('SALDO_ONLINE').Value                         := ifThen(pProdutoModel.SALDO_ONLINE                      = '', Unassigned, pProdutoModel.SALDO_ONLINE);
-  pQry.ParamByName('EQUIPAMENTO_ID').Value                       := ifThen(pProdutoModel.EQUIPAMENTO_ID                    = '', Unassigned, pProdutoModel.EQUIPAMENTO_ID);
-  pQry.ParamByName('MEDIA_SUGESTAO').Value                       := ifThen(pProdutoModel.MEDIA_SUGESTAO                    = '', Unassigned, pProdutoModel.MEDIA_SUGESTAO);
-  pQry.ParamByName('DATA_MEDIA_SUGESTAO').Value                  := ifThen(pProdutoModel.DATA_MEDIA_SUGESTAO               = '', Unassigned, pProdutoModel.DATA_MEDIA_SUGESTAO);
-  pQry.ParamByName('USAR_PARTES').Value                          := ifThen(pProdutoModel.USAR_PARTES                       = '', Unassigned, pProdutoModel.USAR_PARTES);
-  pQry.ParamByName('CODIGO_ANP').Value                           := ifThen(pProdutoModel.CODIGO_ANP                        = '', Unassigned, pProdutoModel.CODIGO_ANP);
-  pQry.ParamByName('ALTURA_M').Value                             := ifThen(pProdutoModel.ALTURA_M                          = '', Unassigned, pProdutoModel.ALTURA_M);
-  pQry.ParamByName('LARGURA_M').Value                            := ifThen(pProdutoModel.LARGURA_M                         = '', Unassigned, pProdutoModel.LARGURA_M);
-  pQry.ParamByName('PROFUNDIDADE_M').Value                       := ifThen(pProdutoModel.PROFUNDIDADE_M                    = '', Unassigned, pProdutoModel.PROFUNDIDADE_M);
-  pQry.ParamByName('BASE_ST_RECOLHIDO').Value                    := ifThen(pProdutoModel.BASE_ST_RECOLHIDO                 = '', Unassigned, pProdutoModel.BASE_ST_RECOLHIDO);
-  pQry.ParamByName('PERCENTUAL_ST_RECOLHIDO').Value              := ifThen(pProdutoModel.PERCENTUAL_ST_RECOLHIDO           = '', Unassigned, pProdutoModel.PERCENTUAL_ST_RECOLHIDO);
-  pQry.ParamByName('FCI').Value                                  := ifThen(pProdutoModel.FCI                               = '', Unassigned, pProdutoModel.FCI);
-  pQry.ParamByName('WEB_PALAVRA_CHAVE').Value                    := ifThen(pProdutoModel.WEB_PALAVRA_CHAVE                 = '', Unassigned, pProdutoModel.WEB_PALAVRA_CHAVE);
-  pQry.ParamByName('WEB_URL').Value                              := ifThen(pProdutoModel.WEB_URL                           = '', Unassigned, pProdutoModel.WEB_URL);
-  pQry.ParamByName('WEB_COR').Value                              := ifThen(pProdutoModel.WEB_COR                           = '', Unassigned, pProdutoModel.WEB_COR);
-  pQry.ParamByName('WEB_TAMANHO').Value                          := ifThen(pProdutoModel.WEB_TAMANHO                       = '', Unassigned, pProdutoModel.WEB_TAMANHO);
-  pQry.ParamByName('IPI_CENQ').Value                             := ifThen(pProdutoModel.IPI_CENQ                          = '', Unassigned, pProdutoModel.IPI_CENQ);
-  pQry.ParamByName('VOLUME_QTDE').Value                          := ifThen(pProdutoModel.VOLUME_QTDE                       = '', Unassigned, pProdutoModel.VOLUME_QTDE);
-  pQry.ParamByName('M3').Value                                   := ifThen(pProdutoModel.M3                                = '', Unassigned, pProdutoModel.M3);
-  pQry.ParamByName('TIPO_ITEM').Value                            := ifThen(pProdutoModel.TIPO_ITEM                         = '', Unassigned, pProdutoModel.TIPO_ITEM);
-  pQry.ParamByName('MARGEM_PRAZO').Value                         := ifThen(pProdutoModel.MARGEM_PRAZO                      = '', Unassigned, pProdutoModel.MARGEM_PRAZO);
-  pQry.ParamByName('VALIDAR_LOTE').Value                         := ifThen(pProdutoModel.VALIDAR_LOTE                      = '', Unassigned, pProdutoModel.VALIDAR_LOTE);
-  pQry.ParamByName('CUSTOBASE_PRO').Value                        := ifThen(pProdutoModel.CUSTOBASE_PRO                     = '', Unassigned, pProdutoModel.CUSTOBASE_PRO);
-  pQry.ParamByName('VALOR_VENDA_MAXIMO').Value                   := ifThen(pProdutoModel.VALOR_VENDA_MAXIMO                = '', Unassigned, pProdutoModel.VALOR_VENDA_MAXIMO);
-  pQry.ParamByName('VALOR_VENDA_MINIMO').Value                   := ifThen(pProdutoModel.VALOR_VENDA_MINIMO                = '', Unassigned, pProdutoModel.VALOR_VENDA_MINIMO);
-  pQry.ParamByName('ORDEM').Value                                := ifThen(pProdutoModel.ORDEM                             = '', Unassigned, pProdutoModel.ORDEM);
-  pQry.ParamByName('NOME_RESUMIDO').Value                        := ifThen(pProdutoModel.NOME_RESUMIDO                     = '', Unassigned, pProdutoModel.NOME_RESUMIDO);
-  pQry.ParamByName('COMBO').Value                                := ifThen(pProdutoModel.COMBO                             = '', Unassigned, pProdutoModel.COMBO);
-  pQry.ParamByName('UTRIB').Value                                := ifThen(pProdutoModel.UTRIB                             = '', Unassigned, pProdutoModel.UTRIB);
-  pQry.ParamByName('QTRIB').Value                                := ifThen(pProdutoModel.QTRIB                             = '', Unassigned, pProdutoModel.QTRIB);
-  pQry.ParamByName('CLIENTE_TSB').Value                          := ifThen(pProdutoModel.CLIENTE_TSB                       = '', Unassigned, pProdutoModel.CLIENTE_TSB);
-  pQry.ParamByName('UUIDALTERACAO').Value                        := ifThen(pProdutoModel.UUIDALTERACAO                     = '', Unassigned, pProdutoModel.UUIDALTERACAO);
-  pQry.ParamByName('RECEITA').Value                              := ifThen(pProdutoModel.RECEITA                           = '', Unassigned, pProdutoModel.RECEITA);
-  pQry.ParamByName('CONTROLE_INVENTARIO').Value                  := ifThen(pProdutoModel.CONTROLE_INVENTARIO               = '', Unassigned, pProdutoModel.CONTROLE_INVENTARIO);
-  pQry.ParamByName('COTACAO_TIPO').Value                         := ifThen(pProdutoModel.COTACAO_TIPO                      = '', Unassigned, pProdutoModel.COTACAO_TIPO);
-  pQry.ParamByName('VENDA_COM_DESCONTO').Value                   := ifThen(pProdutoModel.VENDA_COM_DESCONTO                = '', Unassigned, pProdutoModel.VENDA_COM_DESCONTO);
-  pQry.ParamByName('WEB_URL_IMAGENS').Value                      := ifThen(pProdutoModel.WEB_URL_IMAGENS                   = '', Unassigned, pProdutoModel.WEB_URL_IMAGENS);
-  pQry.ParamByName('WEB_ID').Value                               := ifThen(pProdutoModel.WEB_ID                            = '', Unassigned, pProdutoModel.WEB_ID);
-  pQry.ParamByName('WEB_INTEGRA').Value                          := ifThen(pProdutoModel.WEB_INTEGRA                       = '', Unassigned, pProdutoModel.WEB_INTEGRA);
-  pQry.ParamByName('WEB_GERENCIA_PRECO_VENDA').Value             := ifThen(pProdutoModel.WEB_GERENCIA_PRECO_VENDA          = '', Unassigned, pProdutoModel.WEB_GERENCIA_PRECO_VENDA);
-  pQry.ParamByName('WEB_GERENCIA_IMAGENS').Value                 := ifThen(pProdutoModel.WEB_GERENCIA_IMAGENS              = '', Unassigned, pProdutoModel.WEB_GERENCIA_IMAGENS);
-  pQry.ParamByName('WEB_RESUMO').Value                           := ifThen(pProdutoModel.WEB_RESUMO                        = '', Unassigned, pProdutoModel.WEB_RESUMO);
-  pQry.ParamByName('DESCRICAO_ANP').Value                        := ifThen(pProdutoModel.DESCRICAO_ANP                     = '', Unassigned, pProdutoModel.DESCRICAO_ANP);
-  pQry.ParamByName('CBENEF').Value                               := ifThen(pProdutoModel.CBENEF                            = '', Unassigned, pProdutoModel.CBENEF);
-  pQry.ParamByName('INDESCALA').Value                            := ifThen(pProdutoModel.INDESCALA                         = '', Unassigned, pProdutoModel.INDESCALA);
-  pQry.ParamByName('CNPJFAB').Value                              := ifThen(pProdutoModel.CNPJFAB                           = '', Unassigned, pProdutoModel.CNPJFAB);
-  pQry.ParamByName('PRODUTO_PAI').Value                          := ifThen(pProdutoModel.PRODUTO_PAI                       = '', Unassigned, pProdutoModel.PRODUTO_PAI);
-  pQry.ParamByName('CONVERSAO_FRACIONADA').Value                 := ifThen(pProdutoModel.CONVERSAO_FRACIONADA              = '', Unassigned, pProdutoModel.CONVERSAO_FRACIONADA);
-  pQry.ParamByName('CUSTO_FINANCEIRO').Value                     := ifThen(pProdutoModel.CUSTO_FINANCEIRO                  = '', Unassigned, pProdutoModel.CUSTO_FINANCEIRO);
-  pQry.ParamByName('PRAZO_MEDIO').Value                          := ifThen(pProdutoModel.PRAZO_MEDIO                       = '', Unassigned, pProdutoModel.PRAZO_MEDIO);
-  pQry.ParamByName('ARTIGO_ID').Value                            := ifThen(pProdutoModel.ARTIGO_ID                         = '', Unassigned, pProdutoModel.ARTIGO_ID);
-  pQry.ParamByName('WEB_CATEGORIAS').Value                       := ifThen(pProdutoModel.WEB_CATEGORIAS                    = '', Unassigned, pProdutoModel.WEB_CATEGORIAS);
-  pQry.ParamByName('WEB_TIPO_PRODUTO').Value                     := ifThen(pProdutoModel.WEB_TIPO_PRODUTO                  = '', Unassigned, pProdutoModel.WEB_TIPO_PRODUTO);
-  pQry.ParamByName('SUBLIMACAO').Value                           := ifThen(pProdutoModel.SUBLIMACAO                        = '', Unassigned, pProdutoModel.SUBLIMACAO);
-  pQry.ParamByName('LISTAR_PRODUCAO').Value                      := ifThen(pProdutoModel.LISTAR_PRODUCAO                   = '', Unassigned, pProdutoModel.LISTAR_PRODUCAO);
-  pQry.ParamByName('LISTAR_ROMANEIO').Value                      := ifThen(pProdutoModel.LISTAR_ROMANEIO                   = '', Unassigned, pProdutoModel.LISTAR_ROMANEIO);
-  pQry.ParamByName('VALOR_TERCERIZADOS').Value                   := ifThen(pProdutoModel.VALOR_TERCERIZADOS                = '', Unassigned, pProdutoModel.VALOR_TERCERIZADOS);
-  pQry.ParamByName('GARANTIA_12').Value                          := ifThen(pProdutoModel.GARANTIA_12                       = '', Unassigned, pProdutoModel.GARANTIA_12);
-  pQry.ParamByName('GARANTIA_24').Value                          := ifThen(pProdutoModel.GARANTIA_24                       = '', Unassigned, pProdutoModel.GARANTIA_24);
-  pQry.ParamByName('MONTAGEM').Value                             := ifThen(pProdutoModel.MONTAGEM                          = '', Unassigned, pProdutoModel.MONTAGEM);
-  pQry.ParamByName('ENTREGA').Value                              := ifThen(pProdutoModel.ENTREGA                           = '', Unassigned, pProdutoModel.ENTREGA);
-  pQry.ParamByName('CENQ').Value                                 := ifThen(pProdutoModel.CENQ                              = '', Unassigned, pProdutoModel.CENQ);
-  pQry.ParamByName('CODIGO_ANTERIOR').Value                      := ifThen(pProdutoModel.CODIGO_ANTERIOR                   = '', Unassigned, pProdutoModel.CODIGO_ANTERIOR);
-  pQry.ParamByName('VALOR_BONUS_SERVICO').Value                  := ifThen(pProdutoModel.VALOR_BONUS_SERVICO               = '', Unassigned, pProdutoModel.VALOR_BONUS_SERVICO);
-  pQry.ParamByName('NFE_INTEIRO').Value                          := ifThen(pProdutoModel.NFE_INTEIRO                       = '', Unassigned, pProdutoModel.NFE_INTEIRO);
-  pQry.ParamByName('GRUPO_COMISSAO_ID').Value                    := ifThen(pProdutoModel.GRUPO_COMISSAO_ID                 = '', Unassigned, pProdutoModel.GRUPO_COMISSAO_ID);
-  pQry.ParamByName('VALOR_ICMS_SUBSTITUTO').Value                := ifThen(pProdutoModel.VALOR_ICMS_SUBSTITUTO             = '', Unassigned, pProdutoModel.VALOR_ICMS_SUBSTITUTO);
-  pQry.ParamByName('FAMILIA').Value                              := ifThen(pProdutoModel.FAMILIA                           = '', Unassigned, pProdutoModel.FAMILIA);
-  pQry.ParamByName('TIPO_PRO').Value                             := ifThen(pProdutoModel.TIPO_PRO                          = '', Unassigned, pProdutoModel.TIPO_PRO);
-  pQry.ParamByName('CUSTOULTIMO_IMPORTACAO').Value               := ifThen(pProdutoModel.CUSTOULTIMO_IMPORTACAO            = '', Unassigned, pProdutoModel.CUSTOULTIMO_IMPORTACAO);
-  pQry.ParamByName('PRODUTO_ORIGEM').Value                       := ifThen(pProdutoModel.PRODUTO_ORIGEM                    = '', Unassigned, pProdutoModel.PRODUTO_ORIGEM);
-  pQry.ParamByName('VALOR_MONTADOR').Value                       := ifThen(pProdutoModel.VALOR_MONTADOR                    = '', Unassigned, pProdutoModel.VALOR_MONTADOR);
-  pQry.ParamByName('DATA_ALTERACAO_VENDA_PRO').Value             := ifThen(pProdutoModel.DATA_ALTERACAO_VENDA_PRO          = '', Unassigned, pProdutoModel.DATA_ALTERACAO_VENDA_PRO);
-  pQry.ParamByName('DATA_ALTERACAO_CUSTOULTIMO_PRO').Value       := ifThen(pProdutoModel.DATA_ALTERACAO_CUSTOULTIMO_PRO    = '', Unassigned, pProdutoModel.DATA_ALTERACAO_CUSTOULTIMO_PRO);
-  pQry.ParamByName('WEB_CODIGO_INTEGRACAO_MASTER').Value         := ifThen(pProdutoModel.WEB_CODIGO_INTEGRACAO_MASTER      = '', Unassigned, pProdutoModel.WEB_CODIGO_INTEGRACAO_MASTER);
-  pQry.ParamByName('WEB_CODIGO_INTEGRACAO').Value                := ifThen(pProdutoModel.WEB_CODIGO_INTEGRACAO             = '', Unassigned, pProdutoModel.WEB_CODIGO_INTEGRACAO);
-  pQry.ParamByName('WEB_VARIACAO').Value                         := ifThen(pProdutoModel.WEB_VARIACAO                      = '', Unassigned, pProdutoModel.WEB_VARIACAO);
-  pQry.ParamByName('PRODUTO_MODELO').Value                       := ifThen(pProdutoModel.PRODUTO_MODELO                    = '', Unassigned, pProdutoModel.PRODUTO_MODELO);
-  pQry.ParamByName('DATA_CONSUMO_OMINIONE').Value                := ifThen(pProdutoModel.DATA_CONSUMO_OMINIONE             = '', Unassigned, pProdutoModel.DATA_CONSUMO_OMINIONE);
-  pQry.ParamByName('CATEGORIA_ID').Value                         := ifThen(pProdutoModel.CATEGORIA_ID                      = '', Unassigned, pProdutoModel.CATEGORIA_ID);
-  pQry.ParamByName('UNIDADE_ENTRADA').Value                      := ifThen(pProdutoModel.UNIDADE_ENTRADA                   = '', Unassigned, pProdutoModel.UNIDADE_ENTRADA);
-  pQry.ParamByName('CPRODANVISA').Value                          := ifThen(pProdutoModel.CPRODANVISA                       = '', Unassigned, pProdutoModel.CPRODANVISA);
-  pQry.ParamByName('XMOTIVOISENCAO').Value                       := ifThen(pProdutoModel.XMOTIVOISENCAO                    = '', Unassigned, pProdutoModel.XMOTIVOISENCAO);
-  pQry.ParamByName('VPMC').Value                                 := ifThen(pProdutoModel.VPMC                              = '', Unassigned, pProdutoModel.VPMC);
-  pQry.ParamByName('PRODUTO_FILHO').Value                        := ifThen(pProdutoModel.PRODUTO_FILHO                     = '', Unassigned, pProdutoModel.PRODUTO_FILHO);
-  pQry.ParamByName('CONVERSAO_FRACIONADA_FILHO').Value           := ifThen(pProdutoModel.CONVERSAO_FRACIONADA_FILHO        = '', Unassigned, pProdutoModel.CONVERSAO_FRACIONADA_FILHO);
-  pQry.ParamByName('PERCENTUAL_PERDA_MATERIA_PRIMA').Value       := ifThen(pProdutoModel.PERCENTUAL_PERDA_MATERIA_PRIMA    = '', Unassigned, pProdutoModel.PERCENTUAL_PERDA_MATERIA_PRIMA);
-  pQry.ParamByName('EXTIPI').Value                               := ifThen(pProdutoModel.EXTIPI                            = '', Unassigned, pProdutoModel.EXTIPI);
+  lTabela := vConstrutor.getColumns('PRODUTO');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TProdutosModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pProdutoModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pProdutoModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TProdutosDao.SetStartRecordView(const Value: String);
 begin
   FStartRecordView := Value;
 end;
-
 procedure TProdutosDao.SetTotalRecords(const Value: Integer);
 begin
   FTotalRecords := Value;
 end;
-
 procedure TProdutosDao.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
 end;
-
 procedure TProdutosDao.subtrairSaldo(pIdProduto: String; pSaldo: Double);
 var
   lQry: TFDQuery;
   lSQL:String;
 begin
   lQry := vIConexao.CriarQuery;
-
   lSQL := ' update produto                                     '+SLineBreak+
           '    set saldo_pro = coalesce(saldo_pro, 0) - :saldo '+SLineBreak+
           '  where codigo_pro = :codigo                        '+SLineBreak;
@@ -893,7 +600,6 @@ begin
     lQry.Free;
   end;
 end;
-
 function TProdutosDao.valorVenda(pIdProduto: String): Variant;
 var
   lConexao: TFDConnection;
@@ -901,5 +607,4 @@ begin
   lConexao := vIConexao.getConnection;
   Result   := lConexao.ExecSQLScalar('select venda_pro from produto where codigo_pro = '+ QuotedStr(pIdProduto));
 end;
-
 end.

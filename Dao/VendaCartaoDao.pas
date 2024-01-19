@@ -11,7 +11,8 @@ uses
   System.Variants,
   Terasoft.FuncoesTexto,
   Interfaces.Conexao,
-  Terasoft.ConstrutorDao;
+  Terasoft.ConstrutorDao,
+  Terasoft.Utils;
 
 type
   TVendaCartaoDao = class
@@ -67,6 +68,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TVendaCartao }
 
@@ -280,28 +284,28 @@ begin
 end;
 
 procedure TVendaCartaoDao.setParams(var pQry: TFDQuery; pVendaCartaoModel: TVendaCartaoModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('numero_car').Value           := ifThen(pVendaCartaoModel.NUMERO_CAR           = '', Unassigned, pVendaCartaoModel.NUMERO_CAR);
-  pQry.ParamByName('autorizacao_car').Value      := ifThen(pVendaCartaoModel.AUTORIZACAO_CAR      = '', Unassigned, pVendaCartaoModel.AUTORIZACAO_CAR);
-  pQry.ParamByName('parcela_car').Value          := ifThen(pVendaCartaoModel.PARCELA_CAR          = '', Unassigned, pVendaCartaoModel.PARCELA_CAR);
-  pQry.ParamByName('parcelas_car').Value         := ifThen(pVendaCartaoModel.PARCELAS_CAR         = '', Unassigned, pVendaCartaoModel.PARCELAS_CAR);
-  pQry.ParamByName('valor_car').Value            := ifThen(pVendaCartaoModel.VALOR_CAR            = '', Unassigned, FormataFloatFireBird(pVendaCartaoModel.VALOR_CAR));
-  pQry.ParamByName('codigo_cli').Value           := ifThen(pVendaCartaoModel.CODIGO_CLI           = '', Unassigned, pVendaCartaoModel.CODIGO_CLI);
-  pQry.ParamByName('adm_car').Value              := ifThen(pVendaCartaoModel.ADM_CAR              = '', Unassigned, pVendaCartaoModel.ADM_CAR);
-  pQry.ParamByName('venda_car').Value            := ifThen(pVendaCartaoModel.VENDA_CAR            = '', Unassigned, transformaDataFireBird(pVendaCartaoModel.VENDA_CAR));
-  pQry.ParamByName('parcelado_car').Value        := ifThen(pVendaCartaoModel.PARCELADO_CAR        = '', Unassigned, pVendaCartaoModel.PARCELADO_CAR);
-  pQry.ParamByName('vencimento_car').Value       := ifThen(pVendaCartaoModel.VENCIMENTO_CAR       = '', Unassigned, transformaDataFireBird(pVendaCartaoModel.VENCIMENTO_CAR));
-  pQry.ParamByName('numero_venda').Value         := ifThen(pVendaCartaoModel.NUMERO_VENDA         = '', Unassigned, pVendaCartaoModel.NUMERO_VENDA);
-  pQry.ParamByName('loja').Value                 := ifThen(pVendaCartaoModel.LOJA                 = '', Unassigned, pVendaCartaoModel.LOJA);
-  pQry.ParamByName('numero_os').Value            := ifThen(pVendaCartaoModel.NUMERO_OS            = '', Unassigned, pVendaCartaoModel.NUMERO_OS);
-  pQry.ParamByName('fatura_id').Value            := ifThen(pVendaCartaoModel.FATURA_ID            = '', Unassigned, pVendaCartaoModel.FATURA_ID);
-  pQry.ParamByName('cancelamento_data').Value    := ifThen(pVendaCartaoModel.CANCELAMENTO_DATA    = '', Unassigned, transformaDataFireBird(pVendaCartaoModel.CANCELAMENTO_DATA));
-  pQry.ParamByName('cancelamento_codigo').Value  := ifThen(pVendaCartaoModel.CANCELAMENTO_CODIGO  = '', Unassigned, pVendaCartaoModel.CANCELAMENTO_CODIGO);
-  pQry.ParamByName('taxa').Value                 := ifThen(pVendaCartaoModel.TAXA                 = '', Unassigned, FormataFloatFireBird(pVendaCartaoModel.TAXA));
-  pQry.ParamByName('parcela_tef').Value          := ifThen(pVendaCartaoModel.PARCELA_TEF          = '', Unassigned, pVendaCartaoModel.PARCELA_TEF);
-  pQry.ParamByName('parcelas_tef').Value         := ifThen(pVendaCartaoModel.PARCELAS_TEF         = '', Unassigned, pVendaCartaoModel.PARCELAS_TEF);
-end;
+  lTabela := vConstrutor.getColumns('VENDACARTAO');
 
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TVendaCartaoModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pVendaCartaoModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pVendaCartaoModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
+end;
 procedure TVendaCartaoDao.SetStartRecordView(const Value: String);
 begin
   FStartRecordView := Value;

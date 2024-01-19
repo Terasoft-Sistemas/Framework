@@ -11,7 +11,8 @@ uses
   System.Variants,
   Terasoft.FuncoesTexto,
   Interfaces.Conexao,
-  Terasoft.ConstrutorDao;
+  Terasoft.ConstrutorDao,
+  Terasoft.Utils;
 
 type
   TRecebimentoCartaoDao = class
@@ -67,6 +68,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TRecebimentoCartao }
 
@@ -268,16 +272,27 @@ begin
 end;
 
 procedure TRecebimentoCartaoDao.setParams(var pQry: TFDQuery; pCaixaModel: TRecebimentoCartaoModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('usuario_id').Value  := ifThen(pCaixaModel.USUARIO_ID  = '', Unassigned, pCaixaModel.USUARIO_ID);
-  pQry.ParamByName('data_hora').Value   := ifThen(pCaixaModel.DATA_HORA   = '', Unassigned, transformaDataHoraFireBird(pCaixaModel.DATA_HORA));
-  pQry.ParamByName('cliente_id').Value  := ifThen(pCaixaModel.CLIENTE_ID  = '', Unassigned, pCaixaModel.CLIENTE_ID);
-  pQry.ParamByName('fatura').Value      := ifThen(pCaixaModel.FATURA      = '', Unassigned, pCaixaModel.FATURA);
-  pQry.ParamByName('parcela').Value     := ifThen(pCaixaModel.PARCELA     = '', Unassigned, pCaixaModel.PARCELA);
-  pQry.ParamByName('valor').Value       := ifThen(pCaixaModel.VALOR       = '', Unassigned, FormataFloatFireBird(pCaixaModel.VALOR));
-  pQry.ParamByName('bandeira_id').Value := ifThen(pCaixaModel.BANDEIRA_ID = '', Unassigned, pCaixaModel.BANDEIRA_ID);
-  pQry.ParamByName('vencimento').Value  := ifThen(pCaixaModel.VENCIMENTO  = '', Unassigned, transformaDataFireBird(pCaixaModel.VENCIMENTO));
-  pQry.ParamByName('tef_id').Value      := ifThen(pCaixaModel.TEF_ID      = '', Unassigned, pCaixaModel.TEF_ID);
+  lTabela := vConstrutor.getColumns('RECEBIMENTO_CARTAO');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TRecebimentoCartaoModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pCaixaModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pCaixaModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TRecebimentoCartaoDao.SetStartRecordView(const Value: String);

@@ -8,7 +8,9 @@ uses
   System.Generics.Collections,
   System.Variants,
   Interfaces.Conexao,
-  Terasoft.ConstrutorDao;
+  Terasoft.ConstrutorDao,
+  Terasoft.Utils;
+
 type
   TPromocaoItensDao = class
   private
@@ -35,6 +37,7 @@ type
     procedure SetWhereView(const Value: String);
     function montaCondicaoQuery: String;
     procedure setParams(var pQry: TFDQuery; pPromocaoItensModel: TPromocaoItensModel);
+
   public
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -51,10 +54,13 @@ type
     function incluir(pPromocaoItensModel: TPromocaoItensModel): String;
     function alterar(pPromocaoItensModel: TPromocaoItensModel): String;
     function excluir(pPromocaoItensModel: TPromocaoItensModel): String;
-	
+
     procedure obterLista;
 end;
 implementation
+
+uses
+  System.Rtti;
 { TPromocaoItens }
 constructor TPromocaoItensDao.Create(pIConexao : IConexao);
 begin
@@ -214,12 +220,29 @@ procedure TPromocaoItensDao.SetOrderView(const Value: String);
 begin
   FOrderView := Value;
 end;
+
 procedure TPromocaoItensDao.setParams(var pQry: TFDQuery; pPromocaoItensModel: TPromocaoItensModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('promocao_id').Value     := ifThen(pPromocaoItensModel.PROMOCAO_ID       = '', Unassigned, pPromocaoItensModel.PROMOCAO_ID);
-  pQry.ParamByName('produto_id').Value      := ifThen(pPromocaoItensModel.PRODUTO_ID        = '', Unassigned, pPromocaoItensModel.PRODUTO_ID);
-  pQry.ParamByName('valor_promocao').Value  := ifThen(pPromocaoItensModel.VALOR_PROMOCAO    = '', Unassigned, pPromocaoItensModel.VALOR_PROMOCAO);
-  pQry.ParamByName('saldo').Value           := ifThen(pPromocaoItensModel.SALDO             = '', Unassigned, pPromocaoItensModel.SALDO);
+  lTabela := vConstrutor.getColumns('PROMOCAOITENS');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TPromocaoItensModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPromocaoItensModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pPromocaoItensModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TPromocaoItensDao.SetStartRecordView(const Value: String);

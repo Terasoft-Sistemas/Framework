@@ -11,6 +11,7 @@ uses
   System.Generics.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
+  Terasoft.Utils,
   Interfaces.Conexao;
 
 type
@@ -67,6 +68,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TPedidoWeb }
 
@@ -396,97 +400,27 @@ begin
 end;
 
 procedure TPedidoWebDao.setParams(var pQry: TFDQuery; pPedidoWebModel: TPedidoWebModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('loja').Value                              := ifThen(pPedidoWebModel.LOJA                            = '', Unassigned, pPedidoWebModel.LOJA);
-  pQry.ParamByName('datahora').Value                          := ifThen(pPedidoWebModel.DATAHORA                        = '', Unassigned, transformaDataHoraFireBird(pPedidoWebModel.DATAHORA));
-  pQry.ParamByName('cliente_id').Value                        := ifThen(pPedidoWebModel.CLIENTE_ID                      = '', Unassigned, pPedidoWebModel.CLIENTE_ID);
-  pQry.ParamByName('vendedor_id').Value                       := ifThen(pPedidoWebModel.VENDEDOR_ID                     = '', Unassigned, pPedidoWebModel.VENDEDOR_ID);
-  pQry.ParamByName('portador_id').Value                       := ifThen(pPedidoWebModel.PORTADOR_ID                     = '', Unassigned, pPedidoWebModel.PORTADOR_ID);
-  pQry.ParamByName('tipovenda_id').Value                      := ifThen(pPedidoWebModel.TIPOVENDA_ID                    = '', Unassigned, pPedidoWebModel.TIPOVENDA_ID);
-  pQry.ParamByName('condicoes_pagamento').Value               := ifThen(pPedidoWebModel.CONDICOES_PAGAMENTO             = '', Unassigned, pPedidoWebModel.CONDICOES_PAGAMENTO);
-  pQry.ParamByName('percentual_desconto').Value               := ifThen(pPedidoWebModel.PERCENTUAL_DESCONTO             = '', Unassigned, FormataFloatFireBird(pPedidoWebModel.PERCENTUAL_DESCONTO));
-  pQry.ParamByName('valor_frete').Value                       := ifThen(pPedidoWebModel.VALOR_FRETE                     = '', Unassigned, FormataFloatFireBird(pPedidoWebModel.VALOR_FRETE));
-  pQry.ParamByName('valor_st').Value                          := ifThen(pPedidoWebModel.VALOR_ST                        = '', Unassigned, FormataFloatFireBird(pPedidoWebModel.VALOR_ST));
-  pQry.ParamByName('observacao').Value                        := ifThen(pPedidoWebModel.OBSERVACAO                      = '', Unassigned, pPedidoWebModel.OBSERVACAO);
-  pQry.ParamByName('observacoes').Value                       := ifThen(pPedidoWebModel.OBSERVACOES                     = '', Unassigned, pPedidoWebModel.OBSERVACOES);
-  pQry.ParamByName('status').Value                            := ifThen(pPedidoWebModel.STATUS                          = '', Unassigned, pPedidoWebModel.STATUS);
-  pQry.ParamByName('substatus').Value                         := ifThen(pPedidoWebModel.SUBSTATUS                       = '', Unassigned, pPedidoWebModel.SUBSTATUS);
-  pQry.ParamByName('pedido_id').Value                         := ifThen(pPedidoWebModel.PEDIDO_ID                       = '', Unassigned, pPedidoWebModel.PEDIDO_ID);
-  pQry.ParamByName('origem_pedido').Value                     := ifThen(pPedidoWebModel.ORIGEM_PEDIDO                   = '', Unassigned, pPedidoWebModel.ORIGEM_PEDIDO);
-  pQry.ParamByName('pedido_compra').Value                     := ifThen(pPedidoWebModel.PEDIDO_COMPRA                   = '', Unassigned, pPedidoWebModel.PEDIDO_COMPRA);
-  pQry.ParamByName('acrescimo').Value                         := ifThen(pPedidoWebModel.ACRESCIMO                       = '', Unassigned, FormataFloatFireBird(pPedidoWebModel.ACRESCIMO));
-  pQry.ParamByName('isgift').Value                            := ifThen(pPedidoWebModel.ISGIFT                          = '', Unassigned, pPedidoWebModel.ISGIFT);
-  pQry.ParamByName('valor_total').Value                       := ifThen(pPedidoWebModel.VALOR_TOTAL                     = '', Unassigned, FormataFloatFireBird(pPedidoWebModel.VALOR_TOTAL));
-  pQry.ParamByName('codigo_cupom_desconto').Value             := ifThen(pPedidoWebModel.CODIGO_CUPOM_DESCONTO           = '', Unassigned, pPedidoWebModel.CODIGO_CUPOM_DESCONTO);
-  pQry.ParamByName('valor_cupom_desconto').Value              := ifThen(pPedidoWebModel.VALOR_CUPOM_DESCONTO            = '', Unassigned, FormataFloatFireBird(pPedidoWebModel.VALOR_CUPOM_DESCONTO));
-  pQry.ParamByName('dados_adicionais').Value                  := ifThen(pPedidoWebModel.DADOS_ADICIONAIS                = '', Unassigned, pPedidoWebModel.DADOS_ADICIONAIS);
-  pQry.ParamByName('controlealteracao').Value                 := ifThen(pPedidoWebModel.CONTROLEALTERACAO               = '', Unassigned, pPedidoWebModel.CONTROLEALTERACAO);
-  pQry.ParamByName('usuario').Value                           := ifThen(pPedidoWebModel.USUARIO                         = '', Unassigned, pPedidoWebModel.USUARIO);
-  pQry.ParamByName('transportadora_id').Value                 := ifThen(pPedidoWebModel.TRANSPORTADORA_ID               = '', Unassigned, pPedidoWebModel.TRANSPORTADORA_ID);
-  pQry.ParamByName('impressao').Value                         := ifThen(pPedidoWebModel.IMPRESSAO                       = '', Unassigned, pPedidoWebModel.IMPRESSAO);
-  pQry.ParamByName('idpedidosovis').Value                     := ifThen(pPedidoWebModel.IDPEDIDOSOVIS                   = '', Unassigned, pPedidoWebModel.IDPEDIDOSOVIS);
-  pQry.ParamByName('correio_volume').Value                    := ifThen(pPedidoWebModel.CORREIO_VOLUME                  = '', Unassigned, pPedidoWebModel.CORREIO_VOLUME);
-  pQry.ParamByName('correio_data').Value                      := ifThen(pPedidoWebModel.CORREIO_DATA                    = '', Unassigned, transformaDataFireBird(pPedidoWebModel.CORREIO_DATA));
-  pQry.ParamByName('correio_hora').Value                      := ifThen(pPedidoWebModel.CORREIO_HORA                    = '', Unassigned, pPedidoWebModel.CORREIO_HORA);
-  pQry.ParamByName('enviar_email').Value                      := ifThen(pPedidoWebModel.ENVIAR_EMAIL                    = '', Unassigned, pPedidoWebModel.ENVIAR_EMAIL);
-  pQry.ParamByName('transportadora_dados_adicionais').Value   := ifThen(pPedidoWebModel.TRANSPORTADORA_DADOS_ADICIONAIS = '', Unassigned, pPedidoWebModel.TRANSPORTADORA_DADOS_ADICIONAIS);
-  pQry.ParamByName('dados_autorizacao').Value                 := ifThen(pPedidoWebModel.DADOS_AUTORIZACAO               = '', Unassigned, pPedidoWebModel.DADOS_AUTORIZACAO);
-  pQry.ParamByName('parcelas').Value                          := ifThen(pPedidoWebModel.PARCELAS                        = '', Unassigned, pPedidoWebModel.PARCELAS);
-  pQry.ParamByName('valor_entrada').Value                     := ifThen(pPedidoWebModel.VALOR_ENTRADA                   = '', Unassigned, FormataFloatFireBird(pPedidoWebModel.VALOR_ENTRADA));
-  pQry.ParamByName('primeiro_vencimento').Value               := ifThen(pPedidoWebModel.PRIMEIRO_VENCIMENTO             = '', Unassigned, transformaDataFireBird(pPedidoWebModel.PRIMEIRO_VENCIMENTO));
-  pQry.ParamByName('idpedidosovisusuario').Value              := ifThen(pPedidoWebModel.IDPEDIDOSOVISUSUARIO            = '', Unassigned, pPedidoWebModel.IDPEDIDOSOVISUSUARIO);
-  pQry.ParamByName('usar_tabela_preco').Value                 := ifThen(pPedidoWebModel.USAR_TABELA_PRECO               = '', Unassigned, pPedidoWebModel.USAR_TABELA_PRECO);
-  pQry.ParamByName('tipo').Value                              := ifThen(pPedidoWebModel.TIPO                            = '', Unassigned, pPedidoWebModel.TIPO);
-  pQry.ParamByName('data_hora_analise').Value                 := ifThen(pPedidoWebModel.DATA_HORA_ANALISE               = '', Unassigned, transformaDataHoraFireBird(pPedidoWebModel.DATA_HORA_ANALISE));
-  pQry.ParamByName('usuario_analise').Value                   := ifThen(pPedidoWebModel.USUARIO_ANALISE                 = '', Unassigned, pPedidoWebModel.USUARIO_ANALISE);
-  pQry.ParamByName('data_hora_aprovacao').Value               := ifThen(pPedidoWebModel.DATA_HORA_APROVACAO             = '', Unassigned, transformaDataHoraFireBird(pPedidoWebModel.DATA_HORA_APROVACAO));
-  pQry.ParamByName('usuario_aprovacao').Value                 := ifThen(pPedidoWebModel.USUARIO_APROVACAO               = '', Unassigned, pPedidoWebModel.USUARIO_APROVACAO);
-  pQry.ParamByName('mensagem_analise').Value                  := ifThen(pPedidoWebModel.MENSAGEM_ANALISE                = '', Unassigned, pPedidoWebModel.MENSAGEM_ANALISE);
-  pQry.ParamByName('status_sovis').Value                      := ifThen(pPedidoWebModel.STATUS_SOVIS                    = '', Unassigned, pPedidoWebModel.STATUS_SOVIS);
-  pQry.ParamByName('faturar').Value                           := ifThen(pPedidoWebModel.FATURAR                         = '', Unassigned, pPedidoWebModel.FATURAR);
-  pQry.ParamByName('caminho_boleto').Value                    := ifThen(pPedidoWebModel.CAMINHO_BOLETO                  = '', Unassigned, pPedidoWebModel.CAMINHO_BOLETO);
-  pQry.ParamByName('caminho_nfe').Value                       := ifThen(pPedidoWebModel.CAMINHO_NFE                     = '', Unassigned, pPedidoWebModel.CAMINHO_NFE);
-  pQry.ParamByName('uuid_sovis').Value                        := ifThen(pPedidoWebModel.UUID_SOVIS                      = '', Unassigned, pPedidoWebModel.UUID_SOVIS);
-  pQry.ParamByName('entrega_data').Value                      := ifThen(pPedidoWebModel.ENTREGA_DATA                    = '', Unassigned, pPedidoWebModel.ENTREGA_DATA);
-  pQry.ParamByName('entrega_hora').Value                      := ifThen(pPedidoWebModel.ENTREGA_HORA                    = '', Unassigned, pPedidoWebModel.ENTREGA_HORA);
-  pQry.ParamByName('montagem_data').Value                     := ifThen(pPedidoWebModel.MONTAGEM_DATA                   = '', Unassigned, transformaDataFireBird(pPedidoWebModel.MONTAGEM_DATA));
-  pQry.ParamByName('montagem_hora').Value                     := ifThen(pPedidoWebModel.MONTAGEM_HORA                   = '', Unassigned, pPedidoWebModel.MONTAGEM_HORA);
-  pQry.ParamByName('usuario_analisando').Value                := ifThen(pPedidoWebModel.USUARIO_ANALISANDO              = '', Unassigned, pPedidoWebModel.USUARIO_ANALISANDO);
-  pQry.ParamByName('entrega_endereco').Value                  := ifThen(pPedidoWebModel.ENTREGA_ENDERECO                = '', Unassigned, pPedidoWebModel.ENTREGA_ENDERECO);
-  pQry.ParamByName('entrega_complemento').Value               := ifThen(pPedidoWebModel.ENTREGA_COMPLEMENTO             = '', Unassigned, pPedidoWebModel.ENTREGA_COMPLEMENTO);
-  pQry.ParamByName('entrega_numero').Value                    := ifThen(pPedidoWebModel.ENTREGA_NUMERO                  = '', Unassigned, pPedidoWebModel.ENTREGA_NUMERO);
-  pQry.ParamByName('entrega_bairro').Value                    := ifThen(pPedidoWebModel.ENTREGA_BAIRRO                  = '', Unassigned, pPedidoWebModel.ENTREGA_BAIRRO);
-  pQry.ParamByName('entrega_cidade').Value                    := ifThen(pPedidoWebModel.ENTREGA_CIDADE                  = '', Unassigned, pPedidoWebModel.ENTREGA_CIDADE);
-  pQry.ParamByName('entrega_uf').Value                        := ifThen(pPedidoWebModel.ENTREGA_UF                      = '', Unassigned, pPedidoWebModel.ENTREGA_UF);
-  pQry.ParamByName('entrega_cep').Value                       := ifThen(pPedidoWebModel.ENTREGA_CEP                     = '', Unassigned, pPedidoWebModel.ENTREGA_CEP);
-  pQry.ParamByName('entrega_cod_municipio').Value             := ifThen(pPedidoWebModel.ENTREGA_COD_MUNICIPIO           = '', Unassigned, pPedidoWebModel.ENTREGA_COD_MUNICIPIO);
-  pQry.ParamByName('pre_analise_status').Value                := ifThen(pPedidoWebModel.PRE_ANALISE_STATUS              = '', Unassigned, pPedidoWebModel.PRE_ANALISE_STATUS);
-  pQry.ParamByName('pre_analise_usuario_id').Value            := ifThen(pPedidoWebModel.PRE_ANALISE_USUARIO_ID          = '', Unassigned, pPedidoWebModel.PRE_ANALISE_USUARIO_ID);
-  pQry.ParamByName('pre_analise_datahora').Value              := ifThen(pPedidoWebModel.PRE_ANALISE_DATAHORA            = '', Unassigned, transformaDataHoraFireBird(pPedidoWebModel.PRE_ANALISE_DATAHORA));
-  pQry.ParamByName('period').Value                            := ifThen(pPedidoWebModel.PERIOD                          = '', Unassigned, pPedidoWebModel.PERIOD);
-  pQry.ParamByName('data_hora_reprovado').Value               := ifThen(pPedidoWebModel.DATA_HORA_REPROVADO             = '', Unassigned, transformaDataHoraFireBird(pPedidoWebModel.DATA_HORA_REPROVADO));
-  pQry.ParamByName('usuario_reprovado').Value                 := ifThen(pPedidoWebModel.USUARIO_REPROVADO               = '', Unassigned, pPedidoWebModel.USUARIO_REPROVADO);
-  pQry.ParamByName('condicoes2_pag').Value                    := ifThen(pPedidoWebModel.CONDICOES2_PAG                  = '', Unassigned, pPedidoWebModel.CONDICOES2_PAG);
-  pQry.ParamByName('saida_id').Value                          := ifThen(pPedidoWebModel.SAIDA_ID                        = '', Unassigned, pPedidoWebModel.SAIDA_ID);
-  pQry.ParamByName('proposta').Value                          := ifThen(pPedidoWebModel.PROPOSTA                        = '', Unassigned, pPedidoWebModel.PROPOSTA);
-  pQry.ParamByName('frete_altura').Value                      := ifThen(pPedidoWebModel.FRETE_ALTURA                    = '', Unassigned, FormataFloatFireBird(pPedidoWebModel.FRETE_ALTURA));
-  pQry.ParamByName('frete_profundidade').Value                := ifThen(pPedidoWebModel.FRETE_PROFUNDIDADE              = '', Unassigned, FormataFloatFireBird(pPedidoWebModel.FRETE_PROFUNDIDADE));
-  pQry.ParamByName('frete_largura').Value                     := ifThen(pPedidoWebModel.FRETE_LARGURA                   = '', Unassigned, FormataFloatFireBird(pPedidoWebModel.FRETE_LARGURA));
-  pQry.ParamByName('frete_peso').Value                        := ifThen(pPedidoWebModel.FRETE_PESO                      = '', Unassigned, FormataFloatFireBird(pPedidoWebModel.FRETE_PESO));
-  pQry.ParamByName('frete_valor').Value                       := ifThen(pPedidoWebModel.FRETE_VALOR                     = '', Unassigned, FormataFloatFireBird(pPedidoWebModel.FRETE_VALOR));
-  pQry.ParamByName('cupom_desconto').Value                    := ifThen(pPedidoWebModel.CUPOM_DESCONTO                  = '', Unassigned, pPedidoWebModel.CUPOM_DESCONTO);
-  pQry.ParamByName('cupom_tipo').Value                        := ifThen(pPedidoWebModel.CUPOM_TIPO                      = '', Unassigned, pPedidoWebModel.CUPOM_TIPO);
-  pQry.ParamByName('cupom_valor').Value                       := ifThen(pPedidoWebModel.CUPOM_VALOR                     = '', Unassigned, FormataFloatFireBird(pPedidoWebModel.CUPOM_VALOR));
-  pQry.ParamByName('marketplace').Value                       := ifThen(pPedidoWebModel.MARKETPLACE                     = '', Unassigned, pPedidoWebModel.MARKETPLACE);
-  pQry.ParamByName('regiao_id').Value                         := ifThen(pPedidoWebModel.REGIAO_ID                       = '', Unassigned, pPedidoWebModel.REGIAO_ID);
-  pQry.ParamByName('preco_venda_id').Value                    := ifThen(pPedidoWebModel.PRECO_VENDA_ID                  = '', Unassigned, pPedidoWebModel.PRECO_VENDA_ID);
-  pQry.ParamByName('data_consumo_ominione').Value             := ifThen(pPedidoWebModel.DATA_CONSUMO_OMINIONE           = '', Unassigned, transformaDataHoraFireBird(pPedidoWebModel.DATA_CONSUMO_OMINIONE));
-  pQry.ParamByName('intermediador_id').Value                  := ifThen(pPedidoWebModel.INTERMEDIADOR_ID                = '', Unassigned, pPedidoWebModel.INTERMEDIADOR_ID);
-  pQry.ParamByName('lote_exportacao').Value                   := ifThen(pPedidoWebModel.LOTE_EXPORTACAO                 = '', Unassigned, pPedidoWebModel.LOTE_EXPORTACAO);
-  pQry.ParamByName('data_exportacao').Value                   := ifThen(pPedidoWebModel.DATA_EXPORTACAO                 = '', Unassigned, transformaDataFireBird(pPedidoWebModel.DATA_EXPORTACAO));
-  pQry.ParamByName('status_analise').Value                    := ifThen(pPedidoWebModel.STATUS_ANALISE                  = '', Unassigned, pPedidoWebModel.STATUS_ANALISE);
-  pQry.ParamByName('ped_plataforma').Value                    := ifThen(pPedidoWebModel.PED_PLATAFORMA                  = '', Unassigned, pPedidoWebModel.PED_PLATAFORMA);
-  pQry.ParamByName('codigo_autorizacao_cartao').Value         := ifThen(pPedidoWebModel.CODIGO_AUTORIZACAO_CARTAO       = '', Unassigned, pPedidoWebModel.CODIGO_AUTORIZACAO_CARTAO);
+  lTabela := vConstrutor.getColumns('WEB_PEDIDO');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TPedidoWebModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPedidoWebModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pPedidoWebModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TPedidoWebDao.SetStartRecordView(const Value: String);

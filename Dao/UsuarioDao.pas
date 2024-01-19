@@ -11,7 +11,8 @@ uses
   UsuarioModel,
   System.Generics.Collections,
   Interfaces.Conexao,
-  Terasoft.ConstrutorDao;
+  Terasoft.ConstrutorDao,
+  Terasoft.Utils;
 
 type
   TUsuarioDao = class
@@ -77,6 +78,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TUsuarioDao }
 
@@ -308,35 +312,27 @@ begin
 end;
 
 procedure TUsuarioDao.setParams(var pQry: TFDQuery; pUsuarioModel: TUsuarioModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('status').Value                := ifThen(pUsuarioModel.STATUS               = '', Unassigned, pUsuarioModel.STATUS);
-  pQry.ParamByName('data_inc').Value              := ifThen(pUsuarioModel.DATA_INC             = '', Unassigned, pUsuarioModel.DATA_INC);
-  pQry.ParamByName('senha').Value                 := ifThen(pUsuarioModel.SENHA                = '', Unassigned, pUsuarioModel.SENHA);
-  pQry.ParamByName('hash').Value                  := ifThen(pUsuarioModel.HASH                 = '', Unassigned, pUsuarioModel.HASH);
-  pQry.ParamByName('nome').Value                  := ifThen(pUsuarioModel.NOME                 = '', Unassigned, pUsuarioModel.NOME);
-  pQry.ParamByName('fantasia').Value              := ifThen(pUsuarioModel.FANTASIA             = '', Unassigned, pUsuarioModel.FANTASIA);
-  pQry.ParamByName('dpto').Value                  := ifThen(pUsuarioModel.DPTO                 = '', Unassigned, pUsuarioModel.DPTO);
-  pQry.ParamByName('nivel').Value                 := ifThen(pUsuarioModel.NIVEL                = '', Unassigned, pUsuarioModel.NIVEL);
-  pQry.ParamByName('desconto').Value              := ifThen(pUsuarioModel.DESCONTO             = '', Unassigned, pUsuarioModel.DESCONTO);
-  pQry.ParamByName('caixa').Value                 := ifThen(pUsuarioModel.CAIXA                = '', Unassigned, pUsuarioModel.CAIXA);
-  pQry.ParamByName('perfil_new_id').Value         := ifThen(pUsuarioModel.PERFIL_NEW_ID        = '', Unassigned, pUsuarioModel.PERFIL_NEW_ID);
-  pQry.ParamByName('senha_pedido').Value          := ifThen(pUsuarioModel.SENHA_PEDIDO         = '', Unassigned, pUsuarioModel.SENHA_PEDIDO);
-  pQry.ParamByName('adm_pedido_web').Value        := ifThen(pUsuarioModel.ADM_PEDIDO_WEB       = '', Unassigned, pUsuarioModel.ADM_PEDIDO_WEB);
-  pQry.ParamByName('sql_produto_fc').Value        := ifThen(pUsuarioModel.SQL_PRODUTO_FC       = '', Unassigned, pUsuarioModel.SQL_PRODUTO_FC);
-  pQry.ParamByName('preco_id').Value              := ifThen(pUsuarioModel.PRECO_ID             = '', Unassigned, pUsuarioModel.PRECO_ID);
-  pQry.ParamByName('loja_id').Value               := ifThen(pUsuarioModel.LOJA_ID              = '', Unassigned, pUsuarioModel.LOJA_ID);
-  pQry.ParamByName('uuid').Value                  := ifThen(pUsuarioModel.UUID                 = '', Unassigned, pUsuarioModel.UUID);
-  pQry.ParamByName('uuidalteracao').Value         := ifThen(pUsuarioModel.UUIDALTERACAO        = '', Unassigned, pUsuarioModel.UUIDALTERACAO);
-  pQry.ParamByName('otp').Value                   := ifThen(pUsuarioModel.OTP                  = '', Unassigned, pUsuarioModel.OTP);
-  pQry.ParamByName('codigo_anterior').Value       := ifThen(pUsuarioModel.CODIGO_ANTERIOR      = '', Unassigned, pUsuarioModel.CODIGO_ANTERIOR);
-  pQry.ParamByName('systime').Value               := ifThen(pUsuarioModel.SYSTIME              = '', Unassigned, pUsuarioModel.SYSTIME);
-  pQry.ParamByName('atalhos_web').Value           := ifThen(pUsuarioModel.ATALHOS_WEB          = '', Unassigned, pUsuarioModel.ATALHOS_WEB);
-  pQry.ParamByName('menu_oculto_web').Value       := ifThen(pUsuarioModel.MENU_OCULTO_WEB      = '', Unassigned, pUsuarioModel.MENU_OCULTO_WEB);
-  pQry.ParamByName('pedido_web').Value            := ifThen(pUsuarioModel.PEDIDO_WEB           = '', Unassigned, pUsuarioModel.PEDIDO_WEB);
-  pQry.ParamByName('usuario_windows').Value       := ifThen(pUsuarioModel.USUARIO_WINDOWS      = '', Unassigned, pUsuarioModel.USUARIO_WINDOWS);
-  pQry.ParamByName('senha_windows').Value         := ifThen(pUsuarioModel.SENHA_WINDOWS        = '', Unassigned, pUsuarioModel.SENHA_WINDOWS);
-  pQry.ParamByName('url_windows').Value           := ifThen(pUsuarioModel.URL_WINDOWS          = '', Unassigned, pUsuarioModel.URL_WINDOWS);
-  pQry.ParamByName('pagina_inicial_web').Value    := ifThen(pUsuarioModel.PAGINA_INICIAL_WEB   = '', Unassigned, pUsuarioModel.PAGINA_INICIAL_WEB);
+  lTabela := vConstrutor.getColumns('USUARIO');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TUsuarioModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pUsuarioModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pUsuarioModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TUsuarioDao.SetPerfil(const Value: Variant);

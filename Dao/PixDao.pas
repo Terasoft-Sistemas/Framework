@@ -10,6 +10,7 @@ uses
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
+  Terasoft.Utils,
   Terasoft.FuncoesTexto,
   Interfaces.Conexao;
 
@@ -66,6 +67,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TPix }
 
@@ -325,27 +329,27 @@ begin
 end;
 
 procedure TPixDao.setParams(var pQry: TFDQuery; pPixModel: TPixModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('cliente_id').Value            := ifThen(pPixModel.CLIENTE_ID            = '', Unassigned, pPixModel.CLIENTE_ID);
-  pQry.ParamByName('valor').Value                 := ifThen(pPixModel.VALOR                 = '', Unassigned, FormataFloatFireBird(pPixModel.VALOR));
-  pQry.ParamByName('vencimento').Value            := ifThen(pPixModel.VENCIMENTO            = '', Unassigned, transformaDataFireBird(pPixModel.VENCIMENTO));
-  pQry.ParamByName('expira').Value                := ifThen(pPixModel.EXPIRA                = '', Unassigned, pPixModel.EXPIRA);
-  pQry.ParamByName('mensagem').Value              := ifThen(pPixModel.MENSAGEM              = '', Unassigned, pPixModel.MENSAGEM);
-  pQry.ParamByName('documento').Value             := ifThen(pPixModel.DOCUMENTO             = '', Unassigned, pPixModel.DOCUMENTO);
-  pQry.ParamByName('juros_tipo').Value            := ifThen(pPixModel.JUROS_TIPO            = '', Unassigned, pPixModel.JUROS_TIPO);
-  pQry.ParamByName('juros_valor').Value           := ifThen(pPixModel.JUROS_VALOR           = '', Unassigned, FormataFloatFireBird(pPixModel.JUROS_VALOR));
-  pQry.ParamByName('multa_tipo').Value            := ifThen(pPixModel.MULTA_TIPO            = '', Unassigned, pPixModel.MULTA_TIPO);
-  pQry.ParamByName('multa_valor').Value           := ifThen(pPixModel.MULTA_VALOR           = '', Unassigned, FormataFloatFireBird(pPixModel.MULTA_VALOR));
-  pQry.ParamByName('desconto_tipo').Value         := ifThen(pPixModel.DESCONTO_TIPO         = '', Unassigned, pPixModel.DESCONTO_TIPO);
-  pQry.ParamByName('desconto_valor').Value        := ifThen(pPixModel.DESCONTO_VALOR        = '', Unassigned, FormataFloatFireBird(pPixModel.DESCONTO_VALOR));
-  pQry.ParamByName('desconto_data').Value         := ifThen(pPixModel.DESCONTO_DATA         = '', Unassigned, transformaDataFireBird(pPixModel.DESCONTO_DATA));
-  pQry.ParamByName('pix_id').Value                := ifThen(pPixModel.PIX_ID                = '', Unassigned, pPixModel.PIX_ID);
-  pQry.ParamByName('pix_data').Value              := ifThen(pPixModel.PIX_DATA              = '', Unassigned, pPixModel.PIX_DATA);
-  pQry.ParamByName('pix_url').Value               := ifThen(pPixModel.PIX_URL               = '', Unassigned, pPixModel.PIX_URL);
-  pQry.ParamByName('pix_tipo').Value              := ifThen(pPixModel.PIX_TIPO              = '', Unassigned, pPixModel.PIX_TIPO);
-  pQry.ParamByName('valor_recebido').Value        := ifThen(pPixModel.VALOR_RECEBIDO        = '', Unassigned, FormataFloatFireBird(pPixModel.VALOR_RECEBIDO));
-  pQry.ParamByName('data_pagamento').Value        := ifThen(pPixModel.DATA_PAGAMENTO        = '', Unassigned, transformaDataFireBird(pPixModel.DATA_PAGAMENTO));
-  pQry.ParamByName('contasreceberitens_id').Value := ifThen(pPixModel.CONTASRECEBERITENS_ID = '', Unassigned, pPixModel.CONTASRECEBERITENS_ID);
+  lTabela := vConstrutor.getColumns('PIX');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TPixModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPixModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pPixModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TPixDao.SetStartRecordView(const Value: String);

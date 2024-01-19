@@ -11,7 +11,8 @@ uses
   System.Variants,
   Terasoft.FuncoesTexto,
   Interfaces.Conexao,
-  Terasoft.ConstrutorDao;
+  Terasoft.ConstrutorDao,
+  Terasoft.Utils;
 
 type
   TTEFDao = class
@@ -67,6 +68,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TTEF }
 
@@ -360,45 +364,27 @@ begin
 end;
 
 procedure TTEFDao.setParams(var pQry: TFDQuery; pTEFModel: TTEFModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('nome_rede').Value                  := ifThen(pTEFModel.NOME_REDE                  = '', Unassigned, pTEFModel.NOME_REDE);
-  pQry.ParamByName('valortotal').Value                 := ifThen(pTEFModel.VALORTOTAL                 = '', Unassigned, FormataFloatFireBird(pTEFModel.VALORTOTAL));
-  pQry.ParamByName('tipo_transacao').Value             := ifThen(pTEFModel.TIPO_TRANSACAO             = '', Unassigned, pTEFModel.TIPO_TRANSACAO);
-  pQry.ParamByName('msu').Value                        := ifThen(pTEFModel.MSU                        = '', Unassigned, pTEFModel.MSU);
-  pQry.ParamByName('autorizacao').Value                := ifThen(pTEFModel.AUTORIZACAO                = '', Unassigned, pTEFModel.AUTORIZACAO);
-  pQry.ParamByName('numero_lote').Value                := ifThen(pTEFModel.NUMERO_LOTE                = '', Unassigned, pTEFModel.NUMERO_LOTE);
-  pQry.ParamByName('timestamp_host').Value             := ifThen(pTEFModel.TIMESTAMP_HOST             = '', Unassigned, pTEFModel.TIMESTAMP_HOST);
-  pQry.ParamByName('timestamp_local').Value            := ifThen(pTEFModel.TIMESTAMP_LOCAL            = '', Unassigned, transformaDataFireBird(pTEFModel.TIMESTAMP_LOCAL));
-  pQry.ParamByName('data').Value                       := ifThen(pTEFModel.DATA                       = '', Unassigned, transformaDataFireBird(pTEFModel.DATA));
-  pQry.ParamByName('status').Value                     := ifThen(pTEFModel.STATUS                     = '', Unassigned, pTEFModel.STATUS);
-  pQry.ParamByName('timestamp_cancelamento').Value     := ifThen(pTEFModel.TIMESTAMP_CANCELAMENTO     = '', Unassigned, pTEFModel.TIMESTAMP_CANCELAMENTO);
-  pQry.ParamByName('documento_fiscal_vinculado').Value := ifThen(pTEFModel.DOCUMENTO_FISCAL_VINCULADO = '', Unassigned, pTEFModel.DOCUMENTO_FISCAL_VINCULADO);
-  pQry.ParamByName('moeda').Value                      := ifThen(pTEFModel.MOEDA                      = '', Unassigned, pTEFModel.MOEDA);
-  pQry.ParamByName('tipo_pessoa').Value                := ifThen(pTEFModel.TIPO_PESSOA                = '', Unassigned, pTEFModel.TIPO_PESSOA);
-  pQry.ParamByName('documento_pessoa').Value           := ifThen(pTEFModel.DOCUMENTO_PESSOA           = '', Unassigned, pTEFModel.DOCUMENTO_PESSOA);
-  pQry.ParamByName('status_transacaoo').Value          := ifThen(pTEFModel.STATUS_TRANSACAOO          = '', Unassigned, pTEFModel.STATUS_TRANSACAOO);
-  pQry.ParamByName('nome_administradora').Value        := ifThen(pTEFModel.NOME_ADMINISTRADORA        = '', Unassigned, pTEFModel.NOME_ADMINISTRADORA);
-  pQry.ParamByName('codigo_autorizacao').Value         := ifThen(pTEFModel.CODIGO_AUTORIZACAO         = '', Unassigned, pTEFModel.CODIGO_AUTORIZACAO);
-  pQry.ParamByName('tipo_parcelamento').Value          := ifThen(pTEFModel.TIPO_PARCELAMENTO          = '', Unassigned, pTEFModel.TIPO_PARCELAMENTO);
-  pQry.ParamByName('quantidade_parcelas').Value        := ifThen(pTEFModel.QUANTIDADE_PARCELAS        = '', Unassigned, pTEFModel.QUANTIDADE_PARCELAS);
-  pQry.ParamByName('parcela').Value                    := ifThen(pTEFModel.PARCELA                    = '', Unassigned, pTEFModel.PARCELA);
-  pQry.ParamByName('data_vencimento_parcela').Value    := ifThen(pTEFModel.DATA_VENCIMENTO_PARCELA    = '', Unassigned, transformaDataFireBird(pTEFModel.DATA_VENCIMENTO_PARCELA));
-  pQry.ParamByName('valor_parcela').Value              := ifThen(pTEFModel.VALOR_PARCELA              = '', Unassigned, FormataFloatFireBird(pTEFModel.VALOR_PARCELA));
-  pQry.ParamByName('nsu_parcela').Value                := ifThen(pTEFModel.NSU_PARCELA                = '', Unassigned, pTEFModel.NSU_PARCELA);
-  pQry.ParamByName('data_transacao_comprovante').Value := ifThen(pTEFModel.DATA_TRANSACAO_COMPROVANTE = '', Unassigned, transformaDataFireBird(pTEFModel.DATA_TRANSACAO_COMPROVANTE));
-  pQry.ParamByName('hora_transacao_comprovante').Value := ifThen(pTEFModel.HORA_TRANSACAO_COMPROVANTE = '', Unassigned, pTEFModel.HORA_TRANSACAO_COMPROVANTE);
-  pQry.ParamByName('nsu_cancelamento').Value           := ifThen(pTEFModel.NSU_CANCELAMENTO           = '', Unassigned, pTEFModel.NSU_CANCELAMENTO);
-  pQry.ParamByName('cliente_id').Value                 := ifThen(pTEFModel.CLIENTE_ID                 = '', Unassigned, pTEFModel.CLIENTE_ID);
-  pQry.ParamByName('contasreceber_fatura').Value       := ifThen(pTEFModel.CONTASRECEBER_FATURA       = '', Unassigned, pTEFModel.CONTASRECEBER_FATURA);
-  pQry.ParamByName('contasreceber_parcela').Value      := ifThen(pTEFModel.CONTASRECEBER_PARCELA      = '', Unassigned, pTEFModel.CONTASRECEBER_PARCELA);
-  pQry.ParamByName('pedido_id').Value                  := ifThen(pTEFModel.PEDIDO_ID                  = '', Unassigned, pTEFModel.PEDIDO_ID);
-  pQry.ParamByName('caixa_id').Value                   := ifThen(pTEFModel.CAIXA_ID                   = '', Unassigned, pTEFModel.CAIXA_ID);
-  pQry.ParamByName('contacorrente_id').Value           := ifThen(pTEFModel.CONTACORRENTE_ID           = '', Unassigned, pTEFModel.CONTACORRENTE_ID);
-  pQry.ParamByName('impressao').Value                  := ifThen(pTEFModel.IMPRESSAO                  = '', Unassigned, pTEFModel.IMPRESSAO);
-  pQry.ParamByName('retorno_completo').Value           := ifThen(pTEFModel.RETORNO_COMPLETO           = '', Unassigned, pTEFModel.RETORNO_COMPLETO);
-  pQry.ParamByName('chamada').Value                    := ifThen(pTEFModel.CHAMADA                    = '', Unassigned, pTEFModel.CHAMADA);
-  pQry.ParamByName('cnpj_credenciadora').Value         := ifThen(pTEFModel.CNPJ_CREDENCIADORA         = '', Unassigned, pTEFModel.CNPJ_CREDENCIADORA);
-  pQry.ParamByName('codigo_credenciadora').Value       := ifThen(pTEFModel.CODIGO_CREDENCIADORA       = '', Unassigned, pTEFModel.CODIGO_CREDENCIADORA);
+  lTabela := vConstrutor.getColumns('TEF');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TTEFModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pTEFModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pTEFModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TTEFDao.SetStartRecordView(const Value: String);
