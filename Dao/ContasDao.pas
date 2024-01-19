@@ -10,6 +10,7 @@ uses
   System.Generics.Collections,
   System.Variants,
   Terasoft.ConstrutorDao,
+  Terasoft.Utils,
   Interfaces.Conexao;
 
 type
@@ -65,6 +66,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TContas }
 
@@ -167,7 +171,7 @@ begin
 
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From CONTAS where 1=1 ';
+    lSql := 'select count(*) records from CONTAS where 1=1 ';
 
     lSql := lSql + where;
 
@@ -284,29 +288,27 @@ begin
 end;
 
 procedure TContasDao.setParams(var pQry: TFDQuery; pContasModel: TContasModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('classificacao').Value              := ifThen(pContasModel.CLASSIFICACAO              = '', Unassigned, pContasModel.CLASSIFICACAO);
-  pQry.ParamByName('codigo_cta').Value                 := ifThen(pContasModel.CODIGO_CTA                 = '', Unassigned, pContasModel.CODIGO_CTA);
-  pQry.ParamByName('nome_cta').Value                   := ifThen(pContasModel.NOME_CTA                   = '', Unassigned, pContasModel.NOME_CTA);
-  pQry.ParamByName('tipo_cta').Value                   := ifThen(pContasModel.TIPO_CTA                   = '', Unassigned, pContasModel.TIPO_CTA);
-  pQry.ParamByName('dr_cta').Value                     := ifThen(pContasModel.DR_CTA                     = '', Unassigned, pContasModel.DR_CTA);
-  pQry.ParamByName('usuario_cta').Value                := ifThen(pContasModel.USUARIO_CTA                = '', Unassigned, pContasModel.USUARIO_CTA);
-  pQry.ParamByName('banco_cta').Value                  := ifThen(pContasModel.BANCO_CTA                  = '', Unassigned, pContasModel.BANCO_CTA);
-  pQry.ParamByName('baixapagar_cta').Value             := ifThen(pContasModel.BAIXAPAGAR_CTA             = '', Unassigned, pContasModel.BAIXAPAGAR_CTA);
-  pQry.ParamByName('tiposemdr_cta').Value              := ifThen(pContasModel.TIPOSEMDR_CTA              = '', Unassigned, pContasModel.TIPOSEMDR_CTA);
-  pQry.ParamByName('tiposemdr_cta_recebimento').Value  := ifThen(pContasModel.TIPOSEMDR_CTA_RECEBIMENTO  = '', Unassigned, pContasModel.TIPOSEMDR_CTA_RECEBIMENTO);
-  pQry.ParamByName('grupo_cta').Value                  := ifThen(pContasModel.GRUPO_CTA                  = '', Unassigned, pContasModel.GRUPO_CTA);
-  pQry.ParamByName('subgrupo_cta').Value               := ifThen(pContasModel.SUBGRUPO_CTA               = '', Unassigned, pContasModel.SUBGRUPO_CTA);
-  pQry.ParamByName('centrocusto_cta').Value            := ifThen(pContasModel.CENTROCUSTO_CTA            = '', Unassigned, pContasModel.CENTROCUSTO_CTA);
-  pQry.ParamByName('extrato_cta').Value                := ifThen(pContasModel.EXTRATO_CTA                = '', Unassigned, pContasModel.EXTRATO_CTA);
-  pQry.ParamByName('ordem').Value                      := ifThen(pContasModel.ORDEM                      = '', Unassigned, pContasModel.ORDEM);
-  pQry.ParamByName('loja').Value                       := ifThen(pContasModel.LOJA                       = '', Unassigned, pContasModel.LOJA);
-  pQry.ParamByName('emprestimo_cta').Value             := ifThen(pContasModel.EMPRESTIMO_CTA             = '', Unassigned, pContasModel.EMPRESTIMO_CTA);
-  pQry.ParamByName('status').Value                     := ifThen(pContasModel.STATUS                     = '', Unassigned, pContasModel.STATUS);
-  pQry.ParamByName('credito_icms').Value               := ifThen(pContasModel.CREDITO_ICMS               = '', Unassigned, pContasModel.CREDITO_ICMS);
-  pQry.ParamByName('receitaxdespesas').Value           := ifThen(pContasModel.RECEITAXDESPESAS           = '', Unassigned, pContasModel.RECEITAXDESPESAS);
-  pQry.ParamByName('credito_cliente_cta').Value        := ifThen(pContasModel.CREDITO_CLIENTE_CTA        = '', Unassigned, pContasModel.CREDITO_CLIENTE_CTA);
-  pQry.ParamByName('credito_fornecedor_cta').Value     := ifThen(pContasModel.CREDITO_FORNECEDOR_CTA     = '', Unassigned, pContasModel.CREDITO_FORNECEDOR_CTA);
+  lTabela := vConstrutor.getColumns('CONTAS');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TContasModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pContasModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pContasModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TContasDao.SetStartRecordView(const Value: String);

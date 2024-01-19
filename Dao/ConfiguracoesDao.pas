@@ -10,6 +10,7 @@ uses
   System.Generics.Collections,
   System.Variants,
   Terasoft.ConstrutorDao,
+  Terasoft.Utils,
   Interfaces.Conexao;
 
 type
@@ -65,6 +66,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TConfiguracoes }
 
@@ -260,18 +264,27 @@ begin
 end;
 
 procedure TConfiguracoesDao.setParams(var pQry: TFDQuery; pConfiguracoesModel: TConfiguracoesModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('tag').Value             := ifThen(pConfiguracoesModel.TAG             = '', Unassigned, pConfiguracoesModel.TAG);
-  pQry.ParamByName('fid').Value             := ifThen(pConfiguracoesModel.F_ID            = '', Unassigned, pConfiguracoesModel.F_ID);
-  pQry.ParamByName('perfil_id').Value       := ifThen(pConfiguracoesModel.PERFIL_ID       = '', Unassigned, pConfiguracoesModel.PERFIL_ID);
-  pQry.ParamByName('valorinteiro').Value    := ifThen(pConfiguracoesModel.VALORINTEIRO    = '', Unassigned, pConfiguracoesModel.VALORINTEIRO);
-  pQry.ParamByName('valorstring').Value     := ifThen(pConfiguracoesModel.VALORSTRING     = '', Unassigned, pConfiguracoesModel.VALORSTRING);
-  pQry.ParamByName('valormemo').Value       := ifThen(pConfiguracoesModel.VALORMEMO       = '', Unassigned, pConfiguracoesModel.VALORMEMO);
-  pQry.ParamByName('valornumerico').Value   := ifThen(pConfiguracoesModel.VALORNUMERICO   = '', Unassigned, pConfiguracoesModel.VALORNUMERICO);
-  pQry.ParamByName('valorchar').Value       := ifThen(pConfiguracoesModel.VALORCHAR       = '', Unassigned, pConfiguracoesModel.VALORCHAR);
-  pQry.ParamByName('valordata').Value       := ifThen(pConfiguracoesModel.VALORDATA       = '', Unassigned, pConfiguracoesModel.VALORDATA);
-  pQry.ParamByName('valorhora').Value       := ifThen(pConfiguracoesModel.VALORHORA       = '', Unassigned, pConfiguracoesModel.VALORHORA);
-  pQry.ParamByName('valordatahora').Value   := ifThen(pConfiguracoesModel.VALORDATAHORA   = '', Unassigned, pConfiguracoesModel.VALORDATAHORA);
+  lTabela := vConstrutor.getColumns('CONFIGURACOES');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TConfiguracoesModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pConfiguracoesModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pConfiguracoesModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TConfiguracoesDao.SetStartRecordView(const Value: String);

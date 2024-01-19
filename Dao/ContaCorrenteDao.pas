@@ -11,6 +11,7 @@ uses
   System.Variants,
   Terasoft.FuncoesTexto,
   Terasoft.ConstrutorDao,
+  Terasoft.Utils,
   Interfaces.Conexao;
 
 type
@@ -68,6 +69,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TContaCorrente }
 
@@ -360,42 +364,27 @@ begin
 end;
 
 procedure TContaCorrenteDao.setParams(var pQry: TFDQuery; pContaCorrenteModel: TContaCorrenteModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('data_cor').Value              := ifThen(pContaCorrenteModel.DATA_COR               = '', Unassigned, transformaDataFireBird(pContaCorrenteModel.DATA_COR));
-  pQry.ParamByName('hora_cor').Value              := ifThen(pContaCorrenteModel.HORA_COR               = '', Unassigned, pContaCorrenteModel.HORA_COR);
-  pQry.ParamByName('codigo_cta').Value            := ifThen(pContaCorrenteModel.CODIGO_CTA             = '', Unassigned, pContaCorrenteModel.CODIGO_CTA);
-  pQry.ParamByName('codigo_ban').Value            := ifThen(pContaCorrenteModel.CODIGO_BAN             = '', Unassigned, pContaCorrenteModel.CODIGO_BAN);
-  pQry.ParamByName('observacao_cor').Value        := ifThen(pContaCorrenteModel.OBSERVACAO_COR         = '', Unassigned, pContaCorrenteModel.OBSERVACAO_COR);
-  pQry.ParamByName('valor_cor').Value             := ifThen(pContaCorrenteModel.VALOR_COR              = '', Unassigned, FormataFloatFireBird(pContaCorrenteModel.VALOR_COR));
-  pQry.ParamByName('tipo_cta').Value              := ifThen(pContaCorrenteModel.TIPO_CTA               = '', Unassigned, pContaCorrenteModel.TIPO_CTA);
-  pQry.ParamByName('status').Value                := ifThen(pContaCorrenteModel.STATUS                 = '', Unassigned, pContaCorrenteModel.STATUS);
-  pQry.ParamByName('conciliado_cor').Value        := ifThen(pContaCorrenteModel.CONCILIADO_COR         = '', Unassigned, pContaCorrenteModel.CONCILIADO_COR);
-  pQry.ParamByName('data_con').Value              := ifThen(pContaCorrenteModel.DATA_CON               = '', Unassigned, transformaDataFireBird(pContaCorrenteModel.DATA_CON));
-  pQry.ParamByName('cliente_cor').Value           := ifThen(pContaCorrenteModel.CLIENTE_COR            = '', Unassigned, pContaCorrenteModel.CLIENTE_COR);
-  pQry.ParamByName('fatura_cor').Value            := ifThen(pContaCorrenteModel.FATURA_COR             = '', Unassigned, pContaCorrenteModel.FATURA_COR);
-  pQry.ParamByName('parcela_cor').Value           := ifThen(pContaCorrenteModel.PARCELA_COR            = '', Unassigned, pContaCorrenteModel.PARCELA_COR);
-  pQry.ParamByName('centro_custo').Value          := ifThen(pContaCorrenteModel.CENTRO_CUSTO           = '', Unassigned, pContaCorrenteModel.CENTRO_CUSTO);
-  pQry.ParamByName('loja').Value                  := ifThen(pContaCorrenteModel.LOJA                   = '', Unassigned, pContaCorrenteModel.LOJA);
-  pQry.ParamByName('numero_chq').Value            := ifThen(pContaCorrenteModel.NUMERO_CHQ             = '', Unassigned, pContaCorrenteModel.NUMERO_CHQ);
-  pQry.ParamByName('dr').Value                    := ifThen(pContaCorrenteModel.DR                     = '', Unassigned, pContaCorrenteModel.DR);
-  pQry.ParamByName('portador_cor').Value          := ifThen(pContaCorrenteModel.PORTADOR_COR           = '', Unassigned, pContaCorrenteModel.PORTADOR_COR);
-  pQry.ParamByName('troco').Value                 := ifThen(pContaCorrenteModel.TROCO                  = '', Unassigned, pContaCorrenteModel.TROCO);
-  pQry.ParamByName('usuario_cor').Value           := ifThen(pContaCorrenteModel.USUARIO_COR            = '', Unassigned, pContaCorrenteModel.USUARIO_COR);
-  pQry.ParamByName('tipo').Value                  := ifThen(pContaCorrenteModel.TIPO                   = '', Unassigned, pContaCorrenteModel.TIPO);
-  pQry.ParamByName('sub_id').Value                := ifThen(pContaCorrenteModel.SUB_ID                 = '', Unassigned, pContaCorrenteModel.SUB_ID);
-  pQry.ParamByName('locacao_id').Value            := ifThen(pContaCorrenteModel.LOCACAO_ID             = '', Unassigned, pContaCorrenteModel.LOCACAO_ID);
-  pQry.ParamByName('emprestimo_receber_id').Value := ifThen(pContaCorrenteModel.EMPRESTIMO_RECEBER_ID  = '', Unassigned, pContaCorrenteModel.EMPRESTIMO_RECEBER_ID);
-  pQry.ParamByName('funcionario_id').Value        := ifThen(pContaCorrenteModel.FUNCIONARIO_ID         = '', Unassigned, pContaCorrenteModel.FUNCIONARIO_ID);
-  pQry.ParamByName('os_new_id').Value             := ifThen(pContaCorrenteModel.OS_NEW_ID              = '', Unassigned, pContaCorrenteModel.OS_NEW_ID);
-  pQry.ParamByName('conciliacao_id').Value        := ifThen(pContaCorrenteModel.CONCILIACAO_ID         = '', Unassigned, pContaCorrenteModel.CONCILIACAO_ID);
-  pQry.ParamByName('placa').Value                 := ifThen(pContaCorrenteModel.PLACA                  = '', Unassigned, pContaCorrenteModel.PLACA);
-  pQry.ParamByName('transferencia_origem').Value  := ifThen(pContaCorrenteModel.TRANSFERENCIA_ORIGEM   = '', Unassigned, pContaCorrenteModel.TRANSFERENCIA_ORIGEM);
-  pQry.ParamByName('transferencia_id').Value      := ifThen(pContaCorrenteModel.TRANSFERENCIA_ID       = '', Unassigned, pContaCorrenteModel.TRANSFERENCIA_ID);
-  pQry.ParamByName('competencia').Value           := ifThen(pContaCorrenteModel.COMPETENCIA            = '', Unassigned, pContaCorrenteModel.COMPETENCIA);
-  pQry.ParamByName('pagarme_lote').Value          := ifThen(pContaCorrenteModel.PAGARME_LOTE           = '', Unassigned, pContaCorrenteModel.PAGARME_LOTE);
-  pQry.ParamByName('loja_remoto').Value           := ifThen(pContaCorrenteModel.LOJA_REMOTO            = '', Unassigned, pContaCorrenteModel.LOJA_REMOTO);
-  pQry.ParamByName('pedido_id').Value             := ifThen(pContaCorrenteModel.PEDIDO_ID              = '', Unassigned, pContaCorrenteModel.PEDIDO_ID);
-  pQry.ParamByName('iugu_id').Value               := ifThen(pContaCorrenteModel.IUGU_ID                = '', Unassigned, pContaCorrenteModel.IUGU_ID);
+  lTabela := vConstrutor.getColumns('CONTACORRENTE');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TContaCorrenteModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pContaCorrenteModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pContaCorrenteModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TContaCorrenteDao.SetStartRecordView(const Value: String);

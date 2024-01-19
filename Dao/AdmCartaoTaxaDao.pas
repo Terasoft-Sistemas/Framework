@@ -10,6 +10,7 @@ uses
   System.Generics.Collections,
   System.Variants,
   Interfaces.Conexao,
+  Terasoft.Utils,
   Terasoft.ConstrutorDao;
 
 type
@@ -66,6 +67,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TAdmCartaoTaxa }
 
@@ -263,12 +267,27 @@ begin
 end;
 
 procedure TAdmCartaoTaxaDao.setParams(var pQry: TFDQuery; pCartaoTaxaModel: TAdmCartaoTaxaModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('adm_id').Value          := ifThen(pCartaoTaxaModel.ADM_ID          = '', Unassigned, pCartaoTaxaModel.ADM_ID);
-  pQry.ParamByName('parcela').Value         := ifThen(pCartaoTaxaModel.PARCELA         = '', Unassigned, pCartaoTaxaModel.PARCELA);
-  pQry.ParamByName('taxa').Value            := ifThen(pCartaoTaxaModel.TAXA            = '', Unassigned, pCartaoTaxaModel.TAXA);
-  pQry.ParamByName('dias_vencimento').Value := ifThen(pCartaoTaxaModel.DIAS_VENCIMENTO = '', Unassigned, pCartaoTaxaModel.DIAS_VENCIMENTO);
-  pQry.ParamByName('conciliadora_id').Value := ifThen(pCartaoTaxaModel.CONCILIADORA_ID = '', Unassigned, pCartaoTaxaModel.CONCILIADORA_ID);
+  lTabela := vConstrutor.getColumns('ADMCARTAO_TAXA');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TAdmCartaoTaxaModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pCartaoTaxaModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pCartaoTaxaModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TAdmCartaoTaxaDao.SetStartRecordView(const Value: String);

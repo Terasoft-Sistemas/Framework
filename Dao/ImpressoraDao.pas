@@ -10,6 +10,7 @@ uses
   System.Generics.Collections,
   System.Variants,
   Terasoft.ConstrutorDao,
+  Terasoft.Utils,
   Interfaces.Conexao;
 
 type
@@ -66,6 +67,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TImpressora }
 
@@ -305,20 +309,27 @@ begin
 end;
 
 procedure TImpressoraDao.setParams(var pQry: TFDQuery; pImpressoraModel: TImpressoraModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('nome').Value            := ifThen(pImpressoraModel.NOME            = '', Unassigned, pImpressoraModel.NOME);
-  pQry.ParamByName('caminho').Value         := ifThen(pImpressoraModel.CAMINHO         = '', Unassigned, pImpressoraModel.CAMINHO);
-  pQry.ParamByName('vias').Value            := ifThen(pImpressoraModel.VIAS            = '', Unassigned, pImpressoraModel.VIAS);
-  pQry.ParamByName('direta').Value          := ifThen(pImpressoraModel.DIRETA          = '', Unassigned, pImpressoraModel.DIRETA);
-  pQry.ParamByName('lista_impressao').Value := ifThen(pImpressoraModel.LISTA_IMPRESSAO = '', Unassigned, pImpressoraModel.LISTA_IMPRESSAO);
-  pQry.ParamByName('corte').Value           := ifThen(pImpressoraModel.CORTE           = '', Unassigned, pImpressoraModel.CORTE);
-  pQry.ParamByName('cabecalho').Value       := ifThen(pImpressoraModel.CABECALHO       = '', Unassigned, pImpressoraModel.CABECALHO);
-  pQry.ParamByName('corpo').Value           := ifThen(pImpressoraModel.CORPO           = '', Unassigned, pImpressoraModel.CORPO);
-  pQry.ParamByName('rodape').Value          := ifThen(pImpressoraModel.RODAPE          = '', Unassigned, pImpressoraModel.RODAPE);
-  pQry.ParamByName('porta').Value           := ifThen(pImpressoraModel.PORTA           = '', Unassigned, pImpressoraModel.PORTA);
-  pQry.ParamByName('modelo').Value          := ifThen(pImpressoraModel.MODELO          = '', Unassigned, pImpressoraModel.MODELO);
-  pQry.ParamByName('recibo').Value          := ifThen(pImpressoraModel.RECIBO          = '', Unassigned, pImpressoraModel.RECIBO);
+  lTabela := vConstrutor.getColumns('IMPRESSORA');
 
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TImpressoraModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pImpressoraModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pImpressoraModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TImpressoraDao.SetStartRecordView(const Value: String);

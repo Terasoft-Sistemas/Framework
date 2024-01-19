@@ -7,6 +7,7 @@ uses
   EventosNFeModel,
   System.SysUtils,
   Terasoft.ConstrutorDao,
+  Terasoft.Utils,
   Interfaces.Conexao;
 
 type
@@ -32,7 +33,7 @@ end;
 implementation
 
 uses
-  System.StrUtils, System.Variants;//, SistemaControl;
+  System.StrUtils, System.Variants, System.Rtti;//, SistemaControl;
 { TEventosNFeDao }
 
 function TEventosNFeDao.alterar(AEventosNFeModel: TEventosNFeModel): Boolean;
@@ -106,26 +107,27 @@ begin
 end;
 
 procedure TEventosNFeDao.setParams(var pQry: TFDQuery; pEventosNFeModel: TEventosNFeModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('ID_NFE').Value              := ifThen(pEventosNFeModel.ID_NFE             = '', Unassigned, pEventosNFeModel.ID_NFE);
-  pQry.ParamByName('DATAHORA').Value            := ifThen(pEventosNFeModel.DATAHORA           = '', Unassigned, pEventosNFeModel.DATAHORA);
-  pQry.ParamByName('EVENTO').Value              := ifThen(pEventosNFeModel.EVENTO             = '', Unassigned, pEventosNFeModel.EVENTO);
-  pQry.ParamByName('ID_EVENTO').Value           := ifThen(pEventosNFeModel.ID_EVENTO          = '', Unassigned, pEventosNFeModel.ID_EVENTO);
-  pQry.ParamByName('CHNFE').Value               := ifThen(pEventosNFeModel.CHNFE              = '', Unassigned, pEventosNFeModel.CHNFE);
-  pQry.ParamByName('TPEVENTO').Value            := ifThen(pEventosNFeModel.TPEVENTO           = '', Unassigned, pEventosNFeModel.TPEVENTO);
-  pQry.ParamByName('NSEQEVENTO').Value          := ifThen(pEventosNFeModel.NSEQEVENTO         = '', Unassigned, pEventosNFeModel.NSEQEVENTO);
-  pQry.ParamByName('VEREVENTO').Value           := ifThen(pEventosNFeModel.VEREVENTO          = '', Unassigned, pEventosNFeModel.VEREVENTO);
-  pQry.ParamByName('DESCEVENTO').Value          := ifThen(pEventosNFeModel.DESCEVENTO         = '', Unassigned, pEventosNFeModel.DESCEVENTO);
-  pQry.ParamByName('XCORRECAO').Value           := ifThen(pEventosNFeModel.XCORRECAO          = '', Unassigned, pEventosNFeModel.XCORRECAO);
-  pQry.ParamByName('XCONDUSO').Value            := ifThen(pEventosNFeModel.XCONDUSO           = '', Unassigned, pEventosNFeModel.XCONDUSO);
-  pQry.ParamByName('TXT').Value                 := ifThen(pEventosNFeModel.TXT                = '', Unassigned, pEventosNFeModel.TXT);
-  pQry.ParamByName('XML').Value                 := ifThen(pEventosNFeModel.XML                = '', Unassigned, pEventosNFeModel.XML);
-  pQry.ParamByName('STATUS').Value              := ifThen(pEventosNFeModel.STATUS             = '', Unassigned, pEventosNFeModel.STATUS);
-  pQry.ParamByName('PROTOCOLO_RETORNO').Value   := ifThen(pEventosNFeModel.PROTOCOLO_RETORNO  = '', Unassigned, pEventosNFeModel.PROTOCOLO_RETORNO);
-  pQry.ParamByName('RETORNO_SEFAZ').Value       := ifThen(pEventosNFeModel.RETORNO_SEFAZ      = '', Unassigned, pEventosNFeModel.RETORNO_SEFAZ);
-  pQry.ParamByName('FILIAL').Value              := ifThen(pEventosNFeModel.FILIAL             = '', Unassigned, pEventosNFeModel.FILIAL);
-  pQry.ParamByName('EMPRESA').Value             := ifThen(pEventosNFeModel.EMPRESA            = '', Unassigned, pEventosNFeModel.EMPRESA);
-  pQry.ParamByName('JUSTIFICATIVA').Value       := ifThen(pEventosNFeModel.JUSTIFICATIVA      = '', Unassigned, pEventosNFeModel.JUSTIFICATIVA);
+  lTabela := vConstrutor.getColumns('EVENTOS_NFE');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TEventosNFeModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pEventosNFeModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pEventosNFeModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 function TEventosNFeDao.where: String;

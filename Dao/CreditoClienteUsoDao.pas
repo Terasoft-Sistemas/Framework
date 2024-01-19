@@ -11,6 +11,7 @@ uses
   System.Variants,
   Terasoft.FuncoesTexto,
   Terasoft.ConstrutorDao,
+  Terasoft.Utils,
   Interfaces.Conexao;
 
 type
@@ -67,6 +68,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TCreditoClienteUso }
 
@@ -271,15 +275,27 @@ begin
 end;
 
 procedure TCreditoClienteUsoDao.setParams(var pQry: TFDQuery; pCreditoClienteUsoModel: TCreditoClienteUsoModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('credito_cliente_id').Value  := ifThen(pCreditoClienteUsoModel.CREDITO_CLIENTE_ID = '', Unassigned, pCreditoClienteUsoModel.CREDITO_CLIENTE_ID);
-  pQry.ParamByName('data').Value                := ifThen(pCreditoClienteUsoModel.DATA               = '', Unassigned, transformaDataFireBird(pCreditoClienteUsoModel.DATA));
-  pQry.ParamByName('valor').Value               := ifThen(pCreditoClienteUsoModel.VALOR              = '', Unassigned, FormataFloatFireBird(pCreditoClienteUsoModel.VALOR));
-  pQry.ParamByName('parcela').Value             := ifThen(pCreditoClienteUsoModel.PARCELA            = '', Unassigned, pCreditoClienteUsoModel.PARCELA);
-  pQry.ParamByName('receber_id').Value          := ifThen(pCreditoClienteUsoModel.RECEBER_ID         = '', Unassigned, pCreditoClienteUsoModel.RECEBER_ID);
-  pQry.ParamByName('local').Value               := ifThen(pCreditoClienteUsoModel.LOCAL              = '', Unassigned, pCreditoClienteUsoModel.LOCAL);
-  pQry.ParamByName('usuario_id').Value          := ifThen(pCreditoClienteUsoModel.USUARIO_ID         = '', Unassigned, pCreditoClienteUsoModel.USUARIO_ID);
-  pQry.ParamByName('datahora').Value            := ifThen(pCreditoClienteUsoModel.DATAHORA           = '', Unassigned, transformaDataHoraFireBird(pCreditoClienteUsoModel.DATAHORA));
+  lTabela := vConstrutor.getColumns('CREDITO_CLIENTE_USO');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TCreditoClienteUsoModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pCreditoClienteUsoModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pCreditoClienteUsoModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TCreditoClienteUsoDao.SetStartRecordView(const Value: String);

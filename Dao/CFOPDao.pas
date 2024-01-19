@@ -10,6 +10,7 @@ uses
   System.Generics.Collections,
   System.Variants,
   Interfaces.Conexao,
+  Terasoft.Utils,
   Terasoft.ConstrutorDao;
 
 type
@@ -68,6 +69,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TCFOP }
 
@@ -203,7 +207,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from cfop where ID = :ID',[ACFOPModel.ID]);
+   lQry.ExecSQL('delete from CFOP where ID = :ID',[ACFOPModel.ID]);
    lQry.ExecSQL;
    Result := ACFOPModel.ID;
 
@@ -235,7 +239,7 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From cfop where 1=1 ';
+    lSql := 'select count(*) records from CFOP where 1=1 ';
 
     lSql := lSql + where;
 
@@ -253,7 +257,7 @@ var
   lConexao: TFDConnection;
 begin
   lConexao := vIConexao.getConnection;
-  Result   := lConexao.ExecSQLScalar('select cfop from cfop where id = '+ pIdCFOP);
+  Result   := lConexao.ExecSQLScalar('select CFOP from CFOP where id = '+ pIdCFOP);
 end;
 
 procedure TCFOPDao.obterLista;
@@ -379,51 +383,27 @@ begin
 end;
 
 procedure TCFOPDao.setParams(var pQry: TFDQuery; pCFOPModel: TCFOPModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('cfop').Value                          := ifThen(pCFOPModel.CFOP                          = '', Unassigned, pCFOPModel.CFOP);
-  pQry.ParamByName('descricao').Value                     := ifThen(pCFOPModel.DESCRICAO                     = '', Unassigned, pCFOPModel.DESCRICAO);
-  pQry.ParamByName('tipo').Value                          := ifThen(pCFOPModel.TIPO                          = '', Unassigned, pCFOPModel.TIPO);
-  pQry.ParamByName('estoque').Value                       := ifThen(pCFOPModel.ESTOQUE                       = '', Unassigned, pCFOPModel.ESTOQUE);
-  pQry.ParamByName('icms').Value                          := ifThen(pCFOPModel.ICMS                          = '', Unassigned, pCFOPModel.ICMS);
-  pQry.ParamByName('cst').Value                           := ifThen(pCFOPModel.CST                           = '', Unassigned, pCFOPModel.CST);
-  pQry.ParamByName('obs').Value                           := ifThen(pCFOPModel.OBS                           = '', Unassigned, pCFOPModel.OBS);
-  pQry.ParamByName('pis').Value                           := ifThen(pCFOPModel.PIS                           = '', Unassigned, pCFOPModel.PIS);
-  pQry.ParamByName('cofins').Value                        := ifThen(pCFOPModel.COFINS                        = '', Unassigned, pCFOPModel.COFINS);
-  pQry.ParamByName('valor').Value                         := ifThen(pCFOPModel.VALOR                         = '', Unassigned, pCFOPModel.VALOR);
-  pQry.ParamByName('consignado').Value                    := ifThen(pCFOPModel.CONSIGNADO                    = '', Unassigned, pCFOPModel.CONSIGNADO);
-  pQry.ParamByName('csosn').Value                         := ifThen(pCFOPModel.CSOSN                         = '', Unassigned, pCFOPModel.CSOSN);
-  pQry.ParamByName('cfop_referencia').Value               := ifThen(pCFOPModel.CFOP_REFERENCIA               = '', Unassigned, pCFOPModel.CFOP_REFERENCIA);
-  pQry.ParamByName('conta_contabil').Value                := ifThen(pCFOPModel.CONTA_CONTABIL                = '', Unassigned, pCFOPModel.CONTA_CONTABIL);
-  pQry.ParamByName('cst_entrada').Value                   := ifThen(pCFOPModel.CST_ENTRADA                   = '', Unassigned, pCFOPModel.CST_ENTRADA);
-  pQry.ParamByName('reservado_fisco').Value               := ifThen(pCFOPModel.RESERVADO_FISCO               = '', Unassigned, pCFOPModel.RESERVADO_FISCO);
-  pQry.ParamByName('altera_custo').Value                  := ifThen(pCFOPModel.ALTERA_CUSTO                  = '', Unassigned, pCFOPModel.ALTERA_CUSTO);
-  pQry.ParamByName('ibpt').Value                          := ifThen(pCFOPModel.IBPT                          = '', Unassigned, pCFOPModel.IBPT);
-  pQry.ParamByName('operacao').Value                      := ifThen(pCFOPModel.OPERACAO                      = '', Unassigned, pCFOPModel.OPERACAO);
-  pQry.ParamByName('estoque_2').Value                     := ifThen(pCFOPModel.ESTOQUE_2                     = '', Unassigned, pCFOPModel.ESTOQUE_2);
-  pQry.ParamByName('cst_pis').Value                       := ifThen(pCFOPModel.CST_PIS                       = '', Unassigned, pCFOPModel.CST_PIS);
-  pQry.ParamByName('cst_cofins').Value                    := ifThen(pCFOPModel.CST_COFINS                    = '', Unassigned, pCFOPModel.CST_COFINS);
-  pQry.ParamByName('cst_ipi').Value                       := ifThen(pCFOPModel.CST_IPI                       = '', Unassigned, pCFOPModel.CST_IPI);
-  pQry.ParamByName('aliquota_pis').Value                  := ifThen(pCFOPModel.ALIQUOTA_PIS                  = '', Unassigned, pCFOPModel.ALIQUOTA_PIS);
-  pQry.ParamByName('aliquota_cofins').Value               := ifThen(pCFOPModel.ALIQUOTA_COFINS               = '', Unassigned, pCFOPModel.ALIQUOTA_COFINS);
-  pQry.ParamByName('aliquota_ipi').Value                  := ifThen(pCFOPModel.ALIQUOTA_IPI                  = '', Unassigned, pCFOPModel.ALIQUOTA_IPI);
-  pQry.ParamByName('somar_ipi_base_icms').Value           := ifThen(pCFOPModel.SOMAR_IPI_BASE_ICMS           = '', Unassigned, pCFOPModel.SOMAR_IPI_BASE_ICMS);
-  pQry.ParamByName('status').Value                        := ifThen(pCFOPModel.STATUS                        = '', Unassigned, pCFOPModel.STATUS);
-  pQry.ParamByName('listar_ipi_sped').Value               := ifThen(pCFOPModel.LISTAR_IPI_SPED               = '', Unassigned, pCFOPModel.LISTAR_IPI_SPED);
-  pQry.ParamByName('aproveitamento_icms').Value           := ifThen(pCFOPModel.APROVEITAMENTO_ICMS           = '', Unassigned, pCFOPModel.APROVEITAMENTO_ICMS);
-  pQry.ParamByName('reducao_aproveitamento_icms').Value   := ifThen(pCFOPModel.REDUCAO_APROVEITAMENTO_ICMS   = '', Unassigned, pCFOPModel.REDUCAO_APROVEITAMENTO_ICMS);
-  pQry.ParamByName('desconto_sobre_ipi').Value            := ifThen(pCFOPModel.DESCONTO_SOBRE_IPI            = '', Unassigned, pCFOPModel.DESCONTO_SOBRE_IPI);
-  pQry.ParamByName('somar_pis_cofins_em_outras').Value    := ifThen(pCFOPModel.SOMAR_PIS_COFINS_EM_OUTRAS    = '', Unassigned, pCFOPModel.SOMAR_PIS_COFINS_EM_OUTRAS);
-  pQry.ParamByName('somar_icms_total_nf').Value           := ifThen(pCFOPModel.SOMAR_ICMS_TOTAL_NF           = '', Unassigned, pCFOPModel.SOMAR_ICMS_TOTAL_NF);
-  pQry.ParamByName('cfop_devolucao').Value                := ifThen(pCFOPModel.CFOP_DEVOLUCAO                = '', Unassigned, pCFOPModel.CFOP_DEVOLUCAO);
-  pQry.ParamByName('motdesicms').Value                    := ifThen(pCFOPModel.MOTDESICMS                    = '', Unassigned, pCFOPModel.MOTDESICMS);
-  pQry.ParamByName('cbenef').Value                        := ifThen(pCFOPModel.CBENEF                        = '', Unassigned, pCFOPModel.CBENEF);
-  pQry.ParamByName('predbc_n14').Value                    := ifThen(pCFOPModel.PREDBC_N14                    = '', Unassigned, pCFOPModel.PREDBC_N14);
-  pQry.ParamByName('cenq').Value                          := ifThen(pCFOPModel.CENQ                          = '', Unassigned, pCFOPModel.CENQ);
-  pQry.ParamByName('pcred_presumido').Value               := ifThen(pCFOPModel.PCRED_PRESUMIDO               = '', Unassigned, pCFOPModel.PCRED_PRESUMIDO);
-  pQry.ParamByName('desconto_sobre_icms').Value           := ifThen(pCFOPModel.DESCONTO_SOBRE_ICMS           = '', Unassigned, pCFOPModel.DESCONTO_SOBRE_ICMS);
-  pQry.ParamByName('desconto_icms_base_pis_cofins').Value := ifThen(pCFOPModel.DESCONTO_ICMS_BASE_PIS_COFINS = '', Unassigned, pCFOPModel.DESCONTO_ICMS_BASE_PIS_COFINS);
-  pQry.ParamByName('outras_despesas_entrada').Value       := ifThen(pCFOPModel.OUTRAS_DESPESAS_ENTRADA       = '', Unassigned, pCFOPModel.OUTRAS_DESPESAS_ENTRADA);
+  lTabela := vConstrutor.getColumns('CFOP');
 
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TCFOPModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pCFOPModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pCFOPModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TCFOPDao.SetStartRecordView(const Value: String);

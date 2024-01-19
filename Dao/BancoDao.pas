@@ -10,6 +10,7 @@ uses
   System.Generics.Collections,
   System.Variants,
   Terasoft.ConstrutorDao,
+  Terasoft.Utils,
   Interfaces.Conexao;
 
 type
@@ -65,6 +66,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TBanco }
 
@@ -174,7 +178,7 @@ begin
 
     lQry := vIconexao.CriarQuery;
 
-    lSql := 'select count(*) records From banco where 1=1 ';
+    lSql := 'select count(*) records from BANCO where 1=1 ';
 
     lSql := lSql + where;
 
@@ -332,69 +336,27 @@ begin
 end;
 
 procedure TBancoDao.setParams(var pQry: TFDQuery; pBancoModel: TBancoModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('nome_ban').Value                      := ifThen(pBancoModel.NOME_BAN                      = '', Unassigned, pBancoModel.NOME_BAN);
-  pQry.ParamByName('agencia_ban').Value                   := ifThen(pBancoModel.AGENCIA_BAN                   = '', Unassigned, pBancoModel.AGENCIA_BAN);
-  pQry.ParamByName('conta_ban').Value                     := ifThen(pBancoModel.CONTA_BAN                     = '', Unassigned, pBancoModel.CONTA_BAN);
-  pQry.ParamByName('contato_ban').Value                   := ifThen(pBancoModel.CONTATO_BAN                   = '', Unassigned, pBancoModel.CONTATO_BAN);
-  pQry.ParamByName('telefone_ban').Value                  := ifThen(pBancoModel.TELEFONE_BAN                  = '', Unassigned, pBancoModel.TELEFONE_BAN);
-  pQry.ParamByName('usuario_ban').Value                   := ifThen(pBancoModel.USUARIO_BAN                   = '', Unassigned, pBancoModel.USUARIO_BAN);
-  pQry.ParamByName('digagencia_ban').Value                := ifThen(pBancoModel.DIGAGENCIA_BAN                = '', Unassigned, pBancoModel.DIGAGENCIA_BAN);
-  pQry.ParamByName('digconta_ban').Value                  := ifThen(pBancoModel.DIGCONTA_BAN                  = '', Unassigned, pBancoModel.DIGCONTA_BAN);
-  pQry.ParamByName('num_ban').Value                       := ifThen(pBancoModel.NUM_BAN                       = '', Unassigned, pBancoModel.NUM_BAN);
-  pQry.ParamByName('codigo_cedente').Value                := ifThen(pBancoModel.CODIGO_CEDENTE                = '', Unassigned, pBancoModel.CODIGO_CEDENTE);
-  pQry.ParamByName('licenca').Value                       := ifThen(pBancoModel.LICENCA                       = '', Unassigned, pBancoModel.LICENCA);
-  pQry.ParamByName('layout_retorno').Value                := ifThen(pBancoModel.LAYOUT_RETORNO                = '', Unassigned, pBancoModel.LAYOUT_RETORNO);
-  pQry.ParamByName('layout_remessa').Value                := ifThen(pBancoModel.LAYOUT_REMESSA                = '', Unassigned, pBancoModel.LAYOUT_REMESSA);
-  pQry.ParamByName('caminho_retorno').Value               := ifThen(pBancoModel.CAMINHO_RETORNO               = '', Unassigned, pBancoModel.CAMINHO_RETORNO);
-  pQry.ParamByName('caminho_remessa').Value               := ifThen(pBancoModel.CAMINHO_REMESSA               = '', Unassigned, pBancoModel.CAMINHO_REMESSA);
-  pQry.ParamByName('limite_ban').Value                    := ifThen(pBancoModel.LIMITE_BAN                    = '', Unassigned, pBancoModel.LIMITE_BAN);
-  pQry.ParamByName('valor_boleto').Value                  := ifThen(pBancoModel.VALOR_BOLETO                  = '', Unassigned, pBancoModel.VALOR_BOLETO);
-  pQry.ParamByName('despesa_boleto_conta_id').Value       := ifThen(pBancoModel.DESPESA_BOLETO_CONTA_ID       = '', Unassigned, pBancoModel.DESPESA_BOLETO_CONTA_ID);
-  pQry.ParamByName('codigo_cedente2').Value               := ifThen(pBancoModel.CODIGO_CEDENTE2               = '', Unassigned, pBancoModel.CODIGO_CEDENTE2);
-  pQry.ParamByName('outras_configuracoes').Value          := ifThen(pBancoModel.OUTRAS_CONFIGURACOES          = '', Unassigned, pBancoModel.OUTRAS_CONFIGURACOES);
-  pQry.ParamByName('loja').Value                          := ifThen(pBancoModel.LOJA                          = '', Unassigned, pBancoModel.LOJA);
-  pQry.ParamByName('tipo_impressao').Value                := ifThen(pBancoModel.TIPO_IMPRESSAO                = '', Unassigned, pBancoModel.TIPO_IMPRESSAO);
-  pQry.ParamByName('limite_troca').Value                  := ifThen(pBancoModel.LIMITE_TROCA                  = '', Unassigned, pBancoModel.LIMITE_TROCA);
-  pQry.ParamByName('status').Value                        := ifThen(pBancoModel.STATUS                        = '', Unassigned, pBancoModel.STATUS);
-  pQry.ParamByName('outras_configuracoes2').Value         := ifThen(pBancoModel.OUTRAS_CONFIGURACOES2         = '', Unassigned, pBancoModel.OUTRAS_CONFIGURACOES2);
-  pQry.ParamByName('dias_protesto_devolucao').Value       := ifThen(pBancoModel.DIAS_PROTESTO_DEVOLUCAO       = '', Unassigned, pBancoModel.DIAS_PROTESTO_DEVOLUCAO);
-  pQry.ParamByName('codigo_protesto_devolucao').Value     := ifThen(pBancoModel.CODIGO_PROTESTO_DEVOLUCAO     = '', Unassigned, pBancoModel.CODIGO_PROTESTO_DEVOLUCAO);
-  pQry.ParamByName('conta_aplicacao').Value               := ifThen(pBancoModel.CONTA_APLICACAO               = '', Unassigned, pBancoModel.CONTA_APLICACAO);
-  pQry.ParamByName('local_pagamento').Value               := ifThen(pBancoModel.LOCAL_PAGAMENTO               = '', Unassigned, pBancoModel.LOCAL_PAGAMENTO);
-  pQry.ParamByName('banco_referente').Value               := ifThen(pBancoModel.BANCO_REFERENTE               = '', Unassigned, pBancoModel.BANCO_REFERENTE);
-  pQry.ParamByName('detalhamento_remessa').Value          := ifThen(pBancoModel.DETALHAMENTO_REMESSA          = '', Unassigned, pBancoModel.DETALHAMENTO_REMESSA);
-  pQry.ParamByName('url_atualizacao_boleto').Value        := ifThen(pBancoModel.URL_ATUALIZACAO_BOLETO        = '', Unassigned, pBancoModel.URL_ATUALIZACAO_BOLETO);
-  pQry.ParamByName('atualizar_boleto').Value              := ifThen(pBancoModel.ATUALIZAR_BOLETO              = '', Unassigned, pBancoModel.ATUALIZAR_BOLETO);
-  pQry.ParamByName('drg').Value                           := ifThen(pBancoModel.DRG                           = '', Unassigned, pBancoModel.DRG);
-  pQry.ParamByName('personalizacao_boleto').Value         := ifThen(pBancoModel.PERSONALIZACAO_BOLETO         = '', Unassigned, pBancoModel.PERSONALIZACAO_BOLETO);
-  pQry.ParamByName('sequencia_remessa_pagamento').Value   := ifThen(pBancoModel.SEQUENCIA_REMESSA_PAGAMENTO   = '', Unassigned, pBancoModel.SEQUENCIA_REMESSA_PAGAMENTO);
-  pQry.ParamByName('codigo_convenio_pagamento').Value     := ifThen(pBancoModel.CODIGO_CONVENIO_PAGAMENTO     = '', Unassigned, pBancoModel.CODIGO_CONVENIO_PAGAMENTO);
-  pQry.ParamByName('caminho_retorno_pagamento').Value     := ifThen(pBancoModel.CAMINHO_RETORNO_PAGAMENTO     = '', Unassigned, pBancoModel.CAMINHO_RETORNO_PAGAMENTO);
-  pQry.ParamByName('caminho_remessa_pagamento').Value     := ifThen(pBancoModel.CAMINHO_REMESSA_PAGAMENTO     = '', Unassigned, pBancoModel.CAMINHO_REMESSA_PAGAMENTO);
-  pQry.ParamByName('conta_juros_antecipacao').Value       := ifThen(pBancoModel.CONTA_JUROS_ANTECIPACAO       = '', Unassigned, pBancoModel.CONTA_JUROS_ANTECIPACAO);
-  pQry.ParamByName('conta_iof_antecipacao').Value         := ifThen(pBancoModel.CONTA_IOF_ANTECIPACAO         = '', Unassigned, pBancoModel.CONTA_IOF_ANTECIPACAO);
-  pQry.ParamByName('conta_estorno_antecipacao').Value     := ifThen(pBancoModel.CONTA_ESTORNO_ANTECIPACAO     = '', Unassigned, pBancoModel.CONTA_ESTORNO_ANTECIPACAO);
-  pQry.ParamByName('tipo_cobranca').Value                 := ifThen(pBancoModel.TIPO_COBRANCA                 = '', Unassigned, pBancoModel.TIPO_COBRANCA);
-  pQry.ParamByName('developer_application_key').Value     := ifThen(pBancoModel.DEVELOPER_APPLICATION_KEY     = '', Unassigned, pBancoModel.DEVELOPER_APPLICATION_KEY);
-  pQry.ParamByName('client_id').Value                     := ifThen(pBancoModel.CLIENT_ID                     = '', Unassigned, pBancoModel.CLIENT_ID);
-  pQry.ParamByName('client_secret').Value                 := ifThen(pBancoModel.CLIENT_SECRET                 = '', Unassigned, pBancoModel.CLIENT_SECRET);
-  pQry.ParamByName('fantasia').Value                      := ifThen(pBancoModel.FANTASIA                      = '', Unassigned, pBancoModel.FANTASIA);
-  pQry.ParamByName('razao').Value                         := ifThen(pBancoModel.RAZAO                         = '', Unassigned, pBancoModel.RAZAO);
-  pQry.ParamByName('cnpj').Value                          := ifThen(pBancoModel.CNPJ                          = '', Unassigned, pBancoModel.CNPJ);
-  pQry.ParamByName('endereco').Value                      := ifThen(pBancoModel.ENDERECO                      = '', Unassigned, pBancoModel.ENDERECO);
-  pQry.ParamByName('bairro').Value                        := ifThen(pBancoModel.BAIRRO                        = '', Unassigned, pBancoModel.BAIRRO);
-  pQry.ParamByName('cidade').Value                        := ifThen(pBancoModel.CIDADE                        = '', Unassigned, pBancoModel.CIDADE);
-  pQry.ParamByName('uf').Value                            := ifThen(pBancoModel.UF                            = '', Unassigned, pBancoModel.UF);
-  pQry.ParamByName('cep').Value                           := ifThen(pBancoModel.CEP                           = '', Unassigned, pBancoModel.CEP);
-  pQry.ParamByName('telefone').Value                      := ifThen(pBancoModel.TELEFONE                      = '', Unassigned, pBancoModel.TELEFONE);
-  pQry.ParamByName('tipo_emitente').Value                 := ifThen(pBancoModel.TIPO_EMITENTE                 = '', Unassigned, pBancoModel.TIPO_EMITENTE);
-  pQry.ParamByName('indicadorpix').Value                  := ifThen(pBancoModel.INDICADORPIX                  = '', Unassigned, pBancoModel.INDICADORPIX);
-  pQry.ParamByName('convenio').Value                      := ifThen(pBancoModel.CONVENIO                      = '', Unassigned, pBancoModel.CONVENIO);
-  pQry.ParamByName('modalidade').Value                    := ifThen(pBancoModel.MODALIDADE                    = '', Unassigned, pBancoModel.MODALIDADE);
-  pQry.ParamByName('codigotransmissao').Value             := ifThen(pBancoModel.CODIGOTRANSMISSAO             = '', Unassigned, pBancoModel.CODIGOTRANSMISSAO);
-  pQry.ParamByName('scope').Value                         := ifThen(pBancoModel.SCOPE                         = '', Unassigned, pBancoModel.SCOPE);
-  pQry.ParamByName('caracteristica_titulo').Value         := ifThen(pBancoModel.CARACTERISTICA_TITULO         = '', Unassigned, pBancoModel.CARACTERISTICA_TITULO);
+  lTabela := vConstrutor.getColumns('BANCO');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TBancoModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pBancoModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pBancoModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TBancoDao.SetStartRecordView(const Value: String);

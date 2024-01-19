@@ -7,6 +7,7 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   Interfaces.Conexao,
+  Terasoft.Utils,
   Terasoft.ConstrutorDao;
 
 type
@@ -61,6 +62,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti, System.Variants;
 
 procedure TEmpresaDao.carregar(pEmpresaModel: TEmpresaModel);
 var
@@ -190,10 +194,28 @@ begin
   FOrderView := Value;
 end;
 
-procedure TEmpresaDao.setParams(var pQry: TFDQuery;
-  pEmpresaModel: TEmpresaModel);
+procedure TEmpresaDao.setParams(var pQry: TFDQuery; pEmpresaModel: TEmpresaModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
+  lTabela := vConstrutor.getColumns('EMPRESA');
 
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TEmpresaModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pEmpresaModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pEmpresaModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TEmpresaDao.SetStartRecordView(const Value: String);

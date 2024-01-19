@@ -11,6 +11,7 @@ uses
   System.Variants,
   Terasoft.FuncoesTexto,
   Terasoft.ConstrutorDao,
+  Terasoft.Utils,
   Interfaces.Conexao;
 
 type
@@ -71,6 +72,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TContasReceber }
 
@@ -149,6 +153,7 @@ destructor TContasReceberDao.Destroy;
 begin
   inherited;
 end;
+
 function TContasReceberDao.incluir(AContasReceberModel: TContasReceberModel): String;
 var
   lQry: TFDQuery;
@@ -171,6 +176,7 @@ begin
     lQry.Free;
   end;
 end;
+
 function TContasReceberDao.alterar(AContasReceberModel: TContasReceberModel): String;
 var
   lQry: TFDQuery;
@@ -190,6 +196,7 @@ begin
     lQry.Free;
   end;
 end;
+
 function TContasReceberDao.excluir(AContasReceberModel: TContasReceberModel): String;
 var
   lQry: TFDQuery;
@@ -204,6 +211,7 @@ begin
     lQry.Free;
   end;
 end;
+
 function TContasReceberDao.where: String;
 var
   lSQL : String;
@@ -217,6 +225,7 @@ begin
     lSQL := lSQL + ' and contasreceber.pedido_rec = '+QuotedStr(FIDPedidoView);
   Result := lSQL;
 end;
+
 procedure TContasReceberDao.obterTotalRegistros;
 var
   lQry: TFDQuery;
@@ -238,6 +247,7 @@ begin
     lQry.Free;
   end;
 end;
+
 function TContasReceberDao.pedidoContasReceber(pFatura: String): String;
 var
   lConexao: TFDConnection;
@@ -294,6 +304,7 @@ begin
     lQry.Free;
   end;
 end;
+
 procedure TContasReceberDao.obterLista;
 var
   lQry: TFDQuery;
@@ -369,80 +380,76 @@ begin
     lQry.Free;
   end;
 end;
+
 procedure TContasReceberDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
 end;
+
 procedure TContasReceberDao.SetContasRecebersLista(const Value: TObjectList<TContasReceberModel>);
 begin
   FContasRecebersLista := Value;
 end;
+
 procedure TContasReceberDao.SetID(const Value: Variant);
 begin
   FID := Value;
 end;
+
 procedure TContasReceberDao.SetIDPedidoView(const Value: String);
 begin
   FIDPedidoView := Value;
 end;
+
 procedure TContasReceberDao.SetIDRecordView(const Value: String);
 begin
   FIDRecordView := Value;
 end;
+
 procedure TContasReceberDao.SetLengthPageView(const Value: String);
 begin
   FLengthPageView := Value;
 end;
+
 procedure TContasReceberDao.SetOrderView(const Value: String);
 begin
   FOrderView := Value;
 end;
+
 procedure TContasReceberDao.setParams(var pQry: TFDQuery; pContasReceberModel: TContasReceberModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('codigo_cli').Value            := ifThen(pContasReceberModel.CODIGO_CLI          = '', Unassigned, pContasReceberModel.CODIGO_CLI);
-  pQry.ParamByName('codigo_cta').Value            := ifThen(pContasReceberModel.CODIGO_CTA          = '', Unassigned, pContasReceberModel.CODIGO_CTA);
-  pQry.ParamByName('dataemi_rec').Value           := ifThen(pContasReceberModel.DATAEMI_REC         = '', Unassigned, transformaDataFireBird(pContasReceberModel.DATAEMI_REC));
-  pQry.ParamByName('valor_rec').Value             := ifThen(pContasReceberModel.VALOR_REC           = '', Unassigned, FormataFloatFireBird(pContasReceberModel.VALOR_REC));
-  pQry.ParamByName('obs_rec').Value               := ifThen(pContasReceberModel.OBS_REC             = '', Unassigned, pContasReceberModel.OBS_REC);
-  pQry.ParamByName('situacao_rec').Value          := ifThen(pContasReceberModel.SITUACAO_REC        = '', Unassigned, pContasReceberModel.SITUACAO_REC);
-  pQry.ParamByName('usuario_rec').Value           := ifThen(pContasReceberModel.USUARIO_REC         = '', Unassigned, pContasReceberModel.USUARIO_REC);
-  pQry.ParamByName('vendedor_rec').Value          := ifThen(pContasReceberModel.VENDEDOR_REC        = '', Unassigned, pContasReceberModel.VENDEDOR_REC);
-  pQry.ParamByName('tipo_rec').Value              := ifThen(pContasReceberModel.TIPO_REC            = '', Unassigned, pContasReceberModel.TIPO_REC);
-  pQry.ParamByName('os_rec').Value                := ifThen(pContasReceberModel.OS_REC              = '', Unassigned, pContasReceberModel.OS_REC);
-  pQry.ParamByName('pedido_rec').Value            := ifThen(pContasReceberModel.PEDIDO_REC          = '', Unassigned, pContasReceberModel.PEDIDO_REC);
-  pQry.ParamByName('codigo_por').Value            := ifThen(pContasReceberModel.CODIGO_POR          = '', Unassigned, pContasReceberModel.CODIGO_POR);
-  pQry.ParamByName('loja').Value                  := ifThen(pContasReceberModel.LOJA                = '', Unassigned, pContasReceberModel.LOJA);
-  pQry.ParamByName('centercob').Value             := ifThen(pContasReceberModel.CENTERCOB           = '', Unassigned, pContasReceberModel.CENTERCOB);
-  pQry.ParamByName('avalista').Value              := ifThen(pContasReceberModel.AVALISTA            = '', Unassigned, pContasReceberModel.AVALISTA);
-  pQry.ParamByName('data_agendamento').Value      := ifThen(pContasReceberModel.DATA_AGENDAMENTO    = '', Unassigned, transformaDataFireBird(pContasReceberModel.DATA_AGENDAMENTO));
-  pQry.ParamByName('indice_juros_id').Value       := ifThen(pContasReceberModel.INDICE_JUROS_ID     = '', Unassigned, pContasReceberModel.INDICE_JUROS_ID);
-  pQry.ParamByName('juros_fixo').Value            := ifThen(pContasReceberModel.JUROS_FIXO          = '', Unassigned, FormataFloatFireBird(pContasReceberModel.JUROS_FIXO));
-  pQry.ParamByName('primeiro_venc').Value         := ifThen(pContasReceberModel.PRIMEIRO_VENC       = '', Unassigned, transformaDataFireBird(pContasReceberModel.PRIMEIRO_VENC));
-  pQry.ParamByName('ultimo_dia_mes').Value        := ifThen(pContasReceberModel.ULTIMO_DIA_MES      = '', Unassigned, pContasReceberModel.ULTIMO_DIA_MES);
-  pQry.ParamByName('condicoes_pag').Value         := ifThen(pContasReceberModel.CONDICOES_PAG       = '', Unassigned, pContasReceberModel.CONDICOES_PAG);
-  pQry.ParamByName('sub_id').Value                := ifThen(pContasReceberModel.SUB_ID              = '', Unassigned, pContasReceberModel.SUB_ID);
-  pQry.ParamByName('locacao_id').Value            := ifThen(pContasReceberModel.LOCACAO_ID          = '', Unassigned, pContasReceberModel.LOCACAO_ID);
-  pQry.ParamByName('centro_custo').Value          := ifThen(pContasReceberModel.CENTRO_CUSTO        = '', Unassigned, pContasReceberModel.CENTRO_CUSTO);
-  pQry.ParamByName('obs_complementar').Value      := ifThen(pContasReceberModel.OBS_COMPLEMENTAR    = '', Unassigned, pContasReceberModel.OBS_COMPLEMENTAR);
-  pQry.ParamByName('ficha_id').Value              := ifThen(pContasReceberModel.FICHA_ID            = '', Unassigned, pContasReceberModel.FICHA_ID);
-  pQry.ParamByName('funcionario_id').Value        := ifThen(pContasReceberModel.FUNCIONARIO_ID      = '', Unassigned, pContasReceberModel.FUNCIONARIO_ID);
-  pQry.ParamByName('contrato').Value              := ifThen(pContasReceberModel.CONTRATO            = '', Unassigned, pContasReceberModel.CONTRATO);
-  pQry.ParamByName('conferido').Value             := ifThen(pContasReceberModel.CONFERIDO           = '', Unassigned, pContasReceberModel.CONFERIDO);
-  pQry.ParamByName('local_baixa').Value           := ifThen(pContasReceberModel.LOCAL_BAIXA         = '', Unassigned, pContasReceberModel.LOCAL_BAIXA);
-  pQry.ParamByName('saida_rec').Value             := ifThen(pContasReceberModel.SAIDA_REC           = '', Unassigned, pContasReceberModel.SAIDA_REC);
-  pQry.ParamByName('codigo_anterior').Value       := ifThen(pContasReceberModel.CODIGO_ANTERIOR     = '', Unassigned, pContasReceberModel.CODIGO_ANTERIOR);
-  pQry.ParamByName('desenvolvimento_id').Value    := ifThen(pContasReceberModel.DESENVOLVIMENTO_ID  = '', Unassigned, pContasReceberModel.DESENVOLVIMENTO_ID);
-  pQry.ParamByName('pedido_site').Value           := ifThen(pContasReceberModel.PEDIDO_SITE         = '', Unassigned, pContasReceberModel.PEDIDO_SITE);
-  pQry.ParamByName('acrescimo').Value             := ifThen(pContasReceberModel.ACRESCIMO           = '', Unassigned, FormataFloatFireBird(pContasReceberModel.ACRESCIMO));
+  lTabela := vConstrutor.getColumns('CONTASRECEBER');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TContasReceberModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pContasReceberModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pContasReceberModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
+
 procedure TContasReceberDao.SetStartRecordView(const Value: String);
 begin
   FStartRecordView := Value;
 end;
+
 procedure TContasReceberDao.SetTotalRecords(const Value: Integer);
 begin
   FTotalRecords := Value;
 end;
+
 procedure TContasReceberDao.SetWhereView(const Value: String);
 begin
   FWhereView := Value;

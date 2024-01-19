@@ -14,6 +14,7 @@ uses
   LojasModel,
   Terasoft.Framework.ListaSimples.Impl,
   Terasoft.ConstrutorDao,
+  Terasoft.Utils,
   Interfaces.Conexao;
 
 type
@@ -80,6 +81,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TContasReceberItens }
 
@@ -596,44 +600,27 @@ begin
 end;
 
 procedure TContasReceberItensDao.setParams(var pQry: TFDQuery; pContasReceberItensModel: TContasReceberItensModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('fatura_rec').Value                := ifThen(pContasReceberItensModel.FATURA_REC                = '', Unassigned, pContasReceberItensModel.FATURA_REC);
-  pQry.ParamByName('codigo_cli').Value                := ifThen(pContasReceberItensModel.CODIGO_CLI                = '', Unassigned, pContasReceberItensModel.CODIGO_CLI);
-  pQry.ParamByName('posicao_id').Value                := ifThen(pContasReceberItensModel.POSICAO_ID                = '', Unassigned, pContasReceberItensModel.POSICAO_ID);
-  pQry.ParamByName('vencimento_rec').Value            := ifThen(pContasReceberItensModel.VENCIMENTO_REC            = '', Unassigned, transformaDataFireBird(pContasReceberItensModel.VENCIMENTO_REC));
-  pQry.ParamByName('pacela_rec').Value                := ifThen(pContasReceberItensModel.PACELA_REC                = '', Unassigned, pContasReceberItensModel.PACELA_REC);
-  pQry.ParamByName('vlrparcela_rec').Value            := ifThen(pContasReceberItensModel.VLRPARCELA_REC            = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.VLRPARCELA_REC));
-  pQry.ParamByName('valorrec_rec').Value              := ifThen(pContasReceberItensModel.VALORREC_REC              = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.VALORREC_REC));
-  pQry.ParamByName('databaixa_rec').Value             := ifThen(pContasReceberItensModel.DATABAIXA_REC             = '', Unassigned, transformaDataFireBird(pContasReceberItensModel.DATABAIXA_REC));
-  pQry.ParamByName('situacao_rec').Value              := ifThen(pContasReceberItensModel.SITUACAO_REC              = '', Unassigned, pContasReceberItensModel.SITUACAO_REC);
-  pQry.ParamByName('totalparcelas_rec').Value         := ifThen(pContasReceberItensModel.TOTALPARCELAS_REC         = '', Unassigned, pContasReceberItensModel.TOTALPARCELAS_REC);
-  pQry.ParamByName('codigo_por').Value                := ifThen(pContasReceberItensModel.CODIGO_POR                = '', Unassigned, pContasReceberItensModel.CODIGO_POR);
-  pQry.ParamByName('codigo_con').Value                := ifThen(pContasReceberItensModel.CODIGO_CON                = '', Unassigned, pContasReceberItensModel.CODIGO_CON);
-  pQry.ParamByName('destitulo_rec').Value             := ifThen(pContasReceberItensModel.DESTITULO_REC             = '', Unassigned, pContasReceberItensModel.DESTITULO_REC);
-  pQry.ParamByName('nosso_numero').Value              := ifThen(pContasReceberItensModel.NOSSO_NUMERO              = '', Unassigned, pContasReceberItensModel.NOSSO_NUMERO);
-  pQry.ParamByName('cartao').Value                    := ifThen(pContasReceberItensModel.CARTAO                    = '', Unassigned, pContasReceberItensModel.CARTAO);
-  pQry.ParamByName('observacao').Value                := ifThen(pContasReceberItensModel.OBSERVACAO                = '', Unassigned, pContasReceberItensModel.OBSERVACAO);
-  pQry.ParamByName('vencimento_boleto').Value         := ifThen(pContasReceberItensModel.VENCIMENTO_BOLETO         = '', Unassigned, transformaDataFireBird(pContasReceberItensModel.VENCIMENTO_BOLETO));
-  pQry.ParamByName('comissao').Value                  := ifThen(pContasReceberItensModel.COMISSAO                  = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.COMISSAO));
-  pQry.ParamByName('comissao_base').Value             := ifThen(pContasReceberItensModel.COMISSAO_BASE             = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.COMISSAO_BASE));
-  pQry.ParamByName('loja').Value                      := ifThen(pContasReceberItensModel.LOJA                      = '', Unassigned, pContasReceberItensModel.LOJA);
-  pQry.ParamByName('data_aceite').Value               := ifThen(pContasReceberItensModel.DATA_ACEITE               = '', Unassigned, transformaDataFireBird(pContasReceberItensModel.DATA_ACEITE));
-  pQry.ParamByName('usuario_aceite').Value            := ifThen(pContasReceberItensModel.USUARIO_ACEITE            = '', Unassigned, pContasReceberItensModel.USUARIO_ACEITE);
-  pQry.ParamByName('valor_pago').Value                := ifThen(pContasReceberItensModel.VALOR_PAGO                = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.VALOR_PAGO));
-  pQry.ParamByName('nf_fatura').Value                 := ifThen(pContasReceberItensModel.NF_FATURA                 = '', Unassigned, pContasReceberItensModel.NF_FATURA);
-  pQry.ParamByName('obs').Value                       := ifThen(pContasReceberItensModel.OBS                       = '', Unassigned, pContasReceberItensModel.OBS);
-  pQry.ParamByName('vaucher_cliente_id').Value        := ifThen(pContasReceberItensModel.VAUCHER_CLIENTE_ID        = '', Unassigned, pContasReceberItensModel.VAUCHER_CLIENTE_ID);
-  pQry.ParamByName('valor_desconto_cartao').Value     := ifThen(pContasReceberItensModel.VALOR_DESCONTO_CARTAO     = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.VALOR_DESCONTO_CARTAO));
-  pQry.ParamByName('valor_recebido_cartao').Value     := ifThen(pContasReceberItensModel.VALOR_RECEBIDO_CARTAO     = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.VALOR_RECEBIDO_CARTAO));
-  pQry.ParamByName('fatura_recebida_cartao').Value    := ifThen(pContasReceberItensModel.FATURA_RECEBIDA_CARTAO    = '', Unassigned, pContasReceberItensModel.FATURA_RECEBIDA_CARTAO);
-  pQry.ParamByName('valor_juros_cartao').Value        := ifThen(pContasReceberItensModel.VALOR_JUROS_CARTAO        = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.VALOR_JUROS_CARTAO));
-  pQry.ParamByName('tef_chamada').Value               := ifThen(pContasReceberItensModel.TEF_CHAMADA               = '', Unassigned, pContasReceberItensModel.TEF_CHAMADA);
-  pQry.ParamByName('tef_modalidade').Value            := ifThen(pContasReceberItensModel.TEF_MODALIDADE            = '', Unassigned, pContasReceberItensModel.TEF_MODALIDADE);
-  pQry.ParamByName('tef_parcelamento').Value          := ifThen(pContasReceberItensModel.TEF_PARCELAMENTO          = '', Unassigned, pContasReceberItensModel.TEF_PARCELAMENTO);
-  pQry.ParamByName('tef_adquirente').Value            := ifThen(pContasReceberItensModel.TEF_ADQUIRENTE            = '', Unassigned, pContasReceberItensModel.TEF_ADQUIRENTE);
-  pQry.ParamByName('pix_identificador').Value         := ifThen(pContasReceberItensModel.PIX_IDENTIFICADOR         = '', Unassigned, pContasReceberItensModel.PIX_IDENTIFICADOR);
-  pQry.ParamByName('pix_emv').Value                   := ifThen(pContasReceberItensModel.PIX_EMV                   = '', Unassigned, pContasReceberItensModel.PIX_EMV);
-  pQry.ParamByName('pix_expiracao').Value             := ifThen(pContasReceberItensModel.PIX_EXPIRACAO             = '', Unassigned, pContasReceberItensModel.PIX_EXPIRACAO);
+  lTabela := vConstrutor.getColumns('CONTASRECEBERITENS');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TContasReceberItensModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pContasReceberItensModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pContasReceberItensModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TContasReceberItensDao.setParamsArray(var pQry: TFDQuery; pContasReceberItensModel: TContasReceberItensModel);
@@ -642,43 +629,43 @@ var
 begin
   for lCount := 0 to Pred(pContasReceberItensModel.ContasReceberItenssLista.Count) do
   begin
-    pQry.ParamByName('fatura_rec').Values[lCount]                := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].FATURA_REC                = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].FATURA_REC);
-    pQry.ParamByName('codigo_cli').Values[lCount]                := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].CODIGO_CLI                = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].CODIGO_CLI);
-    pQry.ParamByName('posicao_id').Values[lCount]                := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].POSICAO_ID                = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].POSICAO_ID);
-    pQry.ParamByName('vencimento_rec').Values[lCount]            := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].VENCIMENTO_REC            = '', Unassigned, transformaDataFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].VENCIMENTO_REC));
-    pQry.ParamByName('pacela_rec').Values[lCount]                := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].PACELA_REC                = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].PACELA_REC);
-    pQry.ParamByName('vlrparcela_rec').Values[lCount]            := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].VLRPARCELA_REC            = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].VLRPARCELA_REC));
-    pQry.ParamByName('valorrec_rec').Values[lCount]              := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].VALORREC_REC              = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].VALORREC_REC));
-    pQry.ParamByName('databaixa_rec').Values[lCount]             := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].DATABAIXA_REC             = '', Unassigned, transformaDataFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].DATABAIXA_REC));
-    pQry.ParamByName('situacao_rec').Values[lCount]              := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].SITUACAO_REC              = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].SITUACAO_REC);
-    pQry.ParamByName('totalparcelas_rec').Values[lCount]         := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].TOTALPARCELAS_REC         = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].TOTALPARCELAS_REC);
-    pQry.ParamByName('codigo_por').Values[lCount]                := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].CODIGO_POR                = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].CODIGO_POR);
-    pQry.ParamByName('codigo_con').Values[lCount]                := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].CODIGO_CON                = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].CODIGO_CON);
-    pQry.ParamByName('destitulo_rec').Values[lCount]             := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].DESTITULO_REC             = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].DESTITULO_REC);
-    pQry.ParamByName('nosso_numero').Values[lCount]              := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].NOSSO_NUMERO              = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].NOSSO_NUMERO);
-    pQry.ParamByName('cartao').Values[lCount]                    := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].CARTAO                    = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].CARTAO);
-    pQry.ParamByName('observacao').Values[lCount]                := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].OBSERVACAO                = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].OBSERVACAO);
-    pQry.ParamByName('vencimento_boleto').Values[lCount]         := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].VENCIMENTO_BOLETO         = '', Unassigned, transformaDataFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].VENCIMENTO_BOLETO));
-    pQry.ParamByName('comissao').Values[lCount]                  := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].COMISSAO                  = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].COMISSAO));
-    pQry.ParamByName('comissao_base').Values[lCount]             := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].COMISSAO_BASE             = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].COMISSAO_BASE));
-    pQry.ParamByName('loja').Values[lCount]                      := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].LOJA                      = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].LOJA);
-    pQry.ParamByName('data_aceite').Values[lCount]               := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].DATA_ACEITE               = '', Unassigned, transformaDataFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].DATA_ACEITE));
-    pQry.ParamByName('usuario_aceite').Values[lCount]            := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].USUARIO_ACEITE            = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].USUARIO_ACEITE);
-    pQry.ParamByName('valor_pago').Values[lCount]                := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].VALOR_PAGO                = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].VALOR_PAGO));
-    pQry.ParamByName('nf_fatura').Values[lCount]                 := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].NF_FATURA                 = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].NF_FATURA);
-    pQry.ParamByName('obs').Values[lCount]                       := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].OBS                       = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].OBS);
-    pQry.ParamByName('vaucher_cliente_id').Values[lCount]        := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].VAUCHER_CLIENTE_ID        = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].VAUCHER_CLIENTE_ID);
-    pQry.ParamByName('valor_desconto_cartao').Values[lCount]     := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].VALOR_DESCONTO_CARTAO     = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].VALOR_DESCONTO_CARTAO));
-    pQry.ParamByName('valor_recebido_cartao').Values[lCount]     := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].VALOR_RECEBIDO_CARTAO     = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].VALOR_RECEBIDO_CARTAO));
-    pQry.ParamByName('fatura_recebida_cartao').Values[lCount]    := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].FATURA_RECEBIDA_CARTAO    = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].FATURA_RECEBIDA_CARTAO);
-    pQry.ParamByName('valor_juros_cartao').Values[lCount]        := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].VALOR_JUROS_CARTAO        = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].VALOR_JUROS_CARTAO));
-    pQry.ParamByName('tef_chamada').Values[lCount]               := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].TEF_CHAMADA               = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].TEF_CHAMADA);
-    pQry.ParamByName('tef_modalidade').Values[lCount]            := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].TEF_MODALIDADE            = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].TEF_MODALIDADE);
-    pQry.ParamByName('tef_parcelamento').Values[lCount]          := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].TEF_PARCELAMENTO          = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].TEF_PARCELAMENTO);
-    pQry.ParamByName('tef_adquirente').Values[lCount]            := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].TEF_ADQUIRENTE            = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].TEF_ADQUIRENTE);
-    pQry.ParamByName('pix_identificador').Values[lCount]         := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].PIX_IDENTIFICADOR         = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].PIX_IDENTIFICADOR);
-    pQry.ParamByName('pix_emv').Values[lCount]                   := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].PIX_EMV                   = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].PIX_EMV);
-    pQry.ParamByName('pix_expiracao').Values[lCount]             := ifThen(pContasReceberItensModel.ContasReceberItenssLista[lCount].PIX_EXPIRACAO             = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].PIX_EXPIRACAO);
+    pQry.ParamByName('fatura_rec').Values[lCount]                := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].FATURA_REC                = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].FATURA_REC);
+    pQry.ParamByName('codigo_cli').Values[lCount]                := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].CODIGO_CLI                = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].CODIGO_CLI);
+    pQry.ParamByName('posicao_id').Values[lCount]                := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].POSICAO_ID                = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].POSICAO_ID);
+    pQry.ParamByName('vencimento_rec').Values[lCount]            := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].VENCIMENTO_REC            = '', Unassigned, transformaDataFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].VENCIMENTO_REC));
+    pQry.ParamByName('pacela_rec').Values[lCount]                := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].PACELA_REC                = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].PACELA_REC);
+    pQry.ParamByName('vlrparcela_rec').Values[lCount]            := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].VLRPARCELA_REC            = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].VLRPARCELA_REC));
+    pQry.ParamByName('valorrec_rec').Values[lCount]              := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].VALORREC_REC              = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].VALORREC_REC));
+    pQry.ParamByName('databaixa_rec').Values[lCount]             := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].DATABAIXA_REC             = '', Unassigned, transformaDataFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].DATABAIXA_REC));
+    pQry.ParamByName('situacao_rec').Values[lCount]              := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].SITUACAO_REC              = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].SITUACAO_REC);
+    pQry.ParamByName('totalparcelas_rec').Values[lCount]         := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].TOTALPARCELAS_REC         = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].TOTALPARCELAS_REC);
+    pQry.ParamByName('codigo_por').Values[lCount]                := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].CODIGO_POR                = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].CODIGO_POR);
+    pQry.ParamByName('codigo_con').Values[lCount]                := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].CODIGO_CON                = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].CODIGO_CON);
+    pQry.ParamByName('destitulo_rec').Values[lCount]             := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].DESTITULO_REC             = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].DESTITULO_REC);
+    pQry.ParamByName('nosso_numero').Values[lCount]              := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].NOSSO_NUMERO              = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].NOSSO_NUMERO);
+    pQry.ParamByName('cartao').Values[lCount]                    := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].CARTAO                    = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].CARTAO);
+    pQry.ParamByName('observacao').Values[lCount]                := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].OBSERVACAO                = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].OBSERVACAO);
+    pQry.ParamByName('vencimento_boleto').Values[lCount]         := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].VENCIMENTO_BOLETO         = '', Unassigned, transformaDataFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].VENCIMENTO_BOLETO));
+    pQry.ParamByName('comissao').Values[lCount]                  := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].COMISSAO                  = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].COMISSAO));
+    pQry.ParamByName('comissao_base').Values[lCount]             := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].COMISSAO_BASE             = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].COMISSAO_BASE));
+    pQry.ParamByName('loja').Values[lCount]                      := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].LOJA                      = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].LOJA);
+    pQry.ParamByName('data_aceite').Values[lCount]               := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].DATA_ACEITE               = '', Unassigned, transformaDataFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].DATA_ACEITE));
+    pQry.ParamByName('usuario_aceite').Values[lCount]            := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].USUARIO_ACEITE            = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].USUARIO_ACEITE);
+    pQry.ParamByName('valor_pago').Values[lCount]                := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].VALOR_PAGO                = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].VALOR_PAGO));
+    pQry.ParamByName('nf_fatura').Values[lCount]                 := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].NF_FATURA                 = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].NF_FATURA);
+    pQry.ParamByName('obs').Values[lCount]                       := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].OBS                       = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].OBS);
+    pQry.ParamByName('vaucher_cliente_id').Values[lCount]        := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].VAUCHER_CLIENTE_ID        = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].VAUCHER_CLIENTE_ID);
+    pQry.ParamByName('valor_desconto_cartao').Values[lCount]     := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].VALOR_DESCONTO_CARTAO     = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].VALOR_DESCONTO_CARTAO));
+    pQry.ParamByName('valor_recebido_cartao').Values[lCount]     := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].VALOR_RECEBIDO_CARTAO     = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].VALOR_RECEBIDO_CARTAO));
+    pQry.ParamByName('fatura_recebida_cartao').Values[lCount]    := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].FATURA_RECEBIDA_CARTAO    = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].FATURA_RECEBIDA_CARTAO);
+    pQry.ParamByName('valor_juros_cartao').Values[lCount]        := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].VALOR_JUROS_CARTAO        = '', Unassigned, FormataFloatFireBird(pContasReceberItensModel.ContasReceberItenssLista[lCount].VALOR_JUROS_CARTAO));
+    pQry.ParamByName('tef_chamada').Values[lCount]               := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].TEF_CHAMADA               = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].TEF_CHAMADA);
+    pQry.ParamByName('tef_modalidade').Values[lCount]            := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].TEF_MODALIDADE            = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].TEF_MODALIDADE);
+    pQry.ParamByName('tef_parcelamento').Values[lCount]          := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].TEF_PARCELAMENTO          = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].TEF_PARCELAMENTO);
+    pQry.ParamByName('tef_adquirente').Values[lCount]            := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].TEF_ADQUIRENTE            = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].TEF_ADQUIRENTE);
+    pQry.ParamByName('pix_identificador').Values[lCount]         := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].PIX_IDENTIFICADOR         = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].PIX_IDENTIFICADOR);
+    pQry.ParamByName('pix_emv').Values[lCount]                   := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].PIX_EMV                   = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].PIX_EMV);
+    pQry.ParamByName('pix_expiracao').Values[lCount]             := IIF(pContasReceberItensModel.ContasReceberItenssLista[lCount].PIX_EXPIRACAO             = '', Unassigned, pContasReceberItensModel.ContasReceberItenssLista[lCount].PIX_EXPIRACAO);
   end;
 end;
 

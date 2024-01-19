@@ -11,6 +11,7 @@ uses
   System.Generics.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
+  Terasoft.Utils,
   Interfaces.Conexao;
 
 type
@@ -67,6 +68,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TMovimento }
 
@@ -176,7 +180,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from movimento where ID = :ID',[pMovimentoModel.ID]);
+   lQry.ExecSQL('delete from MOVIMENTO where ID = :ID',[pMovimentoModel.ID]);
    lQry.ExecSQL;
    Result := pMovimentoModel.ID;
 
@@ -208,7 +212,7 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From movimento where 1=1 ';
+    lSql := 'select count(*) records from MOVIMENTO where 1=1 ';
 
     lSql := lSql + where;
 
@@ -318,24 +322,27 @@ begin
 end;
 
 procedure TMovimentoDao.setParams(var pQry: TFDQuery; pMovimentoModel: TMovimentoModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('documento_mov').Value  := ifThen(pMovimentoModel.DOCUMENTO_MOV   = '', Unassigned, pMovimentoModel.DOCUMENTO_MOV);
-  pQry.ParamByName('codigo_pro').Value     := ifThen(pMovimentoModel.CODIGO_PRO      = '', Unassigned, pMovimentoModel.CODIGO_PRO);
-  pQry.ParamByName('codigo_for').Value     := ifThen(pMovimentoModel.CODIGO_FOR      = '', Unassigned, pMovimentoModel.CODIGO_FOR);
-  pQry.ParamByName('obs_mov').Value        := ifThen(pMovimentoModel.OBS_MOV         = '', Unassigned, pMovimentoModel.OBS_MOV);
-  pQry.ParamByName('tipo_doc').Value       := ifThen(pMovimentoModel.TIPO_DOC        = '', Unassigned, pMovimentoModel.TIPO_DOC);
-  pQry.ParamByName('data_mov').Value       := ifThen(pMovimentoModel.DATA_MOV        = '', Unassigned, transformaDataFireBird(pMovimentoModel.DATA_MOV));
-  pQry.ParamByName('data_doc').Value       := ifThen(pMovimentoModel.DATA_DOC        = '', Unassigned, transformaDataFireBird(pMovimentoModel.DATA_DOC));
-  pQry.ParamByName('quantidade_mov').Value := ifThen(pMovimentoModel.QUANTIDADE_MOV  = '', Unassigned, FormataFloatFireBird(pMovimentoModel.QUANTIDADE_MOV));
-  pQry.ParamByName('valor_mov').Value      := ifThen(pMovimentoModel.VALOR_MOV       = '', Unassigned, FormataFloatFireBird(pMovimentoModel.VALOR_MOV));
-  pQry.ParamByName('custo_atual').Value    := ifThen(pMovimentoModel.CUSTO_ATUAL     = '', Unassigned, FormataFloatFireBird(pMovimentoModel.CUSTO_ATUAL));
-  pQry.ParamByName('venda_atual').Value    := ifThen(pMovimentoModel.VENDA_ATUAL     = '', Unassigned, FormataFloatFireBird(pMovimentoModel.VENDA_ATUAL));
-  pQry.ParamByName('status').Value         := ifThen(pMovimentoModel.STATUS          = '', Unassigned, pMovimentoModel.STATUS);
-  pQry.ParamByName('loja').Value           := ifThen(pMovimentoModel.LOJA            = '', Unassigned, pMovimentoModel.LOJA);
-  pQry.ParamByName('usuario_id').Value     := ifThen(pMovimentoModel.USUARIO_ID      = '', Unassigned, pMovimentoModel.USUARIO_ID);
-  pQry.ParamByName('datahora').Value       := ifThen(pMovimentoModel.DATAHORA        = '', Unassigned, transformaDataHoraFireBird(pMovimentoModel.DATAHORA));
-  pQry.ParamByName('tabela_origem').Value  := ifThen(pMovimentoModel.TABELA_ORIGEM   = '', Unassigned, pMovimentoModel.TABELA_ORIGEM);
-  pQry.ParamByName('id_origem').Value      := ifThen(pMovimentoModel.ID_ORIGEM       = '', Unassigned, pMovimentoModel.ID_ORIGEM);
+  lTabela := vConstrutor.getColumns('MOVIMENTO');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TMovimentoModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pMovimentoModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pMovimentoModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TMovimentoDao.SetStartRecordView(const Value: String);

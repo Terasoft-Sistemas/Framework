@@ -11,6 +11,7 @@ uses
   System.Variants,
   Terasoft.FuncoesTexto,
   Terasoft.ConstrutorDao,
+  Terasoft.Utils,
   Interfaces.Conexao;
 
 type
@@ -68,6 +69,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TCaixa }
 
@@ -228,7 +232,7 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From caixa where 1=1 ';
+    lSql := 'select count(*) records from CAIXA where 1=1 ';
 
     lSql := lSql + where;
 
@@ -356,41 +360,27 @@ begin
 end;
 
 procedure TCaixaDao.setParams(var pQry: TFDQuery; pCaixaModel: TCaixaModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('codigo_cta').Value           := ifThen(pCaixaModel.CODIGO_CTA           = '', Unassigned, pCaixaModel.CODIGO_CTA);
-  pQry.ParamByName('data_cai').Value             := ifThen(pCaixaModel.DATA_CAI             = '', Unassigned, transformaDataFireBird(pCaixaModel.DATA_CAI));
-  pQry.ParamByName('hora_cai').Value             := ifThen(pCaixaModel.HORA_CAI             = '', Unassigned, pCaixaModel.HORA_CAI);
-  pQry.ParamByName('historico_cai').Value        := ifThen(pCaixaModel.HISTORICO_CAI        = '', Unassigned, pCaixaModel.HISTORICO_CAI);
-  pQry.ParamByName('valor_cai').Value            := ifThen(pCaixaModel.VALOR_CAI            = '', Unassigned, FormataFloatFireBird(pCaixaModel.VALOR_CAI));
-  pQry.ParamByName('usuario_cai').Value          := ifThen(pCaixaModel.USUARIO_CAI          = '', Unassigned, pCaixaModel.USUARIO_CAI);
-  pQry.ParamByName('tipo_cai').Value             := ifThen(pCaixaModel.TIPO_CAI             = '', Unassigned, pCaixaModel.TIPO_CAI);
-  pQry.ParamByName('cliente_cai').Value          := ifThen(pCaixaModel.CLIENTE_CAI          = '', Unassigned, pCaixaModel.CLIENTE_CAI);
-  pQry.ParamByName('numero_ped').Value           := ifThen(pCaixaModel.NUMERO_PED           = '', Unassigned, pCaixaModel.NUMERO_PED);
-  pQry.ParamByName('fatura_cai').Value           := ifThen(pCaixaModel.FATURA_CAI           = '', Unassigned, pCaixaModel.FATURA_CAI);
-  pQry.ParamByName('parcela_cai').Value          := ifThen(pCaixaModel.PARCELA_CAI          = '', Unassigned, pCaixaModel.PARCELA_CAI);
-  pQry.ParamByName('status').Value               := ifThen(pCaixaModel.STATUS               = '', Unassigned, pCaixaModel.STATUS);
-  pQry.ParamByName('portador_cai').Value         := ifThen(pCaixaModel.PORTADOR_CAI         = '', Unassigned, pCaixaModel.PORTADOR_CAI);
-  pQry.ParamByName('conciliado_cai').Value       := ifThen(pCaixaModel.CONCILIADO_CAI       = '', Unassigned, pCaixaModel.CONCILIADO_CAI);
-  pQry.ParamByName('data_con').Value             := ifThen(pCaixaModel.DATA_CON             = '', Unassigned, transformaDataFireBird(pCaixaModel.DATA_CON));
-  pQry.ParamByName('centro_custo').Value         := ifThen(pCaixaModel.CENTRO_CUSTO         = '', Unassigned, pCaixaModel.CENTRO_CUSTO);
-  pQry.ParamByName('loja').Value                 := ifThen(pCaixaModel.LOJA                 = '', Unassigned, pCaixaModel.LOJA);
-  pQry.ParamByName('recibo').Value               := ifThen(pCaixaModel.RECIBO               = '', Unassigned, pCaixaModel.RECIBO);
-  pQry.ParamByName('relatorio').Value            := ifThen(pCaixaModel.RELATORIO            = '', Unassigned, pCaixaModel.RELATORIO);
-  pQry.ParamByName('observacao').Value           := ifThen(pCaixaModel.OBSERVACAO           = '', Unassigned, pCaixaModel.OBSERVACAO);
-  pQry.ParamByName('dr').Value                   := ifThen(pCaixaModel.DR                   = '', Unassigned, pCaixaModel.DR);
-  pQry.ParamByName('troco').Value                := ifThen(pCaixaModel.TROCO                = '', Unassigned, pCaixaModel.TROCO);
-  pQry.ParamByName('carga_id').Value             := ifThen(pCaixaModel.CARGA_ID             = '', Unassigned, pCaixaModel.CARGA_ID);
-  pQry.ParamByName('tipo').Value                 := ifThen(pCaixaModel.TIPO                 = '', Unassigned, pCaixaModel.TIPO);
-  pQry.ParamByName('sub_id').Value               := ifThen(pCaixaModel.SUB_ID               = '', Unassigned, pCaixaModel.SUB_ID);
-  pQry.ParamByName('locacao_id').Value           := ifThen(pCaixaModel.LOCACAO_ID           = '', Unassigned, pCaixaModel.LOCACAO_ID);
-  pQry.ParamByName('funcionario_id').Value       := ifThen(pCaixaModel.FUNCIONARIO_ID       = '', Unassigned, pCaixaModel.FUNCIONARIO_ID);
-  pQry.ParamByName('os_id').Value                := ifThen(pCaixaModel.OS_ID                = '', Unassigned, pCaixaModel.OS_ID);
-  pQry.ParamByName('placa').Value                := ifThen(pCaixaModel.PLACA                = '', Unassigned, pCaixaModel.PLACA);
-  pQry.ParamByName('transferencia_origem').Value := ifThen(pCaixaModel.TRANSFERENCIA_ORIGEM = '', Unassigned, pCaixaModel.TRANSFERENCIA_ORIGEM);
-  pQry.ParamByName('transferencia_id').Value     := ifThen(pCaixaModel.TRANSFERENCIA_ID     = '', Unassigned, pCaixaModel.TRANSFERENCIA_ID);
-  pQry.ParamByName('competencia').Value          := ifThen(pCaixaModel.COMPETENCIA          = '', Unassigned, pCaixaModel.COMPETENCIA);
-  pQry.ParamByName('loja_remoto').Value          := ifThen(pCaixaModel.LOJA_REMOTO          = '', Unassigned, pCaixaModel.LOJA_REMOTO);
-  pQry.ParamByName('pedido_id').Value            := ifThen(pCaixaModel.PEDIDO_ID            = '', Unassigned, pCaixaModel.PEDIDO_ID);
+  lTabela := vConstrutor.getColumns('CAIXA');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TCaixaModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pCaixaModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pCaixaModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TCaixaDao.SetStartRecordView(const Value: String);

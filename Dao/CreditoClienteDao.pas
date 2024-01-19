@@ -11,6 +11,7 @@ uses
   System.Variants,
   Terasoft.FuncoesTexto,
   Terasoft.ConstrutorDao,
+  Terasoft.Utils,
   Interfaces.Conexao;
 
 type
@@ -69,6 +70,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TCreditoCliente }
 
@@ -339,20 +343,27 @@ begin
 end;
 
 procedure TCreditoClienteDao.setParams(var pQry: TFDQuery; pCreditoClienteModel: TCreditoClienteModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('cliente_id').Value           := ifThen(pCreditoClienteModel.CLIENTE_ID           = '', Unassigned, pCreditoClienteModel.CLIENTE_ID);
-  pQry.ParamByName('devolucao_id').Value         := ifThen(pCreditoClienteModel.DEVOLUCAO_ID         = '', Unassigned, pCreditoClienteModel.DEVOLUCAO_ID);
-  pQry.ParamByName('data').Value                 := ifThen(pCreditoClienteModel.DATA                 = '', Unassigned, transformaDataFireBird(pCreditoClienteModel.DATA));
-  pQry.ParamByName('valor').Value                := ifThen(pCreditoClienteModel.VALOR                = '', Unassigned, FormataFloatFireBird(pCreditoClienteModel.VALOR));
-  pQry.ParamByName('tipo').Value                 := ifThen(pCreditoClienteModel.TIPO                 = '', Unassigned, pCreditoClienteModel.TIPO);
-  pQry.ParamByName('obs').Value                  := ifThen(pCreditoClienteModel.OBS                  = '', Unassigned, pCreditoClienteModel.OBS);
-  pQry.ParamByName('entrada_id').Value           := ifThen(pCreditoClienteModel.ENTRADA_ID           = '', Unassigned, pCreditoClienteModel.ENTRADA_ID);
-  pQry.ParamByName('fornecedor_id').Value        := ifThen(pCreditoClienteModel.FORNECEDOR_ID        = '', Unassigned, pCreditoClienteModel.FORNECEDOR_ID);
-  pQry.ParamByName('fatura_id').Value            := ifThen(pCreditoClienteModel.FATURA_ID            = '', Unassigned, pCreditoClienteModel.FATURA_ID);
-  pQry.ParamByName('pedido_site').Value          := ifThen(pCreditoClienteModel.PEDIDO_SITE          = '', Unassigned, pCreditoClienteModel.PEDIDO_SITE);
-  pQry.ParamByName('contacorrente_id').Value     := ifThen(pCreditoClienteModel.CONTACORRENTE_ID     = '', Unassigned, pCreditoClienteModel.CONTACORRENTE_ID);
-  pQry.ParamByName('cliente_anterior_id').Value  := ifThen(pCreditoClienteModel.CLIENTE_ANTERIOR_ID  = '', Unassigned, pCreditoClienteModel.CLIENTE_ANTERIOR_ID);
-  pQry.ParamByName('venda_casada').Value         := ifThen(pCreditoClienteModel.VENDA_CASADA         = '', Unassigned, pCreditoClienteModel.VENDA_CASADA);
+  lTabela := vConstrutor.getColumns('CREDITO_CLIENTE');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TCreditoClienteModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pCreditoClienteModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pCreditoClienteModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TCreditoClienteDao.SetStartRecordView(const Value: String);

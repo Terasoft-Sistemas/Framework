@@ -11,6 +11,7 @@ uses
   System.Variants,
   Terasoft.FuncoesTexto,
   Terasoft.ConstrutorDao,
+  Terasoft.Utils,
   Interfaces.Conexao;
 
 type
@@ -68,6 +69,9 @@ type
 end;
 
 implementation
+
+uses
+  System.Rtti;
 
 { TCaixaControle }
 
@@ -155,7 +159,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from caixa_ctr where ID = :ID',[ACaixaControleModel.ID]);
+   lQry.ExecSQL('delete from CTR_CAIXA where ID = :ID',[ACaixaControleModel.ID]);
    lQry.ExecSQL;
    Result := ACaixaControleModel.ID;
 
@@ -187,7 +191,7 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From caixa_ctr where 1=1 ';
+    lSql := 'select count(*) records From CTR_CAIXA where 1=1 ';
 
     lSql := lSql + where;
 
@@ -291,16 +295,27 @@ begin
 end;
 
 procedure TCaixaControleDao.setParams(var pQry: TFDQuery; pCaixaControleModel: TCaixaControleModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
 begin
-  pQry.ParamByName('data').Value              := ifThen(pCaixaControleModel.DATA              = '', Unassigned, transformaDataFireBird(pCaixaControleModel.DATA));
-  pQry.ParamByName('status').Value            := ifThen(pCaixaControleModel.STATUS            = '', Unassigned, pCaixaControleModel.STATUS);
-  pQry.ParamByName('usuario').Value           := ifThen(pCaixaControleModel.USUARIO           = '', Unassigned, pCaixaControleModel.USUARIO);
-  pQry.ParamByName('hora').Value              := ifThen(pCaixaControleModel.HORA              = '', Unassigned, pCaixaControleModel.HORA);
-  pQry.ParamByName('data_fecha').Value        := ifThen(pCaixaControleModel.DATA_FECHA        = '', Unassigned, transformaDataFireBird(pCaixaControleModel.DATA_FECHA));
-  pQry.ParamByName('contagem_dinheiro').Value := ifThen(pCaixaControleModel.CONTAGEM_DINHEIRO = '', Unassigned, pCaixaControleModel.CONTAGEM_DINHEIRO);
-  pQry.ParamByName('contagem_credito').Value  := ifThen(pCaixaControleModel.CONTAGEM_CREDITO  = '', Unassigned, pCaixaControleModel.CONTAGEM_CREDITO);
-  pQry.ParamByName('contagem_debito').Value   := ifThen(pCaixaControleModel.CONTAGEM_DEBITO   = '', Unassigned, pCaixaControleModel.CONTAGEM_DEBITO);
-  pQry.ParamByName('justificativa').Value     := ifThen(pCaixaControleModel.JUSTIFICATIVA     = '', Unassigned, pCaixaControleModel.JUSTIFICATIVA);
+  lTabela := vConstrutor.getColumns('CTR_CAIXA');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TCaixaControleModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pCaixaControleModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pCaixaControleModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
 end;
 
 procedure TCaixaControleDao.SetStartRecordView(const Value: String);
