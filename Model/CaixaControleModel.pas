@@ -76,16 +76,19 @@ type
 
     function Salvar: String;
     procedure obterLista;
+
     procedure ultimosCaixa(pUsuario: String);
-
-    procedure InicializarCaixa(pValor: Double; pUsuario: String; pLoja: String);
-    function FecharCaixa(pUsuario: String) : String;
-    function CaixaAberto(pUsuario: String): String;
-    function VerificaCaixaAberto(pUsuario: String): Boolean;
-    procedure Sangria(pValor: Double; pUsuario: String; pLoja: String);
-    procedure Suprimento(pValor: Double; pUsuario: String; pLoja: String);
-
     function ultimoCaixa(pUsuario: String) : String;
+
+    procedure InicializarCaixa(pValor: Double);
+    function FecharCaixa : String;
+
+    function CaixaAberto(pUsuario: String): String; overload;
+    function CaixaAberto: Boolean; overload;
+
+    procedure Sangria(pValor: Double);
+    procedure Suprimento(pValor: Double);
+
     function dataFechamento(pIdCaixa, pUsuario: String): String;
 
     property CaixaControlesLista: TObjectList<TCaixaControleModel> read FCaixaControlesLista write SetCaixaControlesLista;
@@ -130,9 +133,9 @@ begin
   end;
 end;
 
-function TCaixaControleModel.VerificaCaixaAberto(pUsuario: String): Boolean;
+function TCaixaControleModel.CaixaAberto: Boolean;
 begin
-  Result := self.CaixaAberto(pUsuario) <> '';
+  Result := self.CaixaAberto(self.vIConexao.getUSer.ID) <> '';
 end;
 
 constructor TCaixaControleModel.Create(pIConexao : IConexao);
@@ -158,7 +161,7 @@ begin
   inherited;
 end;
 
-function TCaixaControleModel.FecharCaixa(pUsuario: String) : String;
+function TCaixaControleModel.FecharCaixa : String;
 var
   lCaixaControleDao  : TCaixaControleDao;
   lCaixaAberto,
@@ -171,7 +174,7 @@ begin
   try
     lCaixaControleDao.WhereView := ' and caixa_ctr.status = ''I''     '+
                                    ' and caixa_ctr.data_fecha is null '+
-                                   ' and caixa_ctr.usuario = '+ QuotedStr(pUsuario);
+                                   ' and caixa_ctr.usuario = '+ QuotedStr(self.vIConexao.getUSer.ID);
     lCaixaControleDao.obterLista;
 
     if lCaixaControleDao.TotalRecords = 0 then
@@ -186,7 +189,7 @@ begin
     lCaixaFechamento.Acao    := tacIncluir;
     lCaixaFechamento.data    := DateToStr(vIConexao.DataServer);
     lCaixaFechamento.status  := 'F';
-    lCaixaFechamento.usuario := pUsuario;
+    lCaixaFechamento.usuario := self.vIConexao.getUSer.ID;
     lCaixaFechamento.hora    := TimeToStr(vIConexao.HoraServer);
     lCaixaFechamento.Salvar;
 
@@ -199,7 +202,7 @@ begin
   end;
 end;
 
-procedure TCaixaControleModel.InicializarCaixa(pValor: Double; pUsuario: String; pLoja: String);
+procedure TCaixaControleModel.InicializarCaixa(pValor: Double);
 var
   lCaixaModel   : TCaixaModel;
   lUsuarioModel : TUsuarioModel;
@@ -217,7 +220,6 @@ begin
   lUsuarioModel := TUsuarioModel.Create(vIConexao);
 
   try
-    lNomeUsuario := lUsuarioModel.nomeUsuario(pUsuario);
 
     lCaixaModel.CODIGO_CTA        := '500000';
     lCaixaModel.DATA_CAI          := DateToStr(vIConexao.DataServer);
@@ -232,7 +234,7 @@ begin
     lCaixaModel.STATUS            := '';
     lCaixaModel.PORTADOR_CAI      := '000004';
     lCaixaModel.CONCILIADO_CAI    := '.';
-    lCaixaModel.LOJA              := pLoja;
+    lCaixaModel.LOJA              := self.vIConexao.getEmpresa.LOJA;
 
     lCaixaModel.Acao := tacIncluir;
     lCaixaModel.Salvar;
@@ -296,7 +298,7 @@ begin
   end;
 end;
 
-procedure TCaixaControleModel.Sangria(pValor: Double; pUsuario: String; pLoja: String);
+procedure TCaixaControleModel.Sangria(pValor: Double);
 var
   lCaixaModel   : TCaixaModel;
   lUsuarioModel : TUsuarioModel;
@@ -318,7 +320,7 @@ begin
     lCaixaModel.STATUS              := '';
     lCaixaModel.PORTADOR_CAI        := '000004';
     lCaixaModel.CONCILIADO_CAI      := '.';
-    lCaixaModel.LOJA                := pLoja;
+    lCaixaModel.LOJA                := self.vIConexao.getEmpresa.LOJA;
 
     lCaixaModel.Acao := tacIncluir;
     lCaixaModel.Salvar;
@@ -440,7 +442,7 @@ begin
   FWhereView := Value;
 end;
 
-procedure TCaixaControleModel.Suprimento(pValor: Double; pUsuario: String; pLoja: String);
+procedure TCaixaControleModel.Suprimento(pValor: Double);
 var
   lCaixaModel   : TCaixaModel;
   lUsuarioModel : TUsuarioModel;
@@ -462,7 +464,7 @@ begin
     lCaixaModel.STATUS              := '';
     lCaixaModel.PORTADOR_CAI        := '000004';
     lCaixaModel.CONCILIADO_CAI      := '.';
-    lCaixaModel.LOJA                := pLoja;
+    lCaixaModel.LOJA                := self.vIConexao.getEmpresa.LOJA;
 
     lCaixaModel.Acao := tacIncluir;
     lCaixaModel.Salvar;

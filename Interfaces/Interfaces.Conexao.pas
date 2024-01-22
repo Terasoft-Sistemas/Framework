@@ -6,8 +6,14 @@ interface
 
   type
     TUsuario = record
-      ID   : string;
-      NOME : string;
+      ID     : string;
+      NOME   : string;
+      PERFIL : String;
+    end;
+
+    TEmpresa = record
+      ID   : String;
+      LOJA : String;
     end;
 
     IConexao = interface
@@ -23,6 +29,9 @@ interface
 
       function getUSer                                 : TUsuario;
       function setUser(pUser : TUsuario)               : Boolean;
+
+      function setEmpresa(pEmpresa: TEmpresa)          : Boolean;
+      function getEmpresa                              : TEmpresa;
 
     end;
 
