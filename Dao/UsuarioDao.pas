@@ -137,7 +137,7 @@ begin
     lSql := vConstrutor.gerarInsert('USUARIO', 'ID', true);
 
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := vIConexao.Generetor('GEN_VENDACARTAO');
+    pUsuarioModel.id := vIConexao.Generetor('GEN_VENDACARTAO');
     setParams(lQry, pUsuarioModel);
     lQry.Open;
 
@@ -182,7 +182,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := ifThen(pUsuarioModel.ID = '', Unassigned, pUsuarioModel.ID);
     setParams(lQry, pUsuarioModel);
     lQry.ExecSQL;
 

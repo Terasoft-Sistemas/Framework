@@ -97,7 +97,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('ID').Value := vIConexao.Generetor('GEN_CREDITO_CLIENTE_USO');
+    ACreditoClienteUsoModel.ID := vIConexao.Generetor('GEN_CREDITO_CLIENTE_USO');
     setParams(lQry, ACreditoClienteUsoModel);
     lQry.Open;
 
@@ -120,7 +120,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('ID').Value := ifThen(ACreditoClienteUsoModel.ID = '', Unassigned, ACreditoClienteUsoModel.ID);
     setParams(lQry, ACreditoClienteUsoModel);
     lQry.ExecSQL;
 

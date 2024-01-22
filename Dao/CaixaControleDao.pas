@@ -113,7 +113,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('ID').Value := StrToInt(vIConexao.Generetor('GEN_CAIXA_CTR')).ToString;
+    ACaixaControleModel.ID := StrToInt(vIConexao.Generetor('GEN_CAIXA_CTR')).ToString;
     setParams(lQry, ACaixaControleModel);
     lQry.Open;
 
@@ -138,7 +138,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value   := ifThen(ACaixaControleModel.ID = '', Unassigned, ACaixaControleModel.ID);
     setParams(lQry, ACaixaControleModel);
     lQry.ExecSQL;
 

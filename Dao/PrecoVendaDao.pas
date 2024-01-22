@@ -85,7 +85,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('ID').Value := vIConexao.Generetor('GEN_PRECOVENDA');
+    pPrecoVendaModel.ID := vIConexao.Generetor('GEN_PRECOVENDA');
     setParams(lQry, pPrecoVendaModel);
     lQry.Open;
 
@@ -107,7 +107,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('ID').Value := ifThen(pPrecoVendaModel.ID = '', Unassigned, pPrecoVendaModel.ID);
     setParams(lQry, pPrecoVendaModel);
     lQry.ExecSQL;
 

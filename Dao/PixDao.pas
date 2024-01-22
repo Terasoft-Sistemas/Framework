@@ -164,7 +164,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := ifThen(pPixModel.ID = '', Unassigned, pPixModel.ID);
     setParams(lQry, pPixModel);
     lQry.ExecSQL;
 

@@ -162,7 +162,6 @@ begin
   try
     lQry.SQL.Add(lSQL);
     setParams(lQry, pMovimentoModel);
-    lQry.ParamByName('id').Value  := pMovimentoModel.ID;
     lQry.ExecSQL;
 
     Result := pMovimentoModel.ID;

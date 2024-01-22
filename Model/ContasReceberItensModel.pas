@@ -204,13 +204,13 @@ type
 
     function lancarContaCorrente(pValor, pPortador, pConta, pContaCorrente, pHistorico, pTipo: String): String;
 
-    function baixarCaixa(pValor, pPortador, pHistorico: String): String;
+    function baixarCaixa(pValor, pPortador, pHistorico : String): String;
     function baixarContaCorrente(pValor, pPortador, pContaCorrente, pHistorico: String): String;
     function baixarPix(pValor, pPortador, pContaCorrente, pValorTaxa, pContaTaxa: String): String;
     function baixar(pValor: String): String;
     function baixarCreditoCliente(pValor: Double) : Boolean;
 
-    function recebimentoCartao(pValor, pIdAdmCartao, pVencimento: String; pIdTef: String = ''): String;
+    function recebimentoCartao(pValor, pIdAdmCartao, pVencimento: String; pUsuario: String; pIdTef: String = ''): String;
 
     function gerarContasReceberCartao(pValor, pPortador, pIdAdmCartao, pObs, pObsComprementar: String; pParcelas: Integer): String;
 
@@ -233,6 +233,7 @@ type
     property IDUsuarioOperacao: String read FIDUsuarioOperacao write SetIDUsuarioOperacao;
     property ParcelaView: String read FParcelaView write SetParcelaView;
   end;
+
   const
     cCENTRO_CUSTO_PADRAO = '000000';
     cTIPO_DEBITO         = 'D';
@@ -243,7 +244,7 @@ implementation
 uses
   ContasReceberItensDao, VendaCartaoModel, Conexao, System.SysUtils,
   CaixaModel, RecebimentoCartaoModel, AdmCartaoModel, ContasReceberModel, ContaCorrenteModel,
-  VariaveisGlobais, CreditoClienteModel, CreditoClienteUsoModel;
+  CreditoClienteModel, CreditoClienteUsoModel;
 
 { TContasReceberItensModel }
 
@@ -251,7 +252,7 @@ function TContasReceberItensModel.baixar(pValor: String): String;
 begin
   self.FAcao           := tacAlterar;
   self.FVALORREC_REC   := FloatToStr(self.FVALORREC_REC + StrToFloat(pValor));
-  self.FDATABAIXA_REC  := DateToStr(xConexao.DataServer);
+  self.FDATABAIXA_REC  := DateToStr(vIConexao.DataServer);
 
   if self.FVALORREC_REC >= self.VLRPARCELA_REC then
     self.FSITUACAO_REC := 'B';
@@ -269,9 +270,9 @@ begin
 
   try
     lCaixaModel.Acao := tacIncluir;
-    lCaixaModel.USUARIO_CAI     := VariaveisGlobais.xUsuarioID;
-    lCaixaModel.DATA_CAI        := DateToStr(xConexao.DataServer);
-    lCaixaModel.HORA_CAI        := TimeToStr(xConexao.HoraServer);
+    lCaixaModel.USUARIO_CAI     := self.vIConexao.getUSer.ID;
+    lCaixaModel.DATA_CAI        := DateToStr(vIConexao.DataServer);
+    lCaixaModel.HORA_CAI        := TimeToStr(vIConexao.HoraServer);
     lCaixaModel.NUMERO_PED      := lContasReceberModel.pedidoContasReceber(self.FFATURA_REC);
     lCaixaModel.CONCILIADO_CAI  := '.';
     lCaixaModel.TIPO            := 'V';
@@ -345,10 +346,10 @@ begin
       if lBaixa > 0 then
       begin
         lCreditoClienteUsoModel.Acao := tacIncluir;
-        lCreditoClienteUsoModel.USUARIO_ID           := VariaveisGlobais.xUsuarioID;
-        lCreditoClienteUsoModel.DATAHORA             := DateToStr(xConexao.DataServer) + ' ' + TimeToStr(xConexao.HoraServer);
+        lCreditoClienteUsoModel.USUARIO_ID           := self.FIDUsuarioOperacao;
+        lCreditoClienteUsoModel.DATAHORA             := DateToStr(vIConexao.DataServer) + ' ' + TimeToStr(vIConexao.HoraServer);
         lCreditoClienteUsoModel.CREDITO_CLIENTE_ID   := lCreditos.id;
-        lCreditoClienteUsoModel.DATA                 := DateToStr(xConexao.DataServer);
+        lCreditoClienteUsoModel.DATA                 := DateToStr(vIConexao.DataServer);
         lCreditoClienteUsoModel.PARCELA              := self.PACELA_REC;
         lCreditoClienteUsoModel.RECEBER_ID           := self.FATURA_REC;
         lCreditoClienteUsoModel.VALOR                := FloatToStr(lBaixa);
@@ -495,7 +496,7 @@ begin
     lContasReceberModel.LOJA              := self.FLOJA;
     lContasReceberModel.PEDIDO_REC        := '999999';
     lContasReceberModel.CODIGO_CLI        := self.FCODIGO_CLI;
-    lContasReceberModel.DATAEMI_REC       := DateToStr(xConexao.DataServer);
+    lContasReceberModel.DATAEMI_REC       := DateToStr(vIConexao.DataServer);
     lContasReceberModel.VALOR_REC         := pValor;
     lContasReceberModel.SITUACAO_REC      := 'A';
     lContasReceberModel.VENDEDOR_REC      := lContasReceberModel.VENDEDOR_REC;
@@ -508,7 +509,7 @@ begin
     lContasReceberModel.OBS_COMPLEMENTAR  := pObsComprementar;
     lFaturaReceber := lContasReceberModel.Salvar;
     lValorParcela  := StrToFloat(pValor) / pParcelas;
-    lVencimento    := xConexao.DataServer + lAdmCartaoModel.AdmCartaosLista[0].PARCELADO_ADM;
+    lVencimento    := vIConexao.DataServer + lAdmCartaoModel.AdmCartaosLista[0].PARCELADO_ADM;
     lContasReceberItensInserir.ContasReceberItenssLista := TObjectList<TContasReceberItensModel>.Create;
     lContasReceberItensInserir.Acao := tacIncluir;
 
@@ -545,7 +546,7 @@ begin
     self.FVALORREC_REC           := FloatToStr(self.FVALORREC_REC + StrToFloat(pValor));
     self.FVALOR_RECEBIDO_CARTAO  := pValor;
     self.FFATURA_RECEBIDA_CARTAO := lFaturaReceber;
-    self.FDATABAIXA_REC          := DateToStr(xConexao.DataServer);
+    self.FDATABAIXA_REC          := DateToStr(vIConexao.DataServer);
 
     if self.FVALORREC_REC >= self.VLRPARCELA_REC then
       self.FSITUACAO_REC := 'B';
@@ -582,7 +583,7 @@ begin
     lVendaCartaoModel.NUMERO_VENDA    := self.FIDPedidoCartao;
     lVendaCartaoModel.ADM_CAR         := self.FIDAdmCartao;
     lVendaCartaoModel.VENCIMENTO_CAR  := self.FVENCIMENTO_REC;
-    lVendaCartaoModel.VENDA_CAR       := DateToStr(xConexao.DataServer);
+    lVendaCartaoModel.VENDA_CAR       := DateToStr(vIConexao.DataServer);
     lVendaCartaoModel.LOJA            := self.FLOJA;
     lVendaCartaoModel.Salvar;
   finally
@@ -601,7 +602,7 @@ begin
     lContaCorrenteModel.USUARIO_COR    := self.IDUsuarioOperacao;
     lContaCorrenteModel.CENTRO_CUSTO   := cCENTRO_CUSTO_PADRAO;
     lContaCorrenteModel.DR             := 'N';
-    lContaCorrenteModel.DATA_COR       := DateToStr(xConexao.DataServer);
+    lContaCorrenteModel.DATA_COR       := DateToStr(vIConexao.DataServer);
     lContaCorrenteModel.CODIGO_CTA     := pConta;
     lContaCorrenteModel.VALOR_COR      := pValor;
     lContaCorrenteModel.OBSERVACAO_COR := pHistorico;
@@ -691,7 +692,7 @@ begin
   end;
 end;
 
-function TContasReceberItensModel.recebimentoCartao(pValor, pIdAdmCartao, pVencimento: String; pIdTef: String = ''): String;
+function TContasReceberItensModel.recebimentoCartao(pValor, pIdAdmCartao, pVencimento: String; pUsuario: String; pIdTef: String = ''): String;
 var
   lRecebimentoCartaoModel: TRecebimentoCartaoModel;
 begin
@@ -700,8 +701,8 @@ begin
     lRecebimentoCartaoModel.Acao := tacIncluir;
     if pIdTef <> '' then
       lRecebimentoCartaoModel.TEF_ID       := pIdTef;
-    lRecebimentoCartaoModel.USUARIO_ID     := VariaveisGlobais.xUsuarioID;
-    lRecebimentoCartaoModel.DATA_HORA      := DateToStr(xConexao.DataServer) + TimeToStr(xConexao.HoraServer);
+    lRecebimentoCartaoModel.USUARIO_ID     := pUsuario;
+    lRecebimentoCartaoModel.DATA_HORA      := DateToStr(vIConexao.DataServer) + TimeToStr(vIConexao.HoraServer);
     lRecebimentoCartaoModel.CLIENTE_ID     := self.FCODIGO_CLI;
     lRecebimentoCartaoModel.FATURA         := self.FFATURA_REC;
     lRecebimentoCartaoModel.PARCELA        := self.FPACELA_REC;

@@ -188,7 +188,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := ifThen(ACFOPModel.ID = '', Unassigned, ACFOPModel.ID);
     setParams(lQry, ACFOPModel);
     lQry.ExecSQL;
 

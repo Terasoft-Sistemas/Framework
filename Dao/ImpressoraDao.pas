@@ -131,7 +131,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('ID').Value := vIConexao.Generetor('GEN_IMPRESSORA');
+    AImpressoraModel.ID := vIConexao.Generetor('GEN_IMPRESSORA');
     setParams(lQry, AImpressoraModel);
     lQry.Open;
 
@@ -154,7 +154,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('ID').Value   := ifThen(AImpressoraModel.ID   = '', Unassigned, AImpressoraModel.ID);
     setParams(lQry, AImpressoraModel);
     lQry.ExecSQL;
 

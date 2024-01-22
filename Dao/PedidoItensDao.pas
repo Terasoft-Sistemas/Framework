@@ -289,7 +289,6 @@ begin
   lSQL := vConstrutor.gerarUpdate('PEDIDOITENS', 'ID');
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := ifThen(pPedidoItensModel.ID = '', Unassigned, pPedidoItensModel.ID);
     setParams(lQry, pPedidoItensModel);
     lQry.ExecSQL;
     Result := pPedidoItensModel.ID;
@@ -606,7 +605,7 @@ var
   lProp   : TRttiProperty;
   i       : Integer;
 begin
-  lTabela := vConstrutor.getColumns('PEDIDOVENDA');
+  lTabela := vConstrutor.getColumns('PEDIDOITENS');
 
   lCtx := TRttiContext.Create;
   try

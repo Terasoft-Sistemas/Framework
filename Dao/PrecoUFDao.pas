@@ -85,7 +85,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('ID').Value := vIConexao.Generetor('GEN_PRECO_UF');
+    pPrecoUFModel.ID := vIConexao.Generetor('GEN_PRECO_UF');
     setParams(lQry, pPrecoUFModel);
     lQry.Open;
 
@@ -107,7 +107,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('ID').Value := ifThen(pPrecoUFModel.ID = '', Unassigned, pPrecoUFModel.ID);
     setParams(lQry, pPrecoUFModel);
     lQry.ExecSQL;
 

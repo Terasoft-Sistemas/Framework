@@ -95,7 +95,7 @@ begin
   try
     lSQL := vConstrutor.gerarInsert('PROMOCAO', 'ID', true);
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := vIConexao.Generetor('GEN_PROMOCAO');
+    pPromocaoModel.ID := vIConexao.Generetor('GEN_PROMOCAO');
     setParams(lQry, pPromocaoModel);
     lQry.Open;
 
@@ -118,7 +118,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := ifThen(pPromocaoModel.ID = '', Unassigned, pPromocaoModel.ID);
     setParams(lQry, pPromocaoModel);
     lQry.ExecSQL;
 

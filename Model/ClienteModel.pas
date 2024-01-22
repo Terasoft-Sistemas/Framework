@@ -952,9 +952,13 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
   end;
+
 implementation
+
 uses
-  ClienteDao, VariaveisGlobais, System.SysUtils;
+  ClienteDao,
+  System.SysUtils;
+
 { TClienteModel }
 function TClienteModel.carregaClasse(pId: String): TClienteModel;
 var
@@ -987,13 +991,13 @@ begin
   try
     lDataVencimento := lClienteDao.diasAtraso(pCodigoCliente);
 
-    if xConexao.DataServer < lDataVencimento then
+    if vIConexao.DataServer < lDataVencimento then
     begin
       Result := 0;
       exit;
     end;
 
-    Result := FormatFloat('####0', (xConexao.DataServer - lDataVencimento) );
+    Result := FormatFloat('####0', (vIConexao.DataServer - lDataVencimento) );
   finally
     lClienteDao.Free;
   end;

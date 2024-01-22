@@ -158,7 +158,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('NUMERO_CAI').Value := vIConexao.Generetor('GEN_CAIXA');
+    ACaixaModel.NUMERO_CAI := vIConexao.Generetor('GEN_CAIXA');
     setParams(lQry, ACaixaModel);
     lQry.Open;
 
@@ -181,7 +181,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('numero_cai').Value := ifThen(ACaixaModel.NUMERO_CAI = '', Unassigned, ACaixaModel.NUMERO_CAI);
     setParams(lQry, ACaixaModel);
     lQry.ExecSQL;
 

@@ -5,6 +5,11 @@ interface
     FireDAC.Comp.Client;
 
   type
+    TUsuario = record
+      ID   : string;
+      NOME : string;
+    end;
+
     IConexao = interface
       ['{66A98734-B254-4482-A4EA-8D3D1CD8C974}']
 
@@ -15,6 +20,10 @@ interface
       function getLojaConectada                        : String;
       function DataServer                              : TDate;
       function HoraServer                              : TTime;
+
+      function getUSer                                 : TUsuario;
+      function setUser(pUser : TUsuario)               : Boolean;
+
     end;
 
 implementation

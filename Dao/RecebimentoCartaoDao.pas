@@ -96,7 +96,7 @@ begin
   try
     lSQL := vConstrutor.gerarInsert('RECEBIMENTO_CARTAO', 'ID', true);
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := vIConexao.Generetor('GEN_RECEBIMENTO_CARTAO');
+    ARecebimentoCartaoModel.ID := vIConexao.Generetor('GEN_RECEBIMENTO_CARTAO');
     setParams(lQry, ARecebimentoCartaoModel);
     lQry.Open;
 
@@ -119,7 +119,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value   := ifThen(ARecebimentoCartaoModel.ID = '', Unassigned, ARecebimentoCartaoModel.ID);
     setParams(lQry, ARecebimentoCartaoModel);
     lQry.ExecSQL;
 

@@ -280,12 +280,12 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('numero_nf').Value  := vIConexao.Generetor('gen_nf');
+    pNFModel.numero_nf := vIConexao.Generetor('gen_nf');
 
     if pNFModel.MODELO = '65' then
-      lQry.ParamByName('numero_ecf').Value := vIConexao.Generetor('GEN_NFCe')
+      pNFModel.numero_ecf := vIConexao.Generetor('GEN_NFCe')
     else if pNFModel.MODELO = '55' then
-      lQry.ParamByName('numero_ecf').Value := vIConexao.Generetor('GEN_NF2');
+      pNFModel.numero_ecf := vIConexao.Generetor('GEN_NF2');
 
     setParams(lQry, pNFModel);
 
@@ -307,8 +307,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('numero_nf').Value  :=	pNFModel.NUMERO_NF;
-    lQry.ParamByName('numero_ecf').Value :=	pNFModel.NUMERO_ECF;
     setParams(lQry, pNFModel);
     lQry.ExecSQL;
 

@@ -437,7 +437,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('CODIGO_CLI').Value := vIConexao.Generetor('GEN_CLIENTE');
+    pClienteModel.CODIGO_CLI := vIConexao.Generetor('GEN_CLIENTE');
     setParams(lQry, pClienteModel);
     lQry.Open;
 
@@ -460,7 +460,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('CODIGO_CLI').Value   := ifThen(pClienteModel.CODIGO_CLI   = '', Unassigned, pClienteModel.CODIGO_CLI);
     setParams(lQry, pClienteModel);
     lQry.ExecSQL;
 

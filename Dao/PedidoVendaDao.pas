@@ -313,7 +313,6 @@ begin
   lSQL := vConstrutor.gerarUpdate('PEDIDOVENDA', 'NUMERO_PED');
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('numero_ped').Value := ifThen(pPedidoVendaModel.NUMERO_PED = '', Unassigned, pPedidoVendaModel.NUMERO_PED);
     setParams(lQry, pPedidoVendaModel);
     lQry.ExecSQL;
     Result := pPedidoVendaModel.ID;

@@ -148,7 +148,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := ifThen(ATabelaJurosModel.ID = '', Unassigned, ATabelaJurosModel.ID);
     setParams(lQry, ATabelaJurosModel);
     lQry.ExecSQL;
 

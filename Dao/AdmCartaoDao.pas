@@ -136,7 +136,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('ID').Value := vIConexao.Generetor('GEN_ADMCARTAO');
+    AAdmCartaoModel.ID := vIConexao.Generetor('GEN_ADMCARTAO');
     setParams(lQry, AAdmCartaoModel);
     lQry.Open;
 
@@ -159,7 +159,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value   := ifThen(AAdmCartaoModel.ID   = '', Unassigned, AAdmCartaoModel.ID);
     setParams(lQry, AAdmCartaoModel);
     lQry.ExecSQL;
 

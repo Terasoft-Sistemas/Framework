@@ -85,7 +85,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := ifThen(pPedidoWebModel.ID = '', Unassigned, pPedidoWebModel.ID);
     setParams(lQry, pPedidoWebModel);
     lQry.ExecSQL;
 

@@ -52,9 +52,9 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
 
-    function incluir(pPortdorModel: TPortadorModel): String;
-    function alterar(pPortdorModel: TPortadorModel): String;
-    function excluir(pPortdorModel: TPortadorModel): String;
+    function incluir(pPortadorModel: TPortadorModel): String;
+    function alterar(pPortadorModel: TPortadorModel): String;
+    function excluir(pPortadorModel: TPortadorModel): String;
 
     procedure obterLista;
     function carregaClasse(pId: String): TPortadorModel;
@@ -64,7 +64,7 @@ implementation
 uses
   System.Rtti;
 { TPortador }
-function TPortadorDao.alterar(pPortdorModel: TPortadorModel): String;
+function TPortadorDao.alterar(pPortadorModel: TPortadorModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -73,10 +73,9 @@ begin
   lSQL := vConstrutor.gerarUpdate('PORTADOR', 'CODIGO_PORT');
   try
     lQry.SQL.Add(lSQL);
-    setParams(lQry, pPortdorModel);
-    lQry.ParamByName('CODIGO_PORT').Value := ifThen(pPortdorModel.CODIGO_PORT = '', Unassigned, pPortdorModel.CODIGO_PORT);
+    setParams(lQry, pPortadorModel);
     lQry.ExecSQL;
-    Result := pPortdorModel.CODIGO_PORT;
+    Result := pPortadorModel.CODIGO_PORT;
   finally
     lSQL := '';
     lQry.Free;
@@ -140,21 +139,21 @@ destructor TPortadorDao.Destroy;
 begin
   inherited;
 end;
-function TPortadorDao.excluir(pPortdorModel: TPortadorModel): String;
+function TPortadorDao.excluir(pPortadorModel: TPortadorModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
   try
-   lQry.ExecSQL('delete from portador where CODIGO_PORT = :CODIGO_PORT',[pPortdorModel.CODIGO_PORT]);
+   lQry.ExecSQL('delete from portador where CODIGO_PORT = :CODIGO_PORT',[pPortadorModel.CODIGO_PORT]);
    lQry.ExecSQL;
-   Result := pPortdorModel.CODIGO_PORT;
+   Result := pPortadorModel.CODIGO_PORT;
   finally
     lQry.Free;
   end;
 end;
 
-function TPortadorDao.incluir(pPortdorModel: TPortadorModel): String;
+function TPortadorDao.incluir(pPortadorModel: TPortadorModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -163,7 +162,8 @@ begin
   lSQL := vConstrutor.gerarInsert('PORTADOR', 'CODIGO_PORT');
   try
     lQry.SQL.Add(lSQL);
-    setParams(lQry, pPortdorModel);
+    pPortadorModel.CODIGO_PORT := vIConexao.Generetor('GEN_PORTADOR');
+    setParams(lQry, pPortadorModel);
     lQry.Open;
     Result := lQry.FieldByName('CODIGO_PORT').AsString;
   finally

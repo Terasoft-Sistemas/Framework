@@ -160,7 +160,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('NUMERO_COR').Value := vIConexao.Generetor('GEN_CONTACORRENTE');
+    AContaCorrenteModel.NUMERO_COR := vIConexao.Generetor('GEN_CONTACORRENTE');
     setParams(lQry, AContaCorrenteModel);
     lQry.Open;
 
@@ -183,7 +183,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('NUMERO_COR').Value := ifThen(AContaCorrenteModel.DATA_COR = '', Unassigned, AContaCorrenteModel.DATA_COR);
     setParams(lQry, AContaCorrenteModel);
     lQry.ExecSQL;
 

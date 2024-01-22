@@ -148,7 +148,7 @@ type
 
 implementation
 
-uses UsuarioDao, Conexao, VariaveisGlobais;
+uses UsuarioDao;
 
 { TUsuarioModel }
 
@@ -223,10 +223,8 @@ begin
 
     if lUsuarioDao.Status = 'S' then
     begin
-      FID        := lUsuarioDao.ID;
+      FID            := lUsuarioDao.ID;
       FPERFIL_NEW_ID := lUsuarioDao.Perfil;
-
-      xConexao.setContextModoSistema('PAF_NFCE');
 
       Result := true;
     end else

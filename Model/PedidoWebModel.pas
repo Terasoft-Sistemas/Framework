@@ -232,7 +232,7 @@ type
     procedure SetGERENTE_ID(const Value: Variant);
     procedure SetTIPO_COMISSAO(const Value: Variant);
   public
-      procedure AfterConstruction; override;
+    procedure AfterConstruction; override;
     property ID: Variant read FID write SetID;
     property LOJA: Variant read FLOJA write SetLOJA;
     property DATAHORA: Variant read FDATAHORA write SetDATAHORA;
@@ -364,7 +364,7 @@ uses
   PedidoItensModel,
   System.SysUtils,
   FuncionarioModel,
-  VariaveisGlobais, System.StrUtils;
+  System.StrUtils;
 
 { TPedidoWebModel }
 
@@ -405,9 +405,9 @@ begin
     lPedidoWebModel := lPedidoWebModel.carregaClasse(pIdVendaAssistida.ToString);
 
     lPedidoVendaModel.Acao                 := tacIncluir;
-    lPedidoVendaModel.LOJA                 := xEmpresaLoja;
-    lPedidoVendaModel.DATA_PED             := DateToStr(xConexao.DataServer);
-    lPedidoVendaModel.HORA_PED             := TimeToStr(xConexao.HoraServer);
+    lPedidoVendaModel.LOJA                 := lPedidoWebModel.LOJA;
+    lPedidoVendaModel.DATA_PED             := DateToStr(vIConexao.DataServer);
+    lPedidoVendaModel.HORA_PED             := TimeToStr(vIConexao.HoraServer);
     lPedidoVendaModel.PRIMEIROVENC_PED     := lPedidoWebModel.PRIMEIRO_VENCIMENTO;
     lPedidoVendaModel.ACRES_PED            := lPedidoWebModel.ACRESCIMO;
     lPedidoVendaModel.DESC_PED             := lPedidoWebModel.VALOR_CUPOM_DESCONTO;
@@ -441,8 +441,8 @@ begin
     lPedidoVendaModel.ENTREGA_CEP          := lPedidoWebModel.ENTREGA_CEP;
     lPedidoVendaModel.ENTREGA_COMPLEMENTO  := lPedidoWebModel.ENTREGA_COMPLEMENTO;
     lPedidoVendaModel.MONTAGEM_DATA        := lPedidoWebModel.MONTAGEM_DATA;
-    lPedidoVendaModel.USUARIO_PED          := VariaveisGlobais.xUsuarioID;
-    lPedidoVendaModel.IDUsuario            := VariaveisGlobais.xUsuarioID;
+    lPedidoVendaModel.USUARIO_PED          := self.FIDUsuario;
+    lPedidoVendaModel.IDUsuario            := self.FIDUsuario;
     lPedidoVendaModel.TIPO_COMISSAO        := self.TIPO_COMISSAO;
     lPedidoVendaModel.GERENTE_ID           := self.GERENTE_ID;
 
@@ -461,11 +461,11 @@ begin
     for lPedidoWebItensModel in lPedidoWebItensModel.PedidoWebItenssLista do begin
       inc(lItem);
 
-      lPedidoItensModel.PedidoItenssLista.Add(TPedidoItensModel.Create(xConexaoLocal));
+      lPedidoItensModel.PedidoItenssLista.Add(TPedidoItensModel.Create(vIConexao));
 
       lPedidoItensModel.PedidoItenssLista[lIndex].NUMERO_PED             := lPedido;
       lPedidoItensModel.PedidoItenssLista[lIndex].CODIGO_CLI             := lPedidoWebModel.CLIENTE_ID;
-      lPedidoItensModel.PedidoItenssLista[lIndex].LOJA                   := VariaveisGlobais.xEmpresaLoja;
+      lPedidoItensModel.PedidoItenssLista[lIndex].LOJA                   := lPedidoWebModel.LOJA;
       lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_PED         := lPedidoWebItensModel.QUANTIDADE;
       lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_NEW         := lPedidoWebItensModel.QUANTIDADE;
       lPedidoItensModel.PedidoItenssLista[lIndex].WEB_PEDIDOITENS_ID     := lPedidoWebItensModel.ID;

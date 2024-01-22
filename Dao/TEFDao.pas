@@ -159,7 +159,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := vIConexao.Generetor('GEN_TEF');
+    ATEFModel.id := vIConexao.Generetor('GEN_TEF');
     setParams(lQry, ATEFModel);
     lQry.Open;
 
@@ -182,7 +182,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('id').Value := ifThen(ATEFModel.ID = '', Unassigned, ATEFModel.ID);
     setParams(lQry, ATEFModel);
     lQry.ExecSQL;
 

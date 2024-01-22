@@ -166,7 +166,7 @@ begin
   try
 
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('FATURA_REC').Value := vIConexao.Generetor('GEN_CRECEBER');
+    AContasReceberModel.FATURA_REC := vIConexao.Generetor('GEN_CRECEBER');
     setParams(lQry, AContasReceberModel);
     lQry.Open;
 
@@ -187,7 +187,6 @@ begin
   lSQL := vConstrutor.gerarUpdate('CONTASRECEBER','FATURA_REC');
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('fatura_rec').Value  := ifThen(AContasReceberModel.FATURA_REC   = '', Unassigned, AContasReceberModel.FATURA_REC);
     setParams(lQry, AContasReceberModel);
     lQry.ExecSQL;
     Result := AContasReceberModel.FATURA_REC;

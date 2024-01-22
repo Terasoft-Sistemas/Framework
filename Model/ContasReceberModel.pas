@@ -70,6 +70,7 @@ type
     FVALOR_PAGO: Variant;
     FRECEBIMENTO_CONCLUIDO: Boolean;
     FACRESCIMO: Variant;
+    FIDUsuarioOperacao: String;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetContasRecebersLista(const Value: TObjectList<TContasReceberModel>);
@@ -125,6 +126,7 @@ type
     procedure SetRECEBIMENTO_CONCLUIDO(const Value: Boolean);
     procedure validaExclusao;
     procedure SetACRESCIMO(const Value: Variant);
+    procedure SetIDUsuarioOperacao(const Value: String);
   public
     property FATURA_REC: Variant read FFATURA_REC write SetFATURA_REC;
     property CODIGO_CLI: Variant read FCODIGO_CLI write SetCODIGO_CLI;
@@ -192,6 +194,7 @@ type
     property IDPedidoView: String read FIDPedidoView write SetIDPedidoView;
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
     property IDAdmCartao: String read FIDAdmCartao write SetIDAdmCartao;
+    property IDUsuarioOperacao: String read FIDUsuarioOperacao write SetIDUsuarioOperacao;
   end;
 
 implementation
@@ -262,6 +265,8 @@ begin
 
     for lContasReceberItensModel in lContasReceberItensModel.ContasReceberItenssLista do begin
       lContasReceberitensAtualizar := lContasReceberitensAtualizar.carregaClasse(VarToStr(lContasReceberItensModel.ID));
+
+      lContasReceberitensAtualizar.IDUsuarioOperacao := self.IDUsuarioOperacao;
 
       if self.FIDAdmCartao <> '' then begin
         lContasReceberitensAtualizar.IDAdmCartao    := self.FIDAdmCartao;
@@ -555,6 +560,11 @@ end;
 procedure TContasReceberModel.SetIDRecordView(const Value: String);
 begin
   FIDRecordView := Value;
+end;
+
+procedure TContasReceberModel.SetIDUsuarioOperacao(const Value: String);
+begin
+  FIDUsuarioOperacao := Value;
 end;
 
 procedure TContasReceberModel.SetINDICE_JUROS_ID(const Value: Variant);

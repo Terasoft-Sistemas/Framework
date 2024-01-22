@@ -1,5 +1,7 @@
 ﻿unit PedidoItensModel;
+
 interface
+
 uses
   Terasoft.Types,
   System.Generics.Collections,
@@ -460,8 +462,13 @@ type
 implementation
 
 uses
-  PedidoItensDao, CalcularImpostosModel, VariaveisGlobais, System.SysUtils,
-  MovimentoModel, PedidoVendaModel, ProdutosModel;
+  PedidoItensDao,
+  CalcularImpostosModel,
+  System.SysUtils,
+  MovimentoModel,
+  PedidoVendaModel,
+  ProdutosModel,
+  UsuarioModel;
 
 { TPedidoItensModel }
 
@@ -469,9 +476,12 @@ function TPedidoItensModel.cancelarEstoque: String;
 var
   lMovimentoModel, lModel: TMovimentoModel;
   lProdutosModel: TProdutosModel;
+  lUsuarioModel : TUsuarioModel;
 begin
   lMovimentoModel := TMovimentoModel.Create(vIConexao);
   lProdutosModel  := TProdutosModel.Create(vIConexao);
+  lUsuarioModel   := TUsuarioModel.Create(vIConexao);
+
   try
     lMovimentoModel.WhereView := ' and movimento.status <> ''X''                 '+
                                  ' and movimento.tipo_doc = ''P''                '+
@@ -484,7 +494,7 @@ begin
     begin
       lModel.Acao := tacAlterar;
       lModel.STATUS  := 'X';
-      lModel.OBS_MOV := 'Alt.Ped.Usuário: '+ VariaveisGlobais.xUsuarioNome + DateToStr(xConexao.DataServer) + ' ' + TimeToStr(xConexao.HoraServer);
+      lModel.OBS_MOV := 'Alt.Ped.Usuário: '+ lUsuarioModel.nomeUsuario(self.FIDUsuario) + DateToStr(vIConexao.DataServer) + ' ' + TimeToStr(vIConexao.HoraServer);
       lModel.Salvar;
 
       lProdutosModel.adicionarSaldo(lModel.CODIGO_PRO, lModel.QUANTIDADE_MOV);
@@ -533,8 +543,8 @@ begin
     lMovimentoModel.CODIGO_FOR      := self.FCODIGO_CLI;
     lMovimentoModel.OBS_MOV         := 'Venda N: ' + self.FNUMERO_PED;
     lMovimentoModel.TIPO_DOC        := 'P';
-    lMovimentoModel.DATA_MOV        := DateToStr(xConexao.DataServer);
-    lMovimentoModel.DATA_DOC        := DateToStr(xConexao.DataServer);
+    lMovimentoModel.DATA_MOV        := DateToStr(vIConexao.DataServer);
+    lMovimentoModel.DATA_DOC        := DateToStr(vIConexao.DataServer);
     lMovimentoModel.QUANTIDADE_MOV  := self.FQUANTIDADE_PED;
     lMovimentoModel.VALOR_MOV       := self.FVALORUNITARIO_PED;
     lMovimentoModel.CUSTO_ATUAL     := self.FVLRCUSTO_PRO;

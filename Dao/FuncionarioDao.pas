@@ -84,7 +84,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('CODIGO_FUN').Value := AFuncionarioModel.CODIGO_FUN;
     setParams(lQry, AFuncionarioModel);
     lQry.ExecSQL;
 

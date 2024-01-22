@@ -101,7 +101,6 @@ begin
   try
     lQry.SQL.Add(lSQL);
     setParams(lQry, pPrecoClienteModel);
-    lQry.ParamByName('id').Value := ifThen(pPrecoClienteModel.ID = '', Unassigned, pPrecoClienteModel.ID);
     lQry.ExecSQL;
     Result := pPrecoClienteModel.ID;
   finally

@@ -368,7 +368,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('CODIGO_PRO').Value := vIConexao.Generetor('GEN_PRODUTO');
+    pProdutosModel.CODIGO_PRO := vIConexao.Generetor('GEN_PRODUTO');
     setParams(lQry, pProdutosModel);
     lQry.Open;
 
@@ -409,7 +409,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('CODIGO_PRO').Value := ifThen(pProdutosModel.CODIGO_PRO = '', Unassigned, pProdutosModel.CODIGO_PRO);
     setParams(lQry, pProdutosModel);
     lQry.ExecSQL;
 

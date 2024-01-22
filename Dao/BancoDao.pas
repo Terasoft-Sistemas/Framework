@@ -97,7 +97,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('NUMERO_BAN').Value := vIconexao.Generetor('GEN_BANCO');
+    ABancoModel.NUMERO_BAN := vIconexao.Generetor('GEN_BANCO');
     setParams(lQry, ABancoModel);
     lQry.Open;
 
@@ -122,7 +122,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('NUMERO_BAN').Value := ABancoModel.numero_ban;
     setParams(lQry, ABancoModel);
     lQry.ExecSQL;
 

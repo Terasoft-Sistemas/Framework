@@ -64,6 +64,7 @@ type
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property IDContasReceberView: String read FIDContasReceberView write SetIDContasReceberView;
     property ParcelaView: String read FParcelaView write SetParcelaView;
+
     function incluir(AContasReceberItensModel: TContasReceberItensModel): String;
     function alterar(AContasReceberItensModel: TContasReceberItensModel): String;
     function excluir(AContasReceberItensModel: TContasReceberItensModel): String;
@@ -163,7 +164,7 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := vConstrutor.gerarInsert('CONTASRECEBERITENS','FATURA_REC');
+  lSQL := vConstrutor.gerarInsert('CONTASRECEBERITENS','');
 
   try
     lQry.SQL.Add(lSQL);
@@ -184,7 +185,7 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := vConstrutor.gerarUpdate('CONTASRECEBERITENS','FATURA_REC');
+  lSQL := vConstrutor.gerarUpdate('CONTASRECEBERITENS','ID');
   try
     lQry.SQL.Add(lSQL);
     setParams(lQry, AContasReceberItensModel);

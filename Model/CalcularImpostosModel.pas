@@ -246,7 +246,6 @@ implementation
 uses
   Terasoft.Utils,
   CalcularImpostosDao,
-  VariaveisGlobais,
   System.SysUtils;
 
 { TCalcularImpostosModel }
@@ -314,7 +313,7 @@ begin
     lMotor.NotaFiscal.Destinatario.UFSigla                     := Self.FDESTINATARIO_UF;
     lMotor.TipoOperacao                                        := lMotorUtils.SelecionaOperacaiDestino(Self.EMITENTE_UF,Self.DESTINATARIO_UF);
 
-    lMotor.NotaFiscal.Emitente.RegimeTributario                := lMotorUtils.SelecionaRegime(VariaveisGlobais.xEmpresaRegimeTriburario);
+    lMotor.NotaFiscal.Emitente.RegimeTributario                := lMotorUtils.SelecionaRegime(FREGIME_TRIBUTARIO);
     lMotor.NotaFiscal.Emitente.ContribuinteIPI                 := lMotorUtils.SelecionaContriIPIRegime('0');
     lMotor.NotaFiscal.Destinatario.ContribuinteICMS            := lMotorUtils.SelecionaContriICMS('1');
     lMotor.NotaFiscal.Produto.TipoVenda                        := lMotorUtils.SelecionaTipoVenda('Revenda');

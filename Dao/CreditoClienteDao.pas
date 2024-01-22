@@ -184,7 +184,6 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('ID').Value   := ifThen(ACreditoClienteModel.ID   = '', Unassigned, ACreditoClienteModel.ID);
     setParams(lQry, ACreditoClienteModel);
     lQry.ExecSQL;
 
