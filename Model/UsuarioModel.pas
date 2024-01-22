@@ -52,6 +52,7 @@ type
     FADM_PEDIDO_WEB: Variant;
     FMENU_OCULTO_WEB: Variant;
     FDATA_INC: Variant;
+    FPORCENTAGEM_ZOOM_TELA: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCAIXA(const Value: Variant);
     procedure SetCountView(const Value: String);
@@ -89,6 +90,7 @@ type
     procedure SetUSUARIO_WINDOWS(const Value: Variant);
     procedure SetUUID(const Value: Variant);
     procedure SetUUIDALTERACAO(const Value: Variant);
+    procedure SetPORCENTAGEM_ZOOM_TELA(const Value: Variant);
 
   public
 
@@ -121,7 +123,7 @@ type
     property SENHA_WINDOWS       : Variant read FSENHA_WINDOWS write SetSENHA_WINDOWS;
     property URL_WINDOWS         : Variant read FURL_WINDOWS write SetURL_WINDOWS;
     property PAGINA_INICIAL_WEB  : Variant read FPAGINA_INICIAL_WEB write SetPAGINA_INICIAL_WEB;
-
+    property PORCENTAGEM_ZOOM_TELA : Variant read FPORCENTAGEM_ZOOM_TELA write SetPORCENTAGEM_ZOOM_TELA;
 
     property Acao          : TAcao                      read FAcao          write SetAcao;
     property UsuariosLista : TObjectList<TUsuarioModel> read FUsuariosLista write FUsuariosLista;
@@ -380,6 +382,11 @@ end;
 procedure TUsuarioModel.SetPERFIL_NEW_ID(const Value: Variant);
 begin
   FPERFIL_NEW_ID := Value;
+end;
+
+procedure TUsuarioModel.SetPORCENTAGEM_ZOOM_TELA(const Value: Variant);
+begin
+  FPORCENTAGEM_ZOOM_TELA := Value;
 end;
 
 procedure TUsuarioModel.SetPRECO_ID(const Value: Variant);
