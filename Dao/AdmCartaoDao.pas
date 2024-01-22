@@ -18,7 +18,7 @@ type
   TAdmCartaoDao = class
 
   private
-    vIConexao  : IConexao;
+    vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
     FAdmCartaosLista: TObjectList<TAdmCartaoModel>;

@@ -9,14 +9,15 @@ uses
 type
   TRecebimentoContasReceber = class
     private
-    FVALOR: Variant;
-    FTIPO: Variant;
-    FORIGEM: Variant;
-    FID: Variant;
-    procedure SetTIPO(const Value: Variant);
-    procedure SetVALOR(const Value: Variant);
-    procedure SetORIGEM(const Value: Variant);
-    procedure SetID(const Value: Variant);
+      FVALOR: Variant;
+      FTIPO: Variant;
+      FORIGEM: Variant;
+      FID: Variant;
+      procedure SetTIPO(const Value: Variant);
+      procedure SetVALOR(const Value: Variant);
+      procedure SetORIGEM(const Value: Variant);
+      procedure SetID(const Value: Variant);
+
     public
       property ID: Variant read FID write SetID;
       property TIPO: Variant read FTIPO write SetTIPO;
@@ -141,8 +142,9 @@ type
     procedure SetPEDIDO_REC(const Value: Variant);
     procedure SetCLIENTE_NOME(const Value: Variant);
     procedure SetRecebimentoContasReceberLista(
-      const Value: TObjectList<TRecebimentoContasReceber>);
+    const Value: TObjectList<TRecebimentoContasReceber>);
     procedure SetParcelaView(const Value: String);
+
   public
     property ID: Variant read FID write SetID;
     property FATURA_REC: Variant read FFATURA_REC write SetFATURA_REC;
@@ -193,7 +195,6 @@ type
 
     procedure obterLista;
     procedure obterRecebimentoContasReceber;
-    procedure excluirBaixa;
 
     function carregaClasse(pId: String): TContasReceberItensModel;
     function carregaClasseIndexOf(pIndex: Integer): TContasReceberItensModel;
@@ -201,6 +202,7 @@ type
     function obterContaCliente(pContaClienteParametros: TContaClienteParametros): TListaContaClienteRetorno;
 
     procedure gerarVendaCartao;
+    procedure excluirBaixa;
 
     function lancarContaCorrente(pValor, pPortador, pConta, pContaCorrente, pHistorico, pTipo: String): String;
 
@@ -346,7 +348,7 @@ begin
       if lBaixa > 0 then
       begin
         lCreditoClienteUsoModel.Acao := tacIncluir;
-        lCreditoClienteUsoModel.USUARIO_ID           := self.FIDUsuarioOperacao;
+        lCreditoClienteUsoModel.USUARIO_ID           := self.vIConexao.getUSer.ID;
         lCreditoClienteUsoModel.DATAHORA             := DateToStr(vIConexao.DataServer) + ' ' + TimeToStr(vIConexao.HoraServer);
         lCreditoClienteUsoModel.CREDITO_CLIENTE_ID   := lCreditos.id;
         lCreditoClienteUsoModel.DATA                 := DateToStr(vIConexao.DataServer);
@@ -500,7 +502,7 @@ begin
     lContasReceberModel.VALOR_REC         := pValor;
     lContasReceberModel.SITUACAO_REC      := 'A';
     lContasReceberModel.VENDEDOR_REC      := lContasReceberModel.VENDEDOR_REC;
-    lContasReceberModel.USUARIO_REC       := self.IDUsuarioOperacao;
+    lContasReceberModel.USUARIO_REC       := self.vIConexao.getUSer.ID;
     lContasReceberModel.TIPO_REC          := 'R';
     lContasReceberModel.CODIGO_POR        := pPortador;
     lContasReceberModel.JUROS_FIXO        := lContasReceberModel.JUROS_FIXO;
@@ -599,7 +601,7 @@ begin
   try
     lContaCorrenteModel.Acao           := tacIncluir;
     lContaCorrenteModel.CONCILIADO_COR := '.';
-    lContaCorrenteModel.USUARIO_COR    := self.IDUsuarioOperacao;
+    lContaCorrenteModel.USUARIO_COR    := self.vIConexao.getUSer.ID;
     lContaCorrenteModel.CENTRO_CUSTO   := cCENTRO_CUSTO_PADRAO;
     lContaCorrenteModel.DR             := 'N';
     lContaCorrenteModel.DATA_COR       := DateToStr(vIConexao.DataServer);

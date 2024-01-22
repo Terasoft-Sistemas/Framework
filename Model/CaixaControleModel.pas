@@ -209,7 +209,7 @@ begin
   self.Acao    := tacIncluir;
   self.DATA    := DateToStr(vIConexao.DataServer);
   self.STATUS  := 'I';
-  self.USUARIO := pUsuario;
+  self.USUARIO := self.vIConexao.getUSer.ID;
   self.HORA    := TimeToStr(vIConexao.HoraServer);
   self.Salvar;
 
@@ -221,9 +221,9 @@ begin
 
     lCaixaModel.CODIGO_CTA        := '500000';
     lCaixaModel.DATA_CAI          := DateToStr(vIConexao.DataServer);
-    lCaixaModel.HISTORICO_CAI     := 'Inicialização '+ lNomeUsuario +' '+ TimeToStr(vIConexao.HoraServer);
+    lCaixaModel.HISTORICO_CAI     := 'Inicialização '+ self.vIConexao.getUSer.NOME +' '+ TimeToStr(vIConexao.HoraServer);
     lCaixaModel.VALOR_CAI         := FloatToStr(pValor);
-    lCaixaModel.USUARIO_CAI       := pUsuario;
+    lCaixaModel.USUARIO_CAI       := self.vIConexao.getUSer.ID;
     lCaixaModel.TIPO_CAI          := 'C';
     lCaixaModel.CLIENTE_CAI       := '';
     lCaixaModel.NUMERO_PED        := '999999';
@@ -237,7 +237,7 @@ begin
     lCaixaModel.Acao := tacIncluir;
     lCaixaModel.Salvar;
 
-    lCaixaModel.HISTORICO_CAI     := 'Transferencia '+ lNomeUsuario +' '+ TimeToStr(vIConexao.HoraServer);
+    lCaixaModel.HISTORICO_CAI     := 'Transferencia '+ self.vIConexao.getUSer.NOME +' '+ TimeToStr(vIConexao.HoraServer);
     lCaixaModel.USUARIO_CAI       := '000000';
     lCaixaModel.TIPO_CAI          := 'D';
 
@@ -307,9 +307,9 @@ begin
   try
     lCaixaModel.CODIGO_CTA          := '400000';
     lCaixaModel.DATA_CAI            := DateToStr(vIConexao.DataServer);
-    lCaixaModel.HISTORICO_CAI       := 'Sangria '+ lUsuarioModel.nomeUsuario(pUsuario) + ' ' + TimeToStr(vIConexao.HoraServer);
+    lCaixaModel.HISTORICO_CAI       := 'Sangria '+ self.vIConexao.getUSer.NOME + ' ' + TimeToStr(vIConexao.HoraServer);
     lCaixaModel.VALOR_CAI           := FloatToStr(pValor);
-    lCaixaModel.USUARIO_CAI         := pUsuario;
+    lCaixaModel.USUARIO_CAI         := self.vIConexao.getUSer.ID;
     lCaixaModel.TIPO_CAI            := 'D';
     lCaixaModel.CLIENTE_CAI         := '';
     lCaixaModel.NUMERO_PED          := '999999';
@@ -451,9 +451,9 @@ begin
   try
     lCaixaModel.CODIGO_CTA          := '400000';
     lCaixaModel.DATA_CAI            := DateToStr(vIConexao.DataServer);
-    lCaixaModel.HISTORICO_CAI       := 'Suprimento '+ lUsuarioModel.nomeUsuario(pUsuario) + ' ' + TimeToStr(vIConexao.HoraServer);
+    lCaixaModel.HISTORICO_CAI       := 'Suprimento '+ self.vIConexao.getUSer.NOME + ' ' + TimeToStr(vIConexao.HoraServer);
     lCaixaModel.VALOR_CAI           := FloatToStr(pValor);
-    lCaixaModel.USUARIO_CAI         := pUsuario;
+    lCaixaModel.USUARIO_CAI         := self.vIConexao.getUSer.ID;
     lCaixaModel.TIPO_CAI            := 'C';
     lCaixaModel.CLIENTE_CAI         := '';
     lCaixaModel.NUMERO_PED          := '999999';
