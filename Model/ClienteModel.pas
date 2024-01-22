@@ -1009,7 +1009,7 @@ var
 begin
   lClienteDao := TClienteDao.Create(vIConexao);
   try
-    Result := lClienteDao.nomeCliente(pId);
+    Result    := lClienteDao.nomeCliente(pId);
   finally
     lClienteDao.Free;
   end;
@@ -1029,8 +1029,8 @@ begin
     lClienteLista.LengthPageView  := FLengthPageView;
     lClienteLista.IDRecordView    := FIDRecordView;
     lClienteLista.obterLista;
-    FTotalRecords  := lClienteLista.TotalRecords;
-    FClientesLista := lClienteLista.ClientesLista;
+    FTotalRecords                 := lClienteLista.TotalRecords;
+    FClientesLista                := lClienteLista.ClientesLista;
   finally
     lClienteLista.Free;
   end;
@@ -1041,7 +1041,7 @@ var
   lClienteDao: TClienteDao;
 begin
   lClienteDao := TClienteDao.Create(vIConexao);
-  Result := '';
+  Result      := '';
   try
     case FAcao of
       Terasoft.Types.tacIncluir: Result := lClienteDao.incluir(Self);

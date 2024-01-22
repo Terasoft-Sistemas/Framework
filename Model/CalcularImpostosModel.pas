@@ -505,9 +505,6 @@ begin
   end;
 end;
 
-
-
-
 procedure TCalcularImpostosModel.SetABATEDESCONTO_IPI(const Value: String);
 begin
   FABATEDESCONTO_IPI := Value;

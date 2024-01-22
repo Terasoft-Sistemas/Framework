@@ -441,8 +441,8 @@ begin
     lPedidoVendaModel.ENTREGA_CEP          := lPedidoWebModel.ENTREGA_CEP;
     lPedidoVendaModel.ENTREGA_COMPLEMENTO  := lPedidoWebModel.ENTREGA_COMPLEMENTO;
     lPedidoVendaModel.MONTAGEM_DATA        := lPedidoWebModel.MONTAGEM_DATA;
-    lPedidoVendaModel.USUARIO_PED          := self.FIDUsuario;
-    lPedidoVendaModel.IDUsuario            := self.FIDUsuario;
+    lPedidoVendaModel.USUARIO_PED          := self.vIConexao.getUSer.ID;
+    lPedidoVendaModel.IDUsuario            := self.vIConexao.getUSer.ID;
     lPedidoVendaModel.TIPO_COMISSAO        := self.TIPO_COMISSAO;
     lPedidoVendaModel.GERENTE_ID           := self.GERENTE_ID;
 

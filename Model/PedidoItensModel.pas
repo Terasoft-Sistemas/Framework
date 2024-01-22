@@ -494,7 +494,7 @@ begin
     begin
       lModel.Acao := tacAlterar;
       lModel.STATUS  := 'X';
-      lModel.OBS_MOV := 'Alt.Ped.Usuário: '+ lUsuarioModel.nomeUsuario(self.FIDUsuario) + DateToStr(vIConexao.DataServer) + ' ' + TimeToStr(vIConexao.HoraServer);
+      lModel.OBS_MOV := 'Alt.Ped.Usuário: '+ lUsuarioModel.nomeUsuario(self.vIConexao.getUSer.NOME) + DateToStr(vIConexao.DataServer) + ' ' + TimeToStr(vIConexao.HoraServer);
       lModel.Salvar;
 
       lProdutosModel.adicionarSaldo(lModel.CODIGO_PRO, lModel.QUANTIDADE_MOV);

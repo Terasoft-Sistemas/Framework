@@ -266,7 +266,7 @@ begin
     for lContasReceberItensModel in lContasReceberItensModel.ContasReceberItenssLista do begin
       lContasReceberitensAtualizar := lContasReceberitensAtualizar.carregaClasse(VarToStr(lContasReceberItensModel.ID));
 
-      lContasReceberitensAtualizar.IDUsuarioOperacao := self.IDUsuarioOperacao;
+      lContasReceberitensAtualizar.IDUsuarioOperacao := self.vIConexao.getUSer.ID;
 
       if self.FIDAdmCartao <> '' then begin
         lContasReceberitensAtualizar.IDAdmCartao    := self.FIDAdmCartao;

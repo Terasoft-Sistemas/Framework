@@ -662,7 +662,7 @@ begin
     lContasReceberModel.ACRESCIMO     := pAcrescimo;
     lContasReceberModel.SITUACAO_REC  := 'A';
     lContasReceberModel.VENDEDOR_REC  := self.FCODIGO_VEN;
-    lContasReceberModel.USUARIO_REC   := VariaveisGlobais.xUsuarioID;
+    lContasReceberModel.USUARIO_REC   := self.vIConexao.getUSer.ID;
     lContasReceberModel.OBS_REC       := 'Venda: '+self.FNUMERO_PED;
     lContasReceberModel.TIPO_REC      := 'N';
     lContasReceberModel.CODIGO_POR    := pPortador;
@@ -768,7 +768,7 @@ begin
     lNFModel.VALOR_SUFRAMA         := FloatToStr(0);
     lNFModel.VFCPSTRET             := FloatToStr(0);
     lNFModel.VFCPUFDEST            := FloatToStr(0);
-    lNFModel.USUARIO_NF            := VariaveisGlobais.xUsuarioID;
+    lNFModel.USUARIO_NF            := self.vIConexao.getUSer.ID;
     lNFModel.LOJA                  := self.LOJA;
     lNFModel.TIPO_FRETE            := self.FTIPO_FRETE;
     lNFModel.DATA_NF               := DateToStr(xConexao.DataServer);

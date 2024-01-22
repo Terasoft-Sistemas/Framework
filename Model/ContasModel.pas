@@ -158,8 +158,8 @@ begin
 
     lContasLista.obterLista;
 
-    FTotalRecords  := lContasLista.TotalRecords;
-    FContassLista := lContasLista.ContassLista;
+    FTotalRecords   := lContasLista.TotalRecords;
+    FContassLista   := lContasLista.ContassLista;
 
   finally
     lContasLista.Free;

@@ -461,7 +461,6 @@ type
     property  ENTREGA_COD_MUNICIPIO        :Variant read FENTREGA_COD_MUNICIPIO write SetENTREGA_COD_MUNICIPIO;
     property  WEB_PEDIDO_ID                :Variant read FWEB_PEDIDO_ID write SetWEB_PEDIDO_ID;
     property  TRANSFERENCIA_ID             :Variant read FTRANSFERENCIA_ID write SetTRANSFERENCIA_ID;
-
     property  CLIENTE_NF                   :Variant read FCLIENTE_NF write SetCLIENTE_NF;
 
     property NFLista: TObjectList<TNFModel> read FNFLista write SetNFLista;
