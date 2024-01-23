@@ -3,8 +3,7 @@ unit PCGModel;
 interface
 
 uses
-  Terasoft.Enumerado,
-  Terasoft.Web.Types,
+  Terasoft.Types,
   PCGDao,
   FireDAC.Comp.Client,
   Interfaces.Conexao;

@@ -3,26 +3,25 @@ unit FornecedorDao;
 interface
 
 uses
-  Conexao,
-  SistemaControl, 
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Variants,
-  Terasoft.Web.Types,
+  Terasoft.Types,
   Terasoft.Framework.ListaSimples.Impl,
   Terasoft.Framework.ListaSimples,
   Terasoft.Framework.SimpleTypes,
-  Terasoft.FuncoesTexto;
+  Terasoft.FuncoesTexto,
+  Interfaces.Conexao;
 
 type
   TFornecedorDao = class
 
   private
-
+    vIConexao : IConexao;
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function ObterLista(pFornecedor_Parametros: TFornecedor_Parametros): TFDMemTable;
@@ -36,9 +35,9 @@ uses
 
 { TPCG }
 
-constructor TFornecedorDao.Create;
+constructor TFornecedorDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TFornecedorDao.Destroy;
@@ -50,12 +49,9 @@ function TFornecedorDao.ObterLista(pFornecedor_Parametros: TFornecedor_Parametro
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
   lMemTable: TFDMemTable;
 begin
   try
-    lConexao := TConexao.Create;
-
     lMemTable := TFDMemTable.Create(nil);
 
     lSQL := 'Select CODIGO_FOR,       ' + #13 +
@@ -76,7 +72,7 @@ begin
     lMemTable.FieldDefs.Add('RAZAO', ftString, 40);
     lMemTable.CreateDataSet;
 
-    lQry := lConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
     lQry.Open(lSQL);
 
     lQry.First;
@@ -96,7 +92,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 

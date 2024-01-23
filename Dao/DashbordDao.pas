@@ -4,14 +4,12 @@ interface
 
 uses
   DashbordModel,
-  Conexao,
-  SistemaControl,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Variants,
   Terasoft.Utils,
-  Terasoft.Web.Types,
+  Terasoft.Types,
   Terasoft.Framework.ListaSimples.Impl,
   Terasoft.Framework.ListaSimples,
   Terasoft.Framework.SimpleTypes,
@@ -61,8 +59,6 @@ function TDashbordDao.ObterQuery1_Totalizador(pDashbord_Parametros: TDashbord_Pa
 var
   lQry: TFDQuery;
   lSQL:String;
-  lListaLojas: TLista_Lojas_Dados;
-  lLojas_Parametros: TLojas_Parametros;
   lLojasModel,
   lLojas_Dados: TLojasModel;
   MemTable: TFDMemTable;
@@ -289,8 +285,6 @@ function TDashbordDao.ObterQuery2_VendaPorDia(pDashbord_Parametros: TDashbord_Pa
 var
   lQry: TFDQuery;
   lSQL:String;
-  lListaLojas: TLista_Lojas_Dados;
-  lLojas_Parametros: TLojas_Parametros;
   lLojasModel,
   lLojas_Dados: TLojasModel;
   MemTable: TFDMemTable;
@@ -499,8 +493,6 @@ function TDashbordDao.ObterQuery3_VendaPorAno(pDashbord_Parametros: TDashbord_Pa
 var
   lQry: TFDQuery;
   lSQL:String;
-  lListaLojas: TLista_Lojas_Dados;
-  lLojas_Parametros: TLojas_Parametros;
   lLojasModel,
   lLojas_Dados: TLojasModel;
   MemTable: TFDMemTable;
@@ -938,8 +930,6 @@ function TDashbordDao.ObterQuery4_VendaPorHora(pDashbord_Parametros: TDashbord_P
 var
   lQry: TFDQuery;
   lSQL:String;
-  lListaLojas: TLista_Lojas_Dados;
-  lLojas_Parametros: TLojas_Parametros;
   lLojasModel,
   lLojas_Dados: TLojasModel;
   MemTable: TFDMemTable;
@@ -1098,8 +1088,6 @@ function TDashbordDao.ObterQuery6_RankingVendedores(pDashbord_Parametros: TDashb
 var
   lQry: TFDQuery;
   lSQL:String;
-  lListaLojas: TLista_Lojas_Dados;
-  lLojas_Parametros: TLojas_Parametros;
   lLojasModel,
   lLojas_Dados: TLojasModel;
   MemTable: TFDMemTable;
@@ -1342,8 +1330,6 @@ function TDashbordDao.ObterQuery7_RankingFiliais(pDashbord_Parametros: TDashbord
 var
   lQry: TFDQuery;
   lSQL:String;
-  lListaLojas: TLista_Lojas_Dados;
-  lLojas_Parametros: TLojas_Parametros;
   lLojasModel,
   lLojas_Dados: TLojasModel;
   MemTable: TFDMemTable;
@@ -1492,8 +1478,6 @@ var
   lQry: TFDQuery;
   lSQL:String;
   lMemTable: TFDMemTable;
-  lListaLojas: TLista_Lojas_Dados;
-  lLojas_Parametros: TLojas_Parametros;
   lLojasModel,
   lLojas_Dados: TLojasModel;
 begin

@@ -4,28 +4,26 @@ interface
 
 uses
   DRGModel,
-  Conexao,
-  SistemaControl, 
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Variants,
-  Terasoft.Web.Types,
+  Terasoft.Types,
   Terasoft.Framework.ListaSimples.Impl,
   Terasoft.Framework.ListaSimples,
   Terasoft.Framework.SimpleTypes,
+  Interfaces.Conexao,
   Terasoft.FuncoesTexto,
-  ServerController,
   LojasModel;
 
 type
   TDRGDao = class
 
   private
-
+    vIConexao : IConexao;
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function ObterLista(pDRG_Parametros: TDRG_Parametros): TFDMemTable;
@@ -40,9 +38,9 @@ uses
 
 { TDRG }
 
-constructor TDRGDao.Create;
+constructor TDRGDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TDRGDao.Destroy;
@@ -55,16 +53,10 @@ function TDRGDao.ObterDRG_Detalhes(pDRG_Detalhes_Parametros: TDRG_Detalhes_Param
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
-
   lLojasModel, lLojas_Dados: TLojasModel;
-  lListaLojas: TLista_Lojas_Dados;
-  lLojas_Parametros: TLojas_Parametros;
-
   lMemTable: TFDMemTable;
 begin
-  lConexao := TConexao.Create;
-  lLojasModel := TLojasModel.Create(Controller.xConexao);
+  lLojasModel := TLojasModel.Create(vIConexao);
 
   lMemTable := TFDMemTable.Create(nil);
 
@@ -142,13 +134,13 @@ begin
 
     lMemTable.CreateDataSet;
 
-    lLojas_Parametros.Numero := pDRG_Detalhes_Parametros.Lojas;
+    lLojasModel.LojaView := pDRG_Detalhes_Parametros.Lojas;
     lLojasModel.ObterLista;
 
     for lLojas_Dados in lLojasModel.LojassLista do
     begin
-      lConexao.ConfigConexaoExterna(lLojas_Dados.Server,lLojas_Dados.Port,lLojas_Dados.DataBase);
-      lQry := lConexao.CriarQueryExterna;
+      vIConexao.ConfigConexaoExterna(lLojas_Dados.LOJA);
+      lQry := vIConexao.CriarQueryExterna;
       lQry.Open(lSQL);
 
       lQry.First;
@@ -175,7 +167,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
     lLojasModel.Free;
   end;
 end;
@@ -184,18 +175,15 @@ function TDRGDao.ObterLista(pDRG_Parametros: TDRG_Parametros): TFDMemTable;
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
 
-  lLojasModel, lLojas_Dados: TLojasModel;
-  lListaLojas: TLista_Lojas_Dados;
-  lLojas_Parametros: TLojas_Parametros;
+  lLojasModel,
+  lLojas_Dados: TLojasModel;
 
   lMemTable: TFDMemTable;
 
   lGrupoAnt, lGrupo, lSubGrupo, lConta : String;
 begin
-  lConexao := TConexao.Create;
-  lLojasModel := TLojasModel.Create(Controller.xConexao);
+  lLojasModel := TLojasModel.Create(vIConexao);
 
   lMemTable := TFDMemTable.Create(nil);
 
@@ -584,13 +572,13 @@ begin
 
     lMemTable.CreateDataSet;
 
-    lLojas_Parametros.Numero := pDRG_Parametros.Lojas;
+    lLojasModel.LojaView := pDRG_Parametros.Lojas;
     lLojasModel.ObterLista;
 
     for lLojas_Dados in lLojasModel.LojassLista do
     begin
-      lConexao.ConfigConexaoExterna(lLojas_Dados.Server,lLojas_Dados.Port,lLojas_Dados.DataBase);
-      lQry := lConexao.CriarQueryExterna;
+      vIConexao.ConfigConexaoExterna(lLojas_Dados.LOJA);
+      lQry := vIConexao.CriarQueryExterna;
       lQry.Open(lSQL);
 
       lQry.First;
@@ -650,7 +638,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
     lLojasModel.Free;
   end;
 end;

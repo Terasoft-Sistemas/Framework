@@ -3,18 +3,18 @@ unit DRGModel;
 interface
 
 uses
-  Terasoft.Enumerado,
-  Terasoft.Web.Types,
-  FireDAC.Comp.Client;
+  Terasoft.Types,
+  FireDAC.Comp.Client,
+  Interfaces.Conexao;
 
 type
   TDRGModel = class
 
   private
+    vIConexao : IConexao;
+  public
 
- public
-
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function ObterLista(pDRG_Parametros: TDRG_Parametros): TFDMemTable;
@@ -29,9 +29,9 @@ uses
 
 { TDRGModel }
 
-constructor TDRGModel.Create;
+constructor TDRGModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TDRGModel.Destroy;
@@ -45,7 +45,7 @@ var
   lDRGDao: TDRGDao;
   lDRG_Parametros: TDRG_Parametros;
 begin
-  lDRGDao := TDRGDao.Create;
+  lDRGDao := TDRGDao.Create(vIConexao);
 
   try
     lDRG_Parametros.DataInicio              := pDRG_Parametros.DataInicio;
@@ -82,7 +82,7 @@ var
   lDRGDao: TDRGDao;
   lDRG_Detalhes_Parametros: TDRG_Detalhes_Parametros;
 begin
-  lDRGDao := TDRGDao.Create;
+  lDRGDao := TDRGDao.Create(vIConexao);
 
   try
     lDRG_Detalhes_Parametros.DataInicio              := pDRG_Detalhes_Parametros.DataInicio;

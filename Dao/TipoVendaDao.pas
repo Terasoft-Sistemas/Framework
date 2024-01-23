@@ -3,26 +3,26 @@ unit TipoVendaDao;
 interface
 
 uses
-  Conexao,
-  SistemaControl, 
+
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Variants,
-  Terasoft.Web.Types,
+  Terasoft.Types,
   Terasoft.Framework.ListaSimples.Impl,
   Terasoft.Framework.ListaSimples,
   Terasoft.Framework.SimpleTypes,
+  Interfaces.Conexao,
   Terasoft.FuncoesTexto;
 
 type
   TTipoVendaDao = class
 
   private
-
+     vConexao : IConexao;
   public
-    constructor Create;
+    constructor Create(pConexao : IConexao);
     destructor Destroy; override;
 
     function ObterLista(pTipoVenda_Parametros: TTipoVenda_Parametros): TFDMemTable;
@@ -36,9 +36,9 @@ uses
 
 { TPCG }
 
-constructor TTipoVendaDao.Create;
+constructor TTipoVendaDao.Create(pConexao : IConexao);
 begin
-
+  vConexao := pConexao;
 end;
 
 destructor TTipoVendaDao.Destroy;
@@ -50,11 +50,9 @@ function TTipoVendaDao.ObterLista(pTipoVenda_Parametros: TTipoVenda_Parametros):
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
   lMemTable: TFDMemTable;
 begin
   try
-    lConexao := TConexao.Create;
 
     lMemTable := TFDMemTable.Create(nil);
 
@@ -76,7 +74,7 @@ begin
     lMemTable.FieldDefs.Add('RAZAO', ftString, 40);
     lMemTable.CreateDataSet;
 
-    lQry := lConexao.CriarQuery;
+    lQry := vConexao.CriarQuery;
     lQry.Open(lSQL);
 
     lQry.First;
@@ -96,7 +94,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 

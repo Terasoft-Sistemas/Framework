@@ -3,19 +3,19 @@ unit GrupoModel;
 interface
 
 uses
-  Terasoft.Enumerado,
-  Terasoft.Web.Types,
+  Terasoft.Types,
   GrupoDao,
-  FireDAC.Comp.Client;
+  FireDAC.Comp.Client,
+  Interfaces.Conexao;
 
 type
   TGrupoModel = class
 
   private
+    vIConexao : IConexao;
+  public
 
- public
-
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function ObterLista(pGrupo_Parametros: TGrupo_Parametros): TFDMemTable;
@@ -29,9 +29,9 @@ uses
 
 { TGrupoModel }
 
-constructor TGrupoModel.Create;
+constructor TGrupoModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TGrupoModel.Destroy;
@@ -45,8 +45,7 @@ var
   lGrupoDao: TGrupoDao;
   lGrupo_Parametros: TGrupo_Parametros;
 begin
-  lGrupoDao := TGrupoDao.Create;
-
+  lGrupoDao := TGrupoDao.Create(vIConexao);
   try
     lGrupo_Parametros.Grupos := pGrupo_Parametros.Grupos;
 

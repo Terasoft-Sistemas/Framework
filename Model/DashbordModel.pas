@@ -3,8 +3,7 @@ unit DashbordModel;
 interface
 
 uses
-  Terasoft.Enumerado,
-  Terasoft.Web.Types,
+  Terasoft.Types,
   Interfaces.Conexao,
   FireDAC.Comp.Client;
 

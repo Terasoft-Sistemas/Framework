@@ -3,14 +3,12 @@ unit PCGDao;
 interface
 
 uses
-  Conexao,
-  SistemaControl, 
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Variants,
-  Terasoft.Web.Types,
+  Terasoft.Types,
   Terasoft.Framework.ListaSimples.Impl,
   Terasoft.Framework.ListaSimples,
   Terasoft.Framework.SimpleTypes,
@@ -66,9 +64,6 @@ var
   lLojasModel,
   lLojas_Dados: TLojasModel;
   lMemTable: TFDMemTable;
-
-  lListaLojas: TLista_Lojas_Dados;
-  lLojas_Parametros: TLojas_Parametros;
 begin
   lLojasModel := TLojasModel.Create(vIConexao);
   lMemTable   := TFDMemTable.Create(nil);
@@ -257,10 +252,6 @@ var
   lLojasModel,
   lLojas_Dados      : TLojasModel;
   lMemTable         : TFDMemTable;
-
-  lListaLojas       : TLista_Lojas_Dados;
-  lLojas_Parametros : TLojas_Parametros;
-
   lValorPossivel    : Real;
   lPercentual       : Real;
 
@@ -707,9 +698,6 @@ var
   lLojasModel,
   lLojas_Dados: TLojasModel;
   lMemTable: TFDMemTable;
-
-  lListaLojas: TLista_Lojas_Dados;
-  lLojas_Parametros: TLojas_Parametros;
 begin
   lLojasModel := TLojasModel.Create(vIConexao);
   lMemTable := TFDMemTable.Create(nil);

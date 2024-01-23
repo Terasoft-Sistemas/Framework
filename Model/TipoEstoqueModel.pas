@@ -3,19 +3,19 @@ unit TipoEstoqueModel;
 interface
 
 uses
-  Terasoft.Enumerado,
-  Terasoft.Web.Types,
+  Terasoft.Types,
   TipoEstoqueDao,
-  FireDAC.Comp.Client;
+  FireDAC.Comp.Client,
+  Interfaces.Conexao;
 
 type
   TTipoEstoqueModel = class
 
   private
+    vIConexao : IConexao;
+  public
 
- public
-
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function ObterLista(pTipoEstoque_Parametros: TTipoEstoque_Parametros): TFDMemTable;
@@ -29,9 +29,9 @@ uses
 
 { TTipoEstoqueModel }
 
-constructor TTipoEstoqueModel.Create;
+constructor TTipoEstoqueModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TTipoEstoqueModel.Destroy;
@@ -45,7 +45,7 @@ var
   lTipoEstoqueDao: TTipoEstoqueDao;
   lTipoEstoque_Parametros: TTipoEstoque_Parametros;
 begin
-  lTipoEstoqueDao := TTipoEstoqueDao.Create;
+  lTipoEstoqueDao := TTipoEstoqueDao.Create(vICOnexao);
 
   try
     lTipoEstoque_Parametros.TipoEstoques := pTipoEstoque_Parametros.TipoEstoques;

@@ -57,5 +57,219 @@ type
 
   TListaContaClienteRetorno = IListaSimples<TContaClienteRetorno>;
 
+  TTipoAnaliseDRG = (tpFaturamento, tpCompetencia, tpRecebimento, tpPrevisao, tpOrcamento);
+  TNivelVisualizacaoDRG = (tpNivel1, tpNivel2, tpNivel3);
+
+  TTipoAnalisePCG = (tpVendedores, tpClientes, tpProdutos, tpGrupo, tpGrupoComissao, tpPortador, tpFornecedor, tpMes, tpCidade, tpDia, tpMarca, tpUF, tpFilial);
+  TTipoAnaliseEstoquePCG = (tpEstGrupo, tpEstSubGrupo, tpEstFornecedor, tpEstMarca, tpEstTipo);
+  TFiliasPorPCG = (tpDescricao, tpNumero);
+
+  TTipoAnaliseCurvaABC = (tpABCVendedores, tpABCClientes, tpABCProdutos, tpABCGrupo, tpABCGrupoComissao, tpABCPortador, tpABCFornecedor, tpABCMes, tpABCCidade, tpABCDia, tpABCMarca, tpABCUF);
+  TClassificarPorCurvaABC = (tpABCQuantidade, tpABCQtdeCliente, tpABCVenda, tpABCCusto, tpABCLucro);
+
+  //
+  // Curva ABC
+  //
+  TCurvaABC_Parametros = record
+    TipoData,
+    DataInicio,
+    DataFim        : String;
+    TipoAnalise    : TTipoAnaliseCurvaABC;
+    ClassificarPor : TClassificarPorCurvaABC;
+    SomarST,
+    SomarACrescimo,
+    SomarIPI,
+    SomarFrete     : Boolean;
+    Produto,
+    Fornecedor,
+    Grupo,
+    SubGrupo,
+    Marca,
+    Grade,
+    Lojas,
+    Atividade,
+    TipoSaida,
+    Cliente,
+    Vendedor,
+    Gerente,
+    Cidade,
+    UF,
+    TipoMargem     : String;
+  end;
+
+  TCurvaABC_Dados = record
+    Loja, Descricao                : String;
+    Qtde_Venda, Quantidade_Cliente : Integer;
+    Valor_Liquido, Custo           : Real;
+  end;
+
+  TListaCurvaABC = IListaSimples<TCurvaABC_Dados>;
+  // FIM Curva ABC
+
+  //
+  // DASHBOARD
+  //
+  TDashbord_Parametros = record
+    TipoData,
+    DataInicio,
+    DataFim,
+    Lojas,
+    SomarST,
+    SomarAcrescimo,
+    SomarIPI,
+    SomarFrete,
+    Vendedores : String;
+  end;
+
+  TDashbord_Dados = record
+    MES,
+    DATA,
+    LOJA: String;
+    VALOR_LIQUIDO,
+    CUSTO: Real;
+    TOTAL_ITENS,
+    QUANTIDADE_VENDA,
+    QUANTIDADE_CLIENTE : Integer;
+  end;
+
+  TListaDashbord = IListaSimples<TDashbord_Dados>;
+  // FIM DASHBOARD
+
+  //
+  // DRG
+  //
+  TDRG_Parametros = record
+    SomaFrete,
+    ApresentarContasZeradas: Boolean;
+    ListarCMV,
+    ListarDevolucao,
+    ConsiderarDesconto,
+    VisializarGrupoProduto,
+    SomarST,
+    SomarACrescimo,
+    SomarIPI,
+    SomarFrete: Boolean;
+    NivelVisualizacao: TNivelVisualizacaoDRG;
+    TipoAnalise: TTipoAnaliseDRG;
+    DataInicio,
+    DataFim,
+    MesAno,
+    Ano,
+    Nivel,
+    FiltroGrupo,
+    FiltroSubGrupo,
+    Lojas,
+    Filtro: String;
+    ValorPrincipal: Real;
+  end;
+
+  TDRG_Detalhes_Parametros = record
+    DataInicio,
+    DataFim,
+    MesAno,
+    Ano,
+    Conta,
+    Lojas: String;
+  end;
+  // FIM DRG
+
+  //
+  // FORNECEDOR
+  //
+  TFornecedor_Parametros = record
+    Fornecedores: String;
+  end;
+  // FIM FORNECEDOR
+
+  //
+  // PCG
+  //
+  TPCG_Parametros = record
+    TipoData,
+    DataInicio,
+    DataFim,
+    Vendedor,
+    Fornecedor,
+    Grupo,
+    SubGrupo,
+    Marca,
+    Tipo,
+    Lojas,
+    ColunaOrdenacao,
+    ColunaOrdenacaoOrdem: String;
+    FiliaisPor: TFiliasPorPCG;
+    TipoAnalise: TTipoAnalisePCG;
+    TipoAnaliseEstoque: TTipoAnaliseEstoquePCG;
+    SomarST,
+    SomarACrescimo,
+    SomarIPI,
+    SomarFrete: Boolean;
+  end;
+
+  TPCG_Dados = record
+    Loja,
+    Descricao : String;
+    Valor_Liquido,
+    Acrescimo,
+    Frete,
+    IPI,
+    ST : Real;
+  end;
+  TListaPCG = IListaSimples<TPCG_Dados>;
+  // FIM PCG
+
+  //
+  // GRUPO PRODUTO
+  //
+  TGrupo_Parametros = record
+    Grupos: String;
+  end;
+  // FIM GRUPO PRODUTO
+
+
+  //
+  // SUBGRUPO PRODUTO
+  //
+  TSubGrupo_Parametros = record
+    SubGrupos: String;
+  end;
+  // FIM SUBGRUPO PRODUTO
+
+
+  //
+  // VENDEDOR
+  //
+  TVendedor_Parametros = record
+    Vendedores: String;
+  end;
+  // FIM VENDEDOR
+
+
+  //
+  // MARCA PRODUTO
+  //
+  TMarca_Parametros = record
+    Marcas: String;
+  end;
+  // FIM MARCA PRODUTO
+
+
+  //
+  // TIPO VENDA
+  //
+  TTipoVenda_Parametros = record
+    TipoVendas: String;
+  end;
+  // FIM TIPO VENDA
+
+
+  //
+  // TIPO ESTOQUE
+  //
+  TTipoEstoque_Parametros = record
+    TipoEstoques: String;
+  end;
+  // FIM TIPO ESTOQUE
+
 implementation
 end.

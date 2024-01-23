@@ -3,23 +3,22 @@ unit GrupoDao;
 interface
 
 uses
-  Conexao,
-  SistemaControl, 
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Variants,
-  Terasoft.Web.Types,
-  Terasoft.FuncoesTexto;
+  Terasoft.Types,
+  Terasoft.FuncoesTexto,
+  Interfaces.Conexao;
 
 type
   TGrupoDao = class
 
   private
-
+    vIConexao : IConexao;
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function ObterLista(pGrupo_Parametros: TGrupo_Parametros): TFDMemTable;
@@ -33,9 +32,9 @@ uses
 
 { TPCG }
 
-constructor TGrupoDao.Create;
+constructor TGrupoDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TGrupoDao.Destroy;
@@ -47,12 +46,9 @@ function TGrupoDao.ObterLista(pGrupo_Parametros: TGrupo_Parametros): TFDMemTable
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
   lMemTable: TFDMemTable;
 begin
   try
-    lConexao := TConexao.Create;
-
     lMemTable := TFDMemTable.Create(nil);
 
     lSQL := 'Select CODIGO_GRU,       ' + #13 +
@@ -73,7 +69,7 @@ begin
     lMemTable.FieldDefs.Add('RAZAO', ftString, 40);
     lMemTable.CreateDataSet;
 
-    lQry := lConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
     lQry.Open(lSQL);
 
     lQry.First;
@@ -93,7 +89,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 

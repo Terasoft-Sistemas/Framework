@@ -3,19 +3,19 @@ unit MarcaModel;
 interface
 
 uses
-  Terasoft.Enumerado,
-  Terasoft.Web.Types,
+  Terasoft.Types,
   MarcaDao,
-  FireDAC.Comp.Client;
+  FireDAC.Comp.Client,
+  Interfaces.Conexao;
 
 type
   TMarcaModel = class
 
   private
+    vIConexao : IConexao;
+  public
 
- public
-
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function ObterLista(pMarca_Parametros: TMarca_Parametros): TFDMemTable;
@@ -29,9 +29,9 @@ uses
 
 { TMarcaModel }
 
-constructor TMarcaModel.Create;
+constructor TMarcaModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TMarcaModel.Destroy;
@@ -45,7 +45,7 @@ var
   lMarcaDao: TMarcaDao;
   lMarca_Parametros: TMarca_Parametros;
 begin
-  lMarcaDao := TMarcaDao.Create;
+  lMarcaDao := TMarcaDao.Create(vIConexao);
 
   try
     lMarca_Parametros.Marcas := pMarca_Parametros.Marcas;

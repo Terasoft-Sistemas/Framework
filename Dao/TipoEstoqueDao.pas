@@ -3,26 +3,25 @@ unit TipoEstoqueDao;
 interface
 
 uses
-  Conexao,
-  SistemaControl, 
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Variants,
-  Terasoft.Web.Types,
+  Terasoft.Types,
   Terasoft.Framework.ListaSimples.Impl,
   Terasoft.Framework.ListaSimples,
   Terasoft.Framework.SimpleTypes,
-  Terasoft.FuncoesTexto;
+  Terasoft.FuncoesTexto,
+  Interfaces.Conexao;
 
 type
   TTipoEstoqueDao = class
 
   private
-
+    vIConexao : IConexao;
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function ObterLista(pTipoEstoque_Parametros: TTipoEstoque_Parametros): TFDMemTable;
@@ -36,9 +35,9 @@ uses
 
 { TPCG }
 
-constructor TTipoEstoqueDao.Create;
+constructor TTipoEstoqueDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TTipoEstoqueDao.Destroy;
@@ -50,12 +49,9 @@ function TTipoEstoqueDao.ObterLista(pTipoEstoque_Parametros: TTipoEstoque_Parame
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
   lMemTable: TFDMemTable;
 begin
   try
-    lConexao := TConexao.Create;
-
     lMemTable := TFDMemTable.Create(nil);
 
     lSQL := 'Select ID, NOME   ' + #13 +
@@ -75,7 +71,7 @@ begin
     lMemTable.FieldDefs.Add('NOME', ftString, 40);
     lMemTable.CreateDataSet;
 
-    lQry := lConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
     lQry.Open(lSQL);
 
     lQry.First;
@@ -95,7 +91,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 

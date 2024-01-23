@@ -3,14 +3,12 @@ unit CurvaABCDao;
 interface
 
 uses
-  Conexao,
-  SistemaControl, 
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Variants,
-  Terasoft.Web.Types,
+  Terasoft.Types,
   Terasoft.Framework.ListaSimples.Impl,
   Terasoft.Framework.ListaSimples,
   Terasoft.Framework.SimpleTypes,
@@ -42,8 +40,7 @@ implementation
 
 uses
   Data.DB,
-  Clipbrd,
-  ServerController;
+  Clipbrd;
 
 { TCurvaABC }
 
@@ -61,14 +58,10 @@ function TCurvaABCDao.ObterCurvaABC(pCurvaABC_Parametros: TCurvaABC_Parametros):
 var
   lQry              : TFDQuery;
   lSQL              : String;
-  lConexao          : TConexao;
   lLojasModel,
   lLojas_Dados      : TLojasModel;
   lMemTable         : TFDMemTable;
   Options           : TLocateOptions;
-
-  lListaLojas       : TLista_Lojas_Dados;
-  lLojas_Parametros : TLojas_Parametros;
 
   lTotalVendas      : Real;
   lTotalQtde        : Real;
@@ -77,7 +70,6 @@ var
   lTotalLucro       : Real;
   lTotalItens       : Real;
 begin
-  lConexao := TConexao.Create;
   lLojasModel := TLojasModel.Create(vIConexao);
   lMemTable := TFDMemTable.Create(nil);
 
@@ -276,8 +268,8 @@ begin
 
     for lLojas_Dados in lLojasModel.LojassLista do
     begin
-      lConexao.ConfigConexaoExterna(lLojas_Dados.Server,lLojas_Dados.Port,lLojas_Dados.DataBase);
-      lQry := lConexao.CriarQueryExterna;
+      vIConexao.ConfigConexaoExterna(lLojas_Dados.LOJA);
+      lQry := vIConexao.CriarQueryExterna;
       lQry.Open(lSQL);
 
       lQry.First;
@@ -353,7 +345,7 @@ begin
         lMemTable.FieldByName('RATEIO').AsFloat := 0;
 
 
-      if (Controller.xTipoMargem = 'S') then
+      if (pCurvaABC_Parametros.TipoMargem = 'S') then
       begin
         if (lMemTable.FieldByName('CUSTO').AsFloat <> 0) then
           lMemTable.FieldByName('MARGEM').AsFloat := (lMemTable.FieldByName('VALOR_LIQUIDO').AsFloat / lMemTable.FieldByName('CUSTO').AsFloat*100)-100
@@ -377,7 +369,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
     lLojasModel.Free;
   end;
 end;

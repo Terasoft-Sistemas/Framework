@@ -21,7 +21,8 @@ uses
   JPeg,
   Data.DB,
   FireDAC.Comp.Client,
-  GIFImage;
+  GIFImage,
+  Vcl.Forms;
 
   function IIF(Expressao: Variant; ParteTRUE, ParteFALSE: Variant): Variant;
   procedure Base64ToImage(data, path: string);
@@ -32,6 +33,7 @@ uses
   function MaiorQueZero(pValue: Variant): Boolean;
   procedure CriaException(pMSG: String);
   function Base64ToImagePNG(pBase64PNG: string):TMemoryStream;
+  procedure gravaSQL(pSQL, pNome: String);
 
 implementation
 
@@ -163,6 +165,31 @@ begin
   end;
 end;
 
+procedure gravaSQL(pSQL, pNome: String);
+var
+ lSQL: TStringList;
+begin
+  try
+    if not DirectoryExists(ExtractFileDir(Application.ExeName) + '\temp') then
+    begin
+      if not CreateDir(ExtractFileDir(Application.ExeName) + '\temp') then
+      begin
+        ForceDirectories(ExtractFileDir(Application.ExeName) + '\temp');
+      end;
+    end;
+
+    lSQL := TStringList.Create;
+
+    lSQL.Clear;
+    lSQL.Add(pSQL);
+    lSQL.SaveToFile(ExtractFileDir(Application.ExeName) + '\temp\'+pNome+'.sql');
+
+    lSQL.Free;
+  except
+    lSQL.Free;
+  end;
+
+end;
 
 end.
 

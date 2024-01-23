@@ -3,8 +3,7 @@ unit CurvaABCModel;
 interface
 
 uses
-  Terasoft.Enumerado,
-  Terasoft.Web.Types,
+  Terasoft.Types,
   CurvaABCDao,
   FireDAC.Comp.Client,
   Interfaces.Conexao;

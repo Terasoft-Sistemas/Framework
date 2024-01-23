@@ -3,7 +3,7 @@ unit RegiaoModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+  Terasoft.Types,
   FireDAC.Comp.Client,
   Interfaces.Conexao;
 
@@ -115,9 +115,9 @@ begin
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lRegiaoDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lRegiaoDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lRegiaoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lRegiaoDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lRegiaoDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lRegiaoDao.excluir(Self);
     end;
 
   finally

@@ -3,19 +3,19 @@ unit VendedorModel;
 interface
 
 uses
-  Terasoft.Enumerado,
-  Terasoft.Web.Types,
+  Terasoft.Types,
   VendedorDao,
-  FireDAC.Comp.Client;
+  FireDAC.Comp.Client,
+  Interfaces.Conexao;
 
 type
   TVendedorModel = class
 
   private
+    vIConexao : IConexao;
+  public
 
- public
-
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function ObterLista(pVendedor_Parametros: TVendedor_Parametros): TFDMemTable;
@@ -29,9 +29,9 @@ uses
 
 { TVendedorModel }
 
-constructor TVendedorModel.Create;
+constructor TVendedorModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TVendedorModel.Destroy;
@@ -45,7 +45,7 @@ var
   lVendedorDao: TVendedorDao;
   lVendedor_Parametros: TVendedor_Parametros;
 begin
-  lVendedorDao := TVendedorDao.Create;
+  lVendedorDao := TVendedorDao.Create(vIConexao);
 
   try
     lVendedor_Parametros.Vendedores := pVendedor_Parametros.Vendedores;

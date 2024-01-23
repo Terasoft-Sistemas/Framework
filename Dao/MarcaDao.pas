@@ -3,26 +3,26 @@ unit MarcaDao;
 interface
 
 uses
-  Conexao,
-  SistemaControl, 
+
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Variants,
-  Terasoft.Web.Types,
+  Terasoft.Types,
   Terasoft.Framework.ListaSimples.Impl,
   Terasoft.Framework.ListaSimples,
   Terasoft.Framework.SimpleTypes,
+  Interfaces.Conexao,
   Terasoft.FuncoesTexto;
 
 type
   TMarcaDao = class
 
   private
-
+    vIConexao : IConexao;
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function ObterLista(pMarca_Parametros: TMarca_Parametros): TFDMemTable;
@@ -36,9 +36,9 @@ uses
 
 { TPCG }
 
-constructor TMarcaDao.Create;
+constructor TMarcaDao.Create(pIConexao : IConexao);
 begin
-
+    vIConexao := pIConexao;
 end;
 
 destructor TMarcaDao.Destroy;
@@ -50,11 +50,10 @@ function TMarcaDao.ObterLista(pMarca_Parametros: TMarca_Parametros): TFDMemTable
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
   lMemTable: TFDMemTable;
 begin
   try
-    lConexao := TConexao.Create;
+
 
     lMemTable := TFDMemTable.Create(nil);
 
@@ -76,7 +75,7 @@ begin
     lMemTable.FieldDefs.Add('RAZAO', ftString, 40);
     lMemTable.CreateDataSet;
 
-    lQry := lConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
     lQry.Open(lSQL);
 
     lQry.First;
@@ -96,7 +95,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 

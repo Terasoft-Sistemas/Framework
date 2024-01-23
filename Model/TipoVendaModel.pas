@@ -3,19 +3,20 @@ unit TipoVendaModel;
 interface
 
 uses
-  Terasoft.Enumerado,
-  Terasoft.Web.Types,
+
+  Terasoft.Types,
   TipoVendaDao,
+  Interfaces.Conexao,
   FireDAC.Comp.Client;
 
 type
   TTipoVendaModel = class
 
   private
-
+    vConexao : IConexao;
  public
 
-  	constructor Create;
+  	constructor Create(pConexao : IConexao);
     destructor Destroy; override;
 
     function ObterLista(pTipoVenda_Parametros: TTipoVenda_Parametros): TFDMemTable;
@@ -29,9 +30,9 @@ uses
 
 { TTipoVendaModel }
 
-constructor TTipoVendaModel.Create;
+constructor TTipoVendaModel.Create(pConexao : IConexao);
 begin
-
+    vConexao := pConexao;
 end;
 
 destructor TTipoVendaModel.Destroy;
@@ -45,7 +46,7 @@ var
   lTipoVendaDao: TTipoVendaDao;
   lTipoVenda_Parametros: TTipoVenda_Parametros;
 begin
-  lTipoVendaDao := TTipoVendaDao.Create;
+  lTipoVendaDao := TTipoVendaDao.Create(vConexao);
 
   try
     lTipoVenda_Parametros.TipoVendas := pTipoVenda_Parametros.TipoVendas;

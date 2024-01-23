@@ -4,8 +4,6 @@ interface
 
 uses
   RegiaoModel,
-  Conexao,
-  SistemaControl,
   Terasoft.Utils,
   Terasoft.FuncoesTexto,
   Terasoft.ConstrutorDao,
@@ -83,22 +81,19 @@ function TRegiaoDao.incluir(pRegiaoModel: TRegiaoModel): String;
 var
   lQry          : TFDQuery;
   lSQL          : String;
-  lConexao      : TConexao;
 begin
-  lConexao      := TConexao.Create;
-  lQry          := lConexao.CriarQuery;
+  lQry          := vIConexao.CriarQuery;
   try
     lSQL := vConstrutorDao.gerarInsert('REGIAO', 'ID', true);
 
     lQry.SQL.Add(lSQL);
-    pRegiaoModel.ID := lConexao.Generetor('GEN_REGIAO');
+    pRegiaoModel.ID := vIConexao.Generetor('GEN_REGIAO');
     setParams(lQry, pRegiaoModel);
     lQry.Open;
 
     Result := lQry.FieldByName('ID').AsString;
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -106,10 +101,8 @@ function TRegiaoDao.alterar(pRegiaoModel: TRegiaoModel): String;
 var
   lQry      : TFDQuery;
   lSQL      : String;
-  lConexao  : TConexao;
 begin
-  lConexao  := TConexao.Create;
-  lQry      := lConexao.CriarQuery;
+  lQry      := vIConexao.CriarQuery;
 
   lSQL := vConstrutorDao.gerarUpdate('REGIAO', 'ID');
 
@@ -122,17 +115,14 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
 function TRegiaoDao.excluir(pRegiaoModel: TRegiaoModel): String;
 var
   lQry     : TFDQuery;
-  lConexao : TConexao;
 begin
-  lConexao := TConexao.Create;
-  lQry     := lConexao.CriarQuery;
+  lQry     := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from REGIAO where ID = :ID',[pRegiaoModel.ID]);
@@ -141,7 +131,6 @@ begin
    Result := pRegiaoModel.ID;
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -164,11 +153,9 @@ procedure TRegiaoDao.obterTotalRegistros;
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
 begin
   try
-    lConexao := TConexao.Create;
-    lQry := lConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From REGIAO where 1=1 ';
 
@@ -180,7 +167,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -188,11 +174,9 @@ function TRegiaoDao.ObterLista: TFDMemTable;
 var
   lQry       : TFDQuery;
   lSQL       : String;
-  lConexao   : TConexao;
   lPaginacao : String;
 begin
-  lConexao   := TConexao.Create;
-  lQry       := lConexao.CriarQuery;
+  lQry       := vIConexao.CriarQuery;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -210,7 +194,6 @@ begin
     obterTotalRegistros;
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 

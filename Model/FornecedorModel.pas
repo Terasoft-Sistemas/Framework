@@ -3,19 +3,19 @@ unit FornecedorModel;
 interface
 
 uses
-  Terasoft.Enumerado,
-  Terasoft.Web.Types,
+  Terasoft.Types,
   FornecedorDao,
-  FireDAC.Comp.Client;
+  FireDAC.Comp.Client,
+  Interfaces.Conexao;
 
 type
   TFornecedorModel = class
 
   private
+    vIConexao : IConexao;
+  public
 
- public
-
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function ObterLista(pFornecedor_Parametros: TFornecedor_Parametros): TFDMemTable;
@@ -29,9 +29,9 @@ uses
 
 { TFornecedorModel }
 
-constructor TFornecedorModel.Create;
+constructor TFornecedorModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TFornecedorModel.Destroy;
@@ -45,7 +45,7 @@ var
   lFornecedorDao: TFornecedorDao;
   lFornecedor_Parametros: TFornecedor_Parametros;
 begin
-  lFornecedorDao := TFornecedorDao.Create;
+  lFornecedorDao := TFornecedorDao.Create(vIConexao);
 
   try
     lFornecedor_Parametros.Fornecedores := pFornecedor_Parametros.Fornecedores;
