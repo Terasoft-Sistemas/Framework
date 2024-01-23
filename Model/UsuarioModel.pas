@@ -53,6 +53,8 @@ type
     FMENU_OCULTO_WEB: Variant;
     FDATA_INC: Variant;
     FPORCENTAGEM_ZOOM_TELA: Variant;
+    FIMAGEM: Variant;
+    FPERFIL_ID: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCAIXA(const Value: Variant);
     procedure SetCountView(const Value: String);
@@ -91,6 +93,8 @@ type
     procedure SetUUID(const Value: Variant);
     procedure SetUUIDALTERACAO(const Value: Variant);
     procedure SetPORCENTAGEM_ZOOM_TELA(const Value: Variant);
+    procedure SetIMAGEM(const Value: Variant);
+    procedure SetPERFIL_ID(const Value: Variant);
 
   public
 
@@ -124,6 +128,8 @@ type
     property URL_WINDOWS         : Variant read FURL_WINDOWS write SetURL_WINDOWS;
     property PAGINA_INICIAL_WEB  : Variant read FPAGINA_INICIAL_WEB write SetPAGINA_INICIAL_WEB;
     property PORCENTAGEM_ZOOM_TELA : Variant read FPORCENTAGEM_ZOOM_TELA write SetPORCENTAGEM_ZOOM_TELA;
+    property PERFIL_ID: Variant read FPERFIL_ID write SetPERFIL_ID;
+    property IMAGEM: Variant read FIMAGEM write SetIMAGEM;
 
     property Acao          : TAcao                      read FAcao          write SetAcao;
     property UsuariosLista : TObjectList<TUsuarioModel> read FUsuariosLista write FUsuariosLista;
@@ -334,6 +340,11 @@ begin
   FIDRecordView := Value;
 end;
 
+procedure TUsuarioModel.SetIMAGEM(const Value: Variant);
+begin
+  FIMAGEM := Value;
+end;
+
 procedure TUsuarioModel.SetLengthPageView(const Value: String);
 begin
   FLengthPageView := Value;
@@ -377,6 +388,11 @@ end;
 procedure TUsuarioModel.SetPEDIDO_WEB(const Value: Variant);
 begin
   FPEDIDO_WEB := Value;
+end;
+
+procedure TUsuarioModel.SetPERFIL_ID(const Value: Variant);
+begin
+  FPERFIL_ID := Value;
 end;
 
 procedure TUsuarioModel.SetPERFIL_NEW_ID(const Value: Variant);

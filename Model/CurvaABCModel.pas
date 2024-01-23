@@ -6,16 +6,18 @@ uses
   Terasoft.Enumerado,
   Terasoft.Web.Types,
   CurvaABCDao,
-  FireDAC.Comp.Client;
+  FireDAC.Comp.Client,
+  Interfaces.Conexao;
 
 type
   TCurvaABCModel = class
 
   private
+    vIConexao : IConexao;
 
- public
+  public
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function ObterCurvaABC(pCurvaABC_Parametros: TCurvaABC_Parametros): TFDMemTable;
@@ -29,9 +31,9 @@ uses
 
 { TCurvaABCModel }
 
-constructor TCurvaABCModel.Create;
+constructor TCurvaABCModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TCurvaABCModel.Destroy;
@@ -45,7 +47,7 @@ var
   lCurvaABCDao: TCurvaABCDao;
   lCurvaABC_Parametros: TCurvaABC_Parametros;
 begin
-  lCurvaABCDao := TCurvaABCDao.Create;
+  lCurvaABCDao := TCurvaABCDao.Create(vIConexao);
 
   try
     lCurvaABC_Parametros.TipoData                := pCurvaABC_Parametros.TipoData;

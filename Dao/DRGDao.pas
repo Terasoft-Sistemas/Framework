@@ -16,6 +16,7 @@ uses
   Terasoft.Framework.ListaSimples,
   Terasoft.Framework.SimpleTypes,
   Terasoft.FuncoesTexto,
+  ServerController,
   LojasModel;
 
 type
@@ -56,15 +57,14 @@ var
   lSQL:String;
   lConexao: TConexao;
 
-  lLojasModel: TLojasModel;
+  lLojasModel, lLojas_Dados: TLojasModel;
   lListaLojas: TLista_Lojas_Dados;
-  lLojas_Dados: TLojas_Dados;
   lLojas_Parametros: TLojas_Parametros;
 
   lMemTable: TFDMemTable;
 begin
   lConexao := TConexao.Create;
-  lLojasModel := TLojasModel.Create;
+  lLojasModel := TLojasModel.Create(Controller.xConexao);
 
   lMemTable := TFDMemTable.Create(nil);
 
@@ -143,9 +143,9 @@ begin
     lMemTable.CreateDataSet;
 
     lLojas_Parametros.Numero := pDRG_Detalhes_Parametros.Lojas;
-    lListaLojas := lLojasModel.ObterLista(lLojas_Parametros);
+    lLojasModel.ObterLista;
 
-    for lLojas_Dados in lListaLojas do
+    for lLojas_Dados in lLojasModel.LojassLista do
     begin
       lConexao.ConfigConexaoExterna(lLojas_Dados.Server,lLojas_Dados.Port,lLojas_Dados.DataBase);
       lQry := lConexao.CriarQueryExterna;
@@ -155,7 +155,7 @@ begin
       while not lQry.Eof do
       begin
         lMemTable.InsertRecord([
-                                lLojas_Dados.Numero,
+                                lLojas_Dados.LOJA,
                                 lQry.FieldByName('LANCAMENTO').AsString,
                                 lQry.FieldByName('DATA').AsDateTime,
                                 lQry.FieldByName('HISTORICO').AsString,
@@ -186,9 +186,8 @@ var
   lSQL:String;
   lConexao: TConexao;
 
-  lLojasModel: TLojasModel;
+  lLojasModel, lLojas_Dados: TLojasModel;
   lListaLojas: TLista_Lojas_Dados;
-  lLojas_Dados: TLojas_Dados;
   lLojas_Parametros: TLojas_Parametros;
 
   lMemTable: TFDMemTable;
@@ -196,7 +195,7 @@ var
   lGrupoAnt, lGrupo, lSubGrupo, lConta : String;
 begin
   lConexao := TConexao.Create;
-  lLojasModel := TLojasModel.Create;
+  lLojasModel := TLojasModel.Create(Controller.xConexao);
 
   lMemTable := TFDMemTable.Create(nil);
 
@@ -586,9 +585,9 @@ begin
     lMemTable.CreateDataSet;
 
     lLojas_Parametros.Numero := pDRG_Parametros.Lojas;
-    lListaLojas := lLojasModel.ObterLista(lLojas_Parametros);
+    lLojasModel.ObterLista;
 
-    for lLojas_Dados in lListaLojas do
+    for lLojas_Dados in lLojasModel.LojassLista do
     begin
       lConexao.ConfigConexaoExterna(lLojas_Dados.Server,lLojas_Dados.Port,lLojas_Dados.DataBase);
       lQry := lConexao.CriarQueryExterna;

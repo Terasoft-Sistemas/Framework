@@ -63,7 +63,6 @@ function TPCGDao.ObterVendasResultado1(pPCG_Parametros: TPCG_Parametros): TFDMem
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
   lLojasModel,
   lLojas_Dados: TLojasModel;
   lMemTable: TFDMemTable;
@@ -71,7 +70,6 @@ var
   lListaLojas: TLista_Lojas_Dados;
   lLojas_Parametros: TLojas_Parametros;
 begin
-  lConexao    := TConexao.Create;
   lLojasModel := TLojasModel.Create(vIConexao);
   lMemTable   := TFDMemTable.Create(nil);
 
@@ -219,8 +217,8 @@ begin
 
     for lLojas_Dados in lLojasModel.LojassLista do
     begin
-      lConexao.ConfigConexaoExterna(lLojas_Dados.Server,lLojas_Dados.Port,lLojas_Dados.DataBase);
-      lQry := lConexao.CriarQueryExterna;
+      vIConexao.ConfigConexaoExterna(lLojas_Dados.LOJA);
+      lQry := vIConexao.CriarQueryExterna;
       lQry.Open(lSQL);
 
       lQry.First;
@@ -248,7 +246,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
     lLojasModel.Free;
   end;
 end;
@@ -257,12 +254,11 @@ function TPCGDao.ObterVendasResultado2(pPCG_Parametros: TPCG_Parametros): TFDMem
 var
   lQry              : TFDQuery;
   lSQL              : String;
-  lConexao          : TConexao;
-  lLojasModel       : TLojasModel;
+  lLojasModel,
+  lLojas_Dados      : TLojasModel;
   lMemTable         : TFDMemTable;
 
   lListaLojas       : TLista_Lojas_Dados;
-  lLojas_Dados      : TLojas_Dados;
   lLojas_Parametros : TLojas_Parametros;
 
   lValorPossivel    : Real;
@@ -271,7 +267,6 @@ var
   lCodigo           : String;
   lDescricao        : String;
 begin
-  lConexao := TConexao.Create;
   lLojasModel := TLojasModel.Create(vIConexao);
   lMemTable := TFDMemTable.Create(nil);
 
@@ -482,10 +477,10 @@ begin
     lLojasModel.LojaView := pPCG_Parametros.Lojas;
     lLojasModel.ObterLista;
 
-    for lLojas_Dados in lListaLojas do
+    for lLojas_Dados in lLojasModel.LojassLista do
     begin
-      lConexao.ConfigConexaoExterna(lLojas_Dados.Server,lLojas_Dados.Port,lLojas_Dados.DataBase);
-      lQry := lConexao.CriarQueryExterna;
+      vIConexao.ConfigConexaoExterna(lLojas_Dados.LOJA);
+      lQry := vIConexao.CriarQueryExterna;
       lQry.Open(lSQL);
 
       lQry.First;
@@ -502,8 +497,8 @@ begin
 
         if pPCG_Parametros.TipoAnalise = tpFilial then
         begin
-          lCodigo    := lLojas_Dados.Numero;
-          lDescricao := lLojas_Dados.Nome;
+          lCodigo    := lLojas_Dados.LOJA;
+          lDescricao := lLojas_Dados.DESCRICAO;
         end
         else
         begin
@@ -512,7 +507,7 @@ begin
         end;
 
         lMemTable.InsertRecord([
-                                lLojas_Dados.Numero,
+                                lLojas_Dados.LOJA,
                                 lCodigo,
                                 lDescricao,
 
@@ -547,7 +542,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
     lLojasModel.Free;
   end;
 end;
@@ -710,15 +704,13 @@ function TPCGDao.ObterEstoqueResultado1(pPCG_Parametros: TPCG_Parametros): TFDMe
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
-  lLojasModel: TLojasModel;
+  lLojasModel,
+  lLojas_Dados: TLojasModel;
   lMemTable: TFDMemTable;
 
   lListaLojas: TLista_Lojas_Dados;
-  lLojas_Dados: TLojas_Dados;
   lLojas_Parametros: TLojas_Parametros;
 begin
-  lConexao := TConexao.Create;
   lLojasModel := TLojasModel.Create(vIConexao);
   lMemTable := TFDMemTable.Create(nil);
 
@@ -778,18 +770,18 @@ begin
     lLojasModel.LojaView := pPCG_Parametros.Lojas;
     lLojasModel.ObterLista;
 
-    for lLojas_Dados in lListaLojas do
+    for lLojas_Dados in lLojasModel.LojassLista do
     begin
-      lConexao.ConfigConexaoExterna(lLojas_Dados.Server,lLojas_Dados.Port,lLojas_Dados.DataBase);
-      lQry := lConexao.CriarQueryExterna;
+      vIConexao.ConfigConexaoExterna(lLojas_Dados.LOJA);
+      lQry := vIConexao.CriarQueryExterna;
       lQry.Open(lSQL);
 
       lQry.First;
       while not lQry.Eof do
       begin
         lMemTable.InsertRecord([
-                                lLojas_Dados.Numero,
-                                lLojas_Dados.Nome,
+                                lLojas_Dados.LOJA,
+                                lLojas_Dados.DESCRICAO,
                                 lQry.FieldByName('DESCRICAO').AsString,
                                 lQry.FieldByName('CUSTO').AsFloat,
                                 lQry.FieldByName('VENDA').AsFloat,
@@ -807,7 +799,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
     lLojasModel.Free;
   end;
 end;

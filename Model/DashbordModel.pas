@@ -5,16 +5,17 @@ interface
 uses
   Terasoft.Enumerado,
   Terasoft.Web.Types,
+  Interfaces.Conexao,
   FireDAC.Comp.Client;
 
 type
   TDashbordModel = class
 
   private
-
+    vIConexao : IConexao;
   public
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function ObterQuery1_Totalizador(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
@@ -34,9 +35,9 @@ uses
 
 { TDashbordModel }
 
-constructor TDashbordModel.Create;
+constructor TDashbordModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TDashbordModel.Destroy;
@@ -50,7 +51,7 @@ var
   lDashbordDao: TDashbordDao;
   lDashbord_Parametros: TDashbord_Parametros;
 begin
-  lDashbordDao := TDashbordDao.Create;
+  lDashbordDao := TDashbordDao.Create(vIconexao);
 
   try
     lDashbord_Parametros.TipoData       := pDashbord_Parametros.TipoData;
@@ -75,7 +76,7 @@ var
   lDashbordDao: TDashbordDao;
   lDashbord_Parametros: TDashbord_Parametros;
 begin
-  lDashbordDao := TDashbordDao.Create;
+  lDashbordDao := TDashbordDao.Create(vIConexao);
 
   try
     lDashbord_Parametros.TipoData       := pDashbord_Parametros.TipoData;
@@ -100,7 +101,7 @@ var
   lDashbordDao: TDashbordDao;
   lDashbord_Parametros: TDashbord_Parametros;
 begin
-  lDashbordDao := TDashbordDao.Create;
+  lDashbordDao := TDashbordDao.Create(vIConexao);
 
   try
     lDashbord_Parametros.TipoData       := pDashbord_Parametros.TipoData;
@@ -125,7 +126,7 @@ var
   lDashbordDao: TDashbordDao;
   lDashbord_Parametros: TDashbord_Parametros;
 begin
-  lDashbordDao := TDashbordDao.Create;
+  lDashbordDao := TDashbordDao.Create(vIConexao);
 
   try
     lDashbord_Parametros.TipoData       := pDashbord_Parametros.TipoData;
@@ -150,7 +151,7 @@ var
   lDashbordDao: TDashbordDao;
   lDashbord_Parametros: TDashbord_Parametros;
 begin
-  lDashbordDao := TDashbordDao.Create;
+  lDashbordDao := TDashbordDao.Create(vIConexao);
 
   try
     lDashbord_Parametros.TipoData       := pDashbord_Parametros.TipoData;
@@ -175,7 +176,7 @@ var
   lDashbordDao: TDashbordDao;
   lDashbord_Parametros: TDashbord_Parametros;
 begin
-  lDashbordDao := TDashbordDao.Create;
+  lDashbordDao := TDashbordDao.Create(vIConexao);
 
   try
     lDashbord_Parametros.TipoData       := pDashbord_Parametros.TipoData;
@@ -200,7 +201,7 @@ var
   lDashbordDao: TDashbordDao;
   lDashbord_Parametros: TDashbord_Parametros;
 begin
-  lDashbordDao := TDashbordDao.Create;
+  lDashbordDao := TDashbordDao.Create(vIConexao);
 
   try
     lDashbord_Parametros.Lojas := pDashbord_Parametros.Lojas;

@@ -15,12 +15,15 @@ uses
   Terasoft.Framework.ListaSimples,
   Terasoft.Framework.SimpleTypes,
   Terasoft.FuncoesTexto,
+  Interfaces.Conexao,
   LojasModel;
 
 type
   TCurvaABCDao = class
 
   private
+    vIConexao : IConexao;
+
     lNomeCampo, lNomeCampoOS, lNomeCampoDev, lNomeCampoEntrada : String;
     lTabelaPedido, lTabelaOS, lTabelaDevolucao, lTabelaEntrada : String;
     lFiltro : String;
@@ -28,7 +31,7 @@ type
     procedure DefineDadosSelect(Acao: TTipoAnaliseCurvaABC; pCurvaABC_Parametros: TCurvaABC_Parametros);
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function ObterCurvaABC(pCurvaABC_Parametros: TCurvaABC_Parametros): TFDMemTable;
@@ -44,9 +47,9 @@ uses
 
 { TCurvaABC }
 
-constructor TCurvaABCDao.Create;
+constructor TCurvaABCDao.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TCurvaABCDao.Destroy;
@@ -59,12 +62,12 @@ var
   lQry              : TFDQuery;
   lSQL              : String;
   lConexao          : TConexao;
-  lLojasModel       : TLojasModel;
+  lLojasModel,
+  lLojas_Dados      : TLojasModel;
   lMemTable         : TFDMemTable;
   Options           : TLocateOptions;
 
   lListaLojas       : TLista_Lojas_Dados;
-  lLojas_Dados      : TLojas_Dados;
   lLojas_Parametros : TLojas_Parametros;
 
   lTotalVendas      : Real;
@@ -75,7 +78,7 @@ var
   lTotalItens       : Real;
 begin
   lConexao := TConexao.Create;
-  lLojasModel := TLojasModel.Create;
+  lLojasModel := TLojasModel.Create(vIConexao);
   lMemTable := TFDMemTable.Create(nil);
 
   try
@@ -268,10 +271,10 @@ begin
     lTotalLucro  := 0;
     lTotalItens  := 0;
 
-    lLojas_Parametros.Numero := pCurvaABC_Parametros.Lojas;
-    lListaLojas := lLojasModel.ObterLista(lLojas_Parametros);
+    lLojasModel.LojaView := pCurvaABC_Parametros.Lojas;
+    lLojasModel.ObterLista;
 
-    for lLojas_Dados in lListaLojas do
+    for lLojas_Dados in lLojasModel.LojassLista do
     begin
       lConexao.ConfigConexaoExterna(lLojas_Dados.Server,lLojas_Dados.Port,lLojas_Dados.DataBase);
       lQry := lConexao.CriarQueryExterna;

@@ -3,7 +3,7 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
-  Interfaces.Conexao;
+  Interfaces.Conexao, FireDAC.Comp.Client;
 
 type
   TProdutosModel = class
@@ -818,6 +818,7 @@ type
 
     function Salvar: String;
     procedure obterLista;
+    function obterListaMemTable : TFDMemTable;
 
     function obterCodigoBarras(pIdProduto: String): String;
     function obterSaldo(pIdProduto: String): Double;
@@ -837,10 +838,14 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
   end;
+
 implementation
+
 uses
   ProdutosDao;
+
 { TProdutosModel }
+
 procedure TProdutosModel.adicionarSaldo(pIdProduto: String; pSaldo: Double);
 var
   lProdutoDao: TProdutosDao;
@@ -905,6 +910,29 @@ begin
     lProdutosLista.Free;
   end;
 end;
+
+function TProdutosModel.obterListaMemTable: TFDMemTable;
+var
+  lProdutosLista: TProdutosDao;
+begin
+  lProdutosLista := TProdutosDao.Create(vIConexao);
+  try
+    lProdutosLista.TotalRecords    := FTotalRecords;
+    lProdutosLista.WhereView       := FWhereView;
+    lProdutosLista.CountView       := FCountView;
+    lProdutosLista.OrderView       := FOrderView;
+    lProdutosLista.StartRecordView := FStartRecordView;
+    lProdutosLista.LengthPageView  := FLengthPageView;
+    lProdutosLista.IDRecordView    := FIDRecordView;
+
+    Result := lProdutosLista.obterListaMemTable;
+
+    FTotalRecords  := lProdutosLista.TotalRecords;
+  finally
+    lProdutosLista.Free;
+  end;
+end;
+
 function TProdutosModel.obterSaldo(pIdProduto: String): Double;
 var
   lProdutoDao: TProdutosDao;

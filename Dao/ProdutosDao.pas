@@ -57,6 +57,7 @@ type
     function alterar(pProdutosModel: TProdutosModel): String;
     function excluir(pProdutosModel: TProdutosModel): String;
 
+    function ObterListaMemTable: TFDMemTable;
     procedure obterLista;
     function obterSaldo(pIdProduto: String): Double;
     procedure subtrairSaldo(pIdProduto: String; pSaldo: Double);
@@ -510,6 +511,34 @@ begin
     lQry.Free;
   end;
 end;
+function TProdutosDao.ObterListaMemTable: TFDMemTable;
+var
+  lQry: TFDQuery;
+  lSQL:String;
+  lMemTable: TFDMemTable;
+begin
+  try
+    lQry := vIConexao.CriarQuery;
+
+    lSQL := ' Select CODIGO_PRO,      ' + SLineBreak +
+            '        NOME_PRO         ' + SLineBreak +
+            '   From PRODUTO          ' + SLineBreak +
+            '  Order by NOME_PRO      ' + SLineBreak;
+
+
+    lQry.Open(lSQL);
+    lSql := lSql + where;
+
+    if not FOrderView.IsEmpty then
+      lSql := lSql + ' order by '+FOrderView;
+
+    Result := vConstrutor.atribuirRegistros(lQry);
+    obterTotalRegistros;
+  finally
+    lQry.Free;
+  end;
+end;
+
 function TProdutosDao.obterSaldo(pIdProduto: String): Double;
 var
   lConexao: TFDConnection;

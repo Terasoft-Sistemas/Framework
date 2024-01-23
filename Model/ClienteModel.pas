@@ -3,7 +3,7 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
-  Interfaces.Conexao;
+  Interfaces.Conexao, FireDAC.Comp.Client;
 
 type
   TClienteModel = class
@@ -941,6 +941,8 @@ type
     function nomeCliente(pId: String): Variant;
     function diasAtraso(pCodigoCliente: String): Variant;
 
+    function ObterListaMemTable: TFDMemTable;
+
     property ClientesLista: TObjectList<TClienteModel> read FClientesLista write SetClientesLista;
 
    	property Acao :TAcao read FAcao write SetAcao;
@@ -1033,6 +1035,27 @@ begin
     FClientesLista                := lClienteLista.ClientesLista;
   finally
     lClienteLista.Free;
+  end;
+end;
+
+function TClienteModel.ObterListaMemTable: TFDMemTable;
+var
+  lClienteDao: TClienteDao;
+begin
+  lClienteDao := TClienteDao.Create(vIConexao);
+
+  lClienteDao.TotalRecords      := FTotalRecords;
+  lClienteDao.WhereView         := FWhereView;
+  lClienteDao.CountView         := FCountView;
+  lClienteDao.OrderView         := FOrderView;
+  lClienteDao.StartRecordView   := FStartRecordView;
+  lClienteDao.LengthPageView    := FLengthPageView;
+  lClienteDao.IDRecordView      := FIDRecordView;
+
+  try
+    Result := lClienteDao.ObterListaMemTable;
+  finally
+    lClienteDao.Free;
   end;
 end;
 

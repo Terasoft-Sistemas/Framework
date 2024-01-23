@@ -82,7 +82,7 @@ var
   lPCGDao: TPCGDao;
   lPCG_Parametros: TPCG_Parametros;
 begin
-  lPCGDao := TPCGDao.Create;
+  lPCGDao := TPCGDao.Create(vIConexao);
 
   try
     lPCG_Parametros.TipoData                := pPCG_Parametros.TipoData;
@@ -116,7 +116,7 @@ var
   lPCGDao: TPCGDao;
   lPCG_Parametros: TPCG_Parametros;
 begin
-  lPCGDao := TPCGDao.Create;
+  lPCGDao := TPCGDao.Create(vIConexao);
 
   try
     lPCG_Parametros.TipoData                := pPCG_Parametros.TipoData;

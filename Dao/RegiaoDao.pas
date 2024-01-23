@@ -13,12 +13,15 @@ uses
   System.SysUtils,
   System.StrUtils,
   System.Variants,
-  System.Rtti;
+  System.Rtti,
+  Interfaces.Conexao;
 
 type
   TRegiaoDao = class
 
   private
+    vIConexao : IConexao;
+
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -40,7 +43,7 @@ type
       vConstrutorDao : TConstrutorDao;
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property TotalRecords      : Integer      read FTotalRecords        write SetTotalRecords;
@@ -64,9 +67,10 @@ implementation
 
 { TRegiao }
 
-constructor TRegiaoDao.Create;
+constructor TRegiaoDao.Create(pIConexao : IConexao);
 begin
-  vConstrutorDao := TConstrutorDao.Create;
+  vIConexao      := pIConexao;
+  vConstrutorDao := TConstrutorDao.Create(pIConexao);
 end;
 
 destructor TRegiaoDao.Destroy;

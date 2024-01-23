@@ -4,12 +4,15 @@ interface
 
 uses
   Terasoft.Enumerado,
-  FireDAC.Comp.Client;
+  FireDAC.Comp.Client,
+  Interfaces.Conexao;
 
 type
   TRegiaoModel = class
 
   private
+    vIConexao : IConexao;
+
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -55,7 +58,7 @@ type
     property IDRecordView       : Integer     read FIDRecordView       write SetIDRecordView;
 
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -70,9 +73,9 @@ uses
 
 { TRegiaoModel }
 
-constructor TRegiaoModel.Create;
+constructor TRegiaoModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TRegiaoModel.Destroy;
@@ -85,7 +88,7 @@ function TRegiaoModel.obterLista: TFDMemTable;
 var
   lRegiaoLista: TRegiaoDao;
 begin
-  lRegiaoLista := TRegiaoDao.Create;
+  lRegiaoLista := TRegiaoDao.Create(vIConexao);
   try
     lRegiaoLista.TotalRecords    := FTotalRecords;
     lRegiaoLista.WhereView       := FWhereView;
@@ -106,7 +109,7 @@ function TRegiaoModel.Salvar: String;
 var
   lRegiaoDao: TRegiaoDao;
 begin
-  lRegiaoDao := TRegiaoDao.Create;
+  lRegiaoDao := TRegiaoDao.Create(vIConexao);
 
   Result := '';
 

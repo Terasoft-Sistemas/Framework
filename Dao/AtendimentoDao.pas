@@ -10,6 +10,7 @@ uses
   Terasoft.FuncoesTexto,
   Terasoft.ConstrutorDao,
   FireDAC.Comp.Client,
+  ServerController,
   System.SysUtils,
   System.StrUtils,
   System.Variants,
@@ -67,7 +68,7 @@ implementation
 
 constructor TAtendimentoDao.Create;
 begin
-  vConstrutorDao := TConstrutorDao.Create;
+  vConstrutorDao := TConstrutorDao.Create(Controller.xConexao);
 end;
 
 destructor TAtendimentoDao.Destroy;

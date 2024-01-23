@@ -65,6 +65,7 @@ type
     function ufCliente(pId: String): Variant;
     function nomeCliente(pId: String): Variant;
     function diasAtraso(pCodigoCliente: String): Variant;
+    function ObterListaMemTable: TFDMemTable;
 
 end;
 implementation
@@ -850,6 +851,35 @@ begin
       FClientesLista[i].sacador_avalista_id        := lQry.FieldByName('SACADOR_AVALISTA_ID').AsString;
       lQry.Next;
     end;
+    obterTotalRegistros;
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TClienteDao.ObterListaMemTable: TFDMemTable;
+var
+  lQry       : TFDQuery;
+  lSql,
+  lPaginacao : String;
+
+begin
+  try
+
+    lQry     := vIConexao.CriarQuery;
+
+    if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
+      lPaginacao := 'first ' + LengthPageView + ' SKIP ' + StartRecordView;
+
+    lSql := 'select '+ lPaginacao + ' codigo_cli, fantasia_cli from clientes where 1=1 ';
+    lSql := lSql + where;
+
+    if not FOrderView.IsEmpty then
+      lSql := lSql + ' order by '+FOrderView;
+
+    lQry.Open(lSql);
+
+    Result := vConstrutor.atribuirRegistros(lQry);
     obterTotalRegistros;
   finally
     lQry.Free;
