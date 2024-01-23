@@ -102,6 +102,15 @@
             <Form>Form1</Form>
             <FormType>dfm</FormType>
         </DCCReference>
+        <DCCReference Include="..\Dao\FinanceiroPedidoDao.pas"/>
+        <DCCReference Include="..\Model\FinanceiroPedidoModel.pas"/>
+        <DCCReference Include="..\Types\Terasoft.Types.pas"/>
+        <DCCReference Include="..\Interfaces\Interfaces.Conexao.pas"/>
+        <DCCReference Include="..\Libs\Terasoft.Utils.pas"/>
+        <DCCReference Include="..\Libs\Terasoft.ConstrutorDao.pas"/>
+        <DCCReference Include="..\Libs\Terasoft.FuncoesTexto.pas"/>
+        <DCCReference Include="Conexao.pas"/>
+        <DCCReference Include="Controllers.Conexao.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
