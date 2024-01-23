@@ -3,7 +3,7 @@ unit GrupoModel;
 interface
 
 uses
-  Terasoft.Enumerado,
+
   Terasoft.Web.Types,
   GrupoDao,
   FireDAC.Comp.Client;
