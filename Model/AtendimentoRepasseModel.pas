@@ -3,13 +3,16 @@ unit AtendimentoRepasseModel;
 interface
 
 uses
-  Terasoft.Enumerado,
-  FireDAC.Comp.Client;
+  Terasoft.types,
+  FireDAC.Comp.Client,
+  Interfaces.Conexao;
 
 type
   TAtendimentoRepasseModel = class
 
   private
+    vIConexao : IConexao;
+
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -54,7 +57,7 @@ type
     property LengthPageView     : String      read FLengthPageView     write SetLengthPageView;
     property IDRecordView       : Integer     read FIDRecordView       write SetIDRecordView;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -69,9 +72,9 @@ uses
 
 { TAtendimentoRepasseModel }
 
-constructor TAtendimentoRepasseModel.Create;
+constructor TAtendimentoRepasseModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TAtendimentoRepasseModel.Destroy;
@@ -84,7 +87,7 @@ function TAtendimentoRepasseModel.obterLista: TFDMemTable;
 var
   lAtendimentoRepasseLista: TAtendimentoRepasseDao;
 begin
-  lAtendimentoRepasseLista := TAtendimentoRepasseDao.Create;
+  lAtendimentoRepasseLista := TAtendimentoRepasseDao.Create(vIConexao);
   try
     lAtendimentoRepasseLista.TotalRecords    := FTotalRecords;
     lAtendimentoRepasseLista.WhereView       := FWhereView;
@@ -105,15 +108,15 @@ function TAtendimentoRepasseModel.Salvar: String;
 var
   lAtendimentoRepasseDao: TAtendimentoRepasseDao;
 begin
-  lAtendimentoRepasseDao := TAtendimentoRepasseDao.Create;
+  lAtendimentoRepasseDao := TAtendimentoRepasseDao.Create(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lAtendimentoRepasseDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lAtendimentoRepasseDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lAtendimentoRepasseDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lAtendimentoRepasseDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lAtendimentoRepasseDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lAtendimentoRepasseDao.excluir(Self);
     end;
 
   finally

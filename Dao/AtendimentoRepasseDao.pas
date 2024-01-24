@@ -4,22 +4,22 @@ interface
 
 uses
   AtendimentoRepasseModel,
-  Conexao,
-  SistemaControl,
   Terasoft.Utils,
   Terasoft.FuncoesTexto,
   Terasoft.ConstrutorDao,
-  ServerController,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Variants,
-  System.Rtti;
+  System.Rtti,
+  Interfaces.Conexao;
 
 type
   TAtendimentoRepasseDao = class
 
   private
+    vIConexao : IConexao;
+
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -41,7 +41,7 @@ type
       vConstrutorDao : TConstrutorDao;
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property TotalRecords      : Integer      read FTotalRecords        write SetTotalRecords;
@@ -65,9 +65,10 @@ implementation
 
 { TAtendimentoRepasse }
 
-constructor TAtendimentoRepasseDao.Create;
+constructor TAtendimentoRepasseDao.Create(pIConexao : IConexao);
 begin
-  vConstrutorDao := TConstrutorDao.Create(Controller.xConexao);
+  vIConexao      := pIConexao;
+  vConstrutorDao := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TAtendimentoRepasseDao.Destroy;
@@ -78,36 +79,32 @@ end;
 
 function TAtendimentoRepasseDao.incluir(pAtendimentoRepasseModel: TAtendimentoRepasseModel): String;
 var
-  lQry          : TFDQuery;
-  lSQL          : String;
-  lConexao      : TConexao;
+  lQry   : TFDQuery;
+  lSQL   : String;
 begin
-  lConexao      := TConexao.Create;
-  lQry          := lConexao.CriarQuery;
+  lQry   := vIConexao.CriarQuery;
+
   try
     lSQL := vConstrutorDao.gerarInsert('ATENDIMENTO_REPASSE', 'ID', true);
 
     lQry.SQL.Add(lSQL);
 
-    pAtendimentoRepasseModel.ID := lConexao.Generetor('GEN_ATENDIMENTO_REPASSE');
+    pAtendimentoRepasseModel.ID := vIConexao.Generetor('GEN_ATENDIMENTO_REPASSE');
     setParams(lQry, pAtendimentoRepasseModel);
     lQry.Open;
 
     Result := lQry.FieldByName('ID').AsString;
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
 function TAtendimentoRepasseDao.alterar(pAtendimentoRepasseModel: TAtendimentoRepasseModel): String;
 var
-  lQry      : TFDQuery;
-  lSQL      : String;
-  lConexao  : TConexao;
+  lQry   : TFDQuery;
+  lSQL   : String;
 begin
-  lConexao  := TConexao.Create;
-  lQry      := lConexao.CriarQuery;
+  lQry   := vIConexao.CriarQuery;
 
   lSQL := vConstrutorDao.gerarUpdate('ATENDIMENTO_REPASSE', 'ID');
 
@@ -121,17 +118,14 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
 function TAtendimentoRepasseDao.excluir(pAtendimentoRepasseModel: TAtendimentoRepasseModel): String;
 var
-  lQry     : TFDQuery;
-  lConexao : TConexao;
+  lQry  : TFDQuery;
 begin
-  lConexao := TConexao.Create;
-  lQry     := lConexao.CriarQuery;
+  lQry  := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from ATENDIMENTO_REPASSE where ID = :ID',[pAtendimentoRepasseModel.ID]);
@@ -140,7 +134,6 @@ begin
    Result := pAtendimentoRepasseModel.ID;
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -161,13 +154,11 @@ end;
 
 procedure TAtendimentoRepasseDao.obterTotalRegistros;
 var
-  lQry: TFDQuery;
-  lSQL:String;
-  lConexao: TConexao;
+  lQry : TFDQuery;
+  lSQL : String;
 begin
   try
-    lConexao := TConexao.Create;
-    lQry := lConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From ATENDIMENTO_REPASSE inner join usuario on usuario.id = atendimento_repasse.usuario_repasse_id  where 1=1 ';
 
@@ -179,7 +170,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -187,11 +177,9 @@ function TAtendimentoRepasseDao.ObterLista: TFDMemTable;
 var
   lQry       : TFDQuery;
   lSQL       : String;
-  lConexao   : TConexao;
   lPaginacao : String;
 begin
-  lConexao   := TConexao.Create;
-  lQry       := lConexao.CriarQuery;
+  lQry       := vIConexao.CriarQuery;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -215,7 +203,6 @@ begin
     obterTotalRegistros;
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 

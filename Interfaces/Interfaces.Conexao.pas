@@ -21,6 +21,8 @@ interface
 
       function criarQuery                              : TFDQuery;
       function criarQueryExterna                       : TFDQuery;
+      function criaConexao                             : IConexao;
+      function ConfigConexao                           : Boolean;
       function ConfigConexaoExterna(pLoja: String)     : Boolean;
       function Generetor(pValue: String)               : String;
       function getConnection                           : TFDConnection;
@@ -33,6 +35,8 @@ interface
 
       function setEmpresa(pEmpresa: TEmpresa)          : Boolean;
       function getEmpresa                              : TEmpresa;
+
+      procedure setContext(pUsuario: String);
 
     end;
 

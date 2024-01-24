@@ -3,13 +3,16 @@ unit AtendimentoModel;
 interface
 
 uses
-  Terasoft.Enumerado,
-  FireDAC.Comp.Client;
+  Terasoft.Types,
+  FireDAC.Comp.Client,
+  Interfaces.Conexao;
 
 type
   TAtendimentoModel = class
 
   private
+    vIConexao : IConexao;
+
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -120,7 +123,7 @@ type
     property IDRecordView       : Integer     read FIDRecordView        write SetIDRecordView;
 
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -135,9 +138,9 @@ uses
 
 { TAtendimentoModel }
 
-constructor TAtendimentoModel.Create;
+constructor TAtendimentoModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TAtendimentoModel.Destroy;
@@ -150,7 +153,7 @@ function TAtendimentoModel.obterLista: TFDMemTable;
 var
   lAtendimentoLista: TAtendimentoDao;
 begin
-  lAtendimentoLista := TAtendimentoDao.Create;
+  lAtendimentoLista := TAtendimentoDao.Create(vIConexao);
   try
     lAtendimentoLista.TotalRecords    := FTotalRecords;
     lAtendimentoLista.WhereView       := FWhereView;
@@ -171,15 +174,15 @@ function TAtendimentoModel.Salvar: String;
 var
   lAtendimentoDao: TAtendimentoDao;
 begin
-  lAtendimentoDao := TAtendimentoDao.Create;
+  lAtendimentoDao := TAtendimentoDao.Create(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lAtendimentoDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lAtendimentoDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lAtendimentoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lAtendimentoDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lAtendimentoDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lAtendimentoDao.excluir(Self);
     end;
 
   finally

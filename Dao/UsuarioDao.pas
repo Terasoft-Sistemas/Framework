@@ -366,8 +366,8 @@ end;
 
 procedure TUsuarioDao.validaLogin(user, pass: String);
 var
-  lQry: TFDQuery;
-  lSQL:String;
+  lQry : TFDQuery;
+  lSQL : String;
 begin
   lQry := vIConexao.CriarQuery;
 

@@ -3,13 +3,16 @@ unit AtendimentoFinalizadoModel;
 interface
 
 uses
-  Terasoft.Enumerado,
-  FireDAC.Comp.Client;
+  Terasoft.Types,
+  FireDAC.Comp.Client,
+  Interfaces.Conexao;
 
 type
   TAtendimentoFinalizadoModel = class
 
   private
+    vIConexao : IConexao;
+
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -59,7 +62,7 @@ type
     property LengthPageView     : String      read FLengthPageView     write SetLengthPageView;
     property IDRecordView       : Integer     read FIDRecordView       write SetIDRecordView;
 
-  	constructor Create;
+  	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
@@ -74,9 +77,9 @@ uses
 
 { TAtendimentoFinalizadoModel }
 
-constructor TAtendimentoFinalizadoModel.Create;
+constructor TAtendimentoFinalizadoModel.Create(pIConexao : IConexao);
 begin
-
+  vIConexao := pIConexao;
 end;
 
 destructor TAtendimentoFinalizadoModel.Destroy;
@@ -89,7 +92,7 @@ function TAtendimentoFinalizadoModel.obterLista: TFDMemTable;
 var
   lAtendimentoFinalizadoLista: TAtendimentoFinalizadoDao;
 begin
-  lAtendimentoFinalizadoLista := TAtendimentoFinalizadoDao.Create;
+  lAtendimentoFinalizadoLista := TAtendimentoFinalizadoDao.Create(vIConexao);
   try
     lAtendimentoFinalizadoLista.TotalRecords    := FTotalRecords;
     lAtendimentoFinalizadoLista.WhereView       := FWhereView;
@@ -110,15 +113,15 @@ function TAtendimentoFinalizadoModel.Salvar: String;
 var
   lAtendimentoFinalizadoDao: TAtendimentoFinalizadoDao;
 begin
-  lAtendimentoFinalizadoDao := TAtendimentoFinalizadoDao.Create;
+  lAtendimentoFinalizadoDao := TAtendimentoFinalizadoDao.Create(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Enumerado.tacIncluir: Result := lAtendimentoFinalizadoDao.incluir(Self);
-      Terasoft.Enumerado.tacAlterar: Result := lAtendimentoFinalizadoDao.alterar(Self);
-      Terasoft.Enumerado.tacExcluir: Result := lAtendimentoFinalizadoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lAtendimentoFinalizadoDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lAtendimentoFinalizadoDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lAtendimentoFinalizadoDao.excluir(Self);
     end;
 
   finally

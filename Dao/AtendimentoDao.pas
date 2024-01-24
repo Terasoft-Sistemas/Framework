@@ -4,22 +4,22 @@ interface
 
 uses
   AtendimentoModel,
-  Conexao,
-  SistemaControl,
   Terasoft.Utils,
   Terasoft.FuncoesTexto,
   Terasoft.ConstrutorDao,
   FireDAC.Comp.Client,
-  ServerController,
   System.SysUtils,
   System.StrUtils,
   System.Variants,
-  System.Rtti;
+  System.Rtti,
+  Interfaces.Conexao;
 
 type
   TAtendimentoDao = class
 
   private
+    vIConexao : IConexao;
+
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -42,7 +42,7 @@ type
       vConstrutorDao : TConstrutorDao;
 
   public
-    constructor Create;
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     property TotalRecords      : Integer      read FTotalRecords        write SetTotalRecords;
@@ -66,9 +66,10 @@ implementation
 
 { TAtendimento }
 
-constructor TAtendimentoDao.Create;
+constructor TAtendimentoDao.Create(pIConexao : IConexao);
 begin
-  vConstrutorDao := TConstrutorDao.Create(Controller.xConexao);
+  vIConexao      := pIConexao;
+  vConstrutorDao := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TAtendimentoDao.Destroy;
@@ -79,12 +80,11 @@ end;
 
 function TAtendimentoDao.incluir(pAtendimentoModel: TAtendimentoModel): String;
 var
-  lQry          : TFDQuery;
-  lSQL          : String;
-  lConexao      : TConexao;
+  lQry    : TFDQuery;
+  lSQL    : String;
 begin
-  lConexao      := TConexao.Create;
-  lQry          := lConexao.CriarQuery;
+  lQry    := vIConexao.CriarQuery;
+
   try
     lSQL := vConstrutorDao.gerarInsert('ATENDIMENTO', 'ID');
 
@@ -95,7 +95,6 @@ begin
     Result := lQry.FieldByName('ID').AsString;
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -103,10 +102,8 @@ function TAtendimentoDao.alterar(pAtendimentoModel: TAtendimentoModel): String;
 var
   lQry      : TFDQuery;
   lSQL      : String;
-  lConexao  : TConexao;
 begin
-  lConexao  := TConexao.Create;
-  lQry      := lConexao.CriarQuery;
+  lQry      := vIConexao.CriarQuery;
 
   lSQL := vConstrutorDao.gerarUpdate('ATENDIMENTO', 'ID');
 
@@ -119,17 +116,14 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
 function TAtendimentoDao.excluir(pAtendimentoModel: TAtendimentoModel): String;
 var
   lQry     : TFDQuery;
-  lConexao : TConexao;
 begin
-  lConexao := TConexao.Create;
-  lQry     := lConexao.CriarQuery;
+  lQry     := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from atendimento where ID = :ID',[pAtendimentoModel.ID]);
@@ -138,7 +132,6 @@ begin
    Result := pAtendimentoModel.ID;
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -161,11 +154,9 @@ procedure TAtendimentoDao.obterTotalRegistros;
 var
   lQry: TFDQuery;
   lSQL:String;
-  lConexao: TConexao;
 begin
   try
-    lConexao := TConexao.Create;
-    lQry := lConexao.CriarQuery;
+    lQry := vIConexao.CriarQuery;
 
     lSql := '   select count(*) records                                                           '+SLineBreak+
             '     from atendimento                                                                '+SLineBreak+
@@ -182,7 +173,6 @@ begin
 
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
@@ -190,11 +180,9 @@ function TAtendimentoDao.ObterLista: TFDMemTable;
 var
   lQry       : TFDQuery;
   lSQL       : String;
-  lConexao   : TConexao;
   lPaginacao : String;
 begin
-  lConexao   := TConexao.Create;
-  lQry       := lConexao.CriarQuery;
+  lQry       := vIConexao.CriarQuery;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -227,7 +215,6 @@ begin
     obterTotalRegistros;
   finally
     lQry.Free;
-    lConexao.Free;
   end;
 end;
 
