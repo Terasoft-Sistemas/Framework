@@ -9,6 +9,12 @@ uses
   Interfaces.Conexao;
 
 type
+  TVenderItemParametros = record
+    PRODUTO          : String;
+    QUANTIDADE,
+    DESCONTO         : Double;
+  end;
+
   TWebPedidoModel = class
 
   private
@@ -341,6 +347,7 @@ type
     function carregaClasse(pId: String): TWebPedidoModel;
 
     function aprovarVendaAssistida(pIdVendaAssistida: Integer): String;
+    function VenderItem(pVenderItemParametros: TVenderItemParametros): String;
 
     property WebPedidosLista: TObjectList<TWebPedidoModel> read FWebPedidosLista write SetWebPedidosLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -364,7 +371,7 @@ uses
   PedidoItensModel,
   System.SysUtils,
   FuncionarioModel,
-  System.StrUtils;
+  System.StrUtils, ProdutosModel, EmpresaModel;
 
 { TWebPedidoModel }
 
@@ -1123,6 +1130,55 @@ end;
 procedure TWebPedidoModel.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
+end;
+
+function TWebPedidoModel.VenderItem(pVenderItemParametros: TVenderItemParametros): String;
+var
+  lWebPedidoItensModel : TWebPedidoItensModel;
+  lProdutoModel        : TProdutosModel;
+  lPrecoParamentros    : TProdutoPreco;
+
+begin
+  lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
+  lProdutoModel        := TProdutosModel.Create(vIConexao);
+
+  try
+    lProdutoModel.IDRecordView := pVenderItemParametros.PRODUTO;
+    lProdutoModel.obterLista;
+
+    lProdutoModel := lProdutoModel.ProdutossLista[0];
+
+    lWebPedidoItensModel.Acao := tacIncluir;
+    lWebPedidoItensModel.WEB_PEDIDO_ID       := self.PEDIDO_ID;
+    lWebPedidoItensModel.PRODUTO_ID          := pVenderItemParametros.PRODUTO;
+    lWebPedidoItensModel.QUANTIDADE          := pVenderItemParametros.QUANTIDADE;
+
+    lPrecoParamentros.Produto       := pVenderItemParametros.PRODUTO;
+    lPrecoParamentros.Cliente       := self.FCLIENTE_ID;
+    lPrecoParamentros.Portador      := self.FPORTADOR_ID;
+    lPrecoParamentros.PrecoVenda    := '';
+    lPrecoParamentros.Loja          := self.FLOJA;
+    lPrecoParamentros.Qtde          := pVenderItemParametros.QUANTIDADE;
+    lPrecoParamentros.PrecoUf       := false;
+    lPrecoParamentros.Promocao      := true;
+    lPrecoParamentros.PrecoCliente  := false;
+    lPrecoParamentros.TabelaPreco   := true;
+
+    lWebPedidoItensModel.VALOR_UNITARIO      := lProdutoModel.ValorUnitario(lPrecoParamentros);
+    lWebPedidoItensModel.VALOR_VENDIDO       := lWebPedidoItensModel.VALOR_UNITARIO;
+    lWebPedidoItensModel.QUANTIDADE_TROCA    := '0';
+		lWebPedidoItensModel.PERCENTUAL_DESCONTO := '0';
+		lWebPedidoItensModel.VALOR_VENDA_ATUAL   := lProdutoModel.VENDA_PRO;
+		lWebPedidoItensModel.VALOR_CUSTO_ATUAL   := lProdutoModel.CUSTOMEDIO_PRO;
+    lWebPedidoItensModel.TIPO_ENTREGA        := 'LJ';
+		lWebPedidoItensModel.RESERVADO           := pVenderItemParametros.QUANTIDADE;
+    lWebPedidoItensModel.TIPO                := 'NORMAL';
+
+    Result := lWebPedidoItensModel.Salvar;
+  finally
+    lWebPedidoItensModel.Free;
+    lProdutoModel.Free;
+  end;
 end;
 
 end.
