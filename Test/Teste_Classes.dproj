@@ -100,7 +100,6 @@
         </DelphiCompile>
         <DCCReference Include="uTeste.pas">
             <Form>Form1</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="..\Dao\FinanceiroPedidoDao.pas"/>
         <DCCReference Include="..\Model\FinanceiroPedidoModel.pas"/>
@@ -110,6 +109,59 @@
         <DCCReference Include="..\Libs\Terasoft.ConstrutorDao.pas"/>
         <DCCReference Include="..\Libs\Terasoft.FuncoesTexto.pas"/>
         <DCCReference Include="Conexao.pas"/>
+        <DCCReference Include="..\Model\WebPedidoModel.pas"/>
+        <DCCReference Include="..\Dao\WebPedidoDao.pas"/>
+        <DCCReference Include="..\Model\FuncionarioModel.pas"/>
+        <DCCReference Include="..\Model\PedidoItensModel.pas"/>
+        <DCCReference Include="..\Model\PedidoVendaModel.pas"/>
+        <DCCReference Include="..\Model\WebPedidoItensModel.pas"/>
+        <DCCReference Include="..\Dao\FornecedorDao.pas"/>
+        <DCCReference Include="..\Dao\FuncionarioDao.pas"/>
+        <DCCReference Include="..\Dao\PedidoItensDao.pas"/>
+        <DCCReference Include="..\Model\CalcularImpostosModel.pas"/>
+        <DCCReference Include="..\Model\MovimentoModel.pas"/>
+        <DCCReference Include="..\Model\ProdutosModel.pas"/>
+        <DCCReference Include="..\Model\UsuarioModel.pas"/>
+        <DCCReference Include="..\Dao\CalcularImpostosDao.pas"/>
+        <DCCReference Include="..\Dao\MovimentoDao.pas"/>
+        <DCCReference Include="..\Dao\PedidoVendaDao.pas"/>
+        <DCCReference Include="..\Model\CFOPModel.pas"/>
+        <DCCReference Include="..\Model\ContasReceberItensModel.pas"/>
+        <DCCReference Include="..\Model\EmpresaModel.pas"/>
+        <DCCReference Include="..\Model\NFItensModel.pas"/>
+        <DCCReference Include="..\Model\NFModel.pas"/>
+        <DCCReference Include="..\Model\PortadorModel.pas"/>
+        <DCCReference Include="..\Dao\ContasReceberItensDao.pas"/>
+        <DCCReference Include="..\Model\LojasModel.pas"/>
+        <DCCReference Include="..\Dao\LojasDao.pas"/>
+        <DCCReference Include="..\Model\AdmCartaoModel.pas"/>
+        <DCCReference Include="..\Model\RecebimentoCartaoModel.pas"/>
+        <DCCReference Include="..\Model\VendedorModel.pas"/>
+        <DCCReference Include="..\Model\VendaCartaoModel.pas"/>
+        <DCCReference Include="..\Dao\VendaCartaoDao.pas"/>
+        <DCCReference Include="..\Dao\AdmCartaoDao.pas"/>
+        <DCCReference Include="..\Model\ContasReceberModel.pas"/>
+        <DCCReference Include="..\Model\TEFModel.pas"/>
+        <DCCReference Include="..\Dao\ContasReceberDao.pas"/>
+        <DCCReference Include="..\Dao\TEFDao.pas"/>
+        <DCCReference Include="..\Model\CaixaModel.pas"/>
+        <DCCReference Include="..\Model\ContaCorrenteModel.pas"/>
+        <DCCReference Include="..\Model\CreditoClienteModel.pas"/>
+        <DCCReference Include="..\Model\CreditoClienteUsoModel.pas"/>
+        <DCCReference Include="..\Dao\CaixaDao.pas"/>
+        <DCCReference Include="..\Dao\RecebimentoCartaoDao.pas"/>
+        <DCCReference Include="..\Dao\PortadorDao.pas"/>
+        <DCCReference Include="..\Dao\ContaCorrenteDao.pas"/>
+        <DCCReference Include="..\Dao\CreditoClienteDao.pas"/>
+        <DCCReference Include="..\Dao\CreditoClienteUsoDao.pas"/>
+        <DCCReference Include="..\Dao\NFDao.pas"/>
+        <DCCReference Include="..\Dao\NFItensDao.pas"/>
+        <DCCReference Include="..\Dao\ProdutosDao.pas"/>
+        <DCCReference Include="..\Dao\CFOPDao.pas"/>
+        <DCCReference Include="..\Dao\EmpresaDao.pas"/>
+        <DCCReference Include="..\Dao\UsuarioDao.pas"/>
+        <DCCReference Include="..\Dao\WebPedidoItensDao.pas"/>
+        <DCCReference Include="..\Dao\VendedorDao.pas"/>
         <DCCReference Include="Controllers.Conexao.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
