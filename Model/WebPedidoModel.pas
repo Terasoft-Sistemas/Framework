@@ -570,7 +570,9 @@ begin
 
   try
     case FAcao of
+      Terasoft.Types.tacIncluir: Result := lWebPedidoDao.incluir(Self);
       Terasoft.Types.tacAlterar: Result := lWebPedidoDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lWebPedidoDao.excluir(Self);
     end;
   finally
     lWebPedidoDao.Free;
