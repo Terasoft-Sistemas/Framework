@@ -513,7 +513,6 @@ uses
   System.StrUtils,
   CalcularImpostosModel,
   NFModel,
-  Conexao,
   NFItensModel,
   ProdutosModel,
   CFOPModel,

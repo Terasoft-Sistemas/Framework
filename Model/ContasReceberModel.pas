@@ -201,7 +201,7 @@ implementation
 
 uses
   ContasReceberDao, AdmCartaoModel, System.SysUtils, ContasReceberItensModel,
-  VendaCartaoModel, Conexao, PortadorModel, System.Variants, System.StrUtils,
+  VendaCartaoModel, PortadorModel, System.Variants, System.StrUtils,
   CaixaModel, TEFModel;
 { TContasReceberModel }
 

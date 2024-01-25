@@ -244,7 +244,7 @@ type
 implementation
 
 uses
-  ContasReceberItensDao, VendaCartaoModel, Conexao, System.SysUtils,
+  ContasReceberItensDao, VendaCartaoModel, System.SysUtils,
   CaixaModel, RecebimentoCartaoModel, AdmCartaoModel, ContasReceberModel, ContaCorrenteModel,
   CreditoClienteModel, CreditoClienteUsoModel;
 
