@@ -1,4 +1,4 @@
-unit PedidoWebItensModel;
+unit WebPedidoItensModel;
 
 interface
 
@@ -8,11 +8,11 @@ uses
   Interfaces.Conexao;
 
 type
-  TPedidoWebItensModel = class
+  TWebPedidoItensModel = class
 
   private
     vIConexao : IConexao;
-    FPedidoWebItenssLista: TObjectList<TPedidoWebItensModel>;
+    FWebPedidoItenssLista: TObjectList<TWebPedidoItensModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -79,7 +79,7 @@ type
     FPRODUTO_BARRAS: Variant;
     FPRODUTO_CODIGO: Variant;
     FTOTAL: Variant;
-    FIDPedidoWebView: Integer;
+    FIDWebPedidoView: Integer;
     FUSAR_BALANCA: Variant;
     FVENDA_PRO: Variant;
     FCUSTOMEDIO_PRO: Variant;
@@ -89,7 +89,7 @@ type
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetDATA_CADASTRO(const Value: Variant);
-    procedure SetPedidoWebItenssLista(const Value: TObjectList<TPedidoWebItensModel>);
+    procedure SetWebPedidoItenssLista(const Value: TObjectList<TWebPedidoItensModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -154,7 +154,7 @@ type
     procedure SetPRODUTO_REFERENCIA(const Value: Variant);
     procedure SetPRODUTO_REFERENCIA_NEW(const Value: Variant);
     procedure SetTOTAL(const Value: Variant);
-    procedure SetIDPedidoWebView(const Value: Integer);
+    procedure SetIDWebPedidoView(const Value: Integer);
     procedure SetCUSTOMEDIO_PRO(const Value: Variant);
     procedure SetUSAR_BALANCA(const Value: Variant);
     procedure SetVALOR_BONUS_SERVICO(const Value: Variant);
@@ -235,7 +235,7 @@ type
     procedure obterListaVendaAssistidaItens;
     procedure obterLista;
 
-    property PedidoWebItenssLista: TObjectList<TPedidoWebItensModel> read FPedidoWebItenssLista write SetPedidoWebItenssLista;
+    property WebPedidoItenssLista: TObjectList<TWebPedidoItensModel> read FWebPedidoItenssLista write SetWebPedidoItenssLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -244,466 +244,466 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
-    property IDPedidoWebView: Integer read FIDPedidoWebView write SetIDPedidoWebView;
+    property IDWebPedidoView: Integer read FIDWebPedidoView write SetIDWebPedidoView;
 
   end;
 
 implementation
 
 uses
-  PedidoWebItensDao;
+  WebPedidoItensDao;
 
-{ TPedidoWebItensModel }
+{ TWebPedidoItensModel }
 
-constructor TPedidoWebItensModel.Create(pIConexao : IConexao);
+constructor TWebPedidoItensModel.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
 
-destructor TPedidoWebItensModel.Destroy;
+destructor TWebPedidoItensModel.Destroy;
 begin
 
   inherited;
 end;
 
-procedure TPedidoWebItensModel.obterLista;
+procedure TWebPedidoItensModel.obterLista;
 var
-  lPedidoWebItensLista: TPedidoWebItensDao;
+  lWebPedidoItensLista: TWebPedidoItensDao;
 begin
-  lPedidoWebItensLista := TPedidoWebItensDao.Create(vIConexao);
+  lWebPedidoItensLista := TWebPedidoItensDao.Create(vIConexao);
 
   try
-    lPedidoWebItensLista.TotalRecords    := FTotalRecords;
-    lPedidoWebItensLista.WhereView       := FWhereView;
-    lPedidoWebItensLista.CountView       := FCountView;
-    lPedidoWebItensLista.OrderView       := FOrderView;
-    lPedidoWebItensLista.StartRecordView := FStartRecordView;
-    lPedidoWebItensLista.LengthPageView  := FLengthPageView;
-    lPedidoWebItensLista.IDRecordView    := FIDRecordView;
-    lPedidoWebItensLista.IDPedidoWebView := FIDPedidoWebView;
+    lWebPedidoItensLista.TotalRecords    := FTotalRecords;
+    lWebPedidoItensLista.WhereView       := FWhereView;
+    lWebPedidoItensLista.CountView       := FCountView;
+    lWebPedidoItensLista.OrderView       := FOrderView;
+    lWebPedidoItensLista.StartRecordView := FStartRecordView;
+    lWebPedidoItensLista.LengthPageView  := FLengthPageView;
+    lWebPedidoItensLista.IDRecordView    := FIDRecordView;
+    lWebPedidoItensLista.IDWebPedidoView := FIDWebPedidoView;
 
-    lPedidoWebItensLista.obterLista;
+    lWebPedidoItensLista.obterLista;
 
-    FTotalRecords         := lPedidoWebItensLista.TotalRecords;
-    FPedidoWebItenssLista := lPedidoWebItensLista.PedidoWebItenssLista;
+    FTotalRecords         := lWebPedidoItensLista.TotalRecords;
+    FWebPedidoItenssLista := lWebPedidoItensLista.WebPedidoItenssLista;
 
   finally
-    lPedidoWebItensLista.Free;
+    lWebPedidoItensLista.Free;
   end;
 end;
 
-procedure TPedidoWebItensModel.obterListaVendaAssistidaItens;
+procedure TWebPedidoItensModel.obterListaVendaAssistidaItens;
 var
-  lPedidoWebItensLista: TPedidoWebItensDao;
+  lWebPedidoItensLista: TWebPedidoItensDao;
 begin
-  lPedidoWebItensLista := TPedidoWebItensDao.Create(vIConexao);
+  lWebPedidoItensLista := TWebPedidoItensDao.Create(vIConexao);
 
   try
-    lPedidoWebItensLista.TotalRecords    := FTotalRecords;
-    lPedidoWebItensLista.WhereView       := FWhereView;
-    lPedidoWebItensLista.CountView       := FCountView;
-    lPedidoWebItensLista.OrderView       := FOrderView;
-    lPedidoWebItensLista.StartRecordView := FStartRecordView;
-    lPedidoWebItensLista.LengthPageView  := FLengthPageView;
-    lPedidoWebItensLista.IDRecordView    := FIDRecordView;
-    lPedidoWebItensLista.IDPedidoWebView := FIDPedidoWebView;
+    lWebPedidoItensLista.TotalRecords    := FTotalRecords;
+    lWebPedidoItensLista.WhereView       := FWhereView;
+    lWebPedidoItensLista.CountView       := FCountView;
+    lWebPedidoItensLista.OrderView       := FOrderView;
+    lWebPedidoItensLista.StartRecordView := FStartRecordView;
+    lWebPedidoItensLista.LengthPageView  := FLengthPageView;
+    lWebPedidoItensLista.IDRecordView    := FIDRecordView;
+    lWebPedidoItensLista.IDWebPedidoView := FIDWebPedidoView;
 
-    lPedidoWebItensLista.obterListaVendaAssistidaItens;
+    lWebPedidoItensLista.obterListaVendaAssistidaItens;
 
-    FTotalRecords         := lPedidoWebItensLista.TotalRecords;
-    FPedidoWebItenssLista := lPedidoWebItensLista.PedidoWebItenssLista;
+    FTotalRecords         := lWebPedidoItensLista.TotalRecords;
+    FWebPedidoItenssLista := lWebPedidoItensLista.WebPedidoItenssLista;
 
   finally
-    lPedidoWebItensLista.Free;
+    lWebPedidoItensLista.Free;
   end;
 end;
 
-function TPedidoWebItensModel.Salvar: String;
+function TWebPedidoItensModel.Salvar: String;
 var
-  lPedidoWebItensDao: TPedidoWebItensDao;
+  lWebPedidoItensDao: TWebPedidoItensDao;
 begin
-  lPedidoWebItensDao := TPedidoWebItensDao.Create(vIConexao);
+  lWebPedidoItensDao := TWebPedidoItensDao.Create(vIConexao);
 
   Result := '';
 
   try
     
   finally
-    lPedidoWebItensDao.Free;
+    lWebPedidoItensDao.Free;
   end;
 end;
 
-procedure TPedidoWebItensModel.SetAcao(const Value: TAcao);
+procedure TWebPedidoItensModel.SetAcao(const Value: TAcao);
 begin
   FAcao := Value;
 end;
 
-procedure TPedidoWebItensModel.SetALIQ_COFINS(const Value: Variant);
+procedure TWebPedidoItensModel.SetALIQ_COFINS(const Value: Variant);
 begin
   FALIQ_COFINS := Value;
 end;
 
-procedure TPedidoWebItensModel.SetALIQ_ICMS(const Value: Variant);
+procedure TWebPedidoItensModel.SetALIQ_ICMS(const Value: Variant);
 begin
   FALIQ_ICMS := Value;
 end;
 
-procedure TPedidoWebItensModel.SetALIQ_ICMS_ST(const Value: Variant);
+procedure TWebPedidoItensModel.SetALIQ_ICMS_ST(const Value: Variant);
 begin
   FALIQ_ICMS_ST := Value;
 end;
 
-procedure TPedidoWebItensModel.SetALIQ_IPI(const Value: Variant);
+procedure TWebPedidoItensModel.SetALIQ_IPI(const Value: Variant);
 begin
   FALIQ_IPI := Value;
 end;
 
-procedure TPedidoWebItensModel.SetALIQ_PIS(const Value: Variant);
+procedure TWebPedidoItensModel.SetALIQ_PIS(const Value: Variant);
 begin
   FALIQ_PIS := Value;
 end;
 
-procedure TPedidoWebItensModel.SetAVULSO(const Value: Variant);
+procedure TWebPedidoItensModel.SetAVULSO(const Value: Variant);
 begin
   FAVULSO := Value;
 end;
 
-procedure TPedidoWebItensModel.SetBASE_COFINS(const Value: Variant);
+procedure TWebPedidoItensModel.SetBASE_COFINS(const Value: Variant);
 begin
   FBASE_COFINS := Value;
 end;
 
-procedure TPedidoWebItensModel.SetBASE_ICMS(const Value: Variant);
+procedure TWebPedidoItensModel.SetBASE_ICMS(const Value: Variant);
 begin
   FBASE_ICMS := Value;
 end;
 
-procedure TPedidoWebItensModel.SetBASE_PIS(const Value: Variant);
+procedure TWebPedidoItensModel.SetBASE_PIS(const Value: Variant);
 begin
   FBASE_PIS := Value;
 end;
 
-procedure TPedidoWebItensModel.SetBASE_ST(const Value: Variant);
+procedure TWebPedidoItensModel.SetBASE_ST(const Value: Variant);
 begin
   FBASE_ST := Value;
 end;
 
-procedure TPedidoWebItensModel.SetCFOP_ID(const Value: Variant);
+procedure TWebPedidoItensModel.SetCFOP_ID(const Value: Variant);
 begin
   FCFOP_ID := Value;
 end;
 
-procedure TPedidoWebItensModel.SetCOFINS_SUFRAMA(const Value: Variant);
+procedure TWebPedidoItensModel.SetCOFINS_SUFRAMA(const Value: Variant);
 begin
   FCOFINS_SUFRAMA := Value;
 end;
 
-procedure TPedidoWebItensModel.SetCountView(const Value: String);
+procedure TWebPedidoItensModel.SetCountView(const Value: String);
 begin
   FCountView := Value;
 end;
 
-procedure TPedidoWebItensModel.SetCST(const Value: Variant);
+procedure TWebPedidoItensModel.SetCST(const Value: Variant);
 begin
   FCST := Value;
 end;
 
-procedure TPedidoWebItensModel.SetCUSTOMEDIO_PRO(const Value: Variant);
+procedure TWebPedidoItensModel.SetCUSTOMEDIO_PRO(const Value: Variant);
 begin
   FCUSTOMEDIO_PRO := Value;
 end;
 
-procedure TPedidoWebItensModel.SetDATA_CADASTRO(const Value: Variant);
+procedure TWebPedidoItensModel.SetDATA_CADASTRO(const Value: Variant);
 begin
 
 end;
 
-procedure TPedidoWebItensModel.SetDESC_RESTITUICAO_ST(const Value: Variant);
+procedure TWebPedidoItensModel.SetDESC_RESTITUICAO_ST(const Value: Variant);
 begin
   FDESC_RESTITUICAO_ST := Value;
 end;
 
-procedure TPedidoWebItensModel.SetENTREGA(const Value: Variant);
+procedure TWebPedidoItensModel.SetENTREGA(const Value: Variant);
 begin
   FENTREGA := Value;
 end;
 
-procedure TPedidoWebItensModel.SetPedidoWebItenssLista(const Value: TObjectList<TPedidoWebItensModel>);
+procedure TWebPedidoItensModel.SetWebPedidoItenssLista(const Value: TObjectList<TWebPedidoItensModel>);
 begin
-  FPedidoWebItenssLista := Value;
+  FWebPedidoItenssLista := Value;
 end;
 
-procedure TPedidoWebItensModel.SetICMS_SUFRAMA(const Value: Variant);
+procedure TWebPedidoItensModel.SetICMS_SUFRAMA(const Value: Variant);
 begin
   FICMS_SUFRAMA := Value;
 end;
 
-procedure TPedidoWebItensModel.SetID(const Value: Variant);
+procedure TWebPedidoItensModel.SetID(const Value: Variant);
 begin
   FID := Value;
 end;
 
-procedure TPedidoWebItensModel.SetIDPedidoWebView(const Value: Integer);
+procedure TWebPedidoItensModel.SetIDWebPedidoView(const Value: Integer);
 begin
-  FIDPedidoWebView := Value;
+  FIDWebPedidoView := Value;
 end;
 
-procedure TPedidoWebItensModel.SetPERCENTUAL_COMISSAO(const Value: Variant);
+procedure TWebPedidoItensModel.SetPERCENTUAL_COMISSAO(const Value: Variant);
 begin
   FPERCENTUAL_COMISSAO := Value;
 end;
 
-procedure TPedidoWebItensModel.SetPERCENTUAL_DESCONTO(const Value: Variant);
+procedure TWebPedidoItensModel.SetPERCENTUAL_DESCONTO(const Value: Variant);
 begin
   FPERCENTUAL_DESCONTO := Value;
 end;
 
-procedure TPedidoWebItensModel.SetPFCPST(const Value: Variant);
+procedure TWebPedidoItensModel.SetPFCPST(const Value: Variant);
 begin
   FPFCPST := Value;
 end;
 
-procedure TPedidoWebItensModel.SetPIS_SUFRAMA(const Value: Variant);
+procedure TWebPedidoItensModel.SetPIS_SUFRAMA(const Value: Variant);
 begin
   FPIS_SUFRAMA := Value;
 end;
 
-procedure TPedidoWebItensModel.SetPRODUTO_BARRAS(const Value: Variant);
+procedure TWebPedidoItensModel.SetPRODUTO_BARRAS(const Value: Variant);
 begin
   FPRODUTO_BARRAS := Value;
 end;
 
-procedure TPedidoWebItensModel.SetPRODUTO_CODIGO(const Value: Variant);
+procedure TWebPedidoItensModel.SetPRODUTO_CODIGO(const Value: Variant);
 begin
   FPRODUTO_CODIGO := Value;
 end;
 
-procedure TPedidoWebItensModel.SetPRODUTO_ID(const Value: Variant);
+procedure TWebPedidoItensModel.SetPRODUTO_ID(const Value: Variant);
 begin
   FPRODUTO_ID := Value;
 end;
 
-procedure TPedidoWebItensModel.SetPRODUTO_NOME(const Value: Variant);
+procedure TWebPedidoItensModel.SetPRODUTO_NOME(const Value: Variant);
 begin
   FPRODUTO_NOME := Value;
 end;
 
-procedure TPedidoWebItensModel.SetPRODUTO_REFERENCIA(const Value: Variant);
+procedure TWebPedidoItensModel.SetPRODUTO_REFERENCIA(const Value: Variant);
 begin
   FPRODUTO_REFERENCIA := Value;
 end;
 
-procedure TPedidoWebItensModel.SetPRODUTO_REFERENCIA_NEW(const Value: Variant);
+procedure TWebPedidoItensModel.SetPRODUTO_REFERENCIA_NEW(const Value: Variant);
 begin
   FPRODUTO_REFERENCIA_NEW := Value;
 end;
 
-procedure TPedidoWebItensModel.SetQUANTIDADE(const Value: Variant);
+procedure TWebPedidoItensModel.SetQUANTIDADE(const Value: Variant);
 begin
   FQUANTIDADE := Value;
 end;
 
-procedure TPedidoWebItensModel.SetQUANTIDADE_OLD(const Value: Variant);
+procedure TWebPedidoItensModel.SetQUANTIDADE_OLD(const Value: Variant);
 begin
   FQUANTIDADE_OLD := Value;
 end;
 
-procedure TPedidoWebItensModel.SetQUANTIDADE_PENDENTE(const Value: Variant);
+procedure TWebPedidoItensModel.SetQUANTIDADE_PENDENTE(const Value: Variant);
 begin
   FQUANTIDADE_PENDENTE := Value;
 end;
 
-procedure TPedidoWebItensModel.SetQUANTIDADE_SEPARACAO(const Value: Variant);
+procedure TWebPedidoItensModel.SetQUANTIDADE_SEPARACAO(const Value: Variant);
 begin
   FQUANTIDADE_SEPARACAO := Value;
 end;
 
-procedure TPedidoWebItensModel.SetQUANTIDADE_TROCA(const Value: Variant);
+procedure TWebPedidoItensModel.SetQUANTIDADE_TROCA(const Value: Variant);
 begin
   FQUANTIDADE_TROCA := Value;
 end;
 
-procedure TPedidoWebItensModel.SetQUANTIDADE_TROCA_OLD(const Value: Variant);
+procedure TWebPedidoItensModel.SetQUANTIDADE_TROCA_OLD(const Value: Variant);
 begin
   FQUANTIDADE_TROCA_OLD := Value;
 end;
 
-procedure TPedidoWebItensModel.SetREDUCAO_ICMS(const Value: Variant);
+procedure TWebPedidoItensModel.SetREDUCAO_ICMS(const Value: Variant);
 begin
   FREDUCAO_ICMS := Value;
 end;
 
-procedure TPedidoWebItensModel.SetREDUCAO_ST(const Value: Variant);
+procedure TWebPedidoItensModel.SetREDUCAO_ST(const Value: Variant);
 begin
   FREDUCAO_ST := Value;
 end;
 
-procedure TPedidoWebItensModel.SetRESERVADO(const Value: Variant);
+procedure TWebPedidoItensModel.SetRESERVADO(const Value: Variant);
 begin
   FRESERVADO := Value;
 end;
 
-procedure TPedidoWebItensModel.SetIDRecordView(const Value: Integer);
+procedure TWebPedidoItensModel.SetIDRecordView(const Value: Integer);
 begin
   FIDRecordView := Value;
 end;
 
-procedure TPedidoWebItensModel.SetIPI_SUFRAMA(const Value: Variant);
+procedure TWebPedidoItensModel.SetIPI_SUFRAMA(const Value: Variant);
 begin
   FIPI_SUFRAMA := Value;
 end;
 
-procedure TPedidoWebItensModel.SetLengthPageView(const Value: String);
+procedure TWebPedidoItensModel.SetLengthPageView(const Value: String);
 begin
   FLengthPageView := Value;
 end;
 
-procedure TPedidoWebItensModel.SetMONTAGEM(const Value: Variant);
+procedure TWebPedidoItensModel.SetMONTAGEM(const Value: Variant);
 begin
   FMONTAGEM := Value;
 end;
 
-procedure TPedidoWebItensModel.SetMVA(const Value: Variant);
+procedure TWebPedidoItensModel.SetMVA(const Value: Variant);
 begin
   FMVA := Value;
 end;
 
-procedure TPedidoWebItensModel.SetOBSERVACAO(const Value: Variant);
+procedure TWebPedidoItensModel.SetOBSERVACAO(const Value: Variant);
 begin
   FOBSERVACAO := Value;
 end;
 
-procedure TPedidoWebItensModel.SetOrderView(const Value: String);
+procedure TWebPedidoItensModel.SetOrderView(const Value: String);
 begin
   FOrderView := Value;
 end;
 
-procedure TPedidoWebItensModel.SetStartRecordView(const Value: String);
+procedure TWebPedidoItensModel.SetStartRecordView(const Value: String);
 begin
   FStartRecordView := Value;
 end;
 
-procedure TPedidoWebItensModel.SetSYSTIME(const Value: Variant);
+procedure TWebPedidoItensModel.SetSYSTIME(const Value: Variant);
 begin
 
 end;
 
-procedure TPedidoWebItensModel.SetTIPO(const Value: Variant);
+procedure TWebPedidoItensModel.SetTIPO(const Value: Variant);
 begin
   FTIPO := Value;
 end;
 
-procedure TPedidoWebItensModel.SetTIPO_ENTREGA(const Value: Variant);
+procedure TWebPedidoItensModel.SetTIPO_ENTREGA(const Value: Variant);
 begin
   FTIPO_ENTREGA := Value;
 end;
 
-procedure TPedidoWebItensModel.SetTIPO_GARANTIA(const Value: Variant);
+procedure TWebPedidoItensModel.SetTIPO_GARANTIA(const Value: Variant);
 begin
   FTIPO_GARANTIA := Value;
 end;
 
-procedure TPedidoWebItensModel.SetTOTAL(const Value: Variant);
+procedure TWebPedidoItensModel.SetTOTAL(const Value: Variant);
 begin
   FTOTAL := Value;
 end;
 
-procedure TPedidoWebItensModel.SetTotalRecords(const Value: Integer);
+procedure TWebPedidoItensModel.SetTotalRecords(const Value: Integer);
 begin
   FTotalRecords := Value;
 end;
 
-procedure TPedidoWebItensModel.SetUSAR_BALANCA(const Value: Variant);
+procedure TWebPedidoItensModel.SetUSAR_BALANCA(const Value: Variant);
 begin
   FUSAR_BALANCA := Value;
 end;
 
-procedure TPedidoWebItensModel.SetVALOR_BONUS_SERVICO(const Value: Variant);
+procedure TWebPedidoItensModel.SetVALOR_BONUS_SERVICO(const Value: Variant);
 begin
   FVALOR_BONUS_SERVICO := Value;
 end;
 
-procedure TPedidoWebItensModel.SetVALOR_COFINS(const Value: Variant);
+procedure TWebPedidoItensModel.SetVALOR_COFINS(const Value: Variant);
 begin
   FVALOR_COFINS := Value;
 end;
 
-procedure TPedidoWebItensModel.SetVALOR_CUSTO_ATUAL(const Value: Variant);
+procedure TWebPedidoItensModel.SetVALOR_CUSTO_ATUAL(const Value: Variant);
 begin
   FVALOR_CUSTO_ATUAL := Value;
 end;
 
-procedure TPedidoWebItensModel.SetVALOR_ICMS(const Value: Variant);
+procedure TWebPedidoItensModel.SetVALOR_ICMS(const Value: Variant);
 begin
   FVALOR_ICMS := Value;
 end;
 
-procedure TPedidoWebItensModel.SetVALOR_IPI(const Value: Variant);
+procedure TWebPedidoItensModel.SetVALOR_IPI(const Value: Variant);
 begin
   FVALOR_IPI := Value;
 end;
 
-procedure TPedidoWebItensModel.SetVALOR_MONTADOR(const Value: Variant);
+procedure TWebPedidoItensModel.SetVALOR_MONTADOR(const Value: Variant);
 begin
   FVALOR_MONTADOR := Value;
 end;
 
-procedure TPedidoWebItensModel.SetVALOR_PIS(const Value: Variant);
+procedure TWebPedidoItensModel.SetVALOR_PIS(const Value: Variant);
 begin
   FVALOR_PIS := Value;
 end;
 
-procedure TPedidoWebItensModel.SetVALOR_RESTITUICAO_ST(const Value: Variant);
+procedure TWebPedidoItensModel.SetVALOR_RESTITUICAO_ST(const Value: Variant);
 begin
   FVALOR_RESTITUICAO_ST := Value;
 end;
 
-procedure TPedidoWebItensModel.SetVALOR_ST(const Value: Variant);
+procedure TWebPedidoItensModel.SetVALOR_ST(const Value: Variant);
 begin
   FVALOR_ST := Value;
 end;
 
-procedure TPedidoWebItensModel.SetVALOR_UNITARIO(const Value: Variant);
+procedure TWebPedidoItensModel.SetVALOR_UNITARIO(const Value: Variant);
 begin
   FVALOR_UNITARIO := Value;
 end;
 
-procedure TPedidoWebItensModel.SetVALOR_VENDA_ATUAL(const Value: Variant);
+procedure TWebPedidoItensModel.SetVALOR_VENDA_ATUAL(const Value: Variant);
 begin
   FVALOR_VENDA_ATUAL := Value;
 end;
 
-procedure TPedidoWebItensModel.SetVALOR_VENDIDO(const Value: Variant);
+procedure TWebPedidoItensModel.SetVALOR_VENDIDO(const Value: Variant);
 begin
   FVALOR_VENDIDO := Value;
 end;
 
-procedure TPedidoWebItensModel.SetVBCFCPST(const Value: Variant);
+procedure TWebPedidoItensModel.SetVBCFCPST(const Value: Variant);
 begin
   FVBCFCPST := Value;
 end;
 
-procedure TPedidoWebItensModel.SetVENDA_PRO(const Value: Variant);
+procedure TWebPedidoItensModel.SetVENDA_PRO(const Value: Variant);
 begin
   FVENDA_PRO := Value;
 end;
 
-procedure TPedidoWebItensModel.SetVFCPST(const Value: Variant);
+procedure TWebPedidoItensModel.SetVFCPST(const Value: Variant);
 begin
   FVFCPST := Value;
 end;
 
-procedure TPedidoWebItensModel.SetVLR_GARANTIA(const Value: Variant);
+procedure TWebPedidoItensModel.SetVLR_GARANTIA(const Value: Variant);
 begin
   FVLR_GARANTIA := Value;
 end;
 
-procedure TPedidoWebItensModel.SetWEB_PEDIDO_ID(const Value: Variant);
+procedure TWebPedidoItensModel.SetWEB_PEDIDO_ID(const Value: Variant);
 begin
   FWEB_PEDIDO_ID := Value;
 end;
 
-procedure TPedidoWebItensModel.SetWhereView(const Value: String);
+procedure TWebPedidoItensModel.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
 end;

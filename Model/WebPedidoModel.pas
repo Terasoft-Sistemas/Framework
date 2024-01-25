@@ -1,4 +1,4 @@
-unit PedidoWebModel;
+unit WebPedidoModel;
 
 interface
 
@@ -9,11 +9,11 @@ uses
   Interfaces.Conexao;
 
 type
-  TPedidoWebModel = class
+  TWebPedidoModel = class
 
   private
     vIConexao : IConexao;
-    FPedidoWebsLista: TObjectList<TPedidoWebModel>;
+    FWebPedidosLista: TObjectList<TWebPedidoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -124,7 +124,7 @@ type
     FGERENTE_ID: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetPedidoWebsLista(const Value: TObjectList<TPedidoWebModel>);
+    procedure SetWebPedidosLista(const Value: TObjectList<TWebPedidoModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -338,11 +338,11 @@ type
 
     function Salvar: String;
     procedure obterListaVendaAssistida;
-    function carregaClasse(pId: String): TPedidoWebModel;
+    function carregaClasse(pId: String): TWebPedidoModel;
 
     function aprovarVendaAssistida(pIdVendaAssistida: Integer): String;
 
-    property PedidoWebsLista: TObjectList<TPedidoWebModel> read FPedidoWebsLista write SetPedidoWebsLista;
+    property WebPedidosLista: TObjectList<TWebPedidoModel> read FWebPedidosLista write SetWebPedidosLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -358,28 +358,28 @@ type
 implementation
 
 uses
-  PedidoWebDao,
+  WebPedidoDao,
   PedidoVendaModel,
-  PedidoWebItensModel,
+  WebPedidoItensModel,
   PedidoItensModel,
   System.SysUtils,
   FuncionarioModel,
   System.StrUtils;
 
-{ TPedidoWebModel }
+{ TWebPedidoModel }
 
-procedure TPedidoWebModel.AfterConstruction;
+procedure TWebPedidoModel.AfterConstruction;
 begin
   inherited;
 
 end;
 
-function TPedidoWebModel.aprovarVendaAssistida(pIdVendaAssistida: Integer): String;
+function TWebPedidoModel.aprovarVendaAssistida(pIdVendaAssistida: Integer): String;
 var
   lPedidoVendaModel        : TPedidoVendaModel;
   lPedidoItensModel        : TPedidoItensModel;
-  lPedidoWebItensModel     : TPedidoWebItensModel;
-  lPedidoWebModel          : TPedidoWebModel;
+  lWebPedidoItensModel     : TWebPedidoItensModel;
+  lWebPedidoModel          : TWebPedidoModel;
   lPedido                  : String;
   lItem, lIndex            : Integer;
 begin
@@ -387,9 +387,9 @@ begin
   if not (pIdVendaAssistida <> 0) then
     exit;
 
-  lPedidoWebModel        := TPedidoWebModel.Create(vIConexao);
+  lWebPedidoModel        := TWebPedidoModel.Create(vIConexao);
   lPedidoVendaModel      := TPedidoVendaModel.Create(vIConexao);
-  lPedidoWebItensModel   := TPedidoWebItensModel.Create(vIConexao);
+  lWebPedidoItensModel   := TWebPedidoItensModel.Create(vIConexao);
   lPedidoItensModel      := TPedidoItensModel.Create(vIConexao);
 
   try
@@ -402,20 +402,20 @@ begin
       exit;
     end;
 
-    lPedidoWebModel := lPedidoWebModel.carregaClasse(pIdVendaAssistida.ToString);
+    lWebPedidoModel := lWebPedidoModel.carregaClasse(pIdVendaAssistida.ToString);
 
     lPedidoVendaModel.Acao                 := tacIncluir;
-    lPedidoVendaModel.LOJA                 := lPedidoWebModel.LOJA;
+    lPedidoVendaModel.LOJA                 := lWebPedidoModel.LOJA;
     lPedidoVendaModel.DATA_PED             := DateToStr(vIConexao.DataServer);
     lPedidoVendaModel.HORA_PED             := TimeToStr(vIConexao.HoraServer);
-    lPedidoVendaModel.PRIMEIROVENC_PED     := lPedidoWebModel.PRIMEIRO_VENCIMENTO;
-    lPedidoVendaModel.ACRES_PED            := lPedidoWebModel.ACRESCIMO;
-    lPedidoVendaModel.DESC_PED             := lPedidoWebModel.VALOR_CUPOM_DESCONTO;
-    lPedidoVendaModel.DESCONTO_PED         := lPedidoWebModel.PERCENTUAL_DESCONTO;
-    lPedidoVendaModel.VALOR_PED            := FloatToStr((StrToFloat(lPedidoWebModel.VALOR_TOTAL)+StrToFloat(lPedidoWebModel.VALOR_CUPOM_DESCONTO))-StrToFloat(lPedidoWebModel.ACRESCIMO));
-    lPedidoVendaModel.TOTAL_PED            := lPedidoWebModel.VALOR_TOTAL;
-    lPedidoVendaModel.VALORENTADA_PED      := lPedidoWebModel.VALOR_ENTRADA;
-    lPedidoVendaModel.PARCELAS_PED         := lPedidoWebModel.PARCELAS;
+    lPedidoVendaModel.PRIMEIROVENC_PED     := lWebPedidoModel.PRIMEIRO_VENCIMENTO;
+    lPedidoVendaModel.ACRES_PED            := lWebPedidoModel.ACRESCIMO;
+    lPedidoVendaModel.DESC_PED             := lWebPedidoModel.VALOR_CUPOM_DESCONTO;
+    lPedidoVendaModel.DESCONTO_PED         := lWebPedidoModel.PERCENTUAL_DESCONTO;
+    lPedidoVendaModel.VALOR_PED            := FloatToStr((StrToFloat(lWebPedidoModel.VALOR_TOTAL)+StrToFloat(lWebPedidoModel.VALOR_CUPOM_DESCONTO))-StrToFloat(lWebPedidoModel.ACRESCIMO));
+    lPedidoVendaModel.TOTAL_PED            := lWebPedidoModel.VALOR_TOTAL;
+    lPedidoVendaModel.VALORENTADA_PED      := lWebPedidoModel.VALOR_ENTRADA;
+    lPedidoVendaModel.PARCELAS_PED         := lWebPedidoModel.PARCELAS;
     lPedidoVendaModel.PARCELA_PED          := '0'; //Valor da parcela
     lPedidoVendaModel.CTR_IMPRESSAO_PED    := '0';
     lPedidoVendaModel.RESERVADO            := 'N';
@@ -426,21 +426,21 @@ begin
     lPedidoVendaModel.STATUS               := 'P';
     lPedidoVendaModel.TIPO_PED             := 'P';
     lPedidoVendaModel.TABJUROS_PED         := 'N';
-    lPedidoVendaModel.WEB_PEDIDO_ID        := lPedidoWebModel.ID;
-    lPedidoVendaModel.CODIGO_CLI           := lPedidoWebModel.CLIENTE_ID;
-    lPedidoVendaModel.CODIGO_PORT          := lPedidoWebModel.PORTADOR_ID;
-    lPedidoVendaModel.CODIGO_VEN           := lPedidoWebModel.VENDEDOR_ID;
-    lPedidoVendaModel.CODIGO_TIP           := lPedidoWebModel.TIPOVENDA_ID;
-    lPedidoVendaModel.FRETE_PED            := lPedidoWebModel.VALOR_FRETE;
-    lPedidoVendaModel.INFORMACOES_PED      := lPedidoWebModel.OBSERVACAO;
-    lPedidoVendaModel.ENTREGA_ENDERECO     := lPedidoWebModel.ENTREGA_ENDERECO;
-    lPedidoVendaModel.ENTREGA_NUMERO       := lPedidoWebModel.ENTREGA_NUMERO;
-    lPedidoVendaModel.ENTREGA_BAIRRO       := lPedidoWebModel.ENTREGA_BAIRRO;
-    lPedidoVendaModel.ENTREGA_CIDADE       := lPedidoWebModel.ENTREGA_CIDADE;
-    lPedidoVendaModel.ENTREGA_UF           := lPedidoWebModel.ENTREGA_UF;
-    lPedidoVendaModel.ENTREGA_CEP          := lPedidoWebModel.ENTREGA_CEP;
-    lPedidoVendaModel.ENTREGA_COMPLEMENTO  := lPedidoWebModel.ENTREGA_COMPLEMENTO;
-    lPedidoVendaModel.MONTAGEM_DATA        := lPedidoWebModel.MONTAGEM_DATA;
+    lPedidoVendaModel.WEB_PEDIDO_ID        := lWebPedidoModel.ID;
+    lPedidoVendaModel.CODIGO_CLI           := lWebPedidoModel.CLIENTE_ID;
+    lPedidoVendaModel.CODIGO_PORT          := lWebPedidoModel.PORTADOR_ID;
+    lPedidoVendaModel.CODIGO_VEN           := lWebPedidoModel.VENDEDOR_ID;
+    lPedidoVendaModel.CODIGO_TIP           := lWebPedidoModel.TIPOVENDA_ID;
+    lPedidoVendaModel.FRETE_PED            := lWebPedidoModel.VALOR_FRETE;
+    lPedidoVendaModel.INFORMACOES_PED      := lWebPedidoModel.OBSERVACAO;
+    lPedidoVendaModel.ENTREGA_ENDERECO     := lWebPedidoModel.ENTREGA_ENDERECO;
+    lPedidoVendaModel.ENTREGA_NUMERO       := lWebPedidoModel.ENTREGA_NUMERO;
+    lPedidoVendaModel.ENTREGA_BAIRRO       := lWebPedidoModel.ENTREGA_BAIRRO;
+    lPedidoVendaModel.ENTREGA_CIDADE       := lWebPedidoModel.ENTREGA_CIDADE;
+    lPedidoVendaModel.ENTREGA_UF           := lWebPedidoModel.ENTREGA_UF;
+    lPedidoVendaModel.ENTREGA_CEP          := lWebPedidoModel.ENTREGA_CEP;
+    lPedidoVendaModel.ENTREGA_COMPLEMENTO  := lWebPedidoModel.ENTREGA_COMPLEMENTO;
+    lPedidoVendaModel.MONTAGEM_DATA        := lWebPedidoModel.MONTAGEM_DATA;
     lPedidoVendaModel.USUARIO_PED          := self.vIConexao.getUSer.ID;
     lPedidoVendaModel.IDUsuario            := self.vIConexao.getUSer.ID;
     lPedidoVendaModel.TIPO_COMISSAO        := self.TIPO_COMISSAO;
@@ -450,42 +450,42 @@ begin
 
     lPedidoVendaModel.NUMERO_PED := lPedido;
 
-    lPedidoWebItensModel.IDPedidoWebView := pIdVendaAssistida;
-    lPedidoWebItensModel.obterLista;
+    lWebPedidoItensModel.IDWebPedidoView := pIdVendaAssistida;
+    lWebPedidoItensModel.obterLista;
 
     lPedidoItensModel.PedidoItenssLista := TObjectList<TPedidoItensModel>.Create;
 
     lItem  := 0;
     lIndex := 0;
 
-    for lPedidoWebItensModel in lPedidoWebItensModel.PedidoWebItenssLista do begin
+    for lWebPedidoItensModel in lWebPedidoItensModel.WebPedidoItenssLista do begin
       inc(lItem);
 
       lPedidoItensModel.PedidoItenssLista.Add(TPedidoItensModel.Create(vIConexao));
 
       lPedidoItensModel.PedidoItenssLista[lIndex].NUMERO_PED             := lPedido;
-      lPedidoItensModel.PedidoItenssLista[lIndex].CODIGO_CLI             := lPedidoWebModel.CLIENTE_ID;
-      lPedidoItensModel.PedidoItenssLista[lIndex].LOJA                   := lPedidoWebModel.LOJA;
-      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_PED         := lPedidoWebItensModel.QUANTIDADE;
-      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_NEW         := lPedidoWebItensModel.QUANTIDADE;
-      lPedidoItensModel.PedidoItenssLista[lIndex].WEB_PEDIDOITENS_ID     := lPedidoWebItensModel.ID;
-      lPedidoItensModel.PedidoItenssLista[lIndex].TIPO_VENDA             := lPedidoWebItensModel.TIPO_ENTREGA;
-      lPedidoItensModel.PedidoItenssLista[lIndex].OBSERVACAO             := copy(lPedidoWebItensModel.OBSERVACAO,1,50);
-      lPedidoItensModel.PedidoItenssLista[lIndex].OBS_ITEM               := lPedidoWebItensModel.OBSERVACAO;
-      lPedidoItensModel.PedidoItenssLista[lIndex].CODIGO_PRO             := lPedidoWebItensModel.PRODUTO_ID;
-      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_TIPO        := lPedidoWebItensModel.VLR_GARANTIA;
-      lPedidoItensModel.PedidoItenssLista[lIndex].ENTREGA                := lPedidoWebItensModel.ENTREGA;
-      lPedidoItensModel.PedidoItenssLista[lIndex].MONTAGEM               := lPedidoWebItensModel.MONTAGEM;
-      lPedidoItensModel.PedidoItenssLista[lIndex].DESCONTO_PED           := lPedidoWebItensModel.PERCENTUAL_DESCONTO;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VALORUNITARIO_PED      := lPedidoWebItensModel.VALOR_UNITARIO;
+      lPedidoItensModel.PedidoItenssLista[lIndex].CODIGO_CLI             := lWebPedidoModel.CLIENTE_ID;
+      lPedidoItensModel.PedidoItenssLista[lIndex].LOJA                   := lWebPedidoModel.LOJA;
+      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_PED         := lWebPedidoItensModel.QUANTIDADE;
+      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_NEW         := lWebPedidoItensModel.QUANTIDADE;
+      lPedidoItensModel.PedidoItenssLista[lIndex].WEB_PEDIDOITENS_ID     := lWebPedidoItensModel.ID;
+      lPedidoItensModel.PedidoItenssLista[lIndex].TIPO_VENDA             := lWebPedidoItensModel.TIPO_ENTREGA;
+      lPedidoItensModel.PedidoItenssLista[lIndex].OBSERVACAO             := copy(lWebPedidoItensModel.OBSERVACAO,1,50);
+      lPedidoItensModel.PedidoItenssLista[lIndex].OBS_ITEM               := lWebPedidoItensModel.OBSERVACAO;
+      lPedidoItensModel.PedidoItenssLista[lIndex].CODIGO_PRO             := lWebPedidoItensModel.PRODUTO_ID;
+      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_TIPO        := lWebPedidoItensModel.VLR_GARANTIA;
+      lPedidoItensModel.PedidoItenssLista[lIndex].ENTREGA                := lWebPedidoItensModel.ENTREGA;
+      lPedidoItensModel.PedidoItenssLista[lIndex].MONTAGEM               := lWebPedidoItensModel.MONTAGEM;
+      lPedidoItensModel.PedidoItenssLista[lIndex].DESCONTO_PED           := lWebPedidoItensModel.PERCENTUAL_DESCONTO;
+      lPedidoItensModel.PedidoItenssLista[lIndex].VALORUNITARIO_PED      := lWebPedidoItensModel.VALOR_UNITARIO;
       lPedidoItensModel.PedidoItenssLista[lIndex].ITEM                   := lItem.ToString;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_BONUS_SERVICO    := lPedidoWebItensModel.VALOR_BONUS_SERVICO;
-      lPedidoItensModel.PedidoItenssLista[lIndex].BALANCA                := lPedidoWebItensModel.USAR_BALANCA;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VLRVENDA_PRO           := lPedidoWebItensModel.VENDA_PRO;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_VENDA_CADASTRO   := lPedidoWebItensModel.VENDA_PRO;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VLRCUSTO_PRO           := lPedidoWebItensModel.CUSTOMEDIO_PRO;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_MONTADOR         := lPedidoWebItensModel.VALOR_MONTADOR;
-      lPedidoItensModel.PedidoItenssLista[lIndex].COMISSAO_PERCENTUAL    := lPedidoWebItensModel.PERCENTUAL_COMISSAO;
+      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_BONUS_SERVICO    := lWebPedidoItensModel.VALOR_BONUS_SERVICO;
+      lPedidoItensModel.PedidoItenssLista[lIndex].BALANCA                := lWebPedidoItensModel.USAR_BALANCA;
+      lPedidoItensModel.PedidoItenssLista[lIndex].VLRVENDA_PRO           := lWebPedidoItensModel.VENDA_PRO;
+      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_VENDA_CADASTRO   := lWebPedidoItensModel.VENDA_PRO;
+      lPedidoItensModel.PedidoItenssLista[lIndex].VLRCUSTO_PRO           := lWebPedidoItensModel.CUSTOMEDIO_PRO;
+      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_MONTADOR         := lWebPedidoItensModel.VALOR_MONTADOR;
+      lPedidoItensModel.PedidoItenssLista[lIndex].COMISSAO_PERCENTUAL    := lWebPedidoItensModel.PERCENTUAL_COMISSAO;
       lPedidoItensModel.PedidoItenssLista[lIndex].COMISSAO_PED           := '0';
 
       inc(lIndex);
@@ -496,629 +496,629 @@ begin
 
     lPedidoVendaModel.gerarContasReceberPedido;
 
-    lPedidoWebModel.FAcao      := tacAlterar;
-    lPedidoWebModel.FSTATUS    := 'F';
-    lPedidoWebModel.FPEDIDO_ID := lPedido;
-    lPedidoWebModel.Salvar;
+    lWebPedidoModel.FAcao      := tacAlterar;
+    lWebPedidoModel.FSTATUS    := 'F';
+    lWebPedidoModel.FPEDIDO_ID := lPedido;
+    lWebPedidoModel.Salvar;
 
     Result := lPedido;
 
   finally
-    lPedidoWebModel.Free;
+    lWebPedidoModel.Free;
     lPedidoVendaModel.Free;
-    lPedidoWebItensModel.Free;
+    lWebPedidoItensModel.Free;
     lPedidoItensModel.Free;
   end;
 
 end;
 
-function TPedidoWebModel.carregaClasse(pId: String): TPedidoWebModel;
+function TWebPedidoModel.carregaClasse(pId: String): TWebPedidoModel;
 var
-  lPedidoWebDao: TPedidoWebDao;
+  lWebPedidoDao: TWebPedidoDao;
 begin
-  lPedidoWebDao := TPedidoWebDao.Create(vIConexao);
+  lWebPedidoDao := TWebPedidoDao.Create(vIConexao);
   try
-    Result := lPedidoWebDao.carregaClasse(pId);
+    Result := lWebPedidoDao.carregaClasse(pId);
   finally
-    lPedidoWebDao.Free;
+    lWebPedidoDao.Free;
   end;
 end;
 
-constructor TPedidoWebModel.Create(pIConexao : IConexao);
+constructor TWebPedidoModel.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
 
-destructor TPedidoWebModel.Destroy;
+destructor TWebPedidoModel.Destroy;
 begin
 
   inherited;
 end;
 
-procedure TPedidoWebModel.obterListaVendaAssistida;
+procedure TWebPedidoModel.obterListaVendaAssistida;
 var
-  lPedidoWebLista: TPedidoWebDao;
+  lWebPedidoLista: TWebPedidoDao;
 begin
-  lPedidoWebLista := TPedidoWebDao.Create(vIConexao);
+  lWebPedidoLista := TWebPedidoDao.Create(vIConexao);
 
   try
-    lPedidoWebLista.TotalRecords    := FTotalRecords;
-    lPedidoWebLista.WhereView       := FWhereView;
-    lPedidoWebLista.CountView       := FCountView;
-    lPedidoWebLista.OrderView       := FOrderView;
-    lPedidoWebLista.StartRecordView := FStartRecordView;
-    lPedidoWebLista.LengthPageView  := FLengthPageView;
-    lPedidoWebLista.IDRecordView    := FIDRecordView;
+    lWebPedidoLista.TotalRecords    := FTotalRecords;
+    lWebPedidoLista.WhereView       := FWhereView;
+    lWebPedidoLista.CountView       := FCountView;
+    lWebPedidoLista.OrderView       := FOrderView;
+    lWebPedidoLista.StartRecordView := FStartRecordView;
+    lWebPedidoLista.LengthPageView  := FLengthPageView;
+    lWebPedidoLista.IDRecordView    := FIDRecordView;
 
-    lPedidoWebLista.obterListaVendaAssistida;
+    lWebPedidoLista.obterListaVendaAssistida;
 
-    FTotalRecords    := lPedidoWebLista.TotalRecords;
-    FPedidoWebsLista := lPedidoWebLista.PedidoWebsLista;
+    FTotalRecords    := lWebPedidoLista.TotalRecords;
+    FWebPedidosLista := lWebPedidoLista.WebPedidosLista;
 
   finally
-    lPedidoWebLista.Free;
+    lWebPedidoLista.Free;
   end;
 end;
 
-function TPedidoWebModel.Salvar: String;
+function TWebPedidoModel.Salvar: String;
 var
-  lPedidoWebDao: TPedidoWebDao;
+  lWebPedidoDao: TWebPedidoDao;
 begin
-  lPedidoWebDao := TPedidoWebDao.Create(vIConexao);
+  lWebPedidoDao := TWebPedidoDao.Create(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacAlterar: Result := lPedidoWebDao.alterar(Self);
+      Terasoft.Types.tacAlterar: Result := lWebPedidoDao.alterar(Self);
     end;
   finally
-    lPedidoWebDao.Free;
+    lWebPedidoDao.Free;
   end;
 end;
 
-procedure TPedidoWebModel.SetAcao(const Value: TAcao);
+procedure TWebPedidoModel.SetAcao(const Value: TAcao);
 begin
   FAcao := Value;
 end;
 
-procedure TPedidoWebModel.SetACRESCIMO(const Value: Variant);
+procedure TWebPedidoModel.SetACRESCIMO(const Value: Variant);
 begin
   FACRESCIMO := Value;
 end;
 
-procedure TPedidoWebModel.SetCAMINHO_BOLETO(const Value: Variant);
+procedure TWebPedidoModel.SetCAMINHO_BOLETO(const Value: Variant);
 begin
   FCAMINHO_BOLETO := Value;
 end;
 
-procedure TPedidoWebModel.SetCAMINHO_NFE(const Value: Variant);
+procedure TWebPedidoModel.SetCAMINHO_NFE(const Value: Variant);
 begin
   FCAMINHO_NFE := Value;
 end;
 
-procedure TPedidoWebModel.SetCLIENTE_ID(const Value: Variant);
+procedure TWebPedidoModel.SetCLIENTE_ID(const Value: Variant);
 begin
   FCLIENTE_ID := Value;
 end;
 
-procedure TPedidoWebModel.SetCLIENTE_NOME(const Value: Variant);
+procedure TWebPedidoModel.SetCLIENTE_NOME(const Value: Variant);
 begin
   FCLIENTE_NOME := Value;
 end;
 
-procedure TPedidoWebModel.SetCODIGO_AUTORIZACAO_CARTAO(const Value: Variant);
+procedure TWebPedidoModel.SetCODIGO_AUTORIZACAO_CARTAO(const Value: Variant);
 begin
   FCODIGO_AUTORIZACAO_CARTAO := Value;
 end;
 
-procedure TPedidoWebModel.SetCODIGO_CUPOM_DESCONTO(const Value: Variant);
+procedure TWebPedidoModel.SetCODIGO_CUPOM_DESCONTO(const Value: Variant);
 begin
   FCODIGO_CUPOM_DESCONTO := Value;
 end;
 
-procedure TPedidoWebModel.SetCONDICOES2_PAG(const Value: Variant);
+procedure TWebPedidoModel.SetCONDICOES2_PAG(const Value: Variant);
 begin
   FCONDICOES2_PAG := Value;
 end;
 
-procedure TPedidoWebModel.SetCONDICOES_PAGAMENTO(const Value: Variant);
+procedure TWebPedidoModel.SetCONDICOES_PAGAMENTO(const Value: Variant);
 begin
   FCONDICOES_PAGAMENTO := Value;
 end;
 
-procedure TPedidoWebModel.SetCONTROLEALTERACAO(const Value: Variant);
+procedure TWebPedidoModel.SetCONTROLEALTERACAO(const Value: Variant);
 begin
   FCONTROLEALTERACAO := Value;
 end;
 
-procedure TPedidoWebModel.SetCORREIO_DATA(const Value: Variant);
+procedure TWebPedidoModel.SetCORREIO_DATA(const Value: Variant);
 begin
   FCORREIO_DATA := Value;
 end;
 
-procedure TPedidoWebModel.SetCORREIO_HORA(const Value: Variant);
+procedure TWebPedidoModel.SetCORREIO_HORA(const Value: Variant);
 begin
   FCORREIO_HORA := Value;
 end;
 
-procedure TPedidoWebModel.SetCORREIO_VOLUME(const Value: Variant);
+procedure TWebPedidoModel.SetCORREIO_VOLUME(const Value: Variant);
 begin
   FCORREIO_VOLUME := Value;
 end;
 
-procedure TPedidoWebModel.SetCountView(const Value: String);
+procedure TWebPedidoModel.SetCountView(const Value: String);
 begin
   FCountView := Value;
 end;
 
-procedure TPedidoWebModel.SetCUPOM_DESCONTO(const Value: Variant);
+procedure TWebPedidoModel.SetCUPOM_DESCONTO(const Value: Variant);
 begin
   FCUPOM_DESCONTO := Value;
 end;
 
-procedure TPedidoWebModel.SetCUPOM_TIPO(const Value: Variant);
+procedure TWebPedidoModel.SetCUPOM_TIPO(const Value: Variant);
 begin
   FCUPOM_TIPO := Value;
 end;
 
-procedure TPedidoWebModel.SetCUPOM_VALOR(const Value: Variant);
+procedure TWebPedidoModel.SetCUPOM_VALOR(const Value: Variant);
 begin
   FCUPOM_VALOR := Value;
 end;
 
-procedure TPedidoWebModel.SetDADOS_ADICIONAIS(const Value: Variant);
+procedure TWebPedidoModel.SetDADOS_ADICIONAIS(const Value: Variant);
 begin
   FDADOS_ADICIONAIS := Value;
 end;
 
-procedure TPedidoWebModel.SetDADOS_AUTORIZACAO(const Value: Variant);
+procedure TWebPedidoModel.SetDADOS_AUTORIZACAO(const Value: Variant);
 begin
   FDADOS_AUTORIZACAO := Value;
 end;
 
-procedure TPedidoWebModel.SetDATA(const Value: Variant);
+procedure TWebPedidoModel.SetDATA(const Value: Variant);
 begin
   FDATA := Value;
 end;
 
-procedure TPedidoWebModel.SetDATAHORA(const Value: Variant);
+procedure TWebPedidoModel.SetDATAHORA(const Value: Variant);
 begin
   FDATAHORA := Value;
 end;
 
-procedure TPedidoWebModel.SetDATA_CONSUMO_OMINIONE(const Value: Variant);
+procedure TWebPedidoModel.SetDATA_CONSUMO_OMINIONE(const Value: Variant);
 begin
   FDATA_CONSUMO_OMINIONE := Value;
 end;
 
-procedure TPedidoWebModel.SetDATA_EXPORTACAO(const Value: Variant);
+procedure TWebPedidoModel.SetDATA_EXPORTACAO(const Value: Variant);
 begin
   FDATA_EXPORTACAO := Value;
 end;
 
-procedure TPedidoWebModel.SetDATA_HORA_ANALISE(const Value: Variant);
+procedure TWebPedidoModel.SetDATA_HORA_ANALISE(const Value: Variant);
 begin
   FDATA_HORA_ANALISE := Value;
 end;
 
-procedure TPedidoWebModel.SetDATA_HORA_APROVACAO(const Value: Variant);
+procedure TWebPedidoModel.SetDATA_HORA_APROVACAO(const Value: Variant);
 begin
   FDATA_HORA_APROVACAO := Value;
 end;
 
-procedure TPedidoWebModel.SetDATA_HORA_REPROVADO(const Value: Variant);
+procedure TWebPedidoModel.SetDATA_HORA_REPROVADO(const Value: Variant);
 begin
   FDATA_HORA_REPROVADO := Value;
 end;
 
-procedure TPedidoWebModel.SetENTREGA_BAIRRO(const Value: Variant);
+procedure TWebPedidoModel.SetENTREGA_BAIRRO(const Value: Variant);
 begin
   FENTREGA_BAIRRO := Value;
 end;
 
-procedure TPedidoWebModel.SetENTREGA_CEP(const Value: Variant);
+procedure TWebPedidoModel.SetENTREGA_CEP(const Value: Variant);
 begin
   FENTREGA_CEP := Value;
 end;
 
-procedure TPedidoWebModel.SetENTREGA_CIDADE(const Value: Variant);
+procedure TWebPedidoModel.SetENTREGA_CIDADE(const Value: Variant);
 begin
   FENTREGA_CIDADE := Value;
 end;
 
-procedure TPedidoWebModel.SetENTREGA_COD_MUNICIPIO(const Value: Variant);
+procedure TWebPedidoModel.SetENTREGA_COD_MUNICIPIO(const Value: Variant);
 begin
   FENTREGA_COD_MUNICIPIO := Value;
 end;
 
-procedure TPedidoWebModel.SetENTREGA_COMPLEMENTO(const Value: Variant);
+procedure TWebPedidoModel.SetENTREGA_COMPLEMENTO(const Value: Variant);
 begin
   FENTREGA_COMPLEMENTO := Value;
 end;
 
-procedure TPedidoWebModel.SetENTREGA_DATA(const Value: Variant);
+procedure TWebPedidoModel.SetENTREGA_DATA(const Value: Variant);
 begin
   FENTREGA_DATA := Value;
 end;
 
-procedure TPedidoWebModel.SetENTREGA_ENDERECO(const Value: Variant);
+procedure TWebPedidoModel.SetENTREGA_ENDERECO(const Value: Variant);
 begin
   FENTREGA_ENDERECO := Value;
 end;
 
-procedure TPedidoWebModel.SetENTREGA_HORA(const Value: Variant);
+procedure TWebPedidoModel.SetENTREGA_HORA(const Value: Variant);
 begin
   FENTREGA_HORA := Value;
 end;
 
-procedure TPedidoWebModel.SetENTREGA_NUMERO(const Value: Variant);
+procedure TWebPedidoModel.SetENTREGA_NUMERO(const Value: Variant);
 begin
   FENTREGA_NUMERO := Value;
 end;
 
-procedure TPedidoWebModel.SetENTREGA_UF(const Value: Variant);
+procedure TWebPedidoModel.SetENTREGA_UF(const Value: Variant);
 begin
   FENTREGA_UF := Value;
 end;
 
-procedure TPedidoWebModel.SetENVIAR_EMAIL(const Value: Variant);
+procedure TWebPedidoModel.SetENVIAR_EMAIL(const Value: Variant);
 begin
   FENVIAR_EMAIL := Value;
 end;
 
-procedure TPedidoWebModel.SetEVENTO(const Value: Variant);
+procedure TWebPedidoModel.SetEVENTO(const Value: Variant);
 begin
   FEVENTO := Value;
 end;
 
-procedure TPedidoWebModel.SetFATURAR(const Value: Variant);
+procedure TWebPedidoModel.SetFATURAR(const Value: Variant);
 begin
   FFATURAR := Value;
 end;
 
-procedure TPedidoWebModel.SetFRETE_ALTURA(const Value: Variant);
+procedure TWebPedidoModel.SetFRETE_ALTURA(const Value: Variant);
 begin
   FFRETE_ALTURA := Value;
 end;
 
-procedure TPedidoWebModel.SetFRETE_LARGURA(const Value: Variant);
+procedure TWebPedidoModel.SetFRETE_LARGURA(const Value: Variant);
 begin
   FFRETE_LARGURA := Value;
 end;
 
-procedure TPedidoWebModel.SetFRETE_PESO(const Value: Variant);
+procedure TWebPedidoModel.SetFRETE_PESO(const Value: Variant);
 begin
   FFRETE_PESO := Value;
 end;
 
-procedure TPedidoWebModel.SetFRETE_PROFUNDIDADE(const Value: Variant);
+procedure TWebPedidoModel.SetFRETE_PROFUNDIDADE(const Value: Variant);
 begin
   FFRETE_PROFUNDIDADE := Value;
 end;
 
-procedure TPedidoWebModel.SetFRETE_VALOR(const Value: Variant);
+procedure TWebPedidoModel.SetFRETE_VALOR(const Value: Variant);
 begin
   FFRETE_VALOR := Value;
 end;
 
-procedure TPedidoWebModel.SetGERENTE_ID(const Value: Variant);
+procedure TWebPedidoModel.SetGERENTE_ID(const Value: Variant);
 begin
   FGERENTE_ID := Value;
 end;
 
-procedure TPedidoWebModel.SetPARCELAS(const Value: Variant);
+procedure TWebPedidoModel.SetPARCELAS(const Value: Variant);
 begin
   FPARCELAS := Value;
 end;
 
-procedure TPedidoWebModel.SetPedidoWebsLista(const Value: TObjectList<TPedidoWebModel>);
+procedure TWebPedidoModel.SetWebPedidosLista(const Value: TObjectList<TWebPedidoModel>);
 begin
-  FPedidoWebsLista := Value;
+  FWebPedidosLista := Value;
 end;
 
-procedure TPedidoWebModel.SetID(const Value: Variant);
+procedure TWebPedidoModel.SetID(const Value: Variant);
 begin
   FID := Value;
 end;
 
-procedure TPedidoWebModel.SetIDPEDIDOSOVIS(const Value: Variant);
+procedure TWebPedidoModel.SetIDPEDIDOSOVIS(const Value: Variant);
 begin
   FIDPEDIDOSOVIS := Value;
 end;
 
-procedure TPedidoWebModel.SetIDPEDIDOSOVISUSUARIO(const Value: Variant);
+procedure TWebPedidoModel.SetIDPEDIDOSOVISUSUARIO(const Value: Variant);
 begin
   FIDPEDIDOSOVISUSUARIO := Value;
 end;
 
-procedure TPedidoWebModel.SetPEDIDO_COMPRA(const Value: Variant);
+procedure TWebPedidoModel.SetPEDIDO_COMPRA(const Value: Variant);
 begin
   FPEDIDO_COMPRA := Value;
 end;
 
-procedure TPedidoWebModel.SetPEDIDO_ID(const Value: Variant);
+procedure TWebPedidoModel.SetPEDIDO_ID(const Value: Variant);
 begin
   FPEDIDO_ID := Value;
 end;
 
-procedure TPedidoWebModel.SetPED_PLATAFORMA(const Value: Variant);
+procedure TWebPedidoModel.SetPED_PLATAFORMA(const Value: Variant);
 begin
   FPED_PLATAFORMA := Value;
 end;
 
-procedure TPedidoWebModel.SetPERCENTUAL_DESCONTO(const Value: Variant);
+procedure TWebPedidoModel.SetPERCENTUAL_DESCONTO(const Value: Variant);
 begin
   FPERCENTUAL_DESCONTO := Value;
 end;
 
-procedure TPedidoWebModel.SetPERIOD(const Value: Variant);
+procedure TWebPedidoModel.SetPERIOD(const Value: Variant);
 begin
   FPERIOD := Value;
 end;
 
-procedure TPedidoWebModel.SetPORTADOR_ID(const Value: Variant);
+procedure TWebPedidoModel.SetPORTADOR_ID(const Value: Variant);
 begin
   FPORTADOR_ID := Value;
 end;
 
-procedure TPedidoWebModel.SetPRECO_VENDA_ID(const Value: Variant);
+procedure TWebPedidoModel.SetPRECO_VENDA_ID(const Value: Variant);
 begin
   FPRECO_VENDA_ID := Value;
 end;
 
-procedure TPedidoWebModel.SetPRE_ANALISE_DATAHORA(const Value: Variant);
+procedure TWebPedidoModel.SetPRE_ANALISE_DATAHORA(const Value: Variant);
 begin
   FPRE_ANALISE_DATAHORA := Value;
 end;
 
-procedure TPedidoWebModel.SetPRE_ANALISE_STATUS(const Value: Variant);
+procedure TWebPedidoModel.SetPRE_ANALISE_STATUS(const Value: Variant);
 begin
   FPRE_ANALISE_STATUS := Value;
 end;
 
-procedure TPedidoWebModel.SetPRE_ANALISE_USUARIO_ID(const Value: Variant);
+procedure TWebPedidoModel.SetPRE_ANALISE_USUARIO_ID(const Value: Variant);
 begin
   FPRE_ANALISE_USUARIO_ID := Value;
 end;
 
-procedure TPedidoWebModel.SetPRIMEIRO_VENCIMENTO(const Value: Variant);
+procedure TWebPedidoModel.SetPRIMEIRO_VENCIMENTO(const Value: Variant);
 begin
   FPRIMEIRO_VENCIMENTO := Value;
 end;
 
-procedure TPedidoWebModel.SetPROPOSTA(const Value: Variant);
+procedure TWebPedidoModel.SetPROPOSTA(const Value: Variant);
 begin
   FPROPOSTA := Value;
 end;
 
-procedure TPedidoWebModel.SetREGIAO_ID(const Value: Variant);
+procedure TWebPedidoModel.SetREGIAO_ID(const Value: Variant);
 begin
   FREGIAO_ID := Value;
 end;
 
-procedure TPedidoWebModel.SetIDRecordView(const Value: Integer);
+procedure TWebPedidoModel.SetIDRecordView(const Value: Integer);
 begin
   FIDRecordView := Value;
 end;
 
-procedure TPedidoWebModel.SetIDUsuario(const Value: String);
+procedure TWebPedidoModel.SetIDUsuario(const Value: String);
 begin
   FIDUsuario := Value;
 end;
 
-procedure TPedidoWebModel.SetIMPRESSAO(const Value: Variant);
+procedure TWebPedidoModel.SetIMPRESSAO(const Value: Variant);
 begin
   FIMPRESSAO := Value;
 end;
 
-procedure TPedidoWebModel.SetINTERMEDIADOR_ID(const Value: Variant);
+procedure TWebPedidoModel.SetINTERMEDIADOR_ID(const Value: Variant);
 begin
   FINTERMEDIADOR_ID := Value;
 end;
 
-procedure TPedidoWebModel.SetISGIFT(const Value: Variant);
+procedure TWebPedidoModel.SetISGIFT(const Value: Variant);
 begin
   FISGIFT := Value;
 end;
 
-procedure TPedidoWebModel.SetLengthPageView(const Value: String);
+procedure TWebPedidoModel.SetLengthPageView(const Value: String);
 begin
   FLengthPageView := Value;
 end;
 
-procedure TPedidoWebModel.SetLOJA(const Value: Variant);
+procedure TWebPedidoModel.SetLOJA(const Value: Variant);
 begin
   FLOJA := Value;
 end;
 
-procedure TPedidoWebModel.SetLOTE_EXPORTACAO(const Value: Variant);
+procedure TWebPedidoModel.SetLOTE_EXPORTACAO(const Value: Variant);
 begin
   FLOTE_EXPORTACAO := Value;
 end;
 
-procedure TPedidoWebModel.SetMARKETPLACE(const Value: Variant);
+procedure TWebPedidoModel.SetMARKETPLACE(const Value: Variant);
 begin
   FMARKETPLACE := Value;
 end;
 
-procedure TPedidoWebModel.SetMENSAGEM_ANALISE(const Value: Variant);
+procedure TWebPedidoModel.SetMENSAGEM_ANALISE(const Value: Variant);
 begin
   FMENSAGEM_ANALISE := Value;
 end;
 
-procedure TPedidoWebModel.SetMONTAGEM_DATA(const Value: Variant);
+procedure TWebPedidoModel.SetMONTAGEM_DATA(const Value: Variant);
 begin
   FMONTAGEM_DATA := Value;
 end;
 
-procedure TPedidoWebModel.SetMONTAGEM_HORA(const Value: Variant);
+procedure TWebPedidoModel.SetMONTAGEM_HORA(const Value: Variant);
 begin
   FMONTAGEM_HORA := Value;
 end;
 
-procedure TPedidoWebModel.SetOBSERVACAO(const Value: Variant);
+procedure TWebPedidoModel.SetOBSERVACAO(const Value: Variant);
 begin
   FOBSERVACAO := Value;
 end;
 
-procedure TPedidoWebModel.SetOBSERVACOES(const Value: Variant);
+procedure TWebPedidoModel.SetOBSERVACOES(const Value: Variant);
 begin
   FOBSERVACOES := Value;
 end;
 
-procedure TPedidoWebModel.SetOrderView(const Value: String);
+procedure TWebPedidoModel.SetOrderView(const Value: String);
 begin
   FOrderView := Value;
 end;
 
-procedure TPedidoWebModel.SetORIGEM_PEDIDO(const Value: Variant);
+procedure TWebPedidoModel.SetORIGEM_PEDIDO(const Value: Variant);
 begin
   FORIGEM_PEDIDO := Value;
 end;
 
-procedure TPedidoWebModel.SetSAIDA_ID(const Value: Variant);
+procedure TWebPedidoModel.SetSAIDA_ID(const Value: Variant);
 begin
   FSAIDA_ID := Value;
 end;
 
-procedure TPedidoWebModel.SetStartRecordView(const Value: String);
+procedure TWebPedidoModel.SetStartRecordView(const Value: String);
 begin
   FStartRecordView := Value;
 end;
 
-procedure TPedidoWebModel.SetSTATUS(const Value: Variant);
+procedure TWebPedidoModel.SetSTATUS(const Value: Variant);
 begin
   FSTATUS := Value;
 end;
 
-procedure TPedidoWebModel.SetSTATUS_ANALISE(const Value: Variant);
+procedure TWebPedidoModel.SetSTATUS_ANALISE(const Value: Variant);
 begin
   FSTATUS_ANALISE := Value;
 end;
 
-procedure TPedidoWebModel.SetSTATUS_SOVIS(const Value: Variant);
+procedure TWebPedidoModel.SetSTATUS_SOVIS(const Value: Variant);
 begin
   FSTATUS_SOVIS := Value;
 end;
 
-procedure TPedidoWebModel.SetSUBSTATUS(const Value: Variant);
+procedure TWebPedidoModel.SetSUBSTATUS(const Value: Variant);
 begin
   FSUBSTATUS := Value;
 end;
 
-procedure TPedidoWebModel.SetSYSTIME(const Value: Variant);
+procedure TWebPedidoModel.SetSYSTIME(const Value: Variant);
 begin
   FSYSTIME := Value;
 end;
 
-procedure TPedidoWebModel.SetTIPO(const Value: Variant);
+procedure TWebPedidoModel.SetTIPO(const Value: Variant);
 begin
   FTIPO := Value;
 end;
 
-procedure TPedidoWebModel.SetTIPOVENDA_ID(const Value: Variant);
+procedure TWebPedidoModel.SetTIPOVENDA_ID(const Value: Variant);
 begin
   FTIPOVENDA_ID := Value;
 end;
 
-procedure TPedidoWebModel.SetTIPO_COMISSAO(const Value: Variant);
+procedure TWebPedidoModel.SetTIPO_COMISSAO(const Value: Variant);
 begin
   FTIPO_COMISSAO := Value;
 end;
 
-procedure TPedidoWebModel.SetTotalRecords(const Value: Integer);
+procedure TWebPedidoModel.SetTotalRecords(const Value: Integer);
 begin
   FTotalRecords := Value;
 end;
 
-procedure TPedidoWebModel.SetTRANSPORTADORA_DADOS_ADICIONAIS(
+procedure TWebPedidoModel.SetTRANSPORTADORA_DADOS_ADICIONAIS(
   const Value: Variant);
 begin
   FTRANSPORTADORA_DADOS_ADICIONAIS := Value;
 end;
 
-procedure TPedidoWebModel.SetTRANSPORTADORA_ID(const Value: Variant);
+procedure TWebPedidoModel.SetTRANSPORTADORA_ID(const Value: Variant);
 begin
   FTRANSPORTADORA_ID := Value;
 end;
 
-procedure TPedidoWebModel.SetUSAR_TABELA_PRECO(const Value: Variant);
+procedure TWebPedidoModel.SetUSAR_TABELA_PRECO(const Value: Variant);
 begin
   FUSAR_TABELA_PRECO := Value;
 end;
 
-procedure TPedidoWebModel.SetUSUARIO(const Value: Variant);
+procedure TWebPedidoModel.SetUSUARIO(const Value: Variant);
 begin
   FUSUARIO := Value;
 end;
 
-procedure TPedidoWebModel.SetUSUARIO_ANALISANDO(const Value: Variant);
+procedure TWebPedidoModel.SetUSUARIO_ANALISANDO(const Value: Variant);
 begin
   FUSUARIO_ANALISANDO := Value;
 end;
 
-procedure TPedidoWebModel.SetUSUARIO_ANALISE(const Value: Variant);
+procedure TWebPedidoModel.SetUSUARIO_ANALISE(const Value: Variant);
 begin
   FUSUARIO_ANALISE := Value;
 end;
 
-procedure TPedidoWebModel.SetUSUARIO_APROVACAO(const Value: Variant);
+procedure TWebPedidoModel.SetUSUARIO_APROVACAO(const Value: Variant);
 begin
   FUSUARIO_APROVACAO := Value;
 end;
 
-procedure TPedidoWebModel.SetUSUARIO_REPROVADO(const Value: Variant);
+procedure TWebPedidoModel.SetUSUARIO_REPROVADO(const Value: Variant);
 begin
   FUSUARIO_REPROVADO := Value;
 end;
 
-procedure TPedidoWebModel.SetUUID_SOVIS(const Value: Variant);
+procedure TWebPedidoModel.SetUUID_SOVIS(const Value: Variant);
 begin
   FUUID_SOVIS := Value;
 end;
 
-procedure TPedidoWebModel.SetVALOR_CUPOM_DESCONTO(const Value: Variant);
+procedure TWebPedidoModel.SetVALOR_CUPOM_DESCONTO(const Value: Variant);
 begin
   FVALOR_CUPOM_DESCONTO := Value;
 end;
 
-procedure TPedidoWebModel.SetVALOR_ENTRADA(const Value: Variant);
+procedure TWebPedidoModel.SetVALOR_ENTRADA(const Value: Variant);
 begin
   FVALOR_ENTRADA := Value;
 end;
 
-procedure TPedidoWebModel.SetVALOR_FRETE(const Value: Variant);
+procedure TWebPedidoModel.SetVALOR_FRETE(const Value: Variant);
 begin
   FVALOR_FRETE := Value;
 end;
 
-procedure TPedidoWebModel.SetVALOR_GARANTIA(const Value: Variant);
+procedure TWebPedidoModel.SetVALOR_GARANTIA(const Value: Variant);
 begin
   FVALOR_GARANTIA := Value;
 end;
 
-procedure TPedidoWebModel.SetVALOR_ITENS(const Value: Variant);
+procedure TWebPedidoModel.SetVALOR_ITENS(const Value: Variant);
 begin
   FVALOR_ITENS := Value;
 end;
 
-procedure TPedidoWebModel.SetVALOR_ST(const Value: Variant);
+procedure TWebPedidoModel.SetVALOR_ST(const Value: Variant);
 begin
   FVALOR_ST := Value;
 end;
 
-procedure TPedidoWebModel.SetVALOR_TOTAL(const Value: Variant);
+procedure TWebPedidoModel.SetVALOR_TOTAL(const Value: Variant);
 begin
   FVALOR_TOTAL := Value;
 end;
 
-procedure TPedidoWebModel.SetVENDEDOR_ID(const Value: Variant);
+procedure TWebPedidoModel.SetVENDEDOR_ID(const Value: Variant);
 begin
   FVENDEDOR_ID := Value;
 end;
 
-procedure TPedidoWebModel.SetWhereView(const Value: String);
+procedure TWebPedidoModel.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
 end;

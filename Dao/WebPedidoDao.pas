@@ -1,9 +1,9 @@
-unit PedidoWebDao;
+unit WebPedidoDao;
 
 interface
 
 uses
-  PedidoWebModel,
+  WebPedidoModel,
   Terasoft.ConstrutorDao,
   FireDAC.Comp.Client,
   System.SysUtils,
@@ -15,13 +15,13 @@ uses
   Interfaces.Conexao;
 
 type
-  TPedidoWebDao = class
+  TWebPedidoDao = class
 
   private
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FPedidoWebsLista: TObjectList<TPedidoWebModel>;
+    FWebPedidosLista: TObjectList<TWebPedidoModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -32,7 +32,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetPedidoWebsLista(const Value: TObjectList<TPedidoWebModel>);
+    procedure SetWebPedidosLista(const Value: TObjectList<TWebPedidoModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -43,13 +43,13 @@ type
 
     function where: String;
 
-    procedure setParams(var pQry: TFDQuery; pPedidoWebModel: TPedidoWebModel);
+    procedure setParams(var pQry: TFDQuery; pWebPedidoModel: TWebPedidoModel);
 
   public
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property PedidoWebsLista: TObjectList<TPedidoWebModel> read FPedidoWebsLista write SetPedidoWebsLista;
+    property WebPedidosLista: TObjectList<TWebPedidoModel> read FWebPedidosLista write SetWebPedidosLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -59,12 +59,12 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(pPedidoWebModel: TPedidoWebModel): String;
-    function alterar(pPedidoWebModel: TPedidoWebModel): String;
-    function excluir(pPedidoWebModel: TPedidoWebModel): String;
+    function incluir(pWebPedidoModel: TWebPedidoModel): String;
+    function alterar(pWebPedidoModel: TWebPedidoModel): String;
+    function excluir(pWebPedidoModel: TWebPedidoModel): String;
 
     procedure obterListaVendaAssistida;
-    function carregaClasse(pId: String): TPedidoWebModel;
+    function carregaClasse(pId: String): TWebPedidoModel;
 end;
 
 implementation
@@ -72,9 +72,9 @@ implementation
 uses
   System.Rtti;
 
-{ TPedidoWeb }
+{ TWebPedido }
 
-function TPedidoWebDao.alterar(pPedidoWebModel: TPedidoWebModel): String;
+function TWebPedidoDao.alterar(pWebPedidoModel: TWebPedidoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -85,10 +85,10 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    setParams(lQry, pPedidoWebModel);
+    setParams(lQry, pWebPedidoModel);
     lQry.ExecSQL;
 
-    Result := pPedidoWebModel.ID;
+    Result := pWebPedidoModel.ID;
 
   finally
     lSQL := '';
@@ -96,13 +96,13 @@ begin
   end;
 end;
 
-function TPedidoWebDao.carregaClasse(pId: String): TPedidoWebModel;
+function TWebPedidoDao.carregaClasse(pId: String): TWebPedidoModel;
 var
   lQry: TFDQuery;
-  lModel: TPedidoWebModel;
+  lModel: TWebPedidoModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TPedidoWebModel.Create(vIConexao);
+  lModel   := TWebPedidoModel.Create(vIConexao);
   Result   := lModel;
 
   try
@@ -212,35 +212,35 @@ begin
   end;
 end;
 
-constructor TPedidoWebDao.Create(pIConexao : IConexao);
+constructor TWebPedidoDao.Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
-destructor TPedidoWebDao.Destroy;
+destructor TWebPedidoDao.Destroy;
 begin
 
   inherited;
 end;
 
-function TPedidoWebDao.excluir(pPedidoWebModel: TPedidoWebModel): String;
+function TWebPedidoDao.excluir(pWebPedidoModel: TWebPedidoModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from WEB_PEDIDO where ID = :ID',[pPedidoWebModel.ID]);
+   lQry.ExecSQL('delete from WEB_PEDIDO where ID = :ID',[pWebPedidoModel.ID]);
    lQry.ExecSQL;
-   Result := pPedidoWebModel.ID;
+   Result := pWebPedidoModel.ID;
 
   finally
     lQry.Free;
   end;
 end;
 
-function TPedidoWebDao.incluir(pPedidoWebModel: TPedidoWebModel): String;
+function TWebPedidoDao.incluir(pWebPedidoModel: TWebPedidoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -251,7 +251,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    setParams(lQry, pPedidoWebModel);
+    setParams(lQry, pWebPedidoModel);
     lQry.Open;
 
     Result := lQry.FieldByName('ID').AsString;
@@ -262,7 +262,7 @@ begin
   end;
 end;
 
-function TPedidoWebDao.where: String;
+function TWebPedidoDao.where: String;
 var
   lSQL : String;
 begin
@@ -277,7 +277,7 @@ begin
   Result := lSQL;
 end;
 
-procedure TPedidoWebDao.obterTotalRegistros;
+procedure TWebPedidoDao.obterTotalRegistros;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -298,7 +298,7 @@ begin
   end;
 end;
 
-procedure TPedidoWebDao.obterListaVendaAssistida;
+procedure TWebPedidoDao.obterListaVendaAssistida;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -306,7 +306,7 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  FPedidoWebsLista := TObjectList<TPedidoWebModel>.Create;
+  FWebPedidosLista := TObjectList<TWebPedidoModel>.Create;
 
   try
 
@@ -345,18 +345,18 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FPedidoWebsLista.Add(TPedidoWebModel.Create(vIConexao));
+      FWebPedidosLista.Add(TWebPedidoModel.Create(vIConexao));
 
-      i := FPedidoWebsLista.Count -1;
+      i := FWebPedidosLista.Count -1;
 
-      FPedidoWebsLista[i].ID                   := lQry.FieldByName('ID').AsString;
-      FPedidoWebsLista[i].CLIENTE_NOME         := lQry.FieldByName('CLIENTE_NOME').AsString;
-      FPedidoWebsLista[i].VALOR_FRETE          := lQry.FieldByName('VALOR_FRETE').AsString;
-      FPedidoWebsLista[i].ACRESCIMO            := lQry.FieldByName('ACRESCIMO').AsString;
-      FPedidoWebsLista[i].VALOR_ITENS          := lQry.FieldByName('VALOR_ITENS').AsString;
-      FPedidoWebsLista[i].VALOR_GARANTIA       := lQry.FieldByName('VALOR_GARANTIA').AsString;
-      FPedidoWebsLista[i].VALOR_TOTAL          := lQry.FieldByName('VALOR_TOTAL').AsString;
-      FPedidoWebsLista[i].VALOR_CUPOM_DESCONTO := lQry.FieldByName('VALOR_CUPOM_DESCONTO').AsString;
+      FWebPedidosLista[i].ID                   := lQry.FieldByName('ID').AsString;
+      FWebPedidosLista[i].CLIENTE_NOME         := lQry.FieldByName('CLIENTE_NOME').AsString;
+      FWebPedidosLista[i].VALOR_FRETE          := lQry.FieldByName('VALOR_FRETE').AsString;
+      FWebPedidosLista[i].ACRESCIMO            := lQry.FieldByName('ACRESCIMO').AsString;
+      FWebPedidosLista[i].VALOR_ITENS          := lQry.FieldByName('VALOR_ITENS').AsString;
+      FWebPedidosLista[i].VALOR_GARANTIA       := lQry.FieldByName('VALOR_GARANTIA').AsString;
+      FWebPedidosLista[i].VALOR_TOTAL          := lQry.FieldByName('VALOR_TOTAL').AsString;
+      FWebPedidosLista[i].VALOR_CUPOM_DESCONTO := lQry.FieldByName('VALOR_CUPOM_DESCONTO').AsString;
 
       lQry.Next;
     end;
@@ -368,37 +368,37 @@ begin
   end;
 end;
 
-procedure TPedidoWebDao.SetCountView(const Value: String);
+procedure TWebPedidoDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
 end;
 
-procedure TPedidoWebDao.SetPedidoWebsLista(const Value: TObjectList<TPedidoWebModel>);
+procedure TWebPedidoDao.SetWebPedidosLista(const Value: TObjectList<TWebPedidoModel>);
 begin
-  FPedidoWebsLista := Value;
+  FWebPedidosLista := Value;
 end;
 
-procedure TPedidoWebDao.SetID(const Value: Variant);
+procedure TWebPedidoDao.SetID(const Value: Variant);
 begin
   FID := Value;
 end;
 
-procedure TPedidoWebDao.SetIDRecordView(const Value: Integer);
+procedure TWebPedidoDao.SetIDRecordView(const Value: Integer);
 begin
   FIDRecordView := Value;
 end;
 
-procedure TPedidoWebDao.SetLengthPageView(const Value: String);
+procedure TWebPedidoDao.SetLengthPageView(const Value: String);
 begin
   FLengthPageView := Value;
 end;
 
-procedure TPedidoWebDao.SetOrderView(const Value: String);
+procedure TWebPedidoDao.SetOrderView(const Value: String);
 begin
   FOrderView := Value;
 end;
 
-procedure TPedidoWebDao.setParams(var pQry: TFDQuery; pPedidoWebModel: TPedidoWebModel);
+procedure TWebPedidoDao.setParams(var pQry: TFDQuery; pWebPedidoModel: TWebPedidoModel);
 var
   lTabela : TFDMemTable;
   lCtx    : TRttiContext;
@@ -411,28 +411,28 @@ begin
   try
     for i := 0 to pQry.Params.Count - 1 do
     begin
-      lProp := lCtx.GetType(TPedidoWebModel).GetProperty(pQry.Params[i].Name);
+      lProp := lCtx.GetType(TWebPedidoModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPedidoWebModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pPedidoWebModel).AsString))
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pWebPedidoModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pWebPedidoModel).AsString))
     end;
   finally
     lCtx.Free;
   end;
 end;
 
-procedure TPedidoWebDao.SetStartRecordView(const Value: String);
+procedure TWebPedidoDao.SetStartRecordView(const Value: String);
 begin
   FStartRecordView := Value;
 end;
 
-procedure TPedidoWebDao.SetTotalRecords(const Value: Integer);
+procedure TWebPedidoDao.SetTotalRecords(const Value: Integer);
 begin
   FTotalRecords := Value;
 end;
 
-procedure TPedidoWebDao.SetWhereView(const Value: String);
+procedure TWebPedidoDao.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
 end;
