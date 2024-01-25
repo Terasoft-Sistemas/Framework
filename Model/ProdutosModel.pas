@@ -2,10 +2,25 @@ unit ProdutosModel;
 interface
 uses
   Terasoft.Types,
+  Terasoft.Utils,
   System.Generics.Collections,
-  Interfaces.Conexao, FireDAC.Comp.Client;
+  Interfaces.Conexao,
+  FireDAC.Comp.Client;
 
 type
+  TProdutoPreco = record
+    Produto,
+    Cliente,
+    Portador,
+    PrecoVenda,
+    Loja                : String;
+    Qtde                : Double;
+    PrecoUf,
+    Promocao,
+    PrecoCliente,
+    TabelaPreco         : Boolean;
+  end;
+
   TProdutosModel = class
 
   private
@@ -550,6 +565,7 @@ type
     procedure SetWEB_VARIACAO(const Value: Variant);
     procedure SetXMOTIVOISENCAO(const Value: Variant);
     procedure SetIDRecordView(const Value: String);
+
   public
     property UUID: Variant read FUUID write SetUUID;
     property CODIGO_PRO: Variant read FCODIGO_PRO write SetCODIGO_PRO;
@@ -819,11 +835,13 @@ type
     function Salvar: String;
     procedure obterLista;
     function obterListaMemTable : TFDMemTable;
-
     function obterCodigoBarras(pIdProduto: String): String;
     function obterSaldo(pIdProduto: String): Double;
+
     function carregaClasse(pId: String): TProdutosModel;
     function valorVenda(pIdProduto: String): Variant;
+
+    function ValorUnitario(pProdutoPreco: TProdutoPreco) : Double;
 
     procedure subtrairSaldo(pIdProduto: String; pSaldo: Double);
     procedure adicionarSaldo(pIdProduto: String; pSaldo: Double);
@@ -838,14 +856,11 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
   end;
-
 implementation
-
 uses
-  ProdutosDao;
-
+  ProdutosDao, ClienteModel, PrecoUFModel, PromocaoItensModel, PrecoVendaModel,
+  PrecoVendaProdutoModel, PrecoClienteModel, System.SysUtils;
 { TProdutosModel }
-
 procedure TProdutosModel.adicionarSaldo(pIdProduto: String; pSaldo: Double);
 var
   lProdutoDao: TProdutosDao;
@@ -857,7 +872,6 @@ begin
     lProdutoDao.Free;
   end;
 end;
-
 function TProdutosModel.carregaClasse(pId: String): TProdutosModel;
 var
   lProdutosDao: TProdutosDao;
@@ -869,12 +883,10 @@ begin
     lProdutosDao.Free;
   end;
 end;
-
 constructor TProdutosModel.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
-
 destructor TProdutosModel.Destroy;
 begin
   inherited;
@@ -910,7 +922,6 @@ begin
     lProdutosLista.Free;
   end;
 end;
-
 function TProdutosModel.obterListaMemTable: TFDMemTable;
 var
   lProdutosLista: TProdutosDao;
@@ -924,9 +935,7 @@ begin
     lProdutosLista.StartRecordView := FStartRecordView;
     lProdutosLista.LengthPageView  := FLengthPageView;
     lProdutosLista.IDRecordView    := FIDRecordView;
-
     Result := lProdutosLista.obterListaMemTable;
-
     FTotalRecords  := lProdutosLista.TotalRecords;
   finally
     lProdutosLista.Free;
@@ -944,7 +953,6 @@ begin
     lProdutoDao.Free;
   end;
 end;
-
 function TProdutosModel.Salvar: String;
 var
   lProdutosDao: TProdutosDao;
@@ -2055,6 +2063,141 @@ begin
   end;
 end;
 
+function TProdutosModel.ValorUnitario(pProdutoPreco: TProdutoPreco): Double;
+var
+  lClienteModel           : TClienteModel;
+  lPrecoUFModel           : TPrecoUFModel;
+  lPromocaoItensModel     : TPromocaoItensModel;
+  lProdutosModel          : TProdutosModel;
+  lCondicaoPromocao,
+  lDia                    : String;
+  lPrecoVendaModel        : TPrecoVendaModel;
+  lPrecoVendaProdutoModel : TPrecoVendaProdutoModel;
+  lPrecoClienteModel      : TPrecoClienteModel;
+begin
+  lClienteModel           := TClienteModel.Create(vIConexao);
+  lPrecoUFModel           := TPrecoUFModel.Create(vIConexao);
+  lPromocaoItensModel     := TPromocaoItensModel.Create(vIConexao);
+  lPrecoVendaModel        := TPrecoVendaModel.Create(vIConexao);
+  lPrecoVendaProdutoModel := TPrecoVendaProdutoModel.Create(vIConexao);
+  lProdutosModel          := TProdutosModel.Create(vIConexao);
+  lPrecoClienteModel      := TPrecoClienteModel.Create(vIConexao);
+  try
+
+    if pProdutoPreco.PrecoUf then
+    begin
+      lPrecoUFModel.WhereView := ' and preco_uf.uf = ' + QuotedStr(lClienteModel.ufCliente(pProdutoPreco.Cliente)) + ' and preco_uf.produto_id = '+ QuotedStr(pProdutoPreco.Produto);
+      lPrecoUFModel.obterLista;
+      if lPrecoUFModel.TotalRecords > 0 then
+      begin
+        if lPrecoUFModel.PrecoUFsLista[0].TOTAL > 0 then
+        begin
+          Result := lPrecoUFModel.PrecoUFsLista[0].TOTAL;
+          exit;
+        end;
+      end;
+    end;
+
+    if pProdutoPreco.Promocao then
+    begin
+      lDia := DiadaSemana(vIConexao.DataServer);
+      lCondicaoPromocao := '  and promocaoitens.produto_id = '+QuotedStr(pProdutoPreco.Produto) +
+                           '  and current_date between promocao.datainicio and promocao.datafim '+
+                           '  and coalesce(promocao.horainicio, ''00:00:00'') <= ' + QuotedStr(TimeToStr(vIConexao.DataServer)) +
+                           '  and coalesce(promocao.horafim, ''24:00:00'') > '+ QuotedStr(TimeToStr(vIConexao.DataServer)) +
+                           '  and coalesce(promocao.'+lDia+', ''S'') = ''S'' ';
+
+      if pProdutoPreco.Portador <> '' then
+        lCondicaoPromocao := lCondicaoPromocao + ' and ((promocao.portador_id is null) or (promocao.portador_id = '+QuotedStr(pProdutoPreco.Portador)+'))';
+      if pProdutoPreco.PrecoVenda <> '' then
+        lCondicaoPromocao := lCondicaoPromocao + ' and ((promocao.preco_venda_id is null) or (promocao.preco_venda_id = '+QuotedStr(pProdutoPreco.PrecoVenda)+'))';
+      if pProdutoPreco.Cliente <> '' then
+        lCondicaoPromocao := lCondicaoPromocao + ' and ((promocao.cliente_id is null) or (promocao.cliente_id = '+QuotedStr(pProdutoPreco.Cliente)+'))';
+      if pProdutoPreco.Loja <> '' then
+        lCondicaoPromocao := lCondicaoPromocao + ' and ((promocao.loja = '+QuotedStr(pProdutoPreco.Loja)+') or (promocao.loja is null)) ';
+
+      lPromocaoItensModel.WhereView := lCondicaoPromocao;
+      lPromocaoItensModel.obterLista;
+
+      if lPromocaoItensModel.TotalRecords > 0 then
+      begin
+        Result := lPromocaoItensModel.PromocaoItenssLista[0].valor_promocao;
+        exit;
+      end;
+    end;
+
+    if pProdutoPreco.PrecoCliente then
+    begin
+      lPrecoClienteModel.WhereView := ' and preco_cliente.cliente = '+ QuotedStr(pProdutoPreco.Cliente) + ' and preco_cliente.produto = '+ QuotedStr(pProdutoPreco.Produto);
+      lPrecoClienteModel.obterLista;
+
+      if lPrecoClienteModel.TotalRecords > 0 then
+      begin
+        if lPrecoClienteModel.PrecoClientesLista[0].VALOR > 0 then
+        begin
+          Result := lPrecoClienteModel.PrecoClientesLista[0].VALOR;
+          exit;
+        end;
+      end;
+    end;
+
+    if pProdutoPreco.TabelaPreco then
+    begin
+      lClienteModel := lClienteModel.carregaClasse(pProdutoPreco.Cliente);
+      if lClienteModel.preco_id <> '' then
+      begin
+        lPrecoVendaModel.WhereView := ' and id = '+ QuotedStr(lClienteModel.preco_id);
+        lPrecoVendaModel.obterLista;
+      end;
+      if pProdutoPreco.PrecoVenda <> '' then
+      begin
+        lPrecoVendaModel.WhereView := ' and id = '+ QuotedStr(pProdutoPreco.PrecoVenda);
+        lPrecoVendaModel.obterLista;
+      end;
+      if lPrecoVendaModel.TotalRecords > 0  then
+      begin
+        if lPrecoVendaModel.PrecoVendasLista[0].PRODUTOS_IGNORAR <> 'I' then
+        begin
+          lPrecoVendaProdutoModel.WhereView := ' and preco_venda_id = ' + QuotedStr(lPrecoVendaModel.PrecoVendasLista[0].ID) + ' and produto_id = ' + QuotedStr(pProdutoPreco.Produto);
+          lPrecoVendaProdutoModel.obterLista;
+          if lPrecoVendaProdutoModel.TotalRecords = 0 then
+          begin
+            if lPrecoVendaModel.PrecoVendasLista[0].PERCENTUAL > 0 then
+            begin
+              if lPrecoVendaModel.PrecoVendasLista[0].ACRESCIMO_DESCONTO = 'C' then
+              begin
+                Result := lProdutosModel.ProdutossLista[0].CUSTOMEDIO_PRO + (lProdutosModel.ProdutossLista[0].CUSTOMEDIO_PRO * (lPrecoVendaModel.PrecoVendasLista[0].PERCENTUAL / 100));
+                exit;
+              end
+              else if lPrecoVendaModel.PrecoVendasLista[0].ACRESCIMO_DESCONTO = 'A' then
+              begin
+                Result := lProdutosModel.ProdutossLista[0].VENDA_PRO + (lProdutosModel.ProdutossLista[0].VENDA_PRO * (lPrecoVendaModel.PrecoVendasLista[0].PERCENTUAL / 100));
+                exit;
+              end
+              else
+              begin
+                Result := lProdutosModel.ProdutossLista[0].VENDA_PRO - (lProdutosModel.ProdutossLista[0].VENDA_PRO * (lPrecoVendaModel.PrecoVendasLista[0].PERCENTUAL / 100));
+                exit;
+              end;
+            end;
+          end;
+        end;
+      end;
+    end;
+
+    Result := lProdutosModel.valorVenda(pProdutoPreco.Produto);
+
+  finally
+    lPrecoVendaProdutoModel.Free;
+    lPromocaoItensModel.Free;
+    lPrecoClienteModel.Free;
+    lPrecoVendaModel.Free;
+    lProdutosModel.Free;
+    lClienteModel.Free;
+    lPrecoUFModel.Free;
+  end;
+end;
+
 function TProdutosModel.valorVenda(pIdProduto: String): Variant;
 var
   lProdutoDao: TProdutosDao;
@@ -2066,5 +2209,4 @@ begin
     lProdutoDao.Free;
   end;
 end;
-
 end.
