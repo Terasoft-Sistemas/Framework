@@ -10,6 +10,8 @@ interface
 
       private
         function criarQuery                              : TFDQuery;
+        function criaConexao                             : IConexao;
+        function ConfigConexao                           : Boolean;
         function criarQueryExterna                       : TFDQuery;
         function ConfigConexaoExterna(pLoja: String)     : Boolean;
         function Generetor(pValue: String)               : String;
@@ -24,6 +26,7 @@ interface
         function setEmpresa(pEmpresa: TEmpresa)          : Boolean;
         function getEmpresa                              : TEmpresa;
 
+        procedure setContext(pUsuario: String);
       public
         Constructor Create;
         Destructor Destroy; override;
@@ -39,12 +42,22 @@ uses
 
 { TControllersConexao }
 
+function TControllersConexao.ConfigConexao: Boolean;
+begin
+
+end;
+
 function TControllersConexao.ConfigConexaoExterna(pLoja: String): Boolean;
 begin
 
 end;
 
 constructor TControllersConexao.Create;
+begin
+
+end;
+
+function TControllersConexao.criaConexao: IConexao;
 begin
 
 end;
@@ -102,6 +115,11 @@ end;
 class function TControllersConexao.New: IConexao;
 begin
   Result := Self.Create;
+end;
+
+procedure TControllersConexao.setContext(pUsuario: String);
+begin
+
 end;
 
 function TControllersConexao.setEmpresa(pEmpresa: TEmpresa): Boolean;
