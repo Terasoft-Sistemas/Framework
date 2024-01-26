@@ -4,6 +4,7 @@ interface
 
 uses
   Terasoft.Types,
+  Terasoft.Utils,
   Interfaces.Conexao,
   FireDAC.Comp.Client;
 
@@ -85,7 +86,12 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function Salvar: String;
+    function Salvar  : String;
+
+    function Incluir : String;
+    function Alterar : String;
+    function Excluir : String;
+
     function obterLista: TFDMemTable;
 
   end;
@@ -96,6 +102,66 @@ uses
   FinanceiroPedidoDao;
 
 { TFinanceiroPedidoModel }
+
+function TFinanceiroPedidoModel.Incluir: String;
+var
+  lFinanceiroPedidoDao : TFinanceiroPedidoDao;
+begin
+  lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
+  try
+    if self.FWEB_PEDIDO_ID = '' then
+      CriaException('WebPedido não informado.');
+
+    if self.FPORTADOR_ID = '' then
+      CriaException('Portador não informado.');
+
+    if self.FVALOR_TOTAL = '' then
+      CriaException('Valor Total não informado.');
+
+    if self.FQUANTIDADE_PARCELAS = '' then
+      CriaException('Quantidade de Parcelas não informada.');
+
+    if self.FPARCELA = '' then
+      CriaException('Parcela não informada.');
+
+    if self.FVALOR_PARCELA = '' then
+      CriaException('Valor da Parcela não informado.');
+
+    if self.FVENCIMENTO = '' then
+      CriaException('Vencimento não informado.');
+
+    if self.FCONDICAO_PAGAMENTO = '' then
+      CriaException('Condição de Pagamento não informado.');
+
+    Result := lFinanceiroPedidoDao.incluir(Self);
+  finally
+    lFinanceiroPedidoDao.Free;
+  end;
+end;
+
+function TFinanceiroPedidoModel.Alterar: String;
+var
+  lFinanceiroPedidoDao : TFinanceiroPedidoDao;
+begin
+  lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
+  try
+    Result := lFinanceiroPedidoDao.alterar(Self);
+  finally
+    lFinanceiroPedidoDao.Free;
+  end;
+end;
+
+function TFinanceiroPedidoModel.Excluir: String;
+var
+  lFinanceiroPedidoDao : TFinanceiroPedidoDao;
+begin
+  lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
+  try
+    Result := lFinanceiroPedidoDao.excluir(Self);
+  finally
+    lFinanceiroPedidoDao.Free;
+  end;
+end;
 
 constructor TFinanceiroPedidoModel.Create(pIConexao : IConexao);
 begin
@@ -130,22 +196,11 @@ begin
 end;
 
 function TFinanceiroPedidoModel.Salvar: String;
-var
-  lFinanceiroPedidoDao: TFinanceiroPedidoDao;
 begin
-  lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
-
-  Result := '';
-
-  try
-    case FAcao of
-      Terasoft.Types.tacIncluir: Result := lFinanceiroPedidoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lFinanceiroPedidoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lFinanceiroPedidoDao.excluir(Self);
-    end;
-
-  finally
-    lFinanceiroPedidoDao.Free;
+  case FAcao of
+    Terasoft.Types.tacIncluir: Result := Incluir;
+    Terasoft.Types.tacAlterar: Result := Alterar;
+    Terasoft.Types.tacExcluir: Result := Excluir;
   end;
 end;
 

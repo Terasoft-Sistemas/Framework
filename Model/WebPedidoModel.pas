@@ -4,6 +4,7 @@ interface
 
 uses
   Terasoft.Types,
+  Terasoft.Utils,
   System.Generics.Collections,
   Terasoft.FuncoesTexto,
   Interfaces.Conexao;
@@ -394,6 +395,9 @@ var
 begin
   lWebPedidoDao := TWebPedidoDao.Create(vIConexao);
   try
+    if True then
+
+
     Result := lWebPedidoDao.alterar(Self);
   finally
     lWebPedidoDao.Free;
@@ -578,7 +582,27 @@ var
   lWebPedidoDao : TWebPedidoDao;
 begin
   lWebPedidoDao := TWebPedidoDao.Create(vIConexao);
+
   try
+    if self.FCLIENTE_ID = '' then
+      CriaException('Cliente não informado');
+
+    if self.FVENDEDOR_ID = '' then
+      CriaException('Vendedor não informado');
+
+    if self.FPORTADOR_ID = '' then
+      CriaException('Portador não informado');
+
+    if self.FTIPOVENDA_ID = '' then
+      CriaException('TipoVenda não informado');
+
+    self.FDATAHORA              := DateTimeToStr(vIConexao.DataHoraServer);
+    self.FUSUARIO               := vIConexao.getUSer.ID;
+    self.FSTATUS                := 'I';
+    self.FTIPO                  := 'NORMAL';
+    self.FPARCELAS              := '001';
+    self.FPRIMEIRO_VENCIMENTO   := DateToStr(vIConexao.DataServer + 30);
+
     Result := lWebPedidoDao.incluir(Self);
   finally
     lWebPedidoDao.Free;
@@ -638,7 +662,7 @@ begin
   try
     lTotais := lWebPedidoItensDao.obterTotais(self.FID);
 
-    self.Acao := tacIncluir;
+    self.Acao := tacAlterar;
     self.VALOR_TOTAL := lTotais.VALOR_TOTAL;
     self.Salvar;
   finally

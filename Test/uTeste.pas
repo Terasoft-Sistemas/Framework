@@ -117,11 +117,16 @@ begin
   try
     try
       lFinanceiroPedidoModel.Acao := tacIncluir;
-      lFinanceiroPedidoModel.WEB_PEDIDO_ID := '325';
-      lFinanceiroPedidoModel.PORTADOR_ID   := '000001';
-      lFinanceiroPedidoModel.VALOR_TOTAL   := '500';
-      lFinanceiroPedidoModel.PARCELA       := '1';
-      lFinanceiroPedidoModel.VALOR_PARCELA := '1';
+      lFinanceiroPedidoModel.WEB_PEDIDO_ID        := '325';
+      lFinanceiroPedidoModel.PORTADOR_ID          := '000001';
+      lFinanceiroPedidoModel.VALOR_TOTAL          := '500';
+      lFinanceiroPedidoModel.QUANTIDADE_PARCELAS  := '2';
+      lFinanceiroPedidoModel.PARCELA              := '1';
+      lFinanceiroPedidoModel.VALOR_PARCELA        := '500';
+      lFinanceiroPedidoModel.VENCIMENTO           := '26/01/2024';
+      lFinanceiroPedidoModel.CONDICAO_PAGAMENTO   :='30';
+
+
       lFinanceiroPedidoModel.Salvar;
       ShowMessage('Inserido com sucesso!');
     except
@@ -167,8 +172,8 @@ begin
 
   try
     try
-      lFinanceiroPedidoModel.Acao := tacExcluir;
-      lFinanceiroPedidoModel.ID            := '5';
+      lFinanceiroPedidoModel.Acao           := tacExcluir;
+      lFinanceiroPedidoModel.ID             := '5';
       lFinanceiroPedidoModel.Salvar;
       ShowMessage('Excluido com sucesso!');
     except
@@ -223,11 +228,10 @@ begin
     try
       lWebPedidoModel.Acao := tacIncluir;
 
-      lWebPedidoModel.CLIENTE_ID := '000001';
-      lWebPedidoModel.VENDEDOR_ID := '000001';
-      lWebPedidoModel.PORTADOR_ID := '000001';
-      lWebPedidoModel.TIPOVENDA_ID := '000004';
-      lWebPedidoModel.CONDICOES_PAGAMENTO := '30';
+      lWebPedidoModel.CLIENTE_ID          := '000001';
+      lWebPedidoModel.VENDEDOR_ID         := '000001';
+      lWebPedidoModel.TIPOVENDA_ID        := '000004';
+      lWebPedidoModel.PORTADOR_ID         := '000001';
 
       lWebPedidoModel.Salvar;
       ShowMessage('Inserido com sucesso!');
@@ -249,7 +253,7 @@ begin
     try
       lWebPedidoModel := lWebPedidoModel.carregaClasse('329');
 
-      lWebPedidoModel.Acao := tacAlterar;
+      lWebPedidoModel.Acao        := tacAlterar;
       lWebPedidoModel.VENDEDOR_ID := '000001';
 
       lWebPedidoModel.Salvar;
@@ -371,7 +375,6 @@ begin
 
       lWebPedidoItensModel.Acao           := tacAlterar;
       lWebPedidoItensModel.ID             := lID;
-      //lWebPedidoItensModel.PRODUTO_ID     := '000345';
       lWebPedidoItensModel.QUANTIDADE     := '50';
 
       lWebPedidoItensModel.Salvar;
@@ -421,9 +424,17 @@ begin
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
+var
+  lUsuario : TUsuario;
 begin
   vConexao  := TConexao.Create;
   vIConexao := TControllersConexao.New;
+
+  lUsuario.ID     := '000001';
+  lUsuario.NOME   := 'ADMIN';
+  lUsuario.PERFIL := '000000';
+
+  vIConexao.setUser(lUsuario);
 
   vQtdeRegistros := 10;
   vPagina        := 0;

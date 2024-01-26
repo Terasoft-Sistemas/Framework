@@ -34,6 +34,7 @@ type
 
     function DataServer: TDate;
     function HoraServer: TTime;
+    function DataHoraServer: TDateTime;
 
     function criarQuery: TFDQuery;
     procedure setContext(pUsuario: String);
@@ -158,6 +159,11 @@ begin
 
   lQry := Self.criarQuery;
   lQry.Open('select rdb$set_context ( ''USER_SESSION'', ''MODOSISTEMA'', '+QuotedStr(pSistema)+' ) from rdb$database');
+end;
+
+function TConexao.DataHoraServer: TDateTime;
+begin
+  Result := self.FConexao.ExecSQLScalar('select current_timestamp from rdb$database');
 end;
 
 function TConexao.DataServer: TDate;

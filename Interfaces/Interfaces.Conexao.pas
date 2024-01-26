@@ -29,6 +29,7 @@ interface
       function getLojaConectada                        : String;
       function DataServer                              : TDate;
       function HoraServer                              : TTime;
+      function DataHoraServer                          : TDateTime;
 
       function getUSer                                 : TUsuario;
       function setUser(pUser : TUsuario)               : Boolean;

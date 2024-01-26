@@ -9,6 +9,8 @@ interface
     TControllersConexao = class(TInterfacedObject, IConexao)
 
       private
+        vUser : TUsuario;
+
         function criarQuery                              : TFDQuery;
         function criaConexao                             : IConexao;
         function ConfigConexao                           : Boolean;
@@ -19,6 +21,7 @@ interface
         function getLojaConectada                        : String;
         function DataServer                              : TDate;
         function HoraServer                              : TTime;
+        function DataHoraServer                          : TDateTime;
 
         function getUSer                                 : TUsuario;
         function setUser(pUser : TUsuario)               : Boolean;
@@ -72,6 +75,11 @@ begin
   Result := Form1.vConexao.criarQueryExterna;
 end;
 
+function TControllersConexao.DataHoraServer: TDateTime;
+begin
+  Result := Form1.vConexao.DataHoraServer;
+end;
+
 function TControllersConexao.DataServer: TDate;
 begin
   Result := Form1.vConexao.DataServer;
@@ -104,7 +112,7 @@ end;
 
 function TControllersConexao.getUSer: TUsuario;
 begin
-
+  Result := vUser;
 end;
 
 function TControllersConexao.HoraServer: TTime;
@@ -129,7 +137,7 @@ end;
 
 function TControllersConexao.setUser(pUser: TUsuario): Boolean;
 begin
-
+  vUser := pUser;
 end;
 
 end.
