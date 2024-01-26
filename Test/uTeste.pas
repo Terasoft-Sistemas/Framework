@@ -389,14 +389,17 @@ end;
 procedure TForm1.Button11Click(Sender: TObject);
 var
   lWebPedidoItensModel : TWebPedidoItensModel;
-  NumeroItem           : String;
+  lNumeroItem          : String;
+
 begin
   lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
 
   try
     try
+      lNumeroItem := InputBox('WebPedido', 'Digite o ID do Item:', '');
+
       lWebPedidoItensModel.Acao := tacExcluir;
-      lWebPedidoItensModel.ID := '610';
+      lWebPedidoItensModel.ID := lNumeroItem;
 
       lWebPedidoItensModel.Salvar;
       ShowMessage('Excluido com sucesso!');
