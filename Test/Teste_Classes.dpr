@@ -65,7 +65,19 @@ uses
   UsuarioDao in '..\Dao\UsuarioDao.pas',
   WebPedidoItensDao in '..\Dao\WebPedidoItensDao.pas',
   VendedorDao in '..\Dao\VendedorDao.pas',
-  Controllers.Conexao in 'Controllers.Conexao.pas';
+  Controllers.Conexao in 'Controllers.Conexao.pas',
+  ClienteModel in '..\Model\ClienteModel.pas',
+  PrecoClienteModel in '..\Model\PrecoClienteModel.pas',
+  PrecoUFModel in '..\Model\PrecoUFModel.pas',
+  PrecoVendaModel in '..\Model\PrecoVendaModel.pas',
+  PrecoVendaProdutoModel in '..\Model\PrecoVendaProdutoModel.pas',
+  PromocaoItensModel in '..\Model\PromocaoItensModel.pas',
+  ClienteDao in '..\Dao\ClienteDao.pas',
+  PrecoUFDao in '..\Dao\PrecoUFDao.pas',
+  PromocaoItensDao in '..\Dao\PromocaoItensDao.pas',
+  PrecoVendaDao in '..\Dao\PrecoVendaDao.pas',
+  PrecoVendaProdutoDao in '..\Dao\PrecoVendaProdutoDao.pas',
+  PrecoClienteDao in '..\Dao\PrecoClienteDao.pas';
 
 {$R *.res}
 

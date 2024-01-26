@@ -3,6 +3,7 @@ unit WebPedidoItensDao;
 interface
 
 uses
+  Terasoft.FuncoesTexto,
   WebPedidoItensModel,
   Terasoft.ConstrutorDao,
   FireDAC.Comp.Client,
@@ -67,7 +68,7 @@ type
 
     procedure obterListaVendaAssistidaItens;
     procedure obterLista;
-
+    function carregaClasse(pId: String): TWebPedidoItensModel;
 end;
 
 implementation
@@ -95,6 +96,81 @@ begin
 
   finally
     lSQL := '';
+    lQry.Free;
+  end;
+end;
+
+function TWebPedidoItensDao.carregaClasse(pId: String): TWebPedidoItensModel;
+var
+  lQry: TFDQuery;
+  lModel: TWebPedidoItensModel;
+begin
+  lQry     := vIConexao.CriarQuery;
+  lModel   := TWebPedidoItensModel.Create(vIConexao);
+  Result   := lModel;
+
+  try
+    lQry.Open('select * from web_pedidoitens where id = '+pId);
+
+    if lQry.IsEmpty then
+      Exit;
+
+    lModel.ID                   := ZeroLeft(lQry.FieldByName('ID').AsString, 6);
+    lModel.WEB_PEDIDO_ID        := lQry.FieldByName('WEB_PEDIDO_ID').AsString;
+    lModel.PRODUTO_ID           := lQry.FieldByName('PRODUTO_ID').AsString;
+    lModel.QUANTIDADE           := lQry.FieldByName('QUANTIDADE').AsString;
+    lModel.QUANTIDADE_TROCA     := lQry.FieldByName('QUANTIDADE_TROCA').AsString;
+    lModel.VALOR_UNITARIO       := lQry.FieldByName('VALOR_UNITARIO').AsString;
+    lModel.PERCENTUAL_DESCONTO  := lQry.FieldByName('PERCENTUAL_DESCONTO').AsString;
+    lModel.VALOR_VENDA_ATUAL    := lQry.FieldByName('VALOR_VENDA_ATUAL').AsString;
+    lModel.VALOR_CUSTO_ATUAL    := lQry.FieldByName('VALOR_CUSTO_ATUAL').AsString;
+    lModel.PERCENTUAL_COMISSAO  := lQry.FieldByName('PERCENTUAL_COMISSAO').AsString;
+    lModel.OBSERVACAO           := lQry.FieldByName('OBSERVACAO').AsString;
+    lModel.QUANTIDADE_OLD       := lQry.FieldByName('QUANTIDADE_OLD').AsString;
+    lModel.QUANTIDADE_TROCA_OLD := lQry.FieldByName('QUANTIDADE_TROCA_OLD').AsString;
+    lModel.AVULSO               := lQry.FieldByName('AVULSO').AsString;
+    lModel.VALOR_ST             := lQry.FieldByName('VALOR_ST').AsString;
+    lModel.RESERVADO            := lQry.FieldByName('RESERVADO').AsString;
+    lModel.TIPO_GARANTIA        := lQry.FieldByName('TIPO_GARANTIA').AsString;
+    lModel.VLR_GARANTIA         := lQry.FieldByName('VLR_GARANTIA').AsString;
+    lModel.TIPO_ENTREGA         := lQry.FieldByName('TIPO_ENTREGA').AsString;
+    lModel.MONTAGEM             := lQry.FieldByName('MONTAGEM').AsString;
+    lModel.ENTREGA              := lQry.FieldByName('ENTREGA').AsString;
+    lModel.TIPO                 := lQry.FieldByName('TIPO').AsString;
+    lModel.QUANTIDADE_PENDENTE  := lQry.FieldByName('QUANTIDADE_PENDENTE').AsString;
+    lModel.SYSTIME              := lQry.FieldByName('SYSTIME').AsString;
+    lModel.VALOR_VENDIDO        := lQry.FieldByName('VALOR_VENDIDO').AsString;
+    lModel.QUANTIDADE_SEPARACAO := lQry.FieldByName('QUANTIDADE_SEPARACAO').AsString;
+    lModel.ALIQ_IPI             := lQry.FieldByName('ALIQ_IPI').AsString;
+    lModel.VALOR_IPI            := lQry.FieldByName('VALOR_IPI').AsString;
+    lModel.CFOP_ID              := lQry.FieldByName('CFOP_ID').AsString;
+    lModel.CST                  := lQry.FieldByName('CST').AsString;
+    lModel.VALOR_RESTITUICAO_ST := lQry.FieldByName('VALOR_RESTITUICAO_ST').AsString;
+    lModel.ALIQ_ICMS            := lQry.FieldByName('ALIQ_ICMS').AsString;
+    lModel.ALIQ_ICMS_ST         := lQry.FieldByName('ALIQ_ICMS_ST').AsString;
+    lModel.REDUCAO_ST           := lQry.FieldByName('REDUCAO_ST').AsString;
+    lModel.MVA                  := lQry.FieldByName('MVA').AsString;
+    lModel.REDUCAO_ICMS         := lQry.FieldByName('REDUCAO_ICMS').AsString;
+    lModel.BASE_ICMS            := lQry.FieldByName('BASE_ICMS').AsString;
+    lModel.VALOR_ICMS           := lQry.FieldByName('VALOR_ICMS').AsString;
+    lModel.BASE_ST              := lQry.FieldByName('BASE_ST').AsString;
+    lModel.DESC_RESTITUICAO_ST  := lQry.FieldByName('DESC_RESTITUICAO_ST').AsString;
+    lModel.ICMS_SUFRAMA         := lQry.FieldByName('ICMS_SUFRAMA').AsString;
+    lModel.PIS_SUFRAMA          := lQry.FieldByName('PIS_SUFRAMA').AsString;
+    lModel.COFINS_SUFRAMA       := lQry.FieldByName('COFINS_SUFRAMA').AsString;
+    lModel.IPI_SUFRAMA          := lQry.FieldByName('IPI_SUFRAMA').AsString;
+    lModel.ALIQ_PIS             := lQry.FieldByName('ALIQ_PIS').AsString;
+    lModel.ALIQ_COFINS          := lQry.FieldByName('ALIQ_COFINS').AsString;
+    lModel.BASE_PIS             := lQry.FieldByName('BASE_PIS').AsString;
+    lModel.BASE_COFINS          := lQry.FieldByName('BASE_COFINS').AsString;
+    lModel.VALOR_PIS            := lQry.FieldByName('VALOR_PIS').AsString;
+    lModel.VALOR_COFINS         := lQry.FieldByName('VALOR_COFINS').AsString;
+    lModel.VBCFCPST             := lQry.FieldByName('VBCFCPST').AsString;
+    lModel.PFCPST               := lQry.FieldByName('PFCPST').AsString;
+    lModel.VFCPST               := lQry.FieldByName('VFCPST').AsString;
+
+    Result := lModel;
+  finally
     lQry.Free;
   end;
 end;

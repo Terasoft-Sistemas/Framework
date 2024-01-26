@@ -31,6 +31,10 @@ type
     Button5: TButton;
     Button6: TButton;
     Button7: TButton;
+    Button8: TButton;
+    Button9: TButton;
+    Button10: TButton;
+    Button11: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -41,6 +45,10 @@ type
     procedure Button5Click(Sender: TObject);
     procedure Button6Click(Sender: TObject);
     procedure Button7Click(Sender: TObject);
+    procedure Button8Click(Sender: TObject);
+    procedure Button9Click(Sender: TObject);
+    procedure Button10Click(Sender: TObject);
+    procedure Button11Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -62,7 +70,7 @@ uses
   FinanceiroPedidoModel,
   WebPedidoModel,
   Controllers.Conexao,
-  FireDAC.Comp.Client;
+  FireDAC.Comp.Client, WebPedidoItensModel;
 
 {$R *.dfm}
 
@@ -273,6 +281,131 @@ begin
     end;
   finally
     lWebPedidoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button8Click(Sender: TObject);
+var
+  lWebPedidoModel : TWebPedidoModel;
+  lVenderItemParametros: TVenderItemParametros;
+  lWebPedido : String;
+begin
+  lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
+
+  try
+    try
+      lWebPedido := InputBox('WebPedido', 'Digite o número do Web Pedido:', '');
+
+      if lWebPedido.IsEmpty then
+        exit;
+
+      lWebPedidoModel := lWebPedidoModel.carregaClasse(lWebPedido);
+
+      lVenderItemParametros.PRODUTO    := '000005';
+      lVenderItemParametros.QUANTIDADE := 10;
+      lVenderItemParametros.DESCONTO   := 0;
+
+      lWebPedidoModel.VenderItem(lVenderItemParametros);
+      ShowMessage('Vendeu item');
+    except
+    on E:Exception do
+       ShowMessage('Erro vender item' + E.Message);
+    end;
+  finally
+    lWebPedidoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button9Click(Sender: TObject);
+var
+  lWebPedidoItensModel  : TWebPedidoItensModel;
+  lWebPedidoItens       : String;
+  i                     : Integer;
+begin
+  lWebPedidoItensModel  := TWebPedidoItensModel.Create(vIConexao);
+
+  try
+    try
+      lWebPedidoItens := InputBox('WebPedido', 'Digite o número do Web Pedido para consultar os itens:', '');
+      if lWebPedidoItens.IsEmpty then
+        exit;
+
+
+      lWebPedidoItensModel.IDWebPedidoView := StrToInt(lWebPedidoItens);
+      lWebPedidoItensModel.obterListaVendaAssistidaItens;
+
+      memoResultado.Lines.Clear;
+      for i := 0 to lWebPedidoItensModel.WebPedidoItenssLista.Count -1 do
+      begin
+          memoResultado.Lines.Add('ID: ' +lWebPedidoItensModel.WebPedidoItenssLista[i].ID);
+          memoResultado.Lines.Add('QUANTIDADE: ' +lWebPedidoItensModel.WebPedidoItenssLista[i].QUANTIDADE);
+          memoResultado.Lines.Add('PRODUTO_ID: ' +lWebPedidoItensModel.WebPedidoItenssLista[i].PRODUTO_ID);
+          memoResultado.Lines.Add('VALOR_UNITARIO: ' +lWebPedidoItensModel.WebPedidoItenssLista[i].VALOR_UNITARIO);
+          memoResultado.Lines.Add('===============================================');
+      end;
+      ShowMessage('Consultou itens');
+    except
+    on E:Exception do
+       ShowMessage('Erro consultar itens' + E.Message);
+    end;
+  finally
+    lWebPedidoItensModel.Free;
+  end;
+end;
+
+procedure TForm1.Button10Click(Sender: TObject);
+var
+  lWebPedidoModel      : TWebPedidoModel;
+  lWebPedidoItensModel : TWebPedidoItensModel;
+  lID                  : String;
+begin
+  lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
+  try
+    try
+
+      lID := InputBox('WebPedido', 'Digite o ID para alterar o item:', '');
+      if lID.IsEmpty then
+        exit;
+
+      lWebPedidoItensModel := lWebPedidoItensModel.carregaClasse(lID);
+
+      lWebPedidoItensModel.Acao           := tacAlterar;
+      lWebPedidoItensModel.ID             := lID;
+      //lWebPedidoItensModel.PRODUTO_ID     := '000345';
+      lWebPedidoItensModel.QUANTIDADE     := '50';
+
+      lWebPedidoItensModel.Salvar;
+
+      ShowMessage('Alterado o item com sucesso!');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lWebPedidoItensModel.Free;
+  end;
+end;
+
+procedure TForm1.Button11Click(Sender: TObject);
+var
+  lWebPedidoItensModel : TWebPedidoItensModel;
+  NumeroItem           : String;
+begin
+  lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
+
+  try
+    try
+      lWebPedidoItensModel.Acao := tacExcluir;
+      lWebPedidoItensModel.ID := '610';
+
+      lWebPedidoItensModel.Salvar;
+      ShowMessage('Excluido com sucesso!');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lWebPedidoItensModel.Free;
   end;
 end;
 

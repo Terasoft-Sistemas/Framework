@@ -235,6 +235,8 @@ type
     procedure obterListaVendaAssistidaItens;
     procedure obterLista;
 
+    function carregaClasse(pId: String): TWebPedidoItensModel;
+
     property WebPedidoItenssLista: TObjectList<TWebPedidoItensModel> read FWebPedidoItenssLista write SetWebPedidoItenssLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -255,6 +257,17 @@ uses
 
 { TWebPedidoItensModel }
 
+function TWebPedidoItensModel.carregaClasse(pId: String): TWebPedidoItensModel;
+var
+  lWebPedidoItensDao: TWebPedidoItensDao;
+begin
+  lWebPedidoItensDao := TWebPedidoItensDao.Create(vIConexao);
+  try
+    Result := lWebPedidoItensDao.carregaClasse(pId);
+  finally
+    lWebPedidoItensDao.Free;
+  end;
+end;
 constructor TWebPedidoItensModel.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;

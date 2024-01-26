@@ -163,6 +163,18 @@
         <DCCReference Include="..\Dao\WebPedidoItensDao.pas"/>
         <DCCReference Include="..\Dao\VendedorDao.pas"/>
         <DCCReference Include="Controllers.Conexao.pas"/>
+        <DCCReference Include="..\Model\ClienteModel.pas"/>
+        <DCCReference Include="..\Model\PrecoClienteModel.pas"/>
+        <DCCReference Include="..\Model\PrecoUFModel.pas"/>
+        <DCCReference Include="..\Model\PrecoVendaModel.pas"/>
+        <DCCReference Include="..\Model\PrecoVendaProdutoModel.pas"/>
+        <DCCReference Include="..\Model\PromocaoItensModel.pas"/>
+        <DCCReference Include="..\Dao\ClienteDao.pas"/>
+        <DCCReference Include="..\Dao\PrecoUFDao.pas"/>
+        <DCCReference Include="..\Dao\PromocaoItensDao.pas"/>
+        <DCCReference Include="..\Dao\PrecoVendaDao.pas"/>
+        <DCCReference Include="..\Dao\PrecoVendaProdutoDao.pas"/>
+        <DCCReference Include="..\Dao\PrecoClienteDao.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

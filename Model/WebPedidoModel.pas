@@ -1149,7 +1149,7 @@ begin
     lProdutoModel := lProdutoModel.ProdutossLista[0];
 
     lWebPedidoItensModel.Acao := tacIncluir;
-    lWebPedidoItensModel.WEB_PEDIDO_ID       := self.PEDIDO_ID;
+    lWebPedidoItensModel.WEB_PEDIDO_ID       := self.ID;
     lWebPedidoItensModel.PRODUTO_ID          := pVenderItemParametros.PRODUTO;
     lWebPedidoItensModel.QUANTIDADE          := pVenderItemParametros.QUANTIDADE;
 

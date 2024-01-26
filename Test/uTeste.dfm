@@ -34,7 +34,7 @@ object Form1: TForm1
         TabOrder = 0
       end
       object btnFinanceiroPedido: TButton
-        Left = 3
+        Left = 191
         Top = 15
         Width = 182
         Height = 42
@@ -43,7 +43,7 @@ object Form1: TForm1
         OnClick = btnFinanceiroPedidoClick
       end
       object Button1: TButton
-        Left = 191
+        Left = 3
         Top = 15
         Width = 182
         Height = 42
@@ -61,7 +61,7 @@ object Form1: TForm1
         OnClick = Button2Click
       end
       object Button3: TButton
-        Left = 571
+        Left = 567
         Top = 15
         Width = 182
         Height = 42
@@ -70,20 +70,20 @@ object Form1: TForm1
         OnClick = Button3Click
       end
       object Button4: TButton
-        Left = 3
-        Top = 87
-        Width = 182
-        Height = 42
-        Caption = 'PedidoWeb Consultar'
-        TabOrder = 5
-        OnClick = Button4Click
-      end
-      object Button5: TButton
         Left = 191
         Top = 87
         Width = 182
         Height = 42
-        Caption = 'PedidoWeb Inserir'
+        Caption = 'WebPedido Consultar'
+        TabOrder = 5
+        OnClick = Button4Click
+      end
+      object Button5: TButton
+        Left = 3
+        Top = 87
+        Width = 182
+        Height = 42
+        Caption = 'WebPedido Inserir'
         TabOrder = 6
         OnClick = Button5Click
       end
@@ -92,18 +92,54 @@ object Form1: TForm1
         Top = 87
         Width = 182
         Height = 42
-        Caption = 'PedidoWeb Update'
+        Caption = 'WebPedido Update'
         TabOrder = 7
         OnClick = Button6Click
       end
       object Button7: TButton
-        Left = 571
+        Left = 567
         Top = 87
         Width = 182
         Height = 42
-        Caption = 'PedidoWeb Excluir'
+        Caption = 'WebPedido Excluir'
         TabOrder = 8
         OnClick = Button7Click
+      end
+      object Button8: TButton
+        Left = 3
+        Top = 159
+        Width = 182
+        Height = 42
+        Caption = 'WebPedido Vender Itens'
+        TabOrder = 9
+        OnClick = Button8Click
+      end
+      object Button9: TButton
+        Left = 191
+        Top = 159
+        Width = 182
+        Height = 42
+        Caption = 'WebPedido Itens Consultar '
+        TabOrder = 10
+        OnClick = Button9Click
+      end
+      object Button10: TButton
+        Left = 379
+        Top = 159
+        Width = 182
+        Height = 42
+        Caption = 'WebPedido Itens Update'
+        TabOrder = 11
+        OnClick = Button10Click
+      end
+      object Button11: TButton
+        Left = 567
+        Top = 159
+        Width = 182
+        Height = 42
+        Caption = 'WebPedido Itens Excluir'
+        TabOrder = 12
+        OnClick = Button11Click
       end
     end
   end
