@@ -4,6 +4,7 @@ interface
 
 uses
   Terasoft.Types,
+  Terasoft.Utils,
   System.Generics.Collections,
   Interfaces.Conexao;
 
@@ -239,7 +240,12 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function Salvar: String;
+    function Incluir  : String;
+    function Alterar  : String;
+    Function Excluir  : String;
+
+    function Salvar   : String;
+
     procedure obterListaVendaAssistidaItens;
     procedure obterLista;
 
@@ -266,6 +272,33 @@ uses
 
 { TWebPedidoItensModel }
 
+function TWebPedidoItensModel.Incluir: String;
+var
+  lWebPedidoItensDao : TWebPedidoItensDao;
+begin
+  lWebPedidoItensDao := TWebPedidoItensDao.Create(vIConexao);
+  try
+
+    if self.FPRODUTO_ID = '' then
+      CriaException('Produto não informado');
+
+    if self.FQUANTIDADE = '' then
+      CriaException('Quantidade não informado');
+
+  finally
+    lWebPedidoItensDao.Free
+  end;
+end;
+
+function TWebPedidoItensModel.Alterar: String;
+begin
+
+end;
+
+function TWebPedidoItensModel.Excluir: String;
+begin
+
+end;
 function TWebPedidoItensModel.carregaClasse(pId: String): TWebPedidoItensModel;
 var
   lWebPedidoItensDao: TWebPedidoItensDao;

@@ -306,14 +306,14 @@ begin
       lWebPedidoModel := lWebPedidoModel.carregaClasse(lWebPedido);
 
       lVenderItemParametros.PRODUTO    := '000005';
-      lVenderItemParametros.QUANTIDADE := 10;
-      lVenderItemParametros.DESCONTO   := 0;
+      lVenderItemParametros.QUANTIDADE := '10';
+      lVenderItemParametros.DESCONTO   := '0';
 
       lWebPedidoModel.VenderItem(lVenderItemParametros);
       ShowMessage('Vendeu item');
     except
     on E:Exception do
-       ShowMessage('Erro vender item' + E.Message);
+       ShowMessage('Erro vender item: ' + E.Message);
     end;
   finally
     lWebPedidoModel.Free;

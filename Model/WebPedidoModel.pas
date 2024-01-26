@@ -11,9 +11,9 @@ uses
 
 type
   TVenderItemParametros = record
-    PRODUTO          : String;
+    PRODUTO,
     QUANTIDADE,
-    DESCONTO         : Double;
+    DESCONTO         : String;
   end;
 
   TWebPedidoModel = class
@@ -1235,13 +1235,19 @@ begin
   lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
   lProdutoModel        := TProdutosModel.Create(vIConexao);
 
+  if pVenderItemParametros.PRODUTO = '' then
+    CriaException('Produto não informado');
+
+  if StrToFloatDef(pVenderItemParametros.QUANTIDADE, 0) = 0 then
+    CriaException('Quantidade não informada');
+
   try
     lProdutoModel.IDRecordView := pVenderItemParametros.PRODUTO;
     lProdutoModel.obterLista;
 
     lProdutoModel := lProdutoModel.ProdutossLista[0];
 
-    lWebPedidoItensModel.Acao := tacIncluir;
+    lWebPedidoItensModel.Acao                := tacIncluir;
     lWebPedidoItensModel.WEB_PEDIDO_ID       := self.ID;
     lWebPedidoItensModel.PRODUTO_ID          := pVenderItemParametros.PRODUTO;
     lWebPedidoItensModel.QUANTIDADE          := pVenderItemParametros.QUANTIDADE;
@@ -1251,7 +1257,7 @@ begin
     lPrecoParamentros.Portador      := self.FPORTADOR_ID;
     lPrecoParamentros.PrecoVenda    := '';
     lPrecoParamentros.Loja          := self.FLOJA;
-    lPrecoParamentros.Qtde          := pVenderItemParametros.QUANTIDADE;
+    lPrecoParamentros.Qtde          := StrToFloatDef(pVenderItemParametros.QUANTIDADE, 0);
     lPrecoParamentros.PrecoUf       := false;
     lPrecoParamentros.Promocao      := true;
     lPrecoParamentros.PrecoCliente  := false;
