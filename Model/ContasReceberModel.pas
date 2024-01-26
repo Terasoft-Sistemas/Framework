@@ -200,9 +200,16 @@ type
 implementation
 
 uses
-  ContasReceberDao, AdmCartaoModel, System.SysUtils, ContasReceberItensModel,
-  VendaCartaoModel, PortadorModel, System.Variants, System.StrUtils,
-  CaixaModel, TEFModel;
+  ContasReceberDao,
+  AdmCartaoModel,
+  System.SysUtils,
+  ContasReceberItensModel,
+  VendaCartaoModel,
+  PortadorModel,
+  System.Variants,
+  System.StrUtils,
+  CaixaModel,
+  TEFModel;
 { TContasReceberModel }
 
 function TContasReceberModel.carregaClasse(pFatura: String): TContasReceberModel;
