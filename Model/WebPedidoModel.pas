@@ -237,6 +237,11 @@ type
     procedure SetIDUsuario(const Value: String);
     procedure SetGERENTE_ID(const Value: Variant);
     procedure SetTIPO_COMISSAO(const Value: Variant);
+
+    function Incluir: String;
+    function Alterar: String;
+    function Excluir: String;
+
   public
     procedure AfterConstruction; override;
     property ID: Variant read FID write SetID;
@@ -381,6 +386,18 @@ procedure TWebPedidoModel.AfterConstruction;
 begin
   inherited;
 
+end;
+
+function TWebPedidoModel.Alterar: String;
+var
+  lWebPedidoDao : TWebPedidoDao;
+begin
+  lWebPedidoDao := TWebPedidoDao.Create(vIConexao);
+  try
+    Result := lWebPedidoDao.alterar(Self);
+  finally
+    lWebPedidoDao.Free;
+  end;
 end;
 
 function TWebPedidoModel.aprovarVendaAssistida(pIdVendaAssistida: Integer): String;
@@ -544,6 +561,30 @@ begin
   inherited;
 end;
 
+function TWebPedidoModel.Excluir: String;
+var
+  lWebPedidoDao : TWebPedidoDao;
+begin
+  lWebPedidoDao := TWebPedidoDao.Create(vIConexao);
+  try
+    Result := lWebPedidoDao.excluir(Self);
+  finally
+    lWebPedidoDao.Free;
+  end;
+end;
+
+function TWebPedidoModel.Incluir: String;
+var
+  lWebPedidoDao : TWebPedidoDao;
+begin
+  lWebPedidoDao := TWebPedidoDao.Create(vIConexao);
+  try
+    Result := lWebPedidoDao.incluir(Self);
+  finally
+    lWebPedidoDao.Free;
+  end;
+end;
+
 procedure TWebPedidoModel.obterListaVendaAssistida;
 var
   lWebPedidoLista: TWebPedidoDao;
@@ -606,21 +647,11 @@ begin
 end;
 
 function TWebPedidoModel.Salvar: String;
-var
-  lWebPedidoDao: TWebPedidoDao;
 begin
-  lWebPedidoDao := TWebPedidoDao.Create(vIConexao);
-
-  Result := '';
-
-  try
-    case FAcao of
-      Terasoft.Types.tacIncluir: Result := lWebPedidoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lWebPedidoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lWebPedidoDao.excluir(Self);
-    end;
-  finally
-    lWebPedidoDao.Free;
+  case FAcao of
+    Terasoft.Types.tacIncluir: Result := Incluir;
+    Terasoft.Types.tacAlterar: Result := Alterar;
+    Terasoft.Types.tacExcluir: Result := Excluir;
   end;
 end;
 
