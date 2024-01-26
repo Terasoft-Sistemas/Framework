@@ -66,6 +66,8 @@ type
     function alterar(pWebPedidoItensModel: TWebPedidoItensModel): String;
     function excluir(pWebPedidoItensModel: TWebPedidoItensModel): String;
 
+    function obterTotais(pId: String): TTotais;
+
     procedure obterListaVendaAssistidaItens;
     procedure obterLista;
     function carregaClasse(pId: String): TWebPedidoItensModel;
@@ -241,6 +243,34 @@ begin
     lSQL := lSQL + ' and web_pedidoitens.web_pedido_id = '+IntToStr(FIDWebPedidoView);
 
   Result := lSQL;
+end;
+
+function TWebPedidoItensDao.obterTotais(pId: String): TTotais;
+var
+  lQry  : TFDQuery;
+  lSQL  : String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+    lSQL := ' select coalesce(p.acrescimo,0) acrescimo,                                                                                                                                                  '+SLineBreak+
+            '        coalesce(p.valor_frete,0) frete,                                                                                                                                                    '+SLineBreak+
+            '        sum(coalesce(i.valor_unitario,0) * coalesce(i.percentual_desconto,0) / 100) desconto,                                                                                               '+SLineBreak+
+            '        sum(coalesce(i.quantidade,0) * (coalesce(i.valor_unitario,0) + coalesce(i.vlr_garantia,0) - (coalesce(i.valor_unitario,0) * coalesce(i.percentual_desconto,0) / 100) )) valor_itens '+SLineBreak+
+            '   from web_pedidoitens i inner join web_pedido p on i.web_pedido_id = p.id                                                                                                                 '+SLineBreak+
+            '  where i.web_pedido_id = ' + pId +
+            '  group by 1,2 ';
+
+    lQry.Open(lSQL);
+
+    Result.ACRESCIMO    := lQry.FieldByName('ACRESCIMO').AsFloat;
+    Result.FRETE        := lQry.FieldByName('FRETE').AsFloat;
+    Result.DESCONTO     := lQry.FieldByName('DESCONTO').AsFloat;
+    Result.VALOR_ITENS  := lQry.FieldByName('VALOR_ITENS').AsFloat;
+    Result.VALOR_TOTAL  := lQry.FieldByName('VALOR_ITENS').AsFloat + lQry.FieldByName('FRETE').AsFloat + lQry.FieldByName('ACRESCIMO').AsFloat - lQry.FieldByName('DESCONTO').AsFloat;
+  finally
+    lQry.Free;
+  end;
 end;
 
 procedure TWebPedidoItensDao.obterTotalRegistros;
