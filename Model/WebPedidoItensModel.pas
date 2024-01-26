@@ -8,6 +8,14 @@ uses
   Interfaces.Conexao;
 
 type
+  TTotais = record
+    ACRESCIMO,
+    FRETE,
+    DESCONTO,
+    VALOR_ITENS,
+    VALOR_TOTAL    : Double;
+  end;
+
   TWebPedidoItensModel = class
 
   private
@@ -235,6 +243,8 @@ type
     procedure obterListaVendaAssistidaItens;
     procedure obterLista;
 
+    function obterTotais(pId: String): TTotais;
+
     property WebPedidoItenssLista: TObjectList<TWebPedidoItensModel> read FWebPedidoItenssLista write SetWebPedidoItenssLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -315,6 +325,18 @@ begin
 
   finally
     lWebPedidoItensLista.Free;
+  end;
+end;
+
+function TWebPedidoItensModel.obterTotais(pId: String): TTotais;
+var
+  lWebPedidoItensModel : TWebPedidoItensModel;
+begin
+  lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
+  try
+    Result := lWebPedidoItensModel.obterTotais(pId);
+  finally
+    lWebPedidoItensModel.Free;
   end;
 end;
 

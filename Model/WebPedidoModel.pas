@@ -348,6 +348,8 @@ type
 
     function aprovarVendaAssistida(pIdVendaAssistida: Integer): String;
     function VenderItem(pVenderItemParametros: TVenderItemParametros): String;
+    procedure calcularTotais;
+    procedure obterTotais;
 
     property WebPedidosLista: TObjectList<TWebPedidoModel> read FWebPedidosLista write SetWebPedidosLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -371,7 +373,7 @@ uses
   PedidoItensModel,
   System.SysUtils,
   FuncionarioModel,
-  System.StrUtils, ProdutosModel, EmpresaModel;
+  System.StrUtils, ProdutosModel, EmpresaModel, WebPedidoItensDao;
 
 { TWebPedidoModel }
 
@@ -564,6 +566,42 @@ begin
 
   finally
     lWebPedidoLista.Free;
+  end;
+end;
+
+procedure TWebPedidoModel.obterTotais;
+var
+  lWebPedidoItensModel : TWebPedidoItensModel;
+  lTotais : TTotais;
+begin
+  lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
+  try
+    lTotais := lWebPedidoItensModel.obterTotais(self.FID);
+
+    self.ACRESCIMO            := lTotais.ACRESCIMO.ToString;
+    self.VALOR_FRETE          := lTotais.FRETE.ToString;
+    self.VALOR_CUPOM_DESCONTO := lTotais.DESCONTO.ToString;
+    self.VALOR_ITENS          := lTotais.VALOR_ITENS.ToString;
+    self.VALOR_TOTAL          := lTotais.VALOR_TOTAL.ToString;
+  finally
+    lWebPedidoItensModel.free;
+  end;
+end;
+
+procedure TWebPedidoModel.calcularTotais;
+var
+  lWebPedidoItensDao : TWebPedidoItensDao;
+  lTotais            : TTotais;
+begin
+  lWebPedidoItensDao := TWebPedidoItensDao.Create(vIConexao);
+  try
+    lTotais := lWebPedidoItensDao.obterTotais(self.FID);
+
+    self.Acao := tacIncluir;
+    self.VALOR_TOTAL := lTotais.VALOR_TOTAL;
+    self.Salvar;
+  finally
+    lWebPedidoItensDao.Free;
   end;
 end;
 
@@ -1175,6 +1213,7 @@ begin
     lWebPedidoItensModel.TIPO                := 'NORMAL';
 
     Result := lWebPedidoItensModel.Salvar;
+    calcularTotais;
   finally
     lWebPedidoItensModel.Free;
     lProdutoModel.Free;
