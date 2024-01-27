@@ -124,6 +124,7 @@ begin
             '        union all                                                                                                                  ' + #13 +
             '                                                                                                                                   ' + #13 +
             '        select                                                                                                                     ' + #13 +
+            '            distinct                                                                                                               ' + #13 +
             '            d.data DATA_EMISSAO,                                                                                                   ' + #13 +
             '            d.data DATA_FATURADO,                                                                                                  ' + #13 +
             '            (di.valor_unitario * di.quantidade) * -1 VALOR_PRODUTO,                                                                ' + #13 +
@@ -1383,6 +1384,7 @@ begin
         '         union all                                                                                                                                 ' + #13 +
         '                                                                                                                                                   ' + #13 +
         '        select                                                                                                                     ' + #13 +
+        '            distinct                                                                                                               ' + #13 +
         '            d.data DATA_EMISSAO,                                                                                                   ' + #13 +
         '            d.data DATA_FATURADO,                                                                                                  ' + #13 +
         '            (di.valor_unitario * di.quantidade) * -1 VALOR_PRODUTO,                                                                ' + #13 +
