@@ -116,7 +116,6 @@ begin
 
   try
     try
-      lFinanceiroPedidoModel.Acao := tacIncluir;
       lFinanceiroPedidoModel.WEB_PEDIDO_ID        := '325';
       lFinanceiroPedidoModel.PORTADOR_ID          := '000001';
       lFinanceiroPedidoModel.VALOR_TOTAL          := '500';
@@ -126,8 +125,8 @@ begin
       lFinanceiroPedidoModel.VENCIMENTO           := '26/01/2024';
       lFinanceiroPedidoModel.CONDICAO_PAGAMENTO   :='30';
 
+      lFinanceiroPedidoModel.Incluir;
 
-      lFinanceiroPedidoModel.Salvar;
       ShowMessage('Inserido com sucesso!');
     except
      on E:Exception do
@@ -146,8 +145,7 @@ begin
 
   try
     try
-      lFinanceiroPedidoModel.Acao := tacAlterar;
-      lFinanceiroPedidoModel.ID            := '4';
+      lFinanceiroPedidoModel.Alterar('4');
       lFinanceiroPedidoModel.WEB_PEDIDO_ID := '324';
       lFinanceiroPedidoModel.PORTADOR_ID   := '000001';
       lFinanceiroPedidoModel.VALOR_TOTAL   := '300';
@@ -172,9 +170,7 @@ begin
 
   try
     try
-      lFinanceiroPedidoModel.Acao           := tacExcluir;
-      lFinanceiroPedidoModel.ID             := '5';
-      lFinanceiroPedidoModel.Salvar;
+      lFinanceiroPedidoModel.Excluir('5');
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do

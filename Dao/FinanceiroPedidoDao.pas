@@ -54,7 +54,7 @@ type
     function excluir(pFinanceiroPedidoModel: TFinanceiroPedidoModel): String;
 
     procedure setParams(var pQry : TFDQuery; pFinanceiroPedidoModel: TFinanceiroPedidoModel);
-
+    function carregaClasse(pID: String): TFinanceiroPedidoModel;
     function ObterLista: TFDMemTable;
 end;
 
@@ -64,6 +64,40 @@ uses
   System.Variants;
 
 { TFinanceiroPedido }
+
+function TFinanceiroPedidoDao.carregaClasse(pID: String): TFinanceiroPedidoModel;
+var
+  lQry: TFDQuery;
+  lModel: TFinanceiroPedidoModel;
+begin
+  lQry     := vIConexao.CriarQuery;
+  lModel   := TFinanceiroPedidoModel.Create(vIConexao);
+  Result   := lModel;
+
+  try
+    lQry.Open('select * from FINANCEIRO_PEDIDO where id = '+pId);
+
+    if lQry.IsEmpty then
+      Exit;
+
+    lModel.ID                     := lQry.FieldByName('ID').AsString;
+    lModel.SYSTIME                := lQry.FieldByName('SYSTIME').AsString;
+    lModel.DATA_CADASTRO          := lQry.FieldByName('DATA_CADASTRO').AsString;
+    lModel.WEB_PEDIDO_ID          := lQry.FieldByName('WEB_PEDIDO_ID').AsString;
+    lModel.PEDIDO_VENDA_ID        := lQry.FieldByName('PEDIDO_VENDA_ID').AsString;
+    lModel.PORTADOR_ID            := lQry.FieldByName('PORTADOR_ID').AsString;
+    lModel.VALOR_TOTAL            := lQry.FieldByName('VALOR_TOTAL').AsString;
+    lModel.QUANTIDADE_PARCELAS    := lQry.FieldByName('QUANTIDADE_PARCELAS').AsString;
+    lModel.PARCELA                := lQry.FieldByName('PARCELA').AsString;
+    lModel.VALOR_PARCELA          := lQry.FieldByName('VALOR_PARCELA').AsString;
+    lModel.VENCIMENTO             := lQry.FieldByName('VENCIMENTO').AsString;
+    lModel.CONDICAO_PAGAMENTO     := lQry.FieldByName('CONDICAO_PAGAMENTO').AsString;
+    lModel.OBSERVACAO             := lQry.FieldByName('OBSERVACAO').AsString;
+    Result := lModel;
+  finally
+    lQry.Free;
+  end;
+end;
 
 constructor TFinanceiroPedidoDao.Create(pIConexao: IConexao);
 begin

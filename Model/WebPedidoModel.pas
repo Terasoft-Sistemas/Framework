@@ -239,10 +239,6 @@ type
     procedure SetGERENTE_ID(const Value: Variant);
     procedure SetTIPO_COMISSAO(const Value: Variant);
 
-    function Incluir: String;
-    function Alterar: String;
-    function Excluir: String;
-
   public
     procedure AfterConstruction; override;
     property ID: Variant read FID write SetID;
@@ -357,6 +353,10 @@ type
     procedure calcularTotais;
     procedure obterTotais;
 
+    function Incluir: String;
+    function Alterar: String;
+    function Excluir: String;
+
     property WebPedidosLista: TObjectList<TWebPedidoModel> read FWebPedidosLista write SetWebPedidosLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -395,9 +395,6 @@ var
 begin
   lWebPedidoDao := TWebPedidoDao.Create(vIConexao);
   try
-    if True then
-
-
     Result := lWebPedidoDao.alterar(Self);
   finally
     lWebPedidoDao.Free;

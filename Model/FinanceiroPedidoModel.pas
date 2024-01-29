@@ -89,9 +89,10 @@ type
     function Salvar  : String;
 
     function Incluir : String;
-    function Alterar : String;
-    function Excluir : String;
+    procedure Alterar(pID: String);
+    function Excluir(pID: String) : String;
 
+    function carregaClasse(pId: String): TFinanceiroPedidoModel;
     function obterLista: TFDMemTable;
 
   end;
@@ -104,60 +105,61 @@ uses
 { TFinanceiroPedidoModel }
 
 function TFinanceiroPedidoModel.Incluir: String;
-var
-  lFinanceiroPedidoDao : TFinanceiroPedidoDao;
 begin
-  lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
-  try
-    if self.FWEB_PEDIDO_ID = '' then
-      CriaException('WebPedido não informado.');
+  if self.FWEB_PEDIDO_ID = '' then
+    CriaException('WebPedido não informado.');
 
-    if self.FPORTADOR_ID = '' then
-      CriaException('Portador não informado.');
+  if self.FPORTADOR_ID = '' then
+    CriaException('Portador não informado.');
 
-    if self.FVALOR_TOTAL = '' then
-      CriaException('Valor Total não informado.');
+  if self.FVALOR_TOTAL = '' then
+    CriaException('Valor Total não informado.');
 
-    if self.FQUANTIDADE_PARCELAS = '' then
-      CriaException('Quantidade de Parcelas não informada.');
+  if self.FQUANTIDADE_PARCELAS = '' then
+    CriaException('Quantidade de Parcelas não informada.');
 
-    if self.FPARCELA = '' then
-      CriaException('Parcela não informada.');
+  if self.FPARCELA = '' then
+    CriaException('Parcela não informada.');
 
-    if self.FVALOR_PARCELA = '' then
-      CriaException('Valor da Parcela não informado.');
+  if self.FVALOR_PARCELA = '' then
+    CriaException('Valor da Parcela não informado.');
 
-    if self.FVENCIMENTO = '' then
-      CriaException('Vencimento não informado.');
+  if self.FVENCIMENTO = '' then
+    CriaException('Vencimento não informado.');
 
-    if self.FCONDICAO_PAGAMENTO = '' then
-      CriaException('Condição de Pagamento não informado.');
+  if self.FCONDICAO_PAGAMENTO = '' then
+    CriaException('Condição de Pagamento não informado.');
 
-    Result := lFinanceiroPedidoDao.incluir(Self);
-  finally
-    lFinanceiroPedidoDao.Free;
-  end;
+  self.Acao := tacIncluir;
+  self.Salvar;
 end;
 
-function TFinanceiroPedidoModel.Alterar: String;
-var
-  lFinanceiroPedidoDao : TFinanceiroPedidoDao;
+procedure TFinanceiroPedidoModel.Alterar(pID: String);
 begin
-  lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
-  try
-    Result := lFinanceiroPedidoDao.alterar(Self);
-  finally
-    lFinanceiroPedidoDao.Free;
-  end;
+  if pID = '' then
+    CriaException('ID é obrigatório.');
+
+  self := self.carregaClasse(pID);
+  self.Acao := tacAlterar;
 end;
 
-function TFinanceiroPedidoModel.Excluir: String;
+function TFinanceiroPedidoModel.Excluir(pID: String): String;
+begin
+  if pID = '' then
+    CriaException('ID é obrigatório.');
+
+  self.FID  := pID;
+  self.Acao := tacExcluir;
+  Result := self.Salvar;
+end;
+
+function TFinanceiroPedidoModel.carregaClasse(pId: String): TFinanceiroPedidoModel;
 var
   lFinanceiroPedidoDao : TFinanceiroPedidoDao;
 begin
   lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
   try
-    Result := lFinanceiroPedidoDao.excluir(Self);
+    Result := lFinanceiroPedidoDao.carregaClasse(pId);
   finally
     lFinanceiroPedidoDao.Free;
   end;
@@ -196,11 +198,18 @@ begin
 end;
 
 function TFinanceiroPedidoModel.Salvar: String;
+var
+  lFinanceiroPedidoDao : TFinanceiroPedidoDao;
 begin
-  case FAcao of
-    Terasoft.Types.tacIncluir: Result := Incluir;
-    Terasoft.Types.tacAlterar: Result := Alterar;
-    Terasoft.Types.tacExcluir: Result := Excluir;
+  lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
+  try
+    case FAcao of
+      Terasoft.Types.tacIncluir: Result := lFinanceiroPedidoDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lFinanceiroPedidoDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lFinanceiroPedidoDao.excluir(Self);
+    end;
+  finally
+    lFinanceiroPedidoDao.Free;
   end;
 end;
 
