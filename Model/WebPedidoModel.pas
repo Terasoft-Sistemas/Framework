@@ -14,6 +14,7 @@ type
     WEB_PEDIDO,
     PRODUTO,
     QUANTIDADE,
+    VALOR_UNITARIO,
     DESCONTO         : String;
   end;
 
@@ -1237,33 +1238,16 @@ begin
 
     lProdutoModel := lProdutoModel.ProdutossLista[0];
 
-    lWebPedidoItensModel.Acao                := tacIncluir;
     lWebPedidoItensModel.WEB_PEDIDO_ID       := self.ID;
     lWebPedidoItensModel.PRODUTO_ID          := pVenderItemParametros.PRODUTO;
     lWebPedidoItensModel.QUANTIDADE          := pVenderItemParametros.QUANTIDADE;
-
-    lPrecoParamentros.Produto       := pVenderItemParametros.PRODUTO;
-    lPrecoParamentros.Cliente       := self.FCLIENTE_ID;
-    lPrecoParamentros.Portador      := self.FPORTADOR_ID;
-    lPrecoParamentros.PrecoVenda    := '';
-    lPrecoParamentros.Loja          := self.FLOJA;
-    lPrecoParamentros.Qtde          := StrToFloatDef(pVenderItemParametros.QUANTIDADE, 0);
-    lPrecoParamentros.PrecoUf       := false;
-    lPrecoParamentros.Promocao      := true;
-    lPrecoParamentros.PrecoCliente  := false;
-    lPrecoParamentros.TabelaPreco   := true;
-
-    lWebPedidoItensModel.VALOR_UNITARIO      := lProdutoModel.ValorUnitario(lPrecoParamentros);
+    lWebPedidoItensModel.VALOR_UNITARIO      := pVenderItemParametros.VALOR_UNITARIO;
     lWebPedidoItensModel.VALOR_VENDIDO       := lWebPedidoItensModel.VALOR_UNITARIO;
-    lWebPedidoItensModel.QUANTIDADE_TROCA    := '0';
-		lWebPedidoItensModel.PERCENTUAL_DESCONTO := '0';
-		lWebPedidoItensModel.VALOR_VENDA_ATUAL   := lProdutoModel.VENDA_PRO;
+    lWebPedidoItensModel.VALOR_VENDA_ATUAL   := lProdutoModel.VENDA_PRO;
 		lWebPedidoItensModel.VALOR_CUSTO_ATUAL   := lProdutoModel.CUSTOMEDIO_PRO;
-    lWebPedidoItensModel.TIPO_ENTREGA        := 'LJ';
 		lWebPedidoItensModel.RESERVADO           := pVenderItemParametros.QUANTIDADE;
-    lWebPedidoItensModel.TIPO                := 'NORMAL';
 
-    Result := lWebPedidoItensModel.Salvar;
+    Result := lWebPedidoItensModel.Incluir;
     calcularTotais;
   finally
     lWebPedidoItensModel.Free;

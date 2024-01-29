@@ -273,8 +273,12 @@ uses
 { TWebPedidoItensModel }
 
 function TWebPedidoItensModel.Incluir: String;
-
 begin
+  self.FQUANTIDADE_TROCA    := '0';
+  self.FPERCENTUAL_DESCONTO := '0';
+  self.FTIPO_ENTREGA        := 'LJ';
+  self.FTIPO                := 'NORMAL';
+
   self.Acao := tacIncluir;
   self.Salvar;
 end;
