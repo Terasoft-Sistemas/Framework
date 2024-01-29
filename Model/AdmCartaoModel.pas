@@ -84,7 +84,10 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function Salvar: String;
+    function Incluir: String;
+    function Alterar(pID : String): TAdmCartaoModel;
+    function Excluir(pID : String): String;
+    function Salvar      : String;
     procedure obterLista;
 
     function carregaClasse(pId: String): TAdmCartaoModel;
@@ -108,6 +111,21 @@ uses
 
 { TAdmCartaoModel }
 
+function TAdmCartaoModel.Alterar(pID: String): TAdmCartaoModel;
+var
+  lAdmCartaoModel : TAdmCartaoModel;
+begin
+  lAdmCartaoModel := TAdmCartaoModel.Create(vIConexao);
+
+  try
+    lAdmCartaoModel      := lAdmCartaoModel.carregaClasse(pID);
+    lAdmCartaoModel.Acao := tacAlterar;
+    Result               := lAdmCartaoModel;
+  finally
+    lAdmCartaoModel.Free
+  end;
+end;
+
 function TAdmCartaoModel.carregaClasse(pId: String): TAdmCartaoModel;
 var
   lAdmCartaoDao: TAdmCartaoDao;
@@ -130,6 +148,26 @@ destructor TAdmCartaoModel.Destroy;
 begin
 
   inherited;
+end;
+
+function TAdmCartaoModel.Excluir(pID: String): String;
+begin
+  self.FID := pID;
+  self.Acao := tacExcluir;
+  Result := self.Salvar
+end;
+
+function TAdmCartaoModel.Incluir: String;
+var
+  lAdmCartaoModel : TAdmCartaoModel;
+begin
+  lAdmCartaoModel := TAdmCartaoModel.Create(vIConexao);
+  try
+    self.Acao := tacIncluir ;
+    self.Salvar;
+  finally
+    lAdmCartaoModel.Free;
+  end;
 end;
 
 procedure TAdmCartaoModel.obterLista;

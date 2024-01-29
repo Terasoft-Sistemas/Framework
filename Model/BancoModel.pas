@@ -237,7 +237,12 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    function Incluir: String;
+    function Alterar(pID : String): TBancoModel;
+    function Exlcuir(pID : String): String;
     function Salvar: String;
+    function carregaClasse(pID: String): TBancoModel;
+
     procedure obterLista;
 
     property BancosLista: TObjectList<TBancoModel> read FBancosLista write SetBancosLista;
@@ -258,6 +263,45 @@ uses
   BancoDao;
 
 { TBancoModel }
+
+function TBancoModel.Alterar(pID: String): TBancoModel;
+var
+  lBancoModel : TBancoModel;
+begin
+  lBancoModel := lBancoModel.Create(vIConexao);
+  try
+    lBancoModel       := lBancoModel.carregaClasse(pID);
+    lBancoModel.Acao  := tacAlterar;
+    Result            := lBancoModel;
+  finally
+    lBancoModel.Free;
+  end;
+end;
+
+function TBancoModel.Exlcuir(pID: String): String;
+begin
+  self.FID  := pID;
+  self.Acao := tacExcluir;
+  Result    := self.Salvar;
+end;
+
+function TBancoModel.Incluir: String;
+begin
+  self.Acao := tacIncluir;
+  self.Salvar;
+end;
+
+function TBancoModel.carregaClasse(pID: String): TBancoModel;
+var
+  lBancoDao: TBancoDao;
+begin
+  lBancoDao := TBancoDao.Create(vIConexao);
+  try
+    Result  := lBancoDao.carregaClasse(pId);
+  finally
+    lBancoDao.Free;
+  end;
+end;
 
 constructor TBancoModel.Create(pIConexao : IConexao);
 begin

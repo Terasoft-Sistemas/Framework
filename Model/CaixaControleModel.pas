@@ -74,6 +74,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    function Incluir: String;
     function Salvar: String;
     procedure obterLista;
 
@@ -202,19 +203,24 @@ begin
   end;
 end;
 
+function TCaixaControleModel.Incluir: String;
+begin
+  self.DATA    := DateToStr(vIConexao.DataServer);
+  self.STATUS  := 'I';
+  self.USUARIO := self.vIConexao.getUSer.ID;
+  self.HORA    := TimeToStr(vIConexao.HoraServer);
+
+  self.Acao := tacIncluir;
+  self.Salvar;
+end;
+
 procedure TCaixaControleModel.InicializarCaixa(pValor: Double);
 var
   lCaixaModel   : TCaixaModel;
   lUsuarioModel : TUsuarioModel;
   lNomeUsuario  : String;
-
 begin
-  self.Acao    := tacIncluir;
-  self.DATA    := DateToStr(vIConexao.DataServer);
-  self.STATUS  := 'I';
-  self.USUARIO := self.vIConexao.getUSer.ID;
-  self.HORA    := TimeToStr(vIConexao.HoraServer);
-  self.Salvar;
+  self.Incluir;
 
   lCaixaModel   := TCaixaModel.Create(vIConexao);
   lUsuarioModel := TUsuarioModel.Create(vIConexao);
@@ -236,15 +242,13 @@ begin
     lCaixaModel.CONCILIADO_CAI    := '.';
     lCaixaModel.LOJA              := self.vIConexao.getEmpresa.LOJA;
 
-    lCaixaModel.Acao := tacIncluir;
-    lCaixaModel.Salvar;
+    lCaixaModel.Incluir;
 
     lCaixaModel.HISTORICO_CAI     := 'Transferencia '+ self.vIConexao.getUSer.NOME +' '+ TimeToStr(vIConexao.HoraServer);
     lCaixaModel.USUARIO_CAI       := '000000';
     lCaixaModel.TIPO_CAI          := 'D';
 
-    lCaixaModel.Acao := tacIncluir;
-    lCaixaModel.Salvar;
+    lCaixaModel.Incluir;
 
   finally
     lCaixaModel.Free;
@@ -322,14 +326,12 @@ begin
     lCaixaModel.CONCILIADO_CAI      := '.';
     lCaixaModel.LOJA                := self.vIConexao.getEmpresa.LOJA;
 
-    lCaixaModel.Acao := tacIncluir;
-    lCaixaModel.Salvar;
+    lCaixaModel.Incluir;
 
     lCaixaModel.USUARIO_CAI         := '000000';
     lCaixaModel.TIPO_CAI            := 'C';
 
-    lCaixaModel.Acao := tacIncluir;
-    lCaixaModel.Salvar;
+    lCaixaModel.Incluir;;
 
   finally
     lCaixaModel.Free;
@@ -466,14 +468,12 @@ begin
     lCaixaModel.CONCILIADO_CAI      := '.';
     lCaixaModel.LOJA                := self.vIConexao.getEmpresa.LOJA;
 
-    lCaixaModel.Acao := tacIncluir;
-    lCaixaModel.Salvar;
+    lCaixaModel.Incluir;
 
     lCaixaModel.USUARIO_CAI         := '000000';
     lCaixaModel.TIPO_CAI            := 'D';
 
-    lCaixaModel.Acao := tacIncluir;
-    lCaixaModel.Salvar;
+    lCaixaModel.Incluir;
 
   finally
     lCaixaModel.Free;

@@ -934,7 +934,10 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function Salvar: String;
+    function Incluir  : String;
+    function Salvar   : String;
+    function Alterar(pID : String): TClienteModel;
+    function Excluir(pID : String): String;
     procedure obterLista;
     function carregaClasse(pId: String): TClienteModel;
     function ufCliente(pId: String): Variant;
@@ -962,6 +965,33 @@ uses
   System.SysUtils;
 
 { TClienteModel }
+
+function TClienteModel.Incluir: String;
+begin
+  self.Acao := tacIncluir;
+  self.Salvar;
+end;
+
+function TClienteModel.Excluir(pID: String): String;
+begin
+  self.FID := pID;
+  self.FAcao := tacExcluir;
+  Result := self.Salvar;
+end;
+
+function TClienteModel.Alterar(pID: String): TClienteModel;
+var
+  lClienteModel : TClienteModel;
+begin
+  lClienteModel := lClienteModel.Create(vIConexao);
+  try
+    lClienteModel := lClienteModel.carregaClasse(pID);
+    lClienteModel.Acao := tacAlterar;
+    Result := lClienteModel;
+  finally
+  end;
+end;
+
 function TClienteModel.carregaClasse(pId: String): TClienteModel;
 var
   lClienteDao: TClienteDao;

@@ -43,6 +43,7 @@ type
     function where: String;
 
   public
+
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
@@ -60,6 +61,8 @@ type
     function alterar(AAdmCartaoTaxaModel: TAdmCartaoTaxaModel): String;
     function excluir(AAdmCartaoTaxaModel: TAdmCartaoTaxaModel): String;
 
+    function carregaClasse(pID : String): TAdmCartaoTaxaModel;
+
     procedure obterLista;
 
     procedure setParams(var pQry: TFDQuery; pCartaoTaxaModel: TAdmCartaoTaxaModel);
@@ -72,6 +75,35 @@ uses
   System.Rtti;
 
 { TAdmCartaoTaxa }
+
+function TAdmCartaoTaxaDao.carregaClasse(pID: String): TAdmCartaoTaxaModel;
+var
+  lQry: TFDQuery;
+  lModel: TAdmCartaoTaxaModel;
+begin
+  lQry     := vIConexao.CriarQuery;
+  lModel   := TAdmCartaoTaxaModel.Create(vIConexao);
+  Result   := lModel;
+
+  try
+    lQry.Open('select * from ADMCARTAO_TAXA where ID = '+pId);
+
+    if lQry.IsEmpty then
+      Exit;
+
+    lModel.ID                 := lQry.FieldByName('ID').AsString;
+    lModel.ADM_ID             := lQry.FieldByName('ADM_ID').AsString;
+    lModel.PARCELA            := lQry.FieldByName('PARCELA').AsString;
+    lModel.TAXA               := lQry.FieldByName('TAXA').AsString;
+    lModel.SYSTIME            := lQry.FieldByName('SYSTIME').AsString;
+    lModel.DIAS_VENCIMENTO    := lQry.FieldByName('DIAS_VENCIMENTO').AsString;
+    lModel.CONCILIADORA_ID    := lQry.FieldByName('CONCILIADORA_ID').AsString;
+
+    Result := lModel;
+  finally
+    lQry.Free;
+  end;
+end;
 
 constructor TAdmCartaoTaxaDao.Create(pIConexao : IConexao);
 begin

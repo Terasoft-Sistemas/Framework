@@ -57,7 +57,12 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function Salvar: String;
+    function Incluir: String;
+    function Alterar(pID : String): TAdmCartaoTaxaModel;
+    function Excluir(pID : String): String;
+    function Salvar : String;
+
+    function carregaClasse(pId: String): TAdmCartaoTaxaModel;
     procedure obterLista;
 
     property AdmCartaoTaxasLista: TObjectList<TAdmCartaoTaxaModel> read FAdmCartaoTaxasLista write SetAdmCartaoTaxasLista;
@@ -78,6 +83,45 @@ uses
   AdmCartaoTaxaDao;
 
 { TAdmCartaoTaxaModel }
+
+function TAdmCartaoTaxaModel.Alterar(pID: String): TAdmCartaoTaxaModel;
+var
+  lAdmCartaoTaxaModel : TAdmCartaoTaxaModel;
+begin
+  lAdmCartaoTaxaModel := lAdmCartaoTaxaModel.Create(vIConexao);
+  try
+    lAdmCartaoTaxaModel       := lAdmCartaoTaxaModel.carregaClasse(pID);
+    lAdmCartaoTaxaModel.Acao  := tacAlterar;
+    Result                    := lAdmCartaoTaxaModel;
+  finally
+  end;
+end;
+
+function TAdmCartaoTaxaModel.Excluir(pID: String): String;
+begin
+  self.FID := pID;
+  self.FAcao := tacExcluir;
+  Result := self.Salvar;
+end;
+
+function TAdmCartaoTaxaModel.Incluir: String;
+begin
+    self.Acao := tacIncluir;
+    self.Salvar;
+end;
+
+function TAdmCartaoTaxaModel.carregaClasse(pId: String): TAdmCartaoTaxaModel;
+var
+  lAdmCartaoTaxaDao: TAdmCartaoTaxaDao;
+begin
+  lAdmCartaoTaxaDao := lAdmCartaoTaxaDao.Create(vIConexao);
+
+  try
+    Result := lAdmCartaoTaxaDao.carregaClasse(pId);
+  finally
+    lAdmCartaoTaxaDao.Free;
+  end;
+end;
 
 constructor TAdmCartaoTaxaModel.Create(pIConexao : IConexao);
 begin

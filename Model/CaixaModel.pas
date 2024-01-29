@@ -148,6 +148,7 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    function Incluir: String;
     function Salvar: String;
     procedure obterLista;
 
@@ -231,6 +232,12 @@ begin
   end;
 end;
 
+function TCaixaModel.Incluir: String;
+begin
+  self.Acao := tacIncluir;
+  self.Salvar;
+end;
+
 procedure TCaixaModel.obterLista;
 var
   lCaixaLista: TCaixaDao;
@@ -248,8 +255,8 @@ begin
 
     lCaixaLista.obterLista;
 
-    FTotalRecords  := lCaixaLista.TotalRecords;
-    FCaixasLista := lCaixaLista.CaixasLista;
+    FTotalRecords   := lCaixaLista.TotalRecords;
+    FCaixasLista    := lCaixaLista.CaixasLista;
 
   finally
     lCaixaLista.Free;

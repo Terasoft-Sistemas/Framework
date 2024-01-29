@@ -59,7 +59,8 @@ type
     function incluir(ABancoModel: TBancoModel): String;
     function alterar(ABancoModel: TBancoModel): String;
     function excluir(ABancoModel: TBancoModel): String;
-	
+    function carregaClasse(pID : String): TBancoModel;
+
     procedure obterLista;
     procedure setParams(var pQry: TFDQuery; pBancoModel: TBancoModel);
 
@@ -71,6 +72,94 @@ uses
   System.Rtti;
 
 { TBanco }
+
+function TBancoDao.carregaClasse(pID: String): TBancoModel;
+var
+  lQry: TFDQuery;
+  lModel: TBancoModel;
+begin
+  lQry     := vIConexao.CriarQuery;
+  lModel   := TBancoModel.Create(vIConexao);
+  Result   := lModel;
+
+  try
+    lQry.Open('select * from BANCO where ID = '+pId);
+
+    if lQry.IsEmpty then
+      Exit;
+
+    lModel.NUMERO_BAN                     := lQry.FieldByName('NUMERO_BAN').AsString;
+    lModel.NOME_BAN                       := lQry.FieldByName('NOME_BAN').AsString;
+    lModel.AGENCIA_BAN                    := lQry.FieldByName('AGENCIA_BAN').AsString;
+    lModel.CONTA_BAN                      := lQry.FieldByName('CONTA_BAN').AsString;
+    lModel.CONTATO_BAN                    := lQry.FieldByName('CONTATO_BAN').AsString;
+    lModel.TELEFONE_BAN                   := lQry.FieldByName('TELEFONE_BAN').AsString;
+    lModel.USUARIO_BAN                    := lQry.FieldByName('USUARIO_BAN').AsString;
+    lModel.DIGAGENCIA_BAN                 := lQry.FieldByName('DIGAGENCIA_BAN').AsString;
+    lModel.DIGCONTA_BAN                   := lQry.FieldByName('DIGCONTA_BAN').AsString;
+    lModel.NUM_BAN                        := lQry.FieldByName('NUM_BAN').AsString;
+    lModel.CODIGO_CEDENTE                 := lQry.FieldByName('CODIGO_CEDENTE').AsString;
+    lModel.LICENCA                        := lQry.FieldByName('LICENCA').AsString;
+    lModel.LAYOUT_RETORNO                 := lQry.FieldByName('LAYOUT_RETORNO').AsString;
+    lModel.LAYOUT_REMESSA                 := lQry.FieldByName('LAYOUT_REMESSA').AsString;
+    lModel.CAMINHO_RETORNO                := lQry.FieldByName('CAMINHO_RETORNO').AsString;
+    lModel.CAMINHO_REMESSA                := lQry.FieldByName('CAMINHO_REMESSA').AsString;
+    lModel.LIMITE_BAN                     := lQry.FieldByName('LIMITE_BAN').AsString;
+    lModel.ID                             := lQry.FieldByName('ID').AsString;
+    lModel.VALOR_BOLETO                   := lQry.FieldByName('VALOR_BOLETO').AsString;
+    lModel.DESPESA_BOLETO_CONTA_ID        := lQry.FieldByName('DESPESA_BOLETO_CONTA_ID').AsString;
+    lModel.CODIGO_CEDENTE2                := lQry.FieldByName('CODIGO_CEDENTE2').AsString;
+    lModel.OUTRAS_CONFIGURACOES           := lQry.FieldByName('OUTRAS_CONFIGURACOES').AsString;
+    lModel.LOJA                           := lQry.FieldByName('LOJA').AsString;
+    lModel.TIPO_IMPRESSAO                 := lQry.FieldByName('TIPO_IMPRESSAO').AsString;
+    lModel.LIMITE_TROCA                   := lQry.FieldByName('LIMITE_TROCA').AsString;
+    lModel.STATUS                         := lQry.FieldByName('STATUS').AsString;
+    lModel.OUTRAS_CONFIGURACOES2          := lQry.FieldByName('OUTRAS_CONFIGURACOES2').AsString;
+    lModel.DIAS_PROTESTO_DEVOLUCAO        := lQry.FieldByName('DIAS_PROTESTO_DEVOLUCAO').AsString;
+    lModel.CODIGO_PROTESTO_DEVOLUCAO      := lQry.FieldByName('CODIGO_PROTESTO_DEVOLUCAO').AsString;
+    lModel.CONTA_APLICACAO                := lQry.FieldByName('CONTA_APLICACAO').AsString;
+    lModel.LOCAL_PAGAMENTO                := lQry.FieldByName('LOCAL_PAGAMENTO').AsString;
+    lModel.BANCO_REFERENTE                := lQry.FieldByName('BANCO_REFERENTE').AsString;
+    lModel.DETALHAMENTO_REMESSA           := lQry.FieldByName('DETALHAMENTO_REMESSA').AsString;
+    lModel.URL_ATUALIZACAO_BOLETO         := lQry.FieldByName('URL_ATUALIZACAO_BOLETO').AsString;
+    lModel.ATUALIZAR_BOLETO               := lQry.FieldByName('ATUALIZAR_BOLETO').AsString;
+    lModel.DRG                            := lQry.FieldByName('DRG').AsString;
+    lModel.PERSONALIZACAO_BOLETO          := lQry.FieldByName('PERSONALIZACAO_BOLETO').AsString;
+    lModel.SEQUENCIA_REMESSA_PAGAMENTO    := lQry.FieldByName('SEQUENCIA_REMESSA_PAGAMENTO').AsString;
+    lModel.CODIGO_CONVENIO_PAGAMENTO      := lQry.FieldByName('CODIGO_CONVENIO_PAGAMENTO').AsString;
+    lModel.CAMINHO_RETORNO_PAGAMENTO      := lQry.FieldByName('CAMINHO_RETORNO_PAGAMENTO').AsString;
+    lModel.CAMINHO_REMESSA_PAGAMENTO      := lQry.FieldByName('CAMINHO_REMESSA_PAGAMENTO').AsString;
+    lModel.CONTA_JUROS_ANTECIPACAO        := lQry.FieldByName('CONTA_JUROS_ANTECIPACAO').AsString;
+    lModel.CONTA_IOF_ANTECIPACAO          := lQry.FieldByName('CONTA_IOF_ANTECIPACAO').AsString;
+    lModel.CONTA_ESTORNO_ANTECIPACAO      := lQry.FieldByName('CONTA_ESTORNO_ANTECIPACAO').AsString;
+    lModel.SYSTIME                        := lQry.FieldByName('SYSTIME').AsString;
+    lModel.TIPO_COBRANCA                  := lQry.FieldByName('TIPO_COBRANCA').AsString;
+    lModel.DEVELOPER_APPLICATION_KEY      := lQry.FieldByName('DEVELOPER_APPLICATION_KEY').AsString;
+    lModel.CLIENT_ID                      := lQry.FieldByName('CLIENT_ID').AsString;
+    lModel.CLIENT_SECRET                  := lQry.FieldByName('CLIENT_SECRET').AsString;
+    lModel.LOG                            := lQry.FieldByName('LOG').AsString;
+    lModel.FANTASIA                       := lQry.FieldByName('FANTASIA').AsString;
+    lModel.RAZAO                          := lQry.FieldByName('RAZAO').AsString;
+    lModel.CNPJ                           := lQry.FieldByName('CNPJ').AsString;
+    lModel.ENDERECO                       := lQry.FieldByName('ENDERECO').AsString;
+    lModel.BAIRRO                         := lQry.FieldByName('BAIRRO').AsString;
+    lModel.CIDADE                         := lQry.FieldByName('CIDADE').AsString;
+    lModel.UF                             := lQry.FieldByName('UF').AsString;
+    lModel.CEP                            := lQry.FieldByName('CEP').AsString;
+    lModel.TELEFONE                       := lQry.FieldByName('TELEFONE').AsString;
+    lModel.TIPO_EMITENTE                  := lQry.FieldByName('TIPO_EMITENTE').AsString;
+    lModel.INDICADORPIX                   := lQry.FieldByName('INDICADORPIX').AsString;
+    lModel.CONVENIO                       := lQry.FieldByName('CONVENIO').AsString;
+    lModel.MODALIDADE                     := lQry.FieldByName('MODALIDADE').AsString;
+    lModel.CODIGOTRANSMISSAO              := lQry.FieldByName('CODIGOTRANSMISSAO').AsString;
+    lModel.SCOPE                          := lQry.FieldByName('SCOPE').AsString;
+    lModel.CARACTERISTICA_TITULO          := lQry.FieldByName('CARACTERISTICA_TITULO').AsString;
+
+    Result := lModel;
+  finally
+    lQry.Free;
+  end;
+end;
 
 constructor TBancoDao.Create(pIConexao : Iconexao);
 begin

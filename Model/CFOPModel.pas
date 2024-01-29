@@ -171,7 +171,11 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function Salvar: String;
+    function Incluir     : String;
+    function Salvar      : String;
+    function Alterar(pID : String) : TCFOPModel;
+    function Excluir(pID : String) : String;
+
     procedure obterLista;
     function carregaClasse(pId: String): TCFOPModel;
 
@@ -195,6 +199,31 @@ uses
   CFOPDao;
 
 { TCFOPModel }
+
+function TCFOPModel.Excluir(pID: String): String;
+begin
+  self.FID    := pID;
+  self.Acao   := tacExcluir;
+end;
+
+function TCFOPModel.Incluir: String;
+begin
+  self.Acao := tacIncluir;
+  self.Salvar;
+end;
+
+function TCFOPModel.Alterar(pID: String): TCFOPModel;
+var
+  lCFOPModel : TCFOPModel;
+begin
+  lCFOPModel := TCFOPModel.Create(vIConexao);
+  try
+    lCFOPModel      := lCFOPModel.carregaClasse(pID);
+    lCFOPModel.Acao := tacAlterar;
+    Result          := lCFOPModel;
+  finally
+  end;
+end;
 
 function TCFOPModel.carregaClasse(pId: String): TCFOPModel;
 var
