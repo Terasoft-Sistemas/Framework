@@ -5,6 +5,7 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
+  Terasoft.Utils,
   Interfaces.Conexao;
 
 type
@@ -28,6 +29,9 @@ type
     FID: Variant;
     FSYSTIME: Variant;
     FINDCEENT: Variant;
+    FVALOR_TOTAL: Variant;
+    FVALOR_PARCELA: Variant;
+    FJUROS_TEXTO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetTabelaJurossLista(const Value: TObjectList<TTabelaJurosModel>);
@@ -44,6 +48,10 @@ type
     procedure SetPERCENTUAL(const Value: Variant);
     procedure SetPORTADOR_ID(const Value: Variant);
     procedure SetSYSTIME(const Value: Variant);
+    procedure SetVALOR_PARCELA(const Value: Variant);
+    procedure SetVALOR_TOTAL(const Value: Variant);
+    procedure SetJUROS_TEXTO(const Value: Variant);
+
   public
     property CODIGO: Variant read FCODIGO write SetCODIGO;
     property INDCE: Variant read FINDCE write SetINDCE;
@@ -52,12 +60,17 @@ type
     property PERCENTUAL: Variant read FPERCENTUAL write SetPERCENTUAL;
     property PORTADOR_ID: Variant read FPORTADOR_ID write SetPORTADOR_ID;
     property SYSTIME: Variant read FSYSTIME write SetSYSTIME;
+    property VALOR_PARCELA: Variant read FVALOR_PARCELA write SetVALOR_PARCELA;
+    property VALOR_TOTAL: Variant read FVALOR_TOTAL write SetVALOR_TOTAL;
+    property JUROS_TEXTO: Variant read FJUROS_TEXTO write SetJUROS_TEXTO;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
-    procedure obterLista;
+    procedure obterLista; overload;
+    procedure obterLista(pPortador: String; pValor: Double); overload;
+
     function carregaClasse(pId: Integer): TTabelaJurosModel;
 
     property TabelaJurossLista: TObjectList<TTabelaJurosModel> read FTabelaJurossLista write SetTabelaJurossLista;
@@ -75,7 +88,7 @@ type
 implementation
 
 uses
-  TabelaJurosDao;
+  TabelaJurosDao, System.SysUtils;
 
 { TTabelaJurosModel }
 
@@ -101,6 +114,47 @@ destructor TTabelaJurosModel.Destroy;
 begin
 
   inherited;
+end;
+
+procedure TTabelaJurosModel.obterLista(pPortador: String; pValor: Double);
+var
+  lModel : TTabelaJurosModel;
+  i      : Integer;
+  lTotal,
+  lJuros : Double;
+begin
+
+  lModel := TTabelaJurosModel.Create(vIConexao);
+  lTotal := pValor;
+
+  try
+    self.WhereView  := 'and portador_id = ' + QuotedStr(pPortador);
+    self.OrderView  := ' tabelajuros.codigo';
+    self.obterLista;
+
+    if self.TotalRecords = 0 then
+    begin
+      self.FID            := 0;
+      self.FCODIGO        := '001';
+      self.FPERCENTUAL    := 0;
+      self.FJUROS_TEXTO   := 'Juros';
+      self.FVALOR_PARCELA := FormatFloat('#,##0.00',  pValor);
+      self.FVALOR_TOTAL   := 'Total: ' + FormatFloat('#,##0.00',  pValor);
+    end;
+
+    for i := 0 to self.TabelaJurossLista.Count -1 do
+    begin
+      self.FJUROS_TEXTO := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, 'Juros', 'Sem juros');
+      lJuros            := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, self.TabelaJurossLista[i].PERCENTUAL / 100 * lTotal, 0);
+
+      self.FVALOR_TOTAL   := 'Total: ' + FormatFloat('#,##0.00',lTotal + lJuros);
+      self.FVALOR_PARCELA := (lTotal + lJuros) / StrToInt(self.TabelaJurossLista[i].CODIGO);
+    end;
+
+  finally
+    lModel.Free;
+  end;
+
 end;
 
 procedure TTabelaJurosModel.obterLista;
@@ -188,6 +242,11 @@ begin
   FINDCEENT := Value;
 end;
 
+procedure TTabelaJurosModel.SetJUROS_TEXTO(const Value: Variant);
+begin
+  FJUROS_TEXTO := Value;
+end;
+
 procedure TTabelaJurosModel.SetLengthPageView(const Value: String);
 begin
   FLengthPageView := Value;
@@ -221,6 +280,16 @@ end;
 procedure TTabelaJurosModel.SetTotalRecords(const Value: Integer);
 begin
   FTotalRecords := Value;
+end;
+
+procedure TTabelaJurosModel.SetVALOR_PARCELA(const Value: Variant);
+begin
+  FVALOR_PARCELA := Value;
+end;
+
+procedure TTabelaJurosModel.SetVALOR_TOTAL(const Value: Variant);
+begin
+  FVALOR_TOTAL := Value;
 end;
 
 procedure TTabelaJurosModel.SetWhereView(const Value: String);
