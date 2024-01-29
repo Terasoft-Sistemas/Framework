@@ -35,6 +35,8 @@ type
     Button9: TButton;
     Button10: TButton;
     Button11: TButton;
+    btnTabelaPreco: TButton;
+    btnTotais: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -49,6 +51,8 @@ type
     procedure Button9Click(Sender: TObject);
     procedure Button10Click(Sender: TObject);
     procedure Button11Click(Sender: TObject);
+    procedure btnTabelaPrecoClick(Sender: TObject);
+    procedure btnTotaisClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -70,7 +74,7 @@ uses
   FinanceiroPedidoModel,
   WebPedidoModel,
   Controllers.Conexao,
-  FireDAC.Comp.Client, WebPedidoItensModel;
+  FireDAC.Comp.Client, WebPedidoItensModel, TabelaJurosModel;
 
 {$R *.dfm}
 
@@ -150,7 +154,7 @@ begin
       if IDRegistro.IsEmpty then
         exit;
 
-      lFinanceiroPedidoModel.Alterar(IDRegistro);
+      lFinanceiroPedidoModel := lFinanceiroPedidoModel.Alterar(IDRegistro);
       lFinanceiroPedidoModel.WEB_PEDIDO_ID := '324';
       lFinanceiroPedidoModel.PORTADOR_ID   := '000001';
       lFinanceiroPedidoModel.VALOR_TOTAL   := '30';
@@ -314,8 +318,7 @@ begin
       if lWebPedido.IsEmpty then
         exit;
 
-      lWebPedidoModel := lWebPedidoModel.carregaClasse(lWebPedido);
-
+      lVenderItemParametros.WEB_PEDIDO := lWebPedido;
       lVenderItemParametros.PRODUTO    := '000005';
       lVenderItemParametros.QUANTIDADE := '10';
       lVenderItemParametros.DESCONTO   := '0';
@@ -365,6 +368,57 @@ begin
     end;
   finally
     lWebPedidoItensModel.Free;
+  end;
+end;
+
+procedure TForm1.btnTabelaPrecoClick(Sender: TObject);
+var
+  lTabelaJurosModel: TTabelaJurosModel;
+  lPortador : String;
+  lMemTable : TFDMemTable;
+begin
+  lTabelaJurosModel := TTabelaJurosModel.Create(vIConexao);
+  try
+    lPortador := InputBox('WebPedido', 'Digite o ID do portador:', '');
+    lMemTable := lTabelaJurosModel.obterLista(lPortador, 1000);
+
+    lMemTable.first;
+    while not lMemTable.eof do
+    begin
+      memoResultado.Lines.Add('ID: '+lMemTable.FieldByName('ID').AsString);
+      memoResultado.Lines.Add('PARCELA: '+lMemTable.FieldByName('CODIGO').AsString);
+      memoResultado.Lines.Add('PERCENTUAL: '+lMemTable.FieldByName('PERCENTUAL').AsString);
+      memoResultado.Lines.Add('JUROS: '+lMemTable.FieldByName('JUROS_TEXTO').AsString);
+      memoResultado.Lines.Add('VALOR_PARCELA: '+lMemTable.FieldByName('VALOR_PARCELA').AsString);
+      memoResultado.Lines.Add('VALOR_TOTAL: '+lMemTable.FieldByName('VALOR_TOTAL').AsString);
+      memoResultado.Lines.Add('===============================================');
+      lMemTable.Next;
+    end;
+
+  finally
+    lTabelaJurosModel.Free;
+  end;
+end;
+
+procedure TForm1.btnTotaisClick(Sender: TObject);
+var
+  lWebPedidoModel : TWebPedidoModel;
+  lID : String;
+begin
+  lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
+  try
+    lID := InputBox('WebPedido', 'Digite o ID do Web Pedido:', '');
+
+    lWebPedidoModel.ID := lID;
+    lWebPedidoModel.obterTotais;
+
+    memoResultado.Lines.Add('ACRESCIMO: '+lWebPedidoModel.ACRESCIMO);
+    memoResultado.Lines.Add('VALOR_FRETE: '+lWebPedidoModel.VALOR_FRETE);
+    memoResultado.Lines.Add('VALOR_CUPOM_DESCONTO: '+lWebPedidoModel.VALOR_CUPOM_DESCONTO);
+    memoResultado.Lines.Add('VALOR_ITENS: '+lWebPedidoModel.VALOR_ITENS);
+    memoResultado.Lines.Add('VALOR_TOTAL: '+lWebPedidoModel.VALOR_TOTAL);
+  finally
+    lWebPedidoModel.Free;
   end;
 end;
 

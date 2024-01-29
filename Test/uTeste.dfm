@@ -141,6 +141,24 @@ object Form1: TForm1
         TabOrder = 12
         OnClick = Button11Click
       end
+      object btnTabelaPreco: TButton
+        Left = 3
+        Top = 215
+        Width = 182
+        Height = 42
+        Caption = 'Consultar tabela Juros'
+        TabOrder = 13
+        OnClick = btnTabelaPrecoClick
+      end
+      object btnTotais: TButton
+        Left = 191
+        Top = 215
+        Width = 182
+        Height = 42
+        Caption = 'Obter Totais'
+        TabOrder = 14
+        OnClick = btnTotaisClick
+      end
     end
   end
 end

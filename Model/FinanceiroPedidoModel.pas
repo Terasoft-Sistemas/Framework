@@ -89,7 +89,7 @@ type
     function Salvar  : String;
 
     function Incluir : String;
-    procedure Alterar(pID: String);
+    function Alterar(pID: String): TFinanceiroPedidoModel;
     function Excluir(pID: String) : String;
 
     function carregaClasse(pId: String): TFinanceiroPedidoModel;
@@ -134,13 +134,20 @@ begin
   self.Salvar;
 end;
 
-procedure TFinanceiroPedidoModel.Alterar(pID: String);
+function TFinanceiroPedidoModel.Alterar(pID: String): TFinanceiroPedidoModel;
+var
+  lFinanceiroPedidoModel : TFinanceiroPedidoModel;
 begin
   if pID = '' then
     CriaException('ID é obrigatório.');
 
-  self := self.carregaClasse(pID);
-  self.Acao := tacAlterar;
+  lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
+  try
+    lFinanceiroPedidoModel := lFinanceiroPedidoModel.carregaClasse(pID);
+    lFinanceiroPedidoModel.Acao := tacAlterar;
+    Result := lFinanceiroPedidoModel;
+  finally
+  end;
 end;
 
 function TFinanceiroPedidoModel.Excluir(pID: String): String;

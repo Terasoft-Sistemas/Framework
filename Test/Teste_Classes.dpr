@@ -77,7 +77,9 @@ uses
   PromocaoItensDao in '..\Dao\PromocaoItensDao.pas',
   PrecoVendaDao in '..\Dao\PrecoVendaDao.pas',
   PrecoVendaProdutoDao in '..\Dao\PrecoVendaProdutoDao.pas',
-  PrecoClienteDao in '..\Dao\PrecoClienteDao.pas';
+  PrecoClienteDao in '..\Dao\PrecoClienteDao.pas',
+  TabelaJurosModel in '..\Model\TabelaJurosModel.pas',
+  TabelaJurosDao in '..\Dao\TabelaJurosDao.pas';
 
 {$R *.res}
 

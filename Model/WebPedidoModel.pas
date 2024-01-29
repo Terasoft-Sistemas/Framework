@@ -11,6 +11,7 @@ uses
 
 type
   TVenderItemParametros = record
+    WEB_PEDIDO,
     PRODUTO,
     QUANTIDADE,
     DESCONTO         : String;
@@ -616,12 +617,12 @@ end;
 
 procedure TWebPedidoModel.obterTotais;
 var
-  lWebPedidoItensModel : TWebPedidoItensModel;
+  lWebPedidoItensDao : TWebPedidoItensDao;
   lTotais : TTotais;
 begin
-  lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
+  lWebPedidoItensDao := TWebPedidoItensDao.Create(vIConexao);
   try
-    lTotais := lWebPedidoItensModel.obterTotais(self.FID);
+    lTotais := lWebPedidoItensDao.obterTotais(self.FID);
 
     self.ACRESCIMO            := lTotais.ACRESCIMO.ToString;
     self.VALOR_FRETE          := lTotais.FRETE.ToString;
@@ -629,7 +630,7 @@ begin
     self.VALOR_ITENS          := lTotais.VALOR_ITENS.ToString;
     self.VALOR_TOTAL          := lTotais.VALOR_TOTAL.ToString;
   finally
-    lWebPedidoItensModel.free;
+    lWebPedidoItensDao.free;
   end;
 end;
 
@@ -1229,6 +1230,8 @@ begin
     CriaException('Quantidade não informada');
 
   try
+    self := self.carregaClasse(pVenderItemParametros.WEB_PEDIDO);
+
     lProdutoModel.IDRecordView := pVenderItemParametros.PRODUTO;
     lProdutoModel.obterLista;
 

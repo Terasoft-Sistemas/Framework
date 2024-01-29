@@ -6,7 +6,7 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Terasoft.Utils,
-  Interfaces.Conexao;
+  Interfaces.Conexao, FireDAC.Comp.Client;
 
 type
   TTabelaJurosModel = class
@@ -69,7 +69,7 @@ type
 
     function Salvar: String;
     procedure obterLista; overload;
-    procedure obterLista(pPortador: String; pValor: Double); overload;
+    function obterLista(pPortador: String; pValor: Double): TFDMemTable; overload;
 
     function carregaClasse(pId: Integer): TTabelaJurosModel;
 
@@ -88,7 +88,7 @@ type
 implementation
 
 uses
-  TabelaJurosDao, System.SysUtils;
+  TabelaJurosDao, System.SysUtils, Data.DB;
 
 { TTabelaJurosModel }
 
@@ -116,16 +116,18 @@ begin
   inherited;
 end;
 
-procedure TTabelaJurosModel.obterLista(pPortador: String; pValor: Double);
+function TTabelaJurosModel.obterLista(pPortador: String; pValor: Double): TFDMemTable;
 var
-  lModel : TTabelaJurosModel;
-  i      : Integer;
+  lModel    : TTabelaJurosModel;
+  i         : Integer;
   lTotal,
-  lJuros : Double;
+  lJuros    : Double;
+  lMemTable : TFDMemTable;
 begin
 
-  lModel := TTabelaJurosModel.Create(vIConexao);
-  lTotal := pValor;
+  lMemTable := TFDMemTable.Create(nil);
+  lModel    := TTabelaJurosModel.Create(vIConexao);
+  lTotal    := pValor;
 
   try
     self.WhereView  := 'and portador_id = ' + QuotedStr(pPortador);
@@ -134,22 +136,56 @@ begin
 
     if self.TotalRecords = 0 then
     begin
-      self.FID            := 0;
-      self.FCODIGO        := '001';
-      self.FPERCENTUAL    := 0;
-      self.FJUROS_TEXTO   := 'Juros';
-      self.FVALOR_PARCELA := FormatFloat('#,##0.00',  pValor);
-      self.FVALOR_TOTAL   := 'Total: ' + FormatFloat('#,##0.00',  pValor);
+      self.TabelaJurossLista := TObjectList<TTabelaJurosModel>.Create;
+      self.TabelaJurossLista[0].FID            := 0;
+      self.TabelaJurossLista[0].FCODIGO        := '001';
+      self.TabelaJurossLista[0].FPERCENTUAL    := 0;
+      self.TabelaJurossLista[0].FJUROS_TEXTO   := 'Sem Juros';
+      self.TabelaJurossLista[0].FVALOR_PARCELA := FormatFloat('#,##0.00',  lTotal);
+      self.TabelaJurossLista[0].FVALOR_TOTAL   := 'Total: ' + FormatFloat('#,##0.00',  lTotal);
     end;
 
     for i := 0 to self.TabelaJurossLista.Count -1 do
     begin
-      self.FJUROS_TEXTO := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, 'Juros', 'Sem juros');
-      lJuros            := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, self.TabelaJurossLista[i].PERCENTUAL / 100 * lTotal, 0);
+      self.TabelaJurossLista[i].FJUROS_TEXTO := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, 'Juros', 'Sem juros');
+      lJuros                                 := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, self.TabelaJurossLista[i].PERCENTUAL / 100 * lTotal, 0);
 
-      self.FVALOR_TOTAL   := 'Total: ' + FormatFloat('#,##0.00',lTotal + lJuros);
-      self.FVALOR_PARCELA := (lTotal + lJuros) / StrToInt(self.TabelaJurossLista[i].CODIGO);
+      self.TabelaJurossLista[i].FVALOR_TOTAL   := 'Total: ' + FormatFloat('#,##0.00',lTotal + lJuros);
+      self.TabelaJurossLista[i].FVALOR_PARCELA := (lTotal + lJuros) / StrToInt(self.TabelaJurossLista[i].CODIGO);
     end;
+
+    with lMemTable.IndexDefs.AddIndexDef do
+    begin
+      Name := 'OrdenacaoCodigo';
+      Fields := 'CODIGO';
+      Options := [TIndexOption.ixCaseInsensitive];
+    end;
+
+    lMemTable.IndexName := 'OrdenacaoCodigo';
+
+    lMemTable.FieldDefs.Add('ID', ftInteger);
+    lMemTable.FieldDefs.Add('CODIGO', ftString, 3);
+    lMemTable.FieldDefs.Add('PERCENTUAL', ftFloat);
+    lMemTable.FieldDefs.Add('JUROS_TEXTO', ftString, 20);
+    lMemTable.FieldDefs.Add('VALOR_PARCELA', ftFloat);
+    lMemTable.FieldDefs.Add('VALOR_TOTAL', ftString, 100);
+    lMemTable.CreateDataSet;
+
+    for i := 0 to self.TabelaJurossLista.Count -1 do
+    begin
+       lMemTable.InsertRecord([
+                                self.TabelaJurossLista[i].ID,
+                                self.TabelaJurossLista[i].CODIGO,
+                                self.TabelaJurossLista[i].PERCENTUAL,
+                                self.TabelaJurossLista[i].JUROS_TEXTO,
+                                self.TabelaJurossLista[i].VALOR_PARCELA,
+                                self.TabelaJurossLista[i].VALOR_TOTAL
+                               ]);
+    end;
+
+    lMemTable.Open;
+
+    Result := lMemTable;
 
   finally
     lModel.Free;
