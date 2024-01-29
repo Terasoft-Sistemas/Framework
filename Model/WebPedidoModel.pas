@@ -353,9 +353,9 @@ type
     procedure calcularTotais;
     procedure obterTotais;
 
-    function Incluir: String;
-    function Alterar: String;
-    function Excluir: String;
+    function Incluir : String;
+    function Alterar(pID: String): TWebPedidoModel;
+    function Excluir(pID: String) : String;
 
     property WebPedidosLista: TObjectList<TWebPedidoModel> read FWebPedidosLista write SetWebPedidosLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -389,15 +389,19 @@ begin
 
 end;
 
-function TWebPedidoModel.Alterar: String;
+function TWebPedidoModel.Alterar(pID : String): TWebPedidoModel;
 var
-  lWebPedidoDao : TWebPedidoDao;
+  lWebPedidoModel : TWebPedidoModel;
 begin
-  lWebPedidoDao := TWebPedidoDao.Create(vIConexao);
+  if pID = '' then
+    CriaException('ID é obrigatório.');
+
+  lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
   try
-    Result := lWebPedidoDao.alterar(Self);
+    lWebPedidoModel := lWebPedidoModel.carregaClasse(pID);
+    lWebPedidoModel.Acao := tacAlterar;
+    Result := lWebPedidoModel;
   finally
-    lWebPedidoDao.Free;
   end;
 end;
 
@@ -562,37 +566,18 @@ begin
   inherited;
 end;
 
-function TWebPedidoModel.Excluir: String;
-var
-  lWebPedidoDao : TWebPedidoDao;
+function TWebPedidoModel.Excluir(pID: String): String;
 begin
-  lWebPedidoDao := TWebPedidoDao.Create(vIConexao);
-  try
-    Result := lWebPedidoDao.excluir(Self);
-  finally
-    lWebPedidoDao.Free;
-  end;
+  if pID = '' then
+    CriaException('ID é obrigatório.');
+
+  self.FID  := pID;
+  self.Acao := tacExcluir;
+  Result := self.Salvar;
 end;
 
 function TWebPedidoModel.Incluir: String;
-var
-  lWebPedidoDao : TWebPedidoDao;
 begin
-  lWebPedidoDao := TWebPedidoDao.Create(vIConexao);
-
-  try
-    if self.FCLIENTE_ID = '' then
-      CriaException('Cliente não informado');
-
-    if self.FVENDEDOR_ID = '' then
-      CriaException('Vendedor não informado');
-
-    if self.FPORTADOR_ID = '' then
-      CriaException('Portador não informado');
-
-    if self.FTIPOVENDA_ID = '' then
-      CriaException('TipoVenda não informado');
-
     self.FDATAHORA              := DateTimeToStr(vIConexao.DataHoraServer);
     self.FUSUARIO               := vIConexao.getUSer.ID;
     self.FSTATUS                := 'I';
@@ -600,10 +585,8 @@ begin
     self.FPARCELAS              := '001';
     self.FPRIMEIRO_VENCIMENTO   := DateToStr(vIConexao.DataServer + 30);
 
-    Result := lWebPedidoDao.incluir(Self);
-  finally
-    lWebPedidoDao.Free;
-  end;
+    self.Acao := tacIncluir;
+    self.Salvar;
 end;
 
 procedure TWebPedidoModel.obterListaVendaAssistida;
@@ -668,11 +651,18 @@ begin
 end;
 
 function TWebPedidoModel.Salvar: String;
+var
+  lWebPedidoDao : TWebPedidoDao;
 begin
-  case FAcao of
-    Terasoft.Types.tacIncluir: Result := Incluir;
-    Terasoft.Types.tacAlterar: Result := Alterar;
-    Terasoft.Types.tacExcluir: Result := Excluir;
+  lWebPedidoDao := TWebPedidoDao.Create(vIConexao);
+  try
+    case FAcao of
+      Terasoft.Types.tacIncluir: Result := lWebPedidoDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lWebPedidoDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lWebPedidoDao.excluir(Self);
+    end;
+  finally
+    lWebPedidoDao.Free;
   end;
 end;
 

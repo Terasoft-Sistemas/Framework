@@ -113,7 +113,6 @@ var
   lFinanceiroPedidoModel : TFinanceiroPedidoModel;
 begin
   lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
-
   try
     try
       lFinanceiroPedidoModel.WEB_PEDIDO_ID        := '325';
@@ -140,18 +139,25 @@ end;
 procedure TForm1.Button2Click(Sender: TObject);
 var
   lFinanceiroPedidoModel : TFinanceiroPedidoModel;
+  IDRegistro            : String;
 begin
   lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
 
   try
     try
-      lFinanceiroPedidoModel.Alterar('4');
+      IDRegistro := InputBox('FinanceiroPedido', 'Digite o ID do registro Financeiro:', '');
+
+      if IDRegistro.IsEmpty then
+        exit;
+
+      lFinanceiroPedidoModel.Alterar(IDRegistro);
       lFinanceiroPedidoModel.WEB_PEDIDO_ID := '324';
       lFinanceiroPedidoModel.PORTADOR_ID   := '000001';
-      lFinanceiroPedidoModel.VALOR_TOTAL   := '300';
+      lFinanceiroPedidoModel.VALOR_TOTAL   := '30';
       lFinanceiroPedidoModel.PARCELA       := '1';
       lFinanceiroPedidoModel.VALOR_PARCELA := '150';
       lFinanceiroPedidoModel.Salvar;
+
       ShowMessage('Alterado com sucesso!');
     except
      on E:Exception do
@@ -165,12 +171,18 @@ end;
 procedure TForm1.Button3Click(Sender: TObject);
 var
   lFinanceiroPedidoModel : TFinanceiroPedidoModel;
+  IDRegistro             : String;
 begin
   lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
 
   try
     try
-      lFinanceiroPedidoModel.Excluir('5');
+      IDRegistro := InputBox('FinanceiroPedido', 'Digite o ID do registro Financeiro para excluir:', '');
+
+      if IDRegistro.IsEmpty then
+        exit;
+
+      lFinanceiroPedidoModel.Excluir(IDRegistro);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
@@ -222,14 +234,13 @@ begin
   lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
   try
     try
-      lWebPedidoModel.Acao := tacIncluir;
 
-      lWebPedidoModel.CLIENTE_ID          := '000001';
+      lWebPedidoModel.CLIENTE_ID          := '000000';
       lWebPedidoModel.VENDEDOR_ID         := '000001';
       lWebPedidoModel.TIPOVENDA_ID        := '000004';
       lWebPedidoModel.PORTADOR_ID         := '000001';
 
-      lWebPedidoModel.Salvar;
+      lWebPedidoModel.Incluir;
       ShowMessage('Inserido com sucesso!');
     except
      on E:Exception do
@@ -243,16 +254,20 @@ end;
 procedure TForm1.Button6Click(Sender: TObject);
 var
   lWebPedidoModel : TWebPedidoModel;
+  lID             : String;
 begin
   lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
   try
     try
-      lWebPedidoModel := lWebPedidoModel.carregaClasse('329');
+      lID := InputBox('WebPedido', 'Digite o ID do WebPedido:', '');
 
-      lWebPedidoModel.Acao        := tacAlterar;
-      lWebPedidoModel.VENDEDOR_ID := '000001';
+      if lID.IsEmpty then
+        exit;
 
+      lWebPedidoModel := lWebPedidoModel.Alterar(lID);
+      lWebPedidoModel.CLIENTE_ID := '000001';
       lWebPedidoModel.Salvar;
+
       ShowMessage('Alterado com sucesso!');
     except
      on E:Exception do
@@ -266,14 +281,14 @@ end;
 procedure TForm1.Button7Click(Sender: TObject);
 var
   lWebPedidoModel : TWebPedidoModel;
+  PedidoWeb       : String;
 begin
   lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
   try
     try
-      lWebPedidoModel.Acao := tacExcluir;
-      lWebPedidoModel.ID := '333';
+      PedidoWeb := InputBox('WebPedido', 'Digite o ID do Item que deseja excluir:', '');
 
-      lWebPedidoModel.Salvar;
+      lWebPedidoModel.Excluir(PedidoWeb);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
@@ -306,7 +321,7 @@ begin
       lVenderItemParametros.DESCONTO   := '0';
 
       lWebPedidoModel.VenderItem(lVenderItemParametros);
-      ShowMessage('Vendeu item');
+      ShowMessage('Item adicionado ao WebPedido: ' +lWebPedido);
     except
     on E:Exception do
        ShowMessage('Erro vender item: ' + E.Message);
@@ -355,24 +370,20 @@ end;
 
 procedure TForm1.Button10Click(Sender: TObject);
 var
-  lWebPedidoModel      : TWebPedidoModel;
   lWebPedidoItensModel : TWebPedidoItensModel;
-  lID                  : String;
+  ID                  : String;
 begin
   lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
   try
     try
+      ID := InputBox('WebPedido', 'Digite o ID que deseja alterar:', '');
 
-      lID := InputBox('WebPedido', 'Digite o ID para alterar o item:', '');
-      if lID.IsEmpty then
+      if ID.IsEmpty then
         exit;
 
-      lWebPedidoItensModel := lWebPedidoItensModel.carregaClasse(lID);
-
-      lWebPedidoItensModel.Acao           := tacAlterar;
-      lWebPedidoItensModel.ID             := lID;
-      lWebPedidoItensModel.QUANTIDADE     := '50';
-
+      lWebPedidoItensModel := lWebPedidoItensModel.Alterar(ID);
+      lWebPedidoItensModel.PRODUTO_ID := '000001';
+      lWebPedidoItensModel.QUANTIDADE := '25';
       lWebPedidoItensModel.Salvar;
 
       ShowMessage('Alterado o item com sucesso!');
@@ -395,12 +406,11 @@ begin
 
   try
     try
-      lNumeroItem := InputBox('WebPedido', 'Digite o ID do Item:', '');
+      lNumeroItem := InputBox('WebPedido', 'Digite o ID que deseja excluir:', '');
 
-      lWebPedidoItensModel.Acao := tacExcluir;
       lWebPedidoItensModel.ID := lNumeroItem;
+      lWebPedidoItensModel.Excluir(lNumeroItem);
 
-      lWebPedidoItensModel.Salvar;
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do

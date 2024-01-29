@@ -240,9 +240,9 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function Incluir  : String;
-    function Alterar  : String;
-    Function Excluir  : String;
+    function Incluir: String;
+    function Alterar(pID : String): TWebPedidoItensModel;
+    Function Excluir (pID : String) : String;
 
     function Salvar   : String;
 
@@ -273,32 +273,38 @@ uses
 { TWebPedidoItensModel }
 
 function TWebPedidoItensModel.Incluir: String;
-var
-  lWebPedidoItensDao : TWebPedidoItensDao;
+
 begin
-  lWebPedidoItensDao := TWebPedidoItensDao.Create(vIConexao);
+  self.Acao := tacIncluir;
+  self.Salvar;
+end;
+
+function TWebPedidoItensModel.Alterar(pID : String): TWebPedidoItensModel;
+var
+  lWebPedidoItensModel : TWebPedidoItensModel;
+begin
+  if pID = '' then
+    CriaException('ID é obrigatório.');
+
+    lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
   try
-
-    if self.FPRODUTO_ID = '' then
-      CriaException('Produto não informado');
-
-    if self.FQUANTIDADE = '' then
-      CriaException('Quantidade não informado');
-
+    lWebPedidoItensModel := lWebPedidoItensModel.carregaClasse(pID);
+    lWebPedidoItensModel.Acao := tacAlterar;
+    Result := lWebPedidoItensModel;
   finally
-    lWebPedidoItensDao.Free
   end;
 end;
 
-function TWebPedidoItensModel.Alterar: String;
+function TWebPedidoItensModel.Excluir(pID : String): String;
 begin
+  if pID = '' then
+    CriaException('ID é obrigatório.');
 
+  self.FID  := pID;
+  self.Acao := tacExcluir;
+  Result := self.Salvar;
 end;
 
-function TWebPedidoItensModel.Excluir: String;
-begin
-
-end;
 function TWebPedidoItensModel.carregaClasse(pId: String): TWebPedidoItensModel;
 var
   lWebPedidoItensDao: TWebPedidoItensDao;
