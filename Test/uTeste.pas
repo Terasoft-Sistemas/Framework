@@ -318,10 +318,11 @@ begin
       if lWebPedido.IsEmpty then
         exit;
 
-      lVenderItemParametros.WEB_PEDIDO := lWebPedido;
-      lVenderItemParametros.PRODUTO    := '000005';
-      lVenderItemParametros.QUANTIDADE := '10';
-      lVenderItemParametros.DESCONTO   := '0';
+      lVenderItemParametros.WEB_PEDIDO       := lWebPedido;
+      lVenderItemParametros.PRODUTO          := '000005';
+      lVenderItemParametros.QUANTIDADE       := '10';
+      lVenderItemParametros.DESCONTO         := '0';
+      lVenderItemParametros.VALOR_UNITARIO   := '0';
 
       lWebPedidoModel.VenderItem(lVenderItemParametros);
       ShowMessage('Item adicionado ao WebPedido: ' +lWebPedido);
