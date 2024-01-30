@@ -39,6 +39,7 @@ type
     btnTotais: TButton;
     btnSaldo: TButton;
     Button12: TButton;
+    Button13: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -57,6 +58,7 @@ type
     procedure btnTotaisClick(Sender: TObject);
     procedure btnSaldoClick(Sender: TObject);
     procedure Button12Click(Sender: TObject);
+    procedure Button13Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -81,7 +83,7 @@ uses
   FireDAC.Comp.Client,
   WebPedidoItensModel,
   TabelaJurosModel,
-  SaldoModel, EmpresaModel;
+  SaldoModel, EmpresaModel, ProdutosModel;
 
 {$R *.dfm}
 
@@ -397,8 +399,9 @@ begin
 
     lMemTable := lSaldoModel.obterSaldoLojas(lParametros);
 
-    lMemTable.First;
+    memoResultado.Lines.Clear;
 
+    lMemTable.First;
     while not lMemTable.Eof do
     begin
       memoResultado.Lines.Add('CD: '+lMemTable.FieldByName('CD').AsString);
@@ -530,8 +533,9 @@ begin
 
     lMemTable := lSaldoModel.obterSaldo(lProduto);
 
-    lMemTable.First;
+    memoResultado.Lines.Clear;
 
+    lMemTable.First;
     while not lMemTable.Eof do
     begin
       memoResultado.Lines.Add('SALDO_FISICO: '+lMemTable.FieldByName('SALDO_FISICO').AsString);
@@ -543,6 +547,31 @@ begin
 
   finally
     lSaldoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button13Click(Sender: TObject);
+var
+  lProdutoModel : TProdutosModel;
+  lProduto : String;
+  lParametros: TProdutoPreco;
+  lValor : Double;
+begin
+  lProdutoModel := TProdutosModel.Create(vIConexao);
+  try
+     lProduto  := InputBox('Consulta de Saldo', 'Digite o código do produto:', '');
+
+     lParametros.Produto     := lProduto;
+     lParametros.TabelaPreco := true;
+     lParametros.Promocao    := true;
+
+     lValor := lProdutoModel.ValorUnitario(lParametros);
+
+     memoResultado.Lines.Clear;
+     memoResultado.Lines.Add('VALOR DE VENDA: '+ lValor.ToString);
+     memoResultado.Lines.Add('===============================================');
+  finally
+    lProdutoModel.Free;
   end;
 end;
 

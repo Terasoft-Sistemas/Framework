@@ -628,6 +628,7 @@ begin
     lQry.Free;
   end;
 end;
+
 function TProdutosDao.valorVenda(pIdProduto: String): Variant;
 var
   lConexao: TFDConnection;
