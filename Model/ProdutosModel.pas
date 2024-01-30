@@ -831,9 +831,12 @@ type
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
-
-    function Salvar: String;
     procedure obterLista;
+
+    function Incluir  : String;
+    function Alterar(pID : String) : TProdutosModel;
+    function Excluir(pID : String) : String;
+    function Salvar   : String;
     function obterListaMemTable : TFDMemTable;
     function obterCodigoBarras(pIdProduto: String): String;
     function obterSaldo(pIdProduto: String): Double;
@@ -872,6 +875,30 @@ begin
     lProdutoDao.Free;
   end;
 end;
+
+function TProdutosModel.Alterar(pID: String): TProdutosModel;
+var
+  lProdutosModel : TProdutosModel;
+begin
+  lProdutosModel      := lProdutosModel.carregaClasse(pID);
+  lProdutosModel.Acao := tacAlterar;
+  Result              := lProdutosModel;
+
+end;
+
+function TProdutosModel.Excluir(pID: String): String;
+begin
+  self.FID  := pID;
+  self.Acao := tacExcluir;
+  Result    := self.Salvar;
+end;
+
+function TProdutosModel.Incluir: String;
+begin
+  self.Acao := tacIncluir;
+  self.Salvar;
+end;
+
 function TProdutosModel.carregaClasse(pId: String): TProdutosModel;
 var
   lProdutosDao: TProdutosDao;
@@ -891,6 +918,7 @@ destructor TProdutosModel.Destroy;
 begin
   inherited;
 end;
+
 function TProdutosModel.obterCodigoBarras(pIdProduto: String): String;
 var
   lProdutosDao: TProdutosDao;

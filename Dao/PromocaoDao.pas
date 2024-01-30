@@ -61,7 +61,7 @@ type
     function incluir(pPromocaoModel: TPromocaoModel): String;
     function alterar(pPromocaoModel: TPromocaoModel): String;
     function excluir(pPromocaoModel: TPromocaoModel): String;
-
+    function carregaClasse(pID : String) : TPromocaoModel;
     procedure obterLista;
 
 end;
@@ -72,6 +72,49 @@ uses
   System.Rtti;
 
 { TPromocao }
+
+function TPromocaoDao.carregaClasse(pID: String): TPromocaoModel;
+var
+  lQry: TFDQuery;
+  lModel: TPromocaoModel;
+begin
+  lQry     := vIConexao.CriarQuery;
+  lModel   := TPromocaoModel.Create(vIConexao);
+  Result   := lModel;
+
+  try
+    lQry.Open('select * from PROMOCAO where ID = ' + ID);
+
+    if lQry.IsEmpty then
+      Exit;
+
+    lModel.ID               := lQry.FieldByName('ID').AsString;
+    lModel.DESCRICAO        := lQry.FieldByName('DESCRICAO').AsString;
+    lModel.DATA             := lQry.FieldByName('DATA').AsString;
+    lModel.DATAINICIO       := lQry.FieldByName('DATAINICIO').AsString;
+    lModel.DATAFIM          := lQry.FieldByName('DATAFIM').AsString;
+    lModel.CLIENTE_ID       := lQry.FieldByName('CLIENTE_ID').AsString;
+    lModel.PRECO_VENDA_ID   := lQry.FieldByName('PRECO_VENDA_ID').AsString;
+    lModel.HORAINICIO       := lQry.FieldByName('HORAINICIO').AsString;
+    lModel.HORAFIM          := lQry.FieldByName('HORAFIM').AsString;
+    lModel.DOMINGO          := lQry.FieldByName('DOMINGO').AsString;
+    lModel.SEGUNDA          := lQry.FieldByName('SEGUNDA').AsString;
+    lModel.TERCA            := lQry.FieldByName('TERCA').AsString;
+    lModel.QUARTA           := lQry.FieldByName('QUARTA').AsString;
+    lModel.QUINTA           := lQry.FieldByName('QUINTA').AsString;
+    lModel.SEXTA            := lQry.FieldByName('SEXTA').AsString;
+    lModel.SABADO           := lQry.FieldByName('SABADO').AsString;
+    lModel.PORTADOR_ID      := lQry.FieldByName('PORTADOR_ID').AsString;
+    lModel.LOJA             := lQry.FieldByName('LOJA').AsString;
+    lModel.TIPO_ABATIMENTO  := lQry.FieldByName('TIPO_ABATIMENTO').AsString;
+    lModel.SYSTIME          := lQry.FieldByName('SYSTIME').AsString;
+
+    Result := lModel;
+
+  finally
+    lQry.Free;
+  end;
+end;
 
 constructor TPromocaoDao.Create(pIConexao : IConexao);
 begin

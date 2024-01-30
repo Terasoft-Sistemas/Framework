@@ -55,6 +55,7 @@ type
     function incluir(pPrecoVendaProdutoModel: TPrecoVendaProdutoModel): String;
     function alterar(pPrecoVendaProdutoModel: TPrecoVendaProdutoModel): String;
     function excluir(pPrecoVendaProdutoModel: TPrecoVendaProdutoModel): String;
+    function carregaClasse(pID : String) : TPrecoVendaProdutoModel;
 	
     procedure obterLista;
 end;
@@ -63,6 +64,34 @@ implementation
 uses
   System.Rtti;
 { TPrecoVendaProduto }
+function TPrecoVendaProdutoDao.carregaClasse(pID: String): TPrecoVendaProdutoModel;
+var
+  lQry: TFDQuery;
+  lModel: TPrecoVendaProdutoModel;
+begin
+  lQry     := vIConexao.CriarQuery;
+  lModel   := TPrecoVendaProdutoModel.Create(vIConexao);
+  Result   := lModel;
+
+  try
+    lQry.Open('select * from PRECO_VENDA_PRODUTO where ID = ' + ID);
+
+    if lQry.IsEmpty then
+      Exit;
+
+    lModel.ID               := lQry.FieldByName('ID').AsString;
+    lModel.PRECO_VENDA_ID   := lQry.FieldByName('PRECO_VENDA_ID').AsString;
+    lModel.PRODUTO_ID       := lQry.FieldByName('PRODUTO_ID').AsString;
+    lModel.VALOR_VENDA      := lQry.FieldByName('VALOR_VENDA').AsString;
+    lModel.SYSTIME          := lQry.FieldByName('SYSTIME').AsString;
+
+    Result := lModel;
+
+  finally
+    lQry.Free;
+  end;
+end;
+
 constructor TPrecoVendaProdutoDao.Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;

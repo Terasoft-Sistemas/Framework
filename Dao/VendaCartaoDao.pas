@@ -62,7 +62,9 @@ type
     function incluir(AVendaCartaoModel: TVendaCartaoModel): String;
     function alterar(AVendaCartaoModel: TVendaCartaoModel): String;
     function excluir(AVendaCartaoModel: TVendaCartaoModel): String;
-	
+
+    function carregaClasse(pID : String) : TVendaCartaoModel;
+
     procedure obterLista;
 
 end;
@@ -73,6 +75,49 @@ uses
   System.Rtti;
 
 { TVendaCartao }
+
+function TVendaCartaoDao.carregaClasse(pID: String): TVendaCartaoModel;
+var
+  lQry: TFDQuery;
+  lModel: TVendaCartaoModel;
+begin
+  lQry     := vIConexao.CriarQuery;
+  lModel   := TVendaCartaoModel.Create(vIConexao);
+  Result   := lModel;
+
+  try
+    lQry.Open('select * from VENDACARTAO where ID = '+pId);
+
+    if lQry.IsEmpty then
+      Exit;
+
+    lModel.ID                   := lQry.FieldByName('ID').AsString;
+    lModel.NUMERO_CAR           := lQry.FieldByName('NUMERO_CAR').AsString;
+    lModel.AUTORIZACAO_CAR      := lQry.FieldByName('AUTORIZACAO_CAR').AsString;
+    lModel.PARCELA_CAR          := lQry.FieldByName('PARCELA_CAR').AsString;
+    lModel.PARCELAS_CAR         := lQry.FieldByName('PARCELAS_CAR').AsString;
+    lModel.VALOR_CAR            := lQry.FieldByName('VALOR_CAR').AsString;
+    lModel.CODIGO_CLI           := lQry.FieldByName('CODIGO_CLI').AsString;
+    lModel.ADM_CAR              := lQry.FieldByName('ADM_CAR').AsString;
+    lModel.VENDA_CAR            := lQry.FieldByName('VENDA_CAR').AsString;
+    lModel.PARCELADO_CAR        := lQry.FieldByName('PARCELADO_CAR').AsString;
+    lModel.VENCIMENTO_CAR       := lQry.FieldByName('VENCIMENTO_CAR').AsString;
+    lModel.NUMERO_VENDA         := lQry.FieldByName('NUMERO_VENDA').AsString;
+    lModel.LOJA                 := lQry.FieldByName('LOJA').AsString;
+    lModel.NUMERO_OS            := lQry.FieldByName('NUMERO_OS').AsString;
+    lModel.FATURA_ID            := lQry.FieldByName('FATURA_ID').AsString;
+    lModel.CANCELAMENTO_DATA    := lQry.FieldByName('CANCELAMENTO_DATA').AsString;
+    lModel.CANCELAMENTO_CODIGO  := lQry.FieldByName('CANCELAMENTO_CODIGO').AsString;
+    lModel.SYSTIME              := lQry.FieldByName('SYSTIME').AsString;
+    lModel.TAXA                 := lQry.FieldByName('TAXA').AsString;
+    lModel.PARCELA_TEF          := lQry.FieldByName('PARCELA_TEF').AsString;
+    lModel.PARCELAS_TEF         := lQry.FieldByName('PARCELAS_TEF').AsString;
+
+    Result := lModel;
+  finally
+    lQry.Free;
+  end;
+end;
 
 constructor TVendaCartaoDao.Create(pIConexao : IConexao);
 begin

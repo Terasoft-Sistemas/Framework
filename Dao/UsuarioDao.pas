@@ -94,7 +94,7 @@ begin
   Result   := lModel;
 
   try
-    lQry.Open('select * from Usuario where id = ' + ID);
+    lQry.Open('select * from USUARIO where ID = ' + ID);
 
     if lQry.IsEmpty then
       Exit;

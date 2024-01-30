@@ -56,7 +56,7 @@ type
     function incluir(pPrecoVendaModel: TPrecoVendaModel): String;
     function alterar(pPrecoVendaModel: TPrecoVendaModel): String;
     function excluir(pPrecoVendaModel: TPrecoVendaModel): String;
-	
+	  function carregaClasse(pID : String) : TPrecoVendaModel;
     procedure obterLista;
 end;
 implementation
@@ -64,6 +64,38 @@ implementation
 uses
   System.Rtti;
 { TPrecoVenda }
+function TPrecoVendaDao.carregaClasse(pID: String): TPrecoVendaModel;
+var
+  lQry: TFDQuery;
+  lModel: TPrecoVendaModel;
+begin
+  lQry     := vIConexao.CriarQuery;
+  lModel   := TPrecoVendaModel.Create(vIConexao);
+  Result   := lModel;
+
+  try
+    lQry.Open('select * from PRECO_VENDA where ID = ' + ID);
+
+    if lQry.IsEmpty then
+      Exit;
+
+    lModel.ID                   := lQry.FieldByName('ID').AsString;
+    lModel.NOME                 := lQry.FieldByName('NOME').AsString;
+    lModel.ACRESCIMO_DESCONTO   := lQry.FieldByName('ACRESCIMO_DESCONTO').AsString;
+    lModel.PERCENTUAL           := lQry.FieldByName('PERCENTUAL').AsString;
+    lModel.STATUS               := lQry.FieldByName('STATUS').AsString;
+    lModel.SYSTIME              := lQry.FieldByName('SYSTIME').AsString;
+    lModel.TIPO_CUSTO           := lQry.FieldByName('TIPO_CUSTO').AsString;
+    lModel.CONDICOES            := lQry.FieldByName('CONDICOES').AsString;
+    lModel.PRODUTOS_IGNORAR     := lQry.FieldByName('PRODUTOS_IGNORAR').AsString;
+
+    Result := lModel;
+
+  finally
+    lQry.Free;
+  end;
+end;
+
 constructor TPrecoVendaDao.Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;

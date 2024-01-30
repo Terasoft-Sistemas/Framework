@@ -147,11 +147,14 @@ type
 
     function vendedorUsuario(pIdUsuario: String): String;
     function nomeUsuario(pIdUsuario: String): String;
-
     function carregaClasse(ID: String): TUsuarioModel;
-    procedure obterLista;
-    function Salvar: String;
+    function Incluir     : String;
+    function Alterar(pID : String) : TUsuarioModel;
+    function Excluir(pID : String) : String;
+    function Salvar      : String;
     function validaLogin(user,pass: String): Boolean;
+
+    procedure obterLista;
   end;
 
 implementation
@@ -160,15 +163,42 @@ uses UsuarioDao;
 
 { TUsuarioModel }
 
+function TUsuarioModel.Alterar(pID: String): TUsuarioModel;
+var
+  lUsuarioModel : TUsuarioModel;
+begin
+  lUsuarioModel := lUsuarioModel.Create(vIConexao);
+  try
+    lUsuarioModel       := lUsuarioModel.carregaClasse(pID);
+    lUsuarioModel.Acao  := tacAlterar;
+    Result              := lUsuarioModel;
+  finally
+
+  end;
+end;
+
+function TUsuarioModel.Excluir(pID: String): String;
+begin
+  self.FID  := pID;
+  self.Acao := tacExcluir;
+  Result    := self.Salvar;
+end;
+
+function TUsuarioModel.Incluir: String;
+begin
+  self.Acao := tacIncluir;
+  self.Salvar;
+end;
+
 function TUsuarioModel.carregaClasse(ID: String): TUsuarioModel;
 var
-  lUsuarioLista: TUsuarioDao;
+  lUsuarioModel: TUsuarioDao;
 begin
-  lUsuarioLista := TUsuarioDao.Create(vIConexao);
+  lUsuarioModel := TUsuarioDao.Create(vIConexao);
   try
-    Result := lUsuarioLista.carregaClasse(ID);
+    Result := lUsuarioModel.carregaClasse(ID);
   finally
-    lUsuarioLista.Free;
+    lUsuarioModel.Free;
   end;
 end;
 

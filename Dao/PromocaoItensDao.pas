@@ -54,7 +54,7 @@ type
     function incluir(pPromocaoItensModel: TPromocaoItensModel): String;
     function alterar(pPromocaoItensModel: TPromocaoItensModel): String;
     function excluir(pPromocaoItensModel: TPromocaoItensModel): String;
-
+    function carregaClasse(pID : String) : TPromocaoItensModel;
     procedure obterLista;
 end;
 implementation
@@ -62,6 +62,35 @@ implementation
 uses
   System.Rtti;
 { TPromocaoItens }
+function TPromocaoItensDao.carregaClasse(pID: String): TPromocaoItensModel;
+var
+  lQry: TFDQuery;
+  lModel: TPromocaoItensModel;
+begin
+  lQry     := vIConexao.CriarQuery;
+  lModel   := TPromocaoItensModel.Create(vIConexao);
+  Result   := lModel;
+
+  try
+    lQry.Open('select * from PROMOCAOITENS where ID = ' + ID);
+
+    if lQry.IsEmpty then
+      Exit;
+
+    lModel.ID               := lQry.FieldByName('ID').AsString;
+    lModel.PROMOCAO_ID      := lQry.FieldByName('PROMOCAO_ID').AsString;
+    lModel.PRODUTO_ID       := lQry.FieldByName('PRODUTO_ID').AsString;
+    lModel.VALOR_PROMOCAO   := lQry.FieldByName('VALOR_PROMOCAO').AsString;
+    lModel.SALDO            := lQry.FieldByName('SALDO').AsString;
+    lModel.SYSTIME          := lQry.FieldByName('SYSTIME').AsString;
+
+    Result := lModel;
+
+  finally
+    lQry.Free;
+  end;
+end;
+
 constructor TPromocaoItensDao.Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;

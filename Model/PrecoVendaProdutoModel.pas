@@ -50,7 +50,11 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function Salvar: String;
+    function Incluir : String;
+    function Alterar(pID : String) : TPrecoVendaProdutoModel;
+    function Excluir(pID : String) : String;
+    function Salvar  : String;
+    function carregaClasse(pID : String) : TPrecoVendaProdutoModel;
     procedure obterLista;
 
     property PrecoVendaProdutosLista: TObjectList<TPrecoVendaProdutoModel> read FPrecoVendaProdutosLista write SetPrecoVendaProdutosLista;
@@ -72,6 +76,32 @@ uses
 
 { TPrecoVendaProdutoModel }
 
+function TPrecoVendaProdutoModel.Alterar(pID: String): TPrecoVendaProdutoModel;
+var
+  lPrecoVendaProdutoModel : TPrecoVendaProdutoModel;
+begin
+  lPrecoVendaProdutoModel := lPrecoVendaProdutoModel.Create(vIConexao);
+  try
+    lPrecoVendaProdutoModel       := lPrecoVendaProdutoModel.carregaClasse(pID);
+    lPrecoVendaProdutoModel.Acao  := tacAlterar;
+    Result                        := lPrecoVendaProdutoModel;
+  finally
+
+  end;
+end;
+
+function TPrecoVendaProdutoModel.carregaClasse(pID: String): TPrecoVendaProdutoModel;
+var
+  lPrecoVendaProdutoModel: TPrecoVendaProdutoDao;
+begin
+  lPrecoVendaProdutoModel := TPrecoVendaProdutoDao.Create(vIConexao);
+  try
+    Result := lPrecoVendaProdutoModel.carregaClasse(ID);
+  finally
+    lPrecoVendaProdutoModel.Free;
+  end;
+end;
+
 constructor TPrecoVendaProdutoModel.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
@@ -81,6 +111,19 @@ destructor TPrecoVendaProdutoModel.Destroy;
 begin
 
   inherited;
+end;
+
+function TPrecoVendaProdutoModel.Excluir(pID: String): String;
+begin
+  self.FID  := pID;
+  self.Acao := tacExcluir;
+  Result    := self.Salvar;
+end;
+
+function TPrecoVendaProdutoModel.Incluir: String;
+begin
+  self.Acao := tacIncluir;
+  self.Salvar;
 end;
 
 procedure TPrecoVendaProdutoModel.obterLista;

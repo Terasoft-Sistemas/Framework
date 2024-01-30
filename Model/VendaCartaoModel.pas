@@ -98,7 +98,11 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    function Incluir: String;
+    function Alterar(pID : String) : TVendaCartaoModel;
+    function Excluir(pID : String) : String;
     function Salvar: String;
+    function carregaClasse(pID: String): TVendaCartaoModel;
     procedure obterLista;
 
     property VendaCartaosLista: TObjectList<TVendaCartaoModel> read FVendaCartaosLista write SetVendaCartaosLista;
@@ -119,6 +123,45 @@ uses
   VendaCartaoDao;
 
 { TVendaCartaoModel }
+
+function TVendaCartaoModel.Alterar(pID: String): TVendaCartaoModel;
+var
+  lVendaCartaoModel : TVendaCartaoModel;
+begin
+  lVendaCartaoModel := lVendaCartaoModel.Create(vIConexao);
+  try
+    lVendaCartaoModel       := lVendaCartaoModel.carregaClasse(pID);
+    lVendaCartaoModel.Acao  := tacAlterar;
+    Result                  := lVendaCartaoModel;
+  finally
+
+  end;
+end;
+
+function TVendaCartaoModel.Excluir(pID: String): String;
+begin
+  self.FID  := pID;
+  self.Acao := tacExcluir;
+  Result    := self.Salvar;
+end;
+
+function TVendaCartaoModel.Incluir: String;
+begin
+  self.Acao := tacIncluir;
+  self.Salvar;
+end;
+
+function TVendaCartaoModel.carregaClasse(pID: String): TVendaCartaoModel;
+var
+  lVendaCartaoDao: TVendaCartaoDao;
+begin
+  lVendaCartaoDao := TVendaCartaoDao.Create(vIConexao);
+  try
+    Result  := lVendaCartaoDao.carregaClasse(pId);
+  finally
+    lVendaCartaoDao.Free;
+  end;
+end;
 
 constructor TVendaCartaoModel.Create(pIConexao : IConexao);
 begin

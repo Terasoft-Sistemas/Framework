@@ -80,7 +80,7 @@ begin
   lModel   := TProdutosModel.Create(vIConexao);
   Result   := lModel;
   try
-    lQry.Open('select * from produto where codigo_pro = '+ QuotedStr(pId));
+    lQry.Open('select * from PRODUTO where CODIGO_PRO = '+ QuotedStr(pId));
     if lQry.IsEmpty then
       Exit;
     lModel.UUID                             := lQry.FieldByName('UUID').AsString;

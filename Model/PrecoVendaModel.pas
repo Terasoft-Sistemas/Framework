@@ -62,6 +62,10 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    function Incluir: String;
+    function Alterar(pID : String) : TPrecoVendaModel;
+    function Excluir(pID : String) : String;
+    function carregaClasse(pID : String) : TPrecoVendaModel;
     function Salvar: String;
     procedure obterLista;
 
@@ -83,6 +87,45 @@ uses
   PrecoVendaDao;
 
 { TPrecoVendaModel }
+
+function TPrecoVendaModel.Alterar(pID: String): TPrecoVendaModel;
+var
+  lPrecoVendaModel : TPrecoVendaModel;
+begin
+  lPrecoVendaModel := lPrecoVendaModel.Create(vIConexao);
+  try
+    lPrecoVendaModel      := lPrecoVendaModel.carregaClasse(pID);
+    lPrecoVendaModel.Acao := tacAlterar;
+    Result                := lPrecoVendaModel;
+  finally
+
+  end;
+end;
+
+function TPrecoVendaModel.Excluir(pID: String): String;
+begin
+  self.FID  := pID;
+  self.Acao := tacExcluir;
+  Result    := self.Salvar;
+end;
+
+function TPrecoVendaModel.Incluir: String;
+begin
+  self.Acao := tacIncluir;
+  self.Salvar;
+end;
+
+function TPrecoVendaModel.carregaClasse(pID: String): TPrecoVendaModel;
+var
+  lPrecoVendaModel: TPrecoVendaDao;
+begin
+  lPrecoVendaModel := TPrecoVendaDao.Create(vIConexao);
+  try
+    Result := lPrecoVendaModel.carregaClasse(ID);
+  finally
+    lPrecoVendaModel.Free;
+  end;
+end;
 
 constructor TPrecoVendaModel.Create(pIConexao : IConexao);
 begin

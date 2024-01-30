@@ -59,7 +59,11 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    function Incluir: String;
+    function Alterar(pID : String) : TPromocaoItensModel;
+    function Excluir(pID : String) : String;
     function Salvar: String;
+    function carregaClasse(pID : String) : TPromocaoItensModel;
     procedure obterLista;
 
     property PromocaoItenssLista: TObjectList<TPromocaoItensModel> read FPromocaoItenssLista write SetPromocaoItenssLista;
@@ -80,6 +84,45 @@ uses
   PromocaoItensDao;
 
 { TPromocaoItensModel }
+
+function TPromocaoItensModel.Alterar(pID: String): TPromocaoItensModel;
+var
+  lPromocaoItensModel: TPromocaoItensModel;
+begin
+  lPromocaoItensModel := lPromocaoItensModel.Create(vIConexao);
+  try
+    lPromocaoItensModel       := lPromocaoItensModel.carregaClasse(pID);
+    lPromocaoItensModel.Acao  := tacAlterar;
+    Result                    := lPromocaoItensModel;
+  finally
+
+  end;
+end;
+
+function TPromocaoItensModel.Excluir(pID: String): String;
+begin
+  self.Fid  := pID;
+  self.Acao := tacExcluir;
+  Result    := self.Salvar;
+end;
+
+function TPromocaoItensModel.Incluir: String;
+begin
+  self.Acao := tacIncluir;
+  self.Salvar;
+end;
+
+function TPromocaoItensModel.carregaClasse(pID: String): TPromocaoItensModel;
+var
+  lPromocaoItensModel: TPromocaoItensDao;
+begin
+  lPromocaoItensModel := TPromocaoItensDao.Create(vIConexao);
+  try
+    Result := lPromocaoItensModel.carregaClasse(ID);
+  finally
+    lPromocaoItensModel.Free;
+  end;
+end;
 
 constructor TPromocaoItensModel.Create(pIConexao : IConexao);
 begin
