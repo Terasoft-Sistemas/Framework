@@ -13,23 +13,23 @@ interface
         vUser : TUsuario;
         vEmpresa : TEmpresa;
 
-        function criarQuery                              : TFDQuery;
-        function criaConexao                             : IConexao;
-        function ConfigConexao                           : Boolean;
-        function criarQueryExterna                       : TFDQuery;
-        function ConfigConexaoExterna(pLoja: String)     : Boolean;
-        function Generetor(pValue: String)               : String;
-        function getConnection                           : TFDConnection;
-        function getLojaConectada                        : String;
-        function DataServer                              : TDate;
-        function HoraServer                              : TTime;
-        function DataHoraServer                          : TDateTime;
+        function criarQuery                                                : TFDQuery;
+        function criaConexao                                               : IConexao;
+        function ConfigConexao                                             : Boolean;
+        function criarQueryExterna                                         : TFDQuery;
+        function ConfigConexaoExterna(pLoja: String; pHost : String = '')  : Boolean;
+        function Generetor(pValue: String)                                 : String;
+        function getConnection                                             : TFDConnection;
+        function getLojaConectada                                          : String;
+        function DataServer                                                : TDate;
+        function HoraServer                                                : TTime;
+        function DataHoraServer                                            : TDateTime;
 
-        function getUSer                                 : TUsuario;
-        function setUser(pUser : TUsuario)               : Boolean;
+        function getUSer                                                   : TUsuario;
+        function setUser(pUser : TUsuario)                                 : Boolean;
 
-        function setEmpresa(pEmpresa: TEmpresa)          : Boolean;
-        function getEmpresa                              : TEmpresa;
+        function setEmpresa(pEmpresa: TEmpresa)                            : Boolean;
+        function getEmpresa                                                : TEmpresa;
 
         procedure setContext(pUsuario: String);
       public
@@ -43,7 +43,9 @@ interface
 implementation
 
 uses
-  uTeste, LojasModel;
+  uTeste,
+  System.SysUtils,
+  LojasModel;
 
 { TControllersConexao }
 
@@ -52,19 +54,43 @@ begin
 
 end;
 
-function TControllersConexao.ConfigConexaoExterna(pLoja: String): Boolean;
+function TControllersConexao.ConfigConexaoExterna(pLoja: String; pHost : String = ''): Boolean;
 var
   lLojaModel : TLojasModel;
+  lServer,
+  lPort,
+  lDataBase  : String;
+  lPosInicial,
+  lPosFinal  : Integer;
+
 begin
   lLojaModel := TLojasModel.Create(Form1.vIConexao);
 
   try
-    lLojaModel.LojaView := pLoja;
-    lLojaModel.obterLista;
+    if pHost <> '' then
+    begin
+      lServer   := Copy(pHost, 1, pos('/', pHost) -1);
 
-    lLojaModel := lLojaModel.LojassLista[0];
+      lPosInicial := pos('/', pHost) + 1;
+      lPosFinal   := pos(':', pHost);
+      lPort       := Copy(pHost, lPosInicial, lPosFinal - lPosInicial);
 
-    Form1.vConexao.ConfigConexaoExterna(lLojaModel.SERVER, lLojaModel.PORT, lLojaModel.DATABASE);
+      lDataBase := Copy(pHost, pos(':', pHost) + 1, pHost.Length);
+      lDataBase := StringReplace(lDataBase, '\\', '\', [rfReplaceAll]);
+    end
+    else
+    begin
+      lLojaModel.LojaView := pLoja;
+      lLojaModel.obterLista;
+
+      lLojaModel := lLojaModel.LojassLista[0];
+
+      lServer   := lLojaModel.SERVER;
+      lPort     := lLojaModel.PORT;
+      lDataBase := lLojaModel.DATABASE;
+    end;
+
+    Form1.vConexao.ConfigConexaoExterna(lServer, lPort, lDataBase);
 
     Result := True;
     vLoja  := pLoja;

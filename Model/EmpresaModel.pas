@@ -37,6 +37,7 @@ type
     FJUROS_BOL: Variant;
     FLOJA: Variant;
     FLIMITE_ATRASO: Variant;
+    FSTRING_CONEXAO_RESERVA: Variant;
     procedure SetBAIRRO(const Value: Variant);
     procedure SetCEP(const Value: Variant);
     procedure SetCIDADE(const Value: Variant);
@@ -63,34 +64,36 @@ type
     procedure SetJUROS_BOL(const Value: Variant);
     procedure SetLOJA(const Value: Variant);
     procedure SetLIMITE_ATRASO(const Value: Variant);
+    procedure SetSTRING_CONEXAO_RESERVA(const Value: Variant);
   public
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property ID                  :Variant read FID write SetID;
-    property SYSTIME             :Variant read FSYSTIME write SetSYSTIME;
-    property CODIGO              :Variant read FCODIGO write SetCODIGO;
-    property FANTASIA            :Variant read FFANTASIA write SetFANTASIA;
-    property RAZAO_SOCIAL        :Variant read FRAZAO_SOCIAL write SetRAZAO_SOCIAL;
-    property CNPJ                :Variant read FCNPJ write SetCNPJ;
-    property INSCRICAO_ESTADUAL  :Variant read FINSCRICAO_ESTADUAL write SetINSCRICAO_ESTADUAL;
-    property INSCRICAO_MUNICIPAL :Variant read FINSCRICAO_MUNICIPAL write SetINSCRICAO_MUNICIPAL;
-    property ENDERECO            :Variant read FENDERECO write SetENDERECO;
-    property BAIRRO              :Variant read FBAIRRO write SetBAIRRO;
-    property CIDADE              :Variant read FCIDADE write SetCIDADE;
-    property UF                  :Variant read FUF write SetUF;
-    property NUMERO              :Variant read FNUMERO write SetNUMERO;
-    property COMPLEMENTO         :Variant read FCOMPLEMENTO write SetCOMPLEMENTO;
-    property CODIGO_MUNUCIPIO    :Variant read FCODIGO_MUNUCIPIO write SetCODIGO_MUNUCIPIO;
-    property TELEFONE            :Variant read FTELEFONE write SetTELEFONE;
-    property CONTATO             :Variant read FCONTATO write SetCONTATO;
-    property EMAIL               :Variant read FEMAIL write SetEMAIL;
-    property URL                 :Variant read FURL write SetURL;
-    property CEP                 :Variant read FCEP write SetCEP;
-    property REGIME_TRIBUTARIO   :Variant read FREGIME_TRIBUTARIO write SetREGIME_TRIBUTARIO;
-    property JUROS_BOL           :Variant read FJUROS_BOL write SetJUROS_BOL;
-    property LOJA                :Variant read FLOJA write SetLOJA;
-    property LIMITE_ATRASO       :Variant read FLIMITE_ATRASO write SetLIMITE_ATRASO;
+    property ID                     :Variant read FID write SetID;
+    property SYSTIME                :Variant read FSYSTIME write SetSYSTIME;
+    property CODIGO                 :Variant read FCODIGO write SetCODIGO;
+    property FANTASIA               :Variant read FFANTASIA write SetFANTASIA;
+    property RAZAO_SOCIAL           :Variant read FRAZAO_SOCIAL write SetRAZAO_SOCIAL;
+    property CNPJ                   :Variant read FCNPJ write SetCNPJ;
+    property INSCRICAO_ESTADUAL     :Variant read FINSCRICAO_ESTADUAL write SetINSCRICAO_ESTADUAL;
+    property INSCRICAO_MUNICIPAL    :Variant read FINSCRICAO_MUNICIPAL write SetINSCRICAO_MUNICIPAL;
+    property ENDERECO               :Variant read FENDERECO write SetENDERECO;
+    property BAIRRO                 :Variant read FBAIRRO write SetBAIRRO;
+    property CIDADE                 :Variant read FCIDADE write SetCIDADE;
+    property UF                     :Variant read FUF write SetUF;
+    property NUMERO                 :Variant read FNUMERO write SetNUMERO;
+    property COMPLEMENTO            :Variant read FCOMPLEMENTO write SetCOMPLEMENTO;
+    property CODIGO_MUNUCIPIO       :Variant read FCODIGO_MUNUCIPIO write SetCODIGO_MUNUCIPIO;
+    property TELEFONE               :Variant read FTELEFONE write SetTELEFONE;
+    property CONTATO                :Variant read FCONTATO write SetCONTATO;
+    property EMAIL                  :Variant read FEMAIL write SetEMAIL;
+    property URL                    :Variant read FURL write SetURL;
+    property CEP                    :Variant read FCEP write SetCEP;
+    property REGIME_TRIBUTARIO      :Variant read FREGIME_TRIBUTARIO write SetREGIME_TRIBUTARIO;
+    property JUROS_BOL              :Variant read FJUROS_BOL write SetJUROS_BOL;
+    property LOJA                   :Variant read FLOJA write SetLOJA;
+    property LIMITE_ATRASO          :Variant read FLIMITE_ATRASO write SetLIMITE_ATRASO;
+    property STRING_CONEXAO_RESERVA :Variant read FSTRING_CONEXAO_RESERVA write SetSTRING_CONEXAO_RESERVA;
 
     procedure Carregar;
   end;
@@ -213,6 +216,11 @@ procedure TEmpresaModel.SetREGIME_TRIBUTARIO(const Value: Variant);
 begin
   FREGIME_TRIBUTARIO := Value;
 end;
+procedure TEmpresaModel.SetSTRING_CONEXAO_RESERVA(const Value: Variant);
+begin
+  FSTRING_CONEXAO_RESERVA := Value;
+end;
+
 procedure TEmpresaModel.SetSYSTIME(const Value: Variant);
 begin
   FSYSTIME := Value;

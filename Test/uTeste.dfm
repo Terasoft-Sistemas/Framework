@@ -2,8 +2,8 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'Form1'
-  ClientHeight = 741
-  ClientWidth = 1248
+  ClientHeight = 733
+  ClientWidth = 1246
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,11 +16,13 @@ object Form1: TForm1
   object PageControl1: TPageControl
     Left = 0
     Top = 0
-    Width = 1248
-    Height = 741
+    Width = 1246
+    Height = 733
     ActivePage = TabSheet1
     Align = alClient
     TabOrder = 0
+    ExplicitWidth = 1248
+    ExplicitHeight = 741
     object TabSheet1: TTabSheet
       Caption = 'Teste 1'
       object memoResultado: TMemo

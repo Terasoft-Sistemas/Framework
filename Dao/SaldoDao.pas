@@ -84,22 +84,35 @@ var
   lQry      : TFDQuery;
   lSql      : String;
   lLojas    : TLojasModel;
-  i         : Integer;
   lMemTable : TFDMemTable;
-
 begin
   lLojas       := TLojasModel.Create(vIConexao);
   lMemTable    := TFDMemTable.Create(nil);
   FSaldosLista := TObjectList<TSaldoModel>.Create;
-  i            := 0;
 
   try
-    lSql := ' select coalesce(p.saldo_pro,0) saldo_fisico,                                                          '+
-            '        coalesce(p.saldo_pro,0) - coalesce((select sum(v.reservado)                                    '+
-            '                                              from view_reservados v                                   '+
-            '                                             where v.produto_id = p.codigo_pro), 0) saldo_disponivel   '+
-            '   from produto p                                                                                      '+
-            '  where p.codigo_pro = ' + QuotedStr(pParametros.PRODUTO);
+    lSql := ' select                                                   '+
+            '      CODIGO_PRO,                                         '+
+            '      SALDO_FISICO,                                       '+
+            '      SALDO_FISICO-RESERVADOS SALDO_DISPONIVEL            '+
+            '                                                          '+
+            '  from (                                                  '+
+            '                                                          '+
+            '  select                                                  '+
+            '      p.codigo_pro,                                       '+
+            '      coalesce(p.saldo_pro,0) saldo_fisico,               '+
+            '      sum(r.reservado) reservados                         '+
+            '                                                          '+
+            '  from                                                    '+
+            '      view_reservados r                                   '+
+            '                                                          '+
+            '  left join produto p on p.codigo_pro = r.produto_id      '+
+            '                                                          '+
+            '  group by 1,2                                            '+
+            '  ) p                                                     '+
+            '                                                          '+
+            '  where                                                   '+
+            '    p.CODIGO_PRO = ' + QuotedStr(pParametros.PRODUTO);
 
     with lMemTable.IndexDefs.AddIndexDef do
     begin
@@ -110,15 +123,12 @@ begin
 
     lMemTable.IndexName := 'OrdenacaoLoja';
 
-    lMemTable.FieldDefs.Add('CD', ftString, 3);
     lMemTable.FieldDefs.Add('LOJA', ftString, 3);
     lMemTable.FieldDefs.Add('SALDO_FISICO', ftFloat);
     lMemTable.FieldDefs.Add('SALDO_DISPONIVEL', ftFloat);
     lMemTable.CreateDataSet;
 
-    if pParametros.CD then
-      lLojas.WhereView := ' and loja2.cd = '+ QuotedStr('S')
-    else if pParametros.LOJA <> '' then
+    if pParametros.LOJA <> '' then
       lLojas.LojaView := pParametros.LOJA;
 
     lLojas.obterLista;
@@ -130,28 +140,29 @@ begin
       lQry := vIConexao.criarQueryExterna;
       lQry.Open(lSQL);
 
-      lQry.First;
-      while not lQry.Eof do
-      begin
-        FSaldosLista.Add(TSaldoModel.Create(vIConexao));
+      FSaldosLista.Add(TSaldoModel.Create(vIConexao));
 
-        FSaldosLista[i].CD               := llojas.CD;
-        FSaldosLista[i].LOJA             := llojas.LOJA;
-        FSaldosLista[i].SALDO_FISICO     := lQry.FieldByName('SALDO_FISICO').AsString;
-        FSaldosLista[i].SALDO_DISPONIVEL := lQry.FieldByName('SALDO_DISPONIVEL').AsString;
+      lMemTable.InsertRecord([
+                              llojas.LOJA,
+                              lQry.fieldByName('SALDO_FISICO').AsFloat,
+                              lQry.fieldByName('SALDO_DISPONIVEL').AsFloat
+                             ]);
 
-        inc(i);
-        lQry.Next;
-      end;
     end;
 
-    for i := 0 to FSaldosLista.Count -1 do
+    if pParametros.CD then
     begin
+      vIConexao.ConfigConexaoExterna('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA);
+
+      lQry := vIConexao.criarQueryExterna;
+      lQry.Open(lSQL);
+
+      FSaldosLista.Add(TSaldoModel.Create(vIConexao));
+
       lMemTable.InsertRecord([
-                              FSaldosLista[I].CD,
-                              FSaldosLista[I].LOJA,
-                              FSaldosLista[I].SALDO_FISICO,
-                              FSaldosLista[I].SALDO_DISPONIVEL
+                              'CD',
+                              lQry.fieldByName('SALDO_FISICO').AsFloat,
+                              lQry.fieldByName('SALDO_DISPONIVEL').AsFloat
                              ]);
     end;
 
