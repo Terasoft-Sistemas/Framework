@@ -79,7 +79,9 @@ uses
   PrecoVendaProdutoDao in '..\Dao\PrecoVendaProdutoDao.pas',
   PrecoClienteDao in '..\Dao\PrecoClienteDao.pas',
   TabelaJurosModel in '..\Model\TabelaJurosModel.pas',
-  TabelaJurosDao in '..\Dao\TabelaJurosDao.pas';
+  TabelaJurosDao in '..\Dao\TabelaJurosDao.pas',
+  SaldoModel in '..\Model\SaldoModel.pas',
+  SaldoDao in '..\Dao\SaldoDao.pas';
 
 {$R *.res}
 

@@ -28,8 +28,6 @@ object Form1: TForm1
         Top = 15
         Width = 409
         Height = 681
-        Lines.Strings = (
-          'memoResultado')
         ScrollBars = ssVertical
         TabOrder = 0
       end
@@ -158,6 +156,24 @@ object Form1: TForm1
         Caption = 'Obter Totais'
         TabOrder = 14
         OnClick = btnTotaisClick
+      end
+      object btnSaldo: TButton
+        Left = 379
+        Top = 215
+        Width = 182
+        Height = 42
+        Caption = 'Consultar Saldo Lojas'
+        TabOrder = 15
+        OnClick = btnSaldoClick
+      end
+      object Button12: TButton
+        Left = 567
+        Top = 215
+        Width = 182
+        Height = 42
+        Caption = 'Consultar Saldo'
+        TabOrder = 16
+        OnClick = Button12Click
       end
     end
   end

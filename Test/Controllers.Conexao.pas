@@ -9,7 +9,9 @@ interface
     TControllersConexao = class(TInterfacedObject, IConexao)
 
       private
+        vLoja : String;
         vUser : TUsuario;
+        vEmpresa : TEmpresa;
 
         function criarQuery                              : TFDQuery;
         function criaConexao                             : IConexao;
@@ -41,7 +43,7 @@ interface
 implementation
 
 uses
-  uTeste;
+  uTeste, LojasModel;
 
 { TControllersConexao }
 
@@ -51,8 +53,24 @@ begin
 end;
 
 function TControllersConexao.ConfigConexaoExterna(pLoja: String): Boolean;
+var
+  lLojaModel : TLojasModel;
 begin
+  lLojaModel := TLojasModel.Create(Form1.vIConexao);
 
+  try
+    lLojaModel.LojaView := pLoja;
+    lLojaModel.obterLista;
+
+    lLojaModel := lLojaModel.LojassLista[0];
+
+    Form1.vConexao.ConfigConexaoExterna(lLojaModel.SERVER, lLojaModel.PORT, lLojaModel.DATABASE);
+
+    Result := True;
+    vLoja  := pLoja;
+  finally
+    lLojaModel.Free;
+  end;
 end;
 
 constructor TControllersConexao.Create;
@@ -102,12 +120,12 @@ end;
 
 function TControllersConexao.getEmpresa: TEmpresa;
 begin
-
+  Result := vEmpresa;
 end;
 
 function TControllersConexao.getLojaConectada: String;
 begin
-
+  Result := vLoja;
 end;
 
 function TControllersConexao.getUSer: TUsuario;
@@ -132,7 +150,7 @@ end;
 
 function TControllersConexao.setEmpresa(pEmpresa: TEmpresa): Boolean;
 begin
-
+  vEmpresa := pEmpresa;
 end;
 
 function TControllersConexao.setUser(pUser: TUsuario): Boolean;
