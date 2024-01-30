@@ -12,30 +12,31 @@ interface
     end;
 
     TEmpresa = record
-      ID   : String;
-      LOJA : String;
+      ID                     : String;
+      LOJA                   : String;
+      STRING_CONEXAO_RESERVA : String;
     end;
 
     IConexao = interface
       ['{66A98734-B254-4482-A4EA-8D3D1CD8C974}']
 
-      function criarQuery                              : TFDQuery;
-      function criarQueryExterna                       : TFDQuery;
-      function criaConexao                             : IConexao;
-      function ConfigConexao                           : Boolean;
-      function ConfigConexaoExterna(pLoja: String)     : Boolean;
-      function Generetor(pValue: String)               : String;
-      function getConnection                           : TFDConnection;
-      function getLojaConectada                        : String;
-      function DataServer                              : TDate;
-      function HoraServer                              : TTime;
-      function DataHoraServer                          : TDateTime;
+      function criarQuery                                                  : TFDQuery;
+      function criarQueryExterna                                           : TFDQuery;
+      function criaConexao                                                 : IConexao;
+      function ConfigConexao                                               : Boolean;
+      function ConfigConexaoExterna(pLoja: String; pHost : String = '')    : Boolean;
+      function Generetor(pValue: String)                                   : String;
+      function getConnection                                               : TFDConnection;
+      function getLojaConectada                                            : String;
+      function DataServer                                                  : TDate;
+      function HoraServer                                                  : TTime;
+      function DataHoraServer                                              : TDateTime;
 
-      function getUSer                                 : TUsuario;
-      function setUser(pUser : TUsuario)               : Boolean;
+      function getUSer                                                     : TUsuario;
+      function setUser(pUser : TUsuario)                                   : Boolean;
 
-      function setEmpresa(pEmpresa: TEmpresa)          : Boolean;
-      function getEmpresa                              : TEmpresa;
+      function setEmpresa(pEmpresa: TEmpresa)                              : Boolean;
+      function getEmpresa                                                  : TEmpresa;
 
       procedure setContext(pUsuario: String);
 

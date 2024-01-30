@@ -394,7 +394,6 @@ begin
     lProduto  := InputBox('Consulta de Saldo', 'Digite o código do produto:', '');
 
     lParametros.PRODUTO := lProduto;
-    lParametros.LOJA    := '002';
     lParametros.CD      := true;
 
     lMemTable := lSaldoModel.obterSaldoLojas(lParametros);
@@ -404,7 +403,6 @@ begin
     lMemTable.First;
     while not lMemTable.Eof do
     begin
-      memoResultado.Lines.Add('CD: '+lMemTable.FieldByName('CD').AsString);
       memoResultado.Lines.Add('LOJA: '+lMemTable.FieldByName('LOJA').AsString);
       memoResultado.Lines.Add('SALDO_FISICO: '+lMemTable.FieldByName('SALDO_FISICO').AsString);
       memoResultado.Lines.Add('SALDO_DISPONIVEL: '+lMemTable.FieldByName('SALDO_DISPONIVEL').AsString);
@@ -534,17 +532,10 @@ begin
     lMemTable := lSaldoModel.obterSaldo(lProduto);
 
     memoResultado.Lines.Clear;
-
-    lMemTable.First;
-    while not lMemTable.Eof do
-    begin
-      memoResultado.Lines.Add('SALDO_FISICO: '+lMemTable.FieldByName('SALDO_FISICO').AsString);
-      memoResultado.Lines.Add('SALDO_DISPONIVEL: '+lMemTable.FieldByName('SALDO_DISPONIVEL').AsString);
-      memoResultado.Lines.Add('SALDO_CD: '+lMemTable.FieldByName('SALDO_CD').AsString);
-      memoResultado.Lines.Add('===============================================');
-      lMemTable.Next;
-    end;
-
+    memoResultado.Lines.Add('SALDO_FISICO: '+lMemTable.FieldByName('SALDO_FISICO').AsString);
+    memoResultado.Lines.Add('SALDO_DISPONIVEL: '+lMemTable.FieldByName('SALDO_DISPONIVEL').AsString);
+    memoResultado.Lines.Add('SALDO_CD: '+lMemTable.FieldByName('SALDO_CD').AsString);
+    memoResultado.Lines.Add('===============================================');
   finally
     lSaldoModel.Free;
   end;
@@ -601,8 +592,9 @@ begin
   lEmpresaModel := TEmpresaModel.Create(vIConexao);
   lEmpresaModel.Carregar;
 
-  lEmpresa.ID   := lEmpresaModel.ID;
-  lEmpresa.LOJA := lEmpresaModel.LOJA;
+  lEmpresa.ID                     := lEmpresaModel.ID;
+  lEmpresa.LOJA                   := lEmpresaModel.LOJA;
+  lEmpresa.STRING_CONEXAO_RESERVA := lEmpresaModel.STRING_CONEXAO_RESERVA;
 
   vIConexao.setEmpresa(lEmpresa);
 

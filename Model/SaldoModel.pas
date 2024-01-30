@@ -100,23 +100,29 @@ begin
 
     lParametros.PRODUTO := pProduto;
     lParametros.LOJA    := vIConexao.getEmpresa.LOJA;
-
-    lMemConsulta := self.obterSaldoLojas(lParametros);
-
-    lMemTable.append;
-    lMemTable.fieldByName('SALDO_FISICO').value     := lMemConsulta.fieldByName('SALDO_FISICO').value;
-    lMemTable.fieldByName('SALDO_DISPONIVEL').value := lMemConsulta.fieldByName('SALDO_DISPONIVEL').value;
-    lMemTable.post;
-
-    lParametros.PRODUTO := pProduto;
-    lParametros.LOJA    := '';
     lParametros.CD      := true;
 
     lMemConsulta := self.obterSaldoLojas(lParametros);
 
-    lMemTable.edit;
-    lMemTable.fieldByName('SALDO_CD').value := lMemConsulta.fieldByName('SALDO_DISPONIVEL').value;
-    lMemTable.post;
+    lMemConsulta.first;
+
+    while not lMemConsulta.eof do
+    begin
+      if lMemConsulta.fieldByName('LOJA').value = 'CD' then
+      begin
+        lMemTable.edit;
+        lMemTable.fieldByName('SALDO_CD').value := lMemConsulta.fieldByName('SALDO_DISPONIVEL').value;
+        lMemTable.post;
+      end
+      else
+      begin
+        lMemTable.append;
+        lMemTable.fieldByName('SALDO_FISICO').value     := lMemConsulta.fieldByName('SALDO_FISICO').value;
+        lMemTable.fieldByName('SALDO_DISPONIVEL').value := lMemConsulta.fieldByName('SALDO_DISPONIVEL').value;
+        lMemTable.post;
+      end;
+      lMemConsulta.Next;
+    end;
 
     Result := lMemTable;
   finally
