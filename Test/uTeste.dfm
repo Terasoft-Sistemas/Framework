@@ -21,8 +21,6 @@ object Form1: TForm1
     ActivePage = TabSheet1
     Align = alClient
     TabOrder = 0
-    ExplicitWidth = 1248
-    ExplicitHeight = 741
     object TabSheet1: TTabSheet
       Caption = 'Teste 1'
       object memoResultado: TMemo
@@ -143,7 +141,7 @@ object Form1: TForm1
       end
       object btnTabelaPreco: TButton
         Left = 3
-        Top = 215
+        Top = 223
         Width = 182
         Height = 42
         Caption = 'Consultar tabela Juros'
@@ -152,7 +150,7 @@ object Form1: TForm1
       end
       object btnTotais: TButton
         Left = 191
-        Top = 215
+        Top = 223
         Width = 182
         Height = 42
         Caption = 'Obter Totais'
@@ -161,7 +159,7 @@ object Form1: TForm1
       end
       object btnSaldo: TButton
         Left = 379
-        Top = 215
+        Top = 223
         Width = 182
         Height = 42
         Caption = 'Consultar Saldo Lojas'
@@ -170,7 +168,7 @@ object Form1: TForm1
       end
       object Button12: TButton
         Left = 567
-        Top = 215
+        Top = 223
         Width = 182
         Height = 42
         Caption = 'Consultar Saldo'
@@ -179,7 +177,7 @@ object Form1: TForm1
       end
       object Button13: TButton
         Left = 3
-        Top = 263
+        Top = 287
         Width = 182
         Height = 42
         Caption = 'Valor de venda'
