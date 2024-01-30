@@ -432,6 +432,9 @@ type
   	constructor Create(pConexao: IConexao);
     destructor Destroy; override;
     function Salvar: String;
+    function Incluir : String;
+    function Alterar(pID : String) : TPedidoItensModel;
+    function Excluir(pID : String) : String;
 
     procedure obterLista;
     procedure obterPedido(pNUmeroPedido: String);
@@ -471,6 +474,33 @@ uses
   UsuarioModel;
 
 { TPedidoItensModel }
+
+function TPedidoItensModel.Alterar(pID: String): TPedidoItensModel;
+var
+  lPedidoItensModel : TPedidoItensModel;
+begin
+  lPedidoItensModel := lPedidoItensModel.Create(vIConexao);
+  try
+    lPedidoItensModel      := lPedidoItensModel.carregaClasse(pID);
+    lPedidoItensModel.Acao := tacAlterar;
+    Result                 := lPedidoItensModel;
+  finally
+
+  end;
+end;
+
+function TPedidoItensModel.Excluir(pID: String): String;
+begin
+  self.FID  := pID;
+  self.Acao := tacExcluir;
+  Result    := self.Salvar;
+end;
+
+function TPedidoItensModel.Incluir: String;
+begin
+  self.Acao := tacIncluir;
+  self.Salvar;
+end;
 
 function TPedidoItensModel.cancelarEstoque: String;
 var
@@ -527,6 +557,7 @@ destructor TPedidoItensModel.Destroy;
 begin
   inherited;
 end;
+
 function TPedidoItensModel.gerarEstoque: String;
 var
   lMovimentoModel   : TMovimentoModel;

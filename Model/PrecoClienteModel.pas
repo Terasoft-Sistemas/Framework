@@ -50,7 +50,9 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function Salvar: String;
+    function Incluir : String;
+    function Excluir(pID : String) : String;
+    function Salvar : String;
     procedure obterLista;
 
     property PrecoClientesLista: TObjectList<TPrecoClienteModel> read FPrecoClientesLista write SetPrecoClientesLista;
@@ -71,6 +73,19 @@ uses
   PrecoClienteDao;
 
 { TPrecoClienteModel }
+
+function TPrecoClienteModel.Excluir(pID: String): String;
+begin
+  self.FID  := pID;
+  self.Acao := tacExcluir;
+  Result    := self.Salvar;
+end;
+
+function TPrecoClienteModel.Incluir: String;
+begin
+  self.Acao := tacIncluir;
+  self.Salvar;
+end;
 
 constructor TPrecoClienteModel.Create(pIConexao : IConexao);
 begin

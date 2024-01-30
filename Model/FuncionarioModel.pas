@@ -370,7 +370,11 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function Salvar: String;
+    function Incluir : String;
+    function Alterar(pID : String) : TFuncionarioModel;
+    function Excluir(pID : String) : String;
+    function carregaClasse(pId: String): TFuncionarioModel;
+    function Salvar : String;
     procedure obterLista;
 
     function comissaoVendedor(pIdVendedor, pIdTipoVenda : String): Double;
@@ -393,6 +397,38 @@ uses
   FuncionarioDao;
 
 { TFuncionarioModel }
+
+function TFuncionarioModel.Alterar(pID: String): TFuncionarioModel;
+var
+  lFuncionarioModel : TFuncionarioModel;
+begin
+  lFuncionarioModel := lFuncionarioModel.Create(vIConexao);
+  try
+    lFuncionarioModel      := lFuncionarioModel.carregaClasse(pID);
+    lFuncionarioModel.Acao := tacAlterar;
+    Result                 := lFuncionarioModel;
+  finally
+
+  end;
+end;
+
+function TFuncionarioModel.Excluir(pID: String): String;
+begin
+  self.FID  := pID;
+  self.Acao := tacExcluir;
+  Result    := self.Salvar;
+end;
+
+function TFuncionarioModel.Incluir: String;
+begin
+  self.Acao := tacIncluir;
+  self.Salvar;
+end;
+
+function TFuncionarioModel.carregaClasse(pId: String): TFuncionarioModel;
+begin
+
+end;
 
 function TFuncionarioModel.comissaoVendedor(pIdVendedor, pIdTipoVenda: String): Double;
 var

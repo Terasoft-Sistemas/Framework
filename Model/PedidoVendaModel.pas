@@ -481,11 +481,14 @@ type
   	constructor Create(pConexao: IConexao);
     destructor Destroy; override;
 
-    function Salvar: String;
+    function Incluir : String;
+    function Alterar(pID : String) : TPedidoVendaModel;
+    function Excluir(pID : String) : String;
+    function Salvar : String;
 
     procedure obterLista;
     function obterPedido(pNumeroPedido: String): TPedidoVendaModel;
-    
+
     function carregaClasse(pId: String): TPedidoVendaModel;
     procedure RecalcularImpostos(pNumeroPedido: String);
     function GerarNF(pModelo, pSerie: String): String;
@@ -519,6 +522,33 @@ uses
   EmpresaModel;
 
 { TPedidoVendaModel }
+
+function TPedidoVendaModel.Excluir(pID: String): String;
+begin
+  self.FID  := pID;
+  self.Acao := tacExcluir;
+  Result    := Salvar;
+end;
+
+function TPedidoVendaModel.Incluir: String;
+begin
+  self.Acao := tacIncluir;
+  self.Salvar;
+end;
+
+function TPedidoVendaModel.Alterar(pID: String): TPedidoVendaModel;
+var
+  lPedidoVendaModel : TPedidoVendaModel;
+begin
+  lPedidoVendaModel := lPedidoVendaModel.Create(vIConexao);
+  try
+    lPedidoVendaModel      := lPedidoVendaModel.carregaClasse(pID);
+    lPedidoVendaModel.Acao := tacAlterar;
+    Result                 := lPedidoVendaModel;
+  finally
+
+  end;
+end;
 
 procedure TPedidoVendaModel.calcularTotais;
 var
@@ -600,6 +630,7 @@ destructor TPedidoVendaModel.Destroy;
 begin
   inherited;
 end;
+
 procedure TPedidoVendaModel.excluirContasReceber;
 var
   lContasReceberModel, lModel: TContasReceberModel;
