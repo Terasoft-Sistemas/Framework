@@ -37,6 +37,9 @@ type
     Button11: TButton;
     btnTabelaPreco: TButton;
     btnTotais: TButton;
+    btnSaldo: TButton;
+    Button12: TButton;
+    Button13: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -53,16 +56,19 @@ type
     procedure Button11Click(Sender: TObject);
     procedure btnTabelaPrecoClick(Sender: TObject);
     procedure btnTotaisClick(Sender: TObject);
+    procedure btnSaldoClick(Sender: TObject);
+    procedure Button12Click(Sender: TObject);
+    procedure Button13Click(Sender: TObject);
 
   private
     { Private declarations }
-    vIConexao       : IConexao;
     vQtdeRegistros,
     vPagina         : Integer;
 
   public
     { Public declarations }
-    vConexao : TConexao;
+    vIConexao : IConexao;
+    vConexao  : TConexao;
   end;
 
 var
@@ -74,7 +80,10 @@ uses
   FinanceiroPedidoModel,
   WebPedidoModel,
   Controllers.Conexao,
-  FireDAC.Comp.Client, WebPedidoItensModel, TabelaJurosModel;
+  FireDAC.Comp.Client,
+  WebPedidoItensModel,
+  TabelaJurosModel,
+  SaldoModel, EmpresaModel, ProdutosModel;
 
 {$R *.dfm}
 
@@ -372,6 +381,42 @@ begin
   end;
 end;
 
+procedure TForm1.btnSaldoClick(Sender: TObject);
+var
+  lSaldoModel : TSaldoModel;
+  lMemTable   : TFDMemTable;
+  lProduto    : String;
+  lParametros : TParametrosSaldo;
+
+begin
+  lSaldoModel := TSaldoModel.Create(vIConexao);
+  try
+    lProduto  := InputBox('Consulta de Saldo', 'Digite o código do produto:', '');
+
+    lParametros.PRODUTO := lProduto;
+    lParametros.LOJA    := '002';
+    lParametros.CD      := true;
+
+    lMemTable := lSaldoModel.obterSaldoLojas(lParametros);
+
+    memoResultado.Lines.Clear;
+
+    lMemTable.First;
+    while not lMemTable.Eof do
+    begin
+      memoResultado.Lines.Add('CD: '+lMemTable.FieldByName('CD').AsString);
+      memoResultado.Lines.Add('LOJA: '+lMemTable.FieldByName('LOJA').AsString);
+      memoResultado.Lines.Add('SALDO_FISICO: '+lMemTable.FieldByName('SALDO_FISICO').AsString);
+      memoResultado.Lines.Add('SALDO_DISPONIVEL: '+lMemTable.FieldByName('SALDO_DISPONIVEL').AsString);
+      memoResultado.Lines.Add('===============================================');
+      lMemTable.Next;
+    end;
+
+  finally
+    lSaldoModel.Free;
+  end;
+end;
+
 procedure TForm1.btnTabelaPrecoClick(Sender: TObject);
 var
   lTabelaJurosModel: TTabelaJurosModel;
@@ -476,6 +521,60 @@ begin
   end;
 end;
 
+procedure TForm1.Button12Click(Sender: TObject);
+var
+  lSaldoModel : TSaldoModel;
+  lMemTable   : TFDMemTable;
+  lProduto    : String;
+begin
+  lSaldoModel := TSaldoModel.Create(vIConexao);
+  try
+    lProduto  := InputBox('Consulta de Saldo', 'Digite o código do produto:', '');
+
+    lMemTable := lSaldoModel.obterSaldo(lProduto);
+
+    memoResultado.Lines.Clear;
+
+    lMemTable.First;
+    while not lMemTable.Eof do
+    begin
+      memoResultado.Lines.Add('SALDO_FISICO: '+lMemTable.FieldByName('SALDO_FISICO').AsString);
+      memoResultado.Lines.Add('SALDO_DISPONIVEL: '+lMemTable.FieldByName('SALDO_DISPONIVEL').AsString);
+      memoResultado.Lines.Add('SALDO_CD: '+lMemTable.FieldByName('SALDO_CD').AsString);
+      memoResultado.Lines.Add('===============================================');
+      lMemTable.Next;
+    end;
+
+  finally
+    lSaldoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button13Click(Sender: TObject);
+var
+  lProdutoModel : TProdutosModel;
+  lProduto : String;
+  lParametros: TProdutoPreco;
+  lValor : Double;
+begin
+  lProdutoModel := TProdutosModel.Create(vIConexao);
+  try
+     lProduto  := InputBox('Consulta de Saldo', 'Digite o código do produto:', '');
+
+     lParametros.Produto     := lProduto;
+     lParametros.TabelaPreco := true;
+     lParametros.Promocao    := true;
+
+     lValor := lProdutoModel.ValorUnitario(lParametros);
+
+     memoResultado.Lines.Clear;
+     memoResultado.Lines.Add('VALOR DE VENDA: '+ lValor.ToString);
+     memoResultado.Lines.Add('===============================================');
+  finally
+    lProdutoModel.Free;
+  end;
+end;
+
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   vConexao.Free;
@@ -486,7 +585,9 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 var
-  lUsuario : TUsuario;
+  lUsuario      : TUsuario;
+  lEmpresa      : TEmpresa;
+  lEmpresaModel : TEmpresaModel;
 begin
   vConexao  := TConexao.Create;
   vIConexao := TControllersConexao.New;
@@ -496,6 +597,14 @@ begin
   lUsuario.PERFIL := '000000';
 
   vIConexao.setUser(lUsuario);
+
+  lEmpresaModel := TEmpresaModel.Create(vIConexao);
+  lEmpresaModel.Carregar;
+
+  lEmpresa.ID   := lEmpresaModel.ID;
+  lEmpresa.LOJA := lEmpresaModel.LOJA;
+
+  vIConexao.setEmpresa(lEmpresa);
 
   vQtdeRegistros := 10;
   vPagina        := 0;

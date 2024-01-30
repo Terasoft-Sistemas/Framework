@@ -126,6 +126,7 @@ begin
 
   try
     lSQL := ' select                           ' + #13 +
+            '        loja2.cd,                 ' + #13 +
             '        loja2.loja,               ' + #13 +
             '        loja2.descricao,          ' + #13 +
             '        loja2.server,             ' + #13 +
@@ -148,6 +149,7 @@ begin
 
       i := FLojassLista.Count -1;
 
+      FLojassLista[i].CD         := lQry.FieldByName('CD').AsString;
       FLojassLista[i].LOJA       := lQry.FieldByName('LOJA').AsString;
       FLojassLista[i].DESCRICAO  := lQry.FieldByName('DESCRICAO').AsString;
       FLojassLista[i].SERVER     := lQry.FieldByName('SERVER').AsString;

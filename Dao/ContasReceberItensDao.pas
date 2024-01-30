@@ -379,7 +379,7 @@ begin
     for lLojas in lLojasModel.LojassLista do
     begin
       vIConexao.ConfigConexaoExterna(llojas.LOJA);
-      lQry := vIConexao.CriarQuery;
+      lQry := vIConexao.criarQueryExterna;
 
       lQry.Open(lSQL);
 

@@ -27,6 +27,7 @@ type
     FDATABASE: Variant;
     FSERVER: Variant;
     FLojaView: String;
+    FCD: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetLojassLista(const Value: TObjectList<TLojasModel>);
@@ -42,7 +43,9 @@ type
     procedure SetPORT(const Value: Variant);
     procedure SetSERVER(const Value: Variant);
     procedure SetLojaView(const Value: String);
+    procedure SetCD(const Value: Variant);
   public
+    property CD: Variant read FCD write SetCD;
     property LOJA: Variant read FLOJA write SetLOJA;
     property DESCRICAO: Variant read FDESCRICAO write SetDESCRICAO;
     property SERVER: Variant read FSERVER write SetSERVER;
@@ -128,6 +131,11 @@ end;
 procedure TLojasModel.SetAcao(const Value: TAcao);
 begin
   FAcao := Value;
+end;
+
+procedure TLojasModel.SetCD(const Value: Variant);
+begin
+  FCD := Value;
 end;
 
 procedure TLojasModel.SetCountView(const Value: String);

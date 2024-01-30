@@ -177,6 +177,8 @@
         <DCCReference Include="..\Dao\PrecoClienteDao.pas"/>
         <DCCReference Include="..\Model\TabelaJurosModel.pas"/>
         <DCCReference Include="..\Dao\TabelaJurosDao.pas"/>
+        <DCCReference Include="..\Model\SaldoModel.pas"/>
+        <DCCReference Include="..\Dao\SaldoDao.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
