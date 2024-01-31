@@ -3,15 +3,17 @@ unit Controllers.Conexao;
 interface
   uses
     FireDAC.Comp.Client,
+    Terasoft.FuncoesTexto,
     Interfaces.Conexao;
 
   type
     TControllersConexao = class(TInterfacedObject, IConexao)
 
       private
-        vLoja : String;
-        vUser : TUsuario;
-        vEmpresa : TEmpresa;
+        vLoja            : String;
+        vUser            : TUsuario;
+        vEmpresa         : TEmpresa;
+        vConfiguracoesNF : TConfiguracoesNF;
 
         function criarQuery                                                : TFDQuery;
         function criaConexao                                               : IConexao;
@@ -31,6 +33,9 @@ interface
         function setEmpresa(pEmpresa: TEmpresa)                            : Boolean;
         function getEmpresa                                                : TEmpresa;
 
+        function setConfiguracoesNF(pConfiguracoes : TConfiguracoesNF)     : Boolean;
+        function getConfiguracoes                                          : TConfiguracoesNF;
+
         procedure setContext(pUsuario: String);
       public
         Constructor Create;
@@ -45,7 +50,7 @@ implementation
 uses
   uTeste,
   System.SysUtils,
-  LojasModel;
+  LojasModel, Terasoft.Types;
 
 { TControllersConexao }
 
@@ -57,27 +62,14 @@ end;
 function TControllersConexao.ConfigConexaoExterna(pLoja: String; pHost : String = ''): Boolean;
 var
   lLojaModel : TLojasModel;
-  lServer,
-  lPort,
-  lDataBase  : String;
-  lPosInicial,
-  lPosFinal  : Integer;
-
+  lHost      : THost;
 begin
   lLojaModel := TLojasModel.Create(Form1.vIConexao);
 
   try
     if pHost <> '' then
-    begin
-      lServer   := Copy(pHost, 1, pos('/', pHost) -1);
+      lHost := Terasoft.FuncoesTexto.WriteConexao(pHost)
 
-      lPosInicial := pos('/', pHost) + 1;
-      lPosFinal   := pos(':', pHost);
-      lPort       := Copy(pHost, lPosInicial, lPosFinal - lPosInicial);
-
-      lDataBase := Copy(pHost, pos(':', pHost) + 1, pHost.Length);
-      lDataBase := StringReplace(lDataBase, '\\', '\', [rfReplaceAll]);
-    end
     else
     begin
       lLojaModel.LojaView := pLoja;
@@ -85,12 +77,12 @@ begin
 
       lLojaModel := lLojaModel.LojassLista[0];
 
-      lServer   := lLojaModel.SERVER;
-      lPort     := lLojaModel.PORT;
-      lDataBase := lLojaModel.DATABASE;
+      lHost.Server   := lLojaModel.SERVER;
+      lHost.Port     := lLojaModel.PORT;
+      lHost.DataBase := lLojaModel.DATABASE;
     end;
 
-    Form1.vConexao.ConfigConexaoExterna(lServer, lPort, lDataBase);
+    Form1.vConexao.ConfigConexaoExterna(lHost.Server, lHost.Port, lHost.DataBase);
 
     Result := True;
     vLoja  := pLoja;
@@ -139,6 +131,11 @@ begin
   Result := Form1.vConexao.Generetor(pValue);
 end;
 
+function TControllersConexao.getConfiguracoes: TConfiguracoesNF;
+begin
+  Result := vConfiguracoesNF;
+end;
+
 function TControllersConexao.getConnection: TFDConnection;
 begin
   Result := Form1.vConexao.getConnection;
@@ -167,6 +164,12 @@ end;
 class function TControllersConexao.New: IConexao;
 begin
   Result := Self.Create;
+end;
+
+function TControllersConexao.setConfiguracoesNF(pConfiguracoes: TConfiguracoesNF): Boolean;
+begin
+  vConfiguracoesNF := pConfiguracoes;
+  Result := true;
 end;
 
 procedure TControllersConexao.setContext(pUsuario: String);

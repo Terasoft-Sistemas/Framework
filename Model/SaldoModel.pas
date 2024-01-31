@@ -57,6 +57,7 @@ type
 
     function obterSaldoLojas(pParametros : TParametrosSaldo): TFDMemTable;
     function obterSaldo(pProduto : String): TFDMemTable;
+    function obterReservasCD(pProduto : String) : TFDMemTable;
 
     property SaldosLista: TObjectList<TSaldoModel> read FSaldosLista write SetSaldosLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -82,6 +83,18 @@ end;
 destructor TSaldoModel.Destroy;
 begin
   inherited;
+end;
+
+function TSaldoModel.obterReservasCD(pProduto: String): TFDMemTable;
+var
+  lSaldoDao : TSaldoDao;
+begin
+  lSaldoDao := TSaldoDao.Create(vIConexao);
+  try
+    Result := lSaldoDao.obterReservasCD(pProduto);
+  finally
+    lSaldoDao.Free;
+  end;
 end;
 
 function TSaldoModel.obterSaldo(pProduto: String): TFDMemTable;

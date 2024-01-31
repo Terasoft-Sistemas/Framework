@@ -107,7 +107,6 @@
         <DCCReference Include="..\Interfaces\Interfaces.Conexao.pas"/>
         <DCCReference Include="..\Libs\Terasoft.Utils.pas"/>
         <DCCReference Include="..\Libs\Terasoft.ConstrutorDao.pas"/>
-        <DCCReference Include="..\Libs\Terasoft.FuncoesTexto.pas"/>
         <DCCReference Include="Conexao.pas"/>
         <DCCReference Include="..\Model\WebPedidoModel.pas"/>
         <DCCReference Include="..\Dao\WebPedidoDao.pas"/>
@@ -179,6 +178,7 @@
         <DCCReference Include="..\Dao\TabelaJurosDao.pas"/>
         <DCCReference Include="..\Model\SaldoModel.pas"/>
         <DCCReference Include="..\Dao\SaldoDao.pas"/>
+        <DCCReference Include="..\Libs\Terasoft.FuncoesTexto.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

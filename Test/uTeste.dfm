@@ -2,8 +2,8 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'Form1'
-  ClientHeight = 733
-  ClientWidth = 1246
+  ClientHeight = 725
+  ClientWidth = 1244
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,13 +16,13 @@ object Form1: TForm1
   object PageControl1: TPageControl
     Left = 0
     Top = 0
-    Width = 1246
-    Height = 733
+    Width = 1244
+    Height = 725
     ActivePage = TabSheet1
     Align = alClient
     TabOrder = 0
-    ExplicitWidth = 1248
-    ExplicitHeight = 741
+    ExplicitWidth = 1246
+    ExplicitHeight = 733
     object TabSheet1: TTabSheet
       Caption = 'Teste 1'
       object memoResultado: TMemo
@@ -185,6 +185,15 @@ object Form1: TForm1
         Caption = 'Valor de venda'
         TabOrder = 17
         OnClick = Button13Click
+      end
+      object Button14: TButton
+        Left = 191
+        Top = 263
+        Width = 182
+        Height = 42
+        Caption = 'Reservas CD'
+        TabOrder = 18
+        OnClick = Button14Click
       end
     end
   end

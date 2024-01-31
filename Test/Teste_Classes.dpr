@@ -10,7 +10,6 @@ uses
   Interfaces.Conexao in '..\Interfaces\Interfaces.Conexao.pas',
   Terasoft.Utils in '..\Libs\Terasoft.Utils.pas',
   Terasoft.ConstrutorDao in '..\Libs\Terasoft.ConstrutorDao.pas',
-  Terasoft.FuncoesTexto in '..\Libs\Terasoft.FuncoesTexto.pas',
   Conexao in 'Conexao.pas',
   WebPedidoModel in '..\Model\WebPedidoModel.pas',
   WebPedidoDao in '..\Dao\WebPedidoDao.pas',
@@ -81,7 +80,8 @@ uses
   TabelaJurosModel in '..\Model\TabelaJurosModel.pas',
   TabelaJurosDao in '..\Dao\TabelaJurosDao.pas',
   SaldoModel in '..\Model\SaldoModel.pas',
-  SaldoDao in '..\Dao\SaldoDao.pas';
+  SaldoDao in '..\Dao\SaldoDao.pas',
+  Terasoft.FuncoesTexto in '..\Libs\Terasoft.FuncoesTexto.pas';
 
 {$R *.res}
 

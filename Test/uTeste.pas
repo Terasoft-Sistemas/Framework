@@ -40,6 +40,7 @@ type
     btnSaldo: TButton;
     Button12: TButton;
     Button13: TButton;
+    Button14: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -59,6 +60,7 @@ type
     procedure btnSaldoClick(Sender: TObject);
     procedure Button12Click(Sender: TObject);
     procedure Button13Click(Sender: TObject);
+    procedure Button14Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -563,6 +565,38 @@ begin
      memoResultado.Lines.Add('===============================================');
   finally
     lProdutoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button14Click(Sender: TObject);
+var
+  lSaldoModel : TSaldoModel;
+  lProduto    : String;
+  lMemTable   : TFDMemTable;
+begin
+  lSaldoModel := TSaldoModel.Create(vIConexao);
+  try
+    lProduto  := InputBox('Reservas CD', 'Digite o código do produto:', '');
+
+    lMemTable := lSaldoModel.obterReservasCD(lProduto);
+
+    memoResultado.Lines.Clear;
+
+    lMemTable.First;
+    while not lMemTable.eof do
+    begin
+      memoResultado.Lines.Add('DOCUMENTO: '+ lMemTable.FieldByName('DOCUMENTO').AsString);
+      memoResultado.Lines.Add('ORIGEM:    '+ lMemTable.FieldByName('ORIGEM').AsString);
+      memoResultado.Lines.Add('DATA:      '+ lMemTable.FieldByName('DATA').AsString);
+      memoResultado.Lines.Add('CLIENTE:   '+ lMemTable.FieldByName('CLIENTE').AsString);
+      memoResultado.Lines.Add('RESERVADO: '+ lMemTable.FieldByName('RESERVADO').AsString);
+      memoResultado.Lines.Add('LOJA:      '+ lMemTable.FieldByName('LOJA').AsString);
+      memoResultado.Lines.Add('===============================================');
+      lMemTable.Next;
+    end;
+
+  finally
+    lSaldoModel.Free;
   end;
 end;
 

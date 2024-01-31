@@ -24,6 +24,12 @@ type
 
   TTipoValorConfiguracao = ( tvInteiro, tvNumero, tvString, tvMemo, tvChar, tvBool, tvData, tvHora, tvDataHora, tvEmpresa );
 
+  THost = record
+    Server,
+    Port,
+    Database : String;
+  end;
+
   TContaClienteParametros = record
     Juros: Boolean;
     DataInicio,

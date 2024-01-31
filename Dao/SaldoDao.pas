@@ -57,7 +57,7 @@ type
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
 	  function obterSaldoLojas(pParametros : TParametrosSaldo): TFDMemTable;
-
+    function obterReservasCD(pProduto: String): TFDMemTable;
 end;
 
 implementation
@@ -79,6 +79,39 @@ begin
   inherited;
 end;
 
+function TSaldoDao.obterReservasCD(pProduto: String): TFDMemTable;
+var
+  lSql  : String;
+  lQry  : TFDQuery;
+begin
+  try
+    lSql :=  '  select r.id documento,                                                                        '+SLineBreak+
+             '         r.origem,                                                                              '+SLineBreak+
+             '         r.data,                                                                                '+SLineBreak+
+             '         case                                                                                   '+SLineBreak+
+             '         when r.origem = ''Entrada pendente'' then f.fantasia_for                               '+SLineBreak+
+             '         else                                                                                   '+SLineBreak+
+             '         c.fantasia_cli                                                                         '+SLineBreak+
+             '         end cliente,                                                                           '+SLineBreak+
+             '         r.reservado,                                                                           '+SLineBreak+
+             '         l2.descricao loja                                                                      '+SLineBreak+
+             '    from view_reservados r                                                                      '+SLineBreak+
+             '    left join loja2 l2 on r.loja = l2.loja                                                      '+SLineBreak+
+             '    left join clientes c on c.codigo_cli = r.cliente_id and r.origem <> ''Entrada pendente''    '+SLineBreak+
+             '    left join fornecedor f on f.codigo_for = r.cliente_id  and r.origem = ''Entrada pendente''  '+SLineBreak+
+             '   where r.reservado <> 0 and r.produto_id = '+ QuotedStr(pProduto);
+
+    vIConexao.ConfigConexaoExterna('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA);
+
+    lQry := vIConexao.criarQueryExterna;
+    lQry.Open(lSQL);
+
+    Result := vConstrutor.atribuirRegistros(lQry);
+
+  finally
+  end;
+end;
+
 function TSaldoDao.obterSaldoLojas(pParametros : TParametrosSaldo): TFDMemTable;
 var
   lQry      : TFDQuery;
@@ -88,30 +121,29 @@ var
 begin
   lLojas       := TLojasModel.Create(vIConexao);
   lMemTable    := TFDMemTable.Create(nil);
-  FSaldosLista := TObjectList<TSaldoModel>.Create;
 
   try
-    lSql := ' select                                                   '+
-            '      CODIGO_PRO,                                         '+
-            '      SALDO_FISICO,                                       '+
-            '      SALDO_FISICO-RESERVADOS SALDO_DISPONIVEL            '+
-            '                                                          '+
-            '  from (                                                  '+
-            '                                                          '+
-            '  select                                                  '+
-            '      p.codigo_pro,                                       '+
-            '      coalesce(p.saldo_pro,0) saldo_fisico,               '+
-            '      sum(r.reservado) reservados                         '+
-            '                                                          '+
-            '  from                                                    '+
-            '      view_reservados r                                   '+
-            '                                                          '+
-            '  left join produto p on p.codigo_pro = r.produto_id      '+
-            '                                                          '+
-            '  group by 1,2                                            '+
-            '  ) p                                                     '+
-            '                                                          '+
-            '  where                                                   '+
+    lSql := ' select                                                   '+SLineBreak+
+            '      CODIGO_PRO,                                         '+SLineBreak+
+            '      SALDO_FISICO,                                       '+SLineBreak+
+            '      SALDO_FISICO-RESERVADOS SALDO_DISPONIVEL            '+SLineBreak+
+            '                                                          '+SLineBreak+
+            '  from (                                                  '+SLineBreak+
+            '                                                          '+SLineBreak+
+            '  select                                                  '+SLineBreak+
+            '      p.codigo_pro,                                       '+SLineBreak+
+            '      coalesce(p.saldo_pro,0) saldo_fisico,               '+SLineBreak+
+            '      sum(r.reservado) reservados                         '+SLineBreak+
+            '                                                          '+SLineBreak+
+            '  from                                                    '+SLineBreak+
+            '      view_reservados r                                   '+SLineBreak+
+            '                                                          '+SLineBreak+
+            '  left join produto p on p.codigo_pro = r.produto_id      '+SLineBreak+
+            '                                                          '+SLineBreak+
+            '  group by 1,2                                            '+SLineBreak+
+            '  ) p                                                     '+SLineBreak+
+            '                                                          '+SLineBreak+
+            '  where                                                   '+SLineBreak+
             '    p.CODIGO_PRO = ' + QuotedStr(pParametros.PRODUTO);
 
     with lMemTable.IndexDefs.AddIndexDef do
@@ -156,8 +188,6 @@ begin
 
       lQry := vIConexao.criarQueryExterna;
       lQry.Open(lSQL);
-
-      FSaldosLista.Add(TSaldoModel.Create(vIConexao));
 
       lMemTable.InsertRecord([
                               'CD',

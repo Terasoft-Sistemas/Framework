@@ -12,9 +12,40 @@ interface
     end;
 
     TEmpresa = record
-      ID                     : String;
-      LOJA                   : String;
-      STRING_CONEXAO_RESERVA : String;
+      ID                                   : String;
+      LOJA                                 : String;
+      STRING_CONEXAO_RESERVA               : String;
+      EMPRESA_ENDERECO_CODIGO_MUNICIPIO    : String;
+      EMPRESA_ENDERECO_LOGRADOURO          : String;
+      EMPRESA_ENDERE_NUMERO                : String;
+      EMPRESA_ENDERECO_CEP                 : String;
+      EMPRESA_ENDERECO_BAIRRO              : String;
+      EMPRESA_ENDERECO_CIDADE              : String;
+      EMPRESA_ENDERECO_UF                  : String;
+      EMPRESA_ENDERECO_COMPLEMENTO         : String;
+      EMPRESA_FANTASIA                     : String;
+      EMPRESA_RAZAOSOCIAL                  : String;
+      EMPRESA_CNPJ                         : String;
+      EMPRESA_INSCICAO_ESTADUAL            : String;
+      EMPRESA_REGIME_NFE                   : Integer;
+      EMPRESA_TELEFONE                     : String;
+    end;
+
+    TConfiguracoesNF = record
+      NFE_AMBIENTE                         : Integer;
+      NFE_EVENTO_PATH                      : String;
+      NFE_INUTILIZADO_PATH                 : String;
+      NFE_XML_PATH                         : String;
+      NFE_SALVAR_PATH                      : String;
+      NFE_SCHEMAS_PATH                     : String;
+      EMPRESA_CERTIFICADO_PATH             : String;
+      EMPRESA_CERTIFICADO_SENHA            : String;
+      NFCE_TOKEN                           : String;
+      NFE_LOGO_PATH                        : String;
+      NFCE_LOGO_PATH                       : String;
+      EMPRESA_SCAN                         : TDateTime;
+      NFCE_ID_TOKEN                        : String;
+      NFE_TIPO_EMISSAO                     : Integer;
     end;
 
     IConexao = interface
@@ -37,6 +68,9 @@ interface
 
       function setEmpresa(pEmpresa: TEmpresa)                              : Boolean;
       function getEmpresa                                                  : TEmpresa;
+
+      function setConfiguracoesNF(pConfiguracoes : TConfiguracoesNF)       : Boolean;
+      function getConfiguracoes                                            : TConfiguracoesNF;
 
       procedure setContext(pUsuario: String);
 

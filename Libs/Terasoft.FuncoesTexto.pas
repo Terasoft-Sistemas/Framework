@@ -1,12 +1,9 @@
 unit Terasoft.FuncoesTexto;
-
 interface
-
 uses
   Classes,
   Terasoft.Types,
   DB;
-
   function textoEntreTags ( Texto, TagInicio, TagFim: String; PrimeiraOcorrencia: PInteger = nil; caseSensitive: boolean = true ): string;
   function validaCaracteresArquivo(Arquivo: String): String;
   function converteXMLNFeUTF8 ( conteudo: string; somenteUTF: boolean = false ): string;
@@ -33,27 +30,22 @@ uses
   function FormataFloat(pValor: Real ; pCasasDecimais: String = '00'): String;
   function completaComBranco(AValue:string; AQuantidade:integer; ALado: tlado):string;
   function Extenso(valor: real): String;
-
+  function WriteConexao(pHost : String): THost;
   procedure converteDateRangePicker(pData: String; out Data1, Data2: TDate);
-
 implementation
-
 uses
   StrUtils,
   SysUtils,
   MaskUtils,
   System.Variants;
-
 function FormataDinheiro(pValor: Real ; pCasasDecimais: String = '00'): String;
 begin
   Result := 'R$ '+ FormataFloat(pValor, pCasasDecimais);
 end;
-
 function FormataFloat(pValor: Real ; pCasasDecimais: String = '00'): String;
 begin
   Result := FormatFloat('#,##0.'+pCasasDecimais,pValor);
 end;
-
 function FormatarTelefone(Telefone : String):String;
   function SomenteNumero(snum : String) : String;
   VAR s1, s2: STRING;
@@ -99,8 +91,6 @@ begin
    end;
 end;
 
-
-
 function ZeroLeft(vZero: string; vQtd: integer): string;
 var
   i, vTam: integer;
@@ -111,18 +101,14 @@ begin
    Result := '';
    Exit;
   end;
-
   vAux  := vZero;
   vTam  := length(vZero);
   vZero := '';
-
   for i := 1 to vQtd - vTam do
     vZero := '0' + vZero;
-
   vAux   := vZero + vAux;
   result := vAux;
 end;
-
 function StringForStringList(BaseString, BreakString: string; StringList: TStringList): TStringList;
 var
   EndOfCurrentString: byte;
@@ -134,39 +120,31 @@ begin
       StringList.Add(BaseString)
     else
       StringList.Add(copy(BaseString, 1, EndOfCurrentString - 1));
-
     BaseString := copy(BaseString, EndOfCurrentString + Length(BreakString),
       Length(BaseString) - EndOfCurrentString);
   until EndOfCurrentString = 0;
   result := StringList;
 end;
-
 function FormataFloatFireBird(pValor: String): String;
 begin
   result := StringReplace(pValor, ',', '.', [rfReplaceAll]);
 end;
-
 function FormataFireBirdToFloat(pValor: String): Variant;
 begin
   if pValor = '' then
    pValor := '0';
-
   result := StringReplace(pValor, '.', ',', [rfReplaceAll]);
 end;
-
 function ConverteFloat(pMascara, pValor: String): String;
 var
   lNovoValor : real;
 begin
   lNovoValor := 0;
-
   try
     lNovoValor := StrToFloatDef(pValor, 0);
-
   except
     lNovoValor := 0;
   end;
-
   if lNovoValor = 0 then
     result := ''
   else
@@ -175,71 +153,58 @@ begin
     else
       result := FloatToStr(lNovoValor);
 end;
-
 function removeEnter(texto: String): string;
 begin
   Result := StringReplace(StringReplace(StringReplace(texto, #13, ' ', [rfReplaceAll]), #10, ' ', [rfReplaceAll]), '\', '\\', [rfReplaceAll]);
 end;
-
 procedure converteDateRangePicker(pData: String; out Data1, Data2: TDate);
 begin
   Data1 := StrToDate(copy(pData, 1,10));
   Data2 := StrToDate(copy(pData,14,10));
 end;
 
-
 Function transformaDataFireBird(data:Variant; separador:String = '-'):Variant;
 var
  dataInformada, dia, mes, ano:string;
 begin
   dataInformada := VarToStr(data);
-
   dia := copy(dataInformada,1,2);
   mes := copy(dataInformada,4,2);
   ano := copy(dataInformada,7,4);
-
 
   if dia = '' then
     Result := Unassigned
   else
     Result := mes + separador + dia + separador + ano;
 end;
-
 Function transformaDataFireBirdWhere(data:Variant; separador:String = '.'):Variant;
 var
  dataInformada, dia, mes, ano:string;
 begin
   dataInformada := VarToStr(data);
-
   dia := copy(dataInformada,1,2);
   mes := copy(dataInformada,4,2);
   ano := copy(dataInformada,7,4);
-
 
   if dia = '' then
     Result := Unassigned
   else
     Result := dia + separador + mes + separador + ano;
 end;
-
 Function transformaDataHoraFireBird(data:Variant):Variant;
 var
  dataInformada, dia, mes, ano, hora: string;
 begin
   dataInformada := VarToStr(data);
-
   dia  := copy(dataInformada, 1, 2);
   mes  := copy(dataInformada, 4, 2);
   ano  := copy(dataInformada, 7, 4);
-
   hora := copy(dataInformada, 12, 8);
-
   if dia = '' then
     Result := Unassigned
   else
     Result := mes + '-' + dia + '-' + ano + ' ' + hora;
 end;
-
 function converteTextoSemAcento(const str: String): String;
 var
   i: Integer;
@@ -299,9 +264,7 @@ begin
     end;
     Result[i] := c;
   end;
-
 end;
-
 function doubleQuotedStr(const S: string): string;
 var
   I: Integer;
@@ -310,7 +273,6 @@ begin
   for I := Length(Result) downto 1 do
     if Result[I] = '''' then Insert('''', Result, I);
 end;
-
 
 function converteTexto(Lista: TStrings;value:String): String;
   var
@@ -323,11 +285,9 @@ begin
     sO := lista.Names[i];
     if ( sO = '' ) then continue;
     sD := lista.ValueFromIndex[i];
-
     Result := StringReplace(Result, sO, sD, [ rfReplaceAll ] );
   end;
 end;
-
 function validaCaracteresArquivo(Arquivo: String): String;
   var i: Integer;
     c: Char;
@@ -340,7 +300,6 @@ begin
     Result := Result + c;
   end;
 end;
-
 function textoEntreTags ( Texto, TagInicio, TagFim: String; PrimeiraOcorrencia: PInteger = nil; caseSensitive: boolean = true ): string;
   var
     inicio, fim: Integer;
@@ -360,7 +319,6 @@ begin
     inicio := PrimeiraOcorrencia^;
 		PrimeiraOcorrencia^ := 0;
 	end;
-
 	if ( TagInicio = '' ) then
 		inicio := 1
 	else begin
@@ -381,7 +339,6 @@ begin
   Result := Copy ( Texto, inicio, fim - inicio );
 end;
 
-
 function converteXMLNFeUTF8 ( conteudo: string; somenteUTF: boolean = false ): string;
   const Assinatura1 = #239 + #187 + #191;
     tg1a = '<NFe ';
@@ -394,9 +351,7 @@ begin
     Result := Utf8ToAnsi(Copy(Conteudo, 4, Length(Conteudo ) - 3 ))
   else
     Result := Utf8ToAnsi(Conteudo);
-
   if ( somenteUTF ) then exit;
-
   save := Result;
   Result := TextoEntreTags(Result, tg1a, tg2 );
   if ( Result = '' ) then begin
@@ -408,13 +363,11 @@ begin
   end else
     Result := tg1a + Result + tg2;
 end;
-
 function formataResultado(valor: TField; tipoCampo: TTipoColunas = tcoString): string;
 var
   lResultado : String;
 begin
   lResultado := valor.AsString;
-
   if tipoCampo = tcoString then
     lResultado := valor.AsString
   else
@@ -438,40 +391,29 @@ begin
               else
                 if tipoCampo = tcoHora then
                   lResultado := FormatDateTime('hh:nn', valor.AsDateTime);
-
   lResultado := removeEnter(lResultado);
-
   result := '"' + lResultado + '"';
 end;
-
 function formatoCNPJCPFGenerico(field: TField;  texto: String; displayText: Boolean): String;
   var
     mascara: string;
 begin
-
   if(field=nil) then
     Result := texto
   else
     Result := field.AsString;
-
   if Result <> '' then
   begin
     if DisplayText then begin
       case Length(Result) of
-
         11 : mascara := '999.999.999-99;0;_';
-
         14 : mascara := '99.999.999/9999-99;0;_';
-
         else mascara := '999.999.999-99;0;_';
-
       end;
       Result := FormatMaskText(Mascara, Result);
     end;
   end;
-
 end;
-
 
 function valorNaListaPalavras(const valor: string; const listaPalavras: String; separador: char = ';'; padraoAntigo: String = ''; novoPadrao: String = '' ): boolean;
   var
@@ -492,53 +434,41 @@ begin
     lista.Free;
   end
 end;
-
 function formatoTelefoneGenerico(field: TField;   texto: String; displayText: Boolean): String;
   var
     mascara: string;
 begin
-
   if(field=nil) then
     Result := texto
   else
     Result := field.AsString;
-
   if Result <> '' then
   begin
     if DisplayText then begin
       case Length(Result) of
-
         10 : mascara := '\(00\)0000-00000;0;_';
-
         11 : mascara := '\(00\)00000-0000;0;_';
-
         else mascara := '\(00\)000000000;0;_';
-
       end;
       Result := FormatMaskText(Mascara, Result);
     end;
   end;
 end;
 
-
 function formatoCEPGenerico(field: TField;  texto: String; displayText: Boolean): String;
   var
     mascara: string;
 begin
-
   if(field=nil) then
     Result := texto
   else
     Result := field.AsString;
-
   if DisplayText then
   begin
     mascara := '00\.000\-000;0;_';
     Result := FormatMaskText(Mascara, Result);
   end;
-
 end;
-
 
 function removeCaracteresGraficos(texto: String): String;
 var
@@ -546,9 +476,7 @@ var
   I: Integer;
 begin
   remove := ',.-/(){}[] ';
-
   final := '';
-
   for I := 1 to Length(texto) do
   begin
     if pos(texto[I], remove) = 0 then
@@ -556,7 +484,6 @@ begin
   end;
   Result := final;
 end;
-
 function completaComBranco(AValue:string; AQuantidade:integer; ALado: tlado):string;
 var
   contador:integer;
@@ -566,18 +493,14 @@ begin
   begin
     Result := Result + ' ';
   end;
-
   if Alado = lEsquerdo then
      Result := Result + AValue
   else
     Result := AValue + Result
-
 end;
-
 function Extenso(valor: real): String;
 var
   Centavos, Centena, Milhar, Milhao, Bilhao, Texto : string;
-
 const
   Unidades: array [1..9] of string = ('um', 'dois', 'três','quatro','cinco',
   'seis', 'sete', 'oito','nove');
@@ -618,7 +541,6 @@ const
         Centena := Centenas[StrToInt(Valor[1])]
       else
         Centena := '';
-
     Result := Centena + ifs( (Centena <> '') and ((Dezena <> '') or
     (Unidade <> '')),' e ', '') + Dezena + ifs( (Dezena <> '') and
     (Unidade <> ''), ' e ','') + Unidade;
@@ -626,38 +548,30 @@ const
 begin
   if valor  <= 0 then
   Exit;
-
   if Valor = 0 then
   begin
     Result := '';
     Exit;
   end;
-
   Texto    := FormatFloat( '000000000000.00', Valor );
   Centavos := MiniExtenso( '0' + Copy( Texto, 14, 2 ) );
   Centena  := MiniExtenso( Copy( Texto, 10, 3 ) );
   Milhar   := MiniExtenso( Copy( Texto,  7, 3 ) );
-
   if Milhar <> '' then
     Milhar := Milhar + ' mil';
-
   Milhao   := MiniExtenso( Copy( Texto,  4, 3 ) );
-
   if Milhao <> '' then
   begin
     Milhao := Milhao
     + ifs( Copy( Texto, 4,
     3 ) = '001', ' milhão', ' milhões');
   end;
-
   Bilhao   := MiniExtenso( Copy( Texto,  1, 3 ) );
-
   if Bilhao <> '' then
   begin
     Bilhao := Bilhao + ifs( Copy( Texto, 1, 3 ) = '001', ' bilhão',
     ' bilhões');
   end;
-
   Result := Bilhao + ifs( (Bilhao <> '') and (Milhao + Milhar +
   Centena <> ''),
   ifs((Pos(' e ', Bilhao) > 0) or (Pos( ' e ',
@@ -667,7 +581,6 @@ begin
   (Pos( ' e ', Milhar + Centena ) > 0 ),', ',    ' e '), '') +
   Milhar + ifs( (Milhar <> '') and
   (Centena <> ''), ifs(Pos( ' e ', Centena ) > 0, ', ', ' e '),'') + Centena;
-
   if (Bilhao <> '') and (Milhao + Milhar + Centena = '') then
     Result := Bilhao + ' de reais'
   else
@@ -692,10 +605,13 @@ begin
       ' centavo', ' centavos' );
   end;
 end;
-
+function WriteConexao(pHost : String): THost;
+begin
+  Result.Server   := Copy(pHost, 1, pos('/', pHost) -1);
+  Result.Port     := Copy(pHost, pos('/', pHost) + 1, pos(':', pHost) - (pos('/', pHost) + 1));
+  Result.DataBase := Copy(pHost, pos(':', pHost) + 1, pHost.Length);
+  Result.DataBase := StringReplace(Result.DataBase, '\\', '\', [rfReplaceAll]);
+end;
 initialization
-
 finalization
-
 end.
-
