@@ -85,8 +85,11 @@ type
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
-
+    function Incluir : String;
+    function Alterar(pID : String) : TCreditoClienteModel;
+    function Excluir(pID : String) : String;
     function Salvar: String;
+    function carregaClasse(pID : String) : TCreditoClienteModel;
     procedure obterLista;
     procedure creditosAbertos(pCliente : String);
     function totalCreditosAberto(pCliente: String) : Double;
@@ -109,6 +112,46 @@ uses
   CreditoClienteDao;
 
 { TCreditoClienteModel }
+
+function TCreditoClienteModel.Alterar(pID: String): TCreditoClienteModel;
+var
+  lCreditoClienteModel : TCreditoClienteModel;
+begin
+  lCreditoClienteModel := lCreditoClienteModel.Create(vIConexao);
+  try
+    lCreditoClienteModel      := lCreditoClienteModel.carregaClasse(pID);
+    lCreditoClienteModel.Acao := tacAlterar;
+    Result                    := lCreditoClienteModel;
+  finally
+
+  end;
+end;
+
+function TCreditoClienteModel.carregaClasse(pID: String): TCreditoClienteModel;
+var
+  lCreditoClienteDao: TCreditoClienteDao;
+begin
+
+  lCreditoClienteDao := TCreditoClienteDao.Create(vIConexao);
+  try
+    Result := lCreditoClienteDao.carregaClasse(pId);
+  finally
+    lCreditoClienteDao.Free;
+  end;
+end;
+
+function TCreditoClienteModel.Excluir(pID: String): String;
+begin
+  self.Fid  := pID;
+  self.Acao := tacExcluir;
+  Result    := self.Salvar;
+end;
+
+function TCreditoClienteModel.Incluir: String;
+begin
+  self.Acao := tacIncluir;
+  self.Salvar;
+end;
 
 constructor TCreditoClienteModel.Create(pIConexao : IConexao);
 begin

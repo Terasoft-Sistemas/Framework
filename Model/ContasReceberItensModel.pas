@@ -191,8 +191,10 @@ type
 
   	constructor Create(pConexao: IConexao);
     destructor Destroy; override;
-    function Salvar: String;
-
+    function Salvar  : String;
+    function Incluir : String;
+    function Alterar(pID : String) : TContasReceberItensModel;
+    function Excluir(pID : String) : String;
     procedure obterLista;
     procedure obterRecebimentoContasReceber;
 
@@ -256,6 +258,33 @@ uses
   CreditoClienteUsoModel;
 
 { TContasReceberItensModel }
+
+function TContasReceberItensModel.Alterar(pID: String): TContasReceberItensModel;
+var
+  lContasReceberItensModel : TContasReceberItensModel;
+begin
+  lContasReceberItensModel := lContasReceberItensModel.Create(vIConexao);
+  try
+    lContasReceberItensModel      := lContasReceberItensModel.carregaClasse(pID);
+    lContasReceberItensModel.Acao := tacAlterar;
+    Result                        := lContasReceberItensModel;
+  finally
+
+  end;
+end;
+
+function TContasReceberItensModel.Excluir(pID: String): String;
+begin
+  self.FID  := pID;
+  self.Acao := tacExcluir;
+  Result    := self.Salvar;
+end;
+
+function TContasReceberItensModel.Incluir: String;
+begin
+  self.Acao := tacIncluir;
+  self.Salvar;
+end;
 
 function TContasReceberItensModel.baixar(pValor: String): String;
 begin

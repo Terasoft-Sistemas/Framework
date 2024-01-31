@@ -128,6 +128,9 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    function Incluir : String;
+    function Alterar(pID : String) : TPortadorModel;
+    function Excluir(pID : String) : String;
     function Salvar: String;
     procedure obterLista;
 
@@ -153,6 +156,33 @@ uses
   PortadorDao, AdmCartaoDao, System.SysUtils;
 
 { TPortadorModel }
+
+function TPortadorModel.Alterar(pID: String): TPortadorModel;
+var
+  lPortadorModel : TPortadorModel;
+begin
+  lPortadorModel := lPortadorModel.Create(vIConexao);
+  try
+    lPortadorModel := lPortadorModel.carregaClasse(pID);
+    lPortadorModel.Acao := tacAlterar;
+    Result := lPortadorModel;
+  finally
+
+  end;
+end;
+
+function TPortadorModel.Excluir(pID: String): String;
+begin
+  self.FID  := pID;
+  self.Acao := tacExcluir;
+  Result    := self.Salvar;
+end;
+
+function TPortadorModel.Incluir: String;
+begin
+  self.FAcao := tacIncluir;
+  self.Salvar;
+end;
 
 function TPortadorModel.carregaClasse(pId: String): TPortadorModel;
 var

@@ -463,6 +463,7 @@ begin
     memoResultado.Lines.Add('VALOR_CUPOM_DESCONTO: '+lWebPedidoModel.VALOR_CUPOM_DESCONTO);
     memoResultado.Lines.Add('VALOR_ITENS: '+lWebPedidoModel.VALOR_ITENS);
     memoResultado.Lines.Add('VALOR_TOTAL: '+lWebPedidoModel.VALOR_TOTAL);
+    memoResultado.Lines.Add('===============================================');
   finally
     lWebPedidoModel.Free;
   end;

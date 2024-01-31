@@ -148,7 +148,9 @@ type
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
-
+    function Incluir : String;
+    function Alterar(pID : String) : TContaCorrenteModel;
+    function Excluir(pID : String) : String;
     function Salvar: String;
     procedure obterLista;
 
@@ -172,6 +174,33 @@ uses
   ContaCorrenteDao;
 
 { TContaCorrenteModel }
+
+function TContaCorrenteModel.Incluir: String;
+begin
+  self.Acao := tacIncluir;
+  self.Salvar;
+end;
+
+function TContaCorrenteModel.Alterar(pID: String): TContaCorrenteModel;
+var
+  lContaCorrenteModel : TContaCorrenteModel;
+begin
+  lContaCorrenteModel := lContaCorrenteModel.Create(vIConexao);
+  try
+    lContaCorrenteModel      := lContaCorrenteModel.carregaClasse(pID);
+    lContaCorrenteModel.Acao := tacAlterar;
+    Result                   := lContaCorrenteModel;
+  finally
+
+  end;
+end;
+
+function TContaCorrenteModel.Excluir(pID: String): String;
+begin
+  self.FID  := pID;
+  self.Acao := tacExcluir;
+  Result    := self.Salvar;
+end;
 
 function TContaCorrenteModel.carregaClasse(pId: String): TContaCorrenteModel;
 var

@@ -59,7 +59,11 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function Salvar: String;
+    function Incluir : String;
+    function Alterar(pID : String): TPrecoUFModel;
+    function Excluir(pID : String): String;
+    function carregaClasse(ID: String): TPrecoUFModel;
+    function Salvar  : String;
     procedure obterLista;
 
     property PrecoUFsLista: TObjectList<TPrecoUFModel> read FPrecoUFsLista write SetPrecoUFsLista;
@@ -81,6 +85,32 @@ uses
 
 { TPrecoUFModel }
 
+function TPrecoUFModel.Alterar(pID: String): TPrecoUFModel;
+var
+  lPrecoUFModel : TPrecoUFModel;
+begin
+  lPrecoUFModel := lPrecoUFModel.Create(vIConexao);
+  try
+    lPrecoUFModel       := lPrecoUFModel.carregaClasse(pID);
+    lPrecoUFModel.Acao  := tacAlterar;
+    Result              := lPrecoUFModel;
+  finally
+
+  end;
+end;
+
+function TPrecoUFModel.carregaClasse(ID: String): TPrecoUFModel;
+var
+  lPrecoUFModel: TPrecoUFDao;
+begin
+  lPrecoUFModel := TPrecoUFDao.Create(vIConexao);
+  try
+    Result := lPrecoUFModel.carregaClasse(ID);
+  finally
+    lPrecoUFModel.Free;
+  end;
+end;
+
 constructor TPrecoUFModel.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
@@ -90,6 +120,19 @@ destructor TPrecoUFModel.Destroy;
 begin
 
   inherited;
+end;
+
+function TPrecoUFModel.Excluir(pID: String): String;
+begin
+  self.FID    := pID;
+  self.FAcao  := tacExcluir;
+  Result      := self.Salvar;
+end;
+
+function TPrecoUFModel.Incluir: String;
+begin
+  self.Acao := tacIncluir;
+  self.Salvar;
 end;
 
 procedure TPrecoUFModel.obterLista;

@@ -56,7 +56,7 @@ type
     function incluir(pPrecoUFModel: TPrecoUFModel): String;
     function alterar(pPrecoUFModel: TPrecoUFModel): String;
     function excluir(pPrecoUFModel: TPrecoUFModel): String;
-
+    function carregaClasse(ID: String): TPrecoUFModel;
     procedure obterLista;
 end;
 implementation
@@ -64,6 +64,36 @@ implementation
 uses
   System.Rtti;
 { TPrecoUF }
+function TPrecoUFDao.carregaClasse(ID: String): TPrecoUFModel;
+var
+  lQry: TFDQuery;
+  lModel: TPrecoUFModel;
+begin
+  lQry     := vIConexao.CriarQuery;
+  lModel   := TPrecoUFModel.Create(vIConexao);
+  Result   := lModel;
+
+  try
+    lQry.Open('select * from PRECO_UF where ID = ' + ID);
+
+    if lQry.IsEmpty then
+      Exit;
+
+      lModel.ID          := lQry.FieldByName('ID').AsString;
+      lModel.PRODUTO_ID  := lQry.FieldByName('PRODUTO_ID').AsString;
+      lModel.UF          := lQry.FieldByName('UF').AsString;
+      lModel.COMISSAO    := lQry.FieldByName('COMISSAO').AsString;
+      lModel.SIMPLES     := lQry.FieldByName('SIMPLES').AsString;
+      lModel.ICMS_ST     := lQry.FieldByName('ICMS_ST').AsString;
+      lModel.SYSTIME     := lQry.FieldByName('SYSTIME').AsString;
+
+    Result := lModel;
+
+  finally
+    lQry.Free;
+  end;
+end;
+
 constructor TPrecoUFDao.Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;

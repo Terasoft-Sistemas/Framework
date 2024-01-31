@@ -61,7 +61,7 @@ type
     function incluir(ACreditoClienteUsoModel: TCreditoClienteUsoModel): String;
     function alterar(ACreditoClienteUsoModel: TCreditoClienteUsoModel): String;
     function excluir(ACreditoClienteUsoModel: TCreditoClienteUsoModel): String;
-	
+	  function carregaClasse(pID : String) : TCreditoClienteUsoModel;
     procedure obterLista;
     procedure setParams(var pQry: TFDQuery; pCreditoClienteUsoModel: TCreditoClienteUsoModel);
 
@@ -73,6 +73,39 @@ uses
   System.Rtti;
 
 { TCreditoClienteUso }
+
+function TCreditoClienteUsoDao.carregaClasse(pID: String): TCreditoClienteUsoModel;
+var
+  lQry: TFDQuery;
+  lModel: TCreditoClienteUsoModel;
+begin
+  lQry     := vIConexao.CriarQuery;
+  lModel   := TCreditoClienteUsoModel.Create(vIConexao);
+  Result   := lModel;
+
+  try
+    lQry.Open('select * from CREDITO_CLIENTE_USO where ID = ' + ID);
+
+    if lQry.IsEmpty then
+      Exit;
+
+    lModel.ID                 := lQry.FieldByName('ID').AsString;
+    lModel.CREDITO_CLIENTE_ID := lQry.FieldByName('CREDITO_CLIENTE_ID').AsString;
+    lModel.DATA               := lQry.FieldByName('DATA').AsString;
+    lModel.VALOR              := lQry.FieldByName('VALOR').AsString;
+    lModel.PARCELA            := lQry.FieldByName('PARCELA').AsString;
+    lModel.RECEBER_ID         := lQry.FieldByName('RECEBER_ID').AsString;
+    lModel.LOCAL              := lQry.FieldByName('LOCAL').AsString;
+    lModel.USUARIO_ID         := lQry.FieldByName('USUARIO_ID').AsString;
+    lModel.DATAHORA           := lQry.FieldByName('DATAHORA').AsString;
+    lModel.SYSTIME            := lQry.FieldByName('SYSTIME').AsString;
+
+    Result := lModel;
+
+  finally
+    lQry.Free;
+  end;
+end;
 
 constructor TCreditoClienteUsoDao.Create(pIConexao : IConexao);
 begin

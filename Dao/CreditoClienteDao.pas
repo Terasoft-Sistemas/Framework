@@ -60,7 +60,7 @@ type
     function incluir(ACreditoClienteModel: TCreditoClienteModel): String;
     function alterar(ACreditoClienteModel: TCreditoClienteModel): String;
     function excluir(ACreditoClienteModel: TCreditoClienteModel): String;
-
+    function carregaClasse(pID : String) : TCreditoClienteModel;
     function where: String;
 
     procedure obterLista;
@@ -75,6 +75,44 @@ uses
   System.Rtti;
 
 { TCreditoCliente }
+
+function TCreditoClienteDao.carregaClasse(pID: String): TCreditoClienteModel;
+var
+  lQry: TFDQuery;
+  lModel: TCreditoClienteModel;
+begin
+  lQry     := vIConexao.CriarQuery;
+  lModel   := TCreditoClienteModel.Create(vIConexao);
+  Result   := lModel;
+
+  try
+    lQry.Open('select * from CREDITO_CLIENTE where ID = ' + ID);
+
+    if lQry.IsEmpty then
+      Exit;
+
+      lModel.ID                   := lQry.FieldByName('ID').AsString;
+      lModel.CLIENTE_ID           := lQry.FieldByName('CLIENTE_ID').AsString;
+      lModel.DEVOLUCAO_ID         := lQry.FieldByName('DEVOLUCAO_ID').AsString;
+      lModel.DATA                 := lQry.FieldByName('DATA').AsString;
+      lModel.VALOR                := lQry.FieldByName('VALOR').AsString;
+      lModel.TIPO                 := lQry.FieldByName('TIPO').AsString;
+      lModel.OBS                  := lQry.FieldByName('OBS').AsString;
+      lModel.ENTRADA_ID           := lQry.FieldByName('ENTRADA_ID').AsString;
+      lModel.FORNECEDOR_ID        := lQry.FieldByName('FORNECEDOR_ID').AsString;
+      lModel.FATURA_ID            := lQry.FieldByName('FATURA_ID').AsString;
+      lModel.SYSTIME              := lQry.FieldByName('SYSTIME').AsString;
+      lModel.PEDIDO_SITE          := lQry.FieldByName('PEDIDO_SITE').AsString;
+      lModel.CONTACORRENTE_ID     := lQry.FieldByName('CONTACORRENTE_ID').AsString;
+      lModel.CLIENTE_ANTERIOR_ID  := lQry.FieldByName('CLIENTE_ANTERIOR_ID').AsString;
+      lModel.VENDA_CASADA         := lQry.FieldByName('VENDA_CASADA').AsString;
+
+    Result := lModel;
+
+  finally
+    lQry.Free;
+  end;
+end;
 
 constructor TCreditoClienteDao.Create(pIConexao : IConexao);
 begin
