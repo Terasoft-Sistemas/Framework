@@ -280,7 +280,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pNFModel.numero_nf := vIConexao.Generetor('gen_nf');
+    pNFModel.numero_nf := vIConexao.Generetor('gen_nf', true);
 
     if pNFModel.MODELO = '65' then
       pNFModel.numero_ecf := vIConexao.Generetor('GEN_NFCe')

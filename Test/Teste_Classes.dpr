@@ -81,7 +81,8 @@ uses
   TabelaJurosDao in '..\Dao\TabelaJurosDao.pas',
   SaldoModel in '..\Model\SaldoModel.pas',
   SaldoDao in '..\Dao\SaldoDao.pas',
-  Terasoft.FuncoesTexto in '..\Libs\Terasoft.FuncoesTexto.pas';
+  Terasoft.FuncoesTexto in '..\Libs\Terasoft.FuncoesTexto.pas',
+  GeneratorNewDao in '..\Dao\GeneratorNewDao.pas';
 
 {$R *.res}
 

@@ -56,7 +56,7 @@ interface
       function criaConexao                                                 : IConexao;
       function ConfigConexao                                               : Boolean;
       function ConfigConexaoExterna(pLoja: String; pHost : String = '')    : Boolean;
-      function Generetor(pValue: String)                                   : String;
+      function Generetor(pValue: String; pCrtGen : Boolean = false)        : String;
       function getConnection                                               : TFDConnection;
       function getLojaConectada                                            : String;
       function DataServer                                                  : TDate;

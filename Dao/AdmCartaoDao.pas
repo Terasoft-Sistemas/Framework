@@ -136,7 +136,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    AAdmCartaoModel.ID := vIConexao.Generetor('GEN_ADMCARTAO');
+    AAdmCartaoModel.ID := vIConexao.Generetor('GEN_ADMCARTAO', true);
     setParams(lQry, AAdmCartaoModel);
     lQry.Open;
 

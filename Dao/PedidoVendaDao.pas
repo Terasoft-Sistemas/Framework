@@ -293,7 +293,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pPedidoVendaModel.NUMERO_PED := vIConexao.Generetor('GEN_PEDIDOVENDA');
+    pPedidoVendaModel.NUMERO_PED := vIConexao.Generetor('GEN_PEDIDOVENDA', true);
     setParams(lQry, pPedidoVendaModel);
     lQry.Open;
 

@@ -179,6 +179,7 @@
         <DCCReference Include="..\Model\SaldoModel.pas"/>
         <DCCReference Include="..\Dao\SaldoDao.pas"/>
         <DCCReference Include="..\Libs\Terasoft.FuncoesTexto.pas"/>
+        <DCCReference Include="..\Dao\GeneratorNewDao.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

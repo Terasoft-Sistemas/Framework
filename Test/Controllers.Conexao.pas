@@ -20,7 +20,7 @@ interface
         function ConfigConexao                                             : Boolean;
         function criarQueryExterna                                         : TFDQuery;
         function ConfigConexaoExterna(pLoja: String; pHost : String = '')  : Boolean;
-        function Generetor(pValue: String)                                 : String;
+        function Generetor(pValue: String; pCtrGen : Boolean = false)      : String;
         function getConnection                                             : TFDConnection;
         function getLojaConectada                                          : String;
         function DataServer                                                : TDate;
@@ -50,7 +50,7 @@ implementation
 uses
   uTeste,
   System.SysUtils,
-  LojasModel, Terasoft.Types;
+  LojasModel, Terasoft.Types, GeneratorNewDao;
 
 { TControllersConexao }
 
@@ -126,9 +126,22 @@ begin
   inherited;
 end;
 
-function TControllersConexao.Generetor(pValue: String): String;
+function TControllersConexao.Generetor(pValue: String; pCtrGen : Boolean = false): String;
+var
+  lGeneratorDao : TGeneratorNewDao;
 begin
-  Result := Form1.vConexao.Generetor(pValue);
+  lGeneratorDao := TGeneratorNewDao.Create(self);
+  try
+    if pCtrGen then
+    begin
+      Result := lGeneratorDao.generator(pValue);
+      exit;
+    end;
+
+    Result := Form1.vConexao.Generetor(pValue);
+  finally
+    lGeneratorDao.Free;
+  end;
 end;
 
 function TControllersConexao.getConfiguracoes: TConfiguracoesNF;
