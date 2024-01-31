@@ -64,8 +64,11 @@ type
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
-
+    function Incluir : String;
+    function Alterar(pID : String) : TCreditoClienteUsoModel;
+    function Excluir(pID : String) : String;
     function Salvar: String;
+    function carregaClasse(pID : String) : TCreditoClienteUsoModel;
     procedure obterLista;
 
     property CreditoClienteUsosLista: TObjectList<TCreditoClienteUsoModel> read FCreditoClienteUsosLista write SetCreditoClienteUsosLista;
@@ -87,6 +90,33 @@ uses
 
 { TCreditoClienteUsoModel }
 
+function TCreditoClienteUsoModel.Alterar(pID: String): TCreditoClienteUsoModel;
+var
+  lCreditoClienteUsoModel : TCreditoClienteUsoModel;
+begin
+  lCreditoClienteUsoModel := lCreditoClienteUsoModel.Create(vIConexao);
+  try
+    lCreditoClienteUsoModel      := lCreditoClienteUsoModel.carregaClasse(pID);
+    lCreditoClienteUsoModel.Acao := tacAlterar;
+    Result                       := lCreditoClienteUsoModel;
+  finally
+
+  end;
+end;
+
+function TCreditoClienteUsoModel.carregaClasse(pID: String): TCreditoClienteUsoModel;
+var
+  lCreditoClienteUsoDao: TCreditoClienteUsoDao;
+begin
+
+  lCreditoClienteUsoDao := TCreditoClienteUsoDao.Create(vIConexao);
+  try
+    Result := lCreditoClienteUsoDao.carregaClasse(pId);
+  finally
+    lCreditoClienteUsoDao.Free;
+  end;
+end;
+
 constructor TCreditoClienteUsoModel.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
@@ -96,6 +126,19 @@ destructor TCreditoClienteUsoModel.Destroy;
 begin
 
   inherited;
+end;
+
+function TCreditoClienteUsoModel.Excluir(pID: String): String;
+begin
+  self.FID  := pID;
+  self.Acao := tacExcluir;
+  Result    := self.Salvar;
+end;
+
+function TCreditoClienteUsoModel.Incluir: String;
+begin
+  self.Acao := tacIncluir;
+  self.Salvar;
 end;
 
 procedure TCreditoClienteUsoModel.obterLista;

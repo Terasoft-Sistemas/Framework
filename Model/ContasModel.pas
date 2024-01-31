@@ -108,7 +108,11 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function Salvar: String;
+    function Incluir : String;
+    function Salvar  : String;
+    function Alterar(pID : String) : TContasModel;
+    function Excluir(pID : String) : String;
+    function carregaClasse(pID : String) : TContasModel;
     procedure obterLista;
 
     property ContassLista: TObjectList<TContasModel> read FContassLista write SetContassLista;
@@ -129,6 +133,33 @@ uses
   ContasDao;
 
 { TContasModel }
+
+function TContasModel.Alterar(pID: String): TContasModel;
+var
+  lContasModel : TContasModel;
+begin
+  lContasModel := lContasModel.Create(vIConexao);
+  try
+    lContasModel      := lContasModel.carregaClasse(pID);
+    lContasModel.Acao := tacAlterar;
+    Result            := lContasModel;
+  finally
+
+  end;
+end;
+
+function TContasModel.Excluir(pID: String): String;
+begin
+  self.FID  := pID;
+  self.Acao := tacExcluir;
+  result    := self.Salvar;
+end;
+
+function TContasModel.Incluir: String;
+begin
+  self.Acao := tacIncluir;
+  self.Salvar;
+end;
 
 constructor TContasModel.Create(pIConexao : IConexao);
 begin

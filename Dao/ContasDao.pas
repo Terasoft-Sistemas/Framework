@@ -59,7 +59,7 @@ type
     function incluir(AContasModel: TContasModel): String;
     function alterar(AContasModel: TContasModel): String;
     function excluir(AContasModel: TContasModel): String;
-
+    function carregaClasse(pID : String) : TContasModel;
     procedure obterLista;
     procedure setParams(var pQry: TFDQuery; pContasModel: TContasModel);
 
@@ -71,6 +71,52 @@ uses
   System.Rtti;
 
 { TContas }
+
+function TContasDao.carregaClasse(pID: String): TContasModel;
+var
+  lQry: TFDQuery;
+  lModel: TContasModel;
+begin
+  lQry     := vIConexao.CriarQuery;
+  lModel   := TContasModel.Create(vIConexao);
+  Result   := lModel;
+
+  try
+    lQry.Open('select * from CONTAS where ID = ' + ID);
+
+    if lQry.IsEmpty then
+      Exit;
+
+    lModel.ID                           := lQry.FieldByName('ID').AsString;
+    lModel.CLASSIFICACAO                := lQry.FieldByName('CLASSIFICACAO').AsString;
+    lModel.CODIGO_CTA                   := lQry.FieldByName('CODIGO_CTA').AsString;
+    lModel.NOME_CTA                     := lQry.FieldByName('NOME_CTA').AsString;
+    lModel.TIPO_CTA                     := lQry.FieldByName('TIPO_CTA').AsString;
+    lModel.DR_CTA                       := lQry.FieldByName('DR_CTA').AsString;
+    lModel.USUARIO_CTA                  := lQry.FieldByName('USUARIO_CTA').AsString;
+    lModel.BANCO_CTA                    := lQry.FieldByName('BANCO_CTA').AsString;
+    lModel.BAIXAPAGAR_CTA               := lQry.FieldByName('BAIXAPAGAR_CTA').AsString;
+    lModel.TIPOSEMDR_CTA                := lQry.FieldByName('TIPOSEMDR_CTA').AsString;
+    lModel.TIPOSEMDR_CTA_RECEBIMENTO    := lQry.FieldByName('TIPOSEMDR_CTA_RECEBIMENTO').AsString;
+    lModel.GRUPO_CTA                    := lQry.FieldByName('GRUPO_CTA').AsString;
+    lModel.SUBGRUPO_CTA                 := lQry.FieldByName('SUBGRUPO_CTA').AsString;
+    lModel.CENTROCUSTO_CTA              := lQry.FieldByName('CENTROCUSTO_CTA').AsString;
+    lModel.EXTRATO_CTA                  := lQry.FieldByName('EXTRATO_CTA').AsString;
+    lModel.ORDEM                        := lQry.FieldByName('ORDEM').AsString;
+    lModel.LOJA                         := lQry.FieldByName('LOJA').AsString;
+    lModel.EMPRESTIMO_CTA               := lQry.FieldByName('EMPRESTIMO_CTA').AsString;
+    lModel.STATUS                       := lQry.FieldByName('STATUS').AsString;
+    lModel.CREDITO_ICMS                 := lQry.FieldByName('CREDITO_ICMS').AsString;
+    lModel.RECEITAXDESPESAS             := lQry.FieldByName('RECEITAXDESPESAS').AsString;
+    lModel.SYSTIME                      := lQry.FieldByName('SYSTIME').AsString;
+    lModel.CREDITO_CLIENTE_CTA          := lQry.FieldByName('CREDITO_CLIENTE_CTA').AsString;
+    lModel.CREDITO_FORNECEDOR_CTA       := lQry.FieldByName('CREDITO_FORNECEDOR_CTA').AsString;
+    Result := lModel;
+
+  finally
+    lQry.Free;
+  end;
+end;
 
 constructor TContasDao.Create(pIConexao : IConexao);
 begin

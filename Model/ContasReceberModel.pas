@@ -174,6 +174,9 @@ type
 
   	constructor Create(pConexao : IConexao);
     destructor Destroy; override;
+    function Incluir : String;
+    function Alterar(pID : String) : TContasReceberModel;
+    function Excluir(pID : String) : String;
     function Salvar: String;
     procedure obterLista;
     procedure obterContasReceberPedido;
@@ -211,6 +214,33 @@ uses
   CaixaModel,
   TEFModel;
 { TContasReceberModel }
+
+function TContasReceberModel.Incluir: String;
+begin
+  self.FAcao := tacIncluir;
+  self.Salvar;
+end;
+
+function TContasReceberModel.Alterar(pID: String): TContasReceberModel;
+var
+  lContasReceberModel : TContasReceberModel;
+begin
+  lContasReceberModel := lContasReceberModel.Create(vIConexao);
+  try
+    lContasReceberModel      := lContasReceberModel.carregaClasse(pID);
+    lContasReceberModel.Acao := tacAlterar;
+    Result                   := lContasReceberModel;
+  finally
+
+  end;
+end;
+
+function TContasReceberModel.Excluir(pID: String): String;
+begin
+  self.FID  := pID;
+  self.Acao := tacExcluir;
+  Result    := self.Salvar;
+end;
 
 function TContasReceberModel.carregaClasse(pFatura: String): TContasReceberModel;
 var
