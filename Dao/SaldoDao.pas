@@ -85,21 +85,41 @@ var
   lQry  : TFDQuery;
 begin
   try
-    lSql :=  '  select r.id documento,                                                                        '+SLineBreak+
-             '         r.origem,                                                                              '+SLineBreak+
-             '         r.data,                                                                                '+SLineBreak+
-             '         case                                                                                   '+SLineBreak+
-             '         when r.origem = ''Entrada pendente'' then f.fantasia_for                               '+SLineBreak+
-             '         else                                                                                   '+SLineBreak+
-             '         c.fantasia_cli                                                                         '+SLineBreak+
-             '         end cliente,                                                                           '+SLineBreak+
-             '         r.reservado,                                                                           '+SLineBreak+
-             '         l2.descricao loja                                                                      '+SLineBreak+
-             '    from view_reservados r                                                                      '+SLineBreak+
-             '    left join loja2 l2 on r.loja = l2.loja                                                      '+SLineBreak+
-             '    left join clientes c on c.codigo_cli = r.cliente_id and r.origem <> ''Entrada pendente''    '+SLineBreak+
-             '    left join fornecedor f on f.codigo_for = r.cliente_id  and r.origem = ''Entrada pendente''  '+SLineBreak+
-             '   where r.reservado <> 0 and r.produto_id = '+ QuotedStr(pProduto);
+    lSql := '  select                                                                                                 '+SLineBreak+
+            '        DOCUMENTO,                                                                                       '+SLineBreak+
+            '        ORIGEM,                                                                                          '+SLineBreak+
+            '        DATA,                                                                                            '+SLineBreak+
+            '        CLIENTE,                                                                                         '+SLineBreak+
+            '        RESERVADO,                                                                                       '+SLineBreak+
+            '        LOJA,                                                                                            '+SLineBreak+
+            '        PRODUTO                                                                                          '+SLineBreak+
+            '                                                                                                         '+SLineBreak+
+            '    from                                                                                                 '+SLineBreak+
+            '        (                                                                                                '+SLineBreak+
+            '        select                                                                                           '+SLineBreak+
+            '            r.id documento,                                                                              '+SLineBreak+
+            '            r.origem,                                                                                    '+SLineBreak+
+            '            r.data,                                                                                      '+SLineBreak+
+            '            case                                                                                         '+SLineBreak+
+            '            when r.origem = ''Entrada pendente'' then f.fantasia_for                                     '+SLineBreak+
+            '            else                                                                                         '+SLineBreak+
+            '            c.fantasia_cli                                                                               '+SLineBreak+
+            '            end cliente,                                                                                 '+SLineBreak+
+            '            r.reservado,                                                                                 '+SLineBreak+
+            '            l2.loja loja,                                                                                '+SLineBreak+
+            '            r.produto_id produto                                                                         '+SLineBreak+
+            '                                                                                                         '+SLineBreak+
+            '        from                                                                                             '+SLineBreak+
+            '            view_reservados r                                                                            '+SLineBreak+
+            '                                                                                                         '+SLineBreak+
+            '            left join loja2 l2 on r.loja = l2.loja                                                       '+SLineBreak+
+            '            left join clientes c on c.codigo_cli = r.cliente_id and r.origem <> ''Entrada pendente''     '+SLineBreak+
+            '            left join fornecedor f on f.codigo_for = r.cliente_id  and r.origem = ''Entrada pendente''   '+SLineBreak+
+            '        ) r                                                                                              '+SLineBreak+
+            '                                                                                                         '+SLineBreak+
+            '    where                                                                                                '+SLineBreak+
+            '        r.RESERVADO <> 0 and r.PRODUTO = ' + QuotedStr(pProduto);
+
 
     vIConexao.ConfigConexaoExterna('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA);
 
