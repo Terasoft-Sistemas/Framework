@@ -1058,6 +1058,7 @@ procedure TContasReceberItensModel.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
 end;
+
 { TRecebimentoContasReceber }
 
 procedure TRecebimentoContasReceber.SetID(const Value: Variant);

@@ -21,8 +21,6 @@ object Form1: TForm1
     ActivePage = TabSheet1
     Align = alClient
     TabOrder = 0
-    ExplicitWidth = 1246
-    ExplicitHeight = 733
     object TabSheet1: TTabSheet
       Caption = 'Teste 1'
       object memoResultado: TMemo
@@ -71,7 +69,7 @@ object Form1: TForm1
       end
       object Button4: TButton
         Left = 191
-        Top = 87
+        Top = 63
         Width = 182
         Height = 42
         Caption = 'WebPedido Consultar'
@@ -80,7 +78,7 @@ object Form1: TForm1
       end
       object Button5: TButton
         Left = 3
-        Top = 87
+        Top = 63
         Width = 182
         Height = 42
         Caption = 'WebPedido Inserir'
@@ -89,7 +87,7 @@ object Form1: TForm1
       end
       object Button6: TButton
         Left = 379
-        Top = 87
+        Top = 63
         Width = 182
         Height = 42
         Caption = 'WebPedido Update'
@@ -98,7 +96,7 @@ object Form1: TForm1
       end
       object Button7: TButton
         Left = 567
-        Top = 87
+        Top = 63
         Width = 182
         Height = 42
         Caption = 'WebPedido Excluir'
@@ -107,7 +105,7 @@ object Form1: TForm1
       end
       object Button8: TButton
         Left = 3
-        Top = 159
+        Top = 111
         Width = 182
         Height = 42
         Caption = 'WebPedido Vender Itens'
@@ -116,7 +114,7 @@ object Form1: TForm1
       end
       object Button9: TButton
         Left = 191
-        Top = 159
+        Top = 111
         Width = 182
         Height = 42
         Caption = 'WebPedido Itens Consultar '
@@ -125,7 +123,7 @@ object Form1: TForm1
       end
       object Button10: TButton
         Left = 379
-        Top = 159
+        Top = 111
         Width = 182
         Height = 42
         Caption = 'WebPedido Itens Update'
@@ -134,7 +132,7 @@ object Form1: TForm1
       end
       object Button11: TButton
         Left = 567
-        Top = 159
+        Top = 111
         Width = 182
         Height = 42
         Caption = 'WebPedido Itens Excluir'
@@ -143,7 +141,7 @@ object Form1: TForm1
       end
       object btnTabelaPreco: TButton
         Left = 3
-        Top = 215
+        Top = 159
         Width = 182
         Height = 42
         Caption = 'Consultar tabela Juros'
@@ -152,7 +150,7 @@ object Form1: TForm1
       end
       object btnTotais: TButton
         Left = 191
-        Top = 215
+        Top = 159
         Width = 182
         Height = 42
         Caption = 'Obter Totais'
@@ -161,7 +159,7 @@ object Form1: TForm1
       end
       object btnSaldo: TButton
         Left = 379
-        Top = 215
+        Top = 159
         Width = 182
         Height = 42
         Caption = 'Consultar Saldo Lojas'
@@ -170,7 +168,7 @@ object Form1: TForm1
       end
       object Button12: TButton
         Left = 567
-        Top = 215
+        Top = 159
         Width = 182
         Height = 42
         Caption = 'Consultar Saldo'
@@ -179,7 +177,7 @@ object Form1: TForm1
       end
       object Button13: TButton
         Left = 3
-        Top = 263
+        Top = 207
         Width = 182
         Height = 42
         Caption = 'Valor de venda'
@@ -188,7 +186,7 @@ object Form1: TForm1
       end
       object Button14: TButton
         Left = 191
-        Top = 263
+        Top = 207
         Width = 182
         Height = 42
         Caption = 'Reservas CD'
