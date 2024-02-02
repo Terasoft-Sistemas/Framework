@@ -57,8 +57,8 @@ interface
       procedure setDiretorioLDB(const pValue: TipoWideStringFramework);
       function getDiretorioLDB: TipoWideStringFramework;
 
-      procedure setDiretorioLocal(const pValue: TipoWideStringFramework);
-      function getDiretorioLocal: TipoWideStringFramework;
+      //procedure setDiretorioLocal(const pValue: TipoWideStringFramework);
+      //function getDiretorioLocal: TipoWideStringFramework;
 
       procedure setSshUser(const pValue: TipoWideStringFramework);
       function getSshUser: TipoWideStringFramework;
@@ -76,7 +76,7 @@ interface
       property hostSSH: TipoWideStringFramework read getHostSSH write setHostSSH;
       property senhaSSH: TipoWideStringFramework read getSenhaSSH write setSenhaSSH;
       property usuarioSSH: TipoWideStringFramework read getSshUser write setSshUser;
-      property diretorioLocal: TipoWideStringFramework read getDiretorioLocal write setDiretorioLocal;
+      //property diretorioSSHLocal: TipoWideStringFramework read getDiretorioLocal write setDiretorioLocal;
       property diretorioLDB: TipoWideStringFramework read getDiretorioLDB write setDiretorioLDB;
       property modoProducao: boolean read getModoProducao write setModoProducao;
       property diretorioArquivos: TipoWideStringFramework read getDiretorioArquivos write setDiretorioArquivos;
