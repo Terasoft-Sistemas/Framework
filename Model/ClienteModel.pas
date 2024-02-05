@@ -974,20 +974,20 @@ end;
 
 function TClienteModel.Excluir(pID: String): String;
 begin
-  self.FID := pID;
-  self.FAcao := tacExcluir;
-  Result := self.Salvar;
+  self.CODIGO_CLI := pID;
+  self.Acao       := tacExcluir;
+  Result          := self.Salvar;
 end;
 
 function TClienteModel.Alterar(pID: String): TClienteModel;
 var
   lClienteModel : TClienteModel;
 begin
-  lClienteModel := lClienteModel.Create(vIConexao);
+  lClienteModel := TClienteModel.Create(vIConexao);
   try
-    lClienteModel := lClienteModel.carregaClasse(pID);
-    lClienteModel.Acao := tacAlterar;
-    Result := lClienteModel;
+    lClienteModel       := lClienteModel.carregaClasse(pID);
+    lClienteModel.Acao  := tacAlterar;
+    Result              := lClienteModel;
   finally
   end;
 end;

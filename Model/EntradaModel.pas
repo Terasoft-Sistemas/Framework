@@ -289,7 +289,7 @@ function TEntradaModel.Alterar(pID: String): TEntradaModel;
 var
   lEntradaModel : TEntradaModel;
 begin
-  lEntradaModel := lEntradaModel.Create(vIConexao);
+  lEntradaModel := TEntradaModel.Create(vIConexao);
   try
     lEntradaModel       := lEntradaModel.carregaClasse(pID);
     lEntradaModel.Acao  := tacAlterar;
@@ -300,9 +300,9 @@ end;
 
 function TEntradaModel.Excluir(pID: String): String;
 begin
-  self.FID   := pID;
-  self.FAcao := tacExcluir;
-  Result     := self.Salvar;
+  self.NUMERO_ENT   := pID;
+  self.FAcao        := tacExcluir;
+  Result            := self.Salvar;
 end;
 
 function TEntradaModel.Incluir: String;
@@ -315,7 +315,7 @@ function TEntradaModel.carregaClasse(pId: String): TEntradaModel;
 var
   lEntradaDao: TEntradaDao;
 begin
-  lEntradaDao := lEntradaDao.Create(vIConexao);
+  lEntradaDao := TEntradaDao.Create(vIConexao);
 
   try
     Result := lEntradaDao.carregaClasse(pId);
@@ -340,7 +340,6 @@ var
   lEntradaLista: TEntradaDao;
 begin
   lEntradaLista := TEntradaDao.Create(vIConexao);
-
   try
     lEntradaLista.TotalRecords    := FTotalRecords;
     lEntradaLista.WhereView       := FWhereView;
@@ -350,8 +349,7 @@ begin
     lEntradaLista.LengthPageView  := FLengthPageView;
     lEntradaLista.IDRecordView    := FIDRecordView;
 
-    Result := lEntradaLista.obterLista;
-
+    Result        := lEntradaLista.obterLista;
     FTotalRecords := lEntradaLista.TotalRecords;
 
   finally

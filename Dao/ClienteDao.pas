@@ -871,7 +871,7 @@ begin
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lPaginacao := 'first ' + LengthPageView + ' SKIP ' + StartRecordView;
 
-    lSql := 'select '+ lPaginacao + ' codigo_cli, fantasia_cli from clientes where 1=1 ';
+    lSql := 'select '+ lPaginacao + ' codigo_cli, fantasia_cli, razao_cli, cnpj_cpf_cli from clientes where 1=1 ';
     lSql := lSql + where;
 
     if not FOrderView.IsEmpty then

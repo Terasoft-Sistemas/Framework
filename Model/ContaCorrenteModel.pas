@@ -185,7 +185,7 @@ function TContaCorrenteModel.Alterar(pID: String): TContaCorrenteModel;
 var
   lContaCorrenteModel : TContaCorrenteModel;
 begin
-  lContaCorrenteModel := lContaCorrenteModel.Create(vIConexao);
+  lContaCorrenteModel := TContaCorrenteModel.Create(vIConexao);
   try
     lContaCorrenteModel      := lContaCorrenteModel.carregaClasse(pID);
     lContaCorrenteModel.Acao := tacAlterar;

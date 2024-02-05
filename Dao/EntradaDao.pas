@@ -186,16 +186,13 @@ var
   lSQL:String;
 begin
   lQry := vIConexao.CriarQuery;
-
   lSQL := vConstrutor.gerarInsert('ENTRADA', 'NUMERO_ENT');
 
   try
     lQry.SQL.Add(lSQL);
     setParams(lQry, AEntradaModel);
     lQry.Open;
-
     Result := lQry.FieldByName('NUMERO_ENT').AsString;
-
   finally
     lSQL := '';
     lQry.Free;
@@ -290,8 +287,8 @@ begin
       lSql := 'select ';
 
     lSQL := lSQL +
-      '       entrada.*         '+
-	    '  from entrada           '+
+      '       ENTRADA.*         '+
+	    '  from ENTRADA           '+
       ' where 1=1               ';
 
     lSql := lSql + where;

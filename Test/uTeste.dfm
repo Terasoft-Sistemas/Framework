@@ -193,6 +193,78 @@ object Form1: TForm1
         TabOrder = 18
         OnClick = Button14Click
       end
+      object Button15: TButton
+        Left = 3
+        Top = 255
+        Width = 182
+        Height = 42
+        Caption = 'Entrada Forncededor Inserir'
+        TabOrder = 19
+        OnClick = Button15Click
+      end
+      object Button17: TButton
+        Left = 191
+        Top = 255
+        Width = 182
+        Height = 42
+        Caption = 'Entrada Forncededor Consultar'
+        TabOrder = 20
+        OnClick = Button17Click
+      end
+      object Button18: TButton
+        Left = 379
+        Top = 255
+        Width = 182
+        Height = 42
+        Caption = 'Entrada Forncededor Update'
+        TabOrder = 21
+        OnClick = Button18Click
+      end
+      object Button19: TButton
+        Left = 567
+        Top = 255
+        Width = 182
+        Height = 42
+        Caption = 'Entrada Forncededor Excluir'
+        TabOrder = 22
+        OnClick = Button19Click
+      end
+      object Button20: TButton
+        Left = 191
+        Top = 303
+        Width = 182
+        Height = 42
+        Caption = 'Cliente Consultar'
+        TabOrder = 23
+        OnClick = Button20Click
+      end
+      object Button21: TButton
+        Left = 379
+        Top = 303
+        Width = 182
+        Height = 42
+        Caption = 'Cliente Update'
+        TabOrder = 24
+        OnClick = Button21Click
+      end
+      object Button22: TButton
+        Left = 567
+        Top = 303
+        Width = 182
+        Height = 42
+        Caption = 'Cliente Excluir'
+        TabOrder = 25
+        OnClick = Button22Click
+      end
+      object Button23: TButton
+        Left = 3
+        Top = 303
+        Width = 182
+        Height = 42
+        Caption = 'Cliente Inserir'
+        TabOrder = 26
+        OnClick = Button23Click
+      end
     end
   end
 end

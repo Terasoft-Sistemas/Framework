@@ -41,6 +41,14 @@ type
     Button12: TButton;
     Button13: TButton;
     Button14: TButton;
+    Button15: TButton;
+    Button17: TButton;
+    Button18: TButton;
+    Button19: TButton;
+    Button20: TButton;
+    Button21: TButton;
+    Button22: TButton;
+    Button23: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -61,6 +69,14 @@ type
     procedure Button12Click(Sender: TObject);
     procedure Button13Click(Sender: TObject);
     procedure Button14Click(Sender: TObject);
+    procedure Button15Click(Sender: TObject);
+    procedure Button17Click(Sender: TObject);
+    procedure Button18Click(Sender: TObject);
+    procedure Button23Click(Sender: TObject);
+    procedure Button20Click(Sender: TObject);
+    procedure Button21Click(Sender: TObject);
+    procedure Button22Click(Sender: TObject);
+    procedure Button19Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -85,7 +101,8 @@ uses
   FireDAC.Comp.Client,
   WebPedidoItensModel,
   TabelaJurosModel,
-  SaldoModel, EmpresaModel, ProdutosModel;
+  SaldoModel, EmpresaModel, ProdutosModel, EntradaModel, EntradaItensModel,
+  ClienteModel;
 
 {$R *.dfm}
 
@@ -148,6 +165,124 @@ begin
     end;
   finally
     lFinanceiroPedidoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button20Click(Sender: TObject);
+var
+  lClienteModel : TClienteModel;
+  lMemTable     : TFDMemTable;
+  i             : Integer;
+begin
+  lClienteModel := TClienteModel.Create(vIConexao);
+    try
+      try
+        lClienteModel.LengthPageView  := vQtdeRegistros.ToString;
+        lClienteModel.StartRecordView := vPagina.ToString;
+        lClienteModel.OrderView       := 'CODIGO_CLI';
+
+        inc(vPagina, 10);
+
+        lMemTable := lClienteModel.ObterListaMemTable;
+        memoResultado.Lines.Clear;
+        lMemTable.First;
+
+      while not lMemTable.Eof do
+      begin
+        memoResultado.Lines.Add('CODIGO_CLI: '+lMemTable.FieldByName('CODIGO_CLI').AsString);
+        memoResultado.Lines.Add('FANTASIA_CLI: '+lMemTable.FieldByName('FANTASIA_CLI').AsString);
+        memoResultado.Lines.Add('RAZAO_CLI: '+lMemTable.FieldByName('RAZAO_CLI').AsString);
+        memoResultado.Lines.Add('CNPJ_CPF_CLI: '+lMemTable.FieldByName('CNPJ_CPF_CLI').AsString);
+        memoResultado.Lines.Add('===============================================');
+        lMemTable.Next;
+      end;
+
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lClienteModel.Free;
+  end;
+end;
+
+procedure TForm1.Button21Click(Sender: TObject);
+var
+  lClienteModel : TClienteModel;
+  ID    : String;
+begin
+  lClienteModel := TClienteModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('Cliente', 'Digite o ID que deseja Alterar:', '');
+
+      if ID.IsEmpty then
+        exit;
+
+      lClienteModel := lClienteModel.Alterar(ID);
+      lClienteModel.fantasia_cli := 'TESTE ALTERA FANTASIA';
+
+      lClienteModel.Salvar;
+      ShowMessage('Alterado com Sucesso');
+    Except
+      on E:Exception do
+      ShowMessage('Erro: ' +E.Message);
+    end;
+  finally
+    lClienteModel.Free;
+  end;
+end;
+
+procedure TForm1.Button22Click(Sender: TObject);
+var
+  lClienteModel : TClienteModel;
+  CodCli        : String;
+begin
+  lClienteModel := TClienteModel.Create(vIConexao);
+  try
+    try
+      CodCli := InputBox('Cliente', 'Digite o ID do Cliente que deseja excluir:', '');
+
+      lClienteModel.Excluir(CodCli);
+      ShowMessage('Excluido com sucesso!');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lClienteModel.Free;
+  end;
+end;
+
+procedure TForm1.Button23Click(Sender: TObject);
+var
+  lClienteModel : TClienteModel;
+  NomeCli       : String;
+begin
+  lClienteModel := TClienteModel.Create(vIConexao);
+  try
+    try
+      NomeCli := InputBox('Cliente', 'Digite o Nome:', '');
+
+      if NomeCli.IsEmpty then
+        exit;
+
+      lClienteModel.fantasia_cli    := NomeCli;
+      lClienteModel.tipo_cli        := 'F';
+      lClienteModel.seprocado_cli   :='N';
+      lClienteModel.estadocivil_cli := 'O';
+      lClienteModel.data_alteracao  := '05.02.2024';
+      lClienteModel.status          := 'A';
+      lClienteModel.sexo_cli        := 'M';
+
+      lClienteModel.Incluir;
+      ShowMessage('Incluido com Sucesso!');
+    except
+      on E:Exception do
+      ShowMessage('Erro: ' + E.Message);
+    end
+  finally
+    lClienteModel.Free;
   end;
 end;
 
@@ -321,7 +456,6 @@ var
   lWebPedido : String;
 begin
   lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
-
   try
     try
       lWebPedido := InputBox('WebPedido', 'Digite o número do Web Pedido:', '');
@@ -547,9 +681,9 @@ end;
 procedure TForm1.Button13Click(Sender: TObject);
 var
   lProdutoModel : TProdutosModel;
-  lProduto : String;
-  lParametros: TProdutoPreco;
-  lValor : Double;
+  lProduto      : String;
+  lParametros   : TProdutoPreco;
+  lValor        : Double;
 begin
   lProdutoModel := TProdutosModel.Create(vIConexao);
   try
@@ -598,6 +732,114 @@ begin
 
   finally
     lSaldoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button15Click(Sender: TObject);
+var
+  lEntradaModel : TEntradaModel;
+  NumEntrada    : String;
+begin
+  lEntradaModel := TEntradaModel.Create(vIConexao);
+  try
+    try
+      NumEntrada := InputBox('Entrada','Digite o número da Entrada (9 Digitos):','');
+
+      if NumEntrada.IsEmpty then
+        Exit;
+
+      lEntradaModel.NUMERO_ENT  := NumEntrada;
+      lEntradaModel.CODIGO_FOR  := '500005';
+      lEntradaModel.SERIE_ENT   := '001';
+
+      lEntradaModel.Incluir;
+      ShowMessage('Inserido com Sucesso');
+    Except
+      on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lEntradaModel.Free;
+  end;
+end;
+
+procedure TForm1.Button17Click(Sender: TObject);
+var
+  lEntradaModel : TEntradaModel;
+  lMemTable : TFDMemTable;
+begin
+  lEntradaModel := TEntradaModel.Create(vIConexao);
+  try
+    try
+      lMemTable := lEntradaModel.obterLista;
+
+      memoResultado.Lines.Clear;
+
+      lMemTable.First;
+      while not lMemTable.Eof do
+      begin
+        memoResultado.Lines.Add('NUMERO_ENT: '+lMemTable.FieldByName('NUMERO_ENT').AsString);
+        memoResultado.Lines.Add('CODIGO_FOR: '+lMemTable.FieldByName('CODIGO_FOR').AsString);
+        memoResultado.Lines.Add('DATANOTA_ENT: '+lMemTable.FieldByName('DATANOTA_ENT').AsString);
+        memoResultado.Lines.Add('TOTAL_ENT: '+lMemTable.FieldByName('TOTAL_ENT').AsString);
+        memoResultado.Lines.Add('===============================================');
+        lMemTable.Next;
+      end;
+
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lEntradaModel.Free;
+  end;
+end;
+
+procedure TForm1.Button18Click(Sender: TObject);
+var
+  lEntradaModel : TEntradaModel;
+  ID    : String;
+begin
+  lEntradaModel := TEntradaModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('Entrada', 'Digite o número da Entrada que deseja Alterar:', '');
+
+      if ID.IsEmpty then
+        exit;
+
+      lEntradaModel := lEntradaModel.Alterar(ID);
+      lEntradaModel.OBSERVACAO_ENT := 'TESTE ALTERACAO';
+
+      lEntradaModel.Salvar;
+      ShowMessage('Alterado com Sucesso');
+    Except
+      on E:Exception do
+      ShowMessage('Erro: ' +E.Message);
+    end;
+  finally
+    lEntradaModel.Free;
+  end;
+end;
+
+procedure TForm1.Button19Click(Sender: TObject);
+var
+  lEntradaModel : TEntradaModel;
+  ID       : String;
+begin
+  lEntradaModel := TEntradaModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('Entrada', 'Digite o ID da Entrada que deseja excluir:', '');
+
+      lEntradaModel.Excluir(ID);
+      ShowMessage('Excluido com sucesso!');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lEntradaModel.Free;
   end;
 end;
 
