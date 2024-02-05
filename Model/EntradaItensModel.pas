@@ -419,7 +419,7 @@ function TEntradaItensModel.Alterar(pID: String): TEntradaItensModel;
 var
   lEntradaItensModel : TEntradaItensModel;
 begin
-  lEntradaItensModel := lEntradaItensModel.Create(vIConexao);
+  lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
   try
     lEntradaItensModel       := lEntradaItensModel.carregaClasse(pID);
     lEntradaItensModel.Acao  := tacAlterar;
@@ -445,7 +445,7 @@ function TEntradaItensModel.carregaClasse(pId: String): TEntradaItensModel;
 var
   lEntradaItensDao: TEntradaItensDao;
 begin
-  lEntradaItensDao := lEntradaItensDao.Create(vIConexao);
+  lEntradaItensDao := TEntradaItensDao.Create(vIConexao);
 
   try
     Result := lEntradaItensDao.carregaClasse(pId);

@@ -49,6 +49,10 @@ type
     Button21: TButton;
     Button22: TButton;
     Button23: TButton;
+    Button16: TButton;
+    Button24: TButton;
+    Button25: TButton;
+    Button26: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -77,6 +81,10 @@ type
     procedure Button21Click(Sender: TObject);
     procedure Button22Click(Sender: TObject);
     procedure Button19Click(Sender: TObject);
+    procedure Button16Click(Sender: TObject);
+    procedure Button25Click(Sender: TObject);
+    procedure Button24Click(Sender: TObject);
+    procedure Button26Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -102,7 +110,7 @@ uses
   WebPedidoItensModel,
   TabelaJurosModel,
   SaldoModel, EmpresaModel, ProdutosModel, EntradaModel, EntradaItensModel,
-  ClienteModel;
+  ClienteModel, ContasPagarModel;
 
 {$R *.dfm}
 
@@ -209,7 +217,7 @@ end;
 procedure TForm1.Button21Click(Sender: TObject);
 var
   lClienteModel : TClienteModel;
-  ID    : String;
+  ID            : String;
 begin
   lClienteModel := TClienteModel.Create(vIConexao);
   try
@@ -286,6 +294,92 @@ begin
   end;
 end;
 
+procedure TForm1.Button24Click(Sender: TObject);
+var
+  lContasPagarModel : TContasPagarModel;
+  ID    : String;
+begin
+  lContasPagarModel := TContasPagarModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('ContasPagar', 'Digite a Duplicata deseja Alterar:', '');
+
+      if ID.IsEmpty then
+        exit;
+
+      lContasPagarModel := lContasPagarModel.Alterar(ID);
+      lContasPagarModel.CODIGO_FOR := '000175';
+
+      lContasPagarModel.Salvar;
+      ShowMessage('Alterado com Sucesso');
+    Except
+      on E:Exception do
+      ShowMessage('Erro: ' +E.Message);
+    end;
+  finally
+    lContasPagarModel.Free;
+  end;
+end;
+
+procedure TForm1.Button25Click(Sender: TObject);
+var
+  lContasPagarModel : TContasPagarModel;
+  lMemTable        : TFDMemTable;
+begin
+  lContasPagarModel := TContasPagarModel.Create(vIConexao);
+  try
+    try
+
+      lContasPagarModel.LengthPageView  := vQtdeRegistros.ToString;
+      lContasPagarModel.StartRecordView := vPagina.ToString;
+      lContasPagarModel.OrderView       := 'DUPLICATA_PAG';
+
+      inc(vPagina, 10);
+
+      lMemTable := lContasPagarModel.obterLista;
+      memoResultado.Lines.Clear;
+      lMemTable.First;
+
+      while not lMemTable.Eof do
+      begin
+        memoResultado.Lines.Add('DUPLICATA_PAG: '+lMemTable.FieldByName('DUPLICATA_PAG').AsString);
+        memoResultado.Lines.Add('CODIGO_FOR: '+lMemTable.FieldByName('CODIGO_FOR').AsString);
+        memoResultado.Lines.Add('PORTADOR_ID: '+lMemTable.FieldByName('PORTADOR_ID').AsString);
+        memoResultado.Lines.Add('DATAEMI_PAG: '+lMemTable.FieldByName('DATAEMI_PAG').AsString);
+        memoResultado.Lines.Add('TIPO_PAG: '+lMemTable.FieldByName('TIPO_PAG').AsString);
+        memoResultado.Lines.Add('===============================================');
+        lMemTable.Next;
+      end;
+
+    Except
+      on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lContasPagarModel.Free;
+  end;
+end;
+
+procedure TForm1.Button26Click(Sender: TObject);
+var
+  lContasPagarModel : TContasPagarModel;
+  Duplicata         : String;
+begin
+  lContasPagarModel := TContasPagarModel.Create(vIConexao);
+  try
+    try
+      Duplicata := InputBox('Cliente', 'Digite a Duplicata que deseja excluir:', '');
+
+      lContasPagarModel.Excluir(Duplicata);
+      ShowMessage('Excluido com sucesso!');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lContasPagarModel.Free;
+  end;
+end;
 procedure TForm1.Button2Click(Sender: TObject);
 var
   lFinanceiroPedidoModel : TFinanceiroPedidoModel;
@@ -763,6 +857,31 @@ begin
   end;
 end;
 
+procedure TForm1.Button16Click(Sender: TObject);
+var
+  lContasPagarModel : TContasPagarModel;
+begin
+  lContasPagarModel := TContasPagarModel.Create(vIConexao);
+  try
+    try
+
+      lContasPagarModel.DUPLICATA_PAG  := '9000000020';
+      lContasPagarModel.CODIGO_FOR  := '500005';
+      lContasPagarModel.PORTADOR_ID  := '000001';
+      lContasPagarModel.DATAEMI_PAG := '05.02.2024';
+      lContasPagarModel.TIPO_PAG := 'M';
+
+      lContasPagarModel.Incluir;
+      ShowMessage('Inserido com Sucesso');
+    Except
+      on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lContasPagarModel.Free;
+  end;
+end;
+
 procedure TForm1.Button17Click(Sender: TObject);
 var
   lEntradaModel : TEntradaModel;
@@ -797,18 +916,17 @@ end;
 
 procedure TForm1.Button18Click(Sender: TObject);
 var
-  lEntradaModel : TEntradaModel;
-  ID    : String;
+  lEntradaModel     : TEntradaModel;
+  lNumeroEntrada,
+  lCodigoFornecedor : String;
 begin
   lEntradaModel := TEntradaModel.Create(vIConexao);
   try
     try
-      ID := InputBox('Entrada', 'Digite o número da Entrada que deseja Alterar:', '');
+      lNumeroEntrada    := '9999999999';
+      lCodigoFornecedor := '500005';
 
-      if ID.IsEmpty then
-        exit;
-
-      lEntradaModel := lEntradaModel.Alterar(ID);
+      lEntradaModel := lEntradaModel.Alterar(lNumeroEntrada, lCodigoFornecedor);
       lEntradaModel.OBSERVACAO_ENT := 'TESTE ALTERACAO';
 
       lEntradaModel.Salvar;
@@ -824,15 +942,18 @@ end;
 
 procedure TForm1.Button19Click(Sender: TObject);
 var
-  lEntradaModel : TEntradaModel;
-  ID       : String;
+  lEntradaModel     : TEntradaModel;
+  lNumeroEntrada,
+  lCodigoFornecedor : String;
 begin
   lEntradaModel := TEntradaModel.Create(vIConexao);
   try
     try
-      ID := InputBox('Entrada', 'Digite o ID da Entrada que deseja excluir:', '');
 
-      lEntradaModel.Excluir(ID);
+      lNumeroEntrada    := '9999999999';
+      lCodigoFornecedor := '500005';
+
+      lEntradaModel.Excluir(lNumeroEntrada, lCodigoFornecedor);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do

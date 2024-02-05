@@ -479,7 +479,7 @@ function TPedidoItensModel.Alterar(pID: String): TPedidoItensModel;
 var
   lPedidoItensModel : TPedidoItensModel;
 begin
-  lPedidoItensModel := lPedidoItensModel.Create(vIConexao);
+  lPedidoItensModel := TPedidoItensModel.Create(vIConexao);
   try
     lPedidoItensModel      := lPedidoItensModel.carregaClasse(pID);
     lPedidoItensModel.Acao := tacAlterar;

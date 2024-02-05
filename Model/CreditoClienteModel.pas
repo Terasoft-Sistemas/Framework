@@ -117,7 +117,7 @@ function TCreditoClienteModel.Alterar(pID: String): TCreditoClienteModel;
 var
   lCreditoClienteModel : TCreditoClienteModel;
 begin
-  lCreditoClienteModel := lCreditoClienteModel.Create(vIConexao);
+  lCreditoClienteModel := TCreditoClienteModel.Create(vIConexao);
   try
     lCreditoClienteModel      := lCreditoClienteModel.carregaClasse(pID);
     lCreditoClienteModel.Acao := tacAlterar;

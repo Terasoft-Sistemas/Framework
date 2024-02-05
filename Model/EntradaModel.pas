@@ -260,11 +260,11 @@ type
     destructor Destroy; override;
 
     function Incluir: String;
-    function Alterar(pID : String): TEntradaModel;
-    function Excluir(pID : String): String;
+    function Alterar(pID, pFornecedor : String): TEntradaModel;
+    function Excluir(pID, pFornecedor : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId: String): TEntradaModel;
+    function carregaClasse(pId, pFornecedor: String): TEntradaModel;
     function obterLista: TFDMemTable;
 
     property Acao :TAcao read FAcao write SetAcao;
@@ -285,22 +285,23 @@ uses
 
 { TEntradaModel }
 
-function TEntradaModel.Alterar(pID: String): TEntradaModel;
+function TEntradaModel.Alterar(pID, pFornecedor: String): TEntradaModel;
 var
   lEntradaModel : TEntradaModel;
 begin
   lEntradaModel := TEntradaModel.Create(vIConexao);
   try
-    lEntradaModel       := lEntradaModel.carregaClasse(pID);
+    lEntradaModel       := lEntradaModel.carregaClasse(pID, pFornecedor);
     lEntradaModel.Acao  := tacAlterar;
     Result              := lEntradaModel;
   finally
   end;
 end;
 
-function TEntradaModel.Excluir(pID: String): String;
+function TEntradaModel.Excluir(pID, pFornecedor : String): String;
 begin
   self.NUMERO_ENT   := pID;
+  self.CODIGO_FOR   := pFornecedor;
   self.FAcao        := tacExcluir;
   Result            := self.Salvar;
 end;
@@ -311,14 +312,14 @@ begin
     self.Salvar;
 end;
 
-function TEntradaModel.carregaClasse(pId: String): TEntradaModel;
+function TEntradaModel.carregaClasse(pId, pFornecedor: String): TEntradaModel;
 var
   lEntradaDao: TEntradaDao;
 begin
   lEntradaDao := TEntradaDao.Create(vIConexao);
 
   try
-    Result := lEntradaDao.carregaClasse(pId);
+    Result := lEntradaDao.carregaClasse(pId, pFornecedor);
   finally
     lEntradaDao.Free;
   end;

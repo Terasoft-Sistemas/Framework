@@ -89,7 +89,7 @@ function TPrecoUFModel.Alterar(pID: String): TPrecoUFModel;
 var
   lPrecoUFModel : TPrecoUFModel;
 begin
-  lPrecoUFModel := lPrecoUFModel.Create(vIConexao);
+  lPrecoUFModel := TPrecoUFModel.Create(vIConexao);
   try
     lPrecoUFModel       := lPrecoUFModel.carregaClasse(pID);
     lPrecoUFModel.Acao  := tacAlterar;

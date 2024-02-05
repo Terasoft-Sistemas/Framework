@@ -540,7 +540,7 @@ function TPedidoVendaModel.Alterar(pID: String): TPedidoVendaModel;
 var
   lPedidoVendaModel : TPedidoVendaModel;
 begin
-  lPedidoVendaModel := lPedidoVendaModel.Create(vIConexao);
+  lPedidoVendaModel := TPedidoVendaModel.Create(vIConexao);
   try
     lPedidoVendaModel      := lPedidoVendaModel.carregaClasse(pID);
     lPedidoVendaModel.Acao := tacAlterar;

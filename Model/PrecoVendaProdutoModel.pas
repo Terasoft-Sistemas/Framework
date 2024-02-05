@@ -80,7 +80,7 @@ function TPrecoVendaProdutoModel.Alterar(pID: String): TPrecoVendaProdutoModel;
 var
   lPrecoVendaProdutoModel : TPrecoVendaProdutoModel;
 begin
-  lPrecoVendaProdutoModel := lPrecoVendaProdutoModel.Create(vIConexao);
+  lPrecoVendaProdutoModel := TPrecoVendaProdutoModel.Create(vIConexao);
   try
     lPrecoVendaProdutoModel       := lPrecoVendaProdutoModel.carregaClasse(pID);
     lPrecoVendaProdutoModel.Acao  := tacAlterar;

@@ -293,7 +293,7 @@ function TEntradaItensXMLModel.Alterar(pID: String): TEntradaItensXMLModel;
 var
   lEntradaItensXMLModel : TEntradaItensXMLModel;
 begin
-  lEntradaItensXMLModel := lEntradaItensXMLModel.Create(vIConexao);
+  lEntradaItensXMLModel := TEntradaItensXMLModel.Create(vIConexao);
   try
     lEntradaItensXMLModel       := lEntradaItensXMLModel.carregaClasse(pID);
     lEntradaItensXMLModel.Acao  := tacAlterar;
@@ -319,7 +319,7 @@ function TEntradaItensXMLModel.carregaClasse(pId: String): TEntradaItensXMLModel
 var
   lEntradaItensXMLDao: TEntradaItensXMLDao;
 begin
-  lEntradaItensXMLDao := lEntradaItensXMLDao.Create(vIConexao);
+  lEntradaItensXMLDao := TEntradaItensXMLDao.Create(vIConexao);
 
   try
     Result := lEntradaItensXMLDao.carregaClasse(pId);

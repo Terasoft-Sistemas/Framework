@@ -176,20 +176,20 @@ function TContasPagarModel.Alterar(pID: String): TContasPagarModel;
 var
   lContasPagarModel : TContasPagarModel;
 begin
-  lContasPagarModel := lContasPagarModel.Create(vIConexao);
+  lContasPagarModel := TContasPagarModel.Create(vIConexao);
   try
     lContasPagarModel       := lContasPagarModel.carregaClasse(pID);
     lContasPagarModel.Acao  := tacAlterar;
-    Result              	:= lContasPagarModel;
+    Result              	  := lContasPagarModel;
   finally
   end;
 end;
 
 function TContasPagarModel.Excluir(pID: String): String;
 begin
-  self.FID   := pID;
-  self.FAcao := tacExcluir;
-  Result     := self.Salvar;
+  self.DUPLICATA_PAG := pID;
+  self.FAcao         := tacExcluir;
+  Result             := self.Salvar;
 end;
 
 function TContasPagarModel.Incluir: String;
@@ -202,7 +202,7 @@ function TContasPagarModel.carregaClasse(pId: String): TContasPagarModel;
 var
   lContasPagarDao: TContasPagarDao;
 begin
-  lContasPagarDao := lContasPagarDao.Create(vIConexao);
+  lContasPagarDao := TContasPagarDao.Create(vIConexao);
 
   try
     Result := lContasPagarDao.carregaClasse(pId);

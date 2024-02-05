@@ -161,7 +161,7 @@ function TPortadorModel.Alterar(pID: String): TPortadorModel;
 var
   lPortadorModel : TPortadorModel;
 begin
-  lPortadorModel := lPortadorModel.Create(vIConexao);
+  lPortadorModel := TPortadorModel.Create(vIConexao);
   try
     lPortadorModel := lPortadorModel.carregaClasse(pID);
     lPortadorModel.Acao := tacAlterar;

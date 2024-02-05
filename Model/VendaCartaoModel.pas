@@ -128,7 +128,7 @@ function TVendaCartaoModel.Alterar(pID: String): TVendaCartaoModel;
 var
   lVendaCartaoModel : TVendaCartaoModel;
 begin
-  lVendaCartaoModel := lVendaCartaoModel.Create(vIConexao);
+  lVendaCartaoModel := TVendaCartaoModel.Create(vIConexao);
   try
     lVendaCartaoModel       := lVendaCartaoModel.carregaClasse(pID);
     lVendaCartaoModel.Acao  := tacAlterar;

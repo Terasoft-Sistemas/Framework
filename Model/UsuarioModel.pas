@@ -167,7 +167,7 @@ function TUsuarioModel.Alterar(pID: String): TUsuarioModel;
 var
   lUsuarioModel : TUsuarioModel;
 begin
-  lUsuarioModel := lUsuarioModel.Create(vIConexao);
+  lUsuarioModel := TUsuarioModel.Create(vIConexao);
   try
     lUsuarioModel       := lUsuarioModel.carregaClasse(pID);
     lUsuarioModel.Acao  := tacAlterar;

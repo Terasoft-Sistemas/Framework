@@ -83,7 +83,7 @@ begin
   Result   := lModel;
 
   try
-    lQry.Open('select * from CONTASPAGAR where DUPLICATA_PAG = '+pId);
+    lQry.Open('select * from CONTASPAGAR where DUPLICATA_PAG = '+ QuotedStr(pId));
 
     if lQry.IsEmpty then
       Exit;

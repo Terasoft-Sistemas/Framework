@@ -89,7 +89,7 @@ function TPromocaoItensModel.Alterar(pID: String): TPromocaoItensModel;
 var
   lPromocaoItensModel: TPromocaoItensModel;
 begin
-  lPromocaoItensModel := lPromocaoItensModel.Create(vIConexao);
+  lPromocaoItensModel := TPromocaoItensModel.Create(vIConexao);
   try
     lPromocaoItensModel       := lPromocaoItensModel.carregaClasse(pID);
     lPromocaoItensModel.Acao  := tacAlterar;

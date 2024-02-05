@@ -402,7 +402,7 @@ function TFuncionarioModel.Alterar(pID: String): TFuncionarioModel;
 var
   lFuncionarioModel : TFuncionarioModel;
 begin
-  lFuncionarioModel := lFuncionarioModel.Create(vIConexao);
+  lFuncionarioModel := TFuncionarioModel.Create(vIConexao);
   try
     lFuncionarioModel      := lFuncionarioModel.carregaClasse(pID);
     lFuncionarioModel.Acao := tacAlterar;

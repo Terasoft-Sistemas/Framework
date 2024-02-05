@@ -58,7 +58,7 @@ type
     function alterar(AEntradaModel: TEntradaModel): String;
     function excluir(AEntradaModel: TEntradaModel): String;
 
-    function carregaClasse(pID : String): TEntradaModel;
+    function carregaClasse(pID, pFornecedor : String): TEntradaModel;
 
     function obterLista: TFDMemTable;
 
@@ -73,7 +73,7 @@ uses
 
 { TEntrada }
 
-function TEntradaDao.carregaClasse(pID: String): TEntradaModel;
+function TEntradaDao.carregaClasse(pID, pFornecedor: String): TEntradaModel;
 var
   lQry: TFDQuery;
   lModel: TEntradaModel;
@@ -83,7 +83,7 @@ begin
   Result   := lModel;
 
   try
-    lQry.Open('select * from ENTRADA where NUMERO_ENT = '+pId);
+    lQry.Open('select * from ENTRADA where NUMERO_ENT = '+ QuotedStr(pID) + ' and codigo_for = ' + QuotedStr(pFornecedor) );
 
     if lQry.IsEmpty then
       Exit;
@@ -104,7 +104,7 @@ begin
     lModel.USUARIO_ENT                 := lQry.FieldByName('USUARIO_ENT').AsString;
     lModel.STATUS                      := lQry.FieldByName('STATUS').AsString;
     lModel.TOTALPRODUTOS_ENT           := lQry.FieldByName('TOTALPRODUTOS_ENT').AsString;
-    lModel.TIPO_PRO                    := lQry.FieldByName('TIPO_PRO').AsString;
+    lModel.TIPO_PRO                    := lQry.FieldByName('TIPO$_PRO').AsString;
     lModel.CFOP_ENT                    := lQry.FieldByName('CFOP_ENT').AsString;
     lModel.DESPESAS_ADUANEIRAS         := lQry.FieldByName('DESPESAS_ADUANEIRAS').AsString;
     lModel.PIS_ENT                     := lQry.FieldByName('PIS_ENT').AsString;
@@ -228,7 +228,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from ENTRADA where NUMERO_ENT = :NUMERO_ENT',[AEntradaModel.NUMERO_ENT]);
+   lQry.ExecSQL('delete from ENTRADA where NUMERO_ENT = ' + QuotedStr(AEntradaModel.NUMERO_ENT) + ' and codigo_for = ' + QuotedStr(AEntradaModel.CODIGO_FOR));
    lQry.ExecSQL;
    Result := AEntradaModel.NUMERO_ENT;
 
@@ -350,6 +350,9 @@ begin
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pEntradaModel).AsString = '',
         Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pEntradaModel).AsString))
+      else
+        pQry.ParamByName(pQry.Params[i].Name).Value := Unassigned;
+
     end;
   finally
     lCtx.Free;

@@ -231,39 +231,75 @@ object Form1: TForm1
       end
       object Button20: TButton
         Left = 191
-        Top = 303
+        Top = 407
         Width = 182
-        Height = 42
+        Height = 46
         Caption = 'Cliente Consultar'
         TabOrder = 23
         OnClick = Button20Click
       end
       object Button21: TButton
         Left = 379
-        Top = 303
+        Top = 407
         Width = 182
-        Height = 42
+        Height = 46
         Caption = 'Cliente Update'
         TabOrder = 24
         OnClick = Button21Click
       end
       object Button22: TButton
         Left = 567
-        Top = 303
+        Top = 407
         Width = 182
-        Height = 42
+        Height = 46
         Caption = 'Cliente Excluir'
         TabOrder = 25
         OnClick = Button22Click
       end
       object Button23: TButton
         Left = 3
-        Top = 303
+        Top = 407
         Width = 182
-        Height = 42
+        Height = 46
         Caption = 'Cliente Inserir'
         TabOrder = 26
         OnClick = Button23Click
+      end
+      object Button16: TButton
+        Left = 3
+        Top = 303
+        Width = 182
+        Height = 42
+        Caption = 'ContasPagar Inserir'
+        TabOrder = 27
+        OnClick = Button16Click
+      end
+      object Button24: TButton
+        Left = 379
+        Top = 303
+        Width = 182
+        Height = 42
+        Caption = 'ContasPagar Update'
+        TabOrder = 28
+        OnClick = Button24Click
+      end
+      object Button25: TButton
+        Left = 191
+        Top = 303
+        Width = 182
+        Height = 42
+        Caption = 'ContasPagar Consultar'
+        TabOrder = 29
+        OnClick = Button25Click
+      end
+      object Button26: TButton
+        Left = 567
+        Top = 303
+        Width = 182
+        Height = 42
+        Caption = 'ContasPagar Excluir'
+        TabOrder = 30
+        OnClick = Button26Click
       end
     end
   end

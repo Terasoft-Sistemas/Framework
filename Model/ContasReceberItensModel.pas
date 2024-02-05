@@ -263,7 +263,7 @@ function TContasReceberItensModel.Alterar(pID: String): TContasReceberItensModel
 var
   lContasReceberItensModel : TContasReceberItensModel;
 begin
-  lContasReceberItensModel := lContasReceberItensModel.Create(vIConexao);
+  lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
   try
     lContasReceberItensModel      := lContasReceberItensModel.carregaClasse(pID);
     lContasReceberItensModel.Acao := tacAlterar;

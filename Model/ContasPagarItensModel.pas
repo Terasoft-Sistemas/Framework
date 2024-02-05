@@ -141,7 +141,7 @@ function TContasPagarItensModel.Alterar(pID: String): TContasPagarItensModel;
 var
   lContasPagarItensModel : TContasPagarItensModel;
 begin
-  lContasPagarItensModel := lContasPagarItensModel.Create(vIConexao);
+  lContasPagarItensModel := TContasPagarItensModel.Create(vIConexao);
   try
     lContasPagarItensModel       := lContasPagarItensModel.carregaClasse(pID);
     lContasPagarItensModel.Acao  := tacAlterar;
@@ -167,7 +167,7 @@ function TContasPagarItensModel.carregaClasse(pId: String): TContasPagarItensMod
 var
   lContasPagarItensDao: TContasPagarItensDao;
 begin
-  lContasPagarItensDao := lContasPagarItensDao.Create(vIConexao);
+  lContasPagarItensDao := TContasPagarItensDao.Create(vIConexao);
 
   try
     Result := lContasPagarItensDao.carregaClasse(pId);
