@@ -135,7 +135,6 @@ var
   lMemTable : TFDMemTable;
 begin
   lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
-
   try
     try
       lMemTable := lFinanceiroPedidoModel.obterLista;
@@ -339,7 +338,7 @@ end;
 procedure TForm1.Button25Click(Sender: TObject);
 var
   lContasPagarModel : TContasPagarModel;
-  lMemTable        : TFDMemTable;
+  lMemTable         : TFDMemTable;
 begin
   lContasPagarModel := TContasPagarModel.Create(vIConexao);
   try
@@ -384,6 +383,9 @@ begin
   try
     try
       Duplicata := InputBox('Cliente', 'Digite a Duplicata que deseja excluir:', '');
+
+      if Duplicata.IsEmpty then
+      Exit;
 
       lContasPagarModel.Excluir(Duplicata);
       ShowMessage('Excluido com sucesso!');
@@ -521,6 +523,9 @@ begin
   try
     try
       NumParcela := InputBox('ContasPagarItens','Digite o ID da parcela','');
+      if NumParcela.IsEmpty then
+        Exit;
+
       lContasPagarItensModel.Excluir(NumParcela);
       ShowMessage('Excluido com sucesso!');
     except
@@ -571,6 +576,8 @@ begin
   try
     try
       NumEntrada := InputBox('Constulta EntradaItens','Digite o número da Entrada:','');
+        if NumEntrada.IsEmpty then
+          Exit;
 
       lEntradaItensModel.IDEntrada := NumEntrada;
       lMemTable := lEntradaItensModel.obterLista;
@@ -907,6 +914,8 @@ begin
   lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
   try
     lID := InputBox('WebPedido', 'Digite o ID do Web Pedido:', '');
+    if lID.IsEmpty then
+      Exit;
 
     lWebPedidoModel.ID := lID;
     lWebPedidoModel.obterTotais;
