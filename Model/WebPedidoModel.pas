@@ -618,12 +618,12 @@ end;
 
 procedure TWebPedidoModel.obterTotais;
 var
-  lWebPedidoItensDao : TWebPedidoItensDao;
+  lWebPedidoItensModel : TWebPedidoItensModel;
   lTotais : TTotais;
 begin
-  lWebPedidoItensDao := TWebPedidoItensDao.Create(vIConexao);
+  lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
   try
-    lTotais := lWebPedidoItensDao.obterTotais(self.FID);
+    lTotais := lWebPedidoItensModel.obterTotais(self.FID);
 
     self.ACRESCIMO            := lTotais.ACRESCIMO.ToString;
     self.VALOR_FRETE          := lTotais.FRETE.ToString;
@@ -631,7 +631,7 @@ begin
     self.VALOR_ITENS          := lTotais.VALOR_ITENS.ToString;
     self.VALOR_TOTAL          := lTotais.VALOR_TOTAL.ToString;
   finally
-    lWebPedidoItensDao.free;
+    lWebPedidoItensModel.free;
   end;
 end;
 

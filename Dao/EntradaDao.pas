@@ -28,6 +28,7 @@ type
     FOrderView: String;
     FWhereView: String;
     FTotalRecords: Integer;
+    FIDEntrada: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
     procedure SetID(const Value: Variant);
@@ -39,6 +40,7 @@ type
     procedure SetWhereView(const Value: String);
 
     function where: String;
+    procedure SetIDEntrada(const Value: String);
 
   public
 
@@ -53,6 +55,7 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
+    property IDEntrada: String read FIDEntrada write SetIDEntrada;
 
     function incluir(AEntradaModel: TEntradaModel): String;
     function alterar(AEntradaModel: TEntradaModel): String;
@@ -83,7 +86,7 @@ begin
   Result   := lModel;
 
   try
-    lQry.Open('select * from ENTRADA where NUMERO_ENT = '+ QuotedStr(pID) + ' and codigo_for = ' + QuotedStr(pFornecedor) );
+    lQry.Open('select * from ENTRADA where NUMERO_ENT = '+ QuotedStr(pID) + ' and CODIGO_FOR = ' + QuotedStr(pFornecedor) );
 
     if lQry.IsEmpty then
       Exit;
@@ -315,6 +318,11 @@ end;
 procedure TEntradaDao.SetID(const Value: Variant);
 begin
   FID := Value;
+end;
+
+procedure TEntradaDao.SetIDEntrada(const Value: String);
+begin
+  FIDEntrada := Value;
 end;
 
 procedure TEntradaDao.SetIDRecordView(const Value: Integer);

@@ -5,7 +5,6 @@ interface
 uses
   Winapi.Windows,
   Winapi.Messages,
-  System.SysUtils,
   System.Variants,
   System.Classes,
   Vcl.Graphics,
@@ -16,7 +15,7 @@ uses
   Vcl.StdCtrls,
   Terasoft.Types,
   Conexao,
-  Interfaces.Conexao;
+  Interfaces.Conexao, EntradaModel;
 
 type
   TForm1 = class(TForm)
@@ -53,6 +52,14 @@ type
     Button24: TButton;
     Button25: TButton;
     Button26: TButton;
+    Button27: TButton;
+    Button28: TButton;
+    Button29: TButton;
+    Button30: TButton;
+    Button31: TButton;
+    Button32: TButton;
+    Button33: TButton;
+    Button34: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -85,6 +92,14 @@ type
     procedure Button25Click(Sender: TObject);
     procedure Button24Click(Sender: TObject);
     procedure Button26Click(Sender: TObject);
+    procedure Button27Click(Sender: TObject);
+    procedure Button30Click(Sender: TObject);
+    procedure Button28Click(Sender: TObject);
+    procedure Button29Click(Sender: TObject);
+    procedure Button31Click(Sender: TObject);
+    procedure Button32Click(Sender: TObject);
+    procedure Button33Click(Sender: TObject);
+    procedure Button34Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -109,8 +124,8 @@ uses
   FireDAC.Comp.Client,
   WebPedidoItensModel,
   TabelaJurosModel,
-  SaldoModel, EmpresaModel, ProdutosModel, EntradaModel, EntradaItensModel,
-  ClienteModel, ContasPagarModel;
+  SaldoModel, EmpresaModel, ProdutosModel, EntradaItensModel,
+  ClienteModel, ContasPagarModel, ContasPagarItensModel, System.SysUtils;
 
 {$R *.dfm}
 
@@ -297,17 +312,17 @@ end;
 procedure TForm1.Button24Click(Sender: TObject);
 var
   lContasPagarModel : TContasPagarModel;
-  ID    : String;
+  lFornecedor,
+  lDuplicata    : String;
+
 begin
   lContasPagarModel := TContasPagarModel.Create(vIConexao);
   try
     try
-      ID := InputBox('ContasPagar', 'Digite a Duplicata deseja Alterar:', '');
+      lDuplicata  := '';
+      lFornecedor := '';
 
-      if ID.IsEmpty then
-        exit;
-
-      lContasPagarModel := lContasPagarModel.Alterar(ID);
+      lContasPagarModel := lContasPagarModel.Alterar(lDuplicata, lFornecedor);
       lContasPagarModel.CODIGO_FOR := '000175';
 
       lContasPagarModel.Salvar;
@@ -380,10 +395,95 @@ begin
     lContasPagarModel.Free;
   end;
 end;
+
+procedure TForm1.Button27Click(Sender: TObject);
+var
+  lContasPagarModel :  TContasPagarModel;
+  Duplicata         : String;
+begin
+  lContasPagarModel := TContasPagarModel.Create(vIConexao);
+  try
+    try
+      lContasPagarModel.gerarDuplicatas('R00006', '000001');
+
+      ShowMessage('Parcela adicionada com sucesso!');
+    Except
+      on E:Exception do
+      ShowMessage('Erro inserir parcelas:' + E.Message);
+    end;
+  finally
+    lContasPagarModel.Free;
+  end;
+end;
+
+procedure TForm1.Button28Click(Sender: TObject);
+var
+  lContasPagarItensModel  : TContasPagarItensModel;
+  Duplicata               : String;
+  i                       : Integer;
+  lMemTable               : TFDMemTable;
+begin
+  lContasPagarItensModel := TContasPagarItensModel.Create(vIConexao);
+  try
+    try
+      Duplicata := InputBox('ContasPagar', 'Digite a Duplicata para consultar os itens:', '');
+      if Duplicata.IsEmpty then
+        exit;
+
+      lContasPagarItensModel.DuplicataView := Duplicata;
+
+      lMemTable := lContasPagarItensModel.obterLista;
+
+      lMemTable.First;
+      while not lMemTable.Eof do
+      begin
+        memoResultado.Lines.Add('DUPLIACATA_PAG: '+lMemTable.FieldByName('DUPLIACATA_PAG').AsString);
+        memoResultado.Lines.Add('CODIGO_FOR: '+lMemTable.FieldByName('CODIGO_FOR').AsString);
+        memoResultado.Lines.Add('VENC_PAG: '+lMemTable.FieldByName('VENC_PAG').AsString);
+        memoResultado.Lines.Add('PACELA_PAG: '+lMemTable.FieldByName('PACELA_PAG').AsString);
+        memoResultado.Lines.Add('VALORPARCELA_PAG: '+lMemTable.FieldByName('VALORPARCELA_PAG').AsString);
+        memoResultado.Lines.Add('===============================================');
+        lMemTable.Next;
+      end;
+    except
+    on E:Exception do
+       ShowMessage('Erro consultar itens' + E.Message);
+    end;
+  finally
+    lContasPagarItensModel.Free;
+  end;
+end;
+
+procedure TForm1.Button29Click(Sender: TObject);
+var
+  lContasPagarItensModel : TContasPagarItensModel;
+  pDuplicata,
+  pIDItem        : String;
+begin
+  lContasPagarItensModel := TContasPagarItensModel.Create(vIConexao);
+  try
+    try
+      pDuplicata := 'R00006';
+      pIDItem    := '20198';
+
+      lContasPagarItensModel := lContasPagarItensModel.Alterar(pDuplicata, pIDItem);
+      lContasPagarItensModel.VENC_PAG := '10.05.2024';
+
+      lContasPagarItensModel.Salvar;
+
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+  lContasPagarItensModel.Free;
+  end;
+end;
+
 procedure TForm1.Button2Click(Sender: TObject);
 var
   lFinanceiroPedidoModel : TFinanceiroPedidoModel;
-  IDRegistro            : String;
+  IDRegistro             : String;
 begin
   lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
 
@@ -409,6 +509,131 @@ begin
     end;
   finally
     lFinanceiroPedidoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button30Click(Sender: TObject);
+var
+  lContasPagarItensModel : TContasPagarItensModel;
+  NumParcela             : String;
+begin
+  lContasPagarItensModel := TContasPagarItensModel.Create(vIConexao);
+  try
+    try
+      NumParcela := InputBox('ContasPagarItens','Digite o ID da parcela','');
+      lContasPagarItensModel.Excluir(NumParcela);
+      ShowMessage('Excluido com sucesso!');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lContasPagarItensModel.Free;
+  end;
+end;
+
+procedure TForm1.Button31Click(Sender: TObject);
+var
+  lEntradaItensParams : TEntradaItensParams;
+  lEntradaModel       : TEntradaModel;
+  lNumEntrada         : String;
+begin
+  lEntradaModel  := TEntradaModel.Create(vIConexao);
+  try
+    try
+      lNumEntrada := InputBox('EntradaItens','Digite o número da Entrada:','');
+
+      lEntradaItensParams.NUMERO_ENT      := lNumEntrada;
+      lEntradaItensParams.CODIGO_FOR      := '500005';
+      lEntradaItensParams.CODIGO_PRO      := '000444';
+      lEntradaItensParams.QUANTIDADE_ENT  := '1';
+      lEntradaItensParams.VALORUNI_ENT    := '30';
+
+      lEntradaModel.EntradaItens(lEntradaItensParams);
+      ShowMessage('Item adicionado a Entrada: ' + lNumEntrada);
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lEntradaModel.Free;
+  end;
+end;
+
+procedure TForm1.Button32Click(Sender: TObject);
+var
+  lEntradaItensModel : TEntradaItensModel;
+  NumEntrada         : String;
+  i                  : Integer;
+  lMemTable          : TFDMemTable;
+begin
+  lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
+  try
+    try
+      NumEntrada := InputBox('Constulta EntradaItens','Digite o número da Entrada:','');
+
+      lEntradaItensModel.IDEntrada := NumEntrada;
+      lMemTable := lEntradaItensModel.obterLista;
+      lMemTable.First;
+      while not lMemTable.Eof do
+      begin
+         memoResultado.Lines.Add('NUMERO_ENT: ' +lMemTable.FieldByName('NUMERO_ENT').AsString);
+         memoResultado.Lines.Add('CODIGO_FOR: ' +lMemTable.FieldByName('CODIGO_FOR').AsString);
+         memoResultado.Lines.Add('CODIGO_PRO: ' +lMemTable.FieldByName('CODIGO_PRO').AsString);
+         memoResultado.Lines.Add('QUANTIDADE_ENT: ' +lMemTable.FieldByName('QUANTIDADE_ENT').AsString);
+         memoResultado.Lines.Add('VALORUNI_ENT: ' +lMemTable.FieldByName('VALORUNI_ENT').AsString);
+         memoResultado.Lines.Add('============================================');
+         lMemTable.Next;
+      end;
+    except
+      on E:Exception do
+        ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lEntradaItensModel.Free;
+  end;
+end;
+
+procedure TForm1.Button33Click(Sender: TObject);
+var
+  lEntradaItensModel : TEntradaItensModel;
+  pIDItem            : String;
+begin
+  lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
+  try
+    try
+      pIDItem        := '1916';
+
+      lEntradaItensModel := lEntradaItensModel.Alterar(pIDItem);
+      lEntradaItensModel.QUANTIDADE_ENT := '5';
+      lEntradaItensModel.Salvar;
+      ShowMessage('Alterado com sucesso');
+    except
+      on E:Exception do
+        ShowMessage('Erro: ' + E.Message);
+    end;
+    finally
+      lEntradaItensModel.Free;
+  end;
+end;
+
+procedure TForm1.Button34Click(Sender: TObject);
+var
+  lEntradaItensModel : TEntradaItensModel;
+  ID                 : String;
+begin
+  lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
+  try
+    try
+      ID := '1916';
+      lEntradaItensModel.Excluir(ID);
+      ShowMessage('Excluido com sucesso!');
+    except
+     on E:Exception do
+      ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lEntradaItensModel.Free;
   end;
 end;
 
@@ -700,7 +925,7 @@ end;
 procedure TForm1.Button10Click(Sender: TObject);
 var
   lWebPedidoItensModel : TWebPedidoItensModel;
-  ID                  : String;
+  ID                   : String;
 begin
   lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
   try
@@ -865,7 +1090,7 @@ begin
   try
     try
 
-      lContasPagarModel.DUPLICATA_PAG  := '9000000020';
+      lContasPagarModel.DUPLICATA_PAG  := '9000000009';
       lContasPagarModel.CODIGO_FOR  := '500005';
       lContasPagarModel.PORTADOR_ID  := '000001';
       lContasPagarModel.DATAEMI_PAG := '05.02.2024';

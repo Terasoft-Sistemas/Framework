@@ -249,6 +249,7 @@ function TWebPedidoItensDao.obterTotais(pId: String): TTotais;
 var
   lQry  : TFDQuery;
   lSQL  : String;
+  lTotais : TTotais;
 begin
   lQry := vIConexao.CriarQuery;
 

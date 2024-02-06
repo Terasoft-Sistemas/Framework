@@ -5,9 +5,19 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
-  Interfaces.Conexao, FireDAC.Comp.Client;
+  Interfaces.Conexao,
+  Terasoft.Utils,
+  FireDAC.Comp.Client;
 
 type
+  TEntradaItensParams = record
+    NUMERO_ENT,
+    CODIGO_FOR,
+    CODIGO_PRO,
+    QUANTIDADE_ENT,
+    VALORUNI_ENT : String;
+  end;
+
   TEntradaModel = class
 
   private
@@ -264,7 +274,8 @@ type
     function Excluir(pID, pFornecedor : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId, pFornecedor: String): TEntradaModel;
+    function EntradaItens(pEntradaItensParams : TEntradaItensParams) : String;
+    function carregaClasse(pId, pFornecedor : String): TEntradaModel;
     function obterLista: TFDMemTable;
 
     property Acao :TAcao read FAcao write SetAcao;
@@ -281,7 +292,7 @@ type
 implementation
 
 uses
-  EntradaDao;
+  EntradaDao, ProdutosModel, EntradaItensModel, System.SysUtils;
 
 { TEntradaModel }
 
@@ -295,6 +306,49 @@ begin
     lEntradaModel.Acao  := tacAlterar;
     Result              := lEntradaModel;
   finally
+  end;
+end;
+
+function TEntradaModel.EntradaItens(pEntradaItensParams: TEntradaItensParams): String;
+var
+  lEntradaItensModel  : TEntradaItensModel;
+  lEntradaModel       : TEntradaModel;
+  lProdutosModel      : TProdutosModel;
+begin
+  lEntradaItensModel  := TEntradaItensModel.Create(vIConexao);
+  lEntradaModel       := TEntradaModel.Create(vIConexao);
+  lProdutosModel      := TProdutosModel.Create(vIConexao);
+
+  if pEntradaItensParams.CODIGO_FOR = '' then
+    CriaException('Fornecedor não informado');
+
+  if pEntradaItensParams.CODIGO_PRO = '' then
+    CriaException('Produto não informado');
+
+  if StrToFloatDef(pEntradaItensParams.QUANTIDADE_ENT, 0) = 0 then
+    CriaException('Quantidade não informada');
+
+  try
+    self := self.carregaClasse(pEntradaItensParams.NUMERO_ENT, pEntradaItensParams.CODIGO_FOR);
+
+    lProdutosModel.IDRecordView := pEntradaItensParams.CODIGO_PRO;
+    lProdutosModel.obterLista;
+    lProdutosModel := lProdutosModel.ProdutossLista[0];
+
+    lEntradaItensModel.CFOP_ID        := self.FCFOP_ID;
+    lEntradaItensModel.NUMERO_ENT     := self.FNUMERO_ENT;
+    lEntradaItensModel.CODIGO_FOR     := self.FCODIGO_FOR;
+    lEntradaItensModel.CODIGO_PRO     := pEntradaItensParams.CODIGO_PRO;
+    lEntradaItensModel.QUANTIDADE_ENT := pEntradaItensParams.QUANTIDADE_ENT;
+    lEntradaItensModel.VALORUNI_ENT   := pEntradaItensParams.VALORUNI_ENT;
+    lEntradaItensModel.STATUS.Value   := '0';
+    lEntradaItensModel.CST_ENT.Value  := '00';
+
+    Result := lEntradaItensModel.Incluir;
+
+  finally
+    lEntradaItensModel.Free;
+    lProdutosModel.Free;
   end;
 end;
 
@@ -317,7 +371,6 @@ var
   lEntradaDao: TEntradaDao;
 begin
   lEntradaDao := TEntradaDao.Create(vIConexao);
-
   try
     Result := lEntradaDao.carregaClasse(pId, pFornecedor);
   finally

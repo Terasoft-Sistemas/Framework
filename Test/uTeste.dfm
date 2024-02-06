@@ -198,7 +198,7 @@ object Form1: TForm1
         Top = 255
         Width = 182
         Height = 42
-        Caption = 'Entrada Forncededor Inserir'
+        Caption = 'Entrada Fornecedor Inserir'
         TabOrder = 19
         OnClick = Button15Click
       end
@@ -207,7 +207,7 @@ object Form1: TForm1
         Top = 255
         Width = 182
         Height = 42
-        Caption = 'Entrada Forncededor Consultar'
+        Caption = 'Entrada Fornecedor Consultar'
         TabOrder = 20
         OnClick = Button17Click
       end
@@ -216,7 +216,7 @@ object Form1: TForm1
         Top = 255
         Width = 182
         Height = 42
-        Caption = 'Entrada Forncededor Update'
+        Caption = 'Entrada Fornecedor Update'
         TabOrder = 21
         OnClick = Button18Click
       end
@@ -225,13 +225,13 @@ object Form1: TForm1
         Top = 255
         Width = 182
         Height = 42
-        Caption = 'Entrada Forncededor Excluir'
+        Caption = 'Entrada Fornecedor Excluir'
         TabOrder = 22
         OnClick = Button19Click
       end
       object Button20: TButton
         Left = 191
-        Top = 407
+        Top = 447
         Width = 182
         Height = 46
         Caption = 'Cliente Consultar'
@@ -240,7 +240,7 @@ object Form1: TForm1
       end
       object Button21: TButton
         Left = 379
-        Top = 407
+        Top = 447
         Width = 182
         Height = 46
         Caption = 'Cliente Update'
@@ -249,7 +249,7 @@ object Form1: TForm1
       end
       object Button22: TButton
         Left = 567
-        Top = 407
+        Top = 447
         Width = 182
         Height = 46
         Caption = 'Cliente Excluir'
@@ -258,7 +258,7 @@ object Form1: TForm1
       end
       object Button23: TButton
         Left = 3
-        Top = 407
+        Top = 447
         Width = 182
         Height = 46
         Caption = 'Cliente Inserir'
@@ -267,7 +267,7 @@ object Form1: TForm1
       end
       object Button16: TButton
         Left = 3
-        Top = 303
+        Top = 351
         Width = 182
         Height = 42
         Caption = 'ContasPagar Inserir'
@@ -276,7 +276,7 @@ object Form1: TForm1
       end
       object Button24: TButton
         Left = 379
-        Top = 303
+        Top = 351
         Width = 182
         Height = 42
         Caption = 'ContasPagar Update'
@@ -285,7 +285,7 @@ object Form1: TForm1
       end
       object Button25: TButton
         Left = 191
-        Top = 303
+        Top = 351
         Width = 182
         Height = 42
         Caption = 'ContasPagar Consultar'
@@ -294,12 +294,84 @@ object Form1: TForm1
       end
       object Button26: TButton
         Left = 567
-        Top = 303
+        Top = 351
         Width = 182
         Height = 42
         Caption = 'ContasPagar Excluir'
         TabOrder = 30
         OnClick = Button26Click
+      end
+      object Button27: TButton
+        Left = 3
+        Top = 399
+        Width = 182
+        Height = 42
+        Caption = 'ContasPagarItens Inserir'
+        TabOrder = 31
+        OnClick = Button27Click
+      end
+      object Button28: TButton
+        Left = 191
+        Top = 399
+        Width = 182
+        Height = 42
+        Caption = 'ContasPagarItens Consultar'
+        TabOrder = 32
+        OnClick = Button28Click
+      end
+      object Button29: TButton
+        Left = 379
+        Top = 399
+        Width = 182
+        Height = 42
+        Caption = 'ContasPagarItens Update'
+        TabOrder = 33
+        OnClick = Button29Click
+      end
+      object Button30: TButton
+        Left = 567
+        Top = 399
+        Width = 182
+        Height = 42
+        Caption = 'ContasPagarItens Excluir'
+        TabOrder = 34
+        OnClick = Button30Click
+      end
+      object Button31: TButton
+        Left = 3
+        Top = 303
+        Width = 182
+        Height = 42
+        Caption = 'EntradaItens Inserir'
+        TabOrder = 35
+        OnClick = Button31Click
+      end
+      object Button32: TButton
+        Left = 191
+        Top = 303
+        Width = 182
+        Height = 42
+        Caption = 'EntradaItens Consultar'
+        TabOrder = 36
+        OnClick = Button32Click
+      end
+      object Button33: TButton
+        Left = 379
+        Top = 303
+        Width = 182
+        Height = 42
+        Caption = 'EntradaItens Update'
+        TabOrder = 37
+        OnClick = Button33Click
+      end
+      object Button34: TButton
+        Left = 567
+        Top = 303
+        Width = 182
+        Height = 42
+        Caption = 'EntradaItens Excluir'
+        TabOrder = 38
+        OnClick = Button34Click
       end
     end
   end
