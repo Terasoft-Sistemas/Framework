@@ -192,8 +192,6 @@ begin
       lQry := vIConexao.criarQueryExterna;
       lQry.Open(lSQL);
 
-      FSaldosLista.Add(TSaldoModel.Create(vIConexao));
-
       lMemTable.InsertRecord([
                               llojas.LOJA,
                               lQry.fieldByName('SALDO_FISICO').AsFloat,
