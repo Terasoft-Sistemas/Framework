@@ -373,6 +373,42 @@ object Form1: TForm1
         TabOrder = 38
         OnClick = Button34Click
       end
+      object Button35: TButton
+        Left = 3
+        Top = 499
+        Width = 182
+        Height = 46
+        Caption = 'Reserva Inserir'
+        TabOrder = 39
+        OnClick = Button35Click
+      end
+      object Button36: TButton
+        Left = 191
+        Top = 499
+        Width = 182
+        Height = 46
+        Caption = 'Reserva Consultar'
+        TabOrder = 40
+        OnClick = Button36Click
+      end
+      object Button37: TButton
+        Left = 379
+        Top = 499
+        Width = 182
+        Height = 46
+        Caption = 'Reserva Update'
+        TabOrder = 41
+        OnClick = Button37Click
+      end
+      object Button38: TButton
+        Left = 567
+        Top = 499
+        Width = 182
+        Height = 46
+        Caption = 'Reserva Excluir'
+        TabOrder = 42
+        OnClick = Button38Click
+      end
     end
   end
 end

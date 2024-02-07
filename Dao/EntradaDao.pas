@@ -285,14 +285,15 @@ begin
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
-      lSql := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
-    else
-      lSql := 'select ';
+    lSql := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
 
-    lSQL := lSQL +
-      '       ENTRADA.*         '+
-	    '  from ENTRADA           '+
-      ' where 1=1               ';
+    lSQL := ' select entrada.*,                                                                 '+SLineBreak+
+            '        coalesce(fornecedor.razao_for, fornecedor.fantasia_for) NOME_FORNECEDOR,   '+SLineBreak+
+            '        portador.nome_port PORTADOR                                                '+SLineBreak+
+            '   from entrada                                                                    '+SLineBreak+
+            '   left join fornecedor on fornecedor.codigo_for = entrada.codigo_for              '+SLineBreak+
+            '   left join portador on portador.codigo_port = entrada.portador_id                '+SLineBreak+
+            '  where 1=1                                                                        '+SLineBreak;
 
     lSql := lSql + where;
 

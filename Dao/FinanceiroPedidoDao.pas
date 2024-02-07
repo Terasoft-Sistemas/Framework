@@ -235,7 +235,6 @@ begin
       '                                                                              '+SLineBreak+
       ' where 1=1                                                                    '+SLineBreak;
 
-//    lSQL := 'select '+lPaginacao+' * From FINANCEIRO_PEDIDO where 1=1 ';
     lSQL := lSQL + where;
 
     if not FOrderView.IsEmpty then

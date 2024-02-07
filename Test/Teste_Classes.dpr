@@ -92,7 +92,9 @@ uses
   ContasPagarDao in '..\Dao\ContasPagarDao.pas',
   ContasPagarModel in '..\Model\ContasPagarModel.pas',
   ContasPagarItensModel in '..\Model\ContasPagarItensModel.pas',
-  ContasPagarItensDao in '..\Dao\ContasPagarItensDao.pas';
+  ContasPagarItensDao in '..\Dao\ContasPagarItensDao.pas',
+  ReservaDao in '..\Dao\ReservaDao.pas',
+  ReservaModel in '..\Model\ReservaModel.pas';
 
 {$R *.res}
 

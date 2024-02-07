@@ -60,6 +60,10 @@ type
     Button32: TButton;
     Button33: TButton;
     Button34: TButton;
+    Button35: TButton;
+    Button36: TButton;
+    Button37: TButton;
+    Button38: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -100,6 +104,10 @@ type
     procedure Button32Click(Sender: TObject);
     procedure Button33Click(Sender: TObject);
     procedure Button34Click(Sender: TObject);
+    procedure Button35Click(Sender: TObject);
+    procedure Button37Click(Sender: TObject);
+    procedure Button36Click(Sender: TObject);
+    procedure Button38Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -125,7 +133,8 @@ uses
   WebPedidoItensModel,
   TabelaJurosModel,
   SaldoModel, EmpresaModel, ProdutosModel, EntradaItensModel,
-  ClienteModel, ContasPagarModel, ContasPagarItensModel, System.SysUtils;
+  ClienteModel, ContasPagarModel, ContasPagarItensModel, System.SysUtils,
+  ReservaModel;
 
 {$R *.dfm}
 
@@ -146,7 +155,7 @@ begin
       begin
         memoResultado.Lines.Add('ID: '+lMemTable.FieldByName('ID').AsString);
         memoResultado.Lines.Add('PORTADOR_ID: '+lMemTable.FieldByName('PORTADOR_ID').AsString);
-        memoResultado.Lines.Add('PORTADOR_NOME: '+lMemTable.FieldByName('nome_port').AsString);
+        memoResultado.Lines.Add('PORTADOR_NOME: '+lMemTable.FieldByName('NOME_PORT').AsString);
         memoResultado.Lines.Add('PARCELA: '+lMemTable.FieldByName('PARCELA').AsString);
         memoResultado.Lines.Add('VALOR_PARCELA: '+lMemTable.FieldByName('VALOR_PARCELA').AsString);
         memoResultado.Lines.Add('VALOR_TOTAL: '+lMemTable.FieldByName('VALOR_TOTAL').AsString);
@@ -359,7 +368,9 @@ begin
       begin
         memoResultado.Lines.Add('DUPLICATA_PAG: '+lMemTable.FieldByName('DUPLICATA_PAG').AsString);
         memoResultado.Lines.Add('CODIGO_FOR: '+lMemTable.FieldByName('CODIGO_FOR').AsString);
+        memoResultado.Lines.Add('FORNECEDOR: '+lMemTable.FieldByName('FORNECEDOR').AsString);
         memoResultado.Lines.Add('PORTADOR_ID: '+lMemTable.FieldByName('PORTADOR_ID').AsString);
+        memoResultado.Lines.Add('PORTADOR: '+lMemTable.FieldByName('PORTADOR').AsString);
         memoResultado.Lines.Add('DATAEMI_PAG: '+lMemTable.FieldByName('DATAEMI_PAG').AsString);
         memoResultado.Lines.Add('TIPO_PAG: '+lMemTable.FieldByName('TIPO_PAG').AsString);
         memoResultado.Lines.Add('===============================================');
@@ -442,6 +453,9 @@ begin
       begin
         memoResultado.Lines.Add('DUPLIACATA_PAG: '+lMemTable.FieldByName('DUPLIACATA_PAG').AsString);
         memoResultado.Lines.Add('CODIGO_FOR: '+lMemTable.FieldByName('CODIGO_FOR').AsString);
+        memoResultado.Lines.Add('FORNECEDOR: '+lMemTable.FieldByName('FORNECEDOR').AsString);
+        memoResultado.Lines.Add('PORTADOR_ID: '+lMemTable.FieldByName('PORTADOR_ID').AsString);
+        memoResultado.Lines.Add('PORTADOR: '+lMemTable.FieldByName('PORTADOR').AsString);
         memoResultado.Lines.Add('VENC_PAG: '+lMemTable.FieldByName('VENC_PAG').AsString);
         memoResultado.Lines.Add('PACELA_PAG: '+lMemTable.FieldByName('PACELA_PAG').AsString);
         memoResultado.Lines.Add('VALORPARCELA_PAG: '+lMemTable.FieldByName('VALORPARCELA_PAG').AsString);
@@ -587,7 +601,9 @@ begin
       begin
          memoResultado.Lines.Add('NUMERO_ENT: ' +lMemTable.FieldByName('NUMERO_ENT').AsString);
          memoResultado.Lines.Add('CODIGO_FOR: ' +lMemTable.FieldByName('CODIGO_FOR').AsString);
+         memoResultado.Lines.Add('FORNECEDOR: ' +lMemTable.FieldByName('FORNECEDOR').AsString);
          memoResultado.Lines.Add('CODIGO_PRO: ' +lMemTable.FieldByName('CODIGO_PRO').AsString);
+         memoResultado.Lines.Add('PRODUTO: ' +lMemTable.FieldByName('PRODUTO').AsString);
          memoResultado.Lines.Add('QUANTIDADE_ENT: ' +lMemTable.FieldByName('QUANTIDADE_ENT').AsString);
          memoResultado.Lines.Add('VALORUNI_ENT: ' +lMemTable.FieldByName('VALORUNI_ENT').AsString);
          memoResultado.Lines.Add('============================================');
@@ -642,6 +658,124 @@ begin
     end;
   finally
     lEntradaItensModel.Free;
+  end;
+end;
+
+procedure TForm1.Button35Click(Sender: TObject);
+var
+  lReservaModel : TReservaModel;
+  lCodPro       : String;
+begin
+  lReservaModel := TReservaModel.Create(vIConexao);
+  try
+    try
+    lCodPro := InputBox('Reservar','Digite o código do Produto:','');
+      if lCodPro.IsEmpty then
+        Exit;
+
+    lReservaModel.PRODUTO_ID   := lCodPro;
+    lReservaModel.CLIENTE_ID   := '700504';
+    lReservaModel.VENDEDOR_ID  := '000007';
+    lReservaModel.QUANTIDADE   := '10';
+    lReservaModel.STATUS       := 'L';
+    lReservaModel.FILIAL       := '002';
+
+    lReservaModel.Incluir;
+
+    ShowMessage('Produto: '+ lCodPro +', reservado! ');
+    except
+     on E:Exception do
+      ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lReservaModel.Free;
+  end;
+end;
+
+procedure TForm1.Button36Click(Sender: TObject);
+var
+  lReservaModel : TReservaModel;
+  lMemTable : TFDMemTable;
+begin
+  lReservaModel := TReservaModel.Create(vIConexao);
+  try
+    try
+      lMemTable := lReservaModel.obterLista;
+      memoResultado.Lines.Clear;
+
+      lMemTable.First;
+      while not lMemTable.Eof do
+      begin
+        memoResultado.Lines.Add('ID: '+lMemTable.FieldByName('ID').AsString);
+        memoResultado.Lines.Add('PRODUTO_ID: '+lMemTable.FieldByName('PRODUTO_ID').AsString);
+        memoResultado.Lines.Add('PRODUTO: '+lMemTable.FieldByName('PRODUTO').AsString);
+        memoResultado.Lines.Add('VENDEDOR_ID: '+lMemTable.FieldByName('VENDEDOR_ID').AsString);
+        memoResultado.Lines.Add('VENDEDOR: '+lMemTable.FieldByName('VENDEDOR').AsString);
+        memoResultado.Lines.Add('QUANTIDADE: '+lMemTable.FieldByName('QUANTIDADE').AsString);
+        memoResultado.Lines.Add('HORAS_BAIXA: '+lMemTable.FieldByName('HORAS_BAIXA').AsString);
+        memoResultado.Lines.Add('STATUS: '+lMemTable.FieldByName('STATUS').AsString);
+        memoResultado.Lines.Add('FILIAL: '+lMemTable.FieldByName('FILIAL').AsString);
+        memoResultado.Lines.Add('===============================================');
+        lMemTable.Next;
+      end;
+
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lReservaModel.Free;
+  end;
+end;
+
+procedure TForm1.Button37Click(Sender: TObject);
+var
+  lReservaModel : TReservaModel;
+  ID            : String;
+begin
+  lReservaModel := TReservaModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('Reserva', 'Digite o ID que deseja Alterar:', '');
+
+      if ID.IsEmpty then
+        exit;
+
+      lReservaModel := lReservaModel.Alterar(ID);
+      lReservaModel.PRODUTO_ID := '000007';
+      lReservaModel.VENDEDOR_ID := '000007';
+
+      lReservaModel.Salvar;
+      ShowMessage('Alterado com Sucesso');
+    Except
+      on E:Exception do
+      ShowMessage('Erro: ' +E.Message);
+    end;
+  finally
+    lReservaModel.Free;
+  end;
+end;
+
+procedure TForm1.Button38Click(Sender: TObject);
+var
+  lReservaModel : TReservaModel;
+  ID        : String;
+begin
+  lReservaModel := TReservaModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('Reserva', 'Digite o ID da Reserva que deseja excluir:', '');
+      if ID.IsEmpty then
+          Exit;
+
+      lReservaModel.Excluir(ID);
+      ShowMessage('Excluido com sucesso!');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lReservaModel.Free;
   end;
 end;
 
@@ -1156,6 +1290,7 @@ begin
       begin
         memoResultado.Lines.Add('NUMERO_ENT: '+lMemTable.FieldByName('NUMERO_ENT').AsString);
         memoResultado.Lines.Add('CODIGO_FOR: '+lMemTable.FieldByName('CODIGO_FOR').AsString);
+        memoResultado.Lines.Add('FORNECEDOR: '+lMemTable.FieldByName('NOME_FORNECEDOR').AsString);
         memoResultado.Lines.Add('DATANOTA_ENT: '+lMemTable.FieldByName('DATANOTA_ENT').AsString);
         memoResultado.Lines.Add('TOTAL_ENT: '+lMemTable.FieldByName('TOTAL_ENT').AsString);
         memoResultado.Lines.Add('===============================================');

@@ -212,12 +212,12 @@ begin
     else
       lSql := 'select ';
     lSQL := lSQL +
-      '       portador.codigo_port,         '+
-      '       portador.nome_port,           '+
-      '       portador.banco_baixa_direta,  '+
-      '       portador.receita_conta_id     '+
-	    '  from portador                      '+
-      ' where 1=1                           ';
+                  '       portador.codigo_port,         '+
+                  '       portador.nome_port,           '+
+                  '       portador.banco_baixa_direta,  '+
+                  '       portador.receita_conta_id     '+
+                  '  from portador                      '+
+                  ' where 1=1                           ';
     lSql := lSql + where;
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
