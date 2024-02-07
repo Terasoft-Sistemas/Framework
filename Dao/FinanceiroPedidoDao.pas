@@ -222,7 +222,20 @@ begin
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + ' ';
 
-    lSQL := 'select '+lPaginacao+' * From FINANCEIRO_PEDIDO where 1=1 ';
+      lSQL :=
+      ' select   '+lPaginacao+'                                                      '+SLineBreak+
+      '     financeiro_pedido.*,                                                     '+SLineBreak+
+      '     portador.nome_port                                                       '+SLineBreak+
+      '                                                                              '+SLineBreak+
+      '                                                                              '+SLineBreak+
+      ' From                                                                         '+SLineBreak+
+      '     financeiro_pedido                                                        '+SLineBreak+
+      '                                                                              '+SLineBreak+
+      ' left join portador on portador.codigo_port = financeiro_pedido.portador_id   '+SLineBreak+
+      '                                                                              '+SLineBreak+
+      ' where 1=1                                                                    '+SLineBreak;
+
+//    lSQL := 'select '+lPaginacao+' * From FINANCEIRO_PEDIDO where 1=1 ';
     lSQL := lSQL + where;
 
     if not FOrderView.IsEmpty then

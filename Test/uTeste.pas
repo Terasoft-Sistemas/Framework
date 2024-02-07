@@ -132,6 +132,7 @@ begin
       begin
         memoResultado.Lines.Add('ID: '+lMemTable.FieldByName('ID').AsString);
         memoResultado.Lines.Add('PORTADOR_ID: '+lMemTable.FieldByName('PORTADOR_ID').AsString);
+        memoResultado.Lines.Add('PORTADOR_NOME: '+lMemTable.FieldByName('nome_port').AsString);
         memoResultado.Lines.Add('PARCELA: '+lMemTable.FieldByName('PARCELA').AsString);
         memoResultado.Lines.Add('VALOR_PARCELA: '+lMemTable.FieldByName('VALOR_PARCELA').AsString);
         memoResultado.Lines.Add('VALOR_TOTAL: '+lMemTable.FieldByName('VALOR_TOTAL').AsString);
