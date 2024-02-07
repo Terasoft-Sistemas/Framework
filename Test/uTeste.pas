@@ -676,6 +676,7 @@ procedure TForm1.Button4Click(Sender: TObject);
 var
   lWebPedidoModel : TWebPedidoModel;
   i               : Integer;
+  lMemTable       : TFDMemTable;
 begin
   lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
   try
@@ -683,19 +684,40 @@ begin
     lWebPedidoModel.StartRecordView := vPagina.ToString;
     lWebPedidoModel.OrderView       := 'id';
 
-    lWebPedidoModel.obterListaVendaAssistida;
+    lMemTable := lWebPedidoModel.obterLista;
 
     inc(vPagina, 10);
 
     memoResultado.Lines.Clear;
 
-    for i := 0 to lWebPedidoModel.WebPedidosLista.Count -1 do
+    lMemTable.First;
+    while not lMemTable.eof do
     begin
-      memoResultado.Lines.Add('ID: '+ lWebPedidoModel.WebPedidosLista[i].ID);
-      memoResultado.Lines.Add('CLIENTE: '+lWebPedidoModel.WebPedidosLista[i].CLIENTE_NOME);
-      memoResultado.Lines.Add('VALOR_ITENS: '+lWebPedidoModel.WebPedidosLista[i].VALOR_ITENS);
-      memoResultado.Lines.Add('VALOR_TOTAL: '+lWebPedidoModel.WebPedidosLista[i].VALOR_TOTAL);
+      memoResultado.Lines.Add('ID: '+ lMemTable.FieldByName('ID').AsString);
+      memoResultado.Lines.Add('CODIGO_CLI: '+ lMemTable.FieldByName('CODIGO_CLI').AsString);
+      memoResultado.Lines.Add('CLIENTE_NOME: '+ lMemTable.FieldByName('CLIENTE_NOME').AsString);
+      memoResultado.Lines.Add('ENTREGA_ENDERECO: '+ lMemTable.FieldByName('ENTREGA_ENDERECO').AsString);
+      memoResultado.Lines.Add('ENTREGA_NUMERO: '+ lMemTable.FieldByName('ENTREGA_NUMERO').AsString);
+      memoResultado.Lines.Add('ENTREGA_COD_MUNICIPIO: '+ lMemTable.FieldByName('ENTREGA_COD_MUNICIPIO').AsString);
+      memoResultado.Lines.Add('ENTREGA_CEP: '+ lMemTable.FieldByName('ENTREGA_CEP').AsString);
+      memoResultado.Lines.Add('ENTREGA_COMPLEMENTO: '+ lMemTable.FieldByName('ENTREGA_COMPLEMENTO').AsString);
+      memoResultado.Lines.Add('ENTREGA_CIDADE: '+ lMemTable.FieldByName('ENTREGA_CIDADE').AsString);
+      memoResultado.Lines.Add('ENTREGA_BAIRRO: '+ lMemTable.FieldByName('ENTREGA_BAIRRO').AsString);
+      memoResultado.Lines.Add('ENTREGA_UF: '+ lMemTable.FieldByName('ENTREGA_UF').AsString);
+      memoResultado.Lines.Add('MONTAGEM_DATA: '+ lMemTable.FieldByName('MONTAGEM_DATA').AsString);
+      memoResultado.Lines.Add('MONTAGEM_HORA: '+ lMemTable.FieldByName('MONTAGEM_HORA').AsString);
+      memoResultado.Lines.Add('ENTREGA_DATA: '+ lMemTable.FieldByName('ENTREGA_DATA').AsString);
+      memoResultado.Lines.Add('ENTREGA_HORA: '+ lMemTable.FieldByName('ENTREGA_HORA').AsString);
+      memoResultado.Lines.Add('REGIAO: '+ lMemTable.FieldByName('REGIAO').AsString);
+      memoResultado.Lines.Add('VALOR_FRETE: '+ lMemTable.FieldByName('VALOR_FRETE').AsString);
+      memoResultado.Lines.Add('ACRESCIMO: '+ lMemTable.FieldByName('ACRESCIMO').AsString);
+      memoResultado.Lines.Add('VALOR_ITENS: '+ lMemTable.FieldByName('VALOR_ITENS').AsString);
+      memoResultado.Lines.Add('VALOR_GARANTIA: '+ lMemTable.FieldByName('VALOR_GARANTIA').AsString);
+      memoResultado.Lines.Add('VALOR_CUPOM_DESCONTO: '+ lMemTable.FieldByName('VALOR_CUPOM_DESCONTO').AsString);
+      memoResultado.Lines.Add('VALOR_TOTAL: '+ lMemTable.FieldByName('VALOR_TOTAL').AsString);
       memoResultado.Lines.Add('===============================================');
+
+      lMemTable.Next;
     end;
 
   finally

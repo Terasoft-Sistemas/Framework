@@ -7,7 +7,7 @@ uses
   Terasoft.Utils,
   System.Generics.Collections,
   Terasoft.FuncoesTexto,
-  Interfaces.Conexao;
+  Interfaces.Conexao, FireDAC.Comp.Client;
 
 type
   TVenderItemParametros = record
@@ -347,7 +347,7 @@ type
     destructor Destroy; override;
 
     function Salvar: String;
-    procedure obterListaVendaAssistida;
+    function obterLista : TFDMemTable;
     function carregaClasse(pId: String): TWebPedidoModel;
 
     function aprovarVendaAssistida(pIdVendaAssistida: Integer): String;
@@ -591,7 +591,7 @@ begin
   Result := self.Salvar;
 end;
 
-procedure TWebPedidoModel.obterListaVendaAssistida;
+function TWebPedidoModel.obterLista: TFDMemTable;
 var
   lWebPedidoLista: TWebPedidoDao;
 begin
@@ -606,11 +606,8 @@ begin
     lWebPedidoLista.LengthPageView  := FLengthPageView;
     lWebPedidoLista.IDRecordView    := FIDRecordView;
 
-    lWebPedidoLista.obterListaVendaAssistida;
-
-    FTotalRecords    := lWebPedidoLista.TotalRecords;
-    FWebPedidosLista := lWebPedidoLista.WebPedidosLista;
-
+    Result := lWebPedidoLista.obterLista;
+    FTotalRecords := lWebPedidoLista.TotalRecords;
   finally
     lWebPedidoLista.Free;
   end;

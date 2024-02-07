@@ -63,7 +63,7 @@ type
     function alterar(pWebPedidoModel: TWebPedidoModel): String;
     function excluir(pWebPedidoModel: TWebPedidoModel): String;
 
-    procedure obterListaVendaAssistida;
+    function obterLista: TFDMemTable;
     function carregaClasse(pId: String): TWebPedidoModel;
 end;
 
@@ -272,7 +272,7 @@ begin
     lSQL := lSQL + FWhereView;
 
   if FIDRecordView <> 0  then
-    lSQL := lSQL + ' and web_pedido.id = '+IntToStr(FIDRecordView);
+    lSQL := lSQL + ' and id = '+IntToStr(FIDRecordView);
 
   Result := lSQL;
 end;
@@ -298,41 +298,103 @@ begin
   end;
 end;
 
-procedure TWebPedidoDao.obterListaVendaAssistida;
+function TWebPedidoDao.obterLista: TFDMemTable;
 var
-  lQry: TFDQuery;
-  lSQL:String;
-  i: INteger;
+  lQry       : TFDQuery;
+  lSQL       : String;
+  i          : Integer;
+  lPaginacao : String;
 begin
   lQry := vIConexao.CriarQuery;
 
   FWebPedidosLista := TObjectList<TWebPedidoModel>.Create;
 
   try
-
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
-      lSQL := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
-    else
-      lSQL := 'select ';
+      lPaginacao := 'first ' + LengthPageView + ' SKIP ' + StartRecordView;
 
-    lSQL := lSQL +
-      '  web_pedido.id,                                                                                                                                   '+SLineBreak+
-      '  coalesce(clientes.fantasia_cli, clientes.razao_cli) cliente_nome,                                                                                '+SLineBreak+
-      '  web_pedido.valor_frete,                                                                                                                          '+SLineBreak+
-      '  coalesce(web_pedido.acrescimo,0) acrescimo,                                                                                                      '+SLineBreak+
-      '  coalesce((select sum(i.quantidade * i.valor_unitario) from web_pedidoitens i where i.web_pedido_id = web_pedido.id),0) valor_itens,              '+SLineBreak+
-      '  coalesce((select sum(i.quantidade * coalesce(i.vlr_garantia,0)) from web_pedidoitens i where i.web_pedido_id = web_pedido.id),0) valor_garantia, '+SLineBreak+
 
-      '  coalesce(cast(( select sum(i.quantidade * (i.valor_unitario + coalesce(i.vlr_garantia,0)))                                                       '+SLineBreak+
-      '                    from web_pedidoitens i                                                                                                         '+SLineBreak+
-      '                   where i.web_pedido_id = web_pedido.id) as decimal(18,6)),0)                                                                     '+SLineBreak+
-      '    - coalesce(web_pedido.valor_cupom_desconto,0)                                                                                                  '+SLineBreak+
-      '    + coalesce(web_pedido.acrescimo,0)                                                                                                             '+SLineBreak+
-      '    + coalesce(web_pedido.valor_frete,0) valor_total,                                                                                              '+SLineBreak+
-
-      '  coalesce(web_pedido.valor_cupom_desconto,0) valor_cupom_desconto                                                                                 '+SLineBreak+
-      ' from web_pedido inner join clientes on web_pedido.cliente_id = clientes.codigo_cli                                                                '+SLineBreak+
-      ' where 1=1 ';
+    lSQL := '    select  '+lPaginacao+'                                                                                                     '+SLineBreak+
+            '        ID,                                                                                                                    '+SLineBreak+
+            '        CODIGO_CLI,                                                                                                            '+SLineBreak+
+            '        CLIENTE_NOME,                                                                                                          '+SLineBreak+
+            '        ENTREGA_ENDERECO,                                                                                                      '+SLineBreak+
+            '        ENTREGA_NUMERO,                                                                                                        '+SLineBreak+
+            '        ENTREGA_COD_MUNICIPIO,                                                                                                 '+SLineBreak+
+            '        ENTREGA_CEP,                                                                                                           '+SLineBreak+
+            '        ENTREGA_COMPLEMENTO,                                                                                                   '+SLineBreak+
+            '        ENTREGA_CIDADE,                                                                                                        '+SLineBreak+
+            '        ENTREGA_BAIRRO,                                                                                                        '+SLineBreak+
+            '        ENTREGA_UF,                                                                                                            '+SLineBreak+
+            '        MONTAGEM_DATA,                                                                                                         '+SLineBreak+
+            '        MONTAGEM_HORA,                                                                                                         '+SLineBreak+
+            '        ENTREGA_DATA,                                                                                                          '+SLineBreak+
+            '        ENTREGA_HORA,                                                                                                          '+SLineBreak+
+            '        REGIAO,                                                                                                                '+SLineBreak+
+            '        VALOR_FRETE,                                                                                                           '+SLineBreak+
+            '        ACRESCIMO,                                                                                                             '+SLineBreak+
+            '        VALOR_ITENS,                                                                                                           '+SLineBreak+
+            '        VALOR_GARANTIA,                                                                                                        '+SLineBreak+
+            '        VALOR_CUPOM_DESCONTO,                                                                                                  '+SLineBreak+
+            '        VALOR_TOTAL                                                                                                            '+SLineBreak+
+			      '                                                                                                                               '+SLineBreak+
+            '    from (                                                                                                                     '+SLineBreak+
+            '                                                                                                                               '+SLineBreak+
+            '    			select                                                                                                                '+SLineBreak+
+            '    				id,                                                                                                                 '+SLineBreak+
+            '    				codigo_cli,                                                                                                         '+SLineBreak+
+            '    				cliente_nome,                                                                                                       '+SLineBreak+
+            '    				entrega_endereco,                                                                                                   '+SLineBreak+
+            '    				entrega_numero,                                                                                                     '+SLineBreak+
+            '    				entrega_cod_municipio,                                                                                              '+SLineBreak+
+            '    				entrega_cep,                                                                                                        '+SLineBreak+
+            '    				entrega_complemento,                                                                                                '+SLineBreak+
+            '    				entrega_cidade,                                                                                                     '+SLineBreak+
+            '    				entrega_bairro,                                                                                                     '+SLineBreak+
+            '    				entrega_uf,                                                                                                         '+SLineBreak+
+            '    				montagem_data,                                                                                                      '+SLineBreak+
+            '    				montagem_hora,                                                                                                      '+SLineBreak+
+            '    				entrega_data,                                                                                                       '+SLineBreak+
+            '    				entrega_hora,                                                                                                       '+SLineBreak+
+            '    				regiao,                                                                                                             '+SLineBreak+
+            '    				sum(valor_frete) valor_frete,                                                                                       '+SLineBreak+
+            '    				sum(acrescimo) acrescimo,                                                                                           '+SLineBreak+
+            '    				sum(valor_itens) valor_itens,                                                                                       '+SLineBreak+
+            '    				sum(valor_garantia) valor_garantia,                                                                                 '+SLineBreak+
+            '    				sum(valor_cupom_desconto) valor_cupom_desconto,                                                                     '+SLineBreak+
+            '    				sum(valor_itens) + sum(valor_frete) + sum(valor_garantia) + sum(acrescimo) - sum(valor_cupom_desconto) valor_total  '+SLineBreak+
+            '                                                                                                                               '+SLineBreak+
+            '      		from (                                                                                                                '+SLineBreak+
+            '																												                                                                        '+SLineBreak+
+            '      			  select web_pedido.id,                                                                                             '+SLineBreak+
+            '      					 clientes.codigo_cli,                                                                                           '+SLineBreak+
+            '      					 coalesce(clientes.fantasia_cli, clientes.razao_cli) cliente_nome,                                              '+SLineBreak+
+            '      					 web_pedido.entrega_endereco,                                                                                   '+SLineBreak+
+            '      					 web_pedido.entrega_numero,                                                                                     '+SLineBreak+
+            '      					 web_pedido.entrega_cod_municipio,                                                                              '+SLineBreak+
+            '      					 web_pedido.entrega_cep,                                                                                        '+SLineBreak+
+            '      					 web_pedido.entrega_complemento,                                                                                '+SLineBreak+
+            '      					 web_pedido.entrega_cidade,                                                                                     '+SLineBreak+
+            '      					 web_pedido.entrega_bairro,                                                                                     '+SLineBreak+
+            '      					 web_pedido.entrega_uf,                                                                                         '+SLineBreak+
+            '      					 web_pedido.montagem_data,                                                                                      '+SLineBreak+
+            '      					 web_pedido.montagem_hora,                                                                                      '+SLineBreak+
+            '      					 web_pedido.entrega_data,                                                                                       '+SLineBreak+
+            '      					 web_pedido.entrega_hora,                                                                                       '+SLineBreak+
+            '      					 regiao.descricao regiao,                                                                                       '+SLineBreak+
+            '      					 web_pedido.valor_frete valor_frete,                                                                            '+SLineBreak+
+            '      					 coalesce(web_pedido.acrescimo,0) acrescimo,                                                                    '+SLineBreak+
+            '      					 web_pedidoitens.quantidade * web_pedidoitens.valor_unitario valor_itens,                                       '+SLineBreak+
+            '      					 web_pedidoitens.quantidade * coalesce(web_pedidoitens.vlr_garantia,0) valor_garantia,                          '+SLineBreak+
+            '      					 coalesce(web_pedido.valor_cupom_desconto,0) valor_cupom_desconto                                               '+SLineBreak+
+            '      				from web_pedido                                                                                                   '+SLineBreak+
+            '      			   inner join clientes on web_pedido.cliente_id = clientes.codigo_cli                                               '+SLineBreak+
+            '      				left join web_pedidoitens on web_pedidoitens.web_pedido_id = web_pedido.id                                        '+SLineBreak+
+            '      				left join regiao on regiao.id = web_pedido.regiao_id                                                              '+SLineBreak+
+            '      			   ) t1                                                                                                             '+SLineBreak+
+            '                                                                                                                               '+SLineBreak+
+            '    group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 ) web_pedido                                                               '+SLineBreak+
+            '    where 1=1                                                                                                                  '+SLineBreak;
 
     lSQL := lSQL + where;
 
@@ -341,26 +403,7 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
-    lQry.First;
-    while not lQry.Eof do
-    begin
-      FWebPedidosLista.Add(TWebPedidoModel.Create(vIConexao));
-
-      i := FWebPedidosLista.Count -1;
-
-      FWebPedidosLista[i].ID                   := lQry.FieldByName('ID').AsString;
-      FWebPedidosLista[i].CLIENTE_NOME         := lQry.FieldByName('CLIENTE_NOME').AsString;
-      FWebPedidosLista[i].VALOR_FRETE          := lQry.FieldByName('VALOR_FRETE').AsString;
-      FWebPedidosLista[i].ACRESCIMO            := lQry.FieldByName('ACRESCIMO').AsString;
-      FWebPedidosLista[i].VALOR_ITENS          := lQry.FieldByName('VALOR_ITENS').AsString;
-      FWebPedidosLista[i].VALOR_GARANTIA       := lQry.FieldByName('VALOR_GARANTIA').AsString;
-      FWebPedidosLista[i].VALOR_TOTAL          := lQry.FieldByName('VALOR_TOTAL').AsString;
-      FWebPedidosLista[i].VALOR_CUPOM_DESCONTO := lQry.FieldByName('VALOR_CUPOM_DESCONTO').AsString;
-
-      lQry.Next;
-    end;
-
+    Result := vConstrutor.atribuirRegistros(lQry);
     obterTotalRegistros;
 
   finally
