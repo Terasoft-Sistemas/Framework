@@ -161,6 +161,11 @@ begin
   self.Salvar;
 end;
 
+function TContasModel.carregaClasse(pID: String): TContasModel;
+begin
+
+end;
+
 constructor TContasModel.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;

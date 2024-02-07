@@ -28,6 +28,8 @@ type
     FOrderView: String;
     FWhereView: String;
     FTotalRecords: Integer;
+    FDuplicataView: String;
+    FFornecedorView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
     procedure SetID(const Value: Variant);
@@ -39,6 +41,8 @@ type
     procedure SetWhereView(const Value: String);
 
     function where: String;
+    procedure SetDuplicataView(const Value: String);
+    procedure SetFornecedorView(const Value: String);
 
   public
 
@@ -53,12 +57,14 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
+    property DuplicataView: String read FDuplicataView write SetDuplicataView;
+    property FornecedorView: String read FFornecedorView write SetFornecedorView;
 
     function incluir(AContasPagarItensModel: TContasPagarItensModel): String;
     function alterar(AContasPagarItensModel: TContasPagarItensModel): String;
     function excluir(AContasPagarItensModel: TContasPagarItensModel): String;
 
-    function carregaClasse(pID : String): TContasPagarItensModel;
+    function carregaClasse(pID, pIDItem : String): TContasPagarItensModel;
 
     function obterLista: TFDMemTable;
 
@@ -73,7 +79,7 @@ uses
 
 { TContasPagarItens }
 
-function TContasPagarItensDao.carregaClasse(pID: String): TContasPagarItensModel;
+function TContasPagarItensDao.carregaClasse(pID, pIDItem: String): TContasPagarItensModel;
 var
   lQry: TFDQuery;
   lModel: TContasPagarItensModel;
@@ -83,7 +89,7 @@ begin
   Result   := lModel;
 
   try
-    lQry.Open('select * from CONTASPAGARITENS where DUPLIACATA_PAG = '+pId);
+    lQry.Open('select * from CONTASPAGARITENS where DUPLIACATA_PAG = '+ QuotedStr(pId));
 
     if lQry.IsEmpty then
       Exit;
@@ -159,14 +165,14 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL :=  vConstrutor.gerarUpdate('CONTASPAGARITENS','DUPLIACATA_PAG');
+  lSQL :=  vConstrutor.gerarUpdate('CONTASPAGARITENS','ID');
 
   try
     lQry.SQL.Add(lSQL);
     setParams(lQry, AContasPagarItensModel);
     lQry.ExecSQL;
 
-    Result := AContasPagarItensModel.DUPLIACATA_PAG;
+    Result := AContasPagarItensModel.ID;
 
   finally
     lSQL := '';
@@ -181,9 +187,9 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from CONTASPAGARITENS where DUPLIACATA_PAG = :DUPLIACATA_PAG',[AContasPagarItensModel.DUPLIACATA_PAG]);
+   lQry.ExecSQL('delete from CONTASPAGARITENS where ID = :ID',[AContasPagarItensModel.ID]);
    lQry.ExecSQL;
-   Result := AContasPagarItensModel.DUPLIACATA_PAG;
+   Result := AContasPagarItensModel.ID;
 
   finally
     lQry.Free;
@@ -201,6 +207,12 @@ begin
 
   if FIDRecordView <> 0  then
     lSQL := lSQL + ' and id = '+IntToStr(FIDRecordView);
+
+  if not FDuplicataView.IsEmpty then
+    lSQL := lSQL + ' and DUPLIACATA_PAG = '+ QuotedStr(FDuplicataView);
+
+  if not FFornecedorView.IsEmpty then
+    lSQL := lSQL + ' and CODIGO_FOR = '+ QuotedStr(FFornecedorView);
 
   Result := lSQL;
 end;
@@ -263,6 +275,16 @@ end;
 procedure TContasPagarItensDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
+end;
+
+procedure TContasPagarItensDao.SetDuplicataView(const Value: String);
+begin
+  FDuplicataView := Value;
+end;
+
+procedure TContasPagarItensDao.SetFornecedorView(const Value: String);
+begin
+  FFornecedorView := Value;
 end;
 
 procedure TContasPagarItensDao.SetID(const Value: Variant);

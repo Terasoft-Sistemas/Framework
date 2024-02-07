@@ -139,6 +139,7 @@ type
     FCST_ENT: Variant;
     FCUSTO_COMPRA: Variant;
     FIPI_ENT: Variant;
+    FIDEntrada: String;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -265,6 +266,7 @@ type
     procedure SetVPIS_R06(const Value: Variant);
     procedure SetVSEG_I16(const Value: Variant);
     procedure SetVUNID_O12(const Value: Variant);
+    procedure SetIDEntrada(const Value: String);
 
   public
 
@@ -405,6 +407,7 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
+    property IDEntrada: String read FIDEntrada write SetIDEntrada;
 
   end;
 
@@ -415,7 +418,7 @@ uses
 
 { TEntradaItensModel }
 
-function TEntradaItensModel.Alterar(pID: String): TEntradaItensModel;
+function TEntradaItensModel.Alterar(pID : String): TEntradaItensModel;
 var
   lEntradaItensModel : TEntradaItensModel;
 begin
@@ -470,7 +473,6 @@ var
   lEntradaItensLista: TEntradaItensDao;
 begin
   lEntradaItensLista := TEntradaItensDao.Create(vIConexao);
-
   try
     lEntradaItensLista.TotalRecords    := FTotalRecords;
     lEntradaItensLista.WhereView       := FWhereView;
@@ -479,6 +481,7 @@ begin
     lEntradaItensLista.StartRecordView := FStartRecordView;
     lEntradaItensLista.LengthPageView  := FLengthPageView;
     lEntradaItensLista.IDRecordView    := FIDRecordView;
+    lEntradaItensLista.IDEntrada       := FIDEntrada;
 
     Result := lEntradaItensLista.obterLista;
 
@@ -713,6 +716,11 @@ end;
 procedure TEntradaItensModel.SetID(const Value: Variant);
 begin
   FID := Value;
+end;
+
+procedure TEntradaItensModel.SetIDEntrada(const Value: String);
+begin
+  FIDEntrada := Value;
 end;
 
 procedure TEntradaItensModel.SetIDRecordView(const Value: Integer);

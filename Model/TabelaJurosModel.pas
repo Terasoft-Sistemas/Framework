@@ -139,10 +139,10 @@ begin
       self.TabelaJurossLista := TObjectList<TTabelaJurosModel>.Create;
       self.TabelaJurossLista[0].FID            := 0;
       self.TabelaJurossLista[0].FCODIGO        := '001';
-      self.TabelaJurossLista[0].FPERCENTUAL    := 0;
+      self.TabelaJurossLista[0].FPERCENTUAL    := FormatFloat('#,##0.00', 0);
       self.TabelaJurossLista[0].FJUROS_TEXTO   := 'Sem Juros';
       self.TabelaJurossLista[0].FVALOR_PARCELA := FormatFloat('#,##0.00',  lTotal);
-      self.TabelaJurossLista[0].FVALOR_TOTAL   := 'Total: ' + FormatFloat('#,##0.00',  lTotal);
+      self.TabelaJurossLista[0].FVALOR_TOTAL   := FormatFloat('#,##0.00',  lTotal);
     end;
 
     for i := 0 to self.TabelaJurossLista.Count -1 do
@@ -150,8 +150,8 @@ begin
       self.TabelaJurossLista[i].FJUROS_TEXTO := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, 'Juros', 'Sem juros');
       lJuros                                 := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, self.TabelaJurossLista[i].PERCENTUAL / 100 * lTotal, 0);
 
-      self.TabelaJurossLista[i].FVALOR_TOTAL   := 'Total: ' + FormatFloat('#,##0.00',lTotal + lJuros);
-      self.TabelaJurossLista[i].FVALOR_PARCELA := (lTotal + lJuros) / StrToInt(self.TabelaJurossLista[i].CODIGO);
+      self.TabelaJurossLista[i].FVALOR_TOTAL   := FormatFloat('#,##0.00',lTotal + lJuros);
+      self.TabelaJurossLista[i].FVALOR_PARCELA := FormatFloat('#,##0.00', (lTotal + lJuros) / StrToInt(self.TabelaJurossLista[i].CODIGO));
     end;
 
     with lMemTable.IndexDefs.AddIndexDef do

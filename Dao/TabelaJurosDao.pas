@@ -251,7 +251,7 @@ begin
       FTabelaJurossLista[i].INDCE       := lQry.FieldByName('INDCE').AsString;
       FTabelaJurossLista[i].INDCEENT    := lQry.FieldByName('INDCEENT').AsString;
       FTabelaJurossLista[i].ID          := lQry.FieldByName('ID').AsString;
-      FTabelaJurossLista[i].PERCENTUAL  := lQry.FieldByName('PERCENTUAL').AsString;
+      FTabelaJurossLista[i].PERCENTUAL  := FormatFloat('#,##0.00', lQry.FieldByName('PERCENTUAL').AsFloat);
       FTabelaJurossLista[i].PORTADOR_ID := lQry.FieldByName('PORTADOR_ID').AsString;
       FTabelaJurossLista[i].SYSTIME     := lQry.FieldByName('SYSTIME').AsString;
 

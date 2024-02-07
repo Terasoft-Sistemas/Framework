@@ -28,6 +28,7 @@ type
     FOrderView: String;
     FWhereView: String;
     FTotalRecords: Integer;
+    FIDEntrada: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
     procedure SetID(const Value: Variant);
@@ -39,6 +40,7 @@ type
     procedure SetWhereView(const Value: String);
 
     function where: String;
+    procedure SetIDEntrada(const Value: String);
 
   public
 
@@ -53,6 +55,7 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
+    property IDEntrada: String read FIDEntrada write SetIDEntrada;
 
     function incluir(AEntradaItensModel: TEntradaItensModel): String;
     function alterar(AEntradaItensModel: TEntradaItensModel): String;
@@ -83,7 +86,7 @@ begin
   Result   := lModel;
 
   try
-    lQry.Open('select * from ENTRADAITENS where lNUMERO_ENT = '+pId);
+    lQry.Open('select * from ENTRADAITENS where ID = '+ QuotedStr(pID));
 
     if lQry.IsEmpty then
       Exit;
@@ -252,7 +255,7 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL :=  vConstrutor.gerarUpdate('ENTRADA','NUMERO_ENT');
+  lSQL :=  vConstrutor.gerarUpdate('ENTRADAITENS','ID');
 
   try
     lQry.SQL.Add(lSQL);
@@ -274,9 +277,9 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from ENTRADAITENS where NUMERO_ENT = :NUMERO_ENT',[AEntradaItensModel.NUMERO_ENT]);
+   lQry.ExecSQL('delete from ENTRADAITENS where ID = :ID',[AEntradaItensModel.ID]);
    lQry.ExecSQL;
-   Result := AEntradaItensModel.NUMERO_ENT;
+   Result := AEntradaItensModel.ID;
 
   finally
     lQry.Free;
@@ -293,7 +296,10 @@ begin
     lSQL := lSQL + FWhereView;
 
   if FIDRecordView <> 0  then
-    lSQL := lSQL + ' and NUMERO_ENT = '+IntToStr(FIDRecordView);
+    lSQL := lSQL + ' and ID = '+IntToStr(FIDRecordView);
+
+  if not FIDEntrada.IsEmpty then
+    lSQL := lSQL + ' and  NUMERO_ENT= ' + QuotedStr(FIDEntrada);
 
   Result := lSQL;
 end;
@@ -362,6 +368,11 @@ end;
 procedure TEntradaItensDao.SetID(const Value: Variant);
 begin
   FID := Value;
+end;
+
+procedure TEntradaItensDao.SetIDEntrada(const Value: String);
+begin
+  FIDEntrada := Value;
 end;
 
 procedure TEntradaItensDao.SetIDRecordView(const Value: Integer);

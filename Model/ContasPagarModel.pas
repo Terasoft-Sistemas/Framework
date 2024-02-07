@@ -9,6 +9,7 @@ uses
   FireDAC.Comp.Client;
 
 type
+
   TContasPagarModel = class
 
   private
@@ -147,12 +148,13 @@ type
     destructor Destroy; override;
 
     function Incluir: String;
-    function Alterar(pID : String): TContasPagarModel;
+    function Alterar(pID, pFornecedor : String): TContasPagarModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId: String): TContasPagarModel;
+    function carregaClasse(pId, pFornecedor: String): TContasPagarModel;
     function obterLista: TFDMemTable;
+    procedure gerarDuplicatas(pID, pFornecedor : String);
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -168,17 +170,17 @@ type
 implementation
 
 uses
-  ContasPagarDao;
+  ContasPagarDao, ContasPagarItensModel, System.Classes, System.SysUtils;
 
 { TContasPagarModel }
 
-function TContasPagarModel.Alterar(pID: String): TContasPagarModel;
+function TContasPagarModel.Alterar(pID, pFornecedor: String): TContasPagarModel;
 var
   lContasPagarModel : TContasPagarModel;
 begin
   lContasPagarModel := TContasPagarModel.Create(vIConexao);
   try
-    lContasPagarModel       := lContasPagarModel.carregaClasse(pID);
+    lContasPagarModel       := lContasPagarModel.carregaClasse(pID, pFornecedor);
     lContasPagarModel.Acao  := tacAlterar;
     Result              	  := lContasPagarModel;
   finally
@@ -192,20 +194,70 @@ begin
   Result             := self.Salvar;
 end;
 
+procedure TContasPagarModel.gerarDuplicatas(pID, pFornecedor : String);
+var
+  lValorTotal,
+  lValorParcela     : Double;
+  lParcelas         : Integer;
+  lCondicoes        : TStringList;
+  lVencimento       : TDate;
+  i                 : Integer;
+  lContasPagarItensModel : TContasPagarItensModel;
+begin
+
+  lContasPagarItensModel := TContasPagarItensModel.Create(vIConexao);
+  lCondicoes             := TStringList.Create;
+
+  try
+    self := self.carregaClasse(pID, pFornecedor);
+    lValorTotal := self.FVALOR_PAG;
+
+    lCondicoes.Delimiter := '/';
+    lCondicoes.StrictDelimiter := True;
+    lCondicoes.DelimitedText := self.FCONDICOES_PAG;
+
+    lParcelas := lCondicoes.Count;
+
+    lValorParcela := lValorTotal / lParcelas;
+
+    for i := 0 to lParcelas -1 do
+    begin
+      lVencimento := StrToDate(self.DATAEMI_PAG) + StrToInt(lCondicoes.Strings[i]);
+
+      lContasPagarItensModel.DUPLIACATA_PAG    := self.DUPLICATA_PAG;
+      lContasPagarItensModel.CODIGO_FOR        := self.CODIGO_FOR;
+      lContasPagarItensModel.VENC_PAG          := DateToStr(lVencimento);
+      lContasPagarItensModel.PACELA_PAG        := (i+1).ToString;
+      lContasPagarItensModel.TOTALPARCELAS     := lParcelas.ToString;
+      lContasPagarItensModel.VALORPARCELA_PAG  := lValorParcela.ToString;
+      lContasPagarItensModel.SITUACAO_PAG      := 'A';
+      lContasPagarItensModel.LOJA              := self.LOJA;
+      lContasPagarItensModel.PORTADOR_ID       := self.PORTADOR_ID;
+      lContasPagarItensModel.VALORPARCELA_BASE := lValorParcela.ToString;
+      lContasPagarItensModel.Incluir;
+    end;
+
+  finally
+    lContasPagarItensModel.Free;
+    lCondicoes.Free;
+  end;
+
+end;
+
 function TContasPagarModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
     self.Salvar;
 end;
 
-function TContasPagarModel.carregaClasse(pId: String): TContasPagarModel;
+function TContasPagarModel.carregaClasse(pId, pFornecedor: String): TContasPagarModel;
 var
   lContasPagarDao: TContasPagarDao;
 begin
   lContasPagarDao := TContasPagarDao.Create(vIConexao);
 
   try
-    Result := lContasPagarDao.carregaClasse(pId);
+    Result := lContasPagarDao.carregaClasse(pId, pFornecedor);
   finally
     lContasPagarDao.Free;
   end;

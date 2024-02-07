@@ -9,6 +9,7 @@ uses
   Interfaces.Conexao;
 
 type
+
   TTotais = record
     ACRESCIMO,
     FRETE,
@@ -250,6 +251,7 @@ type
     procedure obterLista;
 
     function carregaClasse(pId: String): TWebPedidoItensModel;
+
     function obterTotais(pId: String): TTotais;
 
     property WebPedidoItenssLista: TObjectList<TWebPedidoItensModel> read FWebPedidoItenssLista write SetWebPedidoItenssLista;
@@ -385,13 +387,13 @@ end;
 
 function TWebPedidoItensModel.obterTotais(pId: String): TTotais;
 var
-  lWebPedidoItensModel : TWebPedidoItensModel;
+  lWebPedidoItensDao : TWebPedidoItensDao;
 begin
-  lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
+  lWebPedidoItensDao := TWebPedidoItensDao.Create(vIConexao);
   try
-    Result := lWebPedidoItensModel.obterTotais(pId);
+    Result := lWebPedidoItensDao.obterTotais(pId);
   finally
-    lWebPedidoItensModel.Free;
+    lWebPedidoItensDao.Free;
   end;
 end;
 

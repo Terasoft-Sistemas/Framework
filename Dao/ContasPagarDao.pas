@@ -58,7 +58,7 @@ type
     function alterar(AContasPagarModel: TContasPagarModel): String;
     function excluir(AContasPagarModel: TContasPagarModel): String;
 
-    function carregaClasse(pID : String): TContasPagarModel;
+    function carregaClasse(pID, pFornecedor : String): TContasPagarModel;
 
     function obterLista: TFDMemTable;
 
@@ -73,7 +73,7 @@ uses
 
 { TContasPagar }
 
-function TContasPagarDao.carregaClasse(pID: String): TContasPagarModel;
+function TContasPagarDao.carregaClasse(pID, pFornecedor: String): TContasPagarModel;
 var
   lQry: TFDQuery;
   lModel: TContasPagarModel;
@@ -83,7 +83,7 @@ begin
   Result   := lModel;
 
   try
-    lQry.Open('select * from CONTASPAGAR where DUPLICATA_PAG = '+ QuotedStr(pId));
+    lQry.Open('select * from CONTASPAGAR where DUPLICATA_PAG = '+ QuotedStr(pId) + ' and CODIGO_FOR =' + QuotedStr(pFornecedor));
 
     if lQry.IsEmpty then
       Exit;
@@ -193,7 +193,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from CONTASPAGAR where DUPLICATA_PAG = :DUPLICATA_PAG',[AContasPagarModel.DUPLICATA_PAG]);
+   lQry.ExecSQL('delete from CONTASPAGAR where =' + QuotedStr(AContasPagarModel.DUPLICATA_PAG) + 'and CODIGO_FOR = ' + QuotedStr(AContasPagarModel.CODIGO_FOR));
    lQry.ExecSQL;
    Result := AContasPagarModel.DUPLICATA_PAG;
 

@@ -46,6 +46,8 @@ type
     FVALORPAGO_PAG: Variant;
     FUSUARIO_ACEITE: Variant;
     FDATA_ACEITE: Variant;
+    FDuplicataView: String;
+    FFornecedorView: String;
 
 
     procedure SetAcao(const Value: TAcao);
@@ -80,6 +82,8 @@ type
     procedure SetVALORPARCELA_BASE(const Value: Variant);
     procedure SetVALORPARCELA_PAG(const Value: Variant);
     procedure SetVENC_PAG(const Value: Variant);
+    procedure SetDuplicataView(const Value: String);
+    procedure SetFornecedorView(const Value: String);
 
   public
 
@@ -112,11 +116,11 @@ type
     destructor Destroy; override;
 
     function Incluir: String;
-    function Alterar(pID : String): TContasPagarItensModel;
+    function Alterar(pID, pIDItem : String): TContasPagarItensModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId: String): TContasPagarItensModel;
+    function carregaClasse(pId, pIDItem: String): TContasPagarItensModel;
     function obterLista: TFDMemTable;
 
     property Acao :TAcao read FAcao write SetAcao;
@@ -127,6 +131,8 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
+    property DuplicataView: String read FDuplicataView write SetDuplicataView;
+    property FornecedorView: String read FFornecedorView write SetFornecedorView;
 
   end;
 
@@ -137,13 +143,13 @@ uses
 
 { TContasPagarItensModel }
 
-function TContasPagarItensModel.Alterar(pID: String): TContasPagarItensModel;
+function TContasPagarItensModel.Alterar(pID, pIDItem: String): TContasPagarItensModel;
 var
   lContasPagarItensModel : TContasPagarItensModel;
 begin
   lContasPagarItensModel := TContasPagarItensModel.Create(vIConexao);
   try
-    lContasPagarItensModel       := lContasPagarItensModel.carregaClasse(pID);
+    lContasPagarItensModel       := lContasPagarItensModel.carregaClasse(pID, pIDItem);
     lContasPagarItensModel.Acao  := tacAlterar;
     Result              		     := lContasPagarItensModel;
   finally
@@ -163,14 +169,14 @@ begin
     self.Salvar;
 end;
 
-function TContasPagarItensModel.carregaClasse(pId: String): TContasPagarItensModel;
+function TContasPagarItensModel.carregaClasse(pId, pIDItem: String): TContasPagarItensModel;
 var
   lContasPagarItensDao: TContasPagarItensDao;
 begin
   lContasPagarItensDao := TContasPagarItensDao.Create(vIConexao);
 
   try
-    Result := lContasPagarItensDao.carregaClasse(pId);
+    Result := lContasPagarItensDao.carregaClasse(pId, pIDItem);
   finally
     lContasPagarItensDao.Free;
   end;
@@ -189,25 +195,27 @@ end;
 
 function TContasPagarItensModel.obterLista: TFDMemTable;
 var
-  lContasPagarItensLista: TContasPagarItensDao;
+  lContasPagarDao: TContasPagarItensDao;
 begin
-  lContasPagarItensLista := TContasPagarItensDao.Create(vIConexao);
+  lContasPagarDao := TContasPagarItensDao.Create(vIConexao);
 
   try
-    lContasPagarItensLista.TotalRecords    := FTotalRecords;
-    lContasPagarItensLista.WhereView       := FWhereView;
-    lContasPagarItensLista.CountView       := FCountView;
-    lContasPagarItensLista.OrderView       := FOrderView;
-    lContasPagarItensLista.StartRecordView := FStartRecordView;
-    lContasPagarItensLista.LengthPageView  := FLengthPageView;
-    lContasPagarItensLista.IDRecordView    := FIDRecordView;
+    lContasPagarDao.TotalRecords    := self.FTotalRecords;
+    lContasPagarDao.WhereView       := self.FWhereView;
+    lContasPagarDao.CountView       := self.FCountView;
+    lContasPagarDao.OrderView       := self.FOrderView;
+    lContasPagarDao.StartRecordView := self.FStartRecordView;
+    lContasPagarDao.LengthPageView  := self.FLengthPageView;
+    lContasPagarDao.IDRecordView    := self.FIDRecordView;
+    lContasPagarDao.DuplicataView   := self.DuplicataView;
+    lContasPagarDao.FornecedorView  := self.FornecedorView;
 
-    Result := lContasPagarItensLista.obterLista;
+    Result := lContasPagarDao.obterLista;
 
-    FTotalRecords := lContasPagarItensLista.TotalRecords;
+    FTotalRecords := lContasPagarDao.TotalRecords;
 
   finally
-    lContasPagarItensLista.Free;
+    lContasPagarDao.Free;
   end;
 end;
 
@@ -284,6 +292,16 @@ end;
 procedure TContasPagarItensModel.SetDUPLIACATA_PAG(const Value: Variant);
 begin
   FDUPLIACATA_PAG := Value;
+end;
+
+procedure TContasPagarItensModel.SetDuplicataView(const Value: String);
+begin
+  FDuplicataView := Value;
+end;
+
+procedure TContasPagarItensModel.SetFornecedorView(const Value: String);
+begin
+  FFornecedorView := Value;
 end;
 
 procedure TContasPagarItensModel.SetID(const Value: Variant);
