@@ -15,7 +15,13 @@ type
     PRODUTO,
     QUANTIDADE,
     VALOR_UNITARIO,
-    DESCONTO         : String;
+    DESCONTO,
+    TIPO,
+    ENTREGA,
+    MONTAGEM,
+    TIPO_ENTREGA,
+    TIPO_GARANTIA,
+    VLR_GARANTIA      : String;
   end;
 
   TWebPedidoModel = class
@@ -1243,6 +1249,12 @@ begin
     lWebPedidoItensModel.VALOR_VENDA_ATUAL   := lProdutoModel.VENDA_PRO;
 		lWebPedidoItensModel.VALOR_CUSTO_ATUAL   := lProdutoModel.CUSTOMEDIO_PRO;
 		lWebPedidoItensModel.RESERVADO           := pVenderItemParametros.QUANTIDADE;
+    lWebPedidoItensModel.TIPO                := PVenderItemParametros.TIPO;
+    lWebPedidoItensModel.ENTREGA             := PVenderItemParametros.ENTREGA;
+    lWebPedidoItensModel.MONTAGEM            := PVenderItemParametros.MONTAGEM;
+    lWebPedidoItensModel.TIPO_ENTREGA        := PVenderItemParametros.TIPO_ENTREGA;
+    lWebPedidoItensModel.TIPO_GARANTIA       := PVenderItemParametros.TIPO_GARANTIA;
+    lWebPedidoItensModel.VLR_GARANTIA        := PVenderItemParametros.VLR_GARANTIA;
 
     Result := lWebPedidoItensModel.Incluir;
     calcularTotais;

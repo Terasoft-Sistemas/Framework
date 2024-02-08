@@ -1176,6 +1176,12 @@ begin
       lVenderItemParametros.QUANTIDADE       := '10';
       lVenderItemParametros.DESCONTO         := '0';
       lVenderItemParametros.VALOR_UNITARIO   := '0';
+      lVenderItemParametros.TIPO             := 'NORMAL';
+      lVenderItemParametros.ENTREGA          := 'S'; //S=Sim - N=Não
+      lVenderItemParametros.MONTAGEM         := 'S'; //S=Sim - N=Não
+      lVenderItemParametros.TIPO_ENTREGA     := 'LJ';
+      lVenderItemParametros.TIPO_GARANTIA    := '0000';
+      lVenderItemParametros.VLR_GARANTIA     := '0';
 
       lWebPedidoModel.VenderItem(lVenderItemParametros);
       ShowMessage('Item adicionado ao WebPedido: ' +lWebPedido);
