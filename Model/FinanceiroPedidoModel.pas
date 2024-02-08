@@ -124,12 +124,6 @@ begin
   if self.FVALOR_PARCELA = '' then
     CriaException('Valor da Parcela não informado.');
 
-  if self.FVENCIMENTO = '' then
-    CriaException('Vencimento não informado.');
-
-  if self.FCONDICAO_PAGAMENTO = '' then
-    CriaException('Condição de Pagamento não informado.');
-
   self.Acao := tacIncluir;
   self.Salvar;
 end;
