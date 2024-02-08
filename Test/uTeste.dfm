@@ -409,6 +409,78 @@ object Form1: TForm1
         TabOrder = 42
         OnClick = Button38Click
       end
+      object Button39: TButton
+        Left = 3
+        Top = 551
+        Width = 182
+        Height = 42
+        Caption = 'Documento Inserir'
+        TabOrder = 43
+        OnClick = Button39Click
+      end
+      object Button40: TButton
+        Left = 191
+        Top = 551
+        Width = 182
+        Height = 42
+        Caption = 'Documento Consultar'
+        TabOrder = 44
+        OnClick = Button40Click
+      end
+      object Button41: TButton
+        Left = 379
+        Top = 551
+        Width = 182
+        Height = 42
+        Caption = 'Documento Update'
+        TabOrder = 45
+        OnClick = Button41Click
+      end
+      object Button42: TButton
+        Left = 567
+        Top = 551
+        Width = 182
+        Height = 42
+        Caption = 'Documento Excluir'
+        TabOrder = 46
+        OnClick = Button42Click
+      end
+      object Button43: TButton
+        Left = 3
+        Top = 599
+        Width = 182
+        Height = 42
+        Caption = 'Anexo Inserir'
+        TabOrder = 47
+        OnClick = Button43Click
+      end
+      object Button44: TButton
+        Left = 191
+        Top = 599
+        Width = 182
+        Height = 42
+        Caption = 'Anexo Consultar'
+        TabOrder = 48
+        OnClick = Button44Click
+      end
+      object Button45: TButton
+        Left = 379
+        Top = 599
+        Width = 182
+        Height = 42
+        Caption = 'Anexo Update'
+        TabOrder = 49
+        OnClick = Button45Click
+      end
+      object Button46: TButton
+        Left = 567
+        Top = 599
+        Width = 182
+        Height = 42
+        Caption = 'Anexo Excluir'
+        TabOrder = 50
+        OnClick = Button46Click
+      end
     end
   end
 end

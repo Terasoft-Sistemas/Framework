@@ -64,6 +64,14 @@ type
     Button36: TButton;
     Button37: TButton;
     Button38: TButton;
+    Button39: TButton;
+    Button40: TButton;
+    Button41: TButton;
+    Button42: TButton;
+    Button43: TButton;
+    Button44: TButton;
+    Button45: TButton;
+    Button46: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -108,6 +116,14 @@ type
     procedure Button37Click(Sender: TObject);
     procedure Button36Click(Sender: TObject);
     procedure Button38Click(Sender: TObject);
+    procedure Button39Click(Sender: TObject);
+    procedure Button40Click(Sender: TObject);
+    procedure Button41Click(Sender: TObject);
+    procedure Button42Click(Sender: TObject);
+    procedure Button43Click(Sender: TObject);
+    procedure Button44Click(Sender: TObject);
+    procedure Button45Click(Sender: TObject);
+    procedure Button46Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -134,7 +150,7 @@ uses
   TabelaJurosModel,
   SaldoModel, EmpresaModel, ProdutosModel, EntradaItensModel,
   ClienteModel, ContasPagarModel, ContasPagarItensModel, System.SysUtils,
-  ReservaModel;
+  ReservaModel, DocumentoModel, AnexoModel;
 
 {$R *.dfm}
 
@@ -777,6 +793,31 @@ begin
   end;
 end;
 
+procedure TForm1.Button39Click(Sender: TObject);
+var
+  lDocumentoModel : TDocumentoModel;
+  lDescricao      : String;
+begin
+  lDocumentoModel := TDocumentoModel.Create(vIConexao);
+  try
+    try
+      lDescricao := InputBox('Documento','Digite a descricao: ','');
+      if lDescricao.IsEmpty then
+      Exit;
+
+      lDocumentoModel.NOME := lDescricao;
+      lDocumentoModel.Incluir;
+
+      ShowMessage('Documento incluido com sucesso');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lDocumentoModel.Free;
+  end;
+end;
+
 procedure TForm1.Button3Click(Sender: TObject);
 var
   lFinanceiroPedidoModel : TFinanceiroPedidoModel;
@@ -803,6 +844,189 @@ begin
 end;
 
 /// WebPedido ///
+
+procedure TForm1.Button40Click(Sender: TObject);
+var
+  lDocumentoModel : TDocumentoModel;
+  lMemTable : TFDMemTable;
+begin
+  lDocumentoModel := TDocumentoModel.Create(vIConexao);
+  try
+    try
+      lMemTable := lDocumentoModel.obterLista;
+      memoResultado.Lines.Clear;
+
+      lMemTable.First;
+      while not lMemTable.Eof do
+      begin
+        memoResultado.Lines.Add('ID: '+lMemTable.FieldByName('ID').AsString);
+        memoResultado.Lines.Add('NOME: '+lMemTable.FieldByName('NOME').AsString);
+        memoResultado.Lines.Add('===============================================');
+        lMemTable.Next;
+      end;
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lDocumentoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button41Click(Sender: TObject);
+var
+  lDocumentoModel : TDocumentoModel;
+  ID              : String;
+begin
+  lDocumentoModel := TDocumentoModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('Documento', 'Digite o ID que deseja Alterar:', '');
+      if ID.IsEmpty then
+        exit;
+
+      lDocumentoModel := lDocumentoModel.Alterar(ID);
+      lDocumentoModel.NOME := 'TESTE DOC NOME';
+
+      lDocumentoModel.Salvar;
+      ShowMessage('Alterado com Sucesso');
+    Except
+      on E:Exception do
+      ShowMessage('Erro: ' +E.Message);
+    end;
+  finally
+    lDocumentoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button42Click(Sender: TObject);
+var
+  lDocumentoModel : TDocumentoModel;
+  ID        : String;
+begin
+  lDocumentoModel := TDocumentoModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('Documento', 'Digite o ID do Documento que deseja excluir:', '');
+      if ID.IsEmpty then
+          Exit;
+
+      lDocumentoModel.Excluir(ID);
+      ShowMessage('Excluido com sucesso!');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lDocumentoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button43Click(Sender: TObject);
+var
+  lAnexoModel : TAnexoModel;
+  lIDCli    : String;
+begin
+  lAnexoModel := TAnexoModel.Create(vIConexao);
+  try
+    try
+      lIDCli :=  InputBox('ANEXO','Digite ID do Cliente:','');
+      if lIDCli.IsEmpty then
+      Exit;
+
+      lAnexoModel.REGISTRO_ID   := lIDCli;
+      lAnexoModel.TABELA        := 'CLIENTES';
+      lAnexoModel.DOCUMENTO_ID  := '2';
+
+      lAnexoModel.Incluir;
+      ShowMessage('Incluido com sucesso');
+    except
+       on E:Exception do
+         ShowMessage('Erro: ' + E.Message);
+      end;
+  finally
+    lAnexoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button44Click(Sender: TObject);
+var
+  lAnexoModel : TAnexoModel;
+  lMemTable : TFDMemTable;
+begin
+  lAnexoModel := TAnexoModel.Create(vIConexao);
+  try
+    try
+      lMemTable := lAnexoModel.obterLista;
+      memoResultado.Lines.Clear;
+
+      lMemTable.First;
+      while not lMemTable.Eof do
+      begin
+        memoResultado.Lines.Add('ID: '+lMemTable.FieldByName('ID').AsString);
+        memoResultado.Lines.Add('TABELA: '+lMemTable.FieldByName('TABELA').AsString);
+        memoResultado.Lines.Add('REGISTRO_ID: '+lMemTable.FieldByName('REGISTRO_ID').AsString);
+        memoResultado.Lines.Add('DOCUMENTO_ID: '+lMemTable.FieldByName('DOCUMENTO_ID').AsString);
+        memoResultado.Lines.Add('===============================================');
+        lMemTable.Next;
+      end;
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lAnexoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button45Click(Sender: TObject);
+var
+  lAnexoModel : TAnexoModel;
+  ID          : String;
+begin
+  lAnexoModel := TAnexoModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('ANEXO', 'Digite o ID que deseja Alterar:', '');
+      if ID.IsEmpty then
+        exit;
+
+      lAnexoModel := lAnexoModel.Alterar(ID);
+      lAnexoModel.REGISTRO_ID := '3';
+
+      lAnexoModel.Salvar;
+      ShowMessage('Alterado com Sucesso');
+    Except
+      on E:Exception do
+      ShowMessage('Erro: ' +E.Message);
+    end;
+  finally
+    lAnexoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button46Click(Sender: TObject);
+var
+  lAnexoModel : TAnexoModel;
+  ID        : String;
+begin
+  lAnexoModel := TAnexoModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('ANEXO', 'Digite o ID do Anexo que deseja excluir:', '');
+      if ID.IsEmpty then
+          Exit;
+
+      lAnexoModel.Excluir(ID);
+      ShowMessage('Excluido com sucesso!');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lAnexoModel.Free;
+  end;
+end;
 
 procedure TForm1.Button4Click(Sender: TObject);
 var
