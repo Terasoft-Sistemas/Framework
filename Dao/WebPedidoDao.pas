@@ -331,6 +331,9 @@ begin
             '        ENTREGA_DATA,                                                                                                          '+SLineBreak+
             '        ENTREGA_HORA,                                                                                                          '+SLineBreak+
             '        REGIAO,                                                                                                                '+SLineBreak+
+            '        DATAHORA,                                                                                                              '+SLineBreak+
+            '        VENDEDOR,                                                                                                              '+SLineBreak+
+            '        STATUS,                                                                                                                '+SLineBreak+
             '        VALOR_FRETE,                                                                                                           '+SLineBreak+
             '        ACRESCIMO,                                                                                                             '+SLineBreak+
             '        VALOR_ITENS,                                                                                                           '+SLineBreak+
@@ -357,6 +360,9 @@ begin
             '    				entrega_data,                                                                                                       '+SLineBreak+
             '    				entrega_hora,                                                                                                       '+SLineBreak+
             '    				regiao,                                                                                                             '+SLineBreak+
+            '           datahora,                                                                                                           '+SLineBreak+
+            '           vendedor,                                                                                                           '+SLineBreak+
+            '           status,                                                                                                             '+SLineBreak+
             '    				sum(valor_frete) valor_frete,                                                                                       '+SLineBreak+
             '    				sum(acrescimo) acrescimo,                                                                                           '+SLineBreak+
             '    				sum(valor_itens) valor_itens,                                                                                       '+SLineBreak+
@@ -382,6 +388,9 @@ begin
             '      					 web_pedido.entrega_data,                                                                                       '+SLineBreak+
             '      					 web_pedido.entrega_hora,                                                                                       '+SLineBreak+
             '      					 regiao.descricao regiao,                                                                                       '+SLineBreak+
+            '                web_pedido.datahora,                                                                                           '+SLineBreak+
+            '                funcionario.nome_fun vendedor,                                                                                 '+SLineBreak+
+            '                web_pedido.status,                                                                                             '+SLineBreak+
             '      					 web_pedido.valor_frete valor_frete,                                                                            '+SLineBreak+
             '      					 coalesce(web_pedido.acrescimo,0) acrescimo,                                                                    '+SLineBreak+
             '      					 web_pedidoitens.quantidade * web_pedidoitens.valor_unitario valor_itens,                                       '+SLineBreak+
@@ -391,9 +400,10 @@ begin
             '      			   inner join clientes on web_pedido.cliente_id = clientes.codigo_cli                                               '+SLineBreak+
             '      				left join web_pedidoitens on web_pedidoitens.web_pedido_id = web_pedido.id                                        '+SLineBreak+
             '      				left join regiao on regiao.id = web_pedido.regiao_id                                                              '+SLineBreak+
+            '             left join funcionario on funcionario.codigo_fun = web_pedido.vendedor_id                                          '+SLineBreak+
             '      			   ) t1                                                                                                             '+SLineBreak+
             '                                                                                                                               '+SLineBreak+
-            '    group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 ) web_pedido                                                               '+SLineBreak+
+            '    group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19 ) web_pedido                                                      '+SLineBreak+
             '    where 1=1                                                                                                                  '+SLineBreak;
 
     lSQL := lSQL + where;
