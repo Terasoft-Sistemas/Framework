@@ -55,6 +55,7 @@ type
 
     procedure setParams(var pQry : TFDQuery; pFinanceiroPedidoModel: TFinanceiroPedidoModel);
     function carregaClasse(pID: String): TFinanceiroPedidoModel;
+    function obterResumo(pIDPedido : String) : TFDMemTable;
     function ObterLista: TFDMemTable;
 end;
 
@@ -93,6 +94,9 @@ begin
     lModel.VENCIMENTO             := lQry.FieldByName('VENCIMENTO').AsString;
     lModel.CONDICAO_PAGAMENTO     := lQry.FieldByName('CONDICAO_PAGAMENTO').AsString;
     lModel.OBSERVACAO             := lQry.FieldByName('OBSERVACAO').AsString;
+    lModel.INDCE_APLICADO         := lQry.FieldByName('INDCE_APLICADO').AsString;
+    lModel.VALOR_ACRESCIMO        := lQry.FieldByName('VALOR_ACRESCIMO').AsString;
+
     Result := lModel;
   finally
     lQry.Free;
@@ -185,6 +189,33 @@ begin
     lSQL := lSQL + ' and FINANCEIRO_PEDIDO.ID = '+IntToStr(FIDRecordView);
 
   Result := lSql;
+end;
+
+function TFinanceiroPedidoDao.obterResumo(pIDPedido: String): TFDMemTable;
+var
+  lQry: TFDQuery;
+  lSQL:String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+    lSQL := ' select portador.codigo_port,                                                  '+SLineBreak+
+            '        portador.nome_port,                                                    '+SLineBreak+
+            '        financeiro_pedido.quantidade_parcelas,                                 '+SLineBreak+
+            '        financeiro_pedido.valor_parcela,                                       '+SLineBreak+
+            '        financeiro_pedido.valor_total,                                         '+SLineBreak+
+            '        financeiro_pedido.vencimento                                           '+SLineBreak+
+            '   From financeiro_pedido                                                      '+SLineBreak+
+            '   left join portador on portador.codigo_port = financeiro_pedido.portador_id  '+SLineBreak+
+            '  where financeiro_pedido.web_pedido_id = '+pIDPedido+'                        '+SLineBreak+
+            '    and financeiro_pedido.parcela = 1                                          '+SLineBreak;
+
+    lQry.Open(lSQL);
+
+    Result := vConstrutor.atribuirRegistros(lQry);
+  finally
+    lQry.Free;
+  end;
 end;
 
 procedure TFinanceiroPedidoDao.obterTotalRegistros;

@@ -72,6 +72,7 @@ type
     Button44: TButton;
     Button45: TButton;
     Button46: TButton;
+    Button47: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -124,6 +125,7 @@ type
     procedure Button44Click(Sender: TObject);
     procedure Button45Click(Sender: TObject);
     procedure Button46Click(Sender: TObject);
+    procedure Button47Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -175,6 +177,7 @@ begin
         memoResultado.Lines.Add('PARCELA: '+lMemTable.FieldByName('PARCELA').AsString);
         memoResultado.Lines.Add('VALOR_PARCELA: '+lMemTable.FieldByName('VALOR_PARCELA').AsString);
         memoResultado.Lines.Add('VALOR_TOTAL: '+lMemTable.FieldByName('VALOR_TOTAL').AsString);
+
         memoResultado.Lines.Add('===============================================');
         lMemTable.Next;
       end;
@@ -192,15 +195,29 @@ procedure TForm1.Button1Click(Sender: TObject);
 var
   lFinanceiroPedidoModel : TFinanceiroPedidoModel;
   lFinanceiroParams      : TFinanceiroParams;
+  lTabelaJurosModel      : TTabelaJurosModel;
+  lMemJuros              : TFDMemTable;
+  lJuros                 : Double;
 begin
   lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
+  lTabelaJurosModel      := TTabelaJurosModel.Create(vIConexao);
   try
     try
+      lMemJuros := lTabelaJurosModel.obterLista('000005', 150);
+
       lFinanceiroParams.WEB_PEDIDO_ID       := '325';
-      lFinanceiroParams.PORTADOR_ID         := '000001';
+      lFinanceiroParams.PORTADOR_ID         := '000005';
       lFinanceiroParams.PRIMEIRO_VENCIMENTO := Date + 30;
-      lFinanceiroParams.QUANTIDADE_PARCELAS := 3;
-      lFinanceiroParams.VALOR_TOTAL         := 150;
+      lFinanceiroParams.QUANTIDADE_PARCELAS := 5;
+
+      lMemJuros.first;
+      lMemJuros.locate('CODIGO', '005', []);
+
+      lJuros := lMemJuros.FieldByName('VALOR_JUROS').AsFloat;
+      lFinanceiroParams.INDCE_APLICADO      := lMemJuros.FieldByName('PERCENTUAL').AsFloat;
+      lFinanceiroParams.VALOR_ACRESCIMO     := lJuros;
+
+      lFinanceiroParams.VALOR_TOTAL         := 150 + lJuros;
 
       lFinanceiroPedidoModel.gerarFinanceiro(lFinanceiroParams);
 
@@ -211,6 +228,7 @@ begin
     end;
   finally
     lFinanceiroPedidoModel.Free;
+    lTabelaJurosModel.Free;
   end;
 end;
 
@@ -1028,6 +1046,42 @@ begin
   end;
 end;
 
+procedure TForm1.Button47Click(Sender: TObject);
+var
+  lFinanceiroPedidoModel : TFinanceiroPedidoModel;
+  lPedidoWeb             : String;
+  lMemTable              : TFDMemTable;
+begin
+  lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
+  try
+    try
+      lPedidoWeb := InputBox('ObterResumo','Digite o número do Web Pedido para consultar:','');
+      if lPedidoWeb.IsEmpty then
+      Exit;
+
+      lMemTable := lFinanceiroPedidoModel.obterResumo(lPedidoWeb);
+      memoResultado.Lines.Clear;
+      lMemTable.First;
+      while not lMemTable.Eof do
+      begin
+        memoResultado.Lines.Add('CODIGO_PORT: '+lMemTable.FieldByName('CODIGO_PORT').AsString);
+        memoResultado.Lines.Add('NOME_PORT: '+lMemTable.FieldByName('NOME_PORT').AsString);
+        memoResultado.Lines.Add('QUANTIDADE_PARCELAS: '+lMemTable.FieldByName('QUANTIDADE_PARCELAS').AsString);
+        memoResultado.Lines.Add('VALOR_PARCELAS: '+lMemTable.FieldByName('VALOR_PARCELA').AsString);
+        memoResultado.Lines.Add('VALOR_TOTAL: '+lMemTable.FieldByName('VALOR_TOTAL').AsString);
+        memoResultado.Lines.Add('VENCIMENTO: '+lMemTable.FieldByName('VENCIMENTO').AsString);
+        memoResultado.Lines.Add('===============================================');
+        lMemTable.Next;
+      end;
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lFinanceiroPedidoModel.free;
+  end;
+end;
+
 procedure TForm1.Button4Click(Sender: TObject);
 var
   lWebPedidoModel : TWebPedidoModel;
@@ -1283,6 +1337,7 @@ begin
       memoResultado.Lines.Add('PARCELA: '+lMemTable.FieldByName('CODIGO').AsString);
       memoResultado.Lines.Add('PERCENTUAL: '+lMemTable.FieldByName('PERCENTUAL').AsString);
       memoResultado.Lines.Add('JUROS: '+lMemTable.FieldByName('JUROS_TEXTO').AsString);
+      memoResultado.Lines.Add('VALOR_JUROS: '+lMemTable.FieldByName('VALOR_JUROS').AsString);
       memoResultado.Lines.Add('VALOR_PARCELA: '+lMemTable.FieldByName('VALOR_PARCELA').AsString);
       memoResultado.Lines.Add('VALOR_TOTAL: '+lMemTable.FieldByName('VALOR_TOTAL').AsString);
       memoResultado.Lines.Add('===============================================');

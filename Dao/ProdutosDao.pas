@@ -485,7 +485,9 @@ begin
       '       produto.codigo_pro,           '+
       '       produto.venda_pro,            '+
       '       produto.customedio_pro,       '+
-      '       produto.nfce_cfop             '+
+      '       produto.nfce_cfop,            '+
+      '       produto.garantia_12,          '+
+      '       produto.garantia_24           '+
 	    '  from produto                       '+
       ' where 1=1                           ';
     lSql := lSql + where;
@@ -504,6 +506,8 @@ begin
       FProdutossLista[i].VENDA_PRO       := lQry.FieldByName('VENDA_PRO').AsString;
       FProdutossLista[i].CUSTOMEDIO_PRO  := lQry.FieldByName('CUSTOMEDIO_PRO').AsString;
       FProdutossLista[i].NFCE_CFOP       := lQry.FieldByName('NFCE_CFOP').AsString;
+      FProdutossLista[i].GARANTIA_12     := lQry.FieldByName('GARANTIA_12').AsString;
+      FProdutossLista[i].GARANTIA_24     := lQry.FieldByName('GARANTIA_24').AsString;
       lQry.Next;
     end;
     obterTotalRegistros;
