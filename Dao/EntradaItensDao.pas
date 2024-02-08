@@ -327,22 +327,25 @@ end;
 
 function TEntradaItensDao.obterLista: TFDMemTable;
 var
-  lQry: TFDQuery;
-  lSQL:String;
-
+  lQry       : TFDQuery;
+  lSQL       : String;
+  lPaginacao : String;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
-      lSql := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
-    else
-      lSql := 'select ';
+      lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
 
-    lSQL := lSQL +
-      '       ENTRADAITENS.*         '+
-	    '  from ENTRADAITENS           '+
-      ' where 1=1                    ';
+
+    lSQL := ' select ' +lPaginacao+ '                                                          '+SLineBreak+
+            '        entradaitens.*,                                                           '+SLineBreak+
+            '        coalesce(fornecedor.razao_for, fornecedor.fantasia_for) FORNECEDOR,       '+SLineBreak+
+            '        produto.nome_pro PRODUTO                                                  '+SLineBreak+
+            '   from entradaitens                                                              '+SLineBreak+
+            '   left join fornecedor on fornecedor.codigo_for = entradaitens.codigo_for        '+SLineBreak+
+            '   left join produto on produto.codigo_pro = entradaitens.codigo_pro              '+SLineBreak+
+            '  where 1=1                                                                       '+SLineBreak;
 
     lSql := lSql + where;
 

@@ -297,9 +297,10 @@ end;
 
 procedure TWebPedidoItensDao.obterLista;
 var
-  lQry: TFDQuery;
-  lSQL:String;
-  i: INteger;
+  lQry       : TFDQuery;
+  lSQL       : String;
+  i          : INteger;
+  lPaginacao : String;
 begin
   lQry := vIConexao.CriarQuery;
 
@@ -308,29 +309,23 @@ begin
   try
 
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
-      lSQL := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
-    else
-      lSQL := 'select ';
+      lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
 
-    lSQL := lSQL +
-      '       web_pedidoitens.id,                                             '+SLineBreak+
-      '       web_pedidoitens.quantidade,                                     '+SLineBreak+
-      '       web_pedidoitens.tipo_entrega,                                   '+SLineBreak+
-      '       web_pedidoitens.observacao,                                     '+SLineBreak+
-      '       web_pedidoitens.produto_id,                                     '+SLineBreak+
-      '       web_pedidoitens.vlr_garantia,                                   '+SLineBreak+
-      '       web_pedidoitens.entrega,                                        '+SLineBreak+
-      '       web_pedidoitens.montagem,                                       '+SLineBreak+
-      '       web_pedidoitens.percentual_desconto,                            '+SLineBreak+
-      '       web_pedidoitens.valor_unitario,                                 '+SLineBreak+
-      '       produto.valor_bonus_servico,                                    '+SLineBreak+
-      '       produto.usar_balanca,                                           '+SLineBreak+
-      '       produto.venda_pro,                                              '+SLineBreak+
-      '       produto.customedio_pro,                                         '+SLineBreak+
-      '       produto.valor_montador                                          '+SLineBreak+
-      '  from web_pedidoitens                                                 '+SLineBreak+
-      ' inner join produto on web_pedidoitens.produto_id = produto.codigo_pro '+SLineBreak+
-      ' where 1=1 ';
+      lSQL :=   ' select '+lPaginacao+'                                                      '+SLineBreak+
+                '        web_pedidoitens.id,                                                 '+SLineBreak+
+                '        web_pedidoitens.quantidade,                                         '+SLineBreak+
+                '        web_pedidoitens.tipo_entrega,                                       '+SLineBreak+
+                '        web_pedidoitens.observacao,                                         '+SLineBreak+
+                '        web_pedidoitens.produto_id,                                         '+SLineBreak+
+                '        web_pedidoitens.vlr_garantia,                                       '+SLineBreak+
+                '        web_pedidoitens.entrega,                                            '+SLineBreak+
+                '        web_pedidoitens.montagem,                                           '+SLineBreak+
+                '        web_pedidoitens.percentual_desconto,                                '+SLineBreak+
+                '        web_pedidoitens.valor_unitario,                                     '+SLineBreak+
+                '        produto.nome_pro,                                                   '+SLineBreak+
+                '   from web_pedidoitens                                                     '+SLineBreak+
+                '  inner join produto on produto.codigo_pro = web_pedidoitens.produto_id     '+SLineBreak+
+                '  where 1=1';
 
     lSQL := lSQL + where;
 
@@ -396,9 +391,9 @@ begin
       '        web_pedidoitens.valor_unitario,                                       '+SLineBreak+
       '        web_pedidoitens.quantidade * web_pedidoitens.valor_unitario total,    '+SLineBreak+
       '        produto.nome_pro                                                      '+SLineBreak+
-      '  from  web_pedidoitens                                                       '+SLineBreak+
+      '   from web_pedidoitens                                                       '+SLineBreak+
       '  inner join produto on web_pedidoitens.produto_id = produto.codigo_pro       '+SLineBreak+
-      ' where 1=1 ';
+      '  where 1=1 ';
 
     lSQL := lSQL + where;
 

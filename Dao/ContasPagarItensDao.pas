@@ -242,19 +242,22 @@ function TContasPagarItensDao.obterLista: TFDMemTable;
 var
   lQry : TFDQuery;
   lSQL : String;
+  lPaginacao : String;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
-      lSql := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
-    else
-      lSql := 'select ';
+      lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
 
-    lSQL := lSQL +
-      '       CONTASPAGARITENS.*       '+
-	    '  from CONTASPAGARITENS         '+
-      ' where 1=1                      ';
+    lSQL := ' select '+lPaginacao+'                                                         '+SLineBreak+
+            '        contaspagaritens.*,                                                    '+SLineBreak+
+            '        coalesce(fornecedor.razao_for, fornecedor.fantasia_for) FORNECEDOR,    '+SLineBreak+
+            '        portador.nome_port PORTADOR                                            '+SLineBreak+
+            '   from contaspagaritens                                                       '+SLineBreak+
+            '   left join fornecedor on fornecedor.codigo_for = contaspagaritens.codigo_for '+SLineBreak+
+            '   left join portador on portador.codigo_port = contaspagaritens.portador_id   '+SLineBreak+
+            '  where 1=1                                                                    '+SLineBreak;
 
     lSql := lSql + where;
 
