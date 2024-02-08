@@ -175,20 +175,18 @@ end;
 procedure TForm1.Button1Click(Sender: TObject);
 var
   lFinanceiroPedidoModel : TFinanceiroPedidoModel;
+  lFinanceiroParams      : TFinanceiroParams;
 begin
   lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
   try
     try
-      lFinanceiroPedidoModel.WEB_PEDIDO_ID        := '325';
-      lFinanceiroPedidoModel.PORTADOR_ID          := '000001';
-      lFinanceiroPedidoModel.VALOR_TOTAL          := '500';
-      lFinanceiroPedidoModel.QUANTIDADE_PARCELAS  := '2';
-      lFinanceiroPedidoModel.PARCELA              := '1';
-      lFinanceiroPedidoModel.VALOR_PARCELA        := '500';
-      lFinanceiroPedidoModel.VENCIMENTO           := '26/01/2024';
-      lFinanceiroPedidoModel.CONDICAO_PAGAMENTO   :='30';
+      lFinanceiroParams.WEB_PEDIDO_ID       := '325';
+      lFinanceiroParams.PORTADOR_ID         := '000001';
+      lFinanceiroParams.PRIMEIRO_VENCIMENTO := Date + 30;
+      lFinanceiroParams.QUANTIDADE_PARCELAS := 3;
+      lFinanceiroParams.VALOR_TOTAL         := 150;
 
-      lFinanceiroPedidoModel.Incluir;
+      lFinanceiroPedidoModel.gerarFinanceiro(lFinanceiroParams);
 
       ShowMessage('Inserido com sucesso!');
     except
@@ -843,6 +841,9 @@ begin
       memoResultado.Lines.Add('ENTREGA_DATA: '+ lMemTable.FieldByName('ENTREGA_DATA').AsString);
       memoResultado.Lines.Add('ENTREGA_HORA: '+ lMemTable.FieldByName('ENTREGA_HORA').AsString);
       memoResultado.Lines.Add('REGIAO: '+ lMemTable.FieldByName('REGIAO').AsString);
+      memoResultado.Lines.Add('DATAHORA: '+ lMemTable.FieldByName('DATAHORA').AsString);
+      memoResultado.Lines.Add('VENDEDOR: '+ lMemTable.FieldByName('VENDEDOR').AsString);
+      memoResultado.Lines.Add('STATUS: '+ lMemTable.FieldByName('STATUS').AsString);
       memoResultado.Lines.Add('VALOR_FRETE: '+ lMemTable.FieldByName('VALOR_FRETE').AsString);
       memoResultado.Lines.Add('ACRESCIMO: '+ lMemTable.FieldByName('ACRESCIMO').AsString);
       memoResultado.Lines.Add('VALOR_ITENS: '+ lMemTable.FieldByName('VALOR_ITENS').AsString);

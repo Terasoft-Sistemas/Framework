@@ -3,12 +3,21 @@ unit FinanceiroPedidoModel;
 interface
 
 uses
+  System.Math,
   Terasoft.Types,
   Terasoft.Utils,
   Interfaces.Conexao,
   FireDAC.Comp.Client;
 
 type
+  TFinanceiroParams = record
+    WEB_PEDIDO_ID,
+    PORTADOR_ID           : String;
+    PRIMEIRO_VENCIMENTO   : TDate;
+    QUANTIDADE_PARCELAS   : Integer;
+    VALOR_TOTAL           : Double;
+  end;
+
   TFinanceiroPedidoModel = class
 
   private
@@ -95,12 +104,14 @@ type
     function carregaClasse(pId: String): TFinanceiroPedidoModel;
     function obterLista: TFDMemTable;
 
+    procedure gerarFinanceiro(pFinanceiroParams: TFinanceiroParams);
+
   end;
 
 implementation
 
 uses
-  FinanceiroPedidoDao;
+  FinanceiroPedidoDao, System.Classes, System.SysUtils;
 
 { TFinanceiroPedidoModel }
 
@@ -123,12 +134,6 @@ begin
 
   if self.FVALOR_PARCELA = '' then
     CriaException('Valor da Parcela não informado.');
-
-  if self.FVENCIMENTO = '' then
-    CriaException('Vencimento não informado.');
-
-  if self.FCONDICAO_PAGAMENTO = '' then
-    CriaException('Condição de Pagamento não informado.');
 
   self.Acao := tacIncluir;
   self.Salvar;
@@ -158,6 +163,42 @@ begin
   self.FID  := pID;
   self.Acao := tacExcluir;
   Result := self.Salvar;
+end;
+
+procedure TFinanceiroPedidoModel.gerarFinanceiro(pFinanceiroParams: TFinanceiroParams);
+var
+  i           : Integer;
+  lSoma       : Double;
+  lVencimento : TDate;
+begin
+
+  lVencimento := pFinanceiroParams.PRIMEIRO_VENCIMENTO;
+
+  for i := 1 to pFinanceiroParams.QUANTIDADE_PARCELAS do
+  begin
+    self.WEB_PEDIDO_ID        := pFinanceiroParams.WEB_PEDIDO_ID;
+    self.PORTADOR_ID          := pFinanceiroParams.PORTADOR_ID;
+    self.VALOR_TOTAL          := FloatToStr(pFinanceiroParams.VALOR_TOTAL);
+    self.QUANTIDADE_PARCELAS  := IntToStr(pFinanceiroParams.QUANTIDADE_PARCELAS);
+    self.PARCELA              := IntToStr(i);
+    self.VALOR_PARCELA        := FormatFloat('#,##0.00', pFinanceiroParams.VALOR_TOTAL / pFinanceiroParams.QUANTIDADE_PARCELAS);
+
+    if i = 1 then
+      self.VENCIMENTO         := DateToStr(lVencimento)
+    else
+    begin
+      lVencimento     := IncMonth(lVencimento, 1);
+      self.VENCIMENTO := DateToStr(lVencimento);
+    end;
+
+    lSoma := lSoma + self.VALOR_PARCELA;
+
+    if i = pFinanceiroParams.QUANTIDADE_PARCELAS then
+      self.VALOR_PARCELA := FloatToStr(self.VALOR_PARCELA + (pFinanceiroParams.VALOR_TOTAL - lSoma));
+
+    self.Incluir;
+  end;
+
 end;
 
 function TFinanceiroPedidoModel.carregaClasse(pId: String): TFinanceiroPedidoModel;
