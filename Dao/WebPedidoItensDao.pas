@@ -322,7 +322,7 @@ begin
                 '        web_pedidoitens.montagem,                                           '+SLineBreak+
                 '        web_pedidoitens.percentual_desconto,                                '+SLineBreak+
                 '        web_pedidoitens.valor_unitario,                                     '+SLineBreak+
-                '        produto.nome_pro,                                                   '+SLineBreak+
+                '        produto.nome_pro                                                    '+SLineBreak+
                 '   from web_pedidoitens                                                     '+SLineBreak+
                 '  inner join produto on produto.codigo_pro = web_pedidoitens.produto_id     '+SLineBreak+
                 '  where 1=1';
@@ -352,11 +352,7 @@ begin
       FWebPedidoItenssLista[i].MONTAGEM             := lQry.FieldByName('MONTAGEM').AsString;
       FWebPedidoItenssLista[i].PERCENTUAL_DESCONTO  := lQry.FieldByName('PERCENTUAL_DESCONTO').AsString;
       FWebPedidoItenssLista[i].VALOR_UNITARIO       := lQry.FieldByName('VALOR_UNITARIO').AsString;
-      FWebPedidoItenssLista[i].VALOR_BONUS_SERVICO  := lQry.FieldByName('VALOR_BONUS_SERVICO').AsString;
-      FWebPedidoItenssLista[i].USAR_BALANCA         := lQry.FieldByName('USAR_BALANCA').AsString;
-      FWebPedidoItenssLista[i].VENDA_PRO            := lQry.FieldByName('VENDA_PRO').AsString;
-      FWebPedidoItenssLista[i].CUSTOMEDIO_PRO       := lQry.FieldByName('CUSTOMEDIO_PRO').AsString;
-      FWebPedidoItenssLista[i].VALOR_MONTADOR       := lQry.FieldByName('VALOR_MONTADOR').AsString;
+      FWebPedidoItenssLista[i].PRODUTO_NOME         := lQry.FieldByName('NOME_PRO').AsString;
 
       lQry.Next;
     end;
