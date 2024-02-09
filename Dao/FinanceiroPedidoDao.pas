@@ -96,6 +96,8 @@ begin
     lModel.OBSERVACAO             := lQry.FieldByName('OBSERVACAO').AsString;
     lModel.INDCE_APLICADO         := lQry.FieldByName('INDCE_APLICADO').AsString;
     lModel.VALOR_ACRESCIMO        := lQry.FieldByName('VALOR_ACRESCIMO').AsString;
+    lModel.VALOR_LIQUIDO          := lQry.FieldByName('VALOR_LIQUIDO').AsString;
+    lModel.ID_FINANCEIRO          := lQry.FieldByName('ID_FINANCEIRO').AsString;
 
     Result := lModel;
   finally
@@ -165,16 +167,14 @@ end;
 function TFinanceiroPedidoDao.excluir(pFinanceiroPedidoModel: TFinanceiroPedidoModel): String;
 var
   lQry     : TFDQuery;
-
 begin
-
   lQry     := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from FINANCEIRO_PEDIDO where ID = :ID',[pFinanceiroPedidoModel.ID]);
+   lQry.ExecSQL('delete from FINANCEIRO_PEDIDO where ID_FINANCEIRO = :ID_FINANCEIRO order by ID desc',[pFinanceiroPedidoModel.ID_FINANCEIRO]);
    lQry.ExecSQL;
 
-   Result := pFinanceiroPedidoModel.ID;
+   Result := pFinanceiroPedidoModel.ID_FINANCEIRO;
   finally
     lQry.Free;
   end;
@@ -209,7 +209,9 @@ begin
             '        financeiro_pedido.quantidade_parcelas,                                 '+SLineBreak+
             '        financeiro_pedido.valor_parcela,                                       '+SLineBreak+
             '        financeiro_pedido.valor_total,                                         '+SLineBreak+
-            '        financeiro_pedido.vencimento                                           '+SLineBreak+
+            '        financeiro_pedido.vencimento,                                          '+SLineBreak+
+            '        financeiro_pedido.valor_liquido,                                       '+SLineBreak+
+            '        financeiro_pedido.id_financeiro                                        '+SLineBreak+
             '   From financeiro_pedido                                                      '+SLineBreak+
             '   left join portador on portador.codigo_port = financeiro_pedido.portador_id  '+SLineBreak+
             '  where financeiro_pedido.web_pedido_id = '+pIDPedido+'                        '+SLineBreak+

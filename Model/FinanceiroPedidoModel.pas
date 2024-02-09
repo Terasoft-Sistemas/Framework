@@ -17,6 +17,7 @@ type
     QUANTIDADE_PARCELAS   : Integer;
     INDCE_APLICADO        : Double;
     VALOR_ACRESCIMO       : Double;
+    VALOR_LIQUIDO         : Double;
     VALOR_TOTAL           : Double;
 
   end;
@@ -50,6 +51,7 @@ type
     FINDCE_APLICADO: Variant;
     FVALOR_ACRESCIMO: Variant;
     FID_FINANCEIRO: Variant;
+    FVALOR_LIQUIDO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetIDRecordView(const Value: Integer);
@@ -74,6 +76,7 @@ type
     procedure SetINDCE_APLICADO(const Value: Variant);
     procedure SetVALOR_ACRESCIMO(const Value: Variant);
     procedure SetID_FINANCEIRO(const Value: Variant);
+    procedure SetVALOR_LIQUIDO(const Value: Variant);
         
   public
 
@@ -93,6 +96,7 @@ type
     property  INDCE_APLICADO       : Variant read FINDCE_APLICADO write SetINDCE_APLICADO;
     property  VALOR_ACRESCIMO      : Variant read FVALOR_ACRESCIMO write SetVALOR_ACRESCIMO;
     property  ID_FINANCEIRO        : Variant read FID_FINANCEIRO write SetID_FINANCEIRO;
+    property  VALOR_LIQUIDO        : Variant read FVALOR_LIQUIDO write SetVALOR_LIQUIDO;
 
     property Acao               : TAcao       read FAcao               write SetAcao;
     property TotalRecords       : Integer     read FTotalRecords       write SetTotalRecords;
@@ -173,7 +177,7 @@ begin
   if pID = '' then
     CriaException('ID é obrigatório.');
 
-  self.FID  := pID;
+  self.FID_FINANCEIRO  := pID;
   self.Acao := tacExcluir;
   Result := self.Salvar;
 end;
@@ -194,6 +198,7 @@ begin
   begin
     self.WEB_PEDIDO_ID        := pFinanceiroParams.WEB_PEDIDO_ID;
     self.PORTADOR_ID          := pFinanceiroParams.PORTADOR_ID;
+    self.VALOR_LIQUIDO        := FloatToStr(pFinanceiroParams.VALOR_LIQUIDO);
     self.VALOR_TOTAL          := FloatToStr(pFinanceiroParams.VALOR_TOTAL);
     self.QUANTIDADE_PARCELAS  := IntToStr(pFinanceiroParams.QUANTIDADE_PARCELAS);
     self.PARCELA              := IntToStr(i);
@@ -389,6 +394,11 @@ end;
 procedure TFinanceiroPedidoModel.SetVALOR_ACRESCIMO(const Value: Variant);
 begin
   FVALOR_ACRESCIMO := Value;
+end;
+
+procedure TFinanceiroPedidoModel.SetVALOR_LIQUIDO(const Value: Variant);
+begin
+  FVALOR_LIQUIDO := Value;
 end;
 
 procedure TFinanceiroPedidoModel.SetVALOR_PARCELA(const Value: Variant);

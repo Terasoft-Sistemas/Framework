@@ -197,13 +197,15 @@ var
   lFinanceiroParams      : TFinanceiroParams;
   lTabelaJurosModel      : TTabelaJurosModel;
   lMemJuros              : TFDMemTable;
-  lJuros                 : Double;
+  lJuros,
+  lValorPago             : Double;
 begin
   lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
   lTabelaJurosModel      := TTabelaJurosModel.Create(vIConexao);
   try
     try
-      lMemJuros := lTabelaJurosModel.obterLista('000005', 10000);
+      lValorPago := 10000;
+      lMemJuros  := lTabelaJurosModel.obterLista('000005', lValorPago);
 
       lFinanceiroParams.WEB_PEDIDO_ID       := '325';
       lFinanceiroParams.PORTADOR_ID         := '000005';
@@ -217,7 +219,8 @@ begin
       lFinanceiroParams.INDCE_APLICADO      := lMemJuros.FieldByName('PERCENTUAL').AsFloat;
       lFinanceiroParams.VALOR_ACRESCIMO     := lJuros;
 
-      lFinanceiroParams.VALOR_TOTAL         := 10000 + lJuros;
+      lFinanceiroParams.VALOR_LIQUIDO       := lValorPago;
+      lFinanceiroParams.VALOR_TOTAL         := lValorPago + lJuros;
 
       lFinanceiroPedidoModel.gerarFinanceiro(lFinanceiroParams);
 
@@ -544,10 +547,10 @@ begin
         exit;
 
       lFinanceiroPedidoModel := lFinanceiroPedidoModel.Alterar(IDRegistro);
-      lFinanceiroPedidoModel.WEB_PEDIDO_ID := '324';
+      lFinanceiroPedidoModel.WEB_PEDIDO_ID := '325';
       lFinanceiroPedidoModel.PORTADOR_ID   := '000001';
-      lFinanceiroPedidoModel.VALOR_TOTAL   := '30';
-      lFinanceiroPedidoModel.PARCELA       := '1';
+      lFinanceiroPedidoModel.VALOR_TOTAL   := '800';
+      lFinanceiroPedidoModel.PARCELA       := '3';
       lFinanceiroPedidoModel.VALOR_PARCELA := '150';
       lFinanceiroPedidoModel.Salvar;
 
@@ -839,18 +842,18 @@ end;
 procedure TForm1.Button3Click(Sender: TObject);
 var
   lFinanceiroPedidoModel : TFinanceiroPedidoModel;
-  IDRegistro             : String;
+  IDFinanceiro             : String;
 begin
   lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
 
   try
     try
-      IDRegistro := InputBox('FinanceiroPedido', 'Digite o ID do registro Financeiro para excluir:', '');
+      IDFinanceiro := InputBox('FinanceiroPedido', 'Digite o ID Financeiro para excluir:', '');
 
-      if IDRegistro.IsEmpty then
+      if IDFinanceiro.IsEmpty then
         exit;
 
-      lFinanceiroPedidoModel.Excluir(IDRegistro);
+      lFinanceiroPedidoModel.Excluir(IDFinanceiro);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
@@ -1065,11 +1068,13 @@ begin
       while not lMemTable.Eof do
       begin
         memoResultado.Lines.Add('WEB_PEDIDO_ID: '+lMemTable.FieldByName('WEB_PEDIDO_ID').AsString);
+        memoResultado.Lines.Add('ID_FINANCEIRO: '+lMemTable.FieldByName('ID_FINANCEIRO').AsString);
         memoResultado.Lines.Add('CODIGO_PORT: '+lMemTable.FieldByName('CODIGO_PORT').AsString);
         memoResultado.Lines.Add('NOME_PORT: '+lMemTable.FieldByName('NOME_PORT').AsString);
         memoResultado.Lines.Add('QUANTIDADE_PARCELAS: '+lMemTable.FieldByName('QUANTIDADE_PARCELAS').AsString);
         memoResultado.Lines.Add('VALOR_PARCELAS: '+lMemTable.FieldByName('VALOR_PARCELA').AsString);
         memoResultado.Lines.Add('VALOR_TOTAL: '+lMemTable.FieldByName('VALOR_TOTAL').AsString);
+        memoResultado.Lines.Add('VALOR_LIQUIDO: '+lMemTable.FieldByName('VALOR_LIQUIDO').AsString);
         memoResultado.Lines.Add('VENCIMENTO: '+lMemTable.FieldByName('VENCIMENTO').AsString);
         memoResultado.Lines.Add('===============================================');
         lMemTable.Next;

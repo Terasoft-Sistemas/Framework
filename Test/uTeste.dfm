@@ -486,7 +486,7 @@ object Form1: TForm1
         Top = 647
         Width = 182
         Height = 42
-        Caption = 'ObterResumo'
+        Caption = 'Obter Resumo'
         TabOrder = 51
         OnClick = Button47Click
       end
