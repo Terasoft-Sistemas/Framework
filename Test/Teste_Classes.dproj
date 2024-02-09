@@ -192,6 +192,10 @@
         <DCCReference Include="..\Dao\ContasPagarItensDao.pas"/>
         <DCCReference Include="..\Dao\ReservaDao.pas"/>
         <DCCReference Include="..\Model\ReservaModel.pas"/>
+        <DCCReference Include="..\Model\AnexoModel.pas"/>
+        <DCCReference Include="..\Dao\AnexoDao.pas"/>
+        <DCCReference Include="..\Dao\DocumentoDao.pas"/>
+        <DCCReference Include="..\Model\DocumentoModel.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
