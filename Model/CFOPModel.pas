@@ -209,7 +209,7 @@ end;
 function TCFOPModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
-  self.Salvar;
+  Result    := self.Salvar;
 end;
 
 function TCFOPModel.Alterar(pID: String): TCFOPModel;

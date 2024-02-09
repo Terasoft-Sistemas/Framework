@@ -109,7 +109,7 @@ end;
 function TPromocaoItensModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
-  self.Salvar;
+  Result    := self.Salvar;
 end;
 
 function TPromocaoItensModel.carregaClasse(pID: String): TPromocaoItensModel;

@@ -84,7 +84,7 @@ end;
 function TPrecoClienteModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
-  self.Salvar;
+  Result    := self.Salvar;
 end;
 
 constructor TPrecoClienteModel.Create(pIConexao : IConexao);

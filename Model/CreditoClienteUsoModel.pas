@@ -138,7 +138,7 @@ end;
 function TCreditoClienteUsoModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
-  self.Salvar;
+  Result    := self.Salvar;
 end;
 
 procedure TCreditoClienteUsoModel.obterLista;

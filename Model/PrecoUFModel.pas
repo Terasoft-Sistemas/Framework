@@ -132,7 +132,7 @@ end;
 function TPrecoUFModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
-  self.Salvar;
+  Result    := self.Salvar;
 end;
 
 procedure TPrecoUFModel.obterLista;

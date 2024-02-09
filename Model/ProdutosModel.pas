@@ -896,7 +896,7 @@ end;
 function TProdutosModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
-  self.Salvar;
+  Result    := self.Salvar;
 end;
 
 function TProdutosModel.carregaClasse(pId: String): TProdutosModel;

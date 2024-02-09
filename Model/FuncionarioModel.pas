@@ -422,7 +422,7 @@ end;
 function TFuncionarioModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
-  self.Salvar;
+  Result    := self.Salvar;
 end;
 
 function TFuncionarioModel.carregaClasse(pId: String): TFuncionarioModel;

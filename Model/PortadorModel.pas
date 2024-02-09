@@ -181,7 +181,7 @@ end;
 function TPortadorModel.Incluir: String;
 begin
   self.FAcao := tacIncluir;
-  self.Salvar;
+  Result     := self.Salvar;
 end;
 
 function TPortadorModel.carregaClasse(pId: String): TPortadorModel;

@@ -207,7 +207,7 @@ begin
       lValorPago := 10000;
       lMemJuros  := lTabelaJurosModel.obterLista('000005', lValorPago);
 
-      lFinanceiroParams.WEB_PEDIDO_ID       := '325';
+      lFinanceiroParams.WEB_PEDIDO_ID       := '396';
       lFinanceiroParams.PORTADOR_ID         := '000005';
       lFinanceiroParams.PRIMEIRO_VENCIMENTO := Date + 30;
       lFinanceiroParams.QUANTIDADE_PARCELAS := 5;
@@ -1235,7 +1235,7 @@ begin
       lVenderItemParametros.PRODUTO          := '000005';
       lVenderItemParametros.QUANTIDADE       := '10';
       lVenderItemParametros.DESCONTO         := '0';
-      lVenderItemParametros.VALOR_UNITARIO   := '0';
+      lVenderItemParametros.VALOR_UNITARIO   := '30';
       lVenderItemParametros.TIPO             := 'NORMAL';
       lVenderItemParametros.ENTREGA          := 'S'; //S=Sim - N=Não
       lVenderItemParametros.MONTAGEM         := 'S'; //S=Sim - N=Não
@@ -1270,7 +1270,7 @@ begin
 
 
       lWebPedidoItensModel.IDWebPedidoView := StrToInt(lWebPedidoItens);
-      lWebPedidoItensModel.obterListaVendaAssistidaItens;
+      lWebPedidoItensModel.obterLista;
 
       memoResultado.Lines.Clear;
       for i := 0 to lWebPedidoItensModel.WebPedidoItenssLista.Count -1 do
@@ -1278,6 +1278,7 @@ begin
           memoResultado.Lines.Add('ID: ' +lWebPedidoItensModel.WebPedidoItenssLista[i].ID);
           memoResultado.Lines.Add('QUANTIDADE: ' +lWebPedidoItensModel.WebPedidoItenssLista[i].QUANTIDADE);
           memoResultado.Lines.Add('PRODUTO_ID: ' +lWebPedidoItensModel.WebPedidoItenssLista[i].PRODUTO_ID);
+          memoResultado.Lines.Add('PRODUTO_NOME: ' +lWebPedidoItensModel.WebPedidoItenssLista[i].PRODUTO_NOME);
           memoResultado.Lines.Add('VALOR_UNITARIO: ' +lWebPedidoItensModel.WebPedidoItenssLista[i].VALOR_UNITARIO);
           memoResultado.Lines.Add('===============================================');
       end;

@@ -441,7 +441,7 @@ end;
 function TEntradaItensModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
-  self.Salvar;
+  Result    := self.Salvar;
 end;
 
 function TEntradaItensModel.carregaClasse(pId: String): TEntradaItensModel;

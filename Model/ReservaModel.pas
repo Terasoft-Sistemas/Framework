@@ -175,7 +175,7 @@ begin
   self.HORAS_BAIXA := '24';
 
   self.Acao := tacIncluir;
-  self.Salvar;
+  Result    := self.Salvar;
 end;
 
 function TReservaModel.carregaClasse(pId : String): TReservaModel;

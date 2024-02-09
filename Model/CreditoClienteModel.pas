@@ -150,7 +150,7 @@ end;
 function TCreditoClienteModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
-  self.Salvar;
+  Result    := self.Salvar;
 end;
 
 constructor TCreditoClienteModel.Create(pIConexao : IConexao);

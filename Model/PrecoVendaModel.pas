@@ -112,7 +112,7 @@ end;
 function TPrecoVendaModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
-  self.Salvar;
+  Result    := self.Salvar;
 end;
 
 function TPrecoVendaModel.carregaClasse(pID: String): TPrecoVendaModel;

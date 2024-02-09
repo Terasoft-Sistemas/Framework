@@ -218,7 +218,7 @@ uses
 function TContasReceberModel.Incluir: String;
 begin
   self.FAcao := tacIncluir;
-  self.Salvar;
+  Result     := self.Salvar;
 end;
 
 function TContasReceberModel.Alterar(pID: String): TContasReceberModel;

@@ -341,8 +341,8 @@ begin
     lEntradaItensModel.CODIGO_PRO     := pEntradaItensParams.CODIGO_PRO;
     lEntradaItensModel.QUANTIDADE_ENT := pEntradaItensParams.QUANTIDADE_ENT;
     lEntradaItensModel.VALORUNI_ENT   := pEntradaItensParams.VALORUNI_ENT;
-    lEntradaItensModel.STATUS.Value   := '0';
-    lEntradaItensModel.CST_ENT.Value  := '00';
+    lEntradaItensModel.STATUS         := '0';
+    lEntradaItensModel.CST_ENT        := '00';
 
     Result := lEntradaItensModel.Incluir;
 
@@ -362,8 +362,8 @@ end;
 
 function TEntradaModel.Incluir: String;
 begin
-    self.Acao := tacIncluir;
-    self.Salvar;
+  self.Acao := tacIncluir;
+  Result    := self.Salvar;
 end;
 
 function TEntradaModel.carregaClasse(pId, pFornecedor: String): TEntradaModel;

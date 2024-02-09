@@ -178,7 +178,7 @@ uses
 function TContaCorrenteModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
-  self.Salvar;
+  Result    := self.Salvar;
 end;
 
 function TContaCorrenteModel.Alterar(pID: String): TContaCorrenteModel;

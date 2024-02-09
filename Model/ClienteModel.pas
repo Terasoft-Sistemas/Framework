@@ -969,7 +969,7 @@ uses
 function TClienteModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
-  self.Salvar;
+  Result    := self.Salvar;
 end;
 
 function TClienteModel.Excluir(pID: String): String;

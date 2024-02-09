@@ -533,7 +533,7 @@ end;
 function TPedidoVendaModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
-  self.Salvar;
+  Result    := self.Salvar;
 end;
 
 function TPedidoVendaModel.Alterar(pID: String): TPedidoVendaModel;

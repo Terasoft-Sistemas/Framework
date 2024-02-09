@@ -283,7 +283,7 @@ end;
 function TContasReceberItensModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
-  self.Salvar;
+  Result    := self.Salvar;
 end;
 
 function TContasReceberItensModel.baixar(pValor: String): String;

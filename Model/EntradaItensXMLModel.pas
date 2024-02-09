@@ -312,7 +312,7 @@ end;
 function TEntradaItensXMLModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
-    self.Salvar;
+    Result    := self.Salvar;
 end;
 
 function TEntradaItensXMLModel.carregaClasse(pId: String): TEntradaItensXMLModel;

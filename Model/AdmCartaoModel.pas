@@ -164,7 +164,7 @@ begin
   lAdmCartaoModel := TAdmCartaoModel.Create(vIConexao);
   try
     self.Acao := tacIncluir ;
-    self.Salvar;
+    Result    := self.Salvar;
   finally
     lAdmCartaoModel.Free;
   end;

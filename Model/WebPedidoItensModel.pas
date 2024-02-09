@@ -280,7 +280,7 @@ begin
   self.FPERCENTUAL_DESCONTO := '0';
 
   self.Acao := tacIncluir;
-  self.Salvar;
+  Result    := self.Salvar;
 end;
 
 function TWebPedidoItensModel.Alterar(pID : String): TWebPedidoItensModel;

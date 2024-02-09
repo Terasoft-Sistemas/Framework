@@ -499,7 +499,7 @@ end;
 function TPedidoItensModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
-  self.Salvar;
+  Result    := self.Salvar;
 end;
 
 function TPedidoItensModel.cancelarEstoque: String;
