@@ -203,7 +203,7 @@ begin
   lTabelaJurosModel      := TTabelaJurosModel.Create(vIConexao);
   try
     try
-      lMemJuros := lTabelaJurosModel.obterLista('000005', 150);
+      lMemJuros := lTabelaJurosModel.obterLista('000005', 10000);
 
       lFinanceiroParams.WEB_PEDIDO_ID       := '325';
       lFinanceiroParams.PORTADOR_ID         := '000005';
@@ -217,7 +217,7 @@ begin
       lFinanceiroParams.INDCE_APLICADO      := lMemJuros.FieldByName('PERCENTUAL').AsFloat;
       lFinanceiroParams.VALOR_ACRESCIMO     := lJuros;
 
-      lFinanceiroParams.VALOR_TOTAL         := 150 + lJuros;
+      lFinanceiroParams.VALOR_TOTAL         := 10000 + lJuros;
 
       lFinanceiroPedidoModel.gerarFinanceiro(lFinanceiroParams);
 
