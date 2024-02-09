@@ -316,6 +316,7 @@ begin
                 '        web_pedidoitens.quantidade,                                         '+SLineBreak+
                 '        web_pedidoitens.tipo_entrega,                                       '+SLineBreak+
                 '        web_pedidoitens.tipo_garantia,                                      '+SLineBreak+
+                '        web_pedidoitens.tipo,                                               '+SLineBreak+
                 '        web_pedidoitens.observacao,                                         '+SLineBreak+
                 '        web_pedidoitens.produto_id,                                         '+SLineBreak+
                 '        web_pedidoitens.vlr_garantia,                                       '+SLineBreak+
@@ -347,6 +348,7 @@ begin
       FWebPedidoItenssLista[i].QUANTIDADE           := lQry.FieldByName('QUANTIDADE').AsString;
       FWebPedidoItenssLista[i].TIPO_ENTREGA         := lQry.FieldByName('TIPO_ENTREGA').AsString;
       FWebPedidoItenssLista[i].TIPO_GARANTIA        := lQry.FieldByName('TIPO_GARANTIA').AsString;
+      FWebPedidoItenssLista[i].TIPO                 := lQry.FieldByName('TIPO').AsString;
       FWebPedidoItenssLista[i].OBSERVACAO           := lQry.FieldByName('OBSERVACAO').AsString;
       FWebPedidoItenssLista[i].PRODUTO_ID           := lQry.FieldByName('PRODUTO_ID').AsString;
       FWebPedidoItenssLista[i].VLR_GARANTIA         := lQry.FieldByName('VLR_GARANTIA').AsString;
