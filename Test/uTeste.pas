@@ -1280,6 +1280,7 @@ begin
           memoResultado.Lines.Add('PRODUTO_ID: ' +lWebPedidoItensModel.WebPedidoItenssLista[i].PRODUTO_ID);
           memoResultado.Lines.Add('PRODUTO_NOME: ' +lWebPedidoItensModel.WebPedidoItenssLista[i].PRODUTO_NOME);
           memoResultado.Lines.Add('VALOR_UNITARIO: ' +lWebPedidoItensModel.WebPedidoItenssLista[i].VALOR_UNITARIO);
+          memoResultado.Lines.Add('TIPO_GARANTIA: ' +lWebPedidoItensModel.WebPedidoItenssLista[i].TIPO_GARANTIA);
           memoResultado.Lines.Add('===============================================');
       end;
       ShowMessage('Consultou itens');
