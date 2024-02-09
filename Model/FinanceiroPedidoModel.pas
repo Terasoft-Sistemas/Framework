@@ -15,7 +15,10 @@ type
     PORTADOR_ID           : String;
     PRIMEIRO_VENCIMENTO   : TDate;
     QUANTIDADE_PARCELAS   : Integer;
+    INDCE_APLICADO        : Double;
+    VALOR_ACRESCIMO       : Double;
     VALOR_TOTAL           : Double;
+
   end;
 
   TFinanceiroPedidoModel = class
@@ -44,6 +47,8 @@ type
     FVALOR_PARCELA: Variant;
     FCONDICAO_PAGAMENTO: Variant;
     FPARCELA: Variant;
+    FINDCE_APLICADO: Variant;
+    FVALOR_ACRESCIMO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetIDRecordView(const Value: Integer);
@@ -65,6 +70,8 @@ type
     procedure SetVALOR_TOTAL(const Value: Variant);
     procedure SetVENCIMENTO(const Value: Variant);
     procedure SetWEB_PEDIDO_ID(const Value: Variant);
+    procedure SetINDCE_APLICADO(const Value: Variant);
+    procedure SetVALOR_ACRESCIMO(const Value: Variant);
         
   public
 
@@ -81,6 +88,8 @@ type
     property  VENCIMENTO           : Variant read FVENCIMENTO write SetVENCIMENTO;
     property  CONDICAO_PAGAMENTO   : Variant read FCONDICAO_PAGAMENTO write SetCONDICAO_PAGAMENTO;
     property  OBSERVACAO           : Variant read FOBSERVACAO write SetOBSERVACAO;
+    property  INDCE_APLICADO       : Variant read FINDCE_APLICADO write SetINDCE_APLICADO;
+    property  VALOR_ACRESCIMO      : Variant read FVALOR_ACRESCIMO write SetVALOR_ACRESCIMO;
 
     property Acao               : TAcao       read FAcao               write SetAcao;
     property TotalRecords       : Integer     read FTotalRecords       write SetTotalRecords;
@@ -103,6 +112,7 @@ type
 
     function carregaClasse(pId: String): TFinanceiroPedidoModel;
     function obterLista: TFDMemTable;
+    function obterResumo(pIDPedido : String) : TFDMemTable;
 
     procedure gerarFinanceiro(pFinanceiroParams: TFinanceiroParams);
 
@@ -182,6 +192,8 @@ begin
     self.QUANTIDADE_PARCELAS  := IntToStr(pFinanceiroParams.QUANTIDADE_PARCELAS);
     self.PARCELA              := IntToStr(i);
     self.VALOR_PARCELA        := FormatFloat('#,##0.00', pFinanceiroParams.VALOR_TOTAL / pFinanceiroParams.QUANTIDADE_PARCELAS);
+    self.INDCE_APLICADO       := FloatToStr(pFinanceiroParams.INDCE_APLICADO);
+    self.VALOR_ACRESCIMO      := FloatToStr(pFinanceiroParams.VALOR_ACRESCIMO);
 
     if i = 1 then
       self.VENCIMENTO         := DateToStr(lVencimento)
@@ -222,6 +234,18 @@ destructor TFinanceiroPedidoModel.Destroy;
 begin
 
   inherited;
+end;
+
+function TFinanceiroPedidoModel.obterResumo(pIDPedido : String): TFDMemTable;
+var
+  lFinanceiroPedidoDao : TFinanceiroPedidoDao;
+begin
+  lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
+  try
+    Result := lFinanceiroPedidoDao.obterResumo(pIDPedido);
+  finally
+    lFinanceiroPedidoDao.Free;
+  end;
 end;
 
 function TFinanceiroPedidoModel.obterLista: TFDMemTable;
@@ -291,6 +315,11 @@ begin
   FIDRecordView := Value;
 end;
 
+procedure TFinanceiroPedidoModel.SetINDCE_APLICADO(const Value: Variant);
+begin
+  FINDCE_APLICADO := Value;
+end;
+
 procedure TFinanceiroPedidoModel.SetLengthPageView(const Value: String);
 begin
   FLengthPageView := Value;
@@ -339,6 +368,11 @@ end;
 procedure TFinanceiroPedidoModel.SetTotalRecords(const Value: Integer);
 begin
   FTotalRecords := Value;
+end;
+
+procedure TFinanceiroPedidoModel.SetVALOR_ACRESCIMO(const Value: Variant);
+begin
+  FVALOR_ACRESCIMO := Value;
 end;
 
 procedure TFinanceiroPedidoModel.SetVALOR_PARCELA(const Value: Variant);

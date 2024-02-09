@@ -32,6 +32,7 @@ type
     FVALOR_TOTAL: Variant;
     FVALOR_PARCELA: Variant;
     FJUROS_TEXTO: Variant;
+    FVALOR_JUROS: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetTabelaJurossLista(const Value: TObjectList<TTabelaJurosModel>);
@@ -51,6 +52,7 @@ type
     procedure SetVALOR_PARCELA(const Value: Variant);
     procedure SetVALOR_TOTAL(const Value: Variant);
     procedure SetJUROS_TEXTO(const Value: Variant);
+    procedure SetVALOR_JUROS(const Value: Variant);
 
   public
     property CODIGO: Variant read FCODIGO write SetCODIGO;
@@ -63,6 +65,7 @@ type
     property VALOR_PARCELA: Variant read FVALOR_PARCELA write SetVALOR_PARCELA;
     property VALOR_TOTAL: Variant read FVALOR_TOTAL write SetVALOR_TOTAL;
     property JUROS_TEXTO: Variant read FJUROS_TEXTO write SetJUROS_TEXTO;
+    property VALOR_JUROS: Variant read FVALOR_JUROS write SetVALOR_JUROS;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -141,6 +144,7 @@ begin
       self.TabelaJurossLista[0].FCODIGO        := '001';
       self.TabelaJurossLista[0].FPERCENTUAL    := FormatFloat('#,##0.00', 0);
       self.TabelaJurossLista[0].FJUROS_TEXTO   := 'Sem Juros';
+      self.TabelaJurossLista[0].FVALOR_JUROS   := FormatFloat('#,##0.00',  0);
       self.TabelaJurossLista[0].FVALOR_PARCELA := FormatFloat('#,##0.00',  lTotal);
       self.TabelaJurossLista[0].FVALOR_TOTAL   := FormatFloat('#,##0.00',  lTotal);
     end;
@@ -150,6 +154,7 @@ begin
       self.TabelaJurossLista[i].FJUROS_TEXTO := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, 'Juros', 'Sem juros');
       lJuros                                 := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, self.TabelaJurossLista[i].PERCENTUAL / 100 * lTotal, 0);
 
+      self.TabelaJurossLista[i].FVALOR_JUROS   := FormatFloat('#,##0.00',  lJuros);
       self.TabelaJurossLista[i].FVALOR_TOTAL   := FormatFloat('#,##0.00',lTotal + lJuros);
       self.TabelaJurossLista[i].FVALOR_PARCELA := FormatFloat('#,##0.00', (lTotal + lJuros) / StrToInt(self.TabelaJurossLista[i].CODIGO));
     end;
@@ -167,6 +172,7 @@ begin
     lMemTable.FieldDefs.Add('CODIGO', ftString, 3);
     lMemTable.FieldDefs.Add('PERCENTUAL', ftFloat);
     lMemTable.FieldDefs.Add('JUROS_TEXTO', ftString, 20);
+    lMemTable.FieldDefs.Add('VALOR_JUROS', ftFloat);
     lMemTable.FieldDefs.Add('VALOR_PARCELA', ftFloat);
     lMemTable.FieldDefs.Add('VALOR_TOTAL', ftString, 100);
     lMemTable.CreateDataSet;
@@ -178,6 +184,7 @@ begin
                                 self.TabelaJurossLista[i].CODIGO,
                                 self.TabelaJurossLista[i].PERCENTUAL,
                                 self.TabelaJurossLista[i].JUROS_TEXTO,
+                                self.TabelaJurossLista[i].VALOR_JUROS,
                                 self.TabelaJurossLista[i].VALOR_PARCELA,
                                 self.TabelaJurossLista[i].VALOR_TOTAL
                                ]);
@@ -316,6 +323,11 @@ end;
 procedure TTabelaJurosModel.SetTotalRecords(const Value: Integer);
 begin
   FTotalRecords := Value;
+end;
+
+procedure TTabelaJurosModel.SetVALOR_JUROS(const Value: Variant);
+begin
+  FVALOR_JUROS := Value;
 end;
 
 procedure TTabelaJurosModel.SetVALOR_PARCELA(const Value: Variant);
