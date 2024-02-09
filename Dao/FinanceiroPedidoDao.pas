@@ -117,14 +117,18 @@ end;
 
 function TFinanceiroPedidoDao.incluir(pFinanceiroPedidoModel: TFinanceiroPedidoModel): String;
 var
-  lQry          : TFDQuery;
-  lSQL          : String;
-
+  lQry  : TFDQuery;
+  lSQL  : String;
 begin
-  lQry          := vIConexao.CriarQuery;
+  lQry := vIConexao.CriarQuery;
 
   try
-    lSQL := vConstrutor.gerarInsert('FINANCEIRO_PEDIDO', 'ID');
+    lSQL := vConstrutor.gerarInsert('FINANCEIRO_PEDIDO', 'ID', true);
+
+    pFinanceiroPedidoModel.ID := vIConexao.Generetor('GEN_FINANCEIRO_PEDIDO_ID');
+
+    if pFinanceiroPedidoModel.ID_FINANCEIRO = '' then
+      pFinanceiroPedidoModel.ID_FINANCEIRO := pFinanceiroPedidoModel.ID;
 
     lQry.SQL.Add(lSQL);
     setParams(lQry, pFinanceiroPedidoModel);
@@ -199,7 +203,8 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-    lSQL := ' select portador.codigo_port,                                                  '+SLineBreak+
+    lSQL := ' select financeiro_pedido.web_pedido_id,                                       '+SLineBreak+
+            '        portador.codigo_port,                                                  '+SLineBreak+
             '        portador.nome_port,                                                    '+SLineBreak+
             '        financeiro_pedido.quantidade_parcelas,                                 '+SLineBreak+
             '        financeiro_pedido.valor_parcela,                                       '+SLineBreak+

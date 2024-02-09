@@ -105,7 +105,7 @@ end;
 function TAnexoModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
-    self.Salvar;
+    Result    := self.Salvar;
 end;
 
 function TAnexoModel.carregaClasse(pId : String): TAnexoModel;

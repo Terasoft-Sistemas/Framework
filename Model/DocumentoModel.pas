@@ -99,7 +99,7 @@ end;
 function TDocumentoModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
-    self.Salvar;
+    Result    := self.Salvar;
 end;
 
 function TDocumentoModel.carregaClasse(pId : String): TDocumentoModel;

@@ -1064,6 +1064,7 @@ begin
       lMemTable.First;
       while not lMemTable.Eof do
       begin
+        memoResultado.Lines.Add('WEB_PEDIDO_ID: '+lMemTable.FieldByName('WEB_PEDIDO_ID').AsString);
         memoResultado.Lines.Add('CODIGO_PORT: '+lMemTable.FieldByName('CODIGO_PORT').AsString);
         memoResultado.Lines.Add('NOME_PORT: '+lMemTable.FieldByName('NOME_PORT').AsString);
         memoResultado.Lines.Add('QUANTIDADE_PARCELAS: '+lMemTable.FieldByName('QUANTIDADE_PARCELAS').AsString);
@@ -1390,6 +1391,7 @@ begin
       lWebPedidoItensModel := lWebPedidoItensModel.Alterar(ID);
       lWebPedidoItensModel.PRODUTO_ID := '000001';
       lWebPedidoItensModel.QUANTIDADE := '25';
+      lWebPedidoItensModel.VLR_GARANTIA := '10';
       lWebPedidoItensModel.Salvar;
 
       ShowMessage('Alterado o item com sucesso!');

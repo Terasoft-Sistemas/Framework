@@ -49,6 +49,7 @@ type
     FPARCELA: Variant;
     FINDCE_APLICADO: Variant;
     FVALOR_ACRESCIMO: Variant;
+    FID_FINANCEIRO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetIDRecordView(const Value: Integer);
@@ -72,6 +73,7 @@ type
     procedure SetWEB_PEDIDO_ID(const Value: Variant);
     procedure SetINDCE_APLICADO(const Value: Variant);
     procedure SetVALOR_ACRESCIMO(const Value: Variant);
+    procedure SetID_FINANCEIRO(const Value: Variant);
         
   public
 
@@ -90,6 +92,7 @@ type
     property  OBSERVACAO           : Variant read FOBSERVACAO write SetOBSERVACAO;
     property  INDCE_APLICADO       : Variant read FINDCE_APLICADO write SetINDCE_APLICADO;
     property  VALOR_ACRESCIMO      : Variant read FVALOR_ACRESCIMO write SetVALOR_ACRESCIMO;
+    property  ID_FINANCEIRO        : Variant read FID_FINANCEIRO write SetID_FINANCEIRO;
 
     property Acao               : TAcao       read FAcao               write SetAcao;
     property TotalRecords       : Integer     read FTotalRecords       write SetTotalRecords;
@@ -146,7 +149,7 @@ begin
     CriaException('Valor da Parcela não informado.');
 
   self.Acao := tacIncluir;
-  self.Salvar;
+  Result    := self.Salvar;
 end;
 
 function TFinanceiroPedidoModel.Alterar(pID: String): TFinanceiroPedidoModel;
@@ -177,12 +180,15 @@ end;
 
 procedure TFinanceiroPedidoModel.gerarFinanceiro(pFinanceiroParams: TFinanceiroParams);
 var
-  i           : Integer;
-  lSoma       : Double;
-  lVencimento : TDate;
+  i             : Integer;
+  lSoma         : Double;
+  lVencimento   : TDate;
+  lIDFinanceiro : String;
+  lRetorno      : String;
 begin
 
-  lVencimento := pFinanceiroParams.PRIMEIRO_VENCIMENTO;
+  lVencimento   := pFinanceiroParams.PRIMEIRO_VENCIMENTO;
+  lIDFinanceiro := '';
 
   for i := 1 to pFinanceiroParams.QUANTIDADE_PARCELAS do
   begin
@@ -191,9 +197,10 @@ begin
     self.VALOR_TOTAL          := FloatToStr(pFinanceiroParams.VALOR_TOTAL);
     self.QUANTIDADE_PARCELAS  := IntToStr(pFinanceiroParams.QUANTIDADE_PARCELAS);
     self.PARCELA              := IntToStr(i);
-    self.VALOR_PARCELA        := FormatFloat('#,##0.00', pFinanceiroParams.VALOR_TOTAL / pFinanceiroParams.QUANTIDADE_PARCELAS);
+    self.VALOR_PARCELA        := FloatToStr(pFinanceiroParams.VALOR_TOTAL / pFinanceiroParams.QUANTIDADE_PARCELAS);
     self.INDCE_APLICADO       := FloatToStr(pFinanceiroParams.INDCE_APLICADO);
     self.VALOR_ACRESCIMO      := FloatToStr(pFinanceiroParams.VALOR_ACRESCIMO);
+    self.ID_FINANCEIRO        := lIDFinanceiro;
 
     if i = 1 then
       self.VENCIMENTO         := DateToStr(lVencimento)
@@ -208,7 +215,11 @@ begin
     if i = pFinanceiroParams.QUANTIDADE_PARCELAS then
       self.VALOR_PARCELA := FloatToStr(self.VALOR_PARCELA + (pFinanceiroParams.VALOR_TOTAL - lSoma));
 
-    self.Incluir;
+    lRetorno := self.Incluir;
+
+    if i = 1 then
+      lIDFinanceiro := lRetorno;
+
   end;
 
 end;
@@ -313,6 +324,11 @@ end;
 procedure TFinanceiroPedidoModel.SetIDRecordView(const Value: Integer);
 begin
   FIDRecordView := Value;
+end;
+
+procedure TFinanceiroPedidoModel.SetID_FINANCEIRO(const Value: Variant);
+begin
+  FID_FINANCEIRO := Value;
 end;
 
 procedure TFinanceiroPedidoModel.SetINDCE_APLICADO(const Value: Variant);
