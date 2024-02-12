@@ -171,7 +171,7 @@ begin
   lQry     := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from FINANCEIRO_PEDIDO where ID_FINANCEIRO = :ID_FINANCEIRO order by ID desc',[pFinanceiroPedidoModel.ID_FINANCEIRO]);
+   lQry.ExecSQL('delete from FINANCEIRO_PEDIDO where ID_FINANCEIRO = :ID_FINANCEIRO',[pFinanceiroPedidoModel.ID_FINANCEIRO]);
    lQry.ExecSQL;
 
    Result := pFinanceiroPedidoModel.ID_FINANCEIRO;
