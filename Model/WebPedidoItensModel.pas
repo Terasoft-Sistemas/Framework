@@ -11,9 +11,9 @@ uses
 type
 
   TTotais = record
-    ACRESCIMO,
-    FRETE,
-    DESCONTO,
+    VALOR_ACRESCIMO,
+    VALOR_FRETE,
+    VALOR_DESCONTO,
     VALOR_ITENS,
     VALOR_TOTAL    : Double;
   end;

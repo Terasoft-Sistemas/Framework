@@ -316,6 +316,7 @@ begin
 
     lSQL := '    select  '+lPaginacao+'                                                                                                     '+SLineBreak+
             '        ID,                                                                                                                    '+SLineBreak+
+            '        OBSERVACAO,                                                                                                            '+SLineBreak+
             '        CODIGO_CLI,                                                                                                            '+SLineBreak+
             '        CLIENTE_NOME,                                                                                                          '+SLineBreak+
             '        ENTREGA_ENDERECO,                                                                                                      '+SLineBreak+
@@ -345,6 +346,7 @@ begin
             '                                                                                                                               '+SLineBreak+
             '    			select                                                                                                                '+SLineBreak+
             '    				id,                                                                                                                 '+SLineBreak+
+            '           observacao,                                                                                                         '+SLineBreak+
             '    				codigo_cli,                                                                                                         '+SLineBreak+
             '    				cliente_nome,                                                                                                       '+SLineBreak+
             '    				entrega_endereco,                                                                                                   '+SLineBreak+
@@ -373,6 +375,7 @@ begin
             '      		from (                                                                                                                '+SLineBreak+
             '																												                                                                        '+SLineBreak+
             '      			  select web_pedido.id,                                                                                             '+SLineBreak+
+            '                    web_pedido.observacao,                                                                                     '+SLineBreak+
             '      					 clientes.codigo_cli,                                                                                           '+SLineBreak+
             '      					 coalesce(clientes.fantasia_cli, clientes.razao_cli) cliente_nome,                                              '+SLineBreak+
             '      					 web_pedido.entrega_endereco,                                                                                   '+SLineBreak+
@@ -403,7 +406,7 @@ begin
             '             left join funcionario on funcionario.codigo_fun = web_pedido.vendedor_id                                          '+SLineBreak+
             '      			   ) t1                                                                                                             '+SLineBreak+
             '                                                                                                                               '+SLineBreak+
-            '    group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19 ) web_pedido                                                      '+SLineBreak+
+            '    group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19, 20 ) web_pedido                                                  '+SLineBreak+
             '    where 1=1                                                                                                                  '+SLineBreak;
 
     lSQL := lSQL + where;

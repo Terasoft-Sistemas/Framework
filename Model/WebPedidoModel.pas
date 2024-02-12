@@ -628,11 +628,12 @@ begin
   try
     lTotais := lWebPedidoItensModel.obterTotais(self.FID);
 
-    self.ACRESCIMO            := lTotais.ACRESCIMO.ToString;
-    self.VALOR_FRETE          := lTotais.FRETE.ToString;
-    self.VALOR_CUPOM_DESCONTO := lTotais.DESCONTO.ToString;
-    self.VALOR_ITENS          := lTotais.VALOR_ITENS.ToString;
-    self.VALOR_TOTAL          := lTotais.VALOR_TOTAL.ToString;
+    self.ACRESCIMO             := lTotais.VALOR_ACRESCIMO.ToString;
+    self.VALOR_FRETE           := lTotais.VALOR_FRETE.ToString;
+    self.VALOR_CUPOM_DESCONTO  := lTotais.VALOR_DESCONTO.ToString;
+    self.VALOR_ITENS           := lTotais.VALOR_ITENS.ToString;
+    self.VALOR_TOTAL           := lTotais.VALOR_TOTAL.ToString;
+
   finally
     lWebPedidoItensModel.free;
   end;

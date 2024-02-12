@@ -220,7 +220,11 @@ begin
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
 
-      lSQL := ' select '+lPaginacao+' * from ANEXO where 1=1             '+SLineBreak;
+      lSQL := '  select '+lPaginacao+' anexo.*,                                  '+SLineBreak+
+              '          documento.nome documento_nome                           '+SLineBreak+
+              '          from anexo                                              '+SLineBreak+
+              '     left join documento on documento.id = anexo.documento_id     '+SLineBreak+
+              '    where 1=1                                                     '+SLineBreak;
 
 
     lSql := lSql + where;

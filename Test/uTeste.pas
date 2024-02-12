@@ -988,6 +988,7 @@ begin
         memoResultado.Lines.Add('TABELA: '+lMemTable.FieldByName('TABELA').AsString);
         memoResultado.Lines.Add('REGISTRO_ID: '+lMemTable.FieldByName('REGISTRO_ID').AsString);
         memoResultado.Lines.Add('DOCUMENTO_ID: '+lMemTable.FieldByName('DOCUMENTO_ID').AsString);
+        memoResultado.Lines.Add('DOCUMENTO_NOME: '+lMemTable.FieldByName('DOCUMENTO_NOME').AsString);
         memoResultado.Lines.Add('===============================================');
         lMemTable.Next;
       end;
@@ -1372,9 +1373,9 @@ begin
     lWebPedidoModel.ID := lID;
     lWebPedidoModel.obterTotais;
 
-    memoResultado.Lines.Add('ACRESCIMO: '+lWebPedidoModel.ACRESCIMO);
+    memoResultado.Lines.Add('VALOR_ACRESCIMO: '+lWebPedidoModel.ACRESCIMO);
     memoResultado.Lines.Add('VALOR_FRETE: '+lWebPedidoModel.VALOR_FRETE);
-    memoResultado.Lines.Add('VALOR_CUPOM_DESCONTO: '+lWebPedidoModel.VALOR_CUPOM_DESCONTO);
+    memoResultado.Lines.Add('VALOR_DESCONTO: '+lWebPedidoModel.VALOR_CUPOM_DESCONTO);
     memoResultado.Lines.Add('VALOR_ITENS: '+lWebPedidoModel.VALOR_ITENS);
     memoResultado.Lines.Add('VALOR_TOTAL: '+lWebPedidoModel.VALOR_TOTAL);
     memoResultado.Lines.Add('===============================================');

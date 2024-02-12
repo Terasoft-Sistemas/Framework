@@ -237,10 +237,10 @@ begin
     lSQL := lSQL + FWhereView;
 
   if FIDRecordView <> 0 then
-    lSQL := lSQL + ' and web_pedidoitens.id = '+IntToStr(FIDRecordView);
+    lSQL := lSQL + ' and id = '+IntToStr(FIDRecordView);
 
   if FIDWebPedidoView <> 0 then
-    lSQL := lSQL + ' and web_pedidoitens.web_pedido_id = '+IntToStr(FIDWebPedidoView);
+    lSQL := lSQL + ' and web_pedido_id = '+IntToStr(FIDWebPedidoView);
 
   Result := lSQL;
 end;
@@ -254,21 +254,45 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-    lSQL := ' select coalesce(p.acrescimo,0) acrescimo,                                                                                                                                                  '+SLineBreak+
-            '        coalesce(p.valor_frete,0) frete,                                                                                                                                                    '+SLineBreak+
-            '        sum(coalesce(i.valor_unitario,0) * coalesce(i.percentual_desconto,0) / 100) desconto,                                                                                               '+SLineBreak+
-            '        sum(coalesce(i.quantidade,0) * (coalesce(i.valor_unitario,0) + coalesce(i.vlr_garantia,0) - (coalesce(i.valor_unitario,0) * coalesce(i.percentual_desconto,0) / 100) )) valor_itens '+SLineBreak+
-            '   from web_pedidoitens i inner join web_pedido p on i.web_pedido_id = p.id                                                                                                                 '+SLineBreak+
-            '  where i.web_pedido_id = ' + pId +
-            '  group by 1,2 ';
+    lSQL := '   select                                                                                                   '+SLineBreak+
+            '      WEB_PEDIDO_ID,                                                                                        '+SLineBreak+
+            '      VALOR_ACRESCIMO,                                                                                      '+SLineBreak+
+            '      VALOR_FRETE,                                                                                          '+SLineBreak+
+            '      VALOR_DESCONTO,                                                                                       '+SLineBreak+
+            '      VALOR_ITENS                                                                                           '+SLineBreak+
+            '    from                                                                                                    '+SLineBreak+
+            '    (                                                                                                       '+SLineBreak+
+            '     select                                                                                                 '+SLineBreak+
+            '       web_pedido_id,                                                                                       '+SLineBreak+
+            '       sum(valor_acrescimo) valor_acrescimo,                                                                '+SLineBreak+
+            '       sum(valor_frete) valor_frete,                                                                        '+SLineBreak+
+            '       sum(quantidade * valor_desconto) valor_desconto,                                                     '+SLineBreak+
+            '       sum(quantidade * (valor_unitario + valor_garantia - valor_desconto)) valor_itens                     '+SLineBreak+
+            '      from                                                                                                  '+SLineBreak+
+            '      (                                                                                                     '+SLineBreak+
+            '        select i.web_pedido_id,                                                                             '+SLineBreak+
+            '               coalesce(p.acrescimo,0) valor_acrescimo,                                                     '+SLineBreak+
+            '               coalesce(p.valor_frete,0) valor_frete,                                                       '+SLineBreak+
+            '               coalesce(i.valor_unitario,0) * coalesce(i.percentual_desconto,0) / 100 valor_desconto,       '+SLineBreak+
+            '               coalesce(i.quantidade,0) quantidade,                                                         '+SLineBreak+
+            '               coalesce(i.valor_unitario,0) valor_unitario,                                                 '+SLineBreak+
+            '               coalesce(i.vlr_garantia,0) valor_garantia                                                    '+SLineBreak+
+            '         from web_pedidoitens i                                                                             '+SLineBreak+
+            '        inner join web_pedido p on i.web_pedido_id = p.id ) t1                                              '+SLineBreak+
+            '        group by 1 ) t2                                                                                     '+SLineBreak+
+            '   where web_pedido_id = ' +pID;
 
     lQry.Open(lSQL);
 
-    Result.ACRESCIMO    := lQry.FieldByName('ACRESCIMO').AsFloat;
-    Result.FRETE        := lQry.FieldByName('FRETE').AsFloat;
-    Result.DESCONTO     := lQry.FieldByName('DESCONTO').AsFloat;
-    Result.VALOR_ITENS  := lQry.FieldByName('VALOR_ITENS').AsFloat;
-    Result.VALOR_TOTAL  := lQry.FieldByName('VALOR_ITENS').AsFloat + lQry.FieldByName('FRETE').AsFloat + lQry.FieldByName('ACRESCIMO').AsFloat - lQry.FieldByName('DESCONTO').AsFloat;
+    Result.VALOR_ACRESCIMO  := lQry.FieldByName('VALOR_ACRESCIMO').AsFloat;
+    Result.VALOR_FRETE      := lQry.FieldByName('VALOR_FRETE').AsFloat;
+    Result.VALOR_DESCONTO   := lQry.FieldByName('VALOR_DESCONTO').AsFloat;
+    Result.VALOR_ITENS      := lQry.FieldByName('VALOR_ITENS').AsFloat;
+
+    Result.VALOR_TOTAL  := lQry.FieldByName('VALOR_ITENS').AsFloat +
+                           lQry.FieldByName('VALOR_FRETE').AsFloat +
+                           lQry.FieldByName('VALOR_ACRESCIMO').AsFloat -
+                           lQry.FieldByName('VALOR_DESCONTO').AsFloat;
   finally
     lQry.Free;
   end;
@@ -311,23 +335,67 @@ begin
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
 
-      lSQL :=   ' select '+lPaginacao+'                                                      '+SLineBreak+
-                '        web_pedidoitens.id,                                                 '+SLineBreak+
-                '        web_pedidoitens.quantidade,                                         '+SLineBreak+
-                '        web_pedidoitens.tipo_entrega,                                       '+SLineBreak+
-                '        web_pedidoitens.tipo_garantia,                                      '+SLineBreak+
-                '        web_pedidoitens.tipo,                                               '+SLineBreak+
-                '        web_pedidoitens.observacao,                                         '+SLineBreak+
-                '        web_pedidoitens.produto_id,                                         '+SLineBreak+
-                '        web_pedidoitens.vlr_garantia,                                       '+SLineBreak+
-                '        web_pedidoitens.entrega,                                            '+SLineBreak+
-                '        web_pedidoitens.montagem,                                           '+SLineBreak+
-                '        web_pedidoitens.percentual_desconto,                                '+SLineBreak+
-                '        web_pedidoitens.valor_unitario,                                     '+SLineBreak+
-                '        produto.nome_pro                                                    '+SLineBreak+
-                '   from web_pedidoitens                                                     '+SLineBreak+
-                '  inner join produto on produto.codigo_pro = web_pedidoitens.produto_id     '+SLineBreak+
-                '  where 1=1';
+    lSQL :=   '  select '+lPaginacao+'                                                                                      '+SLineBreak+
+              '      ID,                                                                                                    '+SLineBreak+
+              '      WEB_PEDIDO_ID,                                                                                         '+SLineBreak+
+              '      QUANTIDADE,                                                                                            '+SLineBreak+
+              '      TIPO_ENTREGA,                                                                                          '+SLineBreak+
+              '      TIPO_GARANTIA,                                                                                         '+SLineBreak+
+              '      TIPO,                                                                                                  '+SLineBreak+
+              '      OBSERVACAO,                                                                                            '+SLineBreak+
+              '      PRODUTO_ID,                                                                                            '+SLineBreak+
+              '      VLR_GARANTIA,                                                                                          '+SLineBreak+
+              '      ENTREGA,                                                                                               '+SLineBreak+
+              '      MONTAGEM,                                                                                              '+SLineBreak+
+              '      PERCENTUAL_DESCONTO,                                                                                   '+SLineBreak+
+              '      VALOR_UNITARIO,                                                                                        '+SLineBreak+
+              '      NOME_PRO,                                                                                              '+SLineBreak+
+              '      VALOR_TOTALITENS,                                                                                      '+SLineBreak+
+              '      TOTAL_GARANTIA                                                                                         '+SLineBreak+
+              '      From                                                                                                   '+SLineBreak+
+              '         ( select                                                                                            '+SLineBreak+
+              '              web_pedidoitens.id,                                                                            '+SLineBreak+
+              '              web_pedidoitens.web_pedido_id,                                                                 '+SLineBreak+
+              '              web_pedidoitens.quantidade,                                                                    '+SLineBreak+
+              '              web_pedidoitens.tipo_entrega,                                                                  '+SLineBreak+
+              '              web_pedidoitens.tipo_garantia,                                                                 '+SLineBreak+
+              '              web_pedidoitens.tipo,                                                                          '+SLineBreak+
+              '              web_pedidoitens.observacao,                                                                    '+SLineBreak+
+              '              web_pedidoitens.produto_id,                                                                    '+SLineBreak+
+              '              web_pedidoitens.vlr_garantia,                                                                  '+SLineBreak+
+              '              web_pedidoitens.entrega,                                                                       '+SLineBreak+
+              '              web_pedidoitens.montagem,                                                                      '+SLineBreak+
+              '              web_pedidoitens.percentual_desconto,                                                           '+SLineBreak+
+              '              web_pedidoitens.valor_unitario,                                                                '+SLineBreak+
+              '              produto.nome_pro,                                                                              '+SLineBreak+
+              '              web_pedidoitens.quantidade * web_pedidoitens.valor_unitario valor_totalitens,                  '+SLineBreak+
+              '              web_pedidoitens.quantidade * web_pedidoitens.vlr_garantia total_garantia                       '+SLineBreak+
+              '                                                                                                             '+SLineBreak+
+              '          from web_pedidoitens                                                                               '+SLineBreak+
+              '          inner join produto on produto.codigo_pro = web_pedidoitens.produto_id                              '+SLineBreak+
+              '                                                                                                             '+SLineBreak+
+              '          ) where 1=1 ';
+
+
+//      lSQL :=   'select '+lPaginacao+'                                                                '+SLineBreak+
+//                '       web_pedidoitens.id,                                                           '+SLineBreak+
+//                '       web_pedidoitens.quantidade,                                                   '+SLineBreak+
+//                '       web_pedidoitens.tipo_entrega,                                                 '+SLineBreak+
+//                '       web_pedidoitens.tipo_garantia,                                                '+SLineBreak+
+//                '       web_pedidoitens.tipo,                                                         '+SLineBreak+
+//                '       web_pedidoitens.observacao,                                                   '+SLineBreak+
+//                '       web_pedidoitens.produto_id,                                                   '+SLineBreak+
+//                '       web_pedidoitens.vlr_garantia,                                                 '+SLineBreak+
+//                '       web_pedidoitens.entrega,                                                      '+SLineBreak+
+//                '       web_pedidoitens.montagem,                                                     '+SLineBreak+
+//                '       web_pedidoitens.percentual_desconto,                                          '+SLineBreak+
+//                '       web_pedidoitens.valor_unitario,                                               '+SLineBreak+
+//                '       produto.nome_pro,                                                             '+SLineBreak+
+//                '       web_pedidoitens.quantidade * web_pedidoitens.valor_unitario valor_totalitens, '+SLineBreak+
+//                '       web_pedidoitens.quantidade * web_pedidoitens.vlr_garantia total_garantia      '+SLineBreak+
+//                '  from web_pedidoitens                                                               '+SLineBreak+
+//                ' inner join produto on produto.codigo_pro = web_pedidoitens.produto_id               '+SLineBreak+
+//                ' where 1=1';
 
     lSQL := lSQL + where;
 
