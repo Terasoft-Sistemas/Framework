@@ -394,10 +394,10 @@ begin
             '                web_pedido.datahora,                                                                                           '+SLineBreak+
             '                funcionario.nome_fun vendedor,                                                                                 '+SLineBreak+
             '                web_pedido.status,                                                                                             '+SLineBreak+
-            '      					 web_pedido.valor_frete valor_frete,                                                                            '+SLineBreak+
+            '      					 coalesce(web_pedido.valor_frete,0) valor_frete,                                                                '+SLineBreak+
             '      					 coalesce(web_pedido.acrescimo,0) acrescimo,                                                                    '+SLineBreak+
-            '      					 web_pedidoitens.quantidade * web_pedidoitens.valor_unitario valor_itens,                                       '+SLineBreak+
-            '      					 web_pedidoitens.quantidade * coalesce(web_pedidoitens.vlr_garantia,0) valor_garantia,                          '+SLineBreak+
+            '      					 coalesce(web_pedidoitens.quantidade,0) * coalesce(web_pedidoitens.valor_unitario,0) valor_itens,               '+SLineBreak+
+            '      					 coalesce(web_pedidoitens.quantidade,0) * coalesce(web_pedidoitens.vlr_garantia,0) valor_garantia,              '+SLineBreak+
             '      					 coalesce(web_pedido.valor_cupom_desconto,0) valor_cupom_desconto                                               '+SLineBreak+
             '      				from web_pedido                                                                                                   '+SLineBreak+
             '      			   inner join clientes on web_pedido.cliente_id = clientes.codigo_cli                                               '+SLineBreak+

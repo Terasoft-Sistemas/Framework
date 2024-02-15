@@ -1094,12 +1094,17 @@ var
   lWebPedidoModel : TWebPedidoModel;
   i               : Integer;
   lMemTable       : TFDMemTable;
+  lPedidoWeb      : String;
 begin
   lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
   try
+
+    lPedidoWeb := InputBox('ObterResumo','Digite o número do Web Pedido para consultar:','');
+
     lWebPedidoModel.LengthPageView  := vQtdeRegistros.ToString;
     lWebPedidoModel.StartRecordView := vPagina.ToString;
     lWebPedidoModel.OrderView       := 'id';
+    lWebPedidoModel.IDRecordView    := StrToInt(lPedidoWeb);
 
     lMemTable := lWebPedidoModel.obterLista;
 
