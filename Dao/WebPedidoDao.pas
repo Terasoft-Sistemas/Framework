@@ -335,6 +335,7 @@ begin
             '        DATAHORA,                                                                                                              '+SLineBreak+
             '        VENDEDOR,                                                                                                              '+SLineBreak+
             '        STATUS,                                                                                                                '+SLineBreak+
+            '        REGIAO_ID,                                                                                                             '+SLineBreak+
             '        VALOR_FRETE,                                                                                                           '+SLineBreak+
             '        ACRESCIMO,                                                                                                             '+SLineBreak+
             '        VALOR_ITENS,                                                                                                           '+SLineBreak+
@@ -365,48 +366,50 @@ begin
             '           datahora,                                                                                                           '+SLineBreak+
             '           vendedor,                                                                                                           '+SLineBreak+
             '           status,                                                                                                             '+SLineBreak+
-            '    				sum(valor_frete) valor_frete,                                                                                       '+SLineBreak+
-            '    				sum(acrescimo) acrescimo,                                                                                           '+SLineBreak+
+            '           regiao_id,                                                                                                          '+SLineBreak+
+            '    				valor_frete valor_frete,                                                                                            '+SLineBreak+
+            '    				acrescimo acrescimo,                                                                                                '+SLineBreak+
             '    				sum(valor_itens) valor_itens,                                                                                       '+SLineBreak+
             '    				sum(valor_garantia) valor_garantia,                                                                                 '+SLineBreak+
             '    				sum(valor_cupom_desconto) valor_cupom_desconto,                                                                     '+SLineBreak+
-            '    				sum(valor_itens) + sum(valor_frete) + sum(valor_garantia) + sum(acrescimo) - sum(valor_cupom_desconto) valor_total  '+SLineBreak+
+            '    				sum(valor_itens + valor_frete + valor_garantia + acrescimo - valor_cupom_desconto) valor_total                      '+SLineBreak+
             '                                                                                                                               '+SLineBreak+
             '      		from (                                                                                                                '+SLineBreak+
             '																												                                                                        '+SLineBreak+
             '      			  select web_pedido.id,                                                                                             '+SLineBreak+
             '                    web_pedido.observacao,                                                                                     '+SLineBreak+
-            '      					 clientes.codigo_cli,                                                                                           '+SLineBreak+
-            '      					 coalesce(clientes.fantasia_cli, clientes.razao_cli) cliente_nome,                                              '+SLineBreak+
-            '      					 web_pedido.entrega_endereco,                                                                                   '+SLineBreak+
-            '      					 web_pedido.entrega_numero,                                                                                     '+SLineBreak+
-            '      					 web_pedido.entrega_cod_municipio,                                                                              '+SLineBreak+
-            '      					 web_pedido.entrega_cep,                                                                                        '+SLineBreak+
-            '      					 web_pedido.entrega_complemento,                                                                                '+SLineBreak+
-            '      					 web_pedido.entrega_cidade,                                                                                     '+SLineBreak+
-            '      					 web_pedido.entrega_bairro,                                                                                     '+SLineBreak+
-            '      					 web_pedido.entrega_uf,                                                                                         '+SLineBreak+
-            '      					 web_pedido.montagem_data,                                                                                      '+SLineBreak+
-            '      					 web_pedido.montagem_hora,                                                                                      '+SLineBreak+
-            '      					 web_pedido.entrega_data,                                                                                       '+SLineBreak+
-            '      					 web_pedido.entrega_hora,                                                                                       '+SLineBreak+
-            '      					 regiao.descricao regiao,                                                                                       '+SLineBreak+
-            '                web_pedido.datahora,                                                                                           '+SLineBreak+
-            '                funcionario.nome_fun vendedor,                                                                                 '+SLineBreak+
-            '                web_pedido.status,                                                                                             '+SLineBreak+
-            '      					 web_pedido.valor_frete valor_frete,                                                                            '+SLineBreak+
-            '      					 coalesce(web_pedido.acrescimo,0) acrescimo,                                                                    '+SLineBreak+
-            '      					 web_pedidoitens.quantidade * web_pedidoitens.valor_unitario valor_itens,                                       '+SLineBreak+
-            '      					 web_pedidoitens.quantidade * coalesce(web_pedidoitens.vlr_garantia,0) valor_garantia,                          '+SLineBreak+
-            '      					 coalesce(web_pedido.valor_cupom_desconto,0) valor_cupom_desconto                                               '+SLineBreak+
-            '      				from web_pedido                                                                                                   '+SLineBreak+
+            '         					 clientes.codigo_cli,                                                                                       '+SLineBreak+
+            '         					 coalesce(clientes.fantasia_cli, clientes.razao_cli) cliente_nome,                                          '+SLineBreak+
+            '      	    				 web_pedido.entrega_endereco,                                                                               '+SLineBreak+
+            '      			   		   web_pedido.entrega_numero,                                                                                 '+SLineBreak+
+            '      				    	 web_pedido.entrega_cod_municipio,                                                                          '+SLineBreak+
+            '         					 web_pedido.entrega_cep,                                                                                    '+SLineBreak+
+            '         					 web_pedido.entrega_complemento,                                                                            '+SLineBreak+
+            '         					 web_pedido.entrega_cidade,                                                                                 '+SLineBreak+
+            '      		   	  		 web_pedido.entrega_bairro,                                                                                 '+SLineBreak+
+            '      			   	  	 web_pedido.entrega_uf,                                                                                     '+SLineBreak+
+            '         					 web_pedido.montagem_data,                                                                                  '+SLineBreak+
+            '         					 web_pedido.montagem_hora,                                                                                  '+SLineBreak+
+            '         					 web_pedido.entrega_data,                                                                                   '+SLineBreak+
+            '         					 web_pedido.entrega_hora,                                                                                   '+SLineBreak+
+            '         					 regiao.descricao regiao,                                                                                   '+SLineBreak+
+            '                    web_pedido.datahora,                                                                                       '+SLineBreak+
+            '                    funcionario.nome_fun vendedor,                                                                             '+SLineBreak+
+            '                    web_pedido.status,                                                                                         '+SLineBreak+
+            '                    web_pedido.regiao_id,                                                                                      '+SLineBreak+
+            '         					 coalesce(web_pedido.valor_frete,0) valor_frete,                                                            '+SLineBreak+
+            '         					 coalesce(web_pedido.acrescimo,0) acrescimo,                                                                '+SLineBreak+
+            '         					 coalesce(web_pedidoitens.quantidade,0) * coalesce(web_pedidoitens.valor_unitario,0) valor_itens,           '+SLineBreak+
+            '         					 coalesce(web_pedidoitens.quantidade,0) * coalesce(web_pedidoitens.vlr_garantia,0) valor_garantia,          '+SLineBreak+
+            '         					 coalesce(web_pedido.valor_cupom_desconto,0) valor_cupom_desconto                                           '+SLineBreak+
+            '       				from web_pedido                                                                                                 '+SLineBreak+
             '      			   inner join clientes on web_pedido.cliente_id = clientes.codigo_cli                                               '+SLineBreak+
-            '      				left join web_pedidoitens on web_pedidoitens.web_pedido_id = web_pedido.id                                        '+SLineBreak+
-            '      				left join regiao on regiao.id = web_pedido.regiao_id                                                              '+SLineBreak+
-            '             left join funcionario on funcionario.codigo_fun = web_pedido.vendedor_id                                          '+SLineBreak+
+            '      				  left join web_pedidoitens on web_pedidoitens.web_pedido_id = web_pedido.id                                      '+SLineBreak+
+            '      				  left join regiao on regiao.id = web_pedido.regiao_id                                                            '+SLineBreak+
+            '               left join funcionario on funcionario.codigo_fun = web_pedido.vendedor_id                                        '+SLineBreak+
             '      			   ) t1                                                                                                             '+SLineBreak+
             '                                                                                                                               '+SLineBreak+
-            '    group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19, 20 ) web_pedido                                                  '+SLineBreak+
+            '    group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19, 20, 21, 22, 23 ) web_pedido                                      '+SLineBreak+
             '    where 1=1                                                                                                                  '+SLineBreak;
 
     lSQL := lSQL + where;

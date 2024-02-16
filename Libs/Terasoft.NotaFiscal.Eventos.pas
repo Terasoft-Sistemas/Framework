@@ -30,7 +30,7 @@ uses
   Terasoft.NotaFiscal.Configuracoes,
   FireDAC.Comp.Client,
   Interfaces.Conexao,
-  Terasoft.Sistema.Configura,
+  Terasoft.Configuracoes,
   EventosNFeControl,
   Terasoft.Types,
   NFControl;

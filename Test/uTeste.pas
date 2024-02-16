@@ -1146,12 +1146,17 @@ var
   lWebPedidoModel : TWebPedidoModel;
   i               : Integer;
   lMemTable       : TFDMemTable;
+  lPedidoWeb      : String;
 begin
   lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
   try
+
+    lPedidoWeb := InputBox('ObterResumo','Digite o número do Web Pedido para consultar:','');
+
     lWebPedidoModel.LengthPageView  := vQtdeRegistros.ToString;
     lWebPedidoModel.StartRecordView := vPagina.ToString;
     lWebPedidoModel.OrderView       := 'id';
+    lWebPedidoModel.IDRecordView    := StrToInt(lPedidoWeb);
 
     lMemTable := lWebPedidoModel.obterLista;
 
@@ -1177,6 +1182,7 @@ begin
       memoResultado.Lines.Add('MONTAGEM_HORA: '+ lMemTable.FieldByName('MONTAGEM_HORA').AsString);
       memoResultado.Lines.Add('ENTREGA_DATA: '+ lMemTable.FieldByName('ENTREGA_DATA').AsString);
       memoResultado.Lines.Add('ENTREGA_HORA: '+ lMemTable.FieldByName('ENTREGA_HORA').AsString);
+      memoResultado.Lines.Add('REGIAO_ID: '+ lMemTable.FieldByName('REGIAO_ID').AsString);
       memoResultado.Lines.Add('REGIAO: '+ lMemTable.FieldByName('REGIAO').AsString);
       memoResultado.Lines.Add('DATAHORA: '+ lMemTable.FieldByName('DATAHORA').AsString);
       memoResultado.Lines.Add('VENDEDOR: '+ lMemTable.FieldByName('VENDEDOR').AsString);
