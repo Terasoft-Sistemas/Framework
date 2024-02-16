@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 1244
     Height = 725
-    ActivePage = TabSheet1
+    ActivePage = TabSheet2
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -491,5 +491,41 @@ object Form1: TForm1
         OnClick = Button47Click
       end
     end
+    object TabSheet2: TTabSheet
+      Caption = 'Teste 2'
+      ImageIndex = 1
+      object dbTeste2: TXDBGrid
+        Left = 0
+        Top = 376
+        Width = 1236
+        Height = 319
+        Align = alBottom
+        DataSource = dsTeste2
+        GridStyle.VisualStyle = vsXPStyle
+        TabOrder = 0
+      end
+      object Button48: TButton
+        Left = 11
+        Top = 15
+        Width = 182
+        Height = 42
+        Caption = 'Fluxo Caixa Sintetico'
+        TabOrder = 1
+        OnClick = Button48Click
+      end
+      object Button49: TButton
+        Left = 199
+        Top = 15
+        Width = 182
+        Height = 42
+        Caption = 'Fluxo Caixa Analitico'
+        TabOrder = 2
+        OnClick = Button49Click
+      end
+    end
+  end
+  object dsTeste2: TDataSource
+    Left = 160
+    Top = 472
   end
 end

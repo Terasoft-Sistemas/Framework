@@ -15,7 +15,7 @@ uses
   Vcl.StdCtrls,
   Terasoft.Types,
   Conexao,
-  Interfaces.Conexao, EntradaModel;
+  Interfaces.Conexao, EntradaModel, Vcl.Grids, XDBGrids, Data.DB;
 
 type
   TForm1 = class(TForm)
@@ -73,6 +73,11 @@ type
     Button45: TButton;
     Button46: TButton;
     Button47: TButton;
+    TabSheet2: TTabSheet;
+    dbTeste2: TXDBGrid;
+    Button48: TButton;
+    dsTeste2: TDataSource;
+    Button49: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -126,6 +131,8 @@ type
     procedure Button45Click(Sender: TObject);
     procedure Button46Click(Sender: TObject);
     procedure Button47Click(Sender: TObject);
+    procedure Button48Click(Sender: TObject);
+    procedure Button49Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -152,7 +159,7 @@ uses
   TabelaJurosModel,
   SaldoModel, EmpresaModel, ProdutosModel, EntradaItensModel,
   ClienteModel, ContasPagarModel, ContasPagarItensModel, System.SysUtils,
-  ReservaModel, DocumentoModel, AnexoModel;
+  ReservaModel, DocumentoModel, AnexoModel, FluxoCaixaModel;
 
 {$R *.dfm}
 
@@ -1086,6 +1093,51 @@ begin
     end;
   finally
     lFinanceiroPedidoModel.free;
+  end;
+end;
+
+procedure TForm1.Button48Click(Sender: TObject);
+var
+  lFluxoCaixaModel : TFluxoCaixaModel;
+  lMemTable        : TFDMemTable;
+begin
+  lFluxoCaixaModel := TFluxoCaixaModel.Create(vIConexao);
+  try
+    try
+      lFluxoCaixaModel.DataInicialView := '01/01/2023';
+      lFluxoCaixaModel.DataFinalView   := '12/12/2024';
+      lFluxoCaixaModel.PortadorView    := '000001';
+
+      lMemTable := lFluxoCaixaModel.obterFluxoCaixaSintetico;
+      dsTeste2.DataSet := lMemTable;
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lFluxoCaixaModel.Free;
+  end;
+end;
+
+procedure TForm1.Button49Click(Sender: TObject);
+var
+  lFluxoCaixaModel : TFluxoCaixaModel;
+  lMemTable        : TFDMemTable;
+begin
+  lFluxoCaixaModel := TFluxoCaixaModel.Create(vIConexao);
+  try
+    try
+      lFluxoCaixaModel.DataInicialView := '01/01/2023';
+      lFluxoCaixaModel.DataFinalView   := '12/12/2024';
+
+      lMemTable := lFluxoCaixaModel.obterFluxoCaixaAnalitico;
+      dsTeste2.DataSet := lMemTable;
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lFluxoCaixaModel.Free;
   end;
 end;
 

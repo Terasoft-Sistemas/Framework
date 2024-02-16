@@ -98,7 +98,9 @@ uses
   AnexoModel in '..\Model\AnexoModel.pas',
   AnexoDao in '..\Dao\AnexoDao.pas',
   DocumentoDao in '..\Dao\DocumentoDao.pas',
-  DocumentoModel in '..\Model\DocumentoModel.pas';
+  DocumentoModel in '..\Model\DocumentoModel.pas',
+  FluxoCaixaDao in '..\Dao\FluxoCaixaDao.pas',
+  FluxoCaixaModel in '..\Model\FluxoCaixaModel.pas';
 
 {$R *.res}
 
