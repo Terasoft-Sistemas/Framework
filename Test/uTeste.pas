@@ -1103,6 +1103,7 @@ var
 begin
   lFluxoCaixaModel := TFluxoCaixaModel.Create(vIConexao);
   try
+
     try
       lFluxoCaixaModel.DataInicialView := '01/01/2023';
       lFluxoCaixaModel.DataFinalView   := '12/12/2024';
