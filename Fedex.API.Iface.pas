@@ -6,6 +6,7 @@ interface
   uses
     Terasoft.Framework.ListaSimples,
     Data.FmtBcd,
+    Terasoft.Framework.DB,
     Terasoft.Framework.Texto,
     Terasoft.Framework.Types;
 
@@ -248,11 +249,53 @@ interface
     function createFedexAPI: IFedexAPI; stdcall;
   {$ifend}
 
+  type
+    TPurchaseOrderDataset = record
+      valido: boolean;
+      po, poItens: IDatasetSimples;
+    end;
+
+  function getPurchaseOrderDataset: TPurchaseOrderDataset;
+
 
 implementation
+  uses
+    DBClient, DB;
 
   {$if not defined(__DLL__)}
     function createFedexAPI: IFedexAPI; stdcall; external 'FedexAPI_DLL' name 'createFedexAPI' delayed;
   {$ifend}
+
+function getPurchaseOrderDataset: TPurchaseOrderDataset;
+  var
+    ds: TClientDataSet;
+begin
+  Result.valido := true;
+  Result.po := criaDatasetSimples;
+  ds := TClientDataSet(Result.po.dataset);
+  ds.Close;
+  ds.FieldDefs.Add('id',ftString,50,false);
+  ds.FieldDefs.Add('cfop',ftString,50,false);
+  ds.FieldDefs.Add('fornecedor',ftString,50,false);
+  ds.FieldDefs.Add('data_movimento',ftDate,0,false);
+  ds.FieldDefs.Add('operacao',ftString,1,false);
+  ds.FieldDefs.Add('numero_nfe',ftString,50,false);
+  ds.CreateDataSet;
+  ds.LogChanges := false;
+
+  Result.poItens := criaDatasetSimples;
+  ds := TClientDataSet(Result.poItens.dataset);
+  ds.Close;
+  ds.FieldDefs.Add('id',ftString,50,false);
+  ds.FieldDefs.Add('item',ftString,50,false);
+  ds.FieldDefs.Add('produto',ftString,50,false);
+  ds.FieldDefs.Add('quantidade',ftExtended,0,false);
+  ds.FieldDefs.Add('unitario',ftExtended,0,false);
+  ds.FieldDefs.Add('barras',ftString,50,false);
+  ds.CreateDataSet;
+  ds.LogChanges := false;
+
+end;
+
 
 end.
