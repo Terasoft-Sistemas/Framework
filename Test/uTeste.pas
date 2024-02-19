@@ -343,9 +343,8 @@ begin
 
       lClienteModel.fantasia_cli    := NomeCli;
       lClienteModel.tipo_cli        := 'F';
-      lClienteModel.seprocado_cli   :='N';
+      lClienteModel.seprocado_cli   := 'N';
       lClienteModel.estadocivil_cli := 'O';
-      lClienteModel.data_alteracao  := '05.02.2024';
       lClienteModel.status          := 'A';
       lClienteModel.sexo_cli        := 'M';
 

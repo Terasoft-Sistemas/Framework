@@ -968,6 +968,9 @@ uses
 
 function TClienteModel.Incluir: String;
 begin
+
+  Fdata_alteracao := DateToStr(vIConexao.DataServer);
+
   self.Acao := tacIncluir;
   Result    := self.Salvar;
 end;
