@@ -6,6 +6,7 @@ interface
   uses
     Terasoft.Framework.ListaSimples,
     Data.FmtBcd,
+    Terasoft.Framework.ControleAlteracoes,
     Terasoft.Framework.DB,
     Terasoft.Framework.Texto,
     Terasoft.Framework.Types;
@@ -24,6 +25,25 @@ interface
     SYSCOM_FEDEX_CONTROLE_IDENTIFICADOR_SKU   = 'SKU';
 
     DEF_DIRETORIO_LB = '/PROD/LDB';
+
+
+    URLPRODUCAOFEDEX     = 'https://celular.rapidaocometa.com.br:51040/soap-new?service=WMS10_GENERIC';
+    URLHOMOLOGACAOFEDEX  = 'https://internet.rapidaocometa.com.br:6060/soap-new?service=WMS10_GENERIC';
+
+    SISTEMA_LOGISTICA_FEDEX_PRODUCAO     = 'FEDEX';
+    SISTEMA_LOGISTICA_FEDEX_HOMOLOGACAO  = 'FED.HOM';
+
+    CONTROLE_LOGISTICA_FEDEX_SKU  = 'SKU.CONTROLE';
+    CONTROLE_LOGISTICA_FEDEX_STATUS_PO   = 'PO.STATUS';
+
+    CONTROLE_LOGISTICA_STATUS_ENVIADO = 'A';
+
+  {
+    STATUS Logistica
+    A - Enviado
+  }
+
+
 
 
   type
@@ -73,6 +93,10 @@ interface
       procedure setPortaSSH(const pValue: Integer);
       function getPortaSSH: Integer;
 
+      procedure setControleAlteracoes(const pValue: IControleAlteracoes);
+      function getControleAlteracoes: IControleAlteracoes;
+
+      property controleAlteracoes: IControleAlteracoes read getControleAlteracoes write setControleAlteracoes;
       property portaSSH: Integer read getPortaSSH write setPortaSSH;
       property hostSSH: TipoWideStringFramework read getHostSSH write setHostSSH;
       property senhaSSH: TipoWideStringFramework read getSenhaSSH write setSenhaSSH;
@@ -250,12 +274,12 @@ interface
   {$ifend}
 
   type
-    TPurchaseOrderDataset = record
+    TFedexDatasets = record
       valido: boolean;
-      po, poItens: IDatasetSimples;
+      po, poItens, sku: IDatasetSimples;
     end;
 
-  function getPurchaseOrderDataset: TPurchaseOrderDataset;
+  function getFedexDatasets: TFedexDatasets;
 
 
 implementation
@@ -266,7 +290,7 @@ implementation
     function createFedexAPI: IFedexAPI; stdcall; external 'FedexAPI_DLL' name 'createFedexAPI' delayed;
   {$ifend}
 
-function getPurchaseOrderDataset: TPurchaseOrderDataset;
+function getFedexDatasets: TFedexDatasets;
   var
     ds: TClientDataSet;
 begin
@@ -279,6 +303,7 @@ begin
   ds.FieldDefs.Add('fornecedor',ftString,50,false);
   ds.FieldDefs.Add('data_movimento',ftDate,0,false);
   ds.FieldDefs.Add('operacao',ftString,1,false);
+  ds.FieldDefs.Add('xml',ftMemo,1,false);
   ds.FieldDefs.Add('numero_nfe',ftString,50,false);
   ds.CreateDataSet;
   ds.LogChanges := false;
@@ -289,11 +314,24 @@ begin
   ds.FieldDefs.Add('id',ftString,50,false);
   ds.FieldDefs.Add('item',ftString,50,false);
   ds.FieldDefs.Add('produto',ftString,50,false);
-  ds.FieldDefs.Add('quantidade',ftExtended,0,false);
-  ds.FieldDefs.Add('unitario',ftExtended,0,false);
+  ds.FieldDefs.Add('quantidade',ftFloat,0,false);
+  ds.FieldDefs.Add('unitario',ftFloat,0,false);
   ds.FieldDefs.Add('barras',ftString,50,false);
   ds.CreateDataSet;
   ds.LogChanges := false;
+
+  Result.sku := criaDatasetSimples;
+  ds := TClientDataSet(Result.sku.dataset);
+  ds.Close;
+  ds.FieldDefs.Add('id',ftString,50,false);
+  ds.FieldDefs.Add('barras',ftString,50,false);
+  ds.FieldDefs.Add('nome',ftString,50,false);
+  ds.FieldDefs.Add('peso',ftFloat,0,false);
+  ds.FieldDefs.Add('grupo',ftString,50,false);
+  ds.FieldDefs.Add('subgrupo',ftString,50,false);
+  ds.CreateDataSet;
+  ds.LogChanges := false;
+
 
 end;
 
