@@ -140,6 +140,8 @@ begin
     if self.TotalRecords = 0 then
     begin
       self.TabelaJurossLista := TObjectList<TTabelaJurosModel>.Create;
+      self.TabelaJurossLista.Add(TTabelaJurosModel.Create(vIConexao));
+
       self.TabelaJurossLista[0].FID            := 0;
       self.TabelaJurossLista[0].FCODIGO        := '001';
       self.TabelaJurossLista[0].FPERCENTUAL    := FormatFloat('#,##0.00', 0);
