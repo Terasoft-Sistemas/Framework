@@ -30,6 +30,8 @@ type
     FWhereView: String;
     FTotalRecords: Integer;
     FIDRecordView: String;
+    FIDBancoView: String;
+    FSaldo: Real;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
     procedure SetContaCorrentesLista(const Value: TObjectList<TContaCorrenteModel>);
@@ -42,6 +44,8 @@ type
 
     function where: String;
     procedure SetIDRecordView(const Value: String);
+    procedure setIDBancoView(const Value: String);
+    procedure SetSaldo(const Value: Real);
 
   public
     constructor Create(pIConexao : IConexao);
@@ -56,11 +60,13 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
-
+    property IDBancoView: String read FIDBancoView write setIDBancoView;
+    property Saldo: Real read FSaldo write SetSaldo;
     function incluir(AContaCorrenteModel: TContaCorrenteModel): String;
     function alterar(AContaCorrenteModel: TContaCorrenteModel): String;
     function excluir(AContaCorrenteModel: TContaCorrenteModel): String;
-	
+
+    procedure obterSaldo;
     procedure obterLista;
     function carregaClasse(pId: String): TContaCorrenteModel;
 
@@ -332,6 +338,42 @@ begin
   end;
 end;
 
+procedure TContaCorrenteDao.obterSaldo;
+var
+  lQry: TFDQuery;
+  lSql: String;
+begin
+  try
+    lQry := vIConexao.CriarQuery;
+
+    lSql := ' select                                    '+sLineBreak+
+            '       SUM(case c.tipo_cta                 '+sLineBreak+
+            '       when ''D'' then -1*(c.valor_cor)    '+sLineBreak+
+            '       when ''C'' then c.valor_cor         '+sLineBreak+
+            '       end) SALDO                          '+sLineBreak+
+            '  from contacorrente c                     '+sLineBreak+
+            ' where 1=1                                 '+sLineBreak;
+
+
+    if FIDBancoView <> '' then
+    begin
+      if Pos(',', FIDBancoView) <= 0 then
+        lSQL := lSQL + ' and c.CODIGO_BAN = ' + FIDBancoView
+      else
+        lSQL := lSQL + ' and c.CODIGO_BAN in (' + FIDBancoView + ')';
+    end;
+
+//    lConexao := TConexao.Create;
+//    lQry := lConexao.CriarQuery;
+    lQry.Open(lSQL);
+
+    FSaldo := lQry.FieldByName('SALDO').AsFloat;
+  finally
+    lQry.Free;
+//    lConexao.Free;
+  end;
+end;
+
 procedure TContaCorrenteDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
@@ -345,6 +387,11 @@ end;
 procedure TContaCorrenteDao.SetID(const Value: Variant);
 begin
   FID := Value;
+end;
+
+procedure TContaCorrenteDao.setIDBancoView(const Value: String);
+begin
+  FIDBancoView := Value;
 end;
 
 procedure TContaCorrenteDao.SetIDRecordView(const Value: String);
@@ -384,6 +431,11 @@ begin
   finally
     lCtx.Free;
   end;
+end;
+
+procedure TContaCorrenteDao.SetSaldo(const Value: Real);
+begin
+  FSaldo := Value;
 end;
 
 procedure TContaCorrenteDao.SetStartRecordView(const Value: String);

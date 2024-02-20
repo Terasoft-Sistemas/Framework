@@ -4,6 +4,7 @@ interface
 
 uses
   FireDAC.Comp.Client,
+  Clipbrd,
   System.Classes,
   Data.DB,
   Terasoft.FuncoesTexto,
@@ -206,7 +207,9 @@ begin
   begin
     lSql := StringReplace(lSql, ':'+pSource.Params[i].Name+',', QuotedStr(pSource.Params[i].Value)+',', []);
   end;
-  ShowMessage('Query: ' + lSql);
+
+  Clipboard.AsText := lSql;
+
   Result := lSql;
 end;
 

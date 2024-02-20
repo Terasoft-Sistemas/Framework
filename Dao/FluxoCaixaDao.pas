@@ -30,15 +30,6 @@ type
     FDataFinalView: Variant;
     FDataInicialView: Variant;
     FSomarBancosView: Boolean;
-    FResumo_A_Pagar: Real;
-    FResumo_A_Receber: Real;
-    FResumo_A_Receber_Registros: Integer;
-    FResumo_A_Pagar_Registros: Integer;
-    FResultado_APagar: Real;
-    FResultado_SaldoAtualBancos: Real;
-    FResultado_Inadimplencia: Real;
-    FResultado_Total: Real;
-    FResultado_AReceber: Real;
     FOrderView: String;
     procedure SetFluxoCaixasLista(const Value: TObjectList<TFluxoCaixaModel>);
     procedure SetWhereView(const Value: String);
@@ -49,15 +40,6 @@ type
     procedure SetPorcentagemInadimplenciaView(const Value: Real);
     procedure SetPortadorView(const Value: String);
     procedure SetSomarBancosView(const Value: Boolean);
-    procedure SetResumo_A_Pagar(const Value: Real);
-    procedure SetResumo_A_Receber(const Value: Real);
-    procedure SetResumo_A_Pagar_Registros(const Value: Integer);
-    procedure SetResumo_A_Receber_Registros(const Value: Integer);
-    procedure SetResultado_APagar(const Value: Real);
-    procedure SetResultado_AReceber(const Value: Real);
-    procedure SetResultado_Inadimplencia(const Value: Real);
-    procedure SetResultado_SaldoAtualBancos(const Value: Real);
-    procedure SetResultado_Total(const Value: Real);
     procedure SetOrderView(const Value: String);
 
     function where: String;
@@ -76,28 +58,16 @@ type
     property PorcentagemInadimplenciaView: Real read FPorcentagemInadimplenciaView write SetPorcentagemInadimplenciaView;
     property SomarBancosView: Boolean read FSomarBancosView write SetSomarBancosView;
 
-    property Resumo_A_Receber: Real read FResumo_A_Receber write SetResumo_A_Receber;
-    property Resumo_A_Receber_Registros: Integer read FResumo_A_Receber_Registros write SetResumo_A_Receber_Registros;
-    property Resumo_A_Pagar: Real read FResumo_A_Pagar write SetResumo_A_Pagar;
-    property Resumo_A_Pagar_Registros: Integer read FResumo_A_Pagar_Registros write SetResumo_A_Pagar_Registros;
-
-    property Resultado_SaldoAtualBancos: Real read FResultado_SaldoAtualBancos write SetResultado_SaldoAtualBancos;
-    property Resultado_AReceber: Real read FResultado_AReceber write SetResultado_AReceber;
-    property Resultado_Inadimplencia: Real read FResultado_Inadimplencia write SetResultado_Inadimplencia;
-    property Resultado_APagar: Real read FResultado_APagar write SetResultado_APagar;
-    property Resultado_Total: Real read FResultado_Total write SetResultado_Total;
-
     function obterFluxoCaixaSintetico : TFDMemTable;
     function obterFluxoCaixaAnalitico : TFDMemTable;
-    function obterResumo: TFDMemTable;
-    procedure obterResultadoFluxoCaixa;
-
+    function obterResumo              : TFDMemTable;
+    function obterResultadoFluxoCaixa : TFDMemTable;
 end;
 
 implementation
 
 uses
-  System.Math, System.SysUtils;
+  System.Math, System.SysUtils, Data.DB;
 
 { TFluxoCaixa }
 
@@ -380,12 +350,13 @@ begin
             '                      where (select count(*) from pedidocompraitens i                                                        '+sLineBreak+
             '                      where i.numero_ped = p.numero_ped                                                                      '+sLineBreak+
             '                        and coalesce(i.quantidade_ate,0) < i.quantidade_ped) > 0                                             '+sLineBreak+
-            '          )                                                                                                                  '+sLineBreak;
+            '          )                                                                                                                  '+sLineBreak+
+            '                      where 1=1                                                                                              '+sLineBreak;
 
     lSql := lSql + where;
 
-    lSql := lSql + '  )                                                                                                                   '+sLineBreak+
-                   '  group by 1';
+    lSql := lSql + '  )          '+sLineBreak+
+                   '  group by 1 '+sLineBreak;
 
     lQry.Open(lSql);
 
@@ -396,50 +367,88 @@ begin
   end;
 end;
 
-procedure TFluxoCaixaDao.obterResultadoFluxoCaixa;
+function TFluxoCaixaDao.obterResultadoFluxoCaixa : TFDMemTable;
 var
   lQry: TFDQuery;
   lSql: String;
+  lPagar,
+  lReceber,
+  lInadimplente,
+  lSaldoBanco,
+  lTotal : Double;
   lContaCorrenteModel: TContaCorrenteModel;
-  I: Integer;
+  lMemTable: TFDMemTable;
 begin
 
-  lQry := vIConexao.CriarQuery;
-
+  lQry      := vIConexao.CriarQuery;
+  lMemTable := TFDMemTable.Create(nil);
   try
-    lSql := '      select ''PAGAR'' TIPO, ' +
-            '             Count(*) TotalRegistros, ' +
-            '             Sum(i.valor_parcela - coalesce(i.valor_pago, 0)) Total ' +
-            '      from contaspagaritens i ' +
-            '      where (i.valor_parcela - coalesce(i.valor_pago, 0)) <> 0 ' +
-            '            and i.vencimento between ''' + transformaDataFireBirdWhere(FDataInicialView) + ''' and ''' + transformaDataFireBirdWhere(FDataFinalView) + ''' ';
 
-    lSql := lSql + ' union  all ' +
-                   ' select ''RECEBER'' tipo, ' +
-                   '        Count(*) TotalRegistros, ' +
-                   '        Sum(i.valor_parcela - coalesce(i.valor_recebido,0)) Total ' +
-                   ' from contasreceberitens i ' +
-                   '      inner join contasreceber p on p.id = i.contasreceber_id ' +
-                   ' where (i.valor_parcela - coalesce(i.valor_recebido,0)) <> 0 ' +
-                   '       and i.vencimento between ''' + transformaDataFireBirdWhere(FDataInicialView) + ''' and ''' + transformaDataFireBirdWhere(FDataFinalView) + ''' ' +
-                   ifThen(FPortadorView <> '', ' and p.portador_id = ' + FPortadorView, '');
+    lSql := '        select TIPO,                                                                                  '+sLineBreak+
+            '               COUNT(*) TOTALREGISTROS,                                                               '+sLineBreak+
+            '               SUM(TOTAL) TOTAL                                                                       '+sLineBreak+
+            '          from                                                                                        '+sLineBreak+
+            '                                                                                                      '+sLineBreak+
+            '          (                                                                                           '+sLineBreak+
+            '                                                                                                      '+sLineBreak+
+            '               select tipo,                                                                           '+sLineBreak+
+            '                      vencimento,                                                                     '+sLineBreak+
+            '                      portador_cod,                                                                   '+sLineBreak+
+            '                      total                                                                           '+sLineBreak+
+            '               from                                                                                   '+sLineBreak+
+            '                                                                                                      '+sLineBreak+
+            '                    (                                                                                 '+sLineBreak+
+            '                                                                                                      '+sLineBreak+
+            '                         select ''PAGAR'' tipo,                                                       '+sLineBreak+
+            '                                i.venc_pag vencimento,                                                '+sLineBreak+
+            '                                i.portador_id portador_cod,                                           '+sLineBreak+
+            '                                i.valorparcela_pag - coalesce(i.valorpago_pag, 0) Total               '+sLineBreak+
+            '                           from contaspagaritens i                                                    '+sLineBreak+
+            '                          where (i.valorparcela_pag - coalesce(i.valorpago_pag, 0)) <> 0              '+sLineBreak+
+            '                                                                                                      '+sLineBreak+
+            '                         union all                                                                    '+sLineBreak+
+            '                                                                                                      '+sLineBreak+
+            '                         select ''RECEBER'' tipo,                                                     '+sLineBreak+
+            '                                ci.vencimento_rec vencimento,                                         '+sLineBreak+
+            '                                ci.codigo_por portador_cod,                                           '+sLineBreak+
+            '                                ci.vlrparcela_rec - coalesce(ci.valorrec_rec,0) Total                 '+sLineBreak+
+            '                           from  contasreceberitens ci                                                '+sLineBreak+
+            '                          inner join contasreceber c on c.fatura_rec = ci.fatura_rec                  '+sLineBreak+
+            '                          where (ci.vlrparcela_rec - coalesce(ci.valorrec_rec, 0)) <> 0               '+sLineBreak+
+            '                                                                                                      '+sLineBreak+
+            '                         union all                                                                    '+sLineBreak+
+            '                                                                                                      '+sLineBreak+
+            '                         select ''COMPRA'' tipo,                                                      '+sLineBreak+
+            '                                   pe.vencimento,                                                     '+sLineBreak+
+            '                                   null portador_cod,                                                 '+sLineBreak+
+            '                                   pe.valor_parcela Total                                             '+sLineBreak+
+            '                              from pedidocompra p                                                     '+sLineBreak+
+            '                              inner join previsao_pedidocompra pe on p.numero_ped = pe.numero_ped     '+sLineBreak+
+            '                              where (select count(*) from pedidocompraitens pi                        '+sLineBreak+
+            '                                   where pi.numero_ped = p.numero_ped                                 '+sLineBreak+
+            '                                        and coalesce(pi.quantidade_ate,0)< pi.quantidade_ped) > 0     '+sLineBreak+
+            '                                                                                                      '+sLineBreak+
+            '               )                                                                                      '+sLineBreak+
+            '                                                                                                      '+sLineBreak+
+            '          where 1=1                                                                                   '+sLineBreak;
 
-    lSql := lSql + ' union  all ' +
-                   ' select ''COMPRA'' tipo, ' +
-                   '        Count(*) TotalRegistros, ' +
-                   '        Sum(v.valor_parcela) Total ' +
-                   ' from pedidocompra p ' +
-                   '      inner join pedidocompra_previsaopagar v on v.pedidocompra_id = p.id ' +
-                   ' where (select count(*) from pedidocompraitens i where i.pedidocompra_id = p.id and coalesce(i.quantidade_atendida,0) < i.quantidade) > 0 ' +
-                   '       and v.vencimento between ''' + transformaDataFireBirdWhere(FDataInicialView) + ''' and ''' + transformaDataFireBirdWhere(FDataFinalView) + ''' ';
+    lSql := lSql + Where;
 
-    lSql := lSql + 'order by 1 ';
+    lSql := lSql +
+            '                                                                                                      '+sLineBreak+
+            '          )                                                                                           '+sLineBreak+
+            '                                                                                                      '+sLineBreak+
+            '     group by 1                                                                                       '+sLineBreak;
 
-    lQry.Open(lSql);
+    lQry.SQL.Add(lSql);
 
-    FResultado_AReceber      := 0;
-    FResultado_Inadimplencia := 0;
-    FResultado_APagar        := 0;
+    vConstrutor.getSQL(lQry);
+
+    lQry.Open;
+
+    lReceber      := 0;
+    lInadimplente := 0;
+    lPagar        := 0;
 
     lQry.First;
     while not lQry.Eof do
@@ -448,32 +457,46 @@ begin
       begin
         if FPorcentagemInadimplenciaView > 0 then
         begin
-          FResultado_AReceber      := FResultado_AReceber + (lQry.FieldByName('Total').AsFloat - (lQry.FieldByName('Total').AsFloat * (FPorcentagemInadimplenciaView / 100)));
-          FResultado_Inadimplencia := FResultado_Inadimplencia + (lQry.FieldByName('Total').AsFloat * (FPorcentagemInadimplenciaView / 100));
+          lReceber      := lReceber + (lQry.FieldByName('Total').AsFloat - (lQry.FieldByName('Total').AsFloat * (FPorcentagemInadimplenciaView / 100)));
+          lInadimplente := lInadimplente + (lQry.FieldByName('Total').AsFloat * (FPorcentagemInadimplenciaView / 100));
         end
         else
-          FResultado_AReceber := FResultado_AReceber + lQry.FieldByName('Total').AsFloat;
+          lReceber := lReceber + lQry.FieldByName('Total').AsFloat;
       end;
 
       if (lQry.FieldByName('Tipo').AsString = 'PAGAR') or
          (lQry.FieldByName('Tipo').AsString = 'COMPRA') then
       begin
-        FResultado_APagar := FResultado_APagar + lQry.FieldByName('Total').AsFloat;
+        lPagar := lPagar + lQry.FieldByName('Total').AsFloat;
       end;
 
       lQry.Next;
     end;
 
-
     lContaCorrenteModel := TContaCorrenteModel.Create(vIConexao);
+    lContaCorrenteModel.IDBancoView := FBancoView;
+    lContaCorrenteModel.obterSaldo;
 
-//    lContaCorrenteModel.IDBancoView := FBancoView;
-//    lContaCorrenteModel.obterSaldo;
+    lSaldoBanco := lContaCorrenteModel.Saldo;
 
-//    FResultado_SaldoAtualBancos := lContaCorrenteModel.Saldo;
+    lTotal := lReceber + ifThen(FSomarBancosView, lSaldoBanco, 0) - lPagar;
 
+    lMemTable.FieldDefs.Add('RESULTADO_RECEBER', ftFloat);
+    lMemTable.FieldDefs.Add('RESULTADO_PAGAR', ftFloat);
+    lMemTable.FieldDefs.Add('RESULTADO_INADIMPLENTE', ftFloat);
+    lMemTable.FieldDefs.Add('RESULTADO_SALDO_BANCO', ftFloat);
+    lMemTable.FieldDefs.Add('TOTAL', ftFloat);
+    lMemTable.CreateDataSet;
 
-    FResultado_Total := FResultado_AReceber + ifThen(FSomarBancosView, FResultado_SaldoAtualBancos, 0) - FResultado_APagar;
+    lMemTable.InsertRecord([
+                            FormatFloat('####0.00', lReceber),
+                            FormatFloat('####0.00', lPagar),
+                            FormatFloat('####0.00', lInadimplente),
+                            FormatFloat('####0.00', lSaldoBanco),
+                            FormatFloat('####0.00', lTotal)
+                           ]);
+
+    Result := lMemTable;
 
   finally
     lQry.Free;
@@ -514,51 +537,6 @@ end;
 procedure TFluxoCaixaDao.SetPortadorView(const Value: String);
 begin
   FPortadorView := Value;
-end;
-
-procedure TFluxoCaixaDao.SetResultado_APagar(const Value: Real);
-begin
-  FResultado_APagar := Value;
-end;
-
-procedure TFluxoCaixaDao.SetResultado_AReceber(const Value: Real);
-begin
-  FResultado_AReceber := Value;
-end;
-
-procedure TFluxoCaixaDao.SetResultado_Inadimplencia(const Value: Real);
-begin
-  FResultado_Inadimplencia := Value;
-end;
-
-procedure TFluxoCaixaDao.SetResultado_SaldoAtualBancos(const Value: Real);
-begin
-  FResultado_SaldoAtualBancos := Value;
-end;
-
-procedure TFluxoCaixaDao.SetResultado_Total(const Value: Real);
-begin
-  FResultado_Total := Value;
-end;
-
-procedure TFluxoCaixaDao.SetResumo_A_Pagar(const Value: Real);
-begin
-  FResumo_A_Pagar := Value;
-end;
-
-procedure TFluxoCaixaDao.SetResumo_A_Pagar_Registros(const Value: Integer);
-begin
-  FResumo_A_Pagar_Registros := Value;
-end;
-
-procedure TFluxoCaixaDao.SetResumo_A_Receber(const Value: Real);
-begin
-  FResumo_A_Receber := Value;
-end;
-
-procedure TFluxoCaixaDao.SetResumo_A_Receber_Registros(const Value: Integer);
-begin
-  FResumo_A_Receber_Registros := Value;
 end;
 
 procedure TFluxoCaixaDao.SetSomarBancosView(const Value: Boolean);

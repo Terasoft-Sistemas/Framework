@@ -68,10 +68,10 @@ type
   	constructor Create (pIConexao : IConexao);
     destructor Destroy; override;
 
-    function obterFluxoCaixaSintetico: TFDMemTable;
-    function obterFluxoCaixaAnalitico: TFDMemTable;
-
-    procedure obterResultadoFluxoCaixa;
+    function obterFluxoCaixaSintetico : TFDMemTable;
+    function obterFluxoCaixaAnalitico : TFDMemTable;
+    function obterResumo              : TFDMemTable;
+    function obterResultadoFluxoCaixa : TFDMemTable;
 
     property FluxoCaixasLista: TObjectList<TFluxoCaixaModel> read FFluxoCaixasLista write SetFluxoCaixasLista;
 
@@ -103,7 +103,7 @@ begin
   inherited;
 end;
 
-procedure TFluxoCaixaModel.obterResultadoFluxoCaixa;
+function TFluxoCaixaModel.obterResultadoFluxoCaixa : TFDMemTable;
 var
   lFluxoCaixa: TFluxoCaixaDao;
 begin
@@ -117,15 +117,22 @@ begin
     lFluxoCaixa.PorcentagemInadimplenciaView := FPorcentagemInadimplenciaView;
     lFluxoCaixa.SomarBancosView              := FSomarBancosView;
 
+    Result := lFluxoCaixa.obterResultadoFluxoCaixa;
+  finally
+    lFluxoCaixa.Free;
+  end;
+end;
 
-    lFluxoCaixa.obterResultadoFluxoCaixa;
+function TFluxoCaixaModel.obterResumo: TFDMemTable;
+var
+  lFluxoCaixa: TFluxoCaixaDao;
+begin
+  lFluxoCaixa := TFluxoCaixaDao.Create(vIConexao);
+  try
+    lFluxoCaixa.DataInicialView              := FDataInicialView;
+    lFluxoCaixa.DataFinalView                := FDataFinalView;
 
-    FResultado_SaldoAtualBancos := lFluxoCaixa.Resultado_SaldoAtualBancos;
-    FResultado_AReceber         := lFluxoCaixa.Resultado_AReceber;
-    FResultado_Inadimplencia    := lFluxoCaixa.Resultado_Inadimplencia;
-    FResultado_APagar           := lFluxoCaixa.Resultado_APagar;
-    FResultado_Total            := lFluxoCaixa.Resultado_Total;
-
+    Result := lFluxoCaixa.obterResumo;
   finally
     lFluxoCaixa.Free;
   end;

@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 1244
     Height = 725
-    ActivePage = TabSheet1
+    ActivePage = TabSheet2
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -521,6 +521,24 @@ object Form1: TForm1
         Caption = 'Fluxo Caixa Analitico'
         TabOrder = 2
         OnClick = Button49Click
+      end
+      object Button50: TButton
+        Left = 387
+        Top = 15
+        Width = 182
+        Height = 42
+        Caption = 'Fluxo Caixa Resumo'
+        TabOrder = 3
+        OnClick = Button50Click
+      end
+      object Button51: TButton
+        Left = 575
+        Top = 15
+        Width = 182
+        Height = 42
+        Caption = 'Fluxo Caixa Resultado'
+        TabOrder = 4
+        OnClick = Button51Click
       end
     end
   end

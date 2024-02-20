@@ -59,6 +59,8 @@ type
     FTRANSFERENCIA_ORIGEM: Variant;
     FTIPO_CTA: Variant;
     FIDRecordView: String;
+    FIDBancoView: String;
+    FSaldo: Real;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetContaCorrentesLista(const Value: TObjectList<TContaCorrenteModel>);
@@ -106,7 +108,11 @@ type
     procedure SetUSUARIO_COR(const Value: Variant);
     procedure SetVALOR_COR(const Value: Variant);
     procedure SetIDRecordView(const Value: String);
+    procedure SetIDBancoView(const Value: String);
+    procedure SetSaldo(const Value: Real);
+
   public
+
     property NUMERO_COR: Variant read FNUMERO_COR write SetNUMERO_COR;
     property DATA_COR: Variant read FDATA_COR write SetDATA_COR;
     property HORA_COR: Variant read FHORA_COR write SetHORA_COR;
@@ -153,6 +159,7 @@ type
     function Excluir(pID : String) : String;
     function Salvar: String;
     procedure obterLista;
+    procedure obterSaldo;
 
     function carregaClasse(pId: String): TContaCorrenteModel;
     procedure excluirRegistro(pIdRegistro: String);
@@ -166,6 +173,9 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
+    property IDBancoView: String read FIDBancoView write SetIDBancoView;
+    property Saldo: Real read FSaldo write SetSaldo;
+
   end;
 
 implementation
@@ -279,6 +289,22 @@ begin
   end;
 end;
 
+procedure TContaCorrenteModel.ObterSaldo;
+var
+  lContaCorrenteDao: TContaCorrenteDao;
+begin
+  lContaCorrenteDao := TContaCorrenteDao.Create(vIConexao);
+
+  try
+    lContaCorrenteDao.IDBancoView := FIDBancoView;
+    lContaCorrenteDao.obterSaldo;
+    Saldo := lContaCorrenteDao.Saldo;
+
+  finally
+    lContaCorrenteDao.Free;
+  end;
+end;
+
 function TContaCorrenteModel.Salvar: String;
 var
   lContaCorrenteDao: TContaCorrenteDao;
@@ -389,6 +415,11 @@ begin
   FID := Value;
 end;
 
+procedure TContaCorrenteModel.SetIDBancoView(const Value: String);
+begin
+  FIDBancoView := Value;
+end;
+
 procedure TContaCorrenteModel.SetIDRecordView(const Value: String);
 begin
   FIDRecordView := Value;
@@ -467,6 +498,11 @@ end;
 procedure TContaCorrenteModel.SetPORTADOR_COR(const Value: Variant);
 begin
   FPORTADOR_COR := Value;
+end;
+
+procedure TContaCorrenteModel.SetSaldo(const Value: Real);
+begin
+  FSaldo := Value;
 end;
 
 procedure TContaCorrenteModel.SetStartRecordView(const Value: String);

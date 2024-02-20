@@ -78,6 +78,8 @@ type
     Button48: TButton;
     dsTeste2: TDataSource;
     Button49: TButton;
+    Button50: TButton;
+    Button51: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -133,6 +135,8 @@ type
     procedure Button47Click(Sender: TObject);
     procedure Button48Click(Sender: TObject);
     procedure Button49Click(Sender: TObject);
+    procedure Button50Click(Sender: TObject);
+    procedure Button51Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -1201,6 +1205,53 @@ begin
     lWebPedidoModel.Free;
   end;
 
+end;
+
+procedure TForm1.Button50Click(Sender: TObject);
+var
+  lFluxoCaixaModel : TFluxoCaixaModel;
+  lMemTable        : TFDMemTable;
+begin
+  lFluxoCaixaModel := TFluxoCaixaModel.Create(vIConexao);
+  try
+    try
+      lFluxoCaixaModel.DataInicialView := '01/01/2022';
+      lFluxoCaixaModel.DataFinalView   := '12/12/2024';
+
+      lMemTable := lFluxoCaixaModel.obterResumo;
+      dsTeste2.DataSet := lMemTable;
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lFluxoCaixaModel.Free;
+  end;
+end;
+
+procedure TForm1.Button51Click(Sender: TObject);
+var
+  lFluxoCaixaModel : TFluxoCaixaModel;
+  lMemTable        : TFDMemTable;
+begin
+  lFluxoCaixaModel := TFluxoCaixaModel.Create(vIConexao);
+  try
+    try
+      lFluxoCaixaModel.DataInicialView := '01/01/2022';
+      lFluxoCaixaModel.DataFinalView   := '12/12/2024';
+      lFluxoCaixaModel.PortadorView    := '000001';
+
+      lFluxoCaixaModel.PorcentagemInadimplenciaView := 10;
+      lMemTable := lFluxoCaixaModel.obterResultadoFluxoCaixa;
+
+      dsTeste2.DataSet := lMemTable;
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lFluxoCaixaModel.Free;
+  end;
 end;
 
 procedure TForm1.Button5Click(Sender: TObject);
