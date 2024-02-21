@@ -278,12 +278,12 @@ interface
 
     TFedexDatasets = record
       valido: boolean;
-      po, poItens, sku: IDatasetSimples;
-      so, soItens: IDatasetSimples;
+      po, poItens, sku,
+      so, soItens,
+      cliente, transportador: IDatasetSimples;
     end;
 
   function getFedexDatasets: TFedexDatasets;
-
 
 implementation
   uses
@@ -342,6 +342,7 @@ begin
   ds.FieldDefs.Add('id',ftString,50,false);
   ds.FieldDefs.Add('data_emissao',ftDate,0,false);
   ds.FieldDefs.Add('valor_total',ftFloat,0,false);
+  ds.FieldDefs.Add('cliente_codigo',ftString,30,false);
   ds.FieldDefs.Add('cnpj_cpf',ftString,30,false);
   ds.FieldDefs.Add('transportador',ftString,30,false);
   ds.CreateDataSet;
@@ -357,8 +358,38 @@ begin
   ds.CreateDataSet;
   ds.LogChanges := false;
 
+  Result.cliente := criaDatasetSimples;
+  ds := TClientDataSet(Result.cliente.dataset);
+  ds.Close;
+  ds.FieldDefs.Add('cnpj_cpf',ftString,30,false);
+  ds.FieldDefs.Add('razao_social',ftString,100,false);
+  ds.FieldDefs.Add('fantasia',ftString,100,false);
+  ds.FieldDefs.Add('endereco',ftString,100,false);
+  ds.FieldDefs.Add('numero',ftString,20,false);
+  ds.FieldDefs.Add('complemento',ftString,100,false);
+  ds.FieldDefs.Add('cidade',ftString,100,false);
+  ds.FieldDefs.Add('uf',ftString,10,false);
+  ds.FieldDefs.Add('cep',ftString,30,false);
+  ds.CreateDataSet;
+  ds.LogChanges := false;
+
+  Result.transportador := criaDatasetSimples;
+  ds := TClientDataSet(Result.transportador.dataset);
+  ds.Close;
+  ds.FieldDefs.Add('cnpj_cpf',ftString,30,false);
+  ds.FieldDefs.Add('razao_social',ftString,100,false);
+  ds.FieldDefs.Add('fantasia',ftString,100,false);
+  ds.FieldDefs.Add('endereco',ftString,100,false);
+  ds.FieldDefs.Add('numero',ftString,20,false);
+  ds.FieldDefs.Add('complemento',ftString,100,false);
+  ds.FieldDefs.Add('cidade',ftString,100,false);
+  ds.FieldDefs.Add('uf',ftString,10,false);
+  ds.FieldDefs.Add('cep',ftString,30,false);
+  ds.FieldDefs.Add('pais',ftString,30,false);
+  ds.FieldDefs.Add('telefone',ftString,30,false);
+  ds.CreateDataSet;
+  ds.LogChanges := false;
 
 end;
-
 
 end.
