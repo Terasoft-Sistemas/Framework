@@ -1217,6 +1217,7 @@ begin
     try
       lFluxoCaixaModel.DataInicialView := '01/01/2022';
       lFluxoCaixaModel.DataFinalView   := '12/12/2024';
+      lFluxoCaixaModel.PortadorView    := '000001';
 
       lMemTable := lFluxoCaixaModel.obterResumo;
       dsTeste2.DataSet := lMemTable;

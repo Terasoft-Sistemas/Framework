@@ -22,7 +22,6 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FFluxoCaixasLista: TObjectList<TFluxoCaixaModel>;
     FWhereView: String;
     FPorcentagemInadimplenciaView: Real;
     FBancoView: String;
@@ -31,9 +30,8 @@ type
     FDataInicialView: Variant;
     FSomarBancosView: Boolean;
     FOrderView: String;
-    procedure SetFluxoCaixasLista(const Value: TObjectList<TFluxoCaixaModel>);
-    procedure SetWhereView(const Value: String);
 
+    procedure SetWhereView(const Value: String);
     procedure SetBancoView(const Value: String);
     procedure SetDataFinalView(const Value: Variant);
     procedure SetDataInicialView(const Value: Variant);
@@ -48,7 +46,6 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property FluxoCaixasLista: TObjectList<TFluxoCaixaModel> read FFluxoCaixasLista write SetFluxoCaixasLista;
     property WhereView: String read FWhereView write SetWhereView;
     property OrderView: String read FOrderView write SetOrderView;
     property DataInicialView: Variant read FDataInicialView write SetDataInicialView;
@@ -517,11 +514,6 @@ end;
 procedure TFluxoCaixaDao.SetDataInicialView(const Value: Variant);
 begin
   FDataInicialView := Value;
-end;
-
-procedure TFluxoCaixaDao.SetFluxoCaixasLista(const Value: TObjectList<TFluxoCaixaModel>);
-begin
-  FFluxoCaixasLista := Value;
 end;
 
 procedure TFluxoCaixaDao.SetOrderView(const Value: String);
