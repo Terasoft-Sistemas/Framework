@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 1244
     Height = 725
-    ActivePage = TabSheet2
+    ActivePage = TabSheet1
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -543,7 +543,7 @@ object Form1: TForm1
     end
   end
   object dsTeste2: TDataSource
-    Left = 160
-    Top = 472
+    Left = 1056
+    Top = 544
   end
 end
