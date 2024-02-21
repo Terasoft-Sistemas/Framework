@@ -35,6 +35,7 @@ interface
 
     CONTROLE_LOGISTICA_FEDEX_SKU  = 'SKU.CONTROLE';
     CONTROLE_LOGISTICA_FEDEX_STATUS_PO   = 'PO.STATUS';
+    CONTROLE_LOGISTICA_FEDEX_STATUS_SO   = 'SO.STATUS';
 
     CONTROLE_LOGISTICA_STATUS_ENVIADO = 'A';
 
@@ -274,9 +275,11 @@ interface
   {$ifend}
 
   type
+
     TFedexDatasets = record
       valido: boolean;
       po, poItens, sku: IDatasetSimples;
+      so, soItens: IDatasetSimples;
     end;
 
   function getFedexDatasets: TFedexDatasets;
@@ -298,9 +301,10 @@ begin
   Result.po := criaDatasetSimples;
   ds := TClientDataSet(Result.po.dataset);
   ds.Close;
-  ds.FieldDefs.Add('id',ftString,50,false);
+  ds.FieldDefs.Add('id',ftString,30,false);
   ds.FieldDefs.Add('cfop',ftString,50,false);
-  ds.FieldDefs.Add('fornecedor',ftString,50,false);
+  ds.FieldDefs.Add('fornecedor',ftString,30,false);
+  ds.FieldDefs.Add('codigo_for',ftString,30,false);
   ds.FieldDefs.Add('data_movimento',ftDate,0,false);
   ds.FieldDefs.Add('operacao',ftString,1,false);
   ds.FieldDefs.Add('xml',ftMemo,1,false);
@@ -329,6 +333,27 @@ begin
   ds.FieldDefs.Add('peso',ftFloat,0,false);
   ds.FieldDefs.Add('grupo',ftString,50,false);
   ds.FieldDefs.Add('subgrupo',ftString,50,false);
+  ds.CreateDataSet;
+  ds.LogChanges := false;
+
+  Result.so := criaDatasetSimples;
+  ds := TClientDataSet(Result.so.dataset);
+  ds.Close;
+  ds.FieldDefs.Add('id',ftString,50,false);
+  ds.FieldDefs.Add('data_emissao',ftDate,0,false);
+  ds.FieldDefs.Add('valor_total',ftFloat,0,false);
+  ds.FieldDefs.Add('cnpj_cpf',ftString,30,false);
+  ds.FieldDefs.Add('transportador',ftString,30,false);
+  ds.CreateDataSet;
+  ds.LogChanges := false;
+
+  Result.soItens := criaDatasetSimples;
+  ds := TClientDataSet(Result.soItens.dataset);
+  ds.Close;
+  ds.FieldDefs.Add('id',ftString,50,false);
+  ds.FieldDefs.Add('item',ftString,30,false);
+  ds.FieldDefs.Add('produto_id',ftString,30,false);
+  ds.FieldDefs.Add('quantidade',ftFloat,0,false);
   ds.CreateDataSet;
   ds.LogChanges := false;
 
