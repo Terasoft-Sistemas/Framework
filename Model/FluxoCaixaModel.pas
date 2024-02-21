@@ -14,7 +14,6 @@ type
   private
     vIConexao : IConexao;
 
-    FFluxoCaixasLista: TObjectList<TFluxoCaixaModel>;
     FWhereView: String;
     FSomarBancosView: Boolean;
     FPorcentagemInadimplenciaView: Real;
@@ -22,18 +21,8 @@ type
     FPortadorView: String;
     FDataFinalView: Variant;
     FDataInicialView: Variant;
-    FResumo_A_Pagar: Real;
-    FResumo_A_Receber: Real;
-    FResumo_A_Receber_Registros: Integer;
-    FResumo_A_Pagar_Registros: Integer;
-    FResultado_APagar: Real;
-    FResultado_SaldoAtualBancos: Real;
-    FResultado_Inadimplencia: Real;
-    FResultado_Total: Real;
-    FResultado_AReceber: Real;
     FOrderView: String;
 
-    procedure SetFluxoCaixasLista(const Value: TObjectList<TFluxoCaixaModel>);
     procedure SetWhereView(const Value: String);
     procedure SetBancoView(const Value: String);
     procedure SetDataFinalView(const Value: Variant);
@@ -41,29 +30,9 @@ type
     procedure SetPorcentagemInadimplenciaView(const Value: Real);
     procedure SetPortadorView(const Value: String);
     procedure SetSomarBancosView(const Value: Boolean);
-    procedure SetResumo_A_Pagar(const Value: Real);
-    procedure SetResumo_A_Receber(const Value: Real);
-    procedure SetResumo_A_Pagar_Registros(const Value: Integer);
-    procedure SetResumo_A_Receber_Registros(const Value: Integer);
-    procedure SetResultado_APagar(const Value: Real);
-    procedure SetResultado_AReceber(const Value: Real);
-    procedure SetResultado_Inadimplencia(const Value: Real);
-    procedure SetResultado_SaldoAtualBancos(const Value: Real);
-    procedure SetResultado_Total(const Value: Real);
     procedure SetOrderView(const Value: String);
 
   public
-
-    property Resumo_A_Receber: Real read FResumo_A_Receber write SetResumo_A_Receber;
-    property Resumo_A_Receber_Registros: Integer read FResumo_A_Receber_Registros write SetResumo_A_Receber_Registros;
-    property Resumo_A_Pagar: Real read FResumo_A_Pagar write SetResumo_A_Pagar;
-    property Resumo_A_Pagar_Registros: Integer read FResumo_A_Pagar_Registros write SetResumo_A_Pagar_Registros;
-
-    property Resultado_SaldoAtualBancos: Real read FResultado_SaldoAtualBancos write SetResultado_SaldoAtualBancos;
-    property Resultado_AReceber: Real read FResultado_AReceber write SetResultado_AReceber;
-    property Resultado_Inadimplencia: Real read FResultado_Inadimplencia write SetResultado_Inadimplencia;
-    property Resultado_APagar: Real read FResultado_APagar write SetResultado_APagar;
-    property Resultado_Total: Real read FResultado_Total write SetResultado_Total;
 
   	constructor Create (pIConexao : IConexao);
     destructor Destroy; override;
@@ -72,8 +41,6 @@ type
     function obterFluxoCaixaAnalitico : TFDMemTable;
     function obterResumo              : TFDMemTable;
     function obterResultadoFluxoCaixa : TFDMemTable;
-
-    property FluxoCaixasLista: TObjectList<TFluxoCaixaModel> read FFluxoCaixasLista write SetFluxoCaixasLista;
 
     property WhereView: String read FWhereView write SetWhereView;
     property OrderView: String read FOrderView write SetOrderView;
@@ -131,6 +98,7 @@ begin
   try
     lFluxoCaixa.DataInicialView              := FDataInicialView;
     lFluxoCaixa.DataFinalView                := FDataFinalView;
+    lFluxoCaixa.PortadorView                 := FPortadorView;
 
     Result := lFluxoCaixa.obterResumo;
   finally
@@ -199,11 +167,6 @@ begin
   FDataInicialView := Value;
 end;
 
-procedure TFluxoCaixaModel.SetFluxoCaixasLista(const Value: TObjectList<TFluxoCaixaModel>);
-begin
-  FFluxoCaixasLista := Value;
-end;
-
 procedure TFluxoCaixaModel.SetOrderView(const Value: String);
 begin
   FOrderView := Value;
@@ -217,51 +180,6 @@ end;
 procedure TFluxoCaixaModel.SetPortadorView(const Value: String);
 begin
   FPortadorView := Value;
-end;
-
-procedure TFluxoCaixaModel.SetResultado_APagar(const Value: Real);
-begin
-  FResultado_APagar := Value;
-end;
-
-procedure TFluxoCaixaModel.SetResultado_AReceber(const Value: Real);
-begin
-  FResultado_AReceber := Value;
-end;
-
-procedure TFluxoCaixaModel.SetResultado_Inadimplencia(const Value: Real);
-begin
-  FResultado_Inadimplencia := Value;
-end;
-
-procedure TFluxoCaixaModel.SetResultado_SaldoAtualBancos(const Value: Real);
-begin
-  FResultado_SaldoAtualBancos := Value;
-end;
-
-procedure TFluxoCaixaModel.SetResultado_Total(const Value: Real);
-begin
-  FResultado_Total := Value;
-end;
-
-procedure TFluxoCaixaModel.SetResumo_A_Pagar(const Value: Real);
-begin
-  FResumo_A_Pagar := Value;
-end;
-
-procedure TFluxoCaixaModel.SetResumo_A_Pagar_Registros(const Value: Integer);
-begin
-  FResumo_A_Pagar_Registros := Value;
-end;
-
-procedure TFluxoCaixaModel.SetResumo_A_Receber(const Value: Real);
-begin
-  FResumo_A_Receber := Value;
-end;
-
-procedure TFluxoCaixaModel.SetResumo_A_Receber_Registros(const Value: Integer);
-begin
-  FResumo_A_Receber_Registros := Value;
 end;
 
 procedure TFluxoCaixaModel.SetSomarBancosView(const Value: Boolean);
