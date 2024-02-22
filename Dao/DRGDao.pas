@@ -183,6 +183,10 @@ var
 
   lGrupoAnt, lGrupo, lSubGrupo, lConta : String;
 begin
+
+  if pDRG_Parametros.DataPadrao = '' then
+    CriaException('Data padrão não definida');
+
   lLojasModel := TLojasModel.Create(vIConexao);
 
   lMemTable := TFDMemTable.Create(nil);
@@ -217,7 +221,7 @@ begin
                     '        else ''001. RECEITA''                                                                                                                                                 '+#13+
                     '        end as GRUPO,                                                                                                                                                         '+#13+
                     '        v.loja ,                                                                                                                                                              '+#13+
-                    '        v.DATA_PED data ,                                                                                                                                                     '+#13+
+                    '        v.'+pDRG_Parametros.DataPadrao+' data ,                                                                                                                               '+#13+
                     '        coalesce((trim(coalesce(s.classificacao,'''') || '' '' || s.descricao_cen)) , (''SEM SUB GRUPO'')  ) SUBGRUPO,                                                        '+#13+
                     '        coalesce((trim(coalesce(c.classificacao,'''') || '' '' || c.nome_cta)) , (''VENDA ''||p.nome_port) )  CONTA,                                                          '+#13+
                     '        coalesce(SUM((( i.valorunitario_ped * i.qtde_calculada )-((( CAST(coalesce(i.desconto_ped,0) AS FLOAT) / 100 )*                                                       '+#13+
@@ -255,7 +259,7 @@ begin
                     '        else ''001. RECEITA''                                                                                                                                                 '+#13+
                     '        end as GRUPO,                                                                                                                                                         '+#13+
                     '        v.loja ,                                                                                                                                                              '+#13+
-                    '        v.DATA_PED data ,                                                                                                                                                     '+#13+
+                    '        v.'+pDRG_Parametros.DataPadrao+' data ,                                                                                                                               '+#13+
                     '        coalesce( (trim(coalesce(s.classificacao,'''') || '' '' || s.descricao_cen)) , (''SEM SUB GRUPO'')  ) SUBGRUPO,                                                       '+#13+
                     '        coalesce( (trim(coalesce(c.classificacao,'''') || '' '' || c.nome_cta)) , (''VENDA ''||p.nome_port) )  CONTA,                                                         '+#13+
                     '        coalesce(SUM( i.VLRPARCELA_REC),0) VALOR                                                                                                                              '+#13+
@@ -357,7 +361,7 @@ begin
                     '        else ''002. CUSTOS VARIÁVEIS TOTAIS''                                                                                                                                 '+#13+
                     '        end as GRUPO,                                                                                                                                                         '+#13+
                     '        v.loja ,                                                                                                                                                              '+#13+
-                    '        v.DATA_PED data ,                                                                                                                                                     '+#13+
+                    '        v.'+pDRG_Parametros.DataPadrao+' data ,                                                                                                                               '+#13+
                     '        coalesce( (trim(coalesce(s.classificacao,'''') || '' '' || s.descricao_cen)) , (''SEM SUB GRUPO'')  ) SUBGRUPO,                                                       '+#13+
                     '        coalesce( (trim(coalesce(c.classificacao,'''') || '' '' || c.nome_cta)) , (''CMV - Custo Mercadoria Vendida'') )  CONTA,                                              '+#13+
                     '        coalesce(sum(coalesce(i.QTDE_CALCULADA * i.vlrcusto_pro,0)),0) VALOR                                                                                                  '+#13+
@@ -416,7 +420,7 @@ begin
                     '        v.id,                                                                                                                                                                 '+#13+
                     '        ''007. RECEITAS EXTRA-OPERACIONAIS''  as GRUPO,                                                                                                                       '+#13+
                     '        v.loja ,                                                                                                                                                              '+#13+
-                    '        v.DATA_PED data ,                                                                                                                                                     '+#13+
+                    '        v.'+pDRG_Parametros.DataPadrao+' data ,                                                                                                                               '+#13+
                     '        coalesce( (trim(coalesce(s.classificacao,'''') || '' '' || s.descricao_cen)) , (''SEM SUB GRUPO'')  ) SUBGRUPO,                                                       '+#13+
                     '        coalesce( (trim(coalesce(c.classificacao,'''') || '' '' || c.nome_cta)) , (''Acréscimo financeiro ''||p.nome_port) )  CONTA,                                          '+#13+
                     '        sum(coalesce(v.acres_ped,0)) VALOR                                                                                                                                    '+#13+
@@ -481,58 +485,58 @@ begin
                     '        end as GRUPO,                                                                                                                                                         '+#13+
                     '        v.loja ,                                                                                                                                                              '+#13+
                     '        v.data_cai data ,                                                                                                                                                     '+#13+
-                    '        trim(coalesce(s.classificacao,'''') || '' '' || s.descricao_cen) SUBGRUPO,                                                                                      '+#13+
-                    '        trim(coalesce(c.classificacao,'''') || '' '' || c.nome_cta) CONTA,                                                                                              '+#13+
-                    '        coalesce(sum(coalesce(v.valor_cai,0)),0) VALOR                                                                                                                  '+#13+
-                    '                                                                                                                                                                        '+#13+
-                    '    from                                                                                                                                                                '+#13+
-                    '        contas c                                                                                                                                                        '+#13+
-                    '                                                                                                                                                                        '+#13+
-                    '    left join caixa v on c.codigo_cta = V.codigo_cta and coalesce(v.status,'''') <> ''X''                                                                               '+#13+
-                    '    left join centrocusto_cta s on s.id_cen = c.centrocusto_cta                                                                                                         '+#13+
-                    '                                                                                                                                                                        '+#13+
-                    '    where                                                                                                                                                               '+#13+
-                    '        c.tiposemdr_cta = ''S''                                                                                                                                         '+#13+
-                    '                                                                                                                                                                        '+#13+
-                    '    group by 1,2,3,4,5,6                                                                                                                                                '+#13+
-                    '                                                                                                                                                                        '+#13+
-                    '    union                                                                                                                                                               '+#13+
-                    '                                                                                                                                                                        '+#13+
-                    '    select                                                                                                                                                              '+#13+
-                    '        v.id,                                                                                                                                                           '+#13+
-                    '        case                                                                                                                                                            '+#13+
-                    '        when c.dr_cta = ''A''  then ''001. RECEITA''                                                                                                                    '+#13+
-                    '        when c.dr_cta = ''V''  then ''002. CUSTOS VARIÁVEIS TOTAIS''                                                                                                    '+#13+
-                    '        when c.dr_cta = ''F''  then ''004. CUSTOS FIXOS TOTAIS''                                                                                                        '+#13+
-                    '        when c.dr_cta = ''I''  then ''006. INVESTIMENTOS''                                                                                                              '+#13+
-                    '        when c.dr_cta = ''R''  then ''007. RECEITAS EXTRA-OPERACIONAIS''                                                                                                '+#13+
-                    '        when c.dr_cta = ''O''  then ''008. DESPESAS EXTRA-OPERACIONAIS''                                                                                                '+#13+
-                    '        when c.dr_cta = ''L''  then ''010. IMPOSTOS SOBRE O LUCRO''                                                                                                     '+#13+
-                    '        when c.dr_cta = ''D''  then ''011. DISTRIBUIÇÃO DE LUCROS''                                                                                                     '+#13+
-                    '        end as GRUPO,                                                                                                                                                   '+#13+
-                    '        v.loja ,                                                                                                                                                        '+#13+
-                    '        v.data_cor data ,                                                                                                                                               '+#13+
-                    '        trim(coalesce(s.classificacao,'''') || '' '' || s.descricao_cen) SUBGRUPO,                                                                                      '+#13+
-                    '        trim(coalesce(c.classificacao,'''') || '' '' || c.nome_cta) conta,                                                                                              '+#13+
-                    '        coalesce(sum(coalesce(v.valor_cor,0)),0) VALOR                                                                                                                  '+#13+
-                    '                                                                                                                                                                        '+#13+
-                    '    from                                                                                                                                                                '+#13+
-                    '      contas c                                                                                                                                                          '+#13+
-                    '                                                                                                                                                                        '+#13+
-                    '    left join contacorrente v  on c.codigo_cta = v.codigo_cta and coalesce(v.status,'''') <> ''X''                                                                      '+#13+
-                    '    left join centrocusto_cta s on s.id_cen = c.centrocusto_cta                                                                                                         '+#13+
-                    '    left join banco b on b.NUMERO_BAN = v.CODIGO_BAN                                                                                                                    '+#13+
-                    '                                                                                                                                                                        '+#13+
-                    '    where                                                                                                                                                               '+#13+
-                    '        c.tiposemdr_cta = ''S''                                                                                                                                         '+#13+
-                    '        and coalesce(b.drg,''S'') <> ''N''                                                                                                                              '+#13+
-                    '                                                                                                                                                                        '+#13+
-                    '    group by 1,2,3,4,5,6                                                                                                                                                '+#13+
-                    '                                                                                                                                                                        '+#13+
-                    ')                                                                                                                                                                       '+#13+
-                    'where                                                                                                                                                                   '+#13+
-                    '    data between '+QuotedStr(transformaDataFireBirdWhere(pDRG_Parametros.DataInicio))+' and '+QuotedStr(transformaDataFireBirdWhere(pDRG_Parametros.DataFim)) +'        '+#13+
-                    '    and valor <> 0                                                                                                                                                      '+#13;
+                    '        trim(coalesce(s.classificacao,'''') || '' '' || s.descricao_cen) SUBGRUPO,                                                                                            '+#13+
+                    '        trim(coalesce(c.classificacao,'''') || '' '' || c.nome_cta) CONTA,                                                                                                    '+#13+
+                    '        coalesce(sum(coalesce(v.valor_cai,0)),0) VALOR                                                                                                                        '+#13+
+                    '                                                                                                                                                                              '+#13+
+                    '    from                                                                                                                                                                      '+#13+
+                    '        contas c                                                                                                                                                              '+#13+
+                    '                                                                                                                                                                              '+#13+
+                    '    left join caixa v on c.codigo_cta = V.codigo_cta and coalesce(v.status,'''') <> ''X''                                                                                     '+#13+
+                    '    left join centrocusto_cta s on s.id_cen = c.centrocusto_cta                                                                                                               '+#13+
+                    '                                                                                                                                                                              '+#13+
+                    '    where                                                                                                                                                                     '+#13+
+                    '        c.tiposemdr_cta = ''S''                                                                                                                                               '+#13+
+                    '                                                                                                                                                                              '+#13+
+                    '    group by 1,2,3,4,5,6                                                                                                                                                      '+#13+
+                    '                                                                                                                                                                              '+#13+
+                    '    union                                                                                                                                                                     '+#13+
+                    '                                                                                                                                                                              '+#13+
+                    '    select                                                                                                                                                                    '+#13+
+                    '        v.id,                                                                                                                                                                 '+#13+
+                    '        case                                                                                                                                                                  '+#13+
+                    '        when c.dr_cta = ''A''  then ''001. RECEITA''                                                                                                                          '+#13+
+                    '        when c.dr_cta = ''V''  then ''002. CUSTOS VARIÁVEIS TOTAIS''                                                                                                          '+#13+
+                    '        when c.dr_cta = ''F''  then ''004. CUSTOS FIXOS TOTAIS''                                                                                                              '+#13+
+                    '        when c.dr_cta = ''I''  then ''006. INVESTIMENTOS''                                                                                                                    '+#13+
+                    '        when c.dr_cta = ''R''  then ''007. RECEITAS EXTRA-OPERACIONAIS''                                                                                                      '+#13+
+                    '        when c.dr_cta = ''O''  then ''008. DESPESAS EXTRA-OPERACIONAIS''                                                                                                      '+#13+
+                    '        when c.dr_cta = ''L''  then ''010. IMPOSTOS SOBRE O LUCRO''                                                                                                           '+#13+
+                    '        when c.dr_cta = ''D''  then ''011. DISTRIBUIÇÃO DE LUCROS''                                                                                                           '+#13+
+                    '        end as GRUPO,                                                                                                                                                         '+#13+
+                    '        v.loja ,                                                                                                                                                              '+#13+
+                    '        v.data_cor data ,                                                                                                                                                     '+#13+
+                    '        trim(coalesce(s.classificacao,'''') || '' '' || s.descricao_cen) SUBGRUPO,                                                                                            '+#13+
+                    '        trim(coalesce(c.classificacao,'''') || '' '' || c.nome_cta) conta,                                                                                                    '+#13+
+                    '        coalesce(sum(coalesce(v.valor_cor,0)),0) VALOR                                                                                                                        '+#13+
+                    '                                                                                                                                                                              '+#13+
+                    '    from                                                                                                                                                                      '+#13+
+                    '      contas c                                                                                                                                                                '+#13+
+                    '                                                                                                                                                                              '+#13+
+                    '    left join contacorrente v  on c.codigo_cta = v.codigo_cta and coalesce(v.status,'''') <> ''X''                                                                            '+#13+
+                    '    left join centrocusto_cta s on s.id_cen = c.centrocusto_cta                                                                                                               '+#13+
+                    '    left join banco b on b.NUMERO_BAN = v.CODIGO_BAN                                                                                                                          '+#13+
+                    '                                                                                                                                                                              '+#13+
+                    '    where                                                                                                                                                                     '+#13+
+                    '        c.tiposemdr_cta = ''S''                                                                                                                                               '+#13+
+                    '        and coalesce(b.drg,''S'') <> ''N''                                                                                                                                    '+#13+
+                    '                                                                                                                                                                              '+#13+
+                    '    group by 1,2,3,4,5,6                                                                                                                                                      '+#13+
+                    '                                                                                                                                                                              '+#13+
+                    ')                                                                                                                                                                             '+#13+
+                    'where                                                                                                                                                                         '+#13+
+                    '    data between '+QuotedStr(transformaDataFireBirdWhere(pDRG_Parametros.DataInicio))+' and '+QuotedStr(transformaDataFireBirdWhere(pDRG_Parametros.DataFim)) +'              '+#13+
+                    '    and valor <> 0                                                                                                                                                            '+#13;
 
     if pDRG_Parametros.FiltroGrupo <> '' then
       lSQL := lSQL + '    and Grupo = '+QuotedStr(pDRG_Parametros.FiltroGrupo)+#13;

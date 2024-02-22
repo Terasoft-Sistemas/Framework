@@ -13,8 +13,7 @@ type
   private
     vIConexao : IConexao;
   public
-
-  	constructor Create(pIConexao : IConexao);
+    constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function ObterLista(pDRG_Parametros: TDRG_Parametros): TFDMemTable;
@@ -68,6 +67,7 @@ begin
     lDRG_Parametros.FiltroSubGrupo          := pDRG_Parametros.FiltroSubGrupo;
     lDRG_Parametros.Lojas                   := pDRG_Parametros.Lojas;
     lDRG_Parametros.ValorPrincipal          := pDRG_Parametros.ValorPrincipal;
+    lDRG_Parametros.DataPadrao              := pDRG_Parametros.DataPadrao;
 
     Result := lDRGDao.obterLista(lDRG_Parametros);
 

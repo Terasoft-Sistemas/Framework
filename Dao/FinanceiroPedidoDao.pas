@@ -172,7 +172,6 @@ begin
 
   try
    lQry.ExecSQL('delete from FINANCEIRO_PEDIDO where ID_FINANCEIRO = :ID_FINANCEIRO',[pFinanceiroPedidoModel.ID_FINANCEIRO]);
-   lQry.ExecSQL;
 
    Result := pFinanceiroPedidoModel.ID_FINANCEIRO;
   finally

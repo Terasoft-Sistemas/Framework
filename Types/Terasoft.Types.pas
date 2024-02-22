@@ -167,6 +167,7 @@ type
     Lojas,
     Filtro: String;
     ValorPrincipal: Real;
+    DataPadrao: String;
   end;
 
   TDRG_Detalhes_Parametros = record
