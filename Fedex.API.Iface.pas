@@ -37,15 +37,21 @@ interface
     CONTROLE_LOGISTICA_FEDEX_STATUS_PO   = 'PO.STATUS';
     CONTROLE_LOGISTICA_FEDEX_STATUS_SO   = 'SO.STATUS';
 
-    CONTROLE_LOGISTICA_STATUS_ENVIADO = 'A';
+    CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO = 'A';
+    CONTROLE_LOGISTICA_STATUS_ENVIADO       = 'E';
+    CONTROLE_LOGISTICA_STATUS_FINALIZADO    = 'Z';
+    CONTROLE_LOGISTICA_STATUS_DIVERGENTE    = 'D';
 
   {
     STATUS Logistica
-    A - Enviado
+    CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO(A) - DISPONIVEL PARA ENVIO -
+        Está pronto para envio para a logística
+    CONTROLE_LOGISTICA_STATUS_ENVIADO(E) - Enviado
+        Processo enviou e aguarda um retorno da logística
+    CONTROLE_LOGISTICA_STATUS_DIVERGENTE - Divergente
+        Ocorreu alguma inconsitencia no envio / recebimento
+    CONTROLE_LOGISTICA_STATUS_FINALIZADO - Processo de envio / recebimento finalizado
   }
-
-
-
 
   type
 
@@ -345,6 +351,7 @@ begin
   ds.FieldDefs.Add('cliente_codigo',ftString,30,false);
   ds.FieldDefs.Add('cnpj_cpf',ftString,30,false);
   ds.FieldDefs.Add('transportador',ftString,30,false);
+  ds.FieldDefs.Add('transportadora_codigo',ftString,30,false);
   ds.CreateDataSet;
   ds.LogChanges := false;
 

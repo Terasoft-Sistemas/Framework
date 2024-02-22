@@ -212,6 +212,7 @@ function getShipmentOrderList;
     save1,save2: Integer;
     ctr: IControleAlteracoes;
     orders,items,cliente,transportador: IDataset;
+    lTmp: String;
     lID, lQuery: String;
     lFieldNames: String;
     lParameters: array of Variant;
@@ -239,7 +240,7 @@ begin
     transportador := gdb.criaDataset;
 
     lQuery := 'select p.numero_ped id, p.data_ped data_emissao, p.total_ped valor_total, c.cnpj_cpf_cli cnpj_cpf, ' +
-              ' t.cnpj_cpf_tra transportador, p.codigo_cli cliente_codigo ' +
+              ' t.cnpj_cpf_tra transportador, p.codigo_cli cliente_codigo, p.televenda_ped transportadora_codigo ' +
 //            ' case when ( p.devolucao_pedido_id is null ) then ''E'' else ''D'' end operacao, ' +
 //            ' p.numero_ent numero_nfe, p.codigo_for,p.arq_nfe xml ' +
             ' from pedidovenda p ' +
@@ -283,24 +284,43 @@ begin
           ' from clientes p ' +
           ' where p.codigo_cli = :cliente ', 'cliente', [datasets.so.dataset.FieldByName('cliente_codigo').AsString]);
 
-      atribuirRegistros(cliente.dataset, datasets.cliente.dataset);
-
       if(cliente.dataset.RecordCount=0) then begin
         pResultado.formataErro('getShipmentOrderList: Pedido [%s] não possui um cliente válido.', [ datasets.so.dataset.FieldByName('id').AsString ] );
         break;
       end;
 
-      lQuery := 'select p.numero_ped id, id item, p.codigo_pro produto, p.quantidade_ped quantidade ' +
+      if not datasets.cliente.dataset.Locate('cnpj_cpf', cliente.dataset.FieldByName('cnpj_cpf').AsString, []) then
+        atribuirRegistros(cliente.dataset, datasets.cliente.dataset);
+
+      lTmp := datasets.so.dataset.FieldByName('transportadora_codigo').AsString;
+      if(lTmp='') then
+        lTmp := ValorTagConfig(tagConfig_LOGISTICA_TRANSPORTADOR_PADRAO,'',tvString);
+
+      transportador.query(' select p.cnpj_cpf_tra cnpj_cpf, p.razao_tra razao_social, ' +
+          ' p.fantasia_tra fantasia, p.endereco_tra endereco, p.numero_end numero, p.complemento complemento, ' +
+          ' p.cidade_tra cidade, p.uf_tra uf, p.cep_tra cep,''BR'' PAIS, p.telefone_tra telefone ' +
+          ' from transportadora p ' +
+          ' where p.codigo_tra = :id ', 'id', [lTmp]);
+
+      if( transportador.dataset.RecordCount=0) then begin
+        pResultado.formataErro('getShipmentOrderList: Pedido [%s] não possui um transportador válido.', [ datasets.so.dataset.FieldByName('id').AsString ] );
+        break;
+      end;
+
+      if not datasets.transportador.dataset.Locate('cnpj_cpf', transportador.dataset.FieldByName('cnpj_cpf').AsString, []) then
+        atribuirRegistros(transportador.dataset, datasets.transportador.dataset);
+
+      lQuery := 'select p.numero_ped id, id item, p.codigo_pro produto_id, p.quantidade_ped quantidade ' +
         ' from pedidoitens p ' +
         ' where p.numero_ped=:id ';
 
       items.query(lQuery,'id', [ datasets.so.dataset.FieldByName('id').AsString ]);
 
       while not items.dataset.eof do begin
-        if Fedex_PrecisaEnviarSKU(items.dataset.FieldByName('produto').AsString) then begin
+        if Fedex_PrecisaEnviarSKU(items.dataset.FieldByName('produto_id').AsString) then begin
           save2 := pResultado.erros;
           pAPI.parameters.modoProducao := true;
-          lSKUList := getSKUList(pAPI,items.dataset.FieldByName('produto').AsString,pResultado);
+          lSKUList := getSKUList(pAPI,items.dataset.FieldByName('produto_id').AsString,pResultado);
           if(save2=pResultado.erros) then
             pAPI.sendSKUList(lSKUList,pResultado);
         end;
