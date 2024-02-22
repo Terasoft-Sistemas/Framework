@@ -22,7 +22,7 @@ object Form1: TForm1
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
-      Caption = 'Teste 1'
+      Caption = 'Diversos'
       object memoResultado: TMemo
         Left = 816
         Top = 15
@@ -492,13 +492,13 @@ object Form1: TForm1
       end
     end
     object TabSheet2: TTabSheet
-      Caption = 'Teste 2'
+      Caption = 'Fluxo de caixa'
       ImageIndex = 1
       object dbTeste2: TXDBGrid
         Left = 0
-        Top = 376
+        Top = 72
         Width = 1236
-        Height = 319
+        Height = 623
         Align = alBottom
         DataSource = dsTeste2
         GridStyle.VisualStyle = vsXPStyle
