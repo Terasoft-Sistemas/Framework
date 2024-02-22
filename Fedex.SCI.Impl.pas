@@ -35,7 +35,8 @@ interface
   function getSKUList(pAPI: IFedexAPI; pID: TipoWideStringFramework; pResultado: IResultadoOperacao = nil): TFedex_SKUList;
   function fedex_PrecisaEnviarSKU(const pCodigo: TipoWideStringFramework): boolean;
   function criaControleAlteracoesFedex: IControleAlteracoes;
-  function testFedexAPISCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+  function testFedexAPISOSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+  function testFedexAPIPOSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
 implementation
   uses
@@ -47,7 +48,7 @@ implementation
     SysUtils,
     FuncoesConfig;
 
-function testFedexAPISCI;
+function testFedexAPIPOSCI;
   var
     lAPI: IFedexAPI;
     pLista: TFedex_PurchaseOrderList;
@@ -181,33 +182,151 @@ begin
     atribuirRegistros(lSKU.dataset,datasets.sku.dataset);
 
     Result := pAPI.getSKUList(getXMLFromDataset(datasets.sku.dataset),false,pResultado);
+    if(Result=nil) or (Result.count=0) then
+      pResultado.formataErro('getSKUList: Produto [%s] não existe.', [ pID ]);
   except
     on e: Exception do
       pResultado.formataErro('getSKUList: %s: %s', [ e.ClassName, e.Message ] );
   end;
 end;
 
+function testFedexAPISOSCI;
+  var
+    lAPI: IFedexAPI;
+    pLista: TFedex_ShipmentOrderList;
+begin
+  //Fedex.SCI.Impl.test;  //
+  Result := checkResultadoOperacao(pResultado);
+  lAPI := criaFedexApiSCI;
+  pResultado.propriedade['id'].asString := '000001';
+  pLista := getShipmentOrderList(lAPI,pResultado);
+  lAPI.sendShipmentOrderList(pLista,pResultado);
+
+  if(pResultado.eventos>0) then
+    msgAviso(pResultado.toString);
+end;
+
 function getShipmentOrderList;
   var
     gdb: IGDB;
     save1,save2: Integer;
+    ctr: IControleAlteracoes;
+    orders,items,cliente,transportador: IDataset;
+    lID, lQuery: String;
+    lFieldNames: String;
+    lParameters: array of Variant;
+    datasets: TFedexDatasets;
+    lXMLDataList: IDicionarioSimples<TipoWideStringFramework, TipoWideStringFramework>;
+    lSKUList: TFedex_SKUList;
 begin
   checkResultadoOperacao(pResultado);
   Result := nil;
   try
     save1 := pResultado.erros;
     if(pAPI=nil) then
-      pResultado.adicionaErro('getPurchaseOrderList: Não especificou um API válido.');
+      pResultado.adicionaErro('getShipmentOrderList: Não especificou um API válido.');
     gdb := gdbPadrao;
     if(gdb=nil) or not gdb.conectado then
-      pResultado.adicionaErro('getPurchaseOrderList: Não especificou um DB válido.');
+      pResultado.adicionaErro('getShipmentOrderList: Não especificou um DB válido.');
 
     if(pResultado.erros<>save1) then
       exit;
 
+    ctr := pAPI.parameters.controleAlteracoes;
+    orders := gdb.criaDataset;
+    items := gdb.criaDataset;
+    cliente := gdb.criaDataset;
+    transportador := gdb.criaDataset;
+
+    lQuery := 'select p.numero_ped id, p.data_ped data_emissao, p.total_ped valor_total, c.cnpj_cpf_cli cnpj_cpf, ' +
+              ' t.cnpj_cpf_tra transportador, p.codigo_cli cliente_codigo ' +
+//            ' case when ( p.devolucao_pedido_id is null ) then ''E'' else ''D'' end operacao, ' +
+//            ' p.numero_ent numero_nfe, p.codigo_for,p.arq_nfe xml ' +
+            ' from pedidovenda p ' +
+            ' left join clientes c on c.codigo_cli = p.codigo_cli ' +
+            ' left join transportadora t on t.codigo_tra = p.televenda_ped ';
+
+    lID := pResultado.propriedade['id'].asString;
+    SetLength(lParameters,0);
+    lFieldNames := '';
+    if(lID<>'') then begin
+      //Saida específica
+      lFieldNames := 'numero_ped';
+      SetLength(lParameters,1);
+      lParameters[0] := lID;
+      lQuery := lQuery + ' where p.numero_ped=:numero_ped ';
+    end else begin
+// Listar saidas que não estão no controle e precisam enviar
+//      lQuery := lQuery + ' left join controlealteracoes c on c.sistema = :sistema and c.identificador = :identificador and c.chave = cast(p.id as varchar(22)) ' +
+//                ' where ( (c.id is null) or (coalesce(c.valor, '' '') in ( '''', '' '' )) ) ';
+//      SetLength(lParameters,2);
+//      lParameters[0] := ctr.sistema;
+//      lParameters[1] := CONTROLE_LOGISTICA_FEDEX_STATUS_PO;
+//      lFieldNames := 'sistema;identificador';
+      lQuery := lQuery + ' order by 1 ';
+    end;
+
+    orders.query(lQuery,lFieldNames,lParameters);
+
+    datasets := getFedexDatasets;
+
+    atribuirRegistros(orders.dataset,datasets.so.dataset);
+
+    datasets.so.dataset.First;
+    while not datasets.so.dataset.Eof do begin
+
+      save1 := pResultado.erros;
+
+      cliente.query('select p.cnpj_cpf_cli cnpj_cpf, p.razao_cli razao_social, p.fantasia_cli fantasia, ' +
+          ' p.endereco_cli endereco, p.numero_end numero, p.complemento complemento, p.cidade_cli cidade, ' +
+          ' p.uf_cli uf, p.cep_cli cep ' +
+          ' from clientes p ' +
+          ' where p.codigo_cli = :cliente ', 'cliente', [datasets.so.dataset.FieldByName('cliente_codigo').AsString]);
+
+      atribuirRegistros(cliente.dataset, datasets.cliente.dataset);
+
+      if(cliente.dataset.RecordCount=0) then begin
+        pResultado.formataErro('getShipmentOrderList: Pedido [%s] não possui um cliente válido.', [ datasets.so.dataset.FieldByName('id').AsString ] );
+        break;
+      end;
+
+      lQuery := 'select p.numero_ped id, id item, p.codigo_pro produto, p.quantidade_ped quantidade ' +
+        ' from pedidoitens p ' +
+        ' where p.numero_ped=:id ';
+
+      items.query(lQuery,'id', [ datasets.so.dataset.FieldByName('id').AsString ]);
+
+      while not items.dataset.eof do begin
+        if Fedex_PrecisaEnviarSKU(items.dataset.FieldByName('produto').AsString) then begin
+          save2 := pResultado.erros;
+          pAPI.parameters.modoProducao := true;
+          lSKUList := getSKUList(pAPI,items.dataset.FieldByName('produto').AsString,pResultado);
+          if(save2=pResultado.erros) then
+            pAPI.sendSKUList(lSKUList,pResultado);
+        end;
+        items.dataset.Next;
+      end;
+      items.dataset.First;
+      if(items.dataset.RecordCount=0) or (pResultado.erros<>save1) then
+        datasets.so.dataset.Delete
+      else
+        atribuirRegistros(items.dataset,datasets.soItens.dataset);
+      datasets.so.dataset.Next;
+    end;
+
+    lXMLDataList := TListaSimplesCreator.CreateDictionary<TipoWideStringFramework,TipoWideStringFramework>;
+    lXMLDataList.add('ordem',datasets.so.getXML);
+    lXMLDataList.add('itens',datasets.soItens.getXML);
+    lXMLDataList.add('cliente',datasets.cliente.getXML);
+    lXMLDataList.add('transportador',datasets.transportador.getXML);
+    Result := pAPI.getShipmentOrderList(lXMLDataList,FEDEX_PRIORIDADE_MEDIA,true,nil,pResultado);
+
+    if (Result=nil) or (Result.count=0) then
+      pResultado.adicionaAviso('getShipmentOrderList: Não existem ordens de envio.');
+
   except
     on e: Exception do
-      pResultado.formataErro('getPurchaseOrderList: %s: %s', [ e.ClassName, e.Message ] );
+      pResultado.formataErro('getShipmentOrderList: %s: %s', [ e.ClassName, e.Message ] );
   end;
 
 end;
@@ -238,13 +357,12 @@ begin
     if(pResultado.erros<>save1) then
       exit;
 
-
     ctr := pAPI.parameters.controleAlteracoes;
 
     orders := gdb.criaDataset;
     items := gdb.criaDataset;
 
-    lQuery := 'select p.id, cfop.cfop, fornecedor.cnpj_cpf_for fornecedor, p.datanota_ent data_movimento, ' +
+    lQuery := 'select cast(p.id as varchar(30)) id, cfop.cfop, fornecedor.cnpj_cpf_for fornecedor, p.datanota_ent data_movimento, ' +
             ' case when ( p.devolucao_pedido_id is null ) then ''E'' else ''D'' end operacao, ' +
             ' p.numero_ent numero_nfe, p.codigo_for,p.arq_nfe xml ' +
             ' from entrada p ' +
@@ -255,11 +373,13 @@ begin
     SetLength(lParameters,0);
     lFieldNames := '';
     if(lID<>'') then begin
+      //Entrada específica
       lFieldNames := 'id';
       SetLength(lParameters,1);
       lParameters[0] := lID;
       lQuery := lQuery + ' where p.id=:id ';
     end else begin
+      //Listar entradas que não estão no controle ou STATUS nulo ou espaço
       lQuery := lQuery + ' left join controlealteracoes c on c.sistema = :sistema and c.identificador = :identificador and c.chave = cast(p.id as varchar(22)) ' +
                 ' where ( (c.id is null) or (coalesce(c.valor, '' '') in ( '''', '' '' )) ) ';
       SetLength(lParameters,2);
@@ -274,48 +394,44 @@ begin
     datasets := getFedexDatasets;
 
     atribuirRegistros(orders.dataset,datasets.po.dataset);
-    orders.query(lQuery,'',[]);
 
-    orders.dataset.First;
-    while not orders.dataset.Eof do begin
+    datasets.po.dataset.First;
+    while not datasets.po.dataset.Eof do begin
 
-      lQuery := 'select ' + QuotedStr(orders.dataset.FieldByName('codigo_for').AsString) + ' id, ' +
+      lQuery := 'select ' + QuotedStr(datasets.po.dataset.FieldByName('id').AsString) + ' id, ' +
         ' p.numero_ent, p.codigo_for, p.codigo_pro produto, p.quantidade_ent quantidade, ' +
         ' p.valoruni_ent unitario, produto.barras_pro barras ' +
         ' from entradaitens p ' +
         ' left join produto on produto.codigo_pro=p.codigo_pro ' +
         ' where p.numero_ent=:numero_ent and p.codigo_for = :codigo_for ';
 
-      items.query(lQuery,'numero_ent;codigo_for', [ orders.dataset.FieldByName('numero_nfe').AsString, orders.dataset.FieldByName('codigo_for').AsString ]);
+      items.query(lQuery,'numero_ent;codigo_for', [ datasets.po.dataset.FieldByName('numero_nfe').AsString, datasets.po.dataset.FieldByName('codigo_for').AsString ]);
       save1 := pResultado.erros;
 
       while not items.dataset.eof do begin
         if Fedex_PrecisaEnviarSKU(items.dataset.FieldByName('produto').AsString) then begin
           save2 := pResultado.erros;
           lSKUList := getSKUList(pAPI,items.dataset.FieldByName('produto').AsString,pResultado);
-          if(save2<>pResultado.erros) then
-            exit;
-          pAPI.sendSKUList(lSKUList,pResultado);
-          //if(save2=pResultado.erros) then
-          //  ctr.setValor(CONTROLE_LOGISTICA_FEDEX_SKU,items.dataset.FieldByName('produto').AsString,DateTimeToStr(Now));
+          if(save2=pResultado.erros) then
+            pAPI.sendSKUList(lSKUList,pResultado);
         end;
         items.dataset.Next;
       end;
       items.dataset.First;
       if(pResultado.erros<>save1) then
-        orders.dataset.Delete
+        datasets.po.dataset.Delete
       else
         atribuirRegistros(items.dataset,datasets.poItens.dataset);
-      orders.dataset.Next;
+      datasets.po.dataset.Next;
     end;
 
     lXMLDataList := TListaSimplesCreator.CreateDictionary<TipoWideStringFramework,TipoWideStringFramework>;
-    lXMLDataList.add('ordem',getXMLFromDataset(datasets.po.dataset));
-    lXMLDataList.add('itens',getXMLFromDataset(datasets.poItens.dataset));
+    lXMLDataList.add('ordem',datasets.po.getXML);
+    lXMLDataList.add('itens',datasets.poItens.getXML);
 
     Result := pAPI.getPurchaseOrderList(lXMLDataList,false,nil,pResultado);
 
-    if(Result.count=0) then
+    if (Result=nil) or (Result.count=0) then
       pResultado.adicionaAviso('getPurchaseOrderList: Não existem ordens de recebimento a enviar.');
 
   except

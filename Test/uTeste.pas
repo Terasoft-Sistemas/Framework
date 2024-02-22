@@ -218,7 +218,7 @@ begin
       lValorPago := 10000;
       lMemJuros  := lTabelaJurosModel.obterLista('000005', lValorPago);
 
-      lFinanceiroParams.WEB_PEDIDO_ID       := '396';
+      lFinanceiroParams.WEB_PEDIDO_ID       := '422';
       lFinanceiroParams.PORTADOR_ID         := '000005';
       lFinanceiroParams.PRIMEIRO_VENCIMENTO := Date + 30;
       lFinanceiroParams.QUANTIDADE_PARCELAS := 5;
@@ -867,14 +867,12 @@ begin
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
-       ShowMessage('Erro: ' + E.Message);
+       ShowMessage('Erro do Except: ' + E.Message);
     end;
   finally
     lFinanceiroPedidoModel.Free;
   end;
 end;
-
-/// WebPedido ///
 
 procedure TForm1.Button40Click(Sender: TObject);
 var

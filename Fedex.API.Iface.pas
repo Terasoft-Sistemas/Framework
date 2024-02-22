@@ -35,6 +35,7 @@ interface
 
     CONTROLE_LOGISTICA_FEDEX_SKU  = 'SKU.CONTROLE';
     CONTROLE_LOGISTICA_FEDEX_STATUS_PO   = 'PO.STATUS';
+    CONTROLE_LOGISTICA_FEDEX_STATUS_SO   = 'SO.STATUS';
 
     CONTROLE_LOGISTICA_STATUS_ENVIADO = 'A';
 
@@ -274,13 +275,15 @@ interface
   {$ifend}
 
   type
+
     TFedexDatasets = record
       valido: boolean;
-      po, poItens, sku: IDatasetSimples;
+      po, poItens, sku,
+      so, soItens,
+      cliente, transportador: IDatasetSimples;
     end;
 
   function getFedexDatasets: TFedexDatasets;
-
 
 implementation
   uses
@@ -298,9 +301,10 @@ begin
   Result.po := criaDatasetSimples;
   ds := TClientDataSet(Result.po.dataset);
   ds.Close;
-  ds.FieldDefs.Add('id',ftString,50,false);
+  ds.FieldDefs.Add('id',ftString,30,false);
   ds.FieldDefs.Add('cfop',ftString,50,false);
-  ds.FieldDefs.Add('fornecedor',ftString,50,false);
+  ds.FieldDefs.Add('fornecedor',ftString,30,false);
+  ds.FieldDefs.Add('codigo_for',ftString,30,false);
   ds.FieldDefs.Add('data_movimento',ftDate,0,false);
   ds.FieldDefs.Add('operacao',ftString,1,false);
   ds.FieldDefs.Add('xml',ftMemo,1,false);
@@ -332,8 +336,60 @@ begin
   ds.CreateDataSet;
   ds.LogChanges := false;
 
+  Result.so := criaDatasetSimples;
+  ds := TClientDataSet(Result.so.dataset);
+  ds.Close;
+  ds.FieldDefs.Add('id',ftString,50,false);
+  ds.FieldDefs.Add('data_emissao',ftDate,0,false);
+  ds.FieldDefs.Add('valor_total',ftFloat,0,false);
+  ds.FieldDefs.Add('cliente_codigo',ftString,30,false);
+  ds.FieldDefs.Add('cnpj_cpf',ftString,30,false);
+  ds.FieldDefs.Add('transportador',ftString,30,false);
+  ds.CreateDataSet;
+  ds.LogChanges := false;
+
+  Result.soItens := criaDatasetSimples;
+  ds := TClientDataSet(Result.soItens.dataset);
+  ds.Close;
+  ds.FieldDefs.Add('id',ftString,50,false);
+  ds.FieldDefs.Add('item',ftString,30,false);
+  ds.FieldDefs.Add('produto_id',ftString,30,false);
+  ds.FieldDefs.Add('quantidade',ftFloat,0,false);
+  ds.CreateDataSet;
+  ds.LogChanges := false;
+
+  Result.cliente := criaDatasetSimples;
+  ds := TClientDataSet(Result.cliente.dataset);
+  ds.Close;
+  ds.FieldDefs.Add('cnpj_cpf',ftString,30,false);
+  ds.FieldDefs.Add('razao_social',ftString,100,false);
+  ds.FieldDefs.Add('fantasia',ftString,100,false);
+  ds.FieldDefs.Add('endereco',ftString,100,false);
+  ds.FieldDefs.Add('numero',ftString,20,false);
+  ds.FieldDefs.Add('complemento',ftString,100,false);
+  ds.FieldDefs.Add('cidade',ftString,100,false);
+  ds.FieldDefs.Add('uf',ftString,10,false);
+  ds.FieldDefs.Add('cep',ftString,30,false);
+  ds.CreateDataSet;
+  ds.LogChanges := false;
+
+  Result.transportador := criaDatasetSimples;
+  ds := TClientDataSet(Result.transportador.dataset);
+  ds.Close;
+  ds.FieldDefs.Add('cnpj_cpf',ftString,30,false);
+  ds.FieldDefs.Add('razao_social',ftString,100,false);
+  ds.FieldDefs.Add('fantasia',ftString,100,false);
+  ds.FieldDefs.Add('endereco',ftString,100,false);
+  ds.FieldDefs.Add('numero',ftString,20,false);
+  ds.FieldDefs.Add('complemento',ftString,100,false);
+  ds.FieldDefs.Add('cidade',ftString,100,false);
+  ds.FieldDefs.Add('uf',ftString,10,false);
+  ds.FieldDefs.Add('cep',ftString,30,false);
+  ds.FieldDefs.Add('pais',ftString,30,false);
+  ds.FieldDefs.Add('telefone',ftString,30,false);
+  ds.CreateDataSet;
+  ds.LogChanges := false;
 
 end;
-
 
 end.
