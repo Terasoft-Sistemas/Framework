@@ -58,7 +58,10 @@ type
     function excluir(pProdutosModel: TProdutosModel): String;
 
     function ObterListaMemTable: TFDMemTable;
+
     procedure obterLista;
+    procedure obterListaCatalogo;
+
     function obterSaldo(pIdProduto: String): Double;
     procedure subtrairSaldo(pIdProduto: String; pSaldo: Double);
     procedure adicionarSaldo(pIdProduto: String; pSaldo: Double);
@@ -438,10 +441,13 @@ var
   lSQL : String;
 begin
   lSQL := '';
+
   if not FWhereView.IsEmpty then
     lSQL := lSQL + FWhereView;
+
   if FIDRecordView <> ''  then
-    lSQL := lSQL + ' and produto.codigo_pro = '+ QuotedStr(FIDRecordView);
+    lSQL := lSQL + ' and codigo_pro = '+ QuotedStr(FIDRecordView);
+
   Result := lSQL;
 end;
 procedure TProdutosDao.obterTotalRegistros;
@@ -466,6 +472,7 @@ begin
   lConexao := vIConexao.getConnection;
   Result   := lConexao.ExecSQLScalar('select barras_pro from produto where codigo_pro = '+ QuotedStr(pIdProduto));
 end;
+
 procedure TProdutosDao.obterLista;
 var
   lQry: TFDQuery;
@@ -515,6 +522,95 @@ begin
     lQry.Free;
   end;
 end;
+
+procedure TProdutosDao.obterListaCatalogo;
+var
+  lQry,
+  lQryCD         : TFDQuery;
+  i              : Integer;
+  lPaginacao,
+  lSql           : String;
+begin
+
+  FProdutossLista := TObjectList<TProdutosModel>.Create;
+  lQry            := vIConexao.CriarQuery;
+
+  try
+    if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
+      lPaginacao := 'first ' + LengthPageView + ' SKIP ' + StartRecordView;
+
+    lSQL := '  select  '+lPaginacao+'                                                           '+
+            '          NOME_PRO,                                                                '+
+            '          BARRAS_PRO,                                                              '+
+            '          CODIGO_PRO,                                                              '+
+            '          VENDA_PRO,                                                               '+
+            '          CUSTOMEDIO_PRO,                                                          '+
+            '          NFCE_CFOP,                                                               '+
+            '          GARANTIA_12,                                                             '+
+            '          GARANTIA_24,                                                             '+
+            '          SALDO_DISPONIVEL                                                         '+
+            '    from                                                                           '+
+            '                                                                                   '+
+            '      (                                                                            '+
+            '        select produto.nome_pro,                                                   '+
+            '               produto.barras_pro,                                                 '+
+            '               produto.codigo_pro,                                                 '+
+            '               produto.venda_pro,                                                  '+
+            '               produto.customedio_pro,                                             '+
+            '               produto.nfce_cfop,                                                  '+
+            '               produto.garantia_12,                                                '+
+            '               produto.garantia_24,                                                '+
+            '               saldo.saldo - saldo.reservado saldo_disponivel                      '+
+            '          from produto                                                             '+
+            '          left join view_saldo_produto saldo on saldo.codigo = produto.codigo_pro  '+
+            '       )                                                                           '+
+            '                                                                                   '+
+            '   where 1=1                                                                       ';
+
+    lSql := lSql + where;
+
+    if not FOrderView.IsEmpty then
+      lSQL := lSQL + ' order by '+FOrderView;
+
+    lQry.Open(lSQL);
+
+    vIConexao.ConfigConexaoExterna('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA);
+
+    lQryCD := vIConexao.criarQueryExterna;
+    lQryCD.Open(lSQL);
+
+    i := 0;
+    lQry.First;
+    while not lQry.Eof do
+    begin
+      FProdutossLista.Add(TProdutosModel.Create(vIConexao));
+      i := FProdutossLista.Count -1;
+
+      FProdutossLista[i].CODIGO_PRO        := lQry.FieldByName('CODIGO_PRO').AsString;
+      FProdutossLista[i].NOME_PRO          := lQry.FieldByName('NOME_PRO').AsString;
+      FProdutossLista[i].BARRAS_PRO        := lQry.FieldByName('BARRAS_PRO').AsString;
+      FProdutossLista[i].VENDA_PRO         := lQry.FieldByName('VENDA_PRO').AsString;
+      FProdutossLista[i].CUSTOMEDIO_PRO    := lQry.FieldByName('CUSTOMEDIO_PRO').AsString;
+      FProdutossLista[i].NFCE_CFOP         := lQry.FieldByName('NFCE_CFOP').AsString;
+      FProdutossLista[i].GARANTIA_12       := lQry.FieldByName('GARANTIA_12').AsString;
+      FProdutossLista[i].GARANTIA_24       := lQry.FieldByName('GARANTIA_24').AsString;
+      FProdutossLista[i].SALDO_DISPONIVEL  := lQry.FieldByName('SALDO_DISPONIVEL').AsString;
+
+      lQryCD.First;
+      if lQryCD.Locate('CODIGO_PRO', lQry.FieldByName('CODIGO_PRO').AsString, []) then
+        FProdutossLista[i].SALDO_CD := lQryCD.FieldByName('SALDO_DISPONIVEL').AsString;
+
+      lQry.Next;
+    end;
+
+    obterTotalRegistros;
+
+  finally
+    lQry.Free;
+    lQryCD.Free;
+  end;
+end;
+
 function TProdutosDao.ObterListaMemTable: TFDMemTable;
 var
   lQry: TFDQuery;
