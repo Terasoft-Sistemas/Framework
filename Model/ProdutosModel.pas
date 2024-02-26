@@ -295,6 +295,8 @@ type
     FCSOSN: Variant;
     FVENDAPROMOCAO_PRO: Variant;
     FIDRecordView: String;
+    FSALDO_CD: Variant;
+    FSALDO_DISPONIVEL: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetProdutossLista(const Value: TObjectList<TProdutosModel>);
@@ -565,6 +567,8 @@ type
     procedure SetWEB_VARIACAO(const Value: Variant);
     procedure SetXMOTIVOISENCAO(const Value: Variant);
     procedure SetIDRecordView(const Value: String);
+    procedure SetSALDO_CD(const Value: Variant);
+    procedure SetSALDO_DISPONIVEL(const Value: Variant);
 
   public
     property UUID: Variant read FUUID write SetUUID;
@@ -828,10 +832,14 @@ type
     property CONVERSAO_FRACIONADA_FILHO: Variant read FCONVERSAO_FRACIONADA_FILHO write SetCONVERSAO_FRACIONADA_FILHO;
     property PERCENTUAL_PERDA_MATERIA_PRIMA: Variant read FPERCENTUAL_PERDA_MATERIA_PRIMA write SetPERCENTUAL_PERDA_MATERIA_PRIMA;
     property EXTIPI: Variant read FEXTIPI write SetEXTIPI;
+    property SALDO_DISPONIVEL: Variant read FSALDO_DISPONIVEL write SetSALDO_DISPONIVEL;
+    property SALDO_CD: Variant read FSALDO_CD write SetSALDO_CD;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
+
     procedure obterLista;
+    procedure obterListaCatalogo;
 
     function Incluir  : String;
     function Alterar(pID : String) : TProdutosModel;
@@ -930,6 +938,7 @@ begin
     lProdutosDao.Free;
   end;
 end;
+
 procedure TProdutosModel.obterLista;
 var
   lProdutosLista: TProdutosDao;
@@ -950,6 +959,30 @@ begin
     lProdutosLista.Free;
   end;
 end;
+
+procedure TProdutosModel.obterListaCatalogo;
+var
+  lProdutosLista: TProdutosDao;
+begin
+  lProdutosLista := TProdutosDao.Create(vIConexao);
+  try
+    lProdutosLista.TotalRecords    := FTotalRecords;
+    lProdutosLista.WhereView       := FWhereView;
+    lProdutosLista.CountView       := FCountView;
+    lProdutosLista.OrderView       := FOrderView;
+    lProdutosLista.StartRecordView := FStartRecordView;
+    lProdutosLista.LengthPageView  := FLengthPageView;
+    lProdutosLista.IDRecordView    := FIDRecordView;
+
+    lProdutosLista.obterListaCatalogo;
+
+    FTotalRecords   := lProdutosLista.TotalRecords;
+    FProdutossLista := lProdutosLista.ProdutossLista;
+  finally
+    lProdutosLista.Free;
+  end;
+end;
+
 function TProdutosModel.obterListaMemTable: TFDMemTable;
 var
   lProdutosLista: TProdutosDao;
@@ -1751,6 +1784,16 @@ procedure TProdutosModel.SetSALDOMIN_PRO(const Value: Variant);
 begin
   FSALDOMIN_PRO := Value;
 end;
+procedure TProdutosModel.SetSALDO_CD(const Value: Variant);
+begin
+  FSALDO_CD := Value;
+end;
+
+procedure TProdutosModel.SetSALDO_DISPONIVEL(const Value: Variant);
+begin
+  FSALDO_DISPONIVEL := Value;
+end;
+
 procedure TProdutosModel.SetSALDO_ONLINE(const Value: Variant);
 begin
   FSALDO_ONLINE := Value;
