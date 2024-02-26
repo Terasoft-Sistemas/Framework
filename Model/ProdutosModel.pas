@@ -2172,11 +2172,11 @@ begin
     if pProdutoPreco.Promocao then
     begin
       lDia := DiadaSemana(vIConexao.DataServer);
+
       lCondicaoPromocao := '  and promocaoitens.produto_id = '+QuotedStr(pProdutoPreco.Produto) +
                            '  and current_date between promocao.datainicio and promocao.datafim '+
-                           '  and coalesce(promocao.horainicio, ''00:00:00'') <= ' + QuotedStr(TimeToStr(vIConexao.DataServer)) +
-                           '  and coalesce(promocao.horafim, ''24:00:00'') > '+ QuotedStr(TimeToStr(vIConexao.DataServer)) +
-                           '  and coalesce(promocao.'+lDia+', ''S'') = ''S'' ';
+                           '  and current_time between promocao.horainicio and promocao.horafim'+
+                           '  and promocao.'+lDia+' = ''S'' ';
 
       if pProdutoPreco.Portador <> '' then
         lCondicaoPromocao := lCondicaoPromocao + ' and ((promocao.portador_id is null) or (promocao.portador_id = '+QuotedStr(pProdutoPreco.Portador)+'))';

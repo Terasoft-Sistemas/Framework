@@ -35,8 +35,15 @@ interface
   function getSKUList(pAPI: IFedexAPI; pID: TipoWideStringFramework; pResultado: IResultadoOperacao = nil): TFedex_SKUList;
   function fedex_PrecisaEnviarSKU(const pCodigo: TipoWideStringFramework): boolean;
   function criaControleAlteracoesFedex: IControleAlteracoes;
-  function testFedexAPISOSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-  function testFedexAPIPOSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+  function Fedex_SCI_EnviaPO(pID: String = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+  function Fedex_SCI_EnviaSO(pID: String = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+  function Fedex_SCI_ProcessaRetorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+
+  {$if not defined(__RELEASE__)}
+    function testFedexAPISOSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+    function testFedexAPIPOSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+    function testRetornoSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+  {$ifend}
 
 implementation
   uses
@@ -48,21 +55,47 @@ implementation
     SysUtils,
     FuncoesConfig;
 
-function testFedexAPIPOSCI;
+function Fedex_SCI_EnviaSO;
+  var
+    lAPI: IFedexAPI;
+    pLista: TFedex_ShipmentOrderList;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  lAPI := criaFedexApiSCI;
+  pResultado.propriedade['id'].asString := pID;
+  pLista := getShipmentOrderList(lAPI,pResultado);
+  lAPI.sendShipmentOrderList(pLista,pResultado);
+end;
+
+function Fedex_SCI_EnviaPO(pID: String = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
   var
     lAPI: IFedexAPI;
     pLista: TFedex_PurchaseOrderList;
 begin
-  //Fedex.SCI.Impl.test;  //
   Result := checkResultadoOperacao(pResultado);
   lAPI := criaFedexApiSCI;
-//  pResultado.propriedade['id'].asString := '1';
+  pResultado.propriedade['id'].asString := pID;
   pLista := getPurchaseOrderList(lAPI,pResultado);
   lAPI.sendPurchaseOrderList(pLista,pResultado);
+end;
 
+{$if not defined(__RELEASE__)}
+function testFedexAPIPOSCI;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  Result := Fedex_SCI_EnviaPO('',Result);
   if(pResultado.eventos>0) then
     msgAviso(pResultado.toString);
 end;
+
+function testFedexAPISOSCI;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  Result := Fedex_SCI_EnviaSO('',Result);
+  if(pResultado.eventos>0) then
+    msgAviso(pResultado.toString);
+end;
+{$ifend}
 
 function criaFedexApiSCI;
   var
@@ -190,22 +223,6 @@ begin
   end;
 end;
 
-function testFedexAPISOSCI;
-  var
-    lAPI: IFedexAPI;
-    pLista: TFedex_ShipmentOrderList;
-begin
-  //Fedex.SCI.Impl.test;  //
-  Result := checkResultadoOperacao(pResultado);
-  lAPI := criaFedexApiSCI;
-  pResultado.propriedade['id'].asString := '000001';
-  pLista := getShipmentOrderList(lAPI,pResultado);
-  lAPI.sendShipmentOrderList(pLista,pResultado);
-
-  if(pResultado.eventos>0) then
-    msgAviso(pResultado.toString);
-end;
-
 function getShipmentOrderList;
   var
     gdb: IGDB;
@@ -258,12 +275,13 @@ begin
       lQuery := lQuery + ' where p.numero_ped=:numero_ped ';
     end else begin
 // Listar saidas que não estão no controle e precisam enviar
-//      lQuery := lQuery + ' left join controlealteracoes c on c.sistema = :sistema and c.identificador = :identificador and c.chave = cast(p.id as varchar(22)) ' +
-//                ' where ( (c.id is null) or (coalesce(c.valor, '' '') in ( '''', '' '' )) ) ';
-//      SetLength(lParameters,2);
-//      lParameters[0] := ctr.sistema;
-//      lParameters[1] := CONTROLE_LOGISTICA_FEDEX_STATUS_PO;
-//      lFieldNames := 'sistema;identificador';
+      lQuery := lQuery + ' left join controlealteracoes ca on ca.sistema = :sistema and ca.identificador = :identificador and ca.chave = p.numero_ped ' +
+                ' where ( ca.valor = :status ) ';
+      SetLength(lParameters,3);
+      lParameters[0] := ctr.sistema;
+      lParameters[1] := CONTROLE_LOGISTICA_FEDEX_STATUS_SO;
+      lParameters[2] := CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
+      lFieldNames := 'sistema;identificador;status';
       lQuery := lQuery + ' order by 1 ';
     end;
 
@@ -459,6 +477,22 @@ begin
       pResultado.formataErro('getPurchaseOrderList: %s: %s', [ e.ClassName, e.Message ] );
   end;
 
+end;
+
+function testRetornoSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+begin
+  Result := Fedex_SCI_ProcessaRetorno(checkResultadoOperacao(pResultado));
+  if(pResultado.eventos>0) then
+    msgAviso(pResultado.toString);
+end;
+
+function Fedex_SCI_ProcessaRetorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+  var
+    lAPI: IFedexAPI;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  lAPI := criaFedexApiSCI;
+  lAPI.processaRetorno(nil,pResultado);
 end;
 
 end.

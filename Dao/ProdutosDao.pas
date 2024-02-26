@@ -543,6 +543,7 @@ begin
             '          NOME_PRO,                                                                '+
             '          BARRAS_PRO,                                                              '+
             '          CODIGO_PRO,                                                              '+
+            '          REFERENCIA_NEW,                                                          '+
             '          VENDA_PRO,                                                               '+
             '          CUSTOMEDIO_PRO,                                                          '+
             '          NFCE_CFOP,                                                               '+
@@ -555,6 +556,7 @@ begin
             '        select produto.nome_pro,                                                   '+
             '               produto.barras_pro,                                                 '+
             '               produto.codigo_pro,                                                 '+
+            '               produto.referencia_new,                                             '+
             '               produto.venda_pro,                                                  '+
             '               produto.customedio_pro,                                             '+
             '               produto.nfce_cfop,                                                  '+
@@ -563,7 +565,7 @@ begin
             '               saldo.saldo - saldo.reservado saldo_disponivel                      '+
             '          from produto                                                             '+
             '          left join view_saldo_produto saldo on saldo.codigo = produto.codigo_pro  '+
-            '       )                                                                           '+
+            '       )  produto                                                                  '+
             '                                                                                   '+
             '   where 1=1                                                                       ';
 
