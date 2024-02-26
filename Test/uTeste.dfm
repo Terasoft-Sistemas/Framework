@@ -482,13 +482,49 @@ object Form1: TForm1
         OnClick = Button46Click
       end
       object Button47: TButton
-        Left = 3
-        Top = 647
+        Left = 379
+        Top = 207
         Width = 182
         Height = 42
         Caption = 'Obter Resumo'
         TabOrder = 51
         OnClick = Button47Click
+      end
+      object Button52: TButton
+        Left = 3
+        Top = 647
+        Width = 182
+        Height = 42
+        Caption = 'Banco Inserir'
+        TabOrder = 52
+        OnClick = Button52Click
+      end
+      object Button53: TButton
+        Left = 191
+        Top = 647
+        Width = 182
+        Height = 42
+        Caption = 'Banco Consultar'
+        TabOrder = 53
+        OnClick = Button53Click
+      end
+      object Button54: TButton
+        Left = 379
+        Top = 647
+        Width = 182
+        Height = 42
+        Caption = 'Banco Update'
+        TabOrder = 54
+        OnClick = Button54Click
+      end
+      object Button55: TButton
+        Left = 567
+        Top = 647
+        Width = 182
+        Height = 42
+        Caption = 'Banco Excluir'
+        TabOrder = 55
+        OnClick = Button55Click
       end
     end
     object TabSheet2: TTabSheet

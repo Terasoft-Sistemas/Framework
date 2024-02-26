@@ -5,6 +5,7 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
+  FireDAC.Comp.Client,
   Interfaces.Conexao;
 
 type
@@ -234,7 +235,7 @@ type
     property caracteristica_titulo: Variant read Fcaracteristica_titulo write Setcaracteristica_titulo;
 
     
-  	constructor Create(pIConexao : IConexao);
+    constructor Create(pIConexao: IConexao);
     destructor Destroy; override;
 
     function Incluir: String;
@@ -243,7 +244,7 @@ type
     function Salvar: String;
     function carregaClasse(pID: String): TBancoModel;
 
-    procedure obterLista;
+    function obterLista: TFDMemTable;
 
     property BancosLista: TObjectList<TBancoModel> read FBancosLista write SetBancosLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -268,13 +269,12 @@ function TBancoModel.Alterar(pID: String): TBancoModel;
 var
   lBancoModel : TBancoModel;
 begin
-  lBancoModel := lBancoModel.Create(vIConexao);
+  lBancoModel := TBancoModel.Create(vIConexao);
   try
     lBancoModel       := lBancoModel.carregaClasse(pID);
     lBancoModel.Acao  := tacAlterar;
     Result            := lBancoModel;
   finally
-    lBancoModel.Free;
   end;
 end;
 
@@ -289,6 +289,30 @@ function TBancoModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
   self.Salvar;
+end;
+
+function TBancoModel.obterLista: TFDMemTable;
+var
+  lBancoLista: TBancoDao;
+begin
+  lBancoLista := TBancoDao.Create(vIConexao);
+
+  try
+    lBancoLista.TotalRecords    := FTotalRecords;
+    lBancoLista.WhereView       := FWhereView;
+    lBancoLista.CountView       := FCountView;
+    lBancoLista.OrderView       := FOrderView;
+    lBancoLista.StartRecordView := FStartRecordView;
+    lBancoLista.LengthPageView  := FLengthPageView;
+    lBancoLista.IDRecordView    := FIDRecordView;
+
+    Result := lBancoLista.obterLista;
+
+    FTotalRecords  := lBancoLista.TotalRecords;
+
+  finally
+    lBancoLista.Free;
+  end;
 end;
 
 function TBancoModel.carregaClasse(pID: String): TBancoModel;
@@ -314,46 +338,18 @@ begin
   inherited;
 end;
 
-procedure TBancoModel.obterLista;
-var
-  lBancoLista: TBancoDao;
-begin
-  lBancoLista := TBancoDao.Create(vIConexao);
-
-  try
-    lBancoLista.TotalRecords    := FTotalRecords;
-    lBancoLista.WhereView       := FWhereView;
-    lBancoLista.CountView       := FCountView;
-    lBancoLista.OrderView       := FOrderView;
-    lBancoLista.StartRecordView := FStartRecordView;
-    lBancoLista.LengthPageView  := FLengthPageView;
-    lBancoLista.IDRecordView    := FIDRecordView;
-
-    lBancoLista.obterLista;
-
-    FTotalRecords  := lBancoLista.TotalRecords;
-    FBancosLista := lBancoLista.BancosLista;
-
-  finally
-    lBancoLista.Free;
-  end;
-end;
 
 function TBancoModel.Salvar: String;
 var
   lBancoDao: TBancoDao;
 begin
   lBancoDao := TBancoDao.Create(vIConexao);
-
-  Result := '';
-
   try
     case FAcao of
       Terasoft.Types.tacIncluir: Result := lBancoDao.incluir(Self);
       Terasoft.Types.tacAlterar: Result := lBancoDao.alterar(Self);
       Terasoft.Types.tacExcluir: Result := lBancoDao.excluir(Self);
     end;
-
   finally
     lBancoDao.Free;
   end;
