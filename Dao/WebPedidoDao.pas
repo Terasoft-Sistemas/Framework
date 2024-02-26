@@ -12,7 +12,8 @@ uses
   System.Variants,
   Terasoft.FuncoesTexto,
   Terasoft.Utils,
-  Interfaces.Conexao;
+  Interfaces.Conexao,
+  ClipBrd;
 
 type
   TWebPedidoDao = class
@@ -403,7 +404,7 @@ begin
             '         					 coalesce(web_pedidoitens.quantidade,0) * coalesce(web_pedidoitens.vlr_garantia,0) valor_garantia,          '+SLineBreak+
             '         					 coalesce(web_pedido.valor_cupom_desconto,0) valor_cupom_desconto                                           '+SLineBreak+
             '       				from web_pedido                                                                                                 '+SLineBreak+
-            '      			   inner join clientes on web_pedido.cliente_id = clientes.codigo_cli                                               '+SLineBreak+
+            '      			    left join clientes on web_pedido.cliente_id = clientes.codigo_cli                                               '+SLineBreak+
             '      				  left join web_pedidoitens on web_pedidoitens.web_pedido_id = web_pedido.id                                      '+SLineBreak+
             '      				  left join regiao on regiao.id = web_pedido.regiao_id                                                            '+SLineBreak+
             '               left join funcionario on funcionario.codigo_fun = web_pedido.vendedor_id                                        '+SLineBreak+
@@ -418,6 +419,8 @@ begin
       lSQL := lSQL + ' order by '+FOrderView;
 
     lQry.Open(lSQL);
+
+    Clipboard.AsText := lSQL;
 
     Result := vConstrutor.atribuirRegistros(lQry);
     obterTotalRegistros;
