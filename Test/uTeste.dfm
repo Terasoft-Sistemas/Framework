@@ -2,8 +2,8 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'Form1'
-  ClientHeight = 725
-  ClientWidth = 1244
+  ClientHeight = 733
+  ClientWidth = 1246
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -21,6 +21,8 @@ object Form1: TForm1
     ActivePage = TabSheet1
     Align = alClient
     TabOrder = 0
+    ExplicitWidth = 1244
+    ExplicitHeight = 725
     object TabSheet1: TTabSheet
       Caption = 'Diversos'
       object memoResultado: TMemo
@@ -541,8 +543,8 @@ object Form1: TForm1
       ImageIndex = 1
       object dbTeste2: TXDBGrid
         Left = 0
-        Top = 72
-        Width = 1236
+        Top = 80
+        Width = 1238
         Height = 623
         Align = alBottom
         DataSource = dsTeste2
