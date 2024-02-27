@@ -100,7 +100,10 @@ uses
   DocumentoDao in '..\Dao\DocumentoDao.pas',
   DocumentoModel in '..\Model\DocumentoModel.pas',
   FluxoCaixaDao in '..\Dao\FluxoCaixaDao.pas',
-  FluxoCaixaModel in '..\Model\FluxoCaixaModel.pas';
+  FluxoCaixaModel in '..\Model\FluxoCaixaModel.pas',
+  FornecedorModel in '..\Model\FornecedorModel.pas',
+  BancoModel in '..\Model\BancoModel.pas',
+  BancoDao in '..\Dao\BancoDao.pas';
 
 {$R *.res}
 

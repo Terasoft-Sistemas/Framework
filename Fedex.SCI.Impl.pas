@@ -97,6 +97,16 @@ begin
 end;
 {$ifend}
 
+function processaArquivoExpedicao(pResultado: IResultadoOperacao): IResultadoOperacao;
+begin
+  Result := checkResultadoOperacao(pResultado);
+end;
+
+function processaArquivoRecebimento(pResultado: IResultadoOperacao): IResultadoOperacao;
+begin
+  Result := checkResultadoOperacao(pResultado);
+end;
+
 function criaFedexApiSCI;
   var
     fedex: IFedexAPI;
@@ -105,6 +115,10 @@ function criaFedexApiSCI;
     s: String;
 begin
   fedex := createFedexAPI;
+
+  fedex.setProcessador('S',processaArquivoExpedicao);
+  fedex.setProcessador('R',processaArquivoRecebimento);
+
   {$if not defined(MODO_HOMOLOGACAO)}
     fedex.parameters.modoProducao := true;//true;
   {$else}

@@ -23,31 +23,28 @@ type
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
-    FID: Variant;
     FCountView: String;
     FOrderView: String;
     FWhereView: String;
     FTotalRecords: Integer;
-    FIDEntrada: String;
+    FNumeroView: String;
+    FFornecedorView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-
-    function where: String;
-    procedure SetIDEntrada(const Value: String);
+    procedure SetFornecedorView(const Value: String);
+    procedure SetNumeroView(const Value: String);
 
   public
 
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
     property CountView: String read FCountView write SetCountView;
@@ -55,15 +52,19 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
-    property IDEntrada: String read FIDEntrada write SetIDEntrada;
-
+    property NumeroView: String read FNumeroView write SetNumeroView;
+    property FornecedorView: String read FFornecedorView write SetFornecedorView;
+    
     function incluir(AEntradaModel: TEntradaModel): String;
     function alterar(AEntradaModel: TEntradaModel): String;
     function excluir(AEntradaModel: TEntradaModel): String;
 
-    function carregaClasse(pID, pFornecedor : String): TEntradaModel;
+    function carregaClasse(pEntrada, pFornecedor : String): TEntradaModel;
 
-    function obterLista: TFDMemTable;
+    function where: String;
+
+    function obterLista       : TFDMemTable;
+    function obterTotalizador : TFDMemTable;
 
     procedure setParams(var pQry: TFDQuery; pEntradaModel: TEntradaModel);
 
@@ -76,7 +77,7 @@ uses
 
 { TEntrada }
 
-function TEntradaDao.carregaClasse(pID, pFornecedor: String): TEntradaModel;
+function TEntradaDao.carregaClasse(pEntrada, pFornecedor: String): TEntradaModel;
 var
   lQry: TFDQuery;
   lModel: TEntradaModel;
@@ -86,7 +87,7 @@ begin
   Result   := lModel;
 
   try
-    lQry.Open('select * from ENTRADA where NUMERO_ENT = '+ QuotedStr(pID) + ' and CODIGO_FOR = ' + QuotedStr(pFornecedor) );
+    lQry.Open('select * from ENTRADA where NUMERO_ENT = '+ QuotedStr(pEntrada) + ' and CODIGO_FOR = ' + QuotedStr(pFornecedor) );
 
     if lQry.IsEmpty then
       Exit;
@@ -249,10 +250,97 @@ begin
   if not FWhereView.IsEmpty then
     lSQL := lSQL + FWhereView;
 
-  if FIDRecordView <> 0  then
-    lSQL := lSQL + ' and id = '+IntToStr(FIDRecordView);
+  if FIDRecordView <> 0 then
+    lSQL := lSQL + ' and entrada.id = '+IntToStr(FIDRecordView);
+
+
+  if not FNumeroView.IsEmpty then
+    lSQL := lSQL + ' and entrada.numero_ent = '+QuotedStr(FNumeroView);
+
+
+  if not FFornecedorView.IsEmpty then
+    lSQL := lSQL + ' and entrada.codigo_for = '+QuotedStr(FFornecedorView);
 
   Result := lSQL;
+end;
+
+function TEntradaDao.obterTotalizador: TFDMemTable;
+var
+  lQry : TFDQuery;
+  lSql : String;
+begin
+
+  if FNumeroView.IsEmpty then
+    CriaException('Entrada não informado');
+
+  if FFornecedorView.IsEmpty then
+    CriaException('Fornecedor não informado');
+
+  lQry := vIConexao.CriarQuery;
+
+  try
+    lSql :=
+            ' select                                                                                          '+SLineBreak+
+            '    ENTRADA,                                                                                     '+SLineBreak+
+            '    FORNECEDOR,                                                                                  '+SLineBreak+
+            '    QUANTIDADE_ITENS,                                                                            '+SLineBreak+
+            '    QUANTIDADE_PRODUTOS,                                                                         '+SLineBreak+
+            '    TOTAL_PRODUTOS,                                                                              '+SLineBreak+
+            '    TOTAL_BASE_ICMS,                                                                             '+SLineBreak+
+            '    TOTAL_VALOR_ICMS,                                                                            '+SLineBreak+
+            '    TOTAL_BASE_ICMS_ST,                                                                          '+SLineBreak+
+            '    TOTAL_VALOR_ST,                                                                              '+SLineBreak+
+            '    TOTAL_ICMS_DESON,                                                                            '+SLineBreak+
+            '    TOTAL_BASE_IPI,                                                                              '+SLineBreak+
+            '    TOTAL_VALOR_IPI,                                                                             '+SLineBreak+
+            '    TOTAL_BASE_PIS,                                                                              '+SLineBreak+
+            '    TOTAL_VALOR_PIS,                                                                             '+SLineBreak+
+            '    TOTAL_BASE_COFINS,                                                                           '+SLineBreak+
+            '    TOTAL_VALOR_COFINS,                                                                          '+SLineBreak+
+            '    TOTAL_FCP,                                                                                   '+SLineBreak+
+            '    TOTAL_FCP_ST,                                                                                '+SLineBreak+
+            '    TOTAL_OUTROS,                                                                                '+SLineBreak+
+            '    TOTAL_FRETE,                                                                                 '+SLineBreak+
+            '    TOTAL_DESCONTO                                                                               '+SLineBreak+
+            '     from                                                                                        '+SLineBreak+
+            '     (                                                                                           '+SLineBreak+
+            '      select                                                                                     '+SLineBreak+
+            '          e.numero_ent entrada,                                                                  '+SLineBreak+
+            '          e.codigo_for fornecedor,                                                               '+SLineBreak+
+            '          count(*) quantidade_itens,                                                             '+SLineBreak+
+            '          sum(i.quantidade_ent) quantidade_produtos,                                             '+SLineBreak+
+            '          sum(i.valoruni_ent * i.quantidade_ent) total_produtos,                                 '+SLineBreak+
+            '          sum(i.base_icms_ent) total_base_icms,                                                  '+SLineBreak+
+            '          sum(i.vicms_n17) total_valor_icms,                                                     '+SLineBreak+
+            '          sum(i.base_st_ent) total_base_icms_st,                                                 '+SLineBreak+
+            '          sum(i.vicms_st_ent) total_valor_st,                                                    '+SLineBreak+
+            '          sum(0) total_icms_deson,                                                               '+SLineBreak+
+            '          sum(i.vbc_o10) total_base_ipi,                                                         '+SLineBreak+
+            '          sum(i.vipi_014) total_valor_ipi,                                                       '+SLineBreak+
+            '          sum(i.vbc_q07)  total_base_pis,                                                        '+SLineBreak+
+            '          sum(i.vpis_q09) total_valor_pis,                                                       '+SLineBreak+
+            '          sum(i.vbc_s07) total_base_cofins,                                                      '+SLineBreak+
+            '          sum(i.vcofins_s11) total_valor_cofins,                                                 '+SLineBreak+
+            '          sum(i.vfcpst) total_fcp,                                                               '+SLineBreak+
+            '          sum(i.vfcpstret) total_fcp_st,                                                         '+SLineBreak+
+            '          sum(i.vseg_i16) total_outros,                                                          '+SLineBreak+
+            '          sum(i.vfrete_i15) total_frete,                                                         '+SLineBreak+
+            '          sum(i.desc_i17) total_desconto                                                         '+SLineBreak+
+            '        from entrada e                                                                           '+SLineBreak+
+            '        left join entradaitens i on i.numero_ent = e.numero_ent and i.codigo_for = e.codigo_for  '+SLineBreak+
+            '       group by 1,2                                                                              '+SLineBreak+
+            '       )                                                                                         '+SLineBreak+
+            '      where 1=1 ' + SLineBreak;
+
+    lSql := lSql + ' and entrada = '+ QuotedStr(FNumeroView) + ' and fornecedor = '+ QuotedStr(FFornecedorView);
+
+    lQry.Open(lSql);
+
+    Result := vConstrutor.atribuirRegistros(lQry);
+
+  finally
+    lQry.Free;
+  end;
 end;
 
 procedure TEntradaDao.obterTotalRegistros;
@@ -287,15 +375,31 @@ begin
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
     lSql := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
 
-    lSQL := ' select entrada.*,                                                                 '+SLineBreak+
-            '        coalesce(fornecedor.razao_for, fornecedor.fantasia_for) NOME_FORNECEDOR,   '+SLineBreak+
-            '        portador.nome_port PORTADOR                                                '+SLineBreak+
-            '   from entrada                                                                    '+SLineBreak+
-            '   left join fornecedor on fornecedor.codigo_for = entrada.codigo_for              '+SLineBreak+
-            '   left join portador on portador.codigo_port = entrada.portador_id                '+SLineBreak+
-            '  where 1=1                                                                        '+SLineBreak;
+    lSql := ' select                                                                               '+SLineBreak+
+            '    NUMERO,                                                                           '+SLineBreak+
+            '    SERIE,                                                                            '+SLineBreak+
+            '    COD_FORNECEDOR,                                                                   '+SLineBreak+
+            '    NOME_FORNECEDOR,                                                                  '+SLineBreak+
+            '    DATA_EMISSAO,                                                                     '+SLineBreak+
+            '    DATA_MOVIMENTO,                                                                   '+SLineBreak+
+            '    VALOR_TOTAL                                                                       '+SLineBreak+
+            '    from                                                                              '+SLineBreak+
+            '    (                                                                                 '+SLineBreak+
+            '      select                                                                          '+SLineBreak+
+            '             entrada.numero_ent numero,                                               '+SLineBreak+
+            '             entrada.serie_ent serie,                                                 '+SLineBreak+
+            '             entrada.codigo_for cod_fornecedor,                                       '+SLineBreak+
+            '             coalesce(fornecedor.razao_for, fornecedor.fantasia_for) nome_fornecedor, '+SLineBreak+
+            '             entrada.datanota_ent data_emissao,                                       '+SLineBreak+
+            '             entrada.datamovi_ent data_movimento,                                     '+SLineBreak+
+            '             entrada.total_ent valor_total                                            '+SLineBreak+
+            '        from entrada                                                                  '+SLineBreak+
+            '        left join fornecedor on fornecedor.codigo_for = entrada.codigo_for            '+SLineBreak+
+            '       where 1=1                                                                      '+SLineBreak;
 
     lSql := lSql + where;
+
+    lSql := lSql + ' ) entrada ';
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
@@ -316,14 +420,9 @@ begin
   FCountView := Value;
 end;
 
-procedure TEntradaDao.SetID(const Value: Variant);
+procedure TEntradaDao.SetFornecedorView(const Value: String);
 begin
-  FID := Value;
-end;
-
-procedure TEntradaDao.SetIDEntrada(const Value: String);
-begin
-  FIDEntrada := Value;
+  FFornecedorView := Value;
 end;
 
 procedure TEntradaDao.SetIDRecordView(const Value: Integer);
@@ -334,6 +433,11 @@ end;
 procedure TEntradaDao.SetLengthPageView(const Value: String);
 begin
   FLengthPageView := Value;
+end;
+
+procedure TEntradaDao.SetNumeroView(const Value: String);
+begin
+  FNumeroView := Value;
 end;
 
 procedure TEntradaDao.SetOrderView(const Value: String);

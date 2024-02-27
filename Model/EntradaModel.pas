@@ -7,6 +7,11 @@ uses
   System.Generics.Collections,
   Interfaces.Conexao,
   Terasoft.Utils,
+  ACBrNFeNotasFiscais,
+  ACBrNFeConfiguracoes,
+  ACBrNFe,
+//  pcnConversao,
+  pcnConversaoNFe,
   FireDAC.Comp.Client;
 
 type
@@ -22,7 +27,7 @@ type
 
   private
     vIConexao : IConexao;
-
+    ACBrNFe: TACBrNFe;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -105,6 +110,9 @@ type
     FOS_ID: Variant;
     FST_GUIA: Variant;
     FIPI_ENT: Variant;
+    FPathXML: Variant;
+    FNumeroView: String;
+    FFornecedorView: String;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -188,6 +196,9 @@ type
     procedure SetVRETCSLL_W26(const Value: Variant);
     procedure SetVRETPIS_W24(const Value: Variant);
     procedure SetVRETPREV_W30(const Value: Variant);
+    procedure SetPathXML(const Value: Variant);
+    procedure SetFornecedorView(const Value: String);
+    procedure SetNumeroView(const Value: String);
 
   public
 
@@ -276,7 +287,18 @@ type
 
     function EntradaItens(pEntradaItensParams : TEntradaItensParams) : String;
     function carregaClasse(pId, pFornecedor : String): TEntradaModel;
-    function obterLista: TFDMemTable;
+
+    function ValidaCFOP(pCFOP: String): String;
+
+    function obterLista       : TFDMemTable;
+    function obterTotalizador : TFDMemTable;
+
+    function importaXML       : String;
+    function importaCabecalho : String;
+
+    procedure ImportarItens(pEntrada, pFornecedor: String);
+
+    function obterFornecedor(pCNPJCPF : String): String;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -286,13 +308,19 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
-
+    property PathXML : Variant read FPathXML write SetPathXML;
+    property NumeroView: String read FNumeroView write SetNumeroView;
+    property FornecedorView: String read FFornecedorView write SetFornecedorView;
   end;
 
 implementation
 
 uses
-  EntradaDao, ProdutosModel, EntradaItensModel, System.SysUtils;
+  EntradaDao,
+  ProdutosModel,
+  EntradaItensModel,
+  CFOPModel,
+  System.SysUtils, FornecedorModel;
 
 { TEntradaModel }
 
@@ -360,6 +388,165 @@ begin
   Result            := self.Salvar;
 end;
 
+function TEntradaModel.importaCabecalho: String;
+var
+ i: Integer;
+ lEntrada: String;
+begin
+
+  with ACBrNFe.NotasFiscais.Items[0] do
+  begin
+    FSTATUS                      := '1';
+    FNUMERO_NF                   := IntToStr(NFe.Ide.nNF);
+    FSERIE_ENT                   := IntToStr(NFe.Ide.serie);
+    FMODELO_ENT                  := IntToStr(NFe.Ide.modelo);
+    FCODIGO_FOR                  := Self.ObterFornecedor(NFe.Emit.CNPJCPF);
+    DATANOTA_ENT                 := DateToStr(NFe.Ide.dEmi);
+    FDATAMOVI_ENT                := DateToStr(vIConexao.DataServer);
+    FID_A03                      := copy(NFe.infNFe.ID, 4, 44);
+    FARQ_NFE                     := GerarXML;
+    FTOTAL_ENT                   := FloatToStr(NFe.Total.ICMSTot.vNF);
+    FFINALIZADE                  := FinNFeToStr(NFe.Ide.finNFe);
+    FTIPO_FRETE                  := modFreteToStr(NFe.Transp.modFrete);
+    FUSUARIO_ENT                 := vIConexao.getUSer.ID;
+
+    lEntrada := Self.Incluir;
+    Self.ImportarItens(lEntrada, FCODIGO_FOR);
+
+    result := lEntrada;
+  end;
+end;
+
+procedure TEntradaModel.ImportarItens(pEntrada, pFornecedor: String);
+var
+ lEntradaItensModel: TEntradaItensModel;
+ i: Integer;
+begin
+  lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
+
+  try
+    with ACBrNFe.NotasFiscais.Items[0].NFe do
+    begin
+
+      for i := 0 to Det.Count - 1 do
+      begin
+        lEntradaItensModel.Acao       := tacIncluir;
+        lEntradaItensModel.NUMERO_ENT := pEntrada;
+
+        with Det.Items[i] do
+        begin
+          lEntradaItensModel.LOJA := self.FLOJA;
+
+          if self.FCFOP_ID <> '' then
+            lEntradaItensModel.CFOP_ID := self.FCFOP_ID;
+
+          lEntradaItensModel.CODIGO_FOR        := self.FCODIGO_FOR;
+          lEntradaItensModel.NUMERO_ENT        := self.FNUMERO_ENT;
+
+          lEntradaItensModel.ITEM_ENT          := Prod.nItem.ToString;
+          lEntradaItensModel.CODIGO_PRO        := Prod.cProd;
+          lEntradaItensModel.NCM_I05           := Prod.NCM;
+          lEntradaItensModel.CFOP              := Prod.CFOP;
+          lEntradaItensModel.CFOP_ID           := Self.ValidaCFOP(Prod.CFOP);
+          lEntradaItensModel.QUANTIDADE_ENT    := FloatToStr(Prod.qCom);
+          lEntradaItensModel.VALORUNI_ENT      := FloatToStr(Prod.vUnCom);
+          lEntradaItensModel.DESC_I17          := FloatToStr(Prod.vDesc);
+          lEntradaItensModel.VSEG_I16          := FloatToStr(Prod.vSeg + Prod.vOutro);
+          lEntradaItensModel.VFRETE_I15        := FloatToStr(Prod.vFrete);
+        end;
+
+        with Det.Items[i].Imposto.ICMS do
+        begin
+//          lEntradaItensModel.ICMS_ORIGEM       := OrigToStr(orig);
+//          lEntradaItensModel.ICMS_MODADEDADE   := modBCToStr(modBC);
+//          lEntradaItensModel.ICMS_CST          := CSTICMSToStr(CST);
+//          lEntradaItensModel.ICMS_ALIQUOTA     := FormataFloatFireBird(FloatToStr(pICMS));
+//          lEntradaItensModel.ICMS_REDUCAO      := FormataFloatFireBird(FloatToStr(pRedBC));
+//          lEntradaItensModel.ICMS_BASE         := FormataFloatFireBird(FloatToStr(vBC));
+//          lEntradaItensModel.ICMS_VALOR        := FormataFloatFireBird(FloatToStr(vICMS));
+//          lEntradaItensModel.ICMS_CSOSN        := CSOSNIcmsToStr(CSOSN);
+//          lEntradaItensModel.ICMSST_MODALIDADE := modBCSTToStr(modBCST);
+//          lEntradaItensModel.ICMSST_ALIQUOTA   := FormataFloatFireBird(FloatToStr(pICMSST));
+//          lEntradaItensModel.ICMSST_MVA        := FormataFloatFireBird(FloatToStr(pMVAST));
+//          lEntradaItensModel.ICMSST_REDUCAO    := FormataFloatFireBird(FloatToStr(pRedBCST));
+//          lEntradaItensModel.ICMSST_BASE       := FormataFloatFireBird(FloatToStr(vBCST));
+//          lEntradaItensModel.ICMSST_VALOR      := FormataFloatFireBird(FloatToStr(vICMSST));
+//          lEntradaItensModel.ICMS_PCREDSN      := FormataFloatFireBird(FloatToStr(pCredSN));
+//          lEntradaItensModel.ICMS_VCREDICMSSN  := FormataFloatFireBird(FloatToStr(vCredICMSSN));
+//          lEntradaItensModel.VBCSTRET          := FormataFloatFireBird(FloatToStr(vBCSTRet));
+//          lEntradaItensModel.VICMSSTRET        := FormataFloatFireBird(FloatToStr(vICMSSTRet));
+//          lEntradaItensModel.PFCPST            := FormataFloatFireBird(FloatToStr(pFCPST));
+//          lEntradaItensModel.VFCPST            := FormataFloatFireBird(FloatToStr(vFCPST));
+//          lEntradaItensModel.VBCCFP            := FormataFloatFireBird(FloatToStr(vBCFCP));
+//          lEntradaItensModel.PFCP              := FormataFloatFireBird(FloatToStr(pFCP));
+//          lEntradaItensModel.VFCP              := FormataFloatFireBird(FloatToStr(vFCP));
+//          lEntradaItensModel.VBCFCPSTRET       := FormataFloatFireBird(FloatToStr(vBCFCPSTRet));
+//          lEntradaItensModel.PFCPSTRET         := FormataFloatFireBird(FloatToStr(pFCPSTRet));
+//          lEntradaItensModel.VFCPSTRET         := FormataFloatFireBird(FloatToStr(vFCPSTRet));
+//          lEntradaItensModel.PREDBCEFET        := FormataFloatFireBird(FloatToStr(pRedBCEfet));
+//          lEntradaItensModel.VBCEFET           := FormataFloatFireBird(FloatToStr(vBCEfet));
+//          lEntradaItensModel.PICMSEFET         := FormataFloatFireBird(FloatToStr(pICMSEfet));
+//          lEntradaItensModel.VICMSEFET         := FormataFloatFireBird(FloatToStr(vICMSEfet));
+//          lEntradaItensModel.VICMSDESON        := FormataFloatFireBird(FloatToStr(vICMSDeson));
+//          lEntradaItensModel.MOTDESICMS        := motDesICMSToStr(motDesICMS);
+        end;
+
+        with Det.Items[i].Imposto.PIS do
+        begin
+//          lEntradaItensModel.PIS_CST       := CSTPISToStr(CST);
+//          lEntradaItensModel.PIS_ALIQUOTA  := FormataFloatFireBird(FloatToStr(pPIS));
+//          lEntradaItensModel.PIS_BASE      := FormataFloatFireBird(FloatToStr(vBC));
+//          lEntradaItensModel.PIS_VALOR     := FormataFloatFireBird(FloatToStr(vPIS));
+        end;
+
+        with Det.Items[i].Imposto.COFINS do
+        begin
+//          lEntradaItensModel.COFINS_CST      := CSTCOFINSToStr(CST);
+//          lEntradaItensModel.COFINS_ALIQUOTA := FormataFloatFireBird(FloatToStr(pCOFINS));
+//          lEntradaItensModel.COFINS_BASE     := FormataFloatFireBird(FloatToStr(vBC));
+//          lEntradaItensModel.COFINS_VALOR    := FormataFloatFireBird(FloatToStr(vCOFINS));
+        end;
+
+        with Det.Items[i].Imposto.IPI do
+        begin
+//          lEntradaItensModel.IPI_CST      := CSTIPIToStr(CST);
+//          lEntradaItensModel.IPI_ALIQUOTA := FormataFloatFireBird(FloatToStr(pIPI));
+//          lEntradaItensModel.IPI_BASE     := FormataFloatFireBird(FloatToStr(vBC));
+//          lEntradaItensModel.IPI_VALOR    := FormataFloatFireBird(FloatToStr(vIPI));
+        end;
+
+        with Det.Items[i].Imposto.ICMSUFDest do
+        begin
+//          lEntradaItensModel.VBCUFDEST      := FormataFloatFireBird(FloatToStr(vBCUFDest));
+//          lEntradaItensModel.PFCPUFDEST     := FormataFloatFireBird(FloatToStr(pFCPUFDest));
+//          lEntradaItensModel.PICMSUFDEST    := FormataFloatFireBird(FloatToStr(pICMSUFDest));
+//          lEntradaItensModel.PICMSINTER     := FormataFloatFireBird(FloatToStr(pICMSInter));
+//          lEntradaItensModel.PICMSINTERPART := FormataFloatFireBird(FloatToStr(pICMSInterPart));
+//          lEntradaItensModel.VFCPUFDEST     := FormataFloatFireBird(FloatToStr(vFCPUFDest));
+//          lEntradaItensModel.VICMSUFDEST    := FormataFloatFireBird(FloatToStr(vICMSUFDest));
+//          lEntradaItensModel.VICMSUFREMET   := FormataFloatFireBird(FloatToStr(vICMSUFRemet));
+        end;
+
+        lEntradaItensModel.Salvar;
+      end;
+    end;
+
+  finally
+     lEntradaItensModel.Free;
+  end;
+end;
+
+function TEntradaModel.importaXML: String;
+begin
+  if not FileExists(FPathXML) then
+    CriaException('Arquivo XML não localizado');
+
+  ACBrNFe.NotasFiscais.Clear;
+  ACBrNFe.NotasFiscais.LoadFromFile(FPathXML);
+
+  result := Self.ImportaCabecalho;
+end;
+
 function TEntradaModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
@@ -389,6 +576,50 @@ begin
   inherited;
 end;
 
+function TEntradaModel.obterFornecedor(pCNPJCPF: String): String;
+var
+ lFornecedorModel : TFornecedorModel;
+ lTableFornecedor : TFDMemTable;
+begin
+  lFornecedorModel := TFornecedorModel.Create(vIConexao);
+
+  try
+    lFornecedorModel.CNPJCPFRecordView := pCNPJCPF;
+    lTableFornecedor := lFornecedorModel.obterLista;
+
+    if lTableFornecedor.RecordCount > 0 then
+    begin
+      Result := lTableFornecedor.fieldByName('CODIGO_FOR').Value;
+      exit;
+    end;
+
+    with ACBrNFe.NotasFiscais.Items[0].NFe.Emit do
+    begin
+      lFornecedorModel.TIPO_FOR          := 'J';
+      lFornecedorModel.STATUS            := '1';
+      lFornecedorModel.FANTASIA_FOR      := IIF(xFant = '',xNome, xFant);
+      lFornecedorModel.RAZAO_FOR         := xNome;
+      lFornecedorModel.CNPJ_CPF_FOR      := CNPJCPF;
+      lFornecedorModel.INSCRICAO_RG_FOR  := IE;
+      lFornecedorModel.CEP_FOR           := EnderEmit.CEP.ToString;
+      lFornecedorModel.ENDERECO_FOR      := EnderEmit.xLgr;
+      lFornecedorModel.NUMERO_END        := EnderEmit.cMun.ToString;
+      lFornecedorModel.COMPLEMENTO       := EnderEmit.xCpl;
+      lFornecedorModel.BAIRRO_FOR        := EnderEmit.xBairro;
+      lFornecedorModel.CIDADE_FOR        := EnderEmit.xMun;
+      lFornecedorModel.UF_FOR            := EnderEmit.UF;
+      lFornecedorModel.TELEFONE_FOR      := EnderEmit.fone;
+      lFornecedorModel.COD_MUNICIPIO     := EnderEmit.cMun.ToString;
+      lFornecedorModel.OBSERVACAO_FOR    := 'CADASTRO PELA ENTRADA DE FORNECEDOR';
+    end;
+
+    Result := lFornecedorModel.Incluir;
+
+  finally
+    lFornecedorModel.Free;
+  end;
+end;
+
 function TEntradaModel.obterLista: TFDMemTable;
 var
   lEntradaLista: TEntradaDao;
@@ -408,6 +639,23 @@ begin
 
   finally
     lEntradaLista.Free;
+  end;
+end;
+
+function TEntradaModel.obterTotalizador: TFDMemTable;
+var
+  lEntradaDao: TEntradaDao;
+begin
+  lEntradaDao := TEntradaDao.Create(vIConexao);
+
+  try
+    lEntradaDao.NumeroView     := FNumeroView;
+    lEntradaDao.FornecedorView := FFornecedorView;
+
+    Result := lEntradaDao.obterTotalizador;
+
+  finally
+    lEntradaDao.Free;
   end;
 end;
 
@@ -541,6 +789,11 @@ begin
   FFINALIZADE := Value;
 end;
 
+procedure TEntradaModel.SetFornecedorView(const Value: String);
+begin
+  FFornecedorView := Value;
+end;
+
 procedure TEntradaModel.SetFRETE_ENT(const Value: Variant);
 begin
   FFRETE_ENT := Value;
@@ -611,6 +864,11 @@ begin
   FMODELO_ENT := Value;
 end;
 
+procedure TEntradaModel.SetNumeroView(const Value: String);
+begin
+  FNumeroView := Value;
+end;
+
 procedure TEntradaModel.SetNUMERO_ENT(const Value: Variant);
 begin
   FNUMERO_ENT := Value;
@@ -664,6 +922,11 @@ end;
 procedure TEntradaModel.SetPARCELAS_XML(const Value: Variant);
 begin
   FPARCELAS_XML := Value;
+end;
+
+procedure TEntradaModel.SetPathXML(const Value: Variant);
+begin
+  FPathXML := Value;
 end;
 
 procedure TEntradaModel.SetPEDIDOCOMPRA_ID(const Value: Variant);
@@ -839,6 +1102,31 @@ end;
 procedure TEntradaModel.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
+end;
+
+function TEntradaModel.ValidaCFOP(pCFOP: String): String;
+var
+ lCFOPModel : TCFOPModel;
+begin
+  lCFOPModel := TCFOPModel.Create(vIConexao);
+
+  try
+    lCFOPModel.WhereView := ' and CFOP.CFOP = '+QuotedStr(pCFOP)+' and CFOP.CFOP_REFERENCIA is not NULL ';
+
+    lCFOPModel.obterLista;
+
+    if lCFOPModel.TotalRecords > 0 then
+    begin
+      lCFOPModel.WhereView := 'and CFOP.CFOP = '+QuotedStr(lCFOPModel.CFOPsLista[0].CFOP_REFERENCIA);
+      lCFOPModel.obterLista;
+
+      if lCFOPModel.TotalRecords > 0 then
+        Result := lCFOPModel.CFOPsLista[0].ID;
+    end;
+
+  finally
+     lCFOPModel.Free;
+  end
 end;
 
 end.
