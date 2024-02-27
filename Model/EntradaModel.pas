@@ -419,14 +419,30 @@ end;
 
 procedure TEntradaModel.ImportarItens(pEntrada, pFornecedor: String);
 var
- lEntradaItensModel: TEntradaItensModel;
+ lEntradaItensModel : TEntradaItensModel;
+ lProdutoModel      : TProdutosModel;
  i: Integer;
 begin
   lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
+  lProdutoModel      := TProdutosModel.Create(vIConexao);
 
   try
     with ACBrNFe.NotasFiscais.Items[0].NFe do
     begin
+
+      lProdutoModel.IDRecordView := '999999';
+      lProdutoModel.obterLista;
+
+      if lProdutoModel.TotalRecords = 0 then
+      begin
+        lProdutoModel.CODIGO_PRO   := '999999';
+        lProdutoModel.NOME_PRO     := 'PRODUTO NÃO VINCULADO';
+        lProdutoModel.CODIGO_GRU   := '000000';
+        lProdutoModel.CODIGO_FOR   := '000000';
+        lProdutoModel.CODIGO_MAR   := '000000';
+        lProdutoModel.CODIGO_SUB   := '000000';
+        lProdutoModel.Incluir;
+      end;
 
       for i := 0 to Det.Count - 1 do
       begin
@@ -437,17 +453,18 @@ begin
         begin
           lEntradaItensModel.LOJA := self.FLOJA;
 
-          if self.FCFOP_ID <> '' then
-            lEntradaItensModel.CFOP_ID := self.FCFOP_ID;
-
+          lEntradaItensModel.ITEM_ENT          := Prod.nItem.ToString;
+          lEntradaItensModel.CODIGO_PRO        := '999999';
           lEntradaItensModel.CODIGO_FOR        := self.FCODIGO_FOR;
           lEntradaItensModel.NUMERO_ENT        := self.FNUMERO_ENT;
-
-          lEntradaItensModel.ITEM_ENT          := Prod.nItem.ToString;
-          lEntradaItensModel.CODIGO_PRO        := Prod.cProd;
+          lEntradaItensModel.CPROD             := Prod.cProd;
+          lEntradaItensModel.CEAN              := Prod.cEAN;
+          lEntradaItensModel.CBARRA            := Prod.cBarra;
+          lEntradaItensModel.XPROD             := Prod.xProd;
+          lEntradaItensModel.CEST              := Prod.CEST;
+          lEntradaItensModel.UCOM              := Prod.uCom;
           lEntradaItensModel.NCM_I05           := Prod.NCM;
           lEntradaItensModel.CFOP              := Prod.CFOP;
-          lEntradaItensModel.CFOP_ID           := Self.ValidaCFOP(Prod.CFOP);
           lEntradaItensModel.QUANTIDADE_ENT    := FloatToStr(Prod.qCom);
           lEntradaItensModel.VALORUNI_ENT      := FloatToStr(Prod.vUnCom);
           lEntradaItensModel.DESC_I17          := FloatToStr(Prod.vDesc);
@@ -550,7 +567,8 @@ begin
     end;
 
   finally
-     lEntradaItensModel.Free;
+    lEntradaItensModel.Free;
+    lProdutoModel.Free;
   end;
 end;
 

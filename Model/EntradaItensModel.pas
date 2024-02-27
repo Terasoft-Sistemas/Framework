@@ -140,6 +140,12 @@ type
     FCUSTO_COMPRA: Variant;
     FIPI_ENT: Variant;
     FIDEntrada: String;
+    FCEAN: Variant;
+    FCPROD: Variant;
+    FCEST: Variant;
+    FCBARRA: Variant;
+    FXPROD: Variant;
+    FUCOM: Variant;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -267,6 +273,12 @@ type
     procedure SetVSEG_I16(const Value: Variant);
     procedure SetVUNID_O12(const Value: Variant);
     procedure SetIDEntrada(const Value: String);
+    procedure SetCBARRA(const Value: Variant);
+    procedure SetCEAN(const Value: Variant);
+    procedure SetCEST(const Value: Variant);
+    procedure SetCPROD(const Value: Variant);
+    procedure SetXPROD(const Value: Variant);
+    procedure SetUCOM(const Value: Variant);
 
   public
 
@@ -387,6 +399,12 @@ type
     property VICMS_ORIGINAL                 : Variant  read FVICMS_ORIGINAL write SetVICMS_ORIGINAL;
     property VICMSSUBISTITUTORET            : Variant  read FVICMSSUBISTITUTORET write SetVICMSSUBISTITUTORET;
     property PICMSSTRET                     : Variant  read FPICMSSTRET write SetPICMSSTRET;
+    property CPROD                          : Variant read FCPROD write SetCPROD;
+    property CEAN                           : Variant read FCEAN write SetCEAN;
+    property CBARRA                         : Variant read FCBARRA write SetCBARRA;
+    property XPROD                          : Variant read FXPROD write SetXPROD;
+    property CEST                           : Variant read FCEST write SetCEST;
+    property UCOM                           : Variant read FUCOM write SetUCOM;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -547,9 +565,24 @@ begin
   FBASE_ST_ORIGINAL := Value;
 end;
 
+procedure TEntradaItensModel.SetCBARRA(const Value: Variant);
+begin
+  FCBARRA := Value;
+end;
+
+procedure TEntradaItensModel.SetCEAN(const Value: Variant);
+begin
+  FCEAN := Value;
+end;
+
 procedure TEntradaItensModel.SetCENQ_O06(const Value: Variant);
 begin
   FCENQ_O06 := Value;
+end;
+
+procedure TEntradaItensModel.SetCEST(const Value: Variant);
+begin
+  FCEST := Value;
 end;
 
 procedure TEntradaItensModel.SetCFOP(const Value: Variant);
@@ -600,6 +633,11 @@ end;
 procedure TEntradaItensModel.SetCountView(const Value: String);
 begin
   FCountView := Value;
+end;
+
+procedure TEntradaItensModel.SetCPROD(const Value: Variant);
+begin
+  FCPROD := Value;
 end;
 
 procedure TEntradaItensModel.SetCREDITA_ICMS(const Value: Variant);
@@ -923,6 +961,11 @@ begin
   FTRIBUTA_PIS := Value;
 end;
 
+procedure TEntradaItensModel.SetUCOM(const Value: Variant);
+begin
+  FUCOM := Value;
+end;
+
 procedure TEntradaItensModel.SetVALIQPROD_Q11(const Value: Variant);
 begin
   FVALIQPROD_Q11 := Value;
@@ -1142,6 +1185,11 @@ end;
 procedure TEntradaItensModel.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
+end;
+
+procedure TEntradaItensModel.SetXPROD(const Value: Variant);
+begin
+  FXPROD := Value;
 end;
 
 end.

@@ -952,8 +952,10 @@ begin
     lProdutosLista.StartRecordView := FStartRecordView;
     lProdutosLista.LengthPageView  := FLengthPageView;
     lProdutosLista.IDRecordView    := FIDRecordView;
+
     lProdutosLista.obterLista;
-    FTotalRecords  := lProdutosLista.TotalRecords;
+
+    FTotalRecords   := lProdutosLista.TotalRecords;
     FProdutossLista := lProdutosLista.ProdutossLista;
   finally
     lProdutosLista.Free;

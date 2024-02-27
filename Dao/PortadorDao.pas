@@ -58,6 +58,7 @@ type
 
     procedure obterLista;
     function carregaClasse(pId: String): TPortadorModel;
+    function PortadorTabelaJuros : TFDMemTable;
 end;
 implementation
 
@@ -176,12 +177,17 @@ function TPortadorDao.where: String;
 var
   lSQL : String;
 begin
+
   lSQL := '';
+
   if not FWhereView.IsEmpty then
     lSQL := lSQL + FWhereView;
+
   if FIDRecordView <> '' then
     lSQL := lSQL + ' and portador.codigo_port = '+ QuotedStr(FIDRecordView);
+
   Result := lSQL;
+
 end;
 procedure TPortadorDao.obterTotalRegistros;
 var
@@ -198,6 +204,43 @@ begin
     lQry.Free;
   end;
 end;
+
+function TPortadorDao.PortadorTabelaJuros: TFDMemTable;
+var
+  lQry : TFDQuery;
+  lSql : String;
+begin
+  lQry := vIConexao.criarQuery;
+  try
+    lSql := '  select                                                                '+sLinebreak+
+            '        CODIGO_PORTADOR,                                                '+sLinebreak+
+            '        NOME_PORTADOR || '' - ''|| MAXIMO_PARCELAS ||''x'' PORTADOR     '+sLinebreak+
+            '    from                                                                '+sLinebreak+
+            '        (                                                               '+sLinebreak+
+            '         select                                                         '+sLinebreak+
+            '               p.codigo_port CODIGO_PORTADOR,                           '+sLinebreak+
+            '               p.nome_port NOME_PORTADOR,                               '+sLinebreak+
+            '               cast(max(t.codigo) as integer) MAXIMO_PARCELAS           '+sLinebreak+
+            '                                                                        '+sLinebreak+
+            '          from portador p                                               '+sLinebreak+
+            '                                                                        '+sLinebreak+
+            '         inner join tabelajuros t on t.portador_id = p.codigo_port      '+sLinebreak+
+            '         where 1=1                                                      '+sLinebreak;
+
+    if FIDRecordView <> '' then
+      lSql := lSql + ' and t.portador_id = ' +QuotedStr(FIDRecordView);
+
+      lSql := lSql + '   group by 1,2     )                                           '+sLineBreak;
+
+    lQry.Open(lSql);
+
+    Result := vConstrutor.atribuirRegistros(lQry);
+
+  finally
+    lQry.Free;
+  end;
+end;
+
 procedure TPortadorDao.obterLista;
 var
   lQry: TFDQuery;

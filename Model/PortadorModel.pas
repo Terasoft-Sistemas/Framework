@@ -5,7 +5,7 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
-  Interfaces.Conexao;
+  Interfaces.Conexao, FireDAC.Comp.Client;
 
 type
   TPortadorModel = class
@@ -135,7 +135,7 @@ type
     procedure obterLista;
 
     function carregaClasse(pId: String): TPortadorModel;
-
+    function PortadorTabelaJuros : TFDMemTable;
     function possuiBandeira(pPortador: String): Boolean;
 
     property PortadorsLista: TObjectList<TPortadorModel> read FPortadorsLista write SetPortadorsLista;
@@ -230,6 +230,21 @@ begin
 
   finally
     lPortadorLista.Free;
+  end;
+end;
+
+function TPortadorModel.PortadorTabelaJuros: TFDMemTable;
+var
+  lPortadorTabelaJuros: TPortadorDao;
+begin
+  lPortadorTabelaJuros := TPortadorDao.Create(vIConexao);
+  try
+
+    lPortadorTabelaJuros.IDRecordView := FIDRecordView;
+    Result := lPortadorTabelaJuros.PortadorTabelaJuros;
+
+  finally
+    lPortadorTabelaJuros.Free;
   end;
 end;
 
