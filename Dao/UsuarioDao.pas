@@ -72,7 +72,7 @@ type
     function vendedorUsuario(pIdUsuario: String): String;
     function nomeUsuario(pIdUsuario: String): String;
 
-    function carregaClasse(ID: String): TUsuarioModel;
+    function carregaClasse(pID: String): TUsuarioModel;
     procedure validaLogin(user,pass: String);
     procedure obterLista;
 end;
@@ -84,17 +84,32 @@ uses
 
 { TUsuarioDao }
 
-function TUsuarioDao.carregaClasse(ID: String): TUsuarioModel;
+function TUsuarioDao.carregaClasse(pID: String): TUsuarioModel;
 var
   lQry: TFDQuery;
   lModel: TUsuarioModel;
+  lSQL: String;
 begin
   lQry     := vIConexao.CriarQuery;
   lModel   := TUsuarioModel.Create(vIConexao);
   Result   := lModel;
 
   try
-    lQry.Open('select * from USUARIO where ID = ' + ID);
+
+    lSQL :=
+    ' select                                        '+sLineBreak+
+    '     u.*,                                      '+sLineBreak+
+    '     f.codigo_fun,                             '+sLineBreak+
+    '     f.tipo_ven                                '+sLineBreak+
+    '                                               '+sLineBreak+
+    ' from USUARIO u                                '+sLineBreak+
+    '                                               '+sLineBreak+
+    ' left join funcionario f on f.cod_user = u.id  '+sLineBreak+
+    '                                               '+sLineBreak+
+    ' where u.id = ' + QuotedStr(pID);
+
+
+    lQry.Open(lSQL);
 
     if lQry.IsEmpty then
       Exit;
@@ -106,6 +121,8 @@ begin
     lModel.NOME           := lQry.FieldByName('NOME').AsString;
     lModel.DPTO           := lQry.FieldByName('DPTO').AsString;
     lModel.PERFIL_NEW_ID  := lQry.FieldByName('PERFIL_NEW_ID').AsString;
+    lModel.CODIGO_FUNCIONARIO  := lQry.FieldByName('codigo_fun').AsString;
+    lModel.TIPO_VENDEDOR       := lQry.FieldByName('tipo_ven').AsString;
 
     Result := lModel;
 

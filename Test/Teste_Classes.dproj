@@ -198,6 +198,9 @@
         <DCCReference Include="..\Model\DocumentoModel.pas"/>
         <DCCReference Include="..\Dao\FluxoCaixaDao.pas"/>
         <DCCReference Include="..\Model\FluxoCaixaModel.pas"/>
+        <DCCReference Include="..\Model\FornecedorModel.pas"/>
+        <DCCReference Include="..\Model\BancoModel.pas"/>
+        <DCCReference Include="..\Dao\BancoDao.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

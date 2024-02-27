@@ -32,13 +32,27 @@ uses
   function Base64ToImagePNG(pBase64PNG: string):TMemoryStream;
   procedure gravaSQL(pSQL, pNome: String);
   function DiaDaSemana(pData : TDate) : String;
+  function DiferencaEntreValoresPercentual(valor1, Valor2: Real): Real;
 
 implementation
+
 uses
   {$IFDEF VCL}
     LbString,
   {$ENDIF}
   Terasoft.Types;
+
+
+
+function DiferencaEntreValoresPercentual(valor1, Valor2: Real): Real;
+begin
+  Result := 0;
+
+  if valor1 > 0 then
+   Result := -1*(((Valor2/Valor1)*100)-100)
+end;
+
+
 function Base64ToImagePNG(pBase64PNG: string):TMemoryStream;
 var
   stream: TMemoryStream;

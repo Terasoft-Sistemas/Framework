@@ -80,6 +80,16 @@ type
     Button49: TButton;
     Button50: TButton;
     Button51: TButton;
+    Button52: TButton;
+    Button53: TButton;
+    Button54: TButton;
+    Button55: TButton;
+    TabSheet3: TTabSheet;
+    XDBGrid1: TXDBGrid;
+    XDBGrid2: TXDBGrid;
+    Button56: TButton;
+    OpenDialog: TOpenDialog;
+    dsEntrada: TDataSource;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -137,6 +147,11 @@ type
     procedure Button49Click(Sender: TObject);
     procedure Button50Click(Sender: TObject);
     procedure Button51Click(Sender: TObject);
+    procedure Button52Click(Sender: TObject);
+    procedure Button53Click(Sender: TObject);
+    procedure Button54Click(Sender: TObject);
+    procedure Button55Click(Sender: TObject);
+    procedure Button56Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -163,7 +178,7 @@ uses
   TabelaJurosModel,
   SaldoModel, EmpresaModel, ProdutosModel, EntradaItensModel,
   ClienteModel, ContasPagarModel, ContasPagarItensModel, System.SysUtils,
-  ReservaModel, DocumentoModel, AnexoModel, FluxoCaixaModel;
+  ReservaModel, DocumentoModel, AnexoModel, FluxoCaixaModel, BancoModel;
 
 {$R *.dfm}
 
@@ -463,7 +478,7 @@ begin
   lContasPagarModel := TContasPagarModel.Create(vIConexao);
   try
     try
-      lContasPagarModel.gerarDuplicatas('R00006', '000001');
+      lContasPagarModel.gerarDuplicatas('9000002024', '500005');
 
       ShowMessage('Parcela adicionada com sucesso!');
     Except
@@ -1216,9 +1231,9 @@ begin
   lFluxoCaixaModel := TFluxoCaixaModel.Create(vIConexao);
   try
     try
-      lFluxoCaixaModel.DataInicialView := '01/01/2022';
-      lFluxoCaixaModel.DataFinalView   := '12/12/2024';
-      lFluxoCaixaModel.PortadorView    := '000001';
+      lFluxoCaixaModel.DataInicialView := '27/02/2024';
+      lFluxoCaixaModel.DataFinalView   := '28/02/2024';
+      //lFluxoCaixaModel.PortadorView    := '000001';
 
       lMemTable := lFluxoCaixaModel.obterResumo;
       dsTeste2.DataSet := lMemTable;
@@ -1252,6 +1267,146 @@ begin
     end;
   finally
     lFluxoCaixaModel.Free;
+  end;
+end;
+
+procedure TForm1.Button52Click(Sender: TObject);
+var
+  lBancoModel : TBancoModel;
+  lNomeBanco  : String;
+begin
+  lBancoModel := TBancoModel.create(vIConexao);
+  try
+    try
+      lNomeBanco :=  InputBox('BANCO','Digite o Nome do Banco:','');
+      if lNomeBanco.IsEmpty then
+      Exit;
+
+      lBancoModel.NOME_BAN    := lNomeBanco;
+      lBancoModel.AGENCIA_BAN := '000123';
+      lBancoModel.CONTA_BAN   := '321123';
+
+      lBancoModel.Incluir;
+      ShowMessage('Incluido com sucesso');
+    except
+       on E:Exception do
+         ShowMessage('Erro: ' + E.Message);
+      end;
+  finally
+    lBancoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button53Click(Sender: TObject);
+var
+  lBancoModel : TBancoModel;
+  lMemTable   : TFDMemTable;
+begin
+  lBancoModel := TBancoModel.Create(vIConexao);
+  try
+    try
+      lMemTable := lBancoModel.obterLista;
+      memoResultado.Lines.Clear;
+
+      lMemTable.First;
+      while not lMemTable.Eof do
+      begin
+        memoResultado.Lines.Add('NUMERO_BAN: '+lMemTable.FieldByName('NUMERO_BAN').AsString);
+        memoResultado.Lines.Add('NOME_BAN: '+lMemTable.FieldByName('NOME_BAN').AsString);
+        memoResultado.Lines.Add('AGENCIA_BAN: '+lMemTable.FieldByName('AGENCIA_BAN').AsString);
+        memoResultado.Lines.Add('CONTA_BAN: '+lMemTable.FieldByName('CONTA_BAN').AsString);
+        memoResultado.Lines.Add('===============================================');
+        lMemTable.Next;
+      end;
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lBancoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button54Click(Sender: TObject);
+var
+  lBancoModel : TBancoModel;
+  ID          : String;
+begin
+  lBancoModel := TBancoModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('BANCO', 'Digite o ID do Banco que deseja Alterar:', '');
+      if ID.IsEmpty then
+        exit;
+
+      lBancoModel := lBancoModel.Alterar(ID);
+      lBancoModel.NOME_BAN := 'TESTE ALTERAR';
+
+      lBancoModel.Salvar;
+      ShowMessage('Alterado com Sucesso');
+    Except
+      on E:Exception do
+      ShowMessage('Erro: ' +E.Message);
+    end;
+  finally
+    lBancoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button55Click(Sender: TObject);
+var
+  lBancoModel : TBancoModel;
+  ID        : String;
+begin
+  lBancoModel := TBancoModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('BANCO', 'Digite o ID do Banco que deseja excluir:', '');
+      if ID.IsEmpty then
+          Exit;
+
+      lBancoModel.Exlcuir(ID);
+      ShowMessage('Excluido com sucesso!');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lBancoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button56Click(Sender: TObject);
+var
+  lEntradaModel : TEntradaModel;
+  lEntrada      : String;
+  lTableEntrada : TFDMemTable;
+begin
+  lEntradaModel := TEntradaModel.Create(vIConexao);
+
+  try
+    OpenDialog.FileName   := '';
+    OpenDialog.Title      := 'Selecione a NFE';
+    OpenDialog.DefaultExt := '*.XML';
+    OpenDialog.Filter     := 'Arquivos NFE (*.XML)|*.XML|Arquivos XML (*-nfe.XML)|*-nfe.XML|Todos os Arquivos (*.*)|*.*';
+    OpenDialog.InitialDir := '%homepath%\documents\';
+
+    OpenDialog.Execute;
+
+    if FileExists(OpenDialog.FileName) then
+    begin
+      lEntradaModel.PathXML := OpenDialog.FileName;
+      lEntrada := lEntradaModel.importaXML;
+
+      if lEntrada <> '' then
+      begin
+        lEntradaModel.NumeroView := lEntrada;
+        lTableEntrada := lEntradaModel.obterLista;
+        dsEntrada.DataSet := lTableEntrada;
+      end;
+    end;
+  finally
+    lEntradaModel.Free;
   end;
 end;
 
@@ -1662,10 +1817,10 @@ begin
   try
     try
 
-      lContasPagarModel.DUPLICATA_PAG  := '9000000009';
+      lContasPagarModel.DUPLICATA_PAG  := '9000002024';
       lContasPagarModel.CODIGO_FOR  := '500005';
       lContasPagarModel.PORTADOR_ID  := '000001';
-      lContasPagarModel.DATAEMI_PAG := '05.02.2024';
+      lContasPagarModel.DATAEMI_PAG := '27.02.2024';
       lContasPagarModel.TIPO_PAG := 'M';
 
       lContasPagarModel.Incluir;

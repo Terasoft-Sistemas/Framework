@@ -55,7 +55,7 @@ interface
 
   type
 
-    TFedexProcessadorArquivoRetorno = function (pResultado: IResultadoOperacao): IResultadoOperacao; stdcall;
+    TFedexProcessadorArquivoRetorno = function (pResultado: IResultadoOperacao): IResultadoOperacao;
 
     IFedexAuth = interface;
     IFedexDepositante = interface;
@@ -254,7 +254,10 @@ interface
     TFedex_ShipmentOrderList = IListaSimples<IFedexShipmentOrder>;
 
     IFedexAPI = interface
-      ['{253BC5B4-60E2-40DD-94D9-4EEA866A2E8F}']
+      ['{159D6DD7-2B62-4D84-AC6A-7AE473B3F286}']
+
+      procedure setProcessador(pInterface: TipoWideStringFramework; pProcessador: TFedexProcessadorArquivoRetorno);
+      function getProcessador(pInterface: TipoWideStringFramework): TFedexProcessadorArquivoRetorno;
 
       function getSKUList(pXMLData: TipoWideStringFramework; critica: boolean; pResultado: IResultadoOperacao): TFedex_SKUList;
       function sendSKU(pSku: IFedexSKU; pResultado: IResultadoOperacao): IResultadoOperacao;

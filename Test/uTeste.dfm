@@ -16,8 +16,8 @@ object Form1: TForm1
   object PageControl1: TPageControl
     Left = 0
     Top = 0
-    Width = 1246
-    Height = 733
+    Width = 1244
+    Height = 725
     ActivePage = TabSheet2
     Align = alClient
     TabOrder = 0
@@ -484,13 +484,49 @@ object Form1: TForm1
         OnClick = Button46Click
       end
       object Button47: TButton
-        Left = 3
-        Top = 647
+        Left = 379
+        Top = 207
         Width = 182
         Height = 42
         Caption = 'Obter Resumo'
         TabOrder = 51
         OnClick = Button47Click
+      end
+      object Button52: TButton
+        Left = 3
+        Top = 647
+        Width = 182
+        Height = 42
+        Caption = 'Banco Inserir'
+        TabOrder = 52
+        OnClick = Button52Click
+      end
+      object Button53: TButton
+        Left = 191
+        Top = 647
+        Width = 182
+        Height = 42
+        Caption = 'Banco Consultar'
+        TabOrder = 53
+        OnClick = Button53Click
+      end
+      object Button54: TButton
+        Left = 379
+        Top = 647
+        Width = 182
+        Height = 42
+        Caption = 'Banco Update'
+        TabOrder = 54
+        OnClick = Button54Click
+      end
+      object Button55: TButton
+        Left = 567
+        Top = 647
+        Width = 182
+        Height = 42
+        Caption = 'Banco Excluir'
+        TabOrder = 55
+        OnClick = Button55Click
       end
     end
     object TabSheet2: TTabSheet
@@ -543,9 +579,50 @@ object Form1: TForm1
         OnClick = Button51Click
       end
     end
+    object TabSheet3: TTabSheet
+      Caption = 'Entrada de fornecedores'
+      ImageIndex = 2
+      object XDBGrid1: TXDBGrid
+        Left = 0
+        Top = 400
+        Width = 1236
+        Height = 295
+        Align = alBottom
+        DataSource = dsTeste2
+        GridStyle.VisualStyle = vsXPStyle
+        TabOrder = 0
+      end
+      object XDBGrid2: TXDBGrid
+        Left = 0
+        Top = 256
+        Width = 1236
+        Height = 144
+        Align = alBottom
+        DataSource = dsEntrada
+        GridStyle.VisualStyle = vsXPStyle
+        TabOrder = 1
+      end
+      object Button56: TButton
+        Left = 19
+        Top = 23
+        Width = 182
+        Height = 42
+        Caption = 'Entrada XML'
+        TabOrder = 2
+        OnClick = Button56Click
+      end
+    end
   end
   object dsTeste2: TDataSource
     Left = 1056
     Top = 544
+  end
+  object OpenDialog: TOpenDialog
+    Left = 1152
+    Top = 544
+  end
+  object dsEntrada: TDataSource
+    Left = 1056
+    Top = 608
   end
 end

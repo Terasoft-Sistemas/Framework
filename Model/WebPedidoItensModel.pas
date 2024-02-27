@@ -247,7 +247,6 @@ type
 
     function Salvar   : String;
 
-    procedure obterListaVendaAssistidaItens;
     procedure obterLista;
 
     function carregaClasse(pId: String): TWebPedidoItensModel;
@@ -348,32 +347,6 @@ begin
     lWebPedidoItensLista.IDWebPedidoView := FIDWebPedidoView;
 
     lWebPedidoItensLista.obterLista;
-
-    FTotalRecords         := lWebPedidoItensLista.TotalRecords;
-    FWebPedidoItenssLista := lWebPedidoItensLista.WebPedidoItenssLista;
-
-  finally
-    lWebPedidoItensLista.Free;
-  end;
-end;
-
-procedure TWebPedidoItensModel.obterListaVendaAssistidaItens;
-var
-  lWebPedidoItensLista: TWebPedidoItensDao;
-begin
-  lWebPedidoItensLista := TWebPedidoItensDao.Create(vIConexao);
-
-  try
-    lWebPedidoItensLista.TotalRecords    := FTotalRecords;
-    lWebPedidoItensLista.WhereView       := FWhereView;
-    lWebPedidoItensLista.CountView       := FCountView;
-    lWebPedidoItensLista.OrderView       := FOrderView;
-    lWebPedidoItensLista.StartRecordView := FStartRecordView;
-    lWebPedidoItensLista.LengthPageView  := FLengthPageView;
-    lWebPedidoItensLista.IDRecordView    := FIDRecordView;
-    lWebPedidoItensLista.IDWebPedidoView := FIDWebPedidoView;
-
-    lWebPedidoItensLista.obterListaVendaAssistidaItens;
 
     FTotalRecords         := lWebPedidoItensLista.TotalRecords;
     FWebPedidoItenssLista := lWebPedidoItensLista.WebPedidoItenssLista;

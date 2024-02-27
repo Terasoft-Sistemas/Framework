@@ -63,6 +63,7 @@ type
     function excluir(ACFOPModel: TCFOPModel): String;
 	
     procedure obterLista;
+
     function carregaClasse(pId: String): TCFOPModel;
     function obterCFOP(pIdCFOP: String): String;
 

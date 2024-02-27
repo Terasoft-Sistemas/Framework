@@ -55,6 +55,8 @@ type
     FPORCENTAGEM_ZOOM_TELA: Variant;
     FIMAGEM: Variant;
     FPERFIL_ID: Variant;
+    FCODIGO_FUNCIONARIO: Variant;
+    FTIPO_VENDEDOR: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCAIXA(const Value: Variant);
     procedure SetCountView(const Value: String);
@@ -95,6 +97,8 @@ type
     procedure SetPORCENTAGEM_ZOOM_TELA(const Value: Variant);
     procedure SetIMAGEM(const Value: Variant);
     procedure SetPERFIL_ID(const Value: Variant);
+    procedure SetCODIGO_FUNCIONARIO(const Value: Variant);
+    procedure SetTIPO_VENDEDOR(const Value: Variant);
 
   public
 
@@ -128,8 +132,10 @@ type
     property URL_WINDOWS         : Variant read FURL_WINDOWS write SetURL_WINDOWS;
     property PAGINA_INICIAL_WEB  : Variant read FPAGINA_INICIAL_WEB write SetPAGINA_INICIAL_WEB;
     property PORCENTAGEM_ZOOM_TELA : Variant read FPORCENTAGEM_ZOOM_TELA write SetPORCENTAGEM_ZOOM_TELA;
-    property PERFIL_ID: Variant read FPERFIL_ID write SetPERFIL_ID;
-    property IMAGEM: Variant read FIMAGEM write SetIMAGEM;
+    property PERFIL_ID             : Variant read FPERFIL_ID write SetPERFIL_ID;
+    property IMAGEM                : Variant read FIMAGEM write SetIMAGEM;
+    property CODIGO_FUNCIONARIO    : Variant read FCODIGO_FUNCIONARIO write SetCODIGO_FUNCIONARIO;
+    property TIPO_VENDEDOR         : Variant read FTIPO_VENDEDOR write SetTIPO_VENDEDOR;
 
     property Acao          : TAcao                      read FAcao          write SetAcao;
     property UsuariosLista : TObjectList<TUsuarioModel> read FUsuariosLista write FUsuariosLista;
@@ -330,6 +336,11 @@ begin
   FCODIGO_ANTERIOR := Value;
 end;
 
+procedure TUsuarioModel.SetCODIGO_FUNCIONARIO(const Value: Variant);
+begin
+  FCODIGO_FUNCIONARIO := Value;
+end;
+
 procedure TUsuarioModel.SetCountView(const Value: String);
 begin
   FCountView := Value;
@@ -473,6 +484,11 @@ end;
 procedure TUsuarioModel.SetSYSTIME(const Value: Variant);
 begin
   FSYSTIME := Value;
+end;
+
+procedure TUsuarioModel.SetTIPO_VENDEDOR(const Value: Variant);
+begin
+  FTIPO_VENDEDOR := Value;
 end;
 
 procedure TUsuarioModel.SetTotalRecords(const Value: Integer);
