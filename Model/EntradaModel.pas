@@ -10,7 +10,7 @@ uses
   ACBrNFeNotasFiscais,
   ACBrNFeConfiguracoes,
   ACBrNFe,
-//  pcnConversao,
+  pcnConversao,
   pcnConversaoNFe,
   FireDAC.Comp.Client;
 
@@ -396,19 +396,19 @@ begin
 
   with ACBrNFe.NotasFiscais.Items[0] do
   begin
-    FSTATUS                      := '1';
-    FNUMERO_NF                   := IntToStr(NFe.Ide.nNF);
-    FSERIE_ENT                   := IntToStr(NFe.Ide.serie);
-    FMODELO_ENT                  := IntToStr(NFe.Ide.modelo);
-    FCODIGO_FOR                  := Self.ObterFornecedor(NFe.Emit.CNPJCPF);
-    DATANOTA_ENT                 := DateToStr(NFe.Ide.dEmi);
-    FDATAMOVI_ENT                := DateToStr(vIConexao.DataServer);
-    FID_A03                      := copy(NFe.infNFe.ID, 4, 44);
-    FARQ_NFE                     := GerarXML;
-    FTOTAL_ENT                   := FloatToStr(NFe.Total.ICMSTot.vNF);
-    FFINALIZADE                  := FinNFeToStr(NFe.Ide.finNFe);
-    FTIPO_FRETE                  := modFreteToStr(NFe.Transp.modFrete);
-    FUSUARIO_ENT                 := vIConexao.getUSer.ID;
+    self.FSTATUS                      := '1';
+    self.FNUMERO_NF                   := IntToStr(NFe.Ide.nNF);
+    self.FSERIE_ENT                   := IntToStr(NFe.Ide.serie);
+    self.FMODELO_ENT                  := IntToStr(NFe.Ide.modelo);
+    self.FCODIGO_FOR                  := Self.ObterFornecedor(NFe.Emit.CNPJCPF);
+    self.DATANOTA_ENT                 := DateToStr(NFe.Ide.dEmi);
+    self.FDATAMOVI_ENT                := DateToStr(vIConexao.DataServer);
+    self.FID_A03                      := copy(NFe.infNFe.ID, 4, 44);
+    self.FARQ_NFE                     := GerarXML;
+    self.FTOTAL_ENT                   := FloatToStr(NFe.Total.ICMSTot.vNF);
+    self.FFINALIZADE                  := FinNFeToStr(NFe.Ide.finNFe);
+    self.FTIPO_FRETE                  := modFreteToStr(NFe.Transp.modFrete);
+    self.FUSUARIO_ENT                 := vIConexao.getUSer.ID;
 
     lEntrada := Self.Incluir;
     Self.ImportarItens(lEntrada, FCODIGO_FOR);
@@ -457,75 +457,93 @@ begin
 
         with Det.Items[i].Imposto.ICMS do
         begin
-//          lEntradaItensModel.ICMS_ORIGEM       := OrigToStr(orig);
-//          lEntradaItensModel.ICMS_MODADEDADE   := modBCToStr(modBC);
-//          lEntradaItensModel.ICMS_CST          := CSTICMSToStr(CST);
-//          lEntradaItensModel.ICMS_ALIQUOTA     := FormataFloatFireBird(FloatToStr(pICMS));
-//          lEntradaItensModel.ICMS_REDUCAO      := FormataFloatFireBird(FloatToStr(pRedBC));
-//          lEntradaItensModel.ICMS_BASE         := FormataFloatFireBird(FloatToStr(vBC));
-//          lEntradaItensModel.ICMS_VALOR        := FormataFloatFireBird(FloatToStr(vICMS));
-//          lEntradaItensModel.ICMS_CSOSN        := CSOSNIcmsToStr(CSOSN);
-//          lEntradaItensModel.ICMSST_MODALIDADE := modBCSTToStr(modBCST);
-//          lEntradaItensModel.ICMSST_ALIQUOTA   := FormataFloatFireBird(FloatToStr(pICMSST));
-//          lEntradaItensModel.ICMSST_MVA        := FormataFloatFireBird(FloatToStr(pMVAST));
-//          lEntradaItensModel.ICMSST_REDUCAO    := FormataFloatFireBird(FloatToStr(pRedBCST));
-//          lEntradaItensModel.ICMSST_BASE       := FormataFloatFireBird(FloatToStr(vBCST));
-//          lEntradaItensModel.ICMSST_VALOR      := FormataFloatFireBird(FloatToStr(vICMSST));
-//          lEntradaItensModel.ICMS_PCREDSN      := FormataFloatFireBird(FloatToStr(pCredSN));
-//          lEntradaItensModel.ICMS_VCREDICMSSN  := FormataFloatFireBird(FloatToStr(vCredICMSSN));
-//          lEntradaItensModel.VBCSTRET          := FormataFloatFireBird(FloatToStr(vBCSTRet));
-//          lEntradaItensModel.VICMSSTRET        := FormataFloatFireBird(FloatToStr(vICMSSTRet));
-//          lEntradaItensModel.PFCPST            := FormataFloatFireBird(FloatToStr(pFCPST));
-//          lEntradaItensModel.VFCPST            := FormataFloatFireBird(FloatToStr(vFCPST));
-//          lEntradaItensModel.VBCCFP            := FormataFloatFireBird(FloatToStr(vBCFCP));
-//          lEntradaItensModel.PFCP              := FormataFloatFireBird(FloatToStr(pFCP));
-//          lEntradaItensModel.VFCP              := FormataFloatFireBird(FloatToStr(vFCP));
-//          lEntradaItensModel.VBCFCPSTRET       := FormataFloatFireBird(FloatToStr(vBCFCPSTRet));
-//          lEntradaItensModel.PFCPSTRET         := FormataFloatFireBird(FloatToStr(pFCPSTRet));
-//          lEntradaItensModel.VFCPSTRET         := FormataFloatFireBird(FloatToStr(vFCPSTRet));
-//          lEntradaItensModel.PREDBCEFET        := FormataFloatFireBird(FloatToStr(pRedBCEfet));
-//          lEntradaItensModel.VBCEFET           := FormataFloatFireBird(FloatToStr(vBCEfet));
-//          lEntradaItensModel.PICMSEFET         := FormataFloatFireBird(FloatToStr(pICMSEfet));
-//          lEntradaItensModel.VICMSEFET         := FormataFloatFireBird(FloatToStr(vICMSEfet));
-//          lEntradaItensModel.VICMSDESON        := FormataFloatFireBird(FloatToStr(vICMSDeson));
-//          lEntradaItensModel.MOTDESICMS        := motDesICMSToStr(motDesICMS);
+
+          // Verificar sobre os ifs que tem no legado para tratar os cst e csosn
+          if CSTICMSToStr(CST) <> '' then
+            lEntradaItensModel.CST_ENT         := CSTICMSToStr(CST)
+          else
+            lEntradaItensModel.CST_ENT         := CSOSNIcmsToStr(CSOSN);
+
+          lEntradaItensModel.ORIG_N11          := OrigToStr(orig);
+          lEntradaItensModel.MOBIBC_N13        := modBCToStr(modBC);
+          lEntradaItensModel.ICMS_ENT          := FloatToStr(pICMS);
+          lEntradaItensModel.PREDBC_N14        := FloatToStr(pRedBC);
+          lEntradaItensModel.BASE_ICMS_ENT     := FloatToStr(vBC);
+          lEntradaItensModel.VICMS_N17         := FloatToStr(vICMS);
+          lEntradaItensModel.MDBCST_N18        := modBCSTToStr(modBCST);
+          lEntradaItensModel.ICMS_ST_ENT       := FloatToStr(pICMSST);
+          lEntradaItensModel.ICMS_ST_ORIGINAL  := FloatToStr(pICMSST);
+          lEntradaItensModel.PMVAST_N19        := FloatToStr(pMVAST);
+          lEntradaItensModel.PREDBCST_N20      := FloatToStr(pRedBCST);
+          lEntradaItensModel.BASE_ST_ENT       := FloatToStr(vBCST);
+          lEntradaItensModel.BASE_ST_ORIGINAL  := FloatToStr(vBCST);
+          lEntradaItensModel.VICMS_ST_ENT      := FloatToStr(vICMSST);
+          lEntradaItensModel.VICMS_ST_ORIGINAL := FloatToStr(vICMSST);
+
+          // Não encontrado
+          // lEntradaItensModel.PCREDSN           := FloatToStr(pCredSN);
+          // lEntradaItensModel.VCREDICMSSN       := FloatToStr(vCredICMSSN);
+
+          lEntradaItensModel.VBCSTRET          := FloatToStr(vBCSTRet);
+          lEntradaItensModel.VICMSSTRET        := FloatToStr(vICMSSTRet);
+          lEntradaItensModel.PFCPST            := FloatToStr(pFCPST);
+          lEntradaItensModel.VFCPST            := FloatToStr(vFCPST);
+          lEntradaItensModel.VBCFPC            := FloatToStr(vBCFCP);
+          lEntradaItensModel.PFCP              := FloatToStr(pFCP);
+          lEntradaItensModel.VFCP              := FloatToStr(vFCP);
+          lEntradaItensModel.VBCFCPSTRET       := FloatToStr(vBCFCPSTRet);
+          lEntradaItensModel.PFCPSTRET         := FloatToStr(pFCPSTRet);
+          lEntradaItensModel.VFCPSTRET         := FloatToStr(vFCPSTRet);
+
+          // Não encontrado
+          // lEntradaItensModel.PREDBCEFET        := FloatToStr(pRedBCEfet);
+          // lEntradaItensModel.VBCEFET           := FloatToStr(vBCEfet);
+          // lEntradaItensModel.PICMSEFET         := FloatToStr(pICMSEfet);
+          // lEntradaItensModel.VICMSEFET         := FloatToStr(vICMSEfet);
+          // lEntradaItensModel.VICMSDESON        := FloatToStr(vICMSDeson);
+          // lEntradaItensModel.MOTDESICMS        := motDesICMSToStr(motDesICMS);
         end;
 
         with Det.Items[i].Imposto.PIS do
         begin
-//          lEntradaItensModel.PIS_CST       := CSTPISToStr(CST);
-//          lEntradaItensModel.PIS_ALIQUOTA  := FormataFloatFireBird(FloatToStr(pPIS));
-//          lEntradaItensModel.PIS_BASE      := FormataFloatFireBird(FloatToStr(vBC));
-//          lEntradaItensModel.PIS_VALOR     := FormataFloatFireBird(FloatToStr(vPIS));
+          lEntradaItensModel.CST_Q06      := CSTPISToStr(CST);
+          lEntradaItensModel.PPIS_Q08     := FloatToStr(pPIS);
+          lEntradaItensModel.vBC_Q07      := FloatToStr(vBC);
+          lEntradaItensModel.VPIS_Q09     := FloatToStr(vPIS);
+          lEntradaItensModel.PIS          := FloatToStr(vPIS);
         end;
 
         with Det.Items[i].Imposto.COFINS do
         begin
-//          lEntradaItensModel.COFINS_CST      := CSTCOFINSToStr(CST);
-//          lEntradaItensModel.COFINS_ALIQUOTA := FormataFloatFireBird(FloatToStr(pCOFINS));
-//          lEntradaItensModel.COFINS_BASE     := FormataFloatFireBird(FloatToStr(vBC));
-//          lEntradaItensModel.COFINS_VALOR    := FormataFloatFireBird(FloatToStr(vCOFINS));
+          lEntradaItensModel.CST_S06      := CSTCOFINSToStr(CST);
+          lEntradaItensModel.PCOFINS_S08  := FloatToStr(pCOFINS);
+          lEntradaItensModel.vBC_S07      := FloatToStr(vBC);
+          lEntradaItensModel.COFINS       := FloatToStr(vCOFINS);
         end;
 
         with Det.Items[i].Imposto.IPI do
         begin
-//          lEntradaItensModel.IPI_CST      := CSTIPIToStr(CST);
-//          lEntradaItensModel.IPI_ALIQUOTA := FormataFloatFireBird(FloatToStr(pIPI));
-//          lEntradaItensModel.IPI_BASE     := FormataFloatFireBird(FloatToStr(vBC));
-//          lEntradaItensModel.IPI_VALOR    := FormataFloatFireBird(FloatToStr(vIPI));
+          lEntradaItensModel.CST_O09      := CSTIPIToStr(CST);
+          lEntradaItensModel.CIENQ_O02    := clEnq;
+          lEntradaItensModel.CENQ_O06     := cEnq;
+          lEntradaItensModel.VBC_O10      := FloatToStr(vBC);
+          lEntradaItensModel.QUNID_O11    := FloatToStr(qUnid);
+          lEntradaItensModel.VUNID_O12    := FloatToStr(vUnid);
+          lEntradaItensModel.IPI_ENT      := FloatToStr(pIPI);
+          lEntradaItensModel.VIPI_014     := FloatToStr(vIPI);
         end;
 
-        with Det.Items[i].Imposto.ICMSUFDest do
-        begin
-//          lEntradaItensModel.VBCUFDEST      := FormataFloatFireBird(FloatToStr(vBCUFDest));
-//          lEntradaItensModel.PFCPUFDEST     := FormataFloatFireBird(FloatToStr(pFCPUFDest));
-//          lEntradaItensModel.PICMSUFDEST    := FormataFloatFireBird(FloatToStr(pICMSUFDest));
-//          lEntradaItensModel.PICMSINTER     := FormataFloatFireBird(FloatToStr(pICMSInter));
-//          lEntradaItensModel.PICMSINTERPART := FormataFloatFireBird(FloatToStr(pICMSInterPart));
-//          lEntradaItensModel.VFCPUFDEST     := FormataFloatFireBird(FloatToStr(vFCPUFDest));
-//          lEntradaItensModel.VICMSUFDEST    := FormataFloatFireBird(FloatToStr(vICMSUFDest));
-//          lEntradaItensModel.VICMSUFREMET   := FormataFloatFireBird(FloatToStr(vICMSUFRemet));
-        end;
+        // with Det.Items[i].Imposto.ICMSUFDest do
+        // begin
+        //   lEntradaItensModel.VBCUFDEST      := FormataFloatFireBird(FloatToStr(vBCUFDest));
+        //   lEntradaItensModel.PFCPUFDEST     := FormataFloatFireBird(FloatToStr(pFCPUFDest));
+        //   lEntradaItensModel.PICMSUFDEST    := FormataFloatFireBird(FloatToStr(pICMSUFDest));
+        //   lEntradaItensModel.PICMSINTER     := FormataFloatFireBird(FloatToStr(pICMSInter));
+        //   lEntradaItensModel.PICMSINTERPART := FormataFloatFireBird(FloatToStr(pICMSInterPart));
+        //   lEntradaItensModel.VFCPUFDEST     := FormataFloatFireBird(FloatToStr(vFCPUFDest));
+        //   lEntradaItensModel.VICMSUFDEST    := FormataFloatFireBird(FloatToStr(vICMSUFDest));
+        //   lEntradaItensModel.VICMSUFREMET   := FormataFloatFireBird(FloatToStr(vICMSUFRemet));
+        // end;
 
         lEntradaItensModel.Salvar;
       end;

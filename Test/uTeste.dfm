@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 1244
     Height = 725
-    ActivePage = TabSheet1
+    ActivePage = TabSheet2
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -577,9 +577,50 @@ object Form1: TForm1
         OnClick = Button51Click
       end
     end
+    object TabSheet3: TTabSheet
+      Caption = 'Entrada de fornecedores'
+      ImageIndex = 2
+      object XDBGrid1: TXDBGrid
+        Left = 0
+        Top = 400
+        Width = 1236
+        Height = 295
+        Align = alBottom
+        DataSource = dsTeste2
+        GridStyle.VisualStyle = vsXPStyle
+        TabOrder = 0
+      end
+      object XDBGrid2: TXDBGrid
+        Left = 0
+        Top = 256
+        Width = 1236
+        Height = 144
+        Align = alBottom
+        DataSource = dsEntrada
+        GridStyle.VisualStyle = vsXPStyle
+        TabOrder = 1
+      end
+      object Button56: TButton
+        Left = 19
+        Top = 23
+        Width = 182
+        Height = 42
+        Caption = 'Entrada XML'
+        TabOrder = 2
+        OnClick = Button56Click
+      end
+    end
   end
   object dsTeste2: TDataSource
     Left = 1056
     Top = 544
+  end
+  object OpenDialog: TOpenDialog
+    Left = 1152
+    Top = 544
+  end
+  object dsEntrada: TDataSource
+    Left = 1056
+    Top = 608
   end
 end

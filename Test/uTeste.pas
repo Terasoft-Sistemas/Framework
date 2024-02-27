@@ -84,6 +84,12 @@ type
     Button53: TButton;
     Button54: TButton;
     Button55: TButton;
+    TabSheet3: TTabSheet;
+    XDBGrid1: TXDBGrid;
+    XDBGrid2: TXDBGrid;
+    Button56: TButton;
+    OpenDialog: TOpenDialog;
+    dsEntrada: TDataSource;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -145,6 +151,7 @@ type
     procedure Button53Click(Sender: TObject);
     procedure Button54Click(Sender: TObject);
     procedure Button55Click(Sender: TObject);
+    procedure Button56Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -471,7 +478,7 @@ begin
   lContasPagarModel := TContasPagarModel.Create(vIConexao);
   try
     try
-      lContasPagarModel.gerarDuplicatas('R00006', '000001');
+      lContasPagarModel.gerarDuplicatas('9000002024', '500005');
 
       ShowMessage('Parcela adicionada com sucesso!');
     Except
@@ -1221,9 +1228,9 @@ begin
   lFluxoCaixaModel := TFluxoCaixaModel.Create(vIConexao);
   try
     try
-      lFluxoCaixaModel.DataInicialView := '01/01/2022';
-      lFluxoCaixaModel.DataFinalView   := '12/12/2024';
-      lFluxoCaixaModel.PortadorView    := '000001';
+      lFluxoCaixaModel.DataInicialView := '27/02/2024';
+      lFluxoCaixaModel.DataFinalView   := '28/02/2024';
+      //lFluxoCaixaModel.PortadorView    := '000001';
 
       lMemTable := lFluxoCaixaModel.obterResumo;
       dsTeste2.DataSet := lMemTable;
@@ -1363,6 +1370,40 @@ begin
     end;
   finally
     lBancoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button56Click(Sender: TObject);
+var
+  lEntradaModel : TEntradaModel;
+  lEntrada      : String;
+  lTableEntrada : TFDMemTable;
+begin
+  lEntradaModel := TEntradaModel.Create(vIConexao);
+
+  try
+    OpenDialog.FileName   := '';
+    OpenDialog.Title      := 'Selecione a NFE';
+    OpenDialog.DefaultExt := '*.XML';
+    OpenDialog.Filter     := 'Arquivos NFE (*.XML)|*.XML|Arquivos XML (*-nfe.XML)|*-nfe.XML|Todos os Arquivos (*.*)|*.*';
+    OpenDialog.InitialDir := '%homepath%\documents\';
+
+    OpenDialog.Execute;
+
+    if FileExists(OpenDialog.FileName) then
+    begin
+      lEntradaModel.PathXML := OpenDialog.FileName;
+      lEntrada := lEntradaModel.importaXML;
+
+      if lEntrada <> '' then
+      begin
+        lEntradaModel.NumeroView := lEntrada;
+        lTableEntrada := lEntradaModel.obterLista;
+        dsEntrada.DataSet := lTableEntrada;
+      end;
+    end;
+  finally
+    lEntradaModel.Free;
   end;
 end;
 
@@ -1773,10 +1814,10 @@ begin
   try
     try
 
-      lContasPagarModel.DUPLICATA_PAG  := '9000000009';
+      lContasPagarModel.DUPLICATA_PAG  := '9000002024';
       lContasPagarModel.CODIGO_FOR  := '500005';
       lContasPagarModel.PORTADOR_ID  := '000001';
-      lContasPagarModel.DATAEMI_PAG := '05.02.2024';
+      lContasPagarModel.DATAEMI_PAG := '27.02.2024';
       lContasPagarModel.TIPO_PAG := 'M';
 
       lContasPagarModel.Incluir;
