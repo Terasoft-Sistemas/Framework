@@ -30,6 +30,7 @@ type
     FDataInicialView: Variant;
     FSomarBancosView: Boolean;
     FOrderView: String;
+    FTipoView: String;
 
     procedure SetWhereView(const Value: String);
     procedure SetBancoView(const Value: String);
@@ -41,6 +42,7 @@ type
     procedure SetOrderView(const Value: String);
 
     function where: String;
+    procedure SetTipoView(const Value: String);
 
   public
     constructor Create(pIConexao : IConexao);
@@ -54,6 +56,7 @@ type
     property PortadorView: String read FPortadorView write SetPortadorView;
     property PorcentagemInadimplenciaView: Real read FPorcentagemInadimplenciaView write SetPorcentagemInadimplenciaView;
     property SomarBancosView: Boolean read FSomarBancosView write SetSomarBancosView;
+    property TipoView: String read FTipoView write SetTipoView;
 
     function obterFluxoCaixaSintetico : TFDMemTable;
     function obterFluxoCaixaAnalitico : TFDMemTable;
@@ -536,6 +539,11 @@ begin
   FSomarBancosView := Value;
 end;
 
+procedure TFluxoCaixaDao.SetTipoView(const Value: String);
+begin
+  FTipoView := Value;
+end;
+
 procedure TFluxoCaixaDao.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
@@ -548,7 +556,13 @@ begin
   lSql := ' and vencimento between ''' + transformaDataFireBirdWhere(FDataInicialView) + ''' and ''' + transformaDataFireBirdWhere(FDataFinalView) + ''' ';
 
   if FPortadorView <> '' then
-    lSql := lSql + ' and portador_cod = ' + FPortadorView;
+    lSql := lSql + ' and portador_cod = ' + QuotedStr(FPortadorView);
+
+  if FTipoView <> '' then
+    lSql := lSql + ' and tipo = ' + QuotedStr(FTipoView);
+
+  if FWhereView <> '' then
+    lSql := lSql + FWhereView;
 
   Result := lSql;
 end;

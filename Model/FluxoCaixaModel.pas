@@ -22,6 +22,7 @@ type
     FDataFinalView: Variant;
     FDataInicialView: Variant;
     FOrderView: String;
+    FTipoView: String;
 
     procedure SetWhereView(const Value: String);
     procedure SetBancoView(const Value: String);
@@ -31,6 +32,7 @@ type
     procedure SetPortadorView(const Value: String);
     procedure SetSomarBancosView(const Value: Boolean);
     procedure SetOrderView(const Value: String);
+    procedure SetTipoView(const Value: String);
 
   public
 
@@ -50,6 +52,8 @@ type
     property PortadorView: String read FPortadorView write SetPortadorView;
     property PorcentagemInadimplenciaView: Real read FPorcentagemInadimplenciaView write SetPorcentagemInadimplenciaView;
     property SomarBancosView: Boolean read FSomarBancosView write SetSomarBancosView;
+    property TipoView: String read FTipoView write SetTipoView;
+
   end;
 
 implementation
@@ -83,6 +87,7 @@ begin
     lFluxoCaixa.PortadorView                 := FPortadorView;
     lFluxoCaixa.PorcentagemInadimplenciaView := FPorcentagemInadimplenciaView;
     lFluxoCaixa.SomarBancosView              := FSomarBancosView;
+    lFluxoCaixa.TipoView                     := FTipoView;
 
     Result := lFluxoCaixa.obterResultadoFluxoCaixa;
   finally
@@ -99,6 +104,7 @@ begin
     lFluxoCaixa.DataInicialView              := FDataInicialView;
     lFluxoCaixa.DataFinalView                := FDataFinalView;
     lFluxoCaixa.PortadorView                 := FPortadorView;
+    lFluxoCaixa.TipoView                     := FTipoView;
 
     Result := lFluxoCaixa.obterResumo;
   finally
@@ -121,6 +127,7 @@ begin
     lFluxoCaixaLista.PortadorView                 := FPortadorView;
     lFluxoCaixaLista.PorcentagemInadimplenciaView := FPorcentagemInadimplenciaView;
     lFluxoCaixaLista.SomarBancosView              := FSomarBancosView;
+    lFluxoCaixaLista.TipoView                     := FTipoView;
 
     Result := lFluxoCaixaLista.obterFluxoCaixaSintetico;
 
@@ -144,6 +151,7 @@ begin
     lFluxoCaixaLista.PortadorView                 := FPortadorView;
     lFluxoCaixaLista.PorcentagemInadimplenciaView := FPorcentagemInadimplenciaView;
     lFluxoCaixaLista.SomarBancosView              := FSomarBancosView;
+    lFluxoCaixaLista.TipoView                     := FTipoView;
 
     Result := lFluxoCaixaLista.obterFluxoCaixaAnalitico;
 
@@ -185,6 +193,11 @@ end;
 procedure TFluxoCaixaModel.SetSomarBancosView(const Value: Boolean);
 begin
   FSomarBancosView := Value;
+end;
+
+procedure TFluxoCaixaModel.SetTipoView(const Value: String);
+begin
+  FTipoView := Value;
 end;
 
 procedure TFluxoCaixaModel.SetWhereView(const Value: String);

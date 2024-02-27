@@ -198,6 +198,7 @@ begin
     lQry.Free;
   end;
 end;
+
 procedure TPortadorDao.obterLista;
 var
   lQry: TFDQuery;

@@ -1131,6 +1131,9 @@ begin
       lFluxoCaixaModel.DataInicialView := '01/01/2023';
       lFluxoCaixaModel.DataFinalView   := '12/12/2024';
 
+      //Para localizar um tipo especifico
+      lFluxoCaixaModel.TipoView := 'RECEBER';
+
       lMemTable := lFluxoCaixaModel.obterFluxoCaixaAnalitico;
       dsTeste2.DataSet := lMemTable;
     except
