@@ -330,11 +330,11 @@ begin
             '                                                                                                                             '+sLineBreak+
             '                      union all                                                                                              '+sLineBreak+
             '                     select ''RECEBER'' TIPO,                                                                                '+sLineBreak+
-            '                            i.valorrec_rec - coalesce(i.valor_pago,0) Total,                                                 '+sLineBreak+
+            '                            i.vlrparcela_rec - coalesce(i.valorrec_rec,0) Total,                                             '+sLineBreak+
             '                            i.vencimento_rec vencimento,                                                                     '+sLineBreak+
             '                            i.codigo_por portador_cod                                                                        '+sLineBreak+
             '                       from contasreceberitens i                                                                             '+sLineBreak+
-            '                      where (i.valorrec_rec - coalesce(i.valor_pago,0)) <> 0                                                 '+sLineBreak+
+            '                      where (i.vlrparcela_rec - coalesce(i.valorrec_rec,0)) <> 0                                             '+sLineBreak+
             '                                                                                                                             '+sLineBreak+
             '                      union all                                                                                              '+sLineBreak+
             '                     select ''COMPRA'' TIPO,                                                                                 '+sLineBreak+
