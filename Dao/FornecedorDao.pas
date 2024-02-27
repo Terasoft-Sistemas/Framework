@@ -56,9 +56,11 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property CNPJCPFRecordView : Variant read FCNPJCPFRecordView write SetCNPJCPFRecordView;
+
     function incluir(pFornecedorModel: TFornecedorModel): String;
     function alterar(pFornecedorModel: TFornecedorModel): String;
     function excluir(pFornecedorModel: TFornecedorModel): String;
+
     function where: String;
     function carregaClasse(pID : String): TFornecedorModel;
     function obterLista: TFDMemTable;
@@ -176,6 +178,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
+    pFornecedorModel.CODIGO_FOR := vIConexao.Generetor('GEN_FORNECEDOR');
     setParams(lQry, pFornecedorModel);
     lQry.Open;
 
