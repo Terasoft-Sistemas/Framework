@@ -12,7 +12,8 @@ uses
   System.Generics.Collections,
   System.Variants,
   Terasoft.Utils,
-  Interfaces.Conexao;
+  Interfaces.Conexao,
+  Clipbrd;
 
 type
   TWebPedidoItensDao = class
@@ -68,7 +69,7 @@ type
 
     function obterTotais(pId: String): TTotais;
 
-    procedure obterListaVendaAssistidaItens;
+
     procedure obterLista;
     function carregaClasse(pId: String): TWebPedidoItensModel;
 end;
@@ -381,6 +382,8 @@ begin
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
 
+    Clipboard.AsText := lSQL;
+
     lQry.Open(lSQL);
 
     i := 0;
@@ -404,64 +407,6 @@ begin
       FWebPedidoItenssLista[i].PERCENTUAL_DESCONTO  := lQry.FieldByName('PERCENTUAL_DESCONTO').AsFloat;
       FWebPedidoItenssLista[i].VALOR_UNITARIO       := lQry.FieldByName('VALOR_UNITARIO').AsFloat;
       FWebPedidoItenssLista[i].PRODUTO_NOME         := lQry.FieldByName('NOME_PRO').AsString;
-
-      lQry.Next;
-    end;
-
-    obterTotalRegistros;
-
-  finally
-    lQry.Free;
-  end;
-end;
-
-procedure TWebPedidoItensDao.obterListaVendaAssistidaItens;
-var
-  lQry: TFDQuery;
-  lSQL:String;
-  i: INteger;
-begin
-  lQry := vIConexao.CriarQuery;
-
-  FWebPedidoItenssLista := TObjectList<TWebPedidoItensModel>.Create;
-
-  try
-
-    if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
-      lSQL := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
-    else
-      lSQL := 'select ';
-
-    lSQL := lSQL +
-      '        produto.codigo_pro,                                                   '+SLineBreak+
-      '        web_pedidoitens.quantidade,                                           '+SLineBreak+
-      '        web_pedidoitens.valor_unitario,                                       '+SLineBreak+
-      '        web_pedidoitens.quantidade * web_pedidoitens.valor_unitario total,    '+SLineBreak+
-      '        produto.nome_pro                                                      '+SLineBreak+
-      '   from web_pedidoitens                                                       '+SLineBreak+
-      '  inner join produto on web_pedidoitens.produto_id = produto.codigo_pro       '+SLineBreak+
-      '  where 1=1 ';
-
-    lSQL := lSQL + where;
-
-    if not FOrderView.IsEmpty then
-      lSQL := lSQL + ' order by '+FOrderView;
-
-    lQry.Open(lSQL);
-
-    i := 0;
-    lQry.First;
-    while not lQry.Eof do
-    begin
-      FWebPedidoItenssLista.Add(TWebPedidoItensModel.Create(vIConexao));
-
-      i := FWebPedidoItenssLista.Count -1;
-
-      FWebPedidoItenssLista[i].PRODUTO_NOME     := lQry.FieldByName('NOME_PRO').AsString;
-      FWebPedidoItenssLista[i].PRODUTO_CODIGO   := lQry.FieldByName('CODIGO_PRO').AsString;
-      FWebPedidoItenssLista[i].QUANTIDADE       := lQry.FieldByName('QUANTIDADE').AsString;
-      FWebPedidoItenssLista[i].VALOR_UNITARIO   := lQry.FieldByName('VALOR_UNITARIO').AsString;
-      FWebPedidoItenssLista[i].TOTAL            := lQry.FieldByName('TOTAL').AsString;
 
       lQry.Next;
     end;
