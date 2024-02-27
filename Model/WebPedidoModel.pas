@@ -589,9 +589,6 @@ begin
   self.FDATAHORA              := DateTimeToStr(vIConexao.DataHoraServer);
   self.FUSUARIO               := vIConexao.getUSer.ID;
   self.FSTATUS                := 'I';
-  self.FTIPO                  := 'NORMAL';
-  self.FPARCELAS              := '001';
-  self.FPRIMEIRO_VENCIMENTO   := DateToStr(vIConexao.DataServer + 30);
 
   self.Acao := tacIncluir;
   Result    := self.Salvar;
