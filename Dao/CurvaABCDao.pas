@@ -322,23 +322,15 @@ begin
       if (pCurvaABC_Parametros.ClassificarPor = tpABCQuantidade) and (lTotalQtde <> 0) then
         lMemTable.FieldByName('RATEIO').AsFloat := (lMemTable.FieldByName('QUANTIDADE_VENDA').AsFloat / lTotalQtde) * 100
       else
-        lMemTable.FieldByName('RATEIO').AsFloat := 0;
-
       if (pCurvaABC_Parametros.ClassificarPor = tpABCQtdeCliente) and (lTotalQtdeCli <> 0) then
         lMemTable.FieldByName('RATEIO').AsFloat := (lMemTable.FieldByName('QUANTIDADE_CLIENTE').AsFloat / lTotalQtdeCli) * 100
       else
-        lMemTable.FieldByName('RATEIO').AsFloat := 0;
-
       if (pCurvaABC_Parametros.ClassificarPor = tpABCVenda) and (lTotalVendas <> 0) then
         lMemTable.FieldByName('RATEIO').AsFloat := (lMemTable.FieldByName('VALOR_LIQUIDO').AsFloat / lTotalVendas) * 100
       else
-        lMemTable.FieldByName('RATEIO').AsFloat := 0;
-
       if (pCurvaABC_Parametros.ClassificarPor = tpABCCusto) and (lTotalCusto <> 0) then
         lMemTable.FieldByName('RATEIO').AsFloat := (lMemTable.FieldByName('CUSTO').AsFloat / lTotalCusto) * 100
       else
-        lMemTable.FieldByName('RATEIO').AsFloat := 0;
-
       if (pCurvaABC_Parametros.ClassificarPor = tpABCLucro) and (lTotalLucro <> 0) then
         lMemTable.FieldByName('RATEIO').AsFloat := (lMemTable.FieldByName('LUCRO').AsFloat / lTotalLucro) * 100
       else
@@ -351,8 +343,7 @@ begin
           lMemTable.FieldByName('MARGEM').AsFloat := (lMemTable.FieldByName('VALOR_LIQUIDO').AsFloat / lMemTable.FieldByName('CUSTO').AsFloat*100)-100
         else
           lMemTable.FieldByName('MARGEM').AsFloat := 0;
-      end
-      else
+      end else
       begin
         if (lMemTable.FieldByName('VALOR_LIQUIDO').AsFloat <> 0) then
           lMemTable.FieldByName('MARGEM').AsFloat := -1 * ((lMemTable.FieldByName('CUSTO').AsFloat * 100 / lMemTable.FieldByName('VALOR_LIQUIDO').AsFloat) - 100)
