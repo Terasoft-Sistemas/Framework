@@ -113,6 +113,7 @@ type
     FPathXML: Variant;
     FNumeroView: String;
     FFornecedorView: String;
+    FLOGISTICA: Variant;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -199,6 +200,7 @@ type
     procedure SetPathXML(const Value: Variant);
     procedure SetFornecedorView(const Value: String);
     procedure SetNumeroView(const Value: String);
+    procedure SetLOGISTICA(const Value: Variant);
 
   public
 
@@ -276,6 +278,7 @@ type
     property CONDICOES_XML : Variant  read FCONDICOES_XML write SetCONDICOES_XML;
     property PARCELAS_XML : Variant  read FPARCELAS_XML write SetPARCELAS_XML;
     property ORCAMENTO_ID : Variant  read FORCAMENTO_ID write SetORCAMENTO_ID;
+    property LOGISTICA: Variant read FLOGISTICA write SetLOGISTICA;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -397,7 +400,7 @@ begin
   with ACBrNFe.NotasFiscais.Items[0] do
   begin
     self.FSTATUS                      := '1';
-    self.FNUMERO_NF                   := IntToStr(NFe.Ide.nNF);
+    self.NUMERO_ENT                   := Format('%10.10d', [NFe.Ide.nNF]);
     self.FSERIE_ENT                   := IntToStr(NFe.Ide.serie);
     self.FMODELO_ENT                  := IntToStr(NFe.Ide.modelo);
     self.FCODIGO_FOR                  := Self.ObterFornecedor(NFe.Emit.CNPJCPF);
@@ -419,14 +422,30 @@ end;
 
 procedure TEntradaModel.ImportarItens(pEntrada, pFornecedor: String);
 var
- lEntradaItensModel: TEntradaItensModel;
+ lEntradaItensModel : TEntradaItensModel;
+ lProdutoModel      : TProdutosModel;
  i: Integer;
 begin
   lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
+  lProdutoModel      := TProdutosModel.Create(vIConexao);
 
   try
     with ACBrNFe.NotasFiscais.Items[0].NFe do
     begin
+
+      lProdutoModel.IDRecordView := '999999';
+      lProdutoModel.obterLista;
+
+      if lProdutoModel.TotalRecords = 0 then
+      begin
+        lProdutoModel.CODIGO_PRO   := '999999';
+        lProdutoModel.NOME_PRO     := 'PRODUTO NÃO VINCULADO';
+        lProdutoModel.CODIGO_GRU   := '000000';
+        lProdutoModel.CODIGO_FOR   := '000000';
+        lProdutoModel.CODIGO_MAR   := '000000';
+        lProdutoModel.CODIGO_SUB   := '000000';
+        lProdutoModel.Incluir;
+      end;
 
       for i := 0 to Det.Count - 1 do
       begin
@@ -437,17 +456,18 @@ begin
         begin
           lEntradaItensModel.LOJA := self.FLOJA;
 
-          if self.FCFOP_ID <> '' then
-            lEntradaItensModel.CFOP_ID := self.FCFOP_ID;
-
+          lEntradaItensModel.ITEM_ENT          := Prod.nItem.ToString;
+          lEntradaItensModel.CODIGO_PRO        := '999999';
           lEntradaItensModel.CODIGO_FOR        := self.FCODIGO_FOR;
           lEntradaItensModel.NUMERO_ENT        := self.FNUMERO_ENT;
-
-          lEntradaItensModel.ITEM_ENT          := Prod.nItem.ToString;
-          lEntradaItensModel.CODIGO_PRO        := Prod.cProd;
+          lEntradaItensModel.CPROD             := Prod.cProd;
+          lEntradaItensModel.CEAN              := Prod.cEAN;
+          lEntradaItensModel.CBARRA            := Prod.cBarra;
+          lEntradaItensModel.XPROD             := Prod.xProd;
+          lEntradaItensModel.CEST              := Prod.CEST;
+          lEntradaItensModel.UCOM              := Prod.uCom;
           lEntradaItensModel.NCM_I05           := Prod.NCM;
           lEntradaItensModel.CFOP              := Prod.CFOP;
-          lEntradaItensModel.CFOP_ID           := Self.ValidaCFOP(Prod.CFOP);
           lEntradaItensModel.QUANTIDADE_ENT    := FloatToStr(Prod.qCom);
           lEntradaItensModel.VALORUNI_ENT      := FloatToStr(Prod.vUnCom);
           lEntradaItensModel.DESC_I17          := FloatToStr(Prod.vDesc);
@@ -550,7 +570,8 @@ begin
     end;
 
   finally
-     lEntradaItensModel.Free;
+    lEntradaItensModel.Free;
+    lProdutoModel.Free;
   end;
 end;
 
@@ -586,6 +607,7 @@ end;
 constructor TEntradaModel.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
+  ACBrNFe   := TACBrNFe.Create(nil);
 end;
 
 destructor TEntradaModel.Destroy;
@@ -870,6 +892,11 @@ end;
 procedure TEntradaModel.SetLengthPageView(const Value: String);
 begin
   FLengthPageView := Value;
+end;
+
+procedure TEntradaModel.SetLOGISTICA(const Value: Variant);
+begin
+  FLOGISTICA := Value;
 end;
 
 procedure TEntradaModel.SetLOJA(const Value: Variant);

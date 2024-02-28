@@ -2,8 +2,8 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'Form1'
-  ClientHeight = 725
-  ClientWidth = 1244
+  ClientHeight = 733
+  ClientWidth = 1246
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,9 +16,9 @@ object Form1: TForm1
   object PageControl1: TPageControl
     Left = 0
     Top = 0
-    Width = 1244
-    Height = 725
-    ActivePage = TabSheet2
+    Width = 1246
+    Height = 733
+    ActivePage = TabSheet3
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -526,14 +526,23 @@ object Form1: TForm1
         TabOrder = 55
         OnClick = Button55Click
       end
+      object Button57: TButton
+        Left = 567
+        Top = 207
+        Width = 182
+        Height = 42
+        Caption = 'Obter Portador Tabela Juros'
+        TabOrder = 56
+        OnClick = Button57Click
+      end
     end
     object TabSheet2: TTabSheet
       Caption = 'Fluxo de caixa'
       ImageIndex = 1
       object dbTeste2: TXDBGrid
         Left = 0
-        Top = 72
-        Width = 1236
+        Top = 80
+        Width = 1238
         Height = 623
         Align = alBottom
         DataSource = dsTeste2
@@ -582,8 +591,8 @@ object Form1: TForm1
       ImageIndex = 2
       object XDBGrid1: TXDBGrid
         Left = 0
-        Top = 400
-        Width = 1236
+        Top = 408
+        Width = 1238
         Height = 295
         Align = alBottom
         DataSource = dsTeste2
@@ -592,8 +601,8 @@ object Form1: TForm1
       end
       object XDBGrid2: TXDBGrid
         Left = 0
-        Top = 256
-        Width = 1236
+        Top = 264
+        Width = 1238
         Height = 144
         Align = alBottom
         DataSource = dsEntrada
@@ -601,8 +610,8 @@ object Form1: TForm1
         TabOrder = 1
       end
       object Button56: TButton
-        Left = 19
-        Top = 23
+        Left = 3
+        Top = 26
         Width = 182
         Height = 42
         Caption = 'Entrada XML'

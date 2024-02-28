@@ -90,6 +90,7 @@ type
     Button56: TButton;
     OpenDialog: TOpenDialog;
     dsEntrada: TDataSource;
+    Button57: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -152,6 +153,7 @@ type
     procedure Button54Click(Sender: TObject);
     procedure Button55Click(Sender: TObject);
     procedure Button56Click(Sender: TObject);
+    procedure Button57Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -178,7 +180,8 @@ uses
   TabelaJurosModel,
   SaldoModel, EmpresaModel, ProdutosModel, EntradaItensModel,
   ClienteModel, ContasPagarModel, ContasPagarItensModel, System.SysUtils,
-  ReservaModel, DocumentoModel, AnexoModel, FluxoCaixaModel, BancoModel;
+  ReservaModel, DocumentoModel, AnexoModel, FluxoCaixaModel, BancoModel,
+  PortadorModel;
 
 {$R *.dfm}
 
@@ -1146,6 +1149,9 @@ begin
       lFluxoCaixaModel.DataInicialView := '01/01/2023';
       lFluxoCaixaModel.DataFinalView   := '12/12/2024';
 
+      //Para localizar um tipo especifico
+      lFluxoCaixaModel.TipoView := 'RECEBER';
+
       lMemTable := lFluxoCaixaModel.obterFluxoCaixaAnalitico;
       dsTeste2.DataSet := lMemTable;
     except
@@ -1229,8 +1235,7 @@ begin
   try
     try
       lFluxoCaixaModel.DataInicialView := '27/02/2024';
-      lFluxoCaixaModel.DataFinalView   := '28/02/2024';
-      //lFluxoCaixaModel.PortadorView    := '000001';
+      lFluxoCaixaModel.DataFinalView   := '29/02/2024';
 
       lMemTable := lFluxoCaixaModel.obterResumo;
       dsTeste2.DataSet := lMemTable;
@@ -1251,8 +1256,8 @@ begin
   lFluxoCaixaModel := TFluxoCaixaModel.Create(vIConexao);
   try
     try
-      lFluxoCaixaModel.DataInicialView := '01/01/2022';
-      lFluxoCaixaModel.DataFinalView   := '12/12/2024';
+      lFluxoCaixaModel.DataInicialView := '27/02/2024';
+      lFluxoCaixaModel.DataFinalView   := '29/02/2024';
 
       lFluxoCaixaModel.PorcentagemInadimplenciaView := 10;
       lMemTable := lFluxoCaixaModel.obterResultadoFluxoCaixa;
@@ -1404,6 +1409,35 @@ begin
     end;
   finally
     lEntradaModel.Free;
+  end;
+end;
+
+procedure TForm1.Button57Click(Sender: TObject);
+var
+  lPortadorModel : TPortadorModel;
+  lMemTable      : TFDMemTable;
+begin
+  lPortadorModel := TPortadorModel.Create(vIConexao);
+  try
+    try
+
+      lMemTable := lPortadorModel.PortadorTabelaJuros;
+      memoResultado.Lines.Clear;
+      lMemTable.First;
+
+      while not lMemTable.Eof do
+      begin
+        memoResultado.Lines.Add('CODIGO_PORTADOR: '+lMemTable.FieldByName('CODIGO_PORTADOR').AsString);
+        memoResultado.Lines.Add('PORTADOR: '+lMemTable.FieldByName('PORTADOR').AsString);
+        memoResultado.Lines.Add('===============================================');
+        lMemTable.Next;
+      end;
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lPortadorModel.free;
   end;
 end;
 

@@ -372,7 +372,10 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pProdutosModel.CODIGO_PRO := vIConexao.Generetor('GEN_PRODUTO');
+
+    if pProdutosModel.CODIGO_PRO = '' then
+      pProdutosModel.CODIGO_PRO := vIConexao.Generetor('GEN_PRODUTO');
+
     setParams(lQry, pProdutosModel);
     lQry.Open;
 
@@ -497,10 +500,14 @@ begin
       '       produto.garantia_24           '+
 	    '  from produto                       '+
       ' where 1=1                           ';
+
     lSql := lSql + where;
+
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
+
     lQry.Open(lSQL);
+
     i := 0;
     lQry.First;
     while not lQry.Eof do
@@ -517,6 +524,7 @@ begin
       FProdutossLista[i].GARANTIA_24     := lQry.FieldByName('GARANTIA_24').AsString;
       lQry.Next;
     end;
+
     obterTotalRegistros;
   finally
     lQry.Free;
