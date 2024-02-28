@@ -188,6 +188,9 @@ begin
     lSql := lSql + '        )                                                                                                                             '+sLineBreak+
                    '        group by 1                                                                                                                    '+sLineBreak;
 
+    if not FOrderView.IsEmpty then
+      lSql := lSql + ' order by ' + FOrderView;
+
     lQry.Open(lSQL);
 
     Result := vConstrutor.atribuirRegistros(lQry);
@@ -297,6 +300,9 @@ begin
 
     lSql := lSql + where;
 
+    if not FOrderView.IsEmpty then
+      lSql := lSql + ' order by ' + FOrderView;
+
     lQry.Open(lSQL);
 
     Result := vConstrutor.atribuirRegistros(lQry);
@@ -357,6 +363,9 @@ begin
 
     lSql := lSql + '  )          '+sLineBreak+
                    '  group by 1 '+sLineBreak;
+
+    if not FOrderView.IsEmpty then
+      lSql := lSql + ' order by ' + FOrderView;
 
     lQry.Open(lSql);
 
@@ -439,6 +448,9 @@ begin
             '          )                                                                                           '+sLineBreak+
             '                                                                                                      '+sLineBreak+
             '     group by 1                                                                                       '+sLineBreak;
+
+    if not FOrderView.IsEmpty then
+      lSql := lSql + ' order by ' + FOrderView;
 
     lQry.SQL.Add(lSql);
 

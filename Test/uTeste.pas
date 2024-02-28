@@ -1126,6 +1126,7 @@ begin
       lFluxoCaixaModel.DataInicialView := '01/01/2023';
       lFluxoCaixaModel.DataFinalView   := '12/12/2024';
       lFluxoCaixaModel.PortadorView    := '000001';
+      lFluxoCaixaModel.OrderView       := 'RECEBER';
 
       lMemTable := lFluxoCaixaModel.obterFluxoCaixaSintetico;
       dsTeste2.DataSet := lMemTable;

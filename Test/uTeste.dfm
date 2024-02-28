@@ -16,13 +16,11 @@ object Form1: TForm1
   object PageControl1: TPageControl
     Left = 0
     Top = 0
-    Width = 1244
-    Height = 725
-    ActivePage = TabSheet1
+    Width = 1246
+    Height = 733
+    ActivePage = TabSheet2
     Align = alClient
     TabOrder = 0
-    ExplicitWidth = 1244
-    ExplicitHeight = 725
     object TabSheet1: TTabSheet
       Caption = 'Diversos'
       object memoResultado: TMemo
@@ -593,8 +591,8 @@ object Form1: TForm1
       ImageIndex = 2
       object XDBGrid1: TXDBGrid
         Left = 0
-        Top = 400
-        Width = 1236
+        Top = 408
+        Width = 1238
         Height = 295
         Align = alBottom
         DataSource = dsTeste2
@@ -603,8 +601,8 @@ object Form1: TForm1
       end
       object XDBGrid2: TXDBGrid
         Left = 0
-        Top = 256
-        Width = 1236
+        Top = 264
+        Width = 1238
         Height = 144
         Align = alBottom
         DataSource = dsEntrada
