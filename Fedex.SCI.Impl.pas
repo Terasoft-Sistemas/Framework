@@ -40,9 +40,9 @@ interface
   function Fedex_SCI_ProcessaRetorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
   {$if not defined(__RELEASE__)}
-    function testFedexAPISOSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-    function testFedexAPIPOSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-    function testRetornoSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+    function testaFedexAPISOSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+    function testaFedexAPIPOSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+    function testaRetornoSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
   {$ifend}
 
 implementation
@@ -80,7 +80,7 @@ begin
 end;
 
 {$if not defined(__RELEASE__)}
-function testFedexAPIPOSCI;
+function testaFedexAPIPOSCI;
 begin
   Result := checkResultadoOperacao(pResultado);
   Result := Fedex_SCI_EnviaPO('',Result);
@@ -88,7 +88,7 @@ begin
     msgAviso(pResultado.toString);
 end;
 
-function testFedexAPISOSCI;
+function testaFedexAPISOSCI;
 begin
   Result := checkResultadoOperacao(pResultado);
   Result := Fedex_SCI_EnviaSO('',Result);
@@ -97,14 +97,99 @@ begin
 end;
 {$ifend}
 
-function processaArquivoExpedicao(pResultado: IResultadoOperacao): IResultadoOperacao;
+function processaArquivoExpedicao(pAPI: IFedexAPI; pResultado: IResultadoOperacao): IResultadoOperacao;
 begin
   Result := checkResultadoOperacao(pResultado);
 end;
 
-function processaArquivoRecebimento(pResultado: IResultadoOperacao): IResultadoOperacao;
+function processaArquivoRecebimento(pAPI: IFedexAPI; pResultado: IResultadoOperacao): IResultadoOperacao;
+  var
+    lArquivo, lNF, lCNPJ: String;
+    lTexto,lLinha: IListaTexto;
+    i: Integer;
+    lSave: Integer;
+    lTransferencia: boolean;
+    lDSIMEI, lDSFornecedor, lDSEntrada: IDataset;
+    ctr: IControleAlteracoes;
 begin
   Result := checkResultadoOperacao(pResultado);
+  lSave := pResultado.erros;
+  lArquivo := pResultado.propriedade['ARQUIVO'].asString;
+  if (lArquivo='') or not FileExists(lArquivo) then begin
+    pResultado.formataErro('processaArquivoRecebimento: arquivo [%s] não existe.', [lArquivo]);
+    pResultado.acumulador['Entradas rejeitadas'].incrementa;
+    rejeitarArquivoFedex(true,pResultado);
+    exit;
+  end;
+  if (pAPI=nil) or (pAPI.parameters.depositante.cnpj='') then begin
+    pResultado.formataErro('processaArquivoRecebimento: Não especificou um API/DEPOSITANTE válido.', [lArquivo]);
+    exit;
+  end;
+  ctr := pAPI.parameters.controleAlteracoes;
+  if(ctr=nil) then begin
+    pResultado.adicionaErro('processaArquivoRecebimento: Controle de alterações não definido.');
+    exit;
+  end;
+
+  lTexto := novaListaTexto;
+  lLinha := novaListaTexto;
+  lLinha.strings.Delimiter := '|';
+  lTexto.strings.LoadFromFile(lArquivo);
+
+  lNF := '';
+  lCNPJ := '';
+
+  if(lTexto.lines.Count<1) then begin
+    pResultado.formataErro('processaArquivoRecebimento: arquivo [%s] não possui dados validos.', [lArquivo]);
+    pResultado.acumulador['Entradas rejeitadas'].incrementa;
+    rejeitarArquivoFedex(true,pResultado);
+    exit;
+  end;
+
+  for i := 0 to lTexto.lines.Count - 1 do begin
+    lLinha.strings.DelimitedText := lTexto.strings.Strings[i];
+    if(lLinha.strings.Count < 4 ) then begin
+      pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui 4 campos especificados: %d', [ lArquivo, (i + 1), lLinha.strings.Count ] )
+    end;
+    if(lNF='') then
+      lNF := lLinha.strings.Strings[0];
+    if(lCNPJ='') then
+      lCNPJ    := lLinha.strings.Strings[1];
+
+    if(lNF<>lLinha.strings.Strings[0]) then
+      pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui Número de NF igual ao início: [%s] e [%s]', [ lArquivo, (i + 1), lNF, lLinha.strings.Strings[0] ] );
+
+    if(lCNPJ<>lLinha.strings.Strings[1]) then begin
+      pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui CNPJ igual ao início: [%s] e [%s]', [ lArquivo, (i + 1), lCNPJ, lLinha.strings.Strings[1] ] )
+    end;
+
+  end;
+  if(pResultado.erros<>lSave) then begin
+    rejeitarArquivoFedex(true,pResultado);
+    pResultado.acumulador['Entradas rejeitadas'].incrementa;
+    exit;
+  end;
+
+  lTransferencia := (copy(lCNPJ,1,8) = copy(pAPI.parameters.depositante.cnpj,1,8)) and (lCNPJ<>pAPI.parameters.depositante.cnpj);
+
+  lDSIMEI := gdbPadrao.criaDataset;
+
+  lDSFornecedor := gdbPadrao.criaDataset.query('select f.id from fornecedor f where f.cnpj_cpf_for = :cnpj',
+    'cnpj', [ lCNPJ ] );
+
+  if(lDSFornecedor.dataset.RecordCount=0) then begin
+    pResultado.formataErro('processaArquivoRecebimento [%s]: Fornecedor [%s] não existe', [ lArquivo, lCNPJ ] );
+    rejeitarArquivoFedex(true,pResultado);
+    pResultado.acumulador['Entradas rejeitadas'].incrementa;
+    exit;
+  end;
+
+  lDSEntrada := gdbPadrao.criaDataset.query('select e.* from entrada e ' +
+          ' where e.codigo_for = :fornecedor and e.numero_ent =:numero ',
+
+          'fornecedor;numero', [ lDSFornecedor.fieldByName('codigo_for').AsString, lNF ] );
+
+
 end;
 
 function criaFedexApiSCI;
@@ -493,7 +578,7 @@ begin
 
 end;
 
-function testRetornoSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+function testaRetornoSCI;
 begin
   Result := Fedex_SCI_ProcessaRetorno(checkResultadoOperacao(pResultado));
   if(pResultado.eventos>0) then
