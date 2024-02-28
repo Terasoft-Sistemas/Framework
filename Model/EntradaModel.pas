@@ -113,6 +113,7 @@ type
     FPathXML: Variant;
     FNumeroView: String;
     FFornecedorView: String;
+    FLOGISTICA: Variant;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -199,6 +200,7 @@ type
     procedure SetPathXML(const Value: Variant);
     procedure SetFornecedorView(const Value: String);
     procedure SetNumeroView(const Value: String);
+    procedure SetLOGISTICA(const Value: Variant);
 
   public
 
@@ -276,6 +278,7 @@ type
     property CONDICOES_XML : Variant  read FCONDICOES_XML write SetCONDICOES_XML;
     property PARCELAS_XML : Variant  read FPARCELAS_XML write SetPARCELAS_XML;
     property ORCAMENTO_ID : Variant  read FORCAMENTO_ID write SetORCAMENTO_ID;
+    property LOGISTICA: Variant read FLOGISTICA write SetLOGISTICA;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -397,7 +400,7 @@ begin
   with ACBrNFe.NotasFiscais.Items[0] do
   begin
     self.FSTATUS                      := '1';
-    self.FNUMERO_NF                   := IntToStr(NFe.Ide.nNF);
+    self.NUMERO_ENT                   := Format('%10.10d', [NFe.Ide.nNF]);
     self.FSERIE_ENT                   := IntToStr(NFe.Ide.serie);
     self.FMODELO_ENT                  := IntToStr(NFe.Ide.modelo);
     self.FCODIGO_FOR                  := Self.ObterFornecedor(NFe.Emit.CNPJCPF);
@@ -604,6 +607,7 @@ end;
 constructor TEntradaModel.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
+  ACBrNFe   := TACBrNFe.Create(nil);
 end;
 
 destructor TEntradaModel.Destroy;
@@ -888,6 +892,11 @@ end;
 procedure TEntradaModel.SetLengthPageView(const Value: String);
 begin
   FLengthPageView := Value;
+end;
+
+procedure TEntradaModel.SetLOGISTICA(const Value: Variant);
+begin
+  FLOGISTICA := Value;
 end;
 
 procedure TEntradaModel.SetLOJA(const Value: Variant);

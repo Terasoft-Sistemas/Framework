@@ -230,7 +230,7 @@ begin
     if FIDRecordView <> '' then
       lSql := lSql + ' and t.portador_id = ' +QuotedStr(FIDRecordView);
 
-      lSql := lSql + '   group by 1,2     )                                           '+sLineBreak;
+      lSql := lSql + '   group by 1,2  order by 2   )                                 '+sLineBreak;
 
     lQry.Open(lSql);
 

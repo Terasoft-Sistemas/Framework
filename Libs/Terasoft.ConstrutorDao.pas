@@ -217,7 +217,7 @@ function TConstrutorDao.getValue(pTabela: TFDMemTable; pColumn, pValue: String):
 begin
   if pTabela.Locate('NOME', pColumn) then
   begin
-    if AnsiMatchStr(pTabela.FieldByName('TIPO').AsString, ['INT64', 'FLOAT', 'NUMERIC']) then
+    if AnsiMatchStr(pTabela.FieldByName('TIPO').AsString, ['INTEGER', 'INT64', 'FLOAT', 'NUMERIC']) then
       Result := FormataFloatFireBird(pValue)
     else if pTabela.FieldByName('TIPO').AsString = 'DATE' then
       Result := transformaDataFireBird(pValue)
