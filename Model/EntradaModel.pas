@@ -673,6 +673,7 @@ begin
     lEntradaLista.StartRecordView := FStartRecordView;
     lEntradaLista.LengthPageView  := FLengthPageView;
     lEntradaLista.IDRecordView    := FIDRecordView;
+    lEntradaLista.NumeroView      := FNumeroView;
 
     Result        := lEntradaLista.obterLista;
     FTotalRecords := lEntradaLista.TotalRecords;

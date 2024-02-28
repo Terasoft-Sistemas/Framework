@@ -91,6 +91,11 @@ type
     OpenDialog: TOpenDialog;
     dsEntrada: TDataSource;
     Button57: TButton;
+    dsEntradaItens: TDataSource;
+    Button58: TButton;
+    Button59: TButton;
+    Button60: TButton;
+    Button61: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -154,6 +159,10 @@ type
     procedure Button55Click(Sender: TObject);
     procedure Button56Click(Sender: TObject);
     procedure Button57Click(Sender: TObject);
+    procedure Button58Click(Sender: TObject);
+    procedure Button59Click(Sender: TObject);
+    procedure Button60Click(Sender: TObject);
+    procedure Button61Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -1381,12 +1390,14 @@ end;
 
 procedure TForm1.Button56Click(Sender: TObject);
 var
-  lEntradaModel : TEntradaModel;
-  lEntrada      : String;
-  lTableEntrada : TFDMemTable;
+  lEntradaModel      : TEntradaModel;
+  lEntradaItensModel : TEntradaItensModel;
+  lEntrada           : String;
+  lTableEntrada,
+  lTableItens        : TFDMemTable;
 begin
-  lEntradaModel := TEntradaModel.Create(vIConexao);
-
+  lEntradaModel      := TEntradaModel.Create(vIConexao);
+  lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
   try
     OpenDialog.FileName   := '';
     OpenDialog.Title      := 'Selecione a NFE';
@@ -1404,12 +1415,17 @@ begin
       if lEntrada <> '' then
       begin
         lEntradaModel.NumeroView := lEntrada;
-        lTableEntrada := lEntradaModel.obterLista;
-        dsEntrada.DataSet := lTableEntrada;
+        lTableEntrada            := lEntradaModel.obterLista;
+        dsEntrada.DataSet        := lTableEntrada;
+
+        lEntradaItensModel.IDEntrada := lEntrada;
+        lTableItens                  := lEntradaItensModel.obterLista;
+        dsEntradaItens.DataSet       := lTableitens;
       end;
     end;
   finally
     lEntradaModel.Free;
+    lEntradaItensModel.Free;
   end;
 end;
 
@@ -1442,6 +1458,69 @@ begin
   end;
 end;
 
+procedure TForm1.Button58Click(Sender: TObject);
+var
+  lEntradaModel      : TEntradaModel;
+  lEntradaItensModel : TEntradaItensModel;
+  lEntrada           : String;
+  lTableEntrada,
+  lTableItens        : TFDMemTable;
+begin
+  lEntradaModel      := TEntradaModel.Create(vIConexao);
+  lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
+  try
+
+    lEntrada := InputBox('Constultar Entrada','Digite o número da Entrada:','');
+     if lEntrada.IsEmpty then
+     Exit;
+
+    lEntradaModel.NumeroView := lEntrada;
+    lTableEntrada            := lEntradaModel.obterLista;
+    dsEntrada.DataSet        := lTableEntrada;
+
+    lEntradaItensModel.IDEntrada := lEntrada;
+    lTableItens                  := lEntradaItensModel.obterLista;
+    dsEntradaItens.DataSet       := lTableitens;
+
+
+  finally
+    lEntradaModel.Free;
+    lEntradaItensModel.Free;
+  end;
+end;
+
+
+procedure TForm1.Button59Click(Sender: TObject);
+var
+  lEntradaModel      : TEntradaModel;
+  lEntradaItensModel : TEntradaItensModel;
+
+begin
+  lEntradaModel      := TEntradaModel.Create(vIConexao);
+  lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
+  try
+    try
+      lEntradaModel.NUMERO_ENT    := '55555555';
+      lEntradaModel.CODIGO_FOR    := '500005';
+      lEntradaModel.SERIE_ENT     := '001';
+      lEntradaModel.PARCELAS_ENT  := '3';
+      lEntradaModel.CONDICOES_PAG := '30';
+      lEntradaModel.TOTAL_ENT     := '500';
+      lEntradaModel.DATANOTA_ENT  := DateToStr(vConexao.DataServer);
+
+      lEntradaModel.Incluir;
+
+      ShowMessage('Cabeçalho Entrada Cadastrado');
+      except
+       on E:Exception do
+         ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lEntradaModel.Free;
+    lEntradaItensModel.Free;
+  end;
+end;
+
 procedure TForm1.Button5Click(Sender: TObject);
 var
   lWebPedidoModel : TWebPedidoModel;
@@ -1463,6 +1542,59 @@ begin
     end;
   finally
     lWebPedidoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button60Click(Sender: TObject);
+var
+  lEntradaItensParams : TEntradaItensParams;
+  lEntradaModel       : TEntradaModel;
+  lNumEntrada         : String;
+begin
+  lEntradaModel  := TEntradaModel.Create(vIConexao);
+  try
+    try
+      lNumEntrada := InputBox('Entrada Item','Digite o número da Entrada:','');
+        if lNumEntrada.IsEmpty then
+          Exit;
+
+      lEntradaItensParams.NUMERO_ENT      := lNumEntrada;
+      lEntradaItensParams.CODIGO_FOR      := '500005';
+      lEntradaItensParams.CODIGO_PRO      := '000444';
+      lEntradaItensParams.QUANTIDADE_ENT  := '10';
+      lEntradaItensParams.VALORUNI_ENT    := '50';
+
+      lEntradaModel.EntradaItens(lEntradaItensParams);
+      ShowMessage('Item adicionado a Entrada: ' + lNumEntrada);
+
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lEntradaModel.Free;
+  end;
+end;
+
+procedure TForm1.Button61Click(Sender: TObject);
+var
+  lEntradaModel : TEntradaModel;
+
+begin
+  lEntradaModel := TEntradaModel.Create(vIConexao);
+  try
+    try
+      lEntradaModel.NumeroView     := '0000833352';
+      lEntradaModel.FornecedorView := '500014';
+
+      dsEntrada.DataSet := lEntradaModel.obterTotalizador;
+
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lEntradaModel.Free;
   end;
 end;
 
@@ -1850,10 +1982,10 @@ begin
     try
 
       lContasPagarModel.DUPLICATA_PAG  := '9000002024';
-      lContasPagarModel.CODIGO_FOR  := '500005';
-      lContasPagarModel.PORTADOR_ID  := '000001';
-      lContasPagarModel.DATAEMI_PAG := '27.02.2024';
-      lContasPagarModel.TIPO_PAG := 'M';
+      lContasPagarModel.CODIGO_FOR     := '500005';
+      lContasPagarModel.PORTADOR_ID    := '000001';
+      lContasPagarModel.DATAEMI_PAG    := '27.02.2024';
+      lContasPagarModel.TIPO_PAG       := 'M';
 
       lContasPagarModel.Incluir;
       ShowMessage('Inserido com Sucesso');

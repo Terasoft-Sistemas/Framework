@@ -279,58 +279,92 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-    lSql :=
-            ' select                                                                                          '+SLineBreak+
-            '    ENTRADA,                                                                                     '+SLineBreak+
-            '    FORNECEDOR,                                                                                  '+SLineBreak+
-            '    QUANTIDADE_ITENS,                                                                            '+SLineBreak+
-            '    QUANTIDADE_PRODUTOS,                                                                         '+SLineBreak+
-            '    TOTAL_PRODUTOS,                                                                              '+SLineBreak+
-            '    TOTAL_BASE_ICMS,                                                                             '+SLineBreak+
-            '    TOTAL_VALOR_ICMS,                                                                            '+SLineBreak+
-            '    TOTAL_BASE_ICMS_ST,                                                                          '+SLineBreak+
-            '    TOTAL_VALOR_ST,                                                                              '+SLineBreak+
-            '    TOTAL_ICMS_DESON,                                                                            '+SLineBreak+
-            '    TOTAL_BASE_IPI,                                                                              '+SLineBreak+
-            '    TOTAL_VALOR_IPI,                                                                             '+SLineBreak+
-            '    TOTAL_BASE_PIS,                                                                              '+SLineBreak+
-            '    TOTAL_VALOR_PIS,                                                                             '+SLineBreak+
-            '    TOTAL_BASE_COFINS,                                                                           '+SLineBreak+
-            '    TOTAL_VALOR_COFINS,                                                                          '+SLineBreak+
-            '    TOTAL_FCP,                                                                                   '+SLineBreak+
-            '    TOTAL_FCP_ST,                                                                                '+SLineBreak+
-            '    TOTAL_OUTROS,                                                                                '+SLineBreak+
-            '    TOTAL_FRETE,                                                                                 '+SLineBreak+
-            '    TOTAL_DESCONTO                                                                               '+SLineBreak+
-            '     from                                                                                        '+SLineBreak+
-            '     (                                                                                           '+SLineBreak+
-            '      select                                                                                     '+SLineBreak+
-            '          e.numero_ent entrada,                                                                  '+SLineBreak+
-            '          e.codigo_for fornecedor,                                                               '+SLineBreak+
-            '          count(*) quantidade_itens,                                                             '+SLineBreak+
-            '          sum(i.quantidade_ent) quantidade_produtos,                                             '+SLineBreak+
-            '          sum(i.valoruni_ent * i.quantidade_ent) total_produtos,                                 '+SLineBreak+
-            '          sum(i.base_icms_ent) total_base_icms,                                                  '+SLineBreak+
-            '          sum(i.vicms_n17) total_valor_icms,                                                     '+SLineBreak+
-            '          sum(i.base_st_ent) total_base_icms_st,                                                 '+SLineBreak+
-            '          sum(i.vicms_st_ent) total_valor_st,                                                    '+SLineBreak+
-            '          sum(0) total_icms_deson,                                                               '+SLineBreak+
-            '          sum(i.vbc_o10) total_base_ipi,                                                         '+SLineBreak+
-            '          sum(i.vipi_014) total_valor_ipi,                                                       '+SLineBreak+
-            '          sum(i.vbc_q07)  total_base_pis,                                                        '+SLineBreak+
-            '          sum(i.vpis_q09) total_valor_pis,                                                       '+SLineBreak+
-            '          sum(i.vbc_s07) total_base_cofins,                                                      '+SLineBreak+
-            '          sum(i.vcofins_s11) total_valor_cofins,                                                 '+SLineBreak+
-            '          sum(i.vfcpst) total_fcp,                                                               '+SLineBreak+
-            '          sum(i.vfcpstret) total_fcp_st,                                                         '+SLineBreak+
-            '          sum(i.vseg_i16) total_outros,                                                          '+SLineBreak+
-            '          sum(i.vfrete_i15) total_frete,                                                         '+SLineBreak+
-            '          sum(i.desc_i17) total_desconto                                                         '+SLineBreak+
-            '        from entrada e                                                                           '+SLineBreak+
-            '        left join entradaitens i on i.numero_ent = e.numero_ent and i.codigo_for = e.codigo_for  '+SLineBreak+
-            '       group by 1,2                                                                              '+SLineBreak+
-            '       )                                                                                         '+SLineBreak+
-            '      where 1=1 ' + SLineBreak;
+    lSql := '     select                                                                                                  '+SLineBreak+
+            '       ENTRADA,                                                                                              '+SLineBreak+
+            '       FORNECEDOR,                                                                                           '+SLineBreak+
+            '       QUANTIDADE_ITENS,                                                                                     '+SLineBreak+
+            '       QUANTIDADE_PRODUTOS,                                                                                  '+SLineBreak+
+            '       TOTAL_PRODUTOS,                                                                                       '+SLineBreak+
+            '       TOTAL_BASE_ICMS,                                                                                      '+SLineBreak+
+            '       TOTAL_VALOR_ICMS,                                                                                     '+SLineBreak+
+            '       TOTAL_BASE_ICMS_ST,                                                                                   '+SLineBreak+
+            '       TOTAL_VALOR_ST,                                                                                       '+SLineBreak+
+            '       TOTAL_ICMS_DESON,                                                                                     '+SLineBreak+
+            '       TOTAL_BASE_IPI,                                                                                       '+SLineBreak+
+            '       TOTAL_VALOR_IPI,                                                                                      '+SLineBreak+
+            '       TOTAL_BASE_PIS,                                                                                       '+SLineBreak+
+            '       TOTAL_VALOR_PIS,                                                                                      '+SLineBreak+
+            '       TOTAL_BASE_COFINS,                                                                                    '+SLineBreak+
+            '       TOTAL_VALOR_COFINS,                                                                                   '+SLineBreak+
+            '       TOTAL_FCP,                                                                                            '+SLineBreak+
+            '       TOTAL_FCP_ST,                                                                                         '+SLineBreak+
+            '       TOTAL_OUTROS,                                                                                         '+SLineBreak+
+            '       TOTAL_FRETE,                                                                                          '+SLineBreak+
+            '       TOTAL_DESCONTO,                                                                                       '+SLineBreak+
+            '       TOTAL_ENTRADA                                                                                         '+SLineBreak+
+            '                                                                                                             '+SLineBreak+
+            '       from                                                                                                  '+SLineBreak+
+            '       (                                                                                                     '+SLineBreak+
+            '        select                                                                                               '+SLineBreak+
+            '            entrada,                                                                                         '+SLineBreak+
+            '            fornecedor,                                                                                      '+SLineBreak+
+            '            quantidade_itens,                                                                                '+SLineBreak+
+            '            quantidade_produtos,                                                                             '+SLineBreak+
+            '            total_produtos,                                                                                  '+SLineBreak+
+            '            total_base_icms,                                                                                 '+SLineBreak+
+            '            total_valor_icms,                                                                                '+SLineBreak+
+            '            total_base_icms_st,                                                                              '+SLineBreak+
+            '            total_valor_st,                                                                                  '+SLineBreak+
+            '            total_icms_deson,                                                                                '+SLineBreak+
+            '            total_base_ipi,                                                                                  '+SLineBreak+
+            '            total_valor_ipi,                                                                                 '+SLineBreak+
+            '            total_base_pis,                                                                                  '+SLineBreak+
+            '            total_valor_pis,                                                                                 '+SLineBreak+
+            '            total_base_cofins,                                                                               '+SLineBreak+
+            '            total_valor_cofins,                                                                              '+SLineBreak+
+            '            total_fcp,                                                                                       '+SLineBreak+
+            '            total_fcp_st,                                                                                    '+SLineBreak+
+            '            total_outros,                                                                                    '+SLineBreak+
+            '            total_frete,                                                                                     '+SLineBreak+
+            '            total_desconto,                                                                                  '+SLineBreak+
+            '            total_produtos                                                                                   '+SLineBreak+
+            '              + total_valor_st                                                                               '+SLineBreak+
+            '              + total_valor_ipi                                                                              '+SLineBreak+
+            '              + total_fcp_st                                                                                 '+SLineBreak+
+            '              + total_frete                                                                                  '+SLineBreak+
+            '              + total_outros                                                                                 '+SLineBreak+
+            '              - total_desconto total_entrada                                                                 '+SLineBreak+
+            '                                                                                                             '+SLineBreak+
+            '             from                                                                                            '+SLineBreak+
+            '             (                                                                                               '+SLineBreak+
+            '              select                                                                                         '+SLineBreak+
+            '                  e.numero_ent entrada,                                                                      '+SLineBreak+
+            '                  e.codigo_for fornecedor,                                                                   '+SLineBreak+
+            '                  count(*) quantidade_itens,                                                                 '+SLineBreak+
+            '                  sum(i.quantidade_ent) quantidade_produtos,                                                 '+SLineBreak+
+            '                  sum(i.valoruni_ent * i.quantidade_ent) total_produtos,                                     '+SLineBreak+
+            '                  sum(i.base_icms_ent) total_base_icms,                                                      '+SLineBreak+
+            '                  sum(i.vicms_n17) total_valor_icms,                                                         '+SLineBreak+
+            '                  sum(i.base_st_ent) total_base_icms_st,                                                     '+SLineBreak+
+            '                  sum(i.vicms_st_ent) total_valor_st,                                                        '+SLineBreak+
+            '                  sum(0) total_icms_deson,                                                                   '+SLineBreak+
+            '                  sum(i.vbc_o10) total_base_ipi,                                                             '+SLineBreak+
+            '                  sum(i.vipi_014) total_valor_ipi,                                                           '+SLineBreak+
+            '                  sum(i.vbc_q07)  total_base_pis,                                                            '+SLineBreak+
+            '                  sum(i.vpis_q09) total_valor_pis,                                                           '+SLineBreak+
+            '                  sum(i.vbc_s07) total_base_cofins,                                                          '+SLineBreak+
+            '                  sum(i.vcofins_s11) total_valor_cofins,                                                     '+SLineBreak+
+            '                  sum(i.vfcpst) total_fcp,                                                                   '+SLineBreak+
+            '                  sum(i.vfcpstret) total_fcp_st,                                                             '+SLineBreak+
+            '                  sum(i.vseg_i16) total_outros,                                                              '+SLineBreak+
+            '                  sum(i.vfrete_i15) total_frete,                                                             '+SLineBreak+
+            '                  sum(i.desc_i17) total_desconto                                                             '+SLineBreak+
+            '                from entrada e                                                                               '+SLineBreak+
+            '                left join entradaitens i on i.numero_ent = e.numero_ent and i.codigo_for = e.codigo_for      '+SLineBreak+
+            '               group by 1,2                                                                                  '+SLineBreak+
+            '               )                                                                                             '+SLineBreak+
+            '              )                                                                                              '+SLineBreak+
+            '              where 1=1                                                                                      '+SLineBreak;
 
     lSql := lSql + ' and entrada = '+ QuotedStr(FNumeroView) + ' and fornecedor = '+ QuotedStr(FFornecedorView);
 

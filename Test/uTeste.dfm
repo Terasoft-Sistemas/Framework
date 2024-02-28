@@ -587,23 +587,23 @@ object Form1: TForm1
       end
     end
     object TabSheet3: TTabSheet
-      Caption = 'Entrada de fornecedores'
+      Caption = 'Entrada de Fornecedores'
       ImageIndex = 2
       object XDBGrid1: TXDBGrid
         Left = 0
-        Top = 408
+        Top = 454
         Width = 1238
-        Height = 295
+        Height = 249
         Align = alBottom
-        DataSource = dsTeste2
+        DataSource = dsEntradaItens
         GridStyle.VisualStyle = vsXPStyle
         TabOrder = 0
       end
       object XDBGrid2: TXDBGrid
         Left = 0
-        Top = 264
+        Top = 292
         Width = 1238
-        Height = 144
+        Height = 162
         Align = alBottom
         DataSource = dsEntrada
         GridStyle.VisualStyle = vsXPStyle
@@ -618,18 +618,58 @@ object Form1: TForm1
         TabOrder = 2
         OnClick = Button56Click
       end
+      object Button58: TButton
+        Left = 191
+        Top = 26
+        Width = 182
+        Height = 42
+        Caption = 'Consultar Entrada'
+        TabOrder = 3
+        OnClick = Button58Click
+      end
+      object Button59: TButton
+        Left = 3
+        Top = 74
+        Width = 182
+        Height = 42
+        Caption = 'Entrada Manual Cabe'#231'alho'
+        TabOrder = 4
+        OnClick = Button59Click
+      end
+      object Button60: TButton
+        Left = 191
+        Top = 74
+        Width = 182
+        Height = 42
+        Caption = 'Entrada Manual Item'
+        TabOrder = 5
+        OnClick = Button60Click
+      end
+      object Button61: TButton
+        Left = 379
+        Top = 26
+        Width = 182
+        Height = 42
+        Caption = 'Obter Totalizador Entrada'
+        TabOrder = 6
+        OnClick = Button61Click
+      end
     end
   end
   object dsTeste2: TDataSource
     Left = 1056
-    Top = 544
+    Top = 488
   end
   object OpenDialog: TOpenDialog
-    Left = 1152
-    Top = 544
+    Left = 1144
+    Top = 488
   end
   object dsEntrada: TDataSource
     Left = 1056
-    Top = 608
+    Top = 567
+  end
+  object dsEntradaItens: TDataSource
+    Left = 1057
+    Top = 642
   end
 end
