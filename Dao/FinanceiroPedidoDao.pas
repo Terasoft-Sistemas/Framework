@@ -202,19 +202,28 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-    lSQL := ' select financeiro_pedido.web_pedido_id,                                       '+SLineBreak+
-            '        portador.codigo_port,                                                  '+SLineBreak+
-            '        portador.nome_port,                                                    '+SLineBreak+
-            '        financeiro_pedido.quantidade_parcelas,                                 '+SLineBreak+
-            '        financeiro_pedido.valor_parcela,                                       '+SLineBreak+
-            '        financeiro_pedido.valor_total,                                         '+SLineBreak+
-            '        financeiro_pedido.vencimento,                                          '+SLineBreak+
-            '        financeiro_pedido.valor_liquido,                                       '+SLineBreak+
-            '        financeiro_pedido.id_financeiro                                        '+SLineBreak+
-            '   From financeiro_pedido                                                      '+SLineBreak+
-            '   left join portador on portador.codigo_port = financeiro_pedido.portador_id  '+SLineBreak+
-            '  where financeiro_pedido.web_pedido_id = '+pIDPedido+'                        '+SLineBreak+
-            '    and financeiro_pedido.parcela = 1                                          '+SLineBreak;
+    lSQL :=
+    ' select                                                 '+SLineBreak+
+    '     f.web_pedido_id,                                   '+SLineBreak+
+    '     p.codigo_port,                                     '+SLineBreak+
+    '     p.nome_port,                                       '+SLineBreak+
+    '     f.quantidade_parcelas,                             '+SLineBreak+
+    '     f.valor_parcela,                                   '+SLineBreak+
+    '     f.valor_total,                                     '+SLineBreak+
+    '     f.vencimento,                                      '+SLineBreak+
+    '     f.valor_liquido,                                   '+SLineBreak+
+    '     f.id_financeiro,                                   '+SLineBreak+
+    '     f.valor_acrescimo                                  '+SLineBreak+
+    '                                                        '+SLineBreak+
+    '                                                        '+SLineBreak+
+    ' From financeiro_pedido f                               '+SLineBreak+
+    '                                                        '+SLineBreak+
+    ' left join portador p on p.codigo_port = f.portador_id  '+SLineBreak+
+    ' left join web_pedido w on w.id = f.web_pedido_id       '+SLineBreak+
+    '                                                        '+SLineBreak+
+    ' where                                                  '+SLineBreak+
+    '     f.web_pedido_id = '+pIDPedido+' and                '+SLineBreak+
+    '     f.parcela = 1                                      '+SLineBreak;
 
     lQry.Open(lSQL);
 

@@ -260,7 +260,8 @@ begin
             '      VALOR_ACRESCIMO,                                                                                      '+SLineBreak+
             '      VALOR_FRETE,                                                                                          '+SLineBreak+
             '      VALOR_DESCONTO,                                                                                       '+SLineBreak+
-            '      VALOR_ITENS                                                                                           '+SLineBreak+
+            '      VALOR_ITENS,                                                                                          '+SLineBreak+
+            '      TOTAL_GARANTIA                                                                                        '+SLineBreak+
             '    from                                                                                                    '+SLineBreak+
             '    (                                                                                                       '+SLineBreak+
             '     select                                                                                                 '+SLineBreak+
@@ -268,7 +269,8 @@ begin
             '       sum(valor_acrescimo) valor_acrescimo,                                                                '+SLineBreak+
             '       sum(valor_frete) valor_frete,                                                                        '+SLineBreak+
             '       sum(quantidade * valor_desconto) valor_desconto,                                                     '+SLineBreak+
-            '       sum(quantidade * (valor_unitario + valor_garantia - valor_desconto)) valor_itens                     '+SLineBreak+
+            '       sum(quantidade * (valor_unitario + valor_garantia - valor_desconto)) valor_itens,                    '+SLineBreak+
+            '       sum(quantidade * valor_garantia) total_garantia                                                      '+SLineBreak+
             '      from                                                                                                  '+SLineBreak+
             '      (                                                                                                     '+SLineBreak+
             '        select i.web_pedido_id,                                                                             '+SLineBreak+
@@ -289,6 +291,7 @@ begin
     Result.VALOR_FRETE      := lQry.FieldByName('VALOR_FRETE').AsFloat;
     Result.VALOR_DESCONTO   := lQry.FieldByName('VALOR_DESCONTO').AsFloat;
     Result.VALOR_ITENS      := lQry.FieldByName('VALOR_ITENS').AsFloat;
+    Result.TOTAL_GARANTIA   := lQry.FieldByName('TOTAL_GARANTIA').AsFloat;
 
     Result.VALOR_TOTAL  := lQry.FieldByName('VALOR_ITENS').AsFloat +
                            lQry.FieldByName('VALOR_FRETE').AsFloat +
@@ -407,6 +410,9 @@ begin
       FWebPedidoItenssLista[i].PERCENTUAL_DESCONTO  := lQry.FieldByName('PERCENTUAL_DESCONTO').AsFloat;
       FWebPedidoItenssLista[i].VALOR_UNITARIO       := lQry.FieldByName('VALOR_UNITARIO').AsFloat;
       FWebPedidoItenssLista[i].PRODUTO_NOME         := lQry.FieldByName('NOME_PRO').AsString;
+
+      FWebPedidoItenssLista[i].TOTAL_GARANTIA       := lQry.FieldByName('TOTAL_GARANTIA').AsString;
+      FWebPedidoItenssLista[i].VALOR_TOTALITENS     := lQry.FieldByName('VALOR_TOTALITENS').AsString;
 
       lQry.Next;
     end;

@@ -137,6 +137,7 @@ type
     FIDUsuario: String;
     FTIPO_COMISSAO: Variant;
     FGERENTE_ID: Variant;
+    FTOTAL_GARANTIA: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetWebPedidosLista(const Value: TObjectList<TWebPedidoModel>);
@@ -246,6 +247,7 @@ type
     procedure SetIDUsuario(const Value: String);
     procedure SetGERENTE_ID(const Value: Variant);
     procedure SetTIPO_COMISSAO(const Value: Variant);
+    procedure SetTOTAL_GARANTIA(const Value: Variant);
 
   public
     procedure AfterConstruction; override;
@@ -345,6 +347,7 @@ type
     property CODIGO_AUTORIZACAO_CARTAO: Variant read FCODIGO_AUTORIZACAO_CARTAO write SetCODIGO_AUTORIZACAO_CARTAO;
     property VALOR_ITENS: Variant read FVALOR_ITENS write SetVALOR_ITENS;
     property VALOR_GARANTIA: Variant read FVALOR_GARANTIA write SetVALOR_GARANTIA;
+    property TOTAL_GARANTIA: Variant read FTOTAL_GARANTIA write SetTOTAL_GARANTIA;
     property CLIENTE_NOME: Variant read FCLIENTE_NOME write SetCLIENTE_NOME;
     property TIPO_COMISSAO: Variant read FTIPO_COMISSAO write SetTIPO_COMISSAO;
     property GERENTE_ID: Variant read FGERENTE_ID write SetGERENTE_ID;
@@ -625,11 +628,12 @@ begin
   try
     lTotais := lWebPedidoItensModel.obterTotais(self.FID);
 
-    self.ACRESCIMO             := lTotais.VALOR_ACRESCIMO.ToString;
-    self.VALOR_FRETE           := lTotais.VALOR_FRETE.ToString;
-    self.VALOR_CUPOM_DESCONTO  := lTotais.VALOR_DESCONTO.ToString;
-    self.VALOR_ITENS           := lTotais.VALOR_ITENS.ToString;
-    self.VALOR_TOTAL           := lTotais.VALOR_TOTAL.ToString;
+    self.ACRESCIMO             := lTotais.VALOR_ACRESCIMO;
+    self.TOTAL_GARANTIA        := lTotais.TOTAL_GARANTIA;
+    self.VALOR_FRETE           := lTotais.VALOR_FRETE;
+    self.VALOR_CUPOM_DESCONTO  := lTotais.VALOR_DESCONTO;
+    self.VALOR_ITENS           := lTotais.VALOR_ITENS;
+    self.VALOR_TOTAL           := lTotais.VALOR_TOTAL;
 
   finally
     lWebPedidoItensModel.free;
@@ -1122,6 +1126,11 @@ end;
 procedure TWebPedidoModel.SetTotalRecords(const Value: Integer);
 begin
   FTotalRecords := Value;
+end;
+
+procedure TWebPedidoModel.SetTOTAL_GARANTIA(const Value: Variant);
+begin
+  FTOTAL_GARANTIA := Value;
 end;
 
 procedure TWebPedidoModel.SetTRANSPORTADORA_DADOS_ADICIONAIS(

@@ -15,7 +15,8 @@ type
     VALOR_FRETE,
     VALOR_DESCONTO,
     VALOR_ITENS,
-    VALOR_TOTAL    : Double;
+    VALOR_TOTAL,
+    TOTAL_GARANTIA : Double;
   end;
 
   TWebPedidoItensModel = class
@@ -96,6 +97,8 @@ type
     FVALOR_MONTADOR: Variant;
     FVALOR_BONUS_SERVICO: Variant;
     FID: Variant;
+    FTOTAL_GARANTIA: Variant;
+    FVALOR_TOTALITENS: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetDATA_CADASTRO(const Value: Variant);
@@ -171,6 +174,8 @@ type
     procedure SetVALOR_MONTADOR(const Value: Variant);
     procedure SetVENDA_PRO(const Value: Variant);
     procedure SetID(const Value: Variant);
+    procedure SetTOTAL_GARANTIA(const Value: Variant);
+    procedure SetVALOR_TOTALITENS(const Value: Variant);
   public
     property ID: Variant read FID write SetID;
     property WEB_PEDIDO_ID: Variant read FWEB_PEDIDO_ID write SetWEB_PEDIDO_ID;
@@ -237,6 +242,10 @@ type
     property VENDA_PRO: Variant read FVENDA_PRO write SetVENDA_PRO;
     property CUSTOMEDIO_PRO: Variant read FCUSTOMEDIO_PRO write SetCUSTOMEDIO_PRO;
     property VALOR_MONTADOR: Variant read FVALOR_MONTADOR write SetVALOR_MONTADOR;
+
+    property TOTAL_GARANTIA: Variant read FTOTAL_GARANTIA write SetTOTAL_GARANTIA;
+    property VALOR_TOTALITENS: Variant read FVALOR_TOTALITENS write SetVALOR_TOTALITENS;
+
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -667,6 +676,11 @@ begin
   FTotalRecords := Value;
 end;
 
+procedure TWebPedidoItensModel.SetTOTAL_GARANTIA(const Value: Variant);
+begin
+  FTOTAL_GARANTIA := Value;
+end;
+
 procedure TWebPedidoItensModel.SetUSAR_BALANCA(const Value: Variant);
 begin
   FUSAR_BALANCA := Value;
@@ -715,6 +729,11 @@ end;
 procedure TWebPedidoItensModel.SetVALOR_ST(const Value: Variant);
 begin
   FVALOR_ST := Value;
+end;
+
+procedure TWebPedidoItensModel.SetVALOR_TOTALITENS(const Value: Variant);
+begin
+  FVALOR_TOTALITENS := Value;
 end;
 
 procedure TWebPedidoItensModel.SetVALOR_UNITARIO(const Value: Variant);
