@@ -73,6 +73,7 @@ interface
       function getConfiguracoes                                            : TConfiguracoesNF;
 
       procedure setContext(pUsuario: String);
+      procedure setContextModoSistema(pSistema: String);
 
     end;
 
