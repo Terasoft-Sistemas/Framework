@@ -49,6 +49,8 @@ implementation
   uses
     Terasoft.Framework.DB,
     FuncoesMensagem,
+    Terasoft.Framework.Validacoes,
+    Terasoft.Framework.DB.FIBPlus,
     Terasoft.Framework.Lock,
     Terasoft.Framework.ListaSimples.Impl,
     Terasoft.Framework.ListaSimples,
@@ -104,92 +106,160 @@ end;
 
 function processaArquivoRecebimento(pAPI: IFedexAPI; pResultado: IResultadoOperacao): IResultadoOperacao;
   var
-    lArquivo, lNF, lCNPJ: String;
+    lIMEI,lProduto, lArquivo, lNF, lCNPJ: String;
     lTexto,lLinha: IListaTexto;
     i: Integer;
     lSave: Integer;
     lTransferencia: boolean;
-    lDSIMEI, lDSFornecedor, lDSEntrada: IDataset;
+    lDSIMEI, lDSFornecedor, lDSEntrada, lDSItens: IDataset;
     ctr: IControleAlteracoes;
+    lLista: IDicionarioSimples<TipoWideStringFramework,IListaString>;
+    lListaIMEIS: IListaString;
 begin
   Result := checkResultadoOperacao(pResultado);
   lSave := pResultado.erros;
-  lArquivo := pResultado.propriedade['ARQUIVO'].asString;
-  if (lArquivo='') or not FileExists(lArquivo) then begin
-    pResultado.formataErro('processaArquivoRecebimento: arquivo [%s] não existe.', [lArquivo]);
-    pResultado.acumulador['Entradas rejeitadas'].incrementa;
-    rejeitarArquivoFedex(true,pResultado);
-    exit;
-  end;
-  if (pAPI=nil) or (pAPI.parameters.depositante.cnpj='') then begin
-    pResultado.formataErro('processaArquivoRecebimento: Não especificou um API/DEPOSITANTE válido.', [lArquivo]);
-    exit;
-  end;
-  ctr := pAPI.parameters.controleAlteracoes;
-  if(ctr=nil) then begin
-    pResultado.adicionaErro('processaArquivoRecebimento: Controle de alterações não definido.');
-    exit;
-  end;
-
-  lTexto := novaListaTexto;
-  lLinha := novaListaTexto;
-  lLinha.strings.Delimiter := '|';
-  lTexto.strings.LoadFromFile(lArquivo);
-
-  lNF := '';
-  lCNPJ := '';
-
-  if(lTexto.lines.Count<1) then begin
-    pResultado.formataErro('processaArquivoRecebimento: arquivo [%s] não possui dados validos.', [lArquivo]);
-    pResultado.acumulador['Entradas rejeitadas'].incrementa;
-    rejeitarArquivoFedex(true,pResultado);
-    exit;
-  end;
-
-  for i := 0 to lTexto.lines.Count - 1 do begin
-    lLinha.strings.DelimitedText := lTexto.strings.Strings[i];
-    if(lLinha.strings.Count < 4 ) then begin
-      pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui 4 campos especificados: %d', [ lArquivo, (i + 1), lLinha.strings.Count ] )
+  lLista := TListaSimplesCreator.CreateDictionary<TipoWideStringFramework,IListaString>;
+  try
+    lArquivo := pResultado.propriedade['ARQUIVO'].asString;
+    if (lArquivo='') or not FileExists(lArquivo) then begin
+      pResultado.formataErro('processaArquivoRecebimento: arquivo [%s] não existe.', [lArquivo]);
+      pResultado.acumulador['Entradas rejeitadas'].incrementa;
+      rejeitarArquivoFedex(true,pResultado);
+      exit;
     end;
-    if(lNF='') then
-      lNF := lLinha.strings.Strings[0];
-    if(lCNPJ='') then
-      lCNPJ    := lLinha.strings.Strings[1];
-
-    if(lNF<>lLinha.strings.Strings[0]) then
-      pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui Número de NF igual ao início: [%s] e [%s]', [ lArquivo, (i + 1), lNF, lLinha.strings.Strings[0] ] );
-
-    if(lCNPJ<>lLinha.strings.Strings[1]) then begin
-      pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui CNPJ igual ao início: [%s] e [%s]', [ lArquivo, (i + 1), lCNPJ, lLinha.strings.Strings[1] ] )
+    if (pAPI=nil) or (pAPI.parameters.depositante.cnpj='') then begin
+      pResultado.formataErro('processaArquivoRecebimento: Não especificou um API/DEPOSITANTE válido.', [lArquivo]);
+      exit;
+    end;
+    ctr := pAPI.parameters.controleAlteracoes;
+    if(ctr=nil) then begin
+      pResultado.adicionaErro('processaArquivoRecebimento: Controle de alterações não definido.');
+      exit;
     end;
 
+    lTexto := novaListaTexto;
+    lLinha := novaListaTexto;
+    lLinha.strings.Delimiter := '|';
+    lTexto.strings.LoadFromFile(lArquivo);
+
+    lNF := '';
+    lCNPJ := '';
+
+    if(lTexto.lines.Count<1) then begin
+      pResultado.formataErro('processaArquivoRecebimento: arquivo [%s] não possui dados validos.', [lArquivo]);
+      pResultado.acumulador['Entradas rejeitadas'].incrementa;
+      rejeitarArquivoFedex(true,pResultado);
+      exit;
+    end;
+
+    for i := 0 to lTexto.lines.Count - 1 do begin
+      lLinha.strings.DelimitedText := lTexto.strings.Strings[i];
+      if(lLinha.strings.Count < 4 ) then begin
+        pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui 4 campos especificados: %d', [ lArquivo, (i + 1), lLinha.strings.Count ] )
+      end;
+      if(lNF='') then
+        lNF := lLinha.strings.Strings[0];
+      if(lCNPJ='') then
+        lCNPJ    := lLinha.strings.Strings[1];
+
+      if(lNF<>lLinha.strings.Strings[0]) then
+        pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui Número de NF igual ao início: [%s] e [%s]', [ lArquivo, (i + 1), lNF, lLinha.strings.Strings[0] ] );
+
+      if(lCNPJ<>lLinha.strings.Strings[1]) then begin
+        pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui CNPJ igual ao início: [%s] e [%s]', [ lArquivo, (i + 1), lCNPJ, lLinha.strings.Strings[1] ] )
+      end;
+
+      lProduto := textoEntreTags(lLinha.strings.Strings[2],'','_');
+
+      if(lProduto='') then
+        lProduto := lLinha.strings.Strings[2];
+
+      lIMEI    := lLinha.strings.Strings[3];
+      if not validaIMEI(lIMEI) then begin
+        pResultado.formataErro('processaArquivoRecebimento [%s]: IMEI [%s] inválido para item %d', [ lArquivo, lIMEI, i ] );
+        continue;
+      end;
+
+      if not lLista.get(lProduto,lListaIMEIS) then begin
+        lListaIMEIS := getStringList;
+        lLista.add(lProduto,lListaIMEIS);
+      end;
+      lListaIMEIS.Add(lIMEI);
+
+    end;
+    if(pResultado.erros<>lSave) then begin
+      rejeitarArquivoFedex(true,pResultado);
+      pResultado.acumulador['Entradas rejeitadas'].incrementa;
+      exit;
+    end;
+
+    lTransferencia := (copy(lCNPJ,1,8) = copy(pAPI.parameters.depositante.cnpj,1,8)) and (lCNPJ<>pAPI.parameters.depositante.cnpj);
+
+    lDSIMEI := gdbPadrao.criaDataset;
+
+    lDSFornecedor := gdbPadrao.criaDataset.query('select f.id, f.codigo_for from fornecedor f where f.cnpj_cpf_for = :cnpj',
+      'cnpj', [ lCNPJ ] );
+
+    if(lDSFornecedor.dataset.RecordCount=0) then begin
+      pResultado.formataErro('processaArquivoRecebimento [%s]: Fornecedor [%s] não existe', [ lArquivo, lCNPJ ] );
+      rejeitarArquivoFedex(true,pResultado);
+      pResultado.acumulador['Entradas rejeitadas'].incrementa;
+      exit;
+    end;
+
+    lDSEntrada := gdbPadrao.criaDataset.query('select e.* from entrada e ' +
+            ' where e.codigo_for = :fornecedor and e.numero_ent =:numero ',
+
+            'fornecedor;numero', [ lDSFornecedor.fieldByName('codigo_for').AsString, lNF ] );
+
+    if(lDSEntrada.dataset.RecordCount=0) then begin
+      pResultado.formataErro('processaArquivoRecebimento: NF [%s] do Fornecedor [%s] não existe ou já foi processada',
+        [ lNF, lCNPJ ] );
+      pResultado.propriedade['REJEITAR_ARQUIVO'].asBoolean := true;
+      result.acumulador['Entradas rejeitadas'].incrementa;
+      exit;
+    end else if(ctr.getValor(CONTROLE_LOGISTICA_FEDEX_STATUS_PO, lDSEntrada.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
+      pResultado.acumulador['Entradas divergentes'].incrementa;
+      pResultado.propriedade['MANTER_ARQUIVO'].asBoolean := true;
+      exit;
+    end;
+
+    lDSItens := gdbPadrao.criaDataset.query('select e.* from entradaitens e ' +
+        ' where e.codigo_for = :fornecedor and e.numero_ent =:numero ', 'fornecedor;numero', [ lDSFornecedor.fieldByName('codigo_for').AsString, lNF]);
+
+
+
+{
+    for i := 0 to lTexto.strings.Count-1 do begin
+      lLinha.strings.DelimitedText := lTexto.strings.Strings[i];
+      lProduto := textoEntreTags(lLinha.strings.Strings[2],'','_');
+
+      if(lProduto='') then
+        lProduto := lLinha.strings.Strings[2];
+
+      lIMEI    := lLinha.strings.Strings[3];
+      if not validaIMEI(lIMEI) then begin
+        pResultado.formataErro('processaArquivoRecebimento [%s]: IMEI [%s] inválido para item %d', [ lArquivo, lIMEI, i ] );
+        continue;
+      end;
+
+      if not lLista.get(lProduto,lListaIMEIS) then begin
+        lListaIMEIS := getStringList;
+        lLista.add(lProduto,lListaIMEIS);
+      end;
+      lListaIMEIS.Add(lIMEI);
+    end;
+    if(lSave<>pResultado.erros) then begin
+      pResultado.acumulador['Entradas rejeitadas'].incrementa;
+      rejeitarArquivoFedex(true,pResultado);
+      exit;
+    end;
+}
+
+  except
+    on e: Exception do
+      pResultado.formataErro('processaArquivoRecebimento: %s: %s', [ e.ClassName, e.Message ] );
   end;
-  if(pResultado.erros<>lSave) then begin
-    rejeitarArquivoFedex(true,pResultado);
-    pResultado.acumulador['Entradas rejeitadas'].incrementa;
-    exit;
-  end;
-
-  lTransferencia := (copy(lCNPJ,1,8) = copy(pAPI.parameters.depositante.cnpj,1,8)) and (lCNPJ<>pAPI.parameters.depositante.cnpj);
-
-  lDSIMEI := gdbPadrao.criaDataset;
-
-  lDSFornecedor := gdbPadrao.criaDataset.query('select f.id from fornecedor f where f.cnpj_cpf_for = :cnpj',
-    'cnpj', [ lCNPJ ] );
-
-  if(lDSFornecedor.dataset.RecordCount=0) then begin
-    pResultado.formataErro('processaArquivoRecebimento [%s]: Fornecedor [%s] não existe', [ lArquivo, lCNPJ ] );
-    rejeitarArquivoFedex(true,pResultado);
-    pResultado.acumulador['Entradas rejeitadas'].incrementa;
-    exit;
-  end;
-
-  lDSEntrada := gdbPadrao.criaDataset.query('select e.* from entrada e ' +
-          ' where e.codigo_for = :fornecedor and e.numero_ent =:numero ',
-
-          'fornecedor;numero', [ lDSFornecedor.fieldByName('codigo_for').AsString, lNF ] );
-
-
 end;
 
 function criaFedexApiSCI;
