@@ -88,6 +88,7 @@ begin
     lFluxoCaixa.PorcentagemInadimplenciaView := FPorcentagemInadimplenciaView;
     lFluxoCaixa.SomarBancosView              := FSomarBancosView;
     lFluxoCaixa.TipoView                     := FTipoView;
+    lFluxoCaixa.OrderView                    := FOrderView;
 
     Result := lFluxoCaixa.obterResultadoFluxoCaixa;
   finally
@@ -105,6 +106,7 @@ begin
     lFluxoCaixa.DataFinalView                := FDataFinalView;
     lFluxoCaixa.PortadorView                 := FPortadorView;
     lFluxoCaixa.TipoView                     := FTipoView;
+    lFluxoCaixa.OrderView                    := FOrderView;
 
     Result := lFluxoCaixa.obterResumo;
   finally

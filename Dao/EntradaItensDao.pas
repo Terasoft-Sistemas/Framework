@@ -299,7 +299,7 @@ begin
     lSQL := lSQL + ' and ID = '+IntToStr(FIDRecordView);
 
   if not FIDEntrada.IsEmpty then
-    lSQL := lSQL + ' and  NUMERO_ENT= ' + QuotedStr(FIDEntrada);
+    lSQL := lSQL + ' and  NUMERO_ENT = ' + QuotedStr(FIDEntrada);
 
   Result := lSQL;
 end;

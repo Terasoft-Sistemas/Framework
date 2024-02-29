@@ -39,8 +39,8 @@ interface
 
     CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO = 'A';
     CONTROLE_LOGISTICA_STATUS_ENVIADO       = 'E';
-    CONTROLE_LOGISTICA_STATUS_FINALIZADO    = 'Z';
     CONTROLE_LOGISTICA_STATUS_DIVERGENTE    = 'D';
+    CONTROLE_LOGISTICA_STATUS_FINALIZADO    = 'Z';
 
   {
     STATUS Logistica
@@ -55,11 +55,13 @@ interface
 
   type
 
-    TFedexProcessadorArquivoRetorno = function (pResultado: IResultadoOperacao): IResultadoOperacao;
 
     IFedexAuth = interface;
     IFedexDepositante = interface;
     IFedexSKU = interface;
+    IFedexAPI = interface;
+
+    TFedexProcessadorArquivoRetorno = function (pAPI: IFedexAPI; pResultado: IResultadoOperacao): IResultadoOperacao;
 
     IFedexParam = interface
       ['{D60B5541-FADF-4799-A008-CEECCAC004EB}']
@@ -294,6 +296,8 @@ interface
 
   function getFedexDatasets: TFedexDatasets;
 
+  function rejeitarArquivoFedex(pNotificarUsuario: boolean;pResultado: IResultadoOperacao): IResultadoOperacao;
+
 implementation
   uses
     DBClient, DB;
@@ -400,6 +404,14 @@ begin
   ds.CreateDataSet;
   ds.LogChanges := false;
 
+end;
+
+function rejeitarArquivoFedex(pNotificarUsuario: boolean;pResultado: IResultadoOperacao): IResultadoOperacao;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  pResultado.propriedade['MANTER_ARQUIVO'].asBoolean := false;
+  pResultado.propriedade['REJEITAR_ARQUIVO'].asBoolean := true;
+  pResultado.propriedade['NOTIFICAR_USUARIO'].asBoolean := pNotificarUsuario;
 end;
 
 end.
