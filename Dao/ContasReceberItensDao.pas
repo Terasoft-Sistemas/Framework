@@ -73,7 +73,7 @@ type
     procedure obterLista;
     procedure obterRecebimentoContasReceber;
     function obterContaCliente(pContaClienteParametros: TContaClienteParametros): TListaContaClienteRetorno;
-    function carregaClasse(pId: String): TContasReceberItensModel;
+    function carregaClasse(pId: String; pLoja: String = ''): TContasReceberItensModel;
     function where: String;
 
     function gerarChamadaTEF(pFatura, pTefModalidade, pTefParcelamento, pTefAdquirente: String): String;
@@ -88,19 +88,35 @@ uses
 
 { TContasReceberItens }
 
-function TContasReceberItensDao.carregaClasse(pId: String): TContasReceberItensModel;
+function TContasReceberItensDao.carregaClasse(pId: String; pLoja: String = ''): TContasReceberItensModel;
 var
-  lQry: TFDQuery;
-  lModel: TContasReceberItensModel;
+  lQry   : TFDQuery;
+  lModel : TContasReceberItensModel;
 begin
-  lQry     := vIConexao.CriarQuery;
+
+  if not pLoja.IsEmpty then
+  begin
+    if vIConexao.getLojaConectada <> pLoja then
+      vIConexao.ConfigConexaoExterna(pLoja);
+
+    lQry := vIConexao.criarQueryExterna;
+  end
+  else
+    lQry := vIConexao.CriarQuery;
+
   lModel   := TContasReceberItensModel.Create(vIConexao);
   Result   := lModel;
 
   try
-    lQry.Open('select * from contasreceberitens where id = '+pId);
+    lQry.Open(' select contasreceber.pedido_rec,                                                      '+SLineBreak+
+              '        contasreceberitens.*                                                           '+SLineBreak+
+              '   from contasreceberitens                                                             '+SLineBreak+
+              '  inner join contasreceber on contasreceber.fatura_rec = contasreceberitens.fatura_rec '+SLineBreak+
+              '  where id = '+pId);
+
     if lQry.IsEmpty then
       Exit;
+
     lModel.ID                     := lQry.FieldByName('ID').AsString;
     lModel.FATURA_REC             := lQry.FieldByName('FATURA_REC').AsString;
     lModel.CODIGO_CLI             := lQry.FieldByName('CODIGO_CLI').AsString;
@@ -140,6 +156,8 @@ begin
     lModel.PIX_IDENTIFICADOR      := lQry.FieldByName('PIX_IDENTIFICADOR').AsString;
     lModel.PIX_EMV                := lQry.FieldByName('PIX_EMV').AsString;
     lModel.PIX_EXPIRACAO          := lQry.FieldByName('PIX_EXPIRACAO').AsString;
+    lModel.NUMERO_PED             := lQry.FieldByName('PEDIDO_REC').AsString;
+
     Result := lModel;
   finally
     lQry.Free;

@@ -86,6 +86,7 @@ type
     FCLIENTE_NOME: Variant;
     FRecebimentoContasReceberLista: TObjectList<TRecebimentoContasReceber>;
     FParcelaView: String;
+    FNUMERO_PED: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetContasReceberItenssLista(const Value: TObjectList<TContasReceberItensModel>);
@@ -144,6 +145,7 @@ type
     procedure SetRecebimentoContasReceberLista(
     const Value: TObjectList<TRecebimentoContasReceber>);
     procedure SetParcelaView(const Value: String);
+    procedure SetNUMERO_PED(const Value: Variant);
 
   public
     property ID: Variant read FID write SetID;
@@ -188,6 +190,7 @@ type
     property PORTADOR_NOME: Variant read FPORTADOR_NOME write SetPORTADOR_NOME;
     property PEDIDO_REC: Variant read FPEDIDO_REC write SetPEDIDO_REC;
     property CLIENTE_NOME: Variant read FCLIENTE_NOME write SetCLIENTE_NOME;
+    property NUMERO_PED: Variant read FNUMERO_PED write SetNUMERO_PED;
 
   	constructor Create(pConexao: IConexao);
     destructor Destroy; override;
@@ -198,7 +201,7 @@ type
     procedure obterLista;
     procedure obterRecebimentoContasReceber;
 
-    function carregaClasse(pId: String): TContasReceberItensModel;
+    function carregaClasse(pId: String; pLoja: String = ''): TContasReceberItensModel;
     function carregaClasseIndexOf(pIndex: Integer): TContasReceberItensModel;
 
     function obterContaCliente(pContaClienteParametros: TContaClienteParametros): TListaContaClienteRetorno;
@@ -301,17 +304,15 @@ end;
 function TContasReceberItensModel.baixarCaixa(pValor, pPortador, pHistorico: String): String;
 var
   lCaixaModel: TCaixaModel;
-  lContasReceberModel: TContasReceberModel;
 begin
-  lContasReceberModel := TContasReceberModel.Create(vIConexao);
-  lCaixaModel         := TCaixaModel.Create(vIConexao);
+  lCaixaModel := TCaixaModel.Create(vIConexao);
 
   try
     lCaixaModel.Acao := tacIncluir;
     lCaixaModel.USUARIO_CAI     := self.vIConexao.getUSer.ID;
     lCaixaModel.DATA_CAI        := DateToStr(vIConexao.DataServer);
     lCaixaModel.HORA_CAI        := TimeToStr(vIConexao.HoraServer);
-    lCaixaModel.NUMERO_PED      := lContasReceberModel.pedidoContasReceber(self.FFATURA_REC);
+    lCaixaModel.NUMERO_PED      := self.NUMERO_PED;
     lCaixaModel.CONCILIADO_CAI  := '.';
     lCaixaModel.TIPO            := 'V';
     lCaixaModel.CODIGO_CTA      := '555555';
@@ -331,7 +332,6 @@ begin
     self.baixar(pValor);
 
   finally
-    lContasReceberModel.Free;
     lCaixaModel.Free;
   end;
 end;
@@ -427,13 +427,13 @@ begin
   end;
 end;
 
-function TContasReceberItensModel.carregaClasse(pId: String): TContasReceberItensModel;
+function TContasReceberItensModel.carregaClasse(pId: String; pLoja: String = ''): TContasReceberItensModel;
 var
   lContasReceberItensDao: TContasReceberItensDao;
 begin
   lContasReceberItensDao := TContasReceberItensDao.Create(vIConexao);
   try
-    Result := lContasReceberItensDao.carregaClasse(pId);
+    Result := lContasReceberItensDao.carregaClasse(pId, pLoja);
   finally
     lContasReceberItensDao.Free;
   end;
@@ -894,6 +894,11 @@ end;
 procedure TContasReceberItensModel.SetNOSSO_NUMERO(const Value: Variant);
 begin
   FNOSSO_NUMERO := Value;
+end;
+
+procedure TContasReceberItensModel.SetNUMERO_PED(const Value: Variant);
+begin
+  FNUMERO_PED := Value;
 end;
 
 procedure TContasReceberItensModel.SetOBS(const Value: Variant);
