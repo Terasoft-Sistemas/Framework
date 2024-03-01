@@ -107,6 +107,7 @@ end;
 function processaArquivoRecebimento(pAPI: IFedexAPI; pResultado: IResultadoOperacao): IResultadoOperacao;
   var
     lIMEI,lProduto, lArquivo, lNF, lCNPJ: String;
+    lTmp: TipoWideStringFramework;
     lTexto,lLinha: IListaTexto;
     i: Integer;
     lSave: Integer;
@@ -215,19 +216,56 @@ begin
     if(lDSEntrada.dataset.RecordCount=0) then begin
       pResultado.formataErro('processaArquivoRecebimento: NF [%s] do Fornecedor [%s] não existe ou já foi processada',
         [ lNF, lCNPJ ] );
-      pResultado.propriedade['REJEITAR_ARQUIVO'].asBoolean := true;
+      pResultado.propriedade['ACAO_ARQUIVO'].asString := FEDEX_ACAOARQUIVO_REJEITAR;
       result.acumulador['Entradas rejeitadas'].incrementa;
       exit;
     end else if(ctr.getValor(CONTROLE_LOGISTICA_FEDEX_STATUS_PO, lDSEntrada.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
       pResultado.acumulador['Entradas divergentes'].incrementa;
-      pResultado.propriedade['MANTER_ARQUIVO'].asBoolean := true;
+      rejeitarArquivoFedex(true,pResultado);
       exit;
     end;
 
     lDSItens := gdbPadrao.criaDataset.query('select e.* from entradaitens e ' +
         ' where e.codigo_for = :fornecedor and e.numero_ent =:numero ', 'fornecedor;numero', [ lDSFornecedor.fieldByName('codigo_for').AsString, lNF]);
 
+    if(lDSItens.dataset.RecordCount=0) then begin
+      pResultado.acumulador['Entradas divergentes'].incrementa;
+      rejeitarArquivoFedex(true,pResultado);
+      exit;
+    end;
 
+    try
+
+      while not lDSItens.dataset.eof do begin
+        lProduto := lDSItens.dataset.FieldByName('codigo_pro').AsString;;
+
+        if not lLista.get(lProduto,lListaIMEIS) then begin
+          pResultado.formataErro('processaArquivoRecebimento [%s]: Produto [%s] não possui IMEI de retorno', [ lArquivo, lProduto ] );
+          lDSItens.dataset.Next;
+          continue;
+        end;
+        if(lDSItens.fieldByName('QUANTIDADE_ENT').AsFloat <> lListaIMEIS.Count) then begin
+          pResultado.formataErro('processaArquivoRecebimento [%s]: Produto [%s] não possui IMEI suficientes na entrada: %d', [ lArquivo, lProduto, lListaIMEIS.Count ] );
+          lDSItens.dataset.Next;
+          continue;
+        end;
+        for lTmp in lListaIMEIS do begin
+          gdbPadrao.insereDB('movimento_serial',
+              ['tipo_serial','numero','produto','tipo_documento','id_documento'],
+              ['I',lTmp,lProduto,'E',lDSEntrada.fieldByName('id').AsString]);
+        end;
+        lDSItens.dataset.Next;
+      end;
+
+      if(pResultado.erros<>lSave) then begin
+        rejeitarArquivoFedex(true,pResultado);
+        pResultado.acumulador['Entradas rejeitadas'].incrementa;
+        exit;
+      end;
+      gdbPadrao.commit(true);
+    finally
+      gdbPadrao.rollback(true);
+    end;
 
 {
     for i := 0 to lTexto.strings.Count-1 do begin

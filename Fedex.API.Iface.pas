@@ -21,6 +21,11 @@ interface
     FEDEX_TIPO_ENTRADA_NORMAL     = '1';
     FEDEX_TIPO_ENTRADA_DEVOLUCAO  = '2';
 
+    FEDEX_ACAOARQUIVO_MANTER      = 'M';
+    FEDEX_ACAOARQUIVO_REJEITAR    = 'R';
+    FEDEX_ACAOARQUIVO_PENDENTE    = 'P';
+
+
     SYSCOM_FEDEX_CONTROLE_SISTEMA             = 'WMS';
     SYSCOM_FEDEX_CONTROLE_IDENTIFICADOR_SKU   = 'SKU';
 
@@ -297,6 +302,8 @@ interface
   function getFedexDatasets: TFedexDatasets;
 
   function rejeitarArquivoFedex(pNotificarUsuario: boolean;pResultado: IResultadoOperacao): IResultadoOperacao;
+  function manterArquivoFedex(pNotificarUsuario: boolean;pResultado: IResultadoOperacao): IResultadoOperacao;
+  function divergeneciaArquivoFedex(pNotificarUsuario: boolean;pResultado: IResultadoOperacao): IResultadoOperacao;
 
 implementation
   uses
@@ -409,9 +416,25 @@ end;
 function rejeitarArquivoFedex(pNotificarUsuario: boolean;pResultado: IResultadoOperacao): IResultadoOperacao;
 begin
   Result := checkResultadoOperacao(pResultado);
-  pResultado.propriedade['MANTER_ARQUIVO'].asBoolean := false;
-  pResultado.propriedade['REJEITAR_ARQUIVO'].asBoolean := true;
-  pResultado.propriedade['NOTIFICAR_USUARIO'].asBoolean := pNotificarUsuario;
+  pResultado.propriedade['ACAO_ARQUIVO'].asString := FEDEX_ACAOARQUIVO_REJEITAR;
+  if(pNotificarUsuario) then
+    pResultado.propriedade['NOTIFICAR_USUARIO'].asBoolean := true;
+end;
+
+function manterArquivoFedex(pNotificarUsuario: boolean;pResultado: IResultadoOperacao): IResultadoOperacao;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  pResultado.propriedade['ACAO_ARQUIVO'].asString := FEDEX_ACAOARQUIVO_MANTER;
+  if(pNotificarUsuario) then
+    pResultado.propriedade['NOTIFICAR_USUARIO'].asBoolean := true;
+end;
+
+function divergeneciaArquivoFedex(pNotificarUsuario: boolean;pResultado: IResultadoOperacao): IResultadoOperacao;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  pResultado.propriedade['ACAO_ARQUIVO'].asString := FEDEX_ACAOARQUIVO_PENDENTE;
+  if(pNotificarUsuario) then
+    pResultado.propriedade['NOTIFICAR_USUARIO'].asBoolean := true;
 end;
 
 end.
