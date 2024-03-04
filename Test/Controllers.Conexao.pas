@@ -35,7 +35,7 @@ interface
 
         function setConfiguracoesNF(pConfiguracoes : TConfiguracoesNF)     : Boolean;
         function getConfiguracoes                                          : TConfiguracoesNF;
-
+        procedure setContextModoSistema(pSistema: String);
         procedure setContext(pUsuario: String);
       public
         Constructor Create;
@@ -186,6 +186,11 @@ begin
 end;
 
 procedure TControllersConexao.setContext(pUsuario: String);
+begin
+
+end;
+
+procedure TControllersConexao.setContextModoSistema(pSistema: String);
 begin
 
 end;

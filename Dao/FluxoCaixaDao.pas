@@ -31,6 +31,7 @@ type
     FSomarBancosView: Boolean;
     FOrderView: String;
     FTipoView: String;
+    FLojaView: Variant;
 
     procedure SetWhereView(const Value: String);
     procedure SetBancoView(const Value: String);
@@ -43,6 +44,7 @@ type
 
     function where: String;
     procedure SetTipoView(const Value: String);
+    procedure SetLojaView(const Value: Variant);
 
   public
     constructor Create(pIConexao : IConexao);
@@ -57,6 +59,7 @@ type
     property PorcentagemInadimplenciaView: Real read FPorcentagemInadimplenciaView write SetPorcentagemInadimplenciaView;
     property SomarBancosView: Boolean read FSomarBancosView write SetSomarBancosView;
     property TipoView: String read FTipoView write SetTipoView;
+    property LojaView : Variant read FLojaView write SetLojaView;
 
     function obterFluxoCaixaSintetico : TFDMemTable;
     function obterFluxoCaixaAnalitico : TFDMemTable;
@@ -67,7 +70,7 @@ end;
 implementation
 
 uses
-  System.Math, System.SysUtils, Data.DB;
+  System.Math, System.SysUtils, Data.DB, LojasModel;
 
 { TFluxoCaixa }
 
@@ -85,12 +88,16 @@ end;
 
 function TFluxoCaixaDao.obterFluxoCaixaSintetico : TFDMemTable;
 var
-  lQry               : TFDQuery;
-  lSql               : String;
-  lMemTable          : TFDMemTable;
-  lPaginacao         : String;
+  lQry        : TFDQuery;
+  lSql        : String;
+  lMemTable   : TFDMemTable;
+  lLojas_Dados,
+  lLojasModel : TLojasModel;
 begin
-  lQry := vIConexao.CriarQuery;
+  lQry        := vIConexao.CriarQuery;
+  lLojasModel := TLojasModel.Create(vIConexao);
+  lMemTable   := TFDMemTable.Create(nil);
+
   try
     lSql := '  select                                                                                                                                     '+sLineBreak+
             '        VENCIMENTO,                                                                                                                          '+sLineBreak+
@@ -191,9 +198,41 @@ begin
     if not FOrderView.IsEmpty then
       lSql := lSql + ' order by ' + FOrderView;
 
-    lQry.Open(lSQL);
+    lMemTable.FieldDefs.Add('LOJA',       ftString, 3);
+    lMemTable.FieldDefs.Add('LOJA_NOME',  ftString, 10);
+    lMemTable.FieldDefs.Add('VENCIMENTO', ftDate);
+    lMemTable.FieldDefs.Add('PAGAR',      ftFloat);
+    lMemTable.FieldDefs.Add('RECEBER',    ftFloat);
+    lMemTable.FieldDefs.Add('COMPRA',     ftFloat);
+    lMemTable.CreateDataSet;
 
-    Result := vConstrutor.atribuirRegistros(lQry);
+    lLojasModel.LojaView := self.FLojaView;
+    lLojasModel.obterLista;
+
+    for lLojas_Dados in lLojasModel.LojassLista do
+    begin
+      vIConexao.ConfigConexaoExterna(lLojas_Dados.LOJA);
+      lQry := vIConexao.CriarQueryExterna;
+      lQry.Open(lSQL);
+
+      lQry.First;
+      while not lQry.Eof do
+      begin
+        lMemTable.InsertRecord([
+                                lLojas_Dados.LOJA,
+                                lLojas_Dados.DESCRICAO,
+                                lQry.FieldByName('VENCIMENTO').AsString,
+                                lQry.FieldByName('PAGAR').AsFloat,
+                                lQry.FieldByName('RECEBER').AsFloat,
+                                lQry.FieldByName('COMPRA').AsFloat
+                               ]);
+        lQry.Next;
+      end;
+    end;
+
+    lMemTable.Open;
+    Result := lMemTable;
+
   finally
     lQry.Free;
   end;
@@ -201,12 +240,15 @@ end;
 
 function TFluxoCaixaDao.obterFluxoCaixaAnalitico : TFDMemTable;
 var
-  lQry: TFDQuery;
-  lSql: String;
-  i: Integer;
+  lQry        : TFDQuery;
+  lSql        : String;
+  lMemTable   : TFDMemTable;
+  lLojas_Dados,
+  lLojasModel : TLojasModel;
 begin
-
-  lQry := vIConexao.CriarQuery;
+  lQry        := vIConexao.CriarQuery;
+  lLojasModel := TLojasModel.Create(vIConexao);
+  lMemTable   := TFDMemTable.Create(nil);
 
   try
     lSql := '  select                                                                                                                                     '+sLineBreak+
@@ -303,9 +345,54 @@ begin
     if not FOrderView.IsEmpty then
       lSql := lSql + ' order by ' + FOrderView;
 
-    lQry.Open(lSQL);
+    lMemTable.FieldDefs.Add('LOJA',         ftString, 3);
+    lMemTable.FieldDefs.Add('LOJA_NOME',    ftString, 10);
+    lMemTable.FieldDefs.Add('TITULO',       ftString, 15);
+    lMemTable.FieldDefs.Add('CODIGO_NOME',  ftString, 6);
+    lMemTable.FieldDefs.Add('NOME',         ftString, 50);
+    lMemTable.FieldDefs.Add('VENCIMENTO',   ftDate);
+    lMemTable.FieldDefs.Add('EMISSAO',      ftDate);
+    lMemTable.FieldDefs.Add('PARCELA',      ftString);
+    lMemTable.FieldDefs.Add('VALOR',        ftFloat);
+    lMemTable.FieldDefs.Add('ABERTO',       ftFloat);
+    lMemTable.FieldDefs.Add('PORTADOR',     ftString, 30);
+    lMemTable.FieldDefs.Add('PORTADOR_COD', ftString, 50);
 
-    Result := vConstrutor.atribuirRegistros(lQry);
+    lMemTable.CreateDataSet;
+
+    lLojasModel.LojaView := self.FLojaView;
+    lLojasModel.obterLista;
+
+    for lLojas_Dados in lLojasModel.LojassLista do
+    begin
+      vIConexao.ConfigConexaoExterna(lLojas_Dados.LOJA);
+      lQry := vIConexao.CriarQueryExterna;
+      lQry.Open(lSQL);
+
+      lQry.First;
+      while not lQry.Eof do
+      begin
+        lMemTable.InsertRecord([
+                                lLojas_Dados.LOJA,
+                                lLojas_Dados.DESCRICAO,
+                                lQry.FieldByName('TITULO').AsString,
+                                lQry.FieldByName('CODIGO_NOME').AsString,
+                                lQry.FieldByName('NOME').AsString,
+                                lQry.FieldByName('VENCIMENTO').AsDateTime,
+                                lQry.FieldByName('EMISSAO').AsDateTime,
+                                lQry.FieldByName('PARCELA').AsString,
+                                lQry.FieldByName('VALOR').AsFloat,
+                                lQry.FieldByName('ABERTO').AsFloat,
+                                lQry.FieldByName('PORTADOR').AsString,
+                                lQry.FieldByName('PORTADOR_COD').AsString
+                               ]);
+        lQry.Next;
+      end;
+    end;
+
+    lMemTable.Open;
+    Result := lMemTable;
+
   finally
     lQry.Free;
   end;
@@ -313,10 +400,15 @@ end;
 
 function TFluxoCaixaDao.obterResumo: TFDMemTable;
 var
-  lQry: TFDQuery;
-  lSql: String;
+  lQry        : TFDQuery;
+  lSql        : String;
+  lMemTable   : TFDMemTable;
+  lLojas_Dados,
+  lLojasModel : TLojasModel;
 begin
-  lQry := vIConexao.CriarQuery;
+  lQry        := vIConexao.CriarQuery;
+  lLojasModel := TLojasModel.Create(vIConexao);
+  lMemTable   := TFDMemTable.Create(nil);
 
   try
     lSql := '   select                                                                                                                    '+sLineBreak+
@@ -367,9 +459,38 @@ begin
     if not FOrderView.IsEmpty then
       lSql := lSql + ' order by ' + FOrderView;
 
-    lQry.Open(lSql);
+    lMemTable.FieldDefs.Add('LOJA',            ftString, 3);
+    lMemTable.FieldDefs.Add('LOJA_NOME',       ftString, 10);
+    lMemTable.FieldDefs.Add('TIPO',            ftString, 20);
+    lMemTable.FieldDefs.Add('TOTALREGISTROS',  ftFloat);
+    lMemTable.FieldDefs.Add('TOTAL',           ftFloat);
+    lMemTable.CreateDataSet;
 
-    Result := vConstrutor.atribuirRegistros(lQry);
+    lLojasModel.LojaView := self.FLojaView;
+    lLojasModel.obterLista;
+
+    for lLojas_Dados in lLojasModel.LojassLista do
+    begin
+      vIConexao.ConfigConexaoExterna(lLojas_Dados.LOJA);
+      lQry := vIConexao.CriarQueryExterna;
+      lQry.Open(lSQL);
+
+      lQry.First;
+      while not lQry.Eof do
+      begin
+        lMemTable.InsertRecord([
+                                lLojas_Dados.LOJA,
+                                lLojas_Dados.DESCRICAO,
+                                lQry.FieldByName('TIPO').AsString,
+                                lQry.FieldByName('TOTALREGISTROS').AsFloat,
+                                lQry.FieldByName('TOTAL').AsFloat
+                               ]);
+        lQry.Next;
+      end;
+    end;
+
+    lMemTable.Open;
+    Result := lMemTable;
 
   finally
     lQry.Free;
@@ -378,21 +499,23 @@ end;
 
 function TFluxoCaixaDao.obterResultadoFluxoCaixa : TFDMemTable;
 var
-  lQry: TFDQuery;
-  lSql: String;
+  lQry : TFDQuery;
+  lSql : String;
   lPagar,
   lReceber,
   lInadimplente,
   lSaldoBanco,
-  lTotal : Double;
-  lContaCorrenteModel: TContaCorrenteModel;
-  lMemTable: TFDMemTable;
+  lTotal              : Double;
+  lMemTable           : TFDMemTable;
+  lContaCorrenteModel : TContaCorrenteModel;
+  lLojas_Dados,
+  lLojasModel         : TLojasModel;
+
 begin
-
-  lQry      := vIConexao.CriarQuery;
-  lMemTable := TFDMemTable.Create(nil);
+  lQry        := vIConexao.CriarQuery;
+  lMemTable   := TFDMemTable.Create(nil);
+  lLojasModel := TLojasModel.Create(vIConexao);
   try
-
     lSql := '        select TIPO,                                                                                  '+sLineBreak+
             '               COUNT(*) TOTALREGISTROS,                                                               '+sLineBreak+
             '               SUM(TOTAL) TOTAL                                                                       '+sLineBreak+
@@ -493,14 +616,30 @@ begin
 
     lTotal := lReceber + ifThen(FSomarBancosView, lSaldoBanco, 0) - lPagar;
 
-    lMemTable.FieldDefs.Add('RESULTADO_RECEBER', ftFloat);
-    lMemTable.FieldDefs.Add('RESULTADO_PAGAR', ftFloat);
+    lMemTable.FieldDefs.Add('LOJA',                   ftString, 3);
+    lMemTable.FieldDefs.Add('NOME_LOJA',              ftString, 10);
+    lMemTable.FieldDefs.Add('RESULTADO_RECEBER',      ftFloat);
+    lMemTable.FieldDefs.Add('RESULTADO_PAGAR',        ftFloat);
     lMemTable.FieldDefs.Add('RESULTADO_INADIMPLENTE', ftFloat);
-    lMemTable.FieldDefs.Add('RESULTADO_SALDO_BANCO', ftFloat);
-    lMemTable.FieldDefs.Add('TOTAL', ftFloat);
+    lMemTable.FieldDefs.Add('RESULTADO_SALDO_BANCO',  ftFloat);
+    lMemTable.FieldDefs.Add('TOTAL',                  ftFloat);
     lMemTable.CreateDataSet;
 
-    lMemTable.InsertRecord([
+    lLojasModel.LojaView := self.FLojaView;
+    lLojasModel.obterLista;
+
+    for lLojas_Dados in lLojasModel.LojassLista do
+    begin
+      vIConexao.ConfigConexaoExterna(lLojas_Dados.LOJA);
+      lQry := vIConexao.CriarQueryExterna;
+      lQry.Open(lSQL);
+
+      lQry.First;
+      while not lQry.Eof do
+      begin
+        lMemTable.InsertRecord([
+                            lLojas_Dados.LOJA,
+                            lLojas_Dados.DESCRICAO,
                             FormatFloat('####0.00', lReceber),
                             FormatFloat('####0.00', lPagar),
                             FormatFloat('####0.00', lInadimplente),
@@ -508,7 +647,10 @@ begin
                             FormatFloat('####0.00', lTotal)
                            ]);
 
-    Result := lMemTable;
+        Result := lMemTable;
+        lQry.Next;
+      end;
+    end;
 
   finally
     lQry.Free;
@@ -529,6 +671,11 @@ end;
 procedure TFluxoCaixaDao.SetDataInicialView(const Value: Variant);
 begin
   FDataInicialView := Value;
+end;
+
+procedure TFluxoCaixaDao.SetLojaView(const Value: Variant);
+begin
+  FLojaView := Value;
 end;
 
 procedure TFluxoCaixaDao.SetOrderView(const Value: String);

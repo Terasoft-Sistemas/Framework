@@ -412,6 +412,7 @@ begin
     lSql := ' select                                                                               '+SLineBreak+
             '    NUMERO,                                                                           '+SLineBreak+
             '    SERIE,                                                                            '+SLineBreak+
+            '    MODELO,                                                                           '+SLineBreak+
             '    COD_FORNECEDOR,                                                                   '+SLineBreak+
             '    NOME_FORNECEDOR,                                                                  '+SLineBreak+
             '    DATA_EMISSAO,                                                                     '+SLineBreak+
@@ -422,6 +423,7 @@ begin
             '      select                                                                          '+SLineBreak+
             '             entrada.numero_ent numero,                                               '+SLineBreak+
             '             entrada.serie_ent serie,                                                 '+SLineBreak+
+            '             entrada.modelo_ent modelo,                                               '+SLineBreak+
             '             entrada.codigo_for cod_fornecedor,                                       '+SLineBreak+
             '             coalesce(fornecedor.razao_for, fornecedor.fantasia_for) nome_fornecedor, '+SLineBreak+
             '             entrada.datanota_ent data_emissao,                                       '+SLineBreak+

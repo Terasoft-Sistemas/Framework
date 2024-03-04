@@ -23,6 +23,7 @@ type
     FDataInicialView: Variant;
     FOrderView: String;
     FTipoView: String;
+    FLojaView: Variant;
 
     procedure SetWhereView(const Value: String);
     procedure SetBancoView(const Value: String);
@@ -33,6 +34,7 @@ type
     procedure SetSomarBancosView(const Value: Boolean);
     procedure SetOrderView(const Value: String);
     procedure SetTipoView(const Value: String);
+    procedure SetLojaView(const Value: Variant);
 
   public
 
@@ -53,7 +55,7 @@ type
     property PorcentagemInadimplenciaView: Real read FPorcentagemInadimplenciaView write SetPorcentagemInadimplenciaView;
     property SomarBancosView: Boolean read FSomarBancosView write SetSomarBancosView;
     property TipoView: String read FTipoView write SetTipoView;
-
+    property LojaView : Variant read FLojaView write SetLojaView;
   end;
 
 implementation
@@ -79,7 +81,6 @@ var
   lFluxoCaixa: TFluxoCaixaDao;
 begin
   lFluxoCaixa := TFluxoCaixaDao.Create(vIConexao);
-
   try
     lFluxoCaixa.DataInicialView              := FDataInicialView;
     lFluxoCaixa.DataFinalView                := FDataFinalView;
@@ -89,6 +90,7 @@ begin
     lFluxoCaixa.SomarBancosView              := FSomarBancosView;
     lFluxoCaixa.TipoView                     := FTipoView;
     lFluxoCaixa.OrderView                    := FOrderView;
+    lFluxoCaixa.LojaView                     := FLojaView;
 
     Result := lFluxoCaixa.obterResultadoFluxoCaixa;
   finally
@@ -107,6 +109,7 @@ begin
     lFluxoCaixa.PortadorView                 := FPortadorView;
     lFluxoCaixa.TipoView                     := FTipoView;
     lFluxoCaixa.OrderView                    := FOrderView;
+    lFluxoCaixa.LojaView                     := FLojaView;
 
     Result := lFluxoCaixa.obterResumo;
   finally
@@ -117,6 +120,7 @@ end;
 function TFluxoCaixaModel.obterFluxoCaixaSintetico: TFDMemTable;
 var
   lFluxoCaixaLista: TFluxoCaixaDao;
+
 begin
   lFluxoCaixaLista := TFluxoCaixaDao.Create(vIConexao);
 
@@ -130,6 +134,7 @@ begin
     lFluxoCaixaLista.PorcentagemInadimplenciaView := FPorcentagemInadimplenciaView;
     lFluxoCaixaLista.SomarBancosView              := FSomarBancosView;
     lFluxoCaixaLista.TipoView                     := FTipoView;
+    lFluxoCaixaLista.LojaView                     := FLojaView;
 
     Result := lFluxoCaixaLista.obterFluxoCaixaSintetico;
 
@@ -143,7 +148,6 @@ var
   lFluxoCaixaLista: TFluxoCaixaDao;
 begin
   lFluxoCaixaLista := TFluxoCaixaDao.Create(vIConexao);
-
   try
     lFluxoCaixaLista.WhereView                    := FWhereView;
     lFluxoCaixaLista.OrderView                    := FOrderView;
@@ -154,6 +158,7 @@ begin
     lFluxoCaixaLista.PorcentagemInadimplenciaView := FPorcentagemInadimplenciaView;
     lFluxoCaixaLista.SomarBancosView              := FSomarBancosView;
     lFluxoCaixaLista.TipoView                     := FTipoView;
+    lFluxoCaixaLista.LojaView                     := FLojaView;
 
     Result := lFluxoCaixaLista.obterFluxoCaixaAnalitico;
 
@@ -175,6 +180,11 @@ end;
 procedure TFluxoCaixaModel.SetDataInicialView(const Value: Variant);
 begin
   FDataInicialView := Value;
+end;
+
+procedure TFluxoCaixaModel.SetLojaView(const Value: Variant);
+begin
+  FLojaView := Value;
 end;
 
 procedure TFluxoCaixaModel.SetOrderView(const Value: String);

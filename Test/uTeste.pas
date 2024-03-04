@@ -190,7 +190,7 @@ uses
   SaldoModel, EmpresaModel, ProdutosModel, EntradaItensModel,
   ClienteModel, ContasPagarModel, ContasPagarItensModel, System.SysUtils,
   ReservaModel, DocumentoModel, AnexoModel, FluxoCaixaModel, BancoModel,
-  PortadorModel;
+  PortadorModel, LojasModel;
 
 {$R *.dfm}
 
@@ -1136,6 +1136,7 @@ begin
       lFluxoCaixaModel.DataFinalView   := '12/12/2024';
       lFluxoCaixaModel.PortadorView    := '000001';
       lFluxoCaixaModel.OrderView       := 'RECEBER';
+//      lFluxoCaixaModel.LojaView        := '001';
 
       lMemTable := lFluxoCaixaModel.obterFluxoCaixaSintetico;
       dsTeste2.DataSet := lMemTable;
@@ -1158,9 +1159,10 @@ begin
     try
       lFluxoCaixaModel.DataInicialView := '01/01/2023';
       lFluxoCaixaModel.DataFinalView   := '12/12/2024';
+//      lFluxoCaixaModel.LojaView        := '001';
 
       //Para localizar um tipo especifico
-      lFluxoCaixaModel.TipoView := 'RECEBER';
+      lFluxoCaixaModel.TipoView        := 'RECEBER';
 
       lMemTable := lFluxoCaixaModel.obterFluxoCaixaAnalitico;
       dsTeste2.DataSet := lMemTable;
@@ -1268,6 +1270,7 @@ begin
     try
       lFluxoCaixaModel.DataInicialView := '27/02/2024';
       lFluxoCaixaModel.DataFinalView   := '29/02/2024';
+//      lFluxoCaixaModel.LojaView        := '001';
 
       lFluxoCaixaModel.PorcentagemInadimplenciaView := 10;
       lMemTable := lFluxoCaixaModel.obterResultadoFluxoCaixa;
