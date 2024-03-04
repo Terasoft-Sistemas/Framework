@@ -352,7 +352,7 @@ begin
     lMemTable.FieldDefs.Add('NOME',         ftString, 50);
     lMemTable.FieldDefs.Add('VENCIMENTO',   ftDate);
     lMemTable.FieldDefs.Add('EMISSAO',      ftDate);
-    lMemTable.FieldDefs.Add('PARCELA',      ftString);
+    lMemTable.FieldDefs.Add('PARCELA',      ftString, 10);
     lMemTable.FieldDefs.Add('VALOR',        ftFloat);
     lMemTable.FieldDefs.Add('ABERTO',       ftFloat);
     lMemTable.FieldDefs.Add('PORTADOR',     ftString, 30);
