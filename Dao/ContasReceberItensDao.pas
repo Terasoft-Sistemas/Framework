@@ -112,7 +112,7 @@ begin
               '        contasreceberitens.*                                                           '+SLineBreak+
               '   from contasreceberitens                                                             '+SLineBreak+
               '  inner join contasreceber on contasreceber.fatura_rec = contasreceberitens.fatura_rec '+SLineBreak+
-              '  where id = '+pId);
+              '  where contasreceberitens.id = '+pId);
 
     if lQry.IsEmpty then
       Exit;
@@ -201,7 +201,15 @@ var
   lQry: TFDQuery;
   lSQL:String;
 begin
-  lQry := vIConexao.CriarQuery;
+  if AContasReceberItensModel.LOJA <> vIConexao.getEmpresa.LOJA then
+  begin
+    if vIConexao.getLojaConectada <> AContasReceberItensModel.LOJA then
+      vIConexao.ConfigConexaoExterna(AContasReceberItensModel.LOJA);
+
+    lQry := vIConexao.criarQueryExterna;
+  end
+  else
+    lQry := vIConexao.CriarQuery;
 
   lSQL := vConstrutor.gerarUpdate('CONTASRECEBERITENS','ID');
   try
