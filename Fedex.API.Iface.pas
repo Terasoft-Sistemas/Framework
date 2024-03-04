@@ -24,6 +24,7 @@ interface
     FEDEX_ACAOARQUIVO_MANTER      = 'M';
     FEDEX_ACAOARQUIVO_REJEITAR    = 'R';
     FEDEX_ACAOARQUIVO_PENDENTE    = 'P';
+    FEDEX_ACAOARQUIVO_APAGAR      = 'A';
 
 
     SYSCOM_FEDEX_CONTROLE_SISTEMA             = 'WMS';
@@ -304,6 +305,7 @@ interface
   function rejeitarArquivoFedex(pNotificarUsuario: boolean;pResultado: IResultadoOperacao): IResultadoOperacao;
   function manterArquivoFedex(pNotificarUsuario: boolean;pResultado: IResultadoOperacao): IResultadoOperacao;
   function divergeneciaArquivoFedex(pNotificarUsuario: boolean;pResultado: IResultadoOperacao): IResultadoOperacao;
+  function apagarArquivoFedex(pNotificarUsuario: boolean;pResultado: IResultadoOperacao): IResultadoOperacao;
 
 implementation
   uses
@@ -436,5 +438,14 @@ begin
   if(pNotificarUsuario) then
     pResultado.propriedade['NOTIFICAR_USUARIO'].asBoolean := true;
 end;
+
+function apagarArquivoFedex(pNotificarUsuario: boolean;pResultado: IResultadoOperacao): IResultadoOperacao;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  pResultado.propriedade['ACAO_ARQUIVO'].asString := FEDEX_ACAOARQUIVO_APAGAR;
+  if(pNotificarUsuario) then
+    pResultado.propriedade['NOTIFICAR_USUARIO'].asBoolean := true;
+end;
+
 
 end.

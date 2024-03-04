@@ -100,8 +100,55 @@ end;
 {$ifend}
 
 function processaArquivoExpedicao(pAPI: IFedexAPI; pResultado: IResultadoOperacao): IResultadoOperacao;
+  var
+    lArquivo: String;
+    lTexto, lLinha: IListaTexto;
+    ctr: IControleAlteracoes;
+    lSave: Integer;
+    lLista: IDicionarioSimples<TipoWideStringFramework,IListaString>;
+    lListaIMEIS: IListaString;
+    i: Integer;
+
 begin
   Result := checkResultadoOperacao(pResultado);
+  lSave := pResultado.erros;
+  lLista := TListaSimplesCreator.CreateDictionary<TipoWideStringFramework,IListaString>;
+  try
+    lArquivo := pResultado.propriedade['ARQUIVO'].asString;
+    if (lArquivo='') or not FileExists(lArquivo) then begin
+      pResultado.formataErro('processaArquivoExpedicao: arquivo [%s] não existe.', [lArquivo]);
+      pResultado.acumulador['Saidas rejeitadas'].incrementa;
+      rejeitarArquivoFedex(true,pResultado);
+      exit;
+    end;
+    if (pAPI=nil) or (pAPI.parameters.depositante.cnpj='') then begin
+      pResultado.formataErro('processaArquivoExpedicao: Não especificou um API/DEPOSITANTE válido.', [lArquivo]);
+      exit;
+    end;
+    ctr := pAPI.parameters.controleAlteracoes;
+    if(ctr=nil) then begin
+      pResultado.adicionaErro('processaArquivoExpedicao: Controle de alterações não definido.');
+      exit;
+    end;
+
+    lTexto := novaListaTexto;
+    lLinha := novaListaTexto;
+    lLinha.strings.Delimiter := '|';
+    lTexto.strings.LoadFromFile(lArquivo);
+    for i := 0 to lTexto.lines.Count - 1 do begin
+      lLinha.strings.DelimitedText := lTexto.strings.Strings[i];
+      if(lLinha.strings.Count < 4 ) then begin
+        pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui 4 campos especificados: %d', [ lArquivo, (i + 1), lLinha.strings.Count ] )
+      end;
+    end;
+
+  except
+    on e: Exception do begin
+      pResultado.formataErro('processaArquivoExpedicao: %s: %s', [ e.ClassName, e.Message ] );
+      pResultado.acumulador['Saidas com problemas'].incrementa;
+    end;
+  end;
+
 end;
 
 function processaArquivoRecebimento(pAPI: IFedexAPI; pResultado: IResultadoOperacao): IResultadoOperacao;
@@ -263,6 +310,8 @@ begin
         exit;
       end;
       gdbPadrao.commit(true);
+      ctr.setValor(CONTROLE_LOGISTICA_FEDEX_STATUS_PO, lDSEntrada.dataset.FieldByName('id').AsString,CONTROLE_LOGISTICA_STATUS_FINALIZADO);
+      apagarArquivoFedex(false,pResultado);
     finally
       gdbPadrao.rollback(true);
     end;
@@ -295,8 +344,10 @@ begin
 }
 
   except
-    on e: Exception do
+    on e: Exception do begin
       pResultado.formataErro('processaArquivoRecebimento: %s: %s', [ e.ClassName, e.Message ] );
+      pResultado.acumulador['Entradas com problemas'].incrementa;
+    end;
   end;
 end;
 
