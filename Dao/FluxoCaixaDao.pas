@@ -512,9 +512,9 @@ var
   lLojasModel         : TLojasModel;
 
 begin
-  lQry        := vIConexao.CriarQuery;
   lMemTable   := TFDMemTable.Create(nil);
   lLojasModel := TLojasModel.Create(vIConexao);
+
   try
     lSql := '        select TIPO,                                                                                  '+sLineBreak+
             '               COUNT(*) TOTALREGISTROS,                                                               '+sLineBreak+
@@ -575,47 +575,6 @@ begin
     if not FOrderView.IsEmpty then
       lSql := lSql + ' order by ' + FOrderView;
 
-    lQry.SQL.Add(lSql);
-
-    vConstrutor.getSQL(lQry);
-
-    lQry.Open;
-
-    lReceber      := 0;
-    lInadimplente := 0;
-    lPagar        := 0;
-
-    lQry.First;
-    while not lQry.Eof do
-    begin
-      if lQry.FieldByName('Tipo').AsString = 'RECEBER' then
-      begin
-        if FPorcentagemInadimplenciaView > 0 then
-        begin
-          lReceber      := lReceber + (lQry.FieldByName('Total').AsFloat - (lQry.FieldByName('Total').AsFloat * (FPorcentagemInadimplenciaView / 100)));
-          lInadimplente := lInadimplente + (lQry.FieldByName('Total').AsFloat * (FPorcentagemInadimplenciaView / 100));
-        end
-        else
-          lReceber := lReceber + lQry.FieldByName('Total').AsFloat;
-      end;
-
-      if (lQry.FieldByName('Tipo').AsString = 'PAGAR') or
-         (lQry.FieldByName('Tipo').AsString = 'COMPRA') then
-      begin
-        lPagar := lPagar + lQry.FieldByName('Total').AsFloat;
-      end;
-
-      lQry.Next;
-    end;
-
-    lContaCorrenteModel := TContaCorrenteModel.Create(vIConexao);
-    lContaCorrenteModel.IDBancoView := FBancoView;
-    lContaCorrenteModel.obterSaldo;
-
-    lSaldoBanco := lContaCorrenteModel.Saldo;
-
-    lTotal := lReceber + ifThen(FSomarBancosView, lSaldoBanco, 0) - lPagar;
-
     lMemTable.FieldDefs.Add('LOJA',                   ftString, 3);
     lMemTable.FieldDefs.Add('NOME_LOJA',              ftString, 10);
     lMemTable.FieldDefs.Add('RESULTADO_RECEBER',      ftFloat);
@@ -634,22 +593,53 @@ begin
       lQry := vIConexao.CriarQueryExterna;
       lQry.Open(lSQL);
 
+      lReceber      := 0;
+      lInadimplente := 0;
+      lPagar        := 0;
+
       lQry.First;
       while not lQry.Eof do
       begin
-        lMemTable.InsertRecord([
-                            lLojas_Dados.LOJA,
-                            lLojas_Dados.DESCRICAO,
-                            FormatFloat('####0.00', lReceber),
-                            FormatFloat('####0.00', lPagar),
-                            FormatFloat('####0.00', lInadimplente),
-                            FormatFloat('####0.00', lSaldoBanco),
-                            FormatFloat('####0.00', lTotal)
-                           ]);
+        if lQry.FieldByName('Tipo').AsString = 'RECEBER' then
+        begin
+          if FPorcentagemInadimplenciaView > 0 then
+          begin
+            lReceber      := lReceber + (lQry.FieldByName('Total').AsFloat - (lQry.FieldByName('Total').AsFloat * (FPorcentagemInadimplenciaView / 100)));
+            lInadimplente := lInadimplente + (lQry.FieldByName('Total').AsFloat * (FPorcentagemInadimplenciaView / 100));
+          end
+          else
+            lReceber := lReceber + lQry.FieldByName('Total').AsFloat;
+        end;
 
-        Result := lMemTable;
+        if (lQry.FieldByName('Tipo').AsString = 'PAGAR') or
+           (lQry.FieldByName('Tipo').AsString = 'COMPRA') then
+        begin
+          lPagar := lPagar + lQry.FieldByName('Total').AsFloat;
+        end;
+
         lQry.Next;
       end;
+
+      lContaCorrenteModel := TContaCorrenteModel.Create(vIConexao);
+      lContaCorrenteModel.IDBancoView := FBancoView;
+      lContaCorrenteModel.obterSaldo(lLojas_Dados.LOJA);
+
+      lSaldoBanco := lContaCorrenteModel.Saldo;
+
+      lTotal := lReceber + ifThen(FSomarBancosView, lSaldoBanco, 0) - lPagar;
+
+      lMemTable.InsertRecord([
+                          lLojas_Dados.LOJA,
+                          lLojas_Dados.DESCRICAO,
+                          FormatFloat('####0.00', lReceber),
+                          FormatFloat('####0.00', lPagar),
+                          FormatFloat('####0.00', lInadimplente),
+                          FormatFloat('####0.00', lSaldoBanco),
+                          FormatFloat('####0.00', lTotal)
+                         ]);
+
+      Result := lMemTable;
+
     end;
 
   finally

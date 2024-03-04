@@ -159,7 +159,7 @@ type
     function Excluir(pID : String) : String;
     function Salvar: String;
     procedure obterLista;
-    procedure obterSaldo;
+    procedure obterSaldo(pLoja: String = '');
 
     function carregaClasse(pId: String): TContaCorrenteModel;
     procedure excluirRegistro(pIdRegistro: String);
@@ -289,7 +289,7 @@ begin
   end;
 end;
 
-procedure TContaCorrenteModel.ObterSaldo;
+procedure TContaCorrenteModel.ObterSaldo(pLoja: String = '');
 var
   lContaCorrenteDao: TContaCorrenteDao;
 begin
@@ -297,7 +297,7 @@ begin
 
   try
     lContaCorrenteDao.IDBancoView := FIDBancoView;
-    lContaCorrenteDao.obterSaldo;
+    lContaCorrenteDao.obterSaldo(pLoja);
     Saldo := lContaCorrenteDao.Saldo;
 
   finally

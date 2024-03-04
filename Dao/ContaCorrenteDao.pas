@@ -66,7 +66,7 @@ type
     function alterar(AContaCorrenteModel: TContaCorrenteModel): String;
     function excluir(AContaCorrenteModel: TContaCorrenteModel): String;
 
-    procedure obterSaldo;
+    procedure obterSaldo(pLoja: String);
     procedure obterLista;
     function carregaClasse(pId: String): TContaCorrenteModel;
 
@@ -77,7 +77,7 @@ end;
 implementation
 
 uses
-  System.Rtti;
+  System.Rtti, LojasModel;
 
 { TContaCorrente }
 
@@ -338,14 +338,12 @@ begin
   end;
 end;
 
-procedure TContaCorrenteDao.obterSaldo;
+procedure TContaCorrenteDao.obterSaldo(pLoja: String);
 var
   lQry: TFDQuery;
   lSql: String;
 begin
   try
-    lQry := vIConexao.CriarQuery;
-
     lSql := ' select                                    '+sLineBreak+
             '       SUM(case c.tipo_cta                 '+sLineBreak+
             '       when ''D'' then -1*(c.valor_cor)    '+sLineBreak+
@@ -363,14 +361,14 @@ begin
         lSQL := lSQL + ' and c.CODIGO_BAN in (' + FIDBancoView + ')';
     end;
 
-//    lConexao := TConexao.Create;
-//    lQry := lConexao.CriarQuery;
+    vIConexao.ConfigConexaoExterna(IIF(pLoja <> '', pLoja, vIConexao.getEmpresa.LOJA));
+    lQry := vIConexao.CriarQueryExterna;
     lQry.Open(lSQL);
 
     FSaldo := lQry.FieldByName('SALDO').AsFloat;
+
   finally
     lQry.Free;
-//    lConexao.Free;
   end;
 end;
 
