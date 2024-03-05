@@ -59,6 +59,8 @@ type
     FUSUARIO_PAG: Variant;
     FOS_ID: Variant;
     FTIPO_PAG: Variant;
+    FFornecedorView: Variant;
+    FDuplicataView: Variant;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -104,6 +106,8 @@ type
     procedure SetTIPO_PAG(const Value: Variant);
     procedure SetUSUARIO_PAG(const Value: Variant);
     procedure SetVALOR_PAG(const Value: Variant);
+    procedure SetFornecedorView(const Value: Variant);
+    procedure SetDuplicataView(const Value: Variant);
 
   public
 
@@ -154,6 +158,7 @@ type
 
     function carregaClasse(pId, pFornecedor: String): TContasPagarModel;
     function obterLista: TFDMemTable;
+    function obterValorEntrada(pEntrada, pFornecedor: String): TFDMemTable;
     procedure gerarDuplicatas(pID, pFornecedor : String);
 
     property Acao :TAcao read FAcao write SetAcao;
@@ -164,13 +169,15 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
-
+    property FornecedorView :Variant read FFornecedorView write SetFornecedorView;
+    property DuplicataView: Variant read FDuplicataView write SetDuplicataView;
   end;
 
 implementation
 
 uses
-  ContasPagarDao, ContasPagarItensModel, System.Classes, System.SysUtils;
+  ContasPagarDao, ContasPagarItensModel, System.Classes, System.SysUtils, System.Math,
+  EntradaModel, Data.DB;
 
 { TContasPagarModel }
 
@@ -317,6 +324,39 @@ begin
   end;
 end;
 
+function TContasPagarModel.obterValorEntrada(pEntrada, pFornecedor: String): TFDMemTable;
+var
+  lContasPagarDao: TContasPagarDao;
+  lEntradaModel: TEntradaModel;
+  lTotalFinanceiro: Double;
+  lTotalEntradaFornecedor: Double;
+  lMemTable : TFDMemTable;
+begin
+
+  lContasPagarDao := TContasPagarDao.Create(vIConexao);
+  lEntradaModel   := TEntradaModel.Create(vIConexao);
+  lMemTable       := TFDMemTable.Create(nil);
+
+  try
+    lEntradaModel.NumeroView     := pEntrada;
+    lEntradaModel.FornecedorView := pFornecedor;
+
+    lTotalEntradaFornecedor := lEntradaModel.obterTotalizador.fieldByName('TOTAL_ENTRADA').AsFloat;
+    lTotalFinanceiro        := lContasPagarDao.FinanceiroEntrada(pEntrada, pFornecedor);
+
+    lMemTable.FieldDefs.Add('VALOR', ftFloat);
+    lMemTable.CreateDataSet;
+
+    lMemTable.InsertRecord([lTotalEntradaFornecedor - lTotalFinanceiro]);
+
+    Result := lMemTable;
+
+  finally
+    lContasPagarDao.Free;
+    lEntradaModel.Free;
+  end;
+end;
+
 procedure TContasPagarModel.SetAcao(const Value: TAcao);
 begin
   FAcao := Value;
@@ -362,6 +402,11 @@ begin
   FDATAEMI_PAG := Value;
 end;
 
+procedure TContasPagarModel.SetDuplicataView(const Value: Variant);
+begin
+  FDuplicataView := Value;
+end;
+
 procedure TContasPagarModel.SetDUPLICATA_ANTIGA(const Value: Variant);
 begin
   FDUPLICATA_ANTIGA := Value;
@@ -380,6 +425,11 @@ end;
 procedure TContasPagarModel.SetEMPRESTIMO_RECEBER_ID(const Value: Variant);
 begin
   FEMPRESTIMO_RECEBER_ID := Value;
+end;
+
+procedure TContasPagarModel.SetFornecedorView(const Value: Variant);
+begin
+  FFornecedorView := Value;
 end;
 
 procedure TContasPagarModel.SetFUNCIONARIO_ID(const Value: Variant);

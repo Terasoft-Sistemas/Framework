@@ -96,6 +96,7 @@ type
     Button59: TButton;
     Button60: TButton;
     Button61: TButton;
+    Button62: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -163,6 +164,7 @@ type
     procedure Button59Click(Sender: TObject);
     procedure Button60Click(Sender: TObject);
     procedure Button61Click(Sender: TObject);
+    procedure Button62Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -1601,6 +1603,29 @@ begin
   end;
 end;
 
+procedure TForm1.Button62Click(Sender: TObject);
+var
+  lContasPagarModel : TContasPagarModel;
+  pEntrada,
+  pFornecedor : String;
+begin
+  lContasPagarModel := TContasPagarModel.Create(vIConexao);
+  try
+    try
+      pEntrada    := '0001044283';
+      pFornecedor := '000184';
+
+      dsEntrada.DataSet := lContasPagarModel.obterValorEntrada(pEntrada, pFornecedor);
+
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lContasPagarModel.Free;
+  end;
+end;
+
 procedure TForm1.Button6Click(Sender: TObject);
 var
   lWebPedidoModel : TWebPedidoModel;
@@ -2016,11 +2041,12 @@ begin
       lMemTable.First;
       while not lMemTable.Eof do
       begin
-        memoResultado.Lines.Add('NUMERO_ENT: '+lMemTable.FieldByName('NUMERO_ENT').AsString);
-        memoResultado.Lines.Add('CODIGO_FOR: '+lMemTable.FieldByName('CODIGO_FOR').AsString);
+        memoResultado.Lines.Add('NUMERO_ENT: '+lMemTable.FieldByName('NUMERO_ENTRADA').AsString);
+        memoResultado.Lines.Add('SERIE: '+lMemTable.FieldByName('SERIE').AsString);
+        memoResultado.Lines.Add('CODIGO_FOR: '+lMemTable.FieldByName('COD_FORNECEDOR').AsString);
         memoResultado.Lines.Add('FORNECEDOR: '+lMemTable.FieldByName('NOME_FORNECEDOR').AsString);
-        memoResultado.Lines.Add('DATANOTA_ENT: '+lMemTable.FieldByName('DATANOTA_ENT').AsString);
-        memoResultado.Lines.Add('TOTAL_ENT: '+lMemTable.FieldByName('TOTAL_ENT').AsString);
+        memoResultado.Lines.Add('DATANOTA_ENT: '+lMemTable.FieldByName('DATA_EMISSAO').AsString);
+        memoResultado.Lines.Add('TOTAL_ENT: '+lMemTable.FieldByName('VALOR_TOTAL').AsString);
         memoResultado.Lines.Add('===============================================');
         lMemTable.Next;
       end;

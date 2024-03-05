@@ -59,8 +59,8 @@ type
     function excluir(AContasPagarModel: TContasPagarModel): String;
 
     function carregaClasse(pID, pFornecedor : String): TContasPagarModel;
-
     function obterLista: TFDMemTable;
+    function FinanceiroEntrada(pEntrada, pFornecedor: String): Double;
 
     procedure setParams(var pQry: TFDQuery; pContasPagarModel: TContasPagarModel);
 
@@ -196,6 +196,24 @@ begin
    lQry.ExecSQL('delete from CONTASPAGAR where =' + QuotedStr(AContasPagarModel.DUPLICATA_PAG) + 'and CODIGO_FOR = ' + QuotedStr(AContasPagarModel.CODIGO_FOR));
    lQry.ExecSQL;
    Result := AContasPagarModel.DUPLICATA_PAG;
+
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TContasPagarDao.FinanceiroEntrada(pEntrada, pFornecedor: String): Double;
+var
+  lSql : String;
+  lQry : TFDQuery;
+begin
+  lQry := vIConexao.criarQuery;
+  try
+    lSql := 'select sum(c.valor_pag) valor from contaspagar c where c.duplicata_pag = ' +QuotedStr(pEntrada)+ ' and c.codigo_for = ' +QuotedStr(pFornecedor);
+
+    lQry.Open(lSql);
+
+    Result := lQry.FieldByName('VALOR').AsFloat;
 
   finally
     lQry.Free;

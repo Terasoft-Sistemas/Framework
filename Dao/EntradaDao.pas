@@ -400,17 +400,18 @@ end;
 
 function TEntradaDao.obterLista: TFDMemTable;
 var
-  lQry : TFDQuery;
-  lSQL : String;
+  lQry       : TFDQuery;
+  lSQL       : String;
+  lPaginacao : String;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
-    lSql := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
+    lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView ;
 
-    lSql := ' select                                                                               '+SLineBreak+
-            '    NUMERO,                                                                           '+SLineBreak+
+    lSql := ' select  ' +lPaginacao+ '                                                             '+SLineBreak+
+            '    NUMERO_ENTRADA,                                                                   '+SLineBreak+
             '    SERIE,                                                                            '+SLineBreak+
             '    MODELO,                                                                           '+SLineBreak+
             '    COD_FORNECEDOR,                                                                   '+SLineBreak+
@@ -421,7 +422,7 @@ begin
             '    from                                                                              '+SLineBreak+
             '    (                                                                                 '+SLineBreak+
             '      select                                                                          '+SLineBreak+
-            '             entrada.numero_ent numero,                                               '+SLineBreak+
+            '             entrada.numero_ent numero_entrada,                                       '+SLineBreak+
             '             entrada.serie_ent serie,                                                 '+SLineBreak+
             '             entrada.modelo_ent modelo,                                               '+SLineBreak+
             '             entrada.codigo_for cod_fornecedor,                                       '+SLineBreak+
@@ -438,7 +439,7 @@ begin
     lSql := lSql + ' ) entrada ';
 
     if not FOrderView.IsEmpty then
-      lSQL := lSQL + ' order by '+FOrderView;
+      lSql := lSQL + ' order by '+FOrderView;
 
     lQry.Open(lSQL);
 

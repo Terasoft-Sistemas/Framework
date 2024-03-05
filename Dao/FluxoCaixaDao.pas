@@ -347,7 +347,8 @@ begin
 
     lMemTable.FieldDefs.Add('LOJA',         ftString, 3);
     lMemTable.FieldDefs.Add('LOJA_NOME',    ftString, 10);
-    lMemTable.FieldDefs.Add('TITULO',       ftString, 15);
+    lMemTable.FieldDefs.Add('TIPO',         ftString, 30);
+    lMemTable.FieldDefs.Add('TITULO',       ftString, 30);
     lMemTable.FieldDefs.Add('CODIGO_NOME',  ftString, 6);
     lMemTable.FieldDefs.Add('NOME',         ftString, 50);
     lMemTable.FieldDefs.Add('VENCIMENTO',   ftDate);
@@ -375,6 +376,7 @@ begin
         lMemTable.InsertRecord([
                                 lLojas_Dados.LOJA,
                                 lLojas_Dados.DESCRICAO,
+                                lQry.FieldByName('TIPO').AsString,
                                 lQry.FieldByName('TITULO').AsString,
                                 lQry.FieldByName('CODIGO_NOME').AsString,
                                 lQry.FieldByName('NOME').AsString,
@@ -629,14 +631,14 @@ begin
       lTotal := lReceber + ifThen(FSomarBancosView, lSaldoBanco, 0) - lPagar;
 
       lMemTable.InsertRecord([
-                          lLojas_Dados.LOJA,
-                          lLojas_Dados.DESCRICAO,
-                          FormatFloat('####0.00', lReceber),
-                          FormatFloat('####0.00', lPagar),
-                          FormatFloat('####0.00', lInadimplente),
-                          FormatFloat('####0.00', lSaldoBanco),
-                          FormatFloat('####0.00', lTotal)
-                         ]);
+                              lLojas_Dados.LOJA,
+                              lLojas_Dados.DESCRICAO,
+                              FormatFloat('####0.00', lReceber),
+                              FormatFloat('####0.00', lPagar),
+                              FormatFloat('####0.00', lInadimplente),
+                              FormatFloat('####0.00', lSaldoBanco),
+                              FormatFloat('####0.00', lTotal)
+                             ]);
 
       Result := lMemTable;
 
