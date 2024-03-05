@@ -484,22 +484,25 @@ var
 begin
   lQry := vIConexao.CriarQuery;
   FProdutossLista := TObjectList<TProdutosModel>.Create;
+
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lSql := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
     else
       lSql := 'select ';
+
     lSQL := lSQL +
-      '       produto.nome_pro,             '+
-      '       produto.barras_pro,           '+
-      '       produto.codigo_pro,           '+
-      '       produto.venda_pro,            '+
-      '       produto.customedio_pro,       '+
-      '       produto.nfce_cfop,            '+
-      '       produto.garantia_12,          '+
-      '       produto.garantia_24           '+
-	    '  from produto                       '+
-      ' where 1=1                           ';
+      '       produto.nome_pro,                                    '+
+      '       produto.barras_pro,                                  '+
+      '       produto.codigo_pro,                                  '+
+      '       coalesce(produto.venda_pro, 0) venda_pro,            '+
+      '       coalesce(produto.saldo_pro, 0) saldo_pro,            '+
+      '       produto.customedio_pro,                              '+
+      '       produto.nfce_cfop,                                   '+
+      '       produto.garantia_12,                                 '+
+      '       produto.garantia_24                                  '+
+	    '  from produto                                              '+
+      ' where 1=1                                                  ';
 
     lSql := lSql + where;
 
@@ -522,6 +525,7 @@ begin
       FProdutossLista[i].NFCE_CFOP       := lQry.FieldByName('NFCE_CFOP').AsString;
       FProdutossLista[i].GARANTIA_12     := lQry.FieldByName('GARANTIA_12').AsString;
       FProdutossLista[i].GARANTIA_24     := lQry.FieldByName('GARANTIA_24').AsString;
+      FProdutossLista[i].SALDO_PRO       := lQry.FieldByName('SALDO_PRO').AsString;
       lQry.Next;
     end;
 

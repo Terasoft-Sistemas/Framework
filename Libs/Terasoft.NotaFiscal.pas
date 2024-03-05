@@ -986,6 +986,8 @@ begin
   vIConexao := pIConexao;
   ACBrNFe   := TACBrNFe.Create(nil);
 
+  vConfiguracoesNotaFiscal := TConfiguracoesNotaFiscal.Create(vIConexao);
+
   configuraComponenteNFe;
   FidNotaFiscal  := '';
   FidPedido      := '';
@@ -997,6 +999,7 @@ end;
 
 destructor TNotaFiscal.Destroy;
 begin
+  vConfiguracoesNotaFiscal.Free;
   inherited;
 end;
 
