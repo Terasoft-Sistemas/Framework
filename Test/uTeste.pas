@@ -2045,6 +2045,11 @@ begin
         memoResultado.Lines.Add('SERIE: '+lMemTable.FieldByName('SERIE').AsString);
         memoResultado.Lines.Add('CODIGO_FOR: '+lMemTable.FieldByName('COD_FORNECEDOR').AsString);
         memoResultado.Lines.Add('FORNECEDOR: '+lMemTable.FieldByName('NOME_FORNECEDOR').AsString);
+        memoResultado.Lines.Add('ENDERECO_FORNECEDOR: '+lMemTable.FieldByName('ENDERECO_FORNECEDOR').AsString);
+        memoResultado.Lines.Add('NUMERO_FORNECEDOR: '+lMemTable.FieldByName('NUMERO_FORNECEDOR').AsString);
+        memoResultado.Lines.Add('BAIRRO_FORNECEDOR: '+lMemTable.FieldByName('BAIRRO_FORNECEDOR').AsString);
+        memoResultado.Lines.Add('CIDADE_FORNECEDOR: '+lMemTable.FieldByName('CIDADE_FORNECEDOR').AsString);
+        memoResultado.Lines.Add('CNPJ_CPF_FORNECEDOR: '+lMemTable.FieldByName('CNPJ_CPF_FORNECEDOR').AsString);
         memoResultado.Lines.Add('DATANOTA_ENT: '+lMemTable.FieldByName('DATA_EMISSAO').AsString);
         memoResultado.Lines.Add('TOTAL_ENT: '+lMemTable.FieldByName('VALOR_TOTAL').AsString);
         memoResultado.Lines.Add('===============================================');

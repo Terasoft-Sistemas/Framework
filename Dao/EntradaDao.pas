@@ -410,29 +410,48 @@ begin
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
     lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView ;
 
-    lSql := ' select  ' +lPaginacao+ '                                                             '+SLineBreak+
-            '    NUMERO_ENTRADA,                                                                   '+SLineBreak+
-            '    SERIE,                                                                            '+SLineBreak+
-            '    MODELO,                                                                           '+SLineBreak+
-            '    COD_FORNECEDOR,                                                                   '+SLineBreak+
-            '    NOME_FORNECEDOR,                                                                  '+SLineBreak+
-            '    DATA_EMISSAO,                                                                     '+SLineBreak+
-            '    DATA_MOVIMENTO,                                                                   '+SLineBreak+
-            '    VALOR_TOTAL                                                                       '+SLineBreak+
-            '    from                                                                              '+SLineBreak+
-            '    (                                                                                 '+SLineBreak+
-            '      select                                                                          '+SLineBreak+
-            '             entrada.numero_ent numero_entrada,                                       '+SLineBreak+
-            '             entrada.serie_ent serie,                                                 '+SLineBreak+
-            '             entrada.modelo_ent modelo,                                               '+SLineBreak+
-            '             entrada.codigo_for cod_fornecedor,                                       '+SLineBreak+
-            '             coalesce(fornecedor.razao_for, fornecedor.fantasia_for) nome_fornecedor, '+SLineBreak+
-            '             entrada.datanota_ent data_emissao,                                       '+SLineBreak+
-            '             entrada.datamovi_ent data_movimento,                                     '+SLineBreak+
-            '             entrada.total_ent valor_total                                            '+SLineBreak+
-            '        from entrada                                                                  '+SLineBreak+
-            '        left join fornecedor on fornecedor.codigo_for = entrada.codigo_for            '+SLineBreak+
-            '       where 1=1                                                                      '+SLineBreak;
+    lSql := ' select ' +lPaginacao+ '                                                                             '+SLineBreak+
+            '       NUMERO_ENTRADA,                                                                               '+SLineBreak+
+            '       SERIE,                                                                                        '+SLineBreak+
+            '       MODELO,                                                                                       '+SLineBreak+
+            '       OBSERVACAO,                                                                                   '+SLineBreak+
+            '       COD_FORNECEDOR,                                                                               '+SLineBreak+
+            '       NOME_FORNECEDOR,                                                                              '+SLineBreak+
+            '       ENDERECO_FORNECEDOR,                                                                          '+SLineBreak+
+            '       NUMERO_FORNECEDOR,                                                                            '+SLineBreak+
+            '       BAIRRO_FORNECEDOR,                                                                            '+SLineBreak+
+            '       CIDADE_FORNECEDOR,                                                                            '+SLineBreak+
+            '       UF_FORNECEDOR,                                                                                '+SLineBreak+
+            '       CNPJ_CPF_FORNECEDOR,                                                                          '+SLineBreak+
+            '       TELEFONE_FORNECEDOR,                                                                          '+SLineBreak+
+            '       CELULAR_FORNECEDOR,                                                                           '+SLineBreak+
+            '       CONTATO_FORNECEDOR,                                                                           '+SLineBreak+
+            '       DATA_EMISSAO,                                                                                 '+SLineBreak+
+            '       DATA_MOVIMENTO,                                                                               '+SLineBreak+
+            '       VALOR_TOTAL                                                                                   '+SLineBreak+
+            '                 from                                                                                '+SLineBreak+
+            '                    (select                                                                          '+SLineBreak+
+            '                          entrada.numero_ent numero_entrada,                                         '+SLineBreak+
+            '                          entrada.serie_ent serie,                                                   '+SLineBreak+
+            '                          entrada.modelo_ent modelo,                                                 '+SLineBreak+
+            '                          entrada.observacao_ent observacao,                                         '+SLineBreak+
+            '                          entrada.codigo_for cod_fornecedor,                                         '+SLineBreak+
+            '                          coalesce(fornecedor.razao_for, fornecedor.fantasia_for) nome_fornecedor,   '+SLineBreak+
+            '                          fornecedor.endereco_for endereco_fornecedor,                               '+SLineBreak+
+            '                          fornecedor.numero_end numero_fornecedor,                                   '+SLineBreak+
+            '                          fornecedor.bairro_for bairro_fornecedor,                                   '+SLineBreak+
+            '                          fornecedor.cidade_for cidade_fornecedor,                                   '+SLineBreak+
+            '                          fornecedor.uf_for uf_fornecedor,                                           '+SLineBreak+
+            '                          fornecedor.cnpj_cpf_for cnpj_cpf_fornecedor,                               '+SLineBreak+
+            '                          fornecedor.telefone_for telefone_fornecedor,                               '+SLineBreak+
+            '                          fornecedor.celularcontato_for celular_fornecedor,                          '+SLineBreak+
+            '                          fornecedor.contato_for contato_fornecedor,                                 '+SLineBreak+
+            '                          entrada.datanota_ent data_emissao,                                         '+SLineBreak+
+            '                          entrada.datamovi_ent data_movimento,                                       '+SLineBreak+
+            '                          entrada.total_ent valor_total                                              '+SLineBreak+
+            '                     from entrada                                                                    '+SLineBreak+
+            '                     left join fornecedor on fornecedor.codigo_for = entrada.codigo_for              '+SLineBreak+
+            '                    where 1=1                                                                        '+SLineBreak;
 
     lSql := lSql + where;
 
