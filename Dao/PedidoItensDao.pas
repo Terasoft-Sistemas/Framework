@@ -265,7 +265,7 @@ var
   lSQL : String;
 begin
   lQry := vIConexao.CriarQuery;
-  lSQL := vConstrutor.gerarInsert('PEDIDOITENS', 'ID');
+  lSQL := vConstrutor.gerarInsert('PEDIDOITENS', '');
 
   try
     lQry.SQL.Add(lSQL);

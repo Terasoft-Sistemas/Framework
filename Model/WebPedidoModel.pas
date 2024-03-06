@@ -7,7 +7,18 @@ uses
   Terasoft.Utils,
   System.Generics.Collections,
   Terasoft.FuncoesTexto,
-  Interfaces.Conexao, FireDAC.Comp.Client;
+  Interfaces.Conexao,
+  FireDAC.Comp.Client,
+  PedidoVendaModel,
+  WebPedidoItensModel,
+  PedidoItensModel,
+  ReservaModel,
+  System.SysUtils,
+  FuncionarioModel,
+  System.StrUtils,
+  ProdutosModel,
+  EmpresaModel,
+  WebPedidoItensDao;
 
 type
   TVenderItemParametros = record
@@ -249,6 +260,9 @@ type
     procedure SetTIPO_COMISSAO(const Value: Variant);
     procedure SetTOTAL_GARANTIA(const Value: Variant);
 
+    procedure IncluiReservaCD(pWebPedidoItensModel: TWebPedidoItensModel);
+    procedure AtualizaReservaCD(pWebPedidoModel: TWebPedidoModel);
+
   public
     procedure AfterConstruction; override;
     property ID: Variant read FID write SetID;
@@ -384,13 +398,7 @@ type
 implementation
 
 uses
-  WebPedidoDao,
-  PedidoVendaModel,
-  WebPedidoItensModel,
-  PedidoItensModel,
-  System.SysUtils,
-  FuncionarioModel,
-  System.StrUtils, ProdutosModel, EmpresaModel, WebPedidoItensDao;
+  WebPedidoDao;
 
 { TWebPedidoModel }
 
@@ -430,8 +438,9 @@ begin
     exit;
 
   lWebPedidoModel        := TWebPedidoModel.Create(vIConexao);
-  lPedidoVendaModel      := TPedidoVendaModel.Create(vIConexao);
   lWebPedidoItensModel   := TWebPedidoItensModel.Create(vIConexao);
+
+  lPedidoVendaModel      := TPedidoVendaModel.Create(vIConexao);
   lPedidoItensModel      := TPedidoItensModel.Create(vIConexao);
 
   try
@@ -508,26 +517,26 @@ begin
       lPedidoItensModel.PedidoItenssLista[lIndex].NUMERO_PED             := lPedido;
       lPedidoItensModel.PedidoItenssLista[lIndex].CODIGO_CLI             := lWebPedidoModel.CLIENTE_ID;
       lPedidoItensModel.PedidoItenssLista[lIndex].LOJA                   := lWebPedidoModel.LOJA;
-      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_PED         := lWebPedidoItensModel.QUANTIDADE;
-      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_NEW         := lWebPedidoItensModel.QUANTIDADE;
+      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_PED         := FloatToStr(lWebPedidoItensModel.QUANTIDADE);
+      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_NEW         := FloatToStr(lWebPedidoItensModel.QUANTIDADE);
       lPedidoItensModel.PedidoItenssLista[lIndex].WEB_PEDIDOITENS_ID     := lWebPedidoItensModel.ID;
       lPedidoItensModel.PedidoItenssLista[lIndex].TIPO_VENDA             := lWebPedidoItensModel.TIPO_ENTREGA;
       lPedidoItensModel.PedidoItenssLista[lIndex].OBSERVACAO             := copy(lWebPedidoItensModel.OBSERVACAO,1,50);
       lPedidoItensModel.PedidoItenssLista[lIndex].OBS_ITEM               := lWebPedidoItensModel.OBSERVACAO;
       lPedidoItensModel.PedidoItenssLista[lIndex].CODIGO_PRO             := lWebPedidoItensModel.PRODUTO_ID;
-      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_TIPO        := lWebPedidoItensModel.VLR_GARANTIA;
+      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_TIPO        := FloatToStr(lWebPedidoItensModel.VLR_GARANTIA);
       lPedidoItensModel.PedidoItenssLista[lIndex].ENTREGA                := lWebPedidoItensModel.ENTREGA;
       lPedidoItensModel.PedidoItenssLista[lIndex].MONTAGEM               := lWebPedidoItensModel.MONTAGEM;
-      lPedidoItensModel.PedidoItenssLista[lIndex].DESCONTO_PED           := lWebPedidoItensModel.PERCENTUAL_DESCONTO;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VALORUNITARIO_PED      := lWebPedidoItensModel.VALOR_UNITARIO;
+      lPedidoItensModel.PedidoItenssLista[lIndex].DESCONTO_PED           := FloatToStr(lWebPedidoItensModel.PERCENTUAL_DESCONTO);
+      lPedidoItensModel.PedidoItenssLista[lIndex].VALORUNITARIO_PED      := FloatToStr(lWebPedidoItensModel.VALOR_UNITARIO);
       lPedidoItensModel.PedidoItenssLista[lIndex].ITEM                   := lItem.ToString;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_BONUS_SERVICO    := lWebPedidoItensModel.VALOR_BONUS_SERVICO;
+      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_BONUS_SERVICO    := FloatToStr(lWebPedidoItensModel.VALOR_BONUS_SERVICO);
       lPedidoItensModel.PedidoItenssLista[lIndex].BALANCA                := lWebPedidoItensModel.USAR_BALANCA;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VLRVENDA_PRO           := lWebPedidoItensModel.VENDA_PRO;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_VENDA_CADASTRO   := lWebPedidoItensModel.VENDA_PRO;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VLRCUSTO_PRO           := lWebPedidoItensModel.CUSTOMEDIO_PRO;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_MONTADOR         := lWebPedidoItensModel.VALOR_MONTADOR;
-      lPedidoItensModel.PedidoItenssLista[lIndex].COMISSAO_PERCENTUAL    := lWebPedidoItensModel.PERCENTUAL_COMISSAO;
+      lPedidoItensModel.PedidoItenssLista[lIndex].VLRVENDA_PRO           := FloatToStr(lWebPedidoItensModel.VENDA_PRO);
+      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_VENDA_CADASTRO   := FloatToStr(lWebPedidoItensModel.VENDA_PRO);
+      lPedidoItensModel.PedidoItenssLista[lIndex].VLRCUSTO_PRO           := FloatToStr(lWebPedidoItensModel.CUSTOMEDIO_PRO);
+      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_MONTADOR         := FloatToStr(lWebPedidoItensModel.VALOR_MONTADOR);
+      lPedidoItensModel.PedidoItenssLista[lIndex].COMISSAO_PERCENTUAL    := FloatToStr(lWebPedidoItensModel.PERCENTUAL_COMISSAO);
       lPedidoItensModel.PedidoItenssLista[lIndex].COMISSAO_PED           := '0';
 
       inc(lIndex);
@@ -651,6 +660,15 @@ begin
 
     self.Acao := tacAlterar;
     self.VALOR_TOTAL := lTotais.VALOR_TOTAL;
+
+//    self.VALOR_TOTAL := lTotais.VALOR_TOTAL;
+    self.ACRESCIMO             := lTotais.VALOR_ACRESCIMO;
+    self.TOTAL_GARANTIA        := lTotais.TOTAL_GARANTIA;
+    self.VALOR_FRETE           := lTotais.VALOR_FRETE;
+    self.VALOR_CUPOM_DESCONTO  := lTotais.VALOR_DESCONTO;
+    self.VALOR_ITENS           := lTotais.VALOR_ITENS;
+    self.VALOR_TOTAL           := lTotais.VALOR_TOTAL;
+
     self.Salvar;
   finally
     lWebPedidoItensDao.Free;
@@ -1264,11 +1282,102 @@ begin
     lWebPedidoItensModel.VLR_GARANTIA        := PVenderItemParametros.VLR_GARANTIA;
 
     Result := lWebPedidoItensModel.Incluir;
+
+
+    //Gravar reserva caso venda CD ou Retira loja com entregaCD.
+    if (PVenderItemParametros.TIPO_ENTREGA = 'CD') or ((PVenderItemParametros.TIPO_ENTREGA = 'LJ') and (PVenderItemParametros.ENTREGA = 'S')) then
+    begin
+      lWebPedidoItensModel.ID := Result;
+      Self.IncluiReservaCD(lWebPedidoItensModel);
+    end;
+
     calcularTotais;
   finally
     lWebPedidoItensModel.Free;
     lProdutoModel.Free;
   end;
 end;
+
+procedure TWebPedidoModel.IncluiReservaCD(pWebPedidoItensModel: TWebPedidoItensModel);
+var
+  lReservaModel : TReservaModel;
+  lWebPedidoItensModel : TWebPedidoItensModel;
+begin
+  lReservaModel := TReservaModel.Create(vIConexao);
+  lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
+
+  try
+    try
+      lWebPedidoItensModel := pWebPedidoItensModel;
+
+      with lWebPedidoItensModel do
+      begin
+          lReservaModel.PRODUTO_ID       := PRODUTO_ID;
+        lReservaModel.QUANTIDADE         := QUANTIDADE;
+
+        lReservaModel.VALOR_UNITARIO     := VALOR_UNITARIO;
+        lReservaModel.OBSERVACAO         := 'Reservar realizada pela venda assistida N '+WEB_PEDIDO_ID;
+        lReservaModel.WEB_PEDIDOITENS_ID := ID;
+        lReservaModel.WEB_PEDIDO_ID      := WEB_PEDIDO_ID;
+        lReservaModel.TIPO               := TIPO;
+        lReservaModel.ENTREGA            := ENTREGA;
+        lReservaModel.RETIRA_LOJA        := IIF(TIPO_ENTREGA = 'LJ','S','N');;
+        lReservaModel.STATUS             := IIF(TIPO_ENTREGA = 'LJ','L','1');
+
+        lReservaModel.CLIENTE_ID   := '000000';
+        lReservaModel.VENDEDOR_ID  := '000000';
+        lReservaModel.FILIAL       := '000';
+      end;
+
+      lReservaModel.Incluir;
+
+    except
+     on E:Exception do
+      CriaException(E.Message);
+    end;
+  finally
+    lReservaModel.Free;
+//    lWebPedidoItensModel.Free;
+  end;
+end;
+
+procedure TWebPedidoModel.AtualizaReservaCD(pWebPedidoModel: TWebPedidoModel);
+var
+  lReservaModel : TReservaModel;
+  lWebPedidoModel : TWebPedidoModel;
+begin
+  lReservaModel := TReservaModel.Create(vIConexao);
+  lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
+
+  try
+    try
+      lWebPedidoModel := pWebPedidoModel;
+
+      lReservaModel := lReservaModel.Alterar(lWebPedidoModel.ID); //Precisa alterar "todas" reservas do peiddo
+
+      with lWebPedidoModel do
+      begin
+        lReservaModel.ENTREGA_DATA       := ENTREGA_DATA;
+        lReservaModel.ENTREGA_HORA       := ENTREGA_HORA;
+        lReservaModel.MONTAGEM_DATA      := MONTAGEM_DATA;
+        lReservaModel.MONTAGEM_HORA      := MONTAGEM_HORA;
+        lReservaModel.CLIENTE_ID         := CLIENTE_ID;
+        lReservaModel.VENDEDOR_ID        := VENDEDOR_ID;
+        lReservaModel.FILIAL             := LOJA;
+        lReservaModel.INFORMACOES_PED    := OBSERVACAO;
+      end;
+
+      lReservaModel.Salvar;
+
+    except
+     on E:Exception do
+      CriaException(E.Message);
+    end;
+  finally
+    lReservaModel.Free;
+    lWebPedidoModel.Free;
+  end;
+end;
+
 
 end.
