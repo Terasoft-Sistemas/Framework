@@ -1,5 +1,5 @@
 
-{$i definicoes.inc}
+{$i Fedex_API.inc}
 
 unit Fedex.SCI.Impl;
 
@@ -10,9 +10,6 @@ interface
     Terasoft.Framework.Texto,
     Terasoft.Framework.ControleAlteracoes,
     Fedex.API.Iface;
-
-
-  {$define MODO_HOMOLOGACAO}
 
 
 //  const
