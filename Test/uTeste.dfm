@@ -2,7 +2,7 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'Form1'
-  ClientHeight = 733
+  ClientHeight = 823
   ClientWidth = 1246
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -17,8 +17,8 @@ object Form1: TForm1
     Left = 0
     Top = 0
     Width = 1246
-    Height = 733
-    ActivePage = TabSheet2
+    Height = 823
+    ActivePage = TabSheet4
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -541,7 +541,7 @@ object Form1: TForm1
       ImageIndex = 1
       object dbTeste2: TXDBGrid
         Left = 0
-        Top = 80
+        Top = 170
         Width = 1238
         Height = 623
         Align = alBottom
@@ -591,7 +591,7 @@ object Form1: TForm1
       ImageIndex = 2
       object XDBGrid1: TXDBGrid
         Left = 0
-        Top = 454
+        Top = 544
         Width = 1238
         Height = 249
         Align = alBottom
@@ -601,7 +601,7 @@ object Form1: TForm1
       end
       object XDBGrid2: TXDBGrid
         Left = 0
-        Top = 292
+        Top = 382
         Width = 1238
         Height = 162
         Align = alBottom
@@ -664,6 +664,56 @@ object Form1: TForm1
         OnClick = Button62Click
       end
     end
+    object TabSheet4: TTabSheet
+      Caption = 'OS'
+      ImageIndex = 3
+      object XDBGrid3: TXDBGrid
+        Left = 0
+        Top = 488
+        Width = 1238
+        Height = 305
+        Align = alBottom
+        DataSource = dsOS
+        GridStyle.VisualStyle = vsXPStyle
+        TabOrder = 0
+      end
+      object Button63: TButton
+        Left = 11
+        Top = 23
+        Width = 182
+        Height = 42
+        Caption = 'OS Inserir'
+        TabOrder = 1
+        OnClick = Button63Click
+      end
+      object Button64: TButton
+        Left = 199
+        Top = 23
+        Width = 182
+        Height = 42
+        Caption = 'OS Consultar'
+        TabOrder = 2
+        OnClick = Button64Click
+      end
+      object Button65: TButton
+        Left = 387
+        Top = 23
+        Width = 182
+        Height = 42
+        Caption = 'OS Update'
+        TabOrder = 3
+        OnClick = Button65Click
+      end
+      object Button66: TButton
+        Left = 575
+        Top = 23
+        Width = 182
+        Height = 42
+        Caption = 'OS Excluir'
+        TabOrder = 4
+        OnClick = Button66Click
+      end
+    end
   end
   object dsTeste2: TDataSource
     Left = 1056
@@ -680,5 +730,9 @@ object Form1: TForm1
   object dsEntradaItens: TDataSource
     Left = 1057
     Top = 642
+  end
+  object dsOS: TDataSource
+    Left = 1152
+    Top = 575
   end
 end

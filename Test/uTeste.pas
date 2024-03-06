@@ -97,6 +97,13 @@ type
     Button60: TButton;
     Button61: TButton;
     Button62: TButton;
+    TabSheet4: TTabSheet;
+    XDBGrid3: TXDBGrid;
+    Button63: TButton;
+    Button64: TButton;
+    Button65: TButton;
+    Button66: TButton;
+    dsOS: TDataSource;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -165,6 +172,10 @@ type
     procedure Button60Click(Sender: TObject);
     procedure Button61Click(Sender: TObject);
     procedure Button62Click(Sender: TObject);
+    procedure Button64Click(Sender: TObject);
+    procedure Button63Click(Sender: TObject);
+    procedure Button65Click(Sender: TObject);
+    procedure Button66Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -192,7 +203,7 @@ uses
   SaldoModel, EmpresaModel, ProdutosModel, EntradaItensModel,
   ClienteModel, ContasPagarModel, ContasPagarItensModel, System.SysUtils,
   ReservaModel, DocumentoModel, AnexoModel, FluxoCaixaModel, BancoModel,
-  PortadorModel, LojasModel;
+  PortadorModel, LojasModel, OSModel;
 
 {$R *.dfm}
 
@@ -1296,14 +1307,16 @@ begin
   try
     try
       lNomeBanco :=  InputBox('BANCO','Digite o Nome do Banco:','');
+
       if lNomeBanco.IsEmpty then
-      Exit;
+        Exit;
 
       lBancoModel.NOME_BAN    := lNomeBanco;
       lBancoModel.AGENCIA_BAN := '000123';
       lBancoModel.CONTA_BAN   := '321123';
 
       lBancoModel.Incluir;
+
       ShowMessage('Incluido com sucesso');
     except
        on E:Exception do
@@ -1323,6 +1336,7 @@ begin
   try
     try
       lMemTable := lBancoModel.obterLista;
+
       memoResultado.Lines.Clear;
 
       lMemTable.First;
@@ -1623,6 +1637,77 @@ begin
     end;
   finally
     lContasPagarModel.Free;
+  end;
+end;
+
+procedure TForm1.Button63Click(Sender: TObject);
+var
+  lOsModel : TOSModel;
+begin
+  lOsModel := TOSModel.Create(vIConexao);
+
+  try
+    lOsModel.CODIGO_CLI := '000001';
+    lOsModel.TOTAL_OS   := '1000';
+    lOsModel.Incluir;
+
+    ShowMessage('Inserido com Sucesso');
+
+  finally
+    lOsModel.Free;
+  end;
+end;
+
+procedure TForm1.Button64Click(Sender: TObject);
+var
+  lOsModel  : TOSModel;
+begin
+
+  lOsModel := TOSModel.Create(vIConexao);
+
+  try
+    dsOS.DataSet := lOsModel.obterLista;
+  finally
+    lOsModel.Free;
+  end;
+
+end;
+
+procedure TForm1.Button65Click(Sender: TObject);
+var
+  lOsModel : TOSModel;
+begin
+  lOsModel := TOSModel.Create(vIConexao);
+
+  try
+    lOsModel := lOsModel.Alterar('000045');
+    lOsModel.TOTAL_OS   := '500';
+    lOsModel.Salvar;
+
+    ShowMessage('Alterado com Sucesso');
+
+  finally
+    lOsModel.Free;
+  end;
+end;
+
+procedure TForm1.Button66Click(Sender: TObject);
+var
+  lOsModel : TOSModel;
+begin
+  lOsModel := TOSModel.Create(vIConexao);
+
+  try
+    try
+      lOsModel.Excluir('000045');
+      ShowMessage('Excluido com Sucesso');
+
+    except
+      on E:Exception do
+        ShowMessage('Erro ao excluir: '+ E.Message);
+    end;
+  finally
+    lOsModel.Free;
   end;
 end;
 
