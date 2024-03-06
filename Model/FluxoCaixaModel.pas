@@ -82,6 +82,8 @@ var
 begin
   lFluxoCaixa := TFluxoCaixaDao.Create(vIConexao);
   try
+    lFluxoCaixa.WhereView                    := FWhereView;
+    lFluxoCaixa.OrderView                    := FOrderView;
     lFluxoCaixa.DataInicialView              := FDataInicialView;
     lFluxoCaixa.DataFinalView                := FDataFinalView;
     lFluxoCaixa.BancoView                    := FBancoView;
@@ -89,7 +91,6 @@ begin
     lFluxoCaixa.PorcentagemInadimplenciaView := FPorcentagemInadimplenciaView;
     lFluxoCaixa.SomarBancosView              := FSomarBancosView;
     lFluxoCaixa.TipoView                     := FTipoView;
-    lFluxoCaixa.OrderView                    := FOrderView;
     lFluxoCaixa.LojaView                     := FLojaView;
 
     Result := lFluxoCaixa.obterResultadoFluxoCaixa;
@@ -104,11 +105,15 @@ var
 begin
   lFluxoCaixa := TFluxoCaixaDao.Create(vIConexao);
   try
+    lFluxoCaixa.WhereView                    := FWhereView;
+    lFluxoCaixa.OrderView                    := FOrderView;
     lFluxoCaixa.DataInicialView              := FDataInicialView;
     lFluxoCaixa.DataFinalView                := FDataFinalView;
+    lFluxoCaixa.BancoView                    := FBancoView;
     lFluxoCaixa.PortadorView                 := FPortadorView;
+    lFluxoCaixa.PorcentagemInadimplenciaView := FPorcentagemInadimplenciaView;
+    lFluxoCaixa.SomarBancosView              := FSomarBancosView;
     lFluxoCaixa.TipoView                     := FTipoView;
-    lFluxoCaixa.OrderView                    := FOrderView;
     lFluxoCaixa.LojaView                     := FLojaView;
 
     Result := lFluxoCaixa.obterResumo;

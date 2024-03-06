@@ -206,7 +206,9 @@ begin
     lMemTable.FieldDefs.Add('COMPRA',     ftFloat);
     lMemTable.CreateDataSet;
 
-    lLojasModel.LojaView := self.FLojaView;
+    if self.FLojaView <> '' then
+      lLojasModel.WhereView := ' and loja2.loja in ('+self.FLojaView+')';
+
     lLojasModel.obterLista;
 
     for lLojas_Dados in lLojasModel.LojassLista do
@@ -361,7 +363,9 @@ begin
 
     lMemTable.CreateDataSet;
 
-    lLojasModel.LojaView := self.FLojaView;
+    if self.FLojaView <> '' then
+      lLojasModel.WhereView := ' and loja2.loja in ('+self.FLojaView+')';
+
     lLojasModel.obterLista;
 
     for lLojas_Dados in lLojasModel.LojassLista do
@@ -468,7 +472,9 @@ begin
     lMemTable.FieldDefs.Add('TOTAL',           ftFloat);
     lMemTable.CreateDataSet;
 
-    lLojasModel.LojaView := self.FLojaView;
+    if self.FLojaView <> '' then
+      lLojasModel.WhereView := ' and loja2.loja in ('+self.FLojaView+')';
+
     lLojasModel.obterLista;
 
     for lLojas_Dados in lLojasModel.LojassLista do
@@ -586,7 +592,9 @@ begin
     lMemTable.FieldDefs.Add('TOTAL',                  ftFloat);
     lMemTable.CreateDataSet;
 
-    lLojasModel.LojaView := self.FLojaView;
+    if self.FLojaView <> '' then
+      lLojasModel.WhereView := ' and loja2.loja in ('+self.FLojaView+')';
+
     lLojasModel.obterLista;
 
     for lLojas_Dados in lLojasModel.LojassLista do
