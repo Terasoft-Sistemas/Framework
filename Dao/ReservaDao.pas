@@ -11,6 +11,7 @@ uses
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
+  Terasoft.Types,
   Terasoft.ConstrutorDao;
 
 type
@@ -59,7 +60,7 @@ type
     function alterar(pReservaModel: TReservaModel): String;
     function excluir(pReservaModel: TReservaModel): String;
 
-    function AtualizaReservaVendaAssistida(pReservaModel: TReservaModel): String;
+    function AtualizaReservaVendaAssistida(pAtualizaReserva_Parametros: TAtualizaReserva_Parametros): String;
 
     function carregaClasse(pID : String): TReservaModel;
 
@@ -181,7 +182,7 @@ begin
   end;
 end;
 
-function TReservaDao.AtualizaReservaVendaAssistida(pReservaModel: TReservaModel): String;
+function TReservaDao.AtualizaReservaVendaAssistida(pAtualizaReserva_Parametros: TAtualizaReserva_Parametros): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -199,21 +200,25 @@ begin
           '     entrega_data = :entrega_data,       '+
           '     entrega_hora = :entrega_hora,       '+
           '     montagem_data = :montagem_data,     '+
-          '     montagem_hora = :montagem_hora,     '+
+          '     montagem_hora = :montagem_hora      '+
           ' where                                   '+
-          '     (web_pedido_id = :web_pedido_id)    ';
-
+          '      web_pedido_id = :web_pedido_id     ';
 
   try
+
     lQry.SQL.Add(lSQL);
-
-    //Incluir parametros
-
-
-
+    lQry.ParamByName('CLIENTE_ID').Value       := IIF(pAtualizaReserva_Parametros.Cliente_id      = '', Unassigned, pAtualizaReserva_Parametros.Cliente_id);
+    lQry.ParamByName('VENDEDOR_ID').Value      := IIF(pAtualizaReserva_Parametros.Vendedor_id     = '', Unassigned, pAtualizaReserva_Parametros.Vendedor_id);
+    lQry.ParamByName('FILIAL').Value           := IIF(pAtualizaReserva_Parametros.Filial          = '', Unassigned, pAtualizaReserva_Parametros.Filial);
+    lQry.ParamByName('INFORMACOES_PED').Value  := IIF(pAtualizaReserva_Parametros.Informacoes_ped = '', Unassigned, pAtualizaReserva_Parametros.Informacoes_ped);
+    lQry.ParamByName('ENTREGA_DATA').Value     := IIF(pAtualizaReserva_Parametros.Entrega_data    = '', Unassigned, pAtualizaReserva_Parametros.Entrega_data);
+    lQry.ParamByName('ENTREGA_HORA').Value     := IIF(pAtualizaReserva_Parametros.Entrega_hora    = '', Unassigned, pAtualizaReserva_Parametros.Entrega_hora);
+    lQry.ParamByName('MONTAGEM_DATA').Value    := IIF(pAtualizaReserva_Parametros.Montagem_data   = '', Unassigned, pAtualizaReserva_Parametros.Montagem_data);
+    lQry.ParamByName('MONTAGEM_HORA').Value    := IIF(pAtualizaReserva_Parametros.Montagem_hora   = '', Unassigned, pAtualizaReserva_Parametros.Montagem_hora);
+    lQry.ParamByName('WEB_PEDIDO_ID').Value    := IIF(pAtualizaReserva_Parametros.Web_pedido_id   = '', Unassigned, pAtualizaReserva_Parametros.Web_pedido_id);
     lQry.ExecSQL;
 
-    Result := pReservaModel.web_pedido_id;
+    Result := pAtualizaReserva_Parametros.Web_pedido_id;
   finally
     lSQL := '';
     lQry.Free;

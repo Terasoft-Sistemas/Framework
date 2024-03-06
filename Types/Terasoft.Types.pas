@@ -103,6 +103,20 @@ type
     TipoMargem     : String;
   end;
 
+  TAtualizaReserva_Parametros = record
+    Web_pedido_id,
+    Cliente_id,
+    Vendedor_id,
+    Filial,
+    Informacoes_ped: String;
+
+    Entrega_data,
+    Montagem_data: String;
+
+    Entrega_hora,
+    Montagem_hora: String;
+  end;
+
   TCurvaABC_Dados = record
     Loja, Descricao                : String;
     Qtde_Venda, Quantidade_Cliente : Integer;

@@ -133,6 +133,8 @@ type
     function carregaClasse(pId : String): TReservaModel;
     function obterLista: TFDMemTable;
 
+    function AtualizaReservaVendaAssistida(pAtualizaReserva_Parametros: TAtualizaReserva_Parametros): String;
+
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -163,6 +165,18 @@ begin
     lReservaModel.Acao  := tacAlterar;
     Result              := lReservaModel;
   finally
+  end;
+end;
+
+function TReservaModel.AtualizaReservaVendaAssistida(pAtualizaReserva_Parametros: TAtualizaReserva_Parametros): String;
+var
+  lReservaDao : TReservaDao;
+begin
+  lReservaDao := TReservaDao.Create(vIConexao);
+  try
+    Result := lReservaDao.AtualizaReservaVendaAssistida(pAtualizaReserva_Parametros);
+  finally
+    lReservaDao.Free;
   end;
 end;
 
