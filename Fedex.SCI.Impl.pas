@@ -1,5 +1,5 @@
 
-{$i definicoes.inc}
+{$i Fedex_API.inc}
 
 unit Fedex.SCI.Impl;
 
@@ -10,9 +10,6 @@ interface
     Terasoft.Framework.Texto,
     Terasoft.Framework.ControleAlteracoes,
     Fedex.API.Iface;
-
-
-  {$define MODO_HOMOLOGACAO}
 
 
 //  const
@@ -101,10 +98,12 @@ end;
 
 function processaArquivoExpedicao(pAPI: IFedexAPI; pResultado: IResultadoOperacao): IResultadoOperacao;
   var
-    lArquivo: String;
+    lArquivo,lPedido: String;
     lTexto, lLinha: IListaTexto;
     ctr: IControleAlteracoes;
     lSave: Integer;
+    lDSEntrada: IDataset;
+    lCancelamento: boolean;
     lLista: IDicionarioSimples<TipoWideStringFramework,IListaString>;
     lListaIMEIS: IListaString;
     i: Integer;
@@ -114,6 +113,17 @@ begin
   lSave := pResultado.erros;
   lLista := TListaSimplesCreator.CreateDictionary<TipoWideStringFramework,IListaString>;
   try
+    if(gdbPadrao=nil)or(gdbPadrao.conectado=false) then begin
+      pResultado.adicionaErro('processaArquivoExpedicao: GDB não definido.');
+      exit;
+    end;
+
+    ctr := pAPI.parameters.controleAlteracoes;
+    if(ctr=nil) then begin
+      pResultado.adicionaErro('processaArquivoExpedicao: Controle de alterações não definido.');
+      exit;
+    end;
+
     lArquivo := pResultado.propriedade['ARQUIVO'].asString;
     if (lArquivo='') or not FileExists(lArquivo) then begin
       pResultado.formataErro('processaArquivoExpedicao: arquivo [%s] não existe.', [lArquivo]);
@@ -125,11 +135,6 @@ begin
       pResultado.formataErro('processaArquivoExpedicao: Não especificou um API/DEPOSITANTE válido.', [lArquivo]);
       exit;
     end;
-    ctr := pAPI.parameters.controleAlteracoes;
-    if(ctr=nil) then begin
-      pResultado.adicionaErro('processaArquivoExpedicao: Controle de alterações não definido.');
-      exit;
-    end;
 
     lTexto := novaListaTexto;
     lLinha := novaListaTexto;
@@ -137,11 +142,44 @@ begin
     lTexto.strings.LoadFromFile(lArquivo);
     for i := 0 to lTexto.lines.Count - 1 do begin
       lLinha.strings.DelimitedText := lTexto.strings.Strings[i];
-      if(lLinha.strings.Count < 4 ) then begin
-        pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui 4 campos especificados: %d', [ lArquivo, (i + 1), lLinha.strings.Count ] )
+      lLinha.strings.DelimitedText := lTexto.strings.Strings[i];
+      if(i=0) then begin
+        lCancelamento:=UpperCase(ChangeFileExt(ExtractFileName(lArquivo),''))=UpperCase(lLinha.strings.Strings[0]);
+        if(lCancelamento) then begin
+         if(lPedido='') then
+            lPedido := textoEntreTags(lLinha.strings.Strings[0],'_','_');
+          break;
+        end;
+      end;
+
+      if(lLinha.strings.Count < 5 ) then begin
+        pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui 5 campos especificados: %d', [ lArquivo, (i + 1), lLinha.strings.Count ] );
+        continue;
+      end;
+
+      if(lPedido='') then begin
+        lPedido := lLinha.strings.Strings[0];
+        if (lPedido='') or(Length(lPedido)>6) then begin
+          pResultado.formataErro('processaArquivoRecebimento [%s]: Número de pedido inválido: %s', [ lArquivo, lPedido ] );
+          break;
+        end;
+        lDSEntrada := gdbPadrao.criaDataset.query( 'select p.numero_ped id, p.* from pedidovenda p where p.numero_ped=:id', 'id', [ lPedido ]);
+        if(lDSEntrada.dataset.RecordCount=0) then begin
+          pResultado.formataErro('processaArquivoRecebimento [%s]: Pedido [%s] não existe.', [ lArquivo, lPedido ] );
+          break;
+        end else if(ctr.getValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SO, lDSEntrada.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
+          pResultado.acumulador['Saidas divergentes'].incrementa;
+          pResultado.formataErro('processaArquivoRecebimento [%s]: Pedido [%s] não está no status ENVIADO: [%s]', [ lArquivo, lPedido, ctr.getValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SO, lDSEntrada.dataset.FieldByName('id').AsString,'') ] );
+          break;
+        end;
       end;
     end;
 
+    if(pResultado.erros<>lSave) then begin
+      rejeitarArquivoFedex(true,pResultado);
+      pResultado.acumulador['Saidas rejeitadas'].incrementa;
+      exit;
+    end;
   except
     on e: Exception do begin
       pResultado.formataErro('processaArquivoExpedicao: %s: %s', [ e.ClassName, e.Message ] );
@@ -168,6 +206,10 @@ begin
   lSave := pResultado.erros;
   lLista := TListaSimplesCreator.CreateDictionary<TipoWideStringFramework,IListaString>;
   try
+    if(gdbPadrao=nil)or(gdbPadrao.conectado=false) then begin
+      pResultado.adicionaErro('processaArquivoRecebimento: GDB não definido.');
+      exit;
+    end;
     lArquivo := pResultado.propriedade['ARQUIVO'].asString;
     if (lArquivo='') or not FileExists(lArquivo) then begin
       pResultado.formataErro('processaArquivoRecebimento: arquivo [%s] não existe.', [lArquivo]);
