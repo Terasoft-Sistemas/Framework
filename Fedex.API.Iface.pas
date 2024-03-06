@@ -1,4 +1,4 @@
-{$i definicoes.inc}
+{$i Fedex_API.inc}
 
 unit Fedex.API.Iface;
 

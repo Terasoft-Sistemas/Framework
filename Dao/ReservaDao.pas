@@ -40,6 +40,7 @@ type
 
     function where: String;
 
+
   public
 
     constructor Create(pIConexao : IConexao);
@@ -57,6 +58,8 @@ type
     function incluir(pReservaModel: TReservaModel): String;
     function alterar(pReservaModel: TReservaModel): String;
     function excluir(pReservaModel: TReservaModel): String;
+
+    function AtualizaReservaVendaAssistida(pReservaModel: TReservaModel): String;
 
     function carregaClasse(pID : String): TReservaModel;
 
@@ -172,6 +175,45 @@ begin
 
     Result := pReservaModel.ID;
 
+  finally
+    lSQL := '';
+    lQry.Free;
+  end;
+end;
+
+function TReservaDao.AtualizaReservaVendaAssistida(pReservaModel: TReservaModel): String;
+var
+  lQry: TFDQuery;
+  lSQL:String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  lSQL :=
+          ' update reserva                          '+
+          ' set                                     '+
+          '     cliente_id = :cliente_id,           '+
+          '     vendedor_id = :vendedor_id,         '+
+          '     filial = :filial,                   '+
+          '     informacoes_ped = :informacoes_ped, '+
+          '     entrega = :entrega,                 '+
+          '     entrega_data = :entrega_data,       '+
+          '     entrega_hora = :entrega_hora,       '+
+          '     montagem_data = :montagem_data,     '+
+          '     montagem_hora = :montagem_hora,     '+
+          ' where                                   '+
+          '     (web_pedido_id = :web_pedido_id)    ';
+
+
+  try
+    lQry.SQL.Add(lSQL);
+
+    //Incluir parametros
+
+
+
+    lQry.ExecSQL;
+
+    Result := pReservaModel.web_pedido_id;
   finally
     lSQL := '';
     lQry.Free;
