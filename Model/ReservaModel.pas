@@ -50,6 +50,7 @@ type
     FENTREGA_DATA: Variant;
     FTIPO: Variant;
     FDATA: Variant;
+    FWEB_PEDIDO_ID: Variant;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -86,6 +87,7 @@ type
     procedure SetVALOR_UNITARIO(const Value: Variant);
     procedure SetVENDEDOR_ID(const Value: Variant);
     procedure SetWEB_PEDIDOITENS_ID(const Value: Variant);
+    procedure SetWEB_PEDIDO_ID(const Value: Variant);
 
   public
 
@@ -116,6 +118,9 @@ type
     property SYSTIME              : Variant  read FSYSTIME write SetSYSTIME;
     property PRODUCAO_ID          : Variant  read FPRODUCAO_ID write SetPRODUCAO_ID;
     property PRODUCAO_LOJA        : Variant  read FPRODUCAO_LOJA write SetPRODUCAO_LOJA;
+    property WEB_PEDIDO_ID        : Variant read FWEB_PEDIDO_ID write SetWEB_PEDIDO_ID;
+
+
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -414,6 +419,11 @@ end;
 procedure TReservaModel.SetWEB_PEDIDOITENS_ID(const Value: Variant);
 begin
   FWEB_PEDIDOITENS_ID := Value;
+end;
+
+procedure TReservaModel.SetWEB_PEDIDO_ID(const Value: Variant);
+begin
+  FWEB_PEDIDO_ID := Value;
 end;
 
 procedure TReservaModel.SetWhereView(const Value: String);
