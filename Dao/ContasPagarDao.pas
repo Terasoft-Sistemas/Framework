@@ -29,6 +29,7 @@ type
     FWhereView: String;
     FTotalRecords: Integer;
     FFornecedorView: Variant;
+    FDuplicataView: Variant;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
     procedure SetID(const Value: Variant);
@@ -41,6 +42,7 @@ type
 
     function where: String;
     procedure SetFornecedorView(const Value: Variant);
+    procedure SetDuplicataView(const Value: Variant);
 
   public
 
@@ -56,7 +58,7 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property FornecedorView :Variant read FFornecedorView write SetFornecedorView;
-
+    property DuplicataView :Variant read FDuplicataView write SetDuplicataView;
     function incluir(AContasPagarModel: TContasPagarModel): String;
     function alterar(AContasPagarModel: TContasPagarModel): String;
     function excluir(AContasPagarModel: TContasPagarModel): String;
@@ -232,11 +234,11 @@ begin
   if not FWhereView.IsEmpty then
     lSql := lSQL + FWhereView;
 
-  if FIDRecordView <> 0  then
-    lSql := lSQL + ' and DUPLICATA_PAG = '+IntToStr(FIDRecordView);
+  if DuplicataView <> 0  then
+    lSql := lSQL + ' and contaspagar.DUPLICATA_PAG = ' +QuotedStr(DuplicataView);
 
   if FFornecedorView <> '' then
-    lSql := lSql + ' and CODIGO_FOR = ' +IntToStr(FFornecedorView);
+    lSql := lSql + ' and contaspagar.CODIGO_FOR = ' +QuotedStr(FFornecedorView);
 
   Result := lSQL;
 end;
@@ -302,6 +304,11 @@ end;
 procedure TContasPagarDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
+end;
+
+procedure TContasPagarDao.SetDuplicataView(const Value: Variant);
+begin
+  FDuplicataView := Value;
 end;
 
 procedure TContasPagarDao.SetFornecedorView(const Value: Variant);
