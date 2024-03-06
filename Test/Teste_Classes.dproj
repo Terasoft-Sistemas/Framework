@@ -201,6 +201,8 @@
         <DCCReference Include="..\Model\FornecedorModel.pas"/>
         <DCCReference Include="..\Model\BancoModel.pas"/>
         <DCCReference Include="..\Dao\BancoDao.pas"/>
+        <DCCReference Include="..\Model\OSModel.pas"/>
+        <DCCReference Include="..\Dao\OSDao.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

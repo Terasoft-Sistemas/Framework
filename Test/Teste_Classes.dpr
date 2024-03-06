@@ -103,7 +103,9 @@ uses
   FluxoCaixaModel in '..\Model\FluxoCaixaModel.pas',
   FornecedorModel in '..\Model\FornecedorModel.pas',
   BancoModel in '..\Model\BancoModel.pas',
-  BancoDao in '..\Dao\BancoDao.pas';
+  BancoDao in '..\Dao\BancoDao.pas',
+  OSModel in '..\Model\OSModel.pas',
+  OSDao in '..\Dao\OSDao.pas';
 
 {$R *.res}
 
