@@ -430,8 +430,9 @@ begin
     exit;
 
   lWebPedidoModel        := TWebPedidoModel.Create(vIConexao);
-  lPedidoVendaModel      := TPedidoVendaModel.Create(vIConexao);
   lWebPedidoItensModel   := TWebPedidoItensModel.Create(vIConexao);
+
+  lPedidoVendaModel      := TPedidoVendaModel.Create(vIConexao);
   lPedidoItensModel      := TPedidoItensModel.Create(vIConexao);
 
   try
@@ -508,26 +509,26 @@ begin
       lPedidoItensModel.PedidoItenssLista[lIndex].NUMERO_PED             := lPedido;
       lPedidoItensModel.PedidoItenssLista[lIndex].CODIGO_CLI             := lWebPedidoModel.CLIENTE_ID;
       lPedidoItensModel.PedidoItenssLista[lIndex].LOJA                   := lWebPedidoModel.LOJA;
-      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_PED         := lWebPedidoItensModel.QUANTIDADE;
-      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_NEW         := lWebPedidoItensModel.QUANTIDADE;
+      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_PED         := FloatToStr(lWebPedidoItensModel.QUANTIDADE);
+      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_NEW         := FloatToStr(lWebPedidoItensModel.QUANTIDADE);
       lPedidoItensModel.PedidoItenssLista[lIndex].WEB_PEDIDOITENS_ID     := lWebPedidoItensModel.ID;
       lPedidoItensModel.PedidoItenssLista[lIndex].TIPO_VENDA             := lWebPedidoItensModel.TIPO_ENTREGA;
       lPedidoItensModel.PedidoItenssLista[lIndex].OBSERVACAO             := copy(lWebPedidoItensModel.OBSERVACAO,1,50);
       lPedidoItensModel.PedidoItenssLista[lIndex].OBS_ITEM               := lWebPedidoItensModel.OBSERVACAO;
       lPedidoItensModel.PedidoItenssLista[lIndex].CODIGO_PRO             := lWebPedidoItensModel.PRODUTO_ID;
-      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_TIPO        := lWebPedidoItensModel.VLR_GARANTIA;
+      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_TIPO        := FloatToStr(lWebPedidoItensModel.VLR_GARANTIA);
       lPedidoItensModel.PedidoItenssLista[lIndex].ENTREGA                := lWebPedidoItensModel.ENTREGA;
       lPedidoItensModel.PedidoItenssLista[lIndex].MONTAGEM               := lWebPedidoItensModel.MONTAGEM;
-      lPedidoItensModel.PedidoItenssLista[lIndex].DESCONTO_PED           := lWebPedidoItensModel.PERCENTUAL_DESCONTO;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VALORUNITARIO_PED      := lWebPedidoItensModel.VALOR_UNITARIO;
+      lPedidoItensModel.PedidoItenssLista[lIndex].DESCONTO_PED           := FloatToStr(lWebPedidoItensModel.PERCENTUAL_DESCONTO);
+      lPedidoItensModel.PedidoItenssLista[lIndex].VALORUNITARIO_PED      := FloatToStr(lWebPedidoItensModel.VALOR_UNITARIO);
       lPedidoItensModel.PedidoItenssLista[lIndex].ITEM                   := lItem.ToString;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_BONUS_SERVICO    := lWebPedidoItensModel.VALOR_BONUS_SERVICO;
+      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_BONUS_SERVICO    := FloatToStr(lWebPedidoItensModel.VALOR_BONUS_SERVICO);
       lPedidoItensModel.PedidoItenssLista[lIndex].BALANCA                := lWebPedidoItensModel.USAR_BALANCA;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VLRVENDA_PRO           := lWebPedidoItensModel.VENDA_PRO;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_VENDA_CADASTRO   := lWebPedidoItensModel.VENDA_PRO;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VLRCUSTO_PRO           := lWebPedidoItensModel.CUSTOMEDIO_PRO;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_MONTADOR         := lWebPedidoItensModel.VALOR_MONTADOR;
-      lPedidoItensModel.PedidoItenssLista[lIndex].COMISSAO_PERCENTUAL    := lWebPedidoItensModel.PERCENTUAL_COMISSAO;
+      lPedidoItensModel.PedidoItenssLista[lIndex].VLRVENDA_PRO           := FloatToStr(lWebPedidoItensModel.VENDA_PRO);
+      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_VENDA_CADASTRO   := FloatToStr(lWebPedidoItensModel.VENDA_PRO);
+      lPedidoItensModel.PedidoItenssLista[lIndex].VLRCUSTO_PRO           := FloatToStr(lWebPedidoItensModel.CUSTOMEDIO_PRO);
+      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_MONTADOR         := FloatToStr(lWebPedidoItensModel.VALOR_MONTADOR);
+      lPedidoItensModel.PedidoItenssLista[lIndex].COMISSAO_PERCENTUAL    := FloatToStr(lWebPedidoItensModel.PERCENTUAL_COMISSAO);
       lPedidoItensModel.PedidoItenssLista[lIndex].COMISSAO_PED           := '0';
 
       inc(lIndex);
