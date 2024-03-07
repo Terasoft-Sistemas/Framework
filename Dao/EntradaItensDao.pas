@@ -341,7 +341,8 @@ begin
     lSQL := ' select ' +lPaginacao+ '                                                          '+SLineBreak+
             '        entradaitens.*,                                                           '+SLineBreak+
             '        coalesce(fornecedor.razao_for, fornecedor.fantasia_for) FORNECEDOR,       '+SLineBreak+
-            '        produto.nome_pro PRODUTO                                                  '+SLineBreak+
+            '        produto.nome_pro PRODUTO,                                                 '+SLineBreak+
+            '        produto.unidade_pro UNIDADE                                               '+SLineBreak+
             '   from entradaitens                                                              '+SLineBreak+
             '   left join fornecedor on fornecedor.codigo_for = entradaitens.codigo_for        '+SLineBreak+
             '   left join produto on produto.codigo_pro = entradaitens.codigo_pro              '+SLineBreak+
