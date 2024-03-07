@@ -40,12 +40,14 @@ interface
     function testaFedexAPISOSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     function testaFedexAPIPOSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     function testaRetornoSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-  {$ifend}
+  {$endif}
 
 implementation
   uses
     Terasoft.Framework.DB,
     FuncoesMensagem,
+    DB,
+    Spring.Collections,
     Terasoft.Framework.Validacoes,
     Terasoft.Framework.DB.FIBPlus,
     Terasoft.Framework.Lock,
@@ -94,23 +96,30 @@ begin
   if(pResultado.eventos>0) then
     msgAviso(pResultado.toString);
 end;
-{$ifend}
+{$endif}
 
+{$REGION 'processaArquivoExpedicao'}
 function processaArquivoExpedicao(pAPI: IFedexAPI; pResultado: IResultadoOperacao): IResultadoOperacao;
   var
-    lArquivo,lPedido: String;
+    lArquivo,lPedido,lProduto,lIMEI: String;
     lTexto, lLinha: IListaTexto;
+    lTmp: TipoWideStringFramework;
     ctr: IControleAlteracoes;
-    lSave: Integer;
-    lDSEntrada: IDataset;
+    lDivergencias, lSave: Integer;
+    lDSEntrada,lDSItens,lDSIMEI: IDataset;
     lCancelamento: boolean;
     lLista: IDicionarioSimples<TipoWideStringFramework,IListaString>;
     lListaIMEIS: IListaString;
     i: Integer;
+    lCDS: TDataset;
+    lFieldQtde: TField;
 
 begin
   Result := checkResultadoOperacao(pResultado);
   lSave := pResultado.erros;
+  lDSEntrada := nil;
+  lDSItens := nil;
+  lCDS := nil;
   lLista := TListaSimplesCreator.CreateDictionary<TipoWideStringFramework,IListaString>;
   try
     if(gdbPadrao=nil)or(gdbPadrao.conectado=false) then begin
@@ -153,26 +162,95 @@ begin
       end;
 
       if(lLinha.strings.Count < 5 ) then begin
-        pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui 5 campos especificados: %d', [ lArquivo, (i + 1), lLinha.strings.Count ] );
+        pResultado.formataErro('processaArquivoExpedicao [%s]: Registro %d não possui 5 campos especificados: %d', [ lArquivo, (i + 1), lLinha.strings.Count ] );
         continue;
       end;
 
       if(lPedido='') then begin
         lPedido := lLinha.strings.Strings[0];
         if (lPedido='') or(Length(lPedido)>6) then begin
-          pResultado.formataErro('processaArquivoRecebimento [%s]: Número de pedido inválido: %s', [ lArquivo, lPedido ] );
+          pResultado.formataErro('processaArquivoExpedicao [%s]: Número de pedido inválido: %s', [ lArquivo, lPedido ] );
           break;
         end;
         lDSEntrada := gdbPadrao.criaDataset.query( 'select p.numero_ped id, p.* from pedidovenda p where p.numero_ped=:id', 'id', [ lPedido ]);
         if(lDSEntrada.dataset.RecordCount=0) then begin
-          pResultado.formataErro('processaArquivoRecebimento [%s]: Pedido [%s] não existe.', [ lArquivo, lPedido ] );
+          pResultado.formataErro('processaArquivoExpedicao [%s]: Pedido [%s] não existe.', [ lArquivo, lPedido ] );
           break;
         end else if(ctr.getValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SO, lDSEntrada.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
-          pResultado.acumulador['Saidas divergentes'].incrementa;
-          pResultado.formataErro('processaArquivoRecebimento [%s]: Pedido [%s] não está no status ENVIADO: [%s]', [ lArquivo, lPedido, ctr.getValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SO, lDSEntrada.dataset.FieldByName('id').AsString,'') ] );
+          pResultado.formataErro('processaArquivoExpedicao [%s]: Pedido [%s] não está no status ENVIADO: [%s]', [ lArquivo, lPedido, ctr.getValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SO, lDSEntrada.dataset.FieldByName('id').AsString,'') ] );
+          break;
+        end;
+
+        if(lDSItens=nil) then begin
+          lDSItens := gdbPadrao.criaDataset.query('select p.id id_item, p.numero_ped id, p.codigo_pro produto_id, p.quantidade_ped quantidade, 0 as quantidade_atendida from pedidoitens p ' +
+                                             ' where p.numero_ped = :id order by 1 ', 'id', [ lPedido ] );
+          if(lDSItens.dataset.RecordCount = 0 ) then begin
+            pResultado.formataErro('processaArquivoExpedicao: Pedido [%s]: Não possui itens na tabela de itens', [ lPedido ] );
+            break;
+          end;
+          lCDS := getCDSDataset(lDSItens.dataset);
+          lFieldQtde := lCDS.FindField('quantidade_atendida');
+        end;
+        if (lCDS = nil) or (lFieldQtde=nil) then begin
+          result.formataErro('processaArquivoExpedicao [%s]: Não possui itens na tabela de itens', [ lPedido ] );
           break;
         end;
       end;
+      lProduto := textoEntreTags(lLinha.strings.Strings[3],'','_');
+      if(lProduto='') then
+        lProduto := lLinha.strings.Strings[3];
+
+      lIMEI    := lLinha.strings.Strings[4];
+      if not validaIMEI(lIMEI) then begin
+        pResultado.formataErro('processaArquivoExpedicao [%s]: IMEI [%s] inválido para item %d', [ lArquivo, lIMEI, i ] );
+        continue;
+      end;
+      if not lLista.get(lProduto,lListaIMEIS) then begin
+        lListaIMEIS := getStringList;
+        lLista.add(lProduto,lListaIMEIS);
+      end;
+      lListaIMEIS.Add(lIMEI);
+
+      lCDS.First;
+      while not lCDS.eof do begin
+        if(lCDS.FieldByName('produto_id').AsString = lProduto) then begin
+          lCDS.Edit;
+          lFieldQtde.AsCurrency := lFieldQtde.AsCurrency + 1.0;
+          lCDS.CheckBrowseMode;
+          break;
+        end;
+        lCDS.Next;
+      end;
+      if(lCDS.Eof) then begin
+        pResultado.formataErro('processaArquivoExpedicao Pedido[%s]: Não localizou o produto [%s]', [ lPedido, lProduto ] );
+        result.formataAviso('Pedido [%s] marcado como DIVERGENTE', [ lPedido ] );
+        divergenciaArquivoFedex(true,pResultado);
+        ctr.setValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SO, lPedido, CONTROLE_LOGISTICA_STATUS_DIVERGENTE);
+        pResultado.acumulador['Pedidos divergentes'].incrementa;
+        exit;
+      end;
+    end;
+
+    if(lCDS<>nil) then begin
+      lDivergencias := 0;
+      lCDS.First;
+      while not lCDS.Eof do begin
+        gdbPadrao.updateDB('pedidoitens', [ 'id' ], [ lCDS.FieldByName('id_item').AsInteger ], [ 'quantidade_atendida'], [ lFieldQtde.AsInteger ] );
+        if(lFieldQtde.AsInteger <> lCDS.FieldByName('quantidade').AsInteger) then begin
+          result.formataErro('processaArquivoExpedicao: Pedido [%s], Produto[%s] divergente na quantidade: Vendida: %d, Atendida: %d',
+          [ lPedido, lCDS.FieldByName('produto_id').AsString, lCDS.FieldByName('quantidade').AsInteger, lCDS.FieldByName('quantidade_atendida').AsInteger ] );
+          inc(lDivergencias);
+        end;
+        lCDS.Next;
+      end;
+      gdbPadrao.commit(true);
+    end;
+    if(lDivergencias>0) then begin
+      divergenciaArquivoFedex(true,pResultado);
+      pResultado.formataAviso('Pedido [%s] marcado como DIVERGENTE', [ lPedido ] );
+      ctr.setValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SO, lPedido, CONTROLE_LOGISTICA_STATUS_DIVERGENTE);
+      result.acumulador['Pedidos divergentes'].incrementa;
+      exit;
     end;
 
     if(pResultado.erros<>lSave) then begin
@@ -180,15 +258,43 @@ begin
       pResultado.acumulador['Saidas rejeitadas'].incrementa;
       exit;
     end;
+
+    try
+      lDSIMEI := gdbPadrao.criaDataset;
+      lCDS.First;
+      while not lCDS.eof do begin
+        lProduto := lCDS.FieldByName('produto_id').AsString;
+        if not lLista.get(lProduto,lListaIMEIS) then begin
+          pResultado.formataErro('processaArquivoExpedicao [%s]: Produto [%s] não possui IMEI de retorno', [ lArquivo, lProduto ] );
+          lDSItens.dataset.Next;
+          continue;
+        end;
+        for lTmp in lListaIMEIS do begin
+          gdbPadrao.insereDB('movimento_serial',
+              ['tipo_serial','numero','produto','tipo_documento','id_documento'],
+              ['I',lTmp,lProduto,'P',lPedido]);
+        end;
+
+        lCDS.Next;
+      end;
+      gdbPadrao.commit(true);
+      ctr.setValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SO, lPedido,CONTROLE_LOGISTICA_STATUS_FINALIZADO);
+      apagarArquivoFedex(false,pResultado);
+    finally
+      gdbPadrao.rollback(true);
+    end;
+
   except
     on e: Exception do begin
       pResultado.formataErro('processaArquivoExpedicao: %s: %s', [ e.ClassName, e.Message ] );
       pResultado.acumulador['Saidas com problemas'].incrementa;
     end;
   end;
-
 end;
 
+{$ENDREGION}
+
+{$REGION 'processaArquivoRecebimento'}
 function processaArquivoRecebimento(pAPI: IFedexAPI; pResultado: IResultadoOperacao): IResultadoOperacao;
   var
     lIMEI,lProduto, lArquivo, lNF, lCNPJ: String;
@@ -202,6 +308,8 @@ function processaArquivoRecebimento(pAPI: IFedexAPI; pResultado: IResultadoOpera
     lLista: IDicionarioSimples<TipoWideStringFramework,IListaString>;
     lListaIMEIS: IListaString;
 begin
+  //processamento entrada
+
   Result := checkResultadoOperacao(pResultado);
   lSave := pResultado.erros;
   lLista := TListaSimplesCreator.CreateDictionary<TipoWideStringFramework,IListaString>;
@@ -392,7 +500,9 @@ begin
     end;
   end;
 end;
+{$ENDREGION}
 
+{$REGION 'SCI'}
 function criaFedexApiSCI;
   var
     fedex: IFedexAPI;
@@ -409,7 +519,7 @@ begin
     fedex.parameters.modoProducao := true;//true;
   {$else}
     fedex.parameters.modoProducao := true;//true;
-  {$ifend}
+  {$endif}
   fedex.parameters.controleAlteracoes := criaControleAlteracoesFedex;
   fedex.parameters.urlWS := ValorTagConfig(tagConfig_FEDEX_WEBSERVICE,'',tvString);
   if(fedex.parameters.urlWS='') then
@@ -418,9 +528,9 @@ begin
             URLPRODUCAOFEDEX
           {$else}
             URLHOMOLOGACAOFEDEX
-          {$ifend}
+          {$endif}
       ;
-  fedex.parameters.diretorioLock := {$if defined(__RELEASE__)} getDiretorioLock {$else} 'c:\temp\lock'{$ifend};
+  fedex.parameters.diretorioLock := {$if defined(__RELEASE__)} getDiretorioLock {$else} 'c:\temp\lock'{$endif};
   fedex.parameters.diretorioLDB := ValorTagConfig(tagConfig_FEDEX_DIRETORIOLDB,'',tvString);
   fedex.parameters.diretorioArquivos := ValorTagConfig(tagConfig_FEDEX_DIRETORIOLOCAL,'',tvString);
 
@@ -461,7 +571,7 @@ begin
     Result := criaControleAlteracoes(SISTEMA_LOGISTICA_FEDEX_PRODUCAO);
   {$else}
     Result := criaControleAlteracoes(SISTEMA_LOGISTICA_FEDEX_HOMOLOGACAO);
-  {$ifend}
+  {$endif}
 end;
 
 function fedex_PrecisaEnviarSKU;
@@ -794,5 +904,7 @@ begin
   lAPI := criaFedexApiSCI;
   lAPI.processaRetorno(nil,pResultado);
 end;
+
+{$ENDREGION}
 
 end.
