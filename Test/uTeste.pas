@@ -1603,8 +1603,8 @@ begin
   lEntradaModel := TEntradaModel.Create(vIConexao);
   try
     try
-      lEntradaModel.NumeroView     := '0000833352';
-      lEntradaModel.FornecedorView := '500014';
+      lEntradaModel.NumeroView     := '0001018217';
+      lEntradaModel.FornecedorView := '500009';
 
       dsEntrada.DataSet := lEntradaModel.obterTotalizador;
 

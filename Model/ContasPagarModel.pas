@@ -295,6 +295,7 @@ begin
     lContasPagarLista.LengthPageView  := FLengthPageView;
     lContasPagarLista.IDRecordView    := FIDRecordView;
     lContasPagarLista.FornecedorView  := FFornecedorView;
+    lContasPagarLista.DuplicataView   := FDuplicataView;
 
     Result := lContasPagarLista.obterLista;
 
