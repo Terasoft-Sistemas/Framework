@@ -300,6 +300,7 @@ begin
             '       TOTAL_FCP_ST,                                                                                         '+SLineBreak+
             '       TOTAL_OUTROS,                                                                                         '+SLineBreak+
             '       TOTAL_FRETE,                                                                                          '+SLineBreak+
+            '       PERCENTUAL_DESCONTO,                                                                                  '+SLineBreak+
             '       TOTAL_DESCONTO,                                                                                       '+SLineBreak+
             '       TOTAL_ENTRADA                                                                                         '+SLineBreak+
             '                                                                                                             '+SLineBreak+
@@ -326,6 +327,7 @@ begin
             '            total_fcp_st,                                                                                    '+SLineBreak+
             '            total_outros,                                                                                    '+SLineBreak+
             '            total_frete,                                                                                     '+SLineBreak+
+            '            total_desconto / total_produtos * 100 percentual_desconto,                                       '+SLineBreak+
             '            total_desconto,                                                                                  '+SLineBreak+
             '            total_produtos                                                                                   '+SLineBreak+
             '              + total_valor_st                                                                               '+SLineBreak+
@@ -414,6 +416,7 @@ begin
             '       NUMERO_ENTRADA,                                                                               '+SLineBreak+
             '       SERIE,                                                                                        '+SLineBreak+
             '       MODELO,                                                                                       '+SLineBreak+
+            '       CFOP_ENTRADA,                                                                                 '+SLineBreak+
             '       OBSERVACAO,                                                                                   '+SLineBreak+
             '       COD_FORNECEDOR,                                                                               '+SLineBreak+
             '       NOME_FORNECEDOR,                                                                              '+SLineBreak+
@@ -434,6 +437,7 @@ begin
             '                          entrada.numero_ent numero_entrada,                                         '+SLineBreak+
             '                          entrada.serie_ent serie,                                                   '+SLineBreak+
             '                          entrada.modelo_ent modelo,                                                 '+SLineBreak+
+            '                          entrada.cfop_ent cfop_entrada,                                             '+SLineBreak+
             '                          entrada.observacao_ent observacao,                                         '+SLineBreak+
             '                          entrada.codigo_for cod_fornecedor,                                         '+SLineBreak+
             '                          coalesce(fornecedor.razao_for, fornecedor.fantasia_for) nome_fornecedor,   '+SLineBreak+
