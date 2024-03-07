@@ -23,7 +23,7 @@ interface
 
     FEDEX_ACAOARQUIVO_MANTER      = 'M';
     FEDEX_ACAOARQUIVO_REJEITAR    = 'R';
-    FEDEX_ACAOARQUIVO_PENDENTE    = 'P';
+    FEDEX_ACAOARQUIVO_DIVERGENTE  = 'D';
     FEDEX_ACAOARQUIVO_APAGAR      = 'A';
 
 
@@ -304,7 +304,7 @@ interface
 
   function rejeitarArquivoFedex(pNotificarUsuario: boolean;pResultado: IResultadoOperacao): IResultadoOperacao;
   function manterArquivoFedex(pNotificarUsuario: boolean;pResultado: IResultadoOperacao): IResultadoOperacao;
-  function divergeneciaArquivoFedex(pNotificarUsuario: boolean;pResultado: IResultadoOperacao): IResultadoOperacao;
+  function divergenciaArquivoFedex(pNotificarUsuario: boolean;pResultado: IResultadoOperacao): IResultadoOperacao;
   function apagarArquivoFedex(pNotificarUsuario: boolean;pResultado: IResultadoOperacao): IResultadoOperacao;
 
 implementation
@@ -431,10 +431,10 @@ begin
     pResultado.propriedade['NOTIFICAR_USUARIO'].asBoolean := true;
 end;
 
-function divergeneciaArquivoFedex(pNotificarUsuario: boolean;pResultado: IResultadoOperacao): IResultadoOperacao;
+function divergenciaArquivoFedex(pNotificarUsuario: boolean;pResultado: IResultadoOperacao): IResultadoOperacao;
 begin
   Result := checkResultadoOperacao(pResultado);
-  pResultado.propriedade['ACAO_ARQUIVO'].asString := FEDEX_ACAOARQUIVO_PENDENTE;
+  pResultado.propriedade['ACAO_ARQUIVO'].asString := FEDEX_ACAOARQUIVO_DIVERGENTE;
   if(pNotificarUsuario) then
     pResultado.propriedade['NOTIFICAR_USUARIO'].asBoolean := true;
 end;
