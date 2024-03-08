@@ -686,7 +686,7 @@ begin
     end else begin
 // Listar saidas que não estão no controle e precisam enviar
       lQuery := lQuery + ' left join controlealteracoes ca on ca.sistema = :sistema and ca.identificador = :identificador and ca.chave = p.numero_ped ' +
-                ' where ( ca.valor = :status ) ';
+                ' where ca.valor = :status ';
       SetLength(lParameters,3);
       lParameters[0] := ctr.sistema;
       lParameters[1] := CONTROLE_LOGISTICA_FEDEX_STATUS_SO;
@@ -829,7 +829,7 @@ begin
     end else begin
       //Listar entradas que não estão no controle ou STATUS nulo ou espaço
       lQuery := lQuery + ' left join controlealteracoes c on c.sistema = :sistema and c.identificador = :identificador and c.chave = cast(p.id as varchar(22)) ' +
-                ' where ( (c.id is null) or (coalesce(c.valor, '' '') in ( '''', '' '' )) ) ';
+                ' where c.valor in ( ''A'' ) ';
       SetLength(lParameters,2);
       lParameters[0] := ctr.sistema;
       lParameters[1] := CONTROLE_LOGISTICA_FEDEX_STATUS_PO;
