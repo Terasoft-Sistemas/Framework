@@ -889,12 +889,14 @@ begin
 
 end;
 
+{$if not defined(__RELEASE__)}
 function testaRetornoSCI;
 begin
   Result := Fedex_SCI_ProcessaRetorno(checkResultadoOperacao(pResultado));
   if(pResultado.eventos>0) then
     msgAviso(pResultado.toString);
 end;
+{$endif}
 
 function Fedex_SCI_ProcessaRetorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
   var
