@@ -104,6 +104,9 @@ type
     Button65: TButton;
     Button66: TButton;
     dsOS: TDataSource;
+    TabSheet5: TTabSheet;
+    memoSimulador: TMemo;
+    Button67: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -176,6 +179,7 @@ type
     procedure Button63Click(Sender: TObject);
     procedure Button65Click(Sender: TObject);
     procedure Button66Click(Sender: TObject);
+    procedure Button67Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -203,7 +207,7 @@ uses
   SaldoModel, EmpresaModel, ProdutosModel, EntradaItensModel,
   ClienteModel, ContasPagarModel, ContasPagarItensModel, System.SysUtils,
   ReservaModel, DocumentoModel, AnexoModel, FluxoCaixaModel, BancoModel,
-  PortadorModel, LojasModel, OSModel;
+  PortadorModel, LojasModel, OSModel, SimuladorPrecoModel;
 
 {$R *.dfm}
 
@@ -1708,6 +1712,37 @@ begin
     end;
   finally
     lOsModel.Free;
+  end;
+end;
+
+procedure TForm1.Button67Click(Sender: TObject);
+var
+  lSimuladorPrecoModel : TSimuladorPrecoModel;
+  lResultado           : TResultado;
+begin
+  lSimuladorPrecoModel := TSimuladorPrecoModel.Create;
+  try
+    lSimuladorPrecoModel.VALOR_AQUISICAO                    := 1332;
+    lSimuladorPrecoModel.PERCENTUAL_IPI                     := 17;
+    lSimuladorPrecoModel.PERCENTUAL_FRETE                   := 15;
+    lSimuladorPrecoModel.PERCENTUAL_MVA                     := 15;
+    lSimuladorPrecoModel.PERCENTUAL_ICMS_ST                 := 18;
+    lSimuladorPrecoModel.PERCENTUAL_ICMS                    := 18;
+    lSimuladorPrecoModel.PERCENTUAL_CREDITO_PIS_COFINS      := 10;
+    lSimuladorPrecoModel.PERCENTUAL_REDUCAO_ST              := 5;
+    lSimuladorPrecoModel.PERCENTUAL_REDUCAO_ICMS            := 5;
+    lSimuladorPrecoModel.PERCENTUAL_MARGEM                  := 34.99;
+    lSimuladorPrecoModel.TIPO_FRETE                         := 'CIF';
+
+    lResultado := lSimuladorPrecoModel.simular;
+
+    memoSimulador.Lines.Clear;
+
+    memoSimulador.Lines.Add('Custo Líquido: '+ lResultado.CustoLiquido.ToString);
+    memoSimulador.Lines.Add('Custo Bruto: '+ lResultado.CustoBruto.ToString);
+    memoSimulador.Lines.Add('Custo Compra: '+ lResultado.CustoCompra.ToString);
+  finally
+    lSimuladorPrecoModel.Free;
   end;
 end;
 

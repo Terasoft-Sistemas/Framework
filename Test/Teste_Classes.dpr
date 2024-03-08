@@ -105,7 +105,8 @@ uses
   BancoModel in '..\Model\BancoModel.pas',
   BancoDao in '..\Dao\BancoDao.pas',
   OSModel in '..\Model\OSModel.pas',
-  OSDao in '..\Dao\OSDao.pas';
+  OSDao in '..\Dao\OSDao.pas',
+  SimuladorPrecoModel in '..\Model\SimuladorPrecoModel.pas';
 
 {$R *.res}
 

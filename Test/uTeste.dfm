@@ -2,8 +2,8 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'Form1'
-  ClientHeight = 823
-  ClientWidth = 1246
+  ClientHeight = 831
+  ClientWidth = 1248
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,9 +16,9 @@ object Form1: TForm1
   object PageControl1: TPageControl
     Left = 0
     Top = 0
-    Width = 1246
-    Height = 823
-    ActivePage = TabSheet4
+    Width = 1248
+    Height = 831
+    ActivePage = TabSheet1
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -541,8 +541,8 @@ object Form1: TForm1
       ImageIndex = 1
       object dbTeste2: TXDBGrid
         Left = 0
-        Top = 170
-        Width = 1238
+        Top = 178
+        Width = 1240
         Height = 623
         Align = alBottom
         DataSource = dsTeste2
@@ -591,8 +591,8 @@ object Form1: TForm1
       ImageIndex = 2
       object XDBGrid1: TXDBGrid
         Left = 0
-        Top = 544
-        Width = 1238
+        Top = 552
+        Width = 1240
         Height = 249
         Align = alBottom
         DataSource = dsEntradaItens
@@ -601,8 +601,8 @@ object Form1: TForm1
       end
       object XDBGrid2: TXDBGrid
         Left = 0
-        Top = 382
-        Width = 1238
+        Top = 390
+        Width = 1240
         Height = 162
         Align = alBottom
         DataSource = dsEntrada
@@ -669,8 +669,8 @@ object Form1: TForm1
       ImageIndex = 3
       object XDBGrid3: TXDBGrid
         Left = 0
-        Top = 488
-        Width = 1238
+        Top = 496
+        Width = 1240
         Height = 305
         Align = alBottom
         DataSource = dsOS
@@ -712,6 +712,27 @@ object Form1: TForm1
         Caption = 'OS Excluir'
         TabOrder = 4
         OnClick = Button66Click
+      end
+    end
+    object TabSheet5: TTabSheet
+      Caption = 'Calculadora'
+      ImageIndex = 4
+      object memoSimulador: TMemo
+        Left = 824
+        Top = 23
+        Width = 409
+        Height = 681
+        ScrollBars = ssVertical
+        TabOrder = 0
+      end
+      object Button67: TButton
+        Left = 11
+        Top = 23
+        Width = 182
+        Height = 42
+        Caption = 'Simular Custo'
+        TabOrder = 1
+        OnClick = Button67Click
       end
     end
   end
