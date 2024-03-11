@@ -843,7 +843,7 @@ type
 
     function Incluir  : String;
     function Alterar(pID : String) : TProdutosModel;
-    function Excluir(pID : String) : String;
+    function Excluir(pCodigoPro : String) : String;
     function Salvar   : String;
     function obterListaMemTable : TFDMemTable;
     function obterCodigoBarras(pIdProduto: String): String;
@@ -891,14 +891,13 @@ begin
   lProdutosModel      := lProdutosModel.carregaClasse(pID);
   lProdutosModel.Acao := tacAlterar;
   Result              := lProdutosModel;
-
 end;
 
-function TProdutosModel.Excluir(pID: String): String;
+function TProdutosModel.Excluir(pCodigoPro: String): String;
 begin
-  self.FID  := pID;
-  self.Acao := tacExcluir;
-  Result    := self.Salvar;
+  self.FCODIGO_PRO := pCodigoPro;
+  self.Acao        := tacExcluir;
+  Result           := self.Salvar;
 end;
 
 function TProdutosModel.Incluir: String;
@@ -998,7 +997,7 @@ begin
     lProdutosLista.StartRecordView := FStartRecordView;
     lProdutosLista.LengthPageView  := FLengthPageView;
     lProdutosLista.IDRecordView    := FIDRecordView;
-    Result := lProdutosLista.obterListaMemTable;
+    Result         := lProdutosLista.obterListaMemTable;
     FTotalRecords  := lProdutosLista.TotalRecords;
   finally
     lProdutosLista.Free;
