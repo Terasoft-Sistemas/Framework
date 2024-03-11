@@ -61,7 +61,7 @@ implementation
     Terasoft.Framework.ListaSimples.Impl,
     Terasoft.Framework.ListaSimples,
     SysUtils,
-    FuncoesConfig;
+    FuncoesConfig, SCI.Logistica;
 
 function fedex_SCI_EnviaSO;
   var
@@ -69,6 +69,11 @@ function fedex_SCI_EnviaSO;
     pLista: TFedex_ShipmentOrderList;
 begin
   Result := checkResultadoOperacao(pResultado);
+  if not sci_logistica_usa_fedex then begin
+    pResultado.adicionaErro('Não utiliza fedex na Logística.');
+    exit;
+  end;
+
   lAPI := fedex_SCI_criaAPI;
   pResultado.propriedade['id'].asString := pNumeroPed;
   pLista := fedex_SCI_getShipmentOrderList(lAPI,pResultado);
@@ -81,6 +86,11 @@ function fedex_SCI_EnviaPO(pID: String = ''; pResultado: IResultadoOperacao = ni
     pLista: TFedex_PurchaseOrderList;
 begin
   Result := checkResultadoOperacao(pResultado);
+  if not sci_logistica_usa_fedex then begin
+    pResultado.adicionaErro('Não utiliza fedex na Logística.');
+    exit;
+  end;
+
   lAPI := fedex_SCI_criaAPI;
   pResultado.propriedade['id'].asString := pID;
   pLista := fedex_SCI_getPurchaseOrderList(lAPI,pResultado);
@@ -517,6 +527,9 @@ function fedex_SCI_criaAPI;
     lHost,lPorta,lUser: String;
     s: String;
 begin
+  Result := nil;
+  if not sci_logistica_usa_fedex then
+    exit;
   fedex := createFedexAPI;
 
   fedex.setProcessador('S',processaArquivoExpedicao);
@@ -584,6 +597,10 @@ end;
 function fedex_PrecisaEnviarSKU;
 begin
   Result := false;
+  if not sci_logistica_usa_fedex then begin
+    exit;
+  end;
+
   if(pCodigoPro='') then
     exit;
   Result := stringNoArray(Fedex_SCI_GetStatusSKU(pCodigoPro), [' ','',CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO]);
@@ -592,6 +609,10 @@ end;
 function fedex_PrecisaEnviarSO;
 begin
   Result := false;
+  if not sci_logistica_usa_fedex then begin
+    exit;
+  end;
+
   if(pNumeroPed='') then
     exit;
   Result := Fedex_SCI_GetStatusSO(pNumeroPed)=CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
@@ -600,6 +621,10 @@ end;
 function fedex_PrecisaEnviarPO;
 begin
   Result := false;
+  if not sci_logistica_usa_fedex then begin
+    exit;
+  end;
+
   if(pID='') then
     exit;
   Result := Fedex_SCI_GetStatusPO(pID)=CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
@@ -615,6 +640,11 @@ function fedex_SCI_GetSKUList;
 begin
   checkResultadoOperacao(pResultado);
   Result := nil;
+  if not sci_logistica_usa_fedex then begin
+    pResultado.adicionaErro('getPurchaseOrderList: Não utiliza fedex na Logística.');
+    exit;
+  end;
+
   try
     save := pResultado.erros;
     if(pCodigoPro='') then
@@ -669,6 +699,11 @@ function fedex_SCI_GetShipmentOrderList;
 begin
   checkResultadoOperacao(pResultado);
   Result := nil;
+  if not sci_logistica_usa_fedex then begin
+    pResultado.adicionaErro('getPurchaseOrderList: Não utiliza fedex na Logística.');
+    exit;
+  end;
+
   try
     save1 := pResultado.erros;
     if(pAPI=nil) then
@@ -814,6 +849,12 @@ function fedex_SCI_GetPurchaseOrderList;
 begin
   checkResultadoOperacao(pResultado);
   Result := nil;
+
+  if not sci_logistica_usa_fedex then begin
+    pResultado.adicionaErro('getPurchaseOrderList: Não utiliza fedex na Logística.');
+    exit;
+  end;
+
   try
     save1 := pResultado.erros;
     if(pAPI=nil) then
@@ -923,6 +964,11 @@ function fedex_SCI_ProcessaRetorno(pResultado: IResultadoOperacao = nil): IResul
     lAPI: IFedexAPI;
 begin
   Result := checkResultadoOperacao(pResultado);
+  if not sci_logistica_usa_fedex then begin
+    pResultado.adicionaErro('Não utiliza fedex na Logística.');
+    exit;
+  end;
+
   lAPI := fedex_SCI_criaAPI;
   lAPI.processaRetorno(nil,pResultado);
 end;
