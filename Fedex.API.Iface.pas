@@ -274,7 +274,12 @@ interface
 
       function getParameters: IFedexParam;
 
+      function getVersao: TipoWideStringFramework;
+      function getCompilacao: Int64;
+
       property parameters: IFedexParam read getParameters;
+      property versao: TipoWideStringFramework read getVersao;
+      property compilacao: Int64 read getCompilacao;
 
     end;
 
