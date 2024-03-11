@@ -11,21 +11,6 @@ interface
     Terasoft.Framework.ControleAlteracoes,
     Fedex.API.Iface;
 
-
-//  const
-//    SISTEMA_LOGISTICA_FEDEX = 'FEDEX';
-//    SISTEMA_LOGISTICA_FEDEX_ = 'FEDEX-';
-
-//    CONTROLE_LOGISTICA_FEDEX_SKU = 'SKU.CONTROLE';
-
-
-  {
-    STATUS Logistica
-    A - Enviado
-  }
-
-
-
   function fedex_SCI_criaAPI(const pCNPJ: TipoWideStringFramework = ''; const pRazaoSocial: TipoWideStringFramework = ''): IFedexAPI;
   function fedex_SCI_GetPurchaseOrderList(pAPI: IFedexAPI; pResultado: IResultadoOperacao = nil): TFedex_PurchaseOrderList;
   function fedex_SCI_GetShipmentOrderList(pAPI: IFedexAPI; pResultado: IResultadoOperacao = nil): TFedex_ShipmentOrderList;
@@ -45,6 +30,13 @@ interface
   procedure fedex_SCI_SetStatusSKU(const pID: String; const pStatus: String);
   procedure fedex_SCI_SetStatusPO(const pID: String; const pStatus: String);
   procedure fedex_SCI_SetStatusSO(const pID: String; const pStatus: String);
+
+  function fedex_SCI_SOFinalizado(const pID: String): boolean;
+  function fedex_SCI_POFinalizado(const pID: String): boolean;
+
+  function fedex_SCI_GetResultadoSKU(const pID: String): TipoWideStringFramework;
+  function fedex_SCI_GetResultadoPO(const pID: String): TipoWideStringFramework;
+  function fedex_SCI_GetResultadoSO(const pID: String): TipoWideStringFramework;
 
   {$if not defined(__RELEASE__)}
     function testaFedexAPISOSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
@@ -962,6 +954,31 @@ procedure fedex_SCI_SetStatusSO;
 begin
   if(pID<>'') then
     fedex_SCI_criaControleAlteracoes.setValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SO,pID,pStatus);
+end;
+
+function fedex_SCI_SOFinalizado;
+begin
+  Result := fedex_SCI_GetStatusSO(pID)=CONTROLE_LOGISTICA_STATUS_FINALIZADO;
+end;
+
+function fedex_SCI_POFinalizado;
+begin
+  Result := fedex_SCI_GetStatusPO(pID)=CONTROLE_LOGISTICA_STATUS_FINALIZADO;
+end;
+
+function fedex_SCI_GetResultadoSKU;
+begin
+  Result := fedex_SCI_criaControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_SKU,pID);
+end;
+
+function fedex_SCI_GetResultadoSO;
+begin
+  Result := fedex_SCI_criaControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_SO,pID);
+end;
+
+function fedex_SCI_GetResultadoPO;
+begin
+  Result := fedex_SCI_criaControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_PO,pID);
 end;
 
 {$ENDREGION}
