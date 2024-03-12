@@ -61,7 +61,7 @@ implementation
     Terasoft.Framework.ListaSimples.Impl,
     Terasoft.Framework.ListaSimples,
     SysUtils,
-    FuncoesConfig, SCI.Logistica;
+    FuncoesConfig, Terasoft.Framework.Logistica;
 
 function fedex_SCI_EnviaSO;
   var
@@ -960,17 +960,14 @@ end;
 {$endif}
 
 function fedex_SCI_ProcessaRetorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-  var
-    lAPI: IFedexAPI;
 begin
   Result := checkResultadoOperacao(pResultado);
   if not sci_logistica_usa_fedex then begin
-    pResultado.adicionaErro('Não utiliza fedex na Logística.');
+    pResultado.adicionaErro('fedex_SCI_ProcessaRetorno: Não utiliza fedex na Logística.');
     exit;
   end;
 
-  lAPI := fedex_SCI_criaAPI;
-  lAPI.processaRetorno(nil,pResultado);
+  Result := fedex_SCI_criaAPI.processaRetorno(nil,pResultado);
 end;
 
 function fedex_SCI_GetStatusSKU;
