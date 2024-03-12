@@ -23,24 +23,24 @@ interface
   function fedex_PrecisaEnviarSO(const pNumeroPed: TipoWideStringFramework): boolean;
 
   function fedex_SCI_EnviaPO(pID: String = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-  function fedex_SCI_EnviaSO(pNumeroPed: String = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+  function fedex_SCI_EnviaSO(pNumeroPed: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
   function fedex_SCI_ProcessaRetorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
-  function fedex_SCI_GetStatusSKU(const pID: String): TipoWideStringFramework;
-  function fedex_SCI_GetStatusPO(const pID: String): TipoWideStringFramework;
-  function fedex_SCI_GetStatusSO(const pNumeroPed: String): TipoWideStringFramework;
+  function fedex_SCI_GetStatusSKU(const pID: TipoWideStringFramework): TipoWideStringFramework;
+  function fedex_SCI_GetStatusPO(const pID: TipoWideStringFramework): TipoWideStringFramework;
+  function fedex_SCI_GetStatusSO(const pNumeroPed: TipoWideStringFramework): TipoWideStringFramework;
 
-  procedure fedex_SCI_SetStatusSKU(const pID: String; const pStatus: String);
-  procedure fedex_SCI_SetStatusPO(const pID: String; const pStatus: String);
-  procedure fedex_SCI_SetStatusSO(const pNumeroPed: String; const pStatus: String);
+  procedure fedex_SCI_SetStatusSKU(const pID: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
+  procedure fedex_SCI_SetStatusPO(const pID: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
+  procedure fedex_SCI_SetStatusSO(const pNumeroPed: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
 
-  function fedex_SCI_POFinalizado(const pID: String): boolean;
-  function fedex_SCI_SOFinalizado(const pNumeroPed: String): boolean;
+  function fedex_SCI_POFinalizado(const pID: TipoWideStringFramework): boolean;
+  function fedex_SCI_SOFinalizado(const pNumeroPed: TipoWideStringFramework): boolean;
 
-  function fedex_SCI_GetResultadoSKU(const pID: String): TipoWideStringFramework;
-  function fedex_SCI_GetResultadoPO(const pID: String): TipoWideStringFramework;
-  function fedex_SCI_GetResultadoSO(const pNumeroPed: String): TipoWideStringFramework;
+  function fedex_SCI_GetResultadoSKU(const pID: TipoWideStringFramework): TipoWideStringFramework;
+  function fedex_SCI_GetResultadoPO(const pID: TipoWideStringFramework): TipoWideStringFramework;
+  function fedex_SCI_GetResultadoSO(const pNumeroPed: TipoWideStringFramework): TipoWideStringFramework;
 
   {$if not defined(__RELEASE__)}
     function testaFedexAPISOSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
