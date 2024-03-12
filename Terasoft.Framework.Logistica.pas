@@ -1,6 +1,13 @@
 unit Terasoft.Framework.Logistica;
 
 interface
+  uses
+    Classes, Terasoft.Framework.Texto,
+    Terasoft.Framework.ListaSimples,
+    Data.FmtBcd,
+    Terasoft.Framework.ControleAlteracoes,
+    Terasoft.Framework.DB,
+    Terasoft.Framework.Types;
 
   const
     CONTROLE_LOGISTICA_RESULTADO_SO  = 'RESULTADO.SO';
@@ -15,6 +22,28 @@ interface
 
     CONTROLE_LOGISTICA_NENHUM    = 'N';
     CONTROLE_LOGISTICA_FEDEX     = 'F';
+
+
+
+  type
+
+    TLogisticaProcessadorArquivoRetorno = function (pUnkAPI: IUnknown; pResultado: IResultadoOperacao): IResultadoOperacao;
+
+    ILogisticaAPI = interface
+     ['{6F92AC71-F0F6-4AC1-9188-B0C9B9EBD114}']
+      procedure setProcessador(pInterface: TipoWideStringFramework; pProcessador: TLogisticaProcessadorArquivoRetorno);
+      function getProcessador(pInterface: TipoWideStringFramework): TLogisticaProcessadorArquivoRetorno;
+
+      function processaRetorno(pProcessador: TLogisticaProcessadorArquivoRetorno; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+
+      function getVersao: TipoWideStringFramework;
+      function getCompilacao: Int64;
+
+      property versao: TipoWideStringFramework read getVersao;
+      property compilacao: Int64 read getCompilacao;
+
+    end;
+
 
 
   function sci_logistica_utiizada: String;

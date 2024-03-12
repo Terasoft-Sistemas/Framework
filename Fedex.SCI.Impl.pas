@@ -116,7 +116,7 @@ end;
 {$endif}
 
 {$REGION 'processaArquivoExpedicao'}
-function processaArquivoExpedicao(pAPI: IFedexAPI; pResultado: IResultadoOperacao): IResultadoOperacao;
+function processaArquivoExpedicao(pUnkAPI: IUnknown; pResultado: IResultadoOperacao): IResultadoOperacao;
   var
     lArquivo,lPedido,lProduto,lIMEI: String;
     lTexto, lLinha: IListaTexto;
@@ -130,6 +130,7 @@ function processaArquivoExpedicao(pAPI: IFedexAPI; pResultado: IResultadoOperaca
     i: Integer;
     lCDS: TDataset;
     lFieldQtde: TField;
+    pAPI: IFedexAPI;
 
 begin
   Result := checkResultadoOperacao(pResultado);
@@ -139,6 +140,11 @@ begin
   lCDS := nil;
   lLista := TListaSimplesCreator.CreateDictionary<TipoWideStringFramework,IListaString>;
   try
+    if not Supports(pUnkAPI, IFedexAPI, pAPI) then begin
+      pResultado.adicionaErro('processaArquivoExpedicao: API não definida.');
+      exit;
+    end;
+
     if(gdbPadrao=nil)or(gdbPadrao.conectado=false) then begin
       pResultado.adicionaErro('processaArquivoExpedicao: GDB não definido.');
       exit;
@@ -312,7 +318,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'processaArquivoRecebimento'}
-function processaArquivoRecebimento(pAPI: IFedexAPI; pResultado: IResultadoOperacao): IResultadoOperacao;
+function processaArquivoRecebimento(pUnkAPI: IUnknown; pResultado: IResultadoOperacao): IResultadoOperacao;
   var
     lIMEI,lProduto, lArquivo, lNF, lCNPJ: String;
     lTmp: TipoWideStringFramework;
@@ -324,6 +330,7 @@ function processaArquivoRecebimento(pAPI: IFedexAPI; pResultado: IResultadoOpera
     ctr: IControleAlteracoes;
     lLista: IDicionarioSimples<TipoWideStringFramework,IListaString>;
     lListaIMEIS: IListaString;
+    pAPI: IFedexAPI;
 begin
   //processamento entrada
 
@@ -331,6 +338,10 @@ begin
   lSave := pResultado.erros;
   lLista := TListaSimplesCreator.CreateDictionary<TipoWideStringFramework,IListaString>;
   try
+    if not Supports(pUnkAPI,IFedexAPI, pAPI) then begin
+      pResultado.adicionaErro('processaArquivoRecebimento: API não definida.');
+      exit;
+    end;
     if(gdbPadrao=nil)or(gdbPadrao.conectado=false) then begin
       pResultado.adicionaErro('processaArquivoRecebimento: GDB não definido.');
       exit;

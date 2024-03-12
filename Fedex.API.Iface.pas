@@ -5,6 +5,7 @@ unit Fedex.API.Iface;
 interface
   uses
     Terasoft.Framework.ListaSimples,
+    Terasoft.Framework.Logistica,
     Data.FmtBcd,
     Terasoft.Framework.ControleAlteracoes,
     Terasoft.Framework.DB,
@@ -58,7 +59,8 @@ interface
     IFedexSKU = interface;
     IFedexAPI = interface;
 
-    TFedexProcessadorArquivoRetorno = function (pAPI: IFedexAPI; pResultado: IResultadoOperacao): IResultadoOperacao;
+    // Movido para logistica
+    //TFedexProcessadorArquivoRetorno = function (pAPI: IFedexAPI; pResultado: IResultadoOperacao): IResultadoOperacao;
 
     IFedexParam = interface
       ['{D60B5541-FADF-4799-A008-CEECCAC004EB}']
@@ -255,8 +257,8 @@ interface
     IFedexAPI = interface
       ['{159D6DD7-2B62-4D84-AC6A-7AE473B3F286}']
 
-      procedure setProcessador(pInterface: TipoWideStringFramework; pProcessador: TFedexProcessadorArquivoRetorno);
-      function getProcessador(pInterface: TipoWideStringFramework): TFedexProcessadorArquivoRetorno;
+      procedure setProcessador(pInterface: TipoWideStringFramework; pProcessador: TLogisticaProcessadorArquivoRetorno);
+      function getProcessador(pInterface: TipoWideStringFramework): TLogisticaProcessadorArquivoRetorno;
 
       function getSKUList(pXMLData: TipoWideStringFramework; critica: boolean; pResultado: IResultadoOperacao): TFedex_SKUList;
       function sendSKU(pSku: IFedexSKU; pResultado: IResultadoOperacao): IResultadoOperacao;
@@ -270,7 +272,7 @@ interface
       function sendPurchaseOrderList(pList: TFedex_PurchaseOrderList; pResultado: IResultadoOperacao): IResultadoOperacao;
       function sendPurchaseOrder(pOrder: IFedexPurchaseOrder; pResultado: IResultadoOperacao): IResultadoOperacao;
 
-      function processaRetorno(pProcessador: TFedexProcessadorArquivoRetorno; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+      function processaRetorno(pProcessador: TLogisticaProcessadorArquivoRetorno; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
       function getParameters: IFedexParam;
 
