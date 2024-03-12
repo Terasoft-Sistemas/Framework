@@ -1087,6 +1087,7 @@ begin
 
   try
     Result := lClienteDao.ObterListaMemTable;
+    FTotalRecords := lClienteDao.TotalRecords;
   finally
     lClienteDao.Free;
   end;
