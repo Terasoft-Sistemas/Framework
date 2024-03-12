@@ -45,6 +45,7 @@ implementation
         fAPI: IFedexAPI;
 
         function precisaEnviarProduto(const pCodigoPro: TipoWideStringFramework): boolean;
+        function enviaProduto(pID: String = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
         function getStatusProduto(const pCodigoPro: TipoWideStringFramework): TipoWideStringFramework;
         procedure setStatusProduto(const pCodigoPro: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
         function getResultadoProduto(const pCodigoPro: TipoWideStringFramework): TipoWideStringFramework;
@@ -1018,6 +1019,11 @@ begin
   pResultado.propriedade['id'].asString := pID;
   pLista := fedex_SCI_getPurchaseOrderList(pResultado);
   fAPI.sendPurchaseOrderList(pLista,pResultado);
+end;
+
+function TLogisticaFedex.enviaProduto(pID: String;  pResultado: IResultadoOperacao): IResultadoOperacao;
+begin
+  raise Exception.Create('Não implementado');
 end;
 
 function TLogisticaFedex.enviaVenda(pNumeroPed: TipoWideStringFramework; pResultado: IResultadoOperacao): IResultadoOperacao;

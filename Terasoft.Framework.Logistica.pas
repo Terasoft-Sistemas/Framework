@@ -42,6 +42,7 @@ interface
       procedure setControleAlteracoes(const pValue: IControleAlteracoes);
 
       function precisaEnviarProduto(const pCodigoPro: TipoWideStringFramework): boolean;
+      function enviaProduto(pID: String = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
       function getStatusProduto(const pCodigoPro: TipoWideStringFramework): TipoWideStringFramework;
       procedure setStatusProduto(const pCodigoPro: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
       function getResultadoProduto(const pCodigoPro: TipoWideStringFramework): TipoWideStringFramework;
