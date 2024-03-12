@@ -24,7 +24,6 @@ interface
     CONTROLE_LOGISTICA_FEDEX     = 'F';
 
 
-
   type
 
     TLogisticaProcessadorArquivoRetorno = function (pUnkAPI: IUnknown; pResultado: IResultadoOperacao): IResultadoOperacao;
@@ -43,7 +42,6 @@ interface
       property compilacao: Int64 read getCompilacao;
 
     end;
-
 
 
   function sci_logistica_utiizada: String;
