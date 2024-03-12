@@ -11,37 +11,6 @@ interface
     Terasoft.Framework.ControleAlteracoes,
     Fedex.API.Iface;
 
-  function fedex_SCI_criaAPI(const pCNPJ: TipoWideStringFramework = ''; const pRazaoSocial: TipoWideStringFramework = ''): IFedexAPI;
-  function fedex_SCI_criaControleAlteracoes: IControleAlteracoes;
-
-  function fedex_SCI_GetPurchaseOrderList(pAPI: IFedexAPI; pResultado: IResultadoOperacao = nil): TFedex_PurchaseOrderList;
-  function fedex_SCI_GetShipmentOrderList(pAPI: IFedexAPI; pResultado: IResultadoOperacao = nil): TFedex_ShipmentOrderList;
-  function fedex_SCI_GetSKUList(pAPI: IFedexAPI; pCodigoPro: TipoWideStringFramework; pResultado: IResultadoOperacao = nil): TFedex_SKUList;
-
-  function fedex_PrecisaEnviarSKU(const pCodigoPro: TipoWideStringFramework): boolean;
-  function fedex_PrecisaEnviarPO(const pID: TipoWideStringFramework): boolean;
-  function fedex_PrecisaEnviarSO(const pNumeroPed: TipoWideStringFramework): boolean;
-
-  function fedex_SCI_EnviaPO(pID: String = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-  function fedex_SCI_EnviaSO(pNumeroPed: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-
-  function fedex_SCI_ProcessaRetorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-
-  function fedex_SCI_GetStatusSKU(const pID: TipoWideStringFramework): TipoWideStringFramework;
-  function fedex_SCI_GetStatusPO(const pID: TipoWideStringFramework): TipoWideStringFramework;
-  function fedex_SCI_GetStatusSO(const pNumeroPed: TipoWideStringFramework): TipoWideStringFramework;
-
-  procedure fedex_SCI_SetStatusSKU(const pID: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
-  procedure fedex_SCI_SetStatusPO(const pID: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
-  procedure fedex_SCI_SetStatusSO(const pNumeroPed: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
-
-  function fedex_SCI_POFinalizado(const pID: TipoWideStringFramework): boolean;
-  function fedex_SCI_SOFinalizado(const pNumeroPed: TipoWideStringFramework): boolean;
-
-  function fedex_SCI_GetResultadoSKU(const pID: TipoWideStringFramework): TipoWideStringFramework;
-  function fedex_SCI_GetResultadoPO(const pID: TipoWideStringFramework): TipoWideStringFramework;
-  function fedex_SCI_GetResultadoSO(const pNumeroPed: TipoWideStringFramework): TipoWideStringFramework;
-
   {$if not defined(__RELEASE__)}
     function testaFedexAPISOSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     function testaFedexAPIPOSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
@@ -63,53 +32,79 @@ implementation
     SysUtils,
     FuncoesConfig, Terasoft.Framework.Logistica;
 
-function fedex_SCI_EnviaSO;
-  var
-    lAPI: IFedexAPI;
-    pLista: TFedex_ShipmentOrderList;
-begin
-  Result := checkResultadoOperacao(pResultado);
-  if not sci_logistica_usa_fedex then begin
-    pResultado.adicionaErro('Não utiliza fedex na Logística.');
-    exit;
-  end;
+    type
+      TLogisticaFedex = class(TInterfacedObject, ILogistica)
+      protected
+        function fedex_SCI_GetPurchaseOrderList(pResultado: IResultadoOperacao = nil): TFedex_PurchaseOrderList;
+        function fedex_SCI_GetShipmentOrderList(pResultado: IResultadoOperacao = nil): TFedex_ShipmentOrderList;
+        function fedex_SCI_GetSKUList(pCodigoPro: TipoWideStringFramework; pResultado: IResultadoOperacao = nil): TFedex_SKUList;
+        function fedex_SCI_criaAPI(const pCNPJ: TipoWideStringFramework = ''; const pRazaoSocial: TipoWideStringFramework = ''): IFedexAPI;
+        function criaControleAlteracoes: IControleAlteracoes;
 
-  lAPI := fedex_SCI_criaAPI;
-  pResultado.propriedade['id'].asString := pNumeroPed;
-  pLista := fedex_SCI_getShipmentOrderList(lAPI,pResultado);
-  lAPI.sendShipmentOrderList(pLista,pResultado);
-end;
+      protected
+        fAPI: IFedexAPI;
 
-function fedex_SCI_EnviaPO(pID: String = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-  var
-    lAPI: IFedexAPI;
-    pLista: TFedex_PurchaseOrderList;
-begin
-  Result := checkResultadoOperacao(pResultado);
-  if not sci_logistica_usa_fedex then begin
-    pResultado.adicionaErro('Não utiliza fedex na Logística.');
-    exit;
-  end;
+        function precisaEnviarProduto(const pCodigoPro: TipoWideStringFramework): boolean;
+        function getStatusProduto(const pCodigoPro: TipoWideStringFramework): TipoWideStringFramework;
+        procedure setStatusProduto(const pCodigoPro: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
+        function getResultadoProduto(const pCodigoPro: TipoWideStringFramework): TipoWideStringFramework;
 
-  lAPI := fedex_SCI_criaAPI;
-  pResultado.propriedade['id'].asString := pID;
-  pLista := fedex_SCI_getPurchaseOrderList(lAPI,pResultado);
-  lAPI.sendPurchaseOrderList(pLista,pResultado);
-end;
+        function precisaEnviarEntrada(const pID: TipoWideStringFramework): boolean;
+        function getStatusEntrada(const pID: TipoWideStringFramework): TipoWideStringFramework;
+        procedure setStatusEntrada(const pID: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
+        function getResultadoEntrada(const pID: TipoWideStringFramework): TipoWideStringFramework;
+        function entradaFinalizada(const pID: TipoWideStringFramework): boolean;
+
+        function precisaEnviarVenda(const pNumeroPed: TipoWideStringFramework): boolean;
+        function getStatusVenda(const pNumeroPed: TipoWideStringFramework): TipoWideStringFramework;
+        procedure setStatusVenda(const pNumeroPed: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
+        function getResultadoVenda(const pNumeroPed: TipoWideStringFramework): TipoWideStringFramework;
+        function vendaFinalizada(const pNumeroPed: TipoWideStringFramework): boolean;
+
+        function getControleAlteracoes: IControleAlteracoes;
+        procedure setControleAlteracoes(const pValue: IControleAlteracoes);
+
+        function enviaVenda(pNumeroPed: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+        function enviaEntrada(pID: String = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+        function processaRetorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+
+        function getVersao: TipoWideStringFramework;
+        function getCompilacao: Int64;
+        procedure setAPI(const pValue: IUnknown);
+        function getAPI: IUnknown;
+
+        constructor Create(const pCNPJ: TipoWideStringFramework = ''; const pRazaoSocial: TipoWideStringFramework = '');
+      end;
 
 {$if not defined(__RELEASE__)}
 function testaFedexAPIPOSCI;
+  var
+    p: ILogistica;
 begin
   Result := checkResultadoOperacao(pResultado);
-  Result := Fedex_SCI_EnviaPO('',Result);
+  p := TLogisticaFedex.Create;
+  Result := p.enviaEntrada('',Result);
+  if(pResultado.eventos>0) then
+    msgAviso(pResultado.toString);
+end;
+
+function testaRetornoSCI;
+  var
+    p: ILogistica;
+begin
+  p := TLogisticaFedex.Create;
+  Result := p.processaRetorno(checkResultadoOperacao(pResultado));
   if(pResultado.eventos>0) then
     msgAviso(pResultado.toString);
 end;
 
 function testaFedexAPISOSCI;
+  var
+    p: ILogistica;
 begin
   Result := checkResultadoOperacao(pResultado);
-  Result := Fedex_SCI_EnviaSO('',Result);
+  p := TLogisticaFedex.Create;
+  Result := p.enviaVenda('',Result);
   if(pResultado.eventos>0) then
     msgAviso(pResultado.toString);
 end;
@@ -531,7 +526,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'SCI'}
-function fedex_SCI_criaAPI;
+function TLogisticaFedex.fedex_SCI_criaAPI;
   var
     fedex: IFedexAPI;
     depositante: IFedexDepositante;
@@ -551,7 +546,7 @@ begin
   {$else}
     fedex.parameters.modoProducao := true;//true;
   {$endif}
-  fedex.parameters.controleAlteracoes := fedex_SCI_CriaControleAlteracoes;
+  fedex.parameters.controleAlteracoes := criaControleAlteracoes;
   fedex.parameters.urlWS := ValorTagConfig(tagConfig_FEDEX_WEBSERVICE,'',tvString);
   if(fedex.parameters.urlWS='') then
       fedex.parameters.urlWS :=
@@ -596,52 +591,37 @@ begin
 
 end;
 
-function fedex_SCI_CriaControleAlteracoes;
+function TLogisticaFedex.criaControleAlteracoes: IControleAlteracoes;
 begin
   {$if not defined(MODO_HOMOLOGACAO)}
-    Result := criaControleAlteracoes(SISTEMA_LOGISTICA_FEDEX_PRODUCAO);
+    Result := Terasoft.Framework.ControleAlteracoes.criaControleAlteracoes(SISTEMA_LOGISTICA_FEDEX_PRODUCAO);
   {$else}
-    Result := criaControleAlteracoes(SISTEMA_LOGISTICA_FEDEX_HOMOLOGACAO);
+    Result := Terasoft.Framework.ControleAlteracoes.criaControleAlteracoes(SISTEMA_LOGISTICA_FEDEX_HOMOLOGACAO);
   {$endif}
 end;
 
-function fedex_PrecisaEnviarSKU;
+function TLogisticaFedex.getControleAlteracoes: IControleAlteracoes;
 begin
-  Result := false;
-  if not sci_logistica_usa_fedex then begin
-    exit;
-  end;
-
-  if(pCodigoPro='') then
-    exit;
-  Result := stringNoArray(Fedex_SCI_GetStatusSKU(pCodigoPro), [' ','',CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO]);
+  Result := fAPI.parameters.controleAlteracoes;
 end;
 
-function fedex_PrecisaEnviarSO;
+function TLogisticaFedex.precisaEnviarVenda(const pNumeroPed: TipoWideStringFramework): boolean;
 begin
   Result := false;
-  if not sci_logistica_usa_fedex then begin
-    exit;
-  end;
-
   if(pNumeroPed='') then
     exit;
-  Result := Fedex_SCI_GetStatusSO(pNumeroPed)=CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
+  Result := getStatusVenda(pNumeroPed)=CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
 end;
 
-function fedex_PrecisaEnviarPO;
+function TLogisticaFedex.precisaEnviarEntrada;
 begin
   Result := false;
-  if not sci_logistica_usa_fedex then begin
-    exit;
-  end;
-
   if(pID='') then
     exit;
-  Result := Fedex_SCI_GetStatusPO(pID)=CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
+  Result := getStatusEntrada(pID)=CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
 end;
 
-function fedex_SCI_GetSKUList;
+function TLogisticaFedex.fedex_SCI_GetSKUList;
   var
     gdb: IGDB;
     save: Integer;
@@ -660,8 +640,6 @@ begin
     save := pResultado.erros;
     if(pCodigoPro='') then
       pResultado.adicionaErro('getSKUList: Não especificou um Produto válido.');
-    if(pAPI=nil) then
-      pResultado.adicionaErro('getSKUList: Não especificou um API válido.');
     gdb := gdbPadrao;
     if(gdb=nil) or not gdb.conectado then
       pResultado.adicionaErro('getSKUList: Não especificou um DB válido.');
@@ -685,7 +663,7 @@ begin
 
     atribuirRegistros(lSKU.dataset,datasets.sku.dataset);
 
-    Result := pAPI.getSKUList(getXMLFromDataset(datasets.sku.dataset),false,pResultado);
+    Result := fAPI.getSKUList(getXMLFromDataset(datasets.sku.dataset),false,pResultado);
     if(Result=nil) or (Result.count=0) then
       pResultado.formataErro('getSKUList: Produto [%s] não existe.', [ pCodigoPro ]);
   except
@@ -694,7 +672,7 @@ begin
   end;
 end;
 
-function fedex_SCI_GetShipmentOrderList;
+function TLogisticaFedex.fedex_SCI_GetShipmentOrderList;
   var
     gdb: IGDB;
     save1,save2: Integer;
@@ -717,8 +695,6 @@ begin
 
   try
     save1 := pResultado.erros;
-    if(pAPI=nil) then
-      pResultado.adicionaErro('getShipmentOrderList: Não especificou um API válido.');
     gdb := gdbPadrao;
     if(gdb=nil) or not gdb.conectado then
       pResultado.adicionaErro('getShipmentOrderList: Não especificou um DB válido.');
@@ -726,7 +702,7 @@ begin
     if(pResultado.erros<>save1) then
       exit;
 
-    ctr := pAPI.parameters.controleAlteracoes;
+    ctr := fAPI.parameters.controleAlteracoes;
     orders := gdb.criaDataset;
     items := gdb.criaDataset;
     cliente := gdb.criaDataset;
@@ -811,12 +787,12 @@ begin
       items.query(lQuery,'id', [ datasets.so.dataset.FieldByName('id').AsString ]);
 
       while not items.dataset.eof do begin
-        if Fedex_PrecisaEnviarSKU(items.dataset.FieldByName('produto_id').AsString) then begin
+        if precisaEnviarProduto(items.dataset.FieldByName('produto_id').AsString) then begin
           save2 := pResultado.erros;
-          pAPI.parameters.modoProducao := true;
-          lSKUList := fedex_SCI_GetSKUList(pAPI,items.dataset.FieldByName('produto_id').AsString,pResultado);
+          fAPI.parameters.modoProducao := true;
+          lSKUList := fedex_SCI_GetSKUList(items.dataset.FieldByName('produto_id').AsString,pResultado);
           if(save2=pResultado.erros) then
-            pAPI.sendSKUList(lSKUList,pResultado);
+            fAPI.sendSKUList(lSKUList,pResultado);
         end;
         items.dataset.Next;
       end;
@@ -833,7 +809,7 @@ begin
     lXMLDataList.add('itens',datasets.soItens.getXML);
     lXMLDataList.add('cliente',datasets.cliente.getXML);
     lXMLDataList.add('transportador',datasets.transportador.getXML);
-    Result := pAPI.getShipmentOrderList(lXMLDataList,FEDEX_PRIORIDADE_MEDIA,true,nil,pResultado);
+    Result := fAPI.getShipmentOrderList(lXMLDataList,FEDEX_PRIORIDADE_MEDIA,true,nil,pResultado);
 
     if (Result=nil) or (Result.count=0) then
       pResultado.adicionaAviso('getShipmentOrderList: Não existem ordens de envio.');
@@ -845,7 +821,7 @@ begin
 
 end;
 
-function fedex_SCI_GetPurchaseOrderList;
+function TLogisticaFedex.fedex_SCI_GetPurchaseOrderList;
   var
     gdb: IGDB;
     save1,save2: Integer;
@@ -868,8 +844,6 @@ begin
 
   try
     save1 := pResultado.erros;
-    if(pAPI=nil) then
-      pResultado.adicionaErro('getPurchaseOrderList: Não especificou um API válido.');
     gdb := gdbPadrao;
     if(gdb=nil) or not gdb.conectado then
       pResultado.adicionaErro('getPurchaseOrderList: Não especificou um DB válido.');
@@ -877,7 +851,7 @@ begin
     if(pResultado.erros<>save1) then
       exit;
 
-    ctr := pAPI.parameters.controleAlteracoes;
+    ctr := fAPI.parameters.controleAlteracoes;
 
     orders := gdb.criaDataset;
     items := gdb.criaDataset;
@@ -929,11 +903,11 @@ begin
       save1 := pResultado.erros;
 
       while not items.dataset.eof do begin
-        if Fedex_PrecisaEnviarSKU(items.dataset.FieldByName('produto').AsString) then begin
+        if precisaEnviarProduto(items.dataset.FieldByName('produto').AsString) then begin
           save2 := pResultado.erros;
-          lSKUList := fedex_SCI_GetSKUList(pAPI,items.dataset.FieldByName('produto').AsString,pResultado);
+          lSKUList := fedex_SCI_GetSKUList(items.dataset.FieldByName('produto').AsString,pResultado);
           if(save2=pResultado.erros) then
-            pAPI.sendSKUList(lSKUList,pResultado);
+            fAPI.sendSKUList(lSKUList,pResultado);
         end;
         items.dataset.Next;
       end;
@@ -949,7 +923,7 @@ begin
     lXMLDataList.add('ordem',datasets.po.getXML);
     lXMLDataList.add('itens',datasets.poItens.getXML);
 
-    Result := pAPI.getPurchaseOrderList(lXMLDataList,false,nil,pResultado);
+    Result := fAPI.getPurchaseOrderList(lXMLDataList,false,nil,pResultado);
 
     if (Result=nil) or (Result.count=0) then
       pResultado.adicionaAviso('getPurchaseOrderList: Não existem ordens de recebimento a enviar.');
@@ -961,84 +935,143 @@ begin
 
 end;
 
-{$if not defined(__RELEASE__)}
-function testaRetornoSCI;
-begin
-  Result := Fedex_SCI_ProcessaRetorno(checkResultadoOperacao(pResultado));
-  if(pResultado.eventos>0) then
-    msgAviso(pResultado.toString);
-end;
-{$endif}
-
-function fedex_SCI_ProcessaRetorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+function TLogisticaFedex.processaRetorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 begin
   Result := checkResultadoOperacao(pResultado);
-  if not sci_logistica_usa_fedex then begin
-    pResultado.adicionaErro('fedex_SCI_ProcessaRetorno: Não utiliza fedex na Logística.');
-    exit;
-  end;
-
-  Result := fedex_SCI_criaAPI.processaRetorno(nil,pResultado);
+  Result := fAPI.processaRetorno(nil,pResultado);
 end;
 
-function fedex_SCI_GetStatusSKU;
+function TLogisticaFedex.getStatusProduto;
 begin
-  Result := fedex_SCI_criaControleAlteracoes.getValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SKU,pID);
+  Result := fAPI.parameters.controleAlteracoes.getValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SKU,pCodigoPro);
 end;
 
-procedure fedex_SCI_SetStatusSKU;
+procedure TLogisticaFedex.setStatusProduto;
 begin
-  if(pID<>'') then
-    fedex_SCI_criaControleAlteracoes.setValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SKU,pID,pStatus);
+  if(pCodigoPro<>'') then
+    getControleAlteracoes.setValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SKU,pCodigoPro,pStatus);
 end;
 
-function fedex_SCI_GetStatusPO;
+function TLogisticaFedex.getStatusEntrada;
 begin
-  Result := fedex_SCI_criaControleAlteracoes.getValor(CONTROLE_LOGISTICA_FEDEX_STATUS_PO,pID);
+  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_FEDEX_STATUS_PO,pID);
 end;
 
-procedure fedex_SCI_SetStatusPO;
+procedure TLogisticaFedex.setStatusEntrada;
 begin
   if(pID<>'') then
-    fedex_SCI_criaControleAlteracoes.setValor(CONTROLE_LOGISTICA_FEDEX_STATUS_PO,pID,pStatus);
+    getControleAlteracoes.setValor(CONTROLE_LOGISTICA_FEDEX_STATUS_PO,pID,pStatus);
 end;
 
-function fedex_SCI_GetStatusSO;
+function TLogisticaFedex.getStatusVenda;
 begin
-  Result := fedex_SCI_criaControleAlteracoes.getValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SO,pNumeroPed);
+  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SO,pNumeroPed);
 end;
 
-procedure fedex_SCI_SetStatusSO;
+procedure TLogisticaFedex.setStatusVenda;
 begin
   if(pNumeroPed<>'') then
-    fedex_SCI_criaControleAlteracoes.setValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SO,pNumeroPed,pStatus);
+    getControleAlteracoes.setValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SO,pNumeroPed,pStatus);
 end;
 
-function fedex_SCI_SOFinalizado;
+function TLogisticaFedex.vendaFinalizada;
 begin
-  Result := fedex_SCI_GetStatusSO(pNumeroPed)=CONTROLE_LOGISTICA_STATUS_FINALIZADO;
+  Result := getStatusVenda(pNumeroPed)=CONTROLE_LOGISTICA_STATUS_FINALIZADO;
 end;
 
-function fedex_SCI_POFinalizado;
+function TLogisticaFedex.entradaFinalizada;
 begin
-  Result := fedex_SCI_GetStatusPO(pID)=CONTROLE_LOGISTICA_STATUS_FINALIZADO;
+  Result := getStatusEntrada(pID)=CONTROLE_LOGISTICA_STATUS_FINALIZADO;
 end;
 
-function fedex_SCI_GetResultadoSKU;
+function TLogisticaFedex.getResultadoProduto(const pCodigoPro: TipoWideStringFramework): TipoWideStringFramework;
 begin
-  Result := fedex_SCI_criaControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_SKU,pID);
+  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_SKU,pCodigoPro);
 end;
 
-function fedex_SCI_GetResultadoSO;
+function TLogisticaFedex.getResultadoVenda;
 begin
-  Result := fedex_SCI_criaControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_SO,pNumeroPed);
+  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_SO,pNumeroPed);
 end;
 
-function fedex_SCI_GetResultadoPO;
+function TLogisticaFedex.getResultadoEntrada;
 begin
-  Result := fedex_SCI_criaControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_PO,pID);
+  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_PO,pID);
 end;
 
 {$ENDREGION}
+
+{ TLogisticaFedex }
+
+constructor TLogisticaFedex.Create;
+begin
+  inherited Create;
+  fAPI := fedex_SCI_criaAPI(pCNPJ,pRazaoSocial);
+end;
+
+function TLogisticaFedex.enviaEntrada(pID: String; pResultado: IResultadoOperacao): IResultadoOperacao;
+  var
+    pLista: TFedex_PurchaseOrderList;
+begin
+  Result := checkResultadoOperacao(pResultado);
+
+  pResultado.propriedade['id'].asString := pID;
+  pLista := fedex_SCI_getPurchaseOrderList(pResultado);
+  fAPI.sendPurchaseOrderList(pLista,pResultado);
+end;
+
+function TLogisticaFedex.enviaVenda(pNumeroPed: TipoWideStringFramework; pResultado: IResultadoOperacao): IResultadoOperacao;
+  var
+    lLista: TFedex_ShipmentOrderList;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  pResultado.propriedade['id'].asString := pNumeroPed;
+  lLista := fedex_SCI_getShipmentOrderList(pResultado);
+  fAPI.sendShipmentOrderList(lLista,pResultado);
+end;
+
+function TLogisticaFedex.getAPI: IUnknown;
+begin
+  Result := fAPI;
+end;
+
+function TLogisticaFedex.getCompilacao: Int64;
+begin
+  Result := fAPI.compilacao;
+end;
+
+function TLogisticaFedex.getVersao: TipoWideStringFramework;
+begin
+  Result := fAPI.versao;
+end;
+
+function TLogisticaFedex.precisaEnviarProduto(const pCodigoPro: TipoWideStringFramework): boolean;
+begin
+  Result := false;
+  if(pCodigoPro='') then
+    exit;
+  Result := stringNoArray(getStatusProduto(pCodigoPro), [' ','',CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO]);
+end;
+
+procedure TLogisticaFedex.setAPI(const pValue: IInterface);
+begin
+  supports(pValue, IFedexAPI, fAPI);
+end;
+
+procedure TLogisticaFedex.setControleAlteracoes(const pValue: IControleAlteracoes);
+begin
+  if assigned(pValue) then
+    fAPI.parameters.controleAlteracoes := pValue
+  else
+    fAPI.parameters.controleAlteracoes := criaControleAlteracoes;
+end;
+
+function criaLogisticaFedex(const pCNPJ: TipoWideStringFramework; const pRazaoSocial: TipoWideStringFramework): ILogistica;
+begin
+  Result := TLogisticaFedex.Create(pCNPJ, pRazaoSocial);
+end;
+
+initialization
+  registraLogistica(CONTROLE_LOGISTICA_FEDEX,criaLogisticaFedex);
 
 end.
