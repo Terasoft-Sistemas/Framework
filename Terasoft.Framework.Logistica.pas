@@ -95,12 +95,16 @@ interface
     function testaLogistica_Retorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
   {$endif}
 
-
   function logistica_ProcessaServico(pResultado: IResultadoOperacao): IResultadoOperacao;
-  function logistica_EnviaProduto(pCodigoPro: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-  function logistica_EnviaEntrada(pID: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-  function logistica_EnviaVenda(pNumeroPed: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
+  procedure logistica_marcaProdutoParaEnvio(pCodigoPro: TipoWideStringFramework);
+  function logistica_EnviaProduto(pCodigoPro: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+
+  procedure logistica_marcaEntradaParaEnvio(pID: TipoWideStringFramework);
+  function logistica_EnviaEntrada(pID: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+
+  procedure logistica_marcaVendaParaEnvio(pNumeroPed: TipoWideStringFramework);
+  function logistica_EnviaVenda(pNumeroPed: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
 implementation
   uses
@@ -120,26 +124,40 @@ implementation
     fLogisticaGlobal: ILogistica;
 
 
-function logistica_ProcessaServico(pResultado: IResultadoOperacao): IResultadoOperacao;
+function logistica_ProcessaServico;
 begin
   Result := getLogisticaGlobal.processaServico(checkResultadoOperacao(pResultado));
 end;
 
-function logistica_EnviaProduto(pCodigoPro: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+procedure logistica_marcaProdutoParaEnvio;
+begin
+  getLogisticaGlobal.setStatusProduto(pCodigoPro,CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO);
+end;
+
+function logistica_EnviaProduto;
 begin
   Result := getLogisticaGlobal.enviaProduto(pCodigoPro,checkResultadoOperacao(pResultado));
 end;
 
-function logistica_EnviaEntrada(pID: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+procedure logistica_marcaEntradaParaEnvio;
+begin
+  getLogisticaGlobal.setStatusEntrada(pID,CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO);
+end;
+
+function logistica_EnviaEntrada;
 begin
   Result := getLogisticaGlobal.enviaEntrada(pID,checkResultadoOperacao(pResultado));
 end;
 
-function logistica_EnviaVenda(pNumeroPed: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+procedure logistica_marcaVendaParaEnvio;
+begin
+  getLogisticaGlobal.setStatusVenda(pNumeroPed,CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO);
+end;
+
+function logistica_EnviaVenda;
 begin
   Result := getLogisticaGlobal.enviaVenda(pNumeroPed,checkResultadoOperacao(pResultado));
 end;
-
 
 {$if defined(__TESTAR_LOGISTICA__)}
 function testaLogistica_Entrada;
@@ -168,8 +186,11 @@ end;
 
 function getLogisticaGlobal: ILogistica;
 begin
-  if(fLogisticaGlobal=nil) then
+  if(fLogisticaGlobal=nil) then begin
     fLogisticaGlobal := criaLogistica;
+    if(fLogisticaGlobal=nil) then
+      raise ENaoImplementado.Create('getLogisticaGlobal: Não implementado uma interface de logística');
+  end;
   Result := fLogisticaGlobal;
 end;
 
@@ -190,8 +211,8 @@ begin
   if(pLogistica=CONTROLE_LOGISTICA_NENHUM) then
     exit;
   if assigned(fListaCriador) and fListaCriador.TryGetValue(pLogistica,p) then
-    Result := p(pCNPJ,pRazaoSocial)
-  else
+    Result := p(pCNPJ,pRazaoSocial);
+  if(Result=nil) then
     raise ENaoImplementado.CreateFmt('criaLogistica: Logística [%s] não implementada.', [ pLogistica ]);
 end;
 
