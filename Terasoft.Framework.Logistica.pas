@@ -83,7 +83,7 @@ interface
 
     end;
 
-  function sci_logistica_utiizada: String;
+  function logistica_utiizada: String;
 
   procedure registraLogistica(const pLogistica: TipoWideStringFramework; pCriador: TCriadorLogistica);
   function criaLogistica(pLogistica: TipoWideStringFramework = ''; const pCNPJ: TipoWideStringFramework = ''; const pRazaoSocial: TipoWideStringFramework = ''): ILogistica;
@@ -210,7 +210,7 @@ function criaLogistica;
 begin
   Result := nil;
   if(pLogistica='') then
-    pLogistica := sci_logistica_utiizada;
+    pLogistica := logistica_utiizada;
   if(pLogistica=CONTROLE_LOGISTICA_NENHUM) then
     exit;
   if assigned(fListaCriador) and fListaCriador.TryGetValue(pLogistica,p) then
@@ -219,7 +219,7 @@ begin
     raise ENaoImplementado.CreateFmt('criaLogistica: Logística [%s] não implementada.', [ pLogistica ]);
 end;
 
-function sci_logistica_utiizada: String;
+function logistica_utiizada: String;
 begin
   Result := ValorTagConfig(tagConfig_LOGISTICA,tagConfigcfg_Padrao_LOGISTICA,tvString);
 end;
@@ -228,7 +228,7 @@ end;
 function _automacao_logistica(const pNome: TipoWideStringFramework; const pParametro: TipoWideStringFramework; const pDadosAdicionais: TipoWideStringFramework; pResultado: IResultadoOperacao): IResultadoOperacao;
 begin
   Result := checkResultadoOperacao(pResultado);
-  if(sci_logistica_utiizada=CONTROLE_LOGISTICA_NENHUM) then exit;
+  if(logistica_utiizada=CONTROLE_LOGISTICA_NENHUM) then exit;
   Result := logistica_ProcessaServico(pResultado);
 end;
 
