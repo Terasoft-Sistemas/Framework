@@ -1,3 +1,5 @@
+{$i Logistica.inc}
+
 unit Terasoft.Framework.Logistica;
 
 interface
@@ -32,40 +34,36 @@ interface
     ILogistica = interface
      ['{6F92AC71-F0F6-4AC1-9188-B0C9B9EBD114}']
 
-      function enviaVenda(pNumeroPed: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-      function enviaEntrada(pID: String = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-      function processaRetorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-
       procedure setAPI(const pValue: IUnknown);
       function getAPI: IUnknown;
 
+      function getControleAlteracoes: IControleAlteracoes;
+      procedure setControleAlteracoes(const pValue: IControleAlteracoes);
+
       function precisaEnviarProduto(const pCodigoPro: TipoWideStringFramework): boolean;
+      function enviaProduto(pID: String = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
       function getStatusProduto(const pCodigoPro: TipoWideStringFramework): TipoWideStringFramework;
       procedure setStatusProduto(const pCodigoPro: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
       function getResultadoProduto(const pCodigoPro: TipoWideStringFramework): TipoWideStringFramework;
 
       function precisaEnviarEntrada(const pID: TipoWideStringFramework): boolean;
+      function enviaEntrada(pID: String = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
       function getStatusEntrada(const pID: TipoWideStringFramework): TipoWideStringFramework;
       procedure setStatusEntrada(const pID: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
       function getResultadoEntrada(const pID: TipoWideStringFramework): TipoWideStringFramework;
       function entradaFinalizada(const pID: TipoWideStringFramework): boolean;
 
       function precisaEnviarVenda(const pNumeroPed: TipoWideStringFramework): boolean;
+      function enviaVenda(pNumeroPed: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
       function getStatusVenda(const pNumeroPed: TipoWideStringFramework): TipoWideStringFramework;
       procedure setStatusVenda(const pNumeroPed: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
       function getResultadoVenda(const pNumeroPed: TipoWideStringFramework): TipoWideStringFramework;
       function vendaFinalizada(const pNumeroPed: TipoWideStringFramework): boolean;
 
-      //procedure setProcessador(pInterface: TipoWideStringFramework; pProcessador: TLogisticaProcessadorArquivoRetorno);
-      //function getProcessador(pInterface: TipoWideStringFramework): TLogisticaProcessadorArquivoRetorno;
-
-      //function processaRetorno(pProcessador: TLogisticaProcessadorArquivoRetorno; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+      function processaRetorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
       function getVersao: TipoWideStringFramework;
       function getCompilacao: Int64;
-
-      function getControleAlteracoes: IControleAlteracoes;
-      procedure setControleAlteracoes(const pValue: IControleAlteracoes);
 
       property api: IUnknown read getAPI write setAPI;
 
@@ -84,8 +82,23 @@ interface
 
   function getLogisticaGlobal: ILogistica;
 
+  {$if defined(__TESTAR_LOGISTICA__)}
+    function testaLogistica_Entrada(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+    function testaLogisticaVenda(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+    function testaLogistica_Retorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+  {$endif}
+
+
+
 implementation
   uses
+    {$if defined(__VENDAS__)}
+      Fedex.SCI.Impl,
+    {$endif}
+
+    {$if defined(__TESTAR_LOGISTICA__)}
+      FuncoesMensagem,
+    {$endif}
     Spring.Collections,
     Terasoft.Framework.Exceptions,
     FuncoesConfig;
@@ -93,6 +106,32 @@ implementation
   var
     fListaCriador: IDictionary<TipoWideStringFramework, TCriadorLogistica>;
     fLogisticaGlobal: ILogistica;
+
+
+{$if defined(__TESTAR_LOGISTICA__)}
+function testaLogistica_Entrada;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  Result := getLogisticaGlobal.enviaEntrada('',Result);
+  if(pResultado.eventos>0) then
+    msgAviso(pResultado.toString);
+end;
+
+function testaLogistica_Retorno;
+begin
+  Result := getLogisticaGlobal.processaRetorno(checkResultadoOperacao(pResultado));
+  if(pResultado.eventos>0) then
+    msgAviso(pResultado.toString);
+end;
+
+function testaLogisticaVenda;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  Result := getLogisticaGlobal.enviaVenda('',Result);
+  if(pResultado.eventos>0) then
+    msgAviso(pResultado.toString);
+end;
+{$endif}
 
 function getLogisticaGlobal: ILogistica;
 begin

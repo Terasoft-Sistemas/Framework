@@ -1,5 +1,5 @@
 
-{$i Fedex_API.inc}
+{$i Logistica.inc}
 
 unit Fedex.SCI.Impl;
 
@@ -11,16 +11,9 @@ interface
     Terasoft.Framework.ControleAlteracoes,
     Fedex.API.Iface;
 
-  {$if not defined(__RELEASE__)}
-    function testaFedexAPISOSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-    function testaFedexAPIPOSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-    function testaRetornoSCI(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-  {$endif}
-
 implementation
   uses
     Terasoft.Framework.DB,
-    FuncoesMensagem,
     DB,
     Terasoft.Framework.FuncoesDiversas,
     Spring.Collections,
@@ -45,6 +38,7 @@ implementation
         fAPI: IFedexAPI;
 
         function precisaEnviarProduto(const pCodigoPro: TipoWideStringFramework): boolean;
+        function enviaProduto(pID: String = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
         function getStatusProduto(const pCodigoPro: TipoWideStringFramework): TipoWideStringFramework;
         procedure setStatusProduto(const pCodigoPro: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
         function getResultadoProduto(const pCodigoPro: TipoWideStringFramework): TipoWideStringFramework;
@@ -75,40 +69,6 @@ implementation
 
         constructor Create(const pCNPJ: TipoWideStringFramework = ''; const pRazaoSocial: TipoWideStringFramework = '');
       end;
-
-{$if not defined(__RELEASE__)}
-function testaFedexAPIPOSCI;
-  var
-    p: ILogistica;
-begin
-  Result := checkResultadoOperacao(pResultado);
-  p := TLogisticaFedex.Create;
-  Result := p.enviaEntrada('',Result);
-  if(pResultado.eventos>0) then
-    msgAviso(pResultado.toString);
-end;
-
-function testaRetornoSCI;
-  var
-    p: ILogistica;
-begin
-  p := TLogisticaFedex.Create;
-  Result := p.processaRetorno(checkResultadoOperacao(pResultado));
-  if(pResultado.eventos>0) then
-    msgAviso(pResultado.toString);
-end;
-
-function testaFedexAPISOSCI;
-  var
-    p: ILogistica;
-begin
-  Result := checkResultadoOperacao(pResultado);
-  p := TLogisticaFedex.Create;
-  Result := p.enviaVenda('',Result);
-  if(pResultado.eventos>0) then
-    msgAviso(pResultado.toString);
-end;
-{$endif}
 
 {$REGION 'processaArquivoExpedicao'}
 function processaArquivoExpedicao(pUnkAPI: IUnknown; pResultado: IResultadoOperacao): IResultadoOperacao;
@@ -1018,6 +978,11 @@ begin
   pResultado.propriedade['id'].asString := pID;
   pLista := fedex_SCI_getPurchaseOrderList(pResultado);
   fAPI.sendPurchaseOrderList(pLista,pResultado);
+end;
+
+function TLogisticaFedex.enviaProduto(pID: String;  pResultado: IResultadoOperacao): IResultadoOperacao;
+begin
+  raise Exception.Create('Não implementado');
 end;
 
 function TLogisticaFedex.enviaVenda(pNumeroPed: TipoWideStringFramework; pResultado: IResultadoOperacao): IResultadoOperacao;
