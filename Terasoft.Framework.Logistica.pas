@@ -96,6 +96,11 @@ interface
   {$endif}
 
 
+  function logistica_ProcessaServico(pResultado: IResultadoOperacao): IResultadoOperacao;
+  function logistica_EnviaProduto(pCodigoPro: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+  function logistica_EnviaEntrada(pID: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+  function logistica_EnviaVenda(pNumeroPed: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+
 
 implementation
   uses
@@ -113,6 +118,27 @@ implementation
   var
     fListaCriador: IDictionary<TipoWideStringFramework, TCriadorLogistica>;
     fLogisticaGlobal: ILogistica;
+
+
+function logistica_ProcessaServico(pResultado: IResultadoOperacao): IResultadoOperacao;
+begin
+  Result := getLogisticaGlobal.processaServico(checkResultadoOperacao(pResultado));
+end;
+
+function logistica_EnviaProduto(pCodigoPro: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+begin
+  Result := getLogisticaGlobal.enviaProduto(pCodigoPro,checkResultadoOperacao(pResultado));
+end;
+
+function logistica_EnviaEntrada(pID: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+begin
+  Result := getLogisticaGlobal.enviaEntrada(pID,checkResultadoOperacao(pResultado));
+end;
+
+function logistica_EnviaVenda(pNumeroPed: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+begin
+  Result := getLogisticaGlobal.enviaVenda(pNumeroPed,checkResultadoOperacao(pResultado));
+end;
 
 
 {$if defined(__TESTAR_LOGISTICA__)}
