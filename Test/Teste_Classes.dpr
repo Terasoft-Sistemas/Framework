@@ -106,7 +106,9 @@ uses
   BancoDao in '..\Dao\BancoDao.pas',
   OSModel in '..\Model\OSModel.pas',
   OSDao in '..\Dao\OSDao.pas',
-  SimuladorPrecoModel in '..\Model\SimuladorPrecoModel.pas';
+  SimuladorPrecoModel in '..\Model\SimuladorPrecoModel.pas',
+  GrupoModel in '..\Model\GrupoModel.pas',
+  GrupoDao in '..\Dao\GrupoDao.pas';
 
 {$R *.res}
 

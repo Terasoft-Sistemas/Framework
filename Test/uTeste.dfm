@@ -535,6 +535,42 @@ object Form1: TForm1
         TabOrder = 56
         OnClick = Button57Click
       end
+      object Button68: TButton
+        Left = 3
+        Top = 695
+        Width = 182
+        Height = 42
+        Caption = 'Grupo Inserir'
+        TabOrder = 57
+        OnClick = Button68Click
+      end
+      object Button69: TButton
+        Left = 191
+        Top = 695
+        Width = 182
+        Height = 42
+        Caption = 'Grupo Consultar'
+        TabOrder = 58
+        OnClick = Button69Click
+      end
+      object Button70: TButton
+        Left = 379
+        Top = 695
+        Width = 182
+        Height = 42
+        Caption = 'Grupo Update'
+        TabOrder = 59
+        OnClick = Button70Click
+      end
+      object Button71: TButton
+        Left = 567
+        Top = 695
+        Width = 182
+        Height = 42
+        Caption = 'Grupo Excluir'
+        TabOrder = 60
+        OnClick = Button71Click
+      end
     end
     object TabSheet2: TTabSheet
       Caption = 'Fluxo de caixa'

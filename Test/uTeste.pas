@@ -107,6 +107,10 @@ type
     TabSheet5: TTabSheet;
     memoSimulador: TMemo;
     Button67: TButton;
+    Button68: TButton;
+    Button69: TButton;
+    Button70: TButton;
+    Button71: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -180,6 +184,10 @@ type
     procedure Button65Click(Sender: TObject);
     procedure Button66Click(Sender: TObject);
     procedure Button67Click(Sender: TObject);
+    procedure Button68Click(Sender: TObject);
+    procedure Button69Click(Sender: TObject);
+    procedure Button70Click(Sender: TObject);
+    procedure Button71Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -207,7 +215,7 @@ uses
   SaldoModel, EmpresaModel, ProdutosModel, EntradaItensModel,
   ClienteModel, ContasPagarModel, ContasPagarItensModel, System.SysUtils,
   ReservaModel, DocumentoModel, AnexoModel, FluxoCaixaModel, BancoModel,
-  PortadorModel, LojasModel, OSModel, SimuladorPrecoModel;
+  PortadorModel, LojasModel, OSModel, SimuladorPrecoModel, GrupoModel;
 
 {$R *.dfm}
 
@@ -1746,6 +1754,62 @@ begin
   end;
 end;
 
+procedure TForm1.Button68Click(Sender: TObject);
+var
+  lGrupoModel : TGrupoModel;
+  lNomeGrupo  : String;
+begin
+  lGrupoModel := TGrupoModel.create(vIConexao);
+  try
+    try
+      lNomeGrupo :=  InputBox('GRUPOPRODUTO','Digite o Nome do Grupo:','');
+
+      if lNomeGrupo.IsEmpty then
+        Exit;
+
+      lGrupoModel.NOME_GRU    := lNomeGrupo;
+      lGrupoModel.USUARIO_GRU := '000001';
+
+      lGrupoModel.Incluir;
+
+      ShowMessage('Incluido com sucesso');
+    except
+       on E:Exception do
+         ShowMessage('Erro: ' + E.Message);
+      end;
+  finally
+    lGrupoModel.Free;
+  end;
+end;
+procedure TForm1.Button69Click(Sender: TObject);
+var
+  lGrupoModel : TGrupoModel;
+  lMemTable   : TFDMemTable;
+begin
+  lGrupoModel := TGrupoModel.Create(vIConexao);
+  try
+    try
+      lMemTable := lGrupoModel.ObterLista;
+
+      memoResultado.Lines.Clear;
+
+      lMemTable.First;
+      while not lMemTable.Eof do
+      begin
+        memoResultado.Lines.Add('CODIGO_GRU: '+lMemTable.FieldByName('CODIGO_GRU').AsString);
+        memoResultado.Lines.Add('NOME_GRU: '+lMemTable.FieldByName('NOME_GRU').AsString);
+        memoResultado.Lines.Add('===============================================');
+        lMemTable.Next;
+      end;
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lGrupoModel.Free;
+  end;
+end;
+
 procedure TForm1.Button6Click(Sender: TObject);
 var
   lWebPedidoModel : TWebPedidoModel;
@@ -1770,6 +1834,54 @@ begin
     end;
   finally
     lWebPedidoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button70Click(Sender: TObject);
+var
+  lGrupoModel : TGrupoModel;
+  ID          : String;
+begin
+  lGrupoModel := TGrupoModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('GRUPOPRODUTO', 'Digite o ID do GRUPO que deseja Alterar:', '');
+      if ID.IsEmpty then
+        exit;
+
+      lGrupoModel := lGrupoModel.Alterar(ID);
+      lGrupoModel.NOME_GRU := 'TESTE ALTERAR';
+
+      lGrupoModel.Salvar;
+      ShowMessage('Alterado com Sucesso');
+    Except
+      on E:Exception do
+      ShowMessage('Erro: ' +E.Message);
+    end;
+  finally
+    lGrupoModel.Free;
+  end;
+end;
+procedure TForm1.Button71Click(Sender: TObject);
+var
+  lGrupoModel : TGrupoModel;
+  ID        : String;
+begin
+  lGrupoModel := TGrupoModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('GRUPOPRODUTO', 'Digite o ID do GRUPO que deseja excluir:', '');
+      if ID.IsEmpty then
+          Exit;
+
+      lGrupoModel.Excluir(ID);
+      ShowMessage('Excluido com sucesso!');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lGrupoModel.Free;
   end;
 end;
 

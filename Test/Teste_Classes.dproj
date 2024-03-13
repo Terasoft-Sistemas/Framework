@@ -204,6 +204,8 @@
         <DCCReference Include="..\Model\OSModel.pas"/>
         <DCCReference Include="..\Dao\OSDao.pas"/>
         <DCCReference Include="..\Model\SimuladorPrecoModel.pas"/>
+        <DCCReference Include="..\Model\GrupoModel.pas"/>
+        <DCCReference Include="..\Dao\GrupoDao.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
