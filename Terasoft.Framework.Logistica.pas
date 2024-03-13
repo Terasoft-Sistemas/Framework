@@ -67,6 +67,7 @@ interface
       function vendaFinalizada(const pNumeroPed: TipoWideStringFramework): boolean;
 
       function processaRetorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+      function processaServico(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
       function getVersao: TipoWideStringFramework;
       function getCompilacao: Int64;

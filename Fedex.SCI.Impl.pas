@@ -37,7 +37,6 @@ implementation
         fAPI: IFedexAPI;
 
         function precisaEnviarProduto(const pCodigoPro: TipoWideStringFramework): boolean;
-        function enviaProduto(pCodigoPro: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
         function getStatusProduto(const pCodigoPro: TipoWideStringFramework): TipoWideStringFramework;
         procedure setStatusProduto(const pCodigoPro: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
         function getResultadoProduto(const pCodigoPro: TipoWideStringFramework): TipoWideStringFramework;
@@ -57,9 +56,13 @@ implementation
         function getControleAlteracoes: IControleAlteracoes;
         procedure setControleAlteracoes(const pValue: IControleAlteracoes);
 
+        function enviaProduto(pCodigoPro: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
         function enviaVenda(pNumeroPed: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
         function enviaEntrada(pID: String = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+
         function processaRetorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+
+        function processaServico(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
         function getVersao: TipoWideStringFramework;
         function getCompilacao: Int64;
@@ -600,8 +603,6 @@ begin
 
   try
     save := pResultado.erros;
-    if(pCodigoPro='') then
-      pResultado.adicionaErro('getSKUList: Não especificou um Produto válido.');
     gdb := gdbPadrao;
     if(gdb=nil) or not gdb.conectado then
       pResultado.adicionaErro('getSKUList: Não especificou um DB válido.');
@@ -621,7 +622,7 @@ begin
     lFieldNames := '';
     SetLength(lParameters,0);
 
-    if(pCodigoPro='') then begin
+    if(pCodigoPro<>'') then begin
       lFieldNames := 'id';
       SetLength(lParameters,1);
       lParameters[0] := pCodigoPro;
@@ -642,7 +643,10 @@ begin
     lSKU := gdb.criaDataset.query(lQuery,lFieldNames,lParameters);
 
     if(lSKU.dataset.RecordCount=0) then begin
-      pResultado.formataErro('getSKUList: Produto [%s] não existe.', [ pCodigoPro ]);
+      if(pCodigoPro<>'') then
+        pResultado.formataErro('getSKUList: Produto [%s] não existe.', [ pCodigoPro ])
+      else
+        pResultado.adicionaAviso('getSKUList: Não existe produto diponível.' );
       exit;
     end;
 
@@ -797,7 +801,7 @@ begin
     Result := fAPI.getShipmentOrderList(lXMLDataList,FEDEX_PRIORIDADE_MEDIA,true,nil,pResultado);
 
     if (Result=nil) or (Result.count=0) then
-      pResultado.adicionaAviso('getShipmentOrderList: Não existem ordens de envio.');
+      pResultado.adicionaAviso('getShipmentOrderList: Não existe ordem de envio disponível.');
 
   except
     on e: Exception do
@@ -911,7 +915,7 @@ begin
     Result := fAPI.getPurchaseOrderList(lXMLDataList,false,nil,pResultado);
 
     if (Result=nil) or (Result.count=0) then
-      pResultado.adicionaAviso('getPurchaseOrderList: Não existem ordens de recebimento a enviar.');
+      pResultado.adicionaAviso('getPurchaseOrderList: Não existe ordem de recebimento disponível.');
 
   except
     on e: Exception do
@@ -924,6 +928,29 @@ function TLogisticaFedex.processaRetorno(pResultado: IResultadoOperacao = nil): 
 begin
   Result := checkResultadoOperacao(pResultado);
   Result := fAPI.processaRetorno(nil,pResultado);
+end;
+
+function TLogisticaFedex.processaServico(pResultado: IResultadoOperacao): IResultadoOperacao;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  try
+    Result := enviaProduto('',Result);
+  except
+    on e: Exception do
+      Result.formataErro('TLogisticaFedex.processaServico(enviaProduto): %s: %s', [e.ClassName, e.Message ] );
+  end;
+  try
+    Result := enviaEntrada('',Result);
+  except
+    on e: Exception do
+      Result.formataErro('TLogisticaFedex.processaServico(enviaEntrada): %s: %s', [e.ClassName, e.Message ] );
+  end;
+  try
+    Result := enviaVenda('',Result);
+  except
+    on e: Exception do
+      Result.formataErro('TLogisticaFedex.processaServico(enviaVenda): %s: %s', [e.ClassName, e.Message ] );
+  end;
 end;
 
 function TLogisticaFedex.getStatusProduto;
@@ -996,13 +1023,14 @@ end;
 
 function TLogisticaFedex.enviaEntrada(pID: String; pResultado: IResultadoOperacao): IResultadoOperacao;
   var
-    pLista: TFedex_PurchaseOrderList;
+    lLista: TFedex_PurchaseOrderList;
 begin
   Result := checkResultadoOperacao(pResultado);
 
   pResultado.propriedade['id'].asString := pID;
-  pLista := fedex_SCI_getPurchaseOrderList(pResultado);
-  fAPI.sendPurchaseOrderList(pLista,pResultado);
+  lLista := fedex_SCI_getPurchaseOrderList(pResultado);
+  if assigned(lLista) and (lLista.count>0) then
+    fAPI.sendPurchaseOrderList(lLista,pResultado);
 end;
 
 function TLogisticaFedex.enviaProduto(pCodigoPro: TipoWideStringFramework;  pResultado: IResultadoOperacao): IResultadoOperacao;
@@ -1011,7 +1039,8 @@ function TLogisticaFedex.enviaProduto(pCodigoPro: TipoWideStringFramework;  pRes
 begin
   Result := checkResultadoOperacao(pResultado);
   lLista := fedex_SCI_GetSKUList(pCodigoPro, pResultado);
-  fAPI.sendSKUList(lLista,pResultado);
+  if assigned(lLista) and (lLista.count>0) then
+    fAPI.sendSKUList(lLista,pResultado);
 end;
 
 function TLogisticaFedex.enviaVenda(pNumeroPed: TipoWideStringFramework; pResultado: IResultadoOperacao): IResultadoOperacao;
@@ -1021,7 +1050,8 @@ begin
   Result := checkResultadoOperacao(pResultado);
   pResultado.propriedade['id'].asString := pNumeroPed;
   lLista := fedex_SCI_getShipmentOrderList(pResultado);
-  fAPI.sendShipmentOrderList(lLista,pResultado);
+  if assigned(lLista) and (lLista.count>0) then
+    fAPI.sendShipmentOrderList(lLista,pResultado);
 end;
 
 function TLogisticaFedex.getAPI: IUnknown;
