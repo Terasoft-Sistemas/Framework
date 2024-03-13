@@ -84,7 +84,6 @@ interface
     end;
 
   function sci_logistica_utiizada: String;
-  function sci_logistica_usa_fedex: boolean;
 
   procedure registraLogistica(const pLogistica: TipoWideStringFramework; pCriador: TCriadorLogistica);
   function criaLogistica(pLogistica: TipoWideStringFramework = ''; const pCNPJ: TipoWideStringFramework = ''; const pRazaoSocial: TipoWideStringFramework = ''): ILogistica;
@@ -110,8 +109,10 @@ interface
 
 implementation
   uses
-    {$if defined(__VENDAS__)}
+    {$if defined(__AUTOMATIZA_LOGISTICA__)}
       Fedex.SCI.Impl,
+      Terasoft.Framework.ProcessoAutomacao,
+      Terasoft.Framework.ProcessoAutomacao.consts,
     {$endif}
 
     {$if defined(__TESTAR_LOGISTICA__)}
@@ -223,9 +224,17 @@ begin
   Result := ValorTagConfig(tagConfig_LOGISTICA,tagConfigcfg_Padrao_LOGISTICA,tvString);
 end;
 
-function sci_logistica_usa_fedex: boolean;
+{$if defined(__AUTOMATIZA_LOGISTICA__)}
+function _automacao_logistica(const pNome: TipoWideStringFramework; const pParametro: TipoWideStringFramework; const pDadosAdicionais: TipoWideStringFramework; pResultado: IResultadoOperacao): IResultadoOperacao;
 begin
-  Result := sci_logistica_utiizada = CONTROLE_LOGISTICA_FEDEX;
+  Result := checkResultadoOperacao(pResultado);
+  if(sci_logistica_utiizada=CONTROLE_LOGISTICA_NENHUM) then exit;
+  Result := logistica_ProcessaServico(pResultado);
 end;
+
+initialization
+  Terasoft.Framework.ProcessoAutomacao.registraProcessoAutomacao(AUTOMACAO_LOGISTICA,_automacao_logistica);
+
+{$endif}
 
 end.

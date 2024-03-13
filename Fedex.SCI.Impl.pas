@@ -496,8 +496,6 @@ function TLogisticaFedex.fedex_SCI_criaAPI;
     s: String;
 begin
   Result := nil;
-  if not sci_logistica_usa_fedex then
-    exit;
   fedex := createFedexAPI;
 
   fedex.setProcessador('S',processaArquivoExpedicao);
@@ -596,10 +594,6 @@ function TLogisticaFedex.fedex_SCI_GetSKUList;
 begin
   checkResultadoOperacao(pResultado);
   Result := nil;
-  if not sci_logistica_usa_fedex then begin
-    pResultado.adicionaErro('getPurchaseOrderList: Não utiliza fedex na Logística.');
-    exit;
-  end;
 
   try
     save := pResultado.erros;
@@ -677,10 +671,6 @@ function TLogisticaFedex.fedex_SCI_GetShipmentOrderList;
 begin
   checkResultadoOperacao(pResultado);
   Result := nil;
-  if not sci_logistica_usa_fedex then begin
-    pResultado.adicionaErro('getPurchaseOrderList: Não utiliza fedex na Logística.');
-    exit;
-  end;
 
   try
     save1 := pResultado.erros;
@@ -825,11 +815,6 @@ function TLogisticaFedex.fedex_SCI_GetPurchaseOrderList;
 begin
   checkResultadoOperacao(pResultado);
   Result := nil;
-
-  if not sci_logistica_usa_fedex then begin
-    pResultado.adicionaErro('getPurchaseOrderList: Não utiliza fedex na Logística.');
-    exit;
-  end;
 
   try
     save1 := pResultado.erros;
