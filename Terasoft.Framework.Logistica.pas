@@ -1,5 +1,4 @@
-
-{$i definicoes.inc}
+{$i Logistica.inc}
 
 unit Terasoft.Framework.Logistica;
 
@@ -83,10 +82,22 @@ interface
 
   function getLogisticaGlobal: ILogistica;
 
+  {$if defined(__TESTAR_LOGISTICA__)}
+    function testaLogistica_Entrada(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+    function testaLogisticaVenda(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+    function testaLogistica_Retorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+  {$endif}
+
+
+
 implementation
   uses
     {$if defined(__VENDAS__)}
       Fedex.SCI.Impl,
+    {$endif}
+
+    {$if defined(__TESTAR_LOGISTICA__)}
+      FuncoesMensagem,
     {$endif}
     Spring.Collections,
     Terasoft.Framework.Exceptions,
@@ -95,6 +106,32 @@ implementation
   var
     fListaCriador: IDictionary<TipoWideStringFramework, TCriadorLogistica>;
     fLogisticaGlobal: ILogistica;
+
+
+{$if defined(__TESTAR_LOGISTICA__)}
+function testaLogistica_Entrada;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  Result := getLogisticaGlobal.enviaEntrada('',Result);
+  if(pResultado.eventos>0) then
+    msgAviso(pResultado.toString);
+end;
+
+function testaLogistica_Retorno;
+begin
+  Result := getLogisticaGlobal.processaRetorno(checkResultadoOperacao(pResultado));
+  if(pResultado.eventos>0) then
+    msgAviso(pResultado.toString);
+end;
+
+function testaLogisticaVenda;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  Result := getLogisticaGlobal.enviaVenda('',Result);
+  if(pResultado.eventos>0) then
+    msgAviso(pResultado.toString);
+end;
+{$endif}
 
 function getLogisticaGlobal: ILogistica;
 begin
