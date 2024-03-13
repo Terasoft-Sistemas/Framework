@@ -297,6 +297,9 @@ type
     FIDRecordView: String;
     FSALDO_CD: Variant;
     FSALDO_DISPONIVEL: Variant;
+    FGRADE_ID: Variant;
+    FSALDO_MAXIMO: Variant;
+    FMARGEM_CALCULADA: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetProdutossLista(const Value: TObjectList<TProdutosModel>);
@@ -569,6 +572,9 @@ type
     procedure SetIDRecordView(const Value: String);
     procedure SetSALDO_CD(const Value: Variant);
     procedure SetSALDO_DISPONIVEL(const Value: Variant);
+    procedure SetGRADE_ID(const Value: Variant);
+    procedure SetMARGEM_CALCULADA(const Value: Variant);
+    procedure SetSALDO_MAXIMO(const Value: Variant);
 
   public
     property UUID: Variant read FUUID write SetUUID;
@@ -834,6 +840,9 @@ type
     property EXTIPI: Variant read FEXTIPI write SetEXTIPI;
     property SALDO_DISPONIVEL: Variant read FSALDO_DISPONIVEL write SetSALDO_DISPONIVEL;
     property SALDO_CD: Variant read FSALDO_CD write SetSALDO_CD;
+    property MARGEM_CALCULADA: Variant read FMARGEM_CALCULADA write SetMARGEM_CALCULADA;
+    property SALDO_MAXIMO: Variant read FSALDO_MAXIMO write SetSALDO_MAXIMO;
+    property GRADE_ID: Variant read FGRADE_ID write SetGRADE_ID;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -888,9 +897,14 @@ function TProdutosModel.Alterar(pID: String): TProdutosModel;
 var
   lProdutosModel : TProdutosModel;
 begin
-  lProdutosModel      := lProdutosModel.carregaClasse(pID);
-  lProdutosModel.Acao := tacAlterar;
-  Result              := lProdutosModel;
+  lProdutosModel := TProdutosModel.Create(vIConexao);
+  try
+    lProdutosModel      := lProdutosModel.carregaClasse(pID);
+    lProdutosModel.Acao := tacAlterar;
+    Result              := lProdutosModel;
+  finally
+
+  end;
 end;
 
 function TProdutosModel.Excluir(pCodigoPro: String): String;
@@ -1444,6 +1458,11 @@ procedure TProdutosModel.SetGARANTIA_PRO(const Value: Variant);
 begin
   FGARANTIA_PRO := Value;
 end;
+procedure TProdutosModel.SetGRADE_ID(const Value: Variant);
+begin
+  FGRADE_ID := Value;
+end;
+
 procedure TProdutosModel.SetGRUPO_COMISSAO_ID(const Value: Variant);
 begin
   FGRUPO_COMISSAO_ID := Value;
@@ -1681,6 +1700,11 @@ procedure TProdutosModel.SetMARCA_PRO(const Value: Variant);
 begin
   FMARCA_PRO := Value;
 end;
+procedure TProdutosModel.SetMARGEM_CALCULADA(const Value: Variant);
+begin
+  FMARGEM_CALCULADA := Value;
+end;
+
 procedure TProdutosModel.SetMARGEM_LUCRO(const Value: Variant);
 begin
   FMARGEM_LUCRO := Value;
@@ -1793,6 +1817,11 @@ end;
 procedure TProdutosModel.SetSALDO_DISPONIVEL(const Value: Variant);
 begin
   FSALDO_DISPONIVEL := Value;
+end;
+
+procedure TProdutosModel.SetSALDO_MAXIMO(const Value: Variant);
+begin
+  FSALDO_MAXIMO := Value;
 end;
 
 procedure TProdutosModel.SetSALDO_ONLINE(const Value: Variant);
