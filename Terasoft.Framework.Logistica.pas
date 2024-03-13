@@ -12,9 +12,9 @@ interface
     Terasoft.Framework.Types;
 
   const
-    CONTROLE_LOGISTICA_RESULTADO_SO  = 'RESULTADO.SO';
-    CONTROLE_LOGISTICA_RESULTADO_PO  = 'RESULTADO.PO';
-    CONTROLE_LOGISTICA_RESULTADO_SKU  = 'RESULTADO.SKU';
+    CONTROLE_LOGISTICA_RESULTADO_VENDA  = 'RESULTADO.VENDA';
+    CONTROLE_LOGISTICA_RESULTADO_ENTRADA  = 'RESULTADO.ENTRADA';
+    CONTROLE_LOGISTICA_RESULTADO_PRODUTO  = 'RESULTADO.PRODUTO';
 
     CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO = 'A';
     CONTROLE_LOGISTICA_STATUS_ENVIADO       = 'E';
@@ -23,6 +23,12 @@ interface
 
     CONTROLE_LOGISTICA_NENHUM    = 'N';
     CONTROLE_LOGISTICA_FEDEX     = 'F';
+
+    CONTROLE_LOGISTICA_STATUS_PRODUTO  = 'PRODUTO.CONTROLE';
+    CONTROLE_LOGISTICA_STATUS_ENTRADA  = 'ENTRADA.STATUS';
+    CONTROLE_LOGISTICA_STATUS_VENDA    = 'VENDA.STATUS';
+
+
 
   type
     ILogistica = interface;
@@ -41,7 +47,7 @@ interface
       procedure setControleAlteracoes(const pValue: IControleAlteracoes);
 
       function precisaEnviarProduto(const pCodigoPro: TipoWideStringFramework): boolean;
-      function enviaProduto(pID: String = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+      function enviaProduto(pID: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
       function getStatusProduto(const pCodigoPro: TipoWideStringFramework): TipoWideStringFramework;
       procedure setStatusProduto(const pCodigoPro: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
       function getResultadoProduto(const pCodigoPro: TipoWideStringFramework): TipoWideStringFramework;

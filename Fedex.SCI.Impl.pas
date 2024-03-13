@@ -4,15 +4,14 @@
 unit Fedex.SCI.Impl;
 
 interface
+
+implementation
   uses
     Classes,
     Terasoft.Framework.Types,
     Terasoft.Framework.Texto,
     Terasoft.Framework.ControleAlteracoes,
-    Fedex.API.Iface;
-
-implementation
-  uses
+    Fedex.API.Iface,
     Terasoft.Framework.DB,
     DB,
     Terasoft.Framework.FuncoesDiversas,
@@ -38,7 +37,7 @@ implementation
         fAPI: IFedexAPI;
 
         function precisaEnviarProduto(const pCodigoPro: TipoWideStringFramework): boolean;
-        function enviaProduto(pID: String = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+        function enviaProduto(pCodigoPro: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
         function getStatusProduto(const pCodigoPro: TipoWideStringFramework): TipoWideStringFramework;
         procedure setStatusProduto(const pCodigoPro: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
         function getResultadoProduto(const pCodigoPro: TipoWideStringFramework): TipoWideStringFramework;
@@ -154,8 +153,8 @@ begin
         if(lDSEntrada.dataset.RecordCount=0) then begin
           pResultado.formataErro('processaArquivoExpedicao [%s]: Pedido [%s] não existe.', [ lArquivo, lPedido ] );
           break;
-        end else if(ctr.getValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SO, lDSEntrada.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
-          pResultado.formataErro('processaArquivoExpedicao [%s]: Pedido [%s] não está no status ENVIADO: [%s]', [ lArquivo, lPedido, ctr.getValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SO, lDSEntrada.dataset.FieldByName('id').AsString,'') ] );
+        end else if(ctr.getValor(CONTROLE_LOGISTICA_STATUS_VENDA, lDSEntrada.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
+          pResultado.formataErro('processaArquivoExpedicao [%s]: Pedido [%s] não está no status ENVIADO: [%s]', [ lArquivo, lPedido, ctr.getValor(CONTROLE_LOGISTICA_STATUS_VENDA, lDSEntrada.dataset.FieldByName('id').AsString,'') ] );
           break;
         end;
 
@@ -203,7 +202,7 @@ begin
         pResultado.formataErro('processaArquivoExpedicao Pedido[%s]: Não localizou o produto [%s]', [ lPedido, lProduto ] );
         result.formataAviso('Pedido [%s] marcado como DIVERGENTE', [ lPedido ] );
         divergenciaArquivoFedex(true,pResultado);
-        ctr.setValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SO, lPedido, CONTROLE_LOGISTICA_STATUS_DIVERGENTE);
+        ctr.setValor(CONTROLE_LOGISTICA_STATUS_VENDA, lPedido, CONTROLE_LOGISTICA_STATUS_DIVERGENTE);
         pResultado.acumulador['Pedidos divergentes'].incrementa;
         exit;
       end;
@@ -226,7 +225,7 @@ begin
     if(lDivergencias>0) then begin
       divergenciaArquivoFedex(true,pResultado);
       pResultado.formataAviso('Pedido [%s] marcado como DIVERGENTE', [ lPedido ] );
-      ctr.setValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SO, lPedido, CONTROLE_LOGISTICA_STATUS_DIVERGENTE);
+      ctr.setValor(CONTROLE_LOGISTICA_STATUS_VENDA, lPedido, CONTROLE_LOGISTICA_STATUS_DIVERGENTE);
       result.acumulador['Pedidos divergentes'].incrementa;
       exit;
     end;
@@ -256,7 +255,7 @@ begin
         lCDS.Next;
       end;
       gdbPadrao.commit(true);
-      ctr.setValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SO, lPedido,CONTROLE_LOGISTICA_STATUS_FINALIZADO);
+      ctr.setValor(CONTROLE_LOGISTICA_STATUS_VENDA, lPedido,CONTROLE_LOGISTICA_STATUS_FINALIZADO);
       apagarArquivoFedex(false,pResultado);
     finally
       gdbPadrao.rollback(true);
@@ -399,7 +398,7 @@ begin
       pResultado.propriedade['ACAO_ARQUIVO'].asString := FEDEX_ACAOARQUIVO_REJEITAR;
       result.acumulador['Entradas rejeitadas'].incrementa;
       exit;
-    end else if(ctr.getValor(CONTROLE_LOGISTICA_FEDEX_STATUS_PO, lDSEntrada.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
+    end else if(ctr.getValor(CONTROLE_LOGISTICA_STATUS_ENTRADA, lDSEntrada.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
       pResultado.acumulador['Entradas divergentes'].incrementa;
       rejeitarArquivoFedex(true,pResultado);
       exit;
@@ -443,7 +442,7 @@ begin
         exit;
       end;
       gdbPadrao.commit(true);
-      ctr.setValor(CONTROLE_LOGISTICA_FEDEX_STATUS_PO, lDSEntrada.dataset.FieldByName('id').AsString,CONTROLE_LOGISTICA_STATUS_FINALIZADO);
+      ctr.setValor(CONTROLE_LOGISTICA_STATUS_ENTRADA, lDSEntrada.dataset.FieldByName('id').AsString,CONTROLE_LOGISTICA_STATUS_FINALIZADO);
       apagarArquivoFedex(false,pResultado);
     finally
       gdbPadrao.rollback(true);
@@ -588,6 +587,9 @@ function TLogisticaFedex.fedex_SCI_GetSKUList;
     lID, lQuery: String;
     datasets: TFedexDatasets;
     lSKU: IDataset;
+    lFieldNames: String;
+    lParameters: array of Variant;
+
 begin
   checkResultadoOperacao(pResultado);
   Result := nil;
@@ -609,12 +611,35 @@ begin
 
     datasets := getFedexDatasets;
 
+
     lQuery := 'select ' +
         '   p.codigo_pro id, p.barras_pro barras, p.peso_pro peso, p.codigo_gru grupo, ' +
         '   p.codigo_sub subgrupo, p.nome_pro nome ' +
-        ' from produto p where p.codigo_pro=:id';
+        ' from produto p ';//where p.codigo_pro=:id';
 
-    lSKU := gdb.criaDataset.query(lQuery,'id', [pCodigoPro]);
+
+    lFieldNames := '';
+    SetLength(lParameters,0);
+
+    if(pCodigoPro='') then begin
+      lFieldNames := 'id';
+      SetLength(lParameters,1);
+      lParameters[0] := pCodigoPro;
+      lQuery := lQuery + ' where p.codigo_pro=:id '
+    end else begin
+      lQuery := lQuery + ' left join controlealteracoes ca on ca.sistema = :sistema and ca.identificador = :identificador and ca.chave = p.codigo_pro ' +
+                ' where ca.valor = :status ';
+      SetLength(lParameters,3);
+      lParameters[0] := getControleAlteracoes.sistema;
+      lParameters[1] := CONTROLE_LOGISTICA_STATUS_PRODUTO;
+      lParameters[2] := CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
+      lFieldNames := 'sistema;identificador;status';
+      lQuery := lQuery + ' order by 1 ';
+
+
+    end;
+
+    lSKU := gdb.criaDataset.query(lQuery,lFieldNames,lParameters);
 
     if(lSKU.dataset.RecordCount=0) then begin
       pResultado.formataErro('getSKUList: Produto [%s] não existe.', [ pCodigoPro ]);
@@ -691,7 +716,7 @@ begin
                 ' where ca.valor = :status ';
       SetLength(lParameters,3);
       lParameters[0] := ctr.sistema;
-      lParameters[1] := CONTROLE_LOGISTICA_FEDEX_STATUS_SO;
+      lParameters[1] := CONTROLE_LOGISTICA_STATUS_VENDA;
       lParameters[2] := CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
       lFieldNames := 'sistema;identificador;status';
       lQuery := lQuery + ' order by 1 ';
@@ -838,7 +863,7 @@ begin
                 ' where c.valor in ( ''A'' ) ';
       SetLength(lParameters,2);
       lParameters[0] := ctr.sistema;
-      lParameters[1] := CONTROLE_LOGISTICA_FEDEX_STATUS_PO;
+      lParameters[1] := CONTROLE_LOGISTICA_STATUS_ENTRADA;
       lFieldNames := 'sistema;identificador';
       //Usar controle alterações...
     end;
@@ -903,35 +928,35 @@ end;
 
 function TLogisticaFedex.getStatusProduto;
 begin
-  Result := fAPI.parameters.controleAlteracoes.getValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SKU,pCodigoPro);
+  Result := fAPI.parameters.controleAlteracoes.getValor(CONTROLE_LOGISTICA_STATUS_PRODUTO,pCodigoPro);
 end;
 
 procedure TLogisticaFedex.setStatusProduto;
 begin
   if(pCodigoPro<>'') then
-    getControleAlteracoes.setValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SKU,pCodigoPro,pStatus);
+    getControleAlteracoes.setValor(CONTROLE_LOGISTICA_STATUS_PRODUTO,pCodigoPro,pStatus);
 end;
 
 function TLogisticaFedex.getStatusEntrada;
 begin
-  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_FEDEX_STATUS_PO,pID);
+  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_STATUS_ENTRADA,pID);
 end;
 
 procedure TLogisticaFedex.setStatusEntrada;
 begin
   if(pID<>'') then
-    getControleAlteracoes.setValor(CONTROLE_LOGISTICA_FEDEX_STATUS_PO,pID,pStatus);
+    getControleAlteracoes.setValor(CONTROLE_LOGISTICA_STATUS_ENTRADA,pID,pStatus);
 end;
 
 function TLogisticaFedex.getStatusVenda;
 begin
-  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SO,pNumeroPed);
+  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_STATUS_VENDA,pNumeroPed);
 end;
 
 procedure TLogisticaFedex.setStatusVenda;
 begin
   if(pNumeroPed<>'') then
-    getControleAlteracoes.setValor(CONTROLE_LOGISTICA_FEDEX_STATUS_SO,pNumeroPed,pStatus);
+    getControleAlteracoes.setValor(CONTROLE_LOGISTICA_STATUS_VENDA,pNumeroPed,pStatus);
 end;
 
 function TLogisticaFedex.vendaFinalizada;
@@ -946,17 +971,17 @@ end;
 
 function TLogisticaFedex.getResultadoProduto(const pCodigoPro: TipoWideStringFramework): TipoWideStringFramework;
 begin
-  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_SKU,pCodigoPro);
+  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_PRODUTO,pCodigoPro);
 end;
 
 function TLogisticaFedex.getResultadoVenda;
 begin
-  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_SO,pNumeroPed);
+  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_VENDA,pNumeroPed);
 end;
 
 function TLogisticaFedex.getResultadoEntrada;
 begin
-  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_PO,pID);
+  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_ENTRADA,pID);
 end;
 
 {$ENDREGION}
@@ -980,9 +1005,13 @@ begin
   fAPI.sendPurchaseOrderList(pLista,pResultado);
 end;
 
-function TLogisticaFedex.enviaProduto(pID: String;  pResultado: IResultadoOperacao): IResultadoOperacao;
+function TLogisticaFedex.enviaProduto(pCodigoPro: TipoWideStringFramework;  pResultado: IResultadoOperacao): IResultadoOperacao;
+  var
+    lLista: TFedex_SKUList;
 begin
-  raise Exception.Create('Não implementado');
+  Result := checkResultadoOperacao(pResultado);
+  lLista := fedex_SCI_GetSKUList(pCodigoPro, pResultado);
+  fAPI.sendSKUList(lLista,pResultado);
 end;
 
 function TLogisticaFedex.enviaVenda(pNumeroPed: TipoWideStringFramework; pResultado: IResultadoOperacao): IResultadoOperacao;
