@@ -3,6 +3,7 @@ unit SubGrupoDao;
 interface
 
 uses
+  SubGrupoModel,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
@@ -13,26 +14,67 @@ uses
   Terasoft.Framework.ListaSimples,
   Terasoft.Framework.SimpleTypes,
   Terasoft.FuncoesTexto,
-  Interfaces.Conexao;
+  Interfaces.Conexao,
+  Terasoft.ConstrutorDao;
 
 type
   TSubGrupoDao = class
 
   private
-    vIConexao : IConexao;
+    vIConexao   : IConexao;
+    vConstrutor : TConstrutorDao;
+
+    FLengthPageView: String;
+    FIDRecordView: Integer;
+    FStartRecordView: String;
+    FID: Variant;
+    FCountView: String;
+    FOrderView: String;
+    FWhereView: String;
+    FTotalRecords: Integer;
+    procedure obterTotalRegistros;
+    procedure SetCountView(const Value: String);
+    procedure SetID(const Value: Variant);
+    procedure SetIDRecordView(const Value: Integer);
+    procedure SetLengthPageView(const Value: String);
+    procedure SetOrderView(const Value: String);
+    procedure SetStartRecordView(const Value: String);
+    procedure SetTotalRecords(const Value: Integer);
+    procedure SetWhereView(const Value: String);
+    function where: String;
+
+    var
+      vConstrutorDao : TConstrutorDao;
 
   public
+
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function ObterLista(pSubGrupo_Parametros: TSubGrupo_Parametros): TFDMemTable;
+    property ID :Variant read FID write SetID;
+    property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
+    property WhereView: String read FWhereView write SetWhereView;
+    property CountView: String read FCountView write SetCountView;
+    property OrderView: String read FOrderView write SetOrderView;
+    property StartRecordView: String read FStartRecordView write SetStartRecordView;
+    property LengthPageView: String read FLengthPageView write SetLengthPageView;
+    property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
+
+    function incluir(pSubGrupoModel: TSubGrupoModel): String;
+    function alterar(pSubGrupoModel: TSubGrupoModel): String;
+    function excluir(pSubGrupoModel: TSubGrupoModel): String;
+    function carregaClasse(pID : String): TSubGrupoModel;
+
+    procedure setParams(var pQry: TFDQuery; pSubGrupoModel: TSubGrupoModel);
+    function ObterLista(pSubGrupo_Parametros: TSubGrupo_Parametros): TFDMemTable; overload;
+    function ObterLista: TFDMemTable; overload;
 
 end;
 
 implementation
 
 uses
-  Data.DB;
+  Data.DB, System.Rtti;
 
 { TPCG }
 
@@ -44,6 +86,32 @@ end;
 destructor TSubGrupoDao.Destroy;
 begin
   inherited;
+end;
+
+function TSubGrupoDao.carregaClasse(pID: String): TSubGrupoModel;
+var
+  lQry: TFDQuery;
+  lModel: TSubGrupoModel;
+begin
+  lQry     := vIConexao.CriarQuery;
+  lModel   := TSubGrupoModel.Create(vIConexao);
+  Result   := lModel;
+
+  try
+    lQry.Open('select * from SUBGRUPOPRODUTO where CODIGO_SUB = ' +pId);
+
+    if lQry.IsEmpty then
+      Exit;
+
+    lModel.CODIGO_SUB       := lQry.FieldByName('CODIGO_SUB').AsString;
+    lModel.NOME_SUB         := lQry.FieldByName('NOME_SUB').AsString;
+    lModel.CODIGO_GRU       := lQry.FieldByName('CODIGO_GRU').AsString;
+    lModel.ID               := lQry.FieldByName('ID').AsString;
+
+    Result := lModel;
+  finally
+    lQry.Free;
+  end;
 end;
 
 function TSubGrupoDao.ObterLista(pSubGrupo_Parametros: TSubGrupo_Parametros): TFDMemTable;
@@ -96,5 +164,192 @@ begin
   end;
 end;
 
+function TSubGrupoDao.incluir(pSubGrupoModel: TSubGrupoModel): String;
+var
+  lQry: TFDQuery;
+  lSQL:String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  lSQL := vConstrutor.gerarInsert('SUBGRUPOPRODUTO', 'CODIGO_SUB', true);
+
+  try
+    lQry.SQL.Add(lSQL);
+//    pAnexoModel.ID := vIConexao.Generetor('SUBGRUPOPRODUTO');
+    setParams(lQry, pSubGrupoModel);
+    lQry.Open;
+
+    Result := lQry.FieldByName('CODIGO_SUB').AsString;
+
+  finally
+    lSQL := '';
+    lQry.Free;
+  end;
+end;
+
+function TSubGrupoDao.ObterLista: TFDMemTable;
+var
+  lQry       : TFDQuery;
+  lSQL       : String;
+  lPaginacao : String;
+begin
+  lQry       := vIConexao.CriarQuery;
+  try
+    if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
+      lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + ' ';
+
+    lSQL := 'select '+lPaginacao+' * from SUBGRUPOPRODUTO where 1=1 ';
+
+    lSQL := lSQL + where;
+
+    if not FOrderView.IsEmpty then
+      lSQL := lSQL + ' order by '+FOrderView;
+
+    lQry.Open(lSQL);
+
+    Result := vConstrutorDao.atribuirRegistros(lQry);
+    obterTotalRegistros;
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TSubGrupoDao.alterar(pSubGrupoModel: TSubGrupoModel): String;
+var
+  lQry: TFDQuery;
+  lSQL:String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  lSQL :=  vConstrutor.gerarUpdate('SUBGRUPOPRODUTO','CODIGO_SUB');
+
+  try
+    lQry.SQL.Add(lSQL);
+    setParams(lQry, pSubGrupoModel);
+    lQry.ExecSQL;
+
+    Result := pSubGrupoModel.CODIGO_SUB;
+
+  finally
+    lSQL := '';
+    lQry.Free;
+  end;
+end;
+
+function TSubGrupoDao.excluir(pSubGrupoModel: TSubGrupoModel): String;
+var
+  lQry: TFDQuery;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+   lQry.ExecSQL('delete from SUBGRUPOPRODUTO where CODIGO_SUB = :CODIGO_SUB' ,[pSubGrupoModel.CODIGO_SUB]);
+   lQry.ExecSQL;
+   Result := pSubGrupoModel.CODIGO_SUB;
+
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TSubGrupoDao.where: String;
+var
+  lSQL : String;
+begin
+  lSQL := '';
+
+  if not FWhereView.IsEmpty then
+    lSQL := lSQL + FWhereView;
+
+  if FIDRecordView <> 0  then
+    lSQL := lSQL + ' and CODIGO_SUB = '+IntToStr(FIDRecordView);
+
+  Result := lSQL;
+end;
+
+procedure TSubGrupoDao.obterTotalRegistros;
+var
+  lQry: TFDQuery;
+  lSQL:String;
+begin
+  try
+    lQry := vIConexao.CriarQuery;
+
+    lSql := 'select count(*) records From SUBGRUPOPRODUTO where 1=1 ';
+
+    lSql := lSql + where;
+
+    lQry.Open(lSQL);
+
+    FTotalRecords := lQry.FieldByName('records').AsInteger;
+
+  finally
+    lQry.Free;
+  end;
+end;
+
+procedure TSubGrupoDao.SetCountView(const Value: String);
+begin
+  FCountView := Value;
+end;
+
+procedure TSubGrupoDao.SetID(const Value: Variant);
+begin
+  FID := Value;
+end;
+
+procedure TSubGrupoDao.SetIDRecordView(const Value: Integer);
+begin
+  FIDRecordView := Value;
+end;
+
+procedure TSubGrupoDao.SetLengthPageView(const Value: String);
+begin
+  FLengthPageView := Value;
+end;
+
+procedure TSubGrupoDao.SetOrderView(const Value: String);
+begin
+  FOrderView := Value;
+end;
+
+procedure TSubGrupoDao.setParams(var pQry: TFDQuery; pSubGrupoModel: TSubGrupoModel);
+var
+  lTabela : TFDMemTable;
+  lCtx    : TRttiContext;
+  lProp   : TRttiProperty;
+  i       : Integer;
+begin
+  lTabela := vConstrutor.getColumns('SubGrupoPRODUTO');
+
+  lCtx := TRttiContext.Create;
+  try
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(TSubGrupoModel).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pSubGrupoModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pSubGrupoModel).AsString))
+    end;
+  finally
+    lCtx.Free;
+  end;
+end;
+
+procedure TSubGrupoDao.SetStartRecordView(const Value: String);
+begin
+  FStartRecordView := Value;
+end;
+
+procedure TSubGrupoDao.SetTotalRecords(const Value: Integer);
+begin
+  FTotalRecords := Value;
+end;
+
+procedure TSubGrupoDao.SetWhereView(const Value: String);
+begin
+  FWhereView := Value;
+end;
 
 end.

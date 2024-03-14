@@ -1,4 +1,4 @@
-unit MarcaDao;
+unit MedidaDao;
 
 interface
 
@@ -17,10 +17,10 @@ uses
   Terasoft.FuncoesTexto,
   System.Generics.Collections,
   Terasoft.ConstrutorDao,
-  MarcaModel;
+  MedidaModel;
 
 type
-  TMarcaDao = class
+  TMedidaDao = class
 
   private
     vIConexao : IConexao;
@@ -37,7 +37,6 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -54,7 +53,6 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
     property CountView: String read FCountView write SetCountView;
@@ -63,13 +61,12 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(pMarcaModel: TMarcaModel): String;
-    function alterar(pMarcaModel: TMarcaModel): String;
-    function excluir(pMarcaModel: TMarcaModel): String;
-    function carregaClasse(pID : String): TMarcaModel;
+    function incluir(pMedidaModel: TMedidaModel): String;
+    function alterar(pMedidaModel: TMedidaModel): String;
+    function excluir(pMedidaModel: TMedidaModel): String;
+    function carregaClasse(pID : String): TMedidaModel;
 
-    procedure setParams(var pQry: TFDQuery; pMarcaModel: TMarcaModel);
-    function ObterLista(pMarca_Parametros: TMarca_Parametros): TFDMemTable; overload;
+    procedure setParams(var pQry: TFDQuery; pMedidaModel: TMedidaModel);
     function ObterLista: TFDMemTable; overload;
 
 end;
@@ -81,26 +78,24 @@ uses
 
 { TPCG }
 
-function TMarcaDao.carregaClasse(pID: String): TMarcaModel;
+function TMedidaDao.carregaClasse(pID: String): TMedidaModel;
 var
   lQry: TFDQuery;
-  lModel: TMarcaModel;
+  lModel: TMedidaModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TMarcaModel.Create(vIConexao);
+  lModel   := TMedidaModel.Create(vIConexao);
   Result   := lModel;
 
   try
-    lQry.Open('select * from MARCAPRODUTO where CODIGO_MAR = ' +pId);
+    lQry.Open('select * from MEDIDA where CODIGO_MED = ' +pId);
 
     if lQry.IsEmpty then
       Exit;
 
-    lModel.CODIGO_MAR       := lQry.FieldByName('CODIGO_MAR').AsString;
-    lModel.NOME_MAR         := lQry.FieldByName('NOME_MAR').AsString;
-    lModel.USUARIO_MAR      := lQry.FieldByName('USUARIO_MAR').AsString;
+    lModel.CODIGO_MED       := lQry.FieldByName('CODIGO_MED').AsString;
+    lModel.DESCRICAO_MED    := lQry.FieldByName('DESCRICAO_MED').AsString;
     lModel.ID               := lQry.FieldByName('ID').AsString;
-    lModel.SIGLA            := lQry.FieldByName('SIGLA').AsString;
 
     Result := lModel;
   finally
@@ -108,84 +103,34 @@ begin
   end;
 end;
 
-constructor TMarcaDao.Create(pIConexao : IConexao);
+constructor TMedidaDao.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
 end;
 
-destructor TMarcaDao.Destroy;
+destructor TMedidaDao.Destroy;
 begin
   inherited;
 end;
 
-function TMarcaDao.ObterLista(pMarca_Parametros: TMarca_Parametros): TFDMemTable;
-var
-  lQry: TFDQuery;
-  lSQL:String;
-  lMemTable: TFDMemTable;
-begin
-  try
 
-    lMemTable := TFDMemTable.Create(nil);
-
-    lSQL := ' Select CODIGO_MAR,         ' + #13 +
-            '        NOME_MAR            ' + #13 +
-            '   From MARCAPRODUTO        ' + #13 +
-            '  Order by NOME_MAR         ' + #13;
-
-    with lMemTable.IndexDefs.AddIndexDef do
-    begin
-      Name := 'OrdenacaoRazao';
-      Fields := 'RAZAO';
-      Options := [TIndexOption.ixCaseInsensitive];
-    end;
-
-    lMemTable.IndexName := 'OrdenacaoRazao';
-
-    lMemTable.FieldDefs.Add('CODIGO', ftString, 6);
-    lMemTable.FieldDefs.Add('RAZAO', ftString, 40);
-    lMemTable.CreateDataSet;
-
-    lQry := vIConexao.CriarQuery;
-    lQry.Open(lSQL);
-
-    lQry.First;
-    while not lQry.Eof do
-    begin
-      lMemTable.InsertRecord([
-                              lQry.FieldByName('CODIGO_MAR').AsString,
-                              lQry.FieldByName('NOME_MAR').AsString
-                             ]);
-
-      lQry.Next;
-    end;
-
-    lMemTable.Open;
-
-    Result := lMemTable;
-
-  finally
-    lQry.Free;
-  end;
-end;
-
-function TMarcaDao.incluir(pMarcaModel: TMarcaModel): String;
+function TMedidaDao.incluir(pMedidaModel: TMedidaModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := vConstrutor.gerarInsert('MARCAPRODUTO', 'CODIGO_MAR', true);
+  lSQL := vConstrutor.gerarInsert('MEDIDA', 'CODIGO_MED', true);
 
   try
     lQry.SQL.Add(lSQL);
-//    pAnexoModel.ID := vIConexao.Generetor('MARCAPRODUTO');
-    setParams(lQry, pMarcaModel);
+//    pAnexoModel.ID := vIConexao.Generetor('MEDIDA');
+    setParams(lQry, pMedidaModel);
     lQry.Open;
 
-    Result := lQry.FieldByName('CODIGO_MAR').AsString;
+    Result := lQry.FieldByName('CODIGO_MED').AsString;
 
   finally
     lSQL := '';
@@ -193,7 +138,7 @@ begin
   end;
 end;
 
-function TMarcaDao.ObterLista: TFDMemTable;
+function TMedidaDao.ObterLista: TFDMemTable;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -204,7 +149,7 @@ begin
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + ' ';
 
-    lSQL := 'select '+lPaginacao+' * from MARCAPRODUTO where 1=1 ';
+    lSQL := 'select '+lPaginacao+' * from MEDIDA where 1=1 ';
     lSQL := lSQL + where;
 
     if not FOrderView.IsEmpty then
@@ -219,21 +164,21 @@ begin
   end;
 end;
 
-function TMarcaDao.alterar(pMarcaModel: TMarcaModel): String;
+function TMedidaDao.alterar(pMedidaModel: TMedidaModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL :=  vConstrutor.gerarUpdate('MARCAPRODUTO','CODIGO_MAR');
+  lSQL :=  vConstrutor.gerarUpdate('MEDIDA','CODIGO_MED');
 
   try
     lQry.SQL.Add(lSQL);
-    setParams(lQry, pMarcaModel);
+    setParams(lQry, pMedidaModel);
     lQry.ExecSQL;
 
-    Result := pMarcaModel.CODIGO_MAR;
+    Result := pMedidaModel.CODIGO_MED;
 
   finally
     lSQL := '';
@@ -241,23 +186,23 @@ begin
   end;
 end;
 
-function TMarcaDao.excluir(pMarcaModel: TMarcaModel): String;
+function TMedidaDao.excluir(pMedidaModel: TMedidaModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from MARCAPRODUTO where ID = :ID' ,[pMarcaModel.CODIGO_MAR]);
+   lQry.ExecSQL('delete from MEDIDA where CODIGO_MED = :CODIGO_MED' ,[pMedidaModel.CODIGO_MED]);
    lQry.ExecSQL;
-   Result := pMarcaModel.CODIGO_MAR;
+   Result := pMedidaModel.CODIGO_MED;
 
   finally
     lQry.Free;
   end;
 end;
 
-function TMarcaDao.where: String;
+function TMedidaDao.where: String;
 var
   lSQL : String;
 begin
@@ -267,12 +212,12 @@ begin
     lSQL := lSQL + FWhereView;
 
   if FIDRecordView <> 0  then
-    lSQL := lSQL + ' and CODIGO_MAR = '+IntToStr(FIDRecordView);
+    lSQL := lSQL + ' and CODIGO_MED = '+IntToStr(FIDRecordView);
 
   Result := lSQL;
 end;
 
-procedure TMarcaDao.obterTotalRegistros;
+procedure TMedidaDao.obterTotalRegistros;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -280,7 +225,7 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From MARCAPRODUTO where 1=1 ';
+    lSql := 'select count(*) records From MEDIDA where 1=1 ';
 
     lSql := lSql + where;
 
@@ -294,66 +239,61 @@ begin
 end;
 
 
-procedure TMarcaDao.SetCountView(const Value: String);
+procedure TMedidaDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
 end;
 
-procedure TMarcaDao.SetID(const Value: Variant);
-begin
-  FID := Value;
-end;
-
-procedure TMarcaDao.SetIDRecordView(const Value: Integer);
+procedure TMedidaDao.SetIDRecordView(const Value: Integer);
 begin
   FIDRecordView := Value;
 end;
 
-procedure TMarcaDao.SetLengthPageView(const Value: String);
+procedure TMedidaDao.SetLengthPageView(const Value: String);
 begin
   FLengthPageView := Value;
 end;
 
-procedure TMarcaDao.SetOrderView(const Value: String);
+procedure TMedidaDao.SetOrderView(const Value: String);
 begin
   FOrderView := Value;
 end;
 
-procedure TMarcaDao.setParams(var pQry: TFDQuery; pMarcaModel: TMarcaModel);
+procedure TMedidaDao.setParams(var pQry: TFDQuery; pMedidaModel: TMedidaModel);
 var
   lTabela : TFDMemTable;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
 begin
-  lTabela := vConstrutor.getColumns('MARCAPRODUTO');
+  lTabela := vConstrutor.getColumns('MEDIDA');
 
   lCtx := TRttiContext.Create;
   try
     for i := 0 to pQry.Params.Count - 1 do
     begin
-      lProp := lCtx.GetType(TMarcaModel).GetProperty(pQry.Params[i].Name);
+      lProp := lCtx.GetType(TMedidaModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pMarcaModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pMarcaModel).AsString))
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pMedidaModel).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pMedidaModel).AsString))
     end;
   finally
     lCtx.Free;
   end;
 end;
 
-procedure TMarcaDao.SetStartRecordView(const Value: String);
+procedure TMedidaDao.SetStartRecordView(const Value: String);
 begin
   FStartRecordView := Value;
 end;
 
-procedure TMarcaDao.SetTotalRecords(const Value: Integer);
+procedure TMedidaDao.SetTotalRecords(const Value: Integer);
 begin
   FTotalRecords := Value;
 end;
 
-procedure TMarcaDao.SetWhereView(const Value: String);
+procedure TMedidaDao.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
 end;

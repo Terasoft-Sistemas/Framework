@@ -635,7 +635,8 @@ begin
     lQry := vIConexao.CriarQuery;
 
     lSQL := ' Select CODIGO_PRO,      ' + SLineBreak +
-            '        NOME_PRO         ' + SLineBreak +
+            '        NOME_PRO,        ' + SLineBreak +
+            '        UNIDADE_PRO      ' + SLineBreak +
             '   From PRODUTO          ' + SLineBreak +
             '  Order by NOME_PRO      ' + SLineBreak;
 

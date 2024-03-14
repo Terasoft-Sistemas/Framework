@@ -174,15 +174,15 @@ end;
 
 function TGrupoModel.Excluir(CODIGO_GRU: String): String;
 begin
-  self.CODIGO_GRU  := CODIGO_GRU;
-  self.FAcao   := tacExcluir;
-  Result       := self.Salvar;
+  self.CODIGO_GRU   := CODIGO_GRU;
+  self.FAcao        := tacExcluir;
+  Result            := self.Salvar;
 end;
 
 function TGrupoModel.Incluir: String;
 begin
     self.FAcao := tacIncluir;
-    Result    := self.Salvar;
+    Result     := self.Salvar;
 end;
 
 

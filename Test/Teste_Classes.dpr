@@ -108,7 +108,24 @@ uses
   OSDao in '..\Dao\OSDao.pas',
   SimuladorPrecoModel in '..\Model\SimuladorPrecoModel.pas',
   GrupoModel in '..\Model\GrupoModel.pas',
-  GrupoDao in '..\Dao\GrupoDao.pas';
+  GrupoDao in '..\Dao\GrupoDao.pas',
+  SubGrupoModel in '..\Model\SubGrupoModel.pas',
+  SubGrupoDao in '..\Dao\SubGrupoDao.pas',
+  MarcaDao in '..\Dao\MarcaDao.pas',
+  MarcaModel in '..\Model\MarcaModel.pas',
+  MedidaDao in '..\Dao\MedidaDao.pas',
+  MedidaModel in '..\Model\MedidaModel.pas',
+  GrupoComissaoModel in '..\Model\GrupoComissaoModel.pas',
+  GrupoComissaoDao in '..\Dao\GrupoComissaoDao.pas',
+  ProdutoTipoModel in '..\Model\ProdutoTipoModel.pas',
+  ProdutoTipoDao in '..\Dao\ProdutoTipoDao.pas',
+  LocalizacaoEstoqueDao in '..\Dao\LocalizacaoEstoqueDao.pas',
+  LocalizacaoEstoqueModel in '..\Model\LocalizacaoEstoqueModel.pas';
+
+MarcaProdutoDao in '..\Dao\MarcaProdutoDao.pas',
+  MarcaProdutoModel in '..\Model\MarcaProdutoModel.pas',
+  MarcaDao in '..\Dao\MarcaDao.pas',
+  MarcaModel in '..\Model\MarcaModel.pas';
 
 {$R *.res}
 

@@ -206,6 +206,18 @@
         <DCCReference Include="..\Model\SimuladorPrecoModel.pas"/>
         <DCCReference Include="..\Model\GrupoModel.pas"/>
         <DCCReference Include="..\Dao\GrupoDao.pas"/>
+        <DCCReference Include="..\Model\SubGrupoModel.pas"/>
+        <DCCReference Include="..\Dao\SubGrupoDao.pas"/>
+        <DCCReference Include="..\Dao\MarcaDao.pas"/>
+        <DCCReference Include="..\Model\MarcaModel.pas"/>
+        <DCCReference Include="..\Dao\MedidaDao.pas"/>
+        <DCCReference Include="..\Model\MedidaModel.pas"/>
+        <DCCReference Include="..\Model\GrupoComissaoModel.pas"/>
+        <DCCReference Include="..\Dao\GrupoComissaoDao.pas"/>
+        <DCCReference Include="..\Model\ProdutoTipoModel.pas"/>
+        <DCCReference Include="..\Dao\ProdutoTipoDao.pas"/>
+        <DCCReference Include="..\Dao\LocalizacaoEstoqueDao.pas"/>
+        <DCCReference Include="..\Model\LocalizacaoEstoqueModel.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
