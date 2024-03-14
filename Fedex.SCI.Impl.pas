@@ -88,188 +88,203 @@ function processaArquivoExpedicao(pUnkAPI: IUnknown; pResultado: IResultadoOpera
     lCDS: TDataset;
     lFieldQtde: TField;
     pAPI: IFedexAPI;
+    lRes: IResultadoOperacao;
 
 begin
   Result := checkResultadoOperacao(pResultado);
+  lRes := nil;
   lSave := pResultado.erros;
+  ctr := nil;
+  pAPI := nil;
+  lPedido := '';
   lDSEntrada := nil;
   lDSItens := nil;
   lCDS := nil;
   lLista := TListaSimplesCreator.CreateDictionary<TipoWideStringFramework,IListaString>;
   try
-    if not Supports(pUnkAPI, IFedexAPI, pAPI) then begin
-      pResultado.adicionaErro('processaArquivoExpedicao: API não definida.');
-      exit;
-    end;
-
-    if(gdbPadrao=nil)or(gdbPadrao.conectado=false) then begin
-      pResultado.adicionaErro('processaArquivoExpedicao: GDB não definido.');
-      exit;
-    end;
-
-    ctr := pAPI.parameters.controleAlteracoes;
-    if(ctr=nil) then begin
-      pResultado.adicionaErro('processaArquivoExpedicao: Controle de alterações não definido.');
-      exit;
-    end;
-
-    lArquivo := pResultado.propriedade['ARQUIVO'].asString;
-    if (lArquivo='') or not FileExists(lArquivo) then begin
-      pResultado.formataErro('processaArquivoExpedicao: arquivo [%s] não existe.', [lArquivo]);
-      pResultado.acumulador['Saidas rejeitadas'].incrementa;
-      rejeitarArquivoFedex(true,pResultado);
-      exit;
-    end;
-    if (pAPI=nil) or (pAPI.parameters.depositante.cnpj='') then begin
-      pResultado.formataErro('processaArquivoExpedicao: Não especificou um API/DEPOSITANTE válido.', [lArquivo]);
-      exit;
-    end;
-
-    lTexto := novaListaTexto;
-    lLinha := novaListaTexto;
-    lLinha.strings.Delimiter := '|';
-    lTexto.strings.LoadFromFile(lArquivo);
-    for i := 0 to lTexto.lines.Count - 1 do begin
-      lLinha.strings.DelimitedText := lTexto.strings.Strings[i];
-      lLinha.strings.DelimitedText := lTexto.strings.Strings[i];
-      if(i=0) then begin
-        lCancelamento:=UpperCase(ChangeFileExt(ExtractFileName(lArquivo),''))=UpperCase(lLinha.strings.Strings[0]);
-        if(lCancelamento) then begin
-         if(lPedido='') then
-            lPedido := textoEntreTags(lLinha.strings.Strings[0],'_','_');
-          break;
-        end;
-      end;
-
-      if(lLinha.strings.Count < 5 ) then begin
-        pResultado.formataErro('processaArquivoExpedicao [%s]: Registro %d não possui 5 campos especificados: %d', [ lArquivo, (i + 1), lLinha.strings.Count ] );
-        continue;
-      end;
-
-      if(lPedido='') then begin
-        lPedido := lLinha.strings.Strings[0];
-        if (lPedido='') or(Length(lPedido)>6) then begin
-          pResultado.formataErro('processaArquivoExpedicao [%s]: Número de pedido inválido: %s', [ lArquivo, lPedido ] );
-          break;
-        end;
-        lDSEntrada := gdbPadrao.criaDataset.query( 'select p.numero_ped id, p.* from pedidovenda p where p.numero_ped=:id', 'id', [ lPedido ]);
-        if(lDSEntrada.dataset.RecordCount=0) then begin
-          pResultado.formataErro('processaArquivoExpedicao [%s]: Pedido [%s] não existe.', [ lArquivo, lPedido ] );
-          break;
-        end else if(ctr.getValor(CONTROLE_LOGISTICA_STATUS_VENDA, lDSEntrada.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
-          pResultado.formataErro('processaArquivoExpedicao [%s]: Pedido [%s] não está no status ENVIADO: [%s]', [ lArquivo, lPedido, ctr.getValor(CONTROLE_LOGISTICA_STATUS_VENDA, lDSEntrada.dataset.FieldByName('id').AsString,'') ] );
-          break;
-        end;
-
-        if(lDSItens=nil) then begin
-          lDSItens := gdbPadrao.criaDataset.query('select p.id id_item, p.numero_ped id, p.codigo_pro produto_id, p.quantidade_ped quantidade, 0 as quantidade_atendida from pedidoitens p ' +
-                                             ' where p.numero_ped = :id order by 1 ', 'id', [ lPedido ] );
-          if(lDSItens.dataset.RecordCount = 0 ) then begin
-            pResultado.formataErro('processaArquivoExpedicao: Pedido [%s]: Não possui itens na tabela de itens', [ lPedido ] );
-            break;
-          end;
-          lCDS := getCDSDataset(lDSItens.dataset);
-          lFieldQtde := lCDS.FindField('quantidade_atendida');
-        end;
-        if (lCDS = nil) or (lFieldQtde=nil) then begin
-          result.formataErro('processaArquivoExpedicao [%s]: Não possui itens na tabela de itens', [ lPedido ] );
-          break;
-        end;
-      end;
-      lProduto := textoEntreTags(lLinha.strings.Strings[3],'','_');
-      if(lProduto='') then
-        lProduto := lLinha.strings.Strings[3];
-
-      lIMEI    := lLinha.strings.Strings[4];
-      if not validaIMEI(lIMEI) then begin
-        pResultado.formataErro('processaArquivoExpedicao [%s]: IMEI [%s] inválido para item %d', [ lArquivo, lIMEI, i ] );
-        continue;
-      end;
-      if not lLista.get(lProduto,lListaIMEIS) then begin
-        lListaIMEIS := getStringList;
-        lLista.add(lProduto,lListaIMEIS);
-      end;
-      lListaIMEIS.Add(lIMEI);
-
-      lCDS.First;
-      while not lCDS.eof do begin
-        if(lCDS.FieldByName('produto_id').AsString = lProduto) then begin
-          lCDS.Edit;
-          lFieldQtde.AsCurrency := lFieldQtde.AsCurrency + 1.0;
-          lCDS.CheckBrowseMode;
-          break;
-        end;
-        lCDS.Next;
-      end;
-      if(lCDS.Eof) then begin
-        pResultado.formataErro('processaArquivoExpedicao Pedido[%s]: Não localizou o produto [%s]', [ lPedido, lProduto ] );
-        result.formataAviso('Pedido [%s] marcado como DIVERGENTE', [ lPedido ] );
-        divergenciaArquivoFedex(true,pResultado);
-        ctr.setValor(CONTROLE_LOGISTICA_STATUS_VENDA, lPedido, CONTROLE_LOGISTICA_STATUS_DIVERGENTE);
-        pResultado.acumulador['Pedidos divergentes'].incrementa;
+    try
+      if not Supports(pUnkAPI, IFedexAPI, pAPI) then begin
+        pResultado.adicionaErro('processaArquivoExpedicao: API não definida.');
         exit;
       end;
-    end;
 
-    if(lCDS<>nil) then begin
-      lDivergencias := 0;
-      lCDS.First;
-      while not lCDS.Eof do begin
-        gdbPadrao.updateDB('pedidoitens', [ 'id' ], [ lCDS.FieldByName('id_item').AsInteger ], [ 'quantidade_atendida'], [ lFieldQtde.AsInteger ] );
-        if(lFieldQtde.AsInteger <> lCDS.FieldByName('quantidade').AsInteger) then begin
-          result.formataErro('processaArquivoExpedicao: Pedido [%s], Produto[%s] divergente na quantidade: Vendida: %d, Atendida: %d',
-          [ lPedido, lCDS.FieldByName('produto_id').AsString, lCDS.FieldByName('quantidade').AsInteger, lCDS.FieldByName('quantidade_atendida').AsInteger ] );
-          inc(lDivergencias);
-        end;
-        lCDS.Next;
+      if(gdbPadrao=nil)or(gdbPadrao.conectado=false) then begin
+        pResultado.adicionaErro('processaArquivoExpedicao: GDB não definido.');
+        exit;
       end;
-      gdbPadrao.commit(true);
-    end;
-    if(lDivergencias>0) then begin
-      divergenciaArquivoFedex(true,pResultado);
-      pResultado.formataAviso('Pedido [%s] marcado como DIVERGENTE', [ lPedido ] );
-      ctr.setValor(CONTROLE_LOGISTICA_STATUS_VENDA, lPedido, CONTROLE_LOGISTICA_STATUS_DIVERGENTE);
-      result.acumulador['Pedidos divergentes'].incrementa;
-      exit;
-    end;
 
-    if(pResultado.erros<>lSave) then begin
-      rejeitarArquivoFedex(true,pResultado);
-      pResultado.acumulador['Saidas rejeitadas'].incrementa;
-      exit;
-    end;
+      ctr := pAPI.parameters.controleAlteracoes;
+      if(ctr=nil) then begin
+        pResultado.adicionaErro('processaArquivoExpedicao: Controle de alterações não definido.');
+        exit;
+      end;
 
-    try
-      lDSIMEI := gdbPadrao.criaDataset;
-      lCDS.First;
-      while not lCDS.eof do begin
-        lProduto := lCDS.FieldByName('produto_id').AsString;
-        if not lLista.get(lProduto,lListaIMEIS) then begin
-          pResultado.formataErro('processaArquivoExpedicao [%s]: Produto [%s] não possui IMEI de retorno', [ lArquivo, lProduto ] );
-          lDSItens.dataset.Next;
+      lArquivo := pResultado.propriedade['ARQUIVO'].asString;
+      if (lArquivo='') or not FileExists(lArquivo) then begin
+        pResultado.formataErro('processaArquivoExpedicao: arquivo [%s] não existe.', [lArquivo]);
+        pResultado.acumulador['Saidas rejeitadas'].incrementa;
+        rejeitarArquivoFedex(true,pResultado);
+        exit;
+      end;
+      if (pAPI=nil) or (pAPI.parameters.depositante.cnpj='') then begin
+        pResultado.formataErro('processaArquivoExpedicao: Não especificou um API/DEPOSITANTE válido.', [lArquivo]);
+        exit;
+      end;
+
+      lTexto := novaListaTexto;
+      lLinha := novaListaTexto;
+      lLinha.strings.Delimiter := '|';
+      lTexto.strings.LoadFromFile(lArquivo);
+      for i := 0 to lTexto.lines.Count - 1 do begin
+        lLinha.strings.DelimitedText := lTexto.strings.Strings[i];
+        lLinha.strings.DelimitedText := lTexto.strings.Strings[i];
+        if(i=0) then begin
+          lCancelamento:=UpperCase(ChangeFileExt(ExtractFileName(lArquivo),''))=UpperCase(lLinha.strings.Strings[0]);
+          if(lCancelamento) then begin
+           if(lPedido='') then
+              lPedido := textoEntreTags(lLinha.strings.Strings[0],'_','_');
+            break;
+          end;
+        end;
+
+        if(lLinha.strings.Count < 5 ) then begin
+          pResultado.formataErro('processaArquivoExpedicao [%s]: Registro %d não possui 5 campos especificados: %d', [ lArquivo, (i + 1), lLinha.strings.Count ] );
           continue;
         end;
-        for lTmp in lListaIMEIS do begin
-          gdbPadrao.insereDB('movimento_serial',
-              ['tipo_serial','numero','produto','tipo_documento','id_documento'],
-              ['I',lTmp,lProduto,'P',lPedido]);
+
+        if(lPedido='') then begin
+          lPedido := lLinha.strings.Strings[0];
+          if (lPedido='') or(Length(lPedido)>6) then begin
+            pResultado.formataErro('processaArquivoExpedicao [%s]: Número de pedido inválido: %s', [ lArquivo, lPedido ] );
+            break;
+          end;
+          lRes := pResultado.getSavePoint('so.' + lPedido);
+          lDSEntrada := gdbPadrao.criaDataset.query( 'select p.numero_ped id, p.* from pedidovenda p where p.numero_ped=:id', 'id', [ lPedido ]);
+          if(lDSEntrada.dataset.RecordCount=0) then begin
+            pResultado.formataErro('processaArquivoExpedicao [%s]: Pedido [%s] não existe.', [ lArquivo, lPedido ] );
+            break;
+          end else if(ctr.getValor(CONTROLE_LOGISTICA_STATUS_VENDA, lDSEntrada.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
+            pResultado.formataErro('processaArquivoExpedicao [%s]: Pedido [%s] não está no status ENVIADO: [%s]', [ lArquivo, lPedido, ctr.getValor(CONTROLE_LOGISTICA_STATUS_VENDA, lDSEntrada.dataset.FieldByName('id').AsString,'') ] );
+            break;
+          end;
+
+          if(lDSItens=nil) then begin
+            lDSItens := gdbPadrao.criaDataset.query('select p.id id_item, p.numero_ped id, p.codigo_pro produto_id, p.quantidade_ped quantidade, 0 as quantidade_atendida from pedidoitens p ' +
+                                               ' where p.numero_ped = :id order by 1 ', 'id', [ lPedido ] );
+            if(lDSItens.dataset.RecordCount = 0 ) then begin
+              pResultado.formataErro('processaArquivoExpedicao: Pedido [%s]: Não possui itens na tabela de itens', [ lPedido ] );
+              break;
+            end;
+            lCDS := getCDSDataset(lDSItens.dataset);
+            lFieldQtde := lCDS.FindField('quantidade_atendida');
+          end;
+          if (lCDS = nil) or (lFieldQtde=nil) then begin
+            result.formataErro('processaArquivoExpedicao [%s]: Não possui itens na tabela de itens', [ lPedido ] );
+            break;
+          end;
         end;
+        lProduto := textoEntreTags(lLinha.strings.Strings[3],'','_');
+        if(lProduto='') then
+          lProduto := lLinha.strings.Strings[3];
 
-        lCDS.Next;
+        lIMEI    := lLinha.strings.Strings[4];
+        if not validaIMEI(lIMEI) then begin
+          pResultado.formataErro('processaArquivoExpedicao [%s]: IMEI [%s] inválido para item %d', [ lArquivo, lIMEI, i ] );
+          continue;
+        end;
+        if not lLista.get(lProduto,lListaIMEIS) then begin
+          lListaIMEIS := getStringList;
+          lLista.add(lProduto,lListaIMEIS);
+        end;
+        lListaIMEIS.Add(lIMEI);
+
+        lCDS.First;
+        while not lCDS.eof do begin
+          if(lCDS.FieldByName('produto_id').AsString = lProduto) then begin
+            lCDS.Edit;
+            lFieldQtde.AsCurrency := lFieldQtde.AsCurrency + 1.0;
+            lCDS.CheckBrowseMode;
+            break;
+          end;
+          lCDS.Next;
+        end;
+        if(lCDS.Eof) then begin
+          pResultado.formataErro('processaArquivoExpedicao Pedido[%s]: Não localizou o produto [%s]', [ lPedido, lProduto ] );
+          result.formataAviso('Pedido [%s] marcado como DIVERGENTE', [ lPedido ] );
+          divergenciaArquivoFedex(true,pResultado);
+          ctr.setValor(CONTROLE_LOGISTICA_STATUS_VENDA, lPedido, CONTROLE_LOGISTICA_STATUS_DIVERGENTE);
+          pResultado.acumulador['Pedidos divergentes'].incrementa;
+          exit;
+        end;
       end;
-      gdbPadrao.commit(true);
-      ctr.setValor(CONTROLE_LOGISTICA_STATUS_VENDA, lPedido,CONTROLE_LOGISTICA_STATUS_FINALIZADO);
-      apagarArquivoFedex(false,pResultado);
-    finally
-      gdbPadrao.rollback(true);
-    end;
 
-  except
-    on e: Exception do begin
-      pResultado.formataErro('processaArquivoExpedicao: %s: %s', [ e.ClassName, e.Message ] );
-      pResultado.acumulador['Saidas com problemas'].incrementa;
+      if(lCDS<>nil) then begin
+        lDivergencias := 0;
+        lCDS.First;
+        while not lCDS.Eof do begin
+          gdbPadrao.updateDB('pedidoitens', [ 'id' ], [ lCDS.FieldByName('id_item').AsInteger ], [ 'quantidade_atendida'], [ lFieldQtde.AsInteger ] );
+          if(lFieldQtde.AsInteger <> lCDS.FieldByName('quantidade').AsInteger) then begin
+            result.formataErro('processaArquivoExpedicao: Pedido [%s], Produto[%s] divergente na quantidade: Vendida: %d, Atendida: %d',
+            [ lPedido, lCDS.FieldByName('produto_id').AsString, lCDS.FieldByName('quantidade').AsInteger, lCDS.FieldByName('quantidade_atendida').AsInteger ] );
+            inc(lDivergencias);
+          end;
+          lCDS.Next;
+        end;
+        gdbPadrao.commit(true);
+      end;
+      if(lDivergencias>0) then begin
+        divergenciaArquivoFedex(true,pResultado);
+        pResultado.formataAviso('Pedido [%s] marcado como DIVERGENTE', [ lPedido ] );
+        ctr.setValor(CONTROLE_LOGISTICA_STATUS_VENDA, lPedido, CONTROLE_LOGISTICA_STATUS_DIVERGENTE);
+        result.acumulador['Pedidos divergentes'].incrementa;
+        exit;
+      end;
+
+      if(pResultado.erros<>lSave) then begin
+        rejeitarArquivoFedex(true,pResultado);
+        pResultado.acumulador['Saidas rejeitadas'].incrementa;
+        exit;
+      end;
+
+      try
+        lDSIMEI := gdbPadrao.criaDataset;
+        lCDS.First;
+        while not lCDS.eof do begin
+          lProduto := lCDS.FieldByName('produto_id').AsString;
+          if not lLista.get(lProduto,lListaIMEIS) then begin
+            pResultado.formataErro('processaArquivoExpedicao [%s]: Produto [%s] não possui IMEI de retorno', [ lArquivo, lProduto ] );
+            lDSItens.dataset.Next;
+            continue;
+          end;
+          for lTmp in lListaIMEIS do begin
+            gdbPadrao.insereDB('movimento_serial',
+                ['tipo_serial','numero','produto','tipo_documento','id_documento'],
+                ['I',lTmp,lProduto,'P',lPedido]);
+          end;
+
+          lCDS.Next;
+        end;
+        gdbPadrao.commit(true);
+        ctr.setValor(CONTROLE_LOGISTICA_STATUS_VENDA, lPedido,CONTROLE_LOGISTICA_STATUS_FINALIZADO);
+        apagarArquivoFedex(false,pResultado);
+      finally
+        gdbPadrao.rollback(true);
+      end;
+
+    except
+      on e: Exception do begin
+        pResultado.formataErro('processaArquivoExpedicao: %s: %s', [ e.ClassName, e.Message ] );
+        pResultado.acumulador['Saidas com problemas'].incrementa;
+      end;
+    end;
+  finally
+    if assigned(lRes) and assigned(ctr) then begin
+      pAPI.parameters.controleAlteracoes.setValor(CONTROLE_LOGISTICA_RESULTADO_ENTRADA,lPedido,
+          lRes.toHTML('', 'Resultado de processamento do retorno da FEDEX @' + DateTimeToStr(Now), [ orosh_semHeader ]));
+      pResultado.getSavePoint('');
     end;
   end;
+
 end;
 
 {$ENDREGION}
@@ -288,202 +303,238 @@ function processaArquivoRecebimento(pUnkAPI: IUnknown; pResultado: IResultadoOpe
     lLista: IDicionarioSimples<TipoWideStringFramework,IListaString>;
     lListaIMEIS: IListaString;
     pAPI: IFedexAPI;
+    lRes: IResultadoOperacao;
+    lID: TipoWideStringFramework;
 begin
   //processamento entrada
 
   Result := checkResultadoOperacao(pResultado);
+  lID := '';
   lSave := pResultado.erros;
+  lRes := nil;
+  ctr := nil;
   lLista := TListaSimplesCreator.CreateDictionary<TipoWideStringFramework,IListaString>;
   try
-    if not Supports(pUnkAPI,IFedexAPI, pAPI) then begin
-      pResultado.adicionaErro('processaArquivoRecebimento: API não definida.');
-      exit;
-    end;
-    if(gdbPadrao=nil)or(gdbPadrao.conectado=false) then begin
-      pResultado.adicionaErro('processaArquivoRecebimento: GDB não definido.');
-      exit;
-    end;
-    lArquivo := pResultado.propriedade['ARQUIVO'].asString;
-    if (lArquivo='') or not FileExists(lArquivo) then begin
-      pResultado.formataErro('processaArquivoRecebimento: arquivo [%s] não existe.', [lArquivo]);
-      pResultado.acumulador['Entradas rejeitadas'].incrementa;
-      rejeitarArquivoFedex(true,pResultado);
-      exit;
-    end;
-    if (pAPI=nil) or (pAPI.parameters.depositante.cnpj='') then begin
-      pResultado.formataErro('processaArquivoRecebimento: Não especificou um API/DEPOSITANTE válido.', [lArquivo]);
-      exit;
-    end;
-    ctr := pAPI.parameters.controleAlteracoes;
-    if(ctr=nil) then begin
-      pResultado.adicionaErro('processaArquivoRecebimento: Controle de alterações não definido.');
-      exit;
-    end;
-
-    lTexto := novaListaTexto;
-    lLinha := novaListaTexto;
-    lLinha.strings.Delimiter := '|';
-    lTexto.strings.LoadFromFile(lArquivo);
-
-    lNF := '';
-    lCNPJ := '';
-
-    if(lTexto.lines.Count<1) then begin
-      pResultado.formataErro('processaArquivoRecebimento: arquivo [%s] não possui dados validos.', [lArquivo]);
-      pResultado.acumulador['Entradas rejeitadas'].incrementa;
-      rejeitarArquivoFedex(true,pResultado);
-      exit;
-    end;
-
-    for i := 0 to lTexto.lines.Count - 1 do begin
-      lLinha.strings.DelimitedText := lTexto.strings.Strings[i];
-      if(lLinha.strings.Count < 4 ) then begin
-        pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui 4 campos especificados: %d', [ lArquivo, (i + 1), lLinha.strings.Count ] )
-      end;
-      if(lNF='') then
-        lNF := lLinha.strings.Strings[0];
-      if(lCNPJ='') then
-        lCNPJ    := lLinha.strings.Strings[1];
-
-      if(lNF<>lLinha.strings.Strings[0]) then
-        pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui Número de NF igual ao início: [%s] e [%s]', [ lArquivo, (i + 1), lNF, lLinha.strings.Strings[0] ] );
-
-      if(lCNPJ<>lLinha.strings.Strings[1]) then begin
-        pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui CNPJ igual ao início: [%s] e [%s]', [ lArquivo, (i + 1), lCNPJ, lLinha.strings.Strings[1] ] )
-      end;
-
-      lProduto := textoEntreTags(lLinha.strings.Strings[2],'','_');
-
-      if(lProduto='') then
-        lProduto := lLinha.strings.Strings[2];
-
-      lIMEI    := lLinha.strings.Strings[3];
-      if not validaIMEI(lIMEI) then begin
-        pResultado.formataErro('processaArquivoRecebimento [%s]: IMEI [%s] inválido para item %d', [ lArquivo, lIMEI, i ] );
-        continue;
-      end;
-
-      if not lLista.get(lProduto,lListaIMEIS) then begin
-        lListaIMEIS := getStringList;
-        lLista.add(lProduto,lListaIMEIS);
-      end;
-      lListaIMEIS.Add(lIMEI);
-
-    end;
-    if(pResultado.erros<>lSave) then begin
-      rejeitarArquivoFedex(true,pResultado);
-      pResultado.acumulador['Entradas rejeitadas'].incrementa;
-      exit;
-    end;
-
-    lTransferencia := (copy(lCNPJ,1,8) = copy(pAPI.parameters.depositante.cnpj,1,8)) and (lCNPJ<>pAPI.parameters.depositante.cnpj);
-
-    lDSIMEI := gdbPadrao.criaDataset;
-
-    lDSFornecedor := gdbPadrao.criaDataset.query('select f.id, f.codigo_for from fornecedor f where f.cnpj_cpf_for = :cnpj',
-      'cnpj', [ lCNPJ ] );
-
-    if(lDSFornecedor.dataset.RecordCount=0) then begin
-      pResultado.formataErro('processaArquivoRecebimento [%s]: Fornecedor [%s] não existe', [ lArquivo, lCNPJ ] );
-      rejeitarArquivoFedex(true,pResultado);
-      pResultado.acumulador['Entradas rejeitadas'].incrementa;
-      exit;
-    end;
-
-    lDSEntrada := gdbPadrao.criaDataset.query('select e.* from entrada e ' +
-            ' where e.codigo_for = :fornecedor and e.numero_ent =:numero ',
-
-            'fornecedor;numero', [ lDSFornecedor.fieldByName('codigo_for').AsString, lNF ] );
-
-    if(lDSEntrada.dataset.RecordCount=0) then begin
-      pResultado.formataErro('processaArquivoRecebimento: NF [%s] do Fornecedor [%s] não existe ou já foi processada',
-        [ lNF, lCNPJ ] );
-      pResultado.propriedade['ACAO_ARQUIVO'].asString := FEDEX_ACAOARQUIVO_REJEITAR;
-      result.acumulador['Entradas rejeitadas'].incrementa;
-      exit;
-    end else if(ctr.getValor(CONTROLE_LOGISTICA_STATUS_ENTRADA, lDSEntrada.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
-      pResultado.acumulador['Entradas divergentes'].incrementa;
-      rejeitarArquivoFedex(true,pResultado);
-      exit;
-    end;
-
-    lDSItens := gdbPadrao.criaDataset.query('select e.* from entradaitens e ' +
-        ' where e.codigo_for = :fornecedor and e.numero_ent =:numero ', 'fornecedor;numero', [ lDSFornecedor.fieldByName('codigo_for').AsString, lNF]);
-
-    if(lDSItens.dataset.RecordCount=0) then begin
-      pResultado.acumulador['Entradas divergentes'].incrementa;
-      rejeitarArquivoFedex(true,pResultado);
-      exit;
-    end;
-
     try
+      if not Supports(pUnkAPI,IFedexAPI, pAPI) then begin
+        pResultado.adicionaErro('processaArquivoRecebimento: API não definida.');
+        exit;
+      end;
+      if(gdbPadrao=nil)or(gdbPadrao.conectado=false) then begin
+        pResultado.adicionaErro('processaArquivoRecebimento: GDB não definido.');
+        exit;
+      end;
+      lArquivo := pResultado.propriedade['ARQUIVO'].asString;
+      if (lArquivo='') or not FileExists(lArquivo) then begin
+        pResultado.formataErro('processaArquivoRecebimento: arquivo [%s] não existe.', [lArquivo]);
+        pResultado.acumulador['Entradas rejeitadas'].incrementa;
+        rejeitarArquivoFedex(true,pResultado);
+        exit;
+      end;
+      if (pAPI=nil) or (pAPI.parameters.depositante.cnpj='') then begin
+        pResultado.formataErro('processaArquivoRecebimento: Não especificou um API/DEPOSITANTE válido.', [lArquivo]);
+        exit;
+      end;
+      ctr := pAPI.parameters.controleAlteracoes;
+      if(ctr=nil) then begin
+        pResultado.adicionaErro('processaArquivoRecebimento: Controle de alterações não definido.');
+        exit;
+      end;
 
-      while not lDSItens.dataset.eof do begin
-        lProduto := lDSItens.dataset.FieldByName('codigo_pro').AsString;;
+      lTexto := novaListaTexto;
+      lLinha := novaListaTexto;
+      lLinha.strings.Delimiter := '|';
+      lTexto.strings.LoadFromFile(lArquivo);
+
+      lNF := '';
+      lCNPJ := '';
+
+      if(lTexto.lines.Count<1) then begin
+        pResultado.formataErro('processaArquivoRecebimento: arquivo [%s] não possui dados validos.', [lArquivo]);
+        pResultado.acumulador['Entradas rejeitadas'].incrementa;
+        rejeitarArquivoFedex(true,pResultado);
+        exit;
+      end;
+
+      for i := 0 to lTexto.lines.Count - 1 do begin
+        lLinha.strings.DelimitedText := lTexto.strings.Strings[i];
+        if(lLinha.strings.Count < 4 ) then begin
+          pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui 4 campos especificados: %d', [ lArquivo, (i + 1), lLinha.strings.Count ] )
+        end;
+
+        if(lCNPJ='') then begin
+          lCNPJ    := lLinha.strings.Strings[1];
+          lDSFornecedor := gdbPadrao.criaDataset.query('select f.id, f.codigo_for from fornecedor f where f.cnpj_cpf_for = :cnpj',
+            'cnpj', [ lCNPJ ] );
+
+          if(lDSFornecedor.dataset.RecordCount=0) then begin
+            pResultado.formataErro('processaArquivoRecebimento [%s]: Fornecedor [%s] não existe', [ lArquivo, lCNPJ ] );
+            rejeitarArquivoFedex(true,pResultado);
+            pResultado.acumulador['Entradas rejeitadas'].incrementa;
+            exit;
+          end;
+        end;
+
+        if(lNF='') then begin
+          lNF := lLinha.strings.Strings[0];
+          lDSEntrada := gdbPadrao.criaDataset.query('select e.* from entrada e ' +
+              ' where e.codigo_for = :fornecedor and e.numero_ent =:numero ',
+
+              'fornecedor;numero', [ lDSFornecedor.fieldByName('codigo_for').AsString, lNF ] );
+          if(lDSEntrada.dataset.RecordCount=0) then begin
+            pResultado.formataErro('processaArquivoRecebimento: NF [%s] do Fornecedor [%s] não existe ou já foi processada',
+              [ lNF, lCNPJ ] );
+            pResultado.propriedade['ACAO_ARQUIVO'].asString := FEDEX_ACAOARQUIVO_REJEITAR;
+            result.acumulador['Entradas rejeitadas'].incrementa;
+            exit;
+          end else if(ctr.getValor(CONTROLE_LOGISTICA_STATUS_ENTRADA, lDSEntrada.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
+            pResultado.acumulador['Entradas divergentes'].incrementa;
+            rejeitarArquivoFedex(true,pResultado);
+            exit;
+          end;
+          lID := lDSEntrada.dataset.FieldByName('id').AsString;
+          lRes := pResultado.getSavePoint('po.' + lID);
+        end;
+
+        if(lNF<>lLinha.strings.Strings[0]) then
+          pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui Número de NF igual ao início: [%s] e [%s]', [ lArquivo, (i + 1), lNF, lLinha.strings.Strings[0] ] );
+
+        if(lCNPJ<>lLinha.strings.Strings[1]) then begin
+          pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui CNPJ igual ao início: [%s] e [%s]', [ lArquivo, (i + 1), lCNPJ, lLinha.strings.Strings[1] ] )
+        end;
+
+        lProduto := textoEntreTags(lLinha.strings.Strings[2],'','_');
+
+        if(lProduto='') then
+          lProduto := lLinha.strings.Strings[2];
+
+        lIMEI    := lLinha.strings.Strings[3];
+        if not validaIMEI(lIMEI) then begin
+          pResultado.formataErro('processaArquivoRecebimento [%s]: IMEI [%s] inválido para item %d', [ lArquivo, lIMEI, i ] );
+          continue;
+        end;
 
         if not lLista.get(lProduto,lListaIMEIS) then begin
-          pResultado.formataErro('processaArquivoRecebimento [%s]: Produto [%s] não possui IMEI de retorno', [ lArquivo, lProduto ] );
-          lDSItens.dataset.Next;
-          continue;
+          lListaIMEIS := getStringList;
+          lLista.add(lProduto,lListaIMEIS);
         end;
-        if(lDSItens.fieldByName('QUANTIDADE_ENT').AsFloat <> lListaIMEIS.Count) then begin
-          pResultado.formataErro('processaArquivoRecebimento [%s]: Produto [%s] não possui IMEI suficientes na entrada: %d', [ lArquivo, lProduto, lListaIMEIS.Count ] );
-          lDSItens.dataset.Next;
-          continue;
-        end;
-        for lTmp in lListaIMEIS do begin
-          gdbPadrao.insereDB('movimento_serial',
-              ['tipo_serial','numero','produto','tipo_documento','id_documento'],
-              ['I',lTmp,lProduto,'E',lDSEntrada.fieldByName('id').AsString]);
-        end;
-        lDSItens.dataset.Next;
-      end;
+        lListaIMEIS.Add(lIMEI);
 
+      end;
       if(pResultado.erros<>lSave) then begin
         rejeitarArquivoFedex(true,pResultado);
         pResultado.acumulador['Entradas rejeitadas'].incrementa;
         exit;
       end;
-      gdbPadrao.commit(true);
-      ctr.setValor(CONTROLE_LOGISTICA_STATUS_ENTRADA, lDSEntrada.dataset.FieldByName('id').AsString,CONTROLE_LOGISTICA_STATUS_FINALIZADO);
-      apagarArquivoFedex(false,pResultado);
-    finally
-      gdbPadrao.rollback(true);
-    end;
 
-{
-    for i := 0 to lTexto.strings.Count-1 do begin
-      lLinha.strings.DelimitedText := lTexto.strings.Strings[i];
-      lProduto := textoEntreTags(lLinha.strings.Strings[2],'','_');
+      lTransferencia := (copy(lCNPJ,1,8) = copy(pAPI.parameters.depositante.cnpj,1,8)) and (lCNPJ<>pAPI.parameters.depositante.cnpj);
 
-      if(lProduto='') then
-        lProduto := lLinha.strings.Strings[2];
+      lDSIMEI := gdbPadrao.criaDataset;
 
-      lIMEI    := lLinha.strings.Strings[3];
-      if not validaIMEI(lIMEI) then begin
-        pResultado.formataErro('processaArquivoRecebimento [%s]: IMEI [%s] inválido para item %d', [ lArquivo, lIMEI, i ] );
-        continue;
+
+      lDSEntrada := gdbPadrao.criaDataset.query('select e.* from entrada e ' +
+              ' where e.codigo_for = :fornecedor and e.numero_ent =:numero ',
+
+              'fornecedor;numero', [ lDSFornecedor.fieldByName('codigo_for').AsString, lNF ] );
+
+      if(lDSEntrada.dataset.RecordCount=0) then begin
+        pResultado.formataErro('processaArquivoRecebimento: NF [%s] do Fornecedor [%s] não existe ou já foi processada',
+          [ lNF, lCNPJ ] );
+        pResultado.propriedade['ACAO_ARQUIVO'].asString := FEDEX_ACAOARQUIVO_REJEITAR;
+        result.acumulador['Entradas rejeitadas'].incrementa;
+        exit;
+      end else if(ctr.getValor(CONTROLE_LOGISTICA_STATUS_ENTRADA, lDSEntrada.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
+        pResultado.acumulador['Entradas divergentes'].incrementa;
+        rejeitarArquivoFedex(true,pResultado);
+        exit;
       end;
 
-      if not lLista.get(lProduto,lListaIMEIS) then begin
-        lListaIMEIS := getStringList;
-        lLista.add(lProduto,lListaIMEIS);
-      end;
-      lListaIMEIS.Add(lIMEI);
-    end;
-    if(lSave<>pResultado.erros) then begin
-      pResultado.acumulador['Entradas rejeitadas'].incrementa;
-      rejeitarArquivoFedex(true,pResultado);
-      exit;
-    end;
-}
+      lDSItens := gdbPadrao.criaDataset.query('select e.* from entradaitens e ' +
+          ' where e.codigo_for = :fornecedor and e.numero_ent =:numero ', 'fornecedor;numero', [ lDSFornecedor.fieldByName('codigo_for').AsString, lNF]);
 
-  except
-    on e: Exception do begin
-      pResultado.formataErro('processaArquivoRecebimento: %s: %s', [ e.ClassName, e.Message ] );
-      pResultado.acumulador['Entradas com problemas'].incrementa;
+      if(lDSItens.dataset.RecordCount=0) then begin
+        pResultado.acumulador['Entradas divergentes'].incrementa;
+        rejeitarArquivoFedex(true,pResultado);
+        exit;
+      end;
+
+      try
+
+        while not lDSItens.dataset.eof do begin
+          lProduto := lDSItens.dataset.FieldByName('codigo_pro').AsString;;
+
+          if not lLista.get(lProduto,lListaIMEIS) then begin
+            pResultado.formataErro('processaArquivoRecebimento [%s]: Produto [%s] não possui IMEI de retorno', [ lArquivo, lProduto ] );
+            lDSItens.dataset.Next;
+            continue;
+          end;
+          if(lDSItens.fieldByName('QUANTIDADE_ENT').AsFloat <> lListaIMEIS.Count) then begin
+            pResultado.formataErro('processaArquivoRecebimento [%s]: Produto [%s] não possui IMEI suficientes na entrada: %d', [ lArquivo, lProduto, lListaIMEIS.Count ] );
+            lDSItens.dataset.Next;
+            continue;
+          end;
+          for lTmp in lListaIMEIS do begin
+            gdbPadrao.insereDB('movimento_serial',
+                ['tipo_serial','numero','produto','tipo_documento','id_documento'],
+                ['I',lTmp,lProduto,'E',lDSEntrada.fieldByName('id').AsString]);
+          end;
+          lDSItens.dataset.Next;
+        end;
+
+        if(pResultado.erros<>lSave) then begin
+          rejeitarArquivoFedex(true,pResultado);
+          pResultado.acumulador['Entradas rejeitadas'].incrementa;
+          exit;
+        end;
+        gdbPadrao.commit(true);
+        ctr.setValor(CONTROLE_LOGISTICA_STATUS_ENTRADA, lDSEntrada.dataset.FieldByName('id').AsString,CONTROLE_LOGISTICA_STATUS_FINALIZADO);
+        apagarArquivoFedex(false,pResultado);
+      finally
+        gdbPadrao.rollback(true);
+      end;
+
+  {
+      for i := 0 to lTexto.strings.Count-1 do begin
+        lLinha.strings.DelimitedText := lTexto.strings.Strings[i];
+        lProduto := textoEntreTags(lLinha.strings.Strings[2],'','_');
+
+        if(lProduto='') then
+          lProduto := lLinha.strings.Strings[2];
+
+        lIMEI    := lLinha.strings.Strings[3];
+        if not validaIMEI(lIMEI) then begin
+          pResultado.formataErro('processaArquivoRecebimento [%s]: IMEI [%s] inválido para item %d', [ lArquivo, lIMEI, i ] );
+          continue;
+        end;
+
+        if not lLista.get(lProduto,lListaIMEIS) then begin
+          lListaIMEIS := getStringList;
+          lLista.add(lProduto,lListaIMEIS);
+        end;
+        lListaIMEIS.Add(lIMEI);
+      end;
+      if(lSave<>pResultado.erros) then begin
+        pResultado.acumulador['Entradas rejeitadas'].incrementa;
+        rejeitarArquivoFedex(true,pResultado);
+        exit;
+      end;
+  }
+
+    except
+      on e: Exception do begin
+        pResultado.formataErro('processaArquivoRecebimento: %s: %s', [ e.ClassName, e.Message ] );
+        pResultado.acumulador['Entradas com problemas'].incrementa;
+      end;
+    end;
+
+  finally
+    if assigned(lRes) and assigned(ctr) then begin
+      pAPI.parameters.controleAlteracoes.setValor(CONTROLE_LOGISTICA_RESULTADO_ENTRADA,lID,
+          lRes.toHTML('', 'Resultado de processamento do retorno da FEDEX @' + DateTimeToStr(Now), [ orosh_semHeader ]));
+      pResultado.getSavePoint('');
     end;
   end;
+
 end;
 {$ENDREGION}
 
@@ -935,6 +986,12 @@ begin
   except
     on e: Exception do
       Result.formataErro('TLogisticaFedex.processaServico(enviaVenda): %s: %s', [e.ClassName, e.Message ] );
+  end;
+  try
+    Result := processaRetorno(Result);
+  except
+    on e: Exception do
+      Result.formataErro('TLogisticaFedex.processaServico(processaRetorno): %s: %s', [e.ClassName, e.Message ] );
   end;
 end;
 
