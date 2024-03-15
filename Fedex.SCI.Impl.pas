@@ -196,6 +196,11 @@ begin
           lListaIMEIS := getStringList;
           lLista.add(lProduto,lListaIMEIS);
         end;
+        if not (lListaIMEIS.IndexOf(lIMEI)<0) then begin
+          pResultado.formataErro('processaArquivoExpedicao [%s]: IMEI [%s] já informado para item %d', [ lArquivo, lIMEI, i ] );
+          continue;
+        end;
+
         lListaIMEIS.Add(lIMEI);
 
         lCDS.First;
@@ -418,6 +423,11 @@ begin
           lListaIMEIS := getStringList;
           lLista.add(lProduto,lListaIMEIS);
         end;
+        if not (lListaIMEIS.IndexOf(lIMEI)<0) then begin
+          pResultado.formataErro('processaArquivoRecebimento [%s]: IMEI [%s] já informado para item %d', [ lArquivo, lIMEI, i ] );
+          continue;
+        end;
+
         lListaIMEIS.Add(lIMEI);
 
       end;
