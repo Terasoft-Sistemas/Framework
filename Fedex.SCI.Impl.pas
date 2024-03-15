@@ -80,7 +80,7 @@ function processaArquivoExpedicao(pUnkAPI: IUnknown; pResultado: IResultadoOpera
     lTmp: TipoWideStringFramework;
     ctr: IControleAlteracoes;
     lDivergencias, lSave: Integer;
-    lDSEntrada,lDSItens,lDSIMEI: IDataset;
+    lDS,lDSItens,lDSIMEI,lMovimento: IDataset;
     lCancelamento: boolean;
     lLista: IDicionarioSimples<TipoWideStringFramework,IListaString>;
     lListaIMEIS: IListaString;
@@ -97,7 +97,7 @@ begin
   ctr := nil;
   pAPI := nil;
   lPedido := '';
-  lDSEntrada := nil;
+  lDS := nil;
   lDSItens := nil;
   lCDS := nil;
   lLista := TListaSimplesCreator.CreateDictionary<TipoWideStringFramework,IListaString>;
@@ -159,12 +159,12 @@ begin
             break;
           end;
           lRes := pResultado.getSavePoint('so.' + lPedido);
-          lDSEntrada := gdbPadrao.criaDataset.query( 'select p.numero_ped id, p.* from pedidovenda p where p.numero_ped=:id', 'id', [ lPedido ]);
-          if(lDSEntrada.dataset.RecordCount=0) then begin
+          lDS := gdbPadrao.criaDataset.query( 'select p.numero_ped id, p.* from pedidovenda p where p.numero_ped=:id', 'id', [ lPedido ]);
+          if(lDS.dataset.RecordCount=0) then begin
             pResultado.formataErro('processaArquivoExpedicao [%s]: Pedido [%s] não existe.', [ lArquivo, lPedido ] );
             break;
-          end else if(ctr.getValor(CONTROLE_LOGISTICA_STATUS_VENDA, lDSEntrada.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
-            pResultado.formataErro('processaArquivoExpedicao [%s]: Pedido [%s] não está no status ENVIADO: [%s]', [ lArquivo, lPedido, ctr.getValor(CONTROLE_LOGISTICA_STATUS_VENDA, lDSEntrada.dataset.FieldByName('id').AsString,'') ] );
+          end else if(ctr.getValor(CONTROLE_LOGISTICA_STATUS_VENDA, lDS.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
+            pResultado.formataErro('processaArquivoExpedicao [%s]: Pedido [%s] não está no status ENVIADO: [%s]', [ lArquivo, lPedido, ctr.getValor(CONTROLE_LOGISTICA_STATUS_VENDA, lDS.dataset.FieldByName('id').AsString,'') ] );
             break;
           end;
 
@@ -252,7 +252,17 @@ begin
       end;
 
       try
+
+        lMovimento := gdbPadrao.criaDataset.query('select * from movimento_serial s where s.tipo_documento = ''P'' and id_documento=:id ', 'id', [ lPedido ]);
+        if(lMovimento.dataset.RecordCount>0) then begin
+          rejeitarArquivoFedex(true,pResultado);
+          pResultado.formataErro('processaArquivoRecebimento [%s]: Já possui movimento de seriais para esse pedido [%s]', [ lArquivo, lPedido ] );
+          pResultado.acumulador['Saidas rejeitadas'].incrementa;
+          exit;
+        end;
+
         lDSIMEI := gdbPadrao.criaDataset;
+
         lCDS.First;
         while not lCDS.eof do begin
           lProduto := lCDS.FieldByName('produto_id').AsString;
@@ -303,7 +313,7 @@ function processaArquivoRecebimento(pUnkAPI: IUnknown; pResultado: IResultadoOpe
     i: Integer;
     lSave: Integer;
     lTransferencia: boolean;
-    lMovimento, lDSIMEI, lDSFornecedor, lDSEntrada, lDSItens: IDataset;
+    lMovimento, lDSIMEI, lDSFornecedor, lDS, lDSItens: IDataset;
     ctr: IControleAlteracoes;
     lLista: IDicionarioSimples<TipoWideStringFramework,IListaString>;
     lListaIMEIS: IListaString;
@@ -382,22 +392,22 @@ begin
 
         if(lNF='') then begin
           lNF := lLinha.strings.Strings[0];
-          lDSEntrada := gdbPadrao.criaDataset.query('select e.* from entrada e ' +
+          lDS := gdbPadrao.criaDataset.query('select e.* from entrada e ' +
               ' where e.codigo_for = :fornecedor and e.numero_ent =:numero ',
 
               'fornecedor;numero', [ lDSFornecedor.fieldByName('codigo_for').AsString, lNF ] );
-          if(lDSEntrada.dataset.RecordCount=0) then begin
+          if(lDS.dataset.RecordCount=0) then begin
             pResultado.formataErro('processaArquivoRecebimento: NF [%s] do Fornecedor [%s] não existe ou já foi processada',
               [ lNF, lCNPJ ] );
             pResultado.propriedade['ACAO_ARQUIVO'].asString := FEDEX_ACAOARQUIVO_REJEITAR;
             result.acumulador['Entradas rejeitadas'].incrementa;
             exit;
-          end else if(ctr.getValor(CONTROLE_LOGISTICA_STATUS_ENTRADA, lDSEntrada.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
+          end else if(ctr.getValor(CONTROLE_LOGISTICA_STATUS_ENTRADA, lDS.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
             pResultado.acumulador['Entradas divergentes'].incrementa;
             rejeitarArquivoFedex(true,pResultado);
             exit;
           end;
-          lID := lDSEntrada.dataset.FieldByName('id').AsString;
+          lID := lDS.dataset.FieldByName('id').AsString;
           lRes := pResultado.getSavePoint('po.' + lID);
         end;
 
@@ -442,18 +452,18 @@ begin
       lDSIMEI := gdbPadrao.criaDataset;
 
 
-      lDSEntrada := gdbPadrao.criaDataset.query('select e.* from entrada e ' +
+      lDS := gdbPadrao.criaDataset.query('select e.* from entrada e ' +
               ' where e.codigo_for = :fornecedor and e.numero_ent =:numero ',
 
               'fornecedor;numero', [ lDSFornecedor.fieldByName('codigo_for').AsString, lNF ] );
 
-      if(lDSEntrada.dataset.RecordCount=0) then begin
+      if(lDS.dataset.RecordCount=0) then begin
         pResultado.formataErro('processaArquivoRecebimento: NF [%s] do Fornecedor [%s] não existe ou já foi processada',
           [ lNF, lCNPJ ] );
         pResultado.propriedade['ACAO_ARQUIVO'].asString := FEDEX_ACAOARQUIVO_REJEITAR;
         result.acumulador['Entradas rejeitadas'].incrementa;
         exit;
-      end else if(ctr.getValor(CONTROLE_LOGISTICA_STATUS_ENTRADA, lDSEntrada.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
+      end else if(ctr.getValor(CONTROLE_LOGISTICA_STATUS_ENTRADA, lDS.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
         pResultado.acumulador['Entradas divergentes'].incrementa;
         rejeitarArquivoFedex(true,pResultado);
         exit;
@@ -470,14 +480,13 @@ begin
 
       try
 
-        lMovimento := gdbPadrao.criaDataset.query('select * from movimento_serial s where s.tipo_documento = ''E'' and id_documento=:id ', 'id', [ lDSEntrada.fieldByName('id').AsString ]);
+        lMovimento := gdbPadrao.criaDataset.query('select * from movimento_serial s where s.tipo_documento = ''E'' and id_documento=:id ', 'id', [ lDS.fieldByName('id').AsString ]);
         if(lMovimento.dataset.RecordCount>0) then begin
           rejeitarArquivoFedex(true,pResultado);
-          pResultado.formataErro('processaArquivoRecebimento [%s]: Já possui movimento de seriais para essa entrada [%s]', [ lArquivo, lDSEntrada.fieldByName('id').AsString ] );
+          pResultado.formataErro('processaArquivoRecebimento [%s]: Já possui movimento de seriais para essa entrada [%s]', [ lArquivo, lDS.fieldByName('id').AsString ] );
           pResultado.acumulador['Entradas rejeitadas'].incrementa;
           exit;
         end;
-
 
         while not lDSItens.dataset.eof do begin
           lProduto := lDSItens.dataset.FieldByName('codigo_pro').AsString;;
@@ -495,7 +504,7 @@ begin
           for lTmp in lListaIMEIS do begin
             gdbPadrao.insereDB('movimento_serial',
                 ['tipo_serial','numero','produto','tipo_documento','id_documento'],
-                ['I',lTmp,lProduto,'E',lDSEntrada.fieldByName('id').AsString]);
+                ['I',lTmp,lProduto,'E',lDS.fieldByName('id').AsString]);
           end;
           lDSItens.dataset.Next;
         end;
@@ -506,7 +515,7 @@ begin
           exit;
         end;
         gdbPadrao.commit(true);
-        ctr.setValor(CONTROLE_LOGISTICA_STATUS_ENTRADA, lDSEntrada.dataset.FieldByName('id').AsString,CONTROLE_LOGISTICA_STATUS_FINALIZADO);
+        ctr.setValor(CONTROLE_LOGISTICA_STATUS_ENTRADA, lDS.dataset.FieldByName('id').AsString,CONTROLE_LOGISTICA_STATUS_FINALIZADO);
         apagarArquivoFedex(false,pResultado);
       finally
         gdbPadrao.rollback(true);
