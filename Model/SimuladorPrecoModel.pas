@@ -147,9 +147,6 @@ begin
   if not (FVALOR_AQUISICAO > 0) then
     CriaException('Valor de aquisição deve ser informado.');
 
-  if not (FPERCENTUAL_MARGEM > 0) then
-    CriaException('Valor de margem deve ser informado.');
-
   lValorFrete := PERCENTUAL_FRETE / 100 * VALOR_AQUISICAO;
 
   if TIPO_FRETE = 'CIF' then
