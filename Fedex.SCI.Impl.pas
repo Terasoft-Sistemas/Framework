@@ -303,7 +303,7 @@ function processaArquivoRecebimento(pUnkAPI: IUnknown; pResultado: IResultadoOpe
     i: Integer;
     lSave: Integer;
     lTransferencia: boolean;
-    lDSIMEI, lDSFornecedor, lDSEntrada, lDSItens: IDataset;
+    lMovimento, lDSIMEI, lDSFornecedor, lDSEntrada, lDSItens: IDataset;
     ctr: IControleAlteracoes;
     lLista: IDicionarioSimples<TipoWideStringFramework,IListaString>;
     lListaIMEIS: IListaString;
@@ -469,6 +469,15 @@ begin
       end;
 
       try
+
+        lMovimento := gdbPadrao.criaDataset.query('select * from movimento_serial s where s.tipo_documento = ''E'' and id_documento=:id ', 'id', [ lDSEntrada.fieldByName('id').AsString ]);
+        if(lMovimento.dataset.RecordCount>0) then begin
+          rejeitarArquivoFedex(true,pResultado);
+          pResultado.formataErro('processaArquivoRecebimento [%s]: Já possui movimento de seriais para essa entrada [%s]', [ lArquivo, lDSEntrada.fieldByName('id').AsString ] );
+          pResultado.acumulador['Entradas rejeitadas'].incrementa;
+          exit;
+        end;
+
 
         while not lDSItens.dataset.eof do begin
           lProduto := lDSItens.dataset.FieldByName('codigo_pro').AsString;;
