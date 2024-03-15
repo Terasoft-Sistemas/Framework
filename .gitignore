@@ -4,3 +4,4 @@ __recovery
 *.exe
 *.dcu
 *.local
+*.identcache
