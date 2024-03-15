@@ -206,13 +206,13 @@ begin
     lSQL := lSQL + FWhereView;
 
   if FIDRecordView <> 0  then
-    lSQL := lSQL + ' and id = '+IntToStr(FIDRecordView);
+    lSQL := lSQL + ' and CONTASPAGARITENS.ID = ' +IntToStr(FIDRecordView);
 
   if not FDuplicataView.IsEmpty then
-    lSQL := lSQL + ' and DUPLIACATA_PAG = '+ QuotedStr(FDuplicataView);
+    lSQL := lSQL + ' and CONTASPAGARITENS.DUPLIACATA_PAG = ' +QuotedStr(FDuplicataView);
 
   if not FFornecedorView.IsEmpty then
-    lSQL := lSQL + ' and CODIGO_FOR = '+ QuotedStr(FFornecedorView);
+    lSQL := lSQL + ' and CONTASPAGARITENS.CODIGO_FOR = ' +QuotedStr(FFornecedorView);
 
   Result := lSQL;
 end;
