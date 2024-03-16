@@ -679,6 +679,8 @@ begin
     Result        := lEntradaLista.obterLista;
     FTotalRecords := lEntradaLista.TotalRecords;
 
+    //Teste
+
   finally
     lEntradaLista.Free;
   end;
