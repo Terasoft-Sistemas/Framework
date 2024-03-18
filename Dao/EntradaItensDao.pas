@@ -29,6 +29,14 @@ type
     FWhereView: String;
     FTotalRecords: Integer;
     FIDEntrada: String;
+    FCONCILIACAO_VALOR_UNIDADE: Real;
+    FCONCILIACAO_NOME_PRODUTO: String;
+    FCONCILIACAO_QUANTIDADE: Real;
+    FCONCILIACAO_ORIGEM: String;
+    FCONCILIACAO_DIVISOR: Real;
+    FCONCILIACAO_MULTIPLICADOR: Real;
+    FCONCILIACAO_ID_PRODUTO: String;
+    FCONCILIACAO_UNIDADE_PRODUTO: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
     procedure SetID(const Value: Variant);
@@ -41,8 +49,27 @@ type
 
     function where: String;
     procedure SetIDEntrada(const Value: String);
+    procedure SetCONCILIACAO_DIVISOR(const Value: Real);
+    procedure SetCONCILIACAO_ID_PRODUTO(const Value: String);
+    procedure SetCONCILIACAO_MULTIPLICADOR(const Value: Real);
+    procedure SetCONCILIACAO_NOME_PRODUTO(const Value: String);
+    procedure SetCONCILIACAO_ORIGEM(const Value: String);
+    procedure SetCONCILIACAO_QUANTIDADE(const Value: Real);
+    procedure SetCONCILIACAO_UNIDADE_PRODUTO(const Value: String);
+    procedure SetCONCILIACAO_VALOR_UNIDADE(const Value: Real);
 
   public
+
+    property CONCILIACAO_ID_PRODUTO      :String read FCONCILIACAO_ID_PRODUTO write SetCONCILIACAO_ID_PRODUTO;
+    property CONCILIACAO_NOME_PRODUTO    :String read FCONCILIACAO_NOME_PRODUTO write SetCONCILIACAO_NOME_PRODUTO;
+    property CONCILIACAO_UNIDADE_PRODUTO :String read FCONCILIACAO_UNIDADE_PRODUTO write SetCONCILIACAO_UNIDADE_PRODUTO;
+    property CONCILIACAO_ORIGEM          :String read FCONCILIACAO_ORIGEM write SetCONCILIACAO_ORIGEM;
+    property CONCILIACAO_QUANTIDADE      :Real read FCONCILIACAO_QUANTIDADE write SetCONCILIACAO_QUANTIDADE;
+    property CONCILIACAO_VALOR_UNIDADE   :Real read FCONCILIACAO_VALOR_UNIDADE write SetCONCILIACAO_VALOR_UNIDADE;
+    property CONCILIACAO_DIVISOR         :Real read FCONCILIACAO_DIVISOR write SetCONCILIACAO_DIVISOR;
+    property CONCILIACAO_MULTIPLICADOR   :Real read FCONCILIACAO_MULTIPLICADOR write SetCONCILIACAO_MULTIPLICADOR;
+
+    procedure ConciliaItemEntrada;
 
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -75,6 +102,75 @@ uses
   System.Rtti;
 
 { TEntradaItens }
+
+procedure TEntradaItensDao.ConciliaItemEntrada;
+var
+  lQry: TFDQuery;
+  lSQL:String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+    lSQL :=
+            ' select                                                                                  '+
+            '     p2.codigo_pro VINCULO_FORNECEDOR_CODIGO,                                            '+
+            '     p2.nome_pro PRODUTO_NOME_FORNEC,                                                    '+
+            '     p2.unidade_pro MEDIDA_NOME_FORNEC,                                                  '+
+            '     p2.divizor DIVISOR_FORNEC,                                                          '+
+            '     p2.multiplicador MULTIPLICADOR_FORNEC,                                              '+
+            '     p.codigo_pro VINCULO_EAN,                                                           '+
+            '     p.nome_pro PRODUTO_NOME_EAN,                                                        '+
+            '     p.unidade_pro MEDIDA_NOME_EAN,                                                      '+
+            '     p.divizor DIVISOR_EAN,                                                              '+
+            '     p.multiplicador MULTIPLICADOR_EAN                                                   '+
+
+            ' from                                                                                    '+
+            '     entradaitens i                                                                      '+
+
+            ' left join entrada e on e.numero_ent = i.numero_ent and e.codigo_for = i.codigo_for      '+
+            ' left join fornecedor f on f.codigo_for = e.codigo_for                                   '+
+            ' left join produto p on p.barras_pro = i.cean                                            '+
+            ' left join produto p2 on p2.codigo_fornecedor = i.cprod and p2.codigo_for = e.codigo_for '+
+
+            ' where i.id = ' + FIDRecordView.ToString;
+
+    lQry.Open(lSQL);
+
+    if lQry.FieldByName('VINCULO_EAN').AsString <> '' then
+    begin
+      FCONCILIACAO_ID_PRODUTO      := lQry.FieldByName('VINCULO_EAN').AsString;
+      FCONCILIACAO_NOME_PRODUTO    := lQry.FieldByName('PRODUTO_NOME_EAN').AsString;
+      FCONCILIACAO_UNIDADE_PRODUTO := lQry.FieldByName('MEDIDA_NOME_EAN').AsString;
+      FCONCILIACAO_ORIGEM          := 'EAN';
+      FCONCILIACAO_DIVISOR         := lQry.FieldByName('DIVISOR_EAN').AsFloat;
+      FCONCILIACAO_MULTIPLICADOR   := lQry.FieldByName('MULTIPLICADOR_EAN').AsFloat;
+    end else
+    if lQry.FieldByName('VINCULO_FORNECEDOR_CODIGO').AsString <> '' then
+    begin
+      FCONCILIACAO_ID_PRODUTO    := lQry.FieldByName('VINCULO_FORNECEDOR_CODIGO').AsString;
+      FCONCILIACAO_NOME_PRODUTO  := lQry.FieldByName('PRODUTO_NOME_FORNEC').AsString;
+      FCONCILIACAO_UNIDADE_PRODUTO := lQry.FieldByName('MEDIDA_NOME_FORNEC').AsString;
+      FCONCILIACAO_ORIGEM        := 'FORNECEDOR';
+      FCONCILIACAO_DIVISOR       := lQry.FieldByName('DIVISOR_FORNEC').AsFloat;
+      FCONCILIACAO_MULTIPLICADOR := lQry.FieldByName('MULTIPLICADOR_FORNEC').AsFloat;
+    end else
+    begin
+      FCONCILIACAO_ID_PRODUTO      := '';
+      FCONCILIACAO_NOME_PRODUTO    := '';
+      FCONCILIACAO_UNIDADE_PRODUTO := '';
+      FCONCILIACAO_ORIGEM          := '';
+      FCONCILIACAO_DIVISOR         := 0;
+      FCONCILIACAO_MULTIPLICADOR   := 0;
+    end;
+
+    lQry.Close;
+
+  finally
+    lQry.Free;
+  end;
+end;
+
+
 
 function TEntradaItensDao.carregaClasse(pID: String): TEntradaItensModel;
 var
@@ -362,6 +458,46 @@ begin
   finally
     lQry.Free;
   end;
+end;
+
+procedure TEntradaItensDao.SetCONCILIACAO_DIVISOR(const Value: Real);
+begin
+  FCONCILIACAO_DIVISOR := Value;
+end;
+
+procedure TEntradaItensDao.SetCONCILIACAO_ID_PRODUTO(const Value: String);
+begin
+  FCONCILIACAO_ID_PRODUTO := Value;
+end;
+
+procedure TEntradaItensDao.SetCONCILIACAO_MULTIPLICADOR(const Value: Real);
+begin
+  FCONCILIACAO_MULTIPLICADOR := Value;
+end;
+
+procedure TEntradaItensDao.SetCONCILIACAO_NOME_PRODUTO(const Value: String);
+begin
+  FCONCILIACAO_NOME_PRODUTO := Value;
+end;
+
+procedure TEntradaItensDao.SetCONCILIACAO_ORIGEM(const Value: String);
+begin
+  FCONCILIACAO_ORIGEM := Value;
+end;
+
+procedure TEntradaItensDao.SetCONCILIACAO_QUANTIDADE(const Value: Real);
+begin
+  FCONCILIACAO_QUANTIDADE := Value;
+end;
+
+procedure TEntradaItensDao.SetCONCILIACAO_UNIDADE_PRODUTO(const Value: String);
+begin
+  FCONCILIACAO_UNIDADE_PRODUTO := Value;
+end;
+
+procedure TEntradaItensDao.SetCONCILIACAO_VALOR_UNIDADE(const Value: Real);
+begin
+  FCONCILIACAO_VALOR_UNIDADE := Value;
 end;
 
 procedure TEntradaItensDao.SetCountView(const Value: String);

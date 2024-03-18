@@ -1423,7 +1423,7 @@ procedure TForm1.Button56Click(Sender: TObject);
 var
   lEntradaModel      : TEntradaModel;
   lEntradaItensModel : TEntradaItensModel;
-  lEntrada           : String;
+  lEntrada           : TEntradaResultado;
   lTableEntrada,
   lTableItens        : TFDMemTable;
 begin
@@ -1445,13 +1445,13 @@ begin
         lEntradaModel.PathXML := OpenDialog.FileName;
         lEntrada := lEntradaModel.importaXML;
 
-        if lEntrada <> '' then
+        if lEntrada.NUMERO_ENT <> '' then
         begin
-          lEntradaModel.NumeroView := lEntrada;
+          lEntradaModel.NumeroView := lEntrada.NUMERO_ENT;
           lTableEntrada            := lEntradaModel.obterLista;
           dsEntrada.DataSet        := lTableEntrada;
 
-          lEntradaItensModel.IDEntrada := lEntrada;
+          lEntradaItensModel.IDEntrada := lEntrada.NUMERO_ENT;
           lTableItens                  := lEntradaItensModel.obterLista;
           dsEntradaItens.DataSet       := lTableitens;
         end;
