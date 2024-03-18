@@ -1429,30 +1429,36 @@ var
 begin
   lEntradaModel      := TEntradaModel.Create(vIConexao);
   lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
+
   try
-    OpenDialog.FileName   := '';
-    OpenDialog.Title      := 'Selecione a NFE';
-    OpenDialog.DefaultExt := '*.XML';
-    OpenDialog.Filter     := 'Arquivos NFE (*.XML)|*.XML|Arquivos XML (*-nfe.XML)|*-nfe.XML|Todos os Arquivos (*.*)|*.*';
-    OpenDialog.InitialDir := '%homepath%\documents\';
+    try
+      OpenDialog.FileName   := '';
+      OpenDialog.Title      := 'Selecione a NFE';
+      OpenDialog.DefaultExt := '*.XML';
+      OpenDialog.Filter     := 'Arquivos NFE (*.XML)|*.XML|Arquivos XML (*-nfe.XML)|*-nfe.XML|Todos os Arquivos (*.*)|*.*';
+      OpenDialog.InitialDir := '%homepath%\documents\';
 
-    OpenDialog.Execute;
+      OpenDialog.Execute;
 
-    if FileExists(OpenDialog.FileName) then
-    begin
-      lEntradaModel.PathXML := OpenDialog.FileName;
-      lEntrada := lEntradaModel.importaXML;
-
-      if lEntrada <> '' then
+      if FileExists(OpenDialog.FileName) then
       begin
-        lEntradaModel.NumeroView := lEntrada;
-        lTableEntrada            := lEntradaModel.obterLista;
-        dsEntrada.DataSet        := lTableEntrada;
+        lEntradaModel.PathXML := OpenDialog.FileName;
+        lEntrada := lEntradaModel.importaXML;
 
-        lEntradaItensModel.IDEntrada := lEntrada;
-        lTableItens                  := lEntradaItensModel.obterLista;
-        dsEntradaItens.DataSet       := lTableitens;
+        if lEntrada <> '' then
+        begin
+          lEntradaModel.NumeroView := lEntrada;
+          lTableEntrada            := lEntradaModel.obterLista;
+          dsEntrada.DataSet        := lTableEntrada;
+
+          lEntradaItensModel.IDEntrada := lEntrada;
+          lTableItens                  := lEntradaItensModel.obterLista;
+          dsEntradaItens.DataSet       := lTableitens;
+        end;
       end;
+    except
+      on E:Exception do
+        ShowMessage('Erro: ' + E.Message);
     end;
   finally
     lEntradaModel.Free;

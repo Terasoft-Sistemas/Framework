@@ -394,29 +394,46 @@ end;
 function TEntradaModel.importaCabecalho: String;
 var
  i: Integer;
- lEntrada: String;
+ lEntrada,
+ lFornecedor: String;
+ lEntradaModel: TEntradaModel;
 begin
 
-  with ACBrNFe.NotasFiscais.Items[0] do
-  begin
-    self.FSTATUS                      := '1';
-    self.NUMERO_ENT                   := Format('%10.10d', [NFe.Ide.nNF]);
-    self.FSERIE_ENT                   := IntToStr(NFe.Ide.serie);
-    self.FMODELO_ENT                  := IntToStr(NFe.Ide.modelo);
-    self.FCODIGO_FOR                  := Self.ObterFornecedor(NFe.Emit.CNPJCPF);
-    self.DATANOTA_ENT                 := DateToStr(NFe.Ide.dEmi);
-    self.FDATAMOVI_ENT                := DateToStr(vIConexao.DataServer);
-    self.FID_A03                      := copy(NFe.infNFe.ID, 4, 44);
-    self.FARQ_NFE                     := GerarXML;
-    self.FTOTAL_ENT                   := FloatToStr(NFe.Total.ICMSTot.vNF);
-    self.FFINALIZADE                  := FinNFeToStr(NFe.Ide.finNFe);
-    self.FTIPO_FRETE                  := modFreteToStr(NFe.Transp.modFrete);
-    self.FUSUARIO_ENT                 := vIConexao.getUSer.ID;
+  lEntradaModel := TEntradaModel.Create(vIConexao);
 
-    lEntrada := Self.Incluir;
-    Self.ImportarItens(lEntrada, FCODIGO_FOR);
+  try
+    with ACBrNFe.NotasFiscais.Items[0] do
+    begin
+      lFornecedor := Self.ObterFornecedor(NFe.Emit.CNPJCPF);
 
-    result := lEntrada;
+      lEntradaModel.NumeroView     := Format('%10.10d', [NFe.Ide.nNF]);
+      lEntradaModel.FornecedorView := lFornecedor;
+      lEntradaModel.obterLista;
+
+      if lEntradaModel.TotalRecords > 0 then
+        CriaException('Nota fiscal '+Format('%10.10d', [NFe.Ide.nNF])+', do fornecedor '+lFornecedor+' já importada');
+
+      self.FSTATUS                      := '1';
+      self.NUMERO_ENT                   := Format('%10.10d', [NFe.Ide.nNF]);
+      self.FSERIE_ENT                   := IntToStr(NFe.Ide.serie);
+      self.FMODELO_ENT                  := IntToStr(NFe.Ide.modelo);
+      self.FCODIGO_FOR                  := lFornecedor;
+      self.DATANOTA_ENT                 := DateToStr(NFe.Ide.dEmi);
+      self.FDATAMOVI_ENT                := DateToStr(vIConexao.DataServer);
+      self.FID_A03                      := copy(NFe.infNFe.ID, 4, 44);
+      self.FARQ_NFE                     := GerarXML;
+      self.FTOTAL_ENT                   := FloatToStr(NFe.Total.ICMSTot.vNF);
+      self.FFINALIZADE                  := FinNFeToStr(NFe.Ide.finNFe);
+      self.FTIPO_FRETE                  := modFreteToStr(NFe.Transp.modFrete);
+      self.FUSUARIO_ENT                 := vIConexao.getUSer.ID;
+
+      lEntrada := Self.Incluir;
+      Self.ImportarItens(lEntrada, FCODIGO_FOR);
+
+      result := lEntrada;
+    end;
+  finally
+    lEntradaModel.Free;
   end;
 end;
 
@@ -678,9 +695,6 @@ begin
 
     Result        := lEntradaLista.obterLista;
     FTotalRecords := lEntradaLista.TotalRecords;
-
-
-
   finally
     lEntradaLista.Free;
   end;

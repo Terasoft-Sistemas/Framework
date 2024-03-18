@@ -122,11 +122,6 @@ uses
   LocalizacaoEstoqueDao in '..\Dao\LocalizacaoEstoqueDao.pas',
   LocalizacaoEstoqueModel in '..\Model\LocalizacaoEstoqueModel.pas';
 
-MarcaProdutoDao in '..\Dao\MarcaProdutoDao.pas',
-  MarcaProdutoModel in '..\Model\MarcaProdutoModel.pas',
-  MarcaDao in '..\Dao\MarcaDao.pas',
-  MarcaModel in '..\Model\MarcaModel.pas';
-
 {$R *.res}
 
 begin
