@@ -146,6 +146,14 @@ type
     FCBARRA: Variant;
     FXPROD: Variant;
     FUCOM: Variant;
+    FCONCILIACAO_VALOR_UNIDADE: Real;
+    FCONCILIACAO_NOME_PRODUTO: String;
+    FCONCILIACAO_QUANTIDADE: Real;
+    FCONCILIACAO_ORIGEM: String;
+    FCONCILIACAO_DIVISOR: Real;
+    FCONCILIACAO_MULTIPLICADOR: Real;
+    FCONCILIACAO_ID_PRODUTO: String;
+    FCONCILIACAO_UNIDADE_PRODUTO: String;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -279,6 +287,14 @@ type
     procedure SetCPROD(const Value: Variant);
     procedure SetXPROD(const Value: Variant);
     procedure SetUCOM(const Value: Variant);
+    procedure SetCONCILIACAO_DIVISOR(const Value: Real);
+    procedure SetCONCILIACAO_ID_PRODUTO(const Value: String);
+    procedure SetCONCILIACAO_MULTIPLICADOR(const Value: Real);
+    procedure SetCONCILIACAO_NOME_PRODUTO(const Value: String);
+    procedure SetCONCILIACAO_ORIGEM(const Value: String);
+    procedure SetCONCILIACAO_QUANTIDADE(const Value: Real);
+    procedure SetCONCILIACAO_UNIDADE_PRODUTO(const Value: String);
+    procedure SetCONCILIACAO_VALOR_UNIDADE(const Value: Real);
 
   public
 
@@ -406,6 +422,18 @@ type
     property CEST                           : Variant read FCEST write SetCEST;
     property UCOM                           : Variant read FUCOM write SetUCOM;
 
+
+    property CONCILIACAO_ID_PRODUTO      :String read FCONCILIACAO_ID_PRODUTO write SetCONCILIACAO_ID_PRODUTO;
+    property CONCILIACAO_NOME_PRODUTO    :String read FCONCILIACAO_NOME_PRODUTO write SetCONCILIACAO_NOME_PRODUTO;
+    property CONCILIACAO_UNIDADE_PRODUTO :String read FCONCILIACAO_UNIDADE_PRODUTO write SetCONCILIACAO_UNIDADE_PRODUTO;
+    property CONCILIACAO_ORIGEM          :String read FCONCILIACAO_ORIGEM write SetCONCILIACAO_ORIGEM;
+    property CONCILIACAO_QUANTIDADE      :Real read FCONCILIACAO_QUANTIDADE write SetCONCILIACAO_QUANTIDADE;
+    property CONCILIACAO_VALOR_UNIDADE   :Real read FCONCILIACAO_VALOR_UNIDADE write SetCONCILIACAO_VALOR_UNIDADE;
+    property CONCILIACAO_DIVISOR         :Real read FCONCILIACAO_DIVISOR write SetCONCILIACAO_DIVISOR;
+    property CONCILIACAO_MULTIPLICADOR   :Real read FCONCILIACAO_MULTIPLICADOR write SetCONCILIACAO_MULTIPLICADOR;
+
+    procedure ConciliaItemEntrada;
+
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
@@ -435,6 +463,31 @@ uses
   EntradaItensDao;
 
 { TEntradaItensModel }
+
+procedure TEntradaItensModel.ConciliaItemEntrada;
+var
+  lEntradaItensLista: TEntradaItensDao;
+begin
+  lEntradaItensLista := TEntradaItensDao.Create(vIConexao);
+
+  try
+    lEntradaItensLista.IDRecordView := FIDRecordView;
+    lEntradaItensLista.ConciliaItemEntrada;
+
+    FCONCILIACAO_ID_PRODUTO      := lEntradaItensLista.CONCILIACAO_ID_PRODUTO;
+    FCONCILIACAO_NOME_PRODUTO    := lEntradaItensLista.CONCILIACAO_NOME_PRODUTO;
+    FCONCILIACAO_ORIGEM          := lEntradaItensLista.CONCILIACAO_ORIGEM;
+    FCONCILIACAO_UNIDADE_PRODUTO := lEntradaItensLista.CONCILIACAO_UNIDADE_PRODUTO;
+    FCONCILIACAO_DIVISOR         := lEntradaItensLista.CONCILIACAO_DIVISOR;
+    FCONCILIACAO_MULTIPLICADOR   := lEntradaItensLista.CONCILIACAO_MULTIPLICADOR;
+
+
+  finally
+    lEntradaItensLista.Free;
+  end;
+end;
+
+
 
 function TEntradaItensModel.Alterar(pID : String): TEntradaItensModel;
 var
@@ -623,6 +676,47 @@ end;
 procedure TEntradaItensModel.SetCOFINS(const Value: Variant);
 begin
   FCOFINS := Value;
+end;
+
+procedure TEntradaItensModel.SetCONCILIACAO_DIVISOR(const Value: Real);
+begin
+  FCONCILIACAO_DIVISOR := Value;
+end;
+
+procedure TEntradaItensModel.SetCONCILIACAO_ID_PRODUTO(const Value: String);
+begin
+  FCONCILIACAO_ID_PRODUTO := Value;
+end;
+
+procedure TEntradaItensModel.SetCONCILIACAO_MULTIPLICADOR(const Value: Real);
+begin
+  FCONCILIACAO_MULTIPLICADOR := Value;
+end;
+
+procedure TEntradaItensModel.SetCONCILIACAO_NOME_PRODUTO(const Value: String);
+begin
+  FCONCILIACAO_NOME_PRODUTO := Value;
+end;
+
+procedure TEntradaItensModel.SetCONCILIACAO_ORIGEM(const Value: String);
+begin
+  FCONCILIACAO_ORIGEM := Value;
+end;
+
+procedure TEntradaItensModel.SetCONCILIACAO_QUANTIDADE(const Value: Real);
+begin
+  FCONCILIACAO_QUANTIDADE := Value;
+end;
+
+procedure TEntradaItensModel.SetCONCILIACAO_UNIDADE_PRODUTO(
+  const Value: String);
+begin
+  FCONCILIACAO_UNIDADE_PRODUTO := Value;
+end;
+
+procedure TEntradaItensModel.SetCONCILIACAO_VALOR_UNIDADE(const Value: Real);
+begin
+  FCONCILIACAO_VALOR_UNIDADE := Value;
 end;
 
 procedure TEntradaItensModel.SetCONTA_CONTABIL(const Value: Variant);
