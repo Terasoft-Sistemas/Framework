@@ -166,6 +166,8 @@ begin
     lModel.CONDICOES_XML               := lQry.FieldByName('CONDICOES_XML').AsString;
     lModel.PARCELAS_XML                := lQry.FieldByName('PARCELAS_XML').AsString;
     lModel.ORCAMENTO_ID                := lQry.FieldByName('ORCAMENTO_ID').AsString;
+    lModel.INFADFISCO                  := lQry.FieldByName('INFADFISCO').AsString;
+    lModel.INFCPL                      := lQry.FieldByName('INFCPL').AsString;
 
     Result := lModel;
   finally
@@ -413,6 +415,7 @@ begin
     lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView ;
 
     lSql := ' select ' +lPaginacao+ '                                                                             '+SLineBreak+
+            '       CHAVE,                                                                                        '+SLineBreak+
             '       NUMERO_ENTRADA,                                                                               '+SLineBreak+
             '       SERIE,                                                                                        '+SLineBreak+
             '       MODELO,                                                                                       '+SLineBreak+
@@ -434,6 +437,7 @@ begin
             '       VALOR_TOTAL                                                                                   '+SLineBreak+
             '                 from                                                                                '+SLineBreak+
             '                    (select                                                                          '+SLineBreak+
+            '                          entrada.id_a03 chave,                                                      '+SLineBreak+
             '                          entrada.numero_ent numero_entrada,                                         '+SLineBreak+
             '                          entrada.serie_ent serie,                                                   '+SLineBreak+
             '                          entrada.modelo_ent modelo,                                                 '+SLineBreak+

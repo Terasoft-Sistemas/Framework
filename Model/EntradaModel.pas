@@ -114,6 +114,8 @@ type
     FNumeroView: String;
     FFornecedorView: String;
     FLOGISTICA: Variant;
+    FINFCPL: Variant;
+    FINFADFISCO: Variant;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -201,6 +203,8 @@ type
     procedure SetFornecedorView(const Value: String);
     procedure SetNumeroView(const Value: String);
     procedure SetLOGISTICA(const Value: Variant);
+    procedure SetINFADFISCO(const Value: Variant);
+    procedure SetINFCPL(const Value: Variant);
 
   public
 
@@ -279,6 +283,8 @@ type
     property PARCELAS_XML : Variant  read FPARCELAS_XML write SetPARCELAS_XML;
     property ORCAMENTO_ID : Variant  read FORCAMENTO_ID write SetORCAMENTO_ID;
     property LOGISTICA: Variant read FLOGISTICA write SetLOGISTICA;
+    property INFADFISCO: Variant read FINFADFISCO write SetINFADFISCO;
+    property INFCPL: Variant read FINFCPL write SetINFCPL;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -426,6 +432,8 @@ begin
       self.FFINALIZADE                  := FinNFeToStr(NFe.Ide.finNFe);
       self.FTIPO_FRETE                  := modFreteToStr(NFe.Transp.modFrete);
       self.FUSUARIO_ENT                 := vIConexao.getUSer.ID;
+      self.FINFADFISCO                  := NFe.InfAdic.infAdFisco;
+      self.FINFCPL                      := NFe.InfAdic.infCpl;
 
       lEntrada := Self.Incluir;
       Self.ImportarItens(lEntrada, FCODIGO_FOR);
@@ -900,6 +908,16 @@ end;
 procedure TEntradaModel.SetID_A03(const Value: Variant);
 begin
   FID_A03 := Value;
+end;
+
+procedure TEntradaModel.SetINFADFISCO(const Value: Variant);
+begin
+  FINFADFISCO := Value;
+end;
+
+procedure TEntradaModel.SetINFCPL(const Value: Variant);
+begin
+  FINFCPL := Value;
 end;
 
 procedure TEntradaModel.SetIPI_ENT(const Value: Variant);
