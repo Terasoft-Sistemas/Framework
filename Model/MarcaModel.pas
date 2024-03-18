@@ -16,7 +16,6 @@ type
 
     FAcao: TAcao;
     FLengthPageView: String;
-    FIDRecordView: Integer;
     FStartRecordView: String;
     FCountView: String;
     FOrderView: String;
@@ -27,9 +26,9 @@ type
     FSIGLA: Variant;
     FUSUARIO_MAR: Variant;
     FNOME_MAR: Variant;
+    FIDRecordView: String;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -40,6 +39,7 @@ type
     procedure SetNOME_MAR(const Value: Variant);
     procedure SetSIGLA(const Value: Variant);
     procedure SetUSUARIO_MAR(const Value: Variant);
+    procedure SetIDRecordView(const Value: String);
 
     public
 
@@ -59,7 +59,7 @@ type
     property OrderView: String read FOrderView write SetOrderView;
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
-    property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
+    property IDRecordView : String read FIDRecordView write SetIDRecordView;
 
     function Salvar : String;
     function Incluir: String;
@@ -204,7 +204,7 @@ begin
   FID := Value;
 end;
 
-procedure TMarcaModel.SetIDRecordView(const Value: Integer);
+procedure TMarcaModel.SetIDRecordView(const Value: String);
 begin
   FIDRecordView := Value;
 end;

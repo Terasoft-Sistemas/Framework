@@ -26,7 +26,7 @@ type
     vConstrutor : TConstrutorDao;
 
     FLengthPageView: String;
-    FIDRecordView: Integer;
+    FIDRecordView: String;
     FStartRecordView: String;
     FID: Variant;
     FCountView: String;
@@ -36,12 +36,12 @@ type
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
     procedure SetID(const Value: Variant);
-    procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
+    procedure SetIDRecordView(const Value: String);
 
     function where: String;
 
@@ -56,7 +56,7 @@ type
     property OrderView: String read FOrderView write SetOrderView;
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
-    property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
+    property IDRecordView : String read FIDRecordView write SetIDRecordView;
 
     function incluir(pGrupoModel: TGrupoModel): String;
     function alterar(pGrupoModel: TGrupoModel): String;
@@ -134,7 +134,6 @@ begin
       lModel.MARGERM_PRODUTO        := lQry.FieldByName('MARGERM_PRODUTO').AsString;
       lModel.ID_ECOMMERCE           := lQry.FieldByName('ID_ECOMMERCE').AsString;
       lModel.DESCRICAO_ECOMMERCE    := lQry.FieldByName('DESCRICAO_ECOMMERCE').AsString;
-      lModel.SYSTIME                := lQry.FieldByName('SYSTIME').AsString;
       lModel.STATUS                 := lQry.FieldByName('STATUS').AsString;
 
     Result := lModel;
@@ -297,29 +296,30 @@ begin
     lQry.Free;
   end;
 end;
+
 procedure TGrupoDao.SetCountView(const Value: String);
 begin
-
+  FCountView := Value;
 end;
 
 procedure TGrupoDao.SetID(const Value: Variant);
 begin
-
+  FID := Value;
 end;
 
-procedure TGrupoDao.SetIDRecordView(const Value: Integer);
+procedure TGrupoDao.SetIDRecordView(const Value: String);
 begin
-
+  FIDRecordView := Value;
 end;
 
 procedure TGrupoDao.SetLengthPageView(const Value: String);
 begin
-
+  FLengthPageView := Value;
 end;
 
 procedure TGrupoDao.SetOrderView(const Value: String);
 begin
-
+  FOrderView := Value;
 end;
 
 procedure TGrupoDao.setParams(var pQry: TFDQuery; pGrupoModel: TGrupoModel);
@@ -348,17 +348,17 @@ end;
 
 procedure TGrupoDao.SetStartRecordView(const Value: String);
 begin
-
+  FStartRecordView := Value;
 end;
 
 procedure TGrupoDao.SetTotalRecords(const Value: Integer);
 begin
-
+  FTotalRecords := Value;
 end;
 
 procedure TGrupoDao.SetWhereView(const Value: String);
 begin
-
+  FWhereView := Value;
 end;
 
 function TGrupoDao.where: String;
@@ -370,11 +370,10 @@ begin
   if not FWhereView.IsEmpty then
     lSQL := lSQL + FWhereView;
 
-  if FIDRecordView <> 0  then
-    lSQL := lSQL + ' and CODIGO_GRU = '+IntToStr(FIDRecordView);
+  if FIDRecordView <> ''  then
+    lSQL := lSQL + ' and CODIGO_GRU = ' + QuotedStr(FIDRecordView);
 
   Result := lSQL;
 end;
-
 
 end.

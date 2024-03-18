@@ -300,6 +300,14 @@ type
     FGRADE_ID: Variant;
     FSALDO_MAXIMO: Variant;
     FMARGEM_CALCULADA: Variant;
+    FNF_DESCRICAO_ANP: Variant;
+    FNF_CODIGO_ANP: Variant;
+    FWEB_TITULO: Variant;
+    FNF_PMC_ANVISA: Variant;
+    FNF_OBSERVACAO_ITEM: Variant;
+    FNF_CODIGO_ANVISA: Variant;
+    FNF_MOTIVO_ISENCAO_ANVISA: Variant;
+    FNF_FCI: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetProdutossLista(const Value: TObjectList<TProdutosModel>);
@@ -575,6 +583,14 @@ type
     procedure SetGRADE_ID(const Value: Variant);
     procedure SetMARGEM_CALCULADA(const Value: Variant);
     procedure SetSALDO_MAXIMO(const Value: Variant);
+    procedure SetNF_CODIGO_ANP(const Value: Variant);
+    procedure SetNF_CODIGO_ANVISA(const Value: Variant);
+    procedure SetNF_DESCRICAO_ANP(const Value: Variant);
+    procedure SetNF_MOTIVO_ISENCAO_ANVISA(const Value: Variant);
+    procedure SetNF_OBSERVACAO_ITEM(const Value: Variant);
+    procedure SetNF_PMC_ANVISA(const Value: Variant);
+    procedure SetWEB_TITULO(const Value: Variant);
+    procedure SetNF_FCI(const Value: Variant);
 
   public
     property UUID: Variant read FUUID write SetUUID;
@@ -843,6 +859,14 @@ type
     property MARGEM_CALCULADA: Variant read FMARGEM_CALCULADA write SetMARGEM_CALCULADA;
     property SALDO_MAXIMO: Variant read FSALDO_MAXIMO write SetSALDO_MAXIMO;
     property GRADE_ID: Variant read FGRADE_ID write SetGRADE_ID;
+    property NF_MOTIVO_ISENCAO_ANVISA : Variant read FNF_MOTIVO_ISENCAO_ANVISA write SetNF_MOTIVO_ISENCAO_ANVISA;
+    property NF_PMC_ANVISA : Variant read FNF_PMC_ANVISA write SetNF_PMC_ANVISA;
+    property NF_CODIGO_ANVISA : Variant read FNF_CODIGO_ANVISA write SetNF_CODIGO_ANVISA;
+    property NF_CODIGO_ANP : Variant read FNF_CODIGO_ANP write SetNF_CODIGO_ANP;
+    property NF_DESCRICAO_ANP : Variant read FNF_DESCRICAO_ANP write SetNF_DESCRICAO_ANP;
+    property NF_OBSERVACAO_ITEM : Variant read FNF_OBSERVACAO_ITEM write SetNF_OBSERVACAO_ITEM;
+    property WEB_TITULO : Variant read FWEB_TITULO write SetWEB_TITULO;
+    property NF_FCI : Variant read FNF_FCI write SetNF_FCI;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -878,9 +902,17 @@ type
   end;
 implementation
 uses
-  ProdutosDao, ClienteModel, PrecoUFModel, PromocaoItensModel, PrecoVendaModel,
-  PrecoVendaProdutoModel, PrecoClienteModel, System.SysUtils;
-{ TProdutosModel }
+  ProdutosDao,
+  ClienteModel,
+  PrecoUFModel,
+  PromocaoItensModel,
+  PrecoVendaModel,
+  PrecoVendaProdutoModel,
+  PrecoClienteModel,
+  System.SysUtils;
+
+  { TProdutosModel }
+
 procedure TProdutosModel.adicionarSaldo(pIdProduto: String; pSaldo: Double);
 var
   lProdutoDao: TProdutosDao;
@@ -931,10 +963,12 @@ begin
     lProdutosDao.Free;
   end;
 end;
+
 constructor TProdutosModel.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
+
 destructor TProdutosModel.Destroy;
 begin
   inherited;
@@ -1769,6 +1803,41 @@ procedure TProdutosModel.SetNFE_INTEIRO(const Value: Variant);
 begin
   FNFE_INTEIRO := Value;
 end;
+procedure TProdutosModel.SetNF_CODIGO_ANP(const Value: Variant);
+begin
+  FNF_CODIGO_ANP := Value;
+end;
+
+procedure TProdutosModel.SetNF_CODIGO_ANVISA(const Value: Variant);
+begin
+  FNF_CODIGO_ANVISA := Value;
+end;
+
+procedure TProdutosModel.SetNF_DESCRICAO_ANP(const Value: Variant);
+begin
+  FNF_DESCRICAO_ANP := Value;
+end;
+
+procedure TProdutosModel.SetNF_FCI(const Value: Variant);
+begin
+  FNF_FCI := Value;
+end;
+
+procedure TProdutosModel.SetNF_MOTIVO_ISENCAO_ANVISA(const Value: Variant);
+begin
+  FNF_MOTIVO_ISENCAO_ANVISA := Value;
+end;
+
+procedure TProdutosModel.SetNF_OBSERVACAO_ITEM(const Value: Variant);
+begin
+  FNF_OBSERVACAO_ITEM := Value;
+end;
+
+procedure TProdutosModel.SetNF_PMC_ANVISA(const Value: Variant);
+begin
+  FNF_PMC_ANVISA := Value;
+end;
+
 procedure TProdutosModel.SetNOME_PRO(const Value: Variant);
 begin
   FNOME_PRO := Value;
@@ -2132,6 +2201,11 @@ procedure TProdutosModel.SetWEB_TIPO_PRODUTO(const Value: Variant);
 begin
   FWEB_TIPO_PRODUTO := Value;
 end;
+procedure TProdutosModel.SetWEB_TITULO(const Value: Variant);
+begin
+  FWEB_TITULO := Value;
+end;
+
 procedure TProdutosModel.SetWEB_URL(const Value: Variant);
 begin
   FWEB_URL := Value;

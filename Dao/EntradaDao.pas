@@ -357,7 +357,7 @@ begin
             '                  sum(i.vbc_q07)  total_base_pis,                                                            '+SLineBreak+
             '                  sum(i.vpis_q09) total_valor_pis,                                                           '+SLineBreak+
             '                  sum(i.vbc_s07) total_base_cofins,                                                          '+SLineBreak+
-            '                  sum(i.vcofins_s11) total_valor_cofins,                                                     '+SLineBreak+
+            '                  sum(i.cofins) total_valor_cofins,                                                          '+SLineBreak+
             '                  sum(i.vfcpst) total_fcp,                                                                   '+SLineBreak+
             '                  sum(i.vfcpstret) total_fcp_st,                                                             '+SLineBreak+
             '                  sum(i.vseg_i16) total_outros,                                                              '+SLineBreak+

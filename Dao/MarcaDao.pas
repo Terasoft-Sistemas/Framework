@@ -28,17 +28,17 @@ type
     vConstrutor : TConstrutorDao;
 
     FLengthPageView: String;
-    FIDRecordView: Integer;
     FStartRecordView: String;
     FID: Variant;
     FCountView: String;
     FOrderView: String;
     FWhereView: String;
     FTotalRecords: Integer;
+    FIDRecordView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
     procedure SetID(const Value: Variant);
-    procedure SetIDRecordView(const Value: Integer);
+    procedure SetIDRecordView(const Value: String);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -61,7 +61,7 @@ type
     property OrderView: String read FOrderView write SetOrderView;
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
-    property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
+    property IDRecordView : String read FIDRecordView write SetIDRecordView;
 
     function incluir(pMarcaModel: TMarcaModel): String;
     function alterar(pMarcaModel: TMarcaModel): String;
@@ -205,6 +205,7 @@ begin
       lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + ' ';
 
     lSQL := 'select '+lPaginacao+' * from MARCAPRODUTO where 1=1 ';
+
     lSQL := lSQL + where;
 
     if not FOrderView.IsEmpty then
@@ -214,6 +215,7 @@ begin
 
     Result := vConstrutorDao.atribuirRegistros(lQry);
     obterTotalRegistros;
+
   finally
     lQry.Free;
   end;
@@ -266,8 +268,8 @@ begin
   if not FWhereView.IsEmpty then
     lSQL := lSQL + FWhereView;
 
-  if FIDRecordView <> 0  then
-    lSQL := lSQL + ' and CODIGO_MAR = '+IntToStr(FIDRecordView);
+  if FIDRecordView <> ''  then
+    lSQL := lSQL + ' and CODIGO_MAR = '+QuotedStr(FIDRecordView);
 
   Result := lSQL;
 end;
@@ -304,7 +306,7 @@ begin
   FID := Value;
 end;
 
-procedure TMarcaDao.SetIDRecordView(const Value: Integer);
+procedure TMarcaDao.SetIDRecordView(const Value: String);
 begin
   FIDRecordView := Value;
 end;
@@ -357,6 +359,5 @@ procedure TMarcaDao.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
 end;
-
 
 end.

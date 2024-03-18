@@ -16,7 +16,6 @@ type
 
     FAcao: TAcao;
     FLengthPageView: String;
-    FIDRecordView: Integer;
     FStartRecordView: String;
     FCountView: String;
     FOrderView: String;
@@ -25,10 +24,10 @@ type
     FID: Variant;
     FSYSTIME: Variant;
     FNOME: Variant;
+    FIDRecordView: String;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -37,6 +36,7 @@ type
     procedure SetID(const Value: Variant);
     procedure SetNOME(const Value: Variant);
     procedure SetSYSTIME(const Value: Variant);
+    procedure SetIDRecordView(const Value: String);
 
     public
 
@@ -53,7 +53,7 @@ type
     property OrderView: String read FOrderView write SetOrderView;
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
-    property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
+    property IDRecordView : String read FIDRecordView write SetIDRecordView;
 
     function Salvar : String;
     function Incluir: String;
@@ -159,7 +159,6 @@ begin
   end;
 end;
 
-
 procedure TLocalizacaoEstoqueModel.SetAcao(const Value: TAcao);
 begin
   FAcao := Value;
@@ -175,7 +174,7 @@ begin
   FID := Value;
 end;
 
-procedure TLocalizacaoEstoqueModel.SetIDRecordView(const Value: Integer);
+procedure TLocalizacaoEstoqueModel.SetIDRecordView(const Value: String);
 begin
   FIDRecordView := Value;
 end;

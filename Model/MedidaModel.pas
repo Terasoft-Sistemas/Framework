@@ -16,7 +16,6 @@ type
 
     FAcao: TAcao;
     FLengthPageView: String;
-    FIDRecordView: Integer;
     FStartRecordView: String;
     FCountView: String;
     FOrderView: String;
@@ -26,10 +25,10 @@ type
     FID: Variant;
     FSYSTIME: Variant;
     FDESCRICAO_MED: Variant;
+    FIDRecordView: String;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -39,6 +38,7 @@ type
     procedure SetDESCRICAO_MED(const Value: Variant);
     procedure SetID(const Value: Variant);
     procedure SetSYSTIME(const Value: Variant);
+    procedure SetIDRecordView(const Value: String);
 
 
     public
@@ -46,12 +46,10 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-
-
-    property CODIGO_MED      :Variant read FCODIGO_MED write SetCODIGO_MED;
-    property DESCRICAO_MED   :Variant read FDESCRICAO_MED write SetDESCRICAO_MED;
-    property ID              :Variant read FID write SetID;
-    property SYSTIME         :Variant read FSYSTIME write SetSYSTIME;
+    property CODIGO_MED      : Variant read FCODIGO_MED write SetCODIGO_MED;
+    property DESCRICAO_MED   : Variant read FDESCRICAO_MED write SetDESCRICAO_MED;
+    property ID              : Variant read FID write SetID;
+    property SYSTIME         : Variant read FSYSTIME write SetSYSTIME;
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -59,7 +57,7 @@ type
     property OrderView: String read FOrderView write SetOrderView;
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
-    property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
+    property IDRecordView : String read FIDRecordView write SetIDRecordView;
 
     function Salvar : String;
     function Incluir: String;
@@ -165,7 +163,6 @@ begin
   end;
 end;
 
-
 procedure TMedidaModel.SetAcao(const Value: TAcao);
 begin
   FAcao := Value;
@@ -191,7 +188,7 @@ begin
   FID := Value;
 end;
 
-procedure TMedidaModel.SetIDRecordView(const Value: Integer);
+procedure TMedidaModel.SetIDRecordView(const Value: String);
 begin
   FIDRecordView := Value;
 end;

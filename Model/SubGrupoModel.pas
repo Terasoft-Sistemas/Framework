@@ -16,7 +16,6 @@ type
 
     FAcao: TAcao;
     FLengthPageView: String;
-    FIDRecordView: Integer;
     FStartRecordView: String;
     FCountView: String;
     FOrderView: String;
@@ -32,9 +31,9 @@ type
     FORDEM: Variant;
     FCODIGO_SUB: Variant;
     FTotalRecords: Integer;
+    FIDRecordView: String;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -49,6 +48,7 @@ type
     procedure SetORDEM(const Value: Variant);
     procedure SetSIGLA(const Value: Variant);
     procedure SetUSUARIO_SUB(const Value: Variant);
+    procedure SetIDRecordView(const Value: String);
   public
 
   	constructor Create(pIConexao : IConexao);
@@ -61,6 +61,7 @@ type
     property OrderView: String read FOrderView write SetOrderView;
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
+    property IDRecordView : String read FIDRecordView write SetIDRecordView;
 
     property CODIGO_SUB         :Variant read FCODIGO_SUB write SetCODIGO_SUB;
     property NOME_SUB           :Variant read FNOME_SUB write SetNOME_SUB;
@@ -209,7 +210,7 @@ begin
   FID := Value;
 end;
 
-procedure TSubGrupoModel.SetIDRecordView(const Value: Integer);
+procedure TSubGrupoModel.SetIDRecordView(const Value: String);
 begin
   FIDRecordView := Value;
 end;

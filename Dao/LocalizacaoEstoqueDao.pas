@@ -28,22 +28,22 @@ type
     vConstrutor : TConstrutorDao;
 
     FLengthPageView: String;
-    FIDRecordView: Integer;
     FStartRecordView: String;
     FID: Variant;
     FCountView: String;
     FOrderView: String;
     FWhereView: String;
     FTotalRecords: Integer;
+    FIDRecordView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
     function where: String;
+    procedure SetIDRecordView(const Value: String);
 
     var
       vConstrutorDao : TConstrutorDao;
@@ -59,7 +59,7 @@ type
     property OrderView: String read FOrderView write SetOrderView;
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
-    property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
+    property IDRecordView : String read FIDRecordView write SetIDRecordView;
 
     function incluir(pLocalizacaoEstoqueModel: TLocalizacaoEstoqueModel): String;
     function alterar(pLocalizacaoEstoqueModel: TLocalizacaoEstoqueModel): String;
@@ -149,6 +149,7 @@ begin
       lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + ' ';
 
     lSQL := 'select '+lPaginacao+' * from LOCALIZACAO_ESTOQUE where 1=1 ';
+
     lSQL := lSQL + where;
 
     if not FOrderView.IsEmpty then
@@ -210,8 +211,8 @@ begin
   if not FWhereView.IsEmpty then
     lSQL := lSQL + FWhereView;
 
-  if FIDRecordView <> 0  then
-    lSQL := lSQL + ' and ID = '+IntToStr(FIDRecordView);
+  if FIDRecordView <> ''  then
+    lSQL := lSQL + ' and ID = ' +QuotedStr(FIDRecordView);
 
   Result := lSQL;
 end;
@@ -243,7 +244,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TLocalizacaoEstoqueDao.SetIDRecordView(const Value: Integer);
+procedure TLocalizacaoEstoqueDao.SetIDRecordView(const Value: String);
 begin
   FIDRecordView := Value;
 end;

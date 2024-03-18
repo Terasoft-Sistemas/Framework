@@ -16,7 +16,7 @@ type
 
     FAcao: TAcao;
     FLengthPageView: String;
-    FIDRecordView: Integer;
+    FIDRecordView: String;
     FStartRecordView: String;
     FCountView: String;
     FOrderView: String;
@@ -46,17 +46,11 @@ type
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-    procedure SetDOCUMENTO_ID(const Value: Variant);
-    procedure SetID(const Value: Variant);
-    procedure SetREGISTRO_ID(const Value: Variant);
-    procedure SetSYSTIME(const Value: Variant);
-    procedure SetTABELA(const Value: Variant);
     procedure Setarredondamento(const Value: Variant);
     procedure Setcodigo_gru(const Value: Variant);
     procedure Setcor(const Value: Variant);
@@ -76,6 +70,8 @@ type
     procedure Setsigla(const Value: Variant);
     procedure Setstatus(const Value: Variant);
     procedure Setusuario_gru(const Value: Variant);
+    procedure SetIDRecordview(const Value: String);
+    procedure SetID(const Value: Variant);
 
   public
 
@@ -98,7 +94,6 @@ type
     property margerm_produto          :Variant read Fmargerm_produto write Setmargerm_produto;
     property id_ecommerce             :Variant read Fid_ecommerce write Setid_ecommerce;
     property descricao_ecommerce      :Variant read Fdescricao_ecommerce write Setdescricao_ecommerce;
-    property systime                  :Variant read Fsystime write Setsystime;
     property status                   :Variant read Fstatus write Setstatus;
 
 
@@ -123,8 +118,7 @@ type
     property OrderView: String read FOrderView write SetOrderView;
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
-    property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
-
+    property IDRecordview : String read FIDRecordview write SetIDRecordview;
   end;
 
 implementation
@@ -241,9 +235,10 @@ begin
     lGrupoDao.Free;
   end;
 end;
+
 procedure TGrupoModel.SetAcao(const Value: TAcao);
 begin
-
+  FAcao := Value;
 end;
 
 procedure TGrupoModel.Setarredondamento(const Value: Variant);
@@ -263,7 +258,7 @@ end;
 
 procedure TGrupoModel.SetCountView(const Value: String);
 begin
-
+  FCountView := Value;
 end;
 
 procedure TGrupoModel.Setdescricao_ecommerce(const Value: Variant);
@@ -274,11 +269,6 @@ end;
 procedure TGrupoModel.Setdestaque_pre_venda(const Value: Variant);
 begin
   Fdestaque_pre_venda := Value;
-end;
-
-procedure TGrupoModel.SetDOCUMENTO_ID(const Value: Variant);
-begin
-
 end;
 
 procedure TGrupoModel.Setecf(const Value: Variant);
@@ -293,12 +283,12 @@ end;
 
 procedure TGrupoModel.SetID(const Value: Variant);
 begin
-
+  FID :=  Value;
 end;
 
-procedure TGrupoModel.SetIDRecordView(const Value: Integer);
+procedure TGrupoModel.SetIDRecordview(const Value: String);
 begin
-
+  FIDRecordview := Value;
 end;
 
 procedure TGrupoModel.Setid_ecommerce(const Value: Variant);
@@ -313,7 +303,7 @@ end;
 
 procedure TGrupoModel.SetLengthPageView(const Value: String);
 begin
-
+  FLengthPageView := Value;
 end;
 
 procedure TGrupoModel.Setloja(const Value: Variant);
@@ -343,7 +333,7 @@ end;
 
 procedure TGrupoModel.SetOrderView(const Value: String);
 begin
-
+  FOrderView := Value;
 end;
 
 procedure TGrupoModel.Setredutor_icms_st(const Value: Variant);
@@ -356,11 +346,6 @@ begin
   Freferencia := Value;
 end;
 
-procedure TGrupoModel.SetREGISTRO_ID(const Value: Variant);
-begin
-
-end;
-
 procedure TGrupoModel.Setsigla(const Value: Variant);
 begin
   Fsigla := Value;
@@ -368,7 +353,7 @@ end;
 
 procedure TGrupoModel.SetStartRecordView(const Value: String);
 begin
-
+  FStartRecordView := Value;
 end;
 
 procedure TGrupoModel.Setstatus(const Value: Variant);
@@ -376,19 +361,9 @@ begin
   Fstatus := Value;
 end;
 
-procedure TGrupoModel.SetSYSTIME(const Value: Variant);
-begin
-
-end;
-
-procedure TGrupoModel.SetTABELA(const Value: Variant);
-begin
-
-end;
-
 procedure TGrupoModel.SetTotalRecords(const Value: Integer);
 begin
-
+  FTotalRecords := Value;
 end;
 
 procedure TGrupoModel.Setusuario_gru(const Value: Variant);
@@ -398,7 +373,7 @@ end;
 
 procedure TGrupoModel.SetWhereView(const Value: String);
 begin
-
+  FWhereView := Value;
 end;
 
 end.

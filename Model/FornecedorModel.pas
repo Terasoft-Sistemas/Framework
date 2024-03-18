@@ -17,7 +17,6 @@ type
 
     FAcao: TAcao;
     FLengthPageView: String;
-    FIDRecordView: Integer;
     FStartRecordView: String;
     FCountView: String;
     FOrderView: String;
@@ -81,11 +80,11 @@ type
     FCOD_MUNICIPIO: Variant;
     FEMAIL_FOR: Variant;
     FBAIRRO_FOR: Variant;
-    FCNPJCPFRecordView: Variant;
+    FCNPJCPFRecordView: String;
+    FIDRecordView: String;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -149,7 +148,8 @@ type
     procedure SetURL_FOR(const Value: Variant);
     procedure SetUSUARIO_ENT(const Value: Variant);
     procedure SetVINCULAR_PRODUTOS_ENTRADA(const Value: Variant);
-    procedure SetCNPJCPFRecordView(const Value: Variant);
+    procedure SetCNPJCPFRecordView(const Value: String);
+    procedure SetIDRecordView(const Value: String);
 
   public
 
@@ -230,9 +230,8 @@ type
     property OrderView: String read FOrderView write SetOrderView;
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
-    property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
-    property CNPJCPFRecordView :Variant read FCNPJCPFRecordView write SetCNPJCPFRecordView;
-
+    property IDRecordView: String read FIDRecordView write SetIDRecordView;
+    property CNPJCPFRecordView: String read FCNPJCPFRecordView write SetCNPJCPFRecordView;
   end;
 
 implementation
@@ -307,7 +306,7 @@ begin
     lFornecedorLista.StartRecordView    := FStartRecordView;
     lFornecedorLista.LengthPageView     := FLengthPageView;
     lFornecedorLista.IDRecordView       := FIDRecordView;
-    lFornecedorLista.CNPJCPFRecordView  := CNPJCPFRecordView;
+    lFornecedorLista.CNPJCPFRecordView  := FCNPJCPFRecordView;
 
     Result := lFornecedorLista.obterLista;
 
@@ -380,7 +379,7 @@ begin
   FCIDADE_FOR := Value;
 end;
 
-procedure TFornecedorModel.SetCNPJCPFRecordView(const Value: Variant);
+procedure TFornecedorModel.SetCNPJCPFRecordView(const Value: String);
 begin
   FCNPJCPFRecordView := Value;
 end;
@@ -500,7 +499,7 @@ begin
   FID := Value;
 end;
 
-procedure TFornecedorModel.SetIDRecordView(const Value: Integer);
+procedure TFornecedorModel.SetIDRecordView(const Value: String);
 begin
   FIDRecordView := Value;
 end;

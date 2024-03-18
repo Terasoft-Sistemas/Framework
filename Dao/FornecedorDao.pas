@@ -21,7 +21,6 @@ type
     vConstrutor : TConstrutorDao;
 
     FLengthPageView: String;
-    FIDRecordView: Integer;
     FStartRecordView: String;
     FID: Variant;
     FCountView: String;
@@ -29,18 +28,17 @@ type
     FWhereView: String;
     FTotalRecords: Integer;
     FCNPJCPFRecordView: Variant;
+    FIDRecordView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
     procedure SetID(const Value: Variant);
-    procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-
-
     procedure SetCNPJCPFRecordView(const Value: Variant);
+    procedure SetIDRecordView(const Value: String);
 
   public
 
@@ -54,8 +52,8 @@ type
     property OrderView: String read FOrderView write SetOrderView;
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
-    property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property CNPJCPFRecordView : Variant read FCNPJCPFRecordView write SetCNPJCPFRecordView;
+    property IDRecordView: String read FIDRecordView write SetIDRecordView;
 
     function incluir(pFornecedorModel: TFornecedorModel): String;
     function alterar(pFornecedorModel: TFornecedorModel): String;
@@ -237,8 +235,8 @@ begin
   if not FWhereView.IsEmpty then
     lSQL := lSQL + FWhereView;
 
-  if FIDRecordView <> 0  then
-    lSQL := lSQL + ' and CODIGO_FOR = ' +IntToStr(FIDRecordView);
+  if FIDRecordView <> '' then
+    lSQL := lSQL + ' and CODIGO_FOR = ' +QuotedStr(FIDRecordView);
 
   if FCNPJCPFRecordView <> ''  then
     lSQL := lSQL + ' and CNPJ_CPF_FOR = ' +QuotedStr(FCNPJCPFRecordView);
@@ -313,7 +311,7 @@ begin
   FID := Value;
 end;
 
-procedure TFornecedorDao.SetIDRecordView(const Value: Integer);
+procedure TFornecedorDao.SetIDRecordView(const Value: String);
 begin
   FIDRecordView := Value;
 end;
