@@ -434,7 +434,9 @@ begin
             '       CONTATO_FORNECEDOR,                                                                           '+SLineBreak+
             '       DATA_EMISSAO,                                                                                 '+SLineBreak+
             '       DATA_MOVIMENTO,                                                                               '+SLineBreak+
-            '       VALOR_TOTAL                                                                                   '+SLineBreak+
+            '       VALOR_TOTAL,                                                                                  '+SLineBreak+
+            '       INFADFISCO,                                                                                   '+SLineBreak+
+            '       INFCPL                                                                                        '+SLineBreak+
             '                 from                                                                                '+SLineBreak+
             '                    (select                                                                          '+SLineBreak+
             '                          entrada.id_a03 chave,                                                      '+SLineBreak+
@@ -456,7 +458,9 @@ begin
             '                          fornecedor.contato_for contato_fornecedor,                                 '+SLineBreak+
             '                          entrada.datanota_ent data_emissao,                                         '+SLineBreak+
             '                          entrada.datamovi_ent data_movimento,                                       '+SLineBreak+
-            '                          entrada.total_ent valor_total                                              '+SLineBreak+
+            '                          entrada.total_ent valor_total,                                             '+SLineBreak+
+            '                          entrada.infadfisco,                                                        '+SLineBreak+
+            '                          entrada.infcpl                                                             '+SLineBreak+
             '                     from entrada                                                                    '+SLineBreak+
             '                     left join fornecedor on fornecedor.codigo_for = entrada.codigo_for              '+SLineBreak+
             '                    where 1=1                                                                        '+SLineBreak;
