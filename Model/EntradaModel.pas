@@ -23,6 +23,11 @@ type
     VALORUNI_ENT : String;
   end;
 
+  TEntradaResultado = record
+    NUMERO_ENT,
+    CODIGO_FOR : String;
+  end;
+
   TEntradaModel = class
 
   private
@@ -302,8 +307,8 @@ type
     function obterLista       : TFDMemTable;
     function obterTotalizador : TFDMemTable;
 
-    function importaXML       : String;
-    function importaCabecalho : String;
+    function importaXML       : TEntradaResultado;
+    function importaCabecalho : TEntradaResultado;
 
     procedure ImportarItens(pEntrada, pFornecedor: String);
 
@@ -397,7 +402,7 @@ begin
   Result            := self.Salvar;
 end;
 
-function TEntradaModel.importaCabecalho: String;
+function TEntradaModel.importaCabecalho: TEntradaResultado;
 var
  i: Integer;
  lEntrada,
@@ -438,7 +443,8 @@ begin
       lEntrada := Self.Incluir;
       Self.ImportarItens(lEntrada, FCODIGO_FOR);
 
-      result := lEntrada;
+      result.NUMERO_ENT := lEntrada;
+      result.CODIGO_FOR := lFornecedor;
     end;
   finally
     lEntradaModel.Free;
@@ -600,7 +606,7 @@ begin
   end;
 end;
 
-function TEntradaModel.importaXML: String;
+function TEntradaModel.importaXML: TEntradaResultado;
 begin
   if not FileExists(FPathXML) then
     CriaException('Arquivo XML não localizado');
