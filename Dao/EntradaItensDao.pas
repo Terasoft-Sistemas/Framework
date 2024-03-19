@@ -304,6 +304,14 @@ begin
     lModel.VICMS_ORIGINAL                 := lQry.FieldByName('VICMS_ORIGINAL').AsString;
     lModel.VICMSSUBISTITUTORET            := lQry.FieldByName('VICMSSUBISTITUTORET').AsString;
     lModel.PICMSSTRET                     := lQry.FieldByName('PICMSSTRET').AsString;
+    lModel.CPROD                          := lQry.FieldByName('CPROD').AsString;
+    lModel.CEAN                           := lQry.FieldByName('CEAN').AsString;
+    lModel.CBARRA                         := lQry.FieldByName('CBARRA').AsString;
+    lModel.CEST                           := lQry.FieldByName('CEST').AsString;
+    lModel.XPROD                          := lQry.FieldByName('XPROD').AsString;
+    lModel.UCOM                           := lQry.FieldByName('UCOM').AsString;
+    lModel.QUANTIDADE_NF                  := lQry.FieldByName('QUANTIDADE_NF').AsString;
+    lModel.VALOR_UNITARIO_NF              := lQry.FieldByName('VALOR_UNITARIO_NF').AsString;
 
     Result := lModel;
   finally

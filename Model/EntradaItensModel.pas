@@ -154,6 +154,8 @@ type
     FCONCILIACAO_MULTIPLICADOR: Real;
     FCONCILIACAO_ID_PRODUTO: String;
     FCONCILIACAO_UNIDADE_PRODUTO: String;
+    FVALOR_UNITARIO_NF: Variant;
+    FQUANTIDADE_NF: Variant;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -295,6 +297,8 @@ type
     procedure SetCONCILIACAO_QUANTIDADE(const Value: Real);
     procedure SetCONCILIACAO_UNIDADE_PRODUTO(const Value: String);
     procedure SetCONCILIACAO_VALOR_UNIDADE(const Value: Real);
+    procedure SetQUANTIDADE_NF(const Value: Variant);
+    procedure SetVALOR_UNITARIO_NF(const Value: Variant);
 
   public
 
@@ -422,6 +426,8 @@ type
     property CEST                           : Variant read FCEST write SetCEST;
     property UCOM                           : Variant read FUCOM write SetUCOM;
 
+    property QUANTIDADE_NF                  : Variant read FQUANTIDADE_NF write SetQUANTIDADE_NF;
+    property VALOR_UNITARIO_NF              : Variant read FVALOR_UNITARIO_NF write SetVALOR_UNITARIO_NF;
 
     property CONCILIACAO_ID_PRODUTO      :String read FCONCILIACAO_ID_PRODUTO write SetCONCILIACAO_ID_PRODUTO;
     property CONCILIACAO_NOME_PRODUTO    :String read FCONCILIACAO_NOME_PRODUTO write SetCONCILIACAO_NOME_PRODUTO;
@@ -1015,6 +1021,11 @@ begin
   FQUANTIDADE_ENT := Value;
 end;
 
+procedure TEntradaItensModel.SetQUANTIDADE_NF(const Value: Variant);
+begin
+  FQUANTIDADE_NF := Value;
+end;
+
 procedure TEntradaItensModel.SetQUNID_O11(const Value: Variant);
 begin
   FQUNID_O11 := Value;
@@ -1094,6 +1105,11 @@ procedure TEntradaItensModel.SetVALOR_ATUALIZACAO_PRECO_VENDA(
   const Value: Variant);
 begin
   FVALOR_ATUALIZACAO_PRECO_VENDA := Value;
+end;
+
+procedure TEntradaItensModel.SetVALOR_UNITARIO_NF(const Value: Variant);
+begin
+  FVALOR_UNITARIO_NF := Value;
 end;
 
 procedure TEntradaItensModel.SetVALOR_VENDA(const Value: Variant);
