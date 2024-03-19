@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 1248
     Height = 831
-    ActivePage = TabSheet3
+    ActivePage = TabSheet5
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -769,6 +769,15 @@ object Form1: TForm1
         Caption = 'Simular Custo'
         TabOrder = 1
         OnClick = Button67Click
+      end
+      object Button72: TButton
+        Left = 203
+        Top = 23
+        Width = 182
+        Height = 42
+        Caption = 'Calcular Custo'
+        TabOrder = 2
+        OnClick = Button72Click
       end
     end
   end
