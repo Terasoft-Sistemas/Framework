@@ -501,6 +501,8 @@ begin
           lEntradaItensModel.CFOP              := Prod.CFOP;
           lEntradaItensModel.QUANTIDADE_ENT    := FloatToStr(Prod.qCom);
           lEntradaItensModel.VALORUNI_ENT      := FloatToStr(Prod.vUnCom);
+          lEntradaItensModel.QUANTIDADE_NF     := FloatToStr(Prod.qCom);
+          lEntradaItensModel.VALOR_UNITARIO_NF := FloatToStr(Prod.vUnCom);
           lEntradaItensModel.DESC_I17          := FloatToStr(Prod.vDesc);
           lEntradaItensModel.VSEG_I16          := FloatToStr(Prod.vSeg + Prod.vOutro);
           lEntradaItensModel.VFRETE_I15        := FloatToStr(Prod.vFrete);
