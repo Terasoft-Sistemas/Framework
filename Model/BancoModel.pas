@@ -14,7 +14,6 @@ type
   private
     vIConexao : IConexao;
 
-    FBancosLista: TObjectList<TBancoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -92,7 +91,6 @@ type
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetDATA_CADASTRO(const Value: Variant);
-    procedure SetBancosLista(const Value: TObjectList<TBancoModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -167,6 +165,7 @@ type
     procedure Setvalor_boleto(const Value: Variant);
 
   public
+
     property numero_ban: Variant read Fnumero_ban write Setnumero_ban;
     property nome_ban: Variant read Fnome_ban write Setnome_ban;
     property agencia_ban: Variant read Fagencia_ban write Setagencia_ban;
@@ -234,7 +233,6 @@ type
     property scope: Variant read Fscope write Setscope;
     property caracteristica_titulo: Variant read Fcaracteristica_titulo write Setcaracteristica_titulo;
 
-    
     constructor Create(pIConexao: IConexao);
     destructor Destroy; override;
 
@@ -246,7 +244,6 @@ type
 
     function obterLista: TFDMemTable;
 
-    property BancosLista: TObjectList<TBancoModel> read FBancosLista write SetBancosLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -428,11 +425,6 @@ end;
 procedure TBancoModel.Setfantasia(const Value: Variant);
 begin
   Ffantasia := Value;
-end;
-
-procedure TBancoModel.SetBancosLista(const Value: TObjectList<TBancoModel>);
-begin
-  FBancosLista := Value;
 end;
 
 procedure TBancoModel.Setbanco_referente(const Value: Variant);
