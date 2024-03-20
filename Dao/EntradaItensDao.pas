@@ -314,6 +314,11 @@ begin
     lModel.UCOM                           := lQry.FieldByName('UCOM').AsString;
     lModel.QUANTIDADE_NF                  := lQry.FieldByName('QUANTIDADE_NF').AsString;
     lModel.VALOR_UNITARIO_NF              := lQry.FieldByName('VALOR_UNITARIO_NF').AsString;
+    lModel.ORIGEM_CONCILIACAO_PRODUTO     := lQry.FieldByName('ORIGEM_CONCILIACAO_PRODUTO').AsString;
+
+
+
+
 
     Result := lModel;
   finally
