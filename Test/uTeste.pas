@@ -112,6 +112,7 @@ type
     Button70: TButton;
     Button71: TButton;
     Button72: TButton;
+    Button73: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -190,6 +191,7 @@ type
     procedure Button70Click(Sender: TObject);
     procedure Button71Click(Sender: TObject);
     procedure Button72Click(Sender: TObject);
+    procedure Button73Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -1920,6 +1922,41 @@ begin
   end;
 end;
 
+procedure TForm1.Button73Click(Sender: TObject);
+var
+  lContasPagarModel : TContasPagarModel;
+  Duplicata         : String;
+
+begin
+  lContasPagarModel := TContasPagarModel.Create(vIConexao);
+
+  try
+    try
+
+      lContasPagarModel.DUPLICATA_PAG  := '9000002024'; //Numero NFe
+      lContasPagarModel.CODIGO_FOR     := '500005'; //Fornecedor NFe
+      lContasPagarModel.PORTADOR_ID    := '000001';
+      lContasPagarModel.DATAEMI_PAG    := '27.02.2024'; //Data do MOvimento
+      lContasPagarModel.VALOR_PAG      := '1000'; //Total da nota
+      lContasPagarModel.CONDICOES_PAG  := '30/60/90';
+      lContasPagarModel.USUARIO_PAG    := '000001';
+      lContasPagarModel.OBS_PAG        := 'NUMERO DA NOTA E NOME DO FORNECEDOR';
+      lContasPagarModel.CODIGO_CTA     := '444444';
+      lContasPagarModel.LOJA           := '001';
+
+      lContasPagarModel.GerarFinanceiroEntrada;
+
+      ShowMessage('Inserido com Sucesso');
+    Except
+      on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lContasPagarModel.Free;
+  end;
+end;
+
+
 procedure TForm1.Button7Click(Sender: TObject);
 var
   lWebPedidoModel : TWebPedidoModel;
@@ -2281,6 +2318,8 @@ begin
       lContasPagarModel.PORTADOR_ID    := '000001';
       lContasPagarModel.DATAEMI_PAG    := '27.02.2024';
       lContasPagarModel.TIPO_PAG       := 'M';
+      lContasPagarModel.VALOR_PAG      := '1000';
+      lContasPagarModel.CONDICOES_PAG  := '30/60/90';
 
       lContasPagarModel.Incluir;
       ShowMessage('Inserido com Sucesso');

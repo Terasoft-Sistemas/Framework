@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 1248
     Height = 831
-    ActivePage = TabSheet5
+    ActivePage = TabSheet3
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -698,6 +698,15 @@ object Form1: TForm1
         Caption = 'Obter Valor Entrada'
         TabOrder = 7
         OnClick = Button62Click
+      end
+      object Button73: TButton
+        Left = 3
+        Top = 122
+        Width = 182
+        Height = 42
+        Caption = 'Gerar Contas a Pagar'
+        TabOrder = 8
+        OnClick = Button73Click
       end
     end
     object TabSheet4: TTabSheet

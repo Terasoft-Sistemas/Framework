@@ -160,6 +160,7 @@ type
     function obterLista: TFDMemTable;
     function obterValorEntrada(pEntrada, pFornecedor: String): TFDMemTable;
     procedure gerarDuplicatas(pID, pFornecedor : String);
+    procedure GerarFinanceiroEntrada;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -217,6 +218,72 @@ begin
 
   try
     self := self.carregaClasse(pID, pFornecedor);
+    lValorTotal := self.FVALOR_PAG;
+
+    lCondicoes.Delimiter := '/';
+    lCondicoes.StrictDelimiter := True;
+    lCondicoes.DelimitedText := self.FCONDICOES_PAG;
+
+    lParcelas := lCondicoes.Count;
+
+    lValorParcela := lValorTotal / lParcelas;
+
+    for i := 0 to lParcelas -1 do
+    begin
+      lVencimento := StrToDate(self.DATAEMI_PAG) + StrToInt(lCondicoes.Strings[i]);
+
+      lContasPagarItensModel.DUPLIACATA_PAG    := self.DUPLICATA_PAG;
+      lContasPagarItensModel.CODIGO_FOR        := self.CODIGO_FOR;
+      lContasPagarItensModel.VENC_PAG          := DateToStr(lVencimento);
+      lContasPagarItensModel.PACELA_PAG        := (i+1).ToString;
+      lContasPagarItensModel.TOTALPARCELAS     := lParcelas.ToString;
+      lContasPagarItensModel.VALORPARCELA_PAG  := lValorParcela.ToString;
+      lContasPagarItensModel.SITUACAO_PAG      := 'A';
+      lContasPagarItensModel.LOJA              := self.LOJA;
+      lContasPagarItensModel.PORTADOR_ID       := self.PORTADOR_ID;
+      lContasPagarItensModel.VALORPARCELA_BASE := lValorParcela.ToString;
+      lContasPagarItensModel.Incluir;
+    end;
+
+  finally
+    lContasPagarItensModel.Free;
+    lCondicoes.Free;
+  end;
+
+end;
+
+procedure TContasPagarModel.GerarFinanceiroEntrada;
+var
+  lValorTotal,
+  lValorParcela     : Double;
+  lParcelas         : Integer;
+  lCondicoes        : TStringList;
+  lVencimento       : TDate;
+  i                 : Integer;
+  lContasPagarItensModel : TContasPagarItensModel;
+begin
+
+  lContasPagarItensModel := TContasPagarItensModel.Create(vIConexao);
+  lCondicoes             := TStringList.Create;
+
+  try
+
+    self.DUPLICATA_PAG  := DUPLICATA_PAG;
+    self.CODIGO_FOR     := CODIGO_FOR;
+    self.PORTADOR_ID    := PORTADOR_ID;
+    self.DATAEMI_PAG    := DATAEMI_PAG;
+    self.TIPO_PAG       := 'S';
+    self.VALOR_PAG      := VALOR_PAG;
+    self.CONDICOES_PAG  := CONDICOES_PAG;
+    self.SITUACAO_PAG   := 'A';
+    self.USUARIO_PAG    := USUARIO_PAG;
+    self.OBS_PAG        := Copy(OBS_PAG,1,40);
+    self.CODIGO_CTA     := CODIGO_CTA;
+    self.LOJA           := LOJA;
+    self.TIPO           := 'N';
+    self.Incluir;
+
+    self := self.carregaClasse(Self.DUPLICATA_PAG, Self.CODIGO_FOR);
     lValorTotal := self.FVALOR_PAG;
 
     lCondicoes.Delimiter := '/';
