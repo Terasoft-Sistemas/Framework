@@ -156,6 +156,8 @@ type
     FCONCILIACAO_UNIDADE_PRODUTO: String;
     FVALOR_UNITARIO_NF: Variant;
     FQUANTIDADE_NF: Variant;
+    FMULTIPLICADOR: Variant;
+    FDIVISOR: Variant;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -299,6 +301,8 @@ type
     procedure SetCONCILIACAO_VALOR_UNIDADE(const Value: Real);
     procedure SetQUANTIDADE_NF(const Value: Variant);
     procedure SetVALOR_UNITARIO_NF(const Value: Variant);
+    procedure SetDIVISOR(const Value: Variant);
+    procedure SetMULTIPLICADOR(const Value: Variant);
 
   public
 
@@ -428,6 +432,9 @@ type
 
     property QUANTIDADE_NF                  : Variant read FQUANTIDADE_NF write SetQUANTIDADE_NF;
     property VALOR_UNITARIO_NF              : Variant read FVALOR_UNITARIO_NF write SetVALOR_UNITARIO_NF;
+
+    property DIVISOR                        : Variant read FDIVISOR write SetDIVISOR;
+    property MULTIPLICADOR                  : Variant read FMULTIPLICADOR write SetMULTIPLICADOR;
 
     property CONCILIACAO_ID_PRODUTO      :String read FCONCILIACAO_ID_PRODUTO write SetCONCILIACAO_ID_PRODUTO;
     property CONCILIACAO_NOME_PRODUTO    :String read FCONCILIACAO_NOME_PRODUTO write SetCONCILIACAO_NOME_PRODUTO;
@@ -831,6 +838,11 @@ begin
   FDESC_I17 := Value;
 end;
 
+procedure TEntradaItensModel.SetDIVISOR(const Value: Variant);
+begin
+  FDIVISOR := Value;
+end;
+
 procedure TEntradaItensModel.SetESTOQUE_2(const Value: Variant);
 begin
   FESTOQUE_2 := Value;
@@ -899,6 +911,11 @@ end;
 procedure TEntradaItensModel.SetMOBIBC_N13(const Value: Variant);
 begin
   FMOBIBC_N13 := Value;
+end;
+
+procedure TEntradaItensModel.SetMULTIPLICADOR(const Value: Variant);
+begin
+  FMULTIPLICADOR := Value;
 end;
 
 procedure TEntradaItensModel.SetNCM_I05(const Value: Variant);
