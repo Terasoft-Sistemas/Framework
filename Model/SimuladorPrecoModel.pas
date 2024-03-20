@@ -29,6 +29,11 @@ type
     FPERCENTUAL_MARGEM: Double;
     FPERCENTUAL_ICMS: Double;
     FTIPO_FRETE: String;
+    FVALOR_ICMS: Double;
+    FVALOR_CREDITO_PIS_COFINS: Double;
+    FVALOR_ICMS_ST: Double;
+    FVALOR_FRETE: Double;
+    FVALOR_IPI: Double;
     procedure SetPERCENTUAL_CREDITO_PIS_COFINS(const Value: Double);
     procedure SetPERCENTUAL_FRETE(const Value: Double);
     procedure SetPERCENTUAL_ICMS(const Value: Double);
@@ -40,6 +45,11 @@ type
     procedure SetPERCENTUAL_REDUCAO_ST(const Value: Double);
     procedure SetVALOR_AQUISICAO(const Value: Double);
     procedure SetTIPO_FRETE(const Value: String);
+    procedure SetVALOR_CREDITO_PIS_COFINS(const Value: Double);
+    procedure SetVALOR_FRETE(const Value: Double);
+    procedure SetVALOR_ICMS(const Value: Double);
+    procedure SetVALOR_ICMS_ST(const Value: Double);
+    procedure SetVALOR_IPI(const Value: Double);
 
   public
     property VALOR_AQUISICAO: Double read FVALOR_AQUISICAO write SetVALOR_AQUISICAO;
@@ -54,7 +64,14 @@ type
     property PERCENTUAL_MARGEM: Double read FPERCENTUAL_MARGEM write SetPERCENTUAL_MARGEM;
     property TIPO_FRETE: String read FTIPO_FRETE write SetTIPO_FRETE;
 
+    property VALOR_IPI: Double read FVALOR_IPI write SetVALOR_IPI;
+    property VALOR_FRETE: Double read FVALOR_FRETE write SetVALOR_FRETE;
+    property VALOR_ICMS_ST: Double read FVALOR_ICMS_ST write SetVALOR_ICMS_ST;
+    property VALOR_ICMS: Double read FVALOR_ICMS write SetVALOR_ICMS;
+    property VALOR_CREDITO_PIS_COFINS: Double read FVALOR_CREDITO_PIS_COFINS write SetVALOR_CREDITO_PIS_COFINS;
+
     function simular: TResultado;
+    function calcular: TResultado;
 
   	constructor Create;
     destructor Destroy; override;
@@ -64,6 +81,42 @@ implementation
 
 { TSimuladorPrecoModel }
 
+
+function TSimuladorPrecoModel.calcular: TResultado;
+var
+  lCreditoICMS,
+  lIcmsST,
+  lBaseST,
+  lCustoIPI,
+  lBase : Double;
+begin
+  if not (FVALOR_AQUISICAO > 0) then
+    CriaException('Valor de aquisição deve ser informado.');
+
+  lCustoIPI := VALOR_AQUISICAO + VALOR_IPI;
+
+  if PERCENTUAL_REDUCAO_ST > 0 then
+    lBase := lCustoIPI - (PERCENTUAL_REDUCAO_ST / 100 * lCustoIPI)
+  else
+    lBase := lCustoIPI;
+
+  if PERCENTUAL_MVA > 0 then begin
+   if TIPO_FRETE = 'CIF' then
+     lBase  := lBase + VALOR_FRETE;
+    lBaseST := lBase + (PERCENTUAL_MVA / 100 * lBase);
+    lIcmsST := lBaseST * (PERCENTUAL_ICMS_ST / 100);
+  end
+  else begin
+    lIcmsST := 0;
+  end;
+
+  if lIcmsST = 0 then
+    lCreditoICMS := VALOR_ICMS;
+
+  Result.CustoBruto    := lCustoIPI + VALOR_ICMS_ST + VALOR_FRETE;
+  Result.CustoLiquido  := VALOR_AQUISICAO;
+  Result.CustoCompra   := ( lCustoIPI + VALOR_ICMS_ST + VALOR_FRETE ) - (VALOR_CREDITO_PIS_COFINS + lCreditoICMS);
+end;
 
 constructor TSimuladorPrecoModel.Create;
 begin
@@ -129,6 +182,31 @@ end;
 procedure TSimuladorPrecoModel.SetVALOR_AQUISICAO(const Value: Double);
 begin
   FVALOR_AQUISICAO := Value;
+end;
+
+procedure TSimuladorPrecoModel.SetVALOR_CREDITO_PIS_COFINS(const Value: Double);
+begin
+  FVALOR_CREDITO_PIS_COFINS := Value;
+end;
+
+procedure TSimuladorPrecoModel.SetVALOR_FRETE(const Value: Double);
+begin
+  FVALOR_FRETE := Value;
+end;
+
+procedure TSimuladorPrecoModel.SetVALOR_ICMS(const Value: Double);
+begin
+  FVALOR_ICMS := Value;
+end;
+
+procedure TSimuladorPrecoModel.SetVALOR_ICMS_ST(const Value: Double);
+begin
+  FVALOR_ICMS_ST := Value;
+end;
+
+procedure TSimuladorPrecoModel.SetVALOR_IPI(const Value: Double);
+begin
+  FVALOR_IPI := Value;
 end;
 
 function TSimuladorPrecoModel.simular: TResultado;

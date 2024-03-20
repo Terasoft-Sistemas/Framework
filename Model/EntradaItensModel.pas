@@ -139,7 +139,6 @@ type
     FCST_ENT: Variant;
     FCUSTO_COMPRA: Variant;
     FIPI_ENT: Variant;
-    FIDEntrada: String;
     FCEAN: Variant;
     FCPROD: Variant;
     FCEST: Variant;
@@ -158,6 +157,8 @@ type
     FQUANTIDADE_NF: Variant;
     FMULTIPLICADOR: Variant;
     FDIVISOR: Variant;
+    FNumeroView: Variant;
+    FFornecedorView: Variant;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -284,7 +285,6 @@ type
     procedure SetVPIS_R06(const Value: Variant);
     procedure SetVSEG_I16(const Value: Variant);
     procedure SetVUNID_O12(const Value: Variant);
-    procedure SetIDEntrada(const Value: String);
     procedure SetCBARRA(const Value: Variant);
     procedure SetCEAN(const Value: Variant);
     procedure SetCEST(const Value: Variant);
@@ -303,6 +303,8 @@ type
     procedure SetVALOR_UNITARIO_NF(const Value: Variant);
     procedure SetDIVISOR(const Value: Variant);
     procedure SetMULTIPLICADOR(const Value: Variant);
+    procedure SetFornecedorView(const Value: Variant);
+    procedure SetNumeroView(const Value: Variant);
 
   public
 
@@ -429,7 +431,6 @@ type
     property XPROD                          : Variant read FXPROD write SetXPROD;
     property CEST                           : Variant read FCEST write SetCEST;
     property UCOM                           : Variant read FUCOM write SetUCOM;
-
     property QUANTIDADE_NF                  : Variant read FQUANTIDADE_NF write SetQUANTIDADE_NF;
     property VALOR_UNITARIO_NF              : Variant read FVALOR_UNITARIO_NF write SetVALOR_UNITARIO_NF;
 
@@ -466,7 +467,8 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
-    property IDEntrada: String read FIDEntrada write SetIDEntrada;
+    property NumeroView : Variant read FNumeroView write SetNumeroView;
+    property FornecedorView : Variant read FFornecedorView write SetFornecedorView;
 
   end;
 
@@ -565,7 +567,8 @@ begin
     lEntradaItensLista.StartRecordView := FStartRecordView;
     lEntradaItensLista.LengthPageView  := FLengthPageView;
     lEntradaItensLista.IDRecordView    := FIDRecordView;
-    lEntradaItensLista.IDEntrada       := FIDEntrada;
+    lEntradaItensLista.NumeroView      := FNumeroView;
+    lEntradaItensLista.FornecedorView  := FFornecedorView;
 
     Result := lEntradaItensLista.obterLista;
 
@@ -848,6 +851,11 @@ begin
   FESTOQUE_2 := Value;
 end;
 
+procedure TEntradaItensModel.SetFornecedorView(const Value: Variant);
+begin
+  FFornecedorView := Value;
+end;
+
 procedure TEntradaItensModel.SetICMS_ENT(const Value: Variant);
 begin
   FICMS_ENT := Value;
@@ -866,11 +874,6 @@ end;
 procedure TEntradaItensModel.SetID(const Value: Variant);
 begin
   FID := Value;
-end;
-
-procedure TEntradaItensModel.SetIDEntrada(const Value: String);
-begin
-  FIDEntrada := Value;
 end;
 
 procedure TEntradaItensModel.SetIDRecordView(const Value: Integer);
@@ -921,6 +924,11 @@ end;
 procedure TEntradaItensModel.SetNCM_I05(const Value: Variant);
 begin
   FNCM_I05 := Value;
+end;
+
+procedure TEntradaItensModel.SetNumeroView(const Value: Variant);
+begin
+  FNumeroView := Value;
 end;
 
 procedure TEntradaItensModel.SetNUMERO_ENT(const Value: Variant);

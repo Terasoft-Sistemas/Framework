@@ -111,6 +111,7 @@ type
     Button69: TButton;
     Button70: TButton;
     Button71: TButton;
+    Button72: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -188,6 +189,7 @@ type
     procedure Button69Click(Sender: TObject);
     procedure Button70Click(Sender: TObject);
     procedure Button71Click(Sender: TObject);
+    procedure Button72Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -691,7 +693,7 @@ begin
         if NumEntrada.IsEmpty then
           Exit;
 
-      lEntradaItensModel.IDEntrada := NumEntrada;
+      lEntradaItensModel.NumeroView := NumEntrada;
       lMemTable := lEntradaItensModel.obterLista;
       lMemTable.First;
       while not lMemTable.Eof do
@@ -1451,7 +1453,7 @@ begin
           lTableEntrada            := lEntradaModel.obterLista;
           dsEntrada.DataSet        := lTableEntrada;
 
-          lEntradaItensModel.IDEntrada := lEntrada.NUMERO_ENT;
+          lEntradaItensModel.NumeroView := lEntrada.NUMERO_ENT;
           lTableItens                  := lEntradaItensModel.obterLista;
           dsEntradaItens.DataSet       := lTableitens;
         end;
@@ -1515,7 +1517,7 @@ begin
     lTableEntrada            := lEntradaModel.obterLista;
     dsEntrada.DataSet        := lTableEntrada;
 
-    lEntradaItensModel.IDEntrada := lEntrada;
+    lEntradaItensModel.NumeroView := lEntrada;
     lTableItens                  := lEntradaItensModel.obterLista;
     dsEntradaItens.DataSet       := lTableitens;
 
@@ -1888,6 +1890,33 @@ begin
     end;
   finally
     lGrupoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button72Click(Sender: TObject);
+var
+  lSimuladorPrecoModel : TSimuladorPrecoModel;
+  lResultado           : TResultado;
+begin
+  lSimuladorPrecoModel := TSimuladorPrecoModel.Create;
+  try
+    lSimuladorPrecoModel.VALOR_AQUISICAO             := 1332;
+    lSimuladorPrecoModel.VALOR_IPI                   := 30;
+    lSimuladorPrecoModel.VALOR_FRETE                 := 50;
+    lSimuladorPrecoModel.VALOR_ICMS_ST               := 25;
+    lSimuladorPrecoModel.VALOR_ICMS                  := 80;
+    lSimuladorPrecoModel.VALOR_CREDITO_PIS_COFINS    := 40;
+    lSimuladorPrecoModel.TIPO_FRETE                  := 'CIF';
+
+    lResultado := lSimuladorPrecoModel.calcular;
+
+    memoSimulador.Lines.Clear;
+
+    memoSimulador.Lines.Add('Custo Líquido: '+ lResultado.CustoLiquido.ToString);
+    memoSimulador.Lines.Add('Custo Bruto: '+ lResultado.CustoBruto.ToString);
+    memoSimulador.Lines.Add('Custo Compra: '+ lResultado.CustoCompra.ToString);
+  finally
+    lSimuladorPrecoModel.Free;
   end;
 end;
 
