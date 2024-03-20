@@ -1925,8 +1925,6 @@ end;
 procedure TForm1.Button73Click(Sender: TObject);
 var
   lContasPagarModel : TContasPagarModel;
-  Duplicata         : String;
-
 begin
   lContasPagarModel := TContasPagarModel.Create(vIConexao);
 
