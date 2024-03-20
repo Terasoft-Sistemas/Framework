@@ -402,13 +402,13 @@ begin
     lSQL := lSQL + FWhereView;
 
   if FIDRecordView <> 0  then
-    lSQL := lSQL + ' and ID = '+IntToStr(FIDRecordView);
+    lSQL := lSQL + ' and ENTRADAITENS.ID = '+IntToStr(FIDRecordView);
 
   if not FNumeroView.IsEmpty then
-    lSQL := lSQL + ' and NUMERO_ENT = ' + QuotedStr(FNumeroView);
+    lSQL := lSQL + ' and ENTRADAITENS.NUMERO_ENT = ' + QuotedStr(FNumeroView);
 
   if not FFornecedorView.IsEmpty then
-    lSQL := lSQL + ' and CODIGO_FOR = ' + QuotedStr(FFornecedorView);
+    lSQL := lSQL + ' and ENTRADAITENS.CODIGO_FOR = ' + QuotedStr(FFornecedorView);
 
   Result := lSQL;
 end;
