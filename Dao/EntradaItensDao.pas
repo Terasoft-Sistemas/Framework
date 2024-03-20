@@ -28,7 +28,6 @@ type
     FOrderView: String;
     FWhereView: String;
     FTotalRecords: Integer;
-    FIDEntrada: String;
     FCONCILIACAO_VALOR_UNIDADE: Real;
     FCONCILIACAO_NOME_PRODUTO: String;
     FCONCILIACAO_QUANTIDADE: Real;
@@ -37,6 +36,8 @@ type
     FCONCILIACAO_MULTIPLICADOR: Real;
     FCONCILIACAO_ID_PRODUTO: String;
     FCONCILIACAO_UNIDADE_PRODUTO: String;
+    FNumeroView: Variant;
+    FFornecedorView: Variant;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
     procedure SetID(const Value: Variant);
@@ -48,7 +49,6 @@ type
     procedure SetWhereView(const Value: String);
 
     function where: String;
-    procedure SetIDEntrada(const Value: String);
     procedure SetCONCILIACAO_DIVISOR(const Value: Real);
     procedure SetCONCILIACAO_ID_PRODUTO(const Value: String);
     procedure SetCONCILIACAO_MULTIPLICADOR(const Value: Real);
@@ -57,6 +57,8 @@ type
     procedure SetCONCILIACAO_QUANTIDADE(const Value: Real);
     procedure SetCONCILIACAO_UNIDADE_PRODUTO(const Value: String);
     procedure SetCONCILIACAO_VALOR_UNIDADE(const Value: Real);
+    procedure SetFornecedorView(const Value: Variant);
+    procedure SetNumeroView(const Value: Variant);
 
   public
 
@@ -82,8 +84,8 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
-    property IDEntrada: String read FIDEntrada write SetIDEntrada;
-
+    property FornecedorView : Variant read FFornecedorView write SetFornecedorView;
+    property NumeroView : Variant read FNumeroView write SetNumeroView;
     function incluir(AEntradaItensModel: TEntradaItensModel): String;
     function alterar(AEntradaItensModel: TEntradaItensModel): String;
     function excluir(AEntradaItensModel: TEntradaItensModel): String;
@@ -402,8 +404,8 @@ begin
   if FIDRecordView <> 0  then
     lSQL := lSQL + ' and ID = '+IntToStr(FIDRecordView);
 
-  if not FIDEntrada.IsEmpty then
-    lSQL := lSQL + ' and  NUMERO_ENT = ' + QuotedStr(FIDEntrada);
+  if not FNumeroView.IsEmpty then
+    lSQL := lSQL + ' and  NUMERO_ENT = ' + QuotedStr(FNumeroView);
 
   Result := lSQL;
 end;
@@ -513,14 +515,14 @@ begin
   FCountView := Value;
 end;
 
+procedure TEntradaItensDao.SetFornecedorView(const Value: Variant);
+begin
+  FFornecedorView := Value;
+end;
+
 procedure TEntradaItensDao.SetID(const Value: Variant);
 begin
   FID := Value;
-end;
-
-procedure TEntradaItensDao.SetIDEntrada(const Value: String);
-begin
-  FIDEntrada := Value;
 end;
 
 procedure TEntradaItensDao.SetIDRecordView(const Value: Integer);
@@ -531,6 +533,11 @@ end;
 procedure TEntradaItensDao.SetLengthPageView(const Value: String);
 begin
   FLengthPageView := Value;
+end;
+
+procedure TEntradaItensDao.SetNumeroView(const Value: Variant);
+begin
+  FNumeroView := Value;
 end;
 
 procedure TEntradaItensDao.SetOrderView(const Value: String);
