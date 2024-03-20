@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 1248
     Height = 831
-    ActivePage = TabSheet3
+    ActivePage = API
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -787,6 +787,27 @@ object Form1: TForm1
         Caption = 'Calcular Custo'
         TabOrder = 2
         OnClick = Button72Click
+      end
+    end
+    object API: TTabSheet
+      Caption = 'API'
+      ImageIndex = 5
+      object MemoAPI: TMemo
+        Left = 655
+        Top = 15
+        Width = 409
+        Height = 681
+        ScrollBars = ssVertical
+        TabOrder = 0
+      end
+      object Button74: TButton
+        Left = 3
+        Top = 6
+        Width = 182
+        Height = 42
+        Caption = 'Consultar CNPJ'
+        TabOrder = 1
+        OnClick = Button74Click
       end
     end
   end

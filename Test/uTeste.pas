@@ -113,6 +113,9 @@ type
     Button71: TButton;
     Button72: TButton;
     Button73: TButton;
+    API: TTabSheet;
+    MemoAPI: TMemo;
+    Button74: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -192,6 +195,7 @@ type
     procedure Button71Click(Sender: TObject);
     procedure Button72Click(Sender: TObject);
     procedure Button73Click(Sender: TObject);
+    procedure Button74Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -219,7 +223,7 @@ uses
   SaldoModel, EmpresaModel, ProdutosModel, EntradaItensModel,
   ClienteModel, ContasPagarModel, ContasPagarItensModel, System.SysUtils,
   ReservaModel, DocumentoModel, AnexoModel, FluxoCaixaModel, BancoModel,
-  PortadorModel, LojasModel, OSModel, SimuladorPrecoModel, GrupoModel;
+  PortadorModel, LojasModel, OSModel, SimuladorPrecoModel, GrupoModel, CNPJModel;
 
 {$R *.dfm}
 
@@ -1954,6 +1958,28 @@ begin
   end;
 end;
 
+procedure TForm1.Button74Click(Sender: TObject);
+var
+ lCNPJModel : TCNPJModel;
+ Retorno : TRetornoCnpj;
+begin
+
+  lCNPJModel := TCNPJModel.Create(vIConexao);
+  Retorno := lCNPJModel.consultarCnpj('09020312000131');
+
+  MemoAPI.Lines.Add(Retorno.Nome);
+  MemoAPI.Lines.Add(Retorno.Fantasia);
+  MemoAPI.Lines.Add(Retorno.Cep);
+  MemoAPI.Lines.Add(Retorno.Logradouro);
+  MemoAPI.Lines.Add(Retorno.Numero);
+  MemoAPI.Lines.Add(Retorno.Complemento);
+  MemoAPI.Lines.Add(Retorno.Bairro);
+  MemoAPI.Lines.Add(Retorno.Municipio);
+  MemoAPI.Lines.Add(Retorno.UF);
+  MemoAPI.Lines.Add(Retorno.Telefone);
+  MemoAPI.Lines.Add(Retorno.Email);
+
+end;
 
 procedure TForm1.Button7Click(Sender: TObject);
 var
