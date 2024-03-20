@@ -693,7 +693,7 @@ begin
         if NumEntrada.IsEmpty then
           Exit;
 
-      lEntradaItensModel.IDEntrada := NumEntrada;
+      lEntradaItensModel.NumeroView := NumEntrada;
       lMemTable := lEntradaItensModel.obterLista;
       lMemTable.First;
       while not lMemTable.Eof do
@@ -1453,7 +1453,7 @@ begin
           lTableEntrada            := lEntradaModel.obterLista;
           dsEntrada.DataSet        := lTableEntrada;
 
-          lEntradaItensModel.IDEntrada := lEntrada.NUMERO_ENT;
+          lEntradaItensModel.NumeroView := lEntrada.NUMERO_ENT;
           lTableItens                  := lEntradaItensModel.obterLista;
           dsEntradaItens.DataSet       := lTableitens;
         end;
@@ -1517,7 +1517,7 @@ begin
     lTableEntrada            := lEntradaModel.obterLista;
     dsEntrada.DataSet        := lTableEntrada;
 
-    lEntradaItensModel.IDEntrada := lEntrada;
+    lEntradaItensModel.NumeroView := lEntrada;
     lTableItens                  := lEntradaItensModel.obterLista;
     dsEntradaItens.DataSet       := lTableitens;
 
