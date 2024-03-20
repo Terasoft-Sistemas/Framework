@@ -404,10 +404,10 @@ begin
   if FIDRecordView <> 0  then
     lSQL := lSQL + ' and ENTRADAITENS.ID = '+IntToStr(FIDRecordView);
 
-  if not FNumeroView.IsEmpty then
+  if FNumeroView <> '' then
     lSQL := lSQL + ' and ENTRADAITENS.NUMERO_ENT = ' + QuotedStr(FNumeroView);
 
-  if not FFornecedorView.IsEmpty then
+  if FFornecedorView <> '' then
     lSQL := lSQL + ' and ENTRADAITENS.CODIGO_FOR = ' + QuotedStr(FFornecedorView);
 
   Result := lSQL;
