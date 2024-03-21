@@ -198,7 +198,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from CONTASPAGAR where =' + QuotedStr(AContasPagarModel.DUPLICATA_PAG) + 'and CODIGO_FOR = ' + QuotedStr(AContasPagarModel.CODIGO_FOR));
+   lQry.ExecSQL('delete from CONTASPAGAR where DUPLICATA_PAG = ' + QuotedStr(AContasPagarModel.DUPLICATA_PAG) + 'and CODIGO_FOR = ' + QuotedStr(AContasPagarModel.CODIGO_FOR));
    lQry.ExecSQL;
    Result := AContasPagarModel.DUPLICATA_PAG;
 

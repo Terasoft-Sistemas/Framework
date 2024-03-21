@@ -153,7 +153,7 @@ type
 
     function Incluir: String;
     function Alterar(pID, pFornecedor : String): TContasPagarModel;
-    function Excluir(pID : String): String;
+    function Excluir(pID, pFornecedor : String): String;
     function Salvar : String;
 
     function carregaClasse(pId, pFornecedor: String): TContasPagarModel;
@@ -195,9 +195,10 @@ begin
   end;
 end;
 
-function TContasPagarModel.Excluir(pID: String): String;
+function TContasPagarModel.Excluir(pID, pFornecedor: String): String;
 begin
   self.DUPLICATA_PAG := pID;
+  self.CODIGO_FOR    := pFornecedor;
   self.FAcao         := tacExcluir;
   Result             := self.Salvar;
 end;
