@@ -24,6 +24,7 @@ type
   UF: string;
   Telefone: string;
   Email: string;
+  Abertura: string;
   Status: string;
   Message: string;
   end;
@@ -137,6 +138,9 @@ begin
     end;
     if Assigned(lJsonObj.Get('email')) then begin
       Result.Email := lJsonObj.Values['email'].Value;
+    end;
+    if Assigned(lJsonObj.Get('abertura')) then begin
+      Result.Abertura := lJsonObj.Values['abertura'].Value;
     end;
 
 end;

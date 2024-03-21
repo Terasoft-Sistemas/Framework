@@ -116,6 +116,7 @@ type
     API: TTabSheet;
     MemoAPI: TMemo;
     Button74: TButton;
+    Button75: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -196,6 +197,7 @@ type
     procedure Button72Click(Sender: TObject);
     procedure Button73Click(Sender: TObject);
     procedure Button74Click(Sender: TObject);
+    procedure Button75Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -223,7 +225,7 @@ uses
   SaldoModel, EmpresaModel, ProdutosModel, EntradaItensModel,
   ClienteModel, ContasPagarModel, ContasPagarItensModel, System.SysUtils,
   ReservaModel, DocumentoModel, AnexoModel, FluxoCaixaModel, BancoModel,
-  PortadorModel, LojasModel, OSModel, SimuladorPrecoModel, GrupoModel, CNPJModel;
+  PortadorModel, LojasModel, OSModel, SimuladorPrecoModel, GrupoModel, CNPJModel, CEPModel;
 
 {$R *.dfm}
 
@@ -1978,7 +1980,29 @@ begin
   MemoAPI.Lines.Add(Retorno.UF);
   MemoAPI.Lines.Add(Retorno.Telefone);
   MemoAPI.Lines.Add(Retorno.Email);
+  MemoAPI.Lines.Add(Retorno.Abertura);
 
+end;
+
+procedure TForm1.Button75Click(Sender: TObject);
+var
+ lCEPModel : TCEPModel;
+ Retorno : TRetornoCEP;
+begin
+
+  lCEPModel := TCEPModel.Create(vIConexao);
+  Retorno := lCEPModel.consultarCEP('86185420');
+
+  MemoAPI.Lines.Add(Retorno.CEP);
+  MemoAPI.Lines.Add(Retorno.Logradouro);
+  MemoAPI.Lines.Add(Retorno.Complemento);
+  MemoAPI.Lines.Add(Retorno.Bairro);
+  MemoAPI.Lines.Add(Retorno.Localidade);
+  MemoAPI.Lines.Add(Retorno.UF);
+  MemoAPI.Lines.Add(Retorno.IBGE);
+  MemoAPI.Lines.Add(Retorno.GIA);
+  MemoAPI.Lines.Add(Retorno.DDD);
+  MemoAPI.Lines.Add(Retorno.Siafi);
 end;
 
 procedure TForm1.Button7Click(Sender: TObject);

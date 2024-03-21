@@ -809,6 +809,15 @@ object Form1: TForm1
         TabOrder = 1
         OnClick = Button74Click
       end
+      object Button75: TButton
+        Left = 203
+        Top = 6
+        Width = 182
+        Height = 42
+        Caption = 'Consultar CEP'
+        TabOrder = 2
+        OnClick = Button75Click
+      end
     end
   end
   object dsTeste2: TDataSource
