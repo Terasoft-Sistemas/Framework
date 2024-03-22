@@ -257,6 +257,7 @@ procedure TContasPagarModel.GerarFinanceiroEntrada;
 var
   lValorTotal,
   lValorParcela     : Double;
+  lSoma             : Double;
   lParcelas         : Integer;
   lCondicoes        : TStringList;
   lVencimento       : TDate;
@@ -309,6 +310,13 @@ begin
       lContasPagarItensModel.LOJA              := self.LOJA;
       lContasPagarItensModel.PORTADOR_ID       := self.PORTADOR_ID;
       lContasPagarItensModel.VALORPARCELA_BASE := lValorParcela.ToString;
+
+      lSoma := lSoma + StrToFloat(lValorParcela.ToString);
+
+      if i = lContasPagarItensModel.TOTALPARCELAS then
+       lContasPagarItensModel.PACELA_PAG := FloatToStr(StrToFloat(lValorParcela.ToString) + (self.VALOR_PAG - lSoma));
+
+
       lContasPagarItensModel.Incluir;
     end;
 

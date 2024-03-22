@@ -193,6 +193,7 @@ begin
 
   lVencimento   := pFinanceiroParams.PRIMEIRO_VENCIMENTO;
   lIDFinanceiro := '';
+  lSoma         := 0;
 
   for i := 1 to pFinanceiroParams.QUANTIDADE_PARCELAS do
   begin
