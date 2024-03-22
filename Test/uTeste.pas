@@ -494,7 +494,8 @@ end;
 procedure TForm1.Button26Click(Sender: TObject);
 var
   lContasPagarModel : TContasPagarModel;
-  Duplicata         : String;
+  Duplicata, Fornecedor : String;
+
 begin
   lContasPagarModel := TContasPagarModel.Create(vIConexao);
   try
@@ -504,7 +505,7 @@ begin
       if Duplicata.IsEmpty then
       Exit;
 
-      lContasPagarModel.Excluir(Duplicata);
+      lContasPagarModel.Excluir(Duplicata,Fornecedor);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
