@@ -311,10 +311,10 @@ begin
       lContasPagarItensModel.PORTADOR_ID       := self.PORTADOR_ID;
       lContasPagarItensModel.VALORPARCELA_BASE := lValorParcela.ToString;
 
-      lSoma := lSoma + StrToFloat(lValorParcela.ToString);
+      lSoma := RoundTo(lSoma + StrToFloat(lValorParcela.ToString),-2);
 
-      if i = lContasPagarItensModel.TOTALPARCELAS then
-       lContasPagarItensModel.PACELA_PAG := FloatToStr(StrToFloat(lValorParcela.ToString) + (self.VALOR_PAG - lSoma));
+      if i = lContasPagarItensModel.TOTALPARCELAS -1 then
+       lContasPagarItensModel.VALORPARCELA_PAG := FloatToStr(StrToFloat(lValorParcela.ToString) + (self.VALOR_PAG - lSoma));
 
 
       lContasPagarItensModel.Incluir;
