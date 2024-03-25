@@ -227,6 +227,9 @@ begin
         lDivergencias := 0;
         lCDS.First;
         while not lCDS.Eof do begin
+          gdbPadrao.insereDB('PEDIDOVENDA_EXPEDICAO',
+                ['id','pedido_id', 'item_id', 'produto_id', 'quantidade', 'quantidade_original', 'status'],
+                [gdbPadrao.genValue('GEN_PEDIDOVENDA_EXPEDICAO'),lCDS.FieldByName('id').AsString, lCDS.FieldByName('id_item').AsString, lCDS.FieldByName('produto_id').AsString, lFieldQtde.AsInteger, lCDS.FieldByName('quantidade').AsInteger, '0']);
           gdbPadrao.updateDB('pedidoitens', [ 'id' ], [ lCDS.FieldByName('id_item').AsInteger ], [ 'quantidade_atendida'], [ lFieldQtde.AsInteger ] );
           if(lFieldQtde.AsInteger <> lCDS.FieldByName('quantidade').AsInteger) then begin
             result.formataErro('processaArquivoExpedicao: Pedido [%s], Produto[%s] divergente na quantidade: Vendida: %d, Atendida: %d',
