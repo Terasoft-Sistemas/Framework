@@ -272,12 +272,12 @@ var
   lSql : String;
 begin
 
-  if FNumeroView.IsEmpty then
-    CriaException('Entrada não informado');
-
-  if FFornecedorView.IsEmpty then
-    CriaException('Fornecedor não informado');
-
+//  if FNumeroView.IsEmpty then
+//    CriaException('Entrada não informado');
+//
+//  if FFornecedorView.IsEmpty then
+//    CriaException('Fornecedor não informado');
+//
   lQry := vIConexao.CriarQuery;
 
   try
