@@ -496,15 +496,20 @@ begin
             lDSItens.dataset.Next;
             continue;
           end;
-          if(lDSItens.fieldByName('QUANTIDADE_ENT').AsFloat <> lListaIMEIS.Count) then begin
+          if(lDSItens.dataset.fieldByName('QUANTIDADE_ENT').AsFloat <> lListaIMEIS.Count) then begin
             pResultado.formataErro('processaArquivoRecebimento [%s]: Produto [%s] não possui IMEI suficientes na entrada: %d', [ lArquivo, lProduto, lListaIMEIS.Count ] );
             lDSItens.dataset.Next;
             continue;
+          end else begin
+            lDSItens.dataset.Edit;
+            lDSItens.dataset.FieldByName('qtd_checagem').AsFloat := lDSItens.dataset.fieldByName('QUANTIDADE_ENT').AsFloat;
+            lDSItens.dataset.CheckBrowseMode;
           end;
           for lTmp in lListaIMEIS do begin
             gdbPadrao.insereDB('movimento_serial',
                 ['tipo_serial','numero','produto','tipo_documento','id_documento'],
                 ['I',lTmp,lProduto,'E',lDS.fieldByName('id').AsString]);
+
           end;
           lDSItens.dataset.Next;
         end;
