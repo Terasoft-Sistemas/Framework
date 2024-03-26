@@ -424,7 +424,7 @@ begin
       if lEntradaModel.TotalRecords > 0 then
         CriaException('Nota fiscal '+Format('%10.10d', [NFe.Ide.nNF])+', do fornecedor '+lFornecedor+' já importada');
 
-      self.FSTATUS                      := '1';
+      self.FSTATUS                      := '0';
       self.NUMERO_ENT                   := Format('%10.10d', [NFe.Ide.nNF]);
       self.FSERIE_ENT                   := IntToStr(NFe.Ide.serie);
       self.FMODELO_ENT                  := IntToStr(NFe.Ide.modelo);
@@ -433,6 +433,18 @@ begin
       self.FDATAMOVI_ENT                := DateToStr(vIConexao.DataServer);
       self.FID_A03                      := copy(NFe.infNFe.ID, 4, 44);
       self.FARQ_NFE                     := GerarXML;
+      self.FFRETE_ENT                   := FloatToStr(NFe.Total.ICMSTot.vFrete);
+      self.FIPI_ENT                     := FloatToStr(NFe.Total.ICMSTot.vIPI);
+      self.FICMS_ENT                    := FloatToStr(NFe.Total.ICMSTot.vICMS);
+      self.FOUTROS_ENT                  := FloatToStr(NFe.Total.ICMSTot.vOutro);
+      self.FDESC_ENT                    := FloatToStr(NFe.Total.ICMSTot.vDesc);
+      self.FPIS_ENT                     := FloatToStr(NFe.Total.ICMSTot.vPIS);
+      self.FCOFINS_ENT                  := FloatToStr(NFe.Total.ICMSTot.vCOFINS);
+      self.FICMS_ST                     := FloatToStr(NFe.Total.ICMSTot.vST);
+      self.FBASE_ST                     := FloatToStr(NFe.Total.ICMSTot.vBCST);
+      self.FSEG_W09                     := FloatToStr(NFe.Total.ICMSTot.vSeg);
+      self.FVII_W11                     := FloatToStr(NFe.Total.ICMSTot.vII);
+      self.FTOTALPRODUTOS_ENT           := FloatToStr(NFe.Total.ICMSTot.vProd);
       self.FTOTAL_ENT                   := FloatToStr(NFe.Total.ICMSTot.vNF);
       self.FFINALIZADE                  := FinNFeToStr(NFe.Ide.finNFe);
       self.FTIPO_FRETE                  := modFreteToStr(NFe.Transp.modFrete);
@@ -487,6 +499,7 @@ begin
         begin
           lEntradaItensModel.LOJA := self.FLOJA;
 
+          lEntradaItensModel.STATUS            := '0';
           lEntradaItensModel.ITEM_ENT          := Prod.nItem.ToString;
           lEntradaItensModel.CODIGO_PRO        := '999999';
           lEntradaItensModel.CODIGO_FOR        := self.FCODIGO_FOR;
