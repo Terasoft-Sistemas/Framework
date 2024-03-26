@@ -499,6 +499,9 @@ begin
       '       coalesce(produto.saldo_pro, 0) saldo_pro,            '+
       '       produto.customedio_pro,                              '+
       '       produto.nfce_cfop,                                   '+
+      '       produto.EAN_14,                                      '+
+      '       produto.REFERENCIA_NEW,                              '+
+      '       produto.UNIDADE_PRO,                                 '+
       '       produto.garantia_12,                                 '+
       '       produto.garantia_24                                  '+
 	    '  from produto                                              '+
@@ -523,6 +526,9 @@ begin
       FProdutossLista[i].VENDA_PRO       := lQry.FieldByName('VENDA_PRO').AsString;
       FProdutossLista[i].CUSTOMEDIO_PRO  := lQry.FieldByName('CUSTOMEDIO_PRO').AsString;
       FProdutossLista[i].NFCE_CFOP       := lQry.FieldByName('NFCE_CFOP').AsString;
+      FProdutossLista[i].EAN_14          := lQry.FieldByName('EAN_14').AsString;
+      FProdutossLista[i].REFERENCIA_NEW  := lQry.FieldByName('REFERENCIA_NEW').AsString;
+      FProdutossLista[i].UNIDADE_PRO     := lQry.FieldByName('UNIDADE_PRO').AsString;
       FProdutossLista[i].GARANTIA_12     := lQry.FieldByName('GARANTIA_12').AsString;
       FProdutossLista[i].GARANTIA_24     := lQry.FieldByName('GARANTIA_24').AsString;
       FProdutossLista[i].SALDO_PRO       := lQry.FieldByName('SALDO_PRO').AsString;
