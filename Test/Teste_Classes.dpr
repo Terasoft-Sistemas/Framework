@@ -120,7 +120,11 @@ uses
   ProdutoTipoModel in '..\Model\ProdutoTipoModel.pas',
   ProdutoTipoDao in '..\Dao\ProdutoTipoDao.pas',
   LocalizacaoEstoqueDao in '..\Dao\LocalizacaoEstoqueDao.pas',
-  LocalizacaoEstoqueModel in '..\Model\LocalizacaoEstoqueModel.pas';
+  LocalizacaoEstoqueModel in '..\Model\LocalizacaoEstoqueModel.pas',
+  PedidoCompraModel in '..\Model\PedidoCompraModel.pas',
+  PedidoCompraDao in '..\Dao\PedidoCompraDao.pas',
+  PedidoCompraItensDao in '..\Dao\PedidoCompraItensDao.pas',
+  PedidoCompraItensModel in '..\Model\PedidoCompraItensModel.pas';
 
 {$R *.res}
 

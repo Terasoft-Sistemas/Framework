@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 1248
     Height = 831
-    ActivePage = API
+    ActivePage = TabSheet6
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -819,6 +819,57 @@ object Form1: TForm1
         OnClick = Button75Click
       end
     end
+    object TabSheet6: TTabSheet
+      Caption = 'Pedido de Compra'
+      ImageIndex = 6
+      object XDBGrid4: TXDBGrid
+        Left = 0
+        Top = 359
+        Width = 1240
+        Height = 169
+        Align = alBottom
+        DataSource = dsPedidoCompra
+        GridStyle.VisualStyle = vsXPStyle
+        TabOrder = 0
+      end
+      object Button76: TButton
+        Left = 15
+        Top = 30
+        Width = 182
+        Height = 42
+        Caption = 'Inserir Pedido de Compra'
+        TabOrder = 1
+        OnClick = Button76Click
+      end
+      object Button77: TButton
+        Left = 15
+        Top = 78
+        Width = 182
+        Height = 42
+        Caption = 'Consultar Pedido de Compra'
+        TabOrder = 2
+        OnClick = Button77Click
+      end
+      object XDBGrid5: TXDBGrid
+        Left = 0
+        Top = 528
+        Width = 1240
+        Height = 273
+        Align = alBottom
+        DataSource = dsPedidoCompraItens
+        GridStyle.VisualStyle = vsXPStyle
+        TabOrder = 3
+      end
+      object Button78: TButton
+        Left = 203
+        Top = 30
+        Width = 182
+        Height = 42
+        Caption = 'Inserir Itens Pedido de Compra'
+        TabOrder = 4
+        OnClick = Button78Click
+      end
+    end
   end
   object dsTeste2: TDataSource
     Left = 1056
@@ -839,5 +890,13 @@ object Form1: TForm1
   object dsOS: TDataSource
     Left = 1152
     Top = 575
+  end
+  object dsPedidoCompra: TDataSource
+    Left = 1048
+    Top = 344
+  end
+  object dsPedidoCompraItens: TDataSource
+    Left = 1052
+    Top = 408
   end
 end

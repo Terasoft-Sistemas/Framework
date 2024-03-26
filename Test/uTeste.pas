@@ -117,6 +117,14 @@ type
     MemoAPI: TMemo;
     Button74: TButton;
     Button75: TButton;
+    TabSheet6: TTabSheet;
+    XDBGrid4: TXDBGrid;
+    dsPedidoCompra: TDataSource;
+    Button76: TButton;
+    Button77: TButton;
+    XDBGrid5: TXDBGrid;
+    Button78: TButton;
+    dsPedidoCompraItens: TDataSource;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -198,6 +206,9 @@ type
     procedure Button73Click(Sender: TObject);
     procedure Button74Click(Sender: TObject);
     procedure Button75Click(Sender: TObject);
+    procedure Button76Click(Sender: TObject);
+    procedure Button77Click(Sender: TObject);
+    procedure Button78Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -225,7 +236,8 @@ uses
   SaldoModel, EmpresaModel, ProdutosModel, EntradaItensModel,
   ClienteModel, ContasPagarModel, ContasPagarItensModel, System.SysUtils,
   ReservaModel, DocumentoModel, AnexoModel, FluxoCaixaModel, BancoModel,
-  PortadorModel, LojasModel, OSModel, SimuladorPrecoModel, GrupoModel, CNPJModel, CEPModel;
+  PortadorModel, LojasModel, OSModel, SimuladorPrecoModel, GrupoModel, CNPJModel, CEPModel,
+  PedidoCompraModel, PedidoCompraItensModel;
 
 {$R *.dfm}
 
@@ -2004,6 +2016,100 @@ begin
   MemoAPI.Lines.Add(Retorno.GIA);
   MemoAPI.Lines.Add(Retorno.DDD);
   MemoAPI.Lines.Add(Retorno.Siafi);
+end;
+
+procedure TForm1.Button76Click(Sender: TObject);
+var
+  lPedidoCompra : TPedidoCompraModel;
+begin
+  lPedidoCompra := TPedidoCompraModel.Create(vIConexao);
+  try
+    try
+
+      lPedidoCompra.NUMERO_PED := '000017';
+      lPedidoCompra.CODIGO_FOR := '000059';
+      lPedidoCompra.DATA_PED := DateToStr(vConexao.DataServer);
+      lPedidoCompra.DATAPREV_PED := Date;
+      lPedidoCompra.PARCELAS_PED := 1;
+      lPedidoCompra.PRIMEIROVENC_PED := Date;
+      lPedidoCompra.TOTAL_PED := '1000';
+      lPedidoCompra.USUARIO_PED := '000001';
+      lPedidoCompra.STATUS_PED := 'A';
+      lPedidoCompra.TOTALPRODUTOS_PED := '1000';
+      lPedidoCompra.TIPO_PRO := 'N';
+
+      lPedidoCompra.Incluir;
+      ShowMessage('Inserido com Sucesso');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lPedidoCompra.Free;
+  end;
+end;
+
+procedure TForm1.Button77Click(Sender: TObject);
+var
+  lPedidoCompraModel : TPedidoCompraModel;
+  lPedidoItensModel  : TPedidoCompraItensModel;
+  TablePedidoCompra,
+  TablePedItens      : TFDMEmTable;
+  lNumeroView,
+  lFornecedorView    : String;
+begin
+  lPedidoCompraModel := TPedidoCompraModel.Create(vIConexao);
+  lPedidoItensModel  := TPedidoCompraItensModel.Create(vIConexao);
+  try
+    try
+      lNumeroView     := '000011';
+      lFornecedorView := '000318';
+
+      lPedidoCompraModel.NumeroView    := lNumeroView;
+      TablePedidoCompra                := lPedidoCompraModel.obterLista;
+      dsPedidoCompra.DataSet           := TablePedidoCompra;
+
+      lPedidoItensModel.NumeroView     := lNumeroView;
+      lPedidoItensModel.FornecedorView := lFornecedorView;
+      TablePedItens                    := lPedidoItensModel.obterLista;
+      dsPedidoCompraItens.DataSet      := TablePedItens;
+
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lPedidoCompraModel.Free;
+    lPedidoItensModel.Free;
+  end;
+end;
+
+procedure TForm1.Button78Click(Sender: TObject);
+var
+  lPedidoCompraModel : TPedidoCompraModel;
+  lPedidoItensModel  : TPedidoCompraItensModel;
+  lPedidoParams      : TPedidoItensParams;
+begin
+  lPedidoCompraModel := TPedidoCompraModel.Create(vIConexao);
+  lPedidoItensModel  := TPedidoCompraItensModel.Create(vIConexao);
+  try
+    try
+      lPedidoParams.NUMERO_PED     := '000017';
+      lPedidoParams.CODIGO_FOR     := '000059';
+      lPedidoParams.CODIGO_PRO     := '000980';
+      lPedidoParams.QUANTIDADE_PED := '5';
+      lPedidoParams.VALORUNI_PED   := '100';
+
+      lPedidoCompraModel.AdicionarItens(lPedidoParams);
+      ShowMessage('Item adicionado ao Pedido: ' +lPedidoParams.NUMERO_PED)
+    except
+      on E:Exception do
+      ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lPedidoCompraModel.Free;
+    lPedidoItensModel.Free;
+  end;
 end;
 
 procedure TForm1.Button7Click(Sender: TObject);
