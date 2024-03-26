@@ -205,15 +205,20 @@ begin
 
         lCDS.First;
         while not lCDS.eof do begin
-          if(lCDS.FieldByName('produto_id').AsString = lProduto) then begin
-            lCDS.Edit;
-            lFieldQtde.AsCurrency := lFieldQtde.AsCurrency + 1.0;
-            lCDS.CheckBrowseMode;
-            break;
+          if(lCDS.FieldByName('produto_id').AsString = lProduto) then
+          begin
+            if(lFieldQtde.AsCurrency<lCDS.FieldByName('quantidade').AsCurrency) then
+            begin
+              lCDS.Edit;
+              lFieldQtde.AsCurrency := lFieldQtde.AsCurrency + 1.0;
+              lCDS.CheckBrowseMode;
+              break;
+            end;
           end;
           lCDS.Next;
         end;
-        if(lCDS.Eof) then begin
+        if(lCDS.Eof) then
+        begin
           pResultado.formataErro('processaArquivoExpedicao Pedido[%s]: Não localizou o produto [%s]', [ lPedido, lProduto ] );
           result.formataAviso('Pedido [%s] marcado como DIVERGENTE', [ lPedido ] );
           divergenciaArquivoFedex(true,pResultado);
@@ -223,13 +228,15 @@ begin
         end;
       end;
 
-      if(lCDS<>nil) then begin
+      if(lCDS<>nil) then
+      begin
         lDivergencias := 0;
         lCDS.First;
-        while not lCDS.Eof do begin
+        while not lCDS.Eof do
+        begin
           gdbPadrao.insereDB('PEDIDOVENDA_EXPEDICAO',
                 ['id','pedido_id', 'item_id', 'produto_id', 'quantidade', 'quantidade_original', 'status'],
-                [gdbPadrao.genValue('GEN_PEDIDOVENDA_EXPEDICAO'),lCDS.FieldByName('id').AsString, lCDS.FieldByName('id_item').AsString, lCDS.FieldByName('produto_id').AsString, lFieldQtde.AsInteger, lCDS.FieldByName('quantidade').AsInteger, '0']);
+                [gdbPadrao.genValue('GEN_PEDIDOVENDA_EXPEDICAO'),lCDS.FieldByName('id').AsString, lCDS.FieldByName('id_item').AsString, lCDS.FieldByName('produto_id').AsString, lFieldQtde.AsInteger, lCDS.FieldByName('quantidade').AsInteger, '0'],false,false,'pedido_id,item_id');
           gdbPadrao.updateDB('pedidoitens', [ 'id' ], [ lCDS.FieldByName('id_item').AsInteger ], [ 'quantidade_atendida'], [ lFieldQtde.AsInteger ] );
           if(lFieldQtde.AsInteger <> lCDS.FieldByName('quantidade').AsInteger) then begin
             result.formataErro('processaArquivoExpedicao: Pedido [%s], Produto[%s] divergente na quantidade: Vendida: %d, Atendida: %d',
@@ -240,7 +247,8 @@ begin
         end;
         gdbPadrao.commit(true);
       end;
-      if(lDivergencias>0) then begin
+      if(lDivergencias>0) then
+      begin
         divergenciaArquivoFedex(true,pResultado);
         pResultado.formataAviso('Pedido [%s] marcado como DIVERGENTE', [ lPedido ] );
         ctr.setValor(CONTROLE_LOGISTICA_STATUS_VENDA, lPedido, CONTROLE_LOGISTICA_STATUS_DIVERGENTE);
@@ -248,7 +256,8 @@ begin
         exit;
       end;
 
-      if(pResultado.erros<>lSave) then begin
+      if(pResultado.erros<>lSave) then
+      begin
         rejeitarArquivoFedex(true,pResultado);
         pResultado.acumulador['Saidas rejeitadas'].incrementa;
         exit;
@@ -257,7 +266,8 @@ begin
       try
 
         lMovimento := gdbPadrao.criaDataset.query('select * from movimento_serial s where s.tipo_documento = ''P'' and id_documento=:id ', 'id', [ lPedido ]);
-        if(lMovimento.dataset.RecordCount>0) then begin
+        if(lMovimento.dataset.RecordCount>0) then
+        begin
           rejeitarArquivoFedex(true,pResultado);
           pResultado.formataErro('processaArquivoRecebimento [%s]: Já possui movimento de seriais para esse pedido [%s]', [ lArquivo, lPedido ] );
           pResultado.acumulador['Saidas rejeitadas'].incrementa;
@@ -267,14 +277,17 @@ begin
         lDSIMEI := gdbPadrao.criaDataset;
 
         lCDS.First;
-        while not lCDS.eof do begin
+        while not lCDS.eof do
+        begin
           lProduto := lCDS.FieldByName('produto_id').AsString;
-          if not lLista.get(lProduto,lListaIMEIS) then begin
+          if not lLista.get(lProduto,lListaIMEIS) then
+          begin
             pResultado.formataErro('processaArquivoExpedicao [%s]: Produto [%s] não possui IMEI de retorno', [ lArquivo, lProduto ] );
             lDSItens.dataset.Next;
             continue;
           end;
-          for lTmp in lListaIMEIS do begin
+          for lTmp in lListaIMEIS do
+          begin
             gdbPadrao.insereDB('movimento_serial',
                 ['tipo_serial','numero','produto','tipo_documento','id_documento'],
                 ['I',lTmp,lProduto,'P',lPedido]);
@@ -290,7 +303,8 @@ begin
       end;
 
     except
-      on e: Exception do begin
+      on e: Exception do
+      begin
         pResultado.formataErro('processaArquivoExpedicao: %s: %s', [ e.ClassName, e.Message ] );
         pResultado.acumulador['Saidas com problemas'].incrementa;
       end;
@@ -491,24 +505,39 @@ begin
           exit;
         end;
 
-        while not lDSItens.dataset.eof do begin
+        while not lDSItens.dataset.eof do
+        begin
           lProduto := lDSItens.dataset.FieldByName('codigo_pro').AsString;;
 
-          if not lLista.get(lProduto,lListaIMEIS) then begin
+          if not lLista.get(lProduto,lListaIMEIS) then
+          begin
             pResultado.formataErro('processaArquivoRecebimento [%s]: Produto [%s] não possui IMEI de retorno', [ lArquivo, lProduto ] );
             lDSItens.dataset.Next;
             continue;
           end;
-          if(lDSItens.dataset.fieldByName('QUANTIDADE_ENT').AsFloat <> lListaIMEIS.Count) then begin
+          if(lDSItens.dataset.fieldByName('QUANTIDADE_ENT').AsFloat <> lListaIMEIS.Count) then
+          begin
             pResultado.formataErro('processaArquivoRecebimento [%s]: Produto [%s] não possui IMEI suficientes na entrada: %d', [ lArquivo, lProduto, lListaIMEIS.Count ] );
             lDSItens.dataset.Next;
             continue;
-          end else begin
+          end else
+          begin
             lDSItens.dataset.Edit;
             lDSItens.dataset.FieldByName('qtd_checagem').AsFloat := lDSItens.dataset.fieldByName('QUANTIDADE_ENT').AsFloat;
             lDSItens.dataset.CheckBrowseMode;
           end;
-          for lTmp in lListaIMEIS do begin
+          i := 0;
+
+          while (i < lDSItens.dataset.fieldByName('QUANTIDADE_ENT').AsFloat) and (lListaIMEIS.Count>0) do
+          //for lTmp in lListaIMEIS do
+          begin
+            lTmp := lListaIMEIS.Items[0];
+            lListaIMEIS.Delete(0);
+            inc(i);
+            if(i>lDSItens.dataset.fieldByName('QUANTIDADE_ENT').AsFloat) then break;
+            if(lListaIMEIS.Count=0) then
+              lLista.get(lProduto,lListaIMEIS,true);
+
             gdbPadrao.insereDB('movimento_serial',
                 ['tipo_serial','numero','produto','tipo_documento','id_documento'],
                 ['I',lTmp,lProduto,'E',lDS.fieldByName('id').AsString]);
@@ -516,8 +545,11 @@ begin
           end;
           lDSItens.dataset.Next;
         end;
+        if(lLista.count>0) then
+          pResultado.formataErro('processaArquivoRecebimento [%s]: O retorno possui mais produtos do que o necessário', [ lArquivo ] );
 
-        if(pResultado.erros<>lSave) then begin
+        if(pResultado.erros<>lSave) then
+        begin
           rejeitarArquivoFedex(true,pResultado);
           pResultado.acumulador['Entradas rejeitadas'].incrementa;
           exit;
