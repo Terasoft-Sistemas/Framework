@@ -5,11 +5,13 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
+  System.Classes,
   Interfaces.Conexao,
   Terasoft.Utils,
   ACBrNFeNotasFiscais,
   ACBrNFeConfiguracoes,
   ACBrNFe,
+  ACBrNFeDANFeRLClass,
   pcnConversao,
   pcnConversaoNFe,
   FireDAC.Comp.Client;
@@ -33,6 +35,7 @@ type
   private
     vIConexao : IConexao;
     ACBrNFe: TACBrNFe;
+    ACBrNFeDANFeRL: TACBrNFeDANFeRL;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -314,6 +317,11 @@ type
 
     function obterFornecedor(pCNPJCPF : String): String;
 
+    function VisualizarXML(pIDEntrada, pCodigoFornecedor: String; pImprimir, pMostraPreview, pGerarPDF: Boolean; pPathPDF: String = ''): String;
+    function SalvarXML(pIDEntrada, pCodigoFornecedor, pPath: String): String;
+
+
+
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -337,6 +345,84 @@ uses
   System.SysUtils, FornecedorModel;
 
 { TEntradaModel }
+
+
+
+function TEntradaModel.SalvarXML(pIDEntrada, pCodigoFornecedor, pPath: String): String;
+var
+ lXML: TStringList;
+ lEntradaModel: TEntradaModel;
+begin
+  lEntradaModel   := TEntradaModel.Create(vIConexao);
+
+  try
+    lEntradaModel := lEntradaModel.carregaClasse(pIDEntrada, pCodigoFornecedor);
+    lXML := TStringList.Create;
+
+    if lEntradaModel.ARQ_NFE = '' then
+      CriaException('NF não localizada '+lEntradaModel.ID_A03);
+
+    lXML.Text := lEntradaModel.ARQ_NFE;
+
+    if not DirectoryExists (pPath) then
+      ForceDirectories(pPath);
+    if DirectoryExists (pPath) then
+      lXML.SaveToFile(pPath+'\'+lEntradaModel.ID_A03+'.xml');
+
+    Result := lEntradaModel.ID_A03+'.xml';
+  finally
+    lEntradaModel.Free;
+  end;
+end;
+
+
+function TEntradaModel.VisualizarXML(pIDEntrada, pCodigoFornecedor: String; pImprimir, pMostraPreview, pGerarPDF: Boolean; pPathPDF: String = ''): String;
+var
+ lEntradaModel: TEntradaModel;
+begin
+  lEntradaModel   := TEntradaModel.Create(vIConexao);
+
+  try
+    lEntradaModel := lEntradaModel.carregaClasse(pIDEntrada, pCodigoFornecedor);
+
+    ACBrNFeDANFeRL := TACBrNFeDANFeRL.Create(nil);
+    ACBrNFe.DANFE  := ACBrNFeDANFeRL;
+
+    ACBrNFe.DANFE.TipoDANFE := tiRetrato;
+
+    //ACBrNFe.DANFE.Logo    := vConfiguracoesNotaFiscal.DANFEPathLogo(lNFModel.MODELO);
+    ACBrNFe.DANFE.PathPDF := pPathPDF;
+    ACBrNFe.DANFE.Sistema := 'Emissão: ERP Terasoft';
+
+    if FileExists(ACBrNFe.DANFE.Logo) then
+    begin
+      ACBrNFe.DANFE.ExpandeLogoMarca := True;
+      ACBrNFe.DANFE.ExpandeLogoMarcaConfig.Esticar := False;
+    end;
+
+    ACBrNFe.NotasFiscais.Clear;
+    ACBrNFe.NotasFiscais.LoadFromString(lEntradaModel.ARQ_NFE);
+
+
+    if pGerarPDF then begin
+      ACBrNFe.DANFE.MostraStatus := pMostraPreview;
+      ACBrNFe.DANFE.ImprimirDANFEPDF;
+    end;
+
+    if pImprimir then begin
+      ACBrNFe.DANFE.MostraStatus  := pMostraPreview;
+      ACBrNFe.DANFE.MostraPreview := pMostraPreview;
+      ACBrNFe.DANFE.ImprimirDANFE;
+    end;
+
+    Result := lEntradaModel.ID_A03;
+
+  finally
+    lEntradaModel.Free;
+  end;
+
+end;
+
 
 function TEntradaModel.Alterar(pID, pFornecedor: String): TEntradaModel;
 var

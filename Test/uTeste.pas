@@ -125,6 +125,8 @@ type
     XDBGrid5: TXDBGrid;
     Button78: TButton;
     dsPedidoCompraItens: TDataSource;
+    Button79: TButton;
+    Button80: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -209,6 +211,8 @@ type
     procedure Button76Click(Sender: TObject);
     procedure Button77Click(Sender: TObject);
     procedure Button78Click(Sender: TObject);
+    procedure Button79Click(Sender: TObject);
+    procedure Button80Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -2112,6 +2116,37 @@ begin
   end;
 end;
 
+procedure TForm1.Button79Click(Sender: TObject);
+var
+  lEntradaModel: TEntradaModel;
+  lNomePDF: String;
+  lIDEntrada, lCodigoFornecedor, lPathPDF: String;
+  lImprimir, lMostraPreview, lGerarPDF: Boolean;
+begin
+  lEntradaModel   := TEntradaModel.Create(vIConexao);
+
+  try
+    lIDEntrada         := '0000015340';
+    lCodigoFornecedor  := '500017';
+    lImprimir          := false;
+    lMostraPreview     := false;
+    lGerarPDF          := True;
+    lPathPDF           := 'c:\temp';
+
+    try
+     lNomePDF := lEntradaModel.VisualizarXML(lIDEntrada,lCodigoFornecedor,lImprimir,lMostraPreview,lGerarPDF,lPathPDF)+'-nfe.pdf';
+    except on E: Exception do
+      begin
+        ShowMessage('Erro: '+e.Message);
+        Exit;
+      end;
+    end;
+
+  finally
+    lEntradaModel.Free;
+  end;
+end;
+
 procedure TForm1.Button7Click(Sender: TObject);
 var
   lWebPedidoModel : TWebPedidoModel;
@@ -2130,6 +2165,39 @@ begin
     end;
   finally
     lWebPedidoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button80Click(Sender: TObject);
+var
+  lEntradaModel: TEntradaModel;
+  lNomeXML: String;
+  lPathXML, lIDEntrada, lCodigoFornecedor: String;
+begin
+  lEntradaModel   := TEntradaModel.Create(vIConexao);
+
+  try
+    lIDEntrada         := '0000015340';
+    lCodigoFornecedor  := '500017';
+    lPathXML := 'c:\temp\';
+
+    try
+      lNomeXML := lEntradaModel.SalvarXML(lIDEntrada, lCodigoFornecedor,lPathXML);
+    except on E: Exception do
+      begin
+        ShowMessage('Erro: '+e.Message);
+        Exit;
+      end;
+    end;
+
+    if not FileExists(lPathXML + lNomeXML) then
+    begin
+      ShowMessage('XML não localizado');
+      Exit;
+    end;
+
+  finally
+    lEntradaModel.Free;
   end;
 end;
 
