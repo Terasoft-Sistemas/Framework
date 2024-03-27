@@ -30,6 +30,7 @@ type
     FOrderView: String;
     FWhereView: String;
     FTotalRecords: Integer;
+    FIDProduto: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
     procedure SetMovimentosLista(const Value: TObjectList<TMovimentoModel>);
@@ -42,6 +43,7 @@ type
     procedure SetWhereView(const Value: String);
 
     function where: String;
+    procedure SetIDProduto(const Value: String);
 
   public
     constructor Create(pIConexao : IConexao);
@@ -56,12 +58,14 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
+    property IDProduto : String read FIDProduto write SetIDProduto;
 
     function incluir(pMovimentoModel: TMovimentoModel): String;
     function alterar(pMovimentoModel: TMovimentoModel): String;
     function excluir(pMovimentoModel: TMovimentoModel): String;
 
     procedure obterLista;
+    function obterListaMemTable : TFDMemTable;
     function carregaClasse(pId: String): TMovimentoModel;
     procedure setParams(var pQry: TFDQuery; pMovimentoModel: TMovimentoModel);
 
@@ -198,7 +202,10 @@ begin
     lSQL := lSQL + FWhereView;
 
   if FIDRecordView <> 0  then
-    lSQL := lSQL + ' and id = '+IntToStr(FIDRecordView);
+    lSQL := lSQL + ' and ID = '+IntToStr(FIDRecordView);
+
+  if FIDProduto <> '' then
+    lSql :=  lSql + ' and CODIGO_PRO = ' +QuotedStr(FIDProduto);
 
   Result := lSQL;
 end;
@@ -290,6 +297,36 @@ begin
   end;
 end;
 
+function TMovimentoDao.obterListaMemTable: TFDMemTable;
+var
+  lQry       : TFDQuery;
+  lSQL       : String;
+  lPaginacao : String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+    if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
+      lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
+
+      lSql := 'select '+lPaginacao+' * from MOVIMENTO where 1=1 ';
+
+    lSql := lSql + where;
+
+    if not FOrderView.IsEmpty then
+      lSQL := lSQL + ' order by '+FOrderView;
+
+    lQry.Open(lSQL);
+
+    Result := vConstrutor.atribuirRegistros(lQry);
+
+    obterTotalRegistros;
+
+  finally
+    lQry.Free;
+  end;
+end;
+
 procedure TMovimentoDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
@@ -303,6 +340,11 @@ end;
 procedure TMovimentoDao.SetID(const Value: Variant);
 begin
   FID := Value;
+end;
+
+procedure TMovimentoDao.SetIDProduto(const Value: String);
+begin
+  FIDProduto := Value;
 end;
 
 procedure TMovimentoDao.SetIDRecordView(const Value: Integer);

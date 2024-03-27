@@ -5,7 +5,7 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
-  Interfaces.Conexao;
+  Interfaces.Conexao, FireDAC.Comp.Client;
 
 type
   TMovimentoModel = class
@@ -40,6 +40,7 @@ type
     FOBS_MOV: Variant;
     FUSUARIO_ID: Variant;
     FVALOR_MOV: Variant;
+    FIDProduto: String;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetMovimentosLista(const Value: TObjectList<TMovimentoModel>);
@@ -68,7 +69,10 @@ type
     procedure SetUSUARIO_ID(const Value: Variant);
     procedure SetVALOR_MOV(const Value: Variant);
     procedure SetVENDA_ATUAL(const Value: Variant);
+    procedure SetIDProduto(const Value: String);
+
   public
+
     property DOCUMENTO_MOV: Variant read FDOCUMENTO_MOV write SetDOCUMENTO_MOV;
     property CODIGO_PRO: Variant read FCODIGO_PRO write SetCODIGO_PRO;
     property CODIGO_FOR: Variant read FCODIGO_FOR write SetCODIGO_FOR;
@@ -95,6 +99,7 @@ type
     function Salvar: String;
     procedure obterLista;
     function carregaClasse(pId: String): TMovimentoModel;
+    function obterListaMemTable : TFDMemTable;
 
     property MovimentosLista: TObjectList<TMovimentoModel> read FMovimentosLista write SetMovimentosLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -105,7 +110,7 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
-
+    property IDProduto : String read FIDProduto write SetIDProduto;
   end;
 
 implementation
@@ -160,6 +165,31 @@ begin
 
   finally
     lMovimentoLista.Free;
+  end;
+end;
+
+function TMovimentoModel.obterListaMemTable: TFDMemTable;
+var
+  lMovimento: TMovimentoDao;
+begin
+  lMovimento := TMovimentoDao.Create(vIConexao);
+
+  try
+    lMovimento.TotalRecords    := FTotalRecords;
+    lMovimento.WhereView       := FWhereView;
+    lMovimento.CountView       := FCountView;
+    lMovimento.OrderView       := FOrderView;
+    lMovimento.StartRecordView := FStartRecordView;
+    lMovimento.LengthPageView  := FLengthPageView;
+    lMovimento.IDRecordView    := FIDRecordView;
+    lMovimento.IDProduto       := FIDProduto;
+
+    Result := lMovimento.obterListaMemTable;
+
+    FTotalRecords := lMovimento.TotalRecords;
+
+  finally
+    lMovimento.Free;
   end;
 end;
 
@@ -236,6 +266,11 @@ end;
 procedure TMovimentoModel.SetID(const Value: Variant);
 begin
   FID := Value;
+end;
+
+procedure TMovimentoModel.SetIDProduto(const Value: String);
+begin
+  FIDProduto := Value;
 end;
 
 procedure TMovimentoModel.SetIDRecordView(const Value: Integer);
