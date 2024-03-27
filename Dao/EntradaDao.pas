@@ -415,6 +415,7 @@ begin
     lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView ;
 
     lSql := ' select ' +lPaginacao+ '                                                                             '+SLineBreak+
+            '       ID,                                                                                           '+SLineBreak+
             '       CHAVE,                                                                                        '+SLineBreak+
             '       NUMERO_ENTRADA,                                                                               '+SLineBreak+
             '       SERIE,                                                                                        '+SLineBreak+
@@ -439,6 +440,7 @@ begin
             '       INFCPL                                                                                        '+SLineBreak+
             '                 from                                                                                '+SLineBreak+
             '                    (select                                                                          '+SLineBreak+
+            '                          entrada.id,                                                                '+SLineBreak+
             '                          entrada.id_a03 chave,                                                      '+SLineBreak+
             '                          entrada.numero_ent numero_entrada,                                         '+SLineBreak+
             '                          entrada.serie_ent serie,                                                   '+SLineBreak+
