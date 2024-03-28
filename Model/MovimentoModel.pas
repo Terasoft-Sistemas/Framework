@@ -41,6 +41,8 @@ type
     FUSUARIO_ID: Variant;
     FVALOR_MOV: Variant;
     FIDProduto: String;
+    FDataFinalView: Variant;
+    FDataInicialView: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetMovimentosLista(const Value: TObjectList<TMovimentoModel>);
@@ -70,6 +72,8 @@ type
     procedure SetVALOR_MOV(const Value: Variant);
     procedure SetVENDA_ATUAL(const Value: Variant);
     procedure SetIDProduto(const Value: String);
+    procedure SetDataFinalView(const Value: Variant);
+    procedure SetDataInicialView(const Value: Variant);
 
   public
 
@@ -111,6 +115,8 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property IDProduto : String read FIDProduto write SetIDProduto;
+    property DataInicialView : Variant read FDataInicialView write SetDataInicialView;
+    property DataFinalView : Variant read FDataFinalView write SetDataFinalView;
   end;
 
 implementation
@@ -183,6 +189,8 @@ begin
     lMovimento.LengthPageView  := FLengthPageView;
     lMovimento.IDRecordView    := FIDRecordView;
     lMovimento.IDProduto       := FIDProduto;
+    lMovimento.DataInicialView := FDataInicialView;
+    lMovimento.DataFinalView   := FDataFinalView;
 
     Result := lMovimento.obterListaMemTable;
 
@@ -238,9 +246,19 @@ begin
   FCUSTO_ATUAL := Value;
 end;
 
+procedure TMovimentoModel.SetDataFinalView(const Value: Variant);
+begin
+  FDataFinalView := Value;
+end;
+
 procedure TMovimentoModel.SetDATAHORA(const Value: Variant);
 begin
   FDATAHORA := Value;
+end;
+
+procedure TMovimentoModel.SetDataInicialView(const Value: Variant);
+begin
+  FDataInicialView := Value;
 end;
 
 procedure TMovimentoModel.SetDATA_DOC(const Value: Variant);

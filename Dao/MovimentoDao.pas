@@ -31,6 +31,8 @@ type
     FWhereView: String;
     FTotalRecords: Integer;
     FIDProduto: String;
+    FDataFinalView: Variant;
+    FDataInicialView: Variant;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
     procedure SetMovimentosLista(const Value: TObjectList<TMovimentoModel>);
@@ -44,6 +46,8 @@ type
 
     function where: String;
     procedure SetIDProduto(const Value: String);
+    procedure SetDataFinalView(const Value: Variant);
+    procedure SetDataInicialView(const Value: Variant);
 
   public
     constructor Create(pIConexao : IConexao);
@@ -59,6 +63,8 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property IDProduto : String read FIDProduto write SetIDProduto;
+    property DataInicialView : Variant read FDataInicialView write SetDataInicialView;
+    property DataFinalView : Variant read FDataFinalView write SetDataFinalView;
 
     function incluir(pMovimentoModel: TMovimentoModel): String;
     function alterar(pMovimentoModel: TMovimentoModel): String;
@@ -194,9 +200,10 @@ end;
 
 function TMovimentoDao.where: String;
 var
-  lSQL : String;
+  lSql : String;
 begin
-  lSQL := '';
+
+  lSql := ' and data_mov between ''' + transformaDataFireBirdWhere(FDataInicialView) + ''' and ''' + transformaDataFireBirdWhere(FDataFinalView) + ''' ';
 
   if not FWhereView.IsEmpty then
     lSQL := lSQL + FWhereView;
@@ -330,6 +337,16 @@ end;
 procedure TMovimentoDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
+end;
+
+procedure TMovimentoDao.SetDataFinalView(const Value: Variant);
+begin
+  FDataFinalView := Value;
+end;
+
+procedure TMovimentoDao.SetDataInicialView(const Value: Variant);
+begin
+  FDataInicialView := Value;
 end;
 
 procedure TMovimentoDao.SetMovimentosLista(const Value: TObjectList<TMovimentoModel>);
