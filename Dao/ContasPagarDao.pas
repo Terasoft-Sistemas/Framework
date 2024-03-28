@@ -234,7 +234,7 @@ begin
   if not FWhereView.IsEmpty then
     lSql := lSQL + FWhereView;
 
-  if DuplicataView <> 0  then
+  if DuplicataView <> ''  then
     lSql := lSQL + ' and contaspagar.DUPLICATA_PAG = ' +QuotedStr(DuplicataView);
 
   if FFornecedorView <> '' then
