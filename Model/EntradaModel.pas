@@ -512,8 +512,8 @@ begin
 
       self.FSTATUS                      := '0';
       self.NUMERO_ENT                   := Format('%10.10d', [NFe.Ide.nNF]);
-      self.FSERIE_ENT                   := IntToStr(NFe.Ide.serie);
-      self.FMODELO_ENT                  := IntToStr(NFe.Ide.modelo);
+      self.FSERIE_ENT                   := Format('%3.3d', [(NFe.Ide.serie)]);
+      self.FMODELO_ENT                  := Format('%2.2d', [(NFe.Ide.modelo)]);
       self.FCODIGO_FOR                  := lFornecedor;
       self.DATANOTA_ENT                 := DateToStr(NFe.Ide.dEmi);
       self.FDATAMOVI_ENT                := DateToStr(vIConexao.DataServer);
