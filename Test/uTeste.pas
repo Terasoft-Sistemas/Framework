@@ -127,6 +127,10 @@ type
     dsPedidoCompraItens: TDataSource;
     Button79: TButton;
     Button80: TButton;
+    Button81: TButton;
+    Button82: TButton;
+    Button83: TButton;
+    Button84: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -213,6 +217,10 @@ type
     procedure Button78Click(Sender: TObject);
     procedure Button79Click(Sender: TObject);
     procedure Button80Click(Sender: TObject);
+    procedure Button84Click(Sender: TObject);
+    procedure Button81Click(Sender: TObject);
+    procedure Button82Click(Sender: TObject);
+    procedure Button83Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -241,7 +249,7 @@ uses
   ClienteModel, ContasPagarModel, ContasPagarItensModel, System.SysUtils,
   ReservaModel, DocumentoModel, AnexoModel, FluxoCaixaModel, BancoModel,
   PortadorModel, LojasModel, OSModel, SimuladorPrecoModel, GrupoModel, CNPJModel, CEPModel,
-  PedidoCompraModel, PedidoCompraItensModel;
+  PedidoCompraModel, PedidoCompraItensModel, ClientesContatoModel;
 
 {$R *.dfm}
 
@@ -2198,6 +2206,107 @@ begin
 
   finally
     lEntradaModel.Free;
+  end;
+end;
+
+procedure TForm1.Button81Click(Sender: TObject);
+var
+  lClientesContatoModel : TClientesContatoModel;
+  lMemTable   : TFDMemTable;
+begin
+  lClientesContatoModel := TClientesContatoModel.Create(vIConexao);
+  try
+    try
+      lMemTable := lClientesContatoModel.ObterLista;
+
+      memoResultado.Lines.Clear;
+
+      lMemTable.First;
+      while not lMemTable.Eof do
+      begin
+        memoResultado.Lines.Add('ID: '+lMemTable.FieldByName('ID').AsString);
+        memoResultado.Lines.Add('CLIENTE_ID: '+lMemTable.FieldByName('CLIENTE_ID').AsString);
+        memoResultado.Lines.Add('===============================================');
+        lMemTable.Next;
+      end;
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lClientesContatoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button82Click(Sender: TObject);
+var
+  lClientesContatoModel : TClientesContatoModel;
+  ID          : String;
+begin
+  lClientesContatoModel := TClientesContatoModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('CLIENTES_CONTATO', 'Digite o ID do Contato que deseja Alterar:', '');
+      if ID.IsEmpty then
+        exit;
+
+      lClientesContatoModel := lClientesContatoModel.Alterar(ID);
+      lClientesContatoModel.Contato := 'TESTE ALTERAR';
+
+      lClientesContatoModel.Salvar;
+      ShowMessage('Alterado com Sucesso');
+    Except
+      on E:Exception do
+      ShowMessage('Erro: ' +E.Message);
+    end;
+  finally
+    lClientesContatoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button83Click(Sender: TObject);
+var
+  lClientesContatoModel : TClientesContatoModel;
+  ID        : String;
+begin
+  lClientesContatoModel := TClientesContatoModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('CLIENTES_CONTATO', 'Digite o ID do Contato que deseja excluir:', '');
+      if ID.IsEmpty then
+          Exit;
+
+      lClientesContatoModel.Excluir(ID);
+      ShowMessage('Excluido com sucesso!');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lClientesContatoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button84Click(Sender: TObject);
+var
+  lClientesContatoModel : TClientesContatoModel;
+  CodigoCli       : String;
+begin
+  lClientesContatoModel := TClientesContatoModel.Create(vIConexao);
+  try
+    try
+      lClientesContatoModel.ID          := 10;
+      lClientesContatoModel.CLIENTE_ID  := '000001';
+      lClientesContatoModel.CONTATO     := 'TESTE TERASOFT';
+
+      lClientesContatoModel.Incluir;
+      ShowMessage('Incluido com Sucesso!');
+    except
+      on E:Exception do
+      ShowMessage('Erro: ' + E.Message);
+    end
+  finally
+    lClientesContatoModel.Free;
   end;
 end;
 

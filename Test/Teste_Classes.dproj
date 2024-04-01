@@ -222,6 +222,8 @@
         <DCCReference Include="..\Dao\PedidoCompraDao.pas"/>
         <DCCReference Include="..\Dao\PedidoCompraItensDao.pas"/>
         <DCCReference Include="..\Model\PedidoCompraItensModel.pas"/>
+        <DCCReference Include="..\Model\ClientesContatoModel.pas"/>
+        <DCCReference Include="..\Dao\ClientesContatoDao.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

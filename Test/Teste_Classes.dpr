@@ -124,7 +124,9 @@ uses
   PedidoCompraModel in '..\Model\PedidoCompraModel.pas',
   PedidoCompraDao in '..\Dao\PedidoCompraDao.pas',
   PedidoCompraItensDao in '..\Dao\PedidoCompraItensDao.pas',
-  PedidoCompraItensModel in '..\Model\PedidoCompraItensModel.pas';
+  PedidoCompraItensModel in '..\Model\PedidoCompraItensModel.pas',
+  ClientesContatoModel in '..\Model\ClientesContatoModel.pas',
+  ClientesContatoDao in '..\Dao\ClientesContatoDao.pas';
 
 {$R *.res}
 

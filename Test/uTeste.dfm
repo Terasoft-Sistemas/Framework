@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 1248
     Height = 831
-    ActivePage = TabSheet3
+    ActivePage = TabSheet1
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -570,6 +570,42 @@ object Form1: TForm1
         Caption = 'Grupo Excluir'
         TabOrder = 60
         OnClick = Button71Click
+      end
+      object Button81: TButton
+        Left = 191
+        Top = 743
+        Width = 182
+        Height = 46
+        Caption = 'ClientesContato Consultar'
+        TabOrder = 61
+        OnClick = Button81Click
+      end
+      object Button82: TButton
+        Left = 379
+        Top = 743
+        Width = 182
+        Height = 46
+        Caption = 'ClientesContato Update'
+        TabOrder = 62
+        OnClick = Button82Click
+      end
+      object Button83: TButton
+        Left = 567
+        Top = 743
+        Width = 182
+        Height = 46
+        Caption = 'ClientesContato Excluir'
+        TabOrder = 63
+        OnClick = Button83Click
+      end
+      object Button84: TButton
+        Left = 3
+        Top = 743
+        Width = 182
+        Height = 46
+        Caption = 'ClientesContato Inserir'
+        TabOrder = 64
+        OnClick = Button84Click
       end
     end
     object TabSheet2: TTabSheet
