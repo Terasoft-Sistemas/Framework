@@ -345,24 +345,24 @@ begin
             '                  e.numero_ent entrada,                                                                      '+SLineBreak+
             '                  e.codigo_for fornecedor,                                                                   '+SLineBreak+
             '                  count(*) quantidade_itens,                                                                 '+SLineBreak+
-            '                  sum(i.quantidade_ent) quantidade_produtos,                                                 '+SLineBreak+
-            '                  sum(i.valoruni_ent * i.quantidade_ent) total_produtos,                                     '+SLineBreak+
-            '                  sum(i.base_icms_ent) total_base_icms,                                                      '+SLineBreak+
-            '                  sum(i.vicms_n17) total_valor_icms,                                                         '+SLineBreak+
-            '                  sum(i.base_st_ent) total_base_icms_st,                                                     '+SLineBreak+
-            '                  sum(i.vicms_st_ent) total_valor_st,                                                        '+SLineBreak+
+            '                  COALESCE(sum(i.quantidade_ent), 0) quantidade_produtos,                                    '+SLineBreak+
+            '                  COALESCE(sum(i.valoruni_ent * i.quantidade_ent), 0) total_produtos,                        '+SLineBreak+
+            '                  COALESCE(sum(i.base_icms_ent), 0) total_base_icms,                                         '+SLineBreak+
+            '                  COALESCE(sum(i.vicms_n17), 0) total_valor_icms,                                            '+SLineBreak+
+            '                  COALESCE(sum(i.base_st_ent), 0) total_base_icms_st,                                        '+SLineBreak+
+            '                  COALESCE(sum(i.vicms_st_ent), 0) total_valor_st,                                           '+SLineBreak+
             '                  sum(0) total_icms_deson,                                                                   '+SLineBreak+
-            '                  sum(i.vbc_o10) total_base_ipi,                                                             '+SLineBreak+
-            '                  sum(i.vipi_014) total_valor_ipi,                                                           '+SLineBreak+
-            '                  sum(i.vbc_q07)  total_base_pis,                                                            '+SLineBreak+
-            '                  sum(i.vpis_q09) total_valor_pis,                                                           '+SLineBreak+
-            '                  sum(i.vbc_s07) total_base_cofins,                                                          '+SLineBreak+
-            '                  sum(i.cofins) total_valor_cofins,                                                          '+SLineBreak+
-            '                  sum(i.vfcpst) total_fcp,                                                                   '+SLineBreak+
-            '                  sum(i.vfcpstret) total_fcp_st,                                                             '+SLineBreak+
-            '                  sum(i.vseg_i16) total_outros,                                                              '+SLineBreak+
-            '                  sum(i.vfrete_i15) total_frete,                                                             '+SLineBreak+
-            '                  sum(i.desc_i17) total_desconto                                                             '+SLineBreak+
+            '                  COALESCE(sum(i.vbc_o10), 0) total_base_ipi,                                                '+SLineBreak+
+            '                  COALESCE(sum(i.vipi_014), 0) total_valor_ipi,                                              '+SLineBreak+
+            '                  COALESCE(sum(i.vbc_q07), 0)  total_base_pis,                                               '+SLineBreak+
+            '                  COALESCE(sum(i.vpis_q09), 0) total_valor_pis,                                              '+SLineBreak+
+            '                  COALESCE(sum(i.vbc_s07), 0) total_base_cofins,                                             '+SLineBreak+
+            '                  COALESCE(sum(i.cofins), 0) total_valor_cofins,                                             '+SLineBreak+
+            '                  COALESCE(sum(i.vfcpst), 0) total_fcp,                                                      '+SLineBreak+
+            '                  COALESCE(sum(i.vfcpstret), 0) total_fcp_st,                                                '+SLineBreak+
+            '                  COALESCE(sum(i.vseg_i16), 0) total_outros,                                                 '+SLineBreak+
+            '                  COALESCE(sum(i.vfrete_i15), 0) total_frete,                                                '+SLineBreak+
+            '                  COALESCE(sum(i.desc_i17), 0) total_desconto                                                '+SLineBreak+
             '                from entrada e                                                                               '+SLineBreak+
             '                left join entradaitens i on i.numero_ent = e.numero_ent and i.codigo_for = e.codigo_for      '+SLineBreak+
             '               group by 1,2                                                                                  '+SLineBreak+
