@@ -732,10 +732,10 @@ begin
       lMemTable.First;
       while not lMemTable.Eof do
       begin
-         memoResultado.Lines.Add('ID_ENTRADA: ' +lMemTable.FieldByName('ID_ENTRADA').AsString);
-         memoResultado.Lines.Add('FORNECEDOR_NOME: ' +lMemTable.FieldByName('FORNECEDOR_NOME').AsString);
-         memoResultado.Lines.Add('PRODUTO_CODIGO: ' +lMemTable.FieldByName('PRODUTO_CODIGO').AsString);
-         memoResultado.Lines.Add('PRODUTO_NOME: ' +lMemTable.FieldByName('PRODUTO_NOME').AsString);
+         memoResultado.Lines.Add('NUMERO_ENT: ' +lMemTable.FieldByName('NUMERO_ENT').AsString);
+         memoResultado.Lines.Add('PRODUTO_CODIGO_PRO: ' +lMemTable.FieldByName('PRODUTO_CODIGO_PRO').AsString);
+         memoResultado.Lines.Add('VALOR_LIQUIDO: ' +lMemTable.FieldByName('VALOR_LIQUIDO').AsString);
+         memoResultado.Lines.Add('TOTAL_UNITARIO: ' +lMemTable.FieldByName('TOTAL_UNITARIO').AsString);
 
          lMemTable.Next;
       end;
