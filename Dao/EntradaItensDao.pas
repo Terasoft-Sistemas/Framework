@@ -470,7 +470,7 @@ begin
             '        VALOR_ICMS_RET,                                                                                                             '+SLineBreak+
             '        VALOR_BASE_ICMS,                                                                                                            '+SLineBreak+
             '        VALOR_ICMS,                                                                                                                 '+SLineBreak+
-            '        ALIQUOTA_ICMS,                                                                                                                           '+SLineBreak+
+            '        ALIQUOTA_ICMS,                                                                                                              '+SLineBreak+
             '        PERCENTUAL_ICMS_ST,                                                                                                         '+SLineBreak+
             '        VALOR_ICMS_ST,                                                                                                              '+SLineBreak+
             '        PERCENTUAL_MVA_ST,                                                                                                          '+SLineBreak+
@@ -515,7 +515,7 @@ begin
             '                        valor_icms_ret,                                                                                             '+SLineBreak+
             '                        valor_base_icms,                                                                                            '+SLineBreak+
             '                        valor_icms,                                                                                                 '+SLineBreak+
-            '                        aliquota_icms,                                                                                                            '+SLineBreak+
+            '                        aliquota_icms,                                                                                              '+SLineBreak+
             '                        percentual_icms_st,                                                                                         '+SLineBreak+
             '                        valor_icms_st,                                                                                              '+SLineBreak+
             '                        percentual_mva_st,                                                                                          '+SLineBreak+
