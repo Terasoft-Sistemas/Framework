@@ -727,18 +727,16 @@ begin
           Exit;
 
       lEntradaItensModel.NumeroView := NumEntrada;
+      lEntradaItensModel.FornecedorView := '500007';
       lMemTable := lEntradaItensModel.obterLista;
       lMemTable.First;
       while not lMemTable.Eof do
       begin
-         memoResultado.Lines.Add('NUMERO_ENT: ' +lMemTable.FieldByName('NUMERO_ENT').AsString);
-         memoResultado.Lines.Add('CODIGO_FOR: ' +lMemTable.FieldByName('CODIGO_FOR').AsString);
-         memoResultado.Lines.Add('FORNECEDOR: ' +lMemTable.FieldByName('FORNECEDOR').AsString);
-         memoResultado.Lines.Add('CODIGO_PRO: ' +lMemTable.FieldByName('CODIGO_PRO').AsString);
-         memoResultado.Lines.Add('PRODUTO: ' +lMemTable.FieldByName('PRODUTO').AsString);
-         memoResultado.Lines.Add('QUANTIDADE_ENT: ' +lMemTable.FieldByName('QUANTIDADE_ENT').AsString);
-         memoResultado.Lines.Add('VALORUNI_ENT: ' +lMemTable.FieldByName('VALORUNI_ENT').AsString);
-         memoResultado.Lines.Add('============================================');
+         memoResultado.Lines.Add('ID_ENTRADA: ' +lMemTable.FieldByName('ID_ENTRADA').AsString);
+         memoResultado.Lines.Add('FORNECEDOR_NOME: ' +lMemTable.FieldByName('FORNECEDOR_NOME').AsString);
+         memoResultado.Lines.Add('PRODUTO_CODIGO: ' +lMemTable.FieldByName('PRODUTO_CODIGO').AsString);
+         memoResultado.Lines.Add('PRODUTO_NOME: ' +lMemTable.FieldByName('PRODUTO_NOME').AsString);
+
          lMemTable.Next;
       end;
     except
