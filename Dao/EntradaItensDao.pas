@@ -456,6 +456,7 @@ begin
             '        PRODUTO_UNIDADE_PRO,                                                                                                        '+SLineBreak+
             '        CFOP,                                                                                                                       '+SLineBreak+
             '        NCM,                                                                                                                        '+SLineBreak+
+            '        CST,                                                                                                                        '+SLineBreak+
             '        QUANTIDADE,                                                                                                                 '+SLineBreak+
             '        VALOR_UNITARIO,                                                                                                             '+SLineBreak+
             '        VALOR_FRETE,                                                                                                                '+SLineBreak+
@@ -469,6 +470,7 @@ begin
             '        VALOR_ICMS_RET,                                                                                                             '+SLineBreak+
             '        VALOR_BASE_ICMS,                                                                                                            '+SLineBreak+
             '        VALOR_ICMS,                                                                                                                 '+SLineBreak+
+            '        ALIQUOTA_ICMS,                                                                                                                           '+SLineBreak+
             '        PERCENTUAL_ICMS_ST,                                                                                                         '+SLineBreak+
             '        VALOR_ICMS_ST,                                                                                                              '+SLineBreak+
             '        PERCENTUAL_MVA_ST,                                                                                                          '+SLineBreak+
@@ -499,6 +501,7 @@ begin
             '                        produto_unidade_pro,                                                                                        '+SLineBreak+
             '                        cfop,                                                                                                       '+SLineBreak+
             '                        ncm,                                                                                                        '+SLineBreak+
+            '                        cst,                                                                                                        '+SLineBreak+
             '                        quantidade,                                                                                                 '+SLineBreak+
             '                        valor_unitario,                                                                                             '+SLineBreak+
             '                        valor_frete,                                                                                                '+SLineBreak+
@@ -512,6 +515,7 @@ begin
             '                        valor_icms_ret,                                                                                             '+SLineBreak+
             '                        valor_base_icms,                                                                                            '+SLineBreak+
             '                        valor_icms,                                                                                                 '+SLineBreak+
+            '                        aliquota_icms,                                                                                                            '+SLineBreak+
             '                        percentual_icms_st,                                                                                         '+SLineBreak+
             '                        valor_icms_st,                                                                                              '+SLineBreak+
             '                        percentual_mva_st,                                                                                          '+SLineBreak+
@@ -549,6 +553,7 @@ begin
             '                                            produto.unidade_pro produto_unidade_pro,                                                '+SLineBreak+
             '                                            entradaitens.cfop,                                                                      '+SLineBreak+
             '                                            entradaitens.ncm_i05 ncm,                                                               '+SLineBreak+
+            '                                            entradaitens.cst_ent cst,                                                               '+SLineBreak+
             '                                            coalesce(entradaitens.quantidade_ent, 0) quantidade,                                    '+SLineBreak+
             '                                            coalesce(entradaitens.valoruni_ent, 0) valor_unitario,                                  '+SLineBreak+
             '                                            coalesce(entradaitens.vfrete_i15, 0) valor_frete,                                       '+SLineBreak+
@@ -562,6 +567,7 @@ begin
             '                                            coalesce(entradaitens.vicmsstret, 0) valor_icms_ret,                                    '+SLineBreak+
             '                                            coalesce(entradaitens.base_icms_ent, 0) valor_base_icms,                                '+SLineBreak+
             '                                            coalesce(entradaitens.vicms_n17, 0) valor_icms,                                         '+SLineBreak+
+            '                                            coalesce(entradaitens.icms_ent, 0) aliquota_icms,                                       '+SLineBreak+
             '                                            coalesce(entradaitens.icms_st_ent, 0) percentual_icms_st,                               '+SLineBreak+
             '                                            coalesce(entradaitens.vicms_st_ent, 0) valor_icms_st,                                   '+SLineBreak+
             '                                            coalesce(entradaitens.pmvast_n19, 0) percentual_mva_st,                                 '+SLineBreak+

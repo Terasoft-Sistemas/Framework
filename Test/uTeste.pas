@@ -734,9 +734,10 @@ begin
       begin
          memoResultado.Lines.Add('NUMERO_ENT: ' +lMemTable.FieldByName('NUMERO_ENT').AsString);
          memoResultado.Lines.Add('PRODUTO_CODIGO_PRO: ' +lMemTable.FieldByName('PRODUTO_CODIGO_PRO').AsString);
+         memoResultado.Lines.Add('CST: ' +lMemTable.FieldByName('CST').AsString);
          memoResultado.Lines.Add('VALOR_LIQUIDO: ' +lMemTable.FieldByName('VALOR_LIQUIDO').AsString);
          memoResultado.Lines.Add('TOTAL_UNITARIO: ' +lMemTable.FieldByName('TOTAL_UNITARIO').AsString);
-
+         memoResultado.Lines.Add('ALIQUOTA_ICMS: ' +lMemTable.FieldByName('ALIQUOTA_ICMS').AsString);
          lMemTable.Next;
       end;
     except
