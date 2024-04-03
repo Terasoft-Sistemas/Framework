@@ -1054,6 +1054,7 @@ begin
     for lPedidoVendaModel in lPedidoVendaLista.PedidoVendasLista do
     begin
       lCalcularImpostosModel.EMITENTE_UF          := lEmpresaModel.UF;
+      lCalcularImpostosModel.REGIME_TRIBUTARIO    := lEmpresaModel.REGIME_TRIBUTARIO;
       lCalcularImpostosModel.MODELO_NF            := '65';
       lCalcularImpostosModel.VALOR_DESCONTO_TOTAL := lPedidoVendaModel.DESC_PED;
       lCalcularImpostosModel.VALOR_ACRESCIMO      := lPedidoVendaModel.ACRES_PED;
@@ -1062,6 +1063,7 @@ begin
       lCalcularImpostosModel.CODIGO_PRODUTO       := lPedidoVendaModel.CODIGO_PRO;
       lCalcularImpostosModel.QUANTIDADE           := lPedidoVendaModel.QUANTIDADE_PED;
       lCalcularImpostosModel.VALORUNITARIO        := lPedidoVendaModel.VALORUNITARIO_PED;
+
 
       lCalcularImpostosModel := lCalcularImpostosModel.Processar;
 
