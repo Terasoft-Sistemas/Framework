@@ -15,7 +15,8 @@ uses
   Vcl.StdCtrls,
   Terasoft.Types,
   Conexao,
-  Interfaces.Conexao, EntradaModel, Vcl.Grids, XDBGrids, Data.DB;
+  Interfaces.Conexao, EntradaModel, Vcl.Grids, XDBGrids, Data.DB,
+  Terasoft.Configuracoes;
 
 type
   TForm1 = class(TForm)
@@ -231,6 +232,7 @@ type
     { Public declarations }
     vIConexao : IConexao;
     vConexao  : TConexao;
+    vConfiguracoes : TerasoftConfiguracoes;
   end;
 
 var
@@ -1990,7 +1992,10 @@ var
  Retorno : TRetornoCnpj;
 begin
 
-  lCNPJModel := TCNPJModel.Create(vIConexao);
+  lCNPJModel := TCNPJModel.Create(vConfiguracoes);
+
+//lCNPJModel.API := tApiReceita;  Recebe o valor do Receita
+
   Retorno := lCNPJModel.consultarCnpj('09020312000131');
 
   MemoAPI.Lines.Add(Retorno.Nome);
@@ -2005,7 +2010,6 @@ begin
   MemoAPI.Lines.Add(Retorno.Telefone);
   MemoAPI.Lines.Add(Retorno.Email);
   MemoAPI.Lines.Add(Retorno.Abertura);
-
 end;
 
 procedure TForm1.Button75Click(Sender: TObject);
@@ -2014,19 +2018,19 @@ var
  Retorno : TRetornoCEP;
 begin
 
-  lCEPModel := TCEPModel.Create(vIConexao);
+  lCEPModel := TCEPModel.Create(vConfiguracoes);
+
+//lCEPModel.API := tApiViaCep;  Recebe o valor do ViaCep
+
   Retorno := lCEPModel.consultarCEP('86185420');
 
   MemoAPI.Lines.Add(Retorno.CEP);
   MemoAPI.Lines.Add(Retorno.Logradouro);
-  MemoAPI.Lines.Add(Retorno.Complemento);
   MemoAPI.Lines.Add(Retorno.Bairro);
-  MemoAPI.Lines.Add(Retorno.Localidade);
+  MemoAPI.Lines.Add(Retorno.Cidade);
+  MemoAPI.Lines.Add(Retorno.Cod_Municipio);
   MemoAPI.Lines.Add(Retorno.UF);
-  MemoAPI.Lines.Add(Retorno.IBGE);
-  MemoAPI.Lines.Add(Retorno.GIA);
   MemoAPI.Lines.Add(Retorno.DDD);
-  MemoAPI.Lines.Add(Retorno.Siafi);
 end;
 
 procedure TForm1.Button76Click(Sender: TObject);
@@ -2768,6 +2772,8 @@ var
 begin
   vConexao  := TConexao.Create;
   vIConexao := TControllersConexao.New;
+
+  vConfiguracoes := TerasoftConfiguracoes.Create(vIConexao);
 
   lUsuario.ID     := '000001';
   lUsuario.NOME   := 'ADMIN';

@@ -62,6 +62,7 @@ begin
       vmtConfiguracoes.FieldByName('VALORDATA').Value      := IIF(lModel.VALORDATA      = '', Unassigned, lModel.VALORDATA);
       vmtConfiguracoes.FieldByName('VALORHORA').Value      := IIF(lModel.VALORHORA      = '', Unassigned, lModel.VALORHORA);
       vmtConfiguracoes.FieldByName('VALORDATAHORA').Value  := IIF(lModel.VALORDATAHORA  = '', Unassigned, lModel.VALORDATAHORA);
+      vmtConfiguracoes.FieldByName('VALORMEMO').Value      := IIF(lModel.VALORMEMO      = '', Unassigned, lModel.VALORMEMO);
       vmtConfiguracoes.Post;
     end;
   finally
@@ -141,6 +142,11 @@ begin
     with AddFieldDef do begin
       Name      := 'VALORDATAHORA';
       DataType  := ftDateTime;
+    end;
+
+    with AddFieldDef do begin
+      Name      := 'VALORMEMO';
+      DataType  := ftMemo;
     end;
 
     vmtConfiguracoes.Open;
