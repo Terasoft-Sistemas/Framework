@@ -308,6 +308,10 @@ type
     FNF_CODIGO_ANVISA: Variant;
     FNF_MOTIVO_ISENCAO_ANVISA: Variant;
     FNF_FCI: Variant;
+    FTIPO_NOME: Variant;
+    FNOME_SUB: Variant;
+    FNOME_GRU: Variant;
+    FNOME_MAR: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetProdutossLista(const Value: TObjectList<TProdutosModel>);
@@ -591,6 +595,10 @@ type
     procedure SetNF_PMC_ANVISA(const Value: Variant);
     procedure SetWEB_TITULO(const Value: Variant);
     procedure SetNF_FCI(const Value: Variant);
+    procedure SetNOME_GRU(const Value: Variant);
+    procedure SetNOME_MAR(const Value: Variant);
+    procedure SetNOME_SUB(const Value: Variant);
+    procedure SetTIPO_NOME(const Value: Variant);
 
   public
     property UUID: Variant read FUUID write SetUUID;
@@ -867,6 +875,10 @@ type
     property NF_OBSERVACAO_ITEM : Variant read FNF_OBSERVACAO_ITEM write SetNF_OBSERVACAO_ITEM;
     property WEB_TITULO : Variant read FWEB_TITULO write SetWEB_TITULO;
     property NF_FCI : Variant read FNF_FCI write SetNF_FCI;
+    property NOME_GRU : Variant read FNOME_GRU write SetNOME_GRU;
+    property NOME_SUB : Variant read FNOME_SUB write SetNOME_SUB;
+    property NOME_MAR : Variant read FNOME_MAR write SetNOME_MAR;
+    property TIPO_NOME : Variant read FTIPO_NOME write SetTIPO_NOME;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -1838,6 +1850,16 @@ begin
   FNF_PMC_ANVISA := Value;
 end;
 
+procedure TProdutosModel.SetNOME_GRU(const Value: Variant);
+begin
+  FNOME_GRU := Value;
+end;
+
+procedure TProdutosModel.SetNOME_MAR(const Value: Variant);
+begin
+  FNOME_MAR := Value;
+end;
+
 procedure TProdutosModel.SetNOME_PRO(const Value: Variant);
 begin
   FNOME_PRO := Value;
@@ -1846,6 +1868,11 @@ procedure TProdutosModel.SetNOME_RESUMIDO(const Value: Variant);
 begin
   FNOME_RESUMIDO := Value;
 end;
+procedure TProdutosModel.SetNOME_SUB(const Value: Variant);
+begin
+  FNOME_SUB := Value;
+end;
+
 procedure TProdutosModel.SetNOVIDADE_PRO(const Value: Variant);
 begin
   FNOVIDADE_PRO := Value;
@@ -1957,6 +1984,11 @@ procedure TProdutosModel.SetTIPO_ITEM(const Value: Variant);
 begin
   FTIPO_ITEM := Value;
 end;
+procedure TProdutosModel.SetTIPO_NOME(const Value: Variant);
+begin
+  FTIPO_NOME := Value;
+end;
+
 procedure TProdutosModel.SetTIPO_PRO(const Value: Variant);
 begin
   FTIPO_PRO := Value;

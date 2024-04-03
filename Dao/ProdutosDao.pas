@@ -540,6 +540,10 @@ begin
       FProdutossLista[i].GARANTIA_12     := lQry.FieldByName('GARANTIA_12').AsString;
       FProdutossLista[i].GARANTIA_24     := lQry.FieldByName('GARANTIA_24').AsString;
       FProdutossLista[i].SALDO_PRO       := lQry.FieldByName('SALDO_PRO').AsString;
+      FProdutossLista[i].NOME_GRU        := lQry.FieldByName('NOME_GRU').AsString;
+      FProdutossLista[i].NOME_SUB        := lQry.FieldByName('NOME_SUB').AsString;
+      FProdutossLista[i].NOME_MAR        := lQry.FieldByName('NOME_MAR').AsString;
+      FProdutossLista[i].TIPO_NOME       := lQry.FieldByName('TIPO_NOME').AsString;
       lQry.Next;
     end;
 
