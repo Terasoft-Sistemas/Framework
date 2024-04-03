@@ -126,7 +126,8 @@ uses
   PedidoCompraItensDao in '..\Dao\PedidoCompraItensDao.pas',
   PedidoCompraItensModel in '..\Model\PedidoCompraItensModel.pas',
   ClientesContatoModel in '..\Model\ClientesContatoModel.pas',
-  ClientesContatoDao in '..\Dao\ClientesContatoDao.pas';
+  ClientesContatoDao in '..\Dao\ClientesContatoDao.pas',
+  Terasoft.Configuracoes in '..\Libs\Terasoft.Configuracoes.pas';
 
 {$R *.res}
 

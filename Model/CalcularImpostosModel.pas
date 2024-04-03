@@ -291,13 +291,15 @@ var
   lVALOR_DESCONTO_TOTAL  : Real;
   lVALOR_ACRESCIMO_TOTAL : Real;
   lTOTAL_PRODUTO         : Real;
+  lRegimeTributario      : String;
 begin
   try
-    lQUANTIDADE           := Self.FQUANTIDADE;
-    lVALORUNITARIO        := Self.FVALORUNITARIO;
-    lVALOR_DESCONTO_TOTAL := Self.FVALOR_DESCONTO_TOTAL;
-    lVALOR_ACRESCIMO_TOTAL:= Self.FVALOR_ACRESCIMO;
-    lTOTAL_PRODUTO        := Self.FTOTAL_PRODUTO;
+    lQUANTIDADE            := Self.FQUANTIDADE;
+    lVALORUNITARIO         := Self.FVALORUNITARIO;
+    lVALOR_DESCONTO_TOTAL  := Self.FVALOR_DESCONTO_TOTAL;
+    lVALOR_ACRESCIMO_TOTAL := Self.FVALOR_ACRESCIMO;
+    lTOTAL_PRODUTO         := Self.FTOTAL_PRODUTO;
+    lRegimeTributario      := Self.FREGIME_TRIBUTARIO;
 
     Self := Self.obterAliquotas;
 
@@ -305,6 +307,7 @@ begin
     Self.FVALORUNITARIO        := lVALORUNITARIO;
     Self.FVALOR_DESCONTO_TOTAL := lVALOR_DESCONTO_TOTAL;
     Self.FTOTAL_PRODUTO        := lTOTAL_PRODUTO;
+    Self.FREGIME_TRIBUTARIO    := lRegimeTributario;
 
     //Configuracoes
     lMotor.CalcParam.CalcTipo                                  := ctRound;
@@ -313,7 +316,7 @@ begin
     lMotor.NotaFiscal.Destinatario.UFSigla                     := Self.FDESTINATARIO_UF;
     lMotor.TipoOperacao                                        := lMotorUtils.SelecionaOperacaiDestino(Self.EMITENTE_UF,Self.DESTINATARIO_UF);
 
-    lMotor.NotaFiscal.Emitente.RegimeTributario                := lMotorUtils.SelecionaRegime(FREGIME_TRIBUTARIO);
+    lMotor.NotaFiscal.Emitente.RegimeTributario                := lMotorUtils.SelecionaRegime(Self.FREGIME_TRIBUTARIO);
     lMotor.NotaFiscal.Emitente.ContribuinteIPI                 := lMotorUtils.SelecionaContriIPIRegime('0');
     lMotor.NotaFiscal.Destinatario.ContribuinteICMS            := lMotorUtils.SelecionaContriICMS('1');
     lMotor.NotaFiscal.Produto.TipoVenda                        := lMotorUtils.SelecionaTipoVenda('Revenda');
