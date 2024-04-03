@@ -449,7 +449,7 @@ begin
     lSQL := lSQL + FWhereView;
 
   if FIDRecordView <> ''  then
-    lSQL := lSQL + ' and codigo_pro = '+ QuotedStr(FIDRecordView);
+    lSQL := lSQL + ' and produto.codigo_pro = '+ QuotedStr(FIDRecordView);
 
   Result := lSQL;
 end;
@@ -492,20 +492,28 @@ begin
       lSql := 'select ';
 
     lSQL := lSQL +
-      '       produto.nome_pro,                                    '+
-      '       produto.barras_pro,                                  '+
-      '       produto.codigo_pro,                                  '+
-      '       coalesce(produto.venda_pro, 0) venda_pro,            '+
-      '       coalesce(produto.saldo_pro, 0) saldo_pro,            '+
-      '       produto.customedio_pro,                              '+
-      '       produto.nfce_cfop,                                   '+
-      '       produto.EAN_14,                                      '+
-      '       produto.REFERENCIA_NEW,                              '+
-      '       produto.UNIDADE_PRO,                                 '+
-      '       produto.garantia_12,                                 '+
-      '       produto.garantia_24                                  '+
-	    '  from produto                                              '+
-      ' where 1=1                                                  ';
+      '       produto.nome_pro,                                                            '+SLineBreak+
+      '       produto.barras_pro,                                                          '+SLineBreak+
+      '       produto.codigo_pro,                                                          '+SLineBreak+
+      '       coalesce(produto.venda_pro, 0) venda_pro,                                    '+SLineBreak+
+      '       coalesce(produto.saldo_pro, 0) saldo_pro,                                    '+SLineBreak+
+      '       produto.customedio_pro,                                                      '+SLineBreak+
+      '       produto.nfce_cfop,                                                           '+SLineBreak+
+      '       produto.EAN_14,                                                              '+SLineBreak+
+      '       produto.REFERENCIA_NEW,                                                      '+SLineBreak+
+      '       produto.UNIDADE_PRO,                                                         '+SLineBreak+
+      '       produto.garantia_12,                                                         '+SLineBreak+
+      '       produto.garantia_24,                                                         '+SLineBreak+
+      '       grupoproduto.nome_gru,                                                       '+SLineBreak+
+      '       subgrupoproduto.nome_sub,                                                    '+SLineBreak+
+      '       marcaproduto.nome_mar,                                                       '+SLineBreak+
+      '       produto_tipo.nome tipo_nome                                                  '+SLineBreak+
+	    '  from produto                                                                      '+SLineBreak+
+      ' inner join grupoproduto on grupoproduto.codigo_gru = produto.codigo_gru            '+SLineBreak+
+      ' inner join subgrupoproduto on subgrupoproduto.codigo_sub = produto.codigo_sub      '+SLineBreak+
+      ' inner join marcaproduto on marcaproduto.codigo_mar = produto.codigo_mar            '+SLineBreak+
+      ' inner join produto_tipo on produto_tipo.id = produto.tipo_id                       '+SLineBreak+
+      ' where 1=1 ';
 
     lSql := lSql + where;
 
