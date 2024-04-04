@@ -87,8 +87,6 @@ uses
   EntradaModel in '..\Model\EntradaModel.pas',
   EntradaDao in '..\Dao\EntradaDao.pas',
   EntradaItensModel in '..\Model\EntradaItensModel.pas',
-  EntradaItensXMLDao in '..\Dao\EntradaItensXMLDao.pas',
-  EntradaItensXMLModel in '..\Model\EntradaItensXMLModel.pas',
   ContasPagarDao in '..\Dao\ContasPagarDao.pas',
   ContasPagarModel in '..\Model\ContasPagarModel.pas',
   ContasPagarItensModel in '..\Model\ContasPagarItensModel.pas',
