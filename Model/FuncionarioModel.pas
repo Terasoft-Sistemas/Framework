@@ -426,8 +426,15 @@ begin
 end;
 
 function TFuncionarioModel.carregaClasse(pId: String): TFuncionarioModel;
+var
+  lFuncionarioModel: TFuncionarioDao;
 begin
-
+  lFuncionarioModel := TFuncionarioDao.Create(vIConexao);
+  try
+    Result := lFuncionarioModel.carregaClasse(pId);
+  finally
+    lFuncionarioModel.Free;
+  end;
 end;
 
 function TFuncionarioModel.comissaoVendedor(pIdVendedor, pIdTipoVenda: String): Double;
