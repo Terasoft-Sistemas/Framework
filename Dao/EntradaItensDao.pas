@@ -489,7 +489,6 @@ begin
             '        ALIQUOTA_CONFINS,                                                                                                           '+SLineBreak+
             '        VALOR_COFINS,                                                                                                               '+SLineBreak+
             '        DESCONTO,                                                                                                                   '+SLineBreak+
-            '        VALOR_LIQUIDO,                                                                                                              '+SLineBreak+
             '        TOTAL_UNITARIO,                                                                                                             '+SLineBreak+
             '        VALOR_TOTAL                                                                                                                 '+SLineBreak+
             '                from                                                                                                                '+SLineBreak+
@@ -534,8 +533,7 @@ begin
             '                        aliquota_confins,                                                                                           '+SLineBreak+
             '                        valor_cofins,                                                                                               '+SLineBreak+
             '                        desconto,                                                                                                   '+SLineBreak+
-            '                        quantidade * valor_unitario - desconto valor_liquido,                                                       '+SLineBreak+
-            '                        total_unitario,                                                                                             '+SLineBreak+
+            '                        total_unitario - desconto total_unitario,                                                                   '+SLineBreak+
             '                        total_unitario                                                                                              '+SLineBreak+
             '                                   + valor_ipi                                                                                      '+SLineBreak+
             '                                   + valor_icms_st                                                                                  '+SLineBreak+
