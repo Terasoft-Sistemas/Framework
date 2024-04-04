@@ -184,8 +184,6 @@
         <DCCReference Include="..\Model\EntradaModel.pas"/>
         <DCCReference Include="..\Dao\EntradaDao.pas"/>
         <DCCReference Include="..\Model\EntradaItensModel.pas"/>
-        <DCCReference Include="..\Dao\EntradaItensXMLDao.pas"/>
-        <DCCReference Include="..\Model\EntradaItensXMLModel.pas"/>
         <DCCReference Include="..\Dao\ContasPagarDao.pas"/>
         <DCCReference Include="..\Model\ContasPagarModel.pas"/>
         <DCCReference Include="..\Model\ContasPagarItensModel.pas"/>
