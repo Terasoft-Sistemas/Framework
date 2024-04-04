@@ -107,7 +107,7 @@ begin
   Result   := lModel;
 
   try
-    lQry.Open('select * from FUNCIONARIO where CODIGO_FUN = ' + ID);
+    lQry.Open('select * from FUNCIONARIO where CODIGO_FUN = ' + pID);
 
     if lQry.IsEmpty then
       Exit;
