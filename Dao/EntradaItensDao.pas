@@ -448,152 +448,202 @@ begin
       lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
 
 
-    lSQL := ' select ' +lPaginacao+ '                                                                                                            '+SLineBreak+
-            '        ID,                                                                                                                         '+SLineBreak+
-            '        NUMERO_ENT,                                                                                                                 '+SLineBreak+
-            '        PRODUTO_CODIGO_PRO,                                                                                                         '+SLineBreak+
-            '        PRODUTO_NOME_PRO,                                                                                                           '+SLineBreak+
-            '        PRODUTO_UNIDADE_PRO,                                                                                                        '+SLineBreak+
-            '        CFOP,                                                                                                                       '+SLineBreak+
-            '        NCM,                                                                                                                        '+SLineBreak+
-            '        CST,                                                                                                                        '+SLineBreak+
-            '        QUANTIDADE,                                                                                                                 '+SLineBreak+
-            '        VALOR_UNITARIO,                                                                                                             '+SLineBreak+
-            '        VALOR_FRETE,                                                                                                                '+SLineBreak+
-            '        VALOR_FRETE_2,                                                                                                              '+SLineBreak+
-            '        VALOR_OUTRAS_DESPESAS,                                                                                                      '+SLineBreak+
-            '        VALOR_BASE_IPI,                                                                                                             '+SLineBreak+
-            '        ALIQUOTA_IPI,                                                                                                               '+SLineBreak+
-            '        VALOR_IPI,                                                                                                                  '+SLineBreak+
-            '        ICMS_ORIGEM,                                                                                                                '+SLineBreak+
-            '        PERCENTUAL_RED_BC,                                                                                                          '+SLineBreak+
-            '        VALOR_ICMS_RET,                                                                                                             '+SLineBreak+
-            '        VALOR_BASE_ICMS,                                                                                                            '+SLineBreak+
-            '        VALOR_ICMS,                                                                                                                 '+SLineBreak+
-            '        ALIQUOTA_ICMS,                                                                                                              '+SLineBreak+
-            '        PERCENTUAL_ICMS_ST,                                                                                                         '+SLineBreak+
-            '        VALOR_ICMS_ST,                                                                                                              '+SLineBreak+
-            '        PERCENTUAL_MVA_ST,                                                                                                          '+SLineBreak+
-            '        PERCENTUAL_RED_BC_ST,                                                                                                       '+SLineBreak+
-            '        VALOR_BASE_ST,                                                                                                              '+SLineBreak+
-            '        ALIQUOTA_FCP,                                                                                                               '+SLineBreak+
-            '        VALOR_BASE_FCP,                                                                                                             '+SLineBreak+
-            '        VALOR_FCP,                                                                                                                  '+SLineBreak+
-            '        ALIQUOTA_FCP_ST,                                                                                                            '+SLineBreak+
-            '        VALOR_BC_FCP_ST,                                                                                                            '+SLineBreak+
-            '        VALOR_FCP_ST,                                                                                                               '+SLineBreak+
-            '        VALOR_BASE_PIS,                                                                                                             '+SLineBreak+
-            '        ALIQUOTA_PIS,                                                                                                               '+SLineBreak+
-            '        VALOR_PIS,                                                                                                                  '+SLineBreak+
-            '        VALOR_BASE_CONFINS,                                                                                                         '+SLineBreak+
-            '        ALIQUOTA_CONFINS,                                                                                                           '+SLineBreak+
-            '        VALOR_COFINS,                                                                                                               '+SLineBreak+
-            '        DESCONTO,                                                                                                                   '+SLineBreak+
-            '        TOTAL_UNITARIO,                                                                                                             '+SLineBreak+
-            '        VALOR_TOTAL                                                                                                                 '+SLineBreak+
-            '                from                                                                                                                '+SLineBreak+
-            '                (select                                                                                                             '+SLineBreak+
-            '                        id,                                                                                                         '+SLineBreak+
-            '                        numero_ent,                                                                                                 '+SLineBreak+
-            '                        produto_codigo_pro,                                                                                         '+SLineBreak+
-            '                        produto_nome_pro,                                                                                           '+SLineBreak+
-            '                        produto_unidade_pro,                                                                                        '+SLineBreak+
-            '                        cfop,                                                                                                       '+SLineBreak+
-            '                        ncm,                                                                                                        '+SLineBreak+
-            '                        cst,                                                                                                        '+SLineBreak+
-            '                        quantidade,                                                                                                 '+SLineBreak+
-            '                        valor_unitario,                                                                                             '+SLineBreak+
-            '                        valor_frete,                                                                                                '+SLineBreak+
-            '                        valor_frete_2,                                                                                              '+SLineBreak+
-            '                        valor_outras_despesas,                                                                                      '+SLineBreak+
-            '                        valor_base_ipi,                                                                                             '+SLineBreak+
-            '                        aliquota_ipi,                                                                                               '+SLineBreak+
-            '                        valor_ipi,                                                                                                  '+SLineBreak+
-            '                        icms_origem,                                                                                                '+SLineBreak+
-            '                        percentual_red_bc,                                                                                          '+SLineBreak+
-            '                        valor_icms_ret,                                                                                             '+SLineBreak+
-            '                        valor_base_icms,                                                                                            '+SLineBreak+
-            '                        valor_icms,                                                                                                 '+SLineBreak+
-            '                        aliquota_icms,                                                                                              '+SLineBreak+
-            '                        percentual_icms_st,                                                                                         '+SLineBreak+
-            '                        valor_icms_st,                                                                                              '+SLineBreak+
-            '                        percentual_mva_st,                                                                                          '+SLineBreak+
-            '                        percentual_red_bc_st,                                                                                       '+SLineBreak+
-            '                        valor_base_st,                                                                                              '+SLineBreak+
-            '                        aliquota_fcp,                                                                                               '+SLineBreak+
-            '                        valor_base_fcp,                                                                                             '+SLineBreak+
-            '                        valor_fcp,                                                                                                  '+SLineBreak+
-            '                        aliquota_fcp_st,                                                                                            '+SLineBreak+
-            '                        valor_bc_fcp_st,                                                                                            '+SLineBreak+
-            '                        valor_fcp_st,                                                                                               '+SLineBreak+
-            '                        valor_base_pis,                                                                                             '+SLineBreak+
-            '                        aliquota_pis,                                                                                               '+SLineBreak+
-            '                        valor_pis,                                                                                                  '+SLineBreak+
-            '                        valor_base_confins,                                                                                         '+SLineBreak+
-            '                        aliquota_confins,                                                                                           '+SLineBreak+
-            '                        valor_cofins,                                                                                               '+SLineBreak+
-            '                        desconto,                                                                                                   '+SLineBreak+
-            '                        total_unitario - desconto total_unitario,                                                                   '+SLineBreak+
-            '                        total_unitario                                                                                              '+SLineBreak+
-            '                                   + valor_ipi                                                                                      '+SLineBreak+
-            '                                   + valor_icms_st                                                                                  '+SLineBreak+
-            '                                   + valor_frete                                                                                    '+SLineBreak+
-            '                                   + valor_frete_2                                                                                  '+SLineBreak+
-            '                                   + valor_outras_despesas                                                                          '+SLineBreak+
-            '                                   + valor_fcp_st                                                                                   '+SLineBreak+
-            '                                   - desconto valor_total                                                                           '+SLineBreak+
-            '                                      from                                                                                          '+SLineBreak+
-            '                                      (select                                                                                       '+SLineBreak+
-            '                                            entradaitens.id,                                                                        '+SLineBreak+
-            '                                            entradaitens.numero_ent numero_ent,                                                     '+SLineBreak+
-            '                                            entradaitens.codigo_pro produto_codigo_pro,                                             '+SLineBreak+
-            '                                            produto.nome_pro produto_nome_pro,                                                      '+SLineBreak+
-            '                                            produto.unidade_pro produto_unidade_pro,                                                '+SLineBreak+
-            '                                            entradaitens.cfop,                                                                      '+SLineBreak+
-            '                                            entradaitens.ncm_i05 ncm,                                                               '+SLineBreak+
-            '                                            entradaitens.cst_ent cst,                                                               '+SLineBreak+
-            '                                            coalesce(entradaitens.quantidade_ent, 0) quantidade,                                    '+SLineBreak+
-            '                                            coalesce(entradaitens.valoruni_ent, 0) valor_unitario,                                  '+SLineBreak+
-            '                                            coalesce(entradaitens.vfrete_i15, 0) valor_frete,                                       '+SLineBreak+
-            '                                            coalesce(entradaitens.vfrete_i15_2, 0) valor_frete_2,                                   '+SLineBreak+
-            '                                            coalesce(entradaitens.vseg_i16, 0) valor_outras_despesas,                               '+SLineBreak+
-            '                                            coalesce(entradaitens.vbc_o10, 0) valor_base_ipi,                                       '+SLineBreak+
-            '                                            coalesce(entradaitens.ipi_ent, 0) aliquota_ipi,                                         '+SLineBreak+
-            '                                            coalesce(entradaitens.vipi_014, 0) valor_ipi,                                           '+SLineBreak+
-            '                                            coalesce(entradaitens.orig_n11, 0) icms_origem,                                         '+SLineBreak+
-            '                                            coalesce(entradaitens.predbc_n14, 0) percentual_red_bc,                                 '+SLineBreak+
-            '                                            coalesce(entradaitens.vicmsstret, 0) valor_icms_ret,                                    '+SLineBreak+
-            '                                            coalesce(entradaitens.base_icms_ent, 0) valor_base_icms,                                '+SLineBreak+
-            '                                            coalesce(entradaitens.vicms_n17, 0) valor_icms,                                         '+SLineBreak+
-            '                                            coalesce(entradaitens.icms_ent, 0) aliquota_icms,                                       '+SLineBreak+
-            '                                            coalesce(entradaitens.icms_st_ent, 0) percentual_icms_st,                               '+SLineBreak+
-            '                                            coalesce(entradaitens.vicms_st_ent, 0) valor_icms_st,                                   '+SLineBreak+
-            '                                            coalesce(entradaitens.pmvast_n19, 0) percentual_mva_st,                                 '+SLineBreak+
-            '                                            coalesce(entradaitens.predbcst_n20, 0) percentual_red_bc_st,                            '+SLineBreak+
-            '                                            coalesce(entradaitens.base_st_ent, 0) valor_base_st,                                    '+SLineBreak+
-            '                                            coalesce(entradaitens.pfcp, 0) aliquota_fcp,                                            '+SLineBreak+
-            '                                            coalesce(entradaitens.vbcfpc, 0) valor_base_fcp,                                        '+SLineBreak+
-            '                                            coalesce(entradaitens.vfcp, 0) valor_fcp,                                               '+SLineBreak+
-            '                                            coalesce(entradaitens.pfcpst, 0) aliquota_fcp_st,                                       '+SLineBreak+
-            '                                            coalesce(entradaitens.vbcfcpst, 0) valor_bc_fcp_st,                                     '+SLineBreak+
-            '                                            coalesce(entradaitens.vfcpst, 0) valor_fcp_st,                                          '+SLineBreak+
-            '                                            coalesce(entradaitens.vbc_q07, 0) valor_base_pis,                                       '+SLineBreak+
-            '                                            coalesce(entradaitens.ppis_q08, 0) aliquota_pis,                                        '+SLineBreak+
-            '                                            coalesce(entradaitens.vpis_q09, 0) valor_pis,                                           '+SLineBreak+
-            '                                            coalesce(entradaitens.vbc_s07, 0) valor_base_confins,                                   '+SLineBreak+
-            '                                            coalesce(entradaitens.pcofins_s08, 0) aliquota_confins,                                 '+SLineBreak+
-            '                                            coalesce(entradaitens.cofins, 0) valor_cofins,                                          '+SLineBreak+
-            '                                            coalesce(entradaitens.desc_i17, 0) desconto,                                            '+SLineBreak+
-            '                                            coalesce(entradaitens.quantidade_ent * entradaitens.valoruni_ent, 0) total_unitario     '+SLineBreak+
-            '                                       from entradaitens                                                                            '+SLineBreak+
-            '                                  left join produto on produto.codigo_pro = entradaitens.codigo_pro                                 '+SLineBreak+
-            '                                  left join cfop on cfop.id = entradaitens.cfop_id                                                  '+SLineBreak+
-            '                                      where 1=1                                                                                     '+SLineBreak;
+    lSQL := '     select  '+lPaginacao+'                                                                                                          '+SLineBreak+
+            '        ID,                                                                                                                          '+SLineBreak+
+            '        NUMERO_ENT,                                                                                                                  '+SLineBreak+
+            '        PRODUTO_CODIGO_PRO,                                                                                                          '+SLineBreak+
+            '        PRODUTO_NOME_PRO,                                                                                                            '+SLineBreak+
+            '        PRODUTO_UNIDADE_PRO,                                                                                                         '+SLineBreak+
+            '        CFOP,                                                                                                                        '+SLineBreak+
+            '        CFOP_ID,                                                                                                                     '+SLineBreak+
+            '        CFOP_CFOP,                                                                                                                   '+SLineBreak+
+            '        NCM,                                                                                                                         '+SLineBreak+
+            '        CST,                                                                                                                         '+SLineBreak+
+            '        CPROD,                                                                                                                       '+SLineBreak+
+            '        CEAN,                                                                                                                        '+SLineBreak+
+            '        CBARRA,                                                                                                                      '+SLineBreak+
+            '        CEST,                                                                                                                        '+SLineBreak+
+            '        XPROD,                                                                                                                       '+SLineBreak+
+            '        UCOM,                                                                                                                        '+SLineBreak+
+            '        QUANTIDADE_NF,                                                                                                               '+SLineBreak+
+            '        VALOR_UNITARIO_NF,                                                                                                           '+SLineBreak+
+            '        DIVISOR,                                                                                                                     '+SLineBreak+
+            '        MULTIPLICADODR,                                                                                                              '+SLineBreak+
+            '        ORIGEM_CONCILIACAO_PRODUTO,                                                                                                  '+SLineBreak+
+            '        QUANTIDADE,                                                                                                                  '+SLineBreak+
+            '        VALOR_FRETE,                                                                                                                 '+SLineBreak+
+            '        VALOR_FRETE_2,                                                                                                               '+SLineBreak+
+            '        VALOR_OUTRAS_DESPESAS,                                                                                                       '+SLineBreak+
+            '        VALOR_BASE_IPI,                                                                                                              '+SLineBreak+
+            '        ALIQUOTA_IPI,                                                                                                                '+SLineBreak+
+            '        VALOR_IPI,                                                                                                                   '+SLineBreak+
+            '        ICMS_ORIGEM,                                                                                                                 '+SLineBreak+
+            '        PERCENTUAL_RED_BC,                                                                                                           '+SLineBreak+
+            '        VALOR_ICMS_RET,                                                                                                              '+SLineBreak+
+            '        VALOR_BASE_ICMS,                                                                                                             '+SLineBreak+
+            '        VALOR_ICMS,                                                                                                                  '+SLineBreak+
+            '        ALIQUOTA_ICMS,                                                                                                               '+SLineBreak+
+            '        PERCENTUAL_ICMS_ST,                                                                                                          '+SLineBreak+
+            '        VALOR_ICMS_ST,                                                                                                               '+SLineBreak+
+            '        PERCENTUAL_MVA_ST,                                                                                                           '+SLineBreak+
+            '        PERCENTUAL_RED_BC_ST,                                                                                                        '+SLineBreak+
+            '        VALOR_BASE_ST,                                                                                                               '+SLineBreak+
+            '        ALIQUOTA_FCP,                                                                                                                '+SLineBreak+
+            '        VALOR_BASE_FCP,                                                                                                              '+SLineBreak+
+            '        VALOR_FCP,                                                                                                                   '+SLineBreak+
+            '        ALIQUOTA_FCP_ST,                                                                                                             '+SLineBreak+
+            '        VALOR_BC_FCP_ST,                                                                                                             '+SLineBreak+
+            '        VALOR_FCP_ST,                                                                                                                '+SLineBreak+
+            '        VALOR_BASE_PIS,                                                                                                              '+SLineBreak+
+            '        ALIQUOTA_PIS,                                                                                                                '+SLineBreak+
+            '        VALOR_PIS,                                                                                                                   '+SLineBreak+
+            '        VALOR_BASE_CONFINS,                                                                                                          '+SLineBreak+
+            '        ALIQUOTA_CONFINS,                                                                                                            '+SLineBreak+
+            '        VALOR_COFINS,                                                                                                                '+SLineBreak+
+            '        DESCONTO,                                                                                                                    '+SLineBreak+
+            '        UNITARIO_LIQUIDO,                                                                                                            '+SLineBreak+
+            '        UNITARIO_TOTAL,                                                                                                              '+SLineBreak+
+            '        TOTAL_LIQUIDO,                                                                                                               '+SLineBreak+
+            '        VALOR_TOTAL                                                                                                                  '+SLineBreak+
+            '                from                                                                                                                 '+SLineBreak+
+            '                (select                                                                                                              '+SLineBreak+
+            '                        id,                                                                                                          '+SLineBreak+
+            '                        numero_ent,                                                                                                  '+SLineBreak+
+            '                        produto_codigo_pro,                                                                                          '+SLineBreak+
+            '                        produto_nome_pro,                                                                                            '+SLineBreak+
+            '                        produto_unidade_pro,                                                                                         '+SLineBreak+
+            '                        cfop,                                                                                                        '+SLineBreak+
+            '                        cfop_id,                                                                                                     '+SLineBreak+
+            '                        cfop_cfop,                                                                                                   '+SLineBreak+
+            '                        ncm,                                                                                                         '+SLineBreak+
+            '                        cst,                                                                                                         '+SLineBreak+
+            '                        cprod,                                                                                                       '+SLineBreak+
+            '                        cean,                                                                                                        '+SLineBreak+
+            '                        cbarra,                                                                                                      '+SLineBreak+
+            '                        cest,                                                                                                        '+SLineBreak+
+            '                        xprod,                                                                                                       '+SLineBreak+
+            '                        ucom,                                                                                                        '+SLineBreak+
+            '                        quantidade_nf,                                                                                               '+SLineBreak+
+            '                        valor_unitario_nf,                                                                                           '+SLineBreak+
+            '                        divisor,                                                                                                     '+SLineBreak+
+            '                        multiplicadodr,                                                                                              '+SLineBreak+
+            '                        origem_conciliacao_produto,                                                                                  '+SLineBreak+
+            '                        quantidade,                                                                                                  '+SLineBreak+
+            '                        valor_unitario,                                                                                              '+SLineBreak+
+            '                        valor_frete,                                                                                                 '+SLineBreak+
+            '                        valor_frete_2,                                                                                               '+SLineBreak+
+            '                        valor_outras_despesas,                                                                                       '+SLineBreak+
+            '                        valor_base_ipi,                                                                                              '+SLineBreak+
+            '                        aliquota_ipi,                                                                                                '+SLineBreak+
+            '                        valor_ipi,                                                                                                   '+SLineBreak+
+            '                        icms_origem,                                                                                                 '+SLineBreak+
+            '                        percentual_red_bc,                                                                                           '+SLineBreak+
+            '                        valor_icms_ret,                                                                                              '+SLineBreak+
+            '                        valor_base_icms,                                                                                             '+SLineBreak+
+            '                        valor_icms,                                                                                                  '+SLineBreak+
+            '                        aliquota_icms,                                                                                               '+SLineBreak+
+            '                        percentual_icms_st,                                                                                          '+SLineBreak+
+            '                        valor_icms_st,                                                                                               '+SLineBreak+
+            '                        percentual_mva_st,                                                                                           '+SLineBreak+
+            '                        percentual_red_bc_st,                                                                                        '+SLineBreak+
+            '                        valor_base_st,                                                                                               '+SLineBreak+
+            '                        aliquota_fcp,                                                                                                '+SLineBreak+
+            '                        valor_base_fcp,                                                                                              '+SLineBreak+
+            '                        valor_fcp,                                                                                                   '+SLineBreak+
+            '                        aliquota_fcp_st,                                                                                             '+SLineBreak+
+            '                        valor_bc_fcp_st,                                                                                             '+SLineBreak+
+            '                        valor_fcp_st,                                                                                                '+SLineBreak+
+            '                        valor_base_pis,                                                                                              '+SLineBreak+
+            '                        aliquota_pis,                                                                                                '+SLineBreak+
+            '                        valor_pis,                                                                                                   '+SLineBreak+
+            '                        valor_base_confins,                                                                                          '+SLineBreak+
+            '                        aliquota_confins,                                                                                            '+SLineBreak+
+            '                        valor_cofins,                                                                                                '+SLineBreak+
+            '                        desconto,                                                                                                    '+SLineBreak+
+            '                        (total_unitario - desconto) / quantidade unitario_liquido,                                                   '+SLineBreak+
+            '                        total_unitario - desconto total_liquido,                                                                     '+SLineBreak+
+            '                        (total_unitario                                                                                              '+SLineBreak+
+            '                                   + valor_ipi                                                                                       '+SLineBreak+
+            '                                   + valor_icms_st                                                                                   '+SLineBreak+
+            '                                   + valor_frete                                                                                     '+SLineBreak+
+            '                                   + valor_frete_2                                                                                   '+SLineBreak+
+            '                                   + valor_outras_despesas                                                                           '+SLineBreak+
+            '                                   + valor_fcp_st                                                                                    '+SLineBreak+
+            '                                   - desconto) / quantidade unitario_total,                                                          '+SLineBreak+
+            '                        total_unitario                                                                                               '+SLineBreak+
+            '                                   + valor_ipi                                                                                       '+SLineBreak+
+            '                                   + valor_icms_st                                                                                   '+SLineBreak+
+            '                                   + valor_frete                                                                                     '+SLineBreak+
+            '                                   + valor_frete_2                                                                                   '+SLineBreak+
+            '                                   + valor_outras_despesas                                                                           '+SLineBreak+
+            '                                   + valor_fcp_st                                                                                    '+SLineBreak+
+            '                                   - desconto valor_total                                                                            '+SLineBreak+
+            '                                      from                                                                                           '+SLineBreak+
+            '                                      (select                                                                                        '+SLineBreak+
+            '                                            entradaitens.id,                                                                         '+SLineBreak+
+            '                                            entradaitens.numero_ent numero_ent,                                                      '+SLineBreak+
+            '                                            entradaitens.codigo_pro produto_codigo_pro,                                              '+SLineBreak+
+            '                                            produto.nome_pro produto_nome_pro,                                                       '+SLineBreak+
+            '                                            produto.unidade_pro produto_unidade_pro,                                                 '+SLineBreak+
+            '                                            entradaitens.cfop,                                                                       '+SLineBreak+
+            '                                            entradaitens.cfop_id,                                                                    '+SLineBreak+
+            '                                            cfop.cfop cfop_cfop,                                                                     '+SLineBreak+
+            '                                            entradaitens.ncm_i05 ncm,                                                                '+SLineBreak+
+            '                                            entradaitens.cst_ent cst,                                                                '+SLineBreak+
+            '                                            entradaitens.cprod,                                                                      '+SLineBreak+
+            '                                            entradaitens.cean,                                                                       '+SLineBreak+
+            '                                            entradaitens.cbarra,                                                                     '+SLineBreak+
+            '                                            entradaitens.cest,                                                                       '+SLineBreak+
+            '                                            entradaitens.xprod,                                                                      '+SLineBreak+
+            '                                            entradaitens.ucom,                                                                       '+SLineBreak+
+            '                                            entradaitens.quantidade_nf,                                                              '+SLineBreak+
+            '                                            entradaitens.valor_unitario_nf,                                                          '+SLineBreak+
+            '                                            entradaitens.divisor,                                                                    '+SLineBreak+
+            '                                            entradaitens.multiplicadodr,                                                             '+SLineBreak+
+            '                                            entradaitens.origem_conciliacao_produto,                                                 '+SLineBreak+
+            '                                            coalesce(entradaitens.quantidade_ent, 0) quantidade,                                     '+SLineBreak+
+            '                                            coalesce(entradaitens.valoruni_ent, 0) valor_unitario,                                   '+SLineBreak+
+            '                                            coalesce(entradaitens.vfrete_i15, 0) valor_frete,                                        '+SLineBreak+
+            '                                            coalesce(entradaitens.vfrete_i15_2, 0) valor_frete_2,                                    '+SLineBreak+
+            '                                            coalesce(entradaitens.vseg_i16, 0) valor_outras_despesas,                                '+SLineBreak+
+            '                                            coalesce(entradaitens.vbc_o10, 0) valor_base_ipi,                                        '+SLineBreak+
+            '                                            coalesce(entradaitens.ipi_ent, 0) aliquota_ipi,                                          '+SLineBreak+
+            '                                            coalesce(entradaitens.vipi_014, 0) valor_ipi,                                            '+SLineBreak+
+            '                                            coalesce(entradaitens.orig_n11, 0) icms_origem,                                          '+SLineBreak+
+            '                                            coalesce(entradaitens.predbc_n14, 0) percentual_red_bc,                                  '+SLineBreak+
+            '                                            coalesce(entradaitens.vicmsstret, 0) valor_icms_ret,                                     '+SLineBreak+
+            '                                            coalesce(entradaitens.base_icms_ent, 0) valor_base_icms,                                 '+SLineBreak+
+            '                                            coalesce(entradaitens.vicms_n17, 0) valor_icms,                                          '+SLineBreak+
+            '                                            coalesce(entradaitens.icms_ent, 0) aliquota_icms,                                        '+SLineBreak+
+            '                                            coalesce(entradaitens.icms_st_ent, 0) percentual_icms_st,                                '+SLineBreak+
+            '                                            coalesce(entradaitens.vicms_st_ent, 0) valor_icms_st,                                    '+SLineBreak+
+            '                                            coalesce(entradaitens.pmvast_n19, 0) percentual_mva_st,                                  '+SLineBreak+
+            '                                            coalesce(entradaitens.predbcst_n20, 0) percentual_red_bc_st,                             '+SLineBreak+
+            '                                            coalesce(entradaitens.base_st_ent, 0) valor_base_st,                                     '+SLineBreak+
+            '                                            coalesce(entradaitens.pfcp, 0) aliquota_fcp,                                             '+SLineBreak+
+            '                                            coalesce(entradaitens.vbcfpc, 0) valor_base_fcp,                                         '+SLineBreak+
+            '                                            coalesce(entradaitens.vfcp, 0) valor_fcp,                                                '+SLineBreak+
+            '                                            coalesce(entradaitens.pfcpst, 0) aliquota_fcp_st,                                        '+SLineBreak+
+            '                                            coalesce(entradaitens.vbcfcpst, 0) valor_bc_fcp_st,                                      '+SLineBreak+
+            '                                            coalesce(entradaitens.vfcpst, 0) valor_fcp_st,                                           '+SLineBreak+
+            '                                            coalesce(entradaitens.vbc_q07, 0) valor_base_pis,                                        '+SLineBreak+
+            '                                            coalesce(entradaitens.ppis_q08, 0) aliquota_pis,                                         '+SLineBreak+
+            '                                            coalesce(entradaitens.vpis_q09, 0) valor_pis,                                            '+SLineBreak+
+            '                                            coalesce(entradaitens.vbc_s07, 0) valor_base_confins,                                    '+SLineBreak+
+            '                                            coalesce(entradaitens.pcofins_s08, 0) aliquota_confins,                                  '+SLineBreak+
+            '                                            coalesce(entradaitens.cofins, 0) valor_cofins,                                           '+SLineBreak+
+            '                                            coalesce(entradaitens.desc_i17, 0) desconto,                                             '+SLineBreak+
+            '                                            coalesce(entradaitens.quantidade_ent * entradaitens.valoruni_ent, 0) total_unitario      '+SLineBreak+
+            '                                       from entradaitens                                                                             '+SLineBreak+
+            '                                  left join produto on produto.codigo_pro = entradaitens.codigo_pro                                  '+SLineBreak+
+            '                                  left join cfop on cfop.id = entradaitens.cfop_id                                                   '+SLineBreak+
+            '                                  where 1=1                                                                                          '+SLineBreak;
 
-    lSql := lSql + where;
+    lSQL := lSQL + where;
 
-    lSql := lSql + '     )      '+SLineBreak+
-                   '   )        '+SLineBreak;
+    lSQL := lSQL + '       )   '+SLineBreak+
+                   '  )        '+SLineBreak;
+
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
