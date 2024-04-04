@@ -24,6 +24,7 @@ type
   Municipio: string;
   UF: string;
   Telefone: string;
+  DDD: string;
   Email: string;
   Abertura: string;
   Status: string;
@@ -165,6 +166,10 @@ begin
 
   if Assigned(lJsonObjMunicipio.Get('descricao')) then begin
     Result.Municipio := lJsonObjMunicipio.Values['descricao'].Value;
+  end;
+
+  if Assigned(lJsonObjCNPJ.Get('ddd1')) then begin
+    Result.DDD := lJsonObjCNPJ.Values['ddd1'].Value;
   end;
 
   if Assigned(lJsonObjCNPJ.Get('telefone1')) then begin
