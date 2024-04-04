@@ -32,6 +32,9 @@ interface
     CONTROLE_LOGISTICA_FEDEX     = 'F';
 
 
+    LOGISTTICA_FEDEX             = 'FEDEX';
+
+
   type
     ILogistica = interface;
 
@@ -74,10 +77,14 @@ interface
       function getVersao: TipoWideStringFramework;
       function getCompilacao: Int64;
 
+      function getName: TipoWideStringFramework;
+
       property api: IUnknown read getAPI write setAPI;
 
       property versao: TipoWideStringFramework read getVersao;
       property compilacao: Int64 read getCompilacao;
+
+      property name: TipoWideStringFramework read getName;
 
       property conttroleAlteracoes: IControleAlteracoes read getControleAlteracoes write setControleAlteracoes;
 

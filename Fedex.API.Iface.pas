@@ -33,7 +33,7 @@ interface
     URLPRODUCAOFEDEX     = 'https://celular.rapidaocometa.com.br:51040/soap-new?service=WMS10_GENERIC';
     URLHOMOLOGACAOFEDEX  = 'https://internet.rapidaocometa.com.br:6060/soap-new?service=WMS10_GENERIC';
 
-    SISTEMA_LOGISTICA_FEDEX_PRODUCAO     = 'FEDEX';
+    SISTEMA_LOGISTICA_FEDEX_PRODUCAO     = LOGISTTICA_FEDEX;
     SISTEMA_LOGISTICA_FEDEX_HOMOLOGACAO  = 'FED.HOM';
 
   {

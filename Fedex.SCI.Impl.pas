@@ -32,6 +32,7 @@ implementation
         function fedex_SCI_GetSKUList(pCodigoPro: TipoWideStringFramework; pResultado: IResultadoOperacao = nil): TFedex_SKUList;
         function fedex_SCI_criaAPI(const pCNPJ: TipoWideStringFramework = ''; const pRazaoSocial: TipoWideStringFramework = ''): IFedexAPI;
         function criaControleAlteracoes: IControleAlteracoes;
+        function getName: TipoWideStringFramework;
 
       protected
         fAPI: IFedexAPI;
@@ -289,8 +290,8 @@ begin
           for lTmp in lListaIMEIS do
           begin
             gdbPadrao.insereDB('movimento_serial',
-                ['tipo_serial','numero','produto','tipo_documento','id_documento'],
-                ['I',lTmp,lProduto,'P',lPedido]);
+                ['tipo_serial','numero','produto','tipo_documento','id_documento', 'logistica'],
+                ['I',lTmp,lProduto,'P',lPedido,LOGISTTICA_FEDEX]);
           end;
 
           lCDS.Next;
@@ -539,8 +540,8 @@ begin
               lLista.get(lProduto,lListaIMEIS,true);
 
             gdbPadrao.insereDB('movimento_serial',
-                ['tipo_serial','numero','produto','tipo_documento','id_documento'],
-                ['I',lTmp,lProduto,'E',lDS.fieldByName('id').AsString]);
+                ['tipo_serial','numero','produto','tipo_documento','id_documento','logistica'],
+                ['I',lTmp,lProduto,'E',lDS.fieldByName('id').AsString,LOGISTTICA_FEDEX]);
 
           end;
           lDSItens.dataset.Next;
@@ -682,6 +683,11 @@ end;
 function TLogisticaFedex.getControleAlteracoes: IControleAlteracoes;
 begin
   Result := fAPI.parameters.controleAlteracoes;
+end;
+
+function TLogisticaFedex.getName: TipoWideStringFramework;
+begin
+  Result := LOGISTTICA_FEDEX;
 end;
 
 function TLogisticaFedex.precisaEnviarVenda(const pNumeroPed: TipoWideStringFramework): boolean;
