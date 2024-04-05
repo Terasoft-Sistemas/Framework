@@ -90,6 +90,7 @@ function processaArquivoExpedicao(pUnkAPI: IUnknown; pResultado: IResultadoOpera
     lFieldQtde: TField;
     pAPI: IFedexAPI;
     lRes: IResultadoOperacao;
+    lDataHoraAtual: TDateTime;
 
 begin
   Result := checkResultadoOperacao(pResultado);
@@ -113,6 +114,8 @@ begin
         pResultado.adicionaErro('processaArquivoExpedicao: GDB não definido.');
         exit;
       end;
+
+      lDataHoraAtual := gdbPadrao.dataHoraServer;
 
       ctr := pAPI.parameters.controleAlteracoes;
       if(ctr=nil) then begin
@@ -290,8 +293,8 @@ begin
           for lTmp in lListaIMEIS do
           begin
             gdbPadrao.insereDB('movimento_serial',
-                ['tipo_serial','numero','produto','tipo_documento','id_documento', 'logistica'],
-                ['I',lTmp,lProduto,'P',lPedido,LOGISTTICA_FEDEX]);
+                ['tipo_serial','numero','produto','tipo_documento','id_documento', 'logistica', 'dh_movimento'],
+                ['I',lTmp,lProduto,'P',lPedido,LOGISTTICA_FEDEX,lDataHoraAtual]);
           end;
 
           lCDS.Next;
@@ -338,6 +341,7 @@ function processaArquivoRecebimento(pUnkAPI: IUnknown; pResultado: IResultadoOpe
     pAPI: IFedexAPI;
     lRes: IResultadoOperacao;
     lID: TipoWideStringFramework;
+    lDataHoraAtual: TDateTime;
 begin
   //processamento entrada
 
@@ -357,6 +361,9 @@ begin
         pResultado.adicionaErro('processaArquivoRecebimento: GDB não definido.');
         exit;
       end;
+
+      lDataHoraAtual := gdbPadrao.dataHoraServer;
+
       lArquivo := pResultado.propriedade['ARQUIVO'].asString;
       if (lArquivo='') or not FileExists(lArquivo) then begin
         pResultado.formataErro('processaArquivoRecebimento: arquivo [%s] não existe.', [lArquivo]);
@@ -540,8 +547,8 @@ begin
               lLista.get(lProduto,lListaIMEIS,true);
 
             gdbPadrao.insereDB('movimento_serial',
-                ['tipo_serial','numero','produto','tipo_documento','id_documento','logistica'],
-                ['I',lTmp,lProduto,'E',lDS.fieldByName('id').AsString,LOGISTTICA_FEDEX]);
+                ['tipo_serial','numero','produto','tipo_documento','id_documento','logistica','dh_movimento'],
+                ['I',lTmp,lProduto,'E',lDS.fieldByName('id').AsString,LOGISTTICA_FEDEX,lDataHoraAtual]);
 
           end;
           lDSItens.dataset.Next;
