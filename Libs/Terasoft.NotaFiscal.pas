@@ -267,12 +267,14 @@ begin
       EnderDest.cPais   := IIF(lQry.FieldByName('cPais').AsString <> ''      , lQry.FieldByName('cPais').AsString,    Unassigned);
       EnderDest.xPais   := IIF(lQry.FieldByName('xPais').AsString <> ''      , lQry.FieldByName('xPais').AsString,    Unassigned);
 
-     if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then
-     begin
-       indIEDest := inNaoContribuinte;
-       IE        := '';
-     end;
+      if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then
+      begin
+        indIEDest := inNaoContribuinte;
+        IE        := '';
+        //Colocar o cpf
+      end;
     end;
+
     with NotaF.NFe.Ide do
     begin
      if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then

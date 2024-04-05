@@ -849,7 +849,6 @@ begin
     lNFModel.TRA_PLACA             := self.FPLACA;
     lNFModel.TRA_RNTC              := self.FRNTRC;
     lNFModel.TIPO_FRETE            := IfThen(pModelo = '55', self.FTIPO_FRETE, '9');
-    lNFModel.CNPJ_CPF_CONSUMIDOR   := self.FCNPJ_CPF_CONSUMIDOR;
     lNumeroNFe := lNFModel.Salvar;
 
     lPedidoItensModel.IDPedidoVendaView := self.NUMERO_PED;
