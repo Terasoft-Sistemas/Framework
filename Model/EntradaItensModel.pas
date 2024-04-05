@@ -15,7 +15,6 @@ type
     vIConexao : IConexao;
 
     FAcao: TAcao;
-    FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
     FCountView: String;
@@ -160,11 +159,11 @@ type
     FNumeroView: Variant;
     FFornecedorView: Variant;
     FORIGEM_CONCILIACAO_PRODUTO: Variant;
+    FLengthPageView: String;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetIDRecordView(const Value: Integer);
-    procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
@@ -307,6 +306,7 @@ type
     procedure SetFornecedorView(const Value: Variant);
     procedure SetNumeroView(const Value: Variant);
     procedure SetORIGEM_CONCILIACAO_PRODUTO(const Value: Variant);
+    procedure SetLengthPageView(const Value: String);
 
   public
 
@@ -896,7 +896,7 @@ end;
 
 procedure TEntradaItensModel.SetLengthPageView(const Value: String);
 begin
-
+  FLengthPageView := Value;
 end;
 
 procedure TEntradaItensModel.SetLOJA(const Value: Variant);
