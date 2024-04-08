@@ -195,7 +195,8 @@ begin
       lSQL := ' select '+lPaginacao+'                                                    '+SLineBreak+
               '         DESCONTO.ID,                                                     '+SLineBreak+
               '         DESCONTO.TIPOVENDA_DES,                                          '+SLineBreak+
-              '         DESCONTO.USUARIO_DES                                             '+SLineBreak+
+              '         DESCONTO.USUARIO_DES,                                            '+SLineBreak+
+              '         DESCONTO.VALOR_DES                                               '+SLineBreak+
               '    from DESCONTO                                                         '+SLineBreak+
               '   where 1=1                                                              '+SLineBreak;
 
