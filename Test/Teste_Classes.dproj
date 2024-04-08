@@ -223,6 +223,8 @@
         <DCCReference Include="..\Model\ClientesContatoModel.pas"/>
         <DCCReference Include="..\Dao\ClientesContatoDao.pas"/>
         <DCCReference Include="..\Libs\Terasoft.Configuracoes.pas"/>
+        <DCCReference Include="..\Dao\DescontoDao.pas"/>
+        <DCCReference Include="..\Model\DescontoModel.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

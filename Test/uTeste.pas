@@ -132,6 +132,10 @@ type
     Button82: TButton;
     Button83: TButton;
     Button84: TButton;
+    Button85: TButton;
+    Button86: TButton;
+    Button87: TButton;
+    Button88: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -222,6 +226,10 @@ type
     procedure Button81Click(Sender: TObject);
     procedure Button82Click(Sender: TObject);
     procedure Button83Click(Sender: TObject);
+    procedure Button88Click(Sender: TObject);
+    procedure Button85Click(Sender: TObject);
+    procedure Button86Click(Sender: TObject);
+    procedure Button87Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -251,7 +259,7 @@ uses
   ClienteModel, ContasPagarModel, ContasPagarItensModel, System.SysUtils,
   ReservaModel, DocumentoModel, AnexoModel, FluxoCaixaModel, BancoModel,
   PortadorModel, LojasModel, OSModel, SimuladorPrecoModel, GrupoModel, CNPJModel, CEPModel,
-  PedidoCompraModel, PedidoCompraItensModel, ClientesContatoModel;
+  PedidoCompraModel, PedidoCompraItensModel, ClientesContatoModel, DescontoModel;
 
 {$R *.dfm}
 
@@ -2293,7 +2301,6 @@ end;
 procedure TForm1.Button84Click(Sender: TObject);
 var
   lClientesContatoModel : TClientesContatoModel;
-  CodigoCli       : String;
 begin
   lClientesContatoModel := TClientesContatoModel.Create(vIConexao);
   try
@@ -2313,6 +2320,105 @@ begin
   end;
 end;
 
+procedure TForm1.Button85Click(Sender: TObject);
+var
+  lDescontoModel : TDescontoModel;
+  lMemTable   : TFDMemTable;
+begin
+  lDescontoModel := TDescontoModel.Create(vIConexao);
+  try
+    try
+      lMemTable := lDescontoModel.ObterLista;
+
+      memoResultado.Lines.Clear;
+
+      lMemTable.First;
+      while not lMemTable.Eof do
+      begin
+        memoResultado.Lines.Add('ID: '+lMemTable.FieldByName('ID').AsString);
+        memoResultado.Lines.Add('CLIENTE_ID: '+lMemTable.FieldByName('USUARIO_DES').AsString);
+        memoResultado.Lines.Add('===============================================');
+        lMemTable.Next;
+      end;
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lDescontoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button86Click(Sender: TObject);
+var
+  lDescontoModel : TDescontoModel;
+  ID : String;
+begin
+  lDescontoModel := TDescontoModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('DESCONTO', 'Digite o ID do Contato que deseja Alterar:', '');
+      if ID.IsEmpty then
+        exit;
+
+      lDescontoModel := lDescontoModel.Alterar(ID);
+      lDescontoModel.VALOR_DES := 98;
+
+      lDescontoModel.Salvar;
+      ShowMessage('Alterado com Sucesso');
+    Except
+      on E:Exception do
+      ShowMessage('Erro: ' +E.Message);
+    end;
+  finally
+    lDescontoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button87Click(Sender: TObject);
+var
+  lDescontoModel : TDescontoModel;
+  ID        : String;
+begin
+  lDescontoModel := TDescontoModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('DESCONTO', 'Digite o ID do Contato que deseja excluir:', '');
+      if ID.IsEmpty then
+          Exit;
+
+      lDescontoModel.Excluir(ID);
+      ShowMessage('Excluido com sucesso!');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lDescontoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button88Click(Sender: TObject);
+var
+  lDescontoModel : TDescontoModel;
+begin
+  lDescontoModel := TDescontoModel.Create(vIConexao);
+  try
+    try
+      lDescontoModel.USUARIO_DES   := '000002';
+      lDescontoModel.TIPOVENDA_DES := '000004';
+      lDescontoModel.VALOR_DES     := 99;
+
+      lDescontoModel.Incluir;
+      ShowMessage('Incluido com Sucesso!');
+    except
+      on E:Exception do
+      ShowMessage('Erro: ' + E.Message);
+    end
+  finally
+    lDescontoModel.Free;
+  end;
+end;
 procedure TForm1.Button8Click(Sender: TObject);
 var
   lWebPedidoModel : TWebPedidoModel;

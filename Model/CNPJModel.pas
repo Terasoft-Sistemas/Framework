@@ -94,7 +94,7 @@ end;
 
 function TCNPJModel.cnpjApiBrasil(pCnpj: String): TRetornoCnpj;
 var
-  lJsonObj, lJsonObjResponse, lJsonObjCNPJ, lJsonObjMunicipio: TJSONObject;
+  lJsonObj, lJsonObjResponse, lJsonObjCNPJ, lJsonObjMunicipio, lJsonObjEmpresa: TJSONObject;
   lJsonValue: TJSONValue;
   lToken, lDeviceToken : String;
 begin
@@ -139,9 +139,16 @@ begin
   if Assigned(lJsonObjCNPJ.Get('municipio').JsonValue) then
     lJsonObjMunicipio := lJsonObjCNPJ.Get('municipio').JsonValue as TJSONObject;
 
+  if Assigned(lJsonObjCNPJ.Get('empresa').JsonValue) then
+    lJsonObjEmpresa := lJsonObjCNPJ.Get('empresa').JsonValue as TJSONObject;
+
 
   if Assigned(lJsonObjCNPJ.Get('nome_fantasia')) then begin
     Result.Fantasia := lJsonObjCNPJ.Values['nome_fantasia'].Value;
+  end;
+
+  if Assigned(lJsonObjEmpresa.Get('razao_social')) then begin
+    Result.Nome := lJsonObjEmpresa.Values['razao_social'].Value;
   end;
 
   if Assigned(lJsonObjCNPJ.Get('cep')) then begin
