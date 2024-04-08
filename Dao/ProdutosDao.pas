@@ -504,6 +504,8 @@ begin
       '       produto.UNIDADE_PRO,                                                         '+SLineBreak+
       '       produto.garantia_12,                                                         '+SLineBreak+
       '       produto.garantia_24,                                                         '+SLineBreak+
+      '       produto.divizor,                                                             '+SLineBreak+
+      '       produto.MULTIPLICADOR,                                                       '+sLineBreak+
       '       grupoproduto.nome_gru,                                                       '+SLineBreak+
       '       subgrupoproduto.nome_sub,                                                    '+SLineBreak+
       '       marcaproduto.nome_mar,                                                       '+SLineBreak+
@@ -512,7 +514,7 @@ begin
       ' inner join grupoproduto on grupoproduto.codigo_gru = produto.codigo_gru            '+SLineBreak+
       ' inner join subgrupoproduto on subgrupoproduto.codigo_sub = produto.codigo_sub      '+SLineBreak+
       ' inner join marcaproduto on marcaproduto.codigo_mar = produto.codigo_mar            '+SLineBreak+
-      ' inner join produto_tipo on produto_tipo.id = produto.tipo_id                       '+SLineBreak+
+      ' left join produto_tipo on produto_tipo.id = produto.tipo_id                        '+SLineBreak+
       ' where 1=1 ';
 
     lSql := lSql + where;
@@ -539,6 +541,8 @@ begin
       FProdutossLista[i].UNIDADE_PRO     := lQry.FieldByName('UNIDADE_PRO').AsString;
       FProdutossLista[i].GARANTIA_12     := lQry.FieldByName('GARANTIA_12').AsString;
       FProdutossLista[i].GARANTIA_24     := lQry.FieldByName('GARANTIA_24').AsString;
+      FProdutossLista[i].DIVIZOR         := lQry.FieldByName('DIVIZOR').AsString;
+      FProdutossLista[i].MULTIPLICADOR   := lQry.FieldByName('MULTIPLICADOR').AsString;
       FProdutossLista[i].SALDO_PRO       := lQry.FieldByName('SALDO_PRO').AsString;
       FProdutossLista[i].NOME_GRU        := lQry.FieldByName('NOME_GRU').AsString;
       FProdutossLista[i].NOME_SUB        := lQry.FieldByName('NOME_SUB').AsString;
