@@ -127,7 +127,9 @@ uses
   ClientesContatoDao in '..\Dao\ClientesContatoDao.pas',
   Terasoft.Configuracoes in '..\Libs\Terasoft.Configuracoes.pas',
   DescontoDao in '..\Dao\DescontoDao.pas',
-  DescontoModel in '..\Model\DescontoModel.pas';
+  DescontoModel in '..\Model\DescontoModel.pas',
+  PromocaoModel in '..\Model\PromocaoModel.pas',
+  PromocaoDao in '..\Dao\PromocaoDao.pas';
 
 {$R *.res}
 

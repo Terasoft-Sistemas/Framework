@@ -312,6 +312,7 @@ type
     FNOME_SUB: Variant;
     FNOME_GRU: Variant;
     FNOME_MAR: Variant;
+    FCodProdutoView: String;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetProdutossLista(const Value: TObjectList<TProdutosModel>);
@@ -599,6 +600,7 @@ type
     procedure SetNOME_MAR(const Value: Variant);
     procedure SetNOME_SUB(const Value: Variant);
     procedure SetTIPO_NOME(const Value: Variant);
+    procedure SetCodProdutoView(const Value: String);
 
   public
     property UUID: Variant read FUUID write SetUUID;
@@ -885,6 +887,7 @@ type
 
     procedure obterLista;
     procedure obterListaCatalogo;
+    function obterPromocao(pCodProduto: String): TFDMemTable;
 
     function Incluir  : String;
     function Alterar(pID : String) : TProdutosModel;
@@ -896,7 +899,7 @@ type
 
     function carregaClasse(pId: String): TProdutosModel;
     function valorVenda(pIdProduto: String): Variant;
-
+    function obterPrecoVenda : TFDMemTable;
     function ValorUnitario(pProdutoPreco: TProdutoPreco) : Double;
 
     procedure subtrairSaldo(pIdProduto: String; pSaldo: Double);
@@ -911,7 +914,9 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
+    property CodProdutoView : String read FCodProdutoView write SetCodProdutoView;
   end;
+
 implementation
 uses
   ProdutosDao,
@@ -921,7 +926,7 @@ uses
   PrecoVendaModel,
   PrecoVendaProdutoModel,
   PrecoClienteModel,
-  System.SysUtils;
+  System.SysUtils, Data.DB, PromocaoModel;
 
   { TProdutosModel }
 
@@ -1061,6 +1066,76 @@ begin
     FTotalRecords  := lProdutosLista.TotalRecords;
   finally
     lProdutosLista.Free;
+  end;
+end;
+
+function TProdutosModel.obterPrecoVenda: TFDMemTable;
+var
+  lProdutoDao: TProdutosDao;
+begin
+  lProdutoDao := TProdutosDao.Create(vIConexao);
+  try
+    lProdutoDao.IDRecordView := FIDRecordView;
+    Result := lProdutoDao.obterPrecoVenda;
+  finally
+    lProdutoDao.Free;
+  end;
+end;
+
+function TProdutosModel.obterPromocao(pCodProduto: String): TFDMemTable;
+var
+  lMemTable           : TFDMemTable;
+  lPromocaoModel      : TPromocaoModel;
+  lPromocaoItensModel : TPromocaoItensModel;
+begin
+  if pCodProduto = '' then
+    CriaException('Produto não informado');
+
+  lMemTable           := TFDMemTable.Create(nil);
+  lPromocaoModel      := TPromocaoModel.Create(vIConexao);
+  lPromocaoItensModel := TPromocaoItensModel.Create(vIConexao);
+
+  try
+    with lMemTable.IndexDefs.AddIndexDef do
+    begin
+      Name    := 'OrdenacaoPromocao';
+      Fields  := 'PROMOCAO';
+      Options := [TIndexOption.ixCaseInsensitive];
+    end;
+
+    lMemTable.IndexName := 'OrdenacaoPromocao';
+
+    lMemTable.FieldDefs.Add('ID_PROMOCAO', ftInteger);
+    lMemTable.FieldDefs.Add('DATAINICIO', ftDate);
+    lMemTable.FieldDefs.Add('DATAFIM', ftDate);
+    lMemTable.FieldDefs.Add('PROMOCAO', ftString, 50);
+    lMemTable.FieldDefs.Add('VALOR_PROMOCAO', ftFloat);
+    lMemTable.FieldDefs.Add('SALDO', ftFloat);
+    lMemTable.CreateDataSet;
+
+    lPromocaoItensModel.ProdutoView := pCodProduto;
+    lPromocaoItensModel.obterLista;
+
+    for lPromocaoItensModel in lPromocaoItensModel.PromocaoItenssLista do
+    begin
+      lPromocaoModel.IDRecordView := lPromocaoItensModel.promocao_id;
+      lPromocaoModel.obterLista;
+
+      lMemTable.InsertRecord([
+                              lPromocaoItensModel.promocao_id,
+                              lPromocaoModel.PromocaosLista[0].DATAINICIO,
+                              lPromocaoModel.PromocaosLista[0].DATAFIM,
+                              lPromocaoModel.PromocaosLista[0].DESCRICAO,
+                              lPromocaoItensModel.valor_promocao,
+                              lPromocaoItensModel.saldo
+                             ]);
+    end;
+
+    lMemTable.Open;
+    Result := lMemTable;
+  finally
+    lPromocaoModel.Free;
+    lPromocaoItensModel.Free;
   end;
 end;
 
@@ -1235,6 +1310,11 @@ procedure TProdutosModel.SetCODLISTA_COD(const Value: Variant);
 begin
   FCODLISTA_COD := Value;
 end;
+procedure TProdutosModel.SetCodProdutoView(const Value: String);
+begin
+  FCodProdutoView := Value;
+end;
+
 procedure TProdutosModel.SetCOMBO(const Value: Variant);
 begin
   FCOMBO := Value;

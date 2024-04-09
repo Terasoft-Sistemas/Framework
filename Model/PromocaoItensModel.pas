@@ -29,6 +29,7 @@ type
     Fsaldo: Variant;
     Fpreco_venda_id: Variant;
     Fcliente_id: Variant;
+    FProdutoView: String;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetPromocaoItenssLista(const Value: TObjectList<TPromocaoItensModel>);
@@ -46,7 +47,10 @@ type
     procedure Setvalor_promocao(const Value: Variant);
     procedure Setcliente_id(const Value: Variant);
     procedure Setpreco_venda_id(const Value: Variant);
+    procedure SetProdutoView(const Value: String);
+
   public
+
     property id: Variant read Fid write Setid;
     property promocao_id: Variant read Fpromocao_id write Setpromocao_id;
     property produto_id: Variant read Fproduto_id write Setproduto_id;
@@ -75,7 +79,7 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
-
+    property ProdutoView: String read FProdutoView write SetProdutoView;
   end;
 
 implementation
@@ -149,6 +153,7 @@ begin
     lPromocaoItensLista.StartRecordView := FStartRecordView;
     lPromocaoItensLista.LengthPageView  := FLengthPageView;
     lPromocaoItensLista.IDRecordView    := FIDRecordView;
+    lPromocaoItensLista.ProdutoView     := FProdutoView;
 
     lPromocaoItensLista.obterLista;
 
@@ -233,6 +238,11 @@ end;
 procedure TPromocaoItensModel.Setpreco_venda_id(const Value: Variant);
 begin
   Fpreco_venda_id := Value;
+end;
+
+procedure TPromocaoItensModel.SetProdutoView(const Value: String);
+begin
+  FProdutoView := Value;
 end;
 
 procedure TPromocaoItensModel.Setproduto_id(const Value: Variant);

@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 1248
     Height = 879
-    ActivePage = TabSheet1
+    ActivePage = TabSheet7
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -960,6 +960,38 @@ object Form1: TForm1
         OnClick = Button78Click
       end
     end
+    object TabSheet7: TTabSheet
+      Caption = 'Produtos'
+      ImageIndex = 7
+      object Button91: TButton
+        Left = 191
+        Top = 31
+        Width = 182
+        Height = 42
+        Caption = 'Consulta Pre'#231'o Venda'
+        TabOrder = 0
+        OnClick = Button91Click
+      end
+      object Button90: TButton
+        Left = 3
+        Top = 31
+        Width = 182
+        Height = 42
+        Caption = 'Consulta Promocao'
+        TabOrder = 1
+        OnClick = Button90Click
+      end
+      object XDBGrid6: TXDBGrid
+        Left = 0
+        Top = 440
+        Width = 1240
+        Height = 409
+        Align = alBottom
+        DataSource = dsProdutos
+        GridStyle.VisualStyle = vsXPStyle
+        TabOrder = 2
+      end
+    end
   end
   object dsTeste2: TDataSource
     Left = 1056
@@ -988,5 +1020,9 @@ object Form1: TForm1
   object dsPedidoCompraItens: TDataSource
     Left = 1052
     Top = 408
+  end
+  object dsProdutos: TDataSource
+    Left = 1168
+    Top = 399
   end
 end

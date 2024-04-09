@@ -57,8 +57,8 @@ type
     function alterar(pProdutosModel: TProdutosModel): String;
     function excluir(pProdutosModel: TProdutosModel): String;
 
-    function ObterListaMemTable: TFDMemTable;
-
+    function ObterListaMemTable : TFDMemTable;
+    function obterPrecoVenda : TFDMemTable;
     procedure obterLista;
     procedure obterListaCatalogo;
 
@@ -352,15 +352,18 @@ begin
     lQry.Free;
   end;
 end;
+
 constructor TProdutosDao.Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
+
 destructor TProdutosDao.Destroy;
 begin
   inherited;
 end;
+
 function TProdutosDao.incluir(pProdutosModel: TProdutosModel): String;
 var
   lQry : TFDQuery;
@@ -386,6 +389,7 @@ begin
     lQry.Free;
   end;
 end;
+
 procedure TProdutosDao.adicionarSaldo(pIdProduto: String; pSaldo: Double);
 var
   lQry: TFDQuery;
@@ -405,6 +409,7 @@ begin
     lQry.Free;
   end;
 end;
+
 function TProdutosDao.alterar(pProdutosModel: TProdutosModel): String;
 var
   lQry : TFDQuery;
@@ -426,6 +431,7 @@ begin
     lQry.Free;
   end;
 end;
+
 function TProdutosDao.excluir(pProdutosModel: TProdutosModel): String;
 var
   lQry: TFDQuery;
@@ -439,6 +445,7 @@ begin
     lQry.Free;
   end;
 end;
+
 function TProdutosDao.where: String;
 var
   lSQL : String;
@@ -453,6 +460,7 @@ begin
 
   Result := lSQL;
 end;
+
 procedure TProdutosDao.obterTotalRegistros;
 var
   lQry: TFDQuery;
@@ -468,6 +476,7 @@ begin
     lQry.Free;
   end;
 end;
+
 function TProdutosDao.obterCodigobarras(pIdProduto: String): String;
 var
   lConexao: TFDConnection;
@@ -491,31 +500,37 @@ begin
     else
       lSql := 'select ';
 
-    lSQL := lSQL +
-      '       produto.nome_pro,                                                            '+SLineBreak+
-      '       produto.barras_pro,                                                          '+SLineBreak+
-      '       produto.codigo_pro,                                                          '+SLineBreak+
-      '       coalesce(produto.venda_pro, 0) venda_pro,                                    '+SLineBreak+
-      '       coalesce(produto.saldo_pro, 0) saldo_pro,                                    '+SLineBreak+
-      '       produto.customedio_pro,                                                      '+SLineBreak+
-      '       produto.nfce_cfop,                                                           '+SLineBreak+
-      '       produto.EAN_14,                                                              '+SLineBreak+
-      '       produto.REFERENCIA_NEW,                                                      '+SLineBreak+
-      '       produto.UNIDADE_PRO,                                                         '+SLineBreak+
-      '       produto.garantia_12,                                                         '+SLineBreak+
-      '       produto.garantia_24,                                                         '+SLineBreak+
-      '       produto.divizor,                                                             '+SLineBreak+
-      '       produto.MULTIPLICADOR,                                                       '+sLineBreak+
-      '       grupoproduto.nome_gru,                                                       '+SLineBreak+
-      '       subgrupoproduto.nome_sub,                                                    '+SLineBreak+
-      '       marcaproduto.nome_mar,                                                       '+SLineBreak+
-      '       produto_tipo.nome tipo_nome                                                  '+SLineBreak+
-	    '  from produto                                                                      '+SLineBreak+
-      ' inner join grupoproduto on grupoproduto.codigo_gru = produto.codigo_gru            '+SLineBreak+
-      ' inner join subgrupoproduto on subgrupoproduto.codigo_sub = produto.codigo_sub      '+SLineBreak+
-      ' inner join marcaproduto on marcaproduto.codigo_mar = produto.codigo_mar            '+SLineBreak+
-      ' left join produto_tipo on produto_tipo.id = produto.tipo_id                        '+SLineBreak+
-      ' where 1=1 ';
+      lSql := lSql +'        produto.nome_pro,                                                           '+SLineBreak+
+                    '        produto.barras_pro,                                                         '+SLineBreak+
+                    '        produto.codigo_pro,                                                         '+SLineBreak+
+                    '        coalesce(produto.venda_pro, 0) venda_pro,                                   '+SLineBreak+
+                    '        coalesce(produto.saldo_pro, 0) saldo_pro,                                   '+SLineBreak+
+                    '        produto.customedio_pro,                                                     '+SLineBreak+
+                    '        produto.nfce_cfop,                                                          '+SLineBreak+
+                    '        produto.ean_14,                                                             '+SLineBreak+
+                    '        produto.referencia_new,                                                     '+SLineBreak+
+                    '        produto.unidade_pro,                                                        '+SLineBreak+
+                    '        produto.garantia_12,                                                        '+SLineBreak+
+                    '        produto.garantia_24,                                                        '+SLineBreak+
+                    '        produto.divizor,                                                            '+SLineBreak+
+                    '        produto.multiplicador,                                                      '+SLineBreak+
+                    '        grupoproduto.nome_gru,                                                      '+SLineBreak+
+                    '        subgrupoproduto.nome_sub,                                                   '+SLineBreak+
+                    '        marcaproduto.nome_mar,                                                      '+SLineBreak+
+                    '        produto_tipo.nome tipo_nome,                                                '+SLineBreak+
+                    '        produto.margem_pro margem_pro,                                              '+SLineBreak+
+                    '        produto.aliq_credito_pis,                                                   '+SLineBreak+
+                    '        produto.aliq_credito_cofins,                                                '+SLineBreak+
+                    '        produto.cst_credito_cofins,                                                 '+SLineBreak+
+                    '        produto.cst_credito_pis,                                                    '+SLineBreak+
+                    '        produto.custoultimo_pro,                                                    '+SLineBreak+
+                    '        produto.ipi_pro                                                             '+SLineBreak+
+                    '   from produto                                                                     '+SLineBreak+
+                    '  inner join grupoproduto on grupoproduto.codigo_gru = produto.codigo_gru           '+SLineBreak+
+                    '  inner join subgrupoproduto on subgrupoproduto.codigo_sub = produto.codigo_sub     '+SLineBreak+
+                    '  inner join marcaproduto on marcaproduto.codigo_mar = produto.codigo_mar           '+SLineBreak+
+                    '   left join produto_tipo on produto_tipo.id = produto.tipo_id                      '+SLineBreak+
+                    '  where 1=1                                                                         '+SLineBreak;
 
     lSql := lSql + where;
 
@@ -526,28 +541,39 @@ begin
 
     i := 0;
     lQry.First;
+
     while not lQry.Eof do
     begin
+
       FProdutossLista.Add(TProdutosModel.Create(vIConexao));
       i := FProdutossLista.Count -1;
-      FProdutossLista[i].CODIGO_PRO      := lQry.FieldByName('CODIGO_PRO').AsString;
-      FProdutossLista[i].NOME_PRO        := lQry.FieldByName('NOME_PRO').AsString;
-      FProdutossLista[i].BARRAS_PRO      := lQry.FieldByName('BARRAS_PRO').AsString;
-      FProdutossLista[i].VENDA_PRO       := lQry.FieldByName('VENDA_PRO').AsString;
-      FProdutossLista[i].CUSTOMEDIO_PRO  := lQry.FieldByName('CUSTOMEDIO_PRO').AsString;
-      FProdutossLista[i].NFCE_CFOP       := lQry.FieldByName('NFCE_CFOP').AsString;
-      FProdutossLista[i].EAN_14          := lQry.FieldByName('EAN_14').AsString;
-      FProdutossLista[i].REFERENCIA_NEW  := lQry.FieldByName('REFERENCIA_NEW').AsString;
-      FProdutossLista[i].UNIDADE_PRO     := lQry.FieldByName('UNIDADE_PRO').AsString;
-      FProdutossLista[i].GARANTIA_12     := lQry.FieldByName('GARANTIA_12').AsString;
-      FProdutossLista[i].GARANTIA_24     := lQry.FieldByName('GARANTIA_24').AsString;
-      FProdutossLista[i].DIVIZOR         := lQry.FieldByName('DIVIZOR').AsString;
-      FProdutossLista[i].MULTIPLICADOR   := lQry.FieldByName('MULTIPLICADOR').AsString;
-      FProdutossLista[i].SALDO_PRO       := lQry.FieldByName('SALDO_PRO').AsString;
-      FProdutossLista[i].NOME_GRU        := lQry.FieldByName('NOME_GRU').AsString;
-      FProdutossLista[i].NOME_SUB        := lQry.FieldByName('NOME_SUB').AsString;
-      FProdutossLista[i].NOME_MAR        := lQry.FieldByName('NOME_MAR').AsString;
-      FProdutossLista[i].TIPO_NOME       := lQry.FieldByName('TIPO_NOME').AsString;
+
+      FProdutossLista[i].CODIGO_PRO          := lQry.FieldByName('CODIGO_PRO').AsString;
+      FProdutossLista[i].NOME_PRO            := lQry.FieldByName('NOME_PRO').AsString;
+      FProdutossLista[i].BARRAS_PRO          := lQry.FieldByName('BARRAS_PRO').AsString;
+      FProdutossLista[i].VENDA_PRO           := lQry.FieldByName('VENDA_PRO').AsString;
+      FProdutossLista[i].CUSTOMEDIO_PRO      := lQry.FieldByName('CUSTOMEDIO_PRO').AsString;
+      FProdutossLista[i].NFCE_CFOP           := lQry.FieldByName('NFCE_CFOP').AsString;
+      FProdutossLista[i].EAN_14              := lQry.FieldByName('EAN_14').AsString;
+      FProdutossLista[i].REFERENCIA_NEW      := lQry.FieldByName('REFERENCIA_NEW').AsString;
+      FProdutossLista[i].UNIDADE_PRO         := lQry.FieldByName('UNIDADE_PRO').AsString;
+      FProdutossLista[i].GARANTIA_12         := lQry.FieldByName('GARANTIA_12').AsString;
+      FProdutossLista[i].GARANTIA_24         := lQry.FieldByName('GARANTIA_24').AsString;
+      FProdutossLista[i].DIVIZOR             := lQry.FieldByName('DIVIZOR').AsString;
+      FProdutossLista[i].MULTIPLICADOR       := lQry.FieldByName('MULTIPLICADOR').AsString;
+      FProdutossLista[i].SALDO_PRO           := lQry.FieldByName('SALDO_PRO').AsString;
+      FProdutossLista[i].NOME_GRU            := lQry.FieldByName('NOME_GRU').AsString;
+      FProdutossLista[i].NOME_SUB            := lQry.FieldByName('NOME_SUB').AsString;
+      FProdutossLista[i].NOME_MAR            := lQry.FieldByName('NOME_MAR').AsString;
+      FProdutossLista[i].TIPO_NOME           := lQry.FieldByName('TIPO_NOME').AsString;
+      FProdutossLista[i].MARGEM_PRO          := lQry.FieldByName('MARGEM_PRO').AsString;
+      FProdutossLista[i].ALIQ_CREDITO_PIS    := lQry.FieldByName('ALIQ_CREDITO_PIS').AsString;
+      FProdutossLista[i].ALIQ_CREDITO_COFINS := lQry.FieldByName('ALIQ_CREDITO_COFINS').AsString;
+      FProdutossLista[i].CST_CREDITO_COFINS  := lQry.FieldByName('CST_CREDITO_COFINS').AsString;
+      FProdutossLista[i].CST_CREDITO_PIS     := lQry.FieldByName('CST_CREDITO_PIS').AsString;
+      FProdutossLista[i].CUSTOULTIMO_PRO     := lQry.FieldByName('CUSTOULTIMO_PRO').AsString;
+      FProdutossLista[i].IPI_PRO             := lQry.FieldByName('IPI_PRO').AsString;
+
       lQry.Next;
     end;
 
@@ -676,6 +702,59 @@ begin
   end;
 end;
 
+function TProdutosDao.obterPrecoVenda: TFDMemTable;
+var
+  lQry : TFDQuery;
+  lSql : String;
+  lMemTable : TFDMemTable;
+begin
+  try
+    lQry := vIConexao.CriarQuery;
+
+     lSql :=' select                                                                                                                                  '+SlineBreak+
+            '      tabela,                                                                                                                            '+SlineBreak+
+            '      valor                                                                                                                              '+SlineBreak+
+            '         from                                                                                                                            '+SlineBreak+
+            '           (select                                                                                                                       '+SlineBreak+
+            '                   t.nome tabela,                                                                                                        '+SlineBreak+
+            '                   ti.valor_venda valor                                                                                                  '+SlineBreak+
+            '              from preco_venda t                                                                                                         '+SlineBreak+
+            '             inner join preco_venda_produto ti on t.id = ti.preco_venda_id                                                               '+SlineBreak+
+            '             where coalesce(t.status,''A'') = ''A''                                                                                      '+SlineBreak+
+            '               and coalesce(t.PRODUTOS_IGNORAR, ''A'') <> ''I''                                                                          '+SlineBreak+
+            '               and ti.produto_id = '+QuotedStr(IDRecordView)+'                                                                           '+SlineBreak+
+            ' union all                                                                                                                               '+SlineBreak+
+            ' select                                                                                                                                  '+SlineBreak+
+            '      t.nome tabela,                                                                                                                     '+SlineBreak+
+            '               (select                                                                                                                   '+SlineBreak+
+            '                     case                                                                                                                '+SlineBreak+
+            '                         when t.acrescimo_desconto = ''D'' then pro.venda_pro - t.percentual / 100 * pro.venda_pro                       '+SlineBreak+
+            '                         when t.acrescimo_desconto = ''A'' then pro.venda_pro + t.percentual / 100 * pro.venda_pro                       '+SlineBreak+
+            '                     else                                                                                                                '+SlineBreak+
+            '                     case                                                                                                                '+SlineBreak+
+            '                         when t.tipo_custo = ''CUSTOULTIMO_PRO'' then pro.CUSTOULTIMO_PRO  + t.percentual / 100 * pro.CUSTOULTIMO_PRO    '+SlineBreak+
+            '                         when t.tipo_custo = ''CUSTOMEDIO_PRO'' then pro.CUSTOMEDIO_PRO  + t.percentual / 100 * pro.CUSTOMEDIO_PRO       '+SlineBreak+
+            '                         when t.tipo_custo = ''CUSTOULTIMO_PRO'' then pro.CUSTOLIQUIDO_PRO  + t.percentual / 100 * pro.CUSTOLIQUIDO_PRO  '+SlineBreak+
+            '                         when t.tipo_custo = ''CUSTOULTIMO_PRO'' then pro.CUSTODOLAR_PRO  + t.percentual / 100 * pro.CUSTODOLAR_PRO      '+SlineBreak+
+            '                         when t.tipo_custo = ''CUSTOULTIMO_PRO'' then pro.CUSTO_MANUAL  + t.percentual / 100 * pro.CUSTO_MANUAL          '+SlineBreak+
+            '                     end                                                                                                                 '+SlineBreak+
+            '                     end                                                                                                                 '+SlineBreak+
+            '                from produto pro                                                                                                         '+SlineBreak+
+            '               where pro.codigo_pro = '+QuotedStr(IDRecordView)+') valor                                                                 '+SlineBreak+
+            '                from preco_venda t                                                                                                       '+SlineBreak+
+            '               where coalesce(t.status,''A'') = ''A''                                                                                    '+SlineBreak+
+            '                 and t.PRODUTOS_IGNORAR = ''I''                                                                                          '+SlineBreak+
+            '                 and t.percentual > 0                                                                                                    '+SlineBreak+
+            '  )                                                                                                                                      '+SlineBreak;
+
+    lQry.Open(lSql);
+
+    Result := vConstrutor.atribuirRegistros(lQry);
+  finally
+    lQry.Free;
+  end;
+end;
+
 function TProdutosDao.obterSaldo(pIdProduto: String): Double;
 var
   lConexao: TFDConnection;
@@ -683,18 +762,22 @@ begin
   lConexao := vIConexao.getConnection;
   Result   := lConexao.ExecSQLScalar('select saldo_pro from produto where codigo_pro = '+ QuotedStr(pIdProduto));
 end;
+
 procedure TProdutosDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
 end;
+
 procedure TProdutosDao.SetProdutossLista(const Value: TObjectList<TProdutosModel>);
 begin
   FProdutossLista := Value;
 end;
+
 procedure TProdutosDao.SetID(const Value: Variant);
 begin
   FID := Value;
 end;
+
 procedure TProdutosDao.SetIDRecordView(const Value: String);
 begin
   FIDRecordView := Value;

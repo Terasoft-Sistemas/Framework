@@ -136,6 +136,11 @@ type
     Button86: TButton;
     Button87: TButton;
     Button88: TButton;
+    TabSheet7: TTabSheet;
+    Button91: TButton;
+    Button90: TButton;
+    XDBGrid6: TXDBGrid;
+    dsProdutos: TDataSource;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -230,6 +235,8 @@ type
     procedure Button85Click(Sender: TObject);
     procedure Button86Click(Sender: TObject);
     procedure Button87Click(Sender: TObject);
+    procedure Button90Click(Sender: TObject);
+    procedure Button91Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -259,7 +266,8 @@ uses
   ClienteModel, ContasPagarModel, ContasPagarItensModel, System.SysUtils,
   ReservaModel, DocumentoModel, AnexoModel, FluxoCaixaModel, BancoModel,
   PortadorModel, LojasModel, OSModel, SimuladorPrecoModel, GrupoModel, CNPJModel, CEPModel,
-  PedidoCompraModel, PedidoCompraItensModel, ClientesContatoModel, DescontoModel;
+  PedidoCompraModel, PedidoCompraItensModel, ClientesContatoModel, DescontoModel,
+  PromocaoModel;
 
 {$R *.dfm}
 
@@ -2419,6 +2427,7 @@ begin
     lDescontoModel.Free;
   end;
 end;
+
 procedure TForm1.Button8Click(Sender: TObject);
 var
   lWebPedidoModel : TWebPedidoModel;
@@ -2456,6 +2465,31 @@ begin
   end;
 end;
 
+procedure TForm1.Button90Click(Sender: TObject);
+var
+  lProdutosModel : TProdutosModel;
+begin
+  lProdutosModel := TProdutosModel.Create(vIConexao);
+  try
+    dsProdutos.DataSet := lProdutosModel.obterPromocao('000444');
+  finally
+    lProdutosModel.Free;
+  end;
+end;
+
+procedure TForm1.Button91Click(Sender: TObject);
+var
+  lProduto : TProdutosModel;
+begin
+  lProduto := TProdutosModel.Create(vIConexao);
+  try
+    lProduto.IDRecordView := '000005';
+    dsProdutos.DataSet    := lProduto.obterPrecoVenda;
+  finally
+    lProduto.Free;
+  end;
+end;
+
 procedure TForm1.Button9Click(Sender: TObject);
 var
   lWebPedidoItensModel  : TWebPedidoItensModel;
@@ -2463,7 +2497,6 @@ var
   i                     : Integer;
 begin
   lWebPedidoItensModel  := TWebPedidoItensModel.Create(vIConexao);
-
   try
     try
       lWebPedidoItens := InputBox('WebPedido', 'Digite o número do Web Pedido para consultar os itens:', '');

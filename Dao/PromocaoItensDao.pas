@@ -25,6 +25,7 @@ type
     FOrderView: String;
     FWhereView: String;
     FTotalRecords: Integer;
+    FProdutoView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
     procedure SetPromocaoItenssLista(const Value: TObjectList<TPromocaoItensModel>);
@@ -37,6 +38,7 @@ type
     procedure SetWhereView(const Value: String);
     function montaCondicaoQuery: String;
     procedure setParams(var pQry: TFDQuery; pPromocaoItensModel: TPromocaoItensModel);
+    procedure SetProdutoView(const Value: String);
 
   public
     constructor Create(pIConexao : IConexao);
@@ -50,6 +52,7 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
+    property ProdutoView : String read FProdutoView write SetProdutoView;
 
     function incluir(pPromocaoItensModel: TPromocaoItensModel): String;
     function alterar(pPromocaoItensModel: TPromocaoItensModel): String;
@@ -163,10 +166,16 @@ var
   lSQL : String;
 begin
   lSQL := '';
+
   if not FWhereView.IsEmpty then
     lSQL := lSQL + FWhereView;
+
   if FIDRecordView <> 0  then
     lSQL := lSQL + ' and promocaoitens.id = '+IntToStr(FIDRecordView);
+
+  if not FProdutoView.IsEmpty then
+    lSQL := lSQL + ' and promocaoitens.produto_id = '+QuotedStr(FProdutoView);
+
   Result := lSQL;
 end;
 procedure TPromocaoItensDao.obterTotalRegistros;
@@ -200,25 +209,39 @@ begin
       lSql := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
     else
       lSql := 'select ';
-    lSQL := lSQL +
-      '       promocaoitens.valor_promocao                             '+
-      '       from promocaoitens                                       '+
-      ' inner join promocao on promocaoitens.promocao_id = promocao.id '+
-      ' where 1=1                                                      ';
+
+    lSql := lSql +  '       promocaoitens.id,                                        '+sLineBreak+
+                    '       promocaoitens.promocao_id,                               '+sLineBreak+
+                    '       promocaoitens.produto_id,                                '+sLineBreak+
+                    '       promocaoitens.valor_promocao,                            '+sLineBreak+
+                    '       promocaoitens.saldo                                      '+sLineBreak+
+                    '       from promocaoitens                                       '+sLineBreak+
+                    ' inner join promocao on promocaoitens.promocao_id = promocao.id '+sLineBreak+
+                    ' where 1=1                                                      '+sLineBreak;
+
     lSql := lSql + montaCondicaoQuery;
+
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
+
     lQry.Open(lSQL);
+
     i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
       FPromocaoItenssLista.Add(TPromocaoItensModel.Create(vIConexao));
       i := FPromocaoItenssLista.Count -1;
-      FPromocaoItenssLista[i].VALOR_PROMOCAO := lQry.FieldByName('VALOR_PROMOCAO').AsString;
-      
+
+      FPromocaoItenssLista[i].ID              := lQry.FieldByName('ID').AsString;
+      FPromocaoItenssLista[i].PROMOCAO_ID     := lQry.FieldByName('PROMOCAO_ID').AsString;
+      FPromocaoItenssLista[i].PRODUTO_ID      := lQry.FieldByName('PRODUTO_ID').AsString;
+      FPromocaoItenssLista[i].VALOR_PROMOCAO  := lQry.FieldByName('VALOR_PROMOCAO').AsString;
+      FPromocaoItenssLista[i].SALDO           := lQry.FieldByName('SALDO').AsString;
+
       lQry.Next;
     end;
+
     obterTotalRegistros;
   finally
     lQry.Free;
@@ -228,6 +251,11 @@ procedure TPromocaoItensDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
 end;
+procedure TPromocaoItensDao.SetProdutoView(const Value: String);
+begin
+  FProdutoView := Value;
+end;
+
 procedure TPromocaoItensDao.SetPromocaoItenssLista(const Value: TObjectList<TPromocaoItensModel>);
 begin
   FPromocaoItenssLista := Value;

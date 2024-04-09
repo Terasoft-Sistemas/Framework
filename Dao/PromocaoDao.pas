@@ -29,6 +29,7 @@ type
     FWhereView: String;
     FTotalRecords: Integer;
     FIDRecordView: String;
+    FCodProdutoView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
     procedure SetPromocaosLista(const Value: TObjectList<TPromocaoModel>);
@@ -43,6 +44,7 @@ type
     procedure SetIDRecordView(const Value: String);
 
     procedure setParams(var pQry: TFDQuery; pPromocaoModel: TPromocaoModel);
+    procedure SetCodProdutoView(const Value: String);
 
   public
     constructor Create(pIConexao : IConexao);
@@ -57,6 +59,7 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
+    property CodProdutoView : String read FCodProdutoView write SetCodProdutoView;
 
     function incluir(pPromocaoModel: TPromocaoModel): String;
     function alterar(pPromocaoModel: TPromocaoModel): String;
@@ -198,7 +201,7 @@ begin
     lSQL := lSQL + FWhereView;
 
   if FIDRecordView <> '' then
-    lSQL := lSQL + ' and promocao.id = '+ QuotedStr(FIDRecordView);
+    lSQL := lSQL + ' and promocao.id = ' + QuotedStr(FIDRecordView);
 
   Result := lSQL;
 end;
@@ -240,10 +243,27 @@ begin
     else
       lSql := 'select ';
 
-    lSQL := lSQL +
-    '       promocao.*           '+
-	  '  from promocao             '+
-    ' where 1=1                  ';
+      lSql := lSql +'       id,                '+sLineBreak+
+                    '       descricao,         '+sLineBreak+
+                    '       data,              '+sLineBreak+
+                    '       datainicio,        '+sLineBreak+
+                    '       datafim,           '+sLineBreak+
+                    '       cliente_id,        '+sLineBreak+
+                    '       preco_venda_id,    '+sLineBreak+
+                    '       horainicio,        '+sLineBreak+
+                    '       horafim,           '+sLineBreak+
+                    '       domingo,           '+sLineBreak+
+                    '       segunda,           '+sLineBreak+
+                    '       terca,             '+sLineBreak+
+                    '       quarta,            '+sLineBreak+
+                    '       quinta,            '+sLineBreak+
+                    '       sexta,             '+sLineBreak+
+                    '       sabado,            '+sLineBreak+
+                    '       portador_id,       '+sLineBreak+
+                    '       loja,              '+sLineBreak+
+                    '       tipo_abatimento    '+sLineBreak+
+                    '  from promocao           '+sLineBreak+
+                    ' where 1=1                '+sLineBreak;
 
     lSql := lSql + where;
 
@@ -279,7 +299,6 @@ begin
       FPromocaosLista[i].PORTADOR_ID     := lQry.FieldByName('PORTADOR_ID').AsString;
       FPromocaosLista[i].LOJA            := lQry.FieldByName('LOJA').AsString;
       FPromocaosLista[i].TIPO_ABATIMENTO := lQry.FieldByName('TIPO_ABATIMENTO').AsString;
-      FPromocaosLista[i].SYSTIME         := lQry.FieldByName('SYSTIME').AsString;
 
       lQry.Next;
     end;
@@ -289,6 +308,11 @@ begin
   finally
     lQry.Free;
   end;
+end;
+
+procedure TPromocaoDao.SetCodProdutoView(const Value: String);
+begin
+  FCodProdutoView := Value;
 end;
 
 procedure TPromocaoDao.SetCountView(const Value: String);
