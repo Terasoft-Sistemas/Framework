@@ -4,6 +4,7 @@ interface
 
 uses
   Terasoft.Types,
+  Terasoft.Utils,
   System.Generics.Collections,
   Interfaces.Conexao,
   FireDAC.Comp.Client;
@@ -308,6 +309,8 @@ type
     procedure SetORIGEM_CONCILIACAO_PRODUTO(const Value: Variant);
     procedure SetLengthPageView(const Value: String);
 
+
+
   public
 
     property NUMERO_ENT                     : Variant  read FNUMERO_ENT write SetNUMERO_ENT;
@@ -450,6 +453,7 @@ type
     property CONCILIACAO_MULTIPLICADOR   :Real read FCONCILIACAO_MULTIPLICADOR write SetCONCILIACAO_MULTIPLICADOR;
 
     procedure ConciliaItemEntrada;
+    procedure getDadosProduto;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -478,7 +482,7 @@ type
 implementation
 
 uses
-  EntradaItensDao;
+  EntradaItensDao, ProdutosModel;
 
 { TEntradaItensModel }
 
@@ -498,7 +502,6 @@ begin
     FCONCILIACAO_UNIDADE_PRODUTO := lEntradaItensLista.CONCILIACAO_UNIDADE_PRODUTO;
     FCONCILIACAO_DIVISOR         := lEntradaItensLista.CONCILIACAO_DIVISOR;
     FCONCILIACAO_MULTIPLICADOR   := lEntradaItensLista.CONCILIACAO_MULTIPLICADOR;
-
 
   finally
     lEntradaItensLista.Free;
@@ -525,6 +528,38 @@ begin
   self.FID   := pID;
   self.FAcao := tacExcluir;
   Result     := self.Salvar;
+end;
+
+procedure TEntradaItensModel.getDadosProduto;
+var
+  lProdutosModel : TProdutosModel;
+begin
+  if self.FCODIGO_PRO <> '' then
+    exit;
+
+  lProdutosModel := TProdutosModel.Create(vIConexao);
+  try
+    lProdutosModel.IDRecordView := self.FCODIGO_PRO;
+    lProdutosModel.obterLista;
+
+    if lProdutosModel.TotalRecords = 0 then
+      CriaException('Erro: Produto não encontrado');
+
+    self.FIPI_ENT              := lProdutosModel.ProdutossLista[0].IPI_PRO;
+    self.FVALORUNI_ENT         := lProdutosModel.ProdutossLista[0].CUSTOULTIMO_PRO;
+    self.FVENDA_PRO            := lProdutosModel.ProdutossLista[0].VENDA_PRO;
+    self.FVENDA2_PRO           := lProdutosModel.ProdutossLista[0].VENDA_PRO;
+    self.FMARGEM_PRO           := lProdutosModel.ProdutossLista[0].MARGEM_PRO;
+    self.FALIQ_CREDITO_PIS     := lProdutosModel.ProdutossLista[0].ALIQ_CREDITO_PIS;
+    self.FALIQ_CREDITO_COFINS  := lProdutosModel.ProdutossLista[0].ALIQ_CREDITO_COFINS;
+    self.FCST_CREDITO_COFINS   := lProdutosModel.ProdutossLista[0].CST_CREDITO_COFINS;
+    self.FCST_CREDITO_PIS      := lProdutosModel.ProdutossLista[0].CST_CREDITO_PIS;
+    self.FCUSTOMEDIO_ANTERIOR  := lProdutosModel.ProdutossLista[0].CUSTOMEDIO_PRO;
+    self.FCUSTOULTIMO_ANTERIOR := lProdutosModel.ProdutossLista[0].CUSTOULTIMO_PRO;
+
+  finally
+    lProdutosModel.Free;
+  end;
 end;
 
 function TEntradaItensModel.Incluir: String;
@@ -690,6 +725,7 @@ end;
 procedure TEntradaItensModel.SetCODIGO_PRO(const Value: Variant);
 begin
   FCODIGO_PRO := Value;
+  getDadosProduto;
 end;
 
 procedure TEntradaItensModel.SetCOFINS(const Value: Variant);
