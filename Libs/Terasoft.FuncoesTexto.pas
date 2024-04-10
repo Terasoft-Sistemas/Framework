@@ -34,6 +34,7 @@ uses
   procedure converteDateRangePicker(pData: String; out Data1, Data2: TDate);
   function ValidaCPF(num: string): boolean;
   function ValidaCNPJ(num: string): boolean;
+  function retiraPonto(pValor: string): String;
 
 implementation
 uses
@@ -248,6 +249,14 @@ begin
   except
     ValidaCNPJ := false;
   end;
+end;
+
+function retiraPonto(pValor : string): String;
+var
+ l: string ;
+begin
+  l := StringReplace(pValor,'.','',[rfReplaceAll]);
+  Result := l;
 end;
 
 Function transformaDataFireBird(data:Variant; separador:String = '-'):Variant;
