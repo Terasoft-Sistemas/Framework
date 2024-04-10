@@ -313,6 +313,7 @@ type
     FNOME_GRU: Variant;
     FNOME_MAR: Variant;
     FCodProdutoView: String;
+    FNOME_FOR: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetProdutossLista(const Value: TObjectList<TProdutosModel>);
@@ -601,6 +602,7 @@ type
     procedure SetNOME_SUB(const Value: Variant);
     procedure SetTIPO_NOME(const Value: Variant);
     procedure SetCodProdutoView(const Value: String);
+    procedure SetNOME_FOR(const Value: Variant);
 
   public
     property UUID: Variant read FUUID write SetUUID;
@@ -878,6 +880,7 @@ type
     property WEB_TITULO : Variant read FWEB_TITULO write SetWEB_TITULO;
     property NF_FCI : Variant read FNF_FCI write SetNF_FCI;
     property NOME_GRU : Variant read FNOME_GRU write SetNOME_GRU;
+    property NOME_FOR : Variant read FNOME_FOR write SetNOME_FOR;
     property NOME_SUB : Variant read FNOME_SUB write SetNOME_SUB;
     property NOME_MAR : Variant read FNOME_MAR write SetNOME_MAR;
     property TIPO_NOME : Variant read FTIPO_NOME write SetTIPO_NOME;
@@ -1928,6 +1931,11 @@ end;
 procedure TProdutosModel.SetNF_PMC_ANVISA(const Value: Variant);
 begin
   FNF_PMC_ANVISA := Value;
+end;
+
+procedure TProdutosModel.SetNOME_FOR(const Value: Variant);
+begin
+  FNOME_FOR := Value;
 end;
 
 procedure TProdutosModel.SetNOME_GRU(const Value: Variant);
