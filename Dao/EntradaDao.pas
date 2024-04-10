@@ -329,7 +329,12 @@ begin
             '            total_fcp_st,                                                                                    '+SLineBreak+
             '            total_outros,                                                                                    '+SLineBreak+
             '            total_frete,                                                                                     '+SLineBreak+
-            '            total_desconto / total_produtos * 100 percentual_desconto,                                       '+SLineBreak+
+            '            case                                                                                             '+SLineBreak+
+            '              when total_produtos > 0 then                                                                   '+SLineBreak+
+            '                total_desconto / total_produtos * 100                                                        '+SLineBreak+
+            '              else                                                                                           '+SLineBreak+
+            '                0                                                                                            '+SLineBreak+
+            '            end percentual_desconto,                                                                         '+SLineBreak+
             '            total_desconto,                                                                                  '+SLineBreak+
             '            total_produtos                                                                                   '+SLineBreak+
             '              + total_valor_st                                                                               '+SLineBreak+
