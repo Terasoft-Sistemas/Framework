@@ -769,19 +769,19 @@ begin
     begin
       lFornecedorModel.TIPO_FOR          := 'J';
       lFornecedorModel.STATUS            := '1';
-      lFornecedorModel.FANTASIA_FOR      := IIF(xFant = '',xNome, xFant);
-      lFornecedorModel.RAZAO_FOR         := xNome;
+      lFornecedorModel.FANTASIA_FOR      := UpperCase(copy(IIF(xFant = '',xNome, xFant),1,40));
+      lFornecedorModel.RAZAO_FOR         := UpperCase(copy(xNome,1,40));
       lFornecedorModel.CNPJ_CPF_FOR      := CNPJCPF;
       lFornecedorModel.INSCRICAO_RG_FOR  := IE;
       lFornecedorModel.CEP_FOR           := EnderEmit.CEP.ToString;
-      lFornecedorModel.ENDERECO_FOR      := EnderEmit.xLgr;
-      lFornecedorModel.NUMERO_END        := EnderEmit.cMun.ToString;
-      lFornecedorModel.COMPLEMENTO       := EnderEmit.xCpl;
-      lFornecedorModel.BAIRRO_FOR        := EnderEmit.xBairro;
-      lFornecedorModel.CIDADE_FOR        := EnderEmit.xMun;
-      lFornecedorModel.UF_FOR            := EnderEmit.UF;
-      lFornecedorModel.TELEFONE_FOR      := EnderEmit.fone;
+      lFornecedorModel.ENDERECO_FOR      := UpperCase(EnderEmit.xLgr);
+      lFornecedorModel.NUMERO_END        := EnderEmit.nro;
       lFornecedorModel.COD_MUNICIPIO     := EnderEmit.cMun.ToString;
+      lFornecedorModel.COMPLEMENTO       := UpperCase(EnderEmit.xCpl);
+      lFornecedorModel.BAIRRO_FOR        := UpperCase(EnderEmit.xBairro);
+      lFornecedorModel.CIDADE_FOR        := UpperCase(EnderEmit.xMun);
+      lFornecedorModel.UF_FOR            := UpperCase(EnderEmit.UF);
+      lFornecedorModel.TELEFONE_FOR      := EnderEmit.fone;
       lFornecedorModel.OBSERVACAO_FOR    := 'CADASTRO PELA ENTRADA DE FORNECEDOR';
     end;
 
