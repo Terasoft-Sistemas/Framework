@@ -454,6 +454,7 @@ begin
             '        PRODUTO_CODIGO_PRO,                                                                                                          '+SLineBreak+
             '        PRODUTO_NOME_PRO,                                                                                                            '+SLineBreak+
             '        PRODUTO_UNIDADE_PRO,                                                                                                         '+SLineBreak+
+            '        PRODUTO_BARRAS_PRO,                                                                                                          '+SLineBreak+
             '        CFOP,                                                                                                                        '+SLineBreak+
             '        CFOP_ID,                                                                                                                     '+SLineBreak+
             '        CFOP_CFOP,                                                                                                                   '+SLineBreak+
@@ -512,6 +513,7 @@ begin
             '                        produto_codigo_pro,                                                                                          '+SLineBreak+
             '                        produto_nome_pro,                                                                                            '+SLineBreak+
             '                        produto_unidade_pro,                                                                                         '+SLineBreak+
+            '                        produto_barras_pro,                                                                                          '+SLineBreak+
             '                        cfop,                                                                                                        '+SLineBreak+
             '                        cfop_id,                                                                                                     '+SLineBreak+
             '                        cfop_cfop,                                                                                                   '+SLineBreak+
@@ -585,6 +587,7 @@ begin
             '                                            entradaitens.codigo_pro produto_codigo_pro,                                              '+SLineBreak+
             '                                            produto.nome_pro produto_nome_pro,                                                       '+SLineBreak+
             '                                            produto.unidade_pro produto_unidade_pro,                                                 '+SLineBreak+
+            '                                            produto.barras_pro produto_barras_pro,                                                   '+SLineBreak+
             '                                            entradaitens.cfop,                                                                       '+SLineBreak+
             '                                            entradaitens.cfop_id,                                                                    '+SLineBreak+
             '                                            cfop.cfop cfop_cfop,                                                                     '+SLineBreak+

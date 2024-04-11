@@ -507,8 +507,18 @@ begin
                     '        coalesce(produto.saldo_pro, 0) saldo_pro,                                   '+SLineBreak+
                     '        produto.customedio_pro,                                                     '+SLineBreak+
                     '        produto.nfce_cfop,                                                          '+SLineBreak+
+                    '        produto.fornecedor_codigo,                                                  '+SLineBreak+
+                    '        produto.codigo_fornecedor,                                                  '+SLineBreak+
+                    '        produto.multiplos,                                                          '+SLineBreak+
+                    '        produto.largura_m,                                                          '+SLineBreak+
+                    '        produto.altura_m,                                                           '+SLineBreak+
+                    '        produto.profundidade_m,                                                     '+SLineBreak+
+                    '        produto.peso_liquido,                                                       '+SLineBreak+
+                    '        produto.peso_pro,                                                           '+SLineBreak+
+                    '        produto.localizacao,                                                        '+SLineBreak+
+                    '        produto.aplicacao_pro,                                                      '+SLineBreak+
                     '        produto.ean_14,                                                             '+SLineBreak+
-                    '        produto.referencia_new,                                                     '+SLineBreak+
+                    '        produto.CODLISTA_COD,                                                       '+SLineBreak+
                     '        produto.unidade_pro,                                                        '+SLineBreak+
                     '        produto.garantia_12,                                                        '+SLineBreak+
                     '        produto.garantia_24,                                                        '+SLineBreak+
@@ -556,8 +566,18 @@ begin
       FProdutossLista[i].VENDA_PRO           := lQry.FieldByName('VENDA_PRO').AsString;
       FProdutossLista[i].CUSTOMEDIO_PRO      := lQry.FieldByName('CUSTOMEDIO_PRO').AsString;
       FProdutossLista[i].NFCE_CFOP           := lQry.FieldByName('NFCE_CFOP').AsString;
+      FProdutossLista[i].FORNECEDOR_CODIGO   := lQry.FieldByName('FORNECEDOR_CODIGO').AsString;
+      FProdutossLista[i].CODIGO_FORNECEDOR   := lQry.FieldByName('CODIGO_FORNECEDOR').AsString;
+      FProdutossLista[i].MULTIPLOS           := lQry.FieldByName('MULTIPLOS').AsString;
+      FProdutossLista[i].LARGURA_M           := lQry.FieldByName('LARGURA_M').AsString;
+      FProdutossLista[i].ALTURA_M            := lQry.FieldByName('ALTURA_M').AsString;
+      FProdutossLista[i].PROFUNDIDADE_M      := lQry.FieldByName('PROFUNDIDADE_M').AsString;
+      FProdutossLista[i].PESO_LIQUIDO        := lQry.FieldByName('PESO_LIQUIDO').AsString;
+      FProdutossLista[i].PESO_PRO            := lQry.FieldByName('PESO_PRO').AsString;
+      FProdutossLista[i].APLICACAO_PRO       := lQry.FieldByName('APLICACAO_PRO').AsString;
       FProdutossLista[i].EAN_14              := lQry.FieldByName('EAN_14').AsString;
-      FProdutossLista[i].REFERENCIA_NEW      := lQry.FieldByName('REFERENCIA_NEW').AsString;
+      FProdutossLista[i].LOCALIZACAO         := lQry.FieldByName('LOCALIZACAO').AsString;
+      FProdutossLista[i].CODLISTA_COD        := lQry.FieldByName('CODLISTA_COD').AsString;
       FProdutossLista[i].UNIDADE_PRO         := lQry.FieldByName('UNIDADE_PRO').AsString;
       FProdutossLista[i].GARANTIA_12         := lQry.FieldByName('GARANTIA_12').AsString;
       FProdutossLista[i].GARANTIA_24         := lQry.FieldByName('GARANTIA_24').AsString;
