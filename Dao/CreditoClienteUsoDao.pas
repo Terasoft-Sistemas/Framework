@@ -110,6 +110,7 @@ end;
 constructor TCreditoClienteUsoDao.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TCreditoClienteUsoDao.Destroy;
@@ -130,7 +131,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    ACreditoClienteUsoModel.ID := vIConexao.Generetor('GEN_CREDITO_CLIENTE_USO');
+    ACreditoClienteUsoModel.ID := vIConexao.Generetor('GEN_CREDITO_CLIENTE_USO', true);
     setParams(lQry, ACreditoClienteUsoModel);
     lQry.Open;
 
