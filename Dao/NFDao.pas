@@ -343,6 +343,7 @@ begin
     '       nf.total_nf,                                                  '+#13+
     '       nf.total_nf,                                                  '+#13+
     '       nf.status_nf,                                                 '+#13+
+    '       nf.protocolo_nfe,                                             '+#13+
 
     '       clientes.razao_cli razao_social_cliente,                      '+#13+
     '       clientes.fantasia_cli cliente_nome_cliente,                   '+#13+
@@ -377,6 +378,7 @@ begin
       FNFLista[i].NOME_XML                    := lQry.FieldByName('NOME_XML').AsString;
       FNFLista[i].TOTAL_NF                    := lQry.FieldByName('TOTAL_NF').AsString;
       FNFLista[i].STATUS_NF                   := lQry.FieldByName('STATUS_NF').AsString;
+      FNFLista[i].PROTOCOLO_NFE               := lQry.FieldByName('PROTOCOLO_NFE').AsString;
 
       lQry.Next;
     end;

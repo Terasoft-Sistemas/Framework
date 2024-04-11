@@ -64,7 +64,8 @@ end;
 
 constructor TEventosNFeDao.Create(pIConexao : IConexao);
 begin
-  vIConexao := pIConexao;
+  vIConexao   := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TEventosNFeDao.Destroy;
@@ -99,10 +100,18 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSQL := vConstrutor.gerarInsert('EVENTOS_NFE','ID');
+    lSQL := vConstrutor.gerarInsert('EVENTOS_NFE','ID', true);
+    lQry.SQL.Add(lSQL);
+    AEventosNFeModel.ID := vIConexao.Generetor('GEN_EVENTOS');
+    setParams(lQry, AEventosNFeModel);
 
+    vConstrutor.getSQL(lQry);
+
+    lQry.Open;
+
+    Result := lQry.FieldByName('ID').AsString <> '';
   finally
-
+    lQry.free;
   end;
 end;
 

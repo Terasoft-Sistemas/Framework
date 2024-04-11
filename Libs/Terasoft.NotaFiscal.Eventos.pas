@@ -33,7 +33,9 @@ uses
   Terasoft.Configuracoes,
   EventosNFeControl,
   Terasoft.Types,
-  NFControl;
+  Terasoft.Mensagens,
+  NFControl,
+  NFModel;
 
 type
   TEventosNotaFiscal = class
@@ -52,13 +54,16 @@ type
     destructor Destroy; override;
 
     function cancelar(idNotaFiscal, justificativa: String): TStringList;
-    function inutilizar(idNotaFiscal: String): TStringList;
+    function inutilizar(idNotaFiscal, justificativa: String): TStringList;
     function enviarCartaCorrecao(idNotaFiscal: String): TStringList;
     function consultarPelaChave(pChave: String): TStringList;
 
   end;
 
 implementation
+
+uses
+  VariaveisGlobais;
 
 { TEventosNotaFiscal }
 
@@ -76,8 +81,8 @@ begin
     SSLLib        := libCustom;
     SSLCryptLib   := cryWinCrypt;
     SSLHttpLib    := httpWinINet;
-    SSLXmlSignLib := xsLibXml2;
-
+    SSLXmlSignLib := xsMsXml;
+//    SSLXmlSignLib := xsLibXml2;
     Salvar           := True;
     ExibirErroSchema := true;
     RetirarAcentos   := True;
@@ -140,6 +145,7 @@ end;
 constructor TEventosNotaFiscal.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
+  vConfiguracoesNotaFiscal := TConfiguracoesNotaFiscal.Create(vIConexao);
   ACBrNFe := TACBrNFe.Create(nil);
   configuraComponenteNFe;
 end;
@@ -249,8 +255,65 @@ begin
     end;
 end;
 
-function TEventosNotaFiscal.inutilizar(idNotaFiscal: String): TStringList;
+function TEventosNotaFiscal.inutilizar(idNotaFiscal, justificativa: String): TStringList;
+var
+  lEventosNFeControl: TEventosNFeControl;
+  lAno: String;
+  lRetorno: TStringList;
+  lNFContol: TNFContol;
 begin
+    lEventosNFeControl := TEventosNFeControl.Create(vIConexao);
+    lNFContol := TNFContol.Create(idNotaFiscal, vIConexao);
+    lRetorno  := TStringList.Create;
+    try
+
+      ACBrNFe.NotasFiscais.Clear;
+      ACBrNFe.NotasFiscais.LoadFromString(lNFContol.NFModel.XML_NFE);
+
+      lAno := FormatDateTime('yyyy', Date);
+
+      ACBrNFe.WebServices.Inutiliza(xEmpresaCNPJ, Justificativa, StrToInt(lAno), lNFContol.NFModel.MODELO, lNFContol.NFModel.SERIE_NF, StrToInt(idNotaFiscal), StrToInt(idNotaFiscal));
+
+      if ACBrNFe.WebServices.Inutilizacao.cStat = 102 then begin
+
+        lEventosNFeControl.EventosNFeModel.Acao              := Terasoft.Types.tacIncluir;
+        lEventosNFeControl.EventosNFeModel.ID_NFE            := idNotaFiscal;
+        lEventosNFeControl.EventosNFeModel.DATAHORA          := Now;
+        lEventosNFeControl.EventosNFeModel.EVENTO            := 2;
+        lEventosNFeControl.EventosNFeModel.ID_EVENTO         := '110111';
+        lEventosNFeControl.EventosNFeModel.CHNFE             := lNFContol.NFModel.ID_NF3;
+        lEventosNFeControl.EventosNFeModel.TPEVENTO          := '110111';
+        lEventosNFeControl.EventosNFeModel.NSEQEVENTO        := '';
+        lEventosNFeControl.EventosNFeModel.VEREVENTO         := '1.00';
+        lEventosNFeControl.EventosNFeModel.DESCEVENTO        := 'Inutilização';
+        lEventosNFeControl.EventosNFeModel.XML               := ACBrNFe.WebServices.Inutilizacao.RetornoWS;
+        lEventosNFeControl.EventosNFeModel.STATUS            := '0';
+        lEventosNFeControl.EventosNFeModel.PROTOCOLO_RETORNO := ACBrNFe.WebServices.Inutilizacao.Protocolo;
+        lEventosNFeControl.EventosNFeModel.RETORNO_SEFAZ     := 'Evento registrado e vinculado a NF-e';
+        lEventosNFeControl.EventosNFeModel.JUSTIFICATIVA     := Justificativa;
+        lEventosNFeControl.EventosNFeModel.XCORRECAO         := '';
+        lEventosNFeControl.Salvar;
+
+        lNFContol.NFModel.Acao              := Terasoft.Types.tacAlterar;
+        lNFContol.NFModel.DATA_CANCELAMENTO := now;
+        lNFContol.NFModel.STATUS_NF         := 'X';
+        lNFContol.NFModel.NOME_XML          := 'Inutilização de Número homologado';
+        lNFContol.NFModel.NUMERO_NF         := idNotaFiscal;
+        lNFContol.Salvar;
+
+        lRetorno.Add('Inutilização de Número homologado');
+      end else
+      lRetorno.Add(ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.xMotivo);
+
+      lRetorno.Add(IntToStr(ACBrNFe.WebServices.Inutilizacao.cStat));
+      lRetorno.Add(ACBrNFe.WebServices.Inutilizacao.Protocolo);
+
+      Result := lRetorno;
+
+    finally
+     lEventosNFeControl.Free;
+     lNFContol.Free;
+    end;
 
 end;
 

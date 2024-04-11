@@ -155,6 +155,7 @@ var
  lQry: TFDQuery;
 begin
   try
+    try
     lQry := vIConexao.CriarQuery;
     lSQL :=
     ' select                                                              '+#13+
@@ -206,6 +207,10 @@ begin
     InfoPgto.indPag := ipPrazo;
     InfoPgto.tPag   := vConfiguracoesNotaFiscal.tPag(lQry.FieldByName('tPag').AsString);
     InfoPgto.vPag   := lQry.FieldByName('vOrig').AsFloat;;
+    except
+    on E:Exception do
+       CriaException('Erro: ' + E.Message);
+    end;
   finally
     lSQL := '';
     lQry.Free;
@@ -217,6 +222,7 @@ var
  lQry: TFDQuery;
 begin
   try
+    try
     lQry := vIConexao.CriarQuery;
     lSQL :=
     ' select                                                       '+#13+
@@ -287,6 +293,10 @@ begin
      if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) <> moNFCe then
        IEST := vConfiguracoesNotaFiscal.emitIEST(NotaF.NFe.Dest.EnderDest.UF);
     end
+    except
+    on E:Exception do
+       CriaException('Erro: ' + E.Message);
+    end;
   finally
     lSQL := '';
     lQry.Free;
@@ -335,6 +345,7 @@ var
  lXML: TStringList;
 begin
   try
+    try
     lQry := vIConexao.CriarQuery;
     lXML := TStringList.Create;
     lSQL :=
@@ -351,6 +362,10 @@ begin
     lXML.Text := lQry.FieldByName('xml').AsString;
     lXML.SaveToFile(pPath+'\'+lQry.FieldByName('chave').AsString+'.xml');
     Result := lQry.FieldByName('chave').AsString+'.xml';
+    except
+    on E:Exception do
+       CriaException('Erro: ' + E.Message);
+    end;
   finally
     lSQL := '';
     lQry.Free;
@@ -362,6 +377,7 @@ var
  lQry: TFDQuery;
 begin
   try
+    try
     lQry := vIConexao.CriarQuery;
     lSQL :=
     ' select                                    '+#13+
@@ -426,6 +442,10 @@ begin
       NotaF.NFe.infIntermed.CNPJ := lQry.FieldByName('CNPJ').AsString;
       NotaF.NFe.infIntermed.idCadIntTran := lQry.FieldByName('idCadIntTran').AsString;
     end;
+    except
+    on E:Exception do
+       CriaException('Erro: ' + E.Message);
+    end;
   finally
     lSQL := '';
     lQry.Free;
@@ -442,6 +462,7 @@ begin
    if (FPathPDF = '') and (FgerarPDF = True) then
      CriaException('Para gerar PDF path deve ser informado.');
   try
+    try
     lQry := vIConexao.CriarQuery;
     lSQL :=
     ' select               '+#13+
@@ -497,6 +518,10 @@ begin
     end;
 
     Result := lQry.FieldByName('id_nf3').AsString;
+    except
+    on E:Exception do
+       CriaException('Erro: ' + E.Message);
+    end;
   finally
     lSQL := '';
     lQry.Free;
@@ -508,6 +533,7 @@ var
  lQry: TFDQuery;
 begin
   try
+    try
     lQry := vIConexao.CriarQuery;
     lSQL :=
     ' select                     '+#13+
@@ -525,6 +551,10 @@ begin
       infCpl     :=  lQry.FieldByName('infCpl').AsString;
       infAdFisco :=  lQry.FieldByName('infAdFisco').AsString;
     end;
+    except
+    on E:Exception do
+       CriaException('Erro: ' + E.Message);
+    end;
   finally
     lSQL := '';
     lQry.Free;
@@ -536,6 +566,7 @@ var
  lQry: TFDQuery;
 begin
   try
+    try
     lQry := vIConexao.CriarQuery;
     lSQL :=
     ' select                                          '+#13+
@@ -778,6 +809,10 @@ begin
       end;
       lQry.Next;
     end;
+    except
+    on E:Exception do
+       CriaException('Erro: ' + E.Message);
+    end;
   finally
     lSQL := '';
     lQry.Free;
@@ -848,6 +883,7 @@ var
  lQry: TFDQuery;
 begin
   try
+    try
      lQry := vIConexao.CriarQuery;
      lSQL :=
     ' select                                                     '+#13+
@@ -915,6 +951,10 @@ begin
         vBCRetPrev   := lQry.FieldByName('vBCRetPrev').Value;
         vRetPrev     := lQry.FieldByName('vRetPrev').Value;
       end;
+    except
+    on E:Exception do
+       CriaException('Erro: ' + E.Message);
+    end;
   finally
     lSQL := '';
     lQry.Free;
@@ -926,6 +966,7 @@ var
  lQry: TFDQuery;
 begin
   try
+    try
      lQry := vIConexao.CriarQuery;
      lSQL :=
     ' select                                                         '+#13+
@@ -971,6 +1012,10 @@ begin
       Volume.pesoB :=  lQry.FieldByName('pesoB').AsFloat;
       NotaF.NFe.exporta.UFembarq   := lQry.FieldByName('UFembarq').AsString;
       NotaF.NFe.exporta.xLocEmbarq := lQry.FieldByName('xLocEmbarq').AsString;
+    except
+    on E:Exception do
+       CriaException('Erro: ' + E.Message);
+    end;
   finally
     lSQL := '';
     lQry.Free;
@@ -1035,81 +1080,82 @@ var
 begin
 
  try
-    lRetorno  := TStringList.Create;
-    lNFContol := TNFContol.Create(idNotaFiscal, vIConexao);
-    loteEnvio := idNotaFiscal.ToInteger;
-    lPedidoVendaModel := TPedidoVendaModel.Create(vIConexao);
+  lRetorno  := TStringList.Create;
+  lNFContol := TNFContol.Create(idNotaFiscal, vIConexao);
+  loteEnvio := idNotaFiscal.ToInteger;
+  lPedidoVendaModel := TPedidoVendaModel.Create(vIConexao);
 
-    try
-      processar(idNotaFiscal);
-      ACBrNFe.NotasFiscais.GerarNFe;
-      ACBrNFe.NotasFiscais.Assinar;
+  try
+    processar(idNotaFiscal);
+    ACBrNFe.NotasFiscais.GerarNFe;
+    ACBrNFe.NotasFiscais.Assinar;
 
-      if ACBrNFe.NotasFiscais.Items[0].NFe.Ide.modelo = 55 then
-      begin
-        try
-          ACBrNFe.Enviar(loteEnvio, false);
-        finally
-          lchavenfe  := ACBrNFe.NotasFiscais[0].NFe.procNFe.chNFe;
-          lprotocolo := ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.nProt;
-          lrecibo    := ACBrNFe.WebServices.Enviar.Recibo;
-          lxMotivo   := ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.xMotivo;
-          lCSTAT     := IntToStr(ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.cStat);
-        end;
-      end
-      else
-      begin
-        try
-          ACBrNFe.Enviar(loteEnvio, false, True);
-        finally
-          lchavenfe  := ACBrNFe.NotasFiscais[0].NFe.procNFe.chNFe;
-          lprotocolo := ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.nProt;
-          lrecibo    := ACBrNFe.WebServices.Enviar.Recibo;
-          lxMotivo   := ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.xMotivo;
-          lCSTAT     := IntToStr(ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.cStat);
-        end;
+    if ACBrNFe.NotasFiscais.Items[0].NFe.Ide.modelo = 55 then
+    begin
+      try
+        ACBrNFe.Enviar(loteEnvio, false);
+      finally
+        lchavenfe  := ACBrNFe.NotasFiscais[0].NFe.procNFe.chNFe;
+        lprotocolo := ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.nProt;
+        lrecibo    := ACBrNFe.WebServices.Enviar.Recibo;
+        lxMotivo   := ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.xMotivo;
+        lCSTAT     := IntToStr(ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.cStat);
       end;
-
-      if lCSTAT <> '100' then
-        lxMotivo := 'NOTA NAO AUTORIZADA: ' + lxMotivo;
-
-      lNFContol.NFModel.Acao          := Terasoft.Types.tacAlterar;
-      lNFContol.NFModel.NOME_XML      := copy(lxMotivo, 1, 500);
-      lNFContol.NFModel.ID_NF3        := lchavenfe;
-      lNFContol.NFModel.PROTOCOLO_NFE := lprotocolo;
-      lNFContol.NFModel.RECIBO_NFE    := lrecibo;
-      lNFContol.NFModel.XML_NFE       := ACBrNFe.NotasFiscais.Items[0].GerarXML;
-      lNFContol.NFModel.NUMERO_NF     := idNotaFiscal;
-      lNFContol.Salvar;
-
-      if lNFContol.NFModel.NUMERO_PED <> '' then
-      begin
-        lPedidoVendaModel := lPedidoVendaModel.carregaClasse(lNFContol.NFModel.NUMERO_PED);
-        lPedidoVendaModel.faturado(lNFContol.NFModel.NUMERO_ECF);
+    end
+    else
+    begin
+      try
+        ACBrNFe.Enviar(loteEnvio, false, True);
+      finally
+        lchavenfe  := ACBrNFe.NotasFiscais[0].NFe.procNFe.chNFe;
+        lprotocolo := ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.nProt;
+        lrecibo    := ACBrNFe.WebServices.Enviar.Recibo;
+        lxMotivo   := ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.xMotivo;
+        lCSTAT     := IntToStr(ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.cStat);
       end;
-
-      lRetorno.Add(lCSTAT);
-      lRetorno.Add(lxMotivo);
-      lRetorno.Add(lrecibo);
-      lRetorno.Add(lprotocolo);
-      Result := lRetorno;
-
-    except on E: Exception do
-     begin
-      lNFContol.NFModel.Acao       := Terasoft.Types.tacAlterar;
-      lNFContol.NFModel.NOME_XML   := copy('NOTA NAO AUTORIZADA: '+e.Message, 1, 500);
-      lNFContol.NFModel.XML_NFE    := ACBrNFe.NotasFiscais.Items[0].GerarXML;
-      lNFContol.NFModel.NUMERO_NF  := idNotaFiscal;
-      lNFContol.Salvar;
-
-      lRetorno.Add(lCSTAT);
-      lRetorno.Add(e.Message);
-      lRetorno.Add(lrecibo);
-      lRetorno.Add(lprotocolo);
-
-      Result := lRetorno;
-     end;
     end;
+
+    if lCSTAT <> '100' then
+      lxMotivo := 'NOTA NAO AUTORIZADA: ' + lxMotivo;
+
+    lNFContol.NFModel.Acao          := Terasoft.Types.tacAlterar;
+    lNFContol.NFModel.NOME_XML      := copy(lxMotivo, 1, 500);
+    lNFContol.NFModel.ID_NF3        := lchavenfe;
+    lNFContol.NFModel.PROTOCOLO_NFE := lprotocolo;
+    lNFContol.NFModel.RECIBO_NFE    := lrecibo;
+    lNFContol.NFModel.XML_NFE       := ACBrNFe.NotasFiscais.Items[0].GerarXML;
+    lNFContol.NFModel.NUMERO_NF     := idNotaFiscal;
+    lNFContol.Salvar;
+
+    if lNFContol.NFModel.NUMERO_PED <> '' then
+    begin
+      lPedidoVendaModel := lPedidoVendaModel.carregaClasse(lNFContol.NFModel.NUMERO_PED);
+      lPedidoVendaModel.faturado(lNFContol.NFModel.NUMERO_ECF);
+    end;
+
+    lRetorno.Add(lCSTAT);
+    lRetorno.Add(lxMotivo);
+    lRetorno.Add(lrecibo);
+    lRetorno.Add(lprotocolo);
+    Result := lRetorno;
+
+  except on E: Exception do
+   begin
+    lNFContol.NFModel.Acao       := Terasoft.Types.tacAlterar;
+    lNFContol.NFModel.NOME_XML   := copy('NOTA NAO AUTORIZADA: '+e.Message, 1, 500);
+    lNFContol.NFModel.XML_NFE    := ACBrNFe.NotasFiscais.Items[0].GerarXML;
+    lNFContol.NFModel.NUMERO_NF  := idNotaFiscal;
+    lNFContol.Salvar;
+
+    lRetorno.Add(lCSTAT);
+    lRetorno.Add(e.Message);
+    lRetorno.Add(lrecibo);
+    lRetorno.Add(lprotocolo);
+
+    Result := lRetorno;
+   end;
+  end;
+
  finally
     lQry.Free;
     lNFContol.Free;
