@@ -511,6 +511,7 @@ begin
       FPedidoItenssLista[i].IPI_CST                      := lQry.FieldByName('IPI_CST').AsString;
       FPedidoItenssLista[i].CSOSN                        := lQry.FieldByName('CSOSN').AsString;
       FPedidoItenssLista[i].CFOP                         := lQry.FieldByName('CFOP').AsString;
+      FPedidoItenssLista[i].VDESC                        := lQry.FieldByName('VDESC').AsString;
       lQry.Next;
     end;
     obterTotalRegistros;
@@ -536,6 +537,7 @@ begin
     '   i.quantidade_ped,                                '+#13+
     '   i.valorunitario_ped,                             '+#13+
     '   i.desconto_ped,                                  '+#13+
+    '   i.vdesc,                                         '+#13+
     '   i.item,                                          '+#13+
     '   i.valorunitario_ped * i.quantidade_ped total     '+#13+
     ' from                                               '+#13+
@@ -559,6 +561,7 @@ begin
       FPedidoItenssLista[i].QUANTIDADE_PED    := lQry.FieldByName('QUANTIDADE_PED').AsFloat;
       FPedidoItenssLista[i].VALORUNITARIO_PED := lQry.FieldByName('VALORUNITARIO_PED').AsFloat;
       FPedidoItenssLista[i].DESCONTO_PED      := lQry.FieldByName('DESCONTO_PED').AsFloat;
+      FPedidoItenssLista[i].VDESC             := lQry.FieldByName('VDESC').AsFloat;
       FPedidoItenssLista[i].ITEM              := lQry.FieldByName('ITEM').AsFloat;
       FPedidoItenssLista[i].TOTAL             := lQry.FieldByName('TOTAL').AsFloat;
       lQry.Next;
