@@ -68,7 +68,7 @@ type
     function alterar(pTransportadoraModel: TTransportadoraModel): String;
     function excluir(pTransportadoraModel: TTransportadoraModel): String;
 
-    function carregaClasse(pID : String): TTransportadoraModel;
+    function carregaClasse(pCodigo : String): TTransportadoraModel;
 
     function obterLista: TFDMemTable;
 
@@ -97,7 +97,7 @@ begin
     setParams(lQry, pTransportadoraModel);
     lQry.ExecSQL;
 
-    Result := pTransportadoraModel.ID;
+    Result := pTransportadoraModel.CODIGO_TRA;
 
   finally
     lSQL := '';
@@ -105,7 +105,7 @@ begin
   end;
 end;
 
-function TTransportadoraDao.carregaClasse(pID: String): TTransportadoraModel;
+function TTransportadoraDao.carregaClasse(pCodigo: String): TTransportadoraModel;
 var
   lQry: TFDQuery;
   lModel: TTransportadoraModel;
@@ -115,7 +115,7 @@ begin
   Result   := lModel;
 
   try
-    lQry.Open('select * from TRANSPORTADORA where CODIGO_TRA = ' +pId);
+    lQry.Open('select * from TRANSPORTADORA where CODIGO_TRA = ' +pCodigo);
 
     if lQry.IsEmpty then
       Exit;
