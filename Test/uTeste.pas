@@ -141,6 +141,11 @@ type
     Button90: TButton;
     XDBGrid6: TXDBGrid;
     dsProdutos: TDataSource;
+    Transportadora: TTabSheet;
+    Button89: TButton;
+    Button92: TButton;
+    Button93: TButton;
+    Button94: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -237,6 +242,10 @@ type
     procedure Button87Click(Sender: TObject);
     procedure Button90Click(Sender: TObject);
     procedure Button91Click(Sender: TObject);
+    procedure Button94Click(Sender: TObject);
+    procedure Button89Click(Sender: TObject);
+    procedure Button92Click(Sender: TObject);
+    procedure Button93Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -267,7 +276,7 @@ uses
   ReservaModel, DocumentoModel, AnexoModel, FluxoCaixaModel, BancoModel,
   PortadorModel, LojasModel, OSModel, SimuladorPrecoModel, GrupoModel, CNPJModel, CEPModel,
   PedidoCompraModel, PedidoCompraItensModel, ClientesContatoModel, DescontoModel,
-  PromocaoModel;
+  PromocaoModel, TransportadoraModel;
 
 {$R *.dfm}
 
@@ -2428,6 +2437,35 @@ begin
   end;
 end;
 
+procedure TForm1.Button89Click(Sender: TObject);
+var
+  lTransportadoraModel : TTransportadoraModel;
+  lMemTable   : TFDMemTable;
+begin
+  lTransportadoraModel := TTransportadoraModel.Create(vIConexao);
+  try
+    try
+      lMemTable := lTransportadoraModel.ObterLista;
+
+      memoResultado.Lines.Clear;
+
+      lMemTable.First;
+      while not lMemTable.Eof do
+      begin
+        memoResultado.Lines.Add('CODIGO: '+lMemTable.FieldByName('CODIGO_TRA').AsString);
+        memoResultado.Lines.Add('NOME: '+lMemTable.FieldByName('FANTASIA_TRA').AsString);
+        memoResultado.Lines.Add('===============================================');
+        lMemTable.Next;
+      end;
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lTransportadoraModel.Free;
+  end;
+end;
+
 procedure TForm1.Button8Click(Sender: TObject);
 var
   lWebPedidoModel : TWebPedidoModel;
@@ -2487,6 +2525,77 @@ begin
     dsProdutos.DataSet    := lProduto.obterPrecoVenda;
   finally
     lProduto.Free;
+  end;
+end;
+
+procedure TForm1.Button92Click(Sender: TObject);
+var
+  lTransportadoraModel : TTransportadoraModel;
+  ID : String;
+begin
+  lTransportadoraModel := TTransportadoraModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('TRANSPORTADORA', 'Digite o código da transportadora que deseja Alterar:', '');
+      if ID.IsEmpty then
+        exit;
+
+      lTransportadoraModel := lTransportadoraModel.Alterar(ID);
+      lTransportadoraModel.FANTASIA_TRA := 'TESTE ALTERAÇÃO';
+
+      lTransportadoraModel.Salvar;
+      ShowMessage('Alterado com Sucesso');
+    Except
+      on E:Exception do
+      ShowMessage('Erro: ' +E.Message);
+    end;
+  finally
+    lTransportadoraModel.Free;
+  end;
+end;
+
+procedure TForm1.Button93Click(Sender: TObject);
+var
+  lTransportadoraModel : TTransportadoraModel;
+  codigo        : String;
+begin
+  lTransportadoraModel := TTransportadoraModel.Create(vIConexao);
+  try
+    try
+      codigo := InputBox('TRANSPORTADORA', 'Digite o código da transportadora que deseja excluir:', '');
+      if codigo.IsEmpty then
+          Exit;
+
+      lTransportadoraModel.Excluir(codigo);
+      ShowMessage('Excluido com sucesso!');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lTransportadoraModel.Free;
+  end;
+end;
+
+procedure TForm1.Button94Click(Sender: TObject);
+var
+  lTransportadoraModel : TTransportadoraModel;
+begin
+  lTransportadoraModel := TTransportadoraModel.Create(vIConexao);
+  try
+    try
+      lTransportadoraModel.FANTASIA_TRA := 'FANTASIA TRANSPORTADORA TESTE';
+      lTransportadoraModel.RAZAO_TRA    := 'RAZÃO TRANSPORTADORA TESTE';
+      lTransportadoraModel.STATUS       := 'A';
+
+      lTransportadoraModel.Incluir;
+      ShowMessage('Incluido com Sucesso!');
+    except
+      on E:Exception do
+      ShowMessage('Erro: ' + E.Message);
+    end
+  finally
+    lTransportadoraModel.Free;
   end;
 end;
 

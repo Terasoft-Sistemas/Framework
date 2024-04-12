@@ -227,6 +227,8 @@
         <DCCReference Include="..\Model\DescontoModel.pas"/>
         <DCCReference Include="..\Model\PromocaoModel.pas"/>
         <DCCReference Include="..\Dao\PromocaoDao.pas"/>
+        <DCCReference Include="..\Model\TransportadoraModel.pas"/>
+        <DCCReference Include="..\Dao\TransportadoraDao.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

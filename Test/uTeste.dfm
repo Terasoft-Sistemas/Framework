@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 1248
     Height = 879
-    ActivePage = TabSheet7
+    ActivePage = Transportadora
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -990,6 +990,46 @@ object Form1: TForm1
         DataSource = dsProdutos
         GridStyle.VisualStyle = vsXPStyle
         TabOrder = 2
+      end
+    end
+    object Transportadora: TTabSheet
+      Caption = 'Transportadora'
+      ImageIndex = 8
+      object Button89: TButton
+        Left = 191
+        Top = 11
+        Width = 182
+        Height = 46
+        Caption = 'Transportadora  Consultar'
+        TabOrder = 0
+        OnClick = Button89Click
+      end
+      object Button92: TButton
+        Left = 379
+        Top = 11
+        Width = 182
+        Height = 46
+        Caption = 'Transportadora  Update'
+        TabOrder = 1
+        OnClick = Button92Click
+      end
+      object Button93: TButton
+        Left = 567
+        Top = 11
+        Width = 182
+        Height = 46
+        Caption = 'Transportadora  Excluir'
+        TabOrder = 2
+        OnClick = Button93Click
+      end
+      object Button94: TButton
+        Left = 3
+        Top = 11
+        Width = 182
+        Height = 46
+        Caption = 'Transportadora Inserir'
+        TabOrder = 3
+        OnClick = Button94Click
       end
     end
   end

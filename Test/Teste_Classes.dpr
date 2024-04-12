@@ -129,7 +129,9 @@ uses
   DescontoDao in '..\Dao\DescontoDao.pas',
   DescontoModel in '..\Model\DescontoModel.pas',
   PromocaoModel in '..\Model\PromocaoModel.pas',
-  PromocaoDao in '..\Dao\PromocaoDao.pas';
+  PromocaoDao in '..\Dao\PromocaoDao.pas',
+  TransportadoraModel in '..\Model\TransportadoraModel.pas',
+  TransportadoraDao in '..\Dao\TransportadoraDao.pas';
 
 {$R *.res}
 
