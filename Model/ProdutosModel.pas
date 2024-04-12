@@ -1117,6 +1117,7 @@ begin
     lMemTable.CreateDataSet;
 
     lPromocaoItensModel.ProdutoView := pCodProduto;
+    lPromocaoItensModel.WhereView   := ' and promocao.datafim > current_date ';
     lPromocaoItensModel.obterLista;
 
     for lPromocaoItensModel in lPromocaoItensModel.PromocaoItenssLista do
