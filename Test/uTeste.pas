@@ -2522,7 +2522,7 @@ begin
   lProduto := TProdutosModel.Create(vIConexao);
   try
     lProduto.IDRecordView := '000005';
-    dsProdutos.DataSet    := lProduto.obterPrecoVenda;
+    dsProdutos.DataSet    := lProduto.ObterTabelaPreco;
   finally
     lProduto.Free;
   end;

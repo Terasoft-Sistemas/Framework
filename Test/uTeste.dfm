@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 1248
     Height = 879
-    ActivePage = Transportadora
+    ActivePage = TabSheet7
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -968,7 +968,7 @@ object Form1: TForm1
         Top = 31
         Width = 182
         Height = 42
-        Caption = 'Consulta Pre'#231'o Venda'
+        Caption = 'Consultar Tabela Preco'
         TabOrder = 0
         OnClick = Button91Click
       end

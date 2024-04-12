@@ -902,7 +902,7 @@ type
 
     function carregaClasse(pId: String): TProdutosModel;
     function valorVenda(pIdProduto: String): Variant;
-    function obterPrecoVenda : TFDMemTable;
+    function ObterTabelaPreco : TFDMemTable;
     function ValorUnitario(pProdutoPreco: TProdutoPreco) : Double;
 
     procedure subtrairSaldo(pIdProduto: String; pSaldo: Double);
@@ -1072,14 +1072,14 @@ begin
   end;
 end;
 
-function TProdutosModel.obterPrecoVenda: TFDMemTable;
+function TProdutosModel.ObterTabelaPreco: TFDMemTable;
 var
   lProdutoDao: TProdutosDao;
 begin
   lProdutoDao := TProdutosDao.Create(vIConexao);
   try
     lProdutoDao.IDRecordView := FIDRecordView;
-    Result := lProdutoDao.obterPrecoVenda;
+    Result := lProdutoDao.ObterTabelaPreco;
   finally
     lProdutoDao.Free;
   end;

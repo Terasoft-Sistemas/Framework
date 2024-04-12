@@ -58,7 +58,7 @@ type
     function excluir(pProdutosModel: TProdutosModel): String;
 
     function ObterListaMemTable : TFDMemTable;
-    function obterPrecoVenda : TFDMemTable;
+    function ObterTabelaPreco : TFDMemTable;
     procedure obterLista;
     procedure obterListaCatalogo;
 
@@ -725,7 +725,7 @@ begin
   end;
 end;
 
-function TProdutosDao.obterPrecoVenda: TFDMemTable;
+function TProdutosDao.ObterTabelaPreco: TFDMemTable;
 var
   lQry : TFDQuery;
   lSql : String;
@@ -734,41 +734,41 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-     lSql :=' select                                                                                                                                  '+SlineBreak+
-            '      tabela,                                                                                                                            '+SlineBreak+
-            '      valor                                                                                                                              '+SlineBreak+
-            '         from                                                                                                                            '+SlineBreak+
-            '           (select                                                                                                                       '+SlineBreak+
-            '                   t.nome tabela,                                                                                                        '+SlineBreak+
-            '                   ti.valor_venda valor                                                                                                  '+SlineBreak+
-            '              from preco_venda t                                                                                                         '+SlineBreak+
-            '             inner join preco_venda_produto ti on t.id = ti.preco_venda_id                                                               '+SlineBreak+
-            '             where coalesce(t.status,''A'') = ''A''                                                                                      '+SlineBreak+
-            '               and coalesce(t.PRODUTOS_IGNORAR, ''A'') <> ''I''                                                                          '+SlineBreak+
-            '               and ti.produto_id = '+QuotedStr(IDRecordView)+'                                                                           '+SlineBreak+
-            ' union all                                                                                                                               '+SlineBreak+
-            ' select                                                                                                                                  '+SlineBreak+
-            '      t.nome tabela,                                                                                                                     '+SlineBreak+
-            '               (select                                                                                                                   '+SlineBreak+
-            '                     case                                                                                                                '+SlineBreak+
-            '                         when t.acrescimo_desconto = ''D'' then pro.venda_pro - t.percentual / 100 * pro.venda_pro                       '+SlineBreak+
-            '                         when t.acrescimo_desconto = ''A'' then pro.venda_pro + t.percentual / 100 * pro.venda_pro                       '+SlineBreak+
-            '                     else                                                                                                                '+SlineBreak+
-            '                     case                                                                                                                '+SlineBreak+
-            '                         when t.tipo_custo = ''CUSTOULTIMO_PRO'' then pro.CUSTOULTIMO_PRO  + t.percentual / 100 * pro.CUSTOULTIMO_PRO    '+SlineBreak+
-            '                         when t.tipo_custo = ''CUSTOMEDIO_PRO'' then pro.CUSTOMEDIO_PRO  + t.percentual / 100 * pro.CUSTOMEDIO_PRO       '+SlineBreak+
-            '                         when t.tipo_custo = ''CUSTOULTIMO_PRO'' then pro.CUSTOLIQUIDO_PRO  + t.percentual / 100 * pro.CUSTOLIQUIDO_PRO  '+SlineBreak+
-            '                         when t.tipo_custo = ''CUSTOULTIMO_PRO'' then pro.CUSTODOLAR_PRO  + t.percentual / 100 * pro.CUSTODOLAR_PRO      '+SlineBreak+
-            '                         when t.tipo_custo = ''CUSTOULTIMO_PRO'' then pro.CUSTO_MANUAL  + t.percentual / 100 * pro.CUSTO_MANUAL          '+SlineBreak+
-            '                     end                                                                                                                 '+SlineBreak+
-            '                     end                                                                                                                 '+SlineBreak+
-            '                from produto pro                                                                                                         '+SlineBreak+
-            '               where pro.codigo_pro = '+QuotedStr(IDRecordView)+') valor                                                                 '+SlineBreak+
-            '                from preco_venda t                                                                                                       '+SlineBreak+
-            '               where coalesce(t.status,''A'') = ''A''                                                                                    '+SlineBreak+
-            '                 and t.PRODUTOS_IGNORAR = ''I''                                                                                          '+SlineBreak+
-            '                 and t.percentual > 0                                                                                                    '+SlineBreak+
-            '  )                                                                                                                                      '+SlineBreak;
+    lSql := ' select                                                                                                                             '+SlineBreak+
+            '       tabela,                                                                                                                      '+SlineBreak+
+            '       valor                                                                                                                        '+SlineBreak+
+            '   from                                                                                                                             '+SlineBreak+
+            '       (select                                                                                                                      '+SlineBreak+
+            '              t.nome tabela,                                                                                                        '+SlineBreak+
+            '              ti.valor_venda valor                                                                                                  '+SlineBreak+
+            '          from preco_venda t                                                                                                        '+SlineBreak+
+            '         inner join preco_venda_produto ti on t.id = ti.preco_venda_id                                                              '+SlineBreak+
+            '         where coalesce(t.status,''A'') = ''A''                                                                                     '+SlineBreak+
+            '           and coalesce(t.produtos_ignorar, ''A'') <> ''I''                                                                         '+SlineBreak+
+            '           and ti.produto_id = '+QuotedStr(IDRecordView)+'                                                                          '+SlineBreak+
+            '         union all                                                                                                                  '+SlineBreak+
+            '        select                                                                                                                      '+SlineBreak+
+            '              t.nome tabela,                                                                                                        '+SlineBreak+
+            '              (select                                                                                                               '+SlineBreak+
+            '                case                                                                                                                '+SlineBreak+
+            '                  when t.acrescimo_desconto = ''D'' then pro.venda_pro - t.percentual / 100 * pro.venda_pro                         '+SlineBreak+
+            '                  when t.acrescimo_desconto = ''A'' then pro.venda_pro + t.percentual / 100 * pro.venda_pro                         '+SlineBreak+
+            '                else                                                                                                                '+SlineBreak+
+            '                  case                                                                                                              '+SlineBreak+
+            '                    when t.tipo_custo = ''CUSTOULTIMO_PRO'' then pro.custoultimo_pro + t.percentual / 100 * pro.custoultimo_pro     '+SlineBreak+
+            '                    when t.tipo_custo = ''CUSTOMEDIO_PRO'' then pro.customedio_pro + t.percentual / 100 * pro.customedio_pro        '+SlineBreak+
+            '                    when t.tipo_custo = ''CUSTOULTIMO_PRO'' then pro.custoliquido_pro + t.percentual / 100 * pro.custoliquido_pro   '+SlineBreak+
+            '                    when t.tipo_custo = ''CUSTOULTIMO_PRO'' then pro.custodolar_pro + t.percentual / 100 * pro.custodolar_pro       '+SlineBreak+
+            '                    when t.tipo_custo = ''CUSTOULTIMO_PRO'' then pro.custo_manual + t.percentual / 100 * pro.custo_manual           '+SlineBreak+
+            '                  end                                                                                                               '+SlineBreak+
+            '                end                                                                                                                 '+SlineBreak+
+            '                 from produto pro                                                                                                   '+SlineBreak+
+            '                where pro.codigo_pro = '+QuotedStr(IDRecordView)+') valor                                                           '+SlineBreak+
+            '          from preco_venda t                                                                                                        '+SlineBreak+
+            '         where coalesce(t.status,''A'') = ''A''                                                                                     '+SlineBreak+
+            '           and t.produtos_ignorar = ''I''                                                                                           '+SlineBreak+
+            '           and t.percentual > 0                                                                                                     '+SlineBreak+
+            '               )                                                                                                                    '+SlineBreak;
 
     lQry.Open(lSql);
 
