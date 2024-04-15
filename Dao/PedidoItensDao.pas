@@ -334,10 +334,10 @@ begin
   lQry     := vIConexao.CriarQuery;
   try
     lSQL :=
-      ' select sum( valorunitario_ped * qtde_calculada ) VALOR_TOTAL_ITENS,                                                             '+
-      '        sum( qtde_calculada * coalesce(quantidade_tipo,0) ) VALOR_TOTAL_GARANTIA,                                                '+
-      '        sum(cast(((cast(VALORUNITARIO_PED  as float) * desconto_ped / 100)) * qtde_calculada as float)) as VALOR_TOTAL_DESCONTO  '+
-      '   from pedidoitens                                                                                                              '+
+      ' select sum( valorunitario_ped * qtde_calculada ) VALOR_TOTAL_ITENS,                                                                      '+
+      '        sum( qtde_calculada * coalesce(quantidade_tipo,0) ) VALOR_TOTAL_GARANTIA,                                                         '+
+      '        sum(round(cast(((cast(VALORUNITARIO_PED  as float) * desconto_ped / 100)) * qtde_calculada as float),2)) as VALOR_TOTAL_DESCONTO  '+
+      '   from pedidoitens                                                                                                                       '+
       '  where numero_ped = '+QuotedStr(pNumeroPedido);
 
     lQry.Open(lSQL);
