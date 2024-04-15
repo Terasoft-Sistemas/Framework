@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 1248
     Height = 879
-    ActivePage = TabSheet7
+    ActivePage = TabSheet6
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -958,6 +958,15 @@ object Form1: TForm1
         Caption = 'Inserir Itens Pedido de Compra'
         TabOrder = 4
         OnClick = Button78Click
+      end
+      object Button95: TButton
+        Left = 203
+        Top = 78
+        Width = 182
+        Height = 42
+        Caption = 'ObterTotalizador Itens'
+        TabOrder = 5
+        OnClick = Button95Click
       end
     end
     object TabSheet7: TTabSheet

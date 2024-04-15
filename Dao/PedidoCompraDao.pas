@@ -63,6 +63,7 @@ type
 
     function carregaClasse(pID : String): TPedidoCompraModel;
     function obterLista: TFDMemTable;
+    function ObterTotalizador : TFDMemTable;
     procedure setParams(var pQry: TFDQuery; pPedidoCompraModel: TPedidoCompraModel);
 
 end;
@@ -290,6 +291,66 @@ begin
 
     obterTotalRegistros;
 
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TPedidoCompraDao.ObterTotalizador: TFDMemTable;
+var
+  lQry : TFDQuery;
+  lSql : String;
+begin
+  lQry := vIConexao.CriarQuery;
+  try
+    lSql := ' select                                                                                                   '+SLineBreak+
+            '       quantidade_itens,                                                                                  '+SLineBreak+
+            '       quantidade_produtos,                                                                               '+SLineBreak+
+            '       valor_total_produtos,                                                                              '+SLineBreak+
+            '       valor_total_icms,                                                                                  '+SLineBreak+
+            '       valor_total_ipi,                                                                                   '+SLineBreak+
+            '       valor_total_frete,                                                                                 '+SLineBreak+
+            '       valor_total_outras_depesas,                                                                        '+SLineBreak+
+            '       valor_total_desconto,                                                                              '+SLineBreak+
+            '       percentual_desconto,                                                                               '+SLineBreak+
+            '       valor_total_pedido                                                                                 '+SLineBreak+
+            '   from                                                                                                   '+SLineBreak+
+            '   (select                                                                                                '+SLineBreak+
+            '          quantidade_itens,                                                                               '+SLineBreak+
+            '          quantidade_produtos,                                                                            '+SLineBreak+
+            '          valor_total_produtos,                                                                           '+SLineBreak+
+            '          valor_total_icms,                                                                               '+SLineBreak+
+            '          valor_total_ipi,                                                                                '+SLineBreak+
+            '          valor_total_frete,                                                                              '+SLineBreak+
+            '          valor_total_outras_depesas,                                                                     '+SLineBreak+
+            '          valor_total_desconto,                                                                           '+SLineBreak+
+            '          cast(valor_total_desconto * 100 / valor_total_produtos as numeric(18, 2)) percentual_desconto,  '+SLineBreak+
+            '          valor_total_produtos                                                                            '+SLineBreak+
+            '            + valor_total_icms                                                                            '+SLineBreak+
+            '            + valor_total_icms_st                                                                         '+SLineBreak+
+            '            + valor_total_ipi                                                                             '+SLineBreak+
+            '            + valor_total_frete                                                                           '+SLineBreak+
+            '            + valor_total_outras_depesas                                                                  '+SLineBreak+
+            '            - valor_total_desconto valor_total_pedido                                                     '+SLineBreak+
+            '      from                                                                                                '+SLineBreak+
+            '      (select                                                                                             '+SLineBreak+
+            '              count(*) quantidade_itens,                                                                  '+SLineBreak+
+            '              sum(i.quantidade_ped) quantidade_produtos,                                                  '+SLineBreak+
+            '              sum(i.valoruni_ped * i.quantidade_ped) valor_total_produtos,                                '+SLineBreak+
+            '              coalesce(sum(i.vicms_n17), 0) valor_total_icms,                                             '+SLineBreak+
+            '              coalesce(sum(i.vst_n23), 0) valor_total_icms_st,                                            '+SLineBreak+
+            '              coalesce(sum(i.vipi_014), 0) valor_total_ipi,                                               '+SLineBreak+
+            '              coalesce(sum(i.frete_ped), 0) valor_total_frete,                                            '+SLineBreak+
+            '              coalesce(sum(i.vlr_outras), 0) valor_total_outras_depesas,                                  '+SLineBreak+
+            '              coalesce(sum(i.vlr_desconto), 0) valor_total_desconto                                       '+SLineBreak+
+            '         from pedidocompraitens i                                                                         '+SLineBreak+
+            '        where i.numero_ped = '+QuotedStr(NumeroView)+'                                                    '+SLineBreak+
+            '      )                                                                                                   '+SLineBreak+
+            '    )                                                                                                     '+SLineBreak;
+
+    lQry.Open(lSql);
+
+    Result := vConstrutor.atribuirRegistros(lQry);
   finally
     lQry.Free;
   end;

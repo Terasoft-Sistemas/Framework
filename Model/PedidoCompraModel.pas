@@ -218,6 +218,7 @@ type
     function AdicionarItens(pPedidoItensParams : TPedidoItensParams)  : String;
     function carregaClasse(pID, pFornecedor : String): TPedidoCompraModel;
     function obterLista: TFDMemTable;
+    function ObterTotalizador : TFDMemTable;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -360,6 +361,23 @@ begin
 
   finally
     lPedidoCompraLista.Free;
+  end;
+end;
+
+function TPedidoCompraModel.ObterTotalizador: TFDMemTable;
+var
+  lPedidoCompra: TPedidoCompraDao;
+begin
+  lPedidoCompra := TPedidoCompraDao.Create(vIConexao);
+
+  try
+    lPedidoCompra.NumeroView    := FNumeroView;
+
+    Result := lPedidoCompra.ObterTotalizador;
+
+    FTotalRecords := lPedidoCompra.TotalRecords;
+  finally
+    lPedidoCompra.Free;
   end;
 end;
 
