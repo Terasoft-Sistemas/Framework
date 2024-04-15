@@ -473,7 +473,7 @@ begin
             '        ORIGEM_CONCILIACAO_PRODUTO,                                                                                                  '+SLineBreak+
             '        QUANTIDADE,                                                                                                                  '+SLineBreak+
             '        VALOR_FRETE,                                                                                                                 '+SLineBreak+
-            '        VALOR_FRETE_2,                                                                                                               '+SLineBreak+
+            '        VALOR_FRETE_2, valor_unitario,                                                                                               '+SLineBreak+
             '        VALOR_OUTRAS_DESPESAS,                                                                                                       '+SLineBreak+
             '        VALOR_BASE_IPI,                                                                                                              '+SLineBreak+
             '        ALIQUOTA_IPI,                                                                                                                '+SLineBreak+
