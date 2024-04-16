@@ -207,10 +207,10 @@ begin
     InfoPgto.indPag := ipPrazo;
     InfoPgto.tPag   := vConfiguracoesNotaFiscal.tPag(lQry.FieldByName('tPag').AsString);
     InfoPgto.vPag   := lQry.FieldByName('vOrig').AsFloat;
-    InfoPgto.tpIntegra := tiPagIntegrado;
-    InfoPgto.CNPJ   := '16501555000157';
-    InfoPgto.tBand  := bcVisa ;
-    InfoPgto.cAut   := '180003';;
+
+    if InfoPgto.tPag in [fpCartaoCredito, fpCartaoDebito] then
+      InfoPgto.tpIntegra := tiPagNaoIntegrado;
+
     except
     on E:Exception do
        CriaException('Erro: ' + E.Message);
