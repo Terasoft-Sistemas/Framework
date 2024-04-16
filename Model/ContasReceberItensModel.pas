@@ -612,6 +612,7 @@ begin
     lVendaCartaoModel.Acao := tacIncluir;
     lVendaCartaoModel.NUMERO_CAR      := '1';
     lVendaCartaoModel.AUTORIZACAO_CAR := '1';
+    lVendaCartaoModel.FATURA_ID       := self.FFATURA_REC;
     lVendaCartaoModel.PARCELA_CAR     := self.FPACELA_REC;
     lVendaCartaoModel.PARCELAS_CAR    := self.FTOTALPARCELAS_REC;
     lVendaCartaoModel.PARCELA_TEF     := self.FPACELA_REC;
