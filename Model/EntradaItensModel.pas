@@ -161,6 +161,7 @@ type
     FFornecedorView: Variant;
     FORIGEM_CONCILIACAO_PRODUTO: Variant;
     FLengthPageView: String;
+    FMULTIPLICADOR_: Variant;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -308,6 +309,7 @@ type
     procedure SetNumeroView(const Value: Variant);
     procedure SetORIGEM_CONCILIACAO_PRODUTO(const Value: Variant);
     procedure SetLengthPageView(const Value: String);
+    procedure SetMULTIPLICADOR_(const Value: Variant);
 
 
 
@@ -441,6 +443,9 @@ type
 
     property DIVISOR                        : Variant read FDIVISOR write SetDIVISOR;
     property MULTIPLICADOR                  : Variant read FMULTIPLICADOR write SetMULTIPLICADOR;
+    property MULTIPLICADOR_                 : Variant read FMULTIPLICADOR_ write SetMULTIPLICADOR_;
+
+
     property ORIGEM_CONCILIACAO_PRODUTO     : Variant read FORIGEM_CONCILIACAO_PRODUTO write SetORIGEM_CONCILIACAO_PRODUTO;
 
     property CONCILIACAO_ID_PRODUTO      :String read FCONCILIACAO_ID_PRODUTO write SetCONCILIACAO_ID_PRODUTO;
@@ -958,6 +963,11 @@ end;
 procedure TEntradaItensModel.SetMULTIPLICADOR(const Value: Variant);
 begin
   FMULTIPLICADOR := Value;
+end;
+
+procedure TEntradaItensModel.SetMULTIPLICADOR_(const Value: Variant);
+begin
+  FMULTIPLICADOR_ := Value;
 end;
 
 procedure TEntradaItensModel.SetNCM_I05(const Value: Variant);
