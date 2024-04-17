@@ -147,6 +147,10 @@ type
     Button93: TButton;
     Button94: TButton;
     Button95: TButton;
+    Button96: TButton;
+    Button97: TButton;
+    Button98: TButton;
+    Button99: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -248,6 +252,10 @@ type
     procedure Button92Click(Sender: TObject);
     procedure Button93Click(Sender: TObject);
     procedure Button95Click(Sender: TObject);
+    procedure Button99Click(Sender: TObject);
+    procedure Button96Click(Sender: TObject);
+    procedure Button97Click(Sender: TObject);
+    procedure Button98Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -278,7 +286,7 @@ uses
   ReservaModel, DocumentoModel, AnexoModel, FluxoCaixaModel, BancoModel,
   PortadorModel, LojasModel, OSModel, SimuladorPrecoModel, GrupoModel, CNPJModel, CEPModel,
   PedidoCompraModel, PedidoCompraItensModel, ClientesContatoModel, DescontoModel,
-  PromocaoModel, TransportadoraModel;
+  PromocaoModel, TransportadoraModel, PrevisaoPedidoCompraModel;
 
 {$R *.dfm}
 
@@ -2613,6 +2621,106 @@ begin
   dsPedidoCompra.DataSet   := lTotalizador;
   finally
     lPedidoCompra.Free;
+  end;
+end;
+
+procedure TForm1.Button96Click(Sender: TObject);
+var
+  lPrevisaoPedidoCompraModel : TPrevisaoPedidoCompraModel;
+  lMemTable   : TFDMemTable;
+begin
+  lPrevisaoPedidoCompraModel := TPrevisaoPedidoCompraModel.Create(vIConexao);
+  try
+    try
+      lMemTable := lPrevisaoPedidoCompraModel.ObterLista;
+
+      memoResultado.Lines.Clear;
+
+      lMemTable.First;
+      while not lMemTable.Eof do
+      begin
+        memoResultado.Lines.Add('PEDIDO: '+lMemTable.FieldByName('NUMERO_PED').AsString);
+        memoResultado.Lines.Add('FORNECEDOR: '+lMemTable.FieldByName('CODIGO_FOR').AsString);
+        memoResultado.Lines.Add('===============================================');
+        lMemTable.Next;
+      end;
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lPrevisaoPedidoCompraModel.Free;
+  end;
+end;
+
+procedure TForm1.Button97Click(Sender: TObject);
+var
+  lPrevisaoPedidoCompraModel : TPrevisaoPedidoCompraModel;
+  ID : String;
+begin
+  lPrevisaoPedidoCompraModel := TPrevisaoPedidoCompraModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('PrevisaoPedidoCompra', 'Digite o código do PrevisaoPedidoCompra que deseja Alterar:', '');
+      if ID.IsEmpty then
+        exit;
+
+      lPrevisaoPedidoCompraModel := lPrevisaoPedidoCompraModel.Alterar(ID);
+      lPrevisaoPedidoCompraModel.VALOR_PARCELA := 888;
+
+      lPrevisaoPedidoCompraModel.Salvar;
+      ShowMessage('Alterado com Sucesso');
+    Except
+      on E:Exception do
+      ShowMessage('Erro: ' +E.Message);
+    end;
+  finally
+    lPrevisaoPedidoCompraModel.Free;
+  end;
+end;
+
+procedure TForm1.Button98Click(Sender: TObject);
+var
+  lPrevisaoPedidoCompraModel : TPrevisaoPedidoCompraModel;
+  id : String;
+begin
+  lPrevisaoPedidoCompraModel := TPrevisaoPedidoCompraModel.Create(vIConexao);
+  try
+    try
+      id := InputBox('PrevisaoPedidoCompra', 'Digite o código do PrevisaoPedidoCompra que deseja excluir:', '');
+      if id.IsEmpty then
+          Exit;
+
+      lPrevisaoPedidoCompraModel.Excluir(id);
+      ShowMessage('Excluido com sucesso!');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lPrevisaoPedidoCompraModel.Free;
+  end;
+end;
+
+procedure TForm1.Button99Click(Sender: TObject);
+var
+  lPrevisaoPedidoCompraModel : TPrevisaoPedidoCompraModel;
+begin
+  lPrevisaoPedidoCompraModel := TPrevisaoPedidoCompraModel.Create(vIConexao);
+  try
+    try
+      lPrevisaoPedidoCompraModel.VALOR_PARCELA := 999;
+      lPrevisaoPedidoCompraModel.NUMERO_PED    := '000013';
+      lPrevisaoPedidoCompraModel.CODIGO_FOR    := '000137';
+
+      lPrevisaoPedidoCompraModel.Incluir;
+      ShowMessage('Incluido com Sucesso!');
+    except
+      on E:Exception do
+      ShowMessage('Erro: ' + E.Message);
+    end
+  finally
+    lPrevisaoPedidoCompraModel.Free;
   end;
 end;
 

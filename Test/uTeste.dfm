@@ -968,6 +968,42 @@ object Form1: TForm1
         TabOrder = 5
         OnClick = Button95Click
       end
+      object Button96: TButton
+        Left = 203
+        Top = 126
+        Width = 182
+        Height = 46
+        Caption = 'PrevisaoPedidoCompra Consultar'
+        TabOrder = 6
+        OnClick = Button96Click
+      end
+      object Button97: TButton
+        Left = 391
+        Top = 126
+        Width = 182
+        Height = 46
+        Caption = 'PrevisaoPedidoCompra Update'
+        TabOrder = 7
+        OnClick = Button97Click
+      end
+      object Button98: TButton
+        Left = 579
+        Top = 126
+        Width = 182
+        Height = 46
+        Caption = 'PrevisaoPedidoCompra Excluir'
+        TabOrder = 8
+        OnClick = Button98Click
+      end
+      object Button99: TButton
+        Left = 15
+        Top = 126
+        Width = 182
+        Height = 46
+        Caption = 'PrevisaoPedidoCompra Inserir'
+        TabOrder = 9
+        OnClick = Button99Click
+      end
     end
     object TabSheet7: TTabSheet
       Caption = 'Produtos'

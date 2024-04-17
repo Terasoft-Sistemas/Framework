@@ -131,7 +131,9 @@ uses
   PromocaoModel in '..\Model\PromocaoModel.pas',
   PromocaoDao in '..\Dao\PromocaoDao.pas',
   TransportadoraModel in '..\Model\TransportadoraModel.pas',
-  TransportadoraDao in '..\Dao\TransportadoraDao.pas';
+  TransportadoraDao in '..\Dao\TransportadoraDao.pas',
+  PrevisaoPedidoCompraModel in '..\Model\PrevisaoPedidoCompraModel.pas',
+  PrevisaoPedidoCompraDao in '..\Dao\PrevisaoPedidoCompraDao.pas';
 
 {$R *.res}
 
