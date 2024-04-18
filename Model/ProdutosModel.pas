@@ -1,5 +1,7 @@
 unit ProdutosModel;
+
 interface
+
 uses
   Terasoft.Types,
   Terasoft.Utils,
@@ -929,7 +931,8 @@ uses
   PrecoVendaModel,
   PrecoVendaProdutoModel,
   PrecoClienteModel,
-  System.SysUtils, Data.DB, PromocaoModel;
+  System.SysUtils, Data.DB, PromocaoModel,
+  Variants;
 
   { TProdutosModel }
 
@@ -2501,6 +2504,9 @@ begin
   lProdutoDao := TProdutosDao.Create(vIConexao);
   try
     Result := lProdutoDao.valorVenda(pIdProduto);
+    if Result = Null then
+      Result := 0;
+
   finally
     lProdutoDao.Free;
   end;
