@@ -246,7 +246,7 @@ begin
 
   try
 
-    lSQL := 'select sum(p.valor_parcela) total from pedidocompra_previsaopagar p where p.pedidocompra_id = '+ QuotedStr(pNumeroPedido);
+    lSQL := 'select sum(p.valor_parcela) total from PREVISAO_PEDIDOCOMPRA p where p.NUMERO_PED = '+ QuotedStr(pNumeroPedido);
 
     lQry.Open(lSQL);
 
