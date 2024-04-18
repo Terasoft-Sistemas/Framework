@@ -66,6 +66,8 @@ type
 
     function obterLista: TFDMemTable;
 
+    function TotalFinanceiro(pNumeroPedido: String): Double;
+
     procedure setParams(var pQry: TFDQuery; pPrevisaoPedidoCompraModel: TPrevisaoPedidoCompraModel);
 
 end;
@@ -229,6 +231,26 @@ begin
     lQry.Open(lSQL);
 
     FTotalRecords := lQry.FieldByName('records').AsInteger;
+
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TPrevisaoPedidoCompraDao.TotalFinanceiro(pNumeroPedido: String): Double;
+var
+  lQry: TFDQuery;
+  lSQL:String;
+begin
+    lQry := vIConexao.CriarQuery;
+
+  try
+
+    lSQL := 'select sum(p.valor_parcela) total from pedidocompra_previsaopagar p where p.pedidocompra_id = '+ QuotedStr(pNumeroPedido);
+
+    lQry.Open(lSQL);
+
+    Result := lQry.FieldByName('total').AsFloat;
 
   finally
     lQry.Free;

@@ -6,7 +6,8 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao,
-  FireDAC.Comp.Client;
+  FireDAC.Comp.Client,
+  PedidoCompraModel;
 
 type
 
@@ -71,6 +72,10 @@ type
 
     function ObterLista: TFDMemTable; overload;
 
+    function SaldoFinanceiro(pNumeroPedido: String): Double;
+
+    procedure ValidaTotalFinanceiro(pValor: Double);
+
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -87,7 +92,7 @@ implementation
 uses
   PrevisaoPedidoCompraDao,
   System.Classes,
-  System.SysUtils;
+  System.SysUtils, System.Math;
 
 { TPrevisaoPedidoCompraModel }
 
@@ -161,6 +166,56 @@ begin
 
   finally
     lPrevisaoPedidoCompraLista.Free;
+  end;
+end;
+
+function TPrevisaoPedidoCompraModel.SaldoFinanceiro(pNumeroPedido: String): Double;
+var
+  lPrevisaoPedidoCompraDao: TPrevisaoPedidoCompraDao;
+  lPedidoCompraModel: TPedidoCompraModel;
+  lTotalizador: TFDMemTable;
+  lTotalFinanceiro: Double;
+  lTotalPedido: Double;
+begin
+  lPrevisaoPedidoCompraDao := TPrevisaoPedidoCompraDao.Create(vIConexao);
+  lPedidoCompraModel := TPedidoCompraModel.Create(vIConexao);
+  try
+
+    lPedidoCompraModel.NumeroView := pNumeroPedido;
+    lTotalizador := lPedidoCompraModel.ObterTotalizador;
+
+    lTotalPedido     := RoundTo(StrToFloat(FloatToStr(lTotalizador.FieldByName('valor_total_pedido').AsFloat)), -2);
+    lTotalFinanceiro := RoundTo(lPrevisaoPedidoCompraDao.TotalFinanceiro(pNumeroPedido), -2);
+
+    Result :=  lTotalPedido - lTotalFinanceiro;
+
+  finally
+    lPrevisaoPedidoCompraDao.Free;
+    lPedidoCompraModel.Free;
+  end;
+end;
+
+procedure TPrevisaoPedidoCompraModel.ValidaTotalFinanceiro(pValor: Double);
+var
+  lPrevisaoPedidoCompraDao: TPrevisaoPedidoCompraDao;
+  lPedidoCompraModel: TPedidoCompraModel;
+  lTotalizador  : TFDMemTable;
+  lTotalFinanceiro: Double;
+begin
+  lPrevisaoPedidoCompraDao := TPrevisaoPedidoCompraDao.Create(vIConexao);
+  lPedidoCompraModel := TPedidoCompraModel.Create(vIConexao);
+  try
+
+     lPedidoCompraModel.NumeroView   := FNUMERO_PED;
+     lTotalizador                    := lPedidoCompraModel.obterTotalizador;
+     lTotalFinanceiro                := lPrevisaoPedidoCompraDao.TotalFinanceiro(FNUMERO_PED);
+
+     if (Round(lTotalFinanceiro + pValor )) > (Round(lTotalizador.FieldByName('valor_total_pedido').AsFloat)) then
+       raise Exception.Create('Financeiro já informado ou valor informado maior que o saldo a informar (Total já informado: '+FormatFloat(',0.00', lTotalFinanceiro)+')');
+
+  finally
+    lPrevisaoPedidoCompraDao.Free;
+    lPedidoCompraModel.Free;
   end;
 end;
 
