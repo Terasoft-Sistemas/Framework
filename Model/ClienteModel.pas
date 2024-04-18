@@ -945,6 +945,7 @@ type
     function diasAtraso(pCodigoCliente: String): Variant;
 
     function ObterListaMemTable: TFDMemTable;
+    function ObterBairros: TFDMemTable;
 
     property ClientesLista: TObjectList<TClienteModel> read FClientesLista write SetClientesLista;
 
@@ -1087,6 +1088,26 @@ begin
 
   try
     Result := lClienteDao.ObterListaMemTable;
+    FTotalRecords := lClienteDao.TotalRecords;
+  finally
+    lClienteDao.Free;
+  end;
+end;
+
+function TClienteModel.ObterBairros: TFDMemTable;
+var
+  lClienteDao: TClienteDao;
+begin
+  lClienteDao := TClienteDao.Create(vIConexao);
+
+  lClienteDao.TotalRecords      := FTotalRecords;
+  lClienteDao.WhereView         := FWhereView;
+  lClienteDao.CountView         := FCountView;
+  lClienteDao.OrderView         := FOrderView;
+  lClienteDao.IDRecordView      := FIDRecordView;
+
+  try
+    Result := lClienteDao.ObterBairros;
     FTotalRecords := lClienteDao.TotalRecords;
   finally
     lClienteDao.Free;

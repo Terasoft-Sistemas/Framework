@@ -65,7 +65,9 @@ type
     function ufCliente(pId: String): Variant;
     function nomeCliente(pId: String): Variant;
     function diasAtraso(pCodigoCliente: String): Variant;
+
     function ObterListaMemTable: TFDMemTable;
+    function ObterBairros: TFDMemTable;
 
 end;
 implementation
@@ -871,7 +873,32 @@ begin
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lPaginacao := 'first ' + LengthPageView + ' SKIP ' + StartRecordView;
 
-    lSql := 'select '+ lPaginacao + ' codigo_cli, fantasia_cli, razao_cli, cnpj_cpf_cli, cidade_cli, telefone_cli, email_cli, bairro_cli from clientes where 1=1 ';
+    lSql := 'select '+ lPaginacao + ' codigo_cli, fantasia_cli, razao_cli, cnpj_cpf_cli, cidade_cli, telefone_cli, email_cli from clientes where 1=1 ';
+    lSql := lSql + where;
+
+    if not FOrderView.IsEmpty then
+      lSql := lSql + ' order by '+FOrderView;
+
+    lQry.Open(lSql);
+
+    Result := vConstrutor.atribuirRegistros(lQry);
+    obterTotalRegistros;
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TClienteDao.ObterBairros: TFDMemTable;
+var
+  lQry : TFDQuery;
+  lSql : String;
+
+begin
+  try
+
+    lQry := vIConexao.CriarQuery;
+
+    lSql := 'select distinct trim(clientes.bairro_cli) bairro_cli from clientes where 1=1 ';
     lSql := lSql + where;
 
     if not FOrderView.IsEmpty then

@@ -147,25 +147,25 @@ end;
 
 function TPrevisaoPedidoCompraModel.obterLista: TFDMemTable;
 var
-  lPrevisaoPedidoCompraLista: TPrevisaoPedidoCompraDao;
+  lPrevisaoPedidoCompraDao: TPrevisaoPedidoCompraDao;
 begin
-  lPrevisaoPedidoCompraLista := TPrevisaoPedidoCompraDao.Create(vIConexao);
+  lPrevisaoPedidoCompraDao:= TPrevisaoPedidoCompraDao.Create(vIConexao);
 
   try
-    lPrevisaoPedidoCompraLista.TotalRecords    := FTotalRecords;
-    lPrevisaoPedidoCompraLista.WhereView       := FWhereView;
-    lPrevisaoPedidoCompraLista.CountView       := FCountView;
-    lPrevisaoPedidoCompraLista.OrderView       := FOrderView;
-    lPrevisaoPedidoCompraLista.StartRecordView := FStartRecordView;
-    lPrevisaoPedidoCompraLista.LengthPageView  := FLengthPageView;
-    lPrevisaoPedidoCompraLista.IDRecordView    := FIDRecordView;
+    lPrevisaoPedidoCompraDao.TotalRecords    := FTotalRecords;
+    lPrevisaoPedidoCompraDao.WhereView       := FWhereView;
+    lPrevisaoPedidoCompraDao.CountView       := FCountView;
+    lPrevisaoPedidoCompraDao.OrderView       := FOrderView;
+    lPrevisaoPedidoCompraDao.StartRecordView := FStartRecordView;
+    lPrevisaoPedidoCompraDao.LengthPageView  := FLengthPageView;
+    lPrevisaoPedidoCompraDao.IDRecordView    := FIDRecordView;
 
-    Result := lPrevisaoPedidoCompraLista.obterLista;
+    Result := lPrevisaoPedidoCompraDao.obterLista;
 
-    FTotalRecords := lPrevisaoPedidoCompraLista.TotalRecords;
+    FTotalRecords := lPrevisaoPedidoCompraDao.TotalRecords;
 
   finally
-    lPrevisaoPedidoCompraLista.Free;
+    lPrevisaoPedidoCompraDao.Free;
   end;
 end;
 
