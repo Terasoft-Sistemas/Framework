@@ -5,7 +5,7 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
-  Interfaces.Conexao;
+  Interfaces.Conexao, FireDAC.Comp.Client;
 
 type
   TContagemFechamentoModel = class
@@ -64,9 +64,10 @@ type
     function Alterar(pID : String): TContagemFechamentoModel;
     function Excluir(pID : String): String;
     function Salvar      : String;
-    procedure obterLista;
+    function obterLista  : TFDMemTable;
 
     function carregaClasse(pId: String): TContagemFechamentoModel;
+    function obterContagem(pIdAberturaCaixa: String): TFDMemTable;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -82,7 +83,8 @@ type
 implementation
 
 uses
-  ContagemFechamentoDao;
+  ContagemFechamentoDao, PortadorModel, AdmCartaoModel, Data.DB,
+  System.SysUtils;
 
 { TContagemFechamentoModel }
 
@@ -94,9 +96,9 @@ begin
 
   try
     lContagemFechamentoModel      := lContagemFechamentoModel.carregaClasse(pID);
-
     lContagemFechamentoModel.Acao := tacAlterar;
-    Result               := lContagemFechamentoModel;
+
+    Result := lContagemFechamentoModel;
   finally
     lContagemFechamentoModel.Free
   end;
@@ -107,7 +109,6 @@ var
   lContagemFechamentoDao: TContagemFechamentoDao;
 begin
   lContagemFechamentoDao := TContagemFechamentoDao.Create(vIConexao);
-
   try
     Result := lContagemFechamentoDao.carregaClasse(pId);
   finally
@@ -122,7 +123,6 @@ end;
 
 destructor TContagemFechamentoModel.Destroy;
 begin
-
   inherited;
 end;
 
@@ -146,27 +146,121 @@ begin
   end;
 end;
 
-procedure TContagemFechamentoModel.obterLista;
+function TContagemFechamentoModel.obterContagem(pIdAberturaCaixa: String): TFDMemTable;
 var
-  lContagemFechamentoModel : TContagemFechamentoModel;
+  lPortadorModel   : TPortadorModel;
+  lAdmCartaoModel  : TAdmCartaoModel;
+  lMemTable        : TFDMemTable;
+  lMemTableGerada  : TFDMemTable;
+  lLocate          : Boolean;
+
 begin
-  lContagemFechamentoModel := TContagemFechamentoModel.Create(vIConexao);
+  lPortadorModel   := TPortadorModel.Create(vIConexao);
+  lAdmCartaoModel  := TAdmCartaoModel.Create(vIConexao);
+  lMemTable        := TFDMemTable.Create(nil);
+  lMemTableGerada  := TFDMemTable.Create(nil);
 
   try
-    lContagemFechamentoModel.TotalRecords    := FTotalRecords;
-    lContagemFechamentoModel.WhereView       := FWhereView;
-    lContagemFechamentoModel.CountView       := FCountView;
-    lContagemFechamentoModel.OrderView       := FOrderView;                                           d
-    lContagemFechamentoModel.StartRecordView := FStartRecordView;
-    lContagemFechamentoModel.LengthPageView  := FLengthPageView;
-    lContagemFechamentoModel.IDRecordView    := FIDRecordView;
+    with lMemTable.IndexDefs.AddIndexDef do
+    begin
+      Name := 'OrdenacaoDescricao';
+      Fields := 'DESCRICAO';
+      Options := [TIndexOption.ixCaseInsensitive];
+    end;
 
-    lContagemFechamentoModel.obterLista;
+    lMemTable.IndexName := 'OrdenacaoDescricao';
 
-    FTotalRecords  := lContagemFechamentoModel.TotalRecords;
+    lMemTable.FieldDefs.Add('TIPO', ftString, 1);
+    lMemTable.FieldDefs.Add('ID', ftString, 10);
+    lMemTable.FieldDefs.Add('DESCRICAO', ftString, 50);
+    lMemTable.FieldDefs.Add('VALOR', ftFloat);
+    lMemTable.CreateDataSet;
 
+    lPortadorModel.WhereView := ' and coalesce(portador.contagem,''S'') = ''S''                                               '+
+                                ' and coalesce(portador.status,''A'')   = ''A''                                               '+
+                                ' and (select count(*) from admcartao where admcartao.portador_id = portador.codigo_port) = 0 ';
+
+    lPortadorModel.obterLista;
+
+    for lPortadorModel in lPortadorModel.PortadorsLista do
+    begin
+      lMemTable.InsertRecord([
+                              'P',
+                              lPortadorModel.CODIGO_PORT,
+                              lPortadorModel.NOME_PORT,
+                              0
+                             ]);
+
+    end;
+
+    lAdmCartaoModel.WhereView := ' and coalesce(admcartao.status,''A'') = ''A'' ';
+    lAdmCartaoModel.obterLista;
+
+    for lAdmCartaoModel in lAdmCartaoModel.AdmCartaosLista do
+    begin
+      lMemTable.InsertRecord([
+                              'B',
+                              lAdmCartaoModel.ID,
+                              lAdmCartaoModel.NOME_ADM,
+                              0
+                             ]);
+
+    end;
+
+    lMemTable.Open;
+
+    self.WhereView  := ' and contagem_fechamento.caixa_ctr_id = '+ QuotedStr(pIdAberturaCaixa);
+    lMemTableGerada := self.obterLista;
+
+    lMemTable.First;
+    while not lMemTable.Eof do
+    begin
+      lMemTableGerada.first;
+
+      if lMemTable.fieldByName('TIPO').AsString = 'P' then
+        lLocate := lMemTableGerada.locate('PORTADOR_ID', lMemTable.fieldByName('ID').AsString, [])
+      else
+        lLocate := lMemTableGerada.locate('BANDEIRA_ID', lMemTable.fieldByName('ID').AsString, []);
+
+      if lLocate then
+      begin
+        lMemTable.Edit;
+        lMemTable.fieldByName('VALOR').AsFloat := lMemTableGerada.fieldByName('VALOR').AsFloat;
+        lMemTable.Post;
+      end;
+
+      lMemTable.Next;
+    end;
+
+    Result := lMemTable;
   finally
-    lContagemFechamentoModel.Free;
+    lPortadorModel.Free;
+    lAdmCartaoModel.Free;
+    lMemTableGerada.Free;
+  end;
+
+end;
+
+function TContagemFechamentoModel.obterLista : TFDMemTable;
+var
+  lContagemFechamentoDao : TContagemFechamentoDao;
+begin
+  lContagemFechamentoDao := TContagemFechamentoDao.Create(vIConexao);
+
+  try
+    lContagemFechamentoDao.TotalRecords    := FTotalRecords;
+    lContagemFechamentoDao.WhereView       := FWhereView;
+    lContagemFechamentoDao.CountView       := FCountView;
+    lContagemFechamentoDao.OrderView       := FOrderView;
+    lContagemFechamentoDao.StartRecordView := FStartRecordView;
+    lContagemFechamentoDao.LengthPageView  := FLengthPageView;
+    lContagemFechamentoDao.IDRecordView    := FIDRecordView;
+
+    Result := lContagemFechamentoDao.obterLista;
+
+    FTotalRecords := lContagemFechamentoDao.TotalRecords;
+  finally
+    lContagemFechamentoDao.Free;
   end;
 end;
 
@@ -180,13 +274,12 @@ begin
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lAdmCartaoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lAdmCartaoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lAdmCartaoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lContagemFechamentoDao.incluir(Self);
+      Terasoft.Types.tacAlterar: Result := lContagemFechamentoDao.alterar(Self);
+      Terasoft.Types.tacExcluir: Result := lContagemFechamentoDao.excluir(Self);
     end;
-
   finally
-    lAdmCartaoDao.Free;
+    lContagemFechamentoDao.Free;
   end;
 end;
 

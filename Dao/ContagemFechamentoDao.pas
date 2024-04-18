@@ -59,7 +59,7 @@ type
     function excluir(AContagemFechamentoModel: TContagemFechamentoModel): String;
 
 	  procedure obterTotalRegistros;
-    procedure obterLista;
+    function obterLista: TFDMemTable;
     procedure setParams(var pQry: TFDQuery; pContagemFechamentoModel: TContagemFechamentoModel);
 
     function carregaClasse(pId: String): TContagemFechamentoModel;
@@ -83,27 +83,12 @@ begin
   Result   := lModel;
 
   try
-    lQry.Open('select * from admcartao where id = '+pId);
+    lQry.Open('select * from contagem_fechamento where id = '+pId);
 
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID                    := lQry.FieldByName('ID').AsString;
-    lModel.NOME_ADM              := lQry.FieldByName('NOME_ADM').AsString;
-    lModel.CREDITO_ADM           := lQry.FieldByName('CREDITO_ADM').AsString;
-    lModel.DEBITO_ADM            := lQry.FieldByName('DEBITO_ADM').AsString;
-    lModel.PARCELADO_ADM         := lQry.FieldByName('PARCELADO_ADM').AsString;
-    lModel.STATUS                := lQry.FieldByName('STATUS').AsString;
-    lModel.COMISSAO_ADM          := lQry.FieldByName('COMISSAO_ADM').AsString;
-    lModel.LOJA                  := lQry.FieldByName('LOJA').AsString;
-    lModel.GERENCIADOR           := lQry.FieldByName('GERENCIADOR').AsString;
-    lModel.VENCIMENTO_DIA_SEMANA := lQry.FieldByName('VENCIMENTO_DIA_SEMANA').AsString;
-    lModel.PORTADOR_ID           := lQry.FieldByName('PORTADOR_ID').AsString;
-    lModel.IMAGEM                := lQry.FieldByName('IMAGEM').AsString;
-    lModel.TAXA                  := lQry.FieldByName('TAXA').AsString;
-    lModel.SYSTIME               := lQry.FieldByName('SYSTIME').AsString;
-    lModel.NOME_WEB              := lQry.FieldByName('NOME_WEB').AsString;
-    lModel.CONCILIADORA_ID       := lQry.FieldByName('CONCILIADORA_ID').AsString;
+
 
     Result := lModel;
   finally
@@ -134,6 +119,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
+    AContagemFechamentoModel.ID := vIConexao.Generetor('GEN_CONTAGEM_FECHAMENTO', true);
     setParams(lQry, AContagemFechamentoModel);
     lQry.Open;
 
@@ -219,16 +205,31 @@ begin
   end;
 end;
 
-procedure TContagemFechamentoDao.obterLista;
+function TContagemFechamentoDao.obterLista: TFDMemTable;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  lMemTable: TFDMemTable;
 begin
-  lQry := vIConexao.CriarQuery;
-
   try
+    lQry := vIConexao.CriarQuery;
 
+    lSql := 'select contagem_fechamento.id,                  '+SLineBreak+
+            '       contagem_fechamento.portador_id,         '+SLineBreak+
+            '       contagem_fechamento.bandeira_id,         '+SLineBreak+
+            '       contagem_fechamento.valor,               '+SLineBreak+
+            '       contagem_fechamento.datahora,            '+SLineBreak+
+            '       contagem_fechamento.caixa_ctr_id,        '+SLineBreak+
+            '       contagem_fechamento.justificativa        '+SLineBreak+
+            '  from contagem_fechamento                      '+SLineBreak+
+            ' where 1=1                                      ';
+
+    lSql := lSql + where;
+
+    lQry.Open(lSql);
+
+    Result := vConstrutor.atribuirRegistros(lQry);
+    obterTotalRegistros;
   finally
     lQry.Free;
   end;
