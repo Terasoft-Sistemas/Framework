@@ -57,6 +57,7 @@ type
     function incluir(AContagemFechamentoModel: TContagemFechamentoModel): String;
     function alterar(AContagemFechamentoModel: TContagemFechamentoModel): String;
     function excluir(AContagemFechamentoModel: TContagemFechamentoModel): String;
+    procedure excluirContagem(pIdCaixa: String);
 
 	  procedure obterTotalRegistros;
     function obterLista: TFDMemTable;
@@ -164,6 +165,19 @@ begin
    lQry.ExecSQL;
    Result := AContagemFechamentoModel.ID;
 
+  finally
+    lQry.Free;
+  end;
+end;
+
+procedure TContagemFechamentoDao.excluirContagem(pIdCaixa: String);
+var
+  lQry : TFDQuery;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+   lQry.ExecSQL('delete from CONTAGEM_FECHAMENTO where CAIXA_CTR_ID = :CAIXA_CTR_ID',[pIdCaixa]);
   finally
     lQry.Free;
   end;

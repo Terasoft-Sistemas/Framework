@@ -60,11 +60,12 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function Incluir: String;
+    function Incluir     : String;
     function Alterar(pID : String): TContagemFechamentoModel;
     function Excluir(pID : String): String;
     function Salvar      : String;
     function obterLista  : TFDMemTable;
+    procedure ExcluirContagem(pIdCaixa : String);
 
     function carregaClasse(pId: String): TContagemFechamentoModel;
     function obterContagem(pIdAberturaCaixa: String): TFDMemTable;
@@ -133,13 +134,25 @@ begin
   Result := self.Salvar
 end;
 
+procedure TContagemFechamentoModel.ExcluirContagem(pIdCaixa: String);
+var
+  lContagemFechamentoDao : TContagemFechamentoDao;
+begin
+  lContagemFechamentoDao := TContagemFechamentoDao.Create(vIConexao);
+  try
+    lContagemFechamentoDao.excluirContagem(pIdCaixa);
+  finally
+    lContagemFechamentoDao.Free;
+  end;
+end;
+
 function TContagemFechamentoModel.Incluir: String;
 var
   lContagemFechamentoModel : TContagemFechamentoModel;
 begin
   lContagemFechamentoModel := TContagemFechamentoModel.Create(vIConexao);
   try
-    self.Acao := tacIncluir ;
+    self.Acao := tacIncluir;
     Result    := self.Salvar;
   finally
     lContagemFechamentoModel.Free;
