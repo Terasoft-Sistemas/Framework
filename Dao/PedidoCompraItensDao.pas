@@ -263,15 +263,17 @@ begin
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
 
-      lSQL := 'select '+ lPaginacao +' pedidocompraitens.*,                               ' +sLineBreak+
-              '       produto.nome_pro produto_nome,                                      ' +sLineBreak+
-              '       produto.codigo_for fornecedor_codigo,                               ' +sLineBreak+
-              '       produto.saldomin_pro produto_saldo_min,                             ' +sLineBreak+
-              '       cfop.cfop cfop                                                      ' +sLineBreak+
-              '  from pedidocompraitens                                                   ' +sLineBreak+
-              '  left join produto on pedidocompraitens.codigo_pro = produto.codigo_pro   ' +sLineBreak+
-              '  left join cfop on pedidocompraitens.cfop_id = cfop.id                    ' +sLineBreak+
-              ' where 1=1                                                                 ' +sLineBreak;
+      lSQL := 'select '+ lPaginacao +' pedidocompraitens.*,                                       ' +
+              '       (pedidocompraitens.quantidade_ped - quantidade_ate) quantidade_pendente,    ' +
+              '       produto.nome_pro produto_nome,                                              ' +
+              '       produto.unidade_pro,                                                        ' +
+              '       produto.codigo_for fornecedor_codigo,                                       ' +
+              '       produto.saldomin_pro produto_saldo_min,                                     ' +
+              '       cfop.cfop cfop                                                              ' +
+              '  from pedidocompraitens                                                           ' +
+              '  left join produto on pedidocompraitens.codigo_pro = produto.codigo_pro           ' +
+              '  left join cfop on pedidocompraitens.cfop_id = cfop.id                            ' +
+              ' where 1=1                                                                         ';
 
     lSql := lSql + where;
 
