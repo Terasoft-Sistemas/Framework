@@ -539,7 +539,7 @@ procedure TEntradaItensModel.getDadosProduto;
 var
   lProdutosModel : TProdutosModel;
 begin
-  if self.FCODIGO_PRO <> '' then
+  if (self.FCODIGO_PRO = '') or (self.FCODIGO_PRO = '999999') then
     exit;
 
   lProdutosModel := TProdutosModel.Create(vIConexao);
@@ -548,10 +548,8 @@ begin
     lProdutosModel.obterLista;
 
     if lProdutosModel.TotalRecords = 0 then
-      CriaException('Erro: Produto não encontrado');
+      CriaException('Erro: Produto não encontrado (TEntradaItensModel.getDadosProduto)');
 
-    self.FIPI_ENT              := lProdutosModel.ProdutossLista[0].IPI_PRO;
-    self.FVALORUNI_ENT         := lProdutosModel.ProdutossLista[0].CUSTOULTIMO_PRO;
     self.FVENDA_PRO            := lProdutosModel.ProdutossLista[0].VENDA_PRO;
     self.FVENDA2_PRO           := lProdutosModel.ProdutossLista[0].VENDA_PRO;
     self.FMARGEM_PRO           := lProdutosModel.ProdutossLista[0].MARGEM_PRO;
