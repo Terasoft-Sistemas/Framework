@@ -264,7 +264,7 @@ begin
       lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
 
       lSQL := 'select '+ lPaginacao +' pedidocompraitens.*,                                       ' +
-              '       (pedidocompraitens.quantidade_ped - quantidade_ate) as quantidade_pendente, ' +
+              '       (pedidocompraitens.quantidade_ped - quantidade_ate) quantidade_pendente,    ' +
               '       produto.nome_pro produto_nome,                                              ' +
               '       produto.unidade_pro,                                                        ' +
               '       produto.codigo_for fornecedor_codigo,                                       ' +
