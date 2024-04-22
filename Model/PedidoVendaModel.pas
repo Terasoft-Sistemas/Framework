@@ -851,6 +851,12 @@ begin
     lNFModel.TIPO_FRETE            := IfThen(pModelo = '55', self.FTIPO_FRETE, '9');
     lNumeroNFe := lNFModel.Salvar;
 
+    lNFModel := lNFModel.carregaClasse(lNumeroNFe);
+
+    self.Acao       := tacAlterar;
+    self.FNUMERO_NF := lNFModel.NUMERO_ECF;
+    self.Salvar;
+
     lPedidoItensModel.IDPedidoVendaView := self.NUMERO_PED;
     lPedidoItensModel.obterLista;
 
@@ -1033,6 +1039,7 @@ begin
     lPedidoVendaLista.Free;
   end;
 end;
+
 procedure TPedidoVendaModel.RecalcularImpostos(pNumeroPedido: String);
 var
   lPedidoVendaLista      : TPedidoVendaDao;
