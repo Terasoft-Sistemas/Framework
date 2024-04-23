@@ -268,6 +268,7 @@ begin
               '       produto.nome_pro produto_nome,                                              ' +
               '       produto.unidade_pro,                                                        ' +
               '       produto.codigo_for fornecedor_codigo,                                       ' +
+              '       produto.saldo_pro produto_saldo,                                            ' +
               '       produto.saldomin_pro produto_saldo_min,                                     ' +
               '       cfop.cfop cfop                                                              ' +
               '  from pedidocompraitens                                                           ' +
