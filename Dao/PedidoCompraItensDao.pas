@@ -266,6 +266,7 @@ begin
               '	       ID,                                                                                       '+SLineBreak+
               '        CODIGO_PRO,                                                                               '+SLineBreak+
               '        QUANTIDADE_PENDENTE,                                                                      '+SLineBreak+
+              '        QUANTIDADE_ATENDIDA,                                                                      '+SLineBreak+
               '        PRODUTO_NOME,                                                                             '+SLineBreak+
               '        UNIDADE_PRO,                                                                              '+SLineBreak+
               '        FORNECEDOR_CODIGO,                                                                        '+SLineBreak+
@@ -296,6 +297,7 @@ begin
               '             id,                                                                                  '+SLineBreak+
               '             codigo_pro,                                                                          '+SLineBreak+
               '             quantidade_pendente,                                                                 '+SLineBreak+
+              '             quantidade_atendida,                                                                 '+SLineBreak+
               '             produto_nome,                                                                        '+SLineBreak+
               '             unidade_pro,                                                                         '+SLineBreak+
               '             fornecedor_codigo,                                                                   '+SLineBreak+
@@ -334,6 +336,7 @@ begin
               '                  i.id,                                                                           '+SLineBreak+
               '                  i.codigo_pro,                                                                   '+SLineBreak+
               '                  i.quantidade_ped - quantidade_ate quantidade_pendente,                          '+SLineBreak+
+              '                  i.quantidade_ate quantidade_atendida,                                           '+SLineBreak+
               '                  p.nome_pro produto_nome,                                                        '+SLineBreak+
               '                  p.unidade_pro,                                                                  '+SLineBreak+
               '                  p.codigo_for fornecedor_codigo,                                                 '+SLineBreak+
