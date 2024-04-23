@@ -231,6 +231,7 @@ begin
     lSQL :=
     ' select                                                       '+#13+
     ' c.cnpj_cpf_cli CNPJCPF,                                      '+#13+
+    ' pv.cnpj_cpf_consumidor cpf_consumidor,                       '+#13+
     ' c.inscricao_rg_cli IE,                                       '+#13+
     ' c.SUFRAMA ISUF,                                              '+#13+
     ' c.CONSUMIDOR_FINAL indFinal,                                 '+#13+
@@ -254,9 +255,11 @@ begin
     '                                                              '+#13+
     ' left join clientes c on c.codigo_cli = n.codigo_cli          '+#13+
     ' left join pais p on p.id = c.pais_id                         '+#13+
+    ' left join pedidovenda pv on pv.numero_nf = n.numero_ecf      '+#13+
     '                                                              '+#13+
     ' where                                                        '+#13+
     '     n.numero_nf = '+QuotedStr(pidNF);
+
     lQry.Open(lSQL);
     with NotaF.NFe.Dest do
     begin
@@ -281,7 +284,7 @@ begin
       begin
         indIEDest := inNaoContribuinte;
         IE        := '';
-        //Colocar o cpf
+        CNPJCPF   := lQry.FieldByName('cpf_consumidor').AsString;
       end;
     end;
 

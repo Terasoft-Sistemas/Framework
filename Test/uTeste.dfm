@@ -1004,6 +1004,15 @@ object Form1: TForm1
         TabOrder = 9
         OnClick = Button99Click
       end
+      object Button100: TButton
+        Left = 391
+        Top = 78
+        Width = 182
+        Height = 42
+        Caption = 'PedidoCompraItens ObterLista'
+        TabOrder = 10
+        OnClick = Button100Click
+      end
     end
     object TabSheet7: TTabSheet
       Caption = 'Produtos'
