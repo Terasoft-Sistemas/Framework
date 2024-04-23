@@ -217,7 +217,7 @@ type
     function baixar(pValor: String): String;
     function baixarCreditoCliente(pValor: Double) : Boolean;
 
-    function recebimentoCartao(pValor, pIdAdmCartao, pVencimento: String; pUsuario: String; pIdTef: String = ''): String;
+    function recebimentoCartao(pValor, pIdAdmCartao, pVencimento: String; pIdTef: String = ''): String;
 
     function gerarContasReceberCartao(pValor, pPortador, pIdAdmCartao, pObs, pObsComprementar: String; pParcelas: Integer): String;
 
@@ -731,16 +731,17 @@ begin
   end;
 end;
 
-function TContasReceberItensModel.recebimentoCartao(pValor, pIdAdmCartao, pVencimento: String; pUsuario: String; pIdTef: String = ''): String;
+function TContasReceberItensModel.recebimentoCartao(pValor, pIdAdmCartao, pVencimento: String; pIdTef: String = ''): String;
 var
   lRecebimentoCartaoModel: TRecebimentoCartaoModel;
 begin
   lRecebimentoCartaoModel := TRecebimentoCartaoModel.Create(vIConexao);
+
   try
     lRecebimentoCartaoModel.Acao := tacIncluir;
     if pIdTef <> '' then
       lRecebimentoCartaoModel.TEF_ID       := pIdTef;
-    lRecebimentoCartaoModel.USUARIO_ID     := pUsuario;
+    lRecebimentoCartaoModel.USUARIO_ID     := vIConexao.getUSer.ID;
     lRecebimentoCartaoModel.DATA_HORA      := DateToStr(vIConexao.DataServer) + TimeToStr(vIConexao.HoraServer);
     lRecebimentoCartaoModel.CLIENTE_ID     := self.FCODIGO_CLI;
     lRecebimentoCartaoModel.FATURA         := self.FFATURA_REC;

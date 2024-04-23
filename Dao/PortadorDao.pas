@@ -243,49 +243,62 @@ end;
 
 procedure TPortadorDao.obterLista;
 var
-  lQry: TFDQuery;
-  lSQL:String;
-  i: INteger;
+  lQry : TFDQuery;
+  lSQL : String;
+  i    : INteger;
 begin
   lQry := vIConexao.CriarQuery;
   FPortadorsLista := TObjectList<TPortadorModel>.Create;
+
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lSql := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
     else
       lSql := 'select ';
+
     lSQL := lSQL +
                   '       portador.codigo_port,         '+
                   '       portador.nome_port,           '+
                   '       portador.banco_baixa_direta,  '+
-                  '       portador.receita_conta_id     '+
+                  '       portador.receita_conta_id,    '+
+                  '       portador.tpag_nfe             '+
                   '  from portador                      '+
                   ' where 1=1                           ';
+
     lSql := lSql + where;
+
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
+
     lQry.Open(lSQL);
+
     i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
       FPortadorsLista.Add(TPortadorModel.Create(vIConexao));
       i := FPortadorsLista.Count -1;
+
       FPortadorsLista[i].CODIGO_PORT          := lQry.FieldByName('CODIGO_PORT').AsString;
       FPortadorsLista[i].BANCO_BAIXA_DIRETA   := lQry.FieldByName('BANCO_BAIXA_DIRETA').AsString;
       FPortadorsLista[i].RECEITA_CONTA_ID     := lQry.FieldByName('RECEITA_CONTA_ID').AsString;
       FPortadorsLista[i].NOME_PORT            := lQry.FieldByName('NOME_PORT').AsString;
+      FPortadorsLista[i].TPAG_NFE             := lQry.FieldByName('TPAG_NFE').AsString;
+
       lQry.Next;
     end;
+
     obterTotalRegistros;
   finally
     lQry.Free;
   end;
 end;
+
 procedure TPortadorDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
 end;
+
 procedure TPortadorDao.SetPortadorsLista(const Value: TObjectList<TPortadorModel>);
 begin
   FPortadorsLista := Value;
