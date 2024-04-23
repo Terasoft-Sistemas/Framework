@@ -38,7 +38,7 @@ interface
       NFE_XML_PATH                         : String;
       NFE_SALVAR_PATH                      : String;
       NFE_SCHEMAS_PATH                     : String;
-      EMPRESA_CERTIFICADO_PATH             : String;
+      EMPRESA_CERTIFICADO_PATH             : AnsiString;
       EMPRESA_CERTIFICADO_SENHA            : String;
       NFCE_TOKEN                           : String;
       NFE_LOGO_PATH                        : String;

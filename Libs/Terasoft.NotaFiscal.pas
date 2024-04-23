@@ -104,7 +104,12 @@ uses
 function TNotaFiscal.configuraComponenteNFe: Boolean;
 begin
   ACBrNFe.NotasFiscais.Clear;
-  ACBrNFe.Configuracoes.Certificados.ArquivoPFX  := vConfiguracoesNotaFiscal.certificadoArquivoPFX;
+
+  if(Length(vConfiguracoesNotaFiscal.certificadoArquivoPFX)>256) or not FileExists(vConfiguracoesNotaFiscal.certificadoArquivoPFX) then
+    ACBrNFe.Configuracoes.Certificados.DadosPFX  := vConfiguracoesNotaFiscal.certificadoArquivoPFX
+  else
+    ACBrNFe.Configuracoes.Certificados.ArquivoPFX  := vConfiguracoesNotaFiscal.certificadoArquivoPFX;
+
   ACBrNFe.Configuracoes.Certificados.Senha       := vConfiguracoesNotaFiscal.certificadoSenha;
   ACBrNFe.SSL.DescarregarCertificado;
 

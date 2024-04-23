@@ -37,7 +37,7 @@ type
     function arquivosPathInu: String;
     function arquivosPathEvento: String;
     function arquivosPathSalvar: String;
-    function certificadoArquivoPFX: String;
+    function certificadoArquivoPFX: AnsiString;
     Function certificadoSenha: String;
     function DANFETipoDANFE: TpcnTipoImpressao;
     function DANFEPathLogo(pMOdNF: Integer): String;
@@ -178,7 +178,7 @@ begin
   Result := True;
 end;
 
-function TConfiguracoesNotaFiscal.certificadoArquivoPFX: String;
+function TConfiguracoesNotaFiscal.certificadoArquivoPFX: AnsiString;
 begin
   Result := vIConexao.getConfiguracoes.EMPRESA_CERTIFICADO_PATH;
 end;
