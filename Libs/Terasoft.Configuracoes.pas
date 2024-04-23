@@ -11,6 +11,8 @@ uses
   Terasoft.Types,
   Interfaces.Conexao;
 
+  {$i FuncoesConfigSCI.inc}
+
   type
     TerasoftConfiguracoes = class
 
