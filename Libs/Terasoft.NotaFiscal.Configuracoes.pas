@@ -180,7 +180,7 @@ end;
 
 function TConfiguracoesNotaFiscal.certificadoArquivoPFX: AnsiString;
 begin
-  Result := vIConexao.getConfiguracoes.EMPRESA_CERTIFICADO_PATH;
+  Result := vIConexao.getConfiguracoes.EMPRESA_CERTIFICADO;
 end;
 
 function TConfiguracoesNotaFiscal.certificadoSenha: String;

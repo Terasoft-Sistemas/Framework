@@ -490,10 +490,35 @@ begin
 end;
 
 function TPedidoItensModel.Excluir(pID: String): String;
+var
+  lPedidoItensModel : TPedidoItensModel;
+  lItem : Integer;
 begin
-  self.FID  := pID;
-  self.Acao := tacExcluir;
-  Result    := self.Salvar;
+
+  lPedidoItensModel := TPedidoItensModel.Create(vIConexao);
+  try
+    self      := self.carregaClasse(pID);
+    self.Acao := tacExcluir;
+    Result    := self.Salvar;
+
+    lPedidoItensModel.IDPedidoVendaView := self.FNUMERO_PED;
+    lPedidoItensModel.obterLista;
+
+    lItem := 1;
+
+    for lPedidoItensModel in lPedidoItensModel.FPedidoItenssLista do
+    begin
+      lPedidoItensModel.Acao := tacAlterar;
+      lPedidoItensModel.ITEM := lItem;
+      lPedidoItensModel.Salvar;
+
+      inc(lItem);
+    end;
+
+  finally
+    lPedidoItensModel.Free;
+  end;
+
 end;
 
 function TPedidoItensModel.Incluir: String;
