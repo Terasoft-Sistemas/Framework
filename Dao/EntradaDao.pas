@@ -212,7 +212,7 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL :=  vConstrutor.gerarUpdate('ENTRADA','NUMERO_ENT');
+  lSQL :=  vConstrutor.gerarUpdate('ENTRADA','ID');
 
   try
     lQry.SQL.Add(lSQL);
