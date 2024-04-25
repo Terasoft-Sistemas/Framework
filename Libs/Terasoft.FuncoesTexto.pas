@@ -580,7 +580,7 @@ var
   remove, final: string;
   I: Integer;
 begin
-  remove := ',.-/(){}[] ';
+  remove := '`~!@#$%^&*()-_+={}[]|\:;"<>,.?/'' ';
   final := '';
   for I := 1 to Length(texto) do
   begin
