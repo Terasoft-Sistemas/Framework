@@ -443,6 +443,7 @@ type
 
     function gerarEstoque: String;
     function cancelarEstoque: String;
+    procedure calcularComissao(pVendedor, pTipoVenda: String; pGerente: String = '');
 
     property PedidoItenssLista: TObjectList<TPedidoItensModel> read FPedidoItenssLista write SetPedidoItenssLista;
 
@@ -471,7 +472,8 @@ uses
   MovimentoModel,
   PedidoVendaModel,
   ProdutosModel,
-  UsuarioModel;
+  UsuarioModel, ComissaoVendedorModel, FireDAC.Comp.Client, ClienteModel,
+  GrupoComissaoFuncionarioModel;
 
 { TPedidoItensModel }
 
@@ -525,6 +527,134 @@ function TPedidoItensModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
   Result    := self.Salvar;
+end;
+
+procedure TPedidoItensModel.calcularComissao(pVendedor, pTipoVenda: String; pGerente: String = '');
+var
+  lComissaoVendedor         : TComissaoVendedorModel;
+  lTableComissao,
+  lTableProduto             : TFDMemTable;
+  lProdutosModel            : TProdutosModel;
+  lClienteModel             : TClienteModel;
+  lGrupoComissaoFuncionario : TGrupoComissaoFuncionarioModel;
+  lComissaoCliente          : Double;
+
+begin
+  lGrupoComissaoFuncionario := TGrupoComissaoFuncionarioModel.Create(vIConexao);
+  lComissaoVendedor         := TComissaoVendedorModel.Create(vIConexao);
+  lProdutosModel            := TProdutosModel.Create(vIConexao);
+  lClienteModel             := TClienteModel.Create(vIConexao);
+
+  try
+    lTableProduto    := lProdutosModel.obterComissao(self.FCODIGO_PRO);
+    lComissaoCliente := lClienteModel.comissaoCliente(self.FCODIGO_CLI);
+
+    if lTableProduto.fieldByName('TIPO_VENDA_COMISSAO_ID').AsString <> '' then
+    begin
+      lComissaoVendedor.WhereView := ' and comissao_vendedor.vendedor   = '+QuotedStr(pVendedor)+
+                                     ' and comissao_vendedor.tipo_venda = '+QuotedStr(lTableProduto.fieldByName('TIPO_VENDA_COMISSAO_ID').AsString);
+
+      lTableComissao := lComissaoVendedor.obterLista;
+
+      if lTableComissao.FieldByName('COMISSAO').AsFloat > 0 then
+      begin
+        self.Acao := tacAlterar;
+        self.COMISSAO_PERCENTUAL := lTableComissao.FieldByName('COMISSAO').AsString;
+        self.Salvar;
+      end;
+    end
+    else if lComissaoCliente > 0 then
+    begin
+      self.Acao := tacAlterar;
+      self.COMISSAO_PERCENTUAL := FloatToStr(lComissaoCliente);
+      self.Salvar;
+    end
+    else if lTableProduto.fieldByName('COMIS_PRO').AsFloat > 0 then
+    begin
+      self.Acao := tacAlterar;
+      self.COMISSAO_PERCENTUAL := lTableProduto.fieldByName('COMIS_PRO').AsString;
+      self.Salvar;
+    end
+    else if lTableProduto.fieldByName('GRUPO_COMISSAO_ID').AsString <> '' then
+    begin
+      lGrupoComissaoFuncionario.WhereView := ' and funcionario_grupo_comissao.grupo_comissao_id = '+ QuotedStr(lTableProduto.fieldByName('GRUPO_COMISSAO_ID').AsString) +
+                                             ' and funcionario_grupo_comissao.funcionario_id    = '+ QuotedStr(pVendedor);
+
+      lTableComissao := lGrupoComissaoFuncionario.ObterLista;
+
+      if lTableComissao.FieldByName('PERCENTUAL').AsFloat > 0 then
+      begin
+        self.Acao := tacAlterar;
+        self.COMISSAO_PERCENTUAL := lTableComissao.FieldByName('PERCENTUAL').AsString;
+        self.Salvar;
+      end;
+    end
+    else
+    begin
+      lComissaoVendedor.WhereView := ' and comissao_vendedor.vendedor   = '+QuotedStr(pVendedor)+
+                                     ' and comissao_vendedor.tipo_venda = '+QuotedStr(pTipoVenda);
+
+      lTableComissao := lComissaoVendedor.obterLista;
+
+      if lTableComissao.FieldByName('COMISSAO').AsFloat > 0 then
+      begin
+        self.Acao := tacAlterar;
+        self.COMISSAO_PERCENTUAL := lTableComissao.FieldByName('COMISSAO').AsString;
+        self.Salvar;
+      end;
+    end;
+
+    if pGerente = '' then
+      exit;
+
+    if lComissaoCliente > 0 then
+    begin
+      self.Acao := tacAlterar;
+      self.GERENTE_COMISSAO_PERCENTUAL := FloatToStr(lComissaoCliente);
+      self.Salvar;
+    end
+    else if lTableProduto.fieldByName('COMIS_PRO').AsFloat > 0 then
+    begin
+      self.Acao := tacAlterar;
+      self.GERENTE_COMISSAO_PERCENTUAL := lTableProduto.fieldByName('COMIS_PRO').AsString;
+      self.Salvar;
+    end
+    else if lTableProduto.fieldByName('GRUPO_COMISSAO_ID').AsString <> '' then begin
+
+      lGrupoComissaoFuncionario.WhereView := ' and funcionario_grupo_comissao.grupo_comissao_id = '+ QuotedStr(lTableProduto.fieldByName('GRUPO_COMISSAO_ID').AsString) +
+                                             ' and funcionario_grupo_comissao.funcionario_id    = '+ QuotedStr(pGerente);
+
+      lTableComissao := lGrupoComissaoFuncionario.ObterLista;
+
+      if lTableComissao.FieldByName('PERCENTUAL').AsFloat > 0 then
+      begin
+        self.Acao := tacAlterar;
+        self.GERENTE_COMISSAO_PERCENTUAL := lTableComissao.FieldByName('PERCENTUAL').AsString;
+        self.Salvar;
+      end;
+
+    end
+    else
+    begin
+      lComissaoVendedor.WhereView := ' and comissao_vendedor.vendedor   = '+QuotedStr(pGerente)+
+                                     ' and comissao_vendedor.tipo_venda = '+QuotedStr(pTipoVenda);
+
+      lTableComissao := lComissaoVendedor.obterLista;
+
+      if lTableComissao.FieldByName('COMISSAO').AsFloat > 0 then
+      begin
+        self.Acao := tacAlterar;
+        self.GERENTE_COMISSAO_PERCENTUAL := lTableComissao.FieldByName('COMISSAO').AsString;
+        self.Salvar;
+      end;
+    end;
+
+  finally
+    lGrupoComissaoFuncionario.Free;
+    lComissaoVendedor.Free;
+    lProdutosModel.Free;
+    lClienteModel.Free;
+  end;
 end;
 
 function TPedidoItensModel.cancelarEstoque: String;

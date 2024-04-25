@@ -61,6 +61,7 @@ type
     function ObterTabelaPreco : TFDMemTable;
     procedure obterLista;
     procedure obterListaCatalogo;
+    function obterComissao(pCodProduto: String): TFDMemTable;
 
     function obterSaldo(pIdProduto: String): Double;
     procedure subtrairSaldo(pIdProduto: String; pSaldo: Double);
@@ -485,6 +486,29 @@ begin
   Result   := lConexao.ExecSQLScalar('select barras_pro from produto where codigo_pro = '+ QuotedStr(pIdProduto));
 end;
 
+function TProdutosDao.obterComissao(pCodProduto: String): TFDMemTable;
+var
+  lQry      : TFDQuery;
+  lSql      : String;
+  lMemTable : TFDMemTable;
+begin
+  try
+    lQry := vIConexao.CriarQuery;
+
+    lSql := '  select tipo_venda_comissao_id,                  '+SlineBreak+
+            '         comis_pro,                               '+SlineBreak+
+            '         grupo_comissao_id                        '+SlineBreak+
+            '    from produto                                  '+SlineBreak+
+            '   where codigo_pro = '+ QuotedStr(pCodProduto);
+
+    lQry.Open(lSql);
+
+    Result := vConstrutor.atribuirRegistros(lQry);
+  finally
+    lQry.Free;
+  end;
+end;
+
 procedure TProdutosDao.obterLista;
 var
   lQry: TFDQuery;
@@ -535,7 +559,10 @@ begin
                     '        produto.cst_credito_cofins,                                                 '+SLineBreak+
                     '        produto.cst_credito_pis,                                                    '+SLineBreak+
                     '        produto.custoultimo_pro,                                                    '+SLineBreak+
-                    '        produto.ipi_pro                                                             '+SLineBreak+
+                    '        produto.ipi_pro,                                                            '+SLineBreak+
+                    '        produto.tipo_venda_comissao_id,                                             '+SLineBreak+
+                    '        produto.comis_pro,                                                          '+SLineBreak+
+                    '        produto.grupo_comissao_id                                                   '+SLineBreak+
                     '   from produto                                                                     '+SLineBreak+
                     '  inner join fornecedor on fornecedor.codigo_for = produto.codigo_for               '+SLineBreak+
                     '  inner join grupoproduto on grupoproduto.codigo_gru = produto.codigo_gru           '+SLineBreak+
@@ -560,42 +587,45 @@ begin
       FProdutossLista.Add(TProdutosModel.Create(vIConexao));
       i := FProdutossLista.Count -1;
 
-      FProdutossLista[i].CODIGO_PRO          := lQry.FieldByName('CODIGO_PRO').AsString;
-      FProdutossLista[i].NOME_PRO            := lQry.FieldByName('NOME_PRO').AsString;
-      FProdutossLista[i].BARRAS_PRO          := lQry.FieldByName('BARRAS_PRO').AsString;
-      FProdutossLista[i].VENDA_PRO           := lQry.FieldByName('VENDA_PRO').AsString;
-      FProdutossLista[i].CUSTOMEDIO_PRO      := lQry.FieldByName('CUSTOMEDIO_PRO').AsString;
-      FProdutossLista[i].NFCE_CFOP           := lQry.FieldByName('NFCE_CFOP').AsString;
-      FProdutossLista[i].FORNECEDOR_CODIGO   := lQry.FieldByName('FORNECEDOR_CODIGO').AsString;
-      FProdutossLista[i].CODIGO_FORNECEDOR   := lQry.FieldByName('CODIGO_FORNECEDOR').AsString;
-      FProdutossLista[i].MULTIPLOS           := lQry.FieldByName('MULTIPLOS').AsString;
-      FProdutossLista[i].LARGURA_M           := lQry.FieldByName('LARGURA_M').AsString;
-      FProdutossLista[i].ALTURA_M            := lQry.FieldByName('ALTURA_M').AsString;
-      FProdutossLista[i].PROFUNDIDADE_M      := lQry.FieldByName('PROFUNDIDADE_M').AsString;
-      FProdutossLista[i].PESO_LIQUIDO        := lQry.FieldByName('PESO_LIQUIDO').AsString;
-      FProdutossLista[i].PESO_PRO            := lQry.FieldByName('PESO_PRO').AsString;
-      FProdutossLista[i].APLICACAO_PRO       := lQry.FieldByName('APLICACAO_PRO').AsString;
-      FProdutossLista[i].EAN_14              := lQry.FieldByName('EAN_14').AsString;
-      FProdutossLista[i].LOCALIZACAO         := lQry.FieldByName('LOCALIZACAO').AsString;
-      FProdutossLista[i].CODLISTA_COD        := lQry.FieldByName('CODLISTA_COD').AsString;
-      FProdutossLista[i].UNIDADE_PRO         := lQry.FieldByName('UNIDADE_PRO').AsString;
-      FProdutossLista[i].GARANTIA_12         := lQry.FieldByName('GARANTIA_12').AsString;
-      FProdutossLista[i].GARANTIA_24         := lQry.FieldByName('GARANTIA_24').AsString;
-      FProdutossLista[i].DIVIZOR             := lQry.FieldByName('DIVIZOR').AsString;
-      FProdutossLista[i].MULTIPLICADOR       := lQry.FieldByName('MULTIPLICADOR').AsString;
-      FProdutossLista[i].SALDO_PRO           := lQry.FieldByName('SALDO_PRO').AsString;
-      FProdutossLista[i].NOME_FOR            := lQry.FieldByName('NOME_FOR').AsString;
-      FProdutossLista[i].NOME_GRU            := lQry.FieldByName('NOME_GRU').AsString;
-      FProdutossLista[i].NOME_SUB            := lQry.FieldByName('NOME_SUB').AsString;
-      FProdutossLista[i].NOME_MAR            := lQry.FieldByName('NOME_MAR').AsString;
-      FProdutossLista[i].TIPO_NOME           := lQry.FieldByName('TIPO_NOME').AsString;
-      FProdutossLista[i].MARGEM_PRO          := lQry.FieldByName('MARGEM_PRO').AsString;
-      FProdutossLista[i].ALIQ_CREDITO_PIS    := lQry.FieldByName('ALIQ_CREDITO_PIS').AsString;
-      FProdutossLista[i].ALIQ_CREDITO_COFINS := lQry.FieldByName('ALIQ_CREDITO_COFINS').AsString;
-      FProdutossLista[i].CST_CREDITO_COFINS  := lQry.FieldByName('CST_CREDITO_COFINS').AsString;
-      FProdutossLista[i].CST_CREDITO_PIS     := lQry.FieldByName('CST_CREDITO_PIS').AsString;
-      FProdutossLista[i].CUSTOULTIMO_PRO     := lQry.FieldByName('CUSTOULTIMO_PRO').AsString;
-      FProdutossLista[i].IPI_PRO             := lQry.FieldByName('IPI_PRO').AsString;
+      FProdutossLista[i].CODIGO_PRO              := lQry.FieldByName('CODIGO_PRO').AsString;
+      FProdutossLista[i].NOME_PRO                := lQry.FieldByName('NOME_PRO').AsString;
+      FProdutossLista[i].BARRAS_PRO              := lQry.FieldByName('BARRAS_PRO').AsString;
+      FProdutossLista[i].VENDA_PRO               := lQry.FieldByName('VENDA_PRO').AsString;
+      FProdutossLista[i].CUSTOMEDIO_PRO          := lQry.FieldByName('CUSTOMEDIO_PRO').AsString;
+      FProdutossLista[i].NFCE_CFOP               := lQry.FieldByName('NFCE_CFOP').AsString;
+      FProdutossLista[i].FORNECEDOR_CODIGO       := lQry.FieldByName('FORNECEDOR_CODIGO').AsString;
+      FProdutossLista[i].CODIGO_FORNECEDOR       := lQry.FieldByName('CODIGO_FORNECEDOR').AsString;
+      FProdutossLista[i].MULTIPLOS               := lQry.FieldByName('MULTIPLOS').AsString;
+      FProdutossLista[i].LARGURA_M               := lQry.FieldByName('LARGURA_M').AsString;
+      FProdutossLista[i].ALTURA_M                := lQry.FieldByName('ALTURA_M').AsString;
+      FProdutossLista[i].PROFUNDIDADE_M          := lQry.FieldByName('PROFUNDIDADE_M').AsString;
+      FProdutossLista[i].PESO_LIQUIDO            := lQry.FieldByName('PESO_LIQUIDO').AsString;
+      FProdutossLista[i].PESO_PRO                := lQry.FieldByName('PESO_PRO').AsString;
+      FProdutossLista[i].APLICACAO_PRO           := lQry.FieldByName('APLICACAO_PRO').AsString;
+      FProdutossLista[i].EAN_14                  := lQry.FieldByName('EAN_14').AsString;
+      FProdutossLista[i].LOCALIZACAO             := lQry.FieldByName('LOCALIZACAO').AsString;
+      FProdutossLista[i].CODLISTA_COD            := lQry.FieldByName('CODLISTA_COD').AsString;
+      FProdutossLista[i].UNIDADE_PRO             := lQry.FieldByName('UNIDADE_PRO').AsString;
+      FProdutossLista[i].GARANTIA_12             := lQry.FieldByName('GARANTIA_12').AsString;
+      FProdutossLista[i].GARANTIA_24             := lQry.FieldByName('GARANTIA_24').AsString;
+      FProdutossLista[i].DIVIZOR                 := lQry.FieldByName('DIVIZOR').AsString;
+      FProdutossLista[i].MULTIPLICADOR           := lQry.FieldByName('MULTIPLICADOR').AsString;
+      FProdutossLista[i].SALDO_PRO               := lQry.FieldByName('SALDO_PRO').AsString;
+      FProdutossLista[i].NOME_FOR                := lQry.FieldByName('NOME_FOR').AsString;
+      FProdutossLista[i].NOME_GRU                := lQry.FieldByName('NOME_GRU').AsString;
+      FProdutossLista[i].NOME_SUB                := lQry.FieldByName('NOME_SUB').AsString;
+      FProdutossLista[i].NOME_MAR                := lQry.FieldByName('NOME_MAR').AsString;
+      FProdutossLista[i].TIPO_NOME               := lQry.FieldByName('TIPO_NOME').AsString;
+      FProdutossLista[i].MARGEM_PRO              := lQry.FieldByName('MARGEM_PRO').AsString;
+      FProdutossLista[i].ALIQ_CREDITO_PIS        := lQry.FieldByName('ALIQ_CREDITO_PIS').AsString;
+      FProdutossLista[i].ALIQ_CREDITO_COFINS     := lQry.FieldByName('ALIQ_CREDITO_COFINS').AsString;
+      FProdutossLista[i].CST_CREDITO_COFINS      := lQry.FieldByName('CST_CREDITO_COFINS').AsString;
+      FProdutossLista[i].CST_CREDITO_PIS         := lQry.FieldByName('CST_CREDITO_PIS').AsString;
+      FProdutossLista[i].CUSTOULTIMO_PRO         := lQry.FieldByName('CUSTOULTIMO_PRO').AsString;
+      FProdutossLista[i].IPI_PRO                 := lQry.FieldByName('IPI_PRO').AsString;
+      FProdutossLista[i].TIPO_VENDA_COMISSAO_ID  := lQry.FieldByName('TIPO_VENDA_COMISSAO_ID').AsString;
+      FProdutossLista[i].COMIS_PRO               := lQry.FieldByName('COMIS_PRO').AsString;
+      FProdutossLista[i].GRUPO_COMISSAO_ID       := lQry.FieldByName('GRUPO_COMISSAO_ID').AsString;
 
       lQry.Next;
     end;

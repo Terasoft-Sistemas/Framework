@@ -893,6 +893,7 @@ type
     procedure obterLista;
     procedure obterListaCatalogo;
     function obterPromocao(pCodProduto: String): TFDMemTable;
+    function obterComissao(pCodProduto: String): TFDMemTable;
 
     function Incluir  : String;
     function Alterar(pID : String) : TProdutosModel;
@@ -1004,6 +1005,18 @@ begin
   lProdutosDao := TProdutosDao.Create(vIConexao);
   try
     Result := lProdutosDao.obterCodigoBarras(pIdProduto);
+  finally
+    lProdutosDao.Free;
+  end;
+end;
+
+function TProdutosModel.obterComissao(pCodProduto: String): TFDMemTable;
+var
+  lProdutosDao : TProdutosDao;
+begin
+  lProdutosDao := TProdutosDao.Create(vIConexao);
+  try
+    Result := lProdutosDao.obterComissao(pCodProduto);
   finally
     lProdutosDao.Free;
   end;

@@ -942,6 +942,7 @@ type
     function carregaClasse(pId: String): TClienteModel;
     function ufCliente(pId: String): Variant;
     function nomeCliente(pId: String): Variant;
+    function comissaoCliente(pId: String): Variant;
     function diasAtraso(pCodigoCliente: String): Variant;
 
     function ObterListaMemTable: TFDMemTable;
@@ -1003,6 +1004,18 @@ begin
   lClienteDao := TClienteDao.Create(vIConexao);
   try
     Result := lClienteDao.carregaClasse(pId);
+  finally
+    lClienteDao.Free;
+  end;
+end;
+
+function TClienteModel.comissaoCliente(pId: String): Variant;
+var
+  lClienteDao: TClienteDao;
+begin
+  lClienteDao := TClienteDao.Create(vIConexao);
+  try
+    Result    := lClienteDao.comissaoCliente(pId);
   finally
     lClienteDao.Free;
   end;

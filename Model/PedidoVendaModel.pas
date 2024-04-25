@@ -519,7 +519,8 @@ uses
   NFItensModel,
   ProdutosModel,
   CFOPModel,
-  EmpresaModel, ComissaoVendedorModel, FireDAC.Comp.Client;
+  EmpresaModel,
+  FireDAC.Comp.Client;
 
 { TPedidoVendaModel }
 
@@ -597,12 +598,9 @@ var
   lPedidoVendaModel : TPedidoVendaModel;
   lPedidoItensModel,
   lModel            : TPedidoItensModel;
-  lComissaoVendedor : TComissaoVendedorModel;
-  lTableComissao    : TFDMemTable;
 begin
   lPedidoVendaModel := TPedidoVendaModel.Create(vIConexao);
   lPedidoItensModel := TPedidoItensModel.Create(vIConexao);
-  lComissaoVendedor := TComissaoVendedorModel.Create(vIConexao);
 
   try
     lPedidoVendaModel := lPedidoVendaModel.carregaClasse(self.FNUMERO_PED);
@@ -611,31 +609,18 @@ begin
     lPedidoVendaModel.STATUS     := 'P';
     lPedidoVendaModel.Salvar;
 
-    lComissaoVendedor.WhereView := ' and comissao_vendedor.vendedor   = '+QuotedStr(lPedidoVendaModel.CODIGO_VEN)+
-                                   ' and comissao_vendedor.tipo_venda = '+QuotedStr(lPedidoVendaModel.CODIGO_TIP);
-
-    lTableComissao := lComissaoVendedor.obterLista;
-
     lPedidoItensModel.IDPedidoVendaView := lPedidoVendaModel.NUMERO_PED;
     lPedidoItensModel.obterLista;
 
     for lModel in lPedidoItensModel.PedidoItenssLista do
     begin
       lModel.gerarEstoque;
-
-      if lTableComissao.RecordCount > 0 then
-      begin
-        lModel.Acao := tacAlterar;
-        lModel.COMISSAO_PERCENTUAL := lTableComissao.FieldByName('COMISSAO').AsString;
-        lModel.COMISSAO_PED        := FloatToStr(lTableComissao.FieldByName('COMISSAO').AsFloat / 100  * (lModel.QTDE_CALCULADA * lModel.VALORUNITARIO_PED));
-        lModel.Salvar;
-      end;
+      lModel.calcularComissao(lPedidoVendaModel.CODIGO_VEN, lPedidoVendaModel.CODIGO_TIP, lPedidoVendaModel.GERENTE_ID);
     end;
 
   finally
     lPedidoVendaModel.Free;
     lPedidoItensModel.Free;
-    lComissaoVendedor.Free;
   end;
 end;
 

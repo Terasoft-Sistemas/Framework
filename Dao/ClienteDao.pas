@@ -64,6 +64,7 @@ type
     function carregaClasse(pId: String): TClienteModel;
     function ufCliente(pId: String): Variant;
     function nomeCliente(pId: String): Variant;
+    function comissaoCliente(pId: String): Variant;
     function diasAtraso(pCodigoCliente: String): Variant;
 
     function ObterListaMemTable: TFDMemTable;
@@ -396,6 +397,11 @@ begin
   end;
 end;
 
+function TClienteDao.comissaoCliente(pId: String): Variant;
+begin
+  Result := vIConexao.getConnection.ExecSQLScalar('select coalesce(COMISSAO, 0) from CLIENTES where CODIGO_CLI = '+ QuotedStr(pId));
+end;
+
 constructor TClienteDao.Create(pIConexao : Iconexao);
 begin
   vIConexao   := pIConexao;
@@ -537,15 +543,21 @@ begin
       lSql := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
     else
       lSql := 'select ';
+
     lSQL := lSQL +
       '       clientes.*            '+
 	    '  from clientes              '+
       ' where 1=1                   ';
+
     lSql := lSql + where;
+
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
+
     lQry.Open(lSQL);
+
     i := 0;
+
     lQry.First;
     while not lQry.Eof do
     begin

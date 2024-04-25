@@ -1,9 +1,12 @@
 unit Terasoft.FuncoesTexto;
+
 interface
+
 uses
   Classes,
   Terasoft.Types,
   DB;
+
   function textoEntreTags ( Texto, TagInicio, TagFim: String; PrimeiraOcorrencia: PInteger = nil; caseSensitive: boolean = true ): string;
   function validaCaracteresArquivo(Arquivo: String): String;
   function converteXMLNFeUTF8 ( conteudo: string; somenteUTF: boolean = false ): string;
