@@ -232,8 +232,8 @@ end;
 
 procedure TPedidoCompraItensDao.obterTotalRegistros;
 var
-  lQry: TFDQuery;
-  lSQL:String;
+  lQry : TFDQuery;
+  lSQL : String;
 begin
   try
     lQry := vIConexao.CriarQuery;
@@ -277,6 +277,7 @@ begin
               '        QUANTIDADE,                                                                               '+SLineBreak+
               '        VALOR_UNITARIO,                                                                           '+SLineBreak+
               '        PERCENTUAL_DESCONTO,                                                                      '+SLineBreak+
+              '        VALOR_DESCONTO,                                                                           '+SLineBreak+
               '        VALOR_OUTRAS_DESPESAS,                                                                    '+SLineBreak+
               '        VALOR_BASE_IPI,                                                                           '+SLineBreak+
               '        ALIQUOTA_IPI,                                                                             '+SLineBreak+
@@ -308,6 +309,7 @@ begin
               '             quantidade,                                                                          '+SLineBreak+
               '             valor_unitario,                                                                      '+SLineBreak+
               '             cast(valor_desconto / valor_total * 100 as numeric(18,2)) percentual_desconto,       '+SLineBreak+
+              '             valor_desconto,                                                                      '+SLineBreak+
               '             valor_outras_despesas,                                                               '+SLineBreak+
               '             valor_base_ipi,                                                                      '+SLineBreak+
               '             aliquota_ipi,                                                                        '+SLineBreak+

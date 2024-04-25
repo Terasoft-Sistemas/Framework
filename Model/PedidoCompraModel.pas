@@ -106,6 +106,7 @@ type
     FPRIMEIROVENC_PED: Variant;
     FPARCELAS_PED: Variant;
     FDATAPREV_PED: Variant;
+    FDATA_COTACAO: Variant;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -170,6 +171,7 @@ type
     procedure SetUSUARIO_PED(const Value: Variant);
     procedure SetVFCP(const Value: Variant);
     procedure SetVFCPST(const Value: Variant);
+    procedure SetDATA_COTACAO(const Value: Variant);
 
   public
 
@@ -225,6 +227,7 @@ type
     property PORTADOR_ID                     : Variant read FPORTADOR_ID write SetPORTADOR_ID;
     property SYSTIME                         : Variant read FSYSTIME write SetSYSTIME;
     property ENVIO_WHATSAPP                  : Variant read FENVIO_WHATSAPP write SetENVIO_WHATSAPP;
+    property DATA_COTACAO                    : Variant read FDATA_COTACAO write SetDATA_COTACAO;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -541,6 +544,11 @@ end;
 procedure TPedidoCompraModel.SetDATA_ACEITE(const Value: Variant);
 begin
   FDATA_ACEITE := Value;
+end;
+
+procedure TPedidoCompraModel.SetDATA_COTACAO(const Value: Variant);
+begin
+  FDATA_COTACAO := Value;
 end;
 
 procedure TPedidoCompraModel.SetDATA_PED(const Value: Variant);

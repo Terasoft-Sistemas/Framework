@@ -142,6 +142,7 @@ begin
     lModel.PORTADOR_ID                     := lQry.FieldByName('PORTADOR_ID').AsString;
     lModel.SYSTIME                         := lQry.FieldByName('SYSTIME').AsString;
     lModel.ENVIO_WHATSAPP                  := lQry.FieldByName('ENVIO_WHATSAPP').AsString;
+    lModel.DATA_COTACAO                    := lQry.FieldByName('DATA_COTACAO').AsString;
 
     Result := lModel;
   finally
@@ -230,13 +231,13 @@ begin
     lSQL := lSQL + FWhereView;
 
   if FIDRecordView <> 0  then
-    lSQL := lSQL + ' and PEDIDOCOMPRA.ID = ' +IntToStr(FIDRecordView);
+    lSQL := lSQL + ' and pc.id = ' +IntToStr(FIDRecordView);
 
   if FNumeroView <> ''  then
-    lSQL := lSQL + ' and PEDIDOCOMPRA.NUMERO_PED = ' +QuotedStr(FNumeroView);
+    lSQL := lSQL + ' and pc.numero_ped = ' +QuotedStr(FNumeroView);
 
   if FFornecedorVew <> ''  then
-    lSQL := lSQL + ' and PEDIDOCOMPRA.CODIGO_FOR = ' +QuotedStr(FFornecedorVew);
+    lSQL := lSQL + ' and pc.codigo_for = ' +QuotedStr(FFornecedorVew);
 
   Result := lSQL;
 end;
@@ -249,7 +250,7 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From PEDIDOCOMPRA where 1=1 ';
+    lSql := 'select count(*) records From PEDIDOCOMPRA PC where 1=1 ';
 
     lSql := lSql + where;
 
@@ -269,16 +270,60 @@ var
   lPaginacao : String;
 begin
   lQry := vIConexao.CriarQuery;
-
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
 
-      lSQL := '   select ' + lPaginacao + ' pedidocompra.*,                                  '+SLineBreak+
-              '          fornecedor.fantasia_for fornecedor_nome                             '+SLineBreak+
-              '          from pedidocompra                                                   '+SLineBreak+
-              '     left join fornecedor on fornecedor.codigo_for = pedidocompra.codigo_for  '+SLineBreak+
-              '    where 1=1                                                                 '+SLineBreak;
+      lSQL := ' select ' + lPaginacao + '                                                                     '+SLineBreak+
+              '        pc.numero_ped,                                                                         '+SLineBreak+
+              '        pc.codigo_for,                                                                         '+SLineBreak+
+              '        pc.data_ped,                                                                           '+SLineBreak+
+              '        pc.dataprev_ped,                                                                       '+SLineBreak+
+              '        pc.parcelas_ped,                                                                       '+SLineBreak+
+              '        pc.primeirovenc_ped,                                                                   '+SLineBreak+
+              '        pc.frete_ped,                                                                          '+SLineBreak+
+              '        pc.icms_ped,                                                                           '+SLineBreak+
+              '        pc.outros_ped,                                                                         '+SLineBreak+
+              '        pc.desc_ped,                                                                           '+SLineBreak+
+              '        pc.total_ped,                                                                          '+SLineBreak+
+              '        pc.observacao_ped,                                                                     '+SLineBreak+
+              '        pc.usuario_ped,                                                                        '+SLineBreak+
+              '        pc.status_ped,                                                                         '+SLineBreak+
+              '        pc.totalprodutos_ped,                                                                  '+SLineBreak+
+              '        pc.tipo_pro,                                                                           '+SLineBreak+
+              '        pc.dolar,                                                                              '+SLineBreak+
+              '        pc.condicoes_pag,                                                                      '+SLineBreak+
+              '        pc.id,                                                                                 '+SLineBreak+
+              '        pc.transportadora_id,                                                                  '+SLineBreak+
+              '        pc.status_id,                                                                          '+SLineBreak+
+              '        pc.autorizado,                                                                         '+SLineBreak+
+              '        pc.enviado,                                                                            '+SLineBreak+
+              '        pc.ipi_ped,                                                                            '+SLineBreak+
+              '        pc.st_ped,                                                                             '+SLineBreak+
+              '        pc.tipo_moeda_estrangeira,                                                             '+SLineBreak+
+              '        pc.pedido_fornecedor,                                                                  '+SLineBreak+
+              '        pc.data_aceite,                                                                        '+SLineBreak+
+              '        pc.autorizacao_estoque_status,                                                         '+SLineBreak+
+              '        pc.autorizacao_estoque_datahora,                                                       '+SLineBreak+
+              '        pc.autorizacao_estoque_obs,                                                            '+SLineBreak+
+              '        pc.autorizacao_financeiro_status,                                                      '+SLineBreak+
+              '        pc.autorizacao_financeiro_datahora,                                                    '+SLineBreak+
+              '        pc.autorizacao_financeiro_obs,                                                         '+SLineBreak+
+              '        pc.tipo_frete,                                                                         '+SLineBreak+
+              '        pc.base_icms,                                                                          '+SLineBreak+
+              '        pc.base_st,                                                                            '+SLineBreak+
+              '        pc.vfcp,                                                                               '+SLineBreak+
+              '        pc.vfcpst,                                                                             '+SLineBreak+
+              '        pc.frete_no_ipi,                                                                       '+SLineBreak+
+              '        pc.portador_id,                                                                        '+SLineBreak+
+              '        pc.autorizacao_estoque_usuario,                                                        '+SLineBreak+
+              '        pc.autorizacao_financeiro_usuario,                                                     '+SLineBreak+
+              '        usua_estoque.nome autorizacao_estoque_usuario_nome,                                    '+SLineBreak+
+              '        usua_financeiro.nome autorizacao_financeiro_usuario_nome                               '+SLineBreak+
+              '   from pedidocompra pc                                                                        '+SLineBreak+
+              '   left join usuario usua_estoque on usua_estoque.id = pc.autorizacao_estoque_usuario          '+SLineBreak+
+              '   left join usuario usua_financeiro on usua_financeiro.id = pc.autorizacao_financeiro_usuario '+SLineBreak+
+              '  where 1=1                                                                                    '+SLineBreak;
 
     lSql := lSql + where;
 

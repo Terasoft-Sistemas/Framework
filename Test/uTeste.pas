@@ -152,6 +152,7 @@ type
     Button98: TButton;
     Button99: TButton;
     Button100: TButton;
+    Button101: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -258,6 +259,7 @@ type
     procedure Button97Click(Sender: TObject);
     procedure Button98Click(Sender: TObject);
     procedure Button100Click(Sender: TObject);
+    procedure Button101Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -2866,6 +2868,22 @@ begin
   dsPedidoCompra.DataSet        := lTable;
   finally
     lPedidoCompraItens.Free;
+  end;
+end;
+
+procedure TForm1.Button101Click(Sender: TObject);
+var
+  lPedidoCompra : TPedidoCompraModel;
+  lTable  : TFDMemTable;
+begin
+  lPedidoCompra := TPedidoCompraModel.Create(vIConexao);
+  try
+    lPedidoCompra.NumeroView     := '000008';
+    lPedidoCompra.FornecedorView := '000000';
+    lTable                   := lPedidoCompra.obterLista;
+    dsPedidoCompra.DataSet   := lTable;
+  finally
+    lPedidoCompra.Free;
   end;
 end;
 
