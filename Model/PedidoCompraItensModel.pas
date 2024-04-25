@@ -65,6 +65,8 @@ type
     FQUANTIDADE_ATE: Variant;
     FNumeroView: String;
     FFornecedorView: String;
+    FVALOR_BASE_IPI: Variant;
+    FPERCENTUAL_DESCONTO: Variant;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -116,6 +118,8 @@ type
     procedure SetVST_N23(const Value: Variant);
     procedure SetFornecedorView(const Value: String);
     procedure SetNumeroView(const Value: String);
+    procedure SetPERCENTUAL_DESCONTO(const Value: Variant);
+    procedure SetVALOR_BASE_IPI(const Value: Variant);
 
   public
 
@@ -158,6 +162,8 @@ type
     property LARGURA_M               : Variant read FLARGURA_M write SetLARGURA_M;
     property PROFUNDIDADE_M          : Variant read FPROFUNDIDADE_M write SetPROFUNDIDADE_M;
     property RESERVA_ID              : Variant read FRESERVA_ID write SetRESERVA_ID;
+    property PERCENTUAL_DESCONTO     : Variant read FPERCENTUAL_DESCONTO write SetPERCENTUAL_DESCONTO;
+    property VALOR_BASE_IPI          : Variant read FVALOR_BASE_IPI write SetVALOR_BASE_IPI;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -388,6 +394,11 @@ begin
   FOrderView := Value
 end;
 
+procedure TPedidoCompraItensModel.SetPERCENTUAL_DESCONTO(const Value: Variant);
+begin
+  FPERCENTUAL_DESCONTO := Value;
+end;
+
 procedure TPedidoCompraItensModel.SetPICMS_N16(const Value: Variant);
 begin
   FPICMS_N16 := Value;
@@ -462,6 +473,11 @@ end;
 procedure TPedidoCompraItensModel.SetVALORUNI_PED(const Value: Variant);
 begin
   FVALORUNI_PED := Value;
+end;
+
+procedure TPedidoCompraItensModel.SetVALOR_BASE_IPI(const Value: Variant);
+begin
+  FVALOR_BASE_IPI := Value;
 end;
 
 procedure TPedidoCompraItensModel.SetVBCICMS_N15(const Value: Variant);

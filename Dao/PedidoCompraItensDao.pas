@@ -348,7 +348,7 @@ begin
               '                  i.valoruni_ped valor_unitario,                                                  '+SLineBreak+
               '                  coalesce(i.vlr_desconto, 0) valor_desconto,                                     '+SLineBreak+
               '                  i.vlr_outras valor_outras_despesas,                                             '+SLineBreak+
-              '                  i.quantidade_ped * i.valoruni_ped valor_base_ipi,                               '+SLineBreak+
+              '                  i.valor_base_ipi,                                                               '+SLineBreak+
               '                  i.ipi_ped aliquota_ipi,                                                         '+SLineBreak+
               '                  i.vipi_014 valor_ipi,                                                           '+SLineBreak+
               '                  i.vbcicms_n15 valor_base_icms,                                                  '+SLineBreak+

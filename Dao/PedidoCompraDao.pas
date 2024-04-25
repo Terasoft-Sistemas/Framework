@@ -308,6 +308,7 @@ begin
             '       quantidade_produtos,                                                                               '+SLineBreak+
             '       valor_total_produtos,                                                                              '+SLineBreak+
             '       valor_total_icms,                                                                                  '+SLineBreak+
+            '       valor_total_icms_st,                                                                               '+SLineBreak+
             '       valor_total_ipi,                                                                                   '+SLineBreak+
             '       valor_total_frete,                                                                                 '+SLineBreak+
             '       valor_total_outras_depesas,                                                                        '+SLineBreak+
@@ -320,6 +321,7 @@ begin
             '          quantidade_produtos,                                                                            '+SLineBreak+
             '          valor_total_produtos,                                                                           '+SLineBreak+
             '          valor_total_icms,                                                                               '+SLineBreak+
+            '          valor_total_icms_st,                                                                            '+SLineBreak+
             '          valor_total_ipi,                                                                                '+SLineBreak+
             '          valor_total_frete,                                                                              '+SLineBreak+
             '          valor_total_outras_depesas,                                                                     '+SLineBreak+
