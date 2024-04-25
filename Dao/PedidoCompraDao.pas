@@ -274,56 +274,59 @@ begin
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
 
-      lSQL := ' select ' + lPaginacao + '                                                                     '+SLineBreak+
-              '        pc.numero_ped,                                                                         '+SLineBreak+
-              '        pc.codigo_for,                                                                         '+SLineBreak+
-              '        pc.data_ped,                                                                           '+SLineBreak+
-              '        pc.dataprev_ped,                                                                       '+SLineBreak+
-              '        pc.parcelas_ped,                                                                       '+SLineBreak+
-              '        pc.primeirovenc_ped,                                                                   '+SLineBreak+
-              '        pc.frete_ped,                                                                          '+SLineBreak+
-              '        pc.icms_ped,                                                                           '+SLineBreak+
-              '        pc.outros_ped,                                                                         '+SLineBreak+
-              '        pc.desc_ped,                                                                           '+SLineBreak+
-              '        pc.total_ped,                                                                          '+SLineBreak+
-              '        pc.observacao_ped,                                                                     '+SLineBreak+
-              '        pc.usuario_ped,                                                                        '+SLineBreak+
-              '        pc.status_ped,                                                                         '+SLineBreak+
-              '        pc.totalprodutos_ped,                                                                  '+SLineBreak+
-              '        pc.tipo_pro,                                                                           '+SLineBreak+
-              '        pc.dolar,                                                                              '+SLineBreak+
-              '        pc.condicoes_pag,                                                                      '+SLineBreak+
-              '        pc.id,                                                                                 '+SLineBreak+
-              '        pc.transportadora_id,                                                                  '+SLineBreak+
-              '        pc.status_id,                                                                          '+SLineBreak+
-              '        pc.autorizado,                                                                         '+SLineBreak+
-              '        pc.enviado,                                                                            '+SLineBreak+
-              '        pc.ipi_ped,                                                                            '+SLineBreak+
-              '        pc.st_ped,                                                                             '+SLineBreak+
-              '        pc.tipo_moeda_estrangeira,                                                             '+SLineBreak+
-              '        pc.pedido_fornecedor,                                                                  '+SLineBreak+
-              '        pc.data_aceite,                                                                        '+SLineBreak+
-              '        pc.autorizacao_estoque_status,                                                         '+SLineBreak+
-              '        pc.autorizacao_estoque_datahora,                                                       '+SLineBreak+
-              '        pc.autorizacao_estoque_obs,                                                            '+SLineBreak+
-              '        pc.autorizacao_financeiro_status,                                                      '+SLineBreak+
-              '        pc.autorizacao_financeiro_datahora,                                                    '+SLineBreak+
-              '        pc.autorizacao_financeiro_obs,                                                         '+SLineBreak+
-              '        pc.tipo_frete,                                                                         '+SLineBreak+
-              '        pc.base_icms,                                                                          '+SLineBreak+
-              '        pc.base_st,                                                                            '+SLineBreak+
-              '        pc.vfcp,                                                                               '+SLineBreak+
-              '        pc.vfcpst,                                                                             '+SLineBreak+
-              '        pc.frete_no_ipi,                                                                       '+SLineBreak+
-              '        pc.portador_id,                                                                        '+SLineBreak+
-              '        pc.autorizacao_estoque_usuario,                                                        '+SLineBreak+
-              '        pc.autorizacao_financeiro_usuario,                                                     '+SLineBreak+
-              '        usua_estoque.nome autorizacao_estoque_usuario_nome,                                    '+SLineBreak+
-              '        usua_financeiro.nome autorizacao_financeiro_usuario_nome                               '+SLineBreak+
-              '   from pedidocompra pc                                                                        '+SLineBreak+
-              '   left join usuario usua_estoque on usua_estoque.id = pc.autorizacao_estoque_usuario          '+SLineBreak+
-              '   left join usuario usua_financeiro on usua_financeiro.id = pc.autorizacao_financeiro_usuario '+SLineBreak+
-              '  where 1=1                                                                                    '+SLineBreak;
+      lSQL := ' select ' + lPaginacao + '                                                                          '+SLineBreak+
+              '        pc.numero_ped,                                                                              '+SLineBreak+
+              '        pc.codigo_for,                                                                              '+SLineBreak+
+              '        pc.data_ped,                                                                                '+SLineBreak+
+              '        pc.dataprev_ped,                                                                            '+SLineBreak+
+              '        pc.parcelas_ped,                                                                            '+SLineBreak+
+              '        pc.primeirovenc_ped,                                                                        '+SLineBreak+
+              '        pc.frete_ped,                                                                               '+SLineBreak+
+              '        pc.icms_ped,                                                                                '+SLineBreak+
+              '        pc.outros_ped,                                                                              '+SLineBreak+
+              '        pc.desc_ped,                                                                                '+SLineBreak+
+              '        pc.total_ped,                                                                               '+SLineBreak+
+              '        pc.observacao_ped,                                                                          '+SLineBreak+
+              '        pc.usuario_ped,                                                                             '+SLineBreak+
+              '        pc.status_ped,                                                                              '+SLineBreak+
+              '        pc.totalprodutos_ped,                                                                       '+SLineBreak+
+              '        pc.tipo_pro,                                                                                '+SLineBreak+
+              '        pc.dolar,                                                                                   '+SLineBreak+
+              '        pc.condicoes_pag,                                                                           '+SLineBreak+
+              '        pc.id,                                                                                      '+SLineBreak+
+              '        pc.transportadora_id,                                                                       '+SLineBreak+
+              '        pc.status_id,                                                                               '+SLineBreak+
+              '        pc.autorizado,                                                                              '+SLineBreak+
+              '        pc.enviado,                                                                                 '+SLineBreak+
+              '        pc.ipi_ped,                                                                                 '+SLineBreak+
+              '        pc.st_ped,                                                                                  '+SLineBreak+
+              '        pc.tipo_moeda_estrangeira,                                                                  '+SLineBreak+
+              '        pc.pedido_fornecedor,                                                                       '+SLineBreak+
+              '        pc.data_aceite,                                                                             '+SLineBreak+
+              '        pc.autorizacao_estoque_status,                                                              '+SLineBreak+
+              '        pc.autorizacao_estoque_datahora,                                                            '+SLineBreak+
+              '        pc.autorizacao_estoque_obs,                                                                 '+SLineBreak+
+              '        pc.autorizacao_financeiro_status,                                                           '+SLineBreak+
+              '        pc.autorizacao_financeiro_datahora,                                                         '+SLineBreak+
+              '        pc.autorizacao_financeiro_obs,                                                              '+SLineBreak+
+              '        pc.tipo_frete,                                                                              '+SLineBreak+
+              '        pc.base_icms,                                                                               '+SLineBreak+
+              '        pc.base_st,                                                                                 '+SLineBreak+
+              '        pc.vfcp,                                                                                    '+SLineBreak+
+              '        pc.vfcpst,                                                                                  '+SLineBreak+
+              '        pc.frete_no_ipi,                                                                            '+SLineBreak+
+              '        pc.portador_id,                                                                             '+SLineBreak+
+              '        pc.systime,                                                                                 '+SLineBreak+
+              '        fornecedor.fantasia_for fornecedor_nome,                                                    '+SLineBreak+
+              '        pc.autorizacao_estoque_usuario,                                                             '+SLineBreak+
+              '        pc.autorizacao_financeiro_usuario,                                                          '+SLineBreak+
+              '        usua_estoque.nome autorizacao_estoque_usuario_nome,                                         '+SLineBreak+
+              '        usua_financeiro.nome autorizacao_financeiro_usuario_nome                                    '+SLineBreak+
+              '   from pedidocompra pc                                                                             '+SLineBreak+
+              '        left join fornecedor on fornecedor.codigo_for = pc.codigo_for                               '+SLineBreak+
+              '        left join usuario usua_estoque on usua_estoque.id = pc.autorizacao_estoque_usuario          '+SLineBreak+
+              '        left join usuario usua_financeiro on usua_financeiro.id = pc.autorizacao_financeiro_usuario '+SLineBreak+
+              '   where 1=1                                                                                        '+SLineBreak;
 
     lSql := lSql + where;
 
