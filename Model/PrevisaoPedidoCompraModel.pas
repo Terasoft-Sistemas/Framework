@@ -4,9 +4,11 @@ interface
 
 uses
   Terasoft.Types,
+  System.DateUtils,
   System.Generics.Collections,
   Interfaces.Conexao,
   FireDAC.Comp.Client,
+  Terasoft.FuncoesTexto,
   PedidoCompraModel;
 
 type
@@ -69,11 +71,9 @@ type
     function Salvar : String;
 
     function carregaClasse(pId : String): TPrevisaoPedidoCompraModel;
-
-    function ObterLista: TFDMemTable; overload;
-
     function SaldoFinanceiro(pNumeroPedido, pCodigoFornecedor: String): Double;
-
+    function ObterLista: TFDMemTable; overload;
+    procedure gerarFinanceiro(pPedidoCompraModel : TPedidoCompraModel);
     procedure ValidaTotalFinanceiro(pValor: Double);
 
     property Acao :TAcao read FAcao write SetAcao;
@@ -116,10 +116,40 @@ begin
   Result       := self.Salvar;
 end;
 
+procedure TPrevisaoPedidoCompraModel.gerarFinanceiro(pPedidoCompraModel : TPedidoCompraModel);
+var
+  lVencimentos : TStringList;
+  i            : Integer;
+  lSoma        : Double;
+begin
+  lVencimentos := TStringList.create;
+
+  StringForStringList(pPedidoCompraModel.CONDICOES_PAG, '/', lVencimentos);
+
+  lSoma := 0;
+  i     := 0;
+
+  for i := 0 to lVencimentos.Count - 1 do
+  begin
+    self.FVENCIMENTO     := DateToStr(IncDay(StrToDate(pPedidoCompraModel.DATA_PED), StrToInt(lVencimentos.Strings[i])) );
+    self.FVALOR_PARCELA  := RoundTo(pPedidoCompraModel.TOTAL_PED / lVencimentos.Count, -2);
+    self.FPARCELA        := (i + 1).ToString;
+    self.FNUMERO_PED     := pPedidoCompraModel.NUMERO_PED;
+    self.FCODIGO_FOR     := pPedidoCompraModel.CODIGO_FOR;
+
+    lSoma := lSoma + self.FVALOR_PARCELA;
+
+    if self.FPARCELA = lVencimentos.Count then
+      self.FVALOR_PARCELA := self.FVALOR_PARCELA + (pPedidoCompraModel.TOTAL_PED - lSoma);
+
+    Self.incluir;
+  end;
+end;
+
 function TPrevisaoPedidoCompraModel.Incluir: String;
 begin
-    self.Acao := tacIncluir;
-    Result    := self.Salvar;
+  self.Acao := tacIncluir;
+  Result    := self.Salvar;
 end;
 
 function TPrevisaoPedidoCompraModel.carregaClasse(pId : String): TPrevisaoPedidoCompraModel;

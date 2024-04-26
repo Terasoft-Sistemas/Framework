@@ -63,11 +63,8 @@ type
     function excluir(pPrevisaoPedidoCompraModel: TPrevisaoPedidoCompraModel): String;
 
     function carregaClasse(pID : String): TPrevisaoPedidoCompraModel;
-
-    function obterLista: TFDMemTable;
-
     function TotalFinanceiro(pNumeroPedido: String): Double;
-
+    function obterLista: TFDMemTable;
     procedure setParams(var pQry: TFDQuery; pPrevisaoPedidoCompraModel: TPrevisaoPedidoCompraModel);
 
 end;
@@ -155,6 +152,7 @@ begin
     lQry.Free;
   end;
 end;
+
 function TPrevisaoPedidoCompraDao.incluir(pPrevisaoPedidoCompraModel: TPrevisaoPedidoCompraModel): String;
 var
   lQry: TFDQuery;

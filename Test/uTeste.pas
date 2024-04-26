@@ -153,6 +153,7 @@ type
     Button99: TButton;
     Button100: TButton;
     Button101: TButton;
+    Button102: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -260,6 +261,7 @@ type
     procedure Button98Click(Sender: TObject);
     procedure Button100Click(Sender: TObject);
     procedure Button101Click(Sender: TObject);
+    procedure Button102Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -2883,6 +2885,28 @@ begin
     lPedidoCompra.FornecedorView := '000000';
     lTable                   := lPedidoCompra.obterLista;
     dsPedidoCompra.DataSet   := lTable;
+  finally
+    lPedidoCompra.Free;
+  end;
+end;
+
+procedure TForm1.Button102Click(Sender: TObject);
+var
+  lPrevisaoPedidoCompraModel : TPrevisaoPedidoCompraModel;
+  lPedidoCompra : TPedidoCompraModel;
+  pPed,
+  pFornc : String;
+begin
+  lPedidoCompra := TPedidoCompraModel.Create(vIConexao);
+  lPrevisaoPedidoCompraModel := TPrevisaoPedidoCompraModel.Create(vIConexao);
+  try
+    pPed   := '000013';
+    pFornc := '000137';
+
+    lPedidoCompra := lPedidoCompra.carregaClasse(pPed, pFornc);
+
+    lPrevisaoPedidoCompraModel.gerarFinanceiro(lPedidoCompra);
+
   finally
     lPedidoCompra.Free;
   end;
