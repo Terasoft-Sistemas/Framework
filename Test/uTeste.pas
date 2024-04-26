@@ -2620,7 +2620,8 @@ var
 begin
   lPedidoCompra := TPedidoCompraModel.Create(vIConexao);
   try
-  lPedidoCompra.NumeroView := '000008';
+  lPedidoCompra.NumeroView     := '000008';
+  lPedidoCompra.FornecedorView := '000000';
   lTotalizador             := lPedidoCompra.ObterTotalizador;
   dsPedidoCompra.DataSet   := lTotalizador;
   finally
