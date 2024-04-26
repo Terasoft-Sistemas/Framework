@@ -72,7 +72,7 @@ type
 
     function ObterLista: TFDMemTable; overload;
 
-    function SaldoFinanceiro(pNumeroPedido: String): Double;
+    function SaldoFinanceiro(pNumeroPedido, pCodigoFornecedor: String): Double;
 
     procedure ValidaTotalFinanceiro(pValor: Double);
 
@@ -169,7 +169,7 @@ begin
   end;
 end;
 
-function TPrevisaoPedidoCompraModel.SaldoFinanceiro(pNumeroPedido: String): Double;
+function TPrevisaoPedidoCompraModel.SaldoFinanceiro(pNumeroPedido, pCodigoFornecedor: String): Double;
 var
   lPrevisaoPedidoCompraDao: TPrevisaoPedidoCompraDao;
   lPedidoCompraModel: TPedidoCompraModel;
@@ -181,7 +181,9 @@ begin
   lPedidoCompraModel := TPedidoCompraModel.Create(vIConexao);
   try
 
-    lPedidoCompraModel.NumeroView := pNumeroPedido;
+    lPedidoCompraModel.NumeroView     := pNumeroPedido;
+    lPedidoCompraModel.FornecedorView := pCodigoFornecedor;
+
     lTotalizador := lPedidoCompraModel.ObterTotalizador;
 
     lTotalPedido     := RoundTo(StrToFloat(FloatToStr(lTotalizador.FieldByName('valor_total_pedido').AsFloat)), -2);
