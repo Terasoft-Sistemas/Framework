@@ -411,6 +411,7 @@ begin
 
   try
     lPedidoCompra.NumeroView    := FNumeroView;
+    lPedidoCompra.FornecedorVew := FFornecedorView;
 
     Result := lPedidoCompra.ObterTotalizador;
 
