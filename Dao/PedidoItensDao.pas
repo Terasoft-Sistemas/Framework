@@ -373,25 +373,36 @@ var
 begin
   lQry := vIConexao.CriarQuery;
   FPedidoItenssLista := TObjectList<TPedidoItensModel>.Create;
+
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lSql := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
     else
       lSql := 'select ';
+
     lSQL := lSQL +
-      '       pedidoitens.*      '+
-	    '  from pedidoitens        '+
-      ' where 1=1                ';
+      '       pedidoitens.*,                                               '+sLineBreak+
+      '       produto.tipo_venda_comissao_id,                              '+sLineBreak+
+      '       produto.comis_pro,                                           '+sLineBreak+
+      '       produto.grupo_comissao_id                                    '+sLineBreak+
+	    '  from pedidoitens                                                  '+sLineBreak+
+      '  left join produto on produto.codigo_pro = pedidoitens.codigo_pro  '+sLineBreak+
+      ' where 1=1                    ';
+
     lSql := lSql + where;
+
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
+
     lQry.Open(lSQL);
+
     i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
       FPedidoItenssLista.Add(TPedidoItensModel.Create(vIConexao));
       i := FPedidoItenssLista.Count -1;
+
       FPedidoItenssLista[i].ID                           := lQry.FieldByName('ID').AsString;
       FPedidoItenssLista[i].CODIGO_CLI                   := lQry.FieldByName('CODIGO_CLI').AsString;
       FPedidoItenssLista[i].NUMERO_PED                   := lQry.FieldByName('NUMERO_PED').AsString;
@@ -512,8 +523,13 @@ begin
       FPedidoItenssLista[i].CSOSN                        := lQry.FieldByName('CSOSN').AsString;
       FPedidoItenssLista[i].CFOP                         := lQry.FieldByName('CFOP').AsString;
       FPedidoItenssLista[i].VDESC                        := lQry.FieldByName('VDESC').AsString;
+      FPedidoItenssLista[i].TIPO_VENDA_COMISSAO_ID       := lQry.FieldByName('TIPO_VENDA_COMISSAO_ID').AsString;
+      FPedidoItenssLista[i].COMIS_PRO                    := lQry.FieldByName('COMIS_PRO').AsString;
+      FPedidoItenssLista[i].GRUPO_COMISSAO_ID            := lQry.FieldByName('GRUPO_COMISSAO_ID').AsString;
+
       lQry.Next;
     end;
+
     obterTotalRegistros;
   finally
     lQry.Free;

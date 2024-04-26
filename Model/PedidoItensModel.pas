@@ -163,6 +163,9 @@ type
     FVDESC: Variant;
     FCSOSN: Variant;
     FCFOP: Variant;
+    FGRUPO_COMISSAO_ID: Variant;
+    FCOMIS_PRO: Variant;
+    FTIPO_VENDA_COMISSAO_ID: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetPedidoItenssLista(const Value: TObjectList<TPedidoItensModel>);
@@ -302,6 +305,9 @@ type
     procedure SetVDESC(const Value: Variant);
     procedure SetCSOSN(const Value: Variant);
     procedure SetCFOP(const Value: Variant);
+    procedure SetCOMIS_PRO(const Value: Variant);
+    procedure SetGRUPO_COMISSAO_ID(const Value: Variant);
+    procedure SetTIPO_VENDA_COMISSAO_ID(const Value: Variant);
 
   public
     property ID: Variant read FID write SetID;
@@ -428,6 +434,9 @@ type
     property NOME_PRO: Variant read FNOME_PRO write SetNOME_PRO;
     property TOTAL: Variant read FTOTAL write SetTOTAL;
     property TOTAL_PRODUTO: Variant read FTOTAL_PRODUTO write SetTOTAL_PRODUTO;
+    property TIPO_VENDA_COMISSAO_ID: Variant read FTIPO_VENDA_COMISSAO_ID write SetTIPO_VENDA_COMISSAO_ID;
+    property COMIS_PRO: Variant read FCOMIS_PRO write SetCOMIS_PRO;
+    property GRUPO_COMISSAO_ID: Variant read FGRUPO_COMISSAO_ID write SetGRUPO_COMISSAO_ID;
 
   	constructor Create(pConexao: IConexao);
     destructor Destroy; override;
@@ -443,7 +452,7 @@ type
 
     function gerarEstoque: String;
     function cancelarEstoque: String;
-    procedure calcularComissao(pVendedor, pTipoVenda: String; pGerente: String = '');
+    procedure calcularComissao(pVendedor, pTipoVenda: String; pComissaoCliente: Double; pGerente: String = '');
 
     property PedidoItenssLista: TObjectList<TPedidoItensModel> read FPedidoItenssLista write SetPedidoItenssLista;
 
@@ -529,30 +538,21 @@ begin
   Result    := self.Salvar;
 end;
 
-procedure TPedidoItensModel.calcularComissao(pVendedor, pTipoVenda: String; pGerente: String = '');
+procedure TPedidoItensModel.calcularComissao(pVendedor, pTipoVenda: String; pComissaoCliente: Double; pGerente: String = '');
 var
   lComissaoVendedor         : TComissaoVendedorModel;
-  lTableComissao,
-  lTableProduto             : TFDMemTable;
-  lProdutosModel            : TProdutosModel;
-  lClienteModel             : TClienteModel;
+  lTableComissao            : TFDMemTable;
   lGrupoComissaoFuncionario : TGrupoComissaoFuncionarioModel;
-  lComissaoCliente          : Double;
 
 begin
   lGrupoComissaoFuncionario := TGrupoComissaoFuncionarioModel.Create(vIConexao);
   lComissaoVendedor         := TComissaoVendedorModel.Create(vIConexao);
-  lProdutosModel            := TProdutosModel.Create(vIConexao);
-  lClienteModel             := TClienteModel.Create(vIConexao);
 
   try
-    lTableProduto    := lProdutosModel.obterComissao(self.FCODIGO_PRO);
-    lComissaoCliente := lClienteModel.comissaoCliente(self.FCODIGO_CLI);
-
-    if lTableProduto.fieldByName('TIPO_VENDA_COMISSAO_ID').AsString <> '' then
+    if self.FTIPO_VENDA_COMISSAO_ID <> '' then
     begin
       lComissaoVendedor.WhereView := ' and comissao_vendedor.vendedor   = '+QuotedStr(pVendedor)+
-                                     ' and comissao_vendedor.tipo_venda = '+QuotedStr(lTableProduto.fieldByName('TIPO_VENDA_COMISSAO_ID').AsString);
+                                     ' and comissao_vendedor.tipo_venda = '+QuotedStr(self.FTIPO_VENDA_COMISSAO_ID);
 
       lTableComissao := lComissaoVendedor.obterLista;
 
@@ -563,21 +563,21 @@ begin
         self.Salvar;
       end;
     end
-    else if lComissaoCliente > 0 then
+    else if pComissaoCliente > 0 then
     begin
       self.Acao := tacAlterar;
-      self.COMISSAO_PERCENTUAL := FloatToStr(lComissaoCliente);
+      self.COMISSAO_PERCENTUAL := FloatToStr(pComissaoCliente);
       self.Salvar;
     end
-    else if lTableProduto.fieldByName('COMIS_PRO').AsFloat > 0 then
+    else if self.FCOMIS_PRO > 0 then
     begin
       self.Acao := tacAlterar;
-      self.COMISSAO_PERCENTUAL := lTableProduto.fieldByName('COMIS_PRO').AsString;
+      self.COMISSAO_PERCENTUAL := self.FCOMIS_PRO;
       self.Salvar;
     end
-    else if lTableProduto.fieldByName('GRUPO_COMISSAO_ID').AsString <> '' then
+    else if self.FGRUPO_COMISSAO_ID <> '' then
     begin
-      lGrupoComissaoFuncionario.WhereView := ' and funcionario_grupo_comissao.grupo_comissao_id = '+ QuotedStr(lTableProduto.fieldByName('GRUPO_COMISSAO_ID').AsString) +
+      lGrupoComissaoFuncionario.WhereView := ' and funcionario_grupo_comissao.grupo_comissao_id = '+ QuotedStr(self.FGRUPO_COMISSAO_ID) +
                                              ' and funcionario_grupo_comissao.funcionario_id    = '+ QuotedStr(pVendedor);
 
       lTableComissao := lGrupoComissaoFuncionario.ObterLista;
@@ -607,21 +607,21 @@ begin
     if pGerente = '' then
       exit;
 
-    if lComissaoCliente > 0 then
+    if pComissaoCliente > 0 then
     begin
       self.Acao := tacAlterar;
-      self.GERENTE_COMISSAO_PERCENTUAL := FloatToStr(lComissaoCliente);
+      self.GERENTE_COMISSAO_PERCENTUAL := FloatToStr(pComissaoCliente);
       self.Salvar;
     end
-    else if lTableProduto.fieldByName('COMIS_PRO').AsFloat > 0 then
+    else if self.FCOMIS_PRO > 0 then
     begin
       self.Acao := tacAlterar;
-      self.GERENTE_COMISSAO_PERCENTUAL := lTableProduto.fieldByName('COMIS_PRO').AsString;
+      self.GERENTE_COMISSAO_PERCENTUAL := self.FCOMIS_PRO;
       self.Salvar;
     end
-    else if lTableProduto.fieldByName('GRUPO_COMISSAO_ID').AsString <> '' then begin
+    else if self.FGRUPO_COMISSAO_ID <> '' then begin
 
-      lGrupoComissaoFuncionario.WhereView := ' and funcionario_grupo_comissao.grupo_comissao_id = '+ QuotedStr(lTableProduto.fieldByName('GRUPO_COMISSAO_ID').AsString) +
+      lGrupoComissaoFuncionario.WhereView := ' and funcionario_grupo_comissao.grupo_comissao_id = '+ QuotedStr(self.FGRUPO_COMISSAO_ID) +
                                              ' and funcionario_grupo_comissao.funcionario_id    = '+ QuotedStr(pGerente);
 
       lTableComissao := lGrupoComissaoFuncionario.ObterLista;
@@ -652,8 +652,6 @@ begin
   finally
     lGrupoComissaoFuncionario.Free;
     lComissaoVendedor.Free;
-    lProdutosModel.Free;
-    lClienteModel.Free;
   end;
 end;
 
@@ -967,6 +965,11 @@ begin
   FCOMISSAO_PERCENTUAL := Value;
 end;
 
+procedure TPedidoItensModel.SetCOMIS_PRO(const Value: Variant);
+begin
+  FCOMIS_PRO := Value;
+end;
+
 procedure TPedidoItensModel.SetCountView(const Value: String);
 begin
   FCountView := Value;
@@ -1031,6 +1034,11 @@ procedure TPedidoItensModel.SetGERENTE_COMISSAO_PERCENTUAL(
   const Value: Variant);
 begin
   FGERENTE_COMISSAO_PERCENTUAL := Value;
+end;
+
+procedure TPedidoItensModel.SetGRUPO_COMISSAO_ID(const Value: Variant);
+begin
+  FGRUPO_COMISSAO_ID := Value;
 end;
 
 procedure TPedidoItensModel.SetPCRED_PRESUMIDO(const Value: Variant);
@@ -1330,6 +1338,11 @@ end;
 procedure TPedidoItensModel.SetTIPO_VENDA(const Value: Variant);
 begin
   FTIPO_VENDA := Value;
+end;
+
+procedure TPedidoItensModel.SetTIPO_VENDA_COMISSAO_ID(const Value: Variant);
+begin
+  FTIPO_VENDA_COMISSAO_ID := Value;
 end;
 
 procedure TPedidoItensModel.SetTOTAL(const Value: Variant);

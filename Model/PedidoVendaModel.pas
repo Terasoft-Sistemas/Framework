@@ -520,7 +520,7 @@ uses
   ProdutosModel,
   CFOPModel,
   EmpresaModel,
-  FireDAC.Comp.Client;
+  FireDAC.Comp.Client, ClienteModel;
 
 { TPedidoVendaModel }
 
@@ -598,12 +598,16 @@ var
   lPedidoVendaModel : TPedidoVendaModel;
   lPedidoItensModel,
   lModel            : TPedidoItensModel;
+  lClienteModel     : TClienteModel;
+  lComissaoCliente  : Double;
 begin
   lPedidoVendaModel := TPedidoVendaModel.Create(vIConexao);
   lPedidoItensModel := TPedidoItensModel.Create(vIConexao);
+  lClienteModel     := TClienteModel.Create(vIConexao);
 
   try
     lPedidoVendaModel := lPedidoVendaModel.carregaClasse(self.FNUMERO_PED);
+
     lPedidoVendaModel.Acao := tacAlterar;
     lPedidoVendaModel.STATUS_PED := 'B';
     lPedidoVendaModel.STATUS     := 'P';
@@ -612,15 +616,18 @@ begin
     lPedidoItensModel.IDPedidoVendaView := lPedidoVendaModel.NUMERO_PED;
     lPedidoItensModel.obterLista;
 
+    lComissaoCliente := lClienteModel.comissaoCliente(self.FCODIGO_CLI);
+
     for lModel in lPedidoItensModel.PedidoItenssLista do
     begin
       lModel.gerarEstoque;
-      lModel.calcularComissao(lPedidoVendaModel.CODIGO_VEN, lPedidoVendaModel.CODIGO_TIP, lPedidoVendaModel.GERENTE_ID);
+      lModel.calcularComissao(lPedidoVendaModel.CODIGO_VEN, lPedidoVendaModel.CODIGO_TIP, lComissaoCliente, lPedidoVendaModel.GERENTE_ID);
     end;
 
   finally
     lPedidoVendaModel.Free;
     lPedidoItensModel.Free;
+    lClienteModel.Free;
   end;
 end;
 
