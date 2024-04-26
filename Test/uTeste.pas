@@ -2116,8 +2116,8 @@ begin
   lPedidoItensModel  := TPedidoCompraItensModel.Create(vIConexao);
   try
     try
-      lNumeroView     := '000011';
-      lFornecedorView := '000318';
+      lNumeroView     := '000008';
+      lFornecedorView := '000000';
 
       lPedidoCompraModel.NumeroView    := lNumeroView;
       TablePedidoCompra                := lPedidoCompraModel.obterLista;

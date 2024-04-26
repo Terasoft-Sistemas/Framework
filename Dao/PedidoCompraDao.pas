@@ -321,8 +321,8 @@ begin
               '        fornecedor.fantasia_for fornecedor_nome,                                                    '+SLineBreak+
               '        pc.autorizacao_estoque_usuario,                                                             '+SLineBreak+
               '        pc.autorizacao_financeiro_usuario,                                                          '+SLineBreak+
-              '        usua_estoque.nome autorizacao_estoque_usuario_nome,                                         '+SLineBreak+
-              '        usua_financeiro.nome autorizacao_financeiro_usuario_nome                                    '+SLineBreak+
+              '        usua_estoque.nome estoque_usuario_nome,                                                     '+SLineBreak+
+              '        usua_financeiro.nome financeiro_usuario_nome                                                '+SLineBreak+
               '   from pedidocompra pc                                                                             '+SLineBreak+
               '        left join fornecedor on fornecedor.codigo_for = pc.codigo_for                               '+SLineBreak+
               '        left join usuario usua_estoque on usua_estoque.id = pc.autorizacao_estoque_usuario          '+SLineBreak+
