@@ -317,6 +317,7 @@ begin
               '        pc.frete_no_ipi,                                                                            '+SLineBreak+
               '        pc.portador_id,                                                                             '+SLineBreak+
               '        pc.systime,                                                                                 '+SLineBreak+
+              '        pc.data_cotacao,                                                                            '+SLineBreak+
               '        fornecedor.fantasia_for fornecedor_nome,                                                    '+SLineBreak+
               '        pc.autorizacao_estoque_usuario,                                                             '+SLineBreak+
               '        pc.autorizacao_financeiro_usuario,                                                          '+SLineBreak+
@@ -395,8 +396,9 @@ begin
             '              coalesce(sum(i.vlr_desconto), 0) valor_total_desconto                                       '+SLineBreak+
             '         from pedidocompraitens i                                                                         '+SLineBreak+
             '        where i.numero_ped = '+QuotedStr(NumeroView)+'                                                    '+SLineBreak+
-            '      )                                                                                                   '+SLineBreak+
-            '    )                                                                                                     '+SLineBreak;
+            '          and i.codigo_for = '+QuotedStr(FornecedorVew)+'                                                 '+SLineBreak+
+            '       )                                                                                                  '+SLineBreak+
+            '   )                                                                                                      '+SLineBreak;
 
     lQry.Open(lSql);
 
