@@ -68,6 +68,7 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    function carregaClasse(pID: String): TRecebimentoCartaoModel;
     function Salvar: String;
     procedure obterLista;
 
@@ -89,6 +90,18 @@ uses
   RecebimentoCartaoDao;
 
 { TRecebimentoCartaoModel }
+
+function TRecebimentoCartaoModel.carregaClasse(pID: String): TRecebimentoCartaoModel;
+var
+  lRecebimentoCartaoDao : TRecebimentoCartaoDao;
+begin
+  lRecebimentoCartaoDao := TRecebimentoCartaoDao.Create(vIConexao);
+  try
+    Result := lRecebimentoCartaoDao.carregaClasse(pID);
+  finally
+    lRecebimentoCartaoDao.Free;
+  end;
+end;
 
 constructor TRecebimentoCartaoModel.Create(pIConexao : IConexao);
 begin

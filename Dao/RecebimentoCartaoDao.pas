@@ -62,6 +62,7 @@ type
     function excluir(ARecebimentoCartaoModel: TRecebimentoCartaoModel): String;
 	
     procedure obterLista;
+    function carregaClasse(pID: String): TRecebimentoCartaoModel;
 
     procedure setParams(var pQry: TFDQuery; pCaixaModel: TRecebimentoCartaoModel);
 
@@ -73,6 +74,40 @@ uses
   System.Rtti;
 
 { TRecebimentoCartao }
+
+function TRecebimentoCartaoDao.carregaClasse(pID: String): TRecebimentoCartaoModel;
+var
+  lQry   : TFDQuery;
+  lModel : TRecebimentoCartaoModel;
+begin
+  lQry     := vIConexao.CriarQuery;
+  lModel   := TRecebimentoCartaoModel.Create(vIConexao);
+  Result   := lModel;
+
+  try
+    lQry.Open('select * from recebimento_cartao where id = '+pID);
+
+    if lQry.IsEmpty then
+      Exit;
+
+    lModel.ID            := lQry.FieldByName('ID').AsString;
+    lModel.USUARIO_ID    := lQry.FieldByName('USUARIO_ID').AsString;
+    lModel.DATA_HORA     := lQry.FieldByName('DATA_HORA').AsString;
+    lModel.CLIENTE_ID    := lQry.FieldByName('CLIENTE_ID').AsString;
+    lModel.FATURA        := lQry.FieldByName('FATURA').AsString;
+    lModel.PARCELA       := lQry.FieldByName('PARCELA').AsString;
+    lModel.VALOR         := lQry.FieldByName('VALOR').AsString;
+    lModel.BANDEIRA_ID   := lQry.FieldByName('BANDEIRA_ID').AsString;
+    lModel.VENCIMENTO    := lQry.FieldByName('VENCIMENTO').AsString;
+    lModel.TEF_ID        := lQry.FieldByName('TEF_ID').AsString;
+    lModel.SYSTIME       := lQry.FieldByName('SYSTIME').AsString;
+
+    Result := lModel;
+
+  finally
+    lQry.Free;
+  end;
+end;
 
 constructor TRecebimentoCartaoDao.Create(pIConexao : IConexao);
 begin

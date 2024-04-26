@@ -398,7 +398,7 @@ type
 implementation
 
 uses
-  WebPedidoDao;
+  WebPedidoDao, ClienteModel;
 
 { TWebPedidoModel }
 
@@ -430,8 +430,10 @@ var
   lPedidoItensModel        : TPedidoItensModel;
   lWebPedidoItensModel     : TWebPedidoItensModel;
   lWebPedidoModel          : TWebPedidoModel;
+  lClientesModel           : TClienteModel;
   lPedido                  : String;
   lItem, lIndex            : Integer;
+  lTableCliente            : TFDMemTable;
 begin
 
   if not (pIdVendaAssistida <> 0) then
@@ -443,6 +445,7 @@ begin
   lPedidoVendaModel      := TPedidoVendaModel.Create(vIConexao);
   lPedidoItensModel      := TPedidoItensModel.Create(vIConexao);
 
+  lClientesModel         := TClienteModel.Create(vIConexao);
   try
 
     lPedidoVendaModel.WhereView := ' and pedidovenda.web_pedido_id = '+ IntToStr(pIdVendaAssistida);
@@ -454,6 +457,9 @@ begin
     end;
 
     lWebPedidoModel := lWebPedidoModel.carregaClasse(pIdVendaAssistida.ToString);
+
+    lClientesModel.IDRecordView := lWebPedidoModel.CLIENTE_ID;
+    lTableCliente := lClientesModel.ObterListaMemTable;
 
     lPedidoVendaModel.Acao                 := tacIncluir;
     lPedidoVendaModel.LOJA                 := lWebPedidoModel.LOJA;
@@ -479,6 +485,7 @@ begin
     lPedidoVendaModel.TABJUROS_PED         := 'N';
     lPedidoVendaModel.WEB_PEDIDO_ID        := lWebPedidoModel.ID;
     lPedidoVendaModel.CODIGO_CLI           := lWebPedidoModel.CLIENTE_ID;
+    lPedidoVendaModel.CNPJ_CPF_CONSUMIDOR  := lTableCliente.fieldByName('CNPJ_CPF_CLI').AsString;
     lPedidoVendaModel.CODIGO_PORT          := lWebPedidoModel.PORTADOR_ID;
     lPedidoVendaModel.CODIGO_VEN           := lWebPedidoModel.VENDEDOR_ID;
     lPedidoVendaModel.CODIGO_TIP           := lWebPedidoModel.TIPOVENDA_ID;
@@ -559,6 +566,7 @@ begin
     lPedidoVendaModel.Free;
     lWebPedidoItensModel.Free;
     lPedidoItensModel.Free;
+    lClientesModel.Free;
   end;
 
 end;
