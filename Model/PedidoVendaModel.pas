@@ -322,6 +322,9 @@ type
     procedure SetPEDIDOITENS_ID(const Value: Variant);
     procedure SetCFOP_NF(const Value: Variant);
     procedure SetNOME_VENDEDOR(const Value: Variant);
+
+    procedure getDataVendedor;
+
   public
     property NUMERO_PED: Variant read FNUMERO_PED write SetNUMERO_PED;
     property CODIGO_CLI: Variant read FCODIGO_CLI write SetCODIGO_CLI;
@@ -520,7 +523,7 @@ uses
   ProdutosModel,
   CFOPModel,
   EmpresaModel,
-  FireDAC.Comp.Client, ClienteModel;
+  FireDAC.Comp.Client, ClienteModel, FuncionarioModel;
 
 { TPedidoVendaModel }
 
@@ -973,6 +976,31 @@ begin
   end;
 end;
 
+procedure TPedidoVendaModel.getDataVendedor;
+var
+  lFuncionarioModel : TFuncionarioModel;
+begin
+  if self.FCODIGO_VEN = '' then
+    exit;
+
+  lFuncionarioModel := TFuncionarioModel.Create(vIConexao);
+  try
+    lFuncionarioModel.IDRecordView := self.FCODIGO_VEN;
+    lFuncionarioModel.obterLista;
+
+    if lFuncionarioModel.FuncionariosLista[0].TIPO_COMISSAO <> '' then
+      self.FTIPO_COMISSAO := lFuncionarioModel.FuncionariosLista[0].TIPO_COMISSAO
+    else
+      self.FTIPO_COMISSAO := 'F';
+
+    if lFuncionarioModel.FuncionariosLista[0].GERENTE_ID <> '' then
+      self.FGERENTE_ID := lFuncionarioModel.FuncionariosLista[0].GERENTE_ID;
+
+  finally
+    lFuncionarioModel.Free;
+  end;
+end;
+
 function TPedidoVendaModel.gerarContasReceberPedido: String;
 var
   lValorContasReceber : Double;
@@ -1226,10 +1254,13 @@ procedure TPedidoVendaModel.SetCODIGO_TIP(const Value: Variant);
 begin
   FCODIGO_TIP := Value;
 end;
+
 procedure TPedidoVendaModel.SetCODIGO_VEN(const Value: Variant);
 begin
   FCODIGO_VEN := Value;
+  getDataVendedor;
 end;
+
 procedure TPedidoVendaModel.SetCOMANDA(const Value: Variant);
 begin
   FCOMANDA := Value;

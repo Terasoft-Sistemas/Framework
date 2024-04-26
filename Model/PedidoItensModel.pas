@@ -482,7 +482,7 @@ uses
   PedidoVendaModel,
   ProdutosModel,
   UsuarioModel, ComissaoVendedorModel, FireDAC.Comp.Client, ClienteModel,
-  GrupoComissaoFuncionarioModel;
+  GrupoComissaoFuncionarioModel, FuncionarioModel;
 
 { TPedidoItensModel }
 
@@ -540,118 +540,54 @@ end;
 
 procedure TPedidoItensModel.calcularComissao(pVendedor, pTipoVenda: String; pComissaoCliente: Double; pGerente: String = '');
 var
-  lComissaoVendedor         : TComissaoVendedorModel;
-  lTableComissao            : TFDMemTable;
-  lGrupoComissaoFuncionario : TGrupoComissaoFuncionarioModel;
+  lVendedorModel             : TFuncionarioModel;
+  lPercentualComissao,
+  lPercentualComissaoGerente : Double;
 
 begin
-  lGrupoComissaoFuncionario := TGrupoComissaoFuncionarioModel.Create(vIConexao);
-  lComissaoVendedor         := TComissaoVendedorModel.Create(vIConexao);
+  lVendedorModel := TFuncionarioModel.Create(vIConexao);
 
   try
     if self.FTIPO_VENDA_COMISSAO_ID <> '' then
-    begin
-      lComissaoVendedor.WhereView := ' and comissao_vendedor.vendedor   = '+QuotedStr(pVendedor)+
-                                     ' and comissao_vendedor.tipo_venda = '+QuotedStr(self.FTIPO_VENDA_COMISSAO_ID);
+      lPercentualComissao := lVendedorModel.comissaoPorTipo(pVendedor, self.FTIPO_VENDA_COMISSAO_ID)
 
-      lTableComissao := lComissaoVendedor.obterLista;
-
-      if lTableComissao.FieldByName('COMISSAO').AsFloat > 0 then
-      begin
-        self.Acao := tacAlterar;
-        self.COMISSAO_PERCENTUAL := lTableComissao.FieldByName('COMISSAO').AsString;
-        self.Salvar;
-      end;
-    end
     else if pComissaoCliente > 0 then
-    begin
-      self.Acao := tacAlterar;
-      self.COMISSAO_PERCENTUAL := FloatToStr(pComissaoCliente);
-      self.Salvar;
-    end
+      lPercentualComissao := pComissaoCliente
+
     else if self.FCOMIS_PRO > 0 then
-    begin
-      self.Acao := tacAlterar;
-      self.COMISSAO_PERCENTUAL := self.FCOMIS_PRO;
-      self.Salvar;
-    end
+      lPercentualComissao := self.FCOMIS_PRO
+
     else if self.FGRUPO_COMISSAO_ID <> '' then
-    begin
-      lGrupoComissaoFuncionario.WhereView := ' and funcionario_grupo_comissao.grupo_comissao_id = '+ QuotedStr(self.FGRUPO_COMISSAO_ID) +
-                                             ' and funcionario_grupo_comissao.funcionario_id    = '+ QuotedStr(pVendedor);
+      lPercentualComissao := lVendedorModel.comissaoPorGrupo(pVendedor, self.FGRUPO_COMISSAO_ID)
 
-      lTableComissao := lGrupoComissaoFuncionario.ObterLista;
-
-      if lTableComissao.FieldByName('PERCENTUAL').AsFloat > 0 then
-      begin
-        self.Acao := tacAlterar;
-        self.COMISSAO_PERCENTUAL := lTableComissao.FieldByName('PERCENTUAL').AsString;
-        self.Salvar;
-      end;
-    end
     else
-    begin
-      lComissaoVendedor.WhereView := ' and comissao_vendedor.vendedor   = '+QuotedStr(pVendedor)+
-                                     ' and comissao_vendedor.tipo_venda = '+QuotedStr(pTipoVenda);
+      lPercentualComissao := lVendedorModel.comissaoPorTipo(pVendedor, pTipoVenda);
 
-      lTableComissao := lComissaoVendedor.obterLista;
-
-      if lTableComissao.FieldByName('COMISSAO').AsFloat > 0 then
-      begin
-        self.Acao := tacAlterar;
-        self.COMISSAO_PERCENTUAL := lTableComissao.FieldByName('COMISSAO').AsString;
-        self.Salvar;
-      end;
-    end;
+    self.Acao := tacAlterar;
+    self.COMISSAO_PERCENTUAL := FloatToStr(lPercentualComissao);
+    self.Salvar;
 
     if pGerente = '' then
       exit;
 
     if pComissaoCliente > 0 then
-    begin
-      self.Acao := tacAlterar;
-      self.GERENTE_COMISSAO_PERCENTUAL := FloatToStr(pComissaoCliente);
-      self.Salvar;
-    end
+      lPercentualComissaoGerente := pComissaoCliente
+
     else if self.FCOMIS_PRO > 0 then
-    begin
-      self.Acao := tacAlterar;
-      self.GERENTE_COMISSAO_PERCENTUAL := self.FCOMIS_PRO;
-      self.Salvar;
-    end
-    else if self.FGRUPO_COMISSAO_ID <> '' then begin
+      lPercentualComissaoGerente := self.FCOMIS_PRO
 
-      lGrupoComissaoFuncionario.WhereView := ' and funcionario_grupo_comissao.grupo_comissao_id = '+ QuotedStr(self.FGRUPO_COMISSAO_ID) +
-                                             ' and funcionario_grupo_comissao.funcionario_id    = '+ QuotedStr(pGerente);
+    else if self.FGRUPO_COMISSAO_ID <> '' then
+      lPercentualComissaoGerente := lVendedorModel.comissaoPorGrupo(pGerente, self.FGRUPO_COMISSAO_ID)
 
-      lTableComissao := lGrupoComissaoFuncionario.ObterLista;
-
-      if lTableComissao.FieldByName('PERCENTUAL').AsFloat > 0 then
-      begin
-        self.Acao := tacAlterar;
-        self.GERENTE_COMISSAO_PERCENTUAL := lTableComissao.FieldByName('PERCENTUAL').AsString;
-        self.Salvar;
-      end;
-
-    end
     else
-    begin
-      lComissaoVendedor.WhereView := ' and comissao_vendedor.vendedor   = '+QuotedStr(pGerente)+
-                                     ' and comissao_vendedor.tipo_venda = '+QuotedStr(pTipoVenda);
+      lPercentualComissaoGerente := lVendedorModel.comissaoPorTipo(pGerente, pTipoVenda);
 
-      lTableComissao := lComissaoVendedor.obterLista;
-
-      if lTableComissao.FieldByName('COMISSAO').AsFloat > 0 then
-      begin
-        self.Acao := tacAlterar;
-        self.GERENTE_COMISSAO_PERCENTUAL := lTableComissao.FieldByName('COMISSAO').AsString;
-        self.Salvar;
-      end;
-    end;
+    self.Acao := tacAlterar;
+    self.GERENTE_COMISSAO_PERCENTUAL := FloatToStr(lPercentualComissaoGerente);
+    self.Salvar;
 
   finally
-    lGrupoComissaoFuncionario.Free;
-    lComissaoVendedor.Free;
+    lVendedorModel.Free;
   end;
 end;
 

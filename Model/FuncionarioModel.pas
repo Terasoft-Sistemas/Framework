@@ -377,7 +377,8 @@ type
     function Salvar : String;
     procedure obterLista;
 
-    function comissaoVendedor(pIdVendedor, pIdTipoVenda : String): Double;
+    function comissaoPorTipo(pCodVendedor, pIdTipoVenda : String): Double;
+    function comissaoPorGrupo(pCodVendedor, pIdGrupo: String): Double;
 
     property FuncionariosLista: TObjectList<TFuncionarioModel> read FFuncionariosLista write SetFuncionariosLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -394,7 +395,7 @@ type
 implementation
 
 uses
-  FuncionarioDao;
+  FuncionarioDao, GrupoComissaoFuncionarioModel, System.SysUtils;
 
 { TFuncionarioModel }
 
@@ -437,19 +438,31 @@ begin
   end;
 end;
 
-function TFuncionarioModel.comissaoVendedor(pIdVendedor, pIdTipoVenda: String): Double;
+function TFuncionarioModel.comissaoPorGrupo(pCodVendedor, pIdGrupo: String): Double;
+var
+  lGrupoComissaoFuncionario : TGrupoComissaoFuncionarioModel;
+begin
+  lGrupoComissaoFuncionario := TGrupoComissaoFuncionarioModel.Create(vIConexao);
+  try
+    lGrupoComissaoFuncionario.WhereView := ' and funcionario_grupo_comissao.grupo_comissao_id = '+ QuotedStr(pIdGrupo) +
+                                           ' and funcionario_grupo_comissao.funcionario_id    = '+ QuotedStr(pCodVendedor);
+
+    Result := lGrupoComissaoFuncionario.ObterLista.FieldByName('PERCENTUAL').AsFloat;
+  finally
+    lGrupoComissaoFuncionario.Free;
+  end;
+end;
+
+function TFuncionarioModel.comissaoPorTipo(pCodVendedor, pIdTipoVenda: String): Double;
 var
   lFuncionarioDao: TFuncionarioDao;
 begin
-
   lFuncionarioDao := TFuncionarioDao.Create(vIConexao);
-
   try
-    Result := lFuncionarioDao.comissaoVendedor(pIdVendedor, pIdTipoVenda);
+    Result := lFuncionarioDao.comissaoVendedor(pCodVendedor, pIdTipoVenda);
   finally
     lFuncionarioDao.Free;
   end;
-
 end;
 
 constructor TFuncionarioModel.Create(pIConexao : IConexao);
