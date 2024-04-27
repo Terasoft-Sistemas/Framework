@@ -356,6 +356,7 @@ begin
   ds := TClientDataSet(Result.so.dataset);
   ds.Close;
   ds.FieldDefs.Add('id',ftString,50,false);
+  ds.FieldDefs.Add('pid',ftString,50,false);
   ds.FieldDefs.Add('data_emissao',ftDate,0,false);
   ds.FieldDefs.Add('valor_total',ftFloat,0,false);
   ds.FieldDefs.Add('cliente_codigo',ftString,30,false);

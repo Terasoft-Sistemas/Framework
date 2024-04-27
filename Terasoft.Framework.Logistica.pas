@@ -31,6 +31,9 @@ interface
     CONTROLE_LOGISTICA_NENHUM    = 'N';
     CONTROLE_LOGISTICA_FEDEX     = 'F';
 
+    LOGISTICA_TIPOVENDA_PEDIDO      = 'P';
+    LOGISTICA_TIPOVENDA_SAIDATRANSF = 'T';
+
 
     LOGISTTICA_FEDEX             = 'FEDEX';
 
@@ -58,18 +61,18 @@ interface
       function getResultadoProduto(const pCodigoPro: TipoWideStringFramework): TipoWideStringFramework;
 
       function precisaEnviarEntrada(const pID: TipoWideStringFramework): boolean;
-      function enviaEntrada(pID: String = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+      function enviaEntrada(pID: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
       function getStatusEntrada(const pID: TipoWideStringFramework): TipoWideStringFramework;
       procedure setStatusEntrada(const pID: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
       function getResultadoEntrada(const pID: TipoWideStringFramework): TipoWideStringFramework;
       function entradaFinalizada(const pID: TipoWideStringFramework): boolean;
 
-      function precisaEnviarVenda(const pNumeroPed: TipoWideStringFramework): boolean;
-      function enviaVenda(pNumeroPed: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-      function getStatusVenda(const pNumeroPed: TipoWideStringFramework): TipoWideStringFramework;
-      procedure setStatusVenda(const pNumeroPed: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
-      function getResultadoVenda(const pNumeroPed: TipoWideStringFramework): TipoWideStringFramework;
-      function vendaFinalizada(const pNumeroPed: TipoWideStringFramework): boolean;
+      function precisaEnviarVenda(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework): boolean;
+      function enviaVenda(pTipo: TipoWideStringFramework = ''; pNumeroDoc: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+      function getStatusVenda(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework): TipoWideStringFramework;
+      procedure setStatusVenda(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
+      function getResultadoVenda(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework): TipoWideStringFramework;
+      function vendaFinalizada(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework): boolean;
 
       function processaRetorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
       function processaServico(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
@@ -99,7 +102,7 @@ interface
 
   {$if defined(__TESTAR_LOGISTICA__)}
     function testaLogistica_Entrada(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-    function testaLogisticaVenda(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+    function testaLogisticaVenda(pTipo: TipoWideStringFramework; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     function testaLogistica_Retorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
   {$endif}
 
@@ -111,8 +114,8 @@ interface
   procedure logistica_marcaEntradaParaEnvio(pID: TipoWideStringFramework);
   function logistica_EnviaEntrada(pID: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
-  procedure logistica_marcaVendaParaEnvio(pNumeroPed: TipoWideStringFramework);
-  function logistica_EnviaVenda(pNumeroPed: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+  procedure logistica_marcaVendaParaEnvio(pTipo, pNumeroDoc: TipoWideStringFramework);
+  function logistica_EnviaVenda(pTipo: TipoWideStringFramework; pNumeroPed: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
 implementation
   uses
@@ -161,12 +164,12 @@ end;
 
 procedure logistica_marcaVendaParaEnvio;
 begin
-  getLogisticaGlobal.setStatusVenda(pNumeroPed,CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO);
+  getLogisticaGlobal.setStatusVenda(pTipo,pNumeroDoc,CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO);
 end;
 
 function logistica_EnviaVenda;
 begin
-  Result := getLogisticaGlobal.enviaVenda(pNumeroPed,checkResultadoOperacao(pResultado));
+  Result := getLogisticaGlobal.enviaVenda(pTipo, pNumeroPed,checkResultadoOperacao(pResultado));
 end;
 
 {$if defined(__TESTAR_LOGISTICA__)}
@@ -188,7 +191,7 @@ end;
 function testaLogisticaVenda;
 begin
   Result := checkResultadoOperacao(pResultado);
-  Result := getLogisticaGlobal.enviaVenda('',Result);
+  Result := getLogisticaGlobal.enviaVenda(pTipo,'',Result);
   if(pResultado.eventos>0) then
     msgAviso(pResultado.toString);
 end;

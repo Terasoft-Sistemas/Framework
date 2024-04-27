@@ -48,18 +48,19 @@ implementation
         function getResultadoEntrada(const pID: TipoWideStringFramework): TipoWideStringFramework;
         function entradaFinalizada(const pID: TipoWideStringFramework): boolean;
 
-        function precisaEnviarVenda(const pNumeroPed: TipoWideStringFramework): boolean;
-        function getStatusVenda(const pNumeroPed: TipoWideStringFramework): TipoWideStringFramework;
-        procedure setStatusVenda(const pNumeroPed: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
-        function getResultadoVenda(const pNumeroPed: TipoWideStringFramework): TipoWideStringFramework;
-        function vendaFinalizada(const pNumeroPed: TipoWideStringFramework): boolean;
+
+        function precisaEnviarVenda(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework): boolean;
+        function getStatusVenda(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework): TipoWideStringFramework;
+        procedure setStatusVenda(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
+        function getResultadoVenda(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework): TipoWideStringFramework;
+        function vendaFinalizada(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework): boolean;
 
         function getControleAlteracoes: IControleAlteracoes;
         procedure setControleAlteracoes(const pValue: IControleAlteracoes);
 
         function enviaProduto(pCodigoPro: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-        function enviaVenda(pNumeroPed: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-        function enviaEntrada(pID: String = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+        function enviaVenda(pTipo: TipoWideStringFramework = ''; pNumeroDoc: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+        function enviaEntrada(pID: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
         function processaRetorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
@@ -76,7 +77,7 @@ implementation
 {$REGION 'processaArquivoExpedicao'}
 function processaArquivoExpedicao(pUnkAPI: IUnknown; pResultado: IResultadoOperacao): IResultadoOperacao;
   var
-    lArquivo,lPedido,lProduto,lIMEI: String;
+    lArquivo,lDocumento,lTipoDocumento,lTipo,lProduto,lIMEI: String;
     lTexto, lLinha: IListaTexto;
     lTmp: TipoWideStringFramework;
     ctr: IControleAlteracoes;
@@ -98,7 +99,8 @@ begin
   lSave := pResultado.erros;
   ctr := nil;
   pAPI := nil;
-  lPedido := '';
+  lDocumento := '';
+  lTipo := '';
   lDS := nil;
   lDSItens := nil;
   lCDS := nil;
@@ -141,12 +143,11 @@ begin
       lTexto.strings.LoadFromFile(lArquivo);
       for i := 0 to lTexto.lines.Count - 1 do begin
         lLinha.strings.DelimitedText := lTexto.strings.Strings[i];
-        lLinha.strings.DelimitedText := lTexto.strings.Strings[i];
         if(i=0) then begin
           lCancelamento:=UpperCase(ChangeFileExt(ExtractFileName(lArquivo),''))=UpperCase(lLinha.strings.Strings[0]);
           if(lCancelamento) then begin
-           if(lPedido='') then
-              lPedido := textoEntreTags(lLinha.strings.Strings[0],'_','_');
+           if(lDocumento='') then
+              lDocumento := textoEntreTags(lLinha.strings.Strings[0],'_','_');
             break;
           end;
         end;
@@ -156,34 +157,52 @@ begin
           continue;
         end;
 
-        if(lPedido='') then begin
-          lPedido := lLinha.strings.Strings[0];
-          if (lPedido='') or(Length(lPedido)>6) then begin
-            pResultado.formataErro('processaArquivoExpedicao [%s]: Número de pedido inválido: %s', [ lArquivo, lPedido ] );
+        if(lDocumento='') then begin
+          lTipoDocumento := lLinha.strings.Strings[0];
+          lDocumento := lTipoDocumento;
+          if (lDocumento='') or(Length(lDocumento)<>7) then begin
+            pResultado.formataErro('processaArquivoExpedicao [%s]: Número do documento inválido: %s', [ lArquivo, lTipoDocumento ] );
             break;
           end;
-          lRes := pResultado.getSavePoint('so.' + lPedido);
-          lDS := gdbPadrao.criaDataset.query( 'select p.numero_ped id, p.* from pedidovenda p where p.numero_ped=:id', 'id', [ lPedido ]);
-          if(lDS.dataset.RecordCount=0) then begin
-            pResultado.formataErro('processaArquivoExpedicao [%s]: Pedido [%s] não existe.', [ lArquivo, lPedido ] );
+          lTipo := copy(lDocumento,1,1);
+          lDocumento := copy(lDocumento,2);
+          lRes := pResultado.getSavePoint('so.' + lTipoDocumento);
+
+          if(lTipo=LOGISTICA_TIPOVENDA_PEDIDO) then
+          begin
+            lDS := gdbPadrao.criaDataset.query( 'select p.numero_ped id, p.* from pedidovenda p where p.numero_ped=:id', 'id', [ lDocumento ]);
+          end else begin
+            pResultado.formataErro('processaArquivoExpedicao [%s]: Tipo não reconhecido: %s', [ lArquivo, lTipo ] );
             break;
-          end else if(ctr.getValor(CONTROLE_LOGISTICA_STATUS_VENDA, lDS.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
-            pResultado.formataErro('processaArquivoExpedicao [%s]: Pedido [%s] não está no status ENVIADO: [%s]', [ lArquivo, lPedido, ctr.getValor(CONTROLE_LOGISTICA_STATUS_VENDA, lDS.dataset.FieldByName('id').AsString,'') ] );
+          end;
+
+          if(lDS.dataset.RecordCount=0) then begin
+            pResultado.formataErro('processaArquivoExpedicao [%s]: Documento [%s] não existe.', [ lArquivo, lTipoDocumento ] );
+            break;
+          end else if(ctr.getValor(CONTROLE_LOGISTICA_STATUS_VENDA, lTipo + lDS.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
+            pResultado.formataErro('processaArquivoExpedicao [%s]: Documento [%s] não está no status ENVIADO: [%s]', [ lArquivo, lTipoDocumento, ctr.getValor(CONTROLE_LOGISTICA_STATUS_VENDA, lTipo + lDS.dataset.FieldByName('id').AsString,'') ] );
             break;
           end;
 
           if(lDSItens=nil) then begin
-            lDSItens := gdbPadrao.criaDataset.query('select p.id id_item, p.numero_ped id, p.codigo_pro produto_id, p.quantidade_ped quantidade, 0 as quantidade_atendida from pedidoitens p ' +
-                                               ' where p.numero_ped = :id order by 1 ', 'id', [ lPedido ] );
+            if(lTipo=LOGISTICA_TIPOVENDA_PEDIDO) then
+            begin
+              lDSItens := gdbPadrao.criaDataset.query('select p.id id_item, p.numero_ped id, p.codigo_pro produto_id, p.quantidade_ped quantidade, 0 as quantidade_atendida from pedidoitens p ' +
+                                               ' where p.numero_ped = :id order by 1 ', 'id', [ lDocumento ] );
+            end else begin
+              pResultado.formataErro('processaArquivoExpedicao [%s]: Tipo não reconhecido: %s', [ lArquivo, lTipo ] );
+              break;
+            end;
+
             if(lDSItens.dataset.RecordCount = 0 ) then begin
-              pResultado.formataErro('processaArquivoExpedicao: Pedido [%s]: Não possui itens na tabela de itens', [ lPedido ] );
+              pResultado.formataErro('processaArquivoExpedicao: Pedido [%s]: Não possui itens na tabela de itens', [ lTipoDocumento ] );
               break;
             end;
             lCDS := getCDSDataset(lDSItens.dataset);
             lFieldQtde := lCDS.FindField('quantidade_atendida');
           end;
           if (lCDS = nil) or (lFieldQtde=nil) then begin
-            result.formataErro('processaArquivoExpedicao [%s]: Não possui itens na tabela de itens', [ lPedido ] );
+            result.formataErro('processaArquivoExpedicao [%s]: Não possui itens na tabela de itens', [ lTipoDocumento ] );
             break;
           end;
         end;
@@ -223,10 +242,10 @@ begin
         end;
         if(lCDS.Eof) then
         begin
-          pResultado.formataErro('processaArquivoExpedicao Pedido[%s]: Não localizou o produto [%s]', [ lPedido, lProduto ] );
-          result.formataAviso('Pedido [%s] marcado como DIVERGENTE', [ lPedido ] );
+          pResultado.formataErro('processaArquivoExpedicao Documento[%s]: Não localizou o produto [%s]', [ lDocumento, lProduto ] );
+          result.formataAviso('Documento [%s%s] marcado como DIVERGENTE', [ lTipo, lDocumento ] );
           divergenciaArquivoFedex(true,pResultado);
-          ctr.setValor(CONTROLE_LOGISTICA_STATUS_VENDA, lPedido, CONTROLE_LOGISTICA_STATUS_DIVERGENTE);
+          ctr.setValor(CONTROLE_LOGISTICA_STATUS_VENDA, lTipoDocumento, CONTROLE_LOGISTICA_STATUS_DIVERGENTE);
           pResultado.acumulador['Pedidos divergentes'].incrementa;
           exit;
         end;
@@ -238,14 +257,19 @@ begin
         lCDS.First;
         while not lCDS.Eof do
         begin
-          gdbPadrao.insereDB('PEDIDOVENDA_EXPEDICAO',
+          if(lTipo=LOGISTICA_TIPOVENDA_PEDIDO) then
+          begin
+            gdbPadrao.insereDB('PEDIDOVENDA_EXPEDICAO',
                 ['id','pedido_id', 'item_id', 'produto_id', 'quantidade', 'quantidade_original', 'status'],
                 [gdbPadrao.genValue('GEN_PEDIDOVENDA_EXPEDICAO'),lCDS.FieldByName('id').AsString, lCDS.FieldByName('id_item').AsString, lCDS.FieldByName('produto_id').AsString, lFieldQtde.AsInteger, lCDS.FieldByName('quantidade').AsInteger, '0'],false,false,'pedido_id,item_id');
-          gdbPadrao.updateDB('pedidoitens', [ 'id' ], [ lCDS.FieldByName('id_item').AsInteger ], [ 'quantidade_atendida'], [ lFieldQtde.AsInteger ] );
-          if(lFieldQtde.AsInteger <> lCDS.FieldByName('quantidade').AsInteger) then begin
-            result.formataErro('processaArquivoExpedicao: Pedido [%s], Produto[%s] divergente na quantidade: Vendida: %d, Atendida: %d',
-            [ lPedido, lCDS.FieldByName('produto_id').AsString, lCDS.FieldByName('quantidade').AsInteger, lCDS.FieldByName('quantidade_atendida').AsInteger ] );
-            inc(lDivergencias);
+            gdbPadrao.updateDB('pedidoitens', [ 'id' ], [ lCDS.FieldByName('id_item').AsInteger ], [ 'quantidade_atendida'], [ lFieldQtde.AsInteger ] );
+            if(lFieldQtde.AsInteger <> lCDS.FieldByName('quantidade').AsInteger) then begin
+              result.formataErro('processaArquivoExpedicao: Pedido [%s], Produto[%s] divergente na quantidade: Vendida: %d, Atendida: %d',
+              [ lTipoDocumento, lCDS.FieldByName('produto_id').AsString, lCDS.FieldByName('quantidade').AsInteger, lCDS.FieldByName('quantidade_atendida').AsInteger ] );
+              inc(lDivergencias);
+            end;
+          end else begin
+            pResultado.formataErro('processaArquivoExpedicao [%s]: Tipo não reconhecido: %s', [ lArquivo, lTipo ] );
           end;
           lCDS.Next;
         end;
@@ -254,8 +278,8 @@ begin
       if(lDivergencias>0) then
       begin
         divergenciaArquivoFedex(true,pResultado);
-        pResultado.formataAviso('Pedido [%s] marcado como DIVERGENTE', [ lPedido ] );
-        ctr.setValor(CONTROLE_LOGISTICA_STATUS_VENDA, lPedido, CONTROLE_LOGISTICA_STATUS_DIVERGENTE);
+        pResultado.formataAviso('Pedido [%s] marcado como DIVERGENTE', [ lTipoDocumento ] );
+        ctr.setValor(CONTROLE_LOGISTICA_STATUS_VENDA, lTipoDocumento, CONTROLE_LOGISTICA_STATUS_DIVERGENTE);
         result.acumulador['Pedidos divergentes'].incrementa;
         exit;
       end;
@@ -269,11 +293,11 @@ begin
 
       try
 
-        lMovimento := gdbPadrao.criaDataset.query('select * from movimento_serial s where s.tipo_documento = ''P'' and id_documento=:id ', 'id', [ lPedido ]);
+        lMovimento := gdbPadrao.criaDataset.query('select * from movimento_serial s where s.tipo_documento = ''P'' and id_documento=:id ', 'id', [ lDocumento ]);
         if(lMovimento.dataset.RecordCount>0) then
         begin
           rejeitarArquivoFedex(true,pResultado);
-          pResultado.formataErro('processaArquivoRecebimento [%s]: Já possui movimento de seriais para esse pedido [%s]', [ lArquivo, lPedido ] );
+          pResultado.formataErro('processaArquivoRecebimento [%s]: Já possui movimento de seriais para esse pedido [%s]', [ lArquivo, lTipoDocumento ] );
           pResultado.acumulador['Saidas rejeitadas'].incrementa;
           exit;
         end;
@@ -294,13 +318,13 @@ begin
           begin
             gdbPadrao.insereDB('movimento_serial',
                 ['tipo_serial','numero','produto','tipo_documento','id_documento', 'logistica', 'dh_movimento'],
-                ['I',lTmp,lProduto,'P',lPedido,LOGISTTICA_FEDEX,lDataHoraAtual]);
+                ['I',lTmp,lProduto,lTipo,lDocumento,LOGISTTICA_FEDEX,lDataHoraAtual]);
           end;
 
           lCDS.Next;
         end;
         gdbPadrao.commit(true);
-        ctr.setValor(CONTROLE_LOGISTICA_STATUS_VENDA, lPedido,CONTROLE_LOGISTICA_STATUS_FINALIZADO);
+        ctr.setValor(CONTROLE_LOGISTICA_STATUS_VENDA, lTipoDocumento,CONTROLE_LOGISTICA_STATUS_FINALIZADO);
         apagarArquivoFedex(false,pResultado);
       finally
         gdbPadrao.rollback(true);
@@ -315,7 +339,7 @@ begin
     end;
   finally
     if assigned(lRes) and assigned(ctr) then begin
-      pAPI.parameters.controleAlteracoes.setValor(CONTROLE_LOGISTICA_RESULTADO_ENTRADA,lPedido,
+      pAPI.parameters.controleAlteracoes.setValor(CONTROLE_LOGISTICA_RESULTADO_VENDA,lDocumento,
           lRes.toHTML('', 'Resultado de processamento do retorno da FEDEX @' + DateTimeToStr(Now), [ orosh_semHeader ]));
       pResultado.getSavePoint('');
     end;
@@ -697,12 +721,12 @@ begin
   Result := LOGISTTICA_FEDEX;
 end;
 
-function TLogisticaFedex.precisaEnviarVenda(const pNumeroPed: TipoWideStringFramework): boolean;
+function TLogisticaFedex.precisaEnviarVenda;
 begin
   Result := false;
-  if(pNumeroPed='') then
+  if(pNumeroDoc='') then
     exit;
-  Result := getStatusVenda(pNumeroPed)=CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
+  Result := getStatusVenda(pTipo, pNumeroDoc)=CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
 end;
 
 function TLogisticaFedex.precisaEnviarEntrada;
@@ -794,7 +818,7 @@ function TLogisticaFedex.fedex_SCI_GetShipmentOrderList;
     ctr: IControleAlteracoes;
     orders,items,cliente,transportador: IDataset;
     lTmp: String;
-    lID, lQuery: String;
+    lID,lTipo, lQuery: String;
     lFieldNames: String;
     lParameters: array of Variant;
     datasets: TFedexDatasets;
@@ -818,34 +842,54 @@ begin
     items := gdb.criaDataset;
     cliente := gdb.criaDataset;
     transportador := gdb.criaDataset;
+    lID   := pResultado.propriedade['id'].asString;
+    lTipo := pResultado.propriedade['tipo'].asString;
 
-    lQuery := 'select p.numero_ped id, p.data_ped data_emissao, p.total_ped valor_total, c.cnpj_cpf_cli cnpj_cpf, ' +
-              ' t.cnpj_cpf_tra transportador, p.codigo_cli cliente_codigo, p.televenda_ped transportadora_codigo ' +
-//            ' case when ( p.devolucao_pedido_id is null ) then ''E'' else ''D'' end operacao, ' +
-//            ' p.numero_ent numero_nfe, p.codigo_for,p.arq_nfe xml ' +
-            ' from pedidovenda p ' +
-            ' left join clientes c on c.codigo_cli = p.codigo_cli ' +
-            ' left join transportadora t on t.codigo_tra = p.televenda_ped ';
+    if(lTipo=LOGISTICA_TIPOVENDA_PEDIDO) then
+    begin
+      lQuery := 'select ''P'' || p.numero_ped id, p.numero_ped pid, p.data_ped data_emissao, p.total_ped valor_total, c.cnpj_cpf_cli cnpj_cpf, ' +
+                ' t.cnpj_cpf_tra transportador, p.codigo_cli cliente_codigo, p.televenda_ped transportadora_codigo ' +
+  //            ' case when ( p.devolucao_pedido_id is null ) then ''E'' else ''D'' end operacao, ' +
+  //            ' p.numero_ent numero_nfe, p.codigo_for,p.arq_nfe xml ' +
+              ' from pedidovenda p ' +
+              ' left join clientes c on c.codigo_cli = p.codigo_cli ' +
+              ' left join transportadora t on t.codigo_tra = p.televenda_ped ';
+    end else
+    begin
+      pResultado.formataErro('getShipmentOrderList: Tipo não reconhecido: [%s]', [ lTIpo ]);
+      exit;
+    end;
 
-    lID := pResultado.propriedade['id'].asString;
     SetLength(lParameters,0);
     lFieldNames := '';
     if(lID<>'') then begin
-      //Saida específica
-      lFieldNames := 'numero_ped';
-      SetLength(lParameters,1);
-      lParameters[0] := lID;
-      lQuery := lQuery + ' where p.numero_ped=:numero_ped ';
+      if(lTipo=LOGISTICA_TIPOVENDA_PEDIDO) then
+      begin
+        //PEDIDO específica
+        lFieldNames := 'numero_ped';
+        SetLength(lParameters,1);
+        lParameters[0] := lID;
+        lQuery := lQuery + ' where p.numero_ped=:numero_ped ';
+      end else begin
+        pResultado.formataErro('getShipmentOrderList: Tipo não reconhecido: [%s]', [ lTIpo ]);
+        exit;
+      end;
     end else begin
-// Listar saidas que não estão no controle e precisam enviar
-      lQuery := lQuery + ' left join controlealteracoes ca on ca.sistema = :sistema and ca.identificador = :identificador and ca.chave = p.numero_ped ' +
-                ' where ca.valor = :status ';
-      SetLength(lParameters,3);
-      lParameters[0] := ctr.sistema;
-      lParameters[1] := CONTROLE_LOGISTICA_STATUS_VENDA;
-      lParameters[2] := CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
-      lFieldNames := 'sistema;identificador;status';
-      lQuery := lQuery + ' order by 1 ';
+      if(lTipo=LOGISTICA_TIPOVENDA_PEDIDO) then
+      begin
+        // Listar PEDIDOS que estão no controle e precisam enviar
+        lQuery := lQuery + ' left join controlealteracoes ca on ca.sistema = :sistema and ca.identificador = :identificador and ca.chave = ''P''||p.numero_ped ' +
+                  ' where ca.valor = :status ';
+        SetLength(lParameters,3);
+        lParameters[0] := ctr.sistema;
+        lParameters[1] := CONTROLE_LOGISTICA_STATUS_VENDA;
+        lParameters[2] := CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
+        lFieldNames := 'sistema;identificador;status';
+        lQuery := lQuery + ' order by 1 ';
+      end else begin
+        pResultado.formataErro('getShipmentOrderList: Tipo não reconhecido: [%s]', [ lTIpo ]);
+        exit;
+      end;
     end;
 
     orders.query(lQuery,lFieldNames,lParameters);
@@ -884,18 +928,24 @@ begin
           ' where p.codigo_tra = :id ', 'id', [lTmp]);
 
       if( transportador.dataset.RecordCount=0) then begin
-        pResultado.formataErro('getShipmentOrderList: Pedido [%s] não possui um transportador válido.', [ datasets.so.dataset.FieldByName('id').AsString ] );
+        pResultado.formataErro('getShipmentOrderList: Documento [%s] não possui um transportador válido.', [ datasets.so.dataset.FieldByName('id').AsString ] );
         break;
       end;
 
       if not datasets.transportador.dataset.Locate('cnpj_cpf', transportador.dataset.FieldByName('cnpj_cpf').AsString, []) then
         atribuirRegistros(transportador.dataset, datasets.transportador.dataset);
 
-      lQuery := 'select p.numero_ped id, id item, p.codigo_pro produto_id, p.quantidade_ped quantidade ' +
-        ' from pedidoitens p ' +
-        ' where p.numero_ped=:id ';
+      if(lTipo=LOGISTICA_TIPOVENDA_PEDIDO) then
+      begin
+        lQuery := 'select p.numero_ped id, id item, p.codigo_pro produto_id, p.quantidade_ped quantidade ' +
+          ' from pedidoitens p ' +
+          ' where p.numero_ped=:id ';
+      end else begin
+        pResultado.formataErro('getShipmentOrderList: Documento [%s] não possui u query para o tipo [%s]', [ datasets.so.dataset.FieldByName('id').AsString, lTipo ] );
+        break;
+      end;
 
-      items.query(lQuery,'id', [ datasets.so.dataset.FieldByName('id').AsString ]);
+      items.query(lQuery,'id', [ datasets.so.dataset.FieldByName('pid').AsString ]);
 
       while not items.dataset.eof do begin
         if precisaEnviarProduto(items.dataset.FieldByName('produto_id').AsString) then begin
@@ -913,6 +963,16 @@ begin
       else
         atribuirRegistros(items.dataset,datasets.soItens.dataset);
       datasets.so.dataset.Next;
+    end;
+
+    datasets.soItens.dataset.First;
+    while not datasets.soItens.dataset.eof do
+    begin
+      datasets.soItens.dataset.Edit;
+      datasets.soItens.dataset.FieldByName('id').AsString := lTipo + datasets.soItens.dataset.FieldByName('id').AsString;
+      datasets.soItens.dataset.CheckBrowseMode;
+
+      datasets.soItens.dataset.Next;
     end;
 
     lXMLDataList := TListaSimplesCreator.CreateDictionary<TipoWideStringFramework,TipoWideStringFramework>;
@@ -1063,7 +1123,7 @@ begin
       Result.formataErro('TLogisticaFedex.processaServico(enviaEntrada): %s: %s', [e.ClassName, e.Message ] );
   end;
   try
-    Result := enviaVenda('',Result);
+    Result := enviaVenda('','',Result);
   except
     on e: Exception do
       Result.formataErro('TLogisticaFedex.processaServico(enviaVenda): %s: %s', [e.ClassName, e.Message ] );
@@ -1100,18 +1160,18 @@ end;
 
 function TLogisticaFedex.getStatusVenda;
 begin
-  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_STATUS_VENDA,pNumeroPed);
+  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_STATUS_VENDA,pTipo+pNumeroDoc);
 end;
 
 procedure TLogisticaFedex.setStatusVenda;
 begin
-  if(pNumeroPed<>'') then
-    getControleAlteracoes.setValor(CONTROLE_LOGISTICA_STATUS_VENDA,pNumeroPed,pStatus);
+  if(pNumeroDoc<>'') then
+    getControleAlteracoes.setValor(CONTROLE_LOGISTICA_STATUS_VENDA,pTipo+pNumeroDoc,pStatus);
 end;
 
 function TLogisticaFedex.vendaFinalizada;
 begin
-  Result := getStatusVenda(pNumeroPed)=CONTROLE_LOGISTICA_STATUS_FINALIZADO;
+  Result := getStatusVenda(pTipo,pNumeroDoc)=CONTROLE_LOGISTICA_STATUS_FINALIZADO;
 end;
 
 function TLogisticaFedex.entradaFinalizada;
@@ -1126,7 +1186,7 @@ end;
 
 function TLogisticaFedex.getResultadoVenda;
 begin
-  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_VENDA,pNumeroPed);
+  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_VENDA,pTipo+pNumeroDoc);
 end;
 
 function TLogisticaFedex.getResultadoEntrada;
@@ -1144,7 +1204,7 @@ begin
   fAPI := fedex_SCI_criaAPI(pCNPJ,pRazaoSocial);
 end;
 
-function TLogisticaFedex.enviaEntrada(pID: String; pResultado: IResultadoOperacao): IResultadoOperacao;
+function TLogisticaFedex.enviaEntrada;//(pID: String; pResultado: IResultadoOperacao): IResultadoOperacao;
   var
     lLista: TFedex_PurchaseOrderList;
 begin
@@ -1166,12 +1226,13 @@ begin
     fAPI.sendSKUList(lLista,pResultado);
 end;
 
-function TLogisticaFedex.enviaVenda(pNumeroPed: TipoWideStringFramework; pResultado: IResultadoOperacao): IResultadoOperacao;
+function TLogisticaFedex.enviaVenda;//(pTipo: TipoWideStringFramework = ''; pNumeroPed: TipoWideStringFramework; pResultado: IResultadoOperacao): IResultadoOperacao;
   var
     lLista: TFedex_ShipmentOrderList;
 begin
   Result := checkResultadoOperacao(pResultado);
-  pResultado.propriedade['id'].asString := pNumeroPed;
+  pResultado.propriedade['id'].asString := pNumeroDoc;
+  pResultado.propriedade['tipo'].asString := pTipo;
   lLista := fedex_SCI_getShipmentOrderList(pResultado);
   if assigned(lLista) and (lLista.count>0) then
     fAPI.sendShipmentOrderList(lLista,pResultado);
