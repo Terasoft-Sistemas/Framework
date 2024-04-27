@@ -67,7 +67,7 @@ type
 
     function Incluir: String;
     function Alterar(pID : String): TPrevisaoPedidoCompraModel;
-    function Excluir(pID : String): String;
+    function Excluir(pNumeroPed, pCodigoFor : String): String;
     function Salvar : String;
 
     function carregaClasse(pId : String): TPrevisaoPedidoCompraModel;
@@ -109,11 +109,12 @@ begin
   end;
 end;
 
-function TPrevisaoPedidoCompraModel.Excluir(pID: String): String;
+function TPrevisaoPedidoCompraModel.Excluir(pNumeroPed, pCodigoFor: String): String;
 begin
-  self.ID      := pID;
-  self.FAcao   := tacExcluir;
-  Result       := self.Salvar;
+  self.NUMERO_PED := pNumeroPed;
+  self.CODIGO_FOR := pCodigoFor;
+  self.FAcao      := tacExcluir;
+  Result          := self.Salvar;
 end;
 
 procedure TPrevisaoPedidoCompraModel.gerarFinanceiro(pPedidoCompraModel : TPedidoCompraModel);

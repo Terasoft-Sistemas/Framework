@@ -144,7 +144,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from PREVISAO_PEDIDOCOMPRA where ID = :ID' ,[pPrevisaoPedidoCompraModel.ID]);
+   lQry.ExecSQL('delete from PREVISAO_PEDIDOCOMPRA where NUMERO_PED = :NUMERO_PED and CODIGO_FOR = :CODIGO_FOR', [pPrevisaoPedidoCompraModel.NUMERO_PED, pPrevisaoPedidoCompraModel.CODIGO_FOR]);
    lQry.ExecSQL;
    Result := pPrevisaoPedidoCompraModel.ID;
 

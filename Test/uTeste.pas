@@ -2689,16 +2689,20 @@ end;
 procedure TForm1.Button98Click(Sender: TObject);
 var
   lPrevisaoPedidoCompraModel : TPrevisaoPedidoCompraModel;
-  id : String;
+  Numero_Ped, Codigo_For : String;
 begin
   lPrevisaoPedidoCompraModel := TPrevisaoPedidoCompraModel.Create(vIConexao);
   try
     try
-      id := InputBox('PrevisaoPedidoCompra', 'Digite o código do PrevisaoPedidoCompra que deseja excluir:', '');
-      if id.IsEmpty then
+      Numero_Ped := InputBox('PrevisaoPedidoCompra', 'Digite o Numero Pedido da PrevisaoPedidoCompra que deseja excluir:', '');
+      if Numero_Ped.IsEmpty then
           Exit;
 
-      lPrevisaoPedidoCompraModel.Excluir(id);
+      Codigo_For := InputBox('PrevisaoPedidoCompra', 'Digite o Código Fornecedor da PrevisaoPedidoCompra que deseja excluir:', '');
+      if Codigo_For.IsEmpty then
+          Exit;
+
+      lPrevisaoPedidoCompraModel.Excluir(Numero_Ped, Codigo_For);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do

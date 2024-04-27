@@ -63,20 +63,20 @@ BottomMiddelPanelData=0000080001020200000009000000446F636B5369746530100000004772
 [View0]
 CustomEditViewType=TEditView
 Module=C:\Terasoft\Fontes\mgiratto\FTS\Terasoft\Framework\Test\uTeste.pas
-CursorX=24
-CursorY=2091
-TopLine=2071
+CursorX=46
+CursorY=2702
+TopLine=2689
 LeftCol=1
 Elisions=
 Bookmarks=
-EditViewName=Borland.FormDesignerView
+EditViewName=C:\Terasoft\Fontes\mgiratto\FTS\Terasoft\Framework\Test\uTeste.pas
 
 [View1]
 CustomEditViewType=TEditView
 Module=C:\Terasoft\Fontes\mgiratto\FTS\Terasoft\Framework\Model\PedidoCompraModel.pas
 CursorX=1
 CursorY=312
-TopLine=284
+TopLine=314
 LeftCol=1
 Elisions=
 Bookmarks=
@@ -139,13 +139,13 @@ Create=1
 Visible=1
 Docked=0
 State=2
-Left=-31
+Left=145
 Top=269
-Width=7559
+Width=8930
 Height=8519
 MaxLeft=-4
 MaxTop=-10
-MaxWidth=7559
+MaxWidth=8930
 MaxHeight=8519
 ClientWidth=10000
 ClientHeight=10077
@@ -232,8 +232,8 @@ SplitPos=111
 
 [PropInspDesignerSelection]
 ArrangeBy=Name
-SelectedItem=Name,
-ExpandedItems=LiveBindings=0,"LiveBindings Designer=0",Margins=0,StyleElements=0
+SelectedItem=Caption,
+ExpandedItems=Anchors=0,Constraints=0
 
 [frmDesignPreview]
 PercentageSizes=1
