@@ -191,7 +191,7 @@ end;
 function testaLogisticaVenda;
 begin
   Result := checkResultadoOperacao(pResultado);
-  Result := getLogisticaGlobal.enviaVenda(pTipo,'',Result);
+  Result := getLogisticaGlobal.enviaVenda(pTipo,Result.propriedade['id'].asString,Result);
   if(pResultado.eventos>0) then
     msgAviso(pResultado.toString);
 end;
@@ -231,7 +231,11 @@ end;
 
 function logistica_utiizada: String;
 begin
-  Result := ValorTagConfig(tagConfig_LOGISTICA,tagConfigcfg_Padrao_LOGISTICA,tvString);
+  {$if defined(__FORCAR_LOGISTICA_FEDEX__)}
+    Result := CONTROLE_LOGISTICA_FEDEX;
+  {$else}
+    Result := ValorTagConfig(tagConfig_LOGISTICA,tagConfigcfg_Padrao_LOGISTICA,tvString);
+  {$endif};
 end;
 
 {$if defined(__AUTOMATIZA_LOGISTICA__)}
