@@ -171,6 +171,9 @@ begin
           if(lTipo=LOGISTICA_TIPOVENDA_PEDIDO) then
           begin
             lDS := gdbPadrao.criaDataset.query( 'select p.numero_ped id, p.* from pedidovenda p where p.numero_ped=:id', 'id', [ lDocumento ]);
+          end else if(lTipo=LOGISTICA_TIPOVENDA_SAIDATRANSF) then
+          begin
+            lDS := gdbPadrao.criaDataset.query( 'select p.numero_sai id, p.* from saidas p where p.numero_sai=:id and p.transferencia=''S'' ', 'id', [ lDocumento ]);
           end else begin
             pResultado.formataErro('processaArquivoExpedicao [%s]: Tipo não reconhecido: %s', [ lArquivo, lTipo ] );
             break;
@@ -179,8 +182,8 @@ begin
           if(lDS.dataset.RecordCount=0) then begin
             pResultado.formataErro('processaArquivoExpedicao [%s]: Documento [%s] não existe.', [ lArquivo, lTipoDocumento ] );
             break;
-          end else if(ctr.getValor(CONTROLE_LOGISTICA_STATUS_VENDA, lTipo + lDS.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
-            pResultado.formataErro('processaArquivoExpedicao [%s]: Documento [%s] não está no status ENVIADO: [%s]', [ lArquivo, lTipoDocumento, ctr.getValor(CONTROLE_LOGISTICA_STATUS_VENDA, lTipo + lDS.dataset.FieldByName('id').AsString,'') ] );
+          end else if  stringForaArray(ctr.getValor(CONTROLE_LOGISTICA_STATUS_VENDA, lTipo + lDS.dataset.FieldByName('id').AsString,''), [CONTROLE_LOGISTICA_STATUS_ENVIADO,CONTROLE_LOGISTICA_STATUS_DIVERGENTE]) then begin
+            pResultado.formataErro('processaArquivoExpedicao [%s]: Documento [%s] não está no status ENVIADO ou DIVERGENTE: [%s]', [ lArquivo, lTipoDocumento, ctr.getValor(CONTROLE_LOGISTICA_STATUS_VENDA, lTipo + lDS.dataset.FieldByName('id').AsString,'') ] );
             break;
           end;
 
@@ -189,13 +192,17 @@ begin
             begin
               lDSItens := gdbPadrao.criaDataset.query('select p.id id_item, p.numero_ped id, p.codigo_pro produto_id, p.quantidade_ped quantidade, 0 as quantidade_atendida from pedidoitens p ' +
                                                ' where p.numero_ped = :id order by 1 ', 'id', [ lDocumento ] );
+            end else if(lTipo=LOGISTICA_TIPOVENDA_SAIDATRANSF) then
+            begin
+              lDSItens := gdbPadrao.criaDataset.query('select p.id id_item, p.numero_sai id, p.codigo_pro produto_id, p.quantidade_sai quantidade, 0 as quantidade_atendida from saidasitens p ' +
+                                               ' where p.numero_sai = :id order by 1 ', 'id', [ lDocumento ] );
             end else begin
               pResultado.formataErro('processaArquivoExpedicao [%s]: Tipo não reconhecido: %s', [ lArquivo, lTipo ] );
               break;
             end;
 
             if(lDSItens.dataset.RecordCount = 0 ) then begin
-              pResultado.formataErro('processaArquivoExpedicao: Pedido [%s]: Não possui itens na tabela de itens', [ lTipoDocumento ] );
+              pResultado.formataErro('processaArquivoExpedicao: Documento [%s]: Não possui itens na tabela de itens', [ lTipoDocumento ] );
               break;
             end;
             lCDS := getCDSDataset(lDSItens.dataset);
@@ -265,6 +272,14 @@ begin
             gdbPadrao.updateDB('pedidoitens', [ 'id' ], [ lCDS.FieldByName('id_item').AsInteger ], [ 'quantidade_atendida'], [ lFieldQtde.AsInteger ] );
             if(lFieldQtde.AsInteger <> lCDS.FieldByName('quantidade').AsInteger) then begin
               result.formataErro('processaArquivoExpedicao: Pedido [%s], Produto[%s] divergente na quantidade: Vendida: %d, Atendida: %d',
+              [ lTipoDocumento, lCDS.FieldByName('produto_id').AsString, lCDS.FieldByName('quantidade').AsInteger, lCDS.FieldByName('quantidade_atendida').AsInteger ] );
+              inc(lDivergencias);
+            end;
+          end else if(lTipo=LOGISTICA_TIPOVENDA_SAIDATRANSF) then
+          begin
+            gdbPadrao.updateDB('saidasitens', [ 'id' ], [ lCDS.FieldByName('id_item').AsInteger ], [ 'qtd_checagem'], [ lFieldQtde.AsInteger ] );
+            if(lFieldQtde.AsInteger <> lCDS.FieldByName('quantidade').AsInteger) then begin
+              result.formataErro('processaArquivoExpedicao: Transferencia [%s], Produto[%s] divergente na quantidade: Vendida: %d, Atendida: %d',
               [ lTipoDocumento, lCDS.FieldByName('produto_id').AsString, lCDS.FieldByName('quantidade').AsInteger, lCDS.FieldByName('quantidade_atendida').AsInteger ] );
               inc(lDivergencias);
             end;
@@ -339,7 +354,7 @@ begin
     end;
   finally
     if assigned(lRes) and assigned(ctr) then begin
-      pAPI.parameters.controleAlteracoes.setValor(CONTROLE_LOGISTICA_RESULTADO_VENDA,lDocumento,
+      pAPI.parameters.controleAlteracoes.setValor(CONTROLE_LOGISTICA_RESULTADO_VENDA,lTipoDocumento,
           lRes.toHTML('', 'Resultado de processamento do retorno da FEDEX @' + DateTimeToStr(Now), [ orosh_semHeader ]));
       pResultado.getSavePoint('');
     end;
@@ -880,6 +895,16 @@ begin
               ' from pedidovenda p ' +
               ' left join clientes c on c.codigo_cli = p.codigo_cli ' +
               ' left join transportadora t on t.codigo_tra = p.televenda_ped ';
+    end else if(lTipo=LOGISTICA_TIPOVENDA_SAIDATRANSF) then
+    begin
+      lQuery := 'select ''T'' || p.numero_sai id, p.numero_sai pid, p.data_sai data_emissao, p.total_sai valor_total, c.cnpj_cpf_cli cnpj_cpf, ' +
+                ' t.cnpj_cpf_tra transportador, p.codigo_cli cliente_codigo, p.TRANSPORTADORA_ID transportadora_codigo ' +
+  //            ' case when ( p.devolucao_pedido_id is null ) then ''E'' else ''D'' end operacao, ' +
+  //            ' p.numero_ent numero_nfe, p.codigo_for,p.arq_nfe xml ' +
+              ' from saidas p ' +
+              ' left join clientes c on c.codigo_cli = p.codigo_cli ' +
+              ' left join transportadora t on t.codigo_tra = p.TRANSPORTADORA_ID ';
+
     end else
     begin
       pResultado.formataErro('getShipmentOrderList: Tipo não reconhecido: [%s]', [ lTIpo ]);
@@ -896,6 +921,14 @@ begin
         SetLength(lParameters,1);
         lParameters[0] := lID;
         lQuery := lQuery + ' where p.numero_ped=:numero_ped ';
+      end else if(stringNoArray(lTipo, [LOGISTICA_TIPOVENDA_SAIDATRANSF])) then
+      begin
+        //SAIDAS específica
+        lFieldNames := 'numero_sai';
+        SetLength(lParameters,1);
+        lParameters[0] := lID;
+        lQuery := lQuery + ' where p.numero_sai=:numero_sai and p.transferencia=''S''';
+
       end else begin
         pResultado.formataErro('getShipmentOrderList: Tipo não reconhecido: [%s]', [ lTIpo ]);
         exit;
@@ -906,6 +939,17 @@ begin
         // Listar PEDIDOS que estão no controle e precisam enviar
         lQuery := lQuery + ' left join controlealteracoes ca on ca.sistema = :sistema and ca.identificador = :identificador and ca.chave = ''P''||p.numero_ped ' +
                   ' where ca.valor = :status ';
+        SetLength(lParameters,3);
+        lParameters[0] := ctr.sistema;
+        lParameters[1] := CONTROLE_LOGISTICA_STATUS_VENDA;
+        lParameters[2] := CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
+        lFieldNames := 'sistema;identificador;status';
+        lQuery := lQuery + ' order by 1 ';
+      end else if(lTipo = LOGISTICA_TIPOVENDA_SAIDATRANSF) then
+      begin
+        // Listar PEDIDOS que estão no controle e precisam enviar
+        lQuery := lQuery + ' left join controlealteracoes ca on ca.sistema = :sistema and ca.identificador = :identificador and ca.chave = ''T''||p.numero_sai ' +
+                  ' where ca.valor = :status and p.transferencia=''S'' ';
         SetLength(lParameters,3);
         lParameters[0] := ctr.sistema;
         lParameters[1] := CONTROLE_LOGISTICA_STATUS_VENDA;
@@ -966,6 +1010,11 @@ begin
         lQuery := 'select p.numero_ped id, id item, p.codigo_pro produto_id, p.quantidade_ped quantidade ' +
           ' from pedidoitens p ' +
           ' where p.numero_ped=:id ';
+      end else if(stringNoArray(lTipo, [LOGISTICA_TIPOVENDA_SAIDATRANSF])) then
+      begin
+        lQuery := 'select p.numero_sai id, id item, p.codigo_pro produto_id, p.quantidade_sai quantidade ' +
+          ' from saidasitens p ' +
+          ' where p.numero_sai=:id ';
       end else begin
         pResultado.formataErro('getShipmentOrderList: Documento [%s] não possui u query para o tipo [%s]', [ datasets.so.dataset.FieldByName('id').AsString, lTipo ] );
         break;
