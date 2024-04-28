@@ -824,6 +824,9 @@ function TLogisticaFedex.fedex_SCI_GetShipmentOrderList;
     datasets: TFedexDatasets;
     lXMLDataList: IDicionarioSimples<TipoWideStringFramework, TipoWideStringFramework>;
     lSKUList: TFedex_SKUList;
+    p: TFedex_ShipmentOrderList;
+    l: IListaString;
+    t: IFedexShipmentOrder;
 begin
   checkResultadoOperacao(pResultado);
   Result := nil;
@@ -844,6 +847,29 @@ begin
     transportador := gdb.criaDataset;
     lID   := pResultado.propriedade['id'].asString;
     lTipo := pResultado.propriedade['tipo'].asString;
+
+    if(lTipo = '') then begin
+      l := getStringList;
+      l.Add(LOGISTICA_TIPOVENDA_PEDIDO);
+      l.Add(LOGISTICA_TIPOVENDA_SAIDATRANSF);
+      for lTipo in l do
+      begin
+        pResultado.propriedade['tipo'].asString := lTipo;
+        p := fedex_SCI_GetShipmentOrderList(pResultado);
+        if assigned(p) then
+        begin
+          if(Result=nil) then
+          begin
+            Result := p;
+            continue;
+          end;
+
+          for t in p do
+            Result.add(t);
+        end;
+        exit;
+      end;
+    end;
 
     if(lTipo=LOGISTICA_TIPOVENDA_PEDIDO) then
     begin
