@@ -49,17 +49,17 @@ implementation
         function entradaFinalizada(const pID: TipoWideStringFramework): boolean;
 
 
-        function precisaEnviarVenda(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework): boolean;
-        function getStatusVenda(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework): TipoWideStringFramework;
-        procedure setStatusVenda(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
-        function getResultadoVenda(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework): TipoWideStringFramework;
-        function vendaFinalizada(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework): boolean;
+        function precisaEnviarSaida(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework): boolean;
+        function getStatusSaida(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework): TipoWideStringFramework;
+        procedure setStatusSaida(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
+        function getResultadoSaida(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework): TipoWideStringFramework;
+        function saidaFinalizada(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework): boolean;
 
         function getControleAlteracoes: IControleAlteracoes;
         procedure setControleAlteracoes(const pValue: IControleAlteracoes);
 
         function enviaProduto(pCodigoPro: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-        function enviaVenda(pTipo: TipoWideStringFramework = ''; pNumeroDoc: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+        function enviaSaida(pTipo: TipoWideStringFramework = ''; pNumeroDoc: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
         function enviaEntrada(pID: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
         function processaRetorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
@@ -168,10 +168,10 @@ begin
           lDocumento := copy(lDocumento,2);
           lRes := pResultado.getSavePoint('so.' + lTipoDocumento);
 
-          if(lTipo=LOGISTICA_TIPOVENDA_PEDIDO) then
+          if(lTipo=LOGISTICA_TIPOSAIDA_PEDIDO) then
           begin
             lDS := gdbPadrao.criaDataset.query( 'select p.numero_ped id, p.* from pedidovenda p where p.numero_ped=:id', 'id', [ lDocumento ]);
-          end else if(lTipo=LOGISTICA_TIPOVENDA_SAIDATRANSF) then
+          end else if(lTipo=LOGISTICA_TIPOSAIDA_SAIDATRANSF) then
           begin
             lDS := gdbPadrao.criaDataset.query( 'select p.numero_sai id, p.* from saidas p where p.numero_sai=:id and p.transferencia=''S'' ', 'id', [ lDocumento ]);
           end else begin
@@ -182,17 +182,17 @@ begin
           if(lDS.dataset.RecordCount=0) then begin
             pResultado.formataErro('processaArquivoExpedicao [%s]: Documento [%s] não existe.', [ lArquivo, lTipoDocumento ] );
             break;
-          end else if  stringForaArray(ctr.getValor(CONTROLE_LOGISTICA_STATUS_VENDA, lTipo + lDS.dataset.FieldByName('id').AsString,''), [CONTROLE_LOGISTICA_STATUS_ENVIADO,CONTROLE_LOGISTICA_STATUS_DIVERGENTE]) then begin
-            pResultado.formataErro('processaArquivoExpedicao [%s]: Documento [%s] não está no status ENVIADO ou DIVERGENTE: [%s]', [ lArquivo, lTipoDocumento, ctr.getValor(CONTROLE_LOGISTICA_STATUS_VENDA, lTipo + lDS.dataset.FieldByName('id').AsString,'') ] );
+          end else if  stringForaArray(ctr.getValor(CONTROLE_LOGISTICA_STATUS_SAIDA, lTipo + lDS.dataset.FieldByName('id').AsString,''), [CONTROLE_LOGISTICA_STATUS_ENVIADO,CONTROLE_LOGISTICA_STATUS_DIVERGENTE]) then begin
+            pResultado.formataErro('processaArquivoExpedicao [%s]: Documento [%s] não está no status ENVIADO ou DIVERGENTE: [%s]', [ lArquivo, lTipoDocumento, ctr.getValor(CONTROLE_LOGISTICA_STATUS_SAIDA, lTipo + lDS.dataset.FieldByName('id').AsString,'') ] );
             break;
           end;
 
           if(lDSItens=nil) then begin
-            if(lTipo=LOGISTICA_TIPOVENDA_PEDIDO) then
+            if(lTipo=LOGISTICA_TIPOSAIDA_PEDIDO) then
             begin
               lDSItens := gdbPadrao.criaDataset.query('select p.id id_item, p.numero_ped id, p.codigo_pro produto_id, p.quantidade_ped quantidade, 0 as quantidade_atendida from pedidoitens p ' +
                                                ' where p.numero_ped = :id order by 1 ', 'id', [ lDocumento ] );
-            end else if(lTipo=LOGISTICA_TIPOVENDA_SAIDATRANSF) then
+            end else if(lTipo=LOGISTICA_TIPOSAIDA_SAIDATRANSF) then
             begin
               lDSItens := gdbPadrao.criaDataset.query('select p.id id_item, p.numero_sai id, p.codigo_pro produto_id, p.quantidade_sai quantidade, 0 as quantidade_atendida from saidasitens p ' +
                                                ' where p.numero_sai = :id order by 1 ', 'id', [ lDocumento ] );
@@ -252,7 +252,7 @@ begin
           pResultado.formataErro('processaArquivoExpedicao Documento[%s]: Não localizou o produto [%s]', [ lDocumento, lProduto ] );
           result.formataAviso('Documento [%s%s] marcado como DIVERGENTE', [ lTipo, lDocumento ] );
           divergenciaArquivoFedex(true,pResultado);
-          ctr.setValor(CONTROLE_LOGISTICA_STATUS_VENDA, lTipoDocumento, CONTROLE_LOGISTICA_STATUS_DIVERGENTE);
+          ctr.setValor(CONTROLE_LOGISTICA_STATUS_SAIDA, lTipoDocumento, CONTROLE_LOGISTICA_STATUS_DIVERGENTE);
           pResultado.acumulador['Pedidos divergentes'].incrementa;
           exit;
         end;
@@ -264,7 +264,7 @@ begin
         lCDS.First;
         while not lCDS.Eof do
         begin
-          if(lTipo=LOGISTICA_TIPOVENDA_PEDIDO) then
+          if(lTipo=LOGISTICA_TIPOSAIDA_PEDIDO) then
           begin
             gdbPadrao.insereDB('PEDIDOVENDA_EXPEDICAO',
                 ['id','pedido_id', 'item_id', 'produto_id', 'quantidade', 'quantidade_original', 'status'],
@@ -275,7 +275,7 @@ begin
               [ lTipoDocumento, lCDS.FieldByName('produto_id').AsString, lCDS.FieldByName('quantidade').AsInteger, lCDS.FieldByName('quantidade_atendida').AsInteger ] );
               inc(lDivergencias);
             end;
-          end else if(lTipo=LOGISTICA_TIPOVENDA_SAIDATRANSF) then
+          end else if(lTipo=LOGISTICA_TIPOSAIDA_SAIDATRANSF) then
           begin
             gdbPadrao.updateDB('saidasitens', [ 'id' ], [ lCDS.FieldByName('id_item').AsInteger ], [ 'qtd_checagem'], [ lFieldQtde.AsInteger ] );
             if(lFieldQtde.AsInteger <> lCDS.FieldByName('quantidade').AsInteger) then begin
@@ -294,7 +294,7 @@ begin
       begin
         divergenciaArquivoFedex(true,pResultado);
         pResultado.formataAviso('Pedido [%s] marcado como DIVERGENTE', [ lTipoDocumento ] );
-        ctr.setValor(CONTROLE_LOGISTICA_STATUS_VENDA, lTipoDocumento, CONTROLE_LOGISTICA_STATUS_DIVERGENTE);
+        ctr.setValor(CONTROLE_LOGISTICA_STATUS_SAIDA, lTipoDocumento, CONTROLE_LOGISTICA_STATUS_DIVERGENTE);
         result.acumulador['Pedidos divergentes'].incrementa;
         exit;
       end;
@@ -339,7 +339,7 @@ begin
           lCDS.Next;
         end;
         gdbPadrao.commit(true);
-        ctr.setValor(CONTROLE_LOGISTICA_STATUS_VENDA, lTipoDocumento,CONTROLE_LOGISTICA_STATUS_FINALIZADO);
+        ctr.setValor(CONTROLE_LOGISTICA_STATUS_SAIDA, lTipoDocumento,CONTROLE_LOGISTICA_STATUS_FINALIZADO);
         apagarArquivoFedex(false,pResultado);
       finally
         gdbPadrao.rollback(true);
@@ -354,7 +354,7 @@ begin
     end;
   finally
     if assigned(lRes) and assigned(ctr) then begin
-      pAPI.parameters.controleAlteracoes.setValor(CONTROLE_LOGISTICA_RESULTADO_VENDA,lTipoDocumento,
+      pAPI.parameters.controleAlteracoes.setValor(CONTROLE_LOGISTICA_RESULTADO_SAIDA,lTipoDocumento,
           lRes.toHTML('', 'Resultado de processamento do retorno da FEDEX @' + DateTimeToStr(Now), [ orosh_semHeader ]));
       pResultado.getSavePoint('');
     end;
@@ -736,12 +736,12 @@ begin
   Result := LOGISTTICA_FEDEX;
 end;
 
-function TLogisticaFedex.precisaEnviarVenda;
+function TLogisticaFedex.precisaEnviarSaida;
 begin
   Result := false;
   if(pNumeroDoc='') then
     exit;
-  Result := getStatusVenda(pTipo, pNumeroDoc)=CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
+  Result := getStatusSaida(pTipo, pNumeroDoc)=CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
 end;
 
 function TLogisticaFedex.precisaEnviarEntrada;
@@ -865,8 +865,8 @@ begin
 
     if(lTipo = '') then begin
       l := getStringList;
-      l.Add(LOGISTICA_TIPOVENDA_PEDIDO);
-      l.Add(LOGISTICA_TIPOVENDA_SAIDATRANSF);
+      l.Add(LOGISTICA_TIPOSAIDA_PEDIDO);
+      l.Add(LOGISTICA_TIPOSAIDA_SAIDATRANSF);
       for lTipo in l do
       begin
         pResultado.propriedade['tipo'].asString := lTipo;
@@ -886,7 +886,7 @@ begin
       end;
     end;
 
-    if(lTipo=LOGISTICA_TIPOVENDA_PEDIDO) then
+    if(lTipo=LOGISTICA_TIPOSAIDA_PEDIDO) then
     begin
       lQuery := 'select ''P'' || p.numero_ped id, p.numero_ped pid, p.data_ped data_emissao, p.total_ped valor_total, c.cnpj_cpf_cli cnpj_cpf, ' +
                 ' t.cnpj_cpf_tra transportador, p.codigo_cli cliente_codigo, p.televenda_ped transportadora_codigo ' +
@@ -895,7 +895,7 @@ begin
               ' from pedidovenda p ' +
               ' left join clientes c on c.codigo_cli = p.codigo_cli ' +
               ' left join transportadora t on t.codigo_tra = p.televenda_ped ';
-    end else if(lTipo=LOGISTICA_TIPOVENDA_SAIDATRANSF) then
+    end else if(lTipo=LOGISTICA_TIPOSAIDA_SAIDATRANSF) then
     begin
       lQuery := 'select ''T'' || p.numero_sai id, p.numero_sai pid, p.data_sai data_emissao, p.total_sai valor_total, c.cnpj_cpf_cli cnpj_cpf, ' +
                 ' t.cnpj_cpf_tra transportador, p.codigo_cli cliente_codigo, p.TRANSPORTADORA_ID transportadora_codigo ' +
@@ -914,14 +914,14 @@ begin
     SetLength(lParameters,0);
     lFieldNames := '';
     if(lID<>'') then begin
-      if(lTipo=LOGISTICA_TIPOVENDA_PEDIDO) then
+      if(lTipo=LOGISTICA_TIPOSAIDA_PEDIDO) then
       begin
         //PEDIDO específica
         lFieldNames := 'numero_ped';
         SetLength(lParameters,1);
         lParameters[0] := lID;
         lQuery := lQuery + ' where p.numero_ped=:numero_ped ';
-      end else if(stringNoArray(lTipo, [LOGISTICA_TIPOVENDA_SAIDATRANSF])) then
+      end else if(stringNoArray(lTipo, [LOGISTICA_TIPOSAIDA_SAIDATRANSF])) then
       begin
         //SAIDAS específica
         lFieldNames := 'numero_sai';
@@ -934,25 +934,25 @@ begin
         exit;
       end;
     end else begin
-      if(lTipo=LOGISTICA_TIPOVENDA_PEDIDO) then
+      if(lTipo=LOGISTICA_TIPOSAIDA_PEDIDO) then
       begin
         // Listar PEDIDOS que estão no controle e precisam enviar
         lQuery := lQuery + ' left join controlealteracoes ca on ca.sistema = :sistema and ca.identificador = :identificador and ca.chave = ''P''||p.numero_ped ' +
                   ' where ca.valor = :status ';
         SetLength(lParameters,3);
         lParameters[0] := ctr.sistema;
-        lParameters[1] := CONTROLE_LOGISTICA_STATUS_VENDA;
+        lParameters[1] := CONTROLE_LOGISTICA_STATUS_SAIDA;
         lParameters[2] := CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
         lFieldNames := 'sistema;identificador;status';
         lQuery := lQuery + ' order by 1 ';
-      end else if(lTipo = LOGISTICA_TIPOVENDA_SAIDATRANSF) then
+      end else if(lTipo = LOGISTICA_TIPOSAIDA_SAIDATRANSF) then
       begin
         // Listar PEDIDOS que estão no controle e precisam enviar
         lQuery := lQuery + ' left join controlealteracoes ca on ca.sistema = :sistema and ca.identificador = :identificador and ca.chave = ''T''||p.numero_sai ' +
                   ' where ca.valor = :status and p.transferencia=''S'' ';
         SetLength(lParameters,3);
         lParameters[0] := ctr.sistema;
-        lParameters[1] := CONTROLE_LOGISTICA_STATUS_VENDA;
+        lParameters[1] := CONTROLE_LOGISTICA_STATUS_SAIDA;
         lParameters[2] := CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
         lFieldNames := 'sistema;identificador;status';
         lQuery := lQuery + ' order by 1 ';
@@ -1005,12 +1005,12 @@ begin
       if not datasets.transportador.dataset.Locate('cnpj_cpf', transportador.dataset.FieldByName('cnpj_cpf').AsString, []) then
         atribuirRegistros(transportador.dataset, datasets.transportador.dataset);
 
-      if(lTipo=LOGISTICA_TIPOVENDA_PEDIDO) then
+      if(lTipo=LOGISTICA_TIPOSAIDA_PEDIDO) then
       begin
         lQuery := 'select p.numero_ped id, id item, p.codigo_pro produto_id, p.quantidade_ped quantidade ' +
           ' from pedidoitens p ' +
           ' where p.numero_ped=:id ';
-      end else if(stringNoArray(lTipo, [LOGISTICA_TIPOVENDA_SAIDATRANSF])) then
+      end else if(stringNoArray(lTipo, [LOGISTICA_TIPOSAIDA_SAIDATRANSF])) then
       begin
         lQuery := 'select p.numero_sai id, id item, p.codigo_pro produto_id, p.quantidade_sai quantidade ' +
           ' from saidasitens p ' +
@@ -1198,10 +1198,10 @@ begin
       Result.formataErro('TLogisticaFedex.processaServico(enviaEntrada): %s: %s', [e.ClassName, e.Message ] );
   end;
   try
-    Result := enviaVenda('','',Result);
+    Result := enviaSaida('','',Result);
   except
     on e: Exception do
-      Result.formataErro('TLogisticaFedex.processaServico(enviaVenda): %s: %s', [e.ClassName, e.Message ] );
+      Result.formataErro('TLogisticaFedex.processaServico(enviaSaida): %s: %s', [e.ClassName, e.Message ] );
   end;
   try
     Result := processaRetorno(Result);
@@ -1233,20 +1233,20 @@ begin
     getControleAlteracoes.setValor(CONTROLE_LOGISTICA_STATUS_ENTRADA,pID,pStatus);
 end;
 
-function TLogisticaFedex.getStatusVenda;
+function TLogisticaFedex.getStatusSaida;
 begin
-  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_STATUS_VENDA,pTipo+pNumeroDoc);
+  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_STATUS_SAIDA,pTipo+pNumeroDoc);
 end;
 
-procedure TLogisticaFedex.setStatusVenda;
+procedure TLogisticaFedex.setStatusSaida;
 begin
   if(pNumeroDoc<>'') then
-    getControleAlteracoes.setValor(CONTROLE_LOGISTICA_STATUS_VENDA,pTipo+pNumeroDoc,pStatus);
+    getControleAlteracoes.setValor(CONTROLE_LOGISTICA_STATUS_SAIDA,pTipo+pNumeroDoc,pStatus);
 end;
 
-function TLogisticaFedex.vendaFinalizada;
+function TLogisticaFedex.saidaFinalizada;
 begin
-  Result := getStatusVenda(pTipo,pNumeroDoc)=CONTROLE_LOGISTICA_STATUS_FINALIZADO;
+  Result := getStatusSaida(pTipo,pNumeroDoc)=CONTROLE_LOGISTICA_STATUS_FINALIZADO;
 end;
 
 function TLogisticaFedex.entradaFinalizada;
@@ -1259,9 +1259,9 @@ begin
   Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_PRODUTO,pCodigoPro);
 end;
 
-function TLogisticaFedex.getResultadoVenda;
+function TLogisticaFedex.getResultadoSaida;
 begin
-  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_VENDA,pTipo+pNumeroDoc);
+  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_SAIDA,pTipo+pNumeroDoc);
 end;
 
 function TLogisticaFedex.getResultadoEntrada;
@@ -1301,7 +1301,7 @@ begin
     fAPI.sendSKUList(lLista,pResultado);
 end;
 
-function TLogisticaFedex.enviaVenda;//(pTipo: TipoWideStringFramework = ''; pNumeroPed: TipoWideStringFramework; pResultado: IResultadoOperacao): IResultadoOperacao;
+function TLogisticaFedex.enviaSaida;//(pTipo: TipoWideStringFramework = ''; pNumeroPed: TipoWideStringFramework; pResultado: IResultadoOperacao): IResultadoOperacao;
   var
     lLista: TFedex_ShipmentOrderList;
 begin
