@@ -117,6 +117,7 @@ begin
         exit;
       end;
 
+      lDSIMEI := gdbPadrao.criaDataset;
       lDataHoraAtual := gdbPadrao.dataHoraServer;
 
       ctr := pAPI.parameters.controleAlteracoes;
@@ -201,7 +202,8 @@ begin
               break;
             end;
 
-            if(lDSItens.dataset.RecordCount = 0 ) then begin
+            if(lDSItens.dataset.RecordCount = 0 ) then
+            begin
               pResultado.formataErro('processaArquivoExpedicao: Documento [%s]: Não possui itens na tabela de itens', [ lTipoDocumento ] );
               break;
             end;
@@ -218,15 +220,24 @@ begin
           lProduto := lLinha.strings.Strings[3];
 
         lIMEI    := lLinha.strings.Strings[4];
-        if not validaIMEI(lIMEI) then begin
+        if not validaIMEI(lIMEI) then
+        begin
           pResultado.formataErro('processaArquivoExpedicao [%s]: IMEI [%s] inválido para item %d', [ lArquivo, lIMEI, i ] );
           continue;
         end;
-        if not lLista.get(lProduto,lListaIMEIS) then begin
+        lDSImei.query('select * from movimento_serial m where m.numero=:imei and m.produto=:produto and m.tipo_movimento = ''E''', 'imei;produto', [lIMEI,lProduto]);
+        if(lDSIMEI.dataset.RecordCount = 0 ) then
+        begin
+          pResultado.formataErro('processaArquivoExpedicao [%s]: IMEI [%s] inválido para produto %s', [ lArquivo, lIMEI, lProduto ] );
+          continue;
+        end;
+        if not lLista.get(lProduto,lListaIMEIS) then
+        begin
           lListaIMEIS := getStringList;
           lLista.add(lProduto,lListaIMEIS);
         end;
-        if not (lListaIMEIS.IndexOf(lIMEI)<0) then begin
+        if not (lListaIMEIS.IndexOf(lIMEI)<0) then
+        begin
           pResultado.formataErro('processaArquivoExpedicao [%s]: IMEI [%s] já informado para item %d', [ lArquivo, lIMEI, i ] );
           continue;
         end;
@@ -234,7 +245,8 @@ begin
         lListaIMEIS.Add(lIMEI);
 
         lCDS.First;
-        while not lCDS.eof do begin
+        while not lCDS.eof do
+        begin
           if(lCDS.FieldByName('produto_id').AsString = lProduto) then
           begin
             if(lFieldQtde.AsCurrency<lCDS.FieldByName('quantidade').AsCurrency) then
@@ -316,8 +328,6 @@ begin
           pResultado.acumulador['Saidas rejeitadas'].incrementa;
           exit;
         end;
-
-        lDSIMEI := gdbPadrao.criaDataset;
 
         lCDS.First;
         while not lCDS.eof do
