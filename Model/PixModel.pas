@@ -109,6 +109,7 @@ type
 
     function carregaClasse(pId: String): TPixModel;
     function carregaClasseIndexOf(pIndex: Integer): TPixModel;
+    function CalculaTaxaPix(pTipo: String; PValorBase: Real; pTipoTaxaRecebimento: String; pValorTaxaCobranca: Real; pValorTaxaRecebimento: Real): Real;
 
     property PixsLista: TObjectList<TPixModel> read FPixsLista write SetPixsLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -125,9 +126,40 @@ type
 implementation
 
 uses
-  PixDao;
+  PixDao,
+  Terasoft.Utils;
 
 { TPixModel }
+
+function TPixModel.CalculaTaxaPix(pTipo: String; PValorBase: Real; pTipoTaxaRecebimento: String; pValorTaxaCobranca, pValorTaxaRecebimento: Real): Real;
+var
+  lValorTaxa: Real;
+begin
+  if pTipo = 'COBRANCA' then
+  begin
+    Result := pValorTaxaCobranca;
+  end else
+  if pTipo = 'RECEBIMENTO' then
+  begin
+    if pTipoTaxaRecebimento = 'VALOR' then
+    begin
+      Result := pValorTaxaRecebimento;
+    end else
+    if pTipoTaxaRecebimento = 'PERCENTUAL' then
+    begin
+      lValorTaxa := (pValorTaxaRecebimento / 100) * PValorBase;
+
+      if lValorTaxa < 0.30 then
+        Result := 0.30
+      else if lValorTaxa > 3 then
+        Result := 3
+      else
+        Result := lValorTaxa;
+    end
+    else
+     CriaException('Tipo de taxa pix não definida.');
+  end;
+end;
 
 function TPixModel.carregaClasse(pId: String): TPixModel;
 var
