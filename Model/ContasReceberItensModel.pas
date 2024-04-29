@@ -412,13 +412,12 @@ begin
   lContaCorrenteModel := TContaCorrenteModel.Create(vIConexao);
   lContasReceberModel := TContasReceberModel.Create(vIConexao);
   try
-    lHistorico := 'FC PIX: '+ self.FPACELA_REC+'/'+self.FTOTALPARCELAS_REC+
-                ' PED: '+self.FPEDIDO_REC;
+    lHistorico := 'FC PIX: '+ self.FPACELA_REC+'/'+self.FTOTALPARCELAS_REC+' PED: '+self.FPEDIDO_REC;
 
     lContasReceberModel := lContasReceberModel.carregaClasse(self.FFATURA_REC);
 
     Result := self.lancarContaCorrente(pValor, pPortador, lContasReceberModel.CODIGO_CTA, pContaCorrente, lHistorico, 'C');
-              self.lancarContaCorrente(pValorTaxa, pPortador, pContaTaxa, pContaCorrente, lHistorico, 'D');
+              self.lancarContaCorrente(pValorTaxa, pPortador, pContaTaxa, pContaCorrente, 'TAXA '+lHistorico, 'D');
 
     self.baixar(pValor);
   finally
