@@ -1037,6 +1037,10 @@ var
   lDataVencimento: TDate;
 begin
   lClienteDao := TClienteDao.Create(vIConexao);
+
+  if pCodigoCliente = '000000' then
+    exit;
+
   try
     lDataVencimento := lClienteDao.diasAtraso(pCodigoCliente);
 

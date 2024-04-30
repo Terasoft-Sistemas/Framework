@@ -414,8 +414,10 @@ begin
 end;
 
 function TClienteDao.diasAtraso(pCodigoCliente: String): Variant;
+var
+  lResult : Variant;
 begin
-  Result := vIConexao
+  lResult := vIConexao
               .getConnection
               .ExecSQLScalar('SELECT R.VENCIMENTO_REC                                  '+
                              '  FROM CONTASRECEBERITENS R,                             '+
@@ -433,6 +435,11 @@ begin
                              '   AND P.TIPO <> ''T''                                   '+
                              '   AND C.CODIGO_CLI = ' + QuotedStr(pCodigoCliente)       +
                              ' ORDER BY R.VENCIMENTO_REC');
+
+  if VarIsClear(lResult) then
+    Result := Now
+  else
+    Result := lResult;
 end;
 
 function TClienteDao.incluir(pClienteModel: TClienteModel): String;
