@@ -1,0 +1,27 @@
+create generator gen_XXXXXX_id;
+
+alter table XXXXXX add constraint pk_XXXXXX primary key (id);
+
+create or alter trigger XXXXXX_systime for XXXXXX
+active before insert or update position 0
+as   
+begin   
+ new.systime = current_timestamp;   
+end
+
+
+create or alter trigger tri_XXXXXX_id for XXXXXX
+active before insert position 0
+as
+begin
+  if (new.id is null) then
+    new.id = gen_id(gen_XXXXXX_id,1);
+end
+
+create or alter trigger tri_XXXXXX_datacadastro for XXXXXX
+active before insert position 0
+as
+begin
+  if (new.data_cadastro is null) then
+    new.data_cadastro = current_timestamp;
+end
