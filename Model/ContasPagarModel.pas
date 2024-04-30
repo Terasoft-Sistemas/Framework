@@ -425,7 +425,7 @@ begin
     lMemTable.FieldDefs.Add('VALOR', ftFloat);
     lMemTable.CreateDataSet;
 
-    lMemTable.InsertRecord([lTotalEntradaFornecedor - lTotalFinanceiro]);
+    lMemTable.InsertRecord([RoundTo(lTotalEntradaFornecedor - lTotalFinanceiro, -2)]);
 
     Result := lMemTable;
 
