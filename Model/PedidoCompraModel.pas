@@ -5,6 +5,7 @@ interface
 uses
   Terasoft.Types,
   Terasoft.Utils,
+  Terasoft.FuncoesTexto,
   System.Generics.Collections,
   Interfaces.Conexao,
   FireDAC.Comp.Client;
@@ -252,6 +253,8 @@ type
     property NumeroView : String read FNumeroView write SetNumeroView;
     property FornecedorView : String read FFornecedorView write SetFornecedorView;
 
+    procedure getDadosFornecedor;
+
   end;
 
 implementation
@@ -259,17 +262,15 @@ implementation
 uses
   PedidoCompraDao,  
   System.Classes,
-  System.SysUtils, ProdutosModel, PedidoCompraItensModel;
+  System.SysUtils, ProdutosModel, PedidoCompraItensModel, FornecedorModel;
 
 { TPedidoCompraModel }
 
 function TPedidoCompraModel.AdicionarItens(pPedidoItensParams: TPedidoItensParams): String;
 var
-  lProdutosModel          : TProdutosModel;
   lPedidoCompraModel      : TPedidoCompraModel;
   lPedidoCompraItensModel : TPedidoCompraItensModel;
 begin
-  lProdutosModel          := TProdutosModel.Create(vIConexao);
   lPedidoCompraModel      := TPedidoCompraModel.Create(vIConexao);
   lPedidoCompraItensModel := TPedidoCompraItensModel.Create(vIConexao);
 
@@ -291,10 +292,6 @@ begin
   try
     self := self.carregaClasse(pPedidoItensParams.NUMERO_PED, pPedidoItensParams.CODIGO_FOR);
 
-    lProdutosModel.IDRecordView := pPedidoItensParams.CODIGO_PRO;
-    lProdutosModel.obterLista;
-    lProdutosModel := lProdutosModel.ProdutossLista[0];
-
     lPedidoCompraItensModel.NUMERO_PED           := self.FNUMERO_PED;
     lPedidoCompraItensModel.CODIGO_FOR           := self.FCODIGO_FOR;
     lPedidoCompraItensModel.CODIGO_PRO           := pPedidoItensParams.CODIGO_PRO;
@@ -302,7 +299,7 @@ begin
     lPedidoCompraItensModel.VALORUNI_PED         := pPedidoItensParams.VALORUNI_PED;
     lPedidoCompraItensModel.STATUS_PED           := 'A';
     lPedidoCompraItensModel.PERCENTUAL_DESCONTO  := pPedidoItensParams.PERCENTUAL_DESCONTO;
-    lPedidoCompraItensModel.VLR_DESCONTO         := (lPedidoCompraItensModel.QUANTIDADE_PED  * lPedidoCompraItensModel.VALORUNI_PED) * (lPedidoCompraItensModel.PERCENTUAL_DESCONTO / 100);
+    lPedidoCompraItensModel.VLR_DESCONTO         := (lPedidoCompraItensModel.QUANTIDADE_PED  * lPedidoCompraItensModel.VALORUNI_PED) * ( StrToFloatDef(lPedidoCompraItensModel.PERCENTUAL_DESCONTO, 0) / 100);
     lPedidoCompraItensModel.VLR_OUTRAS           := pPedidoItensParams.VALOR_OUTRAS_DESPESAS;
     lPedidoCompraItensModel.OBSERVACAO           := pPedidoItensParams.OBSERVACAO;
     lPedidoCompraItensModel.CFOP_ID              := pPedidoItensParams.CFOP;
@@ -324,7 +321,6 @@ begin
 
   finally
     lPedidoCompraItensModel.Free;
-    lProdutosModel.Free;
   end;
 end;
 
@@ -348,10 +344,38 @@ begin
   Result       := self.Salvar;
 end;
 
+procedure TPedidoCompraModel.getDadosFornecedor;
+var
+  lFornecedorModel : TFornecedorModel;
+begin
+  if self.FCODIGO_FOR = '' then
+    Exit;
+
+  lFornecedorModel := TFornecedorModel.Create(vIConexao);
+  try
+    lFornecedorModel.IDRecordView := self.CODIGO_FOR;
+    lFornecedorModel.obterLista;
+
+    self.FCONDICOES_PAG     := lFornecedorModel.CONDICOES_PAG;
+    self.FTRANSPORTADORA_ID := lFornecedorModel.TRANSPORTADORA_ID;
+    self.FDATAPREV_PED      := lFornecedorModel.PREVISAO_ENTREGA;
+
+  finally
+    lFornecedorModel.Free;
+  end;
+end;
+
 function TPedidoCompraModel.Incluir: String;
 begin
-    self.Acao := tacIncluir;
-    Result    := self.Salvar;
+  self.FTIPO_PRO         := 'N';
+  self.FCALCULAR_VALORES := 'S';
+  self.FUSO_CONSUMO      := 'N';
+  self.FTIPO_FRETE       := 'P';
+  self.FFRETE_NO_IPI     := 'S';
+  self.FAUTORIZADO       := 'S';
+
+  self.Acao := tacIncluir;
+  Result    := self.Salvar;
 end;
 
 function TPedidoCompraModel.carregaClasse(pID, pFornecedor : String): TPedidoCompraModel;
@@ -359,7 +383,6 @@ var
   lPedidoCompraDao: TPedidoCompraDao;
 begin
   lPedidoCompraDao := TPedidoCompraDao.Create(vIConexao);
-
   try
     Result := lPedidoCompraDao.carregaClasse(pId);
   finally
@@ -438,8 +461,6 @@ begin
   end;
 end;
 
-
-
 procedure TPedidoCompraModel.SetAcao(const Value: TAcao);
 begin
   FAcao := Value;
@@ -515,6 +536,7 @@ end;
 procedure TPedidoCompraModel.SetCODIGO_FOR(const Value: Variant);
 begin
   FCODIGO_FOR := Value;
+  getDadosFornecedor;
 end;
 
 procedure TPedidoCompraModel.SetCONDICOES_PAG(const Value: Variant);

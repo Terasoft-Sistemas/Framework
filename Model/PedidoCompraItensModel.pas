@@ -186,6 +186,8 @@ type
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property NumeroView : String read FNumeroView write SetNumeroView;
     property FornecedorView : String read FFornecedorView write SetFornecedorView;
+
+    procedure getDadosProdutos;
   end;
 
 implementation
@@ -193,7 +195,10 @@ implementation
 uses
   PedidoCompraItensDao,  
   System.Classes, 
-  System.SysUtils;
+  System.SysUtils,
+  ProdutosModel,
+  System.Rtti,
+  Terasoft.Configuracoes;
 
 { TPedidoCompraItensModel }
 
@@ -217,10 +222,48 @@ begin
   Result       := self.Salvar;
 end;
 
+procedure TPedidoCompraItensModel.getDadosProdutos;
+var
+  lProdutosModel : TProdutosModel;
+  lConfiguracoes : TerasoftConfiguracoes;
+  lCtx           : TRttiContext;
+  lProp          : TRttiProperty;
+  lTagCusto,
+  lUF            : String;
+begin
+  if self.FCODIGO_PRO = '' then
+    Exit;
+
+  lProdutosModel := TProdutosModel.Create(vIConexao);
+  lCtx           := TRttiContext.Create;
+
+  try
+    lProdutosModel := lProdutosModel.carregaClasse(self.FCODIGO_PRO);
+
+    self.FSTATUS_PED        := 'P';
+    self.FQUANTIDADE_ATE    := '0';
+    self.FMARGEM_PED        := lProdutosModel.MARGEM_PRO;
+    self.FFRETE_PED         := lProdutosModel.FRETE_PRO;
+    self.FIPI_PED           := lProdutosModel.IPI_PRO;
+    self.FVENDAANTERIOR_PED := lProdutosModel.VENDA_PRO;
+
+    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+
+    lTagCusto := lConfiguracoes.valorTag('CUSTO_PADRAO_PEDIDO_COMPRA', 'CUSTOULTIMO_PRO', tvString);
+
+    lProp := lCtx.GetType(TProdutosModel).GetProperty(lTagCusto);
+
+    self.FVALORUNI_PED := lProp.GetValue(lProdutosModel).AsString;
+
+  finally
+    lProdutosModel.Free;
+  end;
+end;
+
 function TPedidoCompraItensModel.Incluir: String;
 begin
-    self.Acao := tacIncluir;
-    Result    := self.Salvar;
+  self.Acao := tacIncluir;
+  Result    := self.Salvar;
 end;
 
 function TPedidoCompraItensModel.carregaClasse(pId : String): TPedidoCompraItensModel;
@@ -312,6 +355,7 @@ end;
 procedure TPedidoCompraItensModel.SetCODIGO_PRO(const Value: Variant);
 begin
   FCODIGO_PRO := Value;
+  getDadosProdutos;
 end;
 
 procedure TPedidoCompraItensModel.SetCountView(const Value: String);
