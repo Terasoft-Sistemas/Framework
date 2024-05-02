@@ -62,7 +62,7 @@ type
 implementation
 
 uses
-System.JSON, System.SysUtils, Terasoft.Types;
+System.JSON, System.SysUtils, Terasoft.Types, Terasoft.FuncoesTexto;
 
 { TCNPJModel }
 
@@ -143,49 +143,44 @@ begin
     lJsonObjEmpresa := lJsonObjCNPJ.Get('empresa').JsonValue as TJSONObject;
 
 
-  if Assigned(lJsonObjCNPJ.Get('nome_fantasia')) then begin
+  if Assigned(lJsonObjCNPJ.Get('nome_fantasia')) then
     Result.Fantasia := lJsonObjCNPJ.Values['nome_fantasia'].Value;
-  end;
 
-  if Assigned(lJsonObjEmpresa.Get('razao_social')) then begin
+  if Assigned(lJsonObjEmpresa.Get('razao_social')) then
     Result.Nome := lJsonObjEmpresa.Values['razao_social'].Value;
-  end;
 
-  if Assigned(lJsonObjCNPJ.Get('cep')) then begin
+  if Assigned(lJsonObjCNPJ.Get('data_situacao_cadastral')) then
+    Result.Abertura := formatarDataInvertida(lJsonObjCNPJ.Values['data_situacao_cadastral'].Value);
+
+  if Assigned(lJsonObjCNPJ.Get('cep')) then
     Result.Cep := lJsonObjCNPJ.Values['cep'].Value;
-  end;
 
-  if Assigned(lJsonObjCNPJ.Get('logradouro')) then begin
+  if Assigned(lJsonObjCNPJ.Get('logradouro')) then
     Result.Logradouro := lJsonObjCNPJ.Values['logradouro'].Value;
-  end;
 
-  if Assigned(lJsonObjCNPJ.Get('numero')) then begin
+  if Assigned(lJsonObjCNPJ.Get('numero')) then
     Result.Numero := lJsonObjCNPJ.Values['numero'].Value;
-  end;
 
-  if Assigned(lJsonObjCNPJ.Get('complemento')) then begin
+  if Assigned(lJsonObjCNPJ.Get('complemento')) then
     Result.Complemento := lJsonObjCNPJ.Values['complemento'].Value;
-  end;
 
-  if Assigned(lJsonObjCNPJ.Get('uf')) then begin
+  if Assigned(lJsonObjCNPJ.Get('bairro')) then
+    Result.Bairro := lJsonObjCNPJ.Values['bairro'].Value;
+
+  if Assigned(lJsonObjCNPJ.Get('uf')) then
     Result.UF := lJsonObjCNPJ.Values['uf'].Value;
-  end;
 
-  if Assigned(lJsonObjMunicipio.Get('descricao')) then begin
+  if Assigned(lJsonObjMunicipio.Get('descricao')) then
     Result.Municipio := lJsonObjMunicipio.Values['descricao'].Value;
-  end;
 
-  if Assigned(lJsonObjCNPJ.Get('ddd1')) then begin
+  if Assigned(lJsonObjCNPJ.Get('ddd1')) then
     Result.DDD := lJsonObjCNPJ.Values['ddd1'].Value;
-  end;
 
-  if Assigned(lJsonObjCNPJ.Get('telefone1')) then begin
+  if Assigned(lJsonObjCNPJ.Get('telefone1')) then
     Result.Telefone := lJsonObjCNPJ.Values['telefone1'].Value;
-  end;
 
-  if Assigned(lJsonObjCNPJ.Get('correio_eletronico')) then begin
+  if Assigned(lJsonObjCNPJ.Get('correio_eletronico')) then
     Result.Email := lJsonObjCNPJ.Values['correio_eletronico'].Value;
-  end;
 end;
 
 function TCNPJModel.cnpjApiReceita(pCnpj: String): TRetornoCnpj;
@@ -203,55 +198,51 @@ begin
   lJsonObj := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(fRestRequest.Response.Content), 0) as TJSONObject;
 
   // Início da validação do CNPJ
-  if Assigned(lJsonObj.Get('status')) then begin
+  if Assigned(lJsonObj.Get('status')) then
     Result.Status := lJsonObj.Values['status'].Value;
-  end;
 
-  if Assigned(lJsonObj.Get('message')) then begin
+  if Assigned(lJsonObj.Get('message')) then
     Result.Message := lJsonObj.Values['message'].Value;
-  end;
 
-  if Result.Status = 'ERROR' then begin
+  if Result.Status = 'ERROR' then
      CriaException(Result.Message);
-  end;
   // Fim da validação do CNPJ
 
-  if Assigned(lJsonObj.Get('nome')) then begin
+  if Assigned(lJsonObj.Get('nome')) then
     Result.Nome := lJsonObj.Values['nome'].Value;
-  end;
-  if Assigned(lJsonObj.Get('fantasia')) then begin
+
+  if Assigned(lJsonObj.Get('fantasia')) then
     Result.Fantasia := lJsonObj.Values['fantasia'].Value;
-  end;
-  if Assigned(lJsonObj.Get('cep')) then begin
+
+  if Assigned(lJsonObj.Get('cep')) then
     Result.CEP := lJsonObj.Values['cep'].Value;
-  end;
-  if Assigned(lJsonObj.Get('logradouro')) then begin
+
+  if Assigned(lJsonObj.Get('logradouro')) then
     Result.Logradouro := lJsonObj.Values['logradouro'].Value;
-  end;
-  if Assigned(lJsonObj.Get('numero')) then begin
+
+  if Assigned(lJsonObj.Get('numero')) then
     Result.Numero := lJsonObj.Values['numero'].Value;
-  end;
-  if Assigned(lJsonObj.Get('complemento')) then begin
+
+  if Assigned(lJsonObj.Get('complemento')) then
     Result.Complemento := lJsonObj.Values['complemento'].Value;
-  end;
-  if Assigned(lJsonObj.Get('bairro')) then begin
+
+  if Assigned(lJsonObj.Get('bairro')) then
     Result.Bairro := lJsonObj.Values['bairro'].Value;
-  end;
-  if Assigned(lJsonObj.Get('municipio')) then begin
+
+  if Assigned(lJsonObj.Get('municipio')) then
     Result.Municipio := lJsonObj.Values['municipio'].Value;
-  end;
-  if Assigned(lJsonObj.Get('uf')) then begin
+
+  if Assigned(lJsonObj.Get('uf')) then
     Result.UF := lJsonObj.Values['uf'].Value;
-  end;
-  if Assigned(lJsonObj.Get('telefone')) then begin
+
+  if Assigned(lJsonObj.Get('telefone')) then
     Result.Telefone := lJsonObj.Values['telefone'].Value;
-  end;
-  if Assigned(lJsonObj.Get('email')) then begin
+
+  if Assigned(lJsonObj.Get('email')) then
     Result.Email := lJsonObj.Values['email'].Value;
-  end;
-  if Assigned(lJsonObj.Get('abertura')) then begin
+
+  if Assigned(lJsonObj.Get('abertura')) then
     Result.Abertura := lJsonObj.Values['abertura'].Value;
-  end;
 end;
 
 function TCNPJModel.consultarCnpj(pCnpj: String): TRetornoCnpj;

@@ -39,6 +39,7 @@ uses
   function ValidaCNPJ(num: string): boolean;
   function ValidaCPFCNPJ(num: string): boolean;
   function retiraPonto(pValor: string): String;
+  function formatarDataInvertida(const data: string): String;
 
 implementation
 uses
@@ -720,6 +721,15 @@ begin
   Result.DataBase := Copy(pHost, pos(':', pHost) + 1, pHost.Length);
   Result.DataBase := StringReplace(Result.DataBase, '\\', '\', [rfReplaceAll]);
 end;
+
+function formatarDataInvertida(const data: String): String;
+var
+  dataFormatada: TDateTime;
+begin
+  dataFormatada := StrToDate(Format('%s/%s/%s', [Copy(data, 7, 2), Copy(data, 5, 2), Copy(data, 1, 4)]));
+  Result := FormatDateTime('dd/mm/yyyy', dataFormatada);
+end;
+
 initialization
 finalization
 end.
