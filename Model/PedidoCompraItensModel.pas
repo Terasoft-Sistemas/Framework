@@ -228,8 +228,7 @@ var
   lConfiguracoes : TerasoftConfiguracoes;
   lCtx           : TRttiContext;
   lProp          : TRttiProperty;
-  lTagCusto,
-  lUF            : String;
+  lTagCusto      : String;
 begin
   if self.FCODIGO_PRO = '' then
     Exit;

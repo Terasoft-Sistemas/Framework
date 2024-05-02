@@ -129,7 +129,7 @@ type
     function obterLista: TFDMemTable;
 
     procedure getDadosProduto;
-    function ObterTotais(pNmeroSaida : String) : TFDMemTable;
+    function ObterTotais(pNumeroSaida : String) : TFDMemTable;
 
   end;
 
@@ -248,13 +248,13 @@ begin
   end;
 end;
 
-function TSaidasItensModel.ObterTotais(pNmeroSaida : String): TFDMemTable;
+function TSaidasItensModel.ObterTotais(pNumeroSaida : String): TFDMemTable;
 var
   lSaidasItens: TSaidasItensDao;
 begin
   lSaidasItens := TSaidasItensDao.Create(vIConexao);
   try
-    Result := lSaidasItens.ObterTotais(pNmeroSaida);
+    Result := lSaidasItens.ObterTotais(pNumeroSaida);
 
     FTotalRecords := lSaidasItens.TotalRecords;
   finally

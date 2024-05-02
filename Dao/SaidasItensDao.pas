@@ -63,7 +63,7 @@ type
     function carregaClasse(pID : String): TSaidasItensModel;
     function obterLista: TFDMemTable;
 
-    function ObterTotais(pNmeroSaida : String) : TFDMemTable;
+    function ObterTotais(pNumeroSaida : String) : TFDMemTable;
     procedure setParams(var pQry: TFDQuery; pSaidasItensModel: TSaidasItensModel);
 
 end;
@@ -274,7 +274,7 @@ begin
   end;
 end;
 
-function TSaidasItensDao.ObterTotais(pNmeroSaida : String): TFDMemTable;
+function TSaidasItensDao.ObterTotais(pNumeroSaida : String): TFDMemTable;
 var
   lQry : TFDQuery;
   lSql : String;
@@ -290,13 +290,13 @@ begin
             '           sum(quantidade * (valor_saida - valor_saida * percentual_desconto)) valor      '+SLineBreak+
             '      from                                                                                '+SLineBreak+
             '      (select                                                                             '+SLineBreak+
-            '              cast(i.quantidade_sai  as float) quantidade,                                '+SLineBreak+
-            '              coalesce(i.icms_sai,0) custo,                                               '+SLineBreak+
-            '              coalesce(i.desconto_ped,0) / 100 percentual_desconto,                       '+SLineBreak+
-            '              coalesce(i.valor_uni_sai,0) valor_saida                                     '+SLineBreak+
-            '         from saidas s                                                                    '+SLineBreak+
-            '        inner join saidasitens i on i.numero_sai = s.numero_sai                           '+SLineBreak+
-            '        where s.numero_sai = '+QuotedStr(pNmeroSaida)+'                                   '+SLineBreak+
+            '              cast(saidasitens.quantidade_sai as float) quantidade,                       '+SLineBreak+
+            '              coalesce(saidasitens.icms_sai,0) custo,                                     '+SLineBreak+
+            '              coalesce(saidasitens.desconto_ped,0) / 100 percentual_desconto,             '+SLineBreak+
+            '              coalesce(saidasitens.valor_uni_sai,0) valor_saida                           '+SLineBreak+
+            '         from saidas                                                                      '+SLineBreak+
+            '        inner join saidasitens on saidasitens.numero_sai = saidas.numero_sai              '+SLineBreak+
+            '        where saidas.numero_sai = '+QuotedStr(pNumeroSaida)+'                             '+SLineBreak+
             '       )                                                                                  '+SLineBreak+
             '    )                                                                                     '+SLineBreak;
 
