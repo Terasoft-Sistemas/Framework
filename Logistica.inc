@@ -1,8 +1,7 @@
 {$i definicoes.inc}
 
-{$define MODO_HOMOLOGACAO}
-
-{$if not defined(__RELEASE__)}
+{$if defined(DEVEL_BALLOON)}
+  {$define MODO_HOMOLOGACAO}
   {$define __TESTAR_LOGISTICA__}
 {$endif}
 
