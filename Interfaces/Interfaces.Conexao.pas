@@ -2,7 +2,7 @@ unit Interfaces.Conexao;
 
 interface
   uses
-    FireDAC.Comp.Client;
+    FireDAC.Comp.Client, System.SysUtils, System.Classes, System.Generics.Defaults;
 
   type
     TUsuario = record
@@ -71,6 +71,9 @@ interface
 
       function setConfiguracoesNF(pConfiguracoes : TConfiguracoesNF)       : Boolean;
       function getConfiguracoes                                            : TConfiguracoesNF;
+
+      function setTerasoftConfiguracoes(pConfiguracoes : TObject)          : IConexao;
+      function getTerasoftConfiguracoes                                    : TObject;
 
       procedure setContext(pUsuario: String);
       procedure setContextModoSistema(pSistema: String);
