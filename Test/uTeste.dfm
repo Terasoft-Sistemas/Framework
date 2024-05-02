@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 1248
     Height = 879
-    ActivePage = TabSheet6
+    ActivePage = TabSheet8
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -1104,6 +1104,74 @@ object Form1: TForm1
         OnClick = Button94Click
       end
     end
+    object TabSheet8: TTabSheet
+      Caption = 'Outras Sa'#237'das'
+      ImageIndex = 9
+      object Button103: TButton
+        Left = 11
+        Top = 19
+        Width = 182
+        Height = 46
+        Caption = 'Saidas Inserir'
+        TabOrder = 0
+        OnClick = Button103Click
+      end
+      object Button104: TButton
+        Left = 387
+        Top = 19
+        Width = 182
+        Height = 46
+        Caption = 'Saidas Update'
+        TabOrder = 1
+        OnClick = Button104Click
+      end
+      object Button105: TButton
+        Left = 575
+        Top = 19
+        Width = 182
+        Height = 46
+        Caption = 'Saidas Excluir'
+        TabOrder = 2
+        OnClick = Button105Click
+      end
+      object Button106: TButton
+        Left = 199
+        Top = 19
+        Width = 182
+        Height = 46
+        Caption = 'Saidas Consultar'
+        TabOrder = 3
+        OnClick = Button106Click
+      end
+      object XDBGrid7: TXDBGrid
+        Left = 0
+        Top = 544
+        Width = 1240
+        Height = 305
+        Align = alBottom
+        DataSource = dsSaidas
+        GridStyle.VisualStyle = vsXPStyle
+        TabOrder = 4
+      end
+      object Button107: TButton
+        Left = 11
+        Top = 71
+        Width = 182
+        Height = 46
+        Caption = 'Saidas Itens Inserir'
+        TabOrder = 5
+        OnClick = Button107Click
+      end
+      object Button108: TButton
+        Left = 199
+        Top = 71
+        Width = 182
+        Height = 46
+        Caption = 'SaidasItens ObterTotais'
+        TabOrder = 6
+        OnClick = Button108Click
+      end
+    end
   end
   object dsTeste2: TDataSource
     Left = 1056
@@ -1136,5 +1204,9 @@ object Form1: TForm1
   object dsProdutos: TDataSource
     Left = 1168
     Top = 399
+  end
+  object dsSaidas: TDataSource
+    Left = 1048
+    Top = 272
   end
 end

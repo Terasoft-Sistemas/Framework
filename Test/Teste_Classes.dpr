@@ -133,7 +133,11 @@ uses
   TransportadoraModel in '..\Model\TransportadoraModel.pas',
   TransportadoraDao in '..\Dao\TransportadoraDao.pas',
   PrevisaoPedidoCompraModel in '..\Model\PrevisaoPedidoCompraModel.pas',
-  PrevisaoPedidoCompraDao in '..\Dao\PrevisaoPedidoCompraDao.pas';
+  PrevisaoPedidoCompraDao in '..\Dao\PrevisaoPedidoCompraDao.pas',
+  SaidasItensDao in '..\Dao\SaidasItensDao.pas',
+  SaidasDao in '..\Dao\SaidasDao.pas',
+  SaidasItensModel in '..\Model\SaidasItensModel.pas',
+  SaidasModel in '..\Model\SaidasModel.pas';
 
 {$R *.res}
 

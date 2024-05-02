@@ -154,6 +154,15 @@ type
     Button100: TButton;
     Button101: TButton;
     Button102: TButton;
+    TabSheet8: TTabSheet;
+    Button103: TButton;
+    Button104: TButton;
+    Button105: TButton;
+    Button106: TButton;
+    XDBGrid7: TXDBGrid;
+    dsSaidas: TDataSource;
+    Button107: TButton;
+    Button108: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -262,6 +271,12 @@ type
     procedure Button100Click(Sender: TObject);
     procedure Button101Click(Sender: TObject);
     procedure Button102Click(Sender: TObject);
+    procedure Button103Click(Sender: TObject);
+    procedure Button106Click(Sender: TObject);
+    procedure Button105Click(Sender: TObject);
+    procedure Button104Click(Sender: TObject);
+    procedure Button107Click(Sender: TObject);
+    procedure Button108Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -292,7 +307,8 @@ uses
   ReservaModel, DocumentoModel, AnexoModel, FluxoCaixaModel, BancoModel,
   PortadorModel, LojasModel, OSModel, SimuladorPrecoModel, GrupoModel, CNPJModel, CEPModel,
   PedidoCompraModel, PedidoCompraItensModel, ClientesContatoModel, DescontoModel,
-  PromocaoModel, TransportadoraModel, PrevisaoPedidoCompraModel;
+  PromocaoModel, TransportadoraModel, PrevisaoPedidoCompraModel, SaidasModel,
+  SaidasItensModel;
 
 {$R *.dfm}
 
@@ -2916,6 +2932,148 @@ begin
   end;
 end;
 
+procedure TForm1.Button103Click(Sender: TObject);
+var
+  lSaidasModel : TSaidasModel;
+begin
+  lSaidasModel := TSaidasModel.Create(vIConexao);
+  try
+    try
+      lSaidasModel.NUMERO_SAI := '000010';
+      lSaidasModel.LOJA       := '001';
+      lSaidasModel.CODIGO_CLI := '000001';
+
+      lSaidasModel.Incluir;
+
+      ShowMessage('Incluido com Sucesso!');
+    except
+      on E:Exception do
+      ShowMessage('Erro: ' + E.Message);
+    end
+  finally
+    lSaidasModel.Free;
+  end;
+end;
+
+procedure TForm1.Button104Click(Sender: TObject);
+var
+  lSaidasModel : TSaidasModel;
+  ID : String;
+begin
+  lSaidasModel := TSaidasModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('Saidas', 'Digite o código da Saida que deseja Alterar:', '');
+      if ID.IsEmpty then
+        exit;
+
+      lSaidasModel := lSaidasModel.Alterar(ID);
+      lSaidasModel.TOTAL_SAI := 500;
+
+      lSaidasModel.Salvar;
+      ShowMessage('Alterado com Sucesso');
+    Except
+      on E:Exception do
+      ShowMessage('Erro: ' +E.Message);
+    end;
+  finally
+    lSaidasModel.Free;
+  end;
+end;
+
+procedure TForm1.Button105Click(Sender: TObject);
+var
+  lSaidasModel : TSaidasModel;
+  Numero_Saida : String;
+begin
+  lSaidasModel := TSaidasModel.Create(vIConexao);
+  try
+    try
+      Numero_Saida := InputBox('Saida', 'Digite o Numero da Saida que deseja excluir:', '');
+      if Numero_Saida.IsEmpty then
+          Exit;
+
+      lSaidasModel.Excluir(Numero_Saida);
+      ShowMessage('Excluido com sucesso!');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lSaidasModel.Free;
+  end;
+end;
+
+procedure TForm1.Button106Click(Sender: TObject);
+var
+  lSaidasModel : TSaidasModel;
+  lTable       : TFDMemTable;
+begin
+  lSaidasModel := TSaidasModel.Create(vIConexao);
+  try
+    try
+      lSaidasModel.SaidaView := '000215';
+      lSaidasModel.LojaView  := '001';
+
+      lTable           := lSaidasModel.obterLista;
+      dsSaidas.DataSet := lTable;
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lSaidasModel.Free;
+  end;
+end;
+
+procedure TForm1.Button107Click(Sender: TObject);
+var
+  lSaidasModel      : TSaidasModel;
+  lSaidasItensModel : TSaidasItensModel;
+  lSaidaParams      : TSaidaItensParams;
+  lNumeroSaida      : String;
+begin
+  lSaidasModel      := TSaidasModel.Create(vIConexao);
+  lSaidasItensModel := TSaidasItensModel.Create(vIConexao);
+  try
+    try
+      lNumeroSaida := InputBox('SaidaItens', 'Digite o Numero da Saida que deseja inserir os itens:', '');
+      if lNumeroSaida.IsEmpty then
+        exit;
+
+      lSaidasModel := lSaidasModel.carregaClasse(lNumeroSaida);
+
+      lSaidaParams.CODIGO_PRO     := '000007';
+      lSaidaParams.QUANTIDADE_SAI := '5';
+      lSaidaParams.VALOR_UNI_SAI  := '100';
+
+      lSaidasModel.AdicionarItens(lSaidaParams);
+      ShowMessage('Item adicionado ao Pedido: '  + lSaidasModel.NUMERO_SAI)
+
+    except
+      on E:Exception do
+      ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lSaidasModel.Free;
+    lSaidasItensModel.Free;
+  end;
+end;
+
+procedure TForm1.Button108Click(Sender: TObject);
+var
+  lSaidasItens : TSaidasitensModel;
+  lResultado   : TFDMemTable;
+begin
+  lSaidasItens := TSaidasitensModel.Create(vIConexao);
+  try
+    lResultado := lSaidasItens.ObterTotais('000215');
+    dsSaidas.DataSet := lResultado;
+  finally
+    lSaidasItens.Free;
+  end;
+end;
+
 procedure TForm1.Button10Click(Sender: TObject);
 var
   lWebPedidoItensModel : TWebPedidoItensModel;
@@ -3178,7 +3336,6 @@ begin
   lEntradaModel := TEntradaModel.Create(vIConexao);
   try
     try
-
       lNumeroEntrada    := '9999999999';
       lCodigoFornecedor := '500005';
 
@@ -3206,11 +3363,14 @@ var
   lUsuario      : TUsuario;
   lEmpresa      : TEmpresa;
   lEmpresaModel : TEmpresaModel;
+  lConfiguracoes : TerasoftConfiguracoes;
 begin
   vConexao  := TConexao.Create;
   vIConexao := TControllersConexao.New;
 
   vConfiguracoes := TerasoftConfiguracoes.Create(vIConexao);
+
+  vIConexao.setTerasoftConfiguracoes(vConfiguracoes);
 
   lUsuario.ID     := '000001';
   lUsuario.NOME   := 'ADMIN';
