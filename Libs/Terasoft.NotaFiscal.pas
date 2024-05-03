@@ -426,7 +426,7 @@ begin
       serie       := lQry.FieldByName('serie').AsInteger;
       nNF         := lQry.FieldByName('nNF').AsInteger;
       cNF         := GerarCodigoDFe(lQry.FieldByName('cNF').AsInteger);
-      dEmi        := vIConexao.DataServer;// lQry.FieldByName('dEmi').AsDateTime;
+      dEmi        := Now;// lQry.FieldByName('dEmi').AsDateTime;
       dSaiEnt     := vIConexao.DataServer;//lQry.FieldByName('dSaiEnt').AsDateTime;
       hSaiEnt     := vIConexao.DataServer;//lQry.FieldByName('hSaiEnt').Value;
       tpNF        := vConfiguracoesNotaFiscal.tpNF(lQry.FieldByName('tpNF').AsString);
