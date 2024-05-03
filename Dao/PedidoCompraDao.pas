@@ -11,7 +11,8 @@ uses
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
-  Terasoft.ConstrutorDao;
+  Terasoft.ConstrutorDao,
+  ClipBRD;
 
 type
   TPedidoCompraDao = class
@@ -250,7 +251,9 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From PEDIDOCOMPRA PC where 1=1 ';
+    lSql := 'select count(*) records From PEDIDOCOMPRA PC                         ' + SLineBreak +
+            '       left join fornecedor on fornecedor.codigo_for = pc.codigo_for ' + SLineBreak +
+            'where 1=1                                                            ' + SLineBreak;
 
     lSql := lSql + where;
 
@@ -334,6 +337,8 @@ begin
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
 
+
+    ClipBoard.AsText := lSQL;
     lQry.Open(lSQL);
 
     Result := vConstrutor.atribuirRegistros(lQry);
