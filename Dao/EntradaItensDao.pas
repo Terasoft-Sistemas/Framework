@@ -131,7 +131,7 @@ begin
 
             ' left join entrada e on e.numero_ent = i.numero_ent and e.codigo_for = i.codigo_for      '+
             ' left join fornecedor f on f.codigo_for = e.codigo_for                                   '+
-            ' left join produto p on p.barras_pro = i.cean                                            '+
+            ' left join produto p on p.barras_pro = i.cean and p.barras_pro <> ''SEM GTIN''           '+
             ' left join produto p2 on p2.fornecedor_codigo = i.cprod and p2.codigo_for = e.codigo_for '+
 
             ' where i.id = ' + FIDRecordView.ToString;
