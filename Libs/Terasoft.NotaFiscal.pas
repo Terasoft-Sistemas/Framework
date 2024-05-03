@@ -426,9 +426,9 @@ begin
       serie       := lQry.FieldByName('serie').AsInteger;
       nNF         := lQry.FieldByName('nNF').AsInteger;
       cNF         := GerarCodigoDFe(lQry.FieldByName('cNF').AsInteger);
-      dEmi        := NOW;// lQry.FieldByName('dEmi').AsDateTime;
-      dSaiEnt     := NOW;//lQry.FieldByName('dSaiEnt').AsDateTime;
-      hSaiEnt     := NOW;//lQry.FieldByName('hSaiEnt').Value;
+      dEmi        := vIConexao.DataServer;// lQry.FieldByName('dEmi').AsDateTime;
+      dSaiEnt     := vIConexao.DataServer;//lQry.FieldByName('dSaiEnt').AsDateTime;
+      hSaiEnt     := vIConexao.DataServer;//lQry.FieldByName('hSaiEnt').Value;
       tpNF        := vConfiguracoesNotaFiscal.tpNF(lQry.FieldByName('tpNF').AsString);
       verProc     := 'ERP_TERASOFT';
       cUF         := UFtoCUF(vConfiguracoesNotaFiscal.emitUF);
