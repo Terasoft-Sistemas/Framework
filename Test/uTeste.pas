@@ -2098,12 +2098,11 @@ begin
   try
     try
 
-      lPedidoCompra.NUMERO_PED := '000017';
-      lPedidoCompra.CODIGO_FOR := '000059';
       lPedidoCompra.DATA_PED := DateToStr(vConexao.DataServer);
-      lPedidoCompra.DATAPREV_PED := Date;
+      lPedidoCompra.DATAPREV_PED := DateToStr(vConexao.DataServer);
+      lPedidoCompra.CODIGO_FOR := '000059';
       lPedidoCompra.PARCELAS_PED := 1;
-      lPedidoCompra.PRIMEIROVENC_PED := Date;
+      lPedidoCompra.PRIMEIROVENC_PED := DateToStr(vConexao.DataServer);
       lPedidoCompra.TOTAL_PED := '1000';
       lPedidoCompra.USUARIO_PED := '000001';
       lPedidoCompra.STATUS_PED := 'A';

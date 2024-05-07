@@ -358,7 +358,9 @@ begin
 
     self.FCONDICOES_PAG     := lFornecedorModel.CONDICOES_PAG;
     self.FTRANSPORTADORA_ID := lFornecedorModel.TRANSPORTADORA_ID;
-    self.FDATAPREV_PED      := lFornecedorModel.PREVISAO_ENTREGA;
+
+    if lFornecedorModel.PREVISAO_ENTREGA <> '' then
+      self.FDATAPREV_PED := vIConexao.DataServer + lFornecedorModel.PREVISAO_ENTREGA;
 
   finally
     lFornecedorModel.Free;

@@ -169,10 +169,11 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := vConstrutor.gerarInsert('PEDIDOCOMPRA', 'NUMERO_PED', true);
+  lSQL := vConstrutor.gerarInsert('PEDIDOCOMPRA', 'NUMERO_PED');
 
   try
     lQry.SQL.Add(lSQL);
+    pPedidoCompraModel.NUMERO_PED := vIConexao.Generetor('GEN_PEDIDOCOMPRA');
     setParams(lQry, pPedidoCompraModel);
     lQry.Open;
 
