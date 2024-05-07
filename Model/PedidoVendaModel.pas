@@ -11,6 +11,15 @@ uses
   Interfaces.Conexao;
 
 type
+  TVenderItem = record
+    BarrasProduto: String;
+    Quantidade: Double;
+    PrecoUf,
+    Promocao,
+    PrecoCliente,
+    TabelaPreco : Boolean
+  end;
+
   TPedidoVendaModel = class
   private
 
@@ -506,7 +515,7 @@ type
     procedure excluirContasReceber;
     procedure excluirPedido;
 
-    function venderItem(pBarrasProduto: String; pQuantidade: Double): String;
+    procedure venderItem(pVenderItem: TVenderItem);
 
   end;
 
@@ -1003,19 +1012,30 @@ begin
   end;
 end;
 
-function TPedidoVendaModel.venderItem(pBarrasProduto: String; pQuantidade: Double): String;
+
+procedure TPedidoVendaModel.venderItem(pVenderItem: TVenderItem);
 var
   lConfiguracoes : TerasoftConfiguracoes;
   lEmpresaModel  : TEmpresaModel;
   lProdutosModel : TProdutosModel;
+  lPedidoItensModel, lModel : TPedidoItensModel;
+  lProdutoPreco: TProdutoPreco;
+
 begin
-  lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
-  lEmpresaModel  := TEmpresaModel.Create(vIConexao);
-  lProdutosModel := TProdutosModel.Create(vIConexao);
+  lConfiguracoes    := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+  lEmpresaModel     := TEmpresaModel.Create(vIConexao);
+  lProdutosModel    := TProdutosModel.Create(vIConexao);
+  lPedidoItensModel := TPedidoItensModel.Create(vIConexao);
 
   try
-    lProdutosModel.WhereView := ' and produto.barras_pro = '+ QuotedStr(pBarrasProduto);
+    if pVenderItem.Quantidade = 0 then
+      CriaException('Quantidade inválida.');
+
+    lProdutosModel.WhereView := ' and produto.barras_pro = '+ QuotedStr(pVenderItem.BarrasProduto);
     lProdutosModel.obterLista;
+
+    if lProdutosModel.TotalRecords = 0  then
+      CriaException('Produto não localizado.');
 
     lEmpresaModel.Carregar;
 
@@ -1027,9 +1047,49 @@ begin
       if lProdutosModel.ProdutossLista[0].SALDO_PRO <= 0 then
         CriaException('Produto sem saldo em estoque.')
     end;
+
+    lPedidoItensModel.WhereView := 'and pedidoitens.numero_ped = '+ self.FNUMERO_PED +' and pedidoitens.codigo_pro = '+ lProdutosModel.ProdutossLista[0].CODIGO_PRO;
+    lPedidoItensModel.obterLista;
+
+    if (lPedidoItensModel.TotalRecords > 0) and (lConfiguracoes.valorTag('FRENTE_CAIXA_SOMAR_QTDE_ITENS', '', tvBool) = 'S') then
+    begin
+      lModel := lPedidoItensModel.carregaClasse(lPedidoItensModel.PedidoItenssLista[0].ID);
+      lModel.Acao := tacAlterar;
+      lModel.QUANTIDADE_PED := lPedidoItensModel.PedidoItenssLista[0].QUANTIDADE_PED + pVenderItem.Quantidade;
+      lModel.QUANTIDADE_NEW := lPedidoItensModel.PedidoItenssLista[0].QUANTIDADE_NEW + pVenderItem.Quantidade;
+      lModel.Salvar;
+    end
+    else
+    begin
+      lPedidoItensModel.Acao := tacIncluir;
+      lPedidoItensModel.NUMERO_PED           := self.FNUMERO_PED;
+      lPedidoItensModel.CODIGO_PRO           := lProdutosModel.ProdutossLista[0].CODIGO_PRO;
+      lPedidoItensModel.CODIGO_CLI           := self.FCODIGO_CLI;
+      lPedidoItensModel.COMISSAO_PED         := FloatToStr(0);
+      lPedidoItensModel.DESCONTO_PED         := FloatToStr(0);
+      lPedidoItensModel.LOJA                 := lEmpresaModel.LOJA;
+      lPedidoItensModel.QUANTIDADE_PED       := FloatToStr(pVenderItem.Quantidade);
+      lPedidoItensModel.QUANTIDADE_NEW       := FloatToStr(pVenderItem.Quantidade);
+
+      lProdutoPreco.Produto                  := lProdutosModel.ProdutossLista[0].CODIGO_PRO;
+      lProdutoPreco.Cliente                  := self.FCODIGO_CLI;
+      lProdutoPreco.Portador                 := self.FCODIGO_PORT;
+      lProdutoPreco.Qtde                     := pVenderItem.Quantidade;
+      lProdutoPreco.PrecoUf                  := pVenderItem.PrecoUf;
+      lProdutoPreco.PrecoCliente             := pVenderItem.PrecoCliente;
+      lProdutoPreco.Promocao                 := pVenderItem.Promocao;
+      lProdutoPreco.TabelaPreco              := pVenderItem.TabelaPreco;
+
+      lPedidoItensModel.VALORUNITARIO_PED    := lProdutosModel.ValorUnitario(lProdutoPreco).ToString;
+      lPedidoItensModel.VLRVENDA_PRO         := lProdutosModel.ProdutossLista[0].VENDA_PRO;
+      lPedidoItensModel.VLRCUSTO_PRO         := lProdutosModel.ProdutossLista[0].CUSTOMEDIO_PRO;
+      lPedidoItensModel.Salvar;
+    end;
+
   finally
     lEmpresaModel.Free;
     lProdutosModel.Free;
+    lPedidoItensModel.Free;
   end;
 end;
 
