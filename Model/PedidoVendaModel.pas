@@ -506,6 +506,8 @@ type
     procedure excluirContasReceber;
     procedure excluirPedido;
 
+    function venderItem(pBarrasProduto: String; pQuantidade: Double): String;
+
   end;
 
 implementation
@@ -523,7 +525,7 @@ uses
   ProdutosModel,
   CFOPModel,
   EmpresaModel,
-  FireDAC.Comp.Client, ClienteModel, FuncionarioModel;
+  FireDAC.Comp.Client, ClienteModel, FuncionarioModel, Terasoft.Configuracoes;
 
 { TPedidoVendaModel }
 
@@ -998,6 +1000,36 @@ begin
 
   finally
     lFuncionarioModel.Free;
+  end;
+end;
+
+function TPedidoVendaModel.venderItem(pBarrasProduto: String; pQuantidade: Double): String;
+var
+  lConfiguracoes : TerasoftConfiguracoes;
+  lEmpresaModel  : TEmpresaModel;
+  lProdutosModel : TProdutosModel;
+begin
+  lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+  lEmpresaModel  := TEmpresaModel.Create(vIConexao);
+  lProdutosModel := TProdutosModel.Create(vIConexao);
+
+  try
+    lProdutosModel.WhereView := ' and produto.barras_pro = '+ QuotedStr(pBarrasProduto);
+    lProdutosModel.obterLista;
+
+    lEmpresaModel.Carregar;
+
+    if lEmpresaModel.AVISARNEGATIVO_EMP = 'S' then
+    begin
+      if (lConfiguracoes.valorTag('USAR_RESERVA','',tvBool) = 'S') and (lProdutosModel.obterSaldoDisponivel(lProdutosModel.ProdutossLista[0].CODIGO_PRO) <= 0) then
+        CriaException('Produto sem saldo disponível em estoque.')
+      else
+      if lProdutosModel.ProdutossLista[0].SALDO_PRO <= 0 then
+        CriaException('Produto sem saldo em estoque.')
+    end;
+  finally
+    lEmpresaModel.Free;
+    lProdutosModel.Free;
   end;
 end;
 

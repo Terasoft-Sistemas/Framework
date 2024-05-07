@@ -38,6 +38,7 @@ type
     FLOJA: Variant;
     FLIMITE_ATRASO: Variant;
     FSTRING_CONEXAO_RESERVA: Variant;
+    FAVISARNEGATIVO_EMP: Variant;
     procedure SetBAIRRO(const Value: Variant);
     procedure SetCEP(const Value: Variant);
     procedure SetCIDADE(const Value: Variant);
@@ -65,6 +66,7 @@ type
     procedure SetLOJA(const Value: Variant);
     procedure SetLIMITE_ATRASO(const Value: Variant);
     procedure SetSTRING_CONEXAO_RESERVA(const Value: Variant);
+    procedure SetAVISARNEGATIVO_EMP(const Value: Variant);
   public
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -94,6 +96,7 @@ type
     property LOJA                   :Variant read FLOJA write SetLOJA;
     property LIMITE_ATRASO          :Variant read FLIMITE_ATRASO write SetLIMITE_ATRASO;
     property STRING_CONEXAO_RESERVA :Variant read FSTRING_CONEXAO_RESERVA write SetSTRING_CONEXAO_RESERVA;
+    property AVISARNEGATIVO_EMP     :Variant read FAVISARNEGATIVO_EMP write SetAVISARNEGATIVO_EMP;
 
     procedure Carregar;
   end;
@@ -125,6 +128,11 @@ destructor TEmpresaModel.Destroy;
 begin
 
   inherited;
+end;
+
+procedure TEmpresaModel.SetAVISARNEGATIVO_EMP(const Value: Variant);
+begin
+  FAVISARNEGATIVO_EMP := Value;
 end;
 
 procedure TEmpresaModel.SetBAIRRO(const Value: Variant);

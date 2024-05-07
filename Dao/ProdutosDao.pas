@@ -64,6 +64,7 @@ type
     function obterComissao(pCodProduto: String): TFDMemTable;
 
     function obterSaldo(pIdProduto: String): Double;
+    function obterSaldoDisponivel(pIdProduto: String): Double;
     procedure subtrairSaldo(pIdProduto: String; pSaldo: Double);
     procedure adicionarSaldo(pIdProduto: String; pSaldo: Double);
     function valorVenda(pIdProduto: String): Variant;
@@ -809,11 +810,13 @@ begin
 end;
 
 function TProdutosDao.obterSaldo(pIdProduto: String): Double;
-var
-  lConexao: TFDConnection;
 begin
-  lConexao := vIConexao.getConnection;
-  Result   := lConexao.ExecSQLScalar('select saldo_pro from produto where codigo_pro = '+ QuotedStr(pIdProduto));
+  Result := vIConexao.getConnection.ExecSQLScalar('select saldo_pro from produto where codigo_pro = '+ QuotedStr(pIdProduto));
+end;
+
+function TProdutosDao.obterSaldoDisponivel(pIdProduto: String): Double;
+begin
+  Result := vIConexao.getConnection.ExecSQLScalar('select coalesce(saldo - reservado, 0) as saldo_disponivel from view_saldo_produto where codigo = '+ QuotedStr(pIdProduto));
 end;
 
 procedure TProdutosDao.SetCountView(const Value: String);

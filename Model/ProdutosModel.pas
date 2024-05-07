@@ -902,6 +902,7 @@ type
     function obterListaMemTable : TFDMemTable;
     function obterCodigoBarras(pIdProduto: String): String;
     function obterSaldo(pIdProduto: String): Double;
+    function obterSaldoDisponivel(pIdProduto: String): Double;
 
     function carregaClasse(pId: String): TProdutosModel;
     function valorVenda(pIdProduto: String): Variant;
@@ -1170,6 +1171,19 @@ begin
     lProdutoDao.Free;
   end;
 end;
+
+function TProdutosModel.obterSaldoDisponivel(pIdProduto: String): Double;
+var
+  lProdutoDao: TProdutosDao;
+begin
+  lProdutoDao := TProdutosDao.Create(vIConexao);
+  try
+    Result := lProdutoDao.obterSaldoDisponivel(pIdProduto);
+  finally
+    lProdutoDao.Free;
+  end;
+end;
+
 function TProdutosModel.Salvar: String;
 var
   lProdutosDao: TProdutosDao;
