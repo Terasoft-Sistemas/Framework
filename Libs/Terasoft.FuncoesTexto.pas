@@ -40,6 +40,8 @@ uses
   function ValidaCPFCNPJ(num: string): boolean;
   function retiraPonto(pValor: string): String;
   function formatarDataInvertida(const data: string): String;
+  function codigoUF(pUF : String): Integer;
+
 
 implementation
 uses
@@ -728,6 +730,64 @@ var
 begin
   dataFormatada := StrToDate(Format('%s/%s/%s', [Copy(data, 7, 2), Copy(data, 5, 2), Copy(data, 1, 4)]));
   Result := FormatDateTime('dd/mm/yyyy', dataFormatada);
+end;
+
+function codigoUF(pUF : String): Integer;
+begin
+  if pUF = 'AC' then
+    Result := 12
+  else if pUF = 'AL' then
+    Result := 27
+  else if pUF = 'AP' then
+    Result := 16
+  else if pUF = 'AM' then
+    Result := 13
+  else if pUF = 'BA' then
+    Result := 29
+  else if pUF = 'CE' then
+    Result := 23
+  else if pUF = 'DF' then
+    Result := 53
+  else if pUF = 'ES' then
+    Result := 32
+  else if pUF = 'GO' then
+    Result := 52
+  else if pUF = 'MA' then
+    Result := 21
+  else if pUF = 'MT' then
+    Result := 51
+  else if pUF = 'MS' then
+    Result := 50
+  else if pUF = 'MG' then
+    Result := 31
+  else if pUF = 'PA' then
+    Result := 15
+  else if pUF = 'PB' then
+    Result := 25
+  else if pUF = 'PR' then
+    Result := 41
+  else if pUF = 'PE' then
+    Result := 26
+  else if pUF = 'PI' then
+    Result := 22
+  else if pUF = 'RJ' then
+    Result := 33
+  else if pUF = 'RN' then
+    Result := 24
+  else if pUF = 'RS' then
+    Result := 43
+  else if pUF = 'RO' then
+    Result := 11
+  else if pUF = 'RR' then
+    Result := 14
+  else if pUF = 'SC' then
+    Result := 42
+  else if pUF = 'SP' then
+    Result := 35
+  else if pUF = 'SE' then
+    Result := 28
+  else if pUF = 'TO' then
+    Result := 17;
 end;
 
 initialization
