@@ -283,7 +283,8 @@ begin
             '        saidas.loja,                                                      '+sLineBreak+
             '        saidas.nf_sai,                                                    '+sLineBreak+
             '        saidas.total_produtos_sai,                                        '+sLineBreak+
-            '        saidas.total_sai                                                  '+sLineBreak+
+            '        saidas.total_sai,                                                 '+sLineBreak+
+            '        saidas.status_sai                                                 '+sLineBreak+
             '   from saidas                                                            '+sLineBreak+
             '   left join contas on saidas.codigo_cta = contas.codigo_cta              '+sLineBreak+
             '   left join clientes on saidas.codigo_cli = clientes.codigo_cli          '+sLineBreak+
