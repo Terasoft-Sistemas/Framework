@@ -534,7 +534,8 @@ uses
   ProdutosModel,
   CFOPModel,
   EmpresaModel,
-  FireDAC.Comp.Client, ClienteModel, FuncionarioModel, Terasoft.Configuracoes;
+  FireDAC.Comp.Client, ClienteModel, FuncionarioModel, Terasoft.Configuracoes,
+  PixModel;
 
 { TPedidoVendaModel }
 
@@ -611,18 +612,46 @@ end;
 
 procedure TPedidoVendaModel.concluirPedido;
 var
-  lPedidoVendaModel : TPedidoVendaModel;
+  lPedidoVendaModel        : TPedidoVendaModel;
   lPedidoItensModel,
-  lModel            : TPedidoItensModel;
-  lClienteModel     : TClienteModel;
-  lComissaoCliente  : Double;
+  lModel                   : TPedidoItensModel;
+  lContasReceberModel      : TContasReceberModel;
+  lContasReceberItensModel : TContasReceberItensModel;
+  lClienteModel            : TClienteModel;
+  lPixModel                : TPixModel;
+  lComissaoCliente         : Double;
 begin
-  lPedidoVendaModel := TPedidoVendaModel.Create(vIConexao);
-  lPedidoItensModel := TPedidoItensModel.Create(vIConexao);
-  lClienteModel     := TClienteModel.Create(vIConexao);
+  lPedidoVendaModel        := TPedidoVendaModel.Create(vIConexao);
+  lPedidoItensModel        := TPedidoItensModel.Create(vIConexao);
+  lClienteModel            := TClienteModel.Create(vIConexao);
+  lContasReceberModel      := TContasReceberModel.Create(vIConexao);
+  lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
+  lPixModel                := TPixModel.Create(vIConexao);
 
   try
     lPedidoVendaModel := lPedidoVendaModel.carregaClasse(self.FNUMERO_PED);
+
+    lContasReceberModel.IDPedidoView := lPedidoVendaModel.NUMERO_PED;
+    lContasReceberModel.WhereView    := ' and portador.tpag_nfe = ''17''';
+    lContasReceberModel.obterContasReceberPedido;
+
+    for lContasReceberModel in lContasReceberModel.ContasRecebersLista do
+    begin
+      lContasReceberItensModel.IDContasReceberView := lContasReceberModel.FATURA_REC;
+      lContasReceberItensModel.obterLista;
+
+      for lContasReceberItensModel in lContasReceberItensModel.ContasReceberItenssLista do
+      begin
+        lPixModel.WhereView := ' and pix.contasreceberitens_id = '+ lContasReceberItensModel.ID +
+                               ' and pix.valor_recebido > 0         '+
+                               ' and pix.data_pagamento is not null ';
+
+        lPixModel.obterLista;
+
+        if lPixModel.TotalRecords = 0 then
+          CriaException('Pix não recebido. Realizar o recebimento');
+      end;
+    end;
 
     lPedidoVendaModel.Acao := tacAlterar;
     lPedidoVendaModel.STATUS_PED := 'B';
@@ -641,9 +670,12 @@ begin
     end;
 
   finally
+    lContasReceberItensModel.Free;
+    lContasReceberModel.Free;
     lPedidoVendaModel.Free;
     lPedidoItensModel.Free;
     lClienteModel.Free;
+    lPixModel.Free;
   end;
 end;
 
