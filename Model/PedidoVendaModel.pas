@@ -514,7 +514,7 @@ type
     procedure reabrirPedido;
     procedure excluirContasReceber;
     procedure excluirPedido;
-
+    procedure verificarTagObservacao;
     procedure venderItem(pVenderItem: TVenderItem);
 
   end;
@@ -547,6 +547,8 @@ end;
 
 function TPedidoVendaModel.Incluir: String;
 begin
+  verificarTagObservacao;
+
   self.Acao := tacIncluir;
   Result    := self.Salvar;
 end;
@@ -1091,6 +1093,14 @@ begin
     lProdutosModel.Free;
     lPedidoItensModel.Free;
   end;
+end;
+
+procedure TPedidoVendaModel.verificarTagObservacao;
+var
+  lConfiguracoes : TerasoftConfiguracoes;
+begin
+  lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+  self.INFORMACOES_PED := lConfiguracoes.valorTag('OBSERVACAO', '', tvMemo);
 end;
 
 function TPedidoVendaModel.gerarContasReceberPedido: String;

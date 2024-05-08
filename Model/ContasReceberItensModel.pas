@@ -211,7 +211,7 @@ type
 
     function lancarContaCorrente(pValor, pPortador, pConta, pContaCorrente, pHistorico, pTipo: String): String;
 
-    function baixarCaixa(pValor, pPortador, pHistorico : String): String;
+    function baixarCaixa(pValor, pPortador, pConta, pHistorico : String): String;
     function baixarContaCorrente(pValor, pPortador, pContaCorrente, pHistorico: String): String;
     function baixarPix(pValor, pPortador, pContaCorrente, pValorTaxa, pContaTaxa: String): String;
     function baixar(pValor: String): String;
@@ -301,12 +301,11 @@ begin
   self.Salvar;
 end;
 
-function TContasReceberItensModel.baixarCaixa(pValor, pPortador, pHistorico: String): String;
+function TContasReceberItensModel.baixarCaixa(pValor, pPortador, pConta, pHistorico: String): String;
 var
   lCaixaModel: TCaixaModel;
 begin
   lCaixaModel := TCaixaModel.Create(vIConexao);
-
   try
     lCaixaModel.Acao := tacIncluir;
     lCaixaModel.USUARIO_CAI     := self.vIConexao.getUSer.ID;
@@ -315,7 +314,7 @@ begin
     lCaixaModel.NUMERO_PED      := self.NUMERO_PED;
     lCaixaModel.CONCILIADO_CAI  := '.';
     lCaixaModel.TIPO            := 'V';
-    lCaixaModel.CODIGO_CTA      := '555555';
+    lCaixaModel.CODIGO_CTA      := pConta;
     lCaixaModel.CLIENTE_CAI     := self.FCODIGO_CLI;
     lCaixaModel.TIPO_CAI        := cTIPO_CREDITO;
     lCaixaModel.FATURA_CAI      := self.FFATURA_REC;

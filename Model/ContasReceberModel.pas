@@ -257,7 +257,9 @@ end;
 function TContasReceberModel.concluirContasReceber(pFatura: String): TConclusaoContasReceber;
 var
   lContasReceberItensModel, lContasReceberitensAtualizar: TContasReceberItensModel;
-  lPortadorModel: TPortadorModel;
+  lPortadorModel : TPortadorModel;
+  pHistorico,
+  lConta : String;
 begin
 
   lContasReceberItensModel      := TContasReceberItensModel.Create(vIConexao);
@@ -265,8 +267,9 @@ begin
   lPortadorModel                := TPortadorModel.Create(vIConexao);
 
   try
+    lPortadorModel := lPortadorModel.carregaClasse(self.FCODIGO_POR);
+
     if not self.FRECEBIMENTO_CONCLUIDO then begin
-      lPortadorModel := lPortadorModel.carregaClasse(self.FCODIGO_POR);
 
       if lPortadorModel.TIPO = 'T' then
       begin
@@ -311,8 +314,13 @@ begin
         lContasReceberitensAtualizar.gerarVendaCartao;
       end;
 
+      lConta := IIF(lPortadorModel.RECEITA_CONTA_ID <> '', lPortadorModel.RECEITA_CONTA_ID , '888888');
+
       if self.FCODIGO_POR = '000004' then
-        lContasReceberitensAtualizar.baixarCaixa(lContasReceberitensAtualizar.VLRPARCELA_REC, self.FCODIGO_POR, 'Venda em dinheiro');
+      begin
+        pHistorico := 'Venda N: '+ self.PEDIDO_REC +' '+ lPortadorModel.NOME_PORT;
+        lContasReceberitensAtualizar.baixarCaixa(lContasReceberitensAtualizar.VLRPARCELA_REC, self.FCODIGO_POR, lConta, pHistorico);
+      end;
 
       if self.FCODIGO_POR = '555555' then
         lContasReceberitensAtualizar.baixarCreditoCliente(lContasReceberitensAtualizar.VLRPARCELA_REC);
