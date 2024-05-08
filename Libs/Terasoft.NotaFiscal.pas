@@ -427,8 +427,8 @@ begin
       nNF         := lQry.FieldByName('nNF').AsInteger;
       cNF         := GerarCodigoDFe(lQry.FieldByName('cNF').AsInteger);
       dEmi        := Now;// lQry.FieldByName('dEmi').AsDateTime;
-      dSaiEnt     := vIConexao.DataServer;//lQry.FieldByName('dSaiEnt').AsDateTime;
-      hSaiEnt     := vIConexao.DataServer;//lQry.FieldByName('hSaiEnt').Value;
+      dSaiEnt     := Now;//lQry.FieldByName('dSaiEnt').AsDateTime;
+      hSaiEnt     := Now;//lQry.FieldByName('hSaiEnt').Value;
       tpNF        := vConfiguracoesNotaFiscal.tpNF(lQry.FieldByName('tpNF').AsString);
       verProc     := 'ERP_TERASOFT';
       cUF         := UFtoCUF(vConfiguracoesNotaFiscal.emitUF);
@@ -498,7 +498,7 @@ begin
     if copy(Trim(lQry.FieldByName('nome_xml').AsString),1,10) <> 'Autorizado' then
       CriaException('Não é possível imprimir uma nota não autorizada.');
     if lQry.FieldByName('status_nf').AsString = 'X' then
-      CriaException('Não foi possível imprimir uma nota cancelada ou inútilizada.');
+      CriaException('Não foi possível imprimir uma nota cancelada ou inutilizada.');
     if lQry.FieldByName('pmoNFe').AsInteger = 65 then begin
       ACBrNFeDANFCeFortes := TACBrNFeDANFCeFortes.Create(nil);
       ACBrNFe.DANFE       := ACBrNFeDANFCeFortes;
@@ -532,7 +532,7 @@ begin
     Result := lQry.FieldByName('id_nf3').AsString;
     except
     on E:Exception do
-       CriaException('Erro: ' + E.Message);
+       CriaException(E.Message);
     end;
   finally
     lSQL := '';

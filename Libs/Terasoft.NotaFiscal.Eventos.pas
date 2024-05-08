@@ -194,7 +194,7 @@ begin
 
       with ACBrNFe.EventoNFe.Evento.New do
       begin
-        infEvento.dhEvento := vIConexao.DataServer;
+        infEvento.dhEvento := Now;
         infEvento.tpEvento := ptpEvento;
 
         if ptpEvento = teCancelamento then
@@ -220,7 +220,7 @@ begin
       begin
         lEventosNFeControl.EventosNFeModel.Acao              := Terasoft.Types.tacIncluir;
         lEventosNFeControl.EventosNFeModel.ID_NFE            := idNotaFiscal;
-        lEventosNFeControl.EventosNFeModel.DATAHORA          := vIConexao.DataServer;
+        lEventosNFeControl.EventosNFeModel.DATAHORA          := Now;
         lEventosNFeControl.EventosNFeModel.EVENTO            := ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.tpEvento;
         lEventosNFeControl.EventosNFeModel.ID_EVENTO         := lTPEVENTO;
         lEventosNFeControl.EventosNFeModel.CHNFE             := lNFContol.NFModel.ID_NF3;
@@ -239,7 +239,7 @@ begin
         if ptpEvento = teCancelamento then
         begin
           lNFContol.NFModel.Acao              := Terasoft.Types.tacAlterar;
-          lNFContol.NFModel.DATA_CANCELAMENTO := vIConexao.DataServer;
+          lNFContol.NFModel.DATA_CANCELAMENTO := Now;
           lNFContol.NFModel.STATUS_NF         := 'X';
           lNFContol.NFModel.NOME_XML          := 'Cancelamento de NF-e homologado';
           lNFContol.NFModel.NUMERO_NF         := idNotaFiscal;
@@ -283,7 +283,7 @@ begin
 
         lEventosNFeControl.EventosNFeModel.Acao              := Terasoft.Types.tacIncluir;
         lEventosNFeControl.EventosNFeModel.ID_NFE            := idNotaFiscal;
-        lEventosNFeControl.EventosNFeModel.DATAHORA          := vIConexao.DataServer;
+        lEventosNFeControl.EventosNFeModel.DATAHORA          := Now;
         lEventosNFeControl.EventosNFeModel.EVENTO            := 2;
         lEventosNFeControl.EventosNFeModel.ID_EVENTO         := '110111';
         lEventosNFeControl.EventosNFeModel.CHNFE             := lNFContol.NFModel.ID_NF3;
@@ -300,7 +300,7 @@ begin
         lEventosNFeControl.Salvar;
 
         lNFContol.NFModel.Acao              := Terasoft.Types.tacAlterar;
-        lNFContol.NFModel.DATA_CANCELAMENTO := vIConexao.DataServer;
+        lNFContol.NFModel.DATA_CANCELAMENTO := Now;
         lNFContol.NFModel.STATUS_NF         := 'X';
         lNFContol.NFModel.NOME_XML          := 'Inutilização de Número homologado';
         lNFContol.NFModel.NUMERO_NF         := idNotaFiscal;
