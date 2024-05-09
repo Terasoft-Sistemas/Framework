@@ -242,7 +242,13 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From saidas where 1=1 ';
+    lSql := ' select count(*) records                                                  '+sLineBreak+
+            '   From saidas                                                            '+sLineBreak+
+            '   left join contas on saidas.codigo_cta = contas.codigo_cta              '+sLineBreak+
+            '   left join clientes on saidas.codigo_cli = clientes.codigo_cli          '+sLineBreak+
+            '   left join funcionario on saidas.vendedor_id = funcionario.codigo_fun   '+sLineBreak+
+            '   left join cfop on saidas.cfop_sai = cfop.cfop                          '+sLineBreak+
+            '  where 1=1 ';
 
     lSql := lSql + where;
 
