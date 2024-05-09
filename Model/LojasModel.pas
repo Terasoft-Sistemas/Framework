@@ -5,7 +5,7 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
-  Interfaces.Conexao;
+  Interfaces.Conexao, FireDAC.Comp.Client;
 
 type
   TLojasModel = class
@@ -28,6 +28,7 @@ type
     FSERVER: Variant;
     FLojaView: String;
     FCD: Variant;
+    FCLIENTE_ID: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetLojassLista(const Value: TObjectList<TLojasModel>);
@@ -44,6 +45,7 @@ type
     procedure SetSERVER(const Value: Variant);
     procedure SetLojaView(const Value: String);
     procedure SetCD(const Value: Variant);
+    procedure SetCLIENTE_ID(const Value: Variant);
   public
     property CD: Variant read FCD write SetCD;
     property LOJA: Variant read FLOJA write SetLOJA;
@@ -51,12 +53,14 @@ type
     property SERVER: Variant read FSERVER write SetSERVER;
     property PORT: Variant read FPORT write SetPORT;
     property DATABASE: Variant read FDATABASE write SetDATABASE;
+    property CLIENTE_ID: Variant read FCLIENTE_ID write SetCLIENTE_ID;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
     procedure obterLista;
+    function obterFiliais: TFDMemTable;
 
     property LojassLista: TObjectList<TLojasModel> read FLojassLista write SetLojassLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -86,6 +90,18 @@ destructor TLojasModel.Destroy;
 begin
 
   inherited;
+end;
+
+function TLojasModel.obterFiliais: TFDMemTable;
+var
+  lLojasDao : TLojasDao;
+begin
+  lLojasDao := TLojasDao.Create(vIConexao);
+  try
+    Result := lLojasDao.obterFiliais;
+  finally
+    lLojasDao.Free;
+  end;
 end;
 
 procedure TLojasModel.obterLista;
@@ -136,6 +152,11 @@ end;
 procedure TLojasModel.SetCD(const Value: Variant);
 begin
   FCD := Value;
+end;
+
+procedure TLojasModel.SetCLIENTE_ID(const Value: Variant);
+begin
+  FCLIENTE_ID := Value;
 end;
 
 procedure TLojasModel.SetCountView(const Value: String);

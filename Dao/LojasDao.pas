@@ -59,6 +59,7 @@ type
     property LojaView: String read FLojaView write SetLojaView;
 
     procedure obterLista;
+    function obterFiliais: TFDMemTable;
 
 end;
 
@@ -114,6 +115,41 @@ begin
   end;
 end;
 
+function TLojasDao.obterFiliais: TFDMemTable;
+var
+  lQry: TFDQuery;
+  lSQL:String;
+  i: INteger;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  FLojassLista := TObjectList<TLojasModel>.Create;
+
+  try
+    lSQL := ' select                               ' + sLineBreak +
+            '        loja2.cd,                     ' + sLineBreak +
+            '        loja2.loja,                   ' + sLineBreak +
+            '        loja2.descricao,              ' + sLineBreak +
+            '        loja2.server,                 ' + sLineBreak +
+            '        loja2.port,                   ' + sLineBreak +
+            '        loja2.database,               ' + sLineBreak +
+            '        loja2.cliente_id              ' + sLineBreak +
+            '   from loja2                         ' + sLineBreak +
+            '  where loja2.cliente_id is not null  ' + sLineBreak;
+
+    lSql := lSql + where;
+
+    lSQL := lSQL + ' order by 1';
+
+    lQry.Open(lSQL);
+
+    Result := vConstrutor.atribuirRegistros(lQry);
+
+  finally
+    lQry.Free;
+  end;
+end;
+
 procedure TLojasDao.obterLista;
 var
   lQry: TFDQuery;
@@ -131,7 +167,8 @@ begin
             '        loja2.descricao,          ' + #13 +
             '        loja2.server,             ' + #13 +
             '        loja2.port,               ' + #13 +
-            '        loja2.database            ' + #13 +
+            '        loja2.database,           ' + #13 +
+            '        loja2.cliente_id          ' + #13 +
             '   from loja2                     ' + #13 +
             '  where loja2.server is not null  ' + #13;
 
@@ -149,12 +186,13 @@ begin
 
       i := FLojassLista.Count -1;
 
-      FLojassLista[i].CD         := lQry.FieldByName('CD').AsString;
-      FLojassLista[i].LOJA       := lQry.FieldByName('LOJA').AsString;
-      FLojassLista[i].DESCRICAO  := lQry.FieldByName('DESCRICAO').AsString;
-      FLojassLista[i].SERVER     := lQry.FieldByName('SERVER').AsString;
-      FLojassLista[i].PORT       := lQry.FieldByName('PORT').AsString;
-      FLojassLista[i].DATABASE   := lQry.FieldByName('DATABASE').AsString;
+      FLojassLista[i].CD           := lQry.FieldByName('CD').AsString;
+      FLojassLista[i].LOJA         := lQry.FieldByName('LOJA').AsString;
+      FLojassLista[i].DESCRICAO    := lQry.FieldByName('DESCRICAO').AsString;
+      FLojassLista[i].SERVER       := lQry.FieldByName('SERVER').AsString;
+      FLojassLista[i].PORT         := lQry.FieldByName('PORT').AsString;
+      FLojassLista[i].DATABASE     := lQry.FieldByName('DATABASE').AsString;
+      FLojassLista[i].CLIENTE_ID   := lQry.FieldByName('CLIENTE_ID').AsString;
 
       lQry.Next;
     end;

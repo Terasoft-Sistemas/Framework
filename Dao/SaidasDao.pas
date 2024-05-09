@@ -279,6 +279,7 @@ begin
             '        saidas.data_sai,                                                  '+sLineBreak+
             '        saidas.codigo_cli,                                                '+sLineBreak+
             '        coalesce(clientes.razao_cli, clientes.fantasia_cli) cliente_nome, '+sLineBreak+
+            '        loja2.descricao destino,                                          '+sLineBreak+
             '        saidas.observacao_sai,                                            '+sLineBreak+
             '        saidas.cfop_sai,                                                  '+sLineBreak+
             '        cfop.descricao cfop_descricao,                                    '+sLineBreak+
@@ -296,6 +297,7 @@ begin
             '   left join clientes on saidas.codigo_cli = clientes.codigo_cli          '+sLineBreak+
             '   left join funcionario on saidas.vendedor_id = funcionario.codigo_fun   '+sLineBreak+
             '   left join cfop on saidas.cfop_sai = cfop.cfop                          '+sLineBreak+
+            '   left join loja2 on loja2.cliente_id = saidas.codigo_cli                '+sLineBreak+
             '  where 1=1                                                               '+sLineBreak;
 
     lSql := lSql + where;

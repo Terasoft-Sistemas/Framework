@@ -163,6 +163,7 @@ type
     dsSaidas: TDataSource;
     Button107: TButton;
     Button108: TButton;
+    Button109: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -277,6 +278,7 @@ type
     procedure Button104Click(Sender: TObject);
     procedure Button107Click(Sender: TObject);
     procedure Button108Click(Sender: TObject);
+    procedure Button109Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -3070,6 +3072,20 @@ begin
     dsSaidas.DataSet := lResultado;
   finally
     lSaidasItens.Free;
+  end;
+end;
+
+procedure TForm1.Button109Click(Sender: TObject);
+var
+  lLojasModel : TLojasModel;
+  lResultado  : TFDMemTable;
+begin
+  lLojasModel := TLojasModel.Create(vIConexao);
+  try
+    lResultado := lLojasModel.obterFiliais;
+    dsSaidas.DataSet := lResultado;
+  finally
+    lLojasModel.Free;
   end;
 end;
 
