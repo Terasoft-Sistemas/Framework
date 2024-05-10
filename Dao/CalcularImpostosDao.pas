@@ -49,6 +49,9 @@ implementation
 
 { TCalcularImpostos }
 
+uses
+  Terasoft.Utils;
+
 constructor TCalcularImpostosDao.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
@@ -95,6 +98,8 @@ begin
           '     p.ipi_sai,                                                   '+#13+
           '     p.cst_ipi,                                                   '+#13+
           '     p.nfce_csosn,                                                '+#13+
+          '     p.nfce_cfop nfce_cfop_id,                                    '+#13+
+          '     c2.cfop nfce_cfop,                                           '+#13+
           '     c.cfop,                                                      '+#13+
           '     coalesce(c1.cfop, c.cfop) cfop_consumidor                    '+#13+
           '                                                                  '+#13+
@@ -104,6 +109,7 @@ begin
           ' left join tabelaicms t on t.codigo = p.tabicms_pro               '+#13+
           ' left join cfop c on c.id = t.'+lUF_BASE+'_cfop_id                '+#13+
           ' left join cfop c1 on c1.id = t.'+lUF_BASE+'_cfop_id_consumidor   '+#13+
+          ' left join cfop c2 on c2.id = p.nfce_cfop                         '+#13+
           '                                                                  '+#13+
           ' where                                                            '+#13+
           '     p.codigo_pro = '+QuotedStr(FCODIGO_PRODUTO);
@@ -112,14 +118,20 @@ begin
 
     if FMODELO_NF = '65' then
     begin
-      lCalcularImpostosModel.CFOP       := lQry.FieldByName('cfop_consumidor').Value;
-      lCalcularImpostosModel.CFOP_ID    := lQry.FieldByName('cfop_consumidor_id').Value;
+      if lQry.FieldByName('nfce_cfop').AsString = '' then
+        CriaException('CFOP para consumidor não configurado na tabela de ICMS');
+
+      if lQry.FieldByName('nfce_csosn').AsString = '' then
+        CriaException('CSOSN para NFC-e não configurado no cadastro de produto');
+
+      lCalcularImpostosModel.CFOP       := lQry.FieldByName('nfce_cfop').AsString;
+      lCalcularImpostosModel.CFOP_ID    := lQry.FieldByName('nfce_cfop_id').AsString;
       lCalcularImpostosModel.ICMS_CSOSN := lQry.FieldByName('nfce_csosn').AsString;
     end
     else
     begin
-      lCalcularImpostosModel.CFOP       := lQry.FieldByName('cfop').Value;
-      lCalcularImpostosModel.CFOP_ID    := lQry.FieldByName('cfop_id').Value;
+      lCalcularImpostosModel.CFOP       := lQry.FieldByName('cfop').AsString;
+      lCalcularImpostosModel.CFOP_ID    := lQry.FieldByName('cfop_id').AsString;
       lCalcularImpostosModel.ICMS_CSOSN := lQry.FieldByName('cfop_csosn').AsString;
     end;
 
@@ -166,7 +178,7 @@ begin
     lQry.Open(lSQL);
 
     if lQry.FieldByName('cfop_cst_pis').AsString <> '' then
-      lCalcularImpostosModel.PIS_CST := lQry.FieldByName('cfop_cst_pis').Value
+      lCalcularImpostosModel.PIS_CST := lQry.FieldByName('cfop_cst_pis').AsString
     else
       lCalcularImpostosModel.PIS_CST := lCalcularImpostosModel.PIS_CST;
 
@@ -176,7 +188,7 @@ begin
       lCalcularImpostosModel.PIS_ALIQUOTA := lCalcularImpostosModel.PIS_ALIQUOTA;
 
     if lQry.FieldByName('cfop_cst_cofins').AsString <> '' then
-      lCalcularImpostosModel.COFINS_CST := lQry.FieldByName('cfop_cst_cofins').Value
+      lCalcularImpostosModel.COFINS_CST := lQry.FieldByName('cfop_cst_cofins').AsString
     else
       lCalcularImpostosModel.COFINS_CST := lCalcularImpostosModel.COFINS_CST;
 
@@ -186,7 +198,7 @@ begin
       lCalcularImpostosModel.COFINS_ALIQUOTA := lCalcularImpostosModel.COFINS_ALIQUOTA;
 
     if lQry.FieldByName('cfop_cst_ipi').AsString <> '' then
-      lCalcularImpostosModel.IPI_CST := lQry.FieldByName('cfop_cst_ipi').Value
+      lCalcularImpostosModel.IPI_CST := lQry.FieldByName('cfop_cst_ipi').AsString
     else
       lCalcularImpostosModel.IPI_CST := lCalcularImpostosModel.IPI_CST;
 

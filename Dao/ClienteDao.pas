@@ -437,7 +437,7 @@ begin
                              ' ORDER BY R.VENCIMENTO_REC');
 
   if VarIsClear(lResult) then
-    Result := DateToStr(vIConexao.DataServer)
+    Result := vIConexao.DataServer
   else
     Result := lResult;
 end;

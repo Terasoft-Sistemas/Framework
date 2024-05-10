@@ -280,7 +280,10 @@ end;
 function TConfiguracoesNotaFiscal.cstipi(pcstipi: String): TpcnCstIpi;
 begin
   if EstaVazio(pcstipi) then
+  begin
      Result := ipi00;
+     exit;
+  end;
 
   case pcstipi.ToInteger of
      0: Result := ipi00;

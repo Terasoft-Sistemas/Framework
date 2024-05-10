@@ -1044,7 +1044,7 @@ begin
   try
     lDataVencimento := lClienteDao.diasAtraso(pCodigoCliente);
 
-    if vIConexao.DataServer < lDataVencimento then
+    if vIConexao.DataServer <= lDataVencimento then
     begin
       Result := 0;
       exit;

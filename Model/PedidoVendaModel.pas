@@ -1085,7 +1085,7 @@ begin
     lPedidoItensModel.WhereView := 'and pedidoitens.numero_ped = '+ self.FNUMERO_PED +' and pedidoitens.codigo_pro = '+ lProdutosModel.ProdutossLista[0].CODIGO_PRO;
     lPedidoItensModel.obterLista;
 
-    if (lPedidoItensModel.TotalRecords > 0) and (lConfiguracoes.valorTag('FRENTE_CAIXA_SOMAR_QTDE_ITENS', '', tvBool) = 'S') then
+    if (lPedidoItensModel.TotalRecords > 0) and (lConfiguracoes.valorTag('FRENTE_CAIXA_SOMAR_QTDE_ITENS', 'S', tvBool) = 'S') then
     begin
       lModel := lPedidoItensModel.carregaClasse(lPedidoItensModel.PedidoItenssLista[0].ID);
       lModel.Acao := tacAlterar;
