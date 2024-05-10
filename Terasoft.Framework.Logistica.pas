@@ -111,6 +111,9 @@ interface
   procedure logistica_marcaProdutoParaEnvio(pCodigoPro: TipoWideStringFramework);
   function logistica_EnviaProduto(pCodigoPro: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
+  function logistica_EntradaFinalizada(const pID: TipoWideStringFramework; pResultado: IResultadoOperacao = nil): boolean;
+  function logistica_SaidaFinalizada(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework; pResultado: IResultadoOperacao = nil ): boolean;
+
   procedure logistica_marcaEntradaParaEnvio(pID: TipoWideStringFramework);
   function logistica_EnviaEntrada(pID: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
@@ -273,6 +276,29 @@ begin
   end;
 end;
 
+function logistica_EntradaFinalizada(const pID: TipoWideStringFramework; pResultado: IResultadoOperacao = nil): boolean;
+begin
+  checkResultadoOperacao(pResultado);
+
+  Result := true;
+
+  if(logistica_utiizada=CONTROLE_LOGISTICA_NENHUM) then
+    exit;
+
+  Result := getLogisticaGlobal.entradaFinalizada(pID);
+end;
+
+function logistica_SaidaFinalizada(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework; pResultado: IResultadoOperacao = nil ): boolean;
+begin
+  checkResultadoOperacao(pResultado);
+
+  Result := true;
+
+  if(logistica_utiizada=CONTROLE_LOGISTICA_NENHUM) then
+    exit;
+
+  Result := getLogisticaGlobal.saidaFinalizada(pTipo,pNumeroDoc);
+end;
 
 {$if defined(__AUTOMATIZA_LOGISTICA__)}
 function _automacao_logistica(const pNome: TipoWideStringFramework; const pParametro: TipoWideStringFramework; const pDadosAdicionais: TipoWideStringFramework; pResultado: IResultadoOperacao): IResultadoOperacao;
