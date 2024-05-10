@@ -249,6 +249,7 @@ end;
 function logistica_travaDocumento;
 begin
   Result := checkResultadoOperacao(pResultado);
+  if(logistica_utiizada<>CONTROLE_LOGISTICA_NENHUM) then
   try
     gdbPadrao.updateDB('movimento_serial', ['TIPO_DOCUMENTO','ID_DOCUMENTO'], [pTipo,pNumeroDoc],['TIPO_MOVIMENTO'],['*'],true,true);
   except
@@ -262,6 +263,7 @@ function logistica_liberaDocumento;
     lValor: String;
 begin
   Result := checkResultadoOperacao(pResultado);
+  if(logistica_utiizada<>CONTROLE_LOGISTICA_NENHUM) then
   try
     lValor := '';
     if stringNoArray(pTipo,[LOGISTICA_TIPOSAIDA_PEDIDO,LOGISTICA_TIPOSAIDA_SAIDATRANSF]) then
@@ -282,10 +284,8 @@ begin
 
   Result := true;
 
-  if(logistica_utiizada=CONTROLE_LOGISTICA_NENHUM) then
-    exit;
-
-  Result := getLogisticaGlobal.entradaFinalizada(pID);
+  if(logistica_utiizada<>CONTROLE_LOGISTICA_NENHUM) then
+    Result := getLogisticaGlobal.entradaFinalizada(pID);
 end;
 
 function logistica_SaidaFinalizada(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework; pResultado: IResultadoOperacao = nil ): boolean;
