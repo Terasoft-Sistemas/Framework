@@ -114,6 +114,9 @@ interface
   procedure logistica_marcaEntradaParaEnvio(pID: TipoWideStringFramework);
   function logistica_EnviaEntrada(pID: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
+  function logistica_liberaDocumento(pTipo, pNumeroDoc: TipoWideStringFramework; pResultado: IResultadoOperacao=nil):IResultadoOperacao;
+  function logistica_travaDocumento(pTipo, pNumeroDoc: TipoWideStringFramework; pResultado: IResultadoOperacao=nil):IResultadoOperacao;
+
   procedure logistica_marcaSaidaParaEnvio(pTipo, pNumeroDoc: TipoWideStringFramework);
   function logistica_EnviaSaida(pTipo: TipoWideStringFramework; pNumeroPed: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
@@ -130,6 +133,8 @@ implementation
     {$endif}
     Spring.Collections,
     Terasoft.Framework.Exceptions,
+    SysUtils,
+    Terasoft.Framework.FuncoesDiversas,
     FuncoesConfig;
 
   var
@@ -237,6 +242,37 @@ begin
     Result := ValorTagConfig(tagConfig_LOGISTICA,tagConfigcfg_Padrao_LOGISTICA,tvString);
   {$endif};
 end;
+
+function logistica_travaDocumento;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  try
+    gdbPadrao.updateDB('movimento_serial', ['TIPO_DOCUMENTO','ID_DOCUMENTO'], [pTipo,pNumeroDoc],['TIPO_MOVIMENTO'],['*'],true,true);
+  except
+    on e: Exception do
+      Result.formataErro('logistica_liberaDocumento: %s: %s', [ e.ClassName, e.Message]);
+  end;
+end;
+
+function logistica_liberaDocumento;
+  var
+    lValor: String;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  try
+    lValor := '';
+    if stringNoArray(pTipo,[LOGISTICA_TIPOSAIDA_PEDIDO,LOGISTICA_TIPOSAIDA_SAIDATRANSF]) then
+      lValor := 'S';
+
+    if(lValor<>'') then
+      gdbPadrao.updateDB('movimento_serial', ['TIPO_DOCUMENTO','ID_DOCUMENTO'], [pTipo,pNumeroDoc],['TIPO_MOVIMENTO'],[lValor],true,true);
+
+  except
+    on e: Exception do
+      Result.formataErro('logistica_travaDocumento: %s: %s', [ e.ClassName, e.Message]);
+  end;
+end;
+
 
 {$if defined(__AUTOMATIZA_LOGISTICA__)}
 function _automacao_logistica(const pNome: TipoWideStringFramework; const pParametro: TipoWideStringFramework; const pDadosAdicionais: TipoWideStringFramework; pResultado: IResultadoOperacao): IResultadoOperacao;
