@@ -294,18 +294,16 @@ begin
 
   Result := true;
 
-  if(logistica_utiizada=CONTROLE_LOGISTICA_NENHUM) then
-    exit;
-
-  Result := getLogisticaGlobal.saidaFinalizada(pTipo,pNumeroDoc);
+  if(logistica_utiizada<>CONTROLE_LOGISTICA_NENHUM) then
+    Result := getLogisticaGlobal.saidaFinalizada(pTipo,pNumeroDoc);
 end;
 
 {$if defined(__AUTOMATIZA_LOGISTICA__)}
 function _automacao_logistica(const pNome: TipoWideStringFramework; const pParametro: TipoWideStringFramework; const pDadosAdicionais: TipoWideStringFramework; pResultado: IResultadoOperacao): IResultadoOperacao;
 begin
   Result := checkResultadoOperacao(pResultado);
-  if(logistica_utiizada=CONTROLE_LOGISTICA_NENHUM) then exit;
-  Result := logistica_ProcessaServico(pResultado);
+  if(logistica_utiizada<>CONTROLE_LOGISTICA_NENHUM) then
+    Result := logistica_ProcessaServico(pResultado);
 end;
 
 initialization
