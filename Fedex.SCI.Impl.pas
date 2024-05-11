@@ -92,7 +92,7 @@ function processaArquivoExpedicao(pUnkAPI: IUnknown; pResultado: IResultadoOpera
     pAPI: IFedexAPI;
     lRes: IResultadoOperacao;
     lDataHoraAtual: TDateTime;
-
+    strObs: String;
 begin
   Result := checkResultadoOperacao(pResultado);
   lRes := nil;
@@ -276,12 +276,25 @@ begin
         lCDS.First;
         while not lCDS.Eof do
         begin
+          strObs := '';
+
+          if lLista.get(lCDS.FieldByName('produto_id').AsString, lListaIMEIS) then
+          for lIMEI in lListaIMEIS do
+          begin
+            if(strObs<>'') then
+              strObs:=strObs+',';
+            strObs := strObs + lIMEI;
+          end;
+
+          if(strObs<>'') then
+            strObs := 'Seriais:' + strObs;
+
           if(lTipo=LOGISTICA_TIPOSAIDA_PEDIDO) then
           begin
             gdbPadrao.insereDB('PEDIDOVENDA_EXPEDICAO',
                 ['id','pedido_id', 'item_id', 'produto_id', 'quantidade', 'quantidade_original', 'status'],
                 [gdbPadrao.genValue('GEN_PEDIDOVENDA_EXPEDICAO'),lCDS.FieldByName('id').AsString, lCDS.FieldByName('id_item').AsString, lCDS.FieldByName('produto_id').AsString, lFieldQtde.AsInteger, lCDS.FieldByName('quantidade').AsInteger, '0'],false,false,'pedido_id,item_id');
-            gdbPadrao.updateDB('pedidoitens', [ 'id' ], [ lCDS.FieldByName('id_item').AsInteger ], [ 'quantidade_atendida'], [ lFieldQtde.AsInteger ] );
+            gdbPadrao.updateDB('pedidoitens', [ 'id' ], [ lCDS.FieldByName('id_item').AsInteger ], [ 'OBS_ITEM', 'quantidade_atendida'], [ strObs, lFieldQtde.AsInteger ] );
             if(lFieldQtde.AsInteger <> lCDS.FieldByName('quantidade').AsInteger) then begin
               result.formataErro('processaArquivoExpedicao: Pedido [%s], Produto[%s] divergente na quantidade: Vendida: %d, Atendida: %d',
               [ lTipoDocumento, lCDS.FieldByName('produto_id').AsString, lCDS.FieldByName('quantidade').AsInteger, lCDS.FieldByName('quantidade_atendida').AsInteger ] );
@@ -289,7 +302,7 @@ begin
             end;
           end else if(lTipo=LOGISTICA_TIPOSAIDA_SAIDATRANSF) then
           begin
-            gdbPadrao.updateDB('saidasitens', [ 'id' ], [ lCDS.FieldByName('id_item').AsInteger ], [ 'qtd_checagem'], [ lFieldQtde.AsInteger ] );
+            gdbPadrao.updateDB('saidasitens', [ 'id' ], [ lCDS.FieldByName('id_item').AsInteger ], [ 'OBS_ITEM', 'qtd_checagem'], [ strObs, lFieldQtde.AsInteger ] );
             if(lFieldQtde.AsInteger <> lCDS.FieldByName('quantidade').AsInteger) then begin
               result.formataErro('processaArquivoExpedicao: Transferencia [%s], Produto[%s] divergente na quantidade: Vendida: %d, Atendida: %d',
               [ lTipoDocumento, lCDS.FieldByName('produto_id').AsString, lCDS.FieldByName('quantidade').AsInteger, lCDS.FieldByName('quantidade_atendida').AsInteger ] );
