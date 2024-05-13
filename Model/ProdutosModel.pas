@@ -316,6 +316,8 @@ type
     FNOME_MAR: Variant;
     FCodProdutoView: String;
     FNOME_FOR: Variant;
+    FCOR_ID: Variant;
+    FVOLTAGEM_ID: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetProdutossLista(const Value: TObjectList<TProdutosModel>);
@@ -605,6 +607,8 @@ type
     procedure SetTIPO_NOME(const Value: Variant);
     procedure SetCodProdutoView(const Value: String);
     procedure SetNOME_FOR(const Value: Variant);
+    procedure SetCOR_ID(const Value: Variant);
+    procedure SetVOLTAGEM_ID(const Value: Variant);
 
   public
     property UUID: Variant read FUUID write SetUUID;
@@ -886,6 +890,8 @@ type
     property NOME_SUB : Variant read FNOME_SUB write SetNOME_SUB;
     property NOME_MAR : Variant read FNOME_MAR write SetNOME_MAR;
     property TIPO_NOME : Variant read FTIPO_NOME write SetTIPO_NOME;
+    property VOLTAGEM_ID : Variant read FVOLTAGEM_ID write SetVOLTAGEM_ID;
+    property COR_ID : Variant read FCOR_ID write SetCOR_ID;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -895,10 +901,10 @@ type
     function obterPromocao(pCodProduto: String): TFDMemTable;
     function obterComissao(pCodProduto: String): TFDMemTable;
 
-    function Incluir  : String;
+    function Incluir : String;
     function Alterar(pID : String) : TProdutosModel;
     function Excluir(pCodigoPro : String) : String;
-    function Salvar   : String;
+    function Salvar : String;
     function obterListaMemTable : TFDMemTable;
     function obterCodigoBarras(pIdProduto: String): String;
     function obterSaldo(pIdProduto: String): Double;
@@ -911,6 +917,8 @@ type
 
     procedure subtrairSaldo(pIdProduto: String; pSaldo: Double);
     procedure adicionarSaldo(pIdProduto: String; pSaldo: Double);
+
+    procedure verificarCustoMedio;
 
     property ProdutossLista: TObjectList<TProdutosModel> read FProdutossLista write SetProdutossLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -934,7 +942,7 @@ uses
   PrecoVendaProdutoModel,
   PrecoClienteModel,
   System.SysUtils, Data.DB, PromocaoModel,
-  Variants;
+  Variants, GrupoModel, SubGrupoModel, MarcaModel, FornecedorModel;
 
   { TProdutosModel }
 
@@ -972,9 +980,77 @@ begin
 end;
 
 function TProdutosModel.Incluir: String;
+var
+  lGrupoModel      : TGrupoModel;
+  lSubGrupoModel   : TSubGrupoModel;
+  lMarcaModel      : TMarcaModel;
+  lFornecedorModel : TFornecedorModel;
 begin
-  self.Acao := tacIncluir;
-  Result    := self.Salvar;
+
+  lGrupoModel      := TGrupoModel.Create(vIConexao);
+  lSubGrupoModel   := TSubGrupoModel.Create(vIConexao);
+  lMarcaModel      := TMarcaModel.Create(vIConexao);
+  lFornecedorModel := TFornecedorModel.Create(vIConexao);
+  try
+
+    if self.CODIGO_GRU = '' then
+    begin
+      lGrupoModel.StartRecordView := '0';
+      lGrupoModel.LengthPageView  := '1';
+      lGrupoModel.OrderView       := 'CODIGO_GRU';
+      self.CODIGO_GRU := lGrupoModel.ObterLista.FieldByName('CODIGO_GRU').AsString;
+    end;
+
+    if self.CODIGO_FOR = '' then
+    begin
+      lFornecedorModel.StartRecordView := '0';
+      lFornecedorModel.LengthPageView  := '1';
+      lFornecedorModel.OrderView       := 'CODIGO_FOR';
+      self.CODIGO_FOR := lFornecedorModel.ObterLista.FieldByName('CODIGO_FOR').AsString;
+    end;
+
+    if self.CODIGO_MAR = '' then
+    begin
+      lMarcaModel.StartRecordView := '0';
+      lMarcaModel.LengthPageView  := '1';
+      lMarcaModel.OrderView       := 'CODIGO_MAR';
+      self.CODIGO_MAR := lMarcaModel.ObterLista.FieldByName('CODIGO_MAR').AsString;
+    end;
+
+    if self.CODIGO_SUB = '' then
+    begin
+      lSubGrupoModel.StartRecordView := '0';
+      lSubGrupoModel.LengthPageView  := '1';
+      lSubGrupoModel.OrderView       := 'CODIGO_SUB';
+      self.CODIGO_SUB := lSubGrupoModel.ObterLista.FieldByName('CODIGO_SUB').AsString;
+    end;
+
+    self.ECF_PRO              := 'FF';
+    self.TIPO_ITEM            := '00';
+    self.CENQ                 := '999';
+    self.LISTA                := 'N';
+    self.TIPO_PRO             := 'N';
+    self.WEB_GERENCIA_ESTOQUE := 'N';
+    self.PRINCIPIO_ATIVO      := 'N';
+    self.IMPRESSAO_COZINHA    := 'N';
+    self.STATUS_PRO           := 'S';
+    self.TABELA_VENDA         := 'S';
+    self.NOVIDADE_PRO         := 'S';
+    self.PRODUTO_FINAL        := 'S';
+    self.INDESCALA            := 'S';
+    self.VALIDAR_CAIXA        := 'S';
+
+    verificarCustoMedio;
+
+    self.DATADOLAR_PRO   := DateToStr(vIConexao.DataServer);
+    self.USUARIO_PRO     := self.vIConexao.getUSer.NOME;
+    self.LOJA            := self.vIConexao.getEmpresa.LOJA;
+
+    self.Acao := tacIncluir;
+    Result    := self.Salvar;
+  finally
+    lGrupoModel.Free;
+  end;
 end;
 
 function TProdutosModel.carregaClasse(pId: String): TProdutosModel;
@@ -1388,6 +1464,10 @@ end;
 procedure TProdutosModel.SetCONVERSAO_FRACIONADA_FILHO(const Value: Variant);
 begin
   FCONVERSAO_FRACIONADA_FILHO := Value;
+end;
+procedure TProdutosModel.SetCOR_ID(const Value: Variant);
+begin
+  FCOR_ID := Value;
 end;
 procedure TProdutosModel.SetCOTACAO_TIPO(const Value: Variant);
 begin
@@ -2256,6 +2336,11 @@ procedure TProdutosModel.SetVOLTAGEM(const Value: Variant);
 begin
   FVOLTAGEM := Value;
 end;
+procedure TProdutosModel.SetVOLTAGEM_ID(const Value: Variant);
+begin
+  FVOLTAGEM_ID := Value;
+end;
+
 procedure TProdutosModel.SetVOLUME_QTDE(const Value: Variant);
 begin
   FVOLUME_QTDE := Value;
@@ -2538,4 +2623,11 @@ begin
     lProdutoDao.Free;
   end;
 end;
+
+procedure TProdutosModel.verificarCustoMedio;
+begin
+  if self.CUSTOMEDIO_PRO = '' then
+    self.CUSTOMEDIO_PRO := self.CUSTOULTIMO_PRO;
+end;
+
 end.

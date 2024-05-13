@@ -563,7 +563,17 @@ begin
                     '        produto.ipi_pro,                                                            '+SLineBreak+
                     '        produto.tipo_venda_comissao_id,                                             '+SLineBreak+
                     '        produto.comis_pro,                                                          '+SLineBreak+
-                    '        produto.grupo_comissao_id                                                   '+SLineBreak+
+                    '        produto.grupo_comissao_id,                                                  '+SLineBreak+
+                    '        produto.codigo_gru,                                                         '+SLineBreak+
+                    '        produto.codigo_for,                                                         '+SLineBreak+
+                    '        produto.codigo_mar,                                                         '+SLineBreak+
+                    '        produto.codigo_sub,                                                         '+SLineBreak+
+                    '        produto.voltagem_id,                                                        '+SLineBreak+
+                    '        produto.cor_id,                                                             '+SLineBreak+
+                    '        produto.tipo_id,                                                            '+SLineBreak+
+                    '        produto.localizacao,                                                        '+SLineBreak+
+                    '        produto.unidade_entrada,                                                    '+SLineBreak+
+                    '        produto.nome_resumido                                                       '+SLineBreak+
                     '   from produto                                                                     '+SLineBreak+
                     '  inner join fornecedor on fornecedor.codigo_for = produto.codigo_for               '+SLineBreak+
                     '  inner join grupoproduto on grupoproduto.codigo_gru = produto.codigo_gru           '+SLineBreak+
@@ -627,6 +637,16 @@ begin
       FProdutossLista[i].TIPO_VENDA_COMISSAO_ID  := lQry.FieldByName('TIPO_VENDA_COMISSAO_ID').AsString;
       FProdutossLista[i].COMIS_PRO               := lQry.FieldByName('COMIS_PRO').AsString;
       FProdutossLista[i].GRUPO_COMISSAO_ID       := lQry.FieldByName('GRUPO_COMISSAO_ID').AsString;
+      FProdutossLista[i].CODIGO_GRU              := lQry.FieldByName('CODIGO_GRU').AsString;
+      FProdutossLista[i].CODIGO_FOR              := lQry.FieldByName('CODIGO_FOR').AsString;
+      FProdutossLista[i].CODIGO_SUB              := lQry.FieldByName('CODIGO_SUB').AsString;
+      FProdutossLista[i].CODIGO_MAR              := lQry.FieldByName('CODIGO_MAR').AsString;
+      FProdutossLista[i].VOLTAGEM_ID             := lQry.FieldByName('VOLTAGEM_ID').AsString;
+      FProdutossLista[i].COR_ID                  := lQry.FieldByName('COR_ID').AsString;
+      FProdutossLista[i].TIPO_ID                 := lQry.FieldByName('TIPO_ID').AsString;
+      FProdutossLista[i].LOCALIZACAO             := lQry.FieldByName('LOCALIZACAO').AsString;
+      FProdutossLista[i].UNIDADE_ENTRADA         := lQry.FieldByName('UNIDADE_ENTRADA').AsString;
+      FProdutossLista[i].NOME_RESUMIDO           := lQry.FieldByName('NOME_RESUMIDO').AsString;
 
       lQry.Next;
     end;

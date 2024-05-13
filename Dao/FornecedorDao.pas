@@ -277,7 +277,7 @@ begin
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
 
-      lSQL := 'select * From FORNECEDOR where 1=1 ';
+      lSQL := 'select '+lPaginacao+' * From FORNECEDOR where 1=1 ';
 
 
     lSql := lSql + where;
