@@ -282,7 +282,7 @@ begin
           for lIMEI in lListaIMEIS do
           begin
             if(strObs<>'') then
-              strObs:=strObs+',';
+              strObs:=strObs+' ';
             strObs := strObs + lIMEI;
           end;
 
