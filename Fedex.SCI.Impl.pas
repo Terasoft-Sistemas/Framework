@@ -93,6 +93,8 @@ function processaArquivoExpedicao(pUnkAPI: IUnknown; pResultado: IResultadoOpera
     lRes: IResultadoOperacao;
     lDataHoraAtual: TDateTime;
     strObs: String;
+    lVolumes: Integer;
+    lPeso: Extended;
 begin
   Result := checkResultadoOperacao(pResultado);
   lRes := nil;
@@ -105,6 +107,8 @@ begin
   lDSItens := nil;
   lCDS := nil;
   lLista := TListaSimplesCreator.CreateDictionary<TipoWideStringFramework,IListaString>;
+  lVolumes := 0;
+  lPeso := 0;
   try
     try
       if not Supports(pUnkAPI, IFedexAPI, pAPI) then begin
@@ -151,6 +155,8 @@ begin
               lDocumento := textoEntreTags(lLinha.strings.Strings[0],'_','_');
             break;
           end;
+          lPeso := StrToFloatDef(lLinha.strings.Strings[1],0);
+          lVolumes := StrToIntDef(lLinha.strings.Strings[2],0);
         end;
 
         if(lLinha.strings.Count < 5 ) then begin
@@ -300,6 +306,8 @@ begin
               [ lTipoDocumento, lCDS.FieldByName('produto_id').AsString, lCDS.FieldByName('quantidade').AsInteger, lCDS.FieldByName('quantidade_atendida').AsInteger ] );
               inc(lDivergencias);
             end;
+            if(lCDS.RecNo=1) then
+              gdbPadrao.updateDB('pedidovenda', [ 'numero_ped' ], [ lDocumento ], [ 'PESO_BRUTO', 'PESO_LIQUIDO', 'QTDE_VOLUME','ESPECIE_VOLUME'], [ lPeso, lPeso, lVolumes, 'CAIXA' ] );
           end else if(lTipo=LOGISTICA_TIPOSAIDA_SAIDATRANSF) then
           begin
             gdbPadrao.updateDB('saidasitens', [ 'id' ], [ lCDS.FieldByName('id_item').AsInteger ], [ 'OBS_ITEM', 'qtd_checagem'], [ strObs, lFieldQtde.AsInteger ] );
@@ -308,6 +316,8 @@ begin
               [ lTipoDocumento, lCDS.FieldByName('produto_id').AsString, lCDS.FieldByName('quantidade').AsInteger, lCDS.FieldByName('quantidade_atendida').AsInteger ] );
               inc(lDivergencias);
             end;
+            if(lCDS.RecNo=1) then
+              gdbPadrao.updateDB('saidas', [ 'numero_sai' ], [ lDocumento ], [ 'PESO_BRUTO', 'PESO_LIQUIDO', 'QTDE_VOLUME','ESPECIE_VOLUME'], [ lPeso, lPeso, lVolumes, 'CAIXA' ] );
           end else begin
             pResultado.formataErro('processaArquivoExpedicao [%s]: Tipo não reconhecido: %s', [ lArquivo, lTipo ] );
           end;
