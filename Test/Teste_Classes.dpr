@@ -137,7 +137,11 @@ uses
   SaidasItensDao in '..\Dao\SaidasItensDao.pas',
   SaidasDao in '..\Dao\SaidasDao.pas',
   SaidasItensModel in '..\Model\SaidasItensModel.pas',
-  SaidasModel in '..\Model\SaidasModel.pas';
+  SaidasModel in '..\Model\SaidasModel.pas',
+  CorProdutoModel in '..\Model\CorProdutoModel.pas',
+  VoltagemProdutoModel in '..\Model\VoltagemProdutoModel.pas',
+  VoltagemProdutoDao in '..\Dao\VoltagemProdutoDao.pas',
+  CorProdutoDao in '..\Dao\CorProdutoDao.pas';
 
 {$R *.res}
 
