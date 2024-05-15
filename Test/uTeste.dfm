@@ -1189,6 +1189,15 @@ object Form1: TForm1
         TabOrder = 8
         OnClick = Button110Click
       end
+      object Button111: TButton
+        Left = 199
+        Top = 124
+        Width = 182
+        Height = 46
+        Caption = 'Saidas Itens Excluir'
+        TabOrder = 9
+        OnClick = Button111Click
+      end
     end
   end
   object dsTeste2: TDataSource

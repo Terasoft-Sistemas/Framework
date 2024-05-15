@@ -165,6 +165,7 @@ type
     Button108: TButton;
     Button109: TButton;
     Button110: TButton;
+    Button111: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -281,6 +282,7 @@ type
     procedure Button108Click(Sender: TObject);
     procedure Button109Click(Sender: TObject);
     procedure Button110Click(Sender: TObject);
+    procedure Button111Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -2942,7 +2944,6 @@ begin
   lSaidasModel := TSaidasModel.Create(vIConexao);
   try
     try
-      lSaidasModel.NUMERO_SAI := '000010';
       lSaidasModel.LOJA       := '001';
       lSaidasModel.CODIGO_CLI := '000001';
 
@@ -3128,7 +3129,7 @@ begin
   lSaidasModel := TSaidasModel.Create(vIConexao);
 
   try
-    lSaidasModel := lSaidasModel.carregaClasse('000222');
+    lSaidasModel := lSaidasModel.carregaClasse('000224');
 
     lParams.CODIGO_PRO      := '000006';
     lParams.QUANTIDADE_SAI  := '2';
@@ -3139,6 +3140,18 @@ begin
     lSaidasModel.Free;
   end;
 
+end;
+
+procedure TForm1.Button111Click(Sender: TObject);
+var
+  lSaidasItensModel : TSaidasItensModel;
+begin
+  lSaidasItensModel := TSaidasItensModel.Create(vIConexao);
+  try
+    lSaidasItensModel.Excluir('644');
+  finally
+    lSaidasItensModel.Free;
+  end;
 end;
 
 procedure TForm1.Button11Click(Sender: TObject);

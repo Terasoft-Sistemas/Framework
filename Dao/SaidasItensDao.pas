@@ -85,7 +85,7 @@ begin
   Result   := lModel;
 
   try
-    lQry.Open('select * from saidasitens where numero_sai = ' +pID);
+    lQry.Open('select * from saidasitens where id = ' +pID);
 
     if lQry.IsEmpty then
       Exit;
@@ -138,13 +138,13 @@ var
   lSQL : String;
 begin
   lQry := vIConexao.CriarQuery;
-  lSQL := vConstrutor.gerarInsert('SAIDASITENS', 'NUMERO_SAI');
+  lSQL := vConstrutor.gerarInsert('SAIDASITENS', 'ID');
   try
     lQry.SQL.Add(lSQL);
     setParams(lQry, pSaidasItensModel);
     lQry.Open;
 
-    Result := lQry.FieldByName('NUMERO_SAI').AsString;
+    Result := lQry.FieldByName('ID').AsString;
   finally
     lSQL := '';
     lQry.Free;

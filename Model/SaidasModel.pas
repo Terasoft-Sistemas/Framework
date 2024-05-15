@@ -275,6 +275,7 @@ begin
     CriaException('Quantidade não informado');
 
   try
+    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
     lProdutosModel := lProdutosModel.carregaClasse(pSaidaItemParams.CODIGO_PRO);
 
     lSaidasItensModel.NUMERO_SAI       := self.FNUMERO_SAI;
@@ -283,7 +284,6 @@ begin
     lSaidasItensModel.CODIGO_PRO       := pSaidaItemParams.CODIGO_PRO;
     lSaidasItensModel.QUANTIDADE_SAI   := pSaidaItemParams.QUANTIDADE_SAI;
 
-    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
     lTagCusto      := lConfiguracoes.valorTag('BASE_CUSTO_PADRAO', 'CUSTOMEDIO_PRO', tvString);
     lProp          := lCtx.GetType(TProdutosModel).GetProperty(lTagCusto);
 
@@ -322,7 +322,7 @@ begin
   try
     lMemTable := lSaidasItens.ObterTotais(self.NUMERO_SAI);
 
-    self.Alterar(self.FNUMERO_SAI);
+    self := self.Alterar(self.FNUMERO_SAI);
 
     self.FVALOR_ICMS_SAI     := lMemTable.FieldByName('custo').AsFloat;
     self.FTOTAL_PRODUTOS_SAI := lMemTable.FieldByName('valor').AsFloat;

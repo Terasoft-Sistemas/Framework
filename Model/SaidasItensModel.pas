@@ -157,10 +157,20 @@ begin
 end;
 
 function TSaidasItensModel.Excluir(pID: String): String;
+var
+  lSaidasModel : TSaidasModel;
 begin
-  self.ID      := pID;
-  self.FAcao   := tacExcluir;
-  Result       := self.Salvar;
+  lSaidasModel := TSaidasModel.Create(vIConexao);
+  try
+    self         := self.carregaClasse(pID);
+    self.FAcao   := tacExcluir;
+    Result       := self.Salvar;
+
+    lSaidasModel.NUMERO_SAI := self.FNUMERO_SAI;
+    lSaidasModel.CalcularTotais;
+  finally
+    lSaidasModel.Free;
+  end;
 end;
 
 procedure TSaidasItensModel.getDadosProduto;
