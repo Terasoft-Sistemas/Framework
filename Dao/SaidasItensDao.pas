@@ -179,7 +179,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from saidasitens where numero_sai = :numero_sai' ,[pSaidasItensModel.NUMERO_SAI]);
+   lQry.ExecSQL('delete from saidasitens where id = :id' ,[pSaidasItensModel.ID]);
    lQry.ExecSQL;
    Result := pSaidasItensModel.ID;
 
