@@ -238,6 +238,7 @@ begin
     lSaidasItensLista.StartRecordView := FStartRecordView;
     lSaidasItensLista.LengthPageView  := FLengthPageView;
     lSaidasItensLista.IDRecordView    := FIDRecordView;
+    lSaidasItensLista.NumeroSaidaView := FNumeroSaidaView;
 
     Result := lSaidasItensLista.obterLista;
 

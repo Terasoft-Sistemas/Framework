@@ -200,7 +200,7 @@ begin
   if FIDRecordView <> 0  then
     lSQL := lSQL + ' and saidasitens.id = '+IntToStr(FIDRecordView);
 
-  if NumeroSaidaView <> '' then
+  if FNumeroSaidaView <> '' then
     lSQL := lSQL + ' and saidasitens.numero_sai = '+ QuotedStr(FNumeroSaidaView);
 
   Result := lSQL;
