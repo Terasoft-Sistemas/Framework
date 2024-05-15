@@ -17,6 +17,11 @@ type
     VALOR_UNI_SAI : String;
   End;
 
+  TSaidaItensTransferenciaParams = Record
+    CODIGO_PRO,
+    QUANTIDADE_SAI : String;
+  End;
+
   TSaidasModel = class
 
   private
@@ -205,6 +210,7 @@ type
     function obterLista: TFDMemTable;
 
     function AdicionarItens(pSaidaItemParams : TSaidaItensParams) : String;
+    function AdicionarItensTransferencia(pSaidaItemParams : TSaidaItensTransferenciaParams) : String;
     procedure CalcularTotais;
     procedure GetDadosCFOP;
 
@@ -215,7 +221,8 @@ implementation
 uses
   SaidasDao,
   System.Classes, 
-  System.SysUtils, CFOPModel, ProdutosModel, SaidasItensModel;
+  System.SysUtils, CFOPModel, ProdutosModel, SaidasItensModel,
+  Terasoft.Configuracoes, System.Rtti;
 
 { TSaidasModel }
 
@@ -245,6 +252,51 @@ begin
 
   finally
     lSaidasItensModel.Free;
+  end;
+end;
+
+function TSaidasModel.AdicionarItensTransferencia(pSaidaItemParams: TSaidaItensTransferenciaParams): String;
+var
+  lSaidasItensModel : TSaidasItensModel;
+  lProdutosModel    : TProdutosModel;
+  lConfiguracoes    : TerasoftConfiguracoes;
+  lCtx              : TRttiContext;
+  lProp             : TRttiProperty;
+  lTagCusto         : String;
+begin
+  lSaidasItensModel := TSaidasItensModel.Create(vIConexao);
+  lProdutosModel    := TProdutosModel.Create(vIConexao);
+  lCtx              := TRttiContext.Create;
+
+  if pSaidaItemParams.CODIGO_PRO = '' then
+    CriaException('Produto não informado');
+
+  if StrToFloatDef(pSaidaItemParams.QUANTIDADE_SAI, 0) = 0 then
+    CriaException('Quantidade não informado');
+
+  try
+    lProdutosModel := lProdutosModel.carregaClasse(pSaidaItemParams.CODIGO_PRO);
+
+    lSaidasItensModel.NUMERO_SAI       := self.FNUMERO_SAI;
+    lSaidasItensModel.CODIGO_CLI       := self.FCODIGO_CLI;
+    lSaidasItensModel.LOJA             := self.FLOJA;
+    lSaidasItensModel.CODIGO_PRO       := pSaidaItemParams.CODIGO_PRO;
+    lSaidasItensModel.QUANTIDADE_SAI   := pSaidaItemParams.QUANTIDADE_SAI;
+
+    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+    lTagCusto      := lConfiguracoes.valorTag('BASE_CUSTO_PADRAO', 'CUSTOMEDIO_PRO', tvString);
+    lProp          := lCtx.GetType(TProdutosModel).GetProperty(lTagCusto);
+
+    lSaidasItensModel.ICMS_SAI         := lProp.GetValue(lProdutosModel).AsString;
+    lSaidasItensModel.VALOR_UNI_SAI    := lProp.GetValue(lProdutosModel).AsString;
+
+    Result := lSaidasItensModel.Incluir;
+
+    self.CalcularTotais;
+  finally
+    lSaidasItensModel.Free;
+    lProdutosModel.Free;
+    lCtx.Free;
   end;
 end;
 

@@ -164,6 +164,7 @@ type
     Button107: TButton;
     Button108: TButton;
     Button109: TButton;
+    Button110: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -279,6 +280,7 @@ type
     procedure Button107Click(Sender: TObject);
     procedure Button108Click(Sender: TObject);
     procedure Button109Click(Sender: TObject);
+    procedure Button110Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -3116,6 +3118,27 @@ begin
   finally
     lWebPedidoItensModel.Free;
   end;
+end;
+
+procedure TForm1.Button110Click(Sender: TObject);
+var
+  lSaidasModel : TSaidasModel;
+  lParams      : TSaidaItensTransferenciaParams;
+begin
+  lSaidasModel := TSaidasModel.Create(vIConexao);
+
+  try
+    lSaidasModel := lSaidasModel.carregaClasse('000222');
+
+    lParams.CODIGO_PRO      := '000006';
+    lParams.QUANTIDADE_SAI  := '2';
+
+    lSaidasModel.AdicionarItensTransferencia(lParams);
+
+  finally
+    lSaidasModel.Free;
+  end;
+
 end;
 
 procedure TForm1.Button11Click(Sender: TObject);
