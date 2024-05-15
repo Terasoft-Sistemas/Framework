@@ -343,11 +343,11 @@ begin
 
       try
 
-        lMovimento := gdbPadrao.criaDataset.query('select * from movimento_serial s where s.tipo_documento = ''P'' and id_documento=:id ', 'id', [ lDocumento ]);
+        lMovimento := gdbPadrao.criaDataset.query('select * from movimento_serial s where s.tipo_documento = :tipo and id_documento=:id ', 'tipo;id', [ lTipo, lDocumento ]);
         if(lMovimento.dataset.RecordCount>0) then
         begin
           rejeitarArquivoFedex(true,pResultado);
-          pResultado.formataErro('processaArquivoRecebimento [%s]: Já possui movimento de seriais para esse pedido [%s]', [ lArquivo, lTipoDocumento ] );
+          pResultado.formataErro('processaArquivoRecebimento [%s]: Já possui movimento de seriais para esse documento [%s]', [ lArquivo, lTipoDocumento ] );
           pResultado.acumulador['Saidas rejeitadas'].incrementa;
           exit;
         end;
