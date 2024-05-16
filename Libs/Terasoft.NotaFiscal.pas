@@ -99,7 +99,8 @@ implementation
 uses
   Terasoft.Utils,
   System.Variants,
-  PedidoVendaModel;
+  PedidoVendaModel,
+  Terasoft.FuncoesTexto;
 
 function TNotaFiscal.configuraComponenteNFe: Boolean;
 begin
@@ -581,139 +582,153 @@ begin
     try
     lQry := vIConexao.CriarQuery;
     lSQL :=
-    ' select                                          '+#13+
-    ' n.item_nf nItem,                                '+#13+
-    ' n.codigo_pro cProd,                             '+#13+
-    ' p.barras_pro cEAN,                              '+#13+
-    ' p.nome_pro xProd,                               '+#13+
-    ' p.codigo_fornecedor NCM,                        '+#13+
-    ' '''' EXTIPI,                                    '+#13+
-    ' n.cfop CFOP,                                    '+#13+
-    ' substring(p.unidade_pro from 1 for 3) uCom,     '+#13+
-    ' n.quantidade_nf qCom,                           '+#13+
-    ' n.valorunitario_nf vUnCom,                      '+#13+
-    ' n.v_prod2 vProd,                                '+#13+
-    ' p.barras_pro cEANTrib,                          '+#13+
-    ' substring(p.unidade_pro from 1 for 3) uTrib,    '+#13+
-    ' n.quantidade_nf qTrib,                          '+#13+
-    ' n.valorunitario_nf vUnTrib,                     '+#13+
-    ' n.voutros vOutro,                               '+#13+
-    ' n.frete vFrete,                                 '+#13+
-    ' n.vseg vSeg,                                    '+#13+
-    ' n.vdesc vDesc,                                  '+#13+
-    ' p.cest CEST,                                    '+#13+
-    ' p.barras_pro cBarra,                            '+#13+
-    ' p.barras_pro cBarraTrib,                        '+#13+
-    ' p.obs_nf infAdProd,                             '+#13+
-    ' n.vtottrib vTotTrib,                            '+#13+
-    ' p.TIPO$_PRO orig,                                   '+#13+
-    ' n.cst_n12 CST,                                      '+#13+
-    ' '''' modBC,                                         '+#13+
-    ' n.csosn CSOSN,                                      '+#13+
-    ' n.pcredsn pCredSN,                                  '+#13+
-    ' n.vcredicmssn vCredICMSSN,                          '+#13+
-    ' n.vbc_n15 vBC,                                      '+#13+
-    ' n.icms_nf pICMS,                                    '+#13+
-    ' n.vicms_n17 vICMS,                                  '+#13+
-    ' n.modbcst_n18 modBCST,                              '+#13+
-    ' n.pmvast_n19 pMVAST,                                '+#13+
-    ' n.predbcst_n20 pRedBCST,                            '+#13+
-    ' n.vbcst_n21 vBCST,                                  '+#13+
-    ' n.picmsst_n22 pICMSST,                              '+#13+
-    ' n.vicmsst_n23 vICMSST,                              '+#13+
-    ' n.predbcst_n20 pRedBC,                              '+#13+
-    ' n.vbcfcpst vBCFCPST,                                '+#13+
-    ' n.pfcpst pFCPST,                                    '+#13+
-    ' n.vfcpst vFCPST,                                    '+#13+
-    ' n.vbcstret vBCSTRet,                                '+#13+
-    ' n.picmsstret pST,                                   '+#13+
-    ' n.vicmssubistitutoret vICMSSubstituto,              '+#13+
-    ' n.vicmsstret vICMSSTRet,                            '+#13+
-    ' n.vbcfcpstret vBCFCPSTRet,                          '+#13+
-    ' n.pfcpstret pFCPSTRet,                              '+#13+
-    ' n.vfcpstret vFCPSTRet,                              '+#13+
-    ' n.predbcefet pRedBCEfet,                            '+#13+
-    ' n.vbcefet vBCEfet,                                  '+#13+
-    ' n.picmsefet pICMSEfet,                              '+#13+
-    ' n.vicmsefet vICMSEfet,                              '+#13+
-    ' n.vBCUFDest,                                        '+#13+
-    ' n.vBCFCPUFDest,                                     '+#13+
-    ' n.pFCPUFDest,                                       '+#13+
-    ' n.pICMSUFDest,                                      '+#13+
-    ' n.pICMSInter,                                       '+#13+
-    ' n.pICMSInterPart,                                   '+#13+
-    ' n.vFCPUFDest,                                       '+#13+
-    ' n.vICMSUFDest,                                      '+#13+
-    ' n.vICMSUFRemet,                                     '+#13+
-    ' coalesce(n.cenq,''999'') cEnq,                      '+#13+
-    ' n.cst_ipi cstipi,                                   '+#13+
-    ' n.vbc_ipi vBCipi,                                   '+#13+
-    ' n.ipi_nf pIPI,                                      '+#13+
-    ' n.valor_ipi vIPI,                                   '+#13+
-    ' '''' CNPJProd,                                      '+#13+
-    ' '''' cSelo,                                         '+#13+
-    ' 0  qSelo,                                            '+#13+
-    ' n.VBC_P02 vBCII,                                    '+#13+
-    ' n.VDESPADU_P03 vDespAdu,                            '+#13+
-    ' n.VII_P04 vII,                                      '+#13+
-    ' n.VIOF_P05 vIOF,                                     '+#13+
-    ' n.cst_q06 CSTPIS,                                   '+#13+
-    ' n.VBC_Q07 vBCPIS,                                   '+#13+
-    ' n.PPIS_Q08 pPIS,                                    '+#13+
-    ' n.VPIS_Q09 vPIS,                                    '+#13+
-    ' n.QBCPROD_Q10 qBCProd,                              '+#13+
-    ' n.VALIQPROD_Q11 vAliqProd,                          '+#13+
-    ' n.cst_s06 CSTCOFINS,                                '+#13+
-    ' n.VBC_S07 vBCCOFINS,                                '+#13+
-    ' n.PCOFINS_S08 pCOFINS,                              '+#13+
-    ' n.VCOFINS_S11 vCOFINS,                              '+#13+
-    ' n.QBCPROD_S09 qBCProdCOFINS,                        '+#13+
-    ' n.VALIQPROD_S10 vAliqProdCOFINS,                    '+#13+
-    ' CPRODANVISA     cProdANVISA ,                        '+#13+
-    ' XMOTIVOISENCAO  xMotivoIsencao,                      '+#13+
-    ' VPMC            vPMC,                                '+#13+
-    ' l.LOTE       nLote,                                  '+#13+
-    ' l.QUANTIDADE qLote,                                  '+#13+
-    ' l.FABRICACAO dFab,                                   '+#13+
-    ' l.VENCIMENTO dVal                                    '+#13+
-    ' from                                                '+#13+
-    '     nfitens n                                       '+#13+
-    '                                                     '+#13+
-    ' left join produto p on p.codigo_pro = n.codigo_pro  '+#13+
-    ' left join lote_new l on l.produto_id = n.codigo_pro and l.documento = n.numero_nf '+
-    '                                                     '+#13+
-    ' where                                               '+#13+
+    ' select                                                                             '+SLineBreak+
+    '    n.item_nf nItem,                                                                '+SLineBreak+
+    '    n.codigo_pro cProd,                                                             '+SLineBreak+
+    '    p.barras_pro cEAN,                                                              '+SLineBreak+
+    '    p.nome_pro xProd,                                                               '+SLineBreak+
+    '    p.codigo_fornecedor NCM,                                                        '+SLineBreak+
+    '    '''' EXTIPI,                                                                    '+SLineBreak+
+    '    n.cfop CFOP,                                                                    '+SLineBreak+
+    '    substring(p.unidade_pro from 1 for 3) uCom,                                     '+SLineBreak+
+    '    n.quantidade_nf qCom,                                                           '+SLineBreak+
+    '    n.valorunitario_nf vUnCom,                                                      '+SLineBreak+
+    '    n.v_prod2 vProd,                                                                '+SLineBreak+
+    '    p.barras_pro cEANTrib,                                                          '+SLineBreak+
+    '    substring(p.unidade_pro from 1 for 3) uTrib,                                    '+SLineBreak+
+    '    n.quantidade_nf qTrib,                                                          '+SLineBreak+
+    '    n.valorunitario_nf vUnTrib,                                                     '+SLineBreak+
+    '    n.voutros vOutro,                                                               '+SLineBreak+
+    '    n.frete vFrete,                                                                 '+SLineBreak+
+    '    n.vseg vSeg,                                                                    '+SLineBreak+
+    '    n.vdesc vDesc,                                                                  '+SLineBreak+
+    '    p.cest CEST,                                                                    '+SLineBreak+
+    '    p.barras_pro cBarra,                                                            '+SLineBreak+
+    '    p.barras_pro cBarraTrib,                                                        '+SLineBreak+
+    '    p.obs_nf infAdProd,                                                             '+SLineBreak+
+    '    n.vtottrib vTotTrib,                                                            '+SLineBreak+
+    '    p.TIPO$_PRO orig,                                                               '+SLineBreak+
+    '    n.cst_n12 CST,                                                                  '+SLineBreak+
+    '    '''' modBC,                                                                     '+SLineBreak+
+    '    n.csosn CSOSN,                                                                  '+SLineBreak+
+    '    n.pcredsn pCredSN,                                                              '+SLineBreak+
+    '    n.vcredicmssn vCredICMSSN,                                                      '+SLineBreak+
+    '    n.vbc_n15 vBC,                                                                  '+SLineBreak+
+    '    n.icms_nf pICMS,                                                                '+SLineBreak+
+    '    n.vicms_n17 vICMS,                                                              '+SLineBreak+
+    '    n.modbcst_n18 modBCST,                                                          '+SLineBreak+
+    '    n.pmvast_n19 pMVAST,                                                            '+SLineBreak+
+    '    n.predbcst_n20 pRedBCST,                                                        '+SLineBreak+
+    '    n.vbcst_n21 vBCST,                                                              '+SLineBreak+
+    '    n.picmsst_n22 pICMSST,                                                          '+SLineBreak+
+    '    n.vicmsst_n23 vICMSST,                                                          '+SLineBreak+
+    '    n.predbcst_n20 pRedBC,                                                          '+SLineBreak+
+    '    n.vbcfcpst vBCFCPST,                                                            '+SLineBreak+
+    '    n.pfcpst pFCPST,                                                                '+SLineBreak+
+    '    n.vfcpst vFCPST,                                                                '+SLineBreak+
+    '    n.vbcstret vBCSTRet,                                                            '+SLineBreak+
+    '    n.picmsstret pST,                                                               '+SLineBreak+
+    '    n.vicmssubistitutoret vICMSSubstituto,                                          '+SLineBreak+
+    '    n.vicmsstret vICMSSTRet,                                                        '+SLineBreak+
+    '    n.vbcfcpstret vBCFCPSTRet,                                                      '+SLineBreak+
+    '    n.pfcpstret pFCPSTRet,                                                          '+SLineBreak+
+    '    n.vfcpstret vFCPSTRet,                                                          '+SLineBreak+
+    '    n.predbcefet pRedBCEfet,                                                        '+SLineBreak+
+    '    n.vbcefet vBCEfet,                                                              '+SLineBreak+
+    '    n.picmsefet pICMSEfet,                                                          '+SLineBreak+
+    '    n.vicmsefet vICMSEfet,                                                          '+SLineBreak+
+    '    n.vBCUFDest,                                                                    '+SLineBreak+
+    '    n.vBCFCPUFDest,                                                                 '+SLineBreak+
+    '    n.pFCPUFDest,                                                                   '+SLineBreak+
+    '    n.pICMSUFDest,                                                                  '+SLineBreak+
+    '    n.pICMSInter,                                                                   '+SLineBreak+
+    '    n.pICMSInterPart,                                                               '+SLineBreak+
+    '    n.vFCPUFDest,                                                                   '+SLineBreak+
+    '    n.vICMSUFDest,                                                                  '+SLineBreak+
+    '    n.vICMSUFRemet,                                                                 '+SLineBreak+
+    '    coalesce(n.cenq,''999'') cEnq,                                                  '+SLineBreak+
+    '    n.cst_ipi cstipi,                                                               '+SLineBreak+
+    '    n.vbc_ipi vBCipi,                                                               '+SLineBreak+
+    '    n.ipi_nf pIPI,                                                                  '+SLineBreak+
+    '    n.valor_ipi vIPI,                                                               '+SLineBreak+
+    '    '''' CNPJProd,                                                                  '+SLineBreak+
+    '    '''' cSelo,                                                                     '+SLineBreak+
+    '    0  qSelo,                                                                       '+SLineBreak+
+    '    n.VBC_P02 vBCII,                                                                '+SLineBreak+
+    '    n.VDESPADU_P03 vDespAdu,                                                        '+SLineBreak+
+    '    n.VII_P04 vII,                                                                  '+SLineBreak+
+    '    n.VIOF_P05 vIOF,                                                                '+SLineBreak+
+    '    n.cst_q06 CSTPIS,                                                               '+SLineBreak+
+    '    n.VBC_Q07 vBCPIS,                                                               '+SLineBreak+
+    '    n.PPIS_Q08 pPIS,                                                                '+SLineBreak+
+    '    n.VPIS_Q09 vPIS,                                                                '+SLineBreak+
+    '    n.QBCPROD_Q10 qBCProd,                                                          '+SLineBreak+
+    '    n.VALIQPROD_Q11 vAliqProd,                                                      '+SLineBreak+
+    '    n.cst_s06 CSTCOFINS,                                                            '+SLineBreak+
+    '    n.VBC_S07 vBCCOFINS,                                                            '+SLineBreak+
+    '    n.PCOFINS_S08 pCOFINS,                                                          '+SLineBreak+
+    '    n.VCOFINS_S11 vCOFINS,                                                          '+SLineBreak+
+    '    n.QBCPROD_S09 qBCProdCOFINS,                                                    '+SLineBreak+
+    '    n.VALIQPROD_S10 vAliqProdCOFINS,                                                '+SLineBreak+
+    '    CPRODANVISA     cProdANVISA ,                                                   '+SLineBreak+
+    '    XMOTIVOISENCAO  xMotivoIsencao,                                                 '+SLineBreak+
+    '    VPMC            vPMC,                                                           '+SLineBreak+
+    '    l.LOTE       nLote,                                                             '+SLineBreak+
+    '    l.QUANTIDADE qLote,                                                             '+SLineBreak+
+    '    l.FABRICACAO dFab,                                                              '+SLineBreak+
+    '    l.VENCIMENTO dVal                                                               '+SLineBreak+
+    ' from                                                                               '+SLineBreak+
+    '     nfitens n                                                                      '+SLineBreak+
+    '                                                                                    '+SLineBreak+
+    ' left join produto p on p.codigo_pro = n.codigo_pro                                 '+SLineBreak+
+    ' left join lote_new l on l.produto_id = n.codigo_pro and l.documento = n.numero_nf  '+SLineBreak+
+    '                                                                                    '+SLineBreak+
+    ' where                                                                              '+SLineBreak+
     '      n.numero_nf = '+QuotedStr(pidNF);
+
     lQry.Open(lSQL);
+
     lQry.First;
     while not lQry.Eof do begin
       Produto := NotaF.NFe.Det.New;
+
       with Produto.Prod do
       begin
-        nItem    := lQry.FieldByName('nItem').AsInteger;
-        cProd    := lQry.FieldByName('cProd').AsString;
-        cEAN     := lQry.FieldByName('cEAN').AsString;
-        xProd    := lQry.FieldByName('xProd').AsString;
-        NCM      := lQry.FieldByName('NCM').AsString;
-        EXTIPI   := lQry.FieldByName('EXTIPI').AsString;
-        CFOP     := lQry.FieldByName('CFOP').AsString;
-        uCom     := lQry.FieldByName('uCom').AsString;
-        qCom     := lQry.FieldByName('qCom').AsFloat;
-        vUnCom   := lQry.FieldByName('vUnCom').AsFloat;
-        vProd    := lQry.FieldByName('vProd').AsFloat;
-        cEANTrib  := lQry.FieldByName('cEANTrib').AsString;
-        uTrib     := lQry.FieldByName('uTrib').AsString;
-        qTrib     := lQry.FieldByName('qTrib').AsCurrency;
-        vUnTrib   := lQry.FieldByName('vUnTrib').AsFloat;
-        vOutro    := lQry.FieldByName('vOutro').AsFloat;
-        vFrete    := lQry.FieldByName('vFrete').AsFloat;
-        vSeg      := lQry.FieldByName('vSeg').AsFloat;
-        vDesc     := lQry.FieldByName('vDesc').AsFloat;
-        CEST       := lQry.FieldByName('CEST').AsString;
-        cBarra     := lQry.FieldByName('cBarra').AsString;
-        cBarraTrib := lQry.FieldByName('cBarraTrib').AsString;
+        nItem             := lQry.FieldByName('nItem').AsInteger;
+        cProd             := lQry.FieldByName('cProd').AsString;
+
+        if ValidaGTIN(lQry.FieldByName('cEAN').AsString) then
+          cEAN            := lQry.FieldByName('cEAN').AsString
+        else
+          cEAN            := 'SEM GTIN';
+
+        xProd             := lQry.FieldByName('xProd').AsString;
+        NCM               := lQry.FieldByName('NCM').AsString;
+        EXTIPI            := lQry.FieldByName('EXTIPI').AsString;
+        CFOP              := lQry.FieldByName('CFOP').AsString;
+        uCom              := lQry.FieldByName('uCom').AsString;
+        qCom              := lQry.FieldByName('qCom').AsFloat;
+        vUnCom            := lQry.FieldByName('vUnCom').AsFloat;
+        vProd             := lQry.FieldByName('vProd').AsFloat;
+
+        if ValidaGTIN(lQry.FieldByName('cEANTrib').AsString) then
+          cEANTrib        := lQry.FieldByName('cEANTrib').AsString
+        else
+          cEANTrib        := 'SEM GTIN';
+
+        uTrib             := lQry.FieldByName('uTrib').AsString;
+        qTrib             := lQry.FieldByName('qTrib').AsCurrency;
+        vUnTrib           := lQry.FieldByName('vUnTrib').AsFloat;
+        vOutro            := lQry.FieldByName('vOutro').AsFloat;
+        vFrete            := lQry.FieldByName('vFrete').AsFloat;
+        vSeg              := lQry.FieldByName('vSeg').AsFloat;
+        vDesc             := lQry.FieldByName('vDesc').AsFloat;
+        CEST              := lQry.FieldByName('CEST').AsString;
+        cBarra            := lQry.FieldByName('cBarra').AsString;
+        cBarraTrib        := lQry.FieldByName('cBarraTrib').AsString;
         Produto.infAdProd := lQry.FieldByName('infAdProd').AsString;
       end;
+
       with Produto.Imposto do
       begin
         vTotTrib := lQry.FieldByName('vTotTrib').AsFloat;
@@ -725,36 +740,37 @@ begin
             CST     := vConfiguracoesNotaFiscal.CST(lQry.FieldByName('CST').AsString);
           end else
           begin
-            CSOSN   := vConfiguracoesNotaFiscal.CSOSN(lQry.FieldByName('CSOSN').AsString);
-            pCredSN := lQry.FieldByName('pCredSN').Value;
+            CSOSN       := vConfiguracoesNotaFiscal.CSOSN(lQry.FieldByName('CSOSN').AsString);
+            pCredSN     := lQry.FieldByName('pCredSN').Value;
             vCredICMSSN := lQry.FieldByName('vCredICMSSN').Value;
           end;
-          modBC   := vConfiguracoesNotaFiscal.modBC(lQry.FieldByName('modBC').AsString);
-          vBC     := lQry.FieldByName('vBC').AsFloat;
-          pICMS   := lQry.FieldByName('pICMS').AsFloat;
-          vICMS   := lQry.FieldByName('vICMS').AsFloat;
-          modBCST := vConfiguracoesNotaFiscal.modBCST(lQry.FieldByName('modBCST').AsString);
-          pMVAST  := lQry.FieldByName('pMVAST').AsFloat;
-          pRedBCST:= lQry.FieldByName('pRedBCST').AsFloat;
-          vBCST   := lQry.FieldByName('vBCST').AsFloat;
-          pICMSST := lQry.FieldByName('pICMSST').AsFloat;
-          vICMSST := lQry.FieldByName('vICMSST').AsFloat;
-          pRedBC  := lQry.FieldByName('pRedBC').AsFloat;
-          vBCFCPST := lQry.FieldByName('vBCFCPST').AsFloat;
-          pFCPST   := lQry.FieldByName('pFCPST').AsFloat;
-          vFCPST   := lQry.FieldByName('vFCPST').AsFloat;
-          vBCSTRet := lQry.FieldByName('vBCSTRet').AsFloat;
-          pST      := lQry.FieldByName('pST').AsFloat;
+          modBC           := vConfiguracoesNotaFiscal.modBC(lQry.FieldByName('modBC').AsString);
+          vBC             := lQry.FieldByName('vBC').AsFloat;
+          pICMS           := lQry.FieldByName('pICMS').AsFloat;
+          vICMS           := lQry.FieldByName('vICMS').AsFloat;
+          modBCST         := vConfiguracoesNotaFiscal.modBCST(lQry.FieldByName('modBCST').AsString);
+          pMVAST          := lQry.FieldByName('pMVAST').AsFloat;
+          pRedBCST        := lQry.FieldByName('pRedBCST').AsFloat;
+          vBCST           := lQry.FieldByName('vBCST').AsFloat;
+          pICMSST         := lQry.FieldByName('pICMSST').AsFloat;
+          vICMSST         := lQry.FieldByName('vICMSST').AsFloat;
+          pRedBC          := lQry.FieldByName('pRedBC').AsFloat;
+          vBCFCPST        := lQry.FieldByName('vBCFCPST').AsFloat;
+          pFCPST          := lQry.FieldByName('pFCPST').AsFloat;
+          vFCPST          := lQry.FieldByName('vFCPST').AsFloat;
+          vBCSTRet        := lQry.FieldByName('vBCSTRet').AsFloat;
+          pST             := lQry.FieldByName('pST').AsFloat;
           vICMSSubstituto := lQry.FieldByName('vICMSSubstituto').AsFloat;
           vICMSSTRet      := lQry.FieldByName('vICMSSTRet').AsFloat;
-          vBCFCPSTRet := lQry.FieldByName('vBCFCPSTRet').AsFloat;
-          pFCPSTRet   := lQry.FieldByName('pFCPSTRet').AsFloat;
-          vFCPSTRet   := lQry.FieldByName('vFCPSTRet').AsFloat;
-          pRedBCEfet  := lQry.FieldByName('pRedBCEfet').AsFloat;
-          vBCEfet     := lQry.FieldByName('vBCEfet').AsFloat;
-          pICMSEfet   := lQry.FieldByName('pICMSEfet').AsFloat;
-          vICMSEfet   := lQry.FieldByName('vICMSEfet').AsFloat;
+          vBCFCPSTRet     := lQry.FieldByName('vBCFCPSTRet').AsFloat;
+          pFCPSTRet       := lQry.FieldByName('pFCPSTRet').AsFloat;
+          vFCPSTRet       := lQry.FieldByName('vFCPSTRet').AsFloat;
+          pRedBCEfet      := lQry.FieldByName('pRedBCEfet').AsFloat;
+          vBCEfet         := lQry.FieldByName('vBCEfet').AsFloat;
+          pICMSEfet       := lQry.FieldByName('pICMSEfet').AsFloat;
+          vICMSEfet       := lQry.FieldByName('vICMSEfet').AsFloat;
         end;
+
         with ICMSUFDest do
         begin
           vBCUFDest      := lQry.FieldByName('vBCUFDest').AsFloat;
@@ -766,6 +782,7 @@ begin
           vICMSUFDest    := lQry.FieldByName('vICMSUFDest').AsFloat;
           vICMSUFRemet   := lQry.FieldByName('vICMSUFRemet').AsFloat;
         end;
+
         with IPI do
         begin
           CST      := vConfiguracoesNotaFiscal.cstipi(lQry.FieldByName('cstipi').AsString);
@@ -773,11 +790,12 @@ begin
           cSelo    := lQry.FieldByName('cSelo').AsString;
           qSelo    := lQry.FieldByName('qSelo').AsInteger;
           cEnq     := lQry.FieldByName('cEnq').AsString;
-          vBC    := lQry.FieldByName('vBCipi').AsFloat;
-          vUnid  := lQry.FieldByName('vBCUFDest').AsFloat;
-          pIPI   := lQry.FieldByName('pIPI').AsFloat;
-          vIPI   := lQry.FieldByName('vIPI').AsFloat;
+          vBC      := lQry.FieldByName('vBCipi').AsFloat;
+          vUnid    := lQry.FieldByName('vBCUFDest').AsFloat;
+          pIPI     := lQry.FieldByName('pIPI').AsFloat;
+          vIPI     := lQry.FieldByName('vIPI').AsFloat;
         end;
+
         with II do
         begin
           vBc      := lQry.FieldByName('vBcII').AsFloat;
@@ -787,19 +805,20 @@ begin
         end;
         with PIS do
         begin
-          CST  :=  vConfiguracoesNotaFiscal.cstpis(lQry.FieldByName('CSTPIS').AsString);
-          vBC  :=  lQry.FieldByName('vBCPIS').AsFloat;
-          pPIS :=  lQry.FieldByName('pPIS').AsFloat;
-          vPIS :=  lQry.FieldByName('vPIS').AsFloat;
+          CST       :=  vConfiguracoesNotaFiscal.cstpis(lQry.FieldByName('CSTPIS').AsString);
+          vBC       :=  lQry.FieldByName('vBCPIS').AsFloat;
+          pPIS      :=  lQry.FieldByName('pPIS').AsFloat;
+          vPIS      :=  lQry.FieldByName('vPIS').AsFloat;
           qBCProd   :=  lQry.FieldByName('qBCProd').AsFloat;
           vAliqProd :=  lQry.FieldByName('vAliqProd').AsFloat;
         end;
+
         with COFINS do
         begin
-          CST     := vConfiguracoesNotaFiscal.cstcof(lQry.FieldByName('CSTCOFINS').AsString); ;
-          vBC     := lQry.FieldByName('vBCCOFINS').AsFloat;
-          pCOFINS := lQry.FieldByName('pCOFINS').AsFloat;
-          vCOFINS := lQry.FieldByName('vCOFINS').AsFloat;
+          CST       := vConfiguracoesNotaFiscal.cstcof(lQry.FieldByName('CSTCOFINS').AsString); ;
+          vBC       := lQry.FieldByName('vBCCOFINS').AsFloat;
+          pCOFINS   := lQry.FieldByName('pCOFINS').AsFloat;
+          vCOFINS   := lQry.FieldByName('vCOFINS').AsFloat;
           qBCProd   := lQry.FieldByName('qBCProdCOFINS').AsFloat;
           vAliqProd := lQry.FieldByName('vAliqProdCOFINS').AsFloat;
         end;
@@ -814,11 +833,12 @@ begin
       end;
 
       if not lQry.FieldByName('cProdANVISA').IsNull then begin
-        Medicamento := Produto.Prod.med.Add;
-        Medicamento.cProdANVISA := lQry.FieldByName('cProdANVISA').AsString;
-        Medicamento.vPMC        := lQry.FieldByName('vPMC').AsFloat;
+        Medicamento                := Produto.Prod.med.Add;
+        Medicamento.cProdANVISA    := lQry.FieldByName('cProdANVISA').AsString;
+        Medicamento.vPMC           := lQry.FieldByName('vPMC').AsFloat;
         Medicamento.xMotivoIsencao := lQry.FieldByName('xMotivoIsencao').AsString;
       end;
+
       lQry.Next;
     end;
     except

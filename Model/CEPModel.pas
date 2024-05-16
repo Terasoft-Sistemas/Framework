@@ -123,42 +123,35 @@ begin
 
   lJsonObj := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(fRestRequest.Response.Content), 0) as TJSONObject;
 
-  if Assigned(lJsonObj.Get('response').JsonValue) then
+  if Assigned(lJsonObj.Get('response').JsonValue) and (lJsonObj.Get('response').JsonValue is TJSONObject) then
     lJsonObjResponse := lJsonObj.Get('response').JsonValue as TJSONObject;
 
-  if Assigned(lJsonObjResponse.Get('cep').JsonValue) then
+  if Assigned(lJsonObjResponse.Get('cep').JsonValue) and (lJsonObjResponse.Get('cep').JsonValue is TJSONObject) then
     lJsonObjCEP := lJsonObjResponse.Get('cep').JsonValue as TJSONObject;
 
-  if Assigned(lJsonObjCEP.Get('cidade').JsonValue) then
+  if Assigned(lJsonObjCEP.Get('cidade').JsonValue) and (lJsonObjCEP.Get('cidade').JsonValue is TJSONObject) then
     lJsonObjCidade := lJsonObjCEP.Get('cidade').JsonValue as TJSONObject;
 
-  if Assigned(lJsonObjCEP.Get('bairro').JsonValue) then
+  if Assigned(lJsonObjCEP.Get('bairro').JsonValue) and (lJsonObjCEP.Get('bairro').JsonValue is TJSONObject) then
     lJsonObjBairro := lJsonObjCEP.Get('bairro').JsonValue as TJSONObject;
 
-
-  if Assigned(lJsonObjCEP.Get('cep')) then begin
+  if Assigned(lJsonObjCEP) and  Assigned(lJsonObjCEP.Get('cep')) then
     Result.CEP := lJsonObjCEP.Values['cep'].Value;
-  end;
 
-  if Assigned(lJsonObjCEP.Get('logradouro_sem_acento')) then begin
+  if Assigned(lJsonObjCEP) and Assigned(lJsonObjCEP.Get('logradouro_sem_acento')) then
     Result.Logradouro := lJsonObjCEP.Values['logradouro_sem_acento'].Value;
-  end;
 
-  if Assigned(lJsonObjCEP.Get('estado')) then begin
+  if Assigned(lJsonObjCEP) and Assigned(lJsonObjCEP.Get('estado')) then
     Result.UF := lJsonObjCEP.Values['estado'].Value;
-  end;
 
-  if Assigned(lJsonObjCidade.Get('cidade_sem_acento')) then begin
+  if Assigned(lJsonObjCidade) and Assigned(lJsonObjCidade.Get('cidade_sem_acento')) then
     Result.Cidade := lJsonObjCidade.Values['cidade_sem_acento'].Value;
-  end;
 
-  if Assigned(lJsonObjCidade.Get('cidade_ibge')) then begin
+  if Assigned(lJsonObjCidade) and Assigned(lJsonObjCidade.Get('cidade_ibge')) then
     Result.Cod_Municipio := lJsonObjCidade.Values['cidade_ibge'].Value;
-  end;
 
-  if Assigned(lJsonObjBairro.Get('bairro_sem_acento')) then begin
-    Result.Bairro := lJsonObjBairro.Values['bairro_sem_acento'].Value;
-  end;
+  if Assigned(lJsonObjBairro) and Assigned(lJsonObjBairro.Get('bairro_sem_acento')) then
+    Result.Bairro := TJSONString(lJsonObjBairro.Get('bairro_sem_acento').JsonValue).Value;
 end;
 
 function TCEPModel.cepApiViaCep(pCep: String): TRetornoCEP;
