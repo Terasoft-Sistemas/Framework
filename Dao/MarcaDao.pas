@@ -177,11 +177,11 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := vConstrutor.gerarInsert('MARCAPRODUTO', 'CODIGO_MAR', true);
+  lSQL := vConstrutor.gerarInsert('MARCAPRODUTO', 'CODIGO_MAR');
 
   try
     lQry.SQL.Add(lSQL);
-//    pAnexoModel.ID := vIConexao.Generetor('MARCAPRODUTO');
+    pMarcaModel.CODIGO_MAR := vIConexao.Generetor('GEN_MARCAPRODUTO');
     setParams(lQry, pMarcaModel);
     lQry.Open;
 
