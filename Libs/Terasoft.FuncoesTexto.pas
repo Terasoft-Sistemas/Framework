@@ -686,10 +686,13 @@ begin
     Result := texto
   else
     Result := field.AsString;
-  if DisplayText then
+  if not Result.IsEmpty then
   begin
-    mascara := '00\.000\-000;0;_';
-    Result := FormatMaskText(Mascara, Result);
+    if DisplayText then
+    begin
+      mascara := '00\.000\-000;0;_';
+      Result := FormatMaskText(Mascara, Result);
+    end;
   end;
 end;
 
