@@ -41,6 +41,7 @@ type
     procedure setParams(var pQry: TFDQuery; pProdutoModel: TProdutosModel);
 
   public
+
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
     property ProdutossLista: TObjectList<TProdutosModel> read FProdutossLista write SetProdutossLista;
@@ -70,7 +71,9 @@ type
     function valorVenda(pIdProduto: String): Variant;
     function obterCodigobarras(pIdProduto: String): String;
     function carregaClasse(pId: String): TProdutosModel;
+
 end;
+
 implementation
 
 uses
@@ -86,8 +89,10 @@ begin
   Result   := lModel;
   try
     lQry.Open('select * from PRODUTO where CODIGO_PRO = '+ QuotedStr(pId));
+
     if lQry.IsEmpty then
       Exit;
+
     lModel.UUID                             := lQry.FieldByName('UUID').AsString;
     lModel.CODIGO_PRO                       := lQry.FieldByName('CODIGO_PRO').AsString;
     lModel.CODIGO_GRU                       := lQry.FieldByName('CODIGO_GRU').AsString;
@@ -349,6 +354,8 @@ begin
     lModel.CONVERSAO_FRACIONADA_FILHO       := lQry.FieldByName('CONVERSAO_FRACIONADA_FILHO').AsString;
     lModel.PERCENTUAL_PERDA_MATERIA_PRIMA   := lQry.FieldByName('PERCENTUAL_PERDA_MATERIA_PRIMA').AsString;
     lModel.EXTIPI                           := lQry.FieldByName('EXTIPI').AsString;
+    lModel.TIPO__PRO                        := lQry.FieldByName('TIPO$_PRO').AsString;
+
     Result := lModel;
   finally
     lQry.Free;
@@ -372,7 +379,6 @@ var
   lSQL : String;
 begin
   lQry := vIConexao.CriarQuery;
-
   lSQL := vConstrutor.gerarInsert('PRODUTO', 'CODIGO_PRO');
 
   try
@@ -418,9 +424,7 @@ var
   lSQL : String;
 begin
   lQry := vIConexao.CriarQuery;
-
   lSQL :=  vConstrutor.gerarUpdate('PRODUTO', 'CODIGO_PRO');
-
   try
     lQry.SQL.Add(lSQL);
     setParams(lQry, pProdutosModel);
@@ -573,7 +577,8 @@ begin
                     '        produto.tipo_id,                                                            '+SLineBreak+
                     '        produto.localizacao,                                                        '+SLineBreak+
                     '        produto.unidade_entrada,                                                    '+SLineBreak+
-                    '        produto.nome_resumido                                                       '+SLineBreak+
+                    '        produto.nome_resumido,                                                      '+SLineBreak+
+                    '        produto.tipo$_pro                                                          '+SLineBreak+
                     '   from produto                                                                     '+SLineBreak+
                     '  inner join fornecedor on fornecedor.codigo_for = produto.codigo_for               '+SLineBreak+
                     '  inner join grupoproduto on grupoproduto.codigo_gru = produto.codigo_gru           '+SLineBreak+
@@ -882,7 +887,7 @@ begin
   try
     for i := 0 to pQry.Params.Count - 1 do
     begin
-      lProp := lCtx.GetType(TProdutosModel).GetProperty(pQry.Params[i].Name);
+      lProp := lCtx.GetType(TProdutosModel).GetProperty(StringReplace(pQry.Params[i].Name, '$', '_', [rfReplaceAll]));
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pProdutoModel).AsString = '',
