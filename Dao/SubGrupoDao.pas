@@ -175,7 +175,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-//    pAnexoModel.ID := vIConexao.Generetor('SUBGRUPOPRODUTO');
+    pSubGrupoModel.CODIGO_SUB := vIConexao.Generetor('GEN_SUBGRUPOPRODUTO');
     setParams(lQry, pSubGrupoModel);
     lQry.Open;
 
