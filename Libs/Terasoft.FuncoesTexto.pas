@@ -38,6 +38,7 @@ uses
   function ValidaCPF(num: string): boolean;
   function ValidaCNPJ(num: string): boolean;
   function ValidaCPFCNPJ(num: string): boolean;
+  function ValidaGTIN(codigo: string): boolean;
   function retiraPonto(pValor: string): String;
   function formatarDataInvertida(const data: string): String;
   function codigoUF(pUF : String): Integer;
@@ -264,6 +265,117 @@ begin
     Result := false
   else
     Result := true;
+end;
+
+function ValidaGTIN(codigo: string): boolean;
+var
+  i, j, total, digitoVerificador, auxiliar, prefixo:Integer;
+  arrayChar:array[1..14] of Char;
+  resultado :String;
+begin
+
+  try
+    if Length(codigo) = 14 then
+      prefixo := StrToInt(copy(trim(codigo),2,3))
+    else
+      prefixo := StrToInt(copy(trim(codigo),1,3));
+
+    if ((prefixo > 139) and (prefixo < 200)) or
+       ((prefixo > 380) and (prefixo < 383)) or
+       (prefixo = 384) or
+       (prefixo = 386) or
+       (prefixo = 388) or
+       ((prefixo > 389) and (prefixo < 400)) or
+       ((prefixo > 440) and (prefixo < 450)) or
+       ((prefixo > 471) and (prefixo < 474)) or
+       ((prefixo > 509) and (prefixo < 520)) or
+       ((prefixo > 521) and (prefixo < 528)) or
+       ((prefixo > 531) and (prefixo < 535)) or
+       ((prefixo > 535) and (prefixo < 539)) or
+       ((prefixo > 549) and (prefixo < 560)) or
+       ((prefixo > 560) and (prefixo < 569)) or
+       ((prefixo > 579) and (prefixo < 590)) or
+       ((prefixo > 590) and (prefixo < 594)) or
+       ((prefixo > 594) and (prefixo < 599)) or
+       (prefixo = 602) or
+       ((prefixo > 604) and (prefixo < 608)) or
+       (prefixo = 610) or
+       (prefixo = 612) or
+       (prefixo = 614) or
+       (prefixo = 617) or
+       ((prefixo > 629) and (prefixo < 640)) or
+       ((prefixo > 649) and (prefixo < 690)) or
+       ((prefixo > 709) and (prefixo < 729)) or
+       ((prefixo > 746) and (prefixo < 750)) or
+       ((prefixo > 750) and (prefixo < 754)) or
+       ((prefixo > 755) and (prefixo < 759)) or
+       (prefixo = 772) or
+       (prefixo = 774) or
+       (prefixo = 776) or
+       ((prefixo > 780) and (prefixo < 784)) or
+       (prefixo = 785) or
+       ((prefixo > 786) and (prefixo < 789)) or
+       ((prefixo > 790) and (prefixo < 800)) or
+       ((prefixo > 850) and (prefixo < 858)) or
+       ((prefixo > 860) and (prefixo < 865)) or
+       (prefixo = 866) or
+       ((prefixo > 880) and (prefixo < 884)) or
+       ((prefixo > 885) and (prefixo < 888)) or
+       (prefixo = 889) or
+       ((prefixo > 890) and (prefixo < 893)) or
+       ((prefixo > 893) and (prefixo < 896)) or
+       ((prefixo > 896) and (prefixo < 899)) or
+       ((prefixo > 919) and (prefixo < 930)) or
+       ((prefixo > 951) and (prefixo < 955)) or
+       ((prefixo > 955) and (prefixo < 958)) or
+       (prefixo = 959) or
+       ((prefixo > 969) and (prefixo < 977)) or
+       ((prefixo > 984) and (prefixo < 990))
+    then begin
+      Result := false;
+      Exit;
+    end;
+
+    j     :=Length(trim(codigo));
+    total := 0;
+
+    if not AnsiMatchStr(IntToStr(j),['8','12','13','14']) then begin
+      Result := false;
+      Exit;
+    end;
+
+    for i:=j downto 1 do Begin
+      arrayChar[(j+1)-i]:=codigo[i];
+    end;
+
+    for i:=2 to j do Begin
+
+      auxiliar := ord(arrayChar[i])-48;
+
+      if (auxiliar < 0) or (auxiliar > 9) then begin
+        Result := false;
+        Exit;
+      end;
+
+      if (i mod 2) > 0 then
+        total := total + auxiliar
+      else
+        total := total + (auxiliar * 3);
+
+    end;
+
+    if (total mod 10) = 0 then
+      digitoVerificador := 0
+    else
+      digitoVerificador := 10 - (total mod 10);
+
+    if digitoVerificador = (ord(arrayChar[1])-48) then
+      Result := true
+    else
+      Result := false;
+  except
+    Result := false;
+  end;
 end;
 
 function retiraPonto(pValor : string): String;

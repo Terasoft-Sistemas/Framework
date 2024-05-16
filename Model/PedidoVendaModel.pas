@@ -1054,6 +1054,7 @@ var
   lProdutosModel : TProdutosModel;
   lPedidoItensModel, lModel : TPedidoItensModel;
   lProdutoPreco: TProdutoPreco;
+  lSaldoDisponivel : Double;
 
 begin
   lConfiguracoes    := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
@@ -1075,10 +1076,15 @@ begin
 
     if lEmpresaModel.AVISARNEGATIVO_EMP = 'S' then
     begin
-      if (lConfiguracoes.valorTag('USAR_RESERVA','',tvBool) = 'S') and (lProdutosModel.obterSaldoDisponivel(lProdutosModel.ProdutossLista[0].CODIGO_PRO) <= 0) then
-        CriaException('Produto sem saldo disponível em estoque.')
+      if (lConfiguracoes.valorTag('USAR_RESERVA','',tvBool) = 'S') then
+      begin
+        lSaldoDisponivel := lProdutosModel.obterSaldoDisponivel(lProdutosModel.ProdutossLista[0].CODIGO_PRO);
+
+        if (lSaldoDisponivel <= 0) or (pVenderItem.Quantidade > lSaldoDisponivel) then
+          CriaException('Produto sem saldo disponível em estoque.')
+      end
       else
-      if lProdutosModel.ProdutossLista[0].SALDO_PRO <= 0 then
+      if (lProdutosModel.ProdutossLista[0].SALDO_PRO <= 0) or (pVenderItem.Quantidade > lProdutosModel.ProdutossLista[0].SALDO_PRO) then
         CriaException('Produto sem saldo em estoque.')
     end;
 
