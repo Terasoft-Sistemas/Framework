@@ -669,9 +669,9 @@ begin
   begin
     if DisplayText then begin
       case Length(Result) of
-        10 : mascara := '\(00\)0000-00000;0;_';
-        11 : mascara := '\(00\)00000-0000;0;_';
-        else mascara := '\(00\)000000000;0;_';
+        10 : mascara := '\(00\) 0000-00000;0;_';
+        11 : mascara := '\(00\) 00000-0000;0;_';
+        else mascara := '\(00\) 000000000;0;_';
       end;
       Result := FormatMaskText(Mascara, Result);
     end;
