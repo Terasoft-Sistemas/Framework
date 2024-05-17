@@ -398,7 +398,7 @@ type
 implementation
 
 uses
-  WebPedidoDao, ClienteModel, Terasoft.Funcoes.PAF;
+  WebPedidoDao, ClienteModel;
 
 { TWebPedidoModel }
 
@@ -1341,7 +1341,7 @@ begin
 
     except
      on E:Exception do
-       mensagemException(E);
+       CriaException('Erro: '+ E.Message);
     end;
   finally
     lReservaModel.Free;
@@ -1379,7 +1379,7 @@ begin
 
     except
      on E:Exception do
-       mensagemException(E);
+       CriaException('Erro: '+ E.Message);
     end;
   finally
     lReservaModel.Free;

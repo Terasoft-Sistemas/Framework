@@ -100,8 +100,7 @@ uses
   Terasoft.Utils,
   System.Variants,
   PedidoVendaModel,
-  Terasoft.FuncoesTexto,
-  Terasoft.Funcoes.PAF;
+  Terasoft.FuncoesTexto;
 
 function TNotaFiscal.configuraComponenteNFe: Boolean;
 begin
@@ -220,7 +219,7 @@ begin
 
     except
     on E:Exception do
-        mensagemException(E);
+        CriaException('Erro: '+ E.Message);
     end;
   finally
     lSQL := '';
@@ -309,7 +308,7 @@ begin
     end
     except
     on E:Exception do
-        mensagemException(E);
+        CriaException('Erro: '+ E.Message);
     end;
   finally
     lSQL := '';
@@ -378,7 +377,7 @@ begin
     Result := lQry.FieldByName('chave').AsString+'.xml';
     except
     on E:Exception do
-        mensagemException(E);
+        CriaException('Erro: '+ E.Message);
     end;
   finally
     lSQL := '';
@@ -458,7 +457,7 @@ begin
     end;
     except
     on E:Exception do
-        mensagemException(E);
+        CriaException('Erro: '+ E.Message);
     end;
   finally
     lSQL := '';
@@ -534,7 +533,7 @@ begin
     Result := lQry.FieldByName('id_nf3').AsString;
     except
     on E:Exception do
-        mensagemException(E);
+        CriaException('Erro: '+ E.Message);
     end;
   finally
     lSQL := '';
@@ -567,7 +566,7 @@ begin
     end;
     except
     on E:Exception do
-        mensagemException(E);
+        CriaException('Erro: '+ E.Message);
     end;
   finally
     lSQL := '';
@@ -844,7 +843,7 @@ begin
     end;
     except
     on E:Exception do
-        mensagemException(E);
+        CriaException('Erro: '+ E.Message);
     end;
   finally
     lSQL := '';
@@ -986,7 +985,7 @@ begin
       end;
     except
     on E:Exception do
-        mensagemException(E);
+        CriaException('Erro: '+ E.Message);
     end;
   finally
     lSQL := '';
@@ -1047,7 +1046,7 @@ begin
       NotaF.NFe.exporta.xLocEmbarq := lQry.FieldByName('xLocEmbarq').AsString;
     except
     on E:Exception do
-        mensagemException(E);
+        CriaException('Erro: '+ E.Message);
     end;
   finally
     lSQL := '';
