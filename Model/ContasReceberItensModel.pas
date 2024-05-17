@@ -740,7 +740,7 @@ begin
     if pIdTef <> '' then
       lRecebimentoCartaoModel.TEF_ID       := pIdTef;
     lRecebimentoCartaoModel.USUARIO_ID     := vIConexao.getUSer.ID;
-    lRecebimentoCartaoModel.DATA_HORA      := DateToStr(vIConexao.DataServer) + TimeToStr(vIConexao.HoraServer);
+    lRecebimentoCartaoModel.DATA_HORA      := DateTimeToStr(vIConexao.DataHoraServer);
     lRecebimentoCartaoModel.CLIENTE_ID     := self.FCODIGO_CLI;
     lRecebimentoCartaoModel.FATURA         := self.FFATURA_REC;
     lRecebimentoCartaoModel.PARCELA        := self.FPACELA_REC;
