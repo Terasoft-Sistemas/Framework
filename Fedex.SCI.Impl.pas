@@ -95,6 +95,7 @@ function processaArquivoExpedicao(pUnkAPI: IUnknown; pResultado: IResultadoOpera
     strObs: String;
     lVolumes: Integer;
     lPeso: Extended;
+    lStatus: String;
 begin
   Result := checkResultadoOperacao(pResultado);
   lRes := nil;
@@ -188,10 +189,25 @@ begin
 
           if(lDS.dataset.RecordCount=0) then begin
             pResultado.formataErro('processaArquivoExpedicao [%s]: Documento [%s] não existe.', [ lArquivo, lTipoDocumento ] );
-            break;
-          end else if  stringForaArray(ctr.getValor(CONTROLE_LOGISTICA_STATUS_SAIDA, lTipo + lDS.dataset.FieldByName('id').AsString,''), [CONTROLE_LOGISTICA_STATUS_ENVIADO,CONTROLE_LOGISTICA_STATUS_DIVERGENTE]) then begin
-            pResultado.formataErro('processaArquivoExpedicao [%s]: Documento [%s] não está no status ENVIADO ou DIVERGENTE: [%s]', [ lArquivo, lTipoDocumento, ctr.getValor(CONTROLE_LOGISTICA_STATUS_SAIDA, lTipo + lDS.dataset.FieldByName('id').AsString,'') ] );
-            break;
+            divergenciaArquivoFedex(true,pResultado);
+            pResultado.acumulador['Saidas divergentes'].incrementa;
+            exit;
+          end;
+          lStatus := ctr.getValor(CONTROLE_LOGISTICA_STATUS_SAIDA, lTipo + lDS.dataset.FieldByName('id').AsString,'');
+          if (lStatus = CONTROLE_LOGISTICA_STATUS_FINALIZADO) then
+          begin
+            pResultado.formataErro('processaArquivoExpedicao [%s]: Documento [%s] já foi finalizado', [ lArquivo, lTipoDocumento ] );
+            rejeitarArquivoFedex(true,pResultado);
+            pResultado.acumulador['Saidas rejeitadas'].incrementa;
+            lRes:=nil;
+            exit;
+          end;
+
+          if  stringForaArray(lStatus, [CONTROLE_LOGISTICA_STATUS_ENVIADO,CONTROLE_LOGISTICA_STATUS_DIVERGENTE]) then begin
+            pResultado.formataErro('processaArquivoExpedicao [%s]: Documento [%s] não está no status ENVIADO ou DIVERGENTE: [%s]', [ lArquivo, lTipoDocumento, lStatus ] );
+            divergenciaArquivoFedex(true,pResultado);
+            pResultado.acumulador['Saidas divergentes'].incrementa;
+            exit;
           end;
 
           if(lDSItens=nil) then begin
@@ -388,7 +404,7 @@ begin
   finally
     if assigned(lRes) and assigned(ctr) then begin
       pAPI.parameters.controleAlteracoes.setValor(CONTROLE_LOGISTICA_RESULTADO_SAIDA,lTipoDocumento,
-          lRes.toHTML('', 'Resultado de processamento do retorno da FEDEX @' + DateTimeToStr(Now), [ orosh_semHeader ]));
+          lRes.toHTML('', 'Resultado de processamento do RETORNO da FEDEX @' + DateTimeToStr(Now), [ orosh_semHeader ]));
       pResultado.getSavePoint('');
     end;
   end;
@@ -414,6 +430,7 @@ function processaArquivoRecebimento(pUnkAPI: IUnknown; pResultado: IResultadoOpe
     lRes: IResultadoOperacao;
     lID: TipoWideStringFramework;
     lDataHoraAtual: TDateTime;
+    lStatus: String;
 begin
   //processamento entrada
 
@@ -423,6 +440,7 @@ begin
   lRes := nil;
   ctr := nil;
   lLista := TListaSimplesCreator.CreateDictionary<TipoWideStringFramework,IListaString>;
+  lStatus := '';
   try
     try
       if not Supports(pUnkAPI,IFedexAPI, pAPI) then begin
@@ -494,18 +512,32 @@ begin
 
               'fornecedor;numero', [ lDSFornecedor.fieldByName('codigo_for').AsString, lNF ] );
           if(lDS.dataset.RecordCount=0) then begin
-            pResultado.formataErro('processaArquivoRecebimento: NF [%s] do Fornecedor [%s] não existe ou já foi processada',
+            pResultado.formataErro('processaArquivoRecebimento: NF [%s] do Fornecedor [%s] não existe.',
               [ lNF, lCNPJ ] );
             pResultado.propriedade['ACAO_ARQUIVO'].asString := FEDEX_ACAOARQUIVO_REJEITAR;
             result.acumulador['Entradas rejeitadas'].incrementa;
             exit;
-          end else if(ctr.getValor(CONTROLE_LOGISTICA_STATUS_ENTRADA, lDS.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
-            pResultado.acumulador['Entradas divergentes'].incrementa;
-            rejeitarArquivoFedex(true,pResultado);
-            exit;
           end;
+
+          lStatus:=ctr.getValor(CONTROLE_LOGISTICA_STATUS_ENTRADA, lDS.dataset.FieldByName('id').AsString,'');
           lID := lDS.dataset.FieldByName('id').AsString;
           lRes := pResultado.getSavePoint('po.' + lID);
+
+          if(lStatus=CONTROLE_LOGISTICA_STATUS_FINALIZADO) then
+          begin
+            rejeitarArquivoFedex(true,pResultado);
+            pResultado.formataErro('processaArquivoRecebimento: NF [%s] do Fornecedor [%s] já foi processada',
+              [ lNF, lCNPJ ] );
+            pResultado.acumulador['Entradas rejeitadas'].incrementa;
+            lRes := nil;
+            exit;
+          end else if stringNoArray(lStatus,[CONTROLE_LOGISTICA_STATUS_ENVIADO, CONTROLE_LOGISTICA_STATUS_DIVERGENTE]) then begin
+            pResultado.formataErro('processaArquivoRecebimento: NF [%s] do Fornecedor [%s] divergente. Não está no status [ENVIADA] ou [DIVERGENTE].',
+              [ lNF, lCNPJ ] );
+            pResultado.acumulador['Entradas divergentes'].incrementa;
+            divergenciaArquivoFedex(true,pResultado);
+            exit;
+          end;
         end;
 
         if(lNF<>lLinha.strings.Strings[0]) then
@@ -560,18 +592,16 @@ begin
         pResultado.propriedade['ACAO_ARQUIVO'].asString := FEDEX_ACAOARQUIVO_REJEITAR;
         result.acumulador['Entradas rejeitadas'].incrementa;
         exit;
-      end else if(ctr.getValor(CONTROLE_LOGISTICA_STATUS_ENTRADA, lDS.dataset.FieldByName('id').AsString,'')<>CONTROLE_LOGISTICA_STATUS_ENVIADO) then begin
-        pResultado.acumulador['Entradas divergentes'].incrementa;
-        rejeitarArquivoFedex(true,pResultado);
-        exit;
       end;
 
       lDSItens := gdbPadrao.criaDataset.query('select e.* from entradaitens e ' +
           ' where e.codigo_for = :fornecedor and e.numero_ent =:numero ', 'fornecedor;numero', [ lDSFornecedor.fieldByName('codigo_for').AsString, lNF]);
 
       if(lDSItens.dataset.RecordCount=0) then begin
+        pResultado.formataErro('processaArquivoRecebimento: NF [%s] do Fornecedor [%s] não existe items par serem processados',
+          [ lNF, lCNPJ ] );
         pResultado.acumulador['Entradas divergentes'].incrementa;
-        rejeitarArquivoFedex(true,pResultado);
+        divergenciaArquivoFedex(true,pResultado);
         exit;
       end;
 
@@ -640,34 +670,6 @@ begin
       finally
         gdbPadrao.rollback(true);
       end;
-
-  {
-      for i := 0 to lTexto.strings.Count-1 do begin
-        lLinha.strings.DelimitedText := lTexto.strings.Strings[i];
-        lProduto := textoEntreTags(lLinha.strings.Strings[2],'','_');
-
-        if(lProduto='') then
-          lProduto := lLinha.strings.Strings[2];
-
-        lIMEI    := lLinha.strings.Strings[3];
-        if not validaIMEI(lIMEI) then begin
-          pResultado.formataErro('processaArquivoRecebimento [%s]: IMEI [%s] inválido para item %d', [ lArquivo, lIMEI, i ] );
-          continue;
-        end;
-
-        if not lLista.get(lProduto,lListaIMEIS) then begin
-          lListaIMEIS := getStringList;
-          lLista.add(lProduto,lListaIMEIS);
-        end;
-        lListaIMEIS.Add(lIMEI);
-      end;
-      if(lSave<>pResultado.erros) then begin
-        pResultado.acumulador['Entradas rejeitadas'].incrementa;
-        rejeitarArquivoFedex(true,pResultado);
-        exit;
-      end;
-  }
-
     except
       on e: Exception do begin
         pResultado.formataErro('processaArquivoRecebimento: %s: %s', [ e.ClassName, e.Message ] );
@@ -678,7 +680,7 @@ begin
   finally
     if assigned(lRes) and assigned(ctr) then begin
       pAPI.parameters.controleAlteracoes.setValor(CONTROLE_LOGISTICA_RESULTADO_ENTRADA,lID,
-          lRes.toHTML('', 'Resultado de processamento do retorno da FEDEX @' + DateTimeToStr(Now), [ orosh_semHeader ]));
+          lRes.toHTML('', 'Resultado de processamento do RETORNO da FEDEX @' + DateTimeToStr(Now), [ orosh_semHeader ]));
       pResultado.getSavePoint('');
     end;
   end;
