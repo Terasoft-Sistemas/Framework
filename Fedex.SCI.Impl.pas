@@ -6,6 +6,7 @@ unit Fedex.SCI.Impl;
 interface
 
 implementation
+{$REGION 'uses implementation'}
   uses
     Classes,
     Terasoft.Framework.Types,
@@ -23,7 +24,9 @@ implementation
     Terasoft.Framework.ListaSimples,
     SysUtils,
     FuncoesConfig, Terasoft.Framework.Logistica;
+{$endREGION}
 
+{$REGION 'type implementation'}
     type
       TLogisticaFedex = class(TInterfacedObject, ILogistica)
       protected
@@ -73,6 +76,8 @@ implementation
 
         constructor Create(const pCNPJ: TipoWideStringFramework = ''; const pRazaoSocial: TipoWideStringFramework = '');
       end;
+{$ENDREGION}
+
 
 {$REGION 'processaArquivoExpedicao'}
 function processaArquivoExpedicao(pUnkAPI: IUnknown; pResultado: IResultadoOperacao): IResultadoOperacao;
@@ -1306,7 +1311,11 @@ end;
 
 {$ENDREGION}
 
+
+{$REGION 'TLogisticaFedex'}
+
 { TLogisticaFedex }
+
 
 constructor TLogisticaFedex.Create;
 begin
@@ -1388,8 +1397,12 @@ function criaLogisticaFedex(const pCNPJ: TipoWideStringFramework; const pRazaoSo
 begin
   Result := TLogisticaFedex.Create(pCNPJ, pRazaoSocial);
 end;
+{$ENDREGION'}
+
+{$REGION 'initialization'}
 
 initialization
   registraLogistica(CONTROLE_LOGISTICA_FEDEX,criaLogisticaFedex);
+{$ENDREGION}
 
 end.
