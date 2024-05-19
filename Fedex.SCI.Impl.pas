@@ -26,7 +26,7 @@ implementation
     FuncoesConfig, Terasoft.Framework.Logistica;
 {$endREGION}
 
-{$REGION 'type implementation'}
+{$REGION 'type TLogisticaFedex<ILogistica>'}
     type
       TLogisticaFedex = class(TInterfacedObject, ILogistica)
       protected
@@ -693,7 +693,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION 'SCI'}
+{$REGION 'TLogisticaFedex SCI implementation'}
 function TLogisticaFedex.fedex_SCI_criaAPI;
   var
     fedex: IFedexAPI;
