@@ -361,10 +361,7 @@ end;
 function TSaidasModel.Incluir: String;
 begin
   self.FUSUARIO_SAI := vIConexao.getUSer.ID;
-  self.FDATA_SAI    := DateToStr(vIConexao.DataServer);
-  self.FSTATUS_SAI  := '0';
   self.FCONCLUIDA   := 'N';
-  self.FLOJA        := vIConexao.getEmpresa.LOJA;
 
   self.Acao := tacIncluir;
   Result    := self.Salvar;

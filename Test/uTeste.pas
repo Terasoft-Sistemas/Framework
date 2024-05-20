@@ -2944,7 +2944,7 @@ begin
   lSaidasModel := TSaidasModel.Create(vIConexao);
   try
     try
-      lSaidasModel.LOJA       := '001';
+      lSaidasModel.LOJA       := '003';
       lSaidasModel.CODIGO_CLI := '000001';
 
       lSaidasModel.Incluir;
