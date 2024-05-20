@@ -2947,6 +2947,7 @@ begin
   lLojasModel  := TLojasModel.Create(vIConexao);
   try
     try
+      lLojasModel.WhereView := ' and loja2.cliente_id = ' + QuotedStr('000001');
       lMemTable := lLojasModel.obterFiliais;
 
       lSaidasModel.CODIGO_CLI := lMemTable.FieldByName('CLIENTE_ID').AsString;
