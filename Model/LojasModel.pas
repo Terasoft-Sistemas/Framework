@@ -98,7 +98,8 @@ var
 begin
   lLojasDao := TLojasDao.Create(vIConexao);
   try
-    lLojasDao.LojaView := FLojaView;
+    lLojasDao.LojaView  := FLojaView;
+    lLojasDao.WhereView := FWhereView;
     Result := lLojasDao.obterFiliais;
   finally
     lLojasDao.Free;
