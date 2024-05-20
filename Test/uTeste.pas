@@ -2940,12 +2940,16 @@ end;
 procedure TForm1.Button103Click(Sender: TObject);
 var
   lSaidasModel : TSaidasModel;
+  lLojasModel  : TLojasModel;
+  lMemTable    : TFDMemTable;
 begin
   lSaidasModel := TSaidasModel.Create(vIConexao);
+  lLojasModel  := TLojasModel.Create(vIConexao);
   try
     try
-      lSaidasModel.LOJA       := '001';
-      lSaidasModel.CODIGO_CLI := '000001';
+      lMemTable := lLojasModel.obterFiliais;
+
+      lSaidasModel.CODIGO_CLI := lMemTable.FieldByName('CLIENTE_ID').AsString;
 
       lSaidasModel.Incluir;
 
