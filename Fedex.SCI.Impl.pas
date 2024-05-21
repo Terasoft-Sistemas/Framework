@@ -289,7 +289,7 @@ begin
         if(lCDS.Eof) then
         begin
           pResultado.formataErro('processaArquivoExpedicao Documento[%s]: Não localizou o produto [%s]', [ lDocumento, lProduto ] );
-          result.formataAviso('Documento [%s%s] marcado como DIVERGENTE', [ lTipo, lDocumento ] );
+          result.formataAviso('Documento [%s] marcado como DIVERGENTE', [ lTipoDocumento ] );
           divergenciaArquivoFedex(true,pResultado);
           ctr.setValor(CONTROLE_LOGISTICA_STATUS_SAIDA, lTipoDocumento, CONTROLE_LOGISTICA_STATUS_DIVERGENTE);
           pResultado.acumulador['Pedidos divergentes'].incrementa;
@@ -349,7 +349,7 @@ begin
       if(lDivergencias>0) then
       begin
         divergenciaArquivoFedex(true,pResultado);
-        pResultado.formataAviso('Pedido [%s] marcado como DIVERGENTE', [ lTipoDocumento ] );
+        pResultado.formataAviso('Documento [%s] marcado como DIVERGENTE', [ lTipoDocumento ] );
         ctr.setValor(CONTROLE_LOGISTICA_STATUS_SAIDA, lTipoDocumento, CONTROLE_LOGISTICA_STATUS_DIVERGENTE);
         result.acumulador['Pedidos divergentes'].incrementa;
         exit;
