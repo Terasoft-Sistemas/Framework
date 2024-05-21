@@ -29,8 +29,6 @@ uses
       function VerificaPermissaoAcesso(pTag, pPerfil : String): Boolean;
       function verificaPerfil(pTag : String): Boolean;
 
-      procedure setPerfil(pValue: string);
-
       constructor Create(pIConexao : IConexao);
       destructor Destroy; override;
     end;
@@ -155,11 +153,6 @@ begin
   end;
 end;
 
-procedure TerasoftConfiguracoes.setPerfil(pValue: string);
-begin
-  vPerfil := pValue;
-end;
-
 function TerasoftConfiguracoes.valorTag(tag: String; ValorPadrao: Variant; tipoValor: TTipoValorConfiguracao; pPerfil: String): Variant;
 var
   lNomeCampo : String;
@@ -233,7 +226,7 @@ end;
 
 function TerasoftConfiguracoes.verificaPerfil(pTag : String): Boolean;
 begin
-  Result := VerificaPermissaoAcesso(pTag, vPerfil);
+  Result := VerificaPermissaoAcesso(pTag, vIConexao.getUSer.PERFIL);
 end;
 
 function TerasoftConfiguracoes.VerificaPermissaoAcesso(pTag, pPerfil: String): Boolean;
