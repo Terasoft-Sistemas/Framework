@@ -26,7 +26,7 @@ implementation
     FuncoesConfig, Terasoft.Framework.Logistica;
 {$endREGION}
 
-{$REGION 'type implementation'}
+{$REGION 'type TLogisticaFedex<ILogistica>'}
     type
       TLogisticaFedex = class(TInterfacedObject, ILogistica)
       protected
@@ -392,6 +392,19 @@ begin
 
           lCDS.Next;
         end;
+
+        if(pResultado.erros<>lSave) then
+        begin
+          gdbPadrao.rollback(true);
+          rejeitarArquivoFedex(true,pResultado);
+          exit;
+        end;
+
+        if(lTipo=LOGISTICA_TIPOSAIDA_PEDIDO) then
+        begin
+          gdbPadrao.updateDB('pedidovenda_analise', [ 'pedido_id' ], [ lDocumento ], [ 'expedido_usuario_id', 'expedido_datahora'], [ usuarioSistema, gdbPadrao.dataHoraServer ]);
+        end;
+
         gdbPadrao.commit(true);
         ctr.setValor(CONTROLE_LOGISTICA_STATUS_SAIDA, lTipoDocumento,CONTROLE_LOGISTICA_STATUS_FINALIZADO);
         apagarArquivoFedex(false,pResultado);
@@ -693,7 +706,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION 'SCI'}
+{$REGION 'TLogisticaFedex SCI implementation'}
 function TLogisticaFedex.fedex_SCI_criaAPI;
   var
     fedex: IFedexAPI;
