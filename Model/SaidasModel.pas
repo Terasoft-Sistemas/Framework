@@ -83,6 +83,7 @@ type
     FID: Variant;
     FSaidaView: String;
     FLojaView: String;
+    FTransferenciaView: Boolean;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -139,6 +140,7 @@ type
     procedure SetVENDEDOR_ID(const Value: Variant);
     procedure SetSaidaView(const Value: String);
     procedure SetLojaView(const Value: String);
+    procedure SetTransferenciaView(const Value: Boolean);
 
   public
 
@@ -201,8 +203,10 @@ type
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property SaidaView : String read FSaidaView write SetSaidaView;
     property LojaView : String read FLojaView write SetLojaView;
+    property TransferenciaView : Boolean read FTransferenciaView write SetTransferenciaView;
 
     function Incluir: String;
+    function IncluirTransferencia: String;
     function Alterar(pID : String): TSaidasModel;
     function Excluir(pNumero_Saida: String): String;
     function Salvar : String;
@@ -367,6 +371,16 @@ begin
   Result    := self.Salvar;
 end;
 
+function TSaidasModel.IncluirTransferencia: String;
+begin
+  self.FUSUARIO_SAI    := vIConexao.getUSer.ID;
+  self.FCONCLUIDA      := 'N';
+  self.FTRANSFERENCIA  := 'S';
+
+  self.Acao := tacIncluir;
+  Result    := self.Salvar;
+end;
+
 function TSaidasModel.carregaClasse(pID : String): TSaidasModel;
 var
   lSaidasDao: TSaidasDao;
@@ -391,27 +405,28 @@ end;
 
 function TSaidasModel.obterLista: TFDMemTable;
 var
-  lSaidasLista: TSaidasDao;
+  lSaidasDao: TSaidasDao;
 begin
-  lSaidasLista := TSaidasDao.Create(vIConexao);
+  lSaidasDao := TSaidasDao.Create(vIConexao);
 
   try
-    lSaidasLista.TotalRecords    := FTotalRecords;
-    lSaidasLista.WhereView       := FWhereView;
-    lSaidasLista.CountView       := FCountView;
-    lSaidasLista.OrderView       := FOrderView;
-    lSaidasLista.StartRecordView := FStartRecordView;
-    lSaidasLista.LengthPageView  := FLengthPageView;
-    lSaidasLista.IDRecordView    := FIDRecordView;
-    lSaidasLista.SaidaView       := FSaidaView;
-    lSaidasLista.LojaView        := FLojaView;
+    lSaidasDao.TotalRecords       := FTotalRecords;
+    lSaidasDao.WhereView          := FWhereView;
+    lSaidasDao.CountView          := FCountView;
+    lSaidasDao.OrderView          := FOrderView;
+    lSaidasDao.StartRecordView    := FStartRecordView;
+    lSaidasDao.LengthPageView     := FLengthPageView;
+    lSaidasDao.IDRecordView       := FIDRecordView;
+    lSaidasDao.SaidaView          := FSaidaView;
+    lSaidasDao.LojaView           := FLojaView;
+    lSaidasDao.TransferenciaView  := FTransferenciaView;
 
-    Result := lSaidasLista.obterLista;
+    Result := lSaidasDao.obterLista;
 
-    FTotalRecords := lSaidasLista.TotalRecords;
+    FTotalRecords := lSaidasDao.TotalRecords;
 
   finally
-    lSaidasLista.Free;
+    lSaidasDao.Free;
   end;
 end;
 
@@ -671,6 +686,11 @@ end;
 procedure TSaidasModel.SetTRANSFERENCIA(const Value: Variant);
 begin
   FTRANSFERENCIA := Value;
+end;
+
+procedure TSaidasModel.SetTransferenciaView(const Value: Boolean);
+begin
+  FTransferenciaView := Value;
 end;
 
 procedure TSaidasModel.SetTRANSPORTADORA_ID(const Value: Variant);

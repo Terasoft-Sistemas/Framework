@@ -30,6 +30,7 @@ type
     FTotalRecords: Integer;
     FSaidaView: String;
     FLojaView: String;
+    FTransferenciaView: Boolean;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
     procedure SetID(const Value: Variant);
@@ -42,6 +43,7 @@ type
     procedure SetSaidaView(const Value: String);
     procedure SetLojaView(const Value: String);
     function where: String;
+    procedure SetTransferenciaView(const Value: Boolean);
 
   public
 
@@ -58,6 +60,7 @@ type
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property SaidaView : String read FSaidaView write SetSaidaView;
     property LojaView : String read FLojaView write SetLojaView;
+    property TransferenciaView: Boolean read FTransferenciaView write SetTransferenciaView;
 
     function incluir(pSaidasModel: TSaidasModel): String;
     function alterar(pSaidasModel: TSaidasModel): String;
@@ -231,6 +234,8 @@ begin
   if FLojaView <> '' then
     lSQL := lSQL + ' and saidas.loja = ' + QuotedStr(FLojaView);
 
+  lSQL := lSQL + ' and coalesce(saidas.transferencia, ''N'') = ' + QuotedStr(IIF(FTransferenciaView, 'S', 'N'));
+
   Result := lSQL;
 end;
 
@@ -383,6 +388,11 @@ end;
 procedure TSaidasDao.SetTotalRecords(const Value: Integer);
 begin
   FTotalRecords := Value;
+end;
+
+procedure TSaidasDao.SetTransferenciaView(const Value: Boolean);
+begin
+  FTransferenciaView := Value;
 end;
 
 procedure TSaidasDao.SetWhereView(const Value: String);
