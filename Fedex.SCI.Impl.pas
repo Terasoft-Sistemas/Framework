@@ -549,7 +549,7 @@ begin
             pResultado.acumulador['Entradas rejeitadas'].incrementa;
             lRes := nil;
             exit;
-          end else if stringNoArray(lStatus,[CONTROLE_LOGISTICA_STATUS_ENVIADO, CONTROLE_LOGISTICA_STATUS_DIVERGENTE]) then begin
+          end else if stringForaArray(lStatus,[CONTROLE_LOGISTICA_STATUS_ENVIADO, CONTROLE_LOGISTICA_STATUS_DIVERGENTE]) then begin
             pResultado.formataErro('processaArquivoRecebimento: NF [%s] do Fornecedor [%s] divergente. Não está no status [ENVIADA] ou [DIVERGENTE].',
               [ lNF, lCNPJ ] );
             pResultado.acumulador['Entradas divergentes'].incrementa;
