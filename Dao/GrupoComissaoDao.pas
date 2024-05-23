@@ -126,7 +126,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-//    pAnexoModel.ID := vIConexao.Generetor('GRUPO_COMISSAO');
+    pGrupoComissaoModel.ID := vIConexao.Generetor('GEN_GRUPO_COMISSAO');
     setParams(lQry, pGrupoComissaoModel);
     lQry.Open;
 

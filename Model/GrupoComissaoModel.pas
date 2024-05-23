@@ -86,7 +86,7 @@ begin
   try
     lGrupoComissaoModel       := lGrupoComissaoModel.carregaClasse(pID);
     lGrupoComissaoModel.Acao  := tacAlterar;
-    Result            := lGrupoComissaoModel;
+    Result                    := lGrupoComissaoModel;
   finally
   end;
 end;
@@ -116,9 +116,9 @@ end;
 
 function TGrupoComissaoModel.Excluir(pID: String): String;
 begin
-  self.ID      := pID;
-  self.FAcao   := tacExcluir;
-  Result       := self.Salvar;
+  self.ID    := pID;
+  self.FAcao := tacExcluir;
+  Result     := self.Salvar;
 end;
 
 function TGrupoComissaoModel.Incluir: String;

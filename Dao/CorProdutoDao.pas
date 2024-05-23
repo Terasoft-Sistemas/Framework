@@ -116,7 +116,7 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := vConstrutor.gerarInsert('cor_produto', 'ID');
+  lSQL := vConstrutor.gerarInsert('COR_PRODUTO', 'ID');
 
   try
     lQry.SQL.Add(lSQL);

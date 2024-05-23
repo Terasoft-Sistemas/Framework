@@ -80,7 +80,8 @@ uses
 
 constructor TSubGrupoDao.Create(pIConexao : IConexao);
 begin
-  vIConexao := pIConexao;
+  vIConexao   := pIConexao;
+  vConstrutor := TConstrutorDAO.Create(vIConexao);
 end;
 
 destructor TSubGrupoDao.Destroy;
@@ -171,7 +172,7 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := vConstrutor.gerarInsert('SUBGRUPOPRODUTO', 'CODIGO_SUB', true);
+  lSQL := vConstrutor.gerarInsert('SUBGRUPOPRODUTO', 'CODIGO_SUB');
 
   try
     lQry.SQL.Add(lSQL);

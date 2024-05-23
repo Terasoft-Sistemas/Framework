@@ -87,7 +87,10 @@ type
 implementation
 
 uses
-  System.SysUtils, SubGrupoDao;
+  System.SysUtils,
+  System.Classes,
+  SubGrupoDao,
+  GrupoModel;
 
 { TSubGrupoModel }
 
@@ -135,9 +138,21 @@ begin
 end;
 
 function TSubGrupoModel.Incluir: String;
+var
+  lGrupoModel : TGrupoModel;
 begin
+  lGrupoModel := TGrupoModel.Create(vIConexao);
+  try
+    lGrupoModel.StartRecordView := '0';
+    lGrupoModel.LengthPageView  := '1';
+    lGrupoModel.OrderView       := 'CODIGO_GRU';
+    self.CODIGO_GRU := lGrupoModel.ObterLista.FieldByName('CODIGO_GRU').AsString;
+
     self.Acao := tacIncluir;
     Result    := self.Salvar;
+  finally
+    lGrupoModel.Free;
+  end;
 end;
 
 function TSubGrupoModel.ObterLista: TFDMemTable;

@@ -99,7 +99,7 @@ end;
 
 constructor TVoltagemProdutoDao.Create(pIConexao : IConexao);
 begin
-  vIConexao := pIConexao;
+  vIConexao   := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
 end;
 
@@ -115,7 +115,7 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := vConstrutor.gerarInsert('Voltagem_Produto', 'ID');
+  lSQL := vConstrutor.gerarInsert('VOLTAGEM_PRODUTO', 'ID');
 
   try
     lQry.SQL.Add(lSQL);
