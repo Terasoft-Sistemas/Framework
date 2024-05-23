@@ -163,7 +163,7 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := vConstrutor.gerarInsert('CLIENTES_CONTATO', 'ID');
+  lSQL := vConstrutor.gerarInsert('CLIENTES_CONTATO', 'ID', true);
 
   try
     lQry.SQL.Add(lSQL);
@@ -194,7 +194,12 @@ begin
       lSQL := ' select '+lPaginacao+'                                                    '+SLineBreak+
               '         CLIENTES_CONTATO.ID,                                             '+SLineBreak+
               '         CLIENTES_CONTATO.CLIENTE_ID,                                     '+SLineBreak+
-              '         CLIENTES_CONTATO.CONTATO                                         '+SLineBreak+
+              '         CLIENTES_CONTATO.CONTATO,                                        '+SLineBreak+
+              '         CLIENTES_CONTATO.DEPARTAMENTO,                                   '+SLineBreak+
+              '         CLIENTES_CONTATO.CELULAR,                                        '+SLineBreak+
+              '         CLIENTES_CONTATO.TELEFONE,                                       '+SLineBreak+
+              '         CLIENTES_CONTATO.EMAIL,                                          '+SLineBreak+
+              '         CLIENTES_CONTATO.OBS                                             '+SLineBreak+
               '    from CLIENTES_CONTATO                                                 '+SLineBreak+
               '   where 1=1                                                              '+SLineBreak;
 

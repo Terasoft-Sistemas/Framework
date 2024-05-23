@@ -239,6 +239,8 @@
         <DCCReference Include="..\Model\VoltagemProdutoModel.pas"/>
         <DCCReference Include="..\Dao\VoltagemProdutoDao.pas"/>
         <DCCReference Include="..\Dao\CorProdutoDao.pas"/>
+        <DCCReference Include="..\Model\ClientesEnderecoModel.pas"/>
+        <DCCReference Include="..\Dao\ClientesEnderecoDao.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

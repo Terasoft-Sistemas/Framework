@@ -2,7 +2,7 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'Form1'
-  ClientHeight = 879
+  ClientHeight = 927
   ClientWidth = 1248
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -17,8 +17,8 @@ object Form1: TForm1
     Left = 0
     Top = 0
     Width = 1248
-    Height = 879
-    ActivePage = TabSheet8
+    Height = 927
+    ActivePage = TabSheet1
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -607,41 +607,41 @@ object Form1: TForm1
         TabOrder = 64
         OnClick = Button84Click
       end
-      object Button85: TButton
+      object BtnEndereco2: TButton
         Left = 191
         Top = 795
         Width = 182
         Height = 46
-        Caption = 'Desconto Consultar'
+        Caption = 'Endereco Consultar'
         TabOrder = 65
-        OnClick = Button85Click
+        OnClick = BtnEndereco2Click
       end
-      object Button86: TButton
+      object BtnEndereco3: TButton
         Left = 379
         Top = 795
         Width = 182
         Height = 46
-        Caption = 'Desconto Update'
+        Caption = 'Endereco Update'
         TabOrder = 66
-        OnClick = Button86Click
+        OnClick = BtnEndereco3Click
       end
-      object Button87: TButton
+      object BtnEndereco4: TButton
         Left = 567
         Top = 795
         Width = 182
         Height = 46
-        Caption = 'Desconto Excluir'
+        Caption = 'Endereco Excluir'
         TabOrder = 67
-        OnClick = Button87Click
+        OnClick = BtnEndereco4Click
       end
-      object Button88: TButton
+      object BtnEndereco1: TButton
         Left = 3
         Top = 795
         Width = 182
         Height = 46
-        Caption = 'Desconto Inserir'
+        Caption = 'Endereco Inserir'
         TabOrder = 68
-        OnClick = Button88Click
+        OnClick = BtnEndereco1Click
       end
     end
     object TabSheet2: TTabSheet
@@ -649,7 +649,7 @@ object Form1: TForm1
       ImageIndex = 1
       object dbTeste2: TXDBGrid
         Left = 0
-        Top = 226
+        Top = 274
         Width = 1240
         Height = 623
         Align = alBottom
@@ -699,7 +699,7 @@ object Form1: TForm1
       ImageIndex = 2
       object XDBGrid1: TXDBGrid
         Left = 0
-        Top = 600
+        Top = 648
         Width = 1240
         Height = 249
         Align = alBottom
@@ -709,7 +709,7 @@ object Form1: TForm1
       end
       object XDBGrid2: TXDBGrid
         Left = 0
-        Top = 438
+        Top = 486
         Width = 1240
         Height = 162
         Align = alBottom
@@ -804,7 +804,7 @@ object Form1: TForm1
       ImageIndex = 3
       object XDBGrid3: TXDBGrid
         Left = 0
-        Top = 544
+        Top = 592
         Width = 1240
         Height = 305
         Align = alBottom
@@ -914,7 +914,7 @@ object Form1: TForm1
       ImageIndex = 6
       object XDBGrid4: TXDBGrid
         Left = 0
-        Top = 407
+        Top = 455
         Width = 1240
         Height = 169
         Align = alBottom
@@ -942,7 +942,7 @@ object Form1: TForm1
       end
       object XDBGrid5: TXDBGrid
         Left = 0
-        Top = 576
+        Top = 624
         Width = 1240
         Height = 273
         Align = alBottom
@@ -1055,7 +1055,7 @@ object Form1: TForm1
       end
       object XDBGrid6: TXDBGrid
         Left = 0
-        Top = 440
+        Top = 488
         Width = 1240
         Height = 409
         Align = alBottom
@@ -1145,7 +1145,7 @@ object Form1: TForm1
       end
       object XDBGrid7: TXDBGrid
         Left = 0
-        Top = 544
+        Top = 592
         Width = 1240
         Height = 305
         Align = alBottom

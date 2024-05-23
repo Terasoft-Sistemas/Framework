@@ -141,7 +141,9 @@ uses
   CorProdutoModel in '..\Model\CorProdutoModel.pas',
   VoltagemProdutoModel in '..\Model\VoltagemProdutoModel.pas',
   VoltagemProdutoDao in '..\Dao\VoltagemProdutoDao.pas',
-  CorProdutoDao in '..\Dao\CorProdutoDao.pas';
+  CorProdutoDao in '..\Dao\CorProdutoDao.pas',
+  ClientesEnderecoModel in '..\Model\ClientesEnderecoModel.pas',
+  ClientesEnderecoDao in '..\Dao\ClientesEnderecoDao.pas';
 
 {$R *.res}
 
