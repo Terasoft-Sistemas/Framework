@@ -311,7 +311,6 @@ begin
     lCaixaModel.USUARIO_CAI     := self.vIConexao.getUSer.ID;
     lCaixaModel.DATA_CAI        := DateToStr(vIConexao.DataServer);
     lCaixaModel.HORA_CAI        := TimeToStr(vIConexao.HoraServer);
-    lCaixaModel.NUMERO_PED      := self.NUMERO_PED;
     lCaixaModel.CONCILIADO_CAI  := '.';
     lCaixaModel.TIPO            := 'V';
     lCaixaModel.CODIGO_CTA      := pConta;
