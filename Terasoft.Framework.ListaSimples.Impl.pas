@@ -392,6 +392,7 @@ class function TListaSimplesCreator.CreateEnumeratorSimples<T>(const pLista: ILi
 begin
   Result := TEnumeratorSimples<T>.Create(pLista);
 end;
+
 class function TListaSimplesCreator.CreateEnumeratorDicionarioSimples<T,X>(const pLista: IDicionarioSimples<T,X>): IEnumeratorPair<T,X>;
 begin
   Result := TEnumeratorPair<T,X>.Create(pLista);
@@ -402,6 +403,7 @@ begin
   Result := TListaSimples<T>.Create;
   Result.useLock := false;
 end;
+
 class function TListaSimplesCreator.CreateLockList<T>: IListaSimples<T>;
 begin
   Result := TListaSimples<T>.Create;
@@ -414,6 +416,7 @@ begin
   position := -1;
   fLista := pLista;
 end;
+
 destructor TEnumeratorSimples<TValue>.Destroy;
 begin
 
@@ -426,12 +429,14 @@ begin
 {  if not (position<0) then
     Result := fLista.get(position);}
 end;
+
 function TEnumeratorSimples<TValue>.MoveNext: Boolean;
 begin
   inc(position);
   Result := fLista.getTo(position,fCurrent);
 //  Result := position < fLista.count;
 end;
+
 { TDicionarioSimples<T, X> }
 destructor TDicionarioSimples<T,X>.Destroy;
 begin
