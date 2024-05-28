@@ -282,10 +282,16 @@ begin
   lQry := vIConexao.CriarQuery;
   try
     lSql := ' select                                                                                   '+SLineBreak+
+            '        PERCENTUAL_DESCONTO,                                                              '+SLineBreak+
+            '        QUANTIDADE_ITENS,                                                                 '+SLineBreak+
+            '        QUANTIDADE_PRODUTOS,                                                              '+SLineBreak+
             '        CUSTO,                                                                            '+SLineBreak+
             '        VALOR                                                                             '+SLineBreak+
             '   from                                                                                   '+SLineBreak+
             '   (select                                                                                '+SLineBreak+
+            '           cast(percentual_desconto as numeric(18, 2)) percentual_desconto,               '+SLineBreak+
+            '           count(*) as quantidade_itens,                                                  '+SLineBreak+
+            '           sum(quantidade) quantidade_produtos,                                           '+SLineBreak+
             '           sum(quantidade * (custo - custo * percentual_desconto)) custo,                 '+SLineBreak+
             '           sum(quantidade * (valor_saida - valor_saida * percentual_desconto)) valor      '+SLineBreak+
             '      from                                                                                '+SLineBreak+
@@ -298,6 +304,7 @@ begin
             '        inner join saidasitens on saidasitens.numero_sai = saidas.numero_sai              '+SLineBreak+
             '        where saidas.numero_sai = '+QuotedStr(pNumeroSaida)+'                             '+SLineBreak+
             '       )                                                                                  '+SLineBreak+
+            '        group by 1                                                                        '+SLineBreak+
             '    )                                                                                     '+SLineBreak;
 
     lQry.Open(lSql);

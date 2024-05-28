@@ -3175,7 +3175,7 @@ var
 begin
   lSaidasItens := TSaidasitensModel.Create(vIConexao);
   try
-    lResultado := lSaidasItens.ObterTotais('000215');
+    lResultado := lSaidasItens.ObterTotais('000260');
     dsSaidas.DataSet := lResultado;
   finally
     lSaidasItens.Free;

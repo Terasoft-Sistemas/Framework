@@ -276,7 +276,7 @@ begin
     CriaException('Produto não informado');
 
   if StrToFloatDef(pSaidaItemParams.QUANTIDADE_SAI, 0) = 0 then
-    CriaException('Quantidade não informado');
+    CriaException('Quantidade não informada');
 
   try
     lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
