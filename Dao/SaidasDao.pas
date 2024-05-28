@@ -11,7 +11,8 @@ uses
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
-  Terasoft.ConstrutorDao;
+  Terasoft.ConstrutorDao,
+  CLIPBRD;
 
 type
   TSaidasDao = class
@@ -253,6 +254,7 @@ begin
             '   left join clientes on saidas.codigo_cli = clientes.codigo_cli          '+sLineBreak+
             '   left join funcionario on saidas.vendedor_id = funcionario.codigo_fun   '+sLineBreak+
             '   left join cfop on saidas.cfop_sai = cfop.cfop                          '+sLineBreak+
+            '   left join loja2 on loja2.cliente_id = saidas.codigo_cli                '+sLineBreak+
             '  where 1=1 ';
 
     lSql := lSql + where;
@@ -310,6 +312,7 @@ begin
     if not FOrderView.IsEmpty then
       lSql := lSql + ' order by '+FOrderView;
 
+    ClipBoard.AsText := lSql;
     lQry.Open(lSql);
 
     Result := vConstrutor.atribuirRegistros(lQry);
