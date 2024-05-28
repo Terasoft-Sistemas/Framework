@@ -122,17 +122,15 @@ var
   lSQL:String;
 begin
   lQry := vIConexao.CriarQuery;
-
   lSQL := vConstrutor.gerarInsert('PRODUTO_TIPO', 'ID', true);
 
   try
     lQry.SQL.Add(lSQL);
-//    pAnexoModel.ID := vIConexao.Generetor('PRODUTO_TIPO');
+    pProdutoTipoModel.ID := vIConexao.Generetor('GEN_PRODUTO_TIPO');
     setParams(lQry, pProdutoTipoModel);
     lQry.Open;
 
     Result := lQry.FieldByName('ID').AsString;
-
   finally
     lSQL := '';
     lQry.Free;
