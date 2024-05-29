@@ -280,32 +280,42 @@ begin
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
 
-    lSql := ' select '+lPaginacao+'                                                    '+sLineBreak+
-            '        saidas.id,                                                        '+sLineBreak+
-            '        saidas.numero_sai,                                                '+sLineBreak+
-            '        saidas.data_sai,                                                  '+sLineBreak+
-            '        saidas.codigo_cli,                                                '+sLineBreak+
-            '        coalesce(clientes.razao_cli, clientes.fantasia_cli) cliente_nome, '+sLineBreak+
-            '        loja2.descricao destino,                                          '+sLineBreak+
-            '        saidas.observacao_sai,                                            '+sLineBreak+
-            '        saidas.cfop_sai,                                                  '+sLineBreak+
-            '        cfop.descricao cfop_descricao,                                    '+sLineBreak+
-            '        saidas.codigo_cta,                                                '+sLineBreak+
-            '        contas.nome_cta conta_nome,                                       '+sLineBreak+
-            '        saidas.vendedor_id,                                               '+sLineBreak+
-            '        funcionario.nome_fun vendedor_nome,                               '+sLineBreak+
-            '        saidas.loja,                                                      '+sLineBreak+
-            '        saidas.nf_sai,                                                    '+sLineBreak+
-            '        saidas.total_produtos_sai,                                        '+sLineBreak+
-            '        saidas.total_sai,                                                 '+sLineBreak+
-            '        saidas.status_sai                                                 '+sLineBreak+
-            '   from saidas                                                            '+sLineBreak+
-            '   left join contas on saidas.codigo_cta = contas.codigo_cta              '+sLineBreak+
-            '   left join clientes on saidas.codigo_cli = clientes.codigo_cli          '+sLineBreak+
-            '   left join funcionario on saidas.vendedor_id = funcionario.codigo_fun   '+sLineBreak+
-            '   left join cfop on saidas.cfop_sai = cfop.cfop                          '+sLineBreak+
-            '   left join loja2 on loja2.cliente_id = saidas.codigo_cli                '+sLineBreak+
-            '  where 1=1                                                               '+sLineBreak;
+    lSql := ' select '+lPaginacao+'                                                                       '+sLineBreak+
+            '        saidas.id,                                                                           '+sLineBreak+
+            '        saidas.numero_sai,                                                                   '+sLineBreak+
+            '        saidas.data_sai,                                                                     '+sLineBreak+
+            '        saidas.codigo_cli,                                                                   '+sLineBreak+
+            '        coalesce(clientes.fantasia_cli, clientes.razao_cli) cliente_nome,                    '+sLineBreak+
+            '        loja2.descricao destino,                                                             '+sLineBreak+
+            '        saidas.observacao_sai,                                                               '+sLineBreak+
+            '        saidas.cfop_sai,                                                                     '+sLineBreak+
+            '        cfop.descricao cfop_descricao,                                                       '+sLineBreak+
+            '        saidas.codigo_cta,                                                                   '+sLineBreak+
+            '        contas.nome_cta conta_nome,                                                          '+sLineBreak+
+            '        saidas.vendedor_id,                                                                  '+sLineBreak+
+            '        funcionario.nome_fun vendedor_nome,                                                  '+sLineBreak+
+            '        saidas.loja,                                                                         '+sLineBreak+
+            '        saidas.nf_sai,                                                                       '+sLineBreak+
+            '        saidas.total_produtos_sai,                                                           '+sLineBreak+
+            '        saidas.total_sai,                                                                    '+sLineBreak+
+            '        saidas.transportadora_id,                                                            '+sLineBreak+
+            '        coalesce(transportadora.fantasia_tra, transportadora.razao_tra) transportadora_nome, '+sLineBreak+
+            '        saidas.RNTRC,                                                                        '+sLineBreak+
+            '        saidas.PLACA,                                                                        '+sLineBreak+
+            '        saidas.UF_TRANSPORTADORA,                                                            '+sLineBreak+
+            '        saidas.PESO_LIQUIDO,                                                                 '+sLineBreak+
+            '        saidas.PESO_BRUTO,                                                                   '+sLineBreak+
+            '        saidas.QTDE_VOLUME,                                                                  '+sLineBreak+
+            '        saidas.ESPECIE_VOLUME,                                                               '+sLineBreak+
+            '        saidas.status_sai                                                                    '+sLineBreak+
+            '   from saidas                                                                               '+sLineBreak+
+            '   left join contas on saidas.codigo_cta = contas.codigo_cta                                 '+sLineBreak+
+            '   left join clientes on saidas.codigo_cli = clientes.codigo_cli                             '+sLineBreak+
+            '   left join funcionario on saidas.vendedor_id = funcionario.codigo_fun                      '+sLineBreak+
+            '   left join cfop on saidas.cfop_sai = cfop.cfop                                             '+sLineBreak+
+            '   left join loja2 on loja2.cliente_id = saidas.codigo_cli                                   '+sLineBreak+
+            '   left join transportadora on transportadora.codigo_tra = saidas.transportadora_id          '+sLineBreak+
+            '  where 1=1                                                                                  '+sLineBreak;
 
     lSql := lSql + where;
 
