@@ -79,7 +79,7 @@ implementation
 uses
   System.Rtti;
 { TProdutos }
-function TProdutosDao.carregaClasse(pId: String): TProdutosModel;
+function TProdutosDao.carregaClasse(pID: String): TProdutosModel;
 var
   lQry: TFDQuery;
   lModel: TProdutosModel;
@@ -355,6 +355,8 @@ begin
     lModel.PERCENTUAL_PERDA_MATERIA_PRIMA   := lQry.FieldByName('PERCENTUAL_PERDA_MATERIA_PRIMA').AsString;
     lModel.EXTIPI                           := lQry.FieldByName('EXTIPI').AsString;
     lModel.TIPO__PRO                        := lQry.FieldByName('TIPO$_PRO').AsString;
+    lModel.VOLTAGEM_ID                      := lQry.FieldByName('VOLTAGEM_ID').AsString;
+    lModel.COR_ID                           := lQry.FieldByName('COR_ID').AsString;
 
     Result := lModel;
   finally
