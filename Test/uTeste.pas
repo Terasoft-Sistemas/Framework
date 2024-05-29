@@ -166,6 +166,7 @@ type
     Button109: TButton;
     Button110: TButton;
     Button111: TButton;
+    Button85: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -283,6 +284,7 @@ type
     procedure Button109Click(Sender: TObject);
     procedure Button110Click(Sender: TObject);
     procedure Button111Click(Sender: TObject);
+    procedure Button112Click(Sender: TObject);
     procedure BtnEndereco1Click(Sender: TObject);
     procedure BtnEndereco2Click(Sender: TObject);
     procedure BtnEndereco3Click(Sender: TObject);
@@ -3255,6 +3257,21 @@ begin
     lSaidasItensModel.Excluir('644');
   finally
     lSaidasItensModel.Free;
+  end;
+end;
+
+procedure TForm1.Button112Click(Sender: TObject);
+var
+  lSaidasModel : TSaidasModel;
+begin
+  lSaidasModel := TSaidasModel.Create(vIConexao);
+  try
+    lSaidasModel.NUMERO_SAI := '000262';
+    lSaidasModel := lSaidasModel.carregaClasse(lSaidasModel.NUMERO_SAI);
+
+    lSaidasModel.CalcularPeso;
+  finally
+    lSaidasModel.Free;
   end;
 end;
 

@@ -215,6 +215,7 @@ type
 
     function AdicionarItens(pSaidaItemParams : TSaidaItensParams) : String;
     function AdicionarItensTransferencia(pSaidaItemParams : TSaidaItensTransferenciaParams) : String;
+    procedure CalcularPeso;
     procedure CalcularTotais;
     procedure GetDadosCFOP;
 
@@ -314,6 +315,49 @@ begin
     lSaidasModel.Acao  := tacAlterar;
     Result             := lSaidasModel;
   finally
+  end;
+end;
+
+procedure TSaidasModel.CalcularPeso;
+var
+  lSaidasItensModel : TSaidasItensModel;
+  lProdutosModel    : TProdutosModel;
+  lItens            : TFDMemTable;
+  lPesoBruto,
+  lPesoLiquido      : Double;
+begin
+  inherited;
+
+  if self.FNUMERO_SAI = '' then
+    CriaException('Saida não carregada');
+
+  lSaidasItensModel := TSaidasItensModel.Create(vIConexao);
+  lProdutosModel    := TProdutosModel.Create(vIConexao);
+  try
+    lSaidasItensModel.NumeroSaidaView := self.FNUMERO_SAI;
+    lItens := lSaidasItensModel.obterLista;
+
+    lPesoBruto   := 0;
+    lPesoLiquido := 0;
+
+    lItens.First;
+    while not lItens.Eof do
+    begin
+      lProdutosModel := lProdutosModel.carregaClasse(lItens.FieldByname('CODIGO_PRO').AsString);
+      lPesoBruto     := lPesoBruto + lItens.FieldByname('QUANTIDADE_SAI').AsFloat * lProdutosModel.PESO_PRO;
+      lPesoLiquido   := lPesoLiquido + lItens.FieldByname('QUANTIDADE_SAI').AsFloat * lProdutosModel.PESO_LIQUIDO;
+
+      lItens.Next;
+    end;
+
+    self.Acao := tacAlterar;
+    self.PESO_LIQUIDO := lPesoLiquido.ToString;
+    self.PESO_BRUTO   := lPesoLiquido.ToString;
+    self.Salvar;
+
+  finally
+    lSaidasItensModel.Free;
+    lProdutosModel.Free;
   end;
 end;
 
