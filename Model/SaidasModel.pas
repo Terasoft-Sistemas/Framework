@@ -350,10 +350,8 @@ begin
       lItens.Next;
     end;
 
-    self.Acao := tacAlterar;
     self.PESO_LIQUIDO := lPesoLiquido.ToString;
     self.PESO_BRUTO   := lPesoLiquido.ToString;
-    self.Salvar;
 
   finally
     lSaidasItensModel.Free;
