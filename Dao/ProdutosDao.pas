@@ -531,63 +531,66 @@ begin
     else
       lSql := 'select ';
 
-      lSql := lSql +'        produto.nome_pro,                                                           '+SLineBreak+
-                    '        produto.barras_pro,                                                         '+SLineBreak+
-                    '        produto.codigo_pro,                                                         '+SLineBreak+
-                    '        coalesce(produto.venda_pro, 0) venda_pro,                                   '+SLineBreak+
-                    '        coalesce(produto.saldo_pro, 0) saldo_pro,                                   '+SLineBreak+
-                    '        produto.customedio_pro,                                                     '+SLineBreak+
-                    '        produto.nfce_cfop,                                                          '+SLineBreak+
-                    '        produto.fornecedor_codigo,                                                  '+SLineBreak+
-                    '        produto.codigo_fornecedor,                                                  '+SLineBreak+
-                    '        produto.multiplos,                                                          '+SLineBreak+
-                    '        produto.largura_m,                                                          '+SLineBreak+
-                    '        produto.altura_m,                                                           '+SLineBreak+
-                    '        produto.profundidade_m,                                                     '+SLineBreak+
-                    '        produto.peso_liquido,                                                       '+SLineBreak+
-                    '        produto.peso_pro,                                                           '+SLineBreak+
-                    '        produto.localizacao,                                                        '+SLineBreak+
-                    '        produto.aplicacao_pro,                                                      '+SLineBreak+
-                    '        produto.ean_14,                                                             '+SLineBreak+
-                    '        produto.CODLISTA_COD,                                                       '+SLineBreak+
-                    '        produto.unidade_pro,                                                        '+SLineBreak+
-                    '        produto.garantia_12,                                                        '+SLineBreak+
-                    '        produto.garantia_24,                                                        '+SLineBreak+
-                    '        produto.divizor,                                                            '+SLineBreak+
-                    '        produto.multiplicador,                                                      '+SLineBreak+
-                    '        fornecedor.fantasia_for nome_for,                                           '+SLineBreak+
-                    '        grupoproduto.nome_gru,                                                      '+SLineBreak+
-                    '        subgrupoproduto.nome_sub,                                                   '+SLineBreak+
-                    '        marcaproduto.nome_mar,                                                      '+SLineBreak+
-                    '        produto_tipo.nome tipo_nome,                                                '+SLineBreak+
-                    '        produto.margem_pro margem_pro,                                              '+SLineBreak+
-                    '        produto.aliq_credito_pis,                                                   '+SLineBreak+
-                    '        produto.aliq_credito_cofins,                                                '+SLineBreak+
-                    '        produto.cst_credito_cofins,                                                 '+SLineBreak+
-                    '        produto.cst_credito_pis,                                                    '+SLineBreak+
-                    '        produto.custoultimo_pro,                                                    '+SLineBreak+
-                    '        produto.ipi_pro,                                                            '+SLineBreak+
-                    '        produto.tipo_venda_comissao_id,                                             '+SLineBreak+
-                    '        produto.comis_pro,                                                          '+SLineBreak+
-                    '        produto.grupo_comissao_id,                                                  '+SLineBreak+
-                    '        produto.codigo_gru,                                                         '+SLineBreak+
-                    '        produto.codigo_for,                                                         '+SLineBreak+
-                    '        produto.codigo_mar,                                                         '+SLineBreak+
-                    '        produto.codigo_sub,                                                         '+SLineBreak+
-                    '        produto.voltagem_id,                                                        '+SLineBreak+
-                    '        produto.cor_id,                                                             '+SLineBreak+
-                    '        produto.tipo_id,                                                            '+SLineBreak+
-                    '        produto.localizacao,                                                        '+SLineBreak+
-                    '        produto.unidade_entrada,                                                    '+SLineBreak+
-                    '        produto.nome_resumido,                                                      '+SLineBreak+
-                    '        produto.tipo$_pro                                                          '+SLineBreak+
-                    '   from produto                                                                     '+SLineBreak+
-                    '  inner join fornecedor on fornecedor.codigo_for = produto.codigo_for               '+SLineBreak+
-                    '  inner join grupoproduto on grupoproduto.codigo_gru = produto.codigo_gru           '+SLineBreak+
-                    '  inner join subgrupoproduto on subgrupoproduto.codigo_sub = produto.codigo_sub     '+SLineBreak+
-                    '  inner join marcaproduto on marcaproduto.codigo_mar = produto.codigo_mar           '+SLineBreak+
-                    '   left join produto_tipo on produto_tipo.id = produto.tipo_id                      '+SLineBreak+
-                    '  where 1=1                                                                         '+SLineBreak;
+      lSql := lSql +'        produto.nome_pro,                                                                          '+SLineBreak+
+                    '        produto.barras_pro,                                                                        '+SLineBreak+
+                    '        produto.codigo_pro,                                                                        '+SLineBreak+
+                    '        coalesce(produto.venda_pro, 0) venda_pro,                                                  '+SLineBreak+
+                    '        coalesce(produto.saldo_pro, 0) saldo_pro,                                                  '+SLineBreak+
+                    '        produto.customedio_pro,                                                                    '+SLineBreak+
+                    '        produto.nfce_cfop,                                                                         '+SLineBreak+
+                    '        produto.fornecedor_codigo,                                                                 '+SLineBreak+
+                    '        produto.codigo_fornecedor,                                                                 '+SLineBreak+
+                    '        produto.multiplos,                                                                         '+SLineBreak+
+                    '        produto.largura_m,                                                                         '+SLineBreak+
+                    '        produto.altura_m,                                                                          '+SLineBreak+
+                    '        produto.profundidade_m,                                                                    '+SLineBreak+
+                    '        produto.peso_liquido,                                                                      '+SLineBreak+
+                    '        produto.peso_pro,                                                                          '+SLineBreak+
+                    '        produto.localizacao,                                                                       '+SLineBreak+
+                    '        produto.aplicacao_pro,                                                                     '+SLineBreak+
+                    '        produto.ean_14,                                                                            '+SLineBreak+
+                    '        produto.CODLISTA_COD,                                                                      '+SLineBreak+
+                    '        produto.unidade_pro,                                                                       '+SLineBreak+
+                    '        produto.garantia_12,                                                                       '+SLineBreak+
+                    '        produto.garantia_24,                                                                       '+SLineBreak+
+                    '        produto.divizor,                                                                           '+SLineBreak+
+                    '        produto.multiplicador,                                                                     '+SLineBreak+
+                    '        fornecedor.fantasia_for nome_for,                                                          '+SLineBreak+
+                    '        grupoproduto.nome_gru,                                                                     '+SLineBreak+
+                    '        subgrupoproduto.nome_sub,                                                                  '+SLineBreak+
+                    '        marcaproduto.nome_mar,                                                                     '+SLineBreak+
+                    '        produto_tipo.nome tipo_nome,                                                               '+SLineBreak+
+                    '        produto.margem_pro margem_pro,                                                             '+SLineBreak+
+                    '        produto.aliq_credito_pis,                                                                  '+SLineBreak+
+                    '        produto.aliq_credito_cofins,                                                               '+SLineBreak+
+                    '        produto.cst_credito_cofins,                                                                '+SLineBreak+
+                    '        produto.cst_credito_pis,                                                                   '+SLineBreak+
+                    '        produto.custoultimo_pro,                                                                   '+SLineBreak+
+                    '        produto.ipi_pro,                                                                           '+SLineBreak+
+                    '        produto.tipo_venda_comissao_id,                                                            '+SLineBreak+
+                    '        produto.comis_pro,                                                                         '+SLineBreak+
+                    '        produto.grupo_comissao_id,                                                                 '+SLineBreak+
+                    '        produto.codigo_gru,                                                                        '+SLineBreak+
+                    '        produto.codigo_for,                                                                        '+SLineBreak+
+                    '        produto.codigo_mar,                                                                        '+SLineBreak+
+                    '        produto.codigo_sub,                                                                        '+SLineBreak+
+                    '        produto.voltagem_id,                                                                       '+SLineBreak+
+                    '        produto.cor_id,                                                                            '+SLineBreak+
+                    '        produto.tipo_id,                                                                           '+SLineBreak+
+                    '        produto.localizacao,                                                                       '+SLineBreak+
+                    '        produto.unidade_entrada,                                                                   '+SLineBreak+
+                    '        produto.nome_resumido,                                                                     '+SLineBreak+
+                    '        produto.tipo$_pro,                                                                         '+SLineBreak+
+                    '        (select coalesce(saldo - reservado, 0)                                                     '+SLineBreak+
+                    '           from view_saldo_produto                                                                 '+SLineBreak+
+                    '          where view_saldo_produto.codigo = produto.codigo_pro) as saldo_disponivel                '+SLineBreak+
+                    '   from produto                                                                                    '+SLineBreak+
+                    '  inner join fornecedor on fornecedor.codigo_for = produto.codigo_for                              '+SLineBreak+
+                    '  inner join grupoproduto on grupoproduto.codigo_gru = produto.codigo_gru                          '+SLineBreak+
+                    '  inner join subgrupoproduto on subgrupoproduto.codigo_sub = produto.codigo_sub                    '+SLineBreak+
+                    '  inner join marcaproduto on marcaproduto.codigo_mar = produto.codigo_mar                          '+SLineBreak+
+                    '   left join produto_tipo on produto_tipo.id = produto.tipo_id                                     '+SLineBreak+
+                    '  where 1=1                                                                                        '+SLineBreak;
 
     lSql := lSql + where;
 
@@ -654,6 +657,7 @@ begin
       FProdutossLista[i].LOCALIZACAO             := lQry.FieldByName('LOCALIZACAO').AsString;
       FProdutossLista[i].UNIDADE_ENTRADA         := lQry.FieldByName('UNIDADE_ENTRADA').AsString;
       FProdutossLista[i].NOME_RESUMIDO           := lQry.FieldByName('NOME_RESUMIDO').AsString;
+      FProdutossLista[i].SALDO_DISPONIVEL        := lQry.FieldByName('SALDO_DISPONIVEL').AsString;
 
       lQry.Next;
     end;
