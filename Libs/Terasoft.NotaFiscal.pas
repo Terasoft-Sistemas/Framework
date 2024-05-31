@@ -209,13 +209,20 @@ begin
         lQry.Next;
       end;
     end;
-    InfoPgto := NotaF.NFe.pag.New;
-    InfoPgto.indPag := ipPrazo;
-    InfoPgto.tPag   := vConfiguracoesNotaFiscal.tPag(lQry.FieldByName('tPag').AsString);
-    InfoPgto.vPag   := lQry.FieldByName('vOrig').AsFloat;
 
-    if InfoPgto.tPag in [fpCartaoCredito, fpCartaoDebito] then
-      InfoPgto.tpIntegra := tiPagNaoIntegrado;
+    lQry.First;
+    while not lQry.Eof do
+    begin
+      InfoPgto := NotaF.NFe.pag.New;
+      InfoPgto.indPag := ipPrazo;
+      InfoPgto.tPag   := vConfiguracoesNotaFiscal.tPag(lQry.FieldByName('tPag').AsString);
+      InfoPgto.vPag   := lQry.FieldByName('vDup').AsFloat;
+
+      if InfoPgto.tPag in [fpCartaoCredito, fpCartaoDebito, fpPagamentoInstantaneo] then
+        InfoPgto.tpIntegra := tiPagNaoIntegrado;
+
+      lQry.Next;
+    end;
 
     except
     on E:Exception do

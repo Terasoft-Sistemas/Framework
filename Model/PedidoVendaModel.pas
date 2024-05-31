@@ -1076,16 +1076,12 @@ begin
 
     if lEmpresaModel.AVISARNEGATIVO_EMP = 'S' then
     begin
-      if (lConfiguracoes.valorTag('USAR_RESERVA','',tvBool) = 'S') then
-      begin
-        lSaldoDisponivel := lProdutosModel.obterSaldoDisponivel(lProdutosModel.ProdutossLista[0].CODIGO_PRO);
 
-        if (lSaldoDisponivel <= 0) or (pVenderItem.Quantidade > lSaldoDisponivel) then
-          CriaException('Produto sem saldo disponível em estoque.')
-      end
-      else
-      if (lProdutosModel.ProdutossLista[0].SALDO_PRO <= 0) or (pVenderItem.Quantidade > lProdutosModel.ProdutossLista[0].SALDO_PRO) then
-        CriaException('Produto sem saldo em estoque.')
+      lSaldoDisponivel := lProdutosModel.obterSaldoDisponivel(lProdutosModel.ProdutossLista[0].CODIGO_PRO);
+
+      if (lSaldoDisponivel <= 0) or (pVenderItem.Quantidade > lSaldoDisponivel) then
+        CriaException('Produto sem saldo disponível em estoque.')
+
     end;
 
     lPedidoItensModel.WhereView := 'and pedidoitens.numero_ped = '+ self.FNUMERO_PED +' and pedidoitens.codigo_pro = '+ lProdutosModel.ProdutossLista[0].CODIGO_PRO;

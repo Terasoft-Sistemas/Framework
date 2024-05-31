@@ -339,6 +339,7 @@ begin
             '        REGIAO_ID,                                                                                                             '+SLineBreak+
             '        VALOR_FRETE,                                                                                                           '+SLineBreak+
             '        ACRESCIMO,                                                                                                             '+SLineBreak+
+            '        ORIGEM_PEDIDO                                                                                                          '+SLineBreak+
             '        VALOR_ITENS,                                                                                                           '+SLineBreak+
             '        VALOR_GARANTIA,                                                                                                        '+SLineBreak+
             '        VALOR_CUPOM_DESCONTO,                                                                                                  '+SLineBreak+
@@ -370,6 +371,7 @@ begin
             '           regiao_id,                                                                                                          '+SLineBreak+
             '    				valor_frete valor_frete,                                                                                            '+SLineBreak+
             '    				acrescimo acrescimo,                                                                                                '+SLineBreak+
+            '    				origem_pedido,                                                                                                      '+SLineBreak+
             '    				sum(valor_itens) valor_itens,                                                                                       '+SLineBreak+
             '    				sum(valor_garantia) valor_garantia,                                                                                 '+SLineBreak+
             '    				sum(valor_cupom_desconto) valor_cupom_desconto,                                                                     '+SLineBreak+
@@ -400,6 +402,7 @@ begin
             '                    web_pedido.regiao_id,                                                                                      '+SLineBreak+
             '         					 coalesce(web_pedido.valor_frete,0) valor_frete,                                                            '+SLineBreak+
             '         					 coalesce(web_pedido.acrescimo,0) acrescimo,                                                                '+SLineBreak+
+            '                    web_pedido.origem_pedido,                                                                                  '+SLineBreak+
             '         					 coalesce(web_pedidoitens.quantidade,0) * coalesce(web_pedidoitens.valor_unitario,0) valor_itens,           '+SLineBreak+
             '         					 coalesce(web_pedidoitens.quantidade,0) * coalesce(web_pedidoitens.vlr_garantia,0) valor_garantia,          '+SLineBreak+
             '         					 coalesce(web_pedido.valor_cupom_desconto,0) valor_cupom_desconto                                           '+SLineBreak+
@@ -410,7 +413,7 @@ begin
             '               left join funcionario on funcionario.codigo_fun = web_pedido.vendedor_id                                        '+SLineBreak+
             '      			   ) t1                                                                                                             '+SLineBreak+
             '                                                                                                                               '+SLineBreak+
-            '    group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19, 20, 21, 22, 23 ) web_pedido                                      '+SLineBreak+
+            '    group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19, 20, 21, 22, 23, 24 ) web_pedido                                      '+SLineBreak+
             '    where 1=1                                                                                                                  '+SLineBreak;
 
     lSQL := lSQL + where;
