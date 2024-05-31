@@ -151,19 +151,19 @@ begin
             '  from (                                                  '+SLineBreak+
             '                                                          '+SLineBreak+
             '  select                                                  '+SLineBreak+
-            '      p.codigo_pro,                                       '+SLineBreak+
-            '      coalesce(p.saldo_pro,0) saldo_fisico,               '+SLineBreak+
-            '      sum(r.reservado) reservados                         '+SLineBreak+
-            '                                                          '+SLineBreak+
-            '  from                                                    '+SLineBreak+
-            '      view_reservados r                                   '+SLineBreak+
-            '                                                          '+SLineBreak+
-            '  left join produto p on p.codigo_pro = r.produto_id      '+SLineBreak+
-            '                                                          '+SLineBreak+
-            '  group by 1,2                                            '+SLineBreak+
-            '  ) p                                                     '+SLineBreak+
-            '                                                          '+SLineBreak+
-            '  where                                                   '+SLineBreak+
+            '      p.codigo_pro,                                           '+SLineBreak+
+            '      coalesce(p.saldo_pro,0) saldo_fisico,                   '+SLineBreak+
+            '      sum(coalesce(R.reservado,0)) reservados                 '+SLineBreak+
+            '                                                              '+SLineBreak+
+            '  from                                                        '+SLineBreak+
+            '     produto p                                                '+SLineBreak+
+            '                                                              '+SLineBreak+
+            '  left join view_reservados r  on p.codigo_pro = r.produto_id '+SLineBreak+
+            '                                                              '+SLineBreak+
+            '  group by 1,2                                                '+SLineBreak+
+            '  ) p                                                         '+SLineBreak+
+            '                                                              '+SLineBreak+
+            '  where                                                       '+SLineBreak+
             '    p.CODIGO_PRO = ' + QuotedStr(pParametros.PRODUTO);
 
     with lMemTable.IndexDefs.AddIndexDef do
