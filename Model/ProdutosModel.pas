@@ -1006,7 +1006,6 @@ begin
     self.TIPO_ITEM            := '00';
     self.CENQ                 := '999';
     self.LISTA                := 'N';
-    self.TIPO_PRO             := 'N';
     self.WEB_GERENCIA_ESTOQUE := 'N';
     self.PRINCIPIO_ATIVO      := 'N';
     self.IMPRESSAO_COZINHA    := 'N';
