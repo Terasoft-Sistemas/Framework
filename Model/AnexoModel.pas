@@ -28,6 +28,7 @@ type
     FID: Variant;
     FDOCUMENTO_ID: Variant;
     FSYSTIME: Variant;
+    FEXTENSAO: Variant;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -42,6 +43,7 @@ type
     procedure SetREGISTRO_ID(const Value: Variant);
     procedure SetSYSTIME(const Value: Variant);
     procedure SetTABELA(const Value: Variant);
+    procedure SetEXTENSAO(const Value: Variant);
 
   public
 
@@ -50,6 +52,7 @@ type
     property REGISTRO_ID    : Variant read FREGISTRO_ID write SetREGISTRO_ID;
     property DOCUMENTO_ID   : Variant read FDOCUMENTO_ID write SetDOCUMENTO_ID;
     property SYSTIME        : Variant read FSYSTIME write SetSYSTIME;
+    property EXTENSAO       : Variant read FEXTENSAO write SetEXTENSAO;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -185,6 +188,11 @@ end;
 procedure TAnexoModel.SetDOCUMENTO_ID(const Value: Variant);
 begin
   FDOCUMENTO_ID := Value;
+end;
+
+procedure TAnexoModel.SetEXTENSAO(const Value: Variant);
+begin
+  FEXTENSAO := Value;
 end;
 
 procedure TAnexoModel.SetID(const Value: Variant);

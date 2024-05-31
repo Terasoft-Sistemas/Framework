@@ -93,6 +93,7 @@ begin
     lModel.REGISTRO_ID      := lQry.FieldByName('REGISTRO_ID').AsString;
     lModel.DOCUMENTO_ID     := lQry.FieldByName('DOCUMENTO_ID').AsString;
     lModel.SYSTIME          := lQry.FieldByName('SYSTIME').AsString;
+    lModel.EXTENSAO         := lQry.FieldByName('EXTENSAO').AsString;
 
     Result := lModel;
   finally
