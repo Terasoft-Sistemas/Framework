@@ -289,6 +289,7 @@ begin
             '        loja2.descricao destino,                                                             '+sLineBreak+
             '        saidas.observacao_sai,                                                               '+sLineBreak+
             '        saidas.cfop_sai,                                                                     '+sLineBreak+
+            '        saidas.cfop_id,                                                                      '+sLineBreak+
             '        cfop.descricao cfop_descricao,                                                       '+sLineBreak+
             '        saidas.codigo_cta,                                                                   '+sLineBreak+
             '        contas.nome_cta conta_nome,                                                          '+sLineBreak+
