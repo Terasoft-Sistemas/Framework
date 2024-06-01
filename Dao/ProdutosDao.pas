@@ -77,7 +77,8 @@ end;
 implementation
 
 uses
-  System.Rtti;
+  System.Rtti, ClipBRD;
+
 { TProdutos }
 function TProdutosDao.carregaClasse(pID: String): TProdutosModel;
 var
@@ -694,7 +695,17 @@ begin
             '          NFCE_CFOP,                                                               '+
             '          GARANTIA_12,                                                             '+
             '          GARANTIA_24,                                                             '+
-            '          SALDO_DISPONIVEL                                                         '+
+            '          SALDO_DISPONIVEL,                                                        '+
+            '          codigo_for,                                                              '+
+            '          codigo_gru,                                                              '+
+            '          codigo_sub,                                                              '+
+            '          codigo_mar,                                                              '+
+            '          tipo_id,                                                                 '+
+            '          cor_id,                                                                  '+
+            '          voltagem_id,                                                             '+
+            '          saldo_pro,                                                               '+
+            '          status_pro,                                                              '+
+            '          status_linha                                                             '+
             '    from                                                                           '+
             '                                                                                   '+
             '      (                                                                            '+
@@ -707,7 +718,17 @@ begin
             '               produto.nfce_cfop,                                                  '+
             '               produto.garantia_12,                                                '+
             '               produto.garantia_24,                                                '+
-            '               saldo.saldo - saldo.reservado saldo_disponivel                      '+
+            '               saldo.saldo - saldo.reservado saldo_disponivel,                     '+
+            '               produto.codigo_for,                                                 '+
+            '               produto.codigo_gru,                                                 '+
+            '               produto.codigo_sub,                                                 '+
+            '               produto.codigo_mar,                                                 '+
+            '               produto.tipo_id,                                                    '+
+            '               produto.cor_id,                                                     '+
+            '               produto.voltagem_id,                                                '+
+            '               coalesce(produto.saldo_pro, 0) saldo_pro,                           '+
+            '               produto.status_pro,                                                 '+
+            '               coalesce(produto.status_linha, ''N'') status_linha                  '+
             '          from produto                                                             '+
             '          left join view_saldo_produto saldo on saldo.codigo = produto.codigo_pro  '+
             '       )  produto                                                                  '+
@@ -719,12 +740,13 @@ begin
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
 
+    Clipboard.asText := lSQL;
     lQry.Open(lSQL);
 
-    vIConexao.ConfigConexaoExterna('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA);
-
-    lQryCD := vIConexao.criarQueryExterna;
-    lQryCD.Open(lSQL);
+//    vIConexao.ConfigConexaoExterna('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA);
+//
+//    lQryCD := vIConexao.criarQueryExterna;
+//    lQryCD.Open(lSQL);
 
     i := 0;
     lQry.First;
@@ -742,10 +764,20 @@ begin
       FProdutossLista[i].GARANTIA_12       := lQry.FieldByName('GARANTIA_12').AsString;
       FProdutossLista[i].GARANTIA_24       := lQry.FieldByName('GARANTIA_24').AsString;
       FProdutossLista[i].SALDO_DISPONIVEL  := lQry.FieldByName('SALDO_DISPONIVEL').AsString;
+      FProdutossLista[i].codigo_for        := lQry.FieldByName('codigo_for').AsString;
+      FProdutossLista[i].codigo_gru        := lQry.FieldByName('codigo_gru').AsString;
+      FProdutossLista[i].codigo_sub        := lQry.FieldByName('codigo_sub').AsString;
+      FProdutossLista[i].codigo_mar        := lQry.FieldByName('codigo_mar').AsString;
+      FProdutossLista[i].tipo_id           := lQry.FieldByName('tipo_id').AsString;
+      FProdutossLista[i].cor_id            := lQry.FieldByName('cor_id').AsString;
+      FProdutossLista[i].voltagem_id       := lQry.FieldByName('voltagem_id').AsString;
+      FProdutossLista[i].saldo_pro         := lQry.FieldByName('saldo_pro').AsString;
+      FProdutossLista[i].status_pro        := lQry.FieldByName('status_pro').AsString;
+      FProdutossLista[i].status_linha      := lQry.FieldByName('status_linha').AsString;
 
-      lQryCD.First;
-      if lQryCD.Locate('CODIGO_PRO', lQry.FieldByName('CODIGO_PRO').AsString, []) then
-        FProdutossLista[i].SALDO_CD := lQryCD.FieldByName('SALDO_DISPONIVEL').AsString;
+//      lQryCD.First;
+//      if lQryCD.Locate('CODIGO_PRO', lQry.FieldByName('CODIGO_PRO').AsString, []) then
+//        FProdutossLista[i].SALDO_CD := lQryCD.FieldByName('SALDO_DISPONIVEL').AsString;
 
       lQry.Next;
     end;

@@ -63,9 +63,9 @@ BottomMiddelPanelData=0000080001020200000009000000446F636B5369746530100000004772
 [View0]
 CustomEditViewType=TEditView
 Module=C:\Terasoft\Fontes\mgiratto\FTS\Terasoft\Framework\Test\uTeste.pas
-CursorX=46
-CursorY=2702
-TopLine=2689
+CursorX=5
+CursorY=3270
+TopLine=3263
 LeftCol=1
 Elisions=
 Bookmarks=
