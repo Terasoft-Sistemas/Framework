@@ -445,8 +445,10 @@ begin
       indIntermed := vConfiguracoesNotaFiscal.indIntermed(lQry.FieldByName('indIntermed').AsString);
       indPres     := vConfiguracoesNotaFiscal.indPres(lQry.FieldByName('indPres').AsString);
       idDest      := vConfiguracoesNotaFiscal.idDest(lQry.FieldByName('idDest').AsString);
+
       if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then
        tpImp       := tiNFCe;
+
       if tpEmis <> teNormal then
       begin
         dhCont := vConfiguracoesNotaFiscal.dhCont;

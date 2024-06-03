@@ -99,8 +99,6 @@ begin
     1: Result := taProducao;
     2: Result := taHomologacao;
   end;
-
-  Result := taHomologacao;
 end;
 
 function TConfiguracoesNotaFiscal.arquivosAdicionarLiteral: Boolean;
