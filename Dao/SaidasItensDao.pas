@@ -239,24 +239,25 @@ begin
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
 
-    lSql := ' select '+lPaginacao+'                                               '+SLineBreak+
-            '        saidasitens.id,                                              '+SLineBreak+
-            '        saidasitens.numero_sai,                                      '+SLineBreak+
-            '        saidasitens.codigo_cli,                                      '+SLineBreak+
-            '        saidasitens.codigo_pro,                                      '+SLineBreak+
-            '        produto.nome_pro produto_nome,                               '+SLineBreak+
-            '        produto.unidade_pro produto_unidade,                         '+SLineBreak+
-            '        saidasitens.quantidade_sai,                                  '+SLineBreak+
-            '        saidasitens.quantidade_ate,                                  '+SLineBreak+
-            '        saidasitens.valor_uni_sai,                                   '+SLineBreak+
-            '        saidasitens.status,                                          '+SLineBreak+
-            '        saidasitens.loja,                                            '+SLineBreak+
-            '        saidasitens.desconto_ped,                                    '+SLineBreak+
-            '        saidasitens.data_cad,                                        '+SLineBreak+
-            '        saidasitens.saida_id                                         '+SLineBreak+
-            '   from saidasitens                                                  '+SLineBreak+
-            '   left join produto on produto.codigo_pro = saidasitens.codigo_pro  '+SLineBreak+
-            '  where 1=1                                                          '+SLineBreak;
+    lSql := ' select '+lPaginacao+'                                                          ' +
+            '        saidasitens.id,                                                         ' +
+            '        saidasitens.numero_sai,                                                 ' +
+            '        saidasitens.codigo_cli,                                                 ' +
+            '        saidasitens.codigo_pro,                                                 ' +
+            '        produto.nome_pro produto_nome,                                          ' +
+            '        produto.unidade_pro produto_unidade,                                    ' +
+            '        saidasitens.quantidade_sai,                                             ' +
+            '        saidasitens.quantidade_ate,                                             ' +
+            '        saidasitens.valor_uni_sai,                                              ' +
+            '        (saidasitens.valor_uni_sai * saidasitens.quantidade_sai) valor_tot_sai, ' +
+            '        saidasitens.status,                                                     ' +
+            '        saidasitens.loja,                                                       ' +
+            '        saidasitens.desconto_ped,                                               ' +
+            '        saidasitens.data_cad,                                                   ' +
+            '        saidasitens.saida_id                                                    ' +
+            '   from saidasitens                                                             ' +
+            '   left join produto on produto.codigo_pro = saidasitens.codigo_pro             ' +
+            '  where 1=1                                                                     ';
 
     lSql := lSql + Where;
 
