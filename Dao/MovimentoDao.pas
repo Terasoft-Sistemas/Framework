@@ -316,7 +316,17 @@ begin
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
 
-      lSql := 'select '+lPaginacao+' * from MOVIMENTO where 1=1 ';
+      lSql := 'select '+lPaginacao+'                '+SLineBreak+
+              '        movimento.data_doc,          '+SLineBreak+
+              '        movimento.data_mov,          '+SLineBreak+
+              '        movimento.obs_mov,           '+SLineBreak+
+              '        movimento.tipo_doc,          '+SLineBreak+
+              '        movimento.quantidade_mov,    '+SLineBreak+
+              '        movimento.valor_mov,         '+SLineBreak+
+              '        movimento.status,            '+SLineBreak+
+              '        movimento.documento_mov      '+SLineBreak+
+              '   from movimento                    '+SLineBreak+
+              '  where 1=1                          '+SLineBreak;
 
     lSql := lSql + where;
 
