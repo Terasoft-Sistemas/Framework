@@ -248,13 +248,14 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := ' select count(*) records                                                  '+sLineBreak+
-            '   From saidas                                                            '+sLineBreak+
-            '   left join contas on saidas.codigo_cta = contas.codigo_cta              '+sLineBreak+
-            '   left join clientes on saidas.codigo_cli = clientes.codigo_cli          '+sLineBreak+
-            '   left join funcionario on saidas.vendedor_id = funcionario.codigo_fun   '+sLineBreak+
-            '   left join cfop on saidas.cfop_sai = cfop.cfop                          '+sLineBreak+
-            '   left join loja2 on loja2.cliente_id = saidas.codigo_cli                '+sLineBreak+
+    lSql := ' select count(*) records                                                                     '+sLineBreak+
+            '   From saidas                                                                               '+sLineBreak+
+            '   left join contas on saidas.codigo_cta = contas.codigo_cta                                 '+sLineBreak+
+            '   left join clientes on saidas.codigo_cli = clientes.codigo_cli                             '+sLineBreak+
+            '   left join funcionario on saidas.vendedor_id = funcionario.codigo_fun                      '+sLineBreak+
+            '   left join cfop on saidas.cfop_sai = cfop.cfop                                             '+sLineBreak+
+            '   left join loja2 on loja2.cliente_id = saidas.codigo_cli                                   '+sLineBreak+
+            '   left join transportadora on transportadora.codigo_tra = saidas.transportadora_id          '+sLineBreak+
             '  where 1=1 ';
 
     lSql := lSql + where;
@@ -290,6 +291,7 @@ begin
             '        saidas.observacao_sai,                                                               '+sLineBreak+
             '        saidas.cfop_sai,                                                                     '+sLineBreak+
             '        saidas.cfop_id,                                                                      '+sLineBreak+
+            '        cfop.cfop cfop,                                                                      '+sLineBreak+
             '        cfop.descricao cfop_descricao,                                                       '+sLineBreak+
             '        saidas.codigo_cta,                                                                   '+sLineBreak+
             '        contas.nome_cta conta_nome,                                                          '+sLineBreak+
