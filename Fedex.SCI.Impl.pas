@@ -707,6 +707,96 @@ end;
 {$ENDREGION}
 
 {$REGION 'TLogisticaFedex SCI implementation'}
+{ TLogisticaFedex }
+
+function TLogisticaFedex.processaRetorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  Result := fAPI.processaRetorno(nil,pResultado);
+end;
+
+constructor TLogisticaFedex.Create;
+begin
+  inherited Create;
+  fAPI := fedex_SCI_criaAPI(pCNPJ,pRazaoSocial);
+end;
+
+function TLogisticaFedex.enviaEntrada;//(pID: String; pResultado: IResultadoOperacao): IResultadoOperacao;
+  var
+    lLista: TFedex_PurchaseOrderList;
+begin
+  Result := checkResultadoOperacao(pResultado);
+
+  pResultado.propriedade['id'].asString := pID;
+  lLista := fedex_SCI_getPurchaseOrderList(pResultado);
+  if assigned(lLista) and (lLista.count>0) then
+    fAPI.sendPurchaseOrderList(lLista,pResultado);
+end;
+
+function TLogisticaFedex.enviaProduto(pCodigoPro: TipoWideStringFramework;  pResultado: IResultadoOperacao): IResultadoOperacao;
+  var
+    lLista: TFedex_SKUList;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  lLista := fedex_SCI_GetSKUList(pCodigoPro, pResultado);
+  if assigned(lLista) and (lLista.count>0) then
+    fAPI.sendSKUList(lLista,pResultado);
+end;
+
+function TLogisticaFedex.enviaSaida;//(pTipo: TipoWideStringFramework = ''; pNumeroPed: TipoWideStringFramework; pResultado: IResultadoOperacao): IResultadoOperacao;
+  var
+    lLista: TFedex_ShipmentOrderList;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  pResultado.propriedade['id'].asString := pNumeroDoc;
+  pResultado.propriedade['tipo'].asString := pTipo;
+  lLista := fedex_SCI_getShipmentOrderList(pResultado);
+  if assigned(lLista) and (lLista.count>0) then
+    fAPI.sendShipmentOrderList(lLista,pResultado);
+end;
+
+function TLogisticaFedex.getAPI: IUnknown;
+begin
+  Result := fAPI;
+end;
+
+function TLogisticaFedex.getCompilacao: Int64;
+begin
+  Result := fAPI.compilacao;
+end;
+
+function TLogisticaFedex.getVersao: TipoWideStringFramework;
+begin
+  Result := fAPI.versao;
+end;
+
+function TLogisticaFedex.precisaEnviarProduto(const pCodigoPro: TipoWideStringFramework): boolean;
+begin
+  Result := false;
+  if(pCodigoPro='') then
+    exit;
+  Result := stringNoArray(getStatusProduto(pCodigoPro), [' ','',CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO]);
+end;
+
+procedure TLogisticaFedex.setAPI(const pValue: IInterface);
+begin
+  supports(pValue, IFedexAPI, fAPI);
+end;
+
+procedure TLogisticaFedex.setControleAlteracoes(const pValue: IControleAlteracoes);
+begin
+  if assigned(pValue) then
+    fAPI.parameters.controleAlteracoes := pValue
+  else
+    fAPI.parameters.controleAlteracoes := criaControleAlteracoes;
+end;
+
+function criaLogisticaFedex(const pCNPJ: TipoWideStringFramework; const pRazaoSocial: TipoWideStringFramework): ILogistica;
+begin
+  Result := TLogisticaFedex.Create(pCNPJ, pRazaoSocial);
+end;
+
+
 function TLogisticaFedex.fedex_SCI_criaAPI;
   var
     fedex: IFedexAPI;
@@ -804,7 +894,9 @@ begin
     exit;
   Result := getStatusEntrada(pID)=CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
 end;
+{$ENDREGION'}
 
+{$REGION 'TLogisticaFedex fedex_SCI_GetSKUList'}
 function TLogisticaFedex.fedex_SCI_GetSKUList;
   var
     gdb: IGDB;
@@ -878,7 +970,9 @@ begin
       pResultado.formataErro('getSKUList: %s: %s', [ e.ClassName, e.Message ] );
   end;
 end;
+{$ENDREGION}
 
+{$REGION 'TLogisticaFedex fedex_SCI_GetShipmentOrderList'}
 function TLogisticaFedex.fedex_SCI_GetShipmentOrderList;
   var
     gdb: IGDB;
@@ -1117,9 +1211,10 @@ begin
     on e: Exception do
       pResultado.formataErro('getShipmentOrderList: %s: %s', [ e.ClassName, e.Message ] );
   end;
-
 end;
+{$ENDREGION}
 
+{$REGION 'TLogisticaFedex fedex_SCI_GetPurchaseOrderList'}
 function TLogisticaFedex.fedex_SCI_GetPurchaseOrderList;
   var
     gdb: IGDB;
@@ -1228,13 +1323,9 @@ begin
   end;
 
 end;
+{$ENDREGION}
 
-function TLogisticaFedex.processaRetorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-begin
-  Result := checkResultadoOperacao(pResultado);
-  Result := fAPI.processaRetorno(nil,pResultado);
-end;
-
+{$REGION 'TLogisticaFedex processaServico'}
 function TLogisticaFedex.processaServico(pResultado: IResultadoOperacao): IResultadoOperacao;
 begin
   Result := checkResultadoOperacao(pResultado);
@@ -1263,7 +1354,9 @@ begin
       Result.formataErro('TLogisticaFedex.processaServico(processaRetorno): %s: %s', [e.ClassName, e.Message ] );
   end;
 end;
+{$ENDREGION}
 
+{$REGION 'TLogisticaFedex status'}
 function TLogisticaFedex.getStatusProduto;
 begin
   Result := fAPI.parameters.controleAlteracoes.getValor(CONTROLE_LOGISTICA_STATUS_PRODUTO,pCodigoPro);
@@ -1323,94 +1416,6 @@ begin
 end;
 
 {$ENDREGION}
-
-
-{$REGION 'TLogisticaFedex'}
-
-{ TLogisticaFedex }
-
-
-constructor TLogisticaFedex.Create;
-begin
-  inherited Create;
-  fAPI := fedex_SCI_criaAPI(pCNPJ,pRazaoSocial);
-end;
-
-function TLogisticaFedex.enviaEntrada;//(pID: String; pResultado: IResultadoOperacao): IResultadoOperacao;
-  var
-    lLista: TFedex_PurchaseOrderList;
-begin
-  Result := checkResultadoOperacao(pResultado);
-
-  pResultado.propriedade['id'].asString := pID;
-  lLista := fedex_SCI_getPurchaseOrderList(pResultado);
-  if assigned(lLista) and (lLista.count>0) then
-    fAPI.sendPurchaseOrderList(lLista,pResultado);
-end;
-
-function TLogisticaFedex.enviaProduto(pCodigoPro: TipoWideStringFramework;  pResultado: IResultadoOperacao): IResultadoOperacao;
-  var
-    lLista: TFedex_SKUList;
-begin
-  Result := checkResultadoOperacao(pResultado);
-  lLista := fedex_SCI_GetSKUList(pCodigoPro, pResultado);
-  if assigned(lLista) and (lLista.count>0) then
-    fAPI.sendSKUList(lLista,pResultado);
-end;
-
-function TLogisticaFedex.enviaSaida;//(pTipo: TipoWideStringFramework = ''; pNumeroPed: TipoWideStringFramework; pResultado: IResultadoOperacao): IResultadoOperacao;
-  var
-    lLista: TFedex_ShipmentOrderList;
-begin
-  Result := checkResultadoOperacao(pResultado);
-  pResultado.propriedade['id'].asString := pNumeroDoc;
-  pResultado.propriedade['tipo'].asString := pTipo;
-  lLista := fedex_SCI_getShipmentOrderList(pResultado);
-  if assigned(lLista) and (lLista.count>0) then
-    fAPI.sendShipmentOrderList(lLista,pResultado);
-end;
-
-function TLogisticaFedex.getAPI: IUnknown;
-begin
-  Result := fAPI;
-end;
-
-function TLogisticaFedex.getCompilacao: Int64;
-begin
-  Result := fAPI.compilacao;
-end;
-
-function TLogisticaFedex.getVersao: TipoWideStringFramework;
-begin
-  Result := fAPI.versao;
-end;
-
-function TLogisticaFedex.precisaEnviarProduto(const pCodigoPro: TipoWideStringFramework): boolean;
-begin
-  Result := false;
-  if(pCodigoPro='') then
-    exit;
-  Result := stringNoArray(getStatusProduto(pCodigoPro), [' ','',CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO]);
-end;
-
-procedure TLogisticaFedex.setAPI(const pValue: IInterface);
-begin
-  supports(pValue, IFedexAPI, fAPI);
-end;
-
-procedure TLogisticaFedex.setControleAlteracoes(const pValue: IControleAlteracoes);
-begin
-  if assigned(pValue) then
-    fAPI.parameters.controleAlteracoes := pValue
-  else
-    fAPI.parameters.controleAlteracoes := criaControleAlteracoes;
-end;
-
-function criaLogisticaFedex(const pCNPJ: TipoWideStringFramework; const pRazaoSocial: TipoWideStringFramework): ILogistica;
-begin
-  Result := TLogisticaFedex.Create(pCNPJ, pRazaoSocial);
-end;
-{$ENDREGION'}
 
 {$REGION 'initialization'}
 
