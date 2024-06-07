@@ -5,7 +5,7 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
-  Interfaces.Conexao;
+  Interfaces.Conexao, FireDAC.Comp.Client;
 
 type
   TCaixaModel = class
@@ -151,6 +151,7 @@ type
     function Incluir: String;
     function Salvar: String;
     procedure obterLista;
+    function obterSaldo(pUsario: String): TFDMemTable;
 
     function carregaClasse(pIdCaixa: String): TCaixaModel;
     function carregaClasseIndexOf(pIndex: Integer): TCaixaModel;
@@ -258,6 +259,18 @@ begin
     FTotalRecords   := lCaixaLista.TotalRecords;
     FCaixasLista    := lCaixaLista.CaixasLista;
 
+  finally
+    lCaixaLista.Free;
+  end;
+end;
+
+function TCaixaModel.obterSaldo(pUsario: String): TFDMemTable;
+var
+  lCaixaLista: TCaixaDao;
+begin
+  lCaixaLista := TCaixaDao.Create(vIConexao);
+  try
+    Result := lCaixaLista.obterSaldo(pUsario);
   finally
     lCaixaLista.Free;
   end;
