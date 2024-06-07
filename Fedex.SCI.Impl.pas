@@ -1154,9 +1154,9 @@ begin
     begin
       lQuery := 'select ''P'' || p.numero_ped id, p.numero_ped pid, p.data_ped data_emissao, p.total_ped valor_total, c.cnpj_cpf_cli cnpj_cpf, ' +
                 ' t.cnpj_cpf_tra transportador, p.codigo_cli cliente_codigo, p.televenda_ped transportadora_codigo ' +
-              ' from pedidovenda p ' +
-              ' left join clientes c on c.codigo_cli = p.codigo_cli ' +
-              ' left join transportadora t on t.codigo_tra = p.televenda_ped ';
+                ' from pedidovenda p ' +
+                ' left join clientes c on c.codigo_cli = p.codigo_cli ' +
+                ' left join transportadora t on t.codigo_tra = p.televenda_ped ';
     end else if(lTipo=LOGISTICA_TIPOSAIDA_SAIDATRANSF) then
     begin
       lQuery := 'select ''T'' || p.numero_sai id, p.numero_sai pid, p.data_sai data_emissao, p.total_sai valor_total, c.cnpj_cpf_cli cnpj_cpf, ' +

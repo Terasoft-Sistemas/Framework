@@ -63,6 +63,7 @@ type
 
     procedure obterLista;
     function carregaClasse(pIdCaixa: String): TCaixaModel;
+    function obterSaldo(pUsario: String): TFDMemTable;
 
     procedure setParams(var pQry: TFDQuery; pCaixaModel: TCaixaModel);
 
@@ -323,6 +324,29 @@ begin
 
     obterTotalRegistros;
 
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TCaixaDao.obterSaldo(pUsario: String): TFDMemTable;
+var
+  lQry       : TFDQuery;
+  lSQL       : String;
+begin
+  lQry := vIConexao.CriarQuery;
+  try
+    lSQL :=
+      'SELECT SaldoCaixaC - SaldoCaixaD AS SaldoTotal'                                                                                                +SLineBreak+
+      'FROM ('                                                                                                                                        +SLineBreak+
+      '    SELECT '                                                                                                                                   +SLineBreak+
+      '        SUM(CASE WHEN c.tipo_cai = ''C'' AND c.usuario_cai = '+QuotedStr(pUsario)+' THEN c.valor_cai END) AS SaldoCaixaC,'                     +SLineBreak+
+      '        SUM(CASE WHEN c.tipo_cai = ''D'' AND c.usuario_cai = '+QuotedStr(pUsario)+' THEN c.valor_cai END) AS SaldoCaixaD'                      +SLineBreak+
+      '    FROM caixa c'                                                                                                                              +SLineBreak+
+      '    WHERE CAST(c.data_cai + COALESCE(c.hora_cai, CURRENT_TIME) AS TIMESTAMP) BETWEEN ''0001-01-01 00:00:00'' AND CURRENT_DATE + CURRENT_TIME)' +SLineBreak;
+
+      lQry.Open(lSQL);
+      Result := vConstrutor.atribuirRegistros(lQry);
   finally
     lQry.Free;
   end;

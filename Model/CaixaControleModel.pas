@@ -57,6 +57,7 @@ type
     procedure Setusuario(const Value: Variant);
     procedure SetIDRecordView(const Value: String);
     procedure Sethora_fecha(const Value: Variant);
+    procedure incluirFechamento(pCodigoCta: string; pDataCai: TDateTime; pHistoricoCai: string; pValorCai: real; pUsuarioCai: string; pTipoCai: string; pClienteCai: string; pNumeroPed: string; pFaturaCai: string; pParcelaCai: INTEGER; pStatus: string; pPortadorCai: string; pConciliadoCai: string; pLoja: String);
   public
     property id: Variant read Fid write Setid;
     property data: Variant read Fdata write Setdata;
@@ -106,7 +107,7 @@ type
 implementation
 
 uses
-  CaixaControleDao, System.SysUtils, UsuarioModel;
+  CaixaControleDao, System.SysUtils, UsuarioModel, FireDAC.Comp.Client;
 
 { TCaixaControleModel }
 
@@ -167,10 +168,13 @@ var
   lCaixaControleDao  : TCaixaControleDao;
   lCaixaAberto,
   lCaixaFechamento   : TCaixaControleModel;
+  lCaixaModel : TCaixaModel;
+  lMemTable: TFDMemTable;
 begin
   lCaixaControleDao  := TCaixaControleDao.Create(vIConexao);
   lCaixaAberto       := TCaixaControleModel.Create(vIConexao);
   lCaixaFechamento   := TCaixaControleModel.Create(vIConexao);
+  lCaixaModel        := TCaixaModel.Create(vIConexao);
 
   try
     lCaixaControleDao.WhereView := ' and caixa_ctr.status = ''I''     '+
@@ -194,12 +198,48 @@ begin
     lCaixaFechamento.hora    := TimeToStr(vIConexao.HoraServer);
     lCaixaFechamento.Salvar;
 
-    Result := lCaixaAberto.id;
+    lMemTable := lCaixaModel.obterSaldo(self.vIConexao.getUSer.ID);
+    //Crédito
+    incluirFechamento('200000', vIConexao.DataServer, 'Fec.Final '+self.vIConexao.getUSer.NOME+' '+TimeToStr(vIConexao.HoraServer), lMemTable.FieldByName('SaldoTotal').AsFloat, '000000', 'C', '', '', '', 0, '', '000004', '.', self.vIConexao.getEmpresa.LOJA);
+    //Débito
+    incluirFechamento('200000', vIConexao.DataServer, 'Fec.Final '+self.vIConexao.getUSer.NOME+' '+TimeToStr(vIConexao.HoraServer), lMemTable.FieldByName('SaldoTotal').AsFloat, self.vIConexao.getUSer.ID, 'D', '', '', '', 0, '', '000004', '.', self.vIConexao.getEmpresa.LOJA);
 
+    Result := lCaixaAberto.id;
   finally
     lCaixaAberto.Free;
     lCaixaFechamento.Free;
     lCaixaControleDao.Free;
+    lCaixaModel.Free;
+    lMemTable.Free;
+  end;
+end;
+
+procedure TCaixaControleModel.incluirFechamento(pCodigoCta: string; pDataCai: TDateTime; pHistoricoCai: string; pValorCai: real; pUsuarioCai: string; pTipoCai: string; pClienteCai: string; pNumeroPed: string; pFaturaCai: string; pParcelaCai: INTEGER; pStatus: string; pPortadorCai: string; pConciliadoCai: string; pLoja: String);
+var
+  lCaixaModel : TCaixaModel;
+begin
+  lCaixaModel := TCaixaModel.Create(vIConexao);
+  try
+    lCaixaModel.carregaClasse(pCodigoCta);
+
+    lCaixaModel.CODIGO_CTA     := pCodigoCta;
+    lCaixaModel.DATA_CAI       := pDataCai;
+    lCaixaModel.HISTORICO_CAI  := copy(pHistoricoCai,1,100);
+    lCaixaModel.VALOR_CAI      := pValorCai;
+    lCaixaModel.USUARIO_CAI    := pUsuarioCai;
+    lCaixaModel.TIPO_CAI       := pTipoCai;
+    lCaixaModel.CLIENTE_CAI    := pClienteCai;
+    lCaixaModel.NUMERO_PED     := pNumeroPed;
+    lCaixaModel.FATURA_CAI     := pFaturaCai;
+    lCaixaModel.PARCELA_CAI    := pParcelaCai;
+    lCaixaModel.STATUS         := pStatus;
+    lCaixaModel.PORTADOR_CAI   := pPortadorCai;
+    lCaixaModel.CONCILIADO_CAI := pConciliadoCai;
+    lCaixaModel.LOJA           := pLoja;
+
+    lCaixaModel.Incluir;
+  finally
+    lCaixaModel.Free;
   end;
 end;
 
