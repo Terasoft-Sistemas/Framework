@@ -126,8 +126,10 @@ type
 implementation
 
 uses
+  Terasoft.FuncoesTexto,
   PixDao,
-  Terasoft.Utils;
+  Terasoft.Utils,
+  Math;
 
 { TPixModel }
 
@@ -144,10 +146,10 @@ begin
     if pTipoTaxaRecebimento = 'VALOR' then
     begin
       Result := pValorTaxaRecebimento;
-    end else
-    if pTipoTaxaRecebimento = 'PERCENTUAL' then
+    end
+    else if pTipoTaxaRecebimento = 'PERCENTUAL' then
     begin
-      lValorTaxa := (pValorTaxaRecebimento / 100) * PValorBase;
+      lValorTaxa := Ceil((pValorTaxaRecebimento / 100 * PValorBase) * 100) / 100;
 
       if lValorTaxa < 0.30 then
         Result := 0.30
