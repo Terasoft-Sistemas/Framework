@@ -23,6 +23,7 @@ implementation
     Terasoft.Framework.ListaSimples.Impl,
     Terasoft.Framework.ListaSimples,
     SysUtils,
+    ClipBrd,
     FuncoesConfig, Terasoft.Framework.Logistica;
 {$endREGION}
 
@@ -45,11 +46,11 @@ implementation
         procedure setStatusProduto(const pCodigoPro: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
         function getResultadoProduto(const pCodigoPro: TipoWideStringFramework): TipoWideStringFramework;
 
-        function precisaEnviarEntrada(const pID: TipoWideStringFramework): boolean;
-        function getStatusEntrada(const pID: TipoWideStringFramework): TipoWideStringFramework;
-        procedure setStatusEntrada(const pID: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
-        function getResultadoEntrada(const pID: TipoWideStringFramework): TipoWideStringFramework;
-        function entradaFinalizada(const pID: TipoWideStringFramework): boolean;
+        function precisaEnviarEntrada(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework): boolean;
+        function getStatusEntrada(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework): TipoWideStringFramework;
+        procedure setStatusEntrada(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework; const pStatus: TipoWideStringFramework);
+        function getResultadoEntrada(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework): TipoWideStringFramework;
+        function entradaFinalizada(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework): boolean;
 
 
         function precisaEnviarSaida(const pTipo: TipoWideStringFramework; const pNumeroDoc: TipoWideStringFramework): boolean;
@@ -63,7 +64,7 @@ implementation
 
         function enviaProduto(pCodigoPro: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
         function enviaSaida(pTipo: TipoWideStringFramework = ''; pNumeroDoc: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-        function enviaEntrada(pID: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+        function enviaEntrada(pTipo: TipoWideStringFramework = ''; pID: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
         function processaRetorno(pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
@@ -434,27 +435,30 @@ end;
 {$REGION 'processaArquivoRecebimento'}
 function processaArquivoRecebimento(pUnkAPI: IUnknown; pResultado: IResultadoOperacao): IResultadoOperacao;
   var
-    lIMEI,lProduto, lArquivo, lNF, lCNPJ: String;
+    lIMEI,lProduto, lArquivo, _lNF, lCNPJ, lDocumento,lTipoDocumento,lTipoDocOriginal,lTipo: String;
     lTmp: TipoWideStringFramework;
     lTexto,lLinha: IListaTexto;
     i: Integer;
     lSave: Integer;
-    lTransferencia: boolean;
+    lFieldProduto,lFieldQtde,lFieldChecagem: TField;
+    //_lTransferencia: boolean;
     lMovimento, lDSIMEI, lDSFornecedor, lDS, lDSItens: IDataset;
     ctr: IControleAlteracoes;
     lLista: IDicionarioSimples<TipoWideStringFramework,IListaString>;
     lListaIMEIS: IListaString;
     pAPI: IFedexAPI;
     lRes: IResultadoOperacao;
-    lID: TipoWideStringFramework;
+    //lID: TipoWideStringFramework;
     lDataHoraAtual: TDateTime;
     lStatus: String;
 begin
   //processamento entrada
 
   Result := checkResultadoOperacao(pResultado);
-  lID := '';
+  //lID := '';
+  lTipo:='';
   lSave := pResultado.erros;
+  lTipoDocOriginal:='';
   lRes := nil;
   ctr := nil;
   lLista := TListaSimplesCreator.CreateDictionary<TipoWideStringFramework,IListaString>;
@@ -494,7 +498,8 @@ begin
       lLinha.strings.Delimiter := '|';
       lTexto.strings.LoadFromFile(lArquivo);
 
-      lNF := '';
+      lDocumento := '';
+      _lNF := '';
       lCNPJ := '';
 
       if(lTexto.lines.Count<1) then begin
@@ -511,55 +516,85 @@ begin
         end;
 
         if(lCNPJ='') then begin
+
           lCNPJ    := lLinha.strings.Strings[1];
-          lDSFornecedor := gdbPadrao.criaDataset.query('select f.id, f.codigo_for from fornecedor f where f.cnpj_cpf_for = :cnpj',
-            'cnpj', [ lCNPJ ] );
+          lDocumento := lLinha.strings.Strings[0];
 
-          if(lDSFornecedor.dataset.RecordCount=0) then begin
-            pResultado.formataErro('processaArquivoRecebimento [%s]: Fornecedor [%s] não existe', [ lArquivo, lCNPJ ] );
-            rejeitarArquivoFedex(true,pResultado);
-            pResultado.acumulador['Entradas rejeitadas'].incrementa;
-            exit;
+          lTipoDocumento := lDocumento;
+          if (lDocumento='') or(Length(lDocumento)<>11) then begin
+            pResultado.formataErro('processaArquivoExpedicao [%s]: Número do documento inválido: %s', [ lArquivo, lTipoDocumento ] );
+            break;
           end;
-        end;
 
-        if(lNF='') then begin
-          lNF := lLinha.strings.Strings[0];
-          lDS := gdbPadrao.criaDataset.query('select e.* from entrada e ' +
-              ' where e.codigo_for = :fornecedor and e.numero_ent =:numero ',
+          lTipo := copy(lDocumento,1,1);
+          lDocumento := copy(lDocumento,2);
+          lTipoDocOriginal := lTipoDocumento;
 
-              'fornecedor;numero', [ lDSFornecedor.fieldByName('codigo_for').AsString, lNF ] );
+          if(lTipo=LOGISTICA_TIPOENTRADANORMAL) then
+          begin
+            lDSFornecedor := gdbPadrao.criaDataset.query('select f.id, f.codigo_for from fornecedor f where f.cnpj_cpf_for = :cnpj',
+              'cnpj', [ lCNPJ ] );
+
+            if(lDSFornecedor.dataset.RecordCount=0) then begin
+              pResultado.formataErro('processaArquivoRecebimento [%s]: Fornecedor [%s] não existe', [ lArquivo, lCNPJ ] );
+              rejeitarArquivoFedex(true,pResultado);
+              pResultado.acumulador['Entradas rejeitadas'].incrementa;
+              exit;
+            end;
+
+            //primeiro caso..
+            lDS := gdbPadrao.criaDataset.query('select e.* from entrada e ' +
+                ' where e.codigo_for = :fornecedor and e.numero_ent =:numero ',
+
+                'fornecedor;numero', [ lDSFornecedor.fieldByName('codigo_for').AsString, lDocumento ] );
+
+          end else if(lTipo=LOGISTICA_TIPODEVOLUCAOSAIDA) then
+          begin
+            lDocumento := format('%.6d', [strtoInt64def(lDocumento,0)]);
+            lTipoDocumento := lTipo + lDocumento;
+            lDS := gdbPadrao.criaDataset.query('select e.* from devolucao e ' +
+                ' where e.id=:id ',
+
+                'id', [ lDocumento ] );
+          end else
+          begin
+            pResultado.formataErro('processaArquivoRecebimento [%s]: Tipo não reconhecido: %s', [ lArquivo, lTipo ] );
+            break;
+          end;
           if(lDS.dataset.RecordCount=0) then begin
-            pResultado.formataErro('processaArquivoRecebimento: NF [%s] do Fornecedor [%s] não existe.',
-              [ lNF, lCNPJ ] );
+            pResultado.formataErro('processaArquivoRecebimento: Documento de entrada [%s] do Fornecedor [%s] não existe.',
+              [ lTipoDocOriginal, lCNPJ ] );
             pResultado.propriedade['ACAO_ARQUIVO'].asString := FEDEX_ACAOARQUIVO_REJEITAR;
             result.acumulador['Entradas rejeitadas'].incrementa;
             exit;
           end;
 
-          lStatus:=ctr.getValor(CONTROLE_LOGISTICA_STATUS_ENTRADA, lDS.dataset.FieldByName('id').AsString,'');
-          lID := lDS.dataset.FieldByName('id').AsString;
-          lRes := pResultado.getSavePoint('po.' + lID);
+          lDocumento := lDS.dataset.FieldByName('id').AsString;
+          lTipoDocumento := lTipo + lDocumento;
+
+          lStatus:=ctr.getValor(CONTROLE_LOGISTICA_STATUS_ENTRADA, lTipoDocumento{ lDS.dataset.FieldByName('id').AsString},'');
+          //lID := lTipoDocumento;// lDS.dataset.FieldByName('id').AsString;
+          lRes := pResultado.getSavePoint('po.' + lTipoDocumento);
 
           if(lStatus=CONTROLE_LOGISTICA_STATUS_FINALIZADO) then
           begin
             rejeitarArquivoFedex(true,pResultado);
             pResultado.formataErro('processaArquivoRecebimento: NF [%s] do Fornecedor [%s] já foi processada',
-              [ lNF, lCNPJ ] );
+              [ lTipoDocOriginal, lCNPJ ] );
             pResultado.acumulador['Entradas rejeitadas'].incrementa;
             lRes := nil;
             exit;
           end else if stringForaArray(lStatus,[CONTROLE_LOGISTICA_STATUS_ENVIADO, CONTROLE_LOGISTICA_STATUS_DIVERGENTE]) then begin
             pResultado.formataErro('processaArquivoRecebimento: NF [%s] do Fornecedor [%s] divergente. Não está no status [ENVIADA] ou [DIVERGENTE].',
-              [ lNF, lCNPJ ] );
+              [ lTipoDocOriginal, lCNPJ ] );
             pResultado.acumulador['Entradas divergentes'].incrementa;
             divergenciaArquivoFedex(true,pResultado);
             exit;
           end;
         end;
 
-        if(lNF<>lLinha.strings.Strings[0]) then
-          pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui Número de NF igual ao início: [%s] e [%s]', [ lArquivo, (i + 1), lNF, lLinha.strings.Strings[0] ] );
+        if(lTipoDocOriginal<>lLinha.strings.Strings[0]) then
+          pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui Número de NF igual ao início: [%s] e [%s]', [ lArquivo, (i + 1), lTipoDocOriginal, lLinha.strings.Strings[0] ] );
 
         if(lCNPJ<>lLinha.strings.Strings[1]) then begin
           pResultado.formataErro('processaArquivoRecebimento [%s]: Registro %d não possui CNPJ igual ao início: [%s] e [%s]', [ lArquivo, (i + 1), lCNPJ, lLinha.strings.Strings[1] ] )
@@ -594,30 +629,88 @@ begin
         exit;
       end;
 
-      lTransferencia := (copy(lCNPJ,1,8) = copy(pAPI.parameters.depositante.cnpj,1,8)) and (lCNPJ<>pAPI.parameters.depositante.cnpj);
+      //_lTransferencia := (copy(lCNPJ,1,8) = copy(pAPI.parameters.depositante.cnpj,1,8)) and (lCNPJ<>pAPI.parameters.depositante.cnpj);
 
       lDSIMEI := gdbPadrao.criaDataset;
 
 
-      lDS := gdbPadrao.criaDataset.query('select e.* from entrada e ' +
+{      //Segundo caso
+      if(lTipo=LOGISTICA_TIPOENTRADANORMAL) then
+      begin
+        lDS := gdbPadrao.criaDataset.query('select e.* from entrada e ' +
               ' where e.codigo_for = :fornecedor and e.numero_ent =:numero ',
 
-              'fornecedor;numero', [ lDSFornecedor.fieldByName('codigo_for').AsString, lNF ] );
+              'fornecedor;numero', [ lDSFornecedor.fieldByName('codigo_for').AsString, lDocumento ] );
+      end else if(lTipo=LOGISTICA_TIPODEVOLUCAOSAIDA) then
+      begin
+        lDS := gdbPadrao.criaDataset.query('select e.* from devolucao e ' +
+              ' where e.id =:id ',
 
+              'id', [ lDocumento ] );
+      end else
+      begin
+        rejeitarArquivoFedex(true,pResultado);
+        pResultado.acumulador['Entradas rejeitadas'].incrementa;
+        pResultado.formataErro('processaArquivoRecebimento [%s]: Tipo não reconhecido: %s', [ lArquivo, lTipo ] );
+        exit;
+      end;
       if(lDS.dataset.RecordCount=0) then begin
-        pResultado.formataErro('processaArquivoRecebimento: NF [%s] do Fornecedor [%s] não existe ou já foi processada',
-          [ lNF, lCNPJ ] );
+        pResultado.formataErro('processaArquivoRecebimento: Documento [%s] do Fornecedor [%s] não existe ao processar o arquivos [%s]',
+          [ lTipoDocumento, lCNPJ, lArquivo ] );
         pResultado.propriedade['ACAO_ARQUIVO'].asString := FEDEX_ACAOARQUIVO_REJEITAR;
         result.acumulador['Entradas rejeitadas'].incrementa;
         exit;
+      end;}
+      lFieldQtde:=nil;
+      lFieldChecagem:=nil;
+      lFieldProduto:=nil;
+      if(lTipo=LOGISTICA_TIPOENTRADANORMAL) then
+      begin
+        lDSItens := gdbPadrao.criaDataset.query('select e.* from entradaitens e ' +
+          ' where e.codigo_for = :fornecedor and e.numero_ent =:numero ', 'fornecedor;numero', [ lDSFornecedor.fieldByName('codigo_for').AsString, lDS.dataset.FieldByName('numero_ent').AsString]);
+        lFieldQtde := lDSItens.dataset.FindField('QUANTIDADE_ENT');
+        lFieldProduto := lDSItens.dataset.FindField('codigo_pro');
+      end else if(lTipo=LOGISTICA_TIPODEVOLUCAOSAIDA) then
+      begin
+        lDSItens := gdbPadrao.criaDataset.query('select e.* from devolucaoitens e ' +
+          ' where e.id=:id ', 'id', [ lDocumento]);
+        lFieldQtde := lDSItens.dataset.FindField('QUANTIDADE');
+        lFieldProduto := lDSItens.dataset.FindField('produto');
+      end else
+      begin
+        rejeitarArquivoFedex(true,pResultado);
+        pResultado.acumulador['Entradas rejeitadas'].incrementa;
+        pResultado.formataErro('processaArquivoRecebimento [%s]: Tipo não reconhecido: %s', [ lArquivo, lTipo ] );
+        exit;
+      end;
+      if(lFieldChecagem=nil) then
+        lFieldChecagem := lDSItens.dataset.FindField('qtd_checagem');
+
+      if(lFieldChecagem=nil) then begin
+        pResultado.formataErro('processaArquivoRecebimento: Campo de checagem não localizado ao processar arquivo [%s]',
+          [ lArquivo ] );
+        pResultado.acumulador['Entradas divergentes'].incrementa;
+        divergenciaArquivoFedex(true,pResultado);
+        exit;
       end;
 
-      lDSItens := gdbPadrao.criaDataset.query('select e.* from entradaitens e ' +
-          ' where e.codigo_for = :fornecedor and e.numero_ent =:numero ', 'fornecedor;numero', [ lDSFornecedor.fieldByName('codigo_for').AsString, lNF]);
-
+      if(lFieldQtde=nil) then begin
+        pResultado.formataErro('processaArquivoRecebimento: Campo de quantidade não localizado ao processar arquivo [%s]',
+          [ lArquivo ] );
+        pResultado.acumulador['Entradas divergentes'].incrementa;
+        divergenciaArquivoFedex(true,pResultado);
+        exit;
+      end;
+      if(lFieldProduto=nil) then begin
+        pResultado.formataErro('processaArquivoRecebimento: Campo de produto não localizado ao processar arquivo [%s]',
+          [ lArquivo ] );
+        pResultado.acumulador['Entradas divergentes'].incrementa;
+        divergenciaArquivoFedex(true,pResultado);
+        exit;
+      end;
       if(lDSItens.dataset.RecordCount=0) then begin
-        pResultado.formataErro('processaArquivoRecebimento: NF [%s] do Fornecedor [%s] não existe items par serem processados',
-          [ lNF, lCNPJ ] );
+        pResultado.formataErro('processaArquivoRecebimento: Documento [%s] do Fornecedor [%s] não existe items ao processar arquivo [%s]',
+          [ lTipoDocumento, lCNPJ, lArquivo ] );
         pResultado.acumulador['Entradas divergentes'].incrementa;
         divergenciaArquivoFedex(true,pResultado);
         exit;
@@ -625,17 +718,29 @@ begin
 
       try
 
-        lMovimento := gdbPadrao.criaDataset.query('select * from movimento_serial s where s.tipo_documento = ''E'' and id_documento=:id ', 'id', [ lDS.fieldByName('id').AsString ]);
+        if(lTipo=LOGISTICA_TIPOENTRADANORMAL) then
+        begin
+          lMovimento := gdbPadrao.criaDataset.query('select * from movimento_serial s where s.tipo_documento = ''E'' and id_documento=:id ', 'id', [ lDS.fieldByName('id').AsString ]);
+        end else if(lTipo=LOGISTICA_TIPODEVOLUCAOSAIDA) then
+        begin
+          lMovimento := gdbPadrao.criaDataset.query('select * from movimento_serial s where s.tipo_documento = ''D'' and id_documento=:id ', 'id', [ lDocumento ]);
+        end else
+        begin
+          rejeitarArquivoFedex(true,pResultado);
+          pResultado.acumulador['Entradas rejeitadas'].incrementa;
+          pResultado.formataErro('processaArquivoRecebimento [%s]: Tipo não reconhecido: %s', [ lArquivo, lTipo ] );
+          exit;
+        end;
         if(lMovimento.dataset.RecordCount>0) then begin
           rejeitarArquivoFedex(true,pResultado);
-          pResultado.formataErro('processaArquivoRecebimento [%s]: Já possui movimento de seriais para essa entrada [%s]', [ lArquivo, lDS.fieldByName('id').AsString ] );
+          pResultado.formataErro('processaArquivoRecebimento [%s]: Já possui movimento de seriais para esse documento [%s]', [ lArquivo, lTipoDocumento ] );
           pResultado.acumulador['Entradas rejeitadas'].incrementa;
           exit;
         end;
 
         while not lDSItens.dataset.eof do
         begin
-          lProduto := lDSItens.dataset.FieldByName('codigo_pro').AsString;;
+          lProduto := lFieldProduto.AsString;;
 
           if not lLista.get(lProduto,lListaIMEIS) then
           begin
@@ -643,7 +748,7 @@ begin
             lDSItens.dataset.Next;
             continue;
           end;
-          if(lDSItens.dataset.fieldByName('QUANTIDADE_ENT').AsFloat <> lListaIMEIS.Count) then
+          if(lFieldQtde.AsFloat <> lListaIMEIS.Count) then
           begin
             pResultado.formataErro('processaArquivoRecebimento [%s]: Produto [%s] não possui IMEI suficientes na entrada: %d', [ lArquivo, lProduto, lListaIMEIS.Count ] );
             lDSItens.dataset.Next;
@@ -651,25 +756,35 @@ begin
           end else
           begin
             lDSItens.dataset.Edit;
-            lDSItens.dataset.FieldByName('qtd_checagem').AsFloat := lDSItens.dataset.fieldByName('QUANTIDADE_ENT').AsFloat;
+            lFieldChecagem.AsFloat := lFieldQtde.AsFloat;
             lDSItens.dataset.CheckBrowseMode;
           end;
           i := 0;
 
-          while (i < lDSItens.dataset.fieldByName('QUANTIDADE_ENT').AsFloat) and (lListaIMEIS.Count>0) do
-          //for lTmp in lListaIMEIS do
+          while (i < lFieldQtde.AsFloat) and (lListaIMEIS.Count>0) do
           begin
             lTmp := lListaIMEIS.Items[0];
             lListaIMEIS.Delete(0);
             inc(i);
-            if(i>lDSItens.dataset.fieldByName('QUANTIDADE_ENT').AsFloat) then break;
+            if(i>lFieldQtde.AsFloat) then break;
             if(lListaIMEIS.Count=0) then
               lLista.get(lProduto,lListaIMEIS,true);
 
-            gdbPadrao.insereDB('movimento_serial',
-                ['tipo_serial','numero','produto','tipo_documento','id_documento','logistica','dh_movimento'],
-                ['I',lTmp,lProduto,'E',lDS.fieldByName('id').AsString,LOGISTTICA_FEDEX,lDataHoraAtual]);
-
+            if(lTipo = LOGISTICA_TIPOENTRADANORMAL) then
+            begin
+              gdbPadrao.insereDB('movimento_serial',
+                  ['tipo_serial','numero','produto','tipo_documento','id_documento','logistica','dh_movimento'],
+                  ['I',lTmp,lProduto, 'E', lDS.fieldByName('id').AsString,LOGISTTICA_FEDEX,lDataHoraAtual]);
+            end else if(lTipo = LOGISTICA_TIPODEVOLUCAOSAIDA) then
+            begin
+              gdbPadrao.insereDB('movimento_serial',
+                  ['tipo_serial','numero','produto','tipo_documento','id_documento','logistica','dh_movimento'],
+                  ['I',lTmp,lProduto, 'D',lDocumento,LOGISTTICA_FEDEX,lDataHoraAtual]);
+            end else
+            begin
+              pResultado.formataErro('processaArquivoRecebimento [%s]: Tipo não reconhecido: %s', [ lArquivo, lTipo ] );
+              break;
+            end;
           end;
           lDSItens.dataset.Next;
         end;
@@ -683,7 +798,7 @@ begin
           exit;
         end;
         gdbPadrao.commit(true);
-        ctr.setValor(CONTROLE_LOGISTICA_STATUS_ENTRADA, lDS.dataset.FieldByName('id').AsString,CONTROLE_LOGISTICA_STATUS_FINALIZADO);
+        ctr.setValor(CONTROLE_LOGISTICA_STATUS_ENTRADA,lTipoDocumento{ lDS.dataset.FieldByName('id').AsString},CONTROLE_LOGISTICA_STATUS_FINALIZADO);
         apagarArquivoFedex(false,pResultado);
       finally
         gdbPadrao.rollback(true);
@@ -697,7 +812,7 @@ begin
 
   finally
     if assigned(lRes) and assigned(ctr) then begin
-      pAPI.parameters.controleAlteracoes.setValor(CONTROLE_LOGISTICA_RESULTADO_ENTRADA,lID,
+      pAPI.parameters.controleAlteracoes.setValor(CONTROLE_LOGISTICA_RESULTADO_ENTRADA,lTipoDocumento,
           lRes.toHTML('', 'Resultado de processamento do RETORNO da FEDEX @' + DateTimeToStr(Now), [ orosh_semHeader ]));
       pResultado.getSavePoint('');
     end;
@@ -728,6 +843,7 @@ begin
   Result := checkResultadoOperacao(pResultado);
 
   pResultado.propriedade['id'].asString := pID;
+  pResultado.propriedade['tipo'].asString := pTipo;
   lLista := fedex_SCI_getPurchaseOrderList(pResultado);
   if assigned(lLista) and (lLista.count>0) then
     fAPI.sendPurchaseOrderList(lLista,pResultado);
@@ -796,7 +912,6 @@ begin
   Result := TLogisticaFedex.Create(pCNPJ, pRazaoSocial);
 end;
 
-
 function TLogisticaFedex.fedex_SCI_criaAPI;
   var
     fedex: IFedexAPI;
@@ -816,7 +931,9 @@ begin
     fedex.parameters.modoProducao := true;//true;
   {$endif}
   fedex.parameters.controleAlteracoes := criaControleAlteracoes;
-  fedex.parameters.urlWS := ValorTagConfig(tagConfig_FEDEX_WEBSERVICE,'',tvString);
+//  {$if not defined(MODO_HOMOLOGACAO)}
+    fedex.parameters.urlWS := ValorTagConfig(tagConfig_FEDEX_WEBSERVICE,'',tvString);
+//  {$endif}
   if(fedex.parameters.urlWS='') then
       fedex.parameters.urlWS :=
           {$if not defined(MODO_HOMOLOGACAO)}
@@ -890,9 +1007,9 @@ end;
 function TLogisticaFedex.precisaEnviarEntrada;
 begin
   Result := false;
-  if(pID='') then
+  if(pTipo='') or (pNumeroDoc='') then
     exit;
-  Result := getStatusEntrada(pID)=CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
+  Result := getStatusEntrada(pTipo,pNumeroDoc)=CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
 end;
 {$ENDREGION'}
 
@@ -1037,8 +1154,6 @@ begin
     begin
       lQuery := 'select ''P'' || p.numero_ped id, p.numero_ped pid, p.data_ped data_emissao, p.total_ped valor_total, c.cnpj_cpf_cli cnpj_cpf, ' +
                 ' t.cnpj_cpf_tra transportador, p.codigo_cli cliente_codigo, p.televenda_ped transportadora_codigo ' +
-  //            ' case when ( p.devolucao_pedido_id is null ) then ''E'' else ''D'' end operacao, ' +
-  //            ' p.numero_ent numero_nfe, p.codigo_for,p.arq_nfe xml ' +
               ' from pedidovenda p ' +
               ' left join clientes c on c.codigo_cli = p.codigo_cli ' +
               ' left join transportadora t on t.codigo_tra = p.televenda_ped ';
@@ -1046,8 +1161,6 @@ begin
     begin
       lQuery := 'select ''T'' || p.numero_sai id, p.numero_sai pid, p.data_sai data_emissao, p.total_sai valor_total, c.cnpj_cpf_cli cnpj_cpf, ' +
                 ' t.cnpj_cpf_tra transportador, p.codigo_cli cliente_codigo, p.TRANSPORTADORA_ID transportadora_codigo ' +
-  //            ' case when ( p.devolucao_pedido_id is null ) then ''E'' else ''D'' end operacao, ' +
-  //            ' p.numero_ent numero_nfe, p.codigo_for,p.arq_nfe xml ' +
               ' from saidas p ' +
               ' left join clientes c on c.codigo_cli = p.codigo_cli ' +
               ' left join transportadora t on t.codigo_tra = p.TRANSPORTADORA_ID ';
@@ -1222,11 +1335,15 @@ function TLogisticaFedex.fedex_SCI_GetPurchaseOrderList;
     orders,items: IDataset;
     lFieldNames: String;
     lParameters: array of Variant;
-    lID, lQuery: String;
+    lID, lTipo, lQuery: String;
     datasets: TFedexDatasets;
     lSKUList: TFedex_SKUList;
     ctr: IControleAlteracoes;
+    l: IListaString;
     lXMLDataList: IDicionarioSimples<TipoWideStringFramework, TipoWideStringFramework>;
+    p: TFedex_PurchaseOrderList;
+    t: IFedexPurchaseOrder;
+
 begin
   checkResultadoOperacao(pResultado);
   Result := nil;
@@ -1245,31 +1362,95 @@ begin
     orders := gdb.criaDataset;
     items := gdb.criaDataset;
 
-    lQuery := 'select cast(p.id as varchar(30)) id, cfop.cfop, fornecedor.cnpj_cpf_for fornecedor, p.datanota_ent data_movimento, ' +
-            ' case when ( p.devolucao_pedido_id is null ) then ''E'' else ''D'' end operacao, ' +
-            ' p.numero_ent numero_nfe, p.codigo_for,p.arq_nfe xml ' +
-            ' from entrada p ' +
-            ' left join cfop on cfop.id = p.cfop_id ' +
-            ' left join fornecedor on fornecedor.codigo_for=p.codigo_for ';
+    lID   := pResultado.propriedade['id'].asString;
+    lTipo := pResultado.propriedade['tipo'].asString;
 
-    lID := pResultado.propriedade['id'].asString;
+    if(lTipo = '') then begin
+      l := getStringList;
+      l.Add(LOGISTICA_TIPOENTRADANORMAL);
+      l.Add(LOGISTICA_TIPODEVOLUCAOSAIDA);
+      for lTipo in l do
+      begin
+        pResultado.propriedade['tipo'].asString := lTipo;
+        p := fedex_SCI_GetPurchaseOrderList(pResultado);
+        if assigned(p) then
+        begin
+          if(Result=nil) then
+          begin
+            Result := p;
+            continue;
+          end;
+
+          for t in p do
+            Result.add(t);
+        end;
+        exit;
+      end;
+    end;
+
+    if(lTipo=LOGISTICA_TIPOENTRADANORMAL) then
+    begin
+      lQuery := 'select ''E'' || cast(p.id as varchar(30)) id, cast(p.id as varchar(30)) pid, fornecedor.cnpj_cpf_for fornecedor, p.datanota_ent data_movimento, ' +
+              ' case when ( p.devolucao_pedido_id is null ) then ''E'' else ''D'' end operacao, ' +
+              ' p.numero_ent numero_nfe, ''E'' tipo, p.codigo_for,p.arq_nfe xml ' +
+              ' from entrada p ' +
+              ' left join fornecedor on fornecedor.codigo_for=p.codigo_for ';
+    end else if(lTipo=LOGISTICA_TIPODEVOLUCAOSAIDA) then
+    begin
+      lQuery := 'select ''D'' ||cast(p.id as varchar(30)) id, cast(p.id as varchar(30)) pid, (select e.cnpj_emp from empresa e) fornecedor, p.data data_movimento, ' +
+              ' ''D'' operacao, ' +
+              ' p.id numero_nfe, ''D'' tipo, p.cliente codigo_for,'''' xml ' +
+              ' from devolucao p ';
+    end else
+    begin
+      pResultado.formataErro('fedex_SCI_GetPurchaseOrderList: Tipo não reconhecido: [%s]', [ lTIpo ]);
+      exit;
+    end;
+
     SetLength(lParameters,0);
     lFieldNames := '';
     if(lID<>'') then begin
       //Entrada específica
-      lFieldNames := 'id';
-      SetLength(lParameters,1);
-      lParameters[0] := lID;
-      lQuery := lQuery + ' where p.id=:id ';
+      if(lTipo=LOGISTICA_TIPOENTRADANORMAL) then
+      begin
+        //ENTRADA específica
+        lFieldNames := 'id';
+        SetLength(lParameters,1);
+        lParameters[0] := lID;
+        lQuery := lQuery + ' where p.id=:id ';
+      end else if(stringNoArray(lTipo, [LOGISTICA_TIPODEVOLUCAOSAIDA])) then
+      begin
+        //DEVOLUCAO específica
+        lFieldNames := 'id';
+        SetLength(lParameters,1);
+        lParameters[0] := lID;
+        lQuery := lQuery + ' where p.id=:id ';
+
+      end else begin
+        pResultado.formataErro('fedex_SCI_GetPurchaseOrderList: Tipo não reconhecido: [%s]', [ lTIpo ]);
+        exit;
+      end;
+
     end else begin
-      //Listar entradas que não estão no controle ou STATUS nulo ou espaço
-      lQuery := lQuery + ' left join controlealteracoes c on c.sistema = :sistema and c.identificador = :identificador and c.chave = cast(p.id as varchar(22)) ' +
-                ' where c.valor in ( ''A'' ) ';
       SetLength(lParameters,2);
       lParameters[0] := ctr.sistema;
       lParameters[1] := CONTROLE_LOGISTICA_STATUS_ENTRADA;
       lFieldNames := 'sistema;identificador';
       //Usar controle alterações...
+      if(lTipo=LOGISTICA_TIPOENTRADANORMAL) then
+      begin
+        //Listar entradas que não estão no controle ou STATUS nulo ou espaço
+        lQuery := lQuery + ' left join controlealteracoes c on c.sistema = :sistema and c.identificador = :identificador and c.chave = ''E'' || cast(p.id as varchar(22)) ' +
+                  ' where c.valor in ( ''A'' ) ';
+      end else if(lTipo=LOGISTICA_TIPODEVOLUCAOSAIDA) then
+      begin
+        //Listar devoluções que não estão no controle ou STATUS nulo ou espaço
+        lQuery := lQuery + ' left join controlealteracoes c on c.sistema = :sistema and c.identificador = :identificador and c.chave = ''D''||cast(p.id as varchar(22)) ' +
+                  ' where c.valor in ( ''A'' ) ';
+      end else begin
+        pResultado.formataErro('fedex_SCI_GetPurchaseOrderList: Tipo não reconhecido: [%s]', [ lTIpo ]);
+        exit;
+      end;
     end;
 
     orders.query(lQuery,lFieldNames,lParameters);
@@ -1281,14 +1462,32 @@ begin
     datasets.po.dataset.First;
     while not datasets.po.dataset.Eof do begin
 
-      lQuery := 'select ' + QuotedStr(datasets.po.dataset.FieldByName('id').AsString) + ' id, ' +
-        ' p.numero_ent, p.codigo_for, p.codigo_pro produto, p.quantidade_ent quantidade, ' +
-        ' p.valoruni_ent unitario, produto.barras_pro barras ' +
-        ' from entradaitens p ' +
-        ' left join produto on produto.codigo_pro=p.codigo_pro ' +
-        ' where p.numero_ent=:numero_ent and p.codigo_for = :codigo_for ';
+      if(lTipo=LOGISTICA_TIPOENTRADANORMAL) then
+      begin
+        //ENTRADA específica
+        lQuery := 'select ' + QuotedStr(datasets.po.dataset.FieldByName('id').AsString) + ' id, ' +
+          ' p.numero_ent, p.codigo_for, p.codigo_pro produto, p.quantidade_ent quantidade, ' +
+          ' p.valoruni_ent unitario, produto.barras_pro barras ' +
+          ' from entradaitens p ' +
+          ' left join produto on produto.codigo_pro=p.codigo_pro ' +
+          ' where p.numero_ent=:numero_ent and p.codigo_for = :codigo_for ';
+        items.query(lQuery,'numero_ent;codigo_for', [ datasets.po.dataset.FieldByName('numero_nfe').AsString, datasets.po.dataset.FieldByName('codigo_for').AsString ]);
+      end else if(stringNoArray(lTipo, [LOGISTICA_TIPODEVOLUCAOSAIDA])) then
+      begin
+        //DEVOLUCAO específica
+        lQuery := 'select ' + QuotedStr(datasets.po.dataset.FieldByName('id').AsString) + ' id, ' +
+          ' p.id numero_ent, ''000000'' codigo_for, p.produto produto, p.quantidade quantidade, ' +
+          ' p.valor_unitario unitario, produto.barras_pro barras' +
+          ' from devolucaoitens p' +
+          ' left join produto on produto.codigo_pro=p.produto' +
+          ' where p.id=:numero_ent ';
+        items.query(lQuery,'numero_ent', [ datasets.po.dataset.FieldByName('pid').AsString ]);
+      end else begin
+        pResultado.formataErro('fedex_SCI_GetPurchaseOrderList: Tipo não reconhecido: [%s]', [ lTIpo ]);
+        exit;
+      end;
 
-      items.query(lQuery,'numero_ent;codigo_for', [ datasets.po.dataset.FieldByName('numero_nfe').AsString, datasets.po.dataset.FieldByName('codigo_for').AsString ]);
+      //items.query(lQuery,'numero_ent;codigo_for', [ datasets.po.dataset.FieldByName('numero_nfe').AsString, datasets.po.dataset.FieldByName('codigo_for').AsString ]);
       save1 := pResultado.erros;
 
       while not items.dataset.eof do begin
@@ -1307,6 +1506,18 @@ begin
         atribuirRegistros(items.dataset,datasets.poItens.dataset);
       datasets.po.dataset.Next;
     end;
+
+    datasets.poItens.dataset.First;
+    {//id já tem o prefixo
+    while not datasets.poItens.dataset.eof do
+    begin
+      datasets.poItens.dataset.Edit;
+      datasets.poItens.dataset.FieldByName('id').AsString := lTipo + datasets.poItens.dataset.FieldByName('id').AsString;
+      datasets.poItens.dataset.CheckBrowseMode;
+
+      datasets.poItens.dataset.Next;
+    end;}
+
 
     lXMLDataList := TListaSimplesCreator.CreateDictionary<TipoWideStringFramework,TipoWideStringFramework>;
     lXMLDataList.add('ordem',datasets.po.getXML);
@@ -1336,7 +1547,7 @@ begin
       Result.formataErro('TLogisticaFedex.processaServico(enviaProduto): %s: %s', [e.ClassName, e.Message ] );
   end;
   try
-    Result := enviaEntrada('',Result);
+    Result := enviaEntrada('','',Result);
   except
     on e: Exception do
       Result.formataErro('TLogisticaFedex.processaServico(enviaEntrada): %s: %s', [e.ClassName, e.Message ] );
@@ -1370,13 +1581,13 @@ end;
 
 function TLogisticaFedex.getStatusEntrada;
 begin
-  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_STATUS_ENTRADA,pID);
+  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_STATUS_ENTRADA,pTipo+pNumeroDoc);
 end;
 
 procedure TLogisticaFedex.setStatusEntrada;
 begin
-  if(pID<>'') then
-    getControleAlteracoes.setValor(CONTROLE_LOGISTICA_STATUS_ENTRADA,pID,pStatus);
+  if(pTipo<>'') and (pNumeroDoc<>'') then
+    getControleAlteracoes.setValor(CONTROLE_LOGISTICA_STATUS_ENTRADA,pTipo+pNumeroDoc,pStatus);
 end;
 
 function TLogisticaFedex.getStatusSaida;
@@ -1397,7 +1608,7 @@ end;
 
 function TLogisticaFedex.entradaFinalizada;
 begin
-  Result := getStatusEntrada(pID)=CONTROLE_LOGISTICA_STATUS_FINALIZADO;
+  Result := getStatusEntrada(pTipo,pNumeroDoc)=CONTROLE_LOGISTICA_STATUS_FINALIZADO;
 end;
 
 function TLogisticaFedex.getResultadoProduto(const pCodigoPro: TipoWideStringFramework): TipoWideStringFramework;
@@ -1412,7 +1623,7 @@ end;
 
 function TLogisticaFedex.getResultadoEntrada;
 begin
-  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_ENTRADA,pID);
+  Result := getControleAlteracoes.getValor(CONTROLE_LOGISTICA_RESULTADO_ENTRADA,pTipo+pNumeroDoc);
 end;
 
 {$ENDREGION}

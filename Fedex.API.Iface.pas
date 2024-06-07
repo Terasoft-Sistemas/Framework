@@ -318,13 +318,15 @@ begin
   ds := TClientDataSet(Result.po.dataset);
   ds.Close;
   ds.FieldDefs.Add('id',ftString,30,false);
-  ds.FieldDefs.Add('cfop',ftString,50,false);
+  ds.FieldDefs.Add('pid',ftString,50,false);
+  //ds.FieldDefs.Add('cfop',ftString,50,false);
   ds.FieldDefs.Add('fornecedor',ftString,30,false);
   ds.FieldDefs.Add('codigo_for',ftString,30,false);
   ds.FieldDefs.Add('data_movimento',ftDate,0,false);
   ds.FieldDefs.Add('operacao',ftString,1,false);
   ds.FieldDefs.Add('xml',ftMemo,1,false);
   ds.FieldDefs.Add('numero_nfe',ftString,50,false);
+  ds.FieldDefs.Add('tipo',ftString,1,false);
   ds.CreateDataSet;
   ds.LogChanges := false;
 
