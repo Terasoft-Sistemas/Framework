@@ -1,5 +1,7 @@
 unit ProdutosDao;
+
 interface
+
 uses
   ProdutosModel,
   FireDAC.Comp.Client,
@@ -27,14 +29,6 @@ type
     FWhereView: String;
     FTotalRecords: Integer;
     FIDRecordView: String;
-    FFiltroFornecedor: String;
-    FFiltroMarca: Variant;
-    FFiltroSubGrupo: Variant;
-    FFiltroGrupo: Variant;
-    FFiltroCor: Variant;
-    FFiltroGrade: Variant;
-    FFiltroVoltagem: Variant;
-    FFiltroGrupoComissao: Variant;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
     procedure SetProdutossLista(const Value: TObjectList<TProdutosModel>);
@@ -47,14 +41,6 @@ type
     function where: String;
     procedure SetIDRecordView(const Value: String);
     procedure setParams(var pQry: TFDQuery; pProdutoModel: TProdutosModel);
-    procedure SetFiltroFornecedor(const Value: String);
-    procedure SetFiltroCor(const Value: Variant);
-    procedure SetFiltroGrade(const Value: Variant);
-    procedure SetFiltroGrupo(const Value: Variant);
-    procedure SetFiltroGrupoComissao(const Value: Variant);
-    procedure SetFiltroMarca(const Value: Variant);
-    procedure SetFiltroSubGrupo(const Value: Variant);
-    procedure SetFiltroVoltagem(const Value: Variant);
 
   public
 
@@ -69,14 +55,6 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
-    property FiltroFornecedor: String read FFiltroFornecedor write SetFiltroFornecedor;
-    property FiltroSubGrupo : Variant read FFiltroSubGrupo write SetFiltroSubGrupo;
-    property FiltroMarca : Variant read FFiltroMarca write SetFiltroMarca;
-    property FiltroGrupo : Variant read FFiltroGrupo write SetFiltroGrupo;
-    property FiltroCor : Variant read FFiltroCor write SetFiltroCor;
-    property FiltroGrade : Variant read FFiltroGrade write SetFiltroGrade;
-    property FiltroVoltagem : Variant read FFiltroVoltagem write SetFiltroVoltagem;
-    property FiltroGrupoComissao : Variant read FFiltroGrupoComissao write SetFiltroGrupoComissao;
 
     function incluir(pProdutosModel: TProdutosModel): String;
     function alterar(pProdutosModel: TProdutosModel): String;
@@ -490,30 +468,6 @@ begin
 
   if FIDRecordView <> ''  then
     lSQL := lSQL + ' and produto.codigo_pro = '+ QuotedStr(FIDRecordView);
-
-  if FFiltroFornecedor <> '' then
-    lSQL := lSQL + ' and produto.codigo_for = '+ QuotedStr(FFiltroFornecedor);
-
-  if FFiltroSubGrupo <> '' then
-    lSQL := lSQL + ' and produto.codigo_sub = '+ QuotedStr(FFiltroSubGrupo);
-
-  if FFiltroMarca <> '' then
-    lSQL := lSQL + ' and produto.codigo_mar = '+ QuotedStr(FFiltroMarca);
-
-  if FFiltroGrupo <> '' then
-    lSQL := lSQL + ' and produto.codigo_gru = '+ QuotedStr(FFiltroGrupo);
-
-  if FFiltroCor <> '' then
-    lSQL := lSQL + ' and produto.cor_id = '+ QuotedStr(FFiltroCor);
-
-  if FFiltroGrade <> '' then
-    lSQL := lSQL + ' and produto.tipo_id = '+ QuotedStr(FFiltroGrade);
-
-  if FFiltroVoltagem <> '' then
-    lSQL := lSQL + ' and produto.voltagem_id = '+ QuotedStr(FFiltroVoltagem);
-
-  if FFiltroGrupoComissao <> '' then
-    lSQL := lSQL + ' and produto.grupo_comissao_id = '+ QuotedStr(FFiltroGrupoComissao);
 
   Result := lSQL;
 end;
@@ -933,45 +887,6 @@ end;
 procedure TProdutosDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
-end;
-
-procedure TProdutosDao.SetFiltroCor(const Value: Variant);
-begin
-  FFiltroCor := Value;
-end;
-procedure TProdutosDao.SetFiltroFornecedor(const Value: String);
-begin
-  FFiltroFornecedor := Value;
-end;
-
-procedure TProdutosDao.SetFiltroGrade(const Value: Variant);
-begin
-  FFiltroGrade := Value;
-end;
-
-procedure TProdutosDao.SetFiltroGrupo(const Value: Variant);
-begin
-  FFiltroGrupo := Value;
-end;
-
-procedure TProdutosDao.SetFiltroGrupoComissao(const Value: Variant);
-begin
-  FFiltroGrupoComissao := Value;
-end;
-
-procedure TProdutosDao.SetFiltroMarca(const Value: Variant);
-begin
-  FFiltroMarca := Value;
-end;
-
-procedure TProdutosDao.SetFiltroSubGrupo(const Value: Variant);
-begin
-  FFiltroSubGrupo := Value;
-end;
-
-procedure TProdutosDao.SetFiltroVoltagem(const Value: Variant);
-begin
-  FFiltroVoltagem := Value;
 end;
 
 procedure TProdutosDao.SetProdutossLista(const Value: TObjectList<TProdutosModel>);

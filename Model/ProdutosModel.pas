@@ -310,14 +310,6 @@ type
     FCOR_ID: Variant;
     FVOLTAGEM_ID: Variant;
     FTIPO__PRO: Variant;
-    FFiltroFornecedor: String;
-    FFiltroMarca: Variant;
-    FFiltroSubGrupo: Variant;
-    FFiltroGrupo: Variant;
-    FFiltroCor: Variant;
-    FFiltroGrade: Variant;
-    FFiltroVoltagem: Variant;
-    FFiltroGrupoComissao: Variant;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -602,14 +594,6 @@ type
     procedure SetCOR_ID(const Value: Variant);
     procedure SetVOLTAGEM_ID(const Value: Variant);
     procedure SetTIPO__PRO(const Value: Variant);
-    procedure SetFiltroFornecedor(const Value: String);
-    procedure SetFiltroCor(const Value: Variant);
-    procedure SetFiltroGrade(const Value: Variant);
-    procedure SetFiltroGrupo(const Value: Variant);
-    procedure SetFiltroGrupoComissao(const Value: Variant);
-    procedure SetFiltroMarca(const Value: Variant);
-    procedure SetFiltroSubGrupo(const Value: Variant);
-    procedure SetFiltroVoltagem(const Value: Variant);
 
   public
     property UUID: Variant read FUUID write SetUUID;
@@ -923,14 +907,6 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
     property CodProdutoView : String read FCodProdutoView write SetCodProdutoView;
-    property FiltroFornecedor: String read FFiltroFornecedor write SetFiltroFornecedor;
-    property FiltroVoltagem : Variant read FFiltroVoltagem write SetFiltroVoltagem;
-    property FiltroCor : Variant read FFiltroCor write SetFiltroCor;
-    property FiltroGrade : Variant read FFiltroGrade write SetFiltroGrade;
-    property FiltroGrupoComissao : Variant read FFiltroGrupoComissao write SetFiltroGrupoComissao;
-    property FiltroGrupo : Variant read FFiltroGrupo write SetFiltroGrupo;
-    property FiltroSubGrupo : Variant read FFiltroSubGrupo write SetFiltroSubGrupo;
-    property FiltroMarca : Variant read FFiltroMarca write SetFiltroMarca;
 
   end;
 
@@ -943,8 +919,14 @@ uses
   PrecoVendaModel,
   PrecoVendaProdutoModel,
   PrecoClienteModel,
-  System.SysUtils, Data.DB, PromocaoModel,
-  Variants, GrupoModel, SubGrupoModel, MarcaModel, FornecedorModel;
+  System.SysUtils,
+  Data.DB,
+  PromocaoModel,
+  Variants,
+  GrupoModel,
+  SubGrupoModel,
+  MarcaModel,
+  FornecedorModel;
 
   { TProdutosModel }
 
@@ -1113,14 +1095,6 @@ begin
     lProdutosLista.StartRecordView     := FStartRecordView;
     lProdutosLista.LengthPageView      := FLengthPageView;
     lProdutosLista.IDRecordView        := FIDRecordView;
-    lProdutosLista.FiltroFornecedor    := FFiltroFornecedor;
-    lProdutosLista.FiltroSubGrupo      := FFiltroSubGrupo;
-    lProdutosLista.FiltroMarca         := FFiltroMarca;
-    lProdutosLista.FiltroGrupo         := FFiltroGrupo;
-    lProdutosLista.FiltroCor           := FFiltroCor;
-    lProdutosLista.FiltroGrade         := FFiltroGrade;
-    lProdutosLista.FiltroVoltagem      := FFiltroVoltagem;
-    lProdutosLista.FiltroGrupoComissao := FFiltroGrupoComissao;
 
     lProdutosLista.obterLista;
 
@@ -1671,38 +1645,6 @@ end;
 procedure TProdutosModel.SetFICHA_TECNICA(const Value: Variant);
 begin
   FFICHA_TECNICA := Value;
-end;
-procedure TProdutosModel.SetFiltroCor(const Value: Variant);
-begin
-  FFiltroCor := Value;
-end;
-procedure TProdutosModel.SetFiltroFornecedor(const Value: String);
-begin
-  FFiltroFornecedor := Value;
-end;
-procedure TProdutosModel.SetFiltroGrade(const Value: Variant);
-begin
-  FFiltroGrade := Value;
-end;
-procedure TProdutosModel.SetFiltroGrupo(const Value: Variant);
-begin
-  FFiltroGrupo := Value;
-end;
-procedure TProdutosModel.SetFiltroGrupoComissao(const Value: Variant);
-begin
-  FFiltroGrupoComissao := Value;
-end;
-procedure TProdutosModel.SetFiltroMarca(const Value: Variant);
-begin
-  FFiltroMarca := Value;
-end;
-procedure TProdutosModel.SetFiltroSubGrupo(const Value: Variant);
-begin
-  FFiltroSubGrupo := Value;
-end;
-procedure TProdutosModel.SetFiltroVoltagem(const Value: Variant);
-begin
-  FFiltroVoltagem := Value;
 end;
 procedure TProdutosModel.SetFORNECEDOR_CODIGO(const Value: Variant);
 begin
