@@ -58,11 +58,11 @@ type
     function alterar(pDevolucaoItensModel: TDevolucaoItensModel): String;
     function excluir(pDevolucaoItensModel: TDevolucaoItensModel): String;
 
-    function carregaClasse(pID : String): TDevolucaoItensModel;
-
+    function carregaClasse(pID, pProduto, pItem : String): TDevolucaoItensModel;
     function obterLista: TFDMemTable;
-
     procedure setParams(var pQry: TFDQuery; pDevolucaoItensModel: TDevolucaoItensModel);
+    function proximoItem(pDevolucao : String): String;
+    function calculaTotais(pDevolucao : String): TFDmemTable;
 
 end;
 
@@ -73,7 +73,27 @@ uses
 
 { TDevolucaoItens }
 
-function TDevolucaoItensDao.carregaClasse(pID : String): TDevolucaoItensModel;
+function TDevolucaoItensDao.calculaTotais(pDevolucao: String): TFDmemTable;
+var
+  lQry : TFDQuery;
+  lSQL : String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+    lSQL := ' select coalesce(sum(quantidade * valor_unitario), 0) Total  '+SLineBreak+
+            '   from devolucaoItens                                       '+SLineBreak+
+            '  where id = ' + QuotedStr(pDevolucao);
+
+    lQry.Open(lSQL);
+
+    Result := vConstrutor.atribuirRegistros(lQry);
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TDevolucaoItensDao.carregaClasse(pID, pProduto, pItem : String): TDevolucaoItensModel;
 var
   lQry: TFDQuery;
   lModel: TDevolucaoItensModel;
@@ -83,7 +103,11 @@ begin
   Result   := lModel;
 
   try
-    lQry.Open('select * from devolucaoitens where id = ' +QuotedStr(pID));
+    lQry.Open(' select * '+
+              '   from devolucaoitens '+
+              '  where id = ' +QuotedStr(pID) +
+              '    and produto = ' + QuotedStr(pProduto) +
+              '    and item = ' + QuotedStr(pItem));
 
     if lQry.IsEmpty then
       Exit;
@@ -174,12 +198,18 @@ end;
 
 function TDevolucaoItensDao.excluir(pDevolucaoItensModel: TDevolucaoItensModel): String;
 var
-  lQry: TFDQuery;
+  lQry : TFDQuery;
+  lSql : String;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from devolucaoitens where id = '+ QuotedStr(pDevolucaoItensModel.ID));
+   lQry.ExecSQL('delete '+
+                '  from devolucaoitens '+
+                ' where id = '+ QuotedStr(pDevolucaoItensModel.ID) +
+                '   and produto = ' + QuotedStr(pDevolucaoItensModel.PRODUTO) +
+                '   and item = ' + QuotedStr(pDevolucaoItensModel.ITEM));
+
    Result := pDevolucaoItensModel.ID;
 
   finally
@@ -221,6 +251,11 @@ begin
   finally
     lQry.Free;
   end;
+end;
+
+function TDevolucaoItensDao.proximoItem(pDevolucao: String): String;
+begin
+  Result := vIConexao.getConnection.ExecSQLScalar('select first 1 lpad (cast(i.item as integer) + 1, 3, ''0'') item from devolucaoitens i where i.id = '+QuotedStr(pDevolucao)+' order by i.item desc');
 end;
 
 function TDevolucaoItensDao.obterLista: TFDMemTable;

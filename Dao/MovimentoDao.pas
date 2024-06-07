@@ -203,7 +203,8 @@ var
   lSql : String;
 begin
 
-  lSql := ' and data_mov between ''' + transformaDataFireBirdWhere(FDataInicialView) + ''' and ''' + transformaDataFireBirdWhere(FDataFinalView) + ''' ';
+  if (FDataInicialView <> '') and (FDataFinalView <> '') then
+    lSql := ' and data_mov between ''' + transformaDataFireBirdWhere(FDataInicialView) + ''' and ''' + transformaDataFireBirdWhere(FDataFinalView) + ''' ';
 
   if not FWhereView.IsEmpty then
     lSQL := lSQL + FWhereView;
