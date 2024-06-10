@@ -56,7 +56,7 @@ uses
 {= }
 
 const
-  libssh2_name = 'libssh2.dll';
+  libssh2_name = 'libssh21.dll';
 
 type
   libssh2_uint64_t = UInt64;
