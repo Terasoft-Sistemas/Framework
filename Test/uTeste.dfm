@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 1248
     Height = 927
-    ActivePage = TabSheet8
+    ActivePage = Orcamento
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -1206,6 +1206,82 @@ object Form1: TForm1
         Caption = 'Calcular Peso'
         TabOrder = 10
         OnClick = Button112Click
+      end
+    end
+    object Orcamento: TTabSheet
+      Caption = 'Orcamento'
+      ImageIndex = 10
+      object OrcamentoConsultar: TButton
+        Left = 191
+        Top = 3
+        Width = 182
+        Height = 46
+        Caption = 'Orcamento Consultar'
+        TabOrder = 0
+        OnClick = OrcamentoConsultarClick
+      end
+      object OrcamentoAlterar: TButton
+        Left = 379
+        Top = 3
+        Width = 182
+        Height = 46
+        Caption = 'Orcamento Alterar'
+        TabOrder = 1
+        OnClick = OrcamentoAlterarClick
+      end
+      object OrcamentoExcluir: TButton
+        Left = 567
+        Top = 3
+        Width = 182
+        Height = 46
+        Caption = 'Orcamento Excluir'
+        TabOrder = 2
+        OnClick = OrcamentoExcluirClick
+      end
+      object OrcamentoIncluir: TButton
+        Left = 3
+        Top = 3
+        Width = 182
+        Height = 46
+        Caption = 'Orcamento Incluir'
+        TabOrder = 3
+        OnClick = OrcamentoIncluirClick
+      end
+      object OrcamentoItensConsultar: TButton
+        Left = 191
+        Top = 55
+        Width = 182
+        Height = 46
+        Caption = 'OrcamentoItens Consultar'
+        TabOrder = 4
+        OnClick = OrcamentoItensConsultarClick
+      end
+      object OrcamentoItensAlterar: TButton
+        Left = 379
+        Top = 55
+        Width = 182
+        Height = 46
+        Caption = 'OrcamentoItens Alterar'
+        TabOrder = 5
+        OnClick = OrcamentoItensAlterarClick
+      end
+      object OrcamentoItensExcluir: TButton
+        Left = 567
+        Top = 55
+        Width = 182
+        Height = 46
+        Caption = 'OrcamentoItens Excluir'
+        TabOrder = 6
+        OnClick = OrcamentoItensExcluirClick
+      end
+      object OrcamentoItensIncluir: TButton
+        Left = 3
+        Top = 55
+        Width = 182
+        Height = 46
+        Caption = 'OrcamentoItens Incluir'
+        TabOrder = 7
+        OnClick = OrcamentoItensIncluirClick
       end
     end
   end

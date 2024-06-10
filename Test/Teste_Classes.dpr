@@ -143,7 +143,11 @@ uses
   VoltagemProdutoDao in '..\Dao\VoltagemProdutoDao.pas',
   CorProdutoDao in '..\Dao\CorProdutoDao.pas',
   ClientesEnderecoModel in '..\Model\ClientesEnderecoModel.pas',
-  ClientesEnderecoDao in '..\Dao\ClientesEnderecoDao.pas';
+  ClientesEnderecoDao in '..\Dao\ClientesEnderecoDao.pas',
+  OrcamentoModel in '..\Model\OrcamentoModel.pas',
+  OrcamentoDao in '..\Dao\OrcamentoDao.pas',
+  OrcamentoItensModel in '..\Model\OrcamentoItensModel.pas',
+  OrcamentoItensDao in '..\Dao\OrcamentoItensDao.pas';
 
 {$R *.res}
 

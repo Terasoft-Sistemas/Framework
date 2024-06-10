@@ -167,6 +167,15 @@ type
     Button110: TButton;
     Button111: TButton;
     Button85: TButton;
+    Orcamento: TTabSheet;
+    OrcamentoConsultar: TButton;
+    OrcamentoAlterar: TButton;
+    OrcamentoExcluir: TButton;
+    OrcamentoIncluir: TButton;
+    OrcamentoItensConsultar: TButton;
+    OrcamentoItensAlterar: TButton;
+    OrcamentoItensExcluir: TButton;
+    OrcamentoItensIncluir: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -289,6 +298,14 @@ type
     procedure BtnEndereco2Click(Sender: TObject);
     procedure BtnEndereco3Click(Sender: TObject);
     procedure BtnEndereco4Click(Sender: TObject);
+    procedure OrcamentoIncluirClick(Sender: TObject);
+    procedure OrcamentoAlterarClick(Sender: TObject);
+    procedure OrcamentoExcluirClick(Sender: TObject);
+    procedure OrcamentoConsultarClick(Sender: TObject);
+    procedure OrcamentoItensIncluirClick(Sender: TObject);
+    procedure OrcamentoItensConsultarClick(Sender: TObject);
+    procedure OrcamentoItensAlterarClick(Sender: TObject);
+    procedure OrcamentoItensExcluirClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -320,7 +337,7 @@ uses
   PortadorModel, LojasModel, OSModel, SimuladorPrecoModel, GrupoModel, CNPJModel, CEPModel,
   PedidoCompraModel, PedidoCompraItensModel, ClientesContatoModel, DescontoModel,
   PromocaoModel, TransportadoraModel, PrevisaoPedidoCompraModel, SaidasModel,
-  SaidasItensModel, ClientesEnderecoModel;
+  SaidasItensModel, ClientesEnderecoModel, OrcamentoModel, OrcamentoItensModel;
 
 {$R *.dfm}
 
@@ -3561,6 +3578,208 @@ begin
 
   vQtdeRegistros := 10;
   vPagina        := 0;
+end;
+
+procedure TForm1.OrcamentoAlterarClick(Sender: TObject);
+var
+  lOrcamentoModel : TOrcamentoModel;
+  ID : String;
+begin
+  lOrcamentoModel := TOrcamentoModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('ORCAMENTO', 'Digite o ID do ORCAMENTO que deseja Alterar:', '');
+      if ID.IsEmpty then
+        exit;
+
+      lOrcamentoModel := lOrcamentoModel.Alterar(ID);
+      lOrcamentoModel.CODIGO_VEN := '000002';
+
+      lOrcamentoModel.Salvar;
+      ShowMessage('Alterado com Sucesso');
+    Except
+      on E:Exception do
+      ShowMessage('Erro: ' +E.Message);
+    end;
+  finally
+    lOrcamentoModel.Free;
+  end;
+end;
+
+procedure TForm1.OrcamentoConsultarClick(Sender: TObject);
+var
+  lOrcamentoModel : TOrcamentoModel;
+  lMemTable       : TFDMemTable;
+begin
+  lOrcamentoModel := TOrcamentoModel.Create(vIConexao);
+  try
+    try
+      lMemTable := lOrcamentoModel.ObterLista;
+
+      memoResultado.Lines.Clear;
+
+      lMemTable.First;
+      while not lMemTable.Eof do
+      begin
+        memoResultado.Lines.Add('NUMERO_ORC: '+lMemTable.FieldByName('NUMERO_ORC').AsString);
+        memoResultado.Lines.Add('NOME_FUN: '+lMemTable.FieldByName('NOME_FUN').AsString);
+        memoResultado.Lines.Add('===============================================');
+        lMemTable.Next;
+      end;
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lOrcamentoModel.Free;
+  end;
+
+end;
+
+procedure TForm1.OrcamentoExcluirClick(Sender: TObject);
+var
+  lOrcamentoModel : TOrcamentoModel;
+  ID : String;
+begin
+  lOrcamentoModel := TOrcamentoModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('ORCAMENTO', 'Digite o ID do ORCAMENTO que deseja excluir:', '');
+      if ID.IsEmpty then
+          Exit;
+
+      lOrcamentoModel.Excluir(ID);
+      ShowMessage('Excluido com sucesso!');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lOrcamentoModel.Free;
+  end;
+end;
+
+procedure TForm1.OrcamentoIncluirClick(Sender: TObject);
+var
+  lOrcamentoModel : TOrcamentoModel;
+begin
+  lOrcamentoModel := TOrcamentoModel.Create(vIConexao);
+  try
+    try
+      lOrcamentoModel.CODIGO_CLI  := '000001';
+      lOrcamentoModel.CODIGO_VEN  := '000001';
+      lOrcamentoModel.TOTAL_ORC   := 1000;
+
+      lOrcamentoModel.Incluir;
+      ShowMessage('Incluido com Sucesso!');
+    except
+      on E:Exception do
+      ShowMessage('Erro: ' + E.Message);
+    end
+  finally
+    lOrcamentoModel.Free;
+  end;
+end;
+
+procedure TForm1.OrcamentoItensAlterarClick(Sender: TObject);
+var
+  lOrcamentoItensModel : TOrcamentoItensModel;
+  ID : String;
+begin
+  lOrcamentoItensModel := TOrcamentoItensModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('ORCAMENTOITENS', 'Digite o ID do ORCAMENTOITENS que deseja Alterar:', '');
+      if ID.IsEmpty then
+        exit;
+
+      lOrcamentoItensModel := lOrcamentoItensModel.Alterar(ID);
+      lOrcamentoItensModel.CODIGO_PRO := '000345';
+
+      lOrcamentoItensModel.Salvar;
+      ShowMessage('Alterado com Sucesso');
+    Except
+      on E:Exception do
+      ShowMessage('Erro: ' +E.Message);
+    end;
+  finally
+    lOrcamentoItensModel.Free;
+  end;
+end;
+
+procedure TForm1.OrcamentoItensConsultarClick(Sender: TObject);
+var
+  lOrcamentoItensModel : TOrcamentoItensModel;
+  lMemTable            : TFDMemTable;
+begin
+  lOrcamentoItensModel := TOrcamentoItensModel.Create(vIConexao);
+  try
+    try
+      lMemTable := lOrcamentoItensModel.ObterLista;
+
+      memoResultado.Lines.Clear;
+
+      lMemTable.First;
+      while not lMemTable.Eof do
+      begin
+        memoResultado.Lines.Add('CODIGO_PRO: '+lMemTable.FieldByName('CODIGO_PRO').AsString);
+        memoResultado.Lines.Add('TOTAL: '+lMemTable.FieldByName('TOTAL').AsString);
+        memoResultado.Lines.Add('===============================================');
+        lMemTable.Next;
+      end;
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lOrcamentoItensModel.Free;
+  end;
+end;
+
+procedure TForm1.OrcamentoItensExcluirClick(Sender: TObject);
+var
+  lOrcamentoItensModel : TOrcamentoItensModel;
+  ID : String;
+begin
+  lOrcamentoItensModel := TOrcamentoItensModel.Create(vIConexao);
+  try
+    try
+      ID := InputBox('ORCAMENTO', 'Digite o ID do ORCAMENTO que deseja excluir:', '');
+      if ID.IsEmpty then
+          Exit;
+
+      lOrcamentoItensModel.Excluir(ID);
+      ShowMessage('Excluido com sucesso!');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lOrcamentoItensModel.Free;
+  end;
+
+end;
+
+procedure TForm1.OrcamentoItensIncluirClick(Sender: TObject);
+var
+  lOrcamentoItensModel : TOrcamentoItensModel;
+begin
+  lOrcamentoItensModel := TOrcamentoItensModel.Create(vIConexao);
+  try
+    try
+      lOrcamentoItensModel.NUMERO_ORC         := '000015';
+      lOrcamentoItensModel.CODIGO_PRO         := '000001';
+      lOrcamentoItensModel.VALORUNITARIO_ORC  := 1000;
+
+      lOrcamentoItensModel.Incluir;
+      ShowMessage('Incluido com Sucesso!');
+    except
+      on E:Exception do
+      ShowMessage('Erro: ' + E.Message);
+    end
+  finally
+    lOrcamentoItensModel.Free;
+  end;
 end;
 
 end.

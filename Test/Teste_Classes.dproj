@@ -241,6 +241,10 @@
         <DCCReference Include="..\Dao\CorProdutoDao.pas"/>
         <DCCReference Include="..\Model\ClientesEnderecoModel.pas"/>
         <DCCReference Include="..\Dao\ClientesEnderecoDao.pas"/>
+        <DCCReference Include="..\Model\OrcamentoModel.pas"/>
+        <DCCReference Include="..\Dao\OrcamentoDao.pas"/>
+        <DCCReference Include="..\Model\OrcamentoItensModel.pas"/>
+        <DCCReference Include="..\Dao\OrcamentoItensDao.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
