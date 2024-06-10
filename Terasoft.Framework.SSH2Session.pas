@@ -158,6 +158,7 @@ implementation
 
 uses
   System.Math,
+  Terasoft.Framework.Conversoes,
   System.AnsiStrings,
   System.DateUtils;
 
@@ -475,21 +476,11 @@ begin
 end;
 
 constructor TSSHSession.Create(Host: string; Port: Word);
-  function ExpandEnvStrings(const AString: String): String;
-  var
-    bufsize: Integer;
-  begin
-    bufsize := ExpandEnvironmentStrings(PChar(AString), nil, 0);
-    SetLength(result, bufsize);
-    ExpandEnvironmentStrings(PChar(AString), PChar(result), bufsize);
-    result := TrimRight(result);
-  end;
 begin
   inherited Create;
   FKnownHostCheckSettings.EnableCheck := True;
   FKnownHostCheckSettings.Policy := DefKnownHostCheckPolicy;
-  FKnownHostCheckSettings.KnownHostsFile := ExpandEnvStrings(
-    IncludeTrailingPathDelimiter('%USERPROFILE%') + '.ssh\known_hosts');
+  FKnownHostCheckSettings.KnownHostsFile := ExpandEnvStrings(IncludeTrailingPathDelimiter('%USERPROFILE%') + '.ssh\known_hosts');
   FWinSock := GetWinSock;
   FLibSsh2 := GetLibSsh2;
   FHost := Host;

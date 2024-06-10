@@ -685,7 +685,7 @@ begin
         Assert(N = R);
         Inc(Transfered, N);
         if Assigned(FTransferCallback) then
-          FTransferCallback(RemoteFile, Transfered, Total);
+          FTransferCallback(RemoteFile, Transfered, Total,self);
       end
       else if R < 0 then
         CheckSftpResult(R, 'libssh2_sftp_read');
@@ -787,7 +787,7 @@ begin
           Inc(Buf, R);
           Dec(K, R);
           if Assigned(FTransferCallback) then
-            FTransferCallback(RemoteFile, Transfered, Total);
+            FTransferCallback(RemoteFile, Transfered, Total,self);
         until (K <= 0) or FCancelled;
         Buf := StartBuf;
       end;
