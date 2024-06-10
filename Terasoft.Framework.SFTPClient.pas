@@ -30,7 +30,7 @@ type
   TSFTPStatData = record
   end;
 
-  TSftpItem = record
+  TSFTPItem = record
     FileName: string;
     LongEntry: string;
     ItemType: TSFTPItemType;
@@ -43,9 +43,9 @@ type
     Hidden: Boolean;
   end;
 
-  TSftpItems = TArray<TSftpItem>;
+  TSftpItems = TArray<TSFTPItem>;
 
-  ISftpClient = interface
+  ISFTPSession = interface
     ['{3F365360-444A-42B8-9FD3-AD9AAE497F60}']
     procedure SetBufferSize(Size: Int64);
     procedure SetTransferProgressCallback(Callback: TTransferProgressCallback);
@@ -94,7 +94,7 @@ type
   end;
 
 // Factory method
-function CreateSftpClient(Session: ISshSession): ISftpClient;
+function CreateSFTPSession(Session: ISSHSession): ISFTPSession;
 
 implementation
 Uses
@@ -235,7 +235,7 @@ end;
 {$region TSFtpClient}
 type
 
-  TSFtpClient = class(TInterfacedObject, ISftpClient)
+  TSFtpClient = class(TInterfacedObject, ISFTPSession)
   private
     FSession: ISshSession;
     FSftp: PLIBSSH2_SFTP;
@@ -840,7 +840,7 @@ end;
 {$endregion}
 
 {$region 'Factory Methods'}
-function CreateSftpClient(Session: ISshSession): ISftpClient;
+function CreateSFTPSession(Session: ISSHSession): ISFTPSession;
 begin
   Result := TSFtpClient.Create(Session);
 end;

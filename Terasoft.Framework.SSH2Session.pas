@@ -21,7 +21,7 @@ uses
   Terasoft.Framework.libSSH2;
 
 type
-  ESshError = class(Exception);
+  ESSHError = class(Exception);
   // Used for user input (password entry, known host verification)
   // If Echo is False the response should be masked
   TKeybInteractiveCallback = function(const AuthName, AuthInstruction, Prompt: string;
@@ -53,13 +53,13 @@ const
    FPDefault =  FPAllUser + [fpGroupRead, fpGroupExec, fpOtherRead, fpOtherExec];
 
 type
-  ILibSsh2 = interface
+  ILibSSH2 = interface
     ['{EF87E36A-957B-49CA-9680-FEFBF1CE92B2}']
     function GetVersion: string;
     property Version: string read GetVersion;
   end;
 
-  ISshSession = interface
+  ISSHSession = interface
     ['{D1921C45-7838-4E30-B511-6C4AE6C6E4DC}']
     function GetAddr: PLIBSSH2_SESSION;
     function GetSocket: TSocket;
@@ -110,7 +110,7 @@ type
   end;
 
 type
-  IScp = interface
+  ISCPSession = interface
     ['{A780AD77-2D29-499F-8062-B1B18F9E55A8}']
     procedure SetBufferSize(Size: Int64);
     procedure SetTransferProgressCallback(Callback: TTransferProgressCallback);
@@ -127,7 +127,7 @@ type
   end;
 
   { Execute commands on the host and get Output/Errorcode back }
-  ISshExec = interface
+  ISSHExecSession = interface
     ['{CA97A730-667A-4800-AF5D-77D5A4DDB192}']
     procedure SetBufferSize(Size: Int64);
     procedure Cancel;
@@ -136,10 +136,10 @@ type
   end;
 
 // Factory functions
-function GetLibSsh2: ILibSsh2;
-function CreateSession(Host: string; Port: Word = 22): ISshSession;
-function CreateScp(Session: ISshSession): IScp;
-function CreateSshExec(Session: ISshSession): ISshExec;
+function GetLibSSH2: ILibSSH2;
+function CreateSSHSession(Host: string; Port: Word = 22): ISSHSession;
+function CreateSCPSession(Session: ISshSession): ISCPSession;
+function CreateSSHExecSession(Session: ISshSession): ISSHExecSession;
 
 // support routines
 function AnsiToUnicode(P: PAnsiChar; CP: Word): string; overload;
@@ -213,7 +213,7 @@ end;
 
 {$region 'TLibSSh2'}
 type
-  TLibSSh2  = class(TInterfacedObject, ILibSsh2)
+  TLibSSH2  = class(TInterfacedObject, ILibSsh2)
   private
     class var FInstanceCount: Integer;
     function GetVersion: string;
@@ -224,21 +224,21 @@ type
 
 { TLibSSh2 }
 
-constructor TLibSSh2.Create;
+constructor TLibSSH2.Create;
 begin
   inherited;
   if AtomicIncrement(FInstanceCount) = 1 then
     CheckLibSsh2Result(libssh2_init(0), nil, 'libssh2_init');
 end;
 
-destructor TLibSSh2.Destroy;
+destructor TLibSSH2.Destroy;
 begin
   if AtomicDecrement(FInstanceCount) = 0 then
     libssh2_exit();
   inherited;
 end;
 
-function TLibSSh2.GetVersion: string;
+function TLibSSH2.GetVersion: string;
 begin
   Result := string(libssh2_version(0));
 end;
@@ -252,7 +252,7 @@ type
     KnownHostsFile: string;
   end;
 
-  TSshSession = class(TInterfacedObject, ISshSession)
+  TSSHSession = class(TInterfacedObject, ISSHSession)
   private
     FState: TSessionState;
     FWinSock: IWinSock;
@@ -325,7 +325,7 @@ end;
 
 { TSshSession }
 
-procedure TSshSession.CheckKnownHost;
+procedure TSSHSession.CheckKnownHost;
 Var
   KnownHosts: PLIBSSH2_KNOWNHOSTS;
   ReturnCode: integer;
@@ -421,7 +421,7 @@ begin
   end;
 end;
 
-procedure TSshSession.ConfigKeepAlive(WantServerReplies: Boolean;
+procedure TSSHSession.ConfigKeepAlive(WantServerReplies: Boolean;
   IntervalInSecs: Cardinal);
 {Note that non-blocking applications are responsible for sending the
 keepalive messages using libssh2_keepalive_sendbegin}
@@ -429,7 +429,7 @@ begin
   libssh2_keepalive_config(FAddr, IfThen(WantServerReplies, 1, 0), IntervalInSecs);
 end;
 
-procedure TSshSession.ConfigKnownHostCheckPolicy(EnableCheck: Boolean;
+procedure TSSHSession.ConfigKnownHostCheckPolicy(EnableCheck: Boolean;
   const Policy: TKnownHostCheckPolicy; const KnownHostsFile: string);
 begin
   FKnownHostCheckSettings.EnableCheck := EnableCheck;
@@ -438,7 +438,7 @@ begin
   FKnownHostCheckSettings.Policy := Policy;
 end;
 
-procedure TSshSession.Connect(IPVersion: TIPVersion = IPv4);
+procedure TSSHSession.Connect(IPVersion: TIPVersion = IPv4);
 begin
   FSock := FWinSock.CreateAndConnectSocket(FHost, FPort, IPVersion);
   FAddr := libssh2_session_init_ex(malloc, mfree, realloc, Pointer(Self));
@@ -470,7 +470,7 @@ begin
     end;
 end;
 
-constructor TSshSession.Create(Host: string; Port: Word);
+constructor TSSHSession.Create(Host: string; Port: Word);
   function ExpandEnvStrings(const AString: String): String;
   var
     bufsize: Integer;
@@ -494,7 +494,7 @@ begin
   FSock := INVALID_SOCKET;
 end;
 
-destructor TSshSession.Destroy;
+destructor TSSHSession.Destroy;
 begin
   Disconnect;
   FLibSsh2 := nil;
@@ -502,7 +502,7 @@ begin
   inherited;
 end;
 
-procedure TSshSession.Disconnect;
+procedure TSSHSession.Disconnect;
 var
   M: TMarshaller;
 begin
@@ -518,22 +518,22 @@ begin
   FState := session_Disconnected;
 end;
 
-function TSshSession.GetAddr: PLIBSSH2_SESSION;
+function TSSHSession.GetAddr: PLIBSSH2_SESSION;
 begin
   Result := FAddr;
 end;
 
-function TSshSession.GetBlocking: Boolean;
+function TSSHSession.GetBlocking: Boolean;
 begin
   Result := libssh2_session_get_blocking(FAddr) <> 0;
 end;
 
-function TSshSession.GetCodePage: Word;
+function TSSHSession.GetCodePage: Word;
 begin
   Result := FCodePage;
 end;
 
-function TSshSession.GetHostBanner: string;
+function TSSHSession.GetHostBanner: string;
 Var
   S: RawByteString;
 begin
@@ -542,7 +542,7 @@ begin
   Result := string(S);
 end;
 
-function TSshSession.GetSessionMethods: string;
+function TSSHSession.GetSessionMethods: string;
 begin
   Result := '';
   if FAddr <> nil then
@@ -554,47 +554,47 @@ begin
       libssh2_session_methods(FAddr, LIBSSH2_METHOD_LANG_CS)]);
 end;
 
-function TSshSession.GetSessionState: TSessionState;
+function TSSHSession.GetSessionState: TSessionState;
 begin
    Result := FState;
 end;
 
-function TSshSession.GetSocket: TSocket;
+function TSSHSession.GetSocket: TSocket;
 begin
   Result := FSock;
 end;
 
-function TSshSession.GetUserName: string;
+function TSSHSession.GetUserName: string;
 begin
   Result := FUserName;
 end;
 
-function TSshSession.GetWindowsHost: Boolean;
+function TSSHSession.GetWindowsHost: Boolean;
 begin
   Result := Pos('Windows', GetHostBanner) > 0;
 end;
 
-procedure TSshSession.SetBlocking(Block: Boolean);
+procedure TSSHSession.SetBlocking(Block: Boolean);
 begin
   libssh2_session_set_blocking(Faddr, IfThen(Block, 1, 0))
 end;
 
-procedure TSshSession.SetCodePage(const CP: Word);
+procedure TSSHSession.SetCodePage(const CP: Word);
 begin
   FCodePage := CP;
 end;
 
-procedure TSshSession.SetKeybInteractiveCallback(Callback: TKeybInteractiveCallback);
+procedure TSSHSession.SetKeybInteractiveCallback(Callback: TKeybInteractiveCallback);
 begin
   FKeybIntEvent := Callback;
 end;
 
-procedure TSshSession.SetUseCompression(Compress: Boolean);
+procedure TSSHSession.SetUseCompression(Compress: Boolean);
 begin
   FCompression := Compress;
 end;
 
-function TSshSession.AuthMethods(UserName: string): TAuthMethods;
+function TSSHSession.AuthMethods(UserName: string): TAuthMethods;
 var
   M: TMarshaller;
   PList: PAnsiChar;
@@ -660,7 +660,7 @@ begin
   {$POINTERMATH OFF}
 end;
 
-function TSshSession.UserAuth(const UserName: string): Boolean;
+function TSSHSession.UserAuth(const UserName: string): Boolean;
 begin
   if FState = session_Authorized then Exit(True);
   if FState <> session_Connected then Exit(False);
@@ -677,7 +677,7 @@ begin
     Exit(False);
 end;
 
-function TSshSession.UserAuthNone(const UserName: string): Boolean;
+function TSSHSession.UserAuthNone(const UserName: string): Boolean;
 begin
   if FState = session_Authorized then Exit(True);
   if FState <> session_Connected then Exit(False);
@@ -688,7 +688,7 @@ begin
     FUserName := UserName;
 end;
 
-function TSshSession.UserAuthAgent(const UserName: string): Boolean;
+function TSSHSession.UserAuthAgent(const UserName: string): Boolean;
 {
   Note that only pagent from Putty is supported on Windows
   https://github.com/libgit2/libgit2/issues/4958
@@ -741,7 +741,7 @@ begin
   end;
 end;
 
-function TSshSession.UserAuthInteractive(const UserName: string): Boolean;
+function TSSHSession.UserAuthInteractive(const UserName: string): Boolean;
 {
   For some reason libssh2_userauth_keyboard_interactive does not work
   with Windows Hosts.  Do a libssh2_userauth_password instead if possible.
@@ -771,7 +771,7 @@ begin
   end;
 end;
 
-function TSshSession.UserAuthKey(const UserName: string; PrivateKeyFile,
+function TSSHSession.UserAuthKey(const UserName: string; PrivateKeyFile,
   PassPhrase: string): Boolean;
 Var
   M: TMarshaller;
@@ -794,7 +794,7 @@ begin
   end;
 end;
 
-function TSshSession.UserAuthKey(const UserName: string;
+function TSSHSession.UserAuthKey(const UserName: string;
   PrivateKeyFile: string): Boolean;
 begin
   if FState = session_Authorized then Exit(True);
@@ -805,7 +805,7 @@ begin
       Msg_Password, False));
 end;
 
-function TSshSession.UserAuthPass(const UserName, Password: string): Boolean;
+function TSSHSession.UserAuthPass(const UserName, Password: string): Boolean;
 Var
   M: TMarshaller;
 begin
@@ -824,7 +824,7 @@ begin
   end;
 end;
 
-procedure TSshSession.SetTimeout(aTimeoutInMs: LongInt);
+procedure TSSHSession.SetTimeout(aTimeoutInMs: LongInt);
 begin
   libssh2_session_set_timeout(Faddr, aTimeoutInMs);
 end;
@@ -833,7 +833,7 @@ end;
 
 {$region 'TScp'}
 type
-  TScp = class(TInterfacedObject, IScp)
+  TScp = class(TInterfacedObject, ISCPSession)
   private
     FBufferSize: Int64;
     FCancelled: Boolean;
@@ -992,7 +992,7 @@ end;
 
 {$region 'TSshExec'}
 type
-  TSshExec = class(TInterfacedObject, ISshExec)
+  TSshExec = class(TInterfacedObject, ISSHExecSession)
   private
     FSession : ISshSession;
     FBufferSize: Int64;
@@ -1111,25 +1111,25 @@ end;
 {$endregion}
 
 {$region 'Factory Methods'}
-function GetLibSsh2: ILibSsh2;
+function GetLibSSH2: ILibSSH2;
 begin
-  Result := TLibSsh2.Create;
+  Result := TLibSSH2.Create;
 end;
 
-function CreateSession(Host: string; Port: Word): ISshSession;
+function CreateSSHSession(Host: string; Port: Word): ISshSession;
 begin
-  Result := TSshSession.Create(Host, Port);
+  Result := TSSHSession.Create(Host, Port);
 end;
 
-function CreateScp(Session: ISshSession): IScp;
+function CreateSCPSession(Session: ISshSession): ISCPSession;
 begin
   Result := TScp.Create(Session);
 end;
 
 
-function CreateSshExec(Session: ISshSession): ISshExec;
+function CreateSSHExecSession(Session: ISshSession): ISSHExecSession;
 begin
-    Result := TSshExec.Create(Session);
+    Result := TSSHExec.Create(Session);
 end;
 
 
