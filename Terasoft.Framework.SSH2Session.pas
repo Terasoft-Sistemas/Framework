@@ -24,9 +24,9 @@ type
   ESSHError = class(Exception);
   // Used for user input (password entry, known host verification)
   // If Echo is False the response should be masked
-  TKeybInteractiveCallback = function(const AuthName, AuthInstruction, Prompt: string;
-    Echo: Boolean): string;
-  TTransferProgressCallback = procedure(const AFileName: string; ATransfered, ATotal: UInt64);
+  TKeybInteractiveCallback = reference to function(const AuthName, AuthInstruction, Prompt: string;
+    Echo: Boolean; iface: IUnknown): string;
+  TTransferProgressCallback = reference to procedure(const AFileName: string; ATransfered, ATotal: UInt64; iface: IUnknown);
 
   TAuthMethod = (amInteractive, amPassword, amKey, amHostBased);
   TAuthMethods = set of TAuthMethod;
@@ -347,7 +347,7 @@ Var
         Action := khcaStop
       else begin
         if FKeybIntEvent('', Format(Err_SessionUnKnownHost, [FHost]),
-          UnKnownHostPrompt, True) = 'yes'
+          UnKnownHostPrompt, True,self) = 'yes'
         then
           Action := khcaContinue
         else
@@ -646,7 +646,7 @@ begin
     Echo := prompts[PromptNo].Echo <> 0;
     SetString(SPrompt, prompts[PromptNo].text, prompts[PromptNo].length);
     Response :=Session.FKeybIntEvent(
-      string(SName), string(SInstruction), string(SPrompt), Echo);
+      string(SName), string(SInstruction), string(SPrompt), Echo,Session);
     if Response <> '' then
     begin
       // libssh2 will be freeing the allocated memory!!
@@ -761,7 +761,7 @@ begin
          UName.AsAnsi(UserName, FCodePage).ToPointer,
          KbdInteractiveCallback) = 0
   else if amPassword in Methods then
-    Result := UserAuthPass(UserName, FKeybIntEvent('', '', Msg_Password, False))
+    Result := UserAuthPass(UserName, FKeybIntEvent('', '', Msg_Password, False,self))
   else
     Result := False;
   if Result then
@@ -802,7 +802,7 @@ begin
 
   Result := UserAuthKey(UserName, PrivateKeyFile,
       FKeybIntEvent('', Format(Msg_PrivateKeyInstruction, [PrivateKeyFile]),
-      Msg_Password, False));
+      Msg_Password, False,self));
 end;
 
 function TSSHSession.UserAuthPass(const UserName, Password: string): Boolean;
@@ -909,7 +909,7 @@ begin
       if TotalBytesRead > Stat.St_Size then Dec(BytesRead);  // The last byte is #0
       Stream.Write(Buffer, BytesRead);
       if Assigned(FTransferCallback) then
-        FTransferCallback(RemoteFile, TotalBytesRead, Stat.st_size);
+        FTransferCallback(RemoteFile, TotalBytesRead, Stat.st_size,self);
     end;
   finally
     libssh2_channel_free(Channel);
@@ -954,7 +954,7 @@ begin
           Inc(Buf, R);
           Dec(K, R);
           if Assigned(FTransferCallback) then
-            FTransferCallback(RemoteFile, Transfered, Stream.Size);
+            FTransferCallback(RemoteFile, Transfered, Stream.Size,self);
         until (K <= 0) or FCancelled;
       end;
     until (N <= 0) or FCancelled;
