@@ -112,6 +112,7 @@ type
 type
   ISCPSession = interface
     ['{A780AD77-2D29-499F-8062-B1B18F9E55A8}']
+    function getSSHSession: ISSHSession;
     procedure SetBufferSize(Size: Int64);
     procedure SetTransferProgressCallback(Callback: TTransferProgressCallback);
     procedure Cancel;
@@ -124,15 +125,18 @@ type
       Permissions: TFilePermissions = FPDefault;
       MTime: TDateTime = 0; ATime: TDateTime = 0); overload;
     property BufferSize: Int64 write SetBufferSize;
+    property sshSession: ISSHSession read getSSHSession;
   end;
 
   { Execute commands on the host and get Output/Errorcode back }
   ISSHExecSession = interface
     ['{CA97A730-667A-4800-AF5D-77D5A4DDB192}']
     procedure SetBufferSize(Size: Int64);
+    function getSSHSession: ISSHSession;
     procedure Cancel;
     procedure Exec(const Command: string; var Output, ErrOutput: string; var ExitCode: Integer);
     property BufferSize: Int64 write SetBufferSize;
+    property sshSession: ISSHSession read getSSHSession;
   end;
 
 // Factory functions
@@ -839,6 +843,7 @@ type
     FCancelled: Boolean;
     FTransferCallback: TTransferProgressCallback;
     FSession : ISshSession;
+    function getSSHSession: ISSHSession;
     procedure SetBufferSize(Size: Int64);
     procedure SetTransferProgressCallback(Callback: TTransferProgressCallback);
     procedure Cancel;
@@ -866,6 +871,11 @@ begin
   inherited Create;
   FSession := Session;
   FBufferSize := 8 * 1024 - 1;
+end;
+
+function TScp.getSSHSession: ISSHSession;
+begin
+  Result := self.fSession;
 end;
 
 procedure TScp.Receive(const RemoteFile, LocalFile: string);
@@ -1000,6 +1010,7 @@ type
     procedure SetBufferSize(Size: Int64);
     procedure Cancel;
     procedure Exec(const Command: string; var Output, ErrOutput: string; var ExitCode: Integer);
+    function getSSHSession: ISSHSession;
   public
     constructor Create(Session: ISshSession);
   end;
@@ -1101,6 +1112,11 @@ begin
     libssh2_channel_free(Channel);
     FSession.Blocking := True;
   end;
+end;
+
+function TSshExec.getSSHSession: ISSHSession;
+begin
+  Result := self.FSession;
 end;
 
 procedure TSshExec.SetBufferSize(Size: Int64);
