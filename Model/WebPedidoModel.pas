@@ -1308,10 +1308,10 @@ end;
 
 procedure TWebPedidoModel.IncluiReservaCD(pWebPedidoItensModel: TWebPedidoItensModel);
 var
-  lReservaModel : TReservaModel;
+  lReservaModel        : TReservaModel;
   lWebPedidoItensModel : TWebPedidoItensModel;
 begin
-  lReservaModel := TReservaModel.Create(vIConexao);
+  lReservaModel        := TReservaModel.Create(vIConexao.NovaConexao('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA));
   lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
 
   try
@@ -1320,21 +1320,19 @@ begin
 
       with lWebPedidoItensModel do
       begin
-          lReservaModel.PRODUTO_ID       := PRODUTO_ID;
-        lReservaModel.QUANTIDADE         := QUANTIDADE;
-
-        lReservaModel.VALOR_UNITARIO     := VALOR_UNITARIO;
-        lReservaModel.OBSERVACAO         := 'Reservar realizada pela venda assistida N '+WEB_PEDIDO_ID;
-        lReservaModel.WEB_PEDIDOITENS_ID := ID;
-        lReservaModel.WEB_PEDIDO_ID      := WEB_PEDIDO_ID;
-        lReservaModel.TIPO               := TIPO;
-        lReservaModel.ENTREGA            := ENTREGA;
-        lReservaModel.RETIRA_LOJA        := IIF(TIPO_ENTREGA = 'LJ','S','N');;
-        lReservaModel.STATUS             := IIF(TIPO_ENTREGA = 'LJ','L','1');
-
-        lReservaModel.CLIENTE_ID   := '000000';
-        lReservaModel.VENDEDOR_ID  := '000000';
-        lReservaModel.FILIAL       := '000';
+        lReservaModel.PRODUTO_ID          := PRODUTO_ID;
+        lReservaModel.QUANTIDADE          := QUANTIDADE;
+        lReservaModel.VALOR_UNITARIO      := VALOR_UNITARIO;
+        lReservaModel.OBSERVACAO          := 'Reservar realizada pela venda assistida N '+WEB_PEDIDO_ID;
+        lReservaModel.WEB_PEDIDOITENS_ID  := ID;
+        lReservaModel.WEB_PEDIDO_ID       := WEB_PEDIDO_ID;
+        lReservaModel.TIPO                := TIPO;
+        lReservaModel.ENTREGA             := ENTREGA;
+        lReservaModel.RETIRA_LOJA         := IIF(TIPO_ENTREGA = 'LJ','S','N');;
+        lReservaModel.STATUS              := IIF(TIPO_ENTREGA = 'LJ','L','1');
+        lReservaModel.CLIENTE_ID          := '000000';
+        lReservaModel.VENDEDOR_ID         := '000000';
+        lReservaModel.FILIAL              := '000';
       end;
 
       lReservaModel.Incluir;

@@ -485,7 +485,6 @@ begin
     if not FOrderView.IsEmpty then
       lSql := lSQL + ' order by '+FOrderView;
 
-    Clipboard.AsText := lSQL;
     lQry.Open(lSQL);
 
     Result := vConstrutor.atribuirRegistros(lQry);

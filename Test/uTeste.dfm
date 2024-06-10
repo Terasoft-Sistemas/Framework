@@ -2,8 +2,8 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'Form1'
-  ClientHeight = 927
-  ClientWidth = 1248
+  ClientHeight = 935
+  ClientWidth = 1250
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -13,14 +13,16 @@ object Form1: TForm1
   Position = poScreenCenter
   OnCreate = FormCreate
   TextHeight = 15
-  object PageControl1: TPageControl
+  object PageControl: TPageControl
     Left = 0
     Top = 0
-    Width = 1248
-    Height = 927
-    ActivePage = Orcamento
+    Width = 1250
+    Height = 935
+    ActivePage = tabReserva
     Align = alClient
     TabOrder = 0
+    ExplicitWidth = 1248
+    ExplicitHeight = 927
     object TabSheet1: TTabSheet
       Caption = 'Diversos'
       object memoResultado: TMemo
@@ -649,8 +651,8 @@ object Form1: TForm1
       ImageIndex = 1
       object dbTeste2: TXDBGrid
         Left = 0
-        Top = 274
-        Width = 1240
+        Top = 282
+        Width = 1242
         Height = 623
         Align = alBottom
         DataSource = dsTeste2
@@ -699,8 +701,8 @@ object Form1: TForm1
       ImageIndex = 2
       object XDBGrid1: TXDBGrid
         Left = 0
-        Top = 648
-        Width = 1240
+        Top = 656
+        Width = 1242
         Height = 249
         Align = alBottom
         DataSource = dsEntradaItens
@@ -709,8 +711,8 @@ object Form1: TForm1
       end
       object XDBGrid2: TXDBGrid
         Left = 0
-        Top = 486
-        Width = 1240
+        Top = 494
+        Width = 1242
         Height = 162
         Align = alBottom
         DataSource = dsEntrada
@@ -804,8 +806,8 @@ object Form1: TForm1
       ImageIndex = 3
       object XDBGrid3: TXDBGrid
         Left = 0
-        Top = 592
-        Width = 1240
+        Top = 600
+        Width = 1242
         Height = 305
         Align = alBottom
         DataSource = dsOS
@@ -914,8 +916,8 @@ object Form1: TForm1
       ImageIndex = 6
       object XDBGrid4: TXDBGrid
         Left = 0
-        Top = 455
-        Width = 1240
+        Top = 463
+        Width = 1242
         Height = 169
         Align = alBottom
         DataSource = dsPedidoCompra
@@ -942,8 +944,8 @@ object Form1: TForm1
       end
       object XDBGrid5: TXDBGrid
         Left = 0
-        Top = 624
-        Width = 1240
+        Top = 632
+        Width = 1242
         Height = 273
         Align = alBottom
         DataSource = dsPedidoCompraItens
@@ -1055,8 +1057,8 @@ object Form1: TForm1
       end
       object XDBGrid6: TXDBGrid
         Left = 0
-        Top = 488
-        Width = 1240
+        Top = 496
+        Width = 1242
         Height = 409
         Align = alBottom
         DataSource = dsProdutos
@@ -1145,8 +1147,8 @@ object Form1: TForm1
       end
       object XDBGrid7: TXDBGrid
         Left = 0
-        Top = 592
-        Width = 1240
+        Top = 600
+        Width = 1242
         Height = 305
         Align = alBottom
         DataSource = dsSaidas
@@ -1282,6 +1284,19 @@ object Form1: TForm1
         Caption = 'OrcamentoItens Incluir'
         TabOrder = 7
         OnClick = OrcamentoItensIncluirClick
+      end
+    end
+    object tabReserva: TTabSheet
+      Caption = 'Reserva'
+      ImageIndex = 11
+      object btnReserva: TButton
+        Left = 11
+        Top = 11
+        Width = 182
+        Height = 46
+        Caption = 'Reservar CD'
+        TabOrder = 0
+        OnClick = btnReservaClick
       end
     end
   end

@@ -55,6 +55,7 @@ interface
       function criarQueryExterna                                           : TFDQuery;
       function criaConexao                                                 : IConexao;
       function ConfigConexao                                               : Boolean;
+      function NovaConexao(pLoja: String; pHost : String = '')             : IConexao;
       function ConfigConexaoExterna(pLoja: String; pHost : String = '')    : Boolean;
       function Generetor(pValue: String; pCrtGen : Boolean = false)        : String;
       function getConnection                                               : TFDConnection;

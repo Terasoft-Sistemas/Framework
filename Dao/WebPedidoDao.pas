@@ -423,8 +423,6 @@ begin
 
     lQry.Open(lSQL);
 
-    Clipboard.AsText := lSQL;
-
     Result := vConstrutor.atribuirRegistros(lQry);
     obterTotalRegistros;
 

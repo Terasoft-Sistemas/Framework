@@ -20,7 +20,7 @@ uses
 
 type
   TForm1 = class(TForm)
-    PageControl1: TPageControl;
+    PageControl: TPageControl;
     TabSheet1: TTabSheet;
     memoResultado: TMemo;
     btnFinanceiroPedido: TButton;
@@ -176,6 +176,8 @@ type
     OrcamentoItensAlterar: TButton;
     OrcamentoItensExcluir: TButton;
     OrcamentoItensIncluir: TButton;
+    tabReserva: TTabSheet;
+    btnReserva: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -306,6 +308,7 @@ type
     procedure OrcamentoItensConsultarClick(Sender: TObject);
     procedure OrcamentoItensAlterarClick(Sender: TObject);
     procedure OrcamentoItensExcluirClick(Sender: TObject);
+    procedure btnReservaClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -315,7 +318,6 @@ type
   public
     { Public declarations }
     vIConexao : IConexao;
-    vConexao  : TConexao;
     vConfiguracoes : TerasoftConfiguracoes;
   end;
 
@@ -337,7 +339,7 @@ uses
   PortadorModel, LojasModel, OSModel, SimuladorPrecoModel, GrupoModel, CNPJModel, CEPModel,
   PedidoCompraModel, PedidoCompraItensModel, ClientesContatoModel, DescontoModel,
   PromocaoModel, TransportadoraModel, PrevisaoPedidoCompraModel, SaidasModel,
-  SaidasItensModel, ClientesEnderecoModel, OrcamentoModel, OrcamentoItensModel;
+  SaidasItensModel, ClientesEnderecoModel, OrcamentoModel, OrcamentoItensModel, Terasoft.Utils;
 
 {$R *.dfm}
 
@@ -473,6 +475,41 @@ begin
     end;
   finally
     lFinanceiroPedidoModel.Free;
+  end;
+end;
+
+procedure TForm1.btnReservaClick(Sender: TObject);
+var
+  lReservaModel : TReservaModel;
+  lWebPedidoItensModel : TWebPedidoItensModel;
+begin
+  lReservaModel        := TReservaModel.Create(vIConexao.NovaConexao('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA));
+  lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
+
+  try
+    lWebPedidoItensModel := lWebPedidoItensModel.carregaClasse('1091');
+
+    lReservaModel.PRODUTO_ID          := lWebPedidoItensModel.PRODUTO_ID;
+    lReservaModel.QUANTIDADE          :=lWebPedidoItensModel.QUANTIDADE;
+    lReservaModel.VALOR_UNITARIO      := lWebPedidoItensModel.VALOR_UNITARIO;
+    lReservaModel.OBSERVACAO          := 'Reservar realizada pela venda assistida N '+lWebPedidoItensModel.WEB_PEDIDO_ID;
+    lReservaModel.WEB_PEDIDOITENS_ID  := lWebPedidoItensModel.ID;
+    lReservaModel.WEB_PEDIDO_ID       := lWebPedidoItensModel.WEB_PEDIDO_ID;
+    lReservaModel.TIPO                := lWebPedidoItensModel.TIPO;
+    lReservaModel.ENTREGA             := lWebPedidoItensModel.ENTREGA;
+    lReservaModel.RETIRA_LOJA         := IIF(lWebPedidoItensModel.TIPO_ENTREGA = 'LJ','S','N');;
+    lReservaModel.STATUS              := IIF(lWebPedidoItensModel.TIPO_ENTREGA = 'LJ','L','1');
+    lReservaModel.CLIENTE_ID          := '000000';
+    lReservaModel.VENDEDOR_ID         := '000000';
+    lReservaModel.FILIAL              := '000';
+
+    lReservaModel.Incluir;
+
+    lWebPedidoItensModel := lWebPedidoItensModel.carregaClasse('1091');
+
+  finally
+    lWebPedidoItensModel.Free;
+    lReservaModel.Free;
   end;
 end;
 
@@ -1765,7 +1802,7 @@ begin
       lEntradaModel.PARCELAS_ENT  := '3';
       lEntradaModel.CONDICOES_PAG := '30';
       lEntradaModel.TOTAL_ENT     := '500';
-      lEntradaModel.DATANOTA_ENT  := DateToStr(vConexao.DataServer);
+      lEntradaModel.DATANOTA_ENT  := DateToStr(vIConexao.DataServer);
 
       lEntradaModel.Incluir;
 
@@ -2227,11 +2264,11 @@ begin
   try
     try
 
-      lPedidoCompra.DATA_PED := DateToStr(vConexao.DataServer);
-      lPedidoCompra.DATAPREV_PED := DateToStr(vConexao.DataServer);
+      lPedidoCompra.DATA_PED := DateToStr(vIConexao.DataServer);
+      lPedidoCompra.DATAPREV_PED := DateToStr(vIConexao.DataServer);
       lPedidoCompra.CODIGO_FOR := '000059';
       lPedidoCompra.PARCELAS_PED := 1;
-      lPedidoCompra.PRIMEIROVENC_PED := DateToStr(vConexao.DataServer);
+      lPedidoCompra.PRIMEIROVENC_PED := DateToStr(vIConexao.DataServer);
       lPedidoCompra.TOTAL_PED := '1000';
       lPedidoCompra.USUARIO_PED := '000001';
       lPedidoCompra.STATUS_PED := 'A';
@@ -3541,7 +3578,6 @@ end;
 
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  vConexao.Free;
   Form1.Release;
   Form1 := nil;
   Application.Terminate;
@@ -3554,7 +3590,6 @@ var
   lEmpresaModel : TEmpresaModel;
   lConfiguracoes : TerasoftConfiguracoes;
 begin
-  vConexao  := TConexao.Create;
   vIConexao := TControllersConexao.New;
 
   vConfiguracoes := TerasoftConfiguracoes.Create(vIConexao);

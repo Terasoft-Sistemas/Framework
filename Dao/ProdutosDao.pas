@@ -742,13 +742,12 @@ begin
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
 
-    Clipboard.asText := lSQL;
     lQry.Open(lSQL);
 
-//    vIConexao.ConfigConexaoExterna('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA);
-//
-//    lQryCD := vIConexao.criarQueryExterna;
-//    lQryCD.Open(lSQL);
+    vIConexao.ConfigConexaoExterna('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA);
+
+    lQryCD := vIConexao.criarQueryExterna;
+    lQryCD.Open(lSQL);
 
     i := 0;
     lQry.First;
@@ -777,9 +776,9 @@ begin
       FProdutossLista[i].status_pro        := lQry.FieldByName('status_pro').AsString;
       FProdutossLista[i].status_linha      := lQry.FieldByName('status_linha').AsString;
 
-//      lQryCD.First;
-//      if lQryCD.Locate('CODIGO_PRO', lQry.FieldByName('CODIGO_PRO').AsString, []) then
-//        FProdutossLista[i].SALDO_CD := lQryCD.FieldByName('SALDO_DISPONIVEL').AsString;
+      lQryCD.First;
+      if lQryCD.Locate('CODIGO_PRO', lQry.FieldByName('CODIGO_PRO').AsString, []) then
+        FProdutossLista[i].SALDO_CD := lQryCD.FieldByName('SALDO_DISPONIVEL').AsString;
 
       lQry.Next;
     end;

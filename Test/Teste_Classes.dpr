@@ -10,7 +10,6 @@ uses
   Interfaces.Conexao in '..\Interfaces\Interfaces.Conexao.pas',
   Terasoft.Utils in '..\Libs\Terasoft.Utils.pas',
   Terasoft.ConstrutorDao in '..\Libs\Terasoft.ConstrutorDao.pas',
-  Conexao in 'Conexao.pas',
   WebPedidoModel in '..\Model\WebPedidoModel.pas',
   WebPedidoDao in '..\Dao\WebPedidoDao.pas',
   FuncionarioModel in '..\Model\FuncionarioModel.pas',

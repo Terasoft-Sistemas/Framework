@@ -385,8 +385,6 @@ begin
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
 
-    Clipboard.AsText := lSQL;
-
     lQry.Open(lSQL);
 
     i := 0;
