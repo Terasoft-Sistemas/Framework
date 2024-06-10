@@ -1352,7 +1352,8 @@ var
   lReservaModel : TReservaModel;
   lWebPedidoModel : TWebPedidoModel;
 begin
-  lReservaModel := TReservaModel.Create(vIConexao);
+  lReservaModel        := TReservaModel.Create(vIConexao.NovaConexao('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA));
+//  lReservaModel := TReservaModel.Create(vIConexao);
   lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
 
   try

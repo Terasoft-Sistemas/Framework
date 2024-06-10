@@ -112,7 +112,7 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID                              := ZeroLeft(lQry.FieldByName('ID').AsString, 6);
+    lModel.ID                              := lQry.FieldByName('ID').AsString;
     lModel.LOJA                            := lQry.FieldByName('LOJA').AsString;
     lModel.DATAHORA                        := lQry.FieldByName('DATAHORA').AsString;
     lModel.CLIENTE_ID                      := lQry.FieldByName('CLIENTE_ID').AsString;
