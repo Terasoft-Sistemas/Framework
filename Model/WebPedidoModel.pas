@@ -398,7 +398,7 @@ type
 implementation
 
 uses
-  WebPedidoDao, ClienteModel;
+  WebPedidoDao, ClienteModel, FinanceiroPedidoModel;
 
 { TWebPedidoModel }
 
@@ -431,6 +431,7 @@ var
   lWebPedidoItensModel     : TWebPedidoItensModel;
   lWebPedidoModel          : TWebPedidoModel;
   lClientesModel           : TClienteModel;
+  lFinanceiroPedidoModel   : TFinanceiroPedidoModel;
   lPedido                  : String;
   lItem, lIndex            : Integer;
   lTableCliente            : TFDMemTable;
@@ -446,6 +447,8 @@ begin
   lPedidoItensModel      := TPedidoItensModel.Create(vIConexao);
 
   lClientesModel         := TClienteModel.Create(vIConexao);
+  lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
+
   try
 
     lPedidoVendaModel.WhereView := ' and pedidovenda.web_pedido_id = '+ IntToStr(pIdVendaAssistida);
@@ -552,7 +555,13 @@ begin
     lPedidoItensModel.Acao := tacIncluirLote;
     lPedidoItensModel.Salvar;
 
-    lPedidoVendaModel.gerarContasReceberPedido;
+    lFinanceiroPedidoModel.WhereView := ' and financeiro_pedido.web_pedido_id = ' + pIdVendaAssistida.ToString;
+    lFinanceiroPedidoModel.obterLista;
+
+    if lFinanceiroPedidoModel.TotalRecords > 0 then
+      lPedidoVendaModel.gerarContasReceberFinanceiroPedido(pIdVendaAssistida.ToString)
+    else
+      lPedidoVendaModel.gerarContasReceberPedido;
 
     lWebPedidoModel.FAcao      := tacAlterar;
     lWebPedidoModel.FSTATUS    := 'F';
@@ -562,6 +571,7 @@ begin
     Result := lPedido;
 
   finally
+    lFinanceiroPedidoModel.Free;
     lWebPedidoModel.Free;
     lPedidoVendaModel.Free;
     lWebPedidoItensModel.Free;
