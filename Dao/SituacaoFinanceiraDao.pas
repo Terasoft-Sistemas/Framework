@@ -320,7 +320,7 @@ begin
       '    credito_cliente c                                             '+SLineBreak+
       'WHERE                                                             '+SLineBreak+
       '    c.tipo = ''C''                                                '+SLineBreak+
-      '    AND c.cliente_id = ''000001''                                 '+SLineBreak+
+      '    AND c.cliente_id = '+QuotedStr(pCliente)+'                    '+SLineBreak+
       '    AND (c.valor - (SELECT COALESCE(SUM(u.valor), 0)              '+SLineBreak+
       '                    FROM credito_cliente_uso u                    '+SLineBreak+
       '                    WHERE u.credito_cliente_id = c.id)) > 0       '+SLineBreak;
