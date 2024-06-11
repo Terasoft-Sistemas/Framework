@@ -287,6 +287,9 @@ begin
 
     lSql := 'select count(*) records From web_pedido where 1=1 ';
 
+
+
+
     lSql := lSql + where;
 
     lQry.Open(lSQL);
@@ -317,7 +320,7 @@ begin
     lSQL := '    select  '+lPaginacao+'                                                                                                     '+SLineBreak+
             '        ID,                                                                                                                    '+SLineBreak+
             '        OBSERVACAO,                                                                                                            '+SLineBreak+
-            '        CODIGO_CLI,                                                                                                            '+SLineBreak+
+            '        CODIGO_CLI, cliente_id,                                                                                                '+SLineBreak+
             '        CLIENTE_NOME,                                                                                                          '+SLineBreak+
             '        ENTREGA_ENDERECO,                                                                                                      '+SLineBreak+
             '        ENTREGA_NUMERO,                                                                                                        '+SLineBreak+
@@ -350,7 +353,7 @@ begin
             '    			select                                                                                                                '+SLineBreak+
             '    				id,                                                                                                                 '+SLineBreak+
             '           observacao,                                                                                                         '+SLineBreak+
-            '    				codigo_cli,                                                                                                         '+SLineBreak+
+            '    				codigo_cli, cliente_id,                                                                                             '+SLineBreak+
             '    				cliente_nome,                                                                                                       '+SLineBreak+
             '    				entrega_endereco,                                                                                                   '+SLineBreak+
             '    				entrega_numero,                                                                                                     '+SLineBreak+
@@ -382,7 +385,7 @@ begin
             '																												                                                                        '+SLineBreak+
             '      			  select web_pedido.id,                                                                                             '+SLineBreak+
             '                    web_pedido.observacao,                                                                                     '+SLineBreak+
-            '         					 clientes.codigo_cli,                                                                                       '+SLineBreak+
+            '         					 clientes.codigo_cli, web_pedido.cliente_id,                                                                '+SLineBreak+
             '         					 coalesce(clientes.fantasia_cli, clientes.razao_cli) cliente_nome,                                          '+SLineBreak+
             '      	    				 web_pedido.entrega_endereco,                                                                               '+SLineBreak+
             '      			   		   web_pedido.entrega_numero,                                                                                 '+SLineBreak+
@@ -415,7 +418,7 @@ begin
             '               left join funcionario on funcionario.codigo_fun = web_pedido.vendedor_id                                        '+SLineBreak+
             '      			   ) t1                                                                                                             '+SLineBreak+
             '                                                                                                                               '+SLineBreak+
-            '    group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19, 20, 21, 22, 23, 24, 25 ) webpedido                               '+SLineBreak+
+            '    group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19, 20, 21, 22, 23, 24, 25, 26 ) webpedido                               '+SLineBreak+
             '    where 1=1                                                                                                                  '+SLineBreak;
 
     lSQL := lSQL + where;
