@@ -109,7 +109,7 @@ begin
   Result   := lModel;
 
   try
-    lQry.Open('select * from ORCAMENTOITENS where ID = ' +pId);
+    lQry.Open('select * from ORCAMENTOITENS where NUMERO_ORC = ' +pId);
 
     if lQry.IsEmpty then
       Exit;
@@ -235,6 +235,9 @@ begin
               '     P.REFERENCIA_NEW,                                                                               '+SlineBreak+
               '     P.CODIGO_PRO,                                                                                   '+SlineBreak+
               '     P.NOME_PRO,                                                                                     '+SlineBreak+
+              '     I.OBSERVACAO,                                                                                   '+SlineBreak+
+              '     I.VLRCUSTO_ORC,                                                                                 '+SlineBreak+
+              '     I.VLRGARANTIA_ORC,                                                                              '+SlineBreak+
               '     COALESCE(COALESCE(I.QUANTIDADE_ORC, 0) - COALESCE(I.QUANTIDADE_ATE_ORC, 0),0) QUANTIDADE_ORC,   '+SlineBreak+
               '     COALESCE(I.VALORUNITARIO_ORC, 0) VALORUNITARIO_ORC,                                             '+SlineBreak+
               '     COALESCE(I.DESCONTO_ORC, 0) DESCONTO_ORC,                                                       '+SlineBreak+
@@ -270,7 +273,7 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From ORCAMENTOITENS where 1=1 ';
+    lSql := 'select count(*) records From ORCAMENTOITENS I where 1=1 ';
 
     lSql := lSql + where;
 

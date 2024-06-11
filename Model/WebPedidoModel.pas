@@ -434,7 +434,8 @@ var
   lFinanceiroPedidoModel   : TFinanceiroPedidoModel;
   lPedido                  : String;
   lItem, lIndex            : Integer;
-  lTableCliente            : TFDMemTable;
+  lTableCliente,
+  lTableFinanceiro         : TFDMemTable;
 begin
 
   if not (pIdVendaAssistida <> 0) then
@@ -450,14 +451,14 @@ begin
   lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
 
   try
-
     lPedidoVendaModel.WhereView := ' and pedidovenda.web_pedido_id = '+ IntToStr(pIdVendaAssistida);
     lPedidoVendaModel.obterLista;
 
-    if lPedidoVendaModel.TotalRecords > 0 then begin
-      Result := lPedidoVendaModel.PedidoVendasLista[0].NUMERO_PED;
-      exit;
-    end;
+    if lPedidoVendaModel.TotalRecords > 0 then
+      CriaException('Já existe um pedido gerado para esse registro');
+
+    lFinanceiroPedidoModel.WhereView := ' and financeiro_pedido.web_pedido_id = ' + pIdVendaAssistida.ToString;
+    lTableFinanceiro := lFinanceiroPedidoModel.obterLista;
 
     lWebPedidoModel := lWebPedidoModel.carregaClasse(pIdVendaAssistida.ToString);
 
@@ -489,7 +490,12 @@ begin
     lPedidoVendaModel.WEB_PEDIDO_ID        := lWebPedidoModel.ID;
     lPedidoVendaModel.CODIGO_CLI           := lWebPedidoModel.CLIENTE_ID;
     lPedidoVendaModel.CNPJ_CPF_CONSUMIDOR  := lTableCliente.fieldByName('CNPJ_CPF_CLI').AsString;
-    lPedidoVendaModel.CODIGO_PORT          := lWebPedidoModel.PORTADOR_ID;
+
+    if lFinanceiroPedidoModel.TotalRecords > 0 then
+      lPedidoVendaModel.CODIGO_PORT        := lTableFinanceiro.FieldByName('PORTADOR_ID').AsString
+    else
+      lPedidoVendaModel.CODIGO_PORT        := lWebPedidoModel.PORTADOR_ID;
+
     lPedidoVendaModel.CODIGO_VEN           := lWebPedidoModel.VENDEDOR_ID;
     lPedidoVendaModel.CODIGO_TIP           := lWebPedidoModel.TIPOVENDA_ID;
     lPedidoVendaModel.FRETE_PED            := lWebPedidoModel.VALOR_FRETE;
@@ -554,9 +560,6 @@ begin
 
     lPedidoItensModel.Acao := tacIncluirLote;
     lPedidoItensModel.Salvar;
-
-    lFinanceiroPedidoModel.WhereView := ' and financeiro_pedido.web_pedido_id = ' + pIdVendaAssistida.ToString;
-    lFinanceiroPedidoModel.obterLista;
 
     if lFinanceiroPedidoModel.TotalRecords > 0 then
       lPedidoVendaModel.gerarContasReceberFinanceiroPedido(pIdVendaAssistida.ToString)
