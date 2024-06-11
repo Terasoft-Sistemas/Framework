@@ -284,7 +284,10 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From ORCAMENTO where 1=1 ';
+    lSql := 'select count(*) records From ORCAMENTO                                     '+SLineBreak+
+            '    inner join CLIENTES on CLIENTES.CODIGO_CLI = ORCAMENTO.CODIGO_CLI      '+SLineBreak+
+            '    left join FUNCIONARIO on FUNCIONARIO.CODIGO_FUN = ORCAMENTO.CODIGO_VEN '+SLineBreak+
+            '   where 1=1                                                               '+SLineBreak;
 
     lSql := lSql + where;
 
