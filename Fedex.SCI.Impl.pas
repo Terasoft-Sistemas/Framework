@@ -248,7 +248,7 @@ begin
           lProduto := lLinha.strings.Strings[3];
 
         lIMEI    := lLinha.strings.Strings[4];
-        if not validaIMEI(lIMEI) then
+        if lIMEI='' then
         begin
           pResultado.formataErro('processaArquivoExpedicao [%s]: IMEI [%s] inválido para item %d', [ lArquivo, lIMEI, i ] );
           continue;
@@ -606,7 +606,7 @@ begin
           lProduto := lLinha.strings.Strings[2];
 
         lIMEI    := lLinha.strings.Strings[3];
-        if not validaIMEI(lIMEI) then begin
+        if lIMEI='' then begin
           pResultado.formataErro('processaArquivoRecebimento [%s]: IMEI [%s] inválido para item %d', [ lArquivo, lIMEI, i ] );
           continue;
         end;
