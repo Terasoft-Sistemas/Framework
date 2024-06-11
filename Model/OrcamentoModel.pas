@@ -6,7 +6,13 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao,
-  FireDAC.Comp.Client;
+  FireDAC.Comp.Client,
+  PedidoVendaModel,
+  PedidoItensModel,
+  OrcamentoItensModel,
+  EmpresaModel,
+  ProdutosModel,
+  Terasoft.Utils;
 
 type
 
@@ -249,6 +255,8 @@ type
     function Excluir(pID : String): String;
     function Salvar : String;
 
+    function finalizarOrcamento(pNumeroOrc: String): String;
+
     function carregaClasse(pId : String): TOrcamentoModel;
 
     function ObterLista: TFDMemTable; overload;
@@ -269,7 +277,8 @@ implementation
 uses
   OrcamentoDao,
   System.Classes,
-  System.SysUtils;
+  System.SysUtils,
+  ClienteModel;
 
 { TOrcamentoModel }
 
@@ -360,6 +369,167 @@ begin
     end;
   finally
     lOrcamentoDao.Free;
+  end;
+end;
+
+function TOrcamentoModel.finalizarOrcamento(pNumeroOrc: String): String;
+var
+  lPedidoVendaModel        : TPedidoVendaModel;
+  lPedidoItensModel        : TPedidoItensModel;
+  lOrcamentoItensModel     : TOrcamentoItensModel;
+  lOrcamentoModel          : TOrcamentoModel;
+  lClientesModel           : TClienteModel;
+  lEmpresaModel            : TEmpresaModel;
+  lProdutosModel           : TProdutosModel;
+  lPedido                  : String;
+  lItem, lIndex            : Integer;
+  lSaldoDisponivel         : Double;
+  lMemtable, lTableCliente : TFDMemTable;
+begin
+
+  if pNumeroOrc = '' then
+    exit;
+
+  lOrcamentoModel      := TOrcamentoModel.Create(vIConexao);
+  lOrcamentoItensModel := TOrcamentoItensModel.Create(vIConexao);
+  lPedidoVendaModel    := TPedidoVendaModel.Create(vIConexao);
+  lPedidoItensModel    := TPedidoItensModel.Create(vIConexao);
+  lClientesModel       := TClienteModel.Create(vIConexao);
+  lEmpresaModel        := TEmpresaModel.Create(vIConexao);
+  lProdutosModel       := TProdutosModel.Create(vIConexao);
+
+  try
+
+    lPedidoVendaModel.WhereView := ' AND PEDIDOVENDA.NUMERO_ORC = '+ QuotedStr(pNumeroOrc);
+    lPedidoVendaModel.obterLista;
+
+    if lPedidoVendaModel.TotalRecords > 0 then begin
+      Result := lPedidoVendaModel.PedidoVendasLista[0].NUMERO_PED;
+      exit;
+    end;
+
+    lEmpresaModel.Carregar;
+
+    if lEmpresaModel.AVISARNEGATIVO_EMP = 'S' then
+    begin
+      lOrcamentoItensModel.WhereView := ' AND I.NUMERO_ORC = '+QuotedStr(pNumeroOrc)+' ';
+      lMemtable := lOrcamentoItensModel.obterLista;
+
+      lMemtable.First;
+      while not lMemtable.Eof do
+      begin
+        lProdutosModel.IDRecordView := lMemtable.FieldByName('CODIGO_PRO').AsString;
+        lProdutosModel.obterLista;
+
+        lSaldoDisponivel := lProdutosModel.obterSaldoDisponivel(lMemtable.FieldByName('CODIGO_PRO').AsString) + lMemtable.FieldByName('QUANTIDADE_ORC').AsFloat;
+
+        if (lMemtable.FieldByName('QUANTIDADE_ORC').AsFloat > lSaldoDisponivel) then
+          CriaException('Produto '+lMemtable.FieldByName('CODIGO_PRO').AsString+' sem saldo disponível em estoque.');
+
+        lMemtable.Next;
+      end;
+    end;
+
+    lOrcamentoModel := lOrcamentoModel.carregaClasse(pNumeroOrc);
+
+    if lOrcamentoModel.VALOR_IPI > 0 then
+      CriaException('Orçamento contém valor de IPI.'+#13+'Não é possível finalizar orçamento pelo frente de caixa.');
+
+    lClientesModel.IDRecordView := lOrcamentoModel.CODIGO_CLI;
+    lTableCliente := lClientesModel.ObterListaMemTable;
+
+    lPedidoVendaModel.Acao                 := tacIncluir;
+    lPedidoVendaModel.LOJA                 := lOrcamentoModel.LOJA;
+    lPedidoVendaModel.DATA_PED             := DateToStr(vIConexao.DataServer);
+    lPedidoVendaModel.HORA_PED             := TimeToStr(vIConexao.HoraServer);
+    lPedidoVendaModel.PRIMEIROVENC_PED     := lOrcamentoModel.PRIMEIROVCTO_ORC;
+    lPedidoVendaModel.ACRES_PED            := lOrcamentoModel.ACRES_ORC;
+    lPedidoVendaModel.DESC_PED             := lOrcamentoModel.DESCONTO_ORC;
+    lPedidoVendaModel.DESCONTO_PED         := lOrcamentoModel.DESC_ORC;
+    lPedidoVendaModel.VALOR_PED            := FloatToStr((StrToFloat(lOrcamentoModel.TOTAL_ORC)+StrToFloat(lOrcamentoModel.DESCONTO_ORC))-StrToFloat(lOrcamentoModel.ACRES_ORC));
+    lPedidoVendaModel.TOTAL_PED            := lOrcamentoModel.TOTAL_ORC;
+    lPedidoVendaModel.VALORENTADA_PED      := lOrcamentoModel.VLRENTRADA_ORC;
+    lPedidoVendaModel.PARCELAS_PED         := lOrcamentoModel.PARCELAS_ORC;
+    lPedidoVendaModel.PARCELA_PED          := lOrcamentoModel.VLRPARCELA_ORC; //Valor da parcela
+    lPedidoVendaModel.CTR_IMPRESSAO_PED    := '0';
+    lPedidoVendaModel.RESERVADO            := 'N';
+    lPedidoVendaModel.TIPO_FRETE           := '9';
+    lPedidoVendaModel.SMS                  := 'N';
+    lPedidoVendaModel.ENTREGA              := 'N';
+    lPedidoVendaModel.STATUS_PED           := 'P';
+    lPedidoVendaModel.STATUS               := 'P';
+    lPedidoVendaModel.TIPO_PED             := 'P';
+    lPedidoVendaModel.TABJUROS_PED         := 'N';
+    lPedidoVendaModel.NUMERO_ORC           := lOrcamentoModel.NUMERO_ORC;
+    lPedidoVendaModel.CODIGO_CLI           := lOrcamentoModel.CODIGO_CLI;
+    lPedidoVendaModel.CNPJ_CPF_CONSUMIDOR  := lTableCliente.fieldByName('CNPJ_CPF_CLI').AsString;
+    lPedidoVendaModel.CODIGO_PORT          := lOrcamentoModel.CODIGO_PORT;
+    lPedidoVendaModel.CODIGO_VEN           := lOrcamentoModel.CODIGO_VEN;
+    lPedidoVendaModel.CODIGO_TIP           := lOrcamentoModel.CODIGO_TIP;
+    lPedidoVendaModel.FRETE_PED            := lOrcamentoModel.FRETE;
+    lPedidoVendaModel.INFORMACOES_PED      := lOrcamentoModel.INFORMACOES_ORC;
+    lPedidoVendaModel.PRECO_VENDA_ID       := lOrcamentoModel.PRECO_VENDA_ID;
+    lPedidoVendaModel.USUARIO_PED          := self.vIConexao.getUSer.ID;
+    lPedidoVendaModel.IDUsuario            := self.vIConexao.getUSer.ID;
+
+    lPedido := lPedidoVendaModel.Salvar;
+
+    lPedidoVendaModel.NUMERO_PED := lPedido;
+
+    lOrcamentoItensModel.WhereView := ' AND I.NUMERO_ORC = '+QuotedStr(pNumeroOrc)+' ';
+    lMemtable := lOrcamentoItensModel.obterLista;
+
+    lPedidoItensModel.PedidoItenssLista := TObjectList<TPedidoItensModel>.Create;
+
+    lItem  := 0;
+    lIndex := 0;
+
+    lMemtable.First;
+    while not lMemtable.Eof do
+    begin
+      lPedidoItensModel.PedidoItenssLista.Add(TPedidoItensModel.Create(vIConexao));
+      inc(lItem);
+
+      lPedidoItensModel.PedidoItenssLista[lIndex].NUMERO_PED             := lPedido;
+      lPedidoItensModel.PedidoItenssLista[lIndex].CODIGO_CLI             := lOrcamentoModel.CODIGO_CLI;
+      lPedidoItensModel.PedidoItenssLista[lIndex].LOJA                   := lOrcamentoModel.LOJA;
+      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_PED         := lMemtable.FieldByName('QUANTIDADE_ORC').AsString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_NEW         := lMemtable.FieldByName('QUANTIDADE_ORC').AsString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].OBSERVACAO             := copy(lMemtable.FieldByName('OBSERVACAO').AsString,1,50);
+      lPedidoItensModel.PedidoItenssLista[lIndex].OBS_ITEM               := lMemtable.FieldByName('OBSERVACAO').AsString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].CODIGO_PRO             := lMemtable.FieldByName('CODIGO_PRO').AsString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_TIPO        := lMemtable.FieldByName('VLRGARANTIA_ORC').AsString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].DESCONTO_PED           := lMemtable.FieldByName('DESCONTO_ORC').AsString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].VALORUNITARIO_PED      := lMemtable.FieldByName('VALORUNITARIO_ORC').AsString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].ITEM                   := lItem.ToString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].VLRVENDA_PRO           := lMemtable.FieldByName('VALORUNITARIO_ORC').AsString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_VENDA_CADASTRO   := lMemtable.FieldByName('VALORUNITARIO_ORC').AsString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].VLRCUSTO_PRO           := lMemtable.FieldByName('VLRCUSTO_ORC').AsString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].COMISSAO_PED           := '0';
+
+      inc(lIndex);
+      lMemtable.Next;
+    end;
+
+    lPedidoItensModel.Acao := tacIncluirLote;
+    lPedidoItensModel.Salvar;
+
+    lPedidoVendaModel.gerarContasReceberPedido;
+
+    lOrcamentoModel.FAcao := tacAlterar;
+    lOrcamentoModel.FSITUACAO_ORC := 'A';
+    lOrcamentoModel.Salvar;
+
+    Result := lPedido;
+  finally
+    lOrcamentoModel.Free;
+    lPedidoVendaModel.Free;
+    lOrcamentoItensModel.Free;
+    lPedidoItensModel.Free;
+    lClientesModel.Free;
+    lMemtable.Free;
+    lEmpresaModel.Free;
+    lProdutosModel.Free;
   end;
 end;
 
