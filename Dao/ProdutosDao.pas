@@ -720,7 +720,7 @@ begin
             '               produto.nfce_cfop,                                                  '+
             '               produto.garantia_12,                                                '+
             '               produto.garantia_24,                                                '+
-            '               saldo.saldo - saldo.reservado saldo_disponivel,                     '+
+            '               coalesce(produto.saldo_pro,0) - coalesce( saldo.saldo_reservado,0) saldo_disponivel,  '+
             '               produto.codigo_for,                                                 '+
             '               produto.codigo_gru,                                                 '+
             '               produto.codigo_sub,                                                 '+
@@ -732,7 +732,7 @@ begin
             '               produto.status_pro,                                                 '+
             '               coalesce(produto.status_linha, ''N'') status_linha                  '+
             '          from produto                                                             '+
-            '          left join view_saldo_produto saldo on saldo.codigo = produto.codigo_pro  '+
+            '          left join view_saldo_reservado saldo on saldo.produto_id = produto.codigo_pro  '+
             '       )  produto                                                                  '+
             '                                                                                   '+
             '   where 1=1                                                                       ';
