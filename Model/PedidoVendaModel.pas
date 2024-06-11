@@ -737,97 +737,84 @@ var
   lFinanceiroPedidoModel   : TFinanceiroPedidoModel;
   lFaturaReceber,
   lFinanceiro              : String;
-  lParcela, lTotalParcelas : Integer;
-  lValorParcela,
-  lValorTotal,
-  lSomaParcelas            : Double;
-  lVencimento              : TDate;
+  lIndex                   : Integer;
   lMemTable                : TFDMemTable;
 begin
-//  lContasReceberModel      := TContasReceberModel.Create(vIConexao);
-//  lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
-//  lEmpresaModel            := TEmpresaModel.Create(vIConexao);
-//  lFinanceiroPedidoModel   := TFinanceiroPedidoModel.Create(vIConexao);
-//
-//  try
-//    lFinanceiro := '';
-//    lEmpresaModel.Carregar;
-//
-//    lFinanceiroPedidoModel.WhereView := ' and financeiro_pedido.web_pedido_id = ' + pVendaAssistida;
-//    lFinanceiroPedidoModel.OrderView := ' id_financeiro';
-//
-//    lMemTable := lFinanceiroPedidoModel.obterLista;
-//
-//    lMemTable.First;
-//    while not lMemTable.eof do
-//    begin
-//      if lFinanceiro <> lMemTable.FieldByName('ID_FINANCEIRO').AsString then
-//      begin
-//        lFinanceiro := lMemTable.FieldByName('ID_FINANCEIRO').AsString;
-//
-//        lContasReceberModel.Acao          := tacIncluir;
-//        lContasReceberModel.LOJA          := self.FLOJA;
-//        lContasReceberModel.PEDIDO_REC    := self.FNUMERO_PED;
-//        lContasReceberModel.CODIGO_CLI    := self.FCODIGO_CLI;
-//        lContasReceberModel.DATAEMI_REC   := self.FDATA_PED;
-//        lContasReceberModel.VALOR_REC     := lMemTable.FieldByName('VALOR_TOTAL').AsString;
-//        lContasReceberModel.ACRESCIMO     := lMemTable.FieldByName('VALOR_ACRESCIMO').AsString;
-//        lContasReceberModel.SITUACAO_REC  := 'A';
-//        lContasReceberModel.VENDEDOR_REC  := self.FCODIGO_VEN;
-//        lContasReceberModel.USUARIO_REC   := self.vIConexao.getUSer.ID;
-//        lContasReceberModel.OBS_REC       := 'Venda: '+self.FNUMERO_PED;
-//        lContasReceberModel.TIPO_REC      := 'N';
-//        lContasReceberModel.CODIGO_POR    := lMemTable.FieldByName('PORTADOR_ID').AsString;
-//        lContasReceberModel.JUROS_FIXO    := lEmpresaModel.JUROS_BOL;
-//        lContasReceberModel.CODIGO_CTA    := '555555';
-//        lFaturaReceber := lContasReceberModel.Salvar;
-//      end;
-//
-//      lContasReceberItensModel.ContasReceberItenssLista.Add(TContasReceberItensModel.Create(vIConexao));
-//      lContasReceberItensModel.ContasReceberItenssLista[lParcela].FATURA_REC         := lFaturaReceber;
-//      lContasReceberItensModel.ContasReceberItenssLista[lParcela].CODIGO_POR         := pPortador;
-//      lContasReceberItensModel.ContasReceberItenssLista[lParcela].CODIGO_CLI         := lContasReceberModel.CODIGO_CLI;
-//      lContasReceberItensModel.ContasReceberItenssLista[lParcela].SITUACAO_REC       := 'A';
-//      lContasReceberItensModel.ContasReceberItenssLista[lParcela].VALORREC_REC       := '0';
-//      lContasReceberItensModel.ContasReceberItenssLista[lParcela].VALOR_PAGO         := '0';
-//      lContasReceberItensModel.ContasReceberItenssLista[lParcela].LOJA               := lContasReceberModel.LOJA;
-//      lContasReceberItensModel.ContasReceberItenssLista[lParcela].VLRPARCELA_REC     := lValorParcela.ToString;
-//      lContasReceberItensModel.ContasReceberItenssLista[lParcela].PACELA_REC         := (lParcela + 1).ToString;
-//      lContasReceberItensModel.ContasReceberItenssLista[lParcela].TOTALPARCELAS_REC  := lTotalParcelas.ToString;
-//
-//      lMemTable.Next;
-//    end;
-//
-//
-//
-//    lContasReceberItensModel.ContasReceberItenssLista := TObjectList<TContasReceberItensModel>.Create;
-//
-//    for lParcela := 0 to Pred(lTotalParcelas) do begin
-//
-//
-//      if lParcela > 0 then
-//        lVencimento := IncMonth(lVencimento,1);
-//
-//      lContasReceberItensModel.ContasReceberItenssLista[lParcela].VENCIMENTO_REC := DateToStr(lVencimento);
-//
-//      lSomaParcelas := lSomaParcelas + StrToFloat(FormatFloat('0.00', lValorParcela));
-//    end;
-//
-//    if lSomaParcelas > lValorTotal then
-//      lContasReceberItensModel.ContasReceberItenssLista[0].VLRPARCELA_REC := (lValorParcela - (lSomaParcelas - lValorTotal)).ToString
-//    else if lSomaParcelas < lValorTotal then
-//      lContasReceberItensModel.ContasReceberItenssLista[0].VLRPARCELA_REC := (lValorParcela + (lValorTotal - lSomaParcelas)).ToString;
-//
-//    lContasReceberItensModel.Acao := tacIncluir;
-//    lContasReceberItensModel.Salvar;
-//
-//    Result := lFaturaReceber;
-//
-//  finally
-//    lContasReceberItensModel.Free;
-//    lFinanceiroPedidoModel.Free;
-//    lContasReceberModel.Free;
-//  end;
+  lContasReceberModel      := TContasReceberModel.Create(vIConexao);
+  lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
+  lEmpresaModel            := TEmpresaModel.Create(vIConexao);
+  lFinanceiroPedidoModel   := TFinanceiroPedidoModel.Create(vIConexao);
+
+  try
+    lFinanceiro := '';
+    lEmpresaModel.Carregar;
+
+    lFinanceiroPedidoModel.WhereView := ' and financeiro_pedido.web_pedido_id = ' + pVendaAssistida;
+    lFinanceiroPedidoModel.OrderView := ' id_financeiro, parcela';
+    lMemTable := lFinanceiroPedidoModel.obterLista;
+
+    lContasReceberItensModel.ContasReceberItenssLista := TObjectList<TContasReceberItensModel>.Create;
+
+    lMemTable.First;
+    while not lMemTable.eof do
+    begin
+      if lFinanceiro <> lMemTable.FieldByName('ID_FINANCEIRO').AsString then
+      begin
+        lFinanceiro := lMemTable.FieldByName('ID_FINANCEIRO').AsString;
+
+        lContasReceberModel.Acao          := tacIncluir;
+        lContasReceberModel.LOJA          := self.FLOJA;
+        lContasReceberModel.PEDIDO_REC    := self.FNUMERO_PED;
+        lContasReceberModel.CODIGO_CLI    := self.FCODIGO_CLI;
+        lContasReceberModel.DATAEMI_REC   := self.FDATA_PED;
+        lContasReceberModel.VALOR_REC     := lMemTable.FieldByName('VALOR_TOTAL').AsString;
+        lContasReceberModel.ACRESCIMO     := lMemTable.FieldByName('VALOR_ACRESCIMO').AsString;
+        lContasReceberModel.SITUACAO_REC  := 'A';
+        lContasReceberModel.VENDEDOR_REC  := self.FCODIGO_VEN;
+        lContasReceberModel.USUARIO_REC   := self.vIConexao.getUSer.ID;
+        lContasReceberModel.OBS_REC       := 'Venda: '+self.FNUMERO_PED;
+        lContasReceberModel.TIPO_REC      := 'N';
+        lContasReceberModel.CODIGO_POR    := lMemTable.FieldByName('PORTADOR_ID').AsString;
+        lContasReceberModel.JUROS_FIXO    := lEmpresaModel.JUROS_BOL;
+        lContasReceberModel.CODIGO_CTA    := '555555';
+        lFaturaReceber := lContasReceberModel.Salvar;
+      end;
+
+      lContasReceberItensModel.ContasReceberItenssLista.Add(TContasReceberItensModel.Create(vIConexao));
+
+      lContasReceberItensModel.ContasReceberItenssLista[lIndex].FATURA_REC         := lFaturaReceber;
+      lContasReceberItensModel.ContasReceberItenssLista[lIndex].CODIGO_POR         := lMemTable.FieldByName('PORTADOR_ID').AsString;
+      lContasReceberItensModel.ContasReceberItenssLista[lIndex].CODIGO_CLI         := lContasReceberModel.CODIGO_CLI;
+      lContasReceberItensModel.ContasReceberItenssLista[lIndex].SITUACAO_REC       := 'A';
+      lContasReceberItensModel.ContasReceberItenssLista[lIndex].VALORREC_REC       := '0';
+      lContasReceberItensModel.ContasReceberItenssLista[lIndex].VALOR_PAGO         := '0';
+      lContasReceberItensModel.ContasReceberItenssLista[lIndex].LOJA               := lContasReceberModel.LOJA;
+      lContasReceberItensModel.ContasReceberItenssLista[lIndex].VLRPARCELA_REC     := lMemTable.FieldByName('VALOR_PARCELA').AsString;
+      lContasReceberItensModel.ContasReceberItenssLista[lIndex].PACELA_REC         := lMemTable.FieldByName('PARCELA').AsString;
+      lContasReceberItensModel.ContasReceberItenssLista[lIndex].TOTALPARCELAS_REC  := lMemTable.FieldByName('QUANTIDADE_PARCELAS').AsString;
+      lContasReceberItensModel.ContasReceberItenssLista[lIndex].VENCIMENTO_REC     := lMemTable.FieldByName('VENCIMENTO').AsString;
+
+      inc(lIndex);
+
+      if lMemTable.FieldByName('PARCELA').AsString = lMemTable.FieldByName('QUANTIDADE_PARCELAS').AsString then
+      begin
+        lContasReceberItensModel.Acao := tacIncluir;
+        lContasReceberItensModel.Salvar;
+
+        lContasReceberItensModel.ContasReceberItenssLista.Clear;
+        lIndex := 0;
+      end;
+
+      lMemTable.Next;
+    end;
+
+    Result := lFaturaReceber;
+
+  finally
+    lContasReceberItensModel.Free;
+    lFinanceiroPedidoModel.Free;
+    lContasReceberModel.Free;
+  end;
 end;
 
 function TPedidoVendaModel.gerarContasReceberPedido(pValor, pPortador, pParcelas, pPrimeiroVencimento: String; pAcrescimo: String = ''): String;

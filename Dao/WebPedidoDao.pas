@@ -70,7 +70,7 @@ end;
 implementation
 
 uses
-  System.Rtti;
+  System.Rtti, Clipbrd;
 
 { TWebPedido }
 
@@ -285,10 +285,7 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From web_pedido where 1=1 ';
-
-
-
+    lSql := 'select count(*) records From web_pedido webpedido where 1=1 ';
 
     lSql := lSql + where;
 
@@ -343,7 +340,7 @@ begin
             '        MENSAGEM_ANALISE,                                                                                                      '+SLineBreak+
             '        VALOR_FRETE,                                                                                                           '+SLineBreak+
             '        ACRESCIMO,                                                                                                             '+SLineBreak+
-            '        ORIGEM_PEDIDO                                                                                                          '+SLineBreak+
+            '        ORIGEM_PEDIDO,                                                                                                         '+SLineBreak+
             '        VALOR_ITENS,                                                                                                           '+SLineBreak+
             '        VALOR_GARANTIA,                                                                                                        '+SLineBreak+
             '        VALOR_CUPOM_DESCONTO,                                                                                                  '+SLineBreak+
