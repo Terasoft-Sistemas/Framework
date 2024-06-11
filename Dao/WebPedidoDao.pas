@@ -12,8 +12,7 @@ uses
   System.Variants,
   Terasoft.FuncoesTexto,
   Terasoft.Utils,
-  Interfaces.Conexao,
-  ClipBrd;
+  Interfaces.Conexao;
 
 type
   TWebPedidoDao = class
@@ -334,6 +333,7 @@ begin
             '        ENTREGA_HORA,                                                                                                          '+SLineBreak+
             '        REGIAO,                                                                                                                '+SLineBreak+
             '        DATAHORA,                                                                                                              '+SLineBreak+
+            '        VENDEDOR_ID,                                                                                                           '+SLineBreak+
             '        VENDEDOR,                                                                                                              '+SLineBreak+
             '        STATUS,                                                                                                                '+SLineBreak+
             '        REGIAO_ID,                                                                                                             '+SLineBreak+
@@ -366,6 +366,7 @@ begin
             '    				entrega_hora,                                                                                                       '+SLineBreak+
             '    				regiao,                                                                                                             '+SLineBreak+
             '           datahora,                                                                                                           '+SLineBreak+
+            '           vendedor_id,                                                                                                        '+SLineBreak+
             '           vendedor,                                                                                                           '+SLineBreak+
             '           status,                                                                                                             '+SLineBreak+
             '           regiao_id,                                                                                                          '+SLineBreak+
@@ -397,6 +398,7 @@ begin
             '         					 web_pedido.entrega_hora,                                                                                   '+SLineBreak+
             '         					 regiao.descricao regiao,                                                                                   '+SLineBreak+
             '                    web_pedido.datahora,                                                                                       '+SLineBreak+
+            '                    web_pedido.vendedor_id vendedor_id,                                                                        '+SLineBreak+
             '                    funcionario.nome_fun vendedor,                                                                             '+SLineBreak+
             '                    web_pedido.status,                                                                                         '+SLineBreak+
             '                    web_pedido.regiao_id,                                                                                      '+SLineBreak+
@@ -413,7 +415,7 @@ begin
             '               left join funcionario on funcionario.codigo_fun = web_pedido.vendedor_id                                        '+SLineBreak+
             '      			   ) t1                                                                                                             '+SLineBreak+
             '                                                                                                                               '+SLineBreak+
-            '    group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19, 20, 21, 22, 23, 24 ) web_pedido                                      '+SLineBreak+
+            '    group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19, 20, 21, 22, 23, 24, 25 ) webpedido                               '+SLineBreak+
             '    where 1=1                                                                                                                  '+SLineBreak;
 
     lSQL := lSQL + where;
