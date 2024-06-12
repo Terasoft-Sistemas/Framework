@@ -108,13 +108,19 @@ type
     Cliente_id,
     Vendedor_id,
     Filial,
-    Informacoes_ped: String;
-
+    Informacoes_ped,
     Entrega_data,
-    Montagem_data: String;
-
+    Montagem_data,
     Entrega_hora,
-    Montagem_hora: String;
+    Montagem_hora,
+    Entrega_endereco,
+    Entrega_complemento,
+    Entrega_numero,
+    Entrega_bairro,
+    Entrega_cidade,
+    Entrega_uf,
+    Entrega_cep,
+    Entrega_cod_municipio: String;
   end;
 
   TCurvaABC_Dados = record
