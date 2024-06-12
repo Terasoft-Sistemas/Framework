@@ -749,6 +749,8 @@ begin
     lQryCD := vIConexao.criarQueryExterna;
     lQryCD.Open(lSQL);
 
+    Clipboard.AsText := lSql;
+
     i := 0;
     lQry.First;
     while not lQry.Eof do
@@ -778,7 +780,9 @@ begin
 
       lQryCD.First;
       if lQryCD.Locate('CODIGO_PRO', lQry.FieldByName('CODIGO_PRO').AsString, []) then
-        FProdutossLista[i].SALDO_CD := lQryCD.FieldByName('SALDO_DISPONIVEL').AsString;
+        FProdutossLista[i].SALDO_CD := lQryCD.FieldByName('SALDO_DISPONIVEL').AsString
+      else
+        FProdutossLista[i].SALDO_CD := '0';
 
       lQry.Next;
     end;
