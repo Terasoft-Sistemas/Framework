@@ -536,7 +536,7 @@ uses
   CFOPModel,
   EmpresaModel,
   FireDAC.Comp.Client, ClienteModel, FuncionarioModel, Terasoft.Configuracoes,
-  PixModel, FinanceiroPedidoModel;
+  PixModel, FinanceiroPedidoModel, VendaCartaoModel;
 
 { TPedidoVendaModel }
 
@@ -701,9 +701,14 @@ begin
 
     for lModel in lContasReceberModel.ContasRecebersLista do
     begin
-      lModel.Acao := tacExcluir;
-      lModel.Salvar;
+      lModel.validaExclusao;
     end;
+
+    for lContasReceberModel in lContasReceberModel.ContasRecebersLista do
+    begin
+      lContasReceberModel.Excluir(lContasReceberModel.FATURA_REC);
+    end;
+
   finally
     lContasReceberModel.Free;
   end;

@@ -124,7 +124,6 @@ type
     procedure SetIDAdmCartao(const Value: String);
     procedure SetVALOR_PAGO(const Value: Variant);
     procedure SetRECEBIMENTO_CONCLUIDO(const Value: Boolean);
-    procedure validaExclusao;
     procedure SetACRESCIMO(const Value: Variant);
     procedure SetIDUsuarioOperacao(const Value: String);
   public
@@ -174,9 +173,10 @@ type
 
   	constructor Create(pConexao : IConexao);
     destructor Destroy; override;
+
     function Incluir : String;
     function Alterar(pID : String) : TContasReceberModel;
-    function Excluir(pID : String) : String;
+    function Excluir(pFatura : String) : String;
     function Salvar: String;
     procedure obterLista;
     procedure obterContasReceberPedido;
@@ -186,6 +186,8 @@ type
     function pedidoContasReceber(pFatura: String): String;
     procedure excluirBaixa;
     procedure excluirVendaCartao;
+    procedure validaExclusao;
+
     property ContasRecebersLista: TObjectList<TContasReceberModel> read FContasRecebersLista write SetContasRecebersLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -235,9 +237,13 @@ begin
   end;
 end;
 
-function TContasReceberModel.Excluir(pID: String): String;
+function TContasReceberModel.Excluir(pFatura: String): String;
 begin
-  self.FID  := pID;
+  self := self.carregaClasse(pFatura);
+
+  self.validaExclusao;
+  self.excluirVendaCartao;
+
   self.Acao := tacExcluir;
   Result    := self.Salvar;
 end;
@@ -377,24 +383,22 @@ end;
 
 procedure TContasReceberModel.excluirVendaCartao;
 var
-  lVendaCartaoModel, lVendaCartaoExclusao: TVendaCartaoModel;
-  i: Integer;
+  lVendaCartaoModel: TVendaCartaoModel;
 begin
-  if self.FPEDIDO_REC = '' then
-    CriaException('Pedido da fatura não informado.');
-  lVendaCartaoExclusao := TVendaCartaoModel.Create(vIConexao);
-  lVendaCartaoModel    := TVendaCartaoModel.Create(vIConexao);
+  if self.FFATURA_REC = '' then
+    CriaException('Fatura não informada.');
+
+  lVendaCartaoModel := TVendaCartaoModel.Create(vIConexao);
   try
-    lVendaCartaoModel.WhereView := ' and vendacartao.numero_venda = ' + QuotedStr(self.FPEDIDO_REC);
+    lVendaCartaoModel.WhereView := ' and vendacartao.fatura_id = ' + QuotedStr(self.FFATURA_REC);
     lVendaCartaoModel.obterLista;
-    for i := 0 to lVendaCartaoModel.VendaCartaosLista.Count -1 do
+
+    for lVendaCartaoModel in lVendaCartaoModel.VendaCartaosLista do
     begin
-      lVendaCartaoExclusao := lVendaCartaoModel.VendaCartaosLista[i];
-      lVendaCartaoExclusao.Acao := tacExcluir;
-      lVendaCartaoExclusao.Salvar;
+      lVendaCartaoModel.Acao := tacExcluir;
+      lVendaCartaoModel.Salvar;
     end;
   finally
-    lVendaCartaoExclusao.Free;
     lVendaCartaoModel.Free;
   end;
 end;
@@ -761,6 +765,7 @@ procedure TContasReceberModel.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
 end;
+
 
 procedure TContasReceberModel.validaExclusao;
 var
