@@ -51,6 +51,14 @@ type
     FTIPO: Variant;
     FDATA: Variant;
     FWEB_PEDIDO_ID: Variant;
+    FENTREGA_BAIRRO: Variant;
+    FENTREGA_UF: Variant;
+    FENTREGA_CEP: Variant;
+    FENTREGA_NUMERO: Variant;
+    FENTREGA_COMPLEMENTO: Variant;
+    FENTREGA_CIDADE: Variant;
+    FENTREGA_ENDERECO: Variant;
+    FENTREGA_COD_MUNICIPIO: Variant;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -88,6 +96,14 @@ type
     procedure SetVENDEDOR_ID(const Value: Variant);
     procedure SetWEB_PEDIDOITENS_ID(const Value: Variant);
     procedure SetWEB_PEDIDO_ID(const Value: Variant);
+    procedure SetENTREGA_BAIRRO(const Value: Variant);
+    procedure SetENTREGA_CEP(const Value: Variant);
+    procedure SetENTREGA_CIDADE(const Value: Variant);
+    procedure SetENTREGA_COD_MUNICIPIO(const Value: Variant);
+    procedure SetENTREGA_COMPLEMENTO(const Value: Variant);
+    procedure SetENTREGA_ENDERECO(const Value: Variant);
+    procedure SetENTREGA_NUMERO(const Value: Variant);
+    procedure SetENTREGA_UF(const Value: Variant);
 
   public
 
@@ -119,6 +135,14 @@ type
     property PRODUCAO_ID          : Variant  read FPRODUCAO_ID write SetPRODUCAO_ID;
     property PRODUCAO_LOJA        : Variant  read FPRODUCAO_LOJA write SetPRODUCAO_LOJA;
     property WEB_PEDIDO_ID        : Variant read FWEB_PEDIDO_ID write SetWEB_PEDIDO_ID;
+    property ENTREGA_ENDERECO     : Variant read FENTREGA_ENDERECO write SetENTREGA_ENDERECO;
+    property ENTREGA_COMPLEMENTO  : Variant read FENTREGA_COMPLEMENTO write SetENTREGA_COMPLEMENTO;
+    property ENTREGA_NUMERO       : Variant read FENTREGA_NUMERO write SetENTREGA_NUMERO;
+    property ENTREGA_BAIRRO       : Variant read FENTREGA_BAIRRO write SetENTREGA_BAIRRO;
+    property ENTREGA_CIDADE       : Variant read FENTREGA_CIDADE write SetENTREGA_CIDADE;
+    property ENTREGA_UF           : Variant read FENTREGA_UF write SetENTREGA_UF;
+    property ENTREGA_CEP          : Variant read FENTREGA_CEP write SetENTREGA_CEP;
+    property ENTREGA_COD_MUNICIPIO: Variant read FENTREGA_COD_MUNICIPIO write SetENTREGA_COD_MUNICIPIO;
 
 
 
@@ -299,14 +323,54 @@ begin
   FENTREGA := Value;
 end;
 
+procedure TReservaModel.SetENTREGA_BAIRRO(const Value: Variant);
+begin
+  FENTREGA_BAIRRO := Value;
+end;
+
+procedure TReservaModel.SetENTREGA_CEP(const Value: Variant);
+begin
+  FENTREGA_CEP := Value;
+end;
+
+procedure TReservaModel.SetENTREGA_CIDADE(const Value: Variant);
+begin
+  FENTREGA_CIDADE := Value;
+end;
+
+procedure TReservaModel.SetENTREGA_COD_MUNICIPIO(const Value: Variant);
+begin
+  FENTREGA_COD_MUNICIPIO := Value;
+end;
+
+procedure TReservaModel.SetENTREGA_COMPLEMENTO(const Value: Variant);
+begin
+  FENTREGA_COMPLEMENTO := Value;
+end;
+
 procedure TReservaModel.SetENTREGA_DATA(const Value: Variant);
 begin
   FENTREGA_DATA := Value;
 end;
 
+procedure TReservaModel.SetENTREGA_ENDERECO(const Value: Variant);
+begin
+  FENTREGA_ENDERECO := Value;
+end;
+
 procedure TReservaModel.SetENTREGA_HORA(const Value: Variant);
 begin
   FENTREGA_HORA := Value;
+end;
+
+procedure TReservaModel.SetENTREGA_NUMERO(const Value: Variant);
+begin
+  FENTREGA_NUMERO := Value;
+end;
+
+procedure TReservaModel.SetENTREGA_UF(const Value: Variant);
+begin
+  FENTREGA_UF := Value;
 end;
 
 procedure TReservaModel.SetFILIAL(const Value: Variant);

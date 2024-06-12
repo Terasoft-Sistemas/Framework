@@ -241,7 +241,7 @@ begin
               '     COALESCE(COALESCE(I.QUANTIDADE_ORC, 0) - COALESCE(I.QUANTIDADE_ATE_ORC, 0),0) QUANTIDADE_ORC,   '+SlineBreak+
               '     COALESCE(I.VALORUNITARIO_ORC, 0) VALORUNITARIO_ORC,                                             '+SlineBreak+
               '     COALESCE(I.DESCONTO_ORC, 0) DESCONTO_ORC,                                                       '+SlineBreak+
-              '     I.QUANTIDADE_ORC * (I.VALORUNITARIO_ORC - (I.DESCONTO_ORC / 100 * I.VALORUNITARIO_ORC )) TOTAL  '+SlineBreak+
+              '     CAST(I.QUANTIDADE_ORC AS DOUBLE PRECISION) * (I.VALORUNITARIO_ORC - (I.DESCONTO_ORC / 100 * I.VALORUNITARIO_ORC)) AS TOTAL '+SlineBreak+
               ' FROM                                                                                                '+SlineBreak+
               '     ORCAMENTOITENS I                                                                                '+SlineBreak+
               ' INNER JOIN PRODUTO P ON                                                                             '+SlineBreak+
