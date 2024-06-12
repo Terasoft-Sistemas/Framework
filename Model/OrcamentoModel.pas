@@ -450,10 +450,10 @@ begin
     lPedidoVendaModel.TOTAL_PED            := lOrcamentoModel.TOTAL_ORC;
     lPedidoVendaModel.VALORENTADA_PED      := lOrcamentoModel.VLRENTRADA_ORC;
     lPedidoVendaModel.PARCELAS_PED         := lOrcamentoModel.PARCELAS_ORC;
-    lPedidoVendaModel.PARCELA_PED          := lOrcamentoModel.VLRPARCELA_ORC; //Valor da parcela
+    lPedidoVendaModel.PARCELA_PED          := lOrcamentoModel.VLRPARCELA_ORC;
     lPedidoVendaModel.CTR_IMPRESSAO_PED    := '0';
     lPedidoVendaModel.RESERVADO            := 'N';
-    lPedidoVendaModel.TIPO_FRETE           := '9';
+    lPedidoVendaModel.TIPO_FRETE           := lOrcamentoModel.TIPO_FRETE;
     lPedidoVendaModel.SMS                  := 'N';
     lPedidoVendaModel.ENTREGA              := 'N';
     lPedidoVendaModel.STATUS_PED           := 'P';

@@ -272,7 +272,7 @@ begin
     lSQL := lSQL + FWhereView;
 
   if FIDRecordView <> 0  then
-    lSQL := lSQL + ' and id = '+IntToStr(FIDRecordView);
+    lSQL := lSQL + ' and webpedido.id = '+IntToStr(FIDRecordView);
 
   Result := lSQL;
 end;
@@ -285,10 +285,15 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From web_pedido webpedido where 1=1 ';
+    lSql := 'select count(*) records From web_pedido webpedido                   ' +
+            '    left join clientes on webpedido.cliente_id = clientes.codigo_cli          ' +
+            '    left join web_pedidoitens on web_pedidoitens.web_pedido_id = webpedido.id ' +
+            '    left join regiao on regiao.id = webpedido.regiao_id                       ' +
+            '    left join funcionario on funcionario.codigo_fun = webpedido.vendedor_id   ' +
+            'where 1=1 ';
 
     lSql := lSql + where;
-
+    ClipBoard.AsText := lSQL;
     lQry.Open(lSQL);
 
     FTotalRecords := lQry.FieldByName('records').AsInteger;
@@ -426,6 +431,7 @@ begin
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
 
+    ClipBoard.AsText := lSQL;
     lQry.Open(lSQL);
 
     Result := vConstrutor.atribuirRegistros(lQry);
