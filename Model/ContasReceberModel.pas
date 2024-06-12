@@ -289,7 +289,7 @@ begin
         exit;
       end;
 
-      if AnsiMatchStr(lPortadorModel.TPAG_NFE,['17']) then
+      if AnsiMatchStr(lPortadorModel.TPAG_NFE,['17']) and (lPortadorModel.PIX_CHAVE <> '') then
       begin
         Result := tcReceberPix;
         exit;

@@ -520,6 +520,8 @@ begin
     lOrcamentoModel.FSITUACAO_ORC := 'A';
     lOrcamentoModel.Salvar;
 
+    lOrcamentoItensModel.quantidadeAtendida(pNumeroOrc);
+
     Result := lPedido;
   finally
     lOrcamentoModel.Free;
