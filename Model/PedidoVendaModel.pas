@@ -633,7 +633,7 @@ begin
     lPedidoVendaModel := lPedidoVendaModel.carregaClasse(self.FNUMERO_PED);
 
     lContasReceberModel.IDPedidoView := lPedidoVendaModel.NUMERO_PED;
-    lContasReceberModel.WhereView    := ' and portador.tpag_nfe = ''17''';
+    lContasReceberModel.WhereView    := ' and portador.tpag_nfe = ''17'' and portador.pix_chave is not null';
     lContasReceberModel.obterContasReceberPedido;
 
     for lContasReceberModel in lContasReceberModel.ContasRecebersLista do
