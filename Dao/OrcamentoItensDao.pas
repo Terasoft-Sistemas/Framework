@@ -66,6 +66,8 @@ type
 
     function obterLista: TFDMemTable;
 
+    procedure quantidadeAtendida(pNumeroOrc: String);
+
     procedure setParams(var pQry: TFDQuery; pOrcamentoItensModel: TOrcamentoItensModel);
 
 end;
@@ -187,7 +189,6 @@ begin
 
   try
    lQry.ExecSQL('delete from ORCAMENTOITENS where ID = :ID' ,[pOrcamentoItensModel.ID]);
-   lQry.ExecSQL;
    Result := pOrcamentoItensModel.ID;
 
   finally
@@ -260,6 +261,25 @@ begin
 
     obterTotalRegistros;
 
+  finally
+    lQry.Free;
+  end;
+end;
+
+procedure TOrcamentoItensDao.quantidadeAtendida(pNumeroOrc : String);
+var
+  lQry       : TFDQuery;
+  lSQL       : String;
+  lPaginacao : String;
+begin
+  lQry := vIConexao.CriarQuery;
+  try
+      lSQL :=
+              ' UPDATE ORCAMENTOITENS O                      '+SLineBreak+
+              ' SET O.QUANTIDADE_ATE_ORC = O.QUANTIDADE_ORC  '+SLineBreak+
+              ' WHERE O.NUMERO_ORC = '+QuotedStr(pNumeroOrc)  +SLineBreak;
+
+    lQry.ExecSQL(lSQL);
   finally
     lQry.Free;
   end;

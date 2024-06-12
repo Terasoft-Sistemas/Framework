@@ -192,6 +192,8 @@ type
 
     function ObterLista: TFDMemTable; overload;
 
+    procedure quantidadeAtendida(pNumeroOrc: String);
+
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -280,6 +282,18 @@ begin
 
     FTotalRecords := lOrcamentoItensLista.TotalRecords;
 
+  finally
+    lOrcamentoItensLista.Free;
+  end;
+end;
+
+procedure TOrcamentoItensModel.quantidadeAtendida(pNumeroOrc: String);
+var
+  lOrcamentoItensLista: TOrcamentoItensDao;
+begin
+  lOrcamentoItensLista := TOrcamentoItensDao.Create(vIConexao);
+  try
+    lOrcamentoItensLista.quantidadeAtendida(pNumeroOrc);
   finally
     lOrcamentoItensLista.Free;
   end;
