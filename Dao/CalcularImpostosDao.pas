@@ -118,17 +118,19 @@ begin
 
     if FMODELO_NF = '65' then
     begin
-      if lQry.FieldByName('nfce_cfop').AsString = '' then
-        CriaException('CFOP para consumidor não configurado na tabela de ICMS');
+      if lQry.FieldByName('cfop_consumidor_id').AsString <> '' then
+      begin
+        lCalcularImpostosModel.CFOP       := lQry.FieldByName('cfop_consumidor').AsString;
+        lCalcularImpostosModel.CFOP_ID    := lQry.FieldByName('cfop_consumidor_id').AsString;
+      end else
+      begin
+        lCalcularImpostosModel.CFOP       := lQry.FieldByName('nfce_cfop').AsString;
+        lCalcularImpostosModel.CFOP_ID    := lQry.FieldByName('nfce_cfop_id').AsString;
+      end;
 
-      if lQry.FieldByName('nfce_csosn').AsString = '' then
-        CriaException('CSOSN para NFC-e não configurado no cadastro de produto');
-
-      lCalcularImpostosModel.CFOP       := lQry.FieldByName('nfce_cfop').AsString;
-      lCalcularImpostosModel.CFOP_ID    := lQry.FieldByName('nfce_cfop_id').AsString;
       lCalcularImpostosModel.ICMS_CSOSN := lQry.FieldByName('nfce_csosn').AsString;
-    end
-    else
+
+    end else
     begin
       lCalcularImpostosModel.CFOP       := lQry.FieldByName('cfop').AsString;
       lCalcularImpostosModel.CFOP_ID    := lQry.FieldByName('cfop_id').AsString;
