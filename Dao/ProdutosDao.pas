@@ -583,6 +583,7 @@ begin
                     '        produto.localizacao,                                                                       '+SLineBreak+
                     '        produto.unidade_entrada,                                                                   '+SLineBreak+
                     '        produto.nome_resumido,                                                                     '+SLineBreak+
+                    '        produto.usar_balanca,                                                                      '+SLineBreak+
                     '        produto.tipo$_pro,                                                                         '+SLineBreak+
                     '        (select coalesce(saldo - reservado, 0)                                                     '+SLineBreak+
                     '           from view_saldo_produto                                                                 '+SLineBreak+
@@ -660,6 +661,7 @@ begin
       FProdutossLista[i].LOCALIZACAO             := lQry.FieldByName('LOCALIZACAO').AsString;
       FProdutossLista[i].UNIDADE_ENTRADA         := lQry.FieldByName('UNIDADE_ENTRADA').AsString;
       FProdutossLista[i].NOME_RESUMIDO           := lQry.FieldByName('NOME_RESUMIDO').AsString;
+      FProdutossLista[i].USAR_BALANCA            := lQry.FieldByName('USAR_BALANCA').AsString;
       FProdutossLista[i].SALDO_DISPONIVEL        := lQry.FieldByName('SALDO_DISPONIVEL').AsString;
 
       lQry.Next;

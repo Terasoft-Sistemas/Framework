@@ -551,11 +551,12 @@ begin
     '   p.barras_pro,                                    '+#13+
     '   p.nome_pro,                                      '+#13+
     '   i.quantidade_ped,                                '+#13+
+    '   i.qtde_calculada,                                '+#13+
     '   i.valorunitario_ped,                             '+#13+
     '   i.desconto_ped,                                  '+#13+
     '   i.vdesc,                                         '+#13+
     '   i.item,                                          '+#13+
-    '   i.valorunitario_ped * i.quantidade_ped total     '+#13+
+    '   i.valorunitario_ped * i.qtde_calculada total     '+#13+
     ' from                                               '+#13+
     '     pedidoitens i                                  '+#13+
     '                                                    '+#13+
@@ -575,6 +576,7 @@ begin
       FPedidoItenssLista[i].BARRAS_PRO        := lQry.FieldByName('BARRAS_PRO').AsString;
       FPedidoItenssLista[i].NOME_PRO          := lQry.FieldByName('NOME_PRO').AsString;
       FPedidoItenssLista[i].QUANTIDADE_PED    := lQry.FieldByName('QUANTIDADE_PED').AsFloat;
+      FPedidoItenssLista[i].QTDE_CALCULADA    := lQry.FieldByName('QTDE_CALCULADA').AsFloat;
       FPedidoItenssLista[i].VALORUNITARIO_PED := lQry.FieldByName('VALORUNITARIO_PED').AsFloat;
       FPedidoItenssLista[i].DESCONTO_PED      := lQry.FieldByName('DESCONTO_PED').AsFloat;
       FPedidoItenssLista[i].VDESC             := lQry.FieldByName('VDESC').AsFloat;

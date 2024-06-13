@@ -61,6 +61,8 @@ type
 
     procedure obterLista;
 
+    function ObterProdutoBalanca(pBarrasProduto: String): Boolean;
+
     function obterPedido(pNumeroPedido: String): TPedidoVendaModel;
     function carregaClasse(pId: String): TPedidoVendaModel;
     function statusPedido(pId: String): String;
@@ -70,7 +72,7 @@ end;
 implementation
 
 uses
-  Vcl.Dialogs, System.Rtti;
+  Vcl.Dialogs, System.Rtti, Terasoft.Configuracoes, Terasoft.Types;
 { TPedidoVenda }
 procedure TPedidoVendaDao.obterUpdateImpostos(pNumeroPedido: String);
 var
@@ -597,6 +599,37 @@ begin
     lQry.Free;
   end;
 end;
+
+function TPedidoVendaDao.ObterProdutoBalanca(pBarrasProduto: String): Boolean;
+var
+  lQry           : TFDQuery;
+  lSQL           : String;
+  lConfiguracoes : TerasoftConfiguracoes;
+begin
+  lQry := vIConexao.CriarQuery;
+  lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+  try
+
+    if (Length(pBarrasProduto) = 13) and (Copy(pBarrasProduto, 1, 1) = '1') then
+    begin
+      lSQL := 'SELECT * FROM PRODUTO P WHERE P.USAR_BALANCA = ''S'' AND P.CODIGO_PRO = '+ QuotedStr(((Copy(pBarrasProduto, StrToInt(lConfiguracoes.valorTag('tagConfig_BALANCA_COPY_INI_PRODUTO', '2', tvString)), StrToInt(lConfiguracoes.valorTag('tagConfig_BALANCA_COPY_FIM_PRODUTO', '6', tvString))))));
+      lQry.Open(lSQL);
+    end
+    else if (Length(pBarrasProduto) = 13) and (Copy(pBarrasProduto, 1, 1) = '2') then
+    begin
+      lSQL := 'SELECT * FROM PRODUTO P WHERE P.USAR_BALANCA = ''S'' AND P.BARRAS_PRO = '+ QuotedStr(IntToStr(StrToInt(Copy(pBarrasProduto,StrToInt(lConfiguracoes.valorTag('tagConfig_BALANCA_COPY_INI_PRODUTO', '2', tvString)), StrToInt(lConfiguracoes.valorTag('tagConfig_BALANCA_COPY_FIM_PRODUTO', '6', tvString))))));
+      lQry.Open(lSQL);
+    end;
+
+    if lQry.RecordCount = 0 then
+      Result := false
+    else
+      Result := true;
+  finally
+    lQry.Free;
+  end;
+end;
+
 procedure TPedidoVendaDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
