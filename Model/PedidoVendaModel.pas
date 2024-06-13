@@ -838,6 +838,9 @@ begin
   if (self.FCODIGO_CLI = '000000') and (pPortador = '000001') then
     CriaException('Para o cliente consumidor o portador não pode ser carteira.');
 
+  if (self.FCODIGO_CLI = '000000') and (pPortador = '000005') then
+    CriaException('Para o cliente consumidor o portador não pode ser boleto.');
+
   lContasReceberModel      := TContasReceberModel.Create(vIConexao);
   lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
   lEmpresaModel            := TEmpresaModel.Create(vIConexao);
