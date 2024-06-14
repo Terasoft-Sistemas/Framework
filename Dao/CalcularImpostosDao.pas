@@ -98,6 +98,7 @@ begin
           '     p.ipi_sai,                                                   '+#13+
           '     p.cst_ipi,                                                   '+#13+
           '     p.nfce_csosn,                                                '+#13+
+          '     p.nfce_cst,                                                  '+#13+
           '     p.nfce_cfop nfce_cfop_id,                                    '+#13+
           '     c2.cfop nfce_cfop,                                           '+#13+
           '     c.cfop,                                                      '+#13+
@@ -122,10 +123,12 @@ begin
       begin
         lCalcularImpostosModel.CFOP       := lQry.FieldByName('cfop_consumidor').AsString;
         lCalcularImpostosModel.CFOP_ID    := lQry.FieldByName('cfop_consumidor_id').AsString;
+        lCalcularImpostosModel.ICMS_CST   := lQry.FieldByName('cst').AsString;
       end else
       begin
         lCalcularImpostosModel.CFOP       := lQry.FieldByName('nfce_cfop').AsString;
         lCalcularImpostosModel.CFOP_ID    := lQry.FieldByName('nfce_cfop_id').AsString;
+        lCalcularImpostosModel.ICMS_CST   := lQry.FieldByName('nfce_cst').AsString;
       end;
 
       lCalcularImpostosModel.ICMS_CSOSN := lQry.FieldByName('nfce_csosn').AsString;
@@ -137,7 +140,7 @@ begin
       lCalcularImpostosModel.ICMS_CSOSN := lQry.FieldByName('cfop_csosn').AsString;
     end;
 
-    lCalcularImpostosModel.ICMS_CST                    := lQry.FieldByName('cst').AsString;
+
     lCalcularImpostosModel.ICMS_MODADEDADE             := '4';
     lCalcularImpostosModel.ICMS_REDUCAO                := lQry.FieldByName('icms_reducao_base').AsFloat;
     lCalcularImpostosModel.ICMS_ALIQUOTA               := lQry.FieldByName('icms_aliquota_interna').AsFloat;
