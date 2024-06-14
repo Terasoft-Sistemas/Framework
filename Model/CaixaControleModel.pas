@@ -88,8 +88,8 @@ type
     function CaixaAberto(pUsuario: String): String; overload;
     function CaixaAberto: Boolean; overload;
 
-    procedure Sangria(pValor: Double);
-    procedure Suprimento(pValor: Double);
+    procedure Sangria(pValor: Double; pHistorico : String);
+    procedure Suprimento(pValor: Double; pHistorico : String);
 
     function dataFechamento(pIdCaixa, pUsuario: String): String;
 
@@ -342,7 +342,7 @@ begin
   end;
 end;
 
-procedure TCaixaControleModel.Sangria(pValor: Double);
+procedure TCaixaControleModel.Sangria(pValor: Double; pHistorico: String);
 var
   lCaixaModel   : TCaixaModel;
   lUsuarioModel : TUsuarioModel;
@@ -353,7 +353,7 @@ begin
   try
     lCaixaModel.CODIGO_CTA          := '400000';
     lCaixaModel.DATA_CAI            := DateToStr(vIConexao.DataServer);
-    lCaixaModel.HISTORICO_CAI       := 'Sangria '+ self.vIConexao.getUSer.NOME + ' ' + TimeToStr(vIConexao.HoraServer);
+    lCaixaModel.HISTORICO_CAI       := 'Sangria '+ self.vIConexao.getUSer.NOME + ' ' + TimeToStr(vIConexao.HoraServer) + ' ' + pHistorico;
     lCaixaModel.VALOR_CAI           := FloatToStr(pValor);
     lCaixaModel.USUARIO_CAI         := self.vIConexao.getUSer.ID;
     lCaixaModel.TIPO_CAI            := 'D';
@@ -484,7 +484,7 @@ begin
   FWhereView := Value;
 end;
 
-procedure TCaixaControleModel.Suprimento(pValor: Double);
+procedure TCaixaControleModel.Suprimento(pValor: Double; pHistorico: String);
 var
   lCaixaModel   : TCaixaModel;
   lUsuarioModel : TUsuarioModel;
@@ -495,7 +495,7 @@ begin
   try
     lCaixaModel.CODIGO_CTA          := '400000';
     lCaixaModel.DATA_CAI            := DateToStr(vIConexao.DataServer);
-    lCaixaModel.HISTORICO_CAI       := 'Suprimento '+ self.vIConexao.getUSer.NOME + ' ' + TimeToStr(vIConexao.HoraServer);
+    lCaixaModel.HISTORICO_CAI       := 'Suprimento '+ self.vIConexao.getUSer.NOME + ' ' + TimeToStr(vIConexao.HoraServer) + ' ' + pHistorico;
     lCaixaModel.VALOR_CAI           := FloatToStr(pValor);
     lCaixaModel.USUARIO_CAI         := self.vIConexao.getUSer.ID;
     lCaixaModel.TIPO_CAI            := 'C';
