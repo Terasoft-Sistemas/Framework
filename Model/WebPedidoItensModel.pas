@@ -99,6 +99,7 @@ type
     FID: Variant;
     FTOTAL_GARANTIA: Variant;
     FVALOR_TOTALITENS: Variant;
+    FVALOR_DESCONTO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetDATA_CADASTRO(const Value: Variant);
@@ -176,6 +177,7 @@ type
     procedure SetID(const Value: Variant);
     procedure SetTOTAL_GARANTIA(const Value: Variant);
     procedure SetVALOR_TOTALITENS(const Value: Variant);
+    procedure SetVALOR_DESCONTO(const Value: Variant);
   public
     property ID: Variant read FID write SetID;
     property WEB_PEDIDO_ID: Variant read FWEB_PEDIDO_ID write SetWEB_PEDIDO_ID;
@@ -242,9 +244,9 @@ type
     property VENDA_PRO: Variant read FVENDA_PRO write SetVENDA_PRO;
     property CUSTOMEDIO_PRO: Variant read FCUSTOMEDIO_PRO write SetCUSTOMEDIO_PRO;
     property VALOR_MONTADOR: Variant read FVALOR_MONTADOR write SetVALOR_MONTADOR;
-
     property TOTAL_GARANTIA: Variant read FTOTAL_GARANTIA write SetTOTAL_GARANTIA;
     property VALOR_TOTALITENS: Variant read FVALOR_TOTALITENS write SetVALOR_TOTALITENS;
+    property VALOR_DESCONTO: Variant read FVALOR_DESCONTO write SetVALOR_DESCONTO;
 
 
   	constructor Create(pIConexao : IConexao);
@@ -284,9 +286,8 @@ uses
 
 function TWebPedidoItensModel.Incluir: String;
 begin
-  self.FQUANTIDADE_TROCA    := '0';
-  self.FPERCENTUAL_DESCONTO := '0';
-
+  self.FQUANTIDADE_TROCA := '0';
+  
   self.Acao := tacIncluir;
   Result    := self.Salvar;
 end;
@@ -699,6 +700,11 @@ end;
 procedure TWebPedidoItensModel.SetVALOR_CUSTO_ATUAL(const Value: Variant);
 begin
   FVALOR_CUSTO_ATUAL := Value;
+end;
+
+procedure TWebPedidoItensModel.SetVALOR_DESCONTO(const Value: Variant);
+begin
+  FVALOR_DESCONTO := Value;
 end;
 
 procedure TWebPedidoItensModel.SetVALOR_ICMS(const Value: Variant);

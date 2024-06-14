@@ -3,6 +3,7 @@ unit WebPedidoModel;
 interface
 
 uses
+  math,
   Terasoft.Types,
   Terasoft.Utils,
   System.Generics.Collections,
@@ -680,9 +681,7 @@ begin
     lTotais := lWebPedidoItensDao.obterTotais(self.FID);
 
     self.Acao := tacAlterar;
-    self.VALOR_TOTAL := lTotais.VALOR_TOTAL;
 
-//    self.VALOR_TOTAL := lTotais.VALOR_TOTAL;
     self.ACRESCIMO             := lTotais.VALOR_ACRESCIMO;
     self.TOTAL_GARANTIA        := lTotais.TOTAL_GARANTIA;
     self.VALOR_FRETE           := lTotais.VALOR_FRETE;
@@ -1268,7 +1267,9 @@ var
   lWebPedidoItensModel : TWebPedidoItensModel;
   lProdutoModel        : TProdutosModel;
   lPrecoParamentros    : TProdutoPreco;
-
+  lProdutoPreco        : TProdutoPreco;
+  lValorUnitario,
+  lValorVendido        : Double;
 begin
   lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
   lProdutoModel        := TProdutosModel.Create(vIConexao);
@@ -1291,13 +1292,20 @@ begin
     lWebPedidoItensModel.PRODUTO_ID          := pVenderItemParametros.PRODUTO;
     lWebPedidoItensModel.QUANTIDADE          := pVenderItemParametros.QUANTIDADE;
 
-//    lWebPedidoItensModel.VALOR_UNITARIO      := VAlor que apresentou na tela d vendedor ;
-    lWebPedidoItensModel.VALOR_VENDIDO       := pVenderItemParametros.VALOR_UNITARIO;
+    lProdutoPreco.Produto     := pVenderItemParametros.PRODUTO;
+    lProdutoPreco.TabelaPreco := true;
+    lProdutoPreco.Promocao    := true;
 
+    lValorUnitario            := lProdutoModel.ValorUnitario(lProdutoPreco);
+    lValorVendido             := StrToFloat(pVenderItemParametros.VALOR_UNITARIO);
 
-   //Calcular desconto
-   // lWebPedidoItensModel.PERCENTUAL_DESCONTO  := ;
+    lWebPedidoItensModel.VALOR_UNITARIO      := lValorUnitario.ToString;
+    lWebPedidoItensModel.VALOR_VENDIDO       := lValorVendido.ToString;
 
+    if lValorVendido < lValorUnitario then
+      lWebPedidoItensModel.PERCENTUAL_DESCONTO := RoundTo((1 - lValorVendido / lValorUnitario) * 100, -2).ToString
+    else
+      lWebPedidoItensModel.PERCENTUAL_DESCONTO := '0';
 
     lWebPedidoItensModel.VALOR_VENDA_ATUAL   := lProdutoModel.VENDA_PRO;
 		lWebPedidoItensModel.VALOR_CUSTO_ATUAL   := lProdutoModel.CUSTOMEDIO_PRO;
@@ -1311,7 +1319,6 @@ begin
     lWebPedidoItensModel.VLR_GARANTIA        := PVenderItemParametros.VLR_GARANTIA;
 
     Result := lWebPedidoItensModel.Incluir;
-
 
     //Gravar reserva caso venda CD ou Retira loja com entregaCD.
     if (PVenderItemParametros.TIPO_ENTREGA = 'CD') or ((PVenderItemParametros.TIPO_ENTREGA = 'LJ') and (PVenderItemParametros.ENTREGA = 'S')) then
