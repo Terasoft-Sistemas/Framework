@@ -588,6 +588,7 @@ begin
                     '        produto.nome_resumido,                                                                     '+SLineBreak+
                     '        produto.usar_balanca,                                                                      '+SLineBreak+
                     '        produto.tipo$_pro,                                                                         '+SLineBreak+
+                    '        produto.web_caracteristica,                                                                '+SLineBreak+
                     '        (select coalesce(saldo - reservado, 0)                                                     '+SLineBreak+
                     '           from view_saldo_produto                                                                 '+SLineBreak+
                     '          where view_saldo_produto.codigo = produto.codigo_pro) as saldo_disponivel                '+SLineBreak+
@@ -666,6 +667,7 @@ begin
       FProdutossLista[i].NOME_RESUMIDO           := lQry.FieldByName('NOME_RESUMIDO').AsString;
       FProdutossLista[i].USAR_BALANCA            := lQry.FieldByName('USAR_BALANCA').AsString;
       FProdutossLista[i].SALDO_DISPONIVEL        := lQry.FieldByName('SALDO_DISPONIVEL').AsString;
+      FProdutossLista[i].WEB_CARACTERISTICA      := lQry.FieldByName('WEB_CARACTERISTICA').AsString;
 
       lQry.Next;
     end;
