@@ -99,6 +99,11 @@ type
     FID: Variant;
     FTOTAL_GARANTIA: Variant;
     FVALOR_TOTALITENS: Variant;
+    FVLR_GARANTIA_FR: Variant;
+    FTIPO_GARANTIA_FR: Variant;
+    FPER_GARANTIA_FR: Variant;
+    FCUSTO_GARANTIA_FR: Variant;
+    FCUSTO_GARANTIA: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetDATA_CADASTRO(const Value: Variant);
@@ -176,6 +181,11 @@ type
     procedure SetID(const Value: Variant);
     procedure SetTOTAL_GARANTIA(const Value: Variant);
     procedure SetVALOR_TOTALITENS(const Value: Variant);
+    procedure SetCUSTO_GARANTIA(const Value: Variant);
+    procedure SetCUSTO_GARANTIA_FR(const Value: Variant);
+    procedure SetPER_GARANTIA_FR(const Value: Variant);
+    procedure SetTIPO_GARANTIA_FR(const Value: Variant);
+    procedure SetVLR_GARANTIA_FR(const Value: Variant);
   public
     property ID: Variant read FID write SetID;
     property WEB_PEDIDO_ID: Variant read FWEB_PEDIDO_ID write SetWEB_PEDIDO_ID;
@@ -195,6 +205,8 @@ type
     property RESERVADO: Variant read FRESERVADO write SetRESERVADO;
     property TIPO_GARANTIA: Variant read FTIPO_GARANTIA write SetTIPO_GARANTIA;
     property VLR_GARANTIA: Variant read FVLR_GARANTIA write SetVLR_GARANTIA;
+
+
     property TIPO_ENTREGA: Variant read FTIPO_ENTREGA write SetTIPO_ENTREGA;
     property MONTAGEM: Variant read FMONTAGEM write SetMONTAGEM;
     property ENTREGA: Variant read FENTREGA write SetENTREGA;
@@ -231,6 +243,13 @@ type
     property PFCPST: Variant read FPFCPST write SetPFCPST;
     property VFCPST: Variant read FVFCPST write SetVFCPST;
     property TOTAL: Variant read FTOTAL write SetTOTAL;
+
+    property TIPO_GARANTIA_FR: Variant read FTIPO_GARANTIA_FR write SetTIPO_GARANTIA_FR;
+    property VLR_GARANTIA_FR: Variant read FVLR_GARANTIA_FR write SetVLR_GARANTIA_FR;
+    property CUSTO_GARANTIA_FR: Variant read FCUSTO_GARANTIA_FR write SetCUSTO_GARANTIA_FR;
+    property CUSTO_GARANTIA: Variant read FCUSTO_GARANTIA write SetCUSTO_GARANTIA;
+    property PER_GARANTIA_FR: Variant read FPER_GARANTIA_FR write SetPER_GARANTIA_FR;
+
 
     property PRODUTO_CODIGO: Variant read FPRODUTO_CODIGO write SetPRODUTO_CODIGO;
     property PRODUTO_REFERENCIA_NEW: Variant read FPRODUTO_REFERENCIA_NEW write SetPRODUTO_REFERENCIA_NEW;
@@ -476,6 +495,16 @@ begin
   FCUSTOMEDIO_PRO := Value;
 end;
 
+procedure TWebPedidoItensModel.SetCUSTO_GARANTIA(const Value: Variant);
+begin
+  FCUSTO_GARANTIA := Value;
+end;
+
+procedure TWebPedidoItensModel.SetCUSTO_GARANTIA_FR(const Value: Variant);
+begin
+  FCUSTO_GARANTIA_FR := Value;
+end;
+
 procedure TWebPedidoItensModel.SetDATA_CADASTRO(const Value: Variant);
 begin
 
@@ -519,6 +548,11 @@ end;
 procedure TWebPedidoItensModel.SetPERCENTUAL_DESCONTO(const Value: Variant);
 begin
   FPERCENTUAL_DESCONTO := Value;
+end;
+
+procedure TWebPedidoItensModel.SetPER_GARANTIA_FR(const Value: Variant);
+begin
+  FPER_GARANTIA_FR := Value;
 end;
 
 procedure TWebPedidoItensModel.SetPFCPST(const Value: Variant);
@@ -666,6 +700,11 @@ begin
   FTIPO_GARANTIA := Value;
 end;
 
+procedure TWebPedidoItensModel.SetTIPO_GARANTIA_FR(const Value: Variant);
+begin
+  FTIPO_GARANTIA_FR := Value;
+end;
+
 procedure TWebPedidoItensModel.SetTOTAL(const Value: Variant);
 begin
   FTOTAL := Value;
@@ -769,6 +808,11 @@ end;
 procedure TWebPedidoItensModel.SetVLR_GARANTIA(const Value: Variant);
 begin
   FVLR_GARANTIA := Value;
+end;
+
+procedure TWebPedidoItensModel.SetVLR_GARANTIA_FR(const Value: Variant);
+begin
+  FVLR_GARANTIA_FR := Value;
 end;
 
 procedure TWebPedidoItensModel.SetWEB_PEDIDO_ID(const Value: Variant);

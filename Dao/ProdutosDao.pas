@@ -1017,14 +1017,14 @@ begin
     Result.GARANTIA_EXTENDIDA_CUSTO_24 := lQry.FieldByName('GARANTIA_EXTENDIDA_CUSTO_24').AsFloat;
     Result.GARANTIA_EXTENDIDA_VENDA_36 := lQry.FieldByName('GARANTIA_EXTENDIDA_VENDA_36').AsFloat;
     Result.GARANTIA_EXTENDIDA_CUSTO_36 := lQry.FieldByName('GARANTIA_EXTENDIDA_CUSTO_36').AsFloat;
-    Result.ROUBO_FURTO_12              := 0;
-    Result.ROUBO_FURTO_24              := 0;
-    Result.ROUBO_FURTO_CUSTO_12        := 0;
-    Result.ROUBO_FURTO_CUSTO_24        := 0;
-    Result.ROUBO_FURTO_DA_12           := 0;
-    Result.ROUBO_FURTO_DA_24           := 0;
-    Result.ROUBO_FURTO_CUSTO_DA_12     := 0;
-    Result.ROUBO_FURTO_CUSTO_DA_24     := 0;
+    Result.ROUBO_FURTO_12              := 3;
+    Result.ROUBO_FURTO_24              := 4;
+    Result.ROUBO_FURTO_CUSTO_12        := 1;
+    Result.ROUBO_FURTO_CUSTO_24        := 2;
+    Result.ROUBO_FURTO_DA_12           := 5;
+    Result.ROUBO_FURTO_DA_24           := 6;
+    Result.ROUBO_FURTO_CUSTO_DA_12     := 4;
+    Result.ROUBO_FURTO_CUSTO_DA_24     := 5;
   finally
     lSQL := '';
     lQry.Free;
