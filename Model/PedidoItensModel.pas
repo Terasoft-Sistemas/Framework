@@ -166,6 +166,10 @@ type
     FGRUPO_COMISSAO_ID: Variant;
     FCOMIS_PRO: Variant;
     FTIPO_VENDA_COMISSAO_ID: Variant;
+    FVLR_GARANTIA_FR: Variant;
+    FTIPO_GARANTIA_FR: Variant;
+    FPER_GARANTIA_FR: Variant;
+    FCUSTO_GARANTIA_FR: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetPedidoItenssLista(const Value: TObjectList<TPedidoItensModel>);
@@ -308,6 +312,10 @@ type
     procedure SetCOMIS_PRO(const Value: Variant);
     procedure SetGRUPO_COMISSAO_ID(const Value: Variant);
     procedure SetTIPO_VENDA_COMISSAO_ID(const Value: Variant);
+    procedure SetCUSTO_GARANTIA_FR(const Value: Variant);
+    procedure SetPER_GARANTIA_FR(const Value: Variant);
+    procedure SetTIPO_GARANTIA_FR(const Value: Variant);
+    procedure SetVLR_GARANTIA_FR(const Value: Variant);
 
   public
     property ID: Variant read FID write SetID;
@@ -437,6 +445,11 @@ type
     property TIPO_VENDA_COMISSAO_ID: Variant read FTIPO_VENDA_COMISSAO_ID write SetTIPO_VENDA_COMISSAO_ID;
     property COMIS_PRO: Variant read FCOMIS_PRO write SetCOMIS_PRO;
     property GRUPO_COMISSAO_ID: Variant read FGRUPO_COMISSAO_ID write SetGRUPO_COMISSAO_ID;
+    property TIPO_GARANTIA_FR: Variant read FTIPO_GARANTIA_FR write SetTIPO_GARANTIA_FR;
+    property VLR_GARANTIA_FR: Variant read FVLR_GARANTIA_FR write SetVLR_GARANTIA_FR;
+    property CUSTO_GARANTIA_FR: Variant read FCUSTO_GARANTIA_FR write SetCUSTO_GARANTIA_FR;
+    property CUSTO_GARANTIA: Variant read FCUSTO_GARANTIA_FR write SetCUSTO_GARANTIA_FR;
+    property PER_GARANTIA_FR: Variant read FPER_GARANTIA_FR write SetPER_GARANTIA_FR;
 
   	constructor Create(pConexao: IConexao);
     destructor Destroy; override;
@@ -931,6 +944,11 @@ begin
   FCUSTO_DRG := Value;
 end;
 
+procedure TPedidoItensModel.SetCUSTO_GARANTIA_FR(const Value: Variant);
+begin
+  FCUSTO_GARANTIA_FR := Value;
+end;
+
 procedure TPedidoItensModel.SetDESCONTO_PED(const Value: Variant);
 begin
   FDESCONTO_PED := Value;
@@ -1019,6 +1037,11 @@ end;
 procedure TPedidoItensModel.SetPEDIDOITENS_ID(const Value: Variant);
 begin
   FPEDIDOITENS_ID := Value;
+end;
+
+procedure TPedidoItensModel.SetPER_GARANTIA_FR(const Value: Variant);
+begin
+  FPER_GARANTIA_FR := Value;
 end;
 
 procedure TPedidoItensModel.SetPFCPST(const Value: Variant);
@@ -1266,6 +1289,11 @@ begin
   FSYSTIME := Value;
 end;
 
+procedure TPedidoItensModel.SetTIPO_GARANTIA_FR(const Value: Variant);
+begin
+  FTIPO_GARANTIA_FR := Value;
+end;
+
 procedure TPedidoItensModel.SetTIPO_NF(const Value: Variant);
 begin
   FTIPO_NF := Value;
@@ -1444,6 +1472,11 @@ end;
 procedure TPedidoItensModel.SetVLRVENDA_PRO(const Value: Variant);
 begin
   FVLRVENDA_PRO := Value;
+end;
+
+procedure TPedidoItensModel.SetVLR_GARANTIA_FR(const Value: Variant);
+begin
+  FVLR_GARANTIA_FR := Value;
 end;
 
 procedure TPedidoItensModel.SetVOUTROS(const Value: Variant);

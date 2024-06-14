@@ -178,6 +178,8 @@ type
     FPEDIDOITENS_ID: Variant;
     FCFOP_NF: Variant;
     FNOME_VENDEDOR: Variant;
+    FSEGURO_PRESTAMISTA_CUSTO: Variant;
+    FSEGURO_PRESTAMISTA_VALOR: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetPedidoVendasLista(const Value: TObjectList<TPedidoVendaModel>);
@@ -333,6 +335,8 @@ type
     procedure SetNOME_VENDEDOR(const Value: Variant);
 
     procedure getDataVendedor;
+    procedure SetSEGURO_PRESTAMISTA_CUSTO(const Value: Variant);
+    procedure SetSEGURO_PRESTAMISTA_VALOR(const Value: Variant);
 
   public
     property NUMERO_PED: Variant read FNUMERO_PED write SetNUMERO_PED;
@@ -478,6 +482,8 @@ type
     property CODIGO_PRO        :Variant read FCODIGO_PRO write SetCODIGO_PRO;
     property QUANTIDADE_PED    :Variant read FQUANTIDADE_PED write SetQUANTIDADE_PED;
     property VALORUNITARIO_PED :Variant read FVALORUNITARIO_PED write SetVALORUNITARIO_PED;
+    property SEGURO_PRESTAMISTA_VALOR :Variant read FSEGURO_PRESTAMISTA_VALOR write SetSEGURO_PRESTAMISTA_VALOR;
+    property SEGURO_PRESTAMISTA_CUSTO :Variant read FSEGURO_PRESTAMISTA_CUSTO write SetSEGURO_PRESTAMISTA_CUSTO;
 
     property PedidoVendasLista: TObjectList<TPedidoVendaModel> read FPedidoVendasLista write SetPedidoVendasLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -1958,6 +1964,16 @@ end;
 procedure TPedidoVendaModel.SetOrderView(const Value: String);
 begin
   FOrderView := Value;
+end;
+
+procedure TPedidoVendaModel.SetSEGURO_PRESTAMISTA_CUSTO(const Value: Variant);
+begin
+  FSEGURO_PRESTAMISTA_CUSTO := Value;
+end;
+
+procedure TPedidoVendaModel.SetSEGURO_PRESTAMISTA_VALOR(const Value: Variant);
+begin
+  FSEGURO_PRESTAMISTA_VALOR := Value;
 end;
 
 procedure TPedidoVendaModel.SetSMS(const Value: Variant);
