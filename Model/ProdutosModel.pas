@@ -23,6 +23,24 @@ type
     TabelaPreco         : Boolean;
   end;
 
+type
+  TProdutoGarantia = record
+    GARANTIA_EXTENDIDA_VENDA_12,
+    GARANTIA_EXTENDIDA_CUSTO_12,
+    GARANTIA_EXTENDIDA_VENDA_24,
+    GARANTIA_EXTENDIDA_CUSTO_24,
+    GARANTIA_EXTENDIDA_VENDA_36,
+    GARANTIA_EXTENDIDA_CUSTO_36,
+    ROUBO_FURTO_12,
+    ROUBO_FURTO_24,
+    ROUBO_FURTO_CUSTO_12,
+    ROUBO_FURTO_CUSTO_24,
+    ROUBO_FURTO_DA_12,
+    ROUBO_FURTO_DA_24,
+    ROUBO_FURTO_CUSTO_DA_12,
+    ROUBO_FURTO_CUSTO_DA_24 : Double;
+  end;
+
   TProdutosModel = class
 
   private
@@ -891,6 +909,8 @@ type
     function valorVenda(pIdProduto: String): Variant;
     function ObterTabelaPreco : TFDMemTable;
     function ValorUnitario(pProdutoPreco: TProdutoPreco) : Double;
+
+    function ValorGarantia(pProduto: String; pValorFaixa: Double): TProdutoGarantia;
 
     procedure subtrairSaldo(pIdProduto: String; pSaldo: Double);
     procedure adicionarSaldo(pIdProduto: String; pSaldo: Double);
@@ -2416,6 +2436,19 @@ begin
     lProdutoDao.Free;
   end;
 end;
+
+function TProdutosModel.ValorGarantia(pProduto: String; pValorFaixa: Double): TProdutoGarantia;
+var
+  lProdutoDao: TProdutosDao;
+begin
+  lProdutoDao := TProdutosDao.Create(vIConexao);
+  try
+     Result :=  lProdutoDao.ValorGarantia(pProduto, pValorFaixa);
+  finally
+    lProdutoDao.Free;
+  end;
+end;
+
 
 function TProdutosModel.ValorUnitario(pProdutoPreco: TProdutoPreco): Double;
 var

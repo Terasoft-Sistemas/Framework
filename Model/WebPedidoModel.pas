@@ -1290,10 +1290,18 @@ begin
     lWebPedidoItensModel.WEB_PEDIDO_ID       := self.ID;
     lWebPedidoItensModel.PRODUTO_ID          := pVenderItemParametros.PRODUTO;
     lWebPedidoItensModel.QUANTIDADE          := pVenderItemParametros.QUANTIDADE;
-    lWebPedidoItensModel.VALOR_UNITARIO      := pVenderItemParametros.VALOR_UNITARIO;
-    lWebPedidoItensModel.VALOR_VENDIDO       := lWebPedidoItensModel.VALOR_UNITARIO;
+
+//    lWebPedidoItensModel.VALOR_UNITARIO      := VAlor que apresentou na tela d vendedor ;
+    lWebPedidoItensModel.VALOR_VENDIDO       := pVenderItemParametros.VALOR_UNITARIO;
+
+
+   //Calcular desconto
+   // lWebPedidoItensModel.PERCENTUAL_DESCONTO  := ;
+
+
     lWebPedidoItensModel.VALOR_VENDA_ATUAL   := lProdutoModel.VENDA_PRO;
 		lWebPedidoItensModel.VALOR_CUSTO_ATUAL   := lProdutoModel.CUSTOMEDIO_PRO;
+
 		lWebPedidoItensModel.RESERVADO           := pVenderItemParametros.QUANTIDADE;
     lWebPedidoItensModel.TIPO                := PVenderItemParametros.TIPO;
     lWebPedidoItensModel.ENTREGA             := PVenderItemParametros.ENTREGA;
@@ -1312,7 +1320,7 @@ begin
       Self.IncluiReservaCD(lWebPedidoItensModel);
     end;
 
-    calcularTotais;
+    Self.calcularTotais;
   finally
     lWebPedidoItensModel.Free;
     lProdutoModel.Free;

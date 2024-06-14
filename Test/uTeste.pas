@@ -16,7 +16,7 @@ uses
   Terasoft.Types,
   Conexao,
   Interfaces.Conexao, EntradaModel, Vcl.Grids, XDBGrids, Data.DB,
-  Terasoft.Configuracoes;
+  Terasoft.Configuracoes, Terasoft.FuncoesTexto;
 
 type
   TForm1 = class(TForm)
@@ -178,6 +178,7 @@ type
     OrcamentoItensIncluir: TButton;
     tabReserva: TTabSheet;
     btnReserva: TButton;
+    Button86: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -2565,27 +2566,38 @@ end;
 
 procedure TForm1.Button86Click(Sender: TObject);
 var
-  lDescontoModel : TDescontoModel;
-  ID : String;
+  lProdutoModel : TProdutosModel;
+  lValoresGarantia: TProdutoGarantia;
 begin
-  lDescontoModel := TDescontoModel.Create(vIConexao);
+  lProdutoModel := TProdutosModel.Create(vIConexao);
+
   try
     try
-      ID := InputBox('DESCONTO', 'Digite o ID do Contato que deseja Alterar:', '');
-      if ID.IsEmpty then
-        exit;
+      lValoresGarantia := lProdutoModel.ValorGarantia('000014',10);
 
-      lDescontoModel := lDescontoModel.Alterar(ID);
-      lDescontoModel.VALOR_DES := 98;
+      memoResultado.Lines.Clear;
 
-      lDescontoModel.Salvar;
-      ShowMessage('Alterado com Sucesso');
-    Except
-      on E:Exception do
-      ShowMessage('Erro: ' +E.Message);
+      memoResultado.Lines.Add('GARANTIA_EXTENDIDA_VENDA_12  R$ '+FormataFloat(lValoresGarantia.GARANTIA_EXTENDIDA_VENDA_12));
+      memoResultado.Lines.Add('GARANTIA_EXTENDIDA_CUSTO_12  R$ '+FormataFloat(lValoresGarantia.GARANTIA_EXTENDIDA_CUSTO_12));
+      memoResultado.Lines.Add('GARANTIA_EXTENDIDA_VENDA_24  R$ '+FormataFloat(lValoresGarantia.GARANTIA_EXTENDIDA_VENDA_24));
+      memoResultado.Lines.Add('GARANTIA_EXTENDIDA_CUSTO_24  R$ '+FormataFloat(lValoresGarantia.GARANTIA_EXTENDIDA_CUSTO_24));
+      memoResultado.Lines.Add('GARANTIA_EXTENDIDA_VENDA_36  R$ '+FormataFloat(lValoresGarantia.GARANTIA_EXTENDIDA_VENDA_36));
+      memoResultado.Lines.Add('GARANTIA_EXTENDIDA_CUSTO_36  R$ '+FormataFloat(lValoresGarantia.GARANTIA_EXTENDIDA_CUSTO_36));
+      memoResultado.Lines.Add('ROUBO_FURTO_12               R$ '+FormataFloat(lValoresGarantia.ROUBO_FURTO_12             ));
+      memoResultado.Lines.Add('ROUBO_FURTO_24               R$ '+FormataFloat(lValoresGarantia.ROUBO_FURTO_24             ));
+      memoResultado.Lines.Add('ROUBO_FURTO_CUSTO_12         R$ '+FormataFloat(lValoresGarantia.ROUBO_FURTO_CUSTO_12       ));
+      memoResultado.Lines.Add('ROUBO_FURTO_CUSTO_24         R$ '+FormataFloat(lValoresGarantia.ROUBO_FURTO_CUSTO_24       ));
+      memoResultado.Lines.Add('ROUBO_FURTO_DA_12            R$ '+FormataFloat(lValoresGarantia.ROUBO_FURTO_DA_12          ));
+      memoResultado.Lines.Add('ROUBO_FURTO_DA_24            R$ '+FormataFloat(lValoresGarantia.ROUBO_FURTO_DA_24          ));
+      memoResultado.Lines.Add('ROUBO_FURTO_CUSTO_DA_12      R$ '+FormataFloat(lValoresGarantia.ROUBO_FURTO_CUSTO_DA_12    ));
+      memoResultado.Lines.Add('ROUBO_FURTO_CUSTO_DA_24      R$ '+FormataFloat(lValoresGarantia.ROUBO_FURTO_CUSTO_DA_24    ));
+
+     except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lDescontoModel.Free;
+    lProdutoModel.Free;
   end;
 end;
 
