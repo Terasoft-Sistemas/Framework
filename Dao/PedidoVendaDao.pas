@@ -61,7 +61,7 @@ type
 
     procedure obterLista;
 
-    function ObterProdutoBalanca(pBarrasProduto: String): Boolean;
+    function ObterProdutoBalanca(pBarrasProduto: String): String;
 
     function obterPedido(pNumeroPedido: String): TPedidoVendaModel;
     function carregaClasse(pId: String): TPedidoVendaModel;
@@ -379,10 +379,12 @@ begin
     else
       lSql := 'select ';
     lSQL := lSQL +
-      '       pedidovenda.*,           '+#13+
-      '       clientes.fantasia_cli    '+#13+
-	    '  from pedidovenda              '+#13+
-      '  left join clientes on clientes.codigo_cli = pedidovenda.codigo_cli '+#13+
+      '       pedidovenda.*,           '+SLineBreak+
+      '       clientes.fantasia_cli,   '+SLineBreak+
+      '       funcionario.nome_fun     '+SLineBreak+
+	    '  from pedidovenda              '+SLineBreak+
+      '  left join clientes on clientes.codigo_cli = pedidovenda.codigo_cli '+SLineBreak+
+      '  left join funcionario on funcionario.codigo_fun = pedidovenda.codigo_ven '+SLineBreak+
       ' where 1=1              ';
     lSql := lSql + where;
     if not FOrderView.IsEmpty then
@@ -527,6 +529,7 @@ begin
       FPedidoVendasLista[i].DATAHORA_COLETA           := lQry.FieldByName('DATAHORA_COLETA').AsString;
       FPedidoVendasLista[i].DATAHORA_RETIRADA         := lQry.FieldByName('DATAHORA_RETIRADA').AsString;
       FPedidoVendasLista[i].FANTASIA_CLI              := lQry.FieldByName('FANTASIA_CLI').AsString;
+      FPedidoVendasLista[i].NOME_VENDEDOR             := lQry.FieldByName('NOME_FUN').AsString;
       FPedidoVendasLista[i].CFOP_NF                   := lQry.FieldByName('CFOP_NF').AsString;
       lQry.Next;
     end;
@@ -600,7 +603,7 @@ begin
   end;
 end;
 
-function TPedidoVendaDao.ObterProdutoBalanca(pBarrasProduto: String): Boolean;
+function TPedidoVendaDao.ObterProdutoBalanca(pBarrasProduto: String): String;
 var
   lQry           : TFDQuery;
   lSQL           : String;
@@ -622,9 +625,9 @@ begin
     end;
 
     if lQry.RecordCount = 0 then
-      Result := false
+      Result := ''
     else
-      Result := true;
+      Result := lQry.FieldByName('BARRAS_PRO').AsString;
   finally
     lQry.Free;
   end;
