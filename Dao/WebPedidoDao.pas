@@ -205,6 +205,8 @@ begin
     lModel.STATUS_ANALISE                  := lQry.FieldByName('STATUS_ANALISE').AsString;
     lModel.PED_PLATAFORMA                  := lQry.FieldByName('PED_PLATAFORMA').AsString;
     lModel.CODIGO_AUTORIZACAO_CARTAO       := lQry.FieldByName('CODIGO_AUTORIZACAO_CARTAO').AsString;
+    lModel.SEGURO_PRESTAMISTA_VALOR        := lQry.FieldByName('SEGURO_PRESTAMISTA_VALOR').AsString;
+    lModel.SEGURO_PRESTAMISTA_CUSTO        := lQry.FieldByName('SEGURO_PRESTAMISTA_CUSTO').AsString;
 
     Result := lModel;
   finally

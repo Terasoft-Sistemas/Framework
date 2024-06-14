@@ -188,7 +188,9 @@ type
     procedure SetPER_GARANTIA_FR(const Value: Variant);
     procedure SetTIPO_GARANTIA_FR(const Value: Variant);
     procedure SetVLR_GARANTIA_FR(const Value: Variant);
+
   public
+
     property ID: Variant read FID write SetID;
     property WEB_PEDIDO_ID: Variant read FWEB_PEDIDO_ID write SetWEB_PEDIDO_ID;
     property PRODUTO_ID: Variant read FPRODUTO_ID write SetPRODUTO_ID;
@@ -207,7 +209,6 @@ type
     property RESERVADO: Variant read FRESERVADO write SetRESERVADO;
     property TIPO_GARANTIA: Variant read FTIPO_GARANTIA write SetTIPO_GARANTIA;
     property VLR_GARANTIA: Variant read FVLR_GARANTIA write SetVLR_GARANTIA;
-
 
     property TIPO_ENTREGA: Variant read FTIPO_ENTREGA write SetTIPO_ENTREGA;
     property MONTAGEM: Variant read FMONTAGEM write SetMONTAGEM;
@@ -252,7 +253,6 @@ type
     property CUSTO_GARANTIA: Variant read FCUSTO_GARANTIA write SetCUSTO_GARANTIA;
     property PER_GARANTIA_FR: Variant read FPER_GARANTIA_FR write SetPER_GARANTIA_FR;
 
-
     property PRODUTO_CODIGO: Variant read FPRODUTO_CODIGO write SetPRODUTO_CODIGO;
     property PRODUTO_REFERENCIA_NEW: Variant read FPRODUTO_REFERENCIA_NEW write SetPRODUTO_REFERENCIA_NEW;
     property PRODUTO_REFERENCIA: Variant read FPRODUTO_REFERENCIA write SetPRODUTO_REFERENCIA;
@@ -266,7 +266,7 @@ type
     property TOTAL_GARANTIA: Variant read FTOTAL_GARANTIA write SetTOTAL_GARANTIA;
     property VALOR_TOTALITENS: Variant read FVALOR_TOTALITENS write SetVALOR_TOTALITENS;
     property VALOR_DESCONTO: Variant read FVALOR_DESCONTO write SetVALOR_DESCONTO;
-
+    
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -274,13 +274,10 @@ type
     function Incluir: String;
     function Alterar(pID : String): TWebPedidoItensModel;
     Function Excluir (pID : String) : String;
-
     function Salvar   : String;
 
     procedure obterLista;
-
     function carregaClasse(pId: String): TWebPedidoItensModel;
-
     function obterTotais(pId: String): TTotais;
 
     property WebPedidoItenssLista: TObjectList<TWebPedidoItensModel> read FWebPedidoItenssLista write SetWebPedidoItenssLista;
