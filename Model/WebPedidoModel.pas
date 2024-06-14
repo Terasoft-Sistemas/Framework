@@ -33,7 +33,9 @@ type
     MONTAGEM,
     TIPO_ENTREGA,
     TIPO_GARANTIA,
-    VLR_GARANTIA      : String;
+    VLR_GARANTIA,
+    TIPO_GARANTIA_FR,
+    VLR_GARANTIA_FR    : String;
   end;
 
   TWebPedidoModel = class
@@ -1317,6 +1319,8 @@ begin
     lWebPedidoItensModel.TIPO_ENTREGA        := PVenderItemParametros.TIPO_ENTREGA;
     lWebPedidoItensModel.TIPO_GARANTIA       := PVenderItemParametros.TIPO_GARANTIA;
     lWebPedidoItensModel.VLR_GARANTIA        := PVenderItemParametros.VLR_GARANTIA;
+    lWebPedidoItensModel.TIPO_GARANTIA_FR    := PVenderItemParametros.TIPO_GARANTIA_FR;
+    lWebPedidoItensModel.VLR_GARANTIA_FR     := PVenderItemParametros.VLR_GARANTIA_FR;
 
     Result := lWebPedidoItensModel.Incluir;
 

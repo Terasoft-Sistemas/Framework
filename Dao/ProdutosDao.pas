@@ -588,6 +588,7 @@ begin
                     '        produto.nome_resumido,                                                                     '+SLineBreak+
                     '        produto.usar_balanca,                                                                      '+SLineBreak+
                     '        produto.tipo$_pro,                                                                         '+SLineBreak+
+                    '        produto.web_caracteristica,                                                                '+SLineBreak+
                     '        (select coalesce(saldo - reservado, 0)                                                     '+SLineBreak+
                     '           from view_saldo_produto                                                                 '+SLineBreak+
                     '          where view_saldo_produto.codigo = produto.codigo_pro) as saldo_disponivel                '+SLineBreak+
@@ -666,6 +667,7 @@ begin
       FProdutossLista[i].NOME_RESUMIDO           := lQry.FieldByName('NOME_RESUMIDO').AsString;
       FProdutossLista[i].USAR_BALANCA            := lQry.FieldByName('USAR_BALANCA').AsString;
       FProdutossLista[i].SALDO_DISPONIVEL        := lQry.FieldByName('SALDO_DISPONIVEL').AsString;
+      FProdutossLista[i].WEB_CARACTERISTICA      := lQry.FieldByName('WEB_CARACTERISTICA').AsString;
 
       lQry.Next;
     end;
@@ -1015,14 +1017,14 @@ begin
     Result.GARANTIA_EXTENDIDA_CUSTO_24 := lQry.FieldByName('GARANTIA_EXTENDIDA_CUSTO_24').AsFloat;
     Result.GARANTIA_EXTENDIDA_VENDA_36 := lQry.FieldByName('GARANTIA_EXTENDIDA_VENDA_36').AsFloat;
     Result.GARANTIA_EXTENDIDA_CUSTO_36 := lQry.FieldByName('GARANTIA_EXTENDIDA_CUSTO_36').AsFloat;
-    Result.ROUBO_FURTO_12              := 0;
-    Result.ROUBO_FURTO_24              := 0;
-    Result.ROUBO_FURTO_CUSTO_12        := 0;
-    Result.ROUBO_FURTO_CUSTO_24        := 0;
-    Result.ROUBO_FURTO_DA_12           := 0;
-    Result.ROUBO_FURTO_DA_24           := 0;
-    Result.ROUBO_FURTO_CUSTO_DA_12     := 0;
-    Result.ROUBO_FURTO_CUSTO_DA_24     := 0;
+    Result.ROUBO_FURTO_12              := 3;
+    Result.ROUBO_FURTO_24              := 4;
+    Result.ROUBO_FURTO_CUSTO_12        := 1;
+    Result.ROUBO_FURTO_CUSTO_24        := 2;
+    Result.ROUBO_FURTO_DA_12           := 5;
+    Result.ROUBO_FURTO_DA_24           := 6;
+    Result.ROUBO_FURTO_CUSTO_DA_12     := 4;
+    Result.ROUBO_FURTO_CUSTO_DA_24     := 5;
   finally
     lSQL := '';
     lQry.Free;
