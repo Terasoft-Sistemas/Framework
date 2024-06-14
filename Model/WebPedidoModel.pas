@@ -1291,13 +1291,8 @@ begin
     lWebPedidoItensModel.PRODUTO_ID          := pVenderItemParametros.PRODUTO;
     lWebPedidoItensModel.QUANTIDADE          := pVenderItemParametros.QUANTIDADE;
 
-//    lWebPedidoItensModel.VALOR_UNITARIO      := VAlor que apresentou na tela d vendedor ;
+    lWebPedidoItensModel.VALOR_UNITARIO      := pVenderItemParametros.VALOR_UNITARIO;
     lWebPedidoItensModel.VALOR_VENDIDO       := pVenderItemParametros.VALOR_UNITARIO;
-
-
-   //Calcular desconto
-   // lWebPedidoItensModel.PERCENTUAL_DESCONTO  := ;
-
 
     lWebPedidoItensModel.VALOR_VENDA_ATUAL   := lProdutoModel.VENDA_PRO;
 		lWebPedidoItensModel.VALOR_CUSTO_ATUAL   := lProdutoModel.CUSTOMEDIO_PRO;
