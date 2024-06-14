@@ -18,11 +18,9 @@ object Form1: TForm1
     Top = 0
     Width = 1250
     Height = 935
-    ActivePage = tabReserva
+    ActivePage = TabSheet1
     Align = alClient
     TabOrder = 0
-    ExplicitWidth = 1248
-    ExplicitHeight = 927
     object TabSheet1: TTabSheet
       Caption = 'Diversos'
       object memoResultado: TMemo
@@ -644,6 +642,15 @@ object Form1: TForm1
         Caption = 'Endereco Inserir'
         TabOrder = 68
         OnClick = BtnEndereco1Click
+      end
+      object Button86: TButton
+        Left = 567
+        Top = 847
+        Width = 182
+        Height = 42
+        Caption = 'Valores Garantia'
+        TabOrder = 69
+        OnClick = Button86Click
       end
     end
     object TabSheet2: TTabSheet

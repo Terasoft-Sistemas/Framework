@@ -74,6 +74,9 @@ type
     function obterCodigobarras(pIdProduto: String): String;
     function carregaClasse(pId: String): TProdutosModel;
 
+    function ValorGarantia(pProduto: String; pValorFaixa: Double): TProdutoGarantia;
+
+
 end;
 
 implementation
@@ -967,6 +970,57 @@ begin
     lQry.ParamByName('saldo').Value   := FormataFloatFireBird(pSaldo.ToString);
     lQry.ParamByName('codigo').Value  := pIdProduto;
     lQry.ExecSQL;
+  finally
+    lSQL := '';
+    lQry.Free;
+  end;
+end;
+
+function TProdutosDao.ValorGarantia(pProduto: String; pValorFaixa: Double): TProdutoGarantia;
+var
+  lQry: TFDQuery;
+  lSQL:String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  lSQL :=
+          ' select                                                                                      '+#13+
+          '     gf.garantia_extendida_venda_12,                                                         '+#13+
+          '     gf.garantia_extendida_custo_12,                                                         '+#13+
+          '     gf.garantia_extendida_venda_24,                                                         '+#13+
+          '     gf.garantia_extendida_custo_24,                                                         '+#13+
+          '     gf.garantia_extendida_venda_36,                                                         '+#13+
+          '     gf.garantia_extendida_custo_36                                                          '+#13+
+          '                                                                                             '+#13+
+          ' from                                                                                        '+#13+
+          '     produto p                                                                               '+#13+
+          '                                                                                             '+#13+
+          ' left join grupo_garantia g on g.id= p.grupo_garantia_id                                     '+#13+
+          ' left join grupo_garantia_faixa gf on gf.grupo_garantia_id = g.id                            '+#13+
+          '                                                                                             '+#13+
+          ' where                                                                                       '+#13+
+          '     '+FormataFireBirdToFloat(FloatToStr(pValorFaixa))+' between gf.valor_venda_inicial and  '+#13+
+          '     gf.valor_venda_final and p.codigo_pro = '+QuotedStr(pProduto)+'                         '+#13;
+
+  try
+    lQry.SQL.Add(lSQL);
+    lQry.Open(lSQL);
+
+
+    Result.GARANTIA_EXTENDIDA_VENDA_12 := lQry.FieldByName('GARANTIA_EXTENDIDA_VENDA_12').AsFloat;
+    Result.GARANTIA_EXTENDIDA_CUSTO_12 := lQry.FieldByName('GARANTIA_EXTENDIDA_CUSTO_12').AsFloat;
+    Result.GARANTIA_EXTENDIDA_VENDA_24 := lQry.FieldByName('GARANTIA_EXTENDIDA_VENDA_24').AsFloat;
+    Result.GARANTIA_EXTENDIDA_CUSTO_24 := lQry.FieldByName('GARANTIA_EXTENDIDA_CUSTO_24').AsFloat;
+    Result.GARANTIA_EXTENDIDA_VENDA_36 := lQry.FieldByName('GARANTIA_EXTENDIDA_VENDA_36').AsFloat;
+    Result.GARANTIA_EXTENDIDA_CUSTO_36 := lQry.FieldByName('GARANTIA_EXTENDIDA_CUSTO_36').AsFloat;
+    Result.ROUBO_FURTO_12              := 0;
+    Result.ROUBO_FURTO_24              := 0;
+    Result.ROUBO_FURTO_CUSTO_12        := 0;
+    Result.ROUBO_FURTO_CUSTO_24        := 0;
+    Result.ROUBO_FURTO_DA_12           := 0;
+    Result.ROUBO_FURTO_DA_24           := 0;
+    Result.ROUBO_FURTO_CUSTO_DA_12     := 0;
+    Result.ROUBO_FURTO_CUSTO_DA_24     := 0;
   finally
     lSQL := '';
     lQry.Free;

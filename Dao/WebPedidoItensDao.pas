@@ -279,7 +279,7 @@ begin
             '               coalesce(i.valor_unitario,0) * coalesce(i.percentual_desconto,0) / 100 valor_desconto,       '+SLineBreak+
             '               coalesce(i.quantidade,0) quantidade,                                                         '+SLineBreak+
             '               coalesce(i.valor_unitario,0) valor_unitario,                                                 '+SLineBreak+
-            '               coalesce(i.vlr_garantia,0) valor_garantia                                                    '+SLineBreak+
+            '               coalesce(i.vlr_garantia,0)+coalesce(i.vlr_garantia_fr,0) valor_garantia                      '+SLineBreak+
             '         from web_pedidoitens i                                                                             '+SLineBreak+
             '        inner join web_pedido p on i.web_pedido_id = p.id ) t1                                              '+SLineBreak+
             '        group by 1 ) t2                                                                                     '+SLineBreak+

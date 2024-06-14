@@ -190,10 +190,11 @@ begin
   lQry := vIConexao.CriarQuery;
 
   lSQL :=
-          ' update reserva                                           '+
+          ' update reserva                                     '+
           ' set                                                '+
           '     cliente_id = :cliente_id,                      '+
           '     vendedor_id = :vendedor_id,                    '+
+          '     status = :status,                              '+
           '     filial = :filial,                              '+
           '     informacoes_ped = :informacoes_ped,            '+
           '     entrega = :entrega,                            '+
@@ -218,6 +219,7 @@ begin
 
     lQry.SQL.Add(lSQL);
     lQry.ParamByName('CLIENTE_ID').Value       := IIF(pAtualizaReserva_Parametros.Cliente_id      = '', Unassigned, pAtualizaReserva_Parametros.Cliente_id);
+    lQry.ParamByName('STATUS').Value           := IIF(pAtualizaReserva_Parametros.status          = '', Unassigned, pAtualizaReserva_Parametros.status);
     lQry.ParamByName('VENDEDOR_ID').Value      := IIF(pAtualizaReserva_Parametros.Vendedor_id     = '', Unassigned, pAtualizaReserva_Parametros.Vendedor_id);
     lQry.ParamByName('FILIAL').Value           := IIF(pAtualizaReserva_Parametros.Filial          = '', Unassigned, pAtualizaReserva_Parametros.Filial);
     lQry.ParamByName('INFORMACOES_PED').Value  := IIF(pAtualizaReserva_Parametros.Informacoes_ped = '', Unassigned, pAtualizaReserva_Parametros.Informacoes_ped);

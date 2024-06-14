@@ -106,6 +106,7 @@ type
   TAtualizaReserva_Parametros = record
     Web_pedido_id,
     Cliente_id,
+    status,
     Vendedor_id,
     Filial,
     Informacoes_ped,
