@@ -349,6 +349,8 @@ begin
               '      OBSERVACAO,                                                                                                                  '+SLineBreak+
               '      PRODUTO_ID,                                                                                                                  '+SLineBreak+
               '      VLR_GARANTIA,                                                                                                                '+SLineBreak+
+              '      TIPO_GARANTIA_FR,                                                                                                            '+SLineBreak+
+              '      VLR_GARANTIA_FR,                                                                                                             '+SLineBreak+
               '      ENTREGA,                                                                                                                     '+SLineBreak+
               '      MONTAGEM,                                                                                                                    '+SLineBreak+
               '      PERCENTUAL_DESCONTO,                                                                                                         '+SLineBreak+
@@ -368,6 +370,8 @@ begin
               '              web_pedidoitens.observacao,                                                                                          '+SLineBreak+
               '              web_pedidoitens.produto_id,                                                                                          '+SLineBreak+
               '              web_pedidoitens.vlr_garantia,                                                                                        '+SLineBreak+
+              '              web_pedidoitens.tipo_garantia_FR,                                                                                    '+SLineBreak+
+              '              web_pedidoitens.vlr_garantia_FR,                                                                                     '+SLineBreak+
               '              web_pedidoitens.entrega,                                                                                             '+SLineBreak+
               '              web_pedidoitens.montagem,                                                                                            '+SLineBreak+
               '              web_pedidoitens.percentual_desconto,                                                                                 '+SLineBreak+
@@ -413,6 +417,8 @@ begin
       FWebPedidoItenssLista[i].TOTAL_GARANTIA       := lQry.FieldByName('TOTAL_GARANTIA').AsString;
       FWebPedidoItenssLista[i].VALOR_TOTALITENS     := lQry.FieldByName('VALOR_TOTALITENS').AsString;
       FWebPedidoItenssLista[i].VALOR_DESCONTO       := lQry.FieldByName('VALOR_DESCONTO').AsString;
+      FWebPedidoItenssLista[i].TIPO_GARANTIA_FR     := lQry.FieldByName('TIPO_GARANTIA_FR').AsString;
+      FWebPedidoItenssLista[i].VLR_GARANTIA_FR      := lQry.FieldByName('VLR_GARANTIA_FR').AsFloat;
 
       lQry.Next;
     end;
