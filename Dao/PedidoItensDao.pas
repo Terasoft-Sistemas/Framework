@@ -525,7 +525,13 @@ begin
       FPedidoItenssLista[i].VDESC                        := lQry.FieldByName('VDESC').AsString;
       FPedidoItenssLista[i].TIPO_VENDA_COMISSAO_ID       := lQry.FieldByName('TIPO_VENDA_COMISSAO_ID').AsString;
       FPedidoItenssLista[i].COMIS_PRO                    := lQry.FieldByName('COMIS_PRO').AsString;
+
       FPedidoItenssLista[i].GRUPO_COMISSAO_ID            := lQry.FieldByName('GRUPO_COMISSAO_ID').AsString;
+      FPedidoItenssLista[i].TIPO_GARANTIA_FR             := lQry.FieldByName('TIPO_GARANTIA_FR').AsString;
+      FPedidoItenssLista[i].VLR_GARANTIA_FR              := lQry.FieldByName('VLR_GARANTIA_FR').AsString;
+      FPedidoItenssLista[i].CUSTO_GARANTIA_FR            := lQry.FieldByName('CUSTO_GARANTIA_FR').AsString;
+      FPedidoItenssLista[i].CUSTO_GARANTIA               := lQry.FieldByName('CUSTO_GARANTIA').AsString;
+      FPedidoItenssLista[i].PER_GARANTIA_FR              := lQry.FieldByName('PER_GARANTIA_FR').AsString;
 
       lQry.Next;
     end;
@@ -582,6 +588,7 @@ begin
       FPedidoItenssLista[i].VDESC             := lQry.FieldByName('VDESC').AsFloat;
       FPedidoItenssLista[i].ITEM              := lQry.FieldByName('ITEM').AsFloat;
       FPedidoItenssLista[i].TOTAL             := lQry.FieldByName('TOTAL').AsFloat;
+
       lQry.Next;
     end;
   finally
@@ -763,6 +770,13 @@ begin
     pQry.ParamByName('ipi_cst').Values[lCount]                      := IIF(pPedidoItensModel.PedidoItenssLista[lCount].IPI_CST                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].IPI_CST);
     pQry.ParamByName('csosn').Values[lCount]                        := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CSOSN                         = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CSOSN);
     pQry.ParamByName('cfop').Values[lCount]                         := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CFOP                          = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CFOP);
+
+    pQry.ParamByName('tipo_garantia_fr').Values[lCount]             := IIF(pPedidoItensModel.PedidoItenssLista[lCount].TIPO_GARANTIA_FR              = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].TIPO_GARANTIA_FR);
+    pQry.ParamByName('vlr_garantia_fr').Values[lCount]              := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VLR_GARANTIA_FR               = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].VLR_GARANTIA_FR);
+    pQry.ParamByName('custo_garantia_fr').Values[lCount]            := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_GARANTIA_FR             = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_GARANTIA_FR);
+    pQry.ParamByName('custo_garantia').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_GARANTIA                = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_GARANTIA);
+    pQry.ParamByName('per_garantia_fr').Values[lCount]              := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PER_GARANTIA_FR               = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PER_GARANTIA_FR);
+
   end;
 end;
 

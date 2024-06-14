@@ -152,6 +152,8 @@ type
     FTIPO_COMISSAO: Variant;
     FGERENTE_ID: Variant;
     FTOTAL_GARANTIA: Variant;
+    FSEGURO_PRESTAMISTA_CUSTO: Variant;
+    FSEGURO_PRESTAMISTA_VALOR: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetWebPedidosLista(const Value: TObjectList<TWebPedidoModel>);
@@ -265,6 +267,8 @@ type
 
     procedure IncluiReservaCD(pWebPedidoItensModel: TWebPedidoItensModel);
     procedure AtualizaReservaCD(pWebPedidoModel: TWebPedidoModel);
+    procedure SetSEGURO_PRESTAMISTA_CUSTO(const Value: Variant);
+    procedure SetSEGURO_PRESTAMISTA_VALOR(const Value: Variant);
 
   public
     procedure AfterConstruction; override;
@@ -368,6 +372,8 @@ type
     property CLIENTE_NOME: Variant read FCLIENTE_NOME write SetCLIENTE_NOME;
     property TIPO_COMISSAO: Variant read FTIPO_COMISSAO write SetTIPO_COMISSAO;
     property GERENTE_ID: Variant read FGERENTE_ID write SetGERENTE_ID;
+    property SEGURO_PRESTAMISTA_VALOR : Variant read FSEGURO_PRESTAMISTA_VALOR write SetSEGURO_PRESTAMISTA_VALOR;
+    property SEGURO_PRESTAMISTA_CUSTO : Variant read FSEGURO_PRESTAMISTA_CUSTO write SetSEGURO_PRESTAMISTA_CUSTO;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -499,22 +505,25 @@ begin
     else
       lPedidoVendaModel.CODIGO_PORT        := lWebPedidoModel.PORTADOR_ID;
 
-    lPedidoVendaModel.CODIGO_VEN           := lWebPedidoModel.VENDEDOR_ID;
-    lPedidoVendaModel.CODIGO_TIP           := lWebPedidoModel.TIPOVENDA_ID;
-    lPedidoVendaModel.FRETE_PED            := lWebPedidoModel.VALOR_FRETE;
-    lPedidoVendaModel.INFORMACOES_PED      := lWebPedidoModel.OBSERVACAO;
-    lPedidoVendaModel.ENTREGA_ENDERECO     := lWebPedidoModel.ENTREGA_ENDERECO;
-    lPedidoVendaModel.ENTREGA_NUMERO       := lWebPedidoModel.ENTREGA_NUMERO;
-    lPedidoVendaModel.ENTREGA_BAIRRO       := lWebPedidoModel.ENTREGA_BAIRRO;
-    lPedidoVendaModel.ENTREGA_CIDADE       := lWebPedidoModel.ENTREGA_CIDADE;
-    lPedidoVendaModel.ENTREGA_UF           := lWebPedidoModel.ENTREGA_UF;
-    lPedidoVendaModel.ENTREGA_CEP          := lWebPedidoModel.ENTREGA_CEP;
-    lPedidoVendaModel.ENTREGA_COMPLEMENTO  := lWebPedidoModel.ENTREGA_COMPLEMENTO;
-    lPedidoVendaModel.MONTAGEM_DATA        := lWebPedidoModel.MONTAGEM_DATA;
-    lPedidoVendaModel.USUARIO_PED          := self.vIConexao.getUSer.ID;
-    lPedidoVendaModel.IDUsuario            := self.vIConexao.getUSer.ID;
-    lPedidoVendaModel.TIPO_COMISSAO        := self.TIPO_COMISSAO;
-    lPedidoVendaModel.GERENTE_ID           := self.GERENTE_ID;
+    lPedidoVendaModel.CODIGO_VEN               := lWebPedidoModel.VENDEDOR_ID;
+    lPedidoVendaModel.CODIGO_TIP               := lWebPedidoModel.TIPOVENDA_ID;
+    lPedidoVendaModel.FRETE_PED                := lWebPedidoModel.VALOR_FRETE;
+    lPedidoVendaModel.INFORMACOES_PED          := lWebPedidoModel.OBSERVACAO;
+    lPedidoVendaModel.ENTREGA_ENDERECO         := lWebPedidoModel.ENTREGA_ENDERECO;
+    lPedidoVendaModel.ENTREGA_NUMERO           := lWebPedidoModel.ENTREGA_NUMERO;
+    lPedidoVendaModel.ENTREGA_BAIRRO           := lWebPedidoModel.ENTREGA_BAIRRO;
+    lPedidoVendaModel.ENTREGA_CIDADE           := lWebPedidoModel.ENTREGA_CIDADE;
+    lPedidoVendaModel.ENTREGA_UF               := lWebPedidoModel.ENTREGA_UF;
+    lPedidoVendaModel.ENTREGA_CEP              := lWebPedidoModel.ENTREGA_CEP;
+    lPedidoVendaModel.ENTREGA_COMPLEMENTO      := lWebPedidoModel.ENTREGA_COMPLEMENTO;
+    lPedidoVendaModel.MONTAGEM_DATA            := lWebPedidoModel.MONTAGEM_DATA;
+    lPedidoVendaModel.USUARIO_PED              := self.vIConexao.getUSer.ID;
+    lPedidoVendaModel.IDUsuario                := self.vIConexao.getUSer.ID;
+    lPedidoVendaModel.TIPO_COMISSAO            := self.TIPO_COMISSAO;
+    lPedidoVendaModel.GERENTE_ID               := self.GERENTE_ID;
+
+    lPedidoVendaModel.SEGURO_PRESTAMISTA_CUSTO := lWebPedidoModel.SEGURO_PRESTAMISTA_CUSTO;
+    lPedidoVendaModel.SEGURO_PRESTAMISTA_VALOR := lWebPedidoModel.SEGURO_PRESTAMISTA_VALOR;
 
     lPedido := lPedidoVendaModel.Salvar;
 
@@ -557,6 +566,12 @@ begin
       lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_MONTADOR         := FloatToStr(lWebPedidoItensModel.VALOR_MONTADOR);
       lPedidoItensModel.PedidoItenssLista[lIndex].COMISSAO_PERCENTUAL    := FloatToStr(lWebPedidoItensModel.PERCENTUAL_COMISSAO);
       lPedidoItensModel.PedidoItenssLista[lIndex].COMISSAO_PED           := '0';
+
+      lPedidoItensModel.PedidoItenssLista[lIndex].TIPO_GARANTIA_FR       := lWebPedidoItensModel.TIPO_GARANTIA_FR;
+      lPedidoItensModel.PedidoItenssLista[lIndex].VLR_GARANTIA_FR        := lWebPedidoItensModel.VLR_GARANTIA_FR;
+      lPedidoItensModel.PedidoItenssLista[lIndex].CUSTO_GARANTIA_FR      := lWebPedidoItensModel.CUSTO_GARANTIA_FR;
+      lPedidoItensModel.PedidoItenssLista[lIndex].CUSTO_GARANTIA         := lWebPedidoItensModel.CUSTO_GARANTIA;
+      lPedidoItensModel.PedidoItenssLista[lIndex].PER_GARANTIA_FR        := lWebPedidoItensModel.PER_GARANTIA_FR;
 
       inc(lIndex);
     end;
@@ -1116,6 +1131,16 @@ end;
 procedure TWebPedidoModel.SetSAIDA_ID(const Value: Variant);
 begin
   FSAIDA_ID := Value;
+end;
+
+procedure TWebPedidoModel.SetSEGURO_PRESTAMISTA_CUSTO(const Value: Variant);
+begin
+  FSEGURO_PRESTAMISTA_CUSTO := Value;
+end;
+
+procedure TWebPedidoModel.SetSEGURO_PRESTAMISTA_VALOR(const Value: Variant);
+begin
+  FSEGURO_PRESTAMISTA_VALOR := Value;
 end;
 
 procedure TWebPedidoModel.SetStartRecordView(const Value: String);

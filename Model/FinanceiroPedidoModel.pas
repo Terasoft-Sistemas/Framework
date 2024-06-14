@@ -120,6 +120,7 @@ type
     function carregaClasse(pId: String): TFinanceiroPedidoModel;
     function obterLista: TFDMemTable;
     function obterResumo(pIDPedido : String) : TFDMemTable;
+    function qtdePagamentoPrazo(pWebPedido : String): Integer;
 
     procedure gerarFinanceiro(pFinanceiroParams: TFinanceiroParams);
 
@@ -260,6 +261,18 @@ begin
   lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
   try
     Result := lFinanceiroPedidoDao.obterResumo(pIDPedido);
+  finally
+    lFinanceiroPedidoDao.Free;
+  end;
+end;
+
+function TFinanceiroPedidoModel.qtdePagamentoPrazo(pWebPedido: String): Integer;
+var
+  lFinanceiroPedidoDao: TFinanceiroPedidoDao;
+begin
+  lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
+  try
+    Result := lFinanceiroPedidoDao.qtdePagamentoPrazo(pWebPedido);
   finally
     lFinanceiroPedidoDao.Free;
   end;

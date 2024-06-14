@@ -57,6 +57,7 @@ type
     function carregaClasse(pID: String): TFinanceiroPedidoModel;
     function obterResumo(pIDPedido : String) : TFDMemTable;
     function ObterLista: TFDMemTable;
+    function qtdePagamentoPrazo(pWebPedido : String): Integer;
 end;
 
 implementation
@@ -250,6 +251,31 @@ begin
 
     FTotalRecords := lQry.FieldByName('records').AsInteger;
 
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TFinanceiroPedidoDao.qtdePagamentoPrazo(pWebPedido: String): Integer;
+var
+  lQry       : TFDQuery;
+  lSQL       : String;
+  lPaginacao : String;
+begin
+
+  lQry := vIConexao.CriarQuery;
+
+  try
+      lSQL :=
+      '   select count(*) qtde                                           '+SLineBreak+
+      '     from financeiro_pedido f                                     '+SLineBreak+
+      '    inner join portador p on p.codigo_port = f.portador_id        '+SLineBreak+
+      '    where f.web_pedido_id = '+pWebPedido+'                        '+SLineBreak+
+      '      and p.tpag_nfe not in (''01'', ''03'', ''04'', ''99'')      '+SLineBreak;
+
+    lQry.Open(lSQL);
+
+    Result := vConstrutor.atribuirRegistros(lQry).FieldByName('QTDE').AsInteger;
   finally
     lQry.Free;
   end;
