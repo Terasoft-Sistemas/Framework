@@ -1166,12 +1166,10 @@ begin
     if pVenderItem.Quantidade = 0 then
       CriaException('Quantidade inválida.');
 
-    lBarras := pVenderItem.BarrasProduto;
+    lBarras := lPedidoVendaLista.obterProdutoBalanca(pVenderItem.BarrasProduto);
 
-    if lPedidoVendaLista.obterProdutoBalanca(pVenderItem.BarrasProduto) then
+    if not lBarras.IsEmpty then
     begin
-      lBarras := Format('%.*d', [6, StrToInt(Copy(pVenderItem.BarrasProduto, StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_INI_PRODUTO', '2', tvString)), StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_FIM_PRODUTO', '4', tvString))))]);
-
       lProdutosModel.WhereView := ' and produto.barras_pro = '+ QuotedStr(lBarras);
       lProdutosModel.obterLista;
 
