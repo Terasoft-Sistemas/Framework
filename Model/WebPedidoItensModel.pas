@@ -11,6 +11,7 @@ uses
 type
 
   TTotais = record
+    SEGURO_PRESTAMISTA_VALOR,
     VALOR_ACRESCIMO,
     VALOR_FRETE,
     VALOR_DESCONTO,

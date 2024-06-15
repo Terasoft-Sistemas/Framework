@@ -257,6 +257,7 @@ begin
   try
     lSQL := '   select                                                                                                   '+SLineBreak+
             '      WEB_PEDIDO_ID,                                                                                        '+SLineBreak+
+            '      SEGURO_PRESTAMISTA_VALOR,                                                                             '+SLineBreak+
             '      VALOR_ACRESCIMO,                                                                                      '+SLineBreak+
             '      VALOR_FRETE,                                                                                          '+SLineBreak+
             '      VALOR_DESCONTO,                                                                                       '+SLineBreak+
@@ -266,6 +267,7 @@ begin
             '    (                                                                                                       '+SLineBreak+
             '     select                                                                                                 '+SLineBreak+
             '       web_pedido_id,                                                                                       '+SLineBreak+
+            '       seguro_prestamista_valor,                                                                            '+SLineBreak+
             '       sum(valor_acrescimo) valor_acrescimo,                                                                '+SLineBreak+
             '       sum(valor_frete) valor_frete,                                                                        '+SLineBreak+
             '       sum(quantidade * valor_desconto) valor_desconto,                                                     '+SLineBreak+
@@ -274,6 +276,7 @@ begin
             '      from                                                                                                  '+SLineBreak+
             '      (                                                                                                     '+SLineBreak+
             '        select i.web_pedido_id,                                                                             '+SLineBreak+
+            '               seguro_prestamista_valor,                                                                    '+SLineBreak+
             '               coalesce(p.acrescimo, 0) valor_acrescimo,                                                    '+SLineBreak+
             '               coalesce(p.valor_frete, 0) valor_frete,                                                      '+SLineBreak+
             '               coalesce(i.valor_unitario, 0) * coalesce(i.percentual_desconto,0) / 100 valor_desconto,      '+SLineBreak+
@@ -282,19 +285,21 @@ begin
             '               coalesce(i.vlr_garantia,0)+coalesce(i.vlr_garantia_fr,0) valor_garantia                      '+SLineBreak+
             '         from web_pedidoitens i                                                                             '+SLineBreak+
             '        inner join web_pedido p on i.web_pedido_id = p.id ) t1                                              '+SLineBreak+
-            '        group by 1 ) t2                                                                                     '+SLineBreak+
+            '        group by 1,2 ) t2                                                                                   '+SLineBreak+
             '   where web_pedido_id = ' +pID;
 
     lQry.Open(lSQL);
 
-    Result.VALOR_ACRESCIMO  := lQry.FieldByName('VALOR_ACRESCIMO').AsFloat;
-    Result.VALOR_FRETE      := lQry.FieldByName('VALOR_FRETE').AsFloat;
-    Result.VALOR_DESCONTO   := lQry.FieldByName('VALOR_DESCONTO').AsFloat;
-    Result.VALOR_ITENS      := lQry.FieldByName('VALOR_ITENS').AsFloat;
-    Result.TOTAL_GARANTIA   := lQry.FieldByName('TOTAL_GARANTIA').AsFloat;
+    Result.SEGURO_PRESTAMISTA_VALOR  := lQry.FieldByName('SEGURO_PRESTAMISTA_VALOR').AsFloat;
+    Result.VALOR_ACRESCIMO           := lQry.FieldByName('VALOR_ACRESCIMO').AsFloat;
+    Result.VALOR_FRETE               := lQry.FieldByName('VALOR_FRETE').AsFloat;
+    Result.VALOR_DESCONTO            := lQry.FieldByName('VALOR_DESCONTO').AsFloat;
+    Result.VALOR_ITENS               := lQry.FieldByName('VALOR_ITENS').AsFloat;
+    Result.TOTAL_GARANTIA            := lQry.FieldByName('TOTAL_GARANTIA').AsFloat;
 
     Result.VALOR_TOTAL  := lQry.FieldByName('VALOR_ITENS').AsFloat +
                            lQry.FieldByName('VALOR_FRETE').AsFloat +
+                           lQry.FieldByName('SEGURO_PRESTAMISTA_VALOR').AsFloat+
                            lQry.FieldByName('VALOR_ACRESCIMO').AsFloat -
                            lQry.FieldByName('VALOR_DESCONTO').AsFloat;
   finally
@@ -384,7 +389,7 @@ begin
               '              web_pedidoitens.custo_garantia,                                                                                    '+SLineBreak+
               '              web_pedidoitens.per_garantia_fr,                                                                                   '+SLineBreak+
               '              coalesce(web_pedidoitens.quantidade, 0) * coalesce(web_pedidoitens.valor_unitario,0) valor_totalitens,             '+SLineBreak+
-              '              coalesce(web_pedidoitens.quantidade,0) * coalesce(web_pedidoitens.vlr_garantia,0) total_garantia,                  '+SLineBreak+
+              '              coalesce(web_pedidoitens.quantidade,0) * (coalesce(web_pedidoitens.vlr_garantia,0)+coalesce(web_pedidoitens.vlr_garantia_fr,0)) total_garantia,   '+SLineBreak+
               '              coalesce(web_pedidoitens.valor_unitario, 0) * coalesce(web_pedidoitens.percentual_desconto,0) / 100 valor_desconto '+SLineBreak+
               '                                                                                                                                 '+SLineBreak+
               '          from web_pedidoitens                                                                                                   '+SLineBreak+
