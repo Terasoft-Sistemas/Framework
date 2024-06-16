@@ -1144,3 +1144,10 @@ end;
 
 
 end.
+{
+
+cmake -A Win32 -DCRYPTO_BACKEND=WinCNG -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=./bin32 -DCMAKE_BUILD_TYPE=Release
+
+cmake --build . --target install --config Release
+
+}
