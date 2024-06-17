@@ -421,6 +421,7 @@ begin
       i := FWebPedidoItenssLista.Count -1;
 
       FWebPedidoItenssLista[i].ID                   := lQry.FieldByName('ID').AsString;
+      FWebPedidoItenssLista[i].WEB_PEDIDO_ID        := lQry.FieldByName('WEB_PEDIDO_ID').AsString;
       FWebPedidoItenssLista[i].QUANTIDADE           := lQry.FieldByName('QUANTIDADE').AsFloat;
       FWebPedidoItenssLista[i].TIPO_ENTREGA         := lQry.FieldByName('TIPO_ENTREGA').AsString;
       FWebPedidoItenssLista[i].TIPO_GARANTIA        := lQry.FieldByName('TIPO_GARANTIA').AsString;

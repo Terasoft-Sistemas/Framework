@@ -28,6 +28,8 @@ type
     FVALOR_DES: Variant;
     FID: Variant;
     FSYSTIME: Variant;
+    FIDUsuarioView: String;
+    FIDTipoVendaView: String;
 
 
     procedure SetAcao(const Value: TAcao);
@@ -43,6 +45,8 @@ type
     procedure SetFTIPOVENDA_DES(const Value: Variant);
     procedure SetFUSUARIO_DES(const Value: Variant);
     procedure SetFVALOR_DES(const Value: Variant);
+    procedure SetIDTipoVendaView(const Value: String);
+    procedure SetIDUsuarioView(const Value: String);
 
   public
 
@@ -73,6 +77,8 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordview : String read FIDRecordview write SetIDRecordview;
+    property IDUsuarioView : String read FIDUsuarioView write SetIDUsuarioView;
+    property IDTipoVendaView : String read FIDTipoVendaView write SetIDTipoVendaView;
 
   end;
 
@@ -148,6 +154,8 @@ begin
     lDescontoLista.StartRecordView := FStartRecordView;
     lDescontoLista.LengthPageView  := FLengthPageView;
     lDescontoLista.IDRecordView    := FIDRecordView;
+    lDescontoLista.IDTipoVendaView := FIDTipoVendaView;
+    lDescontoLista.IDUsuarioView   := FIDUsuarioView;
 
     Result := lDescontoLista.obterLista;
 
@@ -213,6 +221,16 @@ end;
 procedure TDescontoModel.SetIDRecordview(const Value: String);
 begin
   FIDRecordview := Value;
+end;
+
+procedure TDescontoModel.SetIDTipoVendaView(const Value: String);
+begin
+  FIDTipoVendaView := Value;
+end;
+
+procedure TDescontoModel.SetIDUsuarioView(const Value: String);
+begin
+  FIDUsuarioView := Value;
 end;
 
 procedure TDescontoModel.SetLengthPageView(const Value: String);

@@ -707,6 +707,9 @@ begin
     self.VALOR_ITENS           := lTotais.VALOR_ITENS;
     self.VALOR_TOTAL           := lTotais.VALOR_TOTAL;
 
+    if lTotais.VALOR_DESCONTO > 0 then
+      self.PERCENTUAL_DESCONTO := lTotais.VALOR_DESCONTO * 100 / (lTotais.VALOR_TOTAL + lTotais.VALOR_DESCONTO);
+
     self.Salvar;
   finally
     lWebPedidoItensDao.Free;
@@ -1347,6 +1350,9 @@ begin
     lWebPedidoItensModel.VLR_GARANTIA        := PVenderItemParametros.VLR_GARANTIA;
     lWebPedidoItensModel.TIPO_GARANTIA_FR    := PVenderItemParametros.TIPO_GARANTIA_FR;
     lWebPedidoItensModel.VLR_GARANTIA_FR     := PVenderItemParametros.VLR_GARANTIA_FR;
+
+    if (lWebPedidoItensModel.TIPO <> 'FUTURA') and (pVenderItemParametros.QUANTIDADE > lProdutoModel.SALDO_DISPONIVEL) then
+      lWebPedidoItensModel.TIPO := 'SALDO_NEGA';
 
     Result := lWebPedidoItensModel.Incluir;
 
