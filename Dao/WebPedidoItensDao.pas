@@ -268,8 +268,8 @@ begin
             '     select                                                                                                 '+SLineBreak+
             '       web_pedido_id,                                                                                       '+SLineBreak+
             '       seguro_prestamista_valor,                                                                            '+SLineBreak+
-            '       sum(valor_acrescimo) valor_acrescimo,                                                                '+SLineBreak+
-            '       sum(valor_frete) valor_frete,                                                                        '+SLineBreak+
+            '       valor_acrescimo valor_acrescimo,                                                                     '+SLineBreak+
+            '       valor_frete valor_frete,                                                                             '+SLineBreak+
             '       sum(quantidade * valor_desconto) valor_desconto,                                                     '+SLineBreak+
             '       sum(quantidade * (valor_unitario + valor_garantia)) valor_itens,                                     '+SLineBreak+
             '       sum(quantidade * valor_garantia) total_garantia                                                      '+SLineBreak+
@@ -285,7 +285,7 @@ begin
             '               coalesce(i.vlr_garantia,0)+coalesce(i.vlr_garantia_fr,0) valor_garantia                      '+SLineBreak+
             '         from web_pedidoitens i                                                                             '+SLineBreak+
             '        inner join web_pedido p on i.web_pedido_id = p.id ) t1                                              '+SLineBreak+
-            '        group by 1,2 ) t2                                                                                   '+SLineBreak+
+            '        group by 1,2,3,4 ) t2                                                                               '+SLineBreak+
             '   where web_pedido_id = ' +pID;
 
     lQry.Open(lSQL);
@@ -297,8 +297,16 @@ begin
     Result.VALOR_ITENS               := lQry.FieldByName('VALOR_ITENS').AsFloat;
     Result.TOTAL_GARANTIA            := lQry.FieldByName('TOTAL_GARANTIA').AsFloat;
 
+    Result.TOTAL_PAGAR  := lQry.FieldByName('VALOR_ITENS').AsFloat +
+                           lQry.FieldByName('VALOR_FRETE').AsFloat +
+                           lQry.FieldByName('TOTAL_GARANTIA').AsFloat+
+                           lQry.FieldByName('SEGURO_PRESTAMISTA_VALOR').AsFloat+
+                           lQry.FieldByName('VALOR_DESCONTO').AsFloat;
+
+
     Result.VALOR_TOTAL  := lQry.FieldByName('VALOR_ITENS').AsFloat +
                            lQry.FieldByName('VALOR_FRETE').AsFloat +
+                           lQry.FieldByName('TOTAL_GARANTIA').AsFloat+
                            lQry.FieldByName('SEGURO_PRESTAMISTA_VALOR').AsFloat+
                            lQry.FieldByName('VALOR_ACRESCIMO').AsFloat -
                            lQry.FieldByName('VALOR_DESCONTO').AsFloat;

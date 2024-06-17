@@ -16,8 +16,9 @@ type
     VALOR_FRETE,
     VALOR_DESCONTO,
     VALOR_ITENS,
+    TOTAL_GARANTIA,
     VALOR_TOTAL,
-    TOTAL_GARANTIA : Double;
+    TOTAL_PAGAR : Double;
   end;
 
   TWebPedidoItensModel = class
