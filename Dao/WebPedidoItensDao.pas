@@ -271,7 +271,7 @@ begin
             '       valor_acrescimo valor_acrescimo,                                                                     '+SLineBreak+
             '       valor_frete valor_frete,                                                                             '+SLineBreak+
             '       sum(quantidade * valor_desconto) valor_desconto,                                                     '+SLineBreak+
-            '       sum(quantidade * (valor_unitario + valor_garantia)) valor_itens,                                     '+SLineBreak+
+            '       sum(quantidade * (valor_unitario)) valor_itens,                                                      '+SLineBreak+
             '       sum(quantidade * valor_garantia) total_garantia                                                      '+SLineBreak+
             '      from                                                                                                  '+SLineBreak+
             '      (                                                                                                     '+SLineBreak+

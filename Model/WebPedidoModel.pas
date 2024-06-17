@@ -676,12 +676,12 @@ begin
   try
     lTotais := lWebPedidoItensModel.obterTotais(self.FID);
 
+    self.VALOR_ITENS               := lTotais.VALOR_ITENS;
+    self.VALOR_CUPOM_DESCONTO      := lTotais.VALOR_DESCONTO;
     self.TOTAL_GARANTIA            := lTotais.TOTAL_GARANTIA;
     self.SEGURO_PRESTAMISTA_VALOR  := lTotais.SEGURO_PRESTAMISTA_VALOR;
     self.ACRESCIMO                 := lTotais.VALOR_ACRESCIMO;
     self.VALOR_FRETE               := lTotais.VALOR_FRETE;
-    self.VALOR_CUPOM_DESCONTO      := lTotais.VALOR_DESCONTO;
-    self.VALOR_ITENS               := lTotais.VALOR_ITENS;
     self.VALOR_TOTAL               := lTotais.VALOR_TOTAL;
 
   finally
