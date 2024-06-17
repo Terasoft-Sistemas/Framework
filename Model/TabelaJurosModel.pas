@@ -33,6 +33,9 @@ type
     FVALOR_PARCELA: Variant;
     FJUROS_TEXTO: Variant;
     FVALOR_JUROS: Variant;
+    FVALOR_SEG_PRESTAMISTA: Variant;
+    FVALOR_ACRESCIMO_SEG_PRESTAMISTA: Variant;
+    FPER_SEG_PRESTAMSTA: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetTabelaJurossLista(const Value: TObjectList<TTabelaJurosModel>);
@@ -53,6 +56,9 @@ type
     procedure SetVALOR_TOTAL(const Value: Variant);
     procedure SetJUROS_TEXTO(const Value: Variant);
     procedure SetVALOR_JUROS(const Value: Variant);
+    procedure SetPER_SEG_PRESTAMSTA(const Value: Variant);
+    procedure SetVALOR_ACRESCIMO_SEG_PRESTAMISTA(const Value: Variant);
+    procedure SetVALOR_SEG_PRESTAMISTA(const Value: Variant);
 
   public
     property CODIGO: Variant read FCODIGO write SetCODIGO;
@@ -66,13 +72,17 @@ type
     property VALOR_TOTAL: Variant read FVALOR_TOTAL write SetVALOR_TOTAL;
     property JUROS_TEXTO: Variant read FJUROS_TEXTO write SetJUROS_TEXTO;
     property VALOR_JUROS: Variant read FVALOR_JUROS write SetVALOR_JUROS;
+    property VALOR_SEG_PRESTAMISTA : Variant read FVALOR_SEG_PRESTAMISTA write SetVALOR_SEG_PRESTAMISTA;
+    property PER_SEG_PRESTAMSTA    : Variant read FPER_SEG_PRESTAMSTA write SetPER_SEG_PRESTAMSTA;
+    property VALOR_ACRESCIMO_SEG_PRESTAMISTA : Variant read FVALOR_ACRESCIMO_SEG_PRESTAMISTA write SetVALOR_ACRESCIMO_SEG_PRESTAMISTA;
+
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
     procedure obterLista; overload;
-    function obterLista(pPortador: String; pValor: Double): TFDMemTable; overload;
+    function obterLista(pPortador: String; pValor: Double; pSeguroPrestamista: Boolean): TFDMemTable; overload;
 
     function carregaClasse(pId: Integer): TTabelaJurosModel;
 
@@ -119,7 +129,7 @@ begin
   inherited;
 end;
 
-function TTabelaJurosModel.obterLista(pPortador: String; pValor: Double): TFDMemTable;
+function TTabelaJurosModel.obterLista(pPortador: String; pValor: Double; pSeguroPrestamista: Boolean): TFDMemTable;
 var
   lModel    : TTabelaJurosModel;
   i         : Integer;
@@ -156,9 +166,22 @@ begin
       self.TabelaJurossLista[i].FJUROS_TEXTO := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, 'Juros', 'Sem juros');
       lJuros                                 := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, self.TabelaJurossLista[i].PERCENTUAL / 100 * lTotal, 0);
 
-      self.TabelaJurossLista[i].FVALOR_JUROS   := FormatFloat('#,##0.00',  lJuros);
-      self.TabelaJurossLista[i].FVALOR_TOTAL   := FormatFloat('#,##0.00',lTotal + lJuros);
+      self.TabelaJurossLista[i].FVALOR_JUROS   := FormatFloat('#,##0.00', lJuros);
+      self.TabelaJurossLista[i].FVALOR_TOTAL   := FormatFloat('#,##0.00', lTotal + lJuros);
       self.TabelaJurossLista[i].FVALOR_PARCELA := FormatFloat('#,##0.00', (lTotal + lJuros) / StrToInt(self.TabelaJurossLista[i].CODIGO));
+
+      if pSeguroPrestamista then
+      begin
+        self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := 5;
+        self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := (lTotal + lJuros)*(5/100);
+        self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, self.TabelaJurossLista[i].PERCENTUAL / 100 * self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA, 0);;
+      end else
+      begin
+        self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := 0;
+        self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := 0;
+        self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA := 0;
+      end;
+
     end;
 
     with lMemTable.IndexDefs.AddIndexDef do
@@ -177,6 +200,11 @@ begin
     lMemTable.FieldDefs.Add('VALOR_JUROS', ftFloat);
     lMemTable.FieldDefs.Add('VALOR_PARCELA', ftFloat);
     lMemTable.FieldDefs.Add('VALOR_TOTAL', ftString, 100);
+
+    lMemTable.FieldDefs.Add('VALOR_SEG_PRESTAMISTA', ftFloat);
+    lMemTable.FieldDefs.Add('PER_SEG_PRESTAMSTA', ftFloat);
+    lMemTable.FieldDefs.Add('VALOR_ACRESCIMO_SEG_PRESTAMISTA', ftFloat);
+
     lMemTable.CreateDataSet;
 
     for i := 0 to self.TabelaJurossLista.Count -1 do
@@ -188,7 +216,11 @@ begin
                                 self.TabelaJurossLista[i].JUROS_TEXTO,
                                 self.TabelaJurossLista[i].VALOR_JUROS,
                                 self.TabelaJurossLista[i].VALOR_PARCELA,
-                                self.TabelaJurossLista[i].VALOR_TOTAL
+                                self.TabelaJurossLista[i].VALOR_TOTAL,
+                                self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA,
+                                self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA,
+                                self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA
+
                                ]);
     end;
 
@@ -307,6 +339,11 @@ begin
   FPERCENTUAL := Value;
 end;
 
+procedure TTabelaJurosModel.SetPER_SEG_PRESTAMSTA(const Value: Variant);
+begin
+  FPER_SEG_PRESTAMSTA := Value;
+end;
+
 procedure TTabelaJurosModel.SetPORTADOR_ID(const Value: Variant);
 begin
   FPORTADOR_ID := Value;
@@ -327,6 +364,12 @@ begin
   FTotalRecords := Value;
 end;
 
+procedure TTabelaJurosModel.SetVALOR_ACRESCIMO_SEG_PRESTAMISTA(
+  const Value: Variant);
+begin
+  FVALOR_ACRESCIMO_SEG_PRESTAMISTA := Value;
+end;
+
 procedure TTabelaJurosModel.SetVALOR_JUROS(const Value: Variant);
 begin
   FVALOR_JUROS := Value;
@@ -335,6 +378,11 @@ end;
 procedure TTabelaJurosModel.SetVALOR_PARCELA(const Value: Variant);
 begin
   FVALOR_PARCELA := Value;
+end;
+
+procedure TTabelaJurosModel.SetVALOR_SEG_PRESTAMISTA(const Value: Variant);
+begin
+  FVALOR_SEG_PRESTAMISTA := Value;
 end;
 
 procedure TTabelaJurosModel.SetVALOR_TOTAL(const Value: Variant);

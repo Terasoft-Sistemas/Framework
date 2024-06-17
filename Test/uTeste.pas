@@ -528,7 +528,7 @@ begin
   try
     try
       lValorPago := 10000;
-      lMemJuros  := lTabelaJurosModel.obterLista('000005', lValorPago);
+      lMemJuros  := lTabelaJurosModel.obterLista('000005', lValorPago, true);
 
       lFinanceiroParams.WEB_PEDIDO_ID       := '422';
       lFinanceiroParams.PORTADOR_ID         := '000005';
@@ -3010,7 +3010,7 @@ begin
   lTabelaJurosModel := TTabelaJurosModel.Create(vIConexao);
   try
     lPortador := InputBox('WebPedido', 'Digite o ID do portador:', '');
-    lMemTable := lTabelaJurosModel.obterLista(lPortador, 1000);
+    lMemTable := lTabelaJurosModel.obterLista(lPortador, 1000, true);
 
     lMemTable.first;
     while not lMemTable.eof do
@@ -3023,6 +3023,12 @@ begin
       memoResultado.Lines.Add('VALOR_PARCELA: '+lMemTable.FieldByName('VALOR_PARCELA').AsString);
       memoResultado.Lines.Add('VALOR_TOTAL: '+lMemTable.FieldByName('VALOR_TOTAL').AsString);
       memoResultado.Lines.Add('===============================================');
+      memoResultado.Lines.Add('VALOR_SEG_PRESTAMISTA: '+lMemTable.FieldByName('VALOR_SEG_PRESTAMISTA').AsString);
+      memoResultado.Lines.Add('PER_SEG_PRESTAMSTA: '+lMemTable.FieldByName('PER_SEG_PRESTAMSTA').AsString);
+      memoResultado.Lines.Add('VALOR_ACRESCIMO_SEG_PRESTAMISTA: '+lMemTable.FieldByName('VALOR_ACRESCIMO_SEG_PRESTAMISTA').AsString);
+      memoResultado.Lines.Add('===============================================');
+      memoResultado.Lines.Add('');
+
       lMemTable.Next;
     end;
 

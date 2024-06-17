@@ -1331,7 +1331,7 @@ begin
     lWebPedidoItensModel.VALOR_VENDIDO       := lValorVendido.ToString;
 
     if lValorVendido < lValorUnitario then
-      lWebPedidoItensModel.PERCENTUAL_DESCONTO := RoundTo((1 - lValorVendido / lValorUnitario) * 100, -2).ToString
+      lWebPedidoItensModel.PERCENTUAL_DESCONTO := RoundTo((1 - lValorVendido / lValorUnitario) * 100, -5).ToString
     else
       lWebPedidoItensModel.PERCENTUAL_DESCONTO := '0';
 

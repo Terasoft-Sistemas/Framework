@@ -19,6 +19,9 @@ type
     VALOR_ACRESCIMO       : Double;
     VALOR_LIQUIDO         : Double;
     VALOR_TOTAL           : Double;
+    VALOR_SEG_PRESTAMISTA : Double;
+    PER_SEG_PRESTAMSTA    : Double;
+    VALOR_ACRESCIMO_SEG_PRESTAMISTA : Double;
 
   end;
 
@@ -52,6 +55,9 @@ type
     FVALOR_ACRESCIMO: Variant;
     FID_FINANCEIRO: Variant;
     FVALOR_LIQUIDO: Variant;
+    FVALOR_SEG_PRESTAMISTA: Variant;
+    FPER_SEG_PRESTAMSTA: Variant;
+    FVALOR_ACRESCIMO_SEG_PRESTAMISTA: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetIDRecordView(const Value: Integer);
@@ -77,26 +83,32 @@ type
     procedure SetVALOR_ACRESCIMO(const Value: Variant);
     procedure SetID_FINANCEIRO(const Value: Variant);
     procedure SetVALOR_LIQUIDO(const Value: Variant);
+    procedure SetPER_SEG_PRESTAMSTA(const Value: Variant);
+    procedure SetVALOR_SEG_PRESTAMISTA(const Value: Variant);
+    procedure SetVALOR_ACRESCIMO_SEG_PRESTAMISTA(const Value: Variant);
         
   public
 
-    property  ID                   : Variant read FID write SetID;
-    property  SYSTIME              : Variant read FSYSTIME write SetSYSTIME;
-    property  DATA_CADASTRO        : Variant read FDATA_CADASTRO write SetDATA_CADASTRO;
-    property  WEB_PEDIDO_ID        : Variant read FWEB_PEDIDO_ID write SetWEB_PEDIDO_ID;
-    property  PEDIDO_VENDA_ID      : Variant read FPEDIDO_VENDA_ID write SetPEDIDO_VENDA_ID;
-    property  PORTADOR_ID          : Variant read FPORTADOR_ID write SetPORTADOR_ID;
-    property  VALOR_TOTAL          : Variant read FVALOR_TOTAL write SetVALOR_TOTAL;
-    property  QUANTIDADE_PARCELAS  : Variant read FQUANTIDADE_PARCELAS write SetQUANTIDADE_PARCELAS;
-    property  PARCELA              : Variant read FPARCELA write SetPARCELA;
-    property  VALOR_PARCELA        : Variant read FVALOR_PARCELA write SetVALOR_PARCELA;
-    property  VENCIMENTO           : Variant read FVENCIMENTO write SetVENCIMENTO;
-    property  CONDICAO_PAGAMENTO   : Variant read FCONDICAO_PAGAMENTO write SetCONDICAO_PAGAMENTO;
-    property  OBSERVACAO           : Variant read FOBSERVACAO write SetOBSERVACAO;
-    property  INDCE_APLICADO       : Variant read FINDCE_APLICADO write SetINDCE_APLICADO;
-    property  VALOR_ACRESCIMO      : Variant read FVALOR_ACRESCIMO write SetVALOR_ACRESCIMO;
-    property  ID_FINANCEIRO        : Variant read FID_FINANCEIRO write SetID_FINANCEIRO;
-    property  VALOR_LIQUIDO        : Variant read FVALOR_LIQUIDO write SetVALOR_LIQUIDO;
+    property  ID                    : Variant read FID write SetID;
+    property  SYSTIME               : Variant read FSYSTIME write SetSYSTIME;
+    property  DATA_CADASTRO         : Variant read FDATA_CADASTRO write SetDATA_CADASTRO;
+    property  WEB_PEDIDO_ID         : Variant read FWEB_PEDIDO_ID write SetWEB_PEDIDO_ID;
+    property  PEDIDO_VENDA_ID       : Variant read FPEDIDO_VENDA_ID write SetPEDIDO_VENDA_ID;
+    property  PORTADOR_ID           : Variant read FPORTADOR_ID write SetPORTADOR_ID;
+    property  VALOR_TOTAL           : Variant read FVALOR_TOTAL write SetVALOR_TOTAL;
+    property  QUANTIDADE_PARCELAS   : Variant read FQUANTIDADE_PARCELAS write SetQUANTIDADE_PARCELAS;
+    property  PARCELA               : Variant read FPARCELA write SetPARCELA;
+    property  VALOR_PARCELA         : Variant read FVALOR_PARCELA write SetVALOR_PARCELA;
+    property  VENCIMENTO            : Variant read FVENCIMENTO write SetVENCIMENTO;
+    property  CONDICAO_PAGAMENTO    : Variant read FCONDICAO_PAGAMENTO write SetCONDICAO_PAGAMENTO;
+    property  OBSERVACAO            : Variant read FOBSERVACAO write SetOBSERVACAO;
+    property  INDCE_APLICADO        : Variant read FINDCE_APLICADO write SetINDCE_APLICADO;
+    property  VALOR_ACRESCIMO       : Variant read FVALOR_ACRESCIMO write SetVALOR_ACRESCIMO;
+    property  ID_FINANCEIRO         : Variant read FID_FINANCEIRO write SetID_FINANCEIRO;
+    property  VALOR_LIQUIDO         : Variant read FVALOR_LIQUIDO write SetVALOR_LIQUIDO;
+    property  VALOR_SEG_PRESTAMISTA : Variant read FVALOR_SEG_PRESTAMISTA write SetVALOR_SEG_PRESTAMISTA;
+    property  PER_SEG_PRESTAMSTA    : Variant read FPER_SEG_PRESTAMSTA write SetPER_SEG_PRESTAMSTA;
+    property  VALOR_ACRESCIMO_SEG_PRESTAMISTA : Variant read FVALOR_ACRESCIMO_SEG_PRESTAMISTA write SetVALOR_ACRESCIMO_SEG_PRESTAMISTA;
 
     property Acao               : TAcao       read FAcao               write SetAcao;
     property TotalRecords       : Integer     read FTotalRecords       write SetTotalRecords;
@@ -208,6 +220,11 @@ begin
     self.INDCE_APLICADO       := FloatToStr(pFinanceiroParams.INDCE_APLICADO);
     self.VALOR_ACRESCIMO      := FloatToStr(pFinanceiroParams.VALOR_ACRESCIMO);
     self.ID_FINANCEIRO        := lIDFinanceiro;
+
+    self.VALOR_SEG_PRESTAMISTA           := pFinanceiroParams.VALOR_SEG_PRESTAMISTA;
+    self.PER_SEG_PRESTAMSTA              := pFinanceiroParams.PER_SEG_PRESTAMSTA;
+    self.VALOR_ACRESCIMO_SEG_PRESTAMISTA := pFinanceiroParams.VALOR_ACRESCIMO_SEG_PRESTAMISTA;
+
 
     if i = 1 then
       self.VENCIMENTO         := DateToStr(lVencimento)
@@ -380,6 +397,11 @@ begin
   FPEDIDO_VENDA_ID := Value;
 end;
 
+procedure TFinanceiroPedidoModel.SetPER_SEG_PRESTAMSTA(const Value: Variant);
+begin
+  FPER_SEG_PRESTAMSTA := Value;
+end;
+
 procedure TFinanceiroPedidoModel.SetPORTADOR_ID(const Value: Variant);
 begin
   FPORTADOR_ID := Value;
@@ -410,6 +432,12 @@ begin
   FVALOR_ACRESCIMO := Value;
 end;
 
+procedure TFinanceiroPedidoModel.SetVALOR_ACRESCIMO_SEG_PRESTAMISTA(
+  const Value: Variant);
+begin
+  FVALOR_ACRESCIMO_SEG_PRESTAMISTA := Value;
+end;
+
 procedure TFinanceiroPedidoModel.SetVALOR_LIQUIDO(const Value: Variant);
 begin
   FVALOR_LIQUIDO := Value;
@@ -418,6 +446,11 @@ end;
 procedure TFinanceiroPedidoModel.SetVALOR_PARCELA(const Value: Variant);
 begin
   FVALOR_PARCELA := Value;
+end;
+
+procedure TFinanceiroPedidoModel.SetVALOR_SEG_PRESTAMISTA(const Value: Variant);
+begin
+  FVALOR_SEG_PRESTAMISTA := Value;
 end;
 
 procedure TFinanceiroPedidoModel.SetVALOR_TOTAL(const Value: Variant);

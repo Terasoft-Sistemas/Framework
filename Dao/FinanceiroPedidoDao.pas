@@ -99,6 +99,8 @@ begin
     lModel.VALOR_ACRESCIMO        := lQry.FieldByName('VALOR_ACRESCIMO').AsString;
     lModel.VALOR_LIQUIDO          := lQry.FieldByName('VALOR_LIQUIDO').AsString;
     lModel.ID_FINANCEIRO          := lQry.FieldByName('ID_FINANCEIRO').AsString;
+    lModel.VALOR_LIQUIDO          := lQry.FieldByName('VALOR_SEG_PRESTAMISTA').AsString;
+    lModel.ID_FINANCEIRO          := lQry.FieldByName('PER_SEG_PRESTAMSTA').AsString;
 
     Result := lModel;
   finally
