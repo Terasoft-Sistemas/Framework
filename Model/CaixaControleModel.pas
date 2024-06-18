@@ -353,7 +353,6 @@ begin
   try
     lCaixaModel.CODIGO_CTA          := '400000';
     lCaixaModel.DATA_CAI            := DateToStr(vIConexao.DataServer);
-    lCaixaModel.HISTORICO_CAI       := 'Sangria '+ self.vIConexao.getUSer.NOME + ' ' + TimeToStr(vIConexao.HoraServer) + ' ' + pHistorico;
     lCaixaModel.VALOR_CAI           := FloatToStr(pValor);
     lCaixaModel.USUARIO_CAI         := self.vIConexao.getUSer.ID;
     lCaixaModel.TIPO_CAI            := 'D';
@@ -365,6 +364,11 @@ begin
     lCaixaModel.PORTADOR_CAI        := '000004';
     lCaixaModel.CONCILIADO_CAI      := '.';
     lCaixaModel.LOJA                := self.vIConexao.getEmpresa.LOJA;
+
+    if pHistorico = '' then
+      lCaixaModel.HISTORICO_CAI := 'Sangria '+ self.vIConexao.getUSer.NOME + ' ' + TimeToStr(vIConexao.HoraServer)
+    else
+      lCaixaModel.HISTORICO_CAI := pHistorico;
 
     lCaixaModel.Incluir;
 
@@ -495,7 +499,6 @@ begin
   try
     lCaixaModel.CODIGO_CTA          := '400000';
     lCaixaModel.DATA_CAI            := DateToStr(vIConexao.DataServer);
-    lCaixaModel.HISTORICO_CAI       := 'Suprimento '+ self.vIConexao.getUSer.NOME + ' ' + TimeToStr(vIConexao.HoraServer) + ' ' + pHistorico;
     lCaixaModel.VALOR_CAI           := FloatToStr(pValor);
     lCaixaModel.USUARIO_CAI         := self.vIConexao.getUSer.ID;
     lCaixaModel.TIPO_CAI            := 'C';
@@ -507,6 +510,11 @@ begin
     lCaixaModel.PORTADOR_CAI        := '000004';
     lCaixaModel.CONCILIADO_CAI      := '.';
     lCaixaModel.LOJA                := self.vIConexao.getEmpresa.LOJA;
+
+    if pHistorico = '' then
+      lCaixaModel.HISTORICO_CAI := 'Suprimento '+ self.vIConexao.getUSer.NOME + ' ' + TimeToStr(vIConexao.HoraServer)
+    else
+      lCaixaModel.HISTORICO_CAI := pHistorico;
 
     lCaixaModel.Incluir;
 
