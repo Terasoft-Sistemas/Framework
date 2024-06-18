@@ -1396,7 +1396,7 @@ begin
         lReservaModel.STATUS              := IIF(TIPO_ENTREGA = 'LJ','L','1');
         lReservaModel.CLIENTE_ID          := '000000';
         lReservaModel.VENDEDOR_ID         := '000000';
-        lReservaModel.FILIAL              := '000';
+        lReservaModel.FILIAL              := vIConexao.getEmpresa.LOJA;
       end;
 
       lReservaModel.Incluir;

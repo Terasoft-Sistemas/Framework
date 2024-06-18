@@ -190,54 +190,50 @@ begin
   lQry := vIConexao.CriarQuery;
 
   lSQL :=
-          ' update reserva                                     '+
-          ' set                                                '+
-          '     cliente_id = :cliente_id,                      '+
-          '     vendedor_id = :vendedor_id,                    '+
-          '     status = :status,                              '+
-          '     filial = :filial,                              '+
-          '     informacoes_ped = :informacoes_ped,            '+
-          '     entrega = :entrega,                            '+
-          '     entrega_data = :entrega_data,                  '+
-          '     entrega_hora = :entrega_hora,                  '+
-          '     montagem_data = :montagem_data,                '+
-          '     montagem_hora = :montagem_hora,                 '+
-          '     entrega_endereco = :entrega_endereco,           '+
-          '     entrega_complemento = :entrega_complemento,     '+
-          '     entrega_numero = :entrega_numero,               '+
-          '     entrega_bairro = :entrega_bairro,               '+
-          '     entrega_cidade = :entrega_cidade,               '+
-          '     entrega_uf = :entrega_uf,                       '+
-          '     entrega_cep = :entrega_cep,                     '+
-          '     entrega_cod_municipio = :entrega_cod_municipio  '+
-
-
-          ' where                                   '+
-          '      web_pedido_id = :web_pedido_id     ';
-
+          ' update reserva                                         '+
+          ' set                                                    '+
+          '     cliente_id = :cliente_id,                          '+
+          '     vendedor_id = :vendedor_id,                        '+
+          '     status = :status,                                  '+
+          '     filial = :filial,                                  '+
+          '     informacoes_ped = :informacoes_ped,                '+
+          '     entrega = :entrega,                                '+
+          '     entrega_data = :entrega_data,                      '+
+          '     entrega_hora = :entrega_hora,                      '+
+          '     montagem_data = :montagem_data,                    '+
+          '     montagem_hora = :montagem_hora,                    '+
+          '     entrega_endereco = :entrega_endereco,              '+
+          '     entrega_complemento = :entrega_complemento,        '+
+          '     entrega_numero = :entrega_numero,                  '+
+          '     entrega_bairro = :entrega_bairro,                  '+
+          '     entrega_cidade = :entrega_cidade,                  '+
+          '     entrega_uf = :entrega_uf,                          '+
+          '     entrega_cep = :entrega_cep,                        '+
+          '     entrega_cod_municipio = :entrega_cod_municipio     '+
+          ' where                                                  '+
+          '      web_pedido_id = :web_pedido_id and loja = :loja   ';
   try
 
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('CLIENTE_ID').Value       := IIF(pAtualizaReserva_Parametros.Cliente_id      = '', Unassigned, pAtualizaReserva_Parametros.Cliente_id);
-    lQry.ParamByName('STATUS').Value           := IIF(pAtualizaReserva_Parametros.status          = '', Unassigned, pAtualizaReserva_Parametros.status);
-    lQry.ParamByName('VENDEDOR_ID').Value      := IIF(pAtualizaReserva_Parametros.Vendedor_id     = '', Unassigned, pAtualizaReserva_Parametros.Vendedor_id);
-    lQry.ParamByName('FILIAL').Value           := IIF(pAtualizaReserva_Parametros.Filial          = '', Unassigned, pAtualizaReserva_Parametros.Filial);
-    lQry.ParamByName('INFORMACOES_PED').Value  := IIF(pAtualizaReserva_Parametros.Informacoes_ped = '', Unassigned, pAtualizaReserva_Parametros.Informacoes_ped);
-    lQry.ParamByName('ENTREGA_DATA').Value     := IIF(pAtualizaReserva_Parametros.Entrega_data    = '', Unassigned, pAtualizaReserva_Parametros.Entrega_data);
-    lQry.ParamByName('ENTREGA_HORA').Value     := IIF(pAtualizaReserva_Parametros.Entrega_hora    = '', Unassigned, pAtualizaReserva_Parametros.Entrega_hora);
-    lQry.ParamByName('MONTAGEM_DATA').Value    := IIF(pAtualizaReserva_Parametros.Montagem_data   = '', Unassigned, pAtualizaReserva_Parametros.Montagem_data);
-    lQry.ParamByName('MONTAGEM_HORA').Value    := IIF(pAtualizaReserva_Parametros.Montagem_hora   = '', Unassigned, pAtualizaReserva_Parametros.Montagem_hora);
-    lQry.ParamByName('WEB_PEDIDO_ID').Value    := IIF(pAtualizaReserva_Parametros.Web_pedido_id   = '', Unassigned, pAtualizaReserva_Parametros.Web_pedido_id);
-
-    lQry.ParamByName('entrega_endereco').Value    := IIF(pAtualizaReserva_Parametros.Web_pedido_id        = '', Unassigned, pAtualizaReserva_Parametros.entrega_endereco);
-    lQry.ParamByName('entrega_complemento').Value    := IIF(pAtualizaReserva_Parametros.Web_pedido_id     = '', Unassigned, pAtualizaReserva_Parametros.entrega_complemento);
-    lQry.ParamByName('entrega_numero').Value    := IIF(pAtualizaReserva_Parametros.Web_pedido_id          = '', Unassigned, pAtualizaReserva_Parametros.entrega_numero);
-    lQry.ParamByName('entrega_bairro').Value    := IIF(pAtualizaReserva_Parametros.Web_pedido_id          = '', Unassigned, pAtualizaReserva_Parametros.entrega_bairro);
-    lQry.ParamByName('entrega_cidade').Value    := IIF(pAtualizaReserva_Parametros.Web_pedido_id          = '', Unassigned, pAtualizaReserva_Parametros.entrega_cidade);
-    lQry.ParamByName('entrega_uf').Value    := IIF(pAtualizaReserva_Parametros.Web_pedido_id              = '', Unassigned, pAtualizaReserva_Parametros.entrega_uf);
-    lQry.ParamByName('entrega_cep').Value    := IIF(pAtualizaReserva_Parametros.Web_pedido_id             = '', Unassigned, pAtualizaReserva_Parametros.entrega_cep);
-    lQry.ParamByName('entrega_cod_municipio').Value    := IIF(pAtualizaReserva_Parametros.Web_pedido_id   = '', Unassigned, pAtualizaReserva_Parametros.entrega_cod_municipio);
-
+    lQry.ParamByName('CLIENTE_ID').Value              := IIF(pAtualizaReserva_Parametros.Cliente_id              = '', Unassigned, pAtualizaReserva_Parametros.Cliente_id);
+    lQry.ParamByName('STATUS').Value                  := IIF(pAtualizaReserva_Parametros.status                  = '', Unassigned, pAtualizaReserva_Parametros.status);
+    lQry.ParamByName('VENDEDOR_ID').Value             := IIF(pAtualizaReserva_Parametros.Vendedor_id             = '', Unassigned, pAtualizaReserva_Parametros.Vendedor_id);
+    lQry.ParamByName('FILIAL').Value                  := IIF(pAtualizaReserva_Parametros.Filial                  = '', Unassigned, pAtualizaReserva_Parametros.Filial);
+    lQry.ParamByName('INFORMACOES_PED').Value         := IIF(pAtualizaReserva_Parametros.Informacoes_ped         = '', Unassigned, pAtualizaReserva_Parametros.Informacoes_ped);
+    lQry.ParamByName('ENTREGA_DATA').Value            := IIF(pAtualizaReserva_Parametros.Entrega_data            = '', Unassigned, pAtualizaReserva_Parametros.Entrega_data);
+    lQry.ParamByName('ENTREGA_HORA').Value            := IIF(pAtualizaReserva_Parametros.Entrega_hora            = '', Unassigned, pAtualizaReserva_Parametros.Entrega_hora);
+    lQry.ParamByName('MONTAGEM_DATA').Value           := IIF(pAtualizaReserva_Parametros.Montagem_data           = '', Unassigned, pAtualizaReserva_Parametros.Montagem_data);
+    lQry.ParamByName('MONTAGEM_HORA').Value           := IIF(pAtualizaReserva_Parametros.Montagem_hora           = '', Unassigned, pAtualizaReserva_Parametros.Montagem_hora);
+    lQry.ParamByName('WEB_PEDIDO_ID').Value           := IIF(pAtualizaReserva_Parametros.Web_pedido_id           = '', Unassigned, pAtualizaReserva_Parametros.Web_pedido_id);
+    lQry.ParamByName('entrega_endereco').Value        := IIF(pAtualizaReserva_Parametros.entrega_endereco        = '', Unassigned, pAtualizaReserva_Parametros.entrega_endereco);
+    lQry.ParamByName('entrega_complemento').Value     := IIF(pAtualizaReserva_Parametros.entrega_complemento     = '', Unassigned, pAtualizaReserva_Parametros.entrega_complemento);
+    lQry.ParamByName('entrega_numero').Value          := IIF(pAtualizaReserva_Parametros.entrega_numero          = '', Unassigned, pAtualizaReserva_Parametros.entrega_numero);
+    lQry.ParamByName('entrega_bairro').Value          := IIF(pAtualizaReserva_Parametros.entrega_bairro          = '', Unassigned, pAtualizaReserva_Parametros.entrega_bairro);
+    lQry.ParamByName('entrega_cidade').Value          := IIF(pAtualizaReserva_Parametros.entrega_cidade          = '', Unassigned, pAtualizaReserva_Parametros.entrega_cidade);
+    lQry.ParamByName('entrega_uf').Value              := IIF(pAtualizaReserva_Parametros.entrega_uf              = '', Unassigned, pAtualizaReserva_Parametros.entrega_uf);
+    lQry.ParamByName('entrega_cep').Value             := IIF(pAtualizaReserva_Parametros.entrega_cep             = '', Unassigned, pAtualizaReserva_Parametros.entrega_cep);
+    lQry.ParamByName('entrega_cod_municipio').Value   := IIF(pAtualizaReserva_Parametros.entrega_cod_municipio   = '', Unassigned, pAtualizaReserva_Parametros.entrega_cod_municipio);
+    lQry.ParamByName('loja').Value                    := IIF(pAtualizaReserva_Parametros.Filial                  = '', Unassigned, pAtualizaReserva_Parametros.Filial);
 
     lQry.ExecSQL;
 
