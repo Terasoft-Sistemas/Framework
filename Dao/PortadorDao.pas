@@ -257,13 +257,14 @@ begin
       lSql := 'select ';
 
     lSQL := lSQL +
-                  '       portador.codigo_port,         '+
-                  '       portador.nome_port,           '+
-                  '       portador.banco_baixa_direta,  '+
-                  '       portador.receita_conta_id,    '+
-                  '       portador.tpag_nfe             '+
-                  '  from portador                      '+
-                  ' where 1=1                           ';
+                  '       portador.codigo_port,          '+
+                  '       portador.nome_port,            '+
+                  '       portador.banco_baixa_direta,   '+
+                  '       portador.receita_conta_id,     '+
+                  '       portador.tpag_nfe,             '+
+                  '       portador.per_seguro_prestamista'+
+                  '  from portador                       '+
+                  ' where 1=1                            ';
 
     lSql := lSql + where;
 
@@ -279,11 +280,12 @@ begin
       FPortadorsLista.Add(TPortadorModel.Create(vIConexao));
       i := FPortadorsLista.Count -1;
 
-      FPortadorsLista[i].CODIGO_PORT          := lQry.FieldByName('CODIGO_PORT').AsString;
-      FPortadorsLista[i].BANCO_BAIXA_DIRETA   := lQry.FieldByName('BANCO_BAIXA_DIRETA').AsString;
-      FPortadorsLista[i].RECEITA_CONTA_ID     := lQry.FieldByName('RECEITA_CONTA_ID').AsString;
-      FPortadorsLista[i].NOME_PORT            := lQry.FieldByName('NOME_PORT').AsString;
-      FPortadorsLista[i].TPAG_NFE             := lQry.FieldByName('TPAG_NFE').AsString;
+      FPortadorsLista[i].CODIGO_PORT            := lQry.FieldByName('CODIGO_PORT').AsString;
+      FPortadorsLista[i].BANCO_BAIXA_DIRETA     := lQry.FieldByName('BANCO_BAIXA_DIRETA').AsString;
+      FPortadorsLista[i].RECEITA_CONTA_ID       := lQry.FieldByName('RECEITA_CONTA_ID').AsString;
+      FPortadorsLista[i].NOME_PORT              := lQry.FieldByName('NOME_PORT').AsString;
+      FPortadorsLista[i].TPAG_NFE               := lQry.FieldByName('TPAG_NFE').AsString;
+      FPortadorsLista[i].PER_SEGURO_PRESTAMISTA := lQry.FieldByName('PER_SEGURO_PRESTAMISTA').AsFloat;
 
       lQry.Next;
     end;
