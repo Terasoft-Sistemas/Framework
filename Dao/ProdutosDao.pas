@@ -712,6 +712,8 @@ begin
             '          tipo_id,                                                                 '+
             '          cor_id,                                                                  '+
             '          voltagem_id,                                                             '+
+            '          entrega,                                                                 '+
+            '          montagem,                                                                '+
             '          saldo_pro,                                                               '+
             '          status_pro,                                                              '+
             '          status_linha                                                             '+
@@ -735,6 +737,8 @@ begin
             '               produto.tipo_id,                                                    '+
             '               produto.cor_id,                                                     '+
             '               produto.voltagem_id,                                                '+
+            '               produto.entrega,                                                    '+
+            '               produto.montagem,                                                   '+
             '               coalesce(produto.saldo_pro, 0) saldo_pro,                           '+
             '               produto.status_pro,                                                 '+
             '               coalesce(produto.status_linha, ''N'') status_linha                  '+
@@ -781,6 +785,8 @@ begin
       FProdutossLista[i].tipo_id           := lQry.FieldByName('tipo_id').AsString;
       FProdutossLista[i].cor_id            := lQry.FieldByName('cor_id').AsString;
       FProdutossLista[i].voltagem_id       := lQry.FieldByName('voltagem_id').AsString;
+      FProdutossLista[i].ENTREGA           := lQry.FieldByName('ENTREGA').AsString;
+      FProdutossLista[i].MONTAGEM          := lQry.FieldByName('MONTAGEM').AsString;
       FProdutossLista[i].saldo_pro         := lQry.FieldByName('saldo_pro').AsString;
       FProdutossLista[i].status_pro        := lQry.FieldByName('status_pro').AsString;
       FProdutossLista[i].status_linha      := lQry.FieldByName('status_linha').AsString;
