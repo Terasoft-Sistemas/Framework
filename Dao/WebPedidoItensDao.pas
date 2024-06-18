@@ -300,7 +300,6 @@ begin
     Result.TOTAL_PAGAR  := lQry.FieldByName('VALOR_ITENS').AsFloat +
                            lQry.FieldByName('VALOR_FRETE').AsFloat +
                            lQry.FieldByName('TOTAL_GARANTIA').AsFloat+
-                           lQry.FieldByName('SEGURO_PRESTAMISTA_VALOR').AsFloat+
                            lQry.FieldByName('VALOR_DESCONTO').AsFloat;
 
 

@@ -216,8 +216,8 @@ begin
     '     f.vencimento,                                      '+SLineBreak+
     '     f.valor_liquido,                                   '+SLineBreak+
     '     f.id_financeiro,                                   '+SLineBreak+
-    '     f.valor_acrescimo                                  '+SLineBreak+
-    '                                                        '+SLineBreak+
+    '     f.valor_acrescimo,                                 '+SLineBreak+
+    '     f.valor_seg_prestamista                            '+SLineBreak+
     '                                                        '+SLineBreak+
     ' From financeiro_pedido f                               '+SLineBreak+
     '                                                        '+SLineBreak+
