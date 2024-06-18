@@ -467,7 +467,7 @@ type
     function cancelarEstoque: String;
     procedure calcularComissao(pVendedor, pTipoVenda: String; pComissaoCliente: Double; pGerente: String = '');
 
-    procedure aplicarFreteItem(pID: String; pFrete, pTotal: Double);
+    procedure aplicarFreteItem(pFrete, pTotal: Double);
 
     property PedidoItenssLista: TObjectList<TPedidoItensModel> read FPedidoItenssLista write SetPedidoItenssLista;
 
@@ -703,14 +703,10 @@ begin
   end;
 end;
 
-procedure TPedidoItensModel.aplicarFreteItem(pID: String; pFrete, pTotal: Double);
+procedure TPedidoItensModel.aplicarFreteItem(pFrete, pTotal: Double);
 begin
-  Self.Acao := tacAlterar;
-
-  if Self.VDESC = '' then
-    Self.VDESC := 0;
-
-  Self.VFRETE := retiraPonto(FormataFloat(pFrete / pTotal) * ((Self.VALORUNITARIO_PED - Self.VDESC) * Self.QUANTIDADE_PED));
+  Self.Acao   := tacAlterar;
+  Self.VFRETE := FloatToStr(self.QTDE_CALCULADA * self.VALORUNITARIO_PED / pTotal * pFrete);
   Self.Salvar;
 end;
 
