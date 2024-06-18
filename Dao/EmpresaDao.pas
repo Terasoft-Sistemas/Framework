@@ -98,6 +98,7 @@ begin
         pEmpresaModel.REGIME_TRIBUTARIO        := lQry.fieldByName('REGIME_NFE').AsString;
         pEmpresaModel.JUROS_BOL                := lQry.fieldByName('JUROS_BOL').AsString;
         pEmpresaModel.LOJA                     := lQry.fieldByName('LOJA').AsString;
+        pEmpresaModel.LOGO                     := lQry.fieldByName('LOGO').AsString;
         pEmpresaModel.LIMITE_ATRASO            := lQry.fieldByName('LIMITE_ATRAZO').AsString;
         pEmpresaModel.STRING_CONEXAO_RESERVA   := lQry.fieldByName('STRING_CONEXAO_RESERVA').AsString;
         pEmpresaModel.AVISARNEGATIVO_EMP       := lQry.fieldByName('AVISARNEGATIVO_EMP').AsString;
