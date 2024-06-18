@@ -107,6 +107,7 @@ type
     FPER_GARANTIA_FR: Variant;
     FCUSTO_GARANTIA_FR: Variant;
     FCUSTO_GARANTIA: Variant;
+    FUNIDADE_PRO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetDATA_CADASTRO(const Value: Variant);
@@ -190,10 +191,12 @@ type
     procedure SetPER_GARANTIA_FR(const Value: Variant);
     procedure SetTIPO_GARANTIA_FR(const Value: Variant);
     procedure SetVLR_GARANTIA_FR(const Value: Variant);
+    procedure SetUNIDADE_PRO(const Value: Variant);
 
   public
 
     property ID: Variant read FID write SetID;
+    property UNIDADE_PRO: Variant read FUNIDADE_PRO write SetUNIDADE_PRO;
     property WEB_PEDIDO_ID: Variant read FWEB_PEDIDO_ID write SetWEB_PEDIDO_ID;
     property PRODUTO_ID: Variant read FPRODUTO_ID write SetPRODUTO_ID;
     property QUANTIDADE: Variant read FQUANTIDADE write SetQUANTIDADE;
@@ -718,6 +721,11 @@ end;
 procedure TWebPedidoItensModel.SetTOTAL_GARANTIA(const Value: Variant);
 begin
   FTOTAL_GARANTIA := Value;
+end;
+
+procedure TWebPedidoItensModel.SetUNIDADE_PRO(const Value: Variant);
+begin
+  FUNIDADE_PRO := Value;
 end;
 
 procedure TWebPedidoItensModel.SetUSAR_BALANCA(const Value: Variant);

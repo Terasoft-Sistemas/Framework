@@ -353,6 +353,7 @@ begin
 
     lSQL :=   '  select '+lPaginacao+'                                                                                                          '+SLineBreak+
               '      ID,                                                                                                                        '+SLineBreak+
+              '      UNIDADE_PRO,                                                                                                               '+SLineBreak+
               '      WEB_PEDIDO_ID,                                                                                                             '+SLineBreak+
               '      QUANTIDADE,                                                                                                                '+SLineBreak+
               '      TIPO_ENTREGA,                                                                                                              '+SLineBreak+
@@ -377,6 +378,7 @@ begin
               '      From                                                                                                                       '+SLineBreak+
               '         ( select                                                                                                                '+SLineBreak+
               '              web_pedidoitens.id,                                                                                                '+SLineBreak+
+              '              produto.unidade_pro,                                                                                               '+SLineBreak+
               '              web_pedidoitens.web_pedido_id,                                                                                     '+SLineBreak+
               '              web_pedidoitens.quantidade,                                                                                        '+SLineBreak+
               '              web_pedidoitens.tipo_entrega,                                                                                      '+SLineBreak+
@@ -420,6 +422,7 @@ begin
       i := FWebPedidoItenssLista.Count -1;
 
       FWebPedidoItenssLista[i].ID                   := lQry.FieldByName('ID').AsString;
+      FWebPedidoItenssLista[i].UNIDADE_PRO          := lQry.FieldByName('UNIDADE_PRO').AsString;
       FWebPedidoItenssLista[i].WEB_PEDIDO_ID        := lQry.FieldByName('WEB_PEDIDO_ID').AsString;
       FWebPedidoItenssLista[i].QUANTIDADE           := lQry.FieldByName('QUANTIDADE').AsFloat;
       FWebPedidoItenssLista[i].TIPO_ENTREGA         := lQry.FieldByName('TIPO_ENTREGA').AsString;
