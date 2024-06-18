@@ -672,7 +672,7 @@ begin
 
     for lModel in lPedidoItensModel.PedidoItenssLista do
     begin
-      lModel.aplicarFreteItem(lModel.ID, lPedidoVendaModel.FRETE_PED, lPedidoVendaModel.TOTAL_PED - lPedidoVendaModel.FRETE_PED);
+      lModel.aplicarFreteItem(lPedidoVendaModel.FRETE_PED, lPedidoVendaModel.VALOR_PED);
       lModel.gerarEstoque;
       lModel.calcularComissao(lPedidoVendaModel.CODIGO_VEN, lPedidoVendaModel.CODIGO_TIP, lComissaoCliente, lPedidoVendaModel.GERENTE_ID);
     end;
