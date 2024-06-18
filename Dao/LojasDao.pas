@@ -169,7 +169,6 @@ begin
             '        loja2.port,               ' + #13 +
             '        loja2.database,           ' + #13 +
             '        loja2.cliente_id          ' + #13 +
-            '        loja2.caminho_logo        ' + #13 +
             '   from loja2                     ' + #13 +
             '  where loja2.server is not null  ' + #13;
 
@@ -194,7 +193,6 @@ begin
       FLojassLista[i].PORT         := lQry.FieldByName('PORT').AsString;
       FLojassLista[i].DATABASE     := lQry.FieldByName('DATABASE').AsString;
       FLojassLista[i].CLIENTE_ID   := lQry.FieldByName('CLIENTE_ID').AsString;
-      FLojassLista[i].CAMINHO_LOGO := lQry.FieldByName('CAMINHO_LOGO').AsString;
 
       lQry.Next;
     end;
