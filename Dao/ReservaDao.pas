@@ -211,7 +211,7 @@ begin
           '     entrega_cep = :entrega_cep,                        '+
           '     entrega_cod_municipio = :entrega_cod_municipio     '+
           ' where                                                  '+
-          '      web_pedido_id = :web_pedido_id and loja = :loja   ';
+          '      web_pedido_id = :web_pedido_id and filial = :filial ';
   try
 
     lQry.SQL.Add(lSQL);
@@ -233,7 +233,7 @@ begin
     lQry.ParamByName('entrega_uf').Value              := IIF(pAtualizaReserva_Parametros.entrega_uf              = '', Unassigned, pAtualizaReserva_Parametros.entrega_uf);
     lQry.ParamByName('entrega_cep').Value             := IIF(pAtualizaReserva_Parametros.entrega_cep             = '', Unassigned, pAtualizaReserva_Parametros.entrega_cep);
     lQry.ParamByName('entrega_cod_municipio').Value   := IIF(pAtualizaReserva_Parametros.entrega_cod_municipio   = '', Unassigned, pAtualizaReserva_Parametros.entrega_cod_municipio);
-    lQry.ParamByName('loja').Value                    := IIF(pAtualizaReserva_Parametros.Filial                  = '', Unassigned, pAtualizaReserva_Parametros.Filial);
+    lQry.ParamByName('filial').Value                  := IIF(pAtualizaReserva_Parametros.Filial                  = '', Unassigned, pAtualizaReserva_Parametros.Filial);
 
     lQry.ExecSQL;
 
