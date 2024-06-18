@@ -179,7 +179,7 @@ begin
       if pSeguroPrestamista then
       begin
         if lPortadorModel.PER_SEGURO_PRESTAMISTA = 0 then
-         CriaException('Valor do cadastro do seguroprestamista esta zerado.')
+         CriaException('Valor do cadastro do seguroprestamista esta zerado.');
 
         self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := lPortadorModel.PER_SEGURO_PRESTAMISTA;
         self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := (lTotal + lJuros)*(lPortadorModel.PER_SEGURO_PRESTAMISTA/100);
