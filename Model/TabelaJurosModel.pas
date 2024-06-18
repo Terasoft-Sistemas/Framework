@@ -6,7 +6,7 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Terasoft.Utils,
-  Interfaces.Conexao, FireDAC.Comp.Client;
+  Interfaces.Conexao, FireDAC.Comp.Client, PortadorModel;
 
 type
   TTabelaJurosModel = class
@@ -136,13 +136,19 @@ var
   lTotal,
   lJuros    : Double;
   lMemTable : TFDMemTable;
+  lPortadorModel : TPortadorModel;
 begin
+  lPortadorModel := TPortadorModel.Create(vIConexao);
 
   lMemTable := TFDMemTable.Create(nil);
   lModel    := TTabelaJurosModel.Create(vIConexao);
   lTotal    := pValor;
 
   try
+
+    lPortadorModel.IDRecordView := pPortador;
+    lPortadorModel.obterLista;
+
     self.WhereView  := 'and portador_id = ' + QuotedStr(pPortador);
     self.OrderView  := ' tabelajuros.codigo';
     self.obterLista;
@@ -172,8 +178,11 @@ begin
 
       if pSeguroPrestamista then
       begin
-        self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := 5;
-        self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := (lTotal + lJuros)*(5/100);
+        if lPortadorModel.PER_SEGURO_PRESTAMISTA = 0 then
+         CriaException('Valor do cadastro do seguroprestamista esta zerado.')
+
+        self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := lPortadorModel.PER_SEGURO_PRESTAMISTA;
+        self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := (lTotal + lJuros)*(lPortadorModel.PER_SEGURO_PRESTAMISTA/100);
         self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, self.TabelaJurossLista[i].PERCENTUAL / 100 * self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA, 0);;
       end else
       begin
