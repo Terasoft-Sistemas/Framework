@@ -467,6 +467,8 @@ type
     function cancelarEstoque: String;
     procedure calcularComissao(pVendedor, pTipoVenda: String; pComissaoCliente: Double; pGerente: String = '');
 
+    procedure aplicarFreteItem(pID: String; pFrete, pTotal: Double);
+
     property PedidoItenssLista: TObjectList<TPedidoItensModel> read FPedidoItenssLista write SetPedidoItenssLista;
 
    	property Acao :TAcao read FAcao write SetAcao;
@@ -488,14 +490,19 @@ type
 implementation
 
 uses
+  Terasoft.FuncoesTexto,
   PedidoItensDao,
   CalcularImpostosModel,
   System.SysUtils,
   MovimentoModel,
   PedidoVendaModel,
   ProdutosModel,
-  UsuarioModel, ComissaoVendedorModel, FireDAC.Comp.Client, ClienteModel,
-  GrupoComissaoFuncionarioModel, FuncionarioModel;
+  UsuarioModel,
+  ComissaoVendedorModel,
+  FireDAC.Comp.Client,
+  ClienteModel,
+  GrupoComissaoFuncionarioModel,
+  FuncionarioModel;
 
 { TPedidoItensModel }
 
@@ -694,6 +701,17 @@ begin
     lProdutosModel.Free;
     lMovimentoModel.Free;
   end;
+end;
+
+procedure TPedidoItensModel.aplicarFreteItem(pID: String; pFrete, pTotal: Double);
+begin
+  Self.Acao := tacAlterar;
+
+  if Self.VDESC = '' then
+    Self.VDESC := 0;
+
+  Self.VFRETE := retiraPonto(FormataFloat(pFrete / pTotal) * ((Self.VALORUNITARIO_PED - Self.VDESC) * Self.QUANTIDADE_PED));
+  Self.Salvar;
 end;
 
 procedure TPedidoItensModel.obterPedido(pNUmeroPedido: String);
