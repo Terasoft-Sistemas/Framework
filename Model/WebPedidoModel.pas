@@ -1327,11 +1327,16 @@ begin
     lProdutoPreco.TabelaPreco := true;
     lProdutoPreco.Promocao    := true;
 
+
     lValorUnitario            := lProdutoModel.ValorUnitario(lProdutoPreco);
     lValorVendido             := StrToFloat(pVenderItemParametros.VALOR_UNITARIO);
 
-    lWebPedidoItensModel.VALOR_UNITARIO      := lValorUnitario.ToString;
     lWebPedidoItensModel.VALOR_VENDIDO       := lValorVendido.ToString;
+
+    if lValorVendido < lValorUnitario then
+     lWebPedidoItensModel.VALOR_UNITARIO  := lValorUnitario.ToString
+    else
+     lWebPedidoItensModel.VALOR_UNITARIO  := lValorVendido.ToString;
 
     if lValorVendido < lValorUnitario then
       lWebPedidoItensModel.PERCENTUAL_DESCONTO := RoundTo((1 - lValorVendido / lValorUnitario) * 100, -5).ToString

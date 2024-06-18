@@ -52,6 +52,7 @@ type
     FPIX_CHAVE: Variant;
     FTPAG_NFE: Variant;
     FTIPO: Variant;
+    FPER_SEGURO_PRESTAMISTA: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetPortadorsLista(const Value: TObjectList<TPortadorModel>);
@@ -92,6 +93,7 @@ type
     procedure SetUSUARIO_PORT(const Value: Variant);
     procedure SetVR_PORT(const Value: Variant);
     procedure SetXPAG_NFE(const Value: Variant);
+    procedure SetPER_SEGURO_PRESTAMISTA(const Value: Variant);
   public
     property CODIGO_PORT: Variant read FCODIGO_PORT write SetCODIGO_PORT;
     property NOME_PORT: Variant read FNOME_PORT write SetNOME_PORT;
@@ -124,6 +126,7 @@ type
     property TEF_ADQUIRENTE: Variant read FTEF_ADQUIRENTE write SetTEF_ADQUIRENTE;
     property PIX_CHAVE: Variant read FPIX_CHAVE write SetPIX_CHAVE;
     property XPAG_NFE: Variant read FXPAG_NFE write SetXPAG_NFE;
+    property PER_SEGURO_PRESTAMISTA: Variant read FPER_SEGURO_PRESTAMISTA write SetPER_SEGURO_PRESTAMISTA;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -362,6 +365,11 @@ end;
 procedure TPortadorModel.SetPERCENTUAL_DESPESA_VENDA(const Value: Variant);
 begin
   FPERCENTUAL_DESPESA_VENDA := Value;
+end;
+
+procedure TPortadorModel.SetPER_SEGURO_PRESTAMISTA(const Value: Variant);
+begin
+  FPER_SEGURO_PRESTAMISTA := Value;
 end;
 
 procedure TPortadorModel.SetPIX_CHAVE(const Value: Variant);
