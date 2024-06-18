@@ -542,7 +542,7 @@ uses
   CFOPModel,
   EmpresaModel,
   FireDAC.Comp.Client, ClienteModel, FuncionarioModel, Terasoft.Configuracoes,
-  PixModel, FinanceiroPedidoModel, VendaCartaoModel;
+  PixModel, FinanceiroPedidoModel, VendaCartaoModel, ReservaModel;
 
 { TPedidoVendaModel }
 
@@ -624,6 +624,7 @@ var
   lModel                   : TPedidoItensModel;
   lContasReceberModel      : TContasReceberModel;
   lContasReceberItensModel : TContasReceberItensModel;
+  lReservaModel            : TReservaModel;
   lClienteModel            : TClienteModel;
   lPixModel                : TPixModel;
   lComissaoCliente         : Double;
@@ -637,6 +638,9 @@ begin
 
   try
     lPedidoVendaModel := lPedidoVendaModel.carregaClasse(self.FNUMERO_PED);
+
+    if lPedidoVendaModel.WEB_PEDIDO_ID <> '' then
+      lReservaModel := TReservaModel.Create(vIConexao.NovaConexao('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA));
 
     lContasReceberModel.IDPedidoView := lPedidoVendaModel.NUMERO_PED;
     lContasReceberModel.WhereView    := ' and portador.tpag_nfe = ''17'' and portador.pix_chave is not null';
@@ -677,6 +681,9 @@ begin
 
       lModel.gerarEstoque;
       lModel.calcularComissao(lPedidoVendaModel.CODIGO_VEN, lPedidoVendaModel.CODIGO_TIP, lComissaoCliente, lPedidoVendaModel.GERENTE_ID);
+
+      if (lPedidoVendaModel.WEB_PEDIDO_ID <> '') and ((lModel.TIPO_VENDA = 'CD') or (lModel.ENTREGA = 'S')) then
+        lReservaModel.concluirReserva(IIF(lModel.TIPO_VENDA = 'CD', '2', 'L'), lModel.WEB_PEDIDOITENS_ID, vIConexao.getEmpresa.LOJA);
     end;
 
   finally
@@ -686,6 +693,9 @@ begin
     lPedidoItensModel.Free;
     lClienteModel.Free;
     lPixModel.Free;
+
+    if lReservaModel <> nil then
+      lReservaModel.Free;
   end;
 end;
 

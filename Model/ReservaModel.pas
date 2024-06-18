@@ -158,7 +158,7 @@ type
     function obterLista: TFDMemTable;
 
     function AtualizaReservaVendaAssistida(pAtualizaReserva_Parametros: TAtualizaReserva_Parametros): String;
-
+    function concluirReserva(pStatus, pWebPedidoItensId, pFilial: String): Boolean;
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -232,6 +232,20 @@ begin
   finally
     lReservaDao.Free;
   end;
+end;
+
+function TReservaModel.concluirReserva(pStatus, pWebPedidoItensId, pFilial: String): Boolean;
+var
+  lTableReserva: TFDMemTable;
+begin
+  self.WhereView := ' and reserva.web_pedidoitens_id = ' + pWebPedidoItensId + ' and reserva.filial = ' + QuotedStr(pFilial);
+  lTableReserva := self.obterLista;
+
+  self := self.Alterar(lTableReserva.FieldByName('ID').AsString);
+
+  self.STATUS             := pStatus;
+  self.DATAHORA_EFETIVADA := DateTimeToStr(vIConexao.DataHoraServer);
+  self.Salvar;
 end;
 
 constructor TReservaModel.Create(pIConexao : IConexao);
