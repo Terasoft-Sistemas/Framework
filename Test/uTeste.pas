@@ -3609,6 +3609,7 @@ var
   lConfiguracoes : TerasoftConfiguracoes;
 begin
   vIConexao := TControllersConexao.New;
+  vIConexao.connection;
 
   vConfiguracoes := TerasoftConfiguracoes.Create(vIConexao);
 

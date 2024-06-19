@@ -20,8 +20,10 @@ interface
         vTerasoftConfiguracao : TObject;
 
         function criarQuery                                                : TFDQuery;
-        function criaConexao                                               : IConexao;
-        function ConfigConexao                                             : Boolean;
+
+        function connection                                                : IConexao; overload;
+        function connection(pLoja: String; pHost : String = '')            : IConexao; overload;
+
         function NovaConexao(pLoja: String; pHost : String = '')          : IConexao;
         function criarQueryExterna                                         : TFDQuery;
         function ConfigConexaoExterna(pLoja: String; pHost : String = '')  : Boolean;
@@ -63,31 +65,6 @@ uses
 
 { TControllersConexao }
 
-function TControllersConexao.ConfigConexao: Boolean;
-Var
-  IniFile : String;
-  Ini     : TIniFile;
-begin
-  IniFile := ChangeFileExt( Application.ExeName, '.ini') ;
-  Ini     := TIniFile.Create( IniFile );
-
-  try
-    FConexao.Params.Add('Pooling=True');
-    FConexao.Params.Add('MaxPoolSize=20');
-    FConexao.Params.Add('Server='+ ( Ini.ReadString( 'Configuracao','Servidor' ,'' ) ) );
-    FConexao.Params.Add('user_name='+ (  Ini.ReadString( 'Acesso','Login','' ) ));
-    FConexao.Params.Add('password='+ ( Ini.ReadString( 'Acesso','Senha','' ) ));
-    FConexao.Params.Add('port='+ ( Ini.ReadString( 'Configuracao','Porta' ,'' ) ));
-    FConexao.Params.Add('Database='+ ( Ini.ReadString( 'Configuracao','DataBaseName','' ) ));
-    FConexao.Params.Add('DriverID='+ 'FB');
-    FConexao.Params.Add('Protocol='+ 'TCPIP');
-    FConexao.Params.Add('LoginPrompt='+ 'False');
-  finally
-     Ini.Free;
-     Result:= True;
-  end;
-end;
-
 function TControllersConexao.ConfigConexaoExterna(pLoja: String; pHost : String = ''): Boolean;
 var
   lLojaModel : TLojasModel;
@@ -117,15 +94,79 @@ begin
   end;
 end;
 
+function TControllersConexao.connection(pLoja, pHost: String): IConexao;
+var
+  lLojaModel : TLojasModel;
+  lHost      : THost;
+begin
+  lLojaModel := TLojasModel.Create(Form1.vIConexao);
+  try
+    if pHost <> '' then
+      lHost := Terasoft.FuncoesTexto.WriteConexao(pHost)
+    else
+    begin
+      lLojaModel.LojaView := pLoja;
+      lLojaModel.obterLista;
+
+      lLojaModel := lLojaModel.LojassLista[0];
+
+      lHost.Server   := lLojaModel.SERVER;
+      lHost.Port     := lLojaModel.PORT;
+      lHost.DataBase := lLojaModel.DATABASE;
+    end;
+
+    FConexao.Params.Add('Pooling=True');
+    FConexao.Params.Add('MaxPoolSize=20');
+    FConexao.Params.Add('Server='+lHost.Server);
+    FConexao.Params.Add('user_name='+ 'SYSDBA');
+    FConexao.Params.Add('password='+ 'masterkey');
+    FConexao.Params.Add('port='+lHost.Port);
+    FConexao.Params.Add('Database='+ lHost.DataBase);
+    FConexao.Params.Add('DriverID='+ 'FB');
+    FConexao.Params.Add('Protocol='+ 'TCPIP');
+    FConexao.Params.Add('LoginPrompt='+ 'False');
+
+    FConexao.Connected := False;
+    FConexao.Connected := True;
+
+    Result := Self;
+  finally
+    lLojaModel.Free;
+  end;
+end;
+
+function TControllersConexao.connection: IConexao;
+Var
+  IniFile : String;
+  Ini     : TIniFile;
+begin
+  IniFile := ChangeFileExt( Application.ExeName, '.ini') ;
+  Ini     := TIniFile.Create( IniFile );
+
+  try
+    FConexao.Params.Add('Pooling=True');
+    FConexao.Params.Add('MaxPoolSize=20');
+    FConexao.Params.Add('Server='+ ( Ini.ReadString( 'Configuracao','Servidor' ,'' ) ) );
+    FConexao.Params.Add('user_name='+ (  Ini.ReadString( 'Acesso','Login','' ) ));
+    FConexao.Params.Add('password='+ ( Ini.ReadString( 'Acesso','Senha','' ) ));
+    FConexao.Params.Add('port='+ ( Ini.ReadString( 'Configuracao','Porta' ,'' ) ));
+    FConexao.Params.Add('Database='+ ( Ini.ReadString( 'Configuracao','DataBaseName','' ) ));
+    FConexao.Params.Add('DriverID='+ 'FB');
+    FConexao.Params.Add('Protocol='+ 'TCPIP');
+    FConexao.Params.Add('LoginPrompt='+ 'False');
+
+    FConexao.Connected := false;
+    FConexao.Connected := true;
+
+    Result:= Self;
+  finally
+    Ini.Free;
+  end;
+end;
+
 constructor TControllersConexao.Create;
 begin
   FConexao := TFDConnection.Create(nil);
-  ConfigConexao;
-end;
-
-function TControllersConexao.criaConexao: IConexao;
-begin
-
 end;
 
 function TControllersConexao.criarQuery: TFDQuery;
@@ -225,43 +266,14 @@ end;
 
 function TControllersConexao.NovaConexao(pLoja, pHost: String): IConexao;
 var
-  lLojaModel  : TLojasModel;
-  lHost       : THost;
-  lConexao    : IConexao;
+  lConexao : IConexao;
 begin
-  lConexao   := self.New;
-  lLojaModel := TLojasModel.Create(self);
-
   try
-    if pHost <> '' then
-      lHost := Terasoft.FuncoesTexto.WriteConexao(pHost)
-    else
-    begin
-      lLojaModel.LojaView := pLoja;
-      lLojaModel.obterLista;
-
-      lLojaModel := lLojaModel.LojassLista[0];
-
-      lHost.Server   := lLojaModel.SERVER;
-      lHost.Port     := lLojaModel.PORT;
-      lHost.DataBase := lLojaModel.DATABASE;
-    end;
-
-    lConexao.getConnection.Params.Clear;
-    lConexao.getConnection.Params.Add('Pooling=True');
-    lConexao.getConnection.Params.Add('MaxPoolSize=20');
-    lConexao.getConnection.Params.Add('Server='+lHost.Server);
-    lConexao.getConnection.Params.Add('user_name='+ 'SYSDBA');
-    lConexao.getConnection.Params.Add('password='+ 'masterkey');
-    lConexao.getConnection.Params.Add('port='+lHost.Port);
-    lConexao.getConnection.Params.Add('Database='+ lHost.DataBase);
-    lConexao.getConnection.Params.Add('DriverID='+ 'FB');
-    lConexao.getConnection.Params.Add('Protocol='+ 'TCPIP');
-    lConexao.getConnection.Params.Add('LoginPrompt='+ 'False');
-
+    lConexao := self.New;
+    lConexao.connection(pLoja, pHost);
     Result := lConexao;
-  finally
-    lLojaModel.Free;
+  except
+    Result := nil;
   end;
 end;
 
