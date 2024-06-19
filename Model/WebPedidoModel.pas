@@ -264,9 +264,6 @@ type
     procedure SetGERENTE_ID(const Value: Variant);
     procedure SetTIPO_COMISSAO(const Value: Variant);
     procedure SetTOTAL_GARANTIA(const Value: Variant);
-
-    procedure IncluiReservaCD(pWebPedidoItensModel: TWebPedidoItensModel);
-    procedure AtualizaReservaCD(pWebPedidoModel: TWebPedidoModel);
     procedure SetSEGURO_PRESTAMISTA_CUSTO(const Value: Variant);
     procedure SetSEGURO_PRESTAMISTA_VALOR(const Value: Variant);
 
@@ -403,6 +400,10 @@ type
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property IDUsuario: String read FIDUsuario write SetIDUsuario;
 
+    procedure IncluiReservaCD(pWebPedidoItensModel: TWebPedidoItensModel);
+    procedure ExcluirReservaCD(pWebPedidoItensID, pFilial : String);
+    procedure AtualizaReservaCD(pWebPedidoModel: TWebPedidoModel);
+
   end;
 
 implementation
@@ -423,7 +424,7 @@ var
   lWebPedidoModel : TWebPedidoModel;
 begin
   if pID = '' then
-    CriaException('ID é obrigatório.');
+    CriaException('ID ï¿½ obrigatï¿½rio.');
 
   lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
   try
@@ -465,7 +466,7 @@ begin
     lPedidoVendaModel.obterLista;
 
     if lPedidoVendaModel.TotalRecords > 0 then
-      CriaException('Já existe um pedido gerado para esse registro');
+      CriaException('Jï¿½ existe um pedido gerado para esse registro');
 
     lFinanceiroPedidoModel.WhereView := ' and financeiro_pedido.web_pedido_id = ' + pIdVendaAssistida.ToString;
     lTableFinanceiro := lFinanceiroPedidoModel.obterLista;
@@ -629,7 +630,7 @@ end;
 function TWebPedidoModel.Excluir(pID: String): String;
 begin
   if pID = '' then
-    CriaException('ID é obrigatório.');
+    CriaException('ID ï¿½ obrigatï¿½rio.');
 
   self.FID  := pID;
   self.Acao := tacExcluir;
@@ -648,7 +649,7 @@ begin
     lTableReserva := lReservaModel.obterLista;
 
     if lTableReserva.FieldByName('ID').AsString = '' then
-      CriaException('Reserva não localizada');
+      CriaException('Reserva nï¿½o localizada');
 
     lReservaModel.Excluir(lTableReserva.FieldByName('ID').AsString);
   finally
@@ -1327,10 +1328,10 @@ begin
   lProdutoModel        := TProdutosModel.Create(vIConexao);
 
   if pVenderItemParametros.PRODUTO = '' then
-    CriaException('Produto não informado');
+    CriaException('Produto nï¿½o informado');
 
   if StrToFloatDef(pVenderItemParametros.QUANTIDADE, 0) = 0 then
-    CriaException('Quantidade não informada');
+    CriaException('Quantidade nï¿½o informada');
 
   try
     self := self.carregaClasse(pVenderItemParametros.WEB_PEDIDO);
