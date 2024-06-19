@@ -1,4 +1,4 @@
-unit WebPedidoModel;
+﻿unit WebPedidoModel;
 
 interface
 
@@ -383,7 +383,6 @@ type
     function VenderItem(pVenderItemParametros: TVenderItemParametros): String;
     procedure calcularTotais;
     procedure obterTotais;
-    procedure ExcluirReservaCD(pWebPedidoItensID, pFilial : String);
 
     function Incluir : String;
     function Alterar(pID: String): TWebPedidoModel;
