@@ -1111,7 +1111,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
           end
           object RLLabel18: TRLLabel
             Tag = 10
-            Left = 108
+            Left = 54
             Top = 9
             Width = 48
             Height = 11
@@ -1402,7 +1402,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
           object RLDBText10: TRLDBText
             Left = 684
             Top = 5
-            Width = 64
+            Width = 31
             Height = 15
             Alignment = taCenter
             AutoSize = False
@@ -1467,6 +1467,24 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
             Font.Name = 'Arial'
             Font.Style = []
             ParentFont = False
+          end
+          object RLDBText27: TRLDBText
+            Left = 717
+            Top = 5
+            Width = 31
+            Height = 15
+            Alignment = taCenter
+            AutoSize = False
+            DataField = 'TIPO_GARANTIA_FR'
+            DataSource = dsItens
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clBlack
+            Font.Height = -9
+            Font.Name = 'Arial'
+            Font.Style = []
+            ParentFont = False
+            Text = ''
+            Transparent = False
           end
         end
         object rlBandFatura: TRLBand
@@ -1852,7 +1870,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
             Transparent = False
           end
           object RLDBText31: TRLDBText
-            Left = 394
+            Left = 375
             Top = 4
             Width = 60
             Height = 15
@@ -1867,13 +1885,13 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
             Text = ''
           end
           object RLLabel52: TRLLabel
-            Left = 284
+            Left = 317
             Top = 4
-            Width = 109
+            Width = 59
             Height = 15
             Alignment = taCenter
             AutoSize = False
-            Caption = 'Pedido n'#250'mero:'
+            Caption = 'Pedido:'
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clBlack
             Font.Height = -13
@@ -2030,6 +2048,10 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
     object mtItensTIPO_ENTREGA: TStringField
       FieldName = 'TIPO_ENTREGA'
       Size = 10
+    end
+    object mtItensTIPO_GARANTIA_FR: TStringField
+      FieldName = 'TIPO_GARANTIA_FR'
+      Size = 4
     end
   end
   object dsPedido: TDataSource

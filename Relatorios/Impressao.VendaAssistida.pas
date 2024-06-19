@@ -196,6 +196,8 @@ type
     RLDraw8: TRLDraw;
     mtPedidoSEGURO_PRESTAMISTA: TFloatField;
     RLDBText6: TRLDBText;
+    mtItensTIPO_GARANTIA_FR: TStringField;
+    RLDBText27: TRLDBText;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure RLBand3BeforePrint(Sender: TObject; var PrintIt: Boolean);
@@ -327,7 +329,7 @@ begin
 
   try
     lFinanceiroPedidoModel.WhereView := 'AND FINANCEIRO_PEDIDO.WEB_PEDIDO_ID ='+ Self.FIDPEDIDO;
-    lFinanceiroPedidoModel.OrderView := 'PORTADOR.NOME_PORT, FINANCEIRO_PEDIDO.PARCELA';
+    lFinanceiroPedidoModel.OrderView := 'FINANCEIRO_PEDIDO.ID_FINANCEIRO, PORTADOR.NOME_PORT, FINANCEIRO_PEDIDO.PARCELA';
 
     lMemtable := lFinanceiroPedidoModel.obterLista;
     if (lMemtable.RecordCount > 0) then begin
@@ -421,12 +423,13 @@ begin
       mtItensPRODUTO.Value          := lWebPedidoItensModel.PRODUTO_NOME;
       mtItensQUANTIDADE.Value       := lWebPedidoItensModel.QUANTIDADE;
       mtItensVALOR_UNITARIO.Value   := lWebPedidoItensModel.VALOR_UNITARIO;
-      mtItensVLR_GARANTIA.Value     := lWebPedidoItensModel.VLR_GARANTIA;
+      mtItensVLR_GARANTIA.Value     := lWebPedidoItensModel.TOTAL_GARANTIA;
       mtItensENTREGA.AsString       := IIF(lWebPedidoItensModel.ENTREGA = 'N', 'NÃO', 'SIM');
       mtItensMONTAGEM.AsString      := IIF(lWebPedidoItensModel.MONTAGEM = 'N', 'NÃO', 'SIM');
       mtItensTIPO.AsString          := IIF(lWebPedidoItensModel.TIPO = 'FUTURA', 'SIM', 'NÃO');
       mtItensTIPO_ENTREGA.AsString  := IIF(lWebPedidoItensModel.TIPO_ENTREGA = 'LJ', 'LOJA', 'CD');
       mtItensTIPO_GARANTIA.Value    := lWebPedidoItensModel.TIPO_GARANTIA;
+      mtItensTIPO_GARANTIA_FR.Value := lWebPedidoItensModel.TIPO_GARANTIA_FR;
       mtItensVALOR_TOTAL.Value      := lWebPedidoItensModel.VALOR_TOTALITENS;
       mtItens.Post;
 
@@ -486,6 +489,9 @@ begin
     if Self.FPDF then begin
       if Self.FDIR = '' then
         raise Exception.Create('Diretório não informado');
+
+      if not DirectoryExists(Self.FDIR) then
+        ForceDirectories(Self.FDIR);
 
       lNameArchive := FloatToStr(Round(random(999999))) + Self.FIDPEDIDO + '.pdf';
       try
