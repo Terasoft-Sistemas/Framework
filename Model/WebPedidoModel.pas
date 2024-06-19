@@ -1377,7 +1377,7 @@ begin
     lWebPedidoItensModel.TIPO_GARANTIA_FR    := PVenderItemParametros.TIPO_GARANTIA_FR;
     lWebPedidoItensModel.VLR_GARANTIA_FR     := PVenderItemParametros.VLR_GARANTIA_FR;
 
-    if (lWebPedidoItensModel.TIPO <> 'FUTURA') and (pVenderItemParametros.QUANTIDADE > lProdutoModel.SALDO_DISPONIVEL) then
+    if (lWebPedidoItensModel.TIPO_ENTREGA = 'LJ') and (lWebPedidoItensModel.TIPO <> 'FUTURA') and (pVenderItemParametros.QUANTIDADE > lProdutoModel.SALDO_DISPONIVEL) then
       lWebPedidoItensModel.TIPO := 'SALDO_NEGA';
 
     Result := lWebPedidoItensModel.Incluir;
