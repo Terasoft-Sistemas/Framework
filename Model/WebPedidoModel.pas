@@ -266,6 +266,7 @@ type
     procedure SetTOTAL_GARANTIA(const Value: Variant);
 
     procedure IncluiReservaCD(pWebPedidoItensModel: TWebPedidoItensModel);
+    procedure ExcluirReservaCD(pWebPedidoItensID, pFilial : String);
     procedure AtualizaReservaCD(pWebPedidoModel: TWebPedidoModel);
     procedure SetSEGURO_PRESTAMISTA_CUSTO(const Value: Variant);
     procedure SetSEGURO_PRESTAMISTA_VALOR(const Value: Variant);
@@ -633,6 +634,26 @@ begin
   self.FID  := pID;
   self.Acao := tacExcluir;
   Result := self.Salvar;
+end;
+
+procedure TWebPedidoModel.ExcluirReservaCD(pWebPedidoItensID, pFilial: String);
+var
+  lReservaModel : TReservaModel;
+  lTableReserva : TFDMemTable;
+begin
+  lReservaModel := TReservaModel.Create(vIConexao.NovaConexao('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA));
+
+  try
+    lReservaModel.WhereView := ' and reserva.web_pedidoitens_id = ' + pWebPedidoItensID + ' and reserva.filial = ' + QuotedStr(pFilial);
+    lTableReserva := lReservaModel.obterLista;
+
+    if lTableReserva.FieldByName('ID').AsString = '' then
+      CriaException('Reserva não localizada');
+
+    lReservaModel.Excluir(lTableReserva.FieldByName('ID').AsString);
+  finally
+    lReservaModel.Free;
+  end;
 end;
 
 function TWebPedidoModel.Incluir: String;
