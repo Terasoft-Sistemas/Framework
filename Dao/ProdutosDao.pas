@@ -60,12 +60,13 @@ type
     function alterar(pProdutosModel: TProdutosModel): String;
     function excluir(pProdutosModel: TProdutosModel): String;
 
+    function obterListaConsulta: TFDMemTable;
     function obterListaMemTable: TFDMemTable;
-    function ObterTabelaPreco : TFDMemTable;
+    function ObterTabelaPreco: TFDMemTable;
     procedure obterLista;
     procedure obterListaCatalogo;
-    function obterComissao(pCodProduto: String): TFDMemTable;
 
+    function obterComissao(pCodProduto: String): TFDMemTable;
     function obterSaldo(pIdProduto: String): Double;
     function obterSaldoDisponivel(pIdProduto: String): Double;
     procedure subtrairSaldo(pIdProduto: String; pSaldo: Double);
@@ -589,9 +590,10 @@ begin
                     '        produto.usar_balanca,                                                                      '+SLineBreak+
                     '        produto.tipo$_pro,                                                                         '+SLineBreak+
                     '        produto.web_caracteristica,                                                                '+SLineBreak+
-                    '        (select coalesce(saldo - reservado, 0)                                                     '+SLineBreak+
-                    '           from view_saldo_produto                                                                 '+SLineBreak+
-                    '          where view_saldo_produto.codigo = produto.codigo_pro) as saldo_disponivel                '+SLineBreak+
+                    '        coalesce(produto.saldo_pro,0) - coalesce((                                                 '+SLineBreak+
+                    '          select sum(view_reservados.reservado)                                                    '+SLineBreak+
+                    '            from view_reservados                                                                   '+SLineBreak+
+                    '           where view_reservados.produto_id = produto.codigo_pro), 0) saldo_disponivel             '+SLineBreak+
                     '   from produto                                                                                    '+SLineBreak+
                     '  inner join fornecedor on fornecedor.codigo_for = produto.codigo_for                              '+SLineBreak+
                     '  inner join grupoproduto on grupoproduto.codigo_gru = produto.codigo_gru                          '+SLineBreak+
@@ -808,6 +810,44 @@ begin
   end;
 end;
 
+function TProdutosDao.obterListaConsulta: TFDMemTable;
+var
+  lSQL,
+  lPaginacao : String;
+  lQry      : TFDQuery;
+  lMemTable : TFDMemTable;
+begin
+  lQry := vIConexao.CriarQuery;
+  try
+    if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
+      lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + ' ';
+
+    lSQL := ' select '+lPaginacao+'                                                                                                              '+sLinebreak+
+            '        produto.codigo_pro,                                                                                                         '+sLinebreak+
+            '        produto.nome_pro,                                                                                                           '+sLinebreak+
+            '        produto.barras_pro,                                                                                                         '+sLinebreak+
+            '        coalesce(produto.venda_pro, 0) venda_pro,                                                                                   '+sLinebreak+
+            '        coalesce(produto.saldo_pro, 0) saldo_pro,                                                                                   '+sLinebreak+
+            '        coalesce(produto.saldo_pro,0) - coalesce((select sum(view_reservados.reservado)                                             '+sLinebreak+
+            '                                                    from view_reservados                                                            '+sLinebreak+
+            '                                                   where view_reservados.produto_id = produto.codigo_pro), 0) saldo_disponivel      '+sLinebreak+
+            '   from produto                                                                                                                     '+sLinebreak+
+            '  where 1=1                                                                                                                         '+sLinebreak;
+
+    lSql := lSql + where;
+
+    if not FOrderView.IsEmpty then
+      lSql := lSql + ' order by '+FOrderView;
+
+    lQry.Open(lSQL);
+
+    Result := vConstrutor.atribuirRegistros(lQry);
+    obterTotalRegistros;
+  finally
+    lQry.Free;
+  end;
+end;
+
 function TProdutosDao.obterListaMemTable : TFDMemTable;
 var
   lQry: TFDQuery;
@@ -822,7 +862,6 @@ begin
             '        UNIDADE_PRO      ' + SLineBreak +
             '   From PRODUTO          ' + SLineBreak +
             '  Order by NOME_PRO      ' + SLineBreak;
-
 
     lQry.Open(lSQL);
     lSql := lSql + where;

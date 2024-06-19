@@ -900,6 +900,7 @@ type
     function Alterar(pID : String) : TProdutosModel;
     function Excluir(pCodigoPro : String) : String;
     function Salvar : String;
+    function obterListaConsulta: TFDMemTable;
     function obterListaMemTable: TFDMemTable;
     function obterCodigoBarras(pIdProduto: String): String;
     function obterSaldo(pIdProduto: String): Double;
@@ -1145,6 +1146,27 @@ begin
     FProdutossLista := lProdutosLista.ProdutossLista;
   finally
     lProdutosLista.Free;
+  end;
+end;
+
+function TProdutosModel.obterListaConsulta: TFDMemTable;
+var
+  lProdutos : TProdutosDao;
+begin
+  lProdutos := TProdutosDao.Create(vIConexao);
+  try
+    lProdutos.TotalRecords    := FTotalRecords;
+    lProdutos.WhereView       := FWhereView;
+    lProdutos.CountView       := FCountView;
+    lProdutos.OrderView       := FOrderView;
+    lProdutos.StartRecordView := FStartRecordView;
+    lProdutos.LengthPageView  := FLengthPageView;
+    lProdutos.IDRecordView    := FIDRecordView;
+
+    Result        := lProdutos.obterListaConsulta;
+    FTotalRecords := lProdutos.TotalRecords;
+  finally
+    lProdutos.Free;
   end;
 end;
 
