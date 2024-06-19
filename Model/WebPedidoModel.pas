@@ -264,10 +264,6 @@ type
     procedure SetGERENTE_ID(const Value: Variant);
     procedure SetTIPO_COMISSAO(const Value: Variant);
     procedure SetTOTAL_GARANTIA(const Value: Variant);
-
-    procedure IncluiReservaCD(pWebPedidoItensModel: TWebPedidoItensModel);
-    procedure ExcluirReservaCD(pWebPedidoItensID, pFilial : String);
-    procedure AtualizaReservaCD(pWebPedidoModel: TWebPedidoModel);
     procedure SetSEGURO_PRESTAMISTA_CUSTO(const Value: Variant);
     procedure SetSEGURO_PRESTAMISTA_VALOR(const Value: Variant);
 
@@ -402,6 +398,10 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property IDUsuario: String read FIDUsuario write SetIDUsuario;
+
+    procedure IncluiReservaCD(pWebPedidoItensModel: TWebPedidoItensModel);
+    procedure ExcluirReservaCD(pWebPedidoItensID, pFilial : String);
+    procedure AtualizaReservaCD(pWebPedidoModel: TWebPedidoModel);
 
   end;
 
