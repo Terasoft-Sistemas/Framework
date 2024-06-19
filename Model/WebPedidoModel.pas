@@ -266,7 +266,6 @@ type
     procedure SetTOTAL_GARANTIA(const Value: Variant);
 
     procedure IncluiReservaCD(pWebPedidoItensModel: TWebPedidoItensModel);
-    procedure ExcluirReservaCD(pWebPedidoItensID, pFilial : String);
     procedure AtualizaReservaCD(pWebPedidoModel: TWebPedidoModel);
     procedure SetSEGURO_PRESTAMISTA_CUSTO(const Value: Variant);
     procedure SetSEGURO_PRESTAMISTA_VALOR(const Value: Variant);
@@ -387,6 +386,7 @@ type
     function VenderItem(pVenderItemParametros: TVenderItemParametros): String;
     procedure calcularTotais;
     procedure obterTotais;
+    procedure ExcluirReservaCD(pWebPedidoItensID, pFilial : String);
 
     function Incluir : String;
     function Alterar(pID: String): TWebPedidoModel;
@@ -1350,7 +1350,7 @@ begin
 
 
     lValorUnitario            := lProdutoModel.ValorUnitario(lProdutoPreco);
-    lValorVendido             := StrToFloat(pVenderItemParametros.VALOR_UNITARIO);
+    lValorVendido             := StrToFloat(retiraPonto(pVenderItemParametros.VALOR_UNITARIO));
 
     lWebPedidoItensModel.VALOR_VENDIDO       := lValorVendido.ToString;
 
