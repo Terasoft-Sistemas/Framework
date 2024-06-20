@@ -9,6 +9,12 @@ interface
     Terasoft.Framework.DB,
     Terasoft.Framework.Types;
 
+  const
+    RETORNO_CREDIPAR_LOJA           = 'Credipar.loja';
+    RETORNO_CREDIPAR_MENSAGEM       = 'Credipar.mensagem';
+    RETORNO_CREDIPAR_CONTRATO       = 'Credipar.contrato';
+    RETORNO_CREDIPAR_PROCESSAMENTO  = 'Credipar.processamento';
+    RETORNO_CREDIPAR_ERRO           = 'Credipar.erro';
   type
 
     ICredipar_PessoaJuridica = interface
@@ -18,12 +24,14 @@ interface
 
     ICredipar_PessoaFisica = interface
     ['{B2D41380-46B9-4937-B8BE-926813959765}']
+      function getAddr: Pointer;
       function loadFromPathReaderWriter(const pPathRW: IPathReaderWriter; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     end;
 
     ICredipar_Proposta = interface
     ['{7BFA61DA-E339-44BB-9AE1-BCDD55FBDF47}']
 
+      function getAddr: Pointer;
       function loadFromPathReaderWriter(const pPathRW: IPathReaderWriter; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
     (*
@@ -73,27 +81,74 @@ interface
     ICredipar = interface
     ['{5E234CAB-1B84-42F7-A94E-5F76F58B7901}']
     //property proposta getter/setter
+      function getAddr: Pointer;
+
       function getProposta: ICredipar_Proposta;
       procedure setProposta(const pValue: ICredipar_Proposta);
 
       function getNovaProposta: ICredipar_Proposta;
 
+      function critica(pResultado: IResultadoOperacao): boolean;
+
     //property pessoaFisica getter/setter
       function getPessoaFisica: ICredipar_PessoaFisica;
       procedure setPessoaFisica(const pValue: ICredipar_PessoaFisica);
 
+      function envia(pResultado: IResultadoOperacao): IResultadoOperacao;
+
+    //property diretorioArquivos getter/setter
+      function getDiretorioArquivos: tipoWideStringFramework;
+      procedure setDiretorioArquivos(const pValue: tipoWideStringFramework);
+
+    //property modoProducao getter/setter
+      function getModoProducao: boolean;
+      procedure setModoProducao(const pValue: boolean);
+
+    //property urlWS getter/setter
+      function getUrlWS: TipoWideStringFramework;
+      procedure setUrlWS(const pValue: TipoWideStringFramework);
+
+    //property token getter/setter
+      function getToken: TipoWideStringFramework;
+      procedure setToken(const pValue: TipoWideStringFramework);
+
+    //property codLojaCred getter/setter
+      function getCodLojaCred: Int64;
+      procedure setCodLojaCred(const pValue: Int64);
+
+      property codLojaCred: Int64 read getCodLojaCred write setCodLojaCred;
+      property token: TipoWideStringFramework read getToken write setToken;
+      property urlWS: TipoWideStringFramework read getUrlWS write setUrlWS;
+      property modoProducao: boolean read getModoProducao write setModoProducao;
+      property diretorioArquivos: tipoWideStringFramework read getDiretorioArquivos write setDiretorioArquivos;
       property pessoaFisica: ICredipar_PessoaFisica read getPessoaFisica write setPessoaFisica;
       property proposta: ICredipar_Proposta read getProposta write setProposta;
     end;
 
   {$if not defined(__DLL__)}
     function createCredipar: ICredipar ; stdcall;
+    function getCredipar: ICredipar;
   {$ifend}
 
 implementation
+  uses
+    FuncoesConfig;
 
-  {$if not defined(__DLL__)}
+{$if not defined(__DLL__)}
     function createCredipar: ICredipar; stdcall; external 'Credipar_DLL' name 'createCredipar' delayed;
+
+function getCredipar: ICredipar;
+begin
+  Result := createCredipar;
+  if(gdbPadrao<>nil) then
+  begin
+    Result.urlWS := ValorTagConfig(tagConfig_CREDIPAR_ENDERECO_WS,'',tvString);
+    Result.modoProducao := true;
+    Result.diretorioArquivos := ValorTagConfig(tagConfig_CREDIPAR_DIRETORIO_ARQUIVOS,'',tvString);
+    Result.token := ValorTagConfig(tagConfig_CREDIPAR_TOKEN,'',tvString);
+    Result.codLojaCred := ValorTagConfig(tagConfig_CREDIPAR_CODIGO_LOJA,0,tvInteiro);
+  end;
+end;
   {$ifend}
 
 

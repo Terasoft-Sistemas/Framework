@@ -860,8 +860,8 @@ type
     FvlrCompra: Double;
     FvlrEntrada: Double;
     FvlrParcela: Double;
-    FdtCompra: TXSDateTime;
-    FdtPriVcto: TXSDateTime;
+    FdtCompra: TXSDate;
+    FdtPriVcto: TXSDate;
     Fno_reserva_loja: string;
     Fno_reserva_loja_Specified: boolean;
     FclienteDiamante: string;
@@ -924,8 +924,8 @@ type
     property vlrCompra:          Double       read FvlrCompra write FvlrCompra;
     property vlrEntrada:         Double       read FvlrEntrada write FvlrEntrada;
     property vlrParcela:         Double       read FvlrParcela write FvlrParcela;
-    property dtCompra:           TXSDateTime  read FdtCompra write FdtCompra;
-    property dtPriVcto:          TXSDateTime  read FdtPriVcto write FdtPriVcto;
+    property dtCompra:           TXSDate  read FdtCompra write FdtCompra;
+    property dtPriVcto:          TXSDate  read FdtPriVcto write FdtPriVcto;
     property no_reserva_loja:    string       Index (IS_OPTN) read Fno_reserva_loja write Setno_reserva_loja stored no_reserva_loja_Specified;
     property clienteDiamante:    string       Index (IS_OPTN) read FclienteDiamante write SetclienteDiamante stored clienteDiamante_Specified;
     property planoSic:           string       Index (IS_OPTN) read FplanoSic write SetplanoSic stored planoSic_Specified;
