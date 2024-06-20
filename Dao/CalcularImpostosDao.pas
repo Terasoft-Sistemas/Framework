@@ -82,7 +82,7 @@ begin
 
     lSQL :=
           ' select                                                           '+#13+
-          '     t.'+lUF_BASE+'_cst cst,                                      '+#13+
+          '     coalesce(c1.cst, t.'+lUF_BASE+'_cst) cst,                    '+#13+
           '     t.'+lUF_BASE+'_ icms_aliquota_interestadual,                 '+#13+
           '     t.'+lUF_BASE+'_reducao icms_reducao_base,                    '+#13+
           '     t.'+lUF_BASE+'_aliqint icms_aliquota_interna,                '+#13+
@@ -98,7 +98,7 @@ begin
           '     p.ipi_sai,                                                   '+#13+
           '     p.cst_ipi,                                                   '+#13+
           '     p.nfce_csosn,                                                '+#13+
-          '     p.nfce_cst,                                                  '+#13+
+          '     coalesce(c2.cst, p.nfce_cst) nfce_cst,                       '+#13+
           '     p.nfce_cfop nfce_cfop_id,                                    '+#13+
           '     c2.cfop nfce_cfop,                                           '+#13+
           '     c.cfop,                                                      '+#13+
