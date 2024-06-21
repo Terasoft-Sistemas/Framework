@@ -33,6 +33,7 @@ uses
   procedure gravaSQL(pSQL, pNome: String);
   function DiaDaSemana(pData : TDate) : String;
   function DiferencaEntreValoresPercentual(valor1, Valor2: Real): Real;
+  function CalculaPercentual(pValorItem, pValorTotal: Real): Real;
 
 implementation
 
@@ -43,6 +44,14 @@ uses
   Terasoft.Types;
 
 
+
+function CalculaPercentual(pValorItem, pValorTotal: Real): Real;
+begin
+  Result := 0;
+
+  if pValorTotal <> 0 then
+    Result := ((pValorItem*100)/pValorTotal)/100
+end;
 
 function DiferencaEntreValoresPercentual(valor1, Valor2: Real): Real;
 begin
