@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 1250
     Height = 935
-    ActivePage = TabSheet1
+    ActivePage = tabLiberacao
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -1306,6 +1306,38 @@ object Form1: TForm1
         OnClick = btnReservaClick
       end
     end
+    object tabLiberacao: TTabSheet
+      Caption = 'Libera'#231#227'o'
+      ImageIndex = 12
+      object btnConsultaDesconto: TButton
+        Left = 19
+        Top = 19
+        Width = 182
+        Height = 46
+        Caption = 'Consultar Desconto'
+        TabOrder = 0
+        OnClick = btnConsultaDescontoClick
+      end
+      object XDBGrid8: TXDBGrid
+        Left = 0
+        Top = 600
+        Width = 1242
+        Height = 305
+        Align = alBottom
+        DataSource = dLiberacao
+        GridStyle.VisualStyle = vsXPStyle
+        TabOrder = 1
+      end
+      object btnConsultaPermissao: TButton
+        Left = 219
+        Top = 19
+        Width = 182
+        Height = 46
+        Caption = 'Consultar Permiss'#227'o'
+        TabOrder = 2
+        OnClick = btnConsultaPermissaoClick
+      end
+    end
   end
   object dsTeste2: TDataSource
     Left = 1056
@@ -1342,5 +1374,9 @@ object Form1: TForm1
   object dsSaidas: TDataSource
     Left = 1048
     Top = 272
+  end
+  object dLiberacao: TDataSource
+    Left = 1136
+    Top = 208
   end
 end

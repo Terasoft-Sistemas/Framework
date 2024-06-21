@@ -158,7 +158,7 @@ type
     function obterLista: TFDMemTable;
 
     function AtualizaReservaVendaAssistida(pAtualizaReserva_Parametros: TAtualizaReserva_Parametros): String;
-    function concluirReserva(pStatus, pWebPedidoItensId, pFilial: String): Boolean;
+    function concluirReserva(pStatus, pPedido, pWebPedidoItensId, pFilial: String): Boolean;
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -234,7 +234,7 @@ begin
   end;
 end;
 
-function TReservaModel.concluirReserva(pStatus, pWebPedidoItensId, pFilial: String): Boolean;
+function TReservaModel.concluirReserva(pStatus, pPedido, pWebPedidoItensId, pFilial: String): Boolean;
 var
   lTableReserva: TFDMemTable;
 begin
@@ -244,6 +244,7 @@ begin
   self := self.Alterar(lTableReserva.FieldByName('ID').AsString);
 
   self.STATUS             := pStatus;
+  self.PEDIDO_ID          := pPedido;
   self.DATAHORA_EFETIVADA := DateTimeToStr(vIConexao.DataHoraServer);
   self.Salvar;
 end;

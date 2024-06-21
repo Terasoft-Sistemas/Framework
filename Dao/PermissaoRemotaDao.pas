@@ -198,7 +198,11 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From permissao_remota where 1=1 ';
+    lSql := '  select count(*) records                                                                   '+SLineBreak+
+            '    From permissao_remota                                                                   '+SLineBreak+
+            '    left join usuario solicitante on solicitante.id = permissao_remota.usuario_solicitante  '+SLineBreak+
+            '    left join usuario cedente on cedente.id = permissao_remota.usuario_cedente              '+SLineBreak+
+            '   where 1=1 ';
 
     lSql := lSql + where;
 
@@ -223,9 +227,22 @@ begin
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
 
-      lSQL := '  select '+lPaginacao+' permissao_remota.*             '+SLineBreak+
-              '          from permissao_remota                        '+SLineBreak+
-              '    where 1=1                                          '+SLineBreak;
+      lSQL := '  select  '+lPaginacao+'                                                                    '+SLineBreak+
+              '          permissao_remota.id,                                                              '+SLineBreak+
+              '          permissao_remota.usuario_solicitante,                                             '+SLineBreak+
+              '          solicitante.fantasia usuario_solicitante_nome,                                    '+SLineBreak+
+              '          permissao_remota.usuario_cedente,                                                 '+SLineBreak+
+              '          cedente.fantasia usuario_cedente_nome,                                            '+SLineBreak+
+              '          permissao_remota.operacao,                                                        '+SLineBreak+
+              '          permissao_remota.msg_solicitacao,                                                 '+SLineBreak+
+              '          permissao_remota.status,                                                          '+SLineBreak+
+              '          permissao_remota.tabela,                                                          '+SLineBreak+
+              '          permissao_remota.registro_id,                                                     '+SLineBreak+
+              '          permissao_remota.pedido_id                                                        '+SLineBreak+
+              '    from permissao_remota                                                                   '+SLineBreak+
+              '    left join usuario solicitante on solicitante.id = permissao_remota.usuario_solicitante  '+SLineBreak+
+              '    left join usuario cedente on cedente.id = permissao_remota.usuario_cedente              '+SLineBreak+
+              '   where 1=1                                                                                '+SLineBreak;
 
 
     lSql := lSql + where;
