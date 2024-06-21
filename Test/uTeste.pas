@@ -179,6 +179,10 @@ type
     tabReserva: TTabSheet;
     btnReserva: TButton;
     Button86: TButton;
+    tabLiberacao: TTabSheet;
+    btnConsultaDesconto: TButton;
+    XDBGrid8: TXDBGrid;
+    dLiberacao: TDataSource;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -310,6 +314,7 @@ type
     procedure OrcamentoItensAlterarClick(Sender: TObject);
     procedure OrcamentoItensExcluirClick(Sender: TObject);
     procedure btnReservaClick(Sender: TObject);
+    procedure btnConsultaDescontoClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -340,9 +345,23 @@ uses
   PortadorModel, LojasModel, OSModel, SimuladorPrecoModel, GrupoModel, CNPJModel, CEPModel,
   PedidoCompraModel, PedidoCompraItensModel, ClientesContatoModel, DescontoModel,
   PromocaoModel, TransportadoraModel, PrevisaoPedidoCompraModel, SaidasModel,
-  SaidasItensModel, ClientesEnderecoModel, OrcamentoModel, OrcamentoItensModel, Terasoft.Utils;
+  SaidasItensModel, ClientesEnderecoModel, OrcamentoModel, OrcamentoItensModel, Terasoft.Utils,
+  SolicitacaoDescontoModel;
 
 {$R *.dfm}
+
+procedure TForm1.btnConsultaDescontoClick(Sender: TObject);
+var
+  lSolicitacaoDescontoModel : TSolicitacaoDescontoModel;
+begin
+  lSolicitacaoDescontoModel := TSolicitacaoDescontoModel.Create(vIConexao);
+  try
+    lSolicitacaoDescontoModel.WhereView := ' and solicitacao_desconto.tabela_origem = ''WEB_PEDIDO'' ';
+    dLiberacao.DataSet := lSolicitacaoDescontoModel.obterLista;
+  finally
+    lSolicitacaoDescontoModel.Free;
+  end;
+end;
 
 procedure TForm1.BtnEndereco1Click(Sender: TObject);
 var

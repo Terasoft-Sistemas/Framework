@@ -244,6 +244,10 @@
         <DCCReference Include="..\Dao\OrcamentoDao.pas"/>
         <DCCReference Include="..\Model\OrcamentoItensModel.pas"/>
         <DCCReference Include="..\Dao\OrcamentoItensDao.pas"/>
+        <DCCReference Include="..\Model\PermissaoRemotaModel.pas"/>
+        <DCCReference Include="..\Model\SolicitacaoDescontoModel.pas"/>
+        <DCCReference Include="..\Dao\PermissaoRemotaDao.pas"/>
+        <DCCReference Include="..\Dao\SolicitacaoDescontoDao.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

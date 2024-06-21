@@ -224,9 +224,27 @@ begin
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
 
-      lSQL := '  select '+lPaginacao+' solicitacao_desconto.*             '+SLineBreak+
-              '          from solicitacao_desconto                        '+SLineBreak+
-              '    where 1=1                                              '+SLineBreak;
+      lSQL := '  select '+lPaginacao+'                                                                                           '+SLineBreak+
+              '         solicitacao_desconto.id,                                                                                 '+SLineBreak+
+              '         solicitacao_desconto.cliente_id,                                                                         '+SLineBreak+
+              '         coalesce(clientes.razao_cli, clientes.fantasia_cli) cliente_nome,                                        '+SLineBreak+
+              '         solicitacao_desconto.usuario_solicitante,                                                                '+SLineBreak+
+              '         solicitante.fantasia usuario_solicitante_nome,                                                           '+SLineBreak+
+              '         solicitacao_desconto.usuario_cedente,                                                                    '+SLineBreak+
+              '         cedente.fantasia usuario_cedente_nome,                                                                   '+SLineBreak+
+              '         solicitacao_desconto.pedido_id,                                                                          '+SLineBreak+
+              '         solicitacao_desconto.status,                                                                             '+SLineBreak+
+              '         solicitacao_desconto.tipovenda_id,                                                                       '+SLineBreak+
+              '         solicitacao_desconto.tabela_origem,                                                                      '+SLineBreak+
+              '         solicitacao_desconto.valor_desconto,                                                                     '+SLineBreak+
+              '         solicitacao_desconto.valor_desconto / solicitacao_desconto.valor_pedido * 100 percentual_desconto,       '+SLineBreak+
+              '         solicitacao_desconto.valor_pedido,                                                                       '+SLineBreak+
+              '         solicitacao_desconto.valor_pedido - solicitacao_desconto.valor_desconto                                  '+SLineBreak+
+              '    from solicitacao_desconto                                                                                     '+SLineBreak+
+              '    left join clientes on clientes.codigo_cli = solicitacao_desconto.cliente_id                                   '+SLineBreak+
+              '    left join usuario solicitante on solicitante.id = solicitacao_desconto.usuario_solicitante                    '+SLineBreak+
+              '    left join usuario cedente on cedente.id = solicitacao_desconto.usuario_cedente                                '+SLineBreak+
+              '   where 1=1                                                                                                      '+SLineBreak;
 
     lSql := lSql + where;
 

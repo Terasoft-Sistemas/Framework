@@ -146,7 +146,11 @@ uses
   OrcamentoModel in '..\Model\OrcamentoModel.pas',
   OrcamentoDao in '..\Dao\OrcamentoDao.pas',
   OrcamentoItensModel in '..\Model\OrcamentoItensModel.pas',
-  OrcamentoItensDao in '..\Dao\OrcamentoItensDao.pas';
+  OrcamentoItensDao in '..\Dao\OrcamentoItensDao.pas',
+  PermissaoRemotaModel in '..\Model\PermissaoRemotaModel.pas',
+  SolicitacaoDescontoModel in '..\Model\SolicitacaoDescontoModel.pas',
+  PermissaoRemotaDao in '..\Dao\PermissaoRemotaDao.pas',
+  SolicitacaoDescontoDao in '..\Dao\SolicitacaoDescontoDao.pas';
 
 {$R *.res}
 
