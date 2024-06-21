@@ -704,6 +704,6 @@ function TPedidoVendaDao.statusPedido(pId: String): String;
 begin
   Result := vIConexao
               .getConnection
-              .ExecSQLScalar('select status_ped from pedidovenda where numero_ped = '+ QuotedStr(pId));
+              .ExecSQLScalar('select status from pedidovenda where numero_ped = '+ QuotedStr(pId));
 end;
 end.

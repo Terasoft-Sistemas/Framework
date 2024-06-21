@@ -457,7 +457,7 @@ begin
     lPedidoVendaModel.SMS                  := 'N';
     lPedidoVendaModel.ENTREGA              := 'N';
     lPedidoVendaModel.STATUS_PED           := 'P';
-    lPedidoVendaModel.STATUS               := 'P';
+    lPedidoVendaModel.STATUS               := 'O';
     lPedidoVendaModel.TIPO_PED             := 'P';
     lPedidoVendaModel.TABJUROS_PED         := 'N';
     lPedidoVendaModel.NUMERO_ORC           := lOrcamentoModel.NUMERO_ORC;

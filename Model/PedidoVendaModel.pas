@@ -1322,6 +1322,7 @@ begin
     lPedidoVendaModel := lPedidoVendaModel.carregaClasse(self.FNUMERO_PED);
     lPedidoVendaModel.Acao := tacAlterar;
     lPedidoVendaModel.STATUS_PED := 'P';
+    lPedidoVendaModel.STATUS     := 'O';
     lPedidoVendaModel.Salvar;
 
     lPedidoItensModel.IDPedidoVendaView := lPedidoVendaModel.NUMERO_PED;
