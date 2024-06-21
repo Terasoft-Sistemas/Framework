@@ -388,6 +388,9 @@ type
     function Alterar(pID: String): TWebPedidoModel;
     function Excluir(pID: String) : String;
 
+    function Autorizar(pID : String) : Boolean;
+    function Negar(pID: String): Boolean;
+
     property WebPedidosLista: TObjectList<TWebPedidoModel> read FWebPedidosLista write SetWebPedidosLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -408,7 +411,11 @@ type
 implementation
 
 uses
-  WebPedidoDao, ClienteModel, FinanceiroPedidoModel;
+  WebPedidoDao,
+  ClienteModel,
+  FinanceiroPedidoModel,
+  PortadorModel,
+  SolicitacaoDescontoModel;
 
 { TWebPedidoModel }
 
@@ -1437,6 +1444,52 @@ begin
   end;
 end;
 
+function TWebPedidoModel.Negar(pID: String): Boolean;
+var
+  lWebPedidoModel : TWebPedidoModel;
+  lSolicitacaoDescontoModel : TSolicitacaoDescontoModel;
+  lMemTableSolicitacao : TFDMemTable;
+begin
+  if pID = '' then
+    CriaException('ID não informado');
+
+  lSolicitacaoDescontoModel := TSolicitacaoDescontoModel.Create(vIConexao);
+  lWebPedidoModel           := TWebPedidoModel.Create(vIConexao);
+  try
+    lWebPedidoModel := lWebPedidoModel.carregaClasse(pID);
+
+    if (lWebPedidoModel.STATUS <> 'E') and (lWebPedidoModel.STATUS <> 'P') then
+      CriaException('Permissão já negada ou autorizada.');
+
+    if lWebPedidoModel.STATUS = 'E' then
+    begin
+      lSolicitacaoDescontoModel.WhereView := ' and solicitacao_desconto.tabela_origem = ''WEB_PEDIDO'' '+
+                                             ' and solicitacao_desconto.pedido_id = '+lWebPedidoModel.ID +
+                                             ' and solicitacao_desconto.status is null ';
+
+      lMemTableSolicitacao := lSolicitacaoDescontoModel.obterLista;
+
+      lSolicitacaoDescontoModel := lSolicitacaoDescontoModel.carregaClasse(lMemTableSolicitacao.FieldByName('ID').AsString);
+
+      lSolicitacaoDescontoModel.USUARIO_CEDENTE := vIConexao.getUser.ID;
+      lSolicitacaoDescontoModel.STATUS          := 'N';
+
+      lSolicitacaoDescontoModel.Acao := tacAlterar;
+      lSolicitacaoDescontoModel.Salvar;
+    end;
+
+    lWebPedidoModel.STATUS := 'D';
+    lWebPedidoModel.Acao := tacAlterar;
+    lWebPedidoModel.Salvar;
+
+    Result := true;
+
+  finally
+    lSolicitacaoDescontoModel.Free;
+    lWebPedidoModel.Free;
+  end;
+end;
+
 procedure TWebPedidoModel.AtualizaReservaCD(pWebPedidoModel: TWebPedidoModel);
 var
   lReservaModel : TReservaModel;
@@ -1476,5 +1529,48 @@ begin
   end;
 end;
 
+
+function TWebPedidoModel.Autorizar(pID : String): Boolean;
+var
+  lWebPedidoModel : TWebPedidoModel;
+  lPortadorModel  : TPortadorModel;
+begin
+  if pID = '' then
+    CriaException('ID não informado');
+
+  lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
+  lPortadorModel  := TPortadorModel.Create(vIConexao);
+
+  try
+    lWebPedidoModel := lWebPedidoModel.carregaClasse(pID);
+
+    if (lWebPedidoModel.STATUS <> 'E') and (lWebPedidoModel.STATUS <> 'P') then
+      CriaException('Permissão já negada ou autorizada.');
+
+    lPortadorModel := lPortadorModel.carregaClasse(lWebPedidoModel.PORTADOR_ID);
+
+    if AnsiMatchStr(lPortadorModel.TPAG_NFE,['01','03','04','99']) then
+    begin
+      if lWebPedidoModel.STATUS <> 'E' then
+        lWebPedidoModel.STATUS            := 'C';
+
+      lWebPedidoModel.DATA_HORA_APROVACAO := DateTimeToStr(vIConexao.DataHoraServer);
+      lWebPedidoModel.USUARIO_APROVACAO   := vIConexao.getUSer.ID;
+    end
+    else
+    begin
+      if lWebPedidoModel.STATUS <> 'E' then
+        lWebPedidoModel.STATUS := 'A';
+    end;
+
+    lWebPedidoModel.Acao := tacAlterar;
+    lWebPedidoModel.Salvar;
+
+    Result := true;
+  finally
+    lWebPedidoModel.Free;
+    lPortadorModel.Free;
+  end;
+end;
 
 end.

@@ -76,6 +76,9 @@ type
     function carregaClasse(pId : String): TPermissaoRemotaModel;
     function obterLista: TFDMemTable;
 
+    function Autorizar(pID : String): Boolean;
+    function Negar(pID: String): Boolean;
+
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -90,9 +93,12 @@ type
 implementation
 
 uses
-  PermissaoRemotaDao,  
-  System.Classes, 
-  System.SysUtils;
+  System.Classes,
+  System.SysUtils,
+  Terasoft.Utils,
+  PermissaoRemotaDao,
+  WebPedidoModel,
+  Terasoft.Configuracoes;
 
 { TPermissaoRemotaModel }
 
@@ -120,6 +126,103 @@ function TPermissaoRemotaModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
     Result    := self.Salvar;
+end;
+
+function TPermissaoRemotaModel.Autorizar(pID: String): Boolean;
+var
+  lPermissaoRemotaModel : TPermissaoRemotaModel;
+  lWebPedidoModel       : TWebPedidoModel;
+  lConfiguracoes        : TerasoftConfiguracoes;
+begin
+  if pID = '' then
+    CriaException('ID não informado');
+
+  lPermissaoRemotaModel := TPermissaoRemotaModel.Create(vIConexao);
+  lWebPedidoModel       := TWebPedidoModel.Create(vIConexao);
+
+  try
+    lPermissaoRemotaModel := lPermissaoRemotaModel.carregaClasse(pID);
+
+    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+
+    if not lConfiguracoes.verificaPerfil(lPermissaoRemotaModel.OPERACAO) then
+      CriaException('Usuário sem permissão para autorizar essa solicitação.');
+
+    lPermissaoRemotaModel.Acao := tacAlterar;
+    lPermissaoRemotaModel.USUARIO_CEDENTE := vIConexao.getUSer.ID;
+    lPermissaoRemotaModel.STATUS          := 'A';
+    lPermissaoRemotaModel.Salvar;
+
+    if (lPermissaoRemotaModel.TABELA = 'WEB_PEDIDOITENS') and
+       ((lPermissaoRemotaModel.OPERACAO = 'VENDA_FUTURA_AUTORIZAR') or (lPermissaoRemotaModel.OPERACAO = 'VENDA_NEGATIVA')) then
+    begin
+      lPermissaoRemotaModel.WhereView := ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' '+
+                                         ' and permissao_remota.pedido_id = '+lPermissaoRemotaModel.PEDIDO_ID +
+                                         ' and coalesce(permissao_remota.status, '''') = ''''';
+      lPermissaoRemotaModel.obterLista;
+
+      if lPermissaoRemotaModel.TotalRecords = 0 then
+        lWebPedidoModel.Autorizar(lPermissaoRemotaModel.PEDIDO_ID);
+
+    end;
+
+    Result := true;
+
+  finally
+    lPermissaoRemotaModel.Free;
+    lWebPedidoModel.Free;
+  end;
+end;
+
+function TPermissaoRemotaModel.Negar(pID: String): Boolean;
+var
+  lPermissaoRemotaModel : TPermissaoRemotaModel;
+  lWebPedidoModel       : TWebPedidoModel;
+  lConfiguracoes        : TerasoftConfiguracoes;
+  lTablePermissao       : TFDMemTable;
+begin
+  if pID = '' then
+    CriaException('ID não informado');
+
+  lPermissaoRemotaModel := TPermissaoRemotaModel.Create(vIConexao);
+  lWebPedidoModel       := TWebPedidoModel.Create(vIConexao);
+
+  try
+    lPermissaoRemotaModel := lPermissaoRemotaModel.carregaClasse(pID);
+
+    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+
+    if not lConfiguracoes.verificaPerfil(lPermissaoRemotaModel.OPERACAO) then
+      CriaException('Usuário sem permissão para autorizar essa solicitação.');
+
+    lPermissaoRemotaModel.Acao := tacExcluir;
+    lPermissaoRemotaModel.Salvar;
+
+    if (lPermissaoRemotaModel.TABELA = 'WEB_PEDIDOITENS') and
+       ((lPermissaoRemotaModel.OPERACAO = 'VENDA_FUTURA_AUTORIZAR') or (lPermissaoRemotaModel.OPERACAO = 'VENDA_NEGATIVA')) then
+    begin
+      lPermissaoRemotaModel.WhereView := ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' '+
+                                         ' and permissao_remota.pedido_id = '+lPermissaoRemotaModel.PEDIDO_ID;
+
+      lTablePermissao := lPermissaoRemotaModel.obterLista;
+
+      lTablePermissao.First;
+      while not lTablePermissao.eof do
+      begin
+        lPermissaoRemotaModel.Excluir(lTablePermissao.FieldByName('ID').AsString);
+        lTablePermissao.Next;
+      end;
+
+      lWebPedidoModel.Negar(lPermissaoRemotaModel.PEDIDO_ID);
+    end;
+
+    Result := true;
+
+  finally
+    lPermissaoRemotaModel.Free;
+    lWebPedidoModel.Free;
+  end;
+
 end;
 
 function TPermissaoRemotaModel.carregaClasse(pId : String): TPermissaoRemotaModel;
