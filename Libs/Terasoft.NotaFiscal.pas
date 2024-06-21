@@ -29,6 +29,7 @@ uses
   FireDAC.Comp.Client,
   NFControl,
   Terasoft.Types,
+  VariaveisGlobais,
   Interfaces.Conexao;
 
 type
@@ -56,6 +57,7 @@ type
     FidPedido: String;
     FimprimirDANF: Boolean;
     FidNotaFiscal: String;
+    FImpressoraNFC: String;
     function identificacao(pidNF: String): Boolean;
     function referenciada: Boolean;
     function emitente: Boolean;
@@ -75,6 +77,8 @@ type
     procedure SetimprimirDANF(const Value: Boolean);
     procedure SetMostraPreview(const Value: Boolean);
     procedure SetPathPDF(const Value: String);
+    procedure SetImpressoraNFC(const Value: String);
+
 
   public
     property idNotaFiscal  : String read FidNotaFiscal write SetidNotaFiscal;
@@ -83,6 +87,7 @@ type
     property imprimirDANF      : Boolean read FimprimirDANF write SetimprimirDANF;
     property MostraPreview : Boolean read FMostraPreview write SetMostraPreview;
     property gerarPDF      : Boolean read FgerarPDF write SetgerarPDF;
+    property ImpressoraNFC : String read FImpressoraNFC write SetImpressoraNFC;
 
     constructor Create(pIConexao: IConexao);
     destructor Destroy; override;
@@ -485,70 +490,78 @@ begin
      CriaException('Para gerar PDF path deve ser informado.');
   try
     try
-    lQry := vIConexao.CriarQuery;
-    lSQL :=
-    ' select               '+#13+
-    '    n.xml_nfe xml,    '+#13+
-    '    n.id_nf3 ,        '+#13+
-    '    n.modelo pmoNFe,  '+#13+
-    '    n.nome_xml,       '+#13+
-    '    n.status_nf       '+#13+
-    ' from                 '+#13+
-    '    nf n              '+#13+
-    ' where 1=1            '+#13;
+      lQry := vIConexao.CriarQuery;
 
-    if FidNotaFiscal <> '' then
-      lSQL := lSQL +  '  and  n.numero_nf = '+QuotedStr(FidNotaFiscal);
+      lSQL := ' select               '+#13+
+              '    n.xml_nfe xml,    '+#13+
+              '    n.id_nf3 ,        '+#13+
+              '    n.modelo pmoNFe,  '+#13+
+              '    n.nome_xml,       '+#13+
+              '    n.status_nf       '+#13+
+              ' from                 '+#13+
+              '    nf n              '+#13+
+              ' where 1=1            '+#13;
 
-    if FidPedido <> '' then
-      lSQL := lSQL +  '  and  n.numero_ped = '+QuotedStr(FidPedido);
+      if FidNotaFiscal <> '' then
+        lSQL := lSQL +  '  and  n.numero_nf = '+QuotedStr(FidNotaFiscal);
 
-    lQry.Open(lSQL);
+      if FidPedido <> '' then
+        lSQL := lSQL +  '  and  n.numero_ped = '+QuotedStr(FidPedido);
 
-    if copy(Trim(lQry.FieldByName('nome_xml').AsString),1,10) <> 'Autorizado' then
-      CriaException('Não é possível imprimir uma nota não autorizada.');
-    if lQry.FieldByName('status_nf').AsString = 'X' then
-      CriaException('Não foi possível imprimir uma nota cancelada ou inutilizada.');
-    if lQry.FieldByName('pmoNFe').AsInteger = 65 then begin
-      ACBrNFeDANFCeFortes := TACBrNFeDANFCeFortes.Create(nil);
-      ACBrNFe.DANFE       := ACBrNFeDANFCeFortes;
-      ACBrNFeDANFCeFortes.ImprimeQRCodeLateral := True;
-      ACBrNFeDANFCeFortes.FormularioContinuo   := True;
-    end
-    else
-    begin
-      ACBrNFeDANFeRL := TACBrNFeDANFeRL.Create(nil);
-      ACBrNFe.DANFE  := ACBrNFeDANFeRL;
-      ACBrNFe.DANFE.TipoDANFE := vConfiguracoesNotaFiscal.DANFETipoDANFE;
-    end;
+      lQry.Open(lSQL);
 
-    ACBrNFe.DANFE.Logo    := vConfiguracoesNotaFiscal.DANFEPathLogo(lQry.FieldByName('pmoNFe').AsInteger);
-    ACBrNFe.DANFE.PathPDF := vConfiguracoesNotaFiscal.DANFEPathPDF(FPathPDF);
-    ACBrNFe.DANFE.Sistema := 'Emissão: ERP Terasoft';
-    ACBrNFe.NotasFiscais.Clear;
-    ACBrNFe.NotasFiscais.LoadFromString(lQry.FieldByName('xml').AsString);
+      if copy(Trim(lQry.FieldByName('nome_xml').AsString),1,10) <> 'Autorizado' then
+        CriaException('Não é possível imprimir uma nota não autorizada.');
 
-    if FgerarPDF then begin
-      ACBrNFe.DANFE.MostraStatus := MostraPreview;
-      ACBrNFe.DANFE.ImprimirDANFEPDF;
-    end;
+      if lQry.FieldByName('status_nf').AsString = 'X' then
+        CriaException('Não foi possível imprimir uma nota cancelada ou inutilizada.');
 
-    if FimprimirDANF then begin
-      ACBrNFe.DANFE.MostraStatus := MostraPreview;
-      ACBrNFe.DANFE.MostraPreview := MostraPreview;
-      ACBrNFe.DANFE.ImprimirDANFE;
-    end;
+      if lQry.FieldByName('pmoNFe').AsInteger = 65 then begin
+        ACBrNFeDANFCeFortes := TACBrNFeDANFCeFortes.Create(nil);
+        ACBrNFe.DANFE       := ACBrNFeDANFCeFortes;
+
+        if ImpressoraNFC <> '' then
+          ACBrNFe.DANFE.Impressora := ImpressoraNFC;
+
+        ACBrNFeDANFCeFortes.ImprimeQRCodeLateral := True;
+        ACBrNFeDANFCeFortes.FormularioContinuo   := True;
+      end
+      else
+      begin
+        ACBrNFeDANFeRL := TACBrNFeDANFeRL.Create(nil);
+        ACBrNFe.DANFE  := ACBrNFeDANFeRL;
+        ACBrNFe.DANFE.TipoDANFE := vConfiguracoesNotaFiscal.DANFETipoDANFE;
+      end;
+
+      ACBrNFe.DANFE.Logo    := vConfiguracoesNotaFiscal.DANFEPathLogo(lQry.FieldByName('pmoNFe').AsInteger);
+      ACBrNFe.DANFE.PathPDF := vConfiguracoesNotaFiscal.DANFEPathPDF(FPathPDF);
+      ACBrNFe.DANFE.Sistema := 'Emissão: ERP Terasoft';
+      ACBrNFe.NotasFiscais.Clear;
+      ACBrNFe.NotasFiscais.LoadFromString(lQry.FieldByName('xml').AsString);
+
+      if FgerarPDF then begin
+        ACBrNFe.DANFE.MostraStatus := MostraPreview;
+        ACBrNFe.DANFE.ImprimirDANFEPDF;
+      end;
+
+      if FimprimirDANF then begin
+        ACBrNFe.DANFE.MostraStatus := MostraPreview;
+        ACBrNFe.DANFE.MostraPreview := MostraPreview;
+        ACBrNFe.DANFE.ImprimirDANFE;
+      end;
 
     Result := lQry.FieldByName('id_nf3').AsString;
     except
     on E:Exception do
         CriaException('Erro: '+ E.Message);
     end;
+
   finally
     lSQL := '';
     lQry.Free;
   end;
 end;
+
 function TNotaFiscal.Observacoes(pidNF: String): Boolean;
 var
  lSQL: String;
@@ -906,6 +919,12 @@ procedure TNotaFiscal.SetidPedido(const Value: String);
 begin
   FidPedido := Value;
 end;
+
+procedure TNotaFiscal.SetImpressoraNFC(const Value: String);
+begin
+  FImpressoraNFC := Value;
+end;
+
 procedure TNotaFiscal.SetimprimirDANF(const Value: Boolean);
 begin
   FimprimirDANF := Value;
