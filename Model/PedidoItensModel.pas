@@ -695,7 +695,10 @@ begin
     lMovimentoModel.id_origem       := self.FID;
     Result := lMovimentoModel.Salvar;
 
-    lProdutosModel.subtrairSaldo(self.FCODIGO_PRO, self.FQUANTIDADE_PED);
+    try
+      lProdutosModel.subtrairSaldo(self.FCODIGO_PRO, self.FQUANTIDADE_PED);
+    except
+    end;
 
   finally
     lProdutosModel.Free;
