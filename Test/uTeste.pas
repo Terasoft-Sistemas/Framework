@@ -183,6 +183,7 @@ type
     btnConsultaDesconto: TButton;
     XDBGrid8: TXDBGrid;
     dLiberacao: TDataSource;
+    btnConsultaPermissao: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -276,7 +277,7 @@ type
     procedure Button88Click(Sender: TObject);
     procedure Button85Click(Sender: TObject);
     procedure Button86Click(Sender: TObject);
-    procedure Button87Click(Sender: TObject);
+    procedure btnPermissaoClick(Sender: TObject);
     procedure Button90Click(Sender: TObject);
     procedure Button91Click(Sender: TObject);
     procedure Button94Click(Sender: TObject);
@@ -315,6 +316,7 @@ type
     procedure OrcamentoItensExcluirClick(Sender: TObject);
     procedure btnReservaClick(Sender: TObject);
     procedure btnConsultaDescontoClick(Sender: TObject);
+    procedure btnConsultaPermissaoClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -346,7 +348,7 @@ uses
   PedidoCompraModel, PedidoCompraItensModel, ClientesContatoModel, DescontoModel,
   PromocaoModel, TransportadoraModel, PrevisaoPedidoCompraModel, SaidasModel,
   SaidasItensModel, ClientesEnderecoModel, OrcamentoModel, OrcamentoItensModel, Terasoft.Utils,
-  SolicitacaoDescontoModel;
+  SolicitacaoDescontoModel, PermissaoRemotaModel;
 
 {$R *.dfm}
 
@@ -360,6 +362,22 @@ begin
     dLiberacao.DataSet := lSolicitacaoDescontoModel.obterLista;
   finally
     lSolicitacaoDescontoModel.Free;
+  end;
+end;
+
+procedure TForm1.btnConsultaPermissaoClick(Sender: TObject);
+var
+  lPermissaoRemotaModel : TPermissaoRemotaModel;
+  lVendaAssistida       : String;
+begin
+  lPermissaoRemotaModel := TPermissaoRemotaModel.Create(vIConexao);
+  try
+    lVendaAssistida := '4343';
+
+    lPermissaoRemotaModel.WhereView := ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' and permissao_remota.pedido_id = '+lVendaAssistida;
+    dLiberacao.DataSet := lPermissaoRemotaModel.obterLista;
+  finally
+    lPermissaoRemotaModel.Free;
   end;
 end;
 
@@ -2620,7 +2638,7 @@ begin
   end;
 end;
 
-procedure TForm1.Button87Click(Sender: TObject);
+procedure TForm1.btnPermissaoClick(Sender: TObject);
 var
   lDescontoModel : TDescontoModel;
   ID        : String;

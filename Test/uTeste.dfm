@@ -1328,6 +1328,15 @@ object Form1: TForm1
         GridStyle.VisualStyle = vsXPStyle
         TabOrder = 1
       end
+      object btnConsultaPermissao: TButton
+        Left = 219
+        Top = 19
+        Width = 182
+        Height = 46
+        Caption = 'Consultar Permiss'#227'o'
+        TabOrder = 2
+        OnClick = btnConsultaPermissaoClick
+      end
     end
   end
   object dsTeste2: TDataSource
