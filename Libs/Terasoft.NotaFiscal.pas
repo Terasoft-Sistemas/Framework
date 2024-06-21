@@ -29,7 +29,6 @@ uses
   FireDAC.Comp.Client,
   NFControl,
   Terasoft.Types,
-  VariaveisGlobais,
   Interfaces.Conexao;
 
 type
