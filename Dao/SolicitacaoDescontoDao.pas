@@ -199,7 +199,12 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From solicitacao_desconto where 1=1 ';
+    lSql := '  select count(*) records                                                                       '+SLineBreak+
+            '    From solicitacao_desconto                                                                   '+SLineBreak+
+            '    left join clientes on clientes.codigo_cli = solicitacao_desconto.cliente_id                 '+SLineBreak+
+            '    left join usuario solicitante on solicitante.id = solicitacao_desconto.usuario_solicitante  '+SLineBreak+
+            '    left join usuario cedente on cedente.id = solicitacao_desconto.usuario_cedente              '+SLineBreak+
+            '   where 1=1 ';
 
     lSql := lSql + where;
 
