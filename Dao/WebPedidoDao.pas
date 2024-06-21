@@ -447,7 +447,7 @@ begin
             '        VALOR_ITENS,                                                                                                           '+SLineBreak+
             '        VALOR_GARANTIA,                                                                                                        '+SLineBreak+
             '        VALOR_CUPOM_DESCONTO,                                                                                                  '+SLineBreak+
-            '        VALOR_TOTAL                                                                                                            '+SLineBreak+
+            '        VALOR_TOTAL + VALOR_FRETE + ACRESCIMO - VALOR_CUPOM_DESCONTO VALOR_TOTAL                                               '+SLineBreak+
 			      '                                                                                                                               '+SLineBreak+
             '    from (                                                                                                                     '+SLineBreak+
             '                                                                                                                               '+SLineBreak+
@@ -478,10 +478,10 @@ begin
             '    				valor_frete valor_frete,                                                                                            '+SLineBreak+
             '    				acrescimo acrescimo,                                                                                                '+SLineBreak+
             '    				origem_pedido,                                                                                                      '+SLineBreak+
+            '    				valor_cupom_desconto,                                                                                               '+SLineBreak+
             '    				sum(valor_itens) valor_itens,                                                                                       '+SLineBreak+
             '    				sum(valor_garantia) valor_garantia,                                                                                 '+SLineBreak+
-            '    				sum(valor_cupom_desconto) valor_cupom_desconto,                                                                     '+SLineBreak+
-            '    				sum(valor_itens + valor_frete + valor_garantia + acrescimo - valor_cupom_desconto) valor_total                      '+SLineBreak+
+            '    				sum(valor_itens + valor_garantia) valor_total                                                                       '+SLineBreak+
             '                                                                                                                               '+SLineBreak+
             '      		from (                                                                                                                '+SLineBreak+
             '																												                                                                        '+SLineBreak+
@@ -512,17 +512,17 @@ begin
             '         					 coalesce(web_pedido.acrescimo,0) acrescimo,                                                                '+SLineBreak+
             '                    web_pedido.origem_pedido,                                                                                  '+SLineBreak+
             '         					 coalesce(web_pedidoitens.quantidade,0) * coalesce(web_pedidoitens.valor_unitario,0) valor_itens,           '+SLineBreak+
-            '         					 coalesce(web_pedidoitens.quantidade,0) * coalesce(web_pedidoitens.vlr_garantia,0) valor_garantia,          '+SLineBreak+
-            '         					 coalesce(web_pedido.valor_cupom_desconto,0) valor_cupom_desconto                                           '+SLineBreak+
-            '       				from web_pedido                                                                                                 '+SLineBreak+
-            '      			    left join clientes on web_pedido.cliente_id = clientes.codigo_cli                                               '+SLineBreak+
-            '      				  left join web_pedidoitens on web_pedidoitens.web_pedido_id = web_pedido.id                                      '+SLineBreak+
-            '      				  left join regiao on regiao.id = web_pedido.regiao_id                                                            '+SLineBreak+
-            '               left join funcionario on funcionario.codigo_fun = web_pedido.vendedor_id                                        '+SLineBreak+
-            '      			   ) t1                                                                                                             '+SLineBreak+
-            '                                                                                                                               '+SLineBreak+
-            '    group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19, 20, 21, 22, 23, 24, 25, 26, 27 ) webpedido                       '+SLineBreak+
-            '    where 1=1                                                                                                                  '+SLineBreak;
+            '         					 coalesce(web_pedidoitens.quantidade, 0) * (coalesce(web_pedidoitens.vlr_garantia,0)+coalesce(web_pedidoitens.vlr_garantia_fr,0)) valor_garantia, '+SLineBreak+
+            '         					 coalesce(web_pedido.valor_cupom_desconto,0) valor_cupom_desconto                                                                                 '+SLineBreak+
+            '       				from web_pedido                                                                                                                                       '+SLineBreak+
+            '      			    left join clientes on web_pedido.cliente_id = clientes.codigo_cli                                                                                     '+SLineBreak+
+            '      				  left join web_pedidoitens on web_pedidoitens.web_pedido_id = web_pedido.id                                                                            '+SLineBreak+
+            '      				  left join regiao on regiao.id = web_pedido.regiao_id                                                                                                  '+SLineBreak+
+            '               left join funcionario on funcionario.codigo_fun = web_pedido.vendedor_id                                                                              '+SLineBreak+
+            '      			   ) t1                                                                                                                                                   '+SLineBreak+
+            '                                                                                                                                                                     '+SLineBreak+
+            '    group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19, 20, 21, 22, 23, 24, 25, 26, 27, 28 ) webpedido                                                         '+SLineBreak+
+            '    where 1=1                                                                                                                                                        '+SLineBreak;
 
     lSQL := lSQL + where;
 
