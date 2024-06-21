@@ -597,7 +597,8 @@ begin
       self.DESCONTO_PED  := FloatToStr(lPedidoItensModel.VALOR_TOTAL_DESCONTO * 100 / lPedidoItensModel.VALOR_TOTAL_ITENS)
     else
       self.DESCONTO_PED := '0';
-    self.TOTAL_PED     := FloatToStr(lPedidoItensModel.VALOR_TOTAL + lAcrescimo + lFrete);
+
+    self.TOTAL_PED := FloatToStr(lPedidoItensModel.VALOR_TOTAL + lAcrescimo + lFrete);
 
     self.Salvar;
   finally
