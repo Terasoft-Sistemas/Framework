@@ -263,8 +263,8 @@ begin
 
   lClienteModel := TClienteModel.Create(CONEXAO);
   try
-    if not mtPedidoCLIENTE_ID.AsInteger > 0 then
-      raise Exception.Create('Id do cliente não localizado');
+    if mtPedidoCLIENTE_ID.AsString = '' then
+      raise Exception.Create('ID do Cliente não localizado');
 
     lClienteModel.IDRecordView := mtPedidoCLIENTE_ID.AsString;
     lClienteModel.obterLista;

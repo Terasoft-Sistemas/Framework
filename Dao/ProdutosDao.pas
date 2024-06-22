@@ -1134,13 +1134,32 @@ begin
     lQry.SQL.Add(lSQL);
     lQry.Open(lSQL);
 
+    Result.ROUBO_FURTO_12              := 0;
+    Result.ROUBO_FURTO_24              := 0;
+    Result.ROUBO_FURTO_CUSTO_12        := 0;
+    Result.ROUBO_FURTO_CUSTO_24        := 0;
+    Result.ROUBO_FURTO_DA_12           := 0;
+    Result.ROUBO_FURTO_DA_24           := 0;
+    Result.ROUBO_FURTO_CUSTO_DA_12     := 0;
+    Result.ROUBO_FURTO_CUSTO_DA_24     := 0;
+
+
+
+    if lQry.FieldByName('ROUBO_FURTO_12').AsString <> '' then
     Result.ROUBO_FURTO_12              := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_12').AsFloat/100);
+    if lQry.FieldByName('ROUBO_FURTO_24').AsString <> '' then
     Result.ROUBO_FURTO_24              := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_24').AsFloat/100);
+    if lQry.FieldByName('ROUBO_FURTO_CUSTO_12').AsString <> '' then
     Result.ROUBO_FURTO_CUSTO_12        := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_CUSTO_12').AsFloat/100);
+    if lQry.FieldByName('ROUBO_FURTO_CUSTO_24').AsString <> '' then
     Result.ROUBO_FURTO_CUSTO_24        := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_CUSTO_24').AsFloat/100);
+    if lQry.FieldByName('ROUBO_FURTO_DA_12').AsString <> '' then
     Result.ROUBO_FURTO_DA_12           := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_DA_12').AsFloat/100);
+    if lQry.FieldByName('ROUBO_FURTO_DA_24').AsString <> '' then
     Result.ROUBO_FURTO_DA_24           := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_DA_24').AsFloat/100);
+    if lQry.FieldByName('ROUBO_FURTO_CUSTO_DA_12').AsString <> '' then
     Result.ROUBO_FURTO_CUSTO_DA_12     := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_CUSTO_DA_12').AsFloat/100);
+    if lQry.FieldByName('ROUBO_FURTO_CUSTO_DA_24').AsString <> '' then
     Result.ROUBO_FURTO_CUSTO_DA_24     := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_CUSTO_DA_24').AsFloat/100);
   finally
     lSQL := '';
