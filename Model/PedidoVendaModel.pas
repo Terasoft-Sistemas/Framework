@@ -680,7 +680,9 @@ begin
       if lPedidoVendaModel.FRETE_PED > 0 then
         lModel.aplicarFreteItem(lPedidoVendaModel.FRETE_PED, lPedidoVendaModel.VALOR_PED);
 
-      lModel.gerarEstoque;
+      if (lModel.TIPO_VENDA <> 'CD') then
+        lModel.gerarEstoque;
+
       lModel.calcularComissao(lPedidoVendaModel.CODIGO_VEN, lPedidoVendaModel.CODIGO_TIP, lComissaoCliente, lPedidoVendaModel.GERENTE_ID);
 
       if (lPedidoVendaModel.WEB_PEDIDO_ID <> '') and ((lModel.TIPO_VENDA = 'CD') or (lModel.ENTREGA = 'S')) then
