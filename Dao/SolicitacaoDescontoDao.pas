@@ -244,7 +244,7 @@ begin
               '         solicitacao_desconto.valor_desconto,                                                                     '+SLineBreak+
               '         solicitacao_desconto.valor_desconto / solicitacao_desconto.valor_pedido * 100 percentual_desconto,       '+SLineBreak+
               '         solicitacao_desconto.valor_pedido,                                                                       '+SLineBreak+
-              '         solicitacao_desconto.valor_pedido - solicitacao_desconto.valor_desconto                                  '+SLineBreak+
+              '         solicitacao_desconto.valor_pedido - solicitacao_desconto.valor_desconto valor_liquido                    '+SLineBreak+
               '    from solicitacao_desconto                                                                                     '+SLineBreak+
               '    left join clientes on clientes.codigo_cli = solicitacao_desconto.cliente_id                                   '+SLineBreak+
               '    left join usuario solicitante on solicitante.id = solicitacao_desconto.usuario_solicitante                    '+SLineBreak+

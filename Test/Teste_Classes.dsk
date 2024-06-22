@@ -16,21 +16,31 @@ File_13=TSourceModule,'c:\program files (x86)\embarcadero\studio\22.0\source\rtl
 
 [Modules]
 Module0=C:\Terasoft\Fontes\mgiratto\FTS\Terasoft\Framework\Test\uTeste.pas
-Module1=C:\Terasoft\Fontes\mgiratto\FTS\Terasoft\Framework\Model\PedidoCompraModel.pas
-Count=2
+Module1=C:\Terasoft\Fontes\mgiratto\FTS\Terasoft\Framework\Model\SolicitacaoDescontoModel.pas
+Module2=C:\Terasoft\Fontes\mgiratto\FTS\Terasoft\Framework\Dao\SolicitacaoDescontoDao.pas
+Module3=C:\Terasoft\Fontes\mgiratto\FTS\Terasoft\Framework\Model\PedidoCompraModel.pas
+Count=4
 EditWindowCount=1
 
 [C:\Terasoft\Fontes\mgiratto\FTS\Terasoft\Framework\Test\uTeste.pas]
+ModuleType=TSourceModule
+
+[C:\Terasoft\Fontes\mgiratto\FTS\Terasoft\Framework\Model\SolicitacaoDescontoModel.pas]
+ModuleType=TSourceModule
+
+[C:\Terasoft\Fontes\mgiratto\FTS\Terasoft\Framework\Dao\SolicitacaoDescontoDao.pas]
 ModuleType=TSourceModule
 
 [C:\Terasoft\Fontes\mgiratto\FTS\Terasoft\Framework\Model\PedidoCompraModel.pas]
 ModuleType=TSourceModule
 
 [EditWindow0]
-ViewCount=2
+ViewCount=4
 CurrentEditView=C:\Terasoft\Fontes\mgiratto\FTS\Terasoft\Framework\Test\uTeste.pas
 View0=0
 View1=1
+View2=2
+View3=3
 PercentageSizes=1
 Create=1
 Visible=1
@@ -63,15 +73,37 @@ BottomMiddelPanelData=0000080001020200000009000000446F636B5369746530100000004772
 [View0]
 CustomEditViewType=TEditView
 Module=C:\Terasoft\Fontes\mgiratto\FTS\Terasoft\Framework\Test\uTeste.pas
-CursorX=5
-CursorY=3270
-TopLine=3263
+CursorX=70
+CursorY=371
+TopLine=344
 LeftCol=1
 Elisions=
 Bookmarks=
-EditViewName=C:\Terasoft\Fontes\mgiratto\FTS\Terasoft\Framework\Test\uTeste.pas
+EditViewName=Borland.FormDesignerView
 
 [View1]
+CustomEditViewType=TEditView
+Module=C:\Terasoft\Fontes\mgiratto\FTS\Terasoft\Framework\Model\SolicitacaoDescontoModel.pas
+CursorX=45
+CursorY=166
+TopLine=129
+LeftCol=1
+Elisions=
+Bookmarks=
+EditViewName=C:\Terasoft\Fontes\mgiratto\FTS\Terasoft\Framework\Model\SolicitacaoDescontoModel.pas
+
+[View2]
+CustomEditViewType=TEditView
+Module=C:\Terasoft\Fontes\mgiratto\FTS\Terasoft\Framework\Dao\SolicitacaoDescontoDao.pas
+CursorX=1
+CursorY=220
+TopLine=207
+LeftCol=1
+Elisions=
+Bookmarks=
+EditViewName=C:\Terasoft\Fontes\mgiratto\FTS\Terasoft\Framework\Dao\SolicitacaoDescontoDao.pas
+
+[View3]
 CustomEditViewType=TEditView
 Module=C:\Terasoft\Fontes\mgiratto\FTS\Terasoft\Framework\Model\PedidoCompraModel.pas
 CursorX=1
@@ -232,8 +264,8 @@ SplitPos=111
 
 [PropInspDesignerSelection]
 ArrangeBy=Name
-SelectedItem=Caption,
-ExpandedItems=Anchors=0,Constraints=0
+SelectedItem=Caption,CustomHint
+ExpandedItems=Anchors=0,Constraints=0,LiveBindings=0
 
 [frmDesignPreview]
 PercentageSizes=1

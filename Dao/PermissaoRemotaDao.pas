@@ -238,7 +238,8 @@ begin
               '          permissao_remota.status,                                                          '+SLineBreak+
               '          permissao_remota.tabela,                                                          '+SLineBreak+
               '          permissao_remota.registro_id,                                                     '+SLineBreak+
-              '          permissao_remota.pedido_id                                                        '+SLineBreak+
+              '          permissao_remota.pedido_id,                                                       '+SLineBreak+
+              '          permissao_remota.SYSTIME                                                          '+SLineBreak+
               '    from permissao_remota                                                                   '+SLineBreak+
               '    left join usuario solicitante on solicitante.id = permissao_remota.usuario_solicitante  '+SLineBreak+
               '    left join usuario cedente on cedente.id = permissao_remota.usuario_cedente              '+SLineBreak+
