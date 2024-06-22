@@ -133,6 +133,7 @@ type
     function obterLista: TFDMemTable;
     function obterResumo(pIDPedido : String) : TFDMemTable;
     function qtdePagamentoPrazo(pWebPedido : String): Integer;
+    function obterResumoFinanceiro : TFDMemTable;
 
     procedure gerarFinanceiro(pFinanceiroParams: TFinanceiroParams);
 
@@ -278,6 +279,20 @@ begin
   lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
   try
     Result := lFinanceiroPedidoDao.obterResumo(pIDPedido);
+  finally
+    lFinanceiroPedidoDao.Free;
+  end;
+end;
+
+function TFinanceiroPedidoModel.obterResumoFinanceiro: TFDMemTable;
+var
+  lFinanceiroPedidoDao : TFinanceiroPedidoDao;
+begin
+  lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
+  try
+    lFinanceiroPedidoDao.WhereView := FWhereView;
+
+    Result := lFinanceiroPedidoDao.obterResumoFinanceiro;
   finally
     lFinanceiroPedidoDao.Free;
   end;

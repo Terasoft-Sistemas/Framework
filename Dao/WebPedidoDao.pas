@@ -444,6 +444,8 @@ begin
             '        VALOR_FRETE,                                                                                                           '+SLineBreak+
             '        ACRESCIMO,                                                                                                             '+SLineBreak+
             '        ORIGEM_PEDIDO,                                                                                                         '+SLineBreak+
+            '        SEGURO_PRESTAMISTA_VALOR,                                                                                              '+SLineBreak+
+            '        SEGURO_PRESTAMISTA_CUSTO,   	                                                                                          '+SLineBreak+
             '        VALOR_ITENS,                                                                                                           '+SLineBreak+
             '        VALOR_GARANTIA,                                                                                                        '+SLineBreak+
             '        VALOR_CUPOM_DESCONTO,                                                                                                  '+SLineBreak+
@@ -478,6 +480,8 @@ begin
             '    				valor_frete valor_frete,                                                                                            '+SLineBreak+
             '    				acrescimo acrescimo,                                                                                                '+SLineBreak+
             '    				origem_pedido,                                                                                                      '+SLineBreak+
+            '           seguro_prestamista_valor,                                                                                           '+SLineBreak+
+            '           seguro_prestamista_custo,   	                                                                                      '+SLineBreak+
             '    				valor_cupom_desconto,                                                                                               '+SLineBreak+
             '    				sum(valor_itens) valor_itens,                                                                                       '+SLineBreak+
             '    				sum(valor_garantia) valor_garantia,                                                                                 '+SLineBreak+
@@ -511,6 +515,8 @@ begin
             '         					 coalesce(web_pedido.valor_frete,0) valor_frete,                                                            '+SLineBreak+
             '         					 coalesce(web_pedido.acrescimo,0) acrescimo,                                                                '+SLineBreak+
             '                    web_pedido.origem_pedido,                                                                                  '+SLineBreak+
+            '                    web_pedido.seguro_prestamista_valor,                                                                       '+SLineBreak+
+            '                    web_pedido.seguro_prestamista_custo,   	                                                                  '+SLineBreak+
             '         					 coalesce(web_pedidoitens.quantidade,0) * coalesce(web_pedidoitens.valor_unitario,0) valor_itens,           '+SLineBreak+
             '         					 coalesce(web_pedidoitens.quantidade, 0) * (coalesce(web_pedidoitens.vlr_garantia,0)+coalesce(web_pedidoitens.vlr_garantia_fr,0)) valor_garantia, '+SLineBreak+
             '         					 coalesce(web_pedido.valor_cupom_desconto,0) valor_cupom_desconto                                                                                 '+SLineBreak+
@@ -521,7 +527,7 @@ begin
             '               left join funcionario on funcionario.codigo_fun = web_pedido.vendedor_id                                                                              '+SLineBreak+
             '      			   ) t1                                                                                                                                                   '+SLineBreak+
             '                                                                                                                                                                     '+SLineBreak+
-            '    group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19, 20, 21, 22, 23, 24, 25, 26, 27, 28 ) webpedido                                                         '+SLineBreak+
+            '    group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30 ) webpedido                                                         '+SLineBreak+
             '    where 1=1                                                                                                                                                        '+SLineBreak;
 
     lSQL := lSQL + where;

@@ -56,6 +56,7 @@ type
     procedure setParams(var pQry : TFDQuery; pFinanceiroPedidoModel: TFinanceiroPedidoModel);
     function carregaClasse(pID: String): TFinanceiroPedidoModel;
     function obterResumo(pIDPedido : String) : TFDMemTable;
+    function obterResumoFinanceiro: TFDMemTable;
     function ObterLista: TFDMemTable;
     function qtdePagamentoPrazo(pWebPedido : String): Integer;
 end;
@@ -227,6 +228,39 @@ begin
     ' where                                                  '+SLineBreak+
     '     f.web_pedido_id = '+pIDPedido+' and                '+SLineBreak+
     '     f.parcela = 1                                      '+SLineBreak;
+
+    lQry.Open(lSQL);
+
+    Result := vConstrutor.atribuirRegistros(lQry);
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TFinanceiroPedidoDao.obterResumoFinanceiro: TFDMemTable;
+var
+  lQry: TFDQuery;
+  lSQL:String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+    lSQL := ' select                                                 '+SLineBreak+
+            '     f.web_pedido_id,                                   '+SLineBreak+
+            '     p.codigo_port,                                     '+SLineBreak+
+            '     p.nome_port,                                       '+SLineBreak+
+            '     f.quantidade_parcelas,                             '+SLineBreak+
+            '     f.valor_parcela,                                   '+SLineBreak+
+            '     f.valor_total,                                     '+SLineBreak+
+            '     f.vencimento,                                      '+SLineBreak+
+            '     f.valor_liquido,                                   '+SLineBreak+
+            '     f.id_financeiro                                    '+SLineBreak+
+            ' from financeiro_pedido f                               '+SLineBreak+
+            ' left join portador p on p.codigo_port = f.portador_id  '+SLineBreak+
+            ' left join web_pedido w on w.id = f.web_pedido_id       '+SLineBreak+
+            'where 1=1                                               '+SLineBreak;
+
+    lSQL := lSQL + where;
 
     lQry.Open(lSQL);
 
