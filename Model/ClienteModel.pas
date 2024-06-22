@@ -945,6 +945,7 @@ type
     function comissaoCliente(pId: String): Variant;
     function diasAtraso(pCodigoCliente: String): Variant;
 
+    function obterListaConsulta: TFDMemTable;
     function ObterListaMemTable: TFDMemTable;
     function ObterBairros: TFDMemTable;
 
@@ -1086,6 +1087,27 @@ begin
     FClientesLista                := lClienteLista.ClientesLista;
   finally
     lClienteLista.Free;
+  end;
+end;
+
+function TClienteModel.obterListaConsulta: TFDMemTable;
+var
+  lClienteDao: TClienteDao;
+begin
+  lClienteDao := TClienteDao.Create(vIConexao);
+  try
+    lClienteDao.TotalRecords      := FTotalRecords;
+    lClienteDao.WhereView         := FWhereView;
+    lClienteDao.CountView         := FCountView;
+    lClienteDao.OrderView         := FOrderView;
+    lClienteDao.StartRecordView   := FStartRecordView;
+    lClienteDao.LengthPageView    := FLengthPageView;
+    lClienteDao.IDRecordView      := FIDRecordView;
+
+    Result := lClienteDao.obterListaConsulta;
+    FTotalRecords := lClienteDao.TotalRecords;
+  finally
+    lClienteDao.Free;
   end;
 end;
 
