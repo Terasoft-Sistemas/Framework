@@ -389,7 +389,9 @@ type
     function Excluir(pID: String) : String;
 
     function Autorizar(pID : String) : Boolean;
+    function AutorizarDesconto(pID : String) : Boolean;
     function Negar(pID: String): Boolean;
+    function NegarDesconto(pID: String): Boolean;
 
     property WebPedidosLista: TObjectList<TWebPedidoModel> read FWebPedidosLista write SetWebPedidosLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -415,7 +417,7 @@ uses
   ClienteModel,
   FinanceiroPedidoModel,
   PortadorModel,
-  SolicitacaoDescontoModel;
+  SolicitacaoDescontoModel, PermissaoRemotaModel;
 
 { TWebPedidoModel }
 
@@ -1490,6 +1492,51 @@ begin
   end;
 end;
 
+function TWebPedidoModel.NegarDesconto(pID: String): Boolean;
+var
+  lWebPedidoModel  : TWebPedidoModel;
+  lPermissaoRemota : TPermissaoRemotaModel;
+  lTablePermissa   : TFDMemTable;
+begin
+  if pID = '' then
+    CriaException('ID não informado.');
+
+  lWebPedidoModel  := TWebPedidoModel.Create(vIConexao);
+  lPermissaoRemota := TPermissaoRemotaModel.Create(vIConexao);
+
+  try
+    lWebPedidoModel := lWebPedidoModel.carregaClasse(pID);
+
+    if lWebPedidoModel.STATUS <> 'E' then
+      CriaException('Desconto já negado ou autorizado.');
+
+    lPermissaoRemota.WhereView := ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' '+
+		                              ' and permissao_remota.pedido_id = '+pID +
+		                              ' and coalesce(permissao_remota.status,'') = '''' ';
+
+    lTablePermissa := lPermissaoRemota.obterLista;
+
+    lTablePermissa.First;
+    while not lTablePermissa.Eof do
+    begin
+      lPermissaoRemota.Excluir(lTablePermissa.FieldByName('ID').AsString);
+      lTablePermissa.Next;
+    end;
+
+    lWebPedidoModel.STATUS              := 'D';
+		lWebPedidoModel.DATA_HORA_APROVACAO := '';
+		lWebPedidoModel.USUARIO_APROVACAO   := '';
+
+    lWebPedidoModel.Acao := tacAlterar;
+    lWebPedidoModel.Salvar;
+
+    Result := True;
+  finally
+    lPermissaoRemota.Free;
+    lWebPedidoModel.Free;
+  end;
+end;
+
 procedure TWebPedidoModel.AtualizaReservaCD(pWebPedidoModel: TWebPedidoModel);
 var
   lReservaModel : TReservaModel;
@@ -1568,6 +1615,52 @@ begin
 
     Result := true;
   finally
+    lWebPedidoModel.Free;
+    lPortadorModel.Free;
+  end;
+end;
+
+function TWebPedidoModel.AutorizarDesconto(pID: String): Boolean;
+var
+  lWebPedidoModel  : TWebPedidoModel;
+  lPortadorModel   : TPortadorModel;
+  lPermissaoRemota : TPermissaoRemotaModel;
+  lTablePermissao  : TFDMemTable;
+begin
+  lWebPedidoModel  := TWebPedidoModel.Create(vIConexao);
+  lPortadorModel   := TPortadorModel.Create(vIConexao);
+  lPermissaoRemota := TPermissaoRemotaModel.Create(vIConexao);
+
+  try
+    lWebPedidoModel := lWebPedidoModel.carregaClasse(pID);
+
+    if lWebPedidoModel.STATUS <> 'E' then
+      CriaException('Desconto já negado ou autorizado.');
+
+    lPortadorModel  := lPortadorModel.carregaClasse(lWebPedidoModel.PORTADOR_ID);
+
+    lPermissaoRemota.WhereView := ' and permissao_remota.pedido_id = ' + pID +
+                                  ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' '+
+                                  ' and coalesce(permissao_remota.status,'''') = '''' ';
+
+    lTablePermissao := lPermissaoRemota.obterLista;
+
+    if lTablePermissao.RecordCount > 0 then
+      lWebPedidoModel.STATUS := 'P'
+
+    else if AnsiMatchStr(lPortadorModel.TPAG_NFE,['01','03','04','99']) then
+      lWebPedidoModel.STATUS := 'C'
+
+    else
+      lWebPedidoModel.STATUS := 'A';
+
+    lWebPedidoModel.Acao := tacAlterar;
+    lWebPedidoModel.Salvar;
+
+    Result := True;
+
+  finally
+    lPermissaoRemota.Free;
     lWebPedidoModel.Free;
     lPortadorModel.Free;
   end;
