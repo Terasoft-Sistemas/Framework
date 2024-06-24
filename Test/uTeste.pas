@@ -185,6 +185,7 @@ type
     dLiberacao: TDataSource;
     btnConsultaPermissao: TButton;
     btnPermissaoRemota: TButton;
+    Button87: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -319,6 +320,7 @@ type
     procedure btnConsultaDescontoClick(Sender: TObject);
     procedure btnConsultaPermissaoClick(Sender: TObject);
     procedure btnPermissaoRemotaClick(Sender: TObject);
+    procedure Button87Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -2637,6 +2639,18 @@ begin
     end;
   finally
     lProdutoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button87Click(Sender: TObject);
+var
+  lPermissaoRemotaModel : TPermissaoRemotaModel;
+begin
+  lPermissaoRemotaModel := TPermissaoRemotaModel.Create(vIConexao);
+  try
+    lPermissaoRemotaModel.Negar('789');
+  finally
+    lPermissaoRemotaModel.Free;
   end;
 end;
 

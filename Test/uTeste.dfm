@@ -1310,8 +1310,8 @@ object Form1: TForm1
       Caption = 'Libera'#231#227'o'
       ImageIndex = 12
       object btnConsultaDesconto: TButton
-        Left = 19
-        Top = 19
+        Left = 11
+        Top = 83
         Width = 182
         Height = 46
         Caption = 'Consultar Desconto'
@@ -1329,7 +1329,7 @@ object Form1: TForm1
         TabOrder = 1
       end
       object btnConsultaPermissao: TButton
-        Left = 219
+        Left = 11
         Top = 19
         Width = 182
         Height = 46
@@ -1338,13 +1338,22 @@ object Form1: TForm1
         OnClick = btnConsultaPermissaoClick
       end
       object btnPermissaoRemota: TButton
-        Left = 19
-        Top = 71
+        Left = 203
+        Top = 19
         Width = 182
         Height = 46
-        Caption = 'Permissao remota'
+        Caption = 'Permissao remota Autorizar'
         TabOrder = 3
         OnClick = btnPermissaoRemotaClick
+      end
+      object Button87: TButton
+        Left = 403
+        Top = 19
+        Width = 182
+        Height = 46
+        Caption = 'Permissao remota Negar'
+        TabOrder = 4
+        OnClick = Button87Click
       end
     end
   end

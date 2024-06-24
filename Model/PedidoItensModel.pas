@@ -574,8 +574,8 @@ begin
     else if pComissaoCliente > 0 then
       lPercentualComissao := pComissaoCliente
 
-    else if self.FCOMIS_PRO > 0 then
-      lPercentualComissao := self.FCOMIS_PRO
+    else if self.FCOMIS_PRO <> '' then
+      lPercentualComissao := StrToFloat(self.FCOMIS_PRO)
 
     else if self.FGRUPO_COMISSAO_ID <> '' then
       lPercentualComissao := lVendedorModel.comissaoPorGrupo(pVendedor, self.FGRUPO_COMISSAO_ID)
@@ -593,8 +593,8 @@ begin
     if pComissaoCliente > 0 then
       lPercentualComissaoGerente := pComissaoCliente
 
-    else if self.FCOMIS_PRO > 0 then
-      lPercentualComissaoGerente := self.FCOMIS_PRO
+    else if self.FCOMIS_PRO <> '' then
+      lPercentualComissaoGerente := StrToFloat(self.FCOMIS_PRO)
 
     else if self.FGRUPO_COMISSAO_ID <> '' then
       lPercentualComissaoGerente := lVendedorModel.comissaoPorGrupo(pGerente, self.FGRUPO_COMISSAO_ID)
