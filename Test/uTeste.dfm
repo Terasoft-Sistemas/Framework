@@ -1337,6 +1337,15 @@ object Form1: TForm1
         TabOrder = 2
         OnClick = btnConsultaPermissaoClick
       end
+      object btnPermissaoRemota: TButton
+        Left = 19
+        Top = 71
+        Width = 182
+        Height = 46
+        Caption = 'Permissao remota'
+        TabOrder = 3
+        OnClick = btnPermissaoRemotaClick
+      end
     end
   end
   object dsTeste2: TDataSource

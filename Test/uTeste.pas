@@ -184,6 +184,7 @@ type
     XDBGrid8: TXDBGrid;
     dLiberacao: TDataSource;
     btnConsultaPermissao: TButton;
+    btnPermissaoRemota: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -317,6 +318,7 @@ type
     procedure btnReservaClick(Sender: TObject);
     procedure btnConsultaDescontoClick(Sender: TObject);
     procedure btnConsultaPermissaoClick(Sender: TObject);
+    procedure btnPermissaoRemotaClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -2658,6 +2660,18 @@ begin
     end;
   finally
     lDescontoModel.Free;
+  end;
+end;
+
+procedure TForm1.btnPermissaoRemotaClick(Sender: TObject);
+var
+  lPermissaoRemotaModel : TPermissaoRemotaModel;
+begin
+  lPermissaoRemotaModel := TPermissaoRemotaModel.Create(vIConexao);
+  try
+    lPermissaoRemotaModel.Autorizar('789');
+  finally
+    lPermissaoRemotaModel.Free;
   end;
 end;
 
