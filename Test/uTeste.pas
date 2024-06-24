@@ -186,6 +186,8 @@ type
     btnConsultaPermissao: TButton;
     btnPermissaoRemota: TButton;
     Button87: TButton;
+    btnDescontoAutorizar: TButton;
+    btnDescontoNegar: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -276,7 +278,7 @@ type
     procedure Button81Click(Sender: TObject);
     procedure Button82Click(Sender: TObject);
     procedure Button83Click(Sender: TObject);
-    procedure Button88Click(Sender: TObject);
+    procedure btnDescontoClick(Sender: TObject);
     procedure Button85Click(Sender: TObject);
     procedure Button86Click(Sender: TObject);
     procedure btnPermissaoClick(Sender: TObject);
@@ -321,6 +323,8 @@ type
     procedure btnConsultaPermissaoClick(Sender: TObject);
     procedure btnPermissaoRemotaClick(Sender: TObject);
     procedure Button87Click(Sender: TObject);
+    procedure btnDescontoAutorizarClick(Sender: TObject);
+    procedure btnDescontoNegarClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -2689,7 +2693,20 @@ begin
   end;
 end;
 
-procedure TForm1.Button88Click(Sender: TObject);
+procedure TForm1.btnDescontoAutorizarClick(Sender: TObject);
+var
+  lSolicitacaoDescontoModel : TSolicitacaoDescontoModel;
+begin
+  lSolicitacaoDescontoModel := TSolicitacaoDescontoModel.Create(vIConexao);
+
+  try
+    lSolicitacaoDescontoModel.Autorizar('4176');
+  finally
+    lSolicitacaoDescontoModel.Free;
+  end;
+end;
+
+procedure TForm1.btnDescontoClick(Sender: TObject);
 var
   lDescontoModel : TDescontoModel;
 begin
@@ -2708,6 +2725,19 @@ begin
     end
   finally
     lDescontoModel.Free;
+  end;
+end;
+
+procedure TForm1.btnDescontoNegarClick(Sender: TObject);
+var
+  lSolicitacaoDescontoModel : TSolicitacaoDescontoModel;
+begin
+  lSolicitacaoDescontoModel := TSolicitacaoDescontoModel.Create(vIConexao);
+
+  try
+    lSolicitacaoDescontoModel.Negar('4176');
+  finally
+    lSolicitacaoDescontoModel.Free;
   end;
 end;
 

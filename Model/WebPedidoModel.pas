@@ -1512,7 +1512,7 @@ begin
 
     lPermissaoRemota.WhereView := ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' '+
 		                              ' and permissao_remota.pedido_id = '+pID +
-		                              ' and coalesce(permissao_remota.status,'') = '''' ';
+		                              ' and coalesce(permissao_remota.status,'''') = '''' ';
 
     lTablePermissa := lPermissaoRemota.obterLista;
 
@@ -1622,13 +1622,11 @@ function TWebPedidoModel.AutorizarDesconto(pID: String): Boolean;
 var
   lFinanceiroPedidoModel : TFinanceiroPedidoModel;
   lWebPedidoModel        : TWebPedidoModel;
-  lPortadorModel         : TPortadorModel;
   lPermissaoRemota       : TPermissaoRemotaModel;
   lTablePermissao        : TFDMemTable;
 begin
   lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
   lWebPedidoModel        := TWebPedidoModel.Create(vIConexao);
-  lPortadorModel         := TPortadorModel.Create(vIConexao);
   lPermissaoRemota       := TPermissaoRemotaModel.Create(vIConexao);
 
   try
@@ -1636,8 +1634,6 @@ begin
 
     if lWebPedidoModel.STATUS <> 'E' then
       CriaException('Desconto já negado ou autorizado.');
-
-    lPortadorModel  := lPortadorModel.carregaClasse(lWebPedidoModel.PORTADOR_ID);
 
     lPermissaoRemota.WhereView := ' and permissao_remota.pedido_id = ' + pID +
                                   ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' '+
@@ -1663,7 +1659,6 @@ begin
     lFinanceiroPedidoModel.Free;
     lPermissaoRemota.Free;
     lWebPedidoModel.Free;
-    lPortadorModel.Free;
   end;
 end;
 
