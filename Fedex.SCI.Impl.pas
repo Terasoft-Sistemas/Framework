@@ -188,6 +188,9 @@ begin
           end else if(lTipo=LOGISTICA_TIPOSAIDA_SAIDATRANSF) then
           begin
             lDS := gdbPadrao.criaDataset.query( 'select p.numero_sai id, p.* from saidas p where p.numero_sai=:id and p.transferencia=''S'' ', 'id', [ lDocumento ]);
+          end else if(lTipo=LOGISTICA_TIPOSAIDA_OUTRASSAIDAS) then
+          begin
+            lDS := gdbPadrao.criaDataset.query( 'select p.numero_sai id, p.* from saidas p where p.numero_sai=:id and p.transferencia is distinct from ''S'' ', 'id', [ lDocumento ]);
           end else begin
             pResultado.formataErro('processaArquivoExpedicao [%s]: Tipo não reconhecido: %s', [ lArquivo, lTipo ] );
             break;
@@ -221,7 +224,7 @@ begin
             begin
               lDSItens := gdbPadrao.criaDataset.query('select p.id id_item, p.numero_ped id, p.codigo_pro produto_id, p.quantidade_ped quantidade, 0 as quantidade_atendida from pedidoitens p ' +
                                                ' where p.numero_ped = :id order by 1 ', 'id', [ lDocumento ] );
-            end else if(lTipo=LOGISTICA_TIPOSAIDA_SAIDATRANSF) then
+            end else if(stringNoArray(lTipo, [LOGISTICA_TIPOSAIDA_SAIDATRANSF,LOGISTICA_TIPOSAIDA_OUTRASSAIDAS])) then
             begin
               lDSItens := gdbPadrao.criaDataset.query('select p.id id_item, p.numero_sai id, p.codigo_pro produto_id, p.quantidade_sai quantidade, 0 as quantidade_atendida from saidasitens p ' +
                                                ' where p.numero_sai = :id order by 1 ', 'id', [ lDocumento ] );
@@ -330,7 +333,7 @@ begin
             end;
             if(lCDS.RecNo=1) then
               gdbPadrao.updateDB('pedidovenda', [ 'numero_ped' ], [ lDocumento ], [ 'PESO_BRUTO', 'PESO_LIQUIDO', 'QTDE_VOLUME','ESPECIE_VOLUME'], [ lPeso, lPeso, lVolumes, 'CAIXA' ] );
-          end else if(lTipo=LOGISTICA_TIPOSAIDA_SAIDATRANSF) then
+          end else if(stringNoArray(lTipo,[LOGISTICA_TIPOSAIDA_SAIDATRANSF,LOGISTICA_TIPOSAIDA_OUTRASSAIDAS])) then
           begin
             gdbPadrao.updateDB('saidasitens', [ 'id' ], [ lCDS.FieldByName('id_item').AsInteger ], [ 'OBS_ITEM', 'qtd_checagem'], [ strObs, lFieldQtde.AsInteger ] );
             if(lFieldQtde.AsInteger <> lCDS.FieldByName('quantidade').AsInteger) then begin
@@ -1165,6 +1168,13 @@ begin
               ' left join clientes c on c.codigo_cli = p.codigo_cli ' +
               ' left join transportadora t on t.codigo_tra = p.TRANSPORTADORA_ID ';
 
+    end else if(lTipo=LOGISTICA_TIPOSAIDA_OUTRASSAIDAS) then
+    begin
+      lQuery := 'select ''O'' || p.numero_sai id, p.numero_sai pid, p.data_sai data_emissao, p.total_sai valor_total, c.cnpj_cpf_cli cnpj_cpf, '+#13+
+         ' t.cnpj_cpf_tra transportador, p.codigo_cli cliente_codigo, p.TRANSPORTADORA_ID transportadora_codigo '+#13+
+         ' from saidas p '+#13+
+         ' left join clientes c on c.codigo_cli = p.codigo_cli '+#13+
+         ' left join transportadora t on t.codigo_tra = p.TRANSPORTADORA_ID';
     end else
     begin
       pResultado.formataErro('getShipmentOrderList: Tipo não reconhecido: [%s]', [ lTIpo ]);
@@ -1189,6 +1199,14 @@ begin
         lParameters[0] := lID;
         lQuery := lQuery + ' where p.numero_sai=:numero_sai and p.transferencia=''S''';
 
+      end else if(stringNoArray(lTipo, [LOGISTICA_TIPOSAIDA_OUTRASSAIDAS])) then
+      begin
+        //SAIDAS específica
+        lFieldNames := 'numero_sai';
+        SetLength(lParameters,1);
+        lParameters[0] := lID;
+        lQuery := lQuery + ' where p.numero_sai=:numero_sai and p.transferencia is distinct from ''S''';
+
       end else begin
         pResultado.formataErro('getShipmentOrderList: Tipo não reconhecido: [%s]', [ lTIpo ]);
         exit;
@@ -1210,6 +1228,17 @@ begin
         // Listar PEDIDOS que estão no controle e precisam enviar
         lQuery := lQuery + ' left join controlealteracoes ca on ca.sistema = :sistema and ca.identificador = :identificador and ca.chave = ''T''||p.numero_sai ' +
                   ' where ca.valor = :status and p.transferencia=''S'' ';
+        SetLength(lParameters,3);
+        lParameters[0] := ctr.sistema;
+        lParameters[1] := CONTROLE_LOGISTICA_STATUS_SAIDA;
+        lParameters[2] := CONTROLE_LOGISTICA_STATUS_DISPONIVEL_PARA_ENVIO;
+        lFieldNames := 'sistema;identificador;status';
+        lQuery := lQuery + ' order by 1 ';
+      end else if(lTipo = LOGISTICA_TIPOSAIDA_OUTRASSAIDAS) then
+      begin
+        // Listar PEDIDOS que estão no controle e precisam enviar
+        lQuery := lQuery + ' left join controlealteracoes ca on ca.sistema = :sistema and ca.identificador = :identificador and ca.chave = ''O''||p.numero_sai ' +
+                  ' where ca.valor = :status and p.transferencia is distinct from ''S'' ';
         SetLength(lParameters,3);
         lParameters[0] := ctr.sistema;
         lParameters[1] := CONTROLE_LOGISTICA_STATUS_SAIDA;
@@ -1270,7 +1299,7 @@ begin
         lQuery := 'select p.numero_ped id, id item, p.codigo_pro produto_id, p.quantidade_ped quantidade ' +
           ' from pedidoitens p ' +
           ' where p.numero_ped=:id ';
-      end else if(stringNoArray(lTipo, [LOGISTICA_TIPOSAIDA_SAIDATRANSF])) then
+      end else if(stringNoArray(lTipo, [LOGISTICA_TIPOSAIDA_SAIDATRANSF,LOGISTICA_TIPOSAIDA_OUTRASSAIDAS])) then
       begin
         lQuery := 'select p.numero_sai id, id item, p.codigo_pro produto_id, p.quantidade_sai quantidade ' +
           ' from saidasitens p ' +
