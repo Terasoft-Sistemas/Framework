@@ -199,6 +199,7 @@ end;
 procedure TFinanceiroPedidoModel.gerarFinanceiro(pFinanceiroParams: TFinanceiroParams);
 var
   i                   : Integer;
+  lValorParcela,
   lSoma               : Double;
   lPrimeiroVencimento : TDate;
   lIDFinanceiro       : String;
@@ -208,6 +209,7 @@ begin
   lPrimeiroVencimento   := pFinanceiroParams.PRIMEIRO_VENCIMENTO;
   lIDFinanceiro := '';
   lSoma         := 0;
+  lValorParcela := RoundTo(pFinanceiroParams.VALOR_TOTAL / pFinanceiroParams.QUANTIDADE_PARCELAS, -2);
 
   for i := 0 to pFinanceiroParams.QUANTIDADE_PARCELAS -1 do
   begin
@@ -216,8 +218,8 @@ begin
     self.VALOR_LIQUIDO        := FloatToStr(pFinanceiroParams.VALOR_LIQUIDO);
     self.VALOR_TOTAL          := FloatToStr(pFinanceiroParams.VALOR_TOTAL);
     self.QUANTIDADE_PARCELAS  := IntToStr(pFinanceiroParams.QUANTIDADE_PARCELAS);
-    self.PARCELA              := IntToStr(i);
-    self.VALOR_PARCELA        := FloatToStr(pFinanceiroParams.VALOR_TOTAL / pFinanceiroParams.QUANTIDADE_PARCELAS);
+    self.PARCELA              := IntToStr(i+1);
+    self.VALOR_PARCELA        := FloatToStr(lValorParcela);
     self.INDCE_APLICADO       := FloatToStr(pFinanceiroParams.INDCE_APLICADO);
     self.VALOR_ACRESCIMO      := FloatToStr(pFinanceiroParams.VALOR_ACRESCIMO);
     self.ID_FINANCEIRO        := lIDFinanceiro;
@@ -236,12 +238,12 @@ begin
 
     lSoma := lSoma + self.VALOR_PARCELA;
 
-    if i = pFinanceiroParams.QUANTIDADE_PARCELAS then
+    if self.PARCELA = pFinanceiroParams.QUANTIDADE_PARCELAS then
       self.VALOR_PARCELA := FloatToStr(self.VALOR_PARCELA + (pFinanceiroParams.VALOR_TOTAL - lSoma));
 
     lRetorno := self.Incluir;
 
-    if i = 1 then
+    if i = 0 then
       lIDFinanceiro := lRetorno;
 
   end;
