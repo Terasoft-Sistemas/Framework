@@ -114,16 +114,16 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID             := lQry.FieldByName('ID').AsString;
-    lModel.STATUS         := lQry.FieldByName('STATUS').AsString;
-    lModel.FANTASIA       := lQry.FieldByName('FANTASIA').AsString;
-    lModel.SENHA          := lQry.FieldByName('SENHA').AsString;
-    lModel.NOME           := lQry.FieldByName('NOME').AsString;
-    lModel.DPTO           := lQry.FieldByName('DPTO').AsString;
-    lModel.PERFIL_NEW_ID  := lQry.FieldByName('PERFIL_NEW_ID').AsString;
-    lModel.CODIGO_FUNCIONARIO  := lQry.FieldByName('codigo_fun').AsString;
-    lModel.TIPO_VENDEDOR       := lQry.FieldByName('tipo_ven').AsString;
-
+    lModel.ID                    := lQry.FieldByName('ID').AsString;
+    lModel.STATUS                := lQry.FieldByName('STATUS').AsString;
+    lModel.FANTASIA              := lQry.FieldByName('FANTASIA').AsString;
+    lModel.SENHA                 := lQry.FieldByName('SENHA').AsString;
+    lModel.NOME                  := lQry.FieldByName('NOME').AsString;
+    lModel.DPTO                  := lQry.FieldByName('DPTO').AsString;
+    lModel.PERFIL_NEW_ID         := lQry.FieldByName('PERFIL_NEW_ID').AsString;
+    lModel.CODIGO_FUNCIONARIO    := lQry.FieldByName('codigo_fun').AsString;
+    lModel.TIPO_VENDEDOR         := lQry.FieldByName('tipo_ven').AsString;
+    lModel.PORCENTAGEM_ZOOM_TELA := lQry.FieldByName('PORCENTAGEM_ZOOM_TELA').AsString;
     Result := lModel;
 
   finally
@@ -195,7 +195,7 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := vConstrutor.gerarUpdate('VENDACARTAO', 'ID');
+  lSQL := vConstrutor.gerarUpdate('USUARIO', 'ID');
 
   try
     lQry.SQL.Add(lSQL);
