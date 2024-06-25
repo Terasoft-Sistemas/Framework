@@ -134,8 +134,10 @@ var
   lModel             : TTabelaJurosModel;
   i                  : Integer;
   lTotal,
-  lPercentualJuros,
-  lJuros             : Double;
+  lJuros,
+  lValorGerar,
+  lValorParcela,
+  lPercentualJuros   : Double;
   lMemTable          : TFDMemTable;
   lPortadorModel     : TPortadorModel;
   lConfiguracoes     : TerasoftConfiguracoes;
@@ -178,31 +180,65 @@ begin
     for i := 0 to self.TabelaJurossLista.Count -1 do
     begin
       if lTagPercentual = 'S' then
-        lPercentualJuros := self.TabelaJurossLista[i].PERCENTUAL
+      begin
+        self.TabelaJurossLista[i].FJUROS_TEXTO   := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, 'Juros', 'Sem juros');
+        lJuros                                   := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, self.TabelaJurossLista[i].PERCENTUAL / 100 * lTotal, 0);
+        self.TabelaJurossLista[i].FVALOR_JUROS   := FormatFloat('#,##0.00', lJuros);
+        self.TabelaJurossLista[i].FVALOR_TOTAL   := FormatFloat('#,##0.00', lTotal + lJuros);
+        self.TabelaJurossLista[i].FVALOR_PARCELA := FormatFloat('#,##0.00', (lTotal + lJuros) / StrToInt(self.TabelaJurossLista[i].CODIGO));
+
+        if pSeguroPrestamista then
+        begin
+          if lPortadorModel.PER_SEGURO_PRESTAMISTA = 0 then
+           CriaException('Valor do cadastro do seguroprestamista esta zerado.');
+
+          self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := lPortadorModel.PER_SEGURO_PRESTAMISTA;
+          self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := (lTotal + lJuros)*(lPortadorModel.PER_SEGURO_PRESTAMISTA/100);
+          self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, self.TabelaJurossLista[i].PERCENTUAL / 100 * self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA, 0);;
+        end else
+        begin
+          self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := 0;
+          self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := 0;
+          self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA := 0;
+        end;
+      end
       else
-        lPercentualJuros := self.TabelaJurossLista[i].INDCE;
-
-      self.TabelaJurossLista[i].FJUROS_TEXTO   := IIF(lPercentualJuros > 0, 'Juros', 'Sem juros');
-      lJuros                                   := IIF(lPercentualJuros > 0, lPercentualJuros / 100 * lTotal, 0);
-      self.TabelaJurossLista[i].FVALOR_JUROS   := FormatFloat('#,##0.00', lJuros);
-      self.TabelaJurossLista[i].FVALOR_TOTAL   := FormatFloat('#,##0.00', lTotal + lJuros);
-      self.TabelaJurossLista[i].FVALOR_PARCELA := FormatFloat('#,##0.00', (lTotal + lJuros) / StrToInt(self.TabelaJurossLista[i].CODIGO));
-
-      if pSeguroPrestamista then
       begin
-        if lPortadorModel.PER_SEGURO_PRESTAMISTA = 0 then
-         CriaException('Valor do cadastro do seguroprestamista esta zerado.');
 
-        self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := lPortadorModel.PER_SEGURO_PRESTAMISTA;
-        self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := (lTotal + lJuros)*(lPortadorModel.PER_SEGURO_PRESTAMISTA/100);
-        self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA := IIF(lPercentualJuros > 0, lPercentualJuros / 100 * self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA, 0);;
-      end else
-      begin
-        self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := 0;
-        self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := 0;
-        self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA := 0;
+        if self.TabelaJurossLista[i].INDCE > 0 then
+        begin
+          lValorParcela    := lTotal * self.TabelaJurossLista[i].INDCE;
+          lValorGerar      := lValorParcela * StrToInt(self.TabelaJurossLista[i].CODIGO);
+          lPercentualJuros := (lValorGerar - lTotal) / lTotal * 100;
+        end
+        else
+        begin
+          lValorParcela    := lTotal / StrToInt(self.TabelaJurossLista[i].CODIGO);
+          lValorGerar      := lTotal;
+          lPercentualJuros := 0;
+        end;
+
+        self.TabelaJurossLista[i].FJUROS_TEXTO   := IIF(lPercentualJuros > 0, 'Juros', 'Sem juros');
+        lJuros                                   := IIF(self.TabelaJurossLista[i].INDCE > 0, lValorGerar - lTotal, 0);
+        self.TabelaJurossLista[i].FVALOR_JUROS   := FormatFloat('#,##0.00', lJuros);
+        self.TabelaJurossLista[i].FVALOR_TOTAL   := FormatFloat('#,##0.00', lValorGerar);
+        self.TabelaJurossLista[i].FVALOR_PARCELA := FormatFloat('#,##0.00', lValorParcela);
+
+        if pSeguroPrestamista then
+        begin
+          if lPortadorModel.PER_SEGURO_PRESTAMISTA = 0 then
+           CriaException('Valor do cadastro do seguroprestamista esta zerado.');
+
+          self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := lPortadorModel.PER_SEGURO_PRESTAMISTA;
+          self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := (lTotal + lJuros)*(lPortadorModel.PER_SEGURO_PRESTAMISTA/100);
+          self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA := IIF(lPercentualJuros > 0, lPercentualJuros / 100 * self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA, 0);;
+        end else
+        begin
+          self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := 0;
+          self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := 0;
+          self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA := 0;
+        end;
       end;
-
     end;
 
     with lMemTable.IndexDefs.AddIndexDef do
@@ -230,24 +266,33 @@ begin
 
     for i := 0 to self.TabelaJurossLista.Count -1 do
     begin
-       if lTagPercentual = 'S' then
+      if lTagPercentual = 'S' then
         lPercentualJuros := self.TabelaJurossLista[i].PERCENTUAL
       else
-        lPercentualJuros := self.TabelaJurossLista[i].INDCE;
+      if self.TabelaJurossLista[i].INDCE > 0 then
+      begin
+        lValorParcela    := lTotal * self.TabelaJurossLista[i].INDCE;
+        lValorGerar      := lValorParcela * StrToInt(self.TabelaJurossLista[i].CODIGO);
+        lPercentualJuros := (lValorGerar - lTotal) / lTotal * 100;
+      end
+      else
+      begin
+        lPercentualJuros := 0;
+      end;
 
-       lMemTable.InsertRecord([
-                                self.TabelaJurossLista[i].ID,
-                                self.TabelaJurossLista[i].CODIGO,
-                                IIF(lTagPercentual = 'S', self.TabelaJurossLista[i].PERCENTUAL, self.TabelaJurossLista[i].INDCE),
-                                self.TabelaJurossLista[i].JUROS_TEXTO,
-                                self.TabelaJurossLista[i].VALOR_JUROS,
-                                self.TabelaJurossLista[i].VALOR_PARCELA,
-                                self.TabelaJurossLista[i].VALOR_TOTAL,
-                                self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA,
-                                self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA,
-                                self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA
 
-                               ]);
+      lMemTable.InsertRecord([
+                              self.TabelaJurossLista[i].ID,
+                              self.TabelaJurossLista[i].CODIGO,
+                              IIF(lTagPercentual = 'S', self.TabelaJurossLista[i].PERCENTUAL, lPercentualJuros),
+                              self.TabelaJurossLista[i].JUROS_TEXTO,
+                              self.TabelaJurossLista[i].VALOR_JUROS,
+                              self.TabelaJurossLista[i].VALOR_PARCELA,
+                              self.TabelaJurossLista[i].VALOR_TOTAL,
+                              self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA,
+                              self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA,
+                              self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA
+                             ]);
     end;
 
     lMemTable.Open;
