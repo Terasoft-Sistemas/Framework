@@ -329,7 +329,7 @@ begin
 
   try
     lFinanceiroPedidoModel.WhereView := 'AND FINANCEIRO_PEDIDO.WEB_PEDIDO_ID ='+ Self.FIDPEDIDO;
-    lFinanceiroPedidoModel.OrderView := 'FINANCEIRO_PEDIDO.ID_FINANCEIRO, PORTADOR.NOME_PORT, FINANCEIRO_PEDIDO.PARCELA';
+    lFinanceiroPedidoModel.OrderView := 'FINANCEIRO_PEDIDO.ID_FINANCEIRO, FINANCEIRO_PEDIDO.PARCELA';
 
     lMemtable := lFinanceiroPedidoModel.obterLista;
     if (lMemtable.RecordCount > 0) then begin

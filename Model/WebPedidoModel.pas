@@ -1512,7 +1512,7 @@ begin
 
     lPermissaoRemota.WhereView := ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' '+
 		                              ' and permissao_remota.pedido_id = '+pID +
-		                              ' and coalesce(permissao_remota.status,'') = '''' ';
+		                              ' and coalesce(permissao_remota.status,'''') = '''' ';
 
     lTablePermissa := lPermissaoRemota.obterLista;
 
@@ -1579,14 +1579,14 @@ end;
 
 function TWebPedidoModel.Autorizar(pID : String): Boolean;
 var
-  lWebPedidoModel : TWebPedidoModel;
-  lPortadorModel  : TPortadorModel;
+  lFinanceiroPedidoModel : TFinanceiroPedidoModel;
+  lWebPedidoModel        : TWebPedidoModel;
 begin
   if pID = '' then
     CriaException('ID não informado');
 
-  lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
-  lPortadorModel  := TPortadorModel.Create(vIConexao);
+  lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
+  lWebPedidoModel        := TWebPedidoModel.Create(vIConexao);
 
   try
     lWebPedidoModel := lWebPedidoModel.carregaClasse(pID);
@@ -1594,9 +1594,7 @@ begin
     if (lWebPedidoModel.STATUS <> 'E') and (lWebPedidoModel.STATUS <> 'P') then
       CriaException('Permissão já negada ou autorizada.');
 
-    lPortadorModel := lPortadorModel.carregaClasse(lWebPedidoModel.PORTADOR_ID);
-
-    if AnsiMatchStr(lPortadorModel.TPAG_NFE,['01','03','04','99']) then
+    if (lFinanceiroPedidoModel.qtdePagamentoPrazo(pID) = 0) then
     begin
       if lWebPedidoModel.STATUS <> 'E' then
         lWebPedidoModel.STATUS            := 'C';
@@ -1615,29 +1613,27 @@ begin
 
     Result := true;
   finally
+    lFinanceiroPedidoModel.Free;
     lWebPedidoModel.Free;
-    lPortadorModel.Free;
   end;
 end;
 
 function TWebPedidoModel.AutorizarDesconto(pID: String): Boolean;
 var
-  lWebPedidoModel  : TWebPedidoModel;
-  lPortadorModel   : TPortadorModel;
-  lPermissaoRemota : TPermissaoRemotaModel;
-  lTablePermissao  : TFDMemTable;
+  lFinanceiroPedidoModel : TFinanceiroPedidoModel;
+  lWebPedidoModel        : TWebPedidoModel;
+  lPermissaoRemota       : TPermissaoRemotaModel;
+  lTablePermissao        : TFDMemTable;
 begin
-  lWebPedidoModel  := TWebPedidoModel.Create(vIConexao);
-  lPortadorModel   := TPortadorModel.Create(vIConexao);
-  lPermissaoRemota := TPermissaoRemotaModel.Create(vIConexao);
+  lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
+  lWebPedidoModel        := TWebPedidoModel.Create(vIConexao);
+  lPermissaoRemota       := TPermissaoRemotaModel.Create(vIConexao);
 
   try
     lWebPedidoModel := lWebPedidoModel.carregaClasse(pID);
 
     if lWebPedidoModel.STATUS <> 'E' then
       CriaException('Desconto já negado ou autorizado.');
-
-    lPortadorModel  := lPortadorModel.carregaClasse(lWebPedidoModel.PORTADOR_ID);
 
     lPermissaoRemota.WhereView := ' and permissao_remota.pedido_id = ' + pID +
                                   ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' '+
@@ -1648,7 +1644,7 @@ begin
     if lTablePermissao.RecordCount > 0 then
       lWebPedidoModel.STATUS := 'P'
 
-    else if AnsiMatchStr(lPortadorModel.TPAG_NFE,['01','03','04','99']) then
+    else if (lFinanceiroPedidoModel.qtdePagamentoPrazo(pID) = 0) then
       lWebPedidoModel.STATUS := 'C'
 
     else
@@ -1660,9 +1656,9 @@ begin
     Result := True;
 
   finally
+    lFinanceiroPedidoModel.Free;
     lPermissaoRemota.Free;
     lWebPedidoModel.Free;
-    lPortadorModel.Free;
   end;
 end;
 
