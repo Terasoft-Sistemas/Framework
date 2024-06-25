@@ -197,7 +197,6 @@ begin
           '     status = :status,                                  '+
           '     filial = :filial,                                  '+
           '     informacoes_ped = :informacoes_ped,                '+
-          '     entrega = :entrega,                                '+
           '     entrega_data = :entrega_data,                      '+
           '     entrega_hora = :entrega_hora,                      '+
           '     montagem_data = :montagem_data,                    '+
