@@ -124,6 +124,10 @@ begin
     lModel.CODIGO_FUNCIONARIO    := lQry.FieldByName('codigo_fun').AsString;
     lModel.TIPO_VENDEDOR         := lQry.FieldByName('tipo_ven').AsString;
     lModel.PORCENTAGEM_ZOOM_TELA := lQry.FieldByName('PORCENTAGEM_ZOOM_TELA').AsString;
+    lModel.USUARIO_WINDOWS       := lQry.FieldByName('USUARIO_WINDOWS').AsString;
+    lModel.SENHA_WINDOWS         := lQry.FieldByName('SENHA_WINDOWS').AsString;
+    lModel.URL_WINDOWS           := lQry.FieldByName('URL_WINDOWS').AsString;
+
     Result := lModel;
 
   finally
