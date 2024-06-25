@@ -198,18 +198,18 @@ end;
 
 procedure TFinanceiroPedidoModel.gerarFinanceiro(pFinanceiroParams: TFinanceiroParams);
 var
-  i             : Integer;
-  lSoma         : Double;
-  lVencimento   : TDate;
-  lIDFinanceiro : String;
-  lRetorno      : String;
+  i                   : Integer;
+  lSoma               : Double;
+  lPrimeiroVencimento : TDate;
+  lIDFinanceiro       : String;
+  lRetorno            : String;
 begin
 
-  lVencimento   := pFinanceiroParams.PRIMEIRO_VENCIMENTO;
+  lPrimeiroVencimento   := pFinanceiroParams.PRIMEIRO_VENCIMENTO;
   lIDFinanceiro := '';
   lSoma         := 0;
 
-  for i := 1 to pFinanceiroParams.QUANTIDADE_PARCELAS do
+  for i := 0 to pFinanceiroParams.QUANTIDADE_PARCELAS -1 do
   begin
     self.WEB_PEDIDO_ID        := pFinanceiroParams.WEB_PEDIDO_ID;
     self.PORTADOR_ID          := pFinanceiroParams.PORTADOR_ID;
@@ -227,12 +227,11 @@ begin
     self.VALOR_ACRESCIMO_SEG_PRESTAMISTA := pFinanceiroParams.VALOR_ACRESCIMO_SEG_PRESTAMISTA;
 
 
-    if i = 1 then
-      self.VENCIMENTO         := DateToStr(lVencimento)
+    if i = 0 then
+      self.VENCIMENTO := DateToStr(lPrimeiroVencimento)
     else
     begin
-      lVencimento     := IncMonth(lVencimento, 1);
-      self.VENCIMENTO := DateToStr(lVencimento);
+      self.VENCIMENTO := DateToStr(IncMonth(lPrimeiroVencimento, i));
     end;
 
     lSoma := lSoma + self.VALOR_PARCELA;
