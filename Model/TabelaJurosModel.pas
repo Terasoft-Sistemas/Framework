@@ -101,7 +101,7 @@ type
 implementation
 
 uses
-  TabelaJurosDao, System.SysUtils, Data.DB;
+  TabelaJurosDao, System.SysUtils, Data.DB, Terasoft.Configuracoes;
 
 { TTabelaJurosModel }
 
@@ -131,12 +131,15 @@ end;
 
 function TTabelaJurosModel.obterLista(pPortador: String; pValor: Double; pSeguroPrestamista: Boolean): TFDMemTable;
 var
-  lModel    : TTabelaJurosModel;
-  i         : Integer;
+  lModel             : TTabelaJurosModel;
+  i                  : Integer;
   lTotal,
-  lJuros    : Double;
-  lMemTable : TFDMemTable;
-  lPortadorModel : TPortadorModel;
+  lPercentualJuros,
+  lJuros             : Double;
+  lMemTable          : TFDMemTable;
+  lPortadorModel     : TPortadorModel;
+  lConfiguracoes     : TerasoftConfiguracoes;
+  lTagPercentual     : String;
 begin
   lPortadorModel := TPortadorModel.Create(vIConexao);
 
@@ -145,6 +148,7 @@ begin
   lTotal    := pValor;
 
   try
+    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
 
     lPortadorModel.IDRecordView := pPortador;
     lPortadorModel.obterLista;
@@ -154,6 +158,8 @@ begin
     self.WhereView  := 'and portador_id = ' + QuotedStr(pPortador);
     self.OrderView  := ' tabelajuros.codigo';
     self.obterLista;
+
+    lTagPercentual  := lConfiguracoes.valorTag('PEDIDO_TABELA_JUROS_PERCENTUAL', 'N', tvBool);
 
     if self.TotalRecords = 0 then
     begin
@@ -171,9 +177,13 @@ begin
 
     for i := 0 to self.TabelaJurossLista.Count -1 do
     begin
-      self.TabelaJurossLista[i].FJUROS_TEXTO := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, 'Juros', 'Sem juros');
-      lJuros                                 := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, self.TabelaJurossLista[i].PERCENTUAL / 100 * lTotal, 0);
+      if lTagPercentual = 'S' then
+        lPercentualJuros := self.TabelaJurossLista[i].PERCENTUAL
+      else
+        lPercentualJuros := self.TabelaJurossLista[i].INDCE;
 
+      self.TabelaJurossLista[i].FJUROS_TEXTO   := IIF(lPercentualJuros > 0, 'Juros', 'Sem juros');
+      lJuros                                   := IIF(lPercentualJuros > 0, lPercentualJuros / 100 * lTotal, 0);
       self.TabelaJurossLista[i].FVALOR_JUROS   := FormatFloat('#,##0.00', lJuros);
       self.TabelaJurossLista[i].FVALOR_TOTAL   := FormatFloat('#,##0.00', lTotal + lJuros);
       self.TabelaJurossLista[i].FVALOR_PARCELA := FormatFloat('#,##0.00', (lTotal + lJuros) / StrToInt(self.TabelaJurossLista[i].CODIGO));
@@ -185,7 +195,7 @@ begin
 
         self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := lPortadorModel.PER_SEGURO_PRESTAMISTA;
         self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := (lTotal + lJuros)*(lPortadorModel.PER_SEGURO_PRESTAMISTA/100);
-        self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, self.TabelaJurossLista[i].PERCENTUAL / 100 * self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA, 0);;
+        self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA := IIF(lPercentualJuros > 0, lPercentualJuros / 100 * self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA, 0);;
       end else
       begin
         self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := 0;
@@ -220,10 +230,15 @@ begin
 
     for i := 0 to self.TabelaJurossLista.Count -1 do
     begin
+       if lTagPercentual = 'S' then
+        lPercentualJuros := self.TabelaJurossLista[i].PERCENTUAL
+      else
+        lPercentualJuros := self.TabelaJurossLista[i].INDCE;
+
        lMemTable.InsertRecord([
                                 self.TabelaJurossLista[i].ID,
                                 self.TabelaJurossLista[i].CODIGO,
-                                self.TabelaJurossLista[i].PERCENTUAL,
+                                IIF(lTagPercentual = 'S', self.TabelaJurossLista[i].PERCENTUAL, self.TabelaJurossLista[i].INDCE),
                                 self.TabelaJurossLista[i].JUROS_TEXTO,
                                 self.TabelaJurossLista[i].VALOR_JUROS,
                                 self.TabelaJurossLista[i].VALOR_PARCELA,
