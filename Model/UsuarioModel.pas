@@ -159,13 +159,14 @@ type
     function Excluir(pID : String) : String;
     function Salvar      : String;
     function validaLogin(user,pass: String): Boolean;
+    function verificaServicoNuvem: Boolean;
 
     procedure obterLista;
   end;
 
 implementation
 
-uses UsuarioDao;
+uses UsuarioDao, Terasoft.Configuracoes;
 
 { TUsuarioModel }
 
@@ -288,6 +289,23 @@ begin
   finally
     lUsuarioDao.Free;
   end;
+end;
+
+function TUsuarioModel.verificaServicoNuvem: Boolean;
+var
+  lConfiguracoes : TerasoftConfiguracoes;
+begin
+
+  Result := true;
+
+  lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+
+  if lConfiguracoes.valorTag('USA_SERVICO_NUVEM', 'N', tvBool) = 'S' then
+  begin
+    if (self.FUSUARIO_WINDOWS = '') and (self.FID <> '000001') then
+      Result := false;
+  end;
+
 end;
 
 function TUsuarioModel.Salvar: String;
