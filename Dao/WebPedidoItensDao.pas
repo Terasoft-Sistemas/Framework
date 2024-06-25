@@ -372,7 +372,8 @@ begin
               '      PER_GARANTIA_FR,                                                                                                           '+SLineBreak+
               '      VLR_GARANTIA,                                                                                                              '+SLineBreak+
               '      VLR_GARANTIA_FR,                                                                                                           '+SLineBreak+
-              '      VALOR_TOTALITENS,                                                                                                          '+SLineBreak+
+              '      VALOR_TOTALITENS                                                                                                           '+SLineBreak+
+              '        + TOTAL_GARANTIA - VALOR_DESCONTO VALOR_TOTALITENS,                                                                      '+SLineBreak+
               '      TOTAL_GARANTIA,                                                                                                            '+SLineBreak+
               '      VALOR_DESCONTO                                                                                                             '+SLineBreak+
               '      From                                                                                                                       '+SLineBreak+
