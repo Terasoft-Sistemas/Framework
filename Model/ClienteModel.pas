@@ -3,7 +3,8 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
-  Interfaces.Conexao, FireDAC.Comp.Client;
+  Interfaces.Conexao,
+  FireDAC.Comp.Client;
 
 type
   TClienteModel = class
@@ -949,6 +950,8 @@ type
     function ObterListaMemTable: TFDMemTable;
     function ObterBairros: TFDMemTable;
 
+    procedure camposObrigatorios(pTag: String; pClienteModel: TClienteModel);
+
     property ClientesLista: TObjectList<TClienteModel> read FClientesLista write SetClientesLista;
 
    	property Acao :TAcao read FAcao write SetAcao;
@@ -965,7 +968,11 @@ implementation
 
 uses
   ClienteDao,
-  System.SysUtils;
+  System.SysUtils,
+  Terasoft.Utils,
+  System.Classes,
+  System.Rtti,
+  Terasoft.Configuracoes;
 
 { TClienteModel }
 
@@ -1152,6 +1159,56 @@ begin
     lClienteDao.Free;
   end;
 end;
+
+procedure TClienteModel.camposObrigatorios(pTag: String; pClienteModel : TClienteModel);
+var
+  i        : Integer;
+  lValor   : String;
+  lCampo   : String;
+  lNome    : String;
+  lMsg     : String;
+  lField   : TStringList;
+  lCtx     : TRttiContext;
+  lProp    : TRttiProperty;
+  lConfiguracoes : TerasoftConfiguracoes;
+begin
+  lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+
+  lMsg   := '';
+  lValor := lConfiguracoes.valorTag(pTag, '', tvMemo);
+
+  if Trim(lValor) = '' then
+    exit;
+
+  lField      := TStringList.Create;
+  lField.Text := lValor;
+
+  lCtx := TRttiContext.Create;
+
+  for i := 0 to lField.Count - 1 do
+  begin
+
+    lCampo := Copy(lField.Strings[i], 1, (Pos(';', lField.Strings[i])) - 1);
+    lNome  := Copy(lField.Strings[i], (Pos(';', lField.Strings[i])) + 1, 60);
+    lProp  := lCtx.GetType(TClienteModel).GetProperty(lCampo);
+
+    if not Assigned(lProp) then
+    begin
+      CriaException(' Configurações de campos obrigatórios inválido.');
+      abort;
+    end;
+
+    if lProp.GetValue(pClienteModel).AsString = '' then
+      lMsg := lMsg + lNome + ',';
+  end;
+
+  if Trim(lMsg) <> '' then
+  begin
+    CriaException(' Campo(s) obrigatório(s): ' + copy(lMsg, 1, Length(lMsg) -1) + '.');
+    abort;
+  end;
+end;
+
 
 function TClienteModel.Salvar: String;
 var
