@@ -121,11 +121,12 @@ begin
   else
    Result := ParteFALSE;
 end;
+
 procedure Base64ToImage(data, path: string);
 var
   stream: TMemoryStream;
   bytes: TBytes;
-  png: TPNGImage;
+  jpg: TJPEGImage;
   x: integer;
   d: string;
 begin
@@ -137,10 +138,10 @@ begin
     stream := TMemoryStream.Create;
     stream.WriteData(bytes, Length(bytes));
     stream.Position := 0;
-    png := TPNGImage.Create;
-    png.LoadFromStream(stream);
-    png.SaveToFile(path);
-    png.Destroy;
+    jpg := TJPEGImage.Create;
+    jpg.LoadFromStream(stream);
+    jpg.SaveToFile(path);
+    jpg.Destroy;
   end;
   stream.Free;
 end;
