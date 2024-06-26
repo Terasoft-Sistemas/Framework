@@ -493,6 +493,7 @@ begin
       lPedidoItensModel.PedidoItenssLista[lIndex].NUMERO_PED             := lPedido;
       lPedidoItensModel.PedidoItenssLista[lIndex].CODIGO_CLI             := lOrcamentoModel.CODIGO_CLI;
       lPedidoItensModel.PedidoItenssLista[lIndex].LOJA                   := lOrcamentoModel.LOJA;
+      lPedidoItensModel.PedidoItenssLista[lIndex].BALANCA                := 'S';
       lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_PED         := lMemtable.FieldByName('QUANTIDADE_ORC').AsString;
       lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_NEW         := lMemtable.FieldByName('QUANTIDADE_ORC').AsString;
       lPedidoItensModel.PedidoItenssLista[lIndex].OBSERVACAO             := copy(lMemtable.FieldByName('OBSERVACAO').AsString,1,50);
