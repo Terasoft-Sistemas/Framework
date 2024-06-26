@@ -105,10 +105,11 @@ type
   end;
 
 implementation
+  uses
+    Terasoft.Framework.MultiConfig,
+    EmpresaDao;
 
 { TEmpresa }
-
-uses EmpresaDao;
 
 procedure TEmpresaModel.Carregar;
 var
@@ -232,9 +233,16 @@ procedure TEmpresaModel.SetREGIME_TRIBUTARIO(const Value: Variant);
 begin
   FREGIME_TRIBUTARIO := Value;
 end;
+
 procedure TEmpresaModel.SetSTRING_CONEXAO_RESERVA(const Value: Variant);
+  var
+    ini: IMultiConfig;
 begin
-  FSTRING_CONEXAO_RESERVA := Value;
+  ini := instanciaMultiConfig;
+  FSTRING_CONEXAO_RESERVA := readStringCripto(ini,'reserva', 'conexao', value);
+  FSTRING_CONEXAO_RESERVA := ini.traduzir(FSTRING_CONEXAO_RESERVA,'$(',')');
+  //Exemplo de configuração...
+  //FSTRING_CONEXAO_RESERVA           := '$(local.database.servidor)/$(local.database.porta):c:\XYZ.FDB';
 end;
 
 procedure TEmpresaModel.SetSYSTIME(const Value: Variant);
