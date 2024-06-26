@@ -6,9 +6,12 @@ interface
 
   type
     TUsuario = record
-      ID     : string;
-      NOME   : string;
-      PERFIL : String;
+      ID              : string;
+      NOME            : string;
+      PERFIL          : String;
+      URL_WINDOWS     : String;
+      USUARIO_WINDOWS : String;
+      SENHA_WINDOWS   : String;
     end;
 
     TEmpresa = record

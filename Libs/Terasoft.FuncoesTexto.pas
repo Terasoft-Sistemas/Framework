@@ -42,14 +42,14 @@ uses
   function retiraPonto(pValor: string): String;
   function formatarDataInvertida(const data: string): String;
   function codigoUF(pUF : String): Integer;
-
+  function StringToBase64(const Input: string): string;
 
 implementation
 uses
   StrUtils,
   SysUtils,
   MaskUtils,
-  System.Variants;
+  System.Variants, Soap.EncdDecd;
 function FormataDinheiro(pValor: Real ; pCasasDecimais: String = '00'): String;
 begin
   Result := 'R$ '+ FormataFloat(pValor, pCasasDecimais);
@@ -903,6 +903,33 @@ begin
     Result := 28
   else if pUF = 'TO' then
     Result := 17;
+end;
+
+function StringToBase64(const Input: string): string;
+var
+  InputBytes: TBytes;
+  InputStream: TBytesStream;
+  OutputStream: TStringStream;
+begin
+  // Converte a string de entrada em bytes
+  InputBytes := TEncoding.UTF8.GetBytes(Input);
+
+  // Cria um stream a partir dos bytes de entrada
+  InputStream := TBytesStream.Create(InputBytes);
+  try
+    // Cria um stream para a saída codificada
+    OutputStream := TStringStream.Create('');
+    try
+      // Codifica o stream de entrada em Base64 e escreve no stream de saída
+      EncodeStream(InputStream, OutputStream);
+      // Converte o stream de saída em string
+      Result := OutputStream.DataString;
+    finally
+      OutputStream.Free;
+    end;
+  finally
+    InputStream.Free;
+  end;
 end;
 
 initialization
