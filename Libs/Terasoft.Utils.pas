@@ -125,24 +125,27 @@ end;
 procedure Base64ToImage(data, path: string);
 var
   stream: TMemoryStream;
-  bytes: TBytes;
-  jpg: TJPEGImage;
-  x: integer;
-  d: string;
+  bytes : TBytes;
+  jpg   : TJPEGImage;
+  x     : integer;
+  d     : string;
 begin
-  x := pos(',', data);
-  d := copy(data, x + 1, 9165536);
+  x     := pos(',', data);
+  d     := copy(data, x + 1, 9165536);
   bytes := decodebase64(d);
+
   if Length(bytes) > 0 then
   begin
     stream := TMemoryStream.Create;
     stream.WriteData(bytes, Length(bytes));
     stream.Position := 0;
+
     jpg := TJPEGImage.Create;
     jpg.LoadFromStream(stream);
     jpg.SaveToFile(path);
     jpg.Destroy;
   end;
+
   stream.Free;
 end;
 
