@@ -65,25 +65,21 @@ type
     rlBandFatura: TRLBand;
     RLLabel3: TRLLabel;
     rlTitleFatura: TRLLabel;
-    RLLabel5: TRLLabel;
     RLLabel6: TRLLabel;
     RLLabel7: TRLLabel;
     RLLabel8: TRLLabel;
     RLLabel9: TRLLabel;
     drawFaturasLeft: TRLDraw;
-    rlMemoFaturaLeft: TRLMemo;
     rlMemoParcelaLeft: TRLMemo;
     rlMemoVencimentoLeft: TRLMemo;
     rlMemoValorLeft: TRLMemo;
     rlMemoPortadorLeft: TRLMemo;
     RLLabel31: TRLLabel;
-    RLLabel22: TRLLabel;
     RLLabel23: TRLLabel;
     RLLabel24: TRLLabel;
     RLLabel25: TRLLabel;
     RLLabel26: TRLLabel;
     drawFaturasRight: TRLDraw;
-    rlMemoFaturaRight: TRLMemo;
     rlMemoParcelaRight: TRLMemo;
     rlMemoVencimentoRight: TRLMemo;
     rlMemoValorRight: TRLMemo;
@@ -304,17 +300,24 @@ end;
 procedure TImpressaoVendaAssistida.fetchEmpresa;
 var
   lEmpresaModel : TEmpresaModel;
+  lLojasModel, l   : TLojasModel;
 begin
   lEmpresaModel := TEmpresaModel.Create(CONEXAO);
+  lLojasModel   := TLojasModel.Create(CONEXAO);
   try
     lEmpresaModel.Carregar;
 
     rlLabelEmpresaNome.Caption     := lEmpresaModel.RAZAO_SOCIAL;
     rlLabelEmpresaEndereco.Caption := lEmpresaModel.ENDERECO+' '+lEmpresaModel.NUMERO+' '+lEmpresaModel.COMPLEMENTO;
-    LOJA.Text := lEmpresaModel.RAZAO_SOCIAL;
+
+    lLojasModel.LojaView := lEmpresaModel.LOJA;
+    lLojasModel.obterLista;
+
+    LOJA.Text := lLojasModel.LojassLista[0].DESCRICAO;
     Self.FDIRLOGO := lEmpresaModel.LOGO;
   finally
     lEmpresaModel.Free;
+    lLojasModel.Free;
   end;
 end;
 
@@ -339,14 +342,12 @@ begin
       begin
         inc(lParcela);
         if Odd(lParcela) then begin
-          rlMemoFaturaLeft.Lines.Add(lMemtable.FieldByName('ID_FINANCEIRO').AsString);
           rlMemoParcelaLeft.Lines.Add(lMemtable.FieldByName('PARCELA').AsString+'/'+lMemtable.FieldByName('QUANTIDADE_PARCELAS').AsString);
           rlMemoVencimentoLeft.Lines.Add(lMemtable.FieldByName('VENCIMENTO').AsString);
           rlMemoValorLeft.Lines.Add(FormatCurr('#,###0.00', lMemtable.FieldByName('VALOR_PARCELA').AsFloat));
           rlMemoPortadorLeft.Lines.Add(lMemtable.FieldByName('NOME_PORT').AsString);
         end
         else begin
-          rlMemoFaturaRight.Lines.Add(lMemtable.FieldByName('ID_FINANCEIRO').AsString);
           rlMemoParcelaRight.Lines.Add(lMemtable.FieldByName('PARCELA').AsString+'/'+lMemtable.FieldByName('QUANTIDADE_PARCELAS').AsString);
           rlMemoVencimentoRight.Lines.Add(lMemtable.FieldByName('VENCIMENTO').AsString);
           rlMemoValorRight.Lines.Add(FormatCurr('#,###0.00', lMemtable.FieldByName('VALOR_PARCELA').AsFloat));
@@ -355,7 +356,7 @@ begin
         lMemtable.Next;
       end;
 
-      drawFaturasLeft.Height  := rlMemoFaturaLeft.Height+3;
+      drawFaturasLeft.Height  := rlMemoVencimentoLeft.Height+3;
       drawFaturasRight.Height := drawFaturasLeft.Height;
       rlBandFatura.Height     := rlTitleFatura.Height + drawFaturasLeft.Height + 10;
     end

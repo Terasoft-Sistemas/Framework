@@ -240,6 +240,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
             Height = 12
             AutoSize = False
             DataField = 'CEP'
+            DataSource = dsCliente
             DisplayMask = '99999-999'
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clBlack
@@ -607,7 +608,6 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
             Width = 143
             Height = 12
             AutoSize = False
-            DataSource = dsCliente
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clBlack
             Font.Height = -9
@@ -1529,24 +1529,9 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
             ParentColor = False
             Transparent = False
           end
-          object RLLabel5: TRLLabel
-            Tag = 10
-            Left = 7
-            Top = 4
-            Width = 34
-            Height = 10
-            Alignment = taCenter
-            Caption = 'FATURA'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -8
-            Font.Name = 'Arial'
-            Font.Style = [fsBold]
-            ParentFont = False
-          end
           object RLLabel6: TRLLabel
             Tag = 10
-            Left = 66
+            Left = 6
             Top = 3
             Width = 40
             Height = 10
@@ -1561,7 +1546,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
           end
           object RLLabel7: TRLLabel
             Tag = 10
-            Left = 122
+            Left = 87
             Top = 3
             Width = 56
             Height = 10
@@ -1576,7 +1561,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
           end
           object RLLabel8: TRLLabel
             Tag = 10
-            Left = 205
+            Left = 189
             Top = 3
             Width = 30
             Height = 10
@@ -1591,7 +1576,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
           end
           object RLLabel9: TRLLabel
             Tag = 10
-            Left = 251
+            Left = 250
             Top = 3
             Width = 48
             Height = 10
@@ -1610,26 +1595,12 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
             Width = 369
             Height = 17
           end
-          object rlMemoFaturaLeft: TRLMemo
-            Left = 7
-            Top = 16
-            Width = 34
-            Height = 12
-            Alignment = taRightJustify
-            Behavior = [beSiteExpander]
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -9
-            Font.Name = 'Arial'
-            Font.Style = []
-            ParentFont = False
-          end
           object rlMemoParcelaLeft: TRLMemo
-            Left = 66
+            Left = 7
             Top = 16
             Width = 40
             Height = 12
-            Alignment = taRightJustify
+            Alignment = taCenter
             Behavior = [beSiteExpander]
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clBlack
@@ -1639,7 +1610,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
             ParentFont = False
           end
           object rlMemoVencimentoLeft: TRLMemo
-            Left = 122
+            Left = 87
             Top = 16
             Width = 56
             Height = 12
@@ -1653,7 +1624,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
             ParentFont = False
           end
           object rlMemoValorLeft: TRLMemo
-            Left = 187
+            Left = 171
             Top = 16
             Width = 53
             Height = 12
@@ -1695,24 +1666,9 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
             ParentColor = False
             Transparent = False
           end
-          object RLLabel22: TRLLabel
-            Tag = 10
-            Left = 368
-            Top = 4
-            Width = 34
-            Height = 10
-            Alignment = taCenter
-            Caption = 'FATURA'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -8
-            Font.Name = 'Arial'
-            Font.Style = [fsBold]
-            ParentFont = False
-          end
           object RLLabel23: TRLLabel
             Tag = 10
-            Left = 430
+            Left = 368
             Top = 3
             Width = 40
             Height = 10
@@ -1727,7 +1683,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
           end
           object RLLabel24: TRLLabel
             Tag = 10
-            Left = 499
+            Left = 458
             Top = 3
             Width = 56
             Height = 10
@@ -1742,7 +1698,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
           end
           object RLLabel25: TRLLabel
             Tag = 10
-            Left = 588
+            Left = 564
             Top = 3
             Width = 30
             Height = 10
@@ -1757,8 +1713,8 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
           end
           object RLLabel26: TRLLabel
             Tag = 10
-            Left = 632
-            Top = 4
+            Left = 631
+            Top = 3
             Width = 48
             Height = 10
             Alignment = taCenter
@@ -1776,26 +1732,12 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
             Width = 392
             Height = 17
           end
-          object rlMemoFaturaRight: TRLMemo
-            Left = 368
-            Top = 16
-            Width = 34
-            Height = 12
-            Alignment = taRightJustify
-            Behavior = [beSiteExpander]
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -9
-            Font.Name = 'Arial'
-            Font.Style = []
-            ParentFont = False
-          end
           object rlMemoParcelaRight: TRLMemo
-            Left = 430
+            Left = 370
             Top = 16
             Width = 40
             Height = 12
-            Alignment = taRightJustify
+            Alignment = taCenter
             Behavior = [beSiteExpander]
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clBlack
@@ -1805,7 +1747,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
             ParentFont = False
           end
           object rlMemoVencimentoRight: TRLMemo
-            Left = 499
+            Left = 458
             Top = 16
             Width = 56
             Height = 12
@@ -1819,7 +1761,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
             ParentFont = False
           end
           object rlMemoValorRight: TRLMemo
-            Left = 570
+            Left = 546
             Top = 16
             Width = 53
             Height = 12
@@ -1971,7 +1913,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
     end
     object mtClienteTELEFONE: TStringField
       FieldName = 'TELEFONE'
-      EditMask = '(99)99999-9999;0;'
+      EditMask = '(99)9999-9999;0;'
     end
     object mtClienteEMAIL: TStringField
       FieldName = 'EMAIL'
