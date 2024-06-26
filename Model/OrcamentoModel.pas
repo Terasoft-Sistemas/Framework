@@ -500,6 +500,7 @@ begin
       lPedidoItensModel.PedidoItenssLista[lIndex].CODIGO_PRO             := lMemtable.FieldByName('CODIGO_PRO').AsString;
       lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_TIPO        := lMemtable.FieldByName('VLRGARANTIA_ORC').AsString;
       lPedidoItensModel.PedidoItenssLista[lIndex].DESCONTO_PED           := lMemtable.FieldByName('DESCONTO_ORC').AsString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].VDESC                  := FloatToStr(lMemtable.FieldByName('DESCONTO_ORC').AsFloat / 100 * (lMemtable.FieldByName('VALORUNITARIO_ORC').AsFloat * lMemtable.FieldByName('QUANTIDADE_ORC').AsFloat));
       lPedidoItensModel.PedidoItenssLista[lIndex].VALORUNITARIO_PED      := lMemtable.FieldByName('VALORUNITARIO_ORC').AsString;
       lPedidoItensModel.PedidoItenssLista[lIndex].ITEM                   := lItem.ToString;
       lPedidoItensModel.PedidoItenssLista[lIndex].VLRVENDA_PRO           := lMemtable.FieldByName('VALORUNITARIO_ORC').AsString;
@@ -513,6 +514,9 @@ begin
 
     lPedidoItensModel.Acao := tacIncluirLote;
     lPedidoItensModel.Salvar;
+
+    lPedidoVendaModel := lPedidoVendaModel.carregaClasse(lPedido);
+    lPedidoVendaModel.calcularTotais;
 
     lPedidoVendaModel.gerarContasReceberPedido;
 
