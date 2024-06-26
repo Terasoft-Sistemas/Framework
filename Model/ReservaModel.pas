@@ -59,6 +59,8 @@ type
     FENTREGA_CIDADE: Variant;
     FENTREGA_ENDERECO: Variant;
     FENTREGA_COD_MUNICIPIO: Variant;
+    FVALOR_ACRESCIMO: Variant;
+    FVALOR_TOTAL: Variant;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -104,6 +106,8 @@ type
     procedure SetENTREGA_ENDERECO(const Value: Variant);
     procedure SetENTREGA_NUMERO(const Value: Variant);
     procedure SetENTREGA_UF(const Value: Variant);
+    procedure SetVALOR_ACRESCIMO(const Value: Variant);
+    procedure SetVALOR_TOTAL(const Value: Variant);
 
   public
 
@@ -144,6 +148,8 @@ type
     property ENTREGA_CEP          : Variant read FENTREGA_CEP write SetENTREGA_CEP;
     property ENTREGA_COD_MUNICIPIO: Variant read FENTREGA_COD_MUNICIPIO write SetENTREGA_COD_MUNICIPIO;
 
+    property VALOR_ACRESCIMO      : Variant read FVALOR_ACRESCIMO write SetVALOR_ACRESCIMO;
+    property VALOR_TOTAL          : Variant read FVALOR_TOTAL write SetVALOR_TOTAL;
 
 
   	constructor Create(pIConexao : IConexao);
@@ -497,6 +503,16 @@ end;
 procedure TReservaModel.SetTotalRecords(const Value: Integer);
 begin
   FTotalRecords := Value
+end;
+
+procedure TReservaModel.SetVALOR_ACRESCIMO(const Value: Variant);
+begin
+  FVALOR_ACRESCIMO := Value;
+end;
+
+procedure TReservaModel.SetVALOR_TOTAL(const Value: Variant);
+begin
+  FVALOR_TOTAL := Value;
 end;
 
 procedure TReservaModel.SetVALOR_UNITARIO(const Value: Variant);

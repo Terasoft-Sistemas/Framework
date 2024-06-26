@@ -197,6 +197,8 @@ begin
           '     status = :status,                                  '+
           '     filial = :filial,                                  '+
           '     informacoes_ped = :informacoes_ped,                '+
+          '     VALOR_ACRESCIMO = :VALOR_ACRESCIMO,                '+
+          '     valor_total = :valor_total,                        '+
           '     entrega_data = :entrega_data,                      '+
           '     entrega_hora = :entrega_hora,                      '+
           '     montagem_data = :montagem_data,                    '+
@@ -219,6 +221,10 @@ begin
     lQry.ParamByName('VENDEDOR_ID').Value             := IIF(pAtualizaReserva_Parametros.Vendedor_id             = '', Unassigned, pAtualizaReserva_Parametros.Vendedor_id);
     lQry.ParamByName('FILIAL').Value                  := IIF(pAtualizaReserva_Parametros.Filial                  = '', Unassigned, pAtualizaReserva_Parametros.Filial);
     lQry.ParamByName('INFORMACOES_PED').Value         := IIF(pAtualizaReserva_Parametros.Informacoes_ped         = '', Unassigned, pAtualizaReserva_Parametros.Informacoes_ped);
+
+    lQry.ParamByName('VALOR_ACRESCIMO').Value         := IIF(FloatToStr(pAtualizaReserva_Parametros.Valor_Acrescimo) = '', Unassigned, pAtualizaReserva_Parametros.Valor_Acrescimo);
+    lQry.ParamByName('VALOR_TOTAL').Value             := IIF(FloatToStr(pAtualizaReserva_Parametros.Valor_Total)     = '', Unassigned, pAtualizaReserva_Parametros.Valor_Total);
+
     lQry.ParamByName('ENTREGA_DATA').Value            := IIF(pAtualizaReserva_Parametros.Entrega_data            = '', Unassigned, pAtualizaReserva_Parametros.Entrega_data);
     lQry.ParamByName('ENTREGA_HORA').Value            := IIF(pAtualizaReserva_Parametros.Entrega_hora            = '', Unassigned, pAtualizaReserva_Parametros.Entrega_hora);
     lQry.ParamByName('MONTAGEM_DATA').Value           := IIF(pAtualizaReserva_Parametros.Montagem_data           = '', Unassigned, pAtualizaReserva_Parametros.Montagem_data);

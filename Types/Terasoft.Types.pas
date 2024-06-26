@@ -122,6 +122,8 @@ type
     Entrega_uf,
     Entrega_cep,
     Entrega_cod_municipio: String;
+    Valor_Acrescimo,
+    Valor_Total: Real
   end;
 
   TCurvaABC_Dados = record

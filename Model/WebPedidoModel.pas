@@ -1421,7 +1421,7 @@ begin
       begin
         lReservaModel.PRODUTO_ID          := PRODUTO_ID;
         lReservaModel.QUANTIDADE          := QUANTIDADE;
-        lReservaModel.VALOR_UNITARIO      := VALOR_UNITARIO;
+        lReservaModel.VALOR_UNITARIO      := VALOR_VENDIDO;
         lReservaModel.OBSERVACAO          := 'Reserva realizada pela venda assistida N '+WEB_PEDIDO_ID;
         lReservaModel.WEB_PEDIDOITENS_ID  := ID;
         lReservaModel.WEB_PEDIDO_ID       := WEB_PEDIDO_ID;
