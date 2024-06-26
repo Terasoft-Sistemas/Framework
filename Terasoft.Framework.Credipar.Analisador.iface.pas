@@ -15,24 +15,28 @@ interface
     RETORNO_CREDIPAR_CONTRATO       = 'Credipar.contrato';
     RETORNO_CREDIPAR_PROCESSAMENTO  = 'Credipar.processamento';
     RETORNO_CREDIPAR_ERRO           = 'Credipar.erro';
+
+    RETORNO_CREDIPAR_DADOSCLIENTE   = 'Cliente.dados';
+    RETORNO_CREDIPAR_DADOSPROPOSTA  = 'Proposta.dados';
+
   type
 
-    ICredipar_PessoaJuridica = interface
-    ['{B2D41380-46B9-4937-B8BE-926813959765}']
-      function loadFromPathReaderWriter(const pPathRW: IPathReaderWriter; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-    end;
+    //ICredipar_PessoaJuridica = interface
+    //['{B2D41380-46B9-4937-B8BE-926813959765}']
+    //  function loadFromPathReaderWriter(const pPathRW: IPathReaderWriter; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+    //end;
 
     ICredipar_PessoaFisica = interface
     ['{B2D41380-46B9-4937-B8BE-926813959765}']
       function getAddr: Pointer;
-      function loadFromPathReaderWriter(const pPathRW: IPathReaderWriter; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+      function loadFromPathReaderWriter(const pPathRW: IUnknown; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     end;
 
     ICredipar_Proposta = interface
     ['{7BFA61DA-E339-44BB-9AE1-BCDD55FBDF47}']
 
       function getAddr: Pointer;
-      function loadFromPathReaderWriter(const pPathRW: IPathReaderWriter; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+      function loadFromPathReaderWriter(const pPathRW: IUnknown; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
     (*
     //property proposta getter/setter
@@ -113,10 +117,17 @@ interface
       procedure setToken(const pValue: TipoWideStringFramework);
 
     //property codLojaCred getter/setter
-      function getCodLojaCred: Int64;
-      procedure setCodLojaCred(const pValue: Int64);
+      function getCodigoLojaCredipar: Integer;
+      procedure setCodigoLojaCredipar(const pValue: Integer);
 
-      property codLojaCred: Int64 read getCodLojaCred write setCodLojaCred;
+    //property codigoProdutoCredipar getter/setter
+      function getCodigoProdutoCredipar: Integer;
+      procedure setCodigoProdutoCredipar(const pValue: Integer);
+
+      function editarDados(pDadosCliente, pDadosProposta: IUnknown; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+
+      property codigoProdutoCredipar: Integer read getCodigoProdutoCredipar write setCodigoProdutoCredipar;
+      property codigoLojaCredipar: Integer read getCodigoLojaCredipar write setCodigoLojaCredipar;
       property token: TipoWideStringFramework read getToken write setToken;
       property urlWS: TipoWideStringFramework read getUrlWS write setUrlWS;
       property modoProducao: boolean read getModoProducao write setModoProducao;
@@ -146,7 +157,7 @@ begin
     Result.modoProducao := true;
     Result.diretorioArquivos := ValorTagConfig(tagConfig_CREDIPAR_DIRETORIO_ARQUIVOS,'',tvString);
     Result.token := ValorTagConfig(tagConfig_CREDIPAR_TOKEN,'',tvString);
-    Result.codLojaCred := ValorTagConfig(tagConfig_CREDIPAR_CODIGO_LOJA,0,tvInteiro);
+    Result.codigoLojaCredipar := ValorTagConfig(tagConfig_CREDIPAR_CODIGO_LOJA,0,tvInteiro);
   end;
 end;
   {$ifend}
