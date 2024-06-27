@@ -72,6 +72,8 @@ type
     procedure obterTotalRegistros;
     procedure obterLista;
     procedure obterRecebimentoContasReceber;
+    function obterReceberPixCobranca(pPedido : String) : TFDMemTable;
+
     function obterContaCliente(pContaClienteParametros: TContaClienteParametros): TListaContaClienteRetorno;
     function carregaClasse(pId: String; pLoja: String = ''): TContasReceberItensModel;
     function where: String;
@@ -531,6 +533,45 @@ begin
       lQry.Next;
     end;
     obterTotalRegistros;
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TContasReceberItensDao.obterReceberPixCobranca(pPedido: String): TFDMemTable;
+var
+  lQry : TFDQuery;
+  lSQL : String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+    lSQL := ' select i.fatura_rec,                                                     '+SLineBreak+
+            '        i.vlrparcela_rec,                                                 '+SLineBreak+
+            '        i.vencimento_rec,                                                 '+SLineBreak+
+            '        i.codigo_cli,                                                     '+SLineBreak+
+            '        c.fantasia_cli,                                                   '+SLineBreak+
+            '        c.cnpj_cpf_cli,                                                   '+SLineBreak+
+            '        c.endereco,                                                       '+SLineBreak+
+            '        c.cidade_cli,                                                     '+SLineBreak+
+            '        c.uf_cli,                                                         '+SLineBreak+
+            '        c.cep_cli,                                                        '+SLineBreak+
+            '        i.id,                                                             '+SLineBreak+
+            '        p.contasreceberitens_id, cr.pedido_rec,                           '+SLineBreak+
+            '        i.pacela_rec||''/''||i.totalparcelas_rec parcela,                 '+SLineBreak+
+            '        por.tpag_nfe                                                      '+SLineBreak+
+            '   from contasreceber cr                                                  '+SLineBreak+
+            '   left join contasreceberitens i on i.fatura_rec = cr.fatura_rec         '+SLineBreak+
+            '   left join clientes c on c.codigo_cli = cr.codigo_cli                   '+SLineBreak+
+            '   left join pix p on p.contasreceberitens_id = i.id                      '+SLineBreak+
+            '   left join portador por on por.codigo_port = cr.codigo_por              '+SLineBreak+
+            '  where por.tpag_nfe = ''17''                                             '+SLineBreak+
+            '    and p.contasreceberitens_id is null                                   '+SLineBreak+
+            '    and cr.pedido_rec = ' + QuotedStr(pPedido);
+
+    lQry.Open(lSQL);
+
+    Result := vConstrutor.atribuirRegistros(lQry);
   finally
     lQry.Free;
   end;

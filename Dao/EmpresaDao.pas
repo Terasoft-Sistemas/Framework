@@ -102,6 +102,7 @@ begin
         pEmpresaModel.LIMITE_ATRASO            := lQry.fieldByName('LIMITE_ATRAZO').AsString;
         pEmpresaModel.STRING_CONEXAO_RESERVA   := lQry.fieldByName('STRING_CONEXAO_RESERVA').AsString;
         pEmpresaModel.AVISARNEGATIVO_EMP       := lQry.fieldByName('AVISARNEGATIVO_EMP').AsString;
+        pEmpresaModel.MULTA_BOL                := lQry.fieldByName('MULTA_BOL').AsString;
       finally
         lQry.Close;
       end;

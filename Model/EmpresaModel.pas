@@ -40,6 +40,7 @@ type
     FSTRING_CONEXAO_RESERVA: Variant;
     FAVISARNEGATIVO_EMP: Variant;
     FLOGO: Variant;
+    FMULTA_BOL: Variant;
     procedure SetBAIRRO(const Value: Variant);
     procedure SetCEP(const Value: Variant);
     procedure SetCIDADE(const Value: Variant);
@@ -69,6 +70,7 @@ type
     procedure SetSTRING_CONEXAO_RESERVA(const Value: Variant);
     procedure SetAVISARNEGATIVO_EMP(const Value: Variant);
     procedure SetLOGO(const Value: Variant);
+    procedure SetMULTA_BOL(const Value: Variant);
   public
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -100,6 +102,7 @@ type
     property STRING_CONEXAO_RESERVA :Variant read FSTRING_CONEXAO_RESERVA write SetSTRING_CONEXAO_RESERVA;
     property AVISARNEGATIVO_EMP     :Variant read FAVISARNEGATIVO_EMP write SetAVISARNEGATIVO_EMP;
     property LOGO                   :Variant read FLOGO write SetLOGO;
+    property MULTA_BOL              :Variant read FMULTA_BOL write SetMULTA_BOL;
 
     procedure Carregar;
   end;
@@ -221,6 +224,11 @@ procedure TEmpresaModel.SetLOJA(const Value: Variant);
 begin
   FLOJA := Value;
 end;
+procedure TEmpresaModel.SetMULTA_BOL(const Value: Variant);
+begin
+  FMULTA_BOL := Value;
+end;
+
 procedure TEmpresaModel.SetNUMERO(const Value: Variant);
 begin
   FNUMERO := Value;

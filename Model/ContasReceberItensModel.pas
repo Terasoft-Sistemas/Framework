@@ -205,6 +205,7 @@ type
     function carregaClasseIndexOf(pIndex: Integer): TContasReceberItensModel;
 
     function obterContaCliente(pContaClienteParametros: TContaClienteParametros): TListaContaClienteRetorno;
+    function obterReceberPixCobranca(pPedido : String) : TFDMemTable;
 
     procedure gerarVendaCartao;
     procedure excluirBaixa;
@@ -688,6 +689,18 @@ begin
     FContasReceberItenssLista := lContasReceberItensLista.ContasReceberItenssLista;
   finally
     lContasReceberItensLista.Free;
+  end;
+end;
+
+function TContasReceberItensModel.obterReceberPixCobranca(pPedido: String): TFDMemTable;
+var
+  lContasReceberItensDao : TContasReceberItensDao;
+begin
+  lContasReceberItensDao := TContasReceberItensDao.Create(vIConexao);
+  try
+    Result := lContasReceberItensDao.obterReceberPixCobranca(pPedido);
+  finally
+    lContasReceberItensDao.Free;
   end;
 end;
 
