@@ -571,6 +571,7 @@ begin
           '     p.acres_ped,                                       '+#13+
           '     p.frete_ped,                                       '+#13+
           '     p.desc_ped,                                        '+#13+
+          '     p.desconto_ped,                                    '+#13+
           '     p.total_ped,                                       '+#13+
           '     p.status_ped,                                      '+#13+
           '     f.nome_fun                                         '+#13+
@@ -600,6 +601,7 @@ begin
     lPedidoVendaModel.FRETE_PED      :=  lQry.FieldByName('FRETE_PED').AsString;
     lPedidoVendaModel.ACRES_PED      :=  lQry.FieldByName('ACRES_PED').AsString;
     lPedidoVendaModel.DESC_PED       :=  lQry.FieldByName('DESC_PED').AsString;
+    lPedidoVendaModel.DESCONTO_PED   :=  lQry.FieldByName('DESCONTO_PED').AsString;
     lPedidoVendaModel.TOTAL_PED      :=  lQry.FieldByName('TOTAL_PED').AsString;
     lPedidoVendaModel.STATUS_PED     :=  lQry.FieldByName('STATUS_PED').AsString;
     lPedidoVendaModel.NOME_VENDEDOR  :=  lQry.FieldByName('NOME_FUN').AsString;
