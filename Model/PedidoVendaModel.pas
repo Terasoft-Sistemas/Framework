@@ -1323,10 +1323,12 @@ begin
 
   try
     lPedidoVendaModel := lPedidoVendaModel.carregaClasse(self.FNUMERO_PED);
-    lPedidoVendaModel.Acao := tacAlterar;
-    lPedidoVendaModel.STATUS_PED := 'P';
-    lPedidoVendaModel.STATUS     := 'O';
-    lPedidoVendaModel.Salvar;
+
+    if lPedidoVendaModel.NUMERO_NF <> '' then
+      CriaException('Não é possivel reabrir pedido com NF-e vinculada.');
+
+    if lPedidoVendaModel.WEB_PEDIDO_ID <> '' then
+      CriaException('Venda originada de venda assistida, efetue o processo de devolução.');
 
     lPedidoItensModel.IDPedidoVendaView := lPedidoVendaModel.NUMERO_PED;
     lPedidoItensModel.obterLista;
@@ -1334,7 +1336,17 @@ begin
     for lModel in lPedidoItensModel.PedidoItenssLista do
     begin
       lModel.cancelarEstoque;
+
+      lModel.Acao := tacAlterar;
+      lModel.COMISSAO_PERCENTUAL := 0;
+      lModel.GERENTE_COMISSAO_PERCENTUAL := 0;
+      lModel.Salvar;
     end;
+
+    lPedidoVendaModel.Acao := tacAlterar;
+    lPedidoVendaModel.STATUS_PED := 'P';
+    lPedidoVendaModel.STATUS     := 'O';
+    lPedidoVendaModel.Salvar;
 
   finally
     lPedidoVendaModel.Free;
