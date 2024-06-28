@@ -244,87 +244,115 @@ var
 begin
   try
     try
-    lQry := vIConexao.CriarQuery;
-    lSQL :=
-    ' select                                                       '+#13+
-    ' c.cnpj_cpf_cli CNPJCPF,                                      '+#13+
-    ' pv.cnpj_cpf_consumidor cpf_consumidor,                       '+#13+
-    ' c.inscricao_rg_cli IE,                                       '+#13+
-    ' c.SUFRAMA ISUF,                                              '+#13+
-    ' c.CONSUMIDOR_FINAL indFinal,                                 '+#13+
-    ' c.NAO_CONTRIBUINTE indIEDest,                                '+#13+
-    ' IIF (c.tipo_cli = ''F'', c.fantasia_cli, c.razao_cli) xNome, '+#13+
-    ' c.telefone_cli Fone,                                         '+#13+
-    ' c.cep_cli CEP,                                               '+#13+
-    ' c.endereco_cli xLgr,                                         '+#13+
-    ' c.numero_end nro,                                            '+#13+
-    ' c.complemento xCpl,                                          '+#13+
-    ' c.bairro_cli xBairro,                                        '+#13+
-    ' c.cod_municipio cMun,                                        '+#13+
-    ' c.cidade_cli xMun,                                           '+#13+
-    ' c.uf_cli UF,                                                 '+#13+
-    ' coalesce(p.codigo, ''1058'') cPais,                          '+#13+
-    ' coalesce(p.descricao, ''BRASIL'') xPais,                     '+#13+
-    ' n.modelo                                                     '+#13+
-    '                                                              '+#13+
-    ' from                                                         '+#13+
-    '    nf n                                                      '+#13+
-    '                                                              '+#13+
-    ' left join clientes c on c.codigo_cli = n.codigo_cli          '+#13+
-    ' left join pais p on p.id = c.pais_id                         '+#13+
-    ' left join pedidovenda pv on pv.numero_nf = n.numero_ecf      '+#13+
-    '                                                              '+#13+
-    ' where                                                        '+#13+
-    '     n.numero_nf = '+QuotedStr(pidNF);
+      lQry := vIConexao.CriarQuery;
 
-    lQry.Open(lSQL);
-    with NotaF.NFe.Dest do
-    begin
-      CNPJCPF           := IIF(lQry.FieldByName('CNPJCPF').AsString <> ''    , lQry.FieldByName('CNPJCPF').AsString,  Unassigned);
-      IE                := IIF(lQry.FieldByName('IE').AsString <> ''         , lQry.FieldByName('IE').AsString,       Unassigned);
-      ISUF              := IIF(lQry.FieldByName('ISUF').AsString <> ''       , lQry.FieldByName('ISUF').AsString,     Unassigned);
-      xNome             := IIF(lQry.FieldByName('xNome').AsString <> ''      , lQry.FieldByName('xNome').AsString,    Unassigned);
-      indIEDest         := IIF(lQry.FieldByName('indIEDest').AsString <> ''  , vConfiguracoesNotaFiscal.indIEDest(lQry.FieldByName('indIEDest').AsString),  Unassigned);
-      EnderDest.Fone    := IIF(lQry.FieldByName('Fone').AsString <> ''       , lQry.FieldByName('Fone').AsString,     Unassigned);
-      EnderDest.CEP     := IIF(lQry.FieldByName('CEP').AsString <> ''        , lQry.FieldByName('CEP').AsString,      Unassigned);
-      EnderDest.xLgr    := IIF(lQry.FieldByName('xLgr').AsString <> ''       , lQry.FieldByName('xLgr').AsString,     Unassigned);
-      EnderDest.nro     := IIF(lQry.FieldByName('nro').AsString <> ''        , lQry.FieldByName('nro').AsString,      Unassigned);
-      EnderDest.xCpl    := IIF(lQry.FieldByName('xCpl').AsString <> ''       , lQry.FieldByName('xCpl').AsString,     Unassigned);
-      EnderDest.xBairro := IIF(lQry.FieldByName('xBairro').AsString <> ''    , lQry.FieldByName('xBairro').AsString,  Unassigned);
-      EnderDest.cMun    := IIF(lQry.FieldByName('cMun').AsString <> ''       , lQry.FieldByName('cMun').AsString,     Unassigned);
-      EnderDest.xMun    := IIF(lQry.FieldByName('xMun').AsString <> ''       , lQry.FieldByName('xMun').AsString,     Unassigned);
-      EnderDest.UF      := IIF(lQry.FieldByName('UF').AsString <> ''         , lQry.FieldByName('UF').AsString,       Unassigned);
-      EnderDest.cPais   := IIF(lQry.FieldByName('cPais').AsString <> ''      , lQry.FieldByName('cPais').AsString,    Unassigned);
-      EnderDest.xPais   := IIF(lQry.FieldByName('xPais').AsString <> ''      , lQry.FieldByName('xPais').AsString,    Unassigned);
+      lSQL := ' select                                                       '+#13+
+              ' c.cnpj_cpf_cli CNPJCPF,                                      '+#13+
+              ' pv.cnpj_cpf_consumidor cpf_consumidor,                       '+#13+
+              ' c.inscricao_rg_cli IE,                                       '+#13+
+              ' c.SUFRAMA ISUF,                                              '+#13+
+              ' c.CONSUMIDOR_FINAL indFinal,                                 '+#13+
+              ' c.NAO_CONTRIBUINTE indIEDest,                                '+#13+
+              ' IIF (c.tipo_cli = ''F'', c.fantasia_cli, c.razao_cli) xNome, '+#13+
+              ' c.telefone_cli Fone,                                         '+#13+
+              ' c.cep_cli CEP,                                               '+#13+
+              ' c.endereco_cli xLgr,                                         '+#13+
+              ' c.numero_end nro,                                            '+#13+
+              ' c.complemento xCpl,                                          '+#13+
+              ' c.bairro_cli xBairro,                                        '+#13+
+              ' c.cod_municipio cMun,                                        '+#13+
+              ' c.cidade_cli xMun,                                           '+#13+
+              ' c.uf_cli UF,                                                 '+#13+
+              ' coalesce(p.codigo, ''1058'') cPais,                          '+#13+
+              ' coalesce(p.descricao, ''BRASIL'') xPais,                     '+#13+
+              ' n.modelo                                                     '+#13+
+              '                                                              '+#13+
+              ' from                                                         '+#13+
+              '    nf n                                                      '+#13+
+              '                                                              '+#13+
+              ' left join clientes c on c.codigo_cli = n.codigo_cli          '+#13+
+              ' left join pais p on p.id = c.pais_id                         '+#13+
+              ' left join pedidovenda pv on pv.numero_nf = n.numero_ecf      '+#13+
+              '                                                              '+#13+
+              ' where                                                        '+#13+
+              '     n.numero_nf = '+QuotedStr(pidNF);
 
-      if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then
+      lQry.Open(lSQL);
+
+      with NotaF.NFe.Dest do
       begin
-        indIEDest := inNaoContribuinte;
-        IE        := '';
-        CNPJCPF   := lQry.FieldByName('cpf_consumidor').AsString;
-      end;
-    end;
 
-    with NotaF.NFe.Ide do
-    begin
-     if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then
-       indFinal := cfConsumidorFinal
-     else
-       indFinal := vConfiguracoesNotaFiscal.indFinal(lQry.FieldByName('indFinal').AsString);
-    end;
-     with NotaF.NFe.Emit do
-    begin
-     if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) <> moNFCe then
-       IEST := vConfiguracoesNotaFiscal.emitIEST(NotaF.NFe.Dest.EnderDest.UF);
-    end
+        CNPJCPF           := IIF(lQry.FieldByName('CNPJCPF').AsString <> ''    , lQry.FieldByName('CNPJCPF').AsString,  Unassigned);
+        IE                := IIF(lQry.FieldByName('IE').AsString <> ''         , lQry.FieldByName('IE').AsString,       Unassigned);
+        ISUF              := IIF(lQry.FieldByName('ISUF').AsString <> ''       , lQry.FieldByName('ISUF').AsString,     Unassigned);
+        xNome             := IIF(lQry.FieldByName('xNome').AsString <> ''      , lQry.FieldByName('xNome').AsString,    Unassigned);
+        indIEDest         := IIF(lQry.FieldByName('indIEDest').AsString <> ''  , vConfiguracoesNotaFiscal.indIEDest(lQry.FieldByName('indIEDest').AsString),  Unassigned);
+
+        if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then
+        begin
+          if (lQry.FieldByName('xLgr').AsString <> '') and (lQry.FieldByName('cMun').AsString <> '') and (Length(IntToStr(lQry.FieldByName('cMun').AsInteger)) = 7) and
+          (Length(lQry.FieldByName('CEP').AsString) = 8) and (Trim(lQry.FieldByName('Fone').AsString) <> '') and (lQry.FieldByName('xMun').AsString <> '') and
+          (Trim(lQry.FieldByName('UF').AsString) <> '') and (vConfiguracoesNotaFiscal.emitUF = Trim(lQry.FieldByName('UF').AsString)) then
+          begin
+            EnderDest.xBairro := lQry.FieldByName('xBairro').AsString;
+            EnderDest.cMun    := lQry.FieldByName('cMun').AsInteger;
+            EnderDest.UF      := lQry.FieldByName('UF').AsString;
+            EnderDest.Fone    := lQry.FieldByName('Fone').AsString;
+            EnderDest.CEP     := lQry.FieldByName('CEP').AsInteger;
+            EnderDest.xLgr    := lQry.FieldByName('xLgr').AsString;
+            EnderDest.nro     := lQry.FieldByName('nro').AsString;
+            EnderDest.xCpl    := lQry.FieldByName('xCpl').AsString;
+            EnderDest.xMun    := lQry.FieldByName('xMun').AsString;
+            EnderDest.cPais   := lQry.FieldByName('cPais').AsInteger;
+            EnderDest.xPais   := lQry.FieldByName('xPais').AsString;
+          end;
+        end
+        else
+        begin
+          EnderDest.Fone    := IIF(lQry.FieldByName('Fone').AsString <> ''       , lQry.FieldByName('Fone').AsString,     Unassigned);
+          EnderDest.CEP     := IIF(lQry.FieldByName('CEP').AsString <> ''        , lQry.FieldByName('CEP').AsString,      Unassigned);
+          EnderDest.xLgr    := IIF(lQry.FieldByName('xLgr').AsString <> ''       , lQry.FieldByName('xLgr').AsString,     Unassigned);
+          EnderDest.nro     := IIF(lQry.FieldByName('nro').AsString <> ''        , lQry.FieldByName('nro').AsString,      Unassigned);
+          EnderDest.xCpl    := IIF(lQry.FieldByName('xCpl').AsString <> ''       , lQry.FieldByName('xCpl').AsString,     Unassigned);
+          EnderDest.xMun    := IIF(lQry.FieldByName('xMun').AsString <> ''       , lQry.FieldByName('xMun').AsString,     Unassigned);
+          EnderDest.cPais   := IIF(lQry.FieldByName('cPais').AsString <> ''      , lQry.FieldByName('cPais').AsString,    Unassigned);
+          EnderDest.xPais   := IIF(lQry.FieldByName('xPais').AsString <> ''      , lQry.FieldByName('xPais').AsString,    Unassigned);
+          EnderDest.xBairro := IIF(lQry.FieldByName('xBairro').AsString <> ''    , lQry.FieldByName('xBairro').AsString,  Unassigned);
+          EnderDest.cMun    := IIF(lQry.FieldByName('cMun').AsString <> ''       , lQry.FieldByName('cMun').AsString,     Unassigned);
+          EnderDest.UF      := IIF(lQry.FieldByName('UF').AsString <> ''         , lQry.FieldByName('UF').AsString,       Unassigned);
+        end;
+
+        if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then
+        begin
+          indIEDest := inNaoContribuinte;
+          IE        := '';
+          CNPJCPF   := lQry.FieldByName('cpf_consumidor').AsString;
+        end;
+
+      end;
+
+      with NotaF.NFe.Ide do
+      begin
+       if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then
+         indFinal := cfConsumidorFinal
+       else
+         indFinal := vConfiguracoesNotaFiscal.indFinal(lQry.FieldByName('indFinal').AsString);
+      end;
+       with NotaF.NFe.Emit do
+      begin
+       if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) <> moNFCe then
+         IEST := vConfiguracoesNotaFiscal.emitIEST(NotaF.NFe.Dest.EnderDest.UF);
+      end
+
     except
     on E:Exception do
-        CriaException('Erro: '+ E.Message);
+      CriaException('Erro: '+ E.Message);
     end;
   finally
     lSQL := '';
     lQry.Free;
   end;
+
 end;
 function TNotaFiscal.emitente: Boolean;
 begin
@@ -1126,100 +1154,100 @@ end;
 
 function TNotaFiscal.transmitir(idNotaFiscal: String): TStringList;
 var
-  lRetorno: TStringList;
-  lQry: TFDQuery;
-  loteEnvio: Integer;
-  lchavenfe : String;
+  lRetorno   : TStringList;
+  lQry       : TFDQuery;
+  loteEnvio  : Integer;
+  lchavenfe  : String;
   lprotocolo : String;
-  lrecibo  : String;
-  lxMotivo : String;
-  lCSTAT : String;
-  lNFContol: TNFContol;
+  lrecibo    : String;
+  lxMotivo   : String;
+  lCSTAT     : String;
+  lNFContol  : TNFContol;
   lPedidoVendaModel: TPedidoVendaModel;
 begin
 
- try
-  lRetorno  := TStringList.Create;
-  lNFContol := TNFContol.Create(idNotaFiscal, vIConexao);
-  loteEnvio := idNotaFiscal.ToInteger;
-  lPedidoVendaModel := TPedidoVendaModel.Create(vIConexao);
-
   try
-    processar(idNotaFiscal);
-    ACBrNFe.NotasFiscais.GerarNFe;
-    ACBrNFe.NotasFiscais.Assinar;
+    lRetorno  := TStringList.Create;
+    lNFContol := TNFContol.Create(idNotaFiscal, vIConexao);
+    loteEnvio := idNotaFiscal.ToInteger;
+    lPedidoVendaModel := TPedidoVendaModel.Create(vIConexao);
 
-    if ACBrNFe.NotasFiscais.Items[0].NFe.Ide.modelo = 55 then
-    begin
-      try
-        ACBrNFe.Enviar(loteEnvio, false);
-      finally
-        lchavenfe  := ACBrNFe.NotasFiscais[0].NFe.procNFe.chNFe;
-        lprotocolo := ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.nProt;
-        lrecibo    := ACBrNFe.WebServices.Enviar.Recibo;
-        lxMotivo   := ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.xMotivo;
-        lCSTAT     := IntToStr(ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.cStat);
+    try
+      processar(idNotaFiscal);
+      ACBrNFe.NotasFiscais.GerarNFe;
+      ACBrNFe.NotasFiscais.Assinar;
+
+      if ACBrNFe.NotasFiscais.Items[0].NFe.Ide.modelo = 55 then
+      begin
+        try
+          ACBrNFe.Enviar(loteEnvio, false);
+        finally
+          lchavenfe  := ACBrNFe.NotasFiscais[0].NFe.procNFe.chNFe;
+          lprotocolo := ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.nProt;
+          lrecibo    := ACBrNFe.WebServices.Enviar.Recibo;
+          lxMotivo   := ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.xMotivo;
+          lCSTAT     := IntToStr(ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.cStat);
+        end;
+      end
+      else
+      begin
+        try
+          ACBrNFe.Enviar(loteEnvio, false, True);
+        finally
+          lchavenfe  := ACBrNFe.NotasFiscais[0].NFe.procNFe.chNFe;
+          lprotocolo := ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.nProt;
+          lrecibo    := ACBrNFe.WebServices.Enviar.Recibo;
+          lxMotivo   := ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.xMotivo;
+          lCSTAT     := IntToStr(ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.cStat);
+        end;
       end;
-    end
-    else
-    begin
-      try
-        ACBrNFe.Enviar(loteEnvio, false, True);
-      finally
-        lchavenfe  := ACBrNFe.NotasFiscais[0].NFe.procNFe.chNFe;
-        lprotocolo := ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.nProt;
-        lrecibo    := ACBrNFe.WebServices.Enviar.Recibo;
-        lxMotivo   := ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.xMotivo;
-        lCSTAT     := IntToStr(ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.cStat);
+
+      if lCSTAT <> '100' then
+        lxMotivo := 'NOTA NAO AUTORIZADA: ' + lxMotivo;
+
+      lNFContol.NFModel.Acao          := Terasoft.Types.tacAlterar;
+      lNFContol.NFModel.NOME_XML      := copy(lxMotivo, 1, 500);
+      lNFContol.NFModel.ID_NF3        := lchavenfe;
+      lNFContol.NFModel.PROTOCOLO_NFE := lprotocolo;
+      lNFContol.NFModel.RECIBO_NFE    := lrecibo;
+      lNFContol.NFModel.XML_NFE       := ACBrNFe.NotasFiscais.Items[0].GerarXML;
+      lNFContol.NFModel.NUMERO_NF     := idNotaFiscal;
+      lNFContol.Salvar;
+
+      if lNFContol.NFModel.NUMERO_PED <> '' then
+      begin
+        lPedidoVendaModel := lPedidoVendaModel.carregaClasse(lNFContol.NFModel.NUMERO_PED);
+        lPedidoVendaModel.faturado(lNFContol.NFModel.NUMERO_ECF);
+      end;
+
+      lRetorno.Add(lCSTAT);
+      lRetorno.Add(lxMotivo);
+      lRetorno.Add(lrecibo);
+      lRetorno.Add(lprotocolo);
+      Result := lRetorno;
+
+    except on E: Exception do
+      begin
+        lNFContol.NFModel.Acao       := Terasoft.Types.tacAlterar;
+        lNFContol.NFModel.NOME_XML   := copy('NOTA NAO AUTORIZADA: '+e.Message, 1, 500);
+        lNFContol.NFModel.XML_NFE    := ACBrNFe.NotasFiscais.Items[0].GerarXML;
+        lNFContol.NFModel.NUMERO_NF  := idNotaFiscal;
+        lNFContol.Salvar;
+
+        lRetorno.Add(lCSTAT);
+        lRetorno.Add(e.Message);
+        lRetorno.Add(lrecibo);
+        lRetorno.Add(lprotocolo);
+
+        Result := lRetorno;
       end;
     end;
 
-    if lCSTAT <> '100' then
-      lxMotivo := 'NOTA NAO AUTORIZADA: ' + lxMotivo;
-
-    lNFContol.NFModel.Acao          := Terasoft.Types.tacAlterar;
-    lNFContol.NFModel.NOME_XML      := copy(lxMotivo, 1, 500);
-    lNFContol.NFModel.ID_NF3        := lchavenfe;
-    lNFContol.NFModel.PROTOCOLO_NFE := lprotocolo;
-    lNFContol.NFModel.RECIBO_NFE    := lrecibo;
-    lNFContol.NFModel.XML_NFE       := ACBrNFe.NotasFiscais.Items[0].GerarXML;
-    lNFContol.NFModel.NUMERO_NF     := idNotaFiscal;
-    lNFContol.Salvar;
-
-    if lNFContol.NFModel.NUMERO_PED <> '' then
-    begin
-      lPedidoVendaModel := lPedidoVendaModel.carregaClasse(lNFContol.NFModel.NUMERO_PED);
-      lPedidoVendaModel.faturado(lNFContol.NFModel.NUMERO_ECF);
-    end;
-
-    lRetorno.Add(lCSTAT);
-    lRetorno.Add(lxMotivo);
-    lRetorno.Add(lrecibo);
-    lRetorno.Add(lprotocolo);
-    Result := lRetorno;
-
-  except on E: Exception do
-   begin
-    lNFContol.NFModel.Acao       := Terasoft.Types.tacAlterar;
-    lNFContol.NFModel.NOME_XML   := copy('NOTA NAO AUTORIZADA: '+e.Message, 1, 500);
-    lNFContol.NFModel.XML_NFE    := ACBrNFe.NotasFiscais.Items[0].GerarXML;
-    lNFContol.NFModel.NUMERO_NF  := idNotaFiscal;
-    lNFContol.Salvar;
-
-    lRetorno.Add(lCSTAT);
-    lRetorno.Add(e.Message);
-    lRetorno.Add(lrecibo);
-    lRetorno.Add(lprotocolo);
-
-    Result := lRetorno;
+   finally
+     lQry.Free;
+     lNFContol.Free;
+     lPedidoVendaModel.Free;
    end;
-  end;
-
- finally
-    lQry.Free;
-    lNFContol.Free;
-    lPedidoVendaModel.Free;
- end;
 end;
 
 end.
