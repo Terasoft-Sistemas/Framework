@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 1250
     Height = 749
-    ActivePage = tabLiberacao
+    ActivePage = TabSheet9
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -1374,6 +1374,56 @@ object Form1: TForm1
         OnClick = btnDescontoNegarClick
       end
     end
+    object TabSheet9: TTabSheet
+      Caption = 'Movimento Serial'
+      ImageIndex = 13
+      object XDBGrid9: TXDBGrid
+        Left = 0
+        Top = 504
+        Width = 1242
+        Height = 215
+        Align = alBottom
+        DataSource = dMovimentoSerial
+        GridStyle.VisualStyle = vsXPStyle
+        TabOrder = 0
+      end
+      object Button88: TButton
+        Left = 11
+        Top = 27
+        Width = 182
+        Height = 46
+        Caption = 'MovimentoSerial Incluir'
+        TabOrder = 1
+        OnClick = Button88Click
+      end
+      object Button113: TButton
+        Left = 197
+        Top = 27
+        Width = 182
+        Height = 46
+        Caption = 'MovimentoSerial Excluir'
+        TabOrder = 2
+        OnClick = Button113Click
+      end
+      object Button114: TButton
+        Left = 383
+        Top = 27
+        Width = 182
+        Height = 46
+        Caption = 'ObterLista'
+        TabOrder = 3
+        OnClick = Button114Click
+      end
+      object Button115: TButton
+        Left = 568
+        Top = 27
+        Width = 182
+        Height = 46
+        Caption = 'Consulta Serial'
+        TabOrder = 4
+        OnClick = Button117Click
+      end
+    end
   end
   object dsTeste2: TDataSource
     Left = 1056
@@ -1414,5 +1464,9 @@ object Form1: TForm1
   object dLiberacao: TDataSource
     Left = 1136
     Top = 208
+  end
+  object dMovimentoSerial: TDataSource
+    Left = 1160
+    Top = 336
   end
 end

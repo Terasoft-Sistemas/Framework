@@ -248,6 +248,8 @@
         <DCCReference Include="..\Model\SolicitacaoDescontoModel.pas"/>
         <DCCReference Include="..\Dao\PermissaoRemotaDao.pas"/>
         <DCCReference Include="..\Dao\SolicitacaoDescontoDao.pas"/>
+        <DCCReference Include="..\Dao\MovimentoSerialDao.pas"/>
+        <DCCReference Include="..\Model\MovimentoSerialModel.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

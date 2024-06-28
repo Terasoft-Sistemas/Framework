@@ -150,7 +150,9 @@ uses
   PermissaoRemotaModel in '..\Model\PermissaoRemotaModel.pas',
   SolicitacaoDescontoModel in '..\Model\SolicitacaoDescontoModel.pas',
   PermissaoRemotaDao in '..\Dao\PermissaoRemotaDao.pas',
-  SolicitacaoDescontoDao in '..\Dao\SolicitacaoDescontoDao.pas';
+  SolicitacaoDescontoDao in '..\Dao\SolicitacaoDescontoDao.pas',
+  MovimentoSerialDao in '..\Dao\MovimentoSerialDao.pas',
+  MovimentoSerialModel in '..\Model\MovimentoSerialModel.pas';
 
 {$R *.res}
 

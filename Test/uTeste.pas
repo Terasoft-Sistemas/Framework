@@ -188,6 +188,13 @@ type
     Button87: TButton;
     btnDescontoAutorizar: TButton;
     btnDescontoNegar: TButton;
+    TabSheet9: TTabSheet;
+    XDBGrid9: TXDBGrid;
+    Button88: TButton;
+    Button113: TButton;
+    Button114: TButton;
+    Button115: TButton;
+    dMovimentoSerial: TDataSource;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -325,6 +332,10 @@ type
     procedure Button87Click(Sender: TObject);
     procedure btnDescontoAutorizarClick(Sender: TObject);
     procedure btnDescontoNegarClick(Sender: TObject);
+    procedure Button88Click(Sender: TObject);
+    procedure Button113Click(Sender: TObject);
+    procedure Button114Click(Sender: TObject);
+    procedure Button117Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -356,7 +367,7 @@ uses
   PedidoCompraModel, PedidoCompraItensModel, ClientesContatoModel, DescontoModel,
   PromocaoModel, TransportadoraModel, PrevisaoPedidoCompraModel, SaidasModel,
   SaidasItensModel, ClientesEnderecoModel, OrcamentoModel, OrcamentoItensModel, Terasoft.Utils,
-  SolicitacaoDescontoModel, PermissaoRemotaModel;
+  SolicitacaoDescontoModel, PermissaoRemotaModel, MovimentoSerialModel;
 
 {$R *.dfm}
 
@@ -2658,6 +2669,36 @@ begin
   end;
 end;
 
+procedure TForm1.Button88Click(Sender: TObject);
+var
+  lMovimentoSerial : TMovimentoSerialModel;
+begin
+  lMovimentoSerial := TMovimentoSerialModel.Create(vIConexao);
+  try
+    try
+      lMovimentoSerial.Acao := tacIncluir;
+
+      lMovimentoSerial.DH_MOVIMENTO   :=  FormatDateTime('dd.mm.yyyy', vIConexao.DataHoraServer) + ' ' + TimeToStr(vIConexao.HoraServer);
+		  lMovimentoSerial.LOGISTICA      := 'FEDEX';
+      lMovimentoSerial.TIPO_SERIAL    := 'I';
+      lMovimentoSerial.NUMERO         := '123456789789789';
+      lMovimentoSerial.PRODUTO        := '000001';
+      lMovimentoSerial.TIPO_DOCUMENTO := 'P';
+      lMovimentoSerial.ID_DOCUMENTO   := '000001';
+      lMovimentoSerial.SUB_ID         := '000001';
+      lMovimentoSerial.TIPO_MOVIMENTO := 'E';
+
+      lMovimentoSerial.Salvar;
+      ShowMessage('Inserido com Sucesso');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lMovimentoSerial.Free;
+  end;
+end;
+
 procedure TForm1.btnPermissaoClick(Sender: TObject);
 var
   lDescontoModel : TDescontoModel;
@@ -3439,6 +3480,63 @@ begin
     lSaidasModel.CalcularPeso;
   finally
     lSaidasModel.Free;
+  end;
+end;
+
+procedure TForm1.Button113Click(Sender: TObject);
+var
+  lID : String;
+  lMovimentoSerial : TMovimentoSerialModel;
+begin
+  lMovimentoSerial := TMovimentoSerialModel.Create(vIConexao);
+  try
+    try
+      lID := InputBox('MovimentoSerial', 'Digite o ID que deseja excluir:', '');
+
+      lMovimentoSerial.ID := lID;
+      lMovimentoSerial.Excluir(lID);
+
+      ShowMessage('Excluido com sucesso!');
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lMovimentoSerial.Free;
+  end;
+end;
+
+procedure TForm1.Button114Click(Sender: TObject);
+var
+  lMovimentoSerial : TMovimentoSerialModel;
+begin
+  lMovimentoSerial := TMovimentoSerialModel.Create(vIConexao);
+  try
+    try
+      dMovimentoSerial.DataSet := lMovimentoSerial.ObterLista;
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lMovimentoSerial.Free;
+  end;
+end;
+
+procedure TForm1.Button117Click(Sender: TObject);
+var
+  lMovimentoSerial : TMovimentoSerialModel;
+begin
+  lMovimentoSerial := TMovimentoSerialModel.Create(vIConexao);
+  try
+    try
+      dMovimentoSerial.DataSet := lMovimentoSerial.ConsultaSerial;
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lMovimentoSerial.Free;
   end;
 end;
 
