@@ -28,6 +28,7 @@ interface
 
     ICredipar_PessoaFisica = interface
     ['{B2D41380-46B9-4937-B8BE-926813959765}']
+      function critica(pResultado: IResultadoOperacao): boolean;
       function getAddr: Pointer;
       function loadFromPathReaderWriter(const pPathRW: IUnknown; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     end;
@@ -35,6 +36,7 @@ interface
     ICredipar_Proposta = interface
     ['{7BFA61DA-E339-44BB-9AE1-BCDD55FBDF47}']
 
+      function critica(pResultado: IResultadoOperacao): boolean;
       function getAddr: Pointer;
       function loadFromPathReaderWriter(const pPathRW: IUnknown; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
@@ -141,8 +143,14 @@ interface
     function getCredipar: ICredipar;
   {$ifend}
 
+
+  function strToTempoResidencia(const pValue: String): Integer;
+
 implementation
   uses
+    strUtils,
+    SysUtils,
+    Terasoft.Framework.Conversoes,
     FuncoesConfig;
 
 {$if not defined(__DLL__)}
@@ -160,7 +168,31 @@ begin
     Result.codigoLojaCredipar := ValorTagConfig(tagConfig_CREDIPAR_CODIGO_LOJA,0,tvInteiro);
   end;
 end;
-  {$ifend}
+{$ifend}
 
+function strToTempoResidencia(const pValue: String): Integer;
+  var
+    l: IListaTextoEX;
+begin
+  l := novaListaTextoEx(false,pValue);
+  l.strings.Add('INV');              //0
+  l.strings.Add('MENOS DE UM ANO');  //1
+  l.strings.Add('1 ANO');            //2
+  l.strings.Add('2 ANOS');           //3
+  l.strings.Add('3 ANOS');           //4
+  l.strings.Add('4 ANOS');           //5
+  l.strings.Add('5 ANOS');           //6
+  l.strings.Add('MAIS DE 5 ANOS');   //7
+  l.strings.Add('MAIS DE 10 ANOS');  //8
+  l.strings.Add('MAIS DE 15 ANOS');  //9
+  l.strings.Add('MAIS DE 20 ANOS');  //10
+  Result := l.strings.IndexOf(uppercase(retiraAcentos(trim(pValue))));
+  if(Result>1) and (Result<5) then
+    Result:=2
+  else if(Result>4) and (Result<7) then
+    Result := 3
+  else if(Result>6) then
+    Result := 4;
+end;
 
 end.

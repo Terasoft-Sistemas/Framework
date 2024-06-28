@@ -13,7 +13,7 @@ unit Credipar.Analisador.Webservice;
 
 interface
 
-uses InvokeRegistry, SOAPHTTPClient, Types, XSBuiltIns;
+uses InvokeRegistry, SOAPHTTPClient, Types, XSBuiltIns,Terasoft.Framework.Texto;
 
 const
   IS_OPTN = $0001;
@@ -506,6 +506,8 @@ type
     function  FoneContador_Specified(Index: Integer): boolean;
     procedure SetRamalContador(Index: Integer; const Astring: string);
     function  RamalContador_Specified(Index: Integer): boolean;
+  public
+    function critica(pResultado: IResultadoOperacao): boolean;
   published
     property ID:                              string  Index (IS_OPTN) read FID write SetID stored ID_Specified;
     property CPF:                             string  Index (IS_OPTN) read FCPF write SetCPF stored CPF_Specified;
@@ -901,6 +903,7 @@ type
     procedure SetplanoSic(Index: Integer; const Astring: string);
     function  planoSic_Specified(Index: Integer): boolean;
   public
+    function critica(pResultado: IResultadoOperacao): boolean;
     destructor Destroy; override;
   published
     property codPropostaLojista: string       Index (IS_OPTN) read FcodPropostaLojista write SetcodPropostaLojista stored codPropostaLojista_Specified;
@@ -1092,7 +1095,9 @@ function GetwsCrediparHttpPost(UseWSDL: Boolean=System.False; Addr: string=''; H
 
 
 implementation
-  uses SysUtils;
+  uses
+    Terasoft.Framework.FuncoesDiversas,
+    SysUtils;
 
 function GetwsCrediparSoap(UseWSDL: Boolean; Addr: string; HTTPRIO: THTTPRIO): wsCrediparSoap;
 const
@@ -1225,6 +1230,29 @@ end;
 function stDadosCliente.CPF_Specified(Index: Integer): boolean;
 begin
   Result := FCPF_Specified;
+end;
+
+function stDadosCliente.critica(pResultado: IResultadoOperacao): boolean;
+  var
+    lSave: Integer;
+    i: Integer;
+begin
+  checkResultadoOperacao(pResultado);
+  lSave := pResultado.erros;
+  i := StrToIntDef(fCodOcupacao,-1);
+  if( i<0) or (i>9) then
+    pResultado.formataErro('stDadosCliente.critica: Código de ocupação inválido: [ %s ]', [FCodOcupacao] );
+  if(stringForaArray(FCodEstadoCivil,['0','1','2'])) then
+    pResultado.formataErro('stDadosCliente.critica: Código de estado civil inválido: [ %s ]', [FCodEstadoCivil] );
+  if(stringForaArray(FGrauInstrucao,['1','2','3'])) then
+    pResultado.formataErro('stDadosCliente.critica: Grau de insttrução: [ %s ]', [FGrauInstrucao] );
+  i := StrToIntDef(FTipoDocIdentificacao,-1);
+  if( i<1) or (i>7) then
+    pResultado.formataErro('stDadosCliente.critica: Tipo de documento de identificação inválido: [ %s ]', [FTipoDocIdentificacao] );
+  i := StrToIntDef(FTempoRes,-1);
+  if( i<1) or (i>4) then
+    pResultado.formataErro('stDadosCliente.critica: Tempo de residência inválido: [ %s ]', [FTempoRes] );
+  Result := pResultado.erros<>lSave;
 end;
 
 procedure stDadosCliente.SetNomeCliente(Index: Integer; const Astring: string);
@@ -2640,6 +2668,16 @@ end;
 function stProposta.CorrespondenteNome_Specified(Index: Integer): boolean;
 begin
   Result := FCorrespondenteNome_Specified;
+end;
+
+function stProposta.critica(pResultado: IResultadoOperacao): boolean;
+  var
+    lSave: Integer;
+begin
+  checkResultadoOperacao(pResultado);
+  lSave := pResultado.erros;
+  pResultado.adicionaErro('stProposta.critica: Não implementado.');
+  Result := pResultado.erros<>lSave;
 end;
 
 procedure stProposta.SetArogoCPF(Index: Integer; const Astring: string);
