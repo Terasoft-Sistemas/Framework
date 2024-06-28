@@ -937,7 +937,12 @@ end;
 
 function TProdutosDao.obterSaldoDisponivel(pIdProduto: String): Double;
 begin
-  Result := vIConexao.getConnection.ExecSQLScalar('select coalesce(saldo - reservado, 0) as saldo_disponivel from view_saldo_produto where codigo = '+ QuotedStr(pIdProduto));
+  Result := vIConexao.getConnection.ExecSQLScalar('select coalesce(produto.saldo_pro, 0) -                                                           ' +
+                                                  '       coalesce((select sum(view_reservados.reservado)                                            ' +
+                                                  '                   from view_reservados                                                           ' +
+                                                  '                   where view_reservados.produto_id = produto.codigo_pro), 0) as saldo_disponivel ' +
+                                                  '  from produto                                                                                    ' +
+                                                  ' where codigo_pro = '+ QuotedStr(pIdProduto));
 end;
 
 procedure TProdutosDao.SetCountView(const Value: String);
