@@ -62,6 +62,8 @@ type
     function obterLista: TFDMemTable;
     function ConsultaSerial: TFDMemTable;
 
+    function ValidaVendaSerial(pProduto: String): Boolean;
+
     procedure setParams(var pQry: TFDQuery; pMovimentoSerialModel: TMovimentoSerialModel);
 
 end;
@@ -351,6 +353,40 @@ begin
     end;
   finally
     lCtx.Free;
+  end;
+end;
+
+function TMovimentoSerialDao.ValidaVendaSerial(pProduto: String): Boolean;
+var
+  lQry       : TFDQuery;
+  lSQL       : String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+    lSQL :=
+            ' select first 1                                           '+#13+
+            '     p.controle_serial,                                   '+#13+
+            '     m.numero                                             '+#13+
+            ' from                                                     '+#13+
+            '     produto p                                            '+#13+
+            '                                                          '+#13+
+            ' left join movimento_serial m on m.produto = p.codigo_pro '+#13+
+            '                                                          '+#13+
+            ' where                                                    '+#13+
+            '     p.codigo_pro = '+QuotedStr(pProduto)                  +#13+
+            '                                                          '+#13;
+    lQry.Open(lSQL);
+
+    if lQry.FieldByName('numero').AsString <> '' then
+      Result := True
+    else if lQry.FieldByName('controle_serial').AsString = 'S' then
+      Result := True
+    else
+      Result := False;
+
+  finally
+    lQry.Free;
   end;
 end;
 

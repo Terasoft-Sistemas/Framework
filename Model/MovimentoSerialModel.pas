@@ -82,6 +82,8 @@ type
     function obterLista: TFDMemTable;
     function ConsultaSerial: TFDMemTable;
 
+    function ValidaVendaSerial(pProduto: String): Boolean;
+
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -96,11 +98,23 @@ type
 implementation
 
 uses
-  MovimentoSerialDao,  
-  System.Classes, 
+  MovimentoSerialDao,
+  System.Classes,
   System.SysUtils;
 
 { TMovimentoSerialModel }
+
+function TMovimentoSerialModel.ValidaVendaSerial(pProduto: String): Boolean;
+var
+  lMovimentoSerialDao: TMovimentoSerialDao;
+begin
+  lMovimentoSerialDao := TMovimentoSerialDao.Create(vIConexao);
+  try
+    Result := lMovimentoSerialDao.ValidaVendaSerial(pProduto);
+  finally
+    lMovimentoSerialDao.Free;
+  end;
+end;
 
 function TMovimentoSerialModel.Alterar(pID: String): TMovimentoSerialModel;
 var
@@ -305,5 +319,7 @@ procedure TMovimentoSerialModel.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
 end;
+
+
 
 end.
