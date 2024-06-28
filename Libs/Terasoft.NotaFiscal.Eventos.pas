@@ -33,7 +33,6 @@ uses
   Terasoft.Configuracoes,
   EventosNFeControl,
   Terasoft.Types,
-  Terasoft.Mensagens,
   NFControl,
   NFModel;
 
@@ -61,9 +60,6 @@ type
   end;
 
 implementation
-
-uses
-  VariaveisGlobais;
 
 { TEventosNotaFiscal }
 
@@ -277,7 +273,7 @@ begin
 
       lAno := FormatDateTime('yyyy', Date);
 
-      ACBrNFe.WebServices.Inutiliza(xEmpresaCNPJ, Justificativa, StrToInt(lAno), lNFContol.NFModel.MODELO, lNFContol.NFModel.SERIE_NF, StrToInt(idNotaFiscal), StrToInt(idNotaFiscal));
+      ACBrNFe.WebServices.Inutiliza(vIConexao.getEmpresa.EMPRESA_CNPJ, Justificativa, StrToInt(lAno), lNFContol.NFModel.MODELO, lNFContol.NFModel.SERIE_NF, StrToInt(idNotaFiscal), StrToInt(idNotaFiscal));
 
       if ACBrNFe.WebServices.Inutilizacao.cStat = 102 then begin
 
