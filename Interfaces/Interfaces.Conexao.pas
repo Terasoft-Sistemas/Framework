@@ -2,9 +2,13 @@ unit Interfaces.Conexao;
 
 interface
   uses
+    Terasoft.Framework.ObjectIface,
     FireDAC.Comp.Client, System.SysUtils, System.Classes, System.Generics.Defaults;
 
   type
+
+    IFDQuery = IObject<TFDQuery>;
+
     TUsuario = record
       ID              : string;
       NOME            : string;
@@ -55,7 +59,9 @@ interface
       ['{66A98734-B254-4482-A4EA-8D3D1CD8C974}']
 
       function criarQuery                                                  : TFDQuery;
+      function criaIfaceQuery                                              : IFDQuery;
       function criarQueryExterna                                           : TFDQuery;
+      function criaIfaceQueryExterna                                       : IFDQuery;
       function connection                                                  : IConexao; overload;
       function connection(pLoja: String; pHost : String = '')              : IConexao; overload;
       function NovaConexao(pLoja: String; pHost : String = '')             : IConexao;
