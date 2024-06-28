@@ -364,6 +364,7 @@ begin
     lModel.TIPO__PRO                        := lQry.FieldByName('TIPO$_PRO').AsString;
     lModel.VOLTAGEM_ID                      := lQry.FieldByName('VOLTAGEM_ID').AsString;
     lModel.COR_ID                           := lQry.FieldByName('COR_ID').AsString;
+    lModel.PERMITE_VENDA_SEGURO_FR          := lQry.FieldByName('PERMITE_VENDA_SEGURO_FR').AsString;
 
     Result := lModel;
   finally
@@ -1034,6 +1035,7 @@ begin
 
   lSQL :=
           ' select                                                                                      '+#13+
+          '     p.permite_venda_seguro_fr,                                                              '+#13+
           '     gf.garantia_extendida_venda_12,                                                         '+#13+
           '     gf.garantia_extendida_custo_12,                                                         '+#13+
           '     gf.garantia_extendida_venda_24,                                                         '+#13+
@@ -1055,7 +1057,6 @@ begin
     lQry.SQL.Add(lSQL);
     lQry.Open(lSQL);
 
-
     Result.GARANTIA_EXTENDIDA_VENDA_12 := lQry.FieldByName('GARANTIA_EXTENDIDA_VENDA_12').AsFloat;
     Result.GARANTIA_EXTENDIDA_CUSTO_12 := lQry.FieldByName('GARANTIA_EXTENDIDA_CUSTO_12').AsFloat;
     Result.GARANTIA_EXTENDIDA_VENDA_24 := lQry.FieldByName('GARANTIA_EXTENDIDA_VENDA_24').AsFloat;
@@ -1063,104 +1064,115 @@ begin
     Result.GARANTIA_EXTENDIDA_VENDA_36 := lQry.FieldByName('GARANTIA_EXTENDIDA_VENDA_36').AsFloat;
     Result.GARANTIA_EXTENDIDA_CUSTO_36 := lQry.FieldByName('GARANTIA_EXTENDIDA_CUSTO_36').AsFloat;
 
+    if lQry.FieldByName('PERMITE_VENDA_SEGURO_FR').AsString <> 'S' then
+    begin
+      Result.ROUBO_FURTO_12              := 0;
+      Result.ROUBO_FURTO_24              := 0;
+      Result.ROUBO_FURTO_CUSTO_12        := 0;
+      Result.ROUBO_FURTO_CUSTO_24        := 0;
+      Result.ROUBO_FURTO_DA_12           := 0;
+      Result.ROUBO_FURTO_DA_24           := 0;
+      Result.ROUBO_FURTO_CUSTO_DA_12     := 0;
+      Result.ROUBO_FURTO_CUSTO_DA_24     := 0;
+    end else
+    begin
+      lSQL :=
+              'select                                                            '+#13+
+              'distinct                                                          '+#13+
+              '                                                                  '+#13+
+              '(select                                                           '+#13+
+              'case c.tag                                                        '+#13+
+              'when ''SEGURO_FR_PER_VENDA_12'' then c.valornumerico              '+#13+
+              'end ROUBO_FURTO_12                                                '+#13+
+              'from configuracoes c where c.tag = ''SEGURO_FR_PER_VENDA_12'' ),  '+#13+
+              '                                                                  '+#13+
+              '(select                                                           '+#13+
+              'case c.tag                                                        '+#13+
+              'when ''SEGURO_FR_PER_CUSTO_12'' then c.valornumerico              '+#13+
+              'end ROUBO_FURTO_CUSTO_12                                          '+#13+
+              'from configuracoes c where c.tag = ''SEGURO_FR_PER_CUSTO_12'' ),  '+#13+
+              '                                                                  '+#13+
+              '(select                                                           '+#13+
+              'case c.tag                                                        '+#13+
+              'when ''SEGURO_FRDA_PER_VENDA_12'' then c.valornumerico            '+#13+
+              'end ROUBO_FURTO_DA_12                                             '+#13+
+              'from configuracoes c where c.tag = ''SEGURO_FRDA_PER_VENDA_12'' ),'+#13+
+              '                                                                  '+#13+
+              '(select                                                           '+#13+
+              'case c.tag                                                        '+#13+
+              'when ''SEGURO_FRDA_PER_CUSTO_12'' then c.valornumerico            '+#13+
+              'end ROUBO_FURTO_CUSTO_DA_12                                       '+#13+
+              'from configuracoes c where c.tag = ''SEGURO_FRDA_PER_CUSTO_12'' ),'+#13+
+              '                                                                  '+#13+
+              '(select                                                           '+#13+
+              'case c.tag                                                        '+#13+
+              'when ''SEGURO_FR_PER_VENDA_24'' then c.valornumerico              '+#13+
+              'end ROUBO_FURTO_24                                                '+#13+
+              'from configuracoes c where c.tag = ''SEGURO_FR_PER_VENDA_24'' ),  '+#13+
+              '                                                                  '+#13+
+              '(select                                                           '+#13+
+              'case c.tag                                                        '+#13+
+              'when ''SEGURO_FR_PER_CUSTO_24'' then c.valornumerico              '+#13+
+              'end ROUBO_FURTO_CUSTO_24                                          '+#13+
+              'from configuracoes c where c.tag = ''SEGURO_FR_PER_CUSTO_24'' ),  '+#13+
+              '                                                                  '+#13+
+              '(select                                                           '+#13+
+              'case c.tag                                                        '+#13+
+              'when ''SEGURO_FRDA_PER_VENDA_24'' then c.valornumerico            '+#13+
+              'end ROUBO_FURTO_DA_24                                             '+#13+
+              'from configuracoes c where c.tag = ''SEGURO_FRDA_PER_VENDA_24'' ),'+#13+
+              '                                                                  '+#13+
+              '(select                                                           '+#13+
+              'case c.tag                                                        '+#13+
+              'when ''SEGURO_FRDA_PER_CUSTO_24'' then c.valornumerico            '+#13+
+              'end ROUBO_FURTO_CUSTO_DA_24                                      '+#13+
+              'from configuracoes c where c.tag = ''SEGURO_FRDA_PER_CUSTO_24'' ) '+#13+
+              '                                                                  '+#13+
+              '                                                                  '+#13+
+              '                                                                  '+#13+
+              'from configuracoes c                                              '+#13+
+              '                                                                  '+#13+
+              'where                                                             '+#13+
+              'c.tag in (''SEGURO_FRDA_PER_VENDA_12'',                           '+#13+
+              '''SEGURO_FRDA_PER_CUSTO_12'',                                     '+#13+
+              '''SEGURO_FR_PER_VENDA_12'',                                       '+#13+
+              '''SEGURO_FR_PER_CUSTO_12'',                                       '+#13+
+              '''SEGURO_FRDA_PER_VENDA_24'',                                     '+#13+
+              '''SEGURO_FRDA_PER_CUSTO_24'',                                     '+#13+
+              '''SEGURO_FR_PER_VENDA_24'',                                       '+#13+
+              '''SEGURO_FR_PER_CUSTO_24'')                                       '+#13;
 
-    lSQL :=
-            'select                                                            '+#13+
-            'distinct                                                          '+#13+
-            '                                                                  '+#13+
-            '(select                                                           '+#13+
-            'case c.tag                                                        '+#13+
-            'when ''SEGURO_FR_PER_VENDA_12'' then c.valornumerico              '+#13+
-            'end ROUBO_FURTO_12                                                '+#13+
-            'from configuracoes c where c.tag = ''SEGURO_FR_PER_VENDA_12'' ),  '+#13+
-            '                                                                  '+#13+
-            '(select                                                           '+#13+
-            'case c.tag                                                        '+#13+
-            'when ''SEGURO_FR_PER_CUSTO_12'' then c.valornumerico              '+#13+
-            'end ROUBO_FURTO_CUSTO_12                                          '+#13+
-            'from configuracoes c where c.tag = ''SEGURO_FR_PER_CUSTO_12'' ),  '+#13+
-            '                                                                  '+#13+
-            '(select                                                           '+#13+
-            'case c.tag                                                        '+#13+
-            'when ''SEGURO_FRDA_PER_VENDA_12'' then c.valornumerico            '+#13+
-            'end ROUBO_FURTO_DA_12                                             '+#13+
-            'from configuracoes c where c.tag = ''SEGURO_FRDA_PER_VENDA_12'' ),'+#13+
-            '                                                                  '+#13+
-            '(select                                                           '+#13+
-            'case c.tag                                                        '+#13+
-            'when ''SEGURO_FRDA_PER_CUSTO_12'' then c.valornumerico            '+#13+
-            'end ROUBO_FURTO_CUSTO_DA_12                                       '+#13+
-            'from configuracoes c where c.tag = ''SEGURO_FRDA_PER_CUSTO_12'' ),'+#13+
-            '                                                                  '+#13+
-            '(select                                                           '+#13+
-            'case c.tag                                                        '+#13+
-            'when ''SEGURO_FR_PER_VENDA_24'' then c.valornumerico              '+#13+
-            'end ROUBO_FURTO_24                                                '+#13+
-            'from configuracoes c where c.tag = ''SEGURO_FR_PER_VENDA_24'' ),  '+#13+
-            '                                                                  '+#13+
-            '(select                                                           '+#13+
-            'case c.tag                                                        '+#13+
-            'when ''SEGURO_FR_PER_CUSTO_24'' then c.valornumerico              '+#13+
-            'end ROUBO_FURTO_CUSTO_24                                          '+#13+
-            'from configuracoes c where c.tag = ''SEGURO_FR_PER_CUSTO_24'' ),  '+#13+
-            '                                                                  '+#13+
-            '(select                                                           '+#13+
-            'case c.tag                                                        '+#13+
-            'when ''SEGURO_FRDA_PER_VENDA_24'' then c.valornumerico            '+#13+
-            'end ROUBO_FURTO_DA_24                                             '+#13+
-            'from configuracoes c where c.tag = ''SEGURO_FRDA_PER_VENDA_24'' ),'+#13+
-            '                                                                  '+#13+
-            '(select                                                           '+#13+
-            'case c.tag                                                        '+#13+
-            'when ''SEGURO_FRDA_PER_CUSTO_24'' then c.valornumerico            '+#13+
-            'end ROUBO_FURTO_CUSTO_DA_24                                      '+#13+
-            'from configuracoes c where c.tag = ''SEGURO_FRDA_PER_CUSTO_24'' ) '+#13+
-            '                                                                  '+#13+
-            '                                                                  '+#13+
-            '                                                                  '+#13+
-            'from configuracoes c                                              '+#13+
-            '                                                                  '+#13+
-            'where                                                             '+#13+
-            'c.tag in (''SEGURO_FRDA_PER_VENDA_12'',                           '+#13+
-            '''SEGURO_FRDA_PER_CUSTO_12'',                                     '+#13+
-            '''SEGURO_FR_PER_VENDA_12'',                                       '+#13+
-            '''SEGURO_FR_PER_CUSTO_12'',                                       '+#13+
-            '''SEGURO_FRDA_PER_VENDA_24'',                                     '+#13+
-            '''SEGURO_FRDA_PER_CUSTO_24'',                                     '+#13+
-            '''SEGURO_FR_PER_VENDA_24'',                                       '+#13+
-            '''SEGURO_FR_PER_CUSTO_24'')                                       '+#13;
+      lQry.SQL.Clear;
+      lQry.SQL.Add(lSQL);
+      lQry.Open(lSQL);
 
-    lQry.SQL.Clear;
-    lQry.SQL.Add(lSQL);
-    lQry.Open(lSQL);
+      Result.ROUBO_FURTO_12              := 0;
+      Result.ROUBO_FURTO_24              := 0;
+      Result.ROUBO_FURTO_CUSTO_12        := 0;
+      Result.ROUBO_FURTO_CUSTO_24        := 0;
+      Result.ROUBO_FURTO_DA_12           := 0;
+      Result.ROUBO_FURTO_DA_24           := 0;
+      Result.ROUBO_FURTO_CUSTO_DA_12     := 0;
+      Result.ROUBO_FURTO_CUSTO_DA_24     := 0;
 
-    Result.ROUBO_FURTO_12              := 0;
-    Result.ROUBO_FURTO_24              := 0;
-    Result.ROUBO_FURTO_CUSTO_12        := 0;
-    Result.ROUBO_FURTO_CUSTO_24        := 0;
-    Result.ROUBO_FURTO_DA_12           := 0;
-    Result.ROUBO_FURTO_DA_24           := 0;
-    Result.ROUBO_FURTO_CUSTO_DA_12     := 0;
-    Result.ROUBO_FURTO_CUSTO_DA_24     := 0;
+      if lQry.FieldByName('ROUBO_FURTO_12').AsString <> '' then
+      Result.ROUBO_FURTO_12              := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_12').AsFloat/100);
+      if lQry.FieldByName('ROUBO_FURTO_24').AsString <> '' then
+      Result.ROUBO_FURTO_24              := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_24').AsFloat/100);
+      if lQry.FieldByName('ROUBO_FURTO_CUSTO_12').AsString <> '' then
+      Result.ROUBO_FURTO_CUSTO_12        := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_CUSTO_12').AsFloat/100);
+      if lQry.FieldByName('ROUBO_FURTO_CUSTO_24').AsString <> '' then
+      Result.ROUBO_FURTO_CUSTO_24        := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_CUSTO_24').AsFloat/100);
+      if lQry.FieldByName('ROUBO_FURTO_DA_12').AsString <> '' then
+      Result.ROUBO_FURTO_DA_12           := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_DA_12').AsFloat/100);
+      if lQry.FieldByName('ROUBO_FURTO_DA_24').AsString <> '' then
+      Result.ROUBO_FURTO_DA_24           := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_DA_24').AsFloat/100);
+      if lQry.FieldByName('ROUBO_FURTO_CUSTO_DA_12').AsString <> '' then
+      Result.ROUBO_FURTO_CUSTO_DA_12     := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_CUSTO_DA_12').AsFloat/100);
+      if lQry.FieldByName('ROUBO_FURTO_CUSTO_DA_24').AsString <> '' then
+      Result.ROUBO_FURTO_CUSTO_DA_24     := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_CUSTO_DA_24').AsFloat/100);
+    end;
 
-
-
-    if lQry.FieldByName('ROUBO_FURTO_12').AsString <> '' then
-    Result.ROUBO_FURTO_12              := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_12').AsFloat/100);
-    if lQry.FieldByName('ROUBO_FURTO_24').AsString <> '' then
-    Result.ROUBO_FURTO_24              := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_24').AsFloat/100);
-    if lQry.FieldByName('ROUBO_FURTO_CUSTO_12').AsString <> '' then
-    Result.ROUBO_FURTO_CUSTO_12        := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_CUSTO_12').AsFloat/100);
-    if lQry.FieldByName('ROUBO_FURTO_CUSTO_24').AsString <> '' then
-    Result.ROUBO_FURTO_CUSTO_24        := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_CUSTO_24').AsFloat/100);
-    if lQry.FieldByName('ROUBO_FURTO_DA_12').AsString <> '' then
-    Result.ROUBO_FURTO_DA_12           := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_DA_12').AsFloat/100);
-    if lQry.FieldByName('ROUBO_FURTO_DA_24').AsString <> '' then
-    Result.ROUBO_FURTO_DA_24           := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_DA_24').AsFloat/100);
-    if lQry.FieldByName('ROUBO_FURTO_CUSTO_DA_12').AsString <> '' then
-    Result.ROUBO_FURTO_CUSTO_DA_12     := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_CUSTO_DA_12').AsFloat/100);
-    if lQry.FieldByName('ROUBO_FURTO_CUSTO_DA_24').AsString <> '' then
-    Result.ROUBO_FURTO_CUSTO_DA_24     := pValorFaixa * (lQry.FieldByName('ROUBO_FURTO_CUSTO_DA_24').AsFloat/100);
   finally
     lSQL := '';
     lQry.Free;

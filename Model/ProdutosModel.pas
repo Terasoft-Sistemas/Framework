@@ -328,6 +328,7 @@ type
     FCOR_ID: Variant;
     FVOLTAGEM_ID: Variant;
     FTIPO__PRO: Variant;
+    FPERMITE_VENDA_SEGURO_FR: Variant;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -612,6 +613,7 @@ type
     procedure SetCOR_ID(const Value: Variant);
     procedure SetVOLTAGEM_ID(const Value: Variant);
     procedure SetTIPO__PRO(const Value: Variant);
+    procedure SetPERMITE_VENDA_SEGURO_FR(const Value: Variant);
 
   public
     property UUID: Variant read FUUID write SetUUID;
@@ -887,6 +889,8 @@ type
     property VOLTAGEM_ID : Variant read FVOLTAGEM_ID write SetVOLTAGEM_ID;
     property COR_ID : Variant read FCOR_ID write SetCOR_ID;
     property TIPO__PRO : Variant read FTIPO__PRO write SetTIPO__PRO;
+    property PERMITE_VENDA_SEGURO_FR : Variant read FPERMITE_VENDA_SEGURO_FR write SetPERMITE_VENDA_SEGURO_FR;
+
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -1754,6 +1758,11 @@ procedure TProdutosModel.SetPERCENTUAL_ST_RECOLHIDO(const Value: Variant);
 begin
   FPERCENTUAL_ST_RECOLHIDO := Value;
 end;
+procedure TProdutosModel.SetPERMITE_VENDA_SEGURO_FR(const Value: Variant);
+begin
+  FPERMITE_VENDA_SEGURO_FR := Value;
+end;
+
 procedure TProdutosModel.SetPESO_LIQUIDO(const Value: Variant);
 begin
   FPESO_LIQUIDO := Value;
