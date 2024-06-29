@@ -120,7 +120,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-    lQry.Open(' select saldo from SALDO_MOVIMENTO_SERIAL_PRODUTO('+QuotedStr(pProduto)+') ');
+    lQry.Open(' select sum(saldo+cancelamentos) saldo from view_movimento_serial where produto = '+QuotedStr(pProduto));
 
     Result := lQry.FieldByName('saldo').AsFloat;
 
@@ -132,12 +132,36 @@ end;
 function TMovimentoSerialDao.RetornaSerialVenda(pProduto: String): String;
 var
   lQry : TFDQuery;
+  SQL: String;
 begin
 
   lQry := vIConexao.CriarQuery;
 
   try
-    lQry.Open(' select first 1 serial from saldo_movimento_serial(null,null) where produto = '+QuotedStr(pProduto)+' and saldo > 0 ');
+
+    SQL :=
+    ' select                                    '+#13+
+    '     serial,                               '+#13+
+    '     sum(saldo) saldo                      '+#13+
+    '                                           '+#13+
+    '    from                                   '+#13+
+    '     (select                               '+#13+
+    '         primeira_entrada,                 '+#13+
+    '         serial,                           '+#13+
+    '         saldo+cancelamentos saldo         '+#13+
+    '     from                                  '+#13+
+    '         view_movimento_serial             '+#13+
+    '                                           '+#13+
+    '     where                                 '+#13+
+    '         produto = '+QuotedStr(pProduto)+' '+#13+
+    '                                           '+#13+
+    '     order by 1)                           '+#13+
+    '                                           '+#13+
+    ' group by 1                                '+#13+
+    '                                           '+#13+
+    ' having sum(saldo) > 0                     '+#13;
+
+    lQry.Open(SQL);
 
     Result := lQry.FieldByName('serial').AsString;
 

@@ -1351,7 +1351,7 @@ begin
   if lMovimentoSerialModel.ValidaVendaSerial(pVenderItemParametros.PRODUTO) then
   begin
     if lMovimentoSerialModel.SaldoProdutoSerial(pVenderItemParametros.PRODUTO) <  StrToFloat(pVenderItemParametros.QUANTIDADE) then
-      CriaException('Produto com venda obrigatória de serial e com quantidade inferior a vendida.')
+      CriaException('Produto com venda obrigatória de serial e com saldo de serial inferior a quantidade solicitada para venda.')
     else
       lVendaComSerial := True;
   end;
