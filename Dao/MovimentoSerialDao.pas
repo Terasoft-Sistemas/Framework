@@ -80,8 +80,8 @@ uses
 
 function TMovimentoSerialDao.ValidaVendaSerial(pProduto: String): Boolean;
 var
-  lQry       : TFDQuery;
-  lSQL       : String;
+  lQry: TFDQuery;
+  lSQL: String;
 begin
   lQry := vIConexao.CriarQuery;
 
@@ -114,7 +114,7 @@ end;
 
 function TMovimentoSerialDao.SaldoProdutoSerial(pProduto: String): Real;
 var
-  lQry       : TFDQuery;
+  lQry: TFDQuery;
 begin
 
   lQry := vIConexao.CriarQuery;
@@ -131,15 +131,15 @@ end;
 
 function TMovimentoSerialDao.RetornaSerialVenda(pProduto: String): String;
 var
-  lQry : TFDQuery;
-  SQL: String;
+  lQry: TFDQuery;
+  lSQL: String;
 begin
 
   lQry := vIConexao.CriarQuery;
 
   try
 
-    SQL :=
+    lSQL :=
     ' select                                    '+#13+
     '     serial,                               '+#13+
     '     sum(saldo) saldo                      '+#13+
@@ -153,7 +153,7 @@ begin
     '         view_movimento_serial             '+#13+
     '                                           '+#13+
     '     where                                 '+#13+
-    '         produto = '+QuotedStr(pProduto)+' '+#13+
+    '         produto = '+QuotedStr(pProduto)    +#13+
     '                                           '+#13+
     '     order by 1)                           '+#13+
     '                                           '+#13+
@@ -161,7 +161,7 @@ begin
     '                                           '+#13+
     ' having sum(saldo) > 0                     '+#13;
 
-    lQry.Open(SQL);
+    lQry.Open(lSQL);
 
     Result := lQry.FieldByName('serial').AsString;
 
