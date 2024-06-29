@@ -83,6 +83,10 @@ type
     function ConsultaSerial: TFDMemTable;
 
     function ValidaVendaSerial(pProduto: String): Boolean;
+    function SaldoProdutoSerial(pProduto: String): Real;
+    function RetornaSerialVenda(pProduto: String): String;
+
+    function EstornaMovimentoSerial(pTipoDoc, pID_Doc, pSubId: String): String;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -205,6 +209,43 @@ begin
 
   finally
     lMovimentoSerialLista.Free;
+  end;
+end;
+
+function TMovimentoSerialModel.RetornaSerialVenda(pProduto: String): String;
+var
+  lMovimentoSerialDao: TMovimentoSerialDao;
+begin
+  lMovimentoSerialDao := TMovimentoSerialDao.Create(vIConexao);
+  try
+    Result := lMovimentoSerialDao.RetornaSerialVenda(pProduto);
+  finally
+    lMovimentoSerialDao.Free;
+  end;
+end;
+
+
+function TMovimentoSerialModel.EstornaMovimentoSerial(pTipoDoc, pID_Doc, pSubId: String): String;
+var
+  lMovimentoSerialDao: TMovimentoSerialDao;
+begin
+  lMovimentoSerialDao := TMovimentoSerialDao.Create(vIConexao);
+  try
+    Result := lMovimentoSerialDao.EstornaMovimentoSerial(pTipoDoc,pID_Doc,pSubId);
+  finally
+    lMovimentoSerialDao.Free;
+  end;
+end;
+
+function TMovimentoSerialModel.SaldoProdutoSerial(pProduto: String): Real;
+var
+  lMovimentoSerialDao: TMovimentoSerialDao;
+begin
+  lMovimentoSerialDao := TMovimentoSerialDao.Create(vIConexao);
+  try
+    Result := lMovimentoSerialDao.SaldoProdutoSerial(pProduto);
+  finally
+    lMovimentoSerialDao.Free;
   end;
 end;
 

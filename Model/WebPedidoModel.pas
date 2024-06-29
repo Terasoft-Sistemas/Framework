@@ -19,7 +19,8 @@ uses
   System.StrUtils,
   ProdutosModel,
   EmpresaModel,
-  WebPedidoItensDao;
+  WebPedidoItensDao,
+  MovimentoSerialModel;
 
 type
   TVenderItemParametros = record
@@ -1327,19 +1328,33 @@ function TWebPedidoModel.VenderItem(pVenderItemParametros: TVenderItemParametros
 var
   lWebPedidoItensModel : TWebPedidoItensModel;
   lProdutoModel        : TProdutosModel;
+  lMovimentoSerialModel: TMovimentoSerialModel;
   lPrecoParamentros    : TProdutoPreco;
   lProdutoPreco        : TProdutoPreco;
   lValorUnitario,
   lValorVendido        : Double;
+  i : Integer;
+  lVendaComSerial: Boolean;
 begin
-  lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
-  lProdutoModel        := TProdutosModel.Create(vIConexao);
+  lVendaComSerial := False;
+
+  lWebPedidoItensModel  := TWebPedidoItensModel.Create(vIConexao);
+  lProdutoModel         := TProdutosModel.Create(vIConexao);
+  lMovimentoSerialModel := TMovimentoSerialModel.Create(vIConexao);
 
   if pVenderItemParametros.PRODUTO = '' then
     CriaException('Produto n�o informado');
 
   if StrToFloatDef(pVenderItemParametros.QUANTIDADE, 0) = 0 then
     CriaException('Quantidade n�o informada');
+
+  if lMovimentoSerialModel.ValidaVendaSerial(pVenderItemParametros.PRODUTO) then
+  begin
+    if lMovimentoSerialModel.SaldoProdutoSerial(pVenderItemParametros.PRODUTO) <  StrToFloat(pVenderItemParametros.QUANTIDADE) then
+      CriaException('Produto com venda obrigatória de serial e com quantidade inferior a vendida.')
+    else
+      lVendaComSerial := True;
+  end;
 
   try
     self := self.carregaClasse(pVenderItemParametros.WEB_PEDIDO);
@@ -1391,17 +1406,34 @@ begin
 
     Result := lWebPedidoItensModel.Incluir;
 
-    //Gravar reserva caso venda CD ou Retira loja com entregaCD.
     if (PVenderItemParametros.TIPO_ENTREGA = 'CD') or ((PVenderItemParametros.TIPO_ENTREGA = 'LJ') and (PVenderItemParametros.ENTREGA = 'S')) then
     begin
       lWebPedidoItensModel.ID := Result;
       Self.IncluiReservaCD(lWebPedidoItensModel);
     end;
 
+    if lVendaComSerial then
+    begin
+      for I := 1 to StrToInt(pVenderItemParametros.QUANTIDADE) do
+      begin
+
+        lMovimentoSerialModel.LOGISTICA         := 'LOJA';
+        lMovimentoSerialModel.TIPO_SERIAL       := 'I';
+        lMovimentoSerialModel.NUMERO            := lMovimentoSerialModel.RetornaSerialVenda(pVenderItemParametros.PRODUTO);
+        lMovimentoSerialModel.PRODUTO           := pVenderItemParametros.PRODUTO;
+        lMovimentoSerialModel.TIPO_DOCUMENTO    := 'V';
+        lMovimentoSerialModel.ID_DOCUMENTO      := pVenderItemParametros.WEB_PEDIDO;
+        lMovimentoSerialModel.SUB_ID            := Result;
+        lMovimentoSerialModel.TIPO_MOVIMENTO    := 'S';
+        lMovimentoSerialModel.Incluir;
+      end;
+    end;
+
     Self.calcularTotais;
   finally
     lWebPedidoItensModel.Free;
     lProdutoModel.Free;
+    lMovimentoSerialModel.Free;
   end;
 end;
 

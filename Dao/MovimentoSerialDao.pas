@@ -63,6 +63,9 @@ type
     function ConsultaSerial: TFDMemTable;
 
     function ValidaVendaSerial(pProduto: String): Boolean;
+    function SaldoProdutoSerial(pProduto: String): Real;
+    function RetornaSerialVenda(pProduto: String): String;
+    function EstornaMovimentoSerial(pTipoDoc, pID_Doc, pSubId: String): String;
 
     procedure setParams(var pQry: TFDQuery; pMovimentoSerialModel: TMovimentoSerialModel);
 
@@ -74,6 +77,88 @@ uses
   System.Rtti;
 
 { TMovimentoSerial }
+
+function TMovimentoSerialDao.ValidaVendaSerial(pProduto: String): Boolean;
+var
+  lQry       : TFDQuery;
+  lSQL       : String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+    lSQL :=
+            ' select first 1                                           '+#13+
+            '     p.controle_serial,                                   '+#13+
+            '     m.numero                                             '+#13+
+            ' from                                                     '+#13+
+            '     produto p                                            '+#13+
+            '                                                          '+#13+
+            ' left join movimento_serial m on m.produto = p.codigo_pro '+#13+
+            '                                                          '+#13+
+            ' where                                                    '+#13+
+            '     p.codigo_pro = '+QuotedStr(pProduto)                  +#13+
+            '                                                          '+#13;
+    lQry.Open(lSQL);
+
+    if lQry.FieldByName('numero').AsString <> '' then
+      Result := True
+    else if lQry.FieldByName('controle_serial').AsString = 'S' then
+      Result := True
+    else
+      Result := False;
+
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TMovimentoSerialDao.SaldoProdutoSerial(pProduto: String): Real;
+var
+  lQry       : TFDQuery;
+begin
+
+  lQry := vIConexao.CriarQuery;
+
+  try
+    lQry.Open(' select saldo from SALDO_MOVIMENTO_SERIAL_PRODUTO('+QuotedStr(pProduto)+') ');
+
+    Result := lQry.FieldByName('saldo').AsFloat;
+
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TMovimentoSerialDao.RetornaSerialVenda(pProduto: String): String;
+var
+  lQry : TFDQuery;
+begin
+
+  lQry := vIConexao.CriarQuery;
+
+  try
+    lQry.Open(' select first 1 serial from saldo_movimento_serial(null,null) where produto = '+QuotedStr(pProduto)+' and saldo > 0 ');
+
+    Result := lQry.FieldByName('serial').AsString;
+
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TMovimentoSerialDao.EstornaMovimentoSerial(pTipoDoc, pID_Doc, pSubId: String): String;
+var
+  lQry: TFDQuery;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+   lQry.ExecSQL(' update movimento_serial set status = ''X'' where tipo_documento = '+QuotedStr(pTipoDoc)+' and  id_documento = '+QuotedStr(pID_Doc)+' and sub_id = '+QuotedStr(pSubId)+' ');
+  finally
+    lQry.Free;
+  end;
+
+end;
 
 function TMovimentoSerialDao.carregaClasse(pID : String): TMovimentoSerialModel;
 var
@@ -238,6 +323,7 @@ begin
   end;
 end;
 
+
 function TMovimentoSerialDao.where: String;
 var
   lSQL : String;
@@ -307,6 +393,7 @@ begin
   end;
 end;
 
+
 procedure TMovimentoSerialDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
@@ -353,40 +440,6 @@ begin
     end;
   finally
     lCtx.Free;
-  end;
-end;
-
-function TMovimentoSerialDao.ValidaVendaSerial(pProduto: String): Boolean;
-var
-  lQry       : TFDQuery;
-  lSQL       : String;
-begin
-  lQry := vIConexao.CriarQuery;
-
-  try
-    lSQL :=
-            ' select first 1                                           '+#13+
-            '     p.controle_serial,                                   '+#13+
-            '     m.numero                                             '+#13+
-            ' from                                                     '+#13+
-            '     produto p                                            '+#13+
-            '                                                          '+#13+
-            ' left join movimento_serial m on m.produto = p.codigo_pro '+#13+
-            '                                                          '+#13+
-            ' where                                                    '+#13+
-            '     p.codigo_pro = '+QuotedStr(pProduto)                  +#13+
-            '                                                          '+#13;
-    lQry.Open(lSQL);
-
-    if lQry.FieldByName('numero').AsString <> '' then
-      Result := True
-    else if lQry.FieldByName('controle_serial').AsString = 'S' then
-      Result := True
-    else
-      Result := False;
-
-  finally
-    lQry.Free;
   end;
 end;
 
