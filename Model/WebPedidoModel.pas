@@ -1421,7 +1421,7 @@ begin
       begin
 
 
-        lMovimentoSerialModel.LOGISTICA         := 'LOJA';
+        lMovimentoSerialModel.LOGISTICA         := 'FEDEX';
         lMovimentoSerialModel.TIPO_SERIAL       := 'I';
         lMovimentoSerialModel.NUMERO            := lMovimentoSerialModel.RetornaSerialVenda(pVenderItemParametros.PRODUTO);
         lMovimentoSerialModel.PRODUTO           := pVenderItemParametros.PRODUTO;
