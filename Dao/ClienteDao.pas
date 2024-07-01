@@ -71,6 +71,7 @@ type
     function obterListaConsulta: TFDMemTable;
     function ObterListaMemTable: TFDMemTable;
     function ObterBairros: TFDMemTable;
+    procedure bloquearCNPJCPF(pCliente, pCNPJCPF: String);
 
 end;
 implementation
@@ -981,6 +982,35 @@ begin
 
     Result := vConstrutor.atribuirRegistros(lQry);
     obterTotalRegistros;
+  finally
+    lQry.Free;
+  end;
+end;
+
+procedure TClienteDao.bloquearCNPJCPF(pCliente, pCNPJCPF: String);
+var
+  lQry : TFDQuery;
+  lSql : String;
+  lConfiguracoes : TerasoftConfiguracoes;
+begin
+  try
+    lQry := vIConexao.CriarQuery;
+    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+
+    lSql := 'select clientes.codigo_cli from clientes               '+
+            '  where clientes.codigo_cli <> '+ QuotedStr(pCliente)   +
+            '  and clientes.CNPJ_CPF_CLI =  '+ QuotedStr(pCNPJCPF)   ;
+
+    lQry.Open(lSql);
+
+    if not lQry.IsEmpty then begin
+      if lConfiguracoes.valorTag('UNIQUE_CLIENTE', 'S', tvBool) = 'N' then
+          if lConfiguracoes.verificaPerfil('CLIENTES_CPF_CNPJ_DUPLICADO') then
+            exit;
+
+      criaException('Existe um cliente cadastrado com o código '+ lQry.FieldByName('CODIGO_CLI').AsString +' associado a este CPF/CNPJ');
+    end;
+
   finally
     lQry.Free;
   end;
