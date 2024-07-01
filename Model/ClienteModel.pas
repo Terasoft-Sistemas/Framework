@@ -949,6 +949,7 @@ type
     function obterListaConsulta: TFDMemTable;
     function ObterListaMemTable: TFDMemTable;
     function ObterBairros: TFDMemTable;
+    procedure bloquearCNPJCPF(pCliente, pCNPJCPF: String);
 
     procedure camposObrigatorios(pTag: String; pClienteModel: TClienteModel);
 
@@ -1155,6 +1156,18 @@ begin
   try
     Result := lClienteDao.ObterBairros;
     FTotalRecords := lClienteDao.TotalRecords;
+  finally
+    lClienteDao.Free;
+  end;
+end;
+
+procedure TClienteModel.bloquearCNPJCPF(pCliente, pCNPJCPF: String);
+var
+  lClienteDao: TClienteDao;
+begin
+  lClienteDao := TClienteDao.Create(vIConexao);
+  try
+    lClienteDao.bloquearCNPJCPF(pCliente,pCNPJCPF);
   finally
     lClienteDao.Free;
   end;
