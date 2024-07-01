@@ -469,6 +469,7 @@ begin
       FNFLista[i].DATA_SAIDA                  := lQry.FieldByName('DATA_SAIDA').AsString;
       FNFLista[i].CLIENTE_NF                  := lQry.FieldByName('cliente_nome_cliente').AsString;
       FNFLista[i].NOME_XML                    := lQry.FieldByName('NOME_XML').AsString;
+      FNFLista[i].UF_EMBARQUE                 := lQry.FieldByName('estado_cliente').AsString;
 
       lQry.Next;
     end;
