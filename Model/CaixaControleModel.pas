@@ -93,6 +93,8 @@ type
 
     function dataFechamento(pIdCaixa, pUsuario: String): String;
 
+    function vendaCaixaFechado(pDataHora: String): boolean;
+
     property CaixaControlesLista: TObjectList<TCaixaControleModel> read FCaixaControlesLista write SetCaixaControlesLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -152,6 +154,18 @@ begin
   lCaixaControleDao := TCaixaControleDao.Create(vIConexao);
   try
     Result := lCaixaControleDao.dataFechamento(pIdCaixa, pUsuario);
+  finally
+    lCaixaControleDao.Free;
+  end;
+end;
+
+function TCaixaControleModel.vendaCaixaFechado(pDataHora: String): boolean;
+var
+  lCaixaControleDao : TCaixaControleDao;
+begin
+  lCaixaControleDao := TCaixaControleDao.Create(vIConexao);
+  try
+    Result := lCaixaControleDao.vendaCaixaFechado(pDataHora);
   finally
     lCaixaControleDao.Free;
   end;

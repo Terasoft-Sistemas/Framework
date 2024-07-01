@@ -542,7 +542,7 @@ uses
   CFOPModel,
   EmpresaModel,
   FireDAC.Comp.Client, ClienteModel, FuncionarioModel, Terasoft.Configuracoes,
-  PixModel, FinanceiroPedidoModel, VendaCartaoModel, ReservaModel;
+  PixModel, FinanceiroPedidoModel, VendaCartaoModel, ReservaModel, CaixaControleModel;
 
 { TPedidoVendaModel }
 
@@ -1314,12 +1314,14 @@ end;
 
 procedure TPedidoVendaModel.reabrirPedido;
 var
-  lPedidoVendaModel : TPedidoVendaModel;
+  lPedidoVendaModel   : TPedidoVendaModel;
   lPedidoItensModel,
-  lModel            : TPedidoItensModel;
+  lModel              : TPedidoItensModel;
+  lCaixaControleModel : TCaixaControleModel;
 begin
-  lPedidoVendaModel := TPedidoVendaModel.Create(vIConexao);
-  lPedidoItensModel := TPedidoItensModel.Create(vIConexao);
+  lPedidoVendaModel   := TPedidoVendaModel.Create(vIConexao);
+  lPedidoItensModel   := TPedidoItensModel.Create(vIConexao);
+  lCaixaControleModel := TCaixaControleModel.Create(vIConexao);
 
   try
     lPedidoVendaModel := lPedidoVendaModel.carregaClasse(self.FNUMERO_PED);
@@ -1329,6 +1331,9 @@ begin
 
     if lPedidoVendaModel.WEB_PEDIDO_ID <> '' then
       CriaException('Venda originada de venda assistida, efetue o processo de devolução.');
+
+    if lCaixaControleModel.vendaCaixaFechado(transformaDataHoraFireBird(lPedidoVendaModel.DATA_PED + lPedidoVendaModel.HORA_PED)) then
+      CriaException('Não é possível reabrir venda com o caixa já finalizado');
 
     lPedidoItensModel.IDPedidoVendaView := lPedidoVendaModel.NUMERO_PED;
     lPedidoItensModel.obterLista;
@@ -1351,6 +1356,7 @@ begin
   finally
     lPedidoVendaModel.Free;
     lPedidoItensModel.Free;
+    lCaixaControleModel.Free;
   end;
 end;
 
