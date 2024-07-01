@@ -58,6 +58,8 @@ type
     function alterar(pClienteModel: TClienteModel): String;
     function excluir(pClienteModel: TClienteModel): String;
 
+    function sincronizarDados(pClienteModel: TClienteModel): String;
+
     procedure obterLista;
 
     function where: String;
@@ -466,28 +468,8 @@ begin
 
     Result := lQry.FieldByName('CODIGO_CLI').AsString;
 
-//    if lConfiguracoes.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
-//    begin
-//      lLojasModel.obterLista;
-//
-//      lSQL := vConstrutor.gerarUpdateOrInsert('CLIENTES','CODIGO_CLI', 'CODIGO_CLI', true);
-//
-//      for lLojas in lLojasModel.LojassLista do
-//      begin
-//        if lLojas.LOJA <> vIConexao.getEmpresa.LOJA then
-//        begin
-//          vIConexao.ConfigConexaoExterna(llojas.LOJA);
-//          lQry := vIConexao.criarQueryExterna;
-//
-//          lQry.SQL.Clear;
-//          lQry.SQL.Add(lSQL);
-//          setParams(lQry, pClienteModel);
-//          lQry.Open(lSQL);
-//
-//          lResult := lQry.FieldByName('CODIGO_CLI').AsString;
-//        end;
-//      end;
-//    end;
+    if lConfiguracoes.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
+      sincronizarDados(pClienteModel);
 
   finally
     lLojasModel.Free;
@@ -498,8 +480,9 @@ end;
 
 function TClienteDao.alterar(pClienteModel: TClienteModel): String;
 var
-  lQry: TFDQuery;
-  lSQL:String;
+  lQry           : TFDQuery;
+  lSQL           : String;
+  lConfiguracoes : TerasoftConfiguracoes;
 begin
   lQry := vIConexao.CriarQuery;
 
@@ -511,6 +494,11 @@ begin
     lQry.ExecSQL;
 
     Result := pClienteModel.CODIGO_CLI;
+
+    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+
+    if lConfiguracoes.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
+      sincronizarDados(pClienteModel);
 
   finally
     lSQL := '';
@@ -1065,6 +1053,55 @@ end;
 procedure TClienteDao.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
+end;
+
+function TClienteDao.sincronizarDados(pClienteModel: TClienteModel): String;
+var
+  lLojasModel,
+  lLojas      : TLojasModel;
+  lQry        : TFDQuery;
+  lSQL        : String;
+begin
+
+  lLojasModel := TLojasModel.Create(vIConexao);
+
+  try
+    lLojasModel.obterLista;
+
+    lSQL := vConstrutor.gerarUpdateOrInsert('CLIENTES','CODIGO_CLI', 'CODIGO_CLI', true);
+
+    if vIConexao.getEmpresa.STRING_CONEXAO_RESERVA <> '' then
+    begin
+      vIConexao.ConfigConexaoExterna('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA);
+      lQry := vIConexao.criarQueryExterna;
+
+      lQry.SQL.Add(lSQL);
+      setParams(lQry, pClienteModel);
+      lQry.Open(lSQL);
+
+      lQry.FieldByName('CODIGO_CLI').AsString;
+    end;
+
+    for lLojas in lLojasModel.LojassLista do
+    begin
+      if lLojas.LOJA <> vIConexao.getEmpresa.LOJA then
+      begin
+        vIConexao.ConfigConexaoExterna(llojas.LOJA);
+        lQry := vIConexao.criarQueryExterna;
+
+        lQry.SQL.Clear;
+        lQry.SQL.Add(lSQL);
+        setParams(lQry, pClienteModel);
+        lQry.Open(lSQL);
+
+        lQry.FieldByName('CODIGO_CLI').AsString;
+      end;
+    end;
+
+  finally
+    lLojasModel.Free;
+    lQry.Free;
+  end;
 end;
 
 function TClienteDao.ufCliente(pId: String): Variant;
