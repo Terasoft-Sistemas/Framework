@@ -168,7 +168,10 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL(' update movimento_serial set status = ''X'' where tipo_documento = '+QuotedStr(pTipoDoc)+' and  id_documento = '+QuotedStr(pID_Doc)+' and sub_id = '+QuotedStr(pSubId)+' ');
+   if pSubId = '' then
+     lQry.ExecSQL(' update movimento_serial set status = ''X'' where tipo_documento = '+QuotedStr(pTipoDoc)+' and  id_documento = '+QuotedStr(pID_Doc))
+   else
+     lQry.ExecSQL(' update movimento_serial set status = ''X'' where tipo_documento = '+QuotedStr(pTipoDoc)+' and  id_documento = '+QuotedStr(pID_Doc)+' and sub_id = '+QuotedStr(pSubId)+' ');
   finally
     lQry.Free;
   end;
