@@ -194,6 +194,8 @@ type
     RLDBText6: TRLDBText;
     mtItensTIPO_GARANTIA_FR: TStringField;
     RLDBText27: TRLDBText;
+    mtItensOBSERVACAO: TStringField;
+    RLDBMemo3: TRLDBMemo;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure RLBand3BeforePrint(Sender: TObject; var PrintIt: Boolean);
@@ -432,6 +434,8 @@ begin
       mtItensTIPO_GARANTIA.Value    := lWebPedidoItensModel.TIPO_GARANTIA;
       mtItensTIPO_GARANTIA_FR.Value := lWebPedidoItensModel.TIPO_GARANTIA_FR;
       mtItensVALOR_TOTAL.Value      := lWebPedidoItensModel.VALOR_TOTALITENS;
+      mtItensOBSERVACAO.Value       := lWebPedidoItensModel.OBSERVACAO;
+
       mtItens.Post;
 
       vGarantia := vGarantia + mtItensQUANTIDADE.Value * mtItensVLR_GARANTIA.Value;
@@ -521,6 +525,11 @@ begin
     RLBand3.Color := cl3DLight;
 
   Self.FCONTADOR := Self.FCONTADOR + 1;
+
+  if mtItensOBSERVACAO.Value = '' then
+    RLBand3.Height := 25
+  else
+    RLBand3.Height := 45;
 end;
 
 procedure TImpressaoVendaAssistida.SetCNPJEMPRESA(const Value: Variant);

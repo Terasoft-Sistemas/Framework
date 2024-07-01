@@ -619,7 +619,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
         end
         object RLBand7: TRLBand
           Left = 19
-          Top = 374
+          Top = 394
           Width = 756
           Height = 192
           AlignToBottom = True
@@ -1021,7 +1021,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
         end
         object RLBand9: TRLBand
           Left = 19
-          Top = 566
+          Top = 586
           Width = 756
           Height = 34
           AlignToBottom = True
@@ -1264,7 +1264,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
           Left = 19
           Top = 349
           Width = 756
-          Height = 25
+          Height = 45
           Borders.Sides = sdCustom
           Borders.DrawLeft = True
           Borders.DrawTop = False
@@ -1485,6 +1485,23 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
             ParentFont = False
             Text = ''
             Transparent = False
+          end
+          object RLDBMemo3: TRLDBMemo
+            Left = 7
+            Top = 35
+            Width = 742
+            Height = 11
+            AutoSize = False
+            Behavior = [beSiteExpander]
+            DataField = 'OBSERVACAO'
+            DataSource = dsItens
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clBlack
+            Font.Height = -9
+            Font.Name = 'Arial'
+            Font.Style = []
+            ParentFont = False
+            WordWrap = False
           end
         end
         object rlBandFatura: TRLBand
@@ -1994,6 +2011,10 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
     object mtItensTIPO_GARANTIA_FR: TStringField
       FieldName = 'TIPO_GARANTIA_FR'
       Size = 4
+    end
+    object mtItensOBSERVACAO: TStringField
+      FieldName = 'OBSERVACAO'
+      Size = 500
     end
   end
   object dsPedido: TDataSource
