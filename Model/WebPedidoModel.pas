@@ -590,6 +590,8 @@ begin
     lPedidoItensModel.Acao := tacIncluirLote;
     lPedidoItensModel.Salvar;
 
+    lPedidoVendaModel.calcularTotais;
+
     if lFinanceiroPedidoModel.TotalRecords > 0 then
       lPedidoVendaModel.gerarContasReceberFinanceiroPedido(pIdVendaAssistida.ToString)
     else
