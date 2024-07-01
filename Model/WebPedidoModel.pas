@@ -1335,6 +1335,7 @@ var
   lValorVendido        : Double;
   i : Integer;
   lVendaComSerial: Boolean;
+  lSerialItem: String;
 begin
   lVendaComSerial := False;
 
@@ -1414,8 +1415,11 @@ begin
 
     if lVendaComSerial then
     begin
+      lSerialItem := '';
+
       for I := 1 to StrToInt(pVenderItemParametros.QUANTIDADE) do
       begin
+
 
         lMovimentoSerialModel.LOGISTICA         := 'LOJA';
         lMovimentoSerialModel.TIPO_SERIAL       := 'I';
@@ -1425,8 +1429,15 @@ begin
         lMovimentoSerialModel.ID_DOCUMENTO      := pVenderItemParametros.WEB_PEDIDO;
         lMovimentoSerialModel.SUB_ID            := Result;
         lMovimentoSerialModel.TIPO_MOVIMENTO    := 'S';
+
+        lSerialItem := lSerialItem + lMovimentoSerialModel.NUMERO + ' ';
+
         lMovimentoSerialModel.Incluir;
       end;
+
+      lWebPedidoItensModel :=   lWebPedidoItensModel.Alterar(Result);
+      lWebPedidoItensModel.OBSERVACAO := 'Serial: ' + lSerialItem;
+      lWebPedidoItensModel.Salvar;
     end;
 
     Self.calcularTotais;
