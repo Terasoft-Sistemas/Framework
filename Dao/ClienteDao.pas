@@ -74,7 +74,7 @@ end;
 implementation
 
 uses
-  System.Rtti;
+  System.Rtti, Terasoft.Configuracoes, LojasModel, Terasoft.Types;
 
 { TCliente }
 
@@ -444,14 +444,21 @@ end;
 
 function TClienteDao.incluir(pClienteModel: TClienteModel): String;
 var
-  lQry: TFDQuery;
-  lSQL:String;
+  lQry           : TFDQuery;
+  lSQL,
+  lResult        : String;
+  lConfiguracoes : TerasoftConfiguracoes;
+  lLojasModel,
+  lLojas         : TLojasModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := vConstrutor.gerarInsert('CLIENTES', 'CODIGO_CLI', true);
-
+  lLojasModel := TLojasModel.Create(vIConexao);
   try
+    lSQL := vConstrutor.gerarInsert('CLIENTES', 'CODIGO_CLI', true);
+
+    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+
     lQry.SQL.Add(lSQL);
     pClienteModel.CODIGO_CLI := vIConexao.Generetor('GEN_CLIENTE');
     setParams(lQry, pClienteModel);
@@ -459,7 +466,31 @@ begin
 
     Result := lQry.FieldByName('CODIGO_CLI').AsString;
 
+//    if lConfiguracoes.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
+//    begin
+//      lLojasModel.obterLista;
+//
+//      lSQL := vConstrutor.gerarUpdateOrInsert('CLIENTES','CODIGO_CLI', 'CODIGO_CLI', true);
+//
+//      for lLojas in lLojasModel.LojassLista do
+//      begin
+//        if lLojas.LOJA <> vIConexao.getEmpresa.LOJA then
+//        begin
+//          vIConexao.ConfigConexaoExterna(llojas.LOJA);
+//          lQry := vIConexao.criarQueryExterna;
+//
+//          lQry.SQL.Clear;
+//          lQry.SQL.Add(lSQL);
+//          setParams(lQry, pClienteModel);
+//          lQry.Open(lSQL);
+//
+//          lResult := lQry.FieldByName('CODIGO_CLI').AsString;
+//        end;
+//      end;
+//    end;
+
   finally
+    lLojasModel.Free;
     lSQL := '';
     lQry.Free;
   end;

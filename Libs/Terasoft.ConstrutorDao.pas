@@ -18,6 +18,7 @@ type
 
   public
     function gerarInsert(pTabela, pFieldReturning: String; pGerarID: Boolean = false): String;
+    function gerarUpdateOrInsert(pTabela, pMatch, pFieldReturning: String; pGerarID: Boolean = false): String;
     function gerarUpdate(pTabela, pFieldWhere: String): String;
     function queryTabela(pTabela: String): String;
     function carregaFields(pQry: TFDQuery; pTabela: String; pGerarID: Boolean): TStringList;
@@ -174,6 +175,45 @@ begin
     lUpdate := lUpdate + ' WHERE '+ pFieldWhere + ' = :' + pFieldWhere;
 
     Result := lUpdate;
+  finally
+    lFields.Free;
+    lQry.Free;
+  end;
+end;
+
+function TConstrutorDao.gerarUpdateOrInsert(pTabela, pMatch,
+  pFieldReturning: String; pGerarID: Boolean): String;
+var
+  lQry     : TFDQuery;
+  lColums,
+  lParams  : String;
+  lFields  : TStringList;
+  i        : Integer;
+begin
+  lQry     := vIConexao.CriarQuery;
+  lFields  := TStringList.Create;
+
+  try
+    lQry.Open(queryTabela(pTabela));
+
+    lColums := '';
+    lParams := '';
+
+    lFields := carregaFields(lQry, pTabela, pGerarID);
+
+    for i := 0 to lFields.Count -1 do
+    begin
+      if i > 0 then
+      begin
+        lColums := lColums + ', ';
+        lParams := lParams + ', ';
+      end;
+
+      lColums := lColums + lFields.Strings[i];
+      lParams := lParams + ':'+lFields.Strings[i];
+    end;
+
+    Result := 'UPDATE OR INSERT INTO '+ pTabela + ' ( ' + lColums + ') VALUES ( '+lParams+' ) MATCHING ('+pMatch+') '+ IfThen(pFieldReturning <> '', 'returning '+pFieldReturning, '');
   finally
     lFields.Free;
     lQry.Free;
