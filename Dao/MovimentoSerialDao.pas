@@ -141,7 +141,7 @@ begin
 
     lSQL :=
     ' select                                    '+#13+
-    '     serial,                               '+#13+
+    '     primeira_entrada, serial,             '+#13+
     '     sum(saldo) saldo                      '+#13+
     '                                           '+#13+
     '    from                                   '+#13+
@@ -157,11 +157,12 @@ begin
     '                                           '+#13+
     '     order by 1)                           '+#13+
     '                                           '+#13+
-    ' group by 1                                '+#13+
+    ' group by 1,2                              '+#13+
     '                                           '+#13+
     ' having sum(saldo) > 0                     '+#13;
 
     lQry.Open(lSQL);
+
 
     Result := lQry.FieldByName('serial').AsString;
 
