@@ -66,6 +66,8 @@ type
     procedure setParams(var pQry: TFDQuery; pCaixaControleModel: TCaixaControleModel);
     function ultimoCaixa(pUsuario: String): String;
     function dataFechamento(pIdCaixa, pUsuario: String) : String;
+
+    function vendaCaixaFechado(pDataHora: String): boolean;
 end;
 
 implementation
@@ -90,6 +92,18 @@ begin
           '    and c.status  = ''F''                                     '+
           '    and c.usuario = ' + QuotedStr(pUsuario)                    +
           '  order by 1 ';
+
+  Result := vIConexao.getConnection.ExecSQLScalar(lSql);
+end;
+
+function TCaixaControleDao.vendaCaixaFechado(pDataHora: String): boolean;
+var
+  lSql : String;
+begin
+  lSql := ' select first 1 c.id , cast(c.data+c.hora as timestamp) dataAbertura                    '+
+          '   from caixa_ctr c                                                                     '+
+          ' where c.status = ''F'' and cast(c.data+c.hora as timestamp)  > ' + QuotedStr(pDataHora) +
+          '   and c.usuario = ' + QuotedStr(self.vIConexao.getUSer.ID) + ' order by 2 desc         ';
 
   Result := vIConexao.getConnection.ExecSQLScalar(lSql);
 end;
