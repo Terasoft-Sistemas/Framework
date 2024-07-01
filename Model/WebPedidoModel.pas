@@ -1435,7 +1435,7 @@ begin
         lMovimentoSerialModel.Incluir;
       end;
 
-      lWebPedidoItensModel :=   lWebPedidoItensModel.Alterar(Result);
+      lWebPedidoItensModel := lWebPedidoItensModel.Alterar(Result);
       lWebPedidoItensModel.OBSERVACAO := 'Serial: ' + lSerialItem;
       lWebPedidoItensModel.Salvar;
     end;
