@@ -50,7 +50,7 @@ implementation
 { TCalcularImpostos }
 
 uses
-  Terasoft.Utils;
+  Terasoft.Utils, IbptModel;
 
 constructor TCalcularImpostosDao.Create(pIConexao : IConexao);
 begin
@@ -66,13 +66,19 @@ end;
 
 function TCalcularImpostosDao.obterAliquotas: TCalcularImpostosModel;
 var
-  lQry: TFDQuery;
-  lSQL: String;
-  lCalcularImpostosModel: TCalcularImpostosModel;
-  lUF_BASE: String;
+  lQry : TFDQuery;
+  lSQL : String;
+  lCalcularImpostosModel : TCalcularImpostosModel;
+  lIbptModel             : TIbptModel;
+  lTipoProduto,
+  lNCM,
+  lUF_BASE               : String;
+  lRetornoIbpt           : TIBPTRetorno;
 begin
   lQry := vIConexao.CriarQuery;
+
   lCalcularImpostosModel := TCalcularImpostosModel.Create(vIConexao);
+  lIbptModel             := TIbptModel.Create(vIConexao);
 
   try
     if FMODELO_NF = '65' then
@@ -102,7 +108,9 @@ begin
           '     p.nfce_cfop nfce_cfop_id,                                    '+#13+
           '     c2.cfop nfce_cfop,                                           '+#13+
           '     c.cfop,                                                      '+#13+
-          '     coalesce(c1.cfop, c.cfop) cfop_consumidor                    '+#13+
+          '     coalesce(c1.cfop, c.cfop) cfop_consumidor,                   '+#13+
+          '     p.tipo_pro,                                                  '+#13+
+          '     p.codigo_fornecedor ncm                                      '+#13+
           '                                                                  '+#13+
           ' from                                                             '+#13+
           '     produto p                                                    '+#13+
@@ -159,6 +167,9 @@ begin
     lCalcularImpostosModel.IPI_CST                     := lQry.FieldByName('cst_ipi').AsString;
     lCalcularImpostosModel.IPI_ALIQUOTA                := lQry.FieldByName('ipi_sai').AsFloat;
 
+    lTipoProduto := lQry.FieldByName('tipo_pro').AsString;
+    lNCM         := lQry.FieldByName('ncm').AsString;
+
     lCalcularImpostosModel.CODIGO_PRODUTO    := FCODIGO_PRODUTO;
     lCalcularImpostosModel.CODIGO_CLIENTE    := FCODIGO_CLIENTE;
     lCalcularImpostosModel.EMITENTE_UF       := FEMITENTE_UF;
@@ -174,7 +185,8 @@ begin
         '     c.cst_cofins cfop_cst_cofins,           '+#13+
         '     c.aliquota_cofins cfop_cofins_aliquota, '+#13+
         '     c.aliquota_ipi cfop_ipi_aliquota,       '+#13+
-        '     c.cst_ipi cfop_cst_ipi                  '+#13+
+        '     c.cst_ipi cfop_cst_ipi,                 '+#13+
+        '     c.ibpt                                  '+#13+
         '                                             '+#13+
         ' from                                        '+#13+
         '     cfop c                                  '+#13+
@@ -214,9 +226,20 @@ begin
     else
       lCalcularImpostosModel.IPI_ALIQUOTA := lCalcularImpostosModel.IPI_ALIQUOTA;
 
+
+    if lQry.FieldByName('ibpt').AsString <> 'N' then
+    begin
+      lRetornoIbpt := lIbptModel.obterIBPT(FEMITENTE_UF, lTipoProduto, lNCM);
+
+      lCalcularImpostosModel.ALIQUOTA_FEDERAL   := lRetornoIbpt.IMPOSTO_FEDERAL;
+      lCalcularImpostosModel.ALIQUOTA_ESTADUAL  := lRetornoIbpt.IMPOSTO_ESTADUAL;
+      lCalcularImpostosModel.ALIQUOTA_MUNICIPAL := lRetornoIbpt.IMPOSTO_MUNICIPAL;
+    end;
+
     Result := lCalcularImpostosModel;
 
   finally
+    lIbptModel.Free;
     lQry.Free;
   end;
 end;

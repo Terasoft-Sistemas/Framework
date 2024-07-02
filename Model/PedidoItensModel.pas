@@ -170,6 +170,9 @@ type
     FTIPO_GARANTIA_FR: Variant;
     FPER_GARANTIA_FR: Variant;
     FCUSTO_GARANTIA_FR: Variant;
+    FVTOTTRIB_FEDERAL: Variant;
+    FVTOTTRIB_MUNICIPAL: Variant;
+    FVTOTTRIB_ESTADUAL: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetPedidoItenssLista(const Value: TObjectList<TPedidoItensModel>);
@@ -316,6 +319,9 @@ type
     procedure SetPER_GARANTIA_FR(const Value: Variant);
     procedure SetTIPO_GARANTIA_FR(const Value: Variant);
     procedure SetVLR_GARANTIA_FR(const Value: Variant);
+    procedure SetVTOTTRIB_ESTADUAL(const Value: Variant);
+    procedure SetVTOTTRIB_FEDERAL(const Value: Variant);
+    procedure SetVTOTTRIB_MUNICIPAL(const Value: Variant);
 
   public
     property ID: Variant read FID write SetID;
@@ -450,6 +456,9 @@ type
     property CUSTO_GARANTIA_FR: Variant read FCUSTO_GARANTIA_FR write SetCUSTO_GARANTIA_FR;
     property CUSTO_GARANTIA: Variant read FCUSTO_GARANTIA_FR write SetCUSTO_GARANTIA_FR;
     property PER_GARANTIA_FR: Variant read FPER_GARANTIA_FR write SetPER_GARANTIA_FR;
+    property VTOTTRIB_ESTADUAL: Variant read FVTOTTRIB_ESTADUAL write SetVTOTTRIB_ESTADUAL;
+    property VTOTTRIB_FEDERAL: Variant read FVTOTTRIB_FEDERAL write SetVTOTTRIB_FEDERAL;
+    property VTOTTRIB_MUNICIPAL: Variant read FVTOTTRIB_MUNICIPAL write SetVTOTTRIB_MUNICIPAL;
 
   	constructor Create(pConexao: IConexao);
     destructor Destroy; override;
@@ -1499,6 +1508,21 @@ end;
 procedure TPedidoItensModel.SetVOUTROS(const Value: Variant);
 begin
   FVOUTROS := Value;
+end;
+
+procedure TPedidoItensModel.SetVTOTTRIB_ESTADUAL(const Value: Variant);
+begin
+  FVTOTTRIB_ESTADUAL := Value;
+end;
+
+procedure TPedidoItensModel.SetVTOTTRIB_FEDERAL(const Value: Variant);
+begin
+  FVTOTTRIB_FEDERAL := Value;
+end;
+
+procedure TPedidoItensModel.SetVTOTTRIB_MUNICIPAL(const Value: Variant);
+begin
+  FVTOTTRIB_MUNICIPAL := Value;
 end;
 
 procedure TPedidoItensModel.SetWEB_PEDIDOITENS_ID(const Value: Variant);

@@ -88,6 +88,9 @@ type
     FVALOR_ACRESCIMO: Real;
     FACRESCIMO_ITEM: Real;
     FDESCONTO_ITEM: Real;
+    FALIQUOTA_FEDERAL: Real;
+    FALIQUOTA_MUNICIPAL: Real;
+    FALIQUOTA_ESTADUAL: Real;
     procedure SetABATEDESCONTO_IPI(const Value: String);
     procedure SetCFOP(const Value: String);
     procedure SetCOFINS_ALIQUOTA(const Value: Real);
@@ -155,6 +158,9 @@ type
     procedure SetVALOR_ACRESCIMO(const Value: Real);
     procedure SetACRESCIMO_ITEM(const Value: Real);
     procedure SetDESCONTO_ITEM(const Value: Real);
+    procedure SetALIQUOTA_ESTADUAL(const Value: Real);
+    procedure SetALIQUOTA_FEDERAL(const Value: Real);
+    procedure SetALIQUOTA_MUNICIPAL(const Value: Real);
 
   public
     property CFOP_ID                     : String read FCFOP_ID write SetCFOP_ID;
@@ -229,6 +235,10 @@ type
 
     property DESCONTO_ITEM  : Real read FDESCONTO_ITEM write SetDESCONTO_ITEM;
     property ACRESCIMO_ITEM : Real read FACRESCIMO_ITEM write SetACRESCIMO_ITEM;
+
+    property ALIQUOTA_FEDERAL: Real read FALIQUOTA_FEDERAL write SetALIQUOTA_FEDERAL;
+    property ALIQUOTA_ESTADUAL: Real read FALIQUOTA_ESTADUAL write SetALIQUOTA_ESTADUAL;
+    property ALIQUOTA_MUNICIPAL: Real read FALIQUOTA_MUNICIPAL write SetALIQUOTA_MUNICIPAL;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -386,6 +396,11 @@ begin
     lMotor.NotaFiscal.Produto.ICMS.DIFAL.AliquotaInter := Self.FICMS_ALIQUOTA_INTERESTADUAL;
     lMotor.NotaFiscal.Produto.ICMS.DIFAL.AliquotaIntra := Self.FICMS_ALIQUOTA;
 
+    //IBPT
+    lMotor.NotaFiscal.Produto.IBPT.AliquotaMunicipal := self.ALIQUOTA_MUNICIPAL;
+    lMotor.NotaFiscal.Produto.IBPT.AliquotaEstadual  := self.ALIQUOTA_ESTADUAL;
+    lMotor.NotaFiscal.Produto.IBPT.AliquotaNacional  := self.ALIQUOTA_FEDERAL;
+
     lMotor.Processar;
 
     //======= Rateio =======
@@ -516,6 +531,21 @@ end;
 procedure TCalcularImpostosModel.SetACRESCIMO_ITEM(const Value: Real);
 begin
   FACRESCIMO_ITEM := Value;
+end;
+
+procedure TCalcularImpostosModel.SetALIQUOTA_ESTADUAL(const Value: Real);
+begin
+  FALIQUOTA_ESTADUAL := Value;
+end;
+
+procedure TCalcularImpostosModel.SetALIQUOTA_FEDERAL(const Value: Real);
+begin
+  FALIQUOTA_FEDERAL := Value;
+end;
+
+procedure TCalcularImpostosModel.SetALIQUOTA_MUNICIPAL(const Value: Real);
+begin
+  FALIQUOTA_MUNICIPAL := Value;
 end;
 
 procedure TCalcularImpostosModel.SetCFOP(const Value: String);

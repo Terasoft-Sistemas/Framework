@@ -533,6 +533,10 @@ begin
       FPedidoItenssLista[i].CUSTO_GARANTIA               := lQry.FieldByName('CUSTO_GARANTIA').AsString;
       FPedidoItenssLista[i].PER_GARANTIA_FR              := lQry.FieldByName('PER_GARANTIA_FR').AsString;
 
+      FPedidoItenssLista[i].VTOTTRIB_FEDERAL             := lQry.FieldByName('VTOTTRIB_FEDERAL').AsString;
+      FPedidoItenssLista[i].VTOTTRIB_ESTADUAL            := lQry.FieldByName('VTOTTRIB_ESTADUAL').AsString;
+      FPedidoItenssLista[i].VTOTTRIB_MUNICIPAL           := lQry.FieldByName('VTOTTRIB_MUNICIPAL').AsString;
+
       lQry.Next;
     end;
 
