@@ -10,7 +10,12 @@ uses
   REST.Types, System.Classes,
   Interfaces.Conexao,
   Terasoft.Configuracoes,
-  REST.Authenticator.Basic;
+  REST.Authenticator.Basic,
+  ACBrBase,
+  ACBrSocket,
+  ACBrCEP,
+  Terasoft.FuncoesTexto,
+  Data.DB;
 
 type
 
@@ -34,19 +39,24 @@ type
       fRestRequest         :  TRESTRequest;
       fRestResponse        :  TRESTResponse;
       vConfiguracoes       :  TerasoftConfiguracoes;
+      vACBrCEP             :  TACBrCEP;
+      vMemtable            : TFDMemtable;
+      FAPI                 : TApi;
 
-      FAPI: TApi;
       procedure SetAPI(const Value: TApi);
+      procedure vACBrCEPBuscaEfetuada(Sender: TObject);
 
     public
       constructor Create(pConfiguracoes : TerasoftConfiguracoes);
       destructor Destroy; override;
-      function consultarCEP(pCEP: String): TRetornoCEP;
 
+      function consultarCEP(pCEP: String): TRetornoCEP;
       function cepApiBrasil(pCep: String): TRetornoCEP;
       function cepApiViaCep(pCep: String): TRetornoCEP;
 
       property API: TApi read FAPI write SetAPI;
+
+      function retornarCEP(pEndereco, pCidade, pUF: String): TFDMemtable;
 
   end;
 
@@ -71,11 +81,77 @@ begin
   fRestRequest.Timeout := 120000;
 
   self.FAPI := tApiBrasil;
+
+  vACBrCEP := TACBrCEP.Create(nil);
+  vACBrCEP.URL;
+  vACBrCEP.ParseText := True;
+  vACBrCEP.TimeOut := 2000;
+  vACBrCEP.WebService := wsViaCep;
+  vACBrCEP.OnBuscaEfetuada := vACBrCEPBuscaEfetuada;
+end;
+
+procedure TCEPModel.vACBrCEPBuscaEfetuada(Sender: TObject);
+var
+  I : Integer;
+begin
+  if vACBrCEP.Enderecos.Count < 1 then begin
+    criaException('Nenhum Endereço encontrado');
+  end
+  else
+  begin
+    try
+      vMemtable := TFDMemTable.Create(nil);
+
+      vMemtable.FieldDefs.Add('CEP_CLI', ftString, 8);
+      vMemtable.FieldDefs.Add('ENDERECO_CLI', ftString, 40);
+      vMemtable.FieldDefs.Add('COMPLEMENTO', ftString, 50);
+      vMemtable.FieldDefs.Add('BAIRRO_CLI', ftString, 20);
+      vMemtable.FieldDefs.Add('CIDADE_CLI', ftString, 30);
+      vMemtable.FieldDefs.Add('COD_MUNICIPIO', ftString, 10);
+      vMemtable.FieldDefs.Add('UF_CLI', ftString, 2);
+
+      vMemtable.CreateDataSet;
+
+    for I := 0 to vACBrCEP.Enderecos.Count - 1 do
+      begin
+        with vACBrCEP.Enderecos[I] do
+        begin
+          vMemtable.InsertRecord([
+            removeCaracteresGraficos(CEP),
+            UpperCase(converteTextoSemAcento(Logradouro)),
+            UpperCase(Complemento),
+            UpperCase(Bairro),
+            UpperCase(converteTextoSemAcento(Municipio)),
+            IBGE_Municipio,
+            UpperCase(UF)
+          ]);
+        end;
+      end;
+
+      vMemtable.Open;
+    except
+    on E:Exception do
+      criaException(E.Message);
+    end;
+  end;
 end;
 
 destructor TCEPModel.Destroy;
 begin
 inherited;
+end;
+
+function TCEPModel.retornarCEP(pEndereco, pCidade, pUF: String): TFDMemtable;
+begin
+
+  try
+    vACBrCEP.BuscarPorLogradouro(converteTextoSemAcento(pCidade), '', trim(retiraPonto(converteTextoSemAcento(pEndereco))), pUF,'');
+  except
+  on E:Exception do
+    criaException(E.Message);
+  end;
+
+  Result := vMemtable;
 end;
 
 procedure TCEPModel.SetAPI(const Value: TApi);
