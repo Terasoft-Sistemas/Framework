@@ -583,7 +583,7 @@ begin
     else if pComissaoCliente > 0 then
       lPercentualComissao := pComissaoCliente
 
-    else if self.FCOMIS_PRO <> '' then
+    else if self.FCOMIS_PRO > 0 then
       lPercentualComissao := StrToFloat(self.FCOMIS_PRO)
 
     else if self.FGRUPO_COMISSAO_ID <> '' then
