@@ -210,9 +210,12 @@ type
     procedure gerarVendaCartao;
     procedure excluirBaixa;
 
-    function lancarContaCorrente(pValor, pPortador, pConta, pContaCorrente, pHistorico, pTipo: String): String;
+    function lancarContaCorrente(pValor, pPortador, pConta, pContaCorrente, pHistorico, pTipo: String) : String;
+    function lancarJurosContaCorrente(pJuros, pPortador : String) : String;
 
     function baixarCaixa(pValor, pPortador, pConta, pHistorico : String): String;
+    function baixarJurosCaixa(pJuros, pPortador, pHistorico : String) : String;
+
     function baixarContaCorrente(pValor, pPortador, pContaCorrente, pHistorico: String): String;
     function baixarPix(pValor, pPortador, pContaCorrente, pValorTaxa, pContaTaxa: String): String;
     function baixar(pValor: String): String;
@@ -312,6 +315,7 @@ begin
     lCaixaModel.USUARIO_CAI     := self.vIConexao.getUSer.ID;
     lCaixaModel.DATA_CAI        := DateToStr(vIConexao.DataServer);
     lCaixaModel.HORA_CAI        := TimeToStr(vIConexao.HoraServer);
+    lCaixaModel.NUMERO_PED      := self.NUMERO_PED;
     lCaixaModel.CONCILIADO_CAI  := '.';
     lCaixaModel.TIPO            := 'V';
     lCaixaModel.CODIGO_CTA      := pConta;
@@ -401,19 +405,84 @@ begin
   end;
 end;
 
+function TContasReceberItensModel.baixarJurosCaixa(pJuros, pPortador, pHistorico: String): String;
+var
+  lCaixaModel: TCaixaModel;
+begin
+  lCaixaModel := TCaixaModel.Create(vIConexao);
+  try
+    lCaixaModel.Acao := tacIncluir;
+    lCaixaModel.USUARIO_CAI     := self.vIConexao.getUSer.ID;
+    lCaixaModel.DATA_CAI        := DateToStr(vIConexao.DataServer);
+    lCaixaModel.HORA_CAI        := TimeToStr(vIConexao.HoraServer);
+    lCaixaModel.TIPO            := 'S';
+    lCaixaModel.CODIGO_CTA      := '222222';
+    lCaixaModel.CLIENTE_CAI     := self.FCODIGO_CLI;
+    lCaixaModel.TIPO_CAI        := cTIPO_CREDITO;
+    lCaixaModel.FATURA_CAI      := self.FFATURA_REC;
+    lCaixaModel.PARCELA_CAI     := self.FPACELA_REC;
+    lCaixaModel.STATUS          := 'A';
+    lCaixaModel.LOJA_REMOTO     := self.FLOJA;
+    lCaixaModel.PORTADOR_CAI    := pPortador;
+    lCaixaModel.VALOR_CAI       := pJuros;
+    lCaixaModel.HISTORICO_CAI   := pHistorico;
+    lCaixaModel.COMPETENCIA     := copy(self.VENCIMENTO_REC, 4, 2) + copy(self.VENCIMENTO_REC, 7, 4);
+
+    Result := lCaixaModel.Salvar;
+
+  finally
+    lCaixaModel.Free;
+  end;
+end;
+
+function TContasReceberItensModel.lancarJurosContaCorrente(pJuros, pPortador : String) : String;
+var
+  lContaCorrenteModel : TContaCorrenteModel;
+  lContasReceberModel : TContasReceberModel;
+begin
+  lContaCorrenteModel := TContaCorrenteModel.Create(vIConexao);
+  lContasReceberModel := TContasReceberModel.Create(vIConexao);
+
+  try
+    lContasReceberModel := lContasReceberModel.carregaClasse(self.FFATURA_REC);
+
+    lContaCorrenteModel.Acao           := tacIncluir;
+    lContaCorrenteModel.CONCILIADO_COR := '.';
+    lContaCorrenteModel.USUARIO_COR    := self.vIConexao.getUSer.ID;
+    lContaCorrenteModel.CENTRO_CUSTO   := cCENTRO_CUSTO_PADRAO;
+    lContaCorrenteModel.DR             := 'N';
+    lContaCorrenteModel.DATA_COR       := DateToStr(vIConexao.DataServer);
+    lContaCorrenteModel.CODIGO_CTA     := '222222';
+    lContaCorrenteModel.VALOR_COR      := pJuros;
+    lContaCorrenteModel.OBSERVACAO_COR := 'Juros: '+ self.PACELA_REC+'/'+self.TOTALPARCELAS_REC+' PED: '+lContasReceberModel.PEDIDO_REC;
+    lContaCorrenteModel.CLIENTE_COR    := self.FCODIGO_CLI;
+    lContaCorrenteModel.FATURA_COR     := self.FFATURA_REC;
+    lContaCorrenteModel.PARCELA_COR    := self.FPACELA_REC;
+    lContaCorrenteModel.TIPO_CTA       := cTIPO_CREDITO;
+    lContaCorrenteModel.LOJA           := self.FLOJA;
+    lContaCorrenteModel.PORTADOR_COR   := pPortador;
+    lContaCorrenteModel.STATUS         := 'I';
+    lContaCorrenteModel.TIPO           := 'S';
+
+    Result := lContaCorrenteModel.Salvar;
+  finally
+    lContaCorrenteModel.Free;
+    lContasReceberModel.Free;
+  end;
+end;
+
 function TContasReceberItensModel.baixarPix(pValor, pPortador, pContaCorrente, pValorTaxa, pContaTaxa: String): String;
 var
   lHistorico: String;
-  lBanco: String;
   lContaCorrenteModel: TContaCorrenteModel;
   lContasReceberModel: TContasReceberModel;
 begin
   lContaCorrenteModel := TContaCorrenteModel.Create(vIConexao);
   lContasReceberModel := TContasReceberModel.Create(vIConexao);
   try
-    lHistorico := 'FC PIX: '+ self.FPACELA_REC+'/'+self.FTOTALPARCELAS_REC+' PED: '+self.FPEDIDO_REC;
-
     lContasReceberModel := lContasReceberModel.carregaClasse(self.FFATURA_REC);
+
+    lHistorico := 'FC PIX: '+ self.FPACELA_REC+'/'+self.FTOTALPARCELAS_REC+' PED: '+lContasReceberModel.PEDIDO_REC;
 
     Result := self.lancarContaCorrente(pValor, pPortador, lContasReceberModel.CODIGO_CTA, pContaCorrente, lHistorico, 'C');
               self.lancarContaCorrente(pValorTaxa, pPortador, pContaTaxa, pContaCorrente, 'TAXA '+lHistorico, 'D');
