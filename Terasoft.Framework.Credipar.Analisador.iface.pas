@@ -144,7 +144,7 @@ interface
   {$ifend}
 
 
-  function strToTempoResidencia(const pValue: String): Integer;
+  function strToTempoResidencia(const pValue: String): String;
 
 implementation
   uses
@@ -170,9 +170,10 @@ begin
 end;
 {$ifend}
 
-function strToTempoResidencia(const pValue: String): Integer;
+function strToTempoResidencia(const pValue: String): String;
   var
     l: IListaTextoEX;
+    i: Integer;
 begin
   l := novaListaTextoEx(false,pValue);
   l.strings.Add('INV');              //0
@@ -186,13 +187,14 @@ begin
   l.strings.Add('MAIS DE 10 ANOS');  //8
   l.strings.Add('MAIS DE 15 ANOS');  //9
   l.strings.Add('MAIS DE 20 ANOS');  //10
-  Result := l.strings.IndexOf(uppercase(retiraAcentos(trim(pValue))));
-  if(Result>1) and (Result<5) then
-    Result:=2
-  else if(Result>4) and (Result<7) then
-    Result := 3
-  else if(Result>6) then
-    Result := 4;
+  i := l.strings.IndexOf(uppercase(retiraAcentos(trim(pValue))));
+  if(i>1) and (i<5) then
+    i:=2
+  else if(i>4) and (i<7) then
+    i := 3
+  else if(i>6) then
+    i := 4;
+  Result := IntToStr(i);
 end;
 
 end.

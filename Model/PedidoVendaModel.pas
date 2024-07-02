@@ -940,6 +940,9 @@ var
   lNFItensModel     : TNFItensModel;
   lEmpresaModel     : TEmpresaModel;
   lNumeroNFe        : String;
+  lTribFederal,
+  lTribEstadual,
+  lTribMunicipal    : Double;
 begin
   if self.FNUMERO_PED = '' then
     CriaException('Pedido não informado');
@@ -1070,13 +1073,21 @@ begin
       lNFItensModel.PCREDSN               := FloatToStr(0);
       lNFItensModel.VCREDICMSSN           := FloatToStr(0);
       lNFItensModel.VALIQPROD_S10         := FloatToStr(0);
-      lNFItensModel.VTOTTRIB              := FloatToStr(0);
-      lNFItensModel.VTOTTRIB_FEDERAL      := FloatToStr(0);
-      lNFItensModel.VTOTTRIB_ESTADUAL     := FloatToStr(0);
-      lNFItensModel.VTOTTRIB_MUNICIPAL    := FloatToStr(0);
+
       lNFItensModel.PFCPSTRET             := FloatToStr(0);
       lNFItensModel.VFCPSTRET             := FloatToStr(0);
+
       //
+
+      lNFItensModel.VTOTTRIB_FEDERAL      := lItens.VTOTTRIB_FEDERAL;
+      lNFItensModel.VTOTTRIB_ESTADUAL     := lItens.VTOTTRIB_ESTADUAL;
+      lNFItensModel.VTOTTRIB_MUNICIPAL    := lItens.VTOTTRIB_MUNICIPAL;
+      lNFItensModel.VTOTTRIB              := FloatToStr(StrToFloat(lItens.VTOTTRIB_FEDERAL) + StrToFloat(lItens.VTOTTRIB_ESTADUAL) + StrToFloat(lItens.VTOTTRIB_MUNICIPAL));
+
+      lTribFederal   := lTribFederal   + lItens.VTOTTRIB_FEDERAL;
+      lTribEstadual  := lTribEstadual  + lItens.VTOTTRIB_ESTADUAL;
+      lTribMunicipal := lTribMunicipal + lItens.VTOTTRIB_MUNICIPAL;
+
       lNFItensModel.CODIGO_PRO            := lItens.CODIGO_PRO;
       lNFItensModel.VALORUNITARIO_NF      := lItens.VALORUNITARIO_PED;
       lNFItensModel.QUANTIDADE_NF         := lItens.QTDE_CALCULADA;
@@ -1129,8 +1140,17 @@ begin
       lNFItensModel.XPED                  := lItens.XPED;
       lNFItensModel.NITEMPED2             := lItens.NITEMPED2;
       lNFItensModel.LOTE                  := lItens.OBSERVACAO;
+
       lNFItensModel.Salvar;
     end;
+
+    lNFModel.Acao := tacAlterar;
+    lNFModel.VTOTTRIB              := FloatToStr(lTribFederal + lTribEstadual + lTribMunicipal);
+    lNFModel.VTOTTRIB_FEDERAL      := FloatToStr(lTribFederal);
+    lNFModel.VTOTTRIB_ESTADUAL     := FloatToStr(lTribEstadual);
+    lNFModel.VTOTTRIB_MUNICIPAL    := FloatToStr(lTribMunicipal);
+    lNFModel.Salvar;
+
     Result := lNumeroNFe;
   finally
     lPedidoItensModel.Free;
@@ -1417,44 +1437,48 @@ begin
 
       lPedidoItensModal := lPedidoItensModal.carregaClasse(lPedidoVendaModel.PEDIDOITENS_ID);
 
-      lPedidoItensModal.Acao              := tacAlterar;
-      lPedidoItensModal.ID                := lPedidoVendaModel.PEDIDOITENS_ID;
-      lPedidoItensModal.IPI_CST           := lCalcularImpostosModel.IPI_CST;
-      lPedidoItensModal.ALIQ_IPI          := FloatToStr(lCalcularImpostosModel.IPI_ALIQUOTA);
-      lPedidoItensModal.VALOR_IPI         := FloatToStr(lCalcularImpostosModel.IPI_VALOR);
-      lPedidoItensModal.CST               := (lCalcularImpostosModel.ICMS_CST);
-      lPedidoItensModal.REDUCAO_ICMS      := FloatToStr(lCalcularImpostosModel.ICMS_REDUCAO);
-      lPedidoItensModal.BASE_ICMS         := FloatToStr(lCalcularImpostosModel.ICMS_BASE);
-      lPedidoItensModal.ALIQ_ICMS         := FloatToStr(lCalcularImpostosModel.ICMS_ALIQUOTA);
-      lPedidoItensModal.VALOR_ICMS        := FloatToStr(lCalcularImpostosModel.ICMS_VALOR);
-      lPedidoItensModal.ALIQ_ICMS_ST      := FloatToStr(lCalcularImpostosModel.ICMSST_ALIQUOTA);
-      lPedidoItensModal.MVA               := FloatToStr(lCalcularImpostosModel.ICMSST_MVA);
-      lPedidoItensModal.REDUCAO_ST        := FloatToStr(lCalcularImpostosModel.ICMSST_REDUCAO);
-      lPedidoItensModal.VALOR_ST          := FloatToStr(lCalcularImpostosModel.ICMSST_VALOR);
-      lPedidoItensModal.BASE_ST           := FloatToStr(lCalcularImpostosModel.ICMSST_BASE);
-      lPedidoItensModal.PIS_CST           := (lCalcularImpostosModel.PIS_CST);
-      lPedidoItensModal.ALIQ_PIS          := FloatToStr(lCalcularImpostosModel.PIS_ALIQUOTA);
-      lPedidoItensModal.BASE_PIS          := FloatToStr(lCalcularImpostosModel.PIS_BASE);
-      lPedidoItensModal.VALOR_PIS         := FloatToStr(lCalcularImpostosModel.PIS_VALOR);
-      lPedidoItensModal.COFINS_CST        := (lCalcularImpostosModel.COFINS_CST);
-      lPedidoItensModal.ALIQ_COFINS       := FloatToStr(lCalcularImpostosModel.COFINS_ALIQUOTA);
-      lPedidoItensModal.BASE_COFINS       := FloatToStr(lCalcularImpostosModel.COFINS_BASE);
-      lPedidoItensModal.VALOR_COFINS      := FloatToStr(lCalcularImpostosModel.COFINS_VALOR);
-      lPedidoItensModal.VBCUFDEST         := FloatToStr(lCalcularImpostosModel.VBCUFDEST);
-      lPedidoItensModal.PFCPUFDEST        := FloatToStr(lCalcularImpostosModel.PICMSUFDEST);
-      lPedidoItensModal.PICMSUFDEST       := FloatToStr(lCalcularImpostosModel.PICMSINTER);
-      lPedidoItensModal.PICMSINTER        := FloatToStr(lCalcularImpostosModel.PICMSINTERPART);
-      lPedidoItensModal.PICMSINTERPART    := FloatToStr(lCalcularImpostosModel.PICMSINTERPART);
-      lPedidoItensModal.VICMSUFDEST       := FloatToStr(lCalcularImpostosModel.VICMSUFDEST);
-      lPedidoItensModal.VICMSUFREMET      := FloatToStr(lCalcularImpostosModel.VBCFCPST);
-      lPedidoItensModal.VBCFCPST          := FloatToStr(lCalcularImpostosModel.PFCPST);
-      lPedidoItensModal.PFCPST            := FloatToStr(lCalcularImpostosModel.PFCPST);
-      lPedidoItensModal.VFCPST            := FloatToStr(lCalcularImpostosModel.VFCPST);
-      lPedidoItensModal.CFOP_ID           := lCalcularImpostosModel.CFOP_ID;
-      lPedidoItensModal.CFOP              := lCalcularImpostosModel.CFOP;
-      lPedidoItensModal.DESCONTO_PED      := FloatToStr(lCalcularImpostosModel.DESCONTO_ITEM);
-      lPedidoItensModal.VOUTROS           := FloatToStr(lCalcularImpostosModel.ACRESCIMO_ITEM);
-      lPedidoItensModal.CSOSN             := lCalcularImpostosModel.ICMS_CSOSN;
+      lPedidoItensModal.Acao                := tacAlterar;
+      lPedidoItensModal.ID                  := lPedidoVendaModel.PEDIDOITENS_ID;
+      lPedidoItensModal.IPI_CST             := lCalcularImpostosModel.IPI_CST;
+      lPedidoItensModal.ALIQ_IPI            := FloatToStr(lCalcularImpostosModel.IPI_ALIQUOTA);
+      lPedidoItensModal.VALOR_IPI           := FloatToStr(lCalcularImpostosModel.IPI_VALOR);
+      lPedidoItensModal.CST                 := (lCalcularImpostosModel.ICMS_CST);
+      lPedidoItensModal.REDUCAO_ICMS        := FloatToStr(lCalcularImpostosModel.ICMS_REDUCAO);
+      lPedidoItensModal.BASE_ICMS           := FloatToStr(lCalcularImpostosModel.ICMS_BASE);
+      lPedidoItensModal.ALIQ_ICMS           := FloatToStr(lCalcularImpostosModel.ICMS_ALIQUOTA);
+      lPedidoItensModal.VALOR_ICMS          := FloatToStr(lCalcularImpostosModel.ICMS_VALOR);
+      lPedidoItensModal.ALIQ_ICMS_ST        := FloatToStr(lCalcularImpostosModel.ICMSST_ALIQUOTA);
+      lPedidoItensModal.MVA                 := FloatToStr(lCalcularImpostosModel.ICMSST_MVA);
+      lPedidoItensModal.REDUCAO_ST          := FloatToStr(lCalcularImpostosModel.ICMSST_REDUCAO);
+      lPedidoItensModal.VALOR_ST            := FloatToStr(lCalcularImpostosModel.ICMSST_VALOR);
+      lPedidoItensModal.BASE_ST             := FloatToStr(lCalcularImpostosModel.ICMSST_BASE);
+      lPedidoItensModal.PIS_CST             := (lCalcularImpostosModel.PIS_CST);
+      lPedidoItensModal.ALIQ_PIS            := FloatToStr(lCalcularImpostosModel.PIS_ALIQUOTA);
+      lPedidoItensModal.BASE_PIS            := FloatToStr(lCalcularImpostosModel.PIS_BASE);
+      lPedidoItensModal.VALOR_PIS           := FloatToStr(lCalcularImpostosModel.PIS_VALOR);
+      lPedidoItensModal.COFINS_CST          := (lCalcularImpostosModel.COFINS_CST);
+      lPedidoItensModal.ALIQ_COFINS         := FloatToStr(lCalcularImpostosModel.COFINS_ALIQUOTA);
+      lPedidoItensModal.BASE_COFINS         := FloatToStr(lCalcularImpostosModel.COFINS_BASE);
+      lPedidoItensModal.VALOR_COFINS        := FloatToStr(lCalcularImpostosModel.COFINS_VALOR);
+      lPedidoItensModal.VBCUFDEST           := FloatToStr(lCalcularImpostosModel.VBCUFDEST);
+      lPedidoItensModal.PFCPUFDEST          := FloatToStr(lCalcularImpostosModel.PICMSUFDEST);
+      lPedidoItensModal.PICMSUFDEST         := FloatToStr(lCalcularImpostosModel.PICMSINTER);
+      lPedidoItensModal.PICMSINTER          := FloatToStr(lCalcularImpostosModel.PICMSINTERPART);
+      lPedidoItensModal.PICMSINTERPART      := FloatToStr(lCalcularImpostosModel.PICMSINTERPART);
+      lPedidoItensModal.VICMSUFDEST         := FloatToStr(lCalcularImpostosModel.VICMSUFDEST);
+      lPedidoItensModal.VICMSUFREMET        := FloatToStr(lCalcularImpostosModel.VBCFCPST);
+      lPedidoItensModal.VBCFCPST            := FloatToStr(lCalcularImpostosModel.PFCPST);
+      lPedidoItensModal.PFCPST              := FloatToStr(lCalcularImpostosModel.PFCPST);
+      lPedidoItensModal.VFCPST              := FloatToStr(lCalcularImpostosModel.VFCPST);
+      lPedidoItensModal.CFOP_ID             := lCalcularImpostosModel.CFOP_ID;
+      lPedidoItensModal.CFOP                := lCalcularImpostosModel.CFOP;
+      lPedidoItensModal.DESCONTO_PED        := FloatToStr(lCalcularImpostosModel.DESCONTO_ITEM);
+      lPedidoItensModal.VOUTROS             := FloatToStr(lCalcularImpostosModel.ACRESCIMO_ITEM);
+      lPedidoItensModal.CSOSN               := lCalcularImpostosModel.ICMS_CSOSN;
+      lPedidoItensModal.VTOTTRIB_ESTADUAL   := lCalcularImpostosModel.VTOTTRIB_ESTADUAL;
+      lPedidoItensModal.VTOTTRIB_FEDERAL    := lCalcularImpostosModel.VTOTTRIB_FEDERAL;
+      lPedidoItensModal.VTOTTRIB_MUNICIPAL  := lCalcularImpostosModel.VTOTTRIB_MUNICIPAL;
+
       lPedidoItensModal.Salvar;
     end;
     if self.CFOP_ID = '' then
