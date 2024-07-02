@@ -19,7 +19,7 @@ type
   TTabela = (ttPedidoVenda, ttRecibo, ttFechamentoCaixa, ttCreditoCliente, ttNull);
   TBubina = (tb40, tb30, tbNull);
   TLado = (lEsquerdo, lDireito);
-  TImpressaoPedido = (tipPedido, tipRecibo, tipCarne, tipNFCe, tipPixRecebimento, tipNenhum);
+  TImpressaoPedido = (tipPedido, tipRecibo, tipCarne, tipNFCe, tipNFe, tipPixRecebimento, tipNenhum);
   TProcedure = procedure of object;
 
   TTipoValorConfiguracao = ( tvInteiro, tvNumero, tvString, tvMemo, tvChar, tvBool, tvData, tvHora, tvDataHora, tvEmpresa );
