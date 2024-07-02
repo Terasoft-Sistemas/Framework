@@ -939,10 +939,13 @@ var
   lNFModel          : TNFModel;
   lNFItensModel     : TNFItensModel;
   lEmpresaModel     : TEmpresaModel;
-  lNumeroNFe        : String;
+  lNumeroNFe,
+  lNomeVendedor     : String;
   lTribFederal,
   lTribEstadual,
   lTribMunicipal    : Double;
+  lFuncionarioModel : TFuncionarioModel;
+  lConfiguracoes    : TerasoftConfiguracoes;
 begin
   if self.FNUMERO_PED = '' then
     CriaException('Pedido não informado');
@@ -954,8 +957,21 @@ begin
   lNFItensModel     := TNFItensModel.Create(vIConexao);
   lNFModel          := TNFModel.Create(vIConexao);
   lEmpresaModel     := TEmpresaModel.Create(vIConexao);
+  lFuncionarioModel := TFuncionarioModel.Create(vIConexao);
+  lConfiguracoes    := TerasoftConfiguracoes.Create(vIConexao);
 
   try
+    if pModelo = '65' then
+    begin
+      lFuncionarioModel := lFuncionarioModel.carregaClasse(self.CODIGO_VEN);
+      lNomeVendedor := lFuncionarioModel.NOME_FUN;
+
+      lNFModel.OBS_NF := 'Vendedor: '+lNomeVendedor+' '+sLineBreak;
+
+      if lConfiguracoes.valorTag('MOSTRAR_NUMERO_PEDIDO_NF', 'N', tvBool) = 'S' then
+        lNFModel.OBS_NF := lNFModel.OBS_NF + 'Pedido: '+self.NUMERO_PED+' '+sLineBreak;
+    end;
+
     self.RecalcularImpostos(self.NUMERO_PED);
     lEmpresaModel.Carregar;
 
@@ -1023,7 +1039,7 @@ begin
     lNFModel.FRETE                 := self.FFRETE_PED;
     lNFModel.OUTROS_NF             := self.FACRES_PED;
     lNFModel.TRANSPORTADORA        := self.FTELEVENDA_PED;
-    lNFModel.OBS_NF                := self.FINFORMACOES_PED;
+    lNFModel.OBS_NF                := lNFModel.OBS_NF + self.FINFORMACOES_PED;
     lNFModel.ESPECIE_VOLUME        := self.FESPECIE_VOLUME;
     lNFModel.TRA_UF                := self.FUF_TRANSPORTADORA;
     lNFModel.TRA_PLACA             := self.FPLACA;
