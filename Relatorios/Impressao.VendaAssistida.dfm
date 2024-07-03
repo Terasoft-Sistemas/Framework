@@ -657,7 +657,8 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
             Top = 155
             Width = 213
             Height = 17
-            DrawKind = dkLine
+            HoldStyle = hsCopyHeight
+            SecondHoldStyle = hsCopyHeight
           end
           object RLDBText2: TRLDBText
             Left = 588
@@ -1487,8 +1488,8 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
             Transparent = False
           end
           object RLDBMemo3: TRLDBMemo
-            Left = 7
-            Top = 35
+            Left = 10
+            Top = 37
             Width = 742
             Height = 11
             AutoSize = False
