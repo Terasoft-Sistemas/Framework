@@ -194,7 +194,7 @@ begin
 
   fRestRequest.Execute;
 
-  if fRestResponse.StatusCode = 400 then
+  if fRestResponse.StatusCode >= 400 then
     CriaException('CEP invalido');
 
   lJsonObj := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(fRestRequest.Response.Content), 0) as TJSONObject;
