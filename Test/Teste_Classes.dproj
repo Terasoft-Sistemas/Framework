@@ -250,6 +250,14 @@
         <DCCReference Include="..\Dao\SolicitacaoDescontoDao.pas"/>
         <DCCReference Include="..\Dao\MovimentoSerialDao.pas"/>
         <DCCReference Include="..\Model\MovimentoSerialModel.pas"/>
+        <DCCReference Include="..\Relatorios\Impressao.VendaAssistida.pas">
+            <Form>ImpressaoVendaAssistida</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="..\Relatorios\Impressao.Contratos.pas">
+            <Form>ImpressaoContratos</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

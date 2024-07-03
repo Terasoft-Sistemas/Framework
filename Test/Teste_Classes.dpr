@@ -152,7 +152,9 @@ uses
   PermissaoRemotaDao in '..\Dao\PermissaoRemotaDao.pas',
   SolicitacaoDescontoDao in '..\Dao\SolicitacaoDescontoDao.pas',
   MovimentoSerialDao in '..\Dao\MovimentoSerialDao.pas',
-  MovimentoSerialModel in '..\Model\MovimentoSerialModel.pas';
+  MovimentoSerialModel in '..\Model\MovimentoSerialModel.pas',
+  Impressao.VendaAssistida in '..\Relatorios\Impressao.VendaAssistida.pas' {ImpressaoVendaAssistida},
+  Impressao.Contratos in '..\Relatorios\Impressao.Contratos.pas' {ImpressaoContratos};
 
 {$R *.res}
 
@@ -160,5 +162,7 @@ begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TImpressaoVendaAssistida, ImpressaoVendaAssistida);
+  Application.CreateForm(TImpressaoContratos, ImpressaoContratos);
   Application.Run;
 end.

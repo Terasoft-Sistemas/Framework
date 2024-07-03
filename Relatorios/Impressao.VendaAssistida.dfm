@@ -24,8 +24,8 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
     object VendaAssistida: TTabSheet
       Caption = 'VendaAssistida'
       object rlPadrao: TRLReport
-        Left = 15
-        Top = 13
+        Left = 7
+        Top = 35
         Width = 794
         Height = 1123
         Margins.LeftMargin = 5.000000000000000000
@@ -1487,8 +1487,8 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
             Transparent = False
           end
           object RLDBMemo3: TRLDBMemo
-            Left = 7
-            Top = 35
+            Left = 10
+            Top = 37
             Width = 742
             Height = 11
             AutoSize = False
