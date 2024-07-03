@@ -24,8 +24,8 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
     object VendaAssistida: TTabSheet
       Caption = 'VendaAssistida'
       object rlPadrao: TRLReport
-        Left = 15
-        Top = 13
+        Left = 7
+        Top = 35
         Width = 794
         Height = 1123
         Margins.LeftMargin = 5.000000000000000000
@@ -657,8 +657,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
             Top = 155
             Width = 213
             Height = 17
-            HoldStyle = hsCopyHeight
-            SecondHoldStyle = hsCopyHeight
+            DrawKind = dkLine
           end
           object RLDBText2: TRLDBText
             Left = 588
