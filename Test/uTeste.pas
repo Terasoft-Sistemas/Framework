@@ -195,6 +195,8 @@ type
     Button114: TButton;
     Button115: TButton;
     dMovimentoSerial: TDataSource;
+    TabSheet10: TTabSheet;
+    imprimirGarantidaEstendida: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -336,6 +338,7 @@ type
     procedure Button113Click(Sender: TObject);
     procedure Button114Click(Sender: TObject);
     procedure Button117Click(Sender: TObject);
+    procedure imprimirGarantidaEstendidaClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -367,7 +370,7 @@ uses
   PedidoCompraModel, PedidoCompraItensModel, ClientesContatoModel, DescontoModel,
   PromocaoModel, TransportadoraModel, PrevisaoPedidoCompraModel, SaidasModel,
   SaidasItensModel, ClientesEnderecoModel, OrcamentoModel, OrcamentoItensModel, Terasoft.Utils,
-  SolicitacaoDescontoModel, PermissaoRemotaModel, MovimentoSerialModel;
+  SolicitacaoDescontoModel, PermissaoRemotaModel, MovimentoSerialModel, Impressao.Contratos;
 
 {$R *.dfm}
 
@@ -3825,6 +3828,25 @@ begin
 
   vQtdeRegistros := 10;
   vPagina        := 0;
+end;
+
+procedure TForm1.imprimirGarantidaEstendidaClick(Sender: TObject);
+var
+  lImpressaoContratos : TImpressaoContratos;
+begin
+  lImpressaoContratos := TImpressaoContratos.Create(lImpressaoContratos);
+
+  try
+//      lImpressaoContratos.IDPEDIDO    := vIDVenda;
+      lImpressaoContratos.CONEXAO     := vIConexao;
+      lImpressaoContratos.PDF         := true;
+      lImpressaoContratos.DIR         := ExtractFilePath(ParamStr(0)) + 'wwwroot\PDF\';
+//      lImpressaoContratos.CNPJEMPRESA := removeCaracteresGraficos(Controller.xCNPJEmpresa);
+      lImpressaoContratos.imprimir;
+//      self.showModalPDF('','/PDF/'+ lImpressaoContratos.NOMEARQUIVO);
+  finally
+    lImpressaoContratos.Free;
+  end;
 end;
 
 procedure TForm1.OrcamentoAlterarClick(Sender: TObject);

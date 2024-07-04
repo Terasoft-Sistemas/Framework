@@ -20,6 +20,8 @@ interface
         vTerasoftConfiguracao : TObject;
 
         function criarQuery                                                : TFDQuery;
+        function criaIfaceQuery                                            : IFDQuery;
+        function criaIfaceQueryExterna                                       : IFDQuery;
 
         function connection                                                : IConexao; overload;
         function connection(pLoja: String; pHost : String = '')            : IConexao; overload;
@@ -167,6 +169,16 @@ end;
 constructor TControllersConexao.Create;
 begin
   FConexao := TFDConnection.Create(nil);
+end;
+
+function TControllersConexao.criaIfaceQuery: IFDQuery;
+begin
+
+end;
+
+function TControllersConexao.criaIfaceQueryExterna: IFDQuery;
+begin
+
 end;
 
 function TControllersConexao.criarQuery: TFDQuery;

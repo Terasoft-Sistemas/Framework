@@ -287,7 +287,6 @@ type
     RLDraw20: TRLDraw;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure RLBand3BeforePrint(Sender: TObject; var PrintIt: Boolean);
   private
     FPREVIEW: Variant;
     FDIR: Variant;
@@ -326,8 +325,6 @@ type
     procedure fetchPedido;
     procedure fetchCliente;
     procedure fetchPedidoItens;
-    procedure fetchFinanceiro;
-    procedure fetchEmpresa;
 
     { Public declarations }
   end;
@@ -388,77 +385,6 @@ begin
 
 end;
 
-procedure TImpressaoContratos.fetchEmpresa;
-var
-  lEmpresaModel : TEmpresaModel;
-  lLojasModel, l   : TLojasModel;
-begin
-  lEmpresaModel := TEmpresaModel.Create(CONEXAO);
-  lLojasModel   := TLojasModel.Create(CONEXAO);
-  try
-    lEmpresaModel.Carregar;
-
-    rlLabelEmpresaNome.Caption     := lEmpresaModel.RAZAO_SOCIAL;
-    rlLabelEmpresaEndereco.Caption := lEmpresaModel.ENDERECO+' '+lEmpresaModel.NUMERO+' '+lEmpresaModel.COMPLEMENTO;
-
-    lLojasModel.LojaView := lEmpresaModel.LOJA;
-    lLojasModel.obterLista;
-
-    LOJA.Text := lLojasModel.LojassLista[0].DESCRICAO;
-    Self.FDIRLOGO := lEmpresaModel.LOGO;
-  finally
-    lEmpresaModel.Free;
-    lLojasModel.Free;
-  end;
-end;
-
-procedure TImpressaoContratos.fetchFinanceiro;
-var
-  lFinanceiroPedidoModel : TFinanceiroPedidoModel;
-  lMemtable              : TFDMemtable;
-  lParcela               : Integer;
-begin
-
-  lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(CONEXAO);
-
-  try
-    lFinanceiroPedidoModel.WhereView := 'AND FINANCEIRO_PEDIDO.WEB_PEDIDO_ID ='+ Self.FIDPEDIDO;
-    lFinanceiroPedidoModel.OrderView := 'FINANCEIRO_PEDIDO.ID_FINANCEIRO, FINANCEIRO_PEDIDO.PARCELA';
-
-    lMemtable := lFinanceiroPedidoModel.obterLista;
-    if (lMemtable.RecordCount > 0) then begin
-      lParcela := 0;
-      lMemtable.First;
-      while not lMemTable.Eof do
-      begin
-        inc(lParcela);
-        if Odd(lParcela) then begin
-          rlMemoParcelaLeft.Lines.Add(lMemtable.FieldByName('PARCELA').AsString+'/'+lMemtable.FieldByName('QUANTIDADE_PARCELAS').AsString);
-          rlMemoVencimentoLeft.Lines.Add(lMemtable.FieldByName('VENCIMENTO').AsString);
-          rlMemoValorLeft.Lines.Add(FormatCurr('#,###0.00', lMemtable.FieldByName('VALOR_PARCELA').AsFloat));
-          rlMemoPortadorLeft.Lines.Add(lMemtable.FieldByName('NOME_PORT').AsString);
-        end
-        else begin
-          rlMemoParcelaRight.Lines.Add(lMemtable.FieldByName('PARCELA').AsString+'/'+lMemtable.FieldByName('QUANTIDADE_PARCELAS').AsString);
-          rlMemoVencimentoRight.Lines.Add(lMemtable.FieldByName('VENCIMENTO').AsString);
-          rlMemoValorRight.Lines.Add(FormatCurr('#,###0.00', lMemtable.FieldByName('VALOR_PARCELA').AsFloat));
-          rlMemoPortadorRight.Lines.Add(lMemtable.FieldByName('NOME_PORT').AsString);
-        end;
-        lMemtable.Next;
-      end;
-
-      drawFaturasLeft.Height  := rlMemoVencimentoLeft.Height+3;
-      drawFaturasRight.Height := drawFaturasLeft.Height;
-      rlBandFatura.Height     := rlTitleFatura.Height + drawFaturasLeft.Height + 10;
-    end
-    else
-      rlBandFatura.Visible := false;
-  finally
-    lFinanceiroPedidoModel.Free;
-    lMemtable.Free;
-  end;
-end;
-
 procedure TImpressaoContratos.fetchPedido;
 var
   lWebPedidoModel : TWebPedidoModel;
@@ -490,7 +416,6 @@ begin
     mtPedidoCLIENTE_ID.Value          := lMemtable.FieldByName('CLIENTE_ID').AsString;
     mtPedido.Post;
 
-    IMPRESSO.Text := FormatDateTime('dd/mm/yyyy hh:nn:ss', CONEXAO.DataHoraServer);
   finally
     lWebPedidoModel.Free;
   end;
@@ -554,71 +479,40 @@ var
   lNameArchive : string;
 begin
 
-  if Self.FIDPEDIDO = '' then
-    raise Exception.Create('Pedido não informado para impressão');
+//  if Self.FIDPEDIDO = '' then
+//    raise Exception.Create('Pedido não informado para impressão');
+//
+//  lNameArchive := '';
+//
+//  try
+//    Self.fetchPedido;
+//    Self.fetchCliente;
+//    Self.fetchPedidoItens;
+//
+//    Self.FCONTADOR := 1;
+//
+//    if Self.FPREVIEW then
+      RLReport1.Preview();
 
-  lNameArchive := '';
-
-  try
-    Self.fetchPedido;
-    Self.fetchCliente;
-    Self.fetchPedidoItens;
-    Self.fetchFinanceiro;
-    Self.fetchEmpresa;
-
-    if FDIRLOGO <> '' then
-    begin
-      try
-        Self.rlImageLogo.Picture.LoadFromFile(Self.FDIRLOGO);
-      Except
-        RLBand4.Visible := false;
-      end;
-    end;
-
-    Self.FCONTADOR := 1;
-
-    if Self.FPREVIEW then
-      rlPadrao.Preview();
-
-    if Self.FPDF then begin
-      if Self.FDIR = '' then
-        raise Exception.Create('Diretório não informado');
-
-      if not DirectoryExists(Self.FDIR) then
-        ForceDirectories(Self.FDIR);
-
-      lNameArchive := FloatToStr(Round(random(999999))) + Self.FIDPEDIDO + '.pdf';
-      try
-        rlPadrao.SaveToFile(Self.FDIR+lNameArchive);
-      except
-        on E:Exception do
-
-      end;
-      Self.SetNOMEARQUIVO(lNameArchive);
-    end;
-
-  finally
-  end;
-end;
-
-procedure TImpressaoContratos.RLBand3BeforePrint(Sender: TObject;
-  var PrintIt: Boolean);
-var
-  lCOntador: Integer;
-begin
-  lContador := Self.FCONTADOR;
-
-  if Odd(lContador) then
-    RLBand3.Color := clWhite
-  else
-    RLBand3.Color := cl3DLight;
-
-  Self.FCONTADOR := Self.FCONTADOR + 1;
-
-  if mtItensOBSERVACAO.Value = '' then
-    RLBand3.Height := 25
-  else
-    RLBand3.Height := 45;
+//    if Self.FPDF then begin
+//      if Self.FDIR = '' then
+//        raise Exception.Create('Diretório não informado');
+//
+//      if not DirectoryExists(Self.FDIR) then
+//        ForceDirectories(Self.FDIR);
+//
+//      lNameArchive := FloatToStr(Round(random(999999))) + Self.FIDPEDIDO + '.pdf';
+//      try
+//        rlPadrao.SaveToFile(Self.FDIR+lNameArchive);
+//      except
+//        on E:Exception do
+//
+//      end;
+//      Self.SetNOMEARQUIVO(lNameArchive);
+//    end;
+//
+//  finally
+//  end;
 end;
 
 procedure TImpressaoContratos.SetCNPJEMPRESA(const Value: Variant);

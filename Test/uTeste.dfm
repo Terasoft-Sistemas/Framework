@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 1250
     Height = 749
-    ActivePage = TabSheet9
+    ActivePage = TabSheet10
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -1422,6 +1422,19 @@ object Form1: TForm1
         Caption = 'Consulta Serial'
         TabOrder = 4
         OnClick = Button117Click
+      end
+    end
+    object TabSheet10: TTabSheet
+      Caption = 'Imprimir Contratos'
+      ImageIndex = 14
+      object imprimirGarantidaEstendida: TButton
+        Left = 3
+        Top = 11
+        Width = 182
+        Height = 46
+        Caption = 'Imprimir Garantia Estendida'
+        TabOrder = 0
+        OnClick = imprimirGarantidaEstendidaClick
       end
     end
   end
