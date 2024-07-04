@@ -321,6 +321,15 @@ type
     Freduzir_base_icms: Variant;
     Ftipo_cli: Variant;
     Fcidade_cli: Variant;
+    Fuf_naturalidade_cli: Variant;
+    Fescolaridade_cli: Variant;
+    Fnumbeneficio_cli: Variant;
+    Ffonte_beneficio_cli: Variant;
+    Ftipo_funcionario_publico_cli: Variant;
+    Fcodigo_ocupacao_cli: Variant;
+    Ftipodocidentificacaoconj_cli: Variant;
+    Fdocidentificacaoconj_cli: Variant;
+    Ftipodoc_cli: variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetClientesLista(const Value: TObjectList<TClienteModel>);
@@ -630,6 +639,15 @@ type
     procedure Setzemopay_banco_id(const Value: Variant);
     procedure Setzemopay_id(const Value: Variant);
     procedure Setzemopay_taxa_id(const Value: Variant);
+    procedure Setuf_naturalidade_cli(const Value: Variant);
+    procedure Setescolaridade_cli(const Value: Variant);
+    procedure Setfonte_beneficio_cli(const Value: Variant);
+    procedure Setnumbeneficio_cli(const Value: Variant);
+    procedure Settipo_funcionario_publico_cli(const Value: Variant);
+    procedure Setcodigo_ocupacao_cli(const Value: Variant);
+    procedure Setdocidentificacaoconj_cli(const Value: Variant);
+    procedure Settipodocidentificacaoconj_cli(const Value: Variant);
+    procedure Settipodoc_cli(const Value: variant);
   public
     property codigo_cli: Variant read Fcodigo_cli write Setcodigo_cli;
     property fantasia_cli: Variant read Ffantasia_cli write Setfantasia_cli;
@@ -694,6 +712,8 @@ type
     property carta_cli: Variant read Fcarta_cli write Setcarta_cli;
     property expedicao_rg: Variant read Fexpedicao_rg write Setexpedicao_rg;
     property naturalidade_cli: Variant read Fnaturalidade_cli write Setnaturalidade_cli;
+    property uf_naturalidade_cli: Variant read Fuf_naturalidade_cli write Setuf_naturalidade_cli;
+    property escolaridade_cli: Variant read Fescolaridade_cli write Setescolaridade_cli;
     property tempo_servico: Variant read Ftempo_servico write Settempo_servico;
     property beneficio_cli: Variant read Fbeneficio_cli write Setbeneficio_cli;
     property descricao: Variant read Fdescricao write Setdescricao;
@@ -931,6 +951,13 @@ type
     property tipo_emissao_nfe: Variant read Ftipo_emissao_nfe write Settipo_emissao_nfe;
     property percentual_desconto: Variant read Fpercentual_desconto write Setpercentual_desconto;
     property sacador_avalista_id: Variant read Fsacador_avalista_id write Setsacador_avalista_id;
+    property tipodoc_cli: variant read Ftipodoc_cli write Settipodoc_cli;
+    property tipo_funcionario_publico_cli: Variant read Ftipo_funcionario_publico_cli write Settipo_funcionario_publico_cli;
+    property numbeneficio_cli: Variant read Fnumbeneficio_cli write Setnumbeneficio_cli;
+    property fonte_beneficio_cli: Variant read Ffonte_beneficio_cli write Setfonte_beneficio_cli;
+    property codigo_ocupacao_cli: Variant read Fcodigo_ocupacao_cli write Setcodigo_ocupacao_cli;
+    property docidentificacaoconj_cli: Variant read Fdocidentificacaoconj_cli write Setdocidentificacaoconj_cli;
+    property tipodocidentificacaoconj_cli: Variant read Ftipodocidentificacaoconj_cli write Settipodocidentificacaoconj_cli;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -1615,6 +1642,11 @@ begin
   Fdisidrose := Value;
 end;
 
+procedure TClienteModel.Setdocidentificacaoconj_cli(const Value: Variant);
+begin
+  Fdocidentificacaoconj_cli := Value;
+end;
+
 procedure TClienteModel.Setdst(const Value: Variant);
 begin
   Fdst := Value;
@@ -1668,6 +1700,11 @@ end;
 procedure TClienteModel.Setenvia_sms(const Value: Variant);
 begin
   Fenvia_sms := Value;
+end;
+
+procedure TClienteModel.Setescolaridade_cli(const Value: Variant);
+begin
+  Fescolaridade_cli := Value;
 end;
 
 procedure TClienteModel.Setesporao_calcaneo(const Value: Variant);
@@ -1748,6 +1785,11 @@ end;
 procedure TClienteModel.Setfone_com_aval(const Value: Variant);
 begin
   Ffone_com_aval := Value;
+end;
+
+procedure TClienteModel.Setfonte_beneficio_cli(const Value: Variant);
+begin
+  Ffonte_beneficio_cli := Value;
 end;
 
 procedure TClienteModel.Setformato_unha(const Value: Variant);
@@ -1918,6 +1960,11 @@ end;
 procedure TClienteModel.Setcodigo_concessionaria_cb(const Value: Variant);
 begin
   Fcodigo_concessionaria_cb := Value;
+end;
+
+procedure TClienteModel.Setcodigo_ocupacao_cli(const Value: Variant);
+begin
+  Fcodigo_ocupacao_cli := Value;
 end;
 
 procedure TClienteModel.Setcodigo_ven(const Value: Variant);
@@ -2158,6 +2205,11 @@ end;
 procedure TClienteModel.Setnome_trabalho_anterior(const Value: Variant);
 begin
   Fnome_trabalho_anterior := Value;
+end;
+
+procedure TClienteModel.Setnumbeneficio_cli(const Value: Variant);
+begin
+  Fnumbeneficio_cli := Value;
 end;
 
 procedure TClienteModel.Setnumero_calcado(const Value: Variant);
@@ -2610,6 +2662,16 @@ begin
   Ftinea_pedis := Value;
 end;
 
+procedure TClienteModel.Settipodocidentificacaoconj_cli(const Value: Variant);
+begin
+  Ftipodocidentificacaoconj_cli := Value;
+end;
+
+procedure TClienteModel.Settipodoc_cli(const Value: variant);
+begin
+  Ftipodoc_cli := Value;
+end;
+
 procedure TClienteModel.Settipo_apuracao(const Value: Variant);
 begin
   Ftipo_apuracao := Value;
@@ -2623,6 +2685,11 @@ end;
 procedure TClienteModel.Settipo_emissao_nfe(const Value: Variant);
 begin
   Ftipo_emissao_nfe := Value;
+end;
+
+procedure TClienteModel.Settipo_funcionario_publico_cli(const Value: Variant);
+begin
+  Ftipo_funcionario_publico_cli := Value;
 end;
 
 procedure TClienteModel.Settipo_residencia(const Value: Variant);
@@ -2688,6 +2755,11 @@ end;
 procedure TClienteModel.Setuf_entrega(const Value: Variant);
 begin
   Fuf_entrega := Value;
+end;
+
+procedure TClienteModel.Setuf_naturalidade_cli(const Value: Variant);
+begin
+  Fuf_naturalidade_cli := Value;
 end;
 
 procedure TClienteModel.Setultima_compra(const Value: Variant);
