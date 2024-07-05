@@ -2676,7 +2676,8 @@ function stProposta.critica(pResultado: IResultadoOperacao): boolean;
 begin
   checkResultadoOperacao(pResultado);
   lSave := pResultado.erros;
-  pResultado.adicionaErro('stProposta.critica: Não implementado.');
+  if(FqtdParcela<1) then
+    pResultado.formataErro('stProposta.critica: Qtde de parcelas inválida: [%d]', [FqtdParcela]);
   Result := pResultado.erros<>lSave;
 end;
 

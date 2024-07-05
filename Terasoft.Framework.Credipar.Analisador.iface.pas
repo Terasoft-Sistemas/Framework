@@ -40,48 +40,6 @@ interface
       function getAddr: Pointer;
       function loadFromPathReaderWriter(const pPathRW: IUnknown; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
-    (*
-    //property proposta getter/setter
-      procedure setProposta(const pValue: TipoWideStringFramework);
-      function getProposta: TipoWideStringFramework;
-
-    //property loja getter/setter
-      function getLoja: Integer;
-      procedure setLoja(const pValue: Integer);
-
-    //property qt_parcela getter/setter
-      function getQt_parcela: Integer;
-      procedure setQt_parcela(const pValue: Integer);
-
-    //property cd_pedido getter/setter
-      function getCd_pedido: Integer;
-      procedure setCd_pedido(const pValue: Integer);
-
-    //property idtabela getter/setter
-      function getIdtabela: Integer;
-      procedure setIdtabela(const pValue: Integer);
-
-    //property cd_tipo_financ getter/setter
-      function getCd_tipo_financ: Integer;
-      procedure setCd_tipo_financ(const pValue: Integer);
-
-    //property id_lj_tabela getter/setter
-      function getId_lj_tabela: Integer;
-      procedure setId_lj_tabela(const pValue: Integer);
-
-    //property cd_empresa getter/setter
-      function getCd_empresa: Integer;
-      procedure setCd_empresa(const pValue: Integer);
-
-      property cd_empresa: Integer read getCd_empresa write setCd_empresa;
-      property id_lj_tabela: Integer read getId_lj_tabela write setId_lj_tabela;
-      property cd_tipo_financ: Integer read getCd_tipo_financ write setCd_tipo_financ;
-      property idtabela: Integer read getIdtabela write setIdtabela;
-      property cd_pedido: Integer read getCd_pedido write setCd_pedido;
-      property qt_parcela: Integer read getQt_parcela write setQt_parcela;
-      property loja: Integer read getLoja write setLoja;
-      property proposta: TipoWideStringFramework read getProposta write setProposta;
-     *)
     end;
 
     ICredipar = interface
@@ -141,7 +99,9 @@ interface
   {$if not defined(__DLL__)}
     function createCredipar: ICredipar ; stdcall;
     function getCredipar: ICredipar;
+    function carregaPedidoCredipar(const pID: Int64; pCredipar: ICredipar; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
   {$ifend}
+
 
 
   function strToTempoResidencia(const pValue: String): String;
@@ -168,6 +128,211 @@ begin
     Result.codigoLojaCredipar := ValorTagConfig(tagConfig_CREDIPAR_CODIGO_LOJA,0,tvInteiro);
   end;
 end;
+
+function carregaPedidoCredipar(const pID: Int64; pCredipar: ICredipar; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+  var
+    lDSCliente,lDSProposta: IDataset;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  if(pCredipar=nil) then
+    pCredipar := createCredipar;
+
+  pResultado.propriedade['credipar'].asInterface := pCredipar;
+
+  lDSProposta := gdbPadrao.criaDataset;
+  lDSProposta.query('select'+#13+
+       '    w.id proposta,'+#13+
+       '    w.cliente_id,'+#13+
+       '    -- ''0'' loja, este está em TAG'+#13+
+       '    w.CODIGO_PRODUTO_FINANCIAMENTO codProdutoCredipar,'+#13+
+       '    w.valor_total,'+#13+
+       '    w.valor_entrada,'+#13+
+       '    w.parcelas,'+#13+
+       '    w.data,'+#13+
+       '    w.primeiro_vencimento,'+#13+
+       '    p.nome_pro'+#13+
+       'from'+#13+
+       '    web_pedido w'+#13+
+       'inner join web_pedidoitens i on i.web_pedido_id = w.id'+#13+
+       'inner join produto p on p.codigo_pro = i.produto_id'+#13+
+       ' where w.id=:id',
+
+    'id',[pID]);
+  if(lDSProposta.dataset.RecordCount = 0 ) then
+  begin
+    pResultado.formataErro('carregaPedidoCredipar: Pedido[%d] não existe.',[pID]);
+    exit;
+  end;
+
+  lDSCliente := gdbPadrao.criaDataset;
+  lDSCliente.query('select'+#13+
+     '    c.codigo_cli ID,'+#13+
+     '    c.cnpj_cpf_cli,'+#13+
+     '    c.fantasia_cli,'+#13+
+     '    c.nascimento_cli,'+#13+
+     '    c.sexo_cli,'+#13+
+     '    c.tipodoc_cli tipodoc, --Criado'+#13+
+     '    /*'+#13+
+     '      1-RG'+#13+
+     '      2-CNH'+#13+
+     '      3-CTPS'+#13+
+     '      4-Carteira Cons. Classe'+#13+
+     '      5- RNE (Registro Nacional de estrangeiro)'+#13+
+     '      6-Passaporte'+#13+
+     '      7-Certificado Reservista'+#13+
+     '    */'+#13+
+     '    c.inscricao_rg_cli,'+#13+
+     '    c.inscricao_municipal EMISSOR_RG,'+#13+
+     '    c.expedicao_rg,'+#13+
+     '    case c.estadocivil_cli'+#13+
+     '    /*'+#13+
+     '      0-Casado'+#13+
+     '      1-Solteiro'+#13+
+     '      2-Viuvo'+#13+
+     '    */'+#13+
+     '      when ''C'' then ''0'''+#13+
+     '      when ''S'' then ''1'''+#13+
+     '      when ''V'' then ''2'''+#13+
+     '      else ''9'''+#13+
+     '    end as estadocivil_cli,'+#13+
+     '    c.mae_cli,'+#13+
+     '    c.pai_cli,'+#13+
+     '    c.naturalidade_cli,'+#13+
+     '    c.uf_naturalidade_cli, --Criado'+#13+
+     '    c.ESCOLARIDADE_CLI, --Criado'+#13+
+     '    /*'+#13+
+     '      1- ANALFABETO'+#13+
+     '      2- FUNDAMENTAL/MEDIO'+#13+
+     '      3- SUPERIOR'+#13+
+     '    */'+#13+
+     '    c.telefone_cli,'+#13+
+     '    c.cep_cli,'+#13+
+     '    c.endereco_cli,'+#13+
+     '    c.numero_end,'+#13+
+     '    c.complemento,'+#13+
+     '    c.bairro_cli,'+#13+
+     '    c.cidade_cli,'+#13+
+     '    c.uf_cli,'+#13+
+     '    c.tempo_residencia,'+#13+
+     '/*'+#13+
+     '      1- Até 1 ano'+#13+
+     '      2- de 1 a 3 anos'+#13+
+     '      3- de 3 a 5 anos'+#13+
+     '      4- Mais de 5 anos'+#13+
+     '      feito função para converter'+#13+
+     'function strToTempoResidencia(const pValue: String): Integer;'+#13+
+     '  var'+#13+
+     '    l: IListaTextoEX;'+#13+
+     'begin'+#13+
+     '  l := novaListaTextoEx(false,pValue);'+#13+
+     '  l.strings.Add(''INV'');              //0'+#13+
+     '  l.strings.Add(''MENOS DE UM ANO'');  //1'+#13+
+     '  l.strings.Add(''1 ANO'');            //2'+#13+
+     '  l.strings.Add(''2 ANOS'');           //3'+#13+
+     '  l.strings.Add(''3 ANOS'');           //4'+#13+
+     '  l.strings.Add(''4 ANOS'');           //5'+#13+
+     '  l.strings.Add(''5 ANOS'');           //6'+#13+
+     '  l.strings.Add(''MAIS DE 5 ANOS'');   //7'+#13+
+     '  l.strings.Add(''MAIS DE 10 ANOS'');  //8'+#13+
+     '  l.strings.Add(''MAIS DE 15 ANOS'');  //9'+#13+
+     '  l.strings.Add(''MAIS DE 20 ANOS'');  //10'+#13+
+     '  Result := l.strings.IndexOf(uppercase(retiraAcentos(trim(pValue))));'+#13+
+     '  if(Result>1) and (Result<5) then'+#13+
+     '    Result:=2'+#13+
+     '  else if(Result>4) and (Result<7) then'+#13+
+     '    Result := 3'+#13+
+     '  else if(Result>6) then'+#13+
+     '    Result := 4;'+#13+
+     'end;'+#13+
+     '*/'+#13+
+     '    c.tipo_residencia,'+#13+
+     '    /*'+#13+
+     '      Temos o campo TIPO_RESIDENCIA na tabela, porém ele permite os valores'+#13+
+     '          ''PR''#211''PRIA'''+#13+
+     '          ''CEDIDA'''+#13+
+     '          ''ALUGADA'''+#13+
+     '      0- Alugada'+#13+
+     '      1- Própria'+#13+
+     '      2- Financiada'+#13+
+     '      3- Parentes/Pais'+#13+
+     '    */'+#13+
+     '    c.CODIGO_OCUPACAO_CLI codigo_ocupacao, --criado'+#13+
+     '    /*'+#13+
+     '        0-APOSENTADO'+#13+
+     '        1-PENSIONISTA'+#13+
+     '        2-ASSALARIADO'+#13+
+     '        3-AUTÔNOMO'+#13+
+     '        4-LIBERAL'+#13+
+     '        5-PROPRIETÁRIO'+#13+
+     '        6-DO LAR'+#13+
+     '        8-FUNCIONÁRIO PÚBLICO'+#13+
+     '        7-OUTROS'+#13+
+     '        9-AUXÍLIO-DOENÇA'+#13+
+     '    */'+#13+
+     '    c.localtrabalho_cli,'+#13+
+     '    o.nome ocupacao,'+#13+
+     '    c.trabalho_admissao,'+#13+
+     '    c.renda_cli,'+#13+
+     '    c.ENDTRABALHO_CLI EnderecoEmp,'+#13+
+     '    ''000'' NumeroEmp,'+#13+
+     '    '' '' ComplementoEmp,'+#13+
+     '    c.BAIRTRABALHO_CLI BairroEmp,'+#13+
+     '    c.CIDTRABALHO_CLI CidadeEmp,'+#13+
+     '    c.UFTRABALHO_CLI UFEmp,'+#13+
+     '    c.CEPTRABALHO_CLI CEPEmp,'+#13+
+     '    c.fonetrabalho_cli,'+#13+
+     '    c.TIPO_FUNCIONARIO_PUBLICO_CLI tipofuncionariopublico, --Criado'+#13+
+     '    /*'+#13+
+     '      1- Concursado'+#13+
+     '      2-Contratato'+#13+
+     '      3-Comissionado'+#13+
+     '    */'+#13+
+     '    c.NUMBENEFICIO_CLI, --Criado'+#13+
+     '    c.FONTE_BENEFICIO_CLI, --Criado'+#13+
+     '    /*'+#13+
+     '        1-INSS'+#13+
+     '        2-PREFEITURA'+#13+
+     '        3-AERONÁUTICA'+#13+
+     '        4-EXÉRCITO'+#13+
+     '        5-SIAPE'+#13+
+     '        6-MINISTÉRIO TRANSPORTES'+#13+
+     '        7-DEPART ESTRADAS E RODAGENS'+#13+
+     '        8-GOVERNO DO ESTADO'+#13+
+     '        9-OUTROS'+#13+
+     '    */'+#13+
+     '    c.CNPJ_trabalho_cli, --Criado'+#13+
+     '    ct.nome as CONTADOR_TRABALHO_CLI,'+#13+
+     '    ct.telefone as telefone_CONTADOR_TRABALHO_CLI,'+#13+
+     '    ''000'' as ramal_CONTADOR_TRABALHO_CLI,'+#13+
+     '    c.CPF_CONJUGE_CLI,  --Criado'+#13+
+     '    c.DOCIDENTIFICACAOCONJ_CLI, --Criado'+#13+
+     '    c.TIPODOCIDENTIFICACAOCONJ_CLI, --Criado'+#13+
+     '    c.SALARIOCON_CLI,'+#13+
+     '    '' '' TempoConjAno,'+#13+
+     '    '' '' TempoConjMes,'+#13+
+     '    c.referencia2_cli,'+#13+
+     '    c.foneref2_cli,'+#13+
+     '    c.referencia3_cli,'+#13+
+     '    c.foneref3_cli'+#13+
+     'from'+#13+
+     '    clientes c'+#13+
+     '    left join clientes_ocupacao o on o.id = c.ocupacao_id'+#13+
+     '    left join contador ct  on ct.id = c.contador_id'+#13+
+     '  where c.codigo_cli = :codigo',
+    'codigo',[lDSProposta.dataset.FieldByName('cliente_id').AsString]);
+
+  if(lDSCliente.dataset.RecordCount = 0 ) then
+  begin
+    pResultado.formataErro('carregaPedidoCredipar: Cliente [%s] do pedido [%d] não existe.',[lDSProposta.dataset.FieldByName('cliente_id').AsString, pID]);
+    exit;
+  end;
+
+
+  pCredipar.pessoaFisica.loadFromPathReaderWriter(lDSCliente,pResultado);
+  pCredipar.proposta.loadFromPathReaderWriter(lDSProposta,pResultado);
+
+end;
+
 {$ifend}
 
 function strToTempoResidencia(const pValue: String): String;
@@ -175,7 +340,7 @@ function strToTempoResidencia(const pValue: String): String;
     l: IListaTextoEX;
     i: Integer;
 begin
-  l := novaListaTextoEx(false,pValue);
+  l := novaListaTextoEx(false,'');
   l.strings.Add('INV');              //0
   l.strings.Add('MENOS DE UM ANO');  //1
   l.strings.Add('1 ANO');            //2
