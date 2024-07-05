@@ -8,7 +8,8 @@ uses
   Terasoft.FuncoesTexto,
   Terasoft.Utils,
   PedidoItensModel,
-  Interfaces.Conexao;
+  Interfaces.Conexao,
+  FireDAC.Comp.Client;
 
 type
   TVenderItem = record
@@ -523,6 +524,7 @@ type
     procedure excluirPedido;
     procedure verificarTagObservacao;
     procedure venderItem(pVenderItem: TVenderItem);
+    function obterComprasRealizadas(pCliente: String): TFDMemTable;
 
   end;
 
@@ -541,7 +543,7 @@ uses
   ProdutosModel,
   CFOPModel,
   EmpresaModel,
-  FireDAC.Comp.Client, ClienteModel, FuncionarioModel, Terasoft.Configuracoes,
+  ClienteModel, FuncionarioModel, Terasoft.Configuracoes,
   PixModel, FinanceiroPedidoModel, VendaCartaoModel, ReservaModel, CaixaControleModel;
 
 { TPedidoVendaModel }
@@ -1510,6 +1512,27 @@ begin
     lPedidoItensModal.Free;
   end;
 end;
+
+function TPedidoVendaModel.obterComprasRealizadas(pCliente: String): TFDMemTable;
+var
+  lPedidoVendaModel: TPedidoVendaDao;
+begin
+  lPedidoVendaModel := TPedidoVendaDao.Create(vIConexao);
+  try
+    lPedidoVendaModel.TotalRecords    := FTotalRecords;
+    lPedidoVendaModel.WhereView       := FWhereView;
+    lPedidoVendaModel.CountView       := FCountView;
+    lPedidoVendaModel.OrderView       := FOrderView;
+    lPedidoVendaModel.StartRecordView := FStartRecordView;
+    lPedidoVendaModel.LengthPageView  := FLengthPageView;
+    lPedidoVendaModel.IDRecordView    := FIDRecordView;
+
+    Result := lPedidoVendaModel.obterComprasRealizadas(pCliente);
+  finally
+    lPedidoVendaModel.Free;
+  end;
+end;
+
 function TPedidoVendaModel.Salvar: String;
 var
   lPedidoVendaDao: TPedidoVendaDao;

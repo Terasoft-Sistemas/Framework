@@ -67,6 +67,7 @@ type
     function carregaClasse(pId: String): TPedidoVendaModel;
     function statusPedido(pId: String): String;
     procedure obterUpdateImpostos(pNumeroPedido: String);
+    function obterComprasRealizadas(pCliente: String): TFDMemTable;
 
 end;
 implementation
@@ -606,6 +607,65 @@ begin
     lPedidoVendaModel.STATUS_PED     :=  lQry.FieldByName('STATUS_PED').AsString;
     lPedidoVendaModel.NOME_VENDEDOR  :=  lQry.FieldByName('NOME_FUN').AsString;
     Result := lPedidoVendaModel;
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TPedidoVendaDao.obterComprasRealizadas(pCliente: String): TFDMemTable;
+var
+  lQry       : TFDQuery;
+  lSQL       : String;
+  lPaginacao : String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+    if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
+      lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
+
+      lSQL :=  '    SELECT '+lPaginacao+'                                                                   '+SLineBreak+
+              '        P.NUMERO_PED,                                                                        '+SLineBreak+
+              '        PEDIDOVENDA.DATA_PED,                                                                '+SLineBreak+
+              '        PR.CODIGO_PRO,                                                                       '+SLineBreak+
+              '        PR.NOME_PRO,                                                                         '+SLineBreak+
+              '        CAST(P.QTDE_CALCULADA AS FLOAT) AS QTDE,                                             '+SLineBreak+
+              '        (P.VALORUNITARIO_PED-((PEDIDOVENDA.DESCONTO_PED/100)*P.VALORUNITARIO_PED)) AS VALOR, '+SLineBreak+
+              '        ''PED'' AS TIPO,                                                                     '+SLineBreak+
+              '        PEDIDOVENDA.NUMERO_NF,                                                               '+SLineBreak+
+              '        PEDIDOVENDA.DATA_FATURADO,                                                           '+SLineBreak+
+              '        CAST('''' AS VARCHAR (6)) AS DEVOLUCAO,                                              '+SLineBreak+
+              '        F.NOME_FUN,                                                                          '+SLineBreak+
+              '        PEDIDOVENDA.CONTATO_PED AS CONTATO,                                                  '+SLineBreak+
+              '        PR.CODLISTA_COD,                                                                     '+SLineBreak+
+              '        PR.BARRAS_PRO,                                                                       '+SLineBreak+
+              '        PR.REFERENCIA_NEW,                                                                   '+SLineBreak+
+              '        T.NOME_TV,                                                                           '+SLineBreak+
+              '        E.LOJA                                                                               '+SLineBreak+
+              '    FROM                                                                                     '+SLineBreak+
+              '        PEDIDOITENS P                                                                        '+SLineBreak+
+              '    INNER JOIN PEDIDOVENDA ON                                                                '+SLineBreak+
+              '        PEDIDOVENDA.NUMERO_PED = P.NUMERO_PED                                                '+SLineBreak+
+              '    INNER JOIN PRODUTO PR ON                                                                 '+SLineBreak+
+              '        PR.CODIGO_PRO = P.CODIGO_PRO                                                         '+SLineBreak+
+              '    INNER JOIN FUNCIONARIO F ON                                                              '+SLineBreak+
+              '        F.CODIGO_FUN = PEDIDOVENDA.CODIGO_VEN                                                '+SLineBreak+
+              '    LEFT JOIN TIPOVENDA T ON                                                                 '+SLineBreak+
+              '        PEDIDOVENDA.CODIGO_TIP = T.CODIGO_TV                                                 '+SLineBreak+
+              '    LEFT JOIN EMPRESA E ON                                                                   '+SLineBreak+
+              '        1=1                                                                                  '+SLineBreak+
+              '    WHERE                                                                                    '+SLineBreak+
+              '        PEDIDOVENDA.CODIGO_CLI = '+ QuotedStr(pCliente);
+
+    lSql := lSql + where;
+
+    if not FOrderView.IsEmpty then
+      lSQL := lSQL + ' order by '+FOrderView;
+
+    lQry.Open(lSQL);
+
+    Result := vConstrutor.atribuirRegistros(lQry);
+
   finally
     lQry.Free;
   end;
