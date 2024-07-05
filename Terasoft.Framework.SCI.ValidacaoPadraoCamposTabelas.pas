@@ -14,6 +14,9 @@ implementation
 procedure registraValidacaoPadraoCamposTabelas;
 begin
 
+  registraOpcoesCampoTabela('clientes','STATUS','A','Ativo');
+  registraOpcoesCampoTabela('clientes','STATUS','I','Inativo');
+
   registraOpcoesCampoTabela('clientes','TIPO_CLI','F','Física');
   registraOpcoesCampoTabela('clientes','TIPO_CLI','J','Jurídica');
 
@@ -21,8 +24,6 @@ begin
   registraOpcoesCampoTabela('clientes','ESTADOCIVIL_CLI','S','Solteiro');
   registraOpcoesCampoTabela('clientes','ESTADOCIVIL_CLI','V','Viúvo');
   registraOpcoesCampoTabela('clientes','ESTADOCIVIL_CLI','O','Outros');
-
-
 
 end;
 

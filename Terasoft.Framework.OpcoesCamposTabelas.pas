@@ -12,6 +12,12 @@ interface
     Terasoft.Framework.Texto;
 
   type
+    TDadosSetValores = record
+      nome, descricao: TipoWideStringFramework;
+      listaValores, listaDescricoes: IListaTextoEX;
+      dataset: IDatasetSimples;
+    end;
+
     TDadosCamposRec = record
       valido,padrao: boolean;
       tabela, campo, descricao: TipoWideStringFramework;
@@ -25,10 +31,12 @@ interface
   function getDadosCamposLookup(pTabela: String; pCampos: IListaString=nil): TDadosCamposLookup;
 
   procedure registraOpcoesCampoTabela(const pTabela, pCampo, pOpcao, pOpcaoDescricao: String);
-  procedure configuraEditOpcoesCampoTabela(pTabela: String; pObjet: TComponent);
+  procedure configuraEditOpcoesCampoTabela(pTabela: String; pObject: TComponent);
+  procedure configuraControlesEditOpcoesCampoTabela(pTabela: String; pOwner: TComponent);
 
 implementation
   uses
+    Vcl.Controls,
     Vcl.DBCtrls;
 
   var
@@ -323,34 +331,75 @@ begin
 
 end;
 
-procedure configuraEditOpcoesCampoTabela(pTabela: String; pObjet: TComponent);
+procedure configuraEditOpcoesCampoTabela;//(pTabela: String; pObject: TComponent);
   var
     dados: TDadosCamposLookup;
     lRG: TDBRadioGroup;
+    lLkp: TDBLookupComboBox;
     dataField: String;
     par: TPair<TipoWideStringFramework,TDadosCamposRec>;
 begin
-  if(pObjet=nil) then exit;
+  if(pObject=nil) then exit;
   pTabela := UpperCase(trim(pTabela));
   if(pTabela='') then exit;
   lRG:=nil;
-  if (pObjet is TDBRadioGroup) then
+  lLkp := nil;
+  if (pObject is TDBRadioGroup) then
   begin
-    lRG := TDBRadioGroup(pObjet);
+    lRG := TDBRadioGroup(pObject);
     dataField := lRG.DataField;
+  end else if (pObject is TDBLookupComboBox) then
+  begin
+    lLkp := TDBLookupComboBox(pObject);
+    dataField := lLkp.DataField;
   end;
-  dataField := UpperCase(trim(pTabela));
+
+  dataField := UpperCase(trim(dataField));
 
   if(dataField<>'') then
   begin
-    dados := getDadosCamposLookup(pTabela);
+    dados := getDadosCamposLookup(pTabela,getStringListFromItens([dataField]));
     for par in dados do
     begin
+      if par.Key<>dataField then continue;
 
+      if assigned(lRG) then begin
+        lRG.Values.Text := par.Value.listaValores.text;
+        lRG.Items.Text := par.Value.listaDescricoes.text;
+        lRG.Refresh;
+        exit;
+      end;
+      if assigned(lLkp) then begin
+        lLkp.ListField := 'descricao';
+        lLkp.KeyField := 'ID';
+        par.Value.dataset.dataset.Last;
+        lLkp.ListSource := par.Value.dataset.dataSource;
+        exit;
+      end;
     end;
-
   end;
+end;
 
+procedure configuraControlesEditOpcoesCampoTabela;//(pTabela: String; pOwner: TWinControl);
+  var
+    i: Integer;
+    p: TComponent;
+begin
+  pTabela := UpperCase(trim(pTabela));
+  if(pTabela='') or not assigned(pOwner) then exit;
+  configuraEditOpcoesCampoTabela(pTabela,pOwner);
+
+  if not (pOwner is TWinControl) then exit;
+
+  with TWinControl(pOwner) do
+  begin
+    i := ControlCount;
+    while i > 0 do
+    begin
+      dec(i);
+      configuraEditOpcoesCampoTabela(pTabela,Controls[i]);
+    end;
+  end;
 end;
 
 end.
