@@ -188,7 +188,7 @@ begin
     '     n.numero_nf = '+QuotedStr(pidNF);
     lQry.Open(lSQL);
 
-    if lQry.FieldByName('nFat').AsInteger = 55 then
+    if lQry.FieldByName('modeloNF').AsInteger = 55 then
     begin
       if lQry.IsEmpty then
       begin
