@@ -330,6 +330,8 @@ type
     Ftipodocidentificacaoconj_cli: Variant;
     Fdocidentificacaoconj_cli: Variant;
     Ftipodoc_cli: variant;
+    Fcnpj_trabalho_cli: Variant;
+    Fcpf_conjuge_cli: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetClientesLista(const Value: TObjectList<TClienteModel>);
@@ -648,6 +650,8 @@ type
     procedure Setdocidentificacaoconj_cli(const Value: Variant);
     procedure Settipodocidentificacaoconj_cli(const Value: Variant);
     procedure Settipodoc_cli(const Value: variant);
+    procedure Setcnpj_trabalho_cli(const Value: Variant);
+    procedure Setcpf_conjuge_cli(const Value: Variant);
   public
     property codigo_cli: Variant read Fcodigo_cli write Setcodigo_cli;
     property fantasia_cli: Variant read Ffantasia_cli write Setfantasia_cli;
@@ -958,6 +962,8 @@ type
     property codigo_ocupacao_cli: Variant read Fcodigo_ocupacao_cli write Setcodigo_ocupacao_cli;
     property docidentificacaoconj_cli: Variant read Fdocidentificacaoconj_cli write Setdocidentificacaoconj_cli;
     property tipodocidentificacaoconj_cli: Variant read Ftipodocidentificacaoconj_cli write Settipodocidentificacaoconj_cli;
+    property cnpj_trabalho_cli: Variant read Fcnpj_trabalho_cli write Setcnpj_trabalho_cli;
+    property cpf_conjuge_cli: Variant read Fcpf_conjuge_cli write Setcpf_conjuge_cli;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -1497,6 +1503,11 @@ begin
   Fcpfcon_cli := Value;
 end;
 
+procedure TClienteModel.Setcpf_conjuge_cli(const Value: Variant);
+begin
+  Fcpf_conjuge_cli := Value;
+end;
+
 procedure TClienteModel.Setcredito_cli(const Value: Variant);
 begin
   Fcredito_cli := Value;
@@ -1945,6 +1956,11 @@ end;
 procedure TClienteModel.Setcnpj_cpf_cli(const Value: Variant);
 begin
   Fcnpj_cpf_cli := Value;
+end;
+
+procedure TClienteModel.Setcnpj_trabalho_cli(const Value: Variant);
+begin
+  Fcnpj_trabalho_cli := Value;
 end;
 
 procedure TClienteModel.Setcodigo_anterior(const Value: Variant);
