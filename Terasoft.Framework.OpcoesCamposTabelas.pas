@@ -102,8 +102,8 @@ interface
 
   function registraOpcoesCampos(pNome, pOpcao, pOpcaoDescricao: String; pDescricao: String = ''): IDadosSetOpcoes;
   function registraValidacaoCampoTabela(pTabela, pCampo, pOpcoes: String; pDescricao: String = ''; pObrigatorio: boolean = false): IDadosCamposValidacoes;
-  procedure configuraControlesEditOpcoesCampoTabela(pTabela: String; pOwner: TComponent);
-  procedure configuraEditOpcoesCampoTabela(pTabela: String; pObject: TComponent);
+  procedure configuraControlesEditOpcoesCampoTabela(pTabela: String; pOwner: TComponent; pDataSource: TDataSource);
+  //procedure configuraEditOpcoesCampoTabela(pTabela: String; pObject: TComponent; pDataSource: TDataSource);
   function validaDataset(pTabela: String; pDataset: TDataset; pListaCampos: IListaString = nil; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
   var
@@ -423,28 +423,6 @@ begin
   dadosCampo.obrigatorio := pObrigatorio;
 end;
 
-procedure configuraControlesEditOpcoesCampoTabela;//(pTabela: String; pOwner: TWinControl);
-  var
-    i: Integer;
-    p: TComponent;
-begin
-  pTabela := UpperCase(trim(pTabela));
-  if(pTabela='') or not assigned(pOwner) then exit;
-  configuraEditOpcoesCampoTabela(pTabela,pOwner);
-
-  if not (pOwner is TWinControl) then exit;
-
-  with TWinControl(pOwner) do
-  begin
-    i := ControlCount;
-    while i > 0 do
-    begin
-      dec(i);
-      configuraEditOpcoesCampoTabela(pTabela,Controls[i]);
-    end;
-  end;
-end;
-
 function validaDataset(pTabela: String; pDataset: TDataset; pListaCampos: IListaString = nil; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
   var
     i: Integer;
@@ -527,7 +505,7 @@ begin
   end;
 end;
 
-procedure configuraEditOpcoesCampoTabela;//(pTabela: String; pObject: TComponent);
+procedure configuraEditOpcoesCampoTabela(pTabela: String; pObject: TComponent; pDataSource: TDataSource);
   var
 //    dados: TDadosCamposLookupOld;
     lRG: TDBRadioGroup;
@@ -546,17 +524,21 @@ begin
 
   lRG:=nil;
   lLkp := nil;
+  dataField:='';
   if (pObject is TDBRadioGroup) then
   begin
     lRG := TDBRadioGroup(pObject);
-    dataField := lRG.DataField;
+    if(lRG.DataSource=pDataSource) then
+      dataField := lRG.DataField;
   end else if (pObject is TDBLookupComboBox) then
   begin
     lLkp := TDBLookupComboBox(pObject);
-    dataField := lLkp.DataField;
+    if(lLkp.DataSource=pDataSource) then
+      dataField := lLkp.DataField;
   end;
 
   dataField := UpperCase(trim(dataField));
+  if(dataField='') then exit;
 
   if dadosTabela.TryGetValue(dataField,dadosCampo) then
   begin
@@ -576,6 +558,30 @@ begin
     end;
   end;
 end;
+
+procedure configuraControlesEditOpcoesCampoTabela;//(pTabela: String; pOwner: TWinControl);
+  var
+    i: Integer;
+    p: TComponent;
+begin
+  pTabela := UpperCase(trim(pTabela));
+  if(pTabela='') or not assigned(pOwner) then exit;
+  configuraEditOpcoesCampoTabela(pTabela,pOwner,pDataSOurce);
+
+  if not (pOwner is TWinControl) then exit;
+
+  with TWinControl(pOwner) do
+  begin
+    i := ControlCount;
+    while i > 0 do
+    begin
+      dec(i);
+      configuraControlesEditOpcoesCampoTabela(pTabela,Controls[i],pDataSource);
+      //configuraEditOpcoesCampoTabela(pTabela,Controls[i],pDataSource);
+    end;
+  end;
+end;
+
 
 { TDadosCamposValidacoesImpl }
 
