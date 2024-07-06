@@ -41,6 +41,8 @@ interface
 
       procedure adicionaID_Descricao(const pID,pDescricao: TipoWideStringFramework);
 
+      function match(pValue: TipoWideStringFramework): boolean;
+
       property dataset: IDatasetSimples read getDataset write setDataset;
       property listaDescricoes: IListaTextoEX read getListaDescricoes write setListaDescricoes;
       property listaValores: IListaTextoEX read getListaValores write setListaValores;
@@ -110,6 +112,7 @@ interface
 implementation
   uses
     Vcl.Controls,
+    Terasoft.Framework.Validacoes,
     Vcl.DBCtrls;
 
   type
@@ -167,6 +170,7 @@ implementation
       fListaDescricoes: IListaTextoEX;
       fDataset: IDatasetSimples;
 
+      function match(pValue: TipoWideStringFramework): boolean;
       procedure adicionaID_Descricao(const pID,pDescricao: TipoWideStringFramework);
 
     //property dataset getter/setter
@@ -505,21 +509,19 @@ begin
 
     if(lDependenciaMatch=false) or (pResultado.erros<>save) then continue;
 
-    lDependenciaMatch := false;
-    for lValor in opcoes.listaValores do
+    lDependenciaMatch := opcoes.match(f.AsString);// false;
+    {for lValor in opcoes.listaValores do
     begin
       if(CompareText(lValor,'null')=0) then
-      begin
-        lDependenciaMatch := f.IsNull=true;
-      end else if(CompareText(lValor,'notnull')=0) then
-      begin
-        lDependenciaMatch := f.IsNull=false;
-      end else
+        lDependenciaMatch := f.AsString='' //f.IsNull=true
+      else if(CompareText(lValor,'notnull')=0) then
+        lDependenciaMatch := f.AsString<>''// f.IsNull=false
+      else
         lDependenciaMatch := f.AsString=lValor;
 
       if(lDependenciaMatch=true) then
         break;
-    end;
+    end;}
     if(lDependenciaMatch=false) then
       pResultado.formataErro('validaDataset: Valor do Campo [%s] inválido', [ dadosCampo.descricao ]);
   end;
@@ -645,9 +647,9 @@ begin
     end;
     lValor:=trim(p.Value);
     if(lValor='') then
-      Result := f.IsNull=true
+      Result := f.AsString=''// f.IsNull=true
     else if(CompareText(lValor,'notnull')=0) then
-      Result := f.IsNull=false
+      Result := f.AsString<>''// f.IsNull=false
     else
     begin
       lLista.text := lValor;
@@ -774,41 +776,41 @@ begin
   Result := fNome;
 end;
 
-{  var
-    dicionarioDadosOld: IDictionary<TipoWideStringFramework,TDadosCamposLookupOld>;
-
-procedure registraOpcoesCampoTabelaOld;
+function TDadosSetOpcoesImpl.match(pValue: TipoWideStringFramework): boolean;
   var
-    p: TDadosCamposLookupOld;
-    dados: TDadosCamposRecOld;
+    s: TipoWideStringFramework;
+    lValor: String;
 begin
-  p := nil;
-  if(dicionarioDadosOld=nil) then
-    dicionarioDadosOld := TCollections.CreateDictionary<TipoWideStringFramework,TDadosCamposLookupOld>(getComparadorOrdinalTipoWideStringFramework);
-  if not dicionarioDadosOld.TryGetValue(pTabela,p) then
+  Result := false;
+  for s in getListaValores do
   begin
-    p := TCollections.CreateDictionary<TipoWideStringFramework,TDadosCamposRecOld>(getComparadorOrdinalTipoWideStringFramework);
-    dicionarioDadosOld.AddOrSetValue(pTabela,p);
+    lValor := trim(s);
+    if(CompareText(lValor,'null')=0) then
+      Result := pValue=''
+    else if(CompareText(lValor,'notnull')=0) then
+      Result := pValue<>''
+    else if(CompareText(lValor,'<emailvalido>')=0) then
+      Result := validaEmail(pValue)
+    else if(CompareText(lValor,'<cnpj>')=0) then
+      Result := validaCNPJ(pValue)
+    else if(CompareText(lValor,'<cpf>')=0) then
+      Result := validaCPF(pValue)
+    else if(CompareText(lValor,'<cnpjcpf>')=0) then
+      Result := validaCNPJCPF(pValue)
+    else if(CompareText(lValor,'<chavenfe>')=0) then
+      Result := validaChaveNFe(pValue)
+    else if(CompareText(lValor,'<uf>')=0) then
+      Result := validaUF(pValue)
+    else if(CompareText(lValor,'<imei>')=0) then
+      Result := validaIMEI(pValue)
+    else
+      Result := pValue=lValor;
+      if(Result=true) then
+        exit;
   end;
-  if not p.TryGetValue(pCampo,dados) then
-  begin
-    dados.valido := true;
-    dados.padrao := true;
-    dados.tabela := UpperCase(pTabela);
-    dados.campo := UpperCase(pCampo);
-    //dados.listaValores := novaListaTexto;
-    //dados.listaDescricoes := novaListaTexto;
-    //dados.dataset := getGenericID_DescricaoDataset;
-    p.AddOrSetValue(pCampo,dados);
-  end;
-
-  dados.listaValores.strings.Add(pOpcao);
-  dados.listaDescricoes.strings.Add(pOpcaoDescricao);
-  dados.dataset.dataset.Append;
-  dados.dataset.dataset.FieldByName('id').AsString := pOpcao;
-  dados.dataset.dataset.FieldByName('descricao').AsString := pOpcaoDescricao;
-  dados.dataset.dataset.CheckBrowseMode;
 end;
+
+{
 
 function validaDatasetOld;//(pDataset: TDataset; pListaCampos: IListaString = nil; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
   var

@@ -13,8 +13,17 @@ implementation
 
 procedure registraValidacaoPadraoCamposTabelas;
 begin
+  //Opções null e not null
   registraOpcoesCampos('null', 'null', '');
   registraOpcoesCampos('notnull', 'notnull', '');
+  registraOpcoesCampos('emailvalido', '<@>', '');
+  registraOpcoesCampos('cnpjvalido', '<cnpj>', '');
+  registraOpcoesCampos('cpfvalido', '<cnpj>', '');
+  registraOpcoesCampos('cnpjcpfvalido', '<cnpjcpf>', '');
+  registraOpcoesCampos('somentenumeros', '<somentenumeros>', '');
+  registraOpcoesCampos('chavenfe', '<chavenfe>', '');
+  registraOpcoesCampos('uf', '<uf>', '');
+  registraOpcoesCampos('imei', '<imei>', '');
 
   registraValidacaoCampoTabela('clientes','CNPJ_CPF_CLI','notnull','CNPJ/CPF cliente',true);
 
@@ -31,7 +40,6 @@ begin
   registraOpcoesCampos('estadocivilpessoa', 'V', 'Viúvo');
   registraOpcoesCampos('estadocivilpessoa', 'O', 'Outros');
   registraValidacaoCampoTabela('clientes','ESTADOCIVIL_CLI','estadocivilpessoa','Estado civil do Cliente');
-
 
 
 {  //OLD
