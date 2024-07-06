@@ -12,48 +12,783 @@ interface
     Terasoft.Framework.Texto;
 
   type
-    TDadosSetValores = record
-      nome, descricao: TipoWideStringFramework;
-      listaValores, listaDescricoes: IListaTextoEX;
-      dataset: IDatasetSimples;
+
+    TDependenciaRegra = TPair<TipoWideStringFramework,TipoWideStringFramework>;
+    TListaDependenciaRegra = IList<TDependenciaRegra>;
+
+
+    IDadosSetOpcoes = interface
+    ['{81EEF943-D7CD-478A-9A89-51DC4C453619}']
+    //property nome getter/setter
+      function getNome: TipoWideStringFramework;
+      procedure setNome(const pValue: TipoWideStringFramework);
+
+    //property descricao getter/setter
+      function getDescricao: TipoWideStringFramework;
+      procedure setDescricao(const pValue: TipoWideStringFramework);
+
+    //property listaValores getter/setter
+      function getListaValores: IListaTextoEX;
+      procedure setListaValores(const pValue: IListaTextoEX);
+
+    //property listaDescricoes getter/setter
+      function getListaDescricoes: IListaTextoEX;
+      procedure setListaDescricoes(const pValue: IListaTextoEX);
+
+    //property dataset getter/setter
+      function getDataset: IDatasetSimples;
+      procedure setDataset(const pValue: IDatasetSimples);
+
+      procedure adicionaID_Descricao(const pID,pDescricao: TipoWideStringFramework);
+
+      property dataset: IDatasetSimples read getDataset write setDataset;
+      property listaDescricoes: IListaTextoEX read getListaDescricoes write setListaDescricoes;
+      property listaValores: IListaTextoEX read getListaValores write setListaValores;
+      property descricao: TipoWideStringFramework read getDescricao write setDescricao;
+      property nome: TipoWideStringFramework read getNome write setNome;
     end;
 
-    TDadosCamposRec = record
-      valido,padrao: boolean;
-      tabela, campo, descricao: TipoWideStringFramework;
-      listaValores, listaDescricoes: IListaTextoEX;
-      dataset: IDatasetSimples;
+    IDadosCamposValidacoes = interface
+    ['{B468E846-321E-451A-B321-E46B50B382A8}']
+    //property nome getter/setter
+      function getNome: TipoWideStringFramework;
+      procedure setNome(const pValue: TipoWideStringFramework);
+
+    //property descricao getter/setter
+      function getDescricao: TipoWideStringFramework;
+      procedure setDescricao(const pValue: TipoWideStringFramework);
+
+    //property obrigatorio getter/setter
+      function getObrigatorio: boolean;
+      procedure setObrigatorio(const pValue: boolean);
+
+    //property opcoes getter/setter
+      function getOpcoes: TipoWideStringFramework;
+      procedure setOpcoes(const pValue: TipoWideStringFramework);
+
+    //property tabela getter/setter
+      function getTabela: TipoWideStringFramework;
+      procedure setTabela(const pValue: TipoWideStringFramework);
+
+    //property campo getter/setter
+      function getCampo: TipoWideStringFramework;
+      procedure setCampo(const pValue: TipoWideStringFramework);
+
+    //property dadosOpcoes getter/setter
+      function getDadosOpcoes: IDadosSetOpcoes;
+
+    //property dependencias getter/setter
+      function getDependencias: TListaDependenciaRegra;
+      procedure setDependencias(const pValue: TListaDependenciaRegra);
+
+      procedure adicionaDependencia(pDenpendencia: TipoWideStringFramework; pValor: TipoWideStringFramework);
+      function verificaDependencias(pContexto: TDataset; pResultado: IResultadoOperacao=nil): boolean;
+
+      property dependencias: TListaDependenciaRegra read getDependencias write setDependencias;
+      property dadosOpcoes: IDadosSetOpcoes read getDadosOpcoes;
+      property nome: TipoWideStringFramework read getNome write setNome;
+      property descricao: TipoWideStringFramework read getDescricao write setDescricao;
+      property tabela: TipoWideStringFramework read getTabela write setTabela;
+      property campo: TipoWideStringFramework read getCampo write setCampo;
+      property opcoes: TipoWideStringFramework read getOpcoes write setOpcoes;
+      property obrigatorio: boolean read getObrigatorio write setObrigatorio;
     end;
 
-    TDadosCamposLookup = IDictionary<TipoWideStringFramework,TDadosCamposRec>;
+    TDicionarioDadosCamposValidacoesTabela = IDictionary<TipoWideStringFramework,IDadosCamposValidacoes>;
+    TDicionarioDadosCamposValidacoes = IDictionary<TipoWideStringFramework,TDicionarioDadosCamposValidacoesTabela>;
+    TDicionarioSetValores = IDictionary<TipoWideStringFramework,IDadosSetOpcoes>;
 
+  function registraOpcoesCampos(pNome, pOpcao, pOpcaoDescricao: String; pDescricao: String = ''): IDadosSetOpcoes;
+  function registraValidacaoCampoTabela(pTabela, pCampo, pOpcoes: String; pDescricao: String = ''; pObrigatorio: boolean = false): IDadosCamposValidacoes;
+  procedure configuraControlesEditOpcoesCampoTabela(pTabela: String; pOwner: TComponent);
+  procedure configuraEditOpcoesCampoTabela(pTabela: String; pObject: TComponent);
   function validaDataset(pTabela: String; pDataset: TDataset; pListaCampos: IListaString = nil; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-  function getDadosCamposLookup(pTabela: String; pCampos: IListaString=nil): TDadosCamposLookup;
 
-  procedure registraOpcoesCampoTabela(const pTabela, pCampo, pOpcao, pOpcaoDescricao: String);
-  procedure configuraEditOpcoesCampoTabela(pTabela: String; pObject: TComponent);
-  procedure configuraControlesEditOpcoesCampoTabela(pTabela: String; pOwner: TComponent);
+  var
+    gOpcoesDefaultRegistradas: boolean;
 
 implementation
   uses
     Vcl.Controls,
     Vcl.DBCtrls;
 
-  var
-    dicionarioDados: IDictionary<TipoWideStringFramework,TDadosCamposLookup>;
+  type
 
-procedure registraOpcoesCampoTabela;
+    TDadosCamposValidacoesImpl=class(TInterfacedObject,IDadosCamposValidacoes)
+    protected
+      fNome: TipoWideStringFramework;
+      fDescricao: TipoWideStringFramework;
+      fObrigatorio: boolean;
+      fOpcoes: TipoWideStringFramework;
+      fTabela: TipoWideStringFramework;
+      fCampo: TipoWideStringFramework;
+      fDependencias: TListaDependenciaRegra;
+
+      procedure adicionaDependencia(pDependencia: TipoWideStringFramework; pValor: TipoWideStringFramework);
+      function verificaDependencias(pContexto: TDataset; pResultado: IResultadoOperacao): boolean;
+
+    //property dependencias getter/setter
+      function getDependencias: TListaDependenciaRegra;
+      procedure setDependencias(const pValue: TListaDependenciaRegra);
+
+    //property dadosOpcoes getter/setter
+      function getDadosOpcoes: IDadosSetOpcoes;
+
+    //property campo getter/setter
+      function getCampo: TipoWideStringFramework;
+      procedure setCampo(const pValue: TipoWideStringFramework);
+
+    //property tabela getter/setter
+      function getTabela: TipoWideStringFramework;
+      procedure setTabela(const pValue: TipoWideStringFramework);
+
+    //property opcoes getter/setter
+      function getOpcoes: TipoWideStringFramework;
+      procedure setOpcoes(const pValue: TipoWideStringFramework);
+
+    //property obrigatorio getter/setter
+      function getObrigatorio: boolean;
+      procedure setObrigatorio(const pValue: boolean);
+
+    //property descricao getter/setter
+      function getDescricao: TipoWideStringFramework;
+      procedure setDescricao(const pValue: TipoWideStringFramework);
+
+    //property nome getter/setter
+      function getNome: TipoWideStringFramework;
+      procedure setNome(const pValue: TipoWideStringFramework);
+    end;
+
+    TDadosSetOpcoesImpl=class(TInterfacedObject,IDadosSetOpcoes)
+    protected
+      fNome: TipoWideStringFramework;
+      fDescricao: TipoWideStringFramework;
+      fListaValores: IListaTextoEX;
+      fListaDescricoes: IListaTextoEX;
+      fDataset: IDatasetSimples;
+
+      procedure adicionaID_Descricao(const pID,pDescricao: TipoWideStringFramework);
+
+    //property dataset getter/setter
+      function getDataset: IDatasetSimples;
+      procedure setDataset(const pValue: IDatasetSimples);
+
+    //property listaDescricoes getter/setter
+      function getListaDescricoes: IListaTextoEX;
+      procedure setListaDescricoes(const pValue: IListaTextoEX);
+
+    //property listaValores getter/setter
+      function getListaValores: IListaTextoEX;
+      procedure setListaValores(const pValue: IListaTextoEX);
+
+    //property descricao getter/setter
+      function getDescricao: TipoWideStringFramework;
+      procedure setDescricao(const pValue: TipoWideStringFramework);
+
+    //property nome getter/setter
+      function getNome: TipoWideStringFramework;
+      procedure setNome(const pValue: TipoWideStringFramework);
+    end;
+
   var
-    p: TDadosCamposLookup;
-    dados: TDadosCamposRec;
+    dicionarioDadosCamposValidacoes: TDicionarioDadosCamposValidacoes;
+    dicionarioDadosCamposValidacoesInicializado: boolean;
+
+    dicionarioSetValores: TDicionarioSetValores;
+    dicionarioSetValoresInicializado: boolean;
+
+procedure loadDicionarioCamposValidacoes;
+  var
+    dsRegras, dsDependencias: IDataset;
+    dic: TDicionarioDadosCamposValidacoes;
+    lTabela,lCampo,lNome: TipoWideStringFramework;
+    validacacoesTabelas: TDicionarioDadosCamposValidacoesTabela;
+    validacao: IDadosCamposValidacoes;
+  label
+    proximo1,proximo2;
+begin
+  if(dicionarioDadosCamposValidacoes=nil) then
+    exit;
+  dic := dicionarioDadosCamposValidacoes;
+  dicionarioDadosCamposValidacoesInicializado := true;
+
+  dsRegras := gdbPadrao.criaDataset;
+  dsDependencias := gdbPadrao.criaDataset;
+  dsRegras.query(
+        'select'+#13+
+        '    r.*'+#13+
+        'from'+#13+
+        '    regras r',
+    '',[]);
+
+  while not dsRegras.dataset.Eof do begin
+    lTabela := UpperCase(trim(dsRegras.dataset.FieldByName('tabela').AsString));
+    lCampo := UpperCase(trim(dsRegras.dataset.FieldByName('campo').AsString));
+    lNome := UpperCase(trim(dsRegras.dataset.FieldByName('nome').AsString));
+    if(lTabela='') or (lCampo='') or (lNome='') then goto proximo1;
+    if not dic.TryGetValue(lTabela,validacacoesTabelas) then
+    begin
+      validacacoesTabelas := TCollections.CreateDictionary<TipoWideStringFramework,IDadosCamposValidacoes>(getComparadorOrdinalTipoWideStringFramework);
+      dic.AddOrSetValue(lTabela,validacacoesTabelas);
+    end;
+    if not validacacoesTabelas.TryGetValue(lCampo,validacao) then
+    begin
+      validacao := TDadosCamposValidacoesImpl.Create;
+      validacacoesTabelas.AddOrSetValue(lCampo,validacao);
+    end;
+    validacao.nome := lNome;
+    validacao.descricao := dsRegras.dataset.FieldByName('descricao').AsString;
+    validacao.tabela := lTabela;
+    validacao.campo := lCampo;
+    validacao.opcoes := dsRegras.dataset.FieldByName('valores').AsString;
+    validacao.obrigatorio := dsRegras.dataset.FieldByName('obrigatorio').AsString<>'N';
+    dsDependencias.query(
+      'select'+#13+
+         '    d.*'+#13+
+         'from'+#13+
+         '    regras_dependecias d'+#13+
+         'where'+#13+
+         '    d.regra=:regra',
+      'regra',[lNome]
+    );
+
+    while not dsDependencias.dataset.Eof do
+    begin
+      validacao.adicionaDependencia(dsDependencias.dataset.FieldByName('dependencia').AsString, dsDependencias.dataset.FieldByName('valor_dependencia').AsString);
+     proximo2:
+      dsDependencias.dataset.Next;
+    end;
+
+   proximo1:
+    dsRegras.dataset.Next;
+  end;
+end;
+
+function getDicionarioDadosCamposValidacoes: TDicionarioDadosCamposValidacoes;
+begin
+  if(dicionarioDadosCamposValidacoes=nil) then
+    dicionarioDadosCamposValidacoes:=TCollections.CreateDictionary<TipoWideStringFramework,TDicionarioDadosCamposValidacoesTabela>(getComparadorOrdinalTipoWideStringFramework);
+  if(dicionarioDadosCamposValidacoesInicializado=false) and (gdbPadrao<>nil) and (gOpcoesDefaultRegistradas=true) then
+    loadDicionarioCamposValidacoes;
+  Result := dicionarioDadosCamposValidacoes;
+end;
+
+procedure loadDicionarioSetValores;
+  var
+    dsValores, dsDadosValores: IDataset;
+    dic: TDicionarioSetValores;
+    lNome: TipoWideStringFramework;
+    dados: IDadosSetOpcoes;
+  label
+    proximo1,proximo2;
+begin
+  if(dicionarioSetValores=nil) then
+    exit;
+  dic := dicionarioSetValores;
+  dicionarioSetValoresInicializado := true;
+  dsValores := gdbPadrao.criaDataset;
+  dsDadosValores := gdbPadrao.criaDataset;
+  dsValores.query(
+        'select'+#13+
+        '    v.nome'+#13+
+        'from'+#13+
+        '    regras_valores v'+#13+
+        'group by'+#13+
+        '    1',
+    '',[]);
+
+  while not dsValores.dataset.Eof do begin
+    lNome := UpperCase(trim(dsValores.dataset.FieldByName('nome').AsString));
+    if(lNome='') then goto proximo1;
+    dsDadosValores.query(
+        'select'+#13+
+           '    v.*'+#13+
+           'from'+#13+
+           '    regras_valores v'+#13+
+           'where'+#13+
+           '    v.nome=:nome'+#13+
+           'order by v.ordem',
+    'nome',[lNome]);
+    if(dsDadosValores.dataset.RecordCount=0) then goto proximo1;
+
+    dados:=nil;
+    if(dic.TryGetValue(lNome,dados)) then
+    begin
+      dados.dataset := nil;
+      dados.listaDescricoes.Clear;
+      dados.listaValores.Clear;
+    end else
+    begin
+      dados := TDadosSetOpcoesImpl.Create;
+      dados.nome := lNome;
+      dados.descricao := lNome;
+      dic.AddOrSetValue(lNome,dados);
+    end;
+
+    while not dsDadosValores.dataset.Eof do
+    begin
+      dados.adicionaID_Descricao(dsDadosValores.dataset.FieldByName('valor').AsString,dsDadosValores.dataset.FieldByName('descricao').AsString);
+     proximo2:
+      dsDadosValores.dataset.Next;
+    end;
+
+   proximo1:
+    dsValores.dataset.Next;
+  end;
+
+end;
+
+function getDicionarioSetValores: TDicionarioSetValores;
+begin
+  if(dicionarioSetValores=nil) then
+    dicionarioSetValores:=TCollections.CreateDictionary<TipoWideStringFramework,IDadosSetOpcoes>(getComparadorOrdinalTipoWideStringFramework);
+  Result := dicionarioSetValores;
+  if(dicionarioSetValoresInicializado=false) and (gdbPadrao<>nil) and (gOpcoesDefaultRegistradas=true) then
+    //Le da tabela...
+    loadDicionarioSetValores
+end;
+
+function getValidacaoPorNome(pNome: String): IDadosCamposValidacoes;
+  var
+    dic: TDicionarioDadosCamposValidacoes;
+    p: TPair<TipoWideStringFramework, TDicionarioDadosCamposValidacoesTabela>;
+    r: TPair<TipoWideStringFramework,IDadosCamposValidacoes>;
+begin
+  Result := nil;
+  pNome := UpperCase(trim(pNome));
+  dic := getDicionarioDadosCamposValidacoes;
+  for p in dic do
+    for r in p.Value do
+    begin
+      if(r.Value.nome=pNome) then
+      begin
+        Result := r.Value;
+        exit;
+      end;
+    end;
+end;
+
+
+function registraOpcoesCampos;//(const pNome, pOpcao, pOpcaoDescricao: String; pDescricao: String = ''): TDadosSetOpcoes;
+  var
+    dic: TDicionarioSetValores;
+begin
+  pNome := UpperCase(trim(pNome));
+  if(pNome='') then exit;
+  dic := getDicionarioSetValores;
+  if not dic.TryGetValue(pNome,Result) then
+  begin
+    Result := TDadosSetOpcoesImpl.Create;
+    Result.nome := pNome;
+    Result.descricao := pDescricao;
+    //Result.listaValores := novaListaTexto;
+    //Result.listaDescricoes := novaListaTexto;
+    //Result.dataset := getGenericID_DescricaoDataset;
+    dic.AddOrSetValue(pNome,Result);
+  end;
+
+  Result.adicionaID_Descricao(pOpcao,pOpcaoDescricao);
+
+end;
+
+function registraValidacaoCampoTabela;//(pTabela, pCampo, pOpcoes: String; pDescricao: String = ''; pObrigatorio: boolean = false): IDadosSetOpcoes;
+  var
+    dic: TDicionarioDadosCamposValidacoes;
+    dadosTabela: TDicionarioDadosCamposValidacoesTabela;
+    dadosCampo: IDadosCamposValidacoes;
+begin
+  dic := getDicionarioDadosCamposValidacoes;
+  pTabela := UpperCase(trim(pTabela));
+  pCampo := UpperCase(trim(pCampo));
+  if(pTabela='') then exit;
+  if(pCampo='') then exit;
+  if not dic.TryGetValue(pTabela,dadosTabela) then
+  begin
+    dadosTabela := TCollections.CreateDictionary<TipoWideStringFramework,IDadosCamposValidacoes>(getComparadorOrdinalTipoWideStringFramework);
+    dic.AddOrSetValue(pTabela,dadosTabela);
+  end;
+  if not dadosTabela.TryGetValue(pCampo,dadosCampo) then
+  begin
+    dadosCampo := TDadosCamposValidacoesImpl.Create;
+    dadosTabela.AddOrSetValue(pCampo,dadosCampo);
+  end;
+  dadosCampo.tabela := pTabela;
+  dadosCampo.campo := pCampo;
+  dadosCampo.descricao := pDescricao;
+  dadosCampo.opcoes := UpperCase(trim(pOpcoes));
+  dadosCampo.obrigatorio := pObrigatorio;
+end;
+
+procedure configuraControlesEditOpcoesCampoTabela;//(pTabela: String; pOwner: TWinControl);
+  var
+    i: Integer;
+    p: TComponent;
+begin
+  pTabela := UpperCase(trim(pTabela));
+  if(pTabela='') or not assigned(pOwner) then exit;
+  configuraEditOpcoesCampoTabela(pTabela,pOwner);
+
+  if not (pOwner is TWinControl) then exit;
+
+  with TWinControl(pOwner) do
+  begin
+    i := ControlCount;
+    while i > 0 do
+    begin
+      dec(i);
+      configuraEditOpcoesCampoTabela(pTabela,Controls[i]);
+    end;
+  end;
+end;
+
+function validaDataset(pTabela: String; pDataset: TDataset; pListaCampos: IListaString = nil; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+  var
+    i: Integer;
+    lValor, p1, lNomeCampo: TipoWideStringFramework;
+    dic: TDicionarioDadosCamposValidacoes;
+    dadosTabela: TDicionarioDadosCamposValidacoesTabela;
+    dadosCampo: IDadosCamposValidacoes;
+    lDependenciaMatch: boolean;
+    opcoes: IDadosSetOpcoes;
+    f: TField;
+    save: Integer;
+begin
+  Result := CheckResultadoOperacao(pResultado);
+  save := pResultado.erros;
+  pTabela := uppercase(trim(pTabela));
+  if(pTabela='') then
+  begin
+    pResultado.adicionaErro('Nome da tabela inválida.');
+    exit;
+  end;
+
+  if( (pDataset=nil) or (pDataset.Active=false) ) then
+  begin
+    pResultado.adicionaErro('validaDataset: Não informou um dataset válido');
+    exit;
+  end;
+  if(pListaCampos=nil) then
+    pListaCampos := getStringList;
+
+  if(pListaCampos.Count=0) then
+  begin
+    for i := 0 to pDataset.Fields.Count - 1 do
+      pListaCampos.Add(pDataset.Fields[i].FieldName);
+  end;
+
+  dic := getDicionarioDadosCamposValidacoes;
+  if not dic.TryGetValue(pTabela,dadosTabela) then
+    exit;
+
+  for p1 in pListaCampos do
+  begin
+    lNomeCampo := uppercase(trim(p1));
+    if(lNomeCampo='') then continue;
+    if not dadosTabela.TryGetValue(lNomeCampo,dadosCampo) then continue;
+    if(dadosCampo.obrigatorio=false) then continue;
+
+    f := pDataset.FindField(lNomeCampo);
+    if(f=nil) then
+    begin
+      pResultado.formataErro('validaDataset: Campo [%s] [%s] não fornecido', [lNomeCampo, dadosCampo.descricao ]);
+      continue;
+    end;
+    opcoes := dadosCampo.dadosOpcoes;
+    if(opcoes=nil) then
+    begin
+      pResultado.formataErro('validaDataset: Campo [%s] [%s] não configurado lista de opções', [lNomeCampo, dadosCampo.descricao ]);
+      continue;
+    end;
+
+    lDependenciaMatch := dadosCampo.verificaDependencias(pDataset,pResultado);
+    //Implementar dependencias
+
+    if(lDependenciaMatch=false) or (pResultado.erros<>save) then continue;
+
+    lDependenciaMatch := false;
+    for lValor in opcoes.listaValores do
+    begin
+      if(CompareText(lValor,'null')=0) then
+      begin
+        lDependenciaMatch := f.IsNull=true;
+      end else if(CompareText(lValor,'notnull')=0) then
+      begin
+        lDependenciaMatch := f.IsNull=false;
+      end else
+        lDependenciaMatch := f.AsString=lValor;
+
+      if(lDependenciaMatch=true) then
+        break;
+    end;
+    if(lDependenciaMatch=false) then
+      pResultado.formataErro('validaDataset: Valor do Campo [%s] inválido', [ dadosCampo.descricao ]);
+  end;
+end;
+
+procedure configuraEditOpcoesCampoTabela;//(pTabela: String; pObject: TComponent);
+  var
+//    dados: TDadosCamposLookupOld;
+    lRG: TDBRadioGroup;
+    lLkp: TDBLookupComboBox;
+    dataField: String;
+    dic: TDicionarioDadosCamposValidacoes;
+    dadosTabela: TDicionarioDadosCamposValidacoesTabela;
+    dadosCampo: IDadosCamposValidacoes;
+    opcoes: IDadosSetOpcoes;
+begin
+  dic := getDicionarioDadosCamposValidacoes;
+  if(pObject=nil) then exit;
+  pTabela := UpperCase(trim(pTabela));
+  if(pTabela='') then exit;
+  if not dic.TryGetValue(pTabela,dadosTabela) then exit;
+
+  lRG:=nil;
+  lLkp := nil;
+  if (pObject is TDBRadioGroup) then
+  begin
+    lRG := TDBRadioGroup(pObject);
+    dataField := lRG.DataField;
+  end else if (pObject is TDBLookupComboBox) then
+  begin
+    lLkp := TDBLookupComboBox(pObject);
+    dataField := lLkp.DataField;
+  end;
+
+  dataField := UpperCase(trim(dataField));
+
+  if dadosTabela.TryGetValue(dataField,dadosCampo) then
+  begin
+    opcoes := dadosCampo.dadosOpcoes;
+    if(opcoes=nil) then exit;
+    if assigned(lRG) then
+    begin
+      lRG.Values.Text := opcoes.listaValores.text;
+      lRG.Items.Text := opcoes.listaDescricoes.text;
+      //lRG.Refresh;
+        exit;
+    end else if assigned(lLkp) then begin
+      lLkp.ListField := 'descricao';
+      lLkp.KeyField := 'ID';
+      lLkp.ListSource := opcoes.dataset.dataSource;
+      exit;
+    end;
+  end;
+end;
+
+{ TDadosCamposValidacoesImpl }
+
+procedure TDadosCamposValidacoesImpl.setDependencias(const pValue: TListaDependenciaRegra);
+begin
+  fDependencias := pValue;
+end;
+
+function TDadosCamposValidacoesImpl.getDependencias: TListaDependenciaRegra;
+begin
+  if(fDependencias=nil) then
+    fDependencias := TCollections.CreateList<TDependenciaRegra>;
+  Result := fDependencias;
+end;
+
+function TDadosCamposValidacoesImpl.getDadosOpcoes: IDadosSetOpcoes;
+begin
+  getDicionarioSetValores.TryGetValue(fOpcoes,Result);
+end;
+
+procedure TDadosCamposValidacoesImpl.setCampo(const pValue: TipoWideStringFramework);
+begin
+  fCampo := UpperCase(trim(pValue));
+end;
+
+procedure TDadosCamposValidacoesImpl.adicionaDependencia(pDependencia,  pValor: TipoWideStringFramework);
+begin
+  getDependencias.Add(TDependenciaRegra.Create(pDependencia,pValor));
+end;
+
+function TDadosCamposValidacoesImpl.getCampo: TipoWideStringFramework;
+begin
+  Result := fCampo;
+end;
+
+procedure TDadosCamposValidacoesImpl.setTabela(const pValue: TipoWideStringFramework);
+begin
+  fTabela := UpperCase(trim(pValue));
+end;
+
+function TDadosCamposValidacoesImpl.verificaDependencias;
+  var
+    p: TDependenciaRegra;
+    regra: IDadosCamposValidacoes;
+    f: TField;
+    lValor: String;
+    lLista: IListaTextoEX;
+begin
+  checkResultadoOperacao(pResultado);
+  Result := getDependencias.Count=0;
+  if Result or (pContexto=nil) or (pContexto.Active=false) then
+    exit;
+
+  lLista := novaListaTexto;
+
+  for p in fDependencias do
+  begin
+    regra := getValidacaoPorNome(p.Key);
+    if(regra=nil) then continue;
+    if(regra.tabela<>fTabela) then begin
+      pResultado.formataErro('TDadosCamposValidacoesImpl.verificaDependencias: Tabela da dependencia [%s.%s] diferente da tabela dependente[%s.%s].', [regra.nome, regra.tabela,fNome,fTabela]);
+      exit;
+    end;
+    f := pContexto.FindField(regra.campo);
+    if(f=nil) then
+    begin
+      pResultado.formataErro('TDadosCamposValidacoesImpl.verificaDependencias: Campo da regra [%s.%s] não existe no contexto fornecido.', [regra.nome, regra.campo]);
+      exit;
+    end;
+    lValor:=trim(p.Value);
+    if(lValor='') then
+      Result := f.IsNull=true
+    else if(CompareText(lValor,'notnull')=0) then
+      Result := f.IsNull=false
+    else
+    begin
+      lLista.text := lValor;
+      Result := lLista.strings.IndexOf(f.AsString)<>-1;
+    end;
+    if(Result) then exit;
+  end;
+end;
+
+function TDadosCamposValidacoesImpl.getTabela: TipoWideStringFramework;
+begin
+  Result := fTabela;
+end;
+
+procedure TDadosCamposValidacoesImpl.setOpcoes(const pValue: TipoWideStringFramework);
+begin
+  fOpcoes := UpperCase(trim(pValue));
+end;
+
+function TDadosCamposValidacoesImpl.getOpcoes: TipoWideStringFramework;
+begin
+  Result := fOpcoes;
+end;
+
+procedure TDadosCamposValidacoesImpl.setObrigatorio(const pValue: boolean);
+begin
+  fObrigatorio := pValue;
+end;
+
+function TDadosCamposValidacoesImpl.getObrigatorio: boolean;
+begin
+  Result := fObrigatorio;
+end;
+
+procedure TDadosCamposValidacoesImpl.setDescricao(const pValue: TipoWideStringFramework);
+begin
+  if(pValue<>'') then
+    fDescricao := pValue;
+end;
+
+function TDadosCamposValidacoesImpl.getDescricao: TipoWideStringFramework;
+begin
+  Result := fDescricao;
+end;
+
+procedure TDadosCamposValidacoesImpl.setNome(const pValue: TipoWideStringFramework);
+begin
+  fNome := UpperCase(trim(pValue));
+end;
+
+function TDadosCamposValidacoesImpl.getNome: TipoWideStringFramework;
+begin
+  Result := fNome;
+end;
+
+{ TDadosSetOpcoesImpl }
+
+procedure TDadosSetOpcoesImpl.setDataset(const pValue: IDatasetSimples);
+begin
+  fDataset := pValue;
+end;
+
+procedure TDadosSetOpcoesImpl.adicionaID_Descricao(const pID,  pDescricao: TipoWideStringFramework);
+begin
+  getListaValores.strings.Add(pID);
+  getListaDescricoes.strings.Add(pDescricao);
+  with getDataset.dataset do
+  begin
+    Append;
+    FieldByName('ID').AsString := pID;
+    FieldByName('descricao').AsString := pDescricao;
+    CheckBrowseMode;
+  end;
+end;
+
+function TDadosSetOpcoesImpl.getDataset: IDatasetSimples;
+begin
+  if(fDataset=nil) then
+    fDataset:=getGenericID_DescricaoDataset;
+  Result := fDataset;
+end;
+
+procedure TDadosSetOpcoesImpl.setListaDescricoes(const pValue: IListaTextoEX);
+begin
+  fListaDescricoes := pValue;
+end;
+
+function TDadosSetOpcoesImpl.getListaDescricoes: IListaTextoEX;
+begin
+  if(fListaDescricoes=nil) then
+    fListaDescricoes := novaListaTexto;
+  Result := fListaDescricoes;
+end;
+
+procedure TDadosSetOpcoesImpl.setListaValores(const pValue: IListaTextoEX);
+begin
+  fListaValores := pValue;
+end;
+
+function TDadosSetOpcoesImpl.getListaValores: IListaTextoEX;
+begin
+  if(fListaValores=nil) then
+    fListaValores := novaListaTexto;
+  Result := fListaValores;
+end;
+
+procedure TDadosSetOpcoesImpl.setDescricao(const pValue: TipoWideStringFramework);
+begin
+  fDescricao := pValue;
+end;
+
+function TDadosSetOpcoesImpl.getDescricao: TipoWideStringFramework;
+begin
+  Result := fDescricao;
+end;
+
+procedure TDadosSetOpcoesImpl.setNome(const pValue: TipoWideStringFramework);
+begin
+  fNome := UpperCase(trim(pValue));
+end;
+
+function TDadosSetOpcoesImpl.getNome: TipoWideStringFramework;
+begin
+  Result := fNome;
+end;
+
+{  var
+    dicionarioDadosOld: IDictionary<TipoWideStringFramework,TDadosCamposLookupOld>;
+
+procedure registraOpcoesCampoTabelaOld;
+  var
+    p: TDadosCamposLookupOld;
+    dados: TDadosCamposRecOld;
 begin
   p := nil;
-  if(dicionarioDados=nil) then
-    dicionarioDados := TCollections.CreateDictionary<TipoWideStringFramework,TDadosCamposLookup>(getComparadorOrdinalTipoWideStringFramework);
-  if not dicionarioDados.TryGetValue(pTabela,p) then
+  if(dicionarioDadosOld=nil) then
+    dicionarioDadosOld := TCollections.CreateDictionary<TipoWideStringFramework,TDadosCamposLookupOld>(getComparadorOrdinalTipoWideStringFramework);
+  if not dicionarioDadosOld.TryGetValue(pTabela,p) then
   begin
-    p := TCollections.CreateDictionary<TipoWideStringFramework,TDadosCamposRec>(getComparadorOrdinalTipoWideStringFramework);
-    dicionarioDados.AddOrSetValue(pTabela,p);
+    p := TCollections.CreateDictionary<TipoWideStringFramework,TDadosCamposRecOld>(getComparadorOrdinalTipoWideStringFramework);
+    dicionarioDadosOld.AddOrSetValue(pTabela,p);
   end;
   if not p.TryGetValue(pCampo,dados) then
   begin
@@ -61,9 +796,9 @@ begin
     dados.padrao := true;
     dados.tabela := UpperCase(pTabela);
     dados.campo := UpperCase(pCampo);
-    dados.listaValores := novaListaTexto;
-    dados.listaDescricoes := novaListaTexto;
-    dados.dataset := getGenericID_DescricaoDataset;
+    //dados.listaValores := novaListaTexto;
+    //dados.listaDescricoes := novaListaTexto;
+    //dados.dataset := getGenericID_DescricaoDataset;
     p.AddOrSetValue(pCampo,dados);
   end;
 
@@ -75,7 +810,7 @@ begin
   dados.dataset.dataset.CheckBrowseMode;
 end;
 
-function validaDataset;//(pDataset: TDataset; pListaCampos: IListaString = nil; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+function validaDatasetOld;//(pDataset: TDataset; pListaCampos: IListaString = nil; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
   var
     i: Integer;
     lDSRegra,lDSDependencia,lDSValores: IDataset;
@@ -220,30 +955,29 @@ begin
   end;
 end;
 
-function getDadosCamposLookup;//(pTabela: String; pCampos: IListaString): TDadosCampos;
+function getDadosCamposLookupOld;//(pTabela: String; pCampos: IListaString): TDadosCampos;
   var
     lDS: IDataset;
     p: TipoWideStringFramework;
     lCampo: String;
-    lRec: TDadosCamposRec;
+    lRec: TDadosCamposRecOld;
     tmp: String;
-    lDadosCampoLookup: TDadosCamposLookup;
-    par: TPair<TipoWideStringFramework,TDadosCamposRec>;
+    lDadosCampoLookup: TDadosCamposLookupOld;
+    par: TPair<TipoWideStringFramework,TDadosCamposRecOld>;
 begin
-  Result := TCollections.CreateDictionary<TipoWideStringFramework,TDadosCamposRec>(getComparadorOrdinalTipoWideStringFramework);
+  Result := TCollections.CreateDictionary<TipoWideStringFramework,TDadosCamposRecOld>(getComparadorOrdinalTipoWideStringFramework);
   lRec.valido := true;
   pTabela := uppercase(trim(pTabela));
   if(pTabela='') then exit;
 
-  if not dicionarioDados.TryGetValue(pTabela,lDadosCampoLookup) then
+  if not dicionarioDadosOld.TryGetValue(pTabela,lDadosCampoLookup) then
   begin
-    lDadosCampoLookup := TCollections.CreateDictionary<TipoWideStringFramework,TDadosCamposRec>(getComparadorOrdinalTipoWideStringFramework);
-    dicionarioDados.AddOrSetValue(pTabela,lDadosCampoLookup);
+    lDadosCampoLookup := TCollections.CreateDictionary<TipoWideStringFramework,TDadosCamposRecOld>(getComparadorOrdinalTipoWideStringFramework);
+    dicionarioDadosOld.AddOrSetValue(pTabela,lDadosCampoLookup);
   end;
 
-  if(dicionarioDados=nil) then
-    dicionarioDados := TCollections.CreateDictionary<TipoWideStringFramework,TDadosCamposLookup>(getComparadorOrdinalTipoWideStringFramework);
-
+  if(dicionarioDadosOld=nil) then
+    dicionarioDadosOld := TCollections.CreateDictionary<TipoWideStringFramework,TDadosCamposLookupOld>(getComparadorOrdinalTipoWideStringFramework);
 
   if (pCampos=nil) then
     pCampos := getStringList;
@@ -262,7 +996,6 @@ begin
     if(par.Value.valido) then
       pCampos.Add(par.Value.campo);
 
-
   lRec.tabela := pTabela;
   lRec.campo := '';
 
@@ -276,9 +1009,9 @@ begin
       lRec.padrao :=true;
       lRec.campo  := lCampo;
       lRec.tabela := pTabela;
-      lRec.listaValores := novaListaTextoEx;
-      lRec.listaDescricoes := novaListaTextoEx;
-      lRec.dataset := getGenericID_DescricaoDataset;
+      //lRec.listaValores := novaListaTextoEx;
+      //lRec.listaDescricoes := novaListaTextoEx;
+      //lRec.dataset := getGenericID_DescricaoDataset;
     end else
       Result.AddOrSetValue(lRec.campo,lRec);
 
@@ -330,76 +1063,6 @@ begin
   end;
 
 end;
-
-procedure configuraEditOpcoesCampoTabela;//(pTabela: String; pObject: TComponent);
-  var
-    dados: TDadosCamposLookup;
-    lRG: TDBRadioGroup;
-    lLkp: TDBLookupComboBox;
-    dataField: String;
-    par: TPair<TipoWideStringFramework,TDadosCamposRec>;
-begin
-  if(pObject=nil) then exit;
-  pTabela := UpperCase(trim(pTabela));
-  if(pTabela='') then exit;
-  lRG:=nil;
-  lLkp := nil;
-  if (pObject is TDBRadioGroup) then
-  begin
-    lRG := TDBRadioGroup(pObject);
-    dataField := lRG.DataField;
-  end else if (pObject is TDBLookupComboBox) then
-  begin
-    lLkp := TDBLookupComboBox(pObject);
-    dataField := lLkp.DataField;
-  end;
-
-  dataField := UpperCase(trim(dataField));
-
-  if(dataField<>'') then
-  begin
-    dados := getDadosCamposLookup(pTabela,getStringListFromItens([dataField]));
-    for par in dados do
-    begin
-      if par.Key<>dataField then continue;
-
-      if assigned(lRG) then begin
-        lRG.Values.Text := par.Value.listaValores.text;
-        lRG.Items.Text := par.Value.listaDescricoes.text;
-        lRG.Refresh;
-        exit;
-      end;
-      if assigned(lLkp) then begin
-        lLkp.ListField := 'descricao';
-        lLkp.KeyField := 'ID';
-        par.Value.dataset.dataset.Last;
-        lLkp.ListSource := par.Value.dataset.dataSource;
-        exit;
-      end;
-    end;
-  end;
-end;
-
-procedure configuraControlesEditOpcoesCampoTabela;//(pTabela: String; pOwner: TWinControl);
-  var
-    i: Integer;
-    p: TComponent;
-begin
-  pTabela := UpperCase(trim(pTabela));
-  if(pTabela='') or not assigned(pOwner) then exit;
-  configuraEditOpcoesCampoTabela(pTabela,pOwner);
-
-  if not (pOwner is TWinControl) then exit;
-
-  with TWinControl(pOwner) do
-  begin
-    i := ControlCount;
-    while i > 0 do
-    begin
-      dec(i);
-      configuraEditOpcoesCampoTabela(pTabela,Controls[i]);
-    end;
-  end;
-end;
+}
 
 end.
