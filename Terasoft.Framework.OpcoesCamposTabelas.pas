@@ -16,7 +16,6 @@ interface
     TDependenciaRegra = TPair<TipoWideStringFramework,TipoWideStringFramework>;
     TListaDependenciaRegra = IList<TDependenciaRegra>;
 
-
     IDadosSetOpcoes = interface
     ['{81EEF943-D7CD-478A-9A89-51DC4C453619}']
     //property nome getter/setter
