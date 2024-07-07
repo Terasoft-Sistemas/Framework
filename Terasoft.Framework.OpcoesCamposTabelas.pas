@@ -500,7 +500,7 @@ begin
         break;
     end;}
     if(lDependenciaMatch=false) then
-      pResultado.formataErro('validaDataset: Valor do Campo [%s] inválido', [ dadosCampo.descricao ]);
+      pResultado.formataErro('Valor do Campo [%s] inválido', [ dadosCampo.descricao ]);
   end;
 end;
 
@@ -785,16 +785,19 @@ function TDadosSetOpcoesImpl.match(pValue: TipoWideStringFramework): boolean;
   var
     s: TipoWideStringFramework;
     lValor: String;
+    _not: boolean;
 begin
   Result := false;
   for s in getListaValores do
   begin
+    _not:=false;
     lValor := trim(s);
+    //_not := Pos('<!>',lValor) > 0;
     if(CompareText(lValor,'null')=0) then
       Result := pValue=''
     else if(CompareText(lValor,'notnull')=0) then
       Result := pValue<>''
-    else if(CompareText(lValor,'<emailvalido>')=0) then
+    else if(CompareText(lValor,'<@>')=0) then
       Result := validaEmail(pValue)
     else if(CompareText(lValor,'<cnpj>')=0) then
       Result := validaCNPJ(pValue)
