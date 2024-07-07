@@ -435,6 +435,7 @@ function validaDataset(pTabela: String; pDataset: TDataset; pListaCampos: ILista
     save: Integer;
 begin
   Result := CheckResultadoOperacao(pResultado);
+  if(usaValidacoesNovas=false) then exit;
   save := pResultado.erros;
   pTabela := uppercase(trim(pTabela));
   if(pTabela='') then

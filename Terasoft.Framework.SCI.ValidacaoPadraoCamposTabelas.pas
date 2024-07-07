@@ -9,12 +9,16 @@ interface
 
 implementation
   uses
+    Terasoft.Framework.Validacoes,
     Terasoft.Framework.OpcoesCamposTabelas;
 
 procedure registraValidacaoPadraoCamposTabelas;
 begin
   //Opções null e not null
   try
+//    if(usaValidacoesNovas=false) then
+//      exit;
+
     registraOpcoesCampos('null', 'null', '');
     registraOpcoesCampos('notnull', 'notnull', '');
     registraOpcoesCampos('emailvalidoounull', 'null', '');
