@@ -12,6 +12,13 @@ implementation
     Terasoft.Framework.Validacoes,
     Terasoft.Framework.OpcoesCamposTabelas;
 
+  const
+    {$if defined(AMBIENTE_DESENVOLVIMENTO_NBANTONIO)}
+      condicao = true;
+    {$else}
+      condicao = false;
+    {$endif}
+
 procedure registraValidacaoPadraoCamposTabelas;
 begin
   //Opções null e not null
@@ -40,7 +47,7 @@ begin
 
     registraOpcoesCampos('sexo', 'M', 'Masculino');
     registraOpcoesCampos('sexo', 'F', 'Feminino');
-    registraValidacaoCampoTabela('clientes','SEXO_CLI','sexo','Sexo do cliente');
+    registraValidacaoCampoTabela('clientes','SEXO_CLI','sexo','Sexo do cliente',true);
 
     registraOpcoesCampos('tipopessoa', 'F', 'Física');
     registraOpcoesCampos('tipopessoa', 'J', 'Jurídica');
@@ -57,32 +64,18 @@ begin
     registraOpcoesCampos('SEPROCADO', 'N', 'Liberado');
     registraValidacaoCampoTabela('clientes','SEPROCADO_CLI','SEPROCADO','Situação do cliente',true);
 
-    exit;
-
-    registraValidacaoCampoTabela('clientes','SEXO_DEPENDENTE','sexo','Sexo do dependente');
-    registraValidacaoCampoTabela('clientes','SEXO_DEPENDENTE2','sexo','Sexo do dependente 2');
-    registraValidacaoCampoTabela('clientes','SEXO_DEPENDENTE3','sexo','Sexo do dependente 3');
-    registraValidacaoCampoTabela('clientes','SEXO_DEPENDENTE4','sexo','Sexo do dependente 4');
-    registraValidacaoCampoTabela('clientes','SEXO_DEPENDENTE5','sexo','Sexo do dependente 5');
-    registraValidacaoCampoTabela('clientes','SEXO_DEPENDENTE6','sexo','Sexo do dependente 6');
+    registraOpcoesCampos('estadocivilpessoa', 'C', 'Casado');
+    registraOpcoesCampos('estadocivilpessoa', 'S', 'Solteiro');
+    registraOpcoesCampos('estadocivilpessoa', 'V', 'Viúvo');
+    registraOpcoesCampos('estadocivilpessoa', 'O', 'Outros');
+    registraValidacaoCampoTabela('clientes','ESTADOCIVIL_CLI','estadocivilpessoa','Estado civil do Cliente',true);
 
     registraOpcoesCampos('classificacao', 'A', 'A');
     registraOpcoesCampos('classificacao', 'B', 'B');
     registraOpcoesCampos('classificacao', 'C', 'C');
     registraOpcoesCampos('classificacao', 'D', 'D');
     registraOpcoesCampos('classificacao', 'E', 'E');
-    registraValidacaoCampoTabela('clientes','CLASSIF_CLI','classificacao','Classificação do cliente');
-
-    registraOpcoesCampos('SIMNAO', 'S', 'Sim');
-    registraOpcoesCampos('SIMNAO', 'N', 'Não');
-    registraValidacaoCampoTabela('clientes','ENVIA_SMS','SIMNAO','Envia SMS');
-    registraValidacaoCampoTabela('clientes','tela','SIMNAO','Contrato do cliente');
-
-    registraOpcoesCampos('estadocivilpessoa', 'C', 'Casado');
-    registraOpcoesCampos('estadocivilpessoa', 'S', 'Solteiro');
-    registraOpcoesCampos('estadocivilpessoa', 'V', 'Viúvo');
-    registraOpcoesCampos('estadocivilpessoa', 'O', 'Outros');
-    registraValidacaoCampoTabela('clientes','ESTADOCIVIL_CLI','estadocivilpessoa','Estado civil do Cliente');
+    registraValidacaoCampoTabela('clientes','CLASSIF_CLI','classificacao','Classificação do cliente',condicao);
 
     registraOpcoesCampos('regimetributario', '1', 'Lucro Real');
     registraOpcoesCampos('regimetributario', '2', 'Lucro Presumido');
@@ -94,8 +87,7 @@ begin
     registraOpcoesCampos('regimetributario', 'O', 'Orgão público estadual');
     registraOpcoesCampos('regimetributario', 'F', 'Órgão público federal');
     registraOpcoesCampos('regimetributario', 'M', 'Micro empreendedor Individual');
-    registraValidacaoCampoTabela('clientes','TIPO_APURACAO','regimetributario','Regime tributário do cliente');
-
+    registraValidacaoCampoTabela('clientes','TIPO_APURACAO','regimetributario','Regime tributário do cliente',condicao);
 
     registraOpcoesCampos('tipodocid', '1', 'RG');
     registraOpcoesCampos('tipodocid', '2', 'CNH');
@@ -104,14 +96,25 @@ begin
     registraOpcoesCampos('tipodocid', '5', 'RNE');
     registraOpcoesCampos('tipodocid', '6', 'Passaporte');
     registraOpcoesCampos('tipodocid', '7', 'Certificado de Reservista');
-    registraValidacaoCampoTabela('clientes','TIPODOC_CLI','tipodocid','Tipo de documento de identificação do cliente');
+    registraValidacaoCampoTabela('clientes','TIPODOC_CLI','tipodocid','Tipo de documento de identificação do cliente',condicao);
 
+    registraValidacaoCampoTabela('clientes','SEXO_DEPENDENTE','sexo','Sexo do dependente');
+    registraValidacaoCampoTabela('clientes','SEXO_DEPENDENTE2','sexo','Sexo do dependente 2');
+    registraValidacaoCampoTabela('clientes','SEXO_DEPENDENTE3','sexo','Sexo do dependente 3');
+    registraValidacaoCampoTabela('clientes','SEXO_DEPENDENTE4','sexo','Sexo do dependente 4');
+    registraValidacaoCampoTabela('clientes','SEXO_DEPENDENTE5','sexo','Sexo do dependente 5');
+    registraValidacaoCampoTabela('clientes','SEXO_DEPENDENTE6','sexo','Sexo do dependente 6');
 
-    registraOpcoesCampos('tiposuframa', 'ICMS', '2');
-    registraOpcoesCampos('tiposuframa', 'PIS/Cofins', '3');
-    registraOpcoesCampos('tiposuframa', 'PIS/Cofins/ICMS', '4');
-    registraOpcoesCampos('tiposuframa', 'Sem suframa', '9');
-    registraValidacaoCampoTabela('clientes','TIPO_SUFRAMA','tiposuframa','Tipo SUFRAMA do cliente');
+    registraOpcoesCampos('SIMNAO', 'S', 'Sim');
+    registraOpcoesCampos('SIMNAO', 'N', 'Não');
+    registraValidacaoCampoTabela('clientes','ENVIA_SMS','SIMNAO','Envia SMS');
+    registraValidacaoCampoTabela('clientes','tela','SIMNAO','Contrato do cliente');
+
+    registraOpcoesCampos('tiposuframa', '2', 'ICMS');
+    registraOpcoesCampos('tiposuframa', '3', 'PIS/Cofins');
+    registraOpcoesCampos('tiposuframa', '4', 'PIS/Cofins/ICMS');
+    registraOpcoesCampos('tiposuframa', '9', 'Sem suframa');
+    registraValidacaoCampoTabela('clientes','TIPO_SUFRAMA','tiposuframa','Tipo SUFRAMA do cliente',condicao);
 
     registraOpcoesCampos('sexoa', 'M', 'Macho');
     registraOpcoesCampos('sexoa', 'F', 'Fêmea');

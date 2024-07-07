@@ -9,6 +9,7 @@ interface
     Terasoft.Framework.Types, Terasoft.Framework.DB,
     Spring.Collections,
     Generics.Collections,
+    Vcl.Controls,
     Terasoft.Framework.Texto;
 
   type
@@ -104,13 +105,14 @@ interface
   procedure configuraControlesEditOpcoesCampoTabela(pTabela: String; pOwner: TComponent; pDataSource: TDataSource);
   //procedure configuraEditOpcoesCampoTabela(pTabela: String; pObject: TComponent; pDataSource: TDataSource);
   function validaDataset(pTabela: String; pDataset: TDataset; pListaCampos: IListaString = nil; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+  function retornaControleDataField(pCampo: String; pDatasource: TDataSource; pParent: TWinControl): TWinControl;
+  function setFocoControleDataField(pCampo: String; pDatasource: TDataSource; pParent: TWinControl): TWinControl;
 
   var
     gOpcoesDefaultRegistradas: boolean;
 
 implementation
   uses
-    Vcl.Controls,
     Terasoft.Framework.Validacoes,
     Vcl.DBCtrls;
 
@@ -500,9 +502,79 @@ begin
       if(lDependenciaMatch=true) then
         break;
     end;}
-    if(lDependenciaMatch=false) then
+    if(lDependenciaMatch=false) then begin
+      pResultado.propriedade['campo.erro'].asString := dadosCampo.campo;
       pResultado.formataErro('Valor do Campo [%s] inválido', [ dadosCampo.descricao ]);
+    end;
   end;
+end;
+
+function setFocoControleDataField;//(pCampo: String; pDatasource: TDataSource): TWinControl;
+  var
+    controle: TWinControl;
+begin
+  controle := retornaControleDataField(pCampo, pDatasource, pParent);
+  if(assigned(controle)) then
+  begin
+    controle.Show;
+    if(controle.CanFocus) then
+      controle.SetFocus;
+  end;
+
+end;
+
+function retornaControleDataField(pCampo: String; pDatasource: TDataSource; pParent: TWinControl): TWinControl;
+  var
+    i: Integer;
+
+  procedure testa(cmp: TControl);
+  begin
+    if(cmp=nil) then
+      exit;
+    if(cmp is TDBEdit) then
+    begin
+      with TDBEdit(cmp) do
+      begin
+        if(DataSource=pDatasource) and (DataField=pCampo) then
+          Result := TDBEdit(cmp);
+      end;
+    end else if(cmp is TDBRadioGroup) then
+    begin
+      with TDBRadioGroup(cmp) do
+      begin
+        if(DataSource=pDatasource) and (DataField=pCampo) then
+          Result := TDBRadioGroup(cmp);
+      end;
+    end else if(cmp is TDBComboBox) then
+    begin
+      with TDBComboBox(cmp) do
+      begin
+        if(DataSource=pDatasource) and (DataField=pCampo) then
+          Result := TDBComboBox(cmp);
+      end;
+    end else if(cmp is TDBLookupComboBox) then
+    begin
+      with TDBLookupComboBox(cmp) do
+      begin
+        if(DataSource=pDatasource) and (DataField=pCampo) then
+          Result := TDBLookupComboBox(cmp);
+      end;
+    end;
+  end;
+
+begin
+  Result := nil;
+  testa(pParent);
+  if(Result<>nil) then exit;
+  if(pParent<>nil) then
+    for i := 0 to pParent.ControlCount - 1 do
+    begin
+      if not (pParent.Controls[i] is TWinControl) then continue;
+      
+      Result := retornaControleDataField(pCampo,pDataSource,TWinControl(pParent.Controls[i]));
+      //testa(pParent.Controls[i]);
+      if(Result<>nil) then exit;
+    end;
 end;
 
 procedure configuraEditOpcoesCampoTabela(pTabela: String; pObject: TComponent; pDataSource: TDataSource);
