@@ -9,6 +9,7 @@ interface
 
 implementation
   uses
+    Terasoft.Framework.Log,
     Terasoft.Framework.Validacoes,
     Terasoft.Framework.OpcoesCamposTabelas;
 
@@ -25,6 +26,8 @@ begin
   try
 //    if(usaValidacoesNovas=false) then
 //      exit;
+
+    logaByTagSeNivel(TAGLOG_VALIDACOES,'Iniciando registro de validações padrão.',LOG_LEVEL_DEBUG);
 
     registraOpcoesCampos('null', 'null', '');
     registraOpcoesCampos('notnull', 'notnull', '');
@@ -127,6 +130,7 @@ begin
 
   finally
     gOpcoesDefaultRegistradas := true;
+    logaByTagSeNivel(TAGLOG_VALIDACOES,'Registro de validações padrão finalizado.',LOG_LEVEL_DEBUG);
   end;
 end;
 

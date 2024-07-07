@@ -114,6 +114,7 @@ interface
 implementation
   uses
     Terasoft.Framework.Validacoes,
+    Terasoft.Framework.Log,
     Vcl.DBCtrls;
 
   type
@@ -231,6 +232,8 @@ begin
     lCampo := UpperCase(trim(dsRegras.dataset.FieldByName('campo').AsString));
     lNome := UpperCase(trim(dsRegras.dataset.FieldByName('nome').AsString));
     if(lTabela='') or (lCampo='') or (lNome='') then goto proximo1;
+    logaByTagSeNivel(TAGLOG_VALIDACOES,format('Registrando opção [%s] com valor [%s] e descrição [%s]', []),LOG_LEVEL_DEBUG);
+
     if not dic.TryGetValue(lTabela,validacacoesTabelas) then
     begin
       validacacoesTabelas := TCollections.CreateDictionary<TipoWideStringFramework,IDadosCamposValidacoes>(getComparadorOrdinalTipoWideStringFramework);
@@ -284,61 +287,70 @@ procedure loadDicionarioSetValores;
     dic: TDicionarioSetValores;
     lNome: TipoWideStringFramework;
     dados: IDadosSetOpcoes;
+    cnt: Integer;
   label
     proximo1,proximo2;
 begin
   if(dicionarioSetValores=nil) then
     exit;
-  dic := dicionarioSetValores;
-  dicionarioSetValoresInicializado := true;
-  dsValores := gdbPadrao.criaDataset;
-  dsDadosValores := gdbPadrao.criaDataset;
-  dsValores.query(
-        'select'+#13+
-        '    v.nome'+#13+
-        'from'+#13+
-        '    regras_valores v'+#13+
-        'group by'+#13+
-        '    1',
-    '',[]);
+  logaByTagSeNivel(TAGLOG_VALIDACOES,'Inicio da leitura de regras_valores.',LOG_LEVEL_DEBUG);
 
-  while not dsValores.dataset.Eof do begin
-    lNome := UpperCase(trim(dsValores.dataset.FieldByName('nome').AsString));
-    if(lNome='') then goto proximo1;
-    dsDadosValores.query(
-        'select'+#13+
-           '    v.*'+#13+
-           'from'+#13+
-           '    regras_valores v'+#13+
-           'where'+#13+
-           '    v.nome=:nome'+#13+
-           'order by v.ordem',
-    'nome',[lNome]);
-    if(dsDadosValores.dataset.RecordCount=0) then goto proximo1;
+  cnt := 0;
+  try
+    dic := dicionarioSetValores;
+    dicionarioSetValoresInicializado := true;
+    dsValores := gdbPadrao.criaDataset;
+    dsDadosValores := gdbPadrao.criaDataset;
+    dsValores.query(
+          'select'+#13+
+          '    v.nome'+#13+
+          'from'+#13+
+          '    regras_valores v'+#13+
+          'group by'+#13+
+          '    1',
+      '',[]);
 
-    dados:=nil;
-    if(dic.TryGetValue(lNome,dados)) then
-    begin
-      dados.dataset := nil;
-      dados.listaDescricoes.Clear;
-      dados.listaValores.Clear;
-    end else
-    begin
-      dados := TDadosSetOpcoesImpl.Create;
-      dados.nome := lNome;
-      dados.descricao := lNome;
-      dic.AddOrSetValue(lNome,dados);
+    while not dsValores.dataset.Eof do begin
+      lNome := UpperCase(trim(dsValores.dataset.FieldByName('nome').AsString));
+      if(lNome='') then goto proximo1;
+      dsDadosValores.query(
+          'select'+#13+
+             '    v.*'+#13+
+             'from'+#13+
+             '    regras_valores v'+#13+
+             'where'+#13+
+             '    v.nome=:nome'+#13+
+             'order by v.ordem',
+      'nome',[lNome]);
+      if(dsDadosValores.dataset.RecordCount=0) then goto proximo1;
+
+      dados:=nil;
+      if(dic.TryGetValue(lNome,dados)) then
+      begin
+        dados.dataset := nil;
+        dados.listaDescricoes.Clear;
+        dados.listaValores.Clear;
+      end else
+      begin
+        dados := TDadosSetOpcoesImpl.Create;
+        dados.nome := lNome;
+        dados.descricao := lNome;
+        dic.AddOrSetValue(lNome,dados);
+      end;
+
+      while not dsDadosValores.dataset.Eof do
+      begin
+        dados.adicionaID_Descricao(dsDadosValores.dataset.FieldByName('valor').AsString,dsDadosValores.dataset.FieldByName('descricao').AsString);
+        inc(cnt);
+       proximo2:
+        dsDadosValores.dataset.Next;
+      end;
+
+     proximo1:
+      dsValores.dataset.Next;
     end;
-
-    while not dsDadosValores.dataset.Eof do
-    begin
-      dados.adicionaID_Descricao(dsDadosValores.dataset.FieldByName('valor').AsString,dsDadosValores.dataset.FieldByName('descricao').AsString);
-     proximo2:
-      dsDadosValores.dataset.Next;
-    end;
-
-   proximo1:
-    dsValores.dataset.Next;
+  finally
+    logaByTagSeNivel(TAGLOG_VALIDACOES,format('Final da leitura de regras_valores com [%d] registros importados.',[cnt]),LOG_LEVEL_DEBUG);
   end;
 
 end;
@@ -608,6 +620,7 @@ begin
     if(lLkp.DataSource=pDataSource) then
       dataField := lLkp.DataField;
   end;
+//    logaByTagSeNivel(TAGLOG_VALIDACOES,format('Controle TDBLookupComboBox [%s] [%s] para a tabela [%s] não possui um tipo reconhecido ', [pObject.ClassName, pObject.Name, pTabela]),LOG_LEVEL_DEBUG);
 
   dataField := UpperCase(trim(dataField));
   if(dataField='') then exit;
@@ -620,11 +633,12 @@ begin
     begin
       lRG.Values.Text := opcoes.listaValores.text;
       lRG.Items.Text := opcoes.listaDescricoes.text;
-      //lRG.Refresh;
-        exit;
+      logaByTagSeNivel(TAGLOG_VALIDACOES,format('Configurando controle TDBRadioGroup [%s] para a tabela [%s]: campo [%s]: Valores [%s]: Items [%s] ', [pObject.Name, pTabela,dataField, opcoes.listaValores.text, opcoes.listaDescricoes.text]),LOG_LEVEL_DEBUG);
+      exit;
     end else if assigned(lLkp) then begin
       lLkp.ListField := 'descricao';
       lLkp.KeyField := 'ID';
+      logaByTagSeNivel(TAGLOG_VALIDACOES,format('Configurando controle TDBLookupComboBox [%s] para a tabela [%s]: campo [%s]: Valores [%s]: Items [%s] ', [pObject.Name, pTabela,dataField, opcoes.listaValores.text, opcoes.listaDescricoes.text]),LOG_LEVEL_DEBUG);
       lLkp.ListSource := opcoes.dataset.dataSource;
       exit;
     end;
@@ -636,8 +650,12 @@ end;
     i: Integer;
     p: TComponent;
 begin
+  if(usaValidacoesNovas=false) then exit;
   pTabela := UpperCase(trim(pTabela));
   if(pTabela='') or not assigned(pOwner) then exit;
+
+//  logaByTagSeNivel(TAGLOG_VALIDACOES,format('Configurando controle configura owner [%s] para a tabela [%s]', [pOwner.Name,pTabela]),LOG_LEVEL_DEBUG);
+
   configuraEditOpcoesCampoTabela(pTabela,pOwner,pDataSOurce);
 
   if not (pOwner is TWinControl) then exit;
@@ -792,6 +810,7 @@ end;
 
 procedure TDadosSetOpcoesImpl.adicionaID_Descricao(const pID,  pDescricao: TipoWideStringFramework);
 begin
+  logaByTagSeNivel(TAGLOG_VALIDACOES,format('Registrando opção [%s] com valor [%s] e descrição [%s]', [fNome,pID,pDescricao]),LOG_LEVEL_DEBUG);
   getListaValores.strings.Add(pID);
   getListaDescricoes.strings.Add(pDescricao);
   with getDataset.dataset do
@@ -1147,5 +1166,9 @@ begin
 
 end;
 }
+
+initialization
+  registraLogger(TAGLOG_VALIDACOES,'Validacoes',true);
+
 
 end.
