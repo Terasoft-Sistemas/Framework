@@ -10,6 +10,7 @@ interface
 implementation
   uses
     Terasoft.Framework.Log,
+    Terasoft.Framework.DB,
     Terasoft.Framework.Validacoes,
     Terasoft.Framework.OpcoesCamposTabelas;
 
@@ -22,10 +23,11 @@ implementation
 
 procedure registraValidacaoPadraoCamposTabelas;
 begin
-  //Opções null e not null
+  if(gOpcoesDefaultRegistradas) then
+    exit;
   try
-//    if(usaValidacoesNovas=false) then
-//      exit;
+    if(usaValidacoesNovas=false) then
+      exit;
 
     logaByTagSeNivel(TAGLOG_VALIDACOES,'Iniciando registro de validações padrão.',LOG_LEVEL_DEBUG);
 
@@ -133,5 +135,13 @@ begin
     logaByTagSeNivel(TAGLOG_VALIDACOES,'Registro de validações padrão finalizado.',LOG_LEVEL_DEBUG);
   end;
 end;
+
+procedure doit(const pGDB: IGDB);
+begin
+  registraValidacaoPadraoCamposTabelas;
+end;
+
+initialization
+  registraAfterConnectDatabase(doit);
 
 end.
