@@ -507,7 +507,7 @@ begin
     lDependenciaMatch := dadosCampo.verificaDependencias(pDataset,pResultado);
     //Implementar dependencias
 
-    if(lDependenciaMatch=false) or (pResultado.erros<>save) then continue;
+    if(lDependenciaMatch=false) {or (pResultado.erros<>save)} then continue;
 
     lDependenciaMatch := opcoes.match(f.AsString);// false;
     {for lValor in opcoes.listaValores do
@@ -523,7 +523,8 @@ begin
         break;
     end;}
     if(lDependenciaMatch=false) then begin
-      pResultado.propriedade['campo.erro'].asString := dadosCampo.campo;
+      if(pResultado.propriedade['campo.erro'].asString='') then
+        pResultado.propriedade['campo.erro'].asString := dadosCampo.campo;
       pResultado.formataErro('Valor do Campo [%s] inválido', [ dadosCampo.descricao ]);
     end;
   end;
