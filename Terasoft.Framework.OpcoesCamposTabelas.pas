@@ -101,7 +101,7 @@ interface
     TDicionarioSetValores = IDictionary<TipoWideStringFramework,IDadosSetOpcoes>;
 
   function registraOpcoesCampos(pNome, pOpcao, pOpcaoDescricao: String; pDescricao: String = ''): IDadosSetOpcoes;
-  function registraValidacaoCampoTabela(pTabela, pCampo, pOpcoes: String; pDescricao: String = ''; pObrigatorio: boolean = false): IDadosCamposValidacoes;
+  function registraValidacaoCampoTabela(pTabela, pCampo, pOpcoes: String; pDescricao: String = ''; pObrigatorio: boolean = false;pIgnoraExistente: boolean=false): IDadosCamposValidacoes;
   procedure configuraControlesEditOpcoesCampoTabela(pTabela: String; pOwner: TComponent; pDataSource: TDataSource);
   //procedure configuraEditOpcoesCampoTabela(pTabela: String; pObject: TComponent; pDataSource: TDataSource);
   function validaDataset(pTabela: String; pDataset: TDataset; pListaCampos: IListaString = nil; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
@@ -115,6 +115,7 @@ implementation
   uses
     Terasoft.Framework.Validacoes,
     Terasoft.Framework.Log,
+    Math,strUtils,
     Vcl.DBCtrls;
 
   type
@@ -412,28 +413,35 @@ function registraValidacaoCampoTabela;//(pTabela, pCampo, pOpcoes: String; pDesc
   var
     dic: TDicionarioDadosCamposValidacoes;
     dadosTabela: TDicionarioDadosCamposValidacoesTabela;
-    dadosCampo: IDadosCamposValidacoes;
+    //dadosCampo: IDadosCamposValidacoes;
 begin
   dic := getDicionarioDadosCamposValidacoes;
   pTabela := UpperCase(trim(pTabela));
   pCampo := UpperCase(trim(pCampo));
   if(pTabela='') then exit;
   if(pCampo='') then exit;
+
+  logaByTagSeNivel(TAGLOG_VALIDACOES,format('registraValidacaoCampoTabela: Tabela [%s], Campo [%s], Opções [%s], Descrição [%s], Obrigatório [%s].',[pTabela,pCampo,pOpcoes,pDescricao,ifThen(pObrigatorio,'S','N')]),LOG_LEVEL_DEBUG );
+
   if not dic.TryGetValue(pTabela,dadosTabela) then
   begin
     dadosTabela := TCollections.CreateDictionary<TipoWideStringFramework,IDadosCamposValidacoes>(getComparadorOrdinalTipoWideStringFramework);
     dic.AddOrSetValue(pTabela,dadosTabela);
   end;
-  if not dadosTabela.TryGetValue(pCampo,dadosCampo) then
+  if not dadosTabela.TryGetValue(pCampo,Result) then
   begin
-    dadosCampo := TDadosCamposValidacoesImpl.Create;
-    dadosTabela.AddOrSetValue(pCampo,dadosCampo);
+    Result := TDadosCamposValidacoesImpl.Create;
+    dadosTabela.AddOrSetValue(pCampo,Result);
+  end else if pIgnoraExistente=true then
+  begin
+    logaByTagSeNivel(TAGLOG_VALIDACOES,format('registraValidacaoCampoTabela: Configuração ja existe e sendo ignorada sua inclusão: Tabela [%s], Campo [%s], Opções [%s], Descrição [%s], Obrigatório [%s].',[pTabela,pCampo,pOpcoes,pDescricao,ifThen(pObrigatorio,'S','N')]),LOG_LEVEL_DEBUG,ls_Warning );
+    exit;
   end;
-  dadosCampo.tabela := pTabela;
-  dadosCampo.campo := pCampo;
-  dadosCampo.descricao := pDescricao;
-  dadosCampo.opcoes := UpperCase(trim(pOpcoes));
-  dadosCampo.obrigatorio := pObrigatorio;
+  Result.tabela := pTabela;
+  Result.campo := pCampo;
+  Result.descricao := pDescricao;
+  Result.opcoes := UpperCase(trim(pOpcoes));
+  Result.obrigatorio := pObrigatorio;
 end;
 
 function validaDataset(pTabela: String; pDataset: TDataset; pListaCampos: IListaString = nil; pResultado: IResultadoOperacao = nil): IResultadoOperacao;

@@ -4,12 +4,16 @@
 unit Terasoft.Framework.SCI.ValidacaoPadraoCamposTabelas;
 
 interface
+  uses
+    Terasoft.Framework.Types;
 
   procedure registraValidacaoPadraoCamposTabelas;
 
 implementation
   uses
     Terasoft.Framework.Log,
+    strUtils,SysUtils,Classes,
+    Terasoft.Framework.Texto,
     Terasoft.Framework.DB,
     Terasoft.Framework.Validacoes,
     Terasoft.Framework.OpcoesCamposTabelas;
@@ -22,6 +26,12 @@ implementation
     {$endif}
 
 procedure registraValidacaoPadraoCamposTabelas;
+  var
+    ds: IDataset;
+    lTabela: String;
+    lCampos,lDelim: IListaTextoEX;
+    s1,s2,lCampo,lDescricao: String;
+    i: Integer;
 begin
   if(gOpcoesDefaultRegistradas) then
     exit;
@@ -129,6 +139,46 @@ begin
     registraOpcoesCampos('tipoendereco', 'E', 'Entrega');
     registraOpcoesCampos('tipoendereco', 'O', 'Outros');
     registraValidacaoCampoTabela('CLIENTES_ENDERECO','TIPO','tipoendereco','Tipo de endereço do cliente');
+
+    ds := gdbPadrao.criaDataset;
+    ds.query(
+        'select'+#13+
+           '    c.*'+#13+
+           'from'+#13+
+           '    configuracoes c'+#13+
+           'where'+#13+
+           '    c.tag'+#13+
+           'like'+#13+
+           '    ''CAMPOS_OBRIGATORIO_%''',
+        '',[] );
+
+    lCampos := novaListaTexto;
+    lDelim := novaListaTexto;
+    while not ds.dataset.Eof do
+    begin
+      lTabela:=trim(stringReplace(ds.dataset.FieldByName('tag').AsString,'CAMPOS_OBRIGATORIO_','',[rfReplaceAll,rfIgnoreCase]));
+      lCampos.text := StringReplace(trim(ds.dataset.FieldByName('valormemo').AsString),';','=',[rfReplaceAll]);
+      for s1 in lCampos do
+      begin
+        lDelim.text := s1;
+        i := lDelim.strings.Count;
+        while i > 0 do
+        begin
+          dec(i);
+          lCampo := trim(lDelim.strings.Names[i]);
+          if(lCampo = '') then
+          begin
+            lCampo := trim(lDelim.strings.Strings[i]);
+            if(lCampo='') then continue;
+          end;
+          registraValidacaoCampoTabela(lTabela,lCampo, 'NOTNULL',trim(lDelim.strings.ValueFromIndex[i]),true);
+        end;
+      end;
+
+
+      ds.dataset.Next;
+    end;
+
 
   finally
     gOpcoesDefaultRegistradas := true;
