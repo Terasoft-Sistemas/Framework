@@ -251,7 +251,7 @@ begin
     validacao.opcoes := dsRegras.dataset.FieldByName('valores').AsString;
     validacao.obrigatorio := dsRegras.dataset.FieldByName('obrigatorio').AsString<>'N';
     logaByTagSeNivel(TAGLOG_VALIDACOES,format('Registrando regra validação [%s] para tabela [%s], campo [%s], descrição [%s] e opções [%s], obrigatório=[%s] ',
-        [validacao.nome,validacao.tabela,validacao.campo,validacao.obrigatorio,ifThen(validacao.obrigatorio,'S','N']),LOG_LEVEL_DEBUG);
+        [validacao.nome,validacao.tabela,validacao.campo,validacao.obrigatorio,ifThen(validacao.obrigatorio,'S','N')]),LOG_LEVEL_DEBUG);
     dsDependencias.query(
       'select'+#13+
          '    d.*'+#13+
