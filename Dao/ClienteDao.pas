@@ -1113,27 +1113,15 @@ begin
   lLojasModel := TLojasModel.Create(vIConexao);
 
   try
-    lLojasModel.obterLista;
+    lLojasModel.obterHosts;
 
     lSQL := vConstrutor.gerarUpdateOrInsert('CLIENTES','CODIGO_CLI', 'CODIGO_CLI', true);
-
-    if vIConexao.getEmpresa.STRING_CONEXAO_RESERVA <> '' then
-    begin
-      vIConexao.ConfigConexaoExterna('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA);
-      lQry := vIConexao.criarQueryExterna;
-
-      lQry.SQL.Add(lSQL);
-      setParams(lQry, pClienteModel);
-      lQry.Open(lSQL);
-
-      lQry.FieldByName('CODIGO_CLI').AsString;
-    end;
 
     for lLojas in lLojasModel.LojassLista do
     begin
       if lLojas.LOJA <> vIConexao.getEmpresa.LOJA then
       begin
-        vIConexao.ConfigConexaoExterna(llojas.LOJA);
+        vIConexao.ConfigConexaoExterna('', lLojas.STRING_CONEXAO);
         lQry := vIConexao.criarQueryExterna;
 
         lQry.SQL.Clear;
