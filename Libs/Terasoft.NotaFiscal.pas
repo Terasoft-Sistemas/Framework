@@ -290,7 +290,7 @@ begin
 
         if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then
         begin
-          if (lQry.FieldByName('xLgr').AsString <> '') and (lQry.FieldByName('cMun').AsString <> '') and (Length(IntToStr(lQry.FieldByName('cMun').AsInteger)) = 7) and
+          if (lQry.FieldByName('xLgr').AsString <> '') and (lQry.FieldByName('xBairro').AsString <> '') and (lQry.FieldByName('cMun').AsString <> '') and (Length(IntToStr(lQry.FieldByName('cMun').AsInteger)) = 7) and
           (Length(lQry.FieldByName('CEP').AsString) = 8) and (Trim(lQry.FieldByName('Fone').AsString) <> '') and (lQry.FieldByName('xMun').AsString <> '') and
           (Trim(lQry.FieldByName('UF').AsString) <> '') and (vConfiguracoesNotaFiscal.emitUF = Trim(lQry.FieldByName('UF').AsString)) then
           begin
