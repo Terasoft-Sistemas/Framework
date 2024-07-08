@@ -471,6 +471,7 @@ type
     procedure obterPedido(pNUmeroPedido: String);
     procedure obterTotaisItens(pNumeroPedido: String);
     function carregaClasse(pId: String): TPedidoItensModel;
+    function obterIDItem(pPedido, pProduto : String): String;
 
     function gerarEstoque: String;
     function cancelarEstoque: String;
@@ -747,6 +748,18 @@ begin
     self.VALOR_TOTAL           := lPedidoItensLista.VALOR_TOTAL;
   finally
     lPedidoItensLista.Free;
+  end;
+end;
+
+function TPedidoItensModel.obterIDItem(pPedido, pProduto: String): String;
+var
+  lPedidoItensDao : TPedidoItensDao;
+begin
+  lPedidoItensDao := TPedidoItensDao.Create(vIConexao);
+  try
+    lPedidoItensDao.obterIDItem(pPedido, pProduto);
+  finally
+    lPedidoItensDao.Free;
   end;
 end;
 

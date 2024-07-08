@@ -63,7 +63,9 @@ type
     function obterListaConsulta: TFDMemTable;
     function obterListaMemTable: TFDMemTable;
     function ObterTabelaPreco: TFDMemTable;
+
     procedure obterLista;
+    procedure obterVenderItem;
     procedure obterListaCatalogo;
 
     function obterComissao(pCodProduto: String): TFDMemTable;
@@ -488,6 +490,58 @@ begin
     lSql := lSql + where;
     lQry.Open(lSQL);
     FTotalRecords := lQry.FieldByName('records').AsInteger;
+  finally
+    lQry.Free;
+  end;
+end;
+
+procedure TProdutosDao.obterVenderItem;
+var
+  lQry  : TFDQuery;
+  lSQL  : String;
+  i     : INteger;
+begin
+  lQry := vIConexao.CriarQuery;
+  FProdutossLista := TObjectList<TProdutosModel>.Create;
+
+  try
+    lSql := lSql +  ' select produto.codigo_pro,                                                                       '+SLineBreak+
+                    '        produto.usar_balanca,                                                                     '+SLineBreak+
+                    '        produto.venda_pro,                                                                        '+SLineBreak+
+                    '        produto.customedio_pro,                                                                   '+SLineBreak+
+                    '        coalesce(produto.saldo_pro, 0) -                                                          '+SLineBreak+
+                    '        coalesce((select sum(view_reservados.reservado)                                           '+SLineBreak+
+                    '                    from view_reservados                                                          '+SLineBreak+
+                    '                   where view_reservados.produto_id = produto.codigo_pro), 0) as saldo_disponivel '+SLineBreak+
+                    '   from produto                                                                                   '+SLineBreak+
+                    '  where 1=1                                                                                       '+SLineBreak;
+
+    lSql := lSql + where;
+
+    if not FOrderView.IsEmpty then
+      lSQL := lSQL + ' order by '+FOrderView;
+
+    lQry.Open(lSQL);
+
+    i := 0;
+    lQry.First;
+
+    while not lQry.Eof do
+    begin
+
+      FProdutossLista.Add(TProdutosModel.Create(vIConexao));
+      i := FProdutossLista.Count -1;
+
+      FProdutossLista[i].CODIGO_PRO           := lQry.FieldByName('CODIGO_PRO').AsString;
+      FProdutossLista[i].VENDA_PRO            := lQry.FieldByName('VENDA_PRO').AsString;
+      FProdutossLista[i].CUSTOMEDIO_PRO       := lQry.FieldByName('CUSTOMEDIO_PRO').AsString;
+      FProdutossLista[i].USAR_BALANCA         := lQry.FieldByName('USAR_BALANCA').AsString;
+      FProdutossLista[i].SALDO_DISPONIVEL     := lQry.FieldByName('SALDO_DISPONIVEL').AsString;
+
+      lQry.Next;
+    end;
+
+    obterTotalRegistros;
   finally
     lQry.Free;
   end;

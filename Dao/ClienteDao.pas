@@ -72,7 +72,6 @@ type
     function ObterListaMemTable: TFDMemTable;
     function ObterBairros: TFDMemTable;
     procedure bloquearCNPJCPF(pCliente, pCNPJCPF: String);
-
 end;
 implementation
 

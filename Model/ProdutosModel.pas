@@ -896,6 +896,7 @@ type
     destructor Destroy; override;
 
     procedure obterLista;
+    procedure obterVenderItem;
     procedure obterListaCatalogo;
     function obterPromocao(pCodProduto: String): TFDMemTable;
     function obterComissao(pCodProduto: String): TFDMemTable;
@@ -1205,6 +1206,29 @@ begin
     Result := lProdutoDao.ObterTabelaPreco;
   finally
     lProdutoDao.Free;
+  end;
+end;
+
+procedure TProdutosModel.obterVenderItem;
+var
+  lProdutosDao: TProdutosDao;
+begin
+  lProdutosDao := TProdutosDao.Create(vIConexao);
+  try
+    lProdutosDao.TotalRecords        := FTotalRecords;
+    lProdutosDao.WhereView           := FWhereView;
+    lProdutosDao.CountView           := FCountView;
+    lProdutosDao.OrderView           := FOrderView;
+    lProdutosDao.StartRecordView     := FStartRecordView;
+    lProdutosDao.LengthPageView      := FLengthPageView;
+    lProdutosDao.IDRecordView        := FIDRecordView;
+
+    lProdutosDao.obterVenderItem;
+
+    FTotalRecords   := lProdutosDao.TotalRecords;
+    FProdutossLista := lProdutosDao.ProdutossLista;
+  finally
+    lProdutosDao.Free;
   end;
 end;
 
