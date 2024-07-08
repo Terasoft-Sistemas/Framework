@@ -233,7 +233,6 @@ begin
     lCampo := UpperCase(trim(dsRegras.dataset.FieldByName('campo').AsString));
     lNome := UpperCase(trim(dsRegras.dataset.FieldByName('nome').AsString));
     if(lTabela='') or (lCampo='') or (lNome='') then goto proximo1;
-    logaByTagSeNivel(TAGLOG_VALIDACOES,format('Registrando opção [%s] com valor [%s] e descrição [%s]', []),LOG_LEVEL_DEBUG);
 
     if not dic.TryGetValue(lTabela,validacacoesTabelas) then
     begin
@@ -251,6 +250,8 @@ begin
     validacao.campo := lCampo;
     validacao.opcoes := dsRegras.dataset.FieldByName('valores').AsString;
     validacao.obrigatorio := dsRegras.dataset.FieldByName('obrigatorio').AsString<>'N';
+    logaByTagSeNivel(TAGLOG_VALIDACOES,format('Registrando regra validação [%s] para tabela [%s], campo [%s], descrição [%s] e opções [%s], obrigatório=[%s] ',
+        [validacao.nome,validacao.tabela,validacao.campo,validacao.obrigatorio,ifThen(validacao.obrigatorio,'S','N']),LOG_LEVEL_DEBUG);
     dsDependencias.query(
       'select'+#13+
          '    d.*'+#13+
