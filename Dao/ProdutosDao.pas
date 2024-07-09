@@ -76,6 +76,7 @@ type
     function valorVenda(pIdProduto: String): Variant;
     function obterCodigobarras(pIdProduto: String): String;
     function carregaClasse(pId: String): TProdutosModel;
+    function ConsultaProdutosVendidos(pProduto : String) : TFDMemTable;
 
     function ValorGarantia(pProduto: String; pValorFaixa: Double): TProdutoGarantia;
 
@@ -369,6 +370,32 @@ begin
     lModel.PERMITE_VENDA_SEGURO_FR          := lQry.FieldByName('PERMITE_VENDA_SEGURO_FR').AsString;
 
     Result := lModel;
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TProdutosDao.ConsultaProdutosVendidos(pProduto: String): TFDMemTable;
+var
+  lQry : TFDQuery;
+  lSQL : String;
+begin
+  try
+    lQry := vIConexao.CriarQuery;
+
+    lSql := '  select                                         '+sLineBreak+
+            '         i.numero_ped as documento,              '+sLineBreak+
+            '         p.codigo_pro as codigo,                 '+sLineBreak+
+            '         p.nome_pro as produto,                  '+sLineBreak+
+            '         i.qtde_calculada as quantidade,         '+sLineBreak+
+            '         i.valorunitario_ped as valor            '+sLineBreak+
+            '    from pedidoitens i, produto p                '+sLineBreak+
+            '   where i.codigo_pro = p.codigo_pro             '+sLineBreak+
+            '     and i.numero_ped = '+QuotedStr(pProduto)+'  '+sLineBreak;
+
+    lQry.Open(lSQL);
+
+    Result := vConstrutor.atribuirRegistros(lQry);
   finally
     lQry.Free;
   end;
