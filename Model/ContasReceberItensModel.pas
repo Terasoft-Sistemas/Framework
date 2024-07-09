@@ -222,10 +222,10 @@ type
     function baixarCreditoCliente(pValor: Double) : Boolean;
 
     function recebimentoCartao(pValor, pIdAdmCartao, pVencimento: String; pIdTef: String = ''): String;
-
     function gerarContasReceberCartao(pValor, pPortador, pIdAdmCartao, pObs, pObsComprementar: String; pParcelas: Integer): String;
-
     function parcelasAberta(pFatura: String): Boolean;
+
+    function gerarContasReceberCheque(pValor, pParcela, pPortador, pConta, pObs : String) : String;
 
     property ContasReceberItenssLista: TObjectList<TContasReceberItensModel> read FContasReceberItenssLista write SetContasReceberItenssLista;
     property RecebimentoContasReceberLista: TObjectList<TRecebimentoContasReceber> read FRecebimentoContasReceberLista write SetRecebimentoContasReceberLista;
@@ -663,6 +663,84 @@ begin
     lContasReceberItensInserir.Free;
     lContasReceberModel.Free;
     lAdmCartaoModel.Free;
+  end;
+end;
+
+function TContasReceberItensModel.gerarContasReceberCheque(pValor, pParcela, pPortador, pConta, pObs : String): String;
+var
+  lContasReceberModel : TContasReceberModel;
+  lContasReceberItensInserir,
+  lModel              : TContasReceberItensModel;
+  lFaturaReceber      : String;
+  lValorParcela       : Double;
+  lVencimento         : TDate;
+  i : Integer;
+begin
+  lContasReceberItensInserir := TContasReceberItensModel.Create(vIConexao);
+  lContasReceberModel        := TContasReceberModel.Create(vIConexao);
+
+  try
+    lContasReceberModel := lContasReceberModel.carregaClasse(self.FFATURA_REC);
+
+    lContasReceberModel.Acao              := tacIncluir;
+    lContasReceberModel.LOJA              := self.FLOJA;
+    lContasReceberModel.PEDIDO_REC        := '999999';
+    lContasReceberModel.CODIGO_CLI        := self.FCODIGO_CLI;
+    lContasReceberModel.DATAEMI_REC       := DateToStr(vIConexao.DataServer);
+    lContasReceberModel.VALOR_REC         := pValor;
+    lContasReceberModel.SITUACAO_REC      := 'A';
+    lContasReceberModel.TIPO_REC          := 'R';
+    lContasReceberModel.CODIGO_POR        := pPortador;
+    lContasReceberModel.JUROS_FIXO        := lContasReceberModel.JUROS_FIXO;
+    lContasReceberModel.CENTRO_CUSTO      := '000030';
+    lContasReceberModel.CODIGO_CTA        := '555555';
+    lContasReceberModel.OBS_REC           := 'CONTA CLIENTE';
+    lContasReceberModel.OBS_COMPLEMENTAR  := pObs;
+
+    lFaturaReceber := lContasReceberModel.Salvar;
+    lValorParcela  := StrToFloat(pValor) / pParcela.ToInteger;
+    lVencimento    := vIConexao.DataServer;
+
+    lContasReceberItensInserir.ContasReceberItenssLista := TObjectList<TContasReceberItensModel>.Create;
+    lContasReceberItensInserir.Acao := tacIncluir;
+
+    for i := 0 to Pred(pParcela.ToInteger) do
+    begin
+      lContasReceberItensInserir.ContasReceberItenssLista.Add(TContasReceberItensModel.Create(vIConexao));
+
+      lContasReceberItensInserir.ContasReceberItenssLista[i].FATURA_REC         := lFaturaReceber;
+      lContasReceberItensInserir.ContasReceberItenssLista[i].CODIGO_POR         := pPortador;
+      lContasReceberItensInserir.ContasReceberItenssLista[i].CODIGO_CLI         := self.FCODIGO_CLI;
+      lContasReceberItensInserir.ContasReceberItenssLista[i].SITUACAO_REC       := 'A';
+      lContasReceberItensInserir.ContasReceberItenssLista[i].VALORREC_REC       := '0';
+      lContasReceberItensInserir.ContasReceberItenssLista[i].VALOR_PAGO         := pValor;
+      lContasReceberItensInserir.ContasReceberItenssLista[i].LOJA               := self.FLOJA;
+      lContasReceberItensInserir.ContasReceberItenssLista[i].VLRPARCELA_REC     := lValorParcela.ToString;
+      lContasReceberItensInserir.ContasReceberItenssLista[i].PACELA_REC         := (i + 1).ToString;
+      lContasReceberItensInserir.ContasReceberItenssLista[i].TOTALPARCELAS_REC  := pParcela;
+
+      if i > 0 then
+        lVencimento := IncMonth(lVencimento, 1);
+      lContasReceberItensInserir.ContasReceberItenssLista[i].VENCIMENTO_REC := DateToStr(lVencimento);
+    end;
+
+    lContasReceberItensInserir.Salvar;
+    lContasReceberItensInserir.IDContasReceberView := lFaturaReceber;
+    lContasReceberItensInserir.obterLista;
+
+    self.Acao := tacAlterar;
+    self.FVALORREC_REC           := FloatToStr(self.FVALORREC_REC + StrToFloat(pValor));
+    self.FDATABAIXA_REC          := DateToStr(vIConexao.DataServer);
+
+    if self.FVALORREC_REC >= self.VLRPARCELA_REC then
+      self.FSITUACAO_REC := 'B';
+
+    self.Salvar;
+
+    Result := lFaturaReceber;
+  finally
+    lContasReceberItensInserir.Free;
+    lContasReceberModel.Free;
   end;
 end;
 

@@ -154,7 +154,9 @@ uses
   MovimentoSerialDao in '..\Dao\MovimentoSerialDao.pas',
   MovimentoSerialModel in '..\Model\MovimentoSerialModel.pas',
   Impressao.VendaAssistida in '..\Relatorios\Impressao.VendaAssistida.pas' {ImpressaoVendaAssistida},
-  Impressao.Contratos in '..\Relatorios\Impressao.Contratos.pas' {ImpressaoContratos};
+  Impressao.Contratos in '..\Relatorios\Impressao.Contratos.pas' {ImpressaoContratos},
+  ChequeDao in '..\Dao\ChequeDao.pas',
+  ChequeModel in '..\Model\ChequeModel.pas';
 
 {$R *.res}
 
