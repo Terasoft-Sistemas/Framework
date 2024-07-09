@@ -512,7 +512,7 @@ uses
   FireDAC.Comp.Client,
   ClienteModel,
   GrupoComissaoFuncionarioModel,
-  FuncionarioModel;
+  FuncionarioModel, GrupoComissaoModel;
 
 { TPedidoItensModel }
 
@@ -571,11 +571,13 @@ end;
 procedure TPedidoItensModel.calcularComissao(pVendedor, pTipoVenda: String; pComissaoCliente: Double; pGerente: String = '');
 var
   lVendedorModel             : TFuncionarioModel;
+  lGrupoComissao             : TGrupoComissaoModel;
   lPercentualComissao,
   lPercentualComissaoGerente : Double;
 
 begin
   lVendedorModel := TFuncionarioModel.Create(vIConexao);
+  lGrupoComissao := TGrupoComissaoModel.Create(vIConexao);
 
   try
     if self.FTIPO_VENDA_COMISSAO_ID <> '' then
@@ -588,8 +590,12 @@ begin
       lPercentualComissao := StrToFloat(self.FCOMIS_PRO)
 
     else if self.FGRUPO_COMISSAO_ID <> '' then
-      lPercentualComissao := lVendedorModel.comissaoPorGrupo(pVendedor, self.FGRUPO_COMISSAO_ID)
+    begin
+      lPercentualComissao := lGrupoComissao.ObterGrupoComissaoProduto(self.CODIGO_PRO);
 
+      if lPercentualComissao = 0 then
+        lPercentualComissao := lVendedorModel.comissaoPorGrupo(pVendedor, self.FGRUPO_COMISSAO_ID);
+    end
     else
       lPercentualComissao := lVendedorModel.comissaoPorTipo(pVendedor, pTipoVenda);
 

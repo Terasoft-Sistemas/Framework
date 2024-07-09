@@ -915,8 +915,8 @@ type
     function valorVenda(pIdProduto: String): Variant;
     function ObterTabelaPreco : TFDMemTable;
     function ValorUnitario(pProdutoPreco: TProdutoPreco) : Double;
-
     function ValorGarantia(pProduto: String; pValorFaixa: Double): TProdutoGarantia;
+    function ConsultaProdutosVendidos(pProduto : String): TFDMemTable;
 
     procedure subtrairSaldo(pIdProduto: String; pSaldo: Double);
     procedure adicionarSaldo(pIdProduto: String; pSaldo: Double);
@@ -1069,6 +1069,18 @@ begin
   lProdutosDao := TProdutosDao.Create(vIConexao);
   try
     Result := lProdutosDao.carregaClasse(pId);
+  finally
+    lProdutosDao.Free;
+  end;
+end;
+
+function TProdutosModel.ConsultaProdutosVendidos(pProduto: String): TFDMemTable;
+var
+  lProdutosDao: TProdutosDao;
+begin
+  lProdutosDao := TProdutosDao.Create(vIConexao);
+  try
+    Result := lProdutosDao.ConsultaProdutosVendidos(pProduto);
   finally
     lProdutosDao.Free;
   end;
