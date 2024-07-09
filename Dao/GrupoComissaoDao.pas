@@ -68,6 +68,7 @@ type
 
     procedure setParams(var pQry: TFDQuery; pGrupoComissaoModel: TGrupoComissaoModel);
     function ObterLista: TFDMemTable; overload;
+    function ObterGrupoComissaoProduto(pProduto: String) : Double;
 
 end;
 
@@ -134,6 +135,26 @@ begin
 
   finally
     lSQL := '';
+    lQry.Free;
+  end;
+end;
+
+function TGrupoComissaoDao.ObterGrupoComissaoProduto(pProduto: String): Double;
+var
+  lQry       : TFDQuery;
+  lSQL       : String;
+begin
+  lQry       := vIConexao.CriarQuery;
+  try
+    lSQL := 'select coalesce(g.percentual, 0) as percentual             '+sLineBreak+
+            '  from produto p                                           '+sLineBreak+
+            '  left join grupo_comissao g on g.id = p.grupo_comissao_id '+sLineBreak+
+            ' where p.codigo_pro = ' +QuotedStr(pProduto);
+
+    lQry.Open(lSQL);
+
+    Result := StrToFloat( lQry.FieldByName('PERCENTUAL').AsString);
+  finally
     lQry.Free;
   end;
 end;
