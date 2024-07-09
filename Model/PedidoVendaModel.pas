@@ -907,7 +907,7 @@ begin
       lContasReceberItensModel.ContasReceberItenssLista[lParcela].VALORREC_REC       := '0';
       lContasReceberItensModel.ContasReceberItenssLista[lParcela].VALOR_PAGO         := '0';
       lContasReceberItensModel.ContasReceberItenssLista[lParcela].LOJA               := lContasReceberModel.LOJA;
-      lContasReceberItensModel.ContasReceberItenssLista[lParcela].VLRPARCELA_REC     := FormataFloat(lValorParcela);
+      lContasReceberItensModel.ContasReceberItenssLista[lParcela].VLRPARCELA_REC     := retiraPonto(FormataFloat(lValorParcela));
       lContasReceberItensModel.ContasReceberItenssLista[lParcela].PACELA_REC         := (lParcela + 1).ToString;
       lContasReceberItensModel.ContasReceberItenssLista[lParcela].TOTALPARCELAS_REC  := lTotalParcelas.ToString;
 
