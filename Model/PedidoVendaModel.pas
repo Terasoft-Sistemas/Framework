@@ -1226,7 +1226,7 @@ begin
     if pVenderItem.Quantidade = 0 then
       CriaException('Quantidade inválida.');
 
-    if lConfiguracoes.valorTag('tagConfig_BALANCA_COPY_INI_PRODUTO', '', tvString) <> '' then
+    if lConfiguracoes.valorTag('BALANCA_COPY_INI_PRODUTO', '', tvString) <> '' then
       lCodBalanca := lPedidoVendaLista.obterProdutoBalanca(pVenderItem.BarrasProduto);
 
     if not lCodBalanca.IsEmpty then
