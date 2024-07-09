@@ -907,7 +907,7 @@ begin
       lContasReceberItensModel.ContasReceberItenssLista[lParcela].VALORREC_REC       := '0';
       lContasReceberItensModel.ContasReceberItenssLista[lParcela].VALOR_PAGO         := '0';
       lContasReceberItensModel.ContasReceberItenssLista[lParcela].LOJA               := lContasReceberModel.LOJA;
-      lContasReceberItensModel.ContasReceberItenssLista[lParcela].VLRPARCELA_REC     := lValorParcela.ToString;
+      lContasReceberItensModel.ContasReceberItenssLista[lParcela].VLRPARCELA_REC     := FormataFloat(lValorParcela);
       lContasReceberItensModel.ContasReceberItenssLista[lParcela].PACELA_REC         := (lParcela + 1).ToString;
       lContasReceberItensModel.ContasReceberItenssLista[lParcela].TOTALPARCELAS_REC  := lTotalParcelas.ToString;
 
@@ -919,10 +919,9 @@ begin
       lSomaParcelas := lSomaParcelas + StrToFloat(FormatFloat('0.00', lValorParcela));
     end;
 
-    if lSomaParcelas > lValorTotal then
-      lContasReceberItensModel.ContasReceberItenssLista[0].VLRPARCELA_REC := (lValorParcela - (lSomaParcelas - lValorTotal)).ToString
-    else if lSomaParcelas < lValorTotal then
-      lContasReceberItensModel.ContasReceberItenssLista[0].VLRPARCELA_REC := (lValorParcela + (lValorTotal - lSomaParcelas)).ToString;
+    if lSomaParcelas <> lValorTotal then
+      lContasReceberItensModel.ContasReceberItenssLista[0].VLRPARCELA_REC :=
+        (StrToFloat(lContasReceberItensModel.ContasReceberItenssLista[0].VLRPARCELA_REC) + (lValorTotal - lSomaParcelas)).ToString;
 
     lContasReceberItensModel.Acao := tacIncluir;
     lContasReceberItensModel.Salvar;
