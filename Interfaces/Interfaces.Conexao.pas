@@ -36,6 +36,7 @@ interface
       EMPRESA_INSCICAO_ESTADUAL            : String;
       EMPRESA_REGIME_NFE                   : Integer;
       EMPRESA_TELEFONE                     : String;
+      BLOQUEAR_SALDO_NEGATIVO              : String;
     end;
 
     TConfiguracoesNF = record

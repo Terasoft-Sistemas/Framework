@@ -7,9 +7,15 @@ interface
   uses
     Terasoft.Framework.Texto,
     Terasoft.Framework.DB,
+    Terasoft.Framework.ControleAlteracoes,
     Terasoft.Framework.Types;
 
   const
+    CONTROLEALTERACOES_CREDIPAR          = 'CREDIPAR';
+    CONTROLEALTERACOES_CREDIPAR_PROPOSTA = 'PROPOSTA';
+    CONTROLEALTERACOES_CREDIPAR_RESULTADOMENSAGEM = 'PROPOSTA.MESAGEM';
+    CONTROLEALTERACOES_CREDIPAR_RESULTADOPROCESSAMENTO = 'PROPOSTA.PROCESSAMENTO';
+
     RETORNO_CREDIPAR_LOJA           = 'Credipar.loja';
     RETORNO_CREDIPAR_MENSAGEM       = 'Credipar.mensagem';
     RETORNO_CREDIPAR_CONTRATO       = 'Credipar.contrato';
@@ -58,7 +64,7 @@ interface
       function getPessoaFisica: ICredipar_PessoaFisica;
       procedure setPessoaFisica(const pValue: ICredipar_PessoaFisica);
 
-      function envia(pResultado: IResultadoOperacao): IResultadoOperacao;
+      function enviaProposta(pResultado: IResultadoOperacao): IResultadoOperacao;
 
     //property diretorioArquivos getter/setter
       function getDiretorioArquivos: tipoWideStringFramework;
@@ -86,6 +92,11 @@ interface
 
       function editarDados(pDadosCliente, pDadosProposta: IUnknown; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
 
+    //property controleAlteracoes getter/setter
+      function getControleAlteracoes: IControleAlteracoes;
+      procedure setControleAlteracoes(const pValue: IControleAlteracoes);
+
+      property controleAlteracoes: IControleAlteracoes read getControleAlteracoes write setControleAlteracoes;
       property codigoProdutoCredipar: Integer read getCodigoProdutoCredipar write setCodigoProdutoCredipar;
       property codigoLojaCredipar: Integer read getCodigoLojaCredipar write setCodigoLojaCredipar;
       property token: TipoWideStringFramework read getToken write setToken;
@@ -100,6 +111,7 @@ interface
     function createCredipar: ICredipar ; stdcall;
     function getCredipar: ICredipar;
     function carregaPedidoCredipar(const pID: Int64; pCredipar: ICredipar; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+    function enviaPropostaCredipar(pCredipar: ICredipar; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
   {$ifend}
 
 
@@ -126,12 +138,15 @@ begin
     Result.diretorioArquivos := ValorTagConfig(tagConfig_CREDIPAR_DIRETORIO_ARQUIVOS,'',tvString);
     Result.token := ValorTagConfig(tagConfig_CREDIPAR_TOKEN,'',tvString);
     Result.codigoLojaCredipar := ValorTagConfig(tagConfig_CREDIPAR_CODIGO_LOJA,0,tvInteiro);
+    //Result.controleAlteracoes := criaControleAlteracoes(CONTROLEALTERACOES_SISTEMA_CREDIPAR,gdbPadrao,true)
   end;
 end;
 
 function carregaPedidoCredipar(const pID: Int64; pCredipar: ICredipar; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
   var
     lDSCliente,lDSProposta: IDataset;
+    indice: Integer;
+    maiorValor,valor: Extended;
 begin
   Result := checkResultadoOperacao(pResultado);
   if(pCredipar=nil) then
@@ -140,11 +155,13 @@ begin
   pResultado.propriedade['credipar'].asInterface := pCredipar;
 
   lDSProposta := gdbPadrao.criaDataset;
-  lDSProposta.query('select'+#13+
+  lDSProposta.query(
+    'select'+#13+
        '    w.id proposta,'+#13+
+       '    i.valor_unitario * i.quantidade vlitem,'+#13+
        '    w.cliente_id,'+#13+
        '    -- ''0'' loja, este está em TAG'+#13+
-       '    w.CODIGO_PRODUTO_FINANCIAMENTO codProdutoCredipar,'+#13+
+       '    w.CODIGO_PRODUTO_FINANCIAMENTO codProdutoCredipar, --Criado'+#13+
        '    w.valor_total,'+#13+
        '    w.valor_entrada,'+#13+
        '    w.parcelas,'+#13+
@@ -153,9 +170,21 @@ begin
        '    p.nome_pro'+#13+
        'from'+#13+
        '    web_pedido w'+#13+
-       'inner join web_pedidoitens i on i.web_pedido_id = w.id'+#13+
-       'inner join produto p on p.codigo_pro = i.produto_id'+#13+
-       ' where w.id=:id',
+       'inner join'+#13+
+       '  web_pedidoitens i'+#13+
+       '    on'+#13+
+       '      i.web_pedido_id = w.id'+#13+
+       'inner join'+#13+
+       '  produto p'+#13+
+       '    on'+#13+
+       '      p.codigo_pro = i.produto_id'+#13+
+       'inner join'+#13+
+       '  clientes c'+#13+
+       '    on c.codigo_cli = w.cliente_id'+#13+
+       'where'+#13+
+       '  w.id=:id'+#13+
+       'order by'+#13+
+       '  1,2',
 
     'id',[pID]);
   if(lDSProposta.dataset.RecordCount = 0 ) then
@@ -326,11 +355,43 @@ begin
     pResultado.formataErro('carregaPedidoCredipar: Cliente [%s] do pedido [%d] não existe.',[lDSProposta.dataset.FieldByName('cliente_id').AsString, pID]);
     exit;
   end;
+  valor := 0;
 
+  indice:=-1;
+
+  while not lDSProposta.dataset.Eof do
+  begin
+    valor := lDSProposta.dataset.FieldByName('vlitem').AsExtended;
+    if(valor>maiorValor) then
+    begin
+      maiorValor := valor;
+      indice := lDSProposta.dataset.RecNo;
+    end;
+
+    lDSProposta.dataset.Next;
+  end;
+  lDSProposta.dataset.RecNo := indice;
 
   pCredipar.pessoaFisica.loadFromPathReaderWriter(lDSCliente,pResultado);
   pCredipar.proposta.loadFromPathReaderWriter(lDSProposta,pResultado);
 
+end;
+
+function enviaPropostaCredipar(pCredipar: ICredipar; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+  var
+    save: Integer;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  save := pResultado.erros;
+  if(pCredipar=nil) then
+  begin
+    pResultado.adicionaErro('enviaPedidoCredipar: Interface CREDIPAR não fornecida.');
+    exit;
+  end;
+
+  pResultado := pCredipar.enviaProposta(pResultado);
+
+  if(pResultado.erros<>save) then exit;
 end;
 
 {$ifend}

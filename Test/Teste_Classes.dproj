@@ -258,6 +258,8 @@
             <Form>ImpressaoContratos</Form>
             <FormType>dfm</FormType>
         </DCCReference>
+        <DCCReference Include="..\Dao\ChequeDao.pas"/>
+        <DCCReference Include="..\Model\ChequeModel.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

@@ -66,6 +66,7 @@ type
     function carregaClasse(pId : String): TGrupoComissaoModel;
     function Alterar(pID : String): TGrupoComissaoModel;
     function Excluir(pID : String): String;
+    function ObterGrupoComissaoProduto (pProduto : String) : Double;
 
     function ObterLista : TFDMemTable; overload;
 
@@ -125,6 +126,18 @@ function TGrupoComissaoModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
     Result    := self.Salvar;
+end;
+
+function TGrupoComissaoModel.ObterGrupoComissaoProduto(pProduto: String): Double;
+  var
+  lGrupoComissao: TGrupoComissaoDao;
+begin
+  lGrupoComissao := TGrupoComissaoDao.Create(vIConexao);
+  try
+    Result := lGrupoComissao.ObterGrupoComissaoProduto(pProduto);
+  finally
+    lGrupoComissao.Free;
+  end;
 end;
 
 function TGrupoComissaoModel.ObterLista: TFDMemTable;

@@ -907,7 +907,7 @@ begin
       lContasReceberItensModel.ContasReceberItenssLista[lParcela].VALORREC_REC       := '0';
       lContasReceberItensModel.ContasReceberItenssLista[lParcela].VALOR_PAGO         := '0';
       lContasReceberItensModel.ContasReceberItenssLista[lParcela].LOJA               := lContasReceberModel.LOJA;
-      lContasReceberItensModel.ContasReceberItenssLista[lParcela].VLRPARCELA_REC     := lValorParcela.ToString;
+      lContasReceberItensModel.ContasReceberItenssLista[lParcela].VLRPARCELA_REC     := retiraPonto(FormataFloat(lValorParcela));
       lContasReceberItensModel.ContasReceberItenssLista[lParcela].PACELA_REC         := (lParcela + 1).ToString;
       lContasReceberItensModel.ContasReceberItenssLista[lParcela].TOTALPARCELAS_REC  := lTotalParcelas.ToString;
 
@@ -919,10 +919,9 @@ begin
       lSomaParcelas := lSomaParcelas + StrToFloat(FormatFloat('0.00', lValorParcela));
     end;
 
-    if lSomaParcelas > lValorTotal then
-      lContasReceberItensModel.ContasReceberItenssLista[0].VLRPARCELA_REC := (lValorParcela - (lSomaParcelas - lValorTotal)).ToString
-    else if lSomaParcelas < lValorTotal then
-      lContasReceberItensModel.ContasReceberItenssLista[0].VLRPARCELA_REC := (lValorParcela + (lValorTotal - lSomaParcelas)).ToString;
+    if lSomaParcelas <> lValorTotal then
+      lContasReceberItensModel.ContasReceberItenssLista[0].VLRPARCELA_REC :=
+        (StrToFloat(lContasReceberItensModel.ContasReceberItenssLista[0].VLRPARCELA_REC) + (lValorTotal - lSomaParcelas)).ToString;
 
     lContasReceberItensModel.Acao := tacIncluir;
     lContasReceberItensModel.Salvar;
@@ -1206,32 +1205,34 @@ end;
 
 procedure TPedidoVendaModel.venderItem(pVenderItem: TVenderItem);
 var
-  lConfiguracoes : TerasoftConfiguracoes;
-  lEmpresaModel  : TEmpresaModel;
-  lProdutosModel : TProdutosModel;
-  lPedidoItensModel, lModel : TPedidoItensModel;
-  lPedidoVendaLista : TPedidoVendaDao;
-  lProdutoPreco: TProdutoPreco;
-  lSaldoDisponivel : Double;
-  lBarras, lQuantidade : String;
+  lConfiguracoes     : TerasoftConfiguracoes;
+  lProdutosModel     : TProdutosModel;
+  lPedidoItensModel,
+  lModel             : TPedidoItensModel;
+  lPedidoVendaLista  : TPedidoVendaDao;
+  lProdutoPreco      : TProdutoPreco;
+  lSaldoDisponivel   : Double;
+  lCodBalanca,
+  lQuantidade        : String;
 
 begin
   lConfiguracoes    := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
-  lEmpresaModel     := TEmpresaModel.Create(vIConexao);
   lProdutosModel    := TProdutosModel.Create(vIConexao);
   lPedidoItensModel := TPedidoItensModel.Create(vIConexao);
   lPedidoVendaLista := TPedidoVendaDao.Create(vIConexao);
+  lCodBalanca       := '';
 
   try
     if pVenderItem.Quantidade = 0 then
       CriaException('Quantidade inválida.');
 
-    lBarras := lPedidoVendaLista.obterProdutoBalanca(pVenderItem.BarrasProduto);
+    if lConfiguracoes.valorTag('BALANCA_COPY_INI_PRODUTO', '', tvString) <> '' then
+      lCodBalanca := lPedidoVendaLista.obterProdutoBalanca(pVenderItem.BarrasProduto);
 
-    if not lBarras.IsEmpty then
+    if not lCodBalanca.IsEmpty then
     begin
-      lProdutosModel.WhereView := ' and produto.barras_pro = '+ QuotedStr(lBarras);
-      lProdutosModel.obterLista;
+      lProdutosModel.WhereView := ' and produto.barras_pro = '+ QuotedStr(lCodBalanca);
+      lProdutosModel.obterVenderItem;
 
       if lConfiguracoes.valorTag('BALANCA_LER_POR_PESO', 'N', tvBool) = 'S' then
       begin
@@ -1250,29 +1251,24 @@ begin
     else
     begin
       lProdutosModel.WhereView := ' and produto.barras_pro = '+ QuotedStr(pVenderItem.BarrasProduto);
-      lProdutosModel.obterLista;
+      lProdutosModel.obterVenderItem;
       lQuantidade := pVenderItem.Quantidade.ToString;
     end;
 
     if lProdutosModel.TotalRecords = 0  then
       CriaException('Produto não localizado.');
 
-    lEmpresaModel.Carregar;
-
-    if lEmpresaModel.AVISARNEGATIVO_EMP = 'S' then
+    if vIConexao.getEmpresa.BLOQUEAR_SALDO_NEGATIVO = 'S' then
     begin
-
-      lSaldoDisponivel := lProdutosModel.obterSaldoDisponivel(lProdutosModel.ProdutossLista[0].CODIGO_PRO);
+      lSaldoDisponivel := lProdutosModel.ProdutossLista[0].SALDO_DISPONIVEL;
 
       if (lSaldoDisponivel <= 0) or (pVenderItem.Quantidade > lSaldoDisponivel) then
         CriaException('Produto sem saldo disponível em estoque.')
-
     end;
 
-    lPedidoItensModel.WhereView := 'and pedidoitens.numero_ped = '+ self.FNUMERO_PED +' and pedidoitens.codigo_pro = '+ lProdutosModel.ProdutossLista[0].CODIGO_PRO;
-    lPedidoItensModel.obterLista;
-
-    if (lPedidoItensModel.TotalRecords > 0) and (lConfiguracoes.valorTag('FRENTE_CAIXA_SOMAR_QTDE_ITENS', 'S', tvBool) = 'S') and (lProdutosModel.ProdutossLista[0].USAR_BALANCA <> 'S') then
+    if (lPedidoItensModel.obterIDItem(self.FNUMERO_PED, lProdutosModel.ProdutossLista[0].CODIGO_PRO) <> '') and
+       (lConfiguracoes.valorTag('FRENTE_CAIXA_SOMAR_QTDE_ITENS', 'S', tvBool) = 'S') and
+       (lProdutosModel.ProdutossLista[0].USAR_BALANCA <> 'S') then
     begin
       lModel := lPedidoItensModel.carregaClasse(lPedidoItensModel.PedidoItenssLista[0].ID);
       lModel.Acao := tacAlterar;
@@ -1288,7 +1284,7 @@ begin
       lPedidoItensModel.CODIGO_CLI           := self.FCODIGO_CLI;
       lPedidoItensModel.COMISSAO_PED         := FloatToStr(0);
       lPedidoItensModel.DESCONTO_PED         := FloatToStr(0);
-      lPedidoItensModel.LOJA                 := lEmpresaModel.LOJA;
+      lPedidoItensModel.LOJA                 := vIConexao.getEmpresa.LOJA;
       lPedidoItensModel.QUANTIDADE_PED       := lQuantidade;
       lPedidoItensModel.QUANTIDADE_NEW       := lQuantidade;
       lPedidoItensModel.BALANCA              := lProdutosModel.ProdutossLista[0].USAR_BALANCA;
@@ -1309,7 +1305,6 @@ begin
     end;
 
   finally
-    lEmpresaModel.Free;
     lProdutosModel.Free;
     lPedidoItensModel.Free;
     lPedidoVendaLista.Free;

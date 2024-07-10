@@ -15,8 +15,8 @@ type
   TPosicaoHorizontal = (tphLeft, tphCenter, tphRight);
   TPosicaoVertical = (tpvTop, tpvBottom);
   TConclusaoContasReceber = (tcPedirBandeira, tcReceberEntrada, tcReceberCartao, tcConcluido, tcReceberTef, tcReceberPix, tcNull);
-  TPortador = (tpDinheiro, tpCredito, tpDebito, tpPix, tpTef, tpCarteira, tpBoleto, tpCreditoCliente, tpAvista, tpReceber, tpNull);
-  TTabela = (ttPedidoVenda, ttRecibo, ttFechamentoCaixa, ttCreditoCliente, ttNull);
+  TPortador = (tpDinheiro, tpCredito, tpDebito, tpPix, tpTef, tpCarteira, tpBoleto, tpCreditoCliente, tpAvista, tpReceber, tpCheque, tpNull);
+  TTabela = (ttPedidoVenda, ttRecibo, ttFechamentoCaixa, ttCreditoCliente, ttExtratoCaixa, ttNull);
   TBubina = (tb40, tb30, tbNull);
   TLado = (lEsquerdo, lDireito);
   TImpressaoPedido = (tipPedido, tipRecibo, tipCarne, tipNFCe, tipNFe, tipPixRecebimento, tipNenhum);

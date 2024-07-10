@@ -683,12 +683,12 @@ begin
 
     if (Length(pBarrasProduto) = 13) and (Copy(pBarrasProduto, 1, 1) = '1') then
     begin
-      lSQL := 'SELECT * FROM PRODUTO P WHERE P.USAR_BALANCA = ''S'' AND P.CODIGO_PRO = '+ QuotedStr(((Copy(pBarrasProduto, StrToInt(lConfiguracoes.valorTag('tagConfig_BALANCA_COPY_INI_PRODUTO', '2', tvString)), StrToInt(lConfiguracoes.valorTag('tagConfig_BALANCA_COPY_FIM_PRODUTO', '6', tvString))))));
+      lSQL := 'SELECT BARRAS_PRO FROM PRODUTO P WHERE P.USAR_BALANCA = ''S'' AND P.CODIGO_PRO = '+ QuotedStr(((Copy(pBarrasProduto, StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_INI_PRODUTO', '2', tvString)), StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_FIM_PRODUTO', '6', tvString))))));
       lQry.Open(lSQL);
     end
     else if (Length(pBarrasProduto) = 13) and (Copy(pBarrasProduto, 1, 1) = '2') then
     begin
-      lSQL := 'SELECT * FROM PRODUTO P WHERE P.USAR_BALANCA = ''S'' AND P.BARRAS_PRO = '+ QuotedStr(IntToStr(StrToInt(Copy(pBarrasProduto,StrToInt(lConfiguracoes.valorTag('tagConfig_BALANCA_COPY_INI_PRODUTO', '2', tvString)), StrToInt(lConfiguracoes.valorTag('tagConfig_BALANCA_COPY_FIM_PRODUTO', '6', tvString))))));
+      lSQL := 'SELECT BARRAS_PRO FROM PRODUTO P WHERE P.USAR_BALANCA = ''S'' AND P.BARRAS_PRO = '+ QuotedStr(IntToStr(StrToInt(Copy(pBarrasProduto,StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_INI_PRODUTO', '2', tvString)), StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_FIM_PRODUTO', '6', tvString))))));
       lQry.Open(lSQL);
     end;
 

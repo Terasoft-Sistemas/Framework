@@ -896,6 +896,7 @@ type
     destructor Destroy; override;
 
     procedure obterLista;
+    procedure obterVenderItem;
     procedure obterListaCatalogo;
     function obterPromocao(pCodProduto: String): TFDMemTable;
     function obterComissao(pCodProduto: String): TFDMemTable;
@@ -914,8 +915,8 @@ type
     function valorVenda(pIdProduto: String): Variant;
     function ObterTabelaPreco : TFDMemTable;
     function ValorUnitario(pProdutoPreco: TProdutoPreco) : Double;
-
     function ValorGarantia(pProduto: String; pValorFaixa: Double): TProdutoGarantia;
+    function ConsultaProdutosVendidos(pProduto : String): TFDMemTable;
 
     procedure subtrairSaldo(pIdProduto: String; pSaldo: Double);
     procedure adicionarSaldo(pIdProduto: String; pSaldo: Double);
@@ -1073,6 +1074,18 @@ begin
   end;
 end;
 
+function TProdutosModel.ConsultaProdutosVendidos(pProduto: String): TFDMemTable;
+var
+  lProdutosDao: TProdutosDao;
+begin
+  lProdutosDao := TProdutosDao.Create(vIConexao);
+  try
+    Result := lProdutosDao.ConsultaProdutosVendidos(pProduto);
+  finally
+    lProdutosDao.Free;
+  end;
+end;
+
 constructor TProdutosModel.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
@@ -1205,6 +1218,29 @@ begin
     Result := lProdutoDao.ObterTabelaPreco;
   finally
     lProdutoDao.Free;
+  end;
+end;
+
+procedure TProdutosModel.obterVenderItem;
+var
+  lProdutosDao: TProdutosDao;
+begin
+  lProdutosDao := TProdutosDao.Create(vIConexao);
+  try
+    lProdutosDao.TotalRecords        := FTotalRecords;
+    lProdutosDao.WhereView           := FWhereView;
+    lProdutosDao.CountView           := FCountView;
+    lProdutosDao.OrderView           := FOrderView;
+    lProdutosDao.StartRecordView     := FStartRecordView;
+    lProdutosDao.LengthPageView      := FLengthPageView;
+    lProdutosDao.IDRecordView        := FIDRecordView;
+
+    lProdutosDao.obterVenderItem;
+
+    FTotalRecords   := lProdutosDao.TotalRecords;
+    FProdutossLista := lProdutosDao.ProdutossLista;
+  finally
+    lProdutosDao.Free;
   end;
 end;
 

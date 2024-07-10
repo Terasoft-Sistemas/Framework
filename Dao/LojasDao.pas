@@ -59,6 +59,7 @@ type
     property LojaView: String read FLojaView write SetLojaView;
 
     procedure obterLista;
+    procedure obterHosts;
     function obterFiliais: TFDMemTable;
 
 end;
@@ -145,6 +146,44 @@ begin
 
     Result := vConstrutor.atribuirRegistros(lQry);
 
+  finally
+    lQry.Free;
+  end;
+end;
+
+procedure TLojasDao.obterHosts;
+var
+  lQry: TFDQuery;
+  lSQL:String;
+  i: INteger;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  FLojassLista := TObjectList<TLojasModel>.Create;
+
+  try
+    lSQL := ' select hosts.loja,                          ' + #13+
+            '        hosts.string_conexao                 ' + #13+
+            '   from loja2                                ' + #13+
+            '  inner join hosts on hosts.loja = loja2.loja' + #13;
+
+    lSQL := lSQL + ' order by 1';
+
+    lQry.Open(lSQL);
+
+    i := 0;
+    lQry.First;
+    while not lQry.Eof do
+    begin
+      FLojassLista.Add(TLojasModel.Create(vIConexao));
+
+      i := FLojassLista.Count -1;
+
+      FLojassLista[i].LOJA           := lQry.FieldByName('LOJA').AsString;
+      FLojassLista[i].STRING_CONEXAO := lQry.FieldByName('STRING_CONEXAO').AsString;
+
+      lQry.Next;
+    end;
   finally
     lQry.Free;
   end;

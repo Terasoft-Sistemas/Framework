@@ -29,6 +29,7 @@ type
     FLojaView: String;
     FCD: Variant;
     FCLIENTE_ID: Variant;
+    FSTRING_CONEXAO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetLojassLista(const Value: TObjectList<TLojasModel>);
@@ -46,6 +47,7 @@ type
     procedure SetLojaView(const Value: String);
     procedure SetCD(const Value: Variant);
     procedure SetCLIENTE_ID(const Value: Variant);
+    procedure SetSTRING_CONEXAO(const Value: Variant);
   public
     property CD: Variant read FCD write SetCD;
     property LOJA: Variant read FLOJA write SetLOJA;
@@ -54,12 +56,14 @@ type
     property PORT: Variant read FPORT write SetPORT;
     property DATABASE: Variant read FDATABASE write SetDATABASE;
     property CLIENTE_ID: Variant read FCLIENTE_ID write SetCLIENTE_ID;
+    property STRING_CONEXAO: Variant read FSTRING_CONEXAO write SetSTRING_CONEXAO;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: String;
     procedure obterLista;
+    procedure obterHosts;
     function obterFiliais: TFDMemTable;
 
     property LojassLista: TObjectList<TLojasModel> read FLojassLista write SetLojassLista;
@@ -103,6 +107,32 @@ begin
     Result := lLojasDao.obterFiliais;
   finally
     lLojasDao.Free;
+  end;
+end;
+
+procedure TLojasModel.obterHosts;
+var
+  lLojasLista: TLojasDao;
+begin
+  lLojasLista := TLojasDao.Create(vIConexao);
+
+  try
+    lLojasLista.TotalRecords    := FTotalRecords;
+    lLojasLista.WhereView       := FWhereView;
+    lLojasLista.CountView       := FCountView;
+    lLojasLista.OrderView       := FOrderView;
+    lLojasLista.StartRecordView := FStartRecordView;
+    lLojasLista.LengthPageView  := FLengthPageView;
+    lLojasLista.IDRecordView    := FIDRecordView;
+    lLojasLista.LojaView        := FLojaView;
+
+    lLojasLista.obterHosts;
+
+    FTotalRecords  := lLojasLista.TotalRecords;
+    FLojassLista := lLojasLista.LojassLista;
+
+  finally
+    lLojasLista.Free;
   end;
 end;
 
@@ -219,6 +249,11 @@ end;
 procedure TLojasModel.SetStartRecordView(const Value: String);
 begin
   FStartRecordView := Value;
+end;
+
+procedure TLojasModel.SetSTRING_CONEXAO(const Value: Variant);
+begin
+  FSTRING_CONEXAO := Value;
 end;
 
 procedure TLojasModel.SetTotalRecords(const Value: Integer);

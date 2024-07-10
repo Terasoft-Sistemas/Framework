@@ -79,6 +79,7 @@ type
     procedure obterItensPedido(pNumeroPedido: String);
     procedure obterTotaisItens(pNumeroPedido: String);
     function carregaClasse(pId: String): TPedidoItensModel;
+    function obterIDItem(pPedido, pProduto : String): String;
 end;
 
 implementation
@@ -545,6 +546,11 @@ begin
     lQry.Free;
   end;
 end;
+function TPedidoItensDao.obterIDItem(pPedido, pProduto: String): String;
+begin
+  Result := vIConexao.getConnection.ExecSQLScalar('select i.id from pedidoitens i where i.numero_ped = '+QuotedStr(pPedido)+' and i.codigo_pro = '+QuotedStr(pProduto)+'');
+end;
+
 procedure TPedidoItensDao.obterItensPedido(pNumeroPedido: String);
 var
   lQry: TFDQuery;
