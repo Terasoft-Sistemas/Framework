@@ -56,7 +56,8 @@ interface
       function getPessoaFisica: ICredipar_PessoaFisica;
       procedure setPessoaFisica(const pValue: ICredipar_PessoaFisica);
 
-      function enviaProposta(pResultado: IResultadoOperacao): IResultadoOperacao;
+      function enviaProposta(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function cancelarProposta(pProposta: Int64; pMotivo: TipoWideStringFramework ; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function statusProposta(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function anexarDocumentoAnalise(pProposta: Int64; pTipoDocumento: TipoWideStringFramework; pFormatoArquivo: TipoWideStringFramework; pDados: TBytes; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
 
