@@ -5,26 +5,12 @@ unit Terasoft.Framework.Credipar.Analisador.iface;
 
 interface
   uses
+    Classes,
     Terasoft.Framework.Texto,
+    SysUtils,
     Terasoft.Framework.DB,
     Terasoft.Framework.ControleAlteracoes,
     Terasoft.Framework.Types;
-
-  const
-    CONTROLEALTERACOES_CREDIPAR          = 'CREDIPAR';
-    CONTROLEALTERACOES_CREDIPAR_PROPOSTA = 'PROPOSTA';
-    CONTROLEALTERACOES_CREDIPAR_RESULTADOMENSAGEM = 'PROPOSTA.MSG';
-    CONTROLEALTERACOES_CREDIPAR_RESULTADOPROCESSAMENTO = 'PROPOSTA.PROC';
-
-    RETORNO_CREDIPAR_LOJA           = 'Credipar.loja';
-    RETORNO_CREDIPAR_MENSAGEM       = 'Credipar.mensagem';
-    RETORNO_CREDIPAR_CONTRATO       = 'Credipar.contrato';
-    RETORNO_CREDIPAR_PROCESSAMENTO  = 'Credipar.processamento';
-    RETORNO_CREDIPAR_PROPOSTA       = 'Credipar.proposta';
-    RETORNO_CREDIPAR_ERRO           = 'Credipar.erro';
-
-    RETORNO_CREDIPAR_DADOSCLIENTE   = 'Cliente.dados';
-    RETORNO_CREDIPAR_DADOSPROPOSTA  = 'Proposta.dados';
 
   type
 
@@ -70,10 +56,11 @@ interface
       function getPessoaFisica: ICredipar_PessoaFisica;
       procedure setPessoaFisica(const pValue: ICredipar_PessoaFisica);
 
-      function enviaProposta(pResultado: IResultadoOperacao): IResultadoOperacao;
+      function enviaProposta(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function cancelarProposta(pProposta: Int64; pMotivo: TipoWideStringFramework ; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function statusProposta(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function anexarDocumentoAnalise(pProposta: Int64; pTipoDocumento: TipoWideStringFramework; pFormatoArquivo: TipoWideStringFramework; pDados: TBytes; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
 
-    //property diretorioArquivos getter/setter
       function getDiretorioArquivos: tipoWideStringFramework;
       procedure setDiretorioArquivos(const pValue: tipoWideStringFramework);
 
@@ -128,9 +115,8 @@ interface
 implementation
   uses
     strUtils,
-    SysUtils,
     Terasoft.Framework.Conversoes,
-    FuncoesConfig;
+    FuncoesConfig, Terasoft.Framework.Credipar.Analisador.iface.Conts;
 
 {$if not defined(__DLL__)}
     function createCredipar: ICredipar; stdcall; external 'Credipar_DLL' name 'createCredipar' delayed;
