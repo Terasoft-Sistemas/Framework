@@ -1436,6 +1436,33 @@ object Form1: TForm1
         TabOrder = 0
         OnClick = imprimirGarantidaEstendidaClick
       end
+      object imprimirRF: TButton
+        Left = 191
+        Top = 11
+        Width = 182
+        Height = 46
+        Caption = 'Imprimir RF'
+        TabOrder = 1
+        OnClick = imprimirRFClick
+      end
+      object imprimirPrestamista: TButton
+        Left = 567
+        Top = 11
+        Width = 182
+        Height = 46
+        Caption = 'Imprimir Prestamista'
+        TabOrder = 2
+        OnClick = imprimirPrestamistaClick
+      end
+      object imprimirRFD: TButton
+        Left = 379
+        Top = 11
+        Width = 182
+        Height = 46
+        Caption = 'Imprimir RFD'
+        TabOrder = 3
+        OnClick = imprimirRFDClick
+      end
     end
   end
   object dsTeste2: TDataSource

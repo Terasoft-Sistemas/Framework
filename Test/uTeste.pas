@@ -197,6 +197,9 @@ type
     dMovimentoSerial: TDataSource;
     TabSheet10: TTabSheet;
     imprimirGarantidaEstendida: TButton;
+    imprimirRF: TButton;
+    imprimirPrestamista: TButton;
+    imprimirRFD: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -339,6 +342,9 @@ type
     procedure Button114Click(Sender: TObject);
     procedure Button117Click(Sender: TObject);
     procedure imprimirGarantidaEstendidaClick(Sender: TObject);
+    procedure imprimirRFClick(Sender: TObject);
+    procedure imprimirRFDClick(Sender: TObject);
+    procedure imprimirPrestamistaClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -3835,15 +3841,52 @@ var
   lImpressaoContratos : TImpressaoContratos;
 begin
   lImpressaoContratos := TImpressaoContratos.Create(lImpressaoContratos);
-
   try
-//      lImpressaoContratos.IDPEDIDO    := vIDVenda;
+      lImpressaoContratos.IDPEDIDO    := InputBox('Imprimir garantia estendida', 'Digite o pedido de venda:', '040684');
       lImpressaoContratos.CONEXAO     := vIConexao;
-      lImpressaoContratos.PDF         := true;
-      lImpressaoContratos.DIR         := ExtractFilePath(ParamStr(0)) + 'wwwroot\PDF\';
-//      lImpressaoContratos.CNPJEMPRESA := removeCaracteresGraficos(Controller.xCNPJEmpresa);
-      lImpressaoContratos.imprimir;
-//      self.showModalPDF('','/PDF/'+ lImpressaoContratos.NOMEARQUIVO);
+      lImpressaoContratos.imprimirGarantiaEstendida;
+  finally
+    lImpressaoContratos.Free;
+  end;
+end;
+
+procedure TForm1.imprimirPrestamistaClick(Sender: TObject);
+var
+  lImpressaoContratos : TImpressaoContratos;
+begin
+  lImpressaoContratos := TImpressaoContratos.Create(lImpressaoContratos);
+  try
+      lImpressaoContratos.IDPEDIDO    := InputBox('Imprimir prestamista', 'Digite o pedido de venda:', '040684');
+      lImpressaoContratos.CONEXAO     := vIConexao;
+      lImpressaoContratos.imprimirPrestamista;
+  finally
+    lImpressaoContratos.Free;
+  end;
+end;
+
+procedure TForm1.imprimirRFClick(Sender: TObject);
+var
+  lImpressaoContratos : TImpressaoContratos;
+begin
+  lImpressaoContratos := TImpressaoContratos.Create(lImpressaoContratos);
+  try
+      lImpressaoContratos.IDPEDIDO    := InputBox('Imprimir RF', 'Digite o pedido de venda:', '040684');
+      lImpressaoContratos.CONEXAO     := vIConexao;
+      lImpressaoContratos.imprimirRF;
+  finally
+    lImpressaoContratos.Free;
+  end;
+end;
+
+procedure TForm1.imprimirRFDClick(Sender: TObject);
+var
+  lImpressaoContratos : TImpressaoContratos;
+begin
+  lImpressaoContratos := TImpressaoContratos.Create(lImpressaoContratos);
+  try
+      lImpressaoContratos.IDPEDIDO    := InputBox('Imprimir RFD', 'Digite o pedido de venda:', '040646');
+      lImpressaoContratos.CONEXAO     := vIConexao;
+      lImpressaoContratos.imprimirRFD;
   finally
     lImpressaoContratos.Free;
   end;
