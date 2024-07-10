@@ -71,6 +71,7 @@ interface
       procedure setPessoaFisica(const pValue: ICredipar_PessoaFisica);
 
       function enviaProposta(pResultado: IResultadoOperacao): IResultadoOperacao;
+      function statusProposta(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
 
     //property diretorioArquivos getter/setter
       function getDiretorioArquivos: tipoWideStringFramework;
@@ -96,7 +97,7 @@ interface
       function getCodigoProdutoCredipar: Integer;
       procedure setCodigoProdutoCredipar(const pValue: Integer);
 
-      function editarDados(pDadosCliente, pDadosProposta: IUnknown; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      //function editarDados(pDadosCliente, pDadosProposta: IUnknown; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
 
     //property controleAlteracoes getter/setter
       function getControleAlteracoes: IControleAlteracoes;
