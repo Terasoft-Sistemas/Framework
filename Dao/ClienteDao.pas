@@ -901,6 +901,7 @@ begin
       FClientesLista[i].percentual_desconto        := lQry.FieldByName('PERCENTUAL_DESCONTO').AsString;
       FClientesLista[i].sacador_avalista_id        := lQry.FieldByName('SACADOR_AVALISTA_ID').AsString;
       FClientesLista[i].tipo_funcionario_publico_cli := lQry.FieldByName('TIPO_FUNCIONARIO_PUBLICO_CLI').AsString;
+      FClientesLista[i].naturalidade_cli           := lQry.FieldByName('NATURALIDADE_CLI').AsString;
       FClientesLista[i].numbeneficio_cli           := lQry.FieldByName('NUMBENEFICIO_CLI').AsString;
       FClientesLista[i].fonte_beneficio_cli        := lQry.FieldByName('FONTE_BENEFICIO_CLI').AsString;
       FClientesLista[i].codigo_ocupacao_cli        := lQry.FieldByName('CODIGO_OCUPACAO_CLI').AsString;
