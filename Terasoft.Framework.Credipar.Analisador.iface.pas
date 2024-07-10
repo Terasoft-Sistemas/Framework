@@ -13,13 +13,14 @@ interface
   const
     CONTROLEALTERACOES_CREDIPAR          = 'CREDIPAR';
     CONTROLEALTERACOES_CREDIPAR_PROPOSTA = 'PROPOSTA';
-    CONTROLEALTERACOES_CREDIPAR_RESULTADOMENSAGEM = 'PROPOSTA.MESAGEM';
-    CONTROLEALTERACOES_CREDIPAR_RESULTADOPROCESSAMENTO = 'PROPOSTA.PROCESSAMENTO';
+    CONTROLEALTERACOES_CREDIPAR_RESULTADOMENSAGEM = 'PROPOSTA.MSG';
+    CONTROLEALTERACOES_CREDIPAR_RESULTADOPROCESSAMENTO = 'PROPOSTA.PROC';
 
     RETORNO_CREDIPAR_LOJA           = 'Credipar.loja';
     RETORNO_CREDIPAR_MENSAGEM       = 'Credipar.mensagem';
     RETORNO_CREDIPAR_CONTRATO       = 'Credipar.contrato';
     RETORNO_CREDIPAR_PROCESSAMENTO  = 'Credipar.processamento';
+    RETORNO_CREDIPAR_PROPOSTA       = 'Credipar.proposta';
     RETORNO_CREDIPAR_ERRO           = 'Credipar.erro';
 
     RETORNO_CREDIPAR_DADOSCLIENTE   = 'Cliente.dados';
@@ -46,6 +47,11 @@ interface
       function getAddr: Pointer;
       function loadFromPathReaderWriter(const pPathRW: IUnknown; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
+    //property id getter/setter
+      function getId: Int64;
+      procedure setId(const pValue: Int64);
+
+      property id: Int64 read getId write setId;
     end;
 
     ICredipar = interface
