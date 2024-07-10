@@ -104,7 +104,7 @@ uses
   Terasoft.Utils,
   System.Variants,
   PedidoVendaModel,
-  Terasoft.FuncoesTexto;
+  Terasoft.FuncoesTexto, System.StrUtils;
 
 function TNotaFiscal.configuraComponenteNFe: Boolean;
 begin
@@ -161,8 +161,9 @@ begin
 end;
 function TNotaFiscal.cobranca(pidNF: String): Boolean;
 var
- lSQL: String;
- lQry: TFDQuery;
+ lSQL : String;
+ lQry : TFDQuery;
+ lPag : TpcnFormaPagamento;
 begin
   try
     try
@@ -190,6 +191,7 @@ begin
 
     if lQry.FieldByName('modeloNF').AsInteger = 55 then
     begin
+
       if lQry.IsEmpty then
       begin
         InfoPgto := NotaF.NFe.pag.New;
@@ -197,21 +199,36 @@ begin
         InfoPgto.tPag   := fpSemPagamento;
         exit;
       end;
-      with NotaF.NFe.Cobr.Fat do
+
+      if not AnsiMatchStr(lQry.FieldByName('tPag').AsString, ['03','04','10','11','12','13','90']) then
       begin
-        nFat  := lQry.FieldByName('nFat').AsString;
-        vOrig := lQry.FieldByName('vOrig').AsFloat;
-        vDesc := 0;
-        vLiq  := lQry.FieldByName('vOrig').AsFloat;
+        with NotaF.NFe.Cobr.Fat do
+        begin
+          nFat  := lQry.FieldByName('nFat').AsString;
+          vOrig := lQry.FieldByName('vOrig').AsFloat;
+          vDesc := 0;
+          vLiq  := lQry.FieldByName('vOrig').AsFloat;
+        end;
       end;
+
       lQry.First;
       while not lQry.Eof do begin
-        Duplicata :=  NotaF.NFe.Cobr.Dup.New;
-        Duplicata.nDup  := FormatFloat('000',lQry.FieldByName('nDup').AsInteger);
-        Duplicata.dVenc := lQry.FieldByName('dVenc').Value;
-        Duplicata.vDup  := lQry.FieldByName('vDup').AsFloat;
+        lPag := vConfiguracoesNotaFiscal.tPag(lQry.FieldByName('tPag').AsString);
+
+        if (lPag <> fpCartaoCredito)   and (lPag <> fpCartaoDebito)    and
+           (lPag <> fpValeAlimentacao) and (lPag <> fpValeRefeicao)    and
+           (lPag <> fpValePresente)    and (lPag <> fpValeCombustivel) and
+           (lPag <> fpValeRefeicao)    and (lPag <> fpSemPagamento)    then
+        begin
+          Duplicata :=  NotaF.NFe.Cobr.Dup.New;
+          Duplicata.nDup  := FormatFloat('000',lQry.FieldByName('nDup').AsInteger);
+          Duplicata.dVenc := lQry.FieldByName('dVenc').Value;
+          Duplicata.vDup  := lQry.FieldByName('vDup').AsFloat;
+        end;
+
         lQry.Next;
       end;
+
     end;
 
     lQry.First;
