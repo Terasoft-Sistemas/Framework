@@ -1097,6 +1097,7 @@ function GetwsCrediparHttpPost(UseWSDL: Boolean=System.False; Addr: string=''; H
 implementation
   uses
     Terasoft.Framework.FuncoesDiversas,
+    Terasoft.Framework.Conversoes,
     SysUtils;
 
 function GetwsCrediparSoap(UseWSDL: Boolean; Addr: string; HTTPRIO: THTTPRIO): wsCrediparSoap;
@@ -1252,6 +1253,30 @@ begin
   i := StrToIntDef(FTempoRes,-1);
   if( i<1) or (i>4) then
     pResultado.formataErro('stDadosCliente.critica: Tempo de residência inválido: [ %s ]', [FTempoRes] );
+  if( FMae='') then
+    pResultado.adicionaErro('stDadosCliente.critica: Nome da mãe inválido' );
+  if(Terasoft.Framework.Conversoes.strYMDToDateTime( FDtNascimento,false,0 )=0) then
+    pResultado.adicionaErro('stDadosCliente.critica: Data de nascimento inválido' );
+  if(Terasoft.Framework.Conversoes.strYMDToDateTime( FDataEmissaoDocIdentificacao,false,0 )=0) then
+    pResultado.adicionaErro('stDadosCliente.critica: Data de emissão do documento de identificação inválido' );
+  if(UFEmissorDocIdentificacao='') then
+    pResultado.adicionaErro('stDadosCliente.critica: Emissor do documento de identificação inválido' );
+  if(FCidadeNaturalidade='') then
+    pResultado.adicionaErro('stDadosCliente.critica: Cidade de naturalidade inválida' );
+  if(fUFNaturalidade='') then
+    pResultado.adicionaErro('stDadosCliente.critica: UF de naturalidade inválido' );
+  if(FTipoResidencia='') then
+    pResultado.adicionaErro('stDadosCliente.critica: Tipo de residência inválido' );
+  if(FCEPRes='') then
+    pResultado.adicionaErro('stDadosCliente.critica: CEP residencial inválido' );
+  if(FUFRes='') then
+    pResultado.adicionaErro('stDadosCliente.critica: UF residencial inválido' );
+  if(FCidadeRes='') then
+    pResultado.adicionaErro('stDadosCliente.critica: Cidade residencial inválido' );
+  if(FEnderecoRes='') then
+    pResultado.adicionaErro('stDadosCliente.critica: Endereco residencial inválido' );
+  if(FNumeroRes='') then
+    pResultado.adicionaErro('stDadosCliente.critica: Número residencial inválido' );
   Result := pResultado.erros<>lSave;
 end;
 

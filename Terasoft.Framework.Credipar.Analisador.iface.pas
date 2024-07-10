@@ -116,7 +116,7 @@ interface
 
 
 
-  function strToTempoResidencia(const pValue: String): String;
+  function _strToTempoResidencia(const pValue: String): String;
 
 implementation
   uses
@@ -138,7 +138,7 @@ begin
     Result.diretorioArquivos := ValorTagConfig(tagConfig_CREDIPAR_DIRETORIO_ARQUIVOS,'',tvString);
     Result.token := ValorTagConfig(tagConfig_CREDIPAR_TOKEN,'',tvString);
     Result.codigoLojaCredipar := ValorTagConfig(tagConfig_CREDIPAR_CODIGO_LOJA,0,tvInteiro);
-    //Result.controleAlteracoes := criaControleAlteracoes(CONTROLEALTERACOES_SISTEMA_CREDIPAR,gdbPadrao,true)
+    Result.controleAlteracoes := criaControleAlteracoes(CONTROLEALTERACOES_CREDIPAR,gdbPadrao,true)
   end;
 end;
 
@@ -396,7 +396,7 @@ end;
 
 {$ifend}
 
-function strToTempoResidencia(const pValue: String): String;
+function _strToTempoResidencia(const pValue: String): String;
   var
     l: IListaTextoEX;
     i: Integer;
