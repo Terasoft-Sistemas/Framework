@@ -772,7 +772,10 @@ begin
         vFrete            := lQry.FieldByName('vFrete').AsFloat;
         vSeg              := lQry.FieldByName('vSeg').AsFloat;
         vDesc             := lQry.FieldByName('vDesc').AsFloat;
-        CEST              := lQry.FieldByName('CEST').AsString;
+
+        if Length(lQry.FieldByName('CEST').AsString) = 7 then
+          CEST            := lQry.FieldByName('CEST').AsString;
+
         cBarra            := lQry.FieldByName('cBarra').AsString;
         cBarraTrib        := lQry.FieldByName('cBarraTrib').AsString;
         Produto.infAdProd := lQry.FieldByName('infAdProd').AsString;
