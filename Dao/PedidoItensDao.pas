@@ -783,10 +783,10 @@ begin
     pQry.ParamByName('cfop').Values[lCount]                         := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CFOP                          = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CFOP);
 
     pQry.ParamByName('tipo_garantia_fr').Values[lCount]             := IIF(pPedidoItensModel.PedidoItenssLista[lCount].TIPO_GARANTIA_FR              = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].TIPO_GARANTIA_FR);
-    pQry.ParamByName('vlr_garantia_fr').Values[lCount]              := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VLR_GARANTIA_FR               = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].VLR_GARANTIA_FR);
-    pQry.ParamByName('custo_garantia_fr').Values[lCount]            := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_GARANTIA_FR             = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_GARANTIA_FR);
-    pQry.ParamByName('custo_garantia').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_GARANTIA                = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_GARANTIA);
-    pQry.ParamByName('per_garantia_fr').Values[lCount]              := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PER_GARANTIA_FR               = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PER_GARANTIA_FR);
+    pQry.ParamByName('vlr_garantia_fr').Values[lCount]              := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VLR_GARANTIA_FR               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VLR_GARANTIA_FR));
+    pQry.ParamByName('custo_garantia_fr').Values[lCount]            := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_GARANTIA_FR             = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_GARANTIA_FR));
+    pQry.ParamByName('custo_garantia').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_GARANTIA                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_GARANTIA));
+    pQry.ParamByName('per_garantia_fr').Values[lCount]              := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PER_GARANTIA_FR               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PER_GARANTIA_FR));
 
   end;
 end;
