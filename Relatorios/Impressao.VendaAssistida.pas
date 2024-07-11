@@ -133,7 +133,7 @@ type
     RLLabel57: TRLLabel;
     RLLabel64: TRLLabel;
     RLDBText48: TRLDBText;
-    RLLabel56: TRLLabel;
+    lblDescPercentual: TRLLabel;
     RLDBText41: TRLDBText;
     RLLabel63: TRLLabel;
     RLDBText47: TRLDBText;
@@ -220,8 +220,6 @@ type
     procedure SetCONEXAO(const Value: IConexao);
     { Private declarations }
   public
-
-    vGarantia : Double;
 
     property IDPEDIDO: Variant read FIDPEDIDO write SetIDPEDIDO;
     property NOMEARQUIVO: Variant read FNOMEARQUIVO write SetNOMEARQUIVO;
@@ -391,12 +389,14 @@ begin
     mtPedidoNUMERO.Value              := lMemtable.FieldByName('ID').AsString;
     mtPedidoEMISSAO.Value             := lMemtable.FieldByName('DATAHORA').AsString;
     mtPedidoOBSERVACAO.Value          := lMemtable.FieldByName('OBSERVACAO').AsString;
-    mtPedidoVALOR_PRODUTOS.Value      := lMemtable.FieldByName('VALOR_ITENS').AsFloat;
-    mtPedidoVALOR_DESCONTO.Value      := lMemtable.FieldByName('VALOR_CUPOM_DESCONTO').AsFloat*100/lMemtable.FieldByName('VALOR_ITENS').AsFloat;
+    mtPedidoVALOR_PRODUTOS.Value      := lWebPedidoModel.VALOR_ITENS;
+    mtPedidoVALOR_DESCONTO.Value      := lWebPedidoModel.VALOR_CUPOM_DESCONTO;
+    lblDescPercentual.Caption         := 'Desconto ('+FormatFloat(',0.000',lWebPedidoModel.VALOR_CUPOM_DESCONTO*100/lWebPedidoModel.VALOR_ITENS)+'%)';
+    mtPedidoTOTAL_GARANTIA.Value      := lWebPedidoModel.TOTAL_GARANTIA;
     mtPedidoSEGURO_PRESTAMISTA.Value  := lWebPedidoModel.SEGURO_PRESTAMISTA_VALOR;
-    mtPedidoVALOR_ACRESCIMO.Value     := lMemtable.FieldByName('ACRESCIMO').AsFloat;
-    mtPedidoVALOR_FRETE.Value         := lMemtable.FieldByName('VALOR_FRETE').AsFloat;
-    mtPedidoVALOR_TOTAL.Value         := lMemtable.FieldByName('VALOR_TOTAL').AsFloat;
+    mtPedidoVALOR_ACRESCIMO.Value     := lWebPedidoModel.ACRESCIMO;
+    mtPedidoVALOR_FRETE.Value         := lWebPedidoModel.VALOR_FRETE;
+    mtPedidoVALOR_TOTAL.Value         := lWebPedidoModel.VALOR_TOTAL;
     mtPedidoVENDEDOR.Value            := lMemtable.FieldByName('VENDEDOR').AsString;
     mtPedidoCLIENTE_ID.Value          := lMemtable.FieldByName('CLIENTE_ID').AsString;
     mtPedido.Post;
@@ -410,13 +410,11 @@ end;
 procedure TImpressaoVendaAssistida.fetchPedidoItens;
 var
   lWebPedidoItensModel : TWebPedidoItensModel;
-  lGarantia : Double;
 begin
   lWebPedidoItensModel := TWebPedidoItensModel.Create(CONEXAO);
   try
     lWebPedidoItensModel.IDWebPedidoView := Self.FIDPEDIDO;
     lWebPedidoItensModel.obterLista;
-    vGarantia := 0;
     mtItens.Open;
     for lWebPedidoItensModel in lWebPedidoItensModel.WebPedidoItenssLista do begin
       mtItens.Append;
@@ -437,13 +435,7 @@ begin
       mtItensOBSERVACAO.Value       := lWebPedidoItensModel.OBSERVACAO;
 
       mtItens.Post;
-
-      vGarantia := vGarantia + mtItensQUANTIDADE.Value * mtItensVLR_GARANTIA.Value;
     end;
-
-    mtPedido.Edit;
-    mtPedidoTOTAL_GARANTIA.Value := vGarantia;
-    mtPedido.Post;
 
   finally
     lWebPedidoItensModel.Free;

@@ -772,7 +772,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
             ParentFont = False
             Text = ''
           end
-          object RLLabel56: TRLLabel
+          object lblDescPercentual: TRLLabel
             Tag = 10
             Left = 279
             Top = 59
