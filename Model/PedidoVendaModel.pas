@@ -335,9 +335,11 @@ type
     procedure SetCFOP_NF(const Value: Variant);
     procedure SetNOME_VENDEDOR(const Value: Variant);
 
-    procedure getDataVendedor;
     procedure SetSEGURO_PRESTAMISTA_CUSTO(const Value: Variant);
     procedure SetSEGURO_PRESTAMISTA_VALOR(const Value: Variant);
+
+    procedure getDataVendedor;
+    procedure validaBloqueioPortador(pPortador, pCliente : String);
 
   public
     property NUMERO_PED: Variant read FNUMERO_PED write SetNUMERO_PED;
@@ -865,6 +867,8 @@ begin
   if (self.FCODIGO_CLI = '000000') and (pPortador = '000005') then
     CriaException('Para o cliente consumidor o portador não pode ser boleto.');
 
+  validaBloqueioPortador(pPortador, self.FCODIGO_CLI);
+
   lContasReceberModel      := TContasReceberModel.Create(vIConexao);
   lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
   lEmpresaModel            := TEmpresaModel.Create(vIConexao);
@@ -1202,6 +1206,35 @@ begin
   end;
 end;
 
+
+procedure TPedidoVendaModel.validaBloqueioPortador(pPortador, pCliente : String);
+var
+  lPortadorModel : TPortadorModel;
+  lClienteModel  : TClienteModel;
+begin
+  if (pPortador = '') or (pCliente = '') then
+    exit;
+
+  lPortadorModel := TPortadorModel.Create(vIConexao);
+  lClienteModel  := TClienteModel.Create(vIConexao);
+
+  try
+    lPortadorModel := lPortadorModel.carregaClasse(pPortador);
+
+    if lPortadorModel.VR_PORT = 'X' then
+    begin
+      lClienteModel := lClienteModel.carregaClasse(pCliente);
+
+      if lClienteModel.seprocado_cli <> 'N' then
+        CriaException('Cliente não está liberado para venda com este portador.');
+
+    end;
+  finally
+    lPortadorModel.Free;
+    lClienteModel.Free;
+  end;
+
+end;
 
 procedure TPedidoVendaModel.venderItem(pVenderItem: TVenderItem);
 var
@@ -1601,10 +1634,12 @@ procedure TPedidoVendaModel.SetCNPJ_CPF_CONSUMIDOR(const Value: Variant);
 begin
   FCNPJ_CPF_CONSUMIDOR := Value;
 end;
+
 procedure TPedidoVendaModel.SetCODIGO_CLI(const Value: Variant);
 begin
   FCODIGO_CLI := Value;
 end;
+
 procedure TPedidoVendaModel.SetCODIGO_PORT(const Value: Variant);
 begin
   FCODIGO_PORT := Value;
