@@ -3842,7 +3842,7 @@ var
 begin
   lImpressaoContratos := TImpressaoContratos.Create(lImpressaoContratos);
   try
-      lImpressaoContratos.IDPEDIDO    := InputBox('Imprimir garantia estendida', 'Digite o pedido de venda:', '040684');
+      lImpressaoContratos.IDPEDIDO    := InputBox('Imprimir garantia estendida', 'Digite o pedido de venda:', '040697');
       lImpressaoContratos.CONEXAO     := vIConexao;
       lImpressaoContratos.imprimirGarantiaEstendida;
   finally
@@ -3856,7 +3856,7 @@ var
 begin
   lImpressaoContratos := TImpressaoContratos.Create(lImpressaoContratos);
   try
-      lImpressaoContratos.IDPEDIDO    := InputBox('Imprimir prestamista', 'Digite o pedido de venda:', '040684');
+      lImpressaoContratos.IDPEDIDO    := InputBox('Imprimir prestamista', 'Digite o pedido de venda:', '040697');
       lImpressaoContratos.CONEXAO     := vIConexao;
       lImpressaoContratos.imprimirPrestamista;
   finally
@@ -3870,7 +3870,7 @@ var
 begin
   lImpressaoContratos := TImpressaoContratos.Create(lImpressaoContratos);
   try
-      lImpressaoContratos.IDPEDIDO    := InputBox('Imprimir RF', 'Digite o pedido de venda:', '040684');
+      lImpressaoContratos.IDPEDIDO    := InputBox('Imprimir RF', 'Digite o pedido de venda:', '040697');
       lImpressaoContratos.CONEXAO     := vIConexao;
       lImpressaoContratos.imprimirRF;
   finally
@@ -3884,7 +3884,7 @@ var
 begin
   lImpressaoContratos := TImpressaoContratos.Create(lImpressaoContratos);
   try
-      lImpressaoContratos.IDPEDIDO    := InputBox('Imprimir RFD', 'Digite o pedido de venda:', '040646');
+      lImpressaoContratos.IDPEDIDO    := InputBox('Imprimir RFD', 'Digite o pedido de venda:', '040697');
       lImpressaoContratos.CONEXAO     := vIConexao;
       lImpressaoContratos.imprimirRFD;
   finally

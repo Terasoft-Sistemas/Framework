@@ -9,7 +9,7 @@ uses
   FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
   RLXLSXFilter, RLFilters, RLPDFFilter, Data.DB, FireDAC.Comp.DataSet,
   FireDAC.Comp.Client, Terasoft.Utils, Interfaces.Conexao, xPNGimage,
-  Vcl.Imaging.jpeg, PedidoVendaModel, Terasoft.FuncoesTexto;
+  Vcl.Imaging.jpeg, PedidoVendaModel, Terasoft.FuncoesTexto, Terasoft.Configuracoes;
 
 type
   TImpressaoContratos = class(TForm)
@@ -360,6 +360,23 @@ type
     RLLabel106: TRLLabel;
     RLLabel107: TRLLabel;
     RLDBText4: TRLDBText;
+    RLLabel108: TRLLabel;
+    RLLabel109: TRLLabel;
+    RLLabel110: TRLLabel;
+    mtItensINICIO_VIGENCIA: TStringField;
+    mtItensFIM_VIGENCIA: TStringField;
+    RLDBText12: TRLDBText;
+    RLDBText47: TRLDBText;
+    RLDBText58: TRLDBText;
+    RLDBText59: TRLDBText;
+    RLDBText60: TRLDBText;
+    RLDBText61: TRLDBText;
+    mtItensPREMIO_LIQUIDO: TFloatField;
+    RLDBText62: TRLDBText;
+    mtItensIOF: TFloatField;
+    RLLabel111: TRLLabel;
+    RLLabel112: TRLLabel;
+    mtItensRR_GARANTIA_ESTENDIDA: TFloatField;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
@@ -384,8 +401,6 @@ type
     { Private declarations }
   public
 
-    vGarantia : Double;
-
     property IDPEDIDO: Variant read FIDPEDIDO write SetIDPEDIDO;
     property NOMEARQUIVO: Variant read FNOMEARQUIVO write SetNOMEARQUIVO;
     property PREVIEW: Variant read FPREVIEW write SetPREVIEW;
@@ -403,9 +418,9 @@ type
     procedure fetchPedido;
     procedure fetchCliente;
     procedure fetchPedidoItens(pID : String);
-    procedure fetchMemo(lPedidoVendaModel : TPedidoVendaModel);
+    procedure fetchMemo;
     procedure fetchEmpresa;
-    procedure reportPreview(pReportItem, pReportContrato: TRLReport);
+    procedure reportPreview(pReportItem: TRLReport; pItem: String);
 
     { Public declarations }
   end;
@@ -451,38 +466,39 @@ begin
 
     lPedidoVendaModel.IDRecordView := Self.IDPEDIDO;
     lPedidoVendaModel.Obterlista;
+
     lPedidoVendaModel.ID := Self.IDPEDIDO;
     lPedidoVendaModel.calcularTotais;
 
     if lPedidoVendaModel.TotalRecords = 0 then
       raise Exception.Create('Pedido de venda '+Self.FIDPEDIDO+' não localizado');
 
-    for lPedidoVendaModel in lPedidoVendaModel.PedidoVendasLista do
+    lPedidoVendaModel := lPedidoVendaModel.PedidoVendasLista[0];
+
+    mtPedido.Append;
+    mtPedidoNUMERO.Value              := lPedidoVendaModel.NUMERO_PED;
+    mtPedidoEMISSAO.Value             := lPedidoVendaModel.DATA_PED;
+    mtPedidoOBSERVACAO.Value          := lPedidoVendaModel.OBS_GERAL;
+    mtPedidoVALOR_PRODUTOS.Value      := lPedidoVendaModel.VALOR_PED;
+    mtPedidoVALOR_DESCONTO.Value      := lPedidoVendaModel.DESC_PED;
+    mtPedidoSEGURO_PRESTAMISTA.Value  := IIF(lPedidoVendaModel.SEGURO_PRESTAMISTA_VALOR = '', 0 , lPedidoVendaModel.SEGURO_PRESTAMISTA_VALOR);
+    mtPedidoVALOR_ACRESCIMO.Value     := lPedidoVendaModel.ACRES_PED;
+    mtPedidoVALOR_FRETE.Value         := lPedidoVendaModel.FRETE_PED;
+    mtPedidoVALOR_TOTAL.Value         := lPedidoVendaModel.TOTAL_PED;
+    mtPedidoVENDEDOR.Value            := lPedidoVendaModel.NOME_VENDEDOR;
+    mtPedidoCLIENTE_ID.Value          := lPedidoVendaModel.CODIGO_CLI;
+    mtPedido.Post;
+
+    lContasReceberModel.IDPedidoView := lPedidoVendaModel.NUMERO_PED;
+    lContasReceberModel.obterLista;
+
+    for lContasReceberModel in lContasReceberModel.ContasRecebersLista do
     begin
-      mtPedido.Append;
-      mtPedidoNUMERO.Value              := lPedidoVendaModel.NUMERO_PED;
-      mtPedidoEMISSAO.Value             := lPedidoVendaModel.DATA_PED;
-      mtPedidoOBSERVACAO.Value          := lPedidoVendaModel.OBS_GERAL;
-      mtPedidoVALOR_PRODUTOS.Value      := lPedidoVendaModel.VALOR_PED;
-      mtPedidoVALOR_DESCONTO.Value      := lPedidoVendaModel.DESC_PED;
-      mtPedidoSEGURO_PRESTAMISTA.Value  := IIF(lPedidoVendaModel.SEGURO_PRESTAMISTA_VALOR = '', 0 , lPedidoVendaModel.SEGURO_PRESTAMISTA_VALOR);
-      mtPedidoVALOR_ACRESCIMO.Value     := lPedidoVendaModel.ACRES_PED;
-      mtPedidoVALOR_FRETE.Value         := lPedidoVendaModel.FRETE_PED;
-      mtPedidoVALOR_TOTAL.Value         := lPedidoVendaModel.TOTAL_PED;
-      mtPedidoVENDEDOR.Value            := lPedidoVendaModel.NOME_VENDEDOR;
-      mtPedidoCLIENTE_ID.Value          := lPedidoVendaModel.CODIGO_CLI;
-      mtPedido.Post;
-
-      lContasReceberModel.IDPedidoView := lPedidoVendaModel.NUMERO_PED;
-      lContasReceberModel.obterLista;
-
-      for lContasReceberModel in lContasReceberModel.ContasRecebersLista do
-      begin
-        mtReceber.Append;
-        mtReceberNOME_PORT.Value := lContasReceberModel.PORTADOR_NOME;
-        mtReceberVALOR_REC.Value := lContasReceberModel.VALOR_REC;
-        mtReceber.Post;
-      end;
+      mtReceber.Append;
+      mtReceberNOME_PORT.Value := lContasReceberModel.PORTADOR_NOME;
+      mtReceberVALOR_REC.Value := lContasReceberModel.VALOR_REC;
+      mtReceber.Post;
+    end;
 
 //      lContasReceberItensModel.IDContasReceberView := lContasReceberModel.FATURA_REC;
 //      lContasReceberItensModel.obterLista;
@@ -494,9 +510,7 @@ begin
 //        mtReceberItensTOTAL_PARCELAS.Value := lContasReceberItensModel.TOTALPARCELAS_REC;
 //        mtReceberItens.Post;
 //      end;
-    end;
 
-    Self.fetchMemo(lPedidoVendaModel);
 
   finally
     lPedidoVendaModel.Free;
@@ -505,27 +519,27 @@ begin
   end;
 end;
 
-procedure TImpressaoContratos.fetchMemo(lPedidoVendaModel : TPedidoVendaModel);
+procedure TImpressaoContratos.fetchMemo;
 var
   lClienteModel : TClienteModel;
 begin
 
   lClienteModel := TClienteModel.Create(CONEXAO);
   try
-    lClienteModel.IDRecordView := lPedidoVendaModel.CODIGO_CLI;
+    lClienteModel.IDRecordView := mtPedidoCLIENTE_ID.Value;
     lClienteModel.obterLista;
 
-    RLMemo1.Lines.Text := '      Eu, '+lPedidoVendaModel.FANTASIA_CLI+', inscrito no CPF/MF sob o nº '+formatoCNPJCPFGenerico(nil,lClienteModel.ClientesLista[0].CNPJ_CPF_CLI, true)+', proponente do '+
-                             'seguro Garantia Estendida, autorizo que o pagamento do prêmio de seguro no valor de R$ 135,37 '+
+    RLMemo1.Lines.Text := '      Eu, '+lClienteModel.ClientesLista[0].FANTASIA_CLI+', inscrito no CPF/MF sob o nº '+formatoCNPJCPFGenerico(nil,lClienteModel.ClientesLista[0].CNPJ_CPF_CLI, true)+', proponente do '+
+                             'seguro Garantia Estendida, autorizo que o pagamento do prêmio de seguro no valor de '+ FormataFloat(mtItensVLR_GARANTIA.Value) +' '+
                              'seja realizado em conjunto com o pagamento do(s) produto(s)/serviço(s) ora adquirido(s).';
 
-    RLMemo2.Lines.Text := '   Eu, '+lPedidoVendaModel.FANTASIA_CLI+', inscrito no CPF/MF sob o nº '+formatoCNPJCPFGenerico(nil,lClienteModel.ClientesLista[0].CNPJ_CPF_CLI, true)+', proponente do ' +
+    RLMemo2.Lines.Text := '   Eu, '+lClienteModel.ClientesLista[0].FANTASIA_CLI+', inscrito no CPF/MF sob o nº '+formatoCNPJCPFGenerico(nil,lClienteModel.ClientesLista[0].CNPJ_CPF_CLI, true)+', proponente do ' +
                               'Seguro Proteção de Bens, autorizo que o pagamento do prêmio de seguro no valor de R$ 1.160,00 '+
                               'seja realizado em conjunto com o pagamento do(s) produto(s)/serviço(s) ora adquirido(s).';
 
     RLMemo3.Lines.Text := RLMemo2.Lines.Text;
 
-    RLMemo4.Lines.Text := '    Eu, '+lPedidoVendaModel.FANTASIA_CLI+', inscrito no CPF/MF sob o nº '+formatoCNPJCPFGenerico(nil,lClienteModel.ClientesLista[0].CNPJ_CPF_CLI, true)+', '+
+    RLMemo4.Lines.Text := '    Eu, '+lClienteModel.ClientesLista[0].FANTASIA_CLI+', inscrito no CPF/MF sob o nº '+formatoCNPJCPFGenerico(nil,lClienteModel.ClientesLista[0].CNPJ_CPF_CLI, true)+', '+
                               'proponente do Seguro Prestamista, autorizo que o pagamento do prêmio de seguro no valor de '+
                               'R$ 417,44 seja realizado em conjunto com o  pagamento do(s) produto(s)/serviço(s) ora adquirido(s).';
   finally
@@ -536,46 +550,58 @@ end;
 
 procedure TImpressaoContratos.fetchPedidoItens(pID : String);
 var
-  lPedidoItensModel : TPedidoItensModel;
-  lProdutosModel    : TProdutosModel;
-  lGarantia : Double;
+  lPedidoItensModel    : TPedidoItensModel;
+  lProdutosModel       : TProdutosModel;
+  lWebPedidoItensModel : TWebPedidoItensModel;
+  lConfiguracoes       : TerasoftConfiguracoes;
 begin
-  lPedidoItensModel := TPedidoItensModel.Create(CONEXAO);
-  lProdutosModel    := TProdutosModel.Create(CONEXAO);
+  lPedidoItensModel    := TPedidoItensModel.Create(CONEXAO);
+  lProdutosModel       := TProdutosModel.Create(CONEXAO);
+  lWebPedidoItensModel := TWebPedidoItensModel.Create(CONEXAO);
+  lConfiguracoes       := TerasoftConfiguracoes.Create(CONEXAO);
 
   try
     lPedidoItensModel.IDRecordView := pID;
     lPedidoItensModel.obterLista;
-    vGarantia := 0;
+
+    lProdutosModel.IDRecordView := lPedidoItensModel.PedidoItenssLista[0].CODIGO_PRO;
+    lProdutosModel.obterLista;
+
+    lWebPedidoItensModel.IDRecordView := lPedidoItensModel.PedidoItenssLista[0].WEB_PEDIDOITENS_ID;
+    lWebPedidoItensModel.obterLista;
+
+    mtItens.EmptyDataSet;
 
     mtItens.Append;
-    mtItensID.Value               := lPedidoItensModel.PedidoItenssLista[0].ID;
-    mtItensPRODUTO_ID.Value       := lPedidoItensModel.PedidoItenssLista[0].CODIGO_PRO;
-    mtItensQUANTIDADE.Value       := lPedidoItensModel.PedidoItenssLista[0].QTDE_CALCULADA;
-    mtItensVALOR_UNITARIO.Value   := lPedidoItensModel.PedidoItenssLista[0].VALORUNITARIO_PED;
-    mtItensVLR_GARANTIA.Value     := lPedidoItensModel.PedidoItenssLista[0].VALOR_TOTAL_GARANTIA;
-    mtItensTIPO_GARANTIA_FR.Value := lPedidoItensModel.PedidoItenssLista[0].TIPO_GARANTIA_FR;
-    mtItensVALOR_TOTAL.Value      := lPedidoItensModel.PedidoItenssLista[0].VALOR_TOTAL_ITENS;
-    mtItensOBSERVACAO.Value       := lPedidoItensModel.PedidoItenssLista[0].OBSERVACAO;
+    mtItensID.Value                    := lPedidoItensModel.PedidoItenssLista[0].ID;
+    mtItensPRODUTO_ID.Value            := lPedidoItensModel.PedidoItenssLista[0].CODIGO_PRO;
+    mtItensQUANTIDADE.Value            := lPedidoItensModel.PedidoItenssLista[0].QTDE_CALCULADA;
+    mtItensVALOR_UNITARIO.Value        := lPedidoItensModel.PedidoItenssLista[0].VALORUNITARIO_PED;
+    mtItensVLR_GARANTIA.Value          := lPedidoItensModel.PedidoItenssLista[0].QUANTIDADE_TIPO;
+    mtItensTIPO_GARANTIA_FR.Value      := lPedidoItensModel.PedidoItenssLista[0].TIPO_GARANTIA_FR;
+    mtItensVALOR_TOTAL.Value           := lPedidoItensModel.PedidoItenssLista[0].VALOR_TOTAL_ITENS;
+    mtItensPREMIO_LIQUIDO.Value        := mtItensVLR_GARANTIA.Value / 1.0738;
+    mtItensIOF.Value                   := mtItensVLR_GARANTIA.Value - mtItensPREMIO_LIQUIDO.Value;
+    mtItensRR_GARANTIA_ESTENDIDA.Value := (lConfiguracoes.valorTag('PERCENTUAL_RR_GARANTIA_ESTENDIDA', '0', tvNumero));
+    mtItensOBSERVACAO.Value            := lPedidoItensModel.PedidoItenssLista[0].OBSERVACAO;
+    mtItensINICIO_VIGENCIA.Value       := DateToStr(IncMonth(StrToDate(mtPedidoEMISSAO.Value),lProdutosModel.ProdutossLista[0].GARANTIA_PRO));
+    mtItensFIM_VIGENCIA.Value          := DateToStr(IncMonth(StrToDate(mtItensINICIO_VIGENCIA.Value),StrToInt(Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA,3,2))));
     mtItens.Post;
 
-    vGarantia := vGarantia + mtItensQUANTIDADE.Value * mtItensVLR_GARANTIA.Value;
-
-    mtPedido.Edit;
-    mtPedidoTOTAL_GARANTIA.Value := vGarantia;
-    mtPedido.Post;
-
-    lProdutosModel.IDRecordView := mtItensPRODUTO_ID.Value;
-    lProdutosModel.obterLista;
+    mtProdutos.EmptyDataSet;
 
     mtProdutos.Append;
     mtProdutosNOME_MAR.Value := lProdutosModel.ProdutossLista[0].NOME_MAR;
     mtProdutosNOME_PRO.Value := lProdutosModel.ProdutossLista[0].NOME_PRO;
     mtProdutos.Post;
 
+    RLLabel112.Caption := '*RR: '+ FormataFloat(mtItensRR_GARANTIA_ESTENDIDA.Value) +'%  (R$ '+ FormataFloat(mtItensPREMIO_LIQUIDO.Value * (mtItensRR_GARANTIA_ESTENDIDA.Value / 100)) +')';
+
+    Self.fetchMemo;
   finally
     lPedidoItensModel.Free;
     lProdutosModel.Free;
+    lWebPedidoItensModel.Free;
   end;
 
 end;
@@ -634,28 +660,130 @@ begin
 end;
 
 procedure TImpressaoContratos.imprimirGarantiaEstendida;
+var
+  lPedidoItensModel : TPedidoItensModel;
+  lWebPedidoItensModel : TWebPedidoItensModel;
 begin
-  reportPreview(RLReport1, RLReport3);
+  lPedidoItensModel := TPedidoItensModel.Create(CONEXAO);
+  lWebPedidoItensModel := TWebPedidoItensModel.Create(CONEXAO);
+  try
+    try
+      lPedidoItensModel.IDPedidoVendaView := IDPEDIDO;
+      lPedidoItensModel.obterLista;
+
+      for lPedidoItensModel in lPedidoItensModel.PedidoItenssLista do
+      begin
+        lWebPedidoItensModel.IDRecordView := lPedidoItensModel.WEB_PEDIDOITENS_ID;
+        lWebPedidoItensModel.obterLista;
+
+        if (Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA,3,2) = '12') or (Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA,3,2) = '24') then
+          reportPreview(RLReport1, lPedidoItensModel.ID)
+      end;
+      RLReport3.Preview;
+    except
+    on E:Exception do
+      CriaException(E.Message);
+    end;
+  finally
+    lPedidoItensModel.Free;
+    lWebPedidoItensModel.Free;
+  end;
 end;
 
 procedure TImpressaoContratos.imprimirPrestamista;
+var
+  lPedidoItensModel : TPedidoItensModel;
+  lWebPedidoItensModel : TWebPedidoItensModel;
 begin
-  reportPreview(RLReport16, RLReport17);
+  lPedidoItensModel := TPedidoItensModel.Create(CONEXAO);
+  lWebPedidoItensModel := TWebPedidoItensModel.Create(CONEXAO);
+  try
+    try
+      lPedidoItensModel.IDPedidoVendaView := IDPEDIDO;
+      lPedidoItensModel.obterLista;
+
+      for lPedidoItensModel in lPedidoItensModel.PedidoItenssLista do
+      begin
+        lWebPedidoItensModel.IDRecordView := lPedidoItensModel.WEB_PEDIDOITENS_ID;
+        lWebPedidoItensModel.obterLista;
+
+        reportPreview(RLReport16, lPedidoItensModel.ID)
+      end;
+      RLReport17.Preview;
+    except
+    on E:Exception do
+      CriaException(E.Message);
+    end;
+  finally
+    lPedidoItensModel.Free;
+    lWebPedidoItensModel.Free;
+  end;
 end;
 
 procedure TImpressaoContratos.imprimirRF;
+var
+  lPedidoItensModel : TPedidoItensModel;
+  lWebPedidoItensModel : TWebPedidoItensModel;
 begin
-  reportPreview(RLReport5, RLReport6);
+  lPedidoItensModel := TPedidoItensModel.Create(CONEXAO);
+  lWebPedidoItensModel := TWebPedidoItensModel.Create(CONEXAO);
+  try
+    try
+      lPedidoItensModel.IDPedidoVendaView := IDPEDIDO;
+      lPedidoItensModel.obterLista;
+
+      for lPedidoItensModel in lPedidoItensModel.PedidoItenssLista do
+      begin
+        lWebPedidoItensModel.IDRecordView := lPedidoItensModel.WEB_PEDIDOITENS_ID;
+        lWebPedidoItensModel.obterLista;
+
+        reportPreview(RLReport5, lPedidoItensModel.ID)
+      end;
+      RLReport6.Preview;
+    except
+    on E:Exception do
+      CriaException(E.Message);
+    end;
+  finally
+    lPedidoItensModel.Free;
+    lWebPedidoItensModel.Free;
+  end;
 end;
 
 procedure TImpressaoContratos.imprimirRFD;
-begin
-  reportPreview(RLReport10, RLReport11);
-end;
-
-procedure TImpressaoContratos.reportPreview(pReportItem, pReportContrato: TRLReport);
 var
   lPedidoItensModel : TPedidoItensModel;
+  lWebPedidoItensModel : TWebPedidoItensModel;
+begin
+  lPedidoItensModel := TPedidoItensModel.Create(CONEXAO);
+  lWebPedidoItensModel := TWebPedidoItensModel.Create(CONEXAO);
+  try
+    try
+      lPedidoItensModel.IDPedidoVendaView := IDPEDIDO;
+      lPedidoItensModel.obterLista;
+
+      for lPedidoItensModel in lPedidoItensModel.PedidoItenssLista do
+      begin
+        lWebPedidoItensModel.IDRecordView := lPedidoItensModel.WEB_PEDIDOITENS_ID;
+        lWebPedidoItensModel.obterLista;
+
+        reportPreview(RLReport10, lPedidoItensModel.ID)
+      end;
+      RLReport11.Preview;
+    except
+    on E:Exception do
+      CriaException(E.Message);
+    end;
+  finally
+    lPedidoItensModel.Free;
+    lWebPedidoItensModel.Free;
+  end;
+end;
+
+procedure TImpressaoContratos.reportPreview(pReportItem: TRLReport; pItem: String);
+var
+  lPedidoItensModel : TPedidoItensModel;
+  i : Integer;
 begin
 
   Self.fetchPedido;
@@ -664,21 +792,13 @@ begin
 
   lPedidoItensModel := TPedidoItensModel.Create(CONEXAO);
   try
-    try
-      lPedidoItensModel.IDPedidoVendaView := Self.IDPEDIDO;
-      lPedidoItensModel.obterLista;
+    lPedidoItensModel.IDRecordView := pItem;
+    lPedidoItensModel.obterLista;
 
-      for lPedidoItensModel in lPedidoItensModel.PedidoItenssLista do
-      begin
-        fetchPedidoItens(lPedidoItensModel.ID);
-        pReportItem.PreviewModal();
-      end;
-
-      pReportContrato.Preview();
-
-    except
-    on E:Exception do
-      CriaException(E.Message);
+    for i := 0 to lPedidoItensModel.PedidoItenssLista[0].QUANTIDADE_PED - 1 do
+    begin
+      fetchPedidoItens(lPedidoItensModel.PedidoItenssLista[0].ID);
+      pReportItem.PreviewModal();
     end;
 
   finally
