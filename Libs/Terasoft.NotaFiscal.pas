@@ -274,7 +274,7 @@ begin
               ' c.telefone_cli Fone,                                         '+#13+
               ' c.cep_cli CEP,                                               '+#13+
               ' c.endereco_cli xLgr,                                         '+#13+
-              ' c.numero_end nro,                                            '+#13+
+              ' coalesce(c.numero_end, 0) nro,                               '+#13+
               ' c.complemento xCpl,                                          '+#13+
               ' c.bairro_cli xBairro,                                        '+#13+
               ' c.cod_municipio cMun,                                        '+#13+
