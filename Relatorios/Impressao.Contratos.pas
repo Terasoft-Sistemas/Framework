@@ -379,6 +379,8 @@ type
     mtItensRR_GARANTIA_ESTENDIDA: TFloatField;
     RLDBText63: TRLDBText;
     RLDBText64: TRLDBText;
+    mtItensNUMERO_BILHETE_ITEM: TStringField;
+    RLDBText65: TRLDBText;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
@@ -423,6 +425,8 @@ type
     procedure fetchMemo;
     procedure fetchEmpresa;
     procedure reportPreview(pReportItem: TRLReport; pItem: String);
+
+    function retornaNumeroBilhete(pTipo, pFilial, pNumero: String): String;
 
     { Public declarations }
   end;
@@ -572,9 +576,7 @@ begin
     lWebPedidoItensModel.IDRecordView := lPedidoItensModel.PedidoItenssLista[0].WEB_PEDIDOITENS_ID;
     lWebPedidoItensModel.obterLista;
 
-    mtItens.EmptyDataSet;
-
-    mtItens.Append;
+    mtItens.Edit;
     mtItensID.Value                    := lPedidoItensModel.PedidoItenssLista[0].ID;
     mtItensPRODUTO_ID.Value            := lPedidoItensModel.PedidoItenssLista[0].CODIGO_PRO;
     mtItensQUANTIDADE.Value            := lPedidoItensModel.PedidoItenssLista[0].QTDE_CALCULADA;
@@ -678,6 +680,11 @@ begin
         lWebPedidoItensModel.IDRecordView := lPedidoItensModel.WEB_PEDIDOITENS_ID;
         lWebPedidoItensModel.obterLista;
 
+        mtItens.EmptyDataSet;
+        mtItens.Append;
+        mtItensNUMERO_BILHETE_ITEM.Value := retornaNumeroBilhete('9', CONEXAO.getEmpresa.LOJA, lPedidoItensModel.ID);
+        mtItens.Post;
+
         if (Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA,3,2) = '12') or (Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA,3,2) = '24') then
           reportPreview(RLReport1, lPedidoItensModel.ID)
       end;
@@ -690,6 +697,11 @@ begin
     lPedidoItensModel.Free;
     lWebPedidoItensModel.Free;
   end;
+end;
+
+function TImpressaoContratos.retornaNumeroBilhete(pTipo, pFilial, pNumero : String) : String;
+begin
+  Result := '0000055666'+pTipo+pFilial+StringOfChar('0', 11 - Length(pNumero))+pNumero;
 end;
 
 procedure TImpressaoContratos.imprimirPrestamista;
