@@ -1207,13 +1207,13 @@ procedure TPedidoVendaModel.venderItem(pVenderItem: TVenderItem);
 var
   lConfiguracoes     : TerasoftConfiguracoes;
   lProdutosModel     : TProdutosModel;
-  lPedidoItensModel,
-  lModel             : TPedidoItensModel;
+  lPedidoItensModel  : TPedidoItensModel;
   lPedidoVendaLista  : TPedidoVendaDao;
   lProdutoPreco      : TProdutoPreco;
   lSaldoDisponivel   : Double;
   lCodBalanca,
-  lQuantidade        : String;
+  lQuantidade,
+  lIDItem            : String;
 
 begin
   lConfiguracoes    := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
@@ -1266,15 +1266,16 @@ begin
         CriaException('Produto sem saldo disponível em estoque.')
     end;
 
-    if (lPedidoItensModel.obterIDItem(self.FNUMERO_PED, lProdutosModel.ProdutossLista[0].CODIGO_PRO) <> '') and
-       (lConfiguracoes.valorTag('FRENTE_CAIXA_SOMAR_QTDE_ITENS', 'S', tvBool) = 'S') and
-       (lProdutosModel.ProdutossLista[0].USAR_BALANCA <> 'S') then
+    lIDItem := lPedidoItensModel.obterIDItem(self.FNUMERO_PED, lProdutosModel.ProdutossLista[0].CODIGO_PRO);
+
+    if (lIDItem <> '') and (lConfiguracoes.valorTag('FRENTE_CAIXA_SOMAR_QTDE_ITENS', 'S', tvBool) = 'S')
+    and (lProdutosModel.ProdutossLista[0].USAR_BALANCA <> 'S') then
     begin
-      lModel := lPedidoItensModel.carregaClasse(lPedidoItensModel.PedidoItenssLista[0].ID);
-      lModel.Acao := tacAlterar;
-      lModel.QUANTIDADE_PED := lPedidoItensModel.PedidoItenssLista[0].QUANTIDADE_PED + StrToFloat(lQuantidade);
-      lModel.QUANTIDADE_NEW := lPedidoItensModel.PedidoItenssLista[0].QUANTIDADE_NEW + StrToFloat(lQuantidade);
-      lModel.Salvar;
+      lPedidoItensModel := lPedidoItensModel.carregaClasse(lIDItem);
+      lPedidoItensModel.Acao := tacAlterar;
+      lPedidoItensModel.QUANTIDADE_PED := lPedidoItensModel.QUANTIDADE_PED + StrToFloat(lQuantidade);
+      lPedidoItensModel.QUANTIDADE_NEW := lPedidoItensModel.QUANTIDADE_NEW + StrToFloat(lQuantidade);
+      lPedidoItensModel.Salvar;
     end
     else
     begin

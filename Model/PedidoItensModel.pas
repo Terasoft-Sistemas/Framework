@@ -763,7 +763,7 @@ var
 begin
   lPedidoItensDao := TPedidoItensDao.Create(vIConexao);
   try
-    lPedidoItensDao.obterIDItem(pPedido, pProduto);
+    result := lPedidoItensDao.obterIDItem(pPedido, pProduto);
   finally
     lPedidoItensDao.Free;
   end;
