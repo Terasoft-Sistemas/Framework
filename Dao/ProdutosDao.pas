@@ -1133,11 +1133,11 @@ begin
           '     produto p                                                                               '+#13+
           '                                                                                             '+#13+
           ' left join grupo_garantia g on g.id= p.grupo_garantia_id                                     '+#13+
-          ' left join grupo_garantia_faixa gf on gf.grupo_garantia_id = g.id                            '+#13+
+          ' left join grupo_garantia_faixa gf on gf.grupo_garantia_id = g.id and '+FormataFloatFireBird(FloatToStr(pValorFaixa))+' between gf.valor_venda_inicial and  gf.valor_venda_final '+#13+
           '                                                                                             '+#13+
           ' where                                                                                       '+#13+
-          '     '+FormataFloatFireBird(FloatToStr(pValorFaixa))+' between gf.valor_venda_inicial and    '+#13+
-          '     gf.valor_venda_final and p.codigo_pro = '+QuotedStr(pProduto)+'                         '+#13;
+     //     '     '+FormataFloatFireBird(FloatToStr(pValorFaixa))+' between gf.valor_venda_inicial and  gf.valor_venda_final and   '+#13+
+          '     p.codigo_pro = '+QuotedStr(pProduto)+'                         '+#13;
 
   try
     lQry.SQL.Add(lSQL);
