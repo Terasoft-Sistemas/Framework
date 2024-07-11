@@ -11,6 +11,7 @@ interface
 
 implementation
   uses
+    Terasoft.Framework.Credipar.Analisador.iface.Conts,
     Terasoft.Framework.Log,
     strUtils,SysUtils,Classes,
     Terasoft.Framework.Texto,
@@ -179,6 +180,17 @@ begin
       ds.dataset.Next;
     end;
 
+    registraOpcoesCampos('credipar_tipodoc_analise', CREDIPAR_TIPODOC_CCB, 'CCB');
+    registraOpcoesCampos('credipar_tipodoc_analise', CREDIPAR_TIPODOC_INFPESSOAL, 'Informação Pessoal');
+    registraOpcoesCampos('credipar_tipodoc_analise', CREDIPAR_TIPODOC_COMPRESIDENCIA, 'Comprovante de residência');
+    registraOpcoesCampos('credipar_tipodoc_analise', CREDIPAR_TIPODOC_COMPRENDA, 'Comprovante de renda');
+    registraOpcoesCampos('credipar_tipodoc_analise', CREDIPAR_TIPODOC_COMPRENDA, 'Comprovante de renda');
+    registraOpcoesCampos('credipar_tipodoc_analise', CREDIPAR_TIPODOC_EXPCREDITO, 'Experiência de Crédito');
+    registraOpcoesCampos('credipar_tipodoc_analise', CREDIPAR_TIPODOC_CARTABACEN, 'Carta BACEN');
+    registraOpcoesCampos('credipar_tipodoc_analise', CREDIPAR_TIPODOC_CONSREGIONAL, 'Conselho Regional');
+    registraOpcoesCampos('credipar_tipodoc_analise', CREDIPAR_TIPODOC_CONTRATOSOCIAL, 'Contrato Social');
+    registraOpcoesCampos('credipar_tipodoc_analise', CREDIPAR_TIPODOC_IR, 'Declaração de Imposto de Renda');
+    registraOpcoesCampos('credipar_tipodoc_analise', CREDIPAR_TIPODOC_OUTROS, 'Outros');
 
   finally
     gOpcoesDefaultRegistradas := true;
