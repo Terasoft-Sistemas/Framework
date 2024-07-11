@@ -377,6 +377,8 @@ type
     RLLabel111: TRLLabel;
     RLLabel112: TRLLabel;
     mtItensRR_GARANTIA_ESTENDIDA: TFloatField;
+    RLDBText63: TRLDBText;
+    RLDBText64: TRLDBText;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
