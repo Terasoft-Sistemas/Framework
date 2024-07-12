@@ -119,6 +119,14 @@ begin
     lModel.SYSTIME                := lQry.FieldByName('SYSTIME').AsString;
     lModel.PRODUCAO_ID            := lQry.FieldByName('PRODUCAO_ID').AsString;
     lModel.PRODUCAO_LOJA          := lQry.FieldByName('PRODUCAO_LOJA').AsString;
+    lModel.ENTREGA_ENDERECO       := lQry.FieldByName('ENTREGA_ENDERECO').AsString;
+    lModel.ENTREGA_COMPLEMENTO    := lQry.FieldByName('ENTREGA_COMPLEMENTO').AsString;
+    lModel.ENTREGA_NUMERO         := lQry.FieldByName('ENTREGA_NUMERO').AsString;
+    lModel.ENTREGA_BAIRRO         := lQry.FieldByName('ENTREGA_BAIRRO').AsString;
+    lModel.ENTREGA_CIDADE         := lQry.FieldByName('ENTREGA_CIDADE').AsString;;
+    lModel.ENTREGA_UF             := lQry.FieldByName('ENTREGA_UF').AsString;
+    lModel.ENTREGA_CEP            := lQry.FieldByName('ENTREGA_CEP').AsString;
+    lModel.ENTREGA_COD_MUNICIPIO  := lQry.FieldByName('ENTREGA_COD_MUNICIPIO').AsString;
 
     Result := lModel;
   finally
