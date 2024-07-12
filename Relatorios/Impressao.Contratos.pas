@@ -165,8 +165,6 @@ type
     RLLabel58: TRLLabel;
     RLLabel59: TRLLabel;
     RLLabel60: TRLLabel;
-    RLLabel61: TRLLabel;
-    RLLabel62: TRLLabel;
     RLImage10: TRLImage;
     RLImage12: TRLImage;
     RLImage17: TRLImage;
@@ -314,7 +312,6 @@ type
     RLDBText21: TRLDBText;
     RLDBText22: TRLDBText;
     RLDBText23: TRLDBText;
-    RLDBText24: TRLDBText;
     RLDBText25: TRLDBText;
     RLDBText26: TRLDBText;
     RLDBText27: TRLDBText;
@@ -339,7 +336,6 @@ type
     dsEmpresa: TDataSource;
     mtEmpresa: TFDMemTable;
     mtEmpresaCNPJ: TStringField;
-    RLDBText48: TRLDBText;
     RLDBText49: TRLDBText;
     mtReceberItens: TFDMemTable;
     dsReceberItens: TDataSource;
@@ -409,6 +405,16 @@ type
     RLDBText71: TRLDBText;
     RLDBText72: TRLDBText;
     mtItensVALOR_NOTA_FISCAL: TFloatField;
+    RLLabel61: TRLLabel;
+    RLDBText24: TRLDBText;
+    RLLabel62: TRLLabel;
+    RLDBText48: TRLDBText;
+    RLLabel112: TRLLabel;
+    RLDBText73: TRLDBText;
+    RLDBText74: TRLDBText;
+    RLDBText75: TRLDBText;
+    mtItensVALOR_FRANQUIA: TFloatField;
+    mtItensPREMIO_UNICO_FR: TFloatField;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
@@ -595,10 +601,11 @@ begin
     mtItensVLR_GARANTIA.Value          := lPedidoItensModel.PedidoItenssLista[0].QUANTIDADE_TIPO;
     mtItensTIPO_GARANTIA_FR.Value      := lPedidoItensModel.PedidoItenssLista[0].TIPO_GARANTIA_FR;
     mtItensVALOR_TOTAL.Value           := lPedidoItensModel.PedidoItenssLista[0].VALOR_TOTAL_ITENS;
-    mtItensVALOR_NOTA_FISCAL.Value     := lPedidoItensModel.PedidoItenssLista[0].VALORUNITARIO_PED - (lPedidoItensModel.PedidoItenssLista[0].DESCONTO_PED / lPedidoItensModel.PedidoItenssLista[0].VALORUNITARIO_PED * 100);
+    mtItensVALOR_NOTA_FISCAL.Value     := mtItensVALOR_UNITARIO.Value * (1 - (lPedidoItensModel.PedidoItenssLista[0].DESCONTO_PED / 100));
     mtItensPREMIO_LIQUIDO.Value        := mtItensVLR_GARANTIA.Value / 1.0738;
     mtItensIOF.Value                   := mtItensVLR_GARANTIA.Value - mtItensPREMIO_LIQUIDO.Value;
     mtItensRR_GARANTIA_ESTENDIDA.Value := (lConfiguracoes.valorTag('PERCENTUAL_RR_GARANTIA_ESTENDIDA', '0', tvNumero));
+    mtItensVALOR_FRANQUIA .Value       := mtItensVALOR_UNITARIO.Value * (20 / 100);
     mtItensOBSERVACAO.Value            := lPedidoItensModel.PedidoItenssLista[0].OBSERVACAO;
     mtItensINICIO_VIGENCIA.Value       := retornaInicioVigencia(mtPedidoEMISSAO.Value, lProdutosModel.ProdutossLista[0].GARANTIA_PRO);
     mtItensFIM_VIGENCIA.Value          := DateToStr(IncMonth(StrToDate(mtItensINICIO_VIGENCIA.Value),StrToInt(Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA,3,2))));
