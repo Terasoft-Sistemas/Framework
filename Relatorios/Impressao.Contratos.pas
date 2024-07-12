@@ -406,6 +406,8 @@ type
     lblIOFPrestamista: TRLLabel;
     memoCoberturaPrestamista: TRLMemo;
     lblPlano3: TRLLabel;
+    RLDBText71: TRLDBText;
+    RLDBText72: TRLDBText;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
