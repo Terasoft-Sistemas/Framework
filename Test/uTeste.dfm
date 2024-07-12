@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 1250
     Height = 749
-    ActivePage = TabSheet10
+    ActivePage = Usuario
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -1214,7 +1214,7 @@ object Form1: TForm1
         Height = 46
         Caption = 'Calcular Peso'
         TabOrder = 10
-        OnClick = Button112Click
+        OnClick = BuButton116Click
       end
     end
     object Orcamento: TTabSheet
@@ -1462,6 +1462,19 @@ object Form1: TForm1
         Caption = 'Imprimir RFD'
         TabOrder = 3
         OnClick = imprimirRFDClick
+      end
+    end
+    object Usuario: TTabSheet
+      Caption = 'Usuario'
+      ImageIndex = 15
+      object Button112: TButton
+        Left = 3
+        Top = 19
+        Width = 182
+        Height = 46
+        Caption = 'Alterar Senha'
+        TabOrder = 0
+        OnClick = Button116Click
       end
     end
   end

@@ -200,6 +200,8 @@ type
     imprimirRF: TButton;
     imprimirPrestamista: TButton;
     imprimirRFD: TButton;
+    Usuario: TTabSheet;
+    Button112: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -317,7 +319,7 @@ type
     procedure Button109Click(Sender: TObject);
     procedure Button110Click(Sender: TObject);
     procedure Button111Click(Sender: TObject);
-    procedure Button112Click(Sender: TObject);
+    procedure BuButton116Click(Sender: TObject);
     procedure BtnEndereco1Click(Sender: TObject);
     procedure BtnEndereco2Click(Sender: TObject);
     procedure BtnEndereco3Click(Sender: TObject);
@@ -345,6 +347,7 @@ type
     procedure imprimirRFClick(Sender: TObject);
     procedure imprimirRFDClick(Sender: TObject);
     procedure imprimirPrestamistaClick(Sender: TObject);
+    procedure Button116Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -376,7 +379,8 @@ uses
   PedidoCompraModel, PedidoCompraItensModel, ClientesContatoModel, DescontoModel,
   PromocaoModel, TransportadoraModel, PrevisaoPedidoCompraModel, SaidasModel,
   SaidasItensModel, ClientesEnderecoModel, OrcamentoModel, OrcamentoItensModel, Terasoft.Utils,
-  SolicitacaoDescontoModel, PermissaoRemotaModel, MovimentoSerialModel, Impressao.Contratos;
+  SolicitacaoDescontoModel, PermissaoRemotaModel, MovimentoSerialModel, Impressao.Contratos,
+  UsuarioModel;
 
 {$R *.dfm}
 
@@ -3477,7 +3481,7 @@ begin
   end;
 end;
 
-procedure TForm1.Button112Click(Sender: TObject);
+procedure TForm1.BuButton116Click(Sender: TObject);
 var
   lSaidasModel : TSaidasModel;
 begin
@@ -3529,6 +3533,26 @@ begin
     end;
   finally
     lMovimentoSerial.Free;
+  end;
+end;
+
+procedure TForm1.Button116Click(Sender: TObject);
+var
+  lUsuarioModel : TUsuarioModel;
+  lIDUsuario,
+  lSenhaAtual,
+  lNovaSenha    : String;
+begin
+  lUsuarioModel := TUsuarioModel.Create(vIConexao);
+  try
+    lIDUsuario := '000002';
+    lSenhaAtual := InputBox('Senha', 'Digite a senha atual:', '');
+    lNovaSenha := InputBox('Senha', 'Digite a nova senha:', '');
+
+    lUsuarioModel.alterarSenha(lIDUsuario, lSenhaAtual, lNovaSenha);
+
+  finally
+    lUsuarioModel.Free;
   end;
 end;
 

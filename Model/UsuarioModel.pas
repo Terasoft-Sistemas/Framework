@@ -160,13 +160,17 @@ type
     function Salvar      : String;
     function validaLogin(user,pass: String): Boolean;
     function verificaServicoNuvem: Boolean;
+    function alterarSenha(pIDUsuario, pSenhaAtual, pNovaSenha : String) : Boolean;
 
     procedure obterLista;
   end;
 
 implementation
 
-uses UsuarioDao, Terasoft.Configuracoes;
+uses
+  UsuarioDao,
+  Terasoft.Utils,
+  Terasoft.Configuracoes;
 
 { TUsuarioModel }
 
@@ -195,6 +199,41 @@ function TUsuarioModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
   Result    := self.Salvar;
+end;
+
+function TUsuarioModel.alterarSenha(pIDUsuario, pSenhaAtual, pNovaSenha: String): Boolean;
+var
+  lUsuarioModel : TUsuarioModel;
+  lUsuarioDao   : TUsuarioDao;
+begin
+  lUsuarioDao := TUsuarioDao.Create(vIConexao);
+  try
+    Result := False;
+
+    if pIDUsuario = '' then
+      CriaException('ID do usuário não informado.');
+
+    if pSenhaAtual = '' then
+      CriaException('Senha atual não informada.');
+
+    if pNovaSenha = '' then
+      CriaException('Nova senha não informada.');
+
+    lUsuarioModel := lUsuarioDao.carregaClasse(pIDUsuario);
+
+    if lUsuarioModel.SENHA = pSenhaAtual then
+    begin
+      lUsuarioModel.FAcao := tacAlterar;
+      lUsuarioModel.SENHA := pNovaSenha;
+      lUsuarioModel.Salvar;
+
+      Result := True;
+    end;
+
+  finally
+    lUsuarioDao.Free;
+    lUsuarioModel.Free;
+  end;
 end;
 
 function TUsuarioModel.carregaClasse(ID: String): TUsuarioModel;
@@ -263,7 +302,7 @@ var
 begin
   try
     lUsuarioDao := TUsuarioDao.Create(vIConexao);
-    
+
     lUsuarioDao.validaLogin(user,pass);
 
     if lUsuarioDao.Status = 'S' then
