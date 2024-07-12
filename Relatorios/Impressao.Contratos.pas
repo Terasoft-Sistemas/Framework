@@ -214,12 +214,10 @@ type
     RLDraw18: TRLDraw;
     RLLabel84: TRLLabel;
     RLLabel85: TRLLabel;
-    RLLabel86: TRLLabel;
     RLLabel87: TRLLabel;
     RLLabel88: TRLLabel;
     RLLabel89: TRLLabel;
     RLLabel90: TRLLabel;
-    RLLabel91: TRLLabel;
     TabSheet12: TTabSheet;
     RLReport11: TRLReport;
     RLImage21: TRLImage;
@@ -233,8 +231,6 @@ type
     TabSheet15: TTabSheet;
     RLReport14: TRLReport;
     TabSheet16: TTabSheet;
-    RLDraw19: TRLDraw;
-    RLLabel92: TRLLabel;
     RLImage20: TRLImage;
     RLImage25: TRLImage;
     RLImage27: TRLImage;
@@ -322,7 +318,6 @@ type
     RLDBText32: TRLDBText;
     RLDBText33: TRLDBText;
     RLDBText34: TRLDBText;
-    RLDBText35: TRLDBText;
     RLDBText36: TRLDBText;
     RLDBText37: TRLDBText;
     RLDBText38: TRLDBText;
@@ -336,7 +331,6 @@ type
     dsEmpresa: TDataSource;
     mtEmpresa: TFDMemTable;
     mtEmpresaCNPJ: TStringField;
-    RLDBText49: TRLDBText;
     mtReceberItens: TFDMemTable;
     dsReceberItens: TDataSource;
     mtReceberItensVALOR_PARCELA: TFloatField;
@@ -423,6 +417,21 @@ type
     mtItensIOF_FR: TFloatField;
     RLDBText80: TRLDBText;
     RLDBText81: TRLDBText;
+    RLDBText35: TRLDBText;
+    RLLabel86: TRLLabel;
+    RLDBText49: TRLDBText;
+    RLLabel91: TRLLabel;
+    RLDBText82: TRLDBText;
+    RLDBText83: TRLDBText;
+    RLLabel92: TRLLabel;
+    RLDBText84: TRLDBText;
+    RLDBText85: TRLDBText;
+    RLDBText86: TRLDBText;
+    RLDBText87: TRLDBText;
+    lblRRRouboFurtoDanos: TRLLabel;
+    RLDBText88: TRLDBText;
+    RLDBText89: TRLDBText;
+    RLDBText90: TRLDBText;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
@@ -630,6 +639,7 @@ begin
 
     lblRRGarantiaEstendida.Caption := '*RR: '+ FormataFloat(mtItensRR_GARANTIA_ESTENDIDA.Value) +'%  (R$ '+ FormataFloat(mtItensPREMIO_LIQUIDO.Value * (mtItensRR_GARANTIA_ESTENDIDA.Value / 100)) +')';
     lblRRRouboFurto.Caption        := '*RR: '+ FormataFloat(mtItensRR_GARANTIA_ESTENDIDA.Value) +'%  (R$ '+ FormataFloat(mtItensPREMIO_UNICO_FR.Value * (mtItensRR_GARANTIA_ESTENDIDA.Value / 100)) +')';
+    lblRRRouboFurtoDanos.Caption   := '*RR: '+ FormataFloat(mtItensRR_GARANTIA_ESTENDIDA.Value) +'%  (R$ '+ FormataFloat(mtItensPREMIO_UNICO_FR.Value * (mtItensRR_GARANTIA_ESTENDIDA.Value / 100)) +')';
     Self.fetchMemo;
   finally
     lPedidoItensModel.Free;
