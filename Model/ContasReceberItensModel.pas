@@ -225,7 +225,7 @@ type
     function gerarContasReceberCartao(pValor, pPortador, pIdAdmCartao, pObs, pObsComprementar: String; pParcelas: Integer): String;
     function parcelasAberta(pFatura: String): Boolean;
 
-    function gerarContasReceberCheque(pValor, pParcela, pPortador, pConta, pObs : String) : String;
+    function gerarContasReceberRecebimento(pValor, pParcela, pPortador, pConta, pObs : String) : String;
 
     function valorAberto(pCliente : String) : Double;
 
@@ -668,7 +668,7 @@ begin
   end;
 end;
 
-function TContasReceberItensModel.gerarContasReceberCheque(pValor, pParcela, pPortador, pConta, pObs : String): String;
+function TContasReceberItensModel.gerarContasReceberRecebimento(pValor, pParcela, pPortador, pConta, pObs : String): String;
 var
   lContasReceberModel : TContasReceberModel;
   lContasReceberItensInserir,
