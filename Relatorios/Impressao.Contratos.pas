@@ -408,6 +408,7 @@ type
     lblPlano3: TRLLabel;
     RLDBText71: TRLDBText;
     RLDBText72: TRLDBText;
+    mtItensVALOR_NOTA_FISCAL: TFloatField;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
@@ -452,6 +453,7 @@ type
     procedure fetchMemo;
     procedure fetchEmpresa;
     procedure reportPreview(pReportItem: TRLReport; pItem: String);
+    function retornaInicioVigencia(pInicio: String; pMesesGarantia: Integer) : String;
 
     function retornaNumeroBilhete(pTipo, pFilial, pNumero: String): String;
 
@@ -543,16 +545,18 @@ begin
     lContasReceberItensModel.OrderView := 'CONTASRECEBERITENS.VENCIMENTO_REC DESC';
     lContasReceberItensModel.obterLista;
 
-    lContasReceberItensModel := lContasReceberItensModel.ContasReceberItenssLista[0];
+    for lContasReceberItensModel in lContasReceberItensModel.ContasReceberItenssLista do begin
+      mtReceberItens.Append;
+      mtReceberItensVALOR_PARCELA.Value           := lContasReceberItensModel.VLRPARCELA_REC;
+      mtReceberItensTOTAL_PARCELAS.Value          := lContasReceberItensModel.TOTALPARCELAS_REC;
+      mtReceberItensFIM_VIGENCIA_VENCIMENTO.Value := lContasReceberItensModel.VENCIMENTO_REC;
+      mtReceberItens.Post;
 
-    mtReceberItens.Append;
-    mtReceberItensVALOR_PARCELA.Value           := lContasReceberItensModel.VLRPARCELA_REC;
-    mtReceberItensTOTAL_PARCELAS.Value          := lContasReceberItensModel.TOTALPARCELAS_REC;
-    mtReceberItensFIM_VIGENCIA_VENCIMENTO.Value := lContasReceberItensModel.VENCIMENTO_REC;
-    mtReceberItens.Post;
+      lblRRPrestamista.Caption  := 'RR: '+ FormataFloat(mtPedidoRR_PRESTAMISTA.Value) +'%  (R$ '+ FormataFloat(mtPedidoSEGURO_PRESTAMISTA.Value * (mtPedidoRR_PRESTAMISTA.Value / 100)) +')';
+      lblIOFPrestamista.Caption := 'R$ '+FormataFloat(0.038 * (mtPedidoSEGURO_PRESTAMISTA.Value))+' ';
 
-    lblRRPrestamista.Caption  := 'RR: '+ FormataFloat(mtPedidoRR_PRESTAMISTA.Value) +'%  (R$ '+ FormataFloat(mtPedidoSEGURO_PRESTAMISTA.Value * (mtPedidoRR_PRESTAMISTA.Value / 100)) +')';
-    lblIOFPrestamista.Caption := 'R$ '+FormataFloat(0.038 * (mtPedidoSEGURO_PRESTAMISTA.Value))+' ';
+      exit;
+    end;
 
   finally
     lPedidoVendaModel.Free;
@@ -591,11 +595,12 @@ begin
     mtItensVLR_GARANTIA.Value          := lPedidoItensModel.PedidoItenssLista[0].QUANTIDADE_TIPO;
     mtItensTIPO_GARANTIA_FR.Value      := lPedidoItensModel.PedidoItenssLista[0].TIPO_GARANTIA_FR;
     mtItensVALOR_TOTAL.Value           := lPedidoItensModel.PedidoItenssLista[0].VALOR_TOTAL_ITENS;
+    mtItensVALOR_NOTA_FISCAL.Value     := lPedidoItensModel.PedidoItenssLista[0].VALORUNITARIO_PED - (lPedidoItensModel.PedidoItenssLista[0].DESCONTO_PED / lPedidoItensModel.PedidoItenssLista[0].VALORUNITARIO_PED * 100);
     mtItensPREMIO_LIQUIDO.Value        := mtItensVLR_GARANTIA.Value / 1.0738;
     mtItensIOF.Value                   := mtItensVLR_GARANTIA.Value - mtItensPREMIO_LIQUIDO.Value;
     mtItensRR_GARANTIA_ESTENDIDA.Value := (lConfiguracoes.valorTag('PERCENTUAL_RR_GARANTIA_ESTENDIDA', '0', tvNumero));
     mtItensOBSERVACAO.Value            := lPedidoItensModel.PedidoItenssLista[0].OBSERVACAO;
-    mtItensINICIO_VIGENCIA.Value       := DateToStr(IncMonth(StrToDate(mtPedidoEMISSAO.Value),lProdutosModel.ProdutossLista[0].GARANTIA_PRO));
+    mtItensINICIO_VIGENCIA.Value       := retornaInicioVigencia(mtPedidoEMISSAO.Value, lProdutosModel.ProdutossLista[0].GARANTIA_PRO);
     mtItensFIM_VIGENCIA.Value          := DateToStr(IncMonth(StrToDate(mtItensINICIO_VIGENCIA.Value),StrToInt(Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA,3,2))));
     mtItens.Post;
 
@@ -737,6 +742,14 @@ begin
 
 end;
 
+
+function TImpressaoContratos.retornaInicioVigencia(pInicio: String; pMesesGarantia: Integer): String;
+begin
+  if pMesesGarantia > 0 then
+    Result := DateToStr(IncMonth((StrToDate(pInicio)+1),pMesesGarantia))
+  else
+    Result := pInicio;
+end;
 
 function TImpressaoContratos.retornaNumeroBilhete(pTipo, pFilial, pNumero : String) : String;
 begin
