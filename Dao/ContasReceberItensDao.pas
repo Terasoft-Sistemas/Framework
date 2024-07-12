@@ -77,6 +77,7 @@ type
     function obterContaCliente(pContaClienteParametros: TContaClienteParametros): TListaContaClienteRetorno;
     function carregaClasse(pId: String; pLoja: String = ''): TContasReceberItensModel;
     function where: String;
+    function valorAberto(pCliente : String) : Double;
 
     function gerarChamadaTEF(pFatura, pTefModalidade, pTefParcelamento, pTefAdquirente: String): String;
     procedure setParams(var pQry: TFDQuery; pContasReceberItensModel: TContasReceberItensModel);
@@ -762,6 +763,30 @@ end;
 procedure TContasReceberItensDao.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
+end;
+
+function TContasReceberItensDao.valorAberto(pCliente: String): Double;
+var
+  lQry : TFDQuery;
+  lSQL : String;
+begin
+
+  lQry := vIConexao.CriarQuery;
+
+  try
+    lSQL := ' select sum(contasreceberitens.vlrparcela_rec - contasreceberitens.valorrec_rec) valor_aberto     '+SLineBreak+
+            '   from contasreceberitens                                                                        '+SLineBreak+
+            '  where contasreceberitens.vlrparcela_rec > contasreceberitens.valorrec_rec                       '+SLineBreak+
+            '    and contasreceberitens.situacao_rec = ''A''                                                   '+SLineBreak+
+            '    and contasreceberitens.codigo_cli = ' + QuotedStr(pCliente);
+
+    lQry.Open(lSQL);
+
+    Result := lQry.FieldByName('VALOR_ABERTO').AsFloat;
+
+  finally
+    lQry.Free;
+  end;
 end;
 
 end.

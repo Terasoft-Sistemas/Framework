@@ -227,6 +227,8 @@ type
 
     function gerarContasReceberCheque(pValor, pParcela, pPortador, pConta, pObs : String) : String;
 
+    function valorAberto(pCliente : String) : Double;
+
     property ContasReceberItenssLista: TObjectList<TContasReceberItensModel> read FContasReceberItenssLista write SetContasReceberItenssLista;
     property RecebimentoContasReceberLista: TObjectList<TRecebimentoContasReceber> read FRecebimentoContasReceberLista write SetRecebimentoContasReceberLista;
 
@@ -1221,6 +1223,18 @@ end;
 procedure TContasReceberItensModel.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
+end;
+
+function TContasReceberItensModel.valorAberto(pCliente: String): Double;
+var
+  lContasReceberItensDao : TContasReceberItensDao;
+begin
+  lContasReceberItensDao := TContasReceberItensDao.Create(vIConexao);
+  try
+    Result := lContasReceberItensDao.valorAberto(pCliente);
+  finally
+    lContasReceberItensDao.Free;
+  end;
 end;
 
 { TRecebimentoContasReceber }
