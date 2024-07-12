@@ -3856,9 +3856,9 @@ var
 begin
   lImpressaoContratos := TImpressaoContratos.Create(lImpressaoContratos);
   try
-      lImpressaoContratos.IDPEDIDO    := InputBox('Imprimir prestamista', 'Digite o pedido de venda:', '040697');
-      lImpressaoContratos.CONEXAO     := vIConexao;
-      lImpressaoContratos.imprimirPrestamista;
+    lImpressaoContratos.IDPEDIDO    := InputBox('Imprimir prestamista', 'Digite o pedido de venda:', '040718');
+    lImpressaoContratos.CONEXAO     := vIConexao;
+    lImpressaoContratos.imprimirPrestamista;
   finally
     lImpressaoContratos.Free;
   end;

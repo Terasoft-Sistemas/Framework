@@ -295,7 +295,13 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From contasreceberitens where 1=1 ';
+    lSql := 'select count(*) records                                                               '+SLineBreak+
+            '  From contasreceberitens                                                             '+SLineBreak+
+            ' inner join portador on contasreceberitens.codigo_por = portador.codigo_port          '+SLineBreak+
+            ' inner join contasreceber on contasreceberitens.fatura_rec = contasreceber.fatura_rec '+SLineBreak+
+            ' inner join clientes on contasreceber.codigo_cli = clientes.codigo_cli                '+SLineBreak+
+            ' where 1=1 ';
+
     lSql := lSql + where;
 
     lQry.Open(lSQL);
