@@ -46,8 +46,8 @@ interface
       procedure restoreParent;
       procedure posiciona(x: Integer = -1; y: Integer = -1; width: Integer = -1; height: Integer = -1);
       procedure setLogger(value: ILogSimples);
-      procedure ___open(const url: TipoWideStringFramework; logger: ILogSimples); overload;
-      procedure open(const url: TipoWideStringFramework; logger: ILogSimples; dataFolder: TipoWideStringFramework); overload;
+      procedure ___open(const url: TipoWideStringFramework; logger: ILogSimples=nil); overload;
+      procedure open(const url: TipoWideStringFramework; logger: ILogSimples=nil; dataFolder: TipoWideStringFramework=''); overload;
       procedure setNotifyWV(const value: TNotifyWV);
       function getNotifyWV: TNotifyWV;
       property ebNavigationStarting: TNotifyWV read getNotifyWV write setNotifyWV;
@@ -64,12 +64,17 @@ interface
       property text: TipoWideStringFramework read getText write setText;
     end;
 
-    IWebBrowserIface = interface(IWebBrowserIface_01)
+    IWebBrowserIface_02 = interface(IWebBrowserIface_01)
     ['{E5BF434E-FF78-4FA9-862A-648D459DC198}']
       procedure setNotifyWVEndNavigate(const value: TNotifyWVGeneric);
       function getNotifyWVEndNavigate: TNotifyWVGeneric;
       procedure getHTML(pCallbak: TOnExecuteScriptCallEvent);
       property ebNavigationFinished: TNotifyWVGeneric read getNotifyWVEndNavigate write setNotifyWVEndNavigate;
+    end;
+
+    IWebBrowserIface = interface(IWebBrowserIface_02)
+    ['{3F7D0962-6EE3-4D66-AC99-8283582BD722}']
+      procedure executeJavaScript(pScript: TipoWideStringFramework);
     end;
 
 

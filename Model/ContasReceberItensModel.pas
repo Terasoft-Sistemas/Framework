@@ -298,7 +298,12 @@ end;
 function TContasReceberItensModel.baixar(pValor: String): String;
 begin
   self.FAcao           := tacAlterar;
-  self.FVALORREC_REC   := FloatToStr(StrToFloat(self.FVALORREC_REC) + StrToFloat(pValor));
+
+  if (StrToFloat(self.FVALORREC_REC) + StrToFloat(pValor)) > StrToFloat(self.VLRPARCELA_REC) then
+    self.FVALORREC_REC := self.VLRPARCELA_REC
+  else
+    self.FVALORREC_REC := FloatToStr(StrToFloat(self.FVALORREC_REC) + StrToFloat(pValor));
+
   self.FDATABAIXA_REC  := DateToStr(vIConexao.DataServer);
 
   if StrToFloat(self.FVALORREC_REC) >= StrToFloat(self.VLRPARCELA_REC) then
@@ -597,8 +602,10 @@ begin
 
   try
     lContasReceberModel := lContasReceberModel.carregaClasse(self.FFATURA_REC);
+
     lAdmCartaoModel.IDRecordView := StrToInt(pIdAdmCartao);
     lAdmCartaoModel.obterLista;
+
     lContasReceberModel.Acao              := tacIncluir;
     lContasReceberModel.LOJA              := self.FLOJA;
     lContasReceberModel.PEDIDO_REC        := '999999';
@@ -650,7 +657,12 @@ begin
     end;
 
     self.Acao := tacAlterar;
-    self.FVALORREC_REC           := FloatToStr(self.FVALORREC_REC + StrToFloat(pValor));
+
+    if (self.FVALORREC_REC + StrToFloat(pValor)) > self.VLRPARCELA_REC then
+      self.FVALORREC_REC         := self.VLRPARCELA_REC
+    else
+      self.FVALORREC_REC         := FloatToStr(self.FVALORREC_REC + StrToFloat(pValor));
+
     self.FVALOR_RECEBIDO_CARTAO  := pValor;
     self.FFATURA_RECEBIDA_CARTAO := lFaturaReceber;
     self.FDATABAIXA_REC          := DateToStr(vIConexao.DataServer);
