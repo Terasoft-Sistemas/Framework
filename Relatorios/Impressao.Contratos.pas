@@ -415,6 +415,14 @@ type
     RLDBText75: TRLDBText;
     mtItensVALOR_FRANQUIA: TFloatField;
     mtItensPREMIO_UNICO_FR: TFloatField;
+    RLDBText76: TRLDBText;
+    RLDBText77: TRLDBText;
+    RLDBText78: TRLDBText;
+    RLDBText79: TRLDBText;
+    lblRRRouboFurto: TRLLabel;
+    mtItensIOF_FR: TFloatField;
+    RLDBText80: TRLDBText;
+    RLDBText81: TRLDBText;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
@@ -599,13 +607,15 @@ begin
     mtItensQUANTIDADE.Value            := lPedidoItensModel.PedidoItenssLista[0].QTDE_CALCULADA;
     mtItensVALOR_UNITARIO.Value        := lPedidoItensModel.PedidoItenssLista[0].VALORUNITARIO_PED;
     mtItensVLR_GARANTIA.Value          := lPedidoItensModel.PedidoItenssLista[0].QUANTIDADE_TIPO;
-    mtItensTIPO_GARANTIA_FR.Value      := lPedidoItensModel.PedidoItenssLista[0].TIPO_GARANTIA_FR;
+    mtItensTIPO_GARANTIA_FR.Value      := Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA_FR,3,2) + ' Meses';
     mtItensVALOR_TOTAL.Value           := lPedidoItensModel.PedidoItenssLista[0].VALOR_TOTAL_ITENS;
     mtItensVALOR_NOTA_FISCAL.Value     := mtItensVALOR_UNITARIO.Value * (1 - (lPedidoItensModel.PedidoItenssLista[0].DESCONTO_PED / 100));
     mtItensPREMIO_LIQUIDO.Value        := mtItensVLR_GARANTIA.Value / 1.0738;
     mtItensIOF.Value                   := mtItensVLR_GARANTIA.Value - mtItensPREMIO_LIQUIDO.Value;
     mtItensRR_GARANTIA_ESTENDIDA.Value := (lConfiguracoes.valorTag('PERCENTUAL_RR_GARANTIA_ESTENDIDA', '0', tvNumero));
-    mtItensVALOR_FRANQUIA .Value       := mtItensVALOR_UNITARIO.Value * (20 / 100);
+    mtItensVALOR_FRANQUIA.Value        := mtItensVALOR_UNITARIO.Value * (20 / 100);
+    mtItensPREMIO_UNICO_FR.Value       := lPedidoItensModel.PedidoItenssLista[0].VLR_GARANTIA_FR;
+    mtItensIOF_FR.Value                := mtItensPREMIO_UNICO_FR.Value - (mtItensPREMIO_UNICO_FR.Value / 1.0738);
     mtItensOBSERVACAO.Value            := lPedidoItensModel.PedidoItenssLista[0].OBSERVACAO;
     mtItensINICIO_VIGENCIA.Value       := retornaInicioVigencia(mtPedidoEMISSAO.Value, lProdutosModel.ProdutossLista[0].GARANTIA_PRO);
     mtItensFIM_VIGENCIA.Value          := DateToStr(IncMonth(StrToDate(mtItensINICIO_VIGENCIA.Value),StrToInt(Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA,3,2))));
@@ -619,7 +629,7 @@ begin
     mtProdutos.Post;
 
     lblRRGarantiaEstendida.Caption := '*RR: '+ FormataFloat(mtItensRR_GARANTIA_ESTENDIDA.Value) +'%  (R$ '+ FormataFloat(mtItensPREMIO_LIQUIDO.Value * (mtItensRR_GARANTIA_ESTENDIDA.Value / 100)) +')';
-
+    lblRRRouboFurto.Caption        := '*RR: '+ FormataFloat(mtItensRR_GARANTIA_ESTENDIDA.Value) +'%  (R$ '+ FormataFloat(mtItensPREMIO_UNICO_FR.Value * (mtItensRR_GARANTIA_ESTENDIDA.Value / 100)) +')';
     Self.fetchMemo;
   finally
     lPedidoItensModel.Free;
@@ -704,20 +714,24 @@ begin
       lPedidoItensModel.IDPedidoVendaView := IDPEDIDO;
       lPedidoItensModel.obterLista;
 
-      for lPedidoItensModel in lPedidoItensModel.PedidoItenssLista do
+      if lPedidoItensModel.PedidoItenssLista[0].WEB_PEDIDOITENS_ID <> '' then
       begin
-        lWebPedidoItensModel.IDRecordView := lPedidoItensModel.WEB_PEDIDOITENS_ID;
-        lWebPedidoItensModel.obterLista;
+        for lPedidoItensModel in lPedidoItensModel.PedidoItenssLista do
+        begin
+          lWebPedidoItensModel.IDRecordView := lPedidoItensModel.WEB_PEDIDOITENS_ID;
+          lWebPedidoItensModel.obterLista;
 
-        mtItens.EmptyDataSet;
-        mtItens.Append;
-        mtItensNUMERO_BILHETE.Value := retornaNumeroBilhete('9', CONEXAO.getEmpresa.LOJA, lPedidoItensModel.ID);
-        mtItens.Post;
+          mtItens.EmptyDataSet;
+          mtItens.Append;
+          mtItensNUMERO_BILHETE.Value := retornaNumeroBilhete('9', CONEXAO.getEmpresa.LOJA, lPedidoItensModel.ID);
+          mtItens.Post;
 
-        if (Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA,3,2) = '12') or (Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA,3,2) = '24') then
-          reportPreview(RLReport1, lPedidoItensModel.ID)
+          if (Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA,3,2) = '12') or (Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA,3,2) = '24') then
+            reportPreview(RLReport1, lPedidoItensModel.ID)
+        end;
+        RLReport3.Preview;
       end;
-      RLReport3.Preview;
+
     except
     on E:Exception do
       CriaException(E.Message);
@@ -740,7 +754,7 @@ begin
 
     RLMemo1.Lines.Text := '    Eu, '+lClienteModel.ClientesLista[0].FANTASIA_CLI+', inscrito no CPF/MF sob o nº '+formatoCNPJCPFGenerico(nil,lClienteModel.ClientesLista[0].CNPJ_CPF_CLI, true)+', proponente do seguro Garantia Estendida, autorizo que o pagamento do prêmio de seguro no valor de R$'+FormataFloat(mtItensVLR_GARANTIA.Value)+' seja realizado em conjunto com o pagamento do(s) produto(s)/serviço(s) ora adquirido(s).';
 
-    RLMemo2.Lines.Text := '    Eu, '+lClienteModel.ClientesLista[0].FANTASIA_CLI+', inscrito no CPF/MF sob o nº '+formatoCNPJCPFGenerico(nil,lClienteModel.ClientesLista[0].CNPJ_CPF_CLI, true)+', proponente do Seguro Proteção de Bens, autorizo que o pagamento do prêmio de seguro no valor de R$ 1.160,00 seja realizado em conjunto com o pagamento do(s) produto(s)/serviço(s) ora adquirido(s).';
+    RLMemo2.Lines.Text := '    Eu, '+lClienteModel.ClientesLista[0].FANTASIA_CLI+', inscrito no CPF/MF sob o nº '+formatoCNPJCPFGenerico(nil,lClienteModel.ClientesLista[0].CNPJ_CPF_CLI, true)+', proponente do Seguro Proteção de Bens, autorizo que o pagamento do prêmio de seguro no valor de R$'+FormataFloat(mtItensPREMIO_UNICO_FR.Value)+' seja realizado em conjunto com o pagamento do(s) produto(s)/serviço(s) ora adquirido(s).';
 
     RLMemo3.Lines.Text := RLMemo2.Lines.Text;
   finally
@@ -816,14 +830,24 @@ begin
       lPedidoItensModel.IDPedidoVendaView := IDPEDIDO;
       lPedidoItensModel.obterLista;
 
-      for lPedidoItensModel in lPedidoItensModel.PedidoItenssLista do
+      if lPedidoItensModel.PedidoItenssLista[0].WEB_PEDIDOITENS_ID <> '' then
       begin
-        lWebPedidoItensModel.IDRecordView := lPedidoItensModel.WEB_PEDIDOITENS_ID;
-        lWebPedidoItensModel.obterLista;
+        for lPedidoItensModel in lPedidoItensModel.PedidoItenssLista do
+        begin
+          lWebPedidoItensModel.IDRecordView := lPedidoItensModel.WEB_PEDIDOITENS_ID;
+          lWebPedidoItensModel.obterLista;
 
-        reportPreview(RLReport5, lPedidoItensModel.ID)
+          mtItens.EmptyDataSet;
+          mtItens.Append;
+          mtItensNUMERO_BILHETE.Value := retornaNumeroBilhete('8', CONEXAO.getEmpresa.LOJA, lPedidoItensModel.ID);
+          mtItens.Post;
+
+          if (Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA_FR,3,2) = '12') or (Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA_FR,3,2) = '24') then
+            reportPreview(RLReport5, lPedidoItensModel.ID)
+        end;
+        RLReport6.Preview;
       end;
-      RLReport6.Preview;
+
     except
     on E:Exception do
       CriaException(E.Message);
@@ -846,14 +870,24 @@ begin
       lPedidoItensModel.IDPedidoVendaView := IDPEDIDO;
       lPedidoItensModel.obterLista;
 
-      for lPedidoItensModel in lPedidoItensModel.PedidoItenssLista do
+      if lPedidoItensModel.PedidoItenssLista[0].WEB_PEDIDOITENS_ID <> '' then
       begin
-        lWebPedidoItensModel.IDRecordView := lPedidoItensModel.WEB_PEDIDOITENS_ID;
-        lWebPedidoItensModel.obterLista;
+        for lPedidoItensModel in lPedidoItensModel.PedidoItenssLista do
+        begin
+          lWebPedidoItensModel.IDRecordView := lPedidoItensModel.WEB_PEDIDOITENS_ID;
+          lWebPedidoItensModel.obterLista;
 
-        reportPreview(RLReport10, lPedidoItensModel.ID)
+          mtItens.EmptyDataSet;
+          mtItens.Append;
+          mtItensNUMERO_BILHETE.Value := retornaNumeroBilhete('8', CONEXAO.getEmpresa.LOJA, lPedidoItensModel.ID);
+          mtItens.Post;
+
+          if (Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA_FR,3,2) = '12') or (Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA_FR,3,2) = '24') then
+          reportPreview(RLReport10, lPedidoItensModel.ID)
+        end;
+        RLReport11.Preview;
       end;
-      RLReport11.Preview;
+
     except
     on E:Exception do
       CriaException(E.Message);
