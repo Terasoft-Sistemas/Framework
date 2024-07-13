@@ -449,7 +449,7 @@ begin
             '        VALOR_ITENS,                                                                                                           '+SLineBreak+
             '        VALOR_GARANTIA,                                                                                                        '+SLineBreak+
             '        VALOR_CUPOM_DESCONTO,                                                                                                  '+SLineBreak+
-            '        VALOR_TOTAL + VALOR_FRETE + ACRESCIMO - VALOR_CUPOM_DESCONTO VALOR_TOTAL                                               '+SLineBreak+
+            '        VALOR_TOTAL + SEGURO_PRESTAMISTA_VALOR + VALOR_FRETE + ACRESCIMO - VALOR_CUPOM_DESCONTO VALOR_TOTAL                    '+SLineBreak+
 			      '                                                                                                                               '+SLineBreak+
             '    from (                                                                                                                     '+SLineBreak+
             '                                                                                                                               '+SLineBreak+
