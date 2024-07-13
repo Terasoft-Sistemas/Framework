@@ -82,7 +82,7 @@ type
 
     function Salvar: String;
     procedure obterLista; overload;
-    function obterLista(pPortador: String; pValor: Double; pSeguroPrestamista: Boolean): TFDMemTable; overload;
+    function obterLista(pPortador: String; pValor: Double; pSeguroPrestamista: Boolean; pPrimeiroVencimento: TDate): TFDMemTable; overload;
 
     function carregaClasse(pId: Integer): TTabelaJurosModel;
 
@@ -129,19 +129,21 @@ begin
   inherited;
 end;
 
-function TTabelaJurosModel.obterLista(pPortador: String; pValor: Double; pSeguroPrestamista: Boolean): TFDMemTable;
+function TTabelaJurosModel.obterLista(pPortador: String; pValor: Double; pSeguroPrestamista: Boolean; pPrimeiroVencimento: TDate): TFDMemTable;
 var
-  lModel             : TTabelaJurosModel;
-  i                  : Integer;
+  lModel : TTabelaJurosModel;
+  i      : Integer;
   lTotal,
   lJuros,
   lValorGerar,
   lValorParcela,
-  lPercentualJuros   : Double;
-  lMemTable          : TFDMemTable;
-  lPortadorModel     : TPortadorModel;
-  lConfiguracoes     : TerasoftConfiguracoes;
-  lTagPercentual     : String;
+  lPercentualJuros,
+  lCoeficienteJurosDias : Double;
+
+  lMemTable      : TFDMemTable;
+  lPortadorModel : TPortadorModel;
+  lConfiguracoes : TerasoftConfiguracoes;
+  lTagPercentual : String;
 begin
   lPortadorModel := TPortadorModel.Create(vIConexao);
 
@@ -163,6 +165,12 @@ begin
 
     lTagPercentual  := lConfiguracoes.valorTag('PEDIDO_TABELA_JUROS_PERCENTUAL', 'N', tvBool);
 
+
+//    if Terasoft.Utils.DiferencaEntreDatas(Date,pPrimeiroVencimento) > 0 then
+//      lCoeficienteJurosDias := 1.02698 //Incluir função para pegar indice correto
+//    else
+      lCoeficienteJurosDias := 1;
+
     if self.TotalRecords = 0 then
     begin
       self.TabelaJurossLista := TObjectList<TTabelaJurosModel>.Create;
@@ -179,6 +187,7 @@ begin
 
     for i := 0 to self.TabelaJurossLista.Count -1 do
     begin
+
       if lTagPercentual = 'S' then
       begin
         self.TabelaJurossLista[i].FJUROS_TEXTO   := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, 'Juros', 'Sem juros');
@@ -201,13 +210,12 @@ begin
           self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := 0;
           self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA := 0;
         end;
-      end
-      else
+      end else
       begin
 
         if self.TabelaJurossLista[i].INDCE > 0 then
         begin
-          lValorParcela    := lTotal * self.TabelaJurossLista[i].INDCE;
+           lValorParcela    := lTotal * (self.TabelaJurossLista[i].INDCE * lCoeficienteJurosDias);
           lValorGerar      := lValorParcela * StrToInt(self.TabelaJurossLista[i].CODIGO);
           lPercentualJuros := (lValorGerar - lTotal) / lTotal * 100;
         end

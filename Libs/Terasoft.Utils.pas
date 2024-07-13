@@ -20,7 +20,10 @@ uses
   Data.DB,
   FireDAC.Comp.Client,
   GIFImage,
-  Vcl.Forms;
+  Vcl.Forms,
+  DateUtils;
+
+
   function IIF(Expressao: Variant; ParteTRUE, ParteFALSE: Variant): Variant;
   procedure Base64ToImage(data, path: string);
   function CheckFileOnlineExists(const OnlineFile: string; var Size: Int64): Boolean;
@@ -34,6 +37,7 @@ uses
   function DiaDaSemana(pData : TDate) : String;
   function DiferencaEntreValoresPercentual(valor1, Valor2: Real): Real;
   function CalculaPercentual(pValorItem, pValorTotal: Real): Real;
+  function DiferencaEntreDatas(pDataInicial, pDataFinal: TDate ): Integer;
 
 implementation
 
@@ -44,6 +48,10 @@ uses
   Terasoft.Types;
 
 
+function DiferencaEntreDatas(pDataInicial, pDataFinal: TDate ): Integer;
+begin
+  Result := DaysBetween(pDataInicial, pDataFinal);
+end;
 
 function CalculaPercentual(pValorItem, pValorTotal: Real): Real;
 begin
