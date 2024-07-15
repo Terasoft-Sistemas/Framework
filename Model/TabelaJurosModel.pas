@@ -6,7 +6,10 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Terasoft.Utils,
-  Interfaces.Conexao, FireDAC.Comp.Client, PortadorModel;
+  Interfaces.Conexao,
+  FireDAC.Comp.Client,
+  PortadorModel,
+  TabelaJurosDiaModel;
 
 type
   TTabelaJurosModel = class
@@ -132,6 +135,7 @@ end;
 function TTabelaJurosModel.obterLista(pPortador: String; pValor: Double; pSeguroPrestamista: Boolean; pPrimeiroVencimento: TDate): TFDMemTable;
 var
   lModel : TTabelaJurosModel;
+  lTabelaJurosDia : TTabelaJurosDiaModel;
   i      : Integer;
   lTotal,
   lJuros,
@@ -146,6 +150,7 @@ var
   lTagPercentual : String;
 begin
   lPortadorModel := TPortadorModel.Create(vIConexao);
+  lTabelaJurosDia := TTabelaJurosDiaModel.Create(vIConexao);
 
   lMemTable := TFDMemTable.Create(nil);
   lModel    := TTabelaJurosModel.Create(vIConexao);
@@ -166,9 +171,9 @@ begin
     lTagPercentual  := lConfiguracoes.valorTag('PEDIDO_TABELA_JUROS_PERCENTUAL', 'N', tvBool);
 
 
-//    if Terasoft.Utils.DiferencaEntreDatas(Date,pPrimeiroVencimento) > 0 then
-//      lCoeficienteJurosDias := 1.02698 //Incluir função para pegar indice correto
-//    else
+    if Terasoft.Utils.DiferencaEntreDatas(Date,pPrimeiroVencimento)  > 0 then
+      lCoeficienteJurosDias := lTabelaJurosDia.obterIndice(IntToStr(Terasoft.Utils.DiferencaEntreDatas(Date,pPrimeiroVencimento)), pPortador)
+    else
       lCoeficienteJurosDias := 1;
 
     if self.TotalRecords = 0 then
@@ -309,6 +314,7 @@ begin
 
   finally
     lModel.Free;
+    lTabelaJurosDia.Free;
   end;
 
 end;
