@@ -158,7 +158,9 @@ uses
   ChequeDao in '..\Dao\ChequeDao.pas',
   ChequeModel in '..\Model\ChequeModel.pas',
   TabelaJurosDiaDao in '..\Dao\TabelaJurosDiaDao.pas',
-  TabelaJurosDiaModel in '..\Model\TabelaJurosDiaModel.pas';
+  TabelaJurosDiaModel in '..\Model\TabelaJurosDiaModel.pas',
+  GrupoGarantiaModel in '..\Model\GrupoGarantiaModel.pas',
+  GrupoGarantiaDao in '..\Dao\GrupoGarantiaDao.pas';
 
 {$R *.res}
 
