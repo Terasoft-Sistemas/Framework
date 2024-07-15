@@ -262,6 +262,8 @@
         <DCCReference Include="..\Model\ChequeModel.pas"/>
         <DCCReference Include="..\Dao\TabelaJurosDiaDao.pas"/>
         <DCCReference Include="..\Model\TabelaJurosDiaModel.pas"/>
+        <DCCReference Include="..\Model\GrupoGarantiaModel.pas"/>
+        <DCCReference Include="..\Dao\GrupoGarantiaDao.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
