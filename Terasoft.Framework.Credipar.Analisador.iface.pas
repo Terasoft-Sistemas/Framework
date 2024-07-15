@@ -37,6 +37,11 @@ interface
       function getId: Int64;
       procedure setId(const pValue: Int64);
 
+    //property filial getter/setter
+      function getFilial: TipoWideStringFramework;
+      procedure setFilial(const pValue: TipoWideStringFramework);
+
+      property filial: TipoWideStringFramework read getFilial write setFilial;
       property id: Int64 read getId write setId;
     end;
 
@@ -90,6 +95,16 @@ interface
       function getControleAlteracoes: IControleAlteracoes;
       procedure setControleAlteracoes(const pValue: IControleAlteracoes);
 
+    //property filial getter/setter
+      function getFilial: TipoWideStringFramework;
+      procedure setFilial(const pValue: TipoWideStringFramework);
+
+    //property propriedades getter/setter
+      function getPropriedades: IPropriedade;
+      procedure setPropriedades(const pValue: IPropriedade);
+
+      property propriedades: IPropriedade read getPropriedades write setPropriedades;
+      property filial: TipoWideStringFramework read getFilial write setFilial;
       property controleAlteracoes: IControleAlteracoes read getControleAlteracoes write setControleAlteracoes;
       property codigoProdutoCredipar: Integer read getCodigoProdutoCredipar write setCodigoProdutoCredipar;
       property codigoLojaCredipar: Integer read getCodigoLojaCredipar write setCodigoLojaCredipar;
@@ -103,51 +118,70 @@ interface
 
   {$if not defined(__DLL__)}
     function createCredipar: ICredipar ; stdcall;
-    function getCredipar: ICredipar;
-    function carregaPedidoCredipar(const pID: Int64; pCredipar: ICredipar; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+    function getCredipar(pFilial: TipoWideStringFramework; pGDB: IGDB): ICredipar;
+    function carregaPedidoCredipar(const pID: Int64; pCredipar: ICredipar; pGDB: IGDB; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     function enviaPropostaCredipar(pCredipar: ICredipar; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+    function getCrediparFilial(const pFilial: TipoWideStringFramework; pGDB: IGDB): ICredipar;
   {$ifend}
-
-
 
   function _strToTempoResidencia(const pValue: String): String;
 
 implementation
   uses
     strUtils,
+    Spring.Collections,
     Terasoft.Framework.Conversoes,
     FuncoesConfig, Terasoft.Framework.Credipar.Analisador.iface.Conts;
 
 {$if not defined(__DLL__)}
     function createCredipar: ICredipar; stdcall; external 'Credipar_DLL' name 'createCredipar' delayed;
 
-function getCredipar: ICredipar;
+function getCredipar;//: ICredipar;
+  var
+    cfg: ITagConfig;
 begin
   Result := createCredipar;
-  if(gdbPadrao<>nil) then
+  if(pGDB=nil) then
+    pGDB := gdbPadrao;
+  if(pGDB<>nil) then
   begin
-    Result.urlWS := ValorTagConfig(tagConfig_CREDIPAR_ENDERECO_WS,'',tvString);
+    cfg := novoTagConfig(pGDB);
+    Result.propriedades.propriedade['GDB'].asInterface := pGDB;
+    Result.urlWS := cfg.ValorTagConfig(tagConfig_CREDIPAR_ENDERECO_WS,'',tvString);
     Result.modoProducao := true;
-    Result.diretorioArquivos := ValorTagConfig(tagConfig_CREDIPAR_DIRETORIO_ARQUIVOS,'',tvString);
-    Result.token := ValorTagConfig(tagConfig_CREDIPAR_TOKEN,'',tvString);
-    Result.codigoLojaCredipar := ValorTagConfig(tagConfig_CREDIPAR_CODIGO_LOJA,0,tvInteiro);
-    Result.controleAlteracoes := criaControleAlteracoes(CONTROLEALTERACOES_CREDIPAR,gdbPadrao,true)
+    Result.diretorioArquivos := cfg.ValorTagConfig(tagConfig_CREDIPAR_DIRETORIO_ARQUIVOS,'',tvString);
+    Result.token := cfg.ValorTagConfig(tagConfig_CREDIPAR_TOKEN,'',tvString);
+    Result.codigoLojaCredipar := cfg.ValorTagConfig(tagConfig_CREDIPAR_CODIGO_LOJA,0,tvInteiro);
+    Result.codigoLojaCredipar := cfg.ValorTagConfig(tagConfig_CREDIPAR_PRODUTO,0,tvInteiro);
+    Result.controleAlteracoes := criaControleAlteracoes(CONTROLEALTERACOES_CREDIPAR,pGDB,true);
+    Result.filial := pFilial;
   end;
 end;
 
-function carregaPedidoCredipar(const pID: Int64; pCredipar: ICredipar; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+function carregaPedidoCredipar(const pID: Int64; pCredipar: ICredipar; pGDB: IGDB; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
   var
     lDSCliente,lDSProposta: IDataset;
     indice: Integer;
     maiorValor,valor: Extended;
 begin
   Result := checkResultadoOperacao(pResultado);
+
+  if(pGDB=nil) then
+  begin
+    pGDB := gdbPadrao;
+    if(pGDB=nil) then
+    begin
+      pResultado.adicionaErro('carregaPedidoCredipar: Banco de dados não fornecido.');
+      exit;
+    end;
+  end;
+
   if(pCredipar=nil) then
-    pCredipar := createCredipar;
+    pCredipar :=  getCredipar('', pGDB);
 
   pResultado.propriedade['credipar'].asInterface := pCredipar;
 
-  lDSProposta := gdbPadrao.criaDataset;
+  lDSProposta := pGDB.criaDataset;
   lDSProposta.query(
     'select'+#13+
        '    w.id proposta,'+#13+
@@ -186,7 +220,7 @@ begin
     exit;
   end;
 
-  lDSCliente := gdbPadrao.criaDataset;
+  lDSCliente := pGDB.criaDataset;
   lDSCliente.query('select'+#13+
      '    c.codigo_cli ID,'+#13+
      '    c.cnpj_cpf_cli,'+#13+
@@ -375,6 +409,7 @@ function enviaPropostaCredipar(pCredipar: ICredipar; pResultado: IResultadoOpera
     save: Integer;
 begin
   Result := checkResultadoOperacao(pResultado);
+
   save := pResultado.erros;
   if(pCredipar=nil) then
   begin
@@ -384,7 +419,28 @@ begin
 
   pResultado := pCredipar.enviaProposta(pResultado);
 
+  pCredipar.controleAlteracoes.setValor(RETORNO_CREDIPAR_RESULTADO,IntToStr(pCredipar.proposta.id), pResultado.toHTML(
+            '', 'Resultado de ENVIO para a CREDIPAR @' + DateTimeToStr(Now), [ orosh_semHeader ]));
+
   if(pResultado.erros<>save) then exit;
+end;
+
+  var
+    gListaFilial: IDictionary<TipoWideStringFramework, ICredipar>;
+
+function getCrediparFilial;//(const pFilial: TipoWideStringFramework): ICredipar;
+begin
+  Result := nil;
+  if(pFilial='') then
+    exit;
+  if(gListaFilial=nil) then
+    gListaFilial := TCollections.CreateDictionary<TipoWideStringFramework, ICredipar>;
+
+  if not gListaFilial.TryGetValue(pFilial,Result) then
+  begin
+    Result := getCredipar(pFilial,pGDB);
+    gListaFilial.AddOrSetValue(pFilial,Result);
+  end;
 end;
 
 {$ifend}
