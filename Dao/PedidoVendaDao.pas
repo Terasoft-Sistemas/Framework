@@ -68,6 +68,7 @@ type
     function statusPedido(pId: String): String;
     procedure obterUpdateImpostos(pNumeroPedido: String);
     function obterComprasRealizadas(pCliente: String): TFDMemTable;
+    function retornaGarantia(pNumeroPedido: String) : Boolean;
 
 end;
 implementation
@@ -125,6 +126,32 @@ begin
     lQry.Free;
   end;
 end;
+function TPedidoVendaDao.retornaGarantia(pNumeroPedido: String): Boolean;
+var
+  lQry       : TFDQuery;
+  lSQL       : String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+      lSQL := ' SELECT COUNT(*) RECORDS FROM PEDIDOVENDA P                                             '+SLineBreak+
+              '    LEFT JOIN PEDIDOITENS PI                                                            '+SLineBreak+
+              '    ON P.NUMERO_PED = PI.NUMERO_PED                                                     '+SLineBreak+
+              '  WHERE P.NUMERO_PED = '+QuotedStr(pNumeroPedido)+' AND                                 '+SLineBreak+
+              '   (PI.QUANTIDADE_TIPO > 0 OR PI.VLR_GARANTIA_FR > 0 OR P.SEGURO_PRESTAMISTA_VALOR > 0) '+SLineBreak;
+
+    lQry.Open(lSQL);
+
+    if lQry.FieldByName('RECORDS').AsInteger = 0 then
+      Result := False
+    else
+      Result := True;
+
+  finally
+    lQry.Free;
+  end;
+end;
+
 function TPedidoVendaDao.carregaClasse(pId: String): TPedidoVendaModel;
 var
   lQry: TFDQuery;
@@ -299,7 +326,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pPedidoVendaModel.NUMERO_PED := vIConexao.Generetor('GEN_PEDIDOVENDA', true);
+    pPedidoVendaModel.NUMERO_PED := vIConexao.Generetor('GEN_PEDIDOVENDA');
     setParams(lQry, pPedidoVendaModel);
     lQry.Open;
 
