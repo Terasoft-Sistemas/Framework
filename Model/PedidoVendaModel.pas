@@ -339,7 +339,6 @@ type
     procedure SetSEGURO_PRESTAMISTA_VALOR(const Value: Variant);
 
     procedure getDataVendedor;
-    procedure validaBloqueioPortador(pPortador, pCliente : String);
 
   public
     property NUMERO_PED: Variant read FNUMERO_PED write SetNUMERO_PED;
@@ -517,6 +516,7 @@ type
     function gerarContasReceberPedido(pValor, pPortador, pParcelas, pPrimeiroVencimento : String; pAcrescimo: String = ''): String; overload;
     function gerarContasReceberFinanceiroPedido(pVendaAssistida: String): String;
     function statusPedido(pId: String): String;
+    procedure validaBloqueioPortador(pPortador, pCliente : String);
 
     procedure calcularTotais;
     procedure faturado(pIdNf: String);
