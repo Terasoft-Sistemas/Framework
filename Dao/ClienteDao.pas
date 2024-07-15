@@ -471,7 +471,7 @@ begin
     lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
 
     lQry.SQL.Add(lSQL);
-    pClienteModel.CODIGO_CLI := vIConexao.Generetor('GEN_CLIENTE');
+    pClienteModel.CODIGO_CLI := vIConexao.Generetor('GEN_CLIENTE', true);
     setParams(lQry, pClienteModel);
     lQry.Open;
 

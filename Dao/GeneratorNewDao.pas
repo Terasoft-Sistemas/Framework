@@ -141,6 +141,7 @@ begin
         'X': lCtr := 'Z';
         'Z': lCtr := 'Y';
         'Y': lCtr := 'W';
+        'W': lCtr := 'A';
       end;
 
       if (lCtrGen[1] = 'W') then
