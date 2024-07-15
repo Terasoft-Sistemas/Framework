@@ -1346,10 +1346,10 @@ begin
   lMovimentoSerialModel := TMovimentoSerialModel.Create(vIConexao);
 
   if pVenderItemParametros.PRODUTO = '' then
-    CriaException('Produto n�o informado');
+    CriaException('Produto não informado');
 
   if StrToFloatDef(pVenderItemParametros.QUANTIDADE, 0) = 0 then
-    CriaException('Quantidade n�o informada');
+    CriaException('Quantidade não informada');
 
   if (PVenderItemParametros.TIPO_ENTREGA <> 'CD') and (lMovimentoSerialModel.ValidaVendaSerial(pVenderItemParametros.PRODUTO)) then
   begin

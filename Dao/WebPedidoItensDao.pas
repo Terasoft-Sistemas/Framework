@@ -199,6 +199,7 @@ begin
   try
    lQry.ExecSQL('delete from WEB_PEDIDOITENS where ID = :ID',[pWebPedidoItensModel.ID]);
    lQry.ExecSQL;
+
    Result := pWebPedidoItensModel.ID;
 
   finally

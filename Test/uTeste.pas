@@ -202,6 +202,9 @@ type
     imprimirRFD: TButton;
     Usuario: TTabSheet;
     Button112: TButton;
+    TabelaJurosDia: TTabSheet;
+    Button133: TButton;
+    Memo1: TMemo;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -348,6 +351,7 @@ type
     procedure imprimirRFDClick(Sender: TObject);
     procedure imprimirPrestamistaClick(Sender: TObject);
     procedure Button116Click(Sender: TObject);
+    procedure Button133Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -380,7 +384,7 @@ uses
   PromocaoModel, TransportadoraModel, PrevisaoPedidoCompraModel, SaidasModel,
   SaidasItensModel, ClientesEnderecoModel, OrcamentoModel, OrcamentoItensModel, Terasoft.Utils,
   SolicitacaoDescontoModel, PermissaoRemotaModel, MovimentoSerialModel, Impressao.Contratos,
-  UsuarioModel;
+  UsuarioModel, TabelaJurosDiaModel;
 
 {$R *.dfm}
 
@@ -3617,6 +3621,29 @@ begin
     memoResultado.Lines.Add('===============================================');
   finally
     lSaldoModel.Free;
+  end;
+end;
+
+procedure TForm1.Button133Click(Sender: TObject);
+var
+  lTabelaJurosDia : TTabelaJurosDiaModel;
+  lDia,
+  lPortador       : String;
+  lIndice         : Double;
+begin
+  lTabelaJurosDia := TTabelaJurosDiaModel.Create(vIConexao);
+  try
+    lDia := InputBox('TabelaJurosDia', 'Digite o dia:', '');
+    lPortador := InputBox('TabelaJurosDia', 'Digite o código do portador:', '');
+
+    lIndice := lTabelaJurosDia.obterIndice(lDia, lPortador);
+
+    Memo1.Lines.Clear;
+    Memo1.Lines.Add('Indice: ' +FloatToStr(lIndice));
+    Memo1.Lines.Add('===============================================');
+
+  finally
+    lTabelaJurosDia.Free;
   end;
 end;
 

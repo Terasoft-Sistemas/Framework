@@ -527,6 +527,7 @@ type
     procedure verificarTagObservacao;
     procedure venderItem(pVenderItem: TVenderItem);
     function obterComprasRealizadas(pCliente: String): TFDMemTable;
+    function retornaGarantia(pNumeroPedido: String) : Boolean;
 
   end;
 
@@ -1539,6 +1540,18 @@ begin
     lPedidoVendaLista.Free;
     lCalcularImpostosModel.Free;
     lPedidoItensModal.Free;
+  end;
+end;
+
+function TPedidoVendaModel.retornaGarantia(pNumeroPedido: String): Boolean;
+var
+  lPedidoVendaModel: TPedidoVendaDao;
+begin
+  lPedidoVendaModel := TPedidoVendaDao.Create(vIConexao);
+  try
+    Result := lPedidoVendaModel.retornaGarantia(pNumeroPedido);
+  finally
+    lPedidoVendaModel.Free;
   end;
 end;
 
