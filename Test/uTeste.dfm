@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 1250
     Height = 749
-    ActivePage = Usuario
+    ActivePage = TabelaJurosDia
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -1475,6 +1475,28 @@ object Form1: TForm1
         Caption = 'Alterar Senha'
         TabOrder = 0
         OnClick = Button116Click
+      end
+    end
+    object TabelaJurosDia: TTabSheet
+      Caption = 'TabelaJurosDia'
+      ImageIndex = 16
+      object Button133: TButton
+        Left = 11
+        Top = 35
+        Width = 182
+        Height = 46
+        Caption = 'Obter Indice'
+        TabOrder = 0
+        OnClick = Button133Click
+      end
+      object Memo1: TMemo
+        Left = 0
+        Top = 464
+        Width = 1242
+        Height = 255
+        Align = alBottom
+        ScrollBars = ssVertical
+        TabOrder = 1
       end
     end
   end

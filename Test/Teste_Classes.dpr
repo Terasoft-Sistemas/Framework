@@ -156,7 +156,9 @@ uses
   Impressao.VendaAssistida in '..\Relatorios\Impressao.VendaAssistida.pas' {ImpressaoVendaAssistida},
   Impressao.Contratos in '..\Relatorios\Impressao.Contratos.pas' {ImpressaoContratos},
   ChequeDao in '..\Dao\ChequeDao.pas',
-  ChequeModel in '..\Model\ChequeModel.pas';
+  ChequeModel in '..\Model\ChequeModel.pas',
+  TabelaJurosDiaDao in '..\Dao\TabelaJurosDiaDao.pas',
+  TabelaJurosDiaModel in '..\Model\TabelaJurosDiaModel.pas';
 
 {$R *.res}
 
