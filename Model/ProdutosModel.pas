@@ -329,6 +329,7 @@ type
     FVOLTAGEM_ID: Variant;
     FTIPO__PRO: Variant;
     FPERMITE_VENDA_SEGURO_FR: Variant;
+    FGRUPO_GARANTIA_ID: Variant;
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
@@ -614,6 +615,7 @@ type
     procedure SetVOLTAGEM_ID(const Value: Variant);
     procedure SetTIPO__PRO(const Value: Variant);
     procedure SetPERMITE_VENDA_SEGURO_FR(const Value: Variant);
+    procedure SetGRUPO_GARANTIA_ID(const Value: Variant);
 
   public
     property UUID: Variant read FUUID write SetUUID;
@@ -890,7 +892,7 @@ type
     property COR_ID : Variant read FCOR_ID write SetCOR_ID;
     property TIPO__PRO : Variant read FTIPO__PRO write SetTIPO__PRO;
     property PERMITE_VENDA_SEGURO_FR : Variant read FPERMITE_VENDA_SEGURO_FR write SetPERMITE_VENDA_SEGURO_FR;
-
+    property GRUPO_GARANTIA_ID : Variant read FGRUPO_GARANTIA_ID write SetGRUPO_GARANTIA_ID;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -1773,6 +1775,11 @@ procedure TProdutosModel.SetGRUPO_COMISSAO_ID(const Value: Variant);
 begin
   FGRUPO_COMISSAO_ID := Value;
 end;
+procedure TProdutosModel.SetGRUPO_GARANTIA_ID(const Value: Variant);
+begin
+  FGRUPO_GARANTIA_ID := Value;
+end;
+
 procedure TProdutosModel.SetHORA_MAQUINA(const Value: Variant);
 begin
   FHORA_MAQUINA := Value;

@@ -368,6 +368,7 @@ begin
     lModel.VOLTAGEM_ID                      := lQry.FieldByName('VOLTAGEM_ID').AsString;
     lModel.COR_ID                           := lQry.FieldByName('COR_ID').AsString;
     lModel.PERMITE_VENDA_SEGURO_FR          := lQry.FieldByName('PERMITE_VENDA_SEGURO_FR').AsString;
+    lModel.GRUPO_GARANTIA_ID                := lQry.FieldByName('GRUPO_GARANTIA_ID').AsString;
 
     Result := lModel;
   finally
