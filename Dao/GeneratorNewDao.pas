@@ -39,12 +39,13 @@ end;
 
 function TGeneratorNewDao.generator(pGen: String): String;
 var
-  lQry      : TFDQuery;
+  lQry       : TFDQuery;
   lSql,
   lCtrGen,
   lCtr,
-  lGen      : String;
-  lvalorGen : Integer;
+  lGen       : String;
+  lvalorGen,
+  lDizima    : Integer;
 begin
   lQry := vIConexao.criarQuery;
   try
@@ -56,6 +57,11 @@ begin
 
     lvalorGen := lQry.FieldByName('GEN_ID').AsInteger;
 
+    if lCtrGen.Length > 1 then
+      lDizima := StrToInt(lCtrGen[2])
+    else
+      lDizima := 0;
+
     if lCtrGen = '' then
     begin
       if lvalorGen < 1000000 then
@@ -63,6 +69,7 @@ begin
         Result := Format('%6.6d', [lvalorGen]);
         exit;
       end;
+
       lQry.ExecSQL('alter sequence '+pGen+' restart with 0');
 
       lCtrGen := 'A';
@@ -95,10 +102,19 @@ begin
     end;
 
     if lvalorGen < 100000 then begin
-      Result := lCtrGen + Format('%5.5d', [lvalorGen]);
+      if lCtrGen[2] <> '' then
+        begin
+          Result := Format('%5.5d', [lvalorGen]);
+          Result := Copy(Result, 1, StrToInt(lCtrGen[2]) -1)
+                    + lCtrGen[1]
+                    + Copy(Result, StrToInt(lCtrGen[2]), Result.Length);
+      end
+      else
+        Result := lCtrGen + Format('%5.5d', [lvalorGen]);
     end
     else begin
       lQry.ExecSQL('alter sequence '+pGen+' restart with 0');
+
       case lCtrGen[1] of
         'A': lCtr := 'B';
         'B': lCtr := 'C';
@@ -126,9 +142,32 @@ begin
         'Z': lCtr := 'Y';
         'Y': lCtr := 'W';
       end;
+
+      if (lCtrGen[1] = 'W') then
+      begin
+        if lDizima = 0 then
+          lDizima := 2
+        else
+          Inc(lDizima);
+
+        lCtr := lCtr + lDizima.ToString;
+      end
+      else if lDizima > 0 then
+        lCtr := lCtr + lDizima.ToString;
+
       lQry.ExecSQL('update configuracoes c set c.valorstring = '+QuotedStr(lCtr)+' where c.fid = ''ZZZZZZ'' and c.tag = '+QuotedStr('CTR_'+pGen));
       lCtrGen  := lCtr;
-      Result := lCtrGen+Format('%5.5d', [0]);
+
+      if lCtrGen[2] <> '' then
+      begin
+        Result := Format('%5.5d', [0]);
+        Result := Copy(Result, 1, StrToInt(lCtrGen[2]) -1)
+                  + lCtrGen[1]
+                  + Copy(Result, StrToInt(lCtrGen[2]), Result.Length);
+      end
+      else
+        Result := lCtrGen+Format('%5.5d', [0]);
+
     end;
 
   finally
