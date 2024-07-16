@@ -163,6 +163,30 @@ begin
     registraValidacaoCampoTabela('CLIENTES','PARENTESCO_REF1','parentesco','Parentesco do cliente coma a referência 1');
     registraValidacaoCampoTabela('CLIENTES','PARENTESCO_REF2','parentesco','Parentesco do cliente coma a referência 2');
 
+    registraOpcoesCampos('temporesidencia', 'MENOS DE UM ANO');
+    registraOpcoesCampos('temporesidencia', '1 ANO');
+    registraOpcoesCampos('temporesidencia', '2 ANOS');
+    registraOpcoesCampos('temporesidencia', '3 ANOS');
+    registraOpcoesCampos('temporesidencia', '2 ANOS');
+    registraOpcoesCampos('temporesidencia', '3 ANOS');
+    registraOpcoesCampos('temporesidencia', '4 ANOS');
+    registraOpcoesCampos('temporesidencia', '5 ANOS');
+    registraOpcoesCampos('temporesidencia', 'MAIS DE 5 ANOS');
+    registraOpcoesCampos('temporesidencia', 'MAIS DE 10 ANOS');
+    registraOpcoesCampos('temporesidencia', 'MAIS DE 15 ANOS');
+    registraOpcoesCampos('temporesidencia', 'MAIS DE 20 ANOS');
+    registraValidacaoCampoTabela('CLIENTES','TEMPO_RESIDENCIA','temporesidencia','Tempo de residência do cliente');
+
+    registraOpcoesCampos('tiporesidencia', 'PRÓPRIA');
+    registraOpcoesCampos('tiporesidencia', 'CEDIDA');
+    registraOpcoesCampos('tiporesidencia', 'ALUGADA');
+    registraValidacaoCampoTabela('CLIENTES','TIPO_RESIDENCIA','tiporesidencia','Tipo de residência do cliente');
+
+    registraOpcoesCampos('regimetrabalho', 'CLT');
+    registraOpcoesCampos('regimetrabalho', 'Autônomo');
+    registraOpcoesCampos('regimetrabalho', 'Outros');
+    registraValidacaoCampoTabela('CLIENTES','REGIME_TRABALHO','regimetrabalho','Regime de trabalho do cliente');
+
     registraOpcoesCampos('tipoendereco', 'C', 'Cobrança');
     registraOpcoesCampos('tipoendereco', 'E', 'Entrega');
     registraOpcoesCampos('tipoendereco', 'O', 'Outros');
