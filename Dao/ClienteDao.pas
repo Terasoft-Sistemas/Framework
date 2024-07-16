@@ -157,6 +157,8 @@ begin
     lModel.CARTA_CLI                   := lQry.FieldByName('CARTA_CLI').AsString;
     lModel.EXPEDICAO_RG                := lQry.FieldByName('EXPEDICAO_RG').AsString;
     lModel.NATURALIDADE_CLI            := lQry.FieldByName('NATURALIDADE_CLI').AsString;
+    lModel.uf_naturalidade_cli         := lQry.FieldByName('UF_NATURALIDADE_CLI').AsString;
+    lModel.escolaridade_cli            := lQry.FieldByName('ESCOLARIDADE_CLI').AsString;
     lModel.TEMPO_SERVICO               := lQry.FieldByName('TEMPO_SERVICO').AsString;
     lModel.BENEFICIO_CLI               := lQry.FieldByName('BENEFICIO_CLI').AsString;
     lModel.DESCRICAO                   := lQry.FieldByName('DESCRICAO').AsString;
@@ -400,7 +402,6 @@ begin
     lModel.docidentificacaoconj_cli     := lQry.FieldByName('DOCIDENTIFICACAOCONJ_CLI').AsString;
     lModel.tipodocidentificacaoconj_cli := lQry.FieldByName('TIPODOCIDENTIFICACAOCONJ_CLI').AsString;
     lModel.tipodoc_cli                  := lQry.FieldByName('TIPODOC_CLI').AsString;
-
 
     Result := lModel;
   finally
