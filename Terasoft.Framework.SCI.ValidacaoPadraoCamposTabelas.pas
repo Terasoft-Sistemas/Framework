@@ -136,6 +136,33 @@ begin
     registraOpcoesCampos('sexoa', 'F', 'Fêmea');
     registraValidacaoCampoTabela('CLIENTES_ANIMAIS','sexo','sexoa','Sexo do animal');
 
+    registraOpcoesCampos('parentesco', 'PAI');
+    registraOpcoesCampos('parentesco', 'MÃE');
+    registraOpcoesCampos('parentesco', 'FILHO');
+    registraOpcoesCampos('parentesco', 'FILHA');
+    registraOpcoesCampos('parentesco', 'MARIDO');
+    registraOpcoesCampos('parentesco', 'ESPOSA');
+    registraOpcoesCampos('parentesco', 'AVÔ');
+    registraOpcoesCampos('parentesco', 'AVÓ');
+    registraOpcoesCampos('parentesco', 'NETO');
+    registraOpcoesCampos('parentesco', 'NETA');
+    registraOpcoesCampos('parentesco', 'SOBRINHO');
+    registraOpcoesCampos('parentesco', 'SOBRINHA');
+    registraOpcoesCampos('parentesco', 'TIO');
+    registraOpcoesCampos('parentesco', 'TIA');
+    registraOpcoesCampos('parentesco', 'IRMÃO');
+    registraOpcoesCampos('parentesco', 'IRMÃ');
+    registraOpcoesCampos('parentesco', 'CUNHADO');
+    registraOpcoesCampos('parentesco', 'CUNHADA');
+    registraOpcoesCampos('parentesco', 'PRIMO');
+    registraOpcoesCampos('parentesco', 'PRIMA');
+    registraOpcoesCampos('parentesco', 'SOGRO');
+    registraOpcoesCampos('parentesco', 'SOGRA');
+    registraOpcoesCampos('parentesco', 'GENRO');
+    registraOpcoesCampos('parentesco', 'NORA');
+    registraValidacaoCampoTabela('CLIENTES','PARENTESCO_REF1','parentesco','Parentesco do cliente coma a referência 1');
+    registraValidacaoCampoTabela('CLIENTES','PARENTESCO_REF2','parentesco','Parentesco do cliente coma a referência 2');
+
     registraOpcoesCampos('tipoendereco', 'C', 'Cobrança');
     registraOpcoesCampos('tipoendereco', 'E', 'Entrega');
     registraOpcoesCampos('tipoendereco', 'O', 'Outros');
