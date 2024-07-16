@@ -515,8 +515,8 @@ begin
             '         					 coalesce(web_pedido.valor_frete,0) valor_frete,                                                            '+SLineBreak+
             '         					 coalesce(web_pedido.acrescimo,0) acrescimo,                                                                '+SLineBreak+
             '                    web_pedido.origem_pedido,                                                                                  '+SLineBreak+
-            '                    web_pedido.seguro_prestamista_valor,                                                                       '+SLineBreak+
-            '                    web_pedido.seguro_prestamista_custo,   	                                                                  '+SLineBreak+
+            '                    coalesce(web_pedido.seguro_prestamista_valor, 0) seguro_prestamista_valor,                                 '+SLineBreak+
+            '                    coalesce(web_pedido.seguro_prestamista_custo, 0) seguro_prestamista_custo,                                 '+SLineBreak+
             '         					 coalesce(web_pedidoitens.quantidade,0) * coalesce(web_pedidoitens.valor_unitario,0) valor_itens,           '+SLineBreak+
             '         					 coalesce(web_pedidoitens.quantidade, 0) * (coalesce(web_pedidoitens.vlr_garantia,0)+coalesce(web_pedidoitens.vlr_garantia_fr,0)) valor_garantia, '+SLineBreak+
             '         					 coalesce(web_pedido.valor_cupom_desconto,0) valor_cupom_desconto                                                                                 '+SLineBreak+

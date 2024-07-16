@@ -18,6 +18,8 @@ interface
     RETORNO_CREDIPAR_DADOSCLIENTE   = 'Cliente.dados';
     RETORNO_CREDIPAR_DADOSPROPOSTA  = 'Proposta.dados';
 
+    RETORNO_CREDIPAR_RESULTADO      = 'Proposta.resultado';
+
     CREDIPAR_TIPODOC_CCB            = 'ADI';
     CREDIPAR_TIPODOC_INFPESSOAL     = 'IP';
     CREDIPAR_TIPODOC_COMPRESIDENCIA = 'CRES';

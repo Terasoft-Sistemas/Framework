@@ -619,7 +619,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
         end
         object RLBand7: TRLBand
           Left = 19
-          Top = 394
+          Top = 393
           Width = 756
           Height = 192
           AlignToBottom = True
@@ -1021,7 +1021,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
         end
         object RLBand9: TRLBand
           Left = 19
-          Top = 586
+          Top = 585
           Width = 756
           Height = 34
           AlignToBottom = True
@@ -1264,7 +1264,7 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
           Left = 19
           Top = 349
           Width = 756
-          Height = 45
+          Height = 44
           Borders.Sides = sdCustom
           Borders.DrawLeft = True
           Borders.DrawTop = False
@@ -1487,10 +1487,10 @@ object ImpressaoVendaAssistida: TImpressaoVendaAssistida
             Transparent = False
           end
           object RLDBMemo3: TRLDBMemo
-            Left = 10
-            Top = 37
+            Left = 7
+            Top = 26
             Width = 742
-            Height = 11
+            Height = 15
             AutoSize = False
             Behavior = [beSiteExpander]
             DataField = 'OBSERVACAO'
