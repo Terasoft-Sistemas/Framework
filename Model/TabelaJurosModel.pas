@@ -171,8 +171,8 @@ begin
     lTagPercentual  := lConfiguracoes.valorTag('PEDIDO_TABELA_JUROS_PERCENTUAL', 'N', tvBool);
 
 
-    if Terasoft.Utils.DiferencaEntreDatas(Date,pPrimeiroVencimento)  > 0 then
-      lCoeficienteJurosDias := lTabelaJurosDia.obterIndice(IntToStr(Terasoft.Utils.DiferencaEntreDatas(Date,pPrimeiroVencimento)), pPortador)
+    if Terasoft.Utils.DiferencaEntreDatas(Date,pPrimeiroVencimento)  > 30 then
+      lCoeficienteJurosDias := lTabelaJurosDia.obterIndice(IntToStr(Terasoft.Utils.DiferencaEntreDatas(Date,pPrimeiroVencimento)-30), pPortador)
     else
       lCoeficienteJurosDias := 1;
 
