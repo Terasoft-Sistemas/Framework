@@ -127,6 +127,7 @@ begin
     lModel.USUARIO_WINDOWS       := lQry.FieldByName('USUARIO_WINDOWS').AsString;
     lModel.SENHA_WINDOWS         := lQry.FieldByName('SENHA_WINDOWS').AsString;
     lModel.URL_WINDOWS           := lQry.FieldByName('URL_WINDOWS').AsString;
+    lModel.LOJA_ID               := lQry.FieldByName('LOJA_ID').AsString;
 
     Result := lModel;
 
