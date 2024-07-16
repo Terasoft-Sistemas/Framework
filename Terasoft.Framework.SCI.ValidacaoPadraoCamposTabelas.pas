@@ -56,48 +56,48 @@ begin
     registraOpcoesCampos('imei', '<imei>', '');
 
 
-    registraValidacaoCampoTabela('clientes','CNPJ_CPF_CLI','notnull','CNPJ/CPF cliente',true);
-    registraValidacaoCampoTabela('clientes','FANTASIA_CLI','notnull','Nome do cliente',true);
+    registraValidacaoCampoTabela('','clientes','CNPJ_CPF_CLI','notnull','CNPJ/CPF cliente',true);
+    registraValidacaoCampoTabela('','clientes','FANTASIA_CLI','notnull','Nome do cliente',true);
 
-    registraValidacaoCampoTabela('clientes','EMAIL_CLI','emailvalidoounull','Email do cliente',true);
+    registraValidacaoCampoTabela('','clientes','EMAIL_CLI','emailvalidoounull','Email do cliente',true);
 
     registraOpcoesCampos('sexo', 'M', 'Masculino');
     registraOpcoesCampos('sexo', 'F', 'Feminino');
-    registraValidacaoCampoTabela('clientes','SEXO_CLI','sexo','Sexo do cliente',true);
+    registraValidacaoCampoTabela('','clientes','SEXO_CLI','sexo','Sexo do cliente',true);
 
     registraOpcoesCampos('escolaridade', '1', 'Analfabeto');
     registraOpcoesCampos('escolaridade', '2', 'Fundamental/Médio');
     registraOpcoesCampos('escolaridade', '3', 'Superior');
-    registraValidacaoCampoTabela('clientes','ESCOLARIDADE_CLI','escolaridade','Grau de instrução do cliente',condicao);
+    registraValidacaoCampoTabela('','clientes','ESCOLARIDADE_CLI','escolaridade','Grau de instrução do cliente',condicao);
 
 
     registraOpcoesCampos('tipopessoa', 'F', 'Física');
     registraOpcoesCampos('tipopessoa', 'J', 'Jurídica');
-    registraValidacaoCampoTabela('clientes','TIPO_CLI','tipopessoa','Tipo do cliente',true);
+    registraValidacaoCampoTabela('','clientes','TIPO_CLI','tipopessoa','Tipo do cliente',true);
 
     registraOpcoesCampos('statusgenerico', 'A', 'Ativo');
     registraOpcoesCampos('statusgenerico', 'I', 'Inativo');
-    registraValidacaoCampoTabela('clientes','status','statusgenerico','Status do cliente',true);
+    registraValidacaoCampoTabela('','clientes','status','statusgenerico','Status do cliente',true);
 
     registraOpcoesCampos('SEPROCADO', 'S', 'Seprocado');
     registraOpcoesCampos('SEPROCADO', 'F', 'Falecimento');
     registraOpcoesCampos('SEPROCADO', 'C', 'Cartório');
     registraOpcoesCampos('SEPROCADO', 'I', 'Inadimplente');
     registraOpcoesCampos('SEPROCADO', 'N', 'Liberado');
-    registraValidacaoCampoTabela('clientes','SEPROCADO_CLI','SEPROCADO','Situação do cliente',true);
+    registraValidacaoCampoTabela('','clientes','SEPROCADO_CLI','SEPROCADO','Situação do cliente',true);
 
     registraOpcoesCampos('estadocivilpessoa', 'C', 'Casado');
     registraOpcoesCampos('estadocivilpessoa', 'S', 'Solteiro');
     registraOpcoesCampos('estadocivilpessoa', 'V', 'Viúvo');
     registraOpcoesCampos('estadocivilpessoa', 'O', 'Outros');
-    registraValidacaoCampoTabela('clientes','ESTADOCIVIL_CLI','estadocivilpessoa','Estado civil do Cliente',true);
+    registraValidacaoCampoTabela('','clientes','ESTADOCIVIL_CLI','estadocivilpessoa','Estado civil do Cliente',true);
 
     registraOpcoesCampos('classificacao', 'A', 'A');
     registraOpcoesCampos('classificacao', 'B', 'B');
     registraOpcoesCampos('classificacao', 'C', 'C');
     registraOpcoesCampos('classificacao', 'D', 'D');
     registraOpcoesCampos('classificacao', 'E', 'E');
-    registraValidacaoCampoTabela('clientes','CLASSIF_CLI','classificacao','Classificação do cliente',condicao);
+    registraValidacaoCampoTabela('','clientes','CLASSIF_CLI','classificacao','Classificação do cliente',condicao);
 
     registraOpcoesCampos('regimetributario', '1', 'Lucro Real');
     registraOpcoesCampos('regimetributario', '2', 'Lucro Presumido');
@@ -109,7 +109,7 @@ begin
     registraOpcoesCampos('regimetributario', 'O', 'Orgão público estadual');
     registraOpcoesCampos('regimetributario', 'F', 'Órgão público federal');
     registraOpcoesCampos('regimetributario', 'M', 'Micro empreendedor Individual');
-    registraValidacaoCampoTabela('clientes','TIPO_APURACAO','regimetributario','Regime tributário do cliente',condicao);
+    registraValidacaoCampoTabela('','clientes','TIPO_APURACAO','regimetributario','Regime tributário do cliente',condicao);
 
     registraOpcoesCampos('tipodocid', '1', 'RG');
     registraOpcoesCampos('tipodocid', '2', 'CNH');
@@ -118,7 +118,7 @@ begin
     registraOpcoesCampos('tipodocid', '5', 'RNE');
     registraOpcoesCampos('tipodocid', '6', 'Passaporte');
     registraOpcoesCampos('tipodocid', '7', 'Certificado de Reservista');
-    registraValidacaoCampoTabela('clientes','TIPODOC_CLI','tipodocid','Tipo de documento de identificação do cliente',condicao);
+    registraValidacaoCampoTabela('','clientes','TIPODOC_CLI','tipodocid','Tipo de documento de identificação do cliente',condicao);
 
     registraValidacaoCampoTabela('clientes','SEXO_DEPENDENTE','sexo','Sexo do dependente');
     registraValidacaoCampoTabela('clientes','SEXO_DEPENDENTE2','sexo','Sexo do dependente 2');
@@ -129,18 +129,18 @@ begin
 
     registraOpcoesCampos('SIMNAO', 'S', 'Sim');
     registraOpcoesCampos('SIMNAO', 'N', 'Não');
-    registraValidacaoCampoTabela('clientes','ENVIA_SMS','SIMNAO','Envia SMS');
-    registraValidacaoCampoTabela('clientes','tela','SIMNAO','Contrato do cliente');
+    registraValidacaoCampoTabela('','clientes','ENVIA_SMS','SIMNAO','Envia SMS');
+    registraValidacaoCampoTabela('','clientes','tela','SIMNAO','Contrato do cliente');
 
     registraOpcoesCampos('tiposuframa', '2', 'ICMS');
     registraOpcoesCampos('tiposuframa', '3', 'PIS/Cofins');
     registraOpcoesCampos('tiposuframa', '4', 'PIS/Cofins/ICMS');
     registraOpcoesCampos('tiposuframa', '9', 'Sem suframa');
-    registraValidacaoCampoTabela('clientes','TIPO_SUFRAMA','tiposuframa','Tipo SUFRAMA do cliente',condicao);
+    registraValidacaoCampoTabela('','clientes','TIPO_SUFRAMA','tiposuframa','Tipo SUFRAMA do cliente',condicao);
 
     registraOpcoesCampos('sexoa', 'M', 'Macho');
     registraOpcoesCampos('sexoa', 'F', 'Fêmea');
-    registraValidacaoCampoTabela('CLIENTES_ANIMAIS','sexo','sexoa','Sexo do animal');
+    registraValidacaoCampoTabela('','CLIENTES_ANIMAIS','sexo','sexoa','Sexo do animal');
 
     registraOpcoesCampos('parentesco', 'PAI');
     registraOpcoesCampos('parentesco', 'MÃE');
@@ -166,8 +166,8 @@ begin
     registraOpcoesCampos('parentesco', 'SOGRA');
     registraOpcoesCampos('parentesco', 'GENRO');
     registraOpcoesCampos('parentesco', 'NORA');
-    registraValidacaoCampoTabela('CLIENTES','PARENTESCO_REF1','parentesco','Parentesco do cliente coma a referência 1',condicao);
-    registraValidacaoCampoTabela('CLIENTES','PARENTESCO_REF2','parentesco','Parentesco do cliente coma a referência 2',condicao);
+    registraValidacaoCampoTabela('','CLIENTES','PARENTESCO_REF1','parentesco','Parentesco do cliente coma a referência 1',condicao);
+    registraValidacaoCampoTabela('','CLIENTES','PARENTESCO_REF2','parentesco','Parentesco do cliente coma a referência 2',condicao);
 
     registraOpcoesCampos('temporesidencia', 'MENOS DE UM ANO');
     registraOpcoesCampos('temporesidencia', '1 ANO');
@@ -181,22 +181,22 @@ begin
     registraOpcoesCampos('temporesidencia', 'MAIS DE 10 ANOS');
     registraOpcoesCampos('temporesidencia', 'MAIS DE 15 ANOS');
     registraOpcoesCampos('temporesidencia', 'MAIS DE 20 ANOS');
-    registraValidacaoCampoTabela('CLIENTES','TEMPO_RESIDENCIA','temporesidencia','Tempo de residência do cliente',condicao);
+    registraValidacaoCampoTabela('','CLIENTES','TEMPO_RESIDENCIA','temporesidencia','Tempo de residência do cliente',condicao);
 
     registraOpcoesCampos('tiporesidencia', 'PRÓPRIA');
     registraOpcoesCampos('tiporesidencia', 'CEDIDA');
     registraOpcoesCampos('tiporesidencia', 'ALUGADA');
-    registraValidacaoCampoTabela('CLIENTES','TIPO_RESIDENCIA','tiporesidencia','Tipo de residência do cliente',condicao);
+    registraValidacaoCampoTabela('','CLIENTES','TIPO_RESIDENCIA','tiporesidencia','Tipo de residência do cliente',condicao);
 
     registraOpcoesCampos('regimetrabalho', 'C', 'CLT');
     registraOpcoesCampos('regimetrabalho', 'A', 'Autônomo');
     registraOpcoesCampos('regimetrabalho', 'N', 'Outros');
-    registraValidacaoCampoTabela('CLIENTES','REGIME_TRABALHO','regimetrabalho','Regime de trabalho do cliente',condicao);
+    registraValidacaoCampoTabela('','CLIENTES','REGIME_TRABALHO','regimetrabalho','Regime de trabalho do cliente',condicao);
 
     registraOpcoesCampos('tipoendereco', 'C', 'Cobrança');
     registraOpcoesCampos('tipoendereco', 'E', 'Entrega');
     registraOpcoesCampos('tipoendereco', 'O', 'Outros');
-    registraValidacaoCampoTabela('CLIENTES_ENDERECO','TIPO','tipoendereco','Tipo de endereço do cliente');
+    registraValidacaoCampoTabela('','CLIENTES_ENDERECO','TIPO','tipoendereco','Tipo de endereço do cliente');
 
     ds := gdbPadrao.criaDataset;
     ds.query(
@@ -229,7 +229,7 @@ begin
             lCampo := trim(lDelim.strings.Strings[i]);
             if(lCampo='') then continue;
           end;
-          registraValidacaoCampoTabela(lTabela,lCampo, 'NOTNULL',trim(lDelim.strings.ValueFromIndex[i]),true);
+          registraValidacaoCampoTabela('',lTabela,lCampo, 'NOTNULL',trim(lDelim.strings.ValueFromIndex[i]),true);
         end;
       end;
 

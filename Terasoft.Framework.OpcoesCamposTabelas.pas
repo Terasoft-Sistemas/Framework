@@ -86,6 +86,11 @@ interface
       procedure adicionaDependencia(pDenpendencia: TipoWideStringFramework; pValor: TipoWideStringFramework);
       function verificaDependencias(pContexto: TDataset; pResultado: IResultadoOperacao=nil): boolean;
 
+    //property regra getter/setter
+      function getRegra: TipoWideStringFramework;
+      procedure setRegra(const pValue: TipoWideStringFramework);
+
+      property regra: TipoWideStringFramework read getRegra write setRegra;
       property dependencias: TListaDependenciaRegra read getDependencias write setDependencias;
       property dadosOpcoes: IDadosSetOpcoes read getDadosOpcoes;
       property nome: TipoWideStringFramework read getNome write setNome;
@@ -98,15 +103,17 @@ interface
 
     TDicionarioDadosCamposValidacoesTabela = IDictionary<TipoWideStringFramework,IDadosCamposValidacoes>;
     TDicionarioDadosCamposValidacoes = IDictionary<TipoWideStringFramework,TDicionarioDadosCamposValidacoesTabela>;
+    TDicionarioRegrasDadosCamposValidacoes = IDictionary<TipoWideStringFramework,TDicionarioDadosCamposValidacoes>;
     TDicionarioSetValores = IDictionary<TipoWideStringFramework,IDadosSetOpcoes>;
 
   function registraOpcoesCampos(pNome, pOpcao: String; pOpcaoDescricao: String = ''; pDescricao: String = ''): IDadosSetOpcoes;
-  function registraValidacaoCampoTabela(pTabela, pCampo, pOpcoes: String; pDescricao: String = ''; pObrigatorio: boolean = false;pIgnoraExistente: boolean=false): IDadosCamposValidacoes;
+  function registraValidacaoCampoTabela(pRegra,pTabela, pCampo, pOpcoes: String; pDescricao: String = ''; pObrigatorio: boolean = false;pIgnoraExistente: boolean=false): IDadosCamposValidacoes;
   procedure configuraControlesEditOpcoesCampoTabela(pTabela: String; pOwner: TComponent; pDataSource: TDataSource);
   //procedure configuraEditOpcoesCampoTabela(pTabela: String; pObject: TComponent; pDataSource: TDataSource);
-  function validaDataset(pTabela: String; pDataset: TDataset; pListaCampos: IListaString = nil; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+  function validaDataset(pRegra, pTabela: String; pDataset: TDataset; pListaCampos: IListaString = nil; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
   function retornaControleDataField(pCampo: String; pDatasource: TDataSource; pParent: TWinControl): TWinControl;
   function setFocoControleDataField(pCampo: String; pDatasource: TDataSource; pParent: TWinControl): TWinControl;
+  function getDicionarioRegrasDadosCamposValidacoes(pRegra: TipoWideStringFramework = ''): TDicionarioDadosCamposValidacoes;
 
   var
     gOpcoesDefaultRegistradas: boolean;
@@ -129,6 +136,11 @@ implementation
       fTabela: TipoWideStringFramework;
       fCampo: TipoWideStringFramework;
       fDependencias: TListaDependenciaRegra;
+      fRegra: TipoWideStringFramework;
+
+    //property regra getter/setter
+      function getRegra: TipoWideStringFramework;
+      procedure setRegra(const pValue: TipoWideStringFramework);
 
       procedure adicionaDependencia(pDependencia: TipoWideStringFramework; pValor: TipoWideStringFramework);
       function verificaDependencias(pContexto: TDataset; pResultado: IResultadoOperacao): boolean;
@@ -198,8 +210,9 @@ implementation
     end;
 
   var
-    dicionarioDadosCamposValidacoes: TDicionarioDadosCamposValidacoes;
-    dicionarioDadosCamposValidacoesInicializado: boolean;
+    //_dicionarioDadosCamposValidacoes: TDicionarioDadosCamposValidacoes;
+    dicionarioRegrasDadosCamposValidacoesInicializado: boolean;
+    dicionarioRegrasDadosCamposValidacoes: TDicionarioRegrasDadosCamposValidacoes;
 
     dicionarioSetValores: TDicionarioSetValores;
     dicionarioSetValoresInicializado: boolean;
@@ -208,16 +221,16 @@ procedure loadDicionarioCamposValidacoes;
   var
     dsRegras, dsDependencias: IDataset;
     dic: TDicionarioDadosCamposValidacoes;
-    lTabela,lCampo,lNome: TipoWideStringFramework;
+    lRegra,lTabela,lCampo,lNome: TipoWideStringFramework;
     validacacoesTabelas: TDicionarioDadosCamposValidacoesTabela;
     validacao: IDadosCamposValidacoes;
   label
     proximo1,proximo2;
 begin
-  if(dicionarioDadosCamposValidacoes=nil) then
+  if(dicionarioRegrasDadosCamposValidacoes=nil) then
     exit;
-  dic := dicionarioDadosCamposValidacoes;
-  dicionarioDadosCamposValidacoesInicializado := true;
+  dicionarioRegrasDadosCamposValidacoesInicializado := true;
+
 
   dsRegras := gdbPadrao.criaDataset;
   dsDependencias := gdbPadrao.criaDataset;
@@ -232,7 +245,9 @@ begin
     lTabela := UpperCase(trim(dsRegras.dataset.FieldByName('tabela').AsString));
     lCampo := UpperCase(trim(dsRegras.dataset.FieldByName('campo').AsString));
     lNome := UpperCase(trim(dsRegras.dataset.FieldByName('nome').AsString));
-    if(lTabela='') or (lCampo='') or (lNome='') then goto proximo1;
+    lRegra := UpperCase(trim(dsRegras.dataset.FieldByName('regra').AsString));
+    if(lTabela='') or (lCampo='') or (lNome='') or (lRegra='') then goto proximo1;
+    dic:=getDicionarioRegrasDadosCamposValidacoes(lRegra);
 
     if not dic.TryGetValue(lTabela,validacacoesTabelas) then
     begin
@@ -244,6 +259,7 @@ begin
       validacao := TDadosCamposValidacoesImpl.Create;
       validacacoesTabelas.AddOrSetValue(lCampo,validacao);
     end;
+    validacao.regra := lRegra;
     validacao.nome := lNome;
     validacao.descricao := dsRegras.dataset.FieldByName('descricao').AsString;
     validacao.tabela := lTabela;
@@ -274,15 +290,23 @@ begin
    proximo1:
     dsRegras.dataset.Next;
   end;
+
 end;
 
-function getDicionarioDadosCamposValidacoes: TDicionarioDadosCamposValidacoes;
+function getDicionarioRegrasDadosCamposValidacoes(pRegra: TipoWideStringFramework = ''): TDicionarioDadosCamposValidacoes;
 begin
-  if(dicionarioDadosCamposValidacoes=nil) then
-    dicionarioDadosCamposValidacoes:=TCollections.CreateDictionary<TipoWideStringFramework,TDicionarioDadosCamposValidacoesTabela>(getComparadorOrdinalTipoWideStringFramework);
-  if(dicionarioDadosCamposValidacoesInicializado=false) and (gdbPadrao<>nil) and (gOpcoesDefaultRegistradas=true) then
+  if(pRegra='') then
+    pRegra := 'padrao';
+  pRegra := uppercase(trim(pRegra));
+  if(dicionarioRegrasDadosCamposValidacoes=nil) then
+    dicionarioRegrasDadosCamposValidacoes:=TCollections.CreateDictionary<TipoWideStringFramework,TDicionarioDadosCamposValidacoes>(getComparadorOrdinalTipoWideStringFramework);
+  if(dicionarioRegrasDadosCamposValidacoesInicializado=false) and (gdbPadrao<>nil) and (gOpcoesDefaultRegistradas=true) then
     loadDicionarioCamposValidacoes;
-  Result := dicionarioDadosCamposValidacoes;
+  if not dicionarioRegrasDadosCamposValidacoes.TryGetValue(pRegra,Result) then
+  begin
+    Result := TCollections.CreateDictionary<TipoWideStringFramework,TDicionarioDadosCamposValidacoesTabela>(getComparadorOrdinalTipoWideStringFramework);
+    dicionarioRegrasDadosCamposValidacoes.AddOrSetValue(pRegra,Result);
+  end;
 end;
 
 procedure loadDicionarioSetValores;
@@ -372,21 +396,27 @@ end;
 function getValidacaoPorNome(pNome: String): IDadosCamposValidacoes;
   var
     dic: TDicionarioDadosCamposValidacoes;
-    p: TPair<TipoWideStringFramework, TDicionarioDadosCamposValidacoesTabela>;
+    p1: TPair<TipoWideStringFramework, TDicionarioDadosCamposValidacoes>;
+    p2: TPair<TipoWideStringFramework, TDicionarioDadosCamposValidacoesTabela>;
     r: TPair<TipoWideStringFramework,IDadosCamposValidacoes>;
 begin
   Result := nil;
   pNome := UpperCase(trim(pNome));
-  dic := getDicionarioDadosCamposValidacoes;
-  for p in dic do
-    for r in p.Value do
-    begin
-      if(r.Value.nome=pNome) then
+  if(dicionarioRegrasDadosCamposValidacoes=nil) then
+    exit;
+  for p1 in dicionarioRegrasDadosCamposValidacoes do
+  begin
+    dic := p1.Value;
+    for p2 in dic do
+      for r in p2.Value do
       begin
-        Result := r.Value;
-        exit;
+        if(r.Value.nome=pNome) then
+        begin
+          Result := r.Value;
+          exit;
+        end;
       end;
-    end;
+  end;
 end;
 
 
@@ -420,13 +450,16 @@ function registraValidacaoCampoTabela;//(pTabela, pCampo, pOpcoes: String; pDesc
     dadosTabela: TDicionarioDadosCamposValidacoesTabela;
     //dadosCampo: IDadosCamposValidacoes;
 begin
-  dic := getDicionarioDadosCamposValidacoes;
+  if(pRegra='') then
+    pRegra:='padrao';
+  pRegra := uppercase(trim(pRegra));
+  dic := getDicionarioRegrasDadosCamposValidacoes(pRegra);
   pTabela := UpperCase(trim(pTabela));
   pCampo := UpperCase(trim(pCampo));
   if(pTabela='') then exit;
   if(pCampo='') then exit;
 
-  logaByTagSeNivel(TAGLOG_VALIDACOES,format('registraValidacaoCampoTabela: Tabela [%s], Campo [%s], Opções [%s], Descrição [%s], Obrigatório [%s].',[pTabela,pCampo,pOpcoes,pDescricao,ifThen(pObrigatorio,'S','N')]),LOG_LEVEL_DEBUG );
+  logaByTagSeNivel(TAGLOG_VALIDACOES,format('registraValidacaoCampoTabela: Regra: [%s], Tabela [%s], Campo [%s], Opções [%s], Descrição [%s], Obrigatório [%s].',[pRegra,pTabela,pCampo,pOpcoes,pDescricao,ifThen(pObrigatorio,'S','N')]),LOG_LEVEL_DEBUG );
 
   if not dic.TryGetValue(pTabela,dadosTabela) then
   begin
@@ -442,6 +475,7 @@ begin
     logaByTagSeNivel(TAGLOG_VALIDACOES,format('registraValidacaoCampoTabela: Configuração ja existe e sendo ignorada sua inclusão: Tabela [%s], Campo [%s], Opções [%s], Descrição [%s], Obrigatório [%s].',[pTabela,pCampo,pOpcoes,pDescricao,ifThen(pObrigatorio,'S','N')]),LOG_LEVEL_DEBUG,ls_Warning );
     exit;
   end;
+  Result.regra := pRegra;
   Result.tabela := pTabela;
   Result.campo := pCampo;
   Result.descricao := pDescricao;
@@ -449,7 +483,7 @@ begin
   Result.obrigatorio := pObrigatorio;
 end;
 
-function validaDataset(pTabela: String; pDataset: TDataset; pListaCampos: IListaString = nil; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+function validaDataset;//(pRegra,pTabela: String; pDataset: TDataset; pListaCampos: IListaString = nil; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
   var
     i: Integer;
     lValor, p1, lNomeCampo: TipoWideStringFramework;
@@ -464,7 +498,8 @@ begin
   Result := CheckResultadoOperacao(pResultado);
   if(usaValidacoesNovas=false) then exit;
   save := pResultado.erros;
-  pTabela := uppercase(trim(pTabela));
+  if(pRegra='') then
+    pRegra := 'padrao';
   if(pTabela='') then
   begin
     pResultado.adicionaErro('Nome da tabela inválida.');
@@ -479,13 +514,16 @@ begin
   if(pListaCampos=nil) then
     pListaCampos := getStringList;
 
+  pRegra := uppercase(trim(pRegra));
+  pTabela := uppercase(trim(pTabela));
+
   if(pListaCampos.Count=0) then
   begin
     for i := 0 to pDataset.Fields.Count - 1 do
       pListaCampos.Add(pDataset.Fields[i].FieldName);
   end;
 
-  dic := getDicionarioDadosCamposValidacoes;
+  dic := getDicionarioRegrasDadosCamposValidacoes(pRegra);
   if not dic.TryGetValue(pTabela,dadosTabela) then
     exit;
 
@@ -614,7 +652,8 @@ procedure configuraEditOpcoesCampoTabela(pTabela: String; pObject: TComponent; p
     dadosCampo: IDadosCamposValidacoes;
     opcoes: IDadosSetOpcoes;
 begin
-  dic := getDicionarioDadosCamposValidacoes;
+  //Aqui vamos assumir somente a regra PADRAO por enquanto
+  dic := getDicionarioRegrasDadosCamposValidacoes;
   if(pObject=nil) then exit;
   pTabela := UpperCase(trim(pTabela));
   if(pTabela='') then exit;
@@ -686,8 +725,19 @@ begin
   end;
 end;
 
+{ TDadosCamposValidacoesImpl }
 
-{ TDadosCamposValidacoesImpl }
+procedure TDadosCamposValidacoesImpl.setRegra(const pValue: TipoWideStringFramework);
+begin
+  fRegra := uppercase(trim(pValue));
+end;
+
+function TDadosCamposValidacoesImpl.getRegra: TipoWideStringFramework;
+begin
+  if(fRegra='') then
+    fRegra := 'PADRAO';
+  Result := fRegra;
+end;
 
 procedure TDadosCamposValidacoesImpl.setDependencias(const pValue: TListaDependenciaRegra);
 begin
