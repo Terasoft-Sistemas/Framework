@@ -336,7 +336,7 @@ begin
   try
     lSQL :=
       ' select sum( valorunitario_ped * qtde_calculada ) VALOR_TOTAL_ITENS,                                                                      '+
-      '        sum( qtde_calculada * coalesce(quantidade_tipo,0) ) VALOR_TOTAL_GARANTIA,                                                         '+
+      '        sum( (qtde_calculada * coalesce(quantidade_tipo,0)) + (qtde_calculada * coalesce(VLR_GARANTIA_FR,0)) ) VALOR_TOTAL_GARANTIA,      '+
       '        sum(round(cast(((cast(VALORUNITARIO_PED  as float) * desconto_ped / 100)) * qtde_calculada as float),2)) as VALOR_TOTAL_DESCONTO  '+
       '   from pedidoitens                                                                                                                       '+
       '  where numero_ped = '+QuotedStr(pNumeroPedido);
