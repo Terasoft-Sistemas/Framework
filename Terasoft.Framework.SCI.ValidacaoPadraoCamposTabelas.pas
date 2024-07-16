@@ -65,6 +65,12 @@ begin
     registraOpcoesCampos('sexo', 'F', 'Feminino');
     registraValidacaoCampoTabela('clientes','SEXO_CLI','sexo','Sexo do cliente',true);
 
+    registraOpcoesCampos('escolaridade', '1', 'Analfabeto');
+    registraOpcoesCampos('escolaridade', '2', 'Fundamental/Médio');
+    registraOpcoesCampos('escolaridade', '3', 'Superior');
+    registraValidacaoCampoTabela('clientes','ESCOLARIDADE_CLI','escolaridade','Grau de instrução do cliente',condicao);
+
+
     registraOpcoesCampos('tipopessoa', 'F', 'Física');
     registraOpcoesCampos('tipopessoa', 'J', 'Jurídica');
     registraValidacaoCampoTabela('clientes','TIPO_CLI','tipopessoa','Tipo do cliente',true);
@@ -160,8 +166,8 @@ begin
     registraOpcoesCampos('parentesco', 'SOGRA');
     registraOpcoesCampos('parentesco', 'GENRO');
     registraOpcoesCampos('parentesco', 'NORA');
-    registraValidacaoCampoTabela('CLIENTES','PARENTESCO_REF1','parentesco','Parentesco do cliente coma a referência 1');
-    registraValidacaoCampoTabela('CLIENTES','PARENTESCO_REF2','parentesco','Parentesco do cliente coma a referência 2');
+    registraValidacaoCampoTabela('CLIENTES','PARENTESCO_REF1','parentesco','Parentesco do cliente coma a referência 1',condicao);
+    registraValidacaoCampoTabela('CLIENTES','PARENTESCO_REF2','parentesco','Parentesco do cliente coma a referência 2',condicao);
 
     registraOpcoesCampos('temporesidencia', 'MENOS DE UM ANO');
     registraOpcoesCampos('temporesidencia', '1 ANO');
@@ -175,17 +181,17 @@ begin
     registraOpcoesCampos('temporesidencia', 'MAIS DE 10 ANOS');
     registraOpcoesCampos('temporesidencia', 'MAIS DE 15 ANOS');
     registraOpcoesCampos('temporesidencia', 'MAIS DE 20 ANOS');
-    registraValidacaoCampoTabela('CLIENTES','TEMPO_RESIDENCIA','temporesidencia','Tempo de residência do cliente');
+    registraValidacaoCampoTabela('CLIENTES','TEMPO_RESIDENCIA','temporesidencia','Tempo de residência do cliente',condicao);
 
     registraOpcoesCampos('tiporesidencia', 'PRÓPRIA');
     registraOpcoesCampos('tiporesidencia', 'CEDIDA');
     registraOpcoesCampos('tiporesidencia', 'ALUGADA');
-    registraValidacaoCampoTabela('CLIENTES','TIPO_RESIDENCIA','tiporesidencia','Tipo de residência do cliente');
+    registraValidacaoCampoTabela('CLIENTES','TIPO_RESIDENCIA','tiporesidencia','Tipo de residência do cliente',condicao);
 
-    registraOpcoesCampos('regimetrabalho', 'CLT');
-    registraOpcoesCampos('regimetrabalho', 'Autônomo');
-    registraOpcoesCampos('regimetrabalho', 'Outros');
-    registraValidacaoCampoTabela('CLIENTES','REGIME_TRABALHO','regimetrabalho','Regime de trabalho do cliente');
+    registraOpcoesCampos('regimetrabalho', 'C', 'CLT');
+    registraOpcoesCampos('regimetrabalho', 'A', 'Autônomo');
+    registraOpcoesCampos('regimetrabalho', 'N', 'Outros');
+    registraValidacaoCampoTabela('CLIENTES','REGIME_TRABALHO','regimetrabalho','Regime de trabalho do cliente',condicao);
 
     registraOpcoesCampos('tipoendereco', 'C', 'Cobrança');
     registraOpcoesCampos('tipoendereco', 'E', 'Entrega');

@@ -102,12 +102,15 @@ begin
     end;
 
     if lvalorGen < 100000 then begin
-      if lCtrGen[2] <> '' then
-        begin
-          Result := Format('%5.5d', [lvalorGen]);
-          Result := Copy(Result, 1, StrToInt(lCtrGen[2]) -1)
-                    + lCtrGen[1]
-                    + Copy(Result, StrToInt(lCtrGen[2]), Result.Length);
+      if lCtrGen.Length > 1 then
+      begin
+        if lCtrGen[2] <> '' then
+          begin
+            Result := Format('%5.5d', [lvalorGen]);
+            Result := Copy(Result, 1, StrToInt(lCtrGen[2]) -1)
+                      + lCtrGen[1]
+                      + Copy(Result, StrToInt(lCtrGen[2]), Result.Length);
+        end
       end
       else
         Result := lCtrGen + Format('%5.5d', [lvalorGen]);
