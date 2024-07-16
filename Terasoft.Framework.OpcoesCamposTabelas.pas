@@ -100,7 +100,7 @@ interface
     TDicionarioDadosCamposValidacoes = IDictionary<TipoWideStringFramework,TDicionarioDadosCamposValidacoesTabela>;
     TDicionarioSetValores = IDictionary<TipoWideStringFramework,IDadosSetOpcoes>;
 
-  function registraOpcoesCampos(pNome, pOpcao, pOpcaoDescricao: String; pDescricao: String = ''): IDadosSetOpcoes;
+  function registraOpcoesCampos(pNome, pOpcao: String; pOpcaoDescricao: String = ''; pDescricao: String = ''): IDadosSetOpcoes;
   function registraValidacaoCampoTabela(pTabela, pCampo, pOpcoes: String; pDescricao: String = ''; pObrigatorio: boolean = false;pIgnoraExistente: boolean=false): IDadosCamposValidacoes;
   procedure configuraControlesEditOpcoesCampoTabela(pTabela: String; pOwner: TComponent; pDataSource: TDataSource);
   //procedure configuraEditOpcoesCampoTabela(pTabela: String; pObject: TComponent; pDataSource: TDataSource);
@@ -394,6 +394,8 @@ function registraOpcoesCampos;//(const pNome, pOpcao, pOpcaoDescricao: String; p
   var
     dic: TDicionarioSetValores;
 begin
+  if(pOpcaoDescricao='') then
+    pOpcaoDescricao:=pOpcao;
   pNome := UpperCase(trim(pNome));
   if(pNome='') then exit;
   dic := getDicionarioSetValores;
