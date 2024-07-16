@@ -21,7 +21,7 @@ implementation
 
   const
     {$if defined(AMBIENTE_DESENVOLVIMENTO_NBANTONIO)}
-      condicao = true;
+      condicao = false;
     {$else}
       condicao = false;
     {$endif}
