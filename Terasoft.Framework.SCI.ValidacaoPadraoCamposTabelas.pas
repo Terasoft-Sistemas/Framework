@@ -65,6 +65,12 @@ begin
     registraOpcoesCampos('sexo', 'F', 'Feminino');
     registraValidacaoCampoTabela('clientes','SEXO_CLI','sexo','Sexo do cliente',true);
 
+    registraOpcoesCampos('escolaridade', '1', 'Analfabeto');
+    registraOpcoesCampos('escolaridade', '2', 'Fundamental/Médio');
+    registraOpcoesCampos('escolaridade', '3', 'Superior');
+    registraValidacaoCampoTabela('clientes','ESCOLARIDADE_CLI','escolaridade','Grau de instrução do cliente');
+
+
     registraOpcoesCampos('tipopessoa', 'F', 'Física');
     registraOpcoesCampos('tipopessoa', 'J', 'Jurídica');
     registraValidacaoCampoTabela('clientes','TIPO_CLI','tipopessoa','Tipo do cliente',true);
