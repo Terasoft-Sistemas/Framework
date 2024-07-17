@@ -1502,6 +1502,14 @@ object Form1: TForm1
     object TabelaJurosPromocao: TTabSheet
       Caption = 'TabelaJurosPromocao'
       ImageIndex = 17
+      object SpeedButton1: TSpeedButton
+        Left = 19
+        Top = 95
+        Width = 182
+        Height = 46
+        Caption = 'Calcular coeficiente Promo'#231#227'o'
+        OnClick = SpeedButton1Click
+      end
       object btnObterJurosPromocao: TButton
         Left = 19
         Top = 43

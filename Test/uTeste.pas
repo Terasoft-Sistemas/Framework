@@ -16,7 +16,7 @@ uses
   Terasoft.Types,
   Conexao,
   Interfaces.Conexao, EntradaModel, Vcl.Grids, XDBGrids, Data.DB,
-  Terasoft.Configuracoes, Terasoft.FuncoesTexto;
+  Terasoft.Configuracoes, Terasoft.FuncoesTexto, Vcl.Buttons, FireDAC.Comp.Client;
 
 type
   TForm1 = class(TForm)
@@ -208,6 +208,7 @@ type
     TabelaJurosPromocao: TTabSheet;
     btnObterJurosPromocao: TButton;
     Memo2: TMemo;
+    SpeedButton1: TSpeedButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -356,11 +357,13 @@ type
     procedure Button116Click(Sender: TObject);
     procedure Button133Click(Sender: TObject);
     procedure btnObterJurosPromocaoClick(Sender: TObject);
+    procedure SpeedButton1Click(Sender: TObject);
 
   private
     { Private declarations }
     vQtdeRegistros,
     vPagina         : Integer;
+    function RetornaCoeficientePromocao(pTaxa: Double;  pQuantidadeParcelas: Integer): TFDMemTable;
 
   public
     { Public declarations }
@@ -377,7 +380,6 @@ uses
   FinanceiroPedidoModel,
   WebPedidoModel,
   Controllers.Conexao,
-  FireDAC.Comp.Client,
   WebPedidoItensModel,
   TabelaJurosModel,
   SaldoModel, EmpresaModel, ProdutosModel, EntradaItensModel,
@@ -4168,6 +4170,52 @@ begin
   finally
     lOrcamentoItensModel.Free;
   end;
+end;
+
+
+function TForm1.RetornaCoeficientePromocao(pTaxa: Double; pQuantidadeParcelas: Integer): TFDMemTable;
+var
+ lTaxa: Double;
+ lCoeficiente: Double;
+ lQuantidadeParcelas: Integer;
+ i: Integer;
+
+ lConta1, lConta2, lConta3: Double;
+
+ lMSG: String;
+
+begin
+  lTaxa := pTaxa/100;
+  lQuantidadeParcelas := pQuantidadeParcelas;
+
+  lMSG := '';
+
+ lConta1 := 1 + ltaxa;
+
+ for I := 1 to lQuantidadeParcelas do
+ begin
+   if i = 1 then
+    lConta2 := lConta1
+   else
+    lConta2 := lConta2 *lConta1;
+
+   lConta3 := 1 / lConta2;
+
+   lCoeficiente := lTaxa/(1-lConta3);
+
+   lMSG := lMSG + 'Parcela: '+IntToStr(i)+#13+
+                  'Coeficiente: '+FloatToStr(lCoeficiente)+#13+#13;
+ end;
+
+  ShowMessage(lMSG);
+end;
+
+
+
+
+procedure TForm1.SpeedButton1Click(Sender: TObject);
+begin
+  Self.RetornaCoeficientePromocao(8,24);
 end;
 
 end.
