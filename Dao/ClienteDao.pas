@@ -1131,7 +1131,7 @@ begin
         setParams(lQry, pClienteModel);
         lQry.Open(lSQL);
 
-        lQry.FieldByName('CODIGO_CLI').AsString;
+        Result := lQry.FieldByName('CODIGO_CLI').AsString;
       end;
     end;
 
