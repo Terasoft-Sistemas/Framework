@@ -148,6 +148,8 @@ var
   lPortadorModel : TPortadorModel;
   lConfiguracoes : TerasoftConfiguracoes;
   lTagPercentual : String;
+
+  lTagLimitadorVencimento: Integer;
 begin
   lPortadorModel := TPortadorModel.Create(vIConexao);
   lTabelaJurosDia := TTabelaJurosDiaModel.Create(vIConexao);
@@ -169,6 +171,12 @@ begin
     self.obterLista;
 
     lTagPercentual  := lConfiguracoes.valorTag('PEDIDO_TABELA_JUROS_PERCENTUAL', 'N', tvBool);
+    lTagLimitadorVencimento := StrToInt(lConfiguracoes.valorTag('LIMITADOR_VENCIMENTO_RECEBER', 0, tvInteiro));
+
+
+    if Terasoft.Utils.DiferencaEntreDatas(Date,pPrimeiroVencimento)  > lTagLimitadorVencimento then
+      CriaException('Primeiro vencimento superior ao permitido. Permitido: '+IntToStr(lTagLimitadorVencimento)+' dias.');
+
 
 
     if Terasoft.Utils.DiferencaEntreDatas(Date,pPrimeiroVencimento)  > 30 then
