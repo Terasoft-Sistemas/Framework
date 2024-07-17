@@ -205,6 +205,9 @@ type
     TabelaJurosDia: TTabSheet;
     Button133: TButton;
     Memo1: TMemo;
+    TabelaJurosPromocao: TTabSheet;
+    btnObterJurosPromocao: TButton;
+    Memo2: TMemo;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -352,6 +355,7 @@ type
     procedure imprimirPrestamistaClick(Sender: TObject);
     procedure Button116Click(Sender: TObject);
     procedure Button133Click(Sender: TObject);
+    procedure btnObterJurosPromocaoClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -384,7 +388,7 @@ uses
   PromocaoModel, TransportadoraModel, PrevisaoPedidoCompraModel, SaidasModel,
   SaidasItensModel, ClientesEnderecoModel, OrcamentoModel, OrcamentoItensModel, Terasoft.Utils,
   SolicitacaoDescontoModel, PermissaoRemotaModel, MovimentoSerialModel, Impressao.Contratos,
-  UsuarioModel, TabelaJurosDiaModel;
+  UsuarioModel, TabelaJurosDiaModel, TabelaJurosPromocaoModel;
 
 {$R *.dfm}
 
@@ -552,6 +556,27 @@ begin
   end;
 end;
 
+procedure TForm1.btnObterJurosPromocaoClick(Sender: TObject);
+var
+  lTabelaJurosPromocaoModel : TTabelaJurosPromocaoModel;
+  lMemTable                 : TFDMemTable;
+begin
+  lTabelaJurosPromocaoModel := TTabelaJurosPromocaoModel.Create(vIConexao);
+  try
+    lMemTable := lTabelaJurosPromocaoModel.obterLista;
+
+    lMemTable.First;
+    while not lMemTable.Eof do
+    begin
+      Memo2.Lines.Add(lMemTable.FieldByName('PROMOCAO_ID').AsString);
+      lMemTable.Next;
+    end;
+
+  finally
+    lTabelaJurosPromocaoModel.Free;
+  end;
+end;
+
 procedure TForm1.btnReservaClick(Sender: TObject);
 var
   lReservaModel : TReservaModel;
@@ -601,7 +626,7 @@ begin
   try
     try
       lValorPago := 10000;
-      lMemJuros  := lTabelaJurosModel.obterLista('000005', lValorPago, true);
+      lMemJuros  := lTabelaJurosModel.obterLista('000005', lValorPago, true, vIConexao.dataServer);
 
       lFinanceiroParams.WEB_PEDIDO_ID       := '422';
       lFinanceiroParams.PORTADOR_ID         := '000005';
@@ -3163,7 +3188,7 @@ begin
   lTabelaJurosModel := TTabelaJurosModel.Create(vIConexao);
   try
     lPortador := InputBox('WebPedido', 'Digite o ID do portador:', '');
-    lMemTable := lTabelaJurosModel.obterLista(lPortador, 1000, true);
+    lMemTable := lTabelaJurosModel.obterLista(lPortador, 1000, true, vIConexao.DataServer);
 
     lMemTable.first;
     while not lMemTable.eof do

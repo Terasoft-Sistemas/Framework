@@ -160,7 +160,9 @@ uses
   TabelaJurosDiaDao in '..\Dao\TabelaJurosDiaDao.pas',
   TabelaJurosDiaModel in '..\Model\TabelaJurosDiaModel.pas',
   GrupoGarantiaModel in '..\Model\GrupoGarantiaModel.pas',
-  GrupoGarantiaDao in '..\Dao\GrupoGarantiaDao.pas';
+  GrupoGarantiaDao in '..\Dao\GrupoGarantiaDao.pas',
+  TabelaJurosPromocaoModel in '..\Model\TabelaJurosPromocaoModel.pas',
+  TabelaJurosPromocaoDao in '..\Dao\TabelaJurosPromocaoDao.pas';
 
 {$R *.res}
 

@@ -18,7 +18,7 @@ object Form1: TForm1
     Top = 0
     Width = 1250
     Height = 749
-    ActivePage = TabelaJurosDia
+    ActivePage = TabelaJurosPromocao
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -1490,6 +1490,28 @@ object Form1: TForm1
         OnClick = Button133Click
       end
       object Memo1: TMemo
+        Left = 0
+        Top = 464
+        Width = 1242
+        Height = 255
+        Align = alBottom
+        ScrollBars = ssVertical
+        TabOrder = 1
+      end
+    end
+    object TabelaJurosPromocao: TTabSheet
+      Caption = 'TabelaJurosPromocao'
+      ImageIndex = 17
+      object btnObterJurosPromocao: TButton
+        Left = 19
+        Top = 43
+        Width = 182
+        Height = 46
+        Caption = 'Obter'
+        TabOrder = 0
+        OnClick = btnObterJurosPromocaoClick
+      end
+      object Memo2: TMemo
         Left = 0
         Top = 464
         Width = 1242
