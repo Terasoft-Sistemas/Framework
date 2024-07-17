@@ -630,4 +630,7 @@
   {$ifend}
 {$ifend}
 
+{$if defined(__GESTAO_WEB__)}
+  {$define __USAR_THREAD_VAR__}
+{$ifend}
 
