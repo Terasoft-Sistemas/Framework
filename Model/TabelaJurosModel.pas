@@ -176,6 +176,9 @@ begin
     else
       lCoeficienteJurosDias := 1;
 
+    if lCoeficienteJurosDias = 0 then
+      lCoeficienteJurosDias := 1;
+
     if self.TotalRecords = 0 then
     begin
       self.TabelaJurossLista := TObjectList<TTabelaJurosModel>.Create;
