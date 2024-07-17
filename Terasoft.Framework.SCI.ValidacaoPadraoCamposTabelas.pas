@@ -51,6 +51,7 @@ begin
     registraOpcoesCampos('cpfvalido', '<cnpj>', '');
     registraOpcoesCampos('cnpjcpfvalido', '<cnpjcpf>', '');
     registraOpcoesCampos('somentenumeros', '<somentenumeros>', '');
+    registraOpcoesCampos('naozero', '<naozero>', '');
     registraOpcoesCampos('chavenfe', '<chavenfe>', '');
     registraOpcoesCampos('uf', '<uf>', '');
     registraOpcoesCampos('imei', '<imei>', '');
@@ -142,6 +143,19 @@ begin
     registraOpcoesCampos('sexoa', 'F', 'Fêmea');
     registraValidacaoCampoTabela('','CLIENTES_ANIMAIS','sexo','sexoa','Sexo do animal');
 
+    registraOpcoesCampos('ocupacao', '0','Aposentado');
+    registraOpcoesCampos('ocupacao', '1','Pensionista');
+    registraOpcoesCampos('ocupacao', '2','Assalariado');
+    registraOpcoesCampos('ocupacao', '3','Autônomo');
+    registraOpcoesCampos('ocupacao', '4','Liberal');
+    registraOpcoesCampos('ocupacao', '5','Proprietário');
+    registraOpcoesCampos('ocupacao', '6','Do lar');
+    registraOpcoesCampos('ocupacao', '8','Funcionário Público');
+    registraOpcoesCampos('ocupacao', '7','Outros');
+    registraOpcoesCampos('ocupacao', '9','Auxílio Doença');
+    registraValidacaoCampoTabela('','clientes','CODIGO_OCUPACAO_CLI','ocupacao','Ocupação do cliente');
+
+
     registraOpcoesCampos('parentesco', 'PAI');
     registraOpcoesCampos('parentesco', 'MÃE');
     registraOpcoesCampos('parentesco', 'FILHO');
@@ -189,9 +203,25 @@ begin
     registraValidacaoCampoTabela('','CLIENTES','TIPO_RESIDENCIA','tiporesidencia','Tipo de residência do cliente',condicao);
 
     registraOpcoesCampos('regimetrabalho', 'C', 'CLT');
-    registraOpcoesCampos('regimetrabalho', 'A', 'Autônomo');
+    registraOpcoesCampos('regimetrabúmealho', 'A', 'Autônomo');
     registraOpcoesCampos('regimetrabalho', 'N', 'Outros');
     registraValidacaoCampoTabela('','CLIENTES','REGIME_TRABALHO','regimetrabalho','Regime de trabalho do cliente',condicao);
+
+    registraOpcoesCampos('tipo_funcionario_publico', '1', 'Concursado');
+    registraOpcoesCampos('tipo_funcionario_publico', '2', 'Contratado');
+    registraOpcoesCampos('tipo_funcionario_publico', '2', 'Comissionado');
+    registraValidacaoCampoTabela('','CLIENTES','TIPO_FUNCIONARIO_PUBLICO_CLI','tipo_funcionario_publico','Tipo de Funcionário Público',condicao);
+
+    registraOpcoesCampos('fonte_pagadora_beneficio', '1', 'I.N.S.S.');
+    registraOpcoesCampos('fonte_pagadora_beneficio', '2', 'Prefeitura');
+    registraOpcoesCampos('fonte_pagadora_beneficio', '3', 'Aeronáutica');
+    registraOpcoesCampos('fonte_pagadora_beneficio', '4', 'Exército');
+    registraOpcoesCampos('fonte_pagadora_beneficio', '5', 'SIAPE');
+    registraOpcoesCampos('fonte_pagadora_beneficio', '6', 'Min. Transp.');
+    registraOpcoesCampos('fonte_pagadora_beneficio', '7', 'D.E.R.');
+    registraOpcoesCampos('fonte_pagadora_beneficio', '8', 'Governo do Estado');
+    registraOpcoesCampos('fonte_pagadora_beneficio', '9', 'Outros');
+    registraValidacaoCampoTabela('','CLIENTES','FONTE_BENEFICIO_CLI','fonte_pagadora_beneficio','Fonte Pagadora do benefício do cliente',condicao);
 
     registraOpcoesCampos('tipoendereco', 'C', 'Cobrança');
     registraOpcoesCampos('tipoendereco', 'E', 'Entrega');

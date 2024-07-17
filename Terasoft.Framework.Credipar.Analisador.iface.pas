@@ -14,11 +14,6 @@ interface
 
   type
 
-    //ICredipar_PessoaJuridica = interface
-    //['{B2D41380-46B9-4937-B8BE-926813959765}']
-    //  function loadFromPathReaderWriter(const pPathRW: IPathReaderWriter; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-    //end;
-
     ICredipar_PessoaFisica = interface
     ['{B2D41380-46B9-4937-B8BE-926813959765}']
       function critica(pResultado: IResultadoOperacao): boolean;
@@ -62,8 +57,8 @@ interface
       procedure setPessoaFisica(const pValue: ICredipar_PessoaFisica);
 
       function enviaProposta(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-      function cancelarProposta(pProposta: Int64; pMotivo: TipoWideStringFramework ; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-      function statusProposta(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function cancelarProposta(pID: Int64; pMotivo: TipoWideStringFramework ; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function statusProposta(pID: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function anexarDocumentoAnalise(pProposta: Int64; pTipoDocumento: TipoWideStringFramework; pFormatoArquivo: TipoWideStringFramework; pDados: TBytes; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
 
       function getDiretorioArquivos: tipoWideStringFramework;
@@ -103,6 +98,13 @@ interface
       function getPropriedades: IPropriedade;
       procedure setPropriedades(const pValue: IPropriedade);
 
+    //property nome getter/setter
+      function getNome: TipoWideStringFramework;
+
+      function getStatusProposta(const pID: Int64): TipoWideStringFramework;
+      procedure setStatusProposta(const pID: Int64; const pStatus: TipoWideStringFramework );
+
+      property nome: TipoWideStringFramework read getNome;
       property propriedades: IPropriedade read getPropriedades write setPropriedades;
       property filial: TipoWideStringFramework read getFilial write setFilial;
       property controleAlteracoes: IControleAlteracoes read getControleAlteracoes write setControleAlteracoes;
@@ -117,23 +119,24 @@ interface
     end;
 
   {$if not defined(__DLL__)}
-    function createCredipar: ICredipar ; stdcall;
+    //function createCredipar: ICredipar ; stdcall;
     function getCredipar(pFilial: TipoWideStringFramework; pGDB: IGDB): ICredipar;
     function carregaPedidoCredipar(const pID: Int64; pCredipar: ICredipar; pGDB: IGDB; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     function enviaPropostaCredipar(pCredipar: ICredipar; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     function getCrediparFilial(const pFilial: TipoWideStringFramework; pGDB: IGDB): ICredipar;
+    function preValidarPropostaCredipar(const pID: Int64; pGDB: IGDB=nil; pResultado: IResultadoOperacao=nil):IResultadoOperacao;
   {$ifend}
-
-  function _strToTempoResidencia(const pValue: String): String;
 
 implementation
   uses
     strUtils,
     Spring.Collections,
     Terasoft.Framework.Conversoes,
+    Terasoft.Framework.Validacoes,
     FuncoesConfig, Terasoft.Framework.Credipar.Analisador.iface.Conts;
 
 {$if not defined(__DLL__)}
+
     function createCredipar: ICredipar; stdcall; external 'Credipar_DLL' name 'createCredipar' delayed;
 
 function getCredipar;//: ICredipar;
@@ -153,7 +156,7 @@ begin
     Result.token := cfg.ValorTagConfig(tagConfig_CREDIPAR_TOKEN,'',tvString);
     Result.codigoLojaCredipar := cfg.ValorTagConfig(tagConfig_CREDIPAR_CODIGO_LOJA,0,tvInteiro);
     Result.codigoProdutoCredipar := cfg.ValorTagConfig(tagConfig_CREDIPAR_PRODUTO,0,tvInteiro);
-    Result.controleAlteracoes := criaControleAlteracoes(CONTROLEALTERACOES_CREDIPAR,pGDB,true);
+    Result.controleAlteracoes := criaControleAlteracoes(FINANCEIRA_CREDIPAR_NOME,pGDB,true);
     Result.filial := pFilial;
   end;
 end;
@@ -363,13 +366,7 @@ begin
      '    c.CPF_CONJUGE_CLI,  --Criado'+#13+
      '    c.DOCIDENTIFICACAOCONJ_CLI, --Criado'+#13+
      '    c.TIPODOCIDENTIFICACAOCONJ_CLI, --Criado'+#13+
-     '    c.SALARIOCON_CLI,'+#13+
-     '    '' '' TempoConjAno,'+#13+
-     '    '' '' TempoConjMes,'+#13+
-     '    c.referencia2_cli,'+#13+
-     '    c.foneref2_cli,'+#13+
-     '    c.referencia3_cli,'+#13+
-     '    c.foneref3_cli'+#13+
+     '    c.SALARIOCON_CLI'+#13+
      'from'+#13+
      '    clientes c'+#13+
      '    left join clientes_ocupacao o on o.id = c.ocupacao_id'+#13+
@@ -443,33 +440,28 @@ begin
   end;
 end;
 
-{$ifend}
-
-function _strToTempoResidencia(const pValue: String): String;
+function preValidarPropostaCredipar;//(const pID: Int64; pGDB: IGDB; pResultado: IResultadoOperacao):IResultadoOperacao;
   var
-    l: IListaTextoEX;
-    i: Integer;
+    save: Integer;
+    dsWeb,dsCliente: IDataset;
 begin
-  l := novaListaTextoEx(false,'');
-  l.strings.Add('INV');              //0
-  l.strings.Add('MENOS DE UM ANO');  //1
-  l.strings.Add('1 ANO');            //2
-  l.strings.Add('2 ANOS');           //3
-  l.strings.Add('3 ANOS');           //4
-  l.strings.Add('4 ANOS');           //5
-  l.strings.Add('5 ANOS');           //6
-  l.strings.Add('MAIS DE 5 ANOS');   //7
-  l.strings.Add('MAIS DE 10 ANOS');  //8
-  l.strings.Add('MAIS DE 15 ANOS');  //9
-  l.strings.Add('MAIS DE 20 ANOS');  //10
-  i := l.strings.IndexOf(uppercase(retiraAcentos(trim(pValue))));
-  if(i>1) and (i<5) then
-    i:=2
-  else if(i>4) and (i<7) then
-    i := 3
-  else if(i>6) then
-    i := 4;
-  Result := IntToStr(i);
+  Result := checkResultadoOperacao(pResultado);
+  save := pResultado.erros;
+  validaRegraTabela(FINANCEIRA_CREDIPAR_NOME,'web_pedido','id',[pID],pGDB,pResultado);
+  //if(pResultado.erros<>save) then exit;
+  if supports(pResultado.propriedade['dataset'].asInterface,IDataset,dsWeb) then
+  begin
+    validaRegraTabela(FINANCEIRA_CREDIPAR_NOME,'clientes','CODIGO_CLI',[dsWeb.dataset.FieldByName('cliente_id').AsString],pGDB,pResultado);
+//    if supports(pResultado.propriedade['dataset'].asInterface,IDataset,dsCliente) then
+//    begin
+//      validaRegraTabela(FINANCEIRA_CREDIPAR_NOME,'CLIENTES_OCUPACAO','id',[dsCliente.dataset.FieldByName('ocupacao_id').AsString],pGDB,pResultado);
+//    end;
+    validaRegraTabela(FINANCEIRA_CREDIPAR_NOME,'WEB_PEDIDOITENS','WEB_PEDIDO_ID',[pID],pGDB,pResultado);
+//    if(pResultado.erros<>save) then exit;
+  end;
 end;
+
+
+{$ifend}
 
 end.

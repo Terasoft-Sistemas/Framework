@@ -502,7 +502,7 @@ begin
     pRegra := 'padrao';
   if(pTabela='') then
   begin
-    pResultado.adicionaErro('Nome da tabela inválida.');
+    pResultado.adicionaErro('validaDataset: Nome da tabela inválida.');
     exit;
   end;
 
@@ -511,6 +511,12 @@ begin
     pResultado.adicionaErro('validaDataset: Não informou um dataset válido');
     exit;
   end;
+  if(pDataset.RecordCount=0) then
+  begin
+    pResultado.adicionaErro('validaDataset: Não possui registros para serem validados');
+    exit;
+  end;
+
   if(pListaCampos=nil) then
     pListaCampos := getStringList;
 
@@ -658,7 +664,6 @@ begin
   pTabela := UpperCase(trim(pTabela));
   if(pTabela='') then exit;
   if not dic.TryGetValue(pTabela,dadosTabela) then exit;
-
   lRG:=nil;
   lLkp := nil;
   dataField:='';
@@ -677,7 +682,6 @@ begin
 
   dataField := UpperCase(trim(dataField));
   if(dataField='') then exit;
-
   if dadosTabela.TryGetValue(dataField,dadosCampo) then
   begin
     opcoes := dadosCampo.dadosOpcoes;
@@ -698,21 +702,19 @@ begin
   end;
 end;
 
-procedure configuraControlesEditOpcoesCampoTabela;//(pTabela: String; pOwner: TWinControl);
-  var
+
+procedure configuraControlesEditOpcoesCampoTabela;//(pTabela: String; pOwner: TWinControl);
+
+  var
     i: Integer;
     p: TComponent;
 begin
   if(usaValidacoesNovas=false) then exit;
   pTabela := UpperCase(trim(pTabela));
   if(pTabela='') or not assigned(pOwner) then exit;
-
 //  logaByTagSeNivel(TAGLOG_VALIDACOES,format('Configurando controle configura owner [%s] para a tabela [%s]', [pOwner.Name,pTabela]),LOG_LEVEL_DEBUG);
-
   configuraEditOpcoesCampoTabela(pTabela,pOwner,pDataSOurce);
-
   if not (pOwner is TWinControl) then exit;
-
   with TWinControl(pOwner) do
   begin
     i := ControlCount;
@@ -725,7 +727,8 @@ begin
   end;
 end;
 
-{ TDadosCamposValidacoesImpl }
+
+{ TDadosCamposValidacoesImpl }
 
 procedure TDadosCamposValidacoesImpl.setRegra(const pValue: TipoWideStringFramework);
 begin
@@ -967,6 +970,8 @@ begin
       Result := validaUF(pValue)
     else if(CompareText(lValor,'<imei>')=0) then
       Result := validaIMEI(pValue)
+    else if(CompareText(lValor,'<naozero>')=0) then
+      Result := StrToFloatDef(somenteNumeros(pValue),0)<>0.0
     else
       Result := pValue=lValor;
       if(Result=true) then
@@ -986,9 +991,7 @@ function validaDatasetOld;//(pDataset: TDataset; pListaCampos: IListaString = ni
     lValor: String;
     f: TField;
     lLista: IListaTextoEX;
-
     label proximo1,proximo2;
-
 begin
   Result := CheckResultadoOperacao(pResultado);
   pTabela := uppercase(trim(pTabela));
@@ -1120,7 +1123,6 @@ begin
       pResultado.formataErro('validaDataset: Valor do Campo [%s] inválido', [ lDSRegra.dataset.FieldByName('descricaocampo').AsString ]);
   end;
 end;
-
 function getDadosCamposLookupOld;//(pTabela: String; pCampos: IListaString): TDadosCampos;
   var
     lDS: IDataset;
@@ -1230,9 +1232,7 @@ begin
 
 end;
 }
-
 initialization
   registraLogger(TAGLOG_VALIDACOES,'Validacoes',true);
-
 
 end.
