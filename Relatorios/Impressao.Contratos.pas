@@ -575,8 +575,8 @@ begin
       mtReceberItensFIM_VIGENCIA_VENCIMENTO.Value := lContasReceberItensModel.VENCIMENTO_REC;
       mtReceberItens.Post;
 
-      lblRRPrestamista.Caption  := 'RR: '+ FormataFloat(mtPedidoRR_PRESTAMISTA.Value) +'%  (R$ '+ FormataFloat(mtPedidoSEGURO_PRESTAMISTA.Value * (mtPedidoRR_PRESTAMISTA.Value / 100)) +')';
-      lblIOFPrestamista.Caption := 'R$ '+FormataFloat(0.038 * (mtPedidoSEGURO_PRESTAMISTA.Value))+' ';
+      lblRRPrestamista.Caption  := 'RR: '+ FormataFloat(mtPedidoRR_PRESTAMISTA.Value) +'%  (R$ '+ FormataFloat((mtPedidoSEGURO_PRESTAMISTA.Value / 1.0738) * (mtPedidoRR_PRESTAMISTA.Value / 100)) +')';
+      lblIOFPrestamista.Caption := 'R$ '+FormataFloat(mtPedidoSEGURO_PRESTAMISTA.Value - (mtPedidoSEGURO_PRESTAMISTA.Value / 1.0738))+' ';
 
       exit;
     end;
@@ -594,6 +594,8 @@ var
   lProdutosModel       : TProdutosModel;
   lWebPedidoItensModel : TWebPedidoItensModel;
   lConfiguracoes       : TerasoftConfiguracoes;
+  lTipoGarantia,
+  lTipoGarantiaFR      : String;
 begin
   lPedidoItensModel    := TPedidoItensModel.Create(CONEXAO);
   lProdutosModel       := TProdutosModel.Create(CONEXAO);
@@ -614,7 +616,7 @@ begin
     mtItensID.Value                    := lPedidoItensModel.PedidoItenssLista[0].ID;
     mtItensPRODUTO_ID.Value            := lPedidoItensModel.PedidoItenssLista[0].CODIGO_PRO;
     mtItensQUANTIDADE.Value            := lPedidoItensModel.PedidoItenssLista[0].QTDE_CALCULADA;
-    mtItensVALOR_UNITARIO.Value        := lPedidoItensModel.PedidoItenssLista[0].VALORUNITARIO_PED;
+    mtItensVALOR_UNITARIO.Value        := lPedidoItensModel.PedidoItenssLista[0].VLRVENDA_PRO;
     mtItensVLR_GARANTIA.Value          := lPedidoItensModel.PedidoItenssLista[0].QUANTIDADE_TIPO;
     mtItensTIPO_GARANTIA_FR.Value      := Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA_FR,3,2) + ' Meses';
     mtItensVALOR_TOTAL.Value           := lPedidoItensModel.PedidoItenssLista[0].VALOR_TOTAL_ITENS;
@@ -627,7 +629,18 @@ begin
     mtItensIOF_FR.Value                := mtItensPREMIO_UNICO_FR.Value - (mtItensPREMIO_UNICO_FR.Value / 1.0738);
     mtItensOBSERVACAO.Value            := lPedidoItensModel.PedidoItenssLista[0].OBSERVACAO;
     mtItensINICIO_VIGENCIA.Value       := retornaInicioVigencia(mtPedidoEMISSAO.Value, lProdutosModel.ProdutossLista[0].GARANTIA_PRO);
-    mtItensFIM_VIGENCIA.Value          := DateToStr(IncMonth(StrToDate(mtItensINICIO_VIGENCIA.Value),StrToInt(Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA,3,2))));
+
+    lTipoGarantia   := Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA,3,2);
+    lTipoGarantiaFR := Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA_FR,3,2);
+
+    if (lTipoGarantia = '12') or (lTipoGarantia = '24') then
+      mtItensFIM_VIGENCIA.Value := DateToStr(IncMonth(StrToDate(mtItensINICIO_VIGENCIA.Value),StrToInt(lTipoGarantia)))
+    else
+    if (lTipoGarantiaFR = '12') or (lTipoGarantiaFR = '24') then
+      mtItensFIM_VIGENCIA.Value := DateToStr(IncMonth(StrToDate(mtItensINICIO_VIGENCIA.Value),StrToInt(lTipoGarantiaFR)))
+    else
+      mtItensFIM_VIGENCIA.Value := mtItensINICIO_VIGENCIA.Value;
+
     mtItens.Post;
 
     mtProdutos.EmptyDataSet;
@@ -638,8 +651,8 @@ begin
     mtProdutos.Post;
 
     lblRRGarantiaEstendida.Caption := '*RR: '+ FormataFloat(mtItensRR_GARANTIA_ESTENDIDA.Value) +'%  (R$ '+ FormataFloat(mtItensPREMIO_LIQUIDO.Value * (mtItensRR_GARANTIA_ESTENDIDA.Value / 100)) +')';
-    lblRRRouboFurto.Caption        := '*RR: '+ FormataFloat(mtItensRR_GARANTIA_ESTENDIDA.Value) +'%  (R$ '+ FormataFloat(mtItensPREMIO_UNICO_FR.Value * (mtItensRR_GARANTIA_ESTENDIDA.Value / 100)) +')';
-    lblRRRouboFurtoDanos.Caption   := '*RR: '+ FormataFloat(mtItensRR_GARANTIA_ESTENDIDA.Value) +'%  (R$ '+ FormataFloat(mtItensPREMIO_UNICO_FR.Value * (mtItensRR_GARANTIA_ESTENDIDA.Value / 100)) +')';
+    lblRRRouboFurto.Caption        := '*RR: '+ FormataFloat(mtItensRR_GARANTIA_ESTENDIDA.Value) +'%  (R$ '+ FormataFloat((mtItensPREMIO_UNICO_FR.Value / 1.0738) * (mtItensRR_GARANTIA_ESTENDIDA.Value / 100)) +')';
+    lblRRRouboFurtoDanos.Caption   := '*RR: '+ FormataFloat(mtItensRR_GARANTIA_ESTENDIDA.Value) +'%  (R$ '+ FormataFloat((mtItensPREMIO_UNICO_FR.Value / 1.0738) * (mtItensRR_GARANTIA_ESTENDIDA.Value / 100)) +')';
     Self.fetchMemo;
   finally
     lPedidoItensModel.Free;

@@ -673,6 +673,7 @@ begin
                     '        produto.usar_balanca,                                                                      '+SLineBreak+
                     '        produto.tipo$_pro,                                                                         '+SLineBreak+
                     '        produto.web_caracteristica,                                                                '+SLineBreak+
+                    '        produto.garantia_pro,                                                                      '+SLineBreak+
                     '        coalesce(produto.saldo_pro,0) - coalesce((                                                 '+SLineBreak+
                     '          select sum(view_reservados.reservado)                                                    '+SLineBreak+
                     '            from view_reservados                                                                   '+SLineBreak+
@@ -753,6 +754,7 @@ begin
       FProdutossLista[i].USAR_BALANCA            := lQry.FieldByName('USAR_BALANCA').AsString;
       FProdutossLista[i].SALDO_DISPONIVEL        := lQry.FieldByName('SALDO_DISPONIVEL').AsString;
       FProdutossLista[i].WEB_CARACTERISTICA      := lQry.FieldByName('WEB_CARACTERISTICA').AsString;
+      FProdutossLista[i].GARANTIA_PRO            := lQry.FieldByName('GARANTIA_PRO').AsString;
 
       lQry.Next;
     end;

@@ -108,6 +108,7 @@ type
     FCUSTO_GARANTIA_FR: Variant;
     FCUSTO_GARANTIA: Variant;
     FUNIDADE_PRO: Variant;
+    FVLRVENDA_PRO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetDATA_CADASTRO(const Value: Variant);
@@ -192,6 +193,7 @@ type
     procedure SetTIPO_GARANTIA_FR(const Value: Variant);
     procedure SetVLR_GARANTIA_FR(const Value: Variant);
     procedure SetUNIDADE_PRO(const Value: Variant);
+    procedure SetVLRVENDA_PRO(const Value: Variant);
 
   public
 
@@ -271,7 +273,8 @@ type
     property TOTAL_GARANTIA: Variant read FTOTAL_GARANTIA write SetTOTAL_GARANTIA;
     property VALOR_TOTALITENS: Variant read FVALOR_TOTALITENS write SetVALOR_TOTALITENS;
     property VALOR_DESCONTO: Variant read FVALOR_DESCONTO write SetVALOR_DESCONTO;
-    
+    property VLRVENDA_PRO: Variant read FVLRVENDA_PRO write SetVLRVENDA_PRO;
+
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -816,6 +819,11 @@ end;
 procedure TWebPedidoItensModel.SetVFCPST(const Value: Variant);
 begin
   FVFCPST := Value;
+end;
+
+procedure TWebPedidoItensModel.SetVLRVENDA_PRO(const Value: Variant);
+begin
+  FVLRVENDA_PRO := Value;
 end;
 
 procedure TWebPedidoItensModel.SetVLR_GARANTIA(const Value: Variant);

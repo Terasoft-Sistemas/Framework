@@ -171,6 +171,8 @@ begin
     lModel.VBCFCPST             := lQry.FieldByName('VBCFCPST').AsString;
     lModel.PFCPST               := lQry.FieldByName('PFCPST').AsString;
     lModel.VFCPST               := lQry.FieldByName('VFCPST').AsString;
+    lModel.VALOR_VENDA_ATUAL    := lQry.FieldByName('VALOR_VENDA_ATUAL').AsString;
+    lModel.VLRVENDA_PRO         := lQry.FieldByName('VLRVENDA_PRO').AsString;
 
     Result := lModel;
   finally
@@ -371,6 +373,8 @@ begin
               '      CUSTO_GARANTIA_FR,                                                                                                         '+SLineBreak+
               '      CUSTO_GARANTIA,                                                                                                            '+SLineBreak+
               '      PER_GARANTIA_FR,                                                                                                           '+SLineBreak+
+              '      VALOR_VENDA_ATUAL,                                                                                                         '+SLineBreak+
+              '      VLRVENDA_PRO,                                                                                                              '+SLineBreak+
               '      VLR_GARANTIA,                                                                                                              '+SLineBreak+
               '      VLR_GARANTIA_FR,                                                                                                           '+SLineBreak+
               '      VALOR_TOTALITENS                                                                                                           '+SLineBreak+
@@ -397,6 +401,8 @@ begin
               '              web_pedidoitens.custo_garantia_fr,                                                                                 '+SLineBreak+
               '              web_pedidoitens.custo_garantia,                                                                                    '+SLineBreak+
               '              web_pedidoitens.per_garantia_fr,                                                                                   '+SLineBreak+
+              '              web_pedidoitens.valor_venda_atual,                                                                                 '+SLineBreak+
+              '              web_pedidoitens.vlrvenda_pro,                                                                                      '+SLineBreak+
               '              coalesce(web_pedidoitens.quantidade, 0) * coalesce(web_pedidoitens.vlr_garantia, 0) vlr_garantia,                  '+SLineBreak+
               '              coalesce(web_pedidoitens.quantidade, 0) * coalesce(web_pedidoitens.vlr_garantia_fr, 0) vlr_garantia_fr,            '+SLineBreak+
               '              coalesce(web_pedidoitens.quantidade, 0) * coalesce(web_pedidoitens.valor_unitario,0) valor_totalitens,             '+SLineBreak+
@@ -443,6 +449,8 @@ begin
       FWebPedidoItenssLista[i].CUSTO_GARANTIA_FR    := lQry.FieldByName('CUSTO_GARANTIA_FR').AsString;
       FWebPedidoItenssLista[i].CUSTO_GARANTIA       := lQry.FieldByName('CUSTO_GARANTIA').AsString;
       FWebPedidoItenssLista[i].PER_GARANTIA_FR      := lQry.FieldByName('PER_GARANTIA_FR').AsString;
+      FWebPedidoItenssLista[i].VALOR_VENDA_ATUAL    := lQry.FieldByName('VALOR_VENDA_ATUAL').AsString;
+      FWebPedidoItenssLista[i].VLRVENDA_PRO         := lQry.FieldByName('VLRVENDA_PRO').AsString;
 
       FWebPedidoItenssLista[i].TOTAL_GARANTIA       := lQry.FieldByName('TOTAL_GARANTIA').AsString;
       FWebPedidoItenssLista[i].VALOR_TOTALITENS     := lQry.FieldByName('VALOR_TOTALITENS').AsString;

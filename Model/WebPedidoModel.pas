@@ -571,8 +571,8 @@ begin
       lPedidoItensModel.PedidoItenssLista[lIndex].ITEM                   := lItem.ToString;
       lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_BONUS_SERVICO    := FloatToStr(lWebPedidoItensModel.VALOR_BONUS_SERVICO);
       lPedidoItensModel.PedidoItenssLista[lIndex].BALANCA                := lWebPedidoItensModel.USAR_BALANCA;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VLRVENDA_PRO           := FloatToStr(lWebPedidoItensModel.VENDA_PRO);
-      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_VENDA_CADASTRO   := FloatToStr(lWebPedidoItensModel.VENDA_PRO);
+      lPedidoItensModel.PedidoItenssLista[lIndex].VLRVENDA_PRO           := FloatToStr(lWebPedidoItensModel.VLRVENDA_PRO);
+      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_VENDA_CADASTRO   := FloatToStr(lWebPedidoItensModel.VALOR_VENDA_ATUAL);
       lPedidoItensModel.PedidoItenssLista[lIndex].VLRCUSTO_PRO           := FloatToStr(lWebPedidoItensModel.CUSTOMEDIO_PRO);
       lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_MONTADOR         := FloatToStr(lWebPedidoItensModel.VALOR_MONTADOR);
       lPedidoItensModel.PedidoItenssLista[lIndex].COMISSAO_PERCENTUAL    := FloatToStr(lWebPedidoItensModel.PERCENTUAL_COMISSAO);
@@ -1380,6 +1380,7 @@ begin
     lValorVendido             := StrToFloat(retiraPonto(pVenderItemParametros.VALOR_UNITARIO));
 
     lWebPedidoItensModel.VALOR_VENDIDO       := lValorVendido.ToString;
+    lWebPedidoItensModel.VLRVENDA_PRO        := lValorUnitario;
 
     if lValorVendido < lValorUnitario then
      lWebPedidoItensModel.VALOR_UNITARIO  := lValorUnitario.ToString
