@@ -203,10 +203,12 @@ end;
 
 function TUsuarioModel.alterarSenha(pIDUsuario, pSenhaAtual, pNovaSenha: String): Boolean;
 var
-  lUsuarioModel : TUsuarioModel;
-  lUsuarioDao   : TUsuarioDao;
+  lUsuarioModel  : TUsuarioModel;
+  lUsuarioDao    : TUsuarioDao;
+  lConfiguracoes : TerasoftConfiguracoes;
 begin
-  lUsuarioDao := TUsuarioDao.Create(vIConexao);
+  lUsuarioDao := TUsuarioDao.Create(vIConexao.NovaConexao(vIConexao.getEmpresa.LOJA));
+  lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
   try
     Result := False;
 
@@ -227,7 +229,11 @@ begin
       lUsuarioModel.SENHA := pNovaSenha;
       lUsuarioModel.Salvar;
 
+      if lConfiguracoes.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
+        lUsuarioDao.sincronizarDados(lUsuarioModel);
+
       Result := True;
+
     end;
 
   finally

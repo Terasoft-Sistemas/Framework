@@ -71,6 +71,7 @@ type
 
     function vendedorUsuario(pIdUsuario: String): String;
     function nomeUsuario(pIdUsuario: String): String;
+    function sincronizarDados(pUsuarioModel : TUsuarioModel): String;
 
     function carregaClasse(pID: String): TUsuarioModel;
     procedure validaLogin(user,pass: String);
@@ -80,7 +81,7 @@ end;
 implementation
 
 uses
-  System.Rtti;
+  System.Rtti, LojasModel;
 
 { TUsuarioDao }
 
@@ -384,6 +385,41 @@ end;
 procedure TUsuarioDao.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
+end;
+
+function TUsuarioDao.sincronizarDados(pUsuarioModel: TUsuarioModel): String;
+var
+  lLojasModel,
+  lLojas      : TLojasModel;
+  lQry        : TFDQuery;
+  lSQL        : String;
+begin
+  lLojasModel := TLojasModel.Create(vIConexao);
+  try
+    lLojasModel.obterHosts;
+
+    lSQL := vConstrutor.gerarUpdateOrInsert('USUARIO', 'ID', 'ID', true);
+
+    for lLojas in lLojasModel.LojassLista do
+    begin
+      if lLojas.LOJA <> vIConexao.getEmpresa.LOJA then
+      begin
+        vIConexao.ConfigConexaoExterna('', lLojas.STRING_CONEXAO);
+        lQry := vIConexao.criarQueryExterna;
+
+        lQry.SQL.Clear;
+        lQry.SQL.Add(lSQL);
+        setParams(lQry, pUsuarioModel);
+        lQry.Open(lSQL);
+
+        Result := lQry.FieldByName('ID').AsString;
+      end;
+    end;
+
+  finally
+    lLojasModel.Free;
+    lQry.Free;
+  end;
 end;
 
 procedure TUsuarioDao.validaLogin(user, pass: String);
