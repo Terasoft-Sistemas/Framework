@@ -617,7 +617,12 @@ begin
             '   where c.fatura_cor = ' + QuotedStr(FIDContasReceberView)                                                                        +SLineBreak+
             '     and c.parcela_cor = '+ FParcelaView                                                                                           +SLineBreak+
             '     and c.status <> ''X''                                                                                                        '+SLineBreak+
-            '     and c.tipo_cta = ''C''                                                                                                       '+SLineBreak;
+            '     and c.tipo_cta = ''C''                                                                                                       '+SLineBreak+
+            '   union all                                                                                                                      '+SLineBreak+
+            '  select u.id, ''RECEBIMENTO CREDITO CLIENTE'' tipo, u.valor valor, ''CREDITO_CLIENTE'' ORIGEM                                    '+SLineBreak+
+            '    from credito_cliente_uso u                                                                                                    '+SLineBreak+
+            '   where u.receber_id = ' + QuotedStr(FIDContasReceberView)                                                                        +SLineBreak+
+            '     and u.parcela = '+ FParcelaView;
 
     lQry.Open(lSQL);
 
@@ -627,12 +632,14 @@ begin
     begin
       if lQry.FieldByName('VALOR').AsFloat > 0 then begin
         FRecebimentoContasReceberLista.Add(TRecebimentoContasReceber.Create);
+
         i := FRecebimentoContasReceberLista.Count -1;
         FRecebimentoContasReceberLista[i].ID      := lQry.FieldByName('ID').AsString;
         FRecebimentoContasReceberLista[i].TIPO    := lQry.FieldByName('TIPO').AsString;
         FRecebimentoContasReceberLista[i].VALOR   := lQry.FieldByName('VALOR').AsString;
         FRecebimentoContasReceberLista[i].ORIGEM  := lQry.FieldByName('ORIGEM').AsString;
       end;
+
       lQry.Next;
     end;
 
