@@ -12,6 +12,7 @@ uses
 type
   TFinanceiroParams = record
     WEB_PEDIDO_ID,
+    WEB_PEDIDOITENS_ID,
     PORTADOR_ID           : String;
     PRIMEIRO_VENCIMENTO   : TDate;
     QUANTIDADE_PARCELAS   : Integer;
@@ -58,6 +59,7 @@ type
     FVALOR_SEG_PRESTAMISTA: Variant;
     FPER_SEG_PRESTAMSTA: Variant;
     FVALOR_ACRESCIMO_SEG_PRESTAMISTA: Variant;
+    FWEB_PEDIDOITENS_ID: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetIDRecordView(const Value: Integer);
@@ -86,6 +88,7 @@ type
     procedure SetPER_SEG_PRESTAMSTA(const Value: Variant);
     procedure SetVALOR_SEG_PRESTAMISTA(const Value: Variant);
     procedure SetVALOR_ACRESCIMO_SEG_PRESTAMISTA(const Value: Variant);
+    procedure SetWEB_PEDIDOITENS_ID(const Value: Variant);
         
   public
 
@@ -94,6 +97,7 @@ type
     property  DATA_CADASTRO         : Variant read FDATA_CADASTRO write SetDATA_CADASTRO;
     property  WEB_PEDIDO_ID         : Variant read FWEB_PEDIDO_ID write SetWEB_PEDIDO_ID;
     property  PEDIDO_VENDA_ID       : Variant read FPEDIDO_VENDA_ID write SetPEDIDO_VENDA_ID;
+    property  WEB_PEDIDOITENS_ID    : Variant read FWEB_PEDIDOITENS_ID write SetWEB_PEDIDOITENS_ID;
     property  PORTADOR_ID           : Variant read FPORTADOR_ID write SetPORTADOR_ID;
     property  VALOR_TOTAL           : Variant read FVALOR_TOTAL write SetVALOR_TOTAL;
     property  QUANTIDADE_PARCELAS   : Variant read FQUANTIDADE_PARCELAS write SetQUANTIDADE_PARCELAS;
@@ -477,6 +481,11 @@ end;
 procedure TFinanceiroPedidoModel.SetVENCIMENTO(const Value: Variant);
 begin
   FVENCIMENTO := Value;
+end;
+
+procedure TFinanceiroPedidoModel.SetWEB_PEDIDOITENS_ID(const Value: Variant);
+begin
+  FWEB_PEDIDOITENS_ID := Value;
 end;
 
 procedure TFinanceiroPedidoModel.SetWEB_PEDIDO_ID(const Value: Variant);

@@ -1659,8 +1659,13 @@ end;
 
 {$REGION 'initialization'}
 
-initialization
+procedure inicia;
+begin
   registraLogistica(CONTROLE_LOGISTICA_FEDEX,criaLogisticaFedex);
+end;
+
+initialization
+  inicia;
 {$ENDREGION}
 
 end.
