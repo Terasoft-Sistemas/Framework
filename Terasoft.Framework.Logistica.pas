@@ -310,8 +310,13 @@ begin
     Result := logistica_ProcessaServico(pResultado);
 end;
 
-initialization
+procedure inicia;
+begin
   Terasoft.Framework.ProcessoAutomacao.registraProcessoAutomacao(AUTOMACAO_LOGISTICA,_automacao_logistica);
+end;
+
+initialization
+  inicia;
 
 {$endif}
 

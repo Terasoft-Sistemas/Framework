@@ -163,7 +163,6 @@ function TNotaFiscal.cobranca(pidNF: String): Boolean;
 var
  lSQL : String;
  lQry : TFDQuery;
- lPag : TpcnFormaPagamento;
 begin
   try
     try
@@ -200,32 +199,32 @@ begin
         exit;
       end;
 
-      if not AnsiMatchStr(lQry.FieldByName('tPag').AsString, ['03','04','10','11','12','13','90']) then
+      lQry.First;
+      while not lQry.Eof do
       begin
-        with NotaF.NFe.Cobr.Fat do
+        if lQry.FieldByName('tPag').AsString = '15' then
         begin
-          nFat  := lQry.FieldByName('nFat').AsString;
-          vOrig := lQry.FieldByName('vOrig').AsFloat;
-          vDesc := 0;
-          vLiq  := lQry.FieldByName('vOrig').AsFloat;
+          with NotaF.NFe.Cobr.Fat do
+          begin
+            nFat  := lQry.FieldByName('nFat').AsString;
+            vOrig := vOrig + lQry.FieldByName('vDup').AsFloat;
+            vDesc := 0;
+            vLiq  := vLiq + lQry.FieldByName('vDup').AsFloat;
+          end;
         end;
+        lQry.Next;
       end;
 
       lQry.First;
-      while not lQry.Eof do begin
-        lPag := vConfiguracoesNotaFiscal.tPag(lQry.FieldByName('tPag').AsString);
-
-        if (lPag <> fpCartaoCredito)   and (lPag <> fpCartaoDebito)    and
-           (lPag <> fpValeAlimentacao) and (lPag <> fpValeRefeicao)    and
-           (lPag <> fpValePresente)    and (lPag <> fpValeCombustivel) and
-           (lPag <> fpValeRefeicao)    and (lPag <> fpSemPagamento)    then
+      while not lQry.Eof do
+      begin
+        if lQry.FieldByName('tPag').AsString = '15'  then
         begin
           Duplicata :=  NotaF.NFe.Cobr.Dup.New;
           Duplicata.nDup  := FormatFloat('000',lQry.FieldByName('nDup').AsInteger);
           Duplicata.dVenc := lQry.FieldByName('dVenc').Value;
           Duplicata.vDup  := lQry.FieldByName('vDup').AsFloat;
         end;
-
         lQry.Next;
       end;
 
