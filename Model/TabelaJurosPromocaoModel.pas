@@ -69,6 +69,7 @@ type
 
     function carregaClasse(pId : String): TTabelaJurosPromocaoModel;
     function obterLista: TFDMemTable;
+    function obterTabelaJurosProduto(pProduto : String): TFDMemTable;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -160,6 +161,19 @@ begin
 
   finally
     lTabelaJurosPromocaoLista.Free;
+  end;
+end;
+
+function TTabelaJurosPromocaoModel.obterTabelaJurosProduto(pProduto: String): TFDMemTable;
+var
+  lTabelaJurosPromocaoDao : TTabelaJurosPromocaoDao;
+begin
+  lTabelaJurosPromocaoDao := TTabelaJurosPromocaoDao.Create(vIConexao);
+
+  try
+    Result := lTabelaJurosPromocaoDao.obterTabelaJurosProduto(pProduto);
+  finally
+    lTabelaJurosPromocaoDao.Free;
   end;
 end;
 

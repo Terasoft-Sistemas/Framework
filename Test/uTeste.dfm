@@ -1519,13 +1519,14 @@ object Form1: TForm1
         TabOrder = 0
         OnClick = btnObterJurosPromocaoClick
       end
-      object Memo2: TMemo
+      object dbGridTabelaJuros: TXDBGrid
         Left = 0
-        Top = 464
+        Top = 504
         Width = 1242
-        Height = 255
+        Height = 215
         Align = alBottom
-        ScrollBars = ssVertical
+        DataSource = dsJuros
+        GridStyle.VisualStyle = vsXPStyle
         TabOrder = 1
       end
     end
@@ -1573,5 +1574,9 @@ object Form1: TForm1
   object dMovimentoSerial: TDataSource
     Left = 1160
     Top = 336
+  end
+  object dsJuros: TDataSource
+    Left = 1048
+    Top = 208
   end
 end

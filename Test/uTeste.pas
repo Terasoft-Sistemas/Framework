@@ -207,8 +207,9 @@ type
     Memo1: TMemo;
     TabelaJurosPromocao: TTabSheet;
     btnObterJurosPromocao: TButton;
-    Memo2: TMemo;
     SpeedButton1: TSpeedButton;
+    dbGridTabelaJuros: TXDBGrid;
+    dsJuros: TDataSource;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -363,7 +364,6 @@ type
     { Private declarations }
     vQtdeRegistros,
     vPagina         : Integer;
-    function RetornaCoeficientePromocao(pTaxa: Double;  pQuantidadeParcelas: Integer): TFDMemTable;
 
   public
     { Public declarations }
@@ -567,12 +567,7 @@ begin
   try
     lMemTable := lTabelaJurosPromocaoModel.obterLista;
 
-    lMemTable.First;
-    while not lMemTable.Eof do
-    begin
-      Memo2.Lines.Add(lMemTable.FieldByName('PROMOCAO_ID').AsString);
-      lMemTable.Next;
-    end;
+    dsJuros.DataSet := lMemTable;
 
   finally
     lTabelaJurosPromocaoModel.Free;
@@ -4172,50 +4167,22 @@ begin
   end;
 end;
 
-
-function TForm1.RetornaCoeficientePromocao(pTaxa: Double; pQuantidadeParcelas: Integer): TFDMemTable;
-var
- lTaxa: Double;
- lCoeficiente: Double;
- lQuantidadeParcelas: Integer;
- i: Integer;
-
- lConta1, lConta2, lConta3: Double;
-
- lMSG: String;
-
-begin
-  lTaxa := pTaxa/100;
-  lQuantidadeParcelas := pQuantidadeParcelas;
-
-  lMSG := '';
-
- lConta1 := 1 + ltaxa;
-
- for I := 1 to lQuantidadeParcelas do
- begin
-   if i = 1 then
-    lConta2 := lConta1
-   else
-    lConta2 := lConta2 *lConta1;
-
-   lConta3 := 1 / lConta2;
-
-   lCoeficiente := lTaxa/(1-lConta3);
-
-   lMSG := lMSG + 'Parcela: '+IntToStr(i)+#13+
-                  'Coeficiente: '+FloatToStr(lCoeficiente)+#13+#13;
- end;
-
-  ShowMessage(lMSG);
-end;
-
-
-
-
 procedure TForm1.SpeedButton1Click(Sender: TObject);
+var
+  lTabelaJurosPromocaoModel : TTabelaJurosPromocaoModel;
+  lTableJuros               : TFDMemTable;
 begin
-  Self.RetornaCoeficientePromocao(8,24);
+  lTabelaJurosPromocaoModel := TTabelaJurosPromocaoModel.Create(vIConexao);
+  try
+    lTableJuros := lTabelaJurosPromocaoModel.obterTabelaJurosProduto('006165');
+
+    if lTableJuros.RecordCount > 0 then
+      dsJuros.DataSet := RetornaCoeficiente(lTableJuros.FieldByName('TAXA_JUROS').AsFloat, lTableJuros.FieldByName('PARCELA').AsInteger);
+
+  finally
+    lTabelaJurosPromocaoModel.Free;
+  end;
+
 end;
 
 end.

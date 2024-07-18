@@ -38,6 +38,7 @@ uses
   function DiferencaEntreValoresPercentual(valor1, Valor2: Real): Real;
   function CalculaPercentual(pValorItem, pValorTotal: Real): Real;
   function DiferencaEntreDatas(pDataInicial, pDataFinal: TDate ): Integer;
+  function RetornaCoeficiente(pTaxa: Double;  pQuantidadeParcelas: Integer): TFDMemTable;
 
 implementation
 
@@ -220,6 +221,58 @@ begin
 		7: lDia := 'SABADO';
   end;
   Result := lDia;
+end;
+
+function RetornaCoeficiente(pTaxa: Double;  pQuantidadeParcelas: Integer): TFDMemTable;
+var
+ lTaxa         : Double;
+ lCoeficiente  : Double;
+ i             : Integer;
+ lConta1,
+ lConta2,
+ lConta3       : Double;
+ lMSG          : String;
+ lMemTable     : TFDMemTable;
+begin
+  lMemTable := TFDMemTable.Create(nil);
+  lTaxa     := pTaxa / 100;
+  lMSG      := '';
+  lConta1   := 1 + ltaxa;
+
+  with lMemTable.IndexDefs.AddIndexDef do
+  begin
+    Name := 'OrdenacaoParcela';
+    Fields := 'PARCELA';
+    Options := [TIndexOption.ixCaseInsensitive];
+  end;
+
+  lMemTable.IndexName := '';
+
+  lMemTable.FieldDefs.Add('PARCELA'     , ftInteger);
+  lMemTable.FieldDefs.Add('COEFICIENTE' , ftFloat);
+  lMemTable.CreateDataSet;
+
+  for i := 1 to pQuantidadeParcelas do
+  begin
+    if i = 1 then
+      lConta2 := lConta1
+    else
+      lConta2 := lConta2 * lConta1;
+
+    lConta3 := 1 / lConta2;
+
+    lCoeficiente := lTaxa/(1-lConta3);
+
+    lMemTable.InsertRecord([
+                            i,
+                            lCoeficiente
+                           ]);
+
+  end;
+
+  lMemTable.IndexName := 'OrdenacaoParcela';
+  lMemTable.Open;
+  Result := lMemTable;
 end;
 
 end.

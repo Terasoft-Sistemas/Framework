@@ -60,7 +60,7 @@ type
 
     function carregaClasse(pID : String): TTabelaJurosPromocaoModel;
     function obterLista: TFDMemTable;
-
+    function obterTabelaJurosProduto(pProduto : String): TFDMemTable;
     procedure setParams(var pQry: TFDQuery; pTabelaJurosPromocaoModel: TTabelaJurosPromocaoModel);
 
 end;
@@ -187,10 +187,43 @@ begin
   Result := lSQL;
 end;
 
+function TTabelaJurosPromocaoDao.obterTabelaJurosProduto(pProduto: String): TFDMemTable;
+var
+  lQry       : TFDQuery;
+  lSQL       : String;
+  lPaginacao : String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+    lSQL := '  select pt.nome_port||'' - ''||j.parcela||''x'',                      '+SLineBreak+
+            '         j.portador_id,                                                '+SLineBreak+
+            '         j.parcela,                                                    '+SLineBreak+
+            '         j.taxa_juros,                                                 '+SLineBreak+
+            '         j.com_entrada,                                                '+SLineBreak+
+            '         j.limitado_parcela                                            '+SLineBreak+
+            '    from promocao p                                                    '+SLineBreak+
+            '    left join promocaoitens i on i.promocao_id = p.id                  '+SLineBreak+
+            '    left join tabelajuros_promocao j on j.promocao_id = p.id           '+SLineBreak+
+            '    left join portador pt on pt.codigo_port = j.portador_id            '+SLineBreak+
+            '   where i.produto_id = '+ QuotedStr(pProduto) +'                      '+SLineBreak+
+            '     and current_date between p.datainicio and p.datafim               '+SLineBreak+
+            '     and current_time between p.horainicio and p.horafim               '+SLineBreak+
+            '     and p.segunda = ''S''                                             '+SLineBreak;
+
+    lQry.Open(lSQL);
+    Result := vConstrutor.atribuirRegistros(lQry);
+
+  finally
+    lQry.Free;
+  end;
+
+end;
+
 procedure TTabelaJurosPromocaoDao.obterTotalRegistros;
 var
-  lQry: TFDQuery;
-  lSQL:String;
+  lQry : TFDQuery;
+  lSQL : String;
 begin
   try
     lQry := vIConexao.CriarQuery;
