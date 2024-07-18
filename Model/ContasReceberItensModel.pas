@@ -667,7 +667,7 @@ begin
     self.FFATURA_RECEBIDA_CARTAO := lFaturaReceber;
     self.FDATABAIXA_REC          := DateToStr(vIConexao.DataServer);
 
-    if self.FVALORREC_REC >= self.VLRPARCELA_REC then
+    if StrToFloat(self.FVALORREC_REC) >= StrToFloat(self.VLRPARCELA_REC) then
       self.FSITUACAO_REC := 'B';
 
     self.Salvar;
@@ -746,7 +746,7 @@ begin
     self.FVALORREC_REC           := FloatToStr(self.FVALORREC_REC + StrToFloat(pValor));
     self.FDATABAIXA_REC          := DateToStr(vIConexao.DataServer);
 
-    if self.FVALORREC_REC >= self.VLRPARCELA_REC then
+    if StrToFloat(self.FVALORREC_REC) >= StrToFloat(self.VLRPARCELA_REC) then
       self.FSITUACAO_REC := 'B';
 
     self.Salvar;
