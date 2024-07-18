@@ -2,6 +2,9 @@ unit Interfaces.Conexao;
 
 interface
   uses
+    Terasoft.Framework.Types,
+    Terasoft.Framework.DB,
+    Terasoft.Framework.Texto,
     Terasoft.Framework.ObjectIface,
     FireDAC.Comp.Client, System.SysUtils, System.Classes, System.Generics.Defaults;
 
@@ -88,6 +91,12 @@ interface
 
       procedure setContext(pUsuario: String);
       procedure setContextModoSistema(pSistema: String);
+
+      function getGDB: IGDB;
+      function getValidador: IValidadorDatabase;
+
+      property gdb: IGDB read getGDB;
+      property validador: IValidadorDatabase read getValidador;
 
     end;
 

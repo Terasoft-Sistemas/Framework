@@ -196,7 +196,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-    lSQL := '  select pt.nome_port||'' - ''||j.parcela||''x'',                      '+SLineBreak+
+    lSQL := '  select pt.nome_port||'' - ''||j.parcela||''x'' descricao,            '+SLineBreak+
             '         j.portador_id,                                                '+SLineBreak+
             '         j.parcela,                                                    '+SLineBreak+
             '         j.taxa_juros,                                                 '+SLineBreak+
