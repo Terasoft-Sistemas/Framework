@@ -173,6 +173,7 @@ type
     FVTOTTRIB_FEDERAL: Variant;
     FVTOTTRIB_MUNICIPAL: Variant;
     FVTOTTRIB_ESTADUAL: Variant;
+    FSEGURO_PRESTAMISTA_VALOR: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetPedidoItenssLista(const Value: TObjectList<TPedidoItensModel>);
@@ -322,6 +323,7 @@ type
     procedure SetVTOTTRIB_ESTADUAL(const Value: Variant);
     procedure SetVTOTTRIB_FEDERAL(const Value: Variant);
     procedure SetVTOTTRIB_MUNICIPAL(const Value: Variant);
+    procedure SetSEGURO_PRESTAMISTA_VALOR(const Value: Variant);
 
   public
     property ID: Variant read FID write SetID;
@@ -459,6 +461,7 @@ type
     property VTOTTRIB_ESTADUAL: Variant read FVTOTTRIB_ESTADUAL write SetVTOTTRIB_ESTADUAL;
     property VTOTTRIB_FEDERAL: Variant read FVTOTTRIB_FEDERAL write SetVTOTTRIB_FEDERAL;
     property VTOTTRIB_MUNICIPAL: Variant read FVTOTTRIB_MUNICIPAL write SetVTOTTRIB_MUNICIPAL;
+    property SEGURO_PRESTAMISTA_VALOR: Variant read FSEGURO_PRESTAMISTA_VALOR write SetSEGURO_PRESTAMISTA_VALOR;
 
   	constructor Create(pConexao: IConexao);
     destructor Destroy; override;
@@ -748,10 +751,11 @@ begin
   lPedidoItensLista := TPedidoItensDao.Create(vIConexao);
   try
     lPedidoItensLista.obterTotaisItens(pNUmeroPedido);
-    self.VALOR_TOTAL_ITENS     := lPedidoItensLista.VALOR_TOTAL_ITENS;
-    self.VALOR_TOTAL_GARANTIA  := lPedidoItensLista.VALOR_TOTAL_GARANTIA;
-    self.VALOR_TOTAL_DESCONTO  := lPedidoItensLista.VALOR_TOTAL_DESCONTO;
-    self.VALOR_TOTAL           := lPedidoItensLista.VALOR_TOTAL;
+    self.VALOR_TOTAL_ITENS         := lPedidoItensLista.VALOR_TOTAL_ITENS;
+    self.VALOR_TOTAL_GARANTIA      := lPedidoItensLista.VALOR_TOTAL_GARANTIA;
+    self.VALOR_TOTAL_DESCONTO      := lPedidoItensLista.VALOR_TOTAL_DESCONTO;
+    self.VALOR_TOTAL               := lPedidoItensLista.VALOR_TOTAL;
+    self.SEGURO_PRESTAMISTA_VALOR  := lPedidoItensLista.SEGURO_PRESTAMISTA_VALOR;
   finally
     lPedidoItensLista.Free;
   end;
@@ -1322,6 +1326,11 @@ end;
 procedure TPedidoItensModel.SetSAIDAS_ID(const Value: Variant);
 begin
   FSAIDAS_ID := Value;
+end;
+
+procedure TPedidoItensModel.SetSEGURO_PRESTAMISTA_VALOR(const Value: Variant);
+begin
+  FSEGURO_PRESTAMISTA_VALOR := Value;
 end;
 
 procedure TPedidoItensModel.SetStartRecordView(const Value: String);

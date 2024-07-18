@@ -31,6 +31,7 @@ type
     FVALOR_TOTAL_DESCONTO: Variant;
     FVALOR_TOTAL_GARANTIA: Variant;
     FVALOR_TOTAL: Variant;
+    FSEGURO_PRESTAMISTA_VALOR: Variant;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
     procedure SetPedidoItenssLista(const Value: TObjectList<TPedidoItensModel>);
@@ -50,6 +51,7 @@ type
     procedure setParams(var pQry: TFDQuery; pPedidoItensModel: TPedidoItensModel);
     procedure setParamsArray(var pQry: TFDQuery; pPedidoItensModel: TPedidoItensModel);
     function where: String;
+    procedure SetSEGURO_PRESTAMISTA_VALOR(const Value: Variant);
 
   public
     constructor Create(pConexao : IConexao);
@@ -69,6 +71,7 @@ type
     property VALOR_TOTAL_GARANTIA: Variant read FVALOR_TOTAL_GARANTIA write SetVALOR_TOTAL_GARANTIA;
     property VALOR_TOTAL_DESCONTO: Variant read FVALOR_TOTAL_DESCONTO write SetVALOR_TOTAL_DESCONTO;
     property VALOR_TOTAL: Variant read FVALOR_TOTAL write SetVALOR_TOTAL;
+    property SEGURO_PRESTAMISTA_VALOR: Variant read FSEGURO_PRESTAMISTA_VALOR write SetSEGURO_PRESTAMISTA_VALOR;
 
     function incluir(pPedidoItensModel: TPedidoItensModel): String;
     function incluirLote(pPedidoItensModel: TPedidoItensModel): String;
@@ -335,17 +338,21 @@ begin
   lQry     := vIConexao.CriarQuery;
   try
     lSQL :=
-      ' select sum( valorunitario_ped * qtde_calculada ) VALOR_TOTAL_ITENS,                                                                      '+
-      '        sum( (qtde_calculada * coalesce(quantidade_tipo,0)) + (qtde_calculada * coalesce(VLR_GARANTIA_FR,0)) ) VALOR_TOTAL_GARANTIA,      '+
-      '        sum(round(cast(((cast(VALORUNITARIO_PED  as float) * desconto_ped / 100)) * qtde_calculada as float),2)) as VALOR_TOTAL_DESCONTO  '+
-      '   from pedidoitens                                                                                                                       '+
-      '  where numero_ped = '+QuotedStr(pNumeroPedido);
+      ' select coalesce(pedidovenda.seguro_prestamista_valor, 0) seguro_prestamista_valor,                                                                   '+
+      '        sum( valorunitario_ped * qtde_calculada ) VALOR_TOTAL_ITENS,                                                                                  '+
+      '        sum( (qtde_calculada * coalesce(quantidade_tipo,0)) + (qtde_calculada * coalesce(VLR_GARANTIA_FR,0)) ) VALOR_TOTAL_GARANTIA,                  '+
+      '        sum(round(cast(((cast(VALORUNITARIO_PED  as float) * pedidoitens.desconto_ped / 100)) * qtde_calculada as float),2)) as VALOR_TOTAL_DESCONTO  '+
+      '   from pedidoitens                                                                                                                                   '+
+      '  inner join pedidovenda on pedidovenda.numero_ped = pedidoitens.numero_ped                                                                           '+
+      '  where pedidoitens.numero_ped = '+QuotedStr(pNumeroPedido) +
+      '  group by 1';
 
     lQry.Open(lSQL);
-    self.FVALOR_TOTAL_ITENS     := lQry.FieldByName('VALOR_TOTAL_ITENS').AsFloat;
-    self.FVALOR_TOTAL_GARANTIA  := lQry.FieldByName('VALOR_TOTAL_GARANTIA').AsFloat;
-    self.FVALOR_TOTAL_DESCONTO  := lQry.FieldByName('VALOR_TOTAL_DESCONTO').AsFloat;
-    self.VALOR_TOTAL            := self.FVALOR_TOTAL_ITENS + self.FVALOR_TOTAL_GARANTIA - self.FVALOR_TOTAL_DESCONTO;
+    self.FVALOR_TOTAL_ITENS            := lQry.FieldByName('VALOR_TOTAL_ITENS').AsFloat;
+    self.FVALOR_TOTAL_GARANTIA         := lQry.FieldByName('VALOR_TOTAL_GARANTIA').AsFloat;
+    self.FVALOR_TOTAL_DESCONTO         := lQry.FieldByName('VALOR_TOTAL_DESCONTO').AsFloat;
+    self.VALOR_TOTAL                   := self.FVALOR_TOTAL_ITENS + self.FVALOR_TOTAL_GARANTIA - self.FVALOR_TOTAL_DESCONTO;
+    self.FSEGURO_PRESTAMISTA_VALOR     := lQry.FieldByName('SEGURO_PRESTAMISTA_VALOR').AsFloat;
   finally
     lQry.Free;
   end;
@@ -609,6 +616,7 @@ procedure TPedidoItensDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
 end;
+
 procedure TPedidoItensDao.SetPedidoItenssLista(const Value: TObjectList<TPedidoItensModel>);
 begin
   FPedidoItenssLista := Value;
@@ -789,6 +797,11 @@ begin
     pQry.ParamByName('per_garantia_fr').Values[lCount]              := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PER_GARANTIA_FR               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PER_GARANTIA_FR));
 
   end;
+end;
+
+procedure TPedidoItensDao.SetSEGURO_PRESTAMISTA_VALOR(const Value: Variant);
+begin
+  FSEGURO_PRESTAMISTA_VALOR := Value;
 end;
 
 procedure TPedidoItensDao.SetStartRecordView(const Value: String);

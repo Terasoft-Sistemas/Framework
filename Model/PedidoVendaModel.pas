@@ -592,18 +592,19 @@ begin
     lAcrescimo := self.ACRES_PED;
     lFrete     := self.FRETE_PED;
 
-    self.Acao          := tacAlterar;
-    self.NUMERO_PED    := self.FNUMERO_PED;
-    self.VALOR_PED     := FloatToStr(lPedidoItensModel.VALOR_TOTAL_ITENS);
-    self.VLR_GARANTIA  := FloatToStr(lPedidoItensModel.VALOR_TOTAL_GARANTIA);
-    self.DESC_PED      := FloatToStr(lPedidoItensModel.VALOR_TOTAL_DESCONTO);
+    self.Acao                     := tacAlterar;
+    self.NUMERO_PED               := self.FNUMERO_PED;
+    self.VALOR_PED                := FloatToStr(lPedidoItensModel.VALOR_TOTAL_ITENS);
+    self.VLR_GARANTIA             := FloatToStr(lPedidoItensModel.VALOR_TOTAL_GARANTIA);
+    self.DESC_PED                 := FloatToStr(lPedidoItensModel.VALOR_TOTAL_DESCONTO);
+    self.SEGURO_PRESTAMISTA_VALOR := lPedidoItensModel.SEGURO_PRESTAMISTA_VALOR;
 
     if lPedidoItensModel.VALOR_TOTAL_ITENS > 0 then
       self.DESCONTO_PED  := FloatToStr(lPedidoItensModel.VALOR_TOTAL_DESCONTO * 100 / lPedidoItensModel.VALOR_TOTAL_ITENS)
     else
       self.DESCONTO_PED := '0';
 
-    self.TOTAL_PED := FloatToStr(lPedidoItensModel.VALOR_TOTAL + lAcrescimo + lFrete);
+    self.TOTAL_PED := FloatToStr(lPedidoItensModel.VALOR_TOTAL + lAcrescimo + lFrete + self.SEGURO_PRESTAMISTA_VALOR);
 
     self.Salvar;
   finally
