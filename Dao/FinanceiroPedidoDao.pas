@@ -88,6 +88,7 @@ begin
     lModel.DATA_CADASTRO          := lQry.FieldByName('DATA_CADASTRO').AsString;
     lModel.WEB_PEDIDO_ID          := lQry.FieldByName('WEB_PEDIDO_ID').AsString;
     lModel.PEDIDO_VENDA_ID        := lQry.FieldByName('PEDIDO_VENDA_ID').AsString;
+    lModel.WEB_PEDIDOITENS_ID     := lQry.FieldByName('WEB_PEDIDOITENS_ID').AsString;
     lModel.PORTADOR_ID            := lQry.FieldByName('PORTADOR_ID').AsString;
     lModel.VALOR_TOTAL            := lQry.FieldByName('VALOR_TOTAL').AsString;
     lModel.QUANTIDADE_PARCELAS    := lQry.FieldByName('QUANTIDADE_PARCELAS').AsString;
