@@ -8,7 +8,7 @@ interface
     Terasoft.Framework.DB,
     Terasoft.Framework.Types;
 
-  procedure registraValidacaoPadraoCamposTabelas(const pGDB: IGDB);
+  procedure registraValidacaoPadraoCamposTabelas(pGDB: IGDB);
 
 implementation
   uses
@@ -26,7 +26,7 @@ implementation
       condicao = false;
     {$endif}
 
-procedure registraValidacaoPadraoCamposTabelas(const pGDB: IGDB);
+procedure registraValidacaoPadraoCamposTabelas(pGDB: IGDB);
   var
     ds: IDataset;
     lTabela: String;
@@ -236,7 +236,7 @@ begin
       registraOpcoesCampos('tipoendereco', 'O', 'Outros');
       registraValidacaoCampoTabela('','CLIENTES_ENDERECO','TIPO','tipoendereco','Tipo de endereço do cliente');
 
-      ds := gdbPadrao.criaDataset;
+      ds := pGDB.criaDataset;
       ds.query(
           'select'+#13+
              '    c.*'+#13+
