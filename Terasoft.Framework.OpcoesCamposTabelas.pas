@@ -115,6 +115,9 @@ interface
   function setFocoControleDataField(pCampo: String; pDatasource: TDataSource; pParent: TWinControl): TWinControl;
   function getDicionarioRegrasDadosCamposValidacoes(pRegra: TipoWideStringFramework = ''): TDicionarioDadosCamposValidacoes;
 
+
+//  function getValidadorDatabase(pGDB: IGDB): IValidadorDatabase;
+
   var
     gOpcoesDefaultRegistradas: boolean;
 
@@ -126,6 +129,10 @@ implementation
     Vcl.DBCtrls;
 
   type
+//    TValidadosDatabaseImpl = class(TInterfacedObject, IValidadorDatabase)
+//    protected
+//      procedure dummy;
+//    end;
 
     TDadosCamposValidacoesImpl=class(TInterfacedObject,IDadosCamposValidacoes)
     protected
@@ -511,7 +518,7 @@ begin
     pResultado.adicionaErro('validaDataset: Não informou um dataset válido');
     exit;
   end;
-  if(pDataset.RecordCount=0) then
+  if( not pDataset.RecordCount=0) and (pDataset.State = dsBrowse) then
   begin
     pResultado.adicionaErro('validaDataset: Não possui registros para serem validados');
     exit;
@@ -979,259 +986,19 @@ begin
   end;
 end;
 
-{
+{ TValidadosDatabaseImpl }
 
-function validaDatasetOld;//(pDataset: TDataset; pListaCampos: IListaString = nil; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-  var
-    i: Integer;
-    lDSRegra,lDSDependencia,lDSValores: IDataset;
-    p: TipoWideStringFramework;
-    lNomeCampo: String;
-    lDependenciaMatch: boolean;
-    lValor: String;
-    f: TField;
-    lLista: IListaTextoEX;
-    label proximo1,proximo2;
+{procedure TValidadosDatabaseImpl.dummy;
 begin
-  Result := CheckResultadoOperacao(pResultado);
-  pTabela := uppercase(trim(pTabela));
-  if(pTabela='') then
-  begin
-    pResultado.adicionaErro('Nome da tabela inválida.');
-    exit;
-  end;
-
-  if( (pDataset=nil) or (pDataset.Active=false) ) then
-  begin
-    pResultado.adicionaErro('validaDataset: Não informou um dataset válido');
-    exit;
-  end;
-  if(pListaCampos=nil) then
-    pListaCampos := getStringList;
-
-  if(pListaCampos.Count=0) then
-  begin
-    for i := 0 to pDataset.Fields.Count - 1 do
-      pListaCampos.Add(pDataset.Fields[i].FieldName);
-  end;
-
-  lDSRegra := gdbPadrao.criaDataset;
-  lDSDependencia := gdbPadrao.criaDataset;
-  lDSValores := gdbPadrao.criaDataset;
-
-  lLista := novaListaTextoEx(false,'');
-
-  for p in pListaCampos do
-  begin
-    lNomeCampo := uppercase(trim(p));
-    if(p='') then continue;
-    lDSRegra.query('select r.*'+#13+
-         '    from regras r'+#13+
-         '        where'+#13+
-         '            r.tabela=:tabela'+#13+
-         '            and r.campo=:campo',
-     'tabela;campo',[pTabela,lNomeCampo]);
-
-    if((lDSRegra.dataset.RecordCount=0) or (lDSRegra.dataset.FieldByName('obrigatorio').AsString<>'S')) then continue;
-
-
-    lDSDependencia.query(
-         'select'+#13+
-         '    r.*,'+#13+
-         '    d.valor_dependencia'+#13+
-         '    from'+#13+
-         '        regras_dependecias d,'+#13+
-         '        regras r'+#13+
-         '    where'+#13+
-         '        r.nome=d.dependencia'+#13+
-         '        and d.regra=:regra',
-      'regra',[lDSRegra.dataset.FieldByName('nome').AsString]);
-
-    lDependenciaMatch := lDSDependencia.dataset.RecordCount=0;
-
-    if(lDependenciaMatch=false) then
-    begin
-      while not lDSDependencia.dataset.Eof do
-      begin
-        if(lDSDependencia.dataset.FieldByName('tabela').AsString<>pTabela) then begin
-          pResultado.formataErro('validaDataset: Tabela de dependência diverge da tabela requerida: [%s] e [%s]', [ lDSDependencia.dataset.FieldByName('tabela').AsString, pTabela ]);
-          goto proximo1;
-        end;
-        lValor:=trim(lDSDependencia.dataset.FieldByName('valor_dependencia').AsString);
-        f := pDataset.FindField(lDSDependencia.dataset.FieldByName('campo').AsString);
-        if(f=nil) then
-        begin
-          pResultado.formataErro('validaDataset: Campo [%s] [%s] não fornecido', [ lDSDependencia.dataset.FieldByName('campo').AsString, lDSDependencia.dataset.FieldByName('descricaocampo').AsString ]);
-          goto proximo1;
-        end;
-        if(lValor='') then
-        begin
-          lDependenciaMatch := f.IsNull=true;
-        end else if(CompareText(lValor,'notnull')=0) then
-        begin
-          lDependenciaMatch := f.IsNull=false;
-        end else begin
-          lLista.text := lValor;
-          lDependenciaMatch := lLista.strings.IndexOf(f.AsString)<>-1;
-        end;
-       proximo1:
-        if(lDependenciaMatch=true) then break;
-        lDSDependencia.dataset.Next;
-      end;
-      if(lDependenciaMatch=false) then continue;
-    end;
-    lDSValores.query(
-          'select'+#13+
-          '    v.*'+#13+
-          '    from'+#13+
-          '       regras_valores v'+#13+
-          '    where'+#13+
-          '        v.nome = :nome',
-        'nome', [ lDSRegra.dataset.FieldByName('valores').AsString ]);
-    if(lDSValores.dataset.RecordCount=0) then
-    begin
-       pResultado.formataErro('validaDataset: Não existem valores configurados para a regra [%s]', [ lDSRegra.dataset.FieldByName('valores').AsString ]);
-       continue;
-    end;
-    f := pDataset.FindField(lDSRegra.dataset.FieldByName('campo').AsString);
-    if(f=nil) then
-    begin
-      pResultado.formataErro('validaDataset: Campo [%s] [%s] não fornecido', [ lDSRegra.dataset.FieldByName('campo').AsString, lDSRegra.dataset.FieldByName('descricaocampo').AsString ]);
-      continue;
-    end;
-
-    lDependenciaMatch := false;
-
-    while not lDSValores.dataset.Eof do
-    begin
-      lValor:=trim(lDSValores.dataset.FieldByName('valor').AsString);
-      if(CompareText(lValor,'null')=0) then
-      begin
-        lDependenciaMatch := f.IsNull=true;
-      end else if(CompareText(lValor,'notnull')=0) then
-      begin
-        lDependenciaMatch := f.IsNull=false;
-      end else
-        lDependenciaMatch := f.AsString=lValor;
-
-     proximo2:
-      if(lDependenciaMatch=true) then
-        break;
-      lDSValores.dataset.Next;
-    end;
-    if(lDependenciaMatch=false) then
-      pResultado.formataErro('validaDataset: Valor do Campo [%s] inválido', [ lDSRegra.dataset.FieldByName('descricaocampo').AsString ]);
-  end;
+  raise Exception.Create('Error Message');
 end;
-function getDadosCamposLookupOld;//(pTabela: String; pCampos: IListaString): TDadosCampos;
-  var
-    lDS: IDataset;
-    p: TipoWideStringFramework;
-    lCampo: String;
-    lRec: TDadosCamposRecOld;
-    tmp: String;
-    lDadosCampoLookup: TDadosCamposLookupOld;
-    par: TPair<TipoWideStringFramework,TDadosCamposRecOld>;
+
+function getValidadorDatabase(pGDB: IGDB): IValidadorDatabase;
 begin
-  Result := TCollections.CreateDictionary<TipoWideStringFramework,TDadosCamposRecOld>(getComparadorOrdinalTipoWideStringFramework);
-  lRec.valido := true;
-  pTabela := uppercase(trim(pTabela));
-  if(pTabela='') then exit;
-
-  if not dicionarioDadosOld.TryGetValue(pTabela,lDadosCampoLookup) then
-  begin
-    lDadosCampoLookup := TCollections.CreateDictionary<TipoWideStringFramework,TDadosCamposRecOld>(getComparadorOrdinalTipoWideStringFramework);
-    dicionarioDadosOld.AddOrSetValue(pTabela,lDadosCampoLookup);
-  end;
-
-  if(dicionarioDadosOld=nil) then
-    dicionarioDadosOld := TCollections.CreateDictionary<TipoWideStringFramework,TDadosCamposLookupOld>(getComparadorOrdinalTipoWideStringFramework);
-
-  if (pCampos=nil) then
-    pCampos := getStringList;
-
-  lDS := gdbPadrao.criaDataset;
-  if(pCampos.Count=0)then
-  begin
-    lDS.query('select campo from regras where tabela=:tabela','tabela',[pTabela]);
-    while not lDS.dataset.Eof do
-    begin
-      pCampos.Add(lDS.dataset.FieldByName('campo').AsString);
-      lDS.dataset.Next;
-    end;
-  end;
-  for par in lDadosCampoLookup do
-    if(par.Value.valido) then
-      pCampos.Add(par.Value.campo);
-
-  lRec.tabela := pTabela;
-  lRec.campo := '';
-
-  for p in pCampos do
-  begin
-    lCampo := uppercase(trim(p));
-    if(lCampo='') then continue;
-    if not lDadosCampoLookup.TryGetValue(lCampo,lRec) then
-    begin
-      lRec.valido := true;
-      lRec.padrao :=true;
-      lRec.campo  := lCampo;
-      lRec.tabela := pTabela;
-      //lRec.listaValores := novaListaTextoEx;
-      //lRec.listaDescricoes := novaListaTextoEx;
-      //lRec.dataset := getGenericID_DescricaoDataset;
-    end else
-      Result.AddOrSetValue(lRec.campo,lRec);
-
-    if(lRec.padrao=false) then
-    begin
-      Result.AddOrSetValue(lRec.campo,lRec);
-      continue;
-    end;
-    lRec.padrao :=false;
-    lRec.campo  := lCampo;
-    //lRec.listaValores := novaListaTextoEx;
-    //lRec.listaDescricoes := novaListaTextoEx;
-    //lRec.dataset := getGenericID_DescricaoDataset;
-    lDS.query(
-          'select'+#13+
-          '    r.*, v.valor, v.descricao descricaovalor'+#13+
-          'from'+#13+
-          '    regras r'+#13+
-          'left join'+#13+
-          '    regras_valores v'+#13+
-          '        on'+#13+
-          '            v.nome=r.valores'+#13+
-          'where'+#13+
-          '    r.tabela=:tabela'+#13+
-          '    and r.campo=:campo'+#13+
-          'order by'+#13+
-          '    r.tabela, r.campo, v.ordem',
-      'tabela;campo', [ pTabela, lCampo ]);
-
-    if(lDS.dataset.FieldByName('descricaocampo').AsString<>'') then
-      lRec.descricao := lDS.dataset.FieldByName('descricaocampo').AsString;
-
-    while not lDS.dataset.Eof do
-    begin
-      tmp := lDS.dataset.FieldByName('valor').AsString;
-      if((CompareText(tmp,'null')<>0) and (CompareText(tmp,'notnull')<>0) and (tmp<>'') ) then
-      begin
-        lRec.listaValores.strings.Add(tmp);
-        lRec.listaDescricoes.strings.Add(lDS.dataset.FieldByName('descricaovalor').AsString);
-        lRec.dataset.dataset.Append;
-        lRec.dataset.dataset.FieldByName('id').AsString := tmp;
-        lRec.dataset.dataset.FieldByName('descricao').AsString := lDS.dataset.FieldByName('descricaovalor').AsString;
-        lRec.dataset.dataset.CheckBrowseMode;
-      end;
-      lDS.dataset.Next;
-    end;
-    Result.AddOrSetValue(lRec.campo,lRec);
-    lDadosCampoLookup.AddOrSetValue(lRec.campo,lRec);
-  end;
-
+  raise Exception.Create('Error Message');
 end;
 }
+
 initialization
   registraLogger(TAGLOG_VALIDACOES,'Validacoes',true);
 
