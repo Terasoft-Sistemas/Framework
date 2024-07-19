@@ -9,7 +9,7 @@ uses
   FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
   RLXLSXFilter, RLFilters, RLPDFFilter, Data.DB, FireDAC.Comp.DataSet,
   FireDAC.Comp.Client, Terasoft.Utils, Interfaces.Conexao, xPNGimage,
-  Vcl.Imaging.jpeg, PedidoVendaModel, Terasoft.FuncoesTexto, Terasoft.Configuracoes;
+  Vcl.Imaging.jpeg, PedidoVendaModel, Terasoft.FuncoesTexto, Terasoft.Configuracoes, System.Math;
 
 type
   TImpressaoContratos = class(TForm)
@@ -385,9 +385,6 @@ type
     RLDBText50: TRLDBText;
     RLDBText67: TRLDBText;
     mtReceberItensFIM_VIGENCIA_VENCIMENTO: TStringField;
-    mtPedidoPREMIO_UNICO_1: TFloatField;
-    mtPedidoPREMIO_UNICO_2: TFloatField;
-    mtPedidoPREMIO_UNICO_3: TFloatField;
     RLDBText68: TRLDBText;
     RLDBText69: TRLDBText;
     RLDBText70: TRLDBText;
@@ -434,6 +431,9 @@ type
     RLDBText90: TRLDBText;
     mtItensRR_RF: TFloatField;
     mtItensRR_RFD: TFloatField;
+    mtPedidoPREMIO_UNICO_1: TFloatField;
+    mtPedidoPREMIO_UNICO_2: TFloatField;
+    mtPedidoPREMIO_UNICO_3: TFloatField;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
@@ -519,6 +519,7 @@ var
   lContasReceberModel : TContasReceberModel;
   lContasReceberItensModel : TContasReceberItensModel;
   lConfiguracoes : TerasoftConfiguracoes;
+  lPrimeiraParcela, lTotalPremio : Double;
 begin
   lPedidoVendaModel := TPedidoVendaModel.Create(CONEXAO);
   lContasReceberModel := TContasReceberModel.Create(CONEXAO);
@@ -543,11 +544,17 @@ begin
     mtPedidoOBSERVACAO.Value          := lPedidoVendaModel.OBS_GERAL;
     mtPedidoVALOR_PRODUTOS.Value      := lPedidoVendaModel.VALOR_PED;
     mtPedidoVALOR_DESCONTO.Value      := lPedidoVendaModel.DESC_PED;
-    mtPedidoSEGURO_PRESTAMISTA.Value  := lPedidoVendaModel.SEGURO_PRESTAMISTA_VALOR;
+    mtPedidoSEGURO_PRESTAMISTA.Value  := RoundTo(lPedidoVendaModel.SEGURO_PRESTAMISTA_VALOR, -2);
     mtPedidoRR_PRESTAMISTA.Value      := (lConfiguracoes.valorTag('PERCENTUAL_RR_PRESTAMISTA', '0', tvNumero));
-    mtPedidoPREMIO_UNICO_1.Value      := mtPedidoSEGURO_PRESTAMISTA.Value / 100 * 6.23;
-    mtPedidoPREMIO_UNICO_2.Value      := mtPedidoSEGURO_PRESTAMISTA.Value / 100 * 0.53;
-    mtPedidoPREMIO_UNICO_3.Value      := mtPedidoSEGURO_PRESTAMISTA.Value / 100 * 93.24;
+
+    mtPedidoPREMIO_UNICO_1.Value      := RoundTo((mtPedidoSEGURO_PRESTAMISTA.Value / 100 * 6.23), -2);
+    mtPedidoPREMIO_UNICO_2.Value      := RoundTo((mtPedidoSEGURO_PRESTAMISTA.Value / 100 * 0.53), -2);
+    mtPedidoPREMIO_UNICO_3.Value      := RoundTo((mtPedidoSEGURO_PRESTAMISTA.Value / 100 * 93.24), -2);
+    lTotalPremio                      := mtPedidoPREMIO_UNICO_1.Value + mtPedidoPREMIO_UNICO_2.Value + mtPedidoPREMIO_UNICO_3.Value;
+
+    if lTotalPremio <> mtPedidoSEGURO_PRESTAMISTA.Value then
+      mtPedidoPREMIO_UNICO_3.Value := mtPedidoPREMIO_UNICO_3.Value - (lTotalPremio - mtPedidoSEGURO_PRESTAMISTA.Value);
+
     mtPedidoVALOR_ACRESCIMO.Value     := lPedidoVendaModel.ACRES_PED;
     mtPedidoVALOR_FRETE.Value         := lPedidoVendaModel.FRETE_PED;
     mtPedidoVALOR_TOTAL.Value         := lPedidoVendaModel.TOTAL_PED;
@@ -567,12 +574,18 @@ begin
 
     lContasReceberItensModel.WhereView           := ' AND PORTADOR.TIPO = ''R'' AND PORTADOR.TPAG_NFE NOT IN (''03'', ''04'', ''17'', ''20'') ';
     lContasReceberItensModel.IDContasReceberView := lContasReceberModel.FATURA_REC;
-    lContasReceberItensModel.OrderView := 'CONTASRECEBERITENS.VENCIMENTO_REC DESC';
+    lContasReceberItensModel.OrderView := 'CONTASRECEBERITENS.VENCIMENTO_REC';
     lContasReceberItensModel.obterLista;
+
+    lPrimeiraParcela := 0;
 
     for lContasReceberItensModel in lContasReceberItensModel.ContasReceberItenssLista do begin
       mtReceberItens.Append;
-      mtReceberItensVALOR_PARCELA.Value           := lContasReceberItensModel.VLRPARCELA_REC;
+
+      if lContasReceberItensModel.PACELA_REC = 1 then
+        lPrimeiraParcela := lContasReceberItensModel.VLRPARCELA_REC;
+
+      mtReceberItensVALOR_PARCELA.Value           := lPrimeiraParcela;
       mtReceberItensTOTAL_PARCELAS.Value          := lContasReceberItensModel.TOTALPARCELAS_REC;
       mtReceberItensFIM_VIGENCIA_VENCIMENTO.Value := lContasReceberItensModel.VENCIMENTO_REC;
       mtReceberItens.Post;
@@ -580,7 +593,6 @@ begin
       lblRRPrestamista.Caption  := 'RR: '+ FormataFloat(mtPedidoRR_PRESTAMISTA.Value) +'%  (R$ '+ FormataFloat((mtPedidoSEGURO_PRESTAMISTA.Value / 1.0738) * (mtPedidoRR_PRESTAMISTA.Value / 100)) +')';
       lblIOFPrestamista.Caption := 'R$ '+FormataFloat(mtPedidoSEGURO_PRESTAMISTA.Value - (mtPedidoSEGURO_PRESTAMISTA.Value / 1.0738))+' ';
 
-      exit;
     end;
 
   finally
