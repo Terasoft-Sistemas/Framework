@@ -68,11 +68,11 @@ begin
       //registraValidacaoCampoTabela('','clientes','CNPJ_CPF_CLI','notnull','CNPJ/CPF cliente',condicao);
       registraValidacaoCampoTabela('','clientes','FANTASIA_CLI','notnull','Nome do cliente',true);
 
-      registraValidacaoCampoTabela('','clientes','EMAIL_CLI','emailvalidoounull','Email do cliente',true);
+      registraValidacaoCampoTabela('','clientes','EMAIL_CLI','emailvalidoounull','Email do cliente',condicao);
 
       registraOpcoesCampos('sexo', 'M', 'Masculino');
       registraOpcoesCampos('sexo', 'F', 'Feminino');
-      registraValidacaoCampoTabela('','clientes','SEXO_CLI','sexo','Sexo do cliente',true);
+      registraValidacaoCampoTabela('','clientes','SEXO_CLI','sexo','Sexo do cliente',condicao);
 
       registraOpcoesCampos('escolaridade', '1', 'Analfabeto');
       registraOpcoesCampos('escolaridade', '2', 'Fundamental/Médio');
@@ -82,24 +82,24 @@ begin
 
       registraOpcoesCampos('tipopessoa', 'F', 'Física');
       registraOpcoesCampos('tipopessoa', 'J', 'Jurídica');
-      registraValidacaoCampoTabela('','clientes','TIPO_CLI','tipopessoa','Tipo do cliente',true);
+      registraValidacaoCampoTabela('','clientes','TIPO_CLI','tipopessoa','Tipo do cliente',condicao);
 
       registraOpcoesCampos('statusgenerico', 'A', 'Ativo');
       registraOpcoesCampos('statusgenerico', 'I', 'Inativo');
-      registraValidacaoCampoTabela('','clientes','status','statusgenerico','Status do cliente',true);
+      registraValidacaoCampoTabela('','clientes','status','statusgenerico','Status do cliente',condicao);
 
       registraOpcoesCampos('SEPROCADO', 'S', 'Seprocado');
       registraOpcoesCampos('SEPROCADO', 'F', 'Falecimento');
       registraOpcoesCampos('SEPROCADO', 'C', 'Cartório');
       registraOpcoesCampos('SEPROCADO', 'I', 'Inadimplente');
       registraOpcoesCampos('SEPROCADO', 'N', 'Liberado');
-      registraValidacaoCampoTabela('','clientes','SEPROCADO_CLI','SEPROCADO','Situação do cliente',true);
+      registraValidacaoCampoTabela('','clientes','SEPROCADO_CLI','SEPROCADO','Situação do cliente',condicao);
 
       registraOpcoesCampos('estadocivilpessoa', 'C', 'Casado');
       registraOpcoesCampos('estadocivilpessoa', 'S', 'Solteiro');
       registraOpcoesCampos('estadocivilpessoa', 'V', 'Viúvo');
       registraOpcoesCampos('estadocivilpessoa', 'O', 'Outros');
-      registraValidacaoCampoTabela('','clientes','ESTADOCIVIL_CLI','estadocivilpessoa','Estado civil do Cliente',true);
+      registraValidacaoCampoTabela('','clientes','ESTADOCIVIL_CLI','estadocivilpessoa','Estado civil do Cliente',condicao);
 
       registraOpcoesCampos('classificacao', 'A', 'A');
       registraOpcoesCampos('classificacao', 'B', 'B');

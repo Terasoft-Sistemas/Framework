@@ -18,6 +18,10 @@ interface
 
 implementation
   uses
+    {$if defined(IW)}
+      IWCompListbox,
+    {$endif}
+    System.Rtti,
     Terasoft.Framework.Validacoes,
     Terasoft.Framework.Log,
     Math,strUtils,
@@ -50,8 +54,11 @@ implementation
       function registraValidacaoCampoTabela(pRegra,pTabela, pCampo, pOpcoes: String; pDescricao: String = ''; pObrigatorio: boolean = false;pIgnoraExistente: boolean=false): IDadosCamposValidacoes;
       procedure configuraControlesEditOpcoesCampoTabela(pTabela: String; pOwner: TComponent; pDataSource: TDataSource);
       function validaDataset(pRegra, pTabela: String; pDataset: TDataset; pListaCampos: IListaString = nil; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+      function validaModel(pRegra, pTabela: String; pModel: TObject; pListaCampos: IListaString = nil; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
       function retornaControleDataField(pCampo: String; pDatasource: TDataSource; pParent: TWinControl): TWinControl;
+      function retornaControleDataFieldByName(pCampo: String; pParent: TWinControl): TWinControl;
       function setFocoControleDataField(pCampo: String; pDatasource: TDataSource; pParent: TComponent): TComponent;
+      function setFocoViewControleDataField(pCampo: String; pParent: TWinControl): TWinControl;
       function getDicionarioRegrasDadosCamposValidacoes(pRegra: TipoWideStringFramework = ''): TDicionarioDadosCamposValidacoes;
       function getDicionarioSetValores: TDicionarioSetValores;
       procedure configuraEditOpcoesCampoTabela(pTabela: String; pObject: TComponent; pDataSource: TDataSource);
@@ -78,7 +85,8 @@ implementation
       procedure setRegra(const pValue: TipoWideStringFramework);
 
       procedure adicionaDependencia(pDependencia: TipoWideStringFramework; pValor: TipoWideStringFramework);
-      function verificaDependencias(pContexto: TDataset; pValidador: IValidadorDatabase; pResultado: IResultadoOperacao): boolean;
+      function verificaDependenciasDataset(pContexto: TDataset; pValidador: IValidadorDatabase; pResultado: IResultadoOperacao): boolean;
+      function verificaDependenciasModel(pContexto: TObject; pValidador: IValidadorDatabase; pResultado: IResultadoOperacao=nil): boolean;
 
     //property dependencias getter/setter
       function getDependencias: TListaDependenciaRegra;
@@ -438,7 +446,58 @@ begin
   fTabela := UpperCase(trim(pValue));
 end;
 
-function TDadosCamposValidacoesImpl.verificaDependencias;
+function TDadosCamposValidacoesImpl.verificaDependenciasModel;
+  var
+    p: TDependenciaRegra;
+    regra: IDadosCamposValidacoes;
+    lValor: String;
+    lLista: IListaTextoEX;
+    lCtx    : TRttiContext;
+    lProp   : TRttiProperty;
+    s: String;
+begin
+  checkResultadoOperacao(pResultado);
+  Result := getDependencias.Count=0;
+  if Result or (pContexto=nil) or (pValidador=nil) then
+    exit;
+  lLista := novaListaTexto;
+
+  lCtx := TRttiContext.Create;
+  try
+    for p in fDependencias do
+    begin
+      regra := pValidador.getValidacaoPorNome(p.Key);
+      if(regra=nil) then continue;
+      if(regra.tabela<>fTabela) then begin
+        pResultado.formataErro('TDadosCamposValidacoesImpl.verificaDependenciasModel: Tabela da dependencia [%s.%s] diferente da tabela dependente[%s.%s].', [regra.nome, regra.tabela,fNome,fTabela]);
+        exit;
+      end;
+      lProp := lCtx.GetType(pContexto.ClassType).GetProperty(regra.campo);
+      if(lProp=nil) then
+      begin
+        pResultado.formataErro('TDadosCamposValidacoesImpl.verificaDependenciasModel: Campo da regra [%s.%s] não existe no contexto fornecido.', [regra.nome, regra.campo]);
+        exit;
+      end;
+      s := lProp.GetValue(pContexto).AsString;
+      lValor:=trim(p.Value);
+      if(lValor='') then
+        Result := s=''// f.IsNull=true
+      else if(CompareText(lValor,'notnull')=0) then
+        Result := s<>''// f.IsNull=false
+      else
+      begin
+        lLista.text := lValor;
+        Result := lLista.strings.IndexOf(s)<>-1;
+      end;
+      if(Result) then exit;
+    end;
+  finally
+    lCtx.Free;
+  end;
+
+end;
+
+function TDadosCamposValidacoesImpl.verificaDependenciasDataset;
   var
     p: TDependenciaRegra;
     regra: IDadosCamposValidacoes;
@@ -448,7 +507,7 @@ function TDadosCamposValidacoesImpl.verificaDependencias;
 begin
   checkResultadoOperacao(pResultado);
   Result := getDependencias.Count=0;
-  if Result or (pContexto=nil) or (pContexto.Active=false) or (pValidador=nil) then
+  if Result or (pContexto=nil) or (pValidador=nil) or (pContexto.Active=false) then
     exit;
 
   lLista := novaListaTexto;
@@ -757,6 +816,93 @@ begin
   Result.obrigatorio := pObrigatorio;
 end;
 
+function TValidadorDatabaseImpl.validaModel;
+  var
+    save: Integer;
+    dic: TDicionarioDadosCamposValidacoes;
+    dadosTabela: TDicionarioDadosCamposValidacoesTabela;
+    dadosCampo: IDadosCamposValidacoes;
+    lDependenciaMatch: boolean;
+    opcoes: IDadosSetOpcoes;
+    par: TPair<TipoWideStringFramework,IDadosCamposValidacoes>;
+    lValor, p1, lNomeCampo: TipoWideStringFramework;
+    lCtx    : TRttiContext;
+    lProp   : TRttiProperty;
+begin
+  Result := CheckResultadoOperacao(pResultado);
+  if(usaValidacoesNovas=false) then exit;
+  save := pResultado.erros;
+  if(pRegra='') then
+    pRegra := 'padrao';
+  if(pTabela='') then
+  begin
+    pResultado.adicionaErro('validaModel: Nome da tabela inválida.');
+    exit;
+  end;
+
+  if (pModel=nil) then
+  begin
+    pResultado.adicionaErro('validaModel: Não informou um modelo válido');
+    exit;
+  end;
+
+  if(pListaCampos=nil) then
+    pListaCampos := getStringList;
+
+  pRegra := uppercase(trim(pRegra));
+  pTabela := uppercase(trim(pTabela));
+
+  dic := getDicionarioRegrasDadosCamposValidacoes(pRegra);
+  if not dic.TryGetValue(pTabela,dadosTabela) then
+    exit;
+
+  if(pListaCampos.Count=0) then
+  begin
+    for par in dadosTabela do
+      pListaCampos.Add(par.Value.campo);
+  end;
+
+  lCtx := TRttiContext.Create;
+  try
+    for p1 in pListaCampos do
+    begin
+      lNomeCampo := uppercase(trim(p1));
+      if(lNomeCampo='') then continue;
+      if not dadosTabela.TryGetValue(lNomeCampo,dadosCampo) then continue;
+      if(dadosCampo.obrigatorio=false) then continue;
+
+      lProp := lCtx.GetType(pModel.ClassType).GetProperty(lNomeCampo);
+
+      if(lProp=nil) then
+      begin
+        pResultado.formataErro('validaModel: Campo [%s] [%s] não fornecido', [lNomeCampo, dadosCampo.descricao ]);
+        continue;
+      end;
+      opcoes := dadosCampo.getDadosOpcoes(self);
+      if(opcoes=nil) then
+      begin
+        pResultado.formataErro('validaModel: Campo [%s] [%s] não configurado lista de opções', [lNomeCampo, dadosCampo.descricao ]);
+        continue;
+      end;
+
+      lDependenciaMatch := dadosCampo.verificaDependenciasModel(pModel,self,pResultado);
+      //Implementar dependencias
+
+      if(lDependenciaMatch=false) {or (pResultado.erros<>save)} then continue;
+
+      lDependenciaMatch := opcoes.match(lProp.GetValue(pModel).AsString);// false;
+      if(lDependenciaMatch=false) then begin
+        if(pResultado.propriedade['campo.erro'].asString='') then
+          pResultado.propriedade['campo.erro'].asString := dadosCampo.campo;
+        pResultado.formataErro('Valor do Campo [%s] inválido', [ dadosCampo.descricao ]);
+      end;
+    end;
+  finally
+    lCtx.Free;
+  end;
+
+end;
+
 function TValidadorDatabaseImpl.validaDataset;
   var
     i: Integer;
@@ -827,28 +973,32 @@ begin
       continue;
     end;
 
-    lDependenciaMatch := dadosCampo.verificaDependencias(pDataset,self,pResultado);
+    lDependenciaMatch := dadosCampo.verificaDependenciasDataset(pDataset,self,pResultado);
     //Implementar dependencias
 
     if(lDependenciaMatch=false) {or (pResultado.erros<>save)} then continue;
 
     lDependenciaMatch := opcoes.match(f.AsString);// false;
-    {for lValor in opcoes.listaValores do
-    begin
-      if(CompareText(lValor,'null')=0) then
-        lDependenciaMatch := f.AsString='' //f.IsNull=true
-      else if(CompareText(lValor,'notnull')=0) then
-        lDependenciaMatch := f.AsString<>''// f.IsNull=false
-      else
-        lDependenciaMatch := f.AsString=lValor;
-
-      if(lDependenciaMatch=true) then
-        break;
-    end;}
     if(lDependenciaMatch=false) then begin
       if(pResultado.propriedade['campo.erro'].asString='') then
         pResultado.propriedade['campo.erro'].asString := dadosCampo.campo;
       pResultado.formataErro('Valor do Campo [%s] inválido', [ dadosCampo.descricao ]);
+    end;
+  end;
+end;
+
+function TValidadorDatabaseImpl.retornaControleDataFieldByName;
+  var
+    i: Integer;
+begin
+  i := pParent.ComponentCount;
+  while i > 0 do
+  begin
+    dec(i);
+    if(pParent.Components[i] is TWinControl) and (CompareText(pParent.Components[i].name, pCampo)=0) then
+    begin
+      Result := TWinControl(pParent.Components[i]);
+      exit;
     end;
   end;
 end;
@@ -905,6 +1055,20 @@ begin
       //testa(pParent.Controls[i]);
       if(Result<>nil) then exit;
     end;
+end;
+
+function TValidadorDatabaseImpl.setFocoViewControleDataField(pCampo: String; pParent: TWinControl): TWinControl;
+  var
+    controle: TWinControl;
+begin
+  Result := nil;
+  controle := retornaControleDataFieldByName(pCampo, pParent);
+  if(assigned(controle)) then
+  begin
+    controle.Show;
+    if(controle.CanFocus) then
+      controle.SetFocus;
+  end;
 end;
 
 function TValidadorDatabaseImpl.setFocoControleDataField;//(pCampo: String; pDatasource: TDataSource): TWinControl;
@@ -1030,6 +1194,10 @@ procedure TValidadorDatabaseImpl.configuraEditOpcoesCampoTabela(pTabela: String;
   var
 //    dados: TDadosCamposLookupOld;
     lRG: TDBRadioGroup;
+    {$if defined(IW)}
+      lIW: TIWComboBox;
+    {$endif}
+    i: Integer;
     lCB: TTeraComboBox;
     lLkp: TDBLookupComboBox;
     dataField,tblPart,fieldPart,tmp: String;
@@ -1047,7 +1215,13 @@ begin
   lRG  := nil;
   lLkp := nil;
   lCB  := nil;
+  {$if defined(IW)}
+    lIW := nil;
+  {$endif}
+
+
   dataField:='';
+
   if (pObject is TDBRadioGroup) then
   begin
     lRG := TDBRadioGroup(pObject);
@@ -1074,6 +1248,22 @@ begin
       lCB.values.Clear;
       dataField := fieldPart;
     end;
+  {$if defined(IW)}
+    end else if(pObject is TIWComboBox) then
+    begin
+      lIW := TIWComboBox(pObject);
+      tmp := uppercase(trim(lIW.Items.Text));
+
+      tblPart := textoentretags(tmp, '@','.');
+
+      if(tblPart<>pTabela) then exit;
+      fieldPart := textoentretags(tmp,'.','');
+      if(fieldPart<>'') then
+      begin
+        lIW.Items.Clear;
+        dataField := fieldPart;
+      end;
+  {$endif}
   end;
 //    logaByTagSeNivel(TAGLOG_VALIDACOES,format('Controle TDBLookupComboBox [%s] [%s] para a tabela [%s] não possui um tipo reconhecido ', [pObject.ClassName, pObject.Name, pTabela]),LOG_LEVEL_DEBUG);
 
@@ -1100,6 +1290,14 @@ begin
       lCB.values := opcoes.listaValores.strings;
       logaByTagSeNivel(TAGLOG_VALIDACOES,format('Configurando controle TTeraComboBox [%s] para a tabela [%s]: campo [%s]: Valores [%s]: Items [%s] ', [pObject.Name, pTabela,dataField, opcoes.listaValores.text, opcoes.listaDescricoes.text]),LOG_LEVEL_DEBUG);
       exit;
+    {$if defined(IW)}
+      end else if(assigned(lIW)) then
+      begin
+        for i := 0 to opcoes.listaDescricoes.strings.Count - 1 do
+        begin
+          lIW.Items.Add(format('%s=%s',[opcoes.listaDescricoes.strings.Strings[i], opcoes.listaValores.strings.Strings[i]]));
+        end;
+    {$endif}
     end;
   end;
 end;

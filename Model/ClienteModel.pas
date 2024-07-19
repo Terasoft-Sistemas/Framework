@@ -4,10 +4,11 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Model.Base,
   FireDAC.Comp.Client;
 
 type
-  TClienteModel = class
+  TClienteModel = class(Terasoft.Model.Base.TModelBase)
 
   private
     vIConexao : IConexao;
