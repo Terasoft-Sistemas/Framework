@@ -18,6 +18,9 @@ interface
 
 implementation
   uses
+    {$if defined(IW)}
+      IWCompListbox,
+    {$endif}
     System.Rtti,
     Terasoft.Framework.Validacoes,
     Terasoft.Framework.Log,
@@ -1191,6 +1194,10 @@ procedure TValidadorDatabaseImpl.configuraEditOpcoesCampoTabela(pTabela: String;
   var
 //    dados: TDadosCamposLookupOld;
     lRG: TDBRadioGroup;
+    {$if defined(IW)}
+      lIW: TIWComboBox;
+    {$endif}
+    i: Integer;
     lCB: TTeraComboBox;
     lLkp: TDBLookupComboBox;
     dataField,tblPart,fieldPart,tmp: String;
@@ -1208,7 +1215,13 @@ begin
   lRG  := nil;
   lLkp := nil;
   lCB  := nil;
+  {$if defined(IW)}
+    lIW := nil;
+  {$endif}
+
+
   dataField:='';
+
   if (pObject is TDBRadioGroup) then
   begin
     lRG := TDBRadioGroup(pObject);
@@ -1235,6 +1248,22 @@ begin
       lCB.values.Clear;
       dataField := fieldPart;
     end;
+  {$if defined(IW)}
+    end else if(pObject is TIWComboBox) then
+    begin
+      lIW := TIWComboBox(pObject);
+      tmp := uppercase(trim(lIW.Items.Text));
+
+      tblPart := textoentretags(tmp, '@','.');
+
+      if(tblPart<>pTabela) then exit;
+      fieldPart := textoentretags(tmp,'.','');
+      if(fieldPart<>'') then
+      begin
+        lIW.Items.Clear;
+        dataField := fieldPart;
+      end;
+  {$endif}
   end;
 //    logaByTagSeNivel(TAGLOG_VALIDACOES,format('Controle TDBLookupComboBox [%s] [%s] para a tabela [%s] não possui um tipo reconhecido ', [pObject.ClassName, pObject.Name, pTabela]),LOG_LEVEL_DEBUG);
 
@@ -1261,7 +1290,15 @@ begin
       lCB.values := opcoes.listaValores.strings;
       logaByTagSeNivel(TAGLOG_VALIDACOES,format('Configurando controle TTeraComboBox [%s] para a tabela [%s]: campo [%s]: Valores [%s]: Items [%s] ', [pObject.Name, pTabela,dataField, opcoes.listaValores.text, opcoes.listaDescricoes.text]),LOG_LEVEL_DEBUG);
       exit;
-    end;
+    {$if defined(IW)}
+      end else if(assigned(lIW)) then
+      begin
+        for i := 0 to opcoes.listaDescricoes.strings.Count - 1 do
+        begin
+          lIW.Items.Add(format('%s=%s',[opcoes.listaDescricoes.strings.Strings[i], opcoes.listaValores.strings.Strings[i]]));
+        end;
+      end;
+    {$endif}
   end;
 end;
 
