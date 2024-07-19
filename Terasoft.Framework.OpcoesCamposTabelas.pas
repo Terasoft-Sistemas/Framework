@@ -1056,7 +1056,7 @@ begin
   end else if (pObject is TDBLookupComboBox) then
   begin
     lLkp := TDBLookupComboBox(pObject);
-    if(lLkp.DataSource=pDataSource) then
+    if(lLkp.DataSource=pDataSource) and (lLkp.ListSource=nil) then
       dataField := lLkp.DataField;
   end else if (pObject is TTeraComboBox) then
   begin
