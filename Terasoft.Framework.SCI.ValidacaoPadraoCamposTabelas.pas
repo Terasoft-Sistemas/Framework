@@ -128,6 +128,7 @@ begin
       registraOpcoesCampos('tipodocid', '6', 'Passaporte');
       registraOpcoesCampos('tipodocid', '7', 'Certificado de Reservista');
       registraValidacaoCampoTabela('','clientes','TIPODOC_CLI','tipodocid','Tipo de documento de identificação do cliente',condicao);
+      registraValidacaoCampoTabela('','clientes','TIPODOCIDENTIFICACAOCONJ_CLI','tipodocid','Tipo de documento de identificação do cônjuge do cliente',condicao);
 
       registraValidacaoCampoTabela('clientes','SEXO_DEPENDENTE','sexo','Sexo do dependente');
       registraValidacaoCampoTabela('clientes','SEXO_DEPENDENTE2','sexo','Sexo do dependente 2');
