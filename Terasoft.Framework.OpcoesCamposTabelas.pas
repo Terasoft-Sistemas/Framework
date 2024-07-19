@@ -21,6 +21,7 @@ implementation
     Terasoft.Framework.Validacoes,
     Terasoft.Framework.Log,
     Math,strUtils,
+    Terasoft.VCL.ComboBox,
     Vcl.DBCtrls;
 
   type
@@ -1029,8 +1030,9 @@ procedure TValidadorDatabaseImpl.configuraEditOpcoesCampoTabela(pTabela: String;
   var
 //    dados: TDadosCamposLookupOld;
     lRG: TDBRadioGroup;
+    lCB: TTeraComboBox;
     lLkp: TDBLookupComboBox;
-    dataField: String;
+    dataField,tblPart,fieldPart,tmp: String;
     dic: TDicionarioDadosCamposValidacoes;
     dadosTabela: TDicionarioDadosCamposValidacoesTabela;
     dadosCampo: IDadosCamposValidacoes;
@@ -1042,8 +1044,9 @@ begin
   pTabela := UpperCase(trim(pTabela));
   if(pTabela='') then exit;
   if not dic.TryGetValue(pTabela,dadosTabela) then exit;
-  lRG:=nil;
+  lRG  := nil;
   lLkp := nil;
+  lCB  := nil;
   dataField:='';
   if (pObject is TDBRadioGroup) then
   begin
@@ -1055,6 +1058,22 @@ begin
     lLkp := TDBLookupComboBox(pObject);
     if(lLkp.DataSource=pDataSource) then
       dataField := lLkp.DataField;
+  end else if (pObject is TTeraComboBox) then
+  begin
+    lCB := TTeraComboBox(pObject);
+
+    tmp := uppercase(trim(lCB.Items.Text));
+
+    tblPart := textoentretags(tmp, '@','.');
+
+    if(tblPart<>pTabela) then exit;
+    fieldPart := textoentretags(tmp,'.','');
+    if(fieldPart<>'') then
+    begin
+      lCB.Items.Clear;
+      lCB.values.Clear;
+      dataField := fieldPart;
+    end;
   end;
 //    logaByTagSeNivel(TAGLOG_VALIDACOES,format('Controle TDBLookupComboBox [%s] [%s] para a tabela [%s] não possui um tipo reconhecido ', [pObject.ClassName, pObject.Name, pTabela]),LOG_LEVEL_DEBUG);
 
@@ -1075,6 +1094,11 @@ begin
       lLkp.KeyField := 'ID';
       logaByTagSeNivel(TAGLOG_VALIDACOES,format('Configurando controle TDBLookupComboBox [%s] para a tabela [%s]: campo [%s]: Valores [%s]: Items [%s] ', [pObject.Name, pTabela,dataField, opcoes.listaValores.text, opcoes.listaDescricoes.text]),LOG_LEVEL_DEBUG);
       lLkp.ListSource := opcoes.dataset.dataSource;
+      exit;
+    end else if assigned(lCB) then begin
+      lCB.Items := opcoes.listaDescricoes.strings;
+      lCB.values := opcoes.listaValores.strings;
+      logaByTagSeNivel(TAGLOG_VALIDACOES,format('Configurando controle TTeraComboBox [%s] para a tabela [%s]: campo [%s]: Valores [%s]: Items [%s] ', [pObject.Name, pTabela,dataField, opcoes.listaValores.text, opcoes.listaDescricoes.text]),LOG_LEVEL_DEBUG);
       exit;
     end;
   end;
