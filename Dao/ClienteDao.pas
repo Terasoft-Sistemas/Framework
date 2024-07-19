@@ -1069,7 +1069,7 @@ end;
 
 procedure TClienteDao.setParams(var pQry: TFDQuery; pClienteModel: TClienteModel);
 begin
-  vConstrutor.setParams('CLIENTES',pQry,pClienteModel);
+  vConstrutor.setParams(NomeTabela,pQry,pClienteModel);
 end;
 
 procedure TClienteDao.SetStartRecordView(const Value: String);

@@ -41,6 +41,8 @@ type
     function where: String;
 
   public
+    const
+      NomeTabela = 'Banco';
 
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -326,27 +328,8 @@ begin
 end;
 
 procedure TBancoDao.setParams(var pQry: TFDQuery; pBancoModel: TBancoModel);
-var
-  lTabela : TFDMemTable;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
 begin
-  lTabela := vConstrutor.getColumns('Banco');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TBancoModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pBancoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pBancoModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams(NomeTabela,pQry,pBancoModel);
 end;
 
 procedure TBancoDao.SetStartRecordView(const Value: String);
