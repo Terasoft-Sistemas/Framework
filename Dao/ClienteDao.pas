@@ -1066,27 +1066,8 @@ begin
 end;
 
 procedure TClienteDao.setParams(var pQry: TFDQuery; pClienteModel: TClienteModel);
-var
-  lTabela : TFDMemTable;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
 begin
-  lTabela := vConstrutor.getColumns('CLIENTES');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TClienteModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pClienteModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pClienteModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('CLIENTES',pQry,pClienteModel);
 end;
 
 procedure TClienteDao.SetStartRecordView(const Value: String);

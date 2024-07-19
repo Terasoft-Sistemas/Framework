@@ -7,10 +7,20 @@ uses
   Clipbrd,
   System.Classes,
   Data.DB,
+  Terasoft.Framework.Types,
   Terasoft.FuncoesTexto,
+  Terasoft.Framework.Texto,
   Interfaces.Conexao;
 
 type
+  TDadosFields = record
+    tabela,
+    listaNames,
+    listaValues: TipoWideStringFramework;
+    listaUpdate: TipoWideStringFramework;
+    listaCampos: IListaString;
+  end;
+
   TConstrutorDao = class
 
   private
@@ -21,13 +31,14 @@ type
     function gerarUpdateOrInsert(pTabela, pMatch, pFieldReturning: String; pGerarID: Boolean = false): String;
     function gerarUpdate(pTabela, pFieldWhere: String): String;
     function queryTabela(pTabela: String): String;
-    function carregaFields(pQry: TFDQuery; pTabela: String; pGerarID: Boolean): TStringList;
+    function carregaFields(pQry: TDataset; pTabela: String; pGerarID: Boolean): TDadosFields;
     procedure copiarEstruturaCampos(pSource: TDataSet; var pDest: TFDMemTable);
     procedure atribuirRegistros(pSource: TDataSet; var pDest: TFDMemTable); overload;
     function atribuirRegistros(pSource: TDataSet): TFDMemTable; overload;
     function getColumns(pTabela: String): TFDMemTable;
-    function getValue(pTabela: TFDMemTable; pColumn: String; pValue: String ): String;
+    function getValue(pTabela: TDataset; pColumn: String; pValue: String ): String;
     function getSQL(pSource: TFDQuery): String;
+    procedure setParams(pTabela: String; var pQry: TFDQuery; pModel: TObject);
 
   	constructor Create(pIConexao: IConexao);
     destructor Destroy; override;
@@ -36,6 +47,9 @@ type
 implementation
 
 uses
+  System.Rtti,
+  System.Variants,
+  Terasoft.Utils,
   System.SysUtils, System.StrUtils, Vcl.Dialogs;
 
 { TGeradorModel }
@@ -65,25 +79,40 @@ begin
   Result := lTable;
 end;
 
-function TConstrutorDao.carregaFields(pQry: TFDQuery; pTabela: String; pGerarID: Boolean): TStringList;
-var
-  lFields : TStringList;
+function TConstrutorDao.carregaFields(pQry: TDataSet; pTabela: String; pGerarID: Boolean): TDadosFields;
+  var
+    s: String;
 begin
-  lFields := TStringList.Create;
+  Result.tabela := pTabela;
+  Result.listaCampos := getStringList;
+  Result.listaNames := '';
+  Result.listaValues := '';
+  Result.listaUpdate := '';
 
   pQry.First;
   while not pQry.eof do
   begin
-    if not AnsiMatchStr(pQry.FieldByName('NOME').AsString, ['SYSTIME', 'FORM']) and
+    s := trim(pQry.FieldByName('NOME').AsString);
+    if not AnsiMatchStr(s, ['SYSTIME', 'FORM']) and
        (pQry.FieldByName('COMPUTED').AsString = 'N') and
        ((pQry.FieldByName('NOME').AsString <> 'ID') or (pGerarID = true)) then
+    begin
+      Result.listaCampos.Add(s);
+      if(Result.listaNames<>'') then
+      begin
+        Result.listaNames := Result.listaNames +',';
+        Result.listaValues := Result.listaValues +',';
+        Result.listaUpdate := Result.listaUpdate +',';
+      end;
+      Result.listaNames := Result.listaNames + s;
+      Result.listaValues := Result.listaValues + ':' +s;
+      Result.listaUpdate := Result.listaUpdate + format('%s=:%s', [ s, s ]);
 
-      lFields.Add(pQry.FieldByName('NOME').AsString);
+    end;
 
     pQry.Next;
   end;
 
-  Result := lFields;
 end;
 
 procedure TConstrutorDao.copiarEstruturaCampos(pSource: TDataSet; var pDest: TFDMemTable);
@@ -113,37 +142,16 @@ end;
 function TConstrutorDao.gerarInsert(pTabela, pFieldReturning: String; pGerarID: Boolean = false): String;
 var
   lQry     : TFDQuery;
-  lColums,
-  lParams  : String;
-  lFields  : TStringList;
-  i        : Integer;
+  lFields  : TDadosFields;
 begin
   lQry     := vIConexao.CriarQuery;
-  lFields  := TStringList.Create;
-
   try
     lQry.Open(queryTabela(pTabela));
 
-    lColums := '';
-    lParams := '';
-
     lFields := carregaFields(lQry, pTabela, pGerarID);
 
-    for i := 0 to lFields.Count -1 do
-    begin
-      if i > 0 then
-      begin
-        lColums := lColums + ', ';
-        lParams := lParams + ', ';
-      end;
-
-      lColums := lColums + lFields.Strings[i];
-      lParams := lParams + ':'+lFields.Strings[i];
-    end;
-
-    Result := 'INSERT INTO '+ pTabela + ' ( ' + lColums + ') VALUES ( '+lParams+' ) '+ IfThen(pFieldReturning <> '', 'returning '+pFieldReturning, '');
+    Result := 'INSERT INTO '+ pTabela + ' ( ' + lFields.listaNames + ') VALUES ( '+lFields.listaValues+' ) '+ IfThen(pFieldReturning <> '', 'returning '+pFieldReturning, '');
   finally
-    lFields.Free;
     lQry.Free;
   end;
 
@@ -153,30 +161,20 @@ function TConstrutorDao.gerarUpdate(pTabela, pFieldWhere: String): String;
 var
   lQry     : TFDQuery;
   lUpdate  : String;
-  lFields  : TStringList;
+  lFields  : TDadosFields;
   i        : Integer;
 begin
   lQry     := vIConexao.CriarQuery;
-  lFields  := TStringList.Create;
   try
     lQry.Open(queryTabela(pTabela));
     lFields := carregaFields(lQry, pTabela, false);
 
-    lUpdate := 'UPDATE '+ pTabela + ' SET ' ;
-
-    for i := 0 to lFields.Count -1 do
-    begin
-      lUpdate := lUpdate + lFields.Strings[i] + ' = :'+ lFields.Strings[i];
-
-      if i < (lFields.Count -1) then
-        lUpdate := lUpdate + ', ';
-    end;
+    lUpdate := 'UPDATE '+ pTabela + ' SET ' +lFields.listaUpdate;
 
     lUpdate := lUpdate + ' WHERE '+ pFieldWhere + ' = :' + pFieldWhere;
 
     Result := lUpdate;
   finally
-    lFields.Free;
     lQry.Free;
   end;
 end;
@@ -185,44 +183,25 @@ function TConstrutorDao.gerarUpdateOrInsert(pTabela, pMatch,
   pFieldReturning: String; pGerarID: Boolean): String;
 var
   lQry     : TFDQuery;
-  lColums,
-  lParams  : String;
-  lFields  : TStringList;
+  lFields  : TDadosFields;
   i        : Integer;
 begin
   lQry     := vIConexao.CriarQuery;
-  lFields  := TStringList.Create;
 
   try
     lQry.Open(queryTabela(pTabela));
 
-    lColums := '';
-    lParams := '';
-
     lFields := carregaFields(lQry, pTabela, pGerarID);
 
-    for i := 0 to lFields.Count -1 do
-    begin
-      if i > 0 then
-      begin
-        lColums := lColums + ', ';
-        lParams := lParams + ', ';
-      end;
-
-      lColums := lColums + lFields.Strings[i];
-      lParams := lParams + ':'+lFields.Strings[i];
-    end;
-
-    Result := 'UPDATE OR INSERT INTO '+ pTabela + ' ( ' + lColums + ') VALUES ( '+lParams+' ) MATCHING ('+pMatch+') '+ IfThen(pFieldReturning <> '', 'returning '+pFieldReturning, '');
+    Result := 'UPDATE OR INSERT INTO '+ pTabela + ' ( ' + lFields.listaNames + ') VALUES ( '+lFields.listaValues+' ) MATCHING ('+pMatch+') '+ IfThen(pFieldReturning <> '', 'returning '+pFieldReturning, '');
   finally
-    lFields.Free;
     lQry.Free;
   end;
 end;
 
 function TConstrutorDao.getColumns(pTabela: String): TFDMemTable;
-var
-  lQry : TFDQuery;
+  var
+    lQry : TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
@@ -253,21 +232,18 @@ begin
   Result := lSql;
 end;
 
-function TConstrutorDao.getValue(pTabela: TFDMemTable; pColumn, pValue: String): String;
+function TConstrutorDao.getValue(pTabela: TDataset; pColumn, pValue: String): String;
 begin
-  if pTabela.Locate('NOME', pColumn) then
+  Result := pValue;
+  if pTabela.Locate('NOME', pColumn,[]) then
   begin
     if AnsiMatchStr(pTabela.FieldByName('TIPO').AsString, ['INTEGER', 'INT64', 'FLOAT', 'NUMERIC']) then
-      Result := FormataFloatFireBird(pValue)
+      Result := FormataFloatFireBird(Result)
     else if pTabela.FieldByName('TIPO').AsString = 'DATE' then
-      Result := transformaDataFireBird(pValue)
+      Result := transformaDataFireBird(Result)
     else if pTabela.FieldByName('TIPO').AsString = 'TIMESTAMP' then
-      Result := transformaDataHoraFireBird(pValue)
-    else
-      Result := pValue;
-  end
-  else
-    Result := pValue;
+      Result := transformaDataHoraFireBird(Result);
+  end;
 end;
 
 function TConstrutorDao.queryTabela(pTabela: String): String;
@@ -297,6 +273,33 @@ begin
             '    LEFT JOIN RDB$FIELDS F ON R.RDB$FIELD_SOURCE = F.RDB$FIELD_NAME                   '+SLineBreak+
             '   WHERE R.RDB$RELATION_NAME='+ QuotedStr(pTabela) +
             '   ORDER BY R.RDB$FIELD_POSITION';
+end;
+
+procedure TConstrutorDao.setParams(pTabela: String; var pQry: TFDQuery; pModel: TObject);
+  var
+    lTabela : TDataset;
+    lCtx    : TRttiContext;
+    lProp   : TRttiProperty;
+  i       : Integer;
+begin
+  if(pModel=nil) or (pTabela='') then
+    exit;
+  lTabela := nil;
+  lCtx := TRttiContext.Create;
+  try
+    lTabela := getColumns(pTabela);
+    for i := 0 to pQry.Params.Count - 1 do
+    begin
+      lProp := lCtx.GetType(pModel.ClassType).GetProperty(pQry.Params[i].Name);
+
+      if Assigned(lProp) then
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pModel).AsString = '',
+        Unassigned, getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pModel).AsString))
+    end;
+  finally
+    freeAndNil(lTabela);
+    lCtx.Free;
+  end;
 end;
 
 end.
