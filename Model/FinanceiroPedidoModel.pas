@@ -227,6 +227,7 @@ begin
     self.INDCE_APLICADO       := FloatToStr(pFinanceiroParams.INDCE_APLICADO);
     self.VALOR_ACRESCIMO      := FloatToStr(pFinanceiroParams.VALOR_ACRESCIMO);
     self.ID_FINANCEIRO        := lIDFinanceiro;
+    self.WEB_PEDIDOITENS_ID   := pFinanceiroParams.WEB_PEDIDOITENS_ID;
 
     self.VALOR_SEG_PRESTAMISTA           := pFinanceiroParams.VALOR_SEG_PRESTAMISTA;
     self.PER_SEG_PRESTAMSTA              := pFinanceiroParams.PER_SEG_PRESTAMSTA;
