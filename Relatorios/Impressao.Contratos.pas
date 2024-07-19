@@ -620,7 +620,7 @@ begin
     mtItensVLR_GARANTIA.Value          := lPedidoItensModel.PedidoItenssLista[0].QUANTIDADE_TIPO;
     mtItensTIPO_GARANTIA_FR.Value      := Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA_FR,3,2) + ' Meses';
     mtItensVALOR_TOTAL.Value           := lPedidoItensModel.PedidoItenssLista[0].VALOR_TOTAL_ITENS;
-    mtItensVALOR_NOTA_FISCAL.Value     := mtItensVALOR_UNITARIO.Value * (1 - (lPedidoItensModel.PedidoItenssLista[0].DESCONTO_PED / 100));
+    mtItensVALOR_NOTA_FISCAL.Value     := lPedidoItensModel.PedidoItenssLista[0].VALORUNITARIO_PED * (1 - (lPedidoItensModel.PedidoItenssLista[0].DESCONTO_PED / 100));
     mtItensPREMIO_LIQUIDO.Value        := mtItensVLR_GARANTIA.Value / 1.0738;
     mtItensIOF.Value                   := mtItensVLR_GARANTIA.Value - mtItensPREMIO_LIQUIDO.Value;
     mtItensRR_GARANTIA_ESTENDIDA.Value := (lConfiguracoes.valorTag('PERCENTUAL_RR_GARANTIA_ESTENDIDA', '0', tvNumero));
