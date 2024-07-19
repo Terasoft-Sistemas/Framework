@@ -65,7 +65,7 @@ begin
       registraOpcoesCampos('imei', '<imei>', '');
 
 
-      registraValidacaoCampoTabela('','clientes','CNPJ_CPF_CLI','notnull','CNPJ/CPF cliente',true);
+      //registraValidacaoCampoTabela('','clientes','CNPJ_CPF_CLI','notnull','CNPJ/CPF cliente',condicao);
       registraValidacaoCampoTabela('','clientes','FANTASIA_CLI','notnull','Nome do cliente',true);
 
       registraValidacaoCampoTabela('','clientes','EMAIL_CLI','emailvalidoounull','Email do cliente',true);
