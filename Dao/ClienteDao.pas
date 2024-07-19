@@ -42,6 +42,8 @@ type
     procedure setParams(var pQry: TFDQuery; pClienteModel: TClienteModel);
 
   public
+    const
+      NomeTabela = 'CLIENTES';
     constructor Create(pIConexao : Iconexao);
     destructor Destroy; override;
     property ClientesLista: TObjectList<TClienteModel> read FClientesLista write SetClientesLista;
@@ -89,7 +91,7 @@ begin
   lModel   := TClienteModel.Create(vIConexao);
   Result   := lModel;
   try
-    lQry.Open('select * from CLIENTES where CODIGO_CLI = '+ QuotedStr(pId));
+    lQry.Open('select * from ' + self.NomeTabela + ' where CODIGO_CLI = '+ QuotedStr(pId));
 
     if lQry.IsEmpty then
       Exit;
@@ -411,7 +413,7 @@ end;
 
 function TClienteDao.comissaoCliente(pId: String): Variant;
 begin
-  Result := vIConexao.getConnection.ExecSQLScalar('select coalesce(COMISSAO, 0) from CLIENTES where CODIGO_CLI = '+ QuotedStr(pId));
+  Result := vIConexao.getConnection.ExecSQLScalar('select coalesce(COMISSAO, 0) from ' + self.NomeTabela +' where CODIGO_CLI = '+ QuotedStr(pId));
 end;
 
 constructor TClienteDao.Create(pIConexao : Iconexao);
@@ -467,7 +469,7 @@ begin
 
   lLojasModel := TLojasModel.Create(vIConexao);
   try
-    lSQL := vConstrutor.gerarInsert('CLIENTES', 'CODIGO_CLI', true);
+    lSQL := vConstrutor.gerarInsert(self.NomeTabela, 'CODIGO_CLI', true);
 
     lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
 
@@ -496,7 +498,7 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  lSQL := vConstrutor.gerarUpdate('CLIENTES', 'CODIGO_CLI');
+  lSQL := vConstrutor.gerarUpdate(self.NomeTabela, 'CODIGO_CLI');
 
   try
     lQry.SQL.Add(lSQL);
@@ -522,7 +524,7 @@ var
 begin
   lQry := vIConexao.CriarQuery;
   try
-   lQry.ExecSQL('delete from CLIENTES where CODIGO_CLI = :CODIGO_CLI',[pClienteModel.CODIGO_CLI]);
+   lQry.ExecSQL('delete from ' + self.NomeTabela + ' where CODIGO_CLI = :CODIGO_CLI',[pClienteModel.CODIGO_CLI]);
    lQry.ExecSQL;
    Result := pClienteModel.CODIGO_CLI;
   finally
@@ -547,7 +549,7 @@ var
   lConexao: TFDConnection;
 begin
   lConexao := vIConexao.getConnection;
-  Result   := lConexao.ExecSQLScalar('select coalesce(RAZAO_CLI, FANTASIA_CLI) from CLIENTES where CODIGO_CLI = '+ QuotedStr(pId));
+  Result   := lConexao.ExecSQLScalar('select coalesce(RAZAO_CLI, FANTASIA_CLI) from ' + self.NomeTabela + ' where CODIGO_CLI = '+ QuotedStr(pId));
 end;
 
 procedure TClienteDao.obterTotalRegistros;
@@ -557,7 +559,7 @@ var
 begin
   try
     lQry := vIConexao.CriarQuery;
-    lSql := 'select count(*) records From CLIENTES where 1=1 ';
+    lSql := 'select count(*) records From ' + self.NomeTabela + ' where 1=1 ';
     lSql := lSql + where;
     lQry.Open(lSQL);
     FTotalRecords := lQry.FieldByName('records').AsInteger;
@@ -935,7 +937,7 @@ begin
             '        razao_cli,      '+sLineBreak+
             '        telefone_cli,   '+sLineBreak+
             '        cnpj_cpf_cli    '+sLineBreak+
-            '   from clientes        '+sLineBreak+
+            '   from ' + self.NomeTabela + sLineBreak+
             '  where 1=1             '+sLineBreak;
 
     lSql := lSql + where;
@@ -966,7 +968,7 @@ begin
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lPaginacao := 'first ' + LengthPageView + ' SKIP ' + StartRecordView;
 
-    lSql := 'select '+ lPaginacao + ' codigo_cli, fantasia_cli, razao_cli, cnpj_cpf_cli, cidade_cli, telefone_cli, email_cli from clientes where 1=1 ';
+    lSql := 'select '+ lPaginacao + ' codigo_cli, fantasia_cli, razao_cli, cnpj_cpf_cli, cidade_cli, telefone_cli, email_cli from ' + self.NomeTabela +' where 1=1 ';
     lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
@@ -991,7 +993,7 @@ begin
 
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select distinct trim(clientes.bairro_cli) bairro_cli from clientes where 1=1 ';
+    lSql := 'select distinct trim(clientes.bairro_cli) bairro_cli from ' +self.NomeTabela +' where 1=1 ';
     lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
@@ -1016,7 +1018,7 @@ begin
     lQry := vIConexao.CriarQuery;
     lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
 
-    lSql := 'select clientes.codigo_cli from clientes               '+
+    lSql := 'select clientes.codigo_cli from ' + self.NomeTabela +
             '  where clientes.codigo_cli <> '+ QuotedStr(pCliente)   +
             '  and clientes.CNPJ_CPF_CLI =  '+ QuotedStr(pCNPJCPF)   ;
 
@@ -1127,7 +1129,7 @@ var
   lConexao: TFDConnection;
 begin
   lConexao := vIConexao.getConnection;
-  Result   := lConexao.ExecSQLScalar('select UF_CLI from CLIENTES where CODIGO_CLI = '+ QuotedStr(pId));
+  Result   := lConexao.ExecSQLScalar('select UF_CLI from ' + self.NomeTabela + ' where CODIGO_CLI = '+ QuotedStr(pId));
 end;
 
 end.
