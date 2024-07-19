@@ -1297,8 +1297,8 @@ begin
         begin
           lIW.Items.Add(format('%s=%s',[opcoes.listaDescricoes.strings.Strings[i], opcoes.listaValores.strings.Strings[i]]));
         end;
-      end;
     {$endif}
+    end;
   end;
 end;
 
