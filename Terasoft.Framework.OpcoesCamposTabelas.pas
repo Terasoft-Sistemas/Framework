@@ -19,7 +19,10 @@ interface
 implementation
   uses
     {$if defined(IW)}
+      IWCompEdit,
+      IWVCLBaseControl,
       IWCompListbox,
+      IWVCLComponent,
     {$endif}
     System.Rtti,
     Terasoft.Framework.Validacoes,
@@ -56,9 +59,9 @@ implementation
       function validaDataset(pRegra, pTabela: String; pDataset: TDataset; pListaCampos: IListaString = nil; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
       function validaModel(pRegra, pTabela: String; pModel: TObject; pListaCampos: IListaString = nil; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
       function retornaControleDataField(pCampo: String; pDatasource: TDataSource; pParent: TWinControl): TWinControl;
-      function retornaControleDataFieldByName(pCampo: String; pParent: TWinControl): TWinControl;
+      function retornaControleDataFieldByName(pCampo: String; pParent: TComponent): TComponent;
       function setFocoControleDataField(pCampo: String; pDatasource: TDataSource; pParent: TComponent): TComponent;
-      function setFocoViewControleDataField(pCampo: String; pParent: TWinControl): TWinControl;
+      function setFocoViewControleDataField(pCampo: String; pParent: TComponent): TComponent;
       function getDicionarioRegrasDadosCamposValidacoes(pRegra: TipoWideStringFramework = ''): TDicionarioDadosCamposValidacoes;
       function getDicionarioSetValores: TDicionarioSetValores;
       procedure configuraEditOpcoesCampoTabela(pTabela: String; pObject: TComponent; pDataSource: TDataSource);
@@ -991,13 +994,14 @@ function TValidadorDatabaseImpl.retornaControleDataFieldByName;
   var
     i: Integer;
 begin
+  Result := nil;
   i := pParent.ComponentCount;
   while i > 0 do
   begin
     dec(i);
-    if(pParent.Components[i] is TWinControl) and (CompareText(pParent.Components[i].name, pCampo)=0) then
+    if (CompareText(pParent.Components[i].name, pCampo)=0) then
     begin
-      Result := TWinControl(pParent.Components[i]);
+      Result := pParent.Components[i];
       exit;
     end;
   end;
@@ -1057,17 +1061,28 @@ begin
     end;
 end;
 
-function TValidadorDatabaseImpl.setFocoViewControleDataField(pCampo: String; pParent: TWinControl): TWinControl;
+function TValidadorDatabaseImpl.setFocoViewControleDataField(pCampo: String; pParent: TComponent): TComponent;
   var
-    controle: TWinControl;
+    controle: TComponent;
 begin
   Result := nil;
   controle := retornaControleDataFieldByName(pCampo, pParent);
+  Result := controle;
   if(assigned(controle)) then
   begin
-    controle.Show;
-    if(controle.CanFocus) then
-      controle.SetFocus;
+    {$if defined(IW)}
+      if (controle is TIWCustomEdit) then
+      begin
+        TIWCustomEdit(controle).Show;
+        TIWCustomEdit(controle).SetFocus;
+      end else
+    {$endif}
+    if (controle is TWinControl) then
+    begin
+      TWinControl(controle).Show;
+      if(TWinControl(controle).CanFocus) then
+        TWinControl(controle).SetFocus;
+    end;
   end;
 end;
 
