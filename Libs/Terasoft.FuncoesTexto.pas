@@ -24,6 +24,7 @@ uses
   function formataResultado(valor: TField; tipoCampo: TTipoColunas = tcoString): string;
   function removeEnter(texto: String): string;
   function ConverteFloat(pMascara, pValor: String): String;
+  function RemovePonto(pValor: String): Variant;
   function FormataFloatFireBird(pValor: String): String;
   function StringForStringList(BaseString, BreakString: string; StringList: TStringList): TStringList;
   function ZeroLeft(vZero: string; vQtd: integer): string;
@@ -137,16 +138,26 @@ begin
   until EndOfCurrentString = 0;
   result := StringList;
 end;
+
 function FormataFloatFireBird(pValor: String): String;
 begin
   result := StringReplace(pValor, ',', '.', [rfReplaceAll]);
 end;
+
 function FormataFireBirdToFloat(pValor: String): Variant;
 begin
   if pValor = '' then
    pValor := '0';
+
   result := StringReplace(pValor, '.', ',', [rfReplaceAll]);
 end;
+
+function RemovePonto(pValor: String): Variant;
+begin
+  result := StringReplace(pValor, '.', '', [rfReplaceAll]);
+end;
+
+
 function ConverteFloat(pMascara, pValor: String): String;
 var
   lNovoValor : real;

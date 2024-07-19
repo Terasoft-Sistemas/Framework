@@ -62,6 +62,8 @@ type
 
     function obterLista: TFDMemTable;
 
+    function sincronizarDados(pAnexoModel: TAnexoModel): String;
+
     procedure setParams(var pQry: TFDQuery; pAnexoModel: TAnexoModel);
 
 end;
@@ -69,7 +71,7 @@ end;
 implementation
 
 uses
-  System.Rtti;
+  System.Rtti, Terasoft.Configuracoes, Terasoft.Types, LojasModel;
 
 { TAnexo }
 
@@ -114,18 +116,24 @@ end;
 
 function TAnexoDao.incluir(pAnexoModel: TAnexoModel): String;
 var
-  lQry: TFDQuery;
-  lSQL:String;
+  lQry   : TFDQuery;
+  lSQL   : String;
+  lConfiguracoes : TerasoftConfiguracoes;
 begin
   lQry := vIConexao.CriarQuery;
 
   lSQL := vConstrutor.gerarInsert('ANEXO', 'ID', true);
 
   try
+    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+
     lQry.SQL.Add(lSQL);
     pAnexoModel.ID := vIConexao.Generetor('GEN_ANEXO');
     setParams(lQry, pAnexoModel);
     lQry.Open;
+
+    if lConfiguracoes.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
+      sincronizarDados(pAnexoModel);
 
     Result := lQry.FieldByName('ID').AsString;
 
@@ -137,8 +145,9 @@ end;
 
 function TAnexoDao.alterar(pAnexoModel: TAnexoModel): String;
 var
-  lQry: TFDQuery;
-  lSQL:String;
+  lQry : TFDQuery;
+  lSQL : String;
+  lConfiguracoes : TerasoftConfiguracoes;
 begin
   lQry := vIConexao.CriarQuery;
 
@@ -148,6 +157,11 @@ begin
     lQry.SQL.Add(lSQL);
     setParams(lQry, pAnexoModel);
     lQry.ExecSQL;
+
+    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+
+    if lConfiguracoes.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
+     sincronizarDados(pAnexoModel);
 
     Result := pAnexoModel.ID;
 
@@ -159,13 +173,20 @@ end;
 
 function TAnexoDao.excluir(pAnexoModel: TAnexoModel): String;
 var
-  lQry: TFDQuery;
+  lQry : TFDQuery;
+  lConfiguracoes : TerasoftConfiguracoes;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from ANEXO where ID = :ID' ,[pAnexoModel.ID]);
    lQry.ExecSQL;
+
+   lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+
+   if lConfiguracoes.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
+     sincronizarDados(pAnexoModel);
+
    Result := pAnexoModel.ID;
 
   finally
@@ -306,6 +327,52 @@ end;
 procedure TAnexoDao.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
+end;
+
+function TAnexoDao.sincronizarDados(pAnexoModel: TAnexoModel): String;
+var
+  lLojasModel,
+  lLojas      : TLojasModel;
+  lQry        : TFDQuery;
+  lSQL        : String;
+begin
+  lLojasModel := TLojasModel.Create(vIConexao);
+  try
+    lLojasModel.obterHosts;
+
+    if pAnexoModel.Acao in [tacIncluir, tacAlterar] then
+      lSQL := vConstrutor.gerarUpdateOrInsert('ANEXO','ID', 'ID', true)
+
+    else if pAnexoModel.Acao in [tacExcluir] then
+      lSQL := ('delete from ANEXO where ID = :ID');
+
+    for lLojas in lLojasModel.LojassLista do
+    begin
+      if lLojas.LOJA <> vIConexao.getEmpresa.LOJA then
+      begin
+        vIConexao.ConfigConexaoExterna('', lLojas.STRING_CONEXAO);
+        lQry := vIConexao.criarQueryExterna;
+
+        if pAnexoModel.Acao = tacExcluir then
+        begin
+          lQry.ExecSQL(lSQL, [pAnexoModel.ID]);
+          lQry.ExecSQL;
+        end
+        else
+        begin
+          lQry.SQL.Clear;
+          lQry.SQL.Add(lSQL);
+          setParams(lQry, pAnexoModel);
+          lQry.Open(lSQL);
+        end;
+
+      end;
+    end;
+
+  finally
+    lLojasModel.Free;
+    lQry.Free;
+  end;
 end;
 
 end.
