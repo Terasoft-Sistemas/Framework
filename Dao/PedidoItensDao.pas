@@ -373,6 +373,7 @@ begin
     lQry.Free;
   end;
 end;
+
 procedure TPedidoItensDao.obterLista;
 var
   lQry: TFDQuery;

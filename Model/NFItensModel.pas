@@ -483,6 +483,8 @@ type
 
     function Salvar: String;
     procedure obterLista;
+    function obterTotais(pNF : String): TFDMemTable;
+
     function carregaClasse(pId: String): TNFItensModel;
 
     property NFItenssLista: TObjectList<TNFItensModel> read FNFItenssLista write SetNFItenssLista;
@@ -549,6 +551,18 @@ begin
 
   finally
     lNFItensLista.Free;
+  end;
+end;
+
+function TNFItensModel.obterTotais(pNF: String): TFDMemTable;
+var
+  lNFItensDao : TNFItensDao;
+begin
+  lNFItensDao := TNFItensDao.Create(vIConexao);
+  try
+    Result := lNFItensDao.obterTotais(pNF);
+  finally
+    lNFItensDao.Free;
   end;
 end;
 

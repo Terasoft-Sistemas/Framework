@@ -475,7 +475,7 @@ begin
     lPedidoVendaModel.obterLista;
 
     if lPedidoVendaModel.TotalRecords > 0 then
-      CriaException('J� existe um pedido gerado para esse registro');
+      CriaException('Já existe um pedido gerado para esse registro');
 
     lFinanceiroPedidoModel.WhereView := ' and financeiro_pedido.web_pedido_id = ' + pIdVendaAssistida.ToString;
     lTableFinanceiro := lFinanceiroPedidoModel.obterLista;
@@ -567,6 +567,7 @@ begin
       lPedidoItensModel.PedidoItenssLista[lIndex].ENTREGA                := lWebPedidoItensModel.ENTREGA;
       lPedidoItensModel.PedidoItenssLista[lIndex].MONTAGEM               := lWebPedidoItensModel.MONTAGEM;
       lPedidoItensModel.PedidoItenssLista[lIndex].DESCONTO_PED           := FloatToStr(lWebPedidoItensModel.PERCENTUAL_DESCONTO);
+      lPedidoItensModel.PedidoItenssLista[lIndex].VDESC                  := FloatToStr(lWebPedidoItensModel.PERCENTUAL_DESCONTO / 100 * (lWebPedidoItensModel.QUANTIDADE * lWebPedidoItensModel.VALOR_UNITARIO));
       lPedidoItensModel.PedidoItenssLista[lIndex].VALORUNITARIO_PED      := FloatToStr(lWebPedidoItensModel.VALOR_UNITARIO);
       lPedidoItensModel.PedidoItenssLista[lIndex].ITEM                   := lItem.ToString;
       lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_BONUS_SERVICO    := FloatToStr(lWebPedidoItensModel.VALOR_BONUS_SERVICO);

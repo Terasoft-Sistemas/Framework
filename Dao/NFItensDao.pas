@@ -63,6 +63,8 @@ type
     function excluir(pNFItensModel: TNFItensModel): String;
 
     procedure obterLista;
+    function obterTotais(pNF : String): TFDMemTable;
+
     function carregaClasse(pId: String): TNFItensModel;
 end;
 
@@ -329,6 +331,52 @@ begin
     lSQL := lSQL + ' and nfitens.id = '+IntToStr(FIDRecordView);
 
   Result := lSQL;
+end;
+
+function TNFItensDao.obterTotais(pNF: String): TFDMemTable;
+var
+  lQry     : TFDQuery;
+  lSQL     : String;
+begin
+  lQry     := vIConexao.CriarQuery;
+  try
+    lSQL :=
+        '  select sum(n.quantidade_nf * n.valorunitario_nf) total_itens,                                                                          '+StartRecordView+
+        '         sum(coalesce(n.vdesc,0)) total_desconto,                                                                                        '+StartRecordView+
+        '         sum(coalesce(n.voutros,0)) total_outros,                                                                                        '+StartRecordView+
+        '         sum(coalesce(n.frete,0)) total_frete,                                                                                           '+StartRecordView+
+        '         sum(coalesce(n.valor_ipi,0)) as total_ipi,                                                                                      '+StartRecordView+
+        '         sum(coalesce(n.vicms_n17,0)) as valor_icms,                                                                                     '+StartRecordView+
+        '         sum(coalesce(n.vpis_q09,0)) as total_pis,                                                                                       '+StartRecordView+
+        '         sum(coalesce(n.vcofins_s11,0)) as total_cofins,                                                                                 '+StartRecordView+
+        '         sum(coalesce(n.vii_p04,0)) as total_vii,                                                                                        '+StartRecordView+
+        '         sum(coalesce(n.vseg,0)) as total_seg,                                                                                           '+StartRecordView+
+        '         sum(case                                                                                                                        '+StartRecordView+
+        '               when (n.csosn = ''500'') then                                                                                             '+StartRecordView+
+        '                 0                                                                                                                       '+StartRecordView+
+        '               else                                                                                                                      '+StartRecordView+
+        '                 (coalesce(n.vicmsst_n23,0))                                                                                             '+StartRecordView+
+        '             end) as total_valor_icms_st,                                                                                                '+StartRecordView+
+        '         sum(coalesce(n.vfcpufdest,0)) as vfcpufdest,                                                                                    '+StartRecordView+
+        '         sum(coalesce(n.vicmsufdest,0)) as vicmsufdest,                                                                                  '+StartRecordView+
+        '         sum(coalesce(n.vicmsufremet,0)) as vicmsufremet,                                                                                '+StartRecordView+
+        '         sum(coalesce(n.vfcp,0)) as vfcp,                                                                                                '+StartRecordView+
+        '         sum(coalesce(n.vfcpst,0)) as vfcpst,                                                                                            '+StartRecordView+
+        '         sum(coalesce(n.vfcpstret,0)) as vfcpstret,                                                                                      '+StartRecordView+
+        '         sum(coalesce(n.vcredicmssn,0)) as vcredicmssn,                                                                                  '+StartRecordView+
+        '         sum(coalesce(n.vicmsdeson,0)) as vicmsdeson,                                                                                    '+StartRecordView+
+        '         sum(coalesce(n.vicmsstret,0)) as vicmsstret,                                                                                    '+StartRecordView+
+        '         sum(coalesce(n.icms_suframa,0)+coalesce(n.pis_suframa,0)+coalesce(n.cofins_suframa,0)+coalesce(n.ipi_suframa,0)) as vsuframa,   '+StartRecordView+
+        '         sum(coalesce(n.v_prod2,0)) as vprod                                                                                             '+StartRecordView+
+        '    from nfitens n                                                                                                                       '+StartRecordView+
+        '   where n.numero_nf = ' + QuotedStr(pNF);
+
+    lQry.Open(lSQL);
+
+    Result := vConstrutor.atribuirRegistros(lQry);
+  finally
+    lQry.Free;
+  end;
 end;
 
 procedure TNFItensDao.obterTotalRegistros;

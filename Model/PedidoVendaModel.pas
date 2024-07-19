@@ -953,6 +953,8 @@ var
   lTribMunicipal    : Double;
   lFuncionarioModel : TFuncionarioModel;
   lConfiguracoes    : TerasoftConfiguracoes;
+  lTableTotais      : TFDMemTable;
+  lItem             : Integer;
 begin
   if self.FNUMERO_PED = '' then
     CriaException('Pedido não informado');
@@ -995,7 +997,6 @@ begin
     lNFModel.BICMS_NF              := FloatToStr(0);
     lNFModel.VICMS_NF              := FloatToStr(0);
     lNFModel.ICMS_NF               := FloatToStr(0);
-    lNFModel.OUTROS_NF             := FloatToStr(0);
     lNFModel.BASE_ST_NF            := FloatToStr(0);
     lNFModel.IPI_NF                := FloatToStr(0);
     lNFModel.ICMS_ST               := FloatToStr(0);
@@ -1032,19 +1033,19 @@ begin
     lNFModel.CODIGO_TIP            := self.FCODIGO_TIP;
     lNFModel.CFOP_ID               := self.FCFOP_ID;
     lNFModel.CFOP_NF               := self.FCFOP_NF;
-    lNFModel.VALOR_NF              := self.FVALOR_PED;
-    lNFModel.ACRES_NF              := self.FACRES_PED;
-    lNFModel.TOTAL_NF              := self.FTOTAL_PED;
+    lNFModel.VALOR_NF              := FloatToStr(0);
+    lNFModel.ACRES_NF              := FloatToStr(0);
+    lNFModel.TOTAL_NF              := FloatToStr(0);
     lNFModel.NUMERO_PED            := self.FNUMERO_PED;
     lNFModel.PEDIDO_ID             := self.FNUMERO_PED;
-    lNFModel.DESC_NF               := self.FDESC_PED;
-    lNFModel.DESCONTO_NF           := self.FDESCONTO_PED;
-    lNFModel.VALOR_PAGO            := self.FVALOR_PAGO;
+    lNFModel.DESC_NF               := FloatToStr(0);
+    lNFModel.DESCONTO_NF           := FloatToStr(0);
+    lNFModel.VALOR_PAGO            := FloatToStr(0);
     lNFModel.TIPO_FRETE            := self.TIPO_FRETE;
     lNFModel.CNPJ_CPF_CONSUMIDOR   := self.FCNPJ_CPF_CONSUMIDOR;
     lNFModel.VALOR_SUFRAMA         := self.FVALOR_SUFRAMA;
-    lNFModel.FRETE                 := self.FFRETE_PED;
-    lNFModel.OUTROS_NF             := self.FACRES_PED;
+    lNFModel.FRETE                 := FloatToStr(0);
+    lNFModel.OUTROS_NF             := FloatToStr(0);
     lNFModel.TRANSPORTADORA        := self.FTELEVENDA_PED;
     lNFModel.OBS_NF                := lNFModel.OBS_NF + self.FINFORMACOES_PED;
     lNFModel.ESPECIE_VOLUME        := self.FESPECIE_VOLUME;
@@ -1052,6 +1053,7 @@ begin
     lNFModel.TRA_PLACA             := self.FPLACA;
     lNFModel.TRA_RNTC              := self.FRNTRC;
     lNFModel.TIPO_FRETE            := IfThen(pModelo = '55', self.FTIPO_FRETE, '9');
+
     lNumeroNFe := lNFModel.Salvar;
 
     lNFModel := lNFModel.carregaClasse(lNumeroNFe);
@@ -1061,14 +1063,19 @@ begin
     self.Salvar;
 
     lPedidoItensModel.IDPedidoVendaView := self.NUMERO_PED;
+    lPedidoItensModel.WhereView         := ' and coalesce(pedidoitens.tipo_venda, ''LJ'') = ''LJ'' ';
     lPedidoItensModel.obterLista;
 
+    lItem := 0;
+
     for lItens in lPedidoItensModel.PedidoItenssLista do begin
+      inc(lItem);
+
       lNFItensModel.Acao := tacIncluir;
       lNFItensModel.NUMERO_NF             := lNumeroNFe;
       lNFItensModel.SERIE_NF              := pSerie;
       lNFItensModel.LOJA                  := self.LOJA;
-      lNFItensModel.ITEM_NF               := Format('%3.3d', [StrToInt(lItens.ITEM)]);
+      lNFItensModel.ITEM_NF               := Format('%3.3d', [lItem]);
       lNFItensModel.MODBCST_N18           := '4';
       lNFItensModel.INDESCALA             := 'S';
       //Não encontrado no fonte
@@ -1167,7 +1174,31 @@ begin
       lNFItensModel.Salvar;
     end;
 
+    lTableTotais := lNFItensModel.obterTotais(lNumeroNFe);
+
     lNFModel.Acao := tacAlterar;
+
+    lNFModel.VALOR_NF              := lTableTotais.FieldByName('TOTAL_ITENS').AsString;
+    lNFModel.ACRES_NF              := lTableTotais.FieldByName('TOTAL_OUTROS').AsString;
+
+    lNFModel.TOTAL_NF              := FloatToStr(lTableTotais.FieldByName('TOTAL_ITENS').AsFloat +
+                                                 lTableTotais.FieldByName('TOTAL_OUTROS').AsFloat +
+                                                 lTableTotais.FieldByName('TOTAL_IPI').AsFloat +
+                                                 lTableTotais.FieldByName('TOTAL_VII').AsFloat +
+                                                 lTableTotais.FieldByName('TOTAL_VALOR_ICMS_ST').AsFloat +
+                                                 lTableTotais.FieldByName('TOTAL_SEG').AsFloat +
+                                                 lTableTotais.FieldByName('VFCPST').AsFloat +
+                                                 lTableTotais.FieldByName('TOTAL_FRETE').AsFloat -
+                                                 lTableTotais.FieldByName('TOTAL_DESCONTO').AsFloat -
+                                                 lTableTotais.FieldByName('VICMSDESON').AsFloat -
+                                                 lTableTotais.FieldByName('VSUFRAMA').AsFloat);
+
+    lNFModel.VALOR_PAGO            := lNFModel.TOTAL_NF;
+    lNFModel.DESC_NF               := lTableTotais.FieldByName('TOTAL_DESCONTO').AsString;
+    lNFModel.DESCONTO_NF           := FloatToStr(lTableTotais.FieldByName('TOTAL_DESCONTO').AsFloat / lTableTotais.FieldByName('TOTAL_ITENS').AsFloat * 100);
+    lNFModel.FRETE                 := lTableTotais.FieldByName('TOTAL_FRETE').AsString;
+    lNFModel.OUTROS_NF             := lTableTotais.FieldByName('TOTAL_OUTROS').AsString;
+
     lNFModel.VTOTTRIB              := FloatToStr(lTribFederal + lTribEstadual + lTribMunicipal);
     lNFModel.VTOTTRIB_FEDERAL      := FloatToStr(lTribFederal);
     lNFModel.VTOTTRIB_ESTADUAL     := FloatToStr(lTribEstadual);

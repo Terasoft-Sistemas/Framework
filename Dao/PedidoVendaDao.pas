@@ -75,43 +75,56 @@ implementation
 
 uses
   Vcl.Dialogs, System.Rtti, Terasoft.Configuracoes, Terasoft.Types;
+
 { TPedidoVenda }
+
 procedure TPedidoVendaDao.obterUpdateImpostos(pNumeroPedido: String);
 var
-  lQry: TFDQuery;
-  lSQL:String;
-  i: INteger;
+  lQry         : TFDQuery;
+  lSQL         : String;
+  i            : Integer;
+  lValor_ped,
+  lDesc_ped,
+  lAcres_ped   : Double;
+
 begin
   lQry := vIConexao.CriarQuery;
   FPedidoVendasLista := TObjectList<TPedidoVendaModel>.Create;
+
+  lValor_ped := 0;
+  lDesc_ped  := 0;
+  lAcres_ped := 0;
+
   try
     lSQL :=
-    ' select                                                   '+#13+
-    '     i.id pedidoitens_id,                                 '+#13+
-    '     p.valor_ped,                                         '+#13+
-    '     p.desc_ped,                                          '+#13+
-    '     p.acres_ped,                                         '+#13+
-    '     c.uf_cli,                                            '+#13+
-    '     i.codigo_pro,                                        '+#13+
-    '     i.quantidade_ped,                                    '+#13+
-    '     i.valorunitario_ped                                  '+#13+
-    '                                                          '+#13+
-    ' from                                                     '+#13+
-    '     pedidovenda p                                        '+#13+
-    '                                                          '+#13+
-    ' left join pedidoitens i on i.numero_ped = p.numero_ped   '+#13+
-    ' left join clientes c on c.codigo_cli = p.codigo_cli      '+#13+
-    '                                                          '+#13+
-    '                                                          '+#13+
-    ' where                                                    '+#13+
-    '     p.numero_ped = '+QuotedStr(pNumeroPedido);
+      ' select i.id pedidoitens_id,                                                                       '+SLineBreak+
+      '        p.valor_ped,                                                                               '+SLineBreak+
+      '        p.desc_ped,                                                                                '+SLineBreak+
+      '        p.acres_ped,                                                                               '+SLineBreak+
+      '        c.uf_cli,                                                                                  '+SLineBreak+
+      '        i.codigo_pro,                                                                              '+SLineBreak+
+      '        i.quantidade_ped,                                                                          '+SLineBreak+
+      '        i.valorunitario_ped,                                                                       '+SLineBreak+
+      '        (i.quantidade_ped * i.valorunitario_ped) total_produto,                                    '+SLineBreak+
+      '         i.vdesc desconto_item,                                                                    '+SLineBreak+
+      '         i.quantidade_ped * i.valorunitario_ped / p.valor_ped * p.acres_ped acrescimo_item         '+SLineBreak+
+      '   from pedidovenda p                                                                              '+SLineBreak+
+      '   left join pedidoitens i on i.numero_ped = p.numero_ped                                          '+SLineBreak+
+      '   left join clientes c on c.codigo_cli = p.codigo_cli                                             '+SLineBreak+
+      '  where coalesce(i.tipo_venda, ''LJ'') = ''LJ''                                                    '+SLineBreak+
+      '    and p.numero_ped = '+QuotedStr(pNumeroPedido);
+
     lQry.Open(lSQL);
+
     i := 0;
+
     lQry.First;
     while not lQry.Eof do
     begin
       FPedidoVendasLista.Add(TPedidoVendaModel.Create(vIConexao));
+
       i := FPedidoVendasLista.Count -1;
+
       FPedidoVendasLista[i].PEDIDOITENS_ID    := lQry.FieldByName('PEDIDOITENS_ID').AsString;
       FPedidoVendasLista[i].VALOR_PED         := lQry.FieldByName('VALOR_PED').AsString;
       FPedidoVendasLista[i].DESC_PED          := lQry.FieldByName('DESC_PED').AsString;
@@ -120,8 +133,21 @@ begin
       FPedidoVendasLista[i].CODIGO_PRO        := lQry.FieldByName('CODIGO_PRO').AsString;
       FPedidoVendasLista[i].QUANTIDADE_PED    := lQry.FieldByName('QUANTIDADE_PED').AsString;
       FPedidoVendasLista[i].VALORUNITARIO_PED := lQry.FieldByName('VALORUNITARIO_PED').AsString;
+
+      lValor_ped := lValor_ped   + lQry.FieldByName('TOTAL_PRODUTO').AsFloat;
+      lDesc_ped  := lDesc_ped    + lQry.FieldByName('DESCONTO_ITEM').AsFloat;
+      lAcres_ped := lAcres_ped   + lQry.FieldByName('ACRESCIMO_ITEM').AsFloat;
+
       lQry.Next;
     end;
+
+    for i := 0 to FPedidoVendasLista.Count -1 do
+    begin
+      FPedidoVendasLista[i].VALOR_PED         := FloatToStr(lValor_ped);
+      FPedidoVendasLista[i].DESC_PED          := FloatToStr(lDesc_ped);
+      FPedidoVendasLista[i].ACRES_PED         := FloatToStr(lAcres_ped);
+    end;
+
   finally
     lQry.Free;
   end;

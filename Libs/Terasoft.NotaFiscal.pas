@@ -161,93 +161,104 @@ begin
 end;
 function TNotaFiscal.cobranca(pidNF: String): Boolean;
 var
- lSQL : String;
- lQry : TFDQuery;
+ lSQL        : String;
+ lQry        : TFDQuery;
+ lPercentual,
+ lTotalDup   : Double;
+
 begin
   try
     try
-    lQry := vIConexao.CriarQuery;
-    lSQL :=
-    ' select                                                              '+#13+
-    ' n.modelo                  modeloNF,                                 '+#13+
-    ' n.numero_ecf              nFat,                                     '+#13+
-    ' n.total_nf                vOrig,                                    '+#13+
-    ' ci.pacela_rec             nDup,                                     '+#13+
-    ' ci.vlrparcela_rec         vDup,                                     '+#13+
-    ' ci.vencimento_rec         dVenc,                                    '+#13+
-    ' p.tpag_nfe                tPag                                      '+#13+
-    '                                                                     '+#13+
-    ' from nf n                                                           '+#13+
-    '                                                                     '+#13+
-    ' inner join contasreceber c on c.pedido_rec = n.pedido_id            '+#13+
-    ' inner join contasreceberitens ci on ci.fatura_rec = c.fatura_rec    '+#13+
-    ' inner join portador p on p.codigo_port = c.codigo_por               '+#13+
-    '                                                                     '+#13+
-    '                                                                     '+#13+
-    ' where                                                               '+#13+
-    '     n.numero_nf = '+QuotedStr(pidNF);
-    lQry.Open(lSQL);
+      lQry := vIConexao.CriarQuery;
 
-    if lQry.FieldByName('modeloNF').AsInteger = 55 then
-    begin
+      lSQL :=
+        ' select n.modelo            modeloNF,                                 '+#13+
+        '        n.numero_ecf        nFat,                                     '+#13+
+        '        n.total_nf          vOrig,                                    '+#13+
+        '        ci.pacela_rec       nDup,                                     '+#13+
+        '        ci.vlrparcela_rec   vDup,                                     '+#13+
+        '        ci.vencimento_rec   dVenc,                                    '+#13+
+        '        p.tpag_nfe          tPag                                      '+#13+
+        '   from nf n                                                          '+#13+
+        '  inner join contasreceber c on c.pedido_rec = n.pedido_id            '+#13+
+        '  inner join contasreceberitens ci on ci.fatura_rec = c.fatura_rec    '+#13+
+        '  inner join portador p on p.codigo_port = c.codigo_por               '+#13+
+        '  where n.numero_nf = '+QuotedStr(pidNF);
 
-      if lQry.IsEmpty then
+      lQry.Open(lSQL);
+
+      lTotalDup := 0;
+
+      lQry.First;
+      while not lQry.Eof do
+      begin
+        lTotalDup := lTotalDup + lQry.FieldByName('vDup').AsFloat;
+        lQry.Next;
+      end;
+
+      lPercentual := lQry.FieldByName('vOrig').AsFloat / lTotalDup;
+
+      if lQry.FieldByName('modeloNF').AsInteger = 55 then
+      begin
+
+        if lQry.IsEmpty then
+        begin
+          InfoPgto := NotaF.NFe.pag.New;
+          InfoPgto.indPag := ipNenhum;
+          InfoPgto.tPag   := fpSemPagamento;
+          exit;
+        end;
+
+        lQry.First;
+        while not lQry.Eof do
+        begin
+          if lQry.FieldByName('tPag').AsString = '15' then
+          begin
+            with NotaF.NFe.Cobr.Fat do
+            begin
+              nFat  := lQry.FieldByName('nFat').AsString;
+              vOrig := vOrig + lQry.FieldByName('vDup').AsFloat;
+              vDesc := 0;
+              vLiq  := vLiq + lQry.FieldByName('vDup').AsFloat;
+            end;
+          end;
+          lQry.Next;
+        end;
+
+        lQry.First;
+        while not lQry.Eof do
+        begin
+          if lQry.FieldByName('tPag').AsString = '15'  then
+          begin
+            Duplicata :=  NotaF.NFe.Cobr.Dup.New;
+            Duplicata.nDup  := FormatFloat('000',lQry.FieldByName('nDup').AsInteger);
+            Duplicata.dVenc := lQry.FieldByName('dVenc').Value;
+            Duplicata.vDup  := lPercentual * lQry.FieldByName('vDup').AsFloat;
+          end;
+          lQry.Next;
+        end;
+
+      end;
+
+      lQry.First;
+      while not lQry.Eof do
       begin
         InfoPgto := NotaF.NFe.pag.New;
-        InfoPgto.indPag := ipNenhum;
-        InfoPgto.tPag   := fpSemPagamento;
-        exit;
-      end;
+        InfoPgto.indPag := ipPrazo;
+        InfoPgto.tPag   := vConfiguracoesNotaFiscal.tPag(lQry.FieldByName('tPag').AsString);
+        InfoPgto.vPag   := lPercentual * lQry.FieldByName('vDup').AsFloat;
 
-      lQry.First;
-      while not lQry.Eof do
-      begin
-        if lQry.FieldByName('tPag').AsString = '15' then
-        begin
-          with NotaF.NFe.Cobr.Fat do
-          begin
-            nFat  := lQry.FieldByName('nFat').AsString;
-            vOrig := vOrig + lQry.FieldByName('vDup').AsFloat;
-            vDesc := 0;
-            vLiq  := vLiq + lQry.FieldByName('vDup').AsFloat;
-          end;
-        end;
+        if InfoPgto.tPag in [fpCartaoCredito, fpCartaoDebito, fpPagamentoInstantaneo] then
+          InfoPgto.tpIntegra := tiPagNaoIntegrado;
+
         lQry.Next;
       end;
-
-      lQry.First;
-      while not lQry.Eof do
-      begin
-        if lQry.FieldByName('tPag').AsString = '15'  then
-        begin
-          Duplicata :=  NotaF.NFe.Cobr.Dup.New;
-          Duplicata.nDup  := FormatFloat('000',lQry.FieldByName('nDup').AsInteger);
-          Duplicata.dVenc := lQry.FieldByName('dVenc').Value;
-          Duplicata.vDup  := lQry.FieldByName('vDup').AsFloat;
-        end;
-        lQry.Next;
-      end;
-
-    end;
-
-    lQry.First;
-    while not lQry.Eof do
-    begin
-      InfoPgto := NotaF.NFe.pag.New;
-      InfoPgto.indPag := ipPrazo;
-      InfoPgto.tPag   := vConfiguracoesNotaFiscal.tPag(lQry.FieldByName('tPag').AsString);
-      InfoPgto.vPag   := lQry.FieldByName('vDup').AsFloat;
-
-      if InfoPgto.tPag in [fpCartaoCredito, fpCartaoDebito, fpPagamentoInstantaneo] then
-        InfoPgto.tpIntegra := tiPagNaoIntegrado;
-
-      lQry.Next;
-    end;
 
     except
     on E:Exception do
-        CriaException('Erro: '+ E.Message);
+      CriaException('Erro: '+ E.Message);
     end;
+
   finally
     lSQL := '';
     lQry.Free;
