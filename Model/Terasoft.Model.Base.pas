@@ -14,17 +14,17 @@ interface
     TModelBase = class
     protected
       // LIsta de regras que deverão ser
-      fListaRegras: IListaString;
+      fListaValidacoes: IListaStringLock;
       fModelName: String;
       vIConexao : IConexao;
 
-      function getListaRegras: IListaString; virtual;
+      function getListaVaklidacoes: IListaStringLock; virtual;
 
       procedure doCreate; virtual;
       procedure doDestroy; virtual;
       function doCamposObrigatorios(pTag: String; pView: TComponent; pResultado: IResultadoOperacao=nil): IResultadoOperacao; virtual;
 
-      property listaRegras: IListaString read getListaRegras;
+      property listaValidacoes: IListaStringLock read getListaVaklidacoes;
 
     public
     	constructor Create(pIConexao : IConexao); virtual;
@@ -51,7 +51,7 @@ destructor TModelBase.Destroy;
 begin
   doDestroy;
   vIConexao := nil;
-  fListaRegras := nil;
+  fListaValidacoes := nil;
   inherited;
 end;
 
@@ -65,12 +65,12 @@ begin
   //Não faz nada...
 end;
 
-function TModelBase.getListaRegras: IListaString;
+function TModelBase.getListaVaklidacoes: IListaStringLock;
 begin
-  if(fListaRegras=nil) then
+  if(fListaValidacoes=nil) then
   begin
-    fListaRegras := getStringList;
-    fListaRegras.Add('padrao');
+    fListaValidacoes := getStringListLock;
+    //fListaRegras.Add('padrao');
   end;
 end;
 
@@ -107,14 +107,21 @@ function TModelBase.validaRegrasModel;
 begin
   Result := checkResultadoOperacao(pResultado);
   save := pResultado.erros;
-  if(fListaRegras=nil) then
-    getListaRegras;
-  for s in fListaRegras do
+  if(fListaValidacoes<>nil) then
+    for s in fListaValidacoes do
+    begin
+      Result := vIConexao.validador.validaModel(s,fModelName,self,pListaCampos,Result);
+      if(Result.erros<>save) then
+        exit;
+    end;
+
+  for s in vIConexao.validador.listaValidacoes do
   begin
     Result := vIConexao.validador.validaModel(s,fModelName,self,pListaCampos,Result);
     if(Result.erros<>save) then
       exit;
   end;
+
 
 end;
 
