@@ -44,6 +44,11 @@ implementation
       dicionarioSetValoresInicializado: boolean;
 
       fOpcoesDefaultRegistradas: boolean;
+      fListaValidacoes: IListaStringLock;
+
+    //property listaValidacoes getter/setter
+      function getListaValidacoes: IListaStringLock;
+      procedure setListaValidacoes(const pValue: IListaStringLock);
 
     //property gdb getter/setter
       function getGDB: IGDB;
@@ -709,6 +714,21 @@ begin
 end;
 
 { TValidadorDatabaseImpl }
+
+procedure TValidadorDatabaseImpl.setListaValidacoes(const pValue: IListaStringLock);
+begin
+  fListaValidacoes := pValue;
+end;
+
+function TValidadorDatabaseImpl.getListaValidacoes: IListaStringLock;
+begin
+  if(fListaValidacoes=nil) then
+    fListaValidacoes := getStringListLock;
+  if(fListaValidacoes.Count=0) then
+    fListaValidacoes.Add('');
+
+  Result := fListaValidacoes;
+end;
 
 procedure TValidadorDatabaseImpl.setGDB(const pValue: IGDB);
 begin
