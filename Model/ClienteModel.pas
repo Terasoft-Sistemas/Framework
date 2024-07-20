@@ -1,9 +1,11 @@
 unit ClienteModel;
 interface
 uses
+  Classes,
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.Texto,
   Terasoft.Model.Base,
   FireDAC.Comp.Client;
 
@@ -11,8 +13,6 @@ type
   TClienteModel = class(Terasoft.Model.Base.TModelBase)
 
   private
-    vIConexao : IConexao;
-
     FClientesLista: TObjectList<TClienteModel>;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -653,6 +653,9 @@ type
     procedure Settipodoc_cli(const Value: variant);
     procedure Setcnpj_trabalho_cli(const Value: Variant);
     procedure Setcpf_conjuge_cli(const Value: Variant);
+  protected
+    procedure doCreate; override;
+    procedure doDestroy; override;
   public
     property codigo_cli: Variant read Fcodigo_cli write Setcodigo_cli;
     property fantasia_cli: Variant read Ffantasia_cli write Setfantasia_cli;
@@ -966,7 +969,7 @@ type
     property cnpj_trabalho_cli: Variant read Fcnpj_trabalho_cli write Setcnpj_trabalho_cli;
     property cpf_conjuge_cli: Variant read Fcpf_conjuge_cli write Setcpf_conjuge_cli;
 
-  	constructor Create(pIConexao : IConexao);
+    constructor Create(pIConexao: IConexao); override;
     destructor Destroy; override;
 
     function Incluir  : String;
@@ -984,8 +987,6 @@ type
     function ObterListaMemTable: TFDMemTable;
     function ObterBairros: TFDMemTable;
     procedure bloquearCNPJCPF(pCliente, pCNPJCPF: String);
-
-    procedure camposObrigatorios(pTag: String; pClienteModel: TClienteModel);
 
     property ClientesLista: TObjectList<TClienteModel> read FClientesLista write SetClientesLista;
 
@@ -1005,7 +1006,6 @@ uses
   ClienteDao,
   System.SysUtils,
   Terasoft.Utils,
-  System.Classes,
   System.Rtti,
   Terasoft.Configuracoes;
 
@@ -1066,7 +1066,7 @@ end;
 
 constructor TClienteModel.Create(pIConexao : IConexao);
 begin
-  vIConexao := pIConexao;
+  inherited;
 end;
 
 destructor TClienteModel.Destroy;
@@ -1097,6 +1097,18 @@ begin
   finally
     lClienteDao.Free;
   end;
+end;
+
+procedure TClienteModel.doCreate;
+begin
+  inherited;
+  fModelName := 'CLIENTES';
+end;
+
+procedure TClienteModel.doDestroy;
+begin
+  inherited;
+
 end;
 
 function TClienteModel.nomeCliente(pId: String): Variant;
@@ -1206,56 +1218,6 @@ begin
     lClienteDao.Free;
   end;
 end;
-
-procedure TClienteModel.camposObrigatorios(pTag: String; pClienteModel : TClienteModel);
-var
-  i        : Integer;
-  lValor   : String;
-  lCampo   : String;
-  lNome    : String;
-  lMsg     : String;
-  lField   : TStringList;
-  lCtx     : TRttiContext;
-  lProp    : TRttiProperty;
-  lConfiguracoes : TerasoftConfiguracoes;
-begin
-  lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
-
-  lMsg   := '';
-  lValor := lConfiguracoes.valorTag(pTag, '', tvMemo);
-
-  if Trim(lValor) = '' then
-    exit;
-
-  lField      := TStringList.Create;
-  lField.Text := lValor;
-
-  lCtx := TRttiContext.Create;
-
-  for i := 0 to lField.Count - 1 do
-  begin
-
-    lCampo := Copy(lField.Strings[i], 1, (Pos(';', lField.Strings[i])) - 1);
-    lNome  := Copy(lField.Strings[i], (Pos(';', lField.Strings[i])) + 1, 60);
-    lProp  := lCtx.GetType(TClienteModel).GetProperty(lCampo);
-
-    if not Assigned(lProp) then
-    begin
-      CriaException(' Configurações de campos obrigatórios inválido.');
-      abort;
-    end;
-
-    if lProp.GetValue(pClienteModel).AsString = '' then
-      lMsg := lMsg + lNome + ',';
-  end;
-
-  if Trim(lMsg) <> '' then
-  begin
-    CriaException(' Campo(s) obrigatório(s): ' + copy(lMsg, 1, Length(lMsg) -1) + '.');
-    abort;
-  end;
-end;
-
 
 function TClienteModel.Salvar: String;
 var
