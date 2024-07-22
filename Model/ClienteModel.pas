@@ -976,7 +976,9 @@ type
     function Salvar   : String;
     function Alterar(pID : String): TClienteModel;
     function Excluir(pID : String): String;
+
     procedure obterLista;
+
     function carregaClasse(pId: String): TClienteModel;
     function ufCliente(pId: String): Variant;
     function nomeCliente(pId: String): Variant;
@@ -1013,8 +1015,8 @@ uses
 
 function TClienteModel.Incluir: String;
 begin
-
-  Fdata_alteracao := DateToStr(vIConexao.DataServer);
+  self.Fdata_alteracao := DateToStr(vIConexao.DataServer);
+  self.Floja           := vIConexao.getEmpresa.LOJA;
 
   self.Acao := tacIncluir;
   Result    := self.Salvar;
