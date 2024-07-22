@@ -434,6 +434,7 @@ type
     mtPedidoPREMIO_UNICO_1: TFloatField;
     mtPedidoPREMIO_UNICO_2: TFloatField;
     mtPedidoPREMIO_UNICO_3: TFloatField;
+    mtItensFIM_VIGENCIA_FR: TStringField;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
@@ -649,13 +650,13 @@ begin
     lTipoGarantia   := Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA,3,2);
     lTipoGarantiaFR := Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA_FR,3,2);
 
+    mtItensFIM_VIGENCIA.Value := mtItensINICIO_VIGENCIA.Value;
+
     if (lTipoGarantia = '12') or (lTipoGarantia = '24') then
-      mtItensFIM_VIGENCIA.Value := DateToStr(IncMonth(StrToDate(mtItensINICIO_VIGENCIA.Value),StrToInt(lTipoGarantia)))
-    else
+      mtItensFIM_VIGENCIA.Value := DateToStr(IncMonth(StrToDate(mtItensINICIO_VIGENCIA.Value),StrToInt(lTipoGarantia)));
+
     if (lTipoGarantiaFR = '12') or (lTipoGarantiaFR = '24') then
-      mtItensFIM_VIGENCIA.Value := DateToStr(IncMonth(StrToDate(mtPedidoEMISSAO.Value),StrToInt(lTipoGarantiaFR)))
-    else
-      mtItensFIM_VIGENCIA.Value := mtItensINICIO_VIGENCIA.Value;
+      mtItensFIM_VIGENCIA_FR.Value := DateToStr(IncMonth(StrToDate(mtPedidoEMISSAO.Value),StrToInt(lTipoGarantiaFR)));
 
     mtItens.Post;
 
