@@ -885,6 +885,8 @@ begin
       pListaCampos.Add(par.Value.campo);
   end;
 
+  pResultado.propriedade[pTabela].listaString.Clear;
+
   lCtx := TRttiContext.Create;
   try
     for p1 in pListaCampos do
@@ -915,6 +917,8 @@ begin
 
       lDependenciaMatch := opcoes.match(lProp.GetValue(pModel).AsString);// false;
       if(lDependenciaMatch=false) then begin
+        pResultado.propriedade[pTabela].listaString.add(dadosCampo.campo);
+
         if(pResultado.propriedade['campo.erro'].asString='') then
           pResultado.propriedade['campo.erro'].asString := dadosCampo.campo;
         pResultado.formataErro('Valor do Campo [%s] inválido', [ dadosCampo.descricao ]);
