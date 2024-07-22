@@ -236,7 +236,8 @@ begin
     '     f.valor_liquido,                                   '+SLineBreak+
     '     f.id_financeiro,                                   '+SLineBreak+
     '     f.valor_acrescimo,                                 '+SLineBreak+
-    '     f.valor_seg_prestamista                            '+SLineBreak+
+    '     f.valor_seg_prestamista,                           '+SLineBreak+
+    '     f.web_pedidoitens_id                               '+SLineBreak+
     '                                                        '+SLineBreak+
     ' From financeiro_pedido f                               '+SLineBreak+
     '                                                        '+SLineBreak+
