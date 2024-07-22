@@ -425,6 +425,7 @@ begin
   else
     Result := dia + separador + mes + separador + ano;
 end;
+
 Function transformaDataHoraFireBird(data:Variant):Variant;
 var
  dataInformada, dia, mes, ano, hora: string;

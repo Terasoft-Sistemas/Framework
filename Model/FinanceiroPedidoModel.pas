@@ -7,7 +7,7 @@ uses
   Terasoft.Types,
   Terasoft.Utils,
   Interfaces.Conexao,
-  FireDAC.Comp.Client;
+  FireDAC.Comp.Client, WebPedidoModel;
 
 type
   TFinanceiroParams = record
@@ -23,8 +23,14 @@ type
     VALOR_SEG_PRESTAMISTA : Double;
     PER_SEG_PRESTAMSTA    : Double;
     VALOR_ACRESCIMO_SEG_PRESTAMISTA : Double;
-
   end;
+
+  TFinanceiroUpdate = record
+    PRIMEIRO_VENCIMENTO   : TDate;
+    QUANTIDADE_PARCELAS   : Integer;
+    VALOR_ENTRADA         : Double;
+  end;
+
 
   TFinanceiroPedidoModel = class
 
@@ -140,8 +146,9 @@ type
     function qtdePagamentoPrazo(pWebPedido : String): Integer;
     function obterResumoFinanceiro : TFDMemTable;
 
-    procedure gerarFinanceiro(pFinanceiroParams: TFinanceiroParams);
+    procedure UpdateDadosFinanceiro(pWebPedidoModel: TWebPedidoModel);
 
+    procedure gerarFinanceiro(pFinanceiroParams: TFinanceiroParams);
   end;
 
 implementation
@@ -365,6 +372,18 @@ begin
       Terasoft.Types.tacAlterar: Result := lFinanceiroPedidoDao.alterar(Self);
       Terasoft.Types.tacExcluir: Result := lFinanceiroPedidoDao.excluir(Self);
     end;
+  finally
+    lFinanceiroPedidoDao.Free;
+  end;
+end;
+
+procedure TFinanceiroPedidoModel.UpdateDadosFinanceiro(pWebPedidoModel: TWebPedidoModel);
+var
+  lFinanceiroPedidoDao : TFinanceiroPedidoDao;
+begin
+  lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
+  try
+    lFinanceiroPedidoDao.UpdateDadosFinanceiro(pWebPedidoModel);
   finally
     lFinanceiroPedidoDao.Free;
   end;

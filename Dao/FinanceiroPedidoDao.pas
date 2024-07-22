@@ -10,7 +10,7 @@ uses
   System.SysUtils,
   System.StrUtils,
   Interfaces.Conexao,
-  System.Rtti;
+  System.Rtti, WebPedidoModel, Terasoft.Types;
 
 type
   TFinanceiroPedidoDao = class
@@ -36,6 +36,8 @@ type
     procedure SetWhereView(const Value: String);
     function where: String;
 
+
+
   public
 
     constructor Create(pIConexao: IConexao);
@@ -60,12 +62,14 @@ type
     function obterResumoFinanceiro: TFDMemTable;
     function ObterLista: TFDMemTable;
     function qtdePagamentoPrazo(pWebPedido : String): Integer;
+
+    procedure UpdateDadosFinanceiro(pWebPedidoModel: TWebPedidoModel);
 end;
 
 implementation
 
 uses
-  System.Variants;
+  System.Variants, Terasoft.FuncoesTexto;
 
 { TFinanceiroPedido }
 
@@ -148,6 +152,40 @@ begin
   end;
 end;
 
+procedure TFinanceiroPedidoDao.UpdateDadosFinanceiro(pWebPedidoModel: TWebPedidoModel);
+var
+  lQry: TFDQuery;
+  lSQL: String;
+  lDadosUpdate: TFinanceiroUpdate;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+
+    lSQL := ' select sum(f.valor_total) VALOR_ENTRADA from financeiro_pedido f where f.web_pedido_id = '+pWebPedidoModel.ID+' and f.portador_id = ''777777'' ';
+    lQry.Open(lSQL);
+
+    lDadosUpdate.VALOR_ENTRADA  := lQry.FieldByName('VALOR_ENTRADA').AsFloat;
+
+    lSQL := '  select min(f.vencimento) PRIMEIRO_VENCIMENTO, max(f.parcela) QUANTIDADE_PARCELAS from financeiro_pedido f where f.web_pedido_id = '+pWebPedidoModel.ID+' and f.portador_id = ''000001''';
+    lQry.Open(lSQL);
+
+    lDadosUpdate.PRIMEIRO_VENCIMENTO := lQry.FieldByName('PRIMEIRO_VENCIMENTO').AsDateTime;;
+    lDadosUpdate.QUANTIDADE_PARCELAS := lQry.FieldByName('QUANTIDADE_PARCELAS').AsInteger;
+
+
+    pWebPedidoModel.Acao                :=  tacAlterar;
+    pWebPedidoModel.VALOR_ENTRADA       := lDadosUpdate.VALOR_ENTRADA;
+    pWebPedidoModel.PRIMEIRO_VENCIMENTO := DateToStr(lDadosUpdate.PRIMEIRO_VENCIMENTO);
+    pWebPedidoModel.PARCELAS            := lDadosUpdate.QUANTIDADE_PARCELAS;
+    pWebPedidoModel.Salvar;
+
+
+  finally
+    lQry.Free;
+  end;
+end;
+
 function TFinanceiroPedidoDao.alterar(pFinanceiroPedidoModel: TFinanceiroPedidoModel): String;
 var
   lQry      : TFDQuery;
@@ -199,7 +237,6 @@ begin
     lQry.Free;
   end;
 end;
-
 
 function TFinanceiroPedidoDao.where: String;
 var
