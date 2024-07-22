@@ -304,7 +304,7 @@ type
 implementation
 
 uses
-  WebPedidoItensDao;
+  WebPedidoItensDao, FinanceiroPedidoModel;
 
 { TWebPedidoItensModel }
 
@@ -333,13 +333,23 @@ begin
 end;
 
 function TWebPedidoItensModel.Excluir(pID : String): String;
+  var
+  lFinanceiroPedidoModel : TFinanceiroPedidoModel;
 begin
   if pID = '' then
     CriaException('ID é obrigatório.');
 
-  self.FID  := pID;
-  self.Acao := tacExcluir;
-  Result := self.Salvar;
+  lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
+
+  try
+    self.FID  := pID;
+    self.Acao := tacExcluir;
+    Result := self.Salvar;
+
+    lFinanceiroPedidoModel.ExcluirPromocao(pID);
+  finally
+    lFinanceiroPedidoModel.Free;
+  end;
 end;
 
 function TWebPedidoItensModel.carregaClasse(pId: String): TWebPedidoItensModel;
