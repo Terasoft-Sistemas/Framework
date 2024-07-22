@@ -38,6 +38,9 @@ begin
   if(usaValidacoesNovas=false) then
     exit;
 
+  if not pGDB.tabelaExiste('CONFIGURACOES') then
+    exit;
+
   if not Supports(pGDB.validador, IValidadorDatabase, validador) then exit;
 
   try
