@@ -56,7 +56,7 @@ begin
       registraOpcoesCampos('emailvalidoounull', '<@>', '');
       registraOpcoesCampos('emailvalido', '<@>', '');
       registraOpcoesCampos('cnpjvalido', '<cnpj>', '');
-      registraOpcoesCampos('cpfvalido', '<cnpj>', '');
+      registraOpcoesCampos('cpfvalido', '<cpf>', '');
       registraOpcoesCampos('cnpjcpfvalido', '<cnpjcpf>', '');
       registraOpcoesCampos('somentenumeros', '<somentenumeros>', '');
       registraOpcoesCampos('naozero', '<naozero>', '');

@@ -52,6 +52,7 @@ type
     function incluir(pFinanceiroPedidoModel: TFinanceiroPedidoModel): String;
     function alterar(pFinanceiroPedidoModel: TFinanceiroPedidoModel): String;
     function excluir(pFinanceiroPedidoModel: TFinanceiroPedidoModel): String;
+    function excluirPromocao(pID: String): String;
 
     procedure setParams(var pQry : TFDQuery; pFinanceiroPedidoModel: TFinanceiroPedidoModel);
     function carregaClasse(pID: String): TFinanceiroPedidoModel;
@@ -183,6 +184,22 @@ begin
     lQry.Free;
   end;
 end;
+
+function TFinanceiroPedidoDao.excluirPromocao(pID: String): String;
+var
+  lQry     : TFDQuery;
+begin
+  lQry     := vIConexao.CriarQuery;
+
+  try
+   lQry.ExecSQL('delete from FINANCEIRO_PEDIDO where WEB_PEDIDOITENS_ID = :WEB_PEDIDOITENS_ID',[pID]);
+
+   Result := pID;
+  finally
+    lQry.Free;
+  end;
+end;
+
 
 function TFinanceiroPedidoDao.where: String;
 var

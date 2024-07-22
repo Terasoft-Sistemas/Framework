@@ -89,7 +89,7 @@ type
     procedure SetVALOR_SEG_PRESTAMISTA(const Value: Variant);
     procedure SetVALOR_ACRESCIMO_SEG_PRESTAMISTA(const Value: Variant);
     procedure SetWEB_PEDIDOITENS_ID(const Value: Variant);
-        
+
   public
 
     property  ID                    : Variant read FID write SetID;
@@ -132,6 +132,7 @@ type
     function Incluir : String;
     function Alterar(pID: String): TFinanceiroPedidoModel;
     function Excluir(pID: String) : String;
+    function ExcluirPromocao(pID: String): String;
 
     function carregaClasse(pId: String): TFinanceiroPedidoModel;
     function obterLista: TFDMemTable;
@@ -199,6 +200,15 @@ begin
   self.Acao := tacExcluir;
   Result := self.Salvar;
 end;
+
+function TFinanceiroPedidoModel.ExcluirPromocao(pID: String): String;
+begin
+  if pID = '' then
+    CriaException('ID é obrigatório.');
+
+
+end;
+
 
 procedure TFinanceiroPedidoModel.gerarFinanceiro(pFinanceiroParams: TFinanceiroParams);
 var
