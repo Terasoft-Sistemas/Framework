@@ -1007,6 +1007,7 @@ begin
 
     lDependenciaMatch := opcoes.match(f.AsString);// false;
     if(lDependenciaMatch=false) then begin
+      pResultado.propriedade[pTabela].listaString.add(dadosCampo.campo);
       if(pResultado.propriedade['campo.erro'].asString='') then
         pResultado.propriedade['campo.erro'].asString := dadosCampo.campo;
       pResultado.formataErro('Valor do Campo [%s] inválido', [ dadosCampo.descricao ]);
