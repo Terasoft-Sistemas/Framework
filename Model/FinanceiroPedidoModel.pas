@@ -202,13 +202,20 @@ begin
 end;
 
 function TFinanceiroPedidoModel.ExcluirPromocao(pID: String): String;
+var
+  lFinanceiroPedidoDao : TFinanceiroPedidoDao;
 begin
   if pID = '' then
     CriaException('ID é obrigatório.');
 
+  lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
+  try
+    Result := lFinanceiroPedidoDao.excluirPromocao(pId);
+  finally
+    lFinanceiroPedidoDao.Free;
+  end;
 
 end;
-
 
 procedure TFinanceiroPedidoModel.gerarFinanceiro(pFinanceiroParams: TFinanceiroParams);
 var
