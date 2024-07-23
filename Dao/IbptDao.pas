@@ -100,6 +100,8 @@ end;
 
 destructor TIbptDao.Destroy;
 begin
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

@@ -127,7 +127,8 @@ end;
 
 destructor TPromocaoDao.Destroy;
 begin
-
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

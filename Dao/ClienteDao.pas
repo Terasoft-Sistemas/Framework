@@ -426,6 +426,8 @@ end;
 
 destructor TClienteDao.Destroy;
 begin
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

@@ -134,7 +134,8 @@ end;
 
 destructor TMovimentoDao.Destroy;
 begin
-
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

@@ -116,7 +116,8 @@ end;
 
 destructor TImpressoraDao.Destroy;
 begin
-
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

@@ -63,14 +63,19 @@ implementation
 
 uses
   System.Rtti;
-{ TPrecoCliente }
+
+  { TPrecoCliente }
+
 constructor TPrecoClienteDao.Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
+
 destructor TPrecoClienteDao.Destroy;
 begin
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

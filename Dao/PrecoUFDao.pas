@@ -101,6 +101,8 @@ begin
 end;
 destructor TPrecoUFDao.Destroy;
 begin
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

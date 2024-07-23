@@ -60,7 +60,8 @@ end;
 
 destructor TCalcularImpostosDao.Destroy;
 begin
-
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

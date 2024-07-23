@@ -121,7 +121,8 @@ end;
 
 destructor TAdmCartaoDao.Destroy;
 begin
-
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

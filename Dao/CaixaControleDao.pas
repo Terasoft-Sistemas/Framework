@@ -12,6 +12,7 @@ uses
   Terasoft.FuncoesTexto,
   Terasoft.ConstrutorDao,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
@@ -20,7 +21,7 @@ type
   private
     vIConexao : IConexao;
     vConstrutor : TConstrutorDao;
-    FCaixaControlesLista: TObjectList<TCaixaControleModel>;
+    FCaixaControlesLista: IObject<TObjectList<TCaixaControleModel>>;
     FLengthPageView: String;
     FStartRecordView: String;
     FID: Variant;
@@ -31,7 +32,7 @@ type
     FIDRecordView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetCaixaControlesLista(const Value: TObjectList<TCaixaControleModel>);
+    procedure SetCaixaControlesLista(const Value: IObject<TObjectList<TCaixaControleModel>>);
     procedure SetID(const Value: Variant);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -46,7 +47,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property CaixaControlesLista: TObjectList<TCaixaControleModel> read FCaixaControlesLista write SetCaixaControlesLista;
+    property CaixaControlesLista: IObject<TObjectList<TCaixaControleModel>> read FCaixaControlesLista write SetCaixaControlesLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -110,7 +111,9 @@ end;
 
 destructor TCaixaControleDao.Destroy;
 begin
-
+  FCaixaControlesLista := nil;
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 
@@ -221,13 +224,12 @@ procedure TCaixaControleDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
-
+  modelo: TCaixaControleModel;
 begin
 
   lQry := vIConexao.CriarQuery;
 
-  FCaixaControlesLista := TObjectList<TCaixaControleModel>.Create;
+  FCaixaControlesLista := TImplObjetoOwner<TObjectList<TCaixaControleModel>>.CreateOwner(TObjectList<TCaixaControleModel>.Create);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -247,25 +249,23 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FCaixaControlesLista.Add(TCaixaControleModel.Create(vIConexao));
+      modelo := TCaixaControleModel.Create(vIConexao);
+      FCaixaControlesLista.objeto.Add(modelo);
 
-      i := FCaixaControlesLista.Count -1;
-
-      FCaixaControlesLista[i].ID                := lQry.FieldByName('ID').AsString;
-      FCaixaControlesLista[i].DATA              := lQry.FieldByName('DATA').AsString;
-      FCaixaControlesLista[i].STATUS            := lQry.FieldByName('STATUS').AsString;
-      FCaixaControlesLista[i].USUARIO           := lQry.FieldByName('USUARIO').AsString;
-      FCaixaControlesLista[i].HORA              := lQry.FieldByName('HORA').AsString;
-      FCaixaControlesLista[i].DATA_FECHA        := lQry.FieldByName('DATA_FECHA').AsString;
-      FCaixaControlesLista[i].CONTAGEM_DINHEIRO := lQry.FieldByName('CONTAGEM_DINHEIRO').AsString;
-      FCaixaControlesLista[i].CONTAGEM_CREDITO  := lQry.FieldByName('CONTAGEM_CREDITO').AsString;
-      FCaixaControlesLista[i].CONTAGEM_DEBITO   := lQry.FieldByName('CONTAGEM_DEBITO').AsString;
-      FCaixaControlesLista[i].JUSTIFICATIVA     := lQry.FieldByName('JUSTIFICATIVA').AsString;
-      FCaixaControlesLista[i].SYSTIME           := lQry.FieldByName('SYSTIME').AsString;
+      modelo.ID                := lQry.FieldByName('ID').AsString;
+      modelo.DATA              := lQry.FieldByName('DATA').AsString;
+      modelo.STATUS            := lQry.FieldByName('STATUS').AsString;
+      modelo.USUARIO           := lQry.FieldByName('USUARIO').AsString;
+      modelo.HORA              := lQry.FieldByName('HORA').AsString;
+      modelo.DATA_FECHA        := lQry.FieldByName('DATA_FECHA').AsString;
+      modelo.CONTAGEM_DINHEIRO := lQry.FieldByName('CONTAGEM_DINHEIRO').AsString;
+      modelo.CONTAGEM_CREDITO  := lQry.FieldByName('CONTAGEM_CREDITO').AsString;
+      modelo.CONTAGEM_DEBITO   := lQry.FieldByName('CONTAGEM_DEBITO').AsString;
+      modelo.JUSTIFICATIVA     := lQry.FieldByName('JUSTIFICATIVA').AsString;
+      modelo.SYSTIME           := lQry.FieldByName('SYSTIME').AsString;
 
       lQry.Next;
     end;
@@ -282,7 +282,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TCaixaControleDao.SetCaixaControlesLista(const Value: TObjectList<TCaixaControleModel>);
+procedure TCaixaControleDao.SetCaixaControlesLista;
 begin
   FCaixaControlesLista := Value;
 end;
@@ -371,13 +371,13 @@ procedure TCaixaControleDao.ultimosCaixa(pUsuario: String);
 var
   lQry      : TFDQuery;
   lSQL      : String;
-  i         : INteger;
+  modelo    : TCaixaControleModel;
 
 begin
 
   lQry := vIConexao.CriarQuery;
 
-  FCaixaControlesLista := TObjectList<TCaixaControleModel>.Create;
+  FCaixaControlesLista := TImplObjetoOwner<TObjectList<TCaixaControleModel>>.CreateOwner(TObjectList<TCaixaControleModel>.Create);
 
   try
     lSQL := ' select c.id,                                                                    '+
@@ -401,19 +401,17 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FCaixaControlesLista.Add(TCaixaControleModel.Create(vIConexao));
+      modelo := TCaixaControleModel.Create(vIConexao);
+      FCaixaControlesLista.objeto.Add(modelo);
 
-      i := FCaixaControlesLista.Count -1;
-
-      FCaixaControlesLista[i].ID                := lQry.FieldByName('ID').AsString;
-      FCaixaControlesLista[i].DATA              := lQry.FieldByName('DATA').AsString;
-      FCaixaControlesLista[i].HORA              := lQry.FieldByName('HORA').AsString;
-      FCaixaControlesLista[i].DATA_FECHA        := lQry.FieldByName('DATA_FECHA').AsString;
-      FCaixaControlesLista[i].HORA_FECHA        := lQry.FieldByName('HORA_FECHA').AsString;
+      modelo.ID                := lQry.FieldByName('ID').AsString;
+      modelo.DATA              := lQry.FieldByName('DATA').AsString;
+      modelo.HORA              := lQry.FieldByName('HORA').AsString;
+      modelo.DATA_FECHA        := lQry.FieldByName('DATA_FECHA').AsString;
+      modelo.HORA_FECHA        := lQry.FieldByName('HORA_FECHA').AsString;
 
       lQry.Next;
     end;

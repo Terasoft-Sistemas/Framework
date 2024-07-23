@@ -75,7 +75,8 @@ end;
 
 destructor TSaldoDao.Destroy;
 begin
-
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

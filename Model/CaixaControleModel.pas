@@ -7,6 +7,7 @@ uses
   System.Generics.Collections,
   Terasoft.Utils,
   CaixaModel,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
@@ -15,7 +16,7 @@ type
   private
     vIConexao : IConexao;
 
-    FCaixaControlesLista: TObjectList<TCaixaControleModel>;
+    FCaixaControlesLista: IObject<TObjectList<TCaixaControleModel>>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -38,7 +39,7 @@ type
     Fhora_fecha: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetCaixaControlesLista(const Value: TObjectList<TCaixaControleModel>);
+    procedure SetCaixaControlesLista(const Value: IObject<TObjectList<TCaixaControleModel>>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -95,7 +96,7 @@ type
 
     function vendaCaixaFechado(pDataHora: String): boolean;
 
-    property CaixaControlesLista: TObjectList<TCaixaControleModel> read FCaixaControlesLista write SetCaixaControlesLista;
+    property CaixaControlesLista: IObject<TObjectList<TCaixaControleModel>> read FCaixaControlesLista write SetCaixaControlesLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -130,7 +131,7 @@ begin
       exit;
     end;
 
-    Result := lCaixaControleDao.CaixaControlesLista[0].DATA;
+    Result := lCaixaControleDao.CaixaControlesLista.objeto[0].DATA;
 
   finally
     lCaixaControleDao.Free;
@@ -144,6 +145,7 @@ end;
 
 constructor TCaixaControleModel.Create(pIConexao : IConexao);
 begin
+  FCaixaControlesLista := nil;
   vIConexao := pIConexao;
 end;
 
@@ -173,7 +175,8 @@ end;
 
 destructor TCaixaControleModel.Destroy;
 begin
-
+  FCaixaControlesLista := nil;
+  vIConexao := nil;
   inherited;
 end;
 
@@ -199,7 +202,7 @@ begin
     if lCaixaControleDao.TotalRecords = 0 then
       CriaException('Nenhum caixa aberto localizado.');
 
-    lCaixaAberto := lCaixaControleDao.CaixaControlesLista[0];
+    lCaixaAberto := lCaixaControleDao.CaixaControlesLista.objeto[0];
 
     lCaixaAberto.Acao       := tacAlterar;
     lCaixaAberto.data_fecha := DateToStr(vIConexao.DataServer);
@@ -437,7 +440,7 @@ begin
   FIDRecordView := Value;
 end;
 
-procedure TCaixaControleModel.SetCaixaControlesLista(const Value: TObjectList<TCaixaControleModel>);
+procedure TCaixaControleModel.SetCaixaControlesLista;
 begin
   FCaixaControlesLista := Value;
 end;

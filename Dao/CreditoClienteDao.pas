@@ -181,7 +181,8 @@ end;
 
 destructor TCreditoClienteDao.Destroy;
 begin
-
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

@@ -99,10 +99,14 @@ begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
+
 destructor TPromocaoItensDao.Destroy;
 begin
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
+
 function TPromocaoItensDao.incluir(pPromocaoItensModel: TPromocaoItensModel): String;
 var
   lQry: TFDQuery;

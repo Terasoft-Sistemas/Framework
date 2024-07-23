@@ -127,7 +127,8 @@ end;
 
 destructor TPixDao.Destroy;
 begin
-
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

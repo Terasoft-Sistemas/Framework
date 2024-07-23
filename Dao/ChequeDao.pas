@@ -128,6 +128,8 @@ end;
 
 destructor TChequeDao.Destroy;
 begin
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

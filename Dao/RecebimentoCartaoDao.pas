@@ -117,7 +117,8 @@ end;
 
 destructor TRecebimentoCartaoDao.Destroy;
 begin
-
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

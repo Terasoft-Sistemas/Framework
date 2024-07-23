@@ -80,7 +80,8 @@ end;
 
 destructor TConsultaDao.Destroy;
 begin
-
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

@@ -152,7 +152,8 @@ end;
 
 destructor TCFOPDao.Destroy;
 begin
-
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

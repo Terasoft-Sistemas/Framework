@@ -175,6 +175,8 @@ end;
 
 destructor TContasReceberItensDao.Destroy;
 begin
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

@@ -76,7 +76,8 @@ end;
 
 destructor TLojasDao.Destroy;
 begin
-
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

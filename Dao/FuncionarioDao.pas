@@ -264,7 +264,8 @@ end;
 
 destructor TFuncionarioDao.Destroy;
 begin
-
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

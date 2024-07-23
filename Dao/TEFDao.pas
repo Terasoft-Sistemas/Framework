@@ -145,7 +145,8 @@ end;
 
 destructor TTEFDao.Destroy;
 begin
-
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

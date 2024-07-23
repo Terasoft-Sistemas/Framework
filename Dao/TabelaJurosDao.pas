@@ -112,7 +112,8 @@ end;
 
 destructor TTabelaJurosDao.Destroy;
 begin
-
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

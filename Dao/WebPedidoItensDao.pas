@@ -188,7 +188,8 @@ end;
 
 destructor TWebPedidoItensDao.Destroy;
 begin
-
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

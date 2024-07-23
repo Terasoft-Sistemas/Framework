@@ -112,7 +112,8 @@ end;
 
 destructor TComissaoVendedorDao.Destroy;
 begin
-
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

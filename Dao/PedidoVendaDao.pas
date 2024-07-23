@@ -339,6 +339,8 @@ end;
 
 destructor TPedidoVendaDao.Destroy;
 begin
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

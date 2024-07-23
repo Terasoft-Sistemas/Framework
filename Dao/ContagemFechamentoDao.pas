@@ -105,7 +105,8 @@ end;
 
 destructor TContagemFechamentoDao.Destroy;
 begin
-
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

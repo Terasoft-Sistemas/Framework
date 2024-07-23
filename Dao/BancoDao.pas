@@ -171,6 +171,8 @@ end;
 
 destructor TBancoDao.Destroy;
 begin
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

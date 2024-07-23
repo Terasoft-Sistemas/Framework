@@ -41,6 +41,8 @@ end;
 
 destructor TMunicipiosIBGEDao.Destroy;
 begin
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

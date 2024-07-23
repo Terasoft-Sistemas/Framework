@@ -196,6 +196,8 @@ end;
 
 destructor TOrcamentoDao.Destroy;
 begin
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

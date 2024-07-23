@@ -123,7 +123,8 @@ end;
 
 destructor TFinanceiroPedidoDao.Destroy;
 begin
-  vConstrutor.Free;
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

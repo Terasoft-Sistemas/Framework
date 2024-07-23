@@ -70,8 +70,9 @@ end;
 
 destructor TEventosNFeDao.Destroy;
 begin
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
-
 end;
 
 function TEventosNFeDao.excluir(AEventosNFeModel: TEventosNFeModel): Boolean;

@@ -113,9 +113,10 @@ end;
 
 destructor TGrupoComissaoFuncionarioDao.Destroy;
 begin
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
-
 
 function TGrupoComissaoFuncionarioDao.incluir(pGrupoComissaoFuncionarioModel: TGrupoComissaoFuncionarioModel): String;
 var

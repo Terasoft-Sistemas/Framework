@@ -151,7 +151,8 @@ end;
 
 destructor TContaCorrenteDao.Destroy;
 begin
-
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 

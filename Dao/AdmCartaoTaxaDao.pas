@@ -113,6 +113,8 @@ end;
 
 destructor TAdmCartaoTaxaDao.Destroy;
 begin
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 
