@@ -167,7 +167,13 @@ begin
 
     lDadosUpdate.VALOR_ENTRADA  := lQry.FieldByName('VALOR_ENTRADA').AsFloat;
 
-    lSQL := '  select min(f.vencimento) PRIMEIRO_VENCIMENTO, max(f.parcela) QUANTIDADE_PARCELAS from financeiro_pedido f where f.web_pedido_id = '+pWebPedidoModel.ID+' and f.portador_id = ''000001''';
+    lSQL :=
+    ' select count(*) QUANTIDADE_PARCELAS, min(f.vencimento) PRIMEIRO_VENCIMENTO '+#13+
+    ' from financeiro_pedido f'+#13+
+    ' inner join portador p on p.codigo_port = f.portador_id'+#13+
+    ' where f.web_pedido_id = '+pWebPedidoModel.ID+''+#13+
+    ' and p.tpag_nfe not in (''01'', ''03'', ''04'', ''99'')';
+
     lQry.Open(lSQL);
 
     lDadosUpdate.PRIMEIRO_VENCIMENTO := lQry.FieldByName('PRIMEIRO_VENCIMENTO').AsDateTime;;
