@@ -164,7 +164,7 @@ begin
     lPortadorModel.IDRecordView := pPortador;
     lPortadorModel.obterLista;
 
-    lPortadorModel := lPortadorModel.PortadorsLista.objeto[0];
+    lPortadorModel := lPortadorModel.PortadorsLista.First;
 
     self.WhereView  := 'and portador_id = ' + QuotedStr(pPortador);
     self.OrderView  := ' tabelajuros.codigo';

@@ -5,15 +5,16 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
-  Terasoft.Framework.ObjectIface,
-  Interfaces.Conexao, FireDAC.Comp.Client;
+  Spring.Collections,
+  Interfaces.Conexao,
+  FireDAC.Comp.Client;
 
 type
   TPortadorModel = class
 
   private
     vIConexao : IConexao;
-    FPortadorsLista: IObject<TObjectList<TPortadorModel>>;
+    FPortadorsLista: IList<TPortadorModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -56,7 +57,7 @@ type
     FPER_SEGURO_PRESTAMISTA: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetPortadorsLista(const Value: IObject<TObjectList<TPortadorModel>>);
+    procedure SetPortadorsLista(const Value: IList<TPortadorModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -142,7 +143,7 @@ type
     function PortadorTabelaJuros : TFDMemTable;
     function possuiBandeira(pPortador: String): Boolean;
 
-    property PortadorsLista: IObject<TObjectList<TPortadorModel>> read FPortadorsLista write SetPortadorsLista;
+    property PortadorsLista: IList<TPortadorModel> read FPortadorsLista write SetPortadorsLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;

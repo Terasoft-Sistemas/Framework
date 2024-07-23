@@ -195,7 +195,7 @@ begin
 
     lPortadorModel.obterLista;
 
-    for lPortadorModel in lPortadorModel.PortadorsLista.objeto do
+    for lPortadorModel in lPortadorModel.PortadorsLista do
     begin
       lMemTable.InsertRecord([
                               'P',
