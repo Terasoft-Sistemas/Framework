@@ -6,6 +6,7 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   FireDAC.Comp.Client,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -14,7 +15,7 @@ type
   private
     vIConexao : IConexao;
 
-    FConfiguracoessLista: TObjectList<TConfiguracoesModel>;
+    FConfiguracoessLista: IList<TConfiguracoesModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -38,7 +39,7 @@ type
     FVALORNUMERICO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetConfiguracoessLista(const Value: TObjectList<TConfiguracoesModel>);
+    procedure SetConfiguracoessLista(const Value: IList<TConfiguracoesModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -79,7 +80,7 @@ type
     function Salvar: String;
     procedure obterLista;
 
-    property ConfiguracoessLista: TObjectList<TConfiguracoesModel> read FConfiguracoessLista write SetConfiguracoessLista;
+    property ConfiguracoessLista: IList<TConfiguracoesModel> read FConfiguracoessLista write SetConfiguracoessLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -105,6 +106,7 @@ end;
 
 destructor TConfiguracoesModel.Destroy;
 begin
+  FConfiguracoessLista := nil;
   vIConexao := nil;
   inherited;
 end;
@@ -169,7 +171,7 @@ begin
   FF_ID := Value;
 end;
 
-procedure TConfiguracoesModel.SetConfiguracoessLista(const Value: TObjectList<TConfiguracoesModel>);
+procedure TConfiguracoesModel.SetConfiguracoessLista(const Value: IList<TConfiguracoesModel>);
 begin
   FConfiguracoessLista := Value;
 end;

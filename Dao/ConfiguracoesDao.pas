@@ -11,6 +11,7 @@ uses
   System.Variants,
   Terasoft.ConstrutorDao,
   Terasoft.Utils,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -20,7 +21,7 @@ type
     vIConexao : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FConfiguracoessLista: TObjectList<TConfiguracoesModel>;
+    FConfiguracoessLista: IList<TConfiguracoesModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -31,7 +32,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetConfiguracoessLista(const Value: TObjectList<TConfiguracoesModel>);
+    procedure SetConfiguracoessLista(const Value: IList<TConfiguracoesModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -46,7 +47,7 @@ type
     constructor Create(pIConexao : Iconexao);
     destructor Destroy; override;
 
-    property ConfiguracoessLista: TObjectList<TConfiguracoesModel> read FConfiguracoessLista write SetConfiguracoessLista;
+    property ConfiguracoessLista: IList<TConfiguracoesModel> read FConfiguracoessLista write SetConfiguracoessLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -80,7 +81,7 @@ end;
 
 destructor TConfiguracoesDao.Destroy;
 begin
-  freeAndNil(FConfiguracoessLista);
+  FConfiguracoessLista := nil;
   freeAndNil(vConstrutor);
   vIConexao   := nil;
   inherited;
@@ -190,11 +191,11 @@ procedure TConfiguracoesDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i : Integer;
+  modelo: TConfiguracoesModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FConfiguracoessLista := TObjectList<TConfiguracoesModel>.Create;
+  FConfiguracoessLista := TCollections.CreateList<TConfiguracoesModel>(true);
 
   try
     lSQL := ' select  *                '+
@@ -208,25 +209,24 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FConfiguracoessLista.Add(TConfiguracoesModel.Create(vIConexao));
-      i := FConfiguracoessLista.Count -1;
-      FConfiguracoessLista[i].ID             := lQry.FieldByName('ID').AsString;
-      FConfiguracoessLista[i].TAG            := lQry.FieldByName('TAG').AsString;
-      FConfiguracoessLista[i].F_ID           := lQry.FieldByName('FID').AsString;
-      FConfiguracoessLista[i].PERFIL_ID      := lQry.FieldByName('PERFIL_ID').AsString;
-      FConfiguracoessLista[i].VALORINTEIRO   := lQry.FieldByName('VALORINTEIRO').AsString;
-      FConfiguracoessLista[i].VALORSTRING    := lQry.FieldByName('VALORSTRING').AsString;
-      FConfiguracoessLista[i].VALORMEMO      := lQry.FieldByName('VALORMEMO').AsString;
-      FConfiguracoessLista[i].VALORNUMERICO  := lQry.FieldByName('VALORNUMERICO').AsString;
-      FConfiguracoessLista[i].VALORCHAR      := lQry.FieldByName('VALORCHAR').AsString;
-      FConfiguracoessLista[i].VALORDATA      := lQry.FieldByName('VALORDATA').AsString;
-      FConfiguracoessLista[i].VALORHORA      := lQry.FieldByName('VALORHORA').AsString;
-      FConfiguracoessLista[i].VALORDATAHORA  := lQry.FieldByName('VALORDATAHORA').AsString;
-      FConfiguracoessLista[i].SYSTIME        := lQry.FieldByName('SYSTIME').AsString;
+      modelo := TConfiguracoesModel.Create(vIConexao);
+      FConfiguracoessLista.Add(modelo);
+      modelo.ID             := lQry.FieldByName('ID').AsString;
+      modelo.TAG            := lQry.FieldByName('TAG').AsString;
+      modelo.F_ID           := lQry.FieldByName('FID').AsString;
+      modelo.PERFIL_ID      := lQry.FieldByName('PERFIL_ID').AsString;
+      modelo.VALORINTEIRO   := lQry.FieldByName('VALORINTEIRO').AsString;
+      modelo.VALORSTRING    := lQry.FieldByName('VALORSTRING').AsString;
+      modelo.VALORMEMO      := lQry.FieldByName('VALORMEMO').AsString;
+      modelo.VALORNUMERICO  := lQry.FieldByName('VALORNUMERICO').AsString;
+      modelo.VALORCHAR      := lQry.FieldByName('VALORCHAR').AsString;
+      modelo.VALORDATA      := lQry.FieldByName('VALORDATA').AsString;
+      modelo.VALORHORA      := lQry.FieldByName('VALORHORA').AsString;
+      modelo.VALORDATAHORA  := lQry.FieldByName('VALORDATAHORA').AsString;
+      modelo.SYSTIME        := lQry.FieldByName('SYSTIME').AsString;
       lQry.Next;
     end;
     obterTotalRegistros;
@@ -240,7 +240,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TConfiguracoesDao.SetConfiguracoessLista(const Value: TObjectList<TConfiguracoesModel>);
+procedure TConfiguracoesDao.SetConfiguracoessLista;
 begin
   FConfiguracoessLista := Value;
 end;
