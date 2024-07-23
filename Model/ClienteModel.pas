@@ -333,6 +333,8 @@ type
     Ftipodoc_cli: variant;
     Fcnpj_trabalho_cli: Variant;
     Fcpf_conjuge_cli: Variant;
+    Fnome_contador_cli: Variant;
+    Ftelefone_contador_cli: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetClientesLista(const Value: TObjectList<TClienteModel>);
@@ -653,6 +655,8 @@ type
     procedure Settipodoc_cli(const Value: variant);
     procedure Setcnpj_trabalho_cli(const Value: Variant);
     procedure Setcpf_conjuge_cli(const Value: Variant);
+    procedure Setnome_contador_cli(const Value: Variant);
+    procedure Settelefone_contador_cli(const Value: Variant);
   protected
     procedure doCreate; override;
     procedure doDestroy; override;
@@ -968,6 +972,8 @@ type
     property tipodocidentificacaoconj_cli: Variant read Ftipodocidentificacaoconj_cli write Settipodocidentificacaoconj_cli;
     property cnpj_trabalho_cli: Variant read Fcnpj_trabalho_cli write Setcnpj_trabalho_cli;
     property cpf_conjuge_cli: Variant read Fcpf_conjuge_cli write Setcpf_conjuge_cli;
+    property nome_contador_cli: Variant read Fnome_contador_cli write Setnome_contador_cli;
+    property telefone_contador_cli: Variant read Ftelefone_contador_cli write Settelefone_contador_cli;
 
     constructor Create(pIConexao: IConexao); override;
     destructor Destroy; override;
@@ -2183,6 +2189,11 @@ begin
   Fnomecon_cli := Value;
 end;
 
+procedure TClienteModel.Setnome_contador_cli(const Value: Variant);
+begin
+  Fnome_contador_cli := Value;
+end;
+
 procedure TClienteModel.Setnome_trabalho_anterior(const Value: Variant);
 begin
   Fnome_trabalho_anterior := Value;
@@ -2606,6 +2617,11 @@ end;
 procedure TClienteModel.Settelefone_conjuge(const Value: Variant);
 begin
   Ftelefone_conjuge := Value;
+end;
+
+procedure TClienteModel.Settelefone_contador_cli(const Value: Variant);
+begin
+  Ftelefone_contador_cli := Value;
 end;
 
 procedure TClienteModel.Settelefone_internacional(const Value: Variant);

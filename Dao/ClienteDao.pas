@@ -397,13 +397,15 @@ begin
     lModel.BLOQUEAR_ALTERACAO_TABELA    := lQry.FieldByName('BLOQUEAR_ALTERACAO_TABELA').AsString;
     lModel.TIPO_EMISSAO_NFE             := lQry.FieldByName('TIPO_EMISSAO_NFE').AsString;
     lModel.PERCENTUAL_DESCONTO          := lQry.FieldByName('PERCENTUAL_DESCONTO').AsString;
-    lModel.tipo_funcionario_publico_cli := lQry.FieldByName('TIPO_FUNCIONARIO_PUBLICO_CLI').AsString;
-    lModel.numbeneficio_cli             := lQry.FieldByName('NUMBENEFICIO_CLI').AsString;
-    lModel.fonte_beneficio_cli          := lQry.FieldByName('FONTE_BENEFICIO_CLI').AsString;
-    lModel.codigo_ocupacao_cli          := lQry.FieldByName('CODIGO_OCUPACAO_CLI').AsString;
-    lModel.docidentificacaoconj_cli     := lQry.FieldByName('DOCIDENTIFICACAOCONJ_CLI').AsString;
-    lModel.tipodocidentificacaoconj_cli := lQry.FieldByName('TIPODOCIDENTIFICACAOCONJ_CLI').AsString;
-    lModel.tipodoc_cli                  := lQry.FieldByName('TIPODOC_CLI').AsString;
+    lModel.TIPO_FUNCIONARIO_PUBLICO_CLI := lQry.FieldByName('TIPO_FUNCIONARIO_PUBLICO_CLI').AsString;
+    lModel.NUMBENEFICIO_CLI             := lQry.FieldByName('NUMBENEFICIO_CLI').AsString;
+    lModel.FONTE_BENEFICIO_CLI          := lQry.FieldByName('FONTE_BENEFICIO_CLI').AsString;
+    lModel.CODIGO_OCUPACAO_CLI          := lQry.FieldByName('CODIGO_OCUPACAO_CLI').AsString;
+    lModel.DOCIDENTIFICACAOCONJ_CLI     := lQry.FieldByName('DOCIDENTIFICACAOCONJ_CLI').AsString;
+    lModel.TIPODOCIDENTIFICACAOCONJ_CLI := lQry.FieldByName('TIPODOCIDENTIFICACAOCONJ_CLI').AsString;
+    lModel.TIPODOC_CLI                  := lQry.FieldByName('TIPODOC_CLI').AsString;
+    lModel.NOME_CONTADOR_CLI            := lQry.FieldByName('NOME_CONTADOR_CLI').AsString;
+    lModel.TELEFONE_CONTADOR_CLI        := lQry.FieldByName('TELEFONE_CONTADOR_CLI').AsString;
 
     Result := lModel;
   finally
@@ -624,6 +626,7 @@ begin
       FClientesLista[i].ufcobranca_cli             := lQry.FieldByName('UFCOBRANCA_CLI').AsString;
       FClientesLista[i].cepcobranca_cli            := lQry.FieldByName('CEPCOBRANCA_CLI').AsString;
       FClientesLista[i].localtrabalho_cli          := lQry.FieldByName('LOCALTRABALHO_CLI').AsString;
+      FClientesLista[i].cnpj_trabalho_cli          := lQry.FieldByName('CNPJ_TRABALHO_CLI').AsString;
       FClientesLista[i].endtrabalho_cli            := lQry.FieldByName('ENDTRABALHO_CLI').AsString;
       FClientesLista[i].bairtrabalho_cli           := lQry.FieldByName('BAIRTRABALHO_CLI').AsString;
       FClientesLista[i].cidtrabalho_cli            := lQry.FieldByName('CIDTRABALHO_CLI').AsString;
@@ -911,6 +914,8 @@ begin
       FClientesLista[i].docidentificacaoconj_cli   := lQry.FieldByName('DOCIDENTIFICACAOCONJ_CLI').AsString;
       FClientesLista[i].tipodocidentificacaoconj_cli := lQry.FieldByName('TIPODOCIDENTIFICACAOCONJ_CLI').AsString;
       FClientesLista[i].tipodoc_cli                := lQry.FieldByName('TIPODOC_CLI').AsString;
+      FClientesLista[i].nome_contador_cli          := lQry.FieldByName('NOME_CONTADOR_CLI').AsString;
+      FClientesLista[i].telefone_contador_cli      := lQry.FieldByName('TELEFONE_CONTADOR_CLI').AsString;
       lQry.Next;
     end;
     obterTotalRegistros;
