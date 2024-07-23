@@ -39,6 +39,7 @@ uses
   function CalculaPercentual(pValorItem, pValorTotal: Real): Real;
   function DiferencaEntreDatas(pDataInicial, pDataFinal: TDate ): Integer;
   function RetornaCoeficiente(pTaxa: Double;  pQuantidadeParcelas: Integer): TFDMemTable;
+  function corrigeValorExtended(p1: Extended; pCasasDecimais: Integer = 2): Extended;
 
 implementation
 
@@ -46,6 +47,7 @@ uses
   {$IFDEF VCL}
     LbString,
   {$ENDIF}
+  Math,
   Terasoft.Types;
 
 
@@ -274,6 +276,15 @@ begin
   lMemTable.Open;
   Result := lMemTable;
 end;
+
+function corrigeValorExtended(p1: Extended; pCasasDecimais: Integer = 2): Extended;
+  var
+    p: Extended;
+begin
+  p := Power(10,pCasasDecimais);
+  Result := Trunc(((p1)* p) / p);
+end;
+
 
 end.
 
