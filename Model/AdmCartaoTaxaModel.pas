@@ -5,6 +5,7 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -13,7 +14,7 @@ type
   private
     vIConexao : IConexao;
 
-    FAdmCartaoTaxasLista: TObjectList<TAdmCartaoTaxaModel>;
+    FAdmCartaoTaxasLista: IList<TAdmCartaoTaxaModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -31,7 +32,7 @@ type
     FPARCELA: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetAdmCartaoTaxasLista(const Value: TObjectList<TAdmCartaoTaxaModel>);
+    procedure SetAdmCartaoTaxasLista(const Value: IList<TAdmCartaoTaxaModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -65,7 +66,7 @@ type
     function carregaClasse(pId: String): TAdmCartaoTaxaModel;
     procedure obterLista;
 
-    property AdmCartaoTaxasLista: TObjectList<TAdmCartaoTaxaModel> read FAdmCartaoTaxasLista write SetAdmCartaoTaxasLista;
+    property AdmCartaoTaxasLista: IList<TAdmCartaoTaxaModel> read FAdmCartaoTaxasLista write SetAdmCartaoTaxasLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -130,7 +131,8 @@ end;
 
 destructor TAdmCartaoTaxaModel.Destroy;
 begin
-
+  FAdmCartaoTaxasLista := nil;
+  vIConexao := nil;
   inherited;
 end;
 
@@ -199,7 +201,7 @@ begin
   FDIAS_VENCIMENTO := Value;
 end;
 
-procedure TAdmCartaoTaxaModel.SetAdmCartaoTaxasLista(const Value: TObjectList<TAdmCartaoTaxaModel>);
+procedure TAdmCartaoTaxaModel.SetAdmCartaoTaxasLista;
 begin
   FAdmCartaoTaxasLista := Value;
 end;

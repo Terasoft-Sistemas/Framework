@@ -11,6 +11,7 @@ uses
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
+  Spring.Collections,
   Terasoft.ConstrutorDao;
 
 type
@@ -20,7 +21,7 @@ type
     vIConexao : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FAdmCartaoTaxasLista: TObjectList<TAdmCartaoTaxaModel>;
+    FAdmCartaoTaxasLista: IList<TAdmCartaoTaxaModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -31,7 +32,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetAdmCartaoTaxasLista(const Value: TObjectList<TAdmCartaoTaxaModel>);
+    procedure SetAdmCartaoTaxasLista(const Value: IList<TAdmCartaoTaxaModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -47,7 +48,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property AdmCartaoTaxasLista: TObjectList<TAdmCartaoTaxaModel> read FAdmCartaoTaxasLista write SetAdmCartaoTaxasLista;
+    property AdmCartaoTaxasLista: IList<TAdmCartaoTaxaModel> read FAdmCartaoTaxasLista write SetAdmCartaoTaxasLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -113,6 +114,7 @@ end;
 
 destructor TAdmCartaoTaxaDao.Destroy;
 begin
+  FAdmCartaoTaxasLista := nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -219,11 +221,11 @@ procedure TAdmCartaoTaxaDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: TAdmCartaoTaxaModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FAdmCartaoTaxasLista := TObjectList<TAdmCartaoTaxaModel>.Create;
+  FAdmCartaoTaxasLista := TCollections.CreateList<TAdmCartaoTaxaModel>(true);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -243,21 +245,19 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FAdmCartaoTaxasLista.Add(TAdmCartaoTaxaModel.Create(vIConexao));
+      modelo := TAdmCartaoTaxaModel.Create(vIConexao);
+      FAdmCartaoTaxasLista.Add(modelo);
 
-      i := FAdmCartaoTaxasLista.Count -1;
-
-      FAdmCartaoTaxasLista[i].ID              := lQry.FieldByName('ID').AsString;
-      FAdmCartaoTaxasLista[i].ADM_ID          := lQry.FieldByName('ADM_ID').AsString;
-      FAdmCartaoTaxasLista[i].PARCELA         := lQry.FieldByName('PARCELA').AsString;
-      FAdmCartaoTaxasLista[i].TAXA            := lQry.FieldByName('TAXA').AsString;
-      FAdmCartaoTaxasLista[i].SYSTIME         := lQry.FieldByName('SYSTIME').AsString;
-      FAdmCartaoTaxasLista[i].DIAS_VENCIMENTO := lQry.FieldByName('DIAS_VENCIMENTO').AsString;
-      FAdmCartaoTaxasLista[i].CONCILIADORA_ID := lQry.FieldByName('CONCILIADORA_ID').AsString;
+      modelo.ID              := lQry.FieldByName('ID').AsString;
+      modelo.ADM_ID          := lQry.FieldByName('ADM_ID').AsString;
+      modelo.PARCELA         := lQry.FieldByName('PARCELA').AsString;
+      modelo.TAXA            := lQry.FieldByName('TAXA').AsString;
+      modelo.SYSTIME         := lQry.FieldByName('SYSTIME').AsString;
+      modelo.DIAS_VENCIMENTO := lQry.FieldByName('DIAS_VENCIMENTO').AsString;
+      modelo.CONCILIADORA_ID := lQry.FieldByName('CONCILIADORA_ID').AsString;
 
       lQry.Next;
     end;
@@ -274,7 +274,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TAdmCartaoTaxaDao.SetAdmCartaoTaxasLista(const Value: TObjectList<TAdmCartaoTaxaModel>);
+procedure TAdmCartaoTaxaDao.SetAdmCartaoTaxasLista;
 begin
   FAdmCartaoTaxasLista := Value;
 end;
