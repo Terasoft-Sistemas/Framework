@@ -12,7 +12,7 @@ uses
   Terasoft.FuncoesTexto,
   Terasoft.ConstrutorDao,
   Terasoft.Utils,
-  Terasoft.Framework.ObjectIface,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -22,7 +22,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FContaCorrentesLista: IObject<TObjectList<TContaCorrenteModel>>;
+    FContaCorrentesLista: IList<TContaCorrenteModel>;
     FLengthPageView: String;
     FStartRecordView: String;
     FID: Variant;
@@ -35,7 +35,7 @@ type
     FSaldo: Real;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetContaCorrentesLista(const Value: IObject<TObjectList<TContaCorrenteModel>>);
+    procedure SetContaCorrentesLista(const Value: IList<TContaCorrenteModel>);
     procedure SetID(const Value: Variant);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -52,7 +52,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property ContaCorrentesLista: IObject<TObjectList<TContaCorrenteModel>> read FContaCorrentesLista write SetContaCorrentesLista;
+    property ContaCorrentesLista: IList<TContaCorrenteModel> read FContaCorrentesLista write SetContaCorrentesLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -263,7 +263,7 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  FContaCorrentesLista := TImplObjetoOwner<TObjectList<TContaCorrenteModel>>.CreateOwner(TObjectList<TContaCorrenteModel>.Create);
+  FContaCorrentesLista := TCollections.CreateList<TContaCorrenteModel>(true);;
 
   try
 
@@ -288,7 +288,7 @@ begin
     while not lQry.Eof do
     begin
       modelo := TContaCorrenteModel.Create(vIConexao);
-      FContaCorrentesLista.objeto.Add(modelo);
+      FContaCorrentesLista.Add(modelo);
 
       modelo.NUMERO_COR            := lQry.FieldByName('NUMERO_COR').AsString;
       modelo.DATA_COR              := lQry.FieldByName('DATA_COR').AsString;
@@ -378,7 +378,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TContaCorrenteDao.SetContaCorrentesLista(const Value: IObject<TObjectList<TContaCorrenteModel>>);
+procedure TContaCorrenteDao.SetContaCorrentesLista;
 begin
   FContaCorrentesLista := Value;
 end;

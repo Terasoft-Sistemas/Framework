@@ -6,7 +6,6 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Spring.Collections,
-  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
@@ -14,7 +13,7 @@ type
 
   private
     vIConexao : IConexao;
-    FContaCorrentesLista: IObject<TObjectList<TContaCorrenteModel>>;
+    FContaCorrentesLista: IList<TContaCorrenteModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -65,7 +64,7 @@ type
     FSaldo: Real;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetContaCorrentesLista(const Value: IObject<TObjectList<TContaCorrenteModel>>);
+    procedure SetContaCorrentesLista(const Value: IList<TContaCorrenteModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -166,7 +165,7 @@ type
     function carregaClasse(pId: String): TContaCorrenteModel;
     procedure excluirRegistro(pIdRegistro: String);
 
-    property ContaCorrentesLista: IObject<TObjectList<TContaCorrenteModel>> read FContaCorrentesLista write SetContaCorrentesLista;
+    property ContaCorrentesLista: IList<TContaCorrenteModel> read FContaCorrentesLista write SetContaCorrentesLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -409,7 +408,7 @@ begin
   FHORA_COR := Value;
 end;
 
-procedure TContaCorrenteModel.SetContaCorrentesLista(const Value: IObject<TObjectList<TContaCorrenteModel>>);
+procedure TContaCorrenteModel.SetContaCorrentesLista;
 begin
   FContaCorrentesLista := Value;
 end;
