@@ -8,7 +8,7 @@ uses
   Terasoft.FuncoesTexto,
   ContasReceberItensDao,
   Terasoft.Utils,
-  Terasoft.Framework.ObjectIface,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -17,7 +17,7 @@ type
 
     vIConexao : IConexao;
 
-    FContasRecebersLista: IObject<TObjectList<TContasReceberModel>>;
+    FContasRecebersLista: IList<TContasReceberModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -74,7 +74,7 @@ type
     FIDUsuarioOperacao: String;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetContasRecebersLista(const Value: IObject<TObjectList<TContasReceberModel>>);
+    procedure SetContasRecebersLista(const Value: IList<TContasReceberModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -189,7 +189,7 @@ type
     procedure excluirVendaCartao;
     procedure validaExclusao;
 
-    property ContasRecebersLista: IObject<TObjectList<TContasReceberModel>> read FContasRecebersLista write SetContasRecebersLista;
+    property ContasRecebersLista: IList<TContasReceberModel> read FContasRecebersLista write SetContasRecebersLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -352,6 +352,8 @@ end;
 
 destructor TContasReceberModel.Destroy;
 begin
+  FContasRecebersLista := nil;
+  vIConexao := nil;
   inherited;
 end;
 

@@ -5,6 +5,8 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
+  Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
@@ -12,7 +14,7 @@ type
 
   private
     vIConexao : IConexao;
-    FContaCorrentesLista: TObjectList<TContaCorrenteModel>;
+    FContaCorrentesLista: IObject<TObjectList<TContaCorrenteModel>>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -63,7 +65,7 @@ type
     FSaldo: Real;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetContaCorrentesLista(const Value: TObjectList<TContaCorrenteModel>);
+    procedure SetContaCorrentesLista(const Value: IObject<TObjectList<TContaCorrenteModel>>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -164,7 +166,7 @@ type
     function carregaClasse(pId: String): TContaCorrenteModel;
     procedure excluirRegistro(pIdRegistro: String);
 
-    property ContaCorrentesLista: TObjectList<TContaCorrenteModel> read FContaCorrentesLista write SetContaCorrentesLista;
+    property ContaCorrentesLista: IObject<TObjectList<TContaCorrenteModel>> read FContaCorrentesLista write SetContaCorrentesLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -181,6 +183,7 @@ type
 implementation
 
 uses
+  SysUtils,
   ContaCorrenteDao;
 
 { TContaCorrenteModel }
@@ -232,7 +235,8 @@ end;
 
 destructor TContaCorrenteModel.Destroy;
 begin
-
+  FContaCorrentesLista := nil;
+  vIConexao := nil;
   inherited;
 end;
 
@@ -405,7 +409,7 @@ begin
   FHORA_COR := Value;
 end;
 
-procedure TContaCorrenteModel.SetContaCorrentesLista(const Value: TObjectList<TContaCorrenteModel>);
+procedure TContaCorrenteModel.SetContaCorrentesLista(const Value: IObject<TObjectList<TContaCorrenteModel>>);
 begin
   FContaCorrentesLista := Value;
 end;

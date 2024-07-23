@@ -566,7 +566,7 @@ begin
     lContasReceberModel.IDPedidoView := lPedidoVendaModel.NUMERO_PED;
     lContasReceberModel.obterLista;
 
-    lContasReceberModel := lContasReceberModel.ContasRecebersLista.objeto[0];
+    lContasReceberModel := lContasReceberModel.ContasRecebersLista.First;
 
     mtReceber.Append;
     mtReceberNOME_PORT.Value := lContasReceberModel.PORTADOR_NOME;
