@@ -135,7 +135,7 @@ end;
 
 destructor TConstrutorDao.Destroy;
 begin
-
+  vIConexao := nil;
   inherited;
 end;
 

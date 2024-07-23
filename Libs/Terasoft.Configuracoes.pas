@@ -81,7 +81,8 @@ end;
 
 destructor TerasoftConfiguracoes.Destroy;
 begin
-
+  freeAndNil(vmtConfiguracoes);
+  vIConexao := nil;
   inherited;
 end;
 

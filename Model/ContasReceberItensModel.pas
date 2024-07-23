@@ -527,6 +527,8 @@ end;
 
 destructor TContasReceberItensModel.Destroy;
 begin
+  FreeAndNil(FContasReceberItenssLista);
+  vIConexao := nil;
   inherited;
 end;
 

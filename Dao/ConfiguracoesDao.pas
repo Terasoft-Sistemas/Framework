@@ -80,7 +80,9 @@ end;
 
 destructor TConfiguracoesDao.Destroy;
 begin
-
+  freeAndNil(FConfiguracoessLista);
+  freeAndNil(vConstrutor);
+  vIConexao   := nil;
   inherited;
 end;
 

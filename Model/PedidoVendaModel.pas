@@ -653,7 +653,7 @@ begin
     lContasReceberModel.WhereView    := ' and portador.tpag_nfe = ''17'' and portador.pix_chave is not null';
     lContasReceberModel.obterContasReceberPedido;
 
-    for lContasReceberModel in lContasReceberModel.ContasRecebersLista do
+    for lContasReceberModel in lContasReceberModel.ContasRecebersLista.objeto do
     begin
       lContasReceberItensModel.IDContasReceberView := lContasReceberModel.FATURA_REC;
       lContasReceberItensModel.obterLista;
@@ -715,6 +715,8 @@ end;
 
 destructor TPedidoVendaModel.Destroy;
 begin
+  FreeAndNil(FPedidoVendasLista);
+  vIConexao := nil;
   inherited;
 end;
 
@@ -727,12 +729,12 @@ begin
     lContasReceberModel.IDPedidoView := self.NUMERO_PED;
     lContasReceberModel.obterLista;
 
-    for lModel in lContasReceberModel.ContasRecebersLista do
+    for lModel in lContasReceberModel.ContasRecebersLista.objeto do
     begin
       lModel.validaExclusao;
     end;
 
-    for lContasReceberModel in lContasReceberModel.ContasRecebersLista do
+    for lContasReceberModel in lContasReceberModel.ContasRecebersLista.objeto do
     begin
       lContasReceberModel.Excluir(lContasReceberModel.FATURA_REC);
     end;

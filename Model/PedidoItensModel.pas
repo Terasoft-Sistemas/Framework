@@ -3,6 +3,7 @@
 interface
 
 uses
+  SysUtils,
   Terasoft.Types,
   System.Generics.Collections,
   mcibr.motor,
@@ -506,7 +507,6 @@ uses
   Terasoft.FuncoesTexto,
   PedidoItensDao,
   CalcularImpostosModel,
-  System.SysUtils,
   MovimentoModel,
   PedidoVendaModel,
   ProdutosModel,
@@ -683,6 +683,8 @@ end;
 
 destructor TPedidoItensModel.Destroy;
 begin
+  FreeAndNil(FPedidoItenssLista);
+  vIConexao := nil;
   inherited;
 end;
 

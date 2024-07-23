@@ -11,6 +11,7 @@ uses
   UsuarioModel,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao,
   Terasoft.Utils;
 
@@ -21,7 +22,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FUsuariosLista: TObjectList<TUsuarioModel>;
+    FUsuariosLista: IObject<TObjectList<TUsuarioModel>>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -32,7 +33,7 @@ type
     FStatus: String;
     FID: String;
     FPerfil: Variant;
-    procedure SetUsuariosLista(const Value: TObjectList<TUsuarioModel>);
+    procedure SetUsuariosLista(const Value: IObject<TObjectList<TUsuarioModel>>);
     procedure SetCountView(const Value: String);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -63,7 +64,7 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
-    property UsuariosLista: TObjectList<TUsuarioModel> read FUsuariosLista write SetUsuariosLista;
+    property UsuariosLista: IObject<TObjectList<TUsuarioModel>> read FUsuariosLista write SetUsuariosLista;
 
     function incluir(pUsuarioModel: TUsuarioModel): String;
     function alterar(pUsuarioModel: TUsuarioModel): String;
@@ -145,8 +146,10 @@ end;
 
 destructor TUsuarioDao.Destroy;
 begin
+  FreeAndNil(vConstrutor);
+  FUsuariosLista:=nil;
+  vIConexao   := nil;
   inherited;
-
 end;
 
 function TUsuarioDao.incluir(pUsuarioModel: TUsuarioModel): String;
@@ -261,10 +264,11 @@ var
   lQry: TFDQuery;
   lSQL:String;
   i: INteger;
+  modelo: TUsuarioModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FUsuariosLista := TObjectList<TUsuarioModel>.Create;
+  FUsuariosLista := TImplObjetoOwner<TObjectList<TUsuarioModel>>.CreateOwner(TObjectList<TUsuarioModel>.Create);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -287,17 +291,16 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      FUsuariosLista.Add(TUsuarioModel.Create(vIConexao));
+      modelo := TUsuarioModel.Create(vIConexao);
+      FUsuariosLista.objeto.Add(modelo);
 
-      i := FUsuariosLista.Count -1;
-
-      FUsuariosLista[i].ID             := lQry.FieldByName('ID').AsString;
-      FUsuariosLista[i].STATUS         := lQry.FieldByName('STATUS').AsString;
-      FUsuariosLista[i].FANTASIA       := lQry.FieldByName('FANTASIA').AsString;
-      FUsuariosLista[i].SENHA          := lQry.FieldByName('SENHA').AsString;
-      FUsuariosLista[i].NOME           := lQry.FieldByName('NOME').AsString;
-      FUsuariosLista[i].DPTO           := lQry.FieldByName('DPTO').AsString;
-      FUsuariosLista[i].PERFIL_NEW_ID  := lQry.FieldByName('PERFIL_NEW_ID').AsString;
+      modelo.ID             := lQry.FieldByName('ID').AsString;
+      modelo.STATUS         := lQry.FieldByName('STATUS').AsString;
+      modelo.FANTASIA       := lQry.FieldByName('FANTASIA').AsString;
+      modelo.SENHA          := lQry.FieldByName('SENHA').AsString;
+      modelo.NOME           := lQry.FieldByName('NOME').AsString;
+      modelo.DPTO           := lQry.FieldByName('DPTO').AsString;
+      modelo.PERFIL_NEW_ID  := lQry.FieldByName('PERFIL_NEW_ID').AsString;
 
       lQry.Next;
     end;
@@ -377,7 +380,7 @@ begin
   FTotalRecords := Value;
 end;
 
-procedure TUsuarioDao.SetUsuariosLista(const Value: TObjectList<TUsuarioModel>);
+procedure TUsuarioDao.SetUsuariosLista;
 begin
   FUsuariosLista := Value;
 end;

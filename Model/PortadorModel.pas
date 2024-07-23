@@ -207,7 +207,7 @@ end;
 
 destructor TPortadorModel.Destroy;
 begin
-
+  vIConexao := nil;
   inherited;
 end;
 
@@ -232,7 +232,7 @@ begin
     FPortadorsLista := lPortadorLista.PortadorsLista;
 
   finally
-    lPortadorLista.Free;
+    freeAndNil(lPortadorLista);
   end;
 end;
 

@@ -472,7 +472,8 @@ end;
 
 destructor TFuncionarioModel.Destroy;
 begin
-
+  FreeAndNil(FFuncionariosLista);
+  vIConexao := nil;
   inherited;
 end;
 

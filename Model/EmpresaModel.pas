@@ -133,7 +133,7 @@ end;
 
 destructor TEmpresaModel.Destroy;
 begin
-
+  vIConexao := nil;
   inherited;
 end;
 

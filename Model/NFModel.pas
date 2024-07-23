@@ -3,6 +3,7 @@ unit NFModel;
 interface
 
 uses
+  SysUtils,
   Terasoft.Types,
   FireDAC.Comp.Client,
   System.Generics.Collections,
@@ -510,7 +511,8 @@ end;
 
 destructor TNFModel.Destroy;
 begin
-
+  freeAndNil(FNFLista);
+  vIConexao := nil;
   inherited;
 end;
 

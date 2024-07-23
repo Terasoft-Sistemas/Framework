@@ -92,7 +92,7 @@ end;
 
 destructor TLojasModel.Destroy;
 begin
-
+  vIConexao := nil;
   inherited;
 end;
 

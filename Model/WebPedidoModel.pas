@@ -635,7 +635,8 @@ end;
 
 destructor TWebPedidoModel.Destroy;
 begin
-
+  FreeAndNil(FWebPedidosLista);
+  vIConexao := nil;
   inherited;
 end;
 

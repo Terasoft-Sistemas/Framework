@@ -8,6 +8,7 @@ uses
   Terasoft.FuncoesTexto,
   ContasReceberItensDao,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
@@ -16,7 +17,7 @@ type
 
     vIConexao : IConexao;
 
-    FContasRecebersLista: TObjectList<TContasReceberModel>;
+    FContasRecebersLista: IObject<TObjectList<TContasReceberModel>>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -73,7 +74,7 @@ type
     FIDUsuarioOperacao: String;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetContasRecebersLista(const Value: TObjectList<TContasReceberModel>);
+    procedure SetContasRecebersLista(const Value: IObject<TObjectList<TContasReceberModel>>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -188,7 +189,7 @@ type
     procedure excluirVendaCartao;
     procedure validaExclusao;
 
-    property ContasRecebersLista: TObjectList<TContasReceberModel> read FContasRecebersLista write SetContasRecebersLista;
+    property ContasRecebersLista: IObject<TObjectList<TContasReceberModel>> read FContasRecebersLista write SetContasRecebersLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -581,7 +582,7 @@ begin
   FFUNCIONARIO_ID := Value;
 end;
 
-procedure TContasReceberModel.SetContasRecebersLista(const Value: TObjectList<TContasReceberModel>);
+procedure TContasReceberModel.SetContasRecebersLista;
 begin
   FContasRecebersLista := Value;
 end;

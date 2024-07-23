@@ -3,6 +3,7 @@ unit WebPedidoItensModel;
 interface
 
 uses
+  SysUtils,
   Terasoft.Types,
   Terasoft.Utils,
   System.Generics.Collections,
@@ -370,7 +371,8 @@ end;
 
 destructor TWebPedidoItensModel.Destroy;
 begin
-
+  freeAndNil(FWebPedidoItenssLista);
+  vIConexao := nil;
   inherited;
 end;
 

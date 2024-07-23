@@ -7,6 +7,7 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.Generics.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
@@ -14,7 +15,7 @@ type
 
   private
     vIConexao : IConexao;
-    FUsuariosLista: TObjectList<TUsuarioModel>;
+    FUsuariosLista:IObject<TObjectList<TUsuarioModel>>;
     FAcao: TAcao;
     FDESCONTO: Variant;
     FFANTASIA: Variant;
@@ -138,7 +139,7 @@ type
     property TIPO_VENDEDOR         : Variant read FTIPO_VENDEDOR write SetTIPO_VENDEDOR;
 
     property Acao          : TAcao                      read FAcao          write SetAcao;
-    property UsuariosLista : TObjectList<TUsuarioModel> read FUsuariosLista write FUsuariosLista;
+    property UsuariosLista : IObject<TObjectList<TUsuarioModel>> read FUsuariosLista write FUsuariosLista;
 
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -261,7 +262,8 @@ end;
 
 destructor TUsuarioModel.Destroy;
 begin
-
+  FUsuariosLista := nil;
+  vIConexao := nil;
   inherited;
 end;
 

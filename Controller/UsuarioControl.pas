@@ -3,6 +3,7 @@ unit UsuarioControl;
 interface
 
   uses
+    SysUtils,
     UsuarioModel,
     FireDAC.Comp.Client,
     Interfaces.Conexao;
@@ -34,8 +35,7 @@ end;
 
 destructor TUsuarioControl.Destroy;
 begin
-  FUsuarioModel.Free;
-
+  freeAndNil(FUsuarioModel);
   inherited;
 end;
 

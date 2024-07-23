@@ -105,7 +105,7 @@ end;
 
 destructor TConfiguracoesModel.Destroy;
 begin
-
+  vIConexao := nil;
   inherited;
 end;
 
