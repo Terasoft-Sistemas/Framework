@@ -5,9 +5,11 @@ unit Terasoft.Framework.Generics.DAO;
 
 interface
   uses
-    Terasoft.Framework.Types;
+    Terasoft.Framework.Types,
+    Terasoft.Framework.DB;
 
   type
+    IDAO = IGDB;
     IGeneric_DAO = interface
     ['{08AC6E5D-79B4-4534-9D72-CAB6815908F1}']
       //
