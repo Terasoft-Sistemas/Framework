@@ -12,7 +12,7 @@ uses
   Terasoft.FuncoesTexto,
   Terasoft.ConstrutorDao,
   Terasoft.Utils,
-  Terasoft.Framework.ObjectIface,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -21,7 +21,7 @@ type
   private
     vIConexao : IConexao;
     vConstrutor : TConstrutorDao;
-    FCaixaControlesLista: IObject<TObjectList<TCaixaControleModel>>;
+    FCaixaControlesLista: IList<TCaixaControleModel>;
     FLengthPageView: String;
     FStartRecordView: String;
     FID: Variant;
@@ -32,7 +32,7 @@ type
     FIDRecordView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetCaixaControlesLista(const Value: IObject<TObjectList<TCaixaControleModel>>);
+    procedure SetCaixaControlesLista(const Value: IList<TCaixaControleModel>);
     procedure SetID(const Value: Variant);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -47,7 +47,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property CaixaControlesLista: IObject<TObjectList<TCaixaControleModel>> read FCaixaControlesLista write SetCaixaControlesLista;
+    property CaixaControlesLista: IList<TCaixaControleModel> read FCaixaControlesLista write SetCaixaControlesLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -229,7 +229,7 @@ begin
 
   lQry := vIConexao.CriarQuery;
 
-  FCaixaControlesLista := TImplObjetoOwner<TObjectList<TCaixaControleModel>>.CreateOwner(TObjectList<TCaixaControleModel>.Create);
+  FCaixaControlesLista := TCollections.CreateList<TCaixaControleModel>(true);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -253,7 +253,7 @@ begin
     while not lQry.Eof do
     begin
       modelo := TCaixaControleModel.Create(vIConexao);
-      FCaixaControlesLista.objeto.Add(modelo);
+      FCaixaControlesLista.Add(modelo);
 
       modelo.ID                := lQry.FieldByName('ID').AsString;
       modelo.DATA              := lQry.FieldByName('DATA').AsString;
@@ -377,7 +377,7 @@ begin
 
   lQry := vIConexao.CriarQuery;
 
-  FCaixaControlesLista := TImplObjetoOwner<TObjectList<TCaixaControleModel>>.CreateOwner(TObjectList<TCaixaControleModel>.Create);
+  FCaixaControlesLista := TCollections.CreateList<TCaixaControleModel>(true);
 
   try
     lSQL := ' select c.id,                                                                    '+
@@ -405,7 +405,7 @@ begin
     while not lQry.Eof do
     begin
       modelo := TCaixaControleModel.Create(vIConexao);
-      FCaixaControlesLista.objeto.Add(modelo);
+      FCaixaControlesLista.Add(modelo);
 
       modelo.ID                := lQry.FieldByName('ID').AsString;
       modelo.DATA              := lQry.FieldByName('DATA').AsString;

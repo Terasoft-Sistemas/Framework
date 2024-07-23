@@ -7,7 +7,7 @@ uses
   System.Generics.Collections,
   Terasoft.Utils,
   CaixaModel,
-  Terasoft.Framework.ObjectIface,
+  sPRING.Collections,
   Interfaces.Conexao;
 
 type
@@ -16,7 +16,7 @@ type
   private
     vIConexao : IConexao;
 
-    FCaixaControlesLista: IObject<TObjectList<TCaixaControleModel>>;
+    FCaixaControlesLista: IList<TCaixaControleModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -39,7 +39,7 @@ type
     Fhora_fecha: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetCaixaControlesLista(const Value: IObject<TObjectList<TCaixaControleModel>>);
+    procedure SetCaixaControlesLista(const Value: IList<TCaixaControleModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -96,7 +96,7 @@ type
 
     function vendaCaixaFechado(pDataHora: String): boolean;
 
-    property CaixaControlesLista: IObject<TObjectList<TCaixaControleModel>> read FCaixaControlesLista write SetCaixaControlesLista;
+    property CaixaControlesLista: IList<TCaixaControleModel> read FCaixaControlesLista write SetCaixaControlesLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -131,7 +131,7 @@ begin
       exit;
     end;
 
-    Result := lCaixaControleDao.CaixaControlesLista.objeto[0].DATA;
+    Result := lCaixaControleDao.CaixaControlesLista.First.DATA;
 
   finally
     lCaixaControleDao.Free;
@@ -202,7 +202,7 @@ begin
     if lCaixaControleDao.TotalRecords = 0 then
       CriaException('Nenhum caixa aberto localizado.');
 
-    lCaixaAberto := lCaixaControleDao.CaixaControlesLista.objeto[0];
+    lCaixaAberto := lCaixaControleDao.CaixaControlesLista.First;
 
     lCaixaAberto.Acao       := tacAlterar;
     lCaixaAberto.data_fecha := DateToStr(vIConexao.DataServer);
