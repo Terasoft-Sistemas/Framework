@@ -5,6 +5,7 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -13,7 +14,7 @@ type
   private
     vIConexao : IConexao;
 
-    FAdmCartaosLista: TObjectList<TAdmCartaoModel>;
+    FAdmCartaosLista: IList<TAdmCartaoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -40,7 +41,7 @@ type
     FCONCILIADORA_ID: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetAdmCartaosLista(const Value: TObjectList<TAdmCartaoModel>);
+    procedure SetAdmCartaosLista(const Value: IList<TAdmCartaoModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -92,7 +93,7 @@ type
 
     function carregaClasse(pId: String): TAdmCartaoModel;
 
-    property AdmCartaosLista: TObjectList<TAdmCartaoModel> read FAdmCartaosLista write SetAdmCartaosLista;
+    property AdmCartaosLista: IList<TAdmCartaoModel> read FAdmCartaosLista write SetAdmCartaosLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -146,7 +147,8 @@ end;
 
 destructor TAdmCartaoModel.Destroy;
 begin
-
+  FAdmCartaosLista := nil;
+  vIConexao := nil;
   inherited;
 end;
 
@@ -250,7 +252,7 @@ begin
   FGERENCIADOR := Value;
 end;
 
-procedure TAdmCartaoModel.SetAdmCartaosLista(const Value: TObjectList<TAdmCartaoModel>);
+procedure TAdmCartaoModel.SetAdmCartaosLista;
 begin
   FAdmCartaosLista := Value;
 end;

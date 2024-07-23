@@ -5,8 +5,11 @@ interface
     Terasoft.Framework.Types,
     Terasoft.Framework.DB,
     Terasoft.Framework.Texto,
+    FireDAC.Comp.Client,
+    System.SysUtils,
+    System.Classes,
     Terasoft.Framework.ObjectIface,
-    FireDAC.Comp.Client, System.SysUtils, System.Classes, System.Generics.Defaults;
+    System.Generics.Defaults;
 
   type
 
