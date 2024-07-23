@@ -6,22 +6,55 @@ unit Terasoft.Framework.Generics.Controller;
 interface
   uses
     Classes,Sysutils,
+    Terasoft.Framework.Generics.DAO,
     Terasoft.Framework.Types, Terasoft.Framework.Texto;
 
   const
     GENERIC_TEXT_PADRAO = 'PADRAO';
+    GENERIC_PERFIL_MAIN = 'MAIN';
+    CONTROLLER_BOOT     = 'BOOT';
 
   type
+
+    IGeneric_BootController = interface
+    ['{38B4CE41-E17F-4708-938C-7FF9ED00A065}']
+      function boot(pResultado: IResultadoOperacao): IResultadoOperacao;
+    end;
 
     IGeneric_Controller = interface
     ['{73BAA3FD-417C-4C90-A307-897E1B2381A0}']
     //property perfil getter/setter
       function getPerfil: TipoWideStringFramework;
 
+    //property dao getter/setter
+      function getDao: IDAO;
+      procedure setDao(const pValue: IDAO);
+
+      property dao: IDAO read getDao write setDao;
       property perfil: TipoWideStringFramework read getPerfil;
     end;
 
+    TBaseGenericControllerImpl = class(TInterfacedObject, IGeneric_Controller)
+    protected
+      fPerfil: TipoWideStringFramework;
+      fDao: IDAO;
+
+    //property dao getter/setter
+      function getDao: IDAO;
+      procedure setDao(const pValue: IDAO);
+
+    //property perfil getter/setter
+      function getPerfil: TipoWideStringFramework;
+
+      function doBoot(pResultado: IResultadoOperacao): IResultadoOperacao; virtual; abstract;
+      function boot(pResultado: IResultadoOperacao): IResultadoOperacao;
+
+    public
+      constructor Create(pPerfil: TipoWideStringFramework);
+    end;
+
     function getGenericController(pPerfil, pNome: TipoWideStringFramework): IGeneric_Controller;
+    function bootController(pPerfil,pNome,pRole: TipoWideStringFramework): boolean;
 
     procedure genericRegister(pTable: TipoWideStringFramework; pPerfil: TipoWideStringFramework; pName: TipoWideStringFramework; pGenericCreator: TGenericCreator);
     procedure registerModel(pPerfil: TipoWideStringFramework; pModelName: TipoWideStringFramework; pModelCreator: TGenericCreator);
@@ -29,7 +62,6 @@ interface
     procedure registerView(pPerfil: TipoWideStringFramework; pViewName: TipoWideStringFramework; pViewCreator: TGenericCreator);
     procedure registerController(pPerfil: TipoWideStringFramework; pControllerName: TipoWideStringFramework; pControllerCreator: TGenericCreator);
 
-//    function createGeneric(pPerfil: TipoWideStringFramework; pName: TipoWideStringFramework; pResultado: IUnknown): IUnknown;
     function createGenericIface(pTable, pPerfil, pNome, pRole: TipoWideStringFramework; pParam1: TipoWideStringFramework; pParam2: TipoWideStringFramework; pResultado: IUnknown): IUnknown;
 
 
@@ -37,6 +69,7 @@ implementation
   uses
     Terasoft.Framework.Exceptions,
     strUtils,
+    Terasoft.Framework.DB,
     System.SyncObjs,
     Terasoft.Framework.Collections,
     Generics.Collections;
@@ -48,23 +81,14 @@ implementation
     GENERICTABLE_DAO   = 'DAO';
 
   type
-    TGenericControllerImpl = class(TInterfacedObject, IGeneric_Controller)
-    protected
-      fPerfil: TipoWideStringFramework;
 
-    //property perfil getter/setter
-      function getPerfil: TipoWideStringFramework;
-    public
-      constructor Create(pPerfil: TipoWideStringFramework);
-    end;
+    TPairNameCreator = TPair<TipoWideStringFramework,TGenericCreator>;
+    TPairPerfilCreator = TPair<TipoWideStringFramework,TPairNameCreator>;
+    TPairTablePerfilCreator = TPair<TipoWideStringFramework,TPairPerfilCreator>;
 
-  TPairNameCreator = TPair<TipoWideStringFramework,TGenericCreator>;
-  TPairPerfilCreator = TPair<TipoWideStringFramework,TPairNameCreator>;
-  TPairTablePerfilCreator = TPair<TipoWideStringFramework,TPairPerfilCreator>;
-
-  ILockNameCreator = ILockDictionary<TipoWideStringFramework,TGenericCreator>;
-  ILockPerfilCreator = ILockDictionary<TipoWideStringFramework,ILockNameCreator>;
-  ILockTablePerfilCreator = ILockDictionary<TipoWideStringFramework,ILockPerfilCreator>;
+    ILockNameCreator = ILockDictionary<TipoWideStringFramework,TGenericCreator>;
+    ILockPerfilCreator = ILockDictionary<TipoWideStringFramework,ILockNameCreator>;
+    ILockTablePerfilCreator = ILockDictionary<TipoWideStringFramework,ILockPerfilCreator>;
 
   var
     gDic: ILockTablePerfilCreator;
@@ -109,7 +133,7 @@ begin
 
 end;
 
-function createGenericIface;//(pTable: TipoWideStringFramework; pPerfil: TipoWideStringFramework; pName: TipoWideStringFramework; pResultado: IUnknown): IUnknown;
+function createGenericIface;
   var
     p: TGenericCreator;
     lRes: IResultadoOperacao;
@@ -122,6 +146,7 @@ begin
     begin
       lRes.formataErro('createGeneric: Não existe creator para [%s] [%s] [%s]', [pTable,pPerfil, pNome]);
     end;
+    Result := p(pTable,pPerfil,pNome,pRole,pParam1,pParam2,pResultado);
   except
     on e: Exception do
       lRes.formataErro('createGeneric: %s: %s', [e.ClassName, e.Message]);
@@ -155,7 +180,7 @@ begin
   if not gDic.TryGetValue(pTable,lpc) then
   begin
     lpc := Terasoft.Framework.Collections.TCreateLock.CreateDictionary<TipoWideStringFramework,ILockNameCreator>(getComparadorOrdinalTipoWideStringFramework);
-    gDic.addOrSetValue(pPerfil,lpc);
+    gDic.addOrSetValue(pTable,lpc);
   end;
 
   if not lpc.TryGetValue(pPerfil,lnc) then
@@ -167,21 +192,45 @@ begin
   lnc.addOrSetValue(pName, pGenericCreator);
 end;
 
-function getGenericController;//(pPerfil: TipoWideStringFramework): IGeneric_Controller;
+function getGenericController;
 begin
-  Result := TGenericControllerImpl.Create(pPerfil);
+  Result := TBaseGenericControllerImpl.Create(pPerfil);
 end;
 
 { TGenericControllerImpl }
 
-constructor TGenericControllerImpl.Create(pPerfil: TipoWideStringFramework);
+procedure TBaseGenericControllerImpl.setDao(const pValue: IGDB);
+begin
+  fDao := pValue;
+end;
+
+function TBaseGenericControllerImpl.getDao: IGDB;
+  var
+    db: TDatabaseParts;
+begin
+  if(fDao=nil) then
+  begin
+    db := getDatabasePartsfromIni;
+    db.testarPortas := false;
+    fDao := openGDBDatabase(db);
+  end;
+  Result := fDao;
+end;
+
+function TBaseGenericControllerImpl.boot(pResultado: IResultadoOperacao): IResultadoOperacao;
+begin
+  Result := checkResultadoOperacao(pResultado);
+  Result := doBoot(pResultado);
+end;
+
+constructor TBaseGenericControllerImpl.Create(pPerfil: TipoWideStringFramework);
 begin
   if(pPerfil='') then
     pPerfil := GENERIC_TEXT_PADRAO;
   fPerfil := pPerfil;
 end;
 
-function TGenericControllerImpl.getPerfil: TipoWideStringFramework;
+function TBaseGenericControllerImpl.getPerfil: TipoWideStringFramework;
 begin
   Result := fPerfil;
 end;
@@ -206,31 +255,24 @@ begin
   genericRegister(GENERICTABLE_CONTROLLER,pPerfil,pControllerName,pControllerCreator);
 end;
 
-function criaLocal(pTable, pPerfil, pNome, pRole: TipoWideStringFramework; pParam1: TipoWideStringFramework; pParam2: TipoWideStringFramework; pResultado: IUnknown): IUnknown;
+function bootController;
   var
-    p: TGenericCreator;
     lRes: IResultadoOperacao;
+    boot: IGeneric_BootController;
+
 begin
-  Result := nil;
-  lRes := checkResultadoOperacao(pResultado,pResultado);
-  try
-    Result := TGenericControllerImpl.Create(pPerfil);
-  except
-    on e: Exception do
-      lRes.formataErro('criaLocal: %s: %s', [e.ClassName, e.Message]);
-  end;
+  Result := false;
+  if(pNome='') then
+    pNome := CONTROLLER_BOOT;
 
+  lRes := criaResultadoOperacao;
+  Result := Supports(createGenericIface(GENERICTABLE_CONTROLLER, pPerfil, pNome, pRole, '', '' , lRes), IGeneric_BootController, boot);
+  Result := Result and (lRes.erros=0);
+  if(Result) then
+    boot.boot(lRes);
 end;
-
-procedure registra;
-begin
-  registerController('main','main',criaLocal);
-
-end;
-
 
 initialization
-  registra;
 
 finalization
 
