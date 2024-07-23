@@ -64,8 +64,8 @@ type
 
     function where: String;
 
-    function obterLista       : TFDMemTable;
-    function obterTotalizador : TFDMemTable;
+    function obterLista       : IFDDataset;
+    function obterTotalizador : IFDDataset;
 
     procedure setParams(var pQry: TFDQuery; pEntradaModel: TEntradaModel);
 
@@ -267,7 +267,7 @@ begin
   Result := lSQL;
 end;
 
-function TEntradaDao.obterTotalizador: TFDMemTable;
+function TEntradaDao.obterTotalizador: IFDDataset;
 var
   lQry : TFDQuery;
   lSql : String;
@@ -413,7 +413,7 @@ begin
   end;
 end;
 
-function TEntradaDao.obterLista: TFDMemTable;
+function TEntradaDao.obterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -528,7 +528,7 @@ end;
 
 procedure TEntradaDao.setParams(var pQry: TFDQuery; pEntradaModel: TEntradaModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -543,7 +543,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pEntradaModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pEntradaModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pEntradaModel).AsString))
       else
         pQry.ParamByName(pQry.Params[i].Name).Value := Unassigned;
 

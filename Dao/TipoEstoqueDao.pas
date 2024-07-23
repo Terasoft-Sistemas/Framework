@@ -13,6 +13,7 @@ uses
   Terasoft.Framework.ListaSimples,
   Terasoft.Framework.SimpleTypes,
   Terasoft.FuncoesTexto,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
@@ -24,7 +25,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function ObterLista(pTipoEstoque_Parametros: TTipoEstoque_Parametros): TFDMemTable;
+    function ObterLista(pTipoEstoque_Parametros: TTipoEstoque_Parametros): IFDDataset;
 
 end;
 
@@ -45,31 +46,31 @@ begin
   inherited;
 end;
 
-function TTipoEstoqueDao.ObterLista(pTipoEstoque_Parametros: TTipoEstoque_Parametros): TFDMemTable;
+function TTipoEstoqueDao.ObterLista(pTipoEstoque_Parametros: TTipoEstoque_Parametros): IFDDataset;
 var
   lQry: TFDQuery;
   lSQL:String;
-  lMemTable: TFDMemTable;
+  lMemTable: IFDDataset;
 begin
   try
-    lMemTable := TFDMemTable.Create(nil);
+    lMemTable := TImplObjetoOwner<TDataset>.CreateOwner(TFDMemTable.Create(nil));
 
     lSQL := 'Select ID, NOME   ' + #13 +
             'From PRODUTO_TIPO ' + #13 +
             'Order by NOME     ' + #13;
 
-    with lMemTable.IndexDefs.AddIndexDef do
+    with TFDMemTable(lMemTable.objeto).IndexDefs.AddIndexDef do
     begin
       Name := 'OrdenacaoNome';
       Fields := 'NOME';
       Options := [TIndexOption.ixCaseInsensitive];
     end;
 
-    lMemTable.IndexName := 'OrdenacaoNome';
+    TFDMemTable(lMemTable.objeto).IndexName := 'OrdenacaoNome';
 
-    lMemTable.FieldDefs.Add('CODIGO', ftString, 6);
-    lMemTable.FieldDefs.Add('NOME', ftString, 40);
-    lMemTable.CreateDataSet;
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('CODIGO', ftString, 6);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('NOME', ftString, 40);
+    TFDMemTable(lMemTable.objeto).CreateDataSet;
 
     lQry := vIConexao.CriarQuery;
     lQry.Open(lSQL);
@@ -77,7 +78,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      lMemTable.InsertRecord([
+      lMemTable.objeto.InsertRecord([
                               lQry.FieldByName('ID').AsString,
                               lQry.FieldByName('NOME').AsString
                              ]);
@@ -85,7 +86,7 @@ begin
       lQry.Next;
     end;
 
-    lMemTable.Open;
+    lMemTable.objeto.Open;
 
     Result := lMemTable;
 

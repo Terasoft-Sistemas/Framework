@@ -18,7 +18,7 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function ObterLista(pTipoEstoque_Parametros: TTipoEstoque_Parametros): TFDMemTable;
+    function ObterLista(pTipoEstoque_Parametros: TTipoEstoque_Parametros): IFDDataset;
 
   end;
 
@@ -40,7 +40,7 @@ begin
   inherited;
 end;
 
-function TTipoEstoqueModel.ObterLista(pTipoEstoque_Parametros: TTipoEstoque_Parametros): TFDMemTable;
+function TTipoEstoqueModel.ObterLista(pTipoEstoque_Parametros: TTipoEstoque_Parametros): IFDDataset;
 var
   lTipoEstoqueDao: TTipoEstoqueDao;
   lTipoEstoque_Parametros: TTipoEstoque_Parametros;

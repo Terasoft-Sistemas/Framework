@@ -467,7 +467,7 @@ type
     function Salvar : String;
 
     function carregaClasse(pId: String): TEntradaItensModel;
-    function obterLista : TFDMemTable;
+    function obterLista : IFDDataset;
 
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -593,7 +593,7 @@ begin
   inherited;
 end;
 
-function TEntradaItensModel.obterLista: TFDMemTable;
+function TEntradaItensModel.obterLista: IFDDataset;
 var
   lEntradaItensLista: TEntradaItensDao;
 begin

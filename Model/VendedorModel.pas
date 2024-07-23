@@ -5,6 +5,7 @@ interface
 uses
   Terasoft.Types,
   VendedorDao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client,
   Interfaces.Conexao;
 
@@ -18,7 +19,7 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function ObterLista(pVendedor_Parametros: TVendedor_Parametros): TFDMemTable;
+    function ObterLista(pVendedor_Parametros: TVendedor_Parametros): IFDDataset;
 
   end;
 
@@ -40,7 +41,7 @@ begin
   inherited;
 end;
 
-function TVendedorModel.ObterLista(pVendedor_Parametros: TVendedor_Parametros): TFDMemTable;
+function TVendedorModel.ObterLista(pVendedor_Parametros: TVendedor_Parametros): IFDDataset;
 var
   lVendedorDao: TVendedorDao;
   lVendedor_Parametros: TVendedor_Parametros;

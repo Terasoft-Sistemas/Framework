@@ -14,6 +14,7 @@ uses
   Terasoft.Framework.ListaSimples,
   Terasoft.Framework.SimpleTypes,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   Terasoft.FuncoesTexto;
 
 type
@@ -25,7 +26,7 @@ type
     constructor Create(pConexao : IConexao);
     destructor Destroy; override;
 
-    function ObterLista(pTipoVenda_Parametros: TTipoVenda_Parametros): TFDMemTable;
+    function ObterLista(pTipoVenda_Parametros: TTipoVenda_Parametros): IFDDataset;
 
 end;
 
@@ -46,33 +47,33 @@ begin
   inherited;
 end;
 
-function TTipoVendaDao.ObterLista(pTipoVenda_Parametros: TTipoVenda_Parametros): TFDMemTable;
+function TTipoVendaDao.ObterLista(pTipoVenda_Parametros: TTipoVenda_Parametros): IFDDataset;
 var
   lQry: TFDQuery;
   lSQL:String;
-  lMemTable: TFDMemTable;
+  lMemTable: IFDDataset;
 begin
   try
 
-    lMemTable := TFDMemTable.Create(nil);
+    lMemTable := TImplObjetoOwner<TDataset>.CreateOwner(TFDMemTable.Create(nil));
 
     lSQL := 'Select CODIGO_TV,      ' + #13 +
             '       NOME_TV         ' + #13 +
             'From TIPOVENDA          ' + #13 +
             'Order by NOME_TV       ' + #13;
 
-    with lMemTable.IndexDefs.AddIndexDef do
+    with TFDMemTable(lMemTable.objeto).IndexDefs.AddIndexDef do
     begin
       Name := 'OrdenacaoRazao';
       Fields := 'RAZAO';
       Options := [TIndexOption.ixCaseInsensitive];
     end;
 
-    lMemTable.IndexName := 'OrdenacaoRazao';
+    TFDMemTable(lMemTable.objeto).IndexName := 'OrdenacaoRazao';
 
-    lMemTable.FieldDefs.Add('CODIGO', ftString, 6);
-    lMemTable.FieldDefs.Add('RAZAO', ftString, 40);
-    lMemTable.CreateDataSet;
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('CODIGO', ftString, 6);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('RAZAO', ftString, 40);
+    TFDMemTable(lMemTable.objeto).CreateDataSet;
 
     lQry := vConexao.CriarQuery;
     lQry.Open(lSQL);
@@ -80,7 +81,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      lMemTable.InsertRecord([
+      lMemTable.objeto.InsertRecord([
                               lQry.FieldByName('CODIGO_TV').AsString,
                               lQry.FieldByName('NOME_TV').AsString
                              ]);
@@ -88,7 +89,7 @@ begin
       lQry.Next;
     end;
 
-    lMemTable.Open;
+    lMemTable.objeto.Open;
 
     Result := lMemTable;
 

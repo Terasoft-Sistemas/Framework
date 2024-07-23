@@ -157,8 +157,8 @@ type
     function Salvar : String;
 
     function carregaClasse(pId, pFornecedor: String): TContasPagarModel;
-    function obterLista: TFDMemTable;
-    function obterValorEntrada(pEntrada, pFornecedor: String): TFDMemTable;
+    function obterLista: IFDDataset;
+    function obterValorEntrada(pEntrada, pFornecedor: String): IFDDataset;
     procedure gerarDuplicatas(pID, pFornecedor : String);
     procedure GerarFinanceiroEntrada;
 
@@ -356,7 +356,7 @@ begin
   inherited;
 end;
 
-function TContasPagarModel.obterLista: TFDMemTable;
+function TContasPagarModel.obterLista: IFDDataset;
 var
   lContasPagarLista: TContasPagarDao;
 begin
@@ -402,13 +402,13 @@ begin
   end;
 end;
 
-function TContasPagarModel.obterValorEntrada(pEntrada, pFornecedor: String): TFDMemTable;
+function TContasPagarModel.obterValorEntrada(pEntrada, pFornecedor: String): IFDDataset;
 var
   lContasPagarDao: TContasPagarDao;
   lEntradaModel: TEntradaModel;
   lTotalFinanceiro: Double;
   lTotalEntradaFornecedor: Double;
-  lMemTable : TFDMemTable;
+  lMemTable : IFDDataset;
 begin
 
   lContasPagarDao := TContasPagarDao.Create(vIConexao);
@@ -419,7 +419,7 @@ begin
     lEntradaModel.NumeroView     := pEntrada;
     lEntradaModel.FornecedorView := pFornecedor;
 
-    lTotalEntradaFornecedor := lEntradaModel.obterTotalizador.fieldByName('TOTAL_ENTRADA').AsFloat;
+    lTotalEntradaFornecedor := lEntradaModel.obterTotalizador.objeto.fieldByName('TOTAL_ENTRADA').AsFloat;
     lTotalFinanceiro        := lContasPagarDao.FinanceiroEntrada(pEntrada, pFornecedor);
 
     lMemTable.FieldDefs.Add('VALOR', ftFloat);

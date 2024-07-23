@@ -100,7 +100,7 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function ObterLista(pGrupo_Parametros: TGrupo_Parametros): TFDMemTable; overload;
+    function ObterLista(pGrupo_Parametros: TGrupo_Parametros): IFDDataset; overload;
     function ObterLista: IFDDataset; overload;
 
 
@@ -203,7 +203,7 @@ begin
     lGrupoLista.Free;
   end;
 end;
-function TGrupoModel.ObterLista(pGrupo_Parametros: TGrupo_Parametros): TFDMemTable;
+function TGrupoModel.ObterLista(pGrupo_Parametros: TGrupo_Parametros): IFDDataset;
 var
   lGrupoDao: TGrupoDao;
   lGrupo_Parametros: TGrupo_Parametros;

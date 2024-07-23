@@ -307,8 +307,8 @@ type
 
     function ValidaCFOP(pCFOP: String): String;
 
-    function obterLista       : TFDMemTable;
-    function obterTotalizador : TFDMemTable;
+    function obterLista       : IFDDataset;
+    function obterTotalizador : IFDDataset;
 
     function importaXML       : TEntradaResultado;
     function importaCabecalho : TEntradaResultado;
@@ -751,7 +751,7 @@ end;
 function TEntradaModel.obterFornecedor(pCNPJCPF: String): String;
 var
  lFornecedorModel : TFornecedorModel;
- lTableFornecedor : TFDMemTable;
+ lTableFornecedor : IFDDataset;
 begin
   lFornecedorModel := TFornecedorModel.Create(vIConexao);
 
@@ -759,9 +759,9 @@ begin
     lFornecedorModel.CNPJCPFRecordView := pCNPJCPF;
     lTableFornecedor := lFornecedorModel.obterLista;
 
-    if lTableFornecedor.RecordCount > 0 then
+    if lTableFornecedor.objeto.RecordCount > 0 then
     begin
-      Result := lTableFornecedor.fieldByName('CODIGO_FOR').Value;
+      Result := lTableFornecedor.objeto.fieldByName('CODIGO_FOR').Value;
       exit;
     end;
 
@@ -792,7 +792,7 @@ begin
   end;
 end;
 
-function TEntradaModel.obterLista: TFDMemTable;
+function TEntradaModel.obterLista: IFDDataset;
 var
   lEntradaLista: TEntradaDao;
 begin
@@ -815,7 +815,7 @@ begin
   end;
 end;
 
-function TEntradaModel.obterTotalizador: TFDMemTable;
+function TEntradaModel.obterTotalizador: IFDDataset;
 var
   lEntradaDao: TEntradaDao;
 begin

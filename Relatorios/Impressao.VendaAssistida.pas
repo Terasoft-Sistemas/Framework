@@ -324,7 +324,7 @@ end;
 procedure TImpressaoVendaAssistida.fetchFinanceiro;
 var
   lFinanceiroPedidoModel : TFinanceiroPedidoModel;
-  lMemtable              : TFDMemtable;
+  lMemtable              : IFDDataset;
   lParcela               : Integer;
 begin
 
@@ -335,25 +335,25 @@ begin
     lFinanceiroPedidoModel.OrderView := 'FINANCEIRO_PEDIDO.ID_FINANCEIRO, FINANCEIRO_PEDIDO.PARCELA';
 
     lMemtable := lFinanceiroPedidoModel.obterLista;
-    if (lMemtable.RecordCount > 0) then begin
+    if (lMemtable.objeto.RecordCount > 0) then begin
       lParcela := 0;
-      lMemtable.First;
-      while not lMemTable.Eof do
+      lMemtable.objeto.First;
+      while not lMemTable.objeto.Eof do
       begin
         inc(lParcela);
         if Odd(lParcela) then begin
-          rlMemoParcelaLeft.Lines.Add(lMemtable.FieldByName('PARCELA').AsString+'/'+lMemtable.FieldByName('QUANTIDADE_PARCELAS').AsString);
-          rlMemoVencimentoLeft.Lines.Add(lMemtable.FieldByName('VENCIMENTO').AsString);
-          rlMemoValorLeft.Lines.Add(FormatCurr('#,###0.00', lMemtable.FieldByName('VALOR_PARCELA').AsFloat));
-          rlMemoPortadorLeft.Lines.Add(lMemtable.FieldByName('NOME_PORT').AsString);
+          rlMemoParcelaLeft.Lines.Add(lMemtable.objeto.FieldByName('PARCELA').AsString+'/'+lMemtable.objeto.FieldByName('QUANTIDADE_PARCELAS').AsString);
+          rlMemoVencimentoLeft.Lines.Add(lMemtable.objeto.FieldByName('VENCIMENTO').AsString);
+          rlMemoValorLeft.Lines.Add(FormatCurr('#,###0.00', lMemtable.objeto.FieldByName('VALOR_PARCELA').AsFloat));
+          rlMemoPortadorLeft.Lines.Add(lMemtable.objeto.FieldByName('NOME_PORT').AsString);
         end
         else begin
-          rlMemoParcelaRight.Lines.Add(lMemtable.FieldByName('PARCELA').AsString+'/'+lMemtable.FieldByName('QUANTIDADE_PARCELAS').AsString);
-          rlMemoVencimentoRight.Lines.Add(lMemtable.FieldByName('VENCIMENTO').AsString);
-          rlMemoValorRight.Lines.Add(FormatCurr('#,###0.00', lMemtable.FieldByName('VALOR_PARCELA').AsFloat));
-          rlMemoPortadorRight.Lines.Add(lMemtable.FieldByName('NOME_PORT').AsString);
+          rlMemoParcelaRight.Lines.Add(lMemtable.objeto.FieldByName('PARCELA').AsString+'/'+lMemtable.objeto.FieldByName('QUANTIDADE_PARCELAS').AsString);
+          rlMemoVencimentoRight.Lines.Add(lMemtable.objeto.FieldByName('VENCIMENTO').AsString);
+          rlMemoValorRight.Lines.Add(FormatCurr('#,###0.00', lMemtable.objeto.FieldByName('VALOR_PARCELA').AsFloat));
+          rlMemoPortadorRight.Lines.Add(lMemtable.objeto.FieldByName('NOME_PORT').AsString);
         end;
-        lMemtable.Next;
+        lMemtable.objeto.Next;
       end;
 
       drawFaturasLeft.Height  := rlMemoVencimentoLeft.Height+3;
@@ -364,14 +364,13 @@ begin
       rlBandFatura.Visible := false;
   finally
     lFinanceiroPedidoModel.Free;
-    lMemtable.Free;
   end;
 end;
 
 procedure TImpressaoVendaAssistida.fetchPedido;
 var
   lWebPedidoModel : TWebPedidoModel;
-  lMemtable       : TFDMemtable;
+  lMemtable       : IFDDataset;
 begin
   lWebPedidoModel := TWebPedidoModel.Create(CONEXAO);
   try
@@ -381,14 +380,14 @@ begin
     lWebPedidoModel.ID := Self.FIDPEDIDO;
     lWebPedidoModel.ObterTotais;
 
-    if lMemtable.RecordCount = 0 then
+    if lMemtable.objeto.RecordCount = 0 then
       raise Exception.Create('Pedido de venda '+Self.FIDPEDIDO+' não localizado');
 
     mtPedido.Open;
     mtPedido.Append;
-    mtPedidoNUMERO.Value              := lMemtable.FieldByName('ID').AsString;
-    mtPedidoEMISSAO.Value             := lMemtable.FieldByName('DATAHORA').AsString;
-    mtPedidoOBSERVACAO.Value          := lMemtable.FieldByName('OBSERVACAO').AsString;
+    mtPedidoNUMERO.Value              := lMemtable.objeto.FieldByName('ID').AsString;
+    mtPedidoEMISSAO.Value             := lMemtable.objeto.FieldByName('DATAHORA').AsString;
+    mtPedidoOBSERVACAO.Value          := lMemtable.objeto.FieldByName('OBSERVACAO').AsString;
     mtPedidoVALOR_PRODUTOS.Value      := lWebPedidoModel.VALOR_ITENS;
     mtPedidoVALOR_DESCONTO.Value      := lWebPedidoModel.VALOR_CUPOM_DESCONTO;
     lblDescPercentual.Caption         := 'Desconto ('+FormatFloat(',0.000',lWebPedidoModel.VALOR_CUPOM_DESCONTO*100/lWebPedidoModel.VALOR_ITENS)+'%)';
@@ -397,8 +396,8 @@ begin
     mtPedidoVALOR_ACRESCIMO.Value     := lWebPedidoModel.ACRESCIMO;
     mtPedidoVALOR_FRETE.Value         := lWebPedidoModel.VALOR_FRETE;
     mtPedidoVALOR_TOTAL.Value         := lWebPedidoModel.VALOR_TOTAL;
-    mtPedidoVENDEDOR.Value            := lMemtable.FieldByName('VENDEDOR').AsString;
-    mtPedidoCLIENTE_ID.Value          := lMemtable.FieldByName('CLIENTE_ID').AsString;
+    mtPedidoVENDEDOR.Value            := lMemtable.objeto.FieldByName('VENDEDOR').AsString;
+    mtPedidoCLIENTE_ID.Value          := lMemtable.objeto.FieldByName('CLIENTE_ID').AsString;
     mtPedido.Post;
 
     IMPRESSO.Text := FormatDateTime('dd/mm/yyyy hh:nn:ss', CONEXAO.DataHoraServer);

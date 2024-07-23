@@ -60,7 +60,7 @@ type
 
     function carregaClasse(pID : String): TAnexoModel;
 
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     function sincronizarDados(pAnexoModel: TAnexoModel): String;
 
@@ -230,7 +230,7 @@ begin
   end;
 end;
 
-function TAnexoDao.obterLista: TFDMemTable;
+function TAnexoDao.obterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -292,7 +292,7 @@ end;
 
 procedure TAnexoDao.setParams(var pQry: TFDQuery; pAnexoModel: TAnexoModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -307,7 +307,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pAnexoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pAnexoModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pAnexoModel).AsString))
     end;
   finally
     lCtx.Free;

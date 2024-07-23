@@ -59,8 +59,8 @@ type
     function excluir(pTabelaJurosPromocaoModel: TTabelaJurosPromocaoModel): String;
 
     function carregaClasse(pID : String): TTabelaJurosPromocaoModel;
-    function obterLista: TFDMemTable;
-    function obterTabelaJurosProduto(pProduto : String): TFDMemTable;
+    function obterLista: IFDDataset;
+    function obterTabelaJurosProduto(pProduto : String): IFDDataset;
     procedure setParams(var pQry: TFDQuery; pTabelaJurosPromocaoModel: TTabelaJurosPromocaoModel);
 
 end;
@@ -187,7 +187,7 @@ begin
   Result := lSQL;
 end;
 
-function TTabelaJurosPromocaoDao.obterTabelaJurosProduto(pProduto: String): TFDMemTable;
+function TTabelaJurosPromocaoDao.obterTabelaJurosProduto(pProduto: String): IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -241,7 +241,7 @@ begin
   end;
 end;
 
-function TTabelaJurosPromocaoDao.obterLista: TFDMemTable;
+function TTabelaJurosPromocaoDao.obterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -308,7 +308,7 @@ end;
 
 procedure TTabelaJurosPromocaoDao.setParams(var pQry: TFDQuery; pTabelaJurosPromocaoModel: TTabelaJurosPromocaoModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -323,7 +323,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pTabelaJurosPromocaoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pTabelaJurosPromocaoModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pTabelaJurosPromocaoModel).AsString))
     end;
   finally
     lCtx.Free;

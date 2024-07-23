@@ -79,7 +79,7 @@ type
     function Alterar(pID : String): TSubGrupoModel;
     function Excluir(pID : String): String;
 
-    function ObterLista(pSubGrupo_Parametros: TSubGrupo_Parametros): TFDMemTable; overload;
+    function ObterLista(pSubGrupo_Parametros: TSubGrupo_Parametros): IFDDataset; overload;
     function ObterLista: IFDDataset; overload;
 
   end;
@@ -176,7 +176,7 @@ begin
   end;
 end;
 
-function TSubGrupoModel.ObterLista(pSubGrupo_Parametros: TSubGrupo_Parametros): TFDMemTable;
+function TSubGrupoModel.ObterLista(pSubGrupo_Parametros: TSubGrupo_Parametros): IFDDataset;
 var
   lSubGrupoDao: TSubGrupoDao;
   lSubGrupo_Parametros: TSubGrupo_Parametros;

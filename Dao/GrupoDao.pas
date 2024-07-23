@@ -12,6 +12,7 @@ uses
   Terasoft.Types,
   Terasoft.Framework.ListaSimples.Impl,
   Terasoft.FuncoesTexto,
+  Terasoft.Framework.ObjectIface,
   Terasoft.Framework.ListaSimples,
   Terasoft.Framework.SimpleTypes,
   Interfaces.Conexao,
@@ -64,7 +65,7 @@ type
 
     function carregaClasse(pID : String): TGrupoModel;
 
-    function ObterLista(pGrupo_Parametros: TGrupo_Parametros): TFDMemTable; overload;
+    function ObterLista(pGrupo_Parametros: TGrupo_Parametros): IFDDataset; overload;
     function ObterLista: IFDDataset; overload;
 
     procedure setParams(var pQry: TFDQuery; pGrupoModel: TGrupoModel);
@@ -225,32 +226,32 @@ begin
   end;
 end;
 
-function TGrupoDao.ObterLista(pGrupo_Parametros: TGrupo_Parametros): TFDMemTable;
+function TGrupoDao.ObterLista(pGrupo_Parametros: TGrupo_Parametros): IFDDataset;
 var
   lQry: TFDQuery;
   lSQL:String;
-  lMemTable: TFDMemTable;
+  lMemTable: IFDDataset;
 begin
   try
-    lMemTable := TFDMemTable.Create(nil);
+    lMemTable := TImplObjetoOwner<TDataset>.CreateOwner(TFDMemTable.Create(nil));
 
     lSQL := 'Select CODIGO_GRU,       ' + #13 +
             '       NOME_GRU         ' + #13 +
             'From GRUPOPRODUTO        ' + #13 +
             'Order by NOME_GRU       ' + #13;
 
-    with lMemTable.IndexDefs.AddIndexDef do
+    with TFDMemTable(lMemTable.objeto).IndexDefs.AddIndexDef do
     begin
       Name := 'OrdenacaoRazao';
       Fields := 'RAZAO';
       Options := [TIndexOption.ixCaseInsensitive];
     end;
 
-    lMemTable.IndexName := 'OrdenacaoRazao';
+    TFDMemTable(lMemTable.objeto).IndexName := 'OrdenacaoRazao';
 
-    lMemTable.FieldDefs.Add('CODIGO', ftString, 6);
-    lMemTable.FieldDefs.Add('RAZAO', ftString, 40);
-    lMemTable.CreateDataSet;
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('CODIGO', ftString, 6);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('RAZAO', ftString, 40);
+    TFDMemTable(lMemTable.objeto).CreateDataSet;
                                                   
     lQry := vIConexao.CriarQuery;
     lQry.Open(lSQL);
@@ -258,7 +259,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      lMemTable.InsertRecord([
+      lMemTable.objeto.InsertRecord([
                               lQry.FieldByName('CODIGO_GRU').AsString,
                               lQry.FieldByName('NOME_GRU').AsString
                              ]);
@@ -266,7 +267,7 @@ begin
       lQry.Next;
     end;
 
-    lMemTable.Open;
+    lMemTable.objeto.Open;
 
     Result := lMemTable;
 

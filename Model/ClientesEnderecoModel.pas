@@ -96,7 +96,7 @@ type
 
     function carregaClasse(pId : String): TClientesEnderecoModel;
 
-    function ObterLista: TFDMemTable; overload;
+    function ObterLista: IFDDataset; overload;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -167,7 +167,7 @@ begin
   inherited;
 end;
 
-function TClientesEnderecoModel.obterLista: TFDMemTable;
+function TClientesEnderecoModel.obterLista: IFDDataset;
 var
   lClientesEnderecoLista: TClientesEnderecoDao;
 begin

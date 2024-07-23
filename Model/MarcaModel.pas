@@ -67,7 +67,7 @@ type
     function Alterar(pID : String): TMarcaModel;
     function Excluir(pID : String): String;
 
-    function ObterLista(pMarca_Parametros: TMarca_Parametros): TFDMemTable; overload;
+    function ObterLista(pMarca_Parametros: TMarca_Parametros): IFDDataset; overload;
     function ObterLista : IFDDataset; overload;
 
   end;
@@ -149,7 +149,7 @@ begin
   end;
 end;
 
-function TMarcaModel.ObterLista(pMarca_Parametros: TMarca_Parametros): TFDMemTable;
+function TMarcaModel.ObterLista(pMarca_Parametros: TMarca_Parametros): IFDDataset;
 var
   lMarcaDao: TMarcaDao;
   lMarca_Parametros: TMarca_Parametros;

@@ -64,7 +64,7 @@ type
     function excluir(AContasPagarModel: TContasPagarModel): String;
 
     function carregaClasse(pID, pFornecedor : String): TContasPagarModel;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
     function FinanceiroEntrada(pEntrada, pFornecedor: String): Double;
 
     procedure setParams(var pQry: TFDQuery; pContasPagarModel: TContasPagarModel);
@@ -264,7 +264,7 @@ begin
   end;
 end;
 
-function TContasPagarDao.obterLista: TFDMemTable;
+function TContasPagarDao.obterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -338,7 +338,7 @@ end;
 
 procedure TContasPagarDao.setParams(var pQry: TFDQuery; pContasPagarModel: TContasPagarModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -353,7 +353,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pContasPagarModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pContasPagarModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pContasPagarModel).AsString))
     end;
   finally
     lCtx.Free;

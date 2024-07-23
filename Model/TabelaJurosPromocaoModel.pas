@@ -68,8 +68,8 @@ type
     function Salvar : String;
 
     function carregaClasse(pId : String): TTabelaJurosPromocaoModel;
-    function obterLista: TFDMemTable;
-    function obterTabelaJurosProduto(pProduto : String): TFDMemTable;
+    function obterLista: IFDDataset;
+    function obterTabelaJurosProduto(pProduto : String): IFDDataset;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -140,7 +140,7 @@ begin
   inherited;
 end;
 
-function TTabelaJurosPromocaoModel.obterLista: TFDMemTable;
+function TTabelaJurosPromocaoModel.obterLista: IFDDataset;
 var
   lTabelaJurosPromocaoLista: TTabelaJurosPromocaoDao;
 begin
@@ -164,7 +164,7 @@ begin
   end;
 end;
 
-function TTabelaJurosPromocaoModel.obterTabelaJurosProduto(pProduto: String): TFDMemTable;
+function TTabelaJurosPromocaoModel.obterTabelaJurosProduto(pProduto: String): IFDDataset;
 var
   lTabelaJurosPromocaoDao : TTabelaJurosPromocaoDao;
 begin

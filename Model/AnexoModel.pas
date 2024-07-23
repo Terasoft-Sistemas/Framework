@@ -63,7 +63,7 @@ type
     function Salvar : String;
 
     function carregaClasse(pId : String): TAnexoModel;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -134,7 +134,7 @@ begin
   inherited;
 end;
 
-function TAnexoModel.obterLista: TFDMemTable;
+function TAnexoModel.obterLista: IFDDataset;
 var
   lAnexoLista: TAnexoDao;
 begin

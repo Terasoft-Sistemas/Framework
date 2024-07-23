@@ -64,7 +64,7 @@ type
 
     function carregaClasse(pID : String): TClientesEnderecoModel;
 
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     procedure setParams(var pQry: TFDQuery; pClientesEnderecoModel: TClientesEnderecoModel);
 
@@ -185,7 +185,7 @@ begin
   end;
 end;
 
-function TClientesEnderecoDao.ObterLista: TFDMemTable;
+function TClientesEnderecoDao.ObterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -277,7 +277,7 @@ end;
 
 procedure TClientesEnderecoDao.setParams(var pQry: TFDQuery; pClientesEnderecoModel: TClientesEnderecoModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -292,7 +292,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pClientesEnderecoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pClientesEnderecoModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pClientesEnderecoModel).AsString))
     end;
   finally
     lCtx.Free;

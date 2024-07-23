@@ -19,7 +19,7 @@ type
   	constructor Create(pConexao : IConexao);
     destructor Destroy; override;
 
-    function ObterLista(pTipoVenda_Parametros: TTipoVenda_Parametros): TFDMemTable;
+    function ObterLista(pTipoVenda_Parametros: TTipoVenda_Parametros): IFDDataset;
 
   end;
 
@@ -41,7 +41,7 @@ begin
   inherited;
 end;
 
-function TTipoVendaModel.ObterLista(pTipoVenda_Parametros: TTipoVenda_Parametros): TFDMemTable;
+function TTipoVendaModel.ObterLista(pTipoVenda_Parametros: TTipoVenda_Parametros): IFDDataset;
 var
   lTipoVendaDao: TTipoVendaDao;
   lTipoVenda_Parametros: TTipoVenda_Parametros;
