@@ -9,7 +9,7 @@ uses
   System.Generics.Collections,
   System.Variants,
   Terasoft.Utils,
-  Terasoft.Framework.ObjectIface,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -18,7 +18,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FPortadorsLista: IObject<TObjectList<TPortadorModel>>;
+    FPortadorsLista: IList<TPortadorModel>;
     FLengthPageView: String;
     FStartRecordView: String;
     FID: Variant;
@@ -29,7 +29,7 @@ type
     FIDRecordView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetPortadorsLista(const Value: IObject<TObjectList<TPortadorModel>>);
+    procedure SetPortadorsLista(const Value: IList<TPortadorModel>);
     procedure SetID(const Value: Variant);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -43,7 +43,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property PortadorsLista: IObject<TObjectList<TPortadorModel>> read FPortadorsLista write SetPortadorsLista;
+    property PortadorsLista: IList<TPortadorModel> read FPortadorsLista write SetPortadorsLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -252,7 +252,7 @@ var
   modelo: TPortadorModel;
 begin
   lQry := vIConexao.CriarQuery;
-  FPortadorsLista := TImplObjetoOwner<TObjectList<TPortadorModel>>.CreateOwner(TObjectList<TPortadorModel>.Create);
+  FPortadorsLista := TCollections.CreateList<TPortadorModel>(true);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -281,7 +281,7 @@ begin
     while not lQry.Eof do
     begin
       modelo := TPortadorModel.Create(vIConexao);
-      FPortadorsLista.objeto.Add(modelo);
+      FPortadorsLista.Add(modelo);
       modelo.CODIGO_PORT            := lQry.FieldByName('CODIGO_PORT').AsString;
       modelo.BANCO_BAIXA_DIRETA     := lQry.FieldByName('BANCO_BAIXA_DIRETA').AsString;
       modelo.RECEITA_CONTA_ID       := lQry.FieldByName('RECEITA_CONTA_ID').AsString;
