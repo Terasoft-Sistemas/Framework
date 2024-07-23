@@ -9,6 +9,7 @@ uses
   System.Generics.Collections,
   System.Variants,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
@@ -17,7 +18,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FPortadorsLista: TObjectList<TPortadorModel>;
+    FPortadorsLista: IObject<TObjectList<TPortadorModel>>;
     FLengthPageView: String;
     FStartRecordView: String;
     FID: Variant;
@@ -28,7 +29,7 @@ type
     FIDRecordView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetPortadorsLista(const Value: TObjectList<TPortadorModel>);
+    procedure SetPortadorsLista(const Value: IObject<TObjectList<TPortadorModel>>);
     procedure SetID(const Value: Variant);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -42,7 +43,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property PortadorsLista: TObjectList<TPortadorModel> read FPortadorsLista write SetPortadorsLista;
+    property PortadorsLista: IObject<TObjectList<TPortadorModel>> read FPortadorsLista write SetPortadorsLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -138,6 +139,9 @@ begin
 end;
 destructor TPortadorDao.Destroy;
 begin
+  FPortadorsLista := nil;
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
 end;
 function TPortadorDao.excluir(pPortadorModel: TPortadorModel): String;
@@ -245,10 +249,10 @@ procedure TPortadorDao.obterLista;
 var
   lQry : TFDQuery;
   lSQL : String;
-  i    : INteger;
+  modelo: TPortadorModel;
 begin
   lQry := vIConexao.CriarQuery;
-  FPortadorsLista := TObjectList<TPortadorModel>.Create;
+  FPortadorsLista := TImplObjetoOwner<TObjectList<TPortadorModel>>.CreateOwner(TObjectList<TPortadorModel>.Create);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -273,19 +277,17 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FPortadorsLista.Add(TPortadorModel.Create(vIConexao));
-      i := FPortadorsLista.Count -1;
-
-      FPortadorsLista[i].CODIGO_PORT            := lQry.FieldByName('CODIGO_PORT').AsString;
-      FPortadorsLista[i].BANCO_BAIXA_DIRETA     := lQry.FieldByName('BANCO_BAIXA_DIRETA').AsString;
-      FPortadorsLista[i].RECEITA_CONTA_ID       := lQry.FieldByName('RECEITA_CONTA_ID').AsString;
-      FPortadorsLista[i].NOME_PORT              := lQry.FieldByName('NOME_PORT').AsString;
-      FPortadorsLista[i].TPAG_NFE               := lQry.FieldByName('TPAG_NFE').AsString;
-      FPortadorsLista[i].PER_SEGURO_PRESTAMISTA := lQry.FieldByName('PER_SEGURO_PRESTAMISTA').AsFloat;
+      modelo := TPortadorModel.Create(vIConexao);
+      FPortadorsLista.objeto.Add(modelo);
+      modelo.CODIGO_PORT            := lQry.FieldByName('CODIGO_PORT').AsString;
+      modelo.BANCO_BAIXA_DIRETA     := lQry.FieldByName('BANCO_BAIXA_DIRETA').AsString;
+      modelo.RECEITA_CONTA_ID       := lQry.FieldByName('RECEITA_CONTA_ID').AsString;
+      modelo.NOME_PORT              := lQry.FieldByName('NOME_PORT').AsString;
+      modelo.TPAG_NFE               := lQry.FieldByName('TPAG_NFE').AsString;
+      modelo.PER_SEGURO_PRESTAMISTA := lQry.FieldByName('PER_SEGURO_PRESTAMISTA').AsFloat;
 
       lQry.Next;
     end;
@@ -301,10 +303,11 @@ begin
   FCountView := Value;
 end;
 
-procedure TPortadorDao.SetPortadorsLista(const Value: TObjectList<TPortadorModel>);
+procedure TPortadorDao.SetPortadorsLista;
 begin
   FPortadorsLista := Value;
 end;
+
 procedure TPortadorDao.SetID(const Value: Variant);
 begin
   FID := Value;
