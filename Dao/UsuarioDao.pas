@@ -13,6 +13,7 @@ uses
   Interfaces.Conexao,
   Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao,
+  Spring.Collections,
   Terasoft.Utils;
 
 type
@@ -22,7 +23,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FUsuariosLista: IObject<TObjectList<TUsuarioModel>>;
+    FUsuariosLista: IList<TUsuarioModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -33,7 +34,7 @@ type
     FStatus: String;
     FID: String;
     FPerfil: Variant;
-    procedure SetUsuariosLista(const Value: IObject<TObjectList<TUsuarioModel>>);
+    procedure SetUsuariosLista(const Value: IList<TUsuarioModel>);
     procedure SetCountView(const Value: String);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -64,7 +65,7 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
-    property UsuariosLista: IObject<TObjectList<TUsuarioModel>> read FUsuariosLista write SetUsuariosLista;
+    property UsuariosLista: IList<TUsuarioModel> read FUsuariosLista write SetUsuariosLista;
 
     function incluir(pUsuarioModel: TUsuarioModel): String;
     function alterar(pUsuarioModel: TUsuarioModel): String;
@@ -268,7 +269,7 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  FUsuariosLista := TImplObjetoOwner<TObjectList<TUsuarioModel>>.CreateOwner(TObjectList<TUsuarioModel>.Create);
+  FUsuariosLista := TCollections.CreateList<TUsuarioModel>(true);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -292,7 +293,7 @@ begin
     while not lQry.Eof do
     begin
       modelo := TUsuarioModel.Create(vIConexao);
-      FUsuariosLista.objeto.Add(modelo);
+      FUsuariosLista.Add(modelo);
 
       modelo.ID             := lQry.FieldByName('ID').AsString;
       modelo.STATUS         := lQry.FieldByName('STATUS').AsString;

@@ -8,6 +8,7 @@ uses
   Terasoft.FuncoesTexto,
   ContasReceberItensDao,
   Terasoft.Utils,
+  Spring.Collections,
   Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 

@@ -5,6 +5,7 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
+  Spring.Collections,
   Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
