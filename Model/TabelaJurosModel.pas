@@ -171,7 +171,7 @@ begin
     self.obterLista;
 
     lTagPercentual  := lConfiguracoes.valorTag('PEDIDO_TABELA_JUROS_PERCENTUAL', 'N', tvBool);
-    lTagLimitadorVencimento := StrToInt(lConfiguracoes.valorTag('LIMITADOR_VENCIMENTO_RECEBER', 0, tvInteiro));
+    lTagLimitadorVencimento := StrToInt(lConfiguracoes.valorTag('LIMITADOR_VENCIMENTO_RECEBER', 31, tvInteiro));
 
 
     if Terasoft.Utils.DiferencaEntreDatas(Date,pPrimeiroVencimento)  > lTagLimitadorVencimento then
