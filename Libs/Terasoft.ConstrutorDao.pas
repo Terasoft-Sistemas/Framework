@@ -10,6 +10,7 @@ uses
   Terasoft.Framework.Types,
   Terasoft.FuncoesTexto,
   Terasoft.Framework.Texto,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
@@ -34,8 +35,8 @@ type
     function carregaFields(pQry: TDataset; pTabela: String; pGerarID: Boolean): TDadosFields;
     procedure copiarEstruturaCampos(pSource: TDataSet; var pDest: TFDMemTable);
     procedure atribuirRegistros(pSource: TDataSet; var pDest: TFDMemTable); overload;
-    function atribuirRegistros(pSource: TDataSet): TFDMemTable; overload;
-    function getColumns(pTabela: String): TFDMemTable;
+    function atribuirRegistros(pSource: TDataSet): IFDDataset; overload;
+    function getColumns(pTabela: String): IFDDataset;
     function getValue(pTabela: TDataset; pColumn: String; pValue: String ): String;
     function getSQL(pSource: TFDQuery): String;
     procedure setParams(pTabela: String; var pQry: TFDQuery; pModel: TObject);
@@ -70,13 +71,13 @@ begin
   end;
 end;
 
-function TConstrutorDao.atribuirRegistros(pSource: TDataSet): TFDMemTable;
+function TConstrutorDao.atribuirRegistros(pSource: TDataSet): IFDDataset;
 var
   lTable : TFDMemTable;
 begin
   lTable := TFDMemTable.Create(nil);
   atribuirRegistros(pSource, lTable);
-  Result := lTable;
+  Result := TImplObjetoOwner<TDataset>.CreateOwner(lTable);
 end;
 
 function TConstrutorDao.carregaFields(pQry: TDataSet; pTabela: String; pGerarID: Boolean): TDadosFields;
@@ -199,7 +200,7 @@ begin
   end;
 end;
 
-function TConstrutorDao.getColumns(pTabela: String): TFDMemTable;
+function TConstrutorDao.getColumns;
   var
     lQry : TFDQuery;
 begin
@@ -208,7 +209,7 @@ begin
   try
     lQry.Open(queryTabela(pTabela));
 
-    Result := atribuirRegistros(lQry);
+    Result :=  atribuirRegistros(lQry);
   finally
     lQry.Free;
   end;
@@ -277,7 +278,7 @@ end;
 
 procedure TConstrutorDao.setParams(pTabela: String; var pQry: TFDQuery; pModel: TObject);
   var
-    lTabela : TDataset;
+    lTabela : IFDDataset;
     lCtx    : TRttiContext;
     lProp   : TRttiProperty;
   i       : Integer;
@@ -294,10 +295,10 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pModel).AsString = '',
-        Unassigned, getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pModel).AsString))
+        Unassigned, getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pModel).AsString))
     end;
   finally
-    freeAndNil(lTabela);
+    lTabela := nil;
     lCtx.Free;
   end;
 end;

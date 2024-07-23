@@ -66,7 +66,7 @@ type
     destructor Destroy; override;
 
     function Salvar: String;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
   end;
 
@@ -88,7 +88,7 @@ begin
   inherited;
 end;
 
-function TAtendimentoFinalizadoModel.obterLista: TFDMemTable;
+function TAtendimentoFinalizadoModel.obterLista: IFDDataset;
 var
   lAtendimentoFinalizadoLista: TAtendimentoFinalizadoDao;
 begin

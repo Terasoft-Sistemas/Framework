@@ -242,7 +242,7 @@ type
     function Salvar: String;
     function carregaClasse(pID: String): TBancoModel;
 
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -258,6 +258,7 @@ type
 implementation
 
 uses
+  SysUtils,
   BancoDao;
 
 { TBancoModel }
@@ -288,7 +289,7 @@ begin
   self.Salvar;
 end;
 
-function TBancoModel.obterLista: TFDMemTable;
+function TBancoModel.obterLista: IFDDataset;
 var
   lBancoLista: TBancoDao;
 begin
@@ -331,7 +332,7 @@ end;
 
 destructor TBancoModel.Destroy;
 begin
-
+  vIConexao := nil;
   inherited;
 end;
 

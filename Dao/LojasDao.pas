@@ -60,7 +60,7 @@ type
 
     procedure obterLista;
     procedure obterHosts;
-    function obterFiliais: TFDMemTable;
+    function obterFiliais: IFDDataset;
 
 end;
 
@@ -117,7 +117,7 @@ begin
   end;
 end;
 
-function TLojasDao.obterFiliais: TFDMemTable;
+function TLojasDao.obterFiliais: IFDDataset;
 var
   lQry: TFDQuery;
   lSQL:String;

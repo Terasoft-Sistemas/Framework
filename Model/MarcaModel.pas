@@ -68,7 +68,7 @@ type
     function Excluir(pID : String): String;
 
     function ObterLista(pMarca_Parametros: TMarca_Parametros): TFDMemTable; overload;
-    function ObterLista : TFDMemTable; overload;
+    function ObterLista : IFDDataset; overload;
 
   end;
 
@@ -128,7 +128,7 @@ begin
     Result    := self.Salvar;
 end;
 
-function TMarcaModel.ObterLista: TFDMemTable;
+function TMarcaModel.ObterLista: IFDDataset;
 var
   lMarca: TMarcaDao;
 begin

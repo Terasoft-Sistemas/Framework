@@ -60,7 +60,7 @@ type
     function excluir(pComissaoVendedorModel: TComissaoVendedorModel): String;
 
 	  procedure obterTotalRegistros;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
     procedure setParams(var pQry: TFDQuery; pComissaoVendedorModel: TComissaoVendedorModel);
 
     function carregaClasse(pId: String): TComissaoVendedorModel;
@@ -212,7 +212,7 @@ begin
   end;
 end;
 
-function TComissaoVendedorDao.obterLista: TFDMemTable;
+function TComissaoVendedorDao.obterLista: IFDDataset;
 var
   lQry : TFDQuery;
   lSQL : String;
@@ -274,7 +274,7 @@ end;
 
 procedure TComissaoVendedorDao.setParams(var pQry: TFDQuery; pComissaoVendedorModel: TComissaoVendedorModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -289,7 +289,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pComissaoVendedorModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pComissaoVendedorModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pComissaoVendedorModel).AsString))
     end;
   finally
     lCtx.Free;

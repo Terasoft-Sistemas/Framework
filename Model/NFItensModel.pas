@@ -483,7 +483,7 @@ type
 
     function Salvar: String;
     procedure obterLista;
-    function obterTotais(pNF : String): TFDMemTable;
+    function obterTotais(pNF : String): IFDDataset;
 
     function carregaClasse(pId: String): TNFItensModel;
 
@@ -554,7 +554,7 @@ begin
   end;
 end;
 
-function TNFItensModel.obterTotais(pNF: String): TFDMemTable;
+function TNFItensModel.obterTotais(pNF: String): IFDDataset;
 var
   lNFItensDao : TNFItensDao;
 begin

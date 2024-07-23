@@ -7,6 +7,7 @@ uses
   Terasoft.Utils,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
@@ -900,25 +901,25 @@ type
     procedure obterLista;
     procedure obterVenderItem;
     procedure obterListaCatalogo;
-    function obterPromocao(pCodProduto: String): TFDMemTable;
-    function obterComissao(pCodProduto: String): TFDMemTable;
+    function obterPromocao(pCodProduto: String): IFDDataset;
+    function obterComissao(pCodProduto: String): IFDDataset;
 
     function Incluir : String;
     function Alterar(pID : String) : TProdutosModel;
     function Excluir(pCodigoPro : String) : String;
     function Salvar : String;
-    function obterListaConsulta: TFDMemTable;
-    function obterListaMemTable: TFDMemTable;
+    function obterListaConsulta: IFDDataset;
+    function obterListaMemTable: IFDDataset;
     function obterCodigoBarras(pIdProduto: String): String;
     function obterSaldo(pIdProduto: String): Double;
     function obterSaldoDisponivel(pIdProduto: String): Double;
 
     function carregaClasse(pId: String): TProdutosModel;
     function valorVenda(pIdProduto: String): Variant;
-    function ObterTabelaPreco : TFDMemTable;
+    function ObterTabelaPreco : IFDDataset;
     function ValorUnitario(pProdutoPreco: TProdutoPreco) : Double;
     function ValorGarantia(pProduto: String; pValorFaixa: Double): TProdutoGarantia;
-    function ConsultaProdutosVendidos(pProduto : String): TFDMemTable;
+    function ConsultaProdutosVendidos(pProduto : String): IFDDataset;
 
     procedure subtrairSaldo(pIdProduto: String; pSaldo: Double);
     procedure adicionarSaldo(pIdProduto: String; pSaldo: Double);
@@ -1010,7 +1011,7 @@ begin
       lGrupoModel.StartRecordView := '0';
       lGrupoModel.LengthPageView  := '1';
       lGrupoModel.OrderView       := 'CODIGO_GRU';
-      self.CODIGO_GRU := lGrupoModel.ObterLista.FieldByName('CODIGO_GRU').AsString;
+      self.CODIGO_GRU := lGrupoModel.ObterLista.objeto.FieldByName('CODIGO_GRU').AsString;
     end;
 
     if self.CODIGO_FOR = '' then
@@ -1018,7 +1019,7 @@ begin
       lFornecedorModel.StartRecordView := '0';
       lFornecedorModel.LengthPageView  := '1';
       lFornecedorModel.OrderView       := 'CODIGO_FOR';
-      self.CODIGO_FOR := lFornecedorModel.ObterLista.FieldByName('CODIGO_FOR').AsString;
+      self.CODIGO_FOR := lFornecedorModel.ObterLista.objeto.FieldByName('CODIGO_FOR').AsString;
     end;
 
     if self.CODIGO_MAR = '' then
@@ -1026,7 +1027,7 @@ begin
       lMarcaModel.StartRecordView := '0';
       lMarcaModel.LengthPageView  := '1';
       lMarcaModel.OrderView       := 'CODIGO_MAR';
-      self.CODIGO_MAR := lMarcaModel.ObterLista.FieldByName('CODIGO_MAR').AsString;
+      self.CODIGO_MAR := lMarcaModel.ObterLista.objeto.FieldByName('CODIGO_MAR').AsString;
     end;
 
     if self.CODIGO_SUB = '' then
@@ -1034,7 +1035,7 @@ begin
       lSubGrupoModel.StartRecordView := '0';
       lSubGrupoModel.LengthPageView  := '1';
       lSubGrupoModel.OrderView       := 'CODIGO_SUB';
-      self.CODIGO_SUB := lSubGrupoModel.ObterLista.FieldByName('CODIGO_SUB').AsString;
+      self.CODIGO_SUB := lSubGrupoModel.ObterLista.objeto.FieldByName('CODIGO_SUB').AsString;
     end;
 
     self.ECF_PRO              := 'FF';
@@ -1076,7 +1077,7 @@ begin
   end;
 end;
 
-function TProdutosModel.ConsultaProdutosVendidos(pProduto: String): TFDMemTable;
+function TProdutosModel.ConsultaProdutosVendidos(pProduto: String): IFDDataset;
 var
   lProdutosDao: TProdutosDao;
 begin
@@ -1110,7 +1111,7 @@ begin
   end;
 end;
 
-function TProdutosModel.obterComissao(pCodProduto: String): TFDMemTable;
+function TProdutosModel.obterComissao(pCodProduto: String): IFDDataset;
 var
   lProdutosDao : TProdutosDao;
 begin
@@ -1168,7 +1169,7 @@ begin
   end;
 end;
 
-function TProdutosModel.obterListaConsulta: TFDMemTable;
+function TProdutosModel.obterListaConsulta: IFDDataset;
 var
   lProdutos : TProdutosDao;
 begin
@@ -1189,7 +1190,7 @@ begin
   end;
 end;
 
-function TProdutosModel.obterListaMemTable: TFDMemTable;
+function TProdutosModel.obterListaMemTable: IFDDataset;
 var
   lProdutosLista : TProdutosDao;
 begin
@@ -1210,7 +1211,7 @@ begin
   end;
 end;
 
-function TProdutosModel.ObterTabelaPreco: TFDMemTable;
+function TProdutosModel.ObterTabelaPreco: IFDDataset;
 var
   lProdutoDao: TProdutosDao;
 begin
@@ -1246,36 +1247,38 @@ begin
   end;
 end;
 
-function TProdutosModel.obterPromocao(pCodProduto: String): TFDMemTable;
+function TProdutosModel.obterPromocao(pCodProduto: String): IFDDataset;
 var
-  lMemTable           : TFDMemTable;
+  lMemTable           : IFDDataset;
   lPromocaoModel      : TPromocaoModel;
   lPromocaoItensModel : TPromocaoItensModel;
 begin
   if pCodProduto = '' then
     CriaException('Produto não informado');
 
-  lMemTable           := TFDMemTable.Create(nil);
+  lMemTable           := TImplObjetoOwner<TDataset>.CreateOwner(TFDMemTable.Create(nil));
   lPromocaoModel      := TPromocaoModel.Create(vIConexao);
   lPromocaoItensModel := TPromocaoItensModel.Create(vIConexao);
 
   try
-    with lMemTable.IndexDefs.AddIndexDef do
+    with TFDMemTable(lMemTable.objeto).IndexDefs.AddIndexDef do
     begin
       Name    := 'OrdenacaoPromocao';
       Fields  := 'PROMOCAO';
       Options := [TIndexOption.ixCaseInsensitive];
     end;
 
-    lMemTable.IndexName := 'OrdenacaoPromocao';
-
-    lMemTable.FieldDefs.Add('ID_PROMOCAO', ftInteger);
-    lMemTable.FieldDefs.Add('DATAINICIO', ftDate);
-    lMemTable.FieldDefs.Add('DATAFIM', ftDate);
-    lMemTable.FieldDefs.Add('PROMOCAO', ftString, 50);
-    lMemTable.FieldDefs.Add('VALOR_PROMOCAO', ftFloat);
-    lMemTable.FieldDefs.Add('SALDO', ftFloat);
-    lMemTable.CreateDataSet;
+    with TFDMemTable(lMemTable.objeto) do
+    begin
+      IndexName := 'OrdenacaoPromocao';
+      FieldDefs.Add('ID_PROMOCAO', ftInteger);
+      FieldDefs.Add('DATAINICIO', ftDate);
+      FieldDefs.Add('DATAFIM', ftDate);
+      FieldDefs.Add('PROMOCAO', ftString, 50);
+      FieldDefs.Add('VALOR_PROMOCAO', ftFloat);
+      FieldDefs.Add('SALDO', ftFloat);
+      CreateDataSet;
+    end;
 
     lPromocaoItensModel.ProdutoView := pCodProduto;
     lPromocaoItensModel.WhereView   := ' and current_date between promocao.datainicio and promocao.datafim ';
@@ -1286,7 +1289,7 @@ begin
       lPromocaoModel.IDRecordView := lPromocaoItensModel.promocao_id;
       lPromocaoModel.obterLista;
 
-      lMemTable.InsertRecord([
+      lMemTable.objeto.InsertRecord([
                               lPromocaoItensModel.promocao_id,
                               lPromocaoModel.PromocaosLista[0].DATAINICIO,
                               lPromocaoModel.PromocaosLista[0].DATAFIM,
@@ -1296,7 +1299,7 @@ begin
                              ]);
     end;
 
-    lMemTable.Open;
+    lMemTable.objeto.Open;
     Result := lMemTable;
   finally
     lPromocaoModel.Free;

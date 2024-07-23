@@ -60,7 +60,7 @@ type
 
     function carregaClasse(pID : String): TPermissaoRemotaModel;
 
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     procedure setParams(var pQry: TFDQuery; pPermissaoRemotaModel: TPermissaoRemotaModel);
 
@@ -215,7 +215,7 @@ begin
   end;
 end;
 
-function TPermissaoRemotaDao.obterLista: TFDMemTable;
+function TPermissaoRemotaDao.obterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -289,7 +289,7 @@ end;
 
 procedure TPermissaoRemotaDao.setParams(var pQry: TFDQuery; pPermissaoRemotaModel: TPermissaoRemotaModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -304,7 +304,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPermissaoRemotaModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pPermissaoRemotaModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPermissaoRemotaModel).AsString))
     end;
   finally
     lCtx.Free;

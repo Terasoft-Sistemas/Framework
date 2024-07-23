@@ -80,7 +80,7 @@ type
     function Excluir(pID : String): String;
 
     function ObterLista(pSubGrupo_Parametros: TSubGrupo_Parametros): TFDMemTable; overload;
-    function ObterLista: TFDMemTable; overload;
+    function ObterLista: IFDDataset; overload;
 
   end;
 
@@ -146,7 +146,7 @@ begin
     lGrupoModel.StartRecordView := '0';
     lGrupoModel.LengthPageView  := '1';
     lGrupoModel.OrderView       := 'CODIGO_GRU';
-    self.CODIGO_GRU := lGrupoModel.ObterLista.FieldByName('CODIGO_GRU').AsString;
+    self.CODIGO_GRU := lGrupoModel.ObterLista.objeto.FieldByName('CODIGO_GRU').AsString;
 
     self.Acao := tacIncluir;
     Result    := self.Salvar;
@@ -155,7 +155,7 @@ begin
   end;
 end;
 
-function TSubGrupoModel.ObterLista: TFDMemTable;
+function TSubGrupoModel.ObterLista: IFDDataset;
 var
   lSubGrupo: TSubGrupoDao;
 begin

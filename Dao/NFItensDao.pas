@@ -63,7 +63,7 @@ type
     function excluir(pNFItensModel: TNFItensModel): String;
 
     procedure obterLista;
-    function obterTotais(pNF : String): TFDMemTable;
+    function obterTotais(pNF : String): IFDDataset;
 
     function carregaClasse(pId: String): TNFItensModel;
 end;
@@ -334,7 +334,7 @@ begin
   Result := lSQL;
 end;
 
-function TNFItensDao.obterTotais(pNF: String): TFDMemTable;
+function TNFItensDao.obterTotais(pNF: String): IFDDataset;
 var
   lQry     : TFDQuery;
   lSQL     : String;
@@ -628,7 +628,7 @@ end;
 
 procedure TNFItensDao.setParams(var pQry: TFDQuery; pNFItensModel: TNFItensModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -643,7 +643,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pNFItensModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pNFItensModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pNFItensModel).AsString))
     end;
   finally
     lCtx.Free;

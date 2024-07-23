@@ -71,7 +71,7 @@ type
     function excluir(pMovimentoModel: TMovimentoModel): String;
 
     procedure obterLista;
-    function obterListaMemTable : TFDMemTable;
+    function obterListaMemTable : IFDDataset;
     function carregaClasse(pId: String): TMovimentoModel;
     procedure setParams(var pQry: TFDQuery; pMovimentoModel: TMovimentoModel);
 
@@ -306,7 +306,7 @@ begin
   end;
 end;
 
-function TMovimentoDao.obterListaMemTable: TFDMemTable;
+function TMovimentoDao.obterListaMemTable: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -393,7 +393,7 @@ end;
 
 procedure TMovimentoDao.setParams(var pQry: TFDQuery; pMovimentoModel: TMovimentoModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -408,7 +408,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pMovimentoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pMovimentoModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pMovimentoModel).AsString))
     end;
   finally
     lCtx.Free;

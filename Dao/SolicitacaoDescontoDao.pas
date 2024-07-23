@@ -60,7 +60,7 @@ type
 
     function carregaClasse(pID : String): TSolicitacaoDescontoModel;
 
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     procedure setParams(var pQry: TFDQuery; pSolicitacaoDescontoModel: TSolicitacaoDescontoModel);
 
@@ -217,7 +217,7 @@ begin
   end;
 end;
 
-function TSolicitacaoDescontoDao.obterLista: TFDMemTable;
+function TSolicitacaoDescontoDao.obterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -294,7 +294,7 @@ end;
 
 procedure TSolicitacaoDescontoDao.setParams(var pQry: TFDQuery; pSolicitacaoDescontoModel: TSolicitacaoDescontoModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -309,7 +309,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pSolicitacaoDescontoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pSolicitacaoDescontoModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pSolicitacaoDescontoModel).AsString))
     end;
   finally
     lCtx.Free;

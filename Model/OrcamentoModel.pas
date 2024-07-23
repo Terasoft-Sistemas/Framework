@@ -259,7 +259,7 @@ type
 
     function carregaClasse(pId : String): TOrcamentoModel;
 
-    function ObterLista: TFDMemTable; overload;
+    function ObterLista: IFDDataset; overload;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -331,7 +331,7 @@ begin
   inherited;
 end;
 
-function TOrcamentoModel.obterLista: TFDMemTable;
+function TOrcamentoModel.obterLista: IFDDataset;
 var
   lOrcamentoLista: TOrcamentoDao;
 begin
@@ -384,7 +384,7 @@ var
   lPedido                  : String;
   lItem, lIndex            : Integer;
   lSaldoDisponivel         : Double;
-  lMemtable, lTableCliente : TFDMemTable;
+  lMemtable, lTableCliente : IFDDataset;
 begin
 
   if pNumeroOrc = '' then
@@ -415,18 +415,18 @@ begin
       lOrcamentoItensModel.WhereView := ' AND I.NUMERO_ORC = '+QuotedStr(pNumeroOrc)+' ';
       lMemtable := lOrcamentoItensModel.obterLista;
 
-      lMemtable.First;
-      while not lMemtable.Eof do
+      lMemtable.objeto.First;
+      while not lMemtable.objeto.Eof do
       begin
-        lProdutosModel.IDRecordView := lMemtable.FieldByName('CODIGO_PRO').AsString;
+        lProdutosModel.IDRecordView := lMemtable.objeto.FieldByName('CODIGO_PRO').AsString;
         lProdutosModel.obterLista;
 
-        lSaldoDisponivel := lProdutosModel.obterSaldoDisponivel(lMemtable.FieldByName('CODIGO_PRO').AsString) + lMemtable.FieldByName('QUANTIDADE_ORC').AsFloat;
+        lSaldoDisponivel := lProdutosModel.obterSaldoDisponivel(lMemtable.objeto.FieldByName('CODIGO_PRO').AsString) + lMemtable.objeto.FieldByName('QUANTIDADE_ORC').AsFloat;
 
-        if (lMemtable.FieldByName('QUANTIDADE_ORC').AsFloat > lSaldoDisponivel) then
-          CriaException('Produto '+lMemtable.FieldByName('CODIGO_PRO').AsString+' sem saldo disponível em estoque.');
+        if (lMemtable.objeto.FieldByName('QUANTIDADE_ORC').AsFloat > lSaldoDisponivel) then
+          CriaException('Produto '+lMemtable.objeto.FieldByName('CODIGO_PRO').AsString+' sem saldo disponível em estoque.');
 
-        lMemtable.Next;
+        lMemtable.objeto.Next;
       end;
     end;
 
@@ -462,7 +462,7 @@ begin
     lPedidoVendaModel.TABJUROS_PED         := 'N';
     lPedidoVendaModel.NUMERO_ORC           := lOrcamentoModel.NUMERO_ORC;
     lPedidoVendaModel.CODIGO_CLI           := lOrcamentoModel.CODIGO_CLI;
-    lPedidoVendaModel.CNPJ_CPF_CONSUMIDOR  := lTableCliente.fieldByName('CNPJ_CPF_CLI').AsString;
+    lPedidoVendaModel.CNPJ_CPF_CONSUMIDOR  := lTableCliente.objeto.fieldByName('CNPJ_CPF_CLI').AsString;
     lPedidoVendaModel.CODIGO_PORT          := lOrcamentoModel.CODIGO_PORT;
     lPedidoVendaModel.CODIGO_VEN           := lOrcamentoModel.CODIGO_VEN;
     lPedidoVendaModel.CODIGO_TIP           := lOrcamentoModel.CODIGO_TIP;
@@ -484,8 +484,8 @@ begin
     lItem  := 0;
     lIndex := 0;
 
-    lMemtable.First;
-    while not lMemtable.Eof do
+    lMemtable.objeto.First;
+    while not lMemtable.objeto.Eof do
     begin
       lPedidoItensModel.PedidoItenssLista.Add(TPedidoItensModel.Create(vIConexao));
       inc(lItem);
@@ -494,23 +494,23 @@ begin
       lPedidoItensModel.PedidoItenssLista[lIndex].CODIGO_CLI             := lOrcamentoModel.CODIGO_CLI;
       lPedidoItensModel.PedidoItenssLista[lIndex].LOJA                   := lOrcamentoModel.LOJA;
       lPedidoItensModel.PedidoItenssLista[lIndex].BALANCA                := 'S';
-      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_PED         := lMemtable.FieldByName('QUANTIDADE_ORC').AsString;
-      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_NEW         := lMemtable.FieldByName('QUANTIDADE_ORC').AsString;
-      lPedidoItensModel.PedidoItenssLista[lIndex].OBSERVACAO             := copy(lMemtable.FieldByName('OBSERVACAO').AsString,1,50);
-      lPedidoItensModel.PedidoItenssLista[lIndex].OBS_ITEM               := lMemtable.FieldByName('OBSERVACAO').AsString;
-      lPedidoItensModel.PedidoItenssLista[lIndex].CODIGO_PRO             := lMemtable.FieldByName('CODIGO_PRO').AsString;
-      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_TIPO        := lMemtable.FieldByName('VLRGARANTIA_ORC').AsString;
-      lPedidoItensModel.PedidoItenssLista[lIndex].DESCONTO_PED           := lMemtable.FieldByName('DESCONTO_ORC').AsString;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VDESC                  := FloatToStr(lMemtable.FieldByName('DESCONTO_ORC').AsFloat / 100 * (lMemtable.FieldByName('VALORUNITARIO_ORC').AsFloat * lMemtable.FieldByName('QUANTIDADE_ORC').AsFloat));
-      lPedidoItensModel.PedidoItenssLista[lIndex].VALORUNITARIO_PED      := lMemtable.FieldByName('VALORUNITARIO_ORC').AsString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_PED         := lMemtable.objeto.FieldByName('QUANTIDADE_ORC').AsString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_NEW         := lMemtable.objeto.FieldByName('QUANTIDADE_ORC').AsString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].OBSERVACAO             := copy(lMemtable.objeto.FieldByName('OBSERVACAO').AsString,1,50);
+      lPedidoItensModel.PedidoItenssLista[lIndex].OBS_ITEM               := lMemtable.objeto.FieldByName('OBSERVACAO').AsString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].CODIGO_PRO             := lMemtable.objeto.FieldByName('CODIGO_PRO').AsString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_TIPO        := lMemtable.objeto.FieldByName('VLRGARANTIA_ORC').AsString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].DESCONTO_PED           := lMemtable.objeto.FieldByName('DESCONTO_ORC').AsString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].VDESC                  := FloatToStr(lMemtable.objeto.FieldByName('DESCONTO_ORC').AsFloat / 100 * (lMemtable.objeto.FieldByName('VALORUNITARIO_ORC').AsFloat * lMemtable.objeto.FieldByName('QUANTIDADE_ORC').AsFloat));
+      lPedidoItensModel.PedidoItenssLista[lIndex].VALORUNITARIO_PED      := lMemtable.objeto.FieldByName('VALORUNITARIO_ORC').AsString;
       lPedidoItensModel.PedidoItenssLista[lIndex].ITEM                   := lItem.ToString;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VLRVENDA_PRO           := lMemtable.FieldByName('VALORUNITARIO_ORC').AsString;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_VENDA_CADASTRO   := lMemtable.FieldByName('VALORUNITARIO_ORC').AsString;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VLRCUSTO_PRO           := lMemtable.FieldByName('VLRCUSTO_ORC').AsString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].VLRVENDA_PRO           := lMemtable.objeto.FieldByName('VALORUNITARIO_ORC').AsString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_VENDA_CADASTRO   := lMemtable.objeto.FieldByName('VALORUNITARIO_ORC').AsString;
+      lPedidoItensModel.PedidoItenssLista[lIndex].VLRCUSTO_PRO           := lMemtable.objeto.FieldByName('VLRCUSTO_ORC').AsString;
       lPedidoItensModel.PedidoItenssLista[lIndex].COMISSAO_PED           := '0';
 
       inc(lIndex);
-      lMemtable.Next;
+      lMemtable.objeto.Next;
     end;
 
     lPedidoItensModel.Acao := tacIncluirLote;
@@ -534,7 +534,6 @@ begin
     lOrcamentoItensModel.Free;
     lPedidoItensModel.Free;
     lClientesModel.Free;
-    lMemtable.Free;
     lEmpresaModel.Free;
     lProdutosModel.Free;
   end;

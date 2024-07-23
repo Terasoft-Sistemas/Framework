@@ -186,7 +186,7 @@ var
   lCaixaAberto,
   lCaixaFechamento   : TCaixaControleModel;
   lCaixaModel : TCaixaModel;
-  lMemTable: TFDMemTable;
+  lMemTable: IFDDataset;
 begin
   lCaixaControleDao  := TCaixaControleDao.Create(vIConexao);
   lCaixaAberto       := TCaixaControleModel.Create(vIConexao);
@@ -217,9 +217,9 @@ begin
 
     lMemTable := lCaixaModel.obterSaldo(self.vIConexao.getUSer.ID);
     //Crédito
-    incluirFechamento('200000', vIConexao.DataServer, 'Fec.Final '+self.vIConexao.getUSer.NOME+' '+TimeToStr(vIConexao.HoraServer), lMemTable.FieldByName('SaldoTotal').AsFloat, '000000', 'C', '', '', '', 0, '', '000004', '.', self.vIConexao.getEmpresa.LOJA);
+    incluirFechamento('200000', vIConexao.DataServer, 'Fec.Final '+self.vIConexao.getUSer.NOME+' '+TimeToStr(vIConexao.HoraServer), lMemTable.objeto.FieldByName('SaldoTotal').AsFloat, '000000', 'C', '', '', '', 0, '', '000004', '.', self.vIConexao.getEmpresa.LOJA);
     //Débito
-    incluirFechamento('200000', vIConexao.DataServer, 'Fec.Final '+self.vIConexao.getUSer.NOME+' '+TimeToStr(vIConexao.HoraServer), lMemTable.FieldByName('SaldoTotal').AsFloat, self.vIConexao.getUSer.ID, 'D', '', '', '', 0, '', '000004', '.', self.vIConexao.getEmpresa.LOJA);
+    incluirFechamento('200000', vIConexao.DataServer, 'Fec.Final '+self.vIConexao.getUSer.NOME+' '+TimeToStr(vIConexao.HoraServer), lMemTable.objeto.FieldByName('SaldoTotal').AsFloat, self.vIConexao.getUSer.ID, 'D', '', '', '', 0, '', '000004', '.', self.vIConexao.getEmpresa.LOJA);
 
     Result := lCaixaAberto.id;
   finally
@@ -227,7 +227,6 @@ begin
     lCaixaFechamento.Free;
     lCaixaControleDao.Free;
     lCaixaModel.Free;
-    lMemTable.Free;
   end;
 end;
 

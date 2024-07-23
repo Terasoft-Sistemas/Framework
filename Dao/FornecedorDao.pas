@@ -61,7 +61,7 @@ type
 
     function where: String;
     function carregaClasse(pID : String): TFornecedorModel;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     procedure setParams(var pQry: TFDQuery; pFornecedorModel: TFornecedorModel);
 
@@ -265,7 +265,7 @@ begin
   end;
 end;
 
-function TFornecedorDao.obterLista: TFDMemTable;
+function TFornecedorDao.obterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -328,7 +328,7 @@ end;
 
 procedure TFornecedorDao.setParams(var pQry: TFDQuery; pFornecedorModel: TFornecedorModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -343,7 +343,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pFornecedorModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pFornecedorModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pFornecedorModel).AsString))
     end;
   finally
     lCtx.Free;

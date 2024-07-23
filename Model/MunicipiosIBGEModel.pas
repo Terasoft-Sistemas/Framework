@@ -21,7 +21,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function obterLista(pMunicipio, pUF : String): TFDMemTable;
+    function obterLista(pMunicipio, pUF : String): IFDDataset;
 
   end;
 
@@ -44,7 +44,7 @@ begin
   inherited;
 end;
 
-function TMunicipiosIBGEModel.obterLista(pMunicipio, pUF : String): TFDMemTable;
+function TMunicipiosIBGEModel.obterLista(pMunicipio, pUF : String): IFDDataset;
 var
   lMunicipiosIBGELista: TMunicipiosIBGEDao;
 begin

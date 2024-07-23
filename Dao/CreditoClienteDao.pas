@@ -382,7 +382,7 @@ end;
 
 procedure TCreditoClienteDao.setParams(var pQry: TFDQuery; pCreditoClienteModel: TCreditoClienteModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -397,7 +397,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pCreditoClienteModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pCreditoClienteModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pCreditoClienteModel).AsString))
     end;
   finally
     lCtx.Free;

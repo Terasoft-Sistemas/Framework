@@ -67,7 +67,7 @@ type
 
     procedure setParams(var pQry: TFDQuery; pSubGrupoModel: TSubGrupoModel);
     function ObterLista(pSubGrupo_Parametros: TSubGrupo_Parametros): TFDMemTable; overload;
-    function ObterLista: TFDMemTable; overload;
+    function ObterLista: IFDDataset; overload;
 
 end;
 
@@ -188,7 +188,7 @@ begin
   end;
 end;
 
-function TSubGrupoDao.ObterLista: TFDMemTable;
+function TSubGrupoDao.ObterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -316,7 +316,7 @@ end;
 
 procedure TSubGrupoDao.setParams(var pQry: TFDQuery; pSubGrupoModel: TSubGrupoModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -331,7 +331,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pSubGrupoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pSubGrupoModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pSubGrupoModel).AsString))
     end;
   finally
     lCtx.Free;

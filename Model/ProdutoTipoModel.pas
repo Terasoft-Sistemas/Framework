@@ -67,7 +67,7 @@ type
     function carregaClasse(pId : String): TProdutoTipoModel;
     function Alterar(pID : String): TProdutoTipoModel;
     function Excluir(pID : String): String;
-    function ObterLista : TFDMemTable; overload;
+    function ObterLista : IFDDataset; overload;
 
   end;
 
@@ -127,7 +127,7 @@ begin
     Result    := self.Salvar;
 end;
 
-function TProdutoTipoModel.ObterLista: TFDMemTable;
+function TProdutoTipoModel.ObterLista: IFDDataset;
 var
   lProdutoTipo: TProdutoTipoDao;
 begin

@@ -72,7 +72,7 @@ type
     procedure obterTotalRegistros;
     procedure obterLista;
     procedure obterRecebimentoContasReceber;
-    function obterReceberPixCobranca(pPedido : String) : TFDMemTable;
+    function obterReceberPixCobranca(pPedido : String) : IFDDataset;
 
     function obterContaCliente(pContaClienteParametros: TContaClienteParametros): TListaContaClienteRetorno;
     function carregaClasse(pId: String; pLoja: String = ''): TContasReceberItensModel;
@@ -547,7 +547,7 @@ begin
   end;
 end;
 
-function TContasReceberItensDao.obterReceberPixCobranca(pPedido: String): TFDMemTable;
+function TContasReceberItensDao.obterReceberPixCobranca(pPedido: String): IFDDataset;
 var
   lQry : TFDQuery;
   lSQL : String;
@@ -687,7 +687,7 @@ end;
 
 procedure TContasReceberItensDao.setParams(var pQry: TFDQuery; pContasReceberItensModel: TContasReceberItensModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -702,7 +702,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pContasReceberItensModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pContasReceberItensModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pContasReceberItensModel).AsString))
     end;
   finally
     lCtx.Free;

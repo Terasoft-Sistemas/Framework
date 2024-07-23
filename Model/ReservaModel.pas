@@ -161,7 +161,7 @@ type
     function Salvar : String;
 
     function carregaClasse(pId : String): TReservaModel;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     function AtualizaReservaVendaAssistida(pAtualizaReserva_Parametros: TAtualizaReserva_Parametros): String;
     function concluirReserva(pStatus, pPedido, pWebPedidoItensId, pFilial: String): Boolean;
@@ -242,12 +242,12 @@ end;
 
 function TReservaModel.concluirReserva(pStatus, pPedido, pWebPedidoItensId, pFilial: String): Boolean;
 var
-  lTableReserva: TFDMemTable;
+  lTableReserva: IFDDataset;
 begin
   self.WhereView := ' and reserva.web_pedidoitens_id = ' + pWebPedidoItensId + ' and reserva.filial = ' + QuotedStr(pFilial);
   lTableReserva := self.obterLista;
 
-  self := self.Alterar(lTableReserva.FieldByName('ID').AsString);
+  self := self.Alterar(lTableReserva.objeto.FieldByName('ID').AsString);
 
   self.STATUS             := pStatus;
   self.PEDIDO_ID          := pPedido;
@@ -265,7 +265,7 @@ begin
   inherited;
 end;
 
-function TReservaModel.obterLista: TFDMemTable;
+function TReservaModel.obterLista: IFDDataset;
 var
   lReservaLista: TReservaDao;
 begin

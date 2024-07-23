@@ -64,7 +64,7 @@ type
 
     function carregaClasse(pID : String): TOrcamentoItensModel;
 
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     procedure quantidadeAtendida(pNumeroOrc: String);
 
@@ -220,7 +220,7 @@ begin
   end;
 end;
 
-function TOrcamentoItensDao.ObterLista: TFDMemTable;
+function TOrcamentoItensDao.ObterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -335,7 +335,7 @@ end;
 
 procedure TOrcamentoItensDao.setParams(var pQry: TFDQuery; pOrcamentoItensModel: TOrcamentoItensModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -350,7 +350,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pOrcamentoItensModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pOrcamentoItensModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pOrcamentoItensModel).AsString))
     end;
   finally
     lCtx.Free;

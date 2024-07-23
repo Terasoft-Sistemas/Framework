@@ -526,7 +526,7 @@ type
     procedure excluirPedido;
     procedure verificarTagObservacao;
     procedure venderItem(pVenderItem: TVenderItem);
-    function obterComprasRealizadas(pCliente: String): TFDMemTable;
+    function obterComprasRealizadas(pCliente: String): IFDDataset;
     function retornaGarantia(pNumeroPedido: String) : Boolean;
 
   end;
@@ -773,7 +773,7 @@ var
   lFaturaReceber,
   lFinanceiro              : String;
   lIndex                   : Integer;
-  lMemTable                : TFDMemTable;
+  lMemTable                : IFDDataset;
 begin
   lContasReceberModel      := TContasReceberModel.Create(vIConexao);
   lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
@@ -790,26 +790,26 @@ begin
 
     lContasReceberItensModel.ContasReceberItenssLista := TObjectList<TContasReceberItensModel>.Create;
 
-    lMemTable.First;
-    while not lMemTable.eof do
+    lMemTable.objeto.First;
+    while not lMemTable.objeto.eof do
     begin
-      if lFinanceiro <> lMemTable.FieldByName('ID_FINANCEIRO').AsString then
+      if lFinanceiro <> lMemTable.objeto.FieldByName('ID_FINANCEIRO').AsString then
       begin
-        lFinanceiro := lMemTable.FieldByName('ID_FINANCEIRO').AsString;
+        lFinanceiro := lMemTable.objeto.FieldByName('ID_FINANCEIRO').AsString;
 
         lContasReceberModel.Acao          := tacIncluir;
         lContasReceberModel.LOJA          := self.FLOJA;
         lContasReceberModel.PEDIDO_REC    := self.FNUMERO_PED;
         lContasReceberModel.CODIGO_CLI    := self.FCODIGO_CLI;
         lContasReceberModel.DATAEMI_REC   := self.FDATA_PED;
-        lContasReceberModel.VALOR_REC     := lMemTable.FieldByName('VALOR_TOTAL').AsString;
-        lContasReceberModel.ACRESCIMO     := lMemTable.FieldByName('VALOR_ACRESCIMO').AsString;
+        lContasReceberModel.VALOR_REC     := lMemTable.objeto.FieldByName('VALOR_TOTAL').AsString;
+        lContasReceberModel.ACRESCIMO     := lMemTable.objeto.FieldByName('VALOR_ACRESCIMO').AsString;
         lContasReceberModel.SITUACAO_REC  := 'A';
         lContasReceberModel.VENDEDOR_REC  := self.FCODIGO_VEN;
         lContasReceberModel.USUARIO_REC   := self.vIConexao.getUSer.ID;
         lContasReceberModel.OBS_REC       := 'Venda: '+self.FNUMERO_PED;
         lContasReceberModel.TIPO_REC      := 'N';
-        lContasReceberModel.CODIGO_POR    := lMemTable.FieldByName('PORTADOR_ID').AsString;
+        lContasReceberModel.CODIGO_POR    := lMemTable.objeto.FieldByName('PORTADOR_ID').AsString;
         lContasReceberModel.JUROS_FIXO    := lEmpresaModel.JUROS_BOL;
         lContasReceberModel.CODIGO_CTA    := '555555';
         lFaturaReceber := lContasReceberModel.Salvar;
@@ -818,20 +818,20 @@ begin
       lContasReceberItensModel.ContasReceberItenssLista.Add(TContasReceberItensModel.Create(vIConexao));
 
       lContasReceberItensModel.ContasReceberItenssLista[lIndex].FATURA_REC         := lFaturaReceber;
-      lContasReceberItensModel.ContasReceberItenssLista[lIndex].CODIGO_POR         := lMemTable.FieldByName('PORTADOR_ID').AsString;
+      lContasReceberItensModel.ContasReceberItenssLista[lIndex].CODIGO_POR         := lMemTable.objeto.FieldByName('PORTADOR_ID').AsString;
       lContasReceberItensModel.ContasReceberItenssLista[lIndex].CODIGO_CLI         := lContasReceberModel.CODIGO_CLI;
       lContasReceberItensModel.ContasReceberItenssLista[lIndex].SITUACAO_REC       := 'A';
       lContasReceberItensModel.ContasReceberItenssLista[lIndex].VALORREC_REC       := '0';
       lContasReceberItensModel.ContasReceberItenssLista[lIndex].VALOR_PAGO         := '0';
       lContasReceberItensModel.ContasReceberItenssLista[lIndex].LOJA               := lContasReceberModel.LOJA;
-      lContasReceberItensModel.ContasReceberItenssLista[lIndex].VLRPARCELA_REC     := lMemTable.FieldByName('VALOR_PARCELA').AsString;
-      lContasReceberItensModel.ContasReceberItenssLista[lIndex].PACELA_REC         := lMemTable.FieldByName('PARCELA').AsString;
-      lContasReceberItensModel.ContasReceberItenssLista[lIndex].TOTALPARCELAS_REC  := lMemTable.FieldByName('QUANTIDADE_PARCELAS').AsString;
-      lContasReceberItensModel.ContasReceberItenssLista[lIndex].VENCIMENTO_REC     := lMemTable.FieldByName('VENCIMENTO').AsString;
+      lContasReceberItensModel.ContasReceberItenssLista[lIndex].VLRPARCELA_REC     := lMemTable.objeto.FieldByName('VALOR_PARCELA').AsString;
+      lContasReceberItensModel.ContasReceberItenssLista[lIndex].PACELA_REC         := lMemTable.objeto.FieldByName('PARCELA').AsString;
+      lContasReceberItensModel.ContasReceberItenssLista[lIndex].TOTALPARCELAS_REC  := lMemTable.objeto.FieldByName('QUANTIDADE_PARCELAS').AsString;
+      lContasReceberItensModel.ContasReceberItenssLista[lIndex].VENCIMENTO_REC     := lMemTable.objeto.FieldByName('VENCIMENTO').AsString;
 
       inc(lIndex);
 
-      if lMemTable.FieldByName('PARCELA').AsString = lMemTable.FieldByName('QUANTIDADE_PARCELAS').AsString then
+      if lMemTable.objeto.FieldByName('PARCELA').AsString = lMemTable.objeto.FieldByName('QUANTIDADE_PARCELAS').AsString then
       begin
         lContasReceberItensModel.Acao := tacIncluir;
         lContasReceberItensModel.Salvar;
@@ -840,7 +840,7 @@ begin
         lIndex := 0;
       end;
 
-      lMemTable.Next;
+      lMemTable.objeto.Next;
     end;
 
     Result := lFaturaReceber;
@@ -955,7 +955,7 @@ var
   lTribMunicipal    : Double;
   lFuncionarioModel : TFuncionarioModel;
   lConfiguracoes    : TerasoftConfiguracoes;
-  lTableTotais      : TFDMemTable;
+  lTableTotais      : IFDDataset;
   lItem             : Integer;
 begin
   if self.FNUMERO_PED = '' then
@@ -1180,26 +1180,26 @@ begin
 
     lNFModel.Acao := tacAlterar;
 
-    lNFModel.VALOR_NF              := lTableTotais.FieldByName('TOTAL_ITENS').AsString;
-    lNFModel.ACRES_NF              := lTableTotais.FieldByName('TOTAL_OUTROS').AsString;
+    lNFModel.VALOR_NF              := lTableTotais.objeto.FieldByName('TOTAL_ITENS').AsString;
+    lNFModel.ACRES_NF              := lTableTotais.objeto.FieldByName('TOTAL_OUTROS').AsString;
 
-    lNFModel.TOTAL_NF              := FloatToStr(lTableTotais.FieldByName('TOTAL_ITENS').AsFloat +
-                                                 lTableTotais.FieldByName('TOTAL_OUTROS').AsFloat +
-                                                 lTableTotais.FieldByName('TOTAL_IPI').AsFloat +
-                                                 lTableTotais.FieldByName('TOTAL_VII').AsFloat +
-                                                 lTableTotais.FieldByName('TOTAL_VALOR_ICMS_ST').AsFloat +
-                                                 lTableTotais.FieldByName('TOTAL_SEG').AsFloat +
-                                                 lTableTotais.FieldByName('VFCPST').AsFloat +
-                                                 lTableTotais.FieldByName('TOTAL_FRETE').AsFloat -
-                                                 lTableTotais.FieldByName('TOTAL_DESCONTO').AsFloat -
-                                                 lTableTotais.FieldByName('VICMSDESON').AsFloat -
-                                                 lTableTotais.FieldByName('VSUFRAMA').AsFloat);
+    lNFModel.TOTAL_NF              := FloatToStr(lTableTotais.objeto.FieldByName('TOTAL_ITENS').AsFloat +
+                                                 lTableTotais.objeto.FieldByName('TOTAL_OUTROS').AsFloat +
+                                                 lTableTotais.objeto.FieldByName('TOTAL_IPI').AsFloat +
+                                                 lTableTotais.objeto.FieldByName('TOTAL_VII').AsFloat +
+                                                 lTableTotais.objeto.FieldByName('TOTAL_VALOR_ICMS_ST').AsFloat +
+                                                 lTableTotais.objeto.FieldByName('TOTAL_SEG').AsFloat +
+                                                 lTableTotais.objeto.FieldByName('VFCPST').AsFloat +
+                                                 lTableTotais.objeto.FieldByName('TOTAL_FRETE').AsFloat -
+                                                 lTableTotais.objeto.FieldByName('TOTAL_DESCONTO').AsFloat -
+                                                 lTableTotais.objeto.FieldByName('VICMSDESON').AsFloat -
+                                                 lTableTotais.objeto.FieldByName('VSUFRAMA').AsFloat);
 
     lNFModel.VALOR_PAGO            := lNFModel.TOTAL_NF;
-    lNFModel.DESC_NF               := lTableTotais.FieldByName('TOTAL_DESCONTO').AsString;
-    lNFModel.DESCONTO_NF           := FloatToStr(lTableTotais.FieldByName('TOTAL_DESCONTO').AsFloat / lTableTotais.FieldByName('TOTAL_ITENS').AsFloat * 100);
-    lNFModel.FRETE                 := lTableTotais.FieldByName('TOTAL_FRETE').AsString;
-    lNFModel.OUTROS_NF             := lTableTotais.FieldByName('TOTAL_OUTROS').AsString;
+    lNFModel.DESC_NF               := lTableTotais.objeto.FieldByName('TOTAL_DESCONTO').AsString;
+    lNFModel.DESCONTO_NF           := FloatToStr(lTableTotais.objeto.FieldByName('TOTAL_DESCONTO').AsFloat / lTableTotais.objeto.FieldByName('TOTAL_ITENS').AsFloat * 100);
+    lNFModel.FRETE                 := lTableTotais.objeto.FieldByName('TOTAL_FRETE').AsString;
+    lNFModel.OUTROS_NF             := lTableTotais.objeto.FieldByName('TOTAL_OUTROS').AsString;
 
     lNFModel.VTOTTRIB              := FloatToStr(lTribFederal + lTribEstadual + lTribMunicipal);
     lNFModel.VTOTTRIB_FEDERAL      := FloatToStr(lTribFederal);
@@ -1589,7 +1589,7 @@ begin
   end;
 end;
 
-function TPedidoVendaModel.obterComprasRealizadas(pCliente: String): TFDMemTable;
+function TPedidoVendaModel.obterComprasRealizadas(pCliente: String): IFDDataset;
 var
   lPedidoVendaModel: TPedidoVendaDao;
 begin

@@ -64,7 +64,7 @@ type
     function Salvar: String;
     procedure obterLista;
     procedure obterHosts;
-    function obterFiliais: TFDMemTable;
+    function obterFiliais: IFDDataset;
 
     property LojassLista: TObjectList<TLojasModel> read FLojassLista write SetLojassLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -96,7 +96,7 @@ begin
   inherited;
 end;
 
-function TLojasModel.obterFiliais: TFDMemTable;
+function TLojasModel.obterFiliais: IFDDataset;
 var
   lLojasDao : TLojasDao;
 begin

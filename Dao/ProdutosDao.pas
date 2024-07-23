@@ -60,15 +60,15 @@ type
     function alterar(pProdutosModel: TProdutosModel): String;
     function excluir(pProdutosModel: TProdutosModel): String;
 
-    function obterListaConsulta: TFDMemTable;
-    function obterListaMemTable: TFDMemTable;
-    function ObterTabelaPreco: TFDMemTable;
+    function obterListaConsulta: IFDDataset;
+    function obterListaMemTable: IFDDataset;
+    function ObterTabelaPreco: IFDDataset;
 
     procedure obterLista;
     procedure obterVenderItem;
     procedure obterListaCatalogo;
 
-    function obterComissao(pCodProduto: String): TFDMemTable;
+    function obterComissao(pCodProduto: String): IFDDataset;
     function obterSaldo(pIdProduto: String): Double;
     function obterSaldoDisponivel(pIdProduto: String): Double;
     procedure subtrairSaldo(pIdProduto: String; pSaldo: Double);
@@ -76,7 +76,7 @@ type
     function valorVenda(pIdProduto: String): Variant;
     function obterCodigobarras(pIdProduto: String): String;
     function carregaClasse(pId: String): TProdutosModel;
-    function ConsultaProdutosVendidos(pProduto : String) : TFDMemTable;
+    function ConsultaProdutosVendidos(pProduto : String) : IFDDataset;
 
     function ValorGarantia(pProduto: String; pValorFaixa: Double): TProdutoGarantia;
 
@@ -376,7 +376,7 @@ begin
   end;
 end;
 
-function TProdutosDao.ConsultaProdutosVendidos(pProduto: String): TFDMemTable;
+function TProdutosDao.ConsultaProdutosVendidos(pProduto: String): IFDDataset;
 var
   lQry : TFDQuery;
   lSQL : String;
@@ -583,7 +583,7 @@ begin
   Result   := lConexao.ExecSQLScalar('select barras_pro from produto where codigo_pro = '+ QuotedStr(pIdProduto));
 end;
 
-function TProdutosDao.obterComissao(pCodProduto: String): TFDMemTable;
+function TProdutosDao.obterComissao(pCodProduto: String): IFDDataset;
 var
   lQry      : TFDQuery;
   lSql      : String;
@@ -895,12 +895,12 @@ begin
   end;
 end;
 
-function TProdutosDao.obterListaConsulta: TFDMemTable;
+function TProdutosDao.obterListaConsulta: IFDDataset;
 var
   lSQL,
   lPaginacao : String;
   lQry      : TFDQuery;
-  lMemTable : TFDMemTable;
+  lMemTable : IFDDataset;
 begin
   lQry := vIConexao.CriarQuery;
   try
@@ -933,11 +933,11 @@ begin
   end;
 end;
 
-function TProdutosDao.obterListaMemTable : TFDMemTable;
+function TProdutosDao.obterListaMemTable : IFDDataset;
 var
   lQry: TFDQuery;
   lSQL:String;
-  lMemTable: TFDMemTable;
+  lMemTable: IFDDataset;
 begin
   try
     lQry := vIConexao.CriarQuery;
@@ -961,11 +961,11 @@ begin
   end;
 end;
 
-function TProdutosDao.ObterTabelaPreco: TFDMemTable;
+function TProdutosDao.ObterTabelaPreco: IFDDataset;
 var
   lQry : TFDQuery;
   lSql : String;
-  lMemTable : TFDMemTable;
+  lMemTable : IFDDataset;
 begin
   try
     lQry := vIConexao.CriarQuery;
@@ -1061,7 +1061,7 @@ end;
 
 procedure TProdutosDao.setParams(var pQry: TFDQuery; pProdutoModel: TProdutosModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -1076,7 +1076,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pProdutoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pProdutoModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pProdutoModel).AsString))
     end;
   finally
     lCtx.Free;

@@ -59,8 +59,8 @@ type
     function excluir(pMovimentoSerialModel: TMovimentoSerialModel): String;
 
     function carregaClasse(pID : String): TMovimentoSerialModel;
-    function obterLista: TFDMemTable;
-    function ConsultaSerial: TFDMemTable;
+    function obterLista: IFDDataset;
+    function ConsultaSerial: IFDDataset;
 
     function ValidaVendaSerial(pProduto: String): Boolean;
     function SaldoProdutoSerial(pProduto: String): Real;
@@ -211,7 +211,7 @@ begin
   end;
 end;
 
-function TMovimentoSerialDao.ConsultaSerial: TFDMemTable;
+function TMovimentoSerialDao.ConsultaSerial: IFDDataset;
 var
   lQry : TFDQuery;
   lSql : String;
@@ -378,7 +378,7 @@ begin
   end;
 end;
 
-function TMovimentoSerialDao.obterLista: TFDMemTable;
+function TMovimentoSerialDao.obterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -439,7 +439,7 @@ end;
 
 procedure TMovimentoSerialDao.setParams(var pQry: TFDQuery; pMovimentoSerialModel: TMovimentoSerialModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -454,7 +454,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pMovimentoSerialModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pMovimentoSerialModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pMovimentoSerialModel).AsString))
     end;
   finally
     lCtx.Free;

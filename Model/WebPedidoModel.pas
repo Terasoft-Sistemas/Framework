@@ -377,7 +377,7 @@ type
     destructor Destroy; override;
 
     function Salvar: String;
-    function obterLista : TFDMemTable;
+    function obterLista : IFDDataset;
     function carregaClasse(pId: String): TWebPedidoModel;
 
     function aprovarVendaAssistida(pIdVendaAssistida: Integer): String;
@@ -455,7 +455,7 @@ var
   lPedido                  : String;
   lItem, lIndex            : Integer;
   lTableCliente,
-  lTableFinanceiro         : TFDMemTable;
+  lTableFinanceiro         : IFDDataset;
 begin
 
   if not (pIdVendaAssistida <> 0) then
@@ -509,10 +509,10 @@ begin
     lPedidoVendaModel.TABJUROS_PED         := 'N';
     lPedidoVendaModel.WEB_PEDIDO_ID        := lWebPedidoModel.ID;
     lPedidoVendaModel.CODIGO_CLI           := lWebPedidoModel.CLIENTE_ID;
-    lPedidoVendaModel.CNPJ_CPF_CONSUMIDOR  := lTableCliente.fieldByName('CNPJ_CPF_CLI').AsString;
+    lPedidoVendaModel.CNPJ_CPF_CONSUMIDOR  := lTableCliente.objeto.fieldByName('CNPJ_CPF_CLI').AsString;
 
     if lFinanceiroPedidoModel.TotalRecords > 0 then
-      lPedidoVendaModel.CODIGO_PORT        := lTableFinanceiro.FieldByName('PORTADOR_ID').AsString
+      lPedidoVendaModel.CODIGO_PORT        := lTableFinanceiro.objeto.FieldByName('PORTADOR_ID').AsString
     else
       lPedidoVendaModel.CODIGO_PORT        := lWebPedidoModel.PORTADOR_ID;
 
@@ -653,7 +653,7 @@ end;
 procedure TWebPedidoModel.ExcluirReservaCD(pWebPedidoItensID, pFilial: String);
 var
   lReservaModel : TReservaModel;
-  lTableReserva : TFDMemTable;
+  lTableReserva : IFDDataset;
 begin
   lReservaModel := TReservaModel.Create(vIConexao.NovaConexao('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA));
 
@@ -661,10 +661,10 @@ begin
     lReservaModel.WhereView := ' and reserva.web_pedidoitens_id = ' + pWebPedidoItensID + ' and reserva.filial = ' + QuotedStr(pFilial);
     lTableReserva := lReservaModel.obterLista;
 
-    if lTableReserva.FieldByName('ID').AsString = '' then
+    if lTableReserva.objeto.FieldByName('ID').AsString = '' then
       CriaException('Reserva n�o localizada');
 
-    lReservaModel.Excluir(lTableReserva.FieldByName('ID').AsString);
+    lReservaModel.Excluir(lTableReserva.objeto.FieldByName('ID').AsString);
   finally
     lReservaModel.Free;
   end;
@@ -680,7 +680,7 @@ begin
   Result    := self.Salvar;
 end;
 
-function TWebPedidoModel.obterLista: TFDMemTable;
+function TWebPedidoModel.obterLista: IFDDataset;
 var
   lWebPedidoLista: TWebPedidoDao;
 begin
@@ -1498,7 +1498,7 @@ function TWebPedidoModel.Negar(pID: String): Boolean;
 var
   lWebPedidoModel : TWebPedidoModel;
   lSolicitacaoDescontoModel : TSolicitacaoDescontoModel;
-  lMemTableSolicitacao : TFDMemTable;
+  lMemTableSolicitacao : IFDDataset;
 begin
   if pID = '' then
     CriaException('ID não informado');
@@ -1519,7 +1519,7 @@ begin
 
       lMemTableSolicitacao := lSolicitacaoDescontoModel.obterLista;
 
-      lSolicitacaoDescontoModel := lSolicitacaoDescontoModel.carregaClasse(lMemTableSolicitacao.FieldByName('ID').AsString);
+      lSolicitacaoDescontoModel := lSolicitacaoDescontoModel.carregaClasse(lMemTableSolicitacao.objeto.FieldByName('ID').AsString);
 
       lSolicitacaoDescontoModel.USUARIO_CEDENTE := vIConexao.getUser.ID;
       lSolicitacaoDescontoModel.STATUS          := 'N';
@@ -1544,7 +1544,7 @@ function TWebPedidoModel.NegarDesconto(pID: String): Boolean;
 var
   lWebPedidoModel  : TWebPedidoModel;
   lPermissaoRemota : TPermissaoRemotaModel;
-  lTablePermissa   : TFDMemTable;
+  lTablePermissa   : IFDDataset;
 begin
   if pID = '' then
     CriaException('ID não informado.');
@@ -1564,11 +1564,11 @@ begin
 
     lTablePermissa := lPermissaoRemota.obterLista;
 
-    lTablePermissa.First;
-    while not lTablePermissa.Eof do
+    lTablePermissa.objeto.First;
+    while not lTablePermissa.objeto.Eof do
     begin
-      lPermissaoRemota.Excluir(lTablePermissa.FieldByName('ID').AsString);
-      lTablePermissa.Next;
+      lPermissaoRemota.Excluir(lTablePermissa.objeto.FieldByName('ID').AsString);
+      lTablePermissa.objeto.Next;
     end;
 
     lWebPedidoModel.STATUS              := 'D';
@@ -1671,7 +1671,7 @@ var
   lFinanceiroPedidoModel : TFinanceiroPedidoModel;
   lWebPedidoModel        : TWebPedidoModel;
   lPermissaoRemota       : TPermissaoRemotaModel;
-  lTablePermissao        : TFDMemTable;
+  lTablePermissao        : IFDDataset;
 begin
   lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
   lWebPedidoModel        := TWebPedidoModel.Create(vIConexao);
@@ -1689,7 +1689,7 @@ begin
 
     lTablePermissao := lPermissaoRemota.obterLista;
 
-    if lTablePermissao.RecordCount > 0 then
+    if lTablePermissao.objeto.RecordCount > 0 then
       lWebPedidoModel.STATUS := 'P'
 
     else if (lFinanceiroPedidoModel.qtdePagamentoPrazo(pID) = 0) then

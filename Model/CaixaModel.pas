@@ -151,7 +151,7 @@ type
     function Incluir: String;
     function Salvar: String;
     procedure obterLista;
-    function obterSaldo(pUsario: String): TFDMemTable;
+    function obterSaldo(pUsario: String): IFDDataset;
 
     function carregaClasse(pIdCaixa: String): TCaixaModel;
     function carregaClasseIndexOf(pIndex: Integer): TCaixaModel;
@@ -264,7 +264,7 @@ begin
   end;
 end;
 
-function TCaixaModel.obterSaldo(pUsario: String): TFDMemTable;
+function TCaixaModel.obterSaldo(pUsario: String): IFDDataset;
 var
   lCaixaLista: TCaixaDao;
 begin

@@ -9,6 +9,7 @@ uses
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
+  Terasoft.Framework.ObjectIface,
   LojasModel,
   Terasoft.FuncoesTexto,
   Interfaces.Conexao,
@@ -56,8 +57,8 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-	  function obterSaldoLojas(pParametros : TParametrosSaldo): TFDMemTable;
-    function obterReservasCD(pProduto: String): TFDMemTable;
+	  function obterSaldoLojas(pParametros : TParametrosSaldo): IFDDataset;
+    function obterReservasCD(pProduto: String): IFDDataset;
 end;
 
 implementation
@@ -80,7 +81,7 @@ begin
   inherited;
 end;
 
-function TSaldoDao.obterReservasCD(pProduto: String): TFDMemTable;
+function TSaldoDao.obterReservasCD(pProduto: String): IFDDataset;
 var
   lSql  : String;
   lQry  : TFDQuery;
@@ -133,15 +134,15 @@ begin
   end;
 end;
 
-function TSaldoDao.obterSaldoLojas(pParametros : TParametrosSaldo): TFDMemTable;
+function TSaldoDao.obterSaldoLojas(pParametros : TParametrosSaldo): IFDDataset;
 var
   lQry      : TFDQuery;
   lSql      : String;
   lLojas    : TLojasModel;
-  lMemTable : TFDMemTable;
+  lMemTable : IFDDataset;
 begin
   lLojas       := TLojasModel.Create(vIConexao);
-  lMemTable    := TFDMemTable.Create(nil);
+  lMemTable    := TImplObjetoOwner<TDataset>.CreateOwner(TFDMemTable.Create(nil));
 
   try
     lSql := ' select                                                   '+SLineBreak+
@@ -167,19 +168,19 @@ begin
             '  where                                                       '+SLineBreak+
             '    p.CODIGO_PRO = ' + QuotedStr(pParametros.PRODUTO);
 
-    with lMemTable.IndexDefs.AddIndexDef do
+    with TFDMemTable(lMemTable.objeto).IndexDefs.AddIndexDef do
     begin
       Name := 'OrdenacaoLoja';
       Fields := 'LOJA';
       Options := [TIndexOption.ixCaseInsensitive];
     end;
 
-    lMemTable.IndexName := 'OrdenacaoLoja';
+    TFDMemTable(lMemTable.objeto).IndexName := 'OrdenacaoLoja';
 
-    lMemTable.FieldDefs.Add('LOJA', ftString, 3);
-    lMemTable.FieldDefs.Add('SALDO_FISICO', ftFloat);
-    lMemTable.FieldDefs.Add('SALDO_DISPONIVEL', ftFloat);
-    lMemTable.CreateDataSet;
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('LOJA', ftString, 3);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('SALDO_FISICO', ftFloat);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('SALDO_DISPONIVEL', ftFloat);
+    TFDMemTable(lMemTable.objeto).CreateDataSet;
 
     if pParametros.LOJA <> '' then
       lLojas.LojaView := pParametros.LOJA;
@@ -193,7 +194,7 @@ begin
       lQry := vIConexao.criarQueryExterna;
       lQry.Open(lSQL);
 
-      lMemTable.InsertRecord([
+      lMemTable.objeto.InsertRecord([
                               llojas.LOJA,
                               lQry.fieldByName('SALDO_FISICO').AsFloat,
                               lQry.fieldByName('SALDO_DISPONIVEL').AsFloat
@@ -208,7 +209,7 @@ begin
       lQry := vIConexao.criarQueryExterna;
       lQry.Open(lSQL);
 
-      lMemTable.InsertRecord([
+      lMemTable.objeto.InsertRecord([
                               'CD',
                               lQry.fieldByName('SALDO_FISICO').AsFloat,
                               lQry.fieldByName('SALDO_DISPONIVEL').AsFloat

@@ -159,7 +159,7 @@ end;
 function TIbptModel.obterIBPT(pUf, pOrigem, pNCM : String): TIBPTRetorno;
 var
   lIbptDao       : TIbptDao;
-  lTable         : TFDMemTable;
+  lTable         : IFDDataset;
   lConfiguracoes : TerasoftConfiguracoes;
 
 begin
@@ -171,20 +171,20 @@ begin
 
     lTable := lIbptDao.obterIBPT(pUf, pNCM);
 
-    if lTable.RecordCount = 0 then
+    if lTable.objeto.RecordCount = 0 then
       exit;
 
     if (pOrigem = 'I') or (pOrigem = '6') then
-      Result.IMPOSTO_FEDERAL := lTable.FieldByName('importados_federal').AsFloat
+      Result.IMPOSTO_FEDERAL := lTable.objeto.FieldByName('importados_federal').AsFloat
     else
-      Result.IMPOSTO_FEDERAL := lTable.FieldByName('nacional_federal').AsFloat;
+      Result.IMPOSTO_FEDERAL := lTable.objeto.FieldByName('nacional_federal').AsFloat;
 
-    Result.IMPOSTO_ESTADUAL  := lTable.FieldByName('estadual').AsFloat;
-    Result.IMPOSTO_MUNICIPAL := lTable.FieldByName('municipal').AsFloat;
+    Result.IMPOSTO_ESTADUAL  := lTable.objeto.FieldByName('estadual').AsFloat;
+    Result.IMPOSTO_MUNICIPAL := lTable.objeto.FieldByName('municipal').AsFloat;
 
-    Result.FONTE  := lTable.FieldByName('fonte').AsString;
-    Result.VERSAO := lTable.FieldByName('versao').AsString;
-    Result.CHAVE  := lTable.FieldByName('chave').AsString;
+    Result.FONTE  := lTable.objeto.FieldByName('fonte').AsString;
+    Result.VERSAO := lTable.objeto.FieldByName('versao').AsString;
+    Result.CHAVE  := lTable.objeto.FieldByName('chave').AsString;
 
     lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
 

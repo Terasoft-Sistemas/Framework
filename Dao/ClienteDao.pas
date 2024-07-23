@@ -70,9 +70,9 @@ type
     function nomeCliente(pId: String): Variant;
     function comissaoCliente(pId: String): Variant;
     function diasAtraso(pCodigoCliente: String): Variant;
-    function obterListaConsulta: TFDMemTable;
-    function ObterListaMemTable: TFDMemTable;
-    function ObterBairros: TFDMemTable;
+    function obterListaConsulta: IFDDataset;
+    function ObterListaMemTable: IFDDataset;
+    function ObterBairros: IFDDataset;
     procedure bloquearCNPJCPF(pCliente, pCNPJCPF: String);
 end;
 implementation
@@ -926,7 +926,7 @@ begin
   end;
 end;
 
-function TClienteDao.obterListaConsulta: TFDMemTable;
+function TClienteDao.obterListaConsulta: IFDDataset;
 var
   lQry : TFDQuery;
   lSql,
@@ -961,7 +961,7 @@ begin
   end;
 end;
 
-function TClienteDao.ObterListaMemTable: TFDMemTable;
+function TClienteDao.ObterListaMemTable: IFDDataset;
 var
   lQry       : TFDQuery;
   lSql,
@@ -990,7 +990,7 @@ begin
   end;
 end;
 
-function TClienteDao.ObterBairros: TFDMemTable;
+function TClienteDao.ObterBairros: IFDDataset;
 var
   lQry : TFDQuery;
   lSql : String;

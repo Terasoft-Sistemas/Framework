@@ -62,7 +62,7 @@ type
     destructor Destroy; override;
 
     function Salvar: String;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
   end;
 
@@ -84,7 +84,7 @@ begin
   inherited;
 end;
 
-function TRegiaoModel.obterLista: TFDMemTable;
+function TRegiaoModel.obterLista: IFDDataset;
 var
   lRegiaoLista: TRegiaoDao;
 begin

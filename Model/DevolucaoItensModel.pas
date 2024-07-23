@@ -110,9 +110,9 @@ type
     function Salvar : String;
 
     function carregaClasse(pID, pProduto, pItem : String): TDevolucaoItensModel;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
     function proximoItem(pDevolucao : String): String;
-    function calculaTotais(pDevolucao : String): TFDmemTable;
+    function calculaTotais(pDevolucao : String): IFDDataset;
     procedure gerarEstoque;
     procedure excluirEstoque;
 
@@ -230,7 +230,7 @@ begin
     Result    := self.Salvar;
 end;
 
-function TDevolucaoItensModel.calculaTotais(pDevolucao: String): TFDmemTable;
+function TDevolucaoItensModel.calculaTotais(pDevolucao: String): IFDDataset;
 var
   lDevolucaoItensDao : TDevolucaoItensDao;
 begin
@@ -265,7 +265,7 @@ begin
   inherited;
 end;
 
-function TDevolucaoItensModel.obterLista: TFDMemTable;
+function TDevolucaoItensModel.obterLista: IFDDataset;
 var
   lDevolucaoItensLista: TDevolucaoItensDao;
 begin

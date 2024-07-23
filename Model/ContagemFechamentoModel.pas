@@ -5,6 +5,7 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao, FireDAC.Comp.Client;
 
 type
@@ -64,11 +65,11 @@ type
     function Alterar(pID : String): TContagemFechamentoModel;
     function Excluir(pID : String): String;
     function Salvar      : String;
-    function obterLista  : TFDMemTable;
+    function obterLista  : IFDDataset;
     procedure ExcluirContagem(pIdCaixa : String);
 
     function carregaClasse(pId: String): TContagemFechamentoModel;
-    function obterContagem(pIdAberturaCaixa: String): TFDMemTable;
+    function obterContagem(pIdAberturaCaixa: String): IFDDataset;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -159,35 +160,37 @@ begin
   end;
 end;
 
-function TContagemFechamentoModel.obterContagem(pIdAberturaCaixa: String): TFDMemTable;
+function TContagemFechamentoModel.obterContagem(pIdAberturaCaixa: String): IFDDataset;
 var
   lPortadorModel   : TPortadorModel;
   lAdmCartaoModel  : TAdmCartaoModel;
-  lMemTable        : TFDMemTable;
-  lMemTableGerada  : TFDMemTable;
+  lMemTable        : IFDDataset;
+  lMemTableGerada  : IFDDataset;
   lLocate          : Boolean;
 
 begin
   lPortadorModel   := TPortadorModel.Create(vIConexao);
   lAdmCartaoModel  := TAdmCartaoModel.Create(vIConexao);
-  lMemTable        := TFDMemTable.Create(nil);
-  lMemTableGerada  := TFDMemTable.Create(nil);
+  lMemTable        := TImplObjetoOwner<TDataset>.CreateOwner(TFDMemTable.Create(nil));
+  lMemTableGerada  := TImplObjetoOwner<TDataset>.CreateOwner(TFDMemTable.Create(nil));
 
   try
-    with lMemTable.IndexDefs.AddIndexDef do
+    with TFDMemTable(lMemTable.objeto).IndexDefs.AddIndexDef do
     begin
       Name := 'OrdenacaoDescricao';
       Fields := 'DESCRICAO';
       Options := [TIndexOption.ixCaseInsensitive];
     end;
 
-    lMemTable.IndexName := 'OrdenacaoDescricao';
-
-    lMemTable.FieldDefs.Add('TIPO', ftString, 1);
-    lMemTable.FieldDefs.Add('ID', ftString, 10);
-    lMemTable.FieldDefs.Add('DESCRICAO', ftString, 50);
-    lMemTable.FieldDefs.Add('VALOR', ftFloat);
-    lMemTable.CreateDataSet;
+    with TFDMemTable(lMemTable.objeto) do
+    begin
+      IndexName := 'OrdenacaoDescricao';
+      FieldDefs.Add('TIPO', ftString, 1);
+      FieldDefs.Add('ID', ftString, 10);
+      FieldDefs.Add('DESCRICAO', ftString, 50);
+      FieldDefs.Add('VALOR', ftFloat);
+      CreateDataSet;
+    end;
 
     lPortadorModel.WhereView := ' and coalesce(portador.contagem,''S'') = ''S''                                               '+
                                 ' and coalesce(portador.status,''A'')   = ''A''                                               '+
@@ -197,7 +200,7 @@ begin
 
     for lPortadorModel in lPortadorModel.PortadorsLista do
     begin
-      lMemTable.InsertRecord([
+      lMemTable.objeto.InsertRecord([
                               'P',
                               lPortadorModel.CODIGO_PORT,
                               lPortadorModel.NOME_PORT,
@@ -211,7 +214,7 @@ begin
 
     for lAdmCartaoModel in lAdmCartaoModel.AdmCartaosLista do
     begin
-      lMemTable.InsertRecord([
+      lMemTable.objeto.InsertRecord([
                               'B',
                               lAdmCartaoModel.ID,
                               lAdmCartaoModel.NOME_ADM,
@@ -220,41 +223,40 @@ begin
 
     end;
 
-    lMemTable.Open;
+    lMemTable.objeto.Open;
 
     self.WhereView  := ' and contagem_fechamento.caixa_ctr_id = '+ QuotedStr(pIdAberturaCaixa);
     lMemTableGerada := self.obterLista;
 
-    lMemTable.First;
-    while not lMemTable.Eof do
+    lMemTable.objeto.First;
+    while not lMemTable.objeto.Eof do
     begin
-      lMemTableGerada.first;
+      lMemTableGerada.objeto.first;
 
-      if lMemTable.fieldByName('TIPO').AsString = 'P' then
-        lLocate := lMemTableGerada.locate('PORTADOR_ID', lMemTable.fieldByName('ID').AsString, [])
+      if lMemTable.objeto.fieldByName('TIPO').AsString = 'P' then
+        lLocate := lMemTableGerada.objeto.locate('PORTADOR_ID', lMemTable.objeto.fieldByName('ID').AsString, [])
       else
-        lLocate := lMemTableGerada.locate('BANDEIRA_ID', lMemTable.fieldByName('ID').AsString, []);
+        lLocate := lMemTableGerada.objeto.locate('BANDEIRA_ID', lMemTable.objeto.fieldByName('ID').AsString, []);
 
       if lLocate then
       begin
-        lMemTable.Edit;
-        lMemTable.fieldByName('VALOR').AsFloat := lMemTableGerada.fieldByName('VALOR').AsFloat;
-        lMemTable.Post;
+        lMemTable.objeto.Edit;
+        lMemTable.objeto.fieldByName('VALOR').AsFloat := lMemTableGerada.objeto.fieldByName('VALOR').AsFloat;
+        lMemTable.objeto.Post;
       end;
 
-      lMemTable.Next;
+      lMemTable.objeto.Next;
     end;
 
     Result := lMemTable;
   finally
     lPortadorModel.Free;
     lAdmCartaoModel.Free;
-    lMemTableGerada.Free;
   end;
 
 end;
 
-function TContagemFechamentoModel.obterLista : TFDMemTable;
+function TContagemFechamentoModel.obterLista : IFDDataset;
 var
   lContagemFechamentoDao : TContagemFechamentoDao;
 begin

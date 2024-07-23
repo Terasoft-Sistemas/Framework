@@ -101,7 +101,7 @@ type
     destructor Destroy; override;
 
     function ObterLista(pGrupo_Parametros: TGrupo_Parametros): TFDMemTable; overload;
-    function ObterLista: TFDMemTable; overload;
+    function ObterLista: IFDDataset; overload;
 
 
     function Incluir: String;
@@ -180,7 +180,7 @@ begin
 end;
 
 
-function TGrupoModel.ObterLista: TFDMemTable;
+function TGrupoModel.ObterLista: IFDDataset;
 var
   lGrupoLista: TGrupoDao;
 begin

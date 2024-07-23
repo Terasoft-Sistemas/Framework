@@ -63,7 +63,7 @@ type
 
     procedure obterLista;
     function carregaClasse(pIdCaixa: String): TCaixaModel;
-    function obterSaldo(pUsario: String): TFDMemTable;
+    function obterSaldo(pUsario: String): IFDDataset;
 
     procedure setParams(var pQry: TFDQuery; pCaixaModel: TCaixaModel);
 
@@ -331,7 +331,7 @@ begin
   end;
 end;
 
-function TCaixaDao.obterSaldo(pUsario: String): TFDMemTable;
+function TCaixaDao.obterSaldo(pUsario: String): IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -386,7 +386,7 @@ end;
 
 procedure TCaixaDao.setParams(var pQry: TFDQuery; pCaixaModel: TCaixaModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -401,7 +401,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pCaixaModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pCaixaModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pCaixaModel).AsString))
     end;
   finally
     lCtx.Free;

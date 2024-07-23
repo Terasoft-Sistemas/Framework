@@ -74,7 +74,7 @@ type
     function Salvar : String;
 
     function carregaClasse(pId : String): TPermissaoRemotaModel;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     function Autorizar(pID : String): Boolean;
     function Negar(pID: String): Boolean;
@@ -179,7 +179,7 @@ var
   lPermissaoRemotaModel : TPermissaoRemotaModel;
   lWebPedidoModel       : TWebPedidoModel;
   lConfiguracoes        : TerasoftConfiguracoes;
-  lTablePermissao       : TFDMemTable;
+  lTablePermissao       : IFDDataset;
 begin
   if pID = '' then
     CriaException('ID não informado');
@@ -206,11 +206,11 @@ begin
 
       lTablePermissao := lPermissaoRemotaModel.obterLista;
 
-      lTablePermissao.First;
-      while not lTablePermissao.eof do
+      lTablePermissao.objeto.First;
+      while not lTablePermissao.objeto.eof do
       begin
-        lPermissaoRemotaModel.Excluir(lTablePermissao.FieldByName('ID').AsString);
-        lTablePermissao.Next;
+        lPermissaoRemotaModel.Excluir(lTablePermissao.objeto.FieldByName('ID').AsString);
+        lTablePermissao.objeto.Next;
       end;
 
       lWebPedidoModel.Negar(lPermissaoRemotaModel.PEDIDO_ID);
@@ -248,7 +248,7 @@ begin
   inherited;
 end;
 
-function TPermissaoRemotaModel.obterLista: TFDMemTable;
+function TPermissaoRemotaModel.obterLista: IFDDataset;
 var
   lPermissaoRemotaLista: TPermissaoRemotaDao;
 begin

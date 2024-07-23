@@ -103,7 +103,7 @@ type
     function Salvar: String;
     procedure obterLista;
     function carregaClasse(pId: String): TMovimentoModel;
-    function obterListaMemTable : TFDMemTable;
+    function obterListaMemTable : IFDDataset;
 
     property MovimentosLista: TObjectList<TMovimentoModel> read FMovimentosLista write SetMovimentosLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -174,7 +174,7 @@ begin
   end;
 end;
 
-function TMovimentoModel.obterListaMemTable: TFDMemTable;
+function TMovimentoModel.obterListaMemTable: IFDDataset;
 var
   lMovimento: TMovimentoDao;
 begin

@@ -991,9 +991,9 @@ type
     function comissaoCliente(pId: String): Variant;
     function diasAtraso(pCodigoCliente: String): Variant;
 
-    function obterListaConsulta: TFDMemTable;
-    function ObterListaMemTable: TFDMemTable;
-    function ObterBairros: TFDMemTable;
+    function obterListaConsulta: IFDDataset;
+    function ObterListaMemTable: IFDDataset;
+    function ObterBairros: IFDDataset;
     procedure bloquearCNPJCPF(pCliente, pCNPJCPF: String);
 
     property ClientesLista: TObjectList<TClienteModel> read FClientesLista write SetClientesLista;
@@ -1152,7 +1152,7 @@ begin
   end;
 end;
 
-function TClienteModel.obterListaConsulta: TFDMemTable;
+function TClienteModel.obterListaConsulta: IFDDataset;
 var
   lClienteDao: TClienteDao;
 begin
@@ -1173,7 +1173,7 @@ begin
   end;
 end;
 
-function TClienteModel.ObterListaMemTable: TFDMemTable;
+function TClienteModel.ObterListaMemTable: IFDDataset;
 var
   lClienteDao: TClienteDao;
 begin
@@ -1195,7 +1195,7 @@ begin
   end;
 end;
 
-function TClienteModel.ObterBairros: TFDMemTable;
+function TClienteModel.ObterBairros: IFDDataset;
 var
   lClienteDao: TClienteDao;
 begin

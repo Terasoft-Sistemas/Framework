@@ -62,7 +62,7 @@ type
 
     function carregaClasse(pID : String): TBancoModel;
 
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     procedure setParams(var pQry: TFDQuery; pBancoModel: TBancoModel);
 
@@ -273,7 +273,7 @@ begin
   end;
 end;
 
-function TBancoDao.obterLista: TFDMemTable;
+function TBancoDao.obterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;

@@ -141,10 +141,10 @@ type
     function ExcluirPromocao(pID: String): String;
 
     function carregaClasse(pId: String): TFinanceiroPedidoModel;
-    function obterLista: TFDMemTable;
-    function obterResumo(pIDPedido : String) : TFDMemTable;
+    function obterLista: IFDDataset;
+    function obterResumo(pIDPedido : String) : IFDDataset;
     function qtdePagamentoPrazo(pWebPedido : String): Integer;
-    function obterResumoFinanceiro : TFDMemTable;
+    function obterResumoFinanceiro : IFDDataset;
 
     procedure UpdateDadosFinanceiro(pWebPedidoModel: TWebPedidoModel);
 
@@ -302,7 +302,7 @@ begin
   inherited;
 end;
 
-function TFinanceiroPedidoModel.obterResumo(pIDPedido : String): TFDMemTable;
+function TFinanceiroPedidoModel.obterResumo(pIDPedido : String): IFDDataset;
 var
   lFinanceiroPedidoDao : TFinanceiroPedidoDao;
 begin
@@ -314,7 +314,7 @@ begin
   end;
 end;
 
-function TFinanceiroPedidoModel.obterResumoFinanceiro: TFDMemTable;
+function TFinanceiroPedidoModel.obterResumoFinanceiro: IFDDataset;
 var
   lFinanceiroPedidoDao : TFinanceiroPedidoDao;
 begin
@@ -340,7 +340,7 @@ begin
   end;
 end;
 
-function TFinanceiroPedidoModel.obterLista: TFDMemTable;
+function TFinanceiroPedidoModel.obterLista: IFDDataset;
 var
   lFinanceiroPedidoLista: TFinanceiroPedidoDao;
 begin

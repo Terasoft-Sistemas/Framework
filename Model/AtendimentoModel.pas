@@ -127,7 +127,7 @@ type
     destructor Destroy; override;
 
     function Salvar: String;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
   end;
 
@@ -149,7 +149,7 @@ begin
   inherited;
 end;
 
-function TAtendimentoModel.obterLista: TFDMemTable;
+function TAtendimentoModel.obterLista: IFDDataset;
 var
   lAtendimentoLista: TAtendimentoDao;
 begin

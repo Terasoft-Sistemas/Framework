@@ -58,7 +58,7 @@ type
 
     procedure setParams(var pQry : TFDQuery; pRegiaoModel: TRegiaoModel);
 
-    function ObterLista: TFDMemTable;
+    function ObterLista: IFDDataset;
 end;
 
 implementation
@@ -170,7 +170,7 @@ begin
   end;
 end;
 
-function TRegiaoDao.ObterLista: TFDMemTable;
+function TRegiaoDao.ObterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;

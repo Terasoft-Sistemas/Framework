@@ -58,7 +58,7 @@ type
 
     procedure setParams(var pQry : TFDQuery; pAtendimentoRepasseModel: TAtendimentoRepasseModel);
 
-    function ObterLista: TFDMemTable;
+    function ObterLista: IFDDataset;
 end;
 
 implementation
@@ -173,7 +173,7 @@ begin
   end;
 end;
 
-function TAtendimentoRepasseDao.ObterLista: TFDMemTable;
+function TAtendimentoRepasseDao.ObterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;

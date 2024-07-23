@@ -65,7 +65,7 @@ type
     function Excluir(pID : String): String;
     function Salvar      : String;
 
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     function carregaClasse(pId: String): TComissaoVendedorModel;
 
@@ -146,7 +146,7 @@ begin
   end;
 end;
 
-function TComissaoVendedorModel.obterLista: TFDMemTable;
+function TComissaoVendedorModel.obterLista: IFDDataset;
 var
   lComissaoVendedorDao: TComissaoVendedorDao;
 begin

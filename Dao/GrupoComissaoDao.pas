@@ -67,7 +67,7 @@ type
     function carregaClasse(pID : String): TGrupoComissaoModel;
 
     procedure setParams(var pQry: TFDQuery; pGrupoComissaoModel: TGrupoComissaoModel);
-    function ObterLista: TFDMemTable; overload;
+    function ObterLista: IFDDataset; overload;
     function ObterGrupoComissaoProduto(pProduto: String) : Double;
 
 end;
@@ -160,7 +160,7 @@ begin
   end;
 end;
 
-function TGrupoComissaoDao.ObterLista: TFDMemTable;
+function TGrupoComissaoDao.ObterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -283,7 +283,7 @@ end;
 
 procedure TGrupoComissaoDao.setParams(var pQry: TFDQuery; pGrupoComissaoModel: TGrupoComissaoModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -298,7 +298,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pGrupoComissaoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pGrupoComissaoModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pGrupoComissaoModel).AsString))
     end;
   finally
     lCtx.Free;

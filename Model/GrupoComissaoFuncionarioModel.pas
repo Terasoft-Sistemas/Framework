@@ -67,7 +67,7 @@ type
     function Alterar(pID : String): TGrupoComissaoFuncionarioModel;
     function Excluir(pID : String): String;
 
-    function ObterLista : TFDMemTable; overload;
+    function ObterLista : IFDDataset; overload;
 
   end;
 
@@ -127,7 +127,7 @@ begin
     Result    := self.Salvar;
 end;
 
-function TGrupoComissaoFuncionarioModel.ObterLista: TFDMemTable;
+function TGrupoComissaoFuncionarioModel.ObterLista: IFDDataset;
 var
   lGrupoComissaoFuncionario: TGrupoComissaoFuncionarioDao;
 begin

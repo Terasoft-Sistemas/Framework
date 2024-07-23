@@ -140,7 +140,7 @@ type
     procedure obterLista;
 
     function carregaClasse(pId: String): TPortadorModel;
-    function PortadorTabelaJuros : TFDMemTable;
+    function PortadorTabelaJuros : IFDDataset;
     function possuiBandeira(pPortador: String): Boolean;
 
     property PortadorsLista: IList<TPortadorModel> read FPortadorsLista write SetPortadorsLista;
@@ -238,7 +238,7 @@ begin
   end;
 end;
 
-function TPortadorModel.PortadorTabelaJuros: TFDMemTable;
+function TPortadorModel.PortadorTabelaJuros: IFDDataset;
 var
   lPortadorTabelaJuros: TPortadorDao;
 begin

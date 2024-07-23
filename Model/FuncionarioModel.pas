@@ -447,7 +447,7 @@ begin
     lGrupoComissaoFuncionario.WhereView := ' and funcionario_grupo_comissao.grupo_comissao_id = '+ QuotedStr(pIdGrupo) +
                                            ' and funcionario_grupo_comissao.funcionario_id    = '+ QuotedStr(pCodVendedor);
 
-    Result := lGrupoComissaoFuncionario.ObterLista.FieldByName('PERCENTUAL').AsFloat;
+    Result := lGrupoComissaoFuncionario.ObterLista.objeto.FieldByName('PERCENTUAL').AsFloat;
   finally
     lGrupoComissaoFuncionario.Free;
   end;

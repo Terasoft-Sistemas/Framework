@@ -190,7 +190,7 @@ type
 
     function carregaClasse(pId : String): TOrcamentoItensModel;
 
-    function ObterLista: TFDMemTable; overload;
+    function ObterLista: IFDDataset; overload;
 
     procedure quantidadeAtendida(pNumeroOrc: String);
 
@@ -263,7 +263,7 @@ begin
   inherited;
 end;
 
-function TOrcamentoItensModel.obterLista: TFDMemTable;
+function TOrcamentoItensModel.obterLista: IFDDataset;
 var
   lOrcamentoItensLista: TOrcamentoItensDao;
 begin

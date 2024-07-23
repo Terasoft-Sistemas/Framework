@@ -221,7 +221,7 @@ type
     function Salvar : String;
 
     function carregaClasse(pId : String): TFornecedorModel;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -292,7 +292,7 @@ begin
   inherited;
 end;
 
-function TFornecedorModel.obterLista: TFDMemTable;
+function TFornecedorModel.obterLista: IFDDataset;
 var
   lFornecedorLista: TFornecedorDao;
 begin

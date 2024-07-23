@@ -58,7 +58,7 @@ type
 
     procedure setParams(var pQry : TFDQuery; pAtendimentoFinalizadoModel: TAtendimentoFinalizadoModel);
 
-    function ObterLista: TFDMemTable;
+    function ObterLista: IFDDataset;
 end;
 
 implementation
@@ -170,7 +170,7 @@ begin
   end;
 end;
 
-function TAtendimentoFinalizadoDao.ObterLista: TFDMemTable;
+function TAtendimentoFinalizadoDao.ObterLista: IFDDataset;
 var
   lQry      : TFDQuery;
   lSQL      : String;

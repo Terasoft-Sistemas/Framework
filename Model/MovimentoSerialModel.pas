@@ -79,8 +79,8 @@ type
     function Salvar : String;
 
     function carregaClasse(pID : String): TMovimentoSerialModel;
-    function obterLista: TFDMemTable;
-    function ConsultaSerial: TFDMemTable;
+    function obterLista: IFDDataset;
+    function ConsultaSerial: IFDDataset;
 
     function ValidaVendaSerial(pProduto: String): Boolean;
     function SaldoProdutoSerial(pProduto: String): Real;
@@ -159,7 +159,7 @@ begin
   end;
 end;
 
-function TMovimentoSerialModel.ConsultaSerial: TFDMemTable;
+function TMovimentoSerialModel.ConsultaSerial: IFDDataset;
 var
   lMovimentoSerial: TMovimentoSerialDao;
 begin
@@ -188,7 +188,7 @@ begin
   inherited;
 end;
 
-function TMovimentoSerialModel.obterLista: TFDMemTable;
+function TMovimentoSerialModel.obterLista: IFDDataset;
 var
   lMovimentoSerialLista: TMovimentoSerialDao;
 begin

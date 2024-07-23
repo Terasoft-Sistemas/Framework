@@ -77,7 +77,7 @@ type
     function Salvar : String;
 
     function carregaClasse(pId : String): TSolicitacaoDescontoModel;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     function Autorizar(pID : String): Boolean;
     function Negar(pID : String): Boolean;
@@ -134,7 +134,7 @@ var
   lSolicitacaoDesconto : TSolicitacaoDescontoModel;
   lWebPedidoModel      : TWebPedidoModel;
   lDescontoModel       : TDescontoModel;
-  lTableDesconto       : TFDMemTable;
+  lTableDesconto       : IFDDataset;
   lPercentual          : Double;
 begin
   if pID = '' then
@@ -154,7 +154,7 @@ begin
 
     lPercentual := lSolicitacaoDesconto.VALOR_DESCONTO / lSolicitacaoDesconto.VALOR_PEDIDO * 100;
 
-    if (lPercentual > lTableDesconto.FieldByName('VALOR_DES').AsFloat) then
+    if (lPercentual > lTableDesconto.objeto.FieldByName('VALOR_DES').AsFloat) then
       CriaException('Desconto não autorizado');
 
     lSolicitacaoDesconto.USUARIO_CEDENTE := vIConexao.getUSer.ID;
@@ -226,7 +226,7 @@ begin
   inherited;
 end;
 
-function TSolicitacaoDescontoModel.obterLista: TFDMemTable;
+function TSolicitacaoDescontoModel.obterLista: IFDDataset;
 var
   lSolicitacaoDescontoLista: TSolicitacaoDescontoDao;
 begin

@@ -70,7 +70,7 @@ type
 
     procedure setParams(var pQry: TFDQuery; pMarcaModel: TMarcaModel);
     function ObterLista(pMarca_Parametros: TMarca_Parametros): TFDMemTable; overload;
-    function ObterLista: TFDMemTable; overload;
+    function ObterLista: IFDDataset; overload;
 
 end;
 
@@ -193,7 +193,7 @@ begin
   end;
 end;
 
-function TMarcaDao.ObterLista: TFDMemTable;
+function TMarcaDao.ObterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -323,7 +323,7 @@ end;
 
 procedure TMarcaDao.setParams(var pQry: TFDQuery; pMarcaModel: TMarcaModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -338,7 +338,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pMarcaModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pMarcaModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pMarcaModel).AsString))
     end;
   finally
     lCtx.Free;

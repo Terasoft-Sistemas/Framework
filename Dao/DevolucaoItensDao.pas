@@ -59,10 +59,10 @@ type
     function excluir(pDevolucaoItensModel: TDevolucaoItensModel): String;
 
     function carregaClasse(pID, pProduto, pItem : String): TDevolucaoItensModel;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
     procedure setParams(var pQry: TFDQuery; pDevolucaoItensModel: TDevolucaoItensModel);
     function proximoItem(pDevolucao : String): String;
-    function calculaTotais(pDevolucao : String): TFDmemTable;
+    function calculaTotais(pDevolucao : String): IFDDataset;
 
 end;
 
@@ -73,7 +73,7 @@ uses
 
 { TDevolucaoItens }
 
-function TDevolucaoItensDao.calculaTotais(pDevolucao: String): TFDmemTable;
+function TDevolucaoItensDao.calculaTotais(pDevolucao: String): IFDDataset;
 var
   lQry : TFDQuery;
   lSQL : String;
@@ -260,7 +260,7 @@ begin
   Result := vIConexao.getConnection.ExecSQLScalar('select first 1 lpad (cast(i.item as integer) + 1, 3, ''0'') item from devolucaoitens i where i.id = '+QuotedStr(pDevolucao)+' order by i.item desc');
 end;
 
-function TDevolucaoItensDao.obterLista: TFDMemTable;
+function TDevolucaoItensDao.obterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -341,7 +341,7 @@ end;
 
 procedure TDevolucaoItensDao.setParams(var pQry: TFDQuery; pDevolucaoItensModel: TDevolucaoItensModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -356,7 +356,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pDevolucaoItensModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pDevolucaoItensModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pDevolucaoItensModel).AsString))
     end;
   finally
     lCtx.Free;

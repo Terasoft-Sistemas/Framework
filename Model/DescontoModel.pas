@@ -67,7 +67,7 @@ type
 
     function carregaClasse(pId : String): TDescontoModel;
 
-    function ObterLista: TFDMemTable; overload;
+    function ObterLista: IFDDataset; overload;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -140,7 +140,7 @@ begin
   inherited;
 end;
 
-function TDescontoModel.obterLista: TFDMemTable;
+function TDescontoModel.obterLista: IFDDataset;
 var
   lDescontoLista: TDescontoDao;
 begin

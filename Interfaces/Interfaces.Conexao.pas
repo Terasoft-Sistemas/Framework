@@ -8,12 +8,15 @@ interface
     FireDAC.Comp.Client,
     System.SysUtils,
     System.Classes,
+    DB,
     Terasoft.Framework.ObjectIface,
     System.Generics.Defaults;
 
   type
 
     IFDQuery = IObject<TFDQuery>;
+    IFDMemTable = IObject<TFDMemTable>;
+    IFDDataset = IObject<TDataset>;
 
     TUsuario = record
       ID              : string;

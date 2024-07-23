@@ -58,9 +58,9 @@ type
 
     procedure setParams(var pQry : TFDQuery; pFinanceiroPedidoModel: TFinanceiroPedidoModel);
     function carregaClasse(pID: String): TFinanceiroPedidoModel;
-    function obterResumo(pIDPedido : String) : TFDMemTable;
-    function obterResumoFinanceiro: TFDMemTable;
-    function ObterLista: TFDMemTable;
+    function obterResumo(pIDPedido : String) : IFDDataset;
+    function obterResumoFinanceiro: IFDDataset;
+    function ObterLista: IFDDataset;
     function qtdePagamentoPrazo(pWebPedido : String): Integer;
 
     procedure UpdateDadosFinanceiro(pWebPedidoModel: TWebPedidoModel);
@@ -260,7 +260,7 @@ begin
   Result := lSql;
 end;
 
-function TFinanceiroPedidoDao.obterResumo(pIDPedido: String): TFDMemTable;
+function TFinanceiroPedidoDao.obterResumo(pIDPedido: String): IFDDataset;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -300,7 +300,7 @@ begin
   end;
 end;
 
-function TFinanceiroPedidoDao.obterResumoFinanceiro: TFDMemTable;
+function TFinanceiroPedidoDao.obterResumoFinanceiro: IFDDataset;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -374,13 +374,13 @@ begin
 
     lQry.Open(lSQL);
 
-    Result := vConstrutor.atribuirRegistros(lQry).FieldByName('QTDE').AsInteger;
+    Result := vConstrutor.atribuirRegistros(lQry).objeto.FieldByName('QTDE').AsInteger;
   finally
     lQry.Free;
   end;
 end;
 
-function TFinanceiroPedidoDao.ObterLista: TFDMemTable;
+function TFinanceiroPedidoDao.ObterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -442,7 +442,7 @@ end;
 
 procedure TFinanceiroPedidoDao.setParams(var pQry: TFDQuery; pFinanceiroPedidoModel: TFinanceiroPedidoModel);
 var
-  lTabela  : TFDMemTable;
+  lTabela  : IFDDataset;
   lCtx     : TRttiContext;
   lProp    : TRttiProperty;
   i        : Integer;
@@ -457,7 +457,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pFinanceiroPedidoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pFinanceiroPedidoModel).AsString));
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pFinanceiroPedidoModel).AsString));
     end;
   finally
     lCtx.Free;

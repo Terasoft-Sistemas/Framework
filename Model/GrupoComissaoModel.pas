@@ -68,7 +68,7 @@ type
     function Excluir(pID : String): String;
     function ObterGrupoComissaoProduto (pProduto : String) : Double;
 
-    function ObterLista : TFDMemTable; overload;
+    function ObterLista : IFDDataset; overload;
 
   end;
 
@@ -140,7 +140,7 @@ begin
   end;
 end;
 
-function TGrupoComissaoModel.ObterLista: TFDMemTable;
+function TGrupoComissaoModel.ObterLista: IFDDataset;
 var
   lGrupoComissao: TGrupoComissaoDao;
 begin

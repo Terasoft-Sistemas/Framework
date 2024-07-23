@@ -60,7 +60,7 @@ type
     function Salvar : String;
 
     function carregaClasse(pId : String): TTabelaJurosDiaModel;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
     function obterIndice (pDia, pPortador_id : String) : Double;
 
     property Acao :TAcao read FAcao write SetAcao;
@@ -139,13 +139,13 @@ begin
   lTabelaJurosDia := TTabelaJurosDiaDao.Create(vIConexao);
   try
     lTabelaJurosDia.WhereView := 'and tabelajuros_dia.dia = '+pDia+' and tabelajuros_dia.portador_id = '+pPortador_id+' ';
-    result := lTabelaJurosDia.obterLista.FieldByName('INDICE').AsFloat;
+    result := lTabelaJurosDia.obterLista.objeto.FieldByName('INDICE').AsFloat;
   finally
     lTabelaJurosDia.Free;
   end;
 end;
 
-function TTabelaJurosDiaModel.obterLista: TFDMemTable;
+function TTabelaJurosDiaModel.obterLista: IFDDataset;
 var
   lTabelaJurosDiaLista: TTabelaJurosDiaDao;
 begin

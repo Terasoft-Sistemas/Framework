@@ -59,7 +59,7 @@ type
     function excluir(pChequeModel: TChequeModel): String;
 
     function carregaClasse(pID : String): TChequeModel;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     procedure setParams(var pQry: TFDQuery; pChequeModel: TChequeModel);
 
@@ -228,7 +228,7 @@ begin
   end;
 end;
 
-function TChequeDao.obterLista: TFDMemTable;
+function TChequeDao.obterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -288,7 +288,7 @@ end;
 
 procedure TChequeDao.setParams(var pQry: TFDQuery; pChequeModel: TChequeModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -303,7 +303,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pChequeModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pChequeModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pChequeModel).AsString))
     end;
   finally
     lCtx.Free;

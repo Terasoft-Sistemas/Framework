@@ -60,7 +60,7 @@ type
     procedure excluirContagem(pIdCaixa: String);
 
 	  procedure obterTotalRegistros;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
     procedure setParams(var pQry: TFDQuery; pContagemFechamentoModel: TContagemFechamentoModel);
 
     function carregaClasse(pId: String): TContagemFechamentoModel;
@@ -220,7 +220,7 @@ begin
   end;
 end;
 
-function TContagemFechamentoDao.obterLista: TFDMemTable;
+function TContagemFechamentoDao.obterLista: IFDDataset;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -277,7 +277,7 @@ end;
 
 procedure TContagemFechamentoDao.setParams(var pQry: TFDQuery; pContagemFechamentoModel: TContagemFechamentoModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -292,7 +292,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pContagemFechamentoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pContagemFechamentoModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pContagemFechamentoModel).AsString))
     end;
   finally
     lCtx.Free;

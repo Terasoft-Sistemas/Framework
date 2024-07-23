@@ -41,7 +41,7 @@ type
 
     function carregaClasse(pID : String): TIbptModel;
 
-    function obterIBPT(pUf, pNCM : String): TFDMemTable;
+    function obterIBPT(pUf, pNCM : String): IFDDataset;
 
     procedure setParams(var pQry: TFDQuery; pIbptModel: TIbptModel);
 
@@ -177,7 +177,7 @@ begin
   Result := lSQL;
 end;
 
-function TIbptDao.obterIBPT(pUf, pNCM : String): TFDMemTable;
+function TIbptDao.obterIBPT(pUf, pNCM : String): IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -215,7 +215,7 @@ end;
 
 procedure TIbptDao.setParams(var pQry: TFDQuery; pIbptModel: TIbptModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -230,7 +230,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pIbptModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pIbptModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pIbptModel).AsString))
     end;
   finally
     lCtx.Free;

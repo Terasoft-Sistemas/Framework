@@ -60,7 +60,7 @@ type
 
     function carregaClasse(pID : String): TDevolucaoModel;
 
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     procedure setParams(var pQry: TFDQuery; pDevolucaoModel: TDevolucaoModel);
 
@@ -230,7 +230,7 @@ begin
   end;
 end;
 
-function TDevolucaoDao.obterLista: TFDMemTable;
+function TDevolucaoDao.obterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -311,7 +311,7 @@ end;
 
 procedure TDevolucaoDao.setParams(var pQry: TFDQuery; pDevolucaoModel: TDevolucaoModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -326,7 +326,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pDevolucaoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pDevolucaoModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pDevolucaoModel).AsString))
     end;
   finally
     lCtx.Free;

@@ -59,7 +59,7 @@ type
 
     procedure obterLista;
     function carregaClasse(pId: String): TPortadorModel;
-    function PortadorTabelaJuros : TFDMemTable;
+    function PortadorTabelaJuros : IFDDataset;
 end;
 implementation
 
@@ -209,7 +209,7 @@ begin
   end;
 end;
 
-function TPortadorDao.PortadorTabelaJuros: TFDMemTable;
+function TPortadorDao.PortadorTabelaJuros: IFDDataset;
 var
   lQry : TFDQuery;
   lSql : String;
@@ -330,7 +330,7 @@ end;
 
 procedure TPortadorDao.setParams(var pQry: TFDQuery; pPortadorModel: TPortadorModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -345,7 +345,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPortadorModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pPortadorModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPortadorModel).AsString))
     end;
   finally
     lCtx.Free;

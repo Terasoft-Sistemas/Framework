@@ -59,7 +59,7 @@ type
     function excluir(pTabelaJurosDiaModel: TTabelaJurosDiaModel): String;
 
     function carregaClasse(pID : String): TTabelaJurosDiaModel;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     procedure setParams(var pQry: TFDQuery; pTabelaJurosDiaModel: TTabelaJurosDiaModel);
 
@@ -201,7 +201,7 @@ begin
   end;
 end;
 
-function TTabelaJurosDiaDao.obterLista: TFDMemTable;
+function TTabelaJurosDiaDao.obterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -258,7 +258,7 @@ end;
 
 procedure TTabelaJurosDiaDao.setParams(var pQry: TFDQuery; pTabelaJurosDiaModel: TTabelaJurosDiaModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -273,7 +273,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pTabelaJurosDiaModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pTabelaJurosDiaModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pTabelaJurosDiaModel).AsString))
     end;
   finally
     lCtx.Free;

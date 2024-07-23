@@ -6,6 +6,7 @@ uses
   FireDAC.Comp.Client,
   Terasoft.Types,
   System.Generics.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
@@ -55,9 +56,9 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function obterSaldoLojas(pParametros : TParametrosSaldo): TFDMemTable;
-    function obterSaldo(pProduto : String): TFDMemTable;
-    function obterReservasCD(pProduto : String) : TFDMemTable;
+    function obterSaldoLojas(pParametros : TParametrosSaldo): IFDDataset;
+    function obterSaldo(pProduto : String): IFDDataset;
+    function obterReservasCD(pProduto : String) : IFDDataset;
 
     property SaldosLista: TObjectList<TSaldoModel> read FSaldosLista write SetSaldosLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -85,7 +86,7 @@ begin
   inherited;
 end;
 
-function TSaldoModel.obterReservasCD(pProduto: String): TFDMemTable;
+function TSaldoModel.obterReservasCD(pProduto: String): IFDDataset;
 var
   lSaldoDao : TSaldoDao;
 begin
@@ -97,19 +98,19 @@ begin
   end;
 end;
 
-function TSaldoModel.obterSaldo(pProduto: String): TFDMemTable;
+function TSaldoModel.obterSaldo(pProduto: String): IFDDataset;
 var
   lMemTable,
-  lMemConsulta : TFDMemTable;
+  lMemConsulta : IFDDataset;
   lParametros : TParametrosSaldo;
 begin
-  lMemTable := TFDMemTable.Create(nil);
+  lMemTable := TImplObjetoOwner<TDataset>.CreateOwner(TFDMemTable.Create(nil));
 
   try
-    lMemTable.FieldDefs.Add('SALDO_FISICO', ftFloat);
-    lMemTable.FieldDefs.Add('SALDO_DISPONIVEL', ftFloat);
-    lMemTable.FieldDefs.Add('SALDO_CD', ftFloat);
-    lMemTable.CreateDataSet;
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('SALDO_FISICO', ftFloat);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('SALDO_DISPONIVEL', ftFloat);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('SALDO_CD', ftFloat);
+    TFDMemTable(lMemTable.objeto).CreateDataSet;
 
     lParametros.PRODUTO := pProduto;
     lParametros.LOJA    := vIConexao.getEmpresa.LOJA;
@@ -117,24 +118,24 @@ begin
 
     lMemConsulta := self.obterSaldoLojas(lParametros);
 
-    lMemConsulta.first;
+    lMemConsulta.objeto.first;
 
-    while not lMemConsulta.eof do
+    while not lMemConsulta.objeto.eof do
     begin
-      if lMemConsulta.fieldByName('LOJA').value = 'CD' then
+      if lMemConsulta.objeto.fieldByName('LOJA').value = 'CD' then
       begin
-        lMemTable.edit;
-        lMemTable.fieldByName('SALDO_CD').value := lMemConsulta.fieldByName('SALDO_DISPONIVEL').value;
-        lMemTable.post;
+        lMemTable.objeto.edit;
+        lMemTable.objeto.fieldByName('SALDO_CD').value := lMemConsulta.objeto.fieldByName('SALDO_DISPONIVEL').value;
+        lMemTable.objeto.post;
       end
       else
       begin
-        lMemTable.append;
-        lMemTable.fieldByName('SALDO_FISICO').value     := lMemConsulta.fieldByName('SALDO_FISICO').value;
-        lMemTable.fieldByName('SALDO_DISPONIVEL').value := lMemConsulta.fieldByName('SALDO_DISPONIVEL').value;
-        lMemTable.post;
+        lMemTable.objeto.append;
+        lMemTable.objeto.fieldByName('SALDO_FISICO').value     := lMemConsulta.objeto.fieldByName('SALDO_FISICO').value;
+        lMemTable.objeto.fieldByName('SALDO_DISPONIVEL').value := lMemConsulta.objeto.fieldByName('SALDO_DISPONIVEL').value;
+        lMemTable.objeto.post;
       end;
-      lMemConsulta.Next;
+      lMemConsulta.objeto.Next;
     end;
 
     Result := lMemTable;
@@ -143,7 +144,7 @@ begin
 
 end;
 
-function TSaldoModel.obterSaldoLojas(pParametros : TParametrosSaldo): TFDMemTable;
+function TSaldoModel.obterSaldoLojas(pParametros : TParametrosSaldo): IFDDataset;
 var
   lSaldoDao : TSaldoDao;
 begin

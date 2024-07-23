@@ -67,7 +67,7 @@ type
     function carregaClasse(pId: String): TPedidoVendaModel;
     function statusPedido(pId: String): String;
     procedure obterUpdateImpostos(pNumeroPedido: String);
-    function obterComprasRealizadas(pCliente: String): TFDMemTable;
+    function obterComprasRealizadas(pCliente: String): IFDDataset;
     function retornaGarantia(pNumeroPedido: String) : Boolean;
 
 end;
@@ -667,7 +667,7 @@ begin
   end;
 end;
 
-function TPedidoVendaDao.obterComprasRealizadas(pCliente: String): TFDMemTable;
+function TPedidoVendaDao.obterComprasRealizadas(pCliente: String): IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -783,7 +783,7 @@ end;
 
 procedure TPedidoVendaDao.setParams(var pQry: TFDQuery; pPedidoVendaModel: TPedidoVendaModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -798,7 +798,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPedidoVendaModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pPedidoVendaModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPedidoVendaModel).AsString))
     end;
   finally
     lCtx.Free;
