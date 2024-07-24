@@ -333,7 +333,7 @@ end;
 
 destructor TFinanceiroPedidoModel.Destroy;
 begin
-
+  vIConexao := nil;
   inherited;
 end;
 
