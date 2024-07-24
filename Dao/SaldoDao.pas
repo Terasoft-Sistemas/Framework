@@ -7,9 +7,8 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  Spring.Collections,
   System.Variants,
-  Terasoft.Framework.ObjectIface,
   LojasModel,
   Terasoft.FuncoesTexto,
   Interfaces.Conexao,
@@ -23,7 +22,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FSaldosLista: TObjectList<TSaldoModel>;
+    FSaldosLista: IList<TSaldoModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -33,7 +32,7 @@ type
     FWhereView: String;
     FTotalRecords: Integer;
     procedure SetCountView(const Value: String);
-    procedure SetSaldosLista(const Value: TObjectList<TSaldoModel>);
+    procedure SetSaldosLista(const Value: IList<TSaldoModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -46,7 +45,7 @@ type
     constructor Create(pIConexao: IConexao);
     destructor Destroy; override;
 
-    property SaldosLista: TObjectList<TSaldoModel> read FSaldosLista write SetSaldosLista;
+    property SaldosLista: IList<TSaldoModel> read FSaldosLista write SetSaldosLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -76,6 +75,7 @@ end;
 
 destructor TSaldoDao.Destroy;
 begin
+  FSaldosLista := nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -141,9 +141,9 @@ var
   lLojas    : TLojasModel;
   lMemTable : IFDDataset;
 begin
+  lQry := nil;
   lLojas       := TLojasModel.Create(vIConexao);
-  lMemTable    := TImplObjetoOwner<TDataset>.CreateOwner(TFDMemTable.Create(nil));
-
+  lMemTable    := criaIFDDataset(TFDMemTable.Create(nil));
   try
     lSql := ' select                                                   '+SLineBreak+
             '      CODIGO_PRO,                                         '+SLineBreak+
@@ -228,7 +228,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TSaldoDao.SetSaldosLista(const Value: TObjectList<TSaldoModel>);
+procedure TSaldoDao.SetSaldosLista;
 begin
   FSaldosLista := Value;
 end;

@@ -5,8 +5,7 @@ interface
 uses
   FireDAC.Comp.Client,
   Terasoft.Types,
-  System.Generics.Collections,
-  Terasoft.Framework.ObjectIface,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -20,7 +19,7 @@ type
 
   private
     vIConexao : IConexao;
-    FSaldosLista: TObjectList<TSaldoModel>;
+    FSaldosLista: IList<TSaldoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -35,7 +34,7 @@ type
     FCD: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetSaldosLista(const Value: TObjectList<TSaldoModel>);
+    procedure SetSaldosLista(const Value: IList<TSaldoModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -60,7 +59,7 @@ type
     function obterSaldo(pProduto : String): IFDDataset;
     function obterReservasCD(pProduto : String) : IFDDataset;
 
-    property SaldosLista: TObjectList<TSaldoModel> read FSaldosLista write SetSaldosLista;
+    property SaldosLista: IList<TSaldoModel> read FSaldosLista write SetSaldosLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -83,6 +82,7 @@ begin
 end;
 destructor TSaldoModel.Destroy;
 begin
+  FSaldosLista := nil;
   inherited;
 end;
 
@@ -104,7 +104,7 @@ var
   lMemConsulta : IFDDataset;
   lParametros : TParametrosSaldo;
 begin
-  lMemTable := TImplObjetoOwner<TDataset>.CreateOwner(TFDMemTable.Create(nil));
+  lMemTable := criaIFDDataset(TFDMemTable.Create(nil));
 
   try
     TFDMemTable(lMemTable.objeto).FieldDefs.Add('SALDO_FISICO', ftFloat);
@@ -169,7 +169,7 @@ procedure TSaldoModel.SetCountView(const Value: String);
 begin
   FCountView := Value;
 end;
-procedure TSaldoModel.SetSaldosLista(const Value: TObjectList<TSaldoModel>);
+procedure TSaldoModel.SetSaldosLista;
 begin
   FSaldosLista := Value;
 end;
