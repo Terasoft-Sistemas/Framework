@@ -1555,7 +1555,7 @@ begin
       lPedidoItensModal.VFCPST              := FloatToStr(lCalcularImpostosModel.VFCPST);
       lPedidoItensModal.CFOP_ID             := lCalcularImpostosModel.CFOP_ID;
       lPedidoItensModal.CFOP                := lCalcularImpostosModel.CFOP;
-      lPedidoItensModal.DESCONTO_PED        := FloatToStr(lCalcularImpostosModel.DESCONTO_ITEM);
+      lPedidoItensModal.VDESC               := FloatToStr(lCalcularImpostosModel.DESCONTO_ITEM);
       lPedidoItensModal.VOUTROS             := FloatToStr(lCalcularImpostosModel.ACRESCIMO_ITEM);
       lPedidoItensModal.CSOSN               := lCalcularImpostosModel.ICMS_CSOSN;
       lPedidoItensModal.VTOTTRIB_ESTADUAL   := lCalcularImpostosModel.VTOTTRIB_ESTADUAL;
