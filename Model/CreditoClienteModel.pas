@@ -4,7 +4,7 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -12,7 +12,7 @@ type
 
   private
     vIConexao : IConexao;
-    FCreditoClientesLista: TObjectList<TCreditoClienteModel>;
+    FCreditoClientesLista: IList<TCreditoClienteModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -40,7 +40,7 @@ type
     Fsystime: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetCreditoClientesLista(const Value: TObjectList<TCreditoClienteModel>);
+    procedure SetCreditoClientesLista(const Value: IList<TCreditoClienteModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -94,7 +94,7 @@ type
     procedure creditosAbertos(pCliente : String);
     function totalCreditosAberto(pCliente: String) : Double;
 
-    property CreditoClientesLista: TObjectList<TCreditoClienteModel> read FCreditoClientesLista write SetCreditoClientesLista;
+    property CreditoClientesLista: IList<TCreditoClienteModel> read FCreditoClientesLista write SetCreditoClientesLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -247,7 +247,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TCreditoClienteModel.SetCreditoClientesLista(const Value: TObjectList<TCreditoClienteModel>);
+procedure TCreditoClienteModel.SetCreditoClientesLista;
 begin
   FCreditoClientesLista := Value;
 end;

@@ -4,7 +4,7 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -12,7 +12,7 @@ type
 
   private
     vIConexao : IConexao;
-    FTEFsLista: TObjectList<TTEFModel>;
+    FTEFsLista: IList<TTEFModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -63,7 +63,7 @@ type
     FIDRecordView: String;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetTEFsLista(const Value: TObjectList<TTEFModel>);
+    procedure SetTEFsLista(const Value: IList<TTEFModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -160,7 +160,7 @@ type
 
     function carregaClasse(pId: String): TTEFModel;
 
-    property TEFsLista: TObjectList<TTEFModel> read FTEFsLista write SetTEFsLista;
+    property TEFsLista: IList<TTEFModel> read FTEFsLista write SetTEFsLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -198,7 +198,8 @@ end;
 
 destructor TTEFModel.Destroy;
 begin
-
+  FTEFsLista:=nil;
+  vIConexao := nil;
   inherited;
 end;
 
@@ -337,7 +338,7 @@ begin
   FHORA_TRANSACAO_COMPROVANTE := Value;
 end;
 
-procedure TTEFModel.SetTEFsLista(const Value: TObjectList<TTEFModel>);
+procedure TTEFModel.SetTEFsLista;
 begin
   FTEFsLista := Value;
 end;

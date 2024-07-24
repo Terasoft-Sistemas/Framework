@@ -4,7 +4,7 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -12,7 +12,7 @@ type
 
   private
     vIConexao : IConexao;
-    FPixsLista: TObjectList<TPixModel>;
+    FPixsLista: IList<TPixModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -46,7 +46,7 @@ type
     Fpix_data: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetPixsLista(const Value: TObjectList<TPixModel>);
+    procedure SetPixsLista(const Value: IList<TPixModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -111,7 +111,7 @@ type
     function carregaClasseIndexOf(pIndex: Integer): TPixModel;
     function CalculaTaxaPix(pTipo: String; PValorBase: Real; pTipoTaxaRecebimento: String; pValorTaxaCobranca: Real; pValorTaxaRecebimento: Real): Real;
 
-    property PixsLista: TObjectList<TPixModel> read FPixsLista write SetPixsLista;
+    property PixsLista: IList<TPixModel> read FPixsLista write SetPixsLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -188,8 +188,9 @@ end;
 
 destructor TPixModel.Destroy;
 begin
-
-
+  FPixsLista := nil;
+  vIConexao := nil;
+  inherited;
 end;
 
 procedure TPixModel.obterLista;
@@ -298,7 +299,7 @@ begin
   Fid := Value;
 end;
 
-procedure TPixModel.SetPixsLista(const Value: TObjectList<TPixModel>);
+procedure TPixModel.SetPixsLista;
 begin
   FPixsLista := Value;
 end;

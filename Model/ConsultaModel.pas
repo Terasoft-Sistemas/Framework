@@ -4,7 +4,7 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -12,7 +12,7 @@ type
 
   private
     vIConexao : IConexao;
-    FConsultasLista: TObjectList<TConsultaModel>;
+    FConsultasLista: IList<TConsultaModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -28,7 +28,7 @@ type
     FCodigoView: String;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetConsultasLista(const Value: TObjectList<TConsultaModel>);
+    procedure SetConsultasLista(const Value: IList<TConsultaModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -49,7 +49,7 @@ type
 
     procedure obterLista;
 
-    property ConsultasLista: TObjectList<TConsultaModel> read FConsultasLista write SetConsultasLista;
+    property ConsultasLista: IList<TConsultaModel> read FConsultasLista write SetConsultasLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -78,7 +78,8 @@ end;
 
 destructor TConsultaModel.Destroy;
 begin
-
+  FConsultasLista := nil;
+  vIConexao := nil;
   inherited;
 end;
 
@@ -140,7 +141,7 @@ begin
   FDescricaoView := Value;
 end;
 
-procedure TConsultaModel.SetConsultasLista(const Value: TObjectList<TConsultaModel>);
+procedure TConsultaModel.SetConsultasLista;
 begin
   FConsultasLista := Value;
 end;

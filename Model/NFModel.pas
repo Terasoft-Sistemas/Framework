@@ -6,7 +6,7 @@ uses
   SysUtils,
   Terasoft.Types,
   FireDAC.Comp.Client,
-  System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -165,7 +165,7 @@ type
     FWhereView: String;
     FTotalRecords: Integer;
     FIDPedidoView: Integer;
-    FNFLista: TObjectList<TNFModel>;
+    FNFLista: IList<TNFModel>;
     procedure SetAcao(const Value: TAcao);
     procedure SetACRES_NF(const Value: Variant);
     procedure SetAGRUPAMENTO_FATURA(const Value: Variant);
@@ -317,7 +317,7 @@ type
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-    procedure SetNFLista(const Value: TObjectList<TNFModel>);
+    procedure SetNFLista(const Value: IList<TNFModel>);
 
   public
     property  Acao                         :TAcao   read FAcao write SetAcao;
@@ -464,7 +464,7 @@ type
     property  TRANSFERENCIA_ID             :Variant read FTRANSFERENCIA_ID write SetTRANSFERENCIA_ID;
     property  CLIENTE_NF                   :Variant read FCLIENTE_NF write SetCLIENTE_NF;
 
-    property NFLista: TObjectList<TNFModel> read FNFLista write SetNFLista;
+    property NFLista: IList<TNFModel> read FNFLista write SetNFLista;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
     property CountView: String read FCountView write SetCountView;
@@ -511,7 +511,7 @@ end;
 
 destructor TNFModel.Destroy;
 begin
-  freeAndNil(FNFLista);
+  FNFLista := nil;
   vIConexao := nil;
   inherited;
 end;
@@ -932,7 +932,7 @@ begin
   FNFE := Value;
 end;
 
-procedure TNFModel.SetNFLista(const Value: TObjectList<TNFModel>);
+procedure TNFModel.SetNFLista;
 begin
   FNFLista := Value;
 end;

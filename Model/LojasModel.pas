@@ -93,6 +93,7 @@ end;
 
 destructor TLojasModel.Destroy;
 begin
+  FLojassLista := nil;
   vIConexao := nil;
   inherited;
 end;

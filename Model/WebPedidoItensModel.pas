@@ -6,7 +6,7 @@ uses
   SysUtils,
   Terasoft.Types,
   Terasoft.Utils,
-  System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -26,7 +26,7 @@ type
 
   private
     vIConexao : IConexao;
-    FWebPedidoItenssLista: TObjectList<TWebPedidoItensModel>;
+    FWebPedidoItenssLista: IList<TWebPedidoItensModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -113,7 +113,7 @@ type
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetDATA_CADASTRO(const Value: Variant);
-    procedure SetWebPedidoItenssLista(const Value: TObjectList<TWebPedidoItensModel>);
+    procedure SetWebPedidoItenssLista(const Value: IList<TWebPedidoItensModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -289,7 +289,7 @@ type
     function carregaClasse(pId: String): TWebPedidoItensModel;
     function obterTotais(pId: String): TTotais;
 
-    property WebPedidoItenssLista: TObjectList<TWebPedidoItensModel> read FWebPedidoItenssLista write SetWebPedidoItenssLista;
+    property WebPedidoItenssLista: IList<TWebPedidoItensModel> read FWebPedidoItenssLista write SetWebPedidoItenssLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -371,7 +371,7 @@ end;
 
 destructor TWebPedidoItensModel.Destroy;
 begin
-  freeAndNil(FWebPedidoItenssLista);
+  FWebPedidoItenssLista := nil;
   vIConexao := nil;
   inherited;
 end;
@@ -538,7 +538,7 @@ begin
   FENTREGA := Value;
 end;
 
-procedure TWebPedidoItensModel.SetWebPedidoItenssLista(const Value: TObjectList<TWebPedidoItensModel>);
+procedure TWebPedidoItensModel.SetWebPedidoItenssLista;
 begin
   FWebPedidoItenssLista := Value;
 end;

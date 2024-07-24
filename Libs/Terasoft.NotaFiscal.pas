@@ -28,6 +28,7 @@ uses
   Terasoft.NotaFiscal.Configuracoes,
   FireDAC.Comp.Client,
   NFControl,
+  NFModel,
   Terasoft.Types,
   Interfaces.Conexao;
 
@@ -92,6 +93,7 @@ type
     destructor Destroy; override;
 
     function transmitir(idNotaFiscal: String): TStringList;
+    function consultarNota(pNota: TNFModel): boolean;
     function imprimir: String;
     function gerarXML(idNotaFiscal, pPath: String): String;
     function VencimentoCertificado: TDateTime;
@@ -159,6 +161,23 @@ begin
     PathSalvar       := vConfiguracoesNotaFiscal.arquivosPathSalvar;
   end;
 end;
+function TNotaFiscal.consultarNota(pNota: TNFModel): boolean;
+begin
+  Result := False;
+
+  ACBrNFe.Consultar(pNota.ID_NF3);
+
+  if ACBrNFe.WebServices.Consulta.cStat = 100 then
+  begin
+    pNota.Acao := tacAlterar;
+    pNota.NOME_XML := ACBrNFe.WebServices.Consulta.XMotivo;
+    pNota.PROTOCOLO_NFE := ACBrNFe.WebServices.Consulta.Protocolo;
+    pNota.Salvar;
+
+    Result := True;
+  end;
+end;
+
 function TNotaFiscal.cobranca(pidNF: String): Boolean;
 var
  lSQL        : String;

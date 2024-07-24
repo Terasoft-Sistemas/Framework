@@ -122,7 +122,7 @@ end;
 
 destructor TComissaoVendedorModel.Destroy;
 begin
-
+  vIConexao := nil;
   inherited;
 end;
 

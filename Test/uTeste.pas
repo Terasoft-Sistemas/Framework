@@ -403,7 +403,7 @@ begin
   lSolicitacaoDescontoModel := TSolicitacaoDescontoModel.Create(vIConexao);
   try
     lSolicitacaoDescontoModel.WhereView := ' and solicitacao_desconto.tabela_origem = ''WEB_PEDIDO'' ';
-    dLiberacao.DataSet := lSolicitacaoDescontoModel.obterLista;
+    dLiberacao.DataSet := lSolicitacaoDescontoModel.obterLista.objeto;
   finally
     lSolicitacaoDescontoModel.Free;
   end;
@@ -419,7 +419,7 @@ begin
     lVendaAssistida := '4343';
 
     lPermissaoRemotaModel.WhereView := ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' and permissao_remota.pedido_id = '+lVendaAssistida;
-    dLiberacao.DataSet := lPermissaoRemotaModel.obterLista;
+    dLiberacao.DataSet := lPermissaoRemotaModel.obterLista.objeto;
   finally
     lPermissaoRemotaModel.Free;
   end;
@@ -450,7 +450,7 @@ end;
 procedure TForm1.BtnEndereco2Click(Sender: TObject);
 var
   lClientesEnderecoModel : TClientesEnderecoModel;
-  lMemTable   : TFDMemTable;
+  lMemTable   : IFDDataset;
 begin
   lClientesEnderecoModel := TClientesEnderecoModel.Create(vIConexao);
   try
@@ -459,13 +459,13 @@ begin
 
       memoResultado.Lines.Clear;
 
-      lMemTable.First;
-      while not lMemTable.Eof do
+      lMemTable.objeto.First;
+      while not lMemTable.objeto.Eof do
       begin
-        memoResultado.Lines.Add('ID: '+lMemTable.FieldByName('ID').AsString);
-        memoResultado.Lines.Add('CLIENTE_ID: '+lMemTable.FieldByName('CLIENTE_ID').AsString);
+        memoResultado.Lines.Add('ID: '+lMemTable.objeto.FieldByName('ID').AsString);
+        memoResultado.Lines.Add('CLIENTE_ID: '+lMemTable.objeto.FieldByName('CLIENTE_ID').AsString);
         memoResultado.Lines.Add('===============================================');
-        lMemTable.Next;
+        lMemTable.objeto.Next;
       end;
     except
      on E:Exception do
@@ -528,7 +528,7 @@ end;
 procedure TForm1.btnFinanceiroPedidoClick(Sender: TObject);
 var
   lFinanceiroPedidoModel : TFinanceiroPedidoModel;
-  lMemTable : TFDMemTable;
+  lMemTable : IFDDataset;
 begin
   lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
   try
@@ -537,18 +537,18 @@ begin
 
       memoResultado.Lines.Clear;
 
-      lMemTable.First;
-      while not lMemTable.Eof do
+      lMemTable.objeto.First;
+      while not lMemTable.objeto.Eof do
       begin
-        memoResultado.Lines.Add('ID: '+lMemTable.FieldByName('ID').AsString);
-        memoResultado.Lines.Add('PORTADOR_ID: '+lMemTable.FieldByName('PORTADOR_ID').AsString);
-        memoResultado.Lines.Add('PORTADOR_NOME: '+lMemTable.FieldByName('NOME_PORT').AsString);
-        memoResultado.Lines.Add('PARCELA: '+lMemTable.FieldByName('PARCELA').AsString);
-        memoResultado.Lines.Add('VALOR_PARCELA: '+lMemTable.FieldByName('VALOR_PARCELA').AsString);
-        memoResultado.Lines.Add('VALOR_TOTAL: '+lMemTable.FieldByName('VALOR_TOTAL').AsString);
+        memoResultado.Lines.Add('ID: '+lMemTable.objeto.FieldByName('ID').AsString);
+        memoResultado.Lines.Add('PORTADOR_ID: '+lMemTable.objeto.FieldByName('PORTADOR_ID').AsString);
+        memoResultado.Lines.Add('PORTADOR_NOME: '+lMemTable.objeto.FieldByName('NOME_PORT').AsString);
+        memoResultado.Lines.Add('PARCELA: '+lMemTable.objeto.FieldByName('PARCELA').AsString);
+        memoResultado.Lines.Add('VALOR_PARCELA: '+lMemTable.objeto.FieldByName('VALOR_PARCELA').AsString);
+        memoResultado.Lines.Add('VALOR_TOTAL: '+lMemTable.objeto.FieldByName('VALOR_TOTAL').AsString);
 
         memoResultado.Lines.Add('===============================================');
-        lMemTable.Next;
+        lMemTable.objeto.Next;
       end;
 
     except
@@ -563,13 +563,13 @@ end;
 procedure TForm1.btnObterJurosPromocaoClick(Sender: TObject);
 var
   lTabelaJurosPromocaoModel : TTabelaJurosPromocaoModel;
-  lMemTable                 : TFDMemTable;
+  lMemTable                 : IFDDataset;
 begin
   lTabelaJurosPromocaoModel := TTabelaJurosPromocaoModel.Create(vIConexao);
   try
     lMemTable := lTabelaJurosPromocaoModel.obterLista;
 
-    dsJuros.DataSet := lMemTable;
+    dsJuros.DataSet := lMemTable.objeto;
 
   finally
     lTabelaJurosPromocaoModel.Free;
@@ -658,7 +658,7 @@ end;
 procedure TForm1.Button20Click(Sender: TObject);
 var
   lClienteModel : TClienteModel;
-  lMemTable     : TFDMemTable;
+  lMemTable     : IFDDataset;
   i             : Integer;
 begin
   lClienteModel := TClienteModel.Create(vIConexao);
@@ -672,16 +672,16 @@ begin
 
         lMemTable := lClienteModel.ObterListaMemTable;
         memoResultado.Lines.Clear;
-        lMemTable.First;
+        lMemTable.objeto.First;
 
-      while not lMemTable.Eof do
+      while not lMemTable.objeto.Eof do
       begin
-        memoResultado.Lines.Add('CODIGO_CLI: '+lMemTable.FieldByName('CODIGO_CLI').AsString);
-        memoResultado.Lines.Add('FANTASIA_CLI: '+lMemTable.FieldByName('FANTASIA_CLI').AsString);
-        memoResultado.Lines.Add('RAZAO_CLI: '+lMemTable.FieldByName('RAZAO_CLI').AsString);
-        memoResultado.Lines.Add('CNPJ_CPF_CLI: '+lMemTable.FieldByName('CNPJ_CPF_CLI').AsString);
+        memoResultado.Lines.Add('CODIGO_CLI: '+lMemTable.objeto.FieldByName('CODIGO_CLI').AsString);
+        memoResultado.Lines.Add('FANTASIA_CLI: '+lMemTable.objeto.FieldByName('FANTASIA_CLI').AsString);
+        memoResultado.Lines.Add('RAZAO_CLI: '+lMemTable.objeto.FieldByName('RAZAO_CLI').AsString);
+        memoResultado.Lines.Add('CNPJ_CPF_CLI: '+lMemTable.objeto.FieldByName('CNPJ_CPF_CLI').AsString);
         memoResultado.Lines.Add('===============================================');
-        lMemTable.Next;
+        lMemTable.objeto.Next;
       end;
 
     except
@@ -802,7 +802,7 @@ end;
 procedure TForm1.Button25Click(Sender: TObject);
 var
   lContasPagarModel : TContasPagarModel;
-  lMemTable         : TFDMemTable;
+  lMemTable         : IFDDataset;
 begin
   lContasPagarModel := TContasPagarModel.Create(vIConexao);
   try
@@ -816,19 +816,19 @@ begin
 
       lMemTable := lContasPagarModel.obterLista;
       memoResultado.Lines.Clear;
-      lMemTable.First;
+      lMemTable.objeto.First;
 
-      while not lMemTable.Eof do
+      while not lMemTable.objeto.Eof do
       begin
-        memoResultado.Lines.Add('DUPLICATA_PAG: '+lMemTable.FieldByName('DUPLICATA_PAG').AsString);
-        memoResultado.Lines.Add('CODIGO_FOR: '+lMemTable.FieldByName('CODIGO_FOR').AsString);
-        memoResultado.Lines.Add('FORNECEDOR: '+lMemTable.FieldByName('FORNECEDOR').AsString);
-        memoResultado.Lines.Add('PORTADOR_ID: '+lMemTable.FieldByName('PORTADOR_ID').AsString);
-        memoResultado.Lines.Add('PORTADOR: '+lMemTable.FieldByName('PORTADOR').AsString);
-        memoResultado.Lines.Add('DATAEMI_PAG: '+lMemTable.FieldByName('DATAEMI_PAG').AsString);
-        memoResultado.Lines.Add('TIPO_PAG: '+lMemTable.FieldByName('TIPO_PAG').AsString);
+        memoResultado.Lines.Add('DUPLICATA_PAG: '+lMemTable.objeto.FieldByName('DUPLICATA_PAG').AsString);
+        memoResultado.Lines.Add('CODIGO_FOR: '+lMemTable.objeto.FieldByName('CODIGO_FOR').AsString);
+        memoResultado.Lines.Add('FORNECEDOR: '+lMemTable.objeto.FieldByName('FORNECEDOR').AsString);
+        memoResultado.Lines.Add('PORTADOR_ID: '+lMemTable.objeto.FieldByName('PORTADOR_ID').AsString);
+        memoResultado.Lines.Add('PORTADOR: '+lMemTable.objeto.FieldByName('PORTADOR').AsString);
+        memoResultado.Lines.Add('DATAEMI_PAG: '+lMemTable.objeto.FieldByName('DATAEMI_PAG').AsString);
+        memoResultado.Lines.Add('TIPO_PAG: '+lMemTable.objeto.FieldByName('TIPO_PAG').AsString);
         memoResultado.Lines.Add('===============================================');
-        lMemTable.Next;
+        lMemTable.objeto.Next;
       end;
 
     Except
@@ -890,7 +890,7 @@ var
   lContasPagarItensModel  : TContasPagarItensModel;
   Duplicata               : String;
   i                       : Integer;
-  lMemTable               : TFDMemTable;
+  lMemTable               : IFDDataset;
 begin
   lContasPagarItensModel := TContasPagarItensModel.Create(vIConexao);
   try
@@ -903,19 +903,19 @@ begin
 
       lMemTable := lContasPagarItensModel.obterLista;
 
-      lMemTable.First;
-      while not lMemTable.Eof do
+      lMemTable.objeto.First;
+      while not lMemTable.objeto.Eof do
       begin
-        memoResultado.Lines.Add('DUPLIACATA_PAG: '+lMemTable.FieldByName('DUPLIACATA_PAG').AsString);
-        memoResultado.Lines.Add('CODIGO_FOR: '+lMemTable.FieldByName('CODIGO_FOR').AsString);
-        memoResultado.Lines.Add('FORNECEDOR: '+lMemTable.FieldByName('FORNECEDOR').AsString);
-        memoResultado.Lines.Add('PORTADOR_ID: '+lMemTable.FieldByName('PORTADOR_ID').AsString);
-        memoResultado.Lines.Add('PORTADOR: '+lMemTable.FieldByName('PORTADOR').AsString);
-        memoResultado.Lines.Add('VENC_PAG: '+lMemTable.FieldByName('VENC_PAG').AsString);
-        memoResultado.Lines.Add('PACELA_PAG: '+lMemTable.FieldByName('PACELA_PAG').AsString);
-        memoResultado.Lines.Add('VALORPARCELA_PAG: '+lMemTable.FieldByName('VALORPARCELA_PAG').AsString);
+        memoResultado.Lines.Add('DUPLIACATA_PAG: '+lMemTable.objeto.FieldByName('DUPLIACATA_PAG').AsString);
+        memoResultado.Lines.Add('CODIGO_FOR: '+lMemTable.objeto.FieldByName('CODIGO_FOR').AsString);
+        memoResultado.Lines.Add('FORNECEDOR: '+lMemTable.objeto.FieldByName('FORNECEDOR').AsString);
+        memoResultado.Lines.Add('PORTADOR_ID: '+lMemTable.objeto.FieldByName('PORTADOR_ID').AsString);
+        memoResultado.Lines.Add('PORTADOR: '+lMemTable.objeto.FieldByName('PORTADOR').AsString);
+        memoResultado.Lines.Add('VENC_PAG: '+lMemTable.objeto.FieldByName('VENC_PAG').AsString);
+        memoResultado.Lines.Add('PACELA_PAG: '+lMemTable.objeto.FieldByName('PACELA_PAG').AsString);
+        memoResultado.Lines.Add('VALORPARCELA_PAG: '+lMemTable.objeto.FieldByName('VALORPARCELA_PAG').AsString);
         memoResultado.Lines.Add('===============================================');
-        lMemTable.Next;
+        lMemTable.objeto.Next;
       end;
     except
     on E:Exception do
@@ -1040,7 +1040,7 @@ var
   lEntradaItensModel : TEntradaItensModel;
   NumEntrada         : String;
   i                  : Integer;
-  lMemTable          : TFDMemTable;
+  lMemTable          : IFDDataset;
 begin
   lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
   try
@@ -1052,16 +1052,17 @@ begin
       lEntradaItensModel.NumeroView := NumEntrada;
       lEntradaItensModel.FornecedorView := '500007';
       lMemTable := lEntradaItensModel.obterLista;
-      lMemTable.First;
-      while not lMemTable.Eof do
+
+      lMemTable.objeto.First;
+      while not lMemTable.objeto.Eof do
       begin
-         memoResultado.Lines.Add('NUMERO_ENT: ' +lMemTable.FieldByName('NUMERO_ENT').AsString);
-         memoResultado.Lines.Add('PRODUTO_CODIGO_PRO: ' +lMemTable.FieldByName('PRODUTO_CODIGO_PRO').AsString);
-         memoResultado.Lines.Add('CST: ' +lMemTable.FieldByName('CST').AsString);
-         memoResultado.Lines.Add('VALOR_LIQUIDO: ' +lMemTable.FieldByName('VALOR_LIQUIDO').AsString);
-         memoResultado.Lines.Add('TOTAL_UNITARIO: ' +lMemTable.FieldByName('TOTAL_UNITARIO').AsString);
-         memoResultado.Lines.Add('ALIQUOTA_ICMS: ' +lMemTable.FieldByName('ALIQUOTA_ICMS').AsString);
-         lMemTable.Next;
+         memoResultado.Lines.Add('NUMERO_ENT: ' +lMemTable.objeto.FieldByName('NUMERO_ENT').AsString);
+         memoResultado.Lines.Add('PRODUTO_CODIGO_PRO: ' +lMemTable.objeto.FieldByName('PRODUTO_CODIGO_PRO').AsString);
+         memoResultado.Lines.Add('CST: ' +lMemTable.objeto.FieldByName('CST').AsString);
+         memoResultado.Lines.Add('VALOR_LIQUIDO: ' +lMemTable.objeto.FieldByName('VALOR_LIQUIDO').AsString);
+         memoResultado.Lines.Add('TOTAL_UNITARIO: ' +lMemTable.objeto.FieldByName('TOTAL_UNITARIO').AsString);
+         memoResultado.Lines.Add('ALIQUOTA_ICMS: ' +lMemTable.objeto.FieldByName('ALIQUOTA_ICMS').AsString);
+         lMemTable.objeto.Next;
       end;
     except
       on E:Exception do
@@ -1149,7 +1150,7 @@ end;
 procedure TForm1.Button36Click(Sender: TObject);
 var
   lReservaModel : TReservaModel;
-  lMemTable : TFDMemTable;
+  lMemTable     : IFDDataset;
 begin
   lReservaModel := TReservaModel.Create(vIConexao);
   try
@@ -1157,20 +1158,20 @@ begin
       lMemTable := lReservaModel.obterLista;
       memoResultado.Lines.Clear;
 
-      lMemTable.First;
-      while not lMemTable.Eof do
+      lMemTable.objeto.First;
+      while not lMemTable.objeto.Eof do
       begin
-        memoResultado.Lines.Add('ID: '+lMemTable.FieldByName('ID').AsString);
-        memoResultado.Lines.Add('PRODUTO_ID: '+lMemTable.FieldByName('PRODUTO_ID').AsString);
-        memoResultado.Lines.Add('PRODUTO: '+lMemTable.FieldByName('PRODUTO').AsString);
-        memoResultado.Lines.Add('VENDEDOR_ID: '+lMemTable.FieldByName('VENDEDOR_ID').AsString);
-        memoResultado.Lines.Add('VENDEDOR: '+lMemTable.FieldByName('VENDEDOR').AsString);
-        memoResultado.Lines.Add('QUANTIDADE: '+lMemTable.FieldByName('QUANTIDADE').AsString);
-        memoResultado.Lines.Add('HORAS_BAIXA: '+lMemTable.FieldByName('HORAS_BAIXA').AsString);
-        memoResultado.Lines.Add('STATUS: '+lMemTable.FieldByName('STATUS').AsString);
-        memoResultado.Lines.Add('FILIAL: '+lMemTable.FieldByName('FILIAL').AsString);
+        memoResultado.Lines.Add('ID: '+lMemTable.objeto.FieldByName('ID').AsString);
+        memoResultado.Lines.Add('PRODUTO_ID: '+lMemTable.objeto.FieldByName('PRODUTO_ID').AsString);
+        memoResultado.Lines.Add('PRODUTO: '+lMemTable.objeto.FieldByName('PRODUTO').AsString);
+        memoResultado.Lines.Add('VENDEDOR_ID: '+lMemTable.objeto.FieldByName('VENDEDOR_ID').AsString);
+        memoResultado.Lines.Add('VENDEDOR: '+lMemTable.objeto.FieldByName('VENDEDOR').AsString);
+        memoResultado.Lines.Add('QUANTIDADE: '+lMemTable.objeto.FieldByName('QUANTIDADE').AsString);
+        memoResultado.Lines.Add('HORAS_BAIXA: '+lMemTable.objeto.FieldByName('HORAS_BAIXA').AsString);
+        memoResultado.Lines.Add('STATUS: '+lMemTable.objeto.FieldByName('STATUS').AsString);
+        memoResultado.Lines.Add('FILIAL: '+lMemTable.objeto.FieldByName('FILIAL').AsString);
         memoResultado.Lines.Add('===============================================');
-        lMemTable.Next;
+        lMemTable.objeto.Next;
       end;
 
     except
@@ -1286,7 +1287,7 @@ end;
 procedure TForm1.Button40Click(Sender: TObject);
 var
   lDocumentoModel : TDocumentoModel;
-  lMemTable : TFDMemTable;
+  lMemTable : IFDDataset;
 begin
   lDocumentoModel := TDocumentoModel.Create(vIConexao);
   try
@@ -1294,13 +1295,13 @@ begin
       lMemTable := lDocumentoModel.obterLista;
       memoResultado.Lines.Clear;
 
-      lMemTable.First;
-      while not lMemTable.Eof do
+      lMemTable.objeto.First;
+      while not lMemTable.objeto.Eof do
       begin
-        memoResultado.Lines.Add('ID: '+lMemTable.FieldByName('ID').AsString);
-        memoResultado.Lines.Add('NOME: '+lMemTable.FieldByName('NOME').AsString);
+        memoResultado.Lines.Add('ID: '+lMemTable.objeto.FieldByName('ID').AsString);
+        memoResultado.Lines.Add('NOME: '+lMemTable.objeto.FieldByName('NOME').AsString);
         memoResultado.Lines.Add('===============================================');
-        lMemTable.Next;
+        lMemTable.objeto.Next;
       end;
     except
      on E:Exception do
@@ -1390,7 +1391,7 @@ end;
 procedure TForm1.Button44Click(Sender: TObject);
 var
   lAnexoModel : TAnexoModel;
-  lMemTable : TFDMemTable;
+  lMemTable : IFDDataset;
 begin
   lAnexoModel := TAnexoModel.Create(vIConexao);
   try
@@ -1398,16 +1399,16 @@ begin
       lMemTable := lAnexoModel.obterLista;
       memoResultado.Lines.Clear;
 
-      lMemTable.First;
-      while not lMemTable.Eof do
+      lMemTable.objeto.First;
+      while not lMemTable.objeto.Eof do
       begin
-        memoResultado.Lines.Add('ID: '+lMemTable.FieldByName('ID').AsString);
-        memoResultado.Lines.Add('TABELA: '+lMemTable.FieldByName('TABELA').AsString);
-        memoResultado.Lines.Add('REGISTRO_ID: '+lMemTable.FieldByName('REGISTRO_ID').AsString);
-        memoResultado.Lines.Add('DOCUMENTO_ID: '+lMemTable.FieldByName('DOCUMENTO_ID').AsString);
-        memoResultado.Lines.Add('DOCUMENTO_NOME: '+lMemTable.FieldByName('DOCUMENTO_NOME').AsString);
+        memoResultado.Lines.Add('ID: '+lMemTable.objeto.FieldByName('ID').AsString);
+        memoResultado.Lines.Add('TABELA: '+lMemTable.objeto.FieldByName('TABELA').AsString);
+        memoResultado.Lines.Add('REGISTRO_ID: '+lMemTable.objeto.FieldByName('REGISTRO_ID').AsString);
+        memoResultado.Lines.Add('DOCUMENTO_ID: '+lMemTable.objeto.FieldByName('DOCUMENTO_ID').AsString);
+        memoResultado.Lines.Add('DOCUMENTO_NOME: '+lMemTable.objeto.FieldByName('DOCUMENTO_NOME').AsString);
         memoResultado.Lines.Add('===============================================');
-        lMemTable.Next;
+        lMemTable.objeto.Next;
       end;
     except
      on E:Exception do
@@ -1471,7 +1472,7 @@ procedure TForm1.Button47Click(Sender: TObject);
 var
   lFinanceiroPedidoModel : TFinanceiroPedidoModel;
   lPedidoWeb             : String;
-  lMemTable              : TFDMemTable;
+  lMemTable              : IFDDataset;
 begin
   lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
   try
@@ -1482,20 +1483,20 @@ begin
 
       lMemTable := lFinanceiroPedidoModel.obterResumo(lPedidoWeb);
       memoResultado.Lines.Clear;
-      lMemTable.First;
-      while not lMemTable.Eof do
+      lMemTable.objeto.First;
+      while not lMemTable.objeto.Eof do
       begin
-        memoResultado.Lines.Add('WEB_PEDIDO_ID: '+lMemTable.FieldByName('WEB_PEDIDO_ID').AsString);
-        memoResultado.Lines.Add('ID_FINANCEIRO: '+lMemTable.FieldByName('ID_FINANCEIRO').AsString);
-        memoResultado.Lines.Add('CODIGO_PORT: '+lMemTable.FieldByName('CODIGO_PORT').AsString);
-        memoResultado.Lines.Add('NOME_PORT: '+lMemTable.FieldByName('NOME_PORT').AsString);
-        memoResultado.Lines.Add('QUANTIDADE_PARCELAS: '+lMemTable.FieldByName('QUANTIDADE_PARCELAS').AsString);
-        memoResultado.Lines.Add('VALOR_PARCELAS: '+lMemTable.FieldByName('VALOR_PARCELA').AsString);
-        memoResultado.Lines.Add('VALOR_TOTAL: '+lMemTable.FieldByName('VALOR_TOTAL').AsString);
-        memoResultado.Lines.Add('VALOR_LIQUIDO: '+lMemTable.FieldByName('VALOR_LIQUIDO').AsString);
-        memoResultado.Lines.Add('VENCIMENTO: '+lMemTable.FieldByName('VENCIMENTO').AsString);
+        memoResultado.Lines.Add('WEB_PEDIDO_ID: '+lMemTable.objeto.FieldByName('WEB_PEDIDO_ID').AsString);
+        memoResultado.Lines.Add('ID_FINANCEIRO: '+lMemTable.objeto.FieldByName('ID_FINANCEIRO').AsString);
+        memoResultado.Lines.Add('CODIGO_PORT: '+lMemTable.objeto.FieldByName('CODIGO_PORT').AsString);
+        memoResultado.Lines.Add('NOME_PORT: '+lMemTable.objeto.FieldByName('NOME_PORT').AsString);
+        memoResultado.Lines.Add('QUANTIDADE_PARCELAS: '+lMemTable.objeto.FieldByName('QUANTIDADE_PARCELAS').AsString);
+        memoResultado.Lines.Add('VALOR_PARCELAS: '+lMemTable.objeto.FieldByName('VALOR_PARCELA').AsString);
+        memoResultado.Lines.Add('VALOR_TOTAL: '+lMemTable.objeto.FieldByName('VALOR_TOTAL').AsString);
+        memoResultado.Lines.Add('VALOR_LIQUIDO: '+lMemTable.objeto.FieldByName('VALOR_LIQUIDO').AsString);
+        memoResultado.Lines.Add('VENCIMENTO: '+lMemTable.objeto.FieldByName('VENCIMENTO').AsString);
         memoResultado.Lines.Add('===============================================');
-        lMemTable.Next;
+        lMemTable.objeto.Next;
       end;
     except
      on E:Exception do
@@ -1561,7 +1562,7 @@ procedure TForm1.Button4Click(Sender: TObject);
 var
   lWebPedidoModel : TWebPedidoModel;
   i               : Integer;
-  lMemTable       : TFDMemTable;
+  lMemTable       : IFDDataset;
   lPedidoWeb      : String;
 begin
   lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
@@ -1580,38 +1581,38 @@ begin
 
     memoResultado.Lines.Clear;
 
-    lMemTable.First;
-    while not lMemTable.eof do
+    lMemTable.objeto.First;
+    while not lMemTable.objeto.eof do
     begin
-      memoResultado.Lines.Add('ID: '+ lMemTable.FieldByName('ID').AsString);
-      memoResultado.Lines.Add('CODIGO_CLI: '+ lMemTable.FieldByName('CODIGO_CLI').AsString);
-      memoResultado.Lines.Add('CLIENTE_NOME: '+ lMemTable.FieldByName('CLIENTE_NOME').AsString);
-      memoResultado.Lines.Add('ENTREGA_ENDERECO: '+ lMemTable.FieldByName('ENTREGA_ENDERECO').AsString);
-      memoResultado.Lines.Add('ENTREGA_NUMERO: '+ lMemTable.FieldByName('ENTREGA_NUMERO').AsString);
-      memoResultado.Lines.Add('ENTREGA_COD_MUNICIPIO: '+ lMemTable.FieldByName('ENTREGA_COD_MUNICIPIO').AsString);
-      memoResultado.Lines.Add('ENTREGA_CEP: '+ lMemTable.FieldByName('ENTREGA_CEP').AsString);
-      memoResultado.Lines.Add('ENTREGA_COMPLEMENTO: '+ lMemTable.FieldByName('ENTREGA_COMPLEMENTO').AsString);
-      memoResultado.Lines.Add('ENTREGA_CIDADE: '+ lMemTable.FieldByName('ENTREGA_CIDADE').AsString);
-      memoResultado.Lines.Add('ENTREGA_BAIRRO: '+ lMemTable.FieldByName('ENTREGA_BAIRRO').AsString);
-      memoResultado.Lines.Add('ENTREGA_UF: '+ lMemTable.FieldByName('ENTREGA_UF').AsString);
-      memoResultado.Lines.Add('MONTAGEM_DATA: '+ lMemTable.FieldByName('MONTAGEM_DATA').AsString);
-      memoResultado.Lines.Add('MONTAGEM_HORA: '+ lMemTable.FieldByName('MONTAGEM_HORA').AsString);
-      memoResultado.Lines.Add('ENTREGA_DATA: '+ lMemTable.FieldByName('ENTREGA_DATA').AsString);
-      memoResultado.Lines.Add('ENTREGA_HORA: '+ lMemTable.FieldByName('ENTREGA_HORA').AsString);
-      memoResultado.Lines.Add('REGIAO_ID: '+ lMemTable.FieldByName('REGIAO_ID').AsString);
-      memoResultado.Lines.Add('REGIAO: '+ lMemTable.FieldByName('REGIAO').AsString);
-      memoResultado.Lines.Add('DATAHORA: '+ lMemTable.FieldByName('DATAHORA').AsString);
-      memoResultado.Lines.Add('VENDEDOR: '+ lMemTable.FieldByName('VENDEDOR').AsString);
-      memoResultado.Lines.Add('STATUS: '+ lMemTable.FieldByName('STATUS').AsString);
-      memoResultado.Lines.Add('VALOR_FRETE: '+ lMemTable.FieldByName('VALOR_FRETE').AsString);
-      memoResultado.Lines.Add('ACRESCIMO: '+ lMemTable.FieldByName('ACRESCIMO').AsString);
-      memoResultado.Lines.Add('VALOR_ITENS: '+ lMemTable.FieldByName('VALOR_ITENS').AsString);
-      memoResultado.Lines.Add('VALOR_GARANTIA: '+ lMemTable.FieldByName('VALOR_GARANTIA').AsString);
-      memoResultado.Lines.Add('VALOR_CUPOM_DESCONTO: '+ lMemTable.FieldByName('VALOR_CUPOM_DESCONTO').AsString);
-      memoResultado.Lines.Add('VALOR_TOTAL: '+ lMemTable.FieldByName('VALOR_TOTAL').AsString);
+      memoResultado.Lines.Add('ID: '+ lMemTable.objeto.FieldByName('ID').AsString);
+      memoResultado.Lines.Add('CODIGO_CLI: '+ lMemTable.objeto.FieldByName('CODIGO_CLI').AsString);
+      memoResultado.Lines.Add('CLIENTE_NOME: '+ lMemTable.objeto.FieldByName('CLIENTE_NOME').AsString);
+      memoResultado.Lines.Add('ENTREGA_ENDERECO: '+ lMemTable.objeto.FieldByName('ENTREGA_ENDERECO').AsString);
+      memoResultado.Lines.Add('ENTREGA_NUMERO: '+ lMemTable.objeto.FieldByName('ENTREGA_NUMERO').AsString);
+      memoResultado.Lines.Add('ENTREGA_COD_MUNICIPIO: '+ lMemTable.objeto.FieldByName('ENTREGA_COD_MUNICIPIO').AsString);
+      memoResultado.Lines.Add('ENTREGA_CEP: '+ lMemTable.objeto.FieldByName('ENTREGA_CEP').AsString);
+      memoResultado.Lines.Add('ENTREGA_COMPLEMENTO: '+ lMemTable.objeto.FieldByName('ENTREGA_COMPLEMENTO').AsString);
+      memoResultado.Lines.Add('ENTREGA_CIDADE: '+ lMemTable.objeto.FieldByName('ENTREGA_CIDADE').AsString);
+      memoResultado.Lines.Add('ENTREGA_BAIRRO: '+ lMemTable.objeto.FieldByName('ENTREGA_BAIRRO').AsString);
+      memoResultado.Lines.Add('ENTREGA_UF: '+ lMemTable.objeto.FieldByName('ENTREGA_UF').AsString);
+      memoResultado.Lines.Add('MONTAGEM_DATA: '+ lMemTable.objeto.FieldByName('MONTAGEM_DATA').AsString);
+      memoResultado.Lines.Add('MONTAGEM_HORA: '+ lMemTable.objeto.FieldByName('MONTAGEM_HORA').AsString);
+      memoResultado.Lines.Add('ENTREGA_DATA: '+ lMemTable.objeto.FieldByName('ENTREGA_DATA').AsString);
+      memoResultado.Lines.Add('ENTREGA_HORA: '+ lMemTable.objeto.FieldByName('ENTREGA_HORA').AsString);
+      memoResultado.Lines.Add('REGIAO_ID: '+ lMemTable.objeto.FieldByName('REGIAO_ID').AsString);
+      memoResultado.Lines.Add('REGIAO: '+ lMemTable.objeto.FieldByName('REGIAO').AsString);
+      memoResultado.Lines.Add('DATAHORA: '+ lMemTable.objeto.FieldByName('DATAHORA').AsString);
+      memoResultado.Lines.Add('VENDEDOR: '+ lMemTable.objeto.FieldByName('VENDEDOR').AsString);
+      memoResultado.Lines.Add('STATUS: '+ lMemTable.objeto.FieldByName('STATUS').AsString);
+      memoResultado.Lines.Add('VALOR_FRETE: '+ lMemTable.objeto.FieldByName('VALOR_FRETE').AsString);
+      memoResultado.Lines.Add('ACRESCIMO: '+ lMemTable.objeto.FieldByName('ACRESCIMO').AsString);
+      memoResultado.Lines.Add('VALOR_ITENS: '+ lMemTable.objeto.FieldByName('VALOR_ITENS').AsString);
+      memoResultado.Lines.Add('VALOR_GARANTIA: '+ lMemTable.objeto.FieldByName('VALOR_GARANTIA').AsString);
+      memoResultado.Lines.Add('VALOR_CUPOM_DESCONTO: '+ lMemTable.objeto.FieldByName('VALOR_CUPOM_DESCONTO').AsString);
+      memoResultado.Lines.Add('VALOR_TOTAL: '+ lMemTable.objeto.FieldByName('VALOR_TOTAL').AsString);
       memoResultado.Lines.Add('===============================================');
 
-      lMemTable.Next;
+      lMemTable.objeto.Next;
     end;
 
   finally
@@ -1699,7 +1700,7 @@ end;
 procedure TForm1.Button53Click(Sender: TObject);
 var
   lBancoModel : TBancoModel;
-  lMemTable   : TFDMemTable;
+  lMemTable   : IFDDataset;
 begin
   lBancoModel := TBancoModel.Create(vIConexao);
   try
@@ -1708,15 +1709,15 @@ begin
 
       memoResultado.Lines.Clear;
 
-      lMemTable.First;
-      while not lMemTable.Eof do
+      lMemTable.objeto.First;
+      while not lMemTable.objeto.Eof do
       begin
-        memoResultado.Lines.Add('NUMERO_BAN: '+lMemTable.FieldByName('NUMERO_BAN').AsString);
-        memoResultado.Lines.Add('NOME_BAN: '+lMemTable.FieldByName('NOME_BAN').AsString);
-        memoResultado.Lines.Add('AGENCIA_BAN: '+lMemTable.FieldByName('AGENCIA_BAN').AsString);
-        memoResultado.Lines.Add('CONTA_BAN: '+lMemTable.FieldByName('CONTA_BAN').AsString);
+        memoResultado.Lines.Add('NUMERO_BAN: '+lMemTable.objeto.FieldByName('NUMERO_BAN').AsString);
+        memoResultado.Lines.Add('NOME_BAN: '+lMemTable.objeto.FieldByName('NOME_BAN').AsString);
+        memoResultado.Lines.Add('AGENCIA_BAN: '+lMemTable.objeto.FieldByName('AGENCIA_BAN').AsString);
+        memoResultado.Lines.Add('CONTA_BAN: '+lMemTable.objeto.FieldByName('CONTA_BAN').AsString);
         memoResultado.Lines.Add('===============================================');
-        lMemTable.Next;
+        lMemTable.objeto.Next;
       end;
     except
      on E:Exception do
@@ -1782,7 +1783,7 @@ var
   lEntradaItensModel : TEntradaItensModel;
   lEntrada           : TEntradaResultado;
   lTableEntrada,
-  lTableItens        : TFDMemTable;
+  lTableItens        : IFDDataset;
 begin
   lEntradaModel      := TEntradaModel.Create(vIConexao);
   lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
@@ -1806,11 +1807,11 @@ begin
         begin
           lEntradaModel.NumeroView := lEntrada.NUMERO_ENT;
           lTableEntrada            := lEntradaModel.obterLista;
-          dsEntrada.DataSet        := lTableEntrada;
+          dsEntrada.DataSet        := lTableEntrada.objeto;
 
           lEntradaItensModel.NumeroView := lEntrada.NUMERO_ENT;
           lTableItens                  := lEntradaItensModel.obterLista;
-          dsEntradaItens.DataSet       := lTableitens;
+          dsEntradaItens.DataSet       := lTableitens.objeto;
         end;
       end;
     except
@@ -1826,7 +1827,7 @@ end;
 procedure TForm1.Button57Click(Sender: TObject);
 var
   lPortadorModel : TPortadorModel;
-  lMemTable      : TFDMemTable;
+  lMemTable      : IFDDataset;
 begin
   lPortadorModel := TPortadorModel.Create(vIConexao);
   try
@@ -1834,14 +1835,14 @@ begin
 
       lMemTable := lPortadorModel.PortadorTabelaJuros;
       memoResultado.Lines.Clear;
-      lMemTable.First;
+      lMemTable.objeto.First;
 
-      while not lMemTable.Eof do
+      while not lMemTable.objeto.Eof do
       begin
-        memoResultado.Lines.Add('CODIGO_PORTADOR: '+lMemTable.FieldByName('CODIGO_PORTADOR').AsString);
-        memoResultado.Lines.Add('PORTADOR: '+lMemTable.FieldByName('PORTADOR').AsString);
+        memoResultado.Lines.Add('CODIGO_PORTADOR: '+lMemTable.objeto.FieldByName('CODIGO_PORTADOR').AsString);
+        memoResultado.Lines.Add('PORTADOR: '+lMemTable.objeto.FieldByName('PORTADOR').AsString);
         memoResultado.Lines.Add('===============================================');
-        lMemTable.Next;
+        lMemTable.objeto.Next;
       end;
     except
      on E:Exception do
@@ -1858,7 +1859,7 @@ var
   lEntradaItensModel : TEntradaItensModel;
   lEntrada           : String;
   lTableEntrada,
-  lTableItens        : TFDMemTable;
+  lTableItens        : IFDDataset;
 begin
   lEntradaModel      := TEntradaModel.Create(vIConexao);
   lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
@@ -1870,11 +1871,11 @@ begin
 
     lEntradaModel.NumeroView := lEntrada;
     lTableEntrada            := lEntradaModel.obterLista;
-    dsEntrada.DataSet        := lTableEntrada;
+    dsEntrada.DataSet        := lTableEntrada.objeto;
 
     lEntradaItensModel.NumeroView := lEntrada;
     lTableItens                  := lEntradaItensModel.obterLista;
-    dsEntradaItens.DataSet       := lTableitens;
+    dsEntradaItens.DataSet       := lTableitens.objeto;
 
 
   finally
@@ -1981,7 +1982,7 @@ begin
       lEntradaModel.NumeroView     := '0001018217';
       lEntradaModel.FornecedorView := '500009';
 
-      dsEntrada.DataSet := lEntradaModel.obterTotalizador;
+      dsEntrada.DataSet := lEntradaModel.obterTotalizador.objeto;
 
     except
      on E:Exception do
@@ -2004,7 +2005,7 @@ begin
       pEntrada    := '0001044283';
       pFornecedor := '000184';
 
-      dsEntrada.DataSet := lContasPagarModel.obterValorEntrada(pEntrada, pFornecedor);
+      dsEntrada.DataSet := lContasPagarModel.obterValorEntrada(pEntrada, pFornecedor).objeto;
 
     except
      on E:Exception do
@@ -2041,7 +2042,7 @@ begin
   lOsModel := TOSModel.Create(vIConexao);
 
   try
-    dsOS.DataSet := lOsModel.obterLista;
+    dsOS.DataSet := lOsModel.obterLista.objeto;
   finally
     lOsModel.Free;
   end;
@@ -2147,7 +2148,7 @@ end;
 procedure TForm1.Button69Click(Sender: TObject);
 var
   lGrupoModel : TGrupoModel;
-  lMemTable   : TFDMemTable;
+  lMemTable   : IFDDataset;
 begin
   lGrupoModel := TGrupoModel.Create(vIConexao);
   try
@@ -2156,13 +2157,13 @@ begin
 
       memoResultado.Lines.Clear;
 
-      lMemTable.First;
-      while not lMemTable.Eof do
+      lMemTable.objeto.First;
+      while not lMemTable.objeto.Eof do
       begin
-        memoResultado.Lines.Add('CODIGO_GRU: '+lMemTable.FieldByName('CODIGO_GRU').AsString);
-        memoResultado.Lines.Add('NOME_GRU: '+lMemTable.FieldByName('NOME_GRU').AsString);
+        memoResultado.Lines.Add('CODIGO_GRU: '+lMemTable.objeto.FieldByName('CODIGO_GRU').AsString);
+        memoResultado.Lines.Add('NOME_GRU: '+lMemTable.objeto.FieldByName('NOME_GRU').AsString);
         memoResultado.Lines.Add('===============================================');
-        lMemTable.Next;
+        lMemTable.objeto.Next;
       end;
     except
      on E:Exception do
@@ -2389,7 +2390,7 @@ var
   lPedidoCompraModel : TPedidoCompraModel;
   lPedidoItensModel  : TPedidoCompraItensModel;
   TablePedidoCompra,
-  TablePedItens      : TFDMEmTable;
+  TablePedItens      : IFDDataset;
   lNumeroView,
   lFornecedorView    : String;
 begin
@@ -2402,12 +2403,12 @@ begin
 
       lPedidoCompraModel.NumeroView    := lNumeroView;
       TablePedidoCompra                := lPedidoCompraModel.obterLista;
-      dsPedidoCompra.DataSet           := TablePedidoCompra;
+      dsPedidoCompra.DataSet           := TablePedidoCompra.objeto;
 
       lPedidoItensModel.NumeroView     := lNumeroView;
       lPedidoItensModel.FornecedorView := lFornecedorView;
       TablePedItens                    := lPedidoItensModel.obterLista;
-      dsPedidoCompraItens.DataSet      := TablePedItens;
+      dsPedidoCompraItens.DataSet      := TablePedItens.objeto;
 
     except
      on E:Exception do
@@ -2535,7 +2536,7 @@ end;
 procedure TForm1.Button81Click(Sender: TObject);
 var
   lClientesContatoModel : TClientesContatoModel;
-  lMemTable   : TFDMemTable;
+  lMemTable   : IFDDataset;
 begin
   lClientesContatoModel := TClientesContatoModel.Create(vIConexao);
   try
@@ -2544,13 +2545,13 @@ begin
 
       memoResultado.Lines.Clear;
 
-      lMemTable.First;
-      while not lMemTable.Eof do
+      lMemTable.objeto.First;
+      while not lMemTable.objeto.Eof do
       begin
-        memoResultado.Lines.Add('ID: '+lMemTable.FieldByName('ID').AsString);
-        memoResultado.Lines.Add('CLIENTE_ID: '+lMemTable.FieldByName('CLIENTE_ID').AsString);
+        memoResultado.Lines.Add('ID: '+lMemTable.objeto.FieldByName('ID').AsString);
+        memoResultado.Lines.Add('CLIENTE_ID: '+lMemTable.objeto.FieldByName('CLIENTE_ID').AsString);
         memoResultado.Lines.Add('===============================================');
-        lMemTable.Next;
+        lMemTable.objeto.Next;
       end;
     except
      on E:Exception do
@@ -2635,7 +2636,7 @@ end;
 procedure TForm1.Button85Click(Sender: TObject);
 var
   lDescontoModel : TDescontoModel;
-  lMemTable   : TFDMemTable;
+  lMemTable   : IFDDataset;
 begin
   lDescontoModel := TDescontoModel.Create(vIConexao);
   try
@@ -2644,13 +2645,13 @@ begin
 
       memoResultado.Lines.Clear;
 
-      lMemTable.First;
-      while not lMemTable.Eof do
+      lMemTable.objeto.First;
+      while not lMemTable.objeto.Eof do
       begin
-        memoResultado.Lines.Add('ID: '+lMemTable.FieldByName('ID').AsString);
-        memoResultado.Lines.Add('CLIENTE_ID: '+lMemTable.FieldByName('USUARIO_DES').AsString);
+        memoResultado.Lines.Add('ID: '+lMemTable.objeto.FieldByName('ID').AsString);
+        memoResultado.Lines.Add('CLIENTE_ID: '+lMemTable.objeto.FieldByName('USUARIO_DES').AsString);
         memoResultado.Lines.Add('===============================================');
-        lMemTable.Next;
+        lMemTable.objeto.Next;
       end;
     except
      on E:Exception do
@@ -2826,7 +2827,7 @@ end;
 procedure TForm1.Button89Click(Sender: TObject);
 var
   lTransportadoraModel : TTransportadoraModel;
-  lMemTable   : TFDMemTable;
+  lMemTable   : IFDDataset;
 begin
   lTransportadoraModel := TTransportadoraModel.Create(vIConexao);
   try
@@ -2835,13 +2836,13 @@ begin
 
       memoResultado.Lines.Clear;
 
-      lMemTable.First;
-      while not lMemTable.Eof do
+      lMemTable.objeto.First;
+      while not lMemTable.objeto.Eof do
       begin
-        memoResultado.Lines.Add('CODIGO: '+lMemTable.FieldByName('CODIGO_TRA').AsString);
-        memoResultado.Lines.Add('NOME: '+lMemTable.FieldByName('FANTASIA_TRA').AsString);
+        memoResultado.Lines.Add('CODIGO: '+lMemTable.objeto.FieldByName('CODIGO_TRA').AsString);
+        memoResultado.Lines.Add('NOME: '+lMemTable.objeto.FieldByName('FANTASIA_TRA').AsString);
         memoResultado.Lines.Add('===============================================');
-        lMemTable.Next;
+        lMemTable.objeto.Next;
       end;
     except
      on E:Exception do
@@ -2895,7 +2896,7 @@ var
 begin
   lProdutosModel := TProdutosModel.Create(vIConexao);
   try
-    dsProdutos.DataSet := lProdutosModel.obterPromocao('000444');
+    dsProdutos.DataSet := lProdutosModel.obterPromocao('000444').objeto;
   finally
     lProdutosModel.Free;
   end;
@@ -2908,7 +2909,7 @@ begin
   lProduto := TProdutosModel.Create(vIConexao);
   try
     lProduto.IDRecordView := '000005';
-    dsProdutos.DataSet    := lProduto.ObterTabelaPreco;
+    dsProdutos.DataSet    := lProduto.ObterTabelaPreco.objeto;
   finally
     lProduto.Free;
   end;
@@ -2988,14 +2989,14 @@ end;
 procedure TForm1.Button95Click(Sender: TObject);
 var
   lPedidoCompra : TPedidoCompraModel;
-  lTotalizador  : TFDMemTable;
+  lTotalizador  : IFDDataset;
 begin
   lPedidoCompra := TPedidoCompraModel.Create(vIConexao);
   try
   lPedidoCompra.NumeroView     := '000008';
   lPedidoCompra.FornecedorView := '000000';
   lTotalizador             := lPedidoCompra.ObterTotalizador;
-  dsPedidoCompra.DataSet   := lTotalizador;
+  dsPedidoCompra.DataSet   := lTotalizador.objeto;
   finally
     lPedidoCompra.Free;
   end;
@@ -3004,7 +3005,7 @@ end;
 procedure TForm1.Button96Click(Sender: TObject);
 var
   lPrevisaoPedidoCompraModel : TPrevisaoPedidoCompraModel;
-  lMemTable   : TFDMemTable;
+  lMemTable   : IFDDataset;
 begin
   lPrevisaoPedidoCompraModel := TPrevisaoPedidoCompraModel.Create(vIConexao);
   try
@@ -3013,13 +3014,13 @@ begin
 
       memoResultado.Lines.Clear;
 
-      lMemTable.First;
-      while not lMemTable.Eof do
+      lMemTable.objeto.First;
+      while not lMemTable.objeto.Eof do
       begin
-        memoResultado.Lines.Add('PEDIDO: '+lMemTable.FieldByName('NUMERO_PED').AsString);
-        memoResultado.Lines.Add('FORNECEDOR: '+lMemTable.FieldByName('CODIGO_FOR').AsString);
+        memoResultado.Lines.Add('PEDIDO: '+lMemTable.objeto.FieldByName('NUMERO_PED').AsString);
+        memoResultado.Lines.Add('FORNECEDOR: '+lMemTable.objeto.FieldByName('CODIGO_FOR').AsString);
         memoResultado.Lines.Add('===============================================');
-        lMemTable.Next;
+        lMemTable.objeto.Next;
       end;
     except
      on E:Exception do
@@ -3147,7 +3148,7 @@ end;
 procedure TForm1.btnSaldoClick(Sender: TObject);
 var
   lSaldoModel : TSaldoModel;
-  lMemTable   : TFDMemTable;
+  lMemTable   : IFDDataset;
   lProduto    : String;
   lParametros : TParametrosSaldo;
 
@@ -3163,14 +3164,14 @@ begin
 
     memoResultado.Lines.Clear;
 
-    lMemTable.First;
-    while not lMemTable.Eof do
+    lMemTable.objeto.First;
+    while not lMemTable.objeto.Eof do
     begin
-      memoResultado.Lines.Add('LOJA: '+lMemTable.FieldByName('LOJA').AsString);
-      memoResultado.Lines.Add('SALDO_FISICO: '+lMemTable.FieldByName('SALDO_FISICO').AsString);
-      memoResultado.Lines.Add('SALDO_DISPONIVEL: '+lMemTable.FieldByName('SALDO_DISPONIVEL').AsString);
+      memoResultado.Lines.Add('LOJA: '+lMemTable.objeto.FieldByName('LOJA').AsString);
+      memoResultado.Lines.Add('SALDO_FISICO: '+lMemTable.objeto.FieldByName('SALDO_FISICO').AsString);
+      memoResultado.Lines.Add('SALDO_DISPONIVEL: '+lMemTable.objeto.FieldByName('SALDO_DISPONIVEL').AsString);
       memoResultado.Lines.Add('===============================================');
-      lMemTable.Next;
+      lMemTable.objeto.Next;
     end;
 
   finally
@@ -3242,13 +3243,13 @@ end;
 procedure TForm1.Button100Click(Sender: TObject);
 var
   lPedidoCompraItens : TPedidoCompraItensModel;
-  lTable  : TFDMemTable;
+  lTable  : IFDDataset;
 begin
   lPedidoCompraItens := TPedidoCompraItensModel.Create(vIConexao);
   try
   lPedidoCompraItens.NumeroView := '000011';
   lTable                        := lPedidoCompraItens.obterLista;
-  dsPedidoCompra.DataSet        := lTable;
+  dsPedidoCompra.DataSet        := lTable.objeto;
   finally
     lPedidoCompraItens.Free;
   end;
@@ -3257,14 +3258,14 @@ end;
 procedure TForm1.Button101Click(Sender: TObject);
 var
   lPedidoCompra : TPedidoCompraModel;
-  lTable  : TFDMemTable;
+  lTable  : IFDDataset;
 begin
   lPedidoCompra := TPedidoCompraModel.Create(vIConexao);
   try
     lPedidoCompra.NumeroView     := '000008';
     lPedidoCompra.FornecedorView := '000000';
     lTable                   := lPedidoCompra.obterLista;
-    dsPedidoCompra.DataSet   := lTable;
+    dsPedidoCompra.DataSet   := lTable.objeto;
   finally
     lPedidoCompra.Free;
   end;
@@ -3366,7 +3367,7 @@ end;
 procedure TForm1.Button106Click(Sender: TObject);
 var
   lSaidasModel : TSaidasModel;
-  lTable       : TFDMemTable;
+  lTable       : IFDDataset;
 begin
   lSaidasModel := TSaidasModel.Create(vIConexao);
   try
@@ -3375,7 +3376,7 @@ begin
       lSaidasModel.LojaView  := '001';
 
       lTable           := lSaidasModel.obterLista;
-      dsSaidas.DataSet := lTable;
+      dsSaidas.DataSet := lTable.objeto;
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
@@ -3422,12 +3423,12 @@ end;
 procedure TForm1.Button108Click(Sender: TObject);
 var
   lSaidasItens : TSaidasitensModel;
-  lResultado   : TFDMemTable;
+  lResultado   : IFDDataset;
 begin
   lSaidasItens := TSaidasitensModel.Create(vIConexao);
   try
     lResultado := lSaidasItens.ObterTotais('000260');
-    dsSaidas.DataSet := lResultado;
+    dsSaidas.DataSet := lResultado.objeto;
   finally
     lSaidasItens.Free;
   end;
@@ -3436,12 +3437,12 @@ end;
 procedure TForm1.Button109Click(Sender: TObject);
 var
   lLojasModel : TLojasModel;
-  lResultado  : TFDMemTable;
+  lResultado  : IFDDataset;
 begin
   lLojasModel := TLojasModel.Create(vIConexao);
   try
     lResultado := lLojasModel.obterFiliais;
-    dsSaidas.DataSet := lResultado;
+    dsSaidas.DataSet := lResultado.objeto;
   finally
     lLojasModel.Free;
   end;
@@ -3554,7 +3555,7 @@ begin
   lMovimentoSerial := TMovimentoSerialModel.Create(vIConexao);
   try
     try
-      dMovimentoSerial.DataSet := lMovimentoSerial.ObterLista;
+      dMovimentoSerial.DataSet := lMovimentoSerial.ObterLista.objeto;
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
@@ -3591,7 +3592,7 @@ begin
   lMovimentoSerial := TMovimentoSerialModel.Create(vIConexao);
   try
     try
-      dMovimentoSerial.DataSet := lMovimentoSerial.ConsultaSerial;
+      dMovimentoSerial.DataSet := lMovimentoSerial.ConsultaSerial.objeto;
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
@@ -3629,7 +3630,7 @@ end;
 procedure TForm1.Button12Click(Sender: TObject);
 var
   lSaldoModel : TSaldoModel;
-  lMemTable   : TFDMemTable;
+  lMemTable   : IFDDataset;
   lProduto    : String;
 begin
   lSaldoModel := TSaldoModel.Create(vIConexao);
@@ -3639,9 +3640,9 @@ begin
     lMemTable := lSaldoModel.obterSaldo(lProduto);
 
     memoResultado.Lines.Clear;
-    memoResultado.Lines.Add('SALDO_FISICO: '+lMemTable.FieldByName('SALDO_FISICO').AsString);
-    memoResultado.Lines.Add('SALDO_DISPONIVEL: '+lMemTable.FieldByName('SALDO_DISPONIVEL').AsString);
-    memoResultado.Lines.Add('SALDO_CD: '+lMemTable.FieldByName('SALDO_CD').AsString);
+    memoResultado.Lines.Add('SALDO_FISICO: '+lMemTable.objeto.FieldByName('SALDO_FISICO').AsString);
+    memoResultado.Lines.Add('SALDO_DISPONIVEL: '+lMemTable.objeto.FieldByName('SALDO_DISPONIVEL').AsString);
+    memoResultado.Lines.Add('SALDO_CD: '+lMemTable.objeto.FieldByName('SALDO_CD').AsString);
     memoResultado.Lines.Add('===============================================');
   finally
     lSaldoModel.Free;
@@ -3700,7 +3701,7 @@ procedure TForm1.Button14Click(Sender: TObject);
 var
   lSaldoModel : TSaldoModel;
   lProduto    : String;
-  lMemTable   : TFDMemTable;
+  lMemTable   : IFDDataset;
 begin
   lSaldoModel := TSaldoModel.Create(vIConexao);
   try
@@ -3710,17 +3711,17 @@ begin
 
     memoResultado.Lines.Clear;
 
-    lMemTable.First;
-    while not lMemTable.eof do
+    lMemTable.objeto.First;
+    while not lMemTable.objeto.eof do
     begin
-      memoResultado.Lines.Add('DOCUMENTO: '+ lMemTable.FieldByName('DOCUMENTO').AsString);
-      memoResultado.Lines.Add('ORIGEM:    '+ lMemTable.FieldByName('ORIGEM').AsString);
-      memoResultado.Lines.Add('DATA:      '+ lMemTable.FieldByName('DATA').AsString);
-      memoResultado.Lines.Add('CLIENTE:   '+ lMemTable.FieldByName('CLIENTE').AsString);
-      memoResultado.Lines.Add('RESERVADO: '+ lMemTable.FieldByName('RESERVADO').AsString);
-      memoResultado.Lines.Add('LOJA:      '+ lMemTable.FieldByName('LOJA').AsString);
+      memoResultado.Lines.Add('DOCUMENTO: '+ lMemTable.objeto.FieldByName('DOCUMENTO').AsString);
+      memoResultado.Lines.Add('ORIGEM:    '+ lMemTable.objeto.FieldByName('ORIGEM').AsString);
+      memoResultado.Lines.Add('DATA:      '+ lMemTable.objeto.FieldByName('DATA').AsString);
+      memoResultado.Lines.Add('CLIENTE:   '+ lMemTable.objeto.FieldByName('CLIENTE').AsString);
+      memoResultado.Lines.Add('RESERVADO: '+ lMemTable.objeto.FieldByName('RESERVADO').AsString);
+      memoResultado.Lines.Add('LOJA:      '+ lMemTable.objeto.FieldByName('LOJA').AsString);
       memoResultado.Lines.Add('===============================================');
-      lMemTable.Next;
+      lMemTable.objeto.Next;
     end;
 
   finally
@@ -3786,7 +3787,7 @@ end;
 procedure TForm1.Button17Click(Sender: TObject);
 var
   lEntradaModel : TEntradaModel;
-  lMemTable : TFDMemTable;
+  lMemTable : IFDDataset;
 begin
   lEntradaModel := TEntradaModel.Create(vIConexao);
   try
@@ -3795,22 +3796,22 @@ begin
 
       memoResultado.Lines.Clear;
 
-      lMemTable.First;
-      while not lMemTable.Eof do
+      lMemTable.objeto.First;
+      while not lMemTable.objeto.Eof do
       begin
-        memoResultado.Lines.Add('NUMERO_ENT: '+lMemTable.FieldByName('NUMERO_ENTRADA').AsString);
-        memoResultado.Lines.Add('SERIE: '+lMemTable.FieldByName('SERIE').AsString);
-        memoResultado.Lines.Add('CODIGO_FOR: '+lMemTable.FieldByName('COD_FORNECEDOR').AsString);
-        memoResultado.Lines.Add('FORNECEDOR: '+lMemTable.FieldByName('NOME_FORNECEDOR').AsString);
-        memoResultado.Lines.Add('ENDERECO_FORNECEDOR: '+lMemTable.FieldByName('ENDERECO_FORNECEDOR').AsString);
-        memoResultado.Lines.Add('NUMERO_FORNECEDOR: '+lMemTable.FieldByName('NUMERO_FORNECEDOR').AsString);
-        memoResultado.Lines.Add('BAIRRO_FORNECEDOR: '+lMemTable.FieldByName('BAIRRO_FORNECEDOR').AsString);
-        memoResultado.Lines.Add('CIDADE_FORNECEDOR: '+lMemTable.FieldByName('CIDADE_FORNECEDOR').AsString);
-        memoResultado.Lines.Add('CNPJ_CPF_FORNECEDOR: '+lMemTable.FieldByName('CNPJ_CPF_FORNECEDOR').AsString);
-        memoResultado.Lines.Add('DATANOTA_ENT: '+lMemTable.FieldByName('DATA_EMISSAO').AsString);
-        memoResultado.Lines.Add('TOTAL_ENT: '+lMemTable.FieldByName('VALOR_TOTAL').AsString);
+        memoResultado.Lines.Add('NUMERO_ENT: '+lMemTable.objeto.FieldByName('NUMERO_ENTRADA').AsString);
+        memoResultado.Lines.Add('SERIE: '+lMemTable.objeto.FieldByName('SERIE').AsString);
+        memoResultado.Lines.Add('CODIGO_FOR: '+lMemTable.objeto.FieldByName('COD_FORNECEDOR').AsString);
+        memoResultado.Lines.Add('FORNECEDOR: '+lMemTable.objeto.FieldByName('NOME_FORNECEDOR').AsString);
+        memoResultado.Lines.Add('ENDERECO_FORNECEDOR: '+lMemTable.objeto.FieldByName('ENDERECO_FORNECEDOR').AsString);
+        memoResultado.Lines.Add('NUMERO_FORNECEDOR: '+lMemTable.objeto.FieldByName('NUMERO_FORNECEDOR').AsString);
+        memoResultado.Lines.Add('BAIRRO_FORNECEDOR: '+lMemTable.objeto.FieldByName('BAIRRO_FORNECEDOR').AsString);
+        memoResultado.Lines.Add('CIDADE_FORNECEDOR: '+lMemTable.objeto.FieldByName('CIDADE_FORNECEDOR').AsString);
+        memoResultado.Lines.Add('CNPJ_CPF_FORNECEDOR: '+lMemTable.objeto.FieldByName('CNPJ_CPF_FORNECEDOR').AsString);
+        memoResultado.Lines.Add('DATANOTA_ENT: '+lMemTable.objeto.FieldByName('DATA_EMISSAO').AsString);
+        memoResultado.Lines.Add('TOTAL_ENT: '+lMemTable.objeto.FieldByName('VALOR_TOTAL').AsString);
         memoResultado.Lines.Add('===============================================');
-        lMemTable.Next;
+        lMemTable.objeto.Next;
       end;
 
     except
@@ -3996,7 +3997,7 @@ end;
 procedure TForm1.OrcamentoConsultarClick(Sender: TObject);
 var
   lOrcamentoModel : TOrcamentoModel;
-  lMemTable       : TFDMemTable;
+  lMemTable       : IFDDataset;
 begin
   lOrcamentoModel := TOrcamentoModel.Create(vIConexao);
   try
@@ -4005,13 +4006,13 @@ begin
 
       memoResultado.Lines.Clear;
 
-      lMemTable.First;
-      while not lMemTable.Eof do
+      lMemTable.objeto.First;
+      while not lMemTable.objeto.Eof do
       begin
-        memoResultado.Lines.Add('NUMERO_ORC: '+lMemTable.FieldByName('NUMERO_ORC').AsString);
-        memoResultado.Lines.Add('NOME_FUN: '+lMemTable.FieldByName('NOME_FUN').AsString);
+        memoResultado.Lines.Add('NUMERO_ORC: '+lMemTable.objeto.FieldByName('NUMERO_ORC').AsString);
+        memoResultado.Lines.Add('NOME_FUN: '+lMemTable.objeto.FieldByName('NOME_FUN').AsString);
         memoResultado.Lines.Add('===============================================');
-        lMemTable.Next;
+        lMemTable.objeto.Next;
       end;
     except
      on E:Exception do
@@ -4097,7 +4098,7 @@ end;
 procedure TForm1.OrcamentoItensConsultarClick(Sender: TObject);
 var
   lOrcamentoItensModel : TOrcamentoItensModel;
-  lMemTable            : TFDMemTable;
+  lMemTable            : IFDDataset;
 begin
   lOrcamentoItensModel := TOrcamentoItensModel.Create(vIConexao);
   try
@@ -4106,13 +4107,13 @@ begin
 
       memoResultado.Lines.Clear;
 
-      lMemTable.First;
-      while not lMemTable.Eof do
+      lMemTable.objeto.First;
+      while not lMemTable.objeto.Eof do
       begin
-        memoResultado.Lines.Add('CODIGO_PRO: '+lMemTable.FieldByName('CODIGO_PRO').AsString);
-        memoResultado.Lines.Add('TOTAL: '+lMemTable.FieldByName('TOTAL').AsString);
+        memoResultado.Lines.Add('CODIGO_PRO: '+lMemTable.objeto.FieldByName('CODIGO_PRO').AsString);
+        memoResultado.Lines.Add('TOTAL: '+lMemTable.objeto.FieldByName('TOTAL').AsString);
         memoResultado.Lines.Add('===============================================');
-        lMemTable.Next;
+        lMemTable.objeto.Next;
       end;
     except
      on E:Exception do
@@ -4172,14 +4173,14 @@ end;
 procedure TForm1.SpeedButton1Click(Sender: TObject);
 var
   lTabelaJurosPromocaoModel : TTabelaJurosPromocaoModel;
-  lTableJuros               : TFDMemTable;
+  lTableJuros               : IFDDataset;
 begin
   lTabelaJurosPromocaoModel := TTabelaJurosPromocaoModel.Create(vIConexao);
   try
     lTableJuros := lTabelaJurosPromocaoModel.obterTabelaJurosProduto('006165');
 
-    if lTableJuros.RecordCount > 0 then
-      dsJuros.DataSet := RetornaCoeficiente(lTableJuros.FieldByName('TAXA_JUROS').AsFloat, lTableJuros.FieldByName('PARCELA').AsInteger);
+    if lTableJuros.objeto.RecordCount > 0 then
+      dsJuros.DataSet := RetornaCoeficiente(lTableJuros.objeto.FieldByName('TAXA_JUROS').AsFloat, lTableJuros.objeto.FieldByName('PARCELA').AsInteger);
 
   finally
     lTabelaJurosPromocaoModel.Free;

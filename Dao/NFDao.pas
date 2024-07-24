@@ -7,7 +7,7 @@ uses
   NFModel,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  Spring.Collections,
   System.Variants,
   Terasoft.ConstrutorDao,
   Terasoft.FuncoesTexto,
@@ -21,7 +21,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FNFLista: TObjectList<TNFModel>;
+    FNFLista: IList<TNFModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -30,7 +30,7 @@ type
     FWhereView: String;
     FTotalRecords: Integer;
     FIDPedidoView: Integer;
-    procedure SetNFLista(const Value: TObjectList<TNFModel>);
+    procedure SetNFLista(const Value: IList<TNFModel>);
     procedure SetCountView(const Value: String);
     procedure SetIDPedidoView(const Value: Integer);
     procedure SetIDRecordView(const Value: Integer);
@@ -44,7 +44,7 @@ type
     procedure obterTotalRegistros;
 
   public
-    property NFLista: TObjectList<TNFModel> read FNFLista write SetNFLista;
+    property NFLista: IList<TNFModel> read FNFLista write SetNFLista;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
     property CountView: String read FCountView write SetCountView;
@@ -84,8 +84,10 @@ end;
 
 destructor TNFDao.Destroy;
 begin
+  FNFLista := nil;
+  FreeAndNil(vConstrutor);
+  vIConexao := nil;
   inherited;
-
 end;
 
 function TNFDao.excluir(pNFModel: TNFModel): String;
@@ -321,11 +323,11 @@ procedure TNFDao.obterListaNFe;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: TNFModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FNFLista := TObjectList<TNFModel>.Create;
+  FNFLista := TCollections.CreateList<TNFModel>(true);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -362,23 +364,22 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FNFLista.Add(TNFModel.Create(vIConexao));
+      modelo := TNFModel.Create(vIConexao);
+      FNFLista.Add(modelo);
 
-      i := FNFLista.Count -1;
-      FNFLista[i].NUMERO_NF                   := lQry.FieldByName('NUMERO_NF').AsString;
-      FNFLista[i].NUMERO_ECF                  := lQry.FieldByName('NUMERO_ECF').AsString;
-      FNFLista[i].NUMERO_PED                  := lQry.FieldByName('NUMERO_PED').AsString;
-      FNFLista[i].SERIE_NF                    := lQry.FieldByName('SERIE_NF').AsString;
-      FNFLista[i].DATA_NF                     := lQry.FieldByName('DATA_NF').AsString;
-      FNFLista[i].CLIENTE_NF                  := lQry.FieldByName('cliente_nome_cliente').AsString;
-      FNFLista[i].NOME_XML                    := lQry.FieldByName('NOME_XML').AsString;
-      FNFLista[i].TOTAL_NF                    := lQry.FieldByName('TOTAL_NF').AsString;
-      FNFLista[i].STATUS_NF                   := lQry.FieldByName('STATUS_NF').AsString;
-      FNFLista[i].PROTOCOLO_NFE               := lQry.FieldByName('PROTOCOLO_NFE').AsString;
+      modelo.NUMERO_NF                   := lQry.FieldByName('NUMERO_NF').AsString;
+      modelo.NUMERO_ECF                  := lQry.FieldByName('NUMERO_ECF').AsString;
+      modelo.NUMERO_PED                  := lQry.FieldByName('NUMERO_PED').AsString;
+      modelo.SERIE_NF                    := lQry.FieldByName('SERIE_NF').AsString;
+      modelo.DATA_NF                     := lQry.FieldByName('DATA_NF').AsString;
+      modelo.CLIENTE_NF                  := lQry.FieldByName('cliente_nome_cliente').AsString;
+      modelo.NOME_XML                    := lQry.FieldByName('NOME_XML').AsString;
+      modelo.TOTAL_NF                    := lQry.FieldByName('TOTAL_NF').AsString;
+      modelo.STATUS_NF                   := lQry.FieldByName('STATUS_NF').AsString;
+      modelo.PROTOCOLO_NFE               := lQry.FieldByName('PROTOCOLO_NFE').AsString;
 
       lQry.Next;
     end;
@@ -394,11 +395,11 @@ procedure TNFDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: TNFModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FNFLista := TObjectList<TNFModel>.Create;
+  FNFLista := TCollections.CreateList<TNFModel>(true);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -452,24 +453,23 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FNFLista.Add(TNFModel.Create(vIConexao));
+      modelo := TNFModel.Create(vIConexao);
+      FNFLista.Add(modelo);
 
-      i := FNFLista.Count -1;
-      FNFLista[i].NUMERO_NF                   := lQry.FieldByName('NUMERO_NF').AsString;
-      FNFLista[i].NUMERO_ECF                  := lQry.FieldByName('NUMERO_ECF').AsString;
-      FNFLista[i].NUMERO_PED                  := lQry.FieldByName('NUMERO_PED').AsString;
-      FNFLista[i].SERIE_NF                    := lQry.FieldByName('SERIE_NF').AsString;
-      FNFLista[i].MODELO                      := lQry.FieldByName('MODELO').AsString;
-      FNFLista[i].CODIGO_CLI                  := lQry.FieldByName('CODIGO_CLI').AsString;
-      FNFLista[i].DATA_NF                     := lQry.FieldByName('DATA_NF').AsString;
-      FNFLista[i].DATA_SAIDA                  := lQry.FieldByName('DATA_SAIDA').AsString;
-      FNFLista[i].CLIENTE_NF                  := lQry.FieldByName('cliente_nome_cliente').AsString;
-      FNFLista[i].NOME_XML                    := lQry.FieldByName('NOME_XML').AsString;
-      FNFLista[i].UF_EMBARQUE                 := lQry.FieldByName('estado_cliente').AsString;
+      modelo.NUMERO_NF                   := lQry.FieldByName('NUMERO_NF').AsString;
+      modelo.NUMERO_ECF                  := lQry.FieldByName('NUMERO_ECF').AsString;
+      modelo.NUMERO_PED                  := lQry.FieldByName('NUMERO_PED').AsString;
+      modelo.SERIE_NF                    := lQry.FieldByName('SERIE_NF').AsString;
+      modelo.MODELO                      := lQry.FieldByName('MODELO').AsString;
+      modelo.CODIGO_CLI                  := lQry.FieldByName('CODIGO_CLI').AsString;
+      modelo.DATA_NF                     := lQry.FieldByName('DATA_NF').AsString;
+      modelo.DATA_SAIDA                  := lQry.FieldByName('DATA_SAIDA').AsString;
+      modelo.CLIENTE_NF                  := lQry.FieldByName('cliente_nome_cliente').AsString;
+      modelo.NOME_XML                    := lQry.FieldByName('NOME_XML').AsString;
+      modelo.UF_EMBARQUE                 := lQry.FieldByName('estado_cliente').AsString;
 
       lQry.Next;
     end;
@@ -544,7 +544,7 @@ begin
   FLengthPageView := Value;
 end;
 
-procedure TNFDao.SetNFLista(const Value: TObjectList<TNFModel>);
+procedure TNFDao.SetNFLista;
 begin
   FNFLista := Value;
 end;

@@ -134,7 +134,7 @@ end;
 
 destructor TObtemAliquotasModel.Destroy;
 begin
-
+  vIConexao := nil;
   inherited;
 end;
 

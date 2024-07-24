@@ -4,7 +4,7 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -12,7 +12,7 @@ type
 
   private
     vIConexao : IConexao;
-    FFuncionariosLista: TObjectList<TFuncionarioModel>;
+    FFuncionariosLista: IList<TFuncionarioModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -134,7 +134,7 @@ type
     FOBS_CARACTERISTICA: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetFuncionariosLista(const Value: TObjectList<TFuncionarioModel>);
+    procedure SetFuncionariosLista(const Value: IList<TFuncionarioModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -380,7 +380,7 @@ type
     function comissaoPorTipo(pCodVendedor, pIdTipoVenda : String): Double;
     function comissaoPorGrupo(pCodVendedor, pIdGrupo: String): Double;
 
-    property FuncionariosLista: TObjectList<TFuncionarioModel> read FFuncionariosLista write SetFuncionariosLista;
+    property FuncionariosLista: IList<TFuncionarioModel> read FFuncionariosLista write SetFuncionariosLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -472,7 +472,7 @@ end;
 
 destructor TFuncionarioModel.Destroy;
 begin
-  FreeAndNil(FFuncionariosLista);
+  FFuncionariosLista := nil;
   vIConexao := nil;
   inherited;
 end;
@@ -832,7 +832,7 @@ begin
   FFUNCAO_FUN := Value;
 end;
 
-procedure TFuncionarioModel.SetFuncionariosLista(const Value: TObjectList<TFuncionarioModel>);
+procedure TFuncionarioModel.SetFuncionariosLista;
 begin
   FFuncionariosLista := Value;
 end;

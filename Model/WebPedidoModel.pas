@@ -6,7 +6,7 @@ uses
   math,
   Terasoft.Types,
   Terasoft.Utils,
-  System.Generics.Collections,
+  Spring.Collections,
   Terasoft.FuncoesTexto,
   Interfaces.Conexao,
   FireDAC.Comp.Client,
@@ -19,7 +19,6 @@ uses
   System.StrUtils,
   ProdutosModel,
   EmpresaModel,
-  Spring.Collections,
   WebPedidoItensDao,
   MovimentoSerialModel;
 
@@ -44,7 +43,7 @@ type
 
   private
     vIConexao : IConexao;
-    FWebPedidosLista: TObjectList<TWebPedidoModel>;
+    FWebPedidosLista: IList<TWebPedidoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -158,7 +157,7 @@ type
     FSEGURO_PRESTAMISTA_VALOR: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetWebPedidosLista(const Value: TObjectList<TWebPedidoModel>);
+    procedure SetWebPedidosLista(const Value: IList<TWebPedidoModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -395,7 +394,7 @@ type
     function Negar(pID: String): Boolean;
     function NegarDesconto(pID: String): Boolean;
 
-    property WebPedidosLista: TObjectList<TWebPedidoModel> read FWebPedidosLista write SetWebPedidosLista;
+    property WebPedidosLista: IList<TWebPedidoModel> read FWebPedidosLista write SetWebPedidosLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -636,7 +635,7 @@ end;
 
 destructor TWebPedidoModel.Destroy;
 begin
-  FreeAndNil(FWebPedidosLista);
+  FWebPedidosLista := nil;
   vIConexao := nil;
   inherited;
 end;
@@ -1003,7 +1002,7 @@ begin
   FPARCELAS := Value;
 end;
 
-procedure TWebPedidoModel.SetWebPedidosLista(const Value: TObjectList<TWebPedidoModel>);
+procedure TWebPedidoModel.SetWebPedidosLista;
 begin
   FWebPedidosLista := Value;
 end;

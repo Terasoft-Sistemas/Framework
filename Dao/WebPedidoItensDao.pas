@@ -9,7 +9,7 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  Spring.Collections,
   System.Variants,
   Terasoft.Utils,
   Interfaces.Conexao,
@@ -22,7 +22,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FPedidoWebItenssLista: TObjectList<TWebPedidoItensModel>;
+    FPedidoWebItenssLista: IList<TWebPedidoItensModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -32,10 +32,10 @@ type
     FTotalRecords: Integer;
     FIDPedidoWebView: Integer;
     FIDWebPedidoView: Integer;
-    FWebPedidoItenssLista: TObjectList<TWebPedidoItensModel>;
+    FWebPedidoItenssLista: IList<TWebPedidoItensModel>;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetPedidoWebItenssLista(const Value: TObjectList<TWebPedidoItensModel>);
+    procedure SetPedidoWebItenssLista(const Value: IList<TWebPedidoItensModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -47,13 +47,13 @@ type
 
     function where: String;
     procedure SetIDWebPedidoView(const Value: Integer);
-    procedure SetWebPedidoItenssLista(const Value: TObjectList<TWebPedidoItensModel>);
+    procedure SetWebPedidoItenssLista(const Value: IList<TWebPedidoItensModel>);
 
   public
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property WebPedidoItenssLista: TObjectList<TWebPedidoItensModel> read FWebPedidoItenssLista write SetWebPedidoItenssLista;
+    property WebPedidoItenssLista: IList<TWebPedidoItensModel> read FWebPedidoItenssLista write SetWebPedidoItenssLista;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
     property CountView: String read FCountView write SetCountView;
@@ -188,6 +188,8 @@ end;
 
 destructor TWebPedidoItensDao.Destroy;
 begin
+  FPedidoWebItenssLista := nil;
+  FWebPedidoItenssLista := nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -343,12 +345,12 @@ procedure TWebPedidoItensDao.obterLista;
 var
   lQry       : TFDQuery;
   lSQL       : String;
-  i          : INteger;
   lPaginacao : String;
+  modelo: TWebPedidoItensModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FWebPedidoItenssLista := TObjectList<TWebPedidoItensModel>.Create;
+  FWebPedidoItenssLista := TCollections.CreateList<TWebPedidoItensModel>(true);
 
   try
 
@@ -422,40 +424,38 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FWebPedidoItenssLista.Add(TWebPedidoItensModel.Create(vIConexao));
+      modelo := TWebPedidoItensModel.Create(vIConexao);
+      FWebPedidoItenssLista.Add(modelo);
 
-      i := FWebPedidoItenssLista.Count -1;
+      modelo.ID                   := lQry.FieldByName('ID').AsString;
+      modelo.UNIDADE_PRO          := lQry.FieldByName('UNIDADE_PRO').AsString;
+      modelo.WEB_PEDIDO_ID        := lQry.FieldByName('WEB_PEDIDO_ID').AsString;
+      modelo.QUANTIDADE           := lQry.FieldByName('QUANTIDADE').AsFloat;
+      modelo.TIPO_ENTREGA         := lQry.FieldByName('TIPO_ENTREGA').AsString;
+      modelo.TIPO_GARANTIA        := lQry.FieldByName('TIPO_GARANTIA').AsString;
+      modelo.TIPO                 := lQry.FieldByName('TIPO').AsString;
+      modelo.OBSERVACAO           := lQry.FieldByName('OBSERVACAO').AsString;
+      modelo.PRODUTO_ID           := lQry.FieldByName('PRODUTO_ID').AsString;
+      modelo.VLR_GARANTIA         := lQry.FieldByName('VLR_GARANTIA').AsFloat;
+      modelo.ENTREGA              := lQry.FieldByName('ENTREGA').AsString;
+      modelo.MONTAGEM             := lQry.FieldByName('MONTAGEM').AsString;
+      modelo.PERCENTUAL_DESCONTO  := lQry.FieldByName('PERCENTUAL_DESCONTO').AsFloat;
+      modelo.VALOR_UNITARIO       := lQry.FieldByName('VALOR_UNITARIO').AsFloat;
+      modelo.PRODUTO_NOME         := lQry.FieldByName('NOME_PRO').AsString;
+      modelo.TIPO_GARANTIA_FR     := lQry.FieldByName('TIPO_GARANTIA_FR').AsString;
+      modelo.VLR_GARANTIA_FR      := lQry.FieldByName('VLR_GARANTIA_FR').AsString;
+      modelo.CUSTO_GARANTIA_FR    := lQry.FieldByName('CUSTO_GARANTIA_FR').AsString;
+      modelo.CUSTO_GARANTIA       := lQry.FieldByName('CUSTO_GARANTIA').AsString;
+      modelo.PER_GARANTIA_FR      := lQry.FieldByName('PER_GARANTIA_FR').AsString;
+      modelo.VALOR_VENDA_ATUAL    := lQry.FieldByName('VALOR_VENDA_ATUAL').AsString;
+      modelo.VLRVENDA_PRO         := lQry.FieldByName('VLRVENDA_PRO').AsString;
 
-      FWebPedidoItenssLista[i].ID                   := lQry.FieldByName('ID').AsString;
-      FWebPedidoItenssLista[i].UNIDADE_PRO          := lQry.FieldByName('UNIDADE_PRO').AsString;
-      FWebPedidoItenssLista[i].WEB_PEDIDO_ID        := lQry.FieldByName('WEB_PEDIDO_ID').AsString;
-      FWebPedidoItenssLista[i].QUANTIDADE           := lQry.FieldByName('QUANTIDADE').AsFloat;
-      FWebPedidoItenssLista[i].TIPO_ENTREGA         := lQry.FieldByName('TIPO_ENTREGA').AsString;
-      FWebPedidoItenssLista[i].TIPO_GARANTIA        := lQry.FieldByName('TIPO_GARANTIA').AsString;
-      FWebPedidoItenssLista[i].TIPO                 := lQry.FieldByName('TIPO').AsString;
-      FWebPedidoItenssLista[i].OBSERVACAO           := lQry.FieldByName('OBSERVACAO').AsString;
-      FWebPedidoItenssLista[i].PRODUTO_ID           := lQry.FieldByName('PRODUTO_ID').AsString;
-      FWebPedidoItenssLista[i].VLR_GARANTIA         := lQry.FieldByName('VLR_GARANTIA').AsFloat;
-      FWebPedidoItenssLista[i].ENTREGA              := lQry.FieldByName('ENTREGA').AsString;
-      FWebPedidoItenssLista[i].MONTAGEM             := lQry.FieldByName('MONTAGEM').AsString;
-      FWebPedidoItenssLista[i].PERCENTUAL_DESCONTO  := lQry.FieldByName('PERCENTUAL_DESCONTO').AsFloat;
-      FWebPedidoItenssLista[i].VALOR_UNITARIO       := lQry.FieldByName('VALOR_UNITARIO').AsFloat;
-      FWebPedidoItenssLista[i].PRODUTO_NOME         := lQry.FieldByName('NOME_PRO').AsString;
-      FWebPedidoItenssLista[i].TIPO_GARANTIA_FR     := lQry.FieldByName('TIPO_GARANTIA_FR').AsString;
-      FWebPedidoItenssLista[i].VLR_GARANTIA_FR      := lQry.FieldByName('VLR_GARANTIA_FR').AsString;
-      FWebPedidoItenssLista[i].CUSTO_GARANTIA_FR    := lQry.FieldByName('CUSTO_GARANTIA_FR').AsString;
-      FWebPedidoItenssLista[i].CUSTO_GARANTIA       := lQry.FieldByName('CUSTO_GARANTIA').AsString;
-      FWebPedidoItenssLista[i].PER_GARANTIA_FR      := lQry.FieldByName('PER_GARANTIA_FR').AsString;
-      FWebPedidoItenssLista[i].VALOR_VENDA_ATUAL    := lQry.FieldByName('VALOR_VENDA_ATUAL').AsString;
-      FWebPedidoItenssLista[i].VLRVENDA_PRO         := lQry.FieldByName('VLRVENDA_PRO').AsString;
-
-      FWebPedidoItenssLista[i].TOTAL_GARANTIA       := lQry.FieldByName('TOTAL_GARANTIA').AsString;
-      FWebPedidoItenssLista[i].VALOR_TOTALITENS     := lQry.FieldByName('VALOR_TOTALITENS').AsString;
-      FWebPedidoItenssLista[i].VALOR_DESCONTO       := lQry.FieldByName('VALOR_DESCONTO').AsString;
+      modelo.TOTAL_GARANTIA       := lQry.FieldByName('TOTAL_GARANTIA').AsString;
+      modelo.VALOR_TOTALITENS     := lQry.FieldByName('VALOR_TOTALITENS').AsString;
+      modelo.VALOR_DESCONTO       := lQry.FieldByName('VALOR_DESCONTO').AsString;
 
       lQry.Next;
     end;
@@ -472,7 +472,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TWebPedidoItensDao.SetWebPedidoItenssLista(const Value: TObjectList<TWebPedidoItensModel>);
+procedure TWebPedidoItensDao.SetWebPedidoItenssLista;
 begin
   FWebPedidoItenssLista := Value;
 end;
@@ -521,10 +521,8 @@ begin
   end;
 end;
 
-procedure TWebPedidoItensDao.SetPedidoWebItenssLista(
-  const Value: TObjectList<TWebPedidoItensModel>);
+procedure TWebPedidoItensDao.SetPedidoWebItenssLista;
 begin
-
 end;
 
 procedure TWebPedidoItensDao.SetStartRecordView(const Value: String);

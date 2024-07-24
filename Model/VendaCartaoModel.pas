@@ -4,7 +4,7 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -12,7 +12,7 @@ type
 
   private
     vIConexao : IConexao;
-    FVendaCartaosLista: TObjectList<TVendaCartaoModel>;
+    FVendaCartaosLista: IList<TVendaCartaoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -44,7 +44,7 @@ type
     FPARCELA_CAR: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetVendaCartaosLista(const Value: TObjectList<TVendaCartaoModel>);
+    procedure SetVendaCartaosLista(const Value: IList<TVendaCartaoModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -105,7 +105,7 @@ type
     function carregaClasse(pID: String): TVendaCartaoModel;
     procedure obterLista;
 
-    property VendaCartaosLista: TObjectList<TVendaCartaoModel> read FVendaCartaosLista write SetVendaCartaosLista;
+    property VendaCartaosLista: IList<TVendaCartaoModel> read FVendaCartaosLista write SetVendaCartaosLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -170,7 +170,8 @@ end;
 
 destructor TVendaCartaoModel.Destroy;
 begin
-
+  FVendaCartaosLista := nil;
+  vIConexao := nil;
   inherited;
 end;
 
@@ -269,7 +270,7 @@ begin
   FVENCIMENTO_CAR := Value;
 end;
 
-procedure TVendaCartaoModel.SetVendaCartaosLista(const Value: TObjectList<TVendaCartaoModel>);
+procedure TVendaCartaoModel.SetVendaCartaosLista;
 begin
   FVendaCartaosLista := Value;
 end;

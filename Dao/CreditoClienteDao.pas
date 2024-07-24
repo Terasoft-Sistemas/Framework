@@ -7,7 +7,7 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  Spring.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
   Terasoft.ConstrutorDao,
@@ -21,7 +21,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FCreditoClientesLista: TObjectList<TCreditoClienteModel>;
+    FCreditoClientesLista: IList<TCreditoClienteModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -32,7 +32,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetCreditoClientesLista(const Value: TObjectList<TCreditoClienteModel>);
+    procedure SetCreditoClientesLista(const Value: IList<TCreditoClienteModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -47,7 +47,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property CreditoClientesLista: TObjectList<TCreditoClienteModel> read FCreditoClientesLista write SetCreditoClientesLista;
+    property CreditoClientesLista: IList<TCreditoClienteModel> read FCreditoClientesLista write SetCreditoClientesLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -124,13 +124,12 @@ procedure TCreditoClienteDao.creditosAbertos(pCliente: String);
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
-
+  modelo: TCreditoClienteModel;
 begin
 
   lQry := vIConexao.CriarQuery;
 
-  FCreditoClientesLista := TObjectList<TCreditoClienteModel>.Create;
+  FCreditoClientesLista := TCollections.CreateList<TCreditoClienteModel>(true);
 
   try
     lSQL := '  select c.*,                                                                                '+
@@ -146,30 +145,28 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FCreditoClientesLista.Add(TCreditoClienteModel.Create(vIConexao));
+      modelo := TCreditoClienteModel.Create(vIConexao);
+      FCreditoClientesLista.Add(modelo);
 
-      i := FCreditoClientesLista.Count -1;
-
-      FCreditoClientesLista[i].ID                  := lQry.FieldByName('ID').AsString;
-      FCreditoClientesLista[i].CLIENTE_ID          := lQry.FieldByName('CLIENTE_ID').AsString;
-      FCreditoClientesLista[i].DEVOLUCAO_ID        := lQry.FieldByName('DEVOLUCAO_ID').AsString;
-      FCreditoClientesLista[i].DATA                := lQry.FieldByName('DATA').AsString;
-      FCreditoClientesLista[i].VALOR               := lQry.FieldByName('VALOR').AsString;
-      FCreditoClientesLista[i].TIPO                := lQry.FieldByName('TIPO').AsString;
-      FCreditoClientesLista[i].OBS                 := lQry.FieldByName('OBS').AsString;
-      FCreditoClientesLista[i].ENTRADA_ID          := lQry.FieldByName('ENTRADA_ID').AsString;
-      FCreditoClientesLista[i].FORNECEDOR_ID       := lQry.FieldByName('FORNECEDOR_ID').AsString;
-      FCreditoClientesLista[i].FATURA_ID           := lQry.FieldByName('FATURA_ID').AsString;
-      FCreditoClientesLista[i].SYSTIME             := lQry.FieldByName('SYSTIME').AsString;
-      FCreditoClientesLista[i].PEDIDO_SITE         := lQry.FieldByName('PEDIDO_SITE').AsString;
-      FCreditoClientesLista[i].CONTACORRENTE_ID    := lQry.FieldByName('CONTACORRENTE_ID').AsString;
-      FCreditoClientesLista[i].CLIENTE_ANTERIOR_ID := lQry.FieldByName('CLIENTE_ANTERIOR_ID').AsString;
-      FCreditoClientesLista[i].VENDA_CASADA        := lQry.FieldByName('VENDA_CASADA').AsString;
-      FCreditoClientesLista[i].VALOR_ABERTO        := lQry.FieldByName('VALOR_ABERTO').AsString;
+      modelo.ID                  := lQry.FieldByName('ID').AsString;
+      modelo.CLIENTE_ID          := lQry.FieldByName('CLIENTE_ID').AsString;
+      modelo.DEVOLUCAO_ID        := lQry.FieldByName('DEVOLUCAO_ID').AsString;
+      modelo.DATA                := lQry.FieldByName('DATA').AsString;
+      modelo.VALOR               := lQry.FieldByName('VALOR').AsString;
+      modelo.TIPO                := lQry.FieldByName('TIPO').AsString;
+      modelo.OBS                 := lQry.FieldByName('OBS').AsString;
+      modelo.ENTRADA_ID          := lQry.FieldByName('ENTRADA_ID').AsString;
+      modelo.FORNECEDOR_ID       := lQry.FieldByName('FORNECEDOR_ID').AsString;
+      modelo.FATURA_ID           := lQry.FieldByName('FATURA_ID').AsString;
+      modelo.SYSTIME             := lQry.FieldByName('SYSTIME').AsString;
+      modelo.PEDIDO_SITE         := lQry.FieldByName('PEDIDO_SITE').AsString;
+      modelo.CONTACORRENTE_ID    := lQry.FieldByName('CONTACORRENTE_ID').AsString;
+      modelo.CLIENTE_ANTERIOR_ID := lQry.FieldByName('CLIENTE_ANTERIOR_ID').AsString;
+      modelo.VENDA_CASADA        := lQry.FieldByName('VENDA_CASADA').AsString;
+      modelo.VALOR_ABERTO        := lQry.FieldByName('VALOR_ABERTO').AsString;
 
       lQry.Next;
     end;
@@ -181,6 +178,7 @@ end;
 
 destructor TCreditoClienteDao.Destroy;
 begin
+  FCreditoClientesLista := nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -292,11 +290,11 @@ procedure TCreditoClienteDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo : TCreditoClienteModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FCreditoClientesLista := TObjectList<TCreditoClienteModel>.Create;
+  FCreditoClientesLista := TCollections.CreateList<TCreditoClienteModel>(true);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -316,29 +314,27 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FCreditoClientesLista.Add(TCreditoClienteModel.Create(vIConexao));
+      modelo := TCreditoClienteModel.Create(vIConexao);
+      FCreditoClientesLista.Add(modelo);
 
-      i := FCreditoClientesLista.Count -1;
-
-      FCreditoClientesLista[i].ID                  := lQry.FieldByName('ID').AsString;
-      FCreditoClientesLista[i].CLIENTE_ID          := lQry.FieldByName('CLIENTE_ID').AsString;
-      FCreditoClientesLista[i].DEVOLUCAO_ID        := lQry.FieldByName('DEVOLUCAO_ID').AsString;
-      FCreditoClientesLista[i].DATA                := lQry.FieldByName('DATA').AsString;
-      FCreditoClientesLista[i].VALOR               := lQry.FieldByName('VALOR').AsString;
-      FCreditoClientesLista[i].TIPO                := lQry.FieldByName('TIPO').AsString;
-      FCreditoClientesLista[i].OBS                 := lQry.FieldByName('OBS').AsString;
-      FCreditoClientesLista[i].ENTRADA_ID          := lQry.FieldByName('ENTRADA_ID').AsString;
-      FCreditoClientesLista[i].FORNECEDOR_ID       := lQry.FieldByName('FORNECEDOR_ID').AsString;
-      FCreditoClientesLista[i].FATURA_ID           := lQry.FieldByName('FATURA_ID').AsString;
-      FCreditoClientesLista[i].SYSTIME             := lQry.FieldByName('SYSTIME').AsString;
-      FCreditoClientesLista[i].PEDIDO_SITE         := lQry.FieldByName('PEDIDO_SITE').AsString;
-      FCreditoClientesLista[i].CONTACORRENTE_ID    := lQry.FieldByName('CONTACORRENTE_ID').AsString;
-      FCreditoClientesLista[i].CLIENTE_ANTERIOR_ID := lQry.FieldByName('CLIENTE_ANTERIOR_ID').AsString;
-      FCreditoClientesLista[i].VENDA_CASADA        := lQry.FieldByName('VENDA_CASADA').AsString;
+      modelo.ID                  := lQry.FieldByName('ID').AsString;
+      modelo.CLIENTE_ID          := lQry.FieldByName('CLIENTE_ID').AsString;
+      modelo.DEVOLUCAO_ID        := lQry.FieldByName('DEVOLUCAO_ID').AsString;
+      modelo.DATA                := lQry.FieldByName('DATA').AsString;
+      modelo.VALOR               := lQry.FieldByName('VALOR').AsString;
+      modelo.TIPO                := lQry.FieldByName('TIPO').AsString;
+      modelo.OBS                 := lQry.FieldByName('OBS').AsString;
+      modelo.ENTRADA_ID          := lQry.FieldByName('ENTRADA_ID').AsString;
+      modelo.FORNECEDOR_ID       := lQry.FieldByName('FORNECEDOR_ID').AsString;
+      modelo.FATURA_ID           := lQry.FieldByName('FATURA_ID').AsString;
+      modelo.SYSTIME             := lQry.FieldByName('SYSTIME').AsString;
+      modelo.PEDIDO_SITE         := lQry.FieldByName('PEDIDO_SITE').AsString;
+      modelo.CONTACORRENTE_ID    := lQry.FieldByName('CONTACORRENTE_ID').AsString;
+      modelo.CLIENTE_ANTERIOR_ID := lQry.FieldByName('CLIENTE_ANTERIOR_ID').AsString;
+      modelo.VENDA_CASADA        := lQry.FieldByName('VENDA_CASADA').AsString;
 
       lQry.Next;
     end;
@@ -355,7 +351,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TCreditoClienteDao.SetCreditoClientesLista(const Value: TObjectList<TCreditoClienteModel>);
+procedure TCreditoClienteDao.SetCreditoClientesLista;
 begin
   FCreditoClientesLista := Value;
 end;

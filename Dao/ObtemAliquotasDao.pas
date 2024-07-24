@@ -54,7 +54,7 @@ end;
 
 destructor TObtemAliquotasDao.Destroy;
 begin
-
+  vIConexao := nil;
   inherited;
 end;
 

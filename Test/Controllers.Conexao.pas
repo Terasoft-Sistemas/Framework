@@ -4,10 +4,12 @@ interface
   uses
     FireDAC.Comp.Client,
     Terasoft.FuncoesTexto,
+    Terasoft.Framework.DB,
+    Terasoft.Framework.Texto,
     Interfaces.Conexao;
 
   type
-    TControllersConexao = class(TInterfacedObject, IConexao)
+    TControllersConexao = class(TInterfacedObject, IInterface, IConexao)
 
       private
         FConexao         : TFDConnection;
@@ -21,12 +23,12 @@ interface
 
         function criarQuery                                                : TFDQuery;
         function criaIfaceQuery                                            : IFDQuery;
-        function criaIfaceQueryExterna                                       : IFDQuery;
+        function criaIfaceQueryExterna                                     : IFDQuery;
 
         function connection                                                : IConexao; overload;
         function connection(pLoja: String; pHost : String = '')            : IConexao; overload;
 
-        function NovaConexao(pLoja: String; pHost : String = '')          : IConexao;
+        function NovaConexao(pLoja: String; pHost : String = '')           : IConexao;
         function criarQueryExterna                                         : TFDQuery;
         function ConfigConexaoExterna(pLoja: String; pHost : String = '')  : Boolean;
         function Generetor(pValue: String; pCtrGen : Boolean = false)      : String;
@@ -45,11 +47,19 @@ interface
         function setConfiguracoesNF(pConfiguracoes : TConfiguracoesNF)     : Boolean;
         function getConfiguracoes                                          : TConfiguracoesNF;
 
-        function setTerasoftConfiguracoes(pConfiguracoes : TObject)        : IConexao;
+        procedure setTerasoftConfiguracoes(const pConfiguracoes : TObject);
         function getTerasoftConfiguracoes                                  : TObject;
 
         procedure setContextModoSistema(pSistema: String);
         procedure setContext(pUsuario: String);
+      protected
+        fGDB: IGDB;
+        function getGDB: IGDB;
+        function getValidador: IValidadorDatabase;
+
+        function _AddRef: Integer; stdcall;
+        function _Release: Integer; stdcall;
+
       public
         Constructor Create;
         Destructor Destroy; override;
@@ -251,6 +261,11 @@ begin
   Result := vEmpresa;
 end;
 
+function TControllersConexao.getGDB: IGDB;
+begin
+
+end;
+
 function TControllersConexao.getLojaConectada: String;
 begin
   Result := vLoja;
@@ -264,6 +279,11 @@ end;
 function TControllersConexao.getUSer: TUsuario;
 begin
   Result := vUser;
+end;
+
+function TControllersConexao.getValidador: IValidadorDatabase;
+begin
+
 end;
 
 function TControllersConexao.HoraServer: TTime;
@@ -310,15 +330,24 @@ begin
   vEmpresa := pEmpresa;
 end;
 
-function TControllersConexao.setTerasoftConfiguracoes(pConfiguracoes: TObject): IConexao;
+procedure TControllersConexao.setTerasoftConfiguracoes(const pConfiguracoes: TObject);
 begin
   vTerasoftConfiguracao := pConfiguracoes;
-  Result := Self;
 end;
 
 function TControllersConexao.setUser(pUser: TUsuario): Boolean;
 begin
   vUser := pUser;
+end;
+
+function TControllersConexao._AddRef: Integer;
+begin
+
+end;
+
+function TControllersConexao._Release: Integer;
+begin
+
 end;
 
 end.
