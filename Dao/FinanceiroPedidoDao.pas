@@ -64,6 +64,10 @@ type
     function qtdePagamentoPrazo(pWebPedido : String): Integer;
 
     procedure UpdateDadosFinanceiro(pWebPedidoModel: TWebPedidoModel);
+
+    procedure UpdateArredondaParcela(pTotal, pValorParcela, pIndice, pValorAcrescimo : Extended; pID_Financeiro: String);
+
+
 end;
 
 implementation
@@ -72,6 +76,41 @@ uses
   System.Variants, Terasoft.FuncoesTexto;
 
 { TFinanceiroPedido }
+
+procedure TFinanceiroPedidoDao.UpdateArredondaParcela(pTotal, pValorParcela, pIndice, pValorAcrescimo : Extended; pID_Financeiro: String);
+var
+  lQry: TFDQuery;
+  lSQL: String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+     lSQL :=
+            ' update                                    '+#13+
+            '     financeiro_pedido f                   '+#13+
+            '                                           '+#13+
+            ' set                                       '+#13+
+            '     f.valor_total = :total,               '+#13+
+            '     f.valor_parcela = :valor_parcela,     '+#13+
+            '     f.indce_aplicado = :indice,           '+#13+
+            '     f.valor_acrescimo = :valor_acrescimo  '+#13+
+            '                                           '+#13+
+            ' where                                     '+#13+
+            '     f.id_financeiro = :id_financeiro      '+#13;
+
+    lQry.SQL.Add(lSQL);
+    lQry.ParamByName('total').Value           := FormataFloatFireBird(FloatToStr(pTotal));
+    lQry.ParamByName('valor_parcela').Value   := FormataFloatFireBird(FloatToStr(pValorParcela));
+    lQry.ParamByName('indice').Value          := FormataFloatFireBird(FloatToStr(pIndice));
+    lQry.ParamByName('valor_acrescimo').Value := FormataFloatFireBird(FloatToStr(pValorAcrescimo));
+    lQry.ParamByName('id_financeiro').Value   := pID_Financeiro;
+    lQry.ExecSQL;
+
+  finally
+    lQry.Free;
+  end;
+
+end;
 
 function TFinanceiroPedidoDao.carregaClasse(pID: String): TFinanceiroPedidoModel;
 var
@@ -106,8 +145,9 @@ begin
     lModel.VALOR_ACRESCIMO        := lQry.FieldByName('VALOR_ACRESCIMO').AsString;
     lModel.VALOR_LIQUIDO          := lQry.FieldByName('VALOR_LIQUIDO').AsString;
     lModel.ID_FINANCEIRO          := lQry.FieldByName('ID_FINANCEIRO').AsString;
-    lModel.VALOR_LIQUIDO          := lQry.FieldByName('VALOR_SEG_PRESTAMISTA').AsString;
-    lModel.ID_FINANCEIRO          := lQry.FieldByName('PER_SEG_PRESTAMSTA').AsString;
+    lModel.VALOR_SEG_PRESTAMISTA  := lQry.FieldByName('VALOR_SEG_PRESTAMISTA').AsString;
+    lModel.PER_SEG_PRESTAMSTA     := lQry.FieldByName('PER_SEG_PRESTAMSTA').AsString;
+    lModel.VALOR_ACRESCIMO_SEG_PRESTAMISTA := lQry.FieldByName('VALOR_ACRESCIMO_SEG_PRESTAMISTA').AsString;
 
     Result := lModel;
   finally

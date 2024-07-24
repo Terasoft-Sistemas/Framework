@@ -149,6 +149,10 @@ type
     procedure UpdateDadosFinanceiro(pWebPedidoModel: TWebPedidoModel);
 
     procedure gerarFinanceiro(pFinanceiroParams: TFinanceiroParams);
+
+    procedure ArredondaParcela(pNovaParcela: Extended; pID_Financeiro: String);
+
+
   end;
 
 implementation
@@ -157,6 +161,37 @@ uses
   FinanceiroPedidoDao, System.Classes, System.SysUtils;
 
 { TFinanceiroPedidoModel }
+
+procedure TFinanceiroPedidoModel.ArredondaParcela(pNovaParcela: Extended; pID_Financeiro: String);
+var
+  lFinanceiroPedidoModel : TFinanceiroPedidoModel;
+  lFinanceiroPedidoDao : TFinanceiroPedidoDao;
+
+  lTotal, lValorParcela, lIndice, lValorAcrescimo : Extended;
+
+begin
+    lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
+    lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
+
+  try
+    lFinanceiroPedidoModel := lFinanceiroPedidoModel.carregaClasse(pID_Financeiro);
+
+    if pNovaParcela < (lFinanceiroPedidoModel.VALOR_PARCELA-0.99) then
+      CriaException('Arredondamento da parcela não pode ser superior a R$ 0.99');
+
+    lIndice         := (pNovaParcela* StrToFloat(lFinanceiroPedidoModel.INDCE_APLICADO))/StrToFloat(lFinanceiroPedidoModel.VALOR_PARCELA);
+    lValorParcela   := (StrToFloat(lFinanceiroPedidoModel.VALOR_LIQUIDO) + StrToFloat(lFinanceiroPedidoModel.VALOR_SEG_PRESTAMISTA))*lIndice;
+    lTotal          := (lValorParcela * StrToInt(lFinanceiroPedidoModel.QUANTIDADE_PARCELAS));
+    lValorAcrescimo := lTotal - StrToFloat(lFinanceiroPedidoModel.VALOR_LIQUIDO)-StrToFloat(lFinanceiroPedidoModel.VALOR_SEG_PRESTAMISTA);
+
+    lFinanceiroPedidoDao.UpdateArredondaParcela(lTotal, lValorParcela, lIndice, lValorAcrescimo, pID_Financeiro);
+
+  finally
+    lFinanceiroPedidoModel.Free;
+    lFinanceiroPedidoDao.Free;
+  end;
+
+end;
 
 function TFinanceiroPedidoModel.Incluir: String;
 begin
