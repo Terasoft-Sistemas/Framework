@@ -52,9 +52,9 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function ObterLista(pCliente : String): TFDMemTable;
+    function ObterLista(pCliente : String): IFDDataset;
     procedure ObterResumoFinanceiro(pCliente : String);
-    function ObterDetalhesBaixa(pFatura, pParcela : String): TFDMemTable;
+    function ObterDetalhesBaixa(pFatura, pParcela : String): IFDDataset;
     function ObterCredito(pCliente: String): Double;
 
     property Acao :TAcao read FAcao write SetAcao;
@@ -93,7 +93,7 @@ begin
   inherited;
 end;
 
-function TSituacaoFinanceiraModel.obterLista(pCliente : String): TFDMemTable;
+function TSituacaoFinanceiraModel.obterLista(pCliente : String): IFDDataset;
 var
   lSituacaoFinanceiraLista: TSituacaoFinanceiraDao;
 begin
@@ -137,7 +137,7 @@ begin
   end;
 end;
 
-function TSituacaoFinanceiraModel.ObterDetalhesBaixa(pFatura, pParcela: String): TFDMemTable;
+function TSituacaoFinanceiraModel.ObterDetalhesBaixa(pFatura, pParcela: String): IFDDataset;
 var
   lSituacaoFinanceiraLista: TSituacaoFinanceiraDao;
 begin

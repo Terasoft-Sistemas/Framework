@@ -174,7 +174,7 @@ type
     function Salvar : String;
 
     function carregaClasse(pId : String): TPedidoCompraItensModel;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -288,7 +288,7 @@ begin
   inherited;
 end;
 
-function TPedidoCompraItensModel.obterLista: TFDMemTable;
+function TPedidoCompraItensModel.obterLista: IFDDataset;
 var
   lPedidoCompraItensLista: TPedidoCompraItensDao;
 begin

@@ -80,7 +80,7 @@ type
 
     function carregaClasse(pId : String): TClientesContatoModel;
 
-    function ObterLista: TFDMemTable; overload;
+    function ObterLista: IFDDataset; overload;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -151,7 +151,7 @@ begin
   inherited;
 end;
 
-function TClientesContatoModel.obterLista: TFDMemTable;
+function TClientesContatoModel.obterLista: IFDDataset;
 var
   lClientesContatoLista: TClientesContatoDao;
 begin

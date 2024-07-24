@@ -63,8 +63,8 @@ type
     function excluir(pPedidoCompraModel : TPedidoCompraModel): String;
 
     function carregaClasse(pID : String): TPedidoCompraModel;
-    function obterLista: TFDMemTable;
-    function ObterTotalizador : TFDMemTable;
+    function obterLista: IFDDataset;
+    function ObterTotalizador : IFDDataset;
     procedure setParams(var pQry: TFDQuery; pPedidoCompraModel: TPedidoCompraModel);
 
 end;
@@ -267,7 +267,7 @@ begin
   end;
 end;
 
-function TPedidoCompraDao.obterLista: TFDMemTable;
+function TPedidoCompraDao.obterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -349,7 +349,7 @@ begin
   end;
 end;
 
-function TPedidoCompraDao.ObterTotalizador: TFDMemTable;
+function TPedidoCompraDao.ObterTotalizador: IFDDataset;
 var
   lQry : TFDQuery;
   lSql : String;
@@ -444,7 +444,7 @@ end;
 
 procedure TPedidoCompraDao.setParams(var pQry: TFDQuery; pPedidoCompraModel: TPedidoCompraModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -459,7 +459,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPedidoCompraModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pPedidoCompraModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPedidoCompraModel).AsString))
     end;
   finally
     lCtx.Free;

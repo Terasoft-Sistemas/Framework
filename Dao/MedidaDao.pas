@@ -67,7 +67,7 @@ type
     function carregaClasse(pID : String): TMedidaModel;
 
     procedure setParams(var pQry: TFDQuery; pMedidaModel: TMedidaModel);
-    function ObterLista: TFDMemTable; overload;
+    function ObterLista: IFDDataset; overload;
 
 end;
 
@@ -138,7 +138,7 @@ begin
   end;
 end;
 
-function TMedidaDao.ObterLista: TFDMemTable;
+function TMedidaDao.ObterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -262,7 +262,7 @@ end;
 
 procedure TMedidaDao.setParams(var pQry: TFDQuery; pMedidaModel: TMedidaModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -277,7 +277,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pMedidaModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pMedidaModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pMedidaModel).AsString))
     end;
   finally
     lCtx.Free;

@@ -64,7 +64,7 @@ type
 
     function carregaClasse(pID : String): TPrevisaoPedidoCompraModel;
     function TotalFinanceiro(pNumeroPedido: String): Double;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
     procedure setParams(var pQry: TFDQuery; pPrevisaoPedidoCompraModel: TPrevisaoPedidoCompraModel);
 
 end;
@@ -176,7 +176,7 @@ begin
   end;
 end;
 
-function TPrevisaoPedidoCompraDao.ObterLista: TFDMemTable;
+function TPrevisaoPedidoCompraDao.ObterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -282,7 +282,7 @@ end;
 
 procedure TPrevisaoPedidoCompraDao.setParams(var pQry: TFDQuery; pPrevisaoPedidoCompraModel: TPrevisaoPedidoCompraModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -297,7 +297,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPrevisaoPedidoCompraModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pPrevisaoPedidoCompraModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPrevisaoPedidoCompraModel).AsString))
     end;
   finally
     lCtx.Free;

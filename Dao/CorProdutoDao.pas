@@ -59,7 +59,7 @@ type
     function excluir(pCorProdutoModel: TCorProdutoModel): String;
 
     function carregaClasse(pID : String): TCorProdutoModel;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     procedure setParams(var pQry: TFDQuery; pCorProdutoModel: TCorProdutoModel);
 
@@ -204,7 +204,7 @@ begin
   end;
 end;
 
-function TCorProdutoDao.obterLista: TFDMemTable;
+function TCorProdutoDao.obterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -268,7 +268,7 @@ end;
 
 procedure TCorProdutoDao.setParams(var pQry: TFDQuery; pCorProdutoModel: TCorProdutoModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -283,7 +283,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pCorProdutoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pCorProdutoModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pCorProdutoModel).AsString))
     end;
   finally
     lCtx.Free;

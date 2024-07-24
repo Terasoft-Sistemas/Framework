@@ -67,7 +67,7 @@ type
     function carregaClasse(pID : String): TLocalizacaoEstoqueModel;
 
     procedure setParams(var pQry: TFDQuery; pLocalizacaoEstoqueModel: TLocalizacaoEstoqueModel);
-    function ObterLista: TFDMemTable; overload;
+    function ObterLista: IFDDataset; overload;
 
 end;
 
@@ -137,7 +137,7 @@ begin
   end;
 end;
 
-function TLocalizacaoEstoqueDao.ObterLista: TFDMemTable;
+function TLocalizacaoEstoqueDao.ObterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -261,7 +261,7 @@ end;
 
 procedure TLocalizacaoEstoqueDao.setParams(var pQry: TFDQuery; pLocalizacaoEstoqueModel: TLocalizacaoEstoqueModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -276,7 +276,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pLocalizacaoEstoqueModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pLocalizacaoEstoqueModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pLocalizacaoEstoqueModel).AsString))
     end;
   finally
     lCtx.Free;

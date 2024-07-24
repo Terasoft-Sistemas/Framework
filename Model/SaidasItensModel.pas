@@ -126,10 +126,10 @@ type
     function Excluir(pID : String): String;
     function Salvar : String;
     function carregaClasse(pID : String): TSaidasItensModel;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     procedure getDadosProduto;
-    function ObterTotais(pNumeroSaida : String) : TFDMemTable;
+    function ObterTotais(pNumeroSaida : String) : IFDDataset;
 
   end;
 
@@ -234,7 +234,7 @@ begin
   inherited;
 end;
 
-function TSaidasItensModel.obterLista: TFDMemTable;
+function TSaidasItensModel.obterLista: IFDDataset;
 var
   lSaidasItensLista: TSaidasItensDao;
 begin
@@ -259,7 +259,7 @@ begin
   end;
 end;
 
-function TSaidasItensModel.ObterTotais(pNumeroSaida : String): TFDMemTable;
+function TSaidasItensModel.ObterTotais(pNumeroSaida : String): IFDDataset;
 var
   lSaidasItens: TSaidasItensDao;
 begin

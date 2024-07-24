@@ -61,9 +61,9 @@ type
     function alterar(pSaidasItensModel: TSaidasItensModel): String;
     function excluir(pSaidasItensModel: TSaidasItensModel): String;
     function carregaClasse(pID : String): TSaidasItensModel;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
-    function ObterTotais(pNumeroSaida : String) : TFDMemTable;
+    function ObterTotais(pNumeroSaida : String) : IFDDataset;
     procedure setParams(var pQry: TFDQuery; pSaidasItensModel: TSaidasItensModel);
 
 end;
@@ -227,7 +227,7 @@ begin
   end;
 end;
 
-function TSaidasItensDao.obterLista: TFDMemTable;
+function TSaidasItensDao.obterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -275,7 +275,7 @@ begin
   end;
 end;
 
-function TSaidasItensDao.ObterTotais(pNumeroSaida : String): TFDMemTable;
+function TSaidasItensDao.ObterTotais(pNumeroSaida : String): IFDDataset;
 var
   lQry : TFDQuery;
   lSql : String;
@@ -348,7 +348,7 @@ end;
 
 procedure TSaidasItensDao.setParams(var pQry: TFDQuery; pSaidasItensModel: TSaidasItensModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -363,7 +363,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pSaidasItensModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pSaidasItensModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pSaidasItensModel).AsString))
     end;
   finally
     lCtx.Free;

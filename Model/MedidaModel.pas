@@ -65,7 +65,7 @@ type
     function Alterar(pID : String): TMedidaModel;
     function Excluir(pID : String): String;
 
-    function ObterLista : TFDMemTable; overload;
+    function ObterLista : IFDDataset; overload;
 
   end;
 
@@ -125,7 +125,7 @@ begin
     Result    := self.Salvar;
 end;
 
-function TMedidaModel.ObterLista: TFDMemTable;
+function TMedidaModel.ObterLista: IFDDataset;
 var
   lMedida: TMedidaDao;
 begin

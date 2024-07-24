@@ -211,7 +211,7 @@ type
     function Excluir(pNumero_Saida: String): String;
     function Salvar : String;
     function carregaClasse(pID : String): TSaidasModel;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     function AdicionarItens(pSaidaItemParams : TSaidaItensParams) : String;
     function AdicionarItensTransferencia(pSaidaItemParams : TSaidaItensTransferenciaParams) : String;
@@ -322,7 +322,7 @@ procedure TSaidasModel.CalcularPeso;
 var
   lSaidasItensModel : TSaidasItensModel;
   lProdutosModel    : TProdutosModel;
-  lItens            : TFDMemTable;
+  lItens            : IFDDataset;
   lPesoBruto,
   lPesoLiquido      : Double;
 begin
@@ -340,14 +340,14 @@ begin
     lPesoBruto   := 0;
     lPesoLiquido := 0;
 
-    lItens.First;
-    while not lItens.Eof do
+    lItens.objeto.First;
+    while not lItens.objeto.Eof do
     begin
-      lProdutosModel := lProdutosModel.carregaClasse(lItens.FieldByname('CODIGO_PRO').AsString);
-      lPesoBruto     := lPesoBruto + lItens.FieldByname('QUANTIDADE_SAI').AsFloat * lProdutosModel.PESO_PRO;
-      lPesoLiquido   := lPesoLiquido + lItens.FieldByname('QUANTIDADE_SAI').AsFloat * lProdutosModel.PESO_LIQUIDO;
+      lProdutosModel := lProdutosModel.carregaClasse(lItens.objeto.FieldByname('CODIGO_PRO').AsString);
+      lPesoBruto     := lPesoBruto + lItens.objeto.FieldByname('QUANTIDADE_SAI').AsFloat * lProdutosModel.PESO_PRO;
+      lPesoLiquido   := lPesoLiquido + lItens.objeto.FieldByname('QUANTIDADE_SAI').AsFloat * lProdutosModel.PESO_LIQUIDO;
 
-      lItens.Next;
+      lItens.objeto.Next;
     end;
 
     self.PESO_LIQUIDO := lPesoLiquido.ToString;
@@ -362,7 +362,7 @@ end;
 procedure TSaidasModel.CalcularTotais;
 var
   lSaidasItens : TSaidasItensModel;
-  lMemTable    : TFDMemTable;
+  lMemTable    : IFDDataset;
 begin
   lSaidasItens := TSaidasItensModel.Create(vIConexao);
   try
@@ -370,9 +370,9 @@ begin
 
     self := self.Alterar(self.FNUMERO_SAI);
 
-    self.FVALOR_ICMS_SAI     := lMemTable.FieldByName('custo').AsFloat;
-    self.FTOTAL_PRODUTOS_SAI := lMemTable.FieldByName('valor').AsFloat;
-    self.FTOTAL_SAI          := lMemTable.FieldByName('valor').AsFloat;
+    self.FVALOR_ICMS_SAI     := lMemTable.objeto.FieldByName('custo').AsFloat;
+    self.FTOTAL_PRODUTOS_SAI := lMemTable.objeto.FieldByName('valor').AsFloat;
+    self.FTOTAL_SAI          := lMemTable.objeto.FieldByName('valor').AsFloat;
 
     self.Salvar;
   finally
@@ -445,7 +445,7 @@ begin
   inherited;
 end;
 
-function TSaidasModel.obterLista: TFDMemTable;
+function TSaidasModel.obterLista: IFDDataset;
 var
   lSaidasDao: TSaidasDao;
 begin

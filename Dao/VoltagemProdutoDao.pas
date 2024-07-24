@@ -58,7 +58,7 @@ type
     function excluir(pVoltagemProdutoModel: TVoltagemProdutoModel): String;
 
     function carregaClasse(pID : String): TVoltagemProdutoModel;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     procedure setParams(var pQry: TFDQuery; pVoltagemProdutoModel: TVoltagemProdutoModel);
 
@@ -203,7 +203,7 @@ begin
   end;
 end;
 
-function TVoltagemProdutoDao.obterLista: TFDMemTable;
+function TVoltagemProdutoDao.obterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -266,7 +266,7 @@ end;
 
 procedure TVoltagemProdutoDao.setParams(var pQry: TFDQuery; pVoltagemProdutoModel: TVoltagemProdutoModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -281,7 +281,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pVoltagemProdutoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pVoltagemProdutoModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pVoltagemProdutoModel).AsString))
     end;
   finally
     lCtx.Free;

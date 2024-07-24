@@ -72,7 +72,7 @@ type
 
     function carregaClasse(pId : String): TPrevisaoPedidoCompraModel;
     function SaldoFinanceiro(pNumeroPedido, pCodigoFornecedor: String): Double;
-    function ObterLista: TFDMemTable; overload;
+    function ObterLista: IFDDataset; overload;
     procedure gerarFinanceiro(pPedidoCompraModel : TPedidoCompraModel);
     procedure ValidaTotalFinanceiro(pValor: Double);
 
@@ -176,7 +176,7 @@ begin
   inherited;
 end;
 
-function TPrevisaoPedidoCompraModel.obterLista: TFDMemTable;
+function TPrevisaoPedidoCompraModel.obterLista: IFDDataset;
 var
   lPrevisaoPedidoCompraDao: TPrevisaoPedidoCompraDao;
 begin
@@ -204,7 +204,7 @@ function TPrevisaoPedidoCompraModel.SaldoFinanceiro(pNumeroPedido, pCodigoFornec
 var
   lPrevisaoPedidoCompraDao: TPrevisaoPedidoCompraDao;
   lPedidoCompraModel: TPedidoCompraModel;
-  lTotalizador: TFDMemTable;
+  lTotalizador: IFDDataset;
   lTotalFinanceiro: Double;
   lTotalPedido: Double;
 begin
@@ -217,7 +217,7 @@ begin
 
     lTotalizador := lPedidoCompraModel.ObterTotalizador;
 
-    lTotalPedido     := RoundTo(StrToFloat(FloatToStr(lTotalizador.FieldByName('valor_total_pedido').AsFloat)), -2);
+    lTotalPedido     := RoundTo(StrToFloat(FloatToStr(lTotalizador.objeto.FieldByName('valor_total_pedido').AsFloat)), -2);
     lTotalFinanceiro := RoundTo(lPrevisaoPedidoCompraDao.TotalFinanceiro(pNumeroPedido), -2);
 
     Result :=  lTotalPedido - lTotalFinanceiro;
@@ -232,7 +232,7 @@ procedure TPrevisaoPedidoCompraModel.ValidaTotalFinanceiro(pValor: Double);
 var
   lPrevisaoPedidoCompraDao: TPrevisaoPedidoCompraDao;
   lPedidoCompraModel: TPedidoCompraModel;
-  lTotalizador  : TFDMemTable;
+  lTotalizador  : IFDDataset;
   lTotalFinanceiro: Double;
 begin
   lPrevisaoPedidoCompraDao := TPrevisaoPedidoCompraDao.Create(vIConexao);
@@ -243,7 +243,7 @@ begin
      lTotalizador                    := lPedidoCompraModel.obterTotalizador;
      lTotalFinanceiro                := lPrevisaoPedidoCompraDao.TotalFinanceiro(FNUMERO_PED);
 
-     if (Round(lTotalFinanceiro + pValor )) > (Round(lTotalizador.FieldByName('valor_total_pedido').AsFloat)) then
+     if (Round(lTotalFinanceiro + pValor )) > (Round(lTotalizador.objeto.FieldByName('valor_total_pedido').AsFloat)) then
        raise Exception.Create('Financeiro já informado ou valor informado maior que o saldo a informar (Total já informado: '+FormatFloat(',0.00', lTotalFinanceiro)+')');
 
   finally

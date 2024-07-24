@@ -75,9 +75,9 @@ type
     property ValorAVencer : Double read FValorAVencer write SetValorAVencer;
     property ValorComprasRealizadasAPrazo : Double read FValorComprasRealizadasAPrazo write SetValorComprasRealizadasAPrazo;
 
-    function obterLista(pCliente : String): TFDMemTable;
+    function obterLista(pCliente : String): IFDDataset;
     function ObterResumoFinanceiro(pCliente : String): TFDMemTable;
-    function ObterDetalhesBaixa(pFatura, pParcela : String): TFDMemTable;
+    function ObterDetalhesBaixa(pFatura, pParcela : String): IFDDataset;
     function ObterCredito(pCliente: String): Double;
 end;
 
@@ -99,7 +99,7 @@ begin
   inherited;
 end;
 
-function TSituacaoFinanceiraDao.ObterLista(pCliente : String): TFDMemTable;
+function TSituacaoFinanceiraDao.ObterLista(pCliente : String): IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -226,7 +226,7 @@ begin
   end;
 end;
 
-function TSituacaoFinanceiraDao.ObterDetalhesBaixa(pFatura, pParcela: String): TFDMemTable;
+function TSituacaoFinanceiraDao.ObterDetalhesBaixa(pFatura, pParcela: String): IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;

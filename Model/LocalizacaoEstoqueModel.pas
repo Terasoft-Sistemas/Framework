@@ -61,7 +61,7 @@ type
     function Alterar(pID : String): TLocalizacaoEstoqueModel;
     function Excluir(pID : String): String;
 
-    function ObterLista : TFDMemTable; overload;
+    function ObterLista : IFDDataset; overload;
 
   end;
 
@@ -121,7 +121,7 @@ begin
     Result    := self.Salvar;
 end;
 
-function TLocalizacaoEstoqueModel.ObterLista: TFDMemTable;
+function TLocalizacaoEstoqueModel.ObterLista: IFDDataset;
 var
   lLocalizacaoEstoque: TLocalizacaoEstoqueDao;
 begin

@@ -143,7 +143,7 @@ type
 
     function carregaClasse(pId : String): TTransportadoraModel;
 
-    function ObterLista: TFDMemTable; overload;
+    function ObterLista: IFDDataset; overload;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -214,7 +214,7 @@ begin
   inherited;
 end;
 
-function TTransportadoraModel.obterLista: TFDMemTable;
+function TTransportadoraModel.obterLista: IFDDataset;
 var
   lTransportadoraLista: TTransportadoraDao;
 begin

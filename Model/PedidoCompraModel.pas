@@ -239,8 +239,8 @@ type
     function Salvar : String;
     function AdicionarItens(pPedidoItensParams : TPedidoItensParams)  : String;
     function carregaClasse(pID, pFornecedor : String): TPedidoCompraModel;
-    function obterLista: TFDMemTable;
-    function ObterTotalizador : TFDMemTable;
+    function obterLista: IFDDataset;
+    function ObterTotalizador : IFDDataset;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -402,7 +402,7 @@ begin
   inherited;
 end;
 
-function TPedidoCompraModel.obterLista: TFDMemTable;
+function TPedidoCompraModel.obterLista: IFDDataset;
 var
   lPedidoCompraLista: TPedidoCompraDao;
 begin
@@ -428,7 +428,7 @@ begin
   end;
 end;
 
-function TPedidoCompraModel.ObterTotalizador: TFDMemTable;
+function TPedidoCompraModel.ObterTotalizador: IFDDataset;
 var
   lPedidoCompra: TPedidoCompraDao;
 begin

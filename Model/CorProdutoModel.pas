@@ -60,7 +60,7 @@ type
     function Salvar : String;
 
     function carregaClasse(pId : String): TCorProdutoModel;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -131,7 +131,7 @@ begin
   inherited;
 end;
 
-function TCorProdutoModel.obterLista: TFDMemTable;
+function TCorProdutoModel.obterLista: IFDDataset;
 var
   lCorProdutoLista: TCorProdutoDao;
 begin

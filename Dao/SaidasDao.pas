@@ -67,7 +67,7 @@ type
     function alterar(pSaidasModel: TSaidasModel): String;
     function excluir(pSaidasModel: TSaidasModel): String;
     function carregaClasse(pID : String): TSaidasModel;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     procedure setParams(var pQry: TFDQuery; pSaidasModel: TSaidasModel);
 
@@ -269,7 +269,7 @@ begin
   end;
 end;
 
-function TSaidasDao.obterLista: TFDMemTable;
+function TSaidasDao.obterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -368,7 +368,7 @@ end;
 
 procedure TSaidasDao.setParams(var pQry: TFDQuery; pSaidasModel: TSaidasModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -383,7 +383,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pSaidasModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pSaidasModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pSaidasModel).AsString))
     end;
   finally
     lCtx.Free;
