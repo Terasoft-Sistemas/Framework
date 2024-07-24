@@ -17,6 +17,7 @@ uses
   mcibr.enum.ipi,
   mcibr.enum.tipo.venda,
   mcibr.utils,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -25,7 +26,7 @@ type
   private
     vIConexao : IConexao;
 
-    FPedidoItenssLista: TObjectList<TPedidoItensModel>;
+    FPedidoItenssLista: IList<TPedidoItensModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -177,7 +178,7 @@ type
     FSEGURO_PRESTAMISTA_VALOR: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetPedidoItenssLista(const Value: TObjectList<TPedidoItensModel>);
+    procedure SetPedidoItenssLista(const Value: IList<TPedidoItensModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -466,6 +467,7 @@ type
 
   	constructor Create(pConexao: IConexao);
     destructor Destroy; override;
+
     function Salvar: String;
     function Incluir : String;
     function Alterar(pID : String) : TPedidoItensModel;
@@ -483,7 +485,7 @@ type
 
     procedure aplicarFreteItem(pFrete, pTotal: Double);
 
-    property PedidoItenssLista: TObjectList<TPedidoItensModel> read FPedidoItenssLista write SetPedidoItenssLista;
+    property PedidoItenssLista: IList<TPedidoItensModel> read FPedidoItenssLista write SetPedidoItenssLista;
 
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -683,7 +685,7 @@ end;
 
 destructor TPedidoItensModel.Destroy;
 begin
-  FreeAndNil(FPedidoItenssLista);
+  FPedidoItenssLista := nil;
   vIConexao := nil;
   inherited;
 end;
@@ -1056,7 +1058,7 @@ begin
   FPEDIDOCOMPRAITENS_ID := Value;
 end;
 
-procedure TPedidoItensModel.SetPedidoItenssLista(const Value: TObjectList<TPedidoItensModel>);
+procedure TPedidoItensModel.SetPedidoItenssLista;
 begin
   FPedidoItenssLista := Value;
 end;

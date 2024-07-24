@@ -11,6 +11,7 @@ uses
   PedidoItensModel,
   OrcamentoItensModel,
   EmpresaModel,
+  Spring.Collections,
   ProdutosModel,
   Terasoft.Utils;
 
@@ -479,7 +480,7 @@ begin
     lOrcamentoItensModel.WhereView := ' AND I.NUMERO_ORC = '+QuotedStr(pNumeroOrc)+' ';
     lMemtable := lOrcamentoItensModel.obterLista;
 
-    lPedidoItensModel.PedidoItenssLista := TObjectList<TPedidoItensModel>.Create;
+    lPedidoItensModel.PedidoItenssLista := TCollections.createList<TPedidoItensModel>(true);
 
     lItem  := 0;
     lIndex := 0;

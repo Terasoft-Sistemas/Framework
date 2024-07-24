@@ -9,6 +9,7 @@ uses
   Terasoft.Utils,
   PedidoItensModel,
   Interfaces.Conexao,
+  Spring.Collections,
   FireDAC.Comp.Client;
 
 type
@@ -26,7 +27,7 @@ type
 
     vIConexao : IConexao;
 
-    FPedidoVendasLista: TObjectList<TPedidoVendaModel>;
+    FPedidoVendasLista: IList<TPedidoVendaModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -183,7 +184,7 @@ type
     FSEGURO_PRESTAMISTA_VALOR: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetPedidoVendasLista(const Value: TObjectList<TPedidoVendaModel>);
+    procedure SetPedidoVendasLista(const Value: IList<TPedidoVendaModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -487,7 +488,7 @@ type
     property SEGURO_PRESTAMISTA_VALOR :Variant read FSEGURO_PRESTAMISTA_VALOR write SetSEGURO_PRESTAMISTA_VALOR;
     property SEGURO_PRESTAMISTA_CUSTO :Variant read FSEGURO_PRESTAMISTA_CUSTO write SetSEGURO_PRESTAMISTA_CUSTO;
 
-    property PedidoVendasLista: TObjectList<TPedidoVendaModel> read FPedidoVendasLista write SetPedidoVendasLista;
+    property PedidoVendasLista: IList<TPedidoVendaModel> read FPedidoVendasLista write SetPedidoVendasLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -715,7 +716,7 @@ end;
 
 destructor TPedidoVendaModel.Destroy;
 begin
-  FreeAndNil(FPedidoVendasLista);
+  FPedidoVendasLista := nil;
   vIConexao := nil;
   inherited;
 end;
@@ -1927,7 +1928,7 @@ begin
   FPEDIDOITENS_ID := Value;
 end;
 
-procedure TPedidoVendaModel.SetPedidoVendasLista(const Value: TObjectList<TPedidoVendaModel>);
+procedure TPedidoVendaModel.SetPedidoVendasLista;
 begin
   FPedidoVendasLista := Value;
 end;

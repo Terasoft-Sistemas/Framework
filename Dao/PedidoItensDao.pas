@@ -9,6 +9,7 @@ uses
   System.Generics.Collections,
   System.Variants,
   Terasoft.Utils,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -17,7 +18,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FPedidoItenssLista: TObjectList<TPedidoItensModel>;
+    FPedidoItenssLista: IList<TPedidoItensModel>;
     FLengthPageView: String;
     FStartRecordView: String;
     FID: Variant;
@@ -34,7 +35,7 @@ type
     FSEGURO_PRESTAMISTA_VALOR: Variant;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetPedidoItenssLista(const Value: TObjectList<TPedidoItensModel>);
+    procedure SetPedidoItenssLista(const Value: IList<TPedidoItensModel>);
     procedure SetID(const Value: Variant);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -57,7 +58,7 @@ type
     constructor Create(pConexao : IConexao);
     destructor Destroy; override;
 
-    property PedidoItenssLista: TObjectList<TPedidoItensModel> read FPedidoItenssLista write SetPedidoItenssLista;
+    property PedidoItenssLista: IList<TPedidoItensModel> read FPedidoItenssLista write SetPedidoItenssLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -241,6 +242,7 @@ end;
 
 destructor TPedidoItensDao.Destroy;
 begin
+  FPedidoItenssLista := nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -380,10 +382,10 @@ procedure TPedidoItensDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: TPedidoItensModel;
 begin
   lQry := vIConexao.CriarQuery;
-  FPedidoItenssLista := TObjectList<TPedidoItensModel>.Create;
+  FPedidoItenssLista := TCollections.CreateList<TPedidoItensModel>(true);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -407,146 +409,145 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FPedidoItenssLista.Add(TPedidoItensModel.Create(vIConexao));
-      i := FPedidoItenssLista.Count -1;
+      modelo := TPedidoItensModel.Create(vIConexao);
+      FPedidoItenssLista.Add(modelo);
 
-      FPedidoItenssLista[i].ID                           := lQry.FieldByName('ID').AsString;
-      FPedidoItenssLista[i].CODIGO_CLI                   := lQry.FieldByName('CODIGO_CLI').AsString;
-      FPedidoItenssLista[i].NUMERO_PED                   := lQry.FieldByName('NUMERO_PED').AsString;
-      FPedidoItenssLista[i].CODIGO_PRO                   := lQry.FieldByName('CODIGO_PRO').AsString;
-      FPedidoItenssLista[i].QUANTIDADE_PED               := lQry.FieldByName('QUANTIDADE_PED').AsString;
-      FPedidoItenssLista[i].QUANTIDADE_TROCA             := lQry.FieldByName('QUANTIDADE_TROCA').AsString;
-      FPedidoItenssLista[i].VALORUNITARIO_PED            := lQry.FieldByName('VALORUNITARIO_PED').AsString;
-      FPedidoItenssLista[i].DESCONTO_PED                 := lQry.FieldByName('DESCONTO_PED').AsString;
-      FPedidoItenssLista[i].DESCONTO_UF                  := lQry.FieldByName('DESCONTO_UF').AsString;
-      FPedidoItenssLista[i].VALOR_IPI                    := lQry.FieldByName('VALOR_IPI').AsString;
-      FPedidoItenssLista[i].VALOR_ST                     := lQry.FieldByName('VALOR_ST').AsString;
-      FPedidoItenssLista[i].VLRVENDA_PRO                 := lQry.FieldByName('VLRVENDA_PRO').AsString;
-      FPedidoItenssLista[i].VLRCUSTO_PRO                 := lQry.FieldByName('VLRCUSTO_PRO').AsString;
-      FPedidoItenssLista[i].COMISSAO_PED                 := lQry.FieldByName('COMISSAO_PED').AsString;
-      FPedidoItenssLista[i].TIPO_NF                      := lQry.FieldByName('TIPO_NF').AsString;
-      FPedidoItenssLista[i].QUANTIDADE_TIPO              := lQry.FieldByName('QUANTIDADE_TIPO').AsString;
-      FPedidoItenssLista[i].OBSERVACAO                   := lQry.FieldByName('OBSERVACAO').AsString;
-      FPedidoItenssLista[i].CTR_EXPORTACAO               := lQry.FieldByName('CTR_EXPORTACAO').AsString;
-      FPedidoItenssLista[i].PRODUTO_REFERENCIA           := lQry.FieldByName('PRODUTO_REFERENCIA').AsString;
-      FPedidoItenssLista[i].OBS_ITEM                     := lQry.FieldByName('OBS_ITEM').AsString;
-      FPedidoItenssLista[i].RESERVA_ID                   := lQry.FieldByName('RESERVA_ID').AsString;
-      FPedidoItenssLista[i].LOJA                         := lQry.FieldByName('LOJA').AsString;
-      FPedidoItenssLista[i].ALIQ_IPI                     := lQry.FieldByName('ALIQ_IPI').AsString;
-      FPedidoItenssLista[i].VALOR_RESTITUICAO_ST         := lQry.FieldByName('VALOR_RESTITUICAO_ST').AsString;
-      FPedidoItenssLista[i].CFOP_ID                      := lQry.FieldByName('CFOP_ID').AsString;
-      FPedidoItenssLista[i].CST                          := lQry.FieldByName('CST').AsString;
-      FPedidoItenssLista[i].ALIQ_ICMS                    := lQry.FieldByName('ALIQ_ICMS').AsString;
-      FPedidoItenssLista[i].ALIQ_ICMS_ST                 := lQry.FieldByName('ALIQ_ICMS_ST').AsString;
-      FPedidoItenssLista[i].REDUCAO_ST                   := lQry.FieldByName('REDUCAO_ST').AsString;
-      FPedidoItenssLista[i].MVA                          := lQry.FieldByName('MVA').AsString;
-      FPedidoItenssLista[i].REDUCAO_ICMS                 := lQry.FieldByName('REDUCAO_ICMS').AsString;
-      FPedidoItenssLista[i].BASE_ICMS                    := lQry.FieldByName('BASE_ICMS').AsString;
-      FPedidoItenssLista[i].VALOR_ICMS                   := lQry.FieldByName('VALOR_ICMS').AsString;
-      FPedidoItenssLista[i].BASE_ST                      := lQry.FieldByName('BASE_ST').AsString;
-      FPedidoItenssLista[i].DESC_RESTITUICAO_ST          := lQry.FieldByName('DESC_RESTITUICAO_ST').AsString;
-      FPedidoItenssLista[i].ICMS_SUFRAMA                 := lQry.FieldByName('ICMS_SUFRAMA').AsString;
-      FPedidoItenssLista[i].PIS_SUFRAMA                  := lQry.FieldByName('PIS_SUFRAMA').AsString;
-      FPedidoItenssLista[i].COFINS_SUFRAMA               := lQry.FieldByName('COFINS_SUFRAMA').AsString;
-      FPedidoItenssLista[i].IPI_SUFRAMA                  := lQry.FieldByName('IPI_SUFRAMA').AsString;
-      FPedidoItenssLista[i].ALIQ_PIS                     := lQry.FieldByName('ALIQ_PIS').AsString;
-      FPedidoItenssLista[i].ALIQ_COFINS                  := lQry.FieldByName('ALIQ_COFINS').AsString;
-      FPedidoItenssLista[i].BASE_PIS                     := lQry.FieldByName('BASE_PIS').AsString;
-      FPedidoItenssLista[i].BASE_COFINS                  := lQry.FieldByName('BASE_COFINS').AsString;
-      FPedidoItenssLista[i].VALOR_PIS                    := lQry.FieldByName('VALOR_PIS').AsString;
-      FPedidoItenssLista[i].VALOR_COFINS                 := lQry.FieldByName('VALOR_COFINS').AsString;
-      FPedidoItenssLista[i].PREVENDA_ID                  := lQry.FieldByName('PREVENDA_ID').AsString;
-      FPedidoItenssLista[i].AVULSO                       := lQry.FieldByName('AVULSO').AsString;
-      FPedidoItenssLista[i].QUANTIDADE_NEW               := lQry.FieldByName('QUANTIDADE_NEW').AsString;
-      FPedidoItenssLista[i].BALANCA                      := lQry.FieldByName('BALANCA').AsString;
-      FPedidoItenssLista[i].QTDE_CALCULADA               := lQry.FieldByName('QTDE_CALCULADA').AsString;
-      FPedidoItenssLista[i].SYSTIME                      := lQry.FieldByName('SYSTIME').AsString;
-      FPedidoItenssLista[i].AMBIENTE_ID                  := lQry.FieldByName('AMBIENTE_ID').AsString;
-      FPedidoItenssLista[i].AMBIENTE_OBS                 := lQry.FieldByName('AMBIENTE_OBS').AsString;
-      FPedidoItenssLista[i].PROJETO_ID                   := lQry.FieldByName('PROJETO_ID').AsString;
-      FPedidoItenssLista[i].LARGURA                      := lQry.FieldByName('LARGURA').AsString;
-      FPedidoItenssLista[i].ALTURA                       := lQry.FieldByName('ALTURA').AsString;
-      FPedidoItenssLista[i].ITEM                         := lQry.FieldByName('ITEM').AsString;
-      FPedidoItenssLista[i].DUN14                        := lQry.FieldByName('DUN14').AsString;
-      FPedidoItenssLista[i].SAIDAS_ID                    := lQry.FieldByName('SAIDAS_ID').AsString;
-      FPedidoItenssLista[i].CUSTO_DRG                    := lQry.FieldByName('CUSTO_DRG').AsString;
-      FPedidoItenssLista[i].POS_VENDA_STATUS             := lQry.FieldByName('POS_VENDA_STATUS').AsString;
-      FPedidoItenssLista[i].POS_VENDA_RETORNO            := lQry.FieldByName('POS_VENDA_RETORNO').AsString;
-      FPedidoItenssLista[i].POS_VENDA_OBS                := lQry.FieldByName('POS_VENDA_OBS').AsString;
-      FPedidoItenssLista[i].VALOR_SUFRAMA_ITEM_NEW       := lQry.FieldByName('VALOR_SUFRAMA_ITEM_NEW').AsString;
-      FPedidoItenssLista[i].VALOR_SUFRAMA_ITEM           := lQry.FieldByName('VALOR_SUFRAMA_ITEM').AsString;
-      FPedidoItenssLista[i].BONUS                        := lQry.FieldByName('BONUS').AsString;
-      FPedidoItenssLista[i].BONUS_USO                    := lQry.FieldByName('BONUS_USO').AsString;
-      FPedidoItenssLista[i].FUNCIONARIO_ID               := lQry.FieldByName('FUNCIONARIO_ID').AsString;
-      FPedidoItenssLista[i].PRODUCAO_ID                  := lQry.FieldByName('PRODUCAO_ID').AsString;
-      FPedidoItenssLista[i].QUANTIDADE_KG                := lQry.FieldByName('QUANTIDADE_KG').AsString;
-      FPedidoItenssLista[i].RESERVADO                    := lQry.FieldByName('RESERVADO').AsString;
-      FPedidoItenssLista[i].DESCRICAO_PRODUTO            := lQry.FieldByName('DESCRICAO_PRODUTO').AsString;
-      FPedidoItenssLista[i].COMISSAO_PERCENTUAL          := lQry.FieldByName('COMISSAO_PERCENTUAL').AsString;
-      FPedidoItenssLista[i].QTD_CHECAGEM                 := lQry.FieldByName('QTD_CHECAGEM').AsString;
-      FPedidoItenssLista[i].QTD_CHECAGEM_CORTE           := lQry.FieldByName('QTD_CHECAGEM_CORTE').AsString;
-      FPedidoItenssLista[i].ALTURA_M                     := lQry.FieldByName('ALTURA_M').AsString;
-      FPedidoItenssLista[i].LARGURA_M                    := lQry.FieldByName('LARGURA_M').AsString;
-      FPedidoItenssLista[i].PROFUNDIDADE_M               := lQry.FieldByName('PROFUNDIDADE_M').AsString;
-      FPedidoItenssLista[i].VBCUFDEST                    := lQry.FieldByName('VBCUFDEST').AsString;
-      FPedidoItenssLista[i].PFCPUFDEST                   := lQry.FieldByName('PFCPUFDEST').AsString;
-      FPedidoItenssLista[i].PICMSUFDEST                  := lQry.FieldByName('PICMSUFDEST').AsString;
-      FPedidoItenssLista[i].PICMSINTER                   := lQry.FieldByName('PICMSINTER').AsString;
-      FPedidoItenssLista[i].PICMSINTERPART               := lQry.FieldByName('PICMSINTERPART').AsString;
-      FPedidoItenssLista[i].VFCPUFDEST                   := lQry.FieldByName('VFCPUFDEST').AsString;
-      FPedidoItenssLista[i].VICMSUFDEST                  := lQry.FieldByName('VICMSUFDEST').AsString;
-      FPedidoItenssLista[i].VICMSUFREMET                 := lQry.FieldByName('VICMSUFREMET').AsString;
-      FPedidoItenssLista[i].COMBO_ITEM                   := lQry.FieldByName('COMBO_ITEM').AsString;
-      FPedidoItenssLista[i].VLRVENDA_MINIMO              := lQry.FieldByName('VLRVENDA_MINIMO').AsString;
-      FPedidoItenssLista[i].VLRVENDA_MAXIMO              := lQry.FieldByName('VLRVENDA_MAXIMO').AsString;
-      FPedidoItenssLista[i].IMPRESSO                     := lQry.FieldByName('IMPRESSO').AsString;
-      FPedidoItenssLista[i].ORCAMENTO_TSB_ID             := lQry.FieldByName('ORCAMENTO_TSB_ID').AsString;
-      FPedidoItenssLista[i].GERENTE_COMISSAO_PERCENTUAL  := lQry.FieldByName('GERENTE_COMISSAO_PERCENTUAL').AsString;
-      FPedidoItenssLista[i].XPED                         := lQry.FieldByName('XPED').AsString;
-      FPedidoItenssLista[i].NITEMPED2                    := lQry.FieldByName('NITEMPED2').AsString;
-      FPedidoItenssLista[i].VOUTROS                      := lQry.FieldByName('VOUTROS').AsString;
-      FPedidoItenssLista[i].VFRETE                       := lQry.FieldByName('VFRETE').AsString;
-      FPedidoItenssLista[i].ORIGINAL_PEDIDO_ID           := lQry.FieldByName('ORIGINAL_PEDIDO_ID').AsString;
-      FPedidoItenssLista[i].VALOR_VENDA_CADASTRO         := lQry.FieldByName('VALOR_VENDA_CADASTRO').AsString;
-      FPedidoItenssLista[i].WEB_PEDIDOITENS_ID           := lQry.FieldByName('WEB_PEDIDOITENS_ID').AsString;
-      FPedidoItenssLista[i].TIPO_VENDA                   := lQry.FieldByName('TIPO_VENDA').AsString;
-      FPedidoItenssLista[i].ENTREGA                      := lQry.FieldByName('ENTREGA').AsString;
-      FPedidoItenssLista[i].VBCFCPST                     := lQry.FieldByName('VBCFCPST').AsString;
-      FPedidoItenssLista[i].PFCPST                       := lQry.FieldByName('PFCPST').AsString;
-      FPedidoItenssLista[i].VFCPST                       := lQry.FieldByName('VFCPST').AsString;
-      FPedidoItenssLista[i].VALOR_BONUS_SERVICO          := lQry.FieldByName('VALOR_BONUS_SERVICO').AsString;
-      FPedidoItenssLista[i].CBENEF                       := lQry.FieldByName('CBENEF').AsString;
-      FPedidoItenssLista[i].VICMSDESON                   := lQry.FieldByName('VICMSDESON').AsString;
-      FPedidoItenssLista[i].MOTDESICMS                   := lQry.FieldByName('MOTDESICMS').AsString;
-      FPedidoItenssLista[i].VALOR_DIFERIMENTO            := lQry.FieldByName('VALOR_DIFERIMENTO').AsString;
-      FPedidoItenssLista[i].VALOR_MONTADOR               := lQry.FieldByName('VALOR_MONTADOR').AsString;
-      FPedidoItenssLista[i].MONTAGEM                     := lQry.FieldByName('MONTAGEM').AsString;
-      FPedidoItenssLista[i].PCRED_PRESUMIDO              := lQry.FieldByName('PCRED_PRESUMIDO').AsString;
-      FPedidoItenssLista[i].PEDIDOCOMPRAITENS_ID         := lQry.FieldByName('PEDIDOCOMPRAITENS_ID').AsString;
-      FPedidoItenssLista[i].PEDIDOITENS_ID               := lQry.FieldByName('PEDIDOITENS_ID').AsString;
-      FPedidoItenssLista[i].PIS_CST                      := lQry.FieldByName('PIS_CST').AsString;
-      FPedidoItenssLista[i].COFINS_CST                   := lQry.FieldByName('COFINS_CST').AsString;
-      FPedidoItenssLista[i].IPI_CST                      := lQry.FieldByName('IPI_CST').AsString;
-      FPedidoItenssLista[i].CSOSN                        := lQry.FieldByName('CSOSN').AsString;
-      FPedidoItenssLista[i].CFOP                         := lQry.FieldByName('CFOP').AsString;
-      FPedidoItenssLista[i].VDESC                        := lQry.FieldByName('VDESC').AsString;
-      FPedidoItenssLista[i].TIPO_VENDA_COMISSAO_ID       := lQry.FieldByName('TIPO_VENDA_COMISSAO_ID').AsString;
-      FPedidoItenssLista[i].COMIS_PRO                    := lQry.FieldByName('COMIS_PRO').AsString;
+      modelo.ID                           := lQry.FieldByName('ID').AsString;
+      modelo.CODIGO_CLI                   := lQry.FieldByName('CODIGO_CLI').AsString;
+      modelo.NUMERO_PED                   := lQry.FieldByName('NUMERO_PED').AsString;
+      modelo.CODIGO_PRO                   := lQry.FieldByName('CODIGO_PRO').AsString;
+      modelo.QUANTIDADE_PED               := lQry.FieldByName('QUANTIDADE_PED').AsString;
+      modelo.QUANTIDADE_TROCA             := lQry.FieldByName('QUANTIDADE_TROCA').AsString;
+      modelo.VALORUNITARIO_PED            := lQry.FieldByName('VALORUNITARIO_PED').AsString;
+      modelo.DESCONTO_PED                 := lQry.FieldByName('DESCONTO_PED').AsString;
+      modelo.DESCONTO_UF                  := lQry.FieldByName('DESCONTO_UF').AsString;
+      modelo.VALOR_IPI                    := lQry.FieldByName('VALOR_IPI').AsString;
+      modelo.VALOR_ST                     := lQry.FieldByName('VALOR_ST').AsString;
+      modelo.VLRVENDA_PRO                 := lQry.FieldByName('VLRVENDA_PRO').AsString;
+      modelo.VLRCUSTO_PRO                 := lQry.FieldByName('VLRCUSTO_PRO').AsString;
+      modelo.COMISSAO_PED                 := lQry.FieldByName('COMISSAO_PED').AsString;
+      modelo.TIPO_NF                      := lQry.FieldByName('TIPO_NF').AsString;
+      modelo.QUANTIDADE_TIPO              := lQry.FieldByName('QUANTIDADE_TIPO').AsString;
+      modelo.OBSERVACAO                   := lQry.FieldByName('OBSERVACAO').AsString;
+      modelo.CTR_EXPORTACAO               := lQry.FieldByName('CTR_EXPORTACAO').AsString;
+      modelo.PRODUTO_REFERENCIA           := lQry.FieldByName('PRODUTO_REFERENCIA').AsString;
+      modelo.OBS_ITEM                     := lQry.FieldByName('OBS_ITEM').AsString;
+      modelo.RESERVA_ID                   := lQry.FieldByName('RESERVA_ID').AsString;
+      modelo.LOJA                         := lQry.FieldByName('LOJA').AsString;
+      modelo.ALIQ_IPI                     := lQry.FieldByName('ALIQ_IPI').AsString;
+      modelo.VALOR_RESTITUICAO_ST         := lQry.FieldByName('VALOR_RESTITUICAO_ST').AsString;
+      modelo.CFOP_ID                      := lQry.FieldByName('CFOP_ID').AsString;
+      modelo.CST                          := lQry.FieldByName('CST').AsString;
+      modelo.ALIQ_ICMS                    := lQry.FieldByName('ALIQ_ICMS').AsString;
+      modelo.ALIQ_ICMS_ST                 := lQry.FieldByName('ALIQ_ICMS_ST').AsString;
+      modelo.REDUCAO_ST                   := lQry.FieldByName('REDUCAO_ST').AsString;
+      modelo.MVA                          := lQry.FieldByName('MVA').AsString;
+      modelo.REDUCAO_ICMS                 := lQry.FieldByName('REDUCAO_ICMS').AsString;
+      modelo.BASE_ICMS                    := lQry.FieldByName('BASE_ICMS').AsString;
+      modelo.VALOR_ICMS                   := lQry.FieldByName('VALOR_ICMS').AsString;
+      modelo.BASE_ST                      := lQry.FieldByName('BASE_ST').AsString;
+      modelo.DESC_RESTITUICAO_ST          := lQry.FieldByName('DESC_RESTITUICAO_ST').AsString;
+      modelo.ICMS_SUFRAMA                 := lQry.FieldByName('ICMS_SUFRAMA').AsString;
+      modelo.PIS_SUFRAMA                  := lQry.FieldByName('PIS_SUFRAMA').AsString;
+      modelo.COFINS_SUFRAMA               := lQry.FieldByName('COFINS_SUFRAMA').AsString;
+      modelo.IPI_SUFRAMA                  := lQry.FieldByName('IPI_SUFRAMA').AsString;
+      modelo.ALIQ_PIS                     := lQry.FieldByName('ALIQ_PIS').AsString;
+      modelo.ALIQ_COFINS                  := lQry.FieldByName('ALIQ_COFINS').AsString;
+      modelo.BASE_PIS                     := lQry.FieldByName('BASE_PIS').AsString;
+      modelo.BASE_COFINS                  := lQry.FieldByName('BASE_COFINS').AsString;
+      modelo.VALOR_PIS                    := lQry.FieldByName('VALOR_PIS').AsString;
+      modelo.VALOR_COFINS                 := lQry.FieldByName('VALOR_COFINS').AsString;
+      modelo.PREVENDA_ID                  := lQry.FieldByName('PREVENDA_ID').AsString;
+      modelo.AVULSO                       := lQry.FieldByName('AVULSO').AsString;
+      modelo.QUANTIDADE_NEW               := lQry.FieldByName('QUANTIDADE_NEW').AsString;
+      modelo.BALANCA                      := lQry.FieldByName('BALANCA').AsString;
+      modelo.QTDE_CALCULADA               := lQry.FieldByName('QTDE_CALCULADA').AsString;
+      modelo.SYSTIME                      := lQry.FieldByName('SYSTIME').AsString;
+      modelo.AMBIENTE_ID                  := lQry.FieldByName('AMBIENTE_ID').AsString;
+      modelo.AMBIENTE_OBS                 := lQry.FieldByName('AMBIENTE_OBS').AsString;
+      modelo.PROJETO_ID                   := lQry.FieldByName('PROJETO_ID').AsString;
+      modelo.LARGURA                      := lQry.FieldByName('LARGURA').AsString;
+      modelo.ALTURA                       := lQry.FieldByName('ALTURA').AsString;
+      modelo.ITEM                         := lQry.FieldByName('ITEM').AsString;
+      modelo.DUN14                        := lQry.FieldByName('DUN14').AsString;
+      modelo.SAIDAS_ID                    := lQry.FieldByName('SAIDAS_ID').AsString;
+      modelo.CUSTO_DRG                    := lQry.FieldByName('CUSTO_DRG').AsString;
+      modelo.POS_VENDA_STATUS             := lQry.FieldByName('POS_VENDA_STATUS').AsString;
+      modelo.POS_VENDA_RETORNO            := lQry.FieldByName('POS_VENDA_RETORNO').AsString;
+      modelo.POS_VENDA_OBS                := lQry.FieldByName('POS_VENDA_OBS').AsString;
+      modelo.VALOR_SUFRAMA_ITEM_NEW       := lQry.FieldByName('VALOR_SUFRAMA_ITEM_NEW').AsString;
+      modelo.VALOR_SUFRAMA_ITEM           := lQry.FieldByName('VALOR_SUFRAMA_ITEM').AsString;
+      modelo.BONUS                        := lQry.FieldByName('BONUS').AsString;
+      modelo.BONUS_USO                    := lQry.FieldByName('BONUS_USO').AsString;
+      modelo.FUNCIONARIO_ID               := lQry.FieldByName('FUNCIONARIO_ID').AsString;
+      modelo.PRODUCAO_ID                  := lQry.FieldByName('PRODUCAO_ID').AsString;
+      modelo.QUANTIDADE_KG                := lQry.FieldByName('QUANTIDADE_KG').AsString;
+      modelo.RESERVADO                    := lQry.FieldByName('RESERVADO').AsString;
+      modelo.DESCRICAO_PRODUTO            := lQry.FieldByName('DESCRICAO_PRODUTO').AsString;
+      modelo.COMISSAO_PERCENTUAL          := lQry.FieldByName('COMISSAO_PERCENTUAL').AsString;
+      modelo.QTD_CHECAGEM                 := lQry.FieldByName('QTD_CHECAGEM').AsString;
+      modelo.QTD_CHECAGEM_CORTE           := lQry.FieldByName('QTD_CHECAGEM_CORTE').AsString;
+      modelo.ALTURA_M                     := lQry.FieldByName('ALTURA_M').AsString;
+      modelo.LARGURA_M                    := lQry.FieldByName('LARGURA_M').AsString;
+      modelo.PROFUNDIDADE_M               := lQry.FieldByName('PROFUNDIDADE_M').AsString;
+      modelo.VBCUFDEST                    := lQry.FieldByName('VBCUFDEST').AsString;
+      modelo.PFCPUFDEST                   := lQry.FieldByName('PFCPUFDEST').AsString;
+      modelo.PICMSUFDEST                  := lQry.FieldByName('PICMSUFDEST').AsString;
+      modelo.PICMSINTER                   := lQry.FieldByName('PICMSINTER').AsString;
+      modelo.PICMSINTERPART               := lQry.FieldByName('PICMSINTERPART').AsString;
+      modelo.VFCPUFDEST                   := lQry.FieldByName('VFCPUFDEST').AsString;
+      modelo.VICMSUFDEST                  := lQry.FieldByName('VICMSUFDEST').AsString;
+      modelo.VICMSUFREMET                 := lQry.FieldByName('VICMSUFREMET').AsString;
+      modelo.COMBO_ITEM                   := lQry.FieldByName('COMBO_ITEM').AsString;
+      modelo.VLRVENDA_MINIMO              := lQry.FieldByName('VLRVENDA_MINIMO').AsString;
+      modelo.VLRVENDA_MAXIMO              := lQry.FieldByName('VLRVENDA_MAXIMO').AsString;
+      modelo.IMPRESSO                     := lQry.FieldByName('IMPRESSO').AsString;
+      modelo.ORCAMENTO_TSB_ID             := lQry.FieldByName('ORCAMENTO_TSB_ID').AsString;
+      modelo.GERENTE_COMISSAO_PERCENTUAL  := lQry.FieldByName('GERENTE_COMISSAO_PERCENTUAL').AsString;
+      modelo.XPED                         := lQry.FieldByName('XPED').AsString;
+      modelo.NITEMPED2                    := lQry.FieldByName('NITEMPED2').AsString;
+      modelo.VOUTROS                      := lQry.FieldByName('VOUTROS').AsString;
+      modelo.VFRETE                       := lQry.FieldByName('VFRETE').AsString;
+      modelo.ORIGINAL_PEDIDO_ID           := lQry.FieldByName('ORIGINAL_PEDIDO_ID').AsString;
+      modelo.VALOR_VENDA_CADASTRO         := lQry.FieldByName('VALOR_VENDA_CADASTRO').AsString;
+      modelo.WEB_PEDIDOITENS_ID           := lQry.FieldByName('WEB_PEDIDOITENS_ID').AsString;
+      modelo.TIPO_VENDA                   := lQry.FieldByName('TIPO_VENDA').AsString;
+      modelo.ENTREGA                      := lQry.FieldByName('ENTREGA').AsString;
+      modelo.VBCFCPST                     := lQry.FieldByName('VBCFCPST').AsString;
+      modelo.PFCPST                       := lQry.FieldByName('PFCPST').AsString;
+      modelo.VFCPST                       := lQry.FieldByName('VFCPST').AsString;
+      modelo.VALOR_BONUS_SERVICO          := lQry.FieldByName('VALOR_BONUS_SERVICO').AsString;
+      modelo.CBENEF                       := lQry.FieldByName('CBENEF').AsString;
+      modelo.VICMSDESON                   := lQry.FieldByName('VICMSDESON').AsString;
+      modelo.MOTDESICMS                   := lQry.FieldByName('MOTDESICMS').AsString;
+      modelo.VALOR_DIFERIMENTO            := lQry.FieldByName('VALOR_DIFERIMENTO').AsString;
+      modelo.VALOR_MONTADOR               := lQry.FieldByName('VALOR_MONTADOR').AsString;
+      modelo.MONTAGEM                     := lQry.FieldByName('MONTAGEM').AsString;
+      modelo.PCRED_PRESUMIDO              := lQry.FieldByName('PCRED_PRESUMIDO').AsString;
+      modelo.PEDIDOCOMPRAITENS_ID         := lQry.FieldByName('PEDIDOCOMPRAITENS_ID').AsString;
+      modelo.PEDIDOITENS_ID               := lQry.FieldByName('PEDIDOITENS_ID').AsString;
+      modelo.PIS_CST                      := lQry.FieldByName('PIS_CST').AsString;
+      modelo.COFINS_CST                   := lQry.FieldByName('COFINS_CST').AsString;
+      modelo.IPI_CST                      := lQry.FieldByName('IPI_CST').AsString;
+      modelo.CSOSN                        := lQry.FieldByName('CSOSN').AsString;
+      modelo.CFOP                         := lQry.FieldByName('CFOP').AsString;
+      modelo.VDESC                        := lQry.FieldByName('VDESC').AsString;
+      modelo.TIPO_VENDA_COMISSAO_ID       := lQry.FieldByName('TIPO_VENDA_COMISSAO_ID').AsString;
+      modelo.COMIS_PRO                    := lQry.FieldByName('COMIS_PRO').AsString;
 
-      FPedidoItenssLista[i].GRUPO_COMISSAO_ID            := lQry.FieldByName('GRUPO_COMISSAO_ID').AsString;
-      FPedidoItenssLista[i].TIPO_GARANTIA_FR             := lQry.FieldByName('TIPO_GARANTIA_FR').AsString;
-      FPedidoItenssLista[i].VLR_GARANTIA_FR              := lQry.FieldByName('VLR_GARANTIA_FR').AsString;
-      FPedidoItenssLista[i].CUSTO_GARANTIA_FR            := lQry.FieldByName('CUSTO_GARANTIA_FR').AsString;
-      FPedidoItenssLista[i].CUSTO_GARANTIA               := lQry.FieldByName('CUSTO_GARANTIA').AsString;
-      FPedidoItenssLista[i].PER_GARANTIA_FR              := lQry.FieldByName('PER_GARANTIA_FR').AsString;
+      modelo.GRUPO_COMISSAO_ID            := lQry.FieldByName('GRUPO_COMISSAO_ID').AsString;
+      modelo.TIPO_GARANTIA_FR             := lQry.FieldByName('TIPO_GARANTIA_FR').AsString;
+      modelo.VLR_GARANTIA_FR              := lQry.FieldByName('VLR_GARANTIA_FR').AsString;
+      modelo.CUSTO_GARANTIA_FR            := lQry.FieldByName('CUSTO_GARANTIA_FR').AsString;
+      modelo.CUSTO_GARANTIA               := lQry.FieldByName('CUSTO_GARANTIA').AsString;
+      modelo.PER_GARANTIA_FR              := lQry.FieldByName('PER_GARANTIA_FR').AsString;
 
-      FPedidoItenssLista[i].VTOTTRIB_FEDERAL             := lQry.FieldByName('VTOTTRIB_FEDERAL').AsString;
-      FPedidoItenssLista[i].VTOTTRIB_ESTADUAL            := lQry.FieldByName('VTOTTRIB_ESTADUAL').AsString;
-      FPedidoItenssLista[i].VTOTTRIB_MUNICIPAL           := lQry.FieldByName('VTOTTRIB_MUNICIPAL').AsString;
+      modelo.VTOTTRIB_FEDERAL             := lQry.FieldByName('VTOTTRIB_FEDERAL').AsString;
+      modelo.VTOTTRIB_ESTADUAL            := lQry.FieldByName('VTOTTRIB_ESTADUAL').AsString;
+      modelo.VTOTTRIB_MUNICIPAL           := lQry.FieldByName('VTOTTRIB_MUNICIPAL').AsString;
 
       lQry.Next;
     end;
@@ -565,10 +566,10 @@ procedure TPedidoItensDao.obterItensPedido(pNumeroPedido: String);
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: TPedidoItensModel;
 begin
   lQry := vIConexao.CriarQuery;
-  FPedidoItenssLista := TObjectList<TPedidoItensModel>.Create;
+  FPedidoItenssLista := TCollections.CreateList<TPedidoItensModel>(true);
   try
     lSQL :=
     ' select                                             '+#13+
@@ -591,23 +592,22 @@ begin
     ' where                                              '+#13+
     '     i.numero_ped = '+QuotedStr(pNumeroPedido);
     lQry.Open(lSQL);
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FPedidoItenssLista.Add(TPedidoItensModel.Create(vIConexao));
-      i := FPedidoItenssLista.Count -1;
-      FPedidoItenssLista[i].ID                := lQry.FieldByName('ID').AsString;
-      FPedidoItenssLista[i].CODIGO_PRO        := lQry.FieldByName('CODIGO_PRO').AsString;
-      FPedidoItenssLista[i].BARRAS_PRO        := lQry.FieldByName('BARRAS_PRO').AsString;
-      FPedidoItenssLista[i].NOME_PRO          := lQry.FieldByName('NOME_PRO').AsString;
-      FPedidoItenssLista[i].QUANTIDADE_PED    := lQry.FieldByName('QUANTIDADE_PED').AsFloat;
-      FPedidoItenssLista[i].QTDE_CALCULADA    := lQry.FieldByName('QTDE_CALCULADA').AsFloat;
-      FPedidoItenssLista[i].VALORUNITARIO_PED := lQry.FieldByName('VALORUNITARIO_PED').AsFloat;
-      FPedidoItenssLista[i].DESCONTO_PED      := lQry.FieldByName('DESCONTO_PED').AsFloat;
-      FPedidoItenssLista[i].VDESC             := lQry.FieldByName('VDESC').AsFloat;
-      FPedidoItenssLista[i].ITEM              := lQry.FieldByName('ITEM').AsFloat;
-      FPedidoItenssLista[i].TOTAL             := lQry.FieldByName('TOTAL').AsFloat;
+      modelo := TPedidoItensModel.Create(vIConexao);
+      FPedidoItenssLista.Add(modelo);
+      modelo.ID                := lQry.FieldByName('ID').AsString;
+      modelo.CODIGO_PRO        := lQry.FieldByName('CODIGO_PRO').AsString;
+      modelo.BARRAS_PRO        := lQry.FieldByName('BARRAS_PRO').AsString;
+      modelo.NOME_PRO          := lQry.FieldByName('NOME_PRO').AsString;
+      modelo.QUANTIDADE_PED    := lQry.FieldByName('QUANTIDADE_PED').AsFloat;
+      modelo.QTDE_CALCULADA    := lQry.FieldByName('QTDE_CALCULADA').AsFloat;
+      modelo.VALORUNITARIO_PED := lQry.FieldByName('VALORUNITARIO_PED').AsFloat;
+      modelo.DESCONTO_PED      := lQry.FieldByName('DESCONTO_PED').AsFloat;
+      modelo.VDESC             := lQry.FieldByName('VDESC').AsFloat;
+      modelo.ITEM              := lQry.FieldByName('ITEM').AsFloat;
+      modelo.TOTAL             := lQry.FieldByName('TOTAL').AsFloat;
 
       lQry.Next;
     end;
@@ -620,7 +620,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TPedidoItensDao.SetPedidoItenssLista(const Value: TObjectList<TPedidoItensModel>);
+procedure TPedidoItensDao.SetPedidoItenssLista;
 begin
   FPedidoItenssLista := Value;
 end;

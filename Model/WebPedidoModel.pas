@@ -19,6 +19,7 @@ uses
   System.StrUtils,
   ProdutosModel,
   EmpresaModel,
+  Spring.Collections,
   WebPedidoItensDao,
   MovimentoSerialModel;
 
@@ -543,7 +544,7 @@ begin
     lWebPedidoItensModel.IDWebPedidoView := pIdVendaAssistida;
     lWebPedidoItensModel.obterLista;
 
-    lPedidoItensModel.PedidoItenssLista := TObjectList<TPedidoItensModel>.Create;
+    lPedidoItensModel.PedidoItenssLista := TCollections.CreateList<TPedidoItensModel>(true);
 
     lItem  := 0;
     lIndex := 0;
