@@ -7,7 +7,7 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  Spring.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
   Interfaces.Conexao,
@@ -21,7 +21,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FVendaCartaosLista: TObjectList<TVendaCartaoModel>;
+    FVendaCartaosLista: IList<TVendaCartaoModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -32,7 +32,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetVendaCartaosLista(const Value: TObjectList<TVendaCartaoModel>);
+    procedure SetVendaCartaosLista(const Value: IList<TVendaCartaoModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -49,7 +49,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property VendaCartaosLista: TObjectList<TVendaCartaoModel> read FVendaCartaosLista write SetVendaCartaosLista;
+    property VendaCartaosLista: IList<TVendaCartaoModel> read FVendaCartaosLista write SetVendaCartaosLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -127,6 +127,7 @@ end;
 
 destructor TVendaCartaoDao.Destroy;
 begin
+  FVendaCartaosLista:=nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -233,11 +234,11 @@ procedure TVendaCartaoDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: TVendaCartaoModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FVendaCartaosLista := TObjectList<TVendaCartaoModel>.Create;
+  FVendaCartaosLista := TCollections.CreateList<TVendaCartaoModel>(true);
 
   try
 
@@ -258,35 +259,33 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FVendaCartaosLista.Add(TVendaCartaoModel.Create(vIConexao));
+      modelo := TVendaCartaoModel.Create(vIConexao);
+      FVendaCartaosLista.Add(modelo);
 
-      i := FVendaCartaosLista.Count -1;
-
-      FVendaCartaosLista[i].ID                  := lQry.FieldByName('ID').AsString;
-      FVendaCartaosLista[i].NUMERO_CAR          := lQry.FieldByName('NUMERO_CAR').AsString;
-      FVendaCartaosLista[i].AUTORIZACAO_CAR     := lQry.FieldByName('AUTORIZACAO_CAR').AsString;
-      FVendaCartaosLista[i].PARCELA_CAR         := lQry.FieldByName('PARCELA_CAR').AsString;
-      FVendaCartaosLista[i].PARCELAS_CAR        := lQry.FieldByName('PARCELAS_CAR').AsString;
-      FVendaCartaosLista[i].VALOR_CAR           := lQry.FieldByName('VALOR_CAR').AsString;
-      FVendaCartaosLista[i].CODIGO_CLI          := lQry.FieldByName('CODIGO_CLI').AsString;
-      FVendaCartaosLista[i].ADM_CAR             := lQry.FieldByName('ADM_CAR').AsString;
-      FVendaCartaosLista[i].VENDA_CAR           := lQry.FieldByName('VENDA_CAR').AsString;
-      FVendaCartaosLista[i].PARCELADO_CAR       := lQry.FieldByName('PARCELADO_CAR').AsString;
-      FVendaCartaosLista[i].VENCIMENTO_CAR      := lQry.FieldByName('VENCIMENTO_CAR').AsString;
-      FVendaCartaosLista[i].NUMERO_VENDA        := lQry.FieldByName('NUMERO_VENDA').AsString;
-      FVendaCartaosLista[i].LOJA                := lQry.FieldByName('LOJA').AsString;
-      FVendaCartaosLista[i].NUMERO_OS           := lQry.FieldByName('NUMERO_OS').AsString;
-      FVendaCartaosLista[i].FATURA_ID           := lQry.FieldByName('FATURA_ID').AsString;
-      FVendaCartaosLista[i].CANCELAMENTO_DATA   := lQry.FieldByName('CANCELAMENTO_DATA').AsString;
-      FVendaCartaosLista[i].CANCELAMENTO_CODIGO := lQry.FieldByName('CANCELAMENTO_CODIGO').AsString;
-      FVendaCartaosLista[i].SYSTIME             := lQry.FieldByName('SYSTIME').AsString;
-      FVendaCartaosLista[i].TAXA                := lQry.FieldByName('TAXA').AsString;
-      FVendaCartaosLista[i].PARCELA_TEF         := lQry.FieldByName('PARCELA_TEF').AsString;
-      FVendaCartaosLista[i].PARCELAS_TEF        := lQry.FieldByName('PARCELAS_TEF').AsString;
+      modelo.ID                  := lQry.FieldByName('ID').AsString;
+      modelo.NUMERO_CAR          := lQry.FieldByName('NUMERO_CAR').AsString;
+      modelo.AUTORIZACAO_CAR     := lQry.FieldByName('AUTORIZACAO_CAR').AsString;
+      modelo.PARCELA_CAR         := lQry.FieldByName('PARCELA_CAR').AsString;
+      modelo.PARCELAS_CAR        := lQry.FieldByName('PARCELAS_CAR').AsString;
+      modelo.VALOR_CAR           := lQry.FieldByName('VALOR_CAR').AsString;
+      modelo.CODIGO_CLI          := lQry.FieldByName('CODIGO_CLI').AsString;
+      modelo.ADM_CAR             := lQry.FieldByName('ADM_CAR').AsString;
+      modelo.VENDA_CAR           := lQry.FieldByName('VENDA_CAR').AsString;
+      modelo.PARCELADO_CAR       := lQry.FieldByName('PARCELADO_CAR').AsString;
+      modelo.VENCIMENTO_CAR      := lQry.FieldByName('VENCIMENTO_CAR').AsString;
+      modelo.NUMERO_VENDA        := lQry.FieldByName('NUMERO_VENDA').AsString;
+      modelo.LOJA                := lQry.FieldByName('LOJA').AsString;
+      modelo.NUMERO_OS           := lQry.FieldByName('NUMERO_OS').AsString;
+      modelo.FATURA_ID           := lQry.FieldByName('FATURA_ID').AsString;
+      modelo.CANCELAMENTO_DATA   := lQry.FieldByName('CANCELAMENTO_DATA').AsString;
+      modelo.CANCELAMENTO_CODIGO := lQry.FieldByName('CANCELAMENTO_CODIGO').AsString;
+      modelo.SYSTIME             := lQry.FieldByName('SYSTIME').AsString;
+      modelo.TAXA                := lQry.FieldByName('TAXA').AsString;
+      modelo.PARCELA_TEF         := lQry.FieldByName('PARCELA_TEF').AsString;
+      modelo.PARCELAS_TEF        := lQry.FieldByName('PARCELAS_TEF').AsString;
 
       lQry.Next;
     end;
@@ -303,7 +302,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TVendaCartaoDao.SetVendaCartaosLista(const Value: TObjectList<TVendaCartaoModel>);
+procedure TVendaCartaoDao.SetVendaCartaosLista;
 begin
   FVendaCartaosLista := Value;
 end;

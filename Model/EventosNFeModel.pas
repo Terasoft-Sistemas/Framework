@@ -99,7 +99,7 @@ end;
 
 destructor TEventosNFeModel.Destroy;
 begin
-
+  vIConexao := nil;
   inherited;
 end;
 
