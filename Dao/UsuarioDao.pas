@@ -147,8 +147,8 @@ end;
 
 destructor TUsuarioDao.Destroy;
 begin
-  FreeAndNil(vConstrutor);
   FUsuariosLista:=nil;
+  FreeAndNil(vConstrutor);
   vIConexao   := nil;
   inherited;
 end;

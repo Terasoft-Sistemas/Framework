@@ -7,11 +7,11 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
   Terasoft.ConstrutorDao,
   Terasoft.Utils,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -21,7 +21,7 @@ type
     vIconexao : Iconexao;
     vConstrutor : TConstrutorDao;
 
-    FCaixasLista: TObjectList<TCaixaModel>;
+    FCaixasLista: IList<TCaixaModel>;
     FLengthPageView: String;
     FStartRecordView: String;
     FID: Variant;
@@ -32,7 +32,7 @@ type
     FIDRecordView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetCaixasLista(const Value: TObjectList<TCaixaModel>);
+    procedure SetCaixasLista(const Value: IList<TCaixaModel>);
     procedure SetID(const Value: Variant);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -47,7 +47,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property CaixasLista: TObjectList<TCaixaModel> read FCaixasLista write SetCaixasLista;
+    property CaixasLista: IList<TCaixaModel> read FCaixasLista write SetCaixasLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -145,6 +145,7 @@ end;
 
 destructor TCaixaDao.Destroy;
 begin
+  FCaixasLista := nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -251,11 +252,11 @@ procedure TCaixaDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: TCaixaModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FCaixasLista := TObjectList<TCaixaModel>.Create;
+  FCaixasLista := TCollections.CreateList<TCaixaModel>(true);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -275,51 +276,49 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FCaixasLista.Add(TCaixaModel.Create(vIConexao));
+      modelo := TCaixaModel.Create(vIConexao);
+      FCaixasLista.Add(modelo);
 
-      i := FCaixasLista.Count -1;
-
-      FCaixasLista[i].NUMERO_CAI           := lQry.FieldByName('NUMERO_CAI').AsString;
-      FCaixasLista[i].CODIGO_CTA           := lQry.FieldByName('CODIGO_CTA').AsString;
-      FCaixasLista[i].DATA_CAI             := lQry.FieldByName('DATA_CAI').AsString;
-      FCaixasLista[i].HORA_CAI             := lQry.FieldByName('HORA_CAI').AsString;
-      FCaixasLista[i].HISTORICO_CAI        := lQry.FieldByName('HISTORICO_CAI').AsString;
-      FCaixasLista[i].VALOR_CAI            := lQry.FieldByName('VALOR_CAI').AsString;
-      FCaixasLista[i].USUARIO_CAI          := lQry.FieldByName('USUARIO_CAI').AsString;
-      FCaixasLista[i].TIPO_CAI             := lQry.FieldByName('TIPO_CAI').AsString;
-      FCaixasLista[i].CLIENTE_CAI          := lQry.FieldByName('CLIENTE_CAI').AsString;
-      FCaixasLista[i].NUMERO_PED           := lQry.FieldByName('NUMERO_PED').AsString;
-      FCaixasLista[i].FATURA_CAI           := lQry.FieldByName('FATURA_CAI').AsString;
-      FCaixasLista[i].PARCELA_CAI          := lQry.FieldByName('PARCELA_CAI').AsString;
-      FCaixasLista[i].STATUS               := lQry.FieldByName('STATUS').AsString;
-      FCaixasLista[i].PORTADOR_CAI         := lQry.FieldByName('PORTADOR_CAI').AsString;
-      FCaixasLista[i].CONCILIADO_CAI       := lQry.FieldByName('CONCILIADO_CAI').AsString;
-      FCaixasLista[i].DATA_CON             := lQry.FieldByName('DATA_CON').AsString;
-      FCaixasLista[i].CENTRO_CUSTO         := lQry.FieldByName('CENTRO_CUSTO').AsString;
-      FCaixasLista[i].LOJA                 := lQry.FieldByName('LOJA').AsString;
-      FCaixasLista[i].RECIBO               := lQry.FieldByName('RECIBO').AsString;
-      FCaixasLista[i].RELATORIO            := lQry.FieldByName('RELATORIO').AsString;
-      FCaixasLista[i].OBSERVACAO           := lQry.FieldByName('OBSERVACAO').AsString;
-      FCaixasLista[i].DR                   := lQry.FieldByName('DR').AsString;
-      FCaixasLista[i].ID                   := lQry.FieldByName('ID').AsString;
-      FCaixasLista[i].TROCO                := lQry.FieldByName('TROCO').AsString;
-      FCaixasLista[i].CARGA_ID             := lQry.FieldByName('CARGA_ID').AsString;
-      FCaixasLista[i].TIPO                 := lQry.FieldByName('TIPO').AsString;
-      FCaixasLista[i].SUB_ID               := lQry.FieldByName('SUB_ID').AsString;
-      FCaixasLista[i].LOCACAO_ID           := lQry.FieldByName('LOCACAO_ID').AsString;
-      FCaixasLista[i].FUNCIONARIO_ID       := lQry.FieldByName('FUNCIONARIO_ID').AsString;
-      FCaixasLista[i].OS_ID                := lQry.FieldByName('OS_ID').AsString;
-      FCaixasLista[i].PLACA                := lQry.FieldByName('PLACA').AsString;
-      FCaixasLista[i].TRANSFERENCIA_ORIGEM := lQry.FieldByName('TRANSFERENCIA_ORIGEM').AsString;
-      FCaixasLista[i].TRANSFERENCIA_ID     := lQry.FieldByName('TRANSFERENCIA_ID').AsString;
-      FCaixasLista[i].COMPETENCIA          := lQry.FieldByName('COMPETENCIA').AsString;
-      FCaixasLista[i].SYSTIME              := lQry.FieldByName('SYSTIME').AsString;
-      FCaixasLista[i].LOJA_REMOTO          := lQry.FieldByName('LOJA_REMOTO').AsString;
-      FCaixasLista[i].PEDIDO_ID            := lQry.FieldByName('PEDIDO_ID').AsString;
+      modelo.NUMERO_CAI           := lQry.FieldByName('NUMERO_CAI').AsString;
+      modelo.CODIGO_CTA           := lQry.FieldByName('CODIGO_CTA').AsString;
+      modelo.DATA_CAI             := lQry.FieldByName('DATA_CAI').AsString;
+      modelo.HORA_CAI             := lQry.FieldByName('HORA_CAI').AsString;
+      modelo.HISTORICO_CAI        := lQry.FieldByName('HISTORICO_CAI').AsString;
+      modelo.VALOR_CAI            := lQry.FieldByName('VALOR_CAI').AsString;
+      modelo.USUARIO_CAI          := lQry.FieldByName('USUARIO_CAI').AsString;
+      modelo.TIPO_CAI             := lQry.FieldByName('TIPO_CAI').AsString;
+      modelo.CLIENTE_CAI          := lQry.FieldByName('CLIENTE_CAI').AsString;
+      modelo.NUMERO_PED           := lQry.FieldByName('NUMERO_PED').AsString;
+      modelo.FATURA_CAI           := lQry.FieldByName('FATURA_CAI').AsString;
+      modelo.PARCELA_CAI          := lQry.FieldByName('PARCELA_CAI').AsString;
+      modelo.STATUS               := lQry.FieldByName('STATUS').AsString;
+      modelo.PORTADOR_CAI         := lQry.FieldByName('PORTADOR_CAI').AsString;
+      modelo.CONCILIADO_CAI       := lQry.FieldByName('CONCILIADO_CAI').AsString;
+      modelo.DATA_CON             := lQry.FieldByName('DATA_CON').AsString;
+      modelo.CENTRO_CUSTO         := lQry.FieldByName('CENTRO_CUSTO').AsString;
+      modelo.LOJA                 := lQry.FieldByName('LOJA').AsString;
+      modelo.RECIBO               := lQry.FieldByName('RECIBO').AsString;
+      modelo.RELATORIO            := lQry.FieldByName('RELATORIO').AsString;
+      modelo.OBSERVACAO           := lQry.FieldByName('OBSERVACAO').AsString;
+      modelo.DR                   := lQry.FieldByName('DR').AsString;
+      modelo.ID                   := lQry.FieldByName('ID').AsString;
+      modelo.TROCO                := lQry.FieldByName('TROCO').AsString;
+      modelo.CARGA_ID             := lQry.FieldByName('CARGA_ID').AsString;
+      modelo.TIPO                 := lQry.FieldByName('TIPO').AsString;
+      modelo.SUB_ID               := lQry.FieldByName('SUB_ID').AsString;
+      modelo.LOCACAO_ID           := lQry.FieldByName('LOCACAO_ID').AsString;
+      modelo.FUNCIONARIO_ID       := lQry.FieldByName('FUNCIONARIO_ID').AsString;
+      modelo.OS_ID                := lQry.FieldByName('OS_ID').AsString;
+      modelo.PLACA                := lQry.FieldByName('PLACA').AsString;
+      modelo.TRANSFERENCIA_ORIGEM := lQry.FieldByName('TRANSFERENCIA_ORIGEM').AsString;
+      modelo.TRANSFERENCIA_ID     := lQry.FieldByName('TRANSFERENCIA_ID').AsString;
+      modelo.COMPETENCIA          := lQry.FieldByName('COMPETENCIA').AsString;
+      modelo.SYSTIME              := lQry.FieldByName('SYSTIME').AsString;
+      modelo.LOJA_REMOTO          := lQry.FieldByName('LOJA_REMOTO').AsString;
+      modelo.PEDIDO_ID            := lQry.FieldByName('PEDIDO_ID').AsString;
 
       lQry.Next;
     end;
@@ -359,7 +358,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TCaixaDao.SetCaixasLista(const Value: TObjectList<TCaixaModel>);
+procedure TCaixaDao.SetCaixasLista;
 begin
   FCaixasLista := Value;
 end;

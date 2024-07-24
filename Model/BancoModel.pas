@@ -336,7 +336,6 @@ begin
   inherited;
 end;
 
-
 function TBancoModel.Salvar: String;
 var
   lBancoDao: TBancoDao;

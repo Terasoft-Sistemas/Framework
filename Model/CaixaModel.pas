@@ -4,7 +4,7 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao, FireDAC.Comp.Client;
 
 type
@@ -13,7 +13,7 @@ type
   private
     vIConexao : IConexao;
 
-    FCaixasLista: TObjectList<TCaixaModel>;
+    FCaixasLista: IList<TCaixaModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -62,7 +62,7 @@ type
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetDATA_CADASTRO(const Value: Variant);
-    procedure SetCaixasLista(const Value: TObjectList<TCaixaModel>);
+    procedure SetCaixasLista(const Value: IList<TCaixaModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -158,7 +158,7 @@ type
 
     procedure excluirRegistro(pIdRegistro: String);
 
-    property CaixasLista: TObjectList<TCaixaModel> read FCaixasLista write SetCaixasLista;
+    property CaixasLista: IList<TCaixaModel> read FCaixasLista write SetCaixasLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -346,7 +346,7 @@ begin
   FHORA_CAI := Value;
 end;
 
-procedure TCaixaModel.SetCaixasLista(const Value: TObjectList<TCaixaModel>);
+procedure TCaixaModel.SetCaixasLista;
 begin
   FCaixasLista := Value;
 end;

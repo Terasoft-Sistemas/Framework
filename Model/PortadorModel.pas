@@ -209,6 +209,7 @@ end;
 
 destructor TPortadorModel.Destroy;
 begin
+  FPortadorsLista := nil;
   vIConexao := nil;
   inherited;
 end;
