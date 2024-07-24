@@ -125,6 +125,7 @@ end;
 
 destructor TContagemFechamentoModel.Destroy;
 begin
+  vIConexao := nil;
   inherited;
 end;
 
