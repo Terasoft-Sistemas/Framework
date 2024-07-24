@@ -4,14 +4,13 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao,
   FireDAC.Comp.Client,
   PedidoVendaModel,
   PedidoItensModel,
   OrcamentoItensModel,
   EmpresaModel,
-  Spring.Collections,
   ProdutosModel,
   Terasoft.Utils;
 
@@ -329,6 +328,7 @@ end;
 
 destructor TOrcamentoModel.Destroy;
 begin
+  vIConexao := nil;
   inherited;
 end;
 
