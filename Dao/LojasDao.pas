@@ -8,7 +8,8 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  //System.Generics.Collections,
+  Spring.Collections,
   System.Variants,
   Interfaces.Conexao;
 
@@ -19,7 +20,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FLojassLista: TObjectList<TLojasModel>;
+    FLojassLista: IList<TLojasModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -31,7 +32,7 @@ type
     FLojaView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetLojassLista(const Value: TObjectList<TLojasModel>);
+    procedure SetLojassLista(const Value: IList<TLojasModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -47,7 +48,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property LojassLista: TObjectList<TLojasModel> read FLojassLista write SetLojassLista;
+    property LojassLista: IList<TLojasModel> read FLojassLista write SetLojassLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -76,6 +77,7 @@ end;
 
 destructor TLojasDao.Destroy;
 begin
+  FLojassLista := nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -121,11 +123,11 @@ function TLojasDao.obterFiliais: IFDDataset;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: TLojasModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FLojassLista := TObjectList<TLojasModel>.Create;
+  FLojassLista := TCollections.CreateList<TLojasModel>(true);
 
   try
     lSQL := ' select                               ' + sLineBreak +
@@ -156,11 +158,11 @@ procedure TLojasDao.obterHosts;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: TLojasModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FLojassLista := TObjectList<TLojasModel>.Create;
+  FLojassLista := TCollections.CreateList<TLojasModel>(true);
 
   try
     lSQL := ' select hosts.loja,                          ' + #13+
@@ -172,16 +174,14 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FLojassLista.Add(TLojasModel.Create(vIConexao));
+      modelo := TLojasModel.Create(vIConexao);
+      FLojassLista.Add(modelo);
 
-      i := FLojassLista.Count -1;
-
-      FLojassLista[i].LOJA           := lQry.FieldByName('LOJA').AsString;
-      FLojassLista[i].STRING_CONEXAO := lQry.FieldByName('STRING_CONEXAO').AsString;
+      modelo.LOJA           := lQry.FieldByName('LOJA').AsString;
+      modelo.STRING_CONEXAO := lQry.FieldByName('STRING_CONEXAO').AsString;
 
       lQry.Next;
     end;
@@ -194,11 +194,11 @@ procedure TLojasDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: TLojasModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FLojassLista := TObjectList<TLojasModel>.Create;
+  FLojassLista := TCollections.CreateList<TLojasModel>(true);
 
   try
     lSQL := ' select                           ' + #13 +
@@ -218,21 +218,19 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FLojassLista.Add(TLojasModel.Create(vIConexao));
+      modelo := TLojasModel.Create(vIConexao);
+      FLojassLista.Add(modelo);
 
-      i := FLojassLista.Count -1;
-
-      FLojassLista[i].CD           := lQry.FieldByName('CD').AsString;
-      FLojassLista[i].LOJA         := lQry.FieldByName('LOJA').AsString;
-      FLojassLista[i].DESCRICAO    := lQry.FieldByName('DESCRICAO').AsString;
-      FLojassLista[i].SERVER       := lQry.FieldByName('SERVER').AsString;
-      FLojassLista[i].PORT         := lQry.FieldByName('PORT').AsString;
-      FLojassLista[i].DATABASE     := lQry.FieldByName('DATABASE').AsString;
-      FLojassLista[i].CLIENTE_ID   := lQry.FieldByName('CLIENTE_ID').AsString;
+      modelo.CD           := lQry.FieldByName('CD').AsString;
+      modelo.LOJA         := lQry.FieldByName('LOJA').AsString;
+      modelo.DESCRICAO    := lQry.FieldByName('DESCRICAO').AsString;
+      modelo.SERVER       := lQry.FieldByName('SERVER').AsString;
+      modelo.PORT         := lQry.FieldByName('PORT').AsString;
+      modelo.DATABASE     := lQry.FieldByName('DATABASE').AsString;
+      modelo.CLIENTE_ID   := lQry.FieldByName('CLIENTE_ID').AsString;
 
       lQry.Next;
     end;
@@ -254,7 +252,7 @@ begin
   FLojaView := Value;
 end;
 
-procedure TLojasDao.SetLojassLista(const Value: TObjectList<TLojasModel>);
+procedure TLojasDao.SetLojassLista;
 begin
   FLojassLista := Value;
 end;

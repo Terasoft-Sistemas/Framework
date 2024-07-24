@@ -4,7 +4,8 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  //System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao, FireDAC.Comp.Client;
 
 type
@@ -12,7 +13,7 @@ type
 
   private
     vIConexao : IConexao;
-    FLojassLista: TObjectList<TLojasModel>;
+    FLojassLista: IList<TLojasModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -32,7 +33,7 @@ type
     FSTRING_CONEXAO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetLojassLista(const Value: TObjectList<TLojasModel>);
+    procedure SetLojassLista(const Value: IList<TLojasModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -66,7 +67,7 @@ type
     procedure obterHosts;
     function obterFiliais: IFDDataset;
 
-    property LojassLista: TObjectList<TLojasModel> read FLojassLista write SetLojassLista;
+    property LojassLista: IList<TLojasModel> read FLojassLista write SetLojassLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -211,7 +212,7 @@ begin
   FLojaView := Value;
 end;
 
-procedure TLojasModel.SetLojassLista(const Value: TObjectList<TLojasModel>);
+procedure TLojasModel.SetLojassLista;
 begin
   FLojassLista := Value;
 end;

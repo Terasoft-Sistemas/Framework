@@ -19,7 +19,7 @@ uses
     private
       [weak]vIConexao        : IConexao;
       vPerfil          : String;
-      vmtConfiguracoes : TFDMemTable;
+      vmtConfiguracoes : IFDDataset;
 
       procedure preparaTabela;
       procedure carregarConfiguracoes;
@@ -51,19 +51,19 @@ begin
 
     for lModel in lConfiguracoesModel.ConfiguracoessLista do
     begin
-      vmtConfiguracoes.Append;
-      vmtConfiguracoes.FieldByName('ID').Value             := IIF(lModel.ID             = '', Unassigned, lModel.ID);
-      vmtConfiguracoes.FieldByName('TAG').Value            := IIF(lModel.TAG            = '', Unassigned, lModel.TAG);
-      vmtConfiguracoes.FieldByName('PERFIL_ID').Value      := IIF(lModel.PERFIL_ID      = '', Unassigned, lModel.PERFIL_ID);
-      vmtConfiguracoes.FieldByName('VALORINTEIRO').Value   := IIF(lModel.VALORINTEIRO   = '', Unassigned, lModel.VALORINTEIRO);
-      vmtConfiguracoes.FieldByName('VALORSTRING').Value    := IIF(lModel.VALORSTRING    = '', Unassigned, lModel.VALORSTRING);
-      vmtConfiguracoes.FieldByName('VALORNUMERICO').Value  := IIF(lModel.VALORNUMERICO  = '', Unassigned, lModel.VALORNUMERICO);
-      vmtConfiguracoes.FieldByName('VALORCHAR').Value      := IIF(lModel.VALORCHAR      = '', Unassigned, lModel.VALORCHAR);
-      vmtConfiguracoes.FieldByName('VALORDATA').Value      := IIF(lModel.VALORDATA      = '', Unassigned, lModel.VALORDATA);
-      vmtConfiguracoes.FieldByName('VALORHORA').Value      := IIF(lModel.VALORHORA      = '', Unassigned, lModel.VALORHORA);
-      vmtConfiguracoes.FieldByName('VALORDATAHORA').Value  := IIF(lModel.VALORDATAHORA  = '', Unassigned, lModel.VALORDATAHORA);
-      vmtConfiguracoes.FieldByName('VALORMEMO').Value      := IIF(lModel.VALORMEMO      = '', Unassigned, lModel.VALORMEMO);
-      vmtConfiguracoes.Post;
+      vmtConfiguracoes.objeto.Append;
+      vmtConfiguracoes.objeto.FieldByName('ID').Value             := IIF(lModel.ID             = '', Unassigned, lModel.ID);
+      vmtConfiguracoes.objeto.FieldByName('TAG').Value            := IIF(lModel.TAG            = '', Unassigned, lModel.TAG);
+      vmtConfiguracoes.objeto.FieldByName('PERFIL_ID').Value      := IIF(lModel.PERFIL_ID      = '', Unassigned, lModel.PERFIL_ID);
+      vmtConfiguracoes.objeto.FieldByName('VALORINTEIRO').Value   := IIF(lModel.VALORINTEIRO   = '', Unassigned, lModel.VALORINTEIRO);
+      vmtConfiguracoes.objeto.FieldByName('VALORSTRING').Value    := IIF(lModel.VALORSTRING    = '', Unassigned, lModel.VALORSTRING);
+      vmtConfiguracoes.objeto.FieldByName('VALORNUMERICO').Value  := IIF(lModel.VALORNUMERICO  = '', Unassigned, lModel.VALORNUMERICO);
+      vmtConfiguracoes.objeto.FieldByName('VALORCHAR').Value      := IIF(lModel.VALORCHAR      = '', Unassigned, lModel.VALORCHAR);
+      vmtConfiguracoes.objeto.FieldByName('VALORDATA').Value      := IIF(lModel.VALORDATA      = '', Unassigned, lModel.VALORDATA);
+      vmtConfiguracoes.objeto.FieldByName('VALORHORA').Value      := IIF(lModel.VALORHORA      = '', Unassigned, lModel.VALORHORA);
+      vmtConfiguracoes.objeto.FieldByName('VALORDATAHORA').Value  := IIF(lModel.VALORDATAHORA  = '', Unassigned, lModel.VALORDATAHORA);
+      vmtConfiguracoes.objeto.FieldByName('VALORMEMO').Value      := IIF(lModel.VALORMEMO      = '', Unassigned, lModel.VALORMEMO);
+      vmtConfiguracoes.objeto.Post;
     end;
   finally
     lConfiguracoesModel.Free;
@@ -76,7 +76,7 @@ begin
   if(vIConexao.terasoftConfiguracoes=nil) then
     vIConexao.terasoftConfiguracoes := self;
 
-  vmtConfiguracoes := TFDMemTable.Create(nil);
+  vmtConfiguracoes := criaIFDDataset(TFDMemTable.Create(nil));
 
   preparaTabela;
   carregarConfiguracoes;
@@ -86,14 +86,14 @@ destructor TerasoftConfiguracoes.Destroy;
 begin
   if(vIConexao.terasoftConfiguracoes=self) then
     vIConexao.setTerasoftConfiguracoes(nil);
-  freeAndNil(vmtConfiguracoes);
+  vmtConfiguracoes := nil;
   vIConexao := nil;
   inherited;
 end;
 
 procedure TerasoftConfiguracoes.preparaTabela;
 begin
-  with vmtConfiguracoes.FieldDefs do begin
+  with TFDMemTable(vmtConfiguracoes.objeto).FieldDefs do begin
     with AddFieldDef do begin
       Name      := 'ID';
       DataType  := ftString;
@@ -155,7 +155,7 @@ begin
       DataType  := ftMemo;
     end;
 
-    vmtConfiguracoes.Open;
+    vmtConfiguracoes.objeto.Open;
   end;
 end;
 
@@ -190,11 +190,11 @@ begin
     exit;
   end;
 
-  vmtConfiguracoes.First;
+  vmtConfiguracoes.objeto.First;
 
   if pPerfil <> '' then
   begin
-    if not vmtConfiguracoes.Locate('TAG;PERFIL_ID', VarArrayOf([tag, pPerfil]), []) then
+    if not vmtConfiguracoes.objeto.Locate('TAG;PERFIL_ID', VarArrayOf([tag, pPerfil]), []) then
     begin
       Result := valorPadrao;
       exit;
@@ -202,7 +202,7 @@ begin
   end
   else
   begin
-    if not vmtConfiguracoes.Locate('TAG', tag, []) then
+    if not vmtConfiguracoes.objeto.Locate('TAG', tag, []) then
     begin
       Result := valorPadrao;
       exit;
@@ -222,7 +222,7 @@ begin
     tvEmpresa   : lNomeCampo := tag;
   end;
 
-  lField := vmtConfiguracoes.FindField(lNomeCampo);
+  lField := vmtConfiguracoes.objeto.FindField(lNomeCampo);
 
   if lField.IsNull then
     Result := ValorPadrao
