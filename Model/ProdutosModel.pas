@@ -5,9 +5,8 @@ interface
 uses
   Terasoft.Types,
   Terasoft.Utils,
-  System.Generics.Collections,
   Interfaces.Conexao,
-  Terasoft.Framework.ObjectIface,
+  Spring.Collections,
   FireDAC.Comp.Client;
 
 type
@@ -46,7 +45,7 @@ type
 
   private
     vIConexao : IConexao;
-    FProdutossLista: TObjectList<TProdutosModel>;
+    FProdutossLista: IList<TProdutosModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -334,7 +333,7 @@ type
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetProdutossLista(const Value: TObjectList<TProdutosModel>);
+    procedure SetProdutossLista(const Value: IList<TProdutosModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -926,7 +925,7 @@ type
 
     procedure verificarCustoMedio;
 
-    property ProdutossLista: TObjectList<TProdutosModel> read FProdutossLista write SetProdutossLista;
+    property ProdutossLista: IList<TProdutosModel> read FProdutossLista write SetProdutossLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -1096,6 +1095,7 @@ end;
 
 destructor TProdutosModel.Destroy;
 begin
+  vIConexao := nil;
   inherited;
 end;
 
@@ -1256,7 +1256,7 @@ begin
   if pCodProduto = '' then
     CriaException('Produto não informado');
 
-  lMemTable           := TImplObjetoOwner<TDataset>.CreateOwner(TFDMemTable.Create(nil));
+  lMemTable           := criaIFDDataset(TFDMemTable.Create(nil));
   lPromocaoModel      := TPromocaoModel.Create(vIConexao);
   lPromocaoItensModel := TPromocaoItensModel.Create(vIConexao);
 
@@ -1849,7 +1849,7 @@ procedure TProdutosModel.SetPRINCIPIO_ATIVO(const Value: Variant);
 begin
   FPRINCIPIO_ATIVO := Value;
 end;
-procedure TProdutosModel.SetProdutossLista(const Value: TObjectList<TProdutosModel>);
+procedure TProdutosModel.SetProdutossLista;
 begin
   FProdutossLista := Value;
 end;
