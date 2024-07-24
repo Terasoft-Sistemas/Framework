@@ -17,7 +17,7 @@ uses
     TerasoftConfiguracoes = class
 
     private
-      vIConexao        : IConexao;
+      [weak]vIConexao        : IConexao;
       vPerfil          : String;
       vmtConfiguracoes : TFDMemTable;
 
@@ -73,6 +73,9 @@ end;
 constructor TerasoftConfiguracoes.Create(pIConexao : IConexao);
 begin
   vIConexao        := pIConexao;
+  if(vIConexao.terasoftConfiguracoes=nil) then
+    vIConexao.terasoftConfiguracoes := self;
+
   vmtConfiguracoes := TFDMemTable.Create(nil);
 
   preparaTabela;
@@ -81,6 +84,8 @@ end;
 
 destructor TerasoftConfiguracoes.Destroy;
 begin
+  if(vIConexao.terasoftConfiguracoes=self) then
+    vIConexao.setTerasoftConfiguracoes(nil);
   freeAndNil(vmtConfiguracoes);
   vIConexao := nil;
   inherited;
