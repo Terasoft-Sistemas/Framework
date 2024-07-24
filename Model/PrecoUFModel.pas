@@ -118,7 +118,8 @@ end;
 
 destructor TPrecoUFModel.Destroy;
 begin
-
+  FPrecoUFsLista := nil;
+  vIConexao := nil;
   inherited;
 end;
 

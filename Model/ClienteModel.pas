@@ -3,7 +3,7 @@ interface
 uses
   Classes,
   Terasoft.Types,
-  System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao,
   Terasoft.Framework.Texto,
   Terasoft.Model.Base,
@@ -13,7 +13,7 @@ type
   TClienteModel = class(Terasoft.Model.Base.TModelBase)
 
   private
-    FClientesLista: TObjectList<TClienteModel>;
+    FClientesLista: IList<TClienteModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -337,7 +337,7 @@ type
     Ftelefone_contador_cli: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetClientesLista(const Value: TObjectList<TClienteModel>);
+    procedure SetClientesLista(const Value: IList<TClienteModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -996,7 +996,7 @@ type
     function ObterBairros: IFDDataset;
     procedure bloquearCNPJCPF(pCliente, pCNPJCPF: String);
 
-    property ClientesLista: TObjectList<TClienteModel> read FClientesLista write SetClientesLista;
+    property ClientesLista: IList<TClienteModel> read FClientesLista write SetClientesLista;
 
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -1115,8 +1115,8 @@ end;
 
 procedure TClienteModel.doDestroy;
 begin
+  FClientesLista := nil;
   inherited;
-
 end;
 
 function TClienteModel.nomeCliente(pId: String): Variant;
@@ -1909,7 +1909,7 @@ begin
   Fjuros_bol := Value;
 end;
 
-procedure TClienteModel.SetClientesLista(const Value: TObjectList<TClienteModel>);
+procedure TClienteModel.SetClientesLista;
 begin
   FClientesLista := Value;
 end;
