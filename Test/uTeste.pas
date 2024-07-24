@@ -210,6 +210,7 @@ type
     SpeedButton1: TSpeedButton;
     dbGridTabelaJuros: TXDBGrid;
     dsJuros: TDataSource;
+    SpeedButton2: TSpeedButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -359,6 +360,7 @@ type
     procedure Button133Click(Sender: TObject);
     procedure btnObterJurosPromocaoClick(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
+    procedure SpeedButton2Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -4184,6 +4186,31 @@ begin
     lTabelaJurosPromocaoModel.Free;
   end;
 
+end;
+
+procedure TForm1.SpeedButton2Click(Sender: TObject);
+var
+  lFinanceiroPedidoModel : TFinanceiroPedidoModel;
+  IDRegistro             : String;
+begin
+  lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
+
+  try
+    try
+      IDRegistro := InputBox('FinanceiroPedido', 'Digite o ID do registro Financeiro:', '');
+
+      if IDRegistro.IsEmpty then
+        exit;
+
+      lFinanceiroPedidoModel.ArredondaParcela(160,IDRegistro);
+
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lFinanceiroPedidoModel.Free;
+  end;
 end;
 
 end.

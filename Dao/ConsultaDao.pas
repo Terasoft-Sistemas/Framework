@@ -7,7 +7,7 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  Spring.Collections,
   System.Variants,
   Terasoft.ConstrutorDao,
   Interfaces.Conexao;
@@ -19,7 +19,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FConsultasLista: TObjectList<TConsultaModel>;
+    FConsultasLista: IList<TConsultaModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -33,7 +33,7 @@ type
     FCodigoView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetConsultasLista(const Value: TObjectList<TConsultaModel>);
+    procedure SetConsultasLista(const Value: IList<TConsultaModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -51,7 +51,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property ConsultasLista: TObjectList<TConsultaModel> read FConsultasLista write SetConsultasLista;
+    property ConsultasLista: IList<TConsultaModel> read FConsultasLista write SetConsultasLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -80,6 +80,7 @@ end;
 
 destructor TConsultaDao.Destroy;
 begin
+  FConsultasLista := nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -122,11 +123,11 @@ procedure TConsultaDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: TConsultaModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FConsultasLista := TObjectList<TConsultaModel>.Create;
+  FConsultasLista := TCollections.CreateList<TConsultaModel>(true);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -147,16 +148,14 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FConsultasLista.Add(TConsultaModel.Create(vIConexao));
+      modelo := TConsultaModel.Create(vIConexao);
+      FConsultasLista.Add(modelo);
 
-      i := FConsultasLista.Count -1;
-
-      FConsultasLista[i].CODIGO      := lQry.FieldByName('CODIGO').AsString;
-      FConsultasLista[i].DESCRICAO   := lQry.FieldByName('DESCRICAO').AsString;
+      modelo.CODIGO      := lQry.FieldByName('CODIGO').AsString;
+      modelo.DESCRICAO   := lQry.FieldByName('DESCRICAO').AsString;
 
       lQry.Next;
     end;
@@ -183,7 +182,7 @@ begin
   FDescricaoView := Value;
 end;
 
-procedure TConsultaDao.SetConsultasLista(const Value: TObjectList<TConsultaModel>);
+procedure TConsultaDao.SetConsultasLista;
 begin
   FConsultasLista := Value;
 end;

@@ -1,8 +1,8 @@
 object Form1: TForm1
   Left = 0
-  Top = 0
+  Top = 270
   Caption = 'Form1'
-  ClientHeight = 749
+  ClientHeight = 753
   ClientWidth = 1250
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -10,23 +10,32 @@ object Form1: TForm1
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
-  Position = poScreenCenter
+  Position = poDesigned
   OnCreate = FormCreate
   TextHeight = 15
   object PageControl: TPageControl
     Left = 0
     Top = 0
     Width = 1250
-    Height = 749
-    ActivePage = TabelaJurosPromocao
+    Height = 753
+    ActivePage = TabSheet1
     Align = alClient
     TabOrder = 0
+    ExplicitHeight = 749
     object TabSheet1: TTabSheet
       Caption = 'Diversos'
-      object memoResultado: TMemo
-        Left = 816
+      object SpeedButton2: TSpeedButton
+        Left = 755
         Top = 15
-        Width = 409
+        Width = 143
+        Height = 42
+        Caption = 'Arredonda Parcela'
+        OnClick = SpeedButton2Click
+      end
+      object memoResultado: TMemo
+        Left = 904
+        Top = 15
+        Width = 321
         Height = 681
         ScrollBars = ssVertical
         TabOrder = 0
@@ -658,7 +667,7 @@ object Form1: TForm1
       ImageIndex = 1
       object dbTeste2: TXDBGrid
         Left = 0
-        Top = 96
+        Top = 100
         Width = 1242
         Height = 623
         Align = alBottom
@@ -708,7 +717,7 @@ object Form1: TForm1
       ImageIndex = 2
       object XDBGrid1: TXDBGrid
         Left = 0
-        Top = 470
+        Top = 474
         Width = 1242
         Height = 249
         Align = alBottom
@@ -718,7 +727,7 @@ object Form1: TForm1
       end
       object XDBGrid2: TXDBGrid
         Left = 0
-        Top = 308
+        Top = 312
         Width = 1242
         Height = 162
         Align = alBottom
@@ -813,7 +822,7 @@ object Form1: TForm1
       ImageIndex = 3
       object XDBGrid3: TXDBGrid
         Left = 0
-        Top = 414
+        Top = 418
         Width = 1242
         Height = 305
         Align = alBottom
@@ -923,7 +932,7 @@ object Form1: TForm1
       ImageIndex = 6
       object XDBGrid4: TXDBGrid
         Left = 0
-        Top = 277
+        Top = 281
         Width = 1242
         Height = 169
         Align = alBottom
@@ -951,7 +960,7 @@ object Form1: TForm1
       end
       object XDBGrid5: TXDBGrid
         Left = 0
-        Top = 446
+        Top = 450
         Width = 1242
         Height = 273
         Align = alBottom
@@ -1064,7 +1073,7 @@ object Form1: TForm1
       end
       object XDBGrid6: TXDBGrid
         Left = 0
-        Top = 310
+        Top = 314
         Width = 1242
         Height = 409
         Align = alBottom
@@ -1154,7 +1163,7 @@ object Form1: TForm1
       end
       object XDBGrid7: TXDBGrid
         Left = 0
-        Top = 414
+        Top = 418
         Width = 1242
         Height = 305
         Align = alBottom
@@ -1320,7 +1329,7 @@ object Form1: TForm1
       end
       object XDBGrid8: TXDBGrid
         Left = 0
-        Top = 414
+        Top = 418
         Width = 1242
         Height = 305
         Align = alBottom
@@ -1379,7 +1388,7 @@ object Form1: TForm1
       ImageIndex = 13
       object XDBGrid9: TXDBGrid
         Left = 0
-        Top = 504
+        Top = 508
         Width = 1242
         Height = 215
         Align = alBottom
@@ -1491,12 +1500,13 @@ object Form1: TForm1
       end
       object Memo1: TMemo
         Left = 0
-        Top = 464
+        Top = 468
         Width = 1242
         Height = 255
         Align = alBottom
         ScrollBars = ssVertical
         TabOrder = 1
+        ExplicitTop = 548
       end
     end
     object TabelaJurosPromocao: TTabSheet
@@ -1521,7 +1531,7 @@ object Form1: TForm1
       end
       object dbGridTabelaJuros: TXDBGrid
         Left = 0
-        Top = 504
+        Top = 508
         Width = 1242
         Height = 215
         Align = alBottom
