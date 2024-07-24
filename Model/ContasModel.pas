@@ -173,7 +173,8 @@ end;
 
 destructor TContasModel.Destroy;
 begin
-
+  FContassLista := nil;
+  vIConexao := nil;
   inherited;
 end;
 
