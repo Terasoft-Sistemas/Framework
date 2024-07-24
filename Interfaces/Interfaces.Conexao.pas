@@ -106,6 +106,13 @@ interface
 
     end;
 
+    function criaIFDDataset(const obj: TDataSet): IFDDataset;
+
 implementation
+
+function criaIFDDataset(const obj: TDataSet): IFDDataset;
+begin
+  Result := TImplObjetoOwner<TDataset>.CreateOwner(obj);
+end;
 
 end.

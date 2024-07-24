@@ -413,7 +413,7 @@ begin
 
   lContasPagarDao := TContasPagarDao.Create(vIConexao);
   lEntradaModel   := TEntradaModel.Create(vIConexao);
-  lMemTable       := TFDMemTable.Create(nil);
+  lMemTable       := criaIFDDataset(TFDMemTable.Create(nil));
 
   try
     lEntradaModel.NumeroView     := pEntrada;
@@ -422,10 +422,10 @@ begin
     lTotalEntradaFornecedor := lEntradaModel.obterTotalizador.objeto.fieldByName('TOTAL_ENTRADA').AsFloat;
     lTotalFinanceiro        := lContasPagarDao.FinanceiroEntrada(pEntrada, pFornecedor);
 
-    lMemTable.FieldDefs.Add('VALOR', ftFloat);
-    lMemTable.CreateDataSet;
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('VALOR', ftFloat);
+    TFDMemTable(lMemTable.objeto).CreateDataSet;
 
-    lMemTable.InsertRecord([RoundTo(lTotalEntradaFornecedor - lTotalFinanceiro, -2)]);
+    lMemTable.objeto.InsertRecord([RoundTo(lTotalEntradaFornecedor - lTotalFinanceiro, -2)]);
 
     Result := lMemTable;
 
