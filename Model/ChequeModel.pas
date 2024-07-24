@@ -191,6 +191,7 @@ end;
 
 destructor TChequeModel.Destroy;
 begin
+  vIConexao := nil;
   inherited;
 end;
 

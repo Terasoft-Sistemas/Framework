@@ -7,7 +7,7 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  Spring.Collections,
   System.Variants,
   Interfaces.Conexao,
   Terasoft.ConstrutorDao,
@@ -20,7 +20,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FPromocaosLista: TObjectList<TPromocaoModel>;
+    FPromocaosLista: IList<TPromocaoModel>;
     FLengthPageView: String;
     FStartRecordView: String;
     FID: Variant;
@@ -32,7 +32,7 @@ type
     FCodProdutoView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetPromocaosLista(const Value: TObjectList<TPromocaoModel>);
+    procedure SetPromocaosLista(const Value: IList<TPromocaoModel>);
     procedure SetID(const Value: Variant);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -50,7 +50,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property PromocaosLista: TObjectList<TPromocaoModel> read FPromocaosLista write SetPromocaosLista;
+    property PromocaosLista: IList<TPromocaoModel> read FPromocaosLista write SetPromocaosLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -127,6 +127,7 @@ end;
 
 destructor TPromocaoDao.Destroy;
 begin
+  FPromocaosLista := nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -232,11 +233,11 @@ procedure TPromocaoDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo : TPromocaoModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FPromocaosLista := TObjectList<TPromocaoModel>.Create;
+  FPromocaosLista := TCollections.CreateList<TPromocaoModel>(true);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -273,33 +274,31 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FPromocaosLista.Add(TPromocaoModel.Create(vIConexao));
+      modelo := TPromocaoModel.Create(vIConexao);
+      FPromocaosLista.Add(modelo);
 
-      i := FPromocaosLista.Count -1;
-
-      FPromocaosLista[i].ID              := lQry.FieldByName('ID').AsString;
-      FPromocaosLista[i].DESCRICAO       := lQry.FieldByName('DESCRICAO').AsString;
-      FPromocaosLista[i].DATA            := lQry.FieldByName('DATA').AsString;
-      FPromocaosLista[i].DATAINICIO      := lQry.FieldByName('DATAINICIO').AsString;
-      FPromocaosLista[i].DATAFIM         := lQry.FieldByName('DATAFIM').AsString;
-      FPromocaosLista[i].CLIENTE_ID      := lQry.FieldByName('CLIENTE_ID').AsString;
-      FPromocaosLista[i].PRECO_VENDA_ID  := lQry.FieldByName('PRECO_VENDA_ID').AsString;
-      FPromocaosLista[i].HORAINICIO      := lQry.FieldByName('HORAINICIO').AsString;
-      FPromocaosLista[i].HORAFIM         := lQry.FieldByName('HORAFIM').AsString;
-      FPromocaosLista[i].DOMINGO         := lQry.FieldByName('DOMINGO').AsString;
-      FPromocaosLista[i].SEGUNDA         := lQry.FieldByName('SEGUNDA').AsString;
-      FPromocaosLista[i].TERCA           := lQry.FieldByName('TERCA').AsString;
-      FPromocaosLista[i].QUARTA          := lQry.FieldByName('QUARTA').AsString;
-      FPromocaosLista[i].QUINTA          := lQry.FieldByName('QUINTA').AsString;
-      FPromocaosLista[i].SEXTA           := lQry.FieldByName('SEXTA').AsString;
-      FPromocaosLista[i].SABADO          := lQry.FieldByName('SABADO').AsString;
-      FPromocaosLista[i].PORTADOR_ID     := lQry.FieldByName('PORTADOR_ID').AsString;
-      FPromocaosLista[i].LOJA            := lQry.FieldByName('LOJA').AsString;
-      FPromocaosLista[i].TIPO_ABATIMENTO := lQry.FieldByName('TIPO_ABATIMENTO').AsString;
+      modelo.ID              := lQry.FieldByName('ID').AsString;
+      modelo.DESCRICAO       := lQry.FieldByName('DESCRICAO').AsString;
+      modelo.DATA            := lQry.FieldByName('DATA').AsString;
+      modelo.DATAINICIO      := lQry.FieldByName('DATAINICIO').AsString;
+      modelo.DATAFIM         := lQry.FieldByName('DATAFIM').AsString;
+      modelo.CLIENTE_ID      := lQry.FieldByName('CLIENTE_ID').AsString;
+      modelo.PRECO_VENDA_ID  := lQry.FieldByName('PRECO_VENDA_ID').AsString;
+      modelo.HORAINICIO      := lQry.FieldByName('HORAINICIO').AsString;
+      modelo.HORAFIM         := lQry.FieldByName('HORAFIM').AsString;
+      modelo.DOMINGO         := lQry.FieldByName('DOMINGO').AsString;
+      modelo.SEGUNDA         := lQry.FieldByName('SEGUNDA').AsString;
+      modelo.TERCA           := lQry.FieldByName('TERCA').AsString;
+      modelo.QUARTA          := lQry.FieldByName('QUARTA').AsString;
+      modelo.QUINTA          := lQry.FieldByName('QUINTA').AsString;
+      modelo.SEXTA           := lQry.FieldByName('SEXTA').AsString;
+      modelo.SABADO          := lQry.FieldByName('SABADO').AsString;
+      modelo.PORTADOR_ID     := lQry.FieldByName('PORTADOR_ID').AsString;
+      modelo.LOJA            := lQry.FieldByName('LOJA').AsString;
+      modelo.TIPO_ABATIMENTO := lQry.FieldByName('TIPO_ABATIMENTO').AsString;
 
       lQry.Next;
     end;
@@ -321,7 +320,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TPromocaoDao.SetPromocaosLista(const Value: TObjectList<TPromocaoModel>);
+procedure TPromocaoDao.SetPromocaosLista;
 begin
   FPromocaosLista := Value;
 end;
