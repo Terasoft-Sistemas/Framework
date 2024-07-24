@@ -7,7 +7,7 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  Spring.Collections,
   System.Variants,
   Terasoft.ConstrutorDao,
   Terasoft.Utils,
@@ -20,7 +20,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FFuncionariosLista: TObjectList<TFuncionarioModel>;
+    FFuncionariosLista: IList<TFuncionarioModel>;
     FLengthPageView: String;
     FStartRecordView: String;
     FID: Variant;
@@ -31,7 +31,7 @@ type
     FIDRecordView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetFuncionariosLista(const Value: TObjectList<TFuncionarioModel>);
+    procedure SetFuncionariosLista(const Value: IList<TFuncionarioModel>);
     procedure SetID(const Value: Variant);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -44,7 +44,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property FuncionariosLista: TObjectList<TFuncionarioModel> read FFuncionariosLista write SetFuncionariosLista;
+    property FuncionariosLista: IList<TFuncionarioModel> read FFuncionariosLista write SetFuncionariosLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -264,6 +264,7 @@ end;
 
 destructor TFuncionarioDao.Destroy;
 begin
+  FFuncionariosLista:=nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -351,11 +352,11 @@ procedure TFuncionarioDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo  : TFuncionarioModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FFuncionariosLista := TObjectList<TFuncionarioModel>.Create;
+  FFuncionariosLista := TCollections.CreateList<TFuncionarioModel>(true);
 
   try
 
@@ -379,18 +380,16 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FFuncionariosLista.Add(TFuncionarioModel.Create(vIConexao));
+      modelo := TFuncionarioModel.Create(vIConexao);
+      FFuncionariosLista.Add(modelo);
 
-      i := FFuncionariosLista.Count -1;
-
-      FFuncionariosLista[i].CODIGO_FUN       := lQry.FieldByName('CODIGO_FUN').AsString;
-      FFuncionariosLista[i].NOME_FUN         := lQry.FieldByName('NOME_FUN').AsString;
-      FFuncionariosLista[i].GERENTE_ID       := lQry.FieldByName('GERENTE_ID').AsString;
-      FFuncionariosLista[i].TIPO_COMISSAO    := lQry.FieldByName('TIPO_COMISSAO').AsString;
+      modelo.CODIGO_FUN       := lQry.FieldByName('CODIGO_FUN').AsString;
+      modelo.NOME_FUN         := lQry.FieldByName('NOME_FUN').AsString;
+      modelo.GERENTE_ID       := lQry.FieldByName('GERENTE_ID').AsString;
+      modelo.TIPO_COMISSAO    := lQry.FieldByName('TIPO_COMISSAO').AsString;
 
       lQry.Next;
     end;
@@ -407,7 +406,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TFuncionarioDao.SetFuncionariosLista(const Value: TObjectList<TFuncionarioModel>);
+procedure TFuncionarioDao.SetFuncionariosLista;
 begin
   FFuncionariosLista := Value;
 end;
