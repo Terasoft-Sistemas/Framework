@@ -8,8 +8,8 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
   System.Variants,
+  Spring.Collections,
   Terasoft.FuncoesTexto,
   Terasoft.Utils,
   Interfaces.Conexao;
@@ -21,7 +21,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FWebPedidosLista: TObjectList<TWebPedidoModel>;
+    FWebPedidosLista: IList<TWebPedidoModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -32,7 +32,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetWebPedidosLista(const Value: TObjectList<TWebPedidoModel>);
+    procedure SetWebPedidosLista(const Value: IList<TWebPedidoModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -49,7 +49,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property WebPedidosLista: TObjectList<TWebPedidoModel> read FWebPedidosLista write SetWebPedidosLista;
+    property WebPedidosLista: IList<TWebPedidoModel> read FWebPedidosLista write SetWebPedidosLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -222,6 +222,7 @@ end;
 
 destructor TWebPedidoDao.Destroy;
 begin
+  FWebPedidosLista := nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -406,12 +407,12 @@ function TWebPedidoDao.obterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
-  i          : Integer;
   lPaginacao : String;
+  modelo: TWebPedidoModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FWebPedidosLista := TObjectList<TWebPedidoModel>.Create;
+  FWebPedidosLista := TCollections.CreateList<TWebPedidoModel>(true);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -552,7 +553,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TWebPedidoDao.SetWebPedidosLista(const Value: TObjectList<TWebPedidoModel>);
+procedure TWebPedidoDao.SetWebPedidosLista;
 begin
   FWebPedidosLista := Value;
 end;
