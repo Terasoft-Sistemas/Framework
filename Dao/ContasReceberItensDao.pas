@@ -7,11 +7,12 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  //System.Generics.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
   Terasoft.Types,
   LojasModel,
+  Spring.Collections,
   Terasoft.Framework.ListaSimples.Impl,
   Terasoft.ConstrutorDao,
   Terasoft.Utils,
@@ -24,7 +25,7 @@ type
     vIConexao : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FContasReceberItenssLista: TObjectList<TContasReceberItensModel>;
+    FContasReceberItenssLista: IList<TContasReceberItensModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -34,10 +35,10 @@ type
     FWhereView: String;
     FTotalRecords: Integer;
     FIDContasReceberView: String;
-    FRecebimentoContasReceberLista: TObjectList<TRecebimentoContasReceber>;
+    FRecebimentoContasReceberLista: IList<TRecebimentoContasReceber>;
     FParcelaView: String;
     procedure SetCountView(const Value: String);
-    procedure SetContasReceberItenssLista(const Value: TObjectList<TContasReceberItensModel>);
+    procedure SetContasReceberItenssLista(const Value: IList<TContasReceberItensModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -46,14 +47,15 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
     procedure SetIDContasReceberView(const Value: String);
-    procedure SetRecebimentoContasReceberLista(const Value: TObjectList<TRecebimentoContasReceber>);
+    procedure SetRecebimentoContasReceberLista(const Value: IList<TRecebimentoContasReceber>);
     procedure SetParcelaView(const Value: String);
 
   public
     constructor Create(pIConexao: IConexao);
     destructor Destroy; override;
-    property ContasReceberItenssLista: TObjectList<TContasReceberItensModel> read FContasReceberItenssLista write SetContasReceberItenssLista;
-    property RecebimentoContasReceberLista: TObjectList<TRecebimentoContasReceber> read FRecebimentoContasReceberLista write SetRecebimentoContasReceberLista;
+
+    property ContasReceberItenssLista: IList<TContasReceberItensModel> read FContasReceberItenssLista write SetContasReceberItenssLista;
+    property RecebimentoContasReceberLista: IList<TRecebimentoContasReceber> read FRecebimentoContasReceberLista write SetRecebimentoContasReceberLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -175,6 +177,8 @@ end;
 
 destructor TContasReceberItensDao.Destroy;
 begin
+  FContasReceberItenssLista := nil;
+  FRecebimentoContasReceberLista := nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -458,12 +462,12 @@ procedure TContasReceberItensDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: TContasReceberItensModel;
 begin
 
   lQry := vIConexao.CriarQuery;
 
-  FContasReceberItenssLista := TObjectList<TContasReceberItensModel>.Create;
+  FContasReceberItenssLista := TCollections.CreateList<TContasReceberItensModel>(true);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -489,56 +493,54 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FContasReceberItenssLista.Add(TContasReceberItensModel.Create(vIConexao));
+      modelo := TContasReceberItensModel.Create(vIConexao);
+      FContasReceberItenssLista.Add(modelo);
 
-      i := FContasReceberItenssLista.Count -1;
-
-      FContasReceberItenssLista[i].ID                      := lQry.FieldByName('ID').AsString;
-      FContasReceberItenssLista[i].FATURA_REC              := lQry.FieldByName('FATURA_REC').AsString;
-      FContasReceberItenssLista[i].CODIGO_CLI              := lQry.FieldByName('CODIGO_CLI').AsString;
-      FContasReceberItenssLista[i].POSICAO_ID              := lQry.FieldByName('POSICAO_ID').AsString;
-      FContasReceberItenssLista[i].VENCIMENTO_REC          := lQry.FieldByName('VENCIMENTO_REC').AsString;
-      FContasReceberItenssLista[i].PACELA_REC              := lQry.FieldByName('PACELA_REC').AsString;
-      FContasReceberItenssLista[i].VLRPARCELA_REC          := lQry.FieldByName('VLRPARCELA_REC').AsString;
-      FContasReceberItenssLista[i].VALORREC_REC            := lQry.FieldByName('VALORREC_REC').AsString;
-      FContasReceberItenssLista[i].DATABAIXA_REC           := lQry.FieldByName('DATABAIXA_REC').AsString;
-      FContasReceberItenssLista[i].SITUACAO_REC            := lQry.FieldByName('SITUACAO_REC').AsString;
-      FContasReceberItenssLista[i].TOTALPARCELAS_REC       := lQry.FieldByName('TOTALPARCELAS_REC').AsString;
-      FContasReceberItenssLista[i].CODIGO_POR              := lQry.FieldByName('CODIGO_POR').AsString;
-      FContasReceberItenssLista[i].CODIGO_CON              := lQry.FieldByName('CODIGO_CON').AsString;
-      FContasReceberItenssLista[i].DESTITULO_REC           := lQry.FieldByName('DESTITULO_REC').AsString;
-      FContasReceberItenssLista[i].NOSSO_NUMERO            := lQry.FieldByName('NOSSO_NUMERO').AsString;
-      FContasReceberItenssLista[i].CARTAO                  := lQry.FieldByName('CARTAO').AsString;
-      FContasReceberItenssLista[i].OBSERVACAO              := lQry.FieldByName('OBSERVACAO').AsString;
-      FContasReceberItenssLista[i].VENCIMENTO_BOLETO       := lQry.FieldByName('VENCIMENTO_BOLETO').AsString;
-      FContasReceberItenssLista[i].COMISSAO                := lQry.FieldByName('COMISSAO').AsString;
-      FContasReceberItenssLista[i].COMISSAO_BASE           := lQry.FieldByName('COMISSAO_BASE').AsString;
-      FContasReceberItenssLista[i].LOJA                    := lQry.FieldByName('LOJA').AsString;
-      FContasReceberItenssLista[i].SYSTIME                 := lQry.FieldByName('SYSTIME').AsString;
-      FContasReceberItenssLista[i].DATA_ACEITE             := lQry.FieldByName('DATA_ACEITE').AsString;
-      FContasReceberItenssLista[i].USUARIO_ACEITE          := lQry.FieldByName('USUARIO_ACEITE').AsString;
-      FContasReceberItenssLista[i].VALOR_PAGO              := lQry.FieldByName('VALOR_PAGO').AsString;
-      FContasReceberItenssLista[i].NF_FATURA               := lQry.FieldByName('NF_FATURA').AsString;
-      FContasReceberItenssLista[i].OBS                     := lQry.FieldByName('OBS').AsString;
-      FContasReceberItenssLista[i].VAUCHER_CLIENTE_ID      := lQry.FieldByName('VAUCHER_CLIENTE_ID').AsString;
-      FContasReceberItenssLista[i].VALOR_DESCONTO_CARTAO   := lQry.FieldByName('VALOR_DESCONTO_CARTAO').AsString;
-      FContasReceberItenssLista[i].VALOR_RECEBIDO_CARTAO   := lQry.FieldByName('VALOR_RECEBIDO_CARTAO').AsString;
-      FContasReceberItenssLista[i].FATURA_RECEBIDA_CARTAO  := lQry.FieldByName('FATURA_RECEBIDA_CARTAO').AsString;
-      FContasReceberItenssLista[i].VALOR_JUROS_CARTAO      := lQry.FieldByName('VALOR_JUROS_CARTAO').AsString;
-      FContasReceberItenssLista[i].TEF_CHAMADA             := lQry.FieldByName('TEF_CHAMADA').AsString;
-      FContasReceberItenssLista[i].TEF_MODALIDADE          := lQry.FieldByName('TEF_MODALIDADE').AsString;
-      FContasReceberItenssLista[i].TEF_PARCELAMENTO        := lQry.FieldByName('TEF_PARCELAMENTO').AsString;
-      FContasReceberItenssLista[i].TEF_ADQUIRENTE          := lQry.FieldByName('TEF_ADQUIRENTE').AsString;
-      FContasReceberItenssLista[i].PIX_IDENTIFICADOR       := lQry.FieldByName('PIX_IDENTIFICADOR').AsString;
-      FContasReceberItenssLista[i].PIX_EMV                 := lQry.FieldByName('PIX_EMV').AsString;
-      FContasReceberItenssLista[i].PIX_EXPIRACAO           := lQry.FieldByName('PIX_EXPIRACAO').AsString;
-      FContasReceberItenssLista[i].PORTADOR_NOME           := lQry.FieldByName('NOME_PORT').AsString;
-      FContasReceberItenssLista[i].PEDIDO_REC              := lQry.FieldByName('PEDIDO_REC').AsString;
-      FContasReceberItenssLista[i].CLIENTE_NOME            := lQry.FieldByName('FANTASIA_CLI').AsString;
+      modelo.ID                      := lQry.FieldByName('ID').AsString;
+      modelo.FATURA_REC              := lQry.FieldByName('FATURA_REC').AsString;
+      modelo.CODIGO_CLI              := lQry.FieldByName('CODIGO_CLI').AsString;
+      modelo.POSICAO_ID              := lQry.FieldByName('POSICAO_ID').AsString;
+      modelo.VENCIMENTO_REC          := lQry.FieldByName('VENCIMENTO_REC').AsString;
+      modelo.PACELA_REC              := lQry.FieldByName('PACELA_REC').AsString;
+      modelo.VLRPARCELA_REC          := lQry.FieldByName('VLRPARCELA_REC').AsString;
+      modelo.VALORREC_REC            := lQry.FieldByName('VALORREC_REC').AsString;
+      modelo.DATABAIXA_REC           := lQry.FieldByName('DATABAIXA_REC').AsString;
+      modelo.SITUACAO_REC            := lQry.FieldByName('SITUACAO_REC').AsString;
+      modelo.TOTALPARCELAS_REC       := lQry.FieldByName('TOTALPARCELAS_REC').AsString;
+      modelo.CODIGO_POR              := lQry.FieldByName('CODIGO_POR').AsString;
+      modelo.CODIGO_CON              := lQry.FieldByName('CODIGO_CON').AsString;
+      modelo.DESTITULO_REC           := lQry.FieldByName('DESTITULO_REC').AsString;
+      modelo.NOSSO_NUMERO            := lQry.FieldByName('NOSSO_NUMERO').AsString;
+      modelo.CARTAO                  := lQry.FieldByName('CARTAO').AsString;
+      modelo.OBSERVACAO              := lQry.FieldByName('OBSERVACAO').AsString;
+      modelo.VENCIMENTO_BOLETO       := lQry.FieldByName('VENCIMENTO_BOLETO').AsString;
+      modelo.COMISSAO                := lQry.FieldByName('COMISSAO').AsString;
+      modelo.COMISSAO_BASE           := lQry.FieldByName('COMISSAO_BASE').AsString;
+      modelo.LOJA                    := lQry.FieldByName('LOJA').AsString;
+      modelo.SYSTIME                 := lQry.FieldByName('SYSTIME').AsString;
+      modelo.DATA_ACEITE             := lQry.FieldByName('DATA_ACEITE').AsString;
+      modelo.USUARIO_ACEITE          := lQry.FieldByName('USUARIO_ACEITE').AsString;
+      modelo.VALOR_PAGO              := lQry.FieldByName('VALOR_PAGO').AsString;
+      modelo.NF_FATURA               := lQry.FieldByName('NF_FATURA').AsString;
+      modelo.OBS                     := lQry.FieldByName('OBS').AsString;
+      modelo.VAUCHER_CLIENTE_ID      := lQry.FieldByName('VAUCHER_CLIENTE_ID').AsString;
+      modelo.VALOR_DESCONTO_CARTAO   := lQry.FieldByName('VALOR_DESCONTO_CARTAO').AsString;
+      modelo.VALOR_RECEBIDO_CARTAO   := lQry.FieldByName('VALOR_RECEBIDO_CARTAO').AsString;
+      modelo.FATURA_RECEBIDA_CARTAO  := lQry.FieldByName('FATURA_RECEBIDA_CARTAO').AsString;
+      modelo.VALOR_JUROS_CARTAO      := lQry.FieldByName('VALOR_JUROS_CARTAO').AsString;
+      modelo.TEF_CHAMADA             := lQry.FieldByName('TEF_CHAMADA').AsString;
+      modelo.TEF_MODALIDADE          := lQry.FieldByName('TEF_MODALIDADE').AsString;
+      modelo.TEF_PARCELAMENTO        := lQry.FieldByName('TEF_PARCELAMENTO').AsString;
+      modelo.TEF_ADQUIRENTE          := lQry.FieldByName('TEF_ADQUIRENTE').AsString;
+      modelo.PIX_IDENTIFICADOR       := lQry.FieldByName('PIX_IDENTIFICADOR').AsString;
+      modelo.PIX_EMV                 := lQry.FieldByName('PIX_EMV').AsString;
+      modelo.PIX_EXPIRACAO           := lQry.FieldByName('PIX_EXPIRACAO').AsString;
+      modelo.PORTADOR_NOME           := lQry.FieldByName('NOME_PORT').AsString;
+      modelo.PEDIDO_REC              := lQry.FieldByName('PEDIDO_REC').AsString;
+      modelo.CLIENTE_NOME            := lQry.FieldByName('FANTASIA_CLI').AsString;
       lQry.Next;
     end;
     obterTotalRegistros;
@@ -592,11 +594,11 @@ procedure TContasReceberItensDao.obterRecebimentoContasReceber;
 var
   lQry : TFDQuery;
   lSQL : String;
-  i    : INteger;
+  modelo: TRecebimentoContasReceber;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FRecebimentoContasReceberLista := TObjectList<TRecebimentoContasReceber>.Create;
+  FRecebimentoContasReceberLista := TCollections.CreateList<TRecebimentoContasReceber>(true);
   try
     lSQL := '  select c.numero_cai id, coalesce(p.nome_port,''DINHEIRO'') tipo, coalesce(c.valor_cai,0) valor, ''CAIXA'' ORIGEM                '+SLineBreak+
             '    from caixa c                                                                                                                  '+SLineBreak+
@@ -628,18 +630,16 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
       if lQry.FieldByName('VALOR').AsFloat > 0 then begin
-        FRecebimentoContasReceberLista.Add(TRecebimentoContasReceber.Create);
-
-        i := FRecebimentoContasReceberLista.Count -1;
-        FRecebimentoContasReceberLista[i].ID      := lQry.FieldByName('ID').AsString;
-        FRecebimentoContasReceberLista[i].TIPO    := lQry.FieldByName('TIPO').AsString;
-        FRecebimentoContasReceberLista[i].VALOR   := lQry.FieldByName('VALOR').AsString;
-        FRecebimentoContasReceberLista[i].ORIGEM  := lQry.FieldByName('ORIGEM').AsString;
+        modelo := TRecebimentoContasReceber.Create;
+        FRecebimentoContasReceberLista.Add(modelo);
+        modelo.ID      := lQry.FieldByName('ID').AsString;
+        modelo.TIPO    := lQry.FieldByName('TIPO').AsString;
+        modelo.VALOR   := lQry.FieldByName('VALOR').AsString;
+        modelo.ORIGEM  := lQry.FieldByName('ORIGEM').AsString;
       end;
 
       lQry.Next;
@@ -655,7 +655,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TContasReceberItensDao.SetContasReceberItenssLista(const Value: TObjectList<TContasReceberItensModel>);
+procedure TContasReceberItensDao.SetContasReceberItenssLista;
 begin
   FContasReceberItenssLista := Value;
 end;
@@ -760,7 +760,7 @@ begin
   FParcelaView := Value;
 end;
 
-procedure TContasReceberItensDao.SetRecebimentoContasReceberLista(const Value: TObjectList<TRecebimentoContasReceber>);
+procedure TContasReceberItensDao.SetRecebimentoContasReceberLista;
 begin
   FRecebimentoContasReceberLista := Value;
 end;

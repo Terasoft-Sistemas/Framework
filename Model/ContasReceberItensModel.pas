@@ -2,7 +2,8 @@ unit ContasReceberItensModel;
 interface
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  //System.Generics.Collections,
+  Spring.Collections,
   Terasoft.Utils, FireDAC.Comp.Client,
   Interfaces.Conexao;
 
@@ -29,7 +30,7 @@ type
   private
     vIConexao : IConexao;
 
-    FContasReceberItenssLista: TObjectList<TContasReceberItensModel>;
+    FContasReceberItenssLista: IList<TContasReceberItensModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -84,12 +85,12 @@ type
     FIDUsuarioOperacao: String;
     FPEDIDO_REC: Variant;
     FCLIENTE_NOME: Variant;
-    FRecebimentoContasReceberLista: TObjectList<TRecebimentoContasReceber>;
+    FRecebimentoContasReceberLista: IList<TRecebimentoContasReceber>;
     FParcelaView: String;
     FNUMERO_PED: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetContasReceberItenssLista(const Value: TObjectList<TContasReceberItensModel>);
+    procedure SetContasReceberItenssLista(const Value: IList<TContasReceberItensModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -142,8 +143,7 @@ type
     procedure SetIDUsuarioOperacao(const Value: String);
     procedure SetPEDIDO_REC(const Value: Variant);
     procedure SetCLIENTE_NOME(const Value: Variant);
-    procedure SetRecebimentoContasReceberLista(
-    const Value: TObjectList<TRecebimentoContasReceber>);
+    procedure SetRecebimentoContasReceberLista(const Value: IList<TRecebimentoContasReceber>);
     procedure SetParcelaView(const Value: String);
     procedure SetNUMERO_PED(const Value: Variant);
 
@@ -229,8 +229,8 @@ type
 
     function valorAberto(pCliente : String) : Double;
 
-    property ContasReceberItenssLista: TObjectList<TContasReceberItensModel> read FContasReceberItenssLista write SetContasReceberItenssLista;
-    property RecebimentoContasReceberLista: TObjectList<TRecebimentoContasReceber> read FRecebimentoContasReceberLista write SetRecebimentoContasReceberLista;
+    property ContasReceberItenssLista: IList<TContasReceberItensModel> read FContasReceberItenssLista write SetContasReceberItenssLista;
+    property RecebimentoContasReceberLista: IList<TRecebimentoContasReceber> read FRecebimentoContasReceberLista write SetRecebimentoContasReceberLista;
 
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -527,7 +527,8 @@ end;
 
 destructor TContasReceberItensModel.Destroy;
 begin
-  FreeAndNil(FContasReceberItenssLista);
+  FContasReceberItenssLista := nil;
+  FRecebimentoContasReceberLista := nil;
   vIConexao := nil;
   inherited;
 end;
@@ -626,7 +627,7 @@ begin
     lFaturaReceber := lContasReceberModel.Salvar;
     lValorParcela  := StrToFloat(pValor) / pParcelas;
     lVencimento    := vIConexao.DataServer + lAdmCartaoModel.AdmCartaosLista[0].PARCELADO_ADM;
-    lContasReceberItensInserir.ContasReceberItenssLista := TObjectList<TContasReceberItensModel>.Create;
+    lContasReceberItensInserir.ContasReceberItenssLista := TCollections.CreateList<TContasReceberItensModel>(true);
     lContasReceberItensInserir.Acao := tacIncluir;
 
     for i := 0 to Pred(pParcelas) do
@@ -717,7 +718,7 @@ begin
     lValorParcela  := StrToFloat(pValor) / pParcela.ToInteger;
     lVencimento    := vIConexao.DataServer;
 
-    lContasReceberItensInserir.ContasReceberItenssLista := TObjectList<TContasReceberItensModel>.Create;
+    lContasReceberItensInserir.ContasReceberItenssLista := TCollections.CreateList<TContasReceberItensModel>(true);
     lContasReceberItensInserir.Acao := tacIncluir;
 
     for i := 0 to Pred(pParcela.ToInteger) do
@@ -1016,7 +1017,7 @@ begin
   FFATURA_RECEBIDA_CARTAO := Value;
 end;
 
-procedure TContasReceberItensModel.SetContasReceberItenssLista(const Value: TObjectList<TContasReceberItensModel>);
+procedure TContasReceberItensModel.SetContasReceberItenssLista;
 begin
   FContasReceberItenssLista := Value;
 end;
@@ -1131,8 +1132,7 @@ begin
   FPOSICAO_ID := Value;
 end;
 
-procedure TContasReceberItensModel.SetRecebimentoContasReceberLista(
-  const Value: TObjectList<TRecebimentoContasReceber>);
+procedure TContasReceberItensModel.SetRecebimentoContasReceberLista;
 begin
   FRecebimentoContasReceberLista := Value;
 end;

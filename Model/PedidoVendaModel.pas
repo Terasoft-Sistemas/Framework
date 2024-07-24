@@ -789,7 +789,7 @@ begin
     lFinanceiroPedidoModel.OrderView := ' id_financeiro, parcela';
     lMemTable := lFinanceiroPedidoModel.obterLista;
 
-    lContasReceberItensModel.ContasReceberItenssLista := TObjectList<TContasReceberItensModel>.Create;
+    lContasReceberItensModel.ContasReceberItenssLista := TCollections.CreateList<TContasReceberItensModel>(true);
 
     lMemTable.objeto.First;
     while not lMemTable.objeto.eof do
@@ -905,7 +905,7 @@ begin
     lVencimento    := StrToDate(pPrimeiroVencimento);
     lSomaParcelas  := 0;
 
-    lContasReceberItensModel.ContasReceberItenssLista := TObjectList<TContasReceberItensModel>.Create;
+    lContasReceberItensModel.ContasReceberItenssLista := TCollections.CreateList<TContasReceberItensModel>(true);
 
     for lParcela := 0 to Pred(lTotalParcelas) do begin
       lContasReceberItensModel.ContasReceberItenssLista.Add(TContasReceberItensModel.Create(vIConexao));
