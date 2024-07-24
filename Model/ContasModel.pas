@@ -4,7 +4,7 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -12,7 +12,7 @@ type
 
   private
     vIConexao : IConexao;
-    FContassLista: TObjectList<TContasModel>;
+    FContassLista: IList<TContasModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -48,7 +48,7 @@ type
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetDATA_CADASTRO(const Value: Variant);
-    procedure SetContassLista(const Value: TObjectList<TContasModel>);
+    procedure SetContassLista(const Value: IList<TContasModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -115,7 +115,7 @@ type
     function carregaClasse(pID : String) : TContasModel;
     procedure obterLista;
 
-    property ContassLista: TObjectList<TContasModel> read FContassLista write SetContassLista;
+    property ContassLista: IList<TContasModel> read FContassLista write SetContassLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -297,7 +297,7 @@ begin
   Fgrupo_cta := Value;
 end;
 
-procedure TContasModel.SetContassLista(const Value: TObjectList<TContasModel>);
+procedure TContasModel.SetContassLista(const Value: IList<TContasModel>);
 begin
   FContassLista := Value;
 end;
