@@ -7,7 +7,7 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  Spring.Collections,
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
@@ -20,7 +20,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FCFOPsLista: TObjectList<TCFOPModel>;
+    FCFOPsLista: IList<TCFOPModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -31,7 +31,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetCFOPsLista(const Value: TObjectList<TCFOPModel>);
+    procedure SetCFOPsLista(const Value: IList<TCFOPModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -48,7 +48,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property CFOPsLista: TObjectList<TCFOPModel> read FCFOPsLista write SetCFOPsLista;
+    property CFOPsLista: IList<TCFOPModel> read FCFOPsLista write SetCFOPsLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -152,6 +152,7 @@ end;
 
 destructor TCFOPDao.Destroy;
 begin
+  FCFOPsLista := nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -265,11 +266,11 @@ procedure TCFOPDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: TCFOPModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FCFOPsLista := TObjectList<TCFOPModel>.Create;
+  FCFOPsLista := TCollections.CreateList<TCFOPModel>(true);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -289,59 +290,57 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FCFOPsLista.Add(TCFOPModel.Create(vIConexao));
+      modelo := TCFOPModel.Create(vIConexao);
+      FCFOPsLista.Add(modelo);
 
-      i := FCFOPsLista.Count -1;
-
-      FCFOPsLista[i].ID                             := lQry.FieldByName('ID').AsString;
-      FCFOPsLista[i].CFOP                           := lQry.FieldByName('CFOP').AsString;
-      FCFOPsLista[i].DESCRICAO                      := lQry.FieldByName('DESCRICAO').AsString;
-      FCFOPsLista[i].TIPO                           := lQry.FieldByName('TIPO').AsString;
-      FCFOPsLista[i].ESTOQUE                        := lQry.FieldByName('ESTOQUE').AsString;
-      FCFOPsLista[i].ICMS                           := lQry.FieldByName('ICMS').AsString;
-      FCFOPsLista[i].CST                            := lQry.FieldByName('CST').AsString;
-      FCFOPsLista[i].OBS                            := lQry.FieldByName('OBS').AsString;
-      FCFOPsLista[i].PIS                            := lQry.FieldByName('PIS').AsString;
-      FCFOPsLista[i].COFINS                         := lQry.FieldByName('COFINS').AsString;
-      FCFOPsLista[i].VALOR                          := lQry.FieldByName('VALOR').AsString;
-      FCFOPsLista[i].CONSIGNADO                     := lQry.FieldByName('CONSIGNADO').AsString;
-      FCFOPsLista[i].CSOSN                          := lQry.FieldByName('CSOSN').AsString;
-      FCFOPsLista[i].CFOP_REFERENCIA                := lQry.FieldByName('CFOP_REFERENCIA').AsString;
-      FCFOPsLista[i].CONTA_CONTABIL                 := lQry.FieldByName('CONTA_CONTABIL').AsString;
-      FCFOPsLista[i].CST_ENTRADA                    := lQry.FieldByName('CST_ENTRADA').AsString;
-      FCFOPsLista[i].RESERVADO_FISCO                := lQry.FieldByName('RESERVADO_FISCO').AsString;
-      FCFOPsLista[i].ALTERA_CUSTO                   := lQry.FieldByName('ALTERA_CUSTO').AsString;
-      FCFOPsLista[i].IBPT                           := lQry.FieldByName('IBPT').AsString;
-      FCFOPsLista[i].OPERACAO                       := lQry.FieldByName('OPERACAO').AsString;
-      FCFOPsLista[i].ESTOQUE_2                      := lQry.FieldByName('ESTOQUE_2').AsString;
-      FCFOPsLista[i].CST_PIS                        := lQry.FieldByName('CST_PIS').AsString;
-      FCFOPsLista[i].CST_COFINS                     := lQry.FieldByName('CST_COFINS').AsString;
-      FCFOPsLista[i].CST_IPI                        := lQry.FieldByName('CST_IPI').AsString;
-      FCFOPsLista[i].ALIQUOTA_PIS                   := lQry.FieldByName('ALIQUOTA_PIS').AsString;
-      FCFOPsLista[i].ALIQUOTA_COFINS                := lQry.FieldByName('ALIQUOTA_COFINS').AsString;
-      FCFOPsLista[i].ALIQUOTA_IPI                   := lQry.FieldByName('ALIQUOTA_IPI').AsString;
-      FCFOPsLista[i].SOMAR_IPI_BASE_ICMS            := lQry.FieldByName('SOMAR_IPI_BASE_ICMS').AsString;
-      FCFOPsLista[i].STATUS                         := lQry.FieldByName('STATUS').AsString;
-      FCFOPsLista[i].LISTAR_IPI_SPED                := lQry.FieldByName('LISTAR_IPI_SPED').AsString;
-      FCFOPsLista[i].APROVEITAMENTO_ICMS            := lQry.FieldByName('APROVEITAMENTO_ICMS').AsString;
-      FCFOPsLista[i].REDUCAO_APROVEITAMENTO_ICMS    := lQry.FieldByName('REDUCAO_APROVEITAMENTO_ICMS').AsString;
-      FCFOPsLista[i].DESCONTO_SOBRE_IPI             := lQry.FieldByName('DESCONTO_SOBRE_IPI').AsString;
-      FCFOPsLista[i].SOMAR_PIS_COFINS_EM_OUTRAS     := lQry.FieldByName('SOMAR_PIS_COFINS_EM_OUTRAS').AsString;
-      FCFOPsLista[i].SOMAR_ICMS_TOTAL_NF            := lQry.FieldByName('SOMAR_ICMS_TOTAL_NF').AsString;
-      FCFOPsLista[i].CFOP_DEVOLUCAO                 := lQry.FieldByName('CFOP_DEVOLUCAO').AsString;
-      FCFOPsLista[i].MOTDESICMS                     := lQry.FieldByName('MOTDESICMS').AsString;
-      FCFOPsLista[i].CBENEF                         := lQry.FieldByName('CBENEF').AsString;
-      FCFOPsLista[i].PREDBC_N14                     := lQry.FieldByName('PREDBC_N14').AsString;
-      FCFOPsLista[i].CENQ                           := lQry.FieldByName('CENQ').AsString;
-      FCFOPsLista[i].SYSTIME                        := lQry.FieldByName('SYSTIME').AsString;
-      FCFOPsLista[i].PCRED_PRESUMIDO                := lQry.FieldByName('PCRED_PRESUMIDO').AsString;
-      FCFOPsLista[i].DESCONTO_SOBRE_ICMS            := lQry.FieldByName('DESCONTO_SOBRE_ICMS').AsString;
-      FCFOPsLista[i].DESCONTO_ICMS_BASE_PIS_COFINS  := lQry.FieldByName('DESCONTO_ICMS_BASE_PIS_COFINS').AsString;
-      FCFOPsLista[i].OUTRAS_DESPESAS_ENTRADA        := lQry.FieldByName('OUTRAS_DESPESAS_ENTRADA').AsString;
+      modelo.ID                             := lQry.FieldByName('ID').AsString;
+      modelo.CFOP                           := lQry.FieldByName('CFOP').AsString;
+      modelo.DESCRICAO                      := lQry.FieldByName('DESCRICAO').AsString;
+      modelo.TIPO                           := lQry.FieldByName('TIPO').AsString;
+      modelo.ESTOQUE                        := lQry.FieldByName('ESTOQUE').AsString;
+      modelo.ICMS                           := lQry.FieldByName('ICMS').AsString;
+      modelo.CST                            := lQry.FieldByName('CST').AsString;
+      modelo.OBS                            := lQry.FieldByName('OBS').AsString;
+      modelo.PIS                            := lQry.FieldByName('PIS').AsString;
+      modelo.COFINS                         := lQry.FieldByName('COFINS').AsString;
+      modelo.VALOR                          := lQry.FieldByName('VALOR').AsString;
+      modelo.CONSIGNADO                     := lQry.FieldByName('CONSIGNADO').AsString;
+      modelo.CSOSN                          := lQry.FieldByName('CSOSN').AsString;
+      modelo.CFOP_REFERENCIA                := lQry.FieldByName('CFOP_REFERENCIA').AsString;
+      modelo.CONTA_CONTABIL                 := lQry.FieldByName('CONTA_CONTABIL').AsString;
+      modelo.CST_ENTRADA                    := lQry.FieldByName('CST_ENTRADA').AsString;
+      modelo.RESERVADO_FISCO                := lQry.FieldByName('RESERVADO_FISCO').AsString;
+      modelo.ALTERA_CUSTO                   := lQry.FieldByName('ALTERA_CUSTO').AsString;
+      modelo.IBPT                           := lQry.FieldByName('IBPT').AsString;
+      modelo.OPERACAO                       := lQry.FieldByName('OPERACAO').AsString;
+      modelo.ESTOQUE_2                      := lQry.FieldByName('ESTOQUE_2').AsString;
+      modelo.CST_PIS                        := lQry.FieldByName('CST_PIS').AsString;
+      modelo.CST_COFINS                     := lQry.FieldByName('CST_COFINS').AsString;
+      modelo.CST_IPI                        := lQry.FieldByName('CST_IPI').AsString;
+      modelo.ALIQUOTA_PIS                   := lQry.FieldByName('ALIQUOTA_PIS').AsString;
+      modelo.ALIQUOTA_COFINS                := lQry.FieldByName('ALIQUOTA_COFINS').AsString;
+      modelo.ALIQUOTA_IPI                   := lQry.FieldByName('ALIQUOTA_IPI').AsString;
+      modelo.SOMAR_IPI_BASE_ICMS            := lQry.FieldByName('SOMAR_IPI_BASE_ICMS').AsString;
+      modelo.STATUS                         := lQry.FieldByName('STATUS').AsString;
+      modelo.LISTAR_IPI_SPED                := lQry.FieldByName('LISTAR_IPI_SPED').AsString;
+      modelo.APROVEITAMENTO_ICMS            := lQry.FieldByName('APROVEITAMENTO_ICMS').AsString;
+      modelo.REDUCAO_APROVEITAMENTO_ICMS    := lQry.FieldByName('REDUCAO_APROVEITAMENTO_ICMS').AsString;
+      modelo.DESCONTO_SOBRE_IPI             := lQry.FieldByName('DESCONTO_SOBRE_IPI').AsString;
+      modelo.SOMAR_PIS_COFINS_EM_OUTRAS     := lQry.FieldByName('SOMAR_PIS_COFINS_EM_OUTRAS').AsString;
+      modelo.SOMAR_ICMS_TOTAL_NF            := lQry.FieldByName('SOMAR_ICMS_TOTAL_NF').AsString;
+      modelo.CFOP_DEVOLUCAO                 := lQry.FieldByName('CFOP_DEVOLUCAO').AsString;
+      modelo.MOTDESICMS                     := lQry.FieldByName('MOTDESICMS').AsString;
+      modelo.CBENEF                         := lQry.FieldByName('CBENEF').AsString;
+      modelo.PREDBC_N14                     := lQry.FieldByName('PREDBC_N14').AsString;
+      modelo.CENQ                           := lQry.FieldByName('CENQ').AsString;
+      modelo.SYSTIME                        := lQry.FieldByName('SYSTIME').AsString;
+      modelo.PCRED_PRESUMIDO                := lQry.FieldByName('PCRED_PRESUMIDO').AsString;
+      modelo.DESCONTO_SOBRE_ICMS            := lQry.FieldByName('DESCONTO_SOBRE_ICMS').AsString;
+      modelo.DESCONTO_ICMS_BASE_PIS_COFINS  := lQry.FieldByName('DESCONTO_ICMS_BASE_PIS_COFINS').AsString;
+      modelo.OUTRAS_DESPESAS_ENTRADA        := lQry.FieldByName('OUTRAS_DESPESAS_ENTRADA').AsString;
 
       lQry.Next;
     end;
@@ -358,7 +357,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TCFOPDao.SetCFOPsLista(const Value: TObjectList<TCFOPModel>);
+procedure TCFOPDao.SetCFOPsLista;
 begin
   FCFOPsLista := Value;
 end;

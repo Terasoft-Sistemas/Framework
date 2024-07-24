@@ -4,7 +4,7 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -13,7 +13,7 @@ type
   private
     vIConexao : IConexao;
 
-    FCFOPsLista: TObjectList<TCFOPModel>;
+    FCFOPsLista: IList<TCFOPModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -69,7 +69,7 @@ type
     FCSOSN: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetCFOPsLista(const Value: TObjectList<TCFOPModel>);
+    procedure SetCFOPsLista(const Value: IList<TCFOPModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -181,7 +181,7 @@ type
 
     function obterCFOP(pIdCFOP: String): String;
 
-    property CFOPsLista: TObjectList<TCFOPModel> read FCFOPsLista write SetCFOPsLista;
+    property CFOPsLista: IList<TCFOPModel> read FCFOPsLista write SetCFOPsLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -244,7 +244,8 @@ end;
 
 destructor TCFOPModel.Destroy;
 begin
-
+  FCFOPsLista := nil;
+  vIConexao := nil;
   inherited;
 end;
 
@@ -415,7 +416,7 @@ begin
   FESTOQUE_2 := Value;
 end;
 
-procedure TCFOPModel.SetCFOPsLista(const Value: TObjectList<TCFOPModel>);
+procedure TCFOPModel.SetCFOPsLista;
 begin
   FCFOPsLista := Value;
 end;
