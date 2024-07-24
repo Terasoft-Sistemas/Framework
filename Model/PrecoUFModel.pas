@@ -4,7 +4,7 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -12,7 +12,7 @@ type
 
   private
     vIConexao : IConexao;
-    FPrecoUFsLista: TObjectList<TPrecoUFModel>;
+    FPrecoUFsLista: IList<TPrecoUFModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -31,7 +31,7 @@ type
     FTOTAL: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetPrecoUFsLista(const Value: TObjectList<TPrecoUFModel>);
+    procedure SetPrecoUFsLista(const Value: IList<TPrecoUFModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -66,7 +66,7 @@ type
     function Salvar  : String;
     procedure obterLista;
 
-    property PrecoUFsLista: TObjectList<TPrecoUFModel> read FPrecoUFsLista write SetPrecoUFsLista;
+    property PrecoUFsLista: IList<TPrecoUFModel> read FPrecoUFsLista write SetPrecoUFsLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -195,7 +195,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TPrecoUFModel.SetPrecoUFsLista(const Value: TObjectList<TPrecoUFModel>);
+procedure TPrecoUFModel.SetPrecoUFsLista;
 begin
   FPrecoUFsLista := Value;
 end;
