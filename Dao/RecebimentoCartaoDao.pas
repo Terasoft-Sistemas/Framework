@@ -7,7 +7,7 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  Spring.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
   Interfaces.Conexao,
@@ -21,7 +21,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FRecebimentoCartaosLista: TObjectList<TRecebimentoCartaoModel>;
+    FRecebimentoCartaosLista: IList<TRecebimentoCartaoModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -32,7 +32,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetRecebimentoCartaosLista(const Value: TObjectList<TRecebimentoCartaoModel>);
+    procedure SetRecebimentoCartaosLista(const Value: IList<TRecebimentoCartaoModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -47,7 +47,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property RecebimentoCartaosLista: TObjectList<TRecebimentoCartaoModel> read FRecebimentoCartaosLista write SetRecebimentoCartaosLista;
+    property RecebimentoCartaosLista: IList<TRecebimentoCartaoModel> read FRecebimentoCartaosLista write SetRecebimentoCartaosLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -117,6 +117,7 @@ end;
 
 destructor TRecebimentoCartaoDao.Destroy;
 begin
+  FRecebimentoCartaosLista := nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -222,11 +223,11 @@ procedure TRecebimentoCartaoDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: TRecebimentoCartaoModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FRecebimentoCartaosLista := TObjectList<TRecebimentoCartaoModel>.Create;
+  FRecebimentoCartaosLista := TCollections.CreateList<TRecebimentoCartaoModel>(true);;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -246,25 +247,23 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FRecebimentoCartaosLista.Add(TRecebimentoCartaoModel.Create(vIConexao));
+      modelo := TRecebimentoCartaoModel.Create(vIConexao);
+      FRecebimentoCartaosLista.Add(modelo);
 
-      i := FRecebimentoCartaosLista.Count -1;
-
-      FRecebimentoCartaosLista[i].ID          := lQry.FieldByName('ID').AsString;
-      FRecebimentoCartaosLista[i].USUARIO_ID  := lQry.FieldByName('USUARIO_ID').AsString;
-      FRecebimentoCartaosLista[i].DATA_HORA   := lQry.FieldByName('DATA_HORA').AsString;
-      FRecebimentoCartaosLista[i].CLIENTE_ID  := lQry.FieldByName('CLIENTE_ID').AsString;
-      FRecebimentoCartaosLista[i].FATURA      := lQry.FieldByName('FATURA').AsString;
-      FRecebimentoCartaosLista[i].PARCELA     := lQry.FieldByName('PARCELA').AsString;
-      FRecebimentoCartaosLista[i].VALOR       := lQry.FieldByName('VALOR').AsString;
-      FRecebimentoCartaosLista[i].BANDEIRA_ID := lQry.FieldByName('BANDEIRA_ID').AsString;
-      FRecebimentoCartaosLista[i].VENCIMENTO  := lQry.FieldByName('VENCIMENTO').AsString;
-      FRecebimentoCartaosLista[i].TEF_ID      := lQry.FieldByName('TEF_ID').AsString;
-      FRecebimentoCartaosLista[i].SYSTIME     := lQry.FieldByName('SYSTIME').AsString;
+      modelo.ID          := lQry.FieldByName('ID').AsString;
+      modelo.USUARIO_ID  := lQry.FieldByName('USUARIO_ID').AsString;
+      modelo.DATA_HORA   := lQry.FieldByName('DATA_HORA').AsString;
+      modelo.CLIENTE_ID  := lQry.FieldByName('CLIENTE_ID').AsString;
+      modelo.FATURA      := lQry.FieldByName('FATURA').AsString;
+      modelo.PARCELA     := lQry.FieldByName('PARCELA').AsString;
+      modelo.VALOR       := lQry.FieldByName('VALOR').AsString;
+      modelo.BANDEIRA_ID := lQry.FieldByName('BANDEIRA_ID').AsString;
+      modelo.VENCIMENTO  := lQry.FieldByName('VENCIMENTO').AsString;
+      modelo.TEF_ID      := lQry.FieldByName('TEF_ID').AsString;
+      modelo.SYSTIME     := lQry.FieldByName('SYSTIME').AsString;
 
       lQry.Next;
     end;
@@ -281,7 +280,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TRecebimentoCartaoDao.SetRecebimentoCartaosLista(const Value: TObjectList<TRecebimentoCartaoModel>);
+procedure TRecebimentoCartaoDao.SetRecebimentoCartaosLista;
 begin
   FRecebimentoCartaosLista := Value;
 end;
