@@ -285,7 +285,7 @@ type
     function carregaClasse(pId : String): TOSModel;
 
     function Salvar: String;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
   end;
 
@@ -350,7 +350,7 @@ begin
    Result    := self.Salvar;
 end;
 
-function TOSModel.obterLista: TFDMemTable;
+function TOSModel.obterLista: IFDDataset;
 var
   lOSLista: TOSDao;
 begin
