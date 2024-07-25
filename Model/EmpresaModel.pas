@@ -77,7 +77,7 @@ type
     procedure SetLOGO(const Value: Variant);
     procedure SetMULTA_BOL(const Value: Variant);
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     class function getNewIface(pIConexao: IConexao): ITEmpresaModel;
@@ -133,7 +133,7 @@ begin
   end;
 end;
 
-constructor TEmpresaModel.Create(pIConexao : IConexao);
+constructor TEmpresaModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -146,7 +146,7 @@ end;
 
 class function TEmpresaModel.getNewIface(pIConexao: IConexao): ITEmpresaModel;
 begin
-  Result := TImplObjetoOwner<TEmpresaModel>.CreateOwner(self.Create(pIConexao));
+  Result := TImplObjetoOwner<TEmpresaModel>.CreateOwner(self._Create(pIConexao));
   Result.objeto.myself := Result;
 end;
 

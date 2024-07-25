@@ -214,22 +214,22 @@ begin
 
       if lcStat = 135 then
       begin
-        lEventosNFeControl.EventosNFeModel.Acao              := Terasoft.Types.tacIncluir;
-        lEventosNFeControl.EventosNFeModel.ID_NFE            := idNotaFiscal;
-        lEventosNFeControl.EventosNFeModel.DATAHORA          := Now;
-        lEventosNFeControl.EventosNFeModel.EVENTO            := ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.tpEvento;
-        lEventosNFeControl.EventosNFeModel.ID_EVENTO         := lTPEVENTO;
-        lEventosNFeControl.EventosNFeModel.CHNFE             := lNFContol.NFModel.ID_NF3;
-        lEventosNFeControl.EventosNFeModel.TPEVENTO          := lTPEVENTO;
-        lEventosNFeControl.EventosNFeModel.NSEQEVENTO        := ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.nSeqEvento;
-        lEventosNFeControl.EventosNFeModel.VEREVENTO         := '1.00';
-        lEventosNFeControl.EventosNFeModel.DESCEVENTO        := lDescricaoEvendto;
-        lEventosNFeControl.EventosNFeModel.XML               := ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.XML;
-        lEventosNFeControl.EventosNFeModel.STATUS            := '0';
-        lEventosNFeControl.EventosNFeModel.PROTOCOLO_RETORNO := ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.nProt;
-        lEventosNFeControl.EventosNFeModel.RETORNO_SEFAZ     := 'Evento registrado e vinculado a NF-e';
-        lEventosNFeControl.EventosNFeModel.JUSTIFICATIVA     := ACBrNFe.EventoNFe.Evento.Items[0].infEvento.detEvento.xJust;
-        lEventosNFeControl.EventosNFeModel.XCORRECAO         := ACBrNFe.EventoNFe.Evento.Items[0].infEvento.detEvento.xCorrecao;
+        lEventosNFeControl.EventosNFeModel.objeto.Acao              := Terasoft.Types.tacIncluir;
+        lEventosNFeControl.EventosNFeModel.objeto.ID_NFE            := idNotaFiscal;
+        lEventosNFeControl.EventosNFeModel.objeto.DATAHORA          := Now;
+        lEventosNFeControl.EventosNFeModel.objeto.EVENTO            := ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.tpEvento;
+        lEventosNFeControl.EventosNFeModel.objeto.ID_EVENTO         := lTPEVENTO;
+        lEventosNFeControl.EventosNFeModel.objeto.CHNFE             := lNFContol.NFModel.ID_NF3;
+        lEventosNFeControl.EventosNFeModel.objeto.TPEVENTO          := lTPEVENTO;
+        lEventosNFeControl.EventosNFeModel.objeto.NSEQEVENTO        := ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.nSeqEvento;
+        lEventosNFeControl.EventosNFeModel.objeto.VEREVENTO         := '1.00';
+        lEventosNFeControl.EventosNFeModel.objeto.DESCEVENTO        := lDescricaoEvendto;
+        lEventosNFeControl.EventosNFeModel.objeto.XML               := ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.XML;
+        lEventosNFeControl.EventosNFeModel.objeto.STATUS            := '0';
+        lEventosNFeControl.EventosNFeModel.objeto.PROTOCOLO_RETORNO := ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.nProt;
+        lEventosNFeControl.EventosNFeModel.objeto.RETORNO_SEFAZ     := 'Evento registrado e vinculado a NF-e';
+        lEventosNFeControl.EventosNFeModel.objeto.JUSTIFICATIVA     := ACBrNFe.EventoNFe.Evento.Items[0].infEvento.detEvento.xJust;
+        lEventosNFeControl.EventosNFeModel.objeto.XCORRECAO         := ACBrNFe.EventoNFe.Evento.Items[0].infEvento.detEvento.xCorrecao;
         lEventosNFeControl.Salvar;
 
         if ptpEvento = teCancelamento then
@@ -277,22 +277,22 @@ begin
 
       if ACBrNFe.WebServices.Inutilizacao.cStat = 102 then begin
 
-        lEventosNFeControl.EventosNFeModel.Acao              := Terasoft.Types.tacIncluir;
-        lEventosNFeControl.EventosNFeModel.ID_NFE            := idNotaFiscal;
-        lEventosNFeControl.EventosNFeModel.DATAHORA          := Now;
-        lEventosNFeControl.EventosNFeModel.EVENTO            := 2;
-        lEventosNFeControl.EventosNFeModel.ID_EVENTO         := '110111';
-        lEventosNFeControl.EventosNFeModel.CHNFE             := lNFContol.NFModel.ID_NF3;
-        lEventosNFeControl.EventosNFeModel.TPEVENTO          := '110111';
-        lEventosNFeControl.EventosNFeModel.NSEQEVENTO        := '';
-        lEventosNFeControl.EventosNFeModel.VEREVENTO         := '1.00';
-        lEventosNFeControl.EventosNFeModel.DESCEVENTO        := 'Inutilização';
-        lEventosNFeControl.EventosNFeModel.XML               := ACBrNFe.WebServices.Inutilizacao.RetornoWS;
-        lEventosNFeControl.EventosNFeModel.STATUS            := '0';
-        lEventosNFeControl.EventosNFeModel.PROTOCOLO_RETORNO := ACBrNFe.WebServices.Inutilizacao.Protocolo;
-        lEventosNFeControl.EventosNFeModel.RETORNO_SEFAZ     := 'Evento registrado e vinculado a NF-e';
-        lEventosNFeControl.EventosNFeModel.JUSTIFICATIVA     := Justificativa;
-        lEventosNFeControl.EventosNFeModel.XCORRECAO         := '';
+        lEventosNFeControl.EventosNFeModel.objeto.Acao              := Terasoft.Types.tacIncluir;
+        lEventosNFeControl.EventosNFeModel.objeto.ID_NFE            := idNotaFiscal;
+        lEventosNFeControl.EventosNFeModel.objeto.DATAHORA          := Now;
+        lEventosNFeControl.EventosNFeModel.objeto.EVENTO            := 2;
+        lEventosNFeControl.EventosNFeModel.objeto.ID_EVENTO         := '110111';
+        lEventosNFeControl.EventosNFeModel.objeto.CHNFE             := lNFContol.NFModel.ID_NF3;
+        lEventosNFeControl.EventosNFeModel.objeto.TPEVENTO          := '110111';
+        lEventosNFeControl.EventosNFeModel.objeto.NSEQEVENTO        := '';
+        lEventosNFeControl.EventosNFeModel.objeto.VEREVENTO         := '1.00';
+        lEventosNFeControl.EventosNFeModel.objeto.DESCEVENTO        := 'Inutilização';
+        lEventosNFeControl.EventosNFeModel.objeto.XML               := ACBrNFe.WebServices.Inutilizacao.RetornoWS;
+        lEventosNFeControl.EventosNFeModel.objeto.STATUS            := '0';
+        lEventosNFeControl.EventosNFeModel.objeto.PROTOCOLO_RETORNO := ACBrNFe.WebServices.Inutilizacao.Protocolo;
+        lEventosNFeControl.EventosNFeModel.objeto.RETORNO_SEFAZ     := 'Evento registrado e vinculado a NF-e';
+        lEventosNFeControl.EventosNFeModel.objeto.JUSTIFICATIVA     := Justificativa;
+        lEventosNFeControl.EventosNFeModel.objeto.XCORRECAO         := '';
         lEventosNFeControl.Salvar;
 
         lNFContol.NFModel.Acao              := Terasoft.Types.tacAlterar;
