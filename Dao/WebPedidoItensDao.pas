@@ -355,64 +355,64 @@ begin
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
 
-    lSQL :=   '  select '+lPaginacao+'                                                                                                          '+SLineBreak+
-              '      ID,                                                                                                                        '+SLineBreak+
-              '      UNIDADE_PRO,                                                                                                               '+SLineBreak+
-              '      WEB_PEDIDO_ID,                                                                                                             '+SLineBreak+
-              '      QUANTIDADE,                                                                                                                '+SLineBreak+
-              '      TIPO_ENTREGA,                                                                                                              '+SLineBreak+
-              '      TIPO_GARANTIA,                                                                                                             '+SLineBreak+
-              '      TIPO,                                                                                                                      '+SLineBreak+
-              '      OBSERVACAO,                                                                                                                '+SLineBreak+
-              '      PRODUTO_ID,                                                                                                                '+SLineBreak+
-              '      ENTREGA,                                                                                                                   '+SLineBreak+
-              '      MONTAGEM,                                                                                                                  '+SLineBreak+
-              '      PERCENTUAL_DESCONTO,                                                                                                       '+SLineBreak+
-              '      VALOR_UNITARIO,                                                                                                            '+SLineBreak+
-              '      NOME_PRO,                                                                                                                  '+SLineBreak+
-              '      TIPO_GARANTIA_FR,                                                                                                          '+SLineBreak+
-              '      CUSTO_GARANTIA_FR,                                                                                                         '+SLineBreak+
-              '      CUSTO_GARANTIA,                                                                                                            '+SLineBreak+
-              '      PER_GARANTIA_FR,                                                                                                           '+SLineBreak+
-              '      VALOR_VENDA_ATUAL,                                                                                                         '+SLineBreak+
-              '      VLRVENDA_PRO,                                                                                                              '+SLineBreak+
-              '      VLR_GARANTIA,                                                                                                              '+SLineBreak+
-              '      VLR_GARANTIA_FR,                                                                                                           '+SLineBreak+
-              '      VALOR_TOTALITENS                                                                                                           '+SLineBreak+
-              '        + TOTAL_GARANTIA - VALOR_DESCONTO VALOR_TOTALITENS,                                                                      '+SLineBreak+
-              '      TOTAL_GARANTIA,                                                                                                            '+SLineBreak+
-              '      VALOR_DESCONTO                                                                                                             '+SLineBreak+
-              '      From                                                                                                                       '+SLineBreak+
-              '         ( select                                                                                                                '+SLineBreak+
-              '              web_pedidoitens.id,                                                                                                '+SLineBreak+
-              '              produto.unidade_pro,                                                                                               '+SLineBreak+
-              '              web_pedidoitens.web_pedido_id,                                                                                     '+SLineBreak+
-              '              web_pedidoitens.quantidade,                                                                                        '+SLineBreak+
-              '              web_pedidoitens.tipo_entrega,                                                                                      '+SLineBreak+
-              '              web_pedidoitens.tipo_garantia,                                                                                     '+SLineBreak+
-              '              web_pedidoitens.tipo,                                                                                              '+SLineBreak+
-              '              web_pedidoitens.observacao,                                                                                        '+SLineBreak+
-              '              web_pedidoitens.produto_id,                                                                                        '+SLineBreak+
-              '              web_pedidoitens.entrega,                                                                                           '+SLineBreak+
-              '              web_pedidoitens.montagem,                                                                                          '+SLineBreak+
-              '              web_pedidoitens.percentual_desconto,                                                                               '+SLineBreak+
-              '              web_pedidoitens.valor_unitario,                                                                                    '+SLineBreak+
-              '              produto.nome_pro,                                                                                                  '+SLineBreak+
-              '              web_pedidoitens.tipo_garantia_fr,                                                                                  '+SLineBreak+
-              '              web_pedidoitens.custo_garantia_fr,                                                                                 '+SLineBreak+
-              '              web_pedidoitens.custo_garantia,                                                                                    '+SLineBreak+
-              '              web_pedidoitens.per_garantia_fr,                                                                                   '+SLineBreak+
-              '              web_pedidoitens.valor_venda_atual,                                                                                 '+SLineBreak+
-              '              web_pedidoitens.vlrvenda_pro,                                                                                      '+SLineBreak+
-              '              coalesce(web_pedidoitens.quantidade, 0) * coalesce(web_pedidoitens.vlr_garantia, 0) vlr_garantia,                  '+SLineBreak+
-              '              coalesce(web_pedidoitens.quantidade, 0) * coalesce(web_pedidoitens.vlr_garantia_fr, 0) vlr_garantia_fr,            '+SLineBreak+
-              '              coalesce(web_pedidoitens.quantidade, 0) * coalesce(web_pedidoitens.valor_unitario,0) valor_totalitens,             '+SLineBreak+
+    lSQL :=   '  select '+lPaginacao+'                                                                                                                                         '+SLineBreak+
+              '      ID,                                                                                                                                                       '+SLineBreak+
+              '      UNIDADE_PRO,                                                                                                                                              '+SLineBreak+
+              '      WEB_PEDIDO_ID,                                                                                                                                            '+SLineBreak+
+              '      QUANTIDADE,                                                                                                                                               '+SLineBreak+
+              '      TIPO_ENTREGA,                                                                                                                                             '+SLineBreak+
+              '      TIPO_GARANTIA,                                                                                                                                            '+SLineBreak+
+              '      TIPO,                                                                                                                                                     '+SLineBreak+
+              '      OBSERVACAO,                                                                                                                                               '+SLineBreak+
+              '      PRODUTO_ID,                                                                                                                                               '+SLineBreak+
+              '      ENTREGA,                                                                                                                                                  '+SLineBreak+
+              '      MONTAGEM,                                                                                                                                                 '+SLineBreak+
+              '      PERCENTUAL_DESCONTO,                                                                                                                                      '+SLineBreak+
+              '      VALOR_UNITARIO,                                                                                                                                           '+SLineBreak+
+              '      NOME_PRO,                                                                                                                                                 '+SLineBreak+
+              '      TIPO_GARANTIA_FR,                                                                                                                                         '+SLineBreak+
+              '      CUSTO_GARANTIA_FR,                                                                                                                                        '+SLineBreak+
+              '      CUSTO_GARANTIA,                                                                                                                                           '+SLineBreak+
+              '      PER_GARANTIA_FR,                                                                                                                                          '+SLineBreak+
+              '      VALOR_VENDA_ATUAL,                                                                                                                                        '+SLineBreak+
+              '      VLRVENDA_PRO,                                                                                                                                             '+SLineBreak+
+              '      VLR_GARANTIA,                                                                                                                                             '+SLineBreak+
+              '      VLR_GARANTIA_FR,                                                                                                                                          '+SLineBreak+
+              '      VALOR_TOTALITENS                                                                                                                                          '+SLineBreak+
+              '        + TOTAL_GARANTIA - VALOR_DESCONTO VALOR_TOTALITENS,                                                                                                     '+SLineBreak+
+              '      TOTAL_GARANTIA,                                                                                                                                           '+SLineBreak+
+              '      VALOR_DESCONTO                                                                                                                                            '+SLineBreak+
+              '      From                                                                                                                                                      '+SLineBreak+
+              '         ( select                                                                                                                                               '+SLineBreak+
+              '              web_pedidoitens.id,                                                                                                                               '+SLineBreak+
+              '              produto.unidade_pro,                                                                                                                              '+SLineBreak+
+              '              web_pedidoitens.web_pedido_id,                                                                                                                    '+SLineBreak+
+              '              web_pedidoitens.quantidade,                                                                                                                       '+SLineBreak+
+              '              web_pedidoitens.tipo_entrega,                                                                                                                     '+SLineBreak+
+              '              web_pedidoitens.tipo_garantia,                                                                                                                    '+SLineBreak+
+              '              web_pedidoitens.tipo,                                                                                                                             '+SLineBreak+
+              '              web_pedidoitens.observacao,                                                                                                                       '+SLineBreak+
+              '              web_pedidoitens.produto_id,                                                                                                                       '+SLineBreak+
+              '              web_pedidoitens.entrega,                                                                                                                          '+SLineBreak+
+              '              web_pedidoitens.montagem,                                                                                                                         '+SLineBreak+
+              '              web_pedidoitens.percentual_desconto,                                                                                                              '+SLineBreak+
+              '              web_pedidoitens.valor_unitario,                                                                                                                   '+SLineBreak+
+              '              produto.nome_pro,                                                                                                                                 '+SLineBreak+
+              '              web_pedidoitens.tipo_garantia_fr,                                                                                                                 '+SLineBreak+
+              '              web_pedidoitens.custo_garantia_fr,                                                                                                                '+SLineBreak+
+              '              web_pedidoitens.custo_garantia,                                                                                                                   '+SLineBreak+
+              '              web_pedidoitens.per_garantia_fr,                                                                                                                  '+SLineBreak+
+              '              web_pedidoitens.valor_venda_atual,                                                                                                                '+SLineBreak+
+              '              web_pedidoitens.vlrvenda_pro,                                                                                                                     '+SLineBreak+
+              '              coalesce(web_pedidoitens.quantidade, 0) * coalesce(web_pedidoitens.vlr_garantia, 0) vlr_garantia,                                                 '+SLineBreak+
+              '              coalesce(web_pedidoitens.quantidade, 0) * coalesce(web_pedidoitens.vlr_garantia_fr, 0) vlr_garantia_fr,                                           '+SLineBreak+
+              '              coalesce(web_pedidoitens.quantidade, 0) * coalesce(web_pedidoitens.valor_unitario,0) valor_totalitens,                                            '+SLineBreak+
               '              coalesce(web_pedidoitens.quantidade,0) * (coalesce(web_pedidoitens.vlr_garantia,0)+coalesce(web_pedidoitens.vlr_garantia_fr,0)) total_garantia,   '+SLineBreak+
-              '              coalesce(web_pedidoitens.valor_unitario, 0) * coalesce(web_pedidoitens.percentual_desconto,0) / 100 valor_desconto '+SLineBreak+
-              '                                                                                                                                 '+SLineBreak+
-              '          from web_pedidoitens                                                                                                   '+SLineBreak+
-              '          inner join produto on produto.codigo_pro = web_pedidoitens.produto_id                                                  '+SLineBreak+
-              '                                                                                                                                 '+SLineBreak+
+              '              coalesce(web_pedidoitens.valor_unitario, 0) * coalesce(web_pedidoitens.percentual_desconto,0) / 100 valor_desconto                                '+SLineBreak+
+              '                                                                                                                                                                '+SLineBreak+
+              '          from web_pedidoitens                                                                                                                                  '+SLineBreak+
+              '          inner join produto on produto.codigo_pro = web_pedidoitens.produto_id                                                                                 '+SLineBreak+
+              '                                                                                                                                                                '+SLineBreak+
               '          ) where 1=1 ';
 
     lSQL := lSQL + where;

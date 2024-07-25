@@ -383,6 +383,7 @@ type
 
     function aprovarVendaAssistida(pIdVendaAssistida: Integer): String;
     function VenderItem(pVenderItemParametros: TVenderItemParametros): String;
+    function ConcederDesconto(pIDPedido, pIDItem, pTipoDesconto : String; pPorcentagem : Real): Boolean;
     procedure calcularTotais;
     procedure obterTotais;
 
@@ -1451,6 +1452,47 @@ begin
     lWebPedidoItensModel.Free;
     lProdutoModel.Free;
     lMovimentoSerialModel.Free;
+  end;
+end;
+
+function TWebPedidoModel.ConcederDesconto(pIDPedido, pIDItem, pTipoDesconto : String; pPorcentagem : Real): Boolean;
+var
+  lWebPedidoItensModel        : TWebPedidoItensModel;
+  lWebPedidoItensModelAlterar : TWebPedidoItensModel;
+  i                           : Integer;
+begin
+  try
+    try
+      lWebPedidoItensModel        := TWebPedidoItensModel.Create(vIConexao);
+      lWebPedidoItensModelAlterar := TWebPedidoItensModel.Create(vIConexao);
+
+      lWebPedidoItensModel.IDWebPedidoView := StrToInt(pIDPedido);
+
+      if pIDItem <> '' then
+        lWebPedidoItensModel.IDRecordView := StrToInt(pIDItem);
+
+      lWebPedidoItensModel.obterLista;
+
+      for i := 0 to lWebPedidoItensModel.WebPedidoItenssLista.Count -1 do
+      begin
+        lWebPedidoItensModelAlterar := lWebPedidoItensModelAlterar.Alterar(lWebPedidoItensModel.WebPedidoItenssLista[i].ID);
+        lWebPedidoItensModelAlterar.PERCENTUAL_DESCONTO := pPorcentagem;
+        lWebPedidoItensModelAlterar.Salvar;
+      end;
+
+      result := True;
+    except
+     on E:Exception do
+     begin
+       CriaException('Erro: '+ E.Message);
+       result := False;
+     end;
+    end;
+
+  finally
+    lWebPedidoItensModel.Free;
+    lWebPedidoItensModelAlterar.Free;
+
   end;
 end;
 
