@@ -256,16 +256,16 @@ end;
 
 function TPortadorModel.possuiBandeira(pPortador: String): Boolean;
 var
-  lAdmCartaoDao: TAdmCartaoDao;
+  lAdmCartaoDao: ITAdmCartaoDao;
 begin
-  lAdmCartaoDao := TAdmCartaoDao.Create(vIConexao);
+  lAdmCartaoDao := TAdmCartaoDao.getNewIface(vIConexao);
   try
-    lAdmCartaoDao.WhereView := 'and coalesce(status,''A'') = ''A'' and portador_id = ' + QuotedStr(pPortador);
-    lAdmCartaoDao.obterTotalRegistros;
+    lAdmCartaoDao.objeto.WhereView := 'and coalesce(status,''A'') = ''A'' and portador_id = ' + QuotedStr(pPortador);
+    lAdmCartaoDao.objeto.obterTotalRegistros;
 
-    Result := (lAdmCartaoDao.TotalRecords > 0);
+    Result := (lAdmCartaoDao.objeto.TotalRecords > 0);
   finally
-    lAdmCartaoDao.Free;
+    lAdmCartaoDao:=nil;
   end;
 end;
 
