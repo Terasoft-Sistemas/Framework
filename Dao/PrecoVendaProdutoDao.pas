@@ -5,7 +5,7 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  Spring.Collections,
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
@@ -16,7 +16,7 @@ type
   private
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
-    FPrecoVendaProdutosLista: TObjectList<TPrecoVendaProdutoModel>;
+    FPrecoVendaProdutosLista: IList<TPrecoVendaProdutoModel>;
     FLengthPageView: String;
     FStartRecordView: String;
     FID: Variant;
@@ -27,7 +27,7 @@ type
     FIDRecordView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetPrecoVendaProdutosLista(const Value: TObjectList<TPrecoVendaProdutoModel>);
+    procedure SetPrecoVendaProdutosLista(const Value: IList<TPrecoVendaProdutoModel>);
     procedure SetID(const Value: Variant);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -42,7 +42,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property PrecoVendaProdutosLista: TObjectList<TPrecoVendaProdutoModel> read FPrecoVendaProdutosLista write SetPrecoVendaProdutosLista;
+    property PrecoVendaProdutosLista: IList<TPrecoVendaProdutoModel> read FPrecoVendaProdutosLista write SetPrecoVendaProdutosLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -100,6 +100,7 @@ end;
 
 destructor TPrecoVendaProdutoDao.Destroy;
 begin
+  FPrecoVendaProdutosLista:=nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -191,10 +192,10 @@ procedure TPrecoVendaProdutoDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: TPrecoVendaProdutoModel;
 begin
   lQry := vIConexao.CriarQuery;
-  FPrecoVendaProdutosLista := TObjectList<TPrecoVendaProdutoModel>.Create;
+  FPrecoVendaProdutosLista := TCollections.CreateList<TPrecoVendaProdutoModel>(true);
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lSql := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
@@ -208,17 +209,16 @@ begin
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
     lQry.Open(lSQL);
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FPrecoVendaProdutosLista.Add(TPrecoVendaProdutoModel.Create(vIConexao));
-      i := FPrecoVendaProdutosLista.Count -1;
-      FPrecoVendaProdutosLista[i].ID             := lQry.FieldByName('ID').AsString;
-      FPrecoVendaProdutosLista[i].PRECO_VENDA_ID := lQry.FieldByName('PRECO_VENDA_ID').AsString;
-      FPrecoVendaProdutosLista[i].PRODUTO_ID     := lQry.FieldByName('PRODUTO_ID').AsString;
-      FPrecoVendaProdutosLista[i].VALOR_VENDA    := lQry.FieldByName('VALOR_VENDA').AsString;
-      FPrecoVendaProdutosLista[i].SYSTIME        := lQry.FieldByName('SYSTIME').AsString;
+      modelo := TPrecoVendaProdutoModel.Create(vIConexao);
+      FPrecoVendaProdutosLista.Add(modelo);
+      modelo.ID             := lQry.FieldByName('ID').AsString;
+      modelo.PRECO_VENDA_ID := lQry.FieldByName('PRECO_VENDA_ID').AsString;
+      modelo.PRODUTO_ID     := lQry.FieldByName('PRODUTO_ID').AsString;
+      modelo.VALOR_VENDA    := lQry.FieldByName('VALOR_VENDA').AsString;
+      modelo.SYSTIME        := lQry.FieldByName('SYSTIME').AsString;
       lQry.Next;
     end;
     obterTotalRegistros;
@@ -230,7 +230,7 @@ procedure TPrecoVendaProdutoDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
 end;
-procedure TPrecoVendaProdutoDao.SetPrecoVendaProdutosLista(const Value: TObjectList<TPrecoVendaProdutoModel>);
+procedure TPrecoVendaProdutoDao.SetPrecoVendaProdutosLista;
 begin
   FPrecoVendaProdutosLista := Value;
 end;
