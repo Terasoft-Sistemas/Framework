@@ -62,12 +62,12 @@ type
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
 
     procedure obterLista;
-    procedure setParams(var pQry: TFDQuery; pFuncionarioModel: TFuncionarioModel);
+    procedure setParams(var pQry: TFDQuery; pFuncionarioModel: ITFuncionarioModel);
 
     function where: String;
-    function incluir(AFuncionarioModel: TFuncionarioModel): String;
-    function alterar(AFuncionarioModel: TFuncionarioModel): String;
-    function excluir(AFuncionarioModel: TFuncionarioModel): String;
+    function incluir(AFuncionarioModel: ITFuncionarioModel): String;
+    function alterar(AFuncionarioModel: ITFuncionarioModel): String;
+    function excluir(AFuncionarioModel: ITFuncionarioModel): String;
     function comissaoVendedor(pIdVendedor, pIdTipoComissao: String): Double;
     function carregaClasse(pId: String): ITFuncionarioModel;
 end;
@@ -79,7 +79,7 @@ uses
 
 { TFuncionario }
 
-function TFuncionarioDao.alterar(AFuncionarioModel: TFuncionarioModel): String;
+function TFuncionarioDao.alterar(AFuncionarioModel: ITFuncionarioModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -95,7 +95,7 @@ begin
     setParams(lQry, AFuncionarioModel);
     lQry.ExecSQL;
 
-    Result := AFuncionarioModel.CODIGO_FUN;
+    Result := AFuncionarioModel.objeto.CODIGO_FUN;
 
   finally
     lSQL := '';
@@ -277,7 +277,7 @@ begin
   inherited;
 end;
 
-function TFuncionarioDao.excluir(AFuncionarioModel: TFuncionarioModel): String;
+function TFuncionarioDao.excluir(AFuncionarioModel: ITFuncionarioModel): String;
 var
   lQry: TFDQuery;
 
@@ -286,9 +286,9 @@ begin
   lQry := vIconexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from FUNCIONARIO where CODIGO_FUN = :CODIGO_FUN',[AFuncionarioModel.CODIGO_FUN]);
+   lQry.ExecSQL('delete from FUNCIONARIO where CODIGO_FUN = :CODIGO_FUN',[AFuncionarioModel.objeto.CODIGO_FUN]);
    lQry.ExecSQL;
-   Result := AFuncionarioModel.CODIGO_FUN;
+   Result := AFuncionarioModel.objeto.CODIGO_FUN;
 
   finally
     lQry.Free;
@@ -301,7 +301,7 @@ begin
   Result.objeto.myself := Result;
 end;
 
-function TFuncionarioDao.incluir(AFuncionarioModel: TFuncionarioModel): String;
+function TFuncionarioDao.incluir(AFuncionarioModel: ITFuncionarioModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -444,7 +444,7 @@ begin
   FOrderView := Value;
 end;
 
-procedure TFuncionarioDao.setParams(var pQry: TFDQuery; pFuncionarioModel: TFuncionarioModel);
+procedure TFuncionarioDao.setParams(var pQry: TFDQuery; pFuncionarioModel: ITFuncionarioModel);
 var
   lTabela : IFDDataset;
   lCtx    : TRttiContext;
@@ -460,7 +460,7 @@ begin
       lProp := lCtx.GetType(TFuncionarioModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pFuncionarioModel).AsString = '',
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pFuncionarioModel.objeto).AsString = '',
         Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pFuncionarioModel).AsString))
     end;
   finally
