@@ -575,18 +575,18 @@ end;
 
 procedure TPedidoItensModel.calcularComissao(pVendedor, pTipoVenda: String; pComissaoCliente: Double; pGerente: String = '');
 var
-  lVendedorModel             : TFuncionarioModel;
+  lVendedorModel             : ITFuncionarioModel;
   lGrupoComissao             : TGrupoComissaoModel;
   lPercentualComissao,
   lPercentualComissaoGerente : Double;
 
 begin
-  lVendedorModel := TFuncionarioModel.Create(vIConexao);
+  lVendedorModel := TFuncionarioModel.getNewIface(vIConexao);
   lGrupoComissao := TGrupoComissaoModel.Create(vIConexao);
 
   try
     if self.FTIPO_VENDA_COMISSAO_ID <> '' then
-      lPercentualComissao := lVendedorModel.comissaoPorTipo(pVendedor, self.FTIPO_VENDA_COMISSAO_ID)
+      lPercentualComissao := lVendedorModel.objeto.comissaoPorTipo(pVendedor, self.FTIPO_VENDA_COMISSAO_ID)
 
     else if pComissaoCliente > 0 then
       lPercentualComissao := pComissaoCliente
@@ -599,10 +599,10 @@ begin
       lPercentualComissao := lGrupoComissao.ObterGrupoComissaoProduto(self.CODIGO_PRO);
 
       if lPercentualComissao = 0 then
-        lPercentualComissao := lVendedorModel.comissaoPorGrupo(pVendedor, self.FGRUPO_COMISSAO_ID);
+        lPercentualComissao := lVendedorModel.objeto.comissaoPorGrupo(pVendedor, self.FGRUPO_COMISSAO_ID);
     end
     else
-      lPercentualComissao := lVendedorModel.comissaoPorTipo(pVendedor, pTipoVenda);
+      lPercentualComissao := lVendedorModel.objeto.comissaoPorTipo(pVendedor, pTipoVenda);
 
     self.Acao := tacAlterar;
     self.COMISSAO_PERCENTUAL := FloatToStr(lPercentualComissao);
@@ -618,17 +618,17 @@ begin
       lPercentualComissaoGerente := StrToFloat(self.FCOMIS_PRO)
 
     else if self.FGRUPO_COMISSAO_ID <> '' then
-      lPercentualComissaoGerente := lVendedorModel.comissaoPorGrupo(pGerente, self.FGRUPO_COMISSAO_ID)
+      lPercentualComissaoGerente := lVendedorModel.objeto.comissaoPorGrupo(pGerente, self.FGRUPO_COMISSAO_ID)
 
     else
-      lPercentualComissaoGerente := lVendedorModel.comissaoPorTipo(pGerente, pTipoVenda);
+      lPercentualComissaoGerente := lVendedorModel.objeto.comissaoPorTipo(pGerente, pTipoVenda);
 
     self.Acao := tacAlterar;
     self.GERENTE_COMISSAO_PERCENTUAL := FloatToStr(lPercentualComissaoGerente);
     self.Salvar;
 
   finally
-    lVendedorModel.Free;
+    lVendedorModel := nil;;
   end;
 end;
 

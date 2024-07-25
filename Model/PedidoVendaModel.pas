@@ -954,7 +954,7 @@ var
   lTribFederal,
   lTribEstadual,
   lTribMunicipal    : Double;
-  lFuncionarioModel : TFuncionarioModel;
+  lFuncionarioModel : ITFuncionarioModel;
   lConfiguracoes    : ITerasoftConfiguracoes;
   lTableTotais      : IFDDataset;
   lItem             : Integer;
@@ -969,14 +969,14 @@ begin
   lNFItensModel     := TNFItensModel.Create(vIConexao);
   lNFModel          := TNFModel.Create(vIConexao);
   lEmpresaModel     := TEmpresaModel.getNewIface(vIConexao);
-  lFuncionarioModel := TFuncionarioModel.Create(vIConexao);
+  lFuncionarioModel := TFuncionarioModel.getNewIface(vIConexao);
   lConfiguracoes    := TerasoftConfiguracoes.getNewIface(vIConexao);
 
   try
     if pModelo = '65' then
     begin
-      lFuncionarioModel := lFuncionarioModel.carregaClasse(self.CODIGO_VEN);
-      lNomeVendedor := lFuncionarioModel.NOME_FUN;
+      lFuncionarioModel := lFuncionarioModel.objeto.carregaClasse(self.CODIGO_VEN);
+      lNomeVendedor := lFuncionarioModel.objeto.NOME_FUN;
 
       lNFModel.OBS_NF := 'Vendedor: '+lNomeVendedor+' '+sLineBreak;
 
@@ -1219,26 +1219,26 @@ end;
 
 procedure TPedidoVendaModel.getDataVendedor;
 var
-  lFuncionarioModel : TFuncionarioModel;
+  lFuncionarioModel : ITFuncionarioModel;
 begin
   if self.FCODIGO_VEN = '' then
     exit;
 
-  lFuncionarioModel := TFuncionarioModel.Create(vIConexao);
+  lFuncionarioModel := TFuncionarioModel.getNewIface(vIConexao);
   try
-    lFuncionarioModel.IDRecordView := self.FCODIGO_VEN;
-    lFuncionarioModel.obterLista;
+    lFuncionarioModel.objeto.IDRecordView := self.FCODIGO_VEN;
+    lFuncionarioModel.objeto.obterLista;
 
-    if lFuncionarioModel.FuncionariosLista[0].TIPO_COMISSAO <> '' then
-      self.FTIPO_COMISSAO := lFuncionarioModel.FuncionariosLista[0].TIPO_COMISSAO
+    if lFuncionarioModel.objeto.FuncionariosLista[0].objeto.TIPO_COMISSAO <> '' then
+      self.FTIPO_COMISSAO := lFuncionarioModel.objeto.FuncionariosLista[0].objeto.TIPO_COMISSAO
     else
       self.FTIPO_COMISSAO := 'F';
 
-    if lFuncionarioModel.FuncionariosLista[0].GERENTE_ID <> '' then
-      self.FGERENTE_ID := lFuncionarioModel.FuncionariosLista[0].GERENTE_ID;
+    if lFuncionarioModel.objeto.FuncionariosLista[0].objeto.GERENTE_ID <> '' then
+      self.FGERENTE_ID := lFuncionarioModel.objeto.FuncionariosLista[0].objeto.GERENTE_ID;
 
   finally
-    lFuncionarioModel.Free;
+    lFuncionarioModel := nil;
   end;
 end;
 
