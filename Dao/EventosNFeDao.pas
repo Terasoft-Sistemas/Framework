@@ -8,25 +8,31 @@ uses
   System.SysUtils,
   Terasoft.ConstrutorDao,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TEventosNFeDao = class
+  TEventosNFeDao = class;
 
+  ITEventosNFeDao = IObject<TEventosNFeDao>;
+
+  TEventosNFeDao = class
   private
+  [weak] mySelf: ITEventosNFeDao;
   vIConexao   : IConexao;
   vConstrutor : TConstrutorDao;
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITEventosNFeDao;
 
-    function incluir(AEventosNFeModel: TEventosNFeModel): Boolean;
-    function alterar(AEventosNFeModel: TEventosNFeModel): Boolean;
-    function excluir(AEventosNFeModel: TEventosNFeModel): Boolean;
+    function incluir(AEventosNFeModel: ITEventosNFeModel): Boolean;
+    function alterar(AEventosNFeModel: ITEventosNFeModel): Boolean;
+    function excluir(AEventosNFeModel: ITEventosNFeModel): Boolean;
 
-    procedure setParams(var pQry: TFDQuery; pEventosNFeModel : TEventosNFeModel);
+    procedure setParams(var pQry: TFDQuery; pEventosNFeModel : ITEventosNFeModel);
     function where: String;
 end;
 
@@ -36,7 +42,7 @@ uses
   System.StrUtils, System.Variants, System.Rtti;//, SistemaControl;
 { TEventosNFeDao }
 
-function TEventosNFeDao.alterar(AEventosNFeModel: TEventosNFeModel): Boolean;
+function TEventosNFeDao.alterar(AEventosNFeModel: ITEventosNFeModel): Boolean;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -49,11 +55,11 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.ParamByName('ID').Value := AEventosNFeModel.ID;
+    lQry.ParamByName('ID').Value := AEventosNFeModel.objeto.ID;
     setParams(lQry, AEventosNFeModel);
     lQry.ExecSQL;
 
-    Result := AEventosNFeModel.ID;
+    Result := AEventosNFeModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -62,7 +68,7 @@ begin
   end;
 end;
 
-constructor TEventosNFeDao.Create(pIConexao : IConexao);
+constructor TEventosNFeDao._Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -75,7 +81,13 @@ begin
   inherited;
 end;
 
-function TEventosNFeDao.excluir(AEventosNFeModel: TEventosNFeModel): Boolean;
+class function TEventosNFeDao.getNewIface(pIConexao: IConexao): ITEventosNFeDao;
+begin
+  Result := TImplObjetoOwner<TEventosNFeDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TEventosNFeDao.excluir(AEventosNFeModel: ITEventosNFeModel): Boolean;
 var
   lQry: TFDQuery;
 
@@ -84,16 +96,16 @@ begin
   lQry := vIconexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from EVENTOS_NFE where ID = :ID',[AEventosNFeModel.ID]);
+   lQry.ExecSQL('delete from EVENTOS_NFE where ID = :ID',[AEventosNFeModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := AEventosNFeModel.ID;
+   Result := AEventosNFeModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
 end;
 
-function TEventosNFeDao.incluir(AEventosNFeModel: TEventosNFeModel): Boolean;
+function TEventosNFeDao.incluir(AEventosNFeModel: ITEventosNFeModel): Boolean;
 var
   lSQL: String;
   lQry: TFDQuery;
@@ -103,7 +115,7 @@ begin
 
     lSQL := vConstrutor.gerarInsert('EVENTOS_NFE','ID', true);
     lQry.SQL.Add(lSQL);
-    AEventosNFeModel.ID := vIConexao.Generetor('GEN_EVENTOS');
+    AEventosNFeModel.objeto.ID := vIConexao.Generetor('GEN_EVENTOS');
     setParams(lQry, AEventosNFeModel);
 
     vConstrutor.getSQL(lQry);
@@ -116,7 +128,7 @@ begin
   end;
 end;
 
-procedure TEventosNFeDao.setParams(var pQry: TFDQuery; pEventosNFeModel: TEventosNFeModel);
+procedure TEventosNFeDao.setParams(var pQry: TFDQuery; pEventosNFeModel: ITEventosNFeModel);
 var
   lTabela : IFDDataset;
   lCtx    : TRttiContext;

@@ -6,15 +6,19 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TAdmCartaoTaxaModel = class
+  TAdmCartaoTaxaModel   = class;
+  ITAdmCartaoTaxaModel  = IObject<TAdmCartaoTaxaModel>;
 
+  TAdmCartaoTaxaModel   = class
   private
+    [weak] mySelf: ITAdmCartaoTaxaModel;
     vIConexao : IConexao;
 
-    FAdmCartaoTaxasLista: IList<TAdmCartaoTaxaModel>;
+    FAdmCartaoTaxasLista: IList<ITAdmCartaoTaxaModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -32,7 +36,7 @@ type
     FPARCELA: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetAdmCartaoTaxasLista(const Value: IList<TAdmCartaoTaxaModel>);
+    procedure SetAdmCartaoTaxasLista(const Value: IList<ITAdmCartaoTaxaModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -58,15 +62,17 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITAdmCartaoTaxaModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TAdmCartaoTaxaModel;
+    function Alterar(pID : String): ITAdmCartaoTaxaModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId: String): TAdmCartaoTaxaModel;
+    function carregaClasse(pId: String): ITAdmCartaoTaxaModel;
     procedure obterLista;
 
-    property AdmCartaoTaxasLista: IList<TAdmCartaoTaxaModel> read FAdmCartaoTaxasLista write SetAdmCartaoTaxasLista;
+    property AdmCartaoTaxasLista: IList<ITAdmCartaoTaxaModel> read FAdmCartaoTaxasLista write SetAdmCartaoTaxasLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -85,14 +91,14 @@ uses
 
 { TAdmCartaoTaxaModel }
 
-function TAdmCartaoTaxaModel.Alterar(pID: String): TAdmCartaoTaxaModel;
+function TAdmCartaoTaxaModel.Alterar(pID: String): ITAdmCartaoTaxaModel;
 var
-  lAdmCartaoTaxaModel : TAdmCartaoTaxaModel;
+  lAdmCartaoTaxaModel : ITAdmCartaoTaxaModel;
 begin
-  lAdmCartaoTaxaModel := lAdmCartaoTaxaModel.Create(vIConexao);
+  lAdmCartaoTaxaModel := TAdmCartaoTaxaModel.getNewIface(vIConexao);
   try
-    lAdmCartaoTaxaModel       := lAdmCartaoTaxaModel.carregaClasse(pID);
-    lAdmCartaoTaxaModel.Acao  := tacAlterar;
+    lAdmCartaoTaxaModel       := lAdmCartaoTaxaModel.objeto.carregaClasse(pID);
+    lAdmCartaoTaxaModel.objeto.Acao  := tacAlterar;
     Result                    := lAdmCartaoTaxaModel;
   finally
   end;
@@ -105,22 +111,28 @@ begin
   Result := self.Salvar;
 end;
 
+class function TAdmCartaoTaxaModel.getNewIface(pIConexao: IConexao): ITAdmCartaoTaxaModel;
+begin
+  Result := TImplObjetoOwner<TAdmCartaoTaxaModel>.CreateOwner(self.Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TAdmCartaoTaxaModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
     self.Salvar;
 end;
 
-function TAdmCartaoTaxaModel.carregaClasse(pId: String): TAdmCartaoTaxaModel;
+function TAdmCartaoTaxaModel.carregaClasse(pId: String): ITAdmCartaoTaxaModel;
 var
-  lAdmCartaoTaxaDao: TAdmCartaoTaxaDao;
+  lAdmCartaoTaxaDao: ITAdmCartaoTaxaDao;
 begin
-  lAdmCartaoTaxaDao := lAdmCartaoTaxaDao.Create(vIConexao);
+  lAdmCartaoTaxaDao := TAdmCartaoTaxaDao.getNewIface(vIConexao);
 
   try
-    Result := lAdmCartaoTaxaDao.carregaClasse(pId);
+    Result := lAdmCartaoTaxaDao.objeto.carregaClasse(pId);
   finally
-    lAdmCartaoTaxaDao.Free;
+    lAdmCartaoTaxaDao := nil;
   end;
 end;
 
@@ -138,46 +150,46 @@ end;
 
 procedure TAdmCartaoTaxaModel.obterLista;
 var
-  lAdmCartaoTaxaLista: TAdmCartaoTaxaDao;
+  lAdmCartaoTaxaLista: ITAdmCartaoTaxaDao;
 begin
-  lAdmCartaoTaxaLista := TAdmCartaoTaxaDao.Create(vIConexao);
+  lAdmCartaoTaxaLista := TAdmCartaoTaxaDao.getNewIface(vIConexao);
 
   try
-    lAdmCartaoTaxaLista.TotalRecords    := FTotalRecords;
-    lAdmCartaoTaxaLista.WhereView       := FWhereView;
-    lAdmCartaoTaxaLista.CountView       := FCountView;
-    lAdmCartaoTaxaLista.OrderView       := FOrderView;
-    lAdmCartaoTaxaLista.StartRecordView := FStartRecordView;
-    lAdmCartaoTaxaLista.LengthPageView  := FLengthPageView;
-    lAdmCartaoTaxaLista.IDRecordView    := FIDRecordView;
+    lAdmCartaoTaxaLista.objeto.TotalRecords    := FTotalRecords;
+    lAdmCartaoTaxaLista.objeto.WhereView       := FWhereView;
+    lAdmCartaoTaxaLista.objeto.CountView       := FCountView;
+    lAdmCartaoTaxaLista.objeto.OrderView       := FOrderView;
+    lAdmCartaoTaxaLista.objeto.StartRecordView := FStartRecordView;
+    lAdmCartaoTaxaLista.objeto.LengthPageView  := FLengthPageView;
+    lAdmCartaoTaxaLista.objeto.IDRecordView    := FIDRecordView;
 
-    lAdmCartaoTaxaLista.obterLista;
+    lAdmCartaoTaxaLista.objeto.obterLista;
 
-    FTotalRecords  := lAdmCartaoTaxaLista.TotalRecords;
-    FAdmCartaoTaxasLista := lAdmCartaoTaxaLista.AdmCartaoTaxasLista;
+    FTotalRecords  := lAdmCartaoTaxaLista.objeto.TotalRecords;
+    FAdmCartaoTaxasLista := lAdmCartaoTaxaLista.objeto.AdmCartaoTaxasLista;
 
   finally
-    lAdmCartaoTaxaLista.Free;
+    lAdmCartaoTaxaLista := nil;
   end;
 end;
 
 function TAdmCartaoTaxaModel.Salvar: String;
 var
-  lAdmCartaoTaxaDao: TAdmCartaoTaxaDao;
+  lAdmCartaoTaxaDao: ITAdmCartaoTaxaDao;
 begin
-  lAdmCartaoTaxaDao := TAdmCartaoTaxaDao.Create(vIConexao);
+  lAdmCartaoTaxaDao := TAdmCartaoTaxaDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lAdmCartaoTaxaDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lAdmCartaoTaxaDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lAdmCartaoTaxaDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lAdmCartaoTaxaDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lAdmCartaoTaxaDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lAdmCartaoTaxaDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lAdmCartaoTaxaDao.Free;
+    lAdmCartaoTaxaDao := nil;
   end;
 end;
 

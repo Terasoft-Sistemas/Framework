@@ -732,20 +732,20 @@ function TPedidoVendaDao.ObterProdutoBalanca(pBarrasProduto: String): String;
 var
   lQry           : TFDQuery;
   lSQL           : String;
-  lConfiguracoes : TerasoftConfiguracoes;
+  lConfiguracoes : ITerasoftConfiguracoes;
 begin
   lQry := vIConexao.CriarQuery;
-  lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+  Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
   try
 
     if (Length(pBarrasProduto) = 13) and (Copy(pBarrasProduto, 1, 1) = '1') then
     begin
-      lSQL := 'SELECT BARRAS_PRO FROM PRODUTO P WHERE P.USAR_BALANCA = ''S'' AND P.CODIGO_PRO = '+ QuotedStr(((Copy(pBarrasProduto, StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_INI_PRODUTO', '2', tvString)), StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_FIM_PRODUTO', '6', tvString))))));
+      lSQL := 'SELECT BARRAS_PRO FROM PRODUTO P WHERE P.USAR_BALANCA = ''S'' AND P.CODIGO_PRO = '+ QuotedStr(((Copy(pBarrasProduto, StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_INI_PRODUTO', '2', tvString)), StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_FIM_PRODUTO', '6', tvString))))));
       lQry.Open(lSQL);
     end
     else if (Length(pBarrasProduto) = 13) and (Copy(pBarrasProduto, 1, 1) = '2') then
     begin
-      lSQL := 'SELECT BARRAS_PRO FROM PRODUTO P WHERE P.USAR_BALANCA = ''S'' AND P.BARRAS_PRO = '+ QuotedStr(IntToStr(StrToInt(Copy(pBarrasProduto,StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_INI_PRODUTO', '2', tvString)), StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_FIM_PRODUTO', '6', tvString))))));
+      lSQL := 'SELECT BARRAS_PRO FROM PRODUTO P WHERE P.USAR_BALANCA = ''S'' AND P.BARRAS_PRO = '+ QuotedStr(IntToStr(StrToInt(Copy(pBarrasProduto,StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_INI_PRODUTO', '2', tvString)), StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_FIM_PRODUTO', '6', tvString))))));
       lQry.Open(lSQL);
     end;
 

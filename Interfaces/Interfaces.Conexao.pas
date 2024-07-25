@@ -92,8 +92,8 @@ interface
       function setConfiguracoesNF(pConfiguracoes : TConfiguracoesNF)       : Boolean;
       function getConfiguracoes                                            : TConfiguracoesNF;
 
-      procedure setTerasoftConfiguracoes(const pConfiguracoes : TObject);
-      function getTerasoftConfiguracoes                                    : TObject;
+      procedure setTerasoftConfiguracoes(const pConfiguracoes : IUnknown);
+      function getTerasoftConfiguracoes                                    : IUnknown;
 
       procedure setContext(pUsuario: String);
       procedure setContextModoSistema(pSistema: String);
@@ -103,7 +103,7 @@ interface
 
       property gdb: IGDB read getGDB;
       property validador: IValidadorDatabase read getValidador;
-      property terasoftConfiguracoes: TObject read getTerasoftConfiguracoes write setTerasoftConfiguracoes;
+      property terasoftConfiguracoes: IUnknown read getTerasoftConfiguracoes write setTerasoftConfiguracoes;
 
     end;
 

@@ -118,21 +118,21 @@ function TAnexoDao.incluir(pAnexoModel: TAnexoModel): String;
 var
   lQry   : TFDQuery;
   lSQL   : String;
-  lConfiguracoes : TerasoftConfiguracoes;
+  lConfiguracoes : ITerasoftConfiguracoes;
 begin
   lQry := vIConexao.CriarQuery;
 
   lSQL := vConstrutor.gerarInsert('ANEXO', 'ID', true);
 
   try
-    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
     lQry.SQL.Add(lSQL);
     pAnexoModel.ID := vIConexao.Generetor('GEN_ANEXO');
     setParams(lQry, pAnexoModel);
     lQry.Open;
 
-    if lConfiguracoes.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
+    if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
       sincronizarDados(pAnexoModel);
 
     Result := lQry.FieldByName('ID').AsString;
@@ -147,7 +147,7 @@ function TAnexoDao.alterar(pAnexoModel: TAnexoModel): String;
 var
   lQry : TFDQuery;
   lSQL : String;
-  lConfiguracoes : TerasoftConfiguracoes;
+  lConfiguracoes : ITerasoftConfiguracoes;
 begin
   lQry := vIConexao.CriarQuery;
 
@@ -158,9 +158,9 @@ begin
     setParams(lQry, pAnexoModel);
     lQry.ExecSQL;
 
-    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
-    if lConfiguracoes.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
+    if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
      sincronizarDados(pAnexoModel);
 
     Result := pAnexoModel.ID;
@@ -174,7 +174,7 @@ end;
 function TAnexoDao.excluir(pAnexoModel: TAnexoModel): String;
 var
   lQry : TFDQuery;
-  lConfiguracoes : TerasoftConfiguracoes;
+  lConfiguracoes : ITerasoftConfiguracoes;
 begin
   lQry := vIConexao.CriarQuery;
 
@@ -182,9 +182,9 @@ begin
    lQry.ExecSQL('delete from ANEXO where ID = :ID' ,[pAnexoModel.ID]);
    lQry.ExecSQL;
 
-   lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+   Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
-   if lConfiguracoes.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
+   if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
      sincronizarDados(pAnexoModel);
 
    Result := pAnexoModel.ID;

@@ -12,16 +12,21 @@ uses
   Interfaces.Conexao,
   Terasoft.Utils,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao;
 
 type
-  TAdmCartaoTaxaDao = class
+  TAdmCartaoTaxaDao = class;
 
+  ITAdmCartaoTaxaDao = IObject<TAdmCartaoTaxaDao>;
+
+  TAdmCartaoTaxaDao = class
   private
+    [weak] mySelf: ITAdmCartaoTaxaDao;
     vIConexao : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FAdmCartaoTaxasLista: IList<TAdmCartaoTaxaModel>;
+    FAdmCartaoTaxasLista: IList<ITAdmCartaoTaxaModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -32,7 +37,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetAdmCartaoTaxasLista(const Value: IList<TAdmCartaoTaxaModel>);
+    procedure SetAdmCartaoTaxasLista(const Value: IList<ITAdmCartaoTaxaModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -48,7 +53,9 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property AdmCartaoTaxasLista: IList<TAdmCartaoTaxaModel> read FAdmCartaoTaxasLista write SetAdmCartaoTaxasLista;
+    class function getNewIface(pIConexao: IConexao): ITAdmCartaoTaxaDao;
+
+    property AdmCartaoTaxasLista: IList<ITAdmCartaoTaxaModel> read FAdmCartaoTaxasLista write SetAdmCartaoTaxasLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -58,15 +65,15 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(AAdmCartaoTaxaModel: TAdmCartaoTaxaModel): String;
-    function alterar(AAdmCartaoTaxaModel: TAdmCartaoTaxaModel): String;
-    function excluir(AAdmCartaoTaxaModel: TAdmCartaoTaxaModel): String;
+    function incluir(AAdmCartaoTaxaModel: ITAdmCartaoTaxaModel): String;
+    function alterar(AAdmCartaoTaxaModel: ITAdmCartaoTaxaModel): String;
+    function excluir(AAdmCartaoTaxaModel: ITAdmCartaoTaxaModel): String;
 
-    function carregaClasse(pID : String): TAdmCartaoTaxaModel;
+    function carregaClasse(pID : String): ITAdmCartaoTaxaModel;
 
     procedure obterLista;
 
-    procedure setParams(var pQry: TFDQuery; pCartaoTaxaModel: TAdmCartaoTaxaModel);
+    procedure setParams(var pQry: TFDQuery; pCartaoTaxaModel: ITAdmCartaoTaxaModel);
 
 end;
 
@@ -77,13 +84,13 @@ uses
 
 { TAdmCartaoTaxa }
 
-function TAdmCartaoTaxaDao.carregaClasse(pID: String): TAdmCartaoTaxaModel;
+function TAdmCartaoTaxaDao.carregaClasse(pID: String): ITAdmCartaoTaxaModel;
 var
   lQry: TFDQuery;
-  lModel: TAdmCartaoTaxaModel;
+  lModel: ITAdmCartaoTaxaModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TAdmCartaoTaxaModel.Create(vIConexao);
+  lModel   := TAdmCartaoTaxaModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -92,13 +99,13 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID                 := lQry.FieldByName('ID').AsString;
-    lModel.ADM_ID             := lQry.FieldByName('ADM_ID').AsString;
-    lModel.PARCELA            := lQry.FieldByName('PARCELA').AsString;
-    lModel.TAXA               := lQry.FieldByName('TAXA').AsString;
-    lModel.SYSTIME            := lQry.FieldByName('SYSTIME').AsString;
-    lModel.DIAS_VENCIMENTO    := lQry.FieldByName('DIAS_VENCIMENTO').AsString;
-    lModel.CONCILIADORA_ID    := lQry.FieldByName('CONCILIADORA_ID').AsString;
+    lModel.objeto.ID                 := lQry.FieldByName('ID').AsString;
+    lModel.objeto.ADM_ID             := lQry.FieldByName('ADM_ID').AsString;
+    lModel.objeto.PARCELA            := lQry.FieldByName('PARCELA').AsString;
+    lModel.objeto.TAXA               := lQry.FieldByName('TAXA').AsString;
+    lModel.objeto.SYSTIME            := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.DIAS_VENCIMENTO    := lQry.FieldByName('DIAS_VENCIMENTO').AsString;
+    lModel.objeto.CONCILIADORA_ID    := lQry.FieldByName('CONCILIADORA_ID').AsString;
 
     Result := lModel;
   finally
@@ -120,7 +127,7 @@ begin
   inherited;
 end;
 
-function TAdmCartaoTaxaDao.incluir(AAdmCartaoTaxaModel: TAdmCartaoTaxaModel): String;
+function TAdmCartaoTaxaDao.incluir(AAdmCartaoTaxaModel: ITAdmCartaoTaxaModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -131,7 +138,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    AAdmCartaoTaxaModel.ID := vIConexao.Generetor('GEN_ADMCARTAO_TAXA');
+    AAdmCartaoTaxaModel.objeto.ID := vIConexao.Generetor('GEN_ADMCARTAO_TAXA');
     setParams(lQry, AAdmCartaoTaxaModel);
     lQry.Open;
 
@@ -143,7 +150,7 @@ begin
   end;
 end;
 
-function TAdmCartaoTaxaDao.alterar(AAdmCartaoTaxaModel: TAdmCartaoTaxaModel): String;
+function TAdmCartaoTaxaDao.alterar(AAdmCartaoTaxaModel: ITAdmCartaoTaxaModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -157,7 +164,7 @@ begin
     setParams(lQry, AAdmCartaoTaxaModel);
     lQry.ExecSQL;
 
-    Result := AAdmCartaoTaxaModel.ID;
+    Result := AAdmCartaoTaxaModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -165,20 +172,26 @@ begin
   end;
 end;
 
-function TAdmCartaoTaxaDao.excluir(AAdmCartaoTaxaModel: TAdmCartaoTaxaModel): String;
+function TAdmCartaoTaxaDao.excluir(AAdmCartaoTaxaModel: ITAdmCartaoTaxaModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from ADMCARTAO_TAXA where ID = :ID',[AAdmCartaoTaxaModel.ID]);
+   lQry.ExecSQL('delete from ADMCARTAO_TAXA where ID = :ID',[AAdmCartaoTaxaModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := AAdmCartaoTaxaModel.ID;
+   Result := AAdmCartaoTaxaModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TAdmCartaoTaxaDao.getNewIface(pIConexao: IConexao): ITAdmCartaoTaxaDao;
+begin
+  Result := TImplObjetoOwner<TAdmCartaoTaxaDao>.CreateOwner(self.Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TAdmCartaoTaxaDao.where: String;
@@ -221,11 +234,11 @@ procedure TAdmCartaoTaxaDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TAdmCartaoTaxaModel;
+  modelo: ITAdmCartaoTaxaModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FAdmCartaoTaxasLista := TCollections.CreateList<TAdmCartaoTaxaModel>(true);
+  FAdmCartaoTaxasLista := TCollections.CreateList<ITAdmCartaoTaxaModel>;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -248,16 +261,16 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TAdmCartaoTaxaModel.Create(vIConexao);
+      modelo := TAdmCartaoTaxaModel.getNewIface(vIConexao);
       FAdmCartaoTaxasLista.Add(modelo);
 
-      modelo.ID              := lQry.FieldByName('ID').AsString;
-      modelo.ADM_ID          := lQry.FieldByName('ADM_ID').AsString;
-      modelo.PARCELA         := lQry.FieldByName('PARCELA').AsString;
-      modelo.TAXA            := lQry.FieldByName('TAXA').AsString;
-      modelo.SYSTIME         := lQry.FieldByName('SYSTIME').AsString;
-      modelo.DIAS_VENCIMENTO := lQry.FieldByName('DIAS_VENCIMENTO').AsString;
-      modelo.CONCILIADORA_ID := lQry.FieldByName('CONCILIADORA_ID').AsString;
+      modelo.objeto.ID              := lQry.FieldByName('ID').AsString;
+      modelo.objeto.ADM_ID          := lQry.FieldByName('ADM_ID').AsString;
+      modelo.objeto.PARCELA         := lQry.FieldByName('PARCELA').AsString;
+      modelo.objeto.TAXA            := lQry.FieldByName('TAXA').AsString;
+      modelo.objeto.SYSTIME         := lQry.FieldByName('SYSTIME').AsString;
+      modelo.objeto.DIAS_VENCIMENTO := lQry.FieldByName('DIAS_VENCIMENTO').AsString;
+      modelo.objeto.CONCILIADORA_ID := lQry.FieldByName('CONCILIADORA_ID').AsString;
 
       lQry.Next;
     end;
@@ -299,7 +312,7 @@ begin
   FOrderView := Value;
 end;
 
-procedure TAdmCartaoTaxaDao.setParams(var pQry: TFDQuery; pCartaoTaxaModel: TAdmCartaoTaxaModel);
+procedure TAdmCartaoTaxaDao.setParams(var pQry: TFDQuery; pCartaoTaxaModel: ITAdmCartaoTaxaModel);
 var
   lTabela : IFDDataset;
   lCtx    : TRttiContext;
@@ -315,7 +328,7 @@ begin
       lProp := lCtx.GetType(TAdmCartaoTaxaModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pCartaoTaxaModel).AsString = '',
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pCartaoTaxaModel.objeto).AsString = '',
         Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pCartaoTaxaModel).AsString))
     end;
   finally

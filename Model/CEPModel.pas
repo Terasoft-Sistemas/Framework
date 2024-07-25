@@ -38,7 +38,7 @@ type
       fRestClient          :  TRESTClient;
       fRestRequest         :  TRESTRequest;
       fRestResponse        :  TRESTResponse;
-      vConfiguracoes       :  TerasoftConfiguracoes;
+      vConfiguracoes       :  ITerasoftConfiguracoes;
       vACBrCEP             :  TACBrCEP;
       vMemtable            : TFDMemtable;
       FAPI                 : TApi;
@@ -47,7 +47,7 @@ type
       procedure vACBrCEPBuscaEfetuada(Sender: TObject);
 
     public
-      constructor Create(pConfiguracoes : TerasoftConfiguracoes);
+      constructor Create(pConfiguracoes : ITerasoftConfiguracoes);
       destructor Destroy; override;
 
       function consultarCEP(pCEP: String): TRetornoCEP;
@@ -67,7 +67,7 @@ System.JSON, System.SysUtils, Terasoft.Types;
 
 { TCEPModel }
 
-constructor TCEPModel.Create(pConfiguracoes : TerasoftConfiguracoes);
+constructor TCEPModel.Create(pConfiguracoes : ITerasoftConfiguracoes);
 begin
   fRestClient    := TRESTClient.Create(nil);
   fRestRequest   := TRESTRequest.Create(nil);
@@ -165,7 +165,7 @@ var
   lJsonValue: TJSONValue;
   lToken, lDeviceToken : String;
 begin
-  fRestClient.BaseURL := vConfiguracoes.valorTag('API_URL_CEP','https://gateway.apibrasil.io/api/v2/cep/cep', tvString);
+  fRestClient.BaseURL := vConfiguracoes.objeto.valorTag('API_URL_CEP','https://gateway.apibrasil.io/api/v2/cep/cep', tvString);
 
   fRestClient.ContentType            := 'application/json';
   fRestRequest.Client                := fRestClient;
@@ -174,8 +174,8 @@ begin
   fRestRequest.Response              := fRestResponse;
   fRestRequest.Params.Clear;
 
-  lDeviceToken := vConfiguracoes.valorTag('API_DEVICE_TOKEN_CEP','aab31101-b8a4-4d8e-8611-fce6bc4c5055', tvString);
-  lToken       := vConfiguracoes.valorTag('API_TOKEN','eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BsYXRhZm9ybWEuYXBpYnJhc2lsLmNvbS5ici9hdXRoL2xvZ2luIiwiaWF0IjoxNjkxNDI4NDE5LCJleHAiOjE3MjI5NjQ0MTksIm5iZiI6MTY5MTQyODQxOSwianRpIj'+'oiMGtKSXFUd2lXRnVlRlhmcSIsInN1YiI6IjQ0ODgiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.AWbyUffVXO7gEceuEFWVBklOWJyBnAdRyVlfpweSS0c', tvMemo);
+  lDeviceToken := vConfiguracoes.objeto.valorTag('API_DEVICE_TOKEN_CEP','aab31101-b8a4-4d8e-8611-fce6bc4c5055', tvString);
+  lToken       := vConfiguracoes.objeto.valorTag('API_TOKEN','eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BsYXRhZm9ybWEuYXBpYnJhc2lsLmNvbS5ici9hdXRoL2xvZ2luIiwiaWF0IjoxNjkxNDI4NDE5LCJleHAiOjE3MjI5NjQ0MTksIm5iZiI6MTY5MTQyODQxOSwianRpIj'+'oiMGtKSXFUd2lXRnVlRlhmcSIsInN1YiI6IjQ0ODgiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.AWbyUffVXO7gEceuEFWVBklOWJyBnAdRyVlfpweSS0c', tvMemo);
 
   fRestRequest.params.AddItem;
   fRestRequest.Params.Items[0].Value := '{"cep":"'+pCEP+'"}';

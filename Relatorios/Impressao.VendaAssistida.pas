@@ -299,24 +299,24 @@ end;
 
 procedure TImpressaoVendaAssistida.fetchEmpresa;
 var
-  lEmpresaModel : TEmpresaModel;
+  lEmpresaModel : ITEmpresaModel;
   lLojasModel, l   : TLojasModel;
 begin
-  lEmpresaModel := TEmpresaModel.Create(CONEXAO);
+  lEmpresaModel := TEmpresaModel.getNewIface(CONEXAO);
   lLojasModel   := TLojasModel.Create(CONEXAO);
   try
-    lEmpresaModel.Carregar;
+    lEmpresaModel.objeto.Carregar;
 
-    rlLabelEmpresaNome.Caption     := lEmpresaModel.RAZAO_SOCIAL;
-    rlLabelEmpresaEndereco.Caption := lEmpresaModel.ENDERECO+' '+lEmpresaModel.NUMERO+' '+lEmpresaModel.COMPLEMENTO;
+    rlLabelEmpresaNome.Caption     := lEmpresaModel.objeto.RAZAO_SOCIAL;
+    rlLabelEmpresaEndereco.Caption := lEmpresaModel.objeto.ENDERECO+' '+lEmpresaModel.objeto.NUMERO+' '+lEmpresaModel.objeto.COMPLEMENTO;
 
-    lLojasModel.LojaView := lEmpresaModel.LOJA;
+    lLojasModel.LojaView := lEmpresaModel.objeto.LOJA;
     lLojasModel.obterLista;
 
     LOJA.Text := lLojasModel.LojassLista[0].DESCRICAO;
-    Self.FDIRLOGO := lEmpresaModel.LOGO;
+    Self.FDIRLOGO := lEmpresaModel.objeto.LOGO;
   finally
-    lEmpresaModel.Free;
+    lEmpresaModel := nil;
     lLojasModel.Free;
   end;
 end;

@@ -132,7 +132,7 @@ function TPermissaoRemotaModel.Autorizar(pID: String): Boolean;
 var
   lPermissaoRemotaModel : TPermissaoRemotaModel;
   lWebPedidoModel       : TWebPedidoModel;
-  lConfiguracoes        : TerasoftConfiguracoes;
+  lConfiguracoes        : ITerasoftConfiguracoes;
 begin
   if pID = '' then
     CriaException('ID não informado');
@@ -143,9 +143,9 @@ begin
   try
     lPermissaoRemotaModel := lPermissaoRemotaModel.carregaClasse(pID);
 
-    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
-    if not lConfiguracoes.verificaPerfil(lPermissaoRemotaModel.OPERACAO) then
+    if not lConfiguracoes.objeto.verificaPerfil(lPermissaoRemotaModel.OPERACAO) then
       CriaException('Usuário sem permissão para autorizar essa solicitação.');
 
     lPermissaoRemotaModel.Acao := tacAlterar;
@@ -178,7 +178,7 @@ function TPermissaoRemotaModel.Negar(pID: String): Boolean;
 var
   lPermissaoRemotaModel : TPermissaoRemotaModel;
   lWebPedidoModel       : TWebPedidoModel;
-  lConfiguracoes        : TerasoftConfiguracoes;
+  lConfiguracoes        : ITerasoftConfiguracoes;
   lTablePermissao       : IFDDataset;
 begin
   if pID = '' then
@@ -190,9 +190,9 @@ begin
   try
     lPermissaoRemotaModel := lPermissaoRemotaModel.carregaClasse(pID);
 
-    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
-    if not lConfiguracoes.verificaPerfil(lPermissaoRemotaModel.OPERACAO) then
+    if not lConfiguracoes.objeto.verificaPerfil(lPermissaoRemotaModel.OPERACAO) then
       CriaException('Usuário sem permissão para autorizar essa solicitação.');
 
     lPermissaoRemotaModel.Acao := tacExcluir;

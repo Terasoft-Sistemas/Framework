@@ -11,14 +11,14 @@ type
     TEventosNFeControl = class
 
   private
-    FEventosNFeModel: TEventosNFeModel;
+    FEventosNFeModel: ITEventosNFeModel;
 
   public
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     function Salvar: Boolean;
-    property EventosNFeModel: TEventosNFeModel read FEventosNFeModel write FEventosNFeModel;
+    property EventosNFeModel: ITEventosNFeModel read FEventosNFeModel write FEventosNFeModel;
 
   end;
 
@@ -28,18 +28,18 @@ implementation
 
 constructor TEventosNFeControl.Create(pIConexao : IConexao);
 begin
-  FEventosNFeModel := TEventosNFeModel.Create(pIConexao);
+  FEventosNFeModel := TEventosNFeModel.getNewIface(pIConexao);
 end;
 
 destructor TEventosNFeControl.Destroy;
 begin
-  FEventosNFeModel.Free;
+  FEventosNFeModel := nil;
   inherited;
 end;
 
 function TEventosNFeControl.Salvar: Boolean;
 begin
-  Result := FEventosNFeModel.Salvar;
+  Result := FEventosNFeModel.objeto.Salvar;
 end;
 
 end.

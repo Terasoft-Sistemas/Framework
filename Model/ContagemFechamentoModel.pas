@@ -164,14 +164,14 @@ end;
 function TContagemFechamentoModel.obterContagem(pIdAberturaCaixa: String): IFDDataset;
 var
   lPortadorModel   : TPortadorModel;
-  lAdmCartaoModel  : TAdmCartaoModel;
+  lAdmCartaoModel  : ITAdmCartaoModel;
   lMemTable        : IFDDataset;
   lMemTableGerada  : IFDDataset;
   lLocate          : Boolean;
 
 begin
   lPortadorModel   := TPortadorModel.Create(vIConexao);
-  lAdmCartaoModel  := TAdmCartaoModel.Create(vIConexao);
+  lAdmCartaoModel  := TAdmCartaoModel.getNewIface(vIConexao);
   lMemTable        := TImplObjetoOwner<TDataset>.CreateOwner(TFDMemTable.Create(nil));
   lMemTableGerada  := TImplObjetoOwner<TDataset>.CreateOwner(TFDMemTable.Create(nil));
 
@@ -210,15 +210,15 @@ begin
 
     end;
 
-    lAdmCartaoModel.WhereView := ' and coalesce(admcartao.status,''A'') = ''A'' ';
-    lAdmCartaoModel.obterLista;
+    lAdmCartaoModel.objeto.WhereView := ' and coalesce(admcartao.status,''A'') = ''A'' ';
+    lAdmCartaoModel.objeto.obterLista;
 
-    for lAdmCartaoModel in lAdmCartaoModel.AdmCartaosLista do
+    for lAdmCartaoModel in lAdmCartaoModel.objeto.AdmCartaosLista do
     begin
       lMemTable.objeto.InsertRecord([
                               'B',
-                              lAdmCartaoModel.ID,
-                              lAdmCartaoModel.NOME_ADM,
+                              lAdmCartaoModel.objeto.ID,
+                              lAdmCartaoModel.objeto.NOME_ADM,
                               0
                              ]);
 
@@ -252,7 +252,7 @@ begin
     Result := lMemTable;
   finally
     lPortadorModel.Free;
-    lAdmCartaoModel.Free;
+    lAdmCartaoModel:=nil;
   end;
 
 end;

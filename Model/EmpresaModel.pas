@@ -4,12 +4,17 @@ interface
 
 uses
   System.SysUtils,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TEmpresaModel = class
+  TEmpresaModel = class;
 
+  ITEmpresaModel = IObject<TEmpresaModel>;
+
+  TEmpresaModel = class
   private
+    [weak] mySelf: ITEmpresaModel;
     vIConexao : IConexao;
     FINSCRICAO_MUNICIPAL: Variant;
     FCNPJ: Variant;
@@ -72,8 +77,10 @@ type
     procedure SetLOGO(const Value: Variant);
     procedure SetMULTA_BOL(const Value: Variant);
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITEmpresaModel;
 
     property ID                     :Variant read FID write SetID;
     property SYSTIME                :Variant read FSYSTIME write SetSYSTIME;
@@ -116,17 +123,17 @@ implementation
 
 procedure TEmpresaModel.Carregar;
 var
-  VEmpresaDao: TEmpresaDao;
+  VEmpresaDao: ITEmpresaDao;
 begin
-  VEmpresaDao := TEmpresaDao.Create(vIConexao);
+  VEmpresaDao := TEmpresaDao.getNewIface(vIConexao);
   try
-    VEmpresaDao.carregar(Self);
+    VEmpresaDao.objeto.carregar(mySelf);
   finally
-    VEmpresaDao.Free;
+    VEmpresaDao := nil;
   end;
 end;
 
-constructor TEmpresaModel.Create(pIConexao : IConexao);
+constructor TEmpresaModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -135,6 +142,12 @@ destructor TEmpresaModel.Destroy;
 begin
   vIConexao := nil;
   inherited;
+end;
+
+class function TEmpresaModel.getNewIface(pIConexao: IConexao): ITEmpresaModel;
+begin
+  Result := TImplObjetoOwner<TEmpresaModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 procedure TEmpresaModel.SetAVISARNEGATIVO_EMP(const Value: Variant);

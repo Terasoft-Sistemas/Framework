@@ -273,13 +273,13 @@ end;
 procedure TCaixaControleModel.InicializarCaixa(pValor: Double);
 var
   lCaixaModel   : TCaixaModel;
-  lUsuarioModel : TUsuarioModel;
+  lUsuarioModel : ITUsuarioModel;
   lNomeUsuario  : String;
 begin
   self.Incluir;
 
   lCaixaModel   := TCaixaModel.Create(vIConexao);
-  lUsuarioModel := TUsuarioModel.Create(vIConexao);
+  lUsuarioModel := TUsuarioModel.getNewIface(vIConexao);
 
   try
 
@@ -308,7 +308,7 @@ begin
 
   finally
     lCaixaModel.Free;
-    lUsuarioModel.Free;
+    lUsuarioModel := nil;
   end;
 
 end;
@@ -361,10 +361,10 @@ end;
 procedure TCaixaControleModel.Sangria(pValor: Double; pHistorico: String);
 var
   lCaixaModel   : TCaixaModel;
-  lUsuarioModel : TUsuarioModel;
+  lUsuarioModel : ITUsuarioModel;
 begin
   lCaixaModel   := TCaixaModel.Create(vIConexao);
-  lUsuarioModel := TUsuarioModel.Create(vIConexao);
+  lUsuarioModel := TUsuarioModel.getNewIface(vIConexao);
 
   try
     lCaixaModel.CODIGO_CTA          := '400000';
@@ -395,7 +395,7 @@ begin
 
   finally
     lCaixaModel.Free;
-    lUsuarioModel.Free;
+    lUsuarioModel := nil;
   end;
 end;
 
@@ -507,10 +507,10 @@ end;
 procedure TCaixaControleModel.Suprimento(pValor: Double; pHistorico: String);
 var
   lCaixaModel   : TCaixaModel;
-  lUsuarioModel : TUsuarioModel;
+  lUsuarioModel : ITUsuarioModel;
 begin
   lCaixaModel   := TCaixaModel.Create(vIConexao);
-  lUsuarioModel := TUsuarioModel.Create(vIConexao);
+  lUsuarioModel := TUsuarioModel.getNewIface(vIConexao);
 
   try
     lCaixaModel.CODIGO_CTA          := '400000';
@@ -541,7 +541,7 @@ begin
 
   finally
     lCaixaModel.Free;
-    lUsuarioModel.Free;
+    lUsuarioModel := nil;
   end;
 end;
 

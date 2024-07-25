@@ -593,7 +593,7 @@ function TContasReceberItensModel.gerarContasReceberCartao(pValor, pPortador, pI
 var
   lContasReceberModel: TContasReceberModel;
   lContasReceberItensInserir, lModel: TContasReceberItensModel;
-  lAdmCartaoModel: TAdmCartaoModel;
+  lAdmCartaoModel: ITAdmCartaoModel;
   lFaturaReceber: String;
   lValorParcela: Double;
   lVencimento: TDate;
@@ -601,13 +601,13 @@ var
 begin
   lContasReceberItensInserir := TContasReceberItensModel.Create(vIConexao);
   lContasReceberModel        := TContasReceberModel.Create(vIConexao);
-  lAdmCartaoModel            := TAdmCartaoModel.Create(vIConexao);
+  lAdmCartaoModel            := TAdmCartaoModel.getNewIface(vIConexao);
 
   try
     lContasReceberModel := lContasReceberModel.carregaClasse(self.FFATURA_REC);
 
-    lAdmCartaoModel.IDRecordView := StrToInt(pIdAdmCartao);
-    lAdmCartaoModel.obterLista;
+    lAdmCartaoModel.objeto.IDRecordView := StrToInt(pIdAdmCartao);
+    lAdmCartaoModel.objeto.obterLista;
 
     lContasReceberModel.Acao              := tacIncluir;
     lContasReceberModel.LOJA              := self.FLOJA;
@@ -626,7 +626,7 @@ begin
     lContasReceberModel.OBS_COMPLEMENTAR  := pObsComprementar;
     lFaturaReceber := lContasReceberModel.Salvar;
     lValorParcela  := StrToFloat(pValor) / pParcelas;
-    lVencimento    := vIConexao.DataServer + lAdmCartaoModel.AdmCartaosLista[0].PARCELADO_ADM;
+    lVencimento    := vIConexao.DataServer + lAdmCartaoModel.objeto.AdmCartaosLista[0].objeto.PARCELADO_ADM;
     lContasReceberItensInserir.ContasReceberItenssLista := TCollections.CreateList<TContasReceberItensModel>(true);
     lContasReceberItensInserir.Acao := tacIncluir;
 
@@ -679,7 +679,7 @@ begin
   finally
     lContasReceberItensInserir.Free;
     lContasReceberModel.Free;
-    lAdmCartaoModel.Free;
+    lAdmCartaoModel := nil;
   end;
 end;
 

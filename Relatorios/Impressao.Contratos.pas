@@ -519,13 +519,13 @@ var
   lPedidoVendaModel : TPedidoVendaModel;
   lContasReceberModel : TContasReceberModel;
   lContasReceberItensModel : TContasReceberItensModel;
-  lConfiguracoes : TerasoftConfiguracoes;
+  lConfiguracoes : ITerasoftConfiguracoes;
   lPrimeiraParcela, lTotalPremio : Double;
 begin
   lPedidoVendaModel := TPedidoVendaModel.Create(CONEXAO);
   lContasReceberModel := TContasReceberModel.Create(CONEXAO);
   lContasReceberItensModel := TContasReceberItensModel.Create(CONEXAO);
-  lConfiguracoes := TerasoftConfiguracoes.Create(CONEXAO);
+  lConfiguracoes := TerasoftConfiguracoes.getNewIface(CONEXAO);
   try
 
     lPedidoVendaModel.IDRecordView := Self.IDPEDIDO;
@@ -546,7 +546,7 @@ begin
     mtPedidoVALOR_PRODUTOS.Value      := lPedidoVendaModel.VALOR_PED;
     mtPedidoVALOR_DESCONTO.Value      := lPedidoVendaModel.DESC_PED;
     mtPedidoSEGURO_PRESTAMISTA.Value  := RoundTo(lPedidoVendaModel.SEGURO_PRESTAMISTA_VALOR, -2);
-    mtPedidoRR_PRESTAMISTA.Value      := (lConfiguracoes.valorTag('PERCENTUAL_RR_PRESTAMISTA', '0', tvNumero));
+    mtPedidoRR_PRESTAMISTA.Value      := (lConfiguracoes.objeto.valorTag('PERCENTUAL_RR_PRESTAMISTA', '0', tvNumero));
 
     mtPedidoPREMIO_UNICO_1.Value      := RoundTo((mtPedidoSEGURO_PRESTAMISTA.Value / 100 * 6.23), -2);
     mtPedidoPREMIO_UNICO_2.Value      := RoundTo((mtPedidoSEGURO_PRESTAMISTA.Value / 100 * 0.53), -2);
@@ -608,14 +608,14 @@ var
   lPedidoItensModel    : TPedidoItensModel;
   lProdutosModel       : TProdutosModel;
   lWebPedidoItensModel : TWebPedidoItensModel;
-  lConfiguracoes       : TerasoftConfiguracoes;
+  lConfiguracoes       : ITerasoftConfiguracoes;
   lTipoGarantia,
   lTipoGarantiaFR      : String;
 begin
   lPedidoItensModel    := TPedidoItensModel.Create(CONEXAO);
   lProdutosModel       := TProdutosModel.Create(CONEXAO);
   lWebPedidoItensModel := TWebPedidoItensModel.Create(CONEXAO);
-  lConfiguracoes       := TerasoftConfiguracoes.Create(CONEXAO);
+  lConfiguracoes       := TerasoftConfiguracoes.getNewIface(CONEXAO);
 
   try
     lPedidoItensModel.IDRecordView := pID;
@@ -638,9 +638,9 @@ begin
     mtItensVALOR_NOTA_FISCAL.Value     := lPedidoItensModel.PedidoItenssLista[0].VALORUNITARIO_PED * (1 - (lPedidoItensModel.PedidoItenssLista[0].DESCONTO_PED / 100));
     mtItensPREMIO_LIQUIDO.Value        := mtItensVLR_GARANTIA.Value / 1.0738;
     mtItensIOF.Value                   := mtItensVLR_GARANTIA.Value - mtItensPREMIO_LIQUIDO.Value;
-    mtItensRR_GARANTIA_ESTENDIDA.Value := (lConfiguracoes.valorTag('PERCENTUAL_RR_GARANTIA_ESTENDIDA', '0', tvNumero));
-    mtItensRR_RF.Value                 := (lConfiguracoes.valorTag('PERCENTUAL_RR_RF', '0', tvNumero));
-    mtItensRR_RFD.Value                := (lConfiguracoes.valorTag('PERCENTUAL_RR_RFD', '0', tvNumero));
+    mtItensRR_GARANTIA_ESTENDIDA.Value := (lConfiguracoes.objeto.valorTag('PERCENTUAL_RR_GARANTIA_ESTENDIDA', '0', tvNumero));
+    mtItensRR_RF.Value                 := (lConfiguracoes.objeto.valorTag('PERCENTUAL_RR_RF', '0', tvNumero));
+    mtItensRR_RFD.Value                := (lConfiguracoes.objeto.valorTag('PERCENTUAL_RR_RFD', '0', tvNumero));
     mtItensVALOR_FRANQUIA.Value        := mtItensVALOR_UNITARIO.Value * (20 / 100);
     mtItensPREMIO_UNICO_FR.Value       := lPedidoItensModel.PedidoItenssLista[0].VLR_GARANTIA_FR;
     mtItensIOF_FR.Value                := mtItensPREMIO_UNICO_FR.Value - (mtItensPREMIO_UNICO_FR.Value / 1.0738);
@@ -728,17 +728,17 @@ end;
 
 procedure TImpressaoContratos.fetchEmpresa;
 var
-  lEmpresaModel : TEmpresaModel;
+  lEmpresaModel : ITEmpresaModel;
 begin
-  lEmpresaModel := TEmpresaModel.Create(CONEXAO);
+  lEmpresaModel := TEmpresaModel.getNewIface(CONEXAO);
   try
-    lEmpresaModel.Carregar;
+    lEmpresaModel.objeto.Carregar;
     mtEmpresa.Append;
-    mtEmpresaCNPJ.Value := lEmpresaModel.CNPJ;
-    mtEmpresaLOCAL_DATA.Value := VarToStr(lEmpresaModel.CIDADE) +'/'+ VarToStr(lEmpresaModel.UF) + '  ' + DateToStr(CONEXAO.DataServer);
+    mtEmpresaCNPJ.Value := lEmpresaModel.objeto.CNPJ;
+    mtEmpresaLOCAL_DATA.Value := VarToStr(lEmpresaModel.objeto.CIDADE) +'/'+ VarToStr(lEmpresaModel.objeto.UF) + '  ' + DateToStr(CONEXAO.DataServer);
     mtEmpresa.Post;
   finally
-    lEmpresaModel.Free;
+    lEmpresaModel := nil;
   end;
 end;
 

@@ -5,14 +5,19 @@ interface
 uses
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TFuncionarioModel = class
+  TFuncionarioModel = class;
 
+  ITFuncionarioModel = IObject<TFuncionarioModel>;
+
+  TFuncionarioModel = class
   private
+    [weak] mySelf: ITFuncionarioModel;
     vIConexao : IConexao;
-    FFuncionariosLista: IList<TFuncionarioModel>;
+    FFuncionariosLista: IList<ITFuncionarioModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -134,7 +139,7 @@ type
     FOBS_CARACTERISTICA: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetFuncionariosLista(const Value: IList<TFuncionarioModel>);
+    procedure SetFuncionariosLista(const Value: IList<ITFuncionarioModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -367,20 +372,22 @@ type
     property  MSG_FINALIZAR_TAREFA          : Variant read FMSG_FINALIZAR_TAREFA         write SetMSG_FINALIZAR_TAREFA;
     property  TIPO_ESTOQUE                  : Variant read FTIPO_ESTOQUE                 write SetTIPO_ESTOQUE;
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITFuncionarioModel;
+
     function Incluir : String;
-    function Alterar(pID : String) : TFuncionarioModel;
+    function Alterar(pID : String) : ITFuncionarioModel;
     function Excluir(pID : String) : String;
-    function carregaClasse(pId: String): TFuncionarioModel;
+    function carregaClasse(pId: String): ITFuncionarioModel;
     function Salvar : String;
     procedure obterLista;
 
     function comissaoPorTipo(pCodVendedor, pIdTipoVenda : String): Double;
     function comissaoPorGrupo(pCodVendedor, pIdGrupo: String): Double;
 
-    property FuncionariosLista: IList<TFuncionarioModel> read FFuncionariosLista write SetFuncionariosLista;
+    property FuncionariosLista: IList<ITFuncionarioModel> read FFuncionariosLista write SetFuncionariosLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -399,14 +406,14 @@ uses
 
 { TFuncionarioModel }
 
-function TFuncionarioModel.Alterar(pID: String): TFuncionarioModel;
+function TFuncionarioModel.Alterar(pID: String): ITFuncionarioModel;
 var
-  lFuncionarioModel : TFuncionarioModel;
+  lFuncionarioModel : ITFuncionarioModel;
 begin
-  lFuncionarioModel := TFuncionarioModel.Create(vIConexao);
+  lFuncionarioModel := TFuncionarioModel.getNewIface(vIConexao);
   try
-    lFuncionarioModel      := lFuncionarioModel.carregaClasse(pID);
-    lFuncionarioModel.Acao := tacAlterar;
+    lFuncionarioModel      := lFuncionarioModel.objeto.carregaClasse(pID);
+    lFuncionarioModel.objeto.Acao := tacAlterar;
     Result                 := lFuncionarioModel;
   finally
 
@@ -420,21 +427,27 @@ begin
   Result    := self.Salvar;
 end;
 
+class function TFuncionarioModel.getNewIface;
+begin
+  Result := TImplObjetoOwner<TFuncionarioModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TFuncionarioModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
   Result    := self.Salvar;
 end;
 
-function TFuncionarioModel.carregaClasse(pId: String): TFuncionarioModel;
+function TFuncionarioModel.carregaClasse(pId: String): ITFuncionarioModel;
 var
-  lFuncionarioModel: TFuncionarioDao;
+  lFuncionarioModel: ITFuncionarioDao;
 begin
-  lFuncionarioModel := TFuncionarioDao.Create(vIConexao);
+  lFuncionarioModel := TFuncionarioDao.getNewIface(vIConexao);
   try
-    Result := lFuncionarioModel.carregaClasse(pId);
+    Result := lFuncionarioModel.objeto.carregaClasse(pId);
   finally
-    lFuncionarioModel.Free;
+    lFuncionarioModel := nil;
   end;
 end;
 
@@ -455,17 +468,17 @@ end;
 
 function TFuncionarioModel.comissaoPorTipo(pCodVendedor, pIdTipoVenda: String): Double;
 var
-  lFuncionarioDao: TFuncionarioDao;
+  lFuncionarioDao: ITFuncionarioDao;
 begin
-  lFuncionarioDao := TFuncionarioDao.Create(vIConexao);
+  lFuncionarioDao := TFuncionarioDao.getNewIface(vIConexao);
   try
-    Result := lFuncionarioDao.comissaoVendedor(pCodVendedor, pIdTipoVenda);
+    Result := lFuncionarioDao.objeto.comissaoVendedor(pCodVendedor, pIdTipoVenda);
   finally
-    lFuncionarioDao.Free;
+    lFuncionarioDao := nil;
   end;
 end;
 
-constructor TFuncionarioModel.Create(pIConexao : IConexao);
+constructor TFuncionarioModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -479,41 +492,41 @@ end;
 
 procedure TFuncionarioModel.obterLista;
 var
-  lFuncionarioLista: TFuncionarioDao;
+  lFuncionarioLista: ITFuncionarioDao;
 begin
-  lFuncionarioLista := TFuncionarioDao.Create(vIConexao);
+  lFuncionarioLista := TFuncionarioDao.getNewIface(vIConexao);
 
   try
-    lFuncionarioLista.TotalRecords    := FTotalRecords;
-    lFuncionarioLista.WhereView       := FWhereView;
-    lFuncionarioLista.CountView       := FCountView;
-    lFuncionarioLista.OrderView       := FOrderView;
-    lFuncionarioLista.StartRecordView := FStartRecordView;
-    lFuncionarioLista.LengthPageView  := FLengthPageView;
-    lFuncionarioLista.IDRecordView    := FIDRecordView;
+    lFuncionarioLista.objeto.TotalRecords    := FTotalRecords;
+    lFuncionarioLista.objeto.WhereView       := FWhereView;
+    lFuncionarioLista.objeto.CountView       := FCountView;
+    lFuncionarioLista.objeto.OrderView       := FOrderView;
+    lFuncionarioLista.objeto.StartRecordView := FStartRecordView;
+    lFuncionarioLista.objeto.LengthPageView  := FLengthPageView;
+    lFuncionarioLista.objeto.IDRecordView    := FIDRecordView;
 
-    lFuncionarioLista.obterLista;
+    lFuncionarioLista.objeto.obterLista;
 
-    FTotalRecords  := lFuncionarioLista.TotalRecords;
-    FFuncionariosLista := lFuncionarioLista.FuncionariosLista;
+    FTotalRecords  := lFuncionarioLista.objeto.TotalRecords;
+    FFuncionariosLista := lFuncionarioLista.objeto.FuncionariosLista;
 
   finally
-    lFuncionarioLista.Free;
+    lFuncionarioLista := nil;
   end;
 end;
 
 function TFuncionarioModel.Salvar: String;
 var
-  lFuncionarioDao: TFuncionarioDao;
+  lFuncionarioDao: ITFuncionarioDao;
 begin
-  lFuncionarioDao := TFuncionarioDao.Create(vIConexao);
+  lFuncionarioDao := TFuncionarioDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
 
   finally
-    lFuncionarioDao.Free;
+    lFuncionarioDao := nil;
   end;
 end;
 

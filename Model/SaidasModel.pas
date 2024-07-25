@@ -264,7 +264,7 @@ function TSaidasModel.AdicionarItensTransferencia(pSaidaItemParams: TSaidaItensT
 var
   lSaidasItensModel : TSaidasItensModel;
   lProdutosModel    : TProdutosModel;
-  lConfiguracoes    : TerasoftConfiguracoes;
+  lConfiguracoes    : ITerasoftConfiguracoes;
   lCtx              : TRttiContext;
   lProp             : TRttiProperty;
   lTagCusto         : String;
@@ -280,7 +280,7 @@ begin
     CriaException('Quantidade não informada');
 
   try
-    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
     lProdutosModel := lProdutosModel.carregaClasse(pSaidaItemParams.CODIGO_PRO);
 
     lSaidasItensModel.NUMERO_SAI       := self.FNUMERO_SAI;
@@ -289,7 +289,7 @@ begin
     lSaidasItensModel.CODIGO_PRO       := pSaidaItemParams.CODIGO_PRO;
     lSaidasItensModel.QUANTIDADE_SAI   := pSaidaItemParams.QUANTIDADE_SAI;
 
-    lTagCusto      := lConfiguracoes.valorTag('BASE_CUSTO_PADRAO', 'CUSTOMEDIO_PRO', tvString);
+    lTagCusto      := lConfiguracoes.objeto.valorTag('BASE_CUSTO_PADRAO', 'CUSTOMEDIO_PRO', tvString);
     lProp          := lCtx.GetType(TProdutosModel).GetProperty(lTagCusto);
 
     lSaidasItensModel.ICMS_SAI         := lProp.GetValue(lProdutosModel).AsString;
