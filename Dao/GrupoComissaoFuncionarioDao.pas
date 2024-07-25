@@ -15,7 +15,7 @@ uses
   Terasoft.Framework.SimpleTypes,
   Interfaces.Conexao,
   Terasoft.FuncoesTexto,
-  System.Generics.Collections,
+  Spring.Collections,
   Terasoft.ConstrutorDao,
   GrupoComissaoFuncionarioModel;
 
