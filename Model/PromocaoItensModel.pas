@@ -4,7 +4,7 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -12,7 +12,7 @@ type
 
   private
     vIConexao : IConexao;
-    FPromocaoItenssLista: TObjectList<TPromocaoItensModel>;
+    FPromocaoItenssLista: IList<TPromocaoItensModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -32,7 +32,7 @@ type
     FProdutoView: String;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetPromocaoItenssLista(const Value: TObjectList<TPromocaoItensModel>);
+    procedure SetPromocaoItenssLista(const Value: IList<TPromocaoItensModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -70,7 +70,7 @@ type
     function carregaClasse(pID : String) : TPromocaoItensModel;
     procedure obterLista;
 
-    property PromocaoItenssLista: TObjectList<TPromocaoItensModel> read FPromocaoItenssLista write SetPromocaoItenssLista;
+    property PromocaoItenssLista: IList<TPromocaoItensModel> read FPromocaoItenssLista write SetPromocaoItenssLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -135,7 +135,8 @@ end;
 
 destructor TPromocaoItensModel.Destroy;
 begin
-
+  FPromocaoItenssLista := nil;
+  vIConexao := nil;
   inherited;
 end;
 
@@ -205,7 +206,7 @@ begin
   Fid := Value;
 end;
 
-procedure TPromocaoItensModel.SetPromocaoItenssLista(const Value: TObjectList<TPromocaoItensModel>);
+procedure TPromocaoItensModel.SetPromocaoItenssLista;
 begin
   FPromocaoItenssLista := Value;
 end;

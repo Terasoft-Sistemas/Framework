@@ -5,7 +5,7 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  Spring.Collections,
   System.Variants,
   Interfaces.Conexao,
   Terasoft.ConstrutorDao,
@@ -16,7 +16,7 @@ type
   private
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
-    FPromocaoItenssLista: TObjectList<TPromocaoItensModel>;
+    FPromocaoItenssLista: IList<TPromocaoItensModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -28,7 +28,7 @@ type
     FProdutoView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetPromocaoItenssLista(const Value: TObjectList<TPromocaoItensModel>);
+    procedure SetPromocaoItenssLista(const Value: IList<TPromocaoItensModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -43,7 +43,7 @@ type
   public
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
-    property PromocaoItenssLista: TObjectList<TPromocaoItensModel> read FPromocaoItenssLista write SetPromocaoItenssLista;
+    property PromocaoItenssLista: IList<TPromocaoItensModel> read FPromocaoItenssLista write SetPromocaoItenssLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -102,6 +102,7 @@ end;
 
 destructor TPromocaoItensDao.Destroy;
 begin
+  FPromocaoItenssLista:=nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -204,10 +205,10 @@ procedure TPromocaoItensDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: TPromocaoItensModel;
 begin
   lQry := vIConexao.CriarQuery;
-  FPromocaoItenssLista := TObjectList<TPromocaoItensModel>.Create;
+  FPromocaoItenssLista := TCollections.CreateList<TPromocaoItensModel>(true);
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lSql := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
@@ -230,18 +231,17 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FPromocaoItenssLista.Add(TPromocaoItensModel.Create(vIConexao));
-      i := FPromocaoItenssLista.Count -1;
+      modelo := TPromocaoItensModel.Create(vIConexao);
+      FPromocaoItenssLista.Add(modelo);
 
-      FPromocaoItenssLista[i].ID              := lQry.FieldByName('ID').AsString;
-      FPromocaoItenssLista[i].PROMOCAO_ID     := lQry.FieldByName('PROMOCAO_ID').AsString;
-      FPromocaoItenssLista[i].PRODUTO_ID      := lQry.FieldByName('PRODUTO_ID').AsString;
-      FPromocaoItenssLista[i].VALOR_PROMOCAO  := lQry.FieldByName('VALOR_PROMOCAO').AsString;
-      FPromocaoItenssLista[i].SALDO           := lQry.FieldByName('SALDO').AsString;
+      modelo.ID              := lQry.FieldByName('ID').AsString;
+      modelo.PROMOCAO_ID     := lQry.FieldByName('PROMOCAO_ID').AsString;
+      modelo.PRODUTO_ID      := lQry.FieldByName('PRODUTO_ID').AsString;
+      modelo.VALOR_PROMOCAO  := lQry.FieldByName('VALOR_PROMOCAO').AsString;
+      modelo.SALDO           := lQry.FieldByName('SALDO').AsString;
 
       lQry.Next;
     end;
@@ -260,7 +260,7 @@ begin
   FProdutoView := Value;
 end;
 
-procedure TPromocaoItensDao.SetPromocaoItenssLista(const Value: TObjectList<TPromocaoItensModel>);
+procedure TPromocaoItensDao.SetPromocaoItenssLista;
 begin
   FPromocaoItenssLista := Value;
 end;
