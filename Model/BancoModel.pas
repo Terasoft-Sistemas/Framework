@@ -6,14 +6,19 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   FireDAC.Comp.Client,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
+
+  TBancoModel = class;
+
+  ITBancoModel = IObject<TBancoModel>;
+
   TBancoModel = class
-
   private
+    [weak] mySelf: ITBancoModel;
     vIConexao : IConexao;
-
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -233,14 +238,16 @@ type
     property scope: Variant read Fscope write Setscope;
     property caracteristica_titulo: Variant read Fcaracteristica_titulo write Setcaracteristica_titulo;
 
-    constructor Create(pIConexao: IConexao);
+    constructor _Create(pIConexao: IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITBancoModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TBancoModel;
+    function Alterar(pID : String): ITBancoModel;
     function Exlcuir(pID : String): String;
     function Salvar: String;
-    function carregaClasse(pID: String): TBancoModel;
+    function carregaClasse(pID: String): ITBancoModel;
 
     function obterLista: IFDDataset;
 
@@ -263,14 +270,14 @@ uses
 
 { TBancoModel }
 
-function TBancoModel.Alterar(pID: String): TBancoModel;
+function TBancoModel.Alterar(pID: String): ITBancoModel;
 var
-  lBancoModel : TBancoModel;
+  lBancoModel : ITBancoModel;
 begin
-  lBancoModel := TBancoModel.Create(vIConexao);
+  lBancoModel := TBancoModel.getNewIface(vIConexao);
   try
-    lBancoModel       := lBancoModel.carregaClasse(pID);
-    lBancoModel.Acao  := tacAlterar;
+    lBancoModel       := lBancoModel.objeto.carregaClasse(pID);
+    lBancoModel.objeto.Acao  := tacAlterar;
     Result            := lBancoModel;
   finally
   end;
@@ -283,6 +290,12 @@ begin
   Result    := self.Salvar;
 end;
 
+class function TBancoModel.getNewIface(pIConexao: IConexao): ITBancoModel;
+begin
+  Result := TImplObjetoOwner<TBancoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TBancoModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
@@ -291,41 +304,41 @@ end;
 
 function TBancoModel.obterLista: IFDDataset;
 var
-  lBancoLista: TBancoDao;
+  lBancoLista: ITBancoDao;
 begin
-  lBancoLista := TBancoDao.Create(vIConexao);
+  lBancoLista := TBancoDao.getNewIface(vIConexao);
 
   try
-    lBancoLista.TotalRecords    := FTotalRecords;
-    lBancoLista.WhereView       := FWhereView;
-    lBancoLista.CountView       := FCountView;
-    lBancoLista.OrderView       := FOrderView;
-    lBancoLista.StartRecordView := FStartRecordView;
-    lBancoLista.LengthPageView  := FLengthPageView;
-    lBancoLista.IDRecordView    := FIDRecordView;
+    lBancoLista.objeto.TotalRecords    := FTotalRecords;
+    lBancoLista.objeto.WhereView       := FWhereView;
+    lBancoLista.objeto.CountView       := FCountView;
+    lBancoLista.objeto.OrderView       := FOrderView;
+    lBancoLista.objeto.StartRecordView := FStartRecordView;
+    lBancoLista.objeto.LengthPageView  := FLengthPageView;
+    lBancoLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lBancoLista.obterLista;
+    Result := lBancoLista.objeto.obterLista;
 
-    FTotalRecords  := lBancoLista.TotalRecords;
+    FTotalRecords  := lBancoLista.objeto.TotalRecords;
 
   finally
-    lBancoLista.Free;
+    lBancoLista := nil;
   end;
 end;
 
-function TBancoModel.carregaClasse(pID: String): TBancoModel;
+function TBancoModel.carregaClasse(pID: String): ITBancoModel;
 var
-  lBancoDao: TBancoDao;
+  lBancoDao: ITBancoDao;
 begin
-  lBancoDao := TBancoDao.Create(vIConexao);
+  lBancoDao := TBancoDao.getNewIface(vIConexao);
   try
-    Result  := lBancoDao.carregaClasse(pId);
+    Result  := lBancoDao.objeto.carregaClasse(pId);
   finally
-    lBancoDao.Free;
+    lBancoDao := nil;
   end;
 end;
 
-constructor TBancoModel.Create(pIConexao : IConexao);
+constructor TBancoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -338,17 +351,17 @@ end;
 
 function TBancoModel.Salvar: String;
 var
-  lBancoDao: TBancoDao;
+  lBancoDao: ITBancoDao;
 begin
-  lBancoDao := TBancoDao.Create(vIConexao);
+  lBancoDao := TBancoDao.getNewIface(vIConexao);
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lBancoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lBancoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lBancoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lBancoDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lBancoDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lBancoDao.objeto.excluir(mySelf);
     end;
   finally
-    lBancoDao.Free;
+    lBancoDao:=nil;
   end;
 end;
 
