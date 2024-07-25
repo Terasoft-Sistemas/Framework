@@ -34,7 +34,7 @@ uses
       function VerificaPermissaoAcesso(pTag, pPerfil : String): Boolean;
       function verificaPerfil(pTag : String): Boolean;
 
-      constructor xCreate(pIConexao : IConexao);
+      constructor _Create(pIConexao : IConexao);
       destructor Destroy; override;
 
       class function getNewIface(pIConexao: IConexao): ITerasoftConfiguracoes;
@@ -78,7 +78,7 @@ begin
   end;
 end;
 
-constructor TerasoftConfiguracoes.xCreate(pIConexao : IConexao);
+constructor TerasoftConfiguracoes._Create(pIConexao : IConexao);
 begin
   vIConexao        := pIConexao;
   if(vIConexao.terasoftConfiguracoes=nil) then
@@ -99,7 +99,7 @@ end;
 
 class function TerasoftConfiguracoes.getNewIface(pIConexao: IConexao): ITerasoftConfiguracoes;
 begin
-  Result := TImplObjetoOwner<TerasoftConfiguracoes>.CreateOwner(self.xCreate(pIConexao));
+  Result := TImplObjetoOwner<TerasoftConfiguracoes>.CreateOwner(self._Create(pIConexao));
   Result.objeto.myself := Result;end;
 
 procedure TerasoftConfiguracoes.preparaTabela;

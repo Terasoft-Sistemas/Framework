@@ -42,7 +42,7 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     class function getNewIface(pIConexao: IConexao): ITEmpresaDao;
@@ -118,7 +118,7 @@ begin
    end;
 end;
 
-constructor TEmpresaDao.Create(pIConexao: IConexao);
+constructor TEmpresaDao._Create(pIConexao: IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -151,7 +151,7 @@ end;
 
 class function TEmpresaDao.getNewIface;
 begin
-  Result := TImplObjetoOwner<TEmpresaDao>.CreateOwner(self.Create(pIConexao));
+  Result := TImplObjetoOwner<TEmpresaDao>.CreateOwner(self._Create(pIConexao));
   Result.objeto.myself := Result;
 end;
 
