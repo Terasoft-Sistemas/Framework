@@ -7,7 +7,7 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  Spring.Collections,
   System.Variants,
   Terasoft.ConstrutorDao,
   Interfaces.Conexao,
@@ -20,7 +20,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FTabelaJurossLista: TObjectList<TTabelaJurosModel>;
+    FTabelaJurossLista: IList<TTabelaJurosModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -31,7 +31,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetTabelaJurossLista(const Value: TObjectList<TTabelaJurosModel>);
+    procedure SetTabelaJurossLista(const Value: IList<TTabelaJurosModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -46,7 +46,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property TabelaJurossLista: TObjectList<TTabelaJurosModel> read FTabelaJurossLista write SetTabelaJurossLista;
+    property TabelaJurossLista: IList<TTabelaJurosModel> read FTabelaJurossLista write SetTabelaJurossLista;
     property ID: Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -112,6 +112,7 @@ end;
 
 destructor TTabelaJurosDao.Destroy;
 begin
+  FTabelaJurossLista:=nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -216,11 +217,11 @@ procedure TTabelaJurosDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: TTabelaJurosModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FTabelaJurossLista := TObjectList<TTabelaJurosModel>.Create;
+  FTabelaJurossLista := TCollections.CreateList<TTabelaJurosModel>(true);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -240,21 +241,19 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FTabelaJurossLista.Add(TTabelaJurosModel.Create(vIConexao));
+      modelo := TTabelaJurosModel.Create(vIConexao);
+      FTabelaJurossLista.Add(modelo);
 
-      i := FTabelaJurossLista.Count -1;
-
-      FTabelaJurossLista[i].CODIGO      := lQry.FieldByName('CODIGO').AsString;
-      FTabelaJurossLista[i].INDCE       := lQry.FieldByName('INDCE').AsString;
-      FTabelaJurossLista[i].INDCEENT    := lQry.FieldByName('INDCEENT').AsString;
-      FTabelaJurossLista[i].ID          := lQry.FieldByName('ID').AsString;
-      FTabelaJurossLista[i].PERCENTUAL  := FormatFloat('#,##0.00', lQry.FieldByName('PERCENTUAL').AsFloat);
-      FTabelaJurossLista[i].PORTADOR_ID := lQry.FieldByName('PORTADOR_ID').AsString;
-      FTabelaJurossLista[i].SYSTIME     := lQry.FieldByName('SYSTIME').AsString;
+      modelo.CODIGO      := lQry.FieldByName('CODIGO').AsString;
+      modelo.INDCE       := lQry.FieldByName('INDCE').AsString;
+      modelo.INDCEENT    := lQry.FieldByName('INDCEENT').AsString;
+      modelo.ID          := lQry.FieldByName('ID').AsString;
+      modelo.PERCENTUAL  := FormatFloat('#,##0.00', lQry.FieldByName('PERCENTUAL').AsFloat);
+      modelo.PORTADOR_ID := lQry.FieldByName('PORTADOR_ID').AsString;
+      modelo.SYSTIME     := lQry.FieldByName('SYSTIME').AsString;
 
       lQry.Next;
     end;
@@ -271,7 +270,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TTabelaJurosDao.SetTabelaJurossLista(const Value: TObjectList<TTabelaJurosModel>);
+procedure TTabelaJurosDao.SetTabelaJurossLista;
 begin
   FTabelaJurossLista := Value;
 end;

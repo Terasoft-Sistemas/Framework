@@ -4,7 +4,7 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Spring.Collections,
   Terasoft.Utils,
   Interfaces.Conexao,
   FireDAC.Comp.Client,
@@ -16,7 +16,7 @@ type
 
   private
     vIConexao : IConexao;
-    FTabelaJurossLista: TObjectList<TTabelaJurosModel>;
+    FTabelaJurossLista: IList<TTabelaJurosModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -41,7 +41,7 @@ type
     FPER_SEG_PRESTAMSTA: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetTabelaJurossLista(const Value: TObjectList<TTabelaJurosModel>);
+    procedure SetTabelaJurossLista(const Value: IList<TTabelaJurosModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -89,7 +89,7 @@ type
 
     function carregaClasse(pId: Integer): TTabelaJurosModel;
 
-    property TabelaJurossLista: TObjectList<TTabelaJurosModel> read FTabelaJurossLista write SetTabelaJurossLista;
+    property TabelaJurossLista: IList<TTabelaJurosModel> read FTabelaJurossLista write SetTabelaJurossLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -128,7 +128,8 @@ end;
 
 destructor TTabelaJurosModel.Destroy;
 begin
-
+  FTabelaJurossLista:=nil;
+  vIConexao:=nil;
   inherited;
 end;
 
@@ -143,6 +144,7 @@ var
   lValorParcela,
   lPercentualJuros,
   lCoeficienteJurosDias : Double;
+
 
   lMemTable      : TFDMemTable;
   lPortadorModel : TPortadorModel;
@@ -189,7 +191,7 @@ begin
 
     if self.TotalRecords = 0 then
     begin
-      self.TabelaJurossLista := TObjectList<TTabelaJurosModel>.Create;
+      self.TabelaJurossLista := TCollections.CreateList<TTabelaJurosModel>(true);
       self.TabelaJurossLista.Add(TTabelaJurosModel.Create(vIConexao));
 
       self.TabelaJurossLista[0].FID            := 0;
@@ -390,7 +392,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TTabelaJurosModel.SetTabelaJurossLista(const Value: TObjectList<TTabelaJurosModel>);
+procedure TTabelaJurosModel.SetTabelaJurossLista;
 begin
   FTabelaJurossLista := Value;
 end;
