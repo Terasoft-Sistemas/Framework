@@ -11,12 +11,16 @@ uses
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao;
 
 type
-  TIbptDao = class
+  TIBPTDao = class;
+  ITIBPTDao = IObject<TIBPTDao>;
 
+  TIBPTDao = class
   private
+    [weak] mySelf: ITIbptDao;
     vIConexao 	: IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -29,21 +33,23 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITIbptDao;
 
     property WhereView: String read FWhereView write SetWhereView;
     property OrderView: String read FOrderView write SetOrderView;
 
-    function incluir(pIbptModel: TIbptModel): String;
-    function alterar(pIbptModel: TIbptModel): String;
-    function excluir(pIbptModel: TIbptModel): String;
+    function incluir(pIbptModel: ITIbptModel): String;
+    function alterar(pIbptModel: ITIbptModel): String;
+    function excluir(pIbptModel: ITIbptModel): String;
 
-    function carregaClasse(pID : String): TIbptModel;
+    function carregaClasse(pID : String): ITIbptModel;
 
     function obterIBPT(pUf, pNCM : String): IFDDataset;
 
-    procedure setParams(var pQry: TFDQuery; pIbptModel: TIbptModel);
+    procedure setParams(var pQry: TFDQuery; pIbptModel: ITIbptModel);
 
 end;
 
@@ -54,13 +60,13 @@ uses
 
 { TIbpt }
 
-function TIbptDao.carregaClasse(pID : String): TIbptModel;
+function TIBPTDao.carregaClasse(pID : String): ITIbptModel;
 var
   lQry: TFDQuery;
-  lModel: TIbptModel;
+  lModel: ITIbptModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TIbptModel.Create(vIConexao);
+  lModel   := TIbptModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -69,22 +75,22 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID                   := lQry.FieldByName('ID').AsString;
-    lModel.UF                   := lQry.FieldByName('UF').AsString;
-    lModel.CODIGO               := lQry.FieldByName('CODIGO').AsString;
-    lModel.EX                   := lQry.FieldByName('EX').AsString;
-    lModel.TIPO                 := lQry.FieldByName('TIPO').AsString;
-    lModel.VIGENCIA_INICIO      := lQry.FieldByName('VIGENCIA_INICIO').AsString;
-    lModel.VIGENCIA_FIM         := lQry.FieldByName('VIGENCIA_FIM').AsString;
-    lModel.NACIONAL_FEDERAL     := lQry.FieldByName('NACIONAL_FEDERAL').AsString;
-    lModel.IMPORTADOS_FEDERAL   := lQry.FieldByName('IMPORTADOS_FEDERAL').AsString;
-    lModel.ESTADUAL             := lQry.FieldByName('ESTADUAL').AsString;
-    lModel.MUNICIPAL            := lQry.FieldByName('MUNICIPAL').AsString;
-    lModel.CHAVE                := lQry.FieldByName('CHAVE').AsString;
-    lModel.VERSAO               := lQry.FieldByName('VERSAO').AsString;
-    lModel.FONTE                := lQry.FieldByName('FONTE').AsString;
-    lModel.UTRIB                := lQry.FieldByName('UTRIB').AsString;
-    lModel.SYSTIME              := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.ID                   := lQry.FieldByName('ID').AsString;
+    lModel.objeto.UF                   := lQry.FieldByName('UF').AsString;
+    lModel.objeto.CODIGO               := lQry.FieldByName('CODIGO').AsString;
+    lModel.objeto.EX                   := lQry.FieldByName('EX').AsString;
+    lModel.objeto.TIPO                 := lQry.FieldByName('TIPO').AsString;
+    lModel.objeto.VIGENCIA_INICIO      := lQry.FieldByName('VIGENCIA_INICIO').AsString;
+    lModel.objeto.VIGENCIA_FIM         := lQry.FieldByName('VIGENCIA_FIM').AsString;
+    lModel.objeto.NACIONAL_FEDERAL     := lQry.FieldByName('NACIONAL_FEDERAL').AsString;
+    lModel.objeto.IMPORTADOS_FEDERAL   := lQry.FieldByName('IMPORTADOS_FEDERAL').AsString;
+    lModel.objeto.ESTADUAL             := lQry.FieldByName('ESTADUAL').AsString;
+    lModel.objeto.MUNICIPAL            := lQry.FieldByName('MUNICIPAL').AsString;
+    lModel.objeto.CHAVE                := lQry.FieldByName('CHAVE').AsString;
+    lModel.objeto.VERSAO               := lQry.FieldByName('VERSAO').AsString;
+    lModel.objeto.FONTE                := lQry.FieldByName('FONTE').AsString;
+    lModel.objeto.UTRIB                := lQry.FieldByName('UTRIB').AsString;
+    lModel.objeto.SYSTIME              := lQry.FieldByName('SYSTIME').AsString;
 
     Result := lModel;
   finally
@@ -92,20 +98,20 @@ begin
   end;
 end;
 
-constructor TIbptDao.Create(pIConexao : IConexao);
+constructor TIBPTDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
 end;
 
-destructor TIbptDao.Destroy;
+destructor TIBPTDao.Destroy;
 begin
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
 end;
 
-function TIbptDao.incluir(pIbptModel: TIbptModel): String;
+function TIBPTDao.incluir(pIbptModel: ITIbptModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -127,7 +133,7 @@ begin
   end;
 end;
 
-function TIbptDao.alterar(pIbptModel: TIbptModel): String;
+function TIBPTDao.alterar(pIbptModel: ITIbptModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -141,7 +147,7 @@ begin
     setParams(lQry, pIbptModel);
     lQry.ExecSQL;
 
-    Result := pIbptModel.ID;
+    Result := pIbptModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -149,23 +155,29 @@ begin
   end;
 end;
 
-function TIbptDao.excluir(pIbptModel: TIbptModel): String;
+function TIBPTDao.excluir(pIbptModel: ITIbptModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from Ibpt2 where ID = :ID' ,[pIbptModel.ID]);
+   lQry.ExecSQL('delete from Ibpt2 where ID = :ID' ,[pIbptModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pIbptModel.ID;
+   Result := pIbptModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
 end;
 
-function TIbptDao.where: String;
+class function TIBPTDao.getNewIface(pIConexao: IConexao): ITIbptDao;
+begin
+  Result := TImplObjetoOwner<TIBPTDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TIBPTDao.where: String;
 var
   lSQL : String;
 begin
@@ -177,7 +189,7 @@ begin
   Result := lSQL;
 end;
 
-function TIbptDao.obterIBPT(pUf, pNCM : String): IFDDataset;
+function TIBPTDao.obterIBPT(pUf, pNCM : String): IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -208,12 +220,12 @@ begin
   end;
 end;
 
-procedure TIbptDao.SetOrderView(const Value: String);
+procedure TIBPTDao.SetOrderView(const Value: String);
 begin
   FOrderView := Value;
 end;
 
-procedure TIbptDao.setParams(var pQry: TFDQuery; pIbptModel: TIbptModel);
+procedure TIBPTDao.setParams(var pQry: TFDQuery; pIbptModel: ITIbptModel);
 var
   lTabela : IFDDataset;
   lCtx    : TRttiContext;
@@ -229,7 +241,7 @@ begin
       lProp := lCtx.GetType(TIbptModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pIbptModel).AsString = '',
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pIbptModel.objeto).AsString = '',
         Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pIbptModel).AsString))
     end;
   finally
@@ -237,7 +249,7 @@ begin
   end;
 end;
 
-procedure TIbptDao.SetWhereView(const Value: String);
+procedure TIBPTDao.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
 end;
