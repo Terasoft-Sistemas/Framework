@@ -636,11 +636,11 @@ function TPedidoItensModel.cancelarEstoque: String;
 var
   lMovimentoModel, lModel: TMovimentoModel;
   lProdutosModel: TProdutosModel;
-  lUsuarioModel : TUsuarioModel;
+  lUsuarioModel : ITUsuarioModel;
 begin
   lMovimentoModel := TMovimentoModel.Create(vIConexao);
   lProdutosModel  := TProdutosModel.Create(vIConexao);
-  lUsuarioModel   := TUsuarioModel.Create(vIConexao);
+  lUsuarioModel   := TUsuarioModel.getNewIface(vIConexao);
 
   try
     lMovimentoModel.WhereView := ' and movimento.status <> ''X''                 '+
@@ -654,7 +654,7 @@ begin
     begin
       lModel.Acao := tacAlterar;
       lModel.STATUS  := 'X';
-      lModel.OBS_MOV := 'Alt.Ped.Usuário: '+ lUsuarioModel.nomeUsuario(self.vIConexao.getUSer.NOME) + DateToStr(vIConexao.DataServer) + ' ' + TimeToStr(vIConexao.HoraServer);
+      lModel.OBS_MOV := 'Alt.Ped.Usuário: '+ lUsuarioModel.objeto.nomeUsuario(self.vIConexao.getUSer.NOME) + DateToStr(vIConexao.DataServer) + ' ' + TimeToStr(vIConexao.HoraServer);
       lModel.Salvar;
 
       lProdutosModel.adicionarSaldo(lModel.CODIGO_PRO, lModel.QUANTIDADE_MOV);

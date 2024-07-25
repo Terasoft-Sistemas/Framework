@@ -8,14 +8,18 @@ uses
   System.SysUtils,
   System.Generics.Collections,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TUsuarioModel = class
+  TUsuarioModel = class;
+  ITUsuarioModel = IObject<TUsuarioModel>;
 
+  TUsuarioModel = class
   private
+    [weak] mySelf: ITUsuarioModel;
     vIConexao : IConexao;
-    FUsuariosLista:IList<TUsuarioModel>;
+    FUsuariosLista:IList<ITUsuarioModel>;
     FAcao: TAcao;
     FDESCONTO: Variant;
     FFANTASIA: Variant;
@@ -139,7 +143,7 @@ type
     property TIPO_VENDEDOR         : Variant read FTIPO_VENDEDOR write SetTIPO_VENDEDOR;
 
     property Acao          : TAcao                      read FAcao          write SetAcao;
-    property UsuariosLista : IList<TUsuarioModel> read FUsuariosLista write FUsuariosLista;
+    property UsuariosLista : IList<ITUsuarioModel> read FUsuariosLista write FUsuariosLista;
 
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -149,14 +153,16 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITUsuarioModel;
 
     function vendedorUsuario(pIdUsuario: String): String;
     function nomeUsuario(pIdUsuario: String): String;
-    function carregaClasse(ID: String): TUsuarioModel;
+    function carregaClasse(ID: String): ITUsuarioModel;
     function Incluir     : String;
-    function Alterar(pID : String) : TUsuarioModel;
+    function Alterar(pID : String) : ITUsuarioModel;
     function Excluir(pID : String) : String;
     function Salvar      : String;
     function validaLogin(user,pass: String): Boolean;
@@ -175,14 +181,14 @@ uses
 
 { TUsuarioModel }
 
-function TUsuarioModel.Alterar(pID: String): TUsuarioModel;
+function TUsuarioModel.Alterar(pID: String): ITUsuarioModel;
 var
-  lUsuarioModel : TUsuarioModel;
+  lUsuarioModel : ITUsuarioModel;
 begin
-  lUsuarioModel := TUsuarioModel.Create(vIConexao);
+  lUsuarioModel := TUsuarioModel.getNewIface(vIConexao);
   try
-    lUsuarioModel       := lUsuarioModel.carregaClasse(pID);
-    lUsuarioModel.Acao  := tacAlterar;
+    lUsuarioModel       := lUsuarioModel.objeto.carregaClasse(pID);
+    lUsuarioModel.objeto.Acao  := tacAlterar;
     Result              := lUsuarioModel;
   finally
 
@@ -196,6 +202,12 @@ begin
   Result    := self.Salvar;
 end;
 
+class function TUsuarioModel.getNewIface(pIConexao: IConexao): ITUsuarioModel;
+begin
+  Result := TImplObjetoOwner<TUsuarioModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TUsuarioModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
@@ -204,11 +216,11 @@ end;
 
 function TUsuarioModel.alterarSenha(pIDUsuario, pSenhaAtual, pNovaSenha: String): Boolean;
 var
-  lUsuarioModel  : TUsuarioModel;
-  lUsuarioDao    : TUsuarioDao;
+  lUsuarioModel  : ITUsuarioModel;
+  lUsuarioDao    : ITUsuarioDao;
   lConfiguracoes : ITerasoftConfiguracoes;
 begin
-  lUsuarioDao := TUsuarioDao.Create(vIConexao.NovaConexao(vIConexao.getEmpresa.LOJA));
+  lUsuarioDao := TUsuarioDao.getNewIface(vIConexao.NovaConexao(vIConexao.getEmpresa.LOJA));
   Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
   try
     Result := False;
@@ -222,40 +234,40 @@ begin
     if pNovaSenha = '' then
       CriaException('Nova senha não informada.');
 
-    lUsuarioModel := lUsuarioDao.carregaClasse(pIDUsuario);
+    lUsuarioModel := lUsuarioDao.objeto.carregaClasse(pIDUsuario);
 
-    if lUsuarioModel.SENHA = pSenhaAtual then
+    if lUsuarioModel.objeto.SENHA = pSenhaAtual then
     begin
-      lUsuarioModel.FAcao := tacAlterar;
-      lUsuarioModel.SENHA := pNovaSenha;
-      lUsuarioModel.Salvar;
+      lUsuarioModel.objeto.FAcao := tacAlterar;
+      lUsuarioModel.objeto.SENHA := pNovaSenha;
+      lUsuarioModel.objeto.Salvar;
 
       if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
-        lUsuarioDao.sincronizarDados(lUsuarioModel);
+        lUsuarioDao.objeto.sincronizarDados(lUsuarioModel);
 
       Result := True;
 
     end;
 
   finally
-    lUsuarioDao.Free;
-    lUsuarioModel.Free;
+    lUsuarioDao := nil;
+    lUsuarioModel := nil;
   end;
 end;
 
-function TUsuarioModel.carregaClasse(ID: String): TUsuarioModel;
+function TUsuarioModel.carregaClasse(ID: String): ITUsuarioModel;
 var
-  lUsuarioModel: TUsuarioDao;
+  lUsuarioModel: ITUsuarioDao;
 begin
-  lUsuarioModel := TUsuarioDao.Create(vIConexao);
+  lUsuarioModel := TUsuarioDao.getNewIface(vIConexao);
   try
-    Result := lUsuarioModel.carregaClasse(ID);
+    Result := lUsuarioModel.objeto.carregaClasse(ID);
   finally
-    lUsuarioModel.Free;
+    lUsuarioModel := nil;
   end;
 end;
 
-constructor TUsuarioModel.Create(pIConexao : IConexao);
+constructor TUsuarioModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -269,72 +281,72 @@ end;
 
 function TUsuarioModel.nomeUsuario(pIdUsuario: String): String;
 var
-  lUsuarioDao: TUsuarioDao;
+  lUsuarioDao: ITUsuarioDao;
 begin
-  lUsuarioDao := TUsuarioDao.Create(vIConexao);
+  lUsuarioDao := TUsuarioDao.getNewIface(vIConexao);
   try
-    Result := lUsuarioDao.nomeUsuario(pIdUsuario);
+    Result := lUsuarioDao.objeto.nomeUsuario(pIdUsuario);
   finally
-    lUsuarioDao.Free;
+    lUsuarioDao := nil;
   end;
 end;
 
 procedure TUsuarioModel.obterLista;
 var
-  lUsuariosLista: TUsuarioDao;
+  lUsuariosLista: ITUsuarioDao;
 begin
-  lUsuariosLista := TUsuarioDao.Create(vIConexao);
+  lUsuariosLista := TUsuarioDao.getNewIface(vIConexao);
 
   try
 
-    lUsuariosLista.WhereView       := FWhereView;
-    lUsuariosLista.CountView       := FCountView;
-    lUsuariosLista.OrderView       := FOrderView;
-    lUsuariosLista.StartRecordView := FStartRecordView;
-    lUsuariosLista.LengthPageView  := FLengthPageView;
-    lUsuariosLista.IDRecordView    := FIDRecordView;
+    lUsuariosLista.objeto.WhereView       := FWhereView;
+    lUsuariosLista.objeto.CountView       := FCountView;
+    lUsuariosLista.objeto.OrderView       := FOrderView;
+    lUsuariosLista.objeto.StartRecordView := FStartRecordView;
+    lUsuariosLista.objeto.LengthPageView  := FLengthPageView;
+    lUsuariosLista.objeto.IDRecordView    := FIDRecordView;
 
-    lUsuariosLista.obterLista;
+    lUsuariosLista.objeto.obterLista;
 
-    FTotalRecords  := lUsuariosLista.TotalRecords;
-    FUsuariosLista := lUsuariosLista.UsuariosLista;
+    FTotalRecords  := lUsuariosLista.objeto.TotalRecords;
+    FUsuariosLista := lUsuariosLista.objeto.UsuariosLista;
 
   finally
-    lUsuariosLista.Free;
+    lUsuariosLista := nil;
   end;
 end;
 
 function TUsuarioModel.validaLogin(user, pass: String): Boolean;
 var
-  lUsuarioDao: TUsuarioDao;
+  lUsuarioDao: ITUsuarioDao;
 begin
   try
-    lUsuarioDao := TUsuarioDao.Create(vIConexao);
+    lUsuarioDao := TUsuarioDao.getNewIface(vIConexao);
 
-    lUsuarioDao.validaLogin(user,pass);
+    lUsuarioDao.objeto.validaLogin(user,pass);
 
-    if lUsuarioDao.Status = 'S' then
+    if lUsuarioDao.objeto.Status = 'S' then
     begin
-      FID            := lUsuarioDao.ID;
-      FPERFIL_NEW_ID := lUsuarioDao.Perfil;
+      FID            := lUsuarioDao.objeto.ID;
+      FPERFIL_NEW_ID := lUsuarioDao.objeto.Perfil;
 
       Result := true;
     end else
       Result := False;
   finally
-    lUsuarioDao.Free;
+    lUsuarioDao := nil;
   end;
 end;
 
 function TUsuarioModel.vendedorUsuario(pIdUsuario: String): String;
 var
-  lUsuarioDao: TUsuarioDao;
+  lUsuarioDao: ITUsuarioDao;
 begin
-  lUsuarioDao := TUsuarioDao.Create(vIConexao);
+  lUsuarioDao := TUsuarioDao.getNewIface(vIConexao);
   try
-    Result := lUsuarioDao.vendedorUsuario(pIdUsuario);
+    Result := lUsuarioDao.objeto.vendedorUsuario(pIdUsuario);
   finally
-    lUsuarioDao.Free;
+    lUsuarioDao := nil;
   end;
 end;
 
@@ -357,22 +369,22 @@ end;
 
 function TUsuarioModel.Salvar: String;
 var
-  lUsuarioDao: TUsuarioDao;
+  lUsuarioDao: ITUsuarioDao;
 begin
-  lUsuarioDao := TUsuarioDao.Create(vIConexao);
+  lUsuarioDao := TUsuarioDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
 
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lUsuarioDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lUsuarioDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lUsuarioDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lUsuarioDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lUsuarioDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lUsuarioDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lUsuarioDao.Free;
+    lUsuarioDao := nil;
   end;
 end;
 
