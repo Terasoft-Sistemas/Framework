@@ -465,7 +465,7 @@ var
   lQry           : TFDQuery;
   lSQL,
   lResult        : String;
-  lConfiguracoes : TerasoftConfiguracoes;
+  lConfiguracoes : ITerasoftConfiguracoes;
   lLojasModel,
   lLojas         : TLojasModel;
 begin
@@ -475,7 +475,7 @@ begin
   try
     lSQL := vConstrutor.gerarInsert(self.NomeTabela, 'CODIGO_CLI', true);
 
-    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
     lQry.SQL.Add(lSQL);
     pClienteModel.CODIGO_CLI := vIConexao.Generetor('GEN_CLIENTE', true);
@@ -484,7 +484,7 @@ begin
 
     Result := lQry.FieldByName('CODIGO_CLI').AsString;
 
-    if lConfiguracoes.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
+    if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
       sincronizarDados(pClienteModel);
 
   finally
@@ -498,7 +498,7 @@ function TClienteDao.alterar(pClienteModel: TClienteModel): String;
 var
   lQry           : TFDQuery;
   lSQL           : String;
-  lConfiguracoes : TerasoftConfiguracoes;
+  lConfiguracoes : ITerasoftConfiguracoes;
 begin
   lQry := vIConexao.CriarQuery;
 
@@ -511,9 +511,9 @@ begin
 
     Result := pClienteModel.CODIGO_CLI;
 
-    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
-    if lConfiguracoes.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
+    if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
       sincronizarDados(pClienteModel);
 
   finally
@@ -1017,11 +1017,14 @@ procedure TClienteDao.bloquearCNPJCPF(pCliente, pCNPJCPF: String);
 var
   lQry : TFDQuery;
   lSql : String;
-  lConfiguracoes : TerasoftConfiguracoes;
+  lConfiguracoes : ITerasoftConfiguracoes;
 begin
   try
     lQry := vIConexao.CriarQuery;
-    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+
+    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
+
+    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as ITerasoftConfiguracoes;
 
     lSql := 'select clientes.codigo_cli from ' + self.NomeTabela +
             '  where clientes.codigo_cli <> '+ QuotedStr(pCliente)   +
@@ -1030,8 +1033,8 @@ begin
     lQry.Open(lSql);
 
     if not lQry.IsEmpty then begin
-      if lConfiguracoes.valorTag('UNIQUE_CLIENTE', 'S', tvBool) = 'N' then
-          if lConfiguracoes.verificaPerfil('CLIENTES_CPF_CNPJ_DUPLICADO') then
+      if lConfiguracoes.objeto.valorTag('UNIQUE_CLIENTE', 'S', tvBool) = 'N' then
+          if lConfiguracoes.objeto.verificaPerfil('CLIENTES_CPF_CNPJ_DUPLICADO') then
             exit;
 
       criaException('Existe um cliente cadastrado com o código '+ lQry.FieldByName('CODIGO_CLI').AsString +' associado a este CPF/CNPJ');

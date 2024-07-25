@@ -148,7 +148,7 @@ var
 
   lMemTable      : TFDMemTable;
   lPortadorModel : TPortadorModel;
-  lConfiguracoes : TerasoftConfiguracoes;
+  lConfiguracoes : ITerasoftConfiguracoes;
   lTagPercentual : String;
 
   lTagLimitadorVencimento: Integer;
@@ -161,7 +161,7 @@ begin
   lTotal    := pValor;
 
   try
-    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
     lPortadorModel.IDRecordView := pPortador;
     lPortadorModel.obterLista;
@@ -172,8 +172,8 @@ begin
     self.OrderView  := ' tabelajuros.codigo';
     self.obterLista;
 
-    lTagPercentual  := lConfiguracoes.valorTag('PEDIDO_TABELA_JUROS_PERCENTUAL', 'N', tvBool);
-    lTagLimitadorVencimento := StrToInt(lConfiguracoes.valorTag('LIMITADOR_VENCIMENTO_RECEBER', 31, tvInteiro));
+    lTagPercentual  := lConfiguracoes.objeto.valorTag('PEDIDO_TABELA_JUROS_PERCENTUAL', 'N', tvBool);
+    lTagLimitadorVencimento := StrToInt(lConfiguracoes.objeto.valorTag('LIMITADOR_VENCIMENTO_RECEBER', 31, tvInteiro));
 
 
     if Terasoft.Utils.DiferencaEntreDatas(Date,pPrimeiroVencimento)  > lTagLimitadorVencimento then

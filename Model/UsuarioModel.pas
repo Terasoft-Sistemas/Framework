@@ -206,10 +206,10 @@ function TUsuarioModel.alterarSenha(pIDUsuario, pSenhaAtual, pNovaSenha: String)
 var
   lUsuarioModel  : TUsuarioModel;
   lUsuarioDao    : TUsuarioDao;
-  lConfiguracoes : TerasoftConfiguracoes;
+  lConfiguracoes : ITerasoftConfiguracoes;
 begin
   lUsuarioDao := TUsuarioDao.Create(vIConexao.NovaConexao(vIConexao.getEmpresa.LOJA));
-  lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+  Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
   try
     Result := False;
 
@@ -230,7 +230,7 @@ begin
       lUsuarioModel.SENHA := pNovaSenha;
       lUsuarioModel.Salvar;
 
-      if lConfiguracoes.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
+      if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
         lUsuarioDao.sincronizarDados(lUsuarioModel);
 
       Result := True;
@@ -340,14 +340,14 @@ end;
 
 function TUsuarioModel.verificaServicoNuvem: Boolean;
 var
-  lConfiguracoes : TerasoftConfiguracoes;
+  lConfiguracoes : ITerasoftConfiguracoes;
 begin
 
   Result := true;
 
-  lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+  Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
-  if lConfiguracoes.valorTag('USA_SERVICO_NUVEM', 'N', tvBool) = 'S' then
+  if lConfiguracoes.objeto.valorTag('USA_SERVICO_NUVEM', 'N', tvBool) = 'S' then
   begin
     if (self.FUSUARIO_WINDOWS = '') and (self.FID <> '000001') then
       Result := false;

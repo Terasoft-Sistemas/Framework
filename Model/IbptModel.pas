@@ -161,7 +161,7 @@ function TIbptModel.obterIBPT(pUf, pOrigem, pNCM : String): TIBPTRetorno;
 var
   lIbptDao       : TIbptDao;
   lTable         : IFDDataset;
-  lConfiguracoes : TerasoftConfiguracoes;
+  lConfiguracoes : ITerasoftConfiguracoes;
 
 begin
   lIbptDao := TIbptDao.Create(vIConexao);
@@ -187,13 +187,13 @@ begin
     Result.VERSAO := lTable.objeto.FieldByName('versao').AsString;
     Result.CHAVE  := lTable.objeto.FieldByName('chave').AsString;
 
-    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
-    if lConfiguracoes.valorTag('PERCENTUAL_IBPT_FEDERAL', 0, tvNumero) > 0 then
-      Result.IMPOSTO_FEDERAL :=  lConfiguracoes.valorTag('PERCENTUAL_IBPT_FEDERAL', 0, tvNumero);
+    if lConfiguracoes.objeto.valorTag('PERCENTUAL_IBPT_FEDERAL', 0, tvNumero) > 0 then
+      Result.IMPOSTO_FEDERAL :=  lConfiguracoes.objeto.valorTag('PERCENTUAL_IBPT_FEDERAL', 0, tvNumero);
 
-    if lConfiguracoes.valorTag('PERCENTUAL_IBPT_ESTADUAL', 0, tvNumero) > 0 then
-      Result.IMPOSTO_ESTADUAL :=  lConfiguracoes.valorTag('PERCENTUAL_IBPT_ESTADUAL', 0, tvNumero);
+    if lConfiguracoes.objeto.valorTag('PERCENTUAL_IBPT_ESTADUAL', 0, tvNumero) > 0 then
+      Result.IMPOSTO_ESTADUAL :=  lConfiguracoes.objeto.valorTag('PERCENTUAL_IBPT_ESTADUAL', 0, tvNumero);
 
   finally
     lIbptDao.Free;

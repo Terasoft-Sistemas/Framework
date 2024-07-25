@@ -955,7 +955,7 @@ var
   lTribEstadual,
   lTribMunicipal    : Double;
   lFuncionarioModel : TFuncionarioModel;
-  lConfiguracoes    : TerasoftConfiguracoes;
+  lConfiguracoes    : ITerasoftConfiguracoes;
   lTableTotais      : IFDDataset;
   lItem             : Integer;
 begin
@@ -970,7 +970,7 @@ begin
   lNFModel          := TNFModel.Create(vIConexao);
   lEmpresaModel     := TEmpresaModel.getNewIface(vIConexao);
   lFuncionarioModel := TFuncionarioModel.Create(vIConexao);
-  lConfiguracoes    := TerasoftConfiguracoes.Create(vIConexao);
+  lConfiguracoes    := TerasoftConfiguracoes.getNewIface(vIConexao);
 
   try
     if pModelo = '65' then
@@ -980,7 +980,7 @@ begin
 
       lNFModel.OBS_NF := 'Vendedor: '+lNomeVendedor+' '+sLineBreak;
 
-      if lConfiguracoes.valorTag('MOSTRAR_NUMERO_PEDIDO_NF', 'N', tvBool) = 'S' then
+      if lConfiguracoes.objeto.valorTag('MOSTRAR_NUMERO_PEDIDO_NF', 'N', tvBool) = 'S' then
         lNFModel.OBS_NF := lNFModel.OBS_NF + 'Pedido: '+self.NUMERO_PED+' '+sLineBreak;
     end;
 
@@ -1274,7 +1274,7 @@ end;
 
 procedure TPedidoVendaModel.venderItem(pVenderItem: TVenderItem);
 var
-  lConfiguracoes     : TerasoftConfiguracoes;
+  lConfiguracoes     : ITerasoftConfiguracoes;
   lProdutosModel     : TProdutosModel;
   lPedidoItensModel  : TPedidoItensModel;
   lPedidoVendaLista  : TPedidoVendaDao;
@@ -1285,7 +1285,7 @@ var
   lIDItem            : String;
 
 begin
-  lConfiguracoes    := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+  Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
   lProdutosModel    := TProdutosModel.Create(vIConexao);
   lPedidoItensModel := TPedidoItensModel.Create(vIConexao);
   lPedidoVendaLista := TPedidoVendaDao.Create(vIConexao);
@@ -1295,7 +1295,7 @@ begin
     if pVenderItem.Quantidade = 0 then
       CriaException('Quantidade inválida.');
 
-    if lConfiguracoes.valorTag('BALANCA_COPY_INI_PRODUTO', '', tvString) <> '' then
+    if lConfiguracoes.objeto.valorTag('BALANCA_COPY_INI_PRODUTO', '', tvString) <> '' then
       lCodBalanca := lPedidoVendaLista.obterProdutoBalanca(pVenderItem.BarrasProduto);
 
     if not lCodBalanca.IsEmpty then
@@ -1303,18 +1303,18 @@ begin
       lProdutosModel.WhereView := ' and produto.barras_pro = '+ QuotedStr(lCodBalanca);
       lProdutosModel.obterVenderItem;
 
-      if lConfiguracoes.valorTag('BALANCA_LER_POR_PESO', 'N', tvBool) = 'S' then
+      if lConfiguracoes.objeto.valorTag('BALANCA_LER_POR_PESO', 'N', tvBool) = 'S' then
       begin
-        lQuantidade := (FormatCurr('####0.000', StrToFloat(Copy(pVenderItem.BarrasProduto, StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_INI_VALOR', '6', tvString)),
-        StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_FIM_VALOR','4', tvString))) + ',' + Copy(pVenderItem.BarrasProduto, StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_INI_DECIMAL', '10', tvString)),
-        StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_FIM_DECIMAL', '3', tvString))))));
+        lQuantidade := (FormatCurr('####0.000', StrToFloat(Copy(pVenderItem.BarrasProduto, StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_INI_VALOR', '6', tvString)),
+        StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_FIM_VALOR','4', tvString))) + ',' + Copy(pVenderItem.BarrasProduto, StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_INI_DECIMAL', '10', tvString)),
+        StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_FIM_DECIMAL', '3', tvString))))));
       end
       else
       begin
-        lQuantidade := (FormatCurr('####0.000', StrToFloat(Copy(pVenderItem.BarrasProduto, StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_INI_VALOR', '7',tvString)),
-        StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_FIM_VALOR', '4', tvString))) + ',' + Copy(pVenderItem.BarrasProduto,
-        StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_INI_DECIMAL', '11', tvString)),
-        StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_FIM_DECIMAL', '10', tvString)))) / lProdutosModel.ProdutossLista[0].VENDA_PRO));
+        lQuantidade := (FormatCurr('####0.000', StrToFloat(Copy(pVenderItem.BarrasProduto, StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_INI_VALOR', '7',tvString)),
+        StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_FIM_VALOR', '4', tvString))) + ',' + Copy(pVenderItem.BarrasProduto,
+        StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_INI_DECIMAL', '11', tvString)),
+        StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_FIM_DECIMAL', '10', tvString)))) / lProdutosModel.ProdutossLista[0].VENDA_PRO));
       end;
     end
     else
@@ -1337,7 +1337,7 @@ begin
 
     lIDItem := lPedidoItensModel.obterIDItem(self.FNUMERO_PED, lProdutosModel.ProdutossLista[0].CODIGO_PRO);
 
-    if (lIDItem <> '') and (lConfiguracoes.valorTag('FRENTE_CAIXA_SOMAR_QTDE_ITENS', 'S', tvBool) = 'S')
+    if (lIDItem <> '') and (lConfiguracoes.objeto.valorTag('FRENTE_CAIXA_SOMAR_QTDE_ITENS', 'S', tvBool) = 'S')
     and (lProdutosModel.ProdutossLista[0].USAR_BALANCA <> 'S') then
     begin
       lPedidoItensModel := lPedidoItensModel.carregaClasse(lIDItem);
@@ -1383,10 +1383,10 @@ end;
 
 procedure TPedidoVendaModel.verificarTagObservacao;
 var
-  lConfiguracoes : TerasoftConfiguracoes;
+  lConfiguracoes : ITerasoftConfiguracoes;
 begin
-  lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
-  self.INFORMACOES_PED := lConfiguracoes.valorTag('OBSERVACAO', '', tvMemo);
+  Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
+  self.INFORMACOES_PED := lConfiguracoes.objeto.valorTag('OBSERVACAO', '', tvMemo);
 end;
 
 function TPedidoVendaModel.gerarContasReceberPedido: String;

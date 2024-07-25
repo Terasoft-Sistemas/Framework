@@ -9,14 +9,19 @@ uses
   FireDAC.Comp.Client,
   System.StrUtils,
   Terasoft.Types,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
   {$i FuncoesConfigSCI.inc}
 
   type
-    TerasoftConfiguracoes = class
+    TerasoftConfiguracoes = class;
 
+    ITerasoftConfiguracoes = IObject<TerasoftConfiguracoes>;
+
+    TerasoftConfiguracoes = class
     private
+      [weak] mySelf: ITerasoftConfiguracoes;
       [weak]vIConexao        : IConexao;
       vPerfil          : String;
       vmtConfiguracoes : IFDDataset;
@@ -29,8 +34,11 @@ uses
       function VerificaPermissaoAcesso(pTag, pPerfil : String): Boolean;
       function verificaPerfil(pTag : String): Boolean;
 
-      constructor Create(pIConexao : IConexao);
+      constructor xCreate(pIConexao : IConexao);
       destructor Destroy; override;
+
+      class function getNewIface(pIConexao: IConexao): ITerasoftConfiguracoes;
+
     end;
 
 implementation
@@ -70,11 +78,11 @@ begin
   end;
 end;
 
-constructor TerasoftConfiguracoes.Create(pIConexao : IConexao);
+constructor TerasoftConfiguracoes.xCreate(pIConexao : IConexao);
 begin
   vIConexao        := pIConexao;
   if(vIConexao.terasoftConfiguracoes=nil) then
-    vIConexao.terasoftConfiguracoes := self;
+    vIConexao.terasoftConfiguracoes := myself;
 
   vmtConfiguracoes := criaIFDDataset(TFDMemTable.Create(nil));
 
@@ -84,12 +92,15 @@ end;
 
 destructor TerasoftConfiguracoes.Destroy;
 begin
-  if(vIConexao.terasoftConfiguracoes=self) then
-    vIConexao.setTerasoftConfiguracoes(nil);
   vmtConfiguracoes := nil;
   vIConexao := nil;
   inherited;
 end;
+
+class function TerasoftConfiguracoes.getNewIface(pIConexao: IConexao): ITerasoftConfiguracoes;
+begin
+  Result := TImplObjetoOwner<TerasoftConfiguracoes>.CreateOwner(self.xCreate(pIConexao));
+  Result.objeto.myself := Result;end;
 
 procedure TerasoftConfiguracoes.preparaTabela;
 begin
