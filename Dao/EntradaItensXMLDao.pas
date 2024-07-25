@@ -7,7 +7,7 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  Spring.Collections,
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
@@ -60,7 +60,7 @@ type
 
     function carregaClasse(pID : String): TEntradaItensXMLModel;
 
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     procedure setParams(var pQry: TFDQuery; pEntradaItensXMLModel: TEntradaItensXMLModel);
 
@@ -277,7 +277,7 @@ begin
   end;
 end;
 
-function TEntradaItensXMLDao.obterLista: TFDMemTable;
+function TEntradaItensXMLDao.obterLista: IFDDataset;
 var
   lQry : TFDQuery;
   lSQL : String;
@@ -338,7 +338,7 @@ end;
 
 procedure TEntradaItensXMLDao.setParams(var pQry: TFDQuery; pEntradaItensXMLModel: TEntradaItensXMLModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -353,7 +353,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pEntradaItensXMLModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pEntradaItensXMLModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pEntradaItensXMLModel).AsString))
     end;
   finally
     lCtx.Free;
