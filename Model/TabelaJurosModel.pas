@@ -4,7 +4,7 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Spring.Collections,
   Terasoft.Utils,
   Interfaces.Conexao,
   FireDAC.Comp.Client,
@@ -16,7 +16,7 @@ type
 
   private
     vIConexao : IConexao;
-    FTabelaJurossLista: TObjectList<TTabelaJurosModel>;
+    FTabelaJurossLista: IList<TTabelaJurosModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -39,9 +39,10 @@ type
     FVALOR_SEG_PRESTAMISTA: Variant;
     FVALOR_ACRESCIMO_SEG_PRESTAMISTA: Variant;
     FPER_SEG_PRESTAMSTA: Variant;
+    FCOEFICIENTE: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetTabelaJurossLista(const Value: TObjectList<TTabelaJurosModel>);
+    procedure SetTabelaJurossLista(const Value: IList<TTabelaJurosModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -62,6 +63,7 @@ type
     procedure SetPER_SEG_PRESTAMSTA(const Value: Variant);
     procedure SetVALOR_ACRESCIMO_SEG_PRESTAMISTA(const Value: Variant);
     procedure SetVALOR_SEG_PRESTAMISTA(const Value: Variant);
+    procedure SetCOEFICIENTE(const Value: Variant);
 
   public
     property CODIGO: Variant read FCODIGO write SetCODIGO;
@@ -78,6 +80,7 @@ type
     property VALOR_SEG_PRESTAMISTA : Variant read FVALOR_SEG_PRESTAMISTA write SetVALOR_SEG_PRESTAMISTA;
     property PER_SEG_PRESTAMSTA    : Variant read FPER_SEG_PRESTAMSTA write SetPER_SEG_PRESTAMSTA;
     property VALOR_ACRESCIMO_SEG_PRESTAMISTA : Variant read FVALOR_ACRESCIMO_SEG_PRESTAMISTA write SetVALOR_ACRESCIMO_SEG_PRESTAMISTA;
+    property COEFICIENTE : Variant read FCOEFICIENTE write SetCOEFICIENTE;
 
 
   	constructor Create(pIConexao : IConexao);
@@ -89,7 +92,7 @@ type
 
     function carregaClasse(pId: Integer): TTabelaJurosModel;
 
-    property TabelaJurossLista: TObjectList<TTabelaJurosModel> read FTabelaJurossLista write SetTabelaJurossLista;
+    property TabelaJurossLista: IList<TTabelaJurosModel> read FTabelaJurossLista write SetTabelaJurossLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -128,7 +131,8 @@ end;
 
 destructor TTabelaJurosModel.Destroy;
 begin
-
+  FTabelaJurossLista:=nil;
+  vIConexao:=nil;
   inherited;
 end;
 
@@ -142,16 +146,18 @@ var
   lValorGerar,
   lValorParcela,
   lPercentualJuros,
+  lCoeficienteJuros,
   lCoeficienteJurosDias : Double;
 
+
   lMemTable      : TFDMemTable;
-  lPortadorModel : TPortadorModel;
-  lConfiguracoes : TerasoftConfiguracoes;
+  lPortadorModel : ITPortadorModel;
+  lConfiguracoes : ITerasoftConfiguracoes;
   lTagPercentual : String;
 
   lTagLimitadorVencimento: Integer;
 begin
-  lPortadorModel := TPortadorModel.Create(vIConexao);
+  lPortadorModel := TPortadorModel.getNewIface(vIConexao);
   lTabelaJurosDia := TTabelaJurosDiaModel.Create(vIConexao);
 
   lMemTable := TFDMemTable.Create(nil);
@@ -159,19 +165,19 @@ begin
   lTotal    := pValor;
 
   try
-    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
-    lPortadorModel.IDRecordView := pPortador;
-    lPortadorModel.obterLista;
+    lPortadorModel.objeto.IDRecordView := pPortador;
+    lPortadorModel.objeto.obterLista;
 
-    lPortadorModel := lPortadorModel.PortadorsLista.First;
+    lPortadorModel := lPortadorModel.objeto.PortadorsLista.First;
 
     self.WhereView  := 'and portador_id = ' + QuotedStr(pPortador);
     self.OrderView  := ' tabelajuros.codigo';
     self.obterLista;
 
-    lTagPercentual  := lConfiguracoes.valorTag('PEDIDO_TABELA_JUROS_PERCENTUAL', 'N', tvBool);
-    lTagLimitadorVencimento := StrToInt(lConfiguracoes.valorTag('LIMITADOR_VENCIMENTO_RECEBER', 31, tvInteiro));
+    lTagPercentual  := lConfiguracoes.objeto.valorTag('PEDIDO_TABELA_JUROS_PERCENTUAL', 'N', tvBool);
+    lTagLimitadorVencimento := StrToInt(lConfiguracoes.objeto.valorTag('LIMITADOR_VENCIMENTO_RECEBER', 31, tvInteiro));
 
 
     if Terasoft.Utils.DiferencaEntreDatas(Date,pPrimeiroVencimento)  > lTagLimitadorVencimento then
@@ -189,7 +195,7 @@ begin
 
     if self.TotalRecords = 0 then
     begin
-      self.TabelaJurossLista := TObjectList<TTabelaJurosModel>.Create;
+      self.TabelaJurossLista := TCollections.CreateList<TTabelaJurosModel>(true);
       self.TabelaJurossLista.Add(TTabelaJurosModel.Create(vIConexao));
 
       self.TabelaJurossLista[0].FID            := 0;
@@ -214,11 +220,11 @@ begin
 
         if pSeguroPrestamista then
         begin
-          if lPortadorModel.PER_SEGURO_PRESTAMISTA = 0 then
+          if lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA = 0 then
            CriaException('Valor do cadastro do seguroprestamista esta zerado.');
 
-          self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := lPortadorModel.PER_SEGURO_PRESTAMISTA;
-          self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := (lTotal + lJuros)*(lPortadorModel.PER_SEGURO_PRESTAMISTA/100);
+          self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA;
+          self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := (lTotal + lJuros)*(lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA/100);
           self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, self.TabelaJurossLista[i].PERCENTUAL / 100 * self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA, 0);;
         end else
         begin
@@ -231,9 +237,10 @@ begin
 
         if self.TabelaJurossLista[i].INDCE > 0 then
         begin
-           lValorParcela    := lTotal * (self.TabelaJurossLista[i].INDCE * lCoeficienteJurosDias);
-          lValorGerar      := lValorParcela * StrToInt(self.TabelaJurossLista[i].CODIGO);
-          lPercentualJuros := (lValorGerar - lTotal) / lTotal * 100;
+          lValorParcela     := lTotal * (self.TabelaJurossLista[i].INDCE * lCoeficienteJurosDias);
+          lCoeficienteJuros := (self.TabelaJurossLista[i].INDCE * lCoeficienteJurosDias);
+          lValorGerar       := lValorParcela * StrToInt(self.TabelaJurossLista[i].CODIGO);
+          lPercentualJuros  := (lValorGerar - lTotal) / lTotal * 100;
         end
         else
         begin
@@ -250,11 +257,11 @@ begin
 
         if pSeguroPrestamista then
         begin
-          if lPortadorModel.PER_SEGURO_PRESTAMISTA = 0 then
+          if lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA = 0 then
            CriaException('Valor do cadastro do seguroprestamista esta zerado.');
 
-          self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := lPortadorModel.PER_SEGURO_PRESTAMISTA;
-          self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := (lTotal + lJuros)*(lPortadorModel.PER_SEGURO_PRESTAMISTA/100);
+          self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA;
+          self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := (lTotal + lJuros)*(lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA/100);
           self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA := IIF(lPercentualJuros > 0, lPercentualJuros / 100 * self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA, 0);;
         end else
         begin
@@ -285,6 +292,7 @@ begin
     lMemTable.FieldDefs.Add('VALOR_SEG_PRESTAMISTA', ftFloat);
     lMemTable.FieldDefs.Add('PER_SEG_PRESTAMSTA', ftFloat);
     lMemTable.FieldDefs.Add('VALOR_ACRESCIMO_SEG_PRESTAMISTA', ftFloat);
+    lMemTable.FieldDefs.Add('COEFICIENTE', ftFloat);
 
     lMemTable.CreateDataSet;
 
@@ -315,8 +323,11 @@ begin
                               self.TabelaJurossLista[i].VALOR_TOTAL,
                               self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA,
                               self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA,
-                              self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA
+                              self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA,
+                              lCoeficienteJuros
                              ]);
+
+
     end;
 
     lMemTable.Open;
@@ -385,12 +396,17 @@ begin
   FCODIGO := Value;
 end;
 
+procedure TTabelaJurosModel.SetCOEFICIENTE(const Value: Variant);
+begin
+  FCOEFICIENTE := Value;
+end;
+
 procedure TTabelaJurosModel.SetCountView(const Value: String);
 begin
   FCountView := Value;
 end;
 
-procedure TTabelaJurosModel.SetTabelaJurossLista(const Value: TObjectList<TTabelaJurosModel>);
+procedure TTabelaJurosModel.SetTabelaJurossLista;
 begin
   FTabelaJurossLista := Value;
 end;

@@ -12,7 +12,7 @@ type
     TUsuarioControl = class
 
   private
-    FUsuarioModel: TUsuarioModel;
+    FUsuarioModel: ITUsuarioModel;
 
   public
     constructor Create(pIConexao : IConexao);
@@ -20,7 +20,7 @@ type
 
     function Salvar: String;
     function validaLogin(user,pass: String): Boolean;
-    property UsuarioModel: TUsuarioModel read FUsuarioModel write FUsuarioModel;
+    property UsuarioModel: ITUsuarioModel read FUsuarioModel write FUsuarioModel;
 
   end;
 
@@ -30,23 +30,23 @@ implementation
 
 constructor TUsuarioControl.Create(pIConexao : IConexao);
 begin
-  FUsuarioModel := TUsuarioModel.Create(pIConexao);
+  FUsuarioModel := TUsuarioModel.getNewIface(pIConexao);
 end;
 
 destructor TUsuarioControl.Destroy;
 begin
-  freeAndNil(FUsuarioModel);
+  FUsuarioModel := nil;
   inherited;
 end;
 
 function TUsuarioControl.Salvar: String;
 begin
-  Result := FUsuarioModel.Salvar;
+  Result := FUsuarioModel.objeto.Salvar;
 end;
 
 function TUsuarioControl.validaLogin(user, pass: String): Boolean;
 begin
-  Result := FUsuarioModel.validaLogin(user, pass);
+  Result := FUsuarioModel.objeto.validaLogin(user, pass);
 end;
 
 end.

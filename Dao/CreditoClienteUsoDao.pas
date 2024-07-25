@@ -7,7 +7,7 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  Spring.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
   Terasoft.ConstrutorDao,
@@ -21,7 +21,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FCreditoClienteUsosLista: TObjectList<TCreditoClienteUsoModel>;
+    FCreditoClienteUsosLista: IList<TCreditoClienteUsoModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -32,7 +32,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetCreditoClienteUsosLista(const Value: TObjectList<TCreditoClienteUsoModel>);
+    procedure SetCreditoClienteUsosLista(const Value: IList<TCreditoClienteUsoModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -47,7 +47,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property CreditoClienteUsosLista: TObjectList<TCreditoClienteUsoModel> read FCreditoClienteUsosLista write SetCreditoClienteUsosLista;
+    property CreditoClienteUsosLista: IList<TCreditoClienteUsoModel> read FCreditoClienteUsosLista write SetCreditoClienteUsosLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -115,6 +115,7 @@ end;
 
 destructor TCreditoClienteUsoDao.Destroy;
 begin
+  FCreditoClienteUsosLista:=nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -224,12 +225,12 @@ procedure TCreditoClienteUsoDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: TCreditoClienteUsoModel;
 begin
 
   lQry := vIConexao.CriarQuery;
 
-  FCreditoClienteUsosLista := TObjectList<TCreditoClienteUsoModel>.Create;
+  FCreditoClienteUsosLista := TCollections.CreateList<TCreditoClienteUsoModel>(true);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -249,24 +250,22 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FCreditoClienteUsosLista.Add(TCreditoClienteUsoModel.Create(vIConexao));
+      modelo := TCreditoClienteUsoModel.Create(vIConexao);
+      FCreditoClienteUsosLista.Add(modelo);
 
-      i := FCreditoClienteUsosLista.Count -1;
-
-      FCreditoClienteUsosLista[i].ID                  := lQry.FieldByName('ID').AsString;
-      FCreditoClienteUsosLista[i].CREDITO_CLIENTE_ID  := lQry.FieldByName('CREDITO_CLIENTE_ID').AsString;
-      FCreditoClienteUsosLista[i].DATA                := lQry.FieldByName('DATA').AsString;
-      FCreditoClienteUsosLista[i].VALOR               := lQry.FieldByName('VALOR').AsString;
-      FCreditoClienteUsosLista[i].PARCELA             := lQry.FieldByName('PARCELA').AsString;
-      FCreditoClienteUsosLista[i].RECEBER_ID          := lQry.FieldByName('RECEBER_ID').AsString;
-      FCreditoClienteUsosLista[i].LOCAL               := lQry.FieldByName('LOCAL').AsString;
-      FCreditoClienteUsosLista[i].USUARIO_ID          := lQry.FieldByName('USUARIO_ID').AsString;
-      FCreditoClienteUsosLista[i].DATAHORA            := lQry.FieldByName('DATAHORA').AsString;
-      FCreditoClienteUsosLista[i].SYSTIME             := lQry.FieldByName('SYSTIME').AsString;
+      modelo.ID                  := lQry.FieldByName('ID').AsString;
+      modelo.CREDITO_CLIENTE_ID  := lQry.FieldByName('CREDITO_CLIENTE_ID').AsString;
+      modelo.DATA                := lQry.FieldByName('DATA').AsString;
+      modelo.VALOR               := lQry.FieldByName('VALOR').AsString;
+      modelo.PARCELA             := lQry.FieldByName('PARCELA').AsString;
+      modelo.RECEBER_ID          := lQry.FieldByName('RECEBER_ID').AsString;
+      modelo.LOCAL               := lQry.FieldByName('LOCAL').AsString;
+      modelo.USUARIO_ID          := lQry.FieldByName('USUARIO_ID').AsString;
+      modelo.DATAHORA            := lQry.FieldByName('DATAHORA').AsString;
+      modelo.SYSTIME             := lQry.FieldByName('SYSTIME').AsString;
 
       lQry.Next;
     end;
@@ -283,7 +282,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TCreditoClienteUsoDao.SetCreditoClienteUsosLista(const Value: TObjectList<TCreditoClienteUsoModel>);
+procedure TCreditoClienteUsoDao.SetCreditoClienteUsosLista;
 begin
   FCreditoClienteUsosLista := Value;
 end;

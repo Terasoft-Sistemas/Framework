@@ -4,7 +4,8 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Terasoft.Framework.ObjectIface,
+  Spring.Collections,
   Interfaces.Conexao,
   FireDAC.Comp.Client;
 
@@ -19,9 +20,12 @@ type
     CHAVE              : String;
   end;
 
-  TIbptModel = class
+  TIBPTModel  = class;
+  ITIBPTModel = IObject<TIBPTModel>;
 
+  TIBPTModel = class
   private
+    [weak] mySelf: ITIBPTModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -82,15 +86,17 @@ type
     property UTRIB                : Variant read FUTRIB write SetUTRIB;
     property SYSTIME              : Variant read FSYSTIME write SetSYSTIME;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITIBPTModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TIbptModel;
+    function Alterar(pID : String): ITIbptModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId : String): TIbptModel;
+    function carregaClasse(pId : String): ITIbptModel;
     function obterIBPT(pUf, pOrigem, pNCM : String): TIBPTRetorno;
 
     property Acao :TAcao read FAcao write SetAcao;
@@ -107,69 +113,76 @@ uses
 
 { TIbptModel }
 
-function TIbptModel.Alterar(pID: String): TIbptModel;
+function TIBPTModel.Alterar(pID: String): ITIbptModel;
 var
-  lIbptModel : TIbptModel;
+  lIbptModel : ITIbptModel;
 begin
-  lIbptModel := TIbptModel.Create(vIConexao);
+  lIbptModel := TIbptModel.getNewIface(vIConexao);
   try
-    lIbptModel       := lIbptModel.carregaClasse(pID);
-    lIbptModel.Acao  := tacAlterar;
+    lIbptModel       := lIbptModel.objeto.carregaClasse(pID);
+    lIbptModel.objeto.Acao  := tacAlterar;
     Result            := lIbptModel;
   finally
   end;
 end;
 
-function TIbptModel.Excluir(pID: String): String;
+function TIBPTModel.Excluir(pID: String): String;
 begin
   self.ID      := pID;
   self.FAcao   := tacExcluir;
   Result       := self.Salvar;
 end;
 
-function TIbptModel.Incluir: String;
+class function TIBPTModel.getNewIface(pIConexao: IConexao): ITIBPTModel;
+begin
+  Result := TImplObjetoOwner<TIBPTModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TIBPTModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
     Result    := self.Salvar;
 end;
 
-function TIbptModel.carregaClasse(pId : String): TIbptModel;
+function TIBPTModel.carregaClasse(pId : String): ITIbptModel;
 var
-  lIbptDao: TIbptDao;
+  lIbptDao: ITIBPTDao;
 begin
-  lIbptDao := TIbptDao.Create(vIConexao);
+  lIbptDao := TIbptDao.getNewIface(vIConexao);
 
   try
-    Result := lIbptDao.carregaClasse(pId);
+    Result := lIbptDao.objeto.carregaClasse(pId);
   finally
-    lIbptDao.Free;
+    lIbptDao := nil;
   end;
 end;
 
-constructor TIbptModel.Create(pIConexao : IConexao);
+constructor TIBPTModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
 
-destructor TIbptModel.Destroy;
+destructor TIBPTModel.Destroy;
 begin
+  vIConexao := nil;
   inherited;
 end;
 
-function TIbptModel.obterIBPT(pUf, pOrigem, pNCM : String): TIBPTRetorno;
+function TIBPTModel.obterIBPT(pUf, pOrigem, pNCM : String): TIBPTRetorno;
 var
-  lIbptDao       : TIbptDao;
+  lIbptDao       : ITIbptDao;
   lTable         : IFDDataset;
-  lConfiguracoes : TerasoftConfiguracoes;
+  lConfiguracoes : ITerasoftConfiguracoes;
 
 begin
-  lIbptDao := TIbptDao.Create(vIConexao);
+  lIbptDao := TIbptDao.getNewIface(vIConexao);
 
   try
-    lIbptDao.WhereView       := FWhereView;
-    lIbptDao.OrderView       := FOrderView;
+    lIbptDao.objeto.WhereView       := FWhereView;
+    lIbptDao.objeto.OrderView       := FOrderView;
 
-    lTable := lIbptDao.obterIBPT(pUf, pNCM);
+    lTable := lIbptDao.objeto.obterIBPT(pUf, pNCM);
 
     if lTable.objeto.RecordCount = 0 then
       exit;
@@ -186,127 +199,127 @@ begin
     Result.VERSAO := lTable.objeto.FieldByName('versao').AsString;
     Result.CHAVE  := lTable.objeto.FieldByName('chave').AsString;
 
-    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
-    if lConfiguracoes.valorTag('PERCENTUAL_IBPT_FEDERAL', 0, tvNumero) > 0 then
-      Result.IMPOSTO_FEDERAL :=  lConfiguracoes.valorTag('PERCENTUAL_IBPT_FEDERAL', 0, tvNumero);
+    if lConfiguracoes.objeto.valorTag('PERCENTUAL_IBPT_FEDERAL', 0, tvNumero) > 0 then
+      Result.IMPOSTO_FEDERAL :=  lConfiguracoes.objeto.valorTag('PERCENTUAL_IBPT_FEDERAL', 0, tvNumero);
 
-    if lConfiguracoes.valorTag('PERCENTUAL_IBPT_ESTADUAL', 0, tvNumero) > 0 then
-      Result.IMPOSTO_ESTADUAL :=  lConfiguracoes.valorTag('PERCENTUAL_IBPT_ESTADUAL', 0, tvNumero);
+    if lConfiguracoes.objeto.valorTag('PERCENTUAL_IBPT_ESTADUAL', 0, tvNumero) > 0 then
+      Result.IMPOSTO_ESTADUAL :=  lConfiguracoes.objeto.valorTag('PERCENTUAL_IBPT_ESTADUAL', 0, tvNumero);
 
   finally
-    lIbptDao.Free;
+    lIbptDao := nil;
   end;
 end;
 
-function TIbptModel.Salvar: String;
+function TIBPTModel.Salvar: String;
 var
-  lIbptDao: TIbptDao;
+  lIbptDao: ITIbptDao;
 begin
-  lIbptDao := TIbptDao.Create(vIConexao);
+  lIbptDao := TIbptDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lIbptDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lIbptDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lIbptDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lIbptDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lIbptDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lIbptDao.objeto.excluir(mySelf);
     end;
   finally
-    lIbptDao.Free;
+    lIbptDao := nil;
   end;
 end;
 
-procedure TIbptModel.SetAcao(const Value: TAcao);
+procedure TIBPTModel.SetAcao(const Value: TAcao);
 begin
   FAcao := Value;
 end;
 
-procedure TIbptModel.SetCHAVE(const Value: Variant);
+procedure TIBPTModel.SetCHAVE(const Value: Variant);
 begin
   FCHAVE := Value;
 end;
 
-procedure TIbptModel.SetCODIGO(const Value: Variant);
+procedure TIBPTModel.SetCODIGO(const Value: Variant);
 begin
   FCODIGO := Value;
 end;
 
-procedure TIbptModel.SetESTADUAL(const Value: Variant);
+procedure TIBPTModel.SetESTADUAL(const Value: Variant);
 begin
   FESTADUAL := Value;
 end;
 
-procedure TIbptModel.SetEX(const Value: Variant);
+procedure TIBPTModel.SetEX(const Value: Variant);
 begin
   FEX := Value;
 end;
 
-procedure TIbptModel.SetFONTE(const Value: Variant);
+procedure TIBPTModel.SetFONTE(const Value: Variant);
 begin
   FFONTE := Value;
 end;
 
-procedure TIbptModel.SetID(const Value: Variant);
+procedure TIBPTModel.SetID(const Value: Variant);
 begin
   FID := Value;
 end;
 
-procedure TIbptModel.SetIMPORTADOS_FEDERAL(const Value: Variant);
+procedure TIBPTModel.SetIMPORTADOS_FEDERAL(const Value: Variant);
 begin
   FIMPORTADOS_FEDERAL := Value;
 end;
 
-procedure TIbptModel.SetMUNICIPAL(const Value: Variant);
+procedure TIBPTModel.SetMUNICIPAL(const Value: Variant);
 begin
   FMUNICIPAL := Value;
 end;
 
-procedure TIbptModel.SetNACIONAL_FEDERAL(const Value: Variant);
+procedure TIBPTModel.SetNACIONAL_FEDERAL(const Value: Variant);
 begin
   FNACIONAL_FEDERAL := Value;
 end;
 
-procedure TIbptModel.SetOrderView(const Value: String);
+procedure TIBPTModel.SetOrderView(const Value: String);
 begin
   FOrderView := Value
 end;
 
-procedure TIbptModel.SetSYSTIME(const Value: Variant);
+procedure TIBPTModel.SetSYSTIME(const Value: Variant);
 begin
   FSYSTIME := Value;
 end;
 
-procedure TIbptModel.SetTIPO(const Value: Variant);
+procedure TIBPTModel.SetTIPO(const Value: Variant);
 begin
   FTIPO := Value;
 end;
 
-procedure TIbptModel.SetUF(const Value: Variant);
+procedure TIBPTModel.SetUF(const Value: Variant);
 begin
   FUF := Value;
 end;
 
-procedure TIbptModel.SetUTRIB(const Value: Variant);
+procedure TIBPTModel.SetUTRIB(const Value: Variant);
 begin
   FUTRIB := Value;
 end;
 
-procedure TIbptModel.SetVERSAO(const Value: Variant);
+procedure TIBPTModel.SetVERSAO(const Value: Variant);
 begin
   FVERSAO := Value;
 end;
 
-procedure TIbptModel.SetVIGENCIA_FIM(const Value: Variant);
+procedure TIBPTModel.SetVIGENCIA_FIM(const Value: Variant);
 begin
   FVIGENCIA_FIM := Value;
 end;
 
-procedure TIbptModel.SetVIGENCIA_INICIO(const Value: Variant);
+procedure TIBPTModel.SetVIGENCIA_INICIO(const Value: Variant);
 begin
   FVIGENCIA_INICIO := Value;
 end;
 
-procedure TIbptModel.SetWhereView(const Value: String);
+procedure TIBPTModel.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
 end;

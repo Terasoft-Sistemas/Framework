@@ -60,7 +60,7 @@ type
 
     procedure setParams(var pQry : TFDQuery; pOSModel: TOSModel);
 
-    function ObterLista: TFDMemTable;
+    function ObterLista: IFDDataset;
 end;
 
 implementation
@@ -272,7 +272,7 @@ begin
   end;
 end;
 
-function TOSDao.ObterLista: TFDMemTable;
+function TOSDao.ObterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -321,7 +321,7 @@ end;
 
 procedure TOSDao.setParams(var pQry: TFDQuery; pOSModel: TOSModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -335,7 +335,7 @@ begin
       lProp := lCtx.GetType(TOSModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pOSModel).AsString = '', Unassigned, vConstrutorDao.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pOSModel).AsString));
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pOSModel).AsString = '', Unassigned, vConstrutorDao.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pOSModel).AsString));
     end;
   finally
     lCtx.Free;

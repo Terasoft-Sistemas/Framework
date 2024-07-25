@@ -17,13 +17,16 @@ uses
   Terasoft.Utils;
 
 type
-  TUsuarioDao = class
+  TUsuarioDao = class;
+  ITUsuarioDao=IObject<TUsuarioDao>;
 
+  TUsuarioDao=class
   private
+    [weak] mySelf: ITUsuarioDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FUsuariosLista: IList<TUsuarioModel>;
+    FUsuariosLista: IList<ITUsuarioModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -34,7 +37,7 @@ type
     FStatus: String;
     FID: String;
     FPerfil: Variant;
-    procedure SetUsuariosLista(const Value: IList<TUsuarioModel>);
+    procedure SetUsuariosLista(const Value: IList<ITUsuarioModel>);
     procedure SetCountView(const Value: String);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -49,11 +52,13 @@ type
     function where: String;
     procedure SetPerfil(const Value: Variant);
 
-    procedure setParams(var pQry: TFDQuery; pUsuarioModel: TUsuarioModel);
+    procedure setParams(var pQry: TFDQuery; pUsuarioModel: ITUsuarioModel);
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITUsuarioDao;
 
     property ID: String read FID write SetID;
     property Status: String read FStatus write SetStatus;
@@ -65,17 +70,17 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
-    property UsuariosLista: IList<TUsuarioModel> read FUsuariosLista write SetUsuariosLista;
+    property UsuariosLista: IList<ITUsuarioModel> read FUsuariosLista write SetUsuariosLista;
 
-    function incluir(pUsuarioModel: TUsuarioModel): String;
-    function alterar(pUsuarioModel: TUsuarioModel): String;
-    function excluir(pUsuarioModel: TUsuarioModel): String;
+    function incluir(pUsuarioModel: ITUsuarioModel): String;
+    function alterar(pUsuarioModel: ITUsuarioModel): String;
+    function excluir(pUsuarioModel: ITUsuarioModel): String;
 
     function vendedorUsuario(pIdUsuario: String): String;
     function nomeUsuario(pIdUsuario: String): String;
-    function sincronizarDados(pUsuarioModel : TUsuarioModel): String;
+    function sincronizarDados(pUsuarioModel : ITUsuarioModel): String;
 
-    function carregaClasse(pID: String): TUsuarioModel;
+    function carregaClasse(pID: String): ITUsuarioModel;
     procedure validaLogin(user,pass: String);
     procedure obterLista;
 end;
@@ -87,14 +92,14 @@ uses
 
 { TUsuarioDao }
 
-function TUsuarioDao.carregaClasse(pID: String): TUsuarioModel;
+function TUsuarioDao.carregaClasse(pID: String): ITUsuarioModel;
 var
   lQry: TFDQuery;
-  lModel: TUsuarioModel;
+  lModel: ITUsuarioModel;
   lSQL: String;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TUsuarioModel.Create(vIConexao);
+  lModel   := TUsuarioModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -117,20 +122,20 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID                    := lQry.FieldByName('ID').AsString;
-    lModel.STATUS                := lQry.FieldByName('STATUS').AsString;
-    lModel.FANTASIA              := lQry.FieldByName('FANTASIA').AsString;
-    lModel.SENHA                 := lQry.FieldByName('SENHA').AsString;
-    lModel.NOME                  := lQry.FieldByName('NOME').AsString;
-    lModel.DPTO                  := lQry.FieldByName('DPTO').AsString;
-    lModel.PERFIL_NEW_ID         := lQry.FieldByName('PERFIL_NEW_ID').AsString;
-    lModel.CODIGO_FUNCIONARIO    := lQry.FieldByName('codigo_fun').AsString;
-    lModel.TIPO_VENDEDOR         := lQry.FieldByName('tipo_ven').AsString;
-    lModel.PORCENTAGEM_ZOOM_TELA := lQry.FieldByName('PORCENTAGEM_ZOOM_TELA').AsString;
-    lModel.USUARIO_WINDOWS       := lQry.FieldByName('USUARIO_WINDOWS').AsString;
-    lModel.SENHA_WINDOWS         := lQry.FieldByName('SENHA_WINDOWS').AsString;
-    lModel.URL_WINDOWS           := lQry.FieldByName('URL_WINDOWS').AsString;
-    lModel.LOJA_ID               := lQry.FieldByName('LOJA_ID').AsString;
+    lModel.objeto.ID                    := lQry.FieldByName('ID').AsString;
+    lModel.objeto.STATUS                := lQry.FieldByName('STATUS').AsString;
+    lModel.objeto.FANTASIA              := lQry.FieldByName('FANTASIA').AsString;
+    lModel.objeto.SENHA                 := lQry.FieldByName('SENHA').AsString;
+    lModel.objeto.NOME                  := lQry.FieldByName('NOME').AsString;
+    lModel.objeto.DPTO                  := lQry.FieldByName('DPTO').AsString;
+    lModel.objeto.PERFIL_NEW_ID         := lQry.FieldByName('PERFIL_NEW_ID').AsString;
+    lModel.objeto.CODIGO_FUNCIONARIO    := lQry.FieldByName('codigo_fun').AsString;
+    lModel.objeto.TIPO_VENDEDOR         := lQry.FieldByName('tipo_ven').AsString;
+    lModel.objeto.PORCENTAGEM_ZOOM_TELA := lQry.FieldByName('PORCENTAGEM_ZOOM_TELA').AsString;
+    lModel.objeto.USUARIO_WINDOWS       := lQry.FieldByName('USUARIO_WINDOWS').AsString;
+    lModel.objeto.SENHA_WINDOWS         := lQry.FieldByName('SENHA_WINDOWS').AsString;
+    lModel.objeto.URL_WINDOWS           := lQry.FieldByName('URL_WINDOWS').AsString;
+    lModel.objeto.LOJA_ID               := lQry.FieldByName('LOJA_ID').AsString;
 
     Result := lModel;
 
@@ -139,7 +144,7 @@ begin
   end;
 end;
 
-constructor TUsuarioDao.Create(pIConexao : IConexao);
+constructor TUsuarioDao._Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -153,7 +158,7 @@ begin
   inherited;
 end;
 
-function TUsuarioDao.incluir(pUsuarioModel: TUsuarioModel): String;
+function TUsuarioDao.incluir(pUsuarioModel: ITUsuarioModel): String;
 var
   lQry : TFDQuery;
   lSql : String;
@@ -164,12 +169,12 @@ begin
     lSql := vConstrutor.gerarInsert('USUARIO', 'ID', true);
 
     lQry.SQL.Add(lSQL);
-    pUsuarioModel.id := vIConexao.Generetor('GEN_VENDACARTAO');
+    pUsuarioModel.objeto.id := vIConexao.Generetor('GEN_VENDACARTAO');
     setParams(lQry, pUsuarioModel);
     lQry.Open;
 
     Result := lQry.FieldByName('ID').AsString;
-    Result := pUsuarioModel.ID;
+    Result := pUsuarioModel.objeto.ID;
   finally
      lQry.Free;
   end;
@@ -198,7 +203,7 @@ begin
   Result   := lConexao.ExecSQLScalar('select u.fantasia from usuario u where u.id = '+ QuotedStr(pIdUsuario));
 end;
 
-function TUsuarioDao.alterar(pUsuarioModel: TUsuarioModel): String;
+function TUsuarioDao.alterar(pUsuarioModel: ITUsuarioModel): String;
 var
   lQry : TFDQuery;
   lSql : String;
@@ -212,7 +217,7 @@ begin
     setParams(lQry, pUsuarioModel);
     lQry.ExecSQL;
 
-    Result := pUsuarioModel.ID;
+    Result := pUsuarioModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -220,7 +225,7 @@ begin
   end;
 end;
 
-function TUsuarioDao.excluir(pUsuarioModel: TUsuarioModel): String;
+function TUsuarioDao.excluir(pUsuarioModel: ITUsuarioModel): String;
 var
   lQry: TFDQuery;
 begin
@@ -229,12 +234,18 @@ begin
   Result := '';
 
   try
-    lQry.ExecSQL('delete from Usuario where id = :id', [pUsuarioModel.ID]);
+    lQry.ExecSQL('delete from Usuario where id = :id', [pUsuarioModel.objeto.ID]);
 
-    Result := pUsuarioModel.ID;
+    Result := pUsuarioModel.objeto.ID;
   finally
     lQry.Free;
   end;
+end;
+
+class function TUsuarioDao.getNewIface(pIConexao: IConexao): ITUsuarioDao;
+begin
+  Result := TImplObjetoOwner<TUsuarioDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 procedure TUsuarioDao.obterTotalRegistros;
@@ -265,11 +276,11 @@ var
   lQry: TFDQuery;
   lSQL:String;
   i: INteger;
-  modelo: TUsuarioModel;
+  modelo: ITUsuarioModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FUsuariosLista := TCollections.CreateList<TUsuarioModel>(true);
+  FUsuariosLista := TCollections.CreateList<ITUsuarioModel>;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -292,16 +303,16 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TUsuarioModel.Create(vIConexao);
+      modelo := TUsuarioModel.getNewIface(vIConexao);
       FUsuariosLista.Add(modelo);
 
-      modelo.ID             := lQry.FieldByName('ID').AsString;
-      modelo.STATUS         := lQry.FieldByName('STATUS').AsString;
-      modelo.FANTASIA       := lQry.FieldByName('FANTASIA').AsString;
-      modelo.SENHA          := lQry.FieldByName('SENHA').AsString;
-      modelo.NOME           := lQry.FieldByName('NOME').AsString;
-      modelo.DPTO           := lQry.FieldByName('DPTO').AsString;
-      modelo.PERFIL_NEW_ID  := lQry.FieldByName('PERFIL_NEW_ID').AsString;
+      modelo.objeto.ID             := lQry.FieldByName('ID').AsString;
+      modelo.objeto.STATUS         := lQry.FieldByName('STATUS').AsString;
+      modelo.objeto.FANTASIA       := lQry.FieldByName('FANTASIA').AsString;
+      modelo.objeto.SENHA          := lQry.FieldByName('SENHA').AsString;
+      modelo.objeto.NOME           := lQry.FieldByName('NOME').AsString;
+      modelo.objeto.DPTO           := lQry.FieldByName('DPTO').AsString;
+      modelo.objeto.PERFIL_NEW_ID  := lQry.FieldByName('PERFIL_NEW_ID').AsString;
 
       lQry.Next;
     end;
@@ -337,7 +348,7 @@ begin
   FOrderView := Value;
 end;
 
-procedure TUsuarioDao.setParams(var pQry: TFDQuery; pUsuarioModel: TUsuarioModel);
+procedure TUsuarioDao.setParams(var pQry: TFDQuery; pUsuarioModel: ITUsuarioModel);
 var
   lTabela : IFDDataset;
   lCtx    : TRttiContext;
@@ -353,7 +364,7 @@ begin
       lProp := lCtx.GetType(TUsuarioModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pUsuarioModel).AsString = '',
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pUsuarioModel.objeto).AsString = '',
         Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pUsuarioModel).AsString))
     end;
   finally
@@ -391,7 +402,7 @@ begin
   FWhereView := Value;
 end;
 
-function TUsuarioDao.sincronizarDados(pUsuarioModel: TUsuarioModel): String;
+function TUsuarioDao.sincronizarDados(pUsuarioModel: ITUsuarioModel): String;
 var
   lLojasModel,
   lLojas      : TLojasModel;

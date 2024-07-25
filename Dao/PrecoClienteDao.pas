@@ -5,7 +5,7 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  Spring.Collections,
   System.Variants,
   Terasoft.ConstrutorDao,
   Terasoft.Utils,
@@ -17,7 +17,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FPrecoClientesLista: TObjectList<TPrecoClienteModel>;
+    FPrecoClientesLista: IList<TPrecoClienteModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -28,7 +28,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetPrecoClientesLista(const Value: TObjectList<TPrecoClienteModel>);
+    procedure SetPrecoClientesLista(const Value: IList<TPrecoClienteModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -43,7 +43,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property PrecoClientesLista: TObjectList<TPrecoClienteModel> read FPrecoClientesLista write SetPrecoClientesLista;
+    property PrecoClientesLista: IList<TPrecoClienteModel> read FPrecoClientesLista write SetPrecoClientesLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -74,6 +74,7 @@ end;
 
 destructor TPrecoClienteDao.Destroy;
 begin
+  FPrecoClientesLista:=nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -156,10 +157,10 @@ procedure TPrecoClienteDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: TPrecoClienteModel;
 begin
   lQry := vIConexao.CriarQuery;
-  FPrecoClientesLista := TObjectList<TPrecoClienteModel>.Create;
+  FPrecoClientesLista := TCollections.CreateList<TPrecoClienteModel>(true);
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lSql := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
@@ -173,17 +174,16 @@ begin
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
     lQry.Open(lSQL);
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FPrecoClientesLista.Add(TPrecoClienteModel.Create(vIConexao));
-      i := FPrecoClientesLista.Count -1;
-      FPrecoClientesLista[i].PRODUTO := lQry.FieldByName('PRODUTO').AsString;
-      FPrecoClientesLista[i].CLIENTE := lQry.FieldByName('CLIENTE').AsString;
-      FPrecoClientesLista[i].VALOR   := lQry.FieldByName('VALOR').AsString;
-      FPrecoClientesLista[i].ID      := lQry.FieldByName('ID').AsString;
-      FPrecoClientesLista[i].SYSTIME := lQry.FieldByName('SYSTIME').AsString;
+      modelo := TPrecoClienteModel.Create(vIConexao);
+      FPrecoClientesLista.Add(modelo);
+      modelo.PRODUTO := lQry.FieldByName('PRODUTO').AsString;
+      modelo.CLIENTE := lQry.FieldByName('CLIENTE').AsString;
+      modelo.VALOR   := lQry.FieldByName('VALOR').AsString;
+      modelo.ID      := lQry.FieldByName('ID').AsString;
+      modelo.SYSTIME := lQry.FieldByName('SYSTIME').AsString;
       lQry.Next;
     end;
     obterTotalRegistros;
@@ -195,7 +195,7 @@ procedure TPrecoClienteDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
 end;
-procedure TPrecoClienteDao.SetPrecoClientesLista(const Value: TObjectList<TPrecoClienteModel>);
+procedure TPrecoClienteDao.SetPrecoClientesLista;
 begin
   FPrecoClientesLista := Value;
 end;

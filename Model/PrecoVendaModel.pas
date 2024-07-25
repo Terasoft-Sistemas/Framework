@@ -4,7 +4,7 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -12,7 +12,7 @@ type
 
   private
     vIConexao : IConexao;
-    FPrecoVendasLista: TObjectList<TPrecoVendaModel>;
+    FPrecoVendasLista: IList<TPrecoVendaModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -32,7 +32,7 @@ type
     FNOME: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetPrecoVendasLista(const Value: TObjectList<TPrecoVendaModel>);
+    procedure SetPrecoVendasLista(const Value: IList<TPrecoVendaModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -69,7 +69,7 @@ type
     function Salvar: String;
     procedure obterLista;
 
-    property PrecoVendasLista: TObjectList<TPrecoVendaModel> read FPrecoVendasLista write SetPrecoVendasLista;
+    property PrecoVendasLista: IList<TPrecoVendaModel> read FPrecoVendasLista write SetPrecoVendasLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -134,7 +134,8 @@ end;
 
 destructor TPrecoVendaModel.Destroy;
 begin
-
+  FPrecoVendasLista:=nil;
+  vIConexao:=nil;
   inherited;
 end;
 
@@ -208,7 +209,7 @@ begin
   FPERCENTUAL := Value;
 end;
 
-procedure TPrecoVendaModel.SetPrecoVendasLista(const Value: TObjectList<TPrecoVendaModel>);
+procedure TPrecoVendaModel.SetPrecoVendasLista;
 begin
   FPrecoVendasLista := Value;
 end;

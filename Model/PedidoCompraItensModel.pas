@@ -225,7 +225,7 @@ end;
 procedure TPedidoCompraItensModel.getDadosProdutos;
 var
   lProdutosModel : TProdutosModel;
-  lConfiguracoes : TerasoftConfiguracoes;
+  lConfiguracoes : ITerasoftConfiguracoes;
   lCtx           : TRttiContext;
   lProp          : TRttiProperty;
   lTagCusto      : String;
@@ -246,9 +246,9 @@ begin
     self.FIPI_PED           := lProdutosModel.IPI_PRO;
     self.FVENDAANTERIOR_PED := lProdutosModel.VENDA_PRO;
 
-    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
-    lTagCusto := lConfiguracoes.valorTag('CUSTO_PADRAO_PEDIDO_COMPRA', 'CUSTOULTIMO_PRO', tvString);
+    lTagCusto := lConfiguracoes.objeto.valorTag('CUSTO_PADRAO_PEDIDO_COMPRA', 'CUSTOULTIMO_PRO', tvString);
 
     lProp := lCtx.GetType(TProdutosModel).GetProperty(lTagCusto);
 

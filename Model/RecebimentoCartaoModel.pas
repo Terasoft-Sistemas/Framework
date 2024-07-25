@@ -4,7 +4,7 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -12,7 +12,7 @@ type
 
   private
     vIConexao : IConexao;
-    FRecebimentoCartaosLista: TObjectList<TRecebimentoCartaoModel>;
+    FRecebimentoCartaosLista: IList<TRecebimentoCartaoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -34,7 +34,7 @@ type
     FPARCELA: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetRecebimentoCartaosLista(const Value: TObjectList<TRecebimentoCartaoModel>);
+    procedure SetRecebimentoCartaosLista(const Value: IList<TRecebimentoCartaoModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -72,7 +72,7 @@ type
     function Salvar: String;
     procedure obterLista;
 
-    property RecebimentoCartaosLista: TObjectList<TRecebimentoCartaoModel> read FRecebimentoCartaosLista write SetRecebimentoCartaosLista;
+    property RecebimentoCartaosLista: IList<TRecebimentoCartaoModel> read FRecebimentoCartaosLista write SetRecebimentoCartaosLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -110,7 +110,8 @@ end;
 
 destructor TRecebimentoCartaoModel.Destroy;
 begin
-
+  FRecebimentoCartaosLista := nil;
+  vIConexao := nil;
   inherited;
 end;
 
@@ -189,7 +190,7 @@ begin
   FFATURA := Value;
 end;
 
-procedure TRecebimentoCartaoModel.SetRecebimentoCartaosLista(const Value: TObjectList<TRecebimentoCartaoModel>);
+procedure TRecebimentoCartaoModel.SetRecebimentoCartaosLista;
 begin
   FRecebimentoCartaosLista := Value;
 end;

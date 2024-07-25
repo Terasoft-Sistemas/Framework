@@ -769,7 +769,7 @@ function TPedidoVendaModel.gerarContasReceberFinanceiroPedido(pVendaAssistida: S
 var
   lContasReceberModel      : TContasReceberModel;
   lContasReceberItensModel : TContasReceberItensModel;
-  lEmpresaModel            : TEmpresaModel;
+  lEmpresaModel            : ITEmpresaModel;
   lFinanceiroPedidoModel   : TFinanceiroPedidoModel;
   lFaturaReceber,
   lFinanceiro              : String;
@@ -778,12 +778,12 @@ var
 begin
   lContasReceberModel      := TContasReceberModel.Create(vIConexao);
   lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
-  lEmpresaModel            := TEmpresaModel.Create(vIConexao);
+  lEmpresaModel            := TEmpresaModel.getNewIface(vIConexao);
   lFinanceiroPedidoModel   := TFinanceiroPedidoModel.Create(vIConexao);
 
   try
     lFinanceiro := '';
-    lEmpresaModel.Carregar;
+    lEmpresaModel.objeto.Carregar;
 
     lFinanceiroPedidoModel.WhereView := ' and financeiro_pedido.web_pedido_id = ' + pVendaAssistida;
     lFinanceiroPedidoModel.OrderView := ' id_financeiro, parcela';
@@ -811,7 +811,7 @@ begin
         lContasReceberModel.OBS_REC       := 'Venda: '+self.FNUMERO_PED;
         lContasReceberModel.TIPO_REC      := 'N';
         lContasReceberModel.CODIGO_POR    := lMemTable.objeto.FieldByName('PORTADOR_ID').AsString;
-        lContasReceberModel.JUROS_FIXO    := lEmpresaModel.JUROS_BOL;
+        lContasReceberModel.JUROS_FIXO    := lEmpresaModel.objeto.JUROS_BOL;
         lContasReceberModel.CODIGO_CTA    := '555555';
         lFaturaReceber := lContasReceberModel.Salvar;
       end;
@@ -857,7 +857,7 @@ function TPedidoVendaModel.gerarContasReceberPedido(pValor, pPortador, pParcelas
 var
   lContasReceberModel      : TContasReceberModel;
   lContasReceberItensModel : TContasReceberItensModel;
-  lEmpresaModel            : TEmpresaModel;
+  lEmpresaModel            : ITEmpresaModel;
   lFaturaReceber           : String;
   lParcela, lTotalParcelas : Integer;
   lValorParcela,
@@ -876,10 +876,10 @@ begin
 
   lContasReceberModel      := TContasReceberModel.Create(vIConexao);
   lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
-  lEmpresaModel            := TEmpresaModel.Create(vIConexao);
+  lEmpresaModel            := TEmpresaModel.getNewIface(vIConexao);
 
   try
-    lEmpresaModel.Carregar;
+    lEmpresaModel.objeto.Carregar;
 
     lContasReceberModel.Acao          := tacIncluir;
     lContasReceberModel.LOJA          := self.FLOJA;
@@ -894,7 +894,7 @@ begin
     lContasReceberModel.OBS_REC       := 'Venda: '+self.FNUMERO_PED;
     lContasReceberModel.TIPO_REC      := 'N';
     lContasReceberModel.CODIGO_POR    := pPortador;
-    lContasReceberModel.JUROS_FIXO    := lEmpresaModel.JUROS_BOL;
+    lContasReceberModel.JUROS_FIXO    := lEmpresaModel.objeto.JUROS_BOL;
     lContasReceberModel.CODIGO_CTA    := '555555';
     lFaturaReceber := lContasReceberModel.Salvar;
 
@@ -948,14 +948,14 @@ var
   lItens            : TPedidoItensModel;
   lNFModel          : TNFModel;
   lNFItensModel     : TNFItensModel;
-  lEmpresaModel     : TEmpresaModel;
+  lEmpresaModel     : ITEmpresaModel;
   lNumeroNFe,
   lNomeVendedor     : String;
   lTribFederal,
   lTribEstadual,
   lTribMunicipal    : Double;
-  lFuncionarioModel : TFuncionarioModel;
-  lConfiguracoes    : TerasoftConfiguracoes;
+  lFuncionarioModel : ITFuncionarioModel;
+  lConfiguracoes    : ITerasoftConfiguracoes;
   lTableTotais      : IFDDataset;
   lItem             : Integer;
 begin
@@ -968,24 +968,24 @@ begin
   lPedidoItensModel := TPedidoItensModel.Create(vIConexao);
   lNFItensModel     := TNFItensModel.Create(vIConexao);
   lNFModel          := TNFModel.Create(vIConexao);
-  lEmpresaModel     := TEmpresaModel.Create(vIConexao);
-  lFuncionarioModel := TFuncionarioModel.Create(vIConexao);
-  lConfiguracoes    := TerasoftConfiguracoes.Create(vIConexao);
+  lEmpresaModel     := TEmpresaModel.getNewIface(vIConexao);
+  lFuncionarioModel := TFuncionarioModel.getNewIface(vIConexao);
+  lConfiguracoes    := TerasoftConfiguracoes.getNewIface(vIConexao);
 
   try
     if pModelo = '65' then
     begin
-      lFuncionarioModel := lFuncionarioModel.carregaClasse(self.CODIGO_VEN);
-      lNomeVendedor := lFuncionarioModel.NOME_FUN;
+      lFuncionarioModel := lFuncionarioModel.objeto.carregaClasse(self.CODIGO_VEN);
+      lNomeVendedor := lFuncionarioModel.objeto.NOME_FUN;
 
       lNFModel.OBS_NF := 'Vendedor: '+lNomeVendedor+' '+sLineBreak;
 
-      if lConfiguracoes.valorTag('MOSTRAR_NUMERO_PEDIDO_NF', 'N', tvBool) = 'S' then
+      if lConfiguracoes.objeto.valorTag('MOSTRAR_NUMERO_PEDIDO_NF', 'N', tvBool) = 'S' then
         lNFModel.OBS_NF := lNFModel.OBS_NF + 'Pedido: '+self.NUMERO_PED+' '+sLineBreak;
     end;
 
     self.RecalcularImpostos(self.NUMERO_PED);
-    lEmpresaModel.Carregar;
+    lEmpresaModel.objeto.Carregar;
 
     lNFModel.Acao := tacIncluir;
     lNFModel.TIPO_NF               := 'N';
@@ -1028,8 +1028,8 @@ begin
     lNFModel.DATA_NF               := DateToStr(vIConexao.DataServer);
     lNFModel.DATA_SAIDA            := DateToStr(vIConexao.DataServer);
     lNFModel.HORA_SAIDA            := TimeToStr(vIConexao.HoraServer);
-    lNFModel.UF_EMBARQUE           := lEmpresaModel.UF;
-    lNFModel.LOCAL_EMBARQUE        := lEmpresaModel.CIDADE;
+    lNFModel.UF_EMBARQUE           := lEmpresaModel.objeto.UF;
+    lNFModel.LOCAL_EMBARQUE        := lEmpresaModel.objeto.CIDADE;
     lNFModel.CODIGO_CLI            := self.FCODIGO_CLI;
     lNFModel.CODIGO_VEN            := self.FCODIGO_VEN;
     lNFModel.CODIGO_PORT           := self.FCODIGO_PORT;
@@ -1213,51 +1213,51 @@ begin
     lPedidoItensModel.Free;
     lNFItensModel.Free;
     lNFModel.Free;
-    lEmpresaModel.Free;
+    lEmpresaModel := nil;
   end;
 end;
 
 procedure TPedidoVendaModel.getDataVendedor;
 var
-  lFuncionarioModel : TFuncionarioModel;
+  lFuncionarioModel : ITFuncionarioModel;
 begin
   if self.FCODIGO_VEN = '' then
     exit;
 
-  lFuncionarioModel := TFuncionarioModel.Create(vIConexao);
+  lFuncionarioModel := TFuncionarioModel.getNewIface(vIConexao);
   try
-    lFuncionarioModel.IDRecordView := self.FCODIGO_VEN;
-    lFuncionarioModel.obterLista;
+    lFuncionarioModel.objeto.IDRecordView := self.FCODIGO_VEN;
+    lFuncionarioModel.objeto.obterLista;
 
-    if lFuncionarioModel.FuncionariosLista[0].TIPO_COMISSAO <> '' then
-      self.FTIPO_COMISSAO := lFuncionarioModel.FuncionariosLista[0].TIPO_COMISSAO
+    if lFuncionarioModel.objeto.FuncionariosLista[0].objeto.TIPO_COMISSAO <> '' then
+      self.FTIPO_COMISSAO := lFuncionarioModel.objeto.FuncionariosLista[0].objeto.TIPO_COMISSAO
     else
       self.FTIPO_COMISSAO := 'F';
 
-    if lFuncionarioModel.FuncionariosLista[0].GERENTE_ID <> '' then
-      self.FGERENTE_ID := lFuncionarioModel.FuncionariosLista[0].GERENTE_ID;
+    if lFuncionarioModel.objeto.FuncionariosLista[0].objeto.GERENTE_ID <> '' then
+      self.FGERENTE_ID := lFuncionarioModel.objeto.FuncionariosLista[0].objeto.GERENTE_ID;
 
   finally
-    lFuncionarioModel.Free;
+    lFuncionarioModel := nil;
   end;
 end;
 
 
 procedure TPedidoVendaModel.validaBloqueioPortador(pPortador, pCliente : String);
 var
-  lPortadorModel : TPortadorModel;
+  lPortadorModel : ITPortadorModel;
   lClienteModel  : TClienteModel;
 begin
   if (pPortador = '') or (pCliente = '') then
     exit;
 
-  lPortadorModel := TPortadorModel.Create(vIConexao);
+  lPortadorModel := TPortadorModel.getNewIface(vIConexao);
   lClienteModel  := TClienteModel.Create(vIConexao);
 
   try
-    lPortadorModel := lPortadorModel.carregaClasse(pPortador);
+    lPortadorModel := lPortadorModel.objeto.carregaClasse(pPortador);
 
-    if lPortadorModel.VR_PORT = 'X' then
+    if lPortadorModel.objeto.VR_PORT = 'X' then
     begin
       lClienteModel := lClienteModel.carregaClasse(pCliente);
 
@@ -1266,7 +1266,7 @@ begin
 
     end;
   finally
-    lPortadorModel.Free;
+    lPortadorModel:=nil;
     lClienteModel.Free;
   end;
 
@@ -1274,7 +1274,7 @@ end;
 
 procedure TPedidoVendaModel.venderItem(pVenderItem: TVenderItem);
 var
-  lConfiguracoes     : TerasoftConfiguracoes;
+  lConfiguracoes     : ITerasoftConfiguracoes;
   lProdutosModel     : TProdutosModel;
   lPedidoItensModel  : TPedidoItensModel;
   lPedidoVendaLista  : TPedidoVendaDao;
@@ -1285,7 +1285,7 @@ var
   lIDItem            : String;
 
 begin
-  lConfiguracoes    := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+  Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
   lProdutosModel    := TProdutosModel.Create(vIConexao);
   lPedidoItensModel := TPedidoItensModel.Create(vIConexao);
   lPedidoVendaLista := TPedidoVendaDao.Create(vIConexao);
@@ -1295,7 +1295,7 @@ begin
     if pVenderItem.Quantidade = 0 then
       CriaException('Quantidade inválida.');
 
-    if lConfiguracoes.valorTag('BALANCA_COPY_INI_PRODUTO', '', tvString) <> '' then
+    if lConfiguracoes.objeto.valorTag('BALANCA_COPY_INI_PRODUTO', '', tvString) <> '' then
       lCodBalanca := lPedidoVendaLista.obterProdutoBalanca(pVenderItem.BarrasProduto);
 
     if not lCodBalanca.IsEmpty then
@@ -1303,18 +1303,18 @@ begin
       lProdutosModel.WhereView := ' and produto.barras_pro = '+ QuotedStr(lCodBalanca);
       lProdutosModel.obterVenderItem;
 
-      if lConfiguracoes.valorTag('BALANCA_LER_POR_PESO', 'N', tvBool) = 'S' then
+      if lConfiguracoes.objeto.valorTag('BALANCA_LER_POR_PESO', 'N', tvBool) = 'S' then
       begin
-        lQuantidade := (FormatCurr('####0.000', StrToFloat(Copy(pVenderItem.BarrasProduto, StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_INI_VALOR', '6', tvString)),
-        StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_FIM_VALOR','4', tvString))) + ',' + Copy(pVenderItem.BarrasProduto, StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_INI_DECIMAL', '10', tvString)),
-        StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_FIM_DECIMAL', '3', tvString))))));
+        lQuantidade := (FormatCurr('####0.000', StrToFloat(Copy(pVenderItem.BarrasProduto, StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_INI_VALOR', '6', tvString)),
+        StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_FIM_VALOR','4', tvString))) + ',' + Copy(pVenderItem.BarrasProduto, StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_INI_DECIMAL', '10', tvString)),
+        StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_FIM_DECIMAL', '3', tvString))))));
       end
       else
       begin
-        lQuantidade := (FormatCurr('####0.000', StrToFloat(Copy(pVenderItem.BarrasProduto, StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_INI_VALOR', '7',tvString)),
-        StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_FIM_VALOR', '4', tvString))) + ',' + Copy(pVenderItem.BarrasProduto,
-        StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_INI_DECIMAL', '11', tvString)),
-        StrToInt(lConfiguracoes.valorTag('BALANCA_COPY_FIM_DECIMAL', '10', tvString)))) / lProdutosModel.ProdutossLista[0].VENDA_PRO));
+        lQuantidade := (FormatCurr('####0.000', StrToFloat(Copy(pVenderItem.BarrasProduto, StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_INI_VALOR', '7',tvString)),
+        StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_FIM_VALOR', '4', tvString))) + ',' + Copy(pVenderItem.BarrasProduto,
+        StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_INI_DECIMAL', '11', tvString)),
+        StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_FIM_DECIMAL', '10', tvString)))) / lProdutosModel.ProdutossLista[0].VENDA_PRO));
       end;
     end
     else
@@ -1337,7 +1337,7 @@ begin
 
     lIDItem := lPedidoItensModel.obterIDItem(self.FNUMERO_PED, lProdutosModel.ProdutossLista[0].CODIGO_PRO);
 
-    if (lIDItem <> '') and (lConfiguracoes.valorTag('FRENTE_CAIXA_SOMAR_QTDE_ITENS', 'S', tvBool) = 'S')
+    if (lIDItem <> '') and (lConfiguracoes.objeto.valorTag('FRENTE_CAIXA_SOMAR_QTDE_ITENS', 'S', tvBool) = 'S')
     and (lProdutosModel.ProdutossLista[0].USAR_BALANCA <> 'S') then
     begin
       lPedidoItensModel := lPedidoItensModel.carregaClasse(lIDItem);
@@ -1383,10 +1383,10 @@ end;
 
 procedure TPedidoVendaModel.verificarTagObservacao;
 var
-  lConfiguracoes : TerasoftConfiguracoes;
+  lConfiguracoes : ITerasoftConfiguracoes;
 begin
-  lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
-  self.INFORMACOES_PED := lConfiguracoes.valorTag('OBSERVACAO', '', tvMemo);
+  Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
+  self.INFORMACOES_PED := lConfiguracoes.objeto.valorTag('OBSERVACAO', '', tvMemo);
 end;
 
 function TPedidoVendaModel.gerarContasReceberPedido: String;
@@ -1491,26 +1491,26 @@ var
   lCalcularImpostosModel : TCalcularImpostosModel;
   lPedidoItensModal      : TPedidoItensModel;
   lPedidoVendaModel      : TPedidoVendaModel;
-  lEmpresaModel          : TEmpresaModel;
+  lEmpresaModel          : ITEmpresaModel;
 begin
   lPedidoVendaLista      := TPedidoVendaDao.Create(vIConexao);
   lCalcularImpostosModel := TCalcularImpostosModel.Create(vIConexao);
   lPedidoItensModal      := TPedidoItensModel.Create(vIConexao);
-  lEmpresaModel          := TEmpresaModel.Create(vIConexao);
+  lEmpresaModel          := TEmpresaModel.getNewIface(vIConexao);
 
   try
     lPedidoVendaLista.obterUpdateImpostos(pNumeroPedido);
-    lEmpresaModel.Carregar;
+    lEmpresaModel.objeto.Carregar;
 
     for lPedidoVendaModel in lPedidoVendaLista.PedidoVendasLista do
     begin
-      lCalcularImpostosModel.EMITENTE_UF          := lEmpresaModel.UF;
-      lCalcularImpostosModel.REGIME_TRIBUTARIO    := lEmpresaModel.REGIME_TRIBUTARIO;
+      lCalcularImpostosModel.EMITENTE_UF          := lEmpresaModel.objeto.UF;
+      lCalcularImpostosModel.REGIME_TRIBUTARIO    := lEmpresaModel.objeto.REGIME_TRIBUTARIO;
       lCalcularImpostosModel.MODELO_NF            := '65';
       lCalcularImpostosModel.VALOR_DESCONTO_TOTAL := lPedidoVendaModel.DESC_PED;
       lCalcularImpostosModel.VALOR_ACRESCIMO      := lPedidoVendaModel.ACRES_PED;
       lCalcularImpostosModel.TOTAL_PRODUTO        := lPedidoVendaModel.VALOR_PED;
-      lCalcularImpostosModel.DESTINATARIO_UF      := IIF(lPedidoVendaModel.UF_CLI <> '', lPedidoVendaModel.UF_CLI, lEmpresaModel.UF);
+      lCalcularImpostosModel.DESTINATARIO_UF      := IIF(lPedidoVendaModel.UF_CLI <> '', lPedidoVendaModel.UF_CLI, lEmpresaModel.objeto.UF);
       lCalcularImpostosModel.CODIGO_PRODUTO       := lPedidoVendaModel.CODIGO_PRO;
       lCalcularImpostosModel.QUANTIDADE           := lPedidoVendaModel.QUANTIDADE_PED;
       lCalcularImpostosModel.VALORUNITARIO        := lPedidoVendaModel.VALORUNITARIO_PED;
@@ -1555,7 +1555,7 @@ begin
       lPedidoItensModal.VFCPST              := FloatToStr(lCalcularImpostosModel.VFCPST);
       lPedidoItensModal.CFOP_ID             := lCalcularImpostosModel.CFOP_ID;
       lPedidoItensModal.CFOP                := lCalcularImpostosModel.CFOP;
-      lPedidoItensModal.DESCONTO_PED        := FloatToStr(lCalcularImpostosModel.DESCONTO_ITEM);
+      lPedidoItensModal.VDESC               := FloatToStr(lCalcularImpostosModel.DESCONTO_ITEM);
       lPedidoItensModal.VOUTROS             := FloatToStr(lCalcularImpostosModel.ACRESCIMO_ITEM);
       lPedidoItensModal.CSOSN               := lCalcularImpostosModel.ICMS_CSOSN;
       lPedidoItensModal.VTOTTRIB_ESTADUAL   := lCalcularImpostosModel.VTOTTRIB_ESTADUAL;

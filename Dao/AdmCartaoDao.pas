@@ -12,17 +12,23 @@ uses
   Terasoft.FuncoesTexto,
   Interfaces.Conexao,
   Terasoft.ConstrutorDao,
+  Terasoft.Framework.ObjectIface,
   Spring.Collections,
   Terasoft.Utils;
 
 type
+  TAdmCartaoDao = class;
+
+  ITAdmCartaoDao = IObject<TAdmCartaoDao>;
+
   TAdmCartaoDao = class
 
   private
+    [weak] myself: ITAdmCartaoDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FAdmCartaosLista: IList<TAdmCartaoModel>;
+    FAdmCartaosLista: IList<ITAdmCartaoModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -32,7 +38,7 @@ type
     FWhereView: String;
     FTotalRecords: Integer;
     procedure SetCountView(const Value: String);
-    procedure SetAdmCartaosLista(const Value: IList<TAdmCartaoModel>);
+    procedure SetAdmCartaosLista(const Value: IList<ITAdmCartaoModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -47,7 +53,9 @@ type
     constructor Create(pIConexao: IConexao);
     destructor Destroy; override;
 
-    property AdmCartaosLista: IList<TAdmCartaoModel> read FAdmCartaosLista write SetAdmCartaosLista;
+    class function getNewIface(pIConexao: IConexao): ITAdmCartaoDao;
+
+    property AdmCartaosLista: IList<ITAdmCartaoModel> read FAdmCartaosLista write SetAdmCartaosLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -57,15 +65,15 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(AAdmCartaoModel: TAdmCartaoModel): String;
-    function alterar(AAdmCartaoModel: TAdmCartaoModel): String;
-    function excluir(AAdmCartaoModel: TAdmCartaoModel): String;
+    function incluir(AAdmCartaoModel: ITAdmCartaoModel): String;
+    function alterar(AAdmCartaoModel: ITAdmCartaoModel): String;
+    function excluir(AAdmCartaoModel: ITAdmCartaoModel): String;
 
 	  procedure obterTotalRegistros;
     procedure obterLista;
-    procedure setParams(var pQry: TFDQuery; pAdmCartaoModel: TAdmCartaoModel);
+    procedure setParams(var pQry: TFDQuery; pAdmCartaoModel: ITAdmCartaoModel);
 
-    function carregaClasse(pId: String): TAdmCartaoModel;
+    function carregaClasse(pId: String): ITAdmCartaoModel;
 
 end;
 
@@ -76,13 +84,13 @@ uses
 
 { TAdmCartao }
 
-function TAdmCartaoDao.carregaClasse(pId: String): TAdmCartaoModel;
+function TAdmCartaoDao.carregaClasse(pId: String): ITAdmCartaoModel;
 var
   lQry: TFDQuery;
-  lModel: TAdmCartaoModel;
+  lModel: ITAdmCartaoModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TAdmCartaoModel.Create(vIConexao);
+  lModel   := TAdmCartaoModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -91,22 +99,22 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID                    := lQry.FieldByName('ID').AsString;
-    lModel.NOME_ADM              := lQry.FieldByName('NOME_ADM').AsString;
-    lModel.CREDITO_ADM           := lQry.FieldByName('CREDITO_ADM').AsString;
-    lModel.DEBITO_ADM            := lQry.FieldByName('DEBITO_ADM').AsString;
-    lModel.PARCELADO_ADM         := lQry.FieldByName('PARCELADO_ADM').AsString;
-    lModel.STATUS                := lQry.FieldByName('STATUS').AsString;
-    lModel.COMISSAO_ADM          := lQry.FieldByName('COMISSAO_ADM').AsString;
-    lModel.LOJA                  := lQry.FieldByName('LOJA').AsString;
-    lModel.GERENCIADOR           := lQry.FieldByName('GERENCIADOR').AsString;
-    lModel.VENCIMENTO_DIA_SEMANA := lQry.FieldByName('VENCIMENTO_DIA_SEMANA').AsString;
-    lModel.PORTADOR_ID           := lQry.FieldByName('PORTADOR_ID').AsString;
-    lModel.IMAGEM                := lQry.FieldByName('IMAGEM').AsString;
-    lModel.TAXA                  := lQry.FieldByName('TAXA').AsString;
-    lModel.SYSTIME               := lQry.FieldByName('SYSTIME').AsString;
-    lModel.NOME_WEB              := lQry.FieldByName('NOME_WEB').AsString;
-    lModel.CONCILIADORA_ID       := lQry.FieldByName('CONCILIADORA_ID').AsString;
+    lModel.objeto.ID                    := lQry.FieldByName('ID').AsString;
+    lModel.objeto.NOME_ADM              := lQry.FieldByName('NOME_ADM').AsString;
+    lModel.objeto.CREDITO_ADM           := lQry.FieldByName('CREDITO_ADM').AsString;
+    lModel.objeto.DEBITO_ADM            := lQry.FieldByName('DEBITO_ADM').AsString;
+    lModel.objeto.PARCELADO_ADM         := lQry.FieldByName('PARCELADO_ADM').AsString;
+    lModel.objeto.STATUS                := lQry.FieldByName('STATUS').AsString;
+    lModel.objeto.COMISSAO_ADM          := lQry.FieldByName('COMISSAO_ADM').AsString;
+    lModel.objeto.LOJA                  := lQry.FieldByName('LOJA').AsString;
+    lModel.objeto.GERENCIADOR           := lQry.FieldByName('GERENCIADOR').AsString;
+    lModel.objeto.VENCIMENTO_DIA_SEMANA := lQry.FieldByName('VENCIMENTO_DIA_SEMANA').AsString;
+    lModel.objeto.PORTADOR_ID           := lQry.FieldByName('PORTADOR_ID').AsString;
+    lModel.objeto.IMAGEM                := lQry.FieldByName('IMAGEM').AsString;
+    lModel.objeto.TAXA                  := lQry.FieldByName('TAXA').AsString;
+    lModel.objeto.SYSTIME               := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.NOME_WEB              := lQry.FieldByName('NOME_WEB').AsString;
+    lModel.objeto.CONCILIADORA_ID       := lQry.FieldByName('CONCILIADORA_ID').AsString;
 
     Result := lModel;
   finally
@@ -128,7 +136,13 @@ begin
   inherited;
 end;
 
-function TAdmCartaoDao.incluir(AAdmCartaoModel: TAdmCartaoModel): String;
+class function TAdmCartaoDao.getNewIface(pIConexao: IConexao): ITAdmCartaoDao;
+begin
+  Result := TImplObjetoOwner<TAdmCartaoDao>.CreateOwner(self.Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TAdmCartaoDao.incluir(AAdmCartaoModel: ITAdmCartaoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -139,7 +153,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    AAdmCartaoModel.ID := vIConexao.Generetor('GEN_ADMCARTAO', true);
+    AAdmCartaoModel.objeto.ID := vIConexao.Generetor('GEN_ADMCARTAO', true);
     setParams(lQry, AAdmCartaoModel);
     lQry.Open;
 
@@ -151,7 +165,7 @@ begin
   end;
 end;
 
-function TAdmCartaoDao.alterar(AAdmCartaoModel: TAdmCartaoModel): String;
+function TAdmCartaoDao.alterar(AAdmCartaoModel: ITAdmCartaoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -165,7 +179,7 @@ begin
     setParams(lQry, AAdmCartaoModel);
     lQry.ExecSQL;
 
-    Result := AAdmCartaoModel.ID;
+    Result := AAdmCartaoModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -173,16 +187,16 @@ begin
   end;
 end;
 
-function TAdmCartaoDao.excluir(AAdmCartaoModel: TAdmCartaoModel): String;
+function TAdmCartaoDao.excluir(AAdmCartaoModel: ITAdmCartaoModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from admcartao where ID = :ID',[AAdmCartaoModel.ID]);
+   lQry.ExecSQL('delete from admcartao where ID = :ID',[AAdmCartaoModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := AAdmCartaoModel.ID;
+   Result := AAdmCartaoModel.objeto.ID;
 
   finally
     lQry.Free;
@@ -229,11 +243,11 @@ procedure TAdmCartaoDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TAdmCartaoModel;
+  modelo: ITAdmCartaoModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FAdmCartaosLista := TCollections.CreateList<TAdmCartaoModel>(true);
+  FAdmCartaosLista := TCollections.CreateList<ITAdmCartaoModel>;
 
   try
 
@@ -257,25 +271,25 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TAdmCartaoModel.Create(vIConexao);
+      modelo := TAdmCartaoModel.getNewIface(vIConexao);
       FAdmCartaosLista.Add(modelo);
 
-      modelo.ID                    := lQry.FieldByName('ID').AsString;
-      modelo.NOME_ADM              := lQry.FieldByName('NOME_ADM').AsString;
-      modelo.CREDITO_ADM           := lQry.FieldByName('CREDITO_ADM').AsString;
-      modelo.DEBITO_ADM            := lQry.FieldByName('DEBITO_ADM').AsString;
-      modelo.PARCELADO_ADM         := lQry.FieldByName('PARCELADO_ADM').AsString;
-      modelo.STATUS                := lQry.FieldByName('STATUS').AsString;
-      modelo.COMISSAO_ADM          := lQry.FieldByName('COMISSAO_ADM').AsString;
-      modelo.LOJA                  := lQry.FieldByName('LOJA').AsString;
-      modelo.GERENCIADOR           := lQry.FieldByName('GERENCIADOR').AsString;
-      modelo.VENCIMENTO_DIA_SEMANA := lQry.FieldByName('VENCIMENTO_DIA_SEMANA').AsString;
-      modelo.PORTADOR_ID           := lQry.FieldByName('PORTADOR_ID').AsString;
-      modelo.IMAGEM                := lQry.FieldByName('IMAGEM').AsString;
-      modelo.TAXA                  := lQry.FieldByName('TAXA').AsString;
-      modelo.SYSTIME               := lQry.FieldByName('SYSTIME').AsString;
-      modelo.NOME_WEB              := lQry.FieldByName('NOME_WEB').AsString;
-      modelo.CONCILIADORA_ID       := lQry.FieldByName('CONCILIADORA_ID').AsString;
+      modelo.objeto.ID                    := lQry.FieldByName('ID').AsString;
+      modelo.objeto.NOME_ADM              := lQry.FieldByName('NOME_ADM').AsString;
+      modelo.objeto.CREDITO_ADM           := lQry.FieldByName('CREDITO_ADM').AsString;
+      modelo.objeto.DEBITO_ADM            := lQry.FieldByName('DEBITO_ADM').AsString;
+      modelo.objeto.PARCELADO_ADM         := lQry.FieldByName('PARCELADO_ADM').AsString;
+      modelo.objeto.STATUS                := lQry.FieldByName('STATUS').AsString;
+      modelo.objeto.COMISSAO_ADM          := lQry.FieldByName('COMISSAO_ADM').AsString;
+      modelo.objeto.LOJA                  := lQry.FieldByName('LOJA').AsString;
+      modelo.objeto.GERENCIADOR           := lQry.FieldByName('GERENCIADOR').AsString;
+      modelo.objeto.VENCIMENTO_DIA_SEMANA := lQry.FieldByName('VENCIMENTO_DIA_SEMANA').AsString;
+      modelo.objeto.PORTADOR_ID           := lQry.FieldByName('PORTADOR_ID').AsString;
+      modelo.objeto.IMAGEM                := lQry.FieldByName('IMAGEM').AsString;
+      modelo.objeto.TAXA                  := lQry.FieldByName('TAXA').AsString;
+      modelo.objeto.SYSTIME               := lQry.FieldByName('SYSTIME').AsString;
+      modelo.objeto.NOME_WEB              := lQry.FieldByName('NOME_WEB').AsString;
+      modelo.objeto.CONCILIADORA_ID       := lQry.FieldByName('CONCILIADORA_ID').AsString;
 
       lQry.Next;
     end;
@@ -317,7 +331,7 @@ begin
   FOrderView := Value;
 end;
 
-procedure TAdmCartaoDao.setParams(var pQry: TFDQuery; pAdmCartaoModel: TAdmCartaoModel);
+procedure TAdmCartaoDao.setParams(var pQry: TFDQuery; pAdmCartaoModel: ITAdmCartaoModel);
 var
   lTabela : IFDDataset;
   lCtx    : TRttiContext;
@@ -333,7 +347,7 @@ begin
       lProp := lCtx.GetType(TAdmCartaoModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pAdmCartaoModel).AsString = '',
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pAdmCartaoModel.objeto).AsString = '',
         Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pAdmCartaoModel).AsString))
     end;
   finally

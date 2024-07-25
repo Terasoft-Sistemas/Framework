@@ -1524,8 +1524,11 @@ begin
 
   finally
     Result := lMemTable;
-    lQry.Free;
     lLojasModel.Free;
+
+    if lQry <> nil then
+      lQry.Free;
+
   end;
 
 end;

@@ -70,7 +70,7 @@ var
   lQry : TFDQuery;
   lSQL : String;
   lCalcularImpostosModel : TCalcularImpostosModel;
-  lIbptModel             : TIbptModel;
+  lIbptModel             : ITIbptModel;
   lTipoProduto,
   lNCM,
   lUF_BASE               : String;
@@ -79,7 +79,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   lCalcularImpostosModel := TCalcularImpostosModel.Create(vIConexao);
-  lIbptModel             := TIbptModel.Create(vIConexao);
+  lIbptModel             := TIbptModel.getNewIface(vIConexao);
 
   try
     if FMODELO_NF = '65' then
@@ -230,7 +230,7 @@ begin
 
     if lQry.FieldByName('ibpt').AsString <> 'N' then
     begin
-      lRetornoIbpt := lIbptModel.obterIBPT(FEMITENTE_UF, lTipoProduto, lNCM);
+      lRetornoIbpt := lIbptModel.objeto.obterIBPT(FEMITENTE_UF, lTipoProduto, lNCM);
 
       lCalcularImpostosModel.ALIQUOTA_FEDERAL   := lRetornoIbpt.IMPOSTO_FEDERAL;
       lCalcularImpostosModel.ALIQUOTA_ESTADUAL  := lRetornoIbpt.IMPOSTO_ESTADUAL;
@@ -240,7 +240,7 @@ begin
     Result := lCalcularImpostosModel;
 
   finally
-    lIbptModel.Free;
+    lIbptModel:=nil;
     lQry.Free;
   end;
 end;

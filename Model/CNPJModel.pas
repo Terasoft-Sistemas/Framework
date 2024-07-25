@@ -43,13 +43,13 @@ type
   fRestRequest         :  TRESTRequest;
   fRestResponse        :  TRESTResponse;
   vIConexao            :  IConexao;
-  vConfiguracoes       :  TerasoftConfiguracoes;
+  vConfiguracoes       :  ITerasoftConfiguracoes;
 
   FAPI: TApi;
   procedure SetAPI(const Value: TApi);
  public
 
-    constructor Create(pConfiguracoes : TerasoftConfiguracoes);
+    constructor Create(pConfiguracoes : ITerasoftConfiguracoes);
     destructor Destroy; override;
     function consultarCnpj(pCnpj: String): TRetornoCnpj;
     function cnpjApiBrasil(pCnpj: String): TRetornoCnpj;
@@ -66,7 +66,7 @@ System.JSON, System.SysUtils, Terasoft.Types, Terasoft.FuncoesTexto;
 
 { TCNPJModel }
 
-constructor TCNPJModel.Create(pConfiguracoes : TerasoftConfiguracoes);
+constructor TCNPJModel.Create(pConfiguracoes : ITerasoftConfiguracoes);
 begin
   fRestClient    := TRESTClient.Create(nil);
   fRestRequest   := TRESTRequest.Create(nil);
@@ -98,7 +98,7 @@ var
   lJsonValue: TJSONValue;
   lToken, lDeviceToken : String;
 begin
-  fRestClient.BaseURL := vConfiguracoes.valorTag('API_URL_CNPJ','https://gateway.apibrasil.io/api/v2/dados/cnpj', tvString);
+  fRestClient.BaseURL := vConfiguracoes.objeto.valorTag('API_URL_CNPJ','https://gateway.apibrasil.io/api/v2/dados/cnpj', tvString);
 
   fRestClient.ContentType            := 'application/json';
   fRestRequest.Client                := fRestClient;
@@ -107,8 +107,8 @@ begin
   fRestRequest.Response              := fRestResponse;
   fRestRequest.Params.Clear;
 
-  lDeviceToken := vConfiguracoes.valorTag('API_DEVICE_TOKEN_CNPJ','c496858e-1457-4927-a10d-6c8b3de1f4c7', tvString);
-  lToken       := vConfiguracoes.valorTag('API_TOKEN','eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BsYXRhZm9ybWEuYXBpYnJhc2lsLmNvbS5ici9hdXRoL2xvZ2luIiwiaWF0IjoxNjkxNDI4NDE5LCJleHAiOjE3MjI5NjQ0MTksIm5iZiI6MTY5MTQyODQxOSwianRpIj'+'oiMGtKSXFUd2lXRnVlRlhmcSIsInN1YiI6IjQ0ODgiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.AWbyUffVXO7gEceuEFWVBklOWJyBnAdRyVlfpweSS0c', tvMemo);
+  lDeviceToken := vConfiguracoes.objeto.valorTag('API_DEVICE_TOKEN_CNPJ','c496858e-1457-4927-a10d-6c8b3de1f4c7', tvString);
+  lToken       := vConfiguracoes.objeto.valorTag('API_TOKEN','eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BsYXRhZm9ybWEuYXBpYnJhc2lsLmNvbS5ici9hdXRoL2xvZ2luIiwiaWF0IjoxNjkxNDI4NDE5LCJleHAiOjE3MjI5NjQ0MTksIm5iZiI6MTY5MTQyODQxOSwianRpIj'+'oiMGtKSXFUd2lXRnVlRlhmcSIsInN1YiI6IjQ0ODgiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.AWbyUffVXO7gEceuEFWVBklOWJyBnAdRyVlfpweSS0c', tvMemo);
 
   fRestRequest.params.AddItem;
   fRestRequest.Params.Items[0].Value := '{"cnpj":"'+pCnpj+'"}';

@@ -5,7 +5,7 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  Spring.Collections,
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
@@ -17,7 +17,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FPrecoUFsLista: TObjectList<TPrecoUFModel>;
+    FPrecoUFsLista: IList<TPrecoUFModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -28,7 +28,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetPrecoUFsLista(const Value: TObjectList<TPrecoUFModel>);
+    procedure SetPrecoUFsLista(const Value: IList<TPrecoUFModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -43,7 +43,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property PrecoUFsLista: TObjectList<TPrecoUFModel> read FPrecoUFsLista write SetPrecoUFsLista;
+    property PrecoUFsLista: IList<TPrecoUFModel> read FPrecoUFsLista write SetPrecoUFsLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -101,6 +101,7 @@ begin
 end;
 destructor TPrecoUFDao.Destroy;
 begin
+  FPrecoUFsLista := nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -192,10 +193,10 @@ procedure TPrecoUFDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: TPrecoUFModel;
 begin
   lQry := vIConexao.CriarQuery;
-  FPrecoUFsLista := TObjectList<TPrecoUFModel>.Create;
+  FPrecoUFsLista := TCollections.CreateList<TPrecoUFModel>(true);
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lSql := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
@@ -212,20 +213,20 @@ begin
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
     lQry.Open(lSQL);
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FPrecoUFsLista.Add(TPrecoUFModel.Create(vIConexao));
-      i := FPrecoUFsLista.Count -1;
-      FPrecoUFsLista[i].ID         := lQry.FieldByName('ID').AsString;
-      FPrecoUFsLista[i].PRODUTO_ID := lQry.FieldByName('PRODUTO_ID').AsString;
-      FPrecoUFsLista[i].UF         := lQry.FieldByName('UF').AsString;
-      FPrecoUFsLista[i].COMISSAO   := lQry.FieldByName('COMISSAO').AsString;
-      FPrecoUFsLista[i].SIMPLES    := lQry.FieldByName('SIMPLES').AsString;
-      FPrecoUFsLista[i].ICMS_ST    := lQry.FieldByName('ICMS_ST').AsString;
-      FPrecoUFsLista[i].SYSTIME    := lQry.FieldByName('SYSTIME').AsString;
-      FPrecoUFsLista[i].TOTAL      := (lQry.FieldByName('CUSTOMEDIO_PRO').AsFloat * lQry.FieldByName('MARGEM_PRO').AsFloat / 100 + lQry.FieldByName('CUSTOMEDIO_PRO').AsFloat) /
+      modelo := TPrecoUFModel.Create(vIConexao);
+      FPrecoUFsLista.Add(modelo);
+
+      modelo.ID         := lQry.FieldByName('ID').AsString;
+      modelo.PRODUTO_ID := lQry.FieldByName('PRODUTO_ID').AsString;
+      modelo.UF         := lQry.FieldByName('UF').AsString;
+      modelo.COMISSAO   := lQry.FieldByName('COMISSAO').AsString;
+      modelo.SIMPLES    := lQry.FieldByName('SIMPLES').AsString;
+      modelo.ICMS_ST    := lQry.FieldByName('ICMS_ST').AsString;
+      modelo.SYSTIME    := lQry.FieldByName('SYSTIME').AsString;
+      modelo.TOTAL      := (lQry.FieldByName('CUSTOMEDIO_PRO').AsFloat * lQry.FieldByName('MARGEM_PRO').AsFloat / 100 + lQry.FieldByName('CUSTOMEDIO_PRO').AsFloat) /
                                       ( (100 - (lQry.FieldByName('COMISSAO').AsFloat + lQry.FieldByName('SIMPLES').AsFloat + lQry.FieldByName('ICMS_ST').AsFloat) ) / 100);
       lQry.Next;
     end;
@@ -238,7 +239,7 @@ procedure TPrecoUFDao.SetCountView(const Value: String);
 begin
   FCountView := Value;
 end;
-procedure TPrecoUFDao.SetPrecoUFsLista(const Value: TObjectList<TPrecoUFModel>);
+procedure TPrecoUFDao.SetPrecoUFsLista;
 begin
   FPrecoUFsLista := Value;
 end;

@@ -59,7 +59,7 @@ type
     function excluir(pGrupoGarantiaModel: TGrupoGarantiaModel): String;
 
     function carregaClasse(pID : String): TGrupoGarantiaModel;
-    function obterLista: TFDMemTable;
+    function obterLista: IFDDataset;
 
     procedure setParams(var pQry: TFDQuery; pGrupoGarantiaModel: TGrupoGarantiaModel);
 
@@ -203,7 +203,7 @@ begin
   end;
 end;
 
-function TGrupoGarantiaDao.obterLista: TFDMemTable;
+function TGrupoGarantiaDao.obterLista: IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -261,7 +261,7 @@ end;
 
 procedure TGrupoGarantiaDao.setParams(var pQry: TFDQuery; pGrupoGarantiaModel: TGrupoGarantiaModel);
 var
-  lTabela : TFDMemTable;
+  lTabela : IFDDataset;
   lCtx    : TRttiContext;
   lProp   : TRttiProperty;
   i       : Integer;
@@ -276,7 +276,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pGrupoGarantiaModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela, pQry.Params[i].Name, lProp.GetValue(pGrupoGarantiaModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pGrupoGarantiaModel).AsString))
     end;
   finally
     lCtx.Free;

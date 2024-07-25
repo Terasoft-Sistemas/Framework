@@ -4,7 +4,7 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Spring.Collections,
   FireDAC.Comp.Client,
   Interfaces.Conexao;
 
@@ -13,7 +13,7 @@ type
 
   private
     vIConexao : IConexao;
-    FNFItenssLista: TObjectList<TNFItensModel>;
+    FNFItenssLista: IList<TNFItensModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -172,7 +172,7 @@ type
     FIPI_NF: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetNFItenssLista(const Value: TObjectList<TNFItensModel>);
+    procedure SetNFItenssLista(const Value: IList<TNFItensModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -487,7 +487,7 @@ type
 
     function carregaClasse(pId: String): TNFItensModel;
 
-    property NFItenssLista: TObjectList<TNFItensModel> read FNFItenssLista write SetNFItenssLista;
+    property NFItenssLista: IList<TNFItensModel> read FNFItenssLista write SetNFItenssLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -525,7 +525,8 @@ end;
 
 destructor TNFItensModel.Destroy;
 begin
-
+  FNFItenssLista:=nil;
+  vIConexao:=nil;
   inherited;
 end;
 
@@ -751,7 +752,7 @@ begin
   FNDRAW := Value;
 end;
 
-procedure TNFItensModel.SetNFItenssLista(const Value: TObjectList<TNFItensModel>);
+procedure TNFItensModel.SetNFItenssLista;
 begin
   FNFItenssLista := Value;
 end;

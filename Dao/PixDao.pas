@@ -8,7 +8,7 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  Spring.Collections,
   System.Variants,
   Terasoft.Utils,
   Terasoft.FuncoesTexto,
@@ -21,7 +21,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FPixsLista: TObjectList<TPixModel>;
+    FPixsLista: ILIst<TPixModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -32,7 +32,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetPixsLista(const Value: TObjectList<TPixModel>);
+    procedure SetPixsLista(const Value: ILIst<TPixModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -47,7 +47,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property PixsLista: TObjectList<TPixModel> read FPixsLista write SetPixsLista;
+    property PixsLista: ILIst<TPixModel> read FPixsLista write SetPixsLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -127,6 +127,7 @@ end;
 
 destructor TPixDao.Destroy;
 begin
+  FPixsLista := nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -232,11 +233,11 @@ procedure TPixDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo : TPixModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FPixsLista := TObjectList<TPixModel>.Create;
+  FPixsLista := TCollections.CreateList<TPixModel>(true);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -256,37 +257,35 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FPixsLista.Add(TPixModel.Create(vIConexao));
+      modelo := TPixModel.Create(vIConexao);
+      FPixsLista.Add(modelo);
 
-      i := FPixsLista.Count -1;
-
-      FPixsLista[i].ID                    := lQry.FieldByName('ID').AsString;
-      FPixsLista[i].DATA_CADASTRO         := lQry.FieldByName('DATA_CADASTRO').AsString;
-      FPixsLista[i].SYSTIME               := lQry.FieldByName('SYSTIME').AsString;
-      FPixsLista[i].CLIENTE_ID            := lQry.FieldByName('CLIENTE_ID').AsString;
-      FPixsLista[i].VALOR                 := lQry.FieldByName('VALOR').AsString;
-      FPixsLista[i].VENCIMENTO            := lQry.FieldByName('VENCIMENTO').AsString;
-      FPixsLista[i].EXPIRA                := lQry.FieldByName('EXPIRA').AsString;
-      FPixsLista[i].MENSAGEM              := lQry.FieldByName('MENSAGEM').AsString;
-      FPixsLista[i].DOCUMENTO             := lQry.FieldByName('DOCUMENTO').AsString;
-      FPixsLista[i].JUROS_TIPO            := lQry.FieldByName('JUROS_TIPO').AsString;
-      FPixsLista[i].JUROS_VALOR           := lQry.FieldByName('JUROS_VALOR').AsString;
-      FPixsLista[i].MULTA_TIPO            := lQry.FieldByName('MULTA_TIPO').AsString;
-      FPixsLista[i].MULTA_VALOR           := lQry.FieldByName('MULTA_VALOR').AsString;
-      FPixsLista[i].DESCONTO_TIPO         := lQry.FieldByName('DESCONTO_TIPO').AsString;
-      FPixsLista[i].DESCONTO_VALOR        := lQry.FieldByName('DESCONTO_VALOR').AsString;
-      FPixsLista[i].DESCONTO_DATA         := lQry.FieldByName('DESCONTO_DATA').AsString;
-      FPixsLista[i].PIX_ID                := lQry.FieldByName('PIX_ID').AsString;
-      FPixsLista[i].PIX_DATA              := lQry.FieldByName('PIX_DATA').AsString;
-      FPixsLista[i].PIX_URL               := lQry.FieldByName('PIX_URL').AsString;
-      FPixsLista[i].PIX_TIPO              := lQry.FieldByName('PIX_TIPO').AsString;
-      FPixsLista[i].VALOR_RECEBIDO        := lQry.FieldByName('VALOR_RECEBIDO').AsString;
-      FPixsLista[i].DATA_PAGAMENTO        := lQry.FieldByName('DATA_PAGAMENTO').AsString;
-      FPixsLista[i].CONTASRECEBERITENS_ID := lQry.FieldByName('CONTASRECEBERITENS_ID').AsString;
+      modelo.ID                    := lQry.FieldByName('ID').AsString;
+      modelo.DATA_CADASTRO         := lQry.FieldByName('DATA_CADASTRO').AsString;
+      modelo.SYSTIME               := lQry.FieldByName('SYSTIME').AsString;
+      modelo.CLIENTE_ID            := lQry.FieldByName('CLIENTE_ID').AsString;
+      modelo.VALOR                 := lQry.FieldByName('VALOR').AsString;
+      modelo.VENCIMENTO            := lQry.FieldByName('VENCIMENTO').AsString;
+      modelo.EXPIRA                := lQry.FieldByName('EXPIRA').AsString;
+      modelo.MENSAGEM              := lQry.FieldByName('MENSAGEM').AsString;
+      modelo.DOCUMENTO             := lQry.FieldByName('DOCUMENTO').AsString;
+      modelo.JUROS_TIPO            := lQry.FieldByName('JUROS_TIPO').AsString;
+      modelo.JUROS_VALOR           := lQry.FieldByName('JUROS_VALOR').AsString;
+      modelo.MULTA_TIPO            := lQry.FieldByName('MULTA_TIPO').AsString;
+      modelo.MULTA_VALOR           := lQry.FieldByName('MULTA_VALOR').AsString;
+      modelo.DESCONTO_TIPO         := lQry.FieldByName('DESCONTO_TIPO').AsString;
+      modelo.DESCONTO_VALOR        := lQry.FieldByName('DESCONTO_VALOR').AsString;
+      modelo.DESCONTO_DATA         := lQry.FieldByName('DESCONTO_DATA').AsString;
+      modelo.PIX_ID                := lQry.FieldByName('PIX_ID').AsString;
+      modelo.PIX_DATA              := lQry.FieldByName('PIX_DATA').AsString;
+      modelo.PIX_URL               := lQry.FieldByName('PIX_URL').AsString;
+      modelo.PIX_TIPO              := lQry.FieldByName('PIX_TIPO').AsString;
+      modelo.VALOR_RECEBIDO        := lQry.FieldByName('VALOR_RECEBIDO').AsString;
+      modelo.DATA_PAGAMENTO        := lQry.FieldByName('DATA_PAGAMENTO').AsString;
+      modelo.CONTASRECEBERITENS_ID := lQry.FieldByName('CONTASRECEBERITENS_ID').AsString;
 
       lQry.Next;
     end;
@@ -303,7 +302,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TPixDao.SetPixsLista(const Value: TObjectList<TPixModel>);
+procedure TPixDao.SetPixsLista;
 begin
   FPixsLista := Value;
 end;

@@ -5,7 +5,7 @@ interface
 uses
   Terasoft.Types,
   Terasoft.Utils,
-  System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao,
   FireDAC.Comp.Client,
   Terasoft.FuncoesTexto;
@@ -41,6 +41,7 @@ end;
 
 destructor TMunicipiosIBGEModel.Destroy;
 begin
+  vIConexao := nil;
   inherited;
 end;
 

@@ -4,7 +4,7 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -12,7 +12,7 @@ type
 
   private
     vIConexao : IConexao;
-    FImpressorasLista: TObjectList<TImpressoraModel>;
+    FImpressorasLista: IList<TImpressoraModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -37,7 +37,7 @@ type
     FRECIBO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetImpressorasLista(const Value: TObjectList<TImpressoraModel>);
+    procedure SetImpressorasLista(const Value: IList<TImpressoraModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -82,7 +82,7 @@ type
     procedure obterLista;
     function carregaClasse(pId: Integer): TImpressoraModel;
 
-    property ImpressorasLista: TObjectList<TImpressoraModel> read FImpressorasLista write SetImpressorasLista;
+    property ImpressorasLista: IList<TImpressoraModel> read FImpressorasLista write SetImpressorasLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -120,7 +120,8 @@ end;
 
 destructor TImpressoraModel.Destroy;
 begin
-
+  FImpressorasLista:=nil;
+  vIConexao:=nil;
   inherited;
 end;
 
@@ -204,7 +205,7 @@ begin
   FDIRETA := Value;
 end;
 
-procedure TImpressoraModel.SetImpressorasLista(const Value: TObjectList<TImpressoraModel>);
+procedure TImpressoraModel.SetImpressorasLista;
 begin
   FImpressorasLista := Value;
 end;

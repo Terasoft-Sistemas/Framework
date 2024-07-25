@@ -176,7 +176,7 @@ end;
 procedure TSaidasItensModel.getDadosProduto;
 var
   lProdutosModel : TProdutosModel;
-  lConfiguracoes : TerasoftConfiguracoes;
+  lConfiguracoes : ITerasoftConfiguracoes;
   lBaseCusto     : String;
   lCtx           : TRttiContext;
   lProp          : TRttiProperty;
@@ -191,9 +191,9 @@ begin
     lProdutosModel.obterLista;
     lProdutosModel := lProdutosModel.ProdutossLista[0];
 
-    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
-    lBaseCusto := lConfiguracoes.valorTag('BASE_CUSTO_PADRAO', 'CUSTOMEDIO_PRO', tvString);
+    lBaseCusto := lConfiguracoes.objeto.valorTag('BASE_CUSTO_PADRAO', 'CUSTOMEDIO_PRO', tvString);
 
     lProp := lCtx.GetType(TProdutosModel).GetProperty(lBaseCusto);
 

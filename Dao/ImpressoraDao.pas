@@ -7,10 +7,10 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
   System.Variants,
   Terasoft.ConstrutorDao,
   Terasoft.Utils,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -20,7 +20,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FImpressorasLista: TObjectList<TImpressoraModel>;
+    FImpressorasLista: IList<TImpressoraModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -31,7 +31,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetImpressorasLista(const Value: TObjectList<TImpressoraModel>);
+    procedure SetImpressorasLista(const Value: IList<TImpressoraModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -47,7 +47,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property ImpressorasLista: TObjectList<TImpressoraModel> read FImpressorasLista write SetImpressorasLista;
+    property ImpressorasLista: IList<TImpressoraModel> read FImpressorasLista write SetImpressorasLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -112,10 +112,12 @@ end;
 constructor TImpressoraDao.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
+  vConstrutor := TConstrutorDao.Create(pIConexao);
 end;
 
 destructor TImpressoraDao.Destroy;
 begin
+  FImpressorasLista:=nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -226,7 +228,7 @@ var
 begin
   lQry := vIConexao.CriarQuery;
 
-  FImpressorasLista := TObjectList<TImpressoraModel>.Create;
+  FImpressorasLista := TCollections.CreateList<TImpressoraModel>(true);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -283,7 +285,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TImpressoraDao.SetImpressorasLista(const Value: TObjectList<TImpressoraModel>);
+procedure TImpressoraDao.SetImpressorasLista;
 begin
   FImpressorasLista := Value;
 end;

@@ -6,15 +6,20 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TAdmCartaoModel = class
+  TAdmCartaoModel = class;
 
+  ITAdmCartaoModel = IObject<TAdmCartaoModel>;
+
+  TAdmCartaoModel = class
   private
+    [weak] myself: ITAdmCartaoModel;
     vIConexao : IConexao;
 
-    FAdmCartaosLista: IList<TAdmCartaoModel>;
+    FAdmCartaosLista: IList<ITAdmCartaoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -41,7 +46,7 @@ type
     FCONCILIADORA_ID: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetAdmCartaosLista(const Value: IList<TAdmCartaoModel>);
+    procedure SetAdmCartaosLista(const Value: IList<ITAdmCartaoModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -85,15 +90,17 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao : IConexao): ITAdmCartaoModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TAdmCartaoModel;
+    function Alterar(pID : String): ITAdmCartaoModel;
     function Excluir(pID : String): String;
     function Salvar      : String;
     procedure obterLista;
 
-    function carregaClasse(pId: String): TAdmCartaoModel;
+    function carregaClasse(pId: String): ITAdmCartaoModel;
 
-    property AdmCartaosLista: IList<TAdmCartaoModel> read FAdmCartaosLista write SetAdmCartaosLista;
+    property AdmCartaosLista: IList<ITAdmCartaoModel> read FAdmCartaosLista write SetAdmCartaosLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -112,31 +119,31 @@ uses
 
 { TAdmCartaoModel }
 
-function TAdmCartaoModel.Alterar(pID: String): TAdmCartaoModel;
+function TAdmCartaoModel.Alterar(pID: String): ITAdmCartaoModel;
 var
-  lAdmCartaoModel : TAdmCartaoModel;
+  lAdmCartaoModel : ITAdmCartaoModel;
 begin
-  lAdmCartaoModel := TAdmCartaoModel.Create(vIConexao);
+  lAdmCartaoModel := TAdmCartaoModel.getNewIface(vIConexao);
 
   try
-    lAdmCartaoModel      := lAdmCartaoModel.carregaClasse(pID);
-    lAdmCartaoModel.Acao := tacAlterar;
+    lAdmCartaoModel      := lAdmCartaoModel.objeto.carregaClasse(pID);
+    lAdmCartaoModel.objeto.Acao := tacAlterar;
     Result               := lAdmCartaoModel;
   finally
-    lAdmCartaoModel.Free
+    lAdmCartaoModel:=nil;
   end;
 end;
 
-function TAdmCartaoModel.carregaClasse(pId: String): TAdmCartaoModel;
+function TAdmCartaoModel.carregaClasse(pId: String): ITAdmCartaoModel;
 var
-  lAdmCartaoDao: TAdmCartaoDao;
+  lAdmCartaoDao: ITAdmCartaoDao;
 begin
-  lAdmCartaoDao := TAdmCartaoDao.Create(vIConexao);
+  lAdmCartaoDao := TAdmCartaoDao.getNewIface(vIConexao);
 
   try
-    Result := lAdmCartaoDao.carregaClasse(pId);
+    Result := lAdmCartaoDao.objeto.carregaClasse(pId);
   finally
-    lAdmCartaoDao.Free;
+    lAdmCartaoDao := nil;
   end;
 end;
 
@@ -159,61 +166,67 @@ begin
   Result := self.Salvar
 end;
 
+class function TAdmCartaoModel.getNewIface(pIConexao: IConexao): ITAdmCartaoModel;
+begin
+  Result := TImplObjetoOwner<TAdmCartaoModel>.CreateOwner(self.Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TAdmCartaoModel.Incluir: String;
 var
-  lAdmCartaoModel : TAdmCartaoModel;
+  lAdmCartaoModel : ITAdmCartaoModel;
 begin
-  lAdmCartaoModel := TAdmCartaoModel.Create(vIConexao);
+  lAdmCartaoModel := TAdmCartaoModel.getNewIface(vIConexao);
   try
     self.Acao := tacIncluir ;
     Result    := self.Salvar;
   finally
-    lAdmCartaoModel.Free;
+    lAdmCartaoModel := nil;
   end;
 end;
 
 procedure TAdmCartaoModel.obterLista;
 var
-  lAdmCartaoLista: TAdmCartaoDao;
+  lAdmCartaoLista: ITAdmCartaoDao;
 begin
-  lAdmCartaoLista := TAdmCartaoDao.Create(vIConexao);
+  lAdmCartaoLista := TAdmCartaoDao.getNewIface(vIConexao);
 
   try
-    lAdmCartaoLista.TotalRecords    := FTotalRecords;
-    lAdmCartaoLista.WhereView       := FWhereView;
-    lAdmCartaoLista.CountView       := FCountView;
-    lAdmCartaoLista.OrderView       := FOrderView;
-    lAdmCartaoLista.StartRecordView := FStartRecordView;
-    lAdmCartaoLista.LengthPageView  := FLengthPageView;
-    lAdmCartaoLista.IDRecordView    := FIDRecordView;
+    lAdmCartaoLista.objeto.TotalRecords    := FTotalRecords;
+    lAdmCartaoLista.objeto.WhereView       := FWhereView;
+    lAdmCartaoLista.objeto.CountView       := FCountView;
+    lAdmCartaoLista.objeto.OrderView       := FOrderView;
+    lAdmCartaoLista.objeto.StartRecordView := FStartRecordView;
+    lAdmCartaoLista.objeto.LengthPageView  := FLengthPageView;
+    lAdmCartaoLista.objeto.IDRecordView    := FIDRecordView;
 
-    lAdmCartaoLista.obterLista;
+    lAdmCartaoLista.objeto.obterLista;
 
-    FTotalRecords  := lAdmCartaoLista.TotalRecords;
-    FAdmCartaosLista := lAdmCartaoLista.AdmCartaosLista;
+    FTotalRecords  := lAdmCartaoLista.objeto.TotalRecords;
+    FAdmCartaosLista := lAdmCartaoLista.objeto.AdmCartaosLista;
 
   finally
-    lAdmCartaoLista.Free;
+    lAdmCartaoLista := nil;
   end;
 end;
 
 function TAdmCartaoModel.Salvar: String;
 var
-  lAdmCartaoDao: TAdmCartaoDao;
+  lAdmCartaoDao: ITAdmCartaoDao;
 begin
-  lAdmCartaoDao := TAdmCartaoDao.Create(vIConexao);
+  lAdmCartaoDao := TAdmCartaoDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lAdmCartaoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lAdmCartaoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lAdmCartaoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lAdmCartaoDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lAdmCartaoDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lAdmCartaoDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lAdmCartaoDao.Free;
+    lAdmCartaoDao := nil;
   end;
 end;
 

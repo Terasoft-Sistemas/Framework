@@ -264,33 +264,33 @@ end;
 function TContasReceberModel.concluirContasReceber(pFatura: String): TConclusaoContasReceber;
 var
   lContasReceberItensModel, lContasReceberitensAtualizar: TContasReceberItensModel;
-  lPortadorModel : TPortadorModel;
+  lPortadorModel : ITPortadorModel;
   pHistorico,
   lConta : String;
 begin
 
   lContasReceberItensModel      := TContasReceberItensModel.Create(vIConexao);
   lContasReceberitensAtualizar  := TContasReceberItensModel.Create(vIConexao);
-  lPortadorModel                := TPortadorModel.Create(vIConexao);
+  lPortadorModel                := TPortadorModel.getNewIface(vIConexao);
 
   try
-    lPortadorModel := lPortadorModel.carregaClasse(self.FCODIGO_POR);
+    lPortadorModel := lPortadorModel.objeto.carregaClasse(self.FCODIGO_POR);
 
     if not self.FRECEBIMENTO_CONCLUIDO then begin
 
-      if lPortadorModel.TIPO = 'T' then
+      if lPortadorModel.objeto.TIPO = 'T' then
       begin
         Result := tcReceberTef;
         exit;
       end;
 
-      if AnsiMatchStr(lPortadorModel.TPAG_NFE,['03','04']) then
+      if AnsiMatchStr(lPortadorModel.objeto.TPAG_NFE,['03','04']) then
       begin
         Result := tcReceberCartao;
         exit;
       end;
 
-      if AnsiMatchStr(lPortadorModel.TPAG_NFE,['17']) and (lPortadorModel.PIX_CHAVE <> '') then
+      if AnsiMatchStr(lPortadorModel.objeto.TPAG_NFE,['17']) and (lPortadorModel.objeto.PIX_CHAVE <> '') then
       begin
         Result := tcReceberPix;
         exit;
@@ -321,11 +321,11 @@ begin
         lContasReceberitensAtualizar.gerarVendaCartao;
       end;
 
-      lConta := IIF(lPortadorModel.RECEITA_CONTA_ID <> '', lPortadorModel.RECEITA_CONTA_ID , '888888');
+      lConta := IIF(lPortadorModel.objeto.RECEITA_CONTA_ID <> '', lPortadorModel.objeto.RECEITA_CONTA_ID , '888888');
 
       if self.FCODIGO_POR = '000004' then
       begin
-        pHistorico := 'Venda N: '+ self.PEDIDO_REC +' '+ lPortadorModel.NOME_PORT;
+        pHistorico := 'Venda N: '+ self.PEDIDO_REC +' '+ lPortadorModel.objeto.NOME_PORT;
         lContasReceberitensAtualizar.baixarCaixa(lContasReceberitensAtualizar.VLRPARCELA_REC, self.FCODIGO_POR, lConta, pHistorico);
       end;
 
@@ -341,7 +341,7 @@ begin
   finally
     lContasReceberitensAtualizar.Free;
     lContasReceberItensModel.Free;
-    lPortadorModel.Free;
+    lPortadorModel:=nil;
   end;
 end;
 
@@ -772,7 +772,7 @@ end;
 
 procedure TContasReceberModel.validaExclusao;
 var
-  lPortadorModel           : TPortadorModel;
+  lPortadorModel           : ITPortadorModel;
   lContasReceberItensModel : TContasReceberItensModel;
   lTefModel                : TTefModel;
 begin
@@ -783,16 +783,16 @@ begin
     CriaException('Informe a fatura do contas a receber');
 
   lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
-  lPortadorModel           := TPortadorModel.Create(vIConexao);
+  lPortadorModel           := TPortadorModel.getNewIface(vIConexao);
   lTefModel                := TTefModel.Create(vIConexao);
 
   try
-    lPortadorModel := lPortadorModel.carregaClasse(self.FCODIGO_POR);
+    lPortadorModel := lPortadorModel.objeto.carregaClasse(self.FCODIGO_POR);
     lContasReceberItensModel.IDContasReceberView := self.FATURA_REC;
     lContasReceberItensModel.WhereView := ' and contasreceberitens.valorrec_rec > 0 ';
     lContasReceberItensModel.obterLista;
 
-    if (lPortadorModel.TPAG_NFE = '17') and (lContasReceberItensModel.TotalRecords > 0) then
+    if (lPortadorModel.objeto.TPAG_NFE = '17') and (lContasReceberItensModel.TotalRecords > 0) then
       CriaException('Não é possível excluir pagamento realizado no PIX.');
 
     lTefModel.WhereView := ' and coalesce(tef.status, '''') <> ''X'' and tef.contasreceber_fatura = '+ QuotedStr(self.FFATURA_REC);
@@ -802,7 +802,7 @@ begin
       CriaException('Não é possível excluir pagamento realizado no TEF.');
   finally
     lContasReceberItensModel.free;
-    lPortadorModel.free;
+    lPortadorModel:=nil;
     lTefModel.free;
   end;
 end;

@@ -5,12 +5,19 @@ interface
 uses
   Terasoft.Types,
   FireDAC.Comp.Client,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TEventosNFeModel = class
 
+  TEventosNFeModel = class;
+
+  ITEventosNFeModel = IObject<TEventosNFeModel>;
+
+
+  TEventosNFeModel = class
   private
+    [weak] mySelf: ITEventosNFeModel;
     vIConexao : IConexao;
     FAcao: TAcao;
     FRETORNO_SEFAZ: Variant;
@@ -56,8 +63,10 @@ type
     procedure SetXML(const Value: Variant);
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITEventosNFeModel;
 
     property    ID                :Variant read FID write SetID;
     property    ID_NFE            :Variant read FID_NFE write SetID_NFE;
@@ -92,34 +101,40 @@ uses EventosNFeDao;
 { TEventosNFe }
 
 
-constructor TEventosNFeModel.Create(pIConexao : IConexao);
+constructor TEventosNFeModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
 
 destructor TEventosNFeModel.Destroy;
 begin
-
+  vIConexao := nil;
   inherited;
+end;
+
+class function TEventosNFeModel.getNewIface(pIConexao: IConexao): ITEventosNFeModel;
+begin
+  Result := TImplObjetoOwner<TEventosNFeModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TEventosNFeModel.Salvar: Boolean;
 var
-  vEventosNFeDao: TEventosNFeDao;
+  vEventosNFeDao: ITEventosNFeDao;
 begin
   Result := False;
-  vEventosNFeDao := TEventosNFeDao.Create(vIConexao);
+  vEventosNFeDao := TEventosNFeDao.getNewIface(vIConexao);
 
    try
 
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := vEventosNFeDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := vEventosNFeDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := vEventosNFeDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := vEventosNFeDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := vEventosNFeDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := vEventosNFeDao.objeto.excluir(mySelf);
     end;
 
    finally
-     vEventosNFeDao.Free;
+     vEventosNFeDao := nil;
    end;
 
 end;
