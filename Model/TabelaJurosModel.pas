@@ -39,6 +39,7 @@ type
     FVALOR_SEG_PRESTAMISTA: Variant;
     FVALOR_ACRESCIMO_SEG_PRESTAMISTA: Variant;
     FPER_SEG_PRESTAMSTA: Variant;
+    FCOEFICIENTE: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetTabelaJurossLista(const Value: IList<TTabelaJurosModel>);
@@ -62,6 +63,7 @@ type
     procedure SetPER_SEG_PRESTAMSTA(const Value: Variant);
     procedure SetVALOR_ACRESCIMO_SEG_PRESTAMISTA(const Value: Variant);
     procedure SetVALOR_SEG_PRESTAMISTA(const Value: Variant);
+    procedure SetCOEFICIENTE(const Value: Variant);
 
   public
     property CODIGO: Variant read FCODIGO write SetCODIGO;
@@ -78,6 +80,7 @@ type
     property VALOR_SEG_PRESTAMISTA : Variant read FVALOR_SEG_PRESTAMISTA write SetVALOR_SEG_PRESTAMISTA;
     property PER_SEG_PRESTAMSTA    : Variant read FPER_SEG_PRESTAMSTA write SetPER_SEG_PRESTAMSTA;
     property VALOR_ACRESCIMO_SEG_PRESTAMISTA : Variant read FVALOR_ACRESCIMO_SEG_PRESTAMISTA write SetVALOR_ACRESCIMO_SEG_PRESTAMISTA;
+    property COEFICIENTE : Variant read FCOEFICIENTE write SetCOEFICIENTE;
 
 
   	constructor Create(pIConexao : IConexao);
@@ -143,6 +146,7 @@ var
   lValorGerar,
   lValorParcela,
   lPercentualJuros,
+  lCoeficienteJuros,
   lCoeficienteJurosDias : Double;
 
 
@@ -233,9 +237,10 @@ begin
 
         if self.TabelaJurossLista[i].INDCE > 0 then
         begin
-           lValorParcela    := lTotal * (self.TabelaJurossLista[i].INDCE * lCoeficienteJurosDias);
-          lValorGerar      := lValorParcela * StrToInt(self.TabelaJurossLista[i].CODIGO);
-          lPercentualJuros := (lValorGerar - lTotal) / lTotal * 100;
+          lValorParcela     := lTotal * (self.TabelaJurossLista[i].INDCE * lCoeficienteJurosDias);
+          lCoeficienteJuros := (self.TabelaJurossLista[i].INDCE * lCoeficienteJurosDias);
+          lValorGerar       := lValorParcela * StrToInt(self.TabelaJurossLista[i].CODIGO);
+          lPercentualJuros  := (lValorGerar - lTotal) / lTotal * 100;
         end
         else
         begin
@@ -287,6 +292,7 @@ begin
     lMemTable.FieldDefs.Add('VALOR_SEG_PRESTAMISTA', ftFloat);
     lMemTable.FieldDefs.Add('PER_SEG_PRESTAMSTA', ftFloat);
     lMemTable.FieldDefs.Add('VALOR_ACRESCIMO_SEG_PRESTAMISTA', ftFloat);
+    lMemTable.FieldDefs.Add('COEFICIENTE', ftFloat);
 
     lMemTable.CreateDataSet;
 
@@ -317,8 +323,11 @@ begin
                               self.TabelaJurossLista[i].VALOR_TOTAL,
                               self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA,
                               self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA,
-                              self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA
+                              self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA,
+                              lCoeficienteJuros
                              ]);
+
+
     end;
 
     lMemTable.Open;
@@ -385,6 +394,11 @@ end;
 procedure TTabelaJurosModel.SetCODIGO(const Value: Variant);
 begin
   FCODIGO := Value;
+end;
+
+procedure TTabelaJurosModel.SetCOEFICIENTE(const Value: Variant);
+begin
+  FCOEFICIENTE := Value;
 end;
 
 procedure TTabelaJurosModel.SetCountView(const Value: String);
