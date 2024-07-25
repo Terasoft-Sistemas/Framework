@@ -151,13 +151,13 @@ var
 
 
   lMemTable      : TFDMemTable;
-  lPortadorModel : TPortadorModel;
+  lPortadorModel : ITPortadorModel;
   lConfiguracoes : ITerasoftConfiguracoes;
   lTagPercentual : String;
 
   lTagLimitadorVencimento: Integer;
 begin
-  lPortadorModel := TPortadorModel.Create(vIConexao);
+  lPortadorModel := TPortadorModel.getNewIface(vIConexao);
   lTabelaJurosDia := TTabelaJurosDiaModel.Create(vIConexao);
 
   lMemTable := TFDMemTable.Create(nil);
@@ -167,10 +167,10 @@ begin
   try
     Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
-    lPortadorModel.IDRecordView := pPortador;
-    lPortadorModel.obterLista;
+    lPortadorModel.objeto.IDRecordView := pPortador;
+    lPortadorModel.objeto.obterLista;
 
-    lPortadorModel := lPortadorModel.PortadorsLista.First;
+    lPortadorModel := lPortadorModel.objeto.PortadorsLista.First;
 
     self.WhereView  := 'and portador_id = ' + QuotedStr(pPortador);
     self.OrderView  := ' tabelajuros.codigo';
@@ -220,11 +220,11 @@ begin
 
         if pSeguroPrestamista then
         begin
-          if lPortadorModel.PER_SEGURO_PRESTAMISTA = 0 then
+          if lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA = 0 then
            CriaException('Valor do cadastro do seguroprestamista esta zerado.');
 
-          self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := lPortadorModel.PER_SEGURO_PRESTAMISTA;
-          self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := (lTotal + lJuros)*(lPortadorModel.PER_SEGURO_PRESTAMISTA/100);
+          self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA;
+          self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := (lTotal + lJuros)*(lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA/100);
           self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, self.TabelaJurossLista[i].PERCENTUAL / 100 * self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA, 0);;
         end else
         begin
@@ -257,11 +257,11 @@ begin
 
         if pSeguroPrestamista then
         begin
-          if lPortadorModel.PER_SEGURO_PRESTAMISTA = 0 then
+          if lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA = 0 then
            CriaException('Valor do cadastro do seguroprestamista esta zerado.');
 
-          self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := lPortadorModel.PER_SEGURO_PRESTAMISTA;
-          self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := (lTotal + lJuros)*(lPortadorModel.PER_SEGURO_PRESTAMISTA/100);
+          self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA;
+          self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := (lTotal + lJuros)*(lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA/100);
           self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA := IIF(lPercentualJuros > 0, lPercentualJuros / 100 * self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA, 0);;
         end else
         begin

@@ -4,17 +4,22 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Terasoft.Framework.ObjectIface,
   Spring.Collections,
   Interfaces.Conexao,
   FireDAC.Comp.Client;
 
 type
-  TPortadorModel = class
 
+  TPortadorModel = class;
+
+  ITPortadorModel = IObject<TPortadorModel>;
+
+  TPortadorModel = class
   private
+    [weak] mySelf: ITPortadorModel;
     vIConexao : IConexao;
-    FPortadorsLista: IList<TPortadorModel>;
+    FPortadorsLista: IList<ITPortadorModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -57,7 +62,7 @@ type
     FPER_SEGURO_PRESTAMISTA: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetPortadorsLista(const Value: IList<TPortadorModel>);
+    procedure SetPortadorsLista(const Value: IList<ITPortadorModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -130,20 +135,22 @@ type
     property XPAG_NFE: Variant read FXPAG_NFE write SetXPAG_NFE;
     property PER_SEGURO_PRESTAMISTA: Variant read FPER_SEGURO_PRESTAMISTA write SetPER_SEGURO_PRESTAMISTA;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITPortadorModel;
+
     function Incluir : String;
-    function Alterar(pID : String) : TPortadorModel;
+    function Alterar(pID : String) : ITPortadorModel;
     function Excluir(pID : String) : String;
     function Salvar: String;
     procedure obterLista;
 
-    function carregaClasse(pId: String): TPortadorModel;
+    function carregaClasse(pId: String): ITPortadorModel;
     function PortadorTabelaJuros : IFDDataset;
     function possuiBandeira(pPortador: String): Boolean;
 
-    property PortadorsLista: IList<TPortadorModel> read FPortadorsLista write SetPortadorsLista;
+    property PortadorsLista: IList<ITPortadorModel> read FPortadorsLista write SetPortadorsLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -162,14 +169,14 @@ uses
 
 { TPortadorModel }
 
-function TPortadorModel.Alterar(pID: String): TPortadorModel;
+function TPortadorModel.Alterar(pID: String): ITPortadorModel;
 var
-  lPortadorModel : TPortadorModel;
+  lPortadorModel : ITPortadorModel;
 begin
-  lPortadorModel := TPortadorModel.Create(vIConexao);
+  lPortadorModel := TPortadorModel.getNewIface(vIConexao);
   try
-    lPortadorModel := lPortadorModel.carregaClasse(pID);
-    lPortadorModel.Acao := tacAlterar;
+    lPortadorModel := lPortadorModel.objeto.carregaClasse(pID);
+    lPortadorModel.objeto.Acao := tacAlterar;
     Result := lPortadorModel;
   finally
 
@@ -183,26 +190,32 @@ begin
   Result    := self.Salvar;
 end;
 
+class function TPortadorModel.getNewIface(pIConexao: IConexao): ITPortadorModel;
+begin
+  Result := TImplObjetoOwner<TPortadorModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TPortadorModel.Incluir: String;
 begin
   self.FAcao := tacIncluir;
   Result     := self.Salvar;
 end;
 
-function TPortadorModel.carregaClasse(pId: String): TPortadorModel;
+function TPortadorModel.carregaClasse(pId: String): ITPortadorModel;
 var
-  lPortadorDao: TPortadorDao;
+  lPortadorDao: ITPortadorDao;
 begin
-  lPortadorDao := TPortadorDao.Create(vIConexao);
+  lPortadorDao := TPortadorDao.getNewIface(vIConexao);
 
   try
-    Result := lPortadorDao.carregaClasse(pId);
+    Result := lPortadorDao.objeto.carregaClasse(pId);
   finally
-    lPortadorDao.Free;
+    lPortadorDao:=nil;
   end;
 end;
 
-constructor TPortadorModel.Create(pIConexao : IConexao);
+constructor TPortadorModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -216,41 +229,41 @@ end;
 
 procedure TPortadorModel.obterLista;
 var
-  lPortadorLista: TPortadorDao;
+  lPortadorLista: ITPortadorDao;
 begin
-  lPortadorLista := TPortadorDao.Create(vIConexao);
+  lPortadorLista := TPortadorDao.getNewIface(vIConexao);
 
   try
-    lPortadorLista.TotalRecords    := FTotalRecords;
-    lPortadorLista.WhereView       := FWhereView;
-    lPortadorLista.CountView       := FCountView;
-    lPortadorLista.OrderView       := FOrderView;
-    lPortadorLista.StartRecordView := FStartRecordView;
-    lPortadorLista.LengthPageView  := FLengthPageView;
-    lPortadorLista.IDRecordView    := FIDRecordView;
+    lPortadorLista.objeto.TotalRecords    := FTotalRecords;
+    lPortadorLista.objeto.WhereView       := FWhereView;
+    lPortadorLista.objeto.CountView       := FCountView;
+    lPortadorLista.objeto.OrderView       := FOrderView;
+    lPortadorLista.objeto.StartRecordView := FStartRecordView;
+    lPortadorLista.objeto.LengthPageView  := FLengthPageView;
+    lPortadorLista.objeto.IDRecordView    := FIDRecordView;
 
-    lPortadorLista.obterLista;
+    lPortadorLista.objeto.obterLista;
 
-    FTotalRecords  := lPortadorLista.TotalRecords;
-    FPortadorsLista := lPortadorLista.PortadorsLista;
+    FTotalRecords  := lPortadorLista.objeto.TotalRecords;
+    FPortadorsLista := lPortadorLista.objeto.PortadorsLista;
 
   finally
-    freeAndNil(lPortadorLista);
+    lPortadorLista:=nil;
   end;
 end;
 
 function TPortadorModel.PortadorTabelaJuros: IFDDataset;
 var
-  lPortadorTabelaJuros: TPortadorDao;
+  lPortadorTabelaJuros: ITPortadorDao;
 begin
-  lPortadorTabelaJuros := TPortadorDao.Create(vIConexao);
+  lPortadorTabelaJuros := TPortadorDao.getNewIface(vIConexao);
   try
 
-    lPortadorTabelaJuros.IDRecordView := FIDRecordView;
-    Result := lPortadorTabelaJuros.PortadorTabelaJuros;
+    lPortadorTabelaJuros.objeto.IDRecordView := FIDRecordView;
+    Result := lPortadorTabelaJuros.objeto.PortadorTabelaJuros;
 
   finally
-    lPortadorTabelaJuros.Free;
+    lPortadorTabelaJuros:=nil;
   end;
 end;
 
@@ -271,17 +284,16 @@ end;
 
 function TPortadorModel.Salvar: String;
 var
-  lPortadorDao: TPortadorDao;
+  lPortadorDao: ITPortadorDao;
 begin
-  lPortadorDao := TPortadorDao.Create(vIConexao);
+  lPortadorDao := TPortadorDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
-    
 
   finally
-    lPortadorDao.Free;
+    lPortadorDao:=nil;
   end;
 end;
 

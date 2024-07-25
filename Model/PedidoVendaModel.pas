@@ -1245,19 +1245,19 @@ end;
 
 procedure TPedidoVendaModel.validaBloqueioPortador(pPortador, pCliente : String);
 var
-  lPortadorModel : TPortadorModel;
+  lPortadorModel : ITPortadorModel;
   lClienteModel  : TClienteModel;
 begin
   if (pPortador = '') or (pCliente = '') then
     exit;
 
-  lPortadorModel := TPortadorModel.Create(vIConexao);
+  lPortadorModel := TPortadorModel.getNewIface(vIConexao);
   lClienteModel  := TClienteModel.Create(vIConexao);
 
   try
-    lPortadorModel := lPortadorModel.carregaClasse(pPortador);
+    lPortadorModel := lPortadorModel.objeto.carregaClasse(pPortador);
 
-    if lPortadorModel.VR_PORT = 'X' then
+    if lPortadorModel.objeto.VR_PORT = 'X' then
     begin
       lClienteModel := lClienteModel.carregaClasse(pCliente);
 
@@ -1266,7 +1266,7 @@ begin
 
     end;
   finally
-    lPortadorModel.Free;
+    lPortadorModel:=nil;
     lClienteModel.Free;
   end;
 

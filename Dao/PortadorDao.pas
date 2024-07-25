@@ -6,19 +6,25 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  Terasoft.Framework.ObjectIface,
   System.Variants,
   Terasoft.Utils,
   Spring.Collections,
   Interfaces.Conexao;
 
 type
+
+  TPortadorDao = class;
+
+  ITPortadorDao = IObject<TPortadorDao>;
+
   TPortadorDao = class
   private
+    [weak] mySelf: ITPortadorDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FPortadorsLista: IList<TPortadorModel>;
+    FPortadorsLista: IList<ITPortadorModel>;
     FLengthPageView: String;
     FStartRecordView: String;
     FID: Variant;
@@ -29,21 +35,23 @@ type
     FIDRecordView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetPortadorsLista(const Value: IList<TPortadorModel>);
+    procedure SetPortadorsLista(const Value: IList<ITPortadorModel>);
     procedure SetID(const Value: Variant);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-    procedure setParams(var pQry: TFDQuery; pPortadorModel: TPortadorModel);
+    procedure setParams(var pQry: TFDQuery; pPortadorModel: ITPortadorModel);
     function where: String;
     procedure SetIDRecordView(const Value: String);
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property PortadorsLista: IList<TPortadorModel> read FPortadorsLista write SetPortadorsLista;
+    class function getNewIface(pIConexao: IConexao): ITPortadorDao;
+
+    property PortadorsLista: IList<ITPortadorModel> read FPortadorsLista write SetPortadorsLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -53,12 +61,12 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
 
-    function incluir(pPortadorModel: TPortadorModel): String;
-    function alterar(pPortadorModel: TPortadorModel): String;
-    function excluir(pPortadorModel: TPortadorModel): String;
+    function incluir(pPortadorModel: ITPortadorModel): String;
+    function alterar(pPortadorModel: ITPortadorModel): String;
+    function excluir(pPortadorModel: ITPortadorModel): String;
 
     procedure obterLista;
-    function carregaClasse(pId: String): TPortadorModel;
+    function carregaClasse(pId: String): ITPortadorModel;
     function PortadorTabelaJuros : IFDDataset;
 end;
 implementation
@@ -66,7 +74,7 @@ implementation
 uses
   System.Rtti;
 { TPortador }
-function TPortadorDao.alterar(pPortadorModel: TPortadorModel): String;
+function TPortadorDao.alterar(pPortadorModel: ITPortadorModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -77,62 +85,62 @@ begin
     lQry.SQL.Add(lSQL);
     setParams(lQry, pPortadorModel);
     lQry.ExecSQL;
-    Result := pPortadorModel.CODIGO_PORT;
+    Result := pPortadorModel.objeto.CODIGO_PORT;
   finally
     lSQL := '';
     lQry.Free;
   end;
 end;
 
-function TPortadorDao.carregaClasse(pId: String): TPortadorModel;
+function TPortadorDao.carregaClasse(pId: String): ITPortadorModel;
 var
   lQry: TFDQuery;
-  lModel: TPortadorModel;
+  lModel: ITPortadorModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TPortadorModel.Create(vIConexao);
+  lModel   := TPortadorModel.getNewIface(vIConexao);
   Result   := lModel;
   try
     lQry.Open('select * from portador where codigo_port = '+pId);
     if lQry.IsEmpty then
       Exit;
-    lModel.CODIGO_PORT              := lQry.FieldByName('CODIGO_PORT').AsString;
-    lModel.NOME_PORT                := lQry.FieldByName('NOME_PORT').AsString;
-    lModel.VR_PORT                  := lQry.FieldByName('VR_PORT').AsString;
-    lModel.DESCONTO_PORT            := lQry.FieldByName('DESCONTO_PORT').AsString;
-    lModel.USUARIO_PORT             := lQry.FieldByName('USUARIO_PORT').AsString;
-    lModel.ID                       := lQry.FieldByName('ID').AsString;
-    lModel.TIPO                     := lQry.FieldByName('TIPO').AsString;
-    lModel.CONDICOES_PAG            := lQry.FieldByName('CONDICOES_PAG').AsString;
-    lModel.OBS                      := lQry.FieldByName('OBS').AsString;
-    lModel.RECEITA_CONTA_ID         := lQry.FieldByName('RECEITA_CONTA_ID').AsString;
-    lModel.CUSTO_CONTA_ID           := lQry.FieldByName('CUSTO_CONTA_ID').AsString;
-    lModel.DF_CONTA_ID              := lQry.FieldByName('DF_CONTA_ID').AsString;
-    lModel.RECEBIMENTO_CONTA_ID     := lQry.FieldByName('RECEBIMENTO_CONTA_ID').AsString;
-    lModel.STATUS                   := lQry.FieldByName('STATUS').AsString;
-    lModel.DIA_VENCIMENTO           := lQry.FieldByName('DIA_VENCIMENTO').AsString;
-    lModel.PERCENTUAL_DESPESA_VENDA := lQry.FieldByName('PERCENTUAL_DESPESA_VENDA').AsString;
-    lModel.DIRETO                   := lQry.FieldByName('DIRETO').AsString;
-    lModel.PEDIR_VENCIMENTO         := lQry.FieldByName('PEDIR_VENCIMENTO').AsString;
-    lModel.TELA_RECEBIMENTO         := lQry.FieldByName('TELA_RECEBIMENTO').AsString;
-    lModel.TPAG_NFE                 := lQry.FieldByName('TPAG_NFE').AsString;
-    lModel.CREDITO_CONTA_ID         := lQry.FieldByName('CREDITO_CONTA_ID').AsString;
-    lModel.CONTAGEM                 := lQry.FieldByName('CONTAGEM').AsString;
-    lModel.PERCENTUAL_COMISSAO      := lQry.FieldByName('PERCENTUAL_COMISSAO').AsString;
-    lModel.SITUACAO_CLIENTE         := lQry.FieldByName('SITUACAO_CLIENTE').AsString;
-    lModel.SYSTIME                  := lQry.FieldByName('SYSTIME').AsString;
-    lModel.BANCO_BAIXA_DIRETA       := lQry.FieldByName('BANCO_BAIXA_DIRETA').AsString;
-    lModel.TEF_MODALIDADE           := lQry.FieldByName('TEF_MODALIDADE').AsString;
-    lModel.TEF_PARCELAMENTO         := lQry.FieldByName('TEF_PARCELAMENTO').AsString;
-    lModel.TEF_ADQUIRENTE           := lQry.FieldByName('TEF_ADQUIRENTE').AsString;
-    lModel.PIX_CHAVE                := lQry.FieldByName('PIX_CHAVE').AsString;
-    lModel.XPAG_NFE                 := lQry.FieldByName('XPAG_NFE').AsString;
+    lModel.objeto.CODIGO_PORT              := lQry.FieldByName('CODIGO_PORT').AsString;
+    lModel.objeto.NOME_PORT                := lQry.FieldByName('NOME_PORT').AsString;
+    lModel.objeto.VR_PORT                  := lQry.FieldByName('VR_PORT').AsString;
+    lModel.objeto.DESCONTO_PORT            := lQry.FieldByName('DESCONTO_PORT').AsString;
+    lModel.objeto.USUARIO_PORT             := lQry.FieldByName('USUARIO_PORT').AsString;
+    lModel.objeto.ID                       := lQry.FieldByName('ID').AsString;
+    lModel.objeto.TIPO                     := lQry.FieldByName('TIPO').AsString;
+    lModel.objeto.CONDICOES_PAG            := lQry.FieldByName('CONDICOES_PAG').AsString;
+    lModel.objeto.OBS                      := lQry.FieldByName('OBS').AsString;
+    lModel.objeto.RECEITA_CONTA_ID         := lQry.FieldByName('RECEITA_CONTA_ID').AsString;
+    lModel.objeto.CUSTO_CONTA_ID           := lQry.FieldByName('CUSTO_CONTA_ID').AsString;
+    lModel.objeto.DF_CONTA_ID              := lQry.FieldByName('DF_CONTA_ID').AsString;
+    lModel.objeto.RECEBIMENTO_CONTA_ID     := lQry.FieldByName('RECEBIMENTO_CONTA_ID').AsString;
+    lModel.objeto.STATUS                   := lQry.FieldByName('STATUS').AsString;
+    lModel.objeto.DIA_VENCIMENTO           := lQry.FieldByName('DIA_VENCIMENTO').AsString;
+    lModel.objeto.PERCENTUAL_DESPESA_VENDA := lQry.FieldByName('PERCENTUAL_DESPESA_VENDA').AsString;
+    lModel.objeto.DIRETO                   := lQry.FieldByName('DIRETO').AsString;
+    lModel.objeto.PEDIR_VENCIMENTO         := lQry.FieldByName('PEDIR_VENCIMENTO').AsString;
+    lModel.objeto.TELA_RECEBIMENTO         := lQry.FieldByName('TELA_RECEBIMENTO').AsString;
+    lModel.objeto.TPAG_NFE                 := lQry.FieldByName('TPAG_NFE').AsString;
+    lModel.objeto.CREDITO_CONTA_ID         := lQry.FieldByName('CREDITO_CONTA_ID').AsString;
+    lModel.objeto.CONTAGEM                 := lQry.FieldByName('CONTAGEM').AsString;
+    lModel.objeto.PERCENTUAL_COMISSAO      := lQry.FieldByName('PERCENTUAL_COMISSAO').AsString;
+    lModel.objeto.SITUACAO_CLIENTE         := lQry.FieldByName('SITUACAO_CLIENTE').AsString;
+    lModel.objeto.SYSTIME                  := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.BANCO_BAIXA_DIRETA       := lQry.FieldByName('BANCO_BAIXA_DIRETA').AsString;
+    lModel.objeto.TEF_MODALIDADE           := lQry.FieldByName('TEF_MODALIDADE').AsString;
+    lModel.objeto.TEF_PARCELAMENTO         := lQry.FieldByName('TEF_PARCELAMENTO').AsString;
+    lModel.objeto.TEF_ADQUIRENTE           := lQry.FieldByName('TEF_ADQUIRENTE').AsString;
+    lModel.objeto.PIX_CHAVE                := lQry.FieldByName('PIX_CHAVE').AsString;
+    lModel.objeto.XPAG_NFE                 := lQry.FieldByName('XPAG_NFE').AsString;
     Result := lModel;
   finally
     lQry.Free;
   end;
 end;
-constructor TPortadorDao.Create(pIConexao : IConexao);
+constructor TPortadorDao._Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -144,21 +152,27 @@ begin
   vIConexao := nil;
   inherited;
 end;
-function TPortadorDao.excluir(pPortadorModel: TPortadorModel): String;
+function TPortadorDao.excluir(pPortadorModel: ITPortadorModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
   try
-   lQry.ExecSQL('delete from portador where CODIGO_PORT = :CODIGO_PORT',[pPortadorModel.CODIGO_PORT]);
+   lQry.ExecSQL('delete from portador where CODIGO_PORT = :CODIGO_PORT',[pPortadorModel.objeto.CODIGO_PORT]);
    lQry.ExecSQL;
-   Result := pPortadorModel.CODIGO_PORT;
+   Result := pPortadorModel.objeto.CODIGO_PORT;
   finally
     lQry.Free;
   end;
 end;
 
-function TPortadorDao.incluir(pPortadorModel: TPortadorModel): String;
+class function TPortadorDao.getNewIface(pIConexao: IConexao): ITPortadorDao;
+begin
+  Result := TImplObjetoOwner<TPortadorDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TPortadorDao.incluir(pPortadorModel: ITPortadorModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -167,7 +181,7 @@ begin
   lSQL := vConstrutor.gerarInsert('PORTADOR', 'CODIGO_PORT');
   try
     lQry.SQL.Add(lSQL);
-    pPortadorModel.CODIGO_PORT := vIConexao.Generetor('GEN_PORTADOR');
+    pPortadorModel.objeto.CODIGO_PORT := vIConexao.Generetor('GEN_PORTADOR');
     setParams(lQry, pPortadorModel);
     lQry.Open;
     Result := lQry.FieldByName('CODIGO_PORT').AsString;
@@ -249,10 +263,10 @@ procedure TPortadorDao.obterLista;
 var
   lQry : TFDQuery;
   lSQL : String;
-  modelo: TPortadorModel;
+  modelo: ITPortadorModel;
 begin
   lQry := vIConexao.CriarQuery;
-  FPortadorsLista := TCollections.CreateList<TPortadorModel>(true);
+  FPortadorsLista := TCollections.CreateList<ITPortadorModel>;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -280,14 +294,14 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TPortadorModel.Create(vIConexao);
+      modelo := TPortadorModel.getNewIface(vIConexao);
       FPortadorsLista.Add(modelo);
-      modelo.CODIGO_PORT            := lQry.FieldByName('CODIGO_PORT').AsString;
-      modelo.BANCO_BAIXA_DIRETA     := lQry.FieldByName('BANCO_BAIXA_DIRETA').AsString;
-      modelo.RECEITA_CONTA_ID       := lQry.FieldByName('RECEITA_CONTA_ID').AsString;
-      modelo.NOME_PORT              := lQry.FieldByName('NOME_PORT').AsString;
-      modelo.TPAG_NFE               := lQry.FieldByName('TPAG_NFE').AsString;
-      modelo.PER_SEGURO_PRESTAMISTA := lQry.FieldByName('PER_SEGURO_PRESTAMISTA').AsFloat;
+      modelo.objeto.CODIGO_PORT            := lQry.FieldByName('CODIGO_PORT').AsString;
+      modelo.objeto.BANCO_BAIXA_DIRETA     := lQry.FieldByName('BANCO_BAIXA_DIRETA').AsString;
+      modelo.objeto.RECEITA_CONTA_ID       := lQry.FieldByName('RECEITA_CONTA_ID').AsString;
+      modelo.objeto.NOME_PORT              := lQry.FieldByName('NOME_PORT').AsString;
+      modelo.objeto.TPAG_NFE               := lQry.FieldByName('TPAG_NFE').AsString;
+      modelo.objeto.PER_SEGURO_PRESTAMISTA := lQry.FieldByName('PER_SEGURO_PRESTAMISTA').AsFloat;
 
       lQry.Next;
     end;
@@ -328,7 +342,7 @@ begin
   FOrderView := Value;
 end;
 
-procedure TPortadorDao.setParams(var pQry: TFDQuery; pPortadorModel: TPortadorModel);
+procedure TPortadorDao.setParams(var pQry: TFDQuery; pPortadorModel: ITPortadorModel);
 var
   lTabela : IFDDataset;
   lCtx    : TRttiContext;
@@ -345,7 +359,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPortadorModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPortadorModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPortadorModel.objeto).AsString))
     end;
   finally
     lCtx.Free;

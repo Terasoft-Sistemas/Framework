@@ -163,14 +163,14 @@ end;
 
 function TContagemFechamentoModel.obterContagem(pIdAberturaCaixa: String): IFDDataset;
 var
-  lPortadorModel   : TPortadorModel;
+  lPortadorModel   : ITPortadorModel;
   lAdmCartaoModel  : ITAdmCartaoModel;
   lMemTable        : IFDDataset;
   lMemTableGerada  : IFDDataset;
   lLocate          : Boolean;
 
 begin
-  lPortadorModel   := TPortadorModel.Create(vIConexao);
+  lPortadorModel   := TPortadorModel.getNewIface(vIConexao);
   lAdmCartaoModel  := TAdmCartaoModel.getNewIface(vIConexao);
   lMemTable        := TImplObjetoOwner<TDataset>.CreateOwner(TFDMemTable.Create(nil));
   lMemTableGerada  := TImplObjetoOwner<TDataset>.CreateOwner(TFDMemTable.Create(nil));
@@ -193,18 +193,18 @@ begin
       CreateDataSet;
     end;
 
-    lPortadorModel.WhereView := ' and coalesce(portador.contagem,''S'') = ''S''                                               '+
+    lPortadorModel.objeto.WhereView := ' and coalesce(portador.contagem,''S'') = ''S''                                               '+
                                 ' and coalesce(portador.status,''A'')   = ''A''                                               '+
                                 ' and (select count(*) from admcartao where admcartao.portador_id = portador.codigo_port) = 0 ';
 
-    lPortadorModel.obterLista;
+    lPortadorModel.objeto.obterLista;
 
-    for lPortadorModel in lPortadorModel.PortadorsLista do
+    for lPortadorModel in lPortadorModel.objeto.PortadorsLista do
     begin
       lMemTable.objeto.InsertRecord([
                               'P',
-                              lPortadorModel.CODIGO_PORT,
-                              lPortadorModel.NOME_PORT,
+                              lPortadorModel.objeto.CODIGO_PORT,
+                              lPortadorModel.objeto.NOME_PORT,
                               0
                              ]);
 
@@ -251,7 +251,7 @@ begin
 
     Result := lMemTable;
   finally
-    lPortadorModel.Free;
+    lPortadorModel:=nil;
     lAdmCartaoModel:=nil;
   end;
 
