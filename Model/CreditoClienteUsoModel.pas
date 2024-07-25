@@ -4,7 +4,7 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Spring.Collections,
   Interfaces.Conexao;
 
 type
@@ -12,7 +12,7 @@ type
 
   private
     vIConexao : IConexao;
-    FCreditoClienteUsosLista: TObjectList<TCreditoClienteUsoModel>;
+    FCreditoClienteUsosLista: IList<TCreditoClienteUsoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -33,7 +33,7 @@ type
     FCREDITO_CLIENTE_ID: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetCreditoClienteUsosLista(const Value: TObjectList<TCreditoClienteUsoModel>);
+    procedure SetCreditoClienteUsosLista(const Value: IList<TCreditoClienteUsoModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -71,7 +71,7 @@ type
     function carregaClasse(pID : String) : TCreditoClienteUsoModel;
     procedure obterLista;
 
-    property CreditoClienteUsosLista: TObjectList<TCreditoClienteUsoModel> read FCreditoClienteUsosLista write SetCreditoClienteUsosLista;
+    property CreditoClienteUsosLista: IList<TCreditoClienteUsoModel> read FCreditoClienteUsosLista write SetCreditoClienteUsosLista;
 
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -125,7 +125,8 @@ end;
 
 destructor TCreditoClienteUsoModel.Destroy;
 begin
-
+  FCreditoClienteUsosLista:=nil;
+  vIConexao:=nil;
   inherited;
 end;
 
@@ -197,7 +198,7 @@ begin
   FCountView := Value;
 end;
 
-procedure TCreditoClienteUsoModel.SetCreditoClienteUsosLista(const Value: TObjectList<TCreditoClienteUsoModel>);
+procedure TCreditoClienteUsoModel.SetCreditoClienteUsosLista;
 begin
   FCreditoClienteUsosLista := Value;
 end;

@@ -4,15 +4,16 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
-  Interfaces.Conexao, FireDAC.Comp.Client;
+  Spring.Collections,
+  Interfaces.Conexao,
+  FireDAC.Comp.Client;
 
 type
   TMovimentoModel = class
 
   private
     vIConexao : IConexao;
-    FMovimentosLista: TObjectList<TMovimentoModel>;
+    FMovimentosLista: IList<TMovimentoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -45,7 +46,7 @@ type
     FDataInicialView: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetMovimentosLista(const Value: TObjectList<TMovimentoModel>);
+    procedure SetMovimentosLista(const Value: IList<TMovimentoModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -105,7 +106,7 @@ type
     function carregaClasse(pId: String): TMovimentoModel;
     function obterListaMemTable : IFDDataset;
 
-    property MovimentosLista: TObjectList<TMovimentoModel> read FMovimentosLista write SetMovimentosLista;
+    property MovimentosLista: IList<TMovimentoModel> read FMovimentosLista write SetMovimentosLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -145,7 +146,8 @@ end;
 
 destructor TMovimentoModel.Destroy;
 begin
-
+  FMovimentosLista:=nil;
+  vIConexao:=nil;
   inherited;
 end;
 
@@ -276,7 +278,7 @@ begin
   FDOCUMENTO_MOV := Value;
 end;
 
-procedure TMovimentoModel.SetMovimentosLista(const Value: TObjectList<TMovimentoModel>);
+procedure TMovimentoModel.SetMovimentosLista;
 begin
   FMovimentosLista := Value;
 end;
