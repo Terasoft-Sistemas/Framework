@@ -8,7 +8,7 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  Spring.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
   Terasoft.Utils,
@@ -21,7 +21,7 @@ type
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FMovimentosLista: TObjectList<TMovimentoModel>;
+    FMovimentosLista: IList<TMovimentoModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -35,7 +35,7 @@ type
     FDataInicialView: Variant;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetMovimentosLista(const Value: TObjectList<TMovimentoModel>);
+    procedure SetMovimentosLista(const Value: IList<TMovimentoModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -53,7 +53,7 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property MovimentosLista: TObjectList<TMovimentoModel> read FMovimentosLista write SetMovimentosLista;
+    property MovimentosLista: IList<TMovimentoModel> read FMovimentosLista write SetMovimentosLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -134,6 +134,7 @@ end;
 
 destructor TMovimentoDao.Destroy;
 begin
+  FMovimentosLista:=nil;
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
@@ -244,11 +245,11 @@ procedure TMovimentoDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: TMovimentoModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FMovimentosLista := TObjectList<TMovimentoModel>.Create;
+  FMovimentosLista := TCollections.CreateList<TMovimentoModel>(true);
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -268,33 +269,31 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FMovimentosLista.Add(TMovimentoModel.Create(vIConexao));
+      modelo := TMovimentoModel.Create(vIConexao);
+      FMovimentosLista.Add(modelo);
 
-      i := FMovimentosLista.Count -1;
-
-      FMovimentosLista[i].DOCUMENTO_MOV   := lQry.FieldByName('DOCUMENTO_MOV').AsString;
-      FMovimentosLista[i].CODIGO_PRO      := lQry.FieldByName('CODIGO_PRO').AsString;
-      FMovimentosLista[i].CODIGO_FOR      := lQry.FieldByName('CODIGO_FOR').AsString;
-      FMovimentosLista[i].OBS_MOV         := lQry.FieldByName('OBS_MOV').AsString;
-      FMovimentosLista[i].TIPO_DOC        := lQry.FieldByName('TIPO_DOC').AsString;
-      FMovimentosLista[i].DATA_MOV        := lQry.FieldByName('DATA_MOV').AsString;
-      FMovimentosLista[i].DATA_DOC        := lQry.FieldByName('DATA_DOC').AsString;
-      FMovimentosLista[i].QUANTIDADE_MOV  := lQry.FieldByName('QUANTIDADE_MOV').AsString;
-      FMovimentosLista[i].VALOR_MOV       := lQry.FieldByName('VALOR_MOV').AsString;
-      FMovimentosLista[i].CUSTO_ATUAL     := lQry.FieldByName('CUSTO_ATUAL').AsString;
-      FMovimentosLista[i].VENDA_ATUAL     := lQry.FieldByName('VENDA_ATUAL').AsString;
-      FMovimentosLista[i].STATUS          := lQry.FieldByName('STATUS').AsString;
-      FMovimentosLista[i].LOJA            := lQry.FieldByName('LOJA').AsString;
-      FMovimentosLista[i].ID              := lQry.FieldByName('ID').AsString;
-      FMovimentosLista[i].USUARIO_ID      := lQry.FieldByName('USUARIO_ID').AsString;
-      FMovimentosLista[i].DATAHORA        := lQry.FieldByName('DATAHORA').AsString;
-      FMovimentosLista[i].SYSTIME         := lQry.FieldByName('SYSTIME').AsString;
-      FMovimentosLista[i].TABELA_ORIGEM   := lQry.FieldByName('TABELA_ORIGEM').AsString;
-      FMovimentosLista[i].ID_ORIGEM       := lQry.FieldByName('ID_ORIGEM').AsString;
+      modelo.DOCUMENTO_MOV   := lQry.FieldByName('DOCUMENTO_MOV').AsString;
+      modelo.CODIGO_PRO      := lQry.FieldByName('CODIGO_PRO').AsString;
+      modelo.CODIGO_FOR      := lQry.FieldByName('CODIGO_FOR').AsString;
+      modelo.OBS_MOV         := lQry.FieldByName('OBS_MOV').AsString;
+      modelo.TIPO_DOC        := lQry.FieldByName('TIPO_DOC').AsString;
+      modelo.DATA_MOV        := lQry.FieldByName('DATA_MOV').AsString;
+      modelo.DATA_DOC        := lQry.FieldByName('DATA_DOC').AsString;
+      modelo.QUANTIDADE_MOV  := lQry.FieldByName('QUANTIDADE_MOV').AsString;
+      modelo.VALOR_MOV       := lQry.FieldByName('VALOR_MOV').AsString;
+      modelo.CUSTO_ATUAL     := lQry.FieldByName('CUSTO_ATUAL').AsString;
+      modelo.VENDA_ATUAL     := lQry.FieldByName('VENDA_ATUAL').AsString;
+      modelo.STATUS          := lQry.FieldByName('STATUS').AsString;
+      modelo.LOJA            := lQry.FieldByName('LOJA').AsString;
+      modelo.ID              := lQry.FieldByName('ID').AsString;
+      modelo.USUARIO_ID      := lQry.FieldByName('USUARIO_ID').AsString;
+      modelo.DATAHORA        := lQry.FieldByName('DATAHORA').AsString;
+      modelo.SYSTIME         := lQry.FieldByName('SYSTIME').AsString;
+      modelo.TABELA_ORIGEM   := lQry.FieldByName('TABELA_ORIGEM').AsString;
+      modelo.ID_ORIGEM       := lQry.FieldByName('ID_ORIGEM').AsString;
 
       lQry.Next;
     end;
@@ -361,7 +360,7 @@ begin
   FDataInicialView := Value;
 end;
 
-procedure TMovimentoDao.SetMovimentosLista(const Value: TObjectList<TMovimentoModel>);
+procedure TMovimentoDao.SetMovimentosLista;
 begin
   FMovimentosLista := Value;
 end;
