@@ -7,22 +7,27 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
   Terasoft.ConstrutorDao,
+  Terasoft.Framework.ObjectIface,
   Terasoft.Utils,
+
   Spring.Collections,
   Interfaces.Conexao;
 
 type
-  TContaCorrenteDao = class
+  TContaCorrenteDao = class;
 
+  ITContaCorrenteDao = IObject<TContaCorrenteDao>;
+
+  TContaCorrenteDao = class
   private
+    [weak] mySelf: ITContaCorrenteDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FContaCorrentesLista: IList<TContaCorrenteModel>;
+    FContaCorrentesLista: IList<ITContaCorrenteModel>;
     FLengthPageView: String;
     FStartRecordView: String;
     FID: Variant;
@@ -35,7 +40,7 @@ type
     FSaldo: Real;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetContaCorrentesLista(const Value: IList<TContaCorrenteModel>);
+    procedure SetContaCorrentesLista(const Value: IList<ITContaCorrenteModel>);
     procedure SetID(const Value: Variant);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -49,10 +54,12 @@ type
     procedure SetSaldo(const Value: Real);
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property ContaCorrentesLista: IList<TContaCorrenteModel> read FContaCorrentesLista write SetContaCorrentesLista;
+    class function getNewIface(pIConexao: IConexao): ITContaCorrenteDao;
+
+    property ContaCorrentesLista: IList<ITContaCorrenteModel> read FContaCorrentesLista write SetContaCorrentesLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -63,15 +70,15 @@ type
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
     property IDBancoView: String read FIDBancoView write setIDBancoView;
     property Saldo: Real read FSaldo write SetSaldo;
-    function incluir(AContaCorrenteModel: TContaCorrenteModel): String;
-    function alterar(AContaCorrenteModel: TContaCorrenteModel): String;
-    function excluir(AContaCorrenteModel: TContaCorrenteModel): String;
+    function incluir(AContaCorrenteModel: ITContaCorrenteModel): String;
+    function alterar(AContaCorrenteModel: ITContaCorrenteModel): String;
+    function excluir(AContaCorrenteModel: ITContaCorrenteModel): String;
 
     procedure obterSaldo(pLoja: String);
     procedure obterLista;
-    function carregaClasse(pId: String): TContaCorrenteModel;
+    function carregaClasse(pId: String): ITContaCorrenteModel;
 
-    procedure setParams(var pQry: TFDQuery; pContaCorrenteModel: TContaCorrenteModel);
+    procedure setParams(var pQry: TFDQuery; pContaCorrenteModel: ITContaCorrenteModel);
 
 end;
 
@@ -83,13 +90,13 @@ uses
 { TContaCorrente }
 
 
-function TContaCorrenteDao.carregaClasse(pId: String): TContaCorrenteModel;
+function TContaCorrenteDao.carregaClasse(pId: String): ITContaCorrenteModel;
 var
   lQry: TFDQuery;
-  lModel: TContaCorrenteModel;
+  lModel: ITContaCorrenteModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TContaCorrenteModel.Create(vIConexao);
+  lModel   := TContaCorrenteModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -98,44 +105,44 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.NUMERO_COR            := lQry.FieldByName('NUMERO_COR').AsString;
-    lModel.DATA_COR              := lQry.FieldByName('DATA_COR').AsString;
-    lModel.HORA_COR              := lQry.FieldByName('HORA_COR').AsString;
-    lModel.CODIGO_CTA            := lQry.FieldByName('CODIGO_CTA').AsString;
-    lModel.CODIGO_BAN            := lQry.FieldByName('CODIGO_BAN').AsString;
-    lModel.OBSERVACAO_COR        := lQry.FieldByName('OBSERVACAO_COR').AsString;
-    lModel.VALOR_COR             := lQry.FieldByName('VALOR_COR').AsString;
-    lModel.TIPO_CTA              := lQry.FieldByName('TIPO_CTA').AsString;
-    lModel.STATUS                := lQry.FieldByName('STATUS').AsString;
-    lModel.CONCILIADO_COR        := lQry.FieldByName('CONCILIADO_COR').AsString;
-    lModel.DATA_CON              := lQry.FieldByName('DATA_CON').AsString;
-    lModel.CLIENTE_COR           := lQry.FieldByName('CLIENTE_COR').AsString;
-    lModel.FATURA_COR            := lQry.FieldByName('FATURA_COR').AsString;
-    lModel.PARCELA_COR           := lQry.FieldByName('PARCELA_COR').AsString;
-    lModel.CENTRO_CUSTO          := lQry.FieldByName('CENTRO_CUSTO').AsString;
-    lModel.LOJA                  := lQry.FieldByName('LOJA').AsString;
-    lModel.NUMERO_CHQ            := lQry.FieldByName('NUMERO_CHQ').AsString;
-    lModel.DR                    := lQry.FieldByName('DR').AsString;
-    lModel.ID                    := lQry.FieldByName('ID').AsString;
-    lModel.PORTADOR_COR          := lQry.FieldByName('PORTADOR_COR').AsString;
-    lModel.TROCO                 := lQry.FieldByName('TROCO').AsString;
-    lModel.USUARIO_COR           := lQry.FieldByName('USUARIO_COR').AsString;
-    lModel.TIPO                  := lQry.FieldByName('TIPO').AsString;
-    lModel.SUB_ID                := lQry.FieldByName('SUB_ID').AsString;
-    lModel.LOCACAO_ID            := lQry.FieldByName('LOCACAO_ID').AsString;
-    lModel.EMPRESTIMO_RECEBER_ID := lQry.FieldByName('EMPRESTIMO_RECEBER_ID').AsString;
-    lModel.FUNCIONARIO_ID        := lQry.FieldByName('FUNCIONARIO_ID').AsString;
-    lModel.OS_NEW_ID             := lQry.FieldByName('OS_NEW_ID').AsString;
-    lModel.CONCILIACAO_ID        := lQry.FieldByName('CONCILIACAO_ID').AsString;
-    lModel.PLACA                 := lQry.FieldByName('PLACA').AsString;
-    lModel.TRANSFERENCIA_ORIGEM  := lQry.FieldByName('TRANSFERENCIA_ORIGEM').AsString;
-    lModel.TRANSFERENCIA_ID      := lQry.FieldByName('TRANSFERENCIA_ID').AsString;
-    lModel.COMPETENCIA           := lQry.FieldByName('COMPETENCIA').AsString;
-    lModel.SYSTIME               := lQry.FieldByName('SYSTIME').AsString;
-    lModel.PAGARME_LOTE          := lQry.FieldByName('PAGARME_LOTE').AsString;
-    lModel.LOJA_REMOTO           := lQry.FieldByName('LOJA_REMOTO').AsString;
-    lModel.PEDIDO_ID             := lQry.FieldByName('PEDIDO_ID').AsString;
-    lModel.IUGU_ID               := lQry.FieldByName('IUGU_ID').AsString;
+    lModel.objeto.NUMERO_COR            := lQry.FieldByName('NUMERO_COR').AsString;
+    lModel.objeto.DATA_COR              := lQry.FieldByName('DATA_COR').AsString;
+    lModel.objeto.HORA_COR              := lQry.FieldByName('HORA_COR').AsString;
+    lModel.objeto.CODIGO_CTA            := lQry.FieldByName('CODIGO_CTA').AsString;
+    lModel.objeto.CODIGO_BAN            := lQry.FieldByName('CODIGO_BAN').AsString;
+    lModel.objeto.OBSERVACAO_COR        := lQry.FieldByName('OBSERVACAO_COR').AsString;
+    lModel.objeto.VALOR_COR             := lQry.FieldByName('VALOR_COR').AsString;
+    lModel.objeto.TIPO_CTA              := lQry.FieldByName('TIPO_CTA').AsString;
+    lModel.objeto.STATUS                := lQry.FieldByName('STATUS').AsString;
+    lModel.objeto.CONCILIADO_COR        := lQry.FieldByName('CONCILIADO_COR').AsString;
+    lModel.objeto.DATA_CON              := lQry.FieldByName('DATA_CON').AsString;
+    lModel.objeto.CLIENTE_COR           := lQry.FieldByName('CLIENTE_COR').AsString;
+    lModel.objeto.FATURA_COR            := lQry.FieldByName('FATURA_COR').AsString;
+    lModel.objeto.PARCELA_COR           := lQry.FieldByName('PARCELA_COR').AsString;
+    lModel.objeto.CENTRO_CUSTO          := lQry.FieldByName('CENTRO_CUSTO').AsString;
+    lModel.objeto.LOJA                  := lQry.FieldByName('LOJA').AsString;
+    lModel.objeto.NUMERO_CHQ            := lQry.FieldByName('NUMERO_CHQ').AsString;
+    lModel.objeto.DR                    := lQry.FieldByName('DR').AsString;
+    lModel.objeto.ID                    := lQry.FieldByName('ID').AsString;
+    lModel.objeto.PORTADOR_COR          := lQry.FieldByName('PORTADOR_COR').AsString;
+    lModel.objeto.TROCO                 := lQry.FieldByName('TROCO').AsString;
+    lModel.objeto.USUARIO_COR           := lQry.FieldByName('USUARIO_COR').AsString;
+    lModel.objeto.TIPO                  := lQry.FieldByName('TIPO').AsString;
+    lModel.objeto.SUB_ID                := lQry.FieldByName('SUB_ID').AsString;
+    lModel.objeto.LOCACAO_ID            := lQry.FieldByName('LOCACAO_ID').AsString;
+    lModel.objeto.EMPRESTIMO_RECEBER_ID := lQry.FieldByName('EMPRESTIMO_RECEBER_ID').AsString;
+    lModel.objeto.FUNCIONARIO_ID        := lQry.FieldByName('FUNCIONARIO_ID').AsString;
+    lModel.objeto.OS_NEW_ID             := lQry.FieldByName('OS_NEW_ID').AsString;
+    lModel.objeto.CONCILIACAO_ID        := lQry.FieldByName('CONCILIACAO_ID').AsString;
+    lModel.objeto.PLACA                 := lQry.FieldByName('PLACA').AsString;
+    lModel.objeto.TRANSFERENCIA_ORIGEM  := lQry.FieldByName('TRANSFERENCIA_ORIGEM').AsString;
+    lModel.objeto.TRANSFERENCIA_ID      := lQry.FieldByName('TRANSFERENCIA_ID').AsString;
+    lModel.objeto.COMPETENCIA           := lQry.FieldByName('COMPETENCIA').AsString;
+    lModel.objeto.SYSTIME               := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.PAGARME_LOTE          := lQry.FieldByName('PAGARME_LOTE').AsString;
+    lModel.objeto.LOJA_REMOTO           := lQry.FieldByName('LOJA_REMOTO').AsString;
+    lModel.objeto.PEDIDO_ID             := lQry.FieldByName('PEDIDO_ID').AsString;
+    lModel.objeto.IUGU_ID               := lQry.FieldByName('IUGU_ID').AsString;
 
     Result := lModel;
 
@@ -144,7 +151,7 @@ begin
   end;
 end;
 
-constructor TContaCorrenteDao.Create(pIConexao : IConexao);
+constructor TContaCorrenteDao._Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -158,7 +165,7 @@ begin
   inherited;
 end;
 
-function TContaCorrenteDao.incluir(AContaCorrenteModel: TContaCorrenteModel): String;
+function TContaCorrenteDao.incluir(AContaCorrenteModel: ITContaCorrenteModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -169,7 +176,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    AContaCorrenteModel.NUMERO_COR := vIConexao.Generetor('GEN_CONTACORRENTE');
+    AContaCorrenteModel.objeto.NUMERO_COR := vIConexao.Generetor('GEN_CONTACORRENTE');
     setParams(lQry, AContaCorrenteModel);
     lQry.Open;
 
@@ -181,7 +188,7 @@ begin
   end;
 end;
 
-function TContaCorrenteDao.alterar(AContaCorrenteModel: TContaCorrenteModel): String;
+function TContaCorrenteDao.alterar(AContaCorrenteModel: ITContaCorrenteModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -195,7 +202,7 @@ begin
     setParams(lQry, AContaCorrenteModel);
     lQry.ExecSQL;
 
-    Result := AContaCorrenteModel.NUMERO_COR;
+    Result := AContaCorrenteModel.objeto.NUMERO_COR;
 
   finally
     lSQL := '';
@@ -203,20 +210,26 @@ begin
   end;
 end;
 
-function TContaCorrenteDao.excluir(AContaCorrenteModel: TContaCorrenteModel): String;
+function TContaCorrenteDao.excluir(AContaCorrenteModel: ITContaCorrenteModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from CONTACORRENTE where NUMERO_COR = :NUMERO_COR',[AContaCorrenteModel.NUMERO_COR]);
+   lQry.ExecSQL('delete from CONTACORRENTE where NUMERO_COR = :NUMERO_COR',[AContaCorrenteModel.objeto.NUMERO_COR]);
    lQry.ExecSQL;
-   Result := AContaCorrenteModel.ID;
+   Result := AContaCorrenteModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TContaCorrenteDao.getNewIface(pIConexao: IConexao): ITContaCorrenteDao;
+begin
+  Result := TImplObjetoOwner<TContaCorrenteDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TContaCorrenteDao.where: String;
@@ -259,11 +272,11 @@ procedure TContaCorrenteDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TContaCorrenteModel;
+  modelo: ITContaCorrenteModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FContaCorrentesLista := TCollections.CreateList<TContaCorrenteModel>(true);;
+  FContaCorrentesLista := TCollections.CreateList<ITContaCorrenteModel>;;
 
   try
 
@@ -287,47 +300,47 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TContaCorrenteModel.Create(vIConexao);
+      modelo := TContaCorrenteModel.getNewIface(vIConexao);
       FContaCorrentesLista.Add(modelo);
 
-      modelo.NUMERO_COR            := lQry.FieldByName('NUMERO_COR').AsString;
-      modelo.DATA_COR              := lQry.FieldByName('DATA_COR').AsString;
-      modelo.HORA_COR              := lQry.FieldByName('HORA_COR').AsString;
-      modelo.CODIGO_CTA            := lQry.FieldByName('CODIGO_CTA').AsString;
-      modelo.CODIGO_BAN            := lQry.FieldByName('CODIGO_BAN').AsString;
-      modelo.OBSERVACAO_COR        := lQry.FieldByName('OBSERVACAO_COR').AsString;
-      modelo.VALOR_COR             := lQry.FieldByName('VALOR_COR').AsString;
-      modelo.TIPO_CTA              := lQry.FieldByName('TIPO_CTA').AsString;
-      modelo.STATUS                := lQry.FieldByName('STATUS').AsString;
-      modelo.CONCILIADO_COR        := lQry.FieldByName('CONCILIADO_COR').AsString;
-      modelo.DATA_CON              := lQry.FieldByName('DATA_CON').AsString;
-      modelo.CLIENTE_COR           := lQry.FieldByName('CLIENTE_COR').AsString;
-      modelo.FATURA_COR            := lQry.FieldByName('FATURA_COR').AsString;
-      modelo.PARCELA_COR           := lQry.FieldByName('PARCELA_COR').AsString;
-      modelo.CENTRO_CUSTO          := lQry.FieldByName('CENTRO_CUSTO').AsString;
-      modelo.LOJA                  := lQry.FieldByName('LOJA').AsString;
-      modelo.NUMERO_CHQ            := lQry.FieldByName('NUMERO_CHQ').AsString;
-      modelo.DR                    := lQry.FieldByName('DR').AsString;
-      modelo.ID                    := lQry.FieldByName('ID').AsString;
-      modelo.PORTADOR_COR          := lQry.FieldByName('PORTADOR_COR').AsString;
-      modelo.TROCO                 := lQry.FieldByName('TROCO').AsString;
-      modelo.USUARIO_COR           := lQry.FieldByName('USUARIO_COR').AsString;
-      modelo.TIPO                  := lQry.FieldByName('TIPO').AsString;
-      modelo.SUB_ID                := lQry.FieldByName('SUB_ID').AsString;
-      modelo.LOCACAO_ID            := lQry.FieldByName('LOCACAO_ID').AsString;
-      modelo.EMPRESTIMO_RECEBER_ID := lQry.FieldByName('EMPRESTIMO_RECEBER_ID').AsString;
-      modelo.FUNCIONARIO_ID        := lQry.FieldByName('FUNCIONARIO_ID').AsString;
-      modelo.OS_NEW_ID             := lQry.FieldByName('OS_NEW_ID').AsString;
-      modelo.CONCILIACAO_ID        := lQry.FieldByName('CONCILIACAO_ID').AsString;
-      modelo.PLACA                 := lQry.FieldByName('PLACA').AsString;
-      modelo.TRANSFERENCIA_ORIGEM  := lQry.FieldByName('TRANSFERENCIA_ORIGEM').AsString;
-      modelo.TRANSFERENCIA_ID      := lQry.FieldByName('TRANSFERENCIA_ID').AsString;
-      modelo.COMPETENCIA           := lQry.FieldByName('COMPETENCIA').AsString;
-      modelo.SYSTIME               := lQry.FieldByName('SYSTIME').AsString;
-      modelo.PAGARME_LOTE          := lQry.FieldByName('PAGARME_LOTE').AsString;
-      modelo.LOJA_REMOTO           := lQry.FieldByName('LOJA_REMOTO').AsString;
-      modelo.PEDIDO_ID             := lQry.FieldByName('PEDIDO_ID').AsString;
-      modelo.IUGU_ID               := lQry.FieldByName('IUGU_ID').AsString;
+      modelo.objeto.NUMERO_COR            := lQry.FieldByName('NUMERO_COR').AsString;
+      modelo.objeto.DATA_COR              := lQry.FieldByName('DATA_COR').AsString;
+      modelo.objeto.HORA_COR              := lQry.FieldByName('HORA_COR').AsString;
+      modelo.objeto.CODIGO_CTA            := lQry.FieldByName('CODIGO_CTA').AsString;
+      modelo.objeto.CODIGO_BAN            := lQry.FieldByName('CODIGO_BAN').AsString;
+      modelo.objeto.OBSERVACAO_COR        := lQry.FieldByName('OBSERVACAO_COR').AsString;
+      modelo.objeto.VALOR_COR             := lQry.FieldByName('VALOR_COR').AsString;
+      modelo.objeto.TIPO_CTA              := lQry.FieldByName('TIPO_CTA').AsString;
+      modelo.objeto.STATUS                := lQry.FieldByName('STATUS').AsString;
+      modelo.objeto.CONCILIADO_COR        := lQry.FieldByName('CONCILIADO_COR').AsString;
+      modelo.objeto.DATA_CON              := lQry.FieldByName('DATA_CON').AsString;
+      modelo.objeto.CLIENTE_COR           := lQry.FieldByName('CLIENTE_COR').AsString;
+      modelo.objeto.FATURA_COR            := lQry.FieldByName('FATURA_COR').AsString;
+      modelo.objeto.PARCELA_COR           := lQry.FieldByName('PARCELA_COR').AsString;
+      modelo.objeto.CENTRO_CUSTO          := lQry.FieldByName('CENTRO_CUSTO').AsString;
+      modelo.objeto.LOJA                  := lQry.FieldByName('LOJA').AsString;
+      modelo.objeto.NUMERO_CHQ            := lQry.FieldByName('NUMERO_CHQ').AsString;
+      modelo.objeto.DR                    := lQry.FieldByName('DR').AsString;
+      modelo.objeto.ID                    := lQry.FieldByName('ID').AsString;
+      modelo.objeto.PORTADOR_COR          := lQry.FieldByName('PORTADOR_COR').AsString;
+      modelo.objeto.TROCO                 := lQry.FieldByName('TROCO').AsString;
+      modelo.objeto.USUARIO_COR           := lQry.FieldByName('USUARIO_COR').AsString;
+      modelo.objeto.TIPO                  := lQry.FieldByName('TIPO').AsString;
+      modelo.objeto.SUB_ID                := lQry.FieldByName('SUB_ID').AsString;
+      modelo.objeto.LOCACAO_ID            := lQry.FieldByName('LOCACAO_ID').AsString;
+      modelo.objeto.EMPRESTIMO_RECEBER_ID := lQry.FieldByName('EMPRESTIMO_RECEBER_ID').AsString;
+      modelo.objeto.FUNCIONARIO_ID        := lQry.FieldByName('FUNCIONARIO_ID').AsString;
+      modelo.objeto.OS_NEW_ID             := lQry.FieldByName('OS_NEW_ID').AsString;
+      modelo.objeto.CONCILIACAO_ID        := lQry.FieldByName('CONCILIACAO_ID').AsString;
+      modelo.objeto.PLACA                 := lQry.FieldByName('PLACA').AsString;
+      modelo.objeto.TRANSFERENCIA_ORIGEM  := lQry.FieldByName('TRANSFERENCIA_ORIGEM').AsString;
+      modelo.objeto.TRANSFERENCIA_ID      := lQry.FieldByName('TRANSFERENCIA_ID').AsString;
+      modelo.objeto.COMPETENCIA           := lQry.FieldByName('COMPETENCIA').AsString;
+      modelo.objeto.SYSTIME               := lQry.FieldByName('SYSTIME').AsString;
+      modelo.objeto.PAGARME_LOTE          := lQry.FieldByName('PAGARME_LOTE').AsString;
+      modelo.objeto.LOJA_REMOTO           := lQry.FieldByName('LOJA_REMOTO').AsString;
+      modelo.objeto.PEDIDO_ID             := lQry.FieldByName('PEDIDO_ID').AsString;
+      modelo.objeto.IUGU_ID               := lQry.FieldByName('IUGU_ID').AsString;
 
       lQry.Next;
     end;
@@ -408,7 +421,7 @@ begin
   FOrderView := Value;
 end;
 
-procedure TContaCorrenteDao.setParams(var pQry: TFDQuery; pContaCorrenteModel: TContaCorrenteModel);
+procedure TContaCorrenteDao.setParams(var pQry: TFDQuery; pContaCorrenteModel: ITContaCorrenteModel);
 var
   lTabela : IFDDataset;
   lCtx    : TRttiContext;
@@ -424,7 +437,7 @@ begin
       lProp := lCtx.GetType(TContaCorrenteModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pContaCorrenteModel).AsString = '',
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pContaCorrenteModel.objeto).AsString = '',
         Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pContaCorrenteModel).AsString))
     end;
   finally

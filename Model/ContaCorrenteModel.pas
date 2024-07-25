@@ -4,16 +4,20 @@ interface
 
 uses
   Terasoft.Types,
-  System.Generics.Collections,
+  Terasoft.Framework.ObjectIface,
   Spring.Collections,
   Interfaces.Conexao;
 
 type
-  TContaCorrenteModel = class
+  TContaCorrenteModel = class;
 
+  ITContaCorrenteModel = IObject<TContaCorrenteModel>;
+
+  TContaCorrenteModel = class
   private
+    [weak] mySelf: ITContaCorrenteModel;
     vIConexao : IConexao;
-    FContaCorrentesLista: IList<TContaCorrenteModel>;
+    FContaCorrentesLista: IList<ITContaCorrenteModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -64,7 +68,7 @@ type
     FSaldo: Real;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetContaCorrentesLista(const Value: IList<TContaCorrenteModel>);
+    procedure SetContaCorrentesLista(const Value: IList<ITContaCorrenteModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -153,19 +157,22 @@ type
     property PEDIDO_ID: Variant read FPEDIDO_ID write SetPEDIDO_ID;
     property IUGU_ID: Variant read FIUGU_ID write SetIUGU_ID;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITContaCorrenteModel;
+
     function Incluir : String;
-    function Alterar(pID : String) : TContaCorrenteModel;
+    function Alterar(pID : String) : ITContaCorrenteModel;
     function Excluir(pID : String) : String;
     function Salvar: String;
     procedure obterLista;
     procedure obterSaldo(pLoja: String = '');
 
-    function carregaClasse(pId: String): TContaCorrenteModel;
+    function carregaClasse(pId: String): ITContaCorrenteModel;
     procedure excluirRegistro(pIdRegistro: String);
 
-    property ContaCorrentesLista: IList<TContaCorrenteModel> read FContaCorrentesLista write SetContaCorrentesLista;
+    property ContaCorrentesLista: IList<ITContaCorrenteModel> read FContaCorrentesLista write SetContaCorrentesLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -193,14 +200,14 @@ begin
   Result    := self.Salvar;
 end;
 
-function TContaCorrenteModel.Alterar(pID: String): TContaCorrenteModel;
+function TContaCorrenteModel.Alterar(pID: String): ITContaCorrenteModel;
 var
-  lContaCorrenteModel : TContaCorrenteModel;
+  lContaCorrenteModel : ITContaCorrenteModel;
 begin
-  lContaCorrenteModel := TContaCorrenteModel.Create(vIConexao);
+  lContaCorrenteModel := TContaCorrenteModel.getNewIface(vIConexao);
   try
-    lContaCorrenteModel      := lContaCorrenteModel.carregaClasse(pID);
-    lContaCorrenteModel.Acao := tacAlterar;
+    lContaCorrenteModel      := lContaCorrenteModel.objeto.carregaClasse(pID);
+    lContaCorrenteModel.objeto.Acao := tacAlterar;
     Result                   := lContaCorrenteModel;
   finally
 
@@ -214,20 +221,20 @@ begin
   Result    := self.Salvar;
 end;
 
-function TContaCorrenteModel.carregaClasse(pId: String): TContaCorrenteModel;
+function TContaCorrenteModel.carregaClasse(pId: String): ITContaCorrenteModel;
 var
-  lContaCorrenteDao: TContaCorrenteDao;
+  lContaCorrenteDao: ITContaCorrenteDao;
 begin
 
-  lContaCorrenteDao := TContaCorrenteDao.Create(vIConexao);
+  lContaCorrenteDao := TContaCorrenteDao.getNewIface(vIConexao);
   try
-    Result := lContaCorrenteDao.carregaClasse(pId);
+    Result := lContaCorrenteDao.objeto.carregaClasse(pId);
   finally
-    lContaCorrenteDao.Free;
+    lContaCorrenteDao:=nil;
   end;
 end;
 
-constructor TContaCorrenteModel.Create(pIConexao : IConexao);
+constructor TContaCorrenteModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -241,90 +248,96 @@ end;
 
 procedure TContaCorrenteModel.excluirRegistro(pIdRegistro: String);
 var
-  lContaCorrenteAlterar, lContaCorrenteExclusao: TContaCorrenteModel;
+  lContaCorrenteAlterar, lContaCorrenteExclusao: ITContaCorrenteModel;
 begin
 
-  lContaCorrenteAlterar  := TContaCorrenteModel.Create(vIConexao);
-  lContaCorrenteExclusao := TContaCorrenteModel.Create(vIConexao);
+  lContaCorrenteAlterar  := TContaCorrenteModel.getNewIface(vIConexao);
+  lContaCorrenteExclusao := TContaCorrenteModel.getNewIface(vIConexao);
 
   try
     lContaCorrenteAlterar  := self.carregaClasse(pIdRegistro);
     lContaCorrenteExclusao := lContaCorrenteAlterar;
 
-    lContaCorrenteAlterar.Acao := tacAlterar;
-    lContaCorrenteAlterar.STATUS := 'X';
-    lContaCorrenteAlterar.Salvar;
+    lContaCorrenteAlterar.objeto.Acao := tacAlterar;
+    lContaCorrenteAlterar.objeto.STATUS := 'X';
+    lContaCorrenteAlterar.objeto.Salvar;
 
-    lContaCorrenteExclusao.Acao := tacIncluir;
-    lContaCorrenteExclusao.STATUS          := 'X';
-    lContaCorrenteExclusao.TIPO_CTA        := 'D';
-    lContaCorrenteExclusao.OBSERVACAO_COR  := 'Estorno lançamento: ' + lContaCorrenteAlterar.NUMERO_COR;
-    lContaCorrenteExclusao.Salvar;
+    lContaCorrenteExclusao.objeto.Acao := tacIncluir;
+    lContaCorrenteExclusao.objeto.STATUS          := 'X';
+    lContaCorrenteExclusao.objeto.TIPO_CTA        := 'D';
+    lContaCorrenteExclusao.objeto.OBSERVACAO_COR  := 'Estorno lançamento: ' + lContaCorrenteAlterar.objeto.NUMERO_COR;
+    lContaCorrenteExclusao.objeto.Salvar;
 
   finally
-    lContaCorrenteAlterar.Free;
-    lContaCorrenteExclusao.Free;
+    lContaCorrenteAlterar:=nil;
+    lContaCorrenteExclusao:=nil;
   end;
+end;
+
+class function TContaCorrenteModel.getNewIface(pIConexao: IConexao): ITContaCorrenteModel;
+begin
+  Result := TImplObjetoOwner<TContaCorrenteModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 procedure TContaCorrenteModel.obterLista;
 var
-  lContaCorrenteLista: TContaCorrenteDao;
+  lContaCorrenteLista: ITContaCorrenteDao;
 begin
-  lContaCorrenteLista := TContaCorrenteDao.Create(vIConexao);
+  lContaCorrenteLista := TContaCorrenteDao.getNewIface(vIConexao);
 
   try
-    lContaCorrenteLista.TotalRecords    := FTotalRecords;
-    lContaCorrenteLista.WhereView       := FWhereView;
-    lContaCorrenteLista.CountView       := FCountView;
-    lContaCorrenteLista.OrderView       := FOrderView;
-    lContaCorrenteLista.StartRecordView := FStartRecordView;
-    lContaCorrenteLista.LengthPageView  := FLengthPageView;
-    lContaCorrenteLista.IDRecordView    := FIDRecordView;
+    lContaCorrenteLista.objeto.TotalRecords    := FTotalRecords;
+    lContaCorrenteLista.objeto.WhereView       := FWhereView;
+    lContaCorrenteLista.objeto.CountView       := FCountView;
+    lContaCorrenteLista.objeto.OrderView       := FOrderView;
+    lContaCorrenteLista.objeto.StartRecordView := FStartRecordView;
+    lContaCorrenteLista.objeto.LengthPageView  := FLengthPageView;
+    lContaCorrenteLista.objeto.IDRecordView    := FIDRecordView;
 
-    lContaCorrenteLista.obterLista;
+    lContaCorrenteLista.objeto.obterLista;
 
-    FTotalRecords  := lContaCorrenteLista.TotalRecords;
-    FContaCorrentesLista := lContaCorrenteLista.ContaCorrentesLista;
+    FTotalRecords  := lContaCorrenteLista.objeto.TotalRecords;
+    FContaCorrentesLista := lContaCorrenteLista.objeto.ContaCorrentesLista;
 
   finally
-    lContaCorrenteLista.Free;
+    lContaCorrenteLista:=nil;
   end;
 end;
 
 procedure TContaCorrenteModel.ObterSaldo(pLoja: String = '');
 var
-  lContaCorrenteDao: TContaCorrenteDao;
+  lContaCorrenteDao: ITContaCorrenteDao;
 begin
-  lContaCorrenteDao := TContaCorrenteDao.Create(vIConexao);
+  lContaCorrenteDao := TContaCorrenteDao.getNewIface(vIConexao);
 
   try
-    lContaCorrenteDao.IDBancoView := FIDBancoView;
-    lContaCorrenteDao.obterSaldo(pLoja);
-    Saldo := lContaCorrenteDao.Saldo;
+    lContaCorrenteDao.objeto.IDBancoView := FIDBancoView;
+    lContaCorrenteDao.objeto.obterSaldo(pLoja);
+    Saldo := lContaCorrenteDao.objeto.Saldo;
 
   finally
-    lContaCorrenteDao.Free;
+    lContaCorrenteDao:=nil;
   end;
 end;
 
 function TContaCorrenteModel.Salvar: String;
 var
-  lContaCorrenteDao: TContaCorrenteDao;
+  lContaCorrenteDao: ITContaCorrenteDao;
 begin
-  lContaCorrenteDao := TContaCorrenteDao.Create(vIConexao);
+  lContaCorrenteDao := TContaCorrenteDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lContaCorrenteDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lContaCorrenteDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lContaCorrenteDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lContaCorrenteDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lContaCorrenteDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lContaCorrenteDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lContaCorrenteDao.Free;
+    lContaCorrenteDao:=nil;
   end;
 end;
 

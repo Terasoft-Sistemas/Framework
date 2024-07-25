@@ -515,7 +515,7 @@ var
   lSaldoBanco,
   lTotal              : Double;
   lMemTable           : TFDMemTable;
-  lContaCorrenteModel : TContaCorrenteModel;
+  lContaCorrenteModel : ITContaCorrenteModel;
   lLojas_Dados,
   lLojasModel         : TLojasModel;
 
@@ -630,11 +630,11 @@ begin
         lQry.Next;
       end;
 
-      lContaCorrenteModel := TContaCorrenteModel.Create(vIConexao);
-      lContaCorrenteModel.IDBancoView := FBancoView;
-      lContaCorrenteModel.obterSaldo(lLojas_Dados.LOJA);
+      lContaCorrenteModel := TContaCorrenteModel.getNewIface(vIConexao);
+      lContaCorrenteModel.objeto.IDBancoView := FBancoView;
+      lContaCorrenteModel.objeto.obterSaldo(lLojas_Dados.LOJA);
 
-      lSaldoBanco := lContaCorrenteModel.Saldo;
+      lSaldoBanco := lContaCorrenteModel.objeto.Saldo;
 
       lTotal := lReceber + ifThen(FSomarBancosView, lSaldoBanco, 0) - lPagar;
 
@@ -654,7 +654,7 @@ begin
 
   finally
     lQry.Free;
-    lContaCorrenteModel.Free;
+    lContaCorrenteModel:=nil;
   end;
 end;
 
