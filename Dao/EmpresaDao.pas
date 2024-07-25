@@ -8,13 +8,18 @@ uses
   System.SysUtils,
   Interfaces.Conexao,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao;
 
 type
+  TEmpresaDao = class;
+
+  ITEmpresaDao = IObject<TEmpresaDao>;
 
   TEmpresaDao = class
 
   private
+    [weak] mySelf: ITEmpresaDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -40,6 +45,8 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITEmpresaDao;
+
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -51,13 +58,13 @@ type
 
     function where: String;
 
-    function incluir(AEmpresaModel: TEmpresaModel): String;
-    function alterar(AEmpresaModel: TEmpresaModel): String;
-    function excluir(AEmpresaModel: TEmpresaModel): String;
+    function incluir(AEmpresaModel: ITEmpresaModel): String;
+    function alterar(AEmpresaModel: ITEmpresaModel): String;
+    function excluir(AEmpresaModel: ITEmpresaModel): String;
 
     procedure obterLista;
-    procedure carregar(pEmpresaModel: TEmpresaModel);
-    procedure setParams(var pQry: TFDQuery; pEmpresaModel: TEmpresaModel);
+    procedure carregar(pEmpresaModel: ITEmpresaModel);
+    procedure setParams(var pQry: TFDQuery; pEmpresaModel: ITEmpresaModel);
 
 end;
 
@@ -66,7 +73,7 @@ implementation
 uses
   System.Rtti, System.Variants;
 
-procedure TEmpresaDao.carregar(pEmpresaModel: TEmpresaModel);
+procedure TEmpresaDao.carregar(pEmpresaModel: ITEmpresaModel);
 var
   lQry: TFDQuery;
   i: INteger;
@@ -75,34 +82,34 @@ begin
    try
       lQry.Open(' select * from EMPRESA ');
       try
-        pEmpresaModel.ID                       := lQry.fieldByName('ID').AsString;
-        pEmpresaModel.SYSTIME                  := lQry.fieldByName('SYSTIME').AsString;
-        pEmpresaModel.CODIGO                   := lQry.fieldByName('CODIGO_EMP').AsString;
-        pEmpresaModel.FANTASIA                 := lQry.fieldByName('FANTASIA_EMP').AsString;
-        pEmpresaModel.RAZAO_SOCIAL             := lQry.fieldByName('RAZAO_EMP').AsString;
-        pEmpresaModel.CNPJ                     := lQry.fieldByName('CNPJ_EMP').AsString;
-        pEmpresaModel.INSCRICAO_ESTADUAL       := lQry.fieldByName('INSCRICAO_EMP').AsString;
-        pEmpresaModel.INSCRICAO_MUNICIPAL      := lQry.fieldByName('INSCRICAO_MUNICIPAL').AsString;
-        pEmpresaModel.ENDERECO                 := lQry.fieldByName('ENDERECO_EMP').AsString;
-        pEmpresaModel.BAIRRO                   := lQry.fieldByName('BAIRRO_EMP').AsString;
-        pEmpresaModel.CIDADE                   := lQry.fieldByName('CIDADE_EMP').AsString;
-        pEmpresaModel.UF                       := lQry.fieldByName('UF_EMP').AsString;
-        pEmpresaModel.NUMERO                   := lQry.fieldByName('NUMERO_END').AsString;
-        pEmpresaModel.COMPLEMENTO              := lQry.fieldByName('COMPLEMENTO').AsString;
-        pEmpresaModel.CODIGO_MUNUCIPIO         := lQry.fieldByName('COD_MUNICIPIO').AsString;
-        pEmpresaModel.TELEFONE                 := lQry.fieldByName('TELEFONE_EMP').AsString;
-        pEmpresaModel.CONTATO                  := lQry.fieldByName('CONTATO_EMP').AsString;
-        pEmpresaModel.EMAIL                    := lQry.fieldByName('EMAIL_EMP').AsString;
-        pEmpresaModel.URL                      := lQry.fieldByName('URL_EMP').AsString;
-        pEmpresaModel.CEP                      := lQry.fieldByName('CEP_EMP').AsString;
-        pEmpresaModel.REGIME_TRIBUTARIO        := lQry.fieldByName('REGIME_NFE').AsString;
-        pEmpresaModel.JUROS_BOL                := lQry.fieldByName('JUROS_BOL').AsString;
-        pEmpresaModel.LOJA                     := lQry.fieldByName('LOJA').AsString;
-        pEmpresaModel.LOGO                     := lQry.fieldByName('LOGO').AsString;
-        pEmpresaModel.LIMITE_ATRASO            := lQry.fieldByName('LIMITE_ATRAZO').AsString;
-        pEmpresaModel.STRING_CONEXAO_RESERVA   := lQry.fieldByName('STRING_CONEXAO_RESERVA').AsString;
-        pEmpresaModel.AVISARNEGATIVO_EMP       := lQry.fieldByName('AVISARNEGATIVO_EMP').AsString;
-        pEmpresaModel.MULTA_BOL                := lQry.fieldByName('MULTA_BOL').AsString;
+        pEmpresaModel.objeto.ID                       := lQry.fieldByName('ID').AsString;
+        pEmpresaModel.objeto.SYSTIME                  := lQry.fieldByName('SYSTIME').AsString;
+        pEmpresaModel.objeto.CODIGO                   := lQry.fieldByName('CODIGO_EMP').AsString;
+        pEmpresaModel.objeto.FANTASIA                 := lQry.fieldByName('FANTASIA_EMP').AsString;
+        pEmpresaModel.objeto.RAZAO_SOCIAL             := lQry.fieldByName('RAZAO_EMP').AsString;
+        pEmpresaModel.objeto.CNPJ                     := lQry.fieldByName('CNPJ_EMP').AsString;
+        pEmpresaModel.objeto.INSCRICAO_ESTADUAL       := lQry.fieldByName('INSCRICAO_EMP').AsString;
+        pEmpresaModel.objeto.INSCRICAO_MUNICIPAL      := lQry.fieldByName('INSCRICAO_MUNICIPAL').AsString;
+        pEmpresaModel.objeto.ENDERECO                 := lQry.fieldByName('ENDERECO_EMP').AsString;
+        pEmpresaModel.objeto.BAIRRO                   := lQry.fieldByName('BAIRRO_EMP').AsString;
+        pEmpresaModel.objeto.CIDADE                   := lQry.fieldByName('CIDADE_EMP').AsString;
+        pEmpresaModel.objeto.UF                       := lQry.fieldByName('UF_EMP').AsString;
+        pEmpresaModel.objeto.NUMERO                   := lQry.fieldByName('NUMERO_END').AsString;
+        pEmpresaModel.objeto.COMPLEMENTO              := lQry.fieldByName('COMPLEMENTO').AsString;
+        pEmpresaModel.objeto.CODIGO_MUNUCIPIO         := lQry.fieldByName('COD_MUNICIPIO').AsString;
+        pEmpresaModel.objeto.TELEFONE                 := lQry.fieldByName('TELEFONE_EMP').AsString;
+        pEmpresaModel.objeto.CONTATO                  := lQry.fieldByName('CONTATO_EMP').AsString;
+        pEmpresaModel.objeto.EMAIL                    := lQry.fieldByName('EMAIL_EMP').AsString;
+        pEmpresaModel.objeto.URL                      := lQry.fieldByName('URL_EMP').AsString;
+        pEmpresaModel.objeto.CEP                      := lQry.fieldByName('CEP_EMP').AsString;
+        pEmpresaModel.objeto.REGIME_TRIBUTARIO        := lQry.fieldByName('REGIME_NFE').AsString;
+        pEmpresaModel.objeto.JUROS_BOL                := lQry.fieldByName('JUROS_BOL').AsString;
+        pEmpresaModel.objeto.LOJA                     := lQry.fieldByName('LOJA').AsString;
+        pEmpresaModel.objeto.LOGO                     := lQry.fieldByName('LOGO').AsString;
+        pEmpresaModel.objeto.LIMITE_ATRASO            := lQry.fieldByName('LIMITE_ATRAZO').AsString;
+        pEmpresaModel.objeto.STRING_CONEXAO_RESERVA   := lQry.fieldByName('STRING_CONEXAO_RESERVA').AsString;
+        pEmpresaModel.objeto.AVISARNEGATIVO_EMP       := lQry.fieldByName('AVISARNEGATIVO_EMP').AsString;
+        pEmpresaModel.objeto.MULTA_BOL                := lQry.fieldByName('MULTA_BOL').AsString;
       finally
         lQry.Close;
       end;
@@ -124,7 +131,7 @@ begin
   inherited;
 end;
 
-function TEmpresaDao.excluir(AEmpresaModel: TEmpresaModel): String;
+function TEmpresaDao.excluir(AEmpresaModel: ITEmpresaModel): String;
 var
   lQry: TFDQuery;
 
@@ -133,16 +140,22 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from EMPRESA where ID = :ID',[AEmpresaModel.ID]);
+   lQry.ExecSQL('delete from EMPRESA where ID = :ID',[AEmpresaModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := AEmpresaModel.ID;
+   Result := AEmpresaModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
 end;
 
-function TEmpresaDao.incluir(AEmpresaModel: TEmpresaModel): String;
+class function TEmpresaDao.getNewIface;
+begin
+  Result := TImplObjetoOwner<TEmpresaDao>.CreateOwner(self.Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TEmpresaDao.incluir(AEmpresaModel: ITEmpresaModel): String;
 begin
 
 end;
@@ -152,7 +165,7 @@ begin
 
 end;
 
-function TEmpresaDao.alterar(AEmpresaModel: TEmpresaModel): String;
+function TEmpresaDao.alterar(AEmpresaModel: ITEmpresaModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -166,7 +179,7 @@ begin
     setParams(lQry, AEmpresaModel);
     lQry.ExecSQL;
 
-    Result := AEmpresaModel.ID;
+    Result := AEmpresaModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -200,7 +213,7 @@ begin
   FOrderView := Value;
 end;
 
-procedure TEmpresaDao.setParams(var pQry: TFDQuery; pEmpresaModel: TEmpresaModel);
+procedure TEmpresaDao.setParams(var pQry: TFDQuery; pEmpresaModel: ITEmpresaModel);
 var
   lTabela : IFDDataset;
   lCtx    : TRttiContext;

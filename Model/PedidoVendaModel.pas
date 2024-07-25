@@ -769,7 +769,7 @@ function TPedidoVendaModel.gerarContasReceberFinanceiroPedido(pVendaAssistida: S
 var
   lContasReceberModel      : TContasReceberModel;
   lContasReceberItensModel : TContasReceberItensModel;
-  lEmpresaModel            : TEmpresaModel;
+  lEmpresaModel            : ITEmpresaModel;
   lFinanceiroPedidoModel   : TFinanceiroPedidoModel;
   lFaturaReceber,
   lFinanceiro              : String;
@@ -778,12 +778,12 @@ var
 begin
   lContasReceberModel      := TContasReceberModel.Create(vIConexao);
   lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
-  lEmpresaModel            := TEmpresaModel.Create(vIConexao);
+  lEmpresaModel            := TEmpresaModel.getNewIface(vIConexao);
   lFinanceiroPedidoModel   := TFinanceiroPedidoModel.Create(vIConexao);
 
   try
     lFinanceiro := '';
-    lEmpresaModel.Carregar;
+    lEmpresaModel.objeto.Carregar;
 
     lFinanceiroPedidoModel.WhereView := ' and financeiro_pedido.web_pedido_id = ' + pVendaAssistida;
     lFinanceiroPedidoModel.OrderView := ' id_financeiro, parcela';
@@ -811,7 +811,7 @@ begin
         lContasReceberModel.OBS_REC       := 'Venda: '+self.FNUMERO_PED;
         lContasReceberModel.TIPO_REC      := 'N';
         lContasReceberModel.CODIGO_POR    := lMemTable.objeto.FieldByName('PORTADOR_ID').AsString;
-        lContasReceberModel.JUROS_FIXO    := lEmpresaModel.JUROS_BOL;
+        lContasReceberModel.JUROS_FIXO    := lEmpresaModel.objeto.JUROS_BOL;
         lContasReceberModel.CODIGO_CTA    := '555555';
         lFaturaReceber := lContasReceberModel.Salvar;
       end;
@@ -857,7 +857,7 @@ function TPedidoVendaModel.gerarContasReceberPedido(pValor, pPortador, pParcelas
 var
   lContasReceberModel      : TContasReceberModel;
   lContasReceberItensModel : TContasReceberItensModel;
-  lEmpresaModel            : TEmpresaModel;
+  lEmpresaModel            : ITEmpresaModel;
   lFaturaReceber           : String;
   lParcela, lTotalParcelas : Integer;
   lValorParcela,
@@ -876,10 +876,10 @@ begin
 
   lContasReceberModel      := TContasReceberModel.Create(vIConexao);
   lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
-  lEmpresaModel            := TEmpresaModel.Create(vIConexao);
+  lEmpresaModel            := TEmpresaModel.getNewIface(vIConexao);
 
   try
-    lEmpresaModel.Carregar;
+    lEmpresaModel.objeto.Carregar;
 
     lContasReceberModel.Acao          := tacIncluir;
     lContasReceberModel.LOJA          := self.FLOJA;
@@ -894,7 +894,7 @@ begin
     lContasReceberModel.OBS_REC       := 'Venda: '+self.FNUMERO_PED;
     lContasReceberModel.TIPO_REC      := 'N';
     lContasReceberModel.CODIGO_POR    := pPortador;
-    lContasReceberModel.JUROS_FIXO    := lEmpresaModel.JUROS_BOL;
+    lContasReceberModel.JUROS_FIXO    := lEmpresaModel.objeto.JUROS_BOL;
     lContasReceberModel.CODIGO_CTA    := '555555';
     lFaturaReceber := lContasReceberModel.Salvar;
 
@@ -948,7 +948,7 @@ var
   lItens            : TPedidoItensModel;
   lNFModel          : TNFModel;
   lNFItensModel     : TNFItensModel;
-  lEmpresaModel     : TEmpresaModel;
+  lEmpresaModel     : ITEmpresaModel;
   lNumeroNFe,
   lNomeVendedor     : String;
   lTribFederal,
@@ -968,7 +968,7 @@ begin
   lPedidoItensModel := TPedidoItensModel.Create(vIConexao);
   lNFItensModel     := TNFItensModel.Create(vIConexao);
   lNFModel          := TNFModel.Create(vIConexao);
-  lEmpresaModel     := TEmpresaModel.Create(vIConexao);
+  lEmpresaModel     := TEmpresaModel.getNewIface(vIConexao);
   lFuncionarioModel := TFuncionarioModel.Create(vIConexao);
   lConfiguracoes    := TerasoftConfiguracoes.Create(vIConexao);
 
@@ -985,7 +985,7 @@ begin
     end;
 
     self.RecalcularImpostos(self.NUMERO_PED);
-    lEmpresaModel.Carregar;
+    lEmpresaModel.objeto.Carregar;
 
     lNFModel.Acao := tacIncluir;
     lNFModel.TIPO_NF               := 'N';
@@ -1028,8 +1028,8 @@ begin
     lNFModel.DATA_NF               := DateToStr(vIConexao.DataServer);
     lNFModel.DATA_SAIDA            := DateToStr(vIConexao.DataServer);
     lNFModel.HORA_SAIDA            := TimeToStr(vIConexao.HoraServer);
-    lNFModel.UF_EMBARQUE           := lEmpresaModel.UF;
-    lNFModel.LOCAL_EMBARQUE        := lEmpresaModel.CIDADE;
+    lNFModel.UF_EMBARQUE           := lEmpresaModel.objeto.UF;
+    lNFModel.LOCAL_EMBARQUE        := lEmpresaModel.objeto.CIDADE;
     lNFModel.CODIGO_CLI            := self.FCODIGO_CLI;
     lNFModel.CODIGO_VEN            := self.FCODIGO_VEN;
     lNFModel.CODIGO_PORT           := self.FCODIGO_PORT;
@@ -1213,7 +1213,7 @@ begin
     lPedidoItensModel.Free;
     lNFItensModel.Free;
     lNFModel.Free;
-    lEmpresaModel.Free;
+    lEmpresaModel := nil;
   end;
 end;
 
@@ -1491,26 +1491,26 @@ var
   lCalcularImpostosModel : TCalcularImpostosModel;
   lPedidoItensModal      : TPedidoItensModel;
   lPedidoVendaModel      : TPedidoVendaModel;
-  lEmpresaModel          : TEmpresaModel;
+  lEmpresaModel          : ITEmpresaModel;
 begin
   lPedidoVendaLista      := TPedidoVendaDao.Create(vIConexao);
   lCalcularImpostosModel := TCalcularImpostosModel.Create(vIConexao);
   lPedidoItensModal      := TPedidoItensModel.Create(vIConexao);
-  lEmpresaModel          := TEmpresaModel.Create(vIConexao);
+  lEmpresaModel          := TEmpresaModel.getNewIface(vIConexao);
 
   try
     lPedidoVendaLista.obterUpdateImpostos(pNumeroPedido);
-    lEmpresaModel.Carregar;
+    lEmpresaModel.objeto.Carregar;
 
     for lPedidoVendaModel in lPedidoVendaLista.PedidoVendasLista do
     begin
-      lCalcularImpostosModel.EMITENTE_UF          := lEmpresaModel.UF;
-      lCalcularImpostosModel.REGIME_TRIBUTARIO    := lEmpresaModel.REGIME_TRIBUTARIO;
+      lCalcularImpostosModel.EMITENTE_UF          := lEmpresaModel.objeto.UF;
+      lCalcularImpostosModel.REGIME_TRIBUTARIO    := lEmpresaModel.objeto.REGIME_TRIBUTARIO;
       lCalcularImpostosModel.MODELO_NF            := '65';
       lCalcularImpostosModel.VALOR_DESCONTO_TOTAL := lPedidoVendaModel.DESC_PED;
       lCalcularImpostosModel.VALOR_ACRESCIMO      := lPedidoVendaModel.ACRES_PED;
       lCalcularImpostosModel.TOTAL_PRODUTO        := lPedidoVendaModel.VALOR_PED;
-      lCalcularImpostosModel.DESTINATARIO_UF      := IIF(lPedidoVendaModel.UF_CLI <> '', lPedidoVendaModel.UF_CLI, lEmpresaModel.UF);
+      lCalcularImpostosModel.DESTINATARIO_UF      := IIF(lPedidoVendaModel.UF_CLI <> '', lPedidoVendaModel.UF_CLI, lEmpresaModel.objeto.UF);
       lCalcularImpostosModel.CODIGO_PRODUTO       := lPedidoVendaModel.CODIGO_PRO;
       lCalcularImpostosModel.QUANTIDADE           := lPedidoVendaModel.QUANTIDADE_PED;
       lCalcularImpostosModel.VALORUNITARIO        := lPedidoVendaModel.VALORUNITARIO_PED;

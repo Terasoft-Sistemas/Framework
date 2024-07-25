@@ -380,7 +380,7 @@ var
   lOrcamentoItensModel     : TOrcamentoItensModel;
   lOrcamentoModel          : TOrcamentoModel;
   lClientesModel           : TClienteModel;
-  lEmpresaModel            : TEmpresaModel;
+  lEmpresaModel            : ITEmpresaModel;
   lProdutosModel           : TProdutosModel;
   lPedido                  : String;
   lItem, lIndex            : Integer;
@@ -396,7 +396,7 @@ begin
   lPedidoVendaModel    := TPedidoVendaModel.Create(vIConexao);
   lPedidoItensModel    := TPedidoItensModel.Create(vIConexao);
   lClientesModel       := TClienteModel.Create(vIConexao);
-  lEmpresaModel        := TEmpresaModel.Create(vIConexao);
+  lEmpresaModel        := TEmpresaModel.getNewIface(vIConexao);
   lProdutosModel       := TProdutosModel.Create(vIConexao);
 
   try
@@ -409,9 +409,9 @@ begin
       exit;
     end;
 
-    lEmpresaModel.Carregar;
+    lEmpresaModel.objeto.Carregar;
 
-    if lEmpresaModel.AVISARNEGATIVO_EMP = 'S' then
+    if lEmpresaModel.objeto.AVISARNEGATIVO_EMP = 'S' then
     begin
       lOrcamentoItensModel.WhereView := ' AND I.NUMERO_ORC = '+QuotedStr(pNumeroOrc)+' ';
       lMemtable := lOrcamentoItensModel.obterLista;
@@ -535,7 +535,7 @@ begin
     lOrcamentoItensModel.Free;
     lPedidoItensModel.Free;
     lClientesModel.Free;
-    lEmpresaModel.Free;
+    lEmpresaModel := nil;
     lProdutosModel.Free;
   end;
 end;

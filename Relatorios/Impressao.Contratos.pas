@@ -728,17 +728,17 @@ end;
 
 procedure TImpressaoContratos.fetchEmpresa;
 var
-  lEmpresaModel : TEmpresaModel;
+  lEmpresaModel : ITEmpresaModel;
 begin
-  lEmpresaModel := TEmpresaModel.Create(CONEXAO);
+  lEmpresaModel := TEmpresaModel.getNewIface(CONEXAO);
   try
-    lEmpresaModel.Carregar;
+    lEmpresaModel.objeto.Carregar;
     mtEmpresa.Append;
-    mtEmpresaCNPJ.Value := lEmpresaModel.CNPJ;
-    mtEmpresaLOCAL_DATA.Value := VarToStr(lEmpresaModel.CIDADE) +'/'+ VarToStr(lEmpresaModel.UF) + '  ' + DateToStr(CONEXAO.DataServer);
+    mtEmpresaCNPJ.Value := lEmpresaModel.objeto.CNPJ;
+    mtEmpresaLOCAL_DATA.Value := VarToStr(lEmpresaModel.objeto.CIDADE) +'/'+ VarToStr(lEmpresaModel.objeto.UF) + '  ' + DateToStr(CONEXAO.DataServer);
     mtEmpresa.Post;
   finally
-    lEmpresaModel.Free;
+    lEmpresaModel := nil;
   end;
 end;
 
