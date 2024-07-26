@@ -5,14 +5,18 @@ interface
 uses
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TPrecoUFModel = class
+  TPrecoUFModel = class;
+  ITPrecoUFModel=IObject<TPrecoUFModel>;
 
+  TPrecoUFModel = class
   private
+    [weak] mySelf: ITPrecoUFModel;
     vIConexao : IConexao;
-    FPrecoUFsLista: IList<TPrecoUFModel>;
+    FPrecoUFsLista: IList<ITPrecoUFModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -31,7 +35,7 @@ type
     FTOTAL: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetPrecoUFsLista(const Value: IList<TPrecoUFModel>);
+    procedure SetPrecoUFsLista(const Value: IList<ITPrecoUFModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -56,17 +60,19 @@ type
     property SYSTIME: Variant read FSYSTIME write SetSYSTIME;
     property TOTAL: Variant read FTOTAL write SetTOTAL;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITPrecoUFModel;
+
     function Incluir : String;
-    function Alterar(pID : String): TPrecoUFModel;
+    function Alterar(pID : String): ITPrecoUFModel;
     function Excluir(pID : String): String;
-    function carregaClasse(ID: String): TPrecoUFModel;
+    function carregaClasse(ID: String): ITPrecoUFModel;
     function Salvar  : String;
     procedure obterLista;
 
-    property PrecoUFsLista: IList<TPrecoUFModel> read FPrecoUFsLista write SetPrecoUFsLista;
+    property PrecoUFsLista: IList<ITPrecoUFModel> read FPrecoUFsLista write SetPrecoUFsLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -85,33 +91,33 @@ uses
 
 { TPrecoUFModel }
 
-function TPrecoUFModel.Alterar(pID: String): TPrecoUFModel;
+function TPrecoUFModel.Alterar(pID: String): ITPrecoUFModel;
 var
-  lPrecoUFModel : TPrecoUFModel;
+  lPrecoUFModel : ITPrecoUFModel;
 begin
-  lPrecoUFModel := TPrecoUFModel.Create(vIConexao);
+  lPrecoUFModel := TPrecoUFModel.getNewIface(vIConexao);
   try
-    lPrecoUFModel       := lPrecoUFModel.carregaClasse(pID);
-    lPrecoUFModel.Acao  := tacAlterar;
+    lPrecoUFModel       := lPrecoUFModel.objeto.carregaClasse(pID);
+    lPrecoUFModel.objeto.Acao  := tacAlterar;
     Result              := lPrecoUFModel;
   finally
 
   end;
 end;
 
-function TPrecoUFModel.carregaClasse(ID: String): TPrecoUFModel;
+function TPrecoUFModel.carregaClasse(ID: String): ITPrecoUFModel;
 var
-  lPrecoUFModel: TPrecoUFDao;
+  lPrecoUFModel: ITPrecoUFDao;
 begin
-  lPrecoUFModel := TPrecoUFDao.Create(vIConexao);
+  lPrecoUFModel := TPrecoUFDao.getNewIface(vIConexao);
   try
-    Result := lPrecoUFModel.carregaClasse(ID);
+    Result := lPrecoUFModel.objeto.carregaClasse(ID);
   finally
-    lPrecoUFModel.Free;
+    lPrecoUFModel:=nil;
   end;
 end;
 
-constructor TPrecoUFModel.Create(pIConexao : IConexao);
+constructor TPrecoUFModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -130,6 +136,12 @@ begin
   Result      := self.Salvar;
 end;
 
+class function TPrecoUFModel.getNewIface(pIConexao: IConexao): ITPrecoUFModel;
+begin
+  Result := TImplObjetoOwner<TPrecoUFModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TPrecoUFModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
@@ -138,46 +150,46 @@ end;
 
 procedure TPrecoUFModel.obterLista;
 var
-  lPrecoUFLista: TPrecoUFDao;
+  lPrecoUFLista: ITPrecoUFDao;
 begin
-  lPrecoUFLista := TPrecoUFDao.Create(vIConexao);
+  lPrecoUFLista := TPrecoUFDao.getNewIface(vIConexao);
 
   try
-    lPrecoUFLista.TotalRecords    := FTotalRecords;
-    lPrecoUFLista.WhereView       := FWhereView;
-    lPrecoUFLista.CountView       := FCountView;
-    lPrecoUFLista.OrderView       := FOrderView;
-    lPrecoUFLista.StartRecordView := FStartRecordView;
-    lPrecoUFLista.LengthPageView  := FLengthPageView;
-    lPrecoUFLista.IDRecordView    := FIDRecordView;
+    lPrecoUFLista.objeto.TotalRecords    := FTotalRecords;
+    lPrecoUFLista.objeto.WhereView       := FWhereView;
+    lPrecoUFLista.objeto.CountView       := FCountView;
+    lPrecoUFLista.objeto.OrderView       := FOrderView;
+    lPrecoUFLista.objeto.StartRecordView := FStartRecordView;
+    lPrecoUFLista.objeto.LengthPageView  := FLengthPageView;
+    lPrecoUFLista.objeto.IDRecordView    := FIDRecordView;
 
-    lPrecoUFLista.obterLista;
+    lPrecoUFLista.objeto.obterLista;
 
-    FTotalRecords  := lPrecoUFLista.TotalRecords;
-    FPrecoUFsLista := lPrecoUFLista.PrecoUFsLista;
+    FTotalRecords  := lPrecoUFLista.objeto.TotalRecords;
+    FPrecoUFsLista := lPrecoUFLista.objeto.PrecoUFsLista;
 
   finally
-    lPrecoUFLista.Free;
+    lPrecoUFLista:=nil;
   end;
 end;
 
 function TPrecoUFModel.Salvar: String;
 var
-  lPrecoUFDao: TPrecoUFDao;
+  lPrecoUFDao: ITPrecoUFDao;
 begin
-  lPrecoUFDao := TPrecoUFDao.Create(vIConexao);
+  lPrecoUFDao := TPrecoUFDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lPrecoUFDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lPrecoUFDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lPrecoUFDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lPrecoUFDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lPrecoUFDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lPrecoUFDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lPrecoUFDao.Free;
+    lPrecoUFDao:=nil;
   end;
 end;
 

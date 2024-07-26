@@ -9,15 +9,20 @@ uses
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao;
 
 type
+  TPrecoUFDao = class;
+  ITPrecoUFDao=IObject<TPrecoUFDao>;
+
   TPrecoUFDao = class
   private
+    [weak] mySelf: ITPrecoUFDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FPrecoUFsLista: IList<TPrecoUFModel>;
+    FPrecoUFsLista: IList<ITPrecoUFModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -28,7 +33,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetPrecoUFsLista(const Value: IList<TPrecoUFModel>);
+    procedure SetPrecoUFsLista(const Value: IList<ITPrecoUFModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -36,14 +41,16 @@ type
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-    procedure setParams(var pQry: TFDQuery; pPrecoUfModel: TPrecoUfModel);
+    procedure setParams(var pQry: TFDQuery; pPrecoUfModel: ITPrecoUfModel);
     function where: String;
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property PrecoUFsLista: IList<TPrecoUFModel> read FPrecoUFsLista write SetPrecoUFsLista;
+    class function getNewIface(pIConexao: IConexao): ITPrecoUFDao;
+
+    property PrecoUFsLista: IList<ITPrecoUFModel> read FPrecoUFsLista write SetPrecoUFsLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -53,10 +60,10 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(pPrecoUFModel: TPrecoUFModel): String;
-    function alterar(pPrecoUFModel: TPrecoUFModel): String;
-    function excluir(pPrecoUFModel: TPrecoUFModel): String;
-    function carregaClasse(ID: String): TPrecoUFModel;
+    function incluir(pPrecoUFModel: ITPrecoUFModel): String;
+    function alterar(pPrecoUFModel: ITPrecoUFModel): String;
+    function excluir(pPrecoUFModel: ITPrecoUFModel): String;
+    function carregaClasse(ID: String): ITPrecoUFModel;
     procedure obterLista;
 end;
 implementation
@@ -64,13 +71,13 @@ implementation
 uses
   System.Rtti;
 { TPrecoUF }
-function TPrecoUFDao.carregaClasse(ID: String): TPrecoUFModel;
+function TPrecoUFDao.carregaClasse(ID: String): ITPrecoUFModel;
 var
   lQry: TFDQuery;
-  lModel: TPrecoUFModel;
+  lModel: ITPrecoUFModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TPrecoUFModel.Create(vIConexao);
+  lModel   := TPrecoUFModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -79,13 +86,13 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-      lModel.ID          := lQry.FieldByName('ID').AsString;
-      lModel.PRODUTO_ID  := lQry.FieldByName('PRODUTO_ID').AsString;
-      lModel.UF          := lQry.FieldByName('UF').AsString;
-      lModel.COMISSAO    := lQry.FieldByName('COMISSAO').AsString;
-      lModel.SIMPLES     := lQry.FieldByName('SIMPLES').AsString;
-      lModel.ICMS_ST     := lQry.FieldByName('ICMS_ST').AsString;
-      lModel.SYSTIME     := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.ID          := lQry.FieldByName('ID').AsString;
+    lModel.objeto.PRODUTO_ID  := lQry.FieldByName('PRODUTO_ID').AsString;
+    lModel.objeto.UF          := lQry.FieldByName('UF').AsString;
+    lModel.objeto.COMISSAO    := lQry.FieldByName('COMISSAO').AsString;
+    lModel.objeto.SIMPLES     := lQry.FieldByName('SIMPLES').AsString;
+    lModel.objeto.ICMS_ST     := lQry.FieldByName('ICMS_ST').AsString;
+    lModel.objeto.SYSTIME     := lQry.FieldByName('SYSTIME').AsString;
 
     Result := lModel;
 
@@ -94,7 +101,7 @@ begin
   end;
 end;
 
-constructor TPrecoUFDao.Create(pIConexao : IConexao);
+constructor TPrecoUFDao._Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -107,7 +114,7 @@ begin
   inherited;
 end;
 
-function TPrecoUFDao.incluir(pPrecoUFModel: TPrecoUFModel): String;
+function TPrecoUFDao.incluir(pPrecoUFModel: ITPrecoUFModel): String;
 var
   lQry : TFDQuery;
   lSQL : String;
@@ -118,7 +125,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pPrecoUFModel.ID := vIConexao.Generetor('GEN_PRECO_UF');
+    pPrecoUFModel.objeto.ID := vIConexao.Generetor('GEN_PRECO_UF');
     setParams(lQry, pPrecoUFModel);
     lQry.Open;
 
@@ -129,7 +136,7 @@ begin
     lQry.Free;
   end;
 end;
-function TPrecoUFDao.alterar(pPrecoUFModel: TPrecoUFModel): String;
+function TPrecoUFDao.alterar(pPrecoUFModel: ITPrecoUFModel): String;
 var
   lQry : TFDQuery;
   lSQL : String;
@@ -143,26 +150,32 @@ begin
     setParams(lQry, pPrecoUFModel);
     lQry.ExecSQL;
 
-    Result := pPrecoUFModel.ID;
+    Result := pPrecoUFModel.objeto.ID;
 
   finally
     lSQL := '';
     lQry.Free;
   end;
 end;
-function TPrecoUFDao.excluir(pPrecoUFModel: TPrecoUFModel): String;
+function TPrecoUFDao.excluir(pPrecoUFModel: ITPrecoUFModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
   try
-   lQry.ExecSQL('delete from preco_uf where ID = :ID',[pPrecoUFModel.ID]);
+   lQry.ExecSQL('delete from preco_uf where ID = :ID',[pPrecoUFModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pPrecoUFModel.ID;
+   Result := pPrecoUFModel.objeto.ID;
   finally
     lQry.Free;
   end;
 end;
+class function TPrecoUFDao.getNewIface(pIConexao: IConexao): ITPrecoUFDao;
+begin
+  Result := TImplObjetoOwner<TPrecoUFDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TPrecoUFDao.where: String;
 var
   lSQL : String;
@@ -193,10 +206,10 @@ procedure TPrecoUFDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TPrecoUFModel;
+  modelo: ITPrecoUFModel;
 begin
   lQry := vIConexao.CriarQuery;
-  FPrecoUFsLista := TCollections.CreateList<TPrecoUFModel>(true);
+  FPrecoUFsLista := TCollections.CreateList<ITPrecoUFModel>;
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lSql := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
@@ -216,17 +229,17 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TPrecoUFModel.Create(vIConexao);
+      modelo := TPrecoUFModel.getNewIface(vIConexao);
       FPrecoUFsLista.Add(modelo);
 
-      modelo.ID         := lQry.FieldByName('ID').AsString;
-      modelo.PRODUTO_ID := lQry.FieldByName('PRODUTO_ID').AsString;
-      modelo.UF         := lQry.FieldByName('UF').AsString;
-      modelo.COMISSAO   := lQry.FieldByName('COMISSAO').AsString;
-      modelo.SIMPLES    := lQry.FieldByName('SIMPLES').AsString;
-      modelo.ICMS_ST    := lQry.FieldByName('ICMS_ST').AsString;
-      modelo.SYSTIME    := lQry.FieldByName('SYSTIME').AsString;
-      modelo.TOTAL      := (lQry.FieldByName('CUSTOMEDIO_PRO').AsFloat * lQry.FieldByName('MARGEM_PRO').AsFloat / 100 + lQry.FieldByName('CUSTOMEDIO_PRO').AsFloat) /
+      modelo.objeto.ID         := lQry.FieldByName('ID').AsString;
+      modelo.objeto.PRODUTO_ID := lQry.FieldByName('PRODUTO_ID').AsString;
+      modelo.objeto.UF         := lQry.FieldByName('UF').AsString;
+      modelo.objeto.COMISSAO   := lQry.FieldByName('COMISSAO').AsString;
+      modelo.objeto.SIMPLES    := lQry.FieldByName('SIMPLES').AsString;
+      modelo.objeto.ICMS_ST    := lQry.FieldByName('ICMS_ST').AsString;
+      modelo.objeto.SYSTIME    := lQry.FieldByName('SYSTIME').AsString;
+      modelo.objeto.TOTAL      := (lQry.FieldByName('CUSTOMEDIO_PRO').AsFloat * lQry.FieldByName('MARGEM_PRO').AsFloat / 100 + lQry.FieldByName('CUSTOMEDIO_PRO').AsFloat) /
                                       ( (100 - (lQry.FieldByName('COMISSAO').AsFloat + lQry.FieldByName('SIMPLES').AsFloat + lQry.FieldByName('ICMS_ST').AsFloat) ) / 100);
       lQry.Next;
     end;
@@ -260,7 +273,7 @@ begin
   FOrderView := Value;
 end;
 
-procedure TPrecoUFDao.setParams(var pQry: TFDQuery; pPrecoUfModel: TPrecoUfModel);
+procedure TPrecoUFDao.setParams(var pQry: TFDQuery; pPrecoUfModel: ITPrecoUfModel);
 var
   lTabela : IFDDataset;
   lCtx    : TRttiContext;
@@ -276,7 +289,7 @@ begin
       lProp := lCtx.GetType(TPrecoUfModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPrecoUfModel).AsString = '',
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPrecoUfModel.objeto).AsString = '',
         Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPrecoUfModel).AsString))
     end;
   finally

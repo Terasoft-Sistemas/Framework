@@ -2542,7 +2542,7 @@ end;
 function TProdutosModel.ValorUnitario(pProdutoPreco: TProdutoPreco): Double;
 var
   lClienteModel           : TClienteModel;
-  lPrecoUFModel           : TPrecoUFModel;
+  lPrecoUFModel           : ITPrecoUFModel;
   lPromocaoItensModel     : TPromocaoItensModel;
   lProdutosModel          : ITProdutosModel;
   lCondicaoPromocao,
@@ -2552,7 +2552,7 @@ var
   lPrecoClienteModel      : TPrecoClienteModel;
 begin
   lClienteModel           := TClienteModel.Create(vIConexao);
-  lPrecoUFModel           := TPrecoUFModel.Create(vIConexao);
+  lPrecoUFModel           := TPrecoUFModel.getNewIface(vIConexao);
   lPromocaoItensModel     := TPromocaoItensModel.Create(vIConexao);
   lPrecoVendaModel        := TPrecoVendaModel.Create(vIConexao);
   lPrecoVendaProdutoModel := TPrecoVendaProdutoModel.Create(vIConexao);
@@ -2562,13 +2562,13 @@ begin
 
     if pProdutoPreco.PrecoUf then
     begin
-      lPrecoUFModel.WhereView := ' and preco_uf.uf = ' + QuotedStr(lClienteModel.ufCliente(pProdutoPreco.Cliente)) + ' and preco_uf.produto_id = '+ QuotedStr(pProdutoPreco.Produto);
-      lPrecoUFModel.obterLista;
-      if lPrecoUFModel.TotalRecords > 0 then
+      lPrecoUFModel.objeto.WhereView := ' and preco_uf.uf = ' + QuotedStr(lClienteModel.ufCliente(pProdutoPreco.Cliente)) + ' and preco_uf.produto_id = '+ QuotedStr(pProdutoPreco.Produto);
+      lPrecoUFModel.objeto.obterLista;
+      if lPrecoUFModel.objeto.TotalRecords > 0 then
       begin
-        if lPrecoUFModel.PrecoUFsLista[0].TOTAL > 0 then
+        if lPrecoUFModel.objeto.PrecoUFsLista.First.objeto.TOTAL > 0 then
         begin
-          Result := lPrecoUFModel.PrecoUFsLista[0].TOTAL;
+          Result := lPrecoUFModel.objeto.PrecoUFsLista.First.objeto.TOTAL;
           exit;
         end;
       end;
@@ -2670,7 +2670,7 @@ begin
     lPrecoVendaModel.Free;
     lProdutosModel:=nil;
     lClienteModel.Free;
-    lPrecoUFModel.Free;
+    lPrecoUFModel:=nil;
   end;
 end;
 
