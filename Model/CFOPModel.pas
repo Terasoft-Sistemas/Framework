@@ -5,15 +5,19 @@ interface
 uses
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TCFOPModel = class
+  TCFOPModel = class;
+  ITCFOPModel=IObject<TCFOPModel>;
 
+  TCFOPModel = class
   private
+    [weak] mySelf: ITCFOPModel;
     vIConexao : IConexao;
 
-    FCFOPsLista: IList<TCFOPModel>;
+    FCFOPsLista: IList<ITCFOPModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -69,7 +73,7 @@ type
     FCSOSN: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetCFOPsLista(const Value: IList<TCFOPModel>);
+    procedure SetCFOPsLista(const Value: IList<ITCFOPModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -168,20 +172,22 @@ type
     property DESCONTO_ICMS_BASE_PIS_COFINS: Variant read FDESCONTO_ICMS_BASE_PIS_COFINS write SetDESCONTO_ICMS_BASE_PIS_COFINS;
     property OUTRAS_DESPESAS_ENTRADA: Variant read FOUTRAS_DESPESAS_ENTRADA write SetOUTRAS_DESPESAS_ENTRADA;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITCFOPModel;
 
     function Incluir     : String;
     function Salvar      : String;
-    function Alterar(pID : String) : TCFOPModel;
+    function Alterar(pID : String) : ITCFOPModel;
     function Excluir(pID : String) : String;
 
     procedure obterLista;
-    function carregaClasse(pId: String): TCFOPModel;
+    function carregaClasse(pId: String): ITCFOPModel;
 
     function obterCFOP(pIdCFOP: String): String;
 
-    property CFOPsLista: IList<TCFOPModel> read FCFOPsLista write SetCFOPsLista;
+    property CFOPsLista: IList<ITCFOPModel> read FCFOPsLista write SetCFOPsLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -206,38 +212,44 @@ begin
   self.Acao   := tacExcluir;
 end;
 
+class function TCFOPModel.getNewIface(pIConexao: IConexao): ITCFOPModel;
+begin
+  Result := TImplObjetoOwner<TCFOPModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TCFOPModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
   Result    := self.Salvar;
 end;
 
-function TCFOPModel.Alterar(pID: String): TCFOPModel;
+function TCFOPModel.Alterar(pID: String): ITCFOPModel;
 var
-  lCFOPModel : TCFOPModel;
+  lCFOPModel : ITCFOPModel;
 begin
-  lCFOPModel := TCFOPModel.Create(vIConexao);
+  lCFOPModel := TCFOPModel.getNewIface(vIConexao);
   try
-    lCFOPModel      := lCFOPModel.carregaClasse(pID);
-    lCFOPModel.Acao := tacAlterar;
+    lCFOPModel      := lCFOPModel.objeto.carregaClasse(pID);
+    lCFOPModel.objeto.Acao := tacAlterar;
     Result          := lCFOPModel;
   finally
   end;
 end;
 
-function TCFOPModel.carregaClasse(pId: String): TCFOPModel;
+function TCFOPModel.carregaClasse(pId: String): ITCFOPModel;
 var
-  lCFOPDao: TCFOPDao;
+  lCFOPDao: ITCFOPDao;
 begin
-  lCFOPDao := TCFOPDao.Create(vIConexao);
+  lCFOPDao := TCFOPDao.getNewIface(vIConexao);
   try
-    Result := lCFOPDao.carregaClasse(pId);
+    Result := lCFOPDao.objeto.carregaClasse(pId);
   finally
-    lCFOPDao.Free;
+    lCFOPDao:=nil;
   end;
 end;
 
-constructor TCFOPModel.Create(pIConexao : IConexao);
+constructor TCFOPModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -251,58 +263,58 @@ end;
 
 function TCFOPModel.obterCFOP(pIdCFOP: String): String;
 var
-  lCFOPDao: TCFOPDao;
+  lCFOPDao: ITCFOPDao;
 begin
-  lCFOPDao := TCFOPDao.Create(vIConexao);
+  lCFOPDao := TCFOPDao.getNewIface(vIConexao);
   try
-    Result := lCFOPDao.obterCFOP(pIdCFOP);
+    Result := lCFOPDao.objeto.obterCFOP(pIdCFOP);
   finally
-    lCFOPDao.Free;
+    lCFOPDao:=nil;
   end;
 end;
 
 procedure TCFOPModel.obterLista;
 var
-  lCFOPLista: TCFOPDao;
+  lCFOPLista: ITCFOPDao;
 begin
-  lCFOPLista := TCFOPDao.Create(vIConexao);
+  lCFOPLista := TCFOPDao.getNewIface(vIConexao);
 
   try
-    lCFOPLista.TotalRecords    := FTotalRecords;
-    lCFOPLista.WhereView       := FWhereView;
-    lCFOPLista.CountView       := FCountView;
-    lCFOPLista.OrderView       := FOrderView;
-    lCFOPLista.StartRecordView := FStartRecordView;
-    lCFOPLista.LengthPageView  := FLengthPageView;
-    lCFOPLista.IDRecordView    := FIDRecordView;
+    lCFOPLista.objeto.TotalRecords    := FTotalRecords;
+    lCFOPLista.objeto.WhereView       := FWhereView;
+    lCFOPLista.objeto.CountView       := FCountView;
+    lCFOPLista.objeto.OrderView       := FOrderView;
+    lCFOPLista.objeto.StartRecordView := FStartRecordView;
+    lCFOPLista.objeto.LengthPageView  := FLengthPageView;
+    lCFOPLista.objeto.IDRecordView    := FIDRecordView;
 
-    lCFOPLista.obterLista;
+    lCFOPLista.objeto.obterLista;
 
-    FTotalRecords  := lCFOPLista.TotalRecords;
-    FCFOPsLista := lCFOPLista.CFOPsLista;
+    FTotalRecords  := lCFOPLista.objeto.TotalRecords;
+    FCFOPsLista := lCFOPLista.objeto.CFOPsLista;
 
   finally
-    lCFOPLista.Free;
+    lCFOPLista:=nil;
   end;
 end;
 
 function TCFOPModel.Salvar: String;
 var
-  lCFOPDao: TCFOPDao;
+  lCFOPDao: ITCFOPDao;
 begin
-  lCFOPDao := TCFOPDao.Create(vIConexao);
+  lCFOPDao := TCFOPDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lCFOPDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lCFOPDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lCFOPDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lCFOPDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lCFOPDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lCFOPDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lCFOPDao.Free;
+    lCFOPDao:=nil;
   end;
 end;
 

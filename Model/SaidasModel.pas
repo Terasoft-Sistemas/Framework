@@ -389,18 +389,18 @@ end;
 
 procedure TSaidasModel.GetDadosCFOP;
 var
-  lCFOPModel : TCFOPModel;
+  lCFOPModel : ITCFOPModel;
 begin
   if Self.FCFOP_ID = '' then
     Exit;
 
-  lCFOPModel := TCFOPModel.Create(vIConexao);
+  lCFOPModel := TCFOPModel.getNewIface(vIConexao);
   try
-    lCFOPModel     := lCFOPModel.carregaClasse(Self.FCFOP_ID);
-    self.FCFOP_SAI := lCFOPModel.CFOP;
+    lCFOPModel     := lCFOPModel.objeto.carregaClasse(Self.FCFOP_ID);
+    self.FCFOP_SAI := lCFOPModel.objeto.CFOP;
 
   finally
-    lCFOPModel.Free;
+    lCFOPModel:=nil;
   end;
 end;
 

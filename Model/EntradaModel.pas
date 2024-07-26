@@ -1294,26 +1294,26 @@ end;
 
 function TEntradaModel.ValidaCFOP(pCFOP: String): String;
 var
- lCFOPModel : TCFOPModel;
+ lCFOPModel : ITCFOPModel;
 begin
-  lCFOPModel := TCFOPModel.Create(vIConexao);
+  lCFOPModel := TCFOPModel.getNewIface(vIConexao);
 
   try
-    lCFOPModel.WhereView := ' and CFOP.CFOP = '+QuotedStr(pCFOP)+' and CFOP.CFOP_REFERENCIA is not NULL ';
+    lCFOPModel.objeto.WhereView := ' and CFOP.CFOP = '+QuotedStr(pCFOP)+' and CFOP.CFOP_REFERENCIA is not NULL ';
 
-    lCFOPModel.obterLista;
+    lCFOPModel.objeto.obterLista;
 
-    if lCFOPModel.TotalRecords > 0 then
+    if lCFOPModel.objeto.TotalRecords > 0 then
     begin
-      lCFOPModel.WhereView := 'and CFOP.CFOP = '+QuotedStr(lCFOPModel.CFOPsLista[0].CFOP_REFERENCIA);
-      lCFOPModel.obterLista;
+      lCFOPModel.objeto.WhereView := 'and CFOP.CFOP = '+QuotedStr(lCFOPModel.objeto.CFOPsLista.First.objeto.CFOP_REFERENCIA);
+      lCFOPModel.objeto.obterLista;
 
-      if lCFOPModel.TotalRecords > 0 then
-        Result := lCFOPModel.CFOPsLista[0].ID;
+      if lCFOPModel.objeto.TotalRecords > 0 then
+        Result := lCFOPModel.objeto.CFOPsLista.First.objeto.ID;
     end;
 
   finally
-     lCFOPModel.Free;
+     lCFOPModel := nil;
   end
 end;
 
