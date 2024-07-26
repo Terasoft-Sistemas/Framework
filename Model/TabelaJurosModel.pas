@@ -9,11 +9,13 @@ uses
   Interfaces.Conexao,
   FireDAC.Comp.Client,
   PortadorModel,
+  Terasoft.Framework.ObjectIface,
   TabelaJurosDiaModel;
 
 type
+  TTabelaJurosModel = class;
+  ITTabelaJurosModel=IObject<TTabelaJurosModel>;
   TTabelaJurosModel = class
-
   private
     vIConexao : IConexao;
     FTabelaJurossLista: IList<TTabelaJurosModel>;
