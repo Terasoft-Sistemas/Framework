@@ -167,7 +167,7 @@ var
   lFinanceiroPedidoModel : TFinanceiroPedidoModel;
   lFinanceiroPedidoDao : TFinanceiroPedidoDao;
 
-  lTotal, lValorParcela, lIndice, lValorAcrescimo : Extended;
+  lTotal, lValorParcela, lIndice, lValorAcrescimo, lValorLiquido : Extended;
 
 begin
     lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
@@ -179,10 +179,12 @@ begin
     if pNovaParcela < (lFinanceiroPedidoModel.VALOR_PARCELA-0.99) then
       CriaException('Arredondamento da parcela não pode ser superior a R$ 0.99');
 
+    lValorLiquido := (StrToFloat(lFinanceiroPedidoModel.VALOR_LIQUIDO) + StrToFloat(lFinanceiroPedidoModel.VALOR_SEG_PRESTAMISTA));
+
     lIndice         := (pNovaParcela* StrToFloat(lFinanceiroPedidoModel.INDCE_APLICADO))/StrToFloat(lFinanceiroPedidoModel.VALOR_PARCELA);
-    lValorParcela   := (StrToFloat(lFinanceiroPedidoModel.VALOR_LIQUIDO) + StrToFloat(lFinanceiroPedidoModel.VALOR_SEG_PRESTAMISTA))*lIndice;
-    lTotal          := (lValorParcela * StrToInt(lFinanceiroPedidoModel.QUANTIDADE_PARCELAS));
-    lValorAcrescimo := lTotal - StrToFloat(lFinanceiroPedidoModel.VALOR_LIQUIDO)-StrToFloat(lFinanceiroPedidoModel.VALOR_SEG_PRESTAMISTA);
+    lValorParcela   := lValorLiquido*lIndice;
+    lTotal          := lValorParcela * StrToInt(lFinanceiroPedidoModel.QUANTIDADE_PARCELAS);
+    lValorAcrescimo := lTotal - lValorLiquido;
 
     lFinanceiroPedidoDao.UpdateArredondaParcela(lTotal, lValorParcela, lIndice, lValorAcrescimo, pID_Financeiro);
 

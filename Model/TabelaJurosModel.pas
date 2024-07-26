@@ -145,10 +145,9 @@ var
   lJuros,
   lValorGerar,
   lValorParcela,
-  lPercentualJuros,
-  lCoeficienteJuros,
-  lCoeficienteJurosDias : Double;
+  lPercentualJuros: Double;
 
+  lCoeficienteJurosDias, lCoeficienteJuros : Extended;
 
   lMemTable      : TFDMemTable;
   lPortadorModel : ITPortadorModel;
@@ -238,7 +237,7 @@ begin
         if self.TabelaJurossLista[i].INDCE > 0 then
         begin
           lValorParcela     := lTotal * (self.TabelaJurossLista[i].INDCE * lCoeficienteJurosDias);
-          lCoeficienteJuros := (self.TabelaJurossLista[i].INDCE * lCoeficienteJurosDias);
+          lCoeficienteJuros := StrToFloat(self.TabelaJurossLista[i].INDCE) * lCoeficienteJurosDias;
           lValorGerar       := lValorParcela * StrToInt(self.TabelaJurossLista[i].CODIGO);
           lPercentualJuros  := (lValorGerar - lTotal) / lTotal * 100;
         end
@@ -306,6 +305,8 @@ begin
         lValorParcela    := lTotal * self.TabelaJurossLista[i].INDCE;
         lValorGerar      := lValorParcela * StrToInt(self.TabelaJurossLista[i].CODIGO);
         lPercentualJuros := (lValorGerar - lTotal) / lTotal * 100;
+        lCoeficienteJuros := StrToFloat(self.TabelaJurossLista[i].INDCE) * lCoeficienteJurosDias;
+
       end
       else
       begin
