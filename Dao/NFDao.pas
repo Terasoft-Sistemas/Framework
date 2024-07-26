@@ -12,16 +12,20 @@ uses
   Terasoft.ConstrutorDao,
   Terasoft.FuncoesTexto,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TNFDao = class
+  TNFDao = class;
+  ITNFDao=IObject<TNFDao>;
 
+  TNFDao = class
   private
+    [weak] mySelf: ITNFDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FNFLista: IList<TNFModel>;
+    FNFLista: IList<ITNFModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -30,7 +34,7 @@ type
     FWhereView: String;
     FTotalRecords: Integer;
     FIDPedidoView: Integer;
-    procedure SetNFLista(const Value: IList<TNFModel>);
+    procedure SetNFLista(const Value: IList<ITNFModel>);
     procedure SetCountView(const Value: String);
     procedure SetIDPedidoView(const Value: Integer);
     procedure SetIDRecordView(const Value: Integer);
@@ -44,7 +48,7 @@ type
     procedure obterTotalRegistros;
 
   public
-    property NFLista: IList<TNFModel> read FNFLista write SetNFLista;
+    property NFLista: IList<ITNFModel> read FNFLista write SetNFLista;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
     property CountView: String read FCountView write SetCountView;
@@ -54,18 +58,20 @@ type
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property IDPedidoView: Integer read FIDPedidoView write SetIDPedidoView;
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function incluir(pNFModel: TNFModel): String;
-    function alterar(pNFModel: TNFModel): String;
-    function excluir(pNFModel: TNFModel): String;
+    class function getNewIface(pIConexao: IConexao): ITNFDao;
 
-    function carregaClasse(ID: String): TNFModel;
+    function incluir(pNFModel: ITNFModel): String;
+    function alterar(pNFModel: ITNFModel): String;
+    function excluir(pNFModel: ITNFModel): String;
+
+    function carregaClasse(ID: String): ITNFModel;
     procedure obterLista;
     procedure obterListaNFe;
 
-    procedure setParams(var pQry: TFDQuery; pNFModel: TNFModel);
+    procedure setParams(var pQry: TFDQuery; pNFModel: ITNFModel);
 
 end;
 
@@ -76,7 +82,7 @@ uses
 
 { TNFDao }
 
-constructor TNFDao.Create(pIConexao : IConexao);
+constructor TNFDao._Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -90,29 +96,35 @@ begin
   inherited;
 end;
 
-function TNFDao.excluir(pNFModel: TNFModel): String;
+function TNFDao.excluir(pNFModel: ITNFModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from NF where NUMERO_NF = :NUMERO_NF',[pNFModel.NUMERO_NF]);
+   lQry.ExecSQL('delete from NF where NUMERO_NF = :NUMERO_NF',[pNFModel.objeto.NUMERO_NF]);
    lQry.ExecSQL;
-   Result := pNFModel.NUMERO_NF;
+   Result := pNFModel.objeto.NUMERO_NF;
 
   finally
     lQry.Free;
   end;
 end;
 
-function TNFDao.carregaClasse(ID: String): TNFModel;
+class function TNFDao.getNewIface(pIConexao: IConexao): ITNFDao;
+begin
+  Result := TImplObjetoOwner<TNFDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TNFDao.carregaClasse(ID: String): ITNFModel;
 var
   lQry: TFDQuery;
-  ANFModel: TNFModel;
+  ANFModel: ITNFModel;
 begin
   lQry := vIConexao.CriarQuery;
-  ANFModel := TNFModel.Create(vIConexao);
+  ANFModel := TNFModel.getNewIface(vIConexao);
   Result   := ANFModel;
 
   try
@@ -122,147 +134,147 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    ANFModel.NUMERO_NF                    := lQry.FieldByName('NUMERO_NF').AsString;
-    ANFModel.SERIE_NF                     := lQry.FieldByName('SERIE_NF').AsString;
-    ANFModel.CODIGO_CLI                   := lQry.FieldByName('CODIGO_CLI').AsString;
-    ANFModel.CODIGO_VEN                   := lQry.FieldByName('CODIGO_VEN').AsString;
-    ANFModel.CODIGO_PORT                  := lQry.FieldByName('CODIGO_PORT').AsString;
-    ANFModel.CODIGO_TIP                   := lQry.FieldByName('CODIGO_TIP').AsString;
-    ANFModel.DATA_NF                      := lQry.FieldByName('DATA_NF').AsString;
-    ANFModel.VALOR_NF                     := lQry.FieldByName('VALOR_NF').AsString;
-    ANFModel.DESC_NF                      := lQry.FieldByName('DESC_NF').AsString;
-    ANFModel.ACRES_NF                     := lQry.FieldByName('ACRES_NF').AsString;
-    ANFModel.TOTAL_NF                     := lQry.FieldByName('TOTAL_NF').AsString;
-    ANFModel.BICMS_NF                     := lQry.FieldByName('BICMS_NF').AsString;
-    ANFModel.VICMS_NF                     := lQry.FieldByName('VICMS_NF').AsString;
-    ANFModel.ICMS_NF                      := lQry.FieldByName('ICMS_NF').AsString;
-    ANFModel.USUARIO_NF                   := lQry.FieldByName('USUARIO_NF').AsString;
-    ANFModel.NUMERO_PED                   := lQry.FieldByName('NUMERO_PED').AsString;
-    ANFModel.TIPO_NF                      := lQry.FieldByName('TIPO_NF').AsString;
-    ANFModel.STATUS_NF                    := lQry.FieldByName('STATUS_NF').AsString;
-    ANFModel.DESCONTO_NF                  := lQry.FieldByName('DESCONTO_NF').AsString;
-    ANFModel.CFOP_NF                      := lQry.FieldByName('CFOP_NF').AsString;
-    ANFModel.FISCO_NF                     := lQry.FieldByName('FISCO_NF').AsString;
-    ANFModel.OBS_NF                       := lQry.FieldByName('OBS_NF').AsString;
-    ANFModel.NUMERO_ECF                   := lQry.FieldByName('NUMERO_ECF').AsString;
-    ANFModel.DATA_CANCELAMENTO            := lQry.FieldByName('DATA_CANCELAMENTO').AsString;
-    ANFModel.PESO_LIQUIDO                 := lQry.FieldByName('PESO_LIQUIDO').AsString;
-    ANFModel.PESO_BRUTO                   := lQry.FieldByName('PESO_BRUTO').AsString;
-    ANFModel.VALOR_EXTENSO                := lQry.FieldByName('VALOR_EXTENSO').AsString;
-    ANFModel.QTDE_VOLUME                  := lQry.FieldByName('QTDE_VOLUME').AsString;
-    ANFModel.ESPECIE_VOLUME               := lQry.FieldByName('ESPECIE_VOLUME').AsString;
-    ANFModel.TRANSPORTADORA               := lQry.FieldByName('TRANSPORTADORA').AsString;
-    ANFModel.DATA_SAIDA                   := lQry.FieldByName('DATA_SAIDA').AsString;
-    ANFModel.FRETE                        := lQry.FieldByName('FRETE').AsString;
-    ANFModel.CONDICOES_PAGTO              := lQry.FieldByName('CONDICOES_PAGTO').AsString;
-    ANFModel.LOJA                         := lQry.FieldByName('LOJA').AsString;
-    ANFModel.ISENTA_NF                    := lQry.FieldByName('ISENTA_NF').AsString;
-    ANFModel.OUTROS_NF                    := lQry.FieldByName('OUTROS_NF').AsString;
-    ANFModel.BASE_ST_NF                   := lQry.FieldByName('BASE_ST_NF').AsString;
-    ANFModel.ICMS_ST                      := lQry.FieldByName('ICMS_ST').AsString;
-    ANFModel.IPI_NF                       := lQry.FieldByName('IPI_NF').AsString;
-    ANFModel.ID_NF3                       := lQry.FieldByName('ID_NF3').AsString;
-    ANFModel.RECIBO_NFE                   := lQry.FieldByName('RECIBO_NFE').AsString;
-    ANFModel.PROTOCOLO_NFE                := lQry.FieldByName('PROTOCOLO_NFE').AsString;
-    ANFModel.NFE                          := lQry.FieldByName('NFE').AsString;
-    ANFModel.AUTORIZADA                   := lQry.FieldByName('AUTORIZADA').AsString;
-    ANFModel.MODELO                       := lQry.FieldByName('MODELO').AsString;
-    ANFModel.VLRENTRADA_NF                := lQry.FieldByName('VLRENTRADA_NF').AsString;
-    ANFModel.QTPARCELAS                   := lQry.FieldByName('QTPARCELAS').AsString;
-    ANFModel.NUMERO_SERIE_ECF             := lQry.FieldByName('NUMERO_SERIE_ECF').AsString;
-    ANFModel.CCF_CUPOM                    := lQry.FieldByName('CCF_CUPOM').AsString;
-    ANFModel.EMAIL_NFE                    := lQry.FieldByName('EMAIL_NFE').AsString;
-    ANFModel.NOME_XML                     := lQry.FieldByName('NOME_XML').AsString;
-    ANFModel.STATUS                       := lQry.FieldByName('STATUS').AsString;
-    ANFModel.PCTE                         := lQry.FieldByName('PCTE').AsString;
-    ANFModel.HEM                          := lQry.FieldByName('HEM').AsString;
-    ANFModel.DR                           := lQry.FieldByName('DR').AsString;
-    ANFModel.AIH                          := lQry.FieldByName('AIH').AsString;
-    ANFModel.VEND                         := lQry.FieldByName('VEND').AsString;
-    ANFModel.CONV                         := lQry.FieldByName('CONV').AsString;
-    ANFModel.ID_INFO_COMPLEMENTAR         := lQry.FieldByName('ID_INFO_COMPLEMENTAR').AsString;
-    ANFModel.TIPO_FRETE                   := lQry.FieldByName('TIPO_FRETE').AsString;
-    ANFModel.TRANSPORTADORA_ID            := lQry.FieldByName('TRANSPORTADORA_ID').AsString;
-    ANFModel.VCREDICMSSN                  := lQry.FieldByName('VCREDICMSSN').AsString;
-    ANFModel.VPIS                         := lQry.FieldByName('VPIS').AsString;
-    ANFModel.VCOFINS                      := lQry.FieldByName('VCOFINS').AsString;
-    ANFModel.ID                           := lQry.FieldByName('ID').AsString;
-    ANFModel.VTOTTRIB                     := lQry.FieldByName('VTOTTRIB').AsString;
-    ANFModel.OBS_FISCAL                   := lQry.FieldByName('OBS_FISCAL').AsString;
-    ANFModel.INFO_COMPLEMENTAR            := lQry.FieldByName('INFO_COMPLEMENTAR').AsString;
-    ANFModel.CFOP_ID                      := lQry.FieldByName('CFOP_ID').AsString;
-    ANFModel.UF_EMBARQUE                  := lQry.FieldByName('UF_EMBARQUE').AsString;
-    ANFModel.LOCAL_EMBARQUE               := lQry.FieldByName('LOCAL_EMBARQUE').AsString;
-    ANFModel.VSEG                         := lQry.FieldByName('VSEG').AsString;
-    ANFModel.VII                          := lQry.FieldByName('VII').AsString;
-    ANFModel.VALOR_SUFRAMA                := lQry.FieldByName('VALOR_SUFRAMA').AsString;
-    ANFModel.XML_NFE                      := lQry.FieldByName('XML_NFE').AsString;
-    ANFModel.STATUS_TRANSMISSAO           := lQry.FieldByName('STATUS_TRANSMISSAO').AsString;
-    ANFModel.HORA_SAIDA                   := lQry.FieldByName('HORA_SAIDA').AsString;
-    ANFModel.VTOTTRIB_FEDERAL             := lQry.FieldByName('VTOTTRIB_FEDERAL').AsString;
-    ANFModel.VTOTTRIB_ESTADUAL            := lQry.FieldByName('VTOTTRIB_ESTADUAL').AsString;
-    ANFModel.VTOTTRIB_MUNICIPAL           := lQry.FieldByName('VTOTTRIB_MUNICIPAL').AsString;
-    ANFModel.CTR_IMPRESSAO_NF             := lQry.FieldByName('CTR_IMPRESSAO_NF').AsString;
-    ANFModel.VALOR_PAGO                   := lQry.FieldByName('VALOR_PAGO').AsString;
-    ANFModel.XPED                         := lQry.FieldByName('XPED').AsString;
-    ANFModel.CNPJ_CPF_CONSUMIDOR          := lQry.FieldByName('CNPJ_CPF_CONSUMIDOR').AsString;
-    ANFModel.DEVOLUCAO_ID                 := lQry.FieldByName('DEVOLUCAO_ID').AsString;
-    ANFModel.PEDIDO_ID                    := lQry.FieldByName('PEDIDO_ID').AsString;
-    ANFModel.OS_ID                        := lQry.FieldByName('OS_ID').AsString;
-    ANFModel.ORCAMENTO_ID                 := lQry.FieldByName('ORCAMENTO_ID').AsString;
-    ANFModel.SAIDAS_ID                    := lQry.FieldByName('SAIDAS_ID').AsString;
-    ANFModel.REF_CUF                      := lQry.FieldByName('REF_CUF').AsString;
-    ANFModel.REF_AAMM                     := lQry.FieldByName('REF_AAMM').AsString;
-    ANFModel.REF_CNPJ                     := lQry.FieldByName('REF_CNPJ').AsString;
-    ANFModel.REF_MOD                      := lQry.FieldByName('REF_MOD').AsString;
-    ANFModel.REF_SERIE                    := lQry.FieldByName('REF_SERIE').AsString;
-    ANFModel.REF_NNF                      := lQry.FieldByName('REF_NNF').AsString;
-    ANFModel.VFCP                         := lQry.FieldByName('VFCP').AsString;
-    ANFModel.VFCPST                       := lQry.FieldByName('VFCPST').AsString;
-    ANFModel.VFCPSTRET                    := lQry.FieldByName('VFCPSTRET').AsString;
-    ANFModel.VFCPUFDEST                   := lQry.FieldByName('VFCPUFDEST').AsString;
-    ANFModel.VICMSUFDEST                  := lQry.FieldByName('VICMSUFDEST').AsString;
-    ANFModel.VICMSUFREMET                 := lQry.FieldByName('VICMSUFREMET').AsString;
-    ANFModel.INDPRES                      := lQry.FieldByName('INDPRES').AsString;
-    ANFModel.GNRE                         := lQry.FieldByName('GNRE').AsString;
-    ANFModel.VDOLAR                       := lQry.FieldByName('VDOLAR').AsString;
-    ANFModel.NUMERO_PROCESSO              := lQry.FieldByName('NUMERO_PROCESSO').AsString;
-    ANFModel.GNRE_IMPRESSO                := lQry.FieldByName('GNRE_IMPRESSO').AsString;
-    ANFModel.TRA_PLACA                    := lQry.FieldByName('TRA_PLACA').AsString;
-    ANFModel.TRA_RNTC                     := lQry.FieldByName('TRA_RNTC').AsString;
-    ANFModel.TRA_UF                       := lQry.FieldByName('TRA_UF').AsString;
-    ANFModel.TRA_MARCA                    := lQry.FieldByName('TRA_MARCA').AsString;
-    ANFModel.TRA_NUMERACAO                := lQry.FieldByName('TRA_NUMERACAO').AsString;
-    ANFModel.TRANSPORTADORA_REDESPACHO_ID := lQry.FieldByName('TRANSPORTADORA_REDESPACHO_ID').AsString;
-    ANFModel.DESPESA_IMPORTACAO           := lQry.FieldByName('DESPESA_IMPORTACAO').AsString;
-    ANFModel.DATA_HORA_AUTORIZACAO        := lQry.FieldByName('DATA_HORA_AUTORIZACAO').AsString;
-    ANFModel.VIPIDEVOL                    := lQry.FieldByName('VIPIDEVOL').AsString;
-    ANFModel.N_SERIE_SAT                  := lQry.FieldByName('N_SERIE_SAT').AsString;
-    ANFModel.CAIXA_SAT                    := lQry.FieldByName('CAIXA_SAT').AsString;
-    ANFModel.AGRUPAMENTO_FATURA           := lQry.FieldByName('AGRUPAMENTO_FATURA').AsString;
-    ANFModel.CONSIGNADO_ID                := lQry.FieldByName('CONSIGNADO_ID').AsString;
-    ANFModel.CONSIGNADO_STATUS            := lQry.FieldByName('CONSIGNADO_STATUS').AsString;
-    ANFModel.PESO_LIQUIDO_NEW             := lQry.FieldByName('PESO_LIQUIDO_NEW').AsString;
-    ANFModel.PESO_BRUTO_NEW               := lQry.FieldByName('PESO_BRUTO_NEW').AsString;
-    ANFModel.STATUS_PENDENTE              := lQry.FieldByName('STATUS_PENDENTE').AsString;
-    ANFModel.CNF                          := lQry.FieldByName('CNF').AsString;
-    ANFModel.VICMSDESON                   := lQry.FieldByName('VICMSDESON').AsString;
-    ANFModel.VICMSSTRET                   := lQry.FieldByName('VICMSSTRET').AsString;
-    ANFModel.SYSTIME                      := lQry.FieldByName('SYSTIME').AsString;
-    ANFModel.ENTRADA_ID                   := lQry.FieldByName('ENTRADA_ID').AsString;
-    ANFModel.INTERMEDIADOR_CNPJ           := lQry.FieldByName('INTERMEDIADOR_CNPJ').AsString;
-    ANFModel.INTERMEDIADOR_NOME           := lQry.FieldByName('INTERMEDIADOR_NOME').AsString;
-    ANFModel.LOJA_ORIGEM                  := lQry.FieldByName('LOJA_ORIGEM').AsString;
-    ANFModel.ENTREGA_ENDERECO             := lQry.FieldByName('ENTREGA_ENDERECO').AsString;
-    ANFModel.ENTREGA_COMPLEMENTO          := lQry.FieldByName('ENTREGA_COMPLEMENTO').AsString;
-    ANFModel.ENTREGA_NUMERO               := lQry.FieldByName('ENTREGA_NUMERO').AsString;
-    ANFModel.ENTREGA_BAIRRO               := lQry.FieldByName('ENTREGA_BAIRRO').AsString;
-    ANFModel.ENTREGA_CIDADE               := lQry.FieldByName('ENTREGA_CIDADE').AsString;
-    ANFModel.ENTREGA_CEP                  := lQry.FieldByName('ENTREGA_CEP').AsString;
-    ANFModel.ENTREGA_UF                   := lQry.FieldByName('ENTREGA_UF').AsString;
-    ANFModel.ENTREGA_COD_MUNICIPIO        := lQry.FieldByName('ENTREGA_COD_MUNICIPIO').AsString;
-    ANFModel.WEB_PEDIDO_ID                := lQry.FieldByName('WEB_PEDIDO_ID').AsString;
-    ANFModel.TRANSFERENCIA_ID             := lQry.FieldByName('TRANSFERENCIA_ID').AsString;
+    ANFModel.objeto.NUMERO_NF                    := lQry.FieldByName('NUMERO_NF').AsString;
+    ANFModel.objeto.SERIE_NF                     := lQry.FieldByName('SERIE_NF').AsString;
+    ANFModel.objeto.CODIGO_CLI                   := lQry.FieldByName('CODIGO_CLI').AsString;
+    ANFModel.objeto.CODIGO_VEN                   := lQry.FieldByName('CODIGO_VEN').AsString;
+    ANFModel.objeto.CODIGO_PORT                  := lQry.FieldByName('CODIGO_PORT').AsString;
+    ANFModel.objeto.CODIGO_TIP                   := lQry.FieldByName('CODIGO_TIP').AsString;
+    ANFModel.objeto.DATA_NF                      := lQry.FieldByName('DATA_NF').AsString;
+    ANFModel.objeto.VALOR_NF                     := lQry.FieldByName('VALOR_NF').AsString;
+    ANFModel.objeto.DESC_NF                      := lQry.FieldByName('DESC_NF').AsString;
+    ANFModel.objeto.ACRES_NF                     := lQry.FieldByName('ACRES_NF').AsString;
+    ANFModel.objeto.TOTAL_NF                     := lQry.FieldByName('TOTAL_NF').AsString;
+    ANFModel.objeto.BICMS_NF                     := lQry.FieldByName('BICMS_NF').AsString;
+    ANFModel.objeto.VICMS_NF                     := lQry.FieldByName('VICMS_NF').AsString;
+    ANFModel.objeto.ICMS_NF                      := lQry.FieldByName('ICMS_NF').AsString;
+    ANFModel.objeto.USUARIO_NF                   := lQry.FieldByName('USUARIO_NF').AsString;
+    ANFModel.objeto.NUMERO_PED                   := lQry.FieldByName('NUMERO_PED').AsString;
+    ANFModel.objeto.TIPO_NF                      := lQry.FieldByName('TIPO_NF').AsString;
+    ANFModel.objeto.STATUS_NF                    := lQry.FieldByName('STATUS_NF').AsString;
+    ANFModel.objeto.DESCONTO_NF                  := lQry.FieldByName('DESCONTO_NF').AsString;
+    ANFModel.objeto.CFOP_NF                      := lQry.FieldByName('CFOP_NF').AsString;
+    ANFModel.objeto.FISCO_NF                     := lQry.FieldByName('FISCO_NF').AsString;
+    ANFModel.objeto.OBS_NF                       := lQry.FieldByName('OBS_NF').AsString;
+    ANFModel.objeto.NUMERO_ECF                   := lQry.FieldByName('NUMERO_ECF').AsString;
+    ANFModel.objeto.DATA_CANCELAMENTO            := lQry.FieldByName('DATA_CANCELAMENTO').AsString;
+    ANFModel.objeto.PESO_LIQUIDO                 := lQry.FieldByName('PESO_LIQUIDO').AsString;
+    ANFModel.objeto.PESO_BRUTO                   := lQry.FieldByName('PESO_BRUTO').AsString;
+    ANFModel.objeto.VALOR_EXTENSO                := lQry.FieldByName('VALOR_EXTENSO').AsString;
+    ANFModel.objeto.QTDE_VOLUME                  := lQry.FieldByName('QTDE_VOLUME').AsString;
+    ANFModel.objeto.ESPECIE_VOLUME               := lQry.FieldByName('ESPECIE_VOLUME').AsString;
+    ANFModel.objeto.TRANSPORTADORA               := lQry.FieldByName('TRANSPORTADORA').AsString;
+    ANFModel.objeto.DATA_SAIDA                   := lQry.FieldByName('DATA_SAIDA').AsString;
+    ANFModel.objeto.FRETE                        := lQry.FieldByName('FRETE').AsString;
+    ANFModel.objeto.CONDICOES_PAGTO              := lQry.FieldByName('CONDICOES_PAGTO').AsString;
+    ANFModel.objeto.LOJA                         := lQry.FieldByName('LOJA').AsString;
+    ANFModel.objeto.ISENTA_NF                    := lQry.FieldByName('ISENTA_NF').AsString;
+    ANFModel.objeto.OUTROS_NF                    := lQry.FieldByName('OUTROS_NF').AsString;
+    ANFModel.objeto.BASE_ST_NF                   := lQry.FieldByName('BASE_ST_NF').AsString;
+    ANFModel.objeto.ICMS_ST                      := lQry.FieldByName('ICMS_ST').AsString;
+    ANFModel.objeto.IPI_NF                       := lQry.FieldByName('IPI_NF').AsString;
+    ANFModel.objeto.ID_NF3                       := lQry.FieldByName('ID_NF3').AsString;
+    ANFModel.objeto.RECIBO_NFE                   := lQry.FieldByName('RECIBO_NFE').AsString;
+    ANFModel.objeto.PROTOCOLO_NFE                := lQry.FieldByName('PROTOCOLO_NFE').AsString;
+    ANFModel.objeto.NFE                          := lQry.FieldByName('NFE').AsString;
+    ANFModel.objeto.AUTORIZADA                   := lQry.FieldByName('AUTORIZADA').AsString;
+    ANFModel.objeto.MODELO                       := lQry.FieldByName('MODELO').AsString;
+    ANFModel.objeto.VLRENTRADA_NF                := lQry.FieldByName('VLRENTRADA_NF').AsString;
+    ANFModel.objeto.QTPARCELAS                   := lQry.FieldByName('QTPARCELAS').AsString;
+    ANFModel.objeto.NUMERO_SERIE_ECF             := lQry.FieldByName('NUMERO_SERIE_ECF').AsString;
+    ANFModel.objeto.CCF_CUPOM                    := lQry.FieldByName('CCF_CUPOM').AsString;
+    ANFModel.objeto.EMAIL_NFE                    := lQry.FieldByName('EMAIL_NFE').AsString;
+    ANFModel.objeto.NOME_XML                     := lQry.FieldByName('NOME_XML').AsString;
+    ANFModel.objeto.STATUS                       := lQry.FieldByName('STATUS').AsString;
+    ANFModel.objeto.PCTE                         := lQry.FieldByName('PCTE').AsString;
+    ANFModel.objeto.HEM                          := lQry.FieldByName('HEM').AsString;
+    ANFModel.objeto.DR                           := lQry.FieldByName('DR').AsString;
+    ANFModel.objeto.AIH                          := lQry.FieldByName('AIH').AsString;
+    ANFModel.objeto.VEND                         := lQry.FieldByName('VEND').AsString;
+    ANFModel.objeto.CONV                         := lQry.FieldByName('CONV').AsString;
+    ANFModel.objeto.ID_INFO_COMPLEMENTAR         := lQry.FieldByName('ID_INFO_COMPLEMENTAR').AsString;
+    ANFModel.objeto.TIPO_FRETE                   := lQry.FieldByName('TIPO_FRETE').AsString;
+    ANFModel.objeto.TRANSPORTADORA_ID            := lQry.FieldByName('TRANSPORTADORA_ID').AsString;
+    ANFModel.objeto.VCREDICMSSN                  := lQry.FieldByName('VCREDICMSSN').AsString;
+    ANFModel.objeto.VPIS                         := lQry.FieldByName('VPIS').AsString;
+    ANFModel.objeto.VCOFINS                      := lQry.FieldByName('VCOFINS').AsString;
+    ANFModel.objeto.ID                           := lQry.FieldByName('ID').AsString;
+    ANFModel.objeto.VTOTTRIB                     := lQry.FieldByName('VTOTTRIB').AsString;
+    ANFModel.objeto.OBS_FISCAL                   := lQry.FieldByName('OBS_FISCAL').AsString;
+    ANFModel.objeto.INFO_COMPLEMENTAR            := lQry.FieldByName('INFO_COMPLEMENTAR').AsString;
+    ANFModel.objeto.CFOP_ID                      := lQry.FieldByName('CFOP_ID').AsString;
+    ANFModel.objeto.UF_EMBARQUE                  := lQry.FieldByName('UF_EMBARQUE').AsString;
+    ANFModel.objeto.LOCAL_EMBARQUE               := lQry.FieldByName('LOCAL_EMBARQUE').AsString;
+    ANFModel.objeto.VSEG                         := lQry.FieldByName('VSEG').AsString;
+    ANFModel.objeto.VII                          := lQry.FieldByName('VII').AsString;
+    ANFModel.objeto.VALOR_SUFRAMA                := lQry.FieldByName('VALOR_SUFRAMA').AsString;
+    ANFModel.objeto.XML_NFE                      := lQry.FieldByName('XML_NFE').AsString;
+    ANFModel.objeto.STATUS_TRANSMISSAO           := lQry.FieldByName('STATUS_TRANSMISSAO').AsString;
+    ANFModel.objeto.HORA_SAIDA                   := lQry.FieldByName('HORA_SAIDA').AsString;
+    ANFModel.objeto.VTOTTRIB_FEDERAL             := lQry.FieldByName('VTOTTRIB_FEDERAL').AsString;
+    ANFModel.objeto.VTOTTRIB_ESTADUAL            := lQry.FieldByName('VTOTTRIB_ESTADUAL').AsString;
+    ANFModel.objeto.VTOTTRIB_MUNICIPAL           := lQry.FieldByName('VTOTTRIB_MUNICIPAL').AsString;
+    ANFModel.objeto.CTR_IMPRESSAO_NF             := lQry.FieldByName('CTR_IMPRESSAO_NF').AsString;
+    ANFModel.objeto.VALOR_PAGO                   := lQry.FieldByName('VALOR_PAGO').AsString;
+    ANFModel.objeto.XPED                         := lQry.FieldByName('XPED').AsString;
+    ANFModel.objeto.CNPJ_CPF_CONSUMIDOR          := lQry.FieldByName('CNPJ_CPF_CONSUMIDOR').AsString;
+    ANFModel.objeto.DEVOLUCAO_ID                 := lQry.FieldByName('DEVOLUCAO_ID').AsString;
+    ANFModel.objeto.PEDIDO_ID                    := lQry.FieldByName('PEDIDO_ID').AsString;
+    ANFModel.objeto.OS_ID                        := lQry.FieldByName('OS_ID').AsString;
+    ANFModel.objeto.ORCAMENTO_ID                 := lQry.FieldByName('ORCAMENTO_ID').AsString;
+    ANFModel.objeto.SAIDAS_ID                    := lQry.FieldByName('SAIDAS_ID').AsString;
+    ANFModel.objeto.REF_CUF                      := lQry.FieldByName('REF_CUF').AsString;
+    ANFModel.objeto.REF_AAMM                     := lQry.FieldByName('REF_AAMM').AsString;
+    ANFModel.objeto.REF_CNPJ                     := lQry.FieldByName('REF_CNPJ').AsString;
+    ANFModel.objeto.REF_MOD                      := lQry.FieldByName('REF_MOD').AsString;
+    ANFModel.objeto.REF_SERIE                    := lQry.FieldByName('REF_SERIE').AsString;
+    ANFModel.objeto.REF_NNF                      := lQry.FieldByName('REF_NNF').AsString;
+    ANFModel.objeto.VFCP                         := lQry.FieldByName('VFCP').AsString;
+    ANFModel.objeto.VFCPST                       := lQry.FieldByName('VFCPST').AsString;
+    ANFModel.objeto.VFCPSTRET                    := lQry.FieldByName('VFCPSTRET').AsString;
+    ANFModel.objeto.VFCPUFDEST                   := lQry.FieldByName('VFCPUFDEST').AsString;
+    ANFModel.objeto.VICMSUFDEST                  := lQry.FieldByName('VICMSUFDEST').AsString;
+    ANFModel.objeto.VICMSUFREMET                 := lQry.FieldByName('VICMSUFREMET').AsString;
+    ANFModel.objeto.INDPRES                      := lQry.FieldByName('INDPRES').AsString;
+    ANFModel.objeto.GNRE                         := lQry.FieldByName('GNRE').AsString;
+    ANFModel.objeto.VDOLAR                       := lQry.FieldByName('VDOLAR').AsString;
+    ANFModel.objeto.NUMERO_PROCESSO              := lQry.FieldByName('NUMERO_PROCESSO').AsString;
+    ANFModel.objeto.GNRE_IMPRESSO                := lQry.FieldByName('GNRE_IMPRESSO').AsString;
+    ANFModel.objeto.TRA_PLACA                    := lQry.FieldByName('TRA_PLACA').AsString;
+    ANFModel.objeto.TRA_RNTC                     := lQry.FieldByName('TRA_RNTC').AsString;
+    ANFModel.objeto.TRA_UF                       := lQry.FieldByName('TRA_UF').AsString;
+    ANFModel.objeto.TRA_MARCA                    := lQry.FieldByName('TRA_MARCA').AsString;
+    ANFModel.objeto.TRA_NUMERACAO                := lQry.FieldByName('TRA_NUMERACAO').AsString;
+    ANFModel.objeto.TRANSPORTADORA_REDESPACHO_ID := lQry.FieldByName('TRANSPORTADORA_REDESPACHO_ID').AsString;
+    ANFModel.objeto.DESPESA_IMPORTACAO           := lQry.FieldByName('DESPESA_IMPORTACAO').AsString;
+    ANFModel.objeto.DATA_HORA_AUTORIZACAO        := lQry.FieldByName('DATA_HORA_AUTORIZACAO').AsString;
+    ANFModel.objeto.VIPIDEVOL                    := lQry.FieldByName('VIPIDEVOL').AsString;
+    ANFModel.objeto.N_SERIE_SAT                  := lQry.FieldByName('N_SERIE_SAT').AsString;
+    ANFModel.objeto.CAIXA_SAT                    := lQry.FieldByName('CAIXA_SAT').AsString;
+    ANFModel.objeto.AGRUPAMENTO_FATURA           := lQry.FieldByName('AGRUPAMENTO_FATURA').AsString;
+    ANFModel.objeto.CONSIGNADO_ID                := lQry.FieldByName('CONSIGNADO_ID').AsString;
+    ANFModel.objeto.CONSIGNADO_STATUS            := lQry.FieldByName('CONSIGNADO_STATUS').AsString;
+    ANFModel.objeto.PESO_LIQUIDO_NEW             := lQry.FieldByName('PESO_LIQUIDO_NEW').AsString;
+    ANFModel.objeto.PESO_BRUTO_NEW               := lQry.FieldByName('PESO_BRUTO_NEW').AsString;
+    ANFModel.objeto.STATUS_PENDENTE              := lQry.FieldByName('STATUS_PENDENTE').AsString;
+    ANFModel.objeto.CNF                          := lQry.FieldByName('CNF').AsString;
+    ANFModel.objeto.VICMSDESON                   := lQry.FieldByName('VICMSDESON').AsString;
+    ANFModel.objeto.VICMSSTRET                   := lQry.FieldByName('VICMSSTRET').AsString;
+    ANFModel.objeto.SYSTIME                      := lQry.FieldByName('SYSTIME').AsString;
+    ANFModel.objeto.ENTRADA_ID                   := lQry.FieldByName('ENTRADA_ID').AsString;
+    ANFModel.objeto.INTERMEDIADOR_CNPJ           := lQry.FieldByName('INTERMEDIADOR_CNPJ').AsString;
+    ANFModel.objeto.INTERMEDIADOR_NOME           := lQry.FieldByName('INTERMEDIADOR_NOME').AsString;
+    ANFModel.objeto.LOJA_ORIGEM                  := lQry.FieldByName('LOJA_ORIGEM').AsString;
+    ANFModel.objeto.ENTREGA_ENDERECO             := lQry.FieldByName('ENTREGA_ENDERECO').AsString;
+    ANFModel.objeto.ENTREGA_COMPLEMENTO          := lQry.FieldByName('ENTREGA_COMPLEMENTO').AsString;
+    ANFModel.objeto.ENTREGA_NUMERO               := lQry.FieldByName('ENTREGA_NUMERO').AsString;
+    ANFModel.objeto.ENTREGA_BAIRRO               := lQry.FieldByName('ENTREGA_BAIRRO').AsString;
+    ANFModel.objeto.ENTREGA_CIDADE               := lQry.FieldByName('ENTREGA_CIDADE').AsString;
+    ANFModel.objeto.ENTREGA_CEP                  := lQry.FieldByName('ENTREGA_CEP').AsString;
+    ANFModel.objeto.ENTREGA_UF                   := lQry.FieldByName('ENTREGA_UF').AsString;
+    ANFModel.objeto.ENTREGA_COD_MUNICIPIO        := lQry.FieldByName('ENTREGA_COD_MUNICIPIO').AsString;
+    ANFModel.objeto.WEB_PEDIDO_ID                := lQry.FieldByName('WEB_PEDIDO_ID').AsString;
+    ANFModel.objeto.TRANSFERENCIA_ID             := lQry.FieldByName('TRANSFERENCIA_ID').AsString;
 
     Result := ANFModel;
 
@@ -271,7 +283,7 @@ begin
   end;
 end;
 
-function TNFDao.incluir(pNFModel: TNFModel): String;
+function TNFDao.incluir(pNFModel: ITNFModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -282,12 +294,12 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pNFModel.numero_nf := vIConexao.Generetor('gen_nf', true);
+    pNFModel.objeto.numero_nf := vIConexao.Generetor('gen_nf', true);
 
-    if pNFModel.MODELO = '65' then
-      pNFModel.numero_ecf := vIConexao.Generetor('GEN_NFCe')
-    else if pNFModel.MODELO = '55' then
-      pNFModel.numero_ecf := vIConexao.Generetor('GEN_NF2');
+    if pNFModel.objeto.MODELO = '65' then
+      pNFModel.objeto.numero_ecf := vIConexao.Generetor('GEN_NFCe')
+    else if pNFModel.objeto.MODELO = '55' then
+      pNFModel.objeto.numero_ecf := vIConexao.Generetor('GEN_NF2');
 
     setParams(lQry, pNFModel);
 
@@ -299,7 +311,7 @@ begin
   end;
 end;
 
-function TNFDao.alterar(pNFModel: TNFModel): String;
+function TNFDao.alterar(pNFModel: ITNFModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -312,7 +324,7 @@ begin
     setParams(lQry, pNFModel);
     lQry.ExecSQL;
 
-    Result := pNFModel.NUMERO_NF;
+    Result := pNFModel.objeto.NUMERO_NF;
 
   finally
     lQry.Free;
@@ -323,11 +335,11 @@ procedure TNFDao.obterListaNFe;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TNFModel;
+  modelo: ITNFModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FNFLista := TCollections.CreateList<TNFModel>(true);
+  FNFLista := TCollections.CreateList<ITNFModel>;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -367,19 +379,19 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TNFModel.Create(vIConexao);
+      modelo := TNFModel.getNewIface(vIConexao);
       FNFLista.Add(modelo);
 
-      modelo.NUMERO_NF                   := lQry.FieldByName('NUMERO_NF').AsString;
-      modelo.NUMERO_ECF                  := lQry.FieldByName('NUMERO_ECF').AsString;
-      modelo.NUMERO_PED                  := lQry.FieldByName('NUMERO_PED').AsString;
-      modelo.SERIE_NF                    := lQry.FieldByName('SERIE_NF').AsString;
-      modelo.DATA_NF                     := lQry.FieldByName('DATA_NF').AsString;
-      modelo.CLIENTE_NF                  := lQry.FieldByName('cliente_nome_cliente').AsString;
-      modelo.NOME_XML                    := lQry.FieldByName('NOME_XML').AsString;
-      modelo.TOTAL_NF                    := lQry.FieldByName('TOTAL_NF').AsString;
-      modelo.STATUS_NF                   := lQry.FieldByName('STATUS_NF').AsString;
-      modelo.PROTOCOLO_NFE               := lQry.FieldByName('PROTOCOLO_NFE').AsString;
+      modelo.objeto.NUMERO_NF                   := lQry.FieldByName('NUMERO_NF').AsString;
+      modelo.objeto.NUMERO_ECF                  := lQry.FieldByName('NUMERO_ECF').AsString;
+      modelo.objeto.NUMERO_PED                  := lQry.FieldByName('NUMERO_PED').AsString;
+      modelo.objeto.SERIE_NF                    := lQry.FieldByName('SERIE_NF').AsString;
+      modelo.objeto.DATA_NF                     := lQry.FieldByName('DATA_NF').AsString;
+      modelo.objeto.CLIENTE_NF                  := lQry.FieldByName('cliente_nome_cliente').AsString;
+      modelo.objeto.NOME_XML                    := lQry.FieldByName('NOME_XML').AsString;
+      modelo.objeto.TOTAL_NF                    := lQry.FieldByName('TOTAL_NF').AsString;
+      modelo.objeto.STATUS_NF                   := lQry.FieldByName('STATUS_NF').AsString;
+      modelo.objeto.PROTOCOLO_NFE               := lQry.FieldByName('PROTOCOLO_NFE').AsString;
 
       lQry.Next;
     end;
@@ -395,11 +407,11 @@ procedure TNFDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TNFModel;
+  modelo: ITNFModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FNFLista := TCollections.CreateList<TNFModel>(true);
+  FNFLista := TCollections.CreateList<ITNFModel>;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -456,20 +468,20 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TNFModel.Create(vIConexao);
+      modelo := TNFModel.getNewIface(vIConexao);
       FNFLista.Add(modelo);
 
-      modelo.NUMERO_NF                   := lQry.FieldByName('NUMERO_NF').AsString;
-      modelo.NUMERO_ECF                  := lQry.FieldByName('NUMERO_ECF').AsString;
-      modelo.NUMERO_PED                  := lQry.FieldByName('NUMERO_PED').AsString;
-      modelo.SERIE_NF                    := lQry.FieldByName('SERIE_NF').AsString;
-      modelo.MODELO                      := lQry.FieldByName('MODELO').AsString;
-      modelo.CODIGO_CLI                  := lQry.FieldByName('CODIGO_CLI').AsString;
-      modelo.DATA_NF                     := lQry.FieldByName('DATA_NF').AsString;
-      modelo.DATA_SAIDA                  := lQry.FieldByName('DATA_SAIDA').AsString;
-      modelo.CLIENTE_NF                  := lQry.FieldByName('cliente_nome_cliente').AsString;
-      modelo.NOME_XML                    := lQry.FieldByName('NOME_XML').AsString;
-      modelo.UF_EMBARQUE                 := lQry.FieldByName('estado_cliente').AsString;
+      modelo.objeto.NUMERO_NF                   := lQry.FieldByName('NUMERO_NF').AsString;
+      modelo.objeto.NUMERO_ECF                  := lQry.FieldByName('NUMERO_ECF').AsString;
+      modelo.objeto.NUMERO_PED                  := lQry.FieldByName('NUMERO_PED').AsString;
+      modelo.objeto.SERIE_NF                    := lQry.FieldByName('SERIE_NF').AsString;
+      modelo.objeto.MODELO                      := lQry.FieldByName('MODELO').AsString;
+      modelo.objeto.CODIGO_CLI                  := lQry.FieldByName('CODIGO_CLI').AsString;
+      modelo.objeto.DATA_NF                     := lQry.FieldByName('DATA_NF').AsString;
+      modelo.objeto.DATA_SAIDA                  := lQry.FieldByName('DATA_SAIDA').AsString;
+      modelo.objeto.CLIENTE_NF                  := lQry.FieldByName('cliente_nome_cliente').AsString;
+      modelo.objeto.NOME_XML                    := lQry.FieldByName('NOME_XML').AsString;
+      modelo.objeto.UF_EMBARQUE                 := lQry.FieldByName('estado_cliente').AsString;
 
       lQry.Next;
     end;
@@ -554,7 +566,7 @@ begin
   FOrderView := Value;
 end;
 
-procedure TNFDao.setParams(var pQry: TFDQuery; pNFModel: TNFModel);
+procedure TNFDao.setParams(var pQry: TFDQuery; pNFModel: ITNFModel);
 var
   lTabela : IFDDataset;
   lCtx    : TRttiContext;
@@ -570,7 +582,7 @@ begin
       lProp := lCtx.GetType(TNFModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pNFModel).AsString = '',
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pNFModel.objeto).AsString = '',
         Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pNFModel).AsString))
     end;
   finally

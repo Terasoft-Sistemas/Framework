@@ -171,17 +171,17 @@ var
   lEventosNFeControl: TEventosNFeControl;
   lDescricaoEvendto: String;
   lTPEVENTO: String;
-  lNFContol: TNFContol;
+  lNFContol: ITNFContol;
 begin
     lEventosNFeControl := TEventosNFeControl.Create(vIConexao);
-    lNFContol := TNFContol.Create(idNotaFiscal, vIConexao);
+    lNFContol := TNFContol.getNewIface(idNotaFiscal, vIConexao);
     lRetorno  := TStringList.Create;
 
     try
 
       ACBrNFe.NotasFiscais.Clear;
 
-      ACBrNFe.NotasFiscais.LoadFromString(lNFContol.NFModel.XML_NFE);
+      ACBrNFe.NotasFiscais.LoadFromString(lNFContol.objeto.NFModel.objeto.XML_NFE);
 
       idLote := 1;
 
@@ -219,7 +219,7 @@ begin
         lEventosNFeControl.EventosNFeModel.objeto.DATAHORA          := Now;
         lEventosNFeControl.EventosNFeModel.objeto.EVENTO            := ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.tpEvento;
         lEventosNFeControl.EventosNFeModel.objeto.ID_EVENTO         := lTPEVENTO;
-        lEventosNFeControl.EventosNFeModel.objeto.CHNFE             := lNFContol.NFModel.ID_NF3;
+        lEventosNFeControl.EventosNFeModel.objeto.CHNFE             := lNFContol.objeto.NFModel.objeto.ID_NF3;
         lEventosNFeControl.EventosNFeModel.objeto.TPEVENTO          := lTPEVENTO;
         lEventosNFeControl.EventosNFeModel.objeto.NSEQEVENTO        := ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.nSeqEvento;
         lEventosNFeControl.EventosNFeModel.objeto.VEREVENTO         := '1.00';
@@ -234,12 +234,12 @@ begin
 
         if ptpEvento = teCancelamento then
         begin
-          lNFContol.NFModel.Acao              := Terasoft.Types.tacAlterar;
-          lNFContol.NFModel.DATA_CANCELAMENTO := Now;
-          lNFContol.NFModel.STATUS_NF         := 'X';
-          lNFContol.NFModel.NOME_XML          := 'Cancelamento de NF-e homologado';
-          lNFContol.NFModel.NUMERO_NF         := idNotaFiscal;
-          lNFContol.Salvar;
+          lNFContol.objeto.NFModel.objeto.Acao              := Terasoft.Types.tacAlterar;
+          lNFContol.objeto.NFModel.objeto.DATA_CANCELAMENTO := Now;
+          lNFContol.objeto.NFModel.objeto.STATUS_NF         := 'X';
+          lNFContol.objeto.NFModel.objeto.NOME_XML          := 'Cancelamento de NF-e homologado';
+          lNFContol.objeto.NFModel.objeto.NUMERO_NF         := idNotaFiscal;
+          lNFContol.objeto.Salvar;
         end;
 
         lRetorno.Add('Cancelamento de NF-e homologado');
@@ -252,7 +252,7 @@ begin
       Result := lRetorno;
     finally
       lEventosNFeControl.Free;
-      lNFContol.Free;
+      lNFContol := nil;
     end;
 end;
 
@@ -261,19 +261,19 @@ var
   lEventosNFeControl: TEventosNFeControl;
   lAno: String;
   lRetorno: TStringList;
-  lNFContol: TNFContol;
+  lNFContol: ITNFContol;
 begin
     lEventosNFeControl := TEventosNFeControl.Create(vIConexao);
-    lNFContol := TNFContol.Create(idNotaFiscal, vIConexao);
+    lNFContol := TNFContol.getNewIface(idNotaFiscal, vIConexao);
     lRetorno  := TStringList.Create;
     try
 
       ACBrNFe.NotasFiscais.Clear;
-      ACBrNFe.NotasFiscais.LoadFromString(lNFContol.NFModel.XML_NFE);
+      ACBrNFe.NotasFiscais.LoadFromString(lNFContol.objeto.NFModel.objeto.XML_NFE);
 
       lAno := FormatDateTime('yyyy', Date);
 
-      ACBrNFe.WebServices.Inutiliza(vIConexao.getEmpresa.EMPRESA_CNPJ, Justificativa, StrToInt(lAno), lNFContol.NFModel.MODELO, lNFContol.NFModel.SERIE_NF, StrToInt(idNotaFiscal), StrToInt(idNotaFiscal));
+      ACBrNFe.WebServices.Inutiliza(vIConexao.getEmpresa.EMPRESA_CNPJ, Justificativa, StrToInt(lAno), lNFContol.objeto.NFModel.objeto.MODELO, lNFContol.objeto.NFModel.objeto.SERIE_NF, StrToInt(idNotaFiscal), StrToInt(idNotaFiscal));
 
       if ACBrNFe.WebServices.Inutilizacao.cStat = 102 then begin
 
@@ -282,7 +282,7 @@ begin
         lEventosNFeControl.EventosNFeModel.objeto.DATAHORA          := Now;
         lEventosNFeControl.EventosNFeModel.objeto.EVENTO            := 2;
         lEventosNFeControl.EventosNFeModel.objeto.ID_EVENTO         := '110111';
-        lEventosNFeControl.EventosNFeModel.objeto.CHNFE             := lNFContol.NFModel.ID_NF3;
+        lEventosNFeControl.EventosNFeModel.objeto.CHNFE             := lNFContol.objeto.NFModel.objeto.ID_NF3;
         lEventosNFeControl.EventosNFeModel.objeto.TPEVENTO          := '110111';
         lEventosNFeControl.EventosNFeModel.objeto.NSEQEVENTO        := '';
         lEventosNFeControl.EventosNFeModel.objeto.VEREVENTO         := '1.00';
@@ -295,12 +295,12 @@ begin
         lEventosNFeControl.EventosNFeModel.objeto.XCORRECAO         := '';
         lEventosNFeControl.Salvar;
 
-        lNFContol.NFModel.Acao              := Terasoft.Types.tacAlterar;
-        lNFContol.NFModel.DATA_CANCELAMENTO := Now;
-        lNFContol.NFModel.STATUS_NF         := 'X';
-        lNFContol.NFModel.NOME_XML          := 'Inutilização de Número homologado';
-        lNFContol.NFModel.NUMERO_NF         := idNotaFiscal;
-        lNFContol.Salvar;
+        lNFContol.objeto.NFModel.objeto.Acao              := Terasoft.Types.tacAlterar;
+        lNFContol.objeto.NFModel.objeto.DATA_CANCELAMENTO := Now;
+        lNFContol.objeto.NFModel.objeto.STATUS_NF         := 'X';
+        lNFContol.objeto.NFModel.objeto.NOME_XML          := 'Inutilização de Número homologado';
+        lNFContol.objeto.NFModel.objeto.NUMERO_NF         := idNotaFiscal;
+        lNFContol.objeto.Salvar;
 
         lRetorno.Add('Inutilização de Número homologado');
       end else
@@ -312,8 +312,9 @@ begin
       Result := lRetorno;
 
     finally
-     lEventosNFeControl.Free;
-     lNFContol.Free;
+      freeAndNil(lRetorno);
+      lEventosNFeControl.Free;
+      lNFContol:=nil;
     end;
 
 end;

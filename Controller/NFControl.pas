@@ -5,21 +5,28 @@ interface
 uses
   NFModel,
   FireDAC.Comp.Client,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-    TNFContol = class
+  TNFContol = class;
+  ITNFContol=IObject<TNFContol>;
 
+
+  TNFContol = class
   private
-    FNFModel: TNFModel;
+    [weak] mySelf: ITNFContol;
+    FNFModel: ITNFModel;
 
   public
-    constructor Create(ID: String; pIConexao : IConexao);
+    constructor _Create(pID: String; pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pID: String; pIConexao: IConexao): ITNFContol;
+
     function Salvar: Boolean;
-    function carregaClasse(ID: String): TNFModel;
-    property NFModel: TNFModel read FNFModel write FNFModel;
+    function carregaClasse(ID: String): ITNFModel;
+    property NFModel: ITNFModel read FNFModel write FNFModel;
 
   end;
 
@@ -27,28 +34,33 @@ implementation
 
 { TNFContol }
 
-function TNFContol.carregaClasse(ID: String): TNFModel;
+function TNFContol.carregaClasse(ID: String): ITNFModel;
 begin
-  Result := FNFModel.carregaClasse(ID);
+  Result := FNFModel.objeto.carregaClasse(ID);
 end;
 
-constructor TNFContol.Create(ID: String; pIConexao : IConexao);
+constructor TNFContol._Create(pID: String; pIConexao : IConexao);
 begin
-  FNFModel := TNFModel.Create(pIConexao);
-if ID <> '' then
-   FNFModel := FNFModel.carregaClasse(ID);
+  FNFModel := TNFModel.getNewIface(pIConexao);
+  if pID <> '' then
+   FNFModel := FNFModel.objeto.carregaClasse(pID);
 end;
 
 destructor TNFContol.Destroy;
 begin
-  FNFModel.Free;
-
+  FNFModel:=nil;
   inherited;
+end;
+
+class function TNFContol.getNewIface(pID: String; pIConexao: IConexao): ITNFContol;
+begin
+  Result := TImplObjetoOwner<TNFContol>.CreateOwner(self._Create(pID, pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TNFContol.Salvar: Boolean;
 begin
-  Result := FNFModel.Salvar <> '';
+  Result := FNFModel.objeto.Salvar <> '';
 end;
 
 end.

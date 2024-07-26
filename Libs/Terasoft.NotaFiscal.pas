@@ -93,7 +93,7 @@ type
     destructor Destroy; override;
 
     function transmitir(idNotaFiscal: String): TStringList;
-    function consultarNota(pNota: TNFModel): boolean;
+    function consultarNota(pNota: ITNFModel): boolean;
     function imprimir: String;
     function gerarXML(idNotaFiscal, pPath: String): String;
     function VencimentoCertificado: TDateTime;
@@ -161,18 +161,18 @@ begin
     PathSalvar       := vConfiguracoesNotaFiscal.arquivosPathSalvar;
   end;
 end;
-function TNotaFiscal.consultarNota(pNota: TNFModel): boolean;
+function TNotaFiscal.consultarNota(pNota: ITNFModel): boolean;
 begin
   Result := False;
 
-  ACBrNFe.Consultar(pNota.ID_NF3);
+  ACBrNFe.Consultar(pNota.objeto.ID_NF3);
 
   if ACBrNFe.WebServices.Consulta.cStat = 100 then
   begin
-    pNota.Acao := tacAlterar;
-    pNota.NOME_XML := ACBrNFe.WebServices.Consulta.XMotivo;
-    pNota.PROTOCOLO_NFE := ACBrNFe.WebServices.Consulta.Protocolo;
-    pNota.Salvar;
+    pNota.objeto.Acao := tacAlterar;
+    pNota.objeto.NOME_XML := ACBrNFe.WebServices.Consulta.XMotivo;
+    pNota.objeto.PROTOCOLO_NFE := ACBrNFe.WebServices.Consulta.Protocolo;
+    pNota.objeto.Salvar;
 
     Result := True;
   end;
@@ -1211,13 +1211,13 @@ var
   lrecibo    : String;
   lxMotivo   : String;
   lCSTAT     : String;
-  lNFContol  : TNFContol;
+  lNFContol  : ITNFContol;
   lPedidoVendaModel: TPedidoVendaModel;
 begin
 
   try
     lRetorno  := TStringList.Create;
-    lNFContol := TNFContol.Create(idNotaFiscal, vIConexao);
+    lNFContol := TNFContol.getNewIface(idNotaFiscal, vIConexao);
     loteEnvio := idNotaFiscal.ToInteger;
     lPedidoVendaModel := TPedidoVendaModel.Create(vIConexao);
 
@@ -1254,19 +1254,19 @@ begin
       if lCSTAT <> '100' then
         lxMotivo := 'NOTA NAO AUTORIZADA: ' + lxMotivo;
 
-      lNFContol.NFModel.Acao          := Terasoft.Types.tacAlterar;
-      lNFContol.NFModel.NOME_XML      := copy(lxMotivo, 1, 500);
-      lNFContol.NFModel.ID_NF3        := lchavenfe;
-      lNFContol.NFModel.PROTOCOLO_NFE := lprotocolo;
-      lNFContol.NFModel.RECIBO_NFE    := lrecibo;
-      lNFContol.NFModel.XML_NFE       := ACBrNFe.NotasFiscais.Items[0].GerarXML;
-      lNFContol.NFModel.NUMERO_NF     := idNotaFiscal;
-      lNFContol.Salvar;
+      lNFContol.objeto.NFModel.objeto.Acao          := Terasoft.Types.tacAlterar;
+      lNFContol.objeto.NFModel.objeto.NOME_XML      := copy(lxMotivo, 1, 500);
+      lNFContol.objeto.NFModel.objeto.ID_NF3        := lchavenfe;
+      lNFContol.objeto.NFModel.objeto.PROTOCOLO_NFE := lprotocolo;
+      lNFContol.objeto.NFModel.objeto.RECIBO_NFE    := lrecibo;
+      lNFContol.objeto.NFModel.objeto.XML_NFE       := ACBrNFe.NotasFiscais.Items[0].GerarXML;
+      lNFContol.objeto.NFModel.objeto.NUMERO_NF     := idNotaFiscal;
+      lNFContol.objeto.Salvar;
 
-      if lNFContol.NFModel.NUMERO_PED <> '' then
+      if lNFContol.objeto.NFModel.objeto.NUMERO_PED <> '' then
       begin
-        lPedidoVendaModel := lPedidoVendaModel.carregaClasse(lNFContol.NFModel.NUMERO_PED);
-        lPedidoVendaModel.faturado(lNFContol.NFModel.NUMERO_ECF);
+        lPedidoVendaModel := lPedidoVendaModel.carregaClasse(lNFContol.objeto.NFModel.objeto.NUMERO_PED);
+        lPedidoVendaModel.faturado(lNFContol.objeto.NFModel.objeto.NUMERO_ECF);
       end;
 
       lRetorno.Add(lCSTAT);
@@ -1277,11 +1277,11 @@ begin
 
     except on E: Exception do
       begin
-        lNFContol.NFModel.Acao       := Terasoft.Types.tacAlterar;
-        lNFContol.NFModel.NOME_XML   := copy('NOTA NAO AUTORIZADA: '+e.Message, 1, 500);
-        lNFContol.NFModel.XML_NFE    := ACBrNFe.NotasFiscais.Items[0].GerarXML;
-        lNFContol.NFModel.NUMERO_NF  := idNotaFiscal;
-        lNFContol.Salvar;
+        lNFContol.objeto.NFModel.objeto.Acao       := Terasoft.Types.tacAlterar;
+        lNFContol.objeto.NFModel.objeto.NOME_XML   := copy('NOTA NAO AUTORIZADA: '+e.Message, 1, 500);
+        lNFContol.objeto.NFModel.objeto.XML_NFE    := ACBrNFe.NotasFiscais.Items[0].GerarXML;
+        lNFContol.objeto.NFModel.objeto.NUMERO_NF  := idNotaFiscal;
+        lNFContol.objeto.Salvar;
 
         lRetorno.Add(lCSTAT);
         lRetorno.Add(e.Message);
@@ -1294,7 +1294,7 @@ begin
 
    finally
      lQry.Free;
-     lNFContol.Free;
+     lNFContol := nil;
      lPedidoVendaModel.Free;
    end;
 end;

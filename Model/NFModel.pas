@@ -7,12 +7,16 @@ uses
   Terasoft.Types,
   FireDAC.Comp.Client,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TNFModel = class
+  TNFModel = class;
+  ITNFModel=IObject<TNFModel>;
 
+  TNFModel = class
   private
+    [weak] mySelf: ITNFModel;
     vIConexao : IConexao;
     FAcao: TAcao;
     FVFCPUFDEST: Variant;
@@ -165,7 +169,7 @@ type
     FWhereView: String;
     FTotalRecords: Integer;
     FIDPedidoView: Integer;
-    FNFLista: IList<TNFModel>;
+    FNFLista: IList<ITNFModel>;
     procedure SetAcao(const Value: TAcao);
     procedure SetACRES_NF(const Value: Variant);
     procedure SetAGRUPAMENTO_FATURA(const Value: Variant);
@@ -317,7 +321,7 @@ type
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-    procedure SetNFLista(const Value: IList<TNFModel>);
+    procedure SetNFLista(const Value: IList<ITNFModel>);
 
   public
     property  Acao                         :TAcao   read FAcao write SetAcao;
@@ -464,7 +468,7 @@ type
     property  TRANSFERENCIA_ID             :Variant read FTRANSFERENCIA_ID write SetTRANSFERENCIA_ID;
     property  CLIENTE_NF                   :Variant read FCLIENTE_NF write SetCLIENTE_NF;
 
-    property NFLista: IList<TNFModel> read FNFLista write SetNFLista;
+    property NFLista: IList<ITNFModel> read FNFLista write SetNFLista;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
     property CountView: String read FCountView write SetCountView;
@@ -474,11 +478,13 @@ type
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property IDPedidoView: Integer read FIDPedidoView write SetIDPedidoView;
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITNFModel;
+
     function Salvar: String;
-    function carregaClasse(ID: String): TNFModel;
+    function carregaClasse(ID: String): ITNFModel;
 
     procedure obterLista;
     procedure obterListaNFe;
@@ -492,19 +498,19 @@ uses
 
 { TNFModel }
 
-function TNFModel.carregaClasse(ID: String): TNFModel;
+function TNFModel.carregaClasse(ID: String): ITNFModel;
 var
-  lNFDao: TNFDao;
+  lNFDao: ITNFDao;
 begin
-  lNFDao := TNFDao.Create(vIConexao);
+  lNFDao := TNFDao.getNewIface(vIConexao);
   try
-    Result := lNFDao.carregaClasse(ID);
+    Result := lNFDao.objeto.carregaClasse(ID);
   finally
-    lNFDao.Free;
+    lNFDao:=nil;
   end;
 end;
 
-constructor TNFModel.Create(pIConexao : IConexao);
+constructor TNFModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -516,74 +522,80 @@ begin
   inherited;
 end;
 
+class function TNFModel.getNewIface(pIConexao: IConexao): ITNFModel;
+begin
+  Result := TImplObjetoOwner<TNFModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TNFModel.Salvar: String;
 var
-  lNFDao: TNFDao;
+  lNFDao: ITNFDao;
 begin
   Result := '';
-  lNFDao := TNFDao.Create(vIConexao);
+  lNFDao := TNFDao.getNewIface(vIConexao);
 
    try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lNFDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lNFDao.alterar(Self);
+      Terasoft.Types.tacIncluir: Result := lNFDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lNFDao.objeto.alterar(mySelf);
     end;
 
    finally
-     lNFDao.Free;
+     lNFDao:=nil;
    end;
 
 end;
 
 procedure TNFModel.obterLista;
 var
-  lNFLista: TNFDao;
+  lNFLista: ITNFDao;
 begin
-  lNFLista := TNFDao.Create(vIConexao);
+  lNFLista := TNFDao.getNewIface(vIConexao);
 
   try
-    lNFLista.TotalRecords    := FTotalRecords;
-    lNFLista.WhereView       := FWhereView;
-    lNFLista.CountView       := FCountView;
-    lNFLista.OrderView       := FOrderView;
-    lNFLista.StartRecordView := FStartRecordView;
-    lNFLista.LengthPageView  := FLengthPageView;
-    lNFLista.IDRecordView    := FIDRecordView;
-    lNFLista.IDPedidoView    := FIDPedidoView;
+    lNFLista.objeto.TotalRecords    := FTotalRecords;
+    lNFLista.objeto.WhereView       := FWhereView;
+    lNFLista.objeto.CountView       := FCountView;
+    lNFLista.objeto.OrderView       := FOrderView;
+    lNFLista.objeto.StartRecordView := FStartRecordView;
+    lNFLista.objeto.LengthPageView  := FLengthPageView;
+    lNFLista.objeto.IDRecordView    := FIDRecordView;
+    lNFLista.objeto.IDPedidoView    := FIDPedidoView;
 
-    lNFLista.obterLista;
+    lNFLista.objeto.obterLista;
 
-    FTotalRecords  := lNFLista.TotalRecords;
-    FNFLista       := lNFLista.NFLista;
+    FTotalRecords  := lNFLista.objeto.TotalRecords;
+    FNFLista       := lNFLista.objeto.NFLista;
 
   finally
-    lNFLista.Free;
+    lNFLista:=nil;
   end;
 end;
 
 procedure TNFModel.obterListaNFe;
 var
-  lNFLista: TNFDao;
+  lNFLista: ITNFDao;
 begin
-  lNFLista := TNFDao.Create(vIConexao);
+  lNFLista := TNFDao.getNewIface(vIConexao);
 
   try
-    lNFLista.TotalRecords    := FTotalRecords;
-    lNFLista.WhereView       := FWhereView;
-    lNFLista.CountView       := FCountView;
-    lNFLista.OrderView       := FOrderView;
-    lNFLista.StartRecordView := FStartRecordView;
-    lNFLista.LengthPageView  := FLengthPageView;
-    lNFLista.IDRecordView    := FIDRecordView;
-    lNFLista.IDPedidoView    := FIDPedidoView;
+    lNFLista.objeto.TotalRecords    := FTotalRecords;
+    lNFLista.objeto.WhereView       := FWhereView;
+    lNFLista.objeto.CountView       := FCountView;
+    lNFLista.objeto.OrderView       := FOrderView;
+    lNFLista.objeto.StartRecordView := FStartRecordView;
+    lNFLista.objeto.LengthPageView  := FLengthPageView;
+    lNFLista.objeto.IDRecordView    := FIDRecordView;
+    lNFLista.objeto.IDPedidoView    := FIDPedidoView;
 
-    lNFLista.obterListaNFe;
+    lNFLista.objeto.obterListaNFe;
 
-    FTotalRecords  := lNFLista.TotalRecords;
-    FNFLista       := lNFLista.NFLista;
+    FTotalRecords  := lNFLista.objeto.TotalRecords;
+    FNFLista       := lNFLista.objeto.NFLista;
 
   finally
-    lNFLista.Free;
+    lNFLista:=nil;
   end;
 end;
 

@@ -946,7 +946,7 @@ function TPedidoVendaModel.GerarNF(pModelo, pSerie: String): String;
 var
   lPedidoItensModel,
   lItens            : TPedidoItensModel;
-  lNFModel          : TNFModel;
+  lNFModel          : ITNFModel;
   lNFItensModel     : TNFItensModel;
   lEmpresaModel     : ITEmpresaModel;
   lNumeroNFe,
@@ -967,7 +967,7 @@ begin
 
   lPedidoItensModel := TPedidoItensModel.Create(vIConexao);
   lNFItensModel     := TNFItensModel.Create(vIConexao);
-  lNFModel          := TNFModel.Create(vIConexao);
+  lNFModel          := TNFModel.getNewIface(vIConexao);
   lEmpresaModel     := TEmpresaModel.getNewIface(vIConexao);
   lFuncionarioModel := TFuncionarioModel.getNewIface(vIConexao);
   lConfiguracoes    := TerasoftConfiguracoes.getNewIface(vIConexao);
@@ -978,91 +978,91 @@ begin
       lFuncionarioModel := lFuncionarioModel.objeto.carregaClasse(self.CODIGO_VEN);
       lNomeVendedor := lFuncionarioModel.objeto.NOME_FUN;
 
-      lNFModel.OBS_NF := 'Vendedor: '+lNomeVendedor+' '+sLineBreak;
+      lNFModel.objeto.OBS_NF := 'Vendedor: '+lNomeVendedor+' '+sLineBreak;
 
       if lConfiguracoes.objeto.valorTag('MOSTRAR_NUMERO_PEDIDO_NF', 'N', tvBool) = 'S' then
-        lNFModel.OBS_NF := lNFModel.OBS_NF + 'Pedido: '+self.NUMERO_PED+' '+sLineBreak;
+        lNFModel.objeto.OBS_NF := lNFModel.objeto.OBS_NF + 'Pedido: '+self.NUMERO_PED+' '+sLineBreak;
     end;
 
     self.RecalcularImpostos(self.NUMERO_PED);
     lEmpresaModel.objeto.Carregar;
 
-    lNFModel.Acao := tacIncluir;
-    lNFModel.TIPO_NF               := 'N';
-    lNFModel.EMAIL_NFE             := '1';
-    lNFModel.STATUS_NF             := '0';
-    lNFModel.INDPRES               := '1';
-    lNFModel.STATUS_TRANSMISSAO    := '8';
-    lNFModel.NOME_XML              := 'Em processamento';
-    lNFModel.MODELO                := pModelo;
-    lNFModel.SERIE_NF              := pSerie;
-    lNFModel.ESPECIE_VOLUME        := self.ESPECIE_VOLUME;
-    lNFModel.BICMS_NF              := FloatToStr(0);
-    lNFModel.VICMS_NF              := FloatToStr(0);
-    lNFModel.ICMS_NF               := FloatToStr(0);
-    lNFModel.BASE_ST_NF            := FloatToStr(0);
-    lNFModel.IPI_NF                := FloatToStr(0);
-    lNFModel.ICMS_ST               := FloatToStr(0);
-    lNFModel.VSEG                  := FloatToStr(0);
-    lNFModel.VALOR_SUFRAMA         := FloatToStr(0);
-    lNFModel.VFCPST                := FloatToStr(0);
-    lNFModel.VFCP                  := FloatToStr(0);
-    lNFModel.VICMSDESON            := FloatToStr(0);
-    lNFModel.VICMSUFDEST           := FloatToStr(0);
-    lNFModel.VICMSUFREMET          := FloatToStr(0);
-    lNFModel.VICMSSTRET            := FloatToStr(0);
-    lNFModel.VTOTTRIB_FEDERAL      := FloatToStr(0);
-    lNFModel.VTOTTRIB_ESTADUAL     := FloatToStr(0);
-    lNFModel.VTOTTRIB_MUNICIPAL    := FloatToStr(0);
-    lNFModel.VCREDICMSSN           := FloatToStr(0);
-    lNFModel.VPIS                  := FloatToStr(0);
-    lNFModel.VCOFINS               := FloatToStr(0);
-    lNFModel.VTOTTRIB              := FloatToStr(0);
-    lNFModel.VII                   := FloatToStr(0);
-    lNFModel.VALOR_SUFRAMA         := FloatToStr(0);
-    lNFModel.VFCPSTRET             := FloatToStr(0);
-    lNFModel.VFCPUFDEST            := FloatToStr(0);
-    lNFModel.USUARIO_NF            := self.vIConexao.getUSer.ID;
-    lNFModel.LOJA                  := self.LOJA;
-    lNFModel.TIPO_FRETE            := self.FTIPO_FRETE;
-    lNFModel.DATA_NF               := DateToStr(vIConexao.DataServer);
-    lNFModel.DATA_SAIDA            := DateToStr(vIConexao.DataServer);
-    lNFModel.HORA_SAIDA            := TimeToStr(vIConexao.HoraServer);
-    lNFModel.UF_EMBARQUE           := lEmpresaModel.objeto.UF;
-    lNFModel.LOCAL_EMBARQUE        := lEmpresaModel.objeto.CIDADE;
-    lNFModel.CODIGO_CLI            := self.FCODIGO_CLI;
-    lNFModel.CODIGO_VEN            := self.FCODIGO_VEN;
-    lNFModel.CODIGO_PORT           := self.FCODIGO_PORT;
-    lNFModel.CODIGO_TIP            := self.FCODIGO_TIP;
-    lNFModel.CFOP_ID               := self.FCFOP_ID;
-    lNFModel.CFOP_NF               := self.FCFOP_NF;
-    lNFModel.VALOR_NF              := FloatToStr(0);
-    lNFModel.ACRES_NF              := FloatToStr(0);
-    lNFModel.TOTAL_NF              := FloatToStr(0);
-    lNFModel.NUMERO_PED            := self.FNUMERO_PED;
-    lNFModel.PEDIDO_ID             := self.FNUMERO_PED;
-    lNFModel.DESC_NF               := FloatToStr(0);
-    lNFModel.DESCONTO_NF           := FloatToStr(0);
-    lNFModel.VALOR_PAGO            := FloatToStr(0);
-    lNFModel.TIPO_FRETE            := self.TIPO_FRETE;
-    lNFModel.CNPJ_CPF_CONSUMIDOR   := self.FCNPJ_CPF_CONSUMIDOR;
-    lNFModel.VALOR_SUFRAMA         := self.FVALOR_SUFRAMA;
-    lNFModel.FRETE                 := FloatToStr(0);
-    lNFModel.OUTROS_NF             := FloatToStr(0);
-    lNFModel.TRANSPORTADORA        := self.FTELEVENDA_PED;
-    lNFModel.OBS_NF                := lNFModel.OBS_NF + self.FINFORMACOES_PED;
-    lNFModel.ESPECIE_VOLUME        := self.FESPECIE_VOLUME;
-    lNFModel.TRA_UF                := self.FUF_TRANSPORTADORA;
-    lNFModel.TRA_PLACA             := self.FPLACA;
-    lNFModel.TRA_RNTC              := self.FRNTRC;
-    lNFModel.TIPO_FRETE            := IfThen(pModelo = '55', self.FTIPO_FRETE, '9');
+    lNFModel.objeto.Acao := tacIncluir;
+    lNFModel.objeto.TIPO_NF               := 'N';
+    lNFModel.objeto.EMAIL_NFE             := '1';
+    lNFModel.objeto.STATUS_NF             := '0';
+    lNFModel.objeto.INDPRES               := '1';
+    lNFModel.objeto.STATUS_TRANSMISSAO    := '8';
+    lNFModel.objeto.NOME_XML              := 'Em processamento';
+    lNFModel.objeto.MODELO                := pModelo;
+    lNFModel.objeto.SERIE_NF              := pSerie;
+    lNFModel.objeto.ESPECIE_VOLUME        := self.ESPECIE_VOLUME;
+    lNFModel.objeto.BICMS_NF              := FloatToStr(0);
+    lNFModel.objeto.VICMS_NF              := FloatToStr(0);
+    lNFModel.objeto.ICMS_NF               := FloatToStr(0);
+    lNFModel.objeto.BASE_ST_NF            := FloatToStr(0);
+    lNFModel.objeto.IPI_NF                := FloatToStr(0);
+    lNFModel.objeto.ICMS_ST               := FloatToStr(0);
+    lNFModel.objeto.VSEG                  := FloatToStr(0);
+    lNFModel.objeto.VALOR_SUFRAMA         := FloatToStr(0);
+    lNFModel.objeto.VFCPST                := FloatToStr(0);
+    lNFModel.objeto.VFCP                  := FloatToStr(0);
+    lNFModel.objeto.VICMSDESON            := FloatToStr(0);
+    lNFModel.objeto.VICMSUFDEST           := FloatToStr(0);
+    lNFModel.objeto.VICMSUFREMET          := FloatToStr(0);
+    lNFModel.objeto.VICMSSTRET            := FloatToStr(0);
+    lNFModel.objeto.VTOTTRIB_FEDERAL      := FloatToStr(0);
+    lNFModel.objeto.VTOTTRIB_ESTADUAL     := FloatToStr(0);
+    lNFModel.objeto.VTOTTRIB_MUNICIPAL    := FloatToStr(0);
+    lNFModel.objeto.VCREDICMSSN           := FloatToStr(0);
+    lNFModel.objeto.VPIS                  := FloatToStr(0);
+    lNFModel.objeto.VCOFINS               := FloatToStr(0);
+    lNFModel.objeto.VTOTTRIB              := FloatToStr(0);
+    lNFModel.objeto.VII                   := FloatToStr(0);
+    lNFModel.objeto.VALOR_SUFRAMA         := FloatToStr(0);
+    lNFModel.objeto.VFCPSTRET             := FloatToStr(0);
+    lNFModel.objeto.VFCPUFDEST            := FloatToStr(0);
+    lNFModel.objeto.USUARIO_NF            := self.vIConexao.getUSer.ID;
+    lNFModel.objeto.LOJA                  := self.LOJA;
+    lNFModel.objeto.TIPO_FRETE            := self.FTIPO_FRETE;
+    lNFModel.objeto.DATA_NF               := DateToStr(vIConexao.DataServer);
+    lNFModel.objeto.DATA_SAIDA            := DateToStr(vIConexao.DataServer);
+    lNFModel.objeto.HORA_SAIDA            := TimeToStr(vIConexao.HoraServer);
+    lNFModel.objeto.UF_EMBARQUE           := lEmpresaModel.objeto.UF;
+    lNFModel.objeto.LOCAL_EMBARQUE        := lEmpresaModel.objeto.CIDADE;
+    lNFModel.objeto.CODIGO_CLI            := self.FCODIGO_CLI;
+    lNFModel.objeto.CODIGO_VEN            := self.FCODIGO_VEN;
+    lNFModel.objeto.CODIGO_PORT           := self.FCODIGO_PORT;
+    lNFModel.objeto.CODIGO_TIP            := self.FCODIGO_TIP;
+    lNFModel.objeto.CFOP_ID               := self.FCFOP_ID;
+    lNFModel.objeto.CFOP_NF               := self.FCFOP_NF;
+    lNFModel.objeto.VALOR_NF              := FloatToStr(0);
+    lNFModel.objeto.ACRES_NF              := FloatToStr(0);
+    lNFModel.objeto.TOTAL_NF              := FloatToStr(0);
+    lNFModel.objeto.NUMERO_PED            := self.FNUMERO_PED;
+    lNFModel.objeto.PEDIDO_ID             := self.FNUMERO_PED;
+    lNFModel.objeto.DESC_NF               := FloatToStr(0);
+    lNFModel.objeto.DESCONTO_NF           := FloatToStr(0);
+    lNFModel.objeto.VALOR_PAGO            := FloatToStr(0);
+    lNFModel.objeto.TIPO_FRETE            := self.TIPO_FRETE;
+    lNFModel.objeto.CNPJ_CPF_CONSUMIDOR   := self.FCNPJ_CPF_CONSUMIDOR;
+    lNFModel.objeto.VALOR_SUFRAMA         := self.FVALOR_SUFRAMA;
+    lNFModel.objeto.FRETE                 := FloatToStr(0);
+    lNFModel.objeto.OUTROS_NF             := FloatToStr(0);
+    lNFModel.objeto.TRANSPORTADORA        := self.FTELEVENDA_PED;
+    lNFModel.objeto.OBS_NF                := lNFModel.objeto.OBS_NF + self.FINFORMACOES_PED;
+    lNFModel.objeto.ESPECIE_VOLUME        := self.FESPECIE_VOLUME;
+    lNFModel.objeto.TRA_UF                := self.FUF_TRANSPORTADORA;
+    lNFModel.objeto.TRA_PLACA             := self.FPLACA;
+    lNFModel.objeto.TRA_RNTC              := self.FRNTRC;
+    lNFModel.objeto.TIPO_FRETE            := IfThen(pModelo = '55', self.FTIPO_FRETE, '9');
 
-    lNumeroNFe := lNFModel.Salvar;
+    lNumeroNFe := lNFModel.objeto.Salvar;
 
-    lNFModel := lNFModel.carregaClasse(lNumeroNFe);
+    lNFModel := lNFModel.objeto.carregaClasse(lNumeroNFe);
 
     self.Acao       := tacAlterar;
-    self.FNUMERO_NF := lNFModel.NUMERO_ECF;
+    self.FNUMERO_NF := lNFModel.objeto.NUMERO_ECF;
     self.Salvar;
 
     lPedidoItensModel.IDPedidoVendaView := self.NUMERO_PED;
@@ -1179,12 +1179,12 @@ begin
 
     lTableTotais := lNFItensModel.obterTotais(lNumeroNFe);
 
-    lNFModel.Acao := tacAlterar;
+    lNFModel.objeto.Acao := tacAlterar;
 
-    lNFModel.VALOR_NF              := lTableTotais.objeto.FieldByName('TOTAL_ITENS').AsString;
-    lNFModel.ACRES_NF              := lTableTotais.objeto.FieldByName('TOTAL_OUTROS').AsString;
+    lNFModel.objeto.VALOR_NF              := lTableTotais.objeto.FieldByName('TOTAL_ITENS').AsString;
+    lNFModel.objeto.ACRES_NF              := lTableTotais.objeto.FieldByName('TOTAL_OUTROS').AsString;
 
-    lNFModel.TOTAL_NF              := FloatToStr(lTableTotais.objeto.FieldByName('TOTAL_ITENS').AsFloat +
+    lNFModel.objeto.TOTAL_NF              := FloatToStr(lTableTotais.objeto.FieldByName('TOTAL_ITENS').AsFloat +
                                                  lTableTotais.objeto.FieldByName('TOTAL_OUTROS').AsFloat +
                                                  lTableTotais.objeto.FieldByName('TOTAL_IPI').AsFloat +
                                                  lTableTotais.objeto.FieldByName('TOTAL_VII').AsFloat +
@@ -1196,23 +1196,23 @@ begin
                                                  lTableTotais.objeto.FieldByName('VICMSDESON').AsFloat -
                                                  lTableTotais.objeto.FieldByName('VSUFRAMA').AsFloat);
 
-    lNFModel.VALOR_PAGO            := lNFModel.TOTAL_NF;
-    lNFModel.DESC_NF               := lTableTotais.objeto.FieldByName('TOTAL_DESCONTO').AsString;
-    lNFModel.DESCONTO_NF           := FloatToStr(lTableTotais.objeto.FieldByName('TOTAL_DESCONTO').AsFloat / lTableTotais.objeto.FieldByName('TOTAL_ITENS').AsFloat * 100);
-    lNFModel.FRETE                 := lTableTotais.objeto.FieldByName('TOTAL_FRETE').AsString;
-    lNFModel.OUTROS_NF             := lTableTotais.objeto.FieldByName('TOTAL_OUTROS').AsString;
+    lNFModel.objeto.VALOR_PAGO            := lNFModel.objeto.TOTAL_NF;
+    lNFModel.objeto.DESC_NF               := lTableTotais.objeto.FieldByName('TOTAL_DESCONTO').AsString;
+    lNFModel.objeto.DESCONTO_NF           := FloatToStr(lTableTotais.objeto.FieldByName('TOTAL_DESCONTO').AsFloat / lTableTotais.objeto.FieldByName('TOTAL_ITENS').AsFloat * 100);
+    lNFModel.objeto.FRETE                 := lTableTotais.objeto.FieldByName('TOTAL_FRETE').AsString;
+    lNFModel.objeto.OUTROS_NF             := lTableTotais.objeto.FieldByName('TOTAL_OUTROS').AsString;
 
-    lNFModel.VTOTTRIB              := FloatToStr(lTribFederal + lTribEstadual + lTribMunicipal);
-    lNFModel.VTOTTRIB_FEDERAL      := FloatToStr(lTribFederal);
-    lNFModel.VTOTTRIB_ESTADUAL     := FloatToStr(lTribEstadual);
-    lNFModel.VTOTTRIB_MUNICIPAL    := FloatToStr(lTribMunicipal);
-    lNFModel.Salvar;
+    lNFModel.objeto.VTOTTRIB              := FloatToStr(lTribFederal + lTribEstadual + lTribMunicipal);
+    lNFModel.objeto.VTOTTRIB_FEDERAL      := FloatToStr(lTribFederal);
+    lNFModel.objeto.VTOTTRIB_ESTADUAL     := FloatToStr(lTribEstadual);
+    lNFModel.objeto.VTOTTRIB_MUNICIPAL    := FloatToStr(lTribMunicipal);
+    lNFModel.objeto.Salvar;
 
     Result := lNumeroNFe;
   finally
     lPedidoItensModel.Free;
     lNFItensModel.Free;
-    lNFModel.Free;
+    lNFModel:=nil;
     lEmpresaModel := nil;
   end;
 end;
