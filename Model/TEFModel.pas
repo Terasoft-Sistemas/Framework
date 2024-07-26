@@ -5,14 +5,18 @@ interface
 uses
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TTEFModel = class
+  TTEFModel = class;
+  ITTEFModel=IObject<TTEFModel>;
 
+  TTEFModel = class
   private
+    [weak] mySelf: ITTEFModel;
     vIConexao : IConexao;
-    FTEFsLista: IList<TTEFModel>;
+    FTEFsLista: IList<ITTEFModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -63,7 +67,7 @@ type
     FIDRecordView: String;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetTEFsLista(const Value: IList<TTEFModel>);
+    procedure SetTEFsLista(const Value: IList<ITTEFModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -152,15 +156,17 @@ type
     property CNPJ_CREDENCIADORA: Variant read FCNPJ_CREDENCIADORA write SetCNPJ_CREDENCIADORA;
     property CODIGO_CREDENCIADORA: Variant read FCODIGO_CREDENCIADORA write SetCODIGO_CREDENCIADORA;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITTEFModel;
 
     function Salvar: String;
     procedure obterLista;
 
-    function carregaClasse(pId: String): TTEFModel;
+    function carregaClasse(pId: String): ITTEFModel;
 
-    property TEFsLista: IList<TTEFModel> read FTEFsLista write SetTEFsLista;
+    property TEFsLista: IList<ITTEFModel> read FTEFsLista write SetTEFsLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -179,19 +185,19 @@ uses
 
 { TTEFModel }
 
-function TTEFModel.carregaClasse(pId: String): TTEFModel;
+function TTEFModel.carregaClasse(pId: String): ITTEFModel;
 var
-  lTEFDao: TTEFDao;
+  lTEFDao: ITTEFDao;
 begin
-  lTEFDao := TTEFDao.Create(vIConexao);
+  lTEFDao := TTEFDao.getNewIface(vIConexao);
   try
-    Result := lTEFDao.carregaClasse(pId);
+    Result := lTEFDao.objeto.carregaClasse(pId);
   finally
-    lTEFDao.Free;
+    lTEFDao:=nil;
   end;
 end;
 
-constructor TTEFModel.Create(pIConexao : IConexao);
+constructor TTEFModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -203,48 +209,54 @@ begin
   inherited;
 end;
 
+class function TTEFModel.getNewIface(pIConexao: IConexao): ITTEFModel;
+begin
+  Result := TImplObjetoOwner<TTEFModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 procedure TTEFModel.obterLista;
 var
-  lTEFLista: TTEFDao;
+  lTEFLista: ITTEFDao;
 begin
-  lTEFLista := TTEFDao.Create(vIConexao);
+  lTEFLista := TTEFDao.getNewIface(vIConexao);
 
   try
-    lTEFLista.TotalRecords    := FTotalRecords;
-    lTEFLista.WhereView       := FWhereView;
-    lTEFLista.CountView       := FCountView;
-    lTEFLista.OrderView       := FOrderView;
-    lTEFLista.StartRecordView := FStartRecordView;
-    lTEFLista.LengthPageView  := FLengthPageView;
-    lTEFLista.IDRecordView    := FIDRecordView;
+    lTEFLista.objeto.TotalRecords    := FTotalRecords;
+    lTEFLista.objeto.WhereView       := FWhereView;
+    lTEFLista.objeto.CountView       := FCountView;
+    lTEFLista.objeto.OrderView       := FOrderView;
+    lTEFLista.objeto.StartRecordView := FStartRecordView;
+    lTEFLista.objeto.LengthPageView  := FLengthPageView;
+    lTEFLista.objeto.IDRecordView    := FIDRecordView;
 
-    lTEFLista.obterLista;
+    lTEFLista.objeto.obterLista;
 
-    FTotalRecords  := lTEFLista.TotalRecords;
-    FTEFsLista := lTEFLista.TEFsLista;
+    FTotalRecords  := lTEFLista.objeto.TotalRecords;
+    FTEFsLista := lTEFLista.objeto.TEFsLista;
 
   finally
-    lTEFLista.Free;
+    lTEFLista:=nil;
   end;
 end;
 
 function TTEFModel.Salvar: String;
 var
-  lTEFDao: TTEFDao;
+  lTEFDao: ITTEFDao;
 begin
-  lTEFDao := TTEFDao.Create(vIConexao);
+  lTEFDao := TTEFDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lTEFDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lTEFDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lTEFDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lTEFDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lTEFDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lTEFDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lTEFDao.Free;
+    lTEFDao:=nil;
   end;
 end;
 

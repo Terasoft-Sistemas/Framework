@@ -774,7 +774,7 @@ procedure TContasReceberModel.validaExclusao;
 var
   lPortadorModel           : ITPortadorModel;
   lContasReceberItensModel : TContasReceberItensModel;
-  lTefModel                : TTefModel;
+  lTefModel                : ITTefModel;
 begin
   if self.FCODIGO_POR = '' then
     CriaException('Informe o portador do contas a receber');
@@ -784,7 +784,7 @@ begin
 
   lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
   lPortadorModel           := TPortadorModel.getNewIface(vIConexao);
-  lTefModel                := TTefModel.Create(vIConexao);
+  lTefModel                := TTefModel.getNewIface(vIConexao);
 
   try
     lPortadorModel := lPortadorModel.objeto.carregaClasse(self.FCODIGO_POR);
@@ -795,15 +795,15 @@ begin
     if (lPortadorModel.objeto.TPAG_NFE = '17') and (lContasReceberItensModel.TotalRecords > 0) then
       CriaException('Não é possível excluir pagamento realizado no PIX.');
 
-    lTefModel.WhereView := ' and coalesce(tef.status, '''') <> ''X'' and tef.contasreceber_fatura = '+ QuotedStr(self.FFATURA_REC);
-    lTefModel.obterLista;
+    lTefModel.objeto.WhereView := ' and coalesce(tef.status, '''') <> ''X'' and tef.contasreceber_fatura = '+ QuotedStr(self.FFATURA_REC);
+    lTefModel.objeto.obterLista;
 
-    if lTefModel.TotalRecords > 0 then
+    if lTefModel.objeto.TotalRecords > 0 then
       CriaException('Não é possível excluir pagamento realizado no TEF.');
   finally
     lContasReceberItensModel.free;
     lPortadorModel:=nil;
-    lTefModel.free;
+    lTefModel:=nil;
   end;
 end;
 
