@@ -5,14 +5,18 @@ interface
 uses
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TPrecoClienteModel = class
+  TPrecoClienteModel = class;
+  ITPrecoClienteModel=IObject<TPrecoClienteModel>;
 
+  TPrecoClienteModel = class
   private
+    [weak] mySelf: ITPrecoClienteModel;
     vIConexao : IConexao;
-    FPrecoClientesLista: IList<TPrecoClienteModel>;
+    FPrecoClientesLista: IList<ITPrecoClienteModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -28,7 +32,7 @@ type
     FSYSTIME: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetPrecoClientesLista(const Value: IList<TPrecoClienteModel>);
+    procedure SetPrecoClientesLista(const Value: IList<ITPrecoClienteModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -47,15 +51,17 @@ type
     property ID: Variant read FID write SetID;
     property SYSTIME: Variant read FSYSTIME write SetSYSTIME;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITPrecoClienteModel;
 
     function Incluir : String;
     function Excluir(pID : String) : String;
     function Salvar : String;
     procedure obterLista;
 
-    property PrecoClientesLista: IList<TPrecoClienteModel> read FPrecoClientesLista write SetPrecoClientesLista;
+    property PrecoClientesLista: IList<ITPrecoClienteModel> read FPrecoClientesLista write SetPrecoClientesLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -81,13 +87,19 @@ begin
   Result    := self.Salvar;
 end;
 
+class function TPrecoClienteModel.getNewIface(pIConexao: IConexao): ITPrecoClienteModel;
+begin
+  Result := TImplObjetoOwner<TPrecoClienteModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TPrecoClienteModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
   Result    := self.Salvar;
 end;
 
-constructor TPrecoClienteModel.Create(pIConexao : IConexao);
+constructor TPrecoClienteModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -101,46 +113,46 @@ end;
 
 procedure TPrecoClienteModel.obterLista;
 var
-  lPrecoClienteLista: TPrecoClienteDao;
+  lPrecoClienteLista: ITPrecoClienteDao;
 begin
-  lPrecoClienteLista := TPrecoClienteDao.Create(vIConexao);
+  lPrecoClienteLista := TPrecoClienteDao.getNewIface(vIConexao);
 
   try
-    lPrecoClienteLista.TotalRecords    := FTotalRecords;
-    lPrecoClienteLista.WhereView       := FWhereView;
-    lPrecoClienteLista.CountView       := FCountView;
-    lPrecoClienteLista.OrderView       := FOrderView;
-    lPrecoClienteLista.StartRecordView := FStartRecordView;
-    lPrecoClienteLista.LengthPageView  := FLengthPageView;
-    lPrecoClienteLista.IDRecordView    := FIDRecordView;
+    lPrecoClienteLista.objeto.TotalRecords    := FTotalRecords;
+    lPrecoClienteLista.objeto.WhereView       := FWhereView;
+    lPrecoClienteLista.objeto.CountView       := FCountView;
+    lPrecoClienteLista.objeto.OrderView       := FOrderView;
+    lPrecoClienteLista.objeto.StartRecordView := FStartRecordView;
+    lPrecoClienteLista.objeto.LengthPageView  := FLengthPageView;
+    lPrecoClienteLista.objeto.IDRecordView    := FIDRecordView;
 
-    lPrecoClienteLista.obterLista;
+    lPrecoClienteLista.objeto.obterLista;
 
-    FTotalRecords  := lPrecoClienteLista.TotalRecords;
-    FPrecoClientesLista := lPrecoClienteLista.PrecoClientesLista;
+    FTotalRecords  := lPrecoClienteLista.objeto.TotalRecords;
+    FPrecoClientesLista := lPrecoClienteLista.objeto.PrecoClientesLista;
 
   finally
-    lPrecoClienteLista.Free;
+    lPrecoClienteLista:=nil;
   end;
 end;
 
 function TPrecoClienteModel.Salvar: String;
 var
-  lPrecoClienteDao: TPrecoClienteDao;
+  lPrecoClienteDao: ITPrecoClienteDao;
 begin
-  lPrecoClienteDao := TPrecoClienteDao.Create(vIConexao);
+  lPrecoClienteDao := TPrecoClienteDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lPrecoClienteDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lPrecoClienteDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lPrecoClienteDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lPrecoClienteDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lPrecoClienteDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lPrecoClienteDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lPrecoClienteDao.Free;
+    lPrecoClienteDao:=nil;
   end;
 end;
 

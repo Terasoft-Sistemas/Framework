@@ -2549,7 +2549,7 @@ var
   lDia                    : String;
   lPrecoVendaModel        : ITPrecoVendaModel;
   lPrecoVendaProdutoModel : ITPrecoVendaProdutoModel;
-  lPrecoClienteModel      : TPrecoClienteModel;
+  lPrecoClienteModel      : ITPrecoClienteModel;
 begin
   lClienteModel           := TClienteModel.Create(vIConexao);
   lPrecoUFModel           := TPrecoUFModel.getNewIface(vIConexao);
@@ -2557,7 +2557,7 @@ begin
   lPrecoVendaModel        := TPrecoVendaModel.getNewIface(vIConexao);
   lPrecoVendaProdutoModel := TPrecoVendaProdutoModel.getNewIface(vIConexao);
   lProdutosModel          := TProdutosModel.getNewIface(vIConexao);
-  lPrecoClienteModel      := TPrecoClienteModel.Create(vIConexao);
+  lPrecoClienteModel      := TPrecoClienteModel.getNewIface(vIConexao);
   try
 
     if pProdutoPreco.PrecoUf then
@@ -2604,14 +2604,14 @@ begin
 
     if pProdutoPreco.PrecoCliente then
     begin
-      lPrecoClienteModel.WhereView := ' and preco_cliente.cliente = '+ QuotedStr(pProdutoPreco.Cliente) + ' and preco_cliente.produto = '+ QuotedStr(pProdutoPreco.Produto);
-      lPrecoClienteModel.obterLista;
+      lPrecoClienteModel.objeto.WhereView := ' and preco_cliente.cliente = '+ QuotedStr(pProdutoPreco.Cliente) + ' and preco_cliente.produto = '+ QuotedStr(pProdutoPreco.Produto);
+      lPrecoClienteModel.objeto.obterLista;
 
-      if lPrecoClienteModel.TotalRecords > 0 then
+      if lPrecoClienteModel.objeto.TotalRecords > 0 then
       begin
-        if lPrecoClienteModel.PrecoClientesLista[0].VALOR > 0 then
+        if lPrecoClienteModel.objeto.PrecoClientesLista.First.objeto.VALOR > 0 then
         begin
-          Result := lPrecoClienteModel.PrecoClientesLista[0].VALOR;
+          Result := lPrecoClienteModel.objeto.PrecoClientesLista.First.objeto.VALOR;
           exit;
         end;
       end;
@@ -2666,7 +2666,7 @@ begin
   finally
     lPrecoVendaProdutoModel:=nil;
     lPromocaoItensModel:=nil;
-    lPrecoClienteModel.Free;
+    lPrecoClienteModel:=nil;
     lPrecoVendaModel:=nil;
     lProdutosModel:=nil;
     lClienteModel.Free;
