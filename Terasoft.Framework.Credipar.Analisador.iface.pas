@@ -192,7 +192,7 @@ begin
        '    w.cliente_id,'+#13+
        '    -- ''0'' loja, este está em TAG'+#13+
        '    w.CODIGO_PRODUTO_FINANCIAMENTO codProdutoCredipar, --Criado'+#13+
-       '    w.valor_total,'+#13+
+       '    w.VALOR_FINANCIADO valor_total,'+#13+
        '    w.valor_entrada,'+#13+
        '    w.parcelas,'+#13+
        '    w.data,'+#13+
