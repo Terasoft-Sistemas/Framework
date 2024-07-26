@@ -5,14 +5,18 @@ interface
 uses
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TPixModel = class
+  TPixModel = class;
+  ITPixModel=IObject<TPixModel>;
 
+  TPixModel = class
   private
+    [weak] mySelf: ITPixModel;
     vIConexao : IConexao;
-    FPixsLista: IList<TPixModel>;
+    FPixsLista: IList<ITPixModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -46,7 +50,7 @@ type
     Fpix_data: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetPixsLista(const Value: IList<TPixModel>);
+    procedure SetPixsLista(const Value: IList<ITPixModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -101,17 +105,19 @@ type
     property data_pagamento: Variant read Fdata_pagamento write Setdata_pagamento;
     property contasreceberitens_id: Variant read Fcontasreceberitens_id write Setcontasreceberitens_id;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITPixModel;
 
     function Salvar: String;
     procedure obterLista;
 
-    function carregaClasse(pId: String): TPixModel;
-    function carregaClasseIndexOf(pIndex: Integer): TPixModel;
+    function carregaClasse(pId: String): ITPixModel;
+    function carregaClasseIndexOf(pIndex: Integer): ITPixModel;
     function CalculaTaxaPix(pTipo: String; PValorBase: Real; pTipoTaxaRecebimento: String; pValorTaxaCobranca: Real; pValorTaxaRecebimento: Real): Real;
 
-    property PixsLista: IList<TPixModel> read FPixsLista write SetPixsLista;
+    property PixsLista: IList<ITPixModel> read FPixsLista write SetPixsLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -163,25 +169,25 @@ begin
   end;
 end;
 
-function TPixModel.carregaClasse(pId: String): TPixModel;
+function TPixModel.carregaClasse(pId: String): ITPixModel;
 var
-  lPixDao: TPixDao;
+  lPixDao: ITPixDao;
 begin
-  lPixDao := TPixDao.Create(vIConexao);
+  lPixDao := TPixDao.getNewIface(vIConexao);
 
   try
-    Result := lPixDao.carregaClasse(pId);
+    Result := lPixDao.objeto.carregaClasse(pId);
   finally
-    lPixDao.Free;
+    lPixDao:=nil;
   end;
 end;
 
-function TPixModel.carregaClasseIndexOf(pIndex: Integer): TPixModel;
+function TPixModel.carregaClasseIndexOf(pIndex: Integer): ITPixModel;
 begin
   Result := FPixsLista[pIndex];
 end;
 
-constructor TPixModel.Create(pIConexao : IConexao);
+constructor TPixModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -193,48 +199,54 @@ begin
   inherited;
 end;
 
+class function TPixModel.getNewIface(pIConexao: IConexao): ITPixModel;
+begin
+  Result := TImplObjetoOwner<TPixModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 procedure TPixModel.obterLista;
 var
-  lPixLista: TPixDao;
+  lPixLista: ITPixDao;
 begin
-  lPixLista := TPixDao.Create(vIConexao);
+  lPixLista := TPixDao.getNewIface(vIConexao);
 
   try
-    lPixLista.TotalRecords    := FTotalRecords;
-    lPixLista.WhereView       := FWhereView;
-    lPixLista.CountView       := FCountView;
-    lPixLista.OrderView       := FOrderView;
-    lPixLista.StartRecordView := FStartRecordView;
-    lPixLista.LengthPageView  := FLengthPageView;
-    lPixLista.IDRecordView    := FIDRecordView;
+    lPixLista.objeto.TotalRecords    := FTotalRecords;
+    lPixLista.objeto.WhereView       := FWhereView;
+    lPixLista.objeto.CountView       := FCountView;
+    lPixLista.objeto.OrderView       := FOrderView;
+    lPixLista.objeto.StartRecordView := FStartRecordView;
+    lPixLista.objeto.LengthPageView  := FLengthPageView;
+    lPixLista.objeto.IDRecordView    := FIDRecordView;
 
-    lPixLista.obterLista;
+    lPixLista.objeto.obterLista;
 
-    FTotalRecords  := lPixLista.TotalRecords;
-    FPixsLista := lPixLista.PixsLista;
+    FTotalRecords  := lPixLista.objeto.TotalRecords;
+    FPixsLista := lPixLista.objeto.PixsLista;
 
   finally
-    lPixLista.Free;
+    lPixLista:=nil;
   end;
 end;
 
 function TPixModel.Salvar: String;
 var
-  lPixDao: TPixDao;
+  lPixDao: ITPixDao;
 begin
-  lPixDao := TPixDao.Create(vIConexao);
+  lPixDao := TPixDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lPixDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lPixDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lPixDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lPixDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lPixDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lPixDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lPixDao.Free;
+    lPixDao:=nil;
   end;
 end;
 

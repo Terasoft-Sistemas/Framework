@@ -12,16 +12,20 @@ uses
   System.Variants,
   Terasoft.Utils,
   Terasoft.FuncoesTexto,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TPixDao = class
+  TPixDao = class;
+  ITPixDao=IObject<TPixDao>;
 
+  TPixDao = class
   private
+    [weak] mYSelf: ITPixDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FPixsLista: ILIst<TPixModel>;
+    FPixsLista: IList<ITPixModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -32,7 +36,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetPixsLista(const Value: ILIst<TPixModel>);
+    procedure SetPixsLista(const Value: ILIst<ITPixModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -40,14 +44,16 @@ type
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-    procedure setParams(var pQry: TFDQuery; pPixModel: TPixModel);
+    procedure setParams(var pQry: TFDQuery; pPixModel: ITPixModel);
     function where: String;
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property PixsLista: ILIst<TPixModel> read FPixsLista write SetPixsLista;
+    class function getNewIface(pIConexao: IConexao): ITPixDao;
+
+    property PixsLista: ILIst<ITPixModel> read FPixsLista write SetPixsLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -57,13 +63,13 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(pPixModel: TPixModel): String;
-    function alterar(pPixModel: TPixModel): String;
-    function excluir(pPixModel: TPixModel): String;
+    function incluir(pPixModel: ITPixModel): String;
+    function alterar(pPixModel: ITPixModel): String;
+    function excluir(pPixModel: ITPixModel): String;
 	
     procedure obterLista;
 
-    function carregaClasse(pId: String): TPixModel;
+    function carregaClasse(pId: String): ITPixModel;
 end;
 
 implementation
@@ -73,13 +79,13 @@ uses
 
 { TPix }
 
-function TPixDao.carregaClasse(pId: String): TPixModel;
+function TPixDao.carregaClasse(pId: String): ITPixModel;
 var
   lQry: TFDQuery;
-  lModel: TPixModel;
+  lModel: ITPixModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TPixModel.Create(vIConexao);
+  lModel   := TPixModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -88,29 +94,29 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID                     := lQry.FieldByName('ID').AsString;
-    lModel.DATA_CADASTRO          := lQry.FieldByName('DATA_CADASTRO').AsString;
-    lModel.SYSTIME                := lQry.FieldByName('SYSTIME').AsString;
-    lModel.CLIENTE_ID             := lQry.FieldByName('CLIENTE_ID').AsString;
-    lModel.VALOR                  := lQry.FieldByName('VALOR').AsString;
-    lModel.VENCIMENTO             := lQry.FieldByName('VENCIMENTO').AsString;
-    lModel.EXPIRA                 := lQry.FieldByName('EXPIRA').AsString;
-    lModel.MENSAGEM               := lQry.FieldByName('MENSAGEM').AsString;
-    lModel.DOCUMENTO              := lQry.FieldByName('DOCUMENTO').AsString;
-    lModel.JUROS_TIPO             := lQry.FieldByName('JUROS_TIPO').AsString;
-    lModel.JUROS_VALOR            := lQry.FieldByName('JUROS_VALOR').AsString;
-    lModel.MULTA_TIPO             := lQry.FieldByName('MULTA_TIPO').AsString;
-    lModel.MULTA_VALOR            := lQry.FieldByName('MULTA_VALOR').AsString;
-    lModel.DESCONTO_TIPO          := lQry.FieldByName('DESCONTO_TIPO').AsString;
-    lModel.DESCONTO_VALOR         := lQry.FieldByName('DESCONTO_VALOR').AsString;
-    lModel.DESCONTO_DATA          := lQry.FieldByName('DESCONTO_DATA').AsString;
-    lModel.PIX_ID                 := lQry.FieldByName('PIX_ID').AsString;
-    lModel.PIX_DATA               := lQry.FieldByName('PIX_DATA').AsString;
-    lModel.PIX_URL                := lQry.FieldByName('PIX_URL').AsString;
-    lModel.PIX_TIPO               := lQry.FieldByName('PIX_TIPO').AsString;
-    lModel.VALOR_RECEBIDO         := lQry.FieldByName('VALOR_RECEBIDO').AsString;
-    lModel.CONTASRECEBERITENS_ID  := lQry.FieldByName('CONTASRECEBERITENS_ID').AsString;
-    lModel.DATA_PAGAMENTO         := lQry.FieldByName('DATA_PAGAMENTO').AsString;
+    lModel.objeto.ID                     := lQry.FieldByName('ID').AsString;
+    lModel.objeto.DATA_CADASTRO          := lQry.FieldByName('DATA_CADASTRO').AsString;
+    lModel.objeto.SYSTIME                := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.CLIENTE_ID             := lQry.FieldByName('CLIENTE_ID').AsString;
+    lModel.objeto.VALOR                  := lQry.FieldByName('VALOR').AsString;
+    lModel.objeto.VENCIMENTO             := lQry.FieldByName('VENCIMENTO').AsString;
+    lModel.objeto.EXPIRA                 := lQry.FieldByName('EXPIRA').AsString;
+    lModel.objeto.MENSAGEM               := lQry.FieldByName('MENSAGEM').AsString;
+    lModel.objeto.DOCUMENTO              := lQry.FieldByName('DOCUMENTO').AsString;
+    lModel.objeto.JUROS_TIPO             := lQry.FieldByName('JUROS_TIPO').AsString;
+    lModel.objeto.JUROS_VALOR            := lQry.FieldByName('JUROS_VALOR').AsString;
+    lModel.objeto.MULTA_TIPO             := lQry.FieldByName('MULTA_TIPO').AsString;
+    lModel.objeto.MULTA_VALOR            := lQry.FieldByName('MULTA_VALOR').AsString;
+    lModel.objeto.DESCONTO_TIPO          := lQry.FieldByName('DESCONTO_TIPO').AsString;
+    lModel.objeto.DESCONTO_VALOR         := lQry.FieldByName('DESCONTO_VALOR').AsString;
+    lModel.objeto.DESCONTO_DATA          := lQry.FieldByName('DESCONTO_DATA').AsString;
+    lModel.objeto.PIX_ID                 := lQry.FieldByName('PIX_ID').AsString;
+    lModel.objeto.PIX_DATA               := lQry.FieldByName('PIX_DATA').AsString;
+    lModel.objeto.PIX_URL                := lQry.FieldByName('PIX_URL').AsString;
+    lModel.objeto.PIX_TIPO               := lQry.FieldByName('PIX_TIPO').AsString;
+    lModel.objeto.VALOR_RECEBIDO         := lQry.FieldByName('VALOR_RECEBIDO').AsString;
+    lModel.objeto.CONTASRECEBERITENS_ID  := lQry.FieldByName('CONTASRECEBERITENS_ID').AsString;
+    lModel.objeto.DATA_PAGAMENTO         := lQry.FieldByName('DATA_PAGAMENTO').AsString;
 
     Result := lModel;
 
@@ -119,7 +125,7 @@ begin
   end;
 end;
 
-constructor TPixDao.Create(pIConexao : IConexao);
+constructor TPixDao._Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -133,7 +139,7 @@ begin
   inherited;
 end;
 
-function TPixDao.incluir(pPixModel: TPixModel): String;
+function TPixDao.incluir(pPixModel: ITPixModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -155,7 +161,7 @@ begin
   end;
 end;
 
-function TPixDao.alterar(pPixModel: TPixModel): String;
+function TPixDao.alterar(pPixModel: ITPixModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -169,7 +175,7 @@ begin
     setParams(lQry, pPixModel);
     lQry.ExecSQL;
 
-    Result := pPixModel.ID;
+    Result := pPixModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -177,20 +183,26 @@ begin
   end;
 end;
 
-function TPixDao.excluir(pPixModel: TPixModel): String;
+function TPixDao.excluir(pPixModel: ITPixModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from pix where ID = :ID',[pPixModel.ID]);
+   lQry.ExecSQL('delete from pix where ID = :ID',[pPixModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pPixModel.ID;
+   Result := pPixModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TPixDao.getNewIface(pIConexao: IConexao): ITPixDao;
+begin
+  Result := TImplObjetoOwner<TPixDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TPixDao.where: String;
@@ -233,11 +245,11 @@ procedure TPixDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo : TPixModel;
+  modelo : ITPixModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FPixsLista := TCollections.CreateList<TPixModel>(true);
+  FPixsLista := TCollections.CreateList<ITPixModel>;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -260,32 +272,32 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TPixModel.Create(vIConexao);
+      modelo := TPixModel.getNewIface(vIConexao);
       FPixsLista.Add(modelo);
 
-      modelo.ID                    := lQry.FieldByName('ID').AsString;
-      modelo.DATA_CADASTRO         := lQry.FieldByName('DATA_CADASTRO').AsString;
-      modelo.SYSTIME               := lQry.FieldByName('SYSTIME').AsString;
-      modelo.CLIENTE_ID            := lQry.FieldByName('CLIENTE_ID').AsString;
-      modelo.VALOR                 := lQry.FieldByName('VALOR').AsString;
-      modelo.VENCIMENTO            := lQry.FieldByName('VENCIMENTO').AsString;
-      modelo.EXPIRA                := lQry.FieldByName('EXPIRA').AsString;
-      modelo.MENSAGEM              := lQry.FieldByName('MENSAGEM').AsString;
-      modelo.DOCUMENTO             := lQry.FieldByName('DOCUMENTO').AsString;
-      modelo.JUROS_TIPO            := lQry.FieldByName('JUROS_TIPO').AsString;
-      modelo.JUROS_VALOR           := lQry.FieldByName('JUROS_VALOR').AsString;
-      modelo.MULTA_TIPO            := lQry.FieldByName('MULTA_TIPO').AsString;
-      modelo.MULTA_VALOR           := lQry.FieldByName('MULTA_VALOR').AsString;
-      modelo.DESCONTO_TIPO         := lQry.FieldByName('DESCONTO_TIPO').AsString;
-      modelo.DESCONTO_VALOR        := lQry.FieldByName('DESCONTO_VALOR').AsString;
-      modelo.DESCONTO_DATA         := lQry.FieldByName('DESCONTO_DATA').AsString;
-      modelo.PIX_ID                := lQry.FieldByName('PIX_ID').AsString;
-      modelo.PIX_DATA              := lQry.FieldByName('PIX_DATA').AsString;
-      modelo.PIX_URL               := lQry.FieldByName('PIX_URL').AsString;
-      modelo.PIX_TIPO              := lQry.FieldByName('PIX_TIPO').AsString;
-      modelo.VALOR_RECEBIDO        := lQry.FieldByName('VALOR_RECEBIDO').AsString;
-      modelo.DATA_PAGAMENTO        := lQry.FieldByName('DATA_PAGAMENTO').AsString;
-      modelo.CONTASRECEBERITENS_ID := lQry.FieldByName('CONTASRECEBERITENS_ID').AsString;
+      modelo.objeto.ID                    := lQry.FieldByName('ID').AsString;
+      modelo.objeto.DATA_CADASTRO         := lQry.FieldByName('DATA_CADASTRO').AsString;
+      modelo.objeto.SYSTIME               := lQry.FieldByName('SYSTIME').AsString;
+      modelo.objeto.CLIENTE_ID            := lQry.FieldByName('CLIENTE_ID').AsString;
+      modelo.objeto.VALOR                 := lQry.FieldByName('VALOR').AsString;
+      modelo.objeto.VENCIMENTO            := lQry.FieldByName('VENCIMENTO').AsString;
+      modelo.objeto.EXPIRA                := lQry.FieldByName('EXPIRA').AsString;
+      modelo.objeto.MENSAGEM              := lQry.FieldByName('MENSAGEM').AsString;
+      modelo.objeto.DOCUMENTO             := lQry.FieldByName('DOCUMENTO').AsString;
+      modelo.objeto.JUROS_TIPO            := lQry.FieldByName('JUROS_TIPO').AsString;
+      modelo.objeto.JUROS_VALOR           := lQry.FieldByName('JUROS_VALOR').AsString;
+      modelo.objeto.MULTA_TIPO            := lQry.FieldByName('MULTA_TIPO').AsString;
+      modelo.objeto.MULTA_VALOR           := lQry.FieldByName('MULTA_VALOR').AsString;
+      modelo.objeto.DESCONTO_TIPO         := lQry.FieldByName('DESCONTO_TIPO').AsString;
+      modelo.objeto.DESCONTO_VALOR        := lQry.FieldByName('DESCONTO_VALOR').AsString;
+      modelo.objeto.DESCONTO_DATA         := lQry.FieldByName('DESCONTO_DATA').AsString;
+      modelo.objeto.PIX_ID                := lQry.FieldByName('PIX_ID').AsString;
+      modelo.objeto.PIX_DATA              := lQry.FieldByName('PIX_DATA').AsString;
+      modelo.objeto.PIX_URL               := lQry.FieldByName('PIX_URL').AsString;
+      modelo.objeto.PIX_TIPO              := lQry.FieldByName('PIX_TIPO').AsString;
+      modelo.objeto.VALOR_RECEBIDO        := lQry.FieldByName('VALOR_RECEBIDO').AsString;
+      modelo.objeto.DATA_PAGAMENTO        := lQry.FieldByName('DATA_PAGAMENTO').AsString;
+      modelo.objeto.CONTASRECEBERITENS_ID := lQry.FieldByName('CONTASRECEBERITENS_ID').AsString;
 
       lQry.Next;
     end;
@@ -327,7 +339,7 @@ begin
   FOrderView := Value;
 end;
 
-procedure TPixDao.setParams(var pQry: TFDQuery; pPixModel: TPixModel);
+procedure TPixDao.setParams(var pQry: TFDQuery; pPixModel: ITPixModel);
 var
   lTabela : IFDDataset;
   lCtx    : TRttiContext;
@@ -343,7 +355,7 @@ begin
       lProp := lCtx.GetType(TPixModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPixModel).AsString = '',
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPixModel.objeto).AsString = '',
         Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPixModel).AsString))
     end;
   finally

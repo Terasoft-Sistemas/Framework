@@ -634,7 +634,7 @@ var
   lContasReceberItensModel : TContasReceberItensModel;
   lReservaModel            : TReservaModel;
   lClienteModel            : TClienteModel;
-  lPixModel                : TPixModel;
+  lPixModel                : ITPixModel;
   lComissaoCliente         : Double;
 begin
   lPedidoVendaModel        := TPedidoVendaModel.Create(vIConexao);
@@ -642,7 +642,7 @@ begin
   lClienteModel            := TClienteModel.Create(vIConexao);
   lContasReceberModel      := TContasReceberModel.Create(vIConexao);
   lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
-  lPixModel                := TPixModel.Create(vIConexao);
+  lPixModel                := TPixModel.getNewIface(vIConexao);
 
   try
     lPedidoVendaModel := lPedidoVendaModel.carregaClasse(self.FNUMERO_PED);
@@ -661,13 +661,13 @@ begin
 
       for lContasReceberItensModel in lContasReceberItensModel.ContasReceberItenssLista do
       begin
-        lPixModel.WhereView := ' and pix.contasreceberitens_id = '+ lContasReceberItensModel.ID +
+        lPixModel.objeto.WhereView := ' and pix.contasreceberitens_id = '+ lContasReceberItensModel.ID +
                                ' and pix.valor_recebido > 0         '+
                                ' and pix.data_pagamento is not null ';
 
-        lPixModel.obterLista;
+        lPixModel.objeto.obterLista;
 
-        if lPixModel.TotalRecords = 0 then
+        if lPixModel.objeto.TotalRecords = 0 then
           CriaException('Pix não recebido. Realizar o recebimento');
       end;
     end;
@@ -702,7 +702,7 @@ begin
     lPedidoVendaModel.Free;
     lPedidoItensModel.Free;
     lClienteModel.Free;
-    lPixModel.Free;
+    lPixModel:=nil;
 
     if lReservaModel <> nil then
       lReservaModel.Free;
