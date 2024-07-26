@@ -9,15 +9,19 @@ uses
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao;
 
 type
+  TPrecoVendaDao = class;
+  ITPrecoVendaDao=IObject<TPrecoVendaDao>;
   TPrecoVendaDao = class
   private
+    [weak] mySelf: ITPrecoVendaDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FPrecoVendasLista: IList<TPrecoVendaModel>;
+    FPrecoVendasLista: IList<ITPrecoVendaModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -28,7 +32,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetPrecoVendasLista(const Value: IList<TPrecoVendaModel>);
+    procedure SetPrecoVendasLista(const Value: IList<ITPrecoVendaModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -36,14 +40,16 @@ type
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-    procedure setParams(var pQry: TFDQuery; pPrecoVendaModel: TPrecoVendaModel);
+    procedure setParams(var pQry: TFDQuery; pPrecoVendaModel: ITPrecoVendaModel);
     function where: String;
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property PrecoVendasLista: IList<TPrecoVendaModel> read FPrecoVendasLista write SetPrecoVendasLista;
+    class function getNewIface(pIConexao: IConexao): ITPrecoVendaDao;
+
+    property PrecoVendasLista: IList<ITPrecoVendaModel> read FPrecoVendasLista write SetPrecoVendasLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -53,10 +59,10 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(pPrecoVendaModel: TPrecoVendaModel): String;
-    function alterar(pPrecoVendaModel: TPrecoVendaModel): String;
-    function excluir(pPrecoVendaModel: TPrecoVendaModel): String;
-	  function carregaClasse(pID : String) : TPrecoVendaModel;
+    function incluir(pPrecoVendaModel: ITPrecoVendaModel): String;
+    function alterar(pPrecoVendaModel: ITPrecoVendaModel): String;
+    function excluir(pPrecoVendaModel: ITPrecoVendaModel): String;
+	  function carregaClasse(pID : String) : ITPrecoVendaModel;
     procedure obterLista;
 end;
 implementation
@@ -64,13 +70,13 @@ implementation
 uses
   System.Rtti;
 { TPrecoVenda }
-function TPrecoVendaDao.carregaClasse(pID: String): TPrecoVendaModel;
+function TPrecoVendaDao.carregaClasse(pID: String): ITPrecoVendaModel;
 var
   lQry: TFDQuery;
-  lModel: TPrecoVendaModel;
+  lModel: ITPrecoVendaModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TPrecoVendaModel.Create(vIConexao);
+  lModel   := TPrecoVendaModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -79,15 +85,15 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID                   := lQry.FieldByName('ID').AsString;
-    lModel.NOME                 := lQry.FieldByName('NOME').AsString;
-    lModel.ACRESCIMO_DESCONTO   := lQry.FieldByName('ACRESCIMO_DESCONTO').AsString;
-    lModel.PERCENTUAL           := lQry.FieldByName('PERCENTUAL').AsString;
-    lModel.STATUS               := lQry.FieldByName('STATUS').AsString;
-    lModel.SYSTIME              := lQry.FieldByName('SYSTIME').AsString;
-    lModel.TIPO_CUSTO           := lQry.FieldByName('TIPO_CUSTO').AsString;
-    lModel.CONDICOES            := lQry.FieldByName('CONDICOES').AsString;
-    lModel.PRODUTOS_IGNORAR     := lQry.FieldByName('PRODUTOS_IGNORAR').AsString;
+    lModel.objeto.ID                   := lQry.FieldByName('ID').AsString;
+    lModel.objeto.NOME                 := lQry.FieldByName('NOME').AsString;
+    lModel.objeto.ACRESCIMO_DESCONTO   := lQry.FieldByName('ACRESCIMO_DESCONTO').AsString;
+    lModel.objeto.PERCENTUAL           := lQry.FieldByName('PERCENTUAL').AsString;
+    lModel.objeto.STATUS               := lQry.FieldByName('STATUS').AsString;
+    lModel.objeto.SYSTIME              := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.TIPO_CUSTO           := lQry.FieldByName('TIPO_CUSTO').AsString;
+    lModel.objeto.CONDICOES            := lQry.FieldByName('CONDICOES').AsString;
+    lModel.objeto.PRODUTOS_IGNORAR     := lQry.FieldByName('PRODUTOS_IGNORAR').AsString;
 
     Result := lModel;
 
@@ -96,7 +102,7 @@ begin
   end;
 end;
 
-constructor TPrecoVendaDao.Create(pIConexao : IConexao);
+constructor TPrecoVendaDao._Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -110,7 +116,7 @@ begin
   inherited;
 end;
 
-function TPrecoVendaDao.incluir(pPrecoVendaModel: TPrecoVendaModel): String;
+function TPrecoVendaDao.incluir(pPrecoVendaModel: ITPrecoVendaModel): String;
 var
   lQry : TFDQuery;
   lSQL : String;
@@ -121,7 +127,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pPrecoVendaModel.ID := vIConexao.Generetor('GEN_PRECOVENDA');
+    pPrecoVendaModel.objeto.ID := vIConexao.Generetor('GEN_PRECOVENDA');
     setParams(lQry, pPrecoVendaModel);
     lQry.Open;
 
@@ -132,7 +138,7 @@ begin
     lQry.Free;
   end;
 end;
-function TPrecoVendaDao.alterar(pPrecoVendaModel: TPrecoVendaModel): String;
+function TPrecoVendaDao.alterar(pPrecoVendaModel: ITPrecoVendaModel): String;
 var
   lQry : TFDQuery;
   lSQL : String;
@@ -146,26 +152,32 @@ begin
     setParams(lQry, pPrecoVendaModel);
     lQry.ExecSQL;
 
-    Result := pPrecoVendaModel.ID;
+    Result := pPrecoVendaModel.objeto.ID;
 
   finally
     lSQL := '';
     lQry.Free;
   end;
 end;
-function TPrecoVendaDao.excluir(pPrecoVendaModel: TPrecoVendaModel): String;
+function TPrecoVendaDao.excluir(pPrecoVendaModel: ITPrecoVendaModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
   try
-   lQry.ExecSQL('delete from preco_venda where ID = :ID',[pPrecoVendaModel.ID]);
+   lQry.ExecSQL('delete from preco_venda where ID = :ID',[pPrecoVendaModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pPrecoVendaModel.ID;
+   Result := pPrecoVendaModel.objeto.ID;
   finally
     lQry.Free;
   end;
 end;
+class function TPrecoVendaDao.getNewIface(pIConexao: IConexao): ITPrecoVendaDao;
+begin
+  Result := TImplObjetoOwner<TPrecoVendaDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TPrecoVendaDao.where: String;
 var
   lSQL : String;
@@ -196,10 +208,10 @@ procedure TPrecoVendaDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TPrecoVendaModel;
+  modelo: ITPrecoVendaModel;
 begin
   lQry := vIConexao.CriarQuery;
-  FPrecoVendasLista := TCollections.CreateList<TPrecoVendaModel>(true);
+  FPrecoVendasLista := TCollections.CreateList<ITPrecoVendaModel>;
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lSql := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
@@ -216,17 +228,17 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TPrecoVendaModel.Create(vIConexao);
+      modelo := TPrecoVendaModel.getNewIface(vIConexao);
       FPrecoVendasLista.Add(modelo);
-      modelo.ID                 := lQry.FieldByName('ID').AsString;
-      modelo.NOME               := lQry.FieldByName('NOME').AsString;
-      modelo.ACRESCIMO_DESCONTO := lQry.FieldByName('ACRESCIMO_DESCONTO').AsString;
-      modelo.PERCENTUAL         := lQry.FieldByName('PERCENTUAL').AsString;
-      modelo.STATUS             := lQry.FieldByName('STATUS').AsString;
-      modelo.SYSTIME            := lQry.FieldByName('SYSTIME').AsString;
-      modelo.TIPO_CUSTO         := lQry.FieldByName('TIPO_CUSTO').AsString;
-      modelo.CONDICOES          := lQry.FieldByName('CONDICOES').AsString;
-      modelo.PRODUTOS_IGNORAR   := lQry.FieldByName('PRODUTOS_IGNORAR').AsString;
+      modelo.objeto.ID                 := lQry.FieldByName('ID').AsString;
+      modelo.objeto.NOME               := lQry.FieldByName('NOME').AsString;
+      modelo.objeto.ACRESCIMO_DESCONTO := lQry.FieldByName('ACRESCIMO_DESCONTO').AsString;
+      modelo.objeto.PERCENTUAL         := lQry.FieldByName('PERCENTUAL').AsString;
+      modelo.objeto.STATUS             := lQry.FieldByName('STATUS').AsString;
+      modelo.objeto.SYSTIME            := lQry.FieldByName('SYSTIME').AsString;
+      modelo.objeto.TIPO_CUSTO         := lQry.FieldByName('TIPO_CUSTO').AsString;
+      modelo.objeto.CONDICOES          := lQry.FieldByName('CONDICOES').AsString;
+      modelo.objeto.PRODUTOS_IGNORAR   := lQry.FieldByName('PRODUTOS_IGNORAR').AsString;
       lQry.Next;
     end;
     obterTotalRegistros;
@@ -259,7 +271,7 @@ begin
   FOrderView := Value;
 end;
 
-procedure TPrecoVendaDao.setParams(var pQry: TFDQuery; pPrecoVendaModel: TPrecoVendaModel);
+procedure TPrecoVendaDao.setParams(var pQry: TFDQuery; pPrecoVendaModel: ITPrecoVendaModel);
 var
   lTabela : IFDDataset;
   lCtx    : TRttiContext;
@@ -275,7 +287,7 @@ begin
       lProp := lCtx.GetType(TPrecoVendaModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPrecoVendaModel).AsString = '',
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPrecoVendaModel.objeto).AsString = '',
         Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPrecoVendaModel).AsString))
     end;
   finally

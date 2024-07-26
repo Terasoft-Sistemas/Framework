@@ -5,14 +5,18 @@ interface
 uses
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TPrecoVendaModel = class
+  TPrecoVendaModel = class;
+  ITPrecoVendaModel=IObject<TPrecoVendaModel>;
 
+  TPrecoVendaModel = class
   private
+    [weak] mySelf: ITPrecoVendaModel;
     vIConexao : IConexao;
-    FPrecoVendasLista: IList<TPrecoVendaModel>;
+    FPrecoVendasLista: IList<ITPrecoVendaModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -32,7 +36,7 @@ type
     FNOME: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetPrecoVendasLista(const Value: IList<TPrecoVendaModel>);
+    procedure SetPrecoVendasLista(const Value: IList<ITPrecoVendaModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -59,17 +63,19 @@ type
     property CONDICOES: Variant read FCONDICOES write SetCONDICOES;
     property PRODUTOS_IGNORAR: Variant read FPRODUTOS_IGNORAR write SetPRODUTOS_IGNORAR;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITPrecoVendaModel;
+
     function Incluir: String;
-    function Alterar(pID : String) : TPrecoVendaModel;
+    function Alterar(pID : String) : ITPrecoVendaModel;
     function Excluir(pID : String) : String;
-    function carregaClasse(pID : String) : TPrecoVendaModel;
+    function carregaClasse(pID : String) : ITPrecoVendaModel;
     function Salvar: String;
     procedure obterLista;
 
-    property PrecoVendasLista: IList<TPrecoVendaModel> read FPrecoVendasLista write SetPrecoVendasLista;
+    property PrecoVendasLista: IList<ITPrecoVendaModel> read FPrecoVendasLista write SetPrecoVendasLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -88,14 +94,14 @@ uses
 
 { TPrecoVendaModel }
 
-function TPrecoVendaModel.Alterar(pID: String): TPrecoVendaModel;
+function TPrecoVendaModel.Alterar(pID: String): ITPrecoVendaModel;
 var
-  lPrecoVendaModel : TPrecoVendaModel;
+  lPrecoVendaModel : ITPrecoVendaModel;
 begin
-  lPrecoVendaModel := TPrecoVendaModel.Create(vIConexao);
+  lPrecoVendaModel := TPrecoVendaModel.getNewIface(vIConexao);
   try
-    lPrecoVendaModel      := lPrecoVendaModel.carregaClasse(pID);
-    lPrecoVendaModel.Acao := tacAlterar;
+    lPrecoVendaModel      := lPrecoVendaModel.objeto.carregaClasse(pID);
+    lPrecoVendaModel.objeto.Acao := tacAlterar;
     Result                := lPrecoVendaModel;
   finally
 
@@ -109,25 +115,32 @@ begin
   Result    := self.Salvar;
 end;
 
+class function TPrecoVendaModel.getNewIface(
+  pIConexao: IConexao): ITPrecoVendaModel;
+begin
+  Result := TImplObjetoOwner<TPrecoVendaModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TPrecoVendaModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
   Result    := self.Salvar;
 end;
 
-function TPrecoVendaModel.carregaClasse(pID: String): TPrecoVendaModel;
+function TPrecoVendaModel.carregaClasse(pID: String): ITPrecoVendaModel;
 var
-  lPrecoVendaModel: TPrecoVendaDao;
+  lPrecoVendaModel: ITPrecoVendaDao;
 begin
-  lPrecoVendaModel := TPrecoVendaDao.Create(vIConexao);
+  lPrecoVendaModel := TPrecoVendaDao.getNewIface(vIConexao);
   try
-    Result := lPrecoVendaModel.carregaClasse(ID);
+    Result := lPrecoVendaModel.objeto.carregaClasse(ID);
   finally
-    lPrecoVendaModel.Free;
+    lPrecoVendaModel:=nil;
   end;
 end;
 
-constructor TPrecoVendaModel.Create(pIConexao : IConexao);
+constructor TPrecoVendaModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -141,46 +154,46 @@ end;
 
 procedure TPrecoVendaModel.obterLista;
 var
-  lPrecoVendaLista: TPrecoVendaDao;
+  lPrecoVendaLista: ITPrecoVendaDao;
 begin
-  lPrecoVendaLista := TPrecoVendaDao.Create(vIConexao);
+  lPrecoVendaLista := TPrecoVendaDao.getNewIface(vIConexao);
 
   try
-    lPrecoVendaLista.TotalRecords    := FTotalRecords;
-    lPrecoVendaLista.WhereView       := FWhereView;
-    lPrecoVendaLista.CountView       := FCountView;
-    lPrecoVendaLista.OrderView       := FOrderView;
-    lPrecoVendaLista.StartRecordView := FStartRecordView;
-    lPrecoVendaLista.LengthPageView  := FLengthPageView;
-    lPrecoVendaLista.IDRecordView    := FIDRecordView;
+    lPrecoVendaLista.objeto.TotalRecords    := FTotalRecords;
+    lPrecoVendaLista.objeto.WhereView       := FWhereView;
+    lPrecoVendaLista.objeto.CountView       := FCountView;
+    lPrecoVendaLista.objeto.OrderView       := FOrderView;
+    lPrecoVendaLista.objeto.StartRecordView := FStartRecordView;
+    lPrecoVendaLista.objeto.LengthPageView  := FLengthPageView;
+    lPrecoVendaLista.objeto.IDRecordView    := FIDRecordView;
 
-    lPrecoVendaLista.obterLista;
+    lPrecoVendaLista.objeto.obterLista;
 
-    FTotalRecords  := lPrecoVendaLista.TotalRecords;
-    FPrecoVendasLista := lPrecoVendaLista.PrecoVendasLista;
+    FTotalRecords  := lPrecoVendaLista.objeto.TotalRecords;
+    FPrecoVendasLista := lPrecoVendaLista.objeto.PrecoVendasLista;
 
   finally
-    lPrecoVendaLista.Free;
+    lPrecoVendaLista:=nil;
   end;
 end;
 
 function TPrecoVendaModel.Salvar: String;
 var
-  lPrecoVendaDao: TPrecoVendaDao;
+  lPrecoVendaDao: ITPrecoVendaDao;
 begin
-  lPrecoVendaDao := TPrecoVendaDao.Create(vIConexao);
+  lPrecoVendaDao := TPrecoVendaDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lPrecoVendaDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lPrecoVendaDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lPrecoVendaDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lPrecoVendaDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lPrecoVendaDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lPrecoVendaDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lPrecoVendaDao.Free;
+    lPrecoVendaDao:=nil;
   end;
 end;
 
