@@ -358,7 +358,7 @@ begin
       lProp := lCtx.GetType(TPortadorModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPortadorModel).AsString = '',
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPortadorModel.objeto).AsString = '',
         Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPortadorModel.objeto).AsString))
     end;
   finally
