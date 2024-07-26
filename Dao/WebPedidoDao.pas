@@ -207,6 +207,10 @@ begin
     lModel.CODIGO_AUTORIZACAO_CARTAO       := lQry.FieldByName('CODIGO_AUTORIZACAO_CARTAO').AsString;
     lModel.SEGURO_PRESTAMISTA_VALOR        := lQry.FieldByName('SEGURO_PRESTAMISTA_VALOR').AsString;
     lModel.SEGURO_PRESTAMISTA_CUSTO        := lQry.FieldByName('SEGURO_PRESTAMISTA_CUSTO').AsString;
+    lModel.VALOR_FINANCIADO                := lQry.FieldByName('VALOR_FINANCIADO').AsString;
+
+
+
 
     Result := lModel;
   finally

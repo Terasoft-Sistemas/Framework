@@ -155,6 +155,7 @@ type
     FTOTAL_GARANTIA: Variant;
     FSEGURO_PRESTAMISTA_CUSTO: Variant;
     FSEGURO_PRESTAMISTA_VALOR: Variant;
+    FVALOR_FINANCIADO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetWebPedidosLista(const Value: IList<TWebPedidoModel>);
@@ -267,6 +268,7 @@ type
     procedure SetTOTAL_GARANTIA(const Value: Variant);
     procedure SetSEGURO_PRESTAMISTA_CUSTO(const Value: Variant);
     procedure SetSEGURO_PRESTAMISTA_VALOR(const Value: Variant);
+    procedure SetVALOR_FINANCIADO(const Value: Variant);
 
   public
     procedure AfterConstruction; override;
@@ -372,6 +374,9 @@ type
     property GERENTE_ID: Variant read FGERENTE_ID write SetGERENTE_ID;
     property SEGURO_PRESTAMISTA_VALOR : Variant read FSEGURO_PRESTAMISTA_VALOR write SetSEGURO_PRESTAMISTA_VALOR;
     property SEGURO_PRESTAMISTA_CUSTO : Variant read FSEGURO_PRESTAMISTA_CUSTO write SetSEGURO_PRESTAMISTA_CUSTO;
+    property VALOR_FINANCIADO: Variant read FVALOR_FINANCIADO write SetVALOR_FINANCIADO;
+
+
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -1292,6 +1297,11 @@ end;
 procedure TWebPedidoModel.SetVALOR_ENTRADA(const Value: Variant);
 begin
   FVALOR_ENTRADA := Value;
+end;
+
+procedure TWebPedidoModel.SetVALOR_FINANCIADO(const Value: Variant);
+begin
+  FVALOR_FINANCIADO := Value;
 end;
 
 procedure TWebPedidoModel.SetVALOR_FRETE(const Value: Variant);
