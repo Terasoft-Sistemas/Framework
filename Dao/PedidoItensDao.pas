@@ -6,19 +6,23 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
+  Terasoft.Framework.ObjectIface,
   System.Variants,
   Terasoft.Utils,
   Spring.Collections,
   Interfaces.Conexao;
 
 type
+  TPedidoItensDao = class;
+  ITPedidoItensDao=IObject<TPedidoItensDao>;
+
   TPedidoItensDao = class
   private
+    [weak] mySelf: ITPedidoItensDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FPedidoItenssLista: IList<TPedidoItensModel>;
+    FPedidoItenssLista: IList<ITPedidoItensModel>;
     FLengthPageView: String;
     FStartRecordView: String;
     FID: Variant;
@@ -35,7 +39,7 @@ type
     FSEGURO_PRESTAMISTA_VALOR: Variant;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetPedidoItenssLista(const Value: IList<TPedidoItensModel>);
+    procedure SetPedidoItenssLista(const Value: IList<ITPedidoItensModel>);
     procedure SetID(const Value: Variant);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -49,16 +53,18 @@ type
     procedure SetVALOR_TOTAL_ITENS(const Value: Variant);
     procedure SetVALOR_TOTAL(const Value: Variant);
 
-    procedure setParams(var pQry: TFDQuery; pPedidoItensModel: TPedidoItensModel);
-    procedure setParamsArray(var pQry: TFDQuery; pPedidoItensModel: TPedidoItensModel);
+    procedure setParams(var pQry: TFDQuery; pPedidoItensModel: ITPedidoItensModel);
+    procedure setParamsArray(var pQry: TFDQuery; pPedidoItensModel: ITPedidoItensModel);
     function where: String;
     procedure SetSEGURO_PRESTAMISTA_VALOR(const Value: Variant);
 
   public
-    constructor Create(pConexao : IConexao);
+    constructor _Create(pConexao : IConexao);
     destructor Destroy; override;
 
-    property PedidoItenssLista: IList<TPedidoItensModel> read FPedidoItenssLista write SetPedidoItenssLista;
+    class function getNewIface(pIConexao: IConexao): ITPedidoItensDao;
+
+    property PedidoItenssLista: IList<ITPedidoItensModel> read FPedidoItenssLista write SetPedidoItenssLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -74,15 +80,15 @@ type
     property VALOR_TOTAL: Variant read FVALOR_TOTAL write SetVALOR_TOTAL;
     property SEGURO_PRESTAMISTA_VALOR: Variant read FSEGURO_PRESTAMISTA_VALOR write SetSEGURO_PRESTAMISTA_VALOR;
 
-    function incluir(pPedidoItensModel: TPedidoItensModel): String;
-    function incluirLote(pPedidoItensModel: TPedidoItensModel): String;
-    function alterar(pPedidoItensModel: TPedidoItensModel): String;
-    function excluir(pPedidoItensModel: TPedidoItensModel): String;
+    function incluir(pPedidoItensModel: ITPedidoItensModel): String;
+    function incluirLote(pPedidoItensModel: ITPedidoItensModel): String;
+    function alterar(pPedidoItensModel: ITPedidoItensModel): String;
+    function excluir(pPedidoItensModel: ITPedidoItensModel): String;
 
     procedure obterLista;
     procedure obterItensPedido(pNumeroPedido: String);
     procedure obterTotaisItens(pNumeroPedido: String);
-    function carregaClasse(pId: String): TPedidoItensModel;
+    function carregaClasse(pId: String): ITPedidoItensModel;
     function obterIDItem(pPedido, pProduto : String): String;
 end;
 
@@ -92,13 +98,13 @@ implementation
 
 uses Terasoft.FuncoesTexto, System.Rtti;
 
-function TPedidoItensDao.carregaClasse(pId: String): TPedidoItensModel;
+function TPedidoItensDao.carregaClasse(pId: String): ITPedidoItensModel;
 var
   lQry: TFDQuery;
-  lModel: TPedidoItensModel;
+  lModel: ITPedidoItensModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TPedidoItensModel.Create(vIConexao);
+  lModel   := TPedidoItensModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -107,126 +113,126 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID                           := lQry.FieldByName('ID').AsString;
-    lModel.CODIGO_CLI                   := lQry.FieldByName('CODIGO_CLI').AsString;
-    lModel.NUMERO_PED                   := lQry.FieldByName('NUMERO_PED').AsString;
-    lModel.CODIGO_PRO                   := lQry.FieldByName('CODIGO_PRO').AsString;
-    lModel.QUANTIDADE_PED               := lQry.FieldByName('QUANTIDADE_PED').AsString;
-    lModel.QUANTIDADE_TROCA             := lQry.FieldByName('QUANTIDADE_TROCA').AsString;
-    lModel.VALORUNITARIO_PED            := lQry.FieldByName('VALORUNITARIO_PED').AsString;
-    lModel.DESCONTO_PED                 := lQry.FieldByName('DESCONTO_PED').AsString;
-    lModel.DESCONTO_UF                  := lQry.FieldByName('DESCONTO_UF').AsString;
-    lModel.VALOR_IPI                    := lQry.FieldByName('VALOR_IPI').AsString;
-    lModel.VALOR_ST                     := lQry.FieldByName('VALOR_ST').AsString;
-    lModel.VLRVENDA_PRO                 := lQry.FieldByName('VLRVENDA_PRO').AsString;
-    lModel.VLRCUSTO_PRO                 := lQry.FieldByName('VLRCUSTO_PRO').AsString;
-    lModel.COMISSAO_PED                 := lQry.FieldByName('COMISSAO_PED').AsString;
-    lModel.TIPO_NF                      := lQry.FieldByName('TIPO_NF').AsString;
-    lModel.QUANTIDADE_TIPO              := lQry.FieldByName('QUANTIDADE_TIPO').AsString;
-    lModel.OBSERVACAO                   := lQry.FieldByName('OBSERVACAO').AsString;
-    lModel.CTR_EXPORTACAO               := lQry.FieldByName('CTR_EXPORTACAO').AsString;
-    lModel.PRODUTO_REFERENCIA           := lQry.FieldByName('PRODUTO_REFERENCIA').AsString;
-    lModel.OBS_ITEM                     := lQry.FieldByName('OBS_ITEM').AsString;
-    lModel.RESERVA_ID                   := lQry.FieldByName('RESERVA_ID').AsString;
-    lModel.LOJA                         := lQry.FieldByName('LOJA').AsString;
-    lModel.ALIQ_IPI                     := lQry.FieldByName('ALIQ_IPI').AsString;
-    lModel.VALOR_RESTITUICAO_ST         := lQry.FieldByName('VALOR_RESTITUICAO_ST').AsString;
-    lModel.CFOP_ID                      := lQry.FieldByName('CFOP_ID').AsString;
-    lModel.CST                          := lQry.FieldByName('CST').AsString;
-    lModel.ALIQ_ICMS                    := lQry.FieldByName('ALIQ_ICMS').AsString;
-    lModel.ALIQ_ICMS_ST                 := lQry.FieldByName('ALIQ_ICMS_ST').AsString;
-    lModel.REDUCAO_ST                   := lQry.FieldByName('REDUCAO_ST').AsString;
-    lModel.MVA                          := lQry.FieldByName('MVA').AsString;
-    lModel.REDUCAO_ICMS                 := lQry.FieldByName('REDUCAO_ICMS').AsString;
-    lModel.BASE_ICMS                    := lQry.FieldByName('BASE_ICMS').AsString;
-    lModel.VALOR_ICMS                   := lQry.FieldByName('VALOR_ICMS').AsString;
-    lModel.BASE_ST                      := lQry.FieldByName('BASE_ST').AsString;
-    lModel.DESC_RESTITUICAO_ST          := lQry.FieldByName('DESC_RESTITUICAO_ST').AsString;
-    lModel.ICMS_SUFRAMA                 := lQry.FieldByName('ICMS_SUFRAMA').AsString;
-    lModel.PIS_SUFRAMA                  := lQry.FieldByName('PIS_SUFRAMA').AsString;
-    lModel.COFINS_SUFRAMA               := lQry.FieldByName('COFINS_SUFRAMA').AsString;
-    lModel.IPI_SUFRAMA                  := lQry.FieldByName('IPI_SUFRAMA').AsString;
-    lModel.ALIQ_PIS                     := lQry.FieldByName('ALIQ_PIS').AsString;
-    lModel.ALIQ_COFINS                  := lQry.FieldByName('ALIQ_COFINS').AsString;
-    lModel.BASE_PIS                     := lQry.FieldByName('BASE_PIS').AsString;
-    lModel.BASE_COFINS                  := lQry.FieldByName('BASE_COFINS').AsString;
-    lModel.VALOR_PIS                    := lQry.FieldByName('VALOR_PIS').AsString;
-    lModel.VALOR_COFINS                 := lQry.FieldByName('VALOR_COFINS').AsString;
-    lModel.PREVENDA_ID                  := lQry.FieldByName('PREVENDA_ID').AsString;
-    lModel.AVULSO                       := lQry.FieldByName('AVULSO').AsString;
-    lModel.QUANTIDADE_NEW               := lQry.FieldByName('QUANTIDADE_NEW').AsString;
-    lModel.BALANCA                      := lQry.FieldByName('BALANCA').AsString;
-    lModel.QTDE_CALCULADA               := lQry.FieldByName('QTDE_CALCULADA').AsString;
-    lModel.SYSTIME                      := lQry.FieldByName('SYSTIME').AsString;
-    lModel.AMBIENTE_ID                  := lQry.FieldByName('AMBIENTE_ID').AsString;
-    lModel.AMBIENTE_OBS                 := lQry.FieldByName('AMBIENTE_OBS').AsString;
-    lModel.PROJETO_ID                   := lQry.FieldByName('PROJETO_ID').AsString;
-    lModel.LARGURA                      := lQry.FieldByName('LARGURA').AsString;
-    lModel.ALTURA                       := lQry.FieldByName('ALTURA').AsString;
-    lModel.ITEM                         := lQry.FieldByName('ITEM').AsString;
-    lModel.DUN14                        := lQry.FieldByName('DUN14').AsString;
-    lModel.SAIDAS_ID                    := lQry.FieldByName('SAIDAS_ID').AsString;
-    lModel.CUSTO_DRG                    := lQry.FieldByName('CUSTO_DRG').AsString;
-    lModel.POS_VENDA_STATUS             := lQry.FieldByName('POS_VENDA_STATUS').AsString;
-    lModel.POS_VENDA_RETORNO            := lQry.FieldByName('POS_VENDA_RETORNO').AsString;
-    lModel.POS_VENDA_OBS                := lQry.FieldByName('POS_VENDA_OBS').AsString;
-    lModel.VALOR_SUFRAMA_ITEM_NEW       := lQry.FieldByName('VALOR_SUFRAMA_ITEM_NEW').AsString;
-    lModel.VALOR_SUFRAMA_ITEM           := lQry.FieldByName('VALOR_SUFRAMA_ITEM').AsString;
-    lModel.BONUS                        := lQry.FieldByName('BONUS').AsString;
-    lModel.BONUS_USO                    := lQry.FieldByName('BONUS_USO').AsString;
-    lModel.FUNCIONARIO_ID               := lQry.FieldByName('FUNCIONARIO_ID').AsString;
-    lModel.PRODUCAO_ID                  := lQry.FieldByName('PRODUCAO_ID').AsString;
-    lModel.QUANTIDADE_KG                := lQry.FieldByName('QUANTIDADE_KG').AsString;
-    lModel.RESERVADO                    := lQry.FieldByName('RESERVADO').AsString;
-    lModel.DESCRICAO_PRODUTO            := lQry.FieldByName('DESCRICAO_PRODUTO').AsString;
-    lModel.COMISSAO_PERCENTUAL          := lQry.FieldByName('COMISSAO_PERCENTUAL').AsString;
-    lModel.QTD_CHECAGEM                 := lQry.FieldByName('QTD_CHECAGEM').AsString;
-    lModel.QTD_CHECAGEM_CORTE           := lQry.FieldByName('QTD_CHECAGEM_CORTE').AsString;
-    lModel.ALTURA_M                     := lQry.FieldByName('ALTURA_M').AsString;
-    lModel.LARGURA_M                    := lQry.FieldByName('LARGURA_M').AsString;
-    lModel.PROFUNDIDADE_M               := lQry.FieldByName('PROFUNDIDADE_M').AsString;
-    lModel.VBCUFDEST                    := lQry.FieldByName('VBCUFDEST').AsString;
-    lModel.PFCPUFDEST                   := lQry.FieldByName('PFCPUFDEST').AsString;
-    lModel.PICMSUFDEST                  := lQry.FieldByName('PICMSUFDEST').AsString;
-    lModel.PICMSINTER                   := lQry.FieldByName('PICMSINTER').AsString;
-    lModel.PICMSINTERPART               := lQry.FieldByName('PICMSINTERPART').AsString;
-    lModel.VFCPUFDEST                   := lQry.FieldByName('VFCPUFDEST').AsString;
-    lModel.VICMSUFDEST                  := lQry.FieldByName('VICMSUFDEST').AsString;
-    lModel.VICMSUFREMET                 := lQry.FieldByName('VICMSUFREMET').AsString;
-    lModel.COMBO_ITEM                   := lQry.FieldByName('COMBO_ITEM').AsString;
-    lModel.VLRVENDA_MINIMO              := lQry.FieldByName('VLRVENDA_MINIMO').AsString;
-    lModel.VLRVENDA_MAXIMO              := lQry.FieldByName('VLRVENDA_MAXIMO').AsString;
-    lModel.IMPRESSO                     := lQry.FieldByName('IMPRESSO').AsString;
-    lModel.ORCAMENTO_TSB_ID             := lQry.FieldByName('ORCAMENTO_TSB_ID').AsString;
-    lModel.GERENTE_COMISSAO_PERCENTUAL  := lQry.FieldByName('GERENTE_COMISSAO_PERCENTUAL').AsString;
-    lModel.XPED                         := lQry.FieldByName('XPED').AsString;
-    lModel.NITEMPED2                    := lQry.FieldByName('NITEMPED2').AsString;
-    lModel.VOUTROS                      := lQry.FieldByName('VOUTROS').AsString;
-    lModel.VFRETE                       := lQry.FieldByName('VFRETE').AsString;
-    lModel.ORIGINAL_PEDIDO_ID           := lQry.FieldByName('ORIGINAL_PEDIDO_ID').AsString;
-    lModel.VALOR_VENDA_CADASTRO         := lQry.FieldByName('VALOR_VENDA_CADASTRO').AsString;
-    lModel.WEB_PEDIDOITENS_ID           := lQry.FieldByName('WEB_PEDIDOITENS_ID').AsString;
-    lModel.TIPO_VENDA                   := lQry.FieldByName('TIPO_VENDA').AsString;
-    lModel.ENTREGA                      := lQry.FieldByName('ENTREGA').AsString;
-    lModel.VBCFCPST                     := lQry.FieldByName('VBCFCPST').AsString;
-    lModel.PFCPST                       := lQry.FieldByName('PFCPST').AsString;
-    lModel.VFCPST                       := lQry.FieldByName('VFCPST').AsString;
-    lModel.VALOR_BONUS_SERVICO          := lQry.FieldByName('VALOR_BONUS_SERVICO').AsString;
-    lModel.CBENEF                       := lQry.FieldByName('CBENEF').AsString;
-    lModel.VICMSDESON                   := lQry.FieldByName('VICMSDESON').AsString;
-    lModel.MOTDESICMS                   := lQry.FieldByName('MOTDESICMS').AsString;
-    lModel.VALOR_DIFERIMENTO            := lQry.FieldByName('VALOR_DIFERIMENTO').AsString;
-    lModel.VALOR_MONTADOR               := lQry.FieldByName('VALOR_MONTADOR').AsString;
-    lModel.MONTAGEM                     := lQry.FieldByName('MONTAGEM').AsString;
-    lModel.PCRED_PRESUMIDO              := lQry.FieldByName('PCRED_PRESUMIDO').AsString;
-    lModel.PEDIDOCOMPRAITENS_ID         := lQry.FieldByName('PEDIDOCOMPRAITENS_ID').AsString;
-    lModel.PEDIDOITENS_ID               := lQry.FieldByName('PEDIDOITENS_ID').AsString;
-    lModel.PIS_CST                      := lQry.FieldByName('PIS_CST').AsString;
-    lModel.COFINS_CST                   := lQry.FieldByName('COFINS_CST').AsString;
-    lModel.IPI_CST                      := lQry.FieldByName('IPI_CST').AsString;
-    lModel.VDESC                        := lQry.FieldByName('VDESC').AsString;
-    lModel.CSOSN                        := lQry.FieldByName('CSOSN').AsString;
-    lModel.CFOP                         := lQry.FieldByName('CFOP').AsString;
+    lModel.objeto.ID                           := lQry.FieldByName('ID').AsString;
+    lModel.objeto.CODIGO_CLI                   := lQry.FieldByName('CODIGO_CLI').AsString;
+    lModel.objeto.NUMERO_PED                   := lQry.FieldByName('NUMERO_PED').AsString;
+    lModel.objeto.CODIGO_PRO                   := lQry.FieldByName('CODIGO_PRO').AsString;
+    lModel.objeto.QUANTIDADE_PED               := lQry.FieldByName('QUANTIDADE_PED').AsString;
+    lModel.objeto.QUANTIDADE_TROCA             := lQry.FieldByName('QUANTIDADE_TROCA').AsString;
+    lModel.objeto.VALORUNITARIO_PED            := lQry.FieldByName('VALORUNITARIO_PED').AsString;
+    lModel.objeto.DESCONTO_PED                 := lQry.FieldByName('DESCONTO_PED').AsString;
+    lModel.objeto.DESCONTO_UF                  := lQry.FieldByName('DESCONTO_UF').AsString;
+    lModel.objeto.VALOR_IPI                    := lQry.FieldByName('VALOR_IPI').AsString;
+    lModel.objeto.VALOR_ST                     := lQry.FieldByName('VALOR_ST').AsString;
+    lModel.objeto.VLRVENDA_PRO                 := lQry.FieldByName('VLRVENDA_PRO').AsString;
+    lModel.objeto.VLRCUSTO_PRO                 := lQry.FieldByName('VLRCUSTO_PRO').AsString;
+    lModel.objeto.COMISSAO_PED                 := lQry.FieldByName('COMISSAO_PED').AsString;
+    lModel.objeto.TIPO_NF                      := lQry.FieldByName('TIPO_NF').AsString;
+    lModel.objeto.QUANTIDADE_TIPO              := lQry.FieldByName('QUANTIDADE_TIPO').AsString;
+    lModel.objeto.OBSERVACAO                   := lQry.FieldByName('OBSERVACAO').AsString;
+    lModel.objeto.CTR_EXPORTACAO               := lQry.FieldByName('CTR_EXPORTACAO').AsString;
+    lModel.objeto.PRODUTO_REFERENCIA           := lQry.FieldByName('PRODUTO_REFERENCIA').AsString;
+    lModel.objeto.OBS_ITEM                     := lQry.FieldByName('OBS_ITEM').AsString;
+    lModel.objeto.RESERVA_ID                   := lQry.FieldByName('RESERVA_ID').AsString;
+    lModel.objeto.LOJA                         := lQry.FieldByName('LOJA').AsString;
+    lModel.objeto.ALIQ_IPI                     := lQry.FieldByName('ALIQ_IPI').AsString;
+    lModel.objeto.VALOR_RESTITUICAO_ST         := lQry.FieldByName('VALOR_RESTITUICAO_ST').AsString;
+    lModel.objeto.CFOP_ID                      := lQry.FieldByName('CFOP_ID').AsString;
+    lModel.objeto.CST                          := lQry.FieldByName('CST').AsString;
+    lModel.objeto.ALIQ_ICMS                    := lQry.FieldByName('ALIQ_ICMS').AsString;
+    lModel.objeto.ALIQ_ICMS_ST                 := lQry.FieldByName('ALIQ_ICMS_ST').AsString;
+    lModel.objeto.REDUCAO_ST                   := lQry.FieldByName('REDUCAO_ST').AsString;
+    lModel.objeto.MVA                          := lQry.FieldByName('MVA').AsString;
+    lModel.objeto.REDUCAO_ICMS                 := lQry.FieldByName('REDUCAO_ICMS').AsString;
+    lModel.objeto.BASE_ICMS                    := lQry.FieldByName('BASE_ICMS').AsString;
+    lModel.objeto.VALOR_ICMS                   := lQry.FieldByName('VALOR_ICMS').AsString;
+    lModel.objeto.BASE_ST                      := lQry.FieldByName('BASE_ST').AsString;
+    lModel.objeto.DESC_RESTITUICAO_ST          := lQry.FieldByName('DESC_RESTITUICAO_ST').AsString;
+    lModel.objeto.ICMS_SUFRAMA                 := lQry.FieldByName('ICMS_SUFRAMA').AsString;
+    lModel.objeto.PIS_SUFRAMA                  := lQry.FieldByName('PIS_SUFRAMA').AsString;
+    lModel.objeto.COFINS_SUFRAMA               := lQry.FieldByName('COFINS_SUFRAMA').AsString;
+    lModel.objeto.IPI_SUFRAMA                  := lQry.FieldByName('IPI_SUFRAMA').AsString;
+    lModel.objeto.ALIQ_PIS                     := lQry.FieldByName('ALIQ_PIS').AsString;
+    lModel.objeto.ALIQ_COFINS                  := lQry.FieldByName('ALIQ_COFINS').AsString;
+    lModel.objeto.BASE_PIS                     := lQry.FieldByName('BASE_PIS').AsString;
+    lModel.objeto.BASE_COFINS                  := lQry.FieldByName('BASE_COFINS').AsString;
+    lModel.objeto.VALOR_PIS                    := lQry.FieldByName('VALOR_PIS').AsString;
+    lModel.objeto.VALOR_COFINS                 := lQry.FieldByName('VALOR_COFINS').AsString;
+    lModel.objeto.PREVENDA_ID                  := lQry.FieldByName('PREVENDA_ID').AsString;
+    lModel.objeto.AVULSO                       := lQry.FieldByName('AVULSO').AsString;
+    lModel.objeto.QUANTIDADE_NEW               := lQry.FieldByName('QUANTIDADE_NEW').AsString;
+    lModel.objeto.BALANCA                      := lQry.FieldByName('BALANCA').AsString;
+    lModel.objeto.QTDE_CALCULADA               := lQry.FieldByName('QTDE_CALCULADA').AsString;
+    lModel.objeto.SYSTIME                      := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.AMBIENTE_ID                  := lQry.FieldByName('AMBIENTE_ID').AsString;
+    lModel.objeto.AMBIENTE_OBS                 := lQry.FieldByName('AMBIENTE_OBS').AsString;
+    lModel.objeto.PROJETO_ID                   := lQry.FieldByName('PROJETO_ID').AsString;
+    lModel.objeto.LARGURA                      := lQry.FieldByName('LARGURA').AsString;
+    lModel.objeto.ALTURA                       := lQry.FieldByName('ALTURA').AsString;
+    lModel.objeto.ITEM                         := lQry.FieldByName('ITEM').AsString;
+    lModel.objeto.DUN14                        := lQry.FieldByName('DUN14').AsString;
+    lModel.objeto.SAIDAS_ID                    := lQry.FieldByName('SAIDAS_ID').AsString;
+    lModel.objeto.CUSTO_DRG                    := lQry.FieldByName('CUSTO_DRG').AsString;
+    lModel.objeto.POS_VENDA_STATUS             := lQry.FieldByName('POS_VENDA_STATUS').AsString;
+    lModel.objeto.POS_VENDA_RETORNO            := lQry.FieldByName('POS_VENDA_RETORNO').AsString;
+    lModel.objeto.POS_VENDA_OBS                := lQry.FieldByName('POS_VENDA_OBS').AsString;
+    lModel.objeto.VALOR_SUFRAMA_ITEM_NEW       := lQry.FieldByName('VALOR_SUFRAMA_ITEM_NEW').AsString;
+    lModel.objeto.VALOR_SUFRAMA_ITEM           := lQry.FieldByName('VALOR_SUFRAMA_ITEM').AsString;
+    lModel.objeto.BONUS                        := lQry.FieldByName('BONUS').AsString;
+    lModel.objeto.BONUS_USO                    := lQry.FieldByName('BONUS_USO').AsString;
+    lModel.objeto.FUNCIONARIO_ID               := lQry.FieldByName('FUNCIONARIO_ID').AsString;
+    lModel.objeto.PRODUCAO_ID                  := lQry.FieldByName('PRODUCAO_ID').AsString;
+    lModel.objeto.QUANTIDADE_KG                := lQry.FieldByName('QUANTIDADE_KG').AsString;
+    lModel.objeto.RESERVADO                    := lQry.FieldByName('RESERVADO').AsString;
+    lModel.objeto.DESCRICAO_PRODUTO            := lQry.FieldByName('DESCRICAO_PRODUTO').AsString;
+    lModel.objeto.COMISSAO_PERCENTUAL          := lQry.FieldByName('COMISSAO_PERCENTUAL').AsString;
+    lModel.objeto.QTD_CHECAGEM                 := lQry.FieldByName('QTD_CHECAGEM').AsString;
+    lModel.objeto.QTD_CHECAGEM_CORTE           := lQry.FieldByName('QTD_CHECAGEM_CORTE').AsString;
+    lModel.objeto.ALTURA_M                     := lQry.FieldByName('ALTURA_M').AsString;
+    lModel.objeto.LARGURA_M                    := lQry.FieldByName('LARGURA_M').AsString;
+    lModel.objeto.PROFUNDIDADE_M               := lQry.FieldByName('PROFUNDIDADE_M').AsString;
+    lModel.objeto.VBCUFDEST                    := lQry.FieldByName('VBCUFDEST').AsString;
+    lModel.objeto.PFCPUFDEST                   := lQry.FieldByName('PFCPUFDEST').AsString;
+    lModel.objeto.PICMSUFDEST                  := lQry.FieldByName('PICMSUFDEST').AsString;
+    lModel.objeto.PICMSINTER                   := lQry.FieldByName('PICMSINTER').AsString;
+    lModel.objeto.PICMSINTERPART               := lQry.FieldByName('PICMSINTERPART').AsString;
+    lModel.objeto.VFCPUFDEST                   := lQry.FieldByName('VFCPUFDEST').AsString;
+    lModel.objeto.VICMSUFDEST                  := lQry.FieldByName('VICMSUFDEST').AsString;
+    lModel.objeto.VICMSUFREMET                 := lQry.FieldByName('VICMSUFREMET').AsString;
+    lModel.objeto.COMBO_ITEM                   := lQry.FieldByName('COMBO_ITEM').AsString;
+    lModel.objeto.VLRVENDA_MINIMO              := lQry.FieldByName('VLRVENDA_MINIMO').AsString;
+    lModel.objeto.VLRVENDA_MAXIMO              := lQry.FieldByName('VLRVENDA_MAXIMO').AsString;
+    lModel.objeto.IMPRESSO                     := lQry.FieldByName('IMPRESSO').AsString;
+    lModel.objeto.ORCAMENTO_TSB_ID             := lQry.FieldByName('ORCAMENTO_TSB_ID').AsString;
+    lModel.objeto.GERENTE_COMISSAO_PERCENTUAL  := lQry.FieldByName('GERENTE_COMISSAO_PERCENTUAL').AsString;
+    lModel.objeto.XPED                         := lQry.FieldByName('XPED').AsString;
+    lModel.objeto.NITEMPED2                    := lQry.FieldByName('NITEMPED2').AsString;
+    lModel.objeto.VOUTROS                      := lQry.FieldByName('VOUTROS').AsString;
+    lModel.objeto.VFRETE                       := lQry.FieldByName('VFRETE').AsString;
+    lModel.objeto.ORIGINAL_PEDIDO_ID           := lQry.FieldByName('ORIGINAL_PEDIDO_ID').AsString;
+    lModel.objeto.VALOR_VENDA_CADASTRO         := lQry.FieldByName('VALOR_VENDA_CADASTRO').AsString;
+    lModel.objeto.WEB_PEDIDOITENS_ID           := lQry.FieldByName('WEB_PEDIDOITENS_ID').AsString;
+    lModel.objeto.TIPO_VENDA                   := lQry.FieldByName('TIPO_VENDA').AsString;
+    lModel.objeto.ENTREGA                      := lQry.FieldByName('ENTREGA').AsString;
+    lModel.objeto.VBCFCPST                     := lQry.FieldByName('VBCFCPST').AsString;
+    lModel.objeto.PFCPST                       := lQry.FieldByName('PFCPST').AsString;
+    lModel.objeto.VFCPST                       := lQry.FieldByName('VFCPST').AsString;
+    lModel.objeto.VALOR_BONUS_SERVICO          := lQry.FieldByName('VALOR_BONUS_SERVICO').AsString;
+    lModel.objeto.CBENEF                       := lQry.FieldByName('CBENEF').AsString;
+    lModel.objeto.VICMSDESON                   := lQry.FieldByName('VICMSDESON').AsString;
+    lModel.objeto.MOTDESICMS                   := lQry.FieldByName('MOTDESICMS').AsString;
+    lModel.objeto.VALOR_DIFERIMENTO            := lQry.FieldByName('VALOR_DIFERIMENTO').AsString;
+    lModel.objeto.VALOR_MONTADOR               := lQry.FieldByName('VALOR_MONTADOR').AsString;
+    lModel.objeto.MONTAGEM                     := lQry.FieldByName('MONTAGEM').AsString;
+    lModel.objeto.PCRED_PRESUMIDO              := lQry.FieldByName('PCRED_PRESUMIDO').AsString;
+    lModel.objeto.PEDIDOCOMPRAITENS_ID         := lQry.FieldByName('PEDIDOCOMPRAITENS_ID').AsString;
+    lModel.objeto.PEDIDOITENS_ID               := lQry.FieldByName('PEDIDOITENS_ID').AsString;
+    lModel.objeto.PIS_CST                      := lQry.FieldByName('PIS_CST').AsString;
+    lModel.objeto.COFINS_CST                   := lQry.FieldByName('COFINS_CST').AsString;
+    lModel.objeto.IPI_CST                      := lQry.FieldByName('IPI_CST').AsString;
+    lModel.objeto.VDESC                        := lQry.FieldByName('VDESC').AsString;
+    lModel.objeto.CSOSN                        := lQry.FieldByName('CSOSN').AsString;
+    lModel.objeto.CFOP                         := lQry.FieldByName('CFOP').AsString;
 
     Result := lModel;
   finally
@@ -234,7 +240,7 @@ begin
   end;
 end;
 
-constructor TPedidoItensDao.Create(pConexao : IConexao);
+constructor TPedidoItensDao._Create(pConexao : IConexao);
 begin
   vIConexao   := pConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -248,7 +254,7 @@ begin
   inherited;
 end;
 
-function TPedidoItensDao.incluir(pPedidoItensModel: TPedidoItensModel): String;
+function TPedidoItensDao.incluir(pPedidoItensModel: ITPedidoItensModel): String;
 var
   lQry : TFDQuery;
   lSQL : String;
@@ -267,7 +273,7 @@ begin
   end;
 end;
 
-function TPedidoItensDao.incluirLote(pPedidoItensModel: TPedidoItensModel): String;
+function TPedidoItensDao.incluirLote(pPedidoItensModel: ITPedidoItensModel): String;
 var
   lQry : TFDQuery;
   lSQL : String;
@@ -277,9 +283,9 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    lQry.Params.ArraySize := pPedidoItensModel.PedidoItenssLista.Count;
+    lQry.Params.ArraySize := pPedidoItensModel.objeto.PedidoItenssLista.Count;
     setParamsArray(lQry, pPedidoItensModel);
-    lQry.Execute(pPedidoItensModel.PedidoItenssLista.Count, 0);
+    lQry.Execute(pPedidoItensModel.objeto.PedidoItenssLista.Count, 0);
     Result := '';
   finally
     lSQL := '';
@@ -287,7 +293,7 @@ begin
   end;
 end;
 
-function TPedidoItensDao.alterar(pPedidoItensModel: TPedidoItensModel): String;
+function TPedidoItensDao.alterar(pPedidoItensModel: ITPedidoItensModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -299,25 +305,31 @@ begin
     lQry.SQL.Add(lSQL);
     setParams(lQry, pPedidoItensModel);
     lQry.ExecSQL;
-    Result := pPedidoItensModel.ID;
+    Result := pPedidoItensModel.objeto.ID;
   finally
     lSQL := '';
     lQry.Free;
   end;
 end;
 
-function TPedidoItensDao.excluir(pPedidoItensModel: TPedidoItensModel): String;
+function TPedidoItensDao.excluir(pPedidoItensModel: ITPedidoItensModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
   try
-   lQry.ExecSQL('delete from pedidoitens where ID = :ID',[pPedidoItensModel.ID]);
+   lQry.ExecSQL('delete from pedidoitens where ID = :ID',[pPedidoItensModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pPedidoItensModel.ID;
+   Result := pPedidoItensModel.objeto.ID;
   finally
     lQry.Free;
   end;
+end;
+
+class function TPedidoItensDao.getNewIface(pIConexao: IConexao): ITPedidoItensDao;
+begin
+  Result := TImplObjetoOwner<TPedidoItensDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TPedidoItensDao.where: String;
@@ -382,10 +394,10 @@ procedure TPedidoItensDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TPedidoItensModel;
+  modelo: ITPedidoItensModel;
 begin
   lQry := vIConexao.CriarQuery;
-  FPedidoItenssLista := TCollections.CreateList<TPedidoItensModel>(true);
+  FPedidoItenssLista := TCollections.CreateList<ITPedidoItensModel>;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -412,142 +424,142 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TPedidoItensModel.Create(vIConexao);
+      modelo := TPedidoItensModel.getNewIface(vIConexao);
       FPedidoItenssLista.Add(modelo);
 
-      modelo.ID                           := lQry.FieldByName('ID').AsString;
-      modelo.CODIGO_CLI                   := lQry.FieldByName('CODIGO_CLI').AsString;
-      modelo.NUMERO_PED                   := lQry.FieldByName('NUMERO_PED').AsString;
-      modelo.CODIGO_PRO                   := lQry.FieldByName('CODIGO_PRO').AsString;
-      modelo.QUANTIDADE_PED               := lQry.FieldByName('QUANTIDADE_PED').AsString;
-      modelo.QUANTIDADE_TROCA             := lQry.FieldByName('QUANTIDADE_TROCA').AsString;
-      modelo.VALORUNITARIO_PED            := lQry.FieldByName('VALORUNITARIO_PED').AsString;
-      modelo.DESCONTO_PED                 := lQry.FieldByName('DESCONTO_PED').AsString;
-      modelo.DESCONTO_UF                  := lQry.FieldByName('DESCONTO_UF').AsString;
-      modelo.VALOR_IPI                    := lQry.FieldByName('VALOR_IPI').AsString;
-      modelo.VALOR_ST                     := lQry.FieldByName('VALOR_ST').AsString;
-      modelo.VLRVENDA_PRO                 := lQry.FieldByName('VLRVENDA_PRO').AsString;
-      modelo.VLRCUSTO_PRO                 := lQry.FieldByName('VLRCUSTO_PRO').AsString;
-      modelo.COMISSAO_PED                 := lQry.FieldByName('COMISSAO_PED').AsString;
-      modelo.TIPO_NF                      := lQry.FieldByName('TIPO_NF').AsString;
-      modelo.QUANTIDADE_TIPO              := lQry.FieldByName('QUANTIDADE_TIPO').AsString;
-      modelo.OBSERVACAO                   := lQry.FieldByName('OBSERVACAO').AsString;
-      modelo.CTR_EXPORTACAO               := lQry.FieldByName('CTR_EXPORTACAO').AsString;
-      modelo.PRODUTO_REFERENCIA           := lQry.FieldByName('PRODUTO_REFERENCIA').AsString;
-      modelo.OBS_ITEM                     := lQry.FieldByName('OBS_ITEM').AsString;
-      modelo.RESERVA_ID                   := lQry.FieldByName('RESERVA_ID').AsString;
-      modelo.LOJA                         := lQry.FieldByName('LOJA').AsString;
-      modelo.ALIQ_IPI                     := lQry.FieldByName('ALIQ_IPI').AsString;
-      modelo.VALOR_RESTITUICAO_ST         := lQry.FieldByName('VALOR_RESTITUICAO_ST').AsString;
-      modelo.CFOP_ID                      := lQry.FieldByName('CFOP_ID').AsString;
-      modelo.CST                          := lQry.FieldByName('CST').AsString;
-      modelo.ALIQ_ICMS                    := lQry.FieldByName('ALIQ_ICMS').AsString;
-      modelo.ALIQ_ICMS_ST                 := lQry.FieldByName('ALIQ_ICMS_ST').AsString;
-      modelo.REDUCAO_ST                   := lQry.FieldByName('REDUCAO_ST').AsString;
-      modelo.MVA                          := lQry.FieldByName('MVA').AsString;
-      modelo.REDUCAO_ICMS                 := lQry.FieldByName('REDUCAO_ICMS').AsString;
-      modelo.BASE_ICMS                    := lQry.FieldByName('BASE_ICMS').AsString;
-      modelo.VALOR_ICMS                   := lQry.FieldByName('VALOR_ICMS').AsString;
-      modelo.BASE_ST                      := lQry.FieldByName('BASE_ST').AsString;
-      modelo.DESC_RESTITUICAO_ST          := lQry.FieldByName('DESC_RESTITUICAO_ST').AsString;
-      modelo.ICMS_SUFRAMA                 := lQry.FieldByName('ICMS_SUFRAMA').AsString;
-      modelo.PIS_SUFRAMA                  := lQry.FieldByName('PIS_SUFRAMA').AsString;
-      modelo.COFINS_SUFRAMA               := lQry.FieldByName('COFINS_SUFRAMA').AsString;
-      modelo.IPI_SUFRAMA                  := lQry.FieldByName('IPI_SUFRAMA').AsString;
-      modelo.ALIQ_PIS                     := lQry.FieldByName('ALIQ_PIS').AsString;
-      modelo.ALIQ_COFINS                  := lQry.FieldByName('ALIQ_COFINS').AsString;
-      modelo.BASE_PIS                     := lQry.FieldByName('BASE_PIS').AsString;
-      modelo.BASE_COFINS                  := lQry.FieldByName('BASE_COFINS').AsString;
-      modelo.VALOR_PIS                    := lQry.FieldByName('VALOR_PIS').AsString;
-      modelo.VALOR_COFINS                 := lQry.FieldByName('VALOR_COFINS').AsString;
-      modelo.PREVENDA_ID                  := lQry.FieldByName('PREVENDA_ID').AsString;
-      modelo.AVULSO                       := lQry.FieldByName('AVULSO').AsString;
-      modelo.QUANTIDADE_NEW               := lQry.FieldByName('QUANTIDADE_NEW').AsString;
-      modelo.BALANCA                      := lQry.FieldByName('BALANCA').AsString;
-      modelo.QTDE_CALCULADA               := lQry.FieldByName('QTDE_CALCULADA').AsString;
-      modelo.SYSTIME                      := lQry.FieldByName('SYSTIME').AsString;
-      modelo.AMBIENTE_ID                  := lQry.FieldByName('AMBIENTE_ID').AsString;
-      modelo.AMBIENTE_OBS                 := lQry.FieldByName('AMBIENTE_OBS').AsString;
-      modelo.PROJETO_ID                   := lQry.FieldByName('PROJETO_ID').AsString;
-      modelo.LARGURA                      := lQry.FieldByName('LARGURA').AsString;
-      modelo.ALTURA                       := lQry.FieldByName('ALTURA').AsString;
-      modelo.ITEM                         := lQry.FieldByName('ITEM').AsString;
-      modelo.DUN14                        := lQry.FieldByName('DUN14').AsString;
-      modelo.SAIDAS_ID                    := lQry.FieldByName('SAIDAS_ID').AsString;
-      modelo.CUSTO_DRG                    := lQry.FieldByName('CUSTO_DRG').AsString;
-      modelo.POS_VENDA_STATUS             := lQry.FieldByName('POS_VENDA_STATUS').AsString;
-      modelo.POS_VENDA_RETORNO            := lQry.FieldByName('POS_VENDA_RETORNO').AsString;
-      modelo.POS_VENDA_OBS                := lQry.FieldByName('POS_VENDA_OBS').AsString;
-      modelo.VALOR_SUFRAMA_ITEM_NEW       := lQry.FieldByName('VALOR_SUFRAMA_ITEM_NEW').AsString;
-      modelo.VALOR_SUFRAMA_ITEM           := lQry.FieldByName('VALOR_SUFRAMA_ITEM').AsString;
-      modelo.BONUS                        := lQry.FieldByName('BONUS').AsString;
-      modelo.BONUS_USO                    := lQry.FieldByName('BONUS_USO').AsString;
-      modelo.FUNCIONARIO_ID               := lQry.FieldByName('FUNCIONARIO_ID').AsString;
-      modelo.PRODUCAO_ID                  := lQry.FieldByName('PRODUCAO_ID').AsString;
-      modelo.QUANTIDADE_KG                := lQry.FieldByName('QUANTIDADE_KG').AsString;
-      modelo.RESERVADO                    := lQry.FieldByName('RESERVADO').AsString;
-      modelo.DESCRICAO_PRODUTO            := lQry.FieldByName('DESCRICAO_PRODUTO').AsString;
-      modelo.COMISSAO_PERCENTUAL          := lQry.FieldByName('COMISSAO_PERCENTUAL').AsString;
-      modelo.QTD_CHECAGEM                 := lQry.FieldByName('QTD_CHECAGEM').AsString;
-      modelo.QTD_CHECAGEM_CORTE           := lQry.FieldByName('QTD_CHECAGEM_CORTE').AsString;
-      modelo.ALTURA_M                     := lQry.FieldByName('ALTURA_M').AsString;
-      modelo.LARGURA_M                    := lQry.FieldByName('LARGURA_M').AsString;
-      modelo.PROFUNDIDADE_M               := lQry.FieldByName('PROFUNDIDADE_M').AsString;
-      modelo.VBCUFDEST                    := lQry.FieldByName('VBCUFDEST').AsString;
-      modelo.PFCPUFDEST                   := lQry.FieldByName('PFCPUFDEST').AsString;
-      modelo.PICMSUFDEST                  := lQry.FieldByName('PICMSUFDEST').AsString;
-      modelo.PICMSINTER                   := lQry.FieldByName('PICMSINTER').AsString;
-      modelo.PICMSINTERPART               := lQry.FieldByName('PICMSINTERPART').AsString;
-      modelo.VFCPUFDEST                   := lQry.FieldByName('VFCPUFDEST').AsString;
-      modelo.VICMSUFDEST                  := lQry.FieldByName('VICMSUFDEST').AsString;
-      modelo.VICMSUFREMET                 := lQry.FieldByName('VICMSUFREMET').AsString;
-      modelo.COMBO_ITEM                   := lQry.FieldByName('COMBO_ITEM').AsString;
-      modelo.VLRVENDA_MINIMO              := lQry.FieldByName('VLRVENDA_MINIMO').AsString;
-      modelo.VLRVENDA_MAXIMO              := lQry.FieldByName('VLRVENDA_MAXIMO').AsString;
-      modelo.IMPRESSO                     := lQry.FieldByName('IMPRESSO').AsString;
-      modelo.ORCAMENTO_TSB_ID             := lQry.FieldByName('ORCAMENTO_TSB_ID').AsString;
-      modelo.GERENTE_COMISSAO_PERCENTUAL  := lQry.FieldByName('GERENTE_COMISSAO_PERCENTUAL').AsString;
-      modelo.XPED                         := lQry.FieldByName('XPED').AsString;
-      modelo.NITEMPED2                    := lQry.FieldByName('NITEMPED2').AsString;
-      modelo.VOUTROS                      := lQry.FieldByName('VOUTROS').AsString;
-      modelo.VFRETE                       := lQry.FieldByName('VFRETE').AsString;
-      modelo.ORIGINAL_PEDIDO_ID           := lQry.FieldByName('ORIGINAL_PEDIDO_ID').AsString;
-      modelo.VALOR_VENDA_CADASTRO         := lQry.FieldByName('VALOR_VENDA_CADASTRO').AsString;
-      modelo.WEB_PEDIDOITENS_ID           := lQry.FieldByName('WEB_PEDIDOITENS_ID').AsString;
-      modelo.TIPO_VENDA                   := lQry.FieldByName('TIPO_VENDA').AsString;
-      modelo.ENTREGA                      := lQry.FieldByName('ENTREGA').AsString;
-      modelo.VBCFCPST                     := lQry.FieldByName('VBCFCPST').AsString;
-      modelo.PFCPST                       := lQry.FieldByName('PFCPST').AsString;
-      modelo.VFCPST                       := lQry.FieldByName('VFCPST').AsString;
-      modelo.VALOR_BONUS_SERVICO          := lQry.FieldByName('VALOR_BONUS_SERVICO').AsString;
-      modelo.CBENEF                       := lQry.FieldByName('CBENEF').AsString;
-      modelo.VICMSDESON                   := lQry.FieldByName('VICMSDESON').AsString;
-      modelo.MOTDESICMS                   := lQry.FieldByName('MOTDESICMS').AsString;
-      modelo.VALOR_DIFERIMENTO            := lQry.FieldByName('VALOR_DIFERIMENTO').AsString;
-      modelo.VALOR_MONTADOR               := lQry.FieldByName('VALOR_MONTADOR').AsString;
-      modelo.MONTAGEM                     := lQry.FieldByName('MONTAGEM').AsString;
-      modelo.PCRED_PRESUMIDO              := lQry.FieldByName('PCRED_PRESUMIDO').AsString;
-      modelo.PEDIDOCOMPRAITENS_ID         := lQry.FieldByName('PEDIDOCOMPRAITENS_ID').AsString;
-      modelo.PEDIDOITENS_ID               := lQry.FieldByName('PEDIDOITENS_ID').AsString;
-      modelo.PIS_CST                      := lQry.FieldByName('PIS_CST').AsString;
-      modelo.COFINS_CST                   := lQry.FieldByName('COFINS_CST').AsString;
-      modelo.IPI_CST                      := lQry.FieldByName('IPI_CST').AsString;
-      modelo.CSOSN                        := lQry.FieldByName('CSOSN').AsString;
-      modelo.CFOP                         := lQry.FieldByName('CFOP').AsString;
-      modelo.VDESC                        := lQry.FieldByName('VDESC').AsString;
-      modelo.TIPO_VENDA_COMISSAO_ID       := lQry.FieldByName('TIPO_VENDA_COMISSAO_ID').AsString;
-      modelo.COMIS_PRO                    := lQry.FieldByName('COMIS_PRO').AsString;
+      modelo.objeto.ID                           := lQry.FieldByName('ID').AsString;
+      modelo.objeto.CODIGO_CLI                   := lQry.FieldByName('CODIGO_CLI').AsString;
+      modelo.objeto.NUMERO_PED                   := lQry.FieldByName('NUMERO_PED').AsString;
+      modelo.objeto.CODIGO_PRO                   := lQry.FieldByName('CODIGO_PRO').AsString;
+      modelo.objeto.QUANTIDADE_PED               := lQry.FieldByName('QUANTIDADE_PED').AsString;
+      modelo.objeto.QUANTIDADE_TROCA             := lQry.FieldByName('QUANTIDADE_TROCA').AsString;
+      modelo.objeto.VALORUNITARIO_PED            := lQry.FieldByName('VALORUNITARIO_PED').AsString;
+      modelo.objeto.DESCONTO_PED                 := lQry.FieldByName('DESCONTO_PED').AsString;
+      modelo.objeto.DESCONTO_UF                  := lQry.FieldByName('DESCONTO_UF').AsString;
+      modelo.objeto.VALOR_IPI                    := lQry.FieldByName('VALOR_IPI').AsString;
+      modelo.objeto.VALOR_ST                     := lQry.FieldByName('VALOR_ST').AsString;
+      modelo.objeto.VLRVENDA_PRO                 := lQry.FieldByName('VLRVENDA_PRO').AsString;
+      modelo.objeto.VLRCUSTO_PRO                 := lQry.FieldByName('VLRCUSTO_PRO').AsString;
+      modelo.objeto.COMISSAO_PED                 := lQry.FieldByName('COMISSAO_PED').AsString;
+      modelo.objeto.TIPO_NF                      := lQry.FieldByName('TIPO_NF').AsString;
+      modelo.objeto.QUANTIDADE_TIPO              := lQry.FieldByName('QUANTIDADE_TIPO').AsString;
+      modelo.objeto.OBSERVACAO                   := lQry.FieldByName('OBSERVACAO').AsString;
+      modelo.objeto.CTR_EXPORTACAO               := lQry.FieldByName('CTR_EXPORTACAO').AsString;
+      modelo.objeto.PRODUTO_REFERENCIA           := lQry.FieldByName('PRODUTO_REFERENCIA').AsString;
+      modelo.objeto.OBS_ITEM                     := lQry.FieldByName('OBS_ITEM').AsString;
+      modelo.objeto.RESERVA_ID                   := lQry.FieldByName('RESERVA_ID').AsString;
+      modelo.objeto.LOJA                         := lQry.FieldByName('LOJA').AsString;
+      modelo.objeto.ALIQ_IPI                     := lQry.FieldByName('ALIQ_IPI').AsString;
+      modelo.objeto.VALOR_RESTITUICAO_ST         := lQry.FieldByName('VALOR_RESTITUICAO_ST').AsString;
+      modelo.objeto.CFOP_ID                      := lQry.FieldByName('CFOP_ID').AsString;
+      modelo.objeto.CST                          := lQry.FieldByName('CST').AsString;
+      modelo.objeto.ALIQ_ICMS                    := lQry.FieldByName('ALIQ_ICMS').AsString;
+      modelo.objeto.ALIQ_ICMS_ST                 := lQry.FieldByName('ALIQ_ICMS_ST').AsString;
+      modelo.objeto.REDUCAO_ST                   := lQry.FieldByName('REDUCAO_ST').AsString;
+      modelo.objeto.MVA                          := lQry.FieldByName('MVA').AsString;
+      modelo.objeto.REDUCAO_ICMS                 := lQry.FieldByName('REDUCAO_ICMS').AsString;
+      modelo.objeto.BASE_ICMS                    := lQry.FieldByName('BASE_ICMS').AsString;
+      modelo.objeto.VALOR_ICMS                   := lQry.FieldByName('VALOR_ICMS').AsString;
+      modelo.objeto.BASE_ST                      := lQry.FieldByName('BASE_ST').AsString;
+      modelo.objeto.DESC_RESTITUICAO_ST          := lQry.FieldByName('DESC_RESTITUICAO_ST').AsString;
+      modelo.objeto.ICMS_SUFRAMA                 := lQry.FieldByName('ICMS_SUFRAMA').AsString;
+      modelo.objeto.PIS_SUFRAMA                  := lQry.FieldByName('PIS_SUFRAMA').AsString;
+      modelo.objeto.COFINS_SUFRAMA               := lQry.FieldByName('COFINS_SUFRAMA').AsString;
+      modelo.objeto.IPI_SUFRAMA                  := lQry.FieldByName('IPI_SUFRAMA').AsString;
+      modelo.objeto.ALIQ_PIS                     := lQry.FieldByName('ALIQ_PIS').AsString;
+      modelo.objeto.ALIQ_COFINS                  := lQry.FieldByName('ALIQ_COFINS').AsString;
+      modelo.objeto.BASE_PIS                     := lQry.FieldByName('BASE_PIS').AsString;
+      modelo.objeto.BASE_COFINS                  := lQry.FieldByName('BASE_COFINS').AsString;
+      modelo.objeto.VALOR_PIS                    := lQry.FieldByName('VALOR_PIS').AsString;
+      modelo.objeto.VALOR_COFINS                 := lQry.FieldByName('VALOR_COFINS').AsString;
+      modelo.objeto.PREVENDA_ID                  := lQry.FieldByName('PREVENDA_ID').AsString;
+      modelo.objeto.AVULSO                       := lQry.FieldByName('AVULSO').AsString;
+      modelo.objeto.QUANTIDADE_NEW               := lQry.FieldByName('QUANTIDADE_NEW').AsString;
+      modelo.objeto.BALANCA                      := lQry.FieldByName('BALANCA').AsString;
+      modelo.objeto.QTDE_CALCULADA               := lQry.FieldByName('QTDE_CALCULADA').AsString;
+      modelo.objeto.SYSTIME                      := lQry.FieldByName('SYSTIME').AsString;
+      modelo.objeto.AMBIENTE_ID                  := lQry.FieldByName('AMBIENTE_ID').AsString;
+      modelo.objeto.AMBIENTE_OBS                 := lQry.FieldByName('AMBIENTE_OBS').AsString;
+      modelo.objeto.PROJETO_ID                   := lQry.FieldByName('PROJETO_ID').AsString;
+      modelo.objeto.LARGURA                      := lQry.FieldByName('LARGURA').AsString;
+      modelo.objeto.ALTURA                       := lQry.FieldByName('ALTURA').AsString;
+      modelo.objeto.ITEM                         := lQry.FieldByName('ITEM').AsString;
+      modelo.objeto.DUN14                        := lQry.FieldByName('DUN14').AsString;
+      modelo.objeto.SAIDAS_ID                    := lQry.FieldByName('SAIDAS_ID').AsString;
+      modelo.objeto.CUSTO_DRG                    := lQry.FieldByName('CUSTO_DRG').AsString;
+      modelo.objeto.POS_VENDA_STATUS             := lQry.FieldByName('POS_VENDA_STATUS').AsString;
+      modelo.objeto.POS_VENDA_RETORNO            := lQry.FieldByName('POS_VENDA_RETORNO').AsString;
+      modelo.objeto.POS_VENDA_OBS                := lQry.FieldByName('POS_VENDA_OBS').AsString;
+      modelo.objeto.VALOR_SUFRAMA_ITEM_NEW       := lQry.FieldByName('VALOR_SUFRAMA_ITEM_NEW').AsString;
+      modelo.objeto.VALOR_SUFRAMA_ITEM           := lQry.FieldByName('VALOR_SUFRAMA_ITEM').AsString;
+      modelo.objeto.BONUS                        := lQry.FieldByName('BONUS').AsString;
+      modelo.objeto.BONUS_USO                    := lQry.FieldByName('BONUS_USO').AsString;
+      modelo.objeto.FUNCIONARIO_ID               := lQry.FieldByName('FUNCIONARIO_ID').AsString;
+      modelo.objeto.PRODUCAO_ID                  := lQry.FieldByName('PRODUCAO_ID').AsString;
+      modelo.objeto.QUANTIDADE_KG                := lQry.FieldByName('QUANTIDADE_KG').AsString;
+      modelo.objeto.RESERVADO                    := lQry.FieldByName('RESERVADO').AsString;
+      modelo.objeto.DESCRICAO_PRODUTO            := lQry.FieldByName('DESCRICAO_PRODUTO').AsString;
+      modelo.objeto.COMISSAO_PERCENTUAL          := lQry.FieldByName('COMISSAO_PERCENTUAL').AsString;
+      modelo.objeto.QTD_CHECAGEM                 := lQry.FieldByName('QTD_CHECAGEM').AsString;
+      modelo.objeto.QTD_CHECAGEM_CORTE           := lQry.FieldByName('QTD_CHECAGEM_CORTE').AsString;
+      modelo.objeto.ALTURA_M                     := lQry.FieldByName('ALTURA_M').AsString;
+      modelo.objeto.LARGURA_M                    := lQry.FieldByName('LARGURA_M').AsString;
+      modelo.objeto.PROFUNDIDADE_M               := lQry.FieldByName('PROFUNDIDADE_M').AsString;
+      modelo.objeto.VBCUFDEST                    := lQry.FieldByName('VBCUFDEST').AsString;
+      modelo.objeto.PFCPUFDEST                   := lQry.FieldByName('PFCPUFDEST').AsString;
+      modelo.objeto.PICMSUFDEST                  := lQry.FieldByName('PICMSUFDEST').AsString;
+      modelo.objeto.PICMSINTER                   := lQry.FieldByName('PICMSINTER').AsString;
+      modelo.objeto.PICMSINTERPART               := lQry.FieldByName('PICMSINTERPART').AsString;
+      modelo.objeto.VFCPUFDEST                   := lQry.FieldByName('VFCPUFDEST').AsString;
+      modelo.objeto.VICMSUFDEST                  := lQry.FieldByName('VICMSUFDEST').AsString;
+      modelo.objeto.VICMSUFREMET                 := lQry.FieldByName('VICMSUFREMET').AsString;
+      modelo.objeto.COMBO_ITEM                   := lQry.FieldByName('COMBO_ITEM').AsString;
+      modelo.objeto.VLRVENDA_MINIMO              := lQry.FieldByName('VLRVENDA_MINIMO').AsString;
+      modelo.objeto.VLRVENDA_MAXIMO              := lQry.FieldByName('VLRVENDA_MAXIMO').AsString;
+      modelo.objeto.IMPRESSO                     := lQry.FieldByName('IMPRESSO').AsString;
+      modelo.objeto.ORCAMENTO_TSB_ID             := lQry.FieldByName('ORCAMENTO_TSB_ID').AsString;
+      modelo.objeto.GERENTE_COMISSAO_PERCENTUAL  := lQry.FieldByName('GERENTE_COMISSAO_PERCENTUAL').AsString;
+      modelo.objeto.XPED                         := lQry.FieldByName('XPED').AsString;
+      modelo.objeto.NITEMPED2                    := lQry.FieldByName('NITEMPED2').AsString;
+      modelo.objeto.VOUTROS                      := lQry.FieldByName('VOUTROS').AsString;
+      modelo.objeto.VFRETE                       := lQry.FieldByName('VFRETE').AsString;
+      modelo.objeto.ORIGINAL_PEDIDO_ID           := lQry.FieldByName('ORIGINAL_PEDIDO_ID').AsString;
+      modelo.objeto.VALOR_VENDA_CADASTRO         := lQry.FieldByName('VALOR_VENDA_CADASTRO').AsString;
+      modelo.objeto.WEB_PEDIDOITENS_ID           := lQry.FieldByName('WEB_PEDIDOITENS_ID').AsString;
+      modelo.objeto.TIPO_VENDA                   := lQry.FieldByName('TIPO_VENDA').AsString;
+      modelo.objeto.ENTREGA                      := lQry.FieldByName('ENTREGA').AsString;
+      modelo.objeto.VBCFCPST                     := lQry.FieldByName('VBCFCPST').AsString;
+      modelo.objeto.PFCPST                       := lQry.FieldByName('PFCPST').AsString;
+      modelo.objeto.VFCPST                       := lQry.FieldByName('VFCPST').AsString;
+      modelo.objeto.VALOR_BONUS_SERVICO          := lQry.FieldByName('VALOR_BONUS_SERVICO').AsString;
+      modelo.objeto.CBENEF                       := lQry.FieldByName('CBENEF').AsString;
+      modelo.objeto.VICMSDESON                   := lQry.FieldByName('VICMSDESON').AsString;
+      modelo.objeto.MOTDESICMS                   := lQry.FieldByName('MOTDESICMS').AsString;
+      modelo.objeto.VALOR_DIFERIMENTO            := lQry.FieldByName('VALOR_DIFERIMENTO').AsString;
+      modelo.objeto.VALOR_MONTADOR               := lQry.FieldByName('VALOR_MONTADOR').AsString;
+      modelo.objeto.MONTAGEM                     := lQry.FieldByName('MONTAGEM').AsString;
+      modelo.objeto.PCRED_PRESUMIDO              := lQry.FieldByName('PCRED_PRESUMIDO').AsString;
+      modelo.objeto.PEDIDOCOMPRAITENS_ID         := lQry.FieldByName('PEDIDOCOMPRAITENS_ID').AsString;
+      modelo.objeto.PEDIDOITENS_ID               := lQry.FieldByName('PEDIDOITENS_ID').AsString;
+      modelo.objeto.PIS_CST                      := lQry.FieldByName('PIS_CST').AsString;
+      modelo.objeto.COFINS_CST                   := lQry.FieldByName('COFINS_CST').AsString;
+      modelo.objeto.IPI_CST                      := lQry.FieldByName('IPI_CST').AsString;
+      modelo.objeto.CSOSN                        := lQry.FieldByName('CSOSN').AsString;
+      modelo.objeto.CFOP                         := lQry.FieldByName('CFOP').AsString;
+      modelo.objeto.VDESC                        := lQry.FieldByName('VDESC').AsString;
+      modelo.objeto.TIPO_VENDA_COMISSAO_ID       := lQry.FieldByName('TIPO_VENDA_COMISSAO_ID').AsString;
+      modelo.objeto.COMIS_PRO                    := lQry.FieldByName('COMIS_PRO').AsString;
 
-      modelo.GRUPO_COMISSAO_ID            := lQry.FieldByName('GRUPO_COMISSAO_ID').AsString;
-      modelo.TIPO_GARANTIA_FR             := lQry.FieldByName('TIPO_GARANTIA_FR').AsString;
-      modelo.VLR_GARANTIA_FR              := lQry.FieldByName('VLR_GARANTIA_FR').AsString;
-      modelo.CUSTO_GARANTIA_FR            := lQry.FieldByName('CUSTO_GARANTIA_FR').AsString;
-      modelo.CUSTO_GARANTIA               := lQry.FieldByName('CUSTO_GARANTIA').AsString;
-      modelo.PER_GARANTIA_FR              := lQry.FieldByName('PER_GARANTIA_FR').AsString;
+      modelo.objeto.GRUPO_COMISSAO_ID            := lQry.FieldByName('GRUPO_COMISSAO_ID').AsString;
+      modelo.objeto.TIPO_GARANTIA_FR             := lQry.FieldByName('TIPO_GARANTIA_FR').AsString;
+      modelo.objeto.VLR_GARANTIA_FR              := lQry.FieldByName('VLR_GARANTIA_FR').AsString;
+      modelo.objeto.CUSTO_GARANTIA_FR            := lQry.FieldByName('CUSTO_GARANTIA_FR').AsString;
+      modelo.objeto.CUSTO_GARANTIA               := lQry.FieldByName('CUSTO_GARANTIA').AsString;
+      modelo.objeto.PER_GARANTIA_FR              := lQry.FieldByName('PER_GARANTIA_FR').AsString;
 
-      modelo.VTOTTRIB_FEDERAL             := lQry.FieldByName('VTOTTRIB_FEDERAL').AsString;
-      modelo.VTOTTRIB_ESTADUAL            := lQry.FieldByName('VTOTTRIB_ESTADUAL').AsString;
-      modelo.VTOTTRIB_MUNICIPAL           := lQry.FieldByName('VTOTTRIB_MUNICIPAL').AsString;
+      modelo.objeto.VTOTTRIB_FEDERAL             := lQry.FieldByName('VTOTTRIB_FEDERAL').AsString;
+      modelo.objeto.VTOTTRIB_ESTADUAL            := lQry.FieldByName('VTOTTRIB_ESTADUAL').AsString;
+      modelo.objeto.VTOTTRIB_MUNICIPAL           := lQry.FieldByName('VTOTTRIB_MUNICIPAL').AsString;
 
       lQry.Next;
     end;
@@ -566,10 +578,10 @@ procedure TPedidoItensDao.obterItensPedido(pNumeroPedido: String);
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TPedidoItensModel;
+  modelo: ITPedidoItensModel;
 begin
   lQry := vIConexao.CriarQuery;
-  FPedidoItenssLista := TCollections.CreateList<TPedidoItensModel>(true);
+  FPedidoItenssLista := TCollections.CreateList<ITPedidoItensModel>;
   try
     lSQL :=
     ' select                                             '+#13+
@@ -595,19 +607,19 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TPedidoItensModel.Create(vIConexao);
+      modelo := TPedidoItensModel.getNewIface(vIConexao);
       FPedidoItenssLista.Add(modelo);
-      modelo.ID                := lQry.FieldByName('ID').AsString;
-      modelo.CODIGO_PRO        := lQry.FieldByName('CODIGO_PRO').AsString;
-      modelo.BARRAS_PRO        := lQry.FieldByName('BARRAS_PRO').AsString;
-      modelo.NOME_PRO          := lQry.FieldByName('NOME_PRO').AsString;
-      modelo.QUANTIDADE_PED    := lQry.FieldByName('QUANTIDADE_PED').AsFloat;
-      modelo.QTDE_CALCULADA    := lQry.FieldByName('QTDE_CALCULADA').AsFloat;
-      modelo.VALORUNITARIO_PED := lQry.FieldByName('VALORUNITARIO_PED').AsFloat;
-      modelo.DESCONTO_PED      := lQry.FieldByName('DESCONTO_PED').AsFloat;
-      modelo.VDESC             := lQry.FieldByName('VDESC').AsFloat;
-      modelo.ITEM              := lQry.FieldByName('ITEM').AsFloat;
-      modelo.TOTAL             := lQry.FieldByName('TOTAL').AsFloat;
+      modelo.objeto.ID                := lQry.FieldByName('ID').AsString;
+      modelo.objeto.CODIGO_PRO        := lQry.FieldByName('CODIGO_PRO').AsString;
+      modelo.objeto.BARRAS_PRO        := lQry.FieldByName('BARRAS_PRO').AsString;
+      modelo.objeto.NOME_PRO          := lQry.FieldByName('NOME_PRO').AsString;
+      modelo.objeto.QUANTIDADE_PED    := lQry.FieldByName('QUANTIDADE_PED').AsFloat;
+      modelo.objeto.QTDE_CALCULADA    := lQry.FieldByName('QTDE_CALCULADA').AsFloat;
+      modelo.objeto.VALORUNITARIO_PED := lQry.FieldByName('VALORUNITARIO_PED').AsFloat;
+      modelo.objeto.DESCONTO_PED      := lQry.FieldByName('DESCONTO_PED').AsFloat;
+      modelo.objeto.VDESC             := lQry.FieldByName('VDESC').AsFloat;
+      modelo.objeto.ITEM              := lQry.FieldByName('ITEM').AsFloat;
+      modelo.objeto.TOTAL             := lQry.FieldByName('TOTAL').AsFloat;
 
       lQry.Next;
     end;
@@ -647,7 +659,7 @@ begin
   FOrderView := Value;
 end;
 
-procedure TPedidoItensDao.setParams(var pQry: TFDQuery; pPedidoItensModel: TPedidoItensModel);
+procedure TPedidoItensDao.setParams(var pQry: TFDQuery; pPedidoItensModel: ITPedidoItensModel);
 var
   lTabela : IFDDataset;
   lCtx    : TRttiContext;
@@ -663,142 +675,144 @@ begin
       lProp := lCtx.GetType(TPedidoItensModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPedidoItensModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPedidoItensModel).AsString))
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPedidoItensModel.objeto).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPedidoItensModel.objeto).AsString))
     end;
   finally
     lCtx.Free;
   end;
 end;
 
-procedure TPedidoItensDao.setParamsArray(var pQry: TFDQuery; pPedidoItensModel: TPedidoItensModel);
+procedure TPedidoItensDao.setParamsArray(var pQry: TFDQuery; pPedidoItensModel: ITPedidoItensModel);
 var
+  modelo: ITPedidoItensModel;
   lCount: Integer;
 begin
-  for lCount := 0 to Pred(pPedidoItensModel.PedidoItenssLista.Count) do
+  lCount := 0;
+  for modelo in pPedidoItensModel.objeto.PedidoItenssLista do
   begin
-    pQry.ParamByName('codigo_cli').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CODIGO_CLI                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CODIGO_CLI);
-    pQry.ParamByName('numero_ped').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].NUMERO_PED                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].NUMERO_PED);
-    pQry.ParamByName('codigo_pro').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CODIGO_PRO                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CODIGO_PRO);
-    pQry.ParamByName('quantidade_ped').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_PED                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_PED));
-    pQry.ParamByName('quantidade_troca').Values[lCount]             := IIF(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_TROCA              = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_TROCA));
-    pQry.ParamByName('valorunitario_ped').Values[lCount]            := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALORUNITARIO_PED             = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALORUNITARIO_PED));
-    pQry.ParamByName('desconto_ped').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].DESCONTO_PED                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].DESCONTO_PED));
-    pQry.ParamByName('vdesc').Values[lCount]                        := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VDESC                         = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VDESC));
-    pQry.ParamByName('desconto_uf').Values[lCount]                  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].DESCONTO_UF                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].DESCONTO_UF));
-    pQry.ParamByName('valor_ipi').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_IPI                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_IPI));
-    pQry.ParamByName('valor_st').Values[lCount]                     := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_ST                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_ST));
-    pQry.ParamByName('vlrvenda_pro').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VLRVENDA_PRO                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VLRVENDA_PRO));
-    pQry.ParamByName('vlrcusto_pro').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VLRCUSTO_PRO                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VLRCUSTO_PRO));
-    pQry.ParamByName('comissao_ped').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].COMISSAO_PED                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].COMISSAO_PED));
-    pQry.ParamByName('tipo_nf').Values[lCount]                      := IIF(pPedidoItensModel.PedidoItenssLista[lCount].TIPO_NF                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].TIPO_NF);
-    pQry.ParamByName('quantidade_tipo').Values[lCount]              := IIF(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_TIPO               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_TIPO));
-    pQry.ParamByName('observacao').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].OBSERVACAO                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].OBSERVACAO);
-    pQry.ParamByName('ctr_exportacao').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CTR_EXPORTACAO                = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CTR_EXPORTACAO);
-    pQry.ParamByName('produto_referencia').Values[lCount]           := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PRODUTO_REFERENCIA            = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PRODUTO_REFERENCIA);
-    pQry.ParamByName('obs_item').Values[lCount]                     := IIF(pPedidoItensModel.PedidoItenssLista[lCount].OBS_ITEM                      = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].OBS_ITEM);
-    pQry.ParamByName('reserva_id').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].RESERVA_ID                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].RESERVA_ID);
-    pQry.ParamByName('loja').Values[lCount]                         := IIF(pPedidoItensModel.PedidoItenssLista[lCount].LOJA                          = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].LOJA);
-    pQry.ParamByName('aliq_ipi').Values[lCount]                     := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_IPI                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_IPI));
-    pQry.ParamByName('valor_restituicao_st').Values[lCount]         := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_RESTITUICAO_ST          = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_RESTITUICAO_ST));
-    pQry.ParamByName('cfop_id').Values[lCount]                      := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CFOP_ID                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CFOP_ID);
-    pQry.ParamByName('cst').Values[lCount]                          := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CST                           = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CST);
-    pQry.ParamByName('aliq_icms').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_ICMS                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_ICMS));
-    pQry.ParamByName('aliq_icms_st').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_ICMS_ST                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_ICMS_ST));
-    pQry.ParamByName('reducao_st').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].REDUCAO_ST                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].REDUCAO_ST));
-    pQry.ParamByName('mva').Values[lCount]                          := IIF(pPedidoItensModel.PedidoItenssLista[lCount].MVA                           = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].MVA));
-    pQry.ParamByName('reducao_icms').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].REDUCAO_ICMS                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].REDUCAO_ICMS));
-    pQry.ParamByName('base_icms').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].BASE_ICMS                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].BASE_ICMS));
-    pQry.ParamByName('valor_icms').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_ICMS                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_ICMS));
-    pQry.ParamByName('base_st').Values[lCount]                      := IIF(pPedidoItensModel.PedidoItenssLista[lCount].BASE_ST                       = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].BASE_ST));
-    pQry.ParamByName('desc_restituicao_st').Values[lCount]          := IIF(pPedidoItensModel.PedidoItenssLista[lCount].DESC_RESTITUICAO_ST           = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].DESC_RESTITUICAO_ST));
-    pQry.ParamByName('icms_suframa').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ICMS_SUFRAMA                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].ICMS_SUFRAMA));
-    pQry.ParamByName('pis_suframa').Values[lCount]                  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PIS_SUFRAMA                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PIS_SUFRAMA));
-    pQry.ParamByName('cofins_suframa').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].COFINS_SUFRAMA                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].COFINS_SUFRAMA));
-    pQry.ParamByName('ipi_suframa').Values[lCount]                  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].IPI_SUFRAMA                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].IPI_SUFRAMA));
-    pQry.ParamByName('aliq_pis').Values[lCount]                     := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_PIS                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_PIS));
-    pQry.ParamByName('aliq_cofins').Values[lCount]                  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_COFINS                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].ALIQ_COFINS));
-    pQry.ParamByName('base_pis').Values[lCount]                     := IIF(pPedidoItensModel.PedidoItenssLista[lCount].BASE_PIS                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].BASE_PIS));
-    pQry.ParamByName('base_cofins').Values[lCount]                  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].BASE_COFINS                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].BASE_COFINS));
-    pQry.ParamByName('valor_pis').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_PIS                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_PIS));
-    pQry.ParamByName('valor_cofins').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_COFINS                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_COFINS));
-    pQry.ParamByName('prevenda_id').Values[lCount]                  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PREVENDA_ID                   = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PREVENDA_ID);
-    pQry.ParamByName('avulso').Values[lCount]                       := IIF(pPedidoItensModel.PedidoItenssLista[lCount].AVULSO                        = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].AVULSO);
-    pQry.ParamByName('quantidade_new').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_NEW                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_NEW));
-    pQry.ParamByName('balanca').Values[lCount]                      := IIF(pPedidoItensModel.PedidoItenssLista[lCount].BALANCA                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].BALANCA);
-    pQry.ParamByName('ambiente_id').Values[lCount]                  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].AMBIENTE_ID                   = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].AMBIENTE_ID);
-    pQry.ParamByName('ambiente_obs').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].AMBIENTE_OBS                  = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].AMBIENTE_OBS);
-    pQry.ParamByName('projeto_id').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PROJETO_ID                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PROJETO_ID);
-    pQry.ParamByName('largura').Values[lCount]                      := IIF(pPedidoItensModel.PedidoItenssLista[lCount].LARGURA                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].LARGURA);
-    pQry.ParamByName('altura').Values[lCount]                       := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ALTURA                        = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].ALTURA);
-    pQry.ParamByName('item').Values[lCount]                         := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ITEM                          = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].ITEM);
-    pQry.ParamByName('dun14').Values[lCount]                        := IIF(pPedidoItensModel.PedidoItenssLista[lCount].DUN14                         = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].DUN14);
-    pQry.ParamByName('saidas_id').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].SAIDAS_ID                     = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].SAIDAS_ID);
-    pQry.ParamByName('custo_drg').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_DRG                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_DRG));
-    pQry.ParamByName('pos_venda_status').Values[lCount]             := IIF(pPedidoItensModel.PedidoItenssLista[lCount].POS_VENDA_STATUS              = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].POS_VENDA_STATUS);
-    pQry.ParamByName('pos_venda_retorno').Values[lCount]            := IIF(pPedidoItensModel.PedidoItenssLista[lCount].POS_VENDA_RETORNO             = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].POS_VENDA_RETORNO);
-    pQry.ParamByName('pos_venda_obs').Values[lCount]                := IIF(pPedidoItensModel.PedidoItenssLista[lCount].POS_VENDA_OBS                 = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].POS_VENDA_OBS);
-    pQry.ParamByName('bonus').Values[lCount]                        := IIF(pPedidoItensModel.PedidoItenssLista[lCount].BONUS                         = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].BONUS);
-    pQry.ParamByName('bonus_uso').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].BONUS_USO                     = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].BONUS_USO);
-    pQry.ParamByName('funcionario_id').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].FUNCIONARIO_ID                = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].FUNCIONARIO_ID);
-    pQry.ParamByName('producao_id').Values[lCount]                  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PRODUCAO_ID                   = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PRODUCAO_ID);
-    pQry.ParamByName('quantidade_kg').Values[lCount]                := IIF(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_KG                 = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].QUANTIDADE_KG));
-    pQry.ParamByName('reservado').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].RESERVADO                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].RESERVADO));
-    pQry.ParamByName('descricao_produto').Values[lCount]            := IIF(pPedidoItensModel.PedidoItenssLista[lCount].DESCRICAO_PRODUTO             = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].DESCRICAO_PRODUTO);
-    pQry.ParamByName('comissao_percentual').Values[lCount]          := IIF(pPedidoItensModel.PedidoItenssLista[lCount].COMISSAO_PERCENTUAL           = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].COMISSAO_PERCENTUAL));
-    pQry.ParamByName('qtd_checagem').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].QTD_CHECAGEM                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].QTD_CHECAGEM));
-    pQry.ParamByName('qtd_checagem_corte').Values[lCount]           := IIF(pPedidoItensModel.PedidoItenssLista[lCount].QTD_CHECAGEM_CORTE            = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].QTD_CHECAGEM_CORTE));
-    pQry.ParamByName('altura_m').Values[lCount]                     := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ALTURA_M                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].ALTURA_M));
-    pQry.ParamByName('largura_m').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].LARGURA_M                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].LARGURA_M));
-    pQry.ParamByName('profundidade_m').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PROFUNDIDADE_M                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PROFUNDIDADE_M));
-    pQry.ParamByName('vbcufdest').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VBCUFDEST                     = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VBCUFDEST));
-    pQry.ParamByName('pfcpufdest').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PFCPUFDEST                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PFCPUFDEST));
-    pQry.ParamByName('picmsufdest').Values[lCount]                  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PICMSUFDEST                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PICMSUFDEST));
-    pQry.ParamByName('picmsinter').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PICMSINTER                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PICMSINTER));
-    pQry.ParamByName('picmsinterpart').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PICMSINTERPART                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PICMSINTERPART));
-    pQry.ParamByName('vfcpufdest').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VFCPUFDEST                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VFCPUFDEST));
-    pQry.ParamByName('vicmsufdest').Values[lCount]                  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VICMSUFDEST                   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VICMSUFDEST));
-    pQry.ParamByName('vicmsufremet').Values[lCount]                 := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VICMSUFREMET                  = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VICMSUFREMET));
-    pQry.ParamByName('combo_item').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].COMBO_ITEM                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].COMBO_ITEM);
-    pQry.ParamByName('vlrvenda_minimo').Values[lCount]              := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VLRVENDA_MINIMO               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VLRVENDA_MINIMO));
-    pQry.ParamByName('vlrvenda_maximo').Values[lCount]              := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VLRVENDA_MAXIMO               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VLRVENDA_MAXIMO));
-    pQry.ParamByName('impresso').Values[lCount]                     := IIF(pPedidoItensModel.PedidoItenssLista[lCount].IMPRESSO                      = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].IMPRESSO);
-    pQry.ParamByName('orcamento_tsb_id').Values[lCount]             := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ORCAMENTO_TSB_ID              = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].ORCAMENTO_TSB_ID);
-    pQry.ParamByName('gerente_comissao_percentual').Values[lCount]  := IIF(pPedidoItensModel.PedidoItenssLista[lCount].GERENTE_COMISSAO_PERCENTUAL   = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].GERENTE_COMISSAO_PERCENTUAL));
-    pQry.ParamByName('xped').Values[lCount]                         := IIF(pPedidoItensModel.PedidoItenssLista[lCount].XPED                          = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].XPED);
-    pQry.ParamByName('nitemped2').Values[lCount]                    := IIF(pPedidoItensModel.PedidoItenssLista[lCount].NITEMPED2                     = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].NITEMPED2);
-    pQry.ParamByName('voutros').Values[lCount]                      := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VOUTROS                       = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VOUTROS));
-    pQry.ParamByName('vfrete').Values[lCount]                       := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VFRETE                        = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VFRETE));
-    pQry.ParamByName('original_pedido_id').Values[lCount]           := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ORIGINAL_PEDIDO_ID            = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].ORIGINAL_PEDIDO_ID);
-    pQry.ParamByName('valor_venda_cadastro').Values[lCount]         := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_VENDA_CADASTRO          = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_VENDA_CADASTRO));
-    pQry.ParamByName('web_pedidoitens_id').Values[lCount]           := IIF(pPedidoItensModel.PedidoItenssLista[lCount].WEB_PEDIDOITENS_ID            = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].WEB_PEDIDOITENS_ID);
-    pQry.ParamByName('tipo_venda').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].TIPO_VENDA                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].TIPO_VENDA);
-    pQry.ParamByName('entrega').Values[lCount]                      := IIF(pPedidoItensModel.PedidoItenssLista[lCount].ENTREGA                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].ENTREGA);
-    pQry.ParamByName('vbcfcpst').Values[lCount]                     := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VBCFCPST                      = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VBCFCPST));
-    pQry.ParamByName('pfcpst').Values[lCount]                       := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PFCPST                        = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PFCPST));
-    pQry.ParamByName('vfcpst').Values[lCount]                       := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VFCPST                        = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VFCPST));
-    pQry.ParamByName('valor_bonus_servico').Values[lCount]          := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_BONUS_SERVICO           = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_BONUS_SERVICO));
-    pQry.ParamByName('cbenef').Values[lCount]                       := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CBENEF                        = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CBENEF);
-    pQry.ParamByName('vicmsdeson').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VICMSDESON                    = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VICMSDESON));
-    pQry.ParamByName('motdesicms').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].MOTDESICMS                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].MOTDESICMS);
-    pQry.ParamByName('valor_diferimento').Values[lCount]            := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_DIFERIMENTO             = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_DIFERIMENTO));
-    pQry.ParamByName('valor_montador').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_MONTADOR                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VALOR_MONTADOR));
-    pQry.ParamByName('montagem').Values[lCount]                     := IIF(pPedidoItensModel.PedidoItenssLista[lCount].MONTAGEM                      = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].MONTAGEM);
-    pQry.ParamByName('pcred_presumido').Values[lCount]              := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PCRED_PRESUMIDO               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PCRED_PRESUMIDO));
-    pQry.ParamByName('pedidocompraitens_id').Values[lCount]         := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PEDIDOCOMPRAITENS_ID          = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PEDIDOCOMPRAITENS_ID);
-    pQry.ParamByName('pedidoitens_id').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PEDIDOITENS_ID                = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PEDIDOITENS_ID);
-    pQry.ParamByName('pis_cst').Values[lCount]                      := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PIS_CST                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].PIS_CST);
-    pQry.ParamByName('cofins_cst').Values[lCount]                   := IIF(pPedidoItensModel.PedidoItenssLista[lCount].COFINS_CST                    = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].COFINS_CST);
-    pQry.ParamByName('ipi_cst').Values[lCount]                      := IIF(pPedidoItensModel.PedidoItenssLista[lCount].IPI_CST                       = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].IPI_CST);
-    pQry.ParamByName('csosn').Values[lCount]                        := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CSOSN                         = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CSOSN);
-    pQry.ParamByName('cfop').Values[lCount]                         := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CFOP                          = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].CFOP);
+    pQry.ParamByName('codigo_cli').Values[lCount]                   := IIF(modelo.objeto.CODIGO_CLI                    = '', Unassigned, modelo.objeto.CODIGO_CLI);
+    pQry.ParamByName('numero_ped').Values[lCount]                   := IIF(modelo.objeto.NUMERO_PED                    = '', Unassigned, modelo.objeto.NUMERO_PED);
+    pQry.ParamByName('codigo_pro').Values[lCount]                   := IIF(modelo.objeto.CODIGO_PRO                    = '', Unassigned, modelo.objeto.CODIGO_PRO);
+    pQry.ParamByName('quantidade_ped').Values[lCount]               := IIF(modelo.objeto.QUANTIDADE_PED                = '', Unassigned, FormataFloatFireBird(modelo.objeto.QUANTIDADE_PED));
+    pQry.ParamByName('quantidade_troca').Values[lCount]             := IIF(modelo.objeto.QUANTIDADE_TROCA              = '', Unassigned, FormataFloatFireBird(modelo.objeto.QUANTIDADE_TROCA));
+    pQry.ParamByName('valorunitario_ped').Values[lCount]            := IIF(modelo.objeto.VALORUNITARIO_PED             = '', Unassigned, FormataFloatFireBird(modelo.objeto.VALORUNITARIO_PED));
+    pQry.ParamByName('desconto_ped').Values[lCount]                 := IIF(modelo.objeto.DESCONTO_PED                  = '', Unassigned, FormataFloatFireBird(modelo.objeto.DESCONTO_PED));
+    pQry.ParamByName('vdesc').Values[lCount]                        := IIF(modelo.objeto.VDESC                         = '', Unassigned, FormataFloatFireBird(modelo.objeto.VDESC));
+    pQry.ParamByName('desconto_uf').Values[lCount]                  := IIF(modelo.objeto.DESCONTO_UF                   = '', Unassigned, FormataFloatFireBird(modelo.objeto.DESCONTO_UF));
+    pQry.ParamByName('valor_ipi').Values[lCount]                    := IIF(modelo.objeto.VALOR_IPI                     = '', Unassigned, FormataFloatFireBird(modelo.objeto.VALOR_IPI));
+    pQry.ParamByName('valor_st').Values[lCount]                     := IIF(modelo.objeto.VALOR_ST                      = '', Unassigned, FormataFloatFireBird(modelo.objeto.VALOR_ST));
+    pQry.ParamByName('vlrvenda_pro').Values[lCount]                 := IIF(modelo.objeto.VLRVENDA_PRO                  = '', Unassigned, FormataFloatFireBird(modelo.objeto.VLRVENDA_PRO));
+    pQry.ParamByName('vlrcusto_pro').Values[lCount]                 := IIF(modelo.objeto.VLRCUSTO_PRO                  = '', Unassigned, FormataFloatFireBird(modelo.objeto.VLRCUSTO_PRO));
+    pQry.ParamByName('comissao_ped').Values[lCount]                 := IIF(modelo.objeto.COMISSAO_PED                  = '', Unassigned, FormataFloatFireBird(modelo.objeto.COMISSAO_PED));
+    pQry.ParamByName('tipo_nf').Values[lCount]                      := IIF(modelo.objeto.TIPO_NF                       = '', Unassigned, modelo.objeto.TIPO_NF);
+    pQry.ParamByName('quantidade_tipo').Values[lCount]              := IIF(modelo.objeto.QUANTIDADE_TIPO               = '', Unassigned, FormataFloatFireBird(modelo.objeto.QUANTIDADE_TIPO));
+    pQry.ParamByName('observacao').Values[lCount]                   := IIF(modelo.objeto.OBSERVACAO                    = '', Unassigned, modelo.objeto.OBSERVACAO);
+    pQry.ParamByName('ctr_exportacao').Values[lCount]               := IIF(modelo.objeto.CTR_EXPORTACAO                = '', Unassigned, modelo.objeto.CTR_EXPORTACAO);
+    pQry.ParamByName('produto_referencia').Values[lCount]           := IIF(modelo.objeto.PRODUTO_REFERENCIA            = '', Unassigned, modelo.objeto.PRODUTO_REFERENCIA);
+    pQry.ParamByName('obs_item').Values[lCount]                     := IIF(modelo.objeto.OBS_ITEM                      = '', Unassigned, modelo.objeto.OBS_ITEM);
+    pQry.ParamByName('reserva_id').Values[lCount]                   := IIF(modelo.objeto.RESERVA_ID                    = '', Unassigned, modelo.objeto.RESERVA_ID);
+    pQry.ParamByName('loja').Values[lCount]                         := IIF(modelo.objeto.LOJA                          = '', Unassigned, modelo.objeto.LOJA);
+    pQry.ParamByName('aliq_ipi').Values[lCount]                     := IIF(modelo.objeto.ALIQ_IPI                      = '', Unassigned, FormataFloatFireBird(modelo.objeto.ALIQ_IPI));
+    pQry.ParamByName('valor_restituicao_st').Values[lCount]         := IIF(modelo.objeto.VALOR_RESTITUICAO_ST          = '', Unassigned, FormataFloatFireBird(modelo.objeto.VALOR_RESTITUICAO_ST));
+    pQry.ParamByName('cfop_id').Values[lCount]                      := IIF(modelo.objeto.CFOP_ID                       = '', Unassigned, modelo.objeto.CFOP_ID);
+    pQry.ParamByName('cst').Values[lCount]                          := IIF(modelo.objeto.CST                           = '', Unassigned, modelo.objeto.CST);
+    pQry.ParamByName('aliq_icms').Values[lCount]                    := IIF(modelo.objeto.ALIQ_ICMS                     = '', Unassigned, FormataFloatFireBird(modelo.objeto.ALIQ_ICMS));
+    pQry.ParamByName('aliq_icms_st').Values[lCount]                 := IIF(modelo.objeto.ALIQ_ICMS_ST                  = '', Unassigned, FormataFloatFireBird(modelo.objeto.ALIQ_ICMS_ST));
+    pQry.ParamByName('reducao_st').Values[lCount]                   := IIF(modelo.objeto.REDUCAO_ST                    = '', Unassigned, FormataFloatFireBird(modelo.objeto.REDUCAO_ST));
+    pQry.ParamByName('mva').Values[lCount]                          := IIF(modelo.objeto.MVA                           = '', Unassigned, FormataFloatFireBird(modelo.objeto.MVA));
+    pQry.ParamByName('reducao_icms').Values[lCount]                 := IIF(modelo.objeto.REDUCAO_ICMS                  = '', Unassigned, FormataFloatFireBird(modelo.objeto.REDUCAO_ICMS));
+    pQry.ParamByName('base_icms').Values[lCount]                    := IIF(modelo.objeto.BASE_ICMS                     = '', Unassigned, FormataFloatFireBird(modelo.objeto.BASE_ICMS));
+    pQry.ParamByName('valor_icms').Values[lCount]                   := IIF(modelo.objeto.VALOR_ICMS                    = '', Unassigned, FormataFloatFireBird(modelo.objeto.VALOR_ICMS));
+    pQry.ParamByName('base_st').Values[lCount]                      := IIF(modelo.objeto.BASE_ST                       = '', Unassigned, FormataFloatFireBird(modelo.objeto.BASE_ST));
+    pQry.ParamByName('desc_restituicao_st').Values[lCount]          := IIF(modelo.objeto.DESC_RESTITUICAO_ST           = '', Unassigned, FormataFloatFireBird(modelo.objeto.DESC_RESTITUICAO_ST));
+    pQry.ParamByName('icms_suframa').Values[lCount]                 := IIF(modelo.objeto.ICMS_SUFRAMA                  = '', Unassigned, FormataFloatFireBird(modelo.objeto.ICMS_SUFRAMA));
+    pQry.ParamByName('pis_suframa').Values[lCount]                  := IIF(modelo.objeto.PIS_SUFRAMA                   = '', Unassigned, FormataFloatFireBird(modelo.objeto.PIS_SUFRAMA));
+    pQry.ParamByName('cofins_suframa').Values[lCount]               := IIF(modelo.objeto.COFINS_SUFRAMA                = '', Unassigned, FormataFloatFireBird(modelo.objeto.COFINS_SUFRAMA));
+    pQry.ParamByName('ipi_suframa').Values[lCount]                  := IIF(modelo.objeto.IPI_SUFRAMA                   = '', Unassigned, FormataFloatFireBird(modelo.objeto.IPI_SUFRAMA));
+    pQry.ParamByName('aliq_pis').Values[lCount]                     := IIF(modelo.objeto.ALIQ_PIS                      = '', Unassigned, FormataFloatFireBird(modelo.objeto.ALIQ_PIS));
+    pQry.ParamByName('aliq_cofins').Values[lCount]                  := IIF(modelo.objeto.ALIQ_COFINS                   = '', Unassigned, FormataFloatFireBird(modelo.objeto.ALIQ_COFINS));
+    pQry.ParamByName('base_pis').Values[lCount]                     := IIF(modelo.objeto.BASE_PIS                      = '', Unassigned, FormataFloatFireBird(modelo.objeto.BASE_PIS));
+    pQry.ParamByName('base_cofins').Values[lCount]                  := IIF(modelo.objeto.BASE_COFINS                   = '', Unassigned, FormataFloatFireBird(modelo.objeto.BASE_COFINS));
+    pQry.ParamByName('valor_pis').Values[lCount]                    := IIF(modelo.objeto.VALOR_PIS                     = '', Unassigned, FormataFloatFireBird(modelo.objeto.VALOR_PIS));
+    pQry.ParamByName('valor_cofins').Values[lCount]                 := IIF(modelo.objeto.VALOR_COFINS                  = '', Unassigned, FormataFloatFireBird(modelo.objeto.VALOR_COFINS));
+    pQry.ParamByName('prevenda_id').Values[lCount]                  := IIF(modelo.objeto.PREVENDA_ID                   = '', Unassigned, modelo.objeto.PREVENDA_ID);
+    pQry.ParamByName('avulso').Values[lCount]                       := IIF(modelo.objeto.AVULSO                        = '', Unassigned, modelo.objeto.AVULSO);
+    pQry.ParamByName('quantidade_new').Values[lCount]               := IIF(modelo.objeto.QUANTIDADE_NEW                = '', Unassigned, FormataFloatFireBird(modelo.objeto.QUANTIDADE_NEW));
+    pQry.ParamByName('balanca').Values[lCount]                      := IIF(modelo.objeto.BALANCA                       = '', Unassigned, modelo.objeto.BALANCA);
+    pQry.ParamByName('ambiente_id').Values[lCount]                  := IIF(modelo.objeto.AMBIENTE_ID                   = '', Unassigned, modelo.objeto.AMBIENTE_ID);
+    pQry.ParamByName('ambiente_obs').Values[lCount]                 := IIF(modelo.objeto.AMBIENTE_OBS                  = '', Unassigned, modelo.objeto.AMBIENTE_OBS);
+    pQry.ParamByName('projeto_id').Values[lCount]                   := IIF(modelo.objeto.PROJETO_ID                    = '', Unassigned, modelo.objeto.PROJETO_ID);
+    pQry.ParamByName('largura').Values[lCount]                      := IIF(modelo.objeto.LARGURA                       = '', Unassigned, modelo.objeto.LARGURA);
+    pQry.ParamByName('altura').Values[lCount]                       := IIF(modelo.objeto.ALTURA                        = '', Unassigned, modelo.objeto.ALTURA);
+    pQry.ParamByName('item').Values[lCount]                         := IIF(modelo.objeto.ITEM                          = '', Unassigned, modelo.objeto.ITEM);
+    pQry.ParamByName('dun14').Values[lCount]                        := IIF(modelo.objeto.DUN14                         = '', Unassigned, modelo.objeto.DUN14);
+    pQry.ParamByName('saidas_id').Values[lCount]                    := IIF(modelo.objeto.SAIDAS_ID                     = '', Unassigned, modelo.objeto.SAIDAS_ID);
+    pQry.ParamByName('custo_drg').Values[lCount]                    := IIF(modelo.objeto.CUSTO_DRG                     = '', Unassigned, FormataFloatFireBird(modelo.objeto.CUSTO_DRG));
+    pQry.ParamByName('pos_venda_status').Values[lCount]             := IIF(modelo.objeto.POS_VENDA_STATUS              = '', Unassigned, modelo.objeto.POS_VENDA_STATUS);
+    pQry.ParamByName('pos_venda_retorno').Values[lCount]            := IIF(modelo.objeto.POS_VENDA_RETORNO             = '', Unassigned, modelo.objeto.POS_VENDA_RETORNO);
+    pQry.ParamByName('pos_venda_obs').Values[lCount]                := IIF(modelo.objeto.POS_VENDA_OBS                 = '', Unassigned, modelo.objeto.POS_VENDA_OBS);
+    pQry.ParamByName('bonus').Values[lCount]                        := IIF(modelo.objeto.BONUS                         = '', Unassigned, modelo.objeto.BONUS);
+    pQry.ParamByName('bonus_uso').Values[lCount]                    := IIF(modelo.objeto.BONUS_USO                     = '', Unassigned, modelo.objeto.BONUS_USO);
+    pQry.ParamByName('funcionario_id').Values[lCount]               := IIF(modelo.objeto.FUNCIONARIO_ID                = '', Unassigned, modelo.objeto.FUNCIONARIO_ID);
+    pQry.ParamByName('producao_id').Values[lCount]                  := IIF(modelo.objeto.PRODUCAO_ID                   = '', Unassigned, modelo.objeto.PRODUCAO_ID);
+    pQry.ParamByName('quantidade_kg').Values[lCount]                := IIF(modelo.objeto.QUANTIDADE_KG                 = '', Unassigned, FormataFloatFireBird(modelo.objeto.QUANTIDADE_KG));
+    pQry.ParamByName('reservado').Values[lCount]                    := IIF(modelo.objeto.RESERVADO                     = '', Unassigned, FormataFloatFireBird(modelo.objeto.RESERVADO));
+    pQry.ParamByName('descricao_produto').Values[lCount]            := IIF(modelo.objeto.DESCRICAO_PRODUTO             = '', Unassigned, modelo.objeto.DESCRICAO_PRODUTO);
+    pQry.ParamByName('comissao_percentual').Values[lCount]          := IIF(modelo.objeto.COMISSAO_PERCENTUAL           = '', Unassigned, FormataFloatFireBird(modelo.objeto.COMISSAO_PERCENTUAL));
+    pQry.ParamByName('qtd_checagem').Values[lCount]                 := IIF(modelo.objeto.QTD_CHECAGEM                  = '', Unassigned, FormataFloatFireBird(modelo.objeto.QTD_CHECAGEM));
+    pQry.ParamByName('qtd_checagem_corte').Values[lCount]           := IIF(modelo.objeto.QTD_CHECAGEM_CORTE            = '', Unassigned, FormataFloatFireBird(modelo.objeto.QTD_CHECAGEM_CORTE));
+    pQry.ParamByName('altura_m').Values[lCount]                     := IIF(modelo.objeto.ALTURA_M                      = '', Unassigned, FormataFloatFireBird(modelo.objeto.ALTURA_M));
+    pQry.ParamByName('largura_m').Values[lCount]                    := IIF(modelo.objeto.LARGURA_M                     = '', Unassigned, FormataFloatFireBird(modelo.objeto.LARGURA_M));
+    pQry.ParamByName('profundidade_m').Values[lCount]               := IIF(modelo.objeto.PROFUNDIDADE_M                = '', Unassigned, FormataFloatFireBird(modelo.objeto.PROFUNDIDADE_M));
+    pQry.ParamByName('vbcufdest').Values[lCount]                    := IIF(modelo.objeto.VBCUFDEST                     = '', Unassigned, FormataFloatFireBird(modelo.objeto.VBCUFDEST));
+    pQry.ParamByName('pfcpufdest').Values[lCount]                   := IIF(modelo.objeto.PFCPUFDEST                    = '', Unassigned, FormataFloatFireBird(modelo.objeto.PFCPUFDEST));
+    pQry.ParamByName('picmsufdest').Values[lCount]                  := IIF(modelo.objeto.PICMSUFDEST                   = '', Unassigned, FormataFloatFireBird(modelo.objeto.PICMSUFDEST));
+    pQry.ParamByName('picmsinter').Values[lCount]                   := IIF(modelo.objeto.PICMSINTER                    = '', Unassigned, FormataFloatFireBird(modelo.objeto.PICMSINTER));
+    pQry.ParamByName('picmsinterpart').Values[lCount]               := IIF(modelo.objeto.PICMSINTERPART                = '', Unassigned, FormataFloatFireBird(modelo.objeto.PICMSINTERPART));
+    pQry.ParamByName('vfcpufdest').Values[lCount]                   := IIF(modelo.objeto.VFCPUFDEST                    = '', Unassigned, FormataFloatFireBird(modelo.objeto.VFCPUFDEST));
+    pQry.ParamByName('vicmsufdest').Values[lCount]                  := IIF(modelo.objeto.VICMSUFDEST                   = '', Unassigned, FormataFloatFireBird(modelo.objeto.VICMSUFDEST));
+    pQry.ParamByName('vicmsufremet').Values[lCount]                 := IIF(modelo.objeto.VICMSUFREMET                  = '', Unassigned, FormataFloatFireBird(modelo.objeto.VICMSUFREMET));
+    pQry.ParamByName('combo_item').Values[lCount]                   := IIF(modelo.objeto.COMBO_ITEM                    = '', Unassigned, modelo.objeto.COMBO_ITEM);
+    pQry.ParamByName('vlrvenda_minimo').Values[lCount]              := IIF(modelo.objeto.VLRVENDA_MINIMO               = '', Unassigned, FormataFloatFireBird(modelo.objeto.VLRVENDA_MINIMO));
+    pQry.ParamByName('vlrvenda_maximo').Values[lCount]              := IIF(modelo.objeto.VLRVENDA_MAXIMO               = '', Unassigned, FormataFloatFireBird(modelo.objeto.VLRVENDA_MAXIMO));
+    pQry.ParamByName('impresso').Values[lCount]                     := IIF(modelo.objeto.IMPRESSO                      = '', Unassigned, modelo.objeto.IMPRESSO);
+    pQry.ParamByName('orcamento_tsb_id').Values[lCount]             := IIF(modelo.objeto.ORCAMENTO_TSB_ID              = '', Unassigned, modelo.objeto.ORCAMENTO_TSB_ID);
+    pQry.ParamByName('gerente_comissao_percentual').Values[lCount]  := IIF(modelo.objeto.GERENTE_COMISSAO_PERCENTUAL   = '', Unassigned, FormataFloatFireBird(modelo.objeto.GERENTE_COMISSAO_PERCENTUAL));
+    pQry.ParamByName('xped').Values[lCount]                         := IIF(modelo.objeto.XPED                          = '', Unassigned, modelo.objeto.XPED);
+    pQry.ParamByName('nitemped2').Values[lCount]                    := IIF(modelo.objeto.NITEMPED2                     = '', Unassigned, modelo.objeto.NITEMPED2);
+    pQry.ParamByName('voutros').Values[lCount]                      := IIF(modelo.objeto.VOUTROS                       = '', Unassigned, FormataFloatFireBird(modelo.objeto.VOUTROS));
+    pQry.ParamByName('vfrete').Values[lCount]                       := IIF(modelo.objeto.VFRETE                        = '', Unassigned, FormataFloatFireBird(modelo.objeto.VFRETE));
+    pQry.ParamByName('original_pedido_id').Values[lCount]           := IIF(modelo.objeto.ORIGINAL_PEDIDO_ID            = '', Unassigned, modelo.objeto.ORIGINAL_PEDIDO_ID);
+    pQry.ParamByName('valor_venda_cadastro').Values[lCount]         := IIF(modelo.objeto.VALOR_VENDA_CADASTRO          = '', Unassigned, FormataFloatFireBird(modelo.objeto.VALOR_VENDA_CADASTRO));
+    pQry.ParamByName('web_pedidoitens_id').Values[lCount]           := IIF(modelo.objeto.WEB_PEDIDOITENS_ID            = '', Unassigned, modelo.objeto.WEB_PEDIDOITENS_ID);
+    pQry.ParamByName('tipo_venda').Values[lCount]                   := IIF(modelo.objeto.TIPO_VENDA                    = '', Unassigned, modelo.objeto.TIPO_VENDA);
+    pQry.ParamByName('entrega').Values[lCount]                      := IIF(modelo.objeto.ENTREGA                       = '', Unassigned, modelo.objeto.ENTREGA);
+    pQry.ParamByName('vbcfcpst').Values[lCount]                     := IIF(modelo.objeto.VBCFCPST                      = '', Unassigned, FormataFloatFireBird(modelo.objeto.VBCFCPST));
+    pQry.ParamByName('pfcpst').Values[lCount]                       := IIF(modelo.objeto.PFCPST                        = '', Unassigned, FormataFloatFireBird(modelo.objeto.PFCPST));
+    pQry.ParamByName('vfcpst').Values[lCount]                       := IIF(modelo.objeto.VFCPST                        = '', Unassigned, FormataFloatFireBird(modelo.objeto.VFCPST));
+    pQry.ParamByName('valor_bonus_servico').Values[lCount]          := IIF(modelo.objeto.VALOR_BONUS_SERVICO           = '', Unassigned, FormataFloatFireBird(modelo.objeto.VALOR_BONUS_SERVICO));
+    pQry.ParamByName('cbenef').Values[lCount]                       := IIF(modelo.objeto.CBENEF                        = '', Unassigned, modelo.objeto.CBENEF);
+    pQry.ParamByName('vicmsdeson').Values[lCount]                   := IIF(modelo.objeto.VICMSDESON                    = '', Unassigned, FormataFloatFireBird(modelo.objeto.VICMSDESON));
+    pQry.ParamByName('motdesicms').Values[lCount]                   := IIF(modelo.objeto.MOTDESICMS                    = '', Unassigned, modelo.objeto.MOTDESICMS);
+    pQry.ParamByName('valor_diferimento').Values[lCount]            := IIF(modelo.objeto.VALOR_DIFERIMENTO             = '', Unassigned, FormataFloatFireBird(modelo.objeto.VALOR_DIFERIMENTO));
+    pQry.ParamByName('valor_montador').Values[lCount]               := IIF(modelo.objeto.VALOR_MONTADOR                = '', Unassigned, FormataFloatFireBird(modelo.objeto.VALOR_MONTADOR));
+    pQry.ParamByName('montagem').Values[lCount]                     := IIF(modelo.objeto.MONTAGEM                      = '', Unassigned, modelo.objeto.MONTAGEM);
+    pQry.ParamByName('pcred_presumido').Values[lCount]              := IIF(modelo.objeto.PCRED_PRESUMIDO               = '', Unassigned, FormataFloatFireBird(modelo.objeto.PCRED_PRESUMIDO));
+    pQry.ParamByName('pedidocompraitens_id').Values[lCount]         := IIF(modelo.objeto.PEDIDOCOMPRAITENS_ID          = '', Unassigned, modelo.objeto.PEDIDOCOMPRAITENS_ID);
+    pQry.ParamByName('pedidoitens_id').Values[lCount]               := IIF(modelo.objeto.PEDIDOITENS_ID                = '', Unassigned, modelo.objeto.PEDIDOITENS_ID);
+    pQry.ParamByName('pis_cst').Values[lCount]                      := IIF(modelo.objeto.PIS_CST                       = '', Unassigned, modelo.objeto.PIS_CST);
+    pQry.ParamByName('cofins_cst').Values[lCount]                   := IIF(modelo.objeto.COFINS_CST                    = '', Unassigned, modelo.objeto.COFINS_CST);
+    pQry.ParamByName('ipi_cst').Values[lCount]                      := IIF(modelo.objeto.IPI_CST                       = '', Unassigned, modelo.objeto.IPI_CST);
+    pQry.ParamByName('csosn').Values[lCount]                        := IIF(modelo.objeto.CSOSN                         = '', Unassigned, modelo.objeto.CSOSN);
+    pQry.ParamByName('cfop').Values[lCount]                         := IIF(modelo.objeto.CFOP                          = '', Unassigned, modelo.objeto.CFOP);
 
-    pQry.ParamByName('tipo_garantia_fr').Values[lCount]             := IIF(pPedidoItensModel.PedidoItenssLista[lCount].TIPO_GARANTIA_FR              = '', Unassigned, pPedidoItensModel.PedidoItenssLista[lCount].TIPO_GARANTIA_FR);
-    pQry.ParamByName('vlr_garantia_fr').Values[lCount]              := IIF(pPedidoItensModel.PedidoItenssLista[lCount].VLR_GARANTIA_FR               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].VLR_GARANTIA_FR));
-    pQry.ParamByName('custo_garantia_fr').Values[lCount]            := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_GARANTIA_FR             = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_GARANTIA_FR));
-    pQry.ParamByName('custo_garantia').Values[lCount]               := IIF(pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_GARANTIA                = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].CUSTO_GARANTIA));
-    pQry.ParamByName('per_garantia_fr').Values[lCount]              := IIF(pPedidoItensModel.PedidoItenssLista[lCount].PER_GARANTIA_FR               = '', Unassigned, FormataFloatFireBird(pPedidoItensModel.PedidoItenssLista[lCount].PER_GARANTIA_FR));
-
+    pQry.ParamByName('tipo_garantia_fr').Values[lCount]             := IIF(modelo.objeto.TIPO_GARANTIA_FR              = '', Unassigned, modelo.objeto.TIPO_GARANTIA_FR);
+    pQry.ParamByName('vlr_garantia_fr').Values[lCount]              := IIF(modelo.objeto.VLR_GARANTIA_FR               = '', Unassigned, FormataFloatFireBird(modelo.objeto.VLR_GARANTIA_FR));
+    pQry.ParamByName('custo_garantia_fr').Values[lCount]            := IIF(modelo.objeto.CUSTO_GARANTIA_FR             = '', Unassigned, FormataFloatFireBird(modelo.objeto.CUSTO_GARANTIA_FR));
+    pQry.ParamByName('custo_garantia').Values[lCount]               := IIF(modelo.objeto.CUSTO_GARANTIA                = '', Unassigned, FormataFloatFireBird(modelo.objeto.CUSTO_GARANTIA));
+    pQry.ParamByName('per_garantia_fr').Values[lCount]              := IIF(modelo.objeto.PER_GARANTIA_FR               = '', Unassigned, FormataFloatFireBird(modelo.objeto.PER_GARANTIA_FR));
+    inc(lCount);
   end;
 end;
 

@@ -11,17 +11,21 @@ uses
   System.Variants,
   Terasoft.FuncoesTexto,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao,
   Terasoft.Utils;
 
 type
-  TRecebimentoCartaoDao = class
+  TRecebimentoCartaoDao = class;
+  ITRecebimentoCartaoDao=IObject<TRecebimentoCartaoDao>;
 
+  TRecebimentoCartaoDao = class
   private
+    [weak] mySelf: ITRecebimentoCartaoDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FRecebimentoCartaosLista: IList<TRecebimentoCartaoModel>;
+    FRecebimentoCartaosLista: IList<ITRecebimentoCartaoModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -32,7 +36,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetRecebimentoCartaosLista(const Value: IList<TRecebimentoCartaoModel>);
+    procedure SetRecebimentoCartaosLista(const Value: IList<ITRecebimentoCartaoModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -44,10 +48,12 @@ type
     function where: String;
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property RecebimentoCartaosLista: IList<TRecebimentoCartaoModel> read FRecebimentoCartaosLista write SetRecebimentoCartaosLista;
+    class function getNewIface(pIConexao: IConexao): ITRecebimentoCartaoDao;
+
+    property RecebimentoCartaosLista: IList<ITRecebimentoCartaoModel> read FRecebimentoCartaosLista write SetRecebimentoCartaosLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -57,14 +63,14 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(ARecebimentoCartaoModel: TRecebimentoCartaoModel): String;
-    function alterar(ARecebimentoCartaoModel: TRecebimentoCartaoModel): String;
-    function excluir(ARecebimentoCartaoModel: TRecebimentoCartaoModel): String;
-	
-    procedure obterLista;
-    function carregaClasse(pID: String): TRecebimentoCartaoModel;
+    function incluir(ARecebimentoCartaoModel: ITRecebimentoCartaoModel): String;
+    function alterar(ARecebimentoCartaoModel: ITRecebimentoCartaoModel): String;
+    function excluir(ARecebimentoCartaoModel: ITRecebimentoCartaoModel): String;
 
-    procedure setParams(var pQry: TFDQuery; pCaixaModel: TRecebimentoCartaoModel);
+    procedure obterLista;
+    function carregaClasse(pID: String): ITRecebimentoCartaoModel;
+
+    procedure setParams(var pQry: TFDQuery; pCaixaModel: ITRecebimentoCartaoModel);
 
 end;
 
@@ -75,13 +81,13 @@ uses
 
 { TRecebimentoCartao }
 
-function TRecebimentoCartaoDao.carregaClasse(pID: String): TRecebimentoCartaoModel;
+function TRecebimentoCartaoDao.carregaClasse(pID: String): ITRecebimentoCartaoModel;
 var
   lQry   : TFDQuery;
-  lModel : TRecebimentoCartaoModel;
+  lModel : ITRecebimentoCartaoModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TRecebimentoCartaoModel.Create(vIConexao);
+  lModel   := TRecebimentoCartaoModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -90,17 +96,17 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID            := lQry.FieldByName('ID').AsString;
-    lModel.USUARIO_ID    := lQry.FieldByName('USUARIO_ID').AsString;
-    lModel.DATA_HORA     := lQry.FieldByName('DATA_HORA').AsString;
-    lModel.CLIENTE_ID    := lQry.FieldByName('CLIENTE_ID').AsString;
-    lModel.FATURA        := lQry.FieldByName('FATURA').AsString;
-    lModel.PARCELA       := lQry.FieldByName('PARCELA').AsString;
-    lModel.VALOR         := lQry.FieldByName('VALOR').AsString;
-    lModel.BANDEIRA_ID   := lQry.FieldByName('BANDEIRA_ID').AsString;
-    lModel.VENCIMENTO    := lQry.FieldByName('VENCIMENTO').AsString;
-    lModel.TEF_ID        := lQry.FieldByName('TEF_ID').AsString;
-    lModel.SYSTIME       := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.ID            := lQry.FieldByName('ID').AsString;
+    lModel.objeto.USUARIO_ID    := lQry.FieldByName('USUARIO_ID').AsString;
+    lModel.objeto.DATA_HORA     := lQry.FieldByName('DATA_HORA').AsString;
+    lModel.objeto.CLIENTE_ID    := lQry.FieldByName('CLIENTE_ID').AsString;
+    lModel.objeto.FATURA        := lQry.FieldByName('FATURA').AsString;
+    lModel.objeto.PARCELA       := lQry.FieldByName('PARCELA').AsString;
+    lModel.objeto.VALOR         := lQry.FieldByName('VALOR').AsString;
+    lModel.objeto.BANDEIRA_ID   := lQry.FieldByName('BANDEIRA_ID').AsString;
+    lModel.objeto.VENCIMENTO    := lQry.FieldByName('VENCIMENTO').AsString;
+    lModel.objeto.TEF_ID        := lQry.FieldByName('TEF_ID').AsString;
+    lModel.objeto.SYSTIME       := lQry.FieldByName('SYSTIME').AsString;
 
     Result := lModel;
 
@@ -109,7 +115,7 @@ begin
   end;
 end;
 
-constructor TRecebimentoCartaoDao.Create(pIConexao : IConexao);
+constructor TRecebimentoCartaoDao._Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -123,7 +129,7 @@ begin
   inherited;
 end;
 
-function TRecebimentoCartaoDao.incluir(ARecebimentoCartaoModel: TRecebimentoCartaoModel): String;
+function TRecebimentoCartaoDao.incluir(ARecebimentoCartaoModel: ITRecebimentoCartaoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -133,7 +139,7 @@ begin
   try
     lSQL := vConstrutor.gerarInsert('RECEBIMENTO_CARTAO', 'ID', true);
     lQry.SQL.Add(lSQL);
-    ARecebimentoCartaoModel.ID := vIConexao.Generetor('GEN_RECEBIMENTO_CARTAO');
+    ARecebimentoCartaoModel.objeto.ID := vIConexao.Generetor('GEN_RECEBIMENTO_CARTAO');
     setParams(lQry, ARecebimentoCartaoModel);
     lQry.Open;
 
@@ -145,7 +151,7 @@ begin
   end;
 end;
 
-function TRecebimentoCartaoDao.alterar(ARecebimentoCartaoModel: TRecebimentoCartaoModel): String;
+function TRecebimentoCartaoDao.alterar(ARecebimentoCartaoModel: ITRecebimentoCartaoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -159,7 +165,7 @@ begin
     setParams(lQry, ARecebimentoCartaoModel);
     lQry.ExecSQL;
 
-    Result := ARecebimentoCartaoModel.ID;
+    Result := ARecebimentoCartaoModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -167,20 +173,26 @@ begin
   end;
 end;
 
-function TRecebimentoCartaoDao.excluir(ARecebimentoCartaoModel: TRecebimentoCartaoModel): String;
+function TRecebimentoCartaoDao.excluir(ARecebimentoCartaoModel: ITRecebimentoCartaoModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from recebimento_cartao where ID = :ID',[ARecebimentoCartaoModel.ID]);
+   lQry.ExecSQL('delete from recebimento_cartao where ID = :ID',[ARecebimentoCartaoModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := ARecebimentoCartaoModel.ID;
+   Result := ARecebimentoCartaoModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TRecebimentoCartaoDao.getNewIface(pIConexao: IConexao): ITRecebimentoCartaoDao;
+begin
+  Result := TImplObjetoOwner<TRecebimentoCartaoDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TRecebimentoCartaoDao.where: String;
@@ -223,11 +235,11 @@ procedure TRecebimentoCartaoDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TRecebimentoCartaoModel;
+  modelo: ITRecebimentoCartaoModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FRecebimentoCartaosLista := TCollections.CreateList<TRecebimentoCartaoModel>(true);;
+  FRecebimentoCartaosLista := TCollections.CreateList<ITRecebimentoCartaoModel>;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -250,20 +262,20 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TRecebimentoCartaoModel.Create(vIConexao);
+      modelo := TRecebimentoCartaoModel.getNewIface(vIConexao);
       FRecebimentoCartaosLista.Add(modelo);
 
-      modelo.ID          := lQry.FieldByName('ID').AsString;
-      modelo.USUARIO_ID  := lQry.FieldByName('USUARIO_ID').AsString;
-      modelo.DATA_HORA   := lQry.FieldByName('DATA_HORA').AsString;
-      modelo.CLIENTE_ID  := lQry.FieldByName('CLIENTE_ID').AsString;
-      modelo.FATURA      := lQry.FieldByName('FATURA').AsString;
-      modelo.PARCELA     := lQry.FieldByName('PARCELA').AsString;
-      modelo.VALOR       := lQry.FieldByName('VALOR').AsString;
-      modelo.BANDEIRA_ID := lQry.FieldByName('BANDEIRA_ID').AsString;
-      modelo.VENCIMENTO  := lQry.FieldByName('VENCIMENTO').AsString;
-      modelo.TEF_ID      := lQry.FieldByName('TEF_ID').AsString;
-      modelo.SYSTIME     := lQry.FieldByName('SYSTIME').AsString;
+      modelo.objeto.ID          := lQry.FieldByName('ID').AsString;
+      modelo.objeto.USUARIO_ID  := lQry.FieldByName('USUARIO_ID').AsString;
+      modelo.objeto.DATA_HORA   := lQry.FieldByName('DATA_HORA').AsString;
+      modelo.objeto.CLIENTE_ID  := lQry.FieldByName('CLIENTE_ID').AsString;
+      modelo.objeto.FATURA      := lQry.FieldByName('FATURA').AsString;
+      modelo.objeto.PARCELA     := lQry.FieldByName('PARCELA').AsString;
+      modelo.objeto.VALOR       := lQry.FieldByName('VALOR').AsString;
+      modelo.objeto.BANDEIRA_ID := lQry.FieldByName('BANDEIRA_ID').AsString;
+      modelo.objeto.VENCIMENTO  := lQry.FieldByName('VENCIMENTO').AsString;
+      modelo.objeto.TEF_ID      := lQry.FieldByName('TEF_ID').AsString;
+      modelo.objeto.SYSTIME     := lQry.FieldByName('SYSTIME').AsString;
 
       lQry.Next;
     end;
@@ -305,7 +317,7 @@ begin
   FOrderView := Value;
 end;
 
-procedure TRecebimentoCartaoDao.setParams(var pQry: TFDQuery; pCaixaModel: TRecebimentoCartaoModel);
+procedure TRecebimentoCartaoDao.setParams(var pQry: TFDQuery; pCaixaModel: ITRecebimentoCartaoModel);
 var
   lTabela : IFDDataset;
   lCtx    : TRttiContext;
@@ -321,8 +333,8 @@ begin
       lProp := lCtx.GetType(TRecebimentoCartaoModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pCaixaModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pCaixaModel).AsString))
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pCaixaModel.objeto).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pCaixaModel.objeto).AsString))
     end;
   finally
     lCtx.Free;

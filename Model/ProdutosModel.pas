@@ -2547,17 +2547,17 @@ var
   lProdutosModel          : ITProdutosModel;
   lCondicaoPromocao,
   lDia                    : String;
-  lPrecoVendaModel        : TPrecoVendaModel;
-  lPrecoVendaProdutoModel : TPrecoVendaProdutoModel;
-  lPrecoClienteModel      : TPrecoClienteModel;
+  lPrecoVendaModel        : ITPrecoVendaModel;
+  lPrecoVendaProdutoModel : ITPrecoVendaProdutoModel;
+  lPrecoClienteModel      : ITPrecoClienteModel;
 begin
   lClienteModel           := TClienteModel.Create(vIConexao);
   lPrecoUFModel           := TPrecoUFModel.getNewIface(vIConexao);
   lPromocaoItensModel     := TPromocaoItensModel.getNewIface(vIConexao);
-  lPrecoVendaModel        := TPrecoVendaModel.Create(vIConexao);
-  lPrecoVendaProdutoModel := TPrecoVendaProdutoModel.Create(vIConexao);
+  lPrecoVendaModel        := TPrecoVendaModel.getNewIface(vIConexao);
+  lPrecoVendaProdutoModel := TPrecoVendaProdutoModel.getNewIface(vIConexao);
   lProdutosModel          := TProdutosModel.getNewIface(vIConexao);
-  lPrecoClienteModel      := TPrecoClienteModel.Create(vIConexao);
+  lPrecoClienteModel      := TPrecoClienteModel.getNewIface(vIConexao);
   try
 
     if pProdutoPreco.PrecoUf then
@@ -2604,14 +2604,14 @@ begin
 
     if pProdutoPreco.PrecoCliente then
     begin
-      lPrecoClienteModel.WhereView := ' and preco_cliente.cliente = '+ QuotedStr(pProdutoPreco.Cliente) + ' and preco_cliente.produto = '+ QuotedStr(pProdutoPreco.Produto);
-      lPrecoClienteModel.obterLista;
+      lPrecoClienteModel.objeto.WhereView := ' and preco_cliente.cliente = '+ QuotedStr(pProdutoPreco.Cliente) + ' and preco_cliente.produto = '+ QuotedStr(pProdutoPreco.Produto);
+      lPrecoClienteModel.objeto.obterLista;
 
-      if lPrecoClienteModel.TotalRecords > 0 then
+      if lPrecoClienteModel.objeto.TotalRecords > 0 then
       begin
-        if lPrecoClienteModel.PrecoClientesLista[0].VALOR > 0 then
+        if lPrecoClienteModel.objeto.PrecoClientesLista.First.objeto.VALOR > 0 then
         begin
-          Result := lPrecoClienteModel.PrecoClientesLista[0].VALOR;
+          Result := lPrecoClienteModel.objeto.PrecoClientesLista.First.objeto.VALOR;
           exit;
         end;
       end;
@@ -2622,37 +2622,37 @@ begin
       lClienteModel := lClienteModel.carregaClasse(pProdutoPreco.Cliente);
       if lClienteModel.preco_id <> '' then
       begin
-        lPrecoVendaModel.WhereView := ' and id = '+ QuotedStr(lClienteModel.preco_id);
-        lPrecoVendaModel.obterLista;
+        lPrecoVendaModel.objeto.WhereView := ' and id = '+ QuotedStr(lClienteModel.preco_id);
+        lPrecoVendaModel.objeto.obterLista;
       end;
       if pProdutoPreco.PrecoVenda <> '' then
       begin
-        lPrecoVendaModel.WhereView := ' and id = '+ QuotedStr(pProdutoPreco.PrecoVenda);
-        lPrecoVendaModel.obterLista;
+        lPrecoVendaModel.objeto.WhereView := ' and id = '+ QuotedStr(pProdutoPreco.PrecoVenda);
+        lPrecoVendaModel.objeto.obterLista;
       end;
-      if lPrecoVendaModel.TotalRecords > 0  then
+      if lPrecoVendaModel.objeto.TotalRecords > 0  then
       begin
-        if lPrecoVendaModel.PrecoVendasLista[0].PRODUTOS_IGNORAR <> 'I' then
+        if lPrecoVendaModel.objeto.PrecoVendasLista[0].objeto.PRODUTOS_IGNORAR <> 'I' then
         begin
-          lPrecoVendaProdutoModel.WhereView := ' and preco_venda_id = ' + QuotedStr(lPrecoVendaModel.PrecoVendasLista[0].ID) + ' and produto_id = ' + QuotedStr(pProdutoPreco.Produto);
-          lPrecoVendaProdutoModel.obterLista;
-          if lPrecoVendaProdutoModel.TotalRecords = 0 then
+          lPrecoVendaProdutoModel.objeto.WhereView := ' and preco_venda_id = ' + QuotedStr(lPrecoVendaModel.objeto.PrecoVendasLista[0].objeto.ID) + ' and produto_id = ' + QuotedStr(pProdutoPreco.Produto);
+          lPrecoVendaProdutoModel.objeto.obterLista;
+          if lPrecoVendaProdutoModel.objeto.TotalRecords = 0 then
           begin
-            if lPrecoVendaModel.PrecoVendasLista[0].PERCENTUAL > 0 then
+            if lPrecoVendaModel.objeto.PrecoVendasLista[0].objeto.PERCENTUAL > 0 then
             begin
-              if lPrecoVendaModel.PrecoVendasLista[0].ACRESCIMO_DESCONTO = 'C' then
+              if lPrecoVendaModel.objeto.PrecoVendasLista[0].objeto.ACRESCIMO_DESCONTO = 'C' then
               begin
-                Result := lProdutosModel.objeto.ProdutossLista.First.objeto.CUSTOMEDIO_PRO + (lProdutosModel.objeto.ProdutossLista.First.objeto.CUSTOMEDIO_PRO * (lPrecoVendaModel.PrecoVendasLista[0].PERCENTUAL / 100));
+                Result := lProdutosModel.objeto.ProdutossLista.First.objeto.CUSTOMEDIO_PRO + (lProdutosModel.objeto.ProdutossLista.First.objeto.CUSTOMEDIO_PRO * (lPrecoVendaModel.objeto.PrecoVendasLista[0].objeto.PERCENTUAL / 100));
                 exit;
               end
-              else if lPrecoVendaModel.PrecoVendasLista[0].ACRESCIMO_DESCONTO = 'A' then
+              else if lPrecoVendaModel.objeto.PrecoVendasLista[0].objeto.ACRESCIMO_DESCONTO = 'A' then
               begin
-                Result := lProdutosModel.objeto.ProdutossLista.First.objeto.VENDA_PRO + (lProdutosModel.objeto.ProdutossLista.First.objeto.VENDA_PRO * (lPrecoVendaModel.PrecoVendasLista[0].PERCENTUAL / 100));
+                Result := lProdutosModel.objeto.ProdutossLista.First.objeto.VENDA_PRO + (lProdutosModel.objeto.ProdutossLista.First.objeto.VENDA_PRO * (lPrecoVendaModel.objeto.PrecoVendasLista[0].objeto.PERCENTUAL / 100));
                 exit;
               end
               else
               begin
-                Result := lProdutosModel.objeto.ProdutossLista.First.objeto.VENDA_PRO - (lProdutosModel.objeto.ProdutossLista.First.objeto.VENDA_PRO * (lPrecoVendaModel.PrecoVendasLista[0].PERCENTUAL / 100));
+                Result := lProdutosModel.objeto.ProdutossLista.First.objeto.VENDA_PRO - (lProdutosModel.objeto.ProdutossLista.First.objeto.VENDA_PRO * (lPrecoVendaModel.objeto.PrecoVendasLista[0].objeto.PERCENTUAL / 100));
                 exit;
               end;
             end;
@@ -2664,10 +2664,10 @@ begin
     Result := lProdutosModel.objeto.valorVenda(pProdutoPreco.Produto);
 
   finally
-    lPrecoVendaProdutoModel.Free;
+    lPrecoVendaProdutoModel:=nil;
     lPromocaoItensModel:=nil;
-    lPrecoClienteModel.Free;
-    lPrecoVendaModel.Free;
+    lPrecoClienteModel:=nil;
+    lPrecoVendaModel:=nil;
     lProdutosModel:=nil;
     lClienteModel.Free;
     lPrecoUFModel:=nil;

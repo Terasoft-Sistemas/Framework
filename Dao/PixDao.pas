@@ -356,7 +356,7 @@ begin
 
       if Assigned(lProp) then
         pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPixModel.objeto).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPixModel).AsString))
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPixModel.objeto).AsString))
     end;
   finally
     lCtx.Free;

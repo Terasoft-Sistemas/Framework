@@ -1212,14 +1212,14 @@ var
   lxMotivo   : String;
   lCSTAT     : String;
   lNFContol  : ITNFContol;
-  lPedidoVendaModel: TPedidoVendaModel;
+  lPedidoVendaModel: ITPedidoVendaModel;
 begin
 
   try
     lRetorno  := TStringList.Create;
     lNFContol := TNFContol.getNewIface(idNotaFiscal, vIConexao);
     loteEnvio := idNotaFiscal.ToInteger;
-    lPedidoVendaModel := TPedidoVendaModel.Create(vIConexao);
+    lPedidoVendaModel := TPedidoVendaModel.getNewIface(vIConexao);
 
     try
       processar(idNotaFiscal);
@@ -1265,8 +1265,8 @@ begin
 
       if lNFContol.objeto.NFModel.objeto.NUMERO_PED <> '' then
       begin
-        lPedidoVendaModel := lPedidoVendaModel.carregaClasse(lNFContol.objeto.NFModel.objeto.NUMERO_PED);
-        lPedidoVendaModel.faturado(lNFContol.objeto.NFModel.objeto.NUMERO_ECF);
+        lPedidoVendaModel := lPedidoVendaModel.objeto.carregaClasse(lNFContol.objeto.NFModel.objeto.NUMERO_PED);
+        lPedidoVendaModel.objeto.faturado(lNFContol.objeto.NFModel.objeto.NUMERO_ECF);
       end;
 
       lRetorno.Add(lCSTAT);
@@ -1295,7 +1295,7 @@ begin
    finally
      lQry.Free;
      lNFContol := nil;
-     lPedidoVendaModel.Free;
+     lPedidoVendaModel:=nil;
    end;
 end;
 

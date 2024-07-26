@@ -144,8 +144,8 @@ begin
       lProp := lCtx.GetType(TEventosNFeModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pEventosNFeModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pEventosNFeModel).AsString))
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pEventosNFeModel.objeto).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pEventosNFeModel.objeto).AsString))
     end;
   finally
     lCtx.Free;

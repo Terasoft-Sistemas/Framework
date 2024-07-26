@@ -7,17 +7,22 @@ uses
   System.StrUtils,
   Spring.Collections,
   System.Variants,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao,
   Terasoft.Utils,
   Interfaces.Conexao;
 
 type
+  TPrecoClienteDao = class;
+  ITPrecoClienteDao=IObject<TPrecoClienteDao>;
+
   TPrecoClienteDao = class
   private
+    [weak] mySelf:ITPrecoClienteDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FPrecoClientesLista: IList<TPrecoClienteModel>;
+    FPrecoClientesLista: IList<ITPrecoClienteModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -28,7 +33,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetPrecoClientesLista(const Value: IList<TPrecoClienteModel>);
+    procedure SetPrecoClientesLista(const Value: IList<ITPrecoClienteModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -36,14 +41,16 @@ type
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-    procedure setParams(var pQry: TFDQuery; pPrecoClienteModel: TPrecoClienteModel);
+    procedure setParams(var pQry: TFDQuery; pPrecoClienteModel: ITPrecoClienteModel);
     function where: String;
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property PrecoClientesLista: IList<TPrecoClienteModel> read FPrecoClientesLista write SetPrecoClientesLista;
+    class function getNewIface(pIConexao: IConexao): ITPrecoClienteDao;
+
+    property PrecoClientesLista: IList<ITPrecoClienteModel> read FPrecoClientesLista write SetPrecoClientesLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -53,9 +60,9 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(pPrecoClienteModel: TPrecoClienteModel): String;
-    function alterar(pPrecoClienteModel: TPrecoClienteModel): String;
-    function excluir(pPrecoClienteModel: TPrecoClienteModel): String;
+    function incluir(pPrecoClienteModel: ITPrecoClienteModel): String;
+    function alterar(pPrecoClienteModel: ITPrecoClienteModel): String;
+    function excluir(pPrecoClienteModel: ITPrecoClienteModel): String;
 	
     procedure obterLista;
 end;
@@ -66,7 +73,7 @@ uses
 
   { TPrecoCliente }
 
-constructor TPrecoClienteDao.Create(pIConexao : IConexao);
+constructor TPrecoClienteDao._Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -80,7 +87,7 @@ begin
   inherited;
 end;
 
-function TPrecoClienteDao.incluir(pPrecoClienteModel: TPrecoClienteModel): String;
+function TPrecoClienteDao.incluir(pPrecoClienteModel: ITPrecoClienteModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -97,7 +104,7 @@ begin
     lQry.Free;
   end;
 end;
-function TPrecoClienteDao.alterar(pPrecoClienteModel: TPrecoClienteModel): String;
+function TPrecoClienteDao.alterar(pPrecoClienteModel: ITPrecoClienteModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -108,25 +115,31 @@ begin
     lQry.SQL.Add(lSQL);
     setParams(lQry, pPrecoClienteModel);
     lQry.ExecSQL;
-    Result := pPrecoClienteModel.ID;
+    Result := pPrecoClienteModel.objeto.ID;
   finally
     lSQL := '';
     lQry.Free;
   end;
 end;
-function TPrecoClienteDao.excluir(pPrecoClienteModel: TPrecoClienteModel): String;
+function TPrecoClienteDao.excluir(pPrecoClienteModel: ITPrecoClienteModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
   try
-   lQry.ExecSQL('delete from preco_cliente where ID = :ID',[pPrecoClienteModel.ID]);
+   lQry.ExecSQL('delete from preco_cliente where ID = :ID',[pPrecoClienteModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pPrecoClienteModel.ID;
+   Result := pPrecoClienteModel.objeto.ID;
   finally
     lQry.Free;
   end;
 end;
+class function TPrecoClienteDao.getNewIface(pIConexao: IConexao): ITPrecoClienteDao;
+begin
+  Result := TImplObjetoOwner<TPrecoClienteDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TPrecoClienteDao.where: String;
 var
   lSQL : String;
@@ -157,10 +170,10 @@ procedure TPrecoClienteDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TPrecoClienteModel;
+  modelo: ITPrecoClienteModel;
 begin
   lQry := vIConexao.CriarQuery;
-  FPrecoClientesLista := TCollections.CreateList<TPrecoClienteModel>(true);
+  FPrecoClientesLista := TCollections.CreateList<ITPrecoClienteModel>;
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lSql := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
@@ -177,13 +190,13 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TPrecoClienteModel.Create(vIConexao);
+      modelo := TPrecoClienteModel.getNewIface(vIConexao);
       FPrecoClientesLista.Add(modelo);
-      modelo.PRODUTO := lQry.FieldByName('PRODUTO').AsString;
-      modelo.CLIENTE := lQry.FieldByName('CLIENTE').AsString;
-      modelo.VALOR   := lQry.FieldByName('VALOR').AsString;
-      modelo.ID      := lQry.FieldByName('ID').AsString;
-      modelo.SYSTIME := lQry.FieldByName('SYSTIME').AsString;
+      modelo.objeto.PRODUTO := lQry.FieldByName('PRODUTO').AsString;
+      modelo.objeto.CLIENTE := lQry.FieldByName('CLIENTE').AsString;
+      modelo.objeto.VALOR   := lQry.FieldByName('VALOR').AsString;
+      modelo.objeto.ID      := lQry.FieldByName('ID').AsString;
+      modelo.objeto.SYSTIME := lQry.FieldByName('SYSTIME').AsString;
       lQry.Next;
     end;
     obterTotalRegistros;
@@ -216,7 +229,7 @@ begin
   FOrderView := Value;
 end;
 
-procedure TPrecoClienteDao.setParams(var pQry: TFDQuery; pPrecoClienteModel: TPrecoClienteModel);
+procedure TPrecoClienteDao.setParams(var pQry: TFDQuery; pPrecoClienteModel: ITPrecoClienteModel);
 var
   lTabela : IFDDataset;
   lCtx    : TRttiContext;
@@ -232,8 +245,8 @@ begin
       lProp := lCtx.GetType(TPrecoClienteModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPrecoClienteModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPrecoClienteModel).AsString))
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPrecoClienteModel.objeto).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPrecoClienteModel.objeto).AsString))
     end;
   finally
     lCtx.Free;

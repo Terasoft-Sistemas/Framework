@@ -5,14 +5,18 @@ interface
 uses
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TRecebimentoCartaoModel = class
+  TRecebimentoCartaoModel = class;
+  ITRecebimentoCartaoModel=IObject<TRecebimentoCartaoModel>;
 
+  TRecebimentoCartaoModel = class
   private
+    [weak] mySelf: ITRecebimentoCartaoModel;
     vIConexao : IConexao;
-    FRecebimentoCartaosLista: IList<TRecebimentoCartaoModel>;
+    FRecebimentoCartaosLista: IList<ITRecebimentoCartaoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -34,7 +38,7 @@ type
     FPARCELA: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetRecebimentoCartaosLista(const Value: IList<TRecebimentoCartaoModel>);
+    procedure SetRecebimentoCartaosLista(const Value: IList<ITRecebimentoCartaoModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -65,14 +69,16 @@ type
     property TEF_ID: Variant read FTEF_ID write SetTEF_ID;
     property SYSTIME: Variant read FSYSTIME write SetSYSTIME;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function carregaClasse(pID: String): TRecebimentoCartaoModel;
+    class function getNewIface(pIConexao: IConexao): ITRecebimentoCartaoModel;
+
+    function carregaClasse(pID: String): ITRecebimentoCartaoModel;
     function Salvar: String;
     procedure obterLista;
 
-    property RecebimentoCartaosLista: IList<TRecebimentoCartaoModel> read FRecebimentoCartaosLista write SetRecebimentoCartaosLista;
+    property RecebimentoCartaosLista: IList<ITRecebimentoCartaoModel> read FRecebimentoCartaosLista write SetRecebimentoCartaosLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -91,19 +97,19 @@ uses
 
 { TRecebimentoCartaoModel }
 
-function TRecebimentoCartaoModel.carregaClasse(pID: String): TRecebimentoCartaoModel;
+function TRecebimentoCartaoModel.carregaClasse(pID: String): ITRecebimentoCartaoModel;
 var
-  lRecebimentoCartaoDao : TRecebimentoCartaoDao;
+  lRecebimentoCartaoDao : ITRecebimentoCartaoDao;
 begin
-  lRecebimentoCartaoDao := TRecebimentoCartaoDao.Create(vIConexao);
+  lRecebimentoCartaoDao := TRecebimentoCartaoDao.getNewIface(vIConexao);
   try
-    Result := lRecebimentoCartaoDao.carregaClasse(pID);
+    Result := lRecebimentoCartaoDao.objeto.carregaClasse(pID);
   finally
-    lRecebimentoCartaoDao.Free;
+    lRecebimentoCartaoDao:=nil;
   end;
 end;
 
-constructor TRecebimentoCartaoModel.Create(pIConexao : IConexao);
+constructor TRecebimentoCartaoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -115,48 +121,55 @@ begin
   inherited;
 end;
 
+class function TRecebimentoCartaoModel.getNewIface(
+  pIConexao: IConexao): ITRecebimentoCartaoModel;
+begin
+  Result := TImplObjetoOwner<TRecebimentoCartaoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 procedure TRecebimentoCartaoModel.obterLista;
 var
-  lRecebimentoCartaoLista: TRecebimentoCartaoDao;
+  lRecebimentoCartaoLista: ITRecebimentoCartaoDao;
 begin
-  lRecebimentoCartaoLista := TRecebimentoCartaoDao.Create(vIConexao);
+  lRecebimentoCartaoLista := TRecebimentoCartaoDao.getNewIface(vIConexao);
 
   try
-    lRecebimentoCartaoLista.TotalRecords    := FTotalRecords;
-    lRecebimentoCartaoLista.WhereView       := FWhereView;
-    lRecebimentoCartaoLista.CountView       := FCountView;
-    lRecebimentoCartaoLista.OrderView       := FOrderView;
-    lRecebimentoCartaoLista.StartRecordView := FStartRecordView;
-    lRecebimentoCartaoLista.LengthPageView  := FLengthPageView;
-    lRecebimentoCartaoLista.IDRecordView    := FIDRecordView;
+    lRecebimentoCartaoLista.objeto.TotalRecords    := FTotalRecords;
+    lRecebimentoCartaoLista.objeto.WhereView       := FWhereView;
+    lRecebimentoCartaoLista.objeto.CountView       := FCountView;
+    lRecebimentoCartaoLista.objeto.OrderView       := FOrderView;
+    lRecebimentoCartaoLista.objeto.StartRecordView := FStartRecordView;
+    lRecebimentoCartaoLista.objeto.LengthPageView  := FLengthPageView;
+    lRecebimentoCartaoLista.objeto.IDRecordView    := FIDRecordView;
 
-    lRecebimentoCartaoLista.obterLista;
+    lRecebimentoCartaoLista.objeto.obterLista;
 
-    FTotalRecords  := lRecebimentoCartaoLista.TotalRecords;
-    FRecebimentoCartaosLista := lRecebimentoCartaoLista.RecebimentoCartaosLista;
+    FTotalRecords  := lRecebimentoCartaoLista.objeto.TotalRecords;
+    FRecebimentoCartaosLista := lRecebimentoCartaoLista.objeto.RecebimentoCartaosLista;
 
   finally
-    lRecebimentoCartaoLista.Free;
+    lRecebimentoCartaoLista:=nil;
   end;
 end;
 
 function TRecebimentoCartaoModel.Salvar: String;
 var
-  lRecebimentoCartaoDao: TRecebimentoCartaoDao;
+  lRecebimentoCartaoDao: ITRecebimentoCartaoDao;
 begin
-  lRecebimentoCartaoDao := TRecebimentoCartaoDao.Create(vIConexao);
+  lRecebimentoCartaoDao := TRecebimentoCartaoDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lRecebimentoCartaoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lRecebimentoCartaoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lRecebimentoCartaoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lRecebimentoCartaoDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lRecebimentoCartaoDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lRecebimentoCartaoDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lRecebimentoCartaoDao.Free;
+    lRecebimentoCartaoDao:=nil;
   end;
 end;
 
