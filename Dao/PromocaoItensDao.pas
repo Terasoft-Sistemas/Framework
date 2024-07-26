@@ -8,15 +8,20 @@ uses
   Spring.Collections,
   System.Variants,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao,
   Terasoft.Utils;
 
 type
+  TPromocaoItensDao = class;
+  ITPromocaoItensDao=IObject<TPromocaoItensDao>;
+
   TPromocaoItensDao = class
   private
+    [weak] mySelf: ITPromocaoItensDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
-    FPromocaoItenssLista: IList<TPromocaoItensModel>;
+    FPromocaoItenssLista: IList<ITPromocaoItensModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -28,7 +33,7 @@ type
     FProdutoView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetPromocaoItenssLista(const Value: IList<TPromocaoItensModel>);
+    procedure SetPromocaoItenssLista(const Value: IList<ITPromocaoItensModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -37,13 +42,16 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
     function montaCondicaoQuery: String;
-    procedure setParams(var pQry: TFDQuery; pPromocaoItensModel: TPromocaoItensModel);
+    procedure setParams(var pQry: TFDQuery; pPromocaoItensModel: ITPromocaoItensModel);
     procedure SetProdutoView(const Value: String);
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
-    property PromocaoItenssLista: IList<TPromocaoItensModel> read FPromocaoItenssLista write SetPromocaoItenssLista;
+
+    class function getNewIface(pIConexao: IConexao): ITPromocaoItensDao;
+
+    property PromocaoItenssLista: IList<ITPromocaoItensModel> read FPromocaoItenssLista write SetPromocaoItenssLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -54,10 +62,10 @@ type
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property ProdutoView : String read FProdutoView write SetProdutoView;
 
-    function incluir(pPromocaoItensModel: TPromocaoItensModel): String;
-    function alterar(pPromocaoItensModel: TPromocaoItensModel): String;
-    function excluir(pPromocaoItensModel: TPromocaoItensModel): String;
-    function carregaClasse(pID : String) : TPromocaoItensModel;
+    function incluir(pPromocaoItensModel: ITPromocaoItensModel): String;
+    function alterar(pPromocaoItensModel: ITPromocaoItensModel): String;
+    function excluir(pPromocaoItensModel: ITPromocaoItensModel): String;
+    function carregaClasse(pID : String) : ITPromocaoItensModel;
     procedure obterLista;
 end;
 implementation
@@ -65,13 +73,13 @@ implementation
 uses
   System.Rtti;
 { TPromocaoItens }
-function TPromocaoItensDao.carregaClasse(pID: String): TPromocaoItensModel;
+function TPromocaoItensDao.carregaClasse(pID: String): ITPromocaoItensModel;
 var
   lQry: TFDQuery;
-  lModel: TPromocaoItensModel;
+  lModel: ITPromocaoItensModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TPromocaoItensModel.Create(vIConexao);
+  lModel   := TPromocaoItensModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -80,12 +88,12 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID               := lQry.FieldByName('ID').AsString;
-    lModel.PROMOCAO_ID      := lQry.FieldByName('PROMOCAO_ID').AsString;
-    lModel.PRODUTO_ID       := lQry.FieldByName('PRODUTO_ID').AsString;
-    lModel.VALOR_PROMOCAO   := lQry.FieldByName('VALOR_PROMOCAO').AsString;
-    lModel.SALDO            := lQry.FieldByName('SALDO').AsString;
-    lModel.SYSTIME          := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.ID               := lQry.FieldByName('ID').AsString;
+    lModel.objeto.PROMOCAO_ID      := lQry.FieldByName('PROMOCAO_ID').AsString;
+    lModel.objeto.PRODUTO_ID       := lQry.FieldByName('PRODUTO_ID').AsString;
+    lModel.objeto.VALOR_PROMOCAO   := lQry.FieldByName('VALOR_PROMOCAO').AsString;
+    lModel.objeto.SALDO            := lQry.FieldByName('SALDO').AsString;
+    lModel.objeto.SYSTIME          := lQry.FieldByName('SYSTIME').AsString;
 
     Result := lModel;
 
@@ -94,7 +102,7 @@ begin
   end;
 end;
 
-constructor TPromocaoItensDao.Create(pIConexao : IConexao);
+constructor TPromocaoItensDao._Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -108,7 +116,7 @@ begin
   inherited;
 end;
 
-function TPromocaoItensDao.incluir(pPromocaoItensModel: TPromocaoItensModel): String;
+function TPromocaoItensDao.incluir(pPromocaoItensModel: ITPromocaoItensModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -118,7 +126,7 @@ begin
   try
     lSQL := vConstrutor.gerarInsert('PROMOCAOITENS', 'ID', true);
     lQry.SQL.Add(lSQL);
-    pPromocaoItensModel.ID := vIConexao.Generetor('GEN_PROMOCAOITENS');
+    pPromocaoItensModel.objeto.ID := vIConexao.Generetor('GEN_PROMOCAOITENS');
     setParams(lQry, pPromocaoItensModel);
     lQry.Open;
 
@@ -130,7 +138,7 @@ begin
   end;
 end;
 
-function TPromocaoItensDao.alterar(pPromocaoItensModel: TPromocaoItensModel): String;
+function TPromocaoItensDao.alterar(pPromocaoItensModel: ITPromocaoItensModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -144,7 +152,7 @@ begin
     setParams(lQry, pPromocaoItensModel);
     lQry.ExecSQL;
 
-    Result := pPromocaoItensModel.ID;
+    Result := pPromocaoItensModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -152,18 +160,24 @@ begin
   end;
 end;
 
-function TPromocaoItensDao.excluir(pPromocaoItensModel: TPromocaoItensModel): String;
+function TPromocaoItensDao.excluir(pPromocaoItensModel: ITPromocaoItensModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
   try
-   lQry.ExecSQL('delete from promocaoitens where ID = :ID',[pPromocaoItensModel.ID]);
+   lQry.ExecSQL('delete from promocaoitens where ID = :ID',[pPromocaoItensModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pPromocaoItensModel.ID;
+   Result := pPromocaoItensModel.objeto.ID;
   finally
     lQry.Free;
   end;
+end;
+
+class function TPromocaoItensDao.getNewIface(pIConexao: IConexao): ITPromocaoItensDao;
+begin
+  Result := TImplObjetoOwner<TPromocaoItensDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TPromocaoItensDao.montaCondicaoQuery: String;
@@ -205,10 +219,10 @@ procedure TPromocaoItensDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TPromocaoItensModel;
+  modelo: ITPromocaoItensModel;
 begin
   lQry := vIConexao.CriarQuery;
-  FPromocaoItenssLista := TCollections.CreateList<TPromocaoItensModel>(true);
+  FPromocaoItenssLista := TCollections.CreateList<ITPromocaoItensModel>;
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lSql := 'select first ' + LengthPageView + ' SKIP ' + StartRecordView
@@ -234,14 +248,14 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TPromocaoItensModel.Create(vIConexao);
+      modelo := TPromocaoItensModel.getNewIface(vIConexao);
       FPromocaoItenssLista.Add(modelo);
 
-      modelo.ID              := lQry.FieldByName('ID').AsString;
-      modelo.PROMOCAO_ID     := lQry.FieldByName('PROMOCAO_ID').AsString;
-      modelo.PRODUTO_ID      := lQry.FieldByName('PRODUTO_ID').AsString;
-      modelo.VALOR_PROMOCAO  := lQry.FieldByName('VALOR_PROMOCAO').AsString;
-      modelo.SALDO           := lQry.FieldByName('SALDO').AsString;
+      modelo.objeto.ID              := lQry.FieldByName('ID').AsString;
+      modelo.objeto.PROMOCAO_ID     := lQry.FieldByName('PROMOCAO_ID').AsString;
+      modelo.objeto.PRODUTO_ID      := lQry.FieldByName('PRODUTO_ID').AsString;
+      modelo.objeto.VALOR_PROMOCAO  := lQry.FieldByName('VALOR_PROMOCAO').AsString;
+      modelo.objeto.SALDO           := lQry.FieldByName('SALDO').AsString;
 
       lQry.Next;
     end;
@@ -281,7 +295,7 @@ begin
   FOrderView := Value;
 end;
 
-procedure TPromocaoItensDao.setParams(var pQry: TFDQuery; pPromocaoItensModel: TPromocaoItensModel);
+procedure TPromocaoItensDao.setParams(var pQry: TFDQuery; pPromocaoItensModel: ITPromocaoItensModel);
 var
   lTabela : IFDDataset;
   lCtx    : TRttiContext;
@@ -297,7 +311,7 @@ begin
       lProp := lCtx.GetType(TPromocaoItensModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPromocaoItensModel).AsString = '',
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPromocaoItensModel.objeto).AsString = '',
         Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPromocaoItensModel).AsString))
     end;
   finally

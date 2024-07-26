@@ -5,14 +5,18 @@ interface
 uses
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TPromocaoItensModel = class
+  TPromocaoItensModel = class;
+  ITPromocaoItensModel=IObject<TPromocaoItensModel>;
 
+  TPromocaoItensModel = class
   private
+    [weak] mySelf: ITPromocaoItensModel;
     vIConexao : IConexao;
-    FPromocaoItenssLista: IList<TPromocaoItensModel>;
+    FPromocaoItenssLista: IList<ITPromocaoItensModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -32,7 +36,7 @@ type
     FProdutoView: String;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetPromocaoItenssLista(const Value: IList<TPromocaoItensModel>);
+    procedure SetPromocaoItenssLista(const Value: IList<ITPromocaoItensModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -60,17 +64,19 @@ type
     property preco_venda_id: Variant read Fpreco_venda_id write Setpreco_venda_id;
     property cliente_id: Variant read Fcliente_id write Setcliente_id;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITPromocaoItensModel;
+
     function Incluir: String;
-    function Alterar(pID : String) : TPromocaoItensModel;
+    function Alterar(pID : String) : ITPromocaoItensModel;
     function Excluir(pID : String) : String;
     function Salvar: String;
-    function carregaClasse(pID : String) : TPromocaoItensModel;
+    function carregaClasse(pID : String) : ITPromocaoItensModel;
     procedure obterLista;
 
-    property PromocaoItenssLista: IList<TPromocaoItensModel> read FPromocaoItenssLista write SetPromocaoItenssLista;
+    property PromocaoItenssLista: IList<ITPromocaoItensModel> read FPromocaoItenssLista write SetPromocaoItenssLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -89,14 +95,14 @@ uses
 
 { TPromocaoItensModel }
 
-function TPromocaoItensModel.Alterar(pID: String): TPromocaoItensModel;
+function TPromocaoItensModel.Alterar(pID: String): ITPromocaoItensModel;
 var
-  lPromocaoItensModel: TPromocaoItensModel;
+  lPromocaoItensModel: ITPromocaoItensModel;
 begin
-  lPromocaoItensModel := TPromocaoItensModel.Create(vIConexao);
+  lPromocaoItensModel := TPromocaoItensModel.getNewIface(vIConexao);
   try
-    lPromocaoItensModel       := lPromocaoItensModel.carregaClasse(pID);
-    lPromocaoItensModel.Acao  := tacAlterar;
+    lPromocaoItensModel       := lPromocaoItensModel.objeto.carregaClasse(pID);
+    lPromocaoItensModel.objeto.Acao  := tacAlterar;
     Result                    := lPromocaoItensModel;
   finally
 
@@ -110,25 +116,32 @@ begin
   Result    := self.Salvar;
 end;
 
+class function TPromocaoItensModel.getNewIface(
+  pIConexao: IConexao): ITPromocaoItensModel;
+begin
+  Result := TImplObjetoOwner<TPromocaoItensModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TPromocaoItensModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
   Result    := self.Salvar;
 end;
 
-function TPromocaoItensModel.carregaClasse(pID: String): TPromocaoItensModel;
+function TPromocaoItensModel.carregaClasse(pID: String): ITPromocaoItensModel;
 var
-  lPromocaoItensModel: TPromocaoItensDao;
+  lPromocaoItensModel: ITPromocaoItensDao;
 begin
-  lPromocaoItensModel := TPromocaoItensDao.Create(vIConexao);
+  lPromocaoItensModel := TPromocaoItensDao.getNewIface(vIConexao);
   try
-    Result := lPromocaoItensModel.carregaClasse(ID);
+    Result := lPromocaoItensModel.objeto.carregaClasse(ID);
   finally
-    lPromocaoItensModel.Free;
+    lPromocaoItensModel:=nil;
   end;
 end;
 
-constructor TPromocaoItensModel.Create(pIConexao : IConexao);
+constructor TPromocaoItensModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -142,47 +155,47 @@ end;
 
 procedure TPromocaoItensModel.obterLista;
 var
-  lPromocaoItensLista: TPromocaoItensDao;
+  lPromocaoItensLista: ITPromocaoItensDao;
 begin
-  lPromocaoItensLista := TPromocaoItensDao.Create(vIConexao);
+  lPromocaoItensLista := TPromocaoItensDao.getNewIface(vIConexao);
 
   try
-    lPromocaoItensLista.TotalRecords    := FTotalRecords;
-    lPromocaoItensLista.WhereView       := FWhereView;
-    lPromocaoItensLista.CountView       := FCountView;
-    lPromocaoItensLista.OrderView       := FOrderView;
-    lPromocaoItensLista.StartRecordView := FStartRecordView;
-    lPromocaoItensLista.LengthPageView  := FLengthPageView;
-    lPromocaoItensLista.IDRecordView    := FIDRecordView;
-    lPromocaoItensLista.ProdutoView     := FProdutoView;
+    lPromocaoItensLista.objeto.TotalRecords    := FTotalRecords;
+    lPromocaoItensLista.objeto.WhereView       := FWhereView;
+    lPromocaoItensLista.objeto.CountView       := FCountView;
+    lPromocaoItensLista.objeto.OrderView       := FOrderView;
+    lPromocaoItensLista.objeto.StartRecordView := FStartRecordView;
+    lPromocaoItensLista.objeto.LengthPageView  := FLengthPageView;
+    lPromocaoItensLista.objeto.IDRecordView    := FIDRecordView;
+    lPromocaoItensLista.objeto.ProdutoView     := FProdutoView;
 
-    lPromocaoItensLista.obterLista;
+    lPromocaoItensLista.objeto.obterLista;
 
-    FTotalRecords  := lPromocaoItensLista.TotalRecords;
-    FPromocaoItenssLista := lPromocaoItensLista.PromocaoItenssLista;
+    FTotalRecords  := lPromocaoItensLista.objeto.TotalRecords;
+    FPromocaoItenssLista := lPromocaoItensLista.objeto.PromocaoItenssLista;
 
   finally
-    lPromocaoItensLista.Free;
+    lPromocaoItensLista:=nil;
   end;
 end;
 
 function TPromocaoItensModel.Salvar: String;
 var
-  lPromocaoItensDao: TPromocaoItensDao;
+  lPromocaoItensDao: ITPromocaoItensDao;
 begin
-  lPromocaoItensDao := TPromocaoItensDao.Create(vIConexao);
+  lPromocaoItensDao := TPromocaoItensDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lPromocaoItensDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lPromocaoItensDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lPromocaoItensDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lPromocaoItensDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lPromocaoItensDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lPromocaoItensDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lPromocaoItensDao.Free;
+    lPromocaoItensDao:=nil;
   end;
 end;
 

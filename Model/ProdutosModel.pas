@@ -1263,14 +1263,14 @@ function TProdutosModel.obterPromocao(pCodProduto: String): IFDDataset;
 var
   lMemTable           : IFDDataset;
   lPromocaoModel      : ITPromocaoModel;
-  lPromocaoItensModel : TPromocaoItensModel;
+  lPromocaoItensModel : ITPromocaoItensModel;
 begin
   if pCodProduto = '' then
     CriaException('Produto não informado');
 
   lMemTable           := criaIFDDataset(TFDMemTable.Create(nil));
   lPromocaoModel      := TPromocaoModel.getNewIface(vIConexao);
-  lPromocaoItensModel := TPromocaoItensModel.Create(vIConexao);
+  lPromocaoItensModel := TPromocaoItensModel.getNewIface(vIConexao);
 
   try
     with TFDMemTable(lMemTable.objeto).IndexDefs.AddIndexDef do
@@ -1292,22 +1292,22 @@ begin
       CreateDataSet;
     end;
 
-    lPromocaoItensModel.ProdutoView := pCodProduto;
-    lPromocaoItensModel.WhereView   := ' and current_date between promocao.datainicio and promocao.datafim ';
-    lPromocaoItensModel.obterLista;
+    lPromocaoItensModel.objeto.ProdutoView := pCodProduto;
+    lPromocaoItensModel.objeto.WhereView   := ' and current_date between promocao.datainicio and promocao.datafim ';
+    lPromocaoItensModel.objeto.obterLista;
 
-    for lPromocaoItensModel in lPromocaoItensModel.PromocaoItenssLista do
+    for lPromocaoItensModel in lPromocaoItensModel.objeto.PromocaoItenssLista do
     begin
-      lPromocaoModel.objeto.IDRecordView := lPromocaoItensModel.promocao_id;
+      lPromocaoModel.objeto.IDRecordView := lPromocaoItensModel.objeto.promocao_id;
       lPromocaoModel.objeto.obterLista;
 
       lMemTable.objeto.InsertRecord([
-                              lPromocaoItensModel.promocao_id,
+                              lPromocaoItensModel.objeto.promocao_id,
                               lPromocaoModel.objeto.PromocaosLista.First.objeto.DATAINICIO,
                               lPromocaoModel.objeto.PromocaosLista.First.objeto.DATAFIM,
                               lPromocaoModel.objeto.PromocaosLista.First.objeto.DESCRICAO,
-                              lPromocaoItensModel.valor_promocao,
-                              lPromocaoItensModel.saldo
+                              lPromocaoItensModel.objeto.valor_promocao,
+                              lPromocaoItensModel.objeto.saldo
                              ]);
     end;
 
@@ -1315,7 +1315,7 @@ begin
     Result := lMemTable;
   finally
     lPromocaoModel:=nil;
-    lPromocaoItensModel.Free;
+    lPromocaoItensModel:=nil;
   end;
 end;
 
@@ -2543,7 +2543,7 @@ function TProdutosModel.ValorUnitario(pProdutoPreco: TProdutoPreco): Double;
 var
   lClienteModel           : TClienteModel;
   lPrecoUFModel           : ITPrecoUFModel;
-  lPromocaoItensModel     : TPromocaoItensModel;
+  lPromocaoItensModel     : ITPromocaoItensModel;
   lProdutosModel          : ITProdutosModel;
   lCondicaoPromocao,
   lDia                    : String;
@@ -2553,7 +2553,7 @@ var
 begin
   lClienteModel           := TClienteModel.Create(vIConexao);
   lPrecoUFModel           := TPrecoUFModel.getNewIface(vIConexao);
-  lPromocaoItensModel     := TPromocaoItensModel.Create(vIConexao);
+  lPromocaoItensModel     := TPromocaoItensModel.getNewIface(vIConexao);
   lPrecoVendaModel        := TPrecoVendaModel.Create(vIConexao);
   lPrecoVendaProdutoModel := TPrecoVendaProdutoModel.Create(vIConexao);
   lProdutosModel          := TProdutosModel.getNewIface(vIConexao);
@@ -2592,12 +2592,12 @@ begin
       if pProdutoPreco.Loja <> '' then
         lCondicaoPromocao := lCondicaoPromocao + ' and ((promocao.loja = '+QuotedStr(pProdutoPreco.Loja)+') or (promocao.loja is null)) ';
 
-      lPromocaoItensModel.WhereView := lCondicaoPromocao;
-      lPromocaoItensModel.obterLista;
+      lPromocaoItensModel.objeto.WhereView := lCondicaoPromocao;
+      lPromocaoItensModel.objeto.obterLista;
 
-      if lPromocaoItensModel.TotalRecords > 0 then
+      if lPromocaoItensModel.objeto.TotalRecords > 0 then
       begin
-        Result := lPromocaoItensModel.PromocaoItenssLista[0].valor_promocao;
+        Result := lPromocaoItensModel.objeto.PromocaoItenssLista.First.objeto.valor_promocao;
         exit;
       end;
     end;
@@ -2665,7 +2665,7 @@ begin
 
   finally
     lPrecoVendaProdutoModel.Free;
-    lPromocaoItensModel.Free;
+    lPromocaoItensModel:=nil;
     lPrecoClienteModel.Free;
     lPrecoVendaModel.Free;
     lProdutosModel:=nil;
