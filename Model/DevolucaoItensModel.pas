@@ -160,10 +160,10 @@ end;
 procedure TDevolucaoItensModel.excluirEstoque;
 var
   lMovimentoModel   : TMovimentoModel;
-  lProdutosModel    : TProdutosModel;
+  lProdutosModel    : ITProdutosModel;
 begin
   lMovimentoModel   := TMovimentoModel.Create(vIConexao);
-  lProdutosModel    := TProdutosModel.Create(vIConexao);
+  lProdutosModel    := TProdutosModel.getNewIface(vIConexao);
 
   try
     lMovimentoModel.WhereView := ' and movimento.documento_mov = '+ QuotedStr(self.FID) +
@@ -176,23 +176,23 @@ begin
     begin
       lMovimentoModel.Acao := tacExcluir;
       lMovimentoModel.Salvar;
-      lProdutosModel.subtrairSaldo(self.FPRODUTO, self.FQUANTIDADE);
+      lProdutosModel.objeto.subtrairSaldo(self.FPRODUTO, self.FQUANTIDADE);
     end;
 
   finally
     lMovimentoModel.Free;
-    lProdutosModel.Free;
+    lProdutosModel:=nil;
   end;
 end;
 
 procedure TDevolucaoItensModel.gerarEstoque;
 var
   lMovimentoModel   : TMovimentoModel;
-  lProdutosModel    : TProdutosModel;
+  lProdutosModel    : ITProdutosModel;
   lDevolucaoModel   : TDevolucaoModel;
 begin
   lMovimentoModel   := TMovimentoModel.Create(vIConexao);
-  lProdutosModel    := TProdutosModel.Create(vIConexao);
+  lProdutosModel    := TProdutosModel.getNewIface(vIConexao);
   lDevolucaoModel   := TDevolucaoModel.Create(vIConexao);
 
   try
@@ -216,10 +216,10 @@ begin
     lMovimentoModel.id_origem       := self.FID;
     lMovimentoModel.Salvar;
 
-    lProdutosModel.adicionarSaldo(self.FPRODUTO, self.FQUANTIDADE);
+    lProdutosModel.objeto.adicionarSaldo(self.FPRODUTO, self.FQUANTIDADE);
 
   finally
-    lProdutosModel.Free;
+    lProdutosModel:=nil;
     lMovimentoModel.Free;
   end;
 end;

@@ -535,31 +535,31 @@ end;
 
 procedure TEntradaItensModel.getDadosProduto;
 var
-  lProdutosModel : TProdutosModel;
+  lProdutosModel : ITProdutosModel;
 begin
   if (self.FCODIGO_PRO = '') or (self.FCODIGO_PRO = '999999') then
     exit;
 
-  lProdutosModel := TProdutosModel.Create(vIConexao);
+  lProdutosModel := TProdutosModel.getNewIface(vIConexao);
   try
-    lProdutosModel.IDRecordView := self.FCODIGO_PRO;
-    lProdutosModel.obterLista;
+    lProdutosModel.objeto.IDRecordView := self.FCODIGO_PRO;
+    lProdutosModel.objeto.obterLista;
 
-    if lProdutosModel.TotalRecords = 0 then
+    if lProdutosModel.objeto.TotalRecords = 0 then
       CriaException('Erro: Produto não encontrado (TEntradaItensModel.getDadosProduto)');
 
-    self.FVENDA_PRO            := lProdutosModel.ProdutossLista[0].VENDA_PRO;
-    self.FVENDA2_PRO           := lProdutosModel.ProdutossLista[0].VENDA_PRO;
-    self.FMARGEM_PRO           := lProdutosModel.ProdutossLista[0].MARGEM_PRO;
-    self.FALIQ_CREDITO_PIS     := lProdutosModel.ProdutossLista[0].ALIQ_CREDITO_PIS;
-    self.FALIQ_CREDITO_COFINS  := lProdutosModel.ProdutossLista[0].ALIQ_CREDITO_COFINS;
-    self.FCST_CREDITO_COFINS   := lProdutosModel.ProdutossLista[0].CST_CREDITO_COFINS;
-    self.FCST_CREDITO_PIS      := lProdutosModel.ProdutossLista[0].CST_CREDITO_PIS;
-    self.FCUSTOMEDIO_ANTERIOR  := lProdutosModel.ProdutossLista[0].CUSTOMEDIO_PRO;
-    self.FCUSTOULTIMO_ANTERIOR := lProdutosModel.ProdutossLista[0].CUSTOULTIMO_PRO;
+    self.FVENDA_PRO            := lProdutosModel.objeto.ProdutossLista.First.objeto.VENDA_PRO;
+    self.FVENDA2_PRO           := lProdutosModel.objeto.ProdutossLista.First.objeto.VENDA_PRO;
+    self.FMARGEM_PRO           := lProdutosModel.objeto.ProdutossLista.First.objeto.MARGEM_PRO;
+    self.FALIQ_CREDITO_PIS     := lProdutosModel.objeto.ProdutossLista.First.objeto.ALIQ_CREDITO_PIS;
+    self.FALIQ_CREDITO_COFINS  := lProdutosModel.objeto.ProdutossLista.First.objeto.ALIQ_CREDITO_COFINS;
+    self.FCST_CREDITO_COFINS   := lProdutosModel.objeto.ProdutossLista.First.objeto.CST_CREDITO_COFINS;
+    self.FCST_CREDITO_PIS      := lProdutosModel.objeto.ProdutossLista.First.objeto.CST_CREDITO_PIS;
+    self.FCUSTOMEDIO_ANTERIOR  := lProdutosModel.objeto.ProdutossLista.First.objeto.CUSTOMEDIO_PRO;
+    self.FCUSTOULTIMO_ANTERIOR := lProdutosModel.objeto.ProdutossLista.First.objeto.CUSTOULTIMO_PRO;
 
   finally
-    lProdutosModel.Free;
+    lProdutosModel:=nil;
   end;
 end;
 

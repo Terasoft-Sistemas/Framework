@@ -1332,7 +1332,7 @@ end;
 function TWebPedidoModel.VenderItem(pVenderItemParametros: TVenderItemParametros): String;
 var
   lWebPedidoItensModel : TWebPedidoItensModel;
-  lProdutoModel        : TProdutosModel;
+  lProdutoModel        : ITProdutosModel;
   lMovimentoSerialModel: TMovimentoSerialModel;
   lPrecoParamentros    : TProdutoPreco;
   lProdutoPreco        : TProdutoPreco;
@@ -1345,7 +1345,7 @@ begin
   lVendaComSerial := False;
 
   lWebPedidoItensModel  := TWebPedidoItensModel.Create(vIConexao);
-  lProdutoModel         := TProdutosModel.Create(vIConexao);
+  lProdutoModel         := TProdutosModel.getNewIface(vIConexao);
   lMovimentoSerialModel := TMovimentoSerialModel.Create(vIConexao);
 
   if pVenderItemParametros.PRODUTO = '' then
@@ -1365,10 +1365,10 @@ begin
   try
     self := self.carregaClasse(pVenderItemParametros.WEB_PEDIDO);
 
-    lProdutoModel.IDRecordView := pVenderItemParametros.PRODUTO;
-    lProdutoModel.obterLista;
+    lProdutoModel.objeto.IDRecordView := pVenderItemParametros.PRODUTO;
+    lProdutoModel.objeto.obterLista;
 
-    lProdutoModel := lProdutoModel.ProdutossLista[0];
+    lProdutoModel := lProdutoModel.objeto.ProdutossLista.First;
 
     lWebPedidoItensModel.WEB_PEDIDO_ID       := self.ID;
     lWebPedidoItensModel.PRODUTO_ID          := pVenderItemParametros.PRODUTO;
@@ -1379,7 +1379,7 @@ begin
     lProdutoPreco.Promocao    := true;
 
 
-    lValorUnitario            := lProdutoModel.ValorUnitario(lProdutoPreco);
+    lValorUnitario            := lProdutoModel.objeto.ValorUnitario(lProdutoPreco);
     lValorVendido             := StrToFloat(retiraPonto(pVenderItemParametros.VALOR_UNITARIO));
 
     lWebPedidoItensModel.VALOR_VENDIDO       := lValorVendido.ToString;
@@ -1395,8 +1395,8 @@ begin
     else
       lWebPedidoItensModel.PERCENTUAL_DESCONTO := '0';
 
-    lWebPedidoItensModel.VALOR_VENDA_ATUAL   := lProdutoModel.VENDA_PRO;
-		lWebPedidoItensModel.VALOR_CUSTO_ATUAL   := lProdutoModel.CUSTOMEDIO_PRO;
+    lWebPedidoItensModel.VALOR_VENDA_ATUAL   := lProdutoModel.objeto.VENDA_PRO;
+		lWebPedidoItensModel.VALOR_CUSTO_ATUAL   := lProdutoModel.objeto.CUSTOMEDIO_PRO;
 
 		lWebPedidoItensModel.RESERVADO           := pVenderItemParametros.QUANTIDADE;
     lWebPedidoItensModel.TIPO                := PVenderItemParametros.TIPO;
@@ -1408,7 +1408,7 @@ begin
     lWebPedidoItensModel.TIPO_GARANTIA_FR    := PVenderItemParametros.TIPO_GARANTIA_FR;
     lWebPedidoItensModel.VLR_GARANTIA_FR     := PVenderItemParametros.VLR_GARANTIA_FR;
 
-    if (lWebPedidoItensModel.TIPO_ENTREGA = 'LJ') and (lWebPedidoItensModel.TIPO <> 'FUTURA') and (pVenderItemParametros.QUANTIDADE > lProdutoModel.SALDO_DISPONIVEL) then
+    if (lWebPedidoItensModel.TIPO_ENTREGA = 'LJ') and (lWebPedidoItensModel.TIPO <> 'FUTURA') and (pVenderItemParametros.QUANTIDADE > lProdutoModel.objeto.SALDO_DISPONIVEL) then
       lWebPedidoItensModel.TIPO := 'SALDO_NEGA';
 
     Result := lWebPedidoItensModel.Incluir;
@@ -1449,7 +1449,7 @@ begin
     Self.calcularTotais;
   finally
     lWebPedidoItensModel.Free;
-    lProdutoModel.Free;
+    lProdutoModel:=nil;
     lMovimentoSerialModel.Free;
   end;
 end;

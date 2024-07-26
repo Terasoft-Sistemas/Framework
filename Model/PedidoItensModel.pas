@@ -635,11 +635,11 @@ end;
 function TPedidoItensModel.cancelarEstoque: String;
 var
   lMovimentoModel, lModel: TMovimentoModel;
-  lProdutosModel: TProdutosModel;
+  lProdutosModel: ITProdutosModel;
   lUsuarioModel : ITUsuarioModel;
 begin
   lMovimentoModel := TMovimentoModel.Create(vIConexao);
-  lProdutosModel  := TProdutosModel.Create(vIConexao);
+  lProdutosModel  := TProdutosModel.getNewIface(vIConexao);
   lUsuarioModel   := TUsuarioModel.getNewIface(vIConexao);
 
   try
@@ -657,12 +657,12 @@ begin
       lModel.OBS_MOV := 'Alt.Ped.Usuário: '+ lUsuarioModel.objeto.nomeUsuario(self.vIConexao.getUSer.NOME) + DateToStr(vIConexao.DataServer) + ' ' + TimeToStr(vIConexao.HoraServer);
       lModel.Salvar;
 
-      lProdutosModel.adicionarSaldo(lModel.CODIGO_PRO, lModel.QUANTIDADE_MOV);
+      lProdutosModel.objeto.adicionarSaldo(lModel.CODIGO_PRO, lModel.QUANTIDADE_MOV);
     end;
 
   finally
     lMovimentoModel.Free;
-    lProdutosModel.Free;
+    lProdutosModel:=nil;
   end;
 end;
 
@@ -693,10 +693,10 @@ end;
 function TPedidoItensModel.gerarEstoque: String;
 var
   lMovimentoModel   : TMovimentoModel;
-  lProdutosModel    : TProdutosModel;
+  lProdutosModel    : ITProdutosModel;
 begin
   lMovimentoModel   := TMovimentoModel.Create(vIConexao);
-  lProdutosModel    := TProdutosModel.Create(vIConexao);
+  lProdutosModel    := TProdutosModel.getNewIface(vIConexao);
 
   try
     lMovimentoModel.Acao := tacIncluir;
@@ -719,12 +719,12 @@ begin
     Result := lMovimentoModel.Salvar;
 
     try
-      lProdutosModel.subtrairSaldo(self.FCODIGO_PRO, self.FQUANTIDADE_PED);
+      lProdutosModel.objeto.subtrairSaldo(self.FCODIGO_PRO, self.FQUANTIDADE_PED);
     except
     end;
 
   finally
-    lProdutosModel.Free;
+    lProdutosModel:=nil;
     lMovimentoModel.Free;
   end;
 end;

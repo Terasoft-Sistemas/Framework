@@ -1275,7 +1275,7 @@ end;
 procedure TPedidoVendaModel.venderItem(pVenderItem: TVenderItem);
 var
   lConfiguracoes     : ITerasoftConfiguracoes;
-  lProdutosModel     : TProdutosModel;
+  lProdutosModel     : ITProdutosModel;
   lPedidoItensModel  : TPedidoItensModel;
   lPedidoVendaLista  : TPedidoVendaDao;
   lProdutoPreco      : TProdutoPreco;
@@ -1286,7 +1286,7 @@ var
 
 begin
   Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
-  lProdutosModel    := TProdutosModel.Create(vIConexao);
+  lProdutosModel    := TProdutosModel.getNewIface(vIConexao);
   lPedidoItensModel := TPedidoItensModel.Create(vIConexao);
   lPedidoVendaLista := TPedidoVendaDao.Create(vIConexao);
   lCodBalanca       := '';
@@ -1300,8 +1300,8 @@ begin
 
     if not lCodBalanca.IsEmpty then
     begin
-      lProdutosModel.WhereView := ' and produto.barras_pro = '+ QuotedStr(lCodBalanca);
-      lProdutosModel.obterVenderItem;
+      lProdutosModel.objeto.WhereView := ' and produto.barras_pro = '+ QuotedStr(lCodBalanca);
+      lProdutosModel.objeto.obterVenderItem;
 
       if lConfiguracoes.objeto.valorTag('BALANCA_LER_POR_PESO', 'N', tvBool) = 'S' then
       begin
@@ -1314,31 +1314,31 @@ begin
         lQuantidade := (FormatCurr('####0.000', StrToFloat(Copy(pVenderItem.BarrasProduto, StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_INI_VALOR', '7',tvString)),
         StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_FIM_VALOR', '4', tvString))) + ',' + Copy(pVenderItem.BarrasProduto,
         StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_INI_DECIMAL', '11', tvString)),
-        StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_FIM_DECIMAL', '10', tvString)))) / lProdutosModel.ProdutossLista[0].VENDA_PRO));
+        StrToInt(lConfiguracoes.objeto.valorTag('BALANCA_COPY_FIM_DECIMAL', '10', tvString)))) / lProdutosModel.objeto.ProdutossLista.First.objeto.VENDA_PRO));
       end;
     end
     else
     begin
-      lProdutosModel.WhereView := ' and produto.barras_pro = '+ QuotedStr(pVenderItem.BarrasProduto);
-      lProdutosModel.obterVenderItem;
+      lProdutosModel.objeto.WhereView := ' and produto.barras_pro = '+ QuotedStr(pVenderItem.BarrasProduto);
+      lProdutosModel.objeto.obterVenderItem;
       lQuantidade := pVenderItem.Quantidade.ToString;
     end;
 
-    if lProdutosModel.TotalRecords = 0  then
+    if lProdutosModel.objeto.TotalRecords = 0  then
       CriaException('Produto não localizado.');
 
     if vIConexao.getEmpresa.BLOQUEAR_SALDO_NEGATIVO = 'S' then
     begin
-      lSaldoDisponivel := lProdutosModel.ProdutossLista[0].SALDO_DISPONIVEL;
+      lSaldoDisponivel := lProdutosModel.objeto.ProdutossLista.First.objeto.SALDO_DISPONIVEL;
 
       if (lSaldoDisponivel <= 0) or (pVenderItem.Quantidade > lSaldoDisponivel) then
         CriaException('Produto sem saldo disponível em estoque.')
     end;
 
-    lIDItem := lPedidoItensModel.obterIDItem(self.FNUMERO_PED, lProdutosModel.ProdutossLista[0].CODIGO_PRO);
+    lIDItem := lPedidoItensModel.obterIDItem(self.FNUMERO_PED, lProdutosModel.objeto.ProdutossLista.First.objeto.CODIGO_PRO);
 
     if (lIDItem <> '') and (lConfiguracoes.objeto.valorTag('FRENTE_CAIXA_SOMAR_QTDE_ITENS', 'S', tvBool) = 'S')
-    and (lProdutosModel.ProdutossLista[0].USAR_BALANCA <> 'S') then
+    and (lProdutosModel.objeto.ProdutossLista.First.objeto.USAR_BALANCA <> 'S') then
     begin
       lPedidoItensModel := lPedidoItensModel.carregaClasse(lIDItem);
       lPedidoItensModel.Acao := tacAlterar;
@@ -1350,16 +1350,16 @@ begin
     begin
       lPedidoItensModel.Acao := tacIncluir;
       lPedidoItensModel.NUMERO_PED           := self.FNUMERO_PED;
-      lPedidoItensModel.CODIGO_PRO           := lProdutosModel.ProdutossLista[0].CODIGO_PRO;
+      lPedidoItensModel.CODIGO_PRO           := lProdutosModel.objeto.ProdutossLista.First.objeto.CODIGO_PRO;
       lPedidoItensModel.CODIGO_CLI           := self.FCODIGO_CLI;
       lPedidoItensModel.COMISSAO_PED         := FloatToStr(0);
       lPedidoItensModel.DESCONTO_PED         := FloatToStr(0);
       lPedidoItensModel.LOJA                 := vIConexao.getEmpresa.LOJA;
       lPedidoItensModel.QUANTIDADE_PED       := lQuantidade;
       lPedidoItensModel.QUANTIDADE_NEW       := lQuantidade;
-      lPedidoItensModel.BALANCA              := lProdutosModel.ProdutossLista[0].USAR_BALANCA;
+      lPedidoItensModel.BALANCA              := lProdutosModel.objeto.ProdutossLista.First.objeto.USAR_BALANCA;
 
-      lProdutoPreco.Produto                  := lProdutosModel.ProdutossLista[0].CODIGO_PRO;
+      lProdutoPreco.Produto                  := lProdutosModel.objeto.ProdutossLista.First.objeto.CODIGO_PRO;
       lProdutoPreco.Cliente                  := self.FCODIGO_CLI;
       lProdutoPreco.Portador                 := self.FCODIGO_PORT;
       lProdutoPreco.Qtde                     := pVenderItem.Quantidade;
@@ -1368,14 +1368,14 @@ begin
       lProdutoPreco.Promocao                 := pVenderItem.Promocao;
       lProdutoPreco.TabelaPreco              := pVenderItem.TabelaPreco;
 
-      lPedidoItensModel.VALORUNITARIO_PED    := lProdutosModel.ValorUnitario(lProdutoPreco).ToString;
-      lPedidoItensModel.VLRVENDA_PRO         := lProdutosModel.ProdutossLista[0].VENDA_PRO;
-      lPedidoItensModel.VLRCUSTO_PRO         := lProdutosModel.ProdutossLista[0].CUSTOMEDIO_PRO;
+      lPedidoItensModel.VALORUNITARIO_PED    := lProdutosModel.objeto.ValorUnitario(lProdutoPreco).ToString;
+      lPedidoItensModel.VLRVENDA_PRO         := lProdutosModel.objeto.ProdutossLista.First.objeto.VENDA_PRO;
+      lPedidoItensModel.VLRCUSTO_PRO         := lProdutosModel.objeto.ProdutossLista.First.objeto.CUSTOMEDIO_PRO;
       lPedidoItensModel.Salvar;
     end;
 
   finally
-    lProdutosModel.Free;
+    lProdutosModel:=nil;
     lPedidoItensModel.Free;
     lPedidoVendaLista.Free;
   end;

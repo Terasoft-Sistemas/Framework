@@ -606,14 +606,14 @@ end;
 procedure TImpressaoContratos.fetchPedidoItens(pID : String);
 var
   lPedidoItensModel    : TPedidoItensModel;
-  lProdutosModel       : TProdutosModel;
+  lProdutosModel       : ITProdutosModel;
   lWebPedidoItensModel : TWebPedidoItensModel;
   lConfiguracoes       : ITerasoftConfiguracoes;
   lTipoGarantia,
   lTipoGarantiaFR      : String;
 begin
   lPedidoItensModel    := TPedidoItensModel.Create(CONEXAO);
-  lProdutosModel       := TProdutosModel.Create(CONEXAO);
+  lProdutosModel       := TProdutosModel.getNewIface(CONEXAO);
   lWebPedidoItensModel := TWebPedidoItensModel.Create(CONEXAO);
   lConfiguracoes       := TerasoftConfiguracoes.getNewIface(CONEXAO);
 
@@ -621,8 +621,8 @@ begin
     lPedidoItensModel.IDRecordView := pID;
     lPedidoItensModel.obterLista;
 
-    lProdutosModel.IDRecordView := lPedidoItensModel.PedidoItenssLista[0].CODIGO_PRO;
-    lProdutosModel.obterLista;
+    lProdutosModel.objeto.IDRecordView := lPedidoItensModel.PedidoItenssLista[0].CODIGO_PRO;
+    lProdutosModel.objeto.obterLista;
 
     lWebPedidoItensModel.IDRecordView := lPedidoItensModel.PedidoItenssLista[0].WEB_PEDIDOITENS_ID;
     lWebPedidoItensModel.obterLista;
@@ -645,7 +645,7 @@ begin
     mtItensPREMIO_UNICO_FR.Value       := lPedidoItensModel.PedidoItenssLista[0].VLR_GARANTIA_FR;
     mtItensIOF_FR.Value                := mtItensPREMIO_UNICO_FR.Value - (mtItensPREMIO_UNICO_FR.Value / 1.0738);
     mtItensOBSERVACAO.Value            := lPedidoItensModel.PedidoItenssLista[0].OBSERVACAO;
-    mtItensINICIO_VIGENCIA.Value       := retornaInicioVigencia(mtPedidoEMISSAO.Value, lProdutosModel.ProdutossLista[0].GARANTIA_PRO);
+    mtItensINICIO_VIGENCIA.Value       := retornaInicioVigencia(mtPedidoEMISSAO.Value, lProdutosModel.objeto.ProdutossLista.First.objeto.GARANTIA_PRO);
 
     lTipoGarantia   := Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA,3,2);
     lTipoGarantiaFR := Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA_FR,3,2);
@@ -663,8 +663,8 @@ begin
     mtProdutos.EmptyDataSet;
 
     mtProdutos.Append;
-    mtProdutosNOME_MAR.Value := lProdutosModel.ProdutossLista[0].NOME_MAR;
-    mtProdutosNOME_PRO.Value := lProdutosModel.ProdutossLista[0].NOME_PRO;
+    mtProdutosNOME_MAR.Value := lProdutosModel.objeto.ProdutossLista.First.objeto.NOME_MAR;
+    mtProdutosNOME_PRO.Value := lProdutosModel.objeto.ProdutossLista.First.objeto.NOME_PRO;
     mtProdutos.Post;
 
     lblRRGarantiaEstendida.Caption := '*RR: '+ FormataFloat(mtItensRR_GARANTIA_ESTENDIDA.Value) +'%  (R$ '+ FormataFloat(mtItensPREMIO_LIQUIDO.Value * (mtItensRR_GARANTIA_ESTENDIDA.Value / 100)) +')';
@@ -673,7 +673,7 @@ begin
     Self.fetchMemo;
   finally
     lPedidoItensModel.Free;
-    lProdutosModel.Free;
+    lProdutosModel:=nil;
     lWebPedidoItensModel.Free;
   end;
 

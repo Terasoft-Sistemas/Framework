@@ -224,7 +224,7 @@ end;
 
 procedure TPedidoCompraItensModel.getDadosProdutos;
 var
-  lProdutosModel : TProdutosModel;
+  lProdutosModel : ITProdutosModel;
   lConfiguracoes : ITerasoftConfiguracoes;
   lCtx           : TRttiContext;
   lProp          : TRttiProperty;
@@ -233,18 +233,18 @@ begin
   if self.FCODIGO_PRO = '' then
     Exit;
 
-  lProdutosModel := TProdutosModel.Create(vIConexao);
+  lProdutosModel := TProdutosModel.getNewIface(vIConexao);
   lCtx           := TRttiContext.Create;
 
   try
-    lProdutosModel := lProdutosModel.carregaClasse(self.FCODIGO_PRO);
+    lProdutosModel := lProdutosModel.objeto.carregaClasse(self.FCODIGO_PRO);
 
     self.FSTATUS_PED        := 'P';
     self.FQUANTIDADE_ATE    := '0';
-    self.FMARGEM_PED        := lProdutosModel.MARGEM_PRO;
-    self.FFRETE_PED         := lProdutosModel.FRETE_PRO;
-    self.FIPI_PED           := lProdutosModel.IPI_PRO;
-    self.FVENDAANTERIOR_PED := lProdutosModel.VENDA_PRO;
+    self.FMARGEM_PED        := lProdutosModel.objeto.MARGEM_PRO;
+    self.FFRETE_PED         := lProdutosModel.objeto.FRETE_PRO;
+    self.FIPI_PED           := lProdutosModel.objeto.IPI_PRO;
+    self.FVENDAANTERIOR_PED := lProdutosModel.objeto.VENDA_PRO;
 
     Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
@@ -252,10 +252,10 @@ begin
 
     lProp := lCtx.GetType(TProdutosModel).GetProperty(lTagCusto);
 
-    self.FVALORUNI_PED := lProp.GetValue(lProdutosModel).AsString;
+    self.FVALORUNI_PED := lProp.GetValue(lProdutosModel.objeto).AsString;
 
   finally
-    lProdutosModel.Free;
+    lProdutosModel:=nil;
   end;
 end;
 

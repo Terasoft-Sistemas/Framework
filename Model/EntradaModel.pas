@@ -441,11 +441,11 @@ function TEntradaModel.EntradaItens(pEntradaItensParams: TEntradaItensParams): S
 var
   lEntradaItensModel  : TEntradaItensModel;
   lEntradaModel       : TEntradaModel;
-  lProdutosModel      : TProdutosModel;
+  lProdutosModel      : ITProdutosModel;
 begin
   lEntradaItensModel  := TEntradaItensModel.Create(vIConexao);
   lEntradaModel       := TEntradaModel.Create(vIConexao);
-  lProdutosModel      := TProdutosModel.Create(vIConexao);
+  lProdutosModel      := TProdutosModel.getNewIface(vIConexao);
 
   if pEntradaItensParams.CODIGO_FOR = '' then
     CriaException('Fornecedor não informado');
@@ -459,9 +459,9 @@ begin
   try
     self := self.carregaClasse(pEntradaItensParams.NUMERO_ENT, pEntradaItensParams.CODIGO_FOR);
 
-    lProdutosModel.IDRecordView := pEntradaItensParams.CODIGO_PRO;
-    lProdutosModel.obterLista;
-    lProdutosModel := lProdutosModel.ProdutossLista[0];
+    lProdutosModel.objeto.IDRecordView := pEntradaItensParams.CODIGO_PRO;
+    lProdutosModel.objeto.obterLista;
+    lProdutosModel := lProdutosModel.objeto.ProdutossLista.First;
 
     lEntradaItensModel.CFOP_ID        := self.FCFOP_ID;
     lEntradaItensModel.NUMERO_ENT     := self.FNUMERO_ENT;
@@ -476,7 +476,7 @@ begin
 
   finally
     lEntradaItensModel.Free;
-    lProdutosModel.Free;
+    lProdutosModel:=nil;
   end;
 end;
 
@@ -552,28 +552,28 @@ end;
 procedure TEntradaModel.ImportarItens(pEntrada, pFornecedor: String);
 var
  lEntradaItensModel : TEntradaItensModel;
- lProdutoModel      : TProdutosModel;
+ lProdutoModel      : ITProdutosModel;
  i: Integer;
 begin
   lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
-  lProdutoModel      := TProdutosModel.Create(vIConexao);
+  lProdutoModel      := TProdutosModel.getNewIface(vIConexao);
 
   try
     with ACBrNFe.NotasFiscais.Items[0].NFe do
     begin
 
-      lProdutoModel.IDRecordView := '999999';
-      lProdutoModel.obterLista;
+      lProdutoModel.objeto.IDRecordView := '999999';
+      lProdutoModel.objeto.obterLista;
 
-      if lProdutoModel.TotalRecords = 0 then
+      if lProdutoModel.objeto.TotalRecords = 0 then
       begin
-        lProdutoModel.CODIGO_PRO   := '999999';
-        lProdutoModel.NOME_PRO     := 'PRODUTO NÃO VINCULADO';
-        lProdutoModel.CODIGO_GRU   := '000000';
-        lProdutoModel.CODIGO_FOR   := '000000';
-        lProdutoModel.CODIGO_MAR   := '000000';
-        lProdutoModel.CODIGO_SUB   := '000000';
-        lProdutoModel.Incluir;
+        lProdutoModel.objeto.CODIGO_PRO   := '999999';
+        lProdutoModel.objeto.NOME_PRO     := 'PRODUTO NÃO VINCULADO';
+        lProdutoModel.objeto.CODIGO_GRU   := '000000';
+        lProdutoModel.objeto.CODIGO_FOR   := '000000';
+        lProdutoModel.objeto.CODIGO_MAR   := '000000';
+        lProdutoModel.objeto.CODIGO_SUB   := '000000';
+        lProdutoModel.objeto.Incluir;
       end;
 
       for i := 0 to Det.Count - 1 do
@@ -703,7 +703,7 @@ begin
 
   finally
     lEntradaItensModel.Free;
-    lProdutoModel.Free;
+    lProdutoModel:=nil;
   end;
 end;
 

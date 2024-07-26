@@ -7,9 +7,14 @@ uses
   Terasoft.Utils,
   Interfaces.Conexao,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
+  TProdutosModel=class;
+  ITProdutosModel=IObject<TProdutosModel>;
+
+
   TProdutoPreco = record
     Produto,
     Cliente,
@@ -23,7 +28,6 @@ type
     TabelaPreco         : Boolean;
   end;
 
-type
   TProdutoGarantia = record
     GARANTIA_EXTENDIDA_VENDA_12,
     GARANTIA_EXTENDIDA_CUSTO_12,
@@ -42,10 +46,10 @@ type
   end;
 
   TProdutosModel = class
-
   private
+    [weak] mySelf: ITProdutosModel;
     vIConexao : IConexao;
-    FProdutossLista: IList<TProdutosModel>;
+    FProdutossLista: IList<ITProdutosModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -333,7 +337,7 @@ type
 
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetProdutossLista(const Value: IList<TProdutosModel>);
+    procedure SetProdutossLista(const Value: IList<ITProdutosModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -894,8 +898,10 @@ type
     property PERMITE_VENDA_SEGURO_FR : Variant read FPERMITE_VENDA_SEGURO_FR write SetPERMITE_VENDA_SEGURO_FR;
     property GRUPO_GARANTIA_ID : Variant read FGRUPO_GARANTIA_ID write SetGRUPO_GARANTIA_ID;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITProdutosModel;
 
     procedure obterLista;
     procedure obterVenderItem;
@@ -904,7 +910,7 @@ type
     function obterComissao(pCodProduto: String): IFDDataset;
 
     function Incluir : String;
-    function Alterar(pID : String) : TProdutosModel;
+    function Alterar(pID : String) : ITProdutosModel;
     function Excluir(pCodigoPro : String) : String;
     function Salvar : String;
     function obterListaConsulta: IFDDataset;
@@ -913,7 +919,7 @@ type
     function obterSaldo(pIdProduto: String): Double;
     function obterSaldoDisponivel(pIdProduto: String): Double;
 
-    function carregaClasse(pId: String): TProdutosModel;
+    function carregaClasse(pId: String): ITProdutosModel;
     function valorVenda(pIdProduto: String): Variant;
     function ObterTabelaPreco : IFDDataset;
     function ValorUnitario(pProdutoPreco: TProdutoPreco) : Double;
@@ -925,7 +931,7 @@ type
 
     procedure verificarCustoMedio;
 
-    property ProdutossLista: IList<TProdutosModel> read FProdutossLista write SetProdutossLista;
+    property ProdutossLista: IList<ITProdutosModel> read FProdutossLista write SetProdutossLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -960,24 +966,24 @@ uses
 
 procedure TProdutosModel.adicionarSaldo(pIdProduto: String; pSaldo: Double);
 var
-  lProdutoDao: TProdutosDao;
+  lProdutoDao: ITProdutosDao;
 begin
-  lProdutoDao := TProdutosDao.Create(vIConexao);
+  lProdutoDao := TProdutosDao.getNewIface(vIConexao);
   try
-    lProdutoDao.adicionarSaldo(pIdProduto, pSaldo);
+    lProdutoDao.objeto.adicionarSaldo(pIdProduto, pSaldo);
   finally
-    lProdutoDao.Free;
+    lProdutoDao:=nil;
   end;
 end;
 
-function TProdutosModel.Alterar(pID: String): TProdutosModel;
+function TProdutosModel.Alterar(pID: String): ITProdutosModel;
 var
-  lProdutosModel : TProdutosModel;
+  lProdutosModel : ITProdutosModel;
 begin
-  lProdutosModel := TProdutosModel.Create(vIConexao);
+  lProdutosModel := TProdutosModel.getNewIface(vIConexao);
   try
-    lProdutosModel      := lProdutosModel.carregaClasse(pID);
-    lProdutosModel.Acao := tacAlterar;
+    lProdutosModel      := lProdutosModel.objeto.carregaClasse(pID);
+    lProdutosModel.objeto.Acao := tacAlterar;
     Result              := lProdutosModel;
   finally
 
@@ -989,6 +995,12 @@ begin
   self.FCODIGO_PRO := pCodigoPro;
   self.Acao        := tacExcluir;
   Result           := self.Salvar;
+end;
+
+class function TProdutosModel.getNewIface(pIConexao: IConexao): ITProdutosModel;
+begin
+  Result := TImplObjetoOwner<TProdutosModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TProdutosModel.Incluir: String;
@@ -1064,31 +1076,31 @@ begin
   end;
 end;
 
-function TProdutosModel.carregaClasse(pId: String): TProdutosModel;
+function TProdutosModel.carregaClasse(pId: String): ITProdutosModel;
 var
-  lProdutosDao: TProdutosDao;
+  lProdutosDao: ITProdutosDao;
 begin
-  lProdutosDao := TProdutosDao.Create(vIConexao);
+  lProdutosDao := TProdutosDao.getNewIface(vIConexao);
   try
-    Result := lProdutosDao.carregaClasse(pId);
+    Result := lProdutosDao.objeto.carregaClasse(pId);
   finally
-    lProdutosDao.Free;
+    lProdutosDao:=nil;
   end;
 end;
 
 function TProdutosModel.ConsultaProdutosVendidos(pProduto: String): IFDDataset;
 var
-  lProdutosDao: TProdutosDao;
+  lProdutosDao: ITProdutosDao;
 begin
-  lProdutosDao := TProdutosDao.Create(vIConexao);
+  lProdutosDao := TProdutosDao.getNewIface(vIConexao);
   try
-    Result := lProdutosDao.ConsultaProdutosVendidos(pProduto);
+    Result := lProdutosDao.objeto.ConsultaProdutosVendidos(pProduto);
   finally
-    lProdutosDao.Free;
+    lProdutosDao:=nil;
   end;
 end;
 
-constructor TProdutosModel.Create(pIConexao : IConexao);
+constructor TProdutosModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -1101,149 +1113,149 @@ end;
 
 function TProdutosModel.obterCodigoBarras(pIdProduto: String): String;
 var
-  lProdutosDao: TProdutosDao;
+  lProdutosDao: ITProdutosDao;
 begin
-  lProdutosDao := TProdutosDao.Create(vIConexao);
+  lProdutosDao := TProdutosDao.getNewIface(vIConexao);
   try
-    Result := lProdutosDao.obterCodigoBarras(pIdProduto);
+    Result := lProdutosDao.objeto.obterCodigoBarras(pIdProduto);
   finally
-    lProdutosDao.Free;
+    lProdutosDao:=nil;
   end;
 end;
 
 function TProdutosModel.obterComissao(pCodProduto: String): IFDDataset;
 var
-  lProdutosDao : TProdutosDao;
+  lProdutosDao : ITProdutosDao;
 begin
-  lProdutosDao := TProdutosDao.Create(vIConexao);
+  lProdutosDao := TProdutosDao.getNewIface(vIConexao);
   try
-    Result := lProdutosDao.obterComissao(pCodProduto);
+    Result := lProdutosDao.objeto.obterComissao(pCodProduto);
   finally
-    lProdutosDao.Free;
+    lProdutosDao:=nil;
   end;
 end;
 
 procedure TProdutosModel.obterLista;
 var
-  lProdutosLista: TProdutosDao;
+  lProdutosLista: ITProdutosDao;
 begin
-  lProdutosLista := TProdutosDao.Create(vIConexao);
+  lProdutosLista := TProdutosDao.getNewIface(vIConexao);
   try
-    lProdutosLista.TotalRecords        := FTotalRecords;
-    lProdutosLista.WhereView           := FWhereView;
-    lProdutosLista.CountView           := FCountView;
-    lProdutosLista.OrderView           := FOrderView;
-    lProdutosLista.StartRecordView     := FStartRecordView;
-    lProdutosLista.LengthPageView      := FLengthPageView;
-    lProdutosLista.IDRecordView        := FIDRecordView;
+    lProdutosLista.objeto.TotalRecords        := FTotalRecords;
+    lProdutosLista.objeto.WhereView           := FWhereView;
+    lProdutosLista.objeto.CountView           := FCountView;
+    lProdutosLista.objeto.OrderView           := FOrderView;
+    lProdutosLista.objeto.StartRecordView     := FStartRecordView;
+    lProdutosLista.objeto.LengthPageView      := FLengthPageView;
+    lProdutosLista.objeto.IDRecordView        := FIDRecordView;
 
-    lProdutosLista.obterLista;
+    lProdutosLista.objeto.obterLista;
 
-    FTotalRecords   := lProdutosLista.TotalRecords;
-    FProdutossLista := lProdutosLista.ProdutossLista;
+    FTotalRecords   := lProdutosLista.objeto.TotalRecords;
+    FProdutossLista := lProdutosLista.objeto.ProdutossLista;
   finally
-    lProdutosLista.Free;
+    lProdutosLista:=nil;
   end;
 end;
 
 procedure TProdutosModel.obterListaCatalogo;
 var
-  lProdutosLista: TProdutosDao;
+  lProdutosLista: ITProdutosDao;
 begin
-  lProdutosLista := TProdutosDao.Create(vIConexao);
+  lProdutosLista := TProdutosDao.getNewIface(vIConexao);
   try
-    lProdutosLista.TotalRecords    := FTotalRecords;
-    lProdutosLista.WhereView       := FWhereView;
-    lProdutosLista.CountView       := FCountView;
-    lProdutosLista.OrderView       := FOrderView;
-    lProdutosLista.StartRecordView := FStartRecordView;
-    lProdutosLista.LengthPageView  := FLengthPageView;
-    lProdutosLista.IDRecordView    := FIDRecordView;
+    lProdutosLista.objeto.TotalRecords    := FTotalRecords;
+    lProdutosLista.objeto.WhereView       := FWhereView;
+    lProdutosLista.objeto.CountView       := FCountView;
+    lProdutosLista.objeto.OrderView       := FOrderView;
+    lProdutosLista.objeto.StartRecordView := FStartRecordView;
+    lProdutosLista.objeto.LengthPageView  := FLengthPageView;
+    lProdutosLista.objeto.IDRecordView    := FIDRecordView;
 
-    lProdutosLista.obterListaCatalogo;
+    lProdutosLista.objeto.obterListaCatalogo;
 
-    FTotalRecords   := lProdutosLista.TotalRecords;
-    FProdutossLista := lProdutosLista.ProdutossLista;
+    FTotalRecords   := lProdutosLista.objeto.TotalRecords;
+    FProdutossLista := lProdutosLista.objeto.ProdutossLista;
   finally
-    lProdutosLista.Free;
+    lProdutosLista:=nil
   end;
 end;
 
 function TProdutosModel.obterListaConsulta: IFDDataset;
 var
-  lProdutos : TProdutosDao;
+  lProdutos : ITProdutosDao;
 begin
-  lProdutos := TProdutosDao.Create(vIConexao);
+  lProdutos := TProdutosDao.getNewIface(vIConexao);
   try
-    lProdutos.TotalRecords    := FTotalRecords;
-    lProdutos.WhereView       := FWhereView;
-    lProdutos.CountView       := FCountView;
-    lProdutos.OrderView       := FOrderView;
-    lProdutos.StartRecordView := FStartRecordView;
-    lProdutos.LengthPageView  := FLengthPageView;
-    lProdutos.IDRecordView    := FIDRecordView;
+    lProdutos.objeto.TotalRecords    := FTotalRecords;
+    lProdutos.objeto.WhereView       := FWhereView;
+    lProdutos.objeto.CountView       := FCountView;
+    lProdutos.objeto.OrderView       := FOrderView;
+    lProdutos.objeto.StartRecordView := FStartRecordView;
+    lProdutos.objeto.LengthPageView  := FLengthPageView;
+    lProdutos.objeto.IDRecordView    := FIDRecordView;
 
-    Result        := lProdutos.obterListaConsulta;
-    FTotalRecords := lProdutos.TotalRecords;
+    Result        := lProdutos.objeto.obterListaConsulta;
+    FTotalRecords := lProdutos.objeto.TotalRecords;
   finally
-    lProdutos.Free;
+    lProdutos:=nil;
   end;
 end;
 
 function TProdutosModel.obterListaMemTable: IFDDataset;
 var
-  lProdutosLista : TProdutosDao;
+  lProdutosLista : ITProdutosDao;
 begin
-  lProdutosLista := TProdutosDao.Create(vIConexao);
+  lProdutosLista := TProdutosDao.getNewIface(vIConexao);
   try
-    lProdutosLista.TotalRecords    := FTotalRecords;
-    lProdutosLista.WhereView       := FWhereView;
-    lProdutosLista.CountView       := FCountView;
-    lProdutosLista.OrderView       := FOrderView;
-    lProdutosLista.StartRecordView := FStartRecordView;
-    lProdutosLista.LengthPageView  := FLengthPageView;
-    lProdutosLista.IDRecordView    := FIDRecordView;
+    lProdutosLista.objeto.TotalRecords    := FTotalRecords;
+    lProdutosLista.objeto.WhereView       := FWhereView;
+    lProdutosLista.objeto.CountView       := FCountView;
+    lProdutosLista.objeto.OrderView       := FOrderView;
+    lProdutosLista.objeto.StartRecordView := FStartRecordView;
+    lProdutosLista.objeto.LengthPageView  := FLengthPageView;
+    lProdutosLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result         := lProdutosLista.obterListaMemTable;
-    FTotalRecords  := lProdutosLista.TotalRecords;
+    Result         := lProdutosLista.objeto.obterListaMemTable;
+    FTotalRecords  := lProdutosLista.objeto.TotalRecords;
   finally
-    lProdutosLista.Free;
+    lProdutosLista:=nil;
   end;
 end;
 
 function TProdutosModel.ObterTabelaPreco: IFDDataset;
 var
-  lProdutoDao: TProdutosDao;
+  lProdutoDao: ITProdutosDao;
 begin
-  lProdutoDao := TProdutosDao.Create(vIConexao);
+  lProdutoDao := TProdutosDao.getNewIface(vIConexao);
   try
-    lProdutoDao.IDRecordView := FIDRecordView;
-    Result := lProdutoDao.ObterTabelaPreco;
+    lProdutoDao.objeto.IDRecordView := FIDRecordView;
+    Result := lProdutoDao.objeto.ObterTabelaPreco;
   finally
-    lProdutoDao.Free;
+    lProdutoDao:=nil;
   end;
 end;
 
 procedure TProdutosModel.obterVenderItem;
 var
-  lProdutosDao: TProdutosDao;
+  lProdutosDao: ITProdutosDao;
 begin
-  lProdutosDao := TProdutosDao.Create(vIConexao);
+  lProdutosDao := TProdutosDao.getNewIface(vIConexao);
   try
-    lProdutosDao.TotalRecords        := FTotalRecords;
-    lProdutosDao.WhereView           := FWhereView;
-    lProdutosDao.CountView           := FCountView;
-    lProdutosDao.OrderView           := FOrderView;
-    lProdutosDao.StartRecordView     := FStartRecordView;
-    lProdutosDao.LengthPageView      := FLengthPageView;
-    lProdutosDao.IDRecordView        := FIDRecordView;
+    lProdutosDao.objeto.TotalRecords        := FTotalRecords;
+    lProdutosDao.objeto.WhereView           := FWhereView;
+    lProdutosDao.objeto.CountView           := FCountView;
+    lProdutosDao.objeto.OrderView           := FOrderView;
+    lProdutosDao.objeto.StartRecordView     := FStartRecordView;
+    lProdutosDao.objeto.LengthPageView      := FLengthPageView;
+    lProdutosDao.objeto.IDRecordView        := FIDRecordView;
 
-    lProdutosDao.obterVenderItem;
+    lProdutosDao.objeto.obterVenderItem;
 
-    FTotalRecords   := lProdutosDao.TotalRecords;
-    FProdutossLista := lProdutosDao.ProdutossLista;
+    FTotalRecords   := lProdutosDao.objeto.TotalRecords;
+    FProdutossLista := lProdutosDao.objeto.ProdutossLista;
   finally
-    lProdutosDao.Free;
+    lProdutosDao:=nil;
   end;
 end;
 
@@ -1309,42 +1321,42 @@ end;
 
 function TProdutosModel.obterSaldo(pIdProduto: String): Double;
 var
-  lProdutoDao: TProdutosDao;
+  lProdutoDao: ITProdutosDao;
 begin
-  lProdutoDao := TProdutosDao.Create(vIConexao);
+  lProdutoDao := TProdutosDao.getNewIface(vIConexao);
   try
-    Result := lProdutoDao.obterSaldo(pIdProduto);
+    Result := lProdutoDao.objeto.obterSaldo(pIdProduto);
   finally
-    lProdutoDao.Free;
+    lProdutoDao:=nil;
   end;
 end;
 
 function TProdutosModel.obterSaldoDisponivel(pIdProduto: String): Double;
 var
-  lProdutoDao: TProdutosDao;
+  lProdutoDao: ITProdutosDao;
 begin
-  lProdutoDao := TProdutosDao.Create(vIConexao);
+  lProdutoDao := TProdutosDao.getNewIface(vIConexao);
   try
-    Result := lProdutoDao.obterSaldoDisponivel(pIdProduto);
+    Result := lProdutoDao.objeto.obterSaldoDisponivel(pIdProduto);
   finally
-    lProdutoDao.Free;
+    lProdutoDao:=nil;
   end;
 end;
 
 function TProdutosModel.Salvar: String;
 var
-  lProdutosDao: TProdutosDao;
+  lProdutosDao: ITProdutosDao;
 begin
-  lProdutosDao := TProdutosDao.Create(vIConexao);
+  lProdutosDao := TProdutosDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lProdutosDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lProdutosDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lProdutosDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lProdutosDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lProdutosDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lProdutosDao.objeto.excluir(mySelf);
     end;
   finally
-    lProdutosDao.Free;
+    lProdutosDao:=nil;
   end;
 end;
 procedure TProdutosModel.SetAcao(const Value: TAcao);
@@ -2504,25 +2516,25 @@ begin
 end;
 procedure TProdutosModel.subtrairSaldo(pIdProduto: String; pSaldo: Double);
 var
-  lProdutoDao: TProdutosDao;
+  lProdutoDao: ITProdutosDao;
 begin
-  lProdutoDao := TProdutosDao.Create(vIConexao);
+  lProdutoDao := TProdutosDao.getNewIface(vIConexao);
   try
-    lProdutoDao.subtrairSaldo(pIdProduto, pSaldo);
+    lProdutoDao.objeto.subtrairSaldo(pIdProduto, pSaldo);
   finally
-    lProdutoDao.Free;
+    lProdutoDao:=nil;
   end;
 end;
 
 function TProdutosModel.ValorGarantia(pProduto: String; pValorFaixa: Double): TProdutoGarantia;
 var
-  lProdutoDao: TProdutosDao;
+  lProdutoDao: ITProdutosDao;
 begin
-  lProdutoDao := TProdutosDao.Create(vIConexao);
+  lProdutoDao := TProdutosDao.getNewIface(vIConexao);
   try
-     Result :=  lProdutoDao.ValorGarantia(pProduto, pValorFaixa);
+     Result :=  lProdutoDao.objeto.ValorGarantia(pProduto, pValorFaixa);
   finally
-    lProdutoDao.Free;
+    lProdutoDao:=nil;
   end;
 end;
 
@@ -2532,7 +2544,7 @@ var
   lClienteModel           : TClienteModel;
   lPrecoUFModel           : TPrecoUFModel;
   lPromocaoItensModel     : TPromocaoItensModel;
-  lProdutosModel          : TProdutosModel;
+  lProdutosModel          : ITProdutosModel;
   lCondicaoPromocao,
   lDia                    : String;
   lPrecoVendaModel        : TPrecoVendaModel;
@@ -2544,7 +2556,7 @@ begin
   lPromocaoItensModel     := TPromocaoItensModel.Create(vIConexao);
   lPrecoVendaModel        := TPrecoVendaModel.Create(vIConexao);
   lPrecoVendaProdutoModel := TPrecoVendaProdutoModel.Create(vIConexao);
-  lProdutosModel          := TProdutosModel.Create(vIConexao);
+  lProdutosModel          := TProdutosModel.getNewIface(vIConexao);
   lPrecoClienteModel      := TPrecoClienteModel.Create(vIConexao);
   try
 
@@ -2630,17 +2642,17 @@ begin
             begin
               if lPrecoVendaModel.PrecoVendasLista[0].ACRESCIMO_DESCONTO = 'C' then
               begin
-                Result := lProdutosModel.ProdutossLista[0].CUSTOMEDIO_PRO + (lProdutosModel.ProdutossLista[0].CUSTOMEDIO_PRO * (lPrecoVendaModel.PrecoVendasLista[0].PERCENTUAL / 100));
+                Result := lProdutosModel.objeto.ProdutossLista.First.objeto.CUSTOMEDIO_PRO + (lProdutosModel.objeto.ProdutossLista.First.objeto.CUSTOMEDIO_PRO * (lPrecoVendaModel.PrecoVendasLista[0].PERCENTUAL / 100));
                 exit;
               end
               else if lPrecoVendaModel.PrecoVendasLista[0].ACRESCIMO_DESCONTO = 'A' then
               begin
-                Result := lProdutosModel.ProdutossLista[0].VENDA_PRO + (lProdutosModel.ProdutossLista[0].VENDA_PRO * (lPrecoVendaModel.PrecoVendasLista[0].PERCENTUAL / 100));
+                Result := lProdutosModel.objeto.ProdutossLista.First.objeto.VENDA_PRO + (lProdutosModel.objeto.ProdutossLista.First.objeto.VENDA_PRO * (lPrecoVendaModel.PrecoVendasLista[0].PERCENTUAL / 100));
                 exit;
               end
               else
               begin
-                Result := lProdutosModel.ProdutossLista[0].VENDA_PRO - (lProdutosModel.ProdutossLista[0].VENDA_PRO * (lPrecoVendaModel.PrecoVendasLista[0].PERCENTUAL / 100));
+                Result := lProdutosModel.objeto.ProdutossLista.First.objeto.VENDA_PRO - (lProdutosModel.objeto.ProdutossLista.First.objeto.VENDA_PRO * (lPrecoVendaModel.PrecoVendasLista[0].PERCENTUAL / 100));
                 exit;
               end;
             end;
@@ -2649,14 +2661,14 @@ begin
       end;
     end;
 
-    Result := lProdutosModel.valorVenda(pProdutoPreco.Produto);
+    Result := lProdutosModel.objeto.valorVenda(pProdutoPreco.Produto);
 
   finally
     lPrecoVendaProdutoModel.Free;
     lPromocaoItensModel.Free;
     lPrecoClienteModel.Free;
     lPrecoVendaModel.Free;
-    lProdutosModel.Free;
+    lProdutosModel:=nil;
     lClienteModel.Free;
     lPrecoUFModel.Free;
   end;
@@ -2664,16 +2676,16 @@ end;
 
 function TProdutosModel.valorVenda(pIdProduto: String): Variant;
 var
-  lProdutoDao: TProdutosDao;
+  lProdutoDao: ITProdutosDao;
 begin
-  lProdutoDao := TProdutosDao.Create(vIConexao);
+  lProdutoDao := TProdutosDao.getNewIface(vIConexao);
   try
-    Result := lProdutoDao.valorVenda(pIdProduto);
+    Result := lProdutoDao.objeto.valorVenda(pIdProduto);
     if Result = Null then
       Result := 0;
 
   finally
-    lProdutoDao.Free;
+    lProdutoDao:=nil;
   end;
 end;
 

@@ -175,7 +175,7 @@ end;
 
 procedure TSaidasItensModel.getDadosProduto;
 var
-  lProdutosModel : TProdutosModel;
+  lProdutosModel : ITProdutosModel;
   lConfiguracoes : ITerasoftConfiguracoes;
   lBaseCusto     : String;
   lCtx           : TRttiContext;
@@ -184,12 +184,12 @@ begin
   if self.FCODIGO_PRO = '' then
     Exit;
 
-  lProdutosModel := TProdutosModel.Create(vIConexao);
+  lProdutosModel := TProdutosModel.getNewIface(vIConexao);
   lCtx           := TRttiContext.Create;
   try
-    lProdutosModel.IDRecordView := self.FCODIGO_PRO;
-    lProdutosModel.obterLista;
-    lProdutosModel := lProdutosModel.ProdutossLista[0];
+    lProdutosModel.objeto.IDRecordView := self.FCODIGO_PRO;
+    lProdutosModel.objeto.obterLista;
+    lProdutosModel := lProdutosModel.objeto.ProdutossLista.First;
 
     Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
@@ -197,11 +197,11 @@ begin
 
     lProp := lCtx.GetType(TProdutosModel).GetProperty(lBaseCusto);
 
-    self.FICMS_SAI      := lProp.GetValue(lProdutosModel).AsString;
-    self.FVALOR_UNI_SAI := lProp.GetValue(lProdutosModel).AsString;
+    self.FICMS_SAI      := lProp.GetValue(lProdutosModel.objeto).AsString;
+    self.FVALOR_UNI_SAI := lProp.GetValue(lProdutosModel.objeto).AsString;
 
   finally
-    lProdutosModel.Free;
+    lProdutosModel:=nil;
   end;
 end;
 

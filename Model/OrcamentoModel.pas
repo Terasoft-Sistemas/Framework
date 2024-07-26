@@ -381,7 +381,7 @@ var
   lOrcamentoModel          : TOrcamentoModel;
   lClientesModel           : TClienteModel;
   lEmpresaModel            : ITEmpresaModel;
-  lProdutosModel           : TProdutosModel;
+  lProdutosModel           : ITProdutosModel;
   lPedido                  : String;
   lItem, lIndex            : Integer;
   lSaldoDisponivel         : Double;
@@ -397,7 +397,7 @@ begin
   lPedidoItensModel    := TPedidoItensModel.Create(vIConexao);
   lClientesModel       := TClienteModel.Create(vIConexao);
   lEmpresaModel        := TEmpresaModel.getNewIface(vIConexao);
-  lProdutosModel       := TProdutosModel.Create(vIConexao);
+  lProdutosModel       := TProdutosModel.getNewIface(vIConexao);
 
   try
 
@@ -419,10 +419,10 @@ begin
       lMemtable.objeto.First;
       while not lMemtable.objeto.Eof do
       begin
-        lProdutosModel.IDRecordView := lMemtable.objeto.FieldByName('CODIGO_PRO').AsString;
-        lProdutosModel.obterLista;
+        lProdutosModel.objeto.IDRecordView := lMemtable.objeto.FieldByName('CODIGO_PRO').AsString;
+        lProdutosModel.objeto.obterLista;
 
-        lSaldoDisponivel := lProdutosModel.obterSaldoDisponivel(lMemtable.objeto.FieldByName('CODIGO_PRO').AsString) + lMemtable.objeto.FieldByName('QUANTIDADE_ORC').AsFloat;
+        lSaldoDisponivel := lProdutosModel.objeto.obterSaldoDisponivel(lMemtable.objeto.FieldByName('CODIGO_PRO').AsString) + lMemtable.objeto.FieldByName('QUANTIDADE_ORC').AsFloat;
 
         if (lMemtable.objeto.FieldByName('QUANTIDADE_ORC').AsFloat > lSaldoDisponivel) then
           CriaException('Produto '+lMemtable.objeto.FieldByName('CODIGO_PRO').AsString+' sem saldo disponível em estoque.');
@@ -536,7 +536,7 @@ begin
     lPedidoItensModel.Free;
     lClientesModel.Free;
     lEmpresaModel := nil;
-    lProdutosModel.Free;
+    lProdutosModel:=nil;
   end;
 end;
 

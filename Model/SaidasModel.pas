@@ -263,14 +263,14 @@ end;
 function TSaidasModel.AdicionarItensTransferencia(pSaidaItemParams: TSaidaItensTransferenciaParams): String;
 var
   lSaidasItensModel : TSaidasItensModel;
-  lProdutosModel    : TProdutosModel;
+  lProdutosModel    : ITProdutosModel;
   lConfiguracoes    : ITerasoftConfiguracoes;
   lCtx              : TRttiContext;
   lProp             : TRttiProperty;
   lTagCusto         : String;
 begin
   lSaidasItensModel := TSaidasItensModel.Create(vIConexao);
-  lProdutosModel    := TProdutosModel.Create(vIConexao);
+  lProdutosModel    := TProdutosModel.getNewIface(vIConexao);
   lCtx              := TRttiContext.Create;
 
   if pSaidaItemParams.CODIGO_PRO = '' then
@@ -281,7 +281,7 @@ begin
 
   try
     Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
-    lProdutosModel := lProdutosModel.carregaClasse(pSaidaItemParams.CODIGO_PRO);
+    lProdutosModel := lProdutosModel.objeto.carregaClasse(pSaidaItemParams.CODIGO_PRO);
 
     lSaidasItensModel.NUMERO_SAI       := self.FNUMERO_SAI;
     lSaidasItensModel.CODIGO_CLI       := self.FCODIGO_CLI;
@@ -292,15 +292,15 @@ begin
     lTagCusto      := lConfiguracoes.objeto.valorTag('BASE_CUSTO_PADRAO', 'CUSTOMEDIO_PRO', tvString);
     lProp          := lCtx.GetType(TProdutosModel).GetProperty(lTagCusto);
 
-    lSaidasItensModel.ICMS_SAI         := lProp.GetValue(lProdutosModel).AsString;
-    lSaidasItensModel.VALOR_UNI_SAI    := lProp.GetValue(lProdutosModel).AsString;
+    lSaidasItensModel.ICMS_SAI         := lProp.GetValue(lProdutosModel.objeto).AsString;
+    lSaidasItensModel.VALOR_UNI_SAI    := lProp.GetValue(lProdutosModel.objeto).AsString;
 
     Result := lSaidasItensModel.Incluir;
 
     self.CalcularTotais;
   finally
     lSaidasItensModel.Free;
-    lProdutosModel.Free;
+    lProdutosModel:=nil;
     lCtx.Free;
   end;
 end;
@@ -321,7 +321,7 @@ end;
 procedure TSaidasModel.CalcularPeso;
 var
   lSaidasItensModel : TSaidasItensModel;
-  lProdutosModel    : TProdutosModel;
+  lProdutosModel    : ITProdutosModel;
   lItens            : IFDDataset;
   lPesoBruto,
   lPesoLiquido      : Double;
@@ -332,7 +332,7 @@ begin
     CriaException('Saida não carregada');
 
   lSaidasItensModel := TSaidasItensModel.Create(vIConexao);
-  lProdutosModel    := TProdutosModel.Create(vIConexao);
+  lProdutosModel    := TProdutosModel.getNewIface(vIConexao);
   try
     lSaidasItensModel.NumeroSaidaView := self.FNUMERO_SAI;
     lItens := lSaidasItensModel.obterLista;
@@ -343,9 +343,9 @@ begin
     lItens.objeto.First;
     while not lItens.objeto.Eof do
     begin
-      lProdutosModel := lProdutosModel.carregaClasse(lItens.objeto.FieldByname('CODIGO_PRO').AsString);
-      lPesoBruto     := lPesoBruto + lItens.objeto.FieldByname('QUANTIDADE_SAI').AsFloat * lProdutosModel.PESO_PRO;
-      lPesoLiquido   := lPesoLiquido + lItens.objeto.FieldByname('QUANTIDADE_SAI').AsFloat * lProdutosModel.PESO_LIQUIDO;
+      lProdutosModel := lProdutosModel.objeto.carregaClasse(lItens.objeto.FieldByname('CODIGO_PRO').AsString);
+      lPesoBruto     := lPesoBruto + lItens.objeto.FieldByname('QUANTIDADE_SAI').AsFloat * lProdutosModel.objeto.PESO_PRO;
+      lPesoLiquido   := lPesoLiquido + lItens.objeto.FieldByname('QUANTIDADE_SAI').AsFloat * lProdutosModel.objeto.PESO_LIQUIDO;
 
       lItens.objeto.Next;
     end;
@@ -355,7 +355,7 @@ begin
 
   finally
     lSaidasItensModel.Free;
-    lProdutosModel.Free;
+    lProdutosModel:=nil;
   end;
 end;
 
