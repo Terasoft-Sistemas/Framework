@@ -10,12 +10,15 @@ uses
   Spring.Collections,
   System.Variants,
   Terasoft.ConstrutorDao,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao,
   Terasoft.Utils;
 
 type
-  TTabelaJurosDao = class
+  TTabelaJurosDao = class;
+  ITTabelaJurosDao=IObject<TTabelaJurosDao>;
 
+  TTabelaJurosDao = class
   private
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;

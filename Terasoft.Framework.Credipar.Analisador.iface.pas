@@ -398,8 +398,8 @@ begin
 
   pResultado := pCredipar.enviaProposta(pResultado);
 
-  pCredipar.controleAlteracoes.setValor(RETORNO_CREDIPAR_RESULTADO,IntToStr(pCredipar.proposta.id), pResultado.toHTML(
-            '', 'Resultado de ENVIO para a CREDIPAR @' + DateTimeToStr(Now), [ orosh_semHeader ]));
+//  pCredipar.controleAlteracoes.setValor(RETORNO_CREDIPAR_RESULTADO,IntToStr(pCredipar.proposta.id), pResultado.toHTML(
+//            '', 'Resultado de ENVIO para a CREDIPAR @' + DateTimeToStr(Now), [ orosh_semHeader ]));
 
   if(pResultado.erros<>save) then exit;
 end;
