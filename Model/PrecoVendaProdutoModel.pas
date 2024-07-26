@@ -5,14 +5,18 @@ interface
 uses
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TPrecoVendaProdutoModel = class
+  TPrecoVendaProdutoModel = class;
+  ITPrecoVendaProdutoModel=IObject<TPrecoVendaProdutoModel>;
 
+  TPrecoVendaProdutoModel = class
   private
+    [weak] mySelf: ITPrecoVendaProdutoModel;
     vIConexao : IConexao;
-    FPrecoVendaProdutosLista: IList<TPrecoVendaProdutoModel>;
+    FPrecoVendaProdutosLista: IList<ITPrecoVendaProdutoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -28,7 +32,7 @@ type
     FIDRecordView: String;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetPrecoVendaProdutosLista(const Value: IList<TPrecoVendaProdutoModel>);
+    procedure SetPrecoVendaProdutosLista(const Value: IList<ITPrecoVendaProdutoModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -47,17 +51,19 @@ type
     property VALOR_VENDA: Variant read FVALOR_VENDA write SetVALOR_VENDA;
     property SYSTIME: Variant read FSYSTIME write SetSYSTIME;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITPrecoVendaProdutoModel;
+
     function Incluir : String;
-    function Alterar(pID : String) : TPrecoVendaProdutoModel;
+    function Alterar(pID : String) : ITPrecoVendaProdutoModel;
     function Excluir(pID : String) : String;
     function Salvar  : String;
-    function carregaClasse(pID : String) : TPrecoVendaProdutoModel;
+    function carregaClasse(pID : String) : ITPrecoVendaProdutoModel;
     procedure obterLista;
 
-    property PrecoVendaProdutosLista: IList<TPrecoVendaProdutoModel> read FPrecoVendaProdutosLista write SetPrecoVendaProdutosLista;
+    property PrecoVendaProdutosLista: IList<ITPrecoVendaProdutoModel> read FPrecoVendaProdutosLista write SetPrecoVendaProdutosLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -76,33 +82,33 @@ uses
 
 { TPrecoVendaProdutoModel }
 
-function TPrecoVendaProdutoModel.Alterar(pID: String): TPrecoVendaProdutoModel;
+function TPrecoVendaProdutoModel.Alterar(pID: String): ITPrecoVendaProdutoModel;
 var
-  lPrecoVendaProdutoModel : TPrecoVendaProdutoModel;
+  lPrecoVendaProdutoModel : ITPrecoVendaProdutoModel;
 begin
-  lPrecoVendaProdutoModel := TPrecoVendaProdutoModel.Create(vIConexao);
+  lPrecoVendaProdutoModel := TPrecoVendaProdutoModel.getNewIface(vIConexao);
   try
-    lPrecoVendaProdutoModel       := lPrecoVendaProdutoModel.carregaClasse(pID);
-    lPrecoVendaProdutoModel.Acao  := tacAlterar;
+    lPrecoVendaProdutoModel       := lPrecoVendaProdutoModel.objeto.carregaClasse(pID);
+    lPrecoVendaProdutoModel.objeto.Acao  := tacAlterar;
     Result                        := lPrecoVendaProdutoModel;
   finally
 
   end;
 end;
 
-function TPrecoVendaProdutoModel.carregaClasse(pID: String): TPrecoVendaProdutoModel;
+function TPrecoVendaProdutoModel.carregaClasse(pID: String): ITPrecoVendaProdutoModel;
 var
-  lPrecoVendaProdutoModel: TPrecoVendaProdutoDao;
+  lPrecoVendaProdutoModel: ITPrecoVendaProdutoDao;
 begin
-  lPrecoVendaProdutoModel := TPrecoVendaProdutoDao.Create(vIConexao);
+  lPrecoVendaProdutoModel := TPrecoVendaProdutoDao.getNewIface(vIConexao);
   try
-    Result := lPrecoVendaProdutoModel.carregaClasse(ID);
+    Result := lPrecoVendaProdutoModel.objeto.carregaClasse(ID);
   finally
-    lPrecoVendaProdutoModel.Free;
+    lPrecoVendaProdutoModel:=nil;
   end;
 end;
 
-constructor TPrecoVendaProdutoModel.Create(pIConexao : IConexao);
+constructor TPrecoVendaProdutoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -121,6 +127,12 @@ begin
   Result    := self.Salvar;
 end;
 
+class function TPrecoVendaProdutoModel.getNewIface(pIConexao: IConexao): ITPrecoVendaProdutoModel;
+begin
+  Result := TImplObjetoOwner<TPrecoVendaProdutoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TPrecoVendaProdutoModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
@@ -129,46 +141,46 @@ end;
 
 procedure TPrecoVendaProdutoModel.obterLista;
 var
-  lPrecoVendaProdutoLista: TPrecoVendaProdutoDao;
+  lPrecoVendaProdutoLista: ITPrecoVendaProdutoDao;
 begin
-  lPrecoVendaProdutoLista := TPrecoVendaProdutoDao.Create(vIConexao);
+  lPrecoVendaProdutoLista := TPrecoVendaProdutoDao.getNewIface(vIConexao);
 
   try
-    lPrecoVendaProdutoLista.TotalRecords    := FTotalRecords;
-    lPrecoVendaProdutoLista.WhereView       := FWhereView;
-    lPrecoVendaProdutoLista.CountView       := FCountView;
-    lPrecoVendaProdutoLista.OrderView       := FOrderView;
-    lPrecoVendaProdutoLista.StartRecordView := FStartRecordView;
-    lPrecoVendaProdutoLista.LengthPageView  := FLengthPageView;
-    lPrecoVendaProdutoLista.IDRecordView    := FIDRecordView;
+    lPrecoVendaProdutoLista.objeto.TotalRecords    := FTotalRecords;
+    lPrecoVendaProdutoLista.objeto.WhereView       := FWhereView;
+    lPrecoVendaProdutoLista.objeto.CountView       := FCountView;
+    lPrecoVendaProdutoLista.objeto.OrderView       := FOrderView;
+    lPrecoVendaProdutoLista.objeto.StartRecordView := FStartRecordView;
+    lPrecoVendaProdutoLista.objeto.LengthPageView  := FLengthPageView;
+    lPrecoVendaProdutoLista.objeto.IDRecordView    := FIDRecordView;
 
-    lPrecoVendaProdutoLista.obterLista;
+    lPrecoVendaProdutoLista.objeto.obterLista;
 
-    FTotalRecords  := lPrecoVendaProdutoLista.TotalRecords;
-    FPrecoVendaProdutosLista := lPrecoVendaProdutoLista.PrecoVendaProdutosLista;
+    FTotalRecords  := lPrecoVendaProdutoLista.objeto.TotalRecords;
+    FPrecoVendaProdutosLista := lPrecoVendaProdutoLista.objeto.PrecoVendaProdutosLista;
 
   finally
-    lPrecoVendaProdutoLista.Free;
+    lPrecoVendaProdutoLista:=nil;
   end;
 end;
 
 function TPrecoVendaProdutoModel.Salvar: String;
 var
-  lPrecoVendaProdutoDao: TPrecoVendaProdutoDao;
+  lPrecoVendaProdutoDao: ITPrecoVendaProdutoDao;
 begin
-  lPrecoVendaProdutoDao := TPrecoVendaProdutoDao.Create(vIConexao);
+  lPrecoVendaProdutoDao := TPrecoVendaProdutoDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lPrecoVendaProdutoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lPrecoVendaProdutoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lPrecoVendaProdutoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lPrecoVendaProdutoDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lPrecoVendaProdutoDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lPrecoVendaProdutoDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lPrecoVendaProdutoDao.Free;
+    lPrecoVendaProdutoDao:=nil;
   end;
 end;
 
