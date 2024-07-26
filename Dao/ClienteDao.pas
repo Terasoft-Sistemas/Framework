@@ -1024,8 +1024,6 @@ begin
 
     Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
-    lConfiguracoes := vIConexao.getTerasoftConfiguracoes as ITerasoftConfiguracoes;
-
     lSql := 'select clientes.codigo_cli from ' + self.NomeTabela +
             '  where clientes.codigo_cli <> '+ QuotedStr(pCliente)   +
             '  and clientes.CNPJ_CPF_CLI =  '+ QuotedStr(pCNPJCPF)   ;
