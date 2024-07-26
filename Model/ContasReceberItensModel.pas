@@ -583,7 +583,6 @@ begin
   finally
     lRecebimentoCartaoModel:=nil;
     lRecebimentoExclusao:=nil;
-    lVendaCartaoExclusao.Free;
     lVendaCartaoModel.Free;
     lCaixaModel.Free;
   end;
