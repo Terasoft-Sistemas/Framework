@@ -4,12 +4,17 @@ interface
 
 uses
   System.Generics.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TObtemAliquotasModel = class
+  TObtemAliquotasModel = class;
+  ITObtemAliquotasModel=IObject<TObtemAliquotasModel>;
 
+
+  TObtemAliquotasModel = class
   private
+    [weak] mySelf: ITObtemAliquotasModel;
     vIConexao : IConexao;
     FDESTINATARIO_UF: String;
     FICMS_SOMA_FRETE_BASE: String;
@@ -111,10 +116,12 @@ type
     property DESTINATARIO_UF : String read FDESTINATARIO_UF write SetDESTINATARIO_UF;
     property MODELO_NF       : String read FMODELO_NF write SetMODELO_NF;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function obterImpostos: TObtemAliquotasModel;
+    class function getNewIface(pIConexao: IConexao): ITObtemAliquotasModel;
+
+    function obterImpostos: ITObtemAliquotasModel;
 
   end;
 
@@ -127,7 +134,7 @@ uses
 
 { TObtemAliquotasModel }
 
-constructor TObtemAliquotasModel.Create(pIConexao : IConexao);
+constructor TObtemAliquotasModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -138,25 +145,32 @@ begin
   inherited;
 end;
 
-function TObtemAliquotasModel.obterImpostos: TObtemAliquotasModel;
-var
-  lObtemAliquotasDao: TObtemAliquotasDao;
+class function TObtemAliquotasModel.getNewIface(
+  pIConexao: IConexao): ITObtemAliquotasModel;
 begin
-  lObtemAliquotasDao := TObtemAliquotasDao.Create(vIConexao);
+  Result := TImplObjetoOwner<TObtemAliquotasModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TObtemAliquotasModel.obterImpostos: ITObtemAliquotasModel;
+var
+  lObtemAliquotasDao: ITObtemAliquotasDao;
+begin
+  lObtemAliquotasDao := TObtemAliquotasDao.getNewIface(vIConexao);
 
   if (FCODIGO_PRODUTO = '') or (FMODELO_NF = '') or (FDESTINATARIO_UF = '') or (FEMITENTE_UF = '')  then
     CriaException('Produto/modelo nf/uf emitente/uf destinatario devem ser informdos.');
 
   try
-    lObtemAliquotasDao.CODIGO_PRODUTO    := FCODIGO_PRODUTO;
-    lObtemAliquotasDao.CODIGO_CLIENTE    := FCODIGO_CLIENTE;
-    lObtemAliquotasDao.EMITENTE_UF       := FEMITENTE_UF;
-    lObtemAliquotasDao.DESTINATARIO_UF   := FDESTINATARIO_UF;
-    lObtemAliquotasDao.MODELO_NF         := FMODELO_NF;
+    lObtemAliquotasDao.objeto.CODIGO_PRODUTO    := FCODIGO_PRODUTO;
+    lObtemAliquotasDao.objeto.CODIGO_CLIENTE    := FCODIGO_CLIENTE;
+    lObtemAliquotasDao.objeto.EMITENTE_UF       := FEMITENTE_UF;
+    lObtemAliquotasDao.objeto.DESTINATARIO_UF   := FDESTINATARIO_UF;
+    lObtemAliquotasDao.objeto.MODELO_NF         := FMODELO_NF;
 
-    Result := lObtemAliquotasDao.obterImpostos;
+    Result := lObtemAliquotasDao.objeto.obterImpostos;
   finally
-    lObtemAliquotasDao.Free;
+    lObtemAliquotasDao:=nil;
   end;
 end;
 
