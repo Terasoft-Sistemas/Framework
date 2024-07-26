@@ -375,7 +375,7 @@ end;
 
 function TOrcamentoModel.finalizarOrcamento(pNumeroOrc: String): String;
 var
-  lPedidoVendaModel        : TPedidoVendaModel;
+  lPedidoVendaModel        : ITPedidoVendaModel;
   lPedidoItensModel        : TPedidoItensModel;
   lOrcamentoItensModel     : TOrcamentoItensModel;
   lOrcamentoModel          : TOrcamentoModel;
@@ -393,7 +393,7 @@ begin
 
   lOrcamentoModel      := TOrcamentoModel.Create(vIConexao);
   lOrcamentoItensModel := TOrcamentoItensModel.Create(vIConexao);
-  lPedidoVendaModel    := TPedidoVendaModel.Create(vIConexao);
+  lPedidoVendaModel    := TPedidoVendaModel.getNewIface(vIConexao);
   lPedidoItensModel    := TPedidoItensModel.Create(vIConexao);
   lClientesModel       := TClienteModel.Create(vIConexao);
   lEmpresaModel        := TEmpresaModel.getNewIface(vIConexao);
@@ -401,11 +401,11 @@ begin
 
   try
 
-    lPedidoVendaModel.WhereView := ' AND PEDIDOVENDA.NUMERO_ORC = '+ QuotedStr(pNumeroOrc);
-    lPedidoVendaModel.obterLista;
+    lPedidoVendaModel.objeto.WhereView := ' AND PEDIDOVENDA.NUMERO_ORC = '+ QuotedStr(pNumeroOrc);
+    lPedidoVendaModel.objeto.obterLista;
 
-    if lPedidoVendaModel.TotalRecords > 0 then begin
-      Result := lPedidoVendaModel.PedidoVendasLista[0].NUMERO_PED;
+    if lPedidoVendaModel.objeto.TotalRecords > 0 then begin
+      Result := lPedidoVendaModel.objeto.PedidoVendasLista.First.objeto.NUMERO_PED;
       exit;
     end;
 
@@ -439,43 +439,43 @@ begin
     lClientesModel.IDRecordView := lOrcamentoModel.CODIGO_CLI;
     lTableCliente := lClientesModel.ObterListaMemTable;
 
-    lPedidoVendaModel.Acao                 := tacIncluir;
-    lPedidoVendaModel.LOJA                 := lOrcamentoModel.LOJA;
-    lPedidoVendaModel.DATA_PED             := DateToStr(vIConexao.DataServer);
-    lPedidoVendaModel.HORA_PED             := TimeToStr(vIConexao.HoraServer);
-    lPedidoVendaModel.PRIMEIROVENC_PED     := lOrcamentoModel.PRIMEIROVCTO_ORC;
-    lPedidoVendaModel.ACRES_PED            := lOrcamentoModel.ACRES_ORC;
-    lPedidoVendaModel.DESC_PED             := lOrcamentoModel.DESCONTO_ORC;
-    lPedidoVendaModel.DESCONTO_PED         := lOrcamentoModel.DESC_ORC;
-    lPedidoVendaModel.VALOR_PED            := FloatToStr((StrToFloat(lOrcamentoModel.TOTAL_ORC)+StrToFloat(lOrcamentoModel.DESCONTO_ORC))-StrToFloat(lOrcamentoModel.ACRES_ORC));
-    lPedidoVendaModel.TOTAL_PED            := lOrcamentoModel.TOTAL_ORC;
-    lPedidoVendaModel.VALORENTADA_PED      := lOrcamentoModel.VLRENTRADA_ORC;
-    lPedidoVendaModel.PARCELAS_PED         := lOrcamentoModel.PARCELAS_ORC;
-    lPedidoVendaModel.PARCELA_PED          := lOrcamentoModel.VLRPARCELA_ORC;
-    lPedidoVendaModel.CTR_IMPRESSAO_PED    := '0';
-    lPedidoVendaModel.RESERVADO            := 'N';
-    lPedidoVendaModel.TIPO_FRETE           := lOrcamentoModel.TIPO_FRETE;
-    lPedidoVendaModel.SMS                  := 'N';
-    lPedidoVendaModel.ENTREGA              := 'N';
-    lPedidoVendaModel.STATUS_PED           := 'P';
-    lPedidoVendaModel.STATUS               := 'O';
-    lPedidoVendaModel.TIPO_PED             := 'P';
-    lPedidoVendaModel.TABJUROS_PED         := 'N';
-    lPedidoVendaModel.NUMERO_ORC           := lOrcamentoModel.NUMERO_ORC;
-    lPedidoVendaModel.CODIGO_CLI           := lOrcamentoModel.CODIGO_CLI;
-    lPedidoVendaModel.CNPJ_CPF_CONSUMIDOR  := lTableCliente.objeto.fieldByName('CNPJ_CPF_CLI').AsString;
-    lPedidoVendaModel.CODIGO_PORT          := lOrcamentoModel.CODIGO_PORT;
-    lPedidoVendaModel.CODIGO_VEN           := lOrcamentoModel.CODIGO_VEN;
-    lPedidoVendaModel.CODIGO_TIP           := lOrcamentoModel.CODIGO_TIP;
-    lPedidoVendaModel.FRETE_PED            := lOrcamentoModel.FRETE;
-    lPedidoVendaModel.INFORMACOES_PED      := lOrcamentoModel.INFORMACOES_ORC;
-    lPedidoVendaModel.PRECO_VENDA_ID       := lOrcamentoModel.PRECO_VENDA_ID;
-    lPedidoVendaModel.USUARIO_PED          := self.vIConexao.getUSer.ID;
-    lPedidoVendaModel.IDUsuario            := self.vIConexao.getUSer.ID;
+    lPedidoVendaModel.objeto.Acao                 := tacIncluir;
+    lPedidoVendaModel.objeto.LOJA                 := lOrcamentoModel.LOJA;
+    lPedidoVendaModel.objeto.DATA_PED             := DateToStr(vIConexao.DataServer);
+    lPedidoVendaModel.objeto.HORA_PED             := TimeToStr(vIConexao.HoraServer);
+    lPedidoVendaModel.objeto.PRIMEIROVENC_PED     := lOrcamentoModel.PRIMEIROVCTO_ORC;
+    lPedidoVendaModel.objeto.ACRES_PED            := lOrcamentoModel.ACRES_ORC;
+    lPedidoVendaModel.objeto.DESC_PED             := lOrcamentoModel.DESCONTO_ORC;
+    lPedidoVendaModel.objeto.DESCONTO_PED         := lOrcamentoModel.DESC_ORC;
+    lPedidoVendaModel.objeto.VALOR_PED            := FloatToStr((StrToFloat(lOrcamentoModel.TOTAL_ORC)+StrToFloat(lOrcamentoModel.DESCONTO_ORC))-StrToFloat(lOrcamentoModel.ACRES_ORC));
+    lPedidoVendaModel.objeto.TOTAL_PED            := lOrcamentoModel.TOTAL_ORC;
+    lPedidoVendaModel.objeto.VALORENTADA_PED      := lOrcamentoModel.VLRENTRADA_ORC;
+    lPedidoVendaModel.objeto.PARCELAS_PED         := lOrcamentoModel.PARCELAS_ORC;
+    lPedidoVendaModel.objeto.PARCELA_PED          := lOrcamentoModel.VLRPARCELA_ORC;
+    lPedidoVendaModel.objeto.CTR_IMPRESSAO_PED    := '0';
+    lPedidoVendaModel.objeto.RESERVADO            := 'N';
+    lPedidoVendaModel.objeto.TIPO_FRETE           := lOrcamentoModel.TIPO_FRETE;
+    lPedidoVendaModel.objeto.SMS                  := 'N';
+    lPedidoVendaModel.objeto.ENTREGA              := 'N';
+    lPedidoVendaModel.objeto.STATUS_PED           := 'P';
+    lPedidoVendaModel.objeto.STATUS               := 'O';
+    lPedidoVendaModel.objeto.TIPO_PED             := 'P';
+    lPedidoVendaModel.objeto.TABJUROS_PED         := 'N';
+    lPedidoVendaModel.objeto.NUMERO_ORC           := lOrcamentoModel.NUMERO_ORC;
+    lPedidoVendaModel.objeto.CODIGO_CLI           := lOrcamentoModel.CODIGO_CLI;
+    lPedidoVendaModel.objeto.CNPJ_CPF_CONSUMIDOR  := lTableCliente.objeto.fieldByName('CNPJ_CPF_CLI').AsString;
+    lPedidoVendaModel.objeto.CODIGO_PORT          := lOrcamentoModel.CODIGO_PORT;
+    lPedidoVendaModel.objeto.CODIGO_VEN           := lOrcamentoModel.CODIGO_VEN;
+    lPedidoVendaModel.objeto.CODIGO_TIP           := lOrcamentoModel.CODIGO_TIP;
+    lPedidoVendaModel.objeto.FRETE_PED            := lOrcamentoModel.FRETE;
+    lPedidoVendaModel.objeto.INFORMACOES_PED      := lOrcamentoModel.INFORMACOES_ORC;
+    lPedidoVendaModel.objeto.PRECO_VENDA_ID       := lOrcamentoModel.PRECO_VENDA_ID;
+    lPedidoVendaModel.objeto.USUARIO_PED          := self.vIConexao.getUSer.ID;
+    lPedidoVendaModel.objeto.IDUsuario            := self.vIConexao.getUSer.ID;
 
-    lPedido := lPedidoVendaModel.Salvar;
+    lPedido := lPedidoVendaModel.objeto.Salvar;
 
-    lPedidoVendaModel.NUMERO_PED := lPedido;
+    lPedidoVendaModel.objeto.NUMERO_PED := lPedido;
 
     lOrcamentoItensModel.WhereView := ' AND I.NUMERO_ORC = '+QuotedStr(pNumeroOrc)+' ';
     lMemtable := lOrcamentoItensModel.obterLista;
@@ -517,10 +517,10 @@ begin
     lPedidoItensModel.Acao := tacIncluirLote;
     lPedidoItensModel.Salvar;
 
-    lPedidoVendaModel := lPedidoVendaModel.carregaClasse(lPedido);
-    lPedidoVendaModel.calcularTotais;
+    lPedidoVendaModel := lPedidoVendaModel.objeto.carregaClasse(lPedido);
+    lPedidoVendaModel.objeto.calcularTotais;
 
-    lPedidoVendaModel.gerarContasReceberPedido;
+    lPedidoVendaModel.objeto.gerarContasReceberPedido;
 
     lOrcamentoModel.FAcao := tacAlterar;
     lOrcamentoModel.FSITUACAO_ORC := 'A';
@@ -531,7 +531,7 @@ begin
     Result := lPedido;
   finally
     lOrcamentoModel.Free;
-    lPedidoVendaModel.Free;
+    lPedidoVendaModel:=nil;
     lOrcamentoItensModel.Free;
     lPedidoItensModel.Free;
     lClientesModel.Free;

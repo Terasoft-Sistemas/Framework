@@ -9,10 +9,14 @@ uses
   Terasoft.Utils,
   PedidoItensModel,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   Spring.Collections,
   FireDAC.Comp.Client;
 
 type
+  TPedidoVendaModel = class;
+  ITPedidoVendaModel=IObject<TPedidoVendaModel>;
+
   TVenderItem = record
     BarrasProduto: String;
     Quantidade: Double;
@@ -24,10 +28,11 @@ type
 
   TPedidoVendaModel = class
   private
+    [weak] mySelf: ITPedidoVendaModel;
 
     vIConexao : IConexao;
 
-    FPedidoVendasLista: IList<TPedidoVendaModel>;
+    FPedidoVendasLista: IList<ITPedidoVendaModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -184,7 +189,7 @@ type
     FSEGURO_PRESTAMISTA_VALOR: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetPedidoVendasLista(const Value: IList<TPedidoVendaModel>);
+    procedure SetPedidoVendasLista(const Value: IList<ITPedidoVendaModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -488,7 +493,7 @@ type
     property SEGURO_PRESTAMISTA_VALOR :Variant read FSEGURO_PRESTAMISTA_VALOR write SetSEGURO_PRESTAMISTA_VALOR;
     property SEGURO_PRESTAMISTA_CUSTO :Variant read FSEGURO_PRESTAMISTA_CUSTO write SetSEGURO_PRESTAMISTA_CUSTO;
 
-    property PedidoVendasLista: IList<TPedidoVendaModel> read FPedidoVendasLista write SetPedidoVendasLista;
+    property PedidoVendasLista: IList<ITPedidoVendaModel> read FPedidoVendasLista write SetPedidoVendasLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -499,18 +504,20 @@ type
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
     property IDUsuario: String read FIDUsuario write SetIDUsuario;
 
-  	constructor Create(pConexao: IConexao);
+  	constructor _Create(pConexao: IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITPedidoVendaModel;
+
     function Incluir : String;
-    function Alterar(pID : String) : TPedidoVendaModel;
+    function Alterar(pID : String) : ITPedidoVendaModel;
     function Excluir(pID : String) : String;
     function Salvar : String;
 
     procedure obterLista;
-    function obterPedido(pNumeroPedido: String): TPedidoVendaModel;
+    function obterPedido(pNumeroPedido: String): ITPedidoVendaModel;
 
-    function carregaClasse(pId: String): TPedidoVendaModel;
+    function carregaClasse(pId: String): ITPedidoVendaModel;
     procedure RecalcularImpostos(pNumeroPedido: String);
     function GerarNF(pModelo, pSerie: String): String;
     function gerarContasReceberPedido: String; overload;
@@ -567,14 +574,14 @@ begin
   Result    := self.Salvar;
 end;
 
-function TPedidoVendaModel.Alterar(pID: String): TPedidoVendaModel;
+function TPedidoVendaModel.Alterar(pID: String): ITPedidoVendaModel;
 var
-  lPedidoVendaModel : TPedidoVendaModel;
+  lPedidoVendaModel : ITPedidoVendaModel;
 begin
-  lPedidoVendaModel := TPedidoVendaModel.Create(vIConexao);
+  lPedidoVendaModel := TPedidoVendaModel.getNewIface(vIConexao);
   try
-    lPedidoVendaModel      := lPedidoVendaModel.carregaClasse(pID);
-    lPedidoVendaModel.Acao := tacAlterar;
+    lPedidoVendaModel      := lPedidoVendaModel.objeto.carregaClasse(pID);
+    lPedidoVendaModel.objeto.Acao := tacAlterar;
     Result                 := lPedidoVendaModel;
   finally
 
@@ -613,21 +620,21 @@ begin
   end;
 end;
 
-function TPedidoVendaModel.carregaClasse(pId: String): TPedidoVendaModel;
+function TPedidoVendaModel.carregaClasse(pId: String): ITPedidoVendaModel;
 var
-  lPedidoVendaDao: TPedidoVendaDao;
+  lPedidoVendaDao: ITPedidoVendaDao;
 begin
-  lPedidoVendaDao := TPedidoVendaDao.Create(vIConexao);
+  lPedidoVendaDao := TPedidoVendaDao.getNewIface(vIConexao);
   try
-    Result := lPedidoVendaDao.carregaClasse(pId);
+    Result := lPedidoVendaDao.objeto.carregaClasse(pId);
   finally
-    lPedidoVendaDao.Free;
+    lPedidoVendaDao:=nil;
   end;
 end;
 
 procedure TPedidoVendaModel.concluirPedido;
 var
-  lPedidoVendaModel        : TPedidoVendaModel;
+  lPedidoVendaModel        : ITPedidoVendaModel;
   lPedidoItensModel,
   lModel                   : TPedidoItensModel;
   lContasReceberModel      : TContasReceberModel;
@@ -637,7 +644,7 @@ var
   lPixModel                : ITPixModel;
   lComissaoCliente         : Double;
 begin
-  lPedidoVendaModel        := TPedidoVendaModel.Create(vIConexao);
+  lPedidoVendaModel        := TPedidoVendaModel.getNewIface(vIConexao);
   lPedidoItensModel        := TPedidoItensModel.Create(vIConexao);
   lClienteModel            := TClienteModel.Create(vIConexao);
   lContasReceberModel      := TContasReceberModel.Create(vIConexao);
@@ -645,12 +652,12 @@ begin
   lPixModel                := TPixModel.getNewIface(vIConexao);
 
   try
-    lPedidoVendaModel := lPedidoVendaModel.carregaClasse(self.FNUMERO_PED);
+    lPedidoVendaModel := lPedidoVendaModel.objeto.carregaClasse(self.FNUMERO_PED);
 
-    if lPedidoVendaModel.WEB_PEDIDO_ID <> '' then
+    if lPedidoVendaModel.objeto.WEB_PEDIDO_ID <> '' then
       lReservaModel := TReservaModel.Create(vIConexao.NovaConexao('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA));
 
-    lContasReceberModel.IDPedidoView := lPedidoVendaModel.NUMERO_PED;
+    lContasReceberModel.IDPedidoView := lPedidoVendaModel.objeto.NUMERO_PED;
     lContasReceberModel.WhereView    := ' and portador.tpag_nfe = ''17'' and portador.pix_chave is not null';
     lContasReceberModel.obterContasReceberPedido;
 
@@ -672,34 +679,34 @@ begin
       end;
     end;
 
-    lPedidoVendaModel.Acao := tacAlterar;
-    lPedidoVendaModel.STATUS_PED := 'B';
-    lPedidoVendaModel.STATUS     := 'P';
-    lPedidoVendaModel.Salvar;
+    lPedidoVendaModel.objeto.Acao := tacAlterar;
+    lPedidoVendaModel.objeto.STATUS_PED := 'B';
+    lPedidoVendaModel.objeto.STATUS     := 'P';
+    lPedidoVendaModel.objeto.Salvar;
 
-    lPedidoItensModel.IDPedidoVendaView := lPedidoVendaModel.NUMERO_PED;
+    lPedidoItensModel.IDPedidoVendaView := lPedidoVendaModel.objeto.NUMERO_PED;
     lPedidoItensModel.obterLista;
 
     lComissaoCliente := lClienteModel.comissaoCliente(self.FCODIGO_CLI);
 
     for lModel in lPedidoItensModel.PedidoItenssLista do
     begin
-      if lPedidoVendaModel.FRETE_PED > 0 then
-        lModel.aplicarFreteItem(lPedidoVendaModel.FRETE_PED, lPedidoVendaModel.VALOR_PED);
+      if lPedidoVendaModel.objeto.FRETE_PED > 0 then
+        lModel.aplicarFreteItem(lPedidoVendaModel.objeto.FRETE_PED, lPedidoVendaModel.objeto.VALOR_PED);
 
       if (lModel.TIPO_VENDA <> 'CD') then
         lModel.gerarEstoque;
 
-      lModel.calcularComissao(lPedidoVendaModel.CODIGO_VEN, lPedidoVendaModel.CODIGO_TIP, lComissaoCliente, lPedidoVendaModel.GERENTE_ID);
+      lModel.calcularComissao(lPedidoVendaModel.objeto.CODIGO_VEN, lPedidoVendaModel.objeto.CODIGO_TIP, lComissaoCliente, lPedidoVendaModel.objeto.GERENTE_ID);
 
-      if (lPedidoVendaModel.WEB_PEDIDO_ID <> '') and ((lModel.TIPO_VENDA = 'CD') or (lModel.ENTREGA = 'S')) then
-        lReservaModel.concluirReserva(IIF(lModel.TIPO_VENDA = 'CD', '2', 'L'), lPedidoVendaModel.NUMERO_PED, lModel.WEB_PEDIDOITENS_ID, vIConexao.getEmpresa.LOJA);
+      if (lPedidoVendaModel.objeto.WEB_PEDIDO_ID <> '') and ((lModel.TIPO_VENDA = 'CD') or (lModel.ENTREGA = 'S')) then
+        lReservaModel.concluirReserva(IIF(lModel.TIPO_VENDA = 'CD', '2', 'L'), lPedidoVendaModel.objeto.NUMERO_PED, lModel.WEB_PEDIDOITENS_ID, vIConexao.getEmpresa.LOJA);
     end;
 
   finally
     lContasReceberItensModel.Free;
     lContasReceberModel.Free;
-    lPedidoVendaModel.Free;
+    lPedidoVendaModel:=nil;
     lPedidoItensModel.Free;
     lClienteModel.Free;
     lPixModel:=nil;
@@ -709,7 +716,7 @@ begin
   end;
 end;
 
-constructor TPedidoVendaModel.Create(pConexao : IConexao);
+constructor TPedidoVendaModel._Create(pConexao : IConexao);
 begin
   vIConexao := pConexao;
 end;
@@ -1243,6 +1250,12 @@ begin
 end;
 
 
+class function TPedidoVendaModel.getNewIface(pIConexao: IConexao): ITPedidoVendaModel;
+begin
+  Result := TImplObjetoOwner<TPedidoVendaModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 procedure TPedidoVendaModel.validaBloqueioPortador(pPortador, pCliente : String);
 var
   lPortadorModel : ITPortadorModel;
@@ -1277,7 +1290,7 @@ var
   lConfiguracoes     : ITerasoftConfiguracoes;
   lProdutosModel     : ITProdutosModel;
   lPedidoItensModel  : TPedidoItensModel;
-  lPedidoVendaLista  : TPedidoVendaDao;
+  lPedidoVendaLista  : ITPedidoVendaDao;
   lProdutoPreco      : TProdutoPreco;
   lSaldoDisponivel   : Double;
   lCodBalanca,
@@ -1288,7 +1301,7 @@ begin
   Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
   lProdutosModel    := TProdutosModel.getNewIface(vIConexao);
   lPedidoItensModel := TPedidoItensModel.Create(vIConexao);
-  lPedidoVendaLista := TPedidoVendaDao.Create(vIConexao);
+  lPedidoVendaLista := TPedidoVendaDao.getNewIface(vIConexao);
   lCodBalanca       := '';
 
   try
@@ -1296,7 +1309,7 @@ begin
       CriaException('Quantidade inválida.');
 
     if lConfiguracoes.objeto.valorTag('BALANCA_COPY_INI_PRODUTO', '', tvString) <> '' then
-      lCodBalanca := lPedidoVendaLista.obterProdutoBalanca(pVenderItem.BarrasProduto);
+      lCodBalanca := lPedidoVendaLista.objeto.obterProdutoBalanca(pVenderItem.BarrasProduto);
 
     if not lCodBalanca.IsEmpty then
     begin
@@ -1377,7 +1390,7 @@ begin
   finally
     lProdutosModel:=nil;
     lPedidoItensModel.Free;
-    lPedidoVendaLista.Free;
+    lPedidoVendaLista:=nil;
   end;
 end;
 
@@ -1403,42 +1416,42 @@ begin
   self.gerarContasReceberPedido(lValorContasReceber.ToString, self.FCODIGO_PORT, lParcelas, self.FPRIMEIROVENC_PED);
 end;
 
-function TPedidoVendaModel.obterPedido(pNumeroPedido: String): TPedidoVendaModel;
+function TPedidoVendaModel.obterPedido(pNumeroPedido: String): ITPedidoVendaModel;
 var
-  lPedidoVendaDao: TPedidoVendaDao;
+  lPedidoVendaDao: ITPedidoVendaDao;
 begin
-  lPedidoVendaDao := TPedidoVendaDao.Create(vIConexao);
+  lPedidoVendaDao := TPedidoVendaDao.getNewIface(vIConexao);
   try
-    Result := lPedidoVendaDao.obterPedido(pNumeroPedido);
+    Result := lPedidoVendaDao.objeto.obterPedido(pNumeroPedido);
   finally
-    lPedidoVendaDao.Free;
+    lPedidoVendaDao:=nil;
   end;
 end;
 
 procedure TPedidoVendaModel.reabrirPedido;
 var
-  lPedidoVendaModel   : TPedidoVendaModel;
+  lPedidoVendaModel   : ITPedidoVendaModel;
   lPedidoItensModel,
   lModel              : TPedidoItensModel;
   lCaixaControleModel : TCaixaControleModel;
 begin
-  lPedidoVendaModel   := TPedidoVendaModel.Create(vIConexao);
+  lPedidoVendaModel   := TPedidoVendaModel.getNewIface(vIConexao);
   lPedidoItensModel   := TPedidoItensModel.Create(vIConexao);
   lCaixaControleModel := TCaixaControleModel.Create(vIConexao);
 
   try
-    lPedidoVendaModel := lPedidoVendaModel.carregaClasse(self.FNUMERO_PED);
+    lPedidoVendaModel := lPedidoVendaModel.objeto.carregaClasse(self.FNUMERO_PED);
 
-    if lPedidoVendaModel.NUMERO_NF <> '' then
+    if lPedidoVendaModel.objeto.NUMERO_NF <> '' then
       CriaException('Não é possivel reabrir pedido com NF-e vinculada.');
 
-    if lPedidoVendaModel.WEB_PEDIDO_ID <> '' then
+    if lPedidoVendaModel.objeto.WEB_PEDIDO_ID <> '' then
       CriaException('Venda originada de venda assistida, efetue o processo de devolução.');
 
-    if lCaixaControleModel.vendaCaixaFechado(transformaDataHoraFireBird(lPedidoVendaModel.DATA_PED + lPedidoVendaModel.HORA_PED)) then
+    if lCaixaControleModel.vendaCaixaFechado(transformaDataHoraFireBird(lPedidoVendaModel.objeto.DATA_PED + lPedidoVendaModel.objeto.HORA_PED)) then
       CriaException('Não é possível reabrir venda com o caixa já finalizado');
 
-    lPedidoItensModel.IDPedidoVendaView := lPedidoVendaModel.NUMERO_PED;
+    lPedidoItensModel.IDPedidoVendaView := lPedidoVendaModel.objeto.NUMERO_PED;
     lPedidoItensModel.obterLista;
 
     for lModel in lPedidoItensModel.PedidoItenssLista do
@@ -1451,13 +1464,13 @@ begin
       lModel.Salvar;
     end;
 
-    lPedidoVendaModel.Acao := tacAlterar;
-    lPedidoVendaModel.STATUS_PED := 'P';
-    lPedidoVendaModel.STATUS     := 'O';
-    lPedidoVendaModel.Salvar;
+    lPedidoVendaModel.objeto.Acao := tacAlterar;
+    lPedidoVendaModel.objeto.STATUS_PED := 'P';
+    lPedidoVendaModel.objeto.STATUS     := 'O';
+    lPedidoVendaModel.objeto.Salvar;
 
   finally
-    lPedidoVendaModel.Free;
+    lPedidoVendaModel:=nil;
     lPedidoItensModel.Free;
     lCaixaControleModel.Free;
   end;
@@ -1465,63 +1478,63 @@ end;
 
 procedure TPedidoVendaModel.obterLista;
 var
-  lPedidoVendaLista: TPedidoVendaDao;
+  lPedidoVendaLista: ITPedidoVendaDao;
 begin
-  lPedidoVendaLista := TPedidoVendaDao.Create(vIConexao);
+  lPedidoVendaLista := TPedidoVendaDao.getNewIface(vIConexao);
   try
-    lPedidoVendaLista.TotalRecords    := FTotalRecords;
-    lPedidoVendaLista.WhereView       := FWhereView;
-    lPedidoVendaLista.CountView       := FCountView;
-    lPedidoVendaLista.OrderView       := FOrderView;
-    lPedidoVendaLista.StartRecordView := FStartRecordView;
-    lPedidoVendaLista.LengthPageView  := FLengthPageView;
-    lPedidoVendaLista.IDRecordView    := FIDRecordView;
-    lPedidoVendaLista.obterLista;
+    lPedidoVendaLista.objeto.TotalRecords    := FTotalRecords;
+    lPedidoVendaLista.objeto.WhereView       := FWhereView;
+    lPedidoVendaLista.objeto.CountView       := FCountView;
+    lPedidoVendaLista.objeto.OrderView       := FOrderView;
+    lPedidoVendaLista.objeto.StartRecordView := FStartRecordView;
+    lPedidoVendaLista.objeto.LengthPageView  := FLengthPageView;
+    lPedidoVendaLista.objeto.IDRecordView    := FIDRecordView;
+    lPedidoVendaLista.objeto.obterLista;
 
-    FTotalRecords      := lPedidoVendaLista.TotalRecords;
-    FPedidoVendasLista := lPedidoVendaLista.PedidoVendasLista;
+    FTotalRecords      := lPedidoVendaLista.objeto.TotalRecords;
+    FPedidoVendasLista := lPedidoVendaLista.objeto.PedidoVendasLista;
   finally
-    lPedidoVendaLista.Free;
+    lPedidoVendaLista:=nil;
   end;
 end;
 
 procedure TPedidoVendaModel.RecalcularImpostos(pNumeroPedido: String);
 var
-  lPedidoVendaLista      : TPedidoVendaDao;
+  lPedidoVendaLista      : ITPedidoVendaDao;
   lCalcularImpostosModel : TCalcularImpostosModel;
   lPedidoItensModal      : TPedidoItensModel;
-  lPedidoVendaModel      : TPedidoVendaModel;
+  lPedidoVendaModel      : ITPedidoVendaModel;
   lEmpresaModel          : ITEmpresaModel;
 begin
-  lPedidoVendaLista      := TPedidoVendaDao.Create(vIConexao);
+  lPedidoVendaLista      := TPedidoVendaDao.getNewIface(vIConexao);
   lCalcularImpostosModel := TCalcularImpostosModel.Create(vIConexao);
   lPedidoItensModal      := TPedidoItensModel.Create(vIConexao);
   lEmpresaModel          := TEmpresaModel.getNewIface(vIConexao);
 
   try
-    lPedidoVendaLista.obterUpdateImpostos(pNumeroPedido);
+    lPedidoVendaLista.objeto.obterUpdateImpostos(pNumeroPedido);
     lEmpresaModel.objeto.Carregar;
 
-    for lPedidoVendaModel in lPedidoVendaLista.PedidoVendasLista do
+    for lPedidoVendaModel in lPedidoVendaLista.objeto.PedidoVendasLista do
     begin
       lCalcularImpostosModel.EMITENTE_UF          := lEmpresaModel.objeto.UF;
       lCalcularImpostosModel.REGIME_TRIBUTARIO    := lEmpresaModel.objeto.REGIME_TRIBUTARIO;
       lCalcularImpostosModel.MODELO_NF            := '65';
-      lCalcularImpostosModel.VALOR_DESCONTO_TOTAL := lPedidoVendaModel.DESC_PED;
-      lCalcularImpostosModel.VALOR_ACRESCIMO      := lPedidoVendaModel.ACRES_PED;
-      lCalcularImpostosModel.TOTAL_PRODUTO        := lPedidoVendaModel.VALOR_PED;
-      lCalcularImpostosModel.DESTINATARIO_UF      := IIF(lPedidoVendaModel.UF_CLI <> '', lPedidoVendaModel.UF_CLI, lEmpresaModel.objeto.UF);
-      lCalcularImpostosModel.CODIGO_PRODUTO       := lPedidoVendaModel.CODIGO_PRO;
-      lCalcularImpostosModel.QUANTIDADE           := lPedidoVendaModel.QUANTIDADE_PED;
-      lCalcularImpostosModel.VALORUNITARIO        := lPedidoVendaModel.VALORUNITARIO_PED;
+      lCalcularImpostosModel.VALOR_DESCONTO_TOTAL := lPedidoVendaModel.objeto.DESC_PED;
+      lCalcularImpostosModel.VALOR_ACRESCIMO      := lPedidoVendaModel.objeto.ACRES_PED;
+      lCalcularImpostosModel.TOTAL_PRODUTO        := lPedidoVendaModel.objeto.VALOR_PED;
+      lCalcularImpostosModel.DESTINATARIO_UF      := IIF(lPedidoVendaModel.objeto.UF_CLI <> '', lPedidoVendaModel.objeto.UF_CLI, lEmpresaModel.objeto.UF);
+      lCalcularImpostosModel.CODIGO_PRODUTO       := lPedidoVendaModel.objeto.CODIGO_PRO;
+      lCalcularImpostosModel.QUANTIDADE           := lPedidoVendaModel.objeto.QUANTIDADE_PED;
+      lCalcularImpostosModel.VALORUNITARIO        := lPedidoVendaModel.objeto.VALORUNITARIO_PED;
 
 
       lCalcularImpostosModel := lCalcularImpostosModel.Processar;
 
-      lPedidoItensModal := lPedidoItensModal.carregaClasse(lPedidoVendaModel.PEDIDOITENS_ID);
+      lPedidoItensModal := lPedidoItensModal.carregaClasse(lPedidoVendaModel.objeto.PEDIDOITENS_ID);
 
       lPedidoItensModal.Acao                := tacAlterar;
-      lPedidoItensModal.ID                  := lPedidoVendaModel.PEDIDOITENS_ID;
+      lPedidoItensModal.ID                  := lPedidoVendaModel.objeto.PEDIDOITENS_ID;
       lPedidoItensModal.IPI_CST             := lCalcularImpostosModel.IPI_CST;
       lPedidoItensModal.ALIQ_IPI            := FloatToStr(lCalcularImpostosModel.IPI_ALIQUOTA);
       lPedidoItensModal.VALOR_IPI           := FloatToStr(lCalcularImpostosModel.IPI_VALOR);
@@ -1572,7 +1585,7 @@ begin
       self.Salvar;
     end;
   finally
-    lPedidoVendaLista.Free;
+    lPedidoVendaLista:=nil;
     lCalcularImpostosModel.Free;
     lPedidoItensModal.Free;
   end;
@@ -1580,50 +1593,50 @@ end;
 
 function TPedidoVendaModel.retornaGarantia(pNumeroPedido: String): Boolean;
 var
-  lPedidoVendaModel: TPedidoVendaDao;
+  lPedidoVendaModel: ITPedidoVendaDao;
 begin
-  lPedidoVendaModel := TPedidoVendaDao.Create(vIConexao);
+  lPedidoVendaModel := TPedidoVendaDao.getNewIface(vIConexao);
   try
-    Result := lPedidoVendaModel.retornaGarantia(pNumeroPedido);
+    Result := lPedidoVendaModel.objeto.retornaGarantia(pNumeroPedido);
   finally
-    lPedidoVendaModel.Free;
+    lPedidoVendaModel:=nil;
   end;
 end;
 
 function TPedidoVendaModel.obterComprasRealizadas(pCliente: String): IFDDataset;
 var
-  lPedidoVendaModel: TPedidoVendaDao;
+  lPedidoVendaModel: ITPedidoVendaDao;
 begin
-  lPedidoVendaModel := TPedidoVendaDao.Create(vIConexao);
+  lPedidoVendaModel := TPedidoVendaDao.getNewIface(vIConexao);
   try
-    lPedidoVendaModel.TotalRecords    := FTotalRecords;
-    lPedidoVendaModel.WhereView       := FWhereView;
-    lPedidoVendaModel.CountView       := FCountView;
-    lPedidoVendaModel.OrderView       := FOrderView;
-    lPedidoVendaModel.StartRecordView := FStartRecordView;
-    lPedidoVendaModel.LengthPageView  := FLengthPageView;
-    lPedidoVendaModel.IDRecordView    := FIDRecordView;
+    lPedidoVendaModel.objeto.TotalRecords    := FTotalRecords;
+    lPedidoVendaModel.objeto.WhereView       := FWhereView;
+    lPedidoVendaModel.objeto.CountView       := FCountView;
+    lPedidoVendaModel.objeto.OrderView       := FOrderView;
+    lPedidoVendaModel.objeto.StartRecordView := FStartRecordView;
+    lPedidoVendaModel.objeto.LengthPageView  := FLengthPageView;
+    lPedidoVendaModel.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lPedidoVendaModel.obterComprasRealizadas(pCliente);
+    Result := lPedidoVendaModel.objeto.obterComprasRealizadas(pCliente);
   finally
-    lPedidoVendaModel.Free;
+    lPedidoVendaModel:=nil;
   end;
 end;
 
 function TPedidoVendaModel.Salvar: String;
 var
-  lPedidoVendaDao: TPedidoVendaDao;
+  lPedidoVendaDao: ITPedidoVendaDao;
 begin
-  lPedidoVendaDao := TPedidoVendaDao.Create(vIConexao);
+  lPedidoVendaDao := TPedidoVendaDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lPedidoVendaDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lPedidoVendaDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lPedidoVendaDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lPedidoVendaDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lPedidoVendaDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lPedidoVendaDao.objeto.excluir(mySelf);
     end;
   finally
-    lPedidoVendaDao.Free;
+    lPedidoVendaDao:=nil;
   end;
 end;
 procedure TPedidoVendaModel.SetAcao(const Value: TAcao);
@@ -2335,13 +2348,13 @@ end;
 
 function TPedidoVendaModel.statusPedido(pId: String): String;
 var
-  lPedidoVendaDao: TPedidoVendaDao;
+  lPedidoVendaDao: ITPedidoVendaDao;
 begin
-  lPedidoVendaDao := TPedidoVendaDao.Create(vIConexao);
+  lPedidoVendaDao := TPedidoVendaDao.getNewIface(vIConexao);
   try
-    Result := lPedidoVendaDao.statusPedido(pId);
+    Result := lPedidoVendaDao.objeto.statusPedido(pId);
   finally
-    lPedidoVendaDao.Free;
+    lPedidoVendaDao:=nil;
   end;
 end;
 

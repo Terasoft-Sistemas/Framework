@@ -516,36 +516,36 @@ end;
 
 procedure TImpressaoContratos.fetchPedido;
 var
-  lPedidoVendaModel : TPedidoVendaModel;
+  lPedidoVendaModel : ITPedidoVendaModel;
   lContasReceberModel : TContasReceberModel;
   lContasReceberItensModel : TContasReceberItensModel;
   lConfiguracoes : ITerasoftConfiguracoes;
   lPrimeiraParcela, lTotalPremio : Double;
 begin
-  lPedidoVendaModel := TPedidoVendaModel.Create(CONEXAO);
+  lPedidoVendaModel := TPedidoVendaModel.getNewIface(CONEXAO);
   lContasReceberModel := TContasReceberModel.Create(CONEXAO);
   lContasReceberItensModel := TContasReceberItensModel.Create(CONEXAO);
   lConfiguracoes := TerasoftConfiguracoes.getNewIface(CONEXAO);
   try
 
-    lPedidoVendaModel.IDRecordView := Self.IDPEDIDO;
-    lPedidoVendaModel.Obterlista;
+    lPedidoVendaModel.objeto.IDRecordView := Self.IDPEDIDO;
+    lPedidoVendaModel.objeto.Obterlista;
 
-    lPedidoVendaModel.ID := Self.IDPEDIDO;
-    lPedidoVendaModel.calcularTotais;
+    lPedidoVendaModel.objeto.ID := Self.IDPEDIDO;
+    lPedidoVendaModel.objeto.calcularTotais;
 
-    if lPedidoVendaModel.TotalRecords = 0 then
+    if lPedidoVendaModel.objeto.TotalRecords = 0 then
       raise Exception.Create('Pedido de venda '+Self.FIDPEDIDO+' não localizado');
 
-    lPedidoVendaModel := lPedidoVendaModel.PedidoVendasLista[0];
+    lPedidoVendaModel := lPedidoVendaModel.objeto.PedidoVendasLista[0];
 
     mtPedido.Append;
-    mtPedidoNUMERO.Value              := lPedidoVendaModel.NUMERO_PED;
-    mtPedidoEMISSAO.Value             := lPedidoVendaModel.DATA_PED;
-    mtPedidoOBSERVACAO.Value          := lPedidoVendaModel.OBS_GERAL;
-    mtPedidoVALOR_PRODUTOS.Value      := lPedidoVendaModel.VALOR_PED;
-    mtPedidoVALOR_DESCONTO.Value      := lPedidoVendaModel.DESC_PED;
-    mtPedidoSEGURO_PRESTAMISTA.Value  := RoundTo(lPedidoVendaModel.SEGURO_PRESTAMISTA_VALOR, -2);
+    mtPedidoNUMERO.Value              := lPedidoVendaModel.objeto.NUMERO_PED;
+    mtPedidoEMISSAO.Value             := lPedidoVendaModel.objeto.DATA_PED;
+    mtPedidoOBSERVACAO.Value          := lPedidoVendaModel.objeto.OBS_GERAL;
+    mtPedidoVALOR_PRODUTOS.Value      := lPedidoVendaModel.objeto.VALOR_PED;
+    mtPedidoVALOR_DESCONTO.Value      := lPedidoVendaModel.objeto.DESC_PED;
+    mtPedidoSEGURO_PRESTAMISTA.Value  := RoundTo(lPedidoVendaModel.objeto.SEGURO_PRESTAMISTA_VALOR, -2);
     mtPedidoRR_PRESTAMISTA.Value      := (lConfiguracoes.objeto.valorTag('PERCENTUAL_RR_PRESTAMISTA', '0', tvNumero));
 
     mtPedidoPREMIO_UNICO_1.Value      := RoundTo((mtPedidoSEGURO_PRESTAMISTA.Value / 100 * 6.23), -2);
@@ -556,14 +556,14 @@ begin
     if lTotalPremio <> mtPedidoSEGURO_PRESTAMISTA.Value then
       mtPedidoPREMIO_UNICO_3.Value := mtPedidoPREMIO_UNICO_3.Value - (lTotalPremio - mtPedidoSEGURO_PRESTAMISTA.Value);
 
-    mtPedidoVALOR_ACRESCIMO.Value     := lPedidoVendaModel.ACRES_PED;
-    mtPedidoVALOR_FRETE.Value         := lPedidoVendaModel.FRETE_PED;
-    mtPedidoVALOR_TOTAL.Value         := lPedidoVendaModel.TOTAL_PED;
-    mtPedidoVENDEDOR.Value            := lPedidoVendaModel.NOME_VENDEDOR;
-    mtPedidoCLIENTE_ID.Value          := lPedidoVendaModel.CODIGO_CLI;
+    mtPedidoVALOR_ACRESCIMO.Value     := lPedidoVendaModel.objeto.ACRES_PED;
+    mtPedidoVALOR_FRETE.Value         := lPedidoVendaModel.objeto.FRETE_PED;
+    mtPedidoVALOR_TOTAL.Value         := lPedidoVendaModel.objeto.TOTAL_PED;
+    mtPedidoVENDEDOR.Value            := lPedidoVendaModel.objeto.NOME_VENDEDOR;
+    mtPedidoCLIENTE_ID.Value          := lPedidoVendaModel.objeto.CODIGO_CLI;
     mtPedido.Post;
 
-    lContasReceberModel.IDPedidoView := lPedidoVendaModel.NUMERO_PED;
+    lContasReceberModel.IDPedidoView := lPedidoVendaModel.objeto.NUMERO_PED;
     lContasReceberModel.obterLista;
 
     lContasReceberModel := lContasReceberModel.ContasRecebersLista.First;
@@ -597,7 +597,7 @@ begin
     end;
 
   finally
-    lPedidoVendaModel.Free;
+    lPedidoVendaModel:=nil;
     lContasReceberModel.Free;
     lContasReceberItensModel.Free;
   end;
@@ -819,18 +819,18 @@ end;
 
 procedure TImpressaoContratos.imprimirPrestamista;
 var
-  lPedidoVendaModel : TPedidoVendaModel;
+  lPedidoVendaModel : ITPedidoVendaModel;
   lWebPedidoModel   : TWebPedidoModel;
   lMemtable         : TFDMemtable;
 begin
-  lPedidoVendaModel := TPedidoVendaModel.Create(CONEXAO);
+  lPedidoVendaModel := TPedidoVendaModel.getNewIface(CONEXAO);
   lWebPedidoModel   := TWebPedidoModel.Create(CONEXAO);
   try
     try
-      lPedidoVendaModel.IDRecordView := IDPEDIDO;
-      lPedidoVendaModel.obterLista;
+      lPedidoVendaModel.objeto.IDRecordView := IDPEDIDO;
+      lPedidoVendaModel.objeto.obterLista;
 
-      lWebPedidoModel.ID := lPedidoVendaModel.PedidoVendasLista[0].WEB_PEDIDO_ID;
+      lWebPedidoModel.ID := lPedidoVendaModel.objeto.PedidoVendasLista.First.objeto.WEB_PEDIDO_ID;
       lWebPedidoModel.obterTotais;
 
       if lWebPedidoModel.SEGURO_PRESTAMISTA_VALOR <> 0 then
@@ -838,7 +838,7 @@ begin
         mtItens.EmptyDataSet;
 
         mtItens.Append;
-        mtItensNUMERO_BILHETE.Value := retornaNumeroBilhete('7', CONEXAO.getEmpresa.LOJA, lPedidoVendaModel.PedidoVendasLista[0].NUMERO_PED);
+        mtItensNUMERO_BILHETE.Value := retornaNumeroBilhete('7', CONEXAO.getEmpresa.LOJA, lPedidoVendaModel.objeto.PedidoVendasLista.First.objeto.NUMERO_PED);
         mtItens.Post;
 
         Self.fetchPedido;
@@ -853,7 +853,7 @@ begin
       CriaException(E.Message);
     end;
   finally
-    lPedidoVendaModel.Free;
+    lPedidoVendaModel:=nil;
     lWebPedidoModel.Free;
   end;
 end;
