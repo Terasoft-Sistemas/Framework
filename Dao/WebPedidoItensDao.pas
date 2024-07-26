@@ -171,7 +171,12 @@ begin
     lModel.VBCFCPST             := lQry.FieldByName('VBCFCPST').AsString;
     lModel.PFCPST               := lQry.FieldByName('PFCPST').AsString;
     lModel.VFCPST               := lQry.FieldByName('VFCPST').AsString;
-    lModel.VALOR_VENDA_ATUAL    := lQry.FieldByName('VALOR_VENDA_ATUAL').AsString;
+    lModel.VALOR_FRETE_SUBTRAIR := lQry.FieldByName('VALOR_FRETE_SUBTRAIR').AsString;
+    lModel.TIPO_GARANTIA_FR     := lQry.FieldByName('TIPO_GARANTIA_FR').AsString;
+    lModel.VLR_GARANTIA_FR      := lQry.FieldByName('VLR_GARANTIA_FR').AsString;
+    lModel.CUSTO_GARANTIA_FR    := lQry.FieldByName('CUSTO_GARANTIA_FR').AsString;
+    lModel.CUSTO_GARANTIA       := lQry.FieldByName('CUSTO_GARANTIA').AsString;
+    lModel.PER_GARANTIA_FR      := lQry.FieldByName('PER_GARANTIA_FR').AsString;
     lModel.VLRVENDA_PRO         := lQry.FieldByName('VLRVENDA_PRO').AsString;
 
     Result := lModel;
