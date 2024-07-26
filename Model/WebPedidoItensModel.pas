@@ -110,6 +110,7 @@ type
     FCUSTO_GARANTIA: Variant;
     FUNIDADE_PRO: Variant;
     FVLRVENDA_PRO: Variant;
+    FVALOR_FRETE_SUBTRAIR: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetDATA_CADASTRO(const Value: Variant);
@@ -195,6 +196,7 @@ type
     procedure SetVLR_GARANTIA_FR(const Value: Variant);
     procedure SetUNIDADE_PRO(const Value: Variant);
     procedure SetVLRVENDA_PRO(const Value: Variant);
+    procedure SetVALOR_FRETE_SUBTRAIR(const Value: Variant);
 
   public
 
@@ -275,6 +277,7 @@ type
     property VALOR_TOTALITENS: Variant read FVALOR_TOTALITENS write SetVALOR_TOTALITENS;
     property VALOR_DESCONTO: Variant read FVALOR_DESCONTO write SetVALOR_DESCONTO;
     property VLRVENDA_PRO: Variant read FVLRVENDA_PRO write SetVLRVENDA_PRO;
+    property VALOR_FRETE_SUBTRAIR: Variant read FVALOR_FRETE_SUBTRAIR write SetVALOR_FRETE_SUBTRAIR;
 
 
   	constructor Create(pIConexao : IConexao);
@@ -766,6 +769,11 @@ end;
 procedure TWebPedidoItensModel.SetVALOR_DESCONTO(const Value: Variant);
 begin
   FVALOR_DESCONTO := Value;
+end;
+
+procedure TWebPedidoItensModel.SetVALOR_FRETE_SUBTRAIR(const Value: Variant);
+begin
+  FVALOR_FRETE_SUBTRAIR := Value;
 end;
 
 procedure TWebPedidoItensModel.SetVALOR_ICMS(const Value: Variant);

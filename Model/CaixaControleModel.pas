@@ -223,7 +223,6 @@ begin
 
     Result := lCaixaAberto.id;
   finally
-    lCaixaAberto.Free;
     lCaixaFechamento.Free;
     lCaixaControleDao.Free;
     lCaixaModel.Free;

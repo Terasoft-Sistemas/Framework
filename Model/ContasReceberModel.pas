@@ -368,6 +368,7 @@ begin
 
   lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
   lItensExclusaoModel      := TContasReceberItensModel.Create(vIConexao);
+
   try
     lContasReceberItensModel.IDContasReceberView := self.FFATURA_REC;
     lContasReceberItensModel.obterLista;
@@ -380,7 +381,6 @@ begin
 
   finally
     lContasReceberItensModel.Free;
-    lItensExclusaoModel.Free;
   end;
 end;
 
