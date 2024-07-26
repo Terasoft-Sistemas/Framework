@@ -537,14 +537,14 @@ procedure TContasReceberItensModel.excluirBaixa;
 var
   lCaixaModel: TCaixaModel;
   lVendaCartaoModel, lVendaCartaoExclusao: TVendaCartaoModel;
-  lRecebimentoCartaoModel, lRecebimentoExclusao: TRecebimentoCartaoModel;
+  lRecebimentoCartaoModel, lRecebimentoExclusao: ITRecebimentoCartaoModel;
   i: Integer;
 begin
   lCaixaModel             := TCaixaModel.Create(vIConexao);
   lVendaCartaoModel       := TVendaCartaoModel.Create(vIConexao);
   lVendaCartaoExclusao    := TVendaCartaoModel.Create(vIConexao);
-  lRecebimentoCartaoModel := TRecebimentoCartaoModel.Create(vIConexao);
-  lRecebimentoExclusao    := TRecebimentoCartaoModel.Create(vIConexao);
+  lRecebimentoCartaoModel := TRecebimentoCartaoModel.getNewIface(vIConexao);
+  lRecebimentoExclusao    := TRecebimentoCartaoModel.getNewIface(vIConexao);
 
   try
     lCaixaModel.WhereView := ' and caixa.status <> ''X'' '+
@@ -567,22 +567,22 @@ begin
       lVendaCartaoExclusao.Salvar;
     end;
 
-    lRecebimentoCartaoModel.WhereView := ' and recebimento_cartao.fatura  = ' + QuotedStr(self.FFATURA_REC) +
+    lRecebimentoCartaoModel.objeto.WhereView := ' and recebimento_cartao.fatura  = ' + QuotedStr(self.FFATURA_REC) +
                                          ' and recebimento_cartao.parcela = ' + self.FPACELA_REC;
 
-    lRecebimentoCartaoModel.obterLista;
+    lRecebimentoCartaoModel.objeto.obterLista;
 
-    for i := 0 to lRecebimentoCartaoModel.RecebimentoCartaosLista.Count -1 do
+    for i := 0 to lRecebimentoCartaoModel.objeto.RecebimentoCartaosLista.Count -1 do
     begin
-      lRecebimentoExclusao := lRecebimentoCartaoModel.RecebimentoCartaosLista[i];
+      lRecebimentoExclusao := lRecebimentoCartaoModel.objeto.RecebimentoCartaosLista[i];
 
-      lRecebimentoExclusao.Acao := tacExcluir;
-      lRecebimentoExclusao.Salvar;
+      lRecebimentoExclusao.objeto.Acao := tacExcluir;
+      lRecebimentoExclusao.objeto.Salvar;
     end;
 
   finally
-    lRecebimentoCartaoModel.Free;
-    lRecebimentoExclusao.Free;
+    lRecebimentoCartaoModel:=nil;
+    lRecebimentoExclusao:=nil;
     lVendaCartaoExclusao.Free;
     lVendaCartaoModel.Free;
     lCaixaModel.Free;
@@ -907,25 +907,25 @@ end;
 
 function TContasReceberItensModel.recebimentoCartao(pValor, pIdAdmCartao, pVencimento: String; pIdTef: String = ''): String;
 var
-  lRecebimentoCartaoModel: TRecebimentoCartaoModel;
+  lRecebimentoCartaoModel: ITRecebimentoCartaoModel;
 begin
-  lRecebimentoCartaoModel := TRecebimentoCartaoModel.Create(vIConexao);
+  lRecebimentoCartaoModel := TRecebimentoCartaoModel.getNewIface(vIConexao);
 
   try
-    lRecebimentoCartaoModel.Acao := tacIncluir;
+    lRecebimentoCartaoModel.objeto.Acao := tacIncluir;
     if pIdTef <> '' then
-      lRecebimentoCartaoModel.TEF_ID       := pIdTef;
-    lRecebimentoCartaoModel.USUARIO_ID     := vIConexao.getUSer.ID;
-    lRecebimentoCartaoModel.DATA_HORA      := DateTimeToStr(vIConexao.DataHoraServer);
-    lRecebimentoCartaoModel.CLIENTE_ID     := self.FCODIGO_CLI;
-    lRecebimentoCartaoModel.FATURA         := self.FFATURA_REC;
-    lRecebimentoCartaoModel.PARCELA        := self.FPACELA_REC;
-    lRecebimentoCartaoModel.VALOR          := pValor;
-    lRecebimentoCartaoModel.BANDEIRA_ID    := pIdAdmCartao;
-    lRecebimentoCartaoModel.VENCIMENTO     := pVencimento;
-    Result := lRecebimentoCartaoModel.Salvar;
+      lRecebimentoCartaoModel.objeto.TEF_ID       := pIdTef;
+    lRecebimentoCartaoModel.objeto.USUARIO_ID     := vIConexao.getUSer.ID;
+    lRecebimentoCartaoModel.objeto.DATA_HORA      := DateTimeToStr(vIConexao.DataHoraServer);
+    lRecebimentoCartaoModel.objeto.CLIENTE_ID     := self.FCODIGO_CLI;
+    lRecebimentoCartaoModel.objeto.FATURA         := self.FFATURA_REC;
+    lRecebimentoCartaoModel.objeto.PARCELA        := self.FPACELA_REC;
+    lRecebimentoCartaoModel.objeto.VALOR          := pValor;
+    lRecebimentoCartaoModel.objeto.BANDEIRA_ID    := pIdAdmCartao;
+    lRecebimentoCartaoModel.objeto.VENCIMENTO     := pVencimento;
+    Result := lRecebimentoCartaoModel.objeto.Salvar;
   finally
-    lRecebimentoCartaoModel.Free;
+    lRecebimentoCartaoModel:=nil;
   end;
 end;
 
