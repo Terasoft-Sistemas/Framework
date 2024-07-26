@@ -590,33 +590,33 @@ end;
 
 procedure TPedidoVendaModel.calcularTotais;
 var
-  lPedidoItensModel  : TPedidoItensModel;
+  lPedidoItensModel  : ITPedidoItensModel;
   lAcrescimo, lFrete : Double;
 begin
-  lPedidoItensModel := TPedidoItensModel.Create(vIConexao);
+  lPedidoItensModel := TPedidoItensModel.getNewIface(vIConexao);
   try
-    lPedidoItensModel.obterTotaisItens(self.FNUMERO_PED);
+    lPedidoItensModel.objeto.obterTotaisItens(self.FNUMERO_PED);
 
     lAcrescimo := self.ACRES_PED;
     lFrete     := self.FRETE_PED;
 
     self.Acao                     := tacAlterar;
     self.NUMERO_PED               := self.FNUMERO_PED;
-    self.VALOR_PED                := FloatToStr(lPedidoItensModel.VALOR_TOTAL_ITENS);
-    self.VLR_GARANTIA             := FloatToStr(lPedidoItensModel.VALOR_TOTAL_GARANTIA);
-    self.DESC_PED                 := FloatToStr(lPedidoItensModel.VALOR_TOTAL_DESCONTO);
-    self.SEGURO_PRESTAMISTA_VALOR := lPedidoItensModel.SEGURO_PRESTAMISTA_VALOR;
+    self.VALOR_PED                := FloatToStr(lPedidoItensModel.objeto.VALOR_TOTAL_ITENS);
+    self.VLR_GARANTIA             := FloatToStr(lPedidoItensModel.objeto.VALOR_TOTAL_GARANTIA);
+    self.DESC_PED                 := FloatToStr(lPedidoItensModel.objeto.VALOR_TOTAL_DESCONTO);
+    self.SEGURO_PRESTAMISTA_VALOR := lPedidoItensModel.objeto.SEGURO_PRESTAMISTA_VALOR;
 
-    if lPedidoItensModel.VALOR_TOTAL_ITENS > 0 then
-      self.DESCONTO_PED  := FloatToStr(lPedidoItensModel.VALOR_TOTAL_DESCONTO * 100 / lPedidoItensModel.VALOR_TOTAL_ITENS)
+    if lPedidoItensModel.objeto.VALOR_TOTAL_ITENS > 0 then
+      self.DESCONTO_PED  := FloatToStr(lPedidoItensModel.objeto.VALOR_TOTAL_DESCONTO * 100 / lPedidoItensModel.objeto.VALOR_TOTAL_ITENS)
     else
       self.DESCONTO_PED := '0';
 
-    self.TOTAL_PED := FloatToStr(lPedidoItensModel.VALOR_TOTAL + lAcrescimo + lFrete + self.SEGURO_PRESTAMISTA_VALOR);
+    self.TOTAL_PED := FloatToStr(lPedidoItensModel.objeto.VALOR_TOTAL + lAcrescimo + lFrete + self.SEGURO_PRESTAMISTA_VALOR);
 
     self.Salvar;
   finally
-    lPedidoItensModel.Free;
+    lPedidoItensModel:=nil;
   end;
 end;
 
@@ -636,7 +636,7 @@ procedure TPedidoVendaModel.concluirPedido;
 var
   lPedidoVendaModel        : ITPedidoVendaModel;
   lPedidoItensModel,
-  lModel                   : TPedidoItensModel;
+  lModel                   : ITPedidoItensModel;
   lContasReceberModel      : TContasReceberModel;
   lContasReceberItensModel : TContasReceberItensModel;
   lReservaModel            : TReservaModel;
@@ -645,7 +645,7 @@ var
   lComissaoCliente         : Double;
 begin
   lPedidoVendaModel        := TPedidoVendaModel.getNewIface(vIConexao);
-  lPedidoItensModel        := TPedidoItensModel.Create(vIConexao);
+  lPedidoItensModel        := TPedidoItensModel.getNewIface(vIConexao);
   lClienteModel            := TClienteModel.Create(vIConexao);
   lContasReceberModel      := TContasReceberModel.Create(vIConexao);
   lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
@@ -684,30 +684,30 @@ begin
     lPedidoVendaModel.objeto.STATUS     := 'P';
     lPedidoVendaModel.objeto.Salvar;
 
-    lPedidoItensModel.IDPedidoVendaView := lPedidoVendaModel.objeto.NUMERO_PED;
-    lPedidoItensModel.obterLista;
+    lPedidoItensModel.objeto.IDPedidoVendaView := lPedidoVendaModel.objeto.NUMERO_PED;
+    lPedidoItensModel.objeto.obterLista;
 
     lComissaoCliente := lClienteModel.comissaoCliente(self.FCODIGO_CLI);
 
-    for lModel in lPedidoItensModel.PedidoItenssLista do
+    for lModel in lPedidoItensModel.objeto.PedidoItenssLista do
     begin
       if lPedidoVendaModel.objeto.FRETE_PED > 0 then
-        lModel.aplicarFreteItem(lPedidoVendaModel.objeto.FRETE_PED, lPedidoVendaModel.objeto.VALOR_PED);
+        lModel.objeto.aplicarFreteItem(lPedidoVendaModel.objeto.FRETE_PED, lPedidoVendaModel.objeto.VALOR_PED);
 
-      if (lModel.TIPO_VENDA <> 'CD') then
-        lModel.gerarEstoque;
+      if (lModel.objeto.TIPO_VENDA <> 'CD') then
+        lModel.objeto.gerarEstoque;
 
-      lModel.calcularComissao(lPedidoVendaModel.objeto.CODIGO_VEN, lPedidoVendaModel.objeto.CODIGO_TIP, lComissaoCliente, lPedidoVendaModel.objeto.GERENTE_ID);
+      lModel.objeto.calcularComissao(lPedidoVendaModel.objeto.CODIGO_VEN, lPedidoVendaModel.objeto.CODIGO_TIP, lComissaoCliente, lPedidoVendaModel.objeto.GERENTE_ID);
 
-      if (lPedidoVendaModel.objeto.WEB_PEDIDO_ID <> '') and ((lModel.TIPO_VENDA = 'CD') or (lModel.ENTREGA = 'S')) then
-        lReservaModel.concluirReserva(IIF(lModel.TIPO_VENDA = 'CD', '2', 'L'), lPedidoVendaModel.objeto.NUMERO_PED, lModel.WEB_PEDIDOITENS_ID, vIConexao.getEmpresa.LOJA);
+      if (lPedidoVendaModel.objeto.WEB_PEDIDO_ID <> '') and ((lModel.objeto.TIPO_VENDA = 'CD') or (lModel.objeto.ENTREGA = 'S')) then
+        lReservaModel.concluirReserva(IIF(lModel.objeto.TIPO_VENDA = 'CD', '2', 'L'), lPedidoVendaModel.objeto.NUMERO_PED, lModel.objeto.WEB_PEDIDOITENS_ID, vIConexao.getEmpresa.LOJA);
     end;
 
   finally
     lContasReceberItensModel.Free;
     lContasReceberModel.Free;
     lPedidoVendaModel:=nil;
-    lPedidoItensModel.Free;
+    lPedidoItensModel:=nil;
     lClienteModel.Free;
     lPixModel:=nil;
 
@@ -952,7 +952,7 @@ end;
 function TPedidoVendaModel.GerarNF(pModelo, pSerie: String): String;
 var
   lPedidoItensModel,
-  lItens            : TPedidoItensModel;
+  lItens            : ITPedidoItensModel;
   lNFModel          : ITNFModel;
   lNFItensModel     : TNFItensModel;
   lEmpresaModel     : ITEmpresaModel;
@@ -972,7 +972,7 @@ begin
   if pModelo = '' then
     CriaException('Modelo não informado');
 
-  lPedidoItensModel := TPedidoItensModel.Create(vIConexao);
+  lPedidoItensModel := TPedidoItensModel.getNewIface(vIConexao);
   lNFItensModel     := TNFItensModel.Create(vIConexao);
   lNFModel          := TNFModel.getNewIface(vIConexao);
   lEmpresaModel     := TEmpresaModel.getNewIface(vIConexao);
@@ -1072,13 +1072,13 @@ begin
     self.FNUMERO_NF := lNFModel.objeto.NUMERO_ECF;
     self.Salvar;
 
-    lPedidoItensModel.IDPedidoVendaView := self.NUMERO_PED;
-    lPedidoItensModel.WhereView         := ' and coalesce(pedidoitens.tipo_venda, ''LJ'') = ''LJ'' ';
-    lPedidoItensModel.obterLista;
+    lPedidoItensModel.objeto.IDPedidoVendaView := self.NUMERO_PED;
+    lPedidoItensModel.objeto.WhereView         := ' and coalesce(pedidoitens.tipo_venda, ''LJ'') = ''LJ'' ';
+    lPedidoItensModel.objeto.obterLista;
 
     lItem := 0;
 
-    for lItens in lPedidoItensModel.PedidoItenssLista do begin
+    for lItens in lPedidoItensModel.objeto.PedidoItenssLista do begin
       inc(lItem);
 
       lNFItensModel.Acao := tacIncluir;
@@ -1119,67 +1119,67 @@ begin
 
       //
 
-      lNFItensModel.VTOTTRIB_FEDERAL      := lItens.VTOTTRIB_FEDERAL;
-      lNFItensModel.VTOTTRIB_ESTADUAL     := lItens.VTOTTRIB_ESTADUAL;
-      lNFItensModel.VTOTTRIB_MUNICIPAL    := lItens.VTOTTRIB_MUNICIPAL;
-      lNFItensModel.VTOTTRIB              := FloatToStr(StrToFloat(lItens.VTOTTRIB_FEDERAL) + StrToFloat(lItens.VTOTTRIB_ESTADUAL) + StrToFloat(lItens.VTOTTRIB_MUNICIPAL));
+      lNFItensModel.VTOTTRIB_FEDERAL      := lItens.objeto.VTOTTRIB_FEDERAL;
+      lNFItensModel.VTOTTRIB_ESTADUAL     := lItens.objeto.VTOTTRIB_ESTADUAL;
+      lNFItensModel.VTOTTRIB_MUNICIPAL    := lItens.objeto.VTOTTRIB_MUNICIPAL;
+      lNFItensModel.VTOTTRIB              := FloatToStr(StrToFloat(lItens.objeto.VTOTTRIB_FEDERAL) + StrToFloat(lItens.objeto.VTOTTRIB_ESTADUAL) + StrToFloat(lItens.objeto.VTOTTRIB_MUNICIPAL));
 
-      lTribFederal   := lTribFederal   + lItens.VTOTTRIB_FEDERAL;
-      lTribEstadual  := lTribEstadual  + lItens.VTOTTRIB_ESTADUAL;
-      lTribMunicipal := lTribMunicipal + lItens.VTOTTRIB_MUNICIPAL;
+      lTribFederal   := lTribFederal   + lItens.objeto.VTOTTRIB_FEDERAL;
+      lTribEstadual  := lTribEstadual  + lItens.objeto.VTOTTRIB_ESTADUAL;
+      lTribMunicipal := lTribMunicipal + lItens.objeto.VTOTTRIB_MUNICIPAL;
 
-      lNFItensModel.CODIGO_PRO            := lItens.CODIGO_PRO;
-      lNFItensModel.VALORUNITARIO_NF      := lItens.VALORUNITARIO_PED;
-      lNFItensModel.QUANTIDADE_NF         := lItens.QTDE_CALCULADA;
-      lNFItensModel.VLRVENDA_NF           := lItens.VLRVENDA_PRO;
-      lNFItensModel.VLRCUSTO_NF           := lItens.VLRCUSTO_PRO;
-      lNFItensModel.CFOP_ID               := lItens.CFOP_ID;
-      lNFItensModel.CFOP                  := lItens.CFOP;
-      lNFItensModel.VFCPST                := lItens.VFCPST;
-      lNFItensModel.VICMSDESON            := lItens.VICMSDESON;
-      lNFItensModel.MOTDESICMS            := lItens.MOTDESICMS;
-      lNFItensModel.PCRED_PRESUMIDO       := lItens.PCRED_PRESUMIDO;
-      lNFItensModel.CST_Q06               := lItens.PIS_CST;
-      lNFItensModel.CST_IPI               := lItens.PIS_CST;
-      lNFItensModel.PPIS_Q08              := lItens.ALIQ_PIS;
-      lNFItensModel.CST_S06               := lItens.COFINS_CST;
-      lNFItensModel.PCOFINS_S08           := lItens.ALIQ_COFINS;
-      lNFItensModel.QBCPROD_S09           := lItens.QTDE_CALCULADA;
-      lNFItensModel.MOTDESICMS            := lItens.MOTDESICMS;
-      lNFItensModel.VICMSDESON            := lItens.VICMSDESON;
-      lNFItensModel.VDESC                 := lItens.VDESC;
-      lNFItensModel.VALOR_SUFRAMA_ITEM    := lItens.VALOR_SUFRAMA_ITEM;
-      lNFItensModel.VBCFCPST              := lItens.VBCFCPST;
-      lNFItensModel.PFCPST                := lItens.PFCPST;
-      lNFItensModel.VICMSUFDEST           := lItens.VICMSUFDEST;
-      lNFItensModel.VICMSUFREMET          := lItens.VICMSUFREMET;
-      lNFItensModel.REDUCAO_NF            := lItens.REDUCAO_ICMS;
-      lNFItensModel.VOUTROS               := lItens.VOUTROS;
-      lNFItensModel.FRETE                 := lItens.VFRETE;
-      lNFItensModel.VALOR_IPI             := lItens.VALOR_IPI;
-      lNFItensModel.CSOSN                 := lItens.CSOSN;
-      lNFItensModel.IPI_NF                := lItens.ALIQ_IPI;
-      lNFItensModel.CST_N12               := lItens.CST;
-      lNFItensModel.PREDBC_N14            := lItens.REDUCAO_ICMS;
-      lNFItensModel.VBC_N15               := lItens.BASE_ICMS;
-      lNFItensModel.ICMS_NF               := lItens.ALIQ_ICMS;
-      lNFItensModel.VICMS_N17             := lItens.VALOR_ICMS;
-      lNFItensModel.PMVAST_N19            := lItens.MVA;
-      lNFItensModel.PREDBCST_N20          := lItens.REDUCAO_ST;
-      lNFItensModel.VBCST_N21             := lItens.BASE_ST;
-      lNFItensModel.PICMSST_N22           := lItens.ALIQ_ICMS_ST;
-      lNFItensModel.VICMSST_N23           := lItens.VALOR_ST;
-      lNFItensModel.VPIS_Q09              := lItens.VALOR_PIS;
-      lNFItensModel.VCOFINS_S11           := lItens.VALOR_COFINS;
-      lNFItensModel.VBC_Q07               := lItens.BASE_PIS;
-      lNFItensModel.VBC_S07               := lItens.BASE_COFINS;
-      lNFItensModel.PIS_SUFRAMA           := lItens.PIS_SUFRAMA;
-      lNFItensModel.COFINS_SUFRAMA        := lItens.COFINS_SUFRAMA;
-      lNFItensModel.ICMS_SUFRAMA          := lItens.ICMS_SUFRAMA;
-      lNFItensModel.IPI_SUFRAMA           := lItens.IPI_SUFRAMA;
-      lNFItensModel.XPED                  := lItens.XPED;
-      lNFItensModel.NITEMPED2             := lItens.NITEMPED2;
-      lNFItensModel.LOTE                  := lItens.OBSERVACAO;
+      lNFItensModel.CODIGO_PRO            := lItens.objeto.CODIGO_PRO;
+      lNFItensModel.VALORUNITARIO_NF      := lItens.objeto.VALORUNITARIO_PED;
+      lNFItensModel.QUANTIDADE_NF         := lItens.objeto.QTDE_CALCULADA;
+      lNFItensModel.VLRVENDA_NF           := lItens.objeto.VLRVENDA_PRO;
+      lNFItensModel.VLRCUSTO_NF           := lItens.objeto.VLRCUSTO_PRO;
+      lNFItensModel.CFOP_ID               := lItens.objeto.CFOP_ID;
+      lNFItensModel.CFOP                  := lItens.objeto.CFOP;
+      lNFItensModel.VFCPST                := lItens.objeto.VFCPST;
+      lNFItensModel.VICMSDESON            := lItens.objeto.VICMSDESON;
+      lNFItensModel.MOTDESICMS            := lItens.objeto.MOTDESICMS;
+      lNFItensModel.PCRED_PRESUMIDO       := lItens.objeto.PCRED_PRESUMIDO;
+      lNFItensModel.CST_Q06               := lItens.objeto.PIS_CST;
+      lNFItensModel.CST_IPI               := lItens.objeto.PIS_CST;
+      lNFItensModel.PPIS_Q08              := lItens.objeto.ALIQ_PIS;
+      lNFItensModel.CST_S06               := lItens.objeto.COFINS_CST;
+      lNFItensModel.PCOFINS_S08           := lItens.objeto.ALIQ_COFINS;
+      lNFItensModel.QBCPROD_S09           := lItens.objeto.QTDE_CALCULADA;
+      lNFItensModel.MOTDESICMS            := lItens.objeto.MOTDESICMS;
+      lNFItensModel.VICMSDESON            := lItens.objeto.VICMSDESON;
+      lNFItensModel.VDESC                 := lItens.objeto.VDESC;
+      lNFItensModel.VALOR_SUFRAMA_ITEM    := lItens.objeto.VALOR_SUFRAMA_ITEM;
+      lNFItensModel.VBCFCPST              := lItens.objeto.VBCFCPST;
+      lNFItensModel.PFCPST                := lItens.objeto.PFCPST;
+      lNFItensModel.VICMSUFDEST           := lItens.objeto.VICMSUFDEST;
+      lNFItensModel.VICMSUFREMET          := lItens.objeto.VICMSUFREMET;
+      lNFItensModel.REDUCAO_NF            := lItens.objeto.REDUCAO_ICMS;
+      lNFItensModel.VOUTROS               := lItens.objeto.VOUTROS;
+      lNFItensModel.FRETE                 := lItens.objeto.VFRETE;
+      lNFItensModel.VALOR_IPI             := lItens.objeto.VALOR_IPI;
+      lNFItensModel.CSOSN                 := lItens.objeto.CSOSN;
+      lNFItensModel.IPI_NF                := lItens.objeto.ALIQ_IPI;
+      lNFItensModel.CST_N12               := lItens.objeto.CST;
+      lNFItensModel.PREDBC_N14            := lItens.objeto.REDUCAO_ICMS;
+      lNFItensModel.VBC_N15               := lItens.objeto.BASE_ICMS;
+      lNFItensModel.ICMS_NF               := lItens.objeto.ALIQ_ICMS;
+      lNFItensModel.VICMS_N17             := lItens.objeto.VALOR_ICMS;
+      lNFItensModel.PMVAST_N19            := lItens.objeto.MVA;
+      lNFItensModel.PREDBCST_N20          := lItens.objeto.REDUCAO_ST;
+      lNFItensModel.VBCST_N21             := lItens.objeto.BASE_ST;
+      lNFItensModel.PICMSST_N22           := lItens.objeto.ALIQ_ICMS_ST;
+      lNFItensModel.VICMSST_N23           := lItens.objeto.VALOR_ST;
+      lNFItensModel.VPIS_Q09              := lItens.objeto.VALOR_PIS;
+      lNFItensModel.VCOFINS_S11           := lItens.objeto.VALOR_COFINS;
+      lNFItensModel.VBC_Q07               := lItens.objeto.BASE_PIS;
+      lNFItensModel.VBC_S07               := lItens.objeto.BASE_COFINS;
+      lNFItensModel.PIS_SUFRAMA           := lItens.objeto.PIS_SUFRAMA;
+      lNFItensModel.COFINS_SUFRAMA        := lItens.objeto.COFINS_SUFRAMA;
+      lNFItensModel.ICMS_SUFRAMA          := lItens.objeto.ICMS_SUFRAMA;
+      lNFItensModel.IPI_SUFRAMA           := lItens.objeto.IPI_SUFRAMA;
+      lNFItensModel.XPED                  := lItens.objeto.XPED;
+      lNFItensModel.NITEMPED2             := lItens.objeto.NITEMPED2;
+      lNFItensModel.LOTE                  := lItens.objeto.OBSERVACAO;
 
       lNFItensModel.Salvar;
     end;
@@ -1217,7 +1217,7 @@ begin
 
     Result := lNumeroNFe;
   finally
-    lPedidoItensModel.Free;
+    lPedidoItensModel:=nil;
     lNFItensModel.Free;
     lNFModel:=nil;
     lEmpresaModel := nil;
@@ -1289,7 +1289,7 @@ procedure TPedidoVendaModel.venderItem(pVenderItem: TVenderItem);
 var
   lConfiguracoes     : ITerasoftConfiguracoes;
   lProdutosModel     : ITProdutosModel;
-  lPedidoItensModel  : TPedidoItensModel;
+  lPedidoItensModel  : ITPedidoItensModel;
   lPedidoVendaLista  : ITPedidoVendaDao;
   lProdutoPreco      : TProdutoPreco;
   lSaldoDisponivel   : Double;
@@ -1300,7 +1300,7 @@ var
 begin
   Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
   lProdutosModel    := TProdutosModel.getNewIface(vIConexao);
-  lPedidoItensModel := TPedidoItensModel.Create(vIConexao);
+  lPedidoItensModel := TPedidoItensModel.getNewIface(vIConexao);
   lPedidoVendaLista := TPedidoVendaDao.getNewIface(vIConexao);
   lCodBalanca       := '';
 
@@ -1348,29 +1348,29 @@ begin
         CriaException('Produto sem saldo disponível em estoque.')
     end;
 
-    lIDItem := lPedidoItensModel.obterIDItem(self.FNUMERO_PED, lProdutosModel.objeto.ProdutossLista.First.objeto.CODIGO_PRO);
+    lIDItem := lPedidoItensModel.objeto.obterIDItem(self.FNUMERO_PED, lProdutosModel.objeto.ProdutossLista.First.objeto.CODIGO_PRO);
 
     if (lIDItem <> '') and (lConfiguracoes.objeto.valorTag('FRENTE_CAIXA_SOMAR_QTDE_ITENS', 'S', tvBool) = 'S')
     and (lProdutosModel.objeto.ProdutossLista.First.objeto.USAR_BALANCA <> 'S') then
     begin
-      lPedidoItensModel := lPedidoItensModel.carregaClasse(lIDItem);
-      lPedidoItensModel.Acao := tacAlterar;
-      lPedidoItensModel.QUANTIDADE_PED := lPedidoItensModel.QUANTIDADE_PED + StrToFloat(lQuantidade);
-      lPedidoItensModel.QUANTIDADE_NEW := lPedidoItensModel.QUANTIDADE_NEW + StrToFloat(lQuantidade);
-      lPedidoItensModel.Salvar;
+      lPedidoItensModel := lPedidoItensModel.objeto.carregaClasse(lIDItem);
+      lPedidoItensModel.objeto.Acao := tacAlterar;
+      lPedidoItensModel.objeto.QUANTIDADE_PED := lPedidoItensModel.objeto.QUANTIDADE_PED + StrToFloat(lQuantidade);
+      lPedidoItensModel.objeto.QUANTIDADE_NEW := lPedidoItensModel.objeto.QUANTIDADE_NEW + StrToFloat(lQuantidade);
+      lPedidoItensModel.objeto.Salvar;
     end
     else
     begin
-      lPedidoItensModel.Acao := tacIncluir;
-      lPedidoItensModel.NUMERO_PED           := self.FNUMERO_PED;
-      lPedidoItensModel.CODIGO_PRO           := lProdutosModel.objeto.ProdutossLista.First.objeto.CODIGO_PRO;
-      lPedidoItensModel.CODIGO_CLI           := self.FCODIGO_CLI;
-      lPedidoItensModel.COMISSAO_PED         := FloatToStr(0);
-      lPedidoItensModel.DESCONTO_PED         := FloatToStr(0);
-      lPedidoItensModel.LOJA                 := vIConexao.getEmpresa.LOJA;
-      lPedidoItensModel.QUANTIDADE_PED       := lQuantidade;
-      lPedidoItensModel.QUANTIDADE_NEW       := lQuantidade;
-      lPedidoItensModel.BALANCA              := lProdutosModel.objeto.ProdutossLista.First.objeto.USAR_BALANCA;
+      lPedidoItensModel.objeto.Acao := tacIncluir;
+      lPedidoItensModel.objeto.NUMERO_PED           := self.FNUMERO_PED;
+      lPedidoItensModel.objeto.CODIGO_PRO           := lProdutosModel.objeto.ProdutossLista.First.objeto.CODIGO_PRO;
+      lPedidoItensModel.objeto.CODIGO_CLI           := self.FCODIGO_CLI;
+      lPedidoItensModel.objeto.COMISSAO_PED         := FloatToStr(0);
+      lPedidoItensModel.objeto.DESCONTO_PED         := FloatToStr(0);
+      lPedidoItensModel.objeto.LOJA                 := vIConexao.getEmpresa.LOJA;
+      lPedidoItensModel.objeto.QUANTIDADE_PED       := lQuantidade;
+      lPedidoItensModel.objeto.QUANTIDADE_NEW       := lQuantidade;
+      lPedidoItensModel.objeto.BALANCA              := lProdutosModel.objeto.ProdutossLista.First.objeto.USAR_BALANCA;
 
       lProdutoPreco.Produto                  := lProdutosModel.objeto.ProdutossLista.First.objeto.CODIGO_PRO;
       lProdutoPreco.Cliente                  := self.FCODIGO_CLI;
@@ -1381,15 +1381,15 @@ begin
       lProdutoPreco.Promocao                 := pVenderItem.Promocao;
       lProdutoPreco.TabelaPreco              := pVenderItem.TabelaPreco;
 
-      lPedidoItensModel.VALORUNITARIO_PED    := lProdutosModel.objeto.ValorUnitario(lProdutoPreco).ToString;
-      lPedidoItensModel.VLRVENDA_PRO         := lProdutosModel.objeto.ProdutossLista.First.objeto.VENDA_PRO;
-      lPedidoItensModel.VLRCUSTO_PRO         := lProdutosModel.objeto.ProdutossLista.First.objeto.CUSTOMEDIO_PRO;
-      lPedidoItensModel.Salvar;
+      lPedidoItensModel.objeto.VALORUNITARIO_PED    := lProdutosModel.objeto.ValorUnitario(lProdutoPreco).ToString;
+      lPedidoItensModel.objeto.VLRVENDA_PRO         := lProdutosModel.objeto.ProdutossLista.First.objeto.VENDA_PRO;
+      lPedidoItensModel.objeto.VLRCUSTO_PRO         := lProdutosModel.objeto.ProdutossLista.First.objeto.CUSTOMEDIO_PRO;
+      lPedidoItensModel.objeto.Salvar;
     end;
 
   finally
     lProdutosModel:=nil;
-    lPedidoItensModel.Free;
+    lPedidoItensModel:=nil;
     lPedidoVendaLista:=nil;
   end;
 end;
@@ -1432,11 +1432,11 @@ procedure TPedidoVendaModel.reabrirPedido;
 var
   lPedidoVendaModel   : ITPedidoVendaModel;
   lPedidoItensModel,
-  lModel              : TPedidoItensModel;
+  lModel              : ITPedidoItensModel;
   lCaixaControleModel : TCaixaControleModel;
 begin
   lPedidoVendaModel   := TPedidoVendaModel.getNewIface(vIConexao);
-  lPedidoItensModel   := TPedidoItensModel.Create(vIConexao);
+  lPedidoItensModel   := TPedidoItensModel.getNewIface(vIConexao);
   lCaixaControleModel := TCaixaControleModel.Create(vIConexao);
 
   try
@@ -1451,17 +1451,17 @@ begin
     if lCaixaControleModel.vendaCaixaFechado(transformaDataHoraFireBird(lPedidoVendaModel.objeto.DATA_PED + lPedidoVendaModel.objeto.HORA_PED)) then
       CriaException('Não é possível reabrir venda com o caixa já finalizado');
 
-    lPedidoItensModel.IDPedidoVendaView := lPedidoVendaModel.objeto.NUMERO_PED;
-    lPedidoItensModel.obterLista;
+    lPedidoItensModel.objeto.IDPedidoVendaView := lPedidoVendaModel.objeto.NUMERO_PED;
+    lPedidoItensModel.objeto.obterLista;
 
-    for lModel in lPedidoItensModel.PedidoItenssLista do
+    for lModel in lPedidoItensModel.objeto.PedidoItenssLista do
     begin
-      lModel.cancelarEstoque;
+      lModel.objeto.cancelarEstoque;
 
-      lModel.Acao := tacAlterar;
-      lModel.COMISSAO_PERCENTUAL := 0;
-      lModel.GERENTE_COMISSAO_PERCENTUAL := 0;
-      lModel.Salvar;
+      lModel.objeto.Acao := tacAlterar;
+      lModel.objeto.COMISSAO_PERCENTUAL := 0;
+      lModel.objeto.GERENTE_COMISSAO_PERCENTUAL := 0;
+      lModel.objeto.Salvar;
     end;
 
     lPedidoVendaModel.objeto.Acao := tacAlterar;
@@ -1471,7 +1471,7 @@ begin
 
   finally
     lPedidoVendaModel:=nil;
-    lPedidoItensModel.Free;
+    lPedidoItensModel:=nil;
     lCaixaControleModel.Free;
   end;
 end;
@@ -1502,13 +1502,13 @@ procedure TPedidoVendaModel.RecalcularImpostos(pNumeroPedido: String);
 var
   lPedidoVendaLista      : ITPedidoVendaDao;
   lCalcularImpostosModel : TCalcularImpostosModel;
-  lPedidoItensModal      : TPedidoItensModel;
+  lPedidoItensModal      : ITPedidoItensModel;
   lPedidoVendaModel      : ITPedidoVendaModel;
   lEmpresaModel          : ITEmpresaModel;
 begin
   lPedidoVendaLista      := TPedidoVendaDao.getNewIface(vIConexao);
   lCalcularImpostosModel := TCalcularImpostosModel.Create(vIConexao);
-  lPedidoItensModal      := TPedidoItensModel.Create(vIConexao);
+  lPedidoItensModal      := TPedidoItensModel.getNewIface(vIConexao);
   lEmpresaModel          := TEmpresaModel.getNewIface(vIConexao);
 
   try
@@ -1531,51 +1531,51 @@ begin
 
       lCalcularImpostosModel := lCalcularImpostosModel.Processar;
 
-      lPedidoItensModal := lPedidoItensModal.carregaClasse(lPedidoVendaModel.objeto.PEDIDOITENS_ID);
+      lPedidoItensModal := lPedidoItensModal.objeto.carregaClasse(lPedidoVendaModel.objeto.PEDIDOITENS_ID);
 
-      lPedidoItensModal.Acao                := tacAlterar;
-      lPedidoItensModal.ID                  := lPedidoVendaModel.objeto.PEDIDOITENS_ID;
-      lPedidoItensModal.IPI_CST             := lCalcularImpostosModel.IPI_CST;
-      lPedidoItensModal.ALIQ_IPI            := FloatToStr(lCalcularImpostosModel.IPI_ALIQUOTA);
-      lPedidoItensModal.VALOR_IPI           := FloatToStr(lCalcularImpostosModel.IPI_VALOR);
-      lPedidoItensModal.CST                 := (lCalcularImpostosModel.ICMS_CST);
-      lPedidoItensModal.REDUCAO_ICMS        := FloatToStr(lCalcularImpostosModel.ICMS_REDUCAO);
-      lPedidoItensModal.BASE_ICMS           := FloatToStr(lCalcularImpostosModel.ICMS_BASE);
-      lPedidoItensModal.ALIQ_ICMS           := FloatToStr(lCalcularImpostosModel.ICMS_ALIQUOTA);
-      lPedidoItensModal.VALOR_ICMS          := FloatToStr(lCalcularImpostosModel.ICMS_VALOR);
-      lPedidoItensModal.ALIQ_ICMS_ST        := FloatToStr(lCalcularImpostosModel.ICMSST_ALIQUOTA);
-      lPedidoItensModal.MVA                 := FloatToStr(lCalcularImpostosModel.ICMSST_MVA);
-      lPedidoItensModal.REDUCAO_ST          := FloatToStr(lCalcularImpostosModel.ICMSST_REDUCAO);
-      lPedidoItensModal.VALOR_ST            := FloatToStr(lCalcularImpostosModel.ICMSST_VALOR);
-      lPedidoItensModal.BASE_ST             := FloatToStr(lCalcularImpostosModel.ICMSST_BASE);
-      lPedidoItensModal.PIS_CST             := (lCalcularImpostosModel.PIS_CST);
-      lPedidoItensModal.ALIQ_PIS            := FloatToStr(lCalcularImpostosModel.PIS_ALIQUOTA);
-      lPedidoItensModal.BASE_PIS            := FloatToStr(lCalcularImpostosModel.PIS_BASE);
-      lPedidoItensModal.VALOR_PIS           := FloatToStr(lCalcularImpostosModel.PIS_VALOR);
-      lPedidoItensModal.COFINS_CST          := (lCalcularImpostosModel.COFINS_CST);
-      lPedidoItensModal.ALIQ_COFINS         := FloatToStr(lCalcularImpostosModel.COFINS_ALIQUOTA);
-      lPedidoItensModal.BASE_COFINS         := FloatToStr(lCalcularImpostosModel.COFINS_BASE);
-      lPedidoItensModal.VALOR_COFINS        := FloatToStr(lCalcularImpostosModel.COFINS_VALOR);
-      lPedidoItensModal.VBCUFDEST           := FloatToStr(lCalcularImpostosModel.VBCUFDEST);
-      lPedidoItensModal.PFCPUFDEST          := FloatToStr(lCalcularImpostosModel.PICMSUFDEST);
-      lPedidoItensModal.PICMSUFDEST         := FloatToStr(lCalcularImpostosModel.PICMSINTER);
-      lPedidoItensModal.PICMSINTER          := FloatToStr(lCalcularImpostosModel.PICMSINTERPART);
-      lPedidoItensModal.PICMSINTERPART      := FloatToStr(lCalcularImpostosModel.PICMSINTERPART);
-      lPedidoItensModal.VICMSUFDEST         := FloatToStr(lCalcularImpostosModel.VICMSUFDEST);
-      lPedidoItensModal.VICMSUFREMET        := FloatToStr(lCalcularImpostosModel.VBCFCPST);
-      lPedidoItensModal.VBCFCPST            := FloatToStr(lCalcularImpostosModel.PFCPST);
-      lPedidoItensModal.PFCPST              := FloatToStr(lCalcularImpostosModel.PFCPST);
-      lPedidoItensModal.VFCPST              := FloatToStr(lCalcularImpostosModel.VFCPST);
-      lPedidoItensModal.CFOP_ID             := lCalcularImpostosModel.CFOP_ID;
-      lPedidoItensModal.CFOP                := lCalcularImpostosModel.CFOP;
-      lPedidoItensModal.VDESC               := FloatToStr(lCalcularImpostosModel.DESCONTO_ITEM);
-      lPedidoItensModal.VOUTROS             := FloatToStr(lCalcularImpostosModel.ACRESCIMO_ITEM);
-      lPedidoItensModal.CSOSN               := lCalcularImpostosModel.ICMS_CSOSN;
-      lPedidoItensModal.VTOTTRIB_ESTADUAL   := lCalcularImpostosModel.VTOTTRIB_ESTADUAL;
-      lPedidoItensModal.VTOTTRIB_FEDERAL    := lCalcularImpostosModel.VTOTTRIB_FEDERAL;
-      lPedidoItensModal.VTOTTRIB_MUNICIPAL  := lCalcularImpostosModel.VTOTTRIB_MUNICIPAL;
+      lPedidoItensModal.objeto.Acao                := tacAlterar;
+      lPedidoItensModal.objeto.ID                  := lPedidoVendaModel.objeto.PEDIDOITENS_ID;
+      lPedidoItensModal.objeto.IPI_CST             := lCalcularImpostosModel.IPI_CST;
+      lPedidoItensModal.objeto.ALIQ_IPI            := FloatToStr(lCalcularImpostosModel.IPI_ALIQUOTA);
+      lPedidoItensModal.objeto.VALOR_IPI           := FloatToStr(lCalcularImpostosModel.IPI_VALOR);
+      lPedidoItensModal.objeto.CST                 := (lCalcularImpostosModel.ICMS_CST);
+      lPedidoItensModal.objeto.REDUCAO_ICMS        := FloatToStr(lCalcularImpostosModel.ICMS_REDUCAO);
+      lPedidoItensModal.objeto.BASE_ICMS           := FloatToStr(lCalcularImpostosModel.ICMS_BASE);
+      lPedidoItensModal.objeto.ALIQ_ICMS           := FloatToStr(lCalcularImpostosModel.ICMS_ALIQUOTA);
+      lPedidoItensModal.objeto.VALOR_ICMS          := FloatToStr(lCalcularImpostosModel.ICMS_VALOR);
+      lPedidoItensModal.objeto.ALIQ_ICMS_ST        := FloatToStr(lCalcularImpostosModel.ICMSST_ALIQUOTA);
+      lPedidoItensModal.objeto.MVA                 := FloatToStr(lCalcularImpostosModel.ICMSST_MVA);
+      lPedidoItensModal.objeto.REDUCAO_ST          := FloatToStr(lCalcularImpostosModel.ICMSST_REDUCAO);
+      lPedidoItensModal.objeto.VALOR_ST            := FloatToStr(lCalcularImpostosModel.ICMSST_VALOR);
+      lPedidoItensModal.objeto.BASE_ST             := FloatToStr(lCalcularImpostosModel.ICMSST_BASE);
+      lPedidoItensModal.objeto.PIS_CST             := (lCalcularImpostosModel.PIS_CST);
+      lPedidoItensModal.objeto.ALIQ_PIS            := FloatToStr(lCalcularImpostosModel.PIS_ALIQUOTA);
+      lPedidoItensModal.objeto.BASE_PIS            := FloatToStr(lCalcularImpostosModel.PIS_BASE);
+      lPedidoItensModal.objeto.VALOR_PIS           := FloatToStr(lCalcularImpostosModel.PIS_VALOR);
+      lPedidoItensModal.objeto.COFINS_CST          := (lCalcularImpostosModel.COFINS_CST);
+      lPedidoItensModal.objeto.ALIQ_COFINS         := FloatToStr(lCalcularImpostosModel.COFINS_ALIQUOTA);
+      lPedidoItensModal.objeto.BASE_COFINS         := FloatToStr(lCalcularImpostosModel.COFINS_BASE);
+      lPedidoItensModal.objeto.VALOR_COFINS        := FloatToStr(lCalcularImpostosModel.COFINS_VALOR);
+      lPedidoItensModal.objeto.VBCUFDEST           := FloatToStr(lCalcularImpostosModel.VBCUFDEST);
+      lPedidoItensModal.objeto.PFCPUFDEST          := FloatToStr(lCalcularImpostosModel.PICMSUFDEST);
+      lPedidoItensModal.objeto.PICMSUFDEST         := FloatToStr(lCalcularImpostosModel.PICMSINTER);
+      lPedidoItensModal.objeto.PICMSINTER          := FloatToStr(lCalcularImpostosModel.PICMSINTERPART);
+      lPedidoItensModal.objeto.PICMSINTERPART      := FloatToStr(lCalcularImpostosModel.PICMSINTERPART);
+      lPedidoItensModal.objeto.VICMSUFDEST         := FloatToStr(lCalcularImpostosModel.VICMSUFDEST);
+      lPedidoItensModal.objeto.VICMSUFREMET        := FloatToStr(lCalcularImpostosModel.VBCFCPST);
+      lPedidoItensModal.objeto.VBCFCPST            := FloatToStr(lCalcularImpostosModel.PFCPST);
+      lPedidoItensModal.objeto.PFCPST              := FloatToStr(lCalcularImpostosModel.PFCPST);
+      lPedidoItensModal.objeto.VFCPST              := FloatToStr(lCalcularImpostosModel.VFCPST);
+      lPedidoItensModal.objeto.CFOP_ID             := lCalcularImpostosModel.CFOP_ID;
+      lPedidoItensModal.objeto.CFOP                := lCalcularImpostosModel.CFOP;
+      lPedidoItensModal.objeto.VDESC               := FloatToStr(lCalcularImpostosModel.DESCONTO_ITEM);
+      lPedidoItensModal.objeto.VOUTROS             := FloatToStr(lCalcularImpostosModel.ACRESCIMO_ITEM);
+      lPedidoItensModal.objeto.CSOSN               := lCalcularImpostosModel.ICMS_CSOSN;
+      lPedidoItensModal.objeto.VTOTTRIB_ESTADUAL   := lCalcularImpostosModel.VTOTTRIB_ESTADUAL;
+      lPedidoItensModal.objeto.VTOTTRIB_FEDERAL    := lCalcularImpostosModel.VTOTTRIB_FEDERAL;
+      lPedidoItensModal.objeto.VTOTTRIB_MUNICIPAL  := lCalcularImpostosModel.VTOTTRIB_MUNICIPAL;
 
-      lPedidoItensModal.Salvar;
+      lPedidoItensModal.objeto.Salvar;
     end;
     if self.CFOP_ID = '' then
     begin
@@ -1587,7 +1587,7 @@ begin
   finally
     lPedidoVendaLista:=nil;
     lCalcularImpostosModel.Free;
-    lPedidoItensModal.Free;
+    lPedidoItensModal:=nil;
   end;
 end;
 

@@ -453,7 +453,7 @@ end;
 function TWebPedidoModel.aprovarVendaAssistida(pIdVendaAssistida: Integer): String;
 var
   lPedidoVendaModel        : ITPedidoVendaModel;
-  lPedidoItensModel        : TPedidoItensModel;
+  lPedidoItensModel        : ITPedidoItensModel;
   lWebPedidoItensModel     : TWebPedidoItensModel;
   lWebPedidoModel          : TWebPedidoModel;
   lClientesModel           : TClienteModel;
@@ -471,7 +471,7 @@ begin
   lWebPedidoItensModel   := TWebPedidoItensModel.Create(vIConexao);
 
   lPedidoVendaModel      := TPedidoVendaModel.getNewIface(vIConexao);
-  lPedidoItensModel      := TPedidoItensModel.Create(vIConexao);
+  lPedidoItensModel      := TPedidoItensModel.getNewIface(vIConexao);
 
   lClientesModel         := TClienteModel.Create(vIConexao);
   lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
@@ -549,7 +549,7 @@ begin
     lWebPedidoItensModel.IDWebPedidoView := pIdVendaAssistida;
     lWebPedidoItensModel.obterLista;
 
-    lPedidoItensModel.PedidoItenssLista := TCollections.CreateList<TPedidoItensModel>(true);
+    lPedidoItensModel.objeto.PedidoItenssLista := TCollections.CreateList<ITPedidoItensModel>;
 
     lItem  := 0;
     lIndex := 0;
@@ -557,45 +557,45 @@ begin
     for lWebPedidoItensModel in lWebPedidoItensModel.WebPedidoItenssLista do begin
       inc(lItem);
 
-      lPedidoItensModel.PedidoItenssLista.Add(TPedidoItensModel.Create(vIConexao));
+      lPedidoItensModel.objeto.PedidoItenssLista.Add(TPedidoItensModel.getNewIface(vIConexao));
 
-      lPedidoItensModel.PedidoItenssLista[lIndex].NUMERO_PED             := lPedido;
-      lPedidoItensModel.PedidoItenssLista[lIndex].CODIGO_CLI             := lWebPedidoModel.CLIENTE_ID;
-      lPedidoItensModel.PedidoItenssLista[lIndex].LOJA                   := lWebPedidoModel.LOJA;
-      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_PED         := FloatToStr(lWebPedidoItensModel.QUANTIDADE);
-      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_NEW         := FloatToStr(lWebPedidoItensModel.QUANTIDADE);
-      lPedidoItensModel.PedidoItenssLista[lIndex].WEB_PEDIDOITENS_ID     := lWebPedidoItensModel.ID;
-      lPedidoItensModel.PedidoItenssLista[lIndex].TIPO_VENDA             := lWebPedidoItensModel.TIPO_ENTREGA;
-      lPedidoItensModel.PedidoItenssLista[lIndex].OBSERVACAO             := copy(lWebPedidoItensModel.OBSERVACAO,1,50);
-      lPedidoItensModel.PedidoItenssLista[lIndex].OBS_ITEM               := lWebPedidoItensModel.OBSERVACAO;
-      lPedidoItensModel.PedidoItenssLista[lIndex].CODIGO_PRO             := lWebPedidoItensModel.PRODUTO_ID;
-      lPedidoItensModel.PedidoItenssLista[lIndex].QUANTIDADE_TIPO        := FloatToStr(lWebPedidoItensModel.VLR_GARANTIA);
-      lPedidoItensModel.PedidoItenssLista[lIndex].ENTREGA                := lWebPedidoItensModel.ENTREGA;
-      lPedidoItensModel.PedidoItenssLista[lIndex].MONTAGEM               := lWebPedidoItensModel.MONTAGEM;
-      lPedidoItensModel.PedidoItenssLista[lIndex].DESCONTO_PED           := FloatToStr(lWebPedidoItensModel.PERCENTUAL_DESCONTO);
-      lPedidoItensModel.PedidoItenssLista[lIndex].VDESC                  := FloatToStr(lWebPedidoItensModel.PERCENTUAL_DESCONTO / 100 * (lWebPedidoItensModel.QUANTIDADE * lWebPedidoItensModel.VALOR_UNITARIO));
-      lPedidoItensModel.PedidoItenssLista[lIndex].VALORUNITARIO_PED      := FloatToStr(lWebPedidoItensModel.VALOR_UNITARIO);
-      lPedidoItensModel.PedidoItenssLista[lIndex].ITEM                   := lItem.ToString;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_BONUS_SERVICO    := FloatToStr(lWebPedidoItensModel.VALOR_BONUS_SERVICO);
-      lPedidoItensModel.PedidoItenssLista[lIndex].BALANCA                := lWebPedidoItensModel.USAR_BALANCA;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VLRVENDA_PRO           := FloatToStr(lWebPedidoItensModel.VLRVENDA_PRO);
-      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_VENDA_CADASTRO   := FloatToStr(lWebPedidoItensModel.VALOR_VENDA_ATUAL);
-      lPedidoItensModel.PedidoItenssLista[lIndex].VLRCUSTO_PRO           := FloatToStr(lWebPedidoItensModel.CUSTOMEDIO_PRO);
-      lPedidoItensModel.PedidoItenssLista[lIndex].VALOR_MONTADOR         := FloatToStr(lWebPedidoItensModel.VALOR_MONTADOR);
-      lPedidoItensModel.PedidoItenssLista[lIndex].COMISSAO_PERCENTUAL    := FloatToStr(lWebPedidoItensModel.PERCENTUAL_COMISSAO);
-      lPedidoItensModel.PedidoItenssLista[lIndex].COMISSAO_PED           := '0';
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.NUMERO_PED             := lPedido;
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.CODIGO_CLI             := lWebPedidoModel.CLIENTE_ID;
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.LOJA                   := lWebPedidoModel.LOJA;
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.QUANTIDADE_PED         := FloatToStr(lWebPedidoItensModel.QUANTIDADE);
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.QUANTIDADE_NEW         := FloatToStr(lWebPedidoItensModel.QUANTIDADE);
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.WEB_PEDIDOITENS_ID     := lWebPedidoItensModel.ID;
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.TIPO_VENDA             := lWebPedidoItensModel.TIPO_ENTREGA;
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.OBSERVACAO             := copy(lWebPedidoItensModel.OBSERVACAO,1,50);
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.OBS_ITEM               := lWebPedidoItensModel.OBSERVACAO;
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.CODIGO_PRO             := lWebPedidoItensModel.PRODUTO_ID;
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.QUANTIDADE_TIPO        := FloatToStr(lWebPedidoItensModel.VLR_GARANTIA);
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.ENTREGA                := lWebPedidoItensModel.ENTREGA;
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.MONTAGEM               := lWebPedidoItensModel.MONTAGEM;
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.DESCONTO_PED           := FloatToStr(lWebPedidoItensModel.PERCENTUAL_DESCONTO);
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VDESC                  := FloatToStr(lWebPedidoItensModel.PERCENTUAL_DESCONTO / 100 * (lWebPedidoItensModel.QUANTIDADE * lWebPedidoItensModel.VALOR_UNITARIO));
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VALORUNITARIO_PED      := FloatToStr(lWebPedidoItensModel.VALOR_UNITARIO);
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.ITEM                   := lItem.ToString;
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VALOR_BONUS_SERVICO    := FloatToStr(lWebPedidoItensModel.VALOR_BONUS_SERVICO);
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.BALANCA                := lWebPedidoItensModel.USAR_BALANCA;
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VLRVENDA_PRO           := FloatToStr(lWebPedidoItensModel.VLRVENDA_PRO);
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VALOR_VENDA_CADASTRO   := FloatToStr(lWebPedidoItensModel.VALOR_VENDA_ATUAL);
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VLRCUSTO_PRO           := FloatToStr(lWebPedidoItensModel.CUSTOMEDIO_PRO);
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VALOR_MONTADOR         := FloatToStr(lWebPedidoItensModel.VALOR_MONTADOR);
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.COMISSAO_PERCENTUAL    := FloatToStr(lWebPedidoItensModel.PERCENTUAL_COMISSAO);
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.COMISSAO_PED           := '0';
 
-      lPedidoItensModel.PedidoItenssLista[lIndex].TIPO_GARANTIA_FR       := lWebPedidoItensModel.TIPO_GARANTIA_FR;
-      lPedidoItensModel.PedidoItenssLista[lIndex].VLR_GARANTIA_FR        := lWebPedidoItensModel.VLR_GARANTIA_FR;
-      lPedidoItensModel.PedidoItenssLista[lIndex].CUSTO_GARANTIA_FR      := lWebPedidoItensModel.CUSTO_GARANTIA_FR;
-      lPedidoItensModel.PedidoItenssLista[lIndex].CUSTO_GARANTIA         := lWebPedidoItensModel.CUSTO_GARANTIA;
-      lPedidoItensModel.PedidoItenssLista[lIndex].PER_GARANTIA_FR        := lWebPedidoItensModel.PER_GARANTIA_FR;
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.TIPO_GARANTIA_FR       := lWebPedidoItensModel.TIPO_GARANTIA_FR;
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VLR_GARANTIA_FR        := lWebPedidoItensModel.VLR_GARANTIA_FR;
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.CUSTO_GARANTIA_FR      := lWebPedidoItensModel.CUSTO_GARANTIA_FR;
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.CUSTO_GARANTIA         := lWebPedidoItensModel.CUSTO_GARANTIA;
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.PER_GARANTIA_FR        := lWebPedidoItensModel.PER_GARANTIA_FR;
 
       inc(lIndex);
     end;
 
-    lPedidoItensModel.Acao := tacIncluirLote;
-    lPedidoItensModel.Salvar;
+    lPedidoItensModel.objeto.Acao := tacIncluirLote;
+    lPedidoItensModel.objeto.Salvar;
 
     lPedidoVendaModel.objeto.calcularTotais;
 
@@ -616,7 +616,7 @@ begin
     lWebPedidoModel.Free;
     lPedidoVendaModel:=nil;
     lWebPedidoItensModel.Free;
-    lPedidoItensModel.Free;
+    lPedidoItensModel:=nil;
     lClientesModel.Free;
   end;
 

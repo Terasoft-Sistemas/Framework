@@ -5,7 +5,7 @@ interface
 uses
   SysUtils,
   Terasoft.Types,
-  System.Generics.Collections,
+  Terasoft.Framework.ObjectIface,
   mcibr.motor,
   mcibr.interfaces,
   mcibr.enum.contribuinte.ipi,
@@ -21,12 +21,15 @@ uses
   Interfaces.Conexao;
 
 type
-  TPedidoItensModel = class
+  TPedidoItensModel = class;
+  ITPedidoItensModel=IObject<TPedidoItensModel>;
 
+  TPedidoItensModel = class
   private
+    [weak] mySelf: ITPedidoItensModel;
     vIConexao : IConexao;
 
-    FPedidoItenssLista: IList<TPedidoItensModel>;
+    FPedidoItenssLista: IList<ITPedidoItensModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -178,7 +181,7 @@ type
     FSEGURO_PRESTAMISTA_VALOR: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetPedidoItenssLista(const Value: IList<TPedidoItensModel>);
+    procedure SetPedidoItenssLista(const Value: IList<ITPedidoItensModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -465,18 +468,20 @@ type
     property VTOTTRIB_MUNICIPAL: Variant read FVTOTTRIB_MUNICIPAL write SetVTOTTRIB_MUNICIPAL;
     property SEGURO_PRESTAMISTA_VALOR: Variant read FSEGURO_PRESTAMISTA_VALOR write SetSEGURO_PRESTAMISTA_VALOR;
 
-  	constructor Create(pConexao: IConexao);
+  	constructor _Create(pConexao: IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITPedidoItensModel;
 
     function Salvar: String;
     function Incluir : String;
-    function Alterar(pID : String) : TPedidoItensModel;
+    function Alterar(pID : String) : ITPedidoItensModel;
     function Excluir(pID : String) : String;
 
     procedure obterLista;
     procedure obterPedido(pNUmeroPedido: String);
     procedure obterTotaisItens(pNumeroPedido: String);
-    function carregaClasse(pId: String): TPedidoItensModel;
+    function carregaClasse(pId: String): ITPedidoItensModel;
     function obterIDItem(pPedido, pProduto : String): String;
 
     function gerarEstoque: String;
@@ -485,7 +490,7 @@ type
 
     procedure aplicarFreteItem(pFrete, pTotal: Double);
 
-    property PedidoItenssLista: IList<TPedidoItensModel> read FPedidoItenssLista write SetPedidoItenssLista;
+    property PedidoItenssLista: IList<ITPedidoItensModel> read FPedidoItenssLista write SetPedidoItenssLista;
 
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -521,14 +526,14 @@ uses
 
 { TPedidoItensModel }
 
-function TPedidoItensModel.Alterar(pID: String): TPedidoItensModel;
+function TPedidoItensModel.Alterar(pID: String): ITPedidoItensModel;
 var
-  lPedidoItensModel : TPedidoItensModel;
+  lPedidoItensModel : ITPedidoItensModel;
 begin
-  lPedidoItensModel := TPedidoItensModel.Create(vIConexao);
+  lPedidoItensModel := TPedidoItensModel.getNewIface(vIConexao);
   try
-    lPedidoItensModel      := lPedidoItensModel.carregaClasse(pID);
-    lPedidoItensModel.Acao := tacAlterar;
+    lPedidoItensModel      := lPedidoItensModel.objeto.carregaClasse(pID);
+    lPedidoItensModel.objeto.Acao := tacAlterar;
     Result                 := lPedidoItensModel;
   finally
 
@@ -537,32 +542,32 @@ end;
 
 function TPedidoItensModel.Excluir(pID: String): String;
 var
-  lPedidoItensModel : TPedidoItensModel;
+  lPedidoItensModel : ITPedidoItensModel;
   lItem : Integer;
 begin
 
-  lPedidoItensModel := TPedidoItensModel.Create(vIConexao);
+  lPedidoItensModel := TPedidoItensModel.getNewIface(vIConexao);
   try
-    self      := self.carregaClasse(pID);
-    self.Acao := tacExcluir;
+    lPedidoItensModel := lPedidoItensModel.objeto.carregaClasse(pID);
+    lPedidoItensModel.objeto.Acao := tacExcluir;
     Result    := self.Salvar;
 
-    lPedidoItensModel.IDPedidoVendaView := self.FNUMERO_PED;
-    lPedidoItensModel.obterLista;
+    lPedidoItensModel.objeto.IDPedidoVendaView := self.FNUMERO_PED;
+    lPedidoItensModel.objeto.obterLista;
 
     lItem := 1;
 
-    for lPedidoItensModel in lPedidoItensModel.FPedidoItenssLista do
+    for lPedidoItensModel in lPedidoItensModel.objeto.FPedidoItenssLista do
     begin
-      lPedidoItensModel.Acao := tacAlterar;
-      lPedidoItensModel.ITEM := lItem;
-      lPedidoItensModel.Salvar;
+      lPedidoItensModel.objeto.Acao := tacAlterar;
+      lPedidoItensModel.objeto.ITEM := lItem;
+      lPedidoItensModel.objeto.Salvar;
 
       inc(lItem);
     end;
 
   finally
-    lPedidoItensModel.Free;
+    lPedidoItensModel:=nil;
   end;
 
 end;
@@ -666,19 +671,19 @@ begin
   end;
 end;
 
-function TPedidoItensModel.carregaClasse(pId: String): TPedidoItensModel;
+function TPedidoItensModel.carregaClasse(pId: String): ITPedidoItensModel;
 var
-  lPedidoItensDao: TPedidoItensDao;
+  lPedidoItensDao: ITPedidoItensDao;
 begin
-  lPedidoItensDao := TPedidoItensDao.Create(vIConexao);
+  lPedidoItensDao := TPedidoItensDao.getNewIface(vIConexao);
   try
-    Result := lPedidoItensDao.carregaClasse(pId);
+    Result := lPedidoItensDao.objeto.carregaClasse(pId);
   finally
-    lPedidoItensDao.Free;
+    lPedidoItensDao:=nil;
   end;
 end;
 
-constructor TPedidoItensModel.Create(pConexao: IConexao);
+constructor TPedidoItensModel._Create(pConexao: IConexao);
 begin
   vIConexao := pConexao;
 end;
@@ -729,6 +734,12 @@ begin
   end;
 end;
 
+class function TPedidoItensModel.getNewIface(pIConexao: IConexao): ITPedidoItensModel;
+begin
+  Result := TImplObjetoOwner<TPedidoItensModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 procedure TPedidoItensModel.aplicarFreteItem(pFrete, pTotal: Double);
 begin
   Self.Acao   := tacAlterar;
@@ -738,87 +749,87 @@ end;
 
 procedure TPedidoItensModel.obterPedido(pNUmeroPedido: String);
 var
-  lPedidoItensLista: TPedidoItensDao;
+  lPedidoItensLista: ITPedidoItensDao;
 begin
-  lPedidoItensLista := TPedidoItensDao.Create(vIConexao);
+  lPedidoItensLista := TPedidoItensDao.getNewIface(vIConexao);
   try
-    lPedidoItensLista.obterItensPedido(pNUmeroPedido);
-    FPedidoItenssLista := lPedidoItensLista.PedidoItenssLista;
+    lPedidoItensLista.objeto.obterItensPedido(pNUmeroPedido);
+    FPedidoItenssLista := lPedidoItensLista.objeto.PedidoItenssLista;
   finally
-    lPedidoItensLista.Free;
+    lPedidoItensLista:=nil;
   end;
 end;
 procedure TPedidoItensModel.obterTotaisItens(pNumeroPedido: String);
 var
-  lPedidoItensLista: TPedidoItensDao;
+  lPedidoItensLista: ITPedidoItensDao;
 begin
-  lPedidoItensLista := TPedidoItensDao.Create(vIConexao);
+  lPedidoItensLista := TPedidoItensDao.getNewIface(vIConexao);
   try
-    lPedidoItensLista.obterTotaisItens(pNUmeroPedido);
-    self.VALOR_TOTAL_ITENS         := lPedidoItensLista.VALOR_TOTAL_ITENS;
-    self.VALOR_TOTAL_GARANTIA      := lPedidoItensLista.VALOR_TOTAL_GARANTIA;
-    self.VALOR_TOTAL_DESCONTO      := lPedidoItensLista.VALOR_TOTAL_DESCONTO;
-    self.VALOR_TOTAL               := lPedidoItensLista.VALOR_TOTAL;
-    self.SEGURO_PRESTAMISTA_VALOR  := lPedidoItensLista.SEGURO_PRESTAMISTA_VALOR;
+    lPedidoItensLista.objeto.obterTotaisItens(pNUmeroPedido);
+    self.VALOR_TOTAL_ITENS         := lPedidoItensLista.objeto.VALOR_TOTAL_ITENS;
+    self.VALOR_TOTAL_GARANTIA      := lPedidoItensLista.objeto.VALOR_TOTAL_GARANTIA;
+    self.VALOR_TOTAL_DESCONTO      := lPedidoItensLista.objeto.VALOR_TOTAL_DESCONTO;
+    self.VALOR_TOTAL               := lPedidoItensLista.objeto.VALOR_TOTAL;
+    self.SEGURO_PRESTAMISTA_VALOR  := lPedidoItensLista.objeto.SEGURO_PRESTAMISTA_VALOR;
   finally
-    lPedidoItensLista.Free;
+    lPedidoItensLista:=nil;
   end;
 end;
 
 function TPedidoItensModel.obterIDItem(pPedido, pProduto: String): String;
 var
-  lPedidoItensDao : TPedidoItensDao;
+  lPedidoItensDao : ITPedidoItensDao;
 begin
-  lPedidoItensDao := TPedidoItensDao.Create(vIConexao);
+  lPedidoItensDao := TPedidoItensDao.getNewIface(vIConexao);
   try
-    result := lPedidoItensDao.obterIDItem(pPedido, pProduto);
+    result := lPedidoItensDao.objeto.obterIDItem(pPedido, pProduto);
   finally
-    lPedidoItensDao.Free;
+    lPedidoItensDao:=nil;
   end;
 end;
 
 procedure TPedidoItensModel.obterLista;
 var
-  lPedidoItensLista: TPedidoItensDao;
+  lPedidoItensLista: ITPedidoItensDao;
 begin
-  lPedidoItensLista := TPedidoItensDao.Create(vIConexao);
+  lPedidoItensLista := TPedidoItensDao.getNewIface(vIConexao);
   try
-    lPedidoItensLista.TotalRecords      := FTotalRecords;
-    lPedidoItensLista.WhereView         := FWhereView;
-    lPedidoItensLista.CountView         := FCountView;
-    lPedidoItensLista.OrderView         := FOrderView;
-    lPedidoItensLista.StartRecordView   := FStartRecordView;
-    lPedidoItensLista.LengthPageView    := FLengthPageView;
-    lPedidoItensLista.IDRecordView      := FIDRecordView;
-    lPedidoItensLista.IDPedidoVendaView := FIDPedidoVendaView;
+    lPedidoItensLista.objeto.TotalRecords      := FTotalRecords;
+    lPedidoItensLista.objeto.WhereView         := FWhereView;
+    lPedidoItensLista.objeto.CountView         := FCountView;
+    lPedidoItensLista.objeto.OrderView         := FOrderView;
+    lPedidoItensLista.objeto.StartRecordView   := FStartRecordView;
+    lPedidoItensLista.objeto.LengthPageView    := FLengthPageView;
+    lPedidoItensLista.objeto.IDRecordView      := FIDRecordView;
+    lPedidoItensLista.objeto.IDPedidoVendaView := FIDPedidoVendaView;
 
-    lPedidoItensLista.obterLista;
+    lPedidoItensLista.objeto.obterLista;
 
-    FTotalRecords      := lPedidoItensLista.TotalRecords;
-    FPedidoItenssLista := lPedidoItensLista.PedidoItenssLista;
+    FTotalRecords      := lPedidoItensLista.objeto.TotalRecords;
+    FPedidoItenssLista := lPedidoItensLista.objeto.PedidoItenssLista;
   finally
-    lPedidoItensLista.Free;
+    lPedidoItensLista:=nil;
   end;
 end;
 
 function TPedidoItensModel.Salvar: String;
 var
-  lPedidoItensDao: TPedidoItensDao;
+  lPedidoItensDao: ITPedidoItensDao;
 begin
-  lPedidoItensDao := TPedidoItensDao.Create(vIConexao);
+  lPedidoItensDao := TPedidoItensDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir     : Result := lPedidoItensDao.incluir(Self);
-      Terasoft.Types.tacIncluirLote : Result := lPedidoItensDao.incluirLote(Self);
-      Terasoft.Types.tacAlterar     : Result := lPedidoItensDao.alterar(Self);
-      Terasoft.Types.tacExcluir     : Result := lPedidoItensDao.excluir(Self);
+      Terasoft.Types.tacIncluir     : Result := lPedidoItensDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacIncluirLote : Result := lPedidoItensDao.objeto.incluirLote(mySelf);
+      Terasoft.Types.tacAlterar     : Result := lPedidoItensDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir     : Result := lPedidoItensDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lPedidoItensDao.Free;
+    lPedidoItensDao:=nil;
   end;
 end;
 
