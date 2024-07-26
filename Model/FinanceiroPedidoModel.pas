@@ -59,6 +59,8 @@ type
     FPER_SEG_PRESTAMSTA: Variant;
     FVALOR_ACRESCIMO_SEG_PRESTAMISTA: Variant;
     FWEB_PEDIDOITENS_ID: Variant;
+    FORIGINAL_VALOR_PARCELA: Variant;
+    FORIGINAL_INDCE_APLICADO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetIDRecordView(const Value: Integer);
@@ -88,6 +90,8 @@ type
     procedure SetVALOR_SEG_PRESTAMISTA(const Value: Variant);
     procedure SetVALOR_ACRESCIMO_SEG_PRESTAMISTA(const Value: Variant);
     procedure SetWEB_PEDIDOITENS_ID(const Value: Variant);
+    procedure SetORIGINAL_INDCE_APLICADO(const Value: Variant);
+    procedure SetORIGINAL_VALOR_PARCELA(const Value: Variant);
 
   public
 
@@ -112,6 +116,9 @@ type
     property  VALOR_SEG_PRESTAMISTA : Variant read FVALOR_SEG_PRESTAMISTA write SetVALOR_SEG_PRESTAMISTA;
     property  PER_SEG_PRESTAMSTA    : Variant read FPER_SEG_PRESTAMSTA write SetPER_SEG_PRESTAMSTA;
     property  VALOR_ACRESCIMO_SEG_PRESTAMISTA : Variant read FVALOR_ACRESCIMO_SEG_PRESTAMISTA write SetVALOR_ACRESCIMO_SEG_PRESTAMISTA;
+
+    property  ORIGINAL_VALOR_PARCELA : Variant read FORIGINAL_VALOR_PARCELA write SetORIGINAL_VALOR_PARCELA;
+    property  ORIGINAL_INDCE_APLICADO : Variant read FORIGINAL_INDCE_APLICADO write SetORIGINAL_INDCE_APLICADO;
 
     property Acao               : TAcao       read FAcao               write SetAcao;
     property TotalRecords       : Integer     read FTotalRecords       write SetTotalRecords;
@@ -160,7 +167,7 @@ var
   lFinanceiroPedidoModel : TFinanceiroPedidoModel;
   lFinanceiroPedidoDao : TFinanceiroPedidoDao;
 
-  lTotal, lValorParcela, lIndice, lValorAcrescimo, lValorLiquido : Extended;
+  lTotal, lValorParcelaNew, lIndiceNew, lIndiceOriginal, lValorAcrescimoNew, lValorLiquido, lParcelaOriginal : Extended;
 
 begin
     lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
@@ -169,17 +176,19 @@ begin
   try
     lFinanceiroPedidoModel := lFinanceiroPedidoModel.carregaClasse(pID_Financeiro);
 
-    if pNovaParcela < (lFinanceiroPedidoModel.VALOR_PARCELA-0.99) then
+    if pNovaParcela < (lFinanceiroPedidoModel.ORIGINAL_VALOR_PARCELA-0.99) then
       CriaException('Arredondamento da parcela não pode ser superior a R$ 0.99');
 
-    lValorLiquido := (StrToFloat(lFinanceiroPedidoModel.VALOR_LIQUIDO) + StrToFloat(lFinanceiroPedidoModel.VALOR_SEG_PRESTAMISTA));
+    lIndiceOriginal  := StrToFloat(lFinanceiroPedidoModel.ORIGINAL_INDCE_APLICADO);
+    lParcelaOriginal := StrToFloat(lFinanceiroPedidoModel.ORIGINAL_VALOR_PARCELA);
+    lValorLiquido    := (StrToFloat(lFinanceiroPedidoModel.VALOR_LIQUIDO) + StrToFloat(lFinanceiroPedidoModel.VALOR_SEG_PRESTAMISTA));
 
-    lIndice         := (pNovaParcela* StrToFloat(lFinanceiroPedidoModel.INDCE_APLICADO))/StrToFloat(lFinanceiroPedidoModel.VALOR_PARCELA);
-    lValorParcela   := lValorLiquido*lIndice;
-    lTotal          := lValorParcela * StrToInt(lFinanceiroPedidoModel.QUANTIDADE_PARCELAS);
-    lValorAcrescimo := lTotal - lValorLiquido;
+    lIndiceNew         := (pNovaParcela * lIndiceOriginal)/lParcelaOriginal;
+    lValorParcelaNew   := lValorLiquido * lIndiceNew;
+    lTotal             := lValorParcelaNew * StrToInt(lFinanceiroPedidoModel.QUANTIDADE_PARCELAS);
+    lValorAcrescimoNew := lTotal - lValorLiquido;
 
-    lFinanceiroPedidoDao.UpdateArredondaParcela(lTotal, lValorParcela, lIndice, lValorAcrescimo, pID_Financeiro);
+    lFinanceiroPedidoDao.UpdateArredondaParcela(lTotal, lValorParcelaNew, lIndiceNew, lValorAcrescimoNew, pID_Financeiro);
 
   finally
     lFinanceiroPedidoModel.Free;
@@ -287,6 +296,8 @@ begin
     self.PER_SEG_PRESTAMSTA              := pFinanceiroParams.PER_SEG_PRESTAMSTA;
     self.VALOR_ACRESCIMO_SEG_PRESTAMISTA := pFinanceiroParams.VALOR_ACRESCIMO_SEG_PRESTAMISTA;
 
+    self.ORIGINAL_VALOR_PARCELA  := self.VALOR_PARCELA;
+    self.ORIGINAL_INDCE_APLICADO := self.INDCE_APLICADO;
 
     if i = 0 then
       self.VENCIMENTO := DateToStr(lPrimeiroVencimento)
@@ -472,6 +483,18 @@ end;
 procedure TFinanceiroPedidoModel.SetOrderView(const Value: String);
 begin
   FOrderView := Value;
+end;
+
+procedure TFinanceiroPedidoModel.SetORIGINAL_INDCE_APLICADO(
+  const Value: Variant);
+begin
+  FORIGINAL_INDCE_APLICADO := Value;
+end;
+
+procedure TFinanceiroPedidoModel.SetORIGINAL_VALOR_PARCELA(
+  const Value: Variant);
+begin
+  FORIGINAL_VALOR_PARCELA := Value;
 end;
 
 procedure TFinanceiroPedidoModel.SetPARCELA(const Value: Variant);

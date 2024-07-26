@@ -148,6 +148,8 @@ begin
     lModel.VALOR_SEG_PRESTAMISTA  := lQry.FieldByName('VALOR_SEG_PRESTAMISTA').AsString;
     lModel.PER_SEG_PRESTAMSTA     := lQry.FieldByName('PER_SEG_PRESTAMSTA').AsString;
     lModel.VALOR_ACRESCIMO_SEG_PRESTAMISTA := lQry.FieldByName('VALOR_ACRESCIMO_SEG_PRESTAMISTA').AsString;
+    lModel.ORIGINAL_VALOR_PARCELA  := lQry.FieldByName('ORIGINAL_VALOR_PARCELA').AsString;
+    lModel.ORIGINAL_INDCE_APLICADO := lQry.FieldByName('ORIGINAL_INDCE_APLICADO').AsString;
 
     Result := lModel;
   finally
