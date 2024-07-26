@@ -11,16 +11,20 @@ uses
   System.Variants,
   Interfaces.Conexao,
   Terasoft.ConstrutorDao,
+  Terasoft.Framework.ObjectIface,
   Terasoft.Utils;
 
 type
-  TPromocaoDao = class
+  TPromocaoDao = class;
+  ITPromocaoDao=IObject<TPromocaoDao>;
 
+  TPromocaoDao = class
   private
+    [weak] mySelf: ITPromocaoDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FPromocaosLista: IList<TPromocaoModel>;
+    FPromocaosLista: IList<ITPromocaoModel>;
     FLengthPageView: String;
     FStartRecordView: String;
     FID: Variant;
@@ -32,7 +36,7 @@ type
     FCodProdutoView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetPromocaosLista(const Value: IList<TPromocaoModel>);
+    procedure SetPromocaosLista(const Value: IList<ITPromocaoModel>);
     procedure SetID(const Value: Variant);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -43,14 +47,16 @@ type
     function where: String;
     procedure SetIDRecordView(const Value: String);
 
-    procedure setParams(var pQry: TFDQuery; pPromocaoModel: TPromocaoModel);
+    procedure setParams(var pQry: TFDQuery; pPromocaoModel: ITPromocaoModel);
     procedure SetCodProdutoView(const Value: String);
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property PromocaosLista: IList<TPromocaoModel> read FPromocaosLista write SetPromocaosLista;
+    class function getNewIface(pIConexao: IConexao): ITPromocaoDao;
+
+    property PromocaosLista: IList<ITPromocaoModel> read FPromocaosLista write SetPromocaosLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -61,10 +67,10 @@ type
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
     property CodProdutoView : String read FCodProdutoView write SetCodProdutoView;
 
-    function incluir(pPromocaoModel: TPromocaoModel): String;
-    function alterar(pPromocaoModel: TPromocaoModel): String;
-    function excluir(pPromocaoModel: TPromocaoModel): String;
-    function carregaClasse(pID : String) : TPromocaoModel;
+    function incluir(pPromocaoModel: ITPromocaoModel): String;
+    function alterar(pPromocaoModel: ITPromocaoModel): String;
+    function excluir(pPromocaoModel: ITPromocaoModel): String;
+    function carregaClasse(pID : String) : ITPromocaoModel;
     procedure obterLista;
 
 end;
@@ -76,13 +82,13 @@ uses
 
 { TPromocao }
 
-function TPromocaoDao.carregaClasse(pID: String): TPromocaoModel;
+function TPromocaoDao.carregaClasse(pID: String): ITPromocaoModel;
 var
   lQry: TFDQuery;
-  lModel: TPromocaoModel;
+  lModel: ITPromocaoModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TPromocaoModel.Create(vIConexao);
+  lModel   := TPromocaoModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -91,26 +97,26 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID               := lQry.FieldByName('ID').AsString;
-    lModel.DESCRICAO        := lQry.FieldByName('DESCRICAO').AsString;
-    lModel.DATA             := lQry.FieldByName('DATA').AsString;
-    lModel.DATAINICIO       := lQry.FieldByName('DATAINICIO').AsString;
-    lModel.DATAFIM          := lQry.FieldByName('DATAFIM').AsString;
-    lModel.CLIENTE_ID       := lQry.FieldByName('CLIENTE_ID').AsString;
-    lModel.PRECO_VENDA_ID   := lQry.FieldByName('PRECO_VENDA_ID').AsString;
-    lModel.HORAINICIO       := lQry.FieldByName('HORAINICIO').AsString;
-    lModel.HORAFIM          := lQry.FieldByName('HORAFIM').AsString;
-    lModel.DOMINGO          := lQry.FieldByName('DOMINGO').AsString;
-    lModel.SEGUNDA          := lQry.FieldByName('SEGUNDA').AsString;
-    lModel.TERCA            := lQry.FieldByName('TERCA').AsString;
-    lModel.QUARTA           := lQry.FieldByName('QUARTA').AsString;
-    lModel.QUINTA           := lQry.FieldByName('QUINTA').AsString;
-    lModel.SEXTA            := lQry.FieldByName('SEXTA').AsString;
-    lModel.SABADO           := lQry.FieldByName('SABADO').AsString;
-    lModel.PORTADOR_ID      := lQry.FieldByName('PORTADOR_ID').AsString;
-    lModel.LOJA             := lQry.FieldByName('LOJA').AsString;
-    lModel.TIPO_ABATIMENTO  := lQry.FieldByName('TIPO_ABATIMENTO').AsString;
-    lModel.SYSTIME          := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.ID               := lQry.FieldByName('ID').AsString;
+    lModel.objeto.DESCRICAO        := lQry.FieldByName('DESCRICAO').AsString;
+    lModel.objeto.DATA             := lQry.FieldByName('DATA').AsString;
+    lModel.objeto.DATAINICIO       := lQry.FieldByName('DATAINICIO').AsString;
+    lModel.objeto.DATAFIM          := lQry.FieldByName('DATAFIM').AsString;
+    lModel.objeto.CLIENTE_ID       := lQry.FieldByName('CLIENTE_ID').AsString;
+    lModel.objeto.PRECO_VENDA_ID   := lQry.FieldByName('PRECO_VENDA_ID').AsString;
+    lModel.objeto.HORAINICIO       := lQry.FieldByName('HORAINICIO').AsString;
+    lModel.objeto.HORAFIM          := lQry.FieldByName('HORAFIM').AsString;
+    lModel.objeto.DOMINGO          := lQry.FieldByName('DOMINGO').AsString;
+    lModel.objeto.SEGUNDA          := lQry.FieldByName('SEGUNDA').AsString;
+    lModel.objeto.TERCA            := lQry.FieldByName('TERCA').AsString;
+    lModel.objeto.QUARTA           := lQry.FieldByName('QUARTA').AsString;
+    lModel.objeto.QUINTA           := lQry.FieldByName('QUINTA').AsString;
+    lModel.objeto.SEXTA            := lQry.FieldByName('SEXTA').AsString;
+    lModel.objeto.SABADO           := lQry.FieldByName('SABADO').AsString;
+    lModel.objeto.PORTADOR_ID      := lQry.FieldByName('PORTADOR_ID').AsString;
+    lModel.objeto.LOJA             := lQry.FieldByName('LOJA').AsString;
+    lModel.objeto.TIPO_ABATIMENTO  := lQry.FieldByName('TIPO_ABATIMENTO').AsString;
+    lModel.objeto.SYSTIME          := lQry.FieldByName('SYSTIME').AsString;
 
     Result := lModel;
 
@@ -119,7 +125,7 @@ begin
   end;
 end;
 
-constructor TPromocaoDao.Create(pIConexao : IConexao);
+constructor TPromocaoDao._Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -133,7 +139,7 @@ begin
   inherited;
 end;
 
-function TPromocaoDao.incluir(pPromocaoModel: TPromocaoModel): String;
+function TPromocaoDao.incluir(pPromocaoModel: ITPromocaoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -143,7 +149,7 @@ begin
   try
     lSQL := vConstrutor.gerarInsert('PROMOCAO', 'ID', true);
     lQry.SQL.Add(lSQL);
-    pPromocaoModel.ID := vIConexao.Generetor('GEN_PROMOCAO');
+    pPromocaoModel.objeto.ID := vIConexao.Generetor('GEN_PROMOCAO');
     setParams(lQry, pPromocaoModel);
     lQry.Open;
 
@@ -155,7 +161,7 @@ begin
   end;
 end;
 
-function TPromocaoDao.alterar(pPromocaoModel: TPromocaoModel): String;
+function TPromocaoDao.alterar(pPromocaoModel: ITPromocaoModel): String;
 var
   lQry : TFDQuery;
   lSQL : String;
@@ -169,7 +175,7 @@ begin
     setParams(lQry, pPromocaoModel);
     lQry.ExecSQL;
 
-    Result := pPromocaoModel.ID;
+    Result := pPromocaoModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -177,20 +183,26 @@ begin
   end;
 end;
 
-function TPromocaoDao.excluir(pPromocaoModel: TPromocaoModel): String;
+function TPromocaoDao.excluir(pPromocaoModel: ITPromocaoModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from promocao where ID = :ID',[pPromocaoModel.ID]);
+   lQry.ExecSQL('delete from promocao where ID = :ID',[pPromocaoModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pPromocaoModel.ID;
+   Result := pPromocaoModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TPromocaoDao.getNewIface(pIConexao: IConexao): ITPromocaoDao;
+begin
+  Result := TImplObjetoOwner<TPromocaoDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TPromocaoDao.where: String;
@@ -233,11 +245,11 @@ procedure TPromocaoDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo : TPromocaoModel;
+  modelo : ITPromocaoModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FPromocaosLista := TCollections.CreateList<TPromocaoModel>(true);
+  FPromocaosLista := TCollections.CreateList<ITPromocaoModel>;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -277,28 +289,28 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TPromocaoModel.Create(vIConexao);
+      modelo := TPromocaoModel.getNewIface(vIConexao);
       FPromocaosLista.Add(modelo);
 
-      modelo.ID              := lQry.FieldByName('ID').AsString;
-      modelo.DESCRICAO       := lQry.FieldByName('DESCRICAO').AsString;
-      modelo.DATA            := lQry.FieldByName('DATA').AsString;
-      modelo.DATAINICIO      := lQry.FieldByName('DATAINICIO').AsString;
-      modelo.DATAFIM         := lQry.FieldByName('DATAFIM').AsString;
-      modelo.CLIENTE_ID      := lQry.FieldByName('CLIENTE_ID').AsString;
-      modelo.PRECO_VENDA_ID  := lQry.FieldByName('PRECO_VENDA_ID').AsString;
-      modelo.HORAINICIO      := lQry.FieldByName('HORAINICIO').AsString;
-      modelo.HORAFIM         := lQry.FieldByName('HORAFIM').AsString;
-      modelo.DOMINGO         := lQry.FieldByName('DOMINGO').AsString;
-      modelo.SEGUNDA         := lQry.FieldByName('SEGUNDA').AsString;
-      modelo.TERCA           := lQry.FieldByName('TERCA').AsString;
-      modelo.QUARTA          := lQry.FieldByName('QUARTA').AsString;
-      modelo.QUINTA          := lQry.FieldByName('QUINTA').AsString;
-      modelo.SEXTA           := lQry.FieldByName('SEXTA').AsString;
-      modelo.SABADO          := lQry.FieldByName('SABADO').AsString;
-      modelo.PORTADOR_ID     := lQry.FieldByName('PORTADOR_ID').AsString;
-      modelo.LOJA            := lQry.FieldByName('LOJA').AsString;
-      modelo.TIPO_ABATIMENTO := lQry.FieldByName('TIPO_ABATIMENTO').AsString;
+      modelo.objeto.ID              := lQry.FieldByName('ID').AsString;
+      modelo.objeto.DESCRICAO       := lQry.FieldByName('DESCRICAO').AsString;
+      modelo.objeto.DATA            := lQry.FieldByName('DATA').AsString;
+      modelo.objeto.DATAINICIO      := lQry.FieldByName('DATAINICIO').AsString;
+      modelo.objeto.DATAFIM         := lQry.FieldByName('DATAFIM').AsString;
+      modelo.objeto.CLIENTE_ID      := lQry.FieldByName('CLIENTE_ID').AsString;
+      modelo.objeto.PRECO_VENDA_ID  := lQry.FieldByName('PRECO_VENDA_ID').AsString;
+      modelo.objeto.HORAINICIO      := lQry.FieldByName('HORAINICIO').AsString;
+      modelo.objeto.HORAFIM         := lQry.FieldByName('HORAFIM').AsString;
+      modelo.objeto.DOMINGO         := lQry.FieldByName('DOMINGO').AsString;
+      modelo.objeto.SEGUNDA         := lQry.FieldByName('SEGUNDA').AsString;
+      modelo.objeto.TERCA           := lQry.FieldByName('TERCA').AsString;
+      modelo.objeto.QUARTA          := lQry.FieldByName('QUARTA').AsString;
+      modelo.objeto.QUINTA          := lQry.FieldByName('QUINTA').AsString;
+      modelo.objeto.SEXTA           := lQry.FieldByName('SEXTA').AsString;
+      modelo.objeto.SABADO          := lQry.FieldByName('SABADO').AsString;
+      modelo.objeto.PORTADOR_ID     := lQry.FieldByName('PORTADOR_ID').AsString;
+      modelo.objeto.LOJA            := lQry.FieldByName('LOJA').AsString;
+      modelo.objeto.TIPO_ABATIMENTO := lQry.FieldByName('TIPO_ABATIMENTO').AsString;
 
       lQry.Next;
     end;
@@ -345,7 +357,7 @@ begin
   FOrderView := Value;
 end;
 
-procedure TPromocaoDao.setParams(var pQry: TFDQuery; pPromocaoModel: TPromocaoModel);
+procedure TPromocaoDao.setParams(var pQry: TFDQuery; pPromocaoModel: ITPromocaoModel);
 var
   lTabela : IFDDataset;
   lCtx    : TRttiContext;
@@ -361,7 +373,7 @@ begin
       lProp := lCtx.GetType(TPromocaoModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPromocaoModel).AsString = '',
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPromocaoModel.objeto).AsString = '',
         Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPromocaoModel).AsString))
     end;
   finally

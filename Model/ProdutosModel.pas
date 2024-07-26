@@ -1262,14 +1262,14 @@ end;
 function TProdutosModel.obterPromocao(pCodProduto: String): IFDDataset;
 var
   lMemTable           : IFDDataset;
-  lPromocaoModel      : TPromocaoModel;
+  lPromocaoModel      : ITPromocaoModel;
   lPromocaoItensModel : TPromocaoItensModel;
 begin
   if pCodProduto = '' then
     CriaException('Produto não informado');
 
   lMemTable           := criaIFDDataset(TFDMemTable.Create(nil));
-  lPromocaoModel      := TPromocaoModel.Create(vIConexao);
+  lPromocaoModel      := TPromocaoModel.getNewIface(vIConexao);
   lPromocaoItensModel := TPromocaoItensModel.Create(vIConexao);
 
   try
@@ -1298,14 +1298,14 @@ begin
 
     for lPromocaoItensModel in lPromocaoItensModel.PromocaoItenssLista do
     begin
-      lPromocaoModel.IDRecordView := lPromocaoItensModel.promocao_id;
-      lPromocaoModel.obterLista;
+      lPromocaoModel.objeto.IDRecordView := lPromocaoItensModel.promocao_id;
+      lPromocaoModel.objeto.obterLista;
 
       lMemTable.objeto.InsertRecord([
                               lPromocaoItensModel.promocao_id,
-                              lPromocaoModel.PromocaosLista[0].DATAINICIO,
-                              lPromocaoModel.PromocaosLista[0].DATAFIM,
-                              lPromocaoModel.PromocaosLista[0].DESCRICAO,
+                              lPromocaoModel.objeto.PromocaosLista.First.objeto.DATAINICIO,
+                              lPromocaoModel.objeto.PromocaosLista.First.objeto.DATAFIM,
+                              lPromocaoModel.objeto.PromocaosLista.First.objeto.DESCRICAO,
                               lPromocaoItensModel.valor_promocao,
                               lPromocaoItensModel.saldo
                              ]);
@@ -1314,7 +1314,7 @@ begin
     lMemTable.objeto.Open;
     Result := lMemTable;
   finally
-    lPromocaoModel.Free;
+    lPromocaoModel:=nil;
     lPromocaoItensModel.Free;
   end;
 end;
