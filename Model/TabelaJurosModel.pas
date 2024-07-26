@@ -15,10 +15,12 @@ uses
 type
   TTabelaJurosModel = class;
   ITTabelaJurosModel=IObject<TTabelaJurosModel>;
+
   TTabelaJurosModel = class
   private
+    [weak] mySelf:ITTabelaJurosModel;
     vIConexao : IConexao;
-    FTabelaJurossLista: IList<TTabelaJurosModel>;
+    FTabelaJurossLista: IList<ITTabelaJurosModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -44,7 +46,7 @@ type
     FCOEFICIENTE: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetTabelaJurossLista(const Value: IList<TTabelaJurosModel>);
+    procedure SetTabelaJurossLista(const Value: IList<ITTabelaJurosModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -84,17 +86,18 @@ type
     property VALOR_ACRESCIMO_SEG_PRESTAMISTA : Variant read FVALOR_ACRESCIMO_SEG_PRESTAMISTA write SetVALOR_ACRESCIMO_SEG_PRESTAMISTA;
     property COEFICIENTE : Variant read FCOEFICIENTE write SetCOEFICIENTE;
 
-
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITTabelaJurosModel;
 
     function Salvar: String;
     procedure obterLista; overload;
     function obterLista(pPortador: String; pValor: Double; pSeguroPrestamista: Boolean; pPrimeiroVencimento: TDate): TFDMemTable; overload;
 
-    function carregaClasse(pId: Integer): TTabelaJurosModel;
+    function carregaClasse(pId: Integer): ITTabelaJurosModel;
 
-    property TabelaJurossLista: IList<TTabelaJurosModel> read FTabelaJurossLista write SetTabelaJurossLista;
+    property TabelaJurossLista: IList<ITTabelaJurosModel> read FTabelaJurossLista write SetTabelaJurossLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -113,20 +116,20 @@ uses
 
 { TTabelaJurosModel }
 
-function TTabelaJurosModel.carregaClasse(pId: Integer): TTabelaJurosModel;
+function TTabelaJurosModel.carregaClasse(pId: Integer): ITTabelaJurosModel;
 var
-  lTabelaJurosDao: TTabelaJurosDao;
+  lTabelaJurosDao: ITTabelaJurosDao;
 begin
-  lTabelaJurosDao := TTabelaJurosDao.Create(vIConexao);
+  lTabelaJurosDao := TTabelaJurosDao.getNewIface(vIConexao);
 
   try
-    Result := lTabelaJurosDao.carregaClasse(pId);
+    Result := lTabelaJurosDao.objeto.carregaClasse(pId);
   finally
-    lTabelaJurosDao.Free;
+    lTabelaJurosDao:=nil;
   end;
 end;
 
-constructor TTabelaJurosModel.Create(pIConexao : IConexao);
+constructor TTabelaJurosModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -138,9 +141,15 @@ begin
   inherited;
 end;
 
+class function TTabelaJurosModel.getNewIface(pIConexao: IConexao): ITTabelaJurosModel;
+begin
+  Result := TImplObjetoOwner<TTabelaJurosModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TTabelaJurosModel.obterLista(pPortador: String; pValor: Double; pSeguroPrestamista: Boolean; pPrimeiroVencimento: TDate): TFDMemTable;
 var
-  lModel : TTabelaJurosModel;
+  lModel : ITTabelaJurosModel;
   lTabelaJurosDia : TTabelaJurosDiaModel;
   i      : Integer;
   lTotal,
@@ -155,6 +164,7 @@ var
   lPortadorModel : ITPortadorModel;
   lConfiguracoes : ITerasoftConfiguracoes;
   lTagPercentual : String;
+  modelo: ITTabelaJurosModel;
 
   lTagLimitadorVencimento: Integer;
 begin
@@ -162,7 +172,7 @@ begin
   lTabelaJurosDia := TTabelaJurosDiaModel.Create(vIConexao);
 
   lMemTable := TFDMemTable.Create(nil);
-  lModel    := TTabelaJurosModel.Create(vIConexao);
+  lModel    := TTabelaJurosModel.getNewIface(vIConexao);
   lTotal    := pValor;
 
   try
@@ -196,16 +206,17 @@ begin
 
     if self.TotalRecords = 0 then
     begin
-      self.TabelaJurossLista := TCollections.CreateList<TTabelaJurosModel>(true);
-      self.TabelaJurossLista.Add(TTabelaJurosModel.Create(vIConexao));
+      self.TabelaJurossLista := TCollections.CreateList<ITTabelaJurosModel>;
+      modelo := TTabelaJurosModel.getNewIface(vIConexao);
+      self.TabelaJurossLista.Add(modelo);
 
-      self.TabelaJurossLista[0].FID            := 0;
-      self.TabelaJurossLista[0].FCODIGO        := '001';
-      self.TabelaJurossLista[0].FPERCENTUAL    := FormatFloat('#,##0.00', 0);
-      self.TabelaJurossLista[0].FJUROS_TEXTO   := 'Sem Juros';
-      self.TabelaJurossLista[0].FVALOR_JUROS   := FormatFloat('#,##0.00',  0);
-      self.TabelaJurossLista[0].FVALOR_PARCELA := FormatFloat('#,##0.00',  lTotal);
-      self.TabelaJurossLista[0].FVALOR_TOTAL   := FormatFloat('#,##0.00',  lTotal);
+      modelo.objeto.FID := 0;
+      modelo.objeto.FCODIGO        := '001';
+      modelo.objeto.FPERCENTUAL    := FormatFloat('#,##0.00', 0);
+      modelo.objeto.FJUROS_TEXTO   := 'Sem Juros';
+      modelo.objeto.FVALOR_JUROS   := FormatFloat('#,##0.00',  0);
+      modelo.objeto.FVALOR_PARCELA := FormatFloat('#,##0.00',  lTotal);
+      modelo.objeto.FVALOR_TOTAL   := FormatFloat('#,##0.00',  lTotal);
     end;
 
     for i := 0 to self.TabelaJurossLista.Count -1 do
@@ -213,62 +224,62 @@ begin
 
       if lTagPercentual = 'S' then
       begin
-        self.TabelaJurossLista[i].FJUROS_TEXTO   := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, 'Juros', 'Sem juros');
-        lJuros                                   := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, self.TabelaJurossLista[i].PERCENTUAL / 100 * lTotal, 0);
-        self.TabelaJurossLista[i].FVALOR_JUROS   := FormatFloat('#,##0.00', lJuros);
-        self.TabelaJurossLista[i].FVALOR_TOTAL   := FormatFloat('#,##0.00', lTotal + lJuros);
-        self.TabelaJurossLista[i].FVALOR_PARCELA := FormatFloat('#,##0.00', (lTotal + lJuros) / StrToInt(self.TabelaJurossLista[i].CODIGO));
+        self.TabelaJurossLista[i].objeto.FJUROS_TEXTO   := IIF(self.TabelaJurossLista[i].objeto.PERCENTUAL > 0, 'Juros', 'Sem juros');
+        lJuros                                   := IIF(self.TabelaJurossLista[i].objeto.PERCENTUAL > 0, self.TabelaJurossLista[i].objeto.PERCENTUAL / 100 * lTotal, 0);
+        self.TabelaJurossLista[i].objeto.FVALOR_JUROS   := FormatFloat('#,##0.00', lJuros);
+        self.TabelaJurossLista[i].objeto.FVALOR_TOTAL   := FormatFloat('#,##0.00', lTotal + lJuros);
+        self.TabelaJurossLista[i].objeto.FVALOR_PARCELA := FormatFloat('#,##0.00', (lTotal + lJuros) / StrToInt(self.TabelaJurossLista[i].objeto.CODIGO));
 
         if pSeguroPrestamista then
         begin
           if lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA = 0 then
            CriaException('Valor do cadastro do seguroprestamista esta zerado.');
 
-          self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA;
-          self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := (lTotal + lJuros)*(lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA/100);
-          self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA := IIF(self.TabelaJurossLista[i].PERCENTUAL > 0, self.TabelaJurossLista[i].PERCENTUAL / 100 * self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA, 0);;
+          self.TabelaJurossLista[i].objeto.PER_SEG_PRESTAMSTA              := lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA;
+          self.TabelaJurossLista[i].objeto.VALOR_SEG_PRESTAMISTA           := (lTotal + lJuros)*(lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA/100);
+          self.TabelaJurossLista[i].objeto.VALOR_ACRESCIMO_SEG_PRESTAMISTA := IIF(self.TabelaJurossLista[i].objeto.PERCENTUAL > 0, self.TabelaJurossLista[i].objeto.PERCENTUAL / 100 * self.TabelaJurossLista[i].objeto.VALOR_SEG_PRESTAMISTA, 0);;
         end else
         begin
-          self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := 0;
-          self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := 0;
-          self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA := 0;
+          self.TabelaJurossLista[i].objeto.PER_SEG_PRESTAMSTA              := 0;
+          self.TabelaJurossLista[i].objeto.VALOR_SEG_PRESTAMISTA           := 0;
+          self.TabelaJurossLista[i].objeto.VALOR_ACRESCIMO_SEG_PRESTAMISTA := 0;
         end;
       end else
       begin
 
-        if self.TabelaJurossLista[i].INDCE > 0 then
+        if self.TabelaJurossLista[i].objeto.INDCE > 0 then
         begin
-          lValorParcela     := lTotal * (self.TabelaJurossLista[i].INDCE * lCoeficienteJurosDias);
-          lCoeficienteJuros := StrToFloat(self.TabelaJurossLista[i].INDCE) * lCoeficienteJurosDias;
-          lValorGerar       := lValorParcela * StrToInt(self.TabelaJurossLista[i].CODIGO);
+          lValorParcela     := lTotal * (self.TabelaJurossLista[i].objeto.INDCE * lCoeficienteJurosDias);
+          lCoeficienteJuros := StrToFloat(self.TabelaJurossLista[i].objeto.INDCE) * lCoeficienteJurosDias;
+          lValorGerar       := lValorParcela * StrToInt(self.TabelaJurossLista[i].objeto.CODIGO);
           lPercentualJuros  := (lValorGerar - lTotal) / lTotal * 100;
         end
         else
         begin
-          lValorParcela    := lTotal / StrToInt(self.TabelaJurossLista[i].CODIGO);
+          lValorParcela    := lTotal / StrToInt(self.TabelaJurossLista[i].objeto.CODIGO);
           lValorGerar      := lTotal;
           lPercentualJuros := 0;
         end;
 
-        self.TabelaJurossLista[i].FJUROS_TEXTO   := IIF(lPercentualJuros > 0, 'Juros', 'Sem juros');
-        lJuros                                   := IIF(self.TabelaJurossLista[i].INDCE > 0, lValorGerar - lTotal, 0);
-        self.TabelaJurossLista[i].FVALOR_JUROS   := FormatFloat('#,##0.00', lJuros);
-        self.TabelaJurossLista[i].FVALOR_TOTAL   := FormatFloat('#,##0.00', lValorGerar);
-        self.TabelaJurossLista[i].FVALOR_PARCELA := FormatFloat('#,##0.00', lValorParcela);
+        self.TabelaJurossLista[i].objeto.FJUROS_TEXTO   := IIF(lPercentualJuros > 0, 'Juros', 'Sem juros');
+        lJuros                                   := IIF(self.TabelaJurossLista[i].objeto.INDCE > 0, lValorGerar - lTotal, 0);
+        self.TabelaJurossLista[i].objeto.FVALOR_JUROS   := FormatFloat('#,##0.00', lJuros);
+        self.TabelaJurossLista[i].objeto.FVALOR_TOTAL   := FormatFloat('#,##0.00', lValorGerar);
+        self.TabelaJurossLista[i].objeto.FVALOR_PARCELA := FormatFloat('#,##0.00', lValorParcela);
 
         if pSeguroPrestamista then
         begin
           if lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA = 0 then
            CriaException('Valor do cadastro do seguroprestamista esta zerado.');
 
-          self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA;
-          self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := (lTotal + lJuros)*(lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA/100);
-          self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA := IIF(lPercentualJuros > 0, lPercentualJuros / 100 * self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA, 0);;
+          self.TabelaJurossLista[i].objeto.PER_SEG_PRESTAMSTA              := lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA;
+          self.TabelaJurossLista[i].objeto.VALOR_SEG_PRESTAMISTA           := (lTotal + lJuros)*(lPortadorModel.objeto.PER_SEGURO_PRESTAMISTA/100);
+          self.TabelaJurossLista[i].objeto.VALOR_ACRESCIMO_SEG_PRESTAMISTA := IIF(lPercentualJuros > 0, lPercentualJuros / 100 * self.TabelaJurossLista[i].objeto.VALOR_SEG_PRESTAMISTA, 0);;
         end else
         begin
-          self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA              := 0;
-          self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA           := 0;
-          self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA := 0;
+          self.TabelaJurossLista[i].objeto.PER_SEG_PRESTAMSTA              := 0;
+          self.TabelaJurossLista[i].objeto.VALOR_SEG_PRESTAMISTA           := 0;
+          self.TabelaJurossLista[i].objeto.VALOR_ACRESCIMO_SEG_PRESTAMISTA := 0;
         end;
       end;
     end;
@@ -300,14 +311,14 @@ begin
     for i := 0 to self.TabelaJurossLista.Count -1 do
     begin
       if lTagPercentual = 'S' then
-        lPercentualJuros := self.TabelaJurossLista[i].PERCENTUAL
+        lPercentualJuros := self.TabelaJurossLista[i].objeto.PERCENTUAL
       else
-      if self.TabelaJurossLista[i].INDCE > 0 then
+      if self.TabelaJurossLista[i].objeto.INDCE > 0 then
       begin
-        lValorParcela    := lTotal * self.TabelaJurossLista[i].INDCE;
-        lValorGerar      := lValorParcela * StrToInt(self.TabelaJurossLista[i].CODIGO);
+        lValorParcela    := lTotal * self.TabelaJurossLista[i].objeto.INDCE;
+        lValorGerar      := lValorParcela * StrToInt(self.TabelaJurossLista[i].objeto.CODIGO);
         lPercentualJuros := (lValorGerar - lTotal) / lTotal * 100;
-        lCoeficienteJuros := StrToFloat(self.TabelaJurossLista[i].INDCE) * lCoeficienteJurosDias;
+        lCoeficienteJuros := StrToFloat(self.TabelaJurossLista[i].objeto.INDCE) * lCoeficienteJurosDias;
 
       end
       else
@@ -317,16 +328,16 @@ begin
 
 
       lMemTable.InsertRecord([
-                              self.TabelaJurossLista[i].ID,
-                              self.TabelaJurossLista[i].CODIGO,
-                              IIF(lTagPercentual = 'S', self.TabelaJurossLista[i].PERCENTUAL, lPercentualJuros),
-                              self.TabelaJurossLista[i].JUROS_TEXTO,
-                              self.TabelaJurossLista[i].VALOR_JUROS,
-                              self.TabelaJurossLista[i].VALOR_PARCELA,
-                              self.TabelaJurossLista[i].VALOR_TOTAL,
-                              self.TabelaJurossLista[i].VALOR_SEG_PRESTAMISTA,
-                              self.TabelaJurossLista[i].PER_SEG_PRESTAMSTA,
-                              self.TabelaJurossLista[i].VALOR_ACRESCIMO_SEG_PRESTAMISTA,
+                              self.TabelaJurossLista[i].objeto.ID,
+                              self.TabelaJurossLista[i].objeto.CODIGO,
+                              IIF(lTagPercentual = 'S', self.TabelaJurossLista[i].objeto.PERCENTUAL, lPercentualJuros),
+                              self.TabelaJurossLista[i].objeto.JUROS_TEXTO,
+                              self.TabelaJurossLista[i].objeto.VALOR_JUROS,
+                              self.TabelaJurossLista[i].objeto.VALOR_PARCELA,
+                              self.TabelaJurossLista[i].objeto.VALOR_TOTAL,
+                              self.TabelaJurossLista[i].objeto.VALOR_SEG_PRESTAMISTA,
+                              self.TabelaJurossLista[i].objeto.PER_SEG_PRESTAMSTA,
+                              self.TabelaJurossLista[i].objeto.VALOR_ACRESCIMO_SEG_PRESTAMISTA,
                               lCoeficienteJuros
                              ]);
 
@@ -338,7 +349,7 @@ begin
     Result := lMemTable;
 
   finally
-    lModel.Free;
+    lModel:=nil;
     lTabelaJurosDia.Free;
   end;
 
@@ -346,46 +357,46 @@ end;
 
 procedure TTabelaJurosModel.obterLista;
 var
-  lTabelaJurosLista: TTabelaJurosDao;
+  lTabelaJurosLista: ITTabelaJurosDao;
 begin
-  lTabelaJurosLista := TTabelaJurosDao.Create(vIConexao);
+  lTabelaJurosLista := TTabelaJurosDao.getNewIface(vIConexao);
 
   try
-    lTabelaJurosLista.TotalRecords    := FTotalRecords;
-    lTabelaJurosLista.WhereView       := FWhereView;
-    lTabelaJurosLista.CountView       := FCountView;
-    lTabelaJurosLista.OrderView       := FOrderView;
-    lTabelaJurosLista.StartRecordView := FStartRecordView;
-    lTabelaJurosLista.LengthPageView  := FLengthPageView;
-    lTabelaJurosLista.IDRecordView    := FIDRecordView;
+    lTabelaJurosLista.objeto.TotalRecords    := FTotalRecords;
+    lTabelaJurosLista.objeto.WhereView       := FWhereView;
+    lTabelaJurosLista.objeto.CountView       := FCountView;
+    lTabelaJurosLista.objeto.OrderView       := FOrderView;
+    lTabelaJurosLista.objeto.StartRecordView := FStartRecordView;
+    lTabelaJurosLista.objeto.LengthPageView  := FLengthPageView;
+    lTabelaJurosLista.objeto.IDRecordView    := FIDRecordView;
 
-    lTabelaJurosLista.obterLista;
+    lTabelaJurosLista.objeto.obterLista;
 
-    FTotalRecords  := lTabelaJurosLista.TotalRecords;
-    FTabelaJurossLista := lTabelaJurosLista.TabelaJurossLista;
+    FTotalRecords  := lTabelaJurosLista.objeto.TotalRecords;
+    FTabelaJurossLista := lTabelaJurosLista.objeto.TabelaJurossLista;
 
   finally
-    lTabelaJurosLista.Free;
+    lTabelaJurosLista:=nil;
   end;
 end;
 
 function TTabelaJurosModel.Salvar: String;
 var
-  lTabelaJurosDao: TTabelaJurosDao;
+  lTabelaJurosDao: ITTabelaJurosDao;
 begin
-  lTabelaJurosDao := TTabelaJurosDao.Create(vIConexao);
+  lTabelaJurosDao := TTabelaJurosDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lTabelaJurosDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lTabelaJurosDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lTabelaJurosDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lTabelaJurosDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lTabelaJurosDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lTabelaJurosDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lTabelaJurosDao.Free;
+    lTabelaJurosDao:=nil;
   end;
 end;
 
