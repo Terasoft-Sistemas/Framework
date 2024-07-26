@@ -415,7 +415,7 @@ begin
               '              coalesce(web_pedidoitens.quantidade, 0) * coalesce(web_pedidoitens.vlr_garantia_fr, 0) vlr_garantia_fr,                                           '+SLineBreak+
               '              coalesce(web_pedidoitens.quantidade, 0) * coalesce(web_pedidoitens.valor_unitario,0) valor_totalitens,                                            '+SLineBreak+
               '              coalesce(web_pedidoitens.quantidade,0) * (coalesce(web_pedidoitens.vlr_garantia,0)+coalesce(web_pedidoitens.vlr_garantia_fr,0)) total_garantia,   '+SLineBreak+
-              '              coalesce(web_pedidoitens.valor_unitario, 0) * coalesce(web_pedidoitens.percentual_desconto,0) / 100 valor_desconto                                '+SLineBreak+
+              '              coalesce(web_pedidoitens.valor_unitario * web_pedidoitens.quantidade, 0) * coalesce(web_pedidoitens.percentual_desconto,0) / 100 valor_desconto   '+SLineBreak+
               '                                                                                                                                                                '+SLineBreak+
               '          from web_pedidoitens                                                                                                                                  '+SLineBreak+
               '          inner join produto on produto.codigo_pro = web_pedidoitens.produto_id                                                                                 '+SLineBreak+
