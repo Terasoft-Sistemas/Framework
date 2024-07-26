@@ -25,13 +25,6 @@ type
     VALOR_ACRESCIMO_SEG_PRESTAMISTA : Double;
   end;
 
-  TFinanceiroUpdate = record
-    PRIMEIRO_VENCIMENTO   : TDate;
-    QUANTIDADE_PARCELAS   : Integer;
-    VALOR_ENTRADA         : Double;
-  end;
-
-
   TFinanceiroPedidoModel = class
 
   private

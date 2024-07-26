@@ -197,7 +197,7 @@ procedure TFinanceiroPedidoDao.UpdateDadosFinanceiro(pWebPedidoModel: TWebPedido
 var
   lQry: TFDQuery;
   lSQL: String;
-  lDadosUpdate: TFinanceiroUpdate;
+  lValorEntrada: Extended;
 begin
   lQry := vIConexao.CriarQuery;
 
@@ -206,28 +206,23 @@ begin
     lSQL := ' select sum(f.valor_total) VALOR_ENTRADA from financeiro_pedido f where f.web_pedido_id = '+pWebPedidoModel.ID+' and f.portador_id = ''777777'' ';
     lQry.Open(lSQL);
 
-    lDadosUpdate.VALOR_ENTRADA  := lQry.FieldByName('VALOR_ENTRADA').AsFloat;
+    lValorEntrada := lQry.FieldByName('VALOR_ENTRADA').AsFloat;
 
     lSQL :=
-    ' select count(*) QUANTIDADE_PARCELAS, min(f.vencimento) PRIMEIRO_VENCIMENTO '+#13+
+    ' select f.valor_liquido valor_financiado, count(*) QUANTIDADE_PARCELAS, min(f.vencimento) PRIMEIRO_VENCIMENTO '+#13+
     ' from financeiro_pedido f'+#13+
     ' inner join portador p on p.codigo_port = f.portador_id'+#13+
     ' where f.web_pedido_id = '+pWebPedidoModel.ID+''+#13+
-    ' and p.tpag_nfe not in (''01'', ''03'', ''04'', ''99'')';
+    ' and p.tpag_nfe not in (''01'', ''03'', ''04'', ''99'') group by 1 ';
 
     lQry.Open(lSQL);
 
-    lDadosUpdate.PRIMEIRO_VENCIMENTO := lQry.FieldByName('PRIMEIRO_VENCIMENTO').AsDateTime;;
-    lDadosUpdate.QUANTIDADE_PARCELAS := lQry.FieldByName('QUANTIDADE_PARCELAS').AsInteger;
-
-
-    pWebPedidoModel.Acao                :=  tacAlterar;
-    pWebPedidoModel.VALOR_ENTRADA       := lDadosUpdate.VALOR_ENTRADA;
-    pWebPedidoModel.PRIMEIRO_VENCIMENTO := DateToStr(lDadosUpdate.PRIMEIRO_VENCIMENTO);
-    pWebPedidoModel.PARCELAS            := lDadosUpdate.QUANTIDADE_PARCELAS;
+    pWebPedidoModel.Acao                := tacAlterar;
+    pWebPedidoModel.VALOR_ENTRADA       := lValorEntrada;
+    pWebPedidoModel.PRIMEIRO_VENCIMENTO := DateToStr(lQry.FieldByName('PRIMEIRO_VENCIMENTO').AsDateTime);
+    pWebPedidoModel.PARCELAS            := lQry.FieldByName('QUANTIDADE_PARCELAS').AsInteger;
+    pWebPedidoModel.VALOR_FINANCIADO    := lQry.FieldByName('valor_financiado').AsString;
     pWebPedidoModel.Salvar;
-
-
   finally
     lQry.Free;
   end;
