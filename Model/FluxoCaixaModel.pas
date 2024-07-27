@@ -6,12 +6,16 @@ uses
   Terasoft.Types,
   Interfaces.Conexao,
   System.Generics.Collections,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
-  TFluxoCaixaModel = class
+  TFluxoCaixaModel = class;
+  ITFluxoCaixaModel=IObject<TFluxoCaixaModel>;
 
+  TFluxoCaixaModel = class
   private
+    [weak] mySelf: ITFluxoCaixaModel;
     vIConexao : IConexao;
 
     FWhereView: String;
@@ -38,8 +42,10 @@ type
 
   public
 
-  	constructor Create (pIConexao : IConexao);
+  	constructor _Create (pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITFluxoCaixaModel;
 
     function obterFluxoCaixaSintetico : TFDMemTable;
     function obterFluxoCaixaAnalitico : TFDMemTable;
@@ -65,7 +71,7 @@ uses
 
 { TFluxoCaixaModel }
 
-constructor TFluxoCaixaModel.Create(pIConexao : IConexao);
+constructor TFluxoCaixaModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -76,99 +82,105 @@ begin
   inherited;
 end;
 
+class function TFluxoCaixaModel.getNewIface(pIConexao: IConexao): ITFluxoCaixaModel;
+begin
+  Result := TImplObjetoOwner<TFluxoCaixaModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TFluxoCaixaModel.obterResultadoFluxoCaixa : TFDMemTable;
 var
-  lFluxoCaixa: TFluxoCaixaDao;
+  lFluxoCaixa: ITFluxoCaixaDao;
 begin
-  lFluxoCaixa := TFluxoCaixaDao.Create(vIConexao);
+  lFluxoCaixa := TFluxoCaixaDao.getNewIface(vIConexao);
   try
-    lFluxoCaixa.WhereView                    := FWhereView;
-    lFluxoCaixa.OrderView                    := FOrderView;
-    lFluxoCaixa.DataInicialView              := FDataInicialView;
-    lFluxoCaixa.DataFinalView                := FDataFinalView;
-    lFluxoCaixa.BancoView                    := FBancoView;
-    lFluxoCaixa.PortadorView                 := FPortadorView;
-    lFluxoCaixa.PorcentagemInadimplenciaView := FPorcentagemInadimplenciaView;
-    lFluxoCaixa.SomarBancosView              := FSomarBancosView;
-    lFluxoCaixa.TipoView                     := FTipoView;
-    lFluxoCaixa.LojaView                     := FLojaView;
+    lFluxoCaixa.objeto.WhereView                    := FWhereView;
+    lFluxoCaixa.objeto.OrderView                    := FOrderView;
+    lFluxoCaixa.objeto.DataInicialView              := FDataInicialView;
+    lFluxoCaixa.objeto.DataFinalView                := FDataFinalView;
+    lFluxoCaixa.objeto.BancoView                    := FBancoView;
+    lFluxoCaixa.objeto.PortadorView                 := FPortadorView;
+    lFluxoCaixa.objeto.PorcentagemInadimplenciaView := FPorcentagemInadimplenciaView;
+    lFluxoCaixa.objeto.SomarBancosView              := FSomarBancosView;
+    lFluxoCaixa.objeto.TipoView                     := FTipoView;
+    lFluxoCaixa.objeto.LojaView                     := FLojaView;
 
-    Result := lFluxoCaixa.obterResultadoFluxoCaixa;
+    Result := lFluxoCaixa.objeto.obterResultadoFluxoCaixa;
   finally
-    lFluxoCaixa.Free;
+    lFluxoCaixa:=nil;
   end;
 end;
 
 function TFluxoCaixaModel.obterResumo: TFDMemTable;
 var
-  lFluxoCaixa: TFluxoCaixaDao;
+  lFluxoCaixa: ITFluxoCaixaDao;
 begin
-  lFluxoCaixa := TFluxoCaixaDao.Create(vIConexao);
+  lFluxoCaixa := TFluxoCaixaDao.getNewIface(vIConexao);
   try
-    lFluxoCaixa.WhereView                    := FWhereView;
-    lFluxoCaixa.OrderView                    := FOrderView;
-    lFluxoCaixa.DataInicialView              := FDataInicialView;
-    lFluxoCaixa.DataFinalView                := FDataFinalView;
-    lFluxoCaixa.BancoView                    := FBancoView;
-    lFluxoCaixa.PortadorView                 := FPortadorView;
-    lFluxoCaixa.PorcentagemInadimplenciaView := FPorcentagemInadimplenciaView;
-    lFluxoCaixa.SomarBancosView              := FSomarBancosView;
-    lFluxoCaixa.TipoView                     := FTipoView;
-    lFluxoCaixa.LojaView                     := FLojaView;
+    lFluxoCaixa.objeto.WhereView                    := FWhereView;
+    lFluxoCaixa.objeto.OrderView                    := FOrderView;
+    lFluxoCaixa.objeto.DataInicialView              := FDataInicialView;
+    lFluxoCaixa.objeto.DataFinalView                := FDataFinalView;
+    lFluxoCaixa.objeto.BancoView                    := FBancoView;
+    lFluxoCaixa.objeto.PortadorView                 := FPortadorView;
+    lFluxoCaixa.objeto.PorcentagemInadimplenciaView := FPorcentagemInadimplenciaView;
+    lFluxoCaixa.objeto.SomarBancosView              := FSomarBancosView;
+    lFluxoCaixa.objeto.TipoView                     := FTipoView;
+    lFluxoCaixa.objeto.LojaView                     := FLojaView;
 
-    Result := lFluxoCaixa.obterResumo;
+    Result := lFluxoCaixa.objeto.obterResumo;
   finally
-    lFluxoCaixa.Free;
+    lFluxoCaixa:=nil;
   end;
 end;
 
 function TFluxoCaixaModel.obterFluxoCaixaSintetico: TFDMemTable;
 var
-  lFluxoCaixaLista: TFluxoCaixaDao;
+  lFluxoCaixaLista: ITFluxoCaixaDao;
 
 begin
-  lFluxoCaixaLista := TFluxoCaixaDao.Create(vIConexao);
+  lFluxoCaixaLista := TFluxoCaixaDao.getNewIface(vIConexao);
 
   try
-    lFluxoCaixaLista.WhereView                    := FWhereView;
-    lFluxoCaixaLista.OrderView                    := FOrderView;
-    lFluxoCaixaLista.DataInicialView              := FDataInicialView;
-    lFluxoCaixaLista.DataFinalView                := FDataFinalView;
-    lFluxoCaixaLista.BancoView                    := FBancoView;
-    lFluxoCaixaLista.PortadorView                 := FPortadorView;
-    lFluxoCaixaLista.PorcentagemInadimplenciaView := FPorcentagemInadimplenciaView;
-    lFluxoCaixaLista.SomarBancosView              := FSomarBancosView;
-    lFluxoCaixaLista.TipoView                     := FTipoView;
-    lFluxoCaixaLista.LojaView                     := FLojaView;
+    lFluxoCaixaLista.objeto.WhereView                    := FWhereView;
+    lFluxoCaixaLista.objeto.OrderView                    := FOrderView;
+    lFluxoCaixaLista.objeto.DataInicialView              := FDataInicialView;
+    lFluxoCaixaLista.objeto.DataFinalView                := FDataFinalView;
+    lFluxoCaixaLista.objeto.BancoView                    := FBancoView;
+    lFluxoCaixaLista.objeto.PortadorView                 := FPortadorView;
+    lFluxoCaixaLista.objeto.PorcentagemInadimplenciaView := FPorcentagemInadimplenciaView;
+    lFluxoCaixaLista.objeto.SomarBancosView              := FSomarBancosView;
+    lFluxoCaixaLista.objeto.TipoView                     := FTipoView;
+    lFluxoCaixaLista.objeto.LojaView                     := FLojaView;
 
-    Result := lFluxoCaixaLista.obterFluxoCaixaSintetico;
+    Result := lFluxoCaixaLista.objeto.obterFluxoCaixaSintetico;
 
   finally
-    lFluxoCaixaLista.Free;
+    lFluxoCaixaLista:=nil;
   end;
 end;
 
 function TFluxoCaixaModel.obterFluxoCaixaAnalitico: TFDMemTable;
 var
-  lFluxoCaixaLista: TFluxoCaixaDao;
+  lFluxoCaixaLista: ITFluxoCaixaDao;
 begin
-  lFluxoCaixaLista := TFluxoCaixaDao.Create(vIConexao);
+  lFluxoCaixaLista := TFluxoCaixaDao.getNewIface(vIConexao);
   try
-    lFluxoCaixaLista.WhereView                    := FWhereView;
-    lFluxoCaixaLista.OrderView                    := FOrderView;
-    lFluxoCaixaLista.DataInicialView              := FDataInicialView;
-    lFluxoCaixaLista.DataFinalView                := FDataFinalView;
-    lFluxoCaixaLista.BancoView                    := FBancoView;
-    lFluxoCaixaLista.PortadorView                 := FPortadorView;
-    lFluxoCaixaLista.PorcentagemInadimplenciaView := FPorcentagemInadimplenciaView;
-    lFluxoCaixaLista.SomarBancosView              := FSomarBancosView;
-    lFluxoCaixaLista.TipoView                     := FTipoView;
-    lFluxoCaixaLista.LojaView                     := FLojaView;
+    lFluxoCaixaLista.objeto.WhereView                    := FWhereView;
+    lFluxoCaixaLista.objeto.OrderView                    := FOrderView;
+    lFluxoCaixaLista.objeto.DataInicialView              := FDataInicialView;
+    lFluxoCaixaLista.objeto.DataFinalView                := FDataFinalView;
+    lFluxoCaixaLista.objeto.BancoView                    := FBancoView;
+    lFluxoCaixaLista.objeto.PortadorView                 := FPortadorView;
+    lFluxoCaixaLista.objeto.PorcentagemInadimplenciaView := FPorcentagemInadimplenciaView;
+    lFluxoCaixaLista.objeto.SomarBancosView              := FSomarBancosView;
+    lFluxoCaixaLista.objeto.TipoView                     := FTipoView;
+    lFluxoCaixaLista.objeto.LojaView                     := FLojaView;
 
-    Result := lFluxoCaixaLista.obterFluxoCaixaAnalitico;
+    Result := lFluxoCaixaLista.objeto.obterFluxoCaixaAnalitico;
 
   finally
-    lFluxoCaixaLista.Free;
+    lFluxoCaixaLista:=nil;
   end;
 end;
 

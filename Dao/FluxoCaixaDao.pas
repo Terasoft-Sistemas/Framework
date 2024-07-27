@@ -12,13 +12,15 @@ uses
   System.Generics.Collections,
   System.Variants,
   Terasoft.ConstrutorDao,
+  Terasoft.Framework.ObjectIface,
   Terasoft.FuncoesTexto;
 
 type
+  TFluxoCaixaDao = class;
+  ITFluxoCaixaDao=IObject<TFluxoCaixaDao>;
   TFluxoCaixaDao = class
-
   private
-
+    [weak] mySelf: ITFluxoCaixaDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -47,8 +49,10 @@ type
     procedure SetLojaView(const Value: Variant);
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITFluxoCaixaDao;
 
     property WhereView: String read FWhereView write SetWhereView;
     property OrderView: String read FOrderView write SetOrderView;
@@ -74,7 +78,7 @@ uses
 
 { TFluxoCaixa }
 
-constructor TFluxoCaixaDao.Create(pIConexao : Iconexao);
+constructor TFluxoCaixaDao._Create(pIConexao : Iconexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -84,6 +88,12 @@ destructor TFluxoCaixaDao.Destroy;
 begin
 
   inherited;
+end;
+
+class function TFluxoCaixaDao.getNewIface(pIConexao: IConexao): ITFluxoCaixaDao;
+begin
+  Result := TImplObjetoOwner<TFluxoCaixaDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TFluxoCaixaDao.obterFluxoCaixaSintetico : TFDMemTable;
