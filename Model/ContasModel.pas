@@ -5,14 +5,18 @@ interface
 uses
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TContasModel = class
+  TContasModel = class;
+  ITContasModel=IObject<TContasModel>;
 
+  TContasModel = class
   private
+    [weak] mySelf: ITContasModel;
     vIConexao : IConexao;
-    FContassLista: IList<TContasModel>;
+    FContassLista: IList<ITContasModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -48,7 +52,7 @@ type
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetDATA_CADASTRO(const Value: Variant);
-    procedure SetContassLista(const Value: IList<TContasModel>);
+    procedure SetContassLista(const Value: IList<ITContasModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -105,17 +109,19 @@ type
     property credito_cliente_cta: Variant read Fcredito_cliente_cta write Setcredito_cliente_cta;
     property credito_fornecedor_cta: Variant read Fcredito_fornecedor_cta write Setcredito_fornecedor_cta;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITContasModel;
 
     function Incluir : String;
     function Salvar  : String;
-    function Alterar(pID : String) : TContasModel;
+    function Alterar(pID : String) : ITContasModel;
     function Excluir(pID : String) : String;
-    function carregaClasse(pID : String) : TContasModel;
+    function carregaClasse(pID : String) : ITContasModel;
     procedure obterLista;
 
-    property ContassLista: IList<TContasModel> read FContassLista write SetContassLista;
+    property ContassLista: IList<ITContasModel> read FContassLista write SetContassLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -134,14 +140,14 @@ uses
 
 { TContasModel }
 
-function TContasModel.Alterar(pID: String): TContasModel;
+function TContasModel.Alterar(pID: String): ITContasModel;
 var
-  lContasModel : TContasModel;
+  lContasModel : ITContasModel;
 begin
-  lContasModel := lContasModel.Create(vIConexao);
+  lContasModel := TContasModel.getNewIface(vIConexao);
   try
-    lContasModel      := lContasModel.carregaClasse(pID);
-    lContasModel.Acao := tacAlterar;
+    lContasModel      := lContasModel.objeto.carregaClasse(pID);
+    lContasModel.objeto.Acao := tacAlterar;
     Result            := lContasModel;
   finally
 
@@ -155,18 +161,24 @@ begin
   result    := self.Salvar;
 end;
 
+class function TContasModel.getNewIface(pIConexao: IConexao): ITContasModel;
+begin
+  Result := TImplObjetoOwner<TContasModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TContasModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
   self.Salvar;
 end;
 
-function TContasModel.carregaClasse(pID: String): TContasModel;
+function TContasModel.carregaClasse(pID: String): ITContasModel;
 begin
 
 end;
 
-constructor TContasModel.Create(pIConexao : IConexao);
+constructor TContasModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -180,46 +192,46 @@ end;
 
 procedure TContasModel.obterLista;
 var
-  lContasLista: TContasDao;
+  lContasLista: ITContasDao;
 begin
-  lContasLista := TContasDao.Create(vIConexao);
+  lContasLista := TContasDao.getNewIface(vIConexao);
 
   try
-    lContasLista.TotalRecords    := FTotalRecords;
-    lContasLista.WhereView       := FWhereView;
-    lContasLista.CountView       := FCountView;
-    lContasLista.OrderView       := FOrderView;
-    lContasLista.StartRecordView := FStartRecordView;
-    lContasLista.LengthPageView  := FLengthPageView;
-    lContasLista.IDRecordView    := FIDRecordView;
+    lContasLista.objeto.TotalRecords    := FTotalRecords;
+    lContasLista.objeto.WhereView       := FWhereView;
+    lContasLista.objeto.CountView       := FCountView;
+    lContasLista.objeto.OrderView       := FOrderView;
+    lContasLista.objeto.StartRecordView := FStartRecordView;
+    lContasLista.objeto.LengthPageView  := FLengthPageView;
+    lContasLista.objeto.IDRecordView    := FIDRecordView;
 
-    lContasLista.obterLista;
+    lContasLista.objeto.obterLista;
 
-    FTotalRecords   := lContasLista.TotalRecords;
-    FContassLista   := lContasLista.ContassLista;
+    FTotalRecords   := lContasLista.objeto.TotalRecords;
+    FContassLista   := lContasLista.objeto.ContassLista;
 
   finally
-    lContasLista.Free;
+    lContasLista:=nil;
   end;
 end;
 
 function TContasModel.Salvar: String;
 var
-  lContasDao: TContasDao;
+  lContasDao: ITContasDao;
 begin
-  lContasDao := TContasDao.Create(vIConexao);
+  lContasDao := TContasDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lContasDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lContasDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lContasDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lContasDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lContasDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lContasDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lContasDao.Free;
+    lContasDao:=nil;
   end;
 end;
 
@@ -298,7 +310,7 @@ begin
   Fgrupo_cta := Value;
 end;
 
-procedure TContasModel.SetContassLista(const Value: IList<TContasModel>);
+procedure TContasModel.SetContassLista;
 begin
   FContassLista := Value;
 end;

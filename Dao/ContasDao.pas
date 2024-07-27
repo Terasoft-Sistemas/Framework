@@ -10,17 +10,21 @@ uses
   Spring.Collections,
   System.Variants,
   Terasoft.ConstrutorDao,
+  Terasoft.Framework.ObjectIface,
   Terasoft.Utils,
   Interfaces.Conexao;
 
 type
-  TContasDao = class
+  TContasDao = class;
+  ITContasDao=IObject<TContasDao>;
 
+  TContasDao = class
   private
+    [weak] mySelf: ITContasDao;
     vIConexao   : IConexao;
     vConstrutor  : TConstrutorDao;
 
-    FContassLista: IList<TContasModel>;
+    FContassLista: IList<ITContasModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -31,7 +35,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetContassLista(const Value: IList<TContasModel>);
+    procedure SetContassLista(const Value: IList<ITContasModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -43,10 +47,12 @@ type
     function where: String;
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property ContassLista: IList<TContasModel> read FContassLista write SetContassLista;
+    class function getNewIface(pIConexao: IConexao): ITContasDao;
+
+    property ContassLista: IList<ITContasModel> read FContassLista write SetContassLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -56,12 +62,12 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(AContasModel: TContasModel): String;
-    function alterar(AContasModel: TContasModel): String;
-    function excluir(AContasModel: TContasModel): String;
-    function carregaClasse(pID : String) : TContasModel;
+    function incluir(AContasModel: ITContasModel): String;
+    function alterar(AContasModel: ITContasModel): String;
+    function excluir(AContasModel: ITContasModel): String;
+    function carregaClasse(pID : String) : ITContasModel;
     procedure obterLista;
-    procedure setParams(var pQry: TFDQuery; pContasModel: TContasModel);
+    procedure setParams(var pQry: TFDQuery; pContasModel: ITContasModel);
 
 end;
 
@@ -72,13 +78,13 @@ uses
 
 { TContas }
 
-function TContasDao.carregaClasse(pID: String): TContasModel;
+function TContasDao.carregaClasse(pID: String): ITContasModel;
 var
   lQry: TFDQuery;
-  lModel: TContasModel;
+  lModel: ITContasModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TContasModel.Create(vIConexao);
+  lModel   := TContasModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -87,30 +93,30 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID                           := lQry.FieldByName('ID').AsString;
-    lModel.CLASSIFICACAO                := lQry.FieldByName('CLASSIFICACAO').AsString;
-    lModel.CODIGO_CTA                   := lQry.FieldByName('CODIGO_CTA').AsString;
-    lModel.NOME_CTA                     := lQry.FieldByName('NOME_CTA').AsString;
-    lModel.TIPO_CTA                     := lQry.FieldByName('TIPO_CTA').AsString;
-    lModel.DR_CTA                       := lQry.FieldByName('DR_CTA').AsString;
-    lModel.USUARIO_CTA                  := lQry.FieldByName('USUARIO_CTA').AsString;
-    lModel.BANCO_CTA                    := lQry.FieldByName('BANCO_CTA').AsString;
-    lModel.BAIXAPAGAR_CTA               := lQry.FieldByName('BAIXAPAGAR_CTA').AsString;
-    lModel.TIPOSEMDR_CTA                := lQry.FieldByName('TIPOSEMDR_CTA').AsString;
-    lModel.TIPOSEMDR_CTA_RECEBIMENTO    := lQry.FieldByName('TIPOSEMDR_CTA_RECEBIMENTO').AsString;
-    lModel.GRUPO_CTA                    := lQry.FieldByName('GRUPO_CTA').AsString;
-    lModel.SUBGRUPO_CTA                 := lQry.FieldByName('SUBGRUPO_CTA').AsString;
-    lModel.CENTROCUSTO_CTA              := lQry.FieldByName('CENTROCUSTO_CTA').AsString;
-    lModel.EXTRATO_CTA                  := lQry.FieldByName('EXTRATO_CTA').AsString;
-    lModel.ORDEM                        := lQry.FieldByName('ORDEM').AsString;
-    lModel.LOJA                         := lQry.FieldByName('LOJA').AsString;
-    lModel.EMPRESTIMO_CTA               := lQry.FieldByName('EMPRESTIMO_CTA').AsString;
-    lModel.STATUS                       := lQry.FieldByName('STATUS').AsString;
-    lModel.CREDITO_ICMS                 := lQry.FieldByName('CREDITO_ICMS').AsString;
-    lModel.RECEITAXDESPESAS             := lQry.FieldByName('RECEITAXDESPESAS').AsString;
-    lModel.SYSTIME                      := lQry.FieldByName('SYSTIME').AsString;
-    lModel.CREDITO_CLIENTE_CTA          := lQry.FieldByName('CREDITO_CLIENTE_CTA').AsString;
-    lModel.CREDITO_FORNECEDOR_CTA       := lQry.FieldByName('CREDITO_FORNECEDOR_CTA').AsString;
+    lModel.objeto.ID                           := lQry.FieldByName('ID').AsString;
+    lModel.objeto.CLASSIFICACAO                := lQry.FieldByName('CLASSIFICACAO').AsString;
+    lModel.objeto.CODIGO_CTA                   := lQry.FieldByName('CODIGO_CTA').AsString;
+    lModel.objeto.NOME_CTA                     := lQry.FieldByName('NOME_CTA').AsString;
+    lModel.objeto.TIPO_CTA                     := lQry.FieldByName('TIPO_CTA').AsString;
+    lModel.objeto.DR_CTA                       := lQry.FieldByName('DR_CTA').AsString;
+    lModel.objeto.USUARIO_CTA                  := lQry.FieldByName('USUARIO_CTA').AsString;
+    lModel.objeto.BANCO_CTA                    := lQry.FieldByName('BANCO_CTA').AsString;
+    lModel.objeto.BAIXAPAGAR_CTA               := lQry.FieldByName('BAIXAPAGAR_CTA').AsString;
+    lModel.objeto.TIPOSEMDR_CTA                := lQry.FieldByName('TIPOSEMDR_CTA').AsString;
+    lModel.objeto.TIPOSEMDR_CTA_RECEBIMENTO    := lQry.FieldByName('TIPOSEMDR_CTA_RECEBIMENTO').AsString;
+    lModel.objeto.GRUPO_CTA                    := lQry.FieldByName('GRUPO_CTA').AsString;
+    lModel.objeto.SUBGRUPO_CTA                 := lQry.FieldByName('SUBGRUPO_CTA').AsString;
+    lModel.objeto.CENTROCUSTO_CTA              := lQry.FieldByName('CENTROCUSTO_CTA').AsString;
+    lModel.objeto.EXTRATO_CTA                  := lQry.FieldByName('EXTRATO_CTA').AsString;
+    lModel.objeto.ORDEM                        := lQry.FieldByName('ORDEM').AsString;
+    lModel.objeto.LOJA                         := lQry.FieldByName('LOJA').AsString;
+    lModel.objeto.EMPRESTIMO_CTA               := lQry.FieldByName('EMPRESTIMO_CTA').AsString;
+    lModel.objeto.STATUS                       := lQry.FieldByName('STATUS').AsString;
+    lModel.objeto.CREDITO_ICMS                 := lQry.FieldByName('CREDITO_ICMS').AsString;
+    lModel.objeto.RECEITAXDESPESAS             := lQry.FieldByName('RECEITAXDESPESAS').AsString;
+    lModel.objeto.SYSTIME                      := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.CREDITO_CLIENTE_CTA          := lQry.FieldByName('CREDITO_CLIENTE_CTA').AsString;
+    lModel.objeto.CREDITO_FORNECEDOR_CTA       := lQry.FieldByName('CREDITO_FORNECEDOR_CTA').AsString;
     Result := lModel;
 
   finally
@@ -118,7 +124,7 @@ begin
   end;
 end;
 
-constructor TContasDao.Create(pIConexao : IConexao);
+constructor TContasDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -132,7 +138,7 @@ begin
   inherited;
 end;
 
-function TContasDao.incluir(AContasModel: TContasModel): String;
+function TContasDao.incluir(AContasModel: ITContasModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -155,7 +161,7 @@ begin
   end;
 end;
 
-function TContasDao.alterar(AContasModel: TContasModel): String;
+function TContasDao.alterar(AContasModel: ITContasModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -170,7 +176,7 @@ begin
     setParams(lQry, AContasModel);
     lQry.ExecSQL;
 
-    Result := AContasModel.ID;
+    Result := AContasModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -178,7 +184,7 @@ begin
   end;
 end;
 
-function TContasDao.excluir(AContasModel: TContasModel): String;
+function TContasDao.excluir(AContasModel: ITContasModel): String;
 var
   lQry: TFDQuery;
 begin
@@ -186,13 +192,19 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from CONTAS where ID = :ID',[AContasModel.ID]);
+   lQry.ExecSQL('delete from CONTAS where ID = :ID',[AContasModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := AContasModel.ID;
+   Result := AContasModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TContasDao.getNewIface(pIConexao: IConexao): ITContasDao;
+begin
+  Result := TImplObjetoOwner<TContasDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TContasDao.where: String;
@@ -236,12 +248,12 @@ procedure TContasDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TContasModel;
+  modelo: ITContasModel;
 begin
 
   lQry := vIConexao.CriarQuery;
 
-  FContassLista := TCollections.CreateList<TContasModel>(true);;
+  FContassLista := TCollections.CreateList<ITContasModel>;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -264,33 +276,33 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TContasModel.Create(vIConexao);
+      modelo := TContasModel.getNewIface(vIConexao);
       FContassLista.Add(modelo);
 
-      modelo.ID                         := lQry.FieldByName('ID').AsString;
-      modelo.CLASSIFICACAO              := lQry.FieldByName('CLASSIFICACAO').AsString;
-      modelo.CODIGO_CTA                 := lQry.FieldByName('CODIGO_CTA').AsString;
-      modelo.NOME_CTA                   := lQry.FieldByName('NOME_CTA').AsString;
-      modelo.TIPO_CTA                   := lQry.FieldByName('TIPO_CTA').AsString;
-      modelo.DR_CTA                     := lQry.FieldByName('DR_CTA').AsString;
-      modelo.USUARIO_CTA                := lQry.FieldByName('USUARIO_CTA').AsString;
-      modelo.BANCO_CTA                  := lQry.FieldByName('BANCO_CTA').AsString;
-      modelo.BAIXAPAGAR_CTA             := lQry.FieldByName('BAIXAPAGAR_CTA').AsString;
-      modelo.TIPOSEMDR_CTA              := lQry.FieldByName('TIPOSEMDR_CTA').AsString;
-      modelo.TIPOSEMDR_CTA_RECEBIMENTO  := lQry.FieldByName('TIPOSEMDR_CTA_RECEBIMENTO').AsString;
-      modelo.GRUPO_CTA                  := lQry.FieldByName('GRUPO_CTA').AsString;
-      modelo.SUBGRUPO_CTA               := lQry.FieldByName('SUBGRUPO_CTA').AsString;
-      modelo.CENTROCUSTO_CTA            := lQry.FieldByName('CENTROCUSTO_CTA').AsString;
-      modelo.EXTRATO_CTA                := lQry.FieldByName('EXTRATO_CTA').AsString;
-      modelo.ORDEM                      := lQry.FieldByName('ORDEM').AsString;
-      modelo.LOJA                       := lQry.FieldByName('LOJA').AsString;
-      modelo.EMPRESTIMO_CTA             := lQry.FieldByName('EMPRESTIMO_CTA').AsString;
-      modelo.STATUS                     := lQry.FieldByName('STATUS').AsString;
-      modelo.CREDITO_ICMS               := lQry.FieldByName('CREDITO_ICMS').AsString;
-      modelo.RECEITAXDESPESAS           := lQry.FieldByName('RECEITAXDESPESAS').AsString;
-      modelo.SYSTIME                    := lQry.FieldByName('SYSTIME').AsString;
-      modelo.CREDITO_CLIENTE_CTA        := lQry.FieldByName('CREDITO_CLIENTE_CTA').AsString;
-      modelo.CREDITO_FORNECEDOR_CTA     := lQry.FieldByName('CREDITO_FORNECEDOR_CTA').AsString;
+      modelo.objeto.ID                         := lQry.FieldByName('ID').AsString;
+      modelo.objeto.CLASSIFICACAO              := lQry.FieldByName('CLASSIFICACAO').AsString;
+      modelo.objeto.CODIGO_CTA                 := lQry.FieldByName('CODIGO_CTA').AsString;
+      modelo.objeto.NOME_CTA                   := lQry.FieldByName('NOME_CTA').AsString;
+      modelo.objeto.TIPO_CTA                   := lQry.FieldByName('TIPO_CTA').AsString;
+      modelo.objeto.DR_CTA                     := lQry.FieldByName('DR_CTA').AsString;
+      modelo.objeto.USUARIO_CTA                := lQry.FieldByName('USUARIO_CTA').AsString;
+      modelo.objeto.BANCO_CTA                  := lQry.FieldByName('BANCO_CTA').AsString;
+      modelo.objeto.BAIXAPAGAR_CTA             := lQry.FieldByName('BAIXAPAGAR_CTA').AsString;
+      modelo.objeto.TIPOSEMDR_CTA              := lQry.FieldByName('TIPOSEMDR_CTA').AsString;
+      modelo.objeto.TIPOSEMDR_CTA_RECEBIMENTO  := lQry.FieldByName('TIPOSEMDR_CTA_RECEBIMENTO').AsString;
+      modelo.objeto.GRUPO_CTA                  := lQry.FieldByName('GRUPO_CTA').AsString;
+      modelo.objeto.SUBGRUPO_CTA               := lQry.FieldByName('SUBGRUPO_CTA').AsString;
+      modelo.objeto.CENTROCUSTO_CTA            := lQry.FieldByName('CENTROCUSTO_CTA').AsString;
+      modelo.objeto.EXTRATO_CTA                := lQry.FieldByName('EXTRATO_CTA').AsString;
+      modelo.objeto.ORDEM                      := lQry.FieldByName('ORDEM').AsString;
+      modelo.objeto.LOJA                       := lQry.FieldByName('LOJA').AsString;
+      modelo.objeto.EMPRESTIMO_CTA             := lQry.FieldByName('EMPRESTIMO_CTA').AsString;
+      modelo.objeto.STATUS                     := lQry.FieldByName('STATUS').AsString;
+      modelo.objeto.CREDITO_ICMS               := lQry.FieldByName('CREDITO_ICMS').AsString;
+      modelo.objeto.RECEITAXDESPESAS           := lQry.FieldByName('RECEITAXDESPESAS').AsString;
+      modelo.objeto.SYSTIME                    := lQry.FieldByName('SYSTIME').AsString;
+      modelo.objeto.CREDITO_CLIENTE_CTA        := lQry.FieldByName('CREDITO_CLIENTE_CTA').AsString;
+      modelo.objeto.CREDITO_FORNECEDOR_CTA     := lQry.FieldByName('CREDITO_FORNECEDOR_CTA').AsString;
 
       lQry.Next;
     end;
@@ -333,7 +345,7 @@ begin
   FOrderView := Value;
 end;
 
-procedure TContasDao.setParams(var pQry: TFDQuery; pContasModel: TContasModel);
+procedure TContasDao.setParams(var pQry: TFDQuery; pContasModel: ITContasModel);
 var
   lTabela : IFDDataset;
   lCtx    : TRttiContext;
@@ -349,8 +361,8 @@ begin
       lProp := lCtx.GetType(TContasModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pContasModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pContasModel).AsString))
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pContasModel.objeto).AsString = '',
+        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pContasModel.objeto).AsString))
     end;
   finally
     lCtx.Free;
