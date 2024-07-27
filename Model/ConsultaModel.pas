@@ -5,14 +5,18 @@ interface
 uses
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TConsultaModel = class
+  TConsultaModel = class;
+  ITConsultaModel=IObject<TConsultaModel>;
 
+  TConsultaModel = class
   private
+    [weak] mySelf: ITConsultaModel;
     vIConexao : IConexao;
-    FConsultasLista: IList<TConsultaModel>;
+    FConsultasLista: IList<ITConsultaModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -28,7 +32,7 @@ type
     FCodigoView: String;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetConsultasLista(const Value: IList<TConsultaModel>);
+    procedure SetConsultasLista(const Value: IList<ITConsultaModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -44,12 +48,14 @@ type
     property CODIGO: Variant read FCODIGO write SetCODIGO;
     property DESCRICAO: Variant read FDESCRICAO write SetDESCRICAO;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITConsultaModel;
 
     procedure obterLista;
 
-    property ConsultasLista: IList<TConsultaModel> read FConsultasLista write SetConsultasLista;
+    property ConsultasLista: IList<ITConsultaModel> read FConsultasLista write SetConsultasLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -71,7 +77,7 @@ uses
 
 { TConsultaModel }
 
-constructor TConsultaModel.Create(pIConexao : IConexao);
+constructor TConsultaModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -83,31 +89,36 @@ begin
   inherited;
 end;
 
+class function TConsultaModel.getNewIface(pIConexao: IConexao): ITConsultaModel;
+begin
+
+end;
+
 procedure TConsultaModel.obterLista;
 var
-  lConsultaLista: TConsultaDao;
+  lConsultaLista: ITConsultaDao;
 begin
-  lConsultaLista := TConsultaDao.Create(vIConexao);
+  lConsultaLista := TConsultaDao.getNewIface(vIConexao);
 
   try
-    lConsultaLista.TotalRecords     := FTotalRecords;
-    lConsultaLista.WhereView        := FWhereView;
-    lConsultaLista.CountView        := FCountView;
-    lConsultaLista.OrderView        := FOrderView;
-    lConsultaLista.StartRecordView  := FStartRecordView;
-    lConsultaLista.LengthPageView   := FLengthPageView;
-    lConsultaLista.IDRecordView     := FIDRecordView;
-    lConsultaLista.TabelaView       := FTabelaView;
-    lConsultaLista.CodigoView       := FCodigoView;
-    lConsultaLista.DescricaoView    := FDescricaoView;
+    lConsultaLista.objeto.TotalRecords     := FTotalRecords;
+    lConsultaLista.objeto.WhereView        := FWhereView;
+    lConsultaLista.objeto.CountView        := FCountView;
+    lConsultaLista.objeto.OrderView        := FOrderView;
+    lConsultaLista.objeto.StartRecordView  := FStartRecordView;
+    lConsultaLista.objeto.LengthPageView   := FLengthPageView;
+    lConsultaLista.objeto.IDRecordView     := FIDRecordView;
+    lConsultaLista.objeto.TabelaView       := FTabelaView;
+    lConsultaLista.objeto.CodigoView       := FCodigoView;
+    lConsultaLista.objeto.DescricaoView    := FDescricaoView;
 
-    lConsultaLista.obterLista;
+    lConsultaLista.objeto.obterLista;
 
-    FTotalRecords  := lConsultaLista.TotalRecords;
-    FConsultasLista := lConsultaLista.ConsultasLista;
+    FTotalRecords  := lConsultaLista.objeto.TotalRecords;
+    FConsultasLista := lConsultaLista.objeto.ConsultasLista;
 
   finally
-    lConsultaLista.Free;
+    lConsultaLista:=nil;
   end;
 end;
 

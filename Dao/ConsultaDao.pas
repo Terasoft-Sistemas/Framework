@@ -9,17 +9,21 @@ uses
   System.StrUtils,
   Spring.Collections,
   System.Variants,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao,
   Interfaces.Conexao;
 
 type
-  TConsultaDao = class
+  TConsultaDao = class;
+  ITConsultaDao=IObject<TConsultaDao>;
 
+  TConsultaDao = class
   private
+    [weak] mySelf: ITConsultaDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FConsultasLista: IList<TConsultaModel>;
+    FConsultasLista: IList<ITConsultaModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -33,7 +37,7 @@ type
     FCodigoView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetConsultasLista(const Value: IList<TConsultaModel>);
+    procedure SetConsultasLista(const Value: IList<ITConsultaModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -48,10 +52,12 @@ type
     procedure SetDescricaoView(const Value: String);
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property ConsultasLista: IList<TConsultaModel> read FConsultasLista write SetConsultasLista;
+    class function getNewIface(pIConexao: IConexao): ITConsultaDao;
+
+    property ConsultasLista: IList<ITConsultaModel> read FConsultasLista write SetConsultasLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -72,7 +78,7 @@ implementation
 
 { TConsulta }
 
-constructor TConsultaDao.Create(pIConexao : IConexao);
+constructor TConsultaDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -84,6 +90,12 @@ begin
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
+end;
+
+class function TConsultaDao.getNewIface(pIConexao: IConexao): ITConsultaDao;
+begin
+  Result := TImplObjetoOwner<TConsultaDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TConsultaDao.where: String;
@@ -123,11 +135,11 @@ procedure TConsultaDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TConsultaModel;
+  modelo: ITConsultaModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FConsultasLista := TCollections.CreateList<TConsultaModel>(true);
+  FConsultasLista := TCollections.CreateList<ITConsultaModel>;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -151,11 +163,11 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TConsultaModel.Create(vIConexao);
+      modelo := TConsultaModel.getNewIface(vIConexao);
       FConsultasLista.Add(modelo);
 
-      modelo.CODIGO      := lQry.FieldByName('CODIGO').AsString;
-      modelo.DESCRICAO   := lQry.FieldByName('DESCRICAO').AsString;
+      modelo.objeto.CODIGO      := lQry.FieldByName('CODIGO').AsString;
+      modelo.objeto.DESCRICAO   := lQry.FieldByName('DESCRICAO').AsString;
 
       lQry.Next;
     end;
