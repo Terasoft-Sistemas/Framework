@@ -467,11 +467,11 @@ var
   lResult        : String;
   lConfiguracoes : ITerasoftConfiguracoes;
   lLojasModel,
-  lLojas         : TLojasModel;
+  lLojas         : ITLojasModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  lLojasModel := TLojasModel.Create(vIConexao);
+  lLojasModel := TLojasModel.getNewIface(vIConexao);
   try
     lSQL := vConstrutor.gerarInsert(self.NomeTabela, 'CODIGO_CLI', true);
 
@@ -488,7 +488,7 @@ begin
       sincronizarDados(pClienteModel);
 
   finally
-    lLojasModel.Free;
+    lLojasModel:=nil;
     lSQL := '';
     lQry.Free;
   end;
@@ -1096,23 +1096,23 @@ end;
 function TClienteDao.sincronizarDados(pClienteModel: TClienteModel): String;
 var
   lLojasModel,
-  lLojas      : TLojasModel;
+  lLojas      : ITLojasModel;
   lQry        : TFDQuery;
   lSQL        : String;
 begin
 
-  lLojasModel := TLojasModel.Create(vIConexao);
+  lLojasModel := TLojasModel.getNewIface(vIConexao);
 
   try
-    lLojasModel.obterHosts;
+    lLojasModel.objeto.obterHosts;
 
     lSQL := vConstrutor.gerarUpdateOrInsert('CLIENTES','CODIGO_CLI', 'CODIGO_CLI', true);
 
-    for lLojas in lLojasModel.LojassLista do
+    for lLojas in lLojasModel.objeto.LojassLista do
     begin
-      if lLojas.LOJA <> vIConexao.getEmpresa.LOJA then
+      if lLojas.objeto.LOJA <> vIConexao.getEmpresa.LOJA then
       begin
-        vIConexao.ConfigConexaoExterna('', lLojas.STRING_CONEXAO);
+        vIConexao.ConfigConexaoExterna('', lLojas.objeto.STRING_CONEXAO);
         lQry := vIConexao.criarQueryExterna;
 
         lQry.SQL.Clear;
@@ -1125,7 +1125,7 @@ begin
     end;
 
   finally
-    lLojasModel.Free;
+    lLojasModel:=nil;
     lQry.Free;
   end;
 end;

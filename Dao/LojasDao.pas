@@ -8,19 +8,22 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  //System.Generics.Collections,
+  Terasoft.Framework.ObjectIface,
   Spring.Collections,
   System.Variants,
   Interfaces.Conexao;
 
 type
-  TLojasDao = class
+  TLojasDao = class;
+  ITLojasDao=IObject<TLojasDao>;
 
+  TLojasDao = class
   private
+    [weak] mySelf:ITLojasDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FLojassLista: IList<TLojasModel>;
+    FLojassLista: IList<ITLojasModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -32,7 +35,7 @@ type
     FLojaView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetLojassLista(const Value: IList<TLojasModel>);
+    procedure SetLojassLista(const Value: IList<ITLojasModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -45,10 +48,12 @@ type
     procedure SetLojaView(const Value: String);
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property LojassLista: IList<TLojasModel> read FLojassLista write SetLojassLista;
+    class function getNewIface(pIConexao: IConexao): ITLojasDao;
+
+    property LojassLista: IList<ITLojasModel> read FLojassLista write SetLojassLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -69,7 +74,7 @@ implementation
 
 { TLojas }
 
-constructor TLojasDao.Create(pIConexao: IConexao);
+constructor TLojasDao._Create(pIConexao: IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -81,6 +86,12 @@ begin
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
+end;
+
+class function TLojasDao.getNewIface(pIConexao: IConexao): ITLojasDao;
+begin
+  Result := TImplObjetoOwner<TLojasDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TLojasDao.where: String;
@@ -123,11 +134,11 @@ function TLojasDao.obterFiliais: IFDDataset;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TLojasModel;
+  modelo: ITLojasModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FLojassLista := TCollections.CreateList<TLojasModel>(true);
+  FLojassLista := TCollections.CreateList<ITLojasModel>;
 
   try
     lSQL := ' select                               ' + sLineBreak +
@@ -158,11 +169,11 @@ procedure TLojasDao.obterHosts;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TLojasModel;
+  modelo: ITLojasModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FLojassLista := TCollections.CreateList<TLojasModel>(true);
+  FLojassLista := TCollections.CreateList<ITLojasModel>;
 
   try
     lSQL := ' select hosts.loja,                          ' + #13+
@@ -177,11 +188,11 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TLojasModel.Create(vIConexao);
+      modelo := TLojasModel.getNewIface(vIConexao);
       FLojassLista.Add(modelo);
 
-      modelo.LOJA           := lQry.FieldByName('LOJA').AsString;
-      modelo.STRING_CONEXAO := lQry.FieldByName('STRING_CONEXAO').AsString;
+      modelo.objeto.LOJA           := lQry.FieldByName('LOJA').AsString;
+      modelo.objeto.STRING_CONEXAO := lQry.FieldByName('STRING_CONEXAO').AsString;
 
       lQry.Next;
     end;
@@ -194,11 +205,11 @@ procedure TLojasDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TLojasModel;
+  modelo: ITLojasModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FLojassLista := TCollections.CreateList<TLojasModel>(true);
+  FLojassLista := TCollections.CreateList<ITLojasModel>;
 
   try
     lSQL := ' select                           ' + #13 +
@@ -221,16 +232,16 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TLojasModel.Create(vIConexao);
+      modelo := TLojasModel.getNewIface(vIConexao);
       FLojassLista.Add(modelo);
 
-      modelo.CD           := lQry.FieldByName('CD').AsString;
-      modelo.LOJA         := lQry.FieldByName('LOJA').AsString;
-      modelo.DESCRICAO    := lQry.FieldByName('DESCRICAO').AsString;
-      modelo.SERVER       := lQry.FieldByName('SERVER').AsString;
-      modelo.PORT         := lQry.FieldByName('PORT').AsString;
-      modelo.DATABASE     := lQry.FieldByName('DATABASE').AsString;
-      modelo.CLIENTE_ID   := lQry.FieldByName('CLIENTE_ID').AsString;
+      modelo.objeto.CD           := lQry.FieldByName('CD').AsString;
+      modelo.objeto.LOJA         := lQry.FieldByName('LOJA').AsString;
+      modelo.objeto.DESCRICAO    := lQry.FieldByName('DESCRICAO').AsString;
+      modelo.objeto.SERVER       := lQry.FieldByName('SERVER').AsString;
+      modelo.objeto.PORT         := lQry.FieldByName('PORT').AsString;
+      modelo.objeto.DATABASE     := lQry.FieldByName('DATABASE').AsString;
+      modelo.objeto.CLIENTE_ID   := lQry.FieldByName('CLIENTE_ID').AsString;
 
       lQry.Next;
     end;

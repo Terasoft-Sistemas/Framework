@@ -332,13 +332,13 @@ end;
 function TAnexoDao.sincronizarDados(pAnexoModel: TAnexoModel): String;
 var
   lLojasModel,
-  lLojas      : TLojasModel;
+  lLojas      : ITLojasModel;
   lQry        : TFDQuery;
   lSQL        : String;
 begin
-  lLojasModel := TLojasModel.Create(vIConexao);
+  lLojasModel := TLojasModel.getNewIface(vIConexao);
   try
-    lLojasModel.obterHosts;
+    lLojasModel.objeto.obterHosts;
 
     if pAnexoModel.Acao in [tacIncluir, tacAlterar] then
       lSQL := vConstrutor.gerarUpdateOrInsert('ANEXO','ID', 'ID', true)
@@ -346,11 +346,11 @@ begin
     else if pAnexoModel.Acao in [tacExcluir] then
       lSQL := ('delete from ANEXO where ID = :ID');
 
-    for lLojas in lLojasModel.LojassLista do
+    for lLojas in lLojasModel.objeto.LojassLista do
     begin
-      if lLojas.LOJA <> vIConexao.getEmpresa.LOJA then
+      if lLojas.objeto.LOJA <> vIConexao.getEmpresa.LOJA then
       begin
-        vIConexao.ConfigConexaoExterna('', lLojas.STRING_CONEXAO);
+        vIConexao.ConfigConexaoExterna('', lLojas.objeto.STRING_CONEXAO);
         lQry := vIConexao.criarQueryExterna;
 
         if pAnexoModel.Acao = tacExcluir then
@@ -370,7 +370,7 @@ begin
     end;
 
   finally
-    lLojasModel.Free;
+    lLojasModel:=nil;
     lQry.Free;
   end;
 end;

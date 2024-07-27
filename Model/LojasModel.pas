@@ -4,16 +4,19 @@ interface
 
 uses
   Terasoft.Types,
-  //System.Generics.Collections,
+  Terasoft.Framework.ObjectIface,
   Spring.Collections,
   Interfaces.Conexao, FireDAC.Comp.Client;
 
 type
-  TLojasModel = class
+  TLojasModel = class;
+  ITLojasModel=IObject<TLojasModel>;
 
+  TLojasModel = class
   private
+    [weaok] mySelf: ITLojasModel;
     vIConexao : IConexao;
-    FLojassLista: IList<TLojasModel>;
+    FLojassLista: IList<ITLojasModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -33,7 +36,7 @@ type
     FSTRING_CONEXAO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetLojassLista(const Value: IList<TLojasModel>);
+    procedure SetLojassLista(const Value: IList<ITLojasModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -59,15 +62,17 @@ type
     property CLIENTE_ID: Variant read FCLIENTE_ID write SetCLIENTE_ID;
     property STRING_CONEXAO: Variant read FSTRING_CONEXAO write SetSTRING_CONEXAO;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITLojasModel;
 
     function Salvar: String;
     procedure obterLista;
     procedure obterHosts;
     function obterFiliais: IFDDataset;
 
-    property LojassLista: IList<TLojasModel> read FLojassLista write SetLojassLista;
+    property LojassLista: IList<ITLojasModel> read FLojassLista write SetLojassLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -86,7 +91,7 @@ uses
 
 { TLojasModel }
 
-constructor TLojasModel.Create(pIConexao : IConexao);
+constructor TLojasModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -98,83 +103,89 @@ begin
   inherited;
 end;
 
+class function TLojasModel.getNewIface(pIConexao: IConexao): ITLojasModel;
+begin
+  Result := TImplObjetoOwner<TLojasModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TLojasModel.obterFiliais: IFDDataset;
 var
-  lLojasDao : TLojasDao;
+  lLojasDao : ITLojasDao;
 begin
-  lLojasDao := TLojasDao.Create(vIConexao);
+  lLojasDao := TLojasDao.getNewIface(vIConexao);
   try
-    lLojasDao.LojaView  := FLojaView;
-    lLojasDao.WhereView := FWhereView;
-    Result := lLojasDao.obterFiliais;
+    lLojasDao.objeto.LojaView  := FLojaView;
+    lLojasDao.objeto.WhereView := FWhereView;
+    Result := lLojasDao.objeto.obterFiliais;
   finally
-    lLojasDao.Free;
+    lLojasDao:=nil;
   end;
 end;
 
 procedure TLojasModel.obterHosts;
 var
-  lLojasLista: TLojasDao;
+  lLojasLista: ITLojasDao;
 begin
-  lLojasLista := TLojasDao.Create(vIConexao);
+  lLojasLista := TLojasDao.getNewIface(vIConexao);
 
   try
-    lLojasLista.TotalRecords    := FTotalRecords;
-    lLojasLista.WhereView       := FWhereView;
-    lLojasLista.CountView       := FCountView;
-    lLojasLista.OrderView       := FOrderView;
-    lLojasLista.StartRecordView := FStartRecordView;
-    lLojasLista.LengthPageView  := FLengthPageView;
-    lLojasLista.IDRecordView    := FIDRecordView;
-    lLojasLista.LojaView        := FLojaView;
+    lLojasLista.objeto.TotalRecords    := FTotalRecords;
+    lLojasLista.objeto.WhereView       := FWhereView;
+    lLojasLista.objeto.CountView       := FCountView;
+    lLojasLista.objeto.OrderView       := FOrderView;
+    lLojasLista.objeto.StartRecordView := FStartRecordView;
+    lLojasLista.objeto.LengthPageView  := FLengthPageView;
+    lLojasLista.objeto.IDRecordView    := FIDRecordView;
+    lLojasLista.objeto.LojaView        := FLojaView;
 
-    lLojasLista.obterHosts;
+    lLojasLista.objeto.obterHosts;
 
-    FTotalRecords  := lLojasLista.TotalRecords;
-    FLojassLista := lLojasLista.LojassLista;
+    FTotalRecords  := lLojasLista.objeto.TotalRecords;
+    FLojassLista := lLojasLista.objeto.LojassLista;
 
   finally
-    lLojasLista.Free;
+    lLojasLista:=nil;
   end;
 end;
 
 procedure TLojasModel.obterLista;
 var
-  lLojasLista: TLojasDao;
+  lLojasLista: ITLojasDao;
 begin
-  lLojasLista := TLojasDao.Create(vIConexao);
+  lLojasLista := TLojasDao.getNewIface(vIConexao);
 
   try
-    lLojasLista.TotalRecords    := FTotalRecords;
-    lLojasLista.WhereView       := FWhereView;
-    lLojasLista.CountView       := FCountView;
-    lLojasLista.OrderView       := FOrderView;
-    lLojasLista.StartRecordView := FStartRecordView;
-    lLojasLista.LengthPageView  := FLengthPageView;
-    lLojasLista.IDRecordView    := FIDRecordView;
-    lLojasLista.LojaView        := FLojaView;
+    lLojasLista.objeto.TotalRecords    := FTotalRecords;
+    lLojasLista.objeto.WhereView       := FWhereView;
+    lLojasLista.objeto.CountView       := FCountView;
+    lLojasLista.objeto.OrderView       := FOrderView;
+    lLojasLista.objeto.StartRecordView := FStartRecordView;
+    lLojasLista.objeto.LengthPageView  := FLengthPageView;
+    lLojasLista.objeto.IDRecordView    := FIDRecordView;
+    lLojasLista.objeto.LojaView        := FLojaView;
 
-    lLojasLista.obterLista;
+    lLojasLista.objeto.obterLista;
 
-    FTotalRecords  := lLojasLista.TotalRecords;
-    FLojassLista := lLojasLista.LojassLista;
+    FTotalRecords  := lLojasLista.objeto.TotalRecords;
+    FLojassLista := lLojasLista.objeto.LojassLista;
 
   finally
-    lLojasLista.Free;
+    lLojasLista:=nil;
   end;
 end;
 
 function TLojasModel.Salvar: String;
 var
-  lLojasDao: TLojasDao;
+  lLojasDao: ITLojasDao;
 begin
-  lLojasDao := TLojasDao.Create(vIConexao);
+  lLojasDao := TLojasDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
   finally
-    lLojasDao.Free;
+    lLojasDao:=nil;
   end;
 end;
 

@@ -92,10 +92,10 @@ var
   lSql        : String;
   lMemTable   : TFDMemTable;
   lLojas_Dados,
-  lLojasModel : TLojasModel;
+  lLojasModel : ITLojasModel;
 begin
   lQry        := vIConexao.CriarQuery;
-  lLojasModel := TLojasModel.Create(vIConexao);
+  lLojasModel := TLojasModel.getNewIface(vIConexao);
   lMemTable   := TFDMemTable.Create(nil);
 
   try
@@ -207,13 +207,13 @@ begin
     lMemTable.CreateDataSet;
 
     if self.FLojaView <> '' then
-      lLojasModel.WhereView := ' and loja2.loja in ('+self.FLojaView+')';
+      lLojasModel.objeto.WhereView := ' and loja2.loja in ('+self.FLojaView+')';
 
-    lLojasModel.obterLista;
+    lLojasModel.objeto.obterLista;
 
-    for lLojas_Dados in lLojasModel.LojassLista do
+    for lLojas_Dados in lLojasModel.objeto.LojassLista do
     begin
-      vIConexao.ConfigConexaoExterna(lLojas_Dados.LOJA);
+      vIConexao.ConfigConexaoExterna(lLojas_Dados.objeto.LOJA);
       lQry := vIConexao.CriarQueryExterna;
       lQry.Open(lSQL);
 
@@ -221,8 +221,8 @@ begin
       while not lQry.Eof do
       begin
         lMemTable.InsertRecord([
-                                lLojas_Dados.LOJA,
-                                lLojas_Dados.DESCRICAO,
+                                lLojas_Dados.objeto.LOJA,
+                                lLojas_Dados.objeto.DESCRICAO,
                                 lQry.FieldByName('VENCIMENTO').AsString,
                                 lQry.FieldByName('PAGAR').AsFloat,
                                 lQry.FieldByName('RECEBER').AsFloat,
@@ -246,10 +246,10 @@ var
   lSql        : String;
   lMemTable   : TFDMemTable;
   lLojas_Dados,
-  lLojasModel : TLojasModel;
+  lLojasModel : ITLojasModel;
 begin
   lQry        := vIConexao.CriarQuery;
-  lLojasModel := TLojasModel.Create(vIConexao);
+  lLojasModel := TLojasModel.getNewIface(vIConexao);
   lMemTable   := TFDMemTable.Create(nil);
 
   try
@@ -364,13 +364,13 @@ begin
     lMemTable.CreateDataSet;
 
     if self.FLojaView <> '' then
-      lLojasModel.WhereView := ' and loja2.loja in ('+self.FLojaView+')';
+      lLojasModel.objeto.WhereView := ' and loja2.loja in ('+self.FLojaView+')';
 
-    lLojasModel.obterLista;
+    lLojasModel.objeto.obterLista;
 
-    for lLojas_Dados in lLojasModel.LojassLista do
+    for lLojas_Dados in lLojasModel.objeto.LojassLista do
     begin
-      vIConexao.ConfigConexaoExterna(lLojas_Dados.LOJA);
+      vIConexao.ConfigConexaoExterna(lLojas_Dados.objeto.LOJA);
       lQry := vIConexao.CriarQueryExterna;
       lQry.Open(lSQL);
 
@@ -378,8 +378,8 @@ begin
       while not lQry.Eof do
       begin
         lMemTable.InsertRecord([
-                                lLojas_Dados.LOJA,
-                                lLojas_Dados.DESCRICAO,
+                                lLojas_Dados.objeto.LOJA,
+                                lLojas_Dados.objeto.DESCRICAO,
                                 lQry.FieldByName('TIPO').AsString,
                                 lQry.FieldByName('TITULO').AsString,
                                 lQry.FieldByName('CODIGO_NOME').AsString,
@@ -410,10 +410,10 @@ var
   lSql        : String;
   lMemTable   : TFDMemTable;
   lLojas_Dados,
-  lLojasModel : TLojasModel;
+  lLojasModel : ITLojasModel;
 begin
   lQry        := vIConexao.CriarQuery;
-  lLojasModel := TLojasModel.Create(vIConexao);
+  lLojasModel := TLojasModel.getNewIface(vIConexao);
   lMemTable   := TFDMemTable.Create(nil);
 
   try
@@ -473,13 +473,13 @@ begin
     lMemTable.CreateDataSet;
 
     if self.FLojaView <> '' then
-      lLojasModel.WhereView := ' and loja2.loja in ('+self.FLojaView+')';
+      lLojasModel.objeto.WhereView := ' and loja2.loja in ('+self.FLojaView+')';
 
-    lLojasModel.obterLista;
+    lLojasModel.objeto.obterLista;
 
-    for lLojas_Dados in lLojasModel.LojassLista do
+    for lLojas_Dados in lLojasModel.objeto.LojassLista do
     begin
-      vIConexao.ConfigConexaoExterna(lLojas_Dados.LOJA);
+      vIConexao.ConfigConexaoExterna(lLojas_Dados.objeto.LOJA);
       lQry := vIConexao.CriarQueryExterna;
       lQry.Open(lSQL);
 
@@ -487,8 +487,8 @@ begin
       while not lQry.Eof do
       begin
         lMemTable.InsertRecord([
-                                lLojas_Dados.LOJA,
-                                lLojas_Dados.DESCRICAO,
+                                lLojas_Dados.objeto.LOJA,
+                                lLojas_Dados.objeto.DESCRICAO,
                                 lQry.FieldByName('TIPO').AsString,
                                 lQry.FieldByName('TOTALREGISTROS').AsFloat,
                                 lQry.FieldByName('TOTAL').AsFloat
@@ -517,11 +517,11 @@ var
   lMemTable           : TFDMemTable;
   lContaCorrenteModel : ITContaCorrenteModel;
   lLojas_Dados,
-  lLojasModel         : TLojasModel;
+  lLojasModel         : ITLojasModel;
 
 begin
   lMemTable   := TFDMemTable.Create(nil);
-  lLojasModel := TLojasModel.Create(vIConexao);
+  lLojasModel := TLojasModel.getNewIface(vIConexao);
 
   try
     lSql := '        select TIPO,                                                                                  '+sLineBreak+
@@ -593,13 +593,13 @@ begin
     lMemTable.CreateDataSet;
 
     if self.FLojaView <> '' then
-      lLojasModel.WhereView := ' and loja2.loja in ('+self.FLojaView+')';
+      lLojasModel.objeto.WhereView := ' and loja2.loja in ('+self.FLojaView+')';
 
-    lLojasModel.obterLista;
+    lLojasModel.objeto.obterLista;
 
-    for lLojas_Dados in lLojasModel.LojassLista do
+    for lLojas_Dados in lLojasModel.objeto.LojassLista do
     begin
-      vIConexao.ConfigConexaoExterna(lLojas_Dados.LOJA);
+      vIConexao.ConfigConexaoExterna(lLojas_Dados.objeto.LOJA);
       lQry := vIConexao.CriarQueryExterna;
       lQry.Open(lSQL);
 
@@ -632,15 +632,15 @@ begin
 
       lContaCorrenteModel := TContaCorrenteModel.getNewIface(vIConexao);
       lContaCorrenteModel.objeto.IDBancoView := FBancoView;
-      lContaCorrenteModel.objeto.obterSaldo(lLojas_Dados.LOJA);
+      lContaCorrenteModel.objeto.obterSaldo(lLojas_Dados.objeto.LOJA);
 
       lSaldoBanco := lContaCorrenteModel.objeto.Saldo;
 
       lTotal := lReceber + ifThen(FSomarBancosView, lSaldoBanco, 0) - lPagar;
 
       lMemTable.InsertRecord([
-                              lLojas_Dados.LOJA,
-                              lLojas_Dados.DESCRICAO,
+                              lLojas_Dados.objeto.LOJA,
+                              lLojas_Dados.objeto.DESCRICAO,
                               FormatFloat('####0.00', lReceber),
                               FormatFloat('####0.00', lPagar),
                               FormatFloat('####0.00', lInadimplente),

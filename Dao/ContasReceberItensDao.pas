@@ -321,11 +321,11 @@ function TContasReceberItensDao.obterContaCliente(pContaClienteParametros: TCont
 var
   lSql          : String;
   lLojasModel,
-  lLojas        : TLojasModel;
+  lLojas        : ITLojasModel;
   lQry          : TFDQuery;
   lResultado    : TContaClienteRetorno;
 begin
-  lLojasModel := TLojasModel.Create(vIConexao);
+  lLojasModel := TLojasModel.getNewIface(vIConexao);
   Result      := TListaSimplesCreator.CreateList<TContaClienteRetorno>;
 
   try
@@ -413,13 +413,13 @@ begin
     lSql := lSql + ' order by i.vencimento_rec ';
 
     if not pContaClienteParametros.Loja.IsEmpty then
-      lLojasModel.LojaView := pContaClienteParametros.Loja;
+      lLojasModel.objeto.LojaView := pContaClienteParametros.Loja;
 
-    lLojasModel.obterLista;
+    lLojasModel.objeto.obterLista;
 
-    for lLojas in lLojasModel.LojassLista do
+    for lLojas in lLojasModel.objeto.LojassLista do
     begin
-      vIConexao.ConfigConexaoExterna(llojas.LOJA);
+      vIConexao.ConfigConexaoExterna(llojas.objeto.LOJA);
       lQry := vIConexao.criarQueryExterna;
 
       lQry.Open(lSQL);
@@ -453,7 +453,7 @@ begin
     end;
 
   finally
-    lLojasModel.Free;
+    lLojasModel:=nil;
   end;
 
 end;

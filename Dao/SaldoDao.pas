@@ -138,11 +138,11 @@ function TSaldoDao.obterSaldoLojas(pParametros : TParametrosSaldo): IFDDataset;
 var
   lQry      : TFDQuery;
   lSql      : String;
-  lLojas    : TLojasModel;
+  lLojas    : ITLojasModel;
   lMemTable : IFDDataset;
 begin
   lQry := nil;
-  lLojas       := TLojasModel.Create(vIConexao);
+  lLojas       := TLojasModel.getNewIface(vIConexao);
   lMemTable    := criaIFDDataset(TFDMemTable.Create(nil));
   try
     lSql := ' select                                                   '+SLineBreak+
@@ -183,19 +183,19 @@ begin
     TFDMemTable(lMemTable.objeto).CreateDataSet;
 
     if pParametros.LOJA <> '' then
-      lLojas.LojaView := pParametros.LOJA;
+      lLojas.objeto.LojaView := pParametros.LOJA;
 
-    lLojas.obterLista;
+    lLojas.objeto.obterLista;
 
-    for lLojas in lLojas.LojassLista do
+    for lLojas in lLojas.objeto.LojassLista do
     begin
-      vIConexao.ConfigConexaoExterna(llojas.LOJA);
+      vIConexao.ConfigConexaoExterna(llojas.objeto.LOJA);
 
       lQry := vIConexao.criarQueryExterna;
       lQry.Open(lSQL);
 
       lMemTable.objeto.InsertRecord([
-                              llojas.LOJA,
+                              llojas.objeto.LOJA,
                               lQry.fieldByName('SALDO_FISICO').AsFloat,
                               lQry.fieldByName('SALDO_DISPONIVEL').AsFloat
                              ]);
@@ -219,7 +219,7 @@ begin
     Result := lMemTable;
   finally
     lQry.Free;
-    lLojas.Free;
+    lLojas:=nil;
   end;
 end;
 

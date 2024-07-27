@@ -62,10 +62,10 @@ var
   lQry: TFDQuery;
   lSQL:String;
   lLojasModel,
-  lLojas_Dados: TLojasModel;
+  lLojas_Dados: ITLojasModel;
   lMemTable: TFDMemTable;
 begin
-  lLojasModel := TLojasModel.Create(vIConexao);
+  lLojasModel := TLojasModel.getNewIface(vIConexao);
   lMemTable   := TFDMemTable.Create(nil);
 
   try
@@ -207,12 +207,12 @@ begin
     lMemTable.FieldDefs.Add('ST', ftFloat);
     lMemTable.CreateDataSet;
 
-    lLojasModel.LojaView := pPCG_Parametros.Lojas;
-    lLojasModel.ObterLista;
+    lLojasModel.objeto.LojaView := pPCG_Parametros.Lojas;
+    lLojasModel.objeto.ObterLista;
 
-    for lLojas_Dados in lLojasModel.LojassLista do
+    for lLojas_Dados in lLojasModel.objeto.LojassLista do
     begin
-      vIConexao.ConfigConexaoExterna(lLojas_Dados.LOJA);
+      vIConexao.ConfigConexaoExterna(lLojas_Dados.objeto.LOJA);
       lQry := vIConexao.CriarQueryExterna;
       lQry.Open(lSQL);
 
@@ -220,7 +220,7 @@ begin
       while not lQry.Eof do
       begin
         lMemTable.InsertRecord([
-                                lLojas_Dados.LOJA,
+                                lLojas_Dados.objeto.LOJA,
                                 lQry.FieldByName('CODIGO').AsString,
                                 lQry.FieldByName('DESCRICAO').AsString,
                                 lQry.FieldByName('VALOR_LIQUIDO').AsFloat,
@@ -241,7 +241,7 @@ begin
 
   finally
     lQry.Free;
-    lLojasModel.Free;
+    lLojasModel:=nil;
   end;
 end;
 
@@ -250,7 +250,7 @@ var
   lQry              : TFDQuery;
   lSQL              : String;
   lLojasModel,
-  lLojas_Dados      : TLojasModel;
+  lLojas_Dados      : ITLojasModel;
   lMemTable         : TFDMemTable;
   lValorPossivel    : Real;
   lPercentual       : Real;
@@ -258,7 +258,7 @@ var
   lCodigo           : String;
   lDescricao        : String;
 begin
-  lLojasModel := TLojasModel.Create(vIConexao);
+  lLojasModel := TLojasModel.getNewIface(vIConexao);
   lMemTable := TFDMemTable.Create(nil);
 
   try
@@ -465,12 +465,12 @@ begin
     lMemTable.FieldDefs.Add('ST', ftFloat);
     lMemTable.CreateDataSet;
 
-    lLojasModel.LojaView := pPCG_Parametros.Lojas;
-    lLojasModel.ObterLista;
+    lLojasModel.objeto.LojaView := pPCG_Parametros.Lojas;
+    lLojasModel.objeto.ObterLista;
 
-    for lLojas_Dados in lLojasModel.LojassLista do
+    for lLojas_Dados in lLojasModel.objeto.LojassLista do
     begin
-      vIConexao.ConfigConexaoExterna(lLojas_Dados.LOJA);
+      vIConexao.ConfigConexaoExterna(lLojas_Dados.objeto.LOJA);
       lQry := vIConexao.CriarQueryExterna;
       lQry.Open(lSQL);
 
@@ -488,8 +488,8 @@ begin
 
         if pPCG_Parametros.TipoAnalise = tpFilial then
         begin
-          lCodigo    := lLojas_Dados.LOJA;
-          lDescricao := lLojas_Dados.DESCRICAO;
+          lCodigo    := lLojas_Dados.objeto.LOJA;
+          lDescricao := lLojas_Dados.objeto.DESCRICAO;
         end
         else
         begin
@@ -498,7 +498,7 @@ begin
         end;
 
         lMemTable.InsertRecord([
-                                lLojas_Dados.LOJA,
+                                lLojas_Dados.objeto.LOJA,
                                 lCodigo,
                                 lDescricao,
 
@@ -533,7 +533,7 @@ begin
 
   finally
     lQry.Free;
-    lLojasModel.Free;
+    lLojasModel:=nil;
   end;
 end;
 
@@ -696,10 +696,10 @@ var
   lQry: TFDQuery;
   lSQL:String;
   lLojasModel,
-  lLojas_Dados: TLojasModel;
+  lLojas_Dados: ITLojasModel;
   lMemTable: TFDMemTable;
 begin
-  lLojasModel := TLojasModel.Create(vIConexao);
+  lLojasModel := TLojasModel.getNewIface(vIConexao);
   lMemTable := TFDMemTable.Create(nil);
 
   try
@@ -755,12 +755,12 @@ begin
     lMemTable.FieldDefs.Add('SALDO', ftFloat);
     lMemTable.CreateDataSet;
 
-    lLojasModel.LojaView := pPCG_Parametros.Lojas;
-    lLojasModel.ObterLista;
+    lLojasModel.objeto.LojaView := pPCG_Parametros.Lojas;
+    lLojasModel.objeto.ObterLista;
 
-    for lLojas_Dados in lLojasModel.LojassLista do
+    for lLojas_Dados in lLojasModel.objeto.LojassLista do
     begin
-      vIConexao.ConfigConexaoExterna(lLojas_Dados.LOJA);
+      vIConexao.ConfigConexaoExterna(lLojas_Dados.objeto.LOJA);
       lQry := vIConexao.CriarQueryExterna;
       lQry.Open(lSQL);
 
@@ -768,8 +768,8 @@ begin
       while not lQry.Eof do
       begin
         lMemTable.InsertRecord([
-                                lLojas_Dados.LOJA,
-                                lLojas_Dados.DESCRICAO,
+                                lLojas_Dados.objeto.LOJA,
+                                lLojas_Dados.objeto.DESCRICAO,
                                 lQry.FieldByName('DESCRICAO').AsString,
                                 lQry.FieldByName('CUSTO').AsFloat,
                                 lQry.FieldByName('VENDA').AsFloat,
@@ -787,7 +787,7 @@ begin
 
   finally
     lQry.Free;
-    lLojasModel.Free;
+    lLojasModel:=nil;
   end;
 end;
 

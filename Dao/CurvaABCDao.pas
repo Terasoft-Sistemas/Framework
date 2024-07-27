@@ -59,7 +59,7 @@ var
   lQry              : TFDQuery;
   lSQL              : String;
   lLojasModel,
-  lLojas_Dados      : TLojasModel;
+  lLojas_Dados      : ITLojasModel;
   lMemTable         : TFDMemTable;
   Options           : TLocateOptions;
 
@@ -70,7 +70,7 @@ var
   lTotalLucro       : Real;
   lTotalItens       : Real;
 begin
-  lLojasModel := TLojasModel.Create(vIConexao);
+  lLojasModel := TLojasModel.getNewIface(vIConexao);
   lMemTable := TFDMemTable.Create(nil);
 
   try
@@ -263,12 +263,12 @@ begin
     lTotalLucro  := 0;
     lTotalItens  := 0;
 
-    lLojasModel.LojaView := pCurvaABC_Parametros.Lojas;
-    lLojasModel.ObterLista;
+    lLojasModel.objeto.LojaView := pCurvaABC_Parametros.Lojas;
+    lLojasModel.objeto.ObterLista;
 
-    for lLojas_Dados in lLojasModel.LojassLista do
+    for lLojas_Dados in lLojasModel.objeto.LojassLista do
     begin
-      vIConexao.ConfigConexaoExterna(lLojas_Dados.LOJA);
+      vIConexao.ConfigConexaoExterna(lLojas_Dados.objeto.LOJA);
       lQry := vIConexao.CriarQueryExterna;
       lQry.Open(lSQL);
 
@@ -360,7 +360,7 @@ begin
 
   finally
     lQry.Free;
-    lLojasModel.Free;
+    lLojasModel:=nil;
   end;
 end;
 

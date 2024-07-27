@@ -53,10 +53,10 @@ function TDRGDao.ObterDRG_Detalhes(pDRG_Detalhes_Parametros: TDRG_Detalhes_Param
 var
   lQry: TFDQuery;
   lSQL:String;
-  lLojasModel, lLojas_Dados: TLojasModel;
+  lLojasModel, lLojas_Dados: ITLojasModel;
   lMemTable: TFDMemTable;
 begin
-  lLojasModel := TLojasModel.Create(vIConexao);
+  lLojasModel := TLojasModel.getNewIface(vIConexao);
 
   lMemTable := TFDMemTable.Create(nil);
 
@@ -134,12 +134,12 @@ begin
 
     lMemTable.CreateDataSet;
 
-    lLojasModel.LojaView := pDRG_Detalhes_Parametros.Lojas;
-    lLojasModel.ObterLista;
+    lLojasModel.objeto.LojaView := pDRG_Detalhes_Parametros.Lojas;
+    lLojasModel.objeto.ObterLista;
 
-    for lLojas_Dados in lLojasModel.LojassLista do
+    for lLojas_Dados in lLojasModel.objeto.LojassLista do
     begin
-      vIConexao.ConfigConexaoExterna(lLojas_Dados.LOJA);
+      vIConexao.ConfigConexaoExterna(lLojas_Dados.objeto.LOJA);
       lQry := vIConexao.CriarQueryExterna;
       lQry.Open(lSQL);
 
@@ -147,7 +147,7 @@ begin
       while not lQry.Eof do
       begin
         lMemTable.InsertRecord([
-                                lLojas_Dados.LOJA,
+                                lLojas_Dados.objeto.LOJA,
                                 lQry.FieldByName('LANCAMENTO').AsString,
                                 lQry.FieldByName('DATA').AsDateTime,
                                 lQry.FieldByName('HISTORICO').AsString,
@@ -167,7 +167,7 @@ begin
 
   finally
     lQry.Free;
-    lLojasModel.Free;
+    lLojasModel:=nil;
   end;
 end;
 
@@ -177,7 +177,7 @@ var
   lSQL:String;
 
   lLojasModel,
-  lLojas_Dados: TLojasModel;
+  lLojas_Dados: ITLojasModel;
 
   lMemTable: TFDMemTable;
 
@@ -187,7 +187,7 @@ begin
   if pDRG_Parametros.DataPadrao = '' then
     CriaException('Data padrão não definida');
 
-  lLojasModel := TLojasModel.Create(vIConexao);
+  lLojasModel := TLojasModel.getNewIface(vIConexao);
 
   lMemTable := TFDMemTable.Create(nil);
 
@@ -576,12 +576,12 @@ begin
 
     lMemTable.CreateDataSet;
 
-    lLojasModel.LojaView := pDRG_Parametros.Lojas;
-    lLojasModel.ObterLista;
+    lLojasModel.objeto.LojaView := pDRG_Parametros.Lojas;
+    lLojasModel.objeto.ObterLista;
 
-    for lLojas_Dados in lLojasModel.LojassLista do
+    for lLojas_Dados in lLojasModel.objeto.LojassLista do
     begin
-      vIConexao.ConfigConexaoExterna(lLojas_Dados.LOJA);
+      vIConexao.ConfigConexaoExterna(lLojas_Dados.objeto.LOJA);
       lQry := vIConexao.CriarQueryExterna;
       lQry.Open(lSQL);
 
@@ -642,7 +642,7 @@ begin
 
   finally
     lQry.Free;
-    lLojasModel.Free;
+    lLojasModel:=nil;
   end;
 end;
 
