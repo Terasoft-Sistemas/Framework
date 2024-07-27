@@ -5,14 +5,18 @@ interface
 uses
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TImpressoraModel = class
+  TImpressoraModel = class;
+  ITImpressoraModel=IObject<TImpressoraModel>;
 
+  TImpressoraModel = class
   private
+    [weak] mySelf: ITImpressoraModel;
     vIConexao : IConexao;
-    FImpressorasLista: IList<TImpressoraModel>;
+    FImpressorasLista: IList<ITImpressoraModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -37,7 +41,7 @@ type
     FRECIBO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetImpressorasLista(const Value: IList<TImpressoraModel>);
+    procedure SetImpressorasLista(const Value: IList<ITImpressoraModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -75,14 +79,16 @@ type
     property MODELO: Variant read FMODELO write SetMODELO;
     property RECIBO: Variant read FRECIBO write SetRECIBO;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITImpressoraModel;
 
     function Salvar: String;
     procedure obterLista;
-    function carregaClasse(pId: Integer): TImpressoraModel;
+    function carregaClasse(pId: Integer): ITImpressoraModel;
 
-    property ImpressorasLista: IList<TImpressoraModel> read FImpressorasLista write SetImpressorasLista;
+    property ImpressorasLista: IList<ITImpressoraModel> read FImpressorasLista write SetImpressorasLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -101,19 +107,19 @@ uses
 
 { TImpressoraModel }
 
-function TImpressoraModel.carregaClasse(pId: Integer): TImpressoraModel;
+function TImpressoraModel.carregaClasse(pId: Integer): ITImpressoraModel;
 var
-  lImpressoraDao: TImpressoraDao;
+  lImpressoraDao: ITImpressoraDao;
 begin
-  lImpressoraDao := TImpressoraDao.Create(vIConexao);
+  lImpressoraDao := TImpressoraDao.getNewIface(vIConexao);
   try
-    Result := lImpressoraDao.carregaClasse(pId);
+    Result := lImpressoraDao.objeto.carregaClasse(pId);
   finally
-    lImpressoraDao.Free;
+    lImpressoraDao:=nil;
   end;
 end;
 
-constructor TImpressoraModel.Create(pIConexao : IConexao);
+constructor TImpressoraModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -125,48 +131,54 @@ begin
   inherited;
 end;
 
+class function TImpressoraModel.getNewIface(
+  pIConexao: IConexao): ITImpressoraModel;
+begin
+
+end;
+
 procedure TImpressoraModel.obterLista;
 var
-  lImpressoraLista: TImpressoraDao;
+  lImpressoraLista: ITImpressoraDao;
 begin
-  lImpressoraLista := TImpressoraDao.Create(vIConexao);
+  lImpressoraLista := TImpressoraDao.getNewIface(vIConexao);
 
   try
-    lImpressoraLista.TotalRecords    := FTotalRecords;
-    lImpressoraLista.WhereView       := FWhereView;
-    lImpressoraLista.CountView       := FCountView;
-    lImpressoraLista.OrderView       := FOrderView;
-    lImpressoraLista.StartRecordView := FStartRecordView;
-    lImpressoraLista.LengthPageView  := FLengthPageView;
-    lImpressoraLista.IDRecordView    := FIDRecordView;
+    lImpressoraLista.objeto.TotalRecords    := FTotalRecords;
+    lImpressoraLista.objeto.WhereView       := FWhereView;
+    lImpressoraLista.objeto.CountView       := FCountView;
+    lImpressoraLista.objeto.OrderView       := FOrderView;
+    lImpressoraLista.objeto.StartRecordView := FStartRecordView;
+    lImpressoraLista.objeto.LengthPageView  := FLengthPageView;
+    lImpressoraLista.objeto.IDRecordView    := FIDRecordView;
 
-    lImpressoraLista.obterLista;
+    lImpressoraLista.objeto.obterLista;
 
-    FTotalRecords  := lImpressoraLista.TotalRecords;
-    FImpressorasLista := lImpressoraLista.ImpressorasLista;
+    FTotalRecords  := lImpressoraLista.objeto.TotalRecords;
+    FImpressorasLista := lImpressoraLista.objeto.ImpressorasLista;
 
   finally
-    lImpressoraLista.Free;
+    lImpressoraLista:=nil;
   end;
 end;
 
 function TImpressoraModel.Salvar: String;
 var
-  lImpressoraDao: TImpressoraDao;
+  lImpressoraDao: ITImpressoraDao;
 begin
-  lImpressoraDao := TImpressoraDao.Create(vIConexao);
+  lImpressoraDao := TImpressoraDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lImpressoraDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lImpressoraDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lImpressoraDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lImpressoraDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lImpressoraDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lImpressoraDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lImpressoraDao.Free;
+    lImpressoraDao:=nil;
   end;
 end;
 

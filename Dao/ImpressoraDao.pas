@@ -11,16 +11,20 @@ uses
   Terasoft.ConstrutorDao,
   Terasoft.Utils,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TImpressoraDao = class
+  TImpressoraDao = class;
+  ITImpressoraDao=IObject<TImpressoraDao>;
 
+  TImpressoraDao = class
   private
+    [weak] mySelf: ITImpressoraDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FImpressorasLista: IList<TImpressoraModel>;
+    FImpressorasLista: IList<ITImpressoraModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -31,7 +35,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetImpressorasLista(const Value: IList<TImpressoraModel>);
+    procedure SetImpressorasLista(const Value: IList<ITImpressoraModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -41,13 +45,15 @@ type
     procedure SetWhereView(const Value: String);
 
     function where: String;
-    procedure setParams(var pQry: TFDQuery; pImpressoraModel: TImpressoraModel);
+    procedure setParams(var pQry: TFDQuery; pImpressoraModel: ITImpressoraModel);
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property ImpressorasLista: IList<TImpressoraModel> read FImpressorasLista write SetImpressorasLista;
+    class function getNewIface(pIConexao: IConexao): ITImpressoraDao;
+
+    property ImpressorasLista: IList<ITImpressoraModel> read FImpressorasLista write SetImpressorasLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -57,10 +63,10 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(AImpressoraModel: TImpressoraModel): String;
-    function alterar(AImpressoraModel: TImpressoraModel): String;
-    function excluir(AImpressoraModel: TImpressoraModel): String;
-	  function carregaClasse(pId: Integer): TImpressoraModel;
+    function incluir(AImpressoraModel: ITImpressoraModel): String;
+    function alterar(AImpressoraModel: ITImpressoraModel): String;
+    function excluir(AImpressoraModel: ITImpressoraModel): String;
+	  function carregaClasse(pId: Integer): ITImpressoraModel;
 
     procedure obterLista;
 
@@ -73,13 +79,13 @@ uses
 
 { TImpressora }
 
-function TImpressoraDao.carregaClasse(pId: Integer): TImpressoraModel;
+function TImpressoraDao.carregaClasse(pId: Integer): ITImpressoraModel;
 var
   lQry: TFDQuery;
-  lModel: TImpressoraModel;
+  lModel: ITImpressoraModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TImpressoraModel.Create(vIConexao);
+  lModel   := TImpressoraModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -88,20 +94,20 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID              := lQry.FieldByName('ID').AsString;
-    lModel.NOME            := lQry.FieldByName('NOME').AsString;
-    lModel.CAMINHO         := lQry.FieldByName('CAMINHO').AsString;
-    lModel.VIAS            := lQry.FieldByName('VIAS').AsString;
-    lModel.DIRETA          := lQry.FieldByName('DIRETA').AsString;
-    lModel.LISTA_IMPRESSAO := lQry.FieldByName('LISTA_IMPRESSAO').AsString;
-    lModel.CORTE           := lQry.FieldByName('CORTE').AsString;
-    lModel.SYSTIME         := lQry.FieldByName('SYSTIME').AsString;
-    lModel.CABECALHO       := lQry.FieldByName('CABECALHO').AsString;
-    lModel.CORPO           := lQry.FieldByName('CORPO').AsString;
-    lModel.RODAPE          := lQry.FieldByName('RODAPE').AsString;
-    lModel.PORTA           := lQry.FieldByName('PORTA').AsString;
-    lModel.MODELO          := lQry.FieldByName('MODELO').AsString;
-    lModel.RECIBO          := lQry.FieldByName('RECIBO').AsString;
+    lModel.objeto.ID              := lQry.FieldByName('ID').AsString;
+    lModel.objeto.NOME            := lQry.FieldByName('NOME').AsString;
+    lModel.objeto.CAMINHO         := lQry.FieldByName('CAMINHO').AsString;
+    lModel.objeto.VIAS            := lQry.FieldByName('VIAS').AsString;
+    lModel.objeto.DIRETA          := lQry.FieldByName('DIRETA').AsString;
+    lModel.objeto.LISTA_IMPRESSAO := lQry.FieldByName('LISTA_IMPRESSAO').AsString;
+    lModel.objeto.CORTE           := lQry.FieldByName('CORTE').AsString;
+    lModel.objeto.SYSTIME         := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.CABECALHO       := lQry.FieldByName('CABECALHO').AsString;
+    lModel.objeto.CORPO           := lQry.FieldByName('CORPO').AsString;
+    lModel.objeto.RODAPE          := lQry.FieldByName('RODAPE').AsString;
+    lModel.objeto.PORTA           := lQry.FieldByName('PORTA').AsString;
+    lModel.objeto.MODELO          := lQry.FieldByName('MODELO').AsString;
+    lModel.objeto.RECIBO          := lQry.FieldByName('RECIBO').AsString;
 
     Result := lModel;
   finally
@@ -109,7 +115,7 @@ begin
   end;
 end;
 
-constructor TImpressoraDao.Create(pIConexao : IConexao);
+constructor TImpressoraDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDao.Create(pIConexao);
@@ -123,7 +129,7 @@ begin
   inherited;
 end;
 
-function TImpressoraDao.incluir(AImpressoraModel: TImpressoraModel): String;
+function TImpressoraDao.incluir(AImpressoraModel: ITImpressoraModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -134,7 +140,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    AImpressoraModel.ID := vIConexao.Generetor('GEN_IMPRESSORA');
+    AImpressoraModel.objeto.ID := vIConexao.Generetor('GEN_IMPRESSORA');
     setParams(lQry, AImpressoraModel);
     lQry.Open;
 
@@ -146,7 +152,7 @@ begin
   end;
 end;
 
-function TImpressoraDao.alterar(AImpressoraModel: TImpressoraModel): String;
+function TImpressoraDao.alterar(AImpressoraModel: ITImpressoraModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -160,7 +166,7 @@ begin
     setParams(lQry, AImpressoraModel);
     lQry.ExecSQL;
 
-    Result := AImpressoraModel.ID;
+    Result := AImpressoraModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -168,20 +174,25 @@ begin
   end;
 end;
 
-function TImpressoraDao.excluir(AImpressoraModel: TImpressoraModel): String;
+function TImpressoraDao.excluir(AImpressoraModel: ITImpressoraModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from IMPRESSORA where ID = :ID',[AImpressoraModel.ID]);
+   lQry.ExecSQL('delete from IMPRESSORA where ID = :ID',[AImpressoraModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := AImpressoraModel.ID;
+   Result := AImpressoraModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TImpressoraDao.getNewIface(pIConexao: IConexao): ITImpressoraDao;
+begin
+
 end;
 
 function TImpressoraDao.where: String;
@@ -224,11 +235,11 @@ procedure TImpressoraDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  i: INteger;
+  modelo: ITImpressoraModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FImpressorasLista := TCollections.CreateList<TImpressoraModel>(true);
+  FImpressorasLista := TCollections.CreateList<ITImpressoraModel>;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -248,28 +259,26 @@ begin
 
     lQry.Open(lSQL);
 
-    i := 0;
     lQry.First;
     while not lQry.Eof do
     begin
-      FImpressorasLista.Add(TImpressoraModel.Create(vIConexao));
+      modelo := TImpressoraModel.getNewIface(vIConexao);
+      FImpressorasLista.Add(modelo);
 
-      i := FImpressorasLista.Count -1;
-
-      FImpressorasLista[i].ID              := lQry.FieldByName('ID').AsString;
-      FImpressorasLista[i].NOME            := lQry.FieldByName('NOME').AsString;
-      FImpressorasLista[i].CAMINHO         := lQry.FieldByName('CAMINHO').AsString;
-      FImpressorasLista[i].VIAS            := lQry.FieldByName('VIAS').AsString;
-      FImpressorasLista[i].DIRETA          := lQry.FieldByName('DIRETA').AsString;
-      FImpressorasLista[i].LISTA_IMPRESSAO := lQry.FieldByName('LISTA_IMPRESSAO').AsString;
-      FImpressorasLista[i].CORTE           := lQry.FieldByName('CORTE').AsString;
-      FImpressorasLista[i].SYSTIME         := lQry.FieldByName('SYSTIME').AsString;
-      FImpressorasLista[i].CABECALHO       := lQry.FieldByName('CABECALHO').AsString;
-      FImpressorasLista[i].CORPO           := lQry.FieldByName('CORPO').AsString;
-      FImpressorasLista[i].RODAPE          := lQry.FieldByName('RODAPE').AsString;
-      FImpressorasLista[i].PORTA           := lQry.FieldByName('PORTA').AsString;
-      FImpressorasLista[i].MODELO          := lQry.FieldByName('MODELO').AsString;
-      FImpressorasLista[i].RECIBO          := lQry.FieldByName('RECIBO').AsString;
+      modelo.objeto.ID              := lQry.FieldByName('ID').AsString;
+      modelo.objeto.NOME            := lQry.FieldByName('NOME').AsString;
+      modelo.objeto.CAMINHO         := lQry.FieldByName('CAMINHO').AsString;
+      modelo.objeto.VIAS            := lQry.FieldByName('VIAS').AsString;
+      modelo.objeto.DIRETA          := lQry.FieldByName('DIRETA').AsString;
+      modelo.objeto.LISTA_IMPRESSAO := lQry.FieldByName('LISTA_IMPRESSAO').AsString;
+      modelo.objeto.CORTE           := lQry.FieldByName('CORTE').AsString;
+      modelo.objeto.SYSTIME         := lQry.FieldByName('SYSTIME').AsString;
+      modelo.objeto.CABECALHO       := lQry.FieldByName('CABECALHO').AsString;
+      modelo.objeto.CORPO           := lQry.FieldByName('CORPO').AsString;
+      modelo.objeto.RODAPE          := lQry.FieldByName('RODAPE').AsString;
+      modelo.objeto.PORTA           := lQry.FieldByName('PORTA').AsString;
+      modelo.objeto.MODELO          := lQry.FieldByName('MODELO').AsString;
+      modelo.objeto.RECIBO          := lQry.FieldByName('RECIBO').AsString;
       lQry.Next;
     end;
 
@@ -310,28 +319,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TImpressoraDao.setParams(var pQry: TFDQuery; pImpressoraModel: TImpressoraModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TImpressoraDao.setParams(var pQry: TFDQuery; pImpressoraModel: ITImpressoraModel);
 begin
-  lTabela := vConstrutor.getColumns('IMPRESSORA');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TImpressoraModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pImpressoraModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pImpressoraModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('IMPRESSORA',pQry,pImpressoraModel.objeto);
 end;
 
 procedure TImpressoraDao.SetStartRecordView(const Value: String);
