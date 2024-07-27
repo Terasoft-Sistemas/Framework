@@ -7,16 +7,20 @@ uses
   System.Generics.Collections,
   Terasoft.Utils,
   CaixaModel,
+  Terasoft.Framework.ObjectIface,
   sPRING.Collections,
   Interfaces.Conexao;
 
 type
+  TCaixaControleModel = class;
+  ITCaixaControleModel=IObject<TCaixaControleModel>;
+
   TCaixaControleModel = class
-
   private
-    vIConexao : IConexao;
+    [weak] mySelf: ITCaixaControleModel;
 
-    FCaixaControlesLista: IList<TCaixaControleModel>;
+    vIConexao : IConexao;
+    FCaixaControlesLista: IList<ITCaixaControleModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -39,7 +43,7 @@ type
     Fhora_fecha: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetCaixaControlesLista(const Value: IList<TCaixaControleModel>);
+    procedure SetCaixaControlesLista(const Value: IList<ITCaixaControleModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -73,8 +77,10 @@ type
     property systime: Variant read Fsystime write Setsystime;
     property hora_fecha: Variant read Fhora_fecha write Sethora_fecha;
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITCaixaControleModel;
 
     function Incluir: String;
     function Salvar: String;
@@ -96,7 +102,7 @@ type
 
     function vendaCaixaFechado(pDataHora: String): boolean;
 
-    property CaixaControlesLista: IList<TCaixaControleModel> read FCaixaControlesLista write SetCaixaControlesLista;
+    property CaixaControlesLista: IList<ITCaixaControleModel> read FCaixaControlesLista write SetCaixaControlesLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -116,25 +122,25 @@ uses
 
 function TCaixaControleModel.CaixaAberto(pUsuario: String): String;
 var
-  lCaixaControleDao: TCaixaControleDao;
+  lCaixaControleDao: ITCaixaControleDao;
 begin
-  lCaixaControleDao := TCaixaControleDao.Create(vIConexao);
+  lCaixaControleDao := TCaixaControleDao.getNewIface(vIConexao);
   try
-    lCaixaControleDao.WhereView := ' and caixa_ctr.status = ''I''     '+
+    lCaixaControleDao.objeto.WhereView := ' and caixa_ctr.status = ''I''     '+
                                    ' and caixa_ctr.data_fecha is null '+
                                    ' and caixa_ctr.usuario = '+ QuotedStr(pUsuario);
-    lCaixaControleDao.obterLista;
+    lCaixaControleDao.objeto.obterLista;
 
-    if lCaixaControleDao.TotalRecords = 0 then
+    if lCaixaControleDao.objeto.TotalRecords = 0 then
     begin
       Result := '';
       exit;
     end;
 
-    Result := lCaixaControleDao.CaixaControlesLista.First.DATA;
+    Result := lCaixaControleDao.objeto.CaixaControlesLista.First.objeto.DATA;
 
   finally
-    lCaixaControleDao.Free;
+    lCaixaControleDao:=nil;
   end;
 end;
 
@@ -143,34 +149,20 @@ begin
   Result := self.CaixaAberto(self.vIConexao.getUSer.ID) <> '';
 end;
 
-constructor TCaixaControleModel.Create(pIConexao : IConexao);
+constructor TCaixaControleModel._Create(pIConexao : IConexao);
 begin
   FCaixaControlesLista := nil;
   vIConexao := pIConexao;
 end;
 
 function TCaixaControleModel.dataFechamento(pIdCaixa, pUsuario: String): String;
-var
-  lCaixaControleDao : TCaixaControleDao;
 begin
-  lCaixaControleDao := TCaixaControleDao.Create(vIConexao);
-  try
-    Result := lCaixaControleDao.dataFechamento(pIdCaixa, pUsuario);
-  finally
-    lCaixaControleDao.Free;
-  end;
+  Result := TCaixaControleDao.getNewIface(vIConexao).objeto.dataFechamento(pIdCaixa, pUsuario);
 end;
 
 function TCaixaControleModel.vendaCaixaFechado(pDataHora: String): boolean;
-var
-  lCaixaControleDao : TCaixaControleDao;
 begin
-  lCaixaControleDao := TCaixaControleDao.Create(vIConexao);
-  try
-    Result := lCaixaControleDao.vendaCaixaFechado(pDataHora);
-  finally
-    lCaixaControleDao.Free;
-  end;
+  TCaixaControleDao.getNewIface(vIConexao).objeto.vendaCaixaFechado(pDataHora);
 end;
 
 destructor TCaixaControleModel.Destroy;
@@ -182,38 +174,38 @@ end;
 
 function TCaixaControleModel.FecharCaixa : String;
 var
-  lCaixaControleDao  : TCaixaControleDao;
+  lCaixaControleDao  : ITCaixaControleDao;
   lCaixaAberto,
-  lCaixaFechamento   : TCaixaControleModel;
+  lCaixaFechamento   : ITCaixaControleModel;
   lCaixaModel : ITCaixaModel;
   lMemTable: IFDDataset;
 begin
-  lCaixaControleDao  := TCaixaControleDao.Create(vIConexao);
-  lCaixaAberto       := TCaixaControleModel.Create(vIConexao);
-  lCaixaFechamento   := TCaixaControleModel.Create(vIConexao);
+  lCaixaControleDao  := TCaixaControleDao.getNewIface(vIConexao);
+  lCaixaAberto       := TCaixaControleModel.getNewIface(vIConexao);
+  lCaixaFechamento   := TCaixaControleModel.getNewIface(vIConexao);
   lCaixaModel        := TCaixaModel.getNewIface(vIConexao);
 
   try
-    lCaixaControleDao.WhereView := ' and caixa_ctr.status = ''I''     '+
+    lCaixaControleDao.objeto.WhereView := ' and caixa_ctr.status = ''I''     '+
                                    ' and caixa_ctr.data_fecha is null '+
                                    ' and caixa_ctr.usuario = '+ QuotedStr(self.vIConexao.getUSer.ID);
-    lCaixaControleDao.obterLista;
+    lCaixaControleDao.objeto.obterLista;
 
-    if lCaixaControleDao.TotalRecords = 0 then
+    if lCaixaControleDao.objeto.TotalRecords = 0 then
       CriaException('Nenhum caixa aberto localizado.');
 
-    lCaixaAberto := lCaixaControleDao.CaixaControlesLista.First;
+    lCaixaAberto := lCaixaControleDao.objeto.CaixaControlesLista.First;
 
-    lCaixaAberto.Acao       := tacAlterar;
-    lCaixaAberto.data_fecha := DateToStr(vIConexao.DataServer);
-    lCaixaAberto.Salvar;
+    lCaixaAberto.objeto.Acao       := tacAlterar;
+    lCaixaAberto.objeto.data_fecha := DateToStr(vIConexao.DataServer);
+    lCaixaAberto.objeto.Salvar;
 
-    lCaixaFechamento.Acao    := tacIncluir;
-    lCaixaFechamento.data    := DateToStr(vIConexao.DataServer);
-    lCaixaFechamento.status  := 'F';
-    lCaixaFechamento.usuario := self.vIConexao.getUSer.ID;
-    lCaixaFechamento.hora    := TimeToStr(vIConexao.HoraServer);
-    lCaixaFechamento.Salvar;
+    lCaixaFechamento.objeto.Acao    := tacIncluir;
+    lCaixaFechamento.objeto.data    := DateToStr(vIConexao.DataServer);
+    lCaixaFechamento.objeto.status  := 'F';
+    lCaixaFechamento.objeto.usuario := self.vIConexao.getUSer.ID;
+    lCaixaFechamento.objeto.hora    := TimeToStr(vIConexao.HoraServer);
+    lCaixaFechamento.objeto.Salvar;
 
     lMemTable := lCaixaModel.objeto.obterSaldo(self.vIConexao.getUSer.ID);
     //Crédito
@@ -221,12 +213,18 @@ begin
     //Débito
     incluirFechamento('200000', vIConexao.DataServer, 'Fec.Final '+self.vIConexao.getUSer.NOME+' '+TimeToStr(vIConexao.HoraServer), lMemTable.objeto.FieldByName('SaldoTotal').AsFloat, self.vIConexao.getUSer.ID, 'D', '', '', '', 0, '', '000004', '.', self.vIConexao.getEmpresa.LOJA);
 
-    Result := lCaixaAberto.id;
+    Result := lCaixaAberto.objeto.id;
   finally
-    lCaixaFechamento.Free;
-    lCaixaControleDao.Free;
+    lCaixaFechamento:=nil;
+    lCaixaControleDao:=nil;
     lCaixaModel:=nil;
   end;
+end;
+
+class function TCaixaControleModel.getNewIface(pIConexao: IConexao): ITCaixaControleModel;
+begin
+  Result := TImplObjetoOwner<TCaixaControleModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 procedure TCaixaControleModel.incluirFechamento(pCodigoCta: string; pDataCai: TDateTime; pHistoricoCai: string; pValorCai: real; pUsuarioCai: string; pTipoCai: string; pClienteCai: string; pNumeroPed: string; pFaturaCai: string; pParcelaCai: INTEGER; pStatus: string; pPortadorCai: string; pConciliadoCai: string; pLoja: String);
@@ -314,46 +312,46 @@ end;
 
 procedure TCaixaControleModel.obterLista;
 var
-  lCaixaControleLista: TCaixaControleDao;
+  lCaixaControleLista: ITCaixaControleDao;
 begin
-  lCaixaControleLista := TCaixaControleDao.Create(vIConexao);
+  lCaixaControleLista := TCaixaControleDao.getNewIface(vIConexao);
 
   try
-    lCaixaControleLista.TotalRecords    := FTotalRecords;
-    lCaixaControleLista.WhereView       := FWhereView;
-    lCaixaControleLista.CountView       := FCountView;
-    lCaixaControleLista.OrderView       := FOrderView;
-    lCaixaControleLista.StartRecordView := FStartRecordView;
-    lCaixaControleLista.LengthPageView  := FLengthPageView;
-    lCaixaControleLista.IDRecordView    := FIDRecordView;
+    lCaixaControleLista.objeto.TotalRecords    := FTotalRecords;
+    lCaixaControleLista.objeto.WhereView       := FWhereView;
+    lCaixaControleLista.objeto.CountView       := FCountView;
+    lCaixaControleLista.objeto.OrderView       := FOrderView;
+    lCaixaControleLista.objeto.StartRecordView := FStartRecordView;
+    lCaixaControleLista.objeto.LengthPageView  := FLengthPageView;
+    lCaixaControleLista.objeto.IDRecordView    := FIDRecordView;
 
-    lCaixaControleLista.obterLista;
+    lCaixaControleLista.objeto.obterLista;
 
-    FTotalRecords  := lCaixaControleLista.TotalRecords;
-    FCaixaControlesLista := lCaixaControleLista.CaixaControlesLista;
+    FTotalRecords  := lCaixaControleLista.objeto.TotalRecords;
+    FCaixaControlesLista := lCaixaControleLista.objeto.CaixaControlesLista;
 
   finally
-    lCaixaControleLista.Free;
+    lCaixaControleLista:=nil;
   end;
 end;
 
 function TCaixaControleModel.Salvar: String;
 var
-  lCaixaControleDao: TCaixaControleDao;
+  lCaixaControleDao: ITCaixaControleDao;
 begin
-  lCaixaControleDao := TCaixaControleDao.Create(vIConexao);
+  lCaixaControleDao := TCaixaControleDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lCaixaControleDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lCaixaControleDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lCaixaControleDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lCaixaControleDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lCaixaControleDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lCaixaControleDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lCaixaControleDao.Free;
+    lCaixaControleDao:=nil;
   end;
 end;
 
@@ -546,27 +544,27 @@ end;
 
 function TCaixaControleModel.ultimoCaixa(pUsuario: String): String;
 var
-  lCaixaControleDao : TCaixaControleDao;
+  lCaixaControleDao : ITCaixaControleDao;
 begin
-  lCaixaControleDao := TCaixaControleDao.Create(vIConexao);
+  lCaixaControleDao := TCaixaControleDao.getNewIface(vIConexao);
   try
-    Result := lCaixaControleDao.ultimoCaixa(pUsuario);
+    Result := lCaixaControleDao.objeto.ultimoCaixa(pUsuario);
   finally
-    lCaixaControleDao.Free;
+    lCaixaControleDao:=nil;
   end;
 end;
 
 procedure TCaixaControleModel.ultimosCaixa(pUsuario: String);
 var
-  lCaixaControleLista: TCaixaControleDao;
+  lCaixaControleLista: ITCaixaControleDao;
 begin
-  lCaixaControleLista := TCaixaControleDao.Create(vIConexao);
+  lCaixaControleLista := TCaixaControleDao.getNewIface(vIConexao);
   try
-    lCaixaControleLista.ultimosCaixa(pUsuario);
-    FCaixaControlesLista := lCaixaControleLista.CaixaControlesLista;
+    lCaixaControleLista.objeto.ultimosCaixa(pUsuario);
+    FCaixaControlesLista := lCaixaControleLista.objeto.CaixaControlesLista;
 
   finally
-    lCaixaControleLista.Free;
+    lCaixaControleLista:=nil;
   end;
 end;
 

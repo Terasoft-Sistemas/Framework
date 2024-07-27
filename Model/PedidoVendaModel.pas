@@ -1433,11 +1433,11 @@ var
   lPedidoVendaModel   : ITPedidoVendaModel;
   lPedidoItensModel,
   lModel              : ITPedidoItensModel;
-  lCaixaControleModel : TCaixaControleModel;
+  lCaixaControleModel : ITCaixaControleModel;
 begin
   lPedidoVendaModel   := TPedidoVendaModel.getNewIface(vIConexao);
   lPedidoItensModel   := TPedidoItensModel.getNewIface(vIConexao);
-  lCaixaControleModel := TCaixaControleModel.Create(vIConexao);
+  lCaixaControleModel := TCaixaControleModel.getNewIface(vIConexao);
 
   try
     lPedidoVendaModel := lPedidoVendaModel.objeto.carregaClasse(self.FNUMERO_PED);
@@ -1448,7 +1448,7 @@ begin
     if lPedidoVendaModel.objeto.WEB_PEDIDO_ID <> '' then
       CriaException('Venda originada de venda assistida, efetue o processo de devolução.');
 
-    if lCaixaControleModel.vendaCaixaFechado(transformaDataHoraFireBird(lPedidoVendaModel.objeto.DATA_PED + lPedidoVendaModel.objeto.HORA_PED)) then
+    if lCaixaControleModel.objeto.vendaCaixaFechado(transformaDataHoraFireBird(lPedidoVendaModel.objeto.DATA_PED + lPedidoVendaModel.objeto.HORA_PED)) then
       CriaException('Não é possível reabrir venda com o caixa já finalizado');
 
     lPedidoItensModel.objeto.IDPedidoVendaView := lPedidoVendaModel.objeto.NUMERO_PED;
@@ -1472,7 +1472,7 @@ begin
   finally
     lPedidoVendaModel:=nil;
     lPedidoItensModel:=nil;
-    lCaixaControleModel.Free;
+    lCaixaControleModel:=nil;
   end;
 end;
 

@@ -12,16 +12,20 @@ uses
   Terasoft.FuncoesTexto,
   Terasoft.ConstrutorDao,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Spring.Collections,
   Interfaces.Conexao;
 
 type
-  TCaixaControleDao = class
+  TCaixaControleDao = class;
+  ITCaixaControleDao=IObject<TCaixaControleDao>;
 
+  TCaixaControleDao = class
   private
+    [weak] mySelf: ITCaixaControleDao;
     vIConexao : IConexao;
     vConstrutor : TConstrutorDao;
-    FCaixaControlesLista: IList<TCaixaControleModel>;
+    FCaixaControlesLista: IList<ITCaixaControleModel>;
     FLengthPageView: String;
     FStartRecordView: String;
     FID: Variant;
@@ -32,7 +36,7 @@ type
     FIDRecordView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetCaixaControlesLista(const Value: IList<TCaixaControleModel>);
+    procedure SetCaixaControlesLista(const Value: IList<ITCaixaControleModel>);
     procedure SetID(const Value: Variant);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -44,10 +48,12 @@ type
     procedure SetIDRecordView(const Value: String);
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property CaixaControlesLista: IList<TCaixaControleModel> read FCaixaControlesLista write SetCaixaControlesLista;
+    class function getNewIface(pIConexao: IConexao): ITCaixaControleDao;
+
+    property CaixaControlesLista: IList<ITCaixaControleModel> read FCaixaControlesLista write SetCaixaControlesLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -57,14 +63,14 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
 
-    function incluir(ACaixaControleModel: TCaixaControleModel): String;
-    function alterar(ACaixaControleModel: TCaixaControleModel): String;
-    function excluir(ACaixaControleModel: TCaixaControleModel): String;
+    function incluir(ACaixaControleModel: ITCaixaControleModel): String;
+    function alterar(ACaixaControleModel: ITCaixaControleModel): String;
+    function excluir(ACaixaControleModel: ITCaixaControleModel): String;
 
     procedure obterLista;
     procedure ultimosCaixa(pUsuario: String);
 
-    procedure setParams(var pQry: TFDQuery; pCaixaControleModel: TCaixaControleModel);
+    procedure setParams(var pQry: TFDQuery; pCaixaControleModel: ITCaixaControleModel);
     function ultimoCaixa(pUsuario: String): String;
     function dataFechamento(pIdCaixa, pUsuario: String) : String;
 
@@ -78,7 +84,7 @@ uses
 
 { TCaixaControle }
 
-constructor TCaixaControleDao.Create(pIConexao : IConexao);
+constructor TCaixaControleDao._Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -117,7 +123,7 @@ begin
   inherited;
 end;
 
-function TCaixaControleDao.incluir(ACaixaControleModel: TCaixaControleModel): String;
+function TCaixaControleDao.incluir(ACaixaControleModel: ITCaixaControleModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -130,7 +136,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    ACaixaControleModel.ID := StrToInt(vIConexao.Generetor('GEN_CAIXA_CTR')).ToString;
+    ACaixaControleModel.objeto.ID := StrToInt(vIConexao.Generetor('GEN_CAIXA_CTR')).ToString;
     setParams(lQry, ACaixaControleModel);
     lQry.Open;
 
@@ -142,7 +148,7 @@ begin
   end;
 end;
 
-function TCaixaControleDao.alterar(ACaixaControleModel: TCaixaControleModel): String;
+function TCaixaControleDao.alterar(ACaixaControleModel: ITCaixaControleModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -158,7 +164,7 @@ begin
     setParams(lQry, ACaixaControleModel);
     lQry.ExecSQL;
 
-    Result := ACaixaControleModel.ID;
+    Result := ACaixaControleModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -166,7 +172,7 @@ begin
   end;
 end;
 
-function TCaixaControleDao.excluir(ACaixaControleModel: TCaixaControleModel): String;
+function TCaixaControleDao.excluir(ACaixaControleModel: ITCaixaControleModel): String;
 var
   lQry: TFDQuery;
 
@@ -175,13 +181,19 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from caixa_ctr where ID = :ID',[ACaixaControleModel.ID]);
+   lQry.ExecSQL('delete from caixa_ctr where ID = :ID',[ACaixaControleModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := ACaixaControleModel.ID;
+   Result := ACaixaControleModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TCaixaControleDao.getNewIface(pIConexao: IConexao): ITCaixaControleDao;
+begin
+  Result := TImplObjetoOwner<TCaixaControleDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TCaixaControleDao.where: String;
@@ -224,12 +236,12 @@ procedure TCaixaControleDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TCaixaControleModel;
+  modelo: ITCaixaControleModel;
 begin
 
   lQry := vIConexao.CriarQuery;
 
-  FCaixaControlesLista := TCollections.CreateList<TCaixaControleModel>(true);
+  FCaixaControlesLista := TCollections.CreateList<ITCaixaControleModel>;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -252,20 +264,20 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TCaixaControleModel.Create(vIConexao);
+      modelo := TCaixaControleModel.getNewIface(vIConexao);
       FCaixaControlesLista.Add(modelo);
 
-      modelo.ID                := lQry.FieldByName('ID').AsString;
-      modelo.DATA              := lQry.FieldByName('DATA').AsString;
-      modelo.STATUS            := lQry.FieldByName('STATUS').AsString;
-      modelo.USUARIO           := lQry.FieldByName('USUARIO').AsString;
-      modelo.HORA              := lQry.FieldByName('HORA').AsString;
-      modelo.DATA_FECHA        := lQry.FieldByName('DATA_FECHA').AsString;
-      modelo.CONTAGEM_DINHEIRO := lQry.FieldByName('CONTAGEM_DINHEIRO').AsString;
-      modelo.CONTAGEM_CREDITO  := lQry.FieldByName('CONTAGEM_CREDITO').AsString;
-      modelo.CONTAGEM_DEBITO   := lQry.FieldByName('CONTAGEM_DEBITO').AsString;
-      modelo.JUSTIFICATIVA     := lQry.FieldByName('JUSTIFICATIVA').AsString;
-      modelo.SYSTIME           := lQry.FieldByName('SYSTIME').AsString;
+      modelo.objeto.ID                := lQry.FieldByName('ID').AsString;
+      modelo.objeto.DATA              := lQry.FieldByName('DATA').AsString;
+      modelo.objeto.STATUS            := lQry.FieldByName('STATUS').AsString;
+      modelo.objeto.USUARIO           := lQry.FieldByName('USUARIO').AsString;
+      modelo.objeto.HORA              := lQry.FieldByName('HORA').AsString;
+      modelo.objeto.DATA_FECHA        := lQry.FieldByName('DATA_FECHA').AsString;
+      modelo.objeto.CONTAGEM_DINHEIRO := lQry.FieldByName('CONTAGEM_DINHEIRO').AsString;
+      modelo.objeto.CONTAGEM_CREDITO  := lQry.FieldByName('CONTAGEM_CREDITO').AsString;
+      modelo.objeto.CONTAGEM_DEBITO   := lQry.FieldByName('CONTAGEM_DEBITO').AsString;
+      modelo.objeto.JUSTIFICATIVA     := lQry.FieldByName('JUSTIFICATIVA').AsString;
+      modelo.objeto.SYSTIME           := lQry.FieldByName('SYSTIME').AsString;
 
       lQry.Next;
     end;
@@ -307,28 +319,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TCaixaControleDao.setParams(var pQry: TFDQuery; pCaixaControleModel: TCaixaControleModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TCaixaControleDao.setParams(var pQry: TFDQuery; pCaixaControleModel: ITCaixaControleModel);
 begin
-  lTabela := vConstrutor.getColumns('CAIXA_CTR');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TCaixaControleModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pCaixaControleModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pCaixaControleModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('CAIXA_CTR',pQry,pCaixaControleModel.objeto);
 end;
 
 procedure TCaixaControleDao.SetStartRecordView(const Value: String);
@@ -371,13 +364,13 @@ procedure TCaixaControleDao.ultimosCaixa(pUsuario: String);
 var
   lQry      : TFDQuery;
   lSQL      : String;
-  modelo    : TCaixaControleModel;
+  modelo    : ITCaixaControleModel;
 
 begin
 
   lQry := vIConexao.CriarQuery;
 
-  FCaixaControlesLista := TCollections.CreateList<TCaixaControleModel>(true);
+  FCaixaControlesLista := TCollections.CreateList<ITCaixaControleModel>;
 
   try
     lSQL := ' select c.id,                                                                    '+
@@ -404,14 +397,14 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TCaixaControleModel.Create(vIConexao);
+      modelo := TCaixaControleModel.getNewIface(vIConexao);
       FCaixaControlesLista.Add(modelo);
 
-      modelo.ID                := lQry.FieldByName('ID').AsString;
-      modelo.DATA              := lQry.FieldByName('DATA').AsString;
-      modelo.HORA              := lQry.FieldByName('HORA').AsString;
-      modelo.DATA_FECHA        := lQry.FieldByName('DATA_FECHA').AsString;
-      modelo.HORA_FECHA        := lQry.FieldByName('HORA_FECHA').AsString;
+      modelo.objeto.ID                := lQry.FieldByName('ID').AsString;
+      modelo.objeto.DATA              := lQry.FieldByName('DATA').AsString;
+      modelo.objeto.HORA              := lQry.FieldByName('HORA').AsString;
+      modelo.objeto.DATA_FECHA        := lQry.FieldByName('DATA_FECHA').AsString;
+      modelo.objeto.HORA_FECHA        := lQry.FieldByName('HORA_FECHA').AsString;
 
       lQry.Next;
     end;
