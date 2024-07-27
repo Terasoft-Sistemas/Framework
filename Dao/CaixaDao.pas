@@ -12,16 +12,19 @@ uses
   Terasoft.ConstrutorDao,
   Terasoft.Utils,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
+  TCaixaDao = class;
+  ITCaixaDao=IObject<TCaixaDao>;
   TCaixaDao = class
-
   private
+    [weak] mySelf: ITCaixaDao;
     vIconexao : Iconexao;
     vConstrutor : TConstrutorDao;
 
-    FCaixasLista: IList<TCaixaModel>;
+    FCaixasLista: IList<ITCaixaModel>;
     FLengthPageView: String;
     FStartRecordView: String;
     FID: Variant;
@@ -32,7 +35,7 @@ type
     FIDRecordView: String;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetCaixasLista(const Value: IList<TCaixaModel>);
+    procedure SetCaixasLista(const Value: IList<ITCaixaModel>);
     procedure SetID(const Value: Variant);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -44,10 +47,12 @@ type
     procedure SetIDRecordView(const Value: String);
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property CaixasLista: IList<TCaixaModel> read FCaixasLista write SetCaixasLista;
+    class function getNewIface(pIConexao: IConexao): ITCaixaDao;
+
+    property CaixasLista: IList<ITCaixaModel> read FCaixasLista write SetCaixasLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -57,15 +62,15 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
 
-    function incluir(ACaixaModel: TCaixaModel): String;
-    function alterar(ACaixaModel: TCaixaModel): String;
-    function excluir(ACaixaModel: TCaixaModel): String;
+    function incluir(ACaixaModel: ITCaixaModel): String;
+    function alterar(ACaixaModel: ITCaixaModel): String;
+    function excluir(ACaixaModel: ITCaixaModel): String;
 
     procedure obterLista;
-    function carregaClasse(pIdCaixa: String): TCaixaModel;
+    function carregaClasse(pIdCaixa: String): ITCaixaModel;
     function obterSaldo(pUsario: String): IFDDataset;
 
-    procedure setParams(var pQry: TFDQuery; pCaixaModel: TCaixaModel);
+    procedure setParams(var pQry: TFDQuery; pCaixaModel: ITCaixaModel);
 
 end;
 
@@ -77,13 +82,13 @@ uses
 { TCaixa }
 
 
-function TCaixaDao.carregaClasse(pIdCaixa: String): TCaixaModel;
+function TCaixaDao.carregaClasse(pIdCaixa: String): ITCaixaModel;
 var
   lQry: TFDQuery;
-  lModel: TCaixaModel;
+  lModel: ITCaixaModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TCaixaModel.Create(vIConexao);
+  lModel   := TCaixaModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -92,43 +97,43 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.NUMERO_CAI            := lQry.FieldByName('NUMERO_CAI').AsString;
-    lModel.CODIGO_CTA            := lQry.FieldByName('CODIGO_CTA').AsString;
-    lModel.DATA_CAI              := lQry.FieldByName('DATA_CAI').AsString;
-    lModel.HORA_CAI              := lQry.FieldByName('HORA_CAI').AsString;
-    lModel.HISTORICO_CAI         := lQry.FieldByName('HISTORICO_CAI').AsString;
-    lModel.VALOR_CAI             := lQry.FieldByName('VALOR_CAI').AsString;
-    lModel.USUARIO_CAI           := lQry.FieldByName('USUARIO_CAI').AsString;
-    lModel.TIPO_CAI              := lQry.FieldByName('TIPO_CAI').AsString;
-    lModel.CLIENTE_CAI           := lQry.FieldByName('CLIENTE_CAI').AsString;
-    lModel.NUMERO_PED            := lQry.FieldByName('NUMERO_PED').AsString;
-    lModel.FATURA_CAI            := lQry.FieldByName('FATURA_CAI').AsString;
-    lModel.PARCELA_CAI           := lQry.FieldByName('PARCELA_CAI').AsString;
-    lModel.STATUS                := lQry.FieldByName('STATUS').AsString;
-    lModel.PORTADOR_CAI          := lQry.FieldByName('PORTADOR_CAI').AsString;
-    lModel.CONCILIADO_CAI        := lQry.FieldByName('CONCILIADO_CAI').AsString;
-    lModel.DATA_CON              := lQry.FieldByName('DATA_CON').AsString;
-    lModel.CENTRO_CUSTO          := lQry.FieldByName('CENTRO_CUSTO').AsString;
-    lModel.LOJA                  := lQry.FieldByName('LOJA').AsString;
-    lModel.RECIBO                := lQry.FieldByName('RECIBO').AsString;
-    lModel.RELATORIO             := lQry.FieldByName('RELATORIO').AsString;
-    lModel.OBSERVACAO            := lQry.FieldByName('OBSERVACAO').AsString;
-    lModel.DR                    := lQry.FieldByName('DR').AsString;
-    lModel.ID                    := lQry.FieldByName('ID').AsString;
-    lModel.TROCO                 := lQry.FieldByName('TROCO').AsString;
-    lModel.CARGA_ID              := lQry.FieldByName('CARGA_ID').AsString;
-    lModel.TIPO                  := lQry.FieldByName('TIPO').AsString;
-    lModel.SUB_ID                := lQry.FieldByName('SUB_ID').AsString;
-    lModel.LOCACAO_ID            := lQry.FieldByName('LOCACAO_ID').AsString;
-    lModel.FUNCIONARIO_ID        := lQry.FieldByName('FUNCIONARIO_ID').AsString;
-    lModel.OS_ID                 := lQry.FieldByName('OS_ID').AsString;
-    lModel.PLACA                 := lQry.FieldByName('PLACA').AsString;
-    lModel.TRANSFERENCIA_ORIGEM  := lQry.FieldByName('TRANSFERENCIA_ORIGEM').AsString;
-    lModel.TRANSFERENCIA_ID      := lQry.FieldByName('TRANSFERENCIA_ID').AsString;
-    lModel.COMPETENCIA           := lQry.FieldByName('COMPETENCIA').AsString;
-    lModel.SYSTIME               := lQry.FieldByName('SYSTIME').AsString;
-    lModel.LOJA_REMOTO           := lQry.FieldByName('LOJA_REMOTO').AsString;
-    lModel.PEDIDO_ID             := lQry.FieldByName('PEDIDO_ID').AsString;
+    lModel.objeto.NUMERO_CAI            := lQry.FieldByName('NUMERO_CAI').AsString;
+    lModel.objeto.CODIGO_CTA            := lQry.FieldByName('CODIGO_CTA').AsString;
+    lModel.objeto.DATA_CAI              := lQry.FieldByName('DATA_CAI').AsString;
+    lModel.objeto.HORA_CAI              := lQry.FieldByName('HORA_CAI').AsString;
+    lModel.objeto.HISTORICO_CAI         := lQry.FieldByName('HISTORICO_CAI').AsString;
+    lModel.objeto.VALOR_CAI             := lQry.FieldByName('VALOR_CAI').AsString;
+    lModel.objeto.USUARIO_CAI           := lQry.FieldByName('USUARIO_CAI').AsString;
+    lModel.objeto.TIPO_CAI              := lQry.FieldByName('TIPO_CAI').AsString;
+    lModel.objeto.CLIENTE_CAI           := lQry.FieldByName('CLIENTE_CAI').AsString;
+    lModel.objeto.NUMERO_PED            := lQry.FieldByName('NUMERO_PED').AsString;
+    lModel.objeto.FATURA_CAI            := lQry.FieldByName('FATURA_CAI').AsString;
+    lModel.objeto.PARCELA_CAI           := lQry.FieldByName('PARCELA_CAI').AsString;
+    lModel.objeto.STATUS                := lQry.FieldByName('STATUS').AsString;
+    lModel.objeto.PORTADOR_CAI          := lQry.FieldByName('PORTADOR_CAI').AsString;
+    lModel.objeto.CONCILIADO_CAI        := lQry.FieldByName('CONCILIADO_CAI').AsString;
+    lModel.objeto.DATA_CON              := lQry.FieldByName('DATA_CON').AsString;
+    lModel.objeto.CENTRO_CUSTO          := lQry.FieldByName('CENTRO_CUSTO').AsString;
+    lModel.objeto.LOJA                  := lQry.FieldByName('LOJA').AsString;
+    lModel.objeto.RECIBO                := lQry.FieldByName('RECIBO').AsString;
+    lModel.objeto.RELATORIO             := lQry.FieldByName('RELATORIO').AsString;
+    lModel.objeto.OBSERVACAO            := lQry.FieldByName('OBSERVACAO').AsString;
+    lModel.objeto.DR                    := lQry.FieldByName('DR').AsString;
+    lModel.objeto.ID                    := lQry.FieldByName('ID').AsString;
+    lModel.objeto.TROCO                 := lQry.FieldByName('TROCO').AsString;
+    lModel.objeto.CARGA_ID              := lQry.FieldByName('CARGA_ID').AsString;
+    lModel.objeto.TIPO                  := lQry.FieldByName('TIPO').AsString;
+    lModel.objeto.SUB_ID                := lQry.FieldByName('SUB_ID').AsString;
+    lModel.objeto.LOCACAO_ID            := lQry.FieldByName('LOCACAO_ID').AsString;
+    lModel.objeto.FUNCIONARIO_ID        := lQry.FieldByName('FUNCIONARIO_ID').AsString;
+    lModel.objeto.OS_ID                 := lQry.FieldByName('OS_ID').AsString;
+    lModel.objeto.PLACA                 := lQry.FieldByName('PLACA').AsString;
+    lModel.objeto.TRANSFERENCIA_ORIGEM  := lQry.FieldByName('TRANSFERENCIA_ORIGEM').AsString;
+    lModel.objeto.TRANSFERENCIA_ID      := lQry.FieldByName('TRANSFERENCIA_ID').AsString;
+    lModel.objeto.COMPETENCIA           := lQry.FieldByName('COMPETENCIA').AsString;
+    lModel.objeto.SYSTIME               := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.LOJA_REMOTO           := lQry.FieldByName('LOJA_REMOTO').AsString;
+    lModel.objeto.PEDIDO_ID             := lQry.FieldByName('PEDIDO_ID').AsString;
 
     Result := lModel;
 
@@ -137,7 +142,7 @@ begin
   end;
 end;
 
-constructor TCaixaDao.Create(pIConexao : IConexao);
+constructor TCaixaDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -151,7 +156,7 @@ begin
   inherited;
 end;
 
-function TCaixaDao.incluir(ACaixaModel: TCaixaModel): String;
+function TCaixaDao.incluir(ACaixaModel: ITCaixaModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -162,7 +167,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    ACaixaModel.NUMERO_CAI := vIConexao.Generetor('GEN_CAIXA');
+    ACaixaModel.objeto.NUMERO_CAI := vIConexao.Generetor('GEN_CAIXA');
     setParams(lQry, ACaixaModel);
     lQry.Open;
 
@@ -174,7 +179,7 @@ begin
   end;
 end;
 
-function TCaixaDao.alterar(ACaixaModel: TCaixaModel): String;
+function TCaixaDao.alterar(ACaixaModel: ITCaixaModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -188,7 +193,7 @@ begin
     setParams(lQry, ACaixaModel);
     lQry.ExecSQL;
 
-    Result := ACaixaModel.NUMERO_CAI;
+    Result := ACaixaModel.objeto.NUMERO_CAI;
 
   finally
     lSQL := '';
@@ -196,20 +201,26 @@ begin
   end;
 end;
 
-function TCaixaDao.excluir(ACaixaModel: TCaixaModel): String;
+function TCaixaDao.excluir(ACaixaModel: ITCaixaModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from CAIXA where NUMERO_CAI = :NUMERO_CAI',[ACaixaModel.NUMERO_CAI]);
+   lQry.ExecSQL('delete from CAIXA where NUMERO_CAI = :NUMERO_CAI',[ACaixaModel.objeto.NUMERO_CAI]);
    lQry.ExecSQL;
-   Result := ACaixaModel.ID;
+   Result := ACaixaModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TCaixaDao.getNewIface(pIConexao: IConexao): ITCaixaDao;
+begin
+  Result := TImplObjetoOwner<TCaixaDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TCaixaDao.where: String;
@@ -252,11 +263,11 @@ procedure TCaixaDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TCaixaModel;
+  modelo: ITCaixaModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FCaixasLista := TCollections.CreateList<TCaixaModel>(true);
+  FCaixasLista := TCollections.CreateList<ITCaixaModel>;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -279,46 +290,46 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TCaixaModel.Create(vIConexao);
+      modelo := TCaixaModel.getNewIface(vIConexao);
       FCaixasLista.Add(modelo);
 
-      modelo.NUMERO_CAI           := lQry.FieldByName('NUMERO_CAI').AsString;
-      modelo.CODIGO_CTA           := lQry.FieldByName('CODIGO_CTA').AsString;
-      modelo.DATA_CAI             := lQry.FieldByName('DATA_CAI').AsString;
-      modelo.HORA_CAI             := lQry.FieldByName('HORA_CAI').AsString;
-      modelo.HISTORICO_CAI        := lQry.FieldByName('HISTORICO_CAI').AsString;
-      modelo.VALOR_CAI            := lQry.FieldByName('VALOR_CAI').AsString;
-      modelo.USUARIO_CAI          := lQry.FieldByName('USUARIO_CAI').AsString;
-      modelo.TIPO_CAI             := lQry.FieldByName('TIPO_CAI').AsString;
-      modelo.CLIENTE_CAI          := lQry.FieldByName('CLIENTE_CAI').AsString;
-      modelo.NUMERO_PED           := lQry.FieldByName('NUMERO_PED').AsString;
-      modelo.FATURA_CAI           := lQry.FieldByName('FATURA_CAI').AsString;
-      modelo.PARCELA_CAI          := lQry.FieldByName('PARCELA_CAI').AsString;
-      modelo.STATUS               := lQry.FieldByName('STATUS').AsString;
-      modelo.PORTADOR_CAI         := lQry.FieldByName('PORTADOR_CAI').AsString;
-      modelo.CONCILIADO_CAI       := lQry.FieldByName('CONCILIADO_CAI').AsString;
-      modelo.DATA_CON             := lQry.FieldByName('DATA_CON').AsString;
-      modelo.CENTRO_CUSTO         := lQry.FieldByName('CENTRO_CUSTO').AsString;
-      modelo.LOJA                 := lQry.FieldByName('LOJA').AsString;
-      modelo.RECIBO               := lQry.FieldByName('RECIBO').AsString;
-      modelo.RELATORIO            := lQry.FieldByName('RELATORIO').AsString;
-      modelo.OBSERVACAO           := lQry.FieldByName('OBSERVACAO').AsString;
-      modelo.DR                   := lQry.FieldByName('DR').AsString;
-      modelo.ID                   := lQry.FieldByName('ID').AsString;
-      modelo.TROCO                := lQry.FieldByName('TROCO').AsString;
-      modelo.CARGA_ID             := lQry.FieldByName('CARGA_ID').AsString;
-      modelo.TIPO                 := lQry.FieldByName('TIPO').AsString;
-      modelo.SUB_ID               := lQry.FieldByName('SUB_ID').AsString;
-      modelo.LOCACAO_ID           := lQry.FieldByName('LOCACAO_ID').AsString;
-      modelo.FUNCIONARIO_ID       := lQry.FieldByName('FUNCIONARIO_ID').AsString;
-      modelo.OS_ID                := lQry.FieldByName('OS_ID').AsString;
-      modelo.PLACA                := lQry.FieldByName('PLACA').AsString;
-      modelo.TRANSFERENCIA_ORIGEM := lQry.FieldByName('TRANSFERENCIA_ORIGEM').AsString;
-      modelo.TRANSFERENCIA_ID     := lQry.FieldByName('TRANSFERENCIA_ID').AsString;
-      modelo.COMPETENCIA          := lQry.FieldByName('COMPETENCIA').AsString;
-      modelo.SYSTIME              := lQry.FieldByName('SYSTIME').AsString;
-      modelo.LOJA_REMOTO          := lQry.FieldByName('LOJA_REMOTO').AsString;
-      modelo.PEDIDO_ID            := lQry.FieldByName('PEDIDO_ID').AsString;
+      modelo.objeto.NUMERO_CAI           := lQry.FieldByName('NUMERO_CAI').AsString;
+      modelo.objeto.CODIGO_CTA           := lQry.FieldByName('CODIGO_CTA').AsString;
+      modelo.objeto.DATA_CAI             := lQry.FieldByName('DATA_CAI').AsString;
+      modelo.objeto.HORA_CAI             := lQry.FieldByName('HORA_CAI').AsString;
+      modelo.objeto.HISTORICO_CAI        := lQry.FieldByName('HISTORICO_CAI').AsString;
+      modelo.objeto.VALOR_CAI            := lQry.FieldByName('VALOR_CAI').AsString;
+      modelo.objeto.USUARIO_CAI          := lQry.FieldByName('USUARIO_CAI').AsString;
+      modelo.objeto.TIPO_CAI             := lQry.FieldByName('TIPO_CAI').AsString;
+      modelo.objeto.CLIENTE_CAI          := lQry.FieldByName('CLIENTE_CAI').AsString;
+      modelo.objeto.NUMERO_PED           := lQry.FieldByName('NUMERO_PED').AsString;
+      modelo.objeto.FATURA_CAI           := lQry.FieldByName('FATURA_CAI').AsString;
+      modelo.objeto.PARCELA_CAI          := lQry.FieldByName('PARCELA_CAI').AsString;
+      modelo.objeto.STATUS               := lQry.FieldByName('STATUS').AsString;
+      modelo.objeto.PORTADOR_CAI         := lQry.FieldByName('PORTADOR_CAI').AsString;
+      modelo.objeto.CONCILIADO_CAI       := lQry.FieldByName('CONCILIADO_CAI').AsString;
+      modelo.objeto.DATA_CON             := lQry.FieldByName('DATA_CON').AsString;
+      modelo.objeto.CENTRO_CUSTO         := lQry.FieldByName('CENTRO_CUSTO').AsString;
+      modelo.objeto.LOJA                 := lQry.FieldByName('LOJA').AsString;
+      modelo.objeto.RECIBO               := lQry.FieldByName('RECIBO').AsString;
+      modelo.objeto.RELATORIO            := lQry.FieldByName('RELATORIO').AsString;
+      modelo.objeto.OBSERVACAO           := lQry.FieldByName('OBSERVACAO').AsString;
+      modelo.objeto.DR                   := lQry.FieldByName('DR').AsString;
+      modelo.objeto.ID                   := lQry.FieldByName('ID').AsString;
+      modelo.objeto.TROCO                := lQry.FieldByName('TROCO').AsString;
+      modelo.objeto.CARGA_ID             := lQry.FieldByName('CARGA_ID').AsString;
+      modelo.objeto.TIPO                 := lQry.FieldByName('TIPO').AsString;
+      modelo.objeto.SUB_ID               := lQry.FieldByName('SUB_ID').AsString;
+      modelo.objeto.LOCACAO_ID           := lQry.FieldByName('LOCACAO_ID').AsString;
+      modelo.objeto.FUNCIONARIO_ID       := lQry.FieldByName('FUNCIONARIO_ID').AsString;
+      modelo.objeto.OS_ID                := lQry.FieldByName('OS_ID').AsString;
+      modelo.objeto.PLACA                := lQry.FieldByName('PLACA').AsString;
+      modelo.objeto.TRANSFERENCIA_ORIGEM := lQry.FieldByName('TRANSFERENCIA_ORIGEM').AsString;
+      modelo.objeto.TRANSFERENCIA_ID     := lQry.FieldByName('TRANSFERENCIA_ID').AsString;
+      modelo.objeto.COMPETENCIA          := lQry.FieldByName('COMPETENCIA').AsString;
+      modelo.objeto.SYSTIME              := lQry.FieldByName('SYSTIME').AsString;
+      modelo.objeto.LOJA_REMOTO          := lQry.FieldByName('LOJA_REMOTO').AsString;
+      modelo.objeto.PEDIDO_ID            := lQry.FieldByName('PEDIDO_ID').AsString;
 
       lQry.Next;
     end;
@@ -383,28 +394,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TCaixaDao.setParams(var pQry: TFDQuery; pCaixaModel: TCaixaModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TCaixaDao.setParams(var pQry: TFDQuery; pCaixaModel: ITCaixaModel);
 begin
-  lTabela := vConstrutor.getColumns('CAIXA');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TCaixaModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pCaixaModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pCaixaModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('CAIXA',pQry,pCaixaModel.objeto);
 end;
 
 procedure TCaixaDao.SetStartRecordView(const Value: String);

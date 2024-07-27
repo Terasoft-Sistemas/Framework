@@ -185,13 +185,13 @@ var
   lCaixaControleDao  : TCaixaControleDao;
   lCaixaAberto,
   lCaixaFechamento   : TCaixaControleModel;
-  lCaixaModel : TCaixaModel;
+  lCaixaModel : ITCaixaModel;
   lMemTable: IFDDataset;
 begin
   lCaixaControleDao  := TCaixaControleDao.Create(vIConexao);
   lCaixaAberto       := TCaixaControleModel.Create(vIConexao);
   lCaixaFechamento   := TCaixaControleModel.Create(vIConexao);
-  lCaixaModel        := TCaixaModel.Create(vIConexao);
+  lCaixaModel        := TCaixaModel.getNewIface(vIConexao);
 
   try
     lCaixaControleDao.WhereView := ' and caixa_ctr.status = ''I''     '+
@@ -215,7 +215,7 @@ begin
     lCaixaFechamento.hora    := TimeToStr(vIConexao.HoraServer);
     lCaixaFechamento.Salvar;
 
-    lMemTable := lCaixaModel.obterSaldo(self.vIConexao.getUSer.ID);
+    lMemTable := lCaixaModel.objeto.obterSaldo(self.vIConexao.getUSer.ID);
     //Crédito
     incluirFechamento('200000', vIConexao.DataServer, 'Fec.Final '+self.vIConexao.getUSer.NOME+' '+TimeToStr(vIConexao.HoraServer), lMemTable.objeto.FieldByName('SaldoTotal').AsFloat, '000000', 'C', '', '', '', 0, '', '000004', '.', self.vIConexao.getEmpresa.LOJA);
     //Débito
@@ -225,36 +225,36 @@ begin
   finally
     lCaixaFechamento.Free;
     lCaixaControleDao.Free;
-    lCaixaModel.Free;
+    lCaixaModel:=nil;
   end;
 end;
 
 procedure TCaixaControleModel.incluirFechamento(pCodigoCta: string; pDataCai: TDateTime; pHistoricoCai: string; pValorCai: real; pUsuarioCai: string; pTipoCai: string; pClienteCai: string; pNumeroPed: string; pFaturaCai: string; pParcelaCai: INTEGER; pStatus: string; pPortadorCai: string; pConciliadoCai: string; pLoja: String);
 var
-  lCaixaModel : TCaixaModel;
+  lCaixaModel : ITCaixaModel;
 begin
-  lCaixaModel := TCaixaModel.Create(vIConexao);
+  lCaixaModel := TCaixaModel.getNewIface(vIConexao);
   try
-    lCaixaModel.carregaClasse(pCodigoCta);
+    lCaixaModel.objeto.carregaClasse(pCodigoCta);
 
-    lCaixaModel.CODIGO_CTA     := pCodigoCta;
-    lCaixaModel.DATA_CAI       := pDataCai;
-    lCaixaModel.HISTORICO_CAI  := copy(pHistoricoCai,1,100);
-    lCaixaModel.VALOR_CAI      := pValorCai;
-    lCaixaModel.USUARIO_CAI    := pUsuarioCai;
-    lCaixaModel.TIPO_CAI       := pTipoCai;
-    lCaixaModel.CLIENTE_CAI    := pClienteCai;
-    lCaixaModel.NUMERO_PED     := pNumeroPed;
-    lCaixaModel.FATURA_CAI     := pFaturaCai;
-    lCaixaModel.PARCELA_CAI    := pParcelaCai;
-    lCaixaModel.STATUS         := pStatus;
-    lCaixaModel.PORTADOR_CAI   := pPortadorCai;
-    lCaixaModel.CONCILIADO_CAI := pConciliadoCai;
-    lCaixaModel.LOJA           := pLoja;
+    lCaixaModel.objeto.CODIGO_CTA     := pCodigoCta;
+    lCaixaModel.objeto.DATA_CAI       := pDataCai;
+    lCaixaModel.objeto.HISTORICO_CAI  := copy(pHistoricoCai,1,100);
+    lCaixaModel.objeto.VALOR_CAI      := pValorCai;
+    lCaixaModel.objeto.USUARIO_CAI    := pUsuarioCai;
+    lCaixaModel.objeto.TIPO_CAI       := pTipoCai;
+    lCaixaModel.objeto.CLIENTE_CAI    := pClienteCai;
+    lCaixaModel.objeto.NUMERO_PED     := pNumeroPed;
+    lCaixaModel.objeto.FATURA_CAI     := pFaturaCai;
+    lCaixaModel.objeto.PARCELA_CAI    := pParcelaCai;
+    lCaixaModel.objeto.STATUS         := pStatus;
+    lCaixaModel.objeto.PORTADOR_CAI   := pPortadorCai;
+    lCaixaModel.objeto.CONCILIADO_CAI := pConciliadoCai;
+    lCaixaModel.objeto.LOJA           := pLoja;
 
-    lCaixaModel.Incluir;
+    lCaixaModel.objeto.Incluir;
   finally
-    lCaixaModel.Free;
+    lCaixaModel:=nil;
   end;
 end;
 
@@ -271,42 +271,42 @@ end;
 
 procedure TCaixaControleModel.InicializarCaixa(pValor: Double);
 var
-  lCaixaModel   : TCaixaModel;
+  lCaixaModel   : ITCaixaModel;
   lUsuarioModel : ITUsuarioModel;
   lNomeUsuario  : String;
 begin
   self.Incluir;
 
-  lCaixaModel   := TCaixaModel.Create(vIConexao);
+  lCaixaModel   := TCaixaModel.getNewIface(vIConexao);
   lUsuarioModel := TUsuarioModel.getNewIface(vIConexao);
 
   try
 
-    lCaixaModel.CODIGO_CTA        := '500000';
-    lCaixaModel.DATA_CAI          := DateToStr(vIConexao.DataServer);
-    lCaixaModel.HISTORICO_CAI     := 'Inicialização '+ self.vIConexao.getUSer.NOME +' '+ TimeToStr(vIConexao.HoraServer);
-    lCaixaModel.VALOR_CAI         := FloatToStr(pValor);
-    lCaixaModel.USUARIO_CAI       := self.vIConexao.getUSer.ID;
-    lCaixaModel.TIPO_CAI          := 'C';
-    lCaixaModel.CLIENTE_CAI       := '';
-    lCaixaModel.NUMERO_PED        := '999999';
-    lCaixaModel.FATURA_CAI        := '';
-    lCaixaModel.PARCELA_CAI       := '0';
-    lCaixaModel.STATUS            := '';
-    lCaixaModel.PORTADOR_CAI      := '000004';
-    lCaixaModel.CONCILIADO_CAI    := '.';
-    lCaixaModel.LOJA              := self.vIConexao.getEmpresa.LOJA;
+    lCaixaModel.objeto.CODIGO_CTA        := '500000';
+    lCaixaModel.objeto.DATA_CAI          := DateToStr(vIConexao.DataServer);
+    lCaixaModel.objeto.HISTORICO_CAI     := 'Inicialização '+ self.vIConexao.getUSer.NOME +' '+ TimeToStr(vIConexao.HoraServer);
+    lCaixaModel.objeto.VALOR_CAI         := FloatToStr(pValor);
+    lCaixaModel.objeto.USUARIO_CAI       := self.vIConexao.getUSer.ID;
+    lCaixaModel.objeto.TIPO_CAI          := 'C';
+    lCaixaModel.objeto.CLIENTE_CAI       := '';
+    lCaixaModel.objeto.NUMERO_PED        := '999999';
+    lCaixaModel.objeto.FATURA_CAI        := '';
+    lCaixaModel.objeto.PARCELA_CAI       := '0';
+    lCaixaModel.objeto.STATUS            := '';
+    lCaixaModel.objeto.PORTADOR_CAI      := '000004';
+    lCaixaModel.objeto.CONCILIADO_CAI    := '.';
+    lCaixaModel.objeto.LOJA              := self.vIConexao.getEmpresa.LOJA;
 
-    lCaixaModel.Incluir;
+    lCaixaModel.objeto.Incluir;
 
-    lCaixaModel.HISTORICO_CAI     := 'Transferencia '+ self.vIConexao.getUSer.NOME +' '+ TimeToStr(vIConexao.HoraServer);
-    lCaixaModel.USUARIO_CAI       := '000000';
-    lCaixaModel.TIPO_CAI          := 'D';
+    lCaixaModel.objeto.HISTORICO_CAI     := 'Transferencia '+ self.vIConexao.getUSer.NOME +' '+ TimeToStr(vIConexao.HoraServer);
+    lCaixaModel.objeto.USUARIO_CAI       := '000000';
+    lCaixaModel.objeto.TIPO_CAI          := 'D';
 
-    lCaixaModel.Incluir;
+    lCaixaModel.objeto.Incluir;
 
   finally
-    lCaixaModel.Free;
+    lCaixaModel:=nil;
     lUsuarioModel := nil;
   end;
 
@@ -359,41 +359,41 @@ end;
 
 procedure TCaixaControleModel.Sangria(pValor: Double; pHistorico: String);
 var
-  lCaixaModel   : TCaixaModel;
+  lCaixaModel   : ITCaixaModel;
   lUsuarioModel : ITUsuarioModel;
 begin
-  lCaixaModel   := TCaixaModel.Create(vIConexao);
+  lCaixaModel   := TCaixaModel.getNewIface(vIConexao);
   lUsuarioModel := TUsuarioModel.getNewIface(vIConexao);
 
   try
-    lCaixaModel.CODIGO_CTA          := '400000';
-    lCaixaModel.DATA_CAI            := DateToStr(vIConexao.DataServer);
-    lCaixaModel.VALOR_CAI           := FloatToStr(pValor);
-    lCaixaModel.USUARIO_CAI         := self.vIConexao.getUSer.ID;
-    lCaixaModel.TIPO_CAI            := 'D';
-    lCaixaModel.CLIENTE_CAI         := '';
-    lCaixaModel.NUMERO_PED          := '999999';
-    lCaixaModel.FATURA_CAI          := '';
-    lCaixaModel.PARCELA_CAI         := '0';
-    lCaixaModel.STATUS              := '';
-    lCaixaModel.PORTADOR_CAI        := '000004';
-    lCaixaModel.CONCILIADO_CAI      := '.';
-    lCaixaModel.LOJA                := self.vIConexao.getEmpresa.LOJA;
+    lCaixaModel.objeto.CODIGO_CTA          := '400000';
+    lCaixaModel.objeto.DATA_CAI            := DateToStr(vIConexao.DataServer);
+    lCaixaModel.objeto.VALOR_CAI           := FloatToStr(pValor);
+    lCaixaModel.objeto.USUARIO_CAI         := self.vIConexao.getUSer.ID;
+    lCaixaModel.objeto.TIPO_CAI            := 'D';
+    lCaixaModel.objeto.CLIENTE_CAI         := '';
+    lCaixaModel.objeto.NUMERO_PED          := '999999';
+    lCaixaModel.objeto.FATURA_CAI          := '';
+    lCaixaModel.objeto.PARCELA_CAI         := '0';
+    lCaixaModel.objeto.STATUS              := '';
+    lCaixaModel.objeto.PORTADOR_CAI        := '000004';
+    lCaixaModel.objeto.CONCILIADO_CAI      := '.';
+    lCaixaModel.objeto.LOJA                := self.vIConexao.getEmpresa.LOJA;
 
     if pHistorico = '' then
-      lCaixaModel.HISTORICO_CAI := 'Sangria '+ self.vIConexao.getUSer.NOME + ' ' + TimeToStr(vIConexao.HoraServer)
+      lCaixaModel.objeto.HISTORICO_CAI := 'Sangria '+ self.vIConexao.getUSer.NOME + ' ' + TimeToStr(vIConexao.HoraServer)
     else
-      lCaixaModel.HISTORICO_CAI := pHistorico;
+      lCaixaModel.objeto.HISTORICO_CAI := pHistorico;
 
-    lCaixaModel.Incluir;
+    lCaixaModel.objeto.Incluir;
 
-    lCaixaModel.USUARIO_CAI         := '000000';
-    lCaixaModel.TIPO_CAI            := 'C';
+    lCaixaModel.objeto.USUARIO_CAI         := '000000';
+    lCaixaModel.objeto.TIPO_CAI            := 'C';
 
-    lCaixaModel.Incluir;;
+    lCaixaModel.objeto.Incluir;;
 
   finally
-    lCaixaModel.Free;
+    lCaixaModel:=nil;
     lUsuarioModel := nil;
   end;
 end;
@@ -505,41 +505,41 @@ end;
 
 procedure TCaixaControleModel.Suprimento(pValor: Double; pHistorico: String);
 var
-  lCaixaModel   : TCaixaModel;
+  lCaixaModel   : ITCaixaModel;
   lUsuarioModel : ITUsuarioModel;
 begin
-  lCaixaModel   := TCaixaModel.Create(vIConexao);
+  lCaixaModel   := TCaixaModel.getNewIface(vIConexao);
   lUsuarioModel := TUsuarioModel.getNewIface(vIConexao);
 
   try
-    lCaixaModel.CODIGO_CTA          := '400000';
-    lCaixaModel.DATA_CAI            := DateToStr(vIConexao.DataServer);
-    lCaixaModel.VALOR_CAI           := FloatToStr(pValor);
-    lCaixaModel.USUARIO_CAI         := self.vIConexao.getUSer.ID;
-    lCaixaModel.TIPO_CAI            := 'C';
-    lCaixaModel.CLIENTE_CAI         := '';
-    lCaixaModel.NUMERO_PED          := '999999';
-    lCaixaModel.FATURA_CAI          := '';
-    lCaixaModel.PARCELA_CAI         := '0';
-    lCaixaModel.STATUS              := '';
-    lCaixaModel.PORTADOR_CAI        := '000004';
-    lCaixaModel.CONCILIADO_CAI      := '.';
-    lCaixaModel.LOJA                := self.vIConexao.getEmpresa.LOJA;
+    lCaixaModel.objeto.CODIGO_CTA          := '400000';
+    lCaixaModel.objeto.DATA_CAI            := DateToStr(vIConexao.DataServer);
+    lCaixaModel.objeto.VALOR_CAI           := FloatToStr(pValor);
+    lCaixaModel.objeto.USUARIO_CAI         := self.vIConexao.getUSer.ID;
+    lCaixaModel.objeto.TIPO_CAI            := 'C';
+    lCaixaModel.objeto.CLIENTE_CAI         := '';
+    lCaixaModel.objeto.NUMERO_PED          := '999999';
+    lCaixaModel.objeto.FATURA_CAI          := '';
+    lCaixaModel.objeto.PARCELA_CAI         := '0';
+    lCaixaModel.objeto.STATUS              := '';
+    lCaixaModel.objeto.PORTADOR_CAI        := '000004';
+    lCaixaModel.objeto.CONCILIADO_CAI      := '.';
+    lCaixaModel.objeto.LOJA                := self.vIConexao.getEmpresa.LOJA;
 
     if pHistorico = '' then
-      lCaixaModel.HISTORICO_CAI := 'Suprimento '+ self.vIConexao.getUSer.NOME + ' ' + TimeToStr(vIConexao.HoraServer)
+      lCaixaModel.objeto.HISTORICO_CAI := 'Suprimento '+ self.vIConexao.getUSer.NOME + ' ' + TimeToStr(vIConexao.HoraServer)
     else
-      lCaixaModel.HISTORICO_CAI := pHistorico;
+      lCaixaModel.objeto.HISTORICO_CAI := pHistorico;
 
-    lCaixaModel.Incluir;
+    lCaixaModel.objeto.Incluir;
 
-    lCaixaModel.USUARIO_CAI         := '000000';
-    lCaixaModel.TIPO_CAI            := 'D';
+    lCaixaModel.objeto.USUARIO_CAI         := '000000';
+    lCaixaModel.objeto.TIPO_CAI            := 'D';
 
-    lCaixaModel.Incluir;
+    lCaixaModel.objeto.Incluir;
 
   finally
-    lCaixaModel.Free;
+    lCaixaModel:=nil;
     lUsuarioModel := nil;
   end;
 end;

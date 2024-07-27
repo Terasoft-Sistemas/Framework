@@ -314,35 +314,35 @@ end;
 
 function TContasReceberItensModel.baixarCaixa(pValor, pPortador, pConta, pHistorico: String): String;
 var
-  lCaixaModel: TCaixaModel;
+  lCaixaModel: ITCaixaModel;
 begin
-  lCaixaModel := TCaixaModel.Create(vIConexao);
+  lCaixaModel := TCaixaModel.getNewIface(vIConexao);
   try
-    lCaixaModel.Acao := tacIncluir;
-    lCaixaModel.USUARIO_CAI     := self.vIConexao.getUSer.ID;
-    lCaixaModel.DATA_CAI        := DateToStr(vIConexao.DataServer);
-    lCaixaModel.HORA_CAI        := TimeToStr(vIConexao.HoraServer);
-    lCaixaModel.NUMERO_PED      := self.NUMERO_PED;
-    lCaixaModel.CONCILIADO_CAI  := '.';
-    lCaixaModel.TIPO            := 'V';
-    lCaixaModel.CODIGO_CTA      := pConta;
-    lCaixaModel.CLIENTE_CAI     := self.FCODIGO_CLI;
-    lCaixaModel.TIPO_CAI        := cTIPO_CREDITO;
-    lCaixaModel.FATURA_CAI      := self.FFATURA_REC;
-    lCaixaModel.PARCELA_CAI     := self.FPACELA_REC;
-    lCaixaModel.STATUS          := 'I';
-    lCaixaModel.LOJA_REMOTO     := self.FLOJA;
-    lCaixaModel.CENTRO_CUSTO    := cCENTRO_CUSTO_PADRAO;
-    lCaixaModel.PORTADOR_CAI    := pPortador;
-    lCaixaModel.VALOR_CAI       := pValor;
-    lCaixaModel.HISTORICO_CAI   := pHistorico;
-    lCaixaModel.COMPETENCIA     := copy(self.VENCIMENTO_REC, 4, 2) + copy(self.VENCIMENTO_REC, 7, 4);
-    Result := lCaixaModel.Salvar;
+    lCaixaModel.objeto.Acao := tacIncluir;
+    lCaixaModel.objeto.USUARIO_CAI     := self.vIConexao.getUSer.ID;
+    lCaixaModel.objeto.DATA_CAI        := DateToStr(vIConexao.DataServer);
+    lCaixaModel.objeto.HORA_CAI        := TimeToStr(vIConexao.HoraServer);
+    lCaixaModel.objeto.NUMERO_PED      := self.NUMERO_PED;
+    lCaixaModel.objeto.CONCILIADO_CAI  := '.';
+    lCaixaModel.objeto.TIPO            := 'V';
+    lCaixaModel.objeto.CODIGO_CTA      := pConta;
+    lCaixaModel.objeto.CLIENTE_CAI     := self.FCODIGO_CLI;
+    lCaixaModel.objeto.TIPO_CAI        := cTIPO_CREDITO;
+    lCaixaModel.objeto.FATURA_CAI      := self.FFATURA_REC;
+    lCaixaModel.objeto.PARCELA_CAI     := self.FPACELA_REC;
+    lCaixaModel.objeto.STATUS          := 'I';
+    lCaixaModel.objeto.LOJA_REMOTO     := self.FLOJA;
+    lCaixaModel.objeto.CENTRO_CUSTO    := cCENTRO_CUSTO_PADRAO;
+    lCaixaModel.objeto.PORTADOR_CAI    := pPortador;
+    lCaixaModel.objeto.VALOR_CAI       := pValor;
+    lCaixaModel.objeto.HISTORICO_CAI   := pHistorico;
+    lCaixaModel.objeto.COMPETENCIA     := copy(self.VENCIMENTO_REC, 4, 2) + copy(self.VENCIMENTO_REC, 7, 4);
+    Result := lCaixaModel.objeto.Salvar;
 
     self.baixar(pValor);
 
   finally
-    lCaixaModel.Free;
+    lCaixaModel:=nil;
   end;
 end;
 
@@ -414,31 +414,31 @@ end;
 
 function TContasReceberItensModel.baixarJurosCaixa(pJuros, pPortador, pHistorico: String): String;
 var
-  lCaixaModel: TCaixaModel;
+  lCaixaModel: ITCaixaModel;
 begin
-  lCaixaModel := TCaixaModel.Create(vIConexao);
+  lCaixaModel := TCaixaModel.getNewIface(vIConexao);
   try
-    lCaixaModel.Acao := tacIncluir;
-    lCaixaModel.USUARIO_CAI     := self.vIConexao.getUSer.ID;
-    lCaixaModel.DATA_CAI        := DateToStr(vIConexao.DataServer);
-    lCaixaModel.HORA_CAI        := TimeToStr(vIConexao.HoraServer);
-    lCaixaModel.TIPO            := 'S';
-    lCaixaModel.CODIGO_CTA      := '222222';
-    lCaixaModel.CLIENTE_CAI     := self.FCODIGO_CLI;
-    lCaixaModel.TIPO_CAI        := cTIPO_CREDITO;
-    lCaixaModel.FATURA_CAI      := self.FFATURA_REC;
-    lCaixaModel.PARCELA_CAI     := self.FPACELA_REC;
-    lCaixaModel.STATUS          := 'A';
-    lCaixaModel.LOJA_REMOTO     := self.FLOJA;
-    lCaixaModel.PORTADOR_CAI    := pPortador;
-    lCaixaModel.VALOR_CAI       := pJuros;
-    lCaixaModel.HISTORICO_CAI   := pHistorico;
-    lCaixaModel.COMPETENCIA     := copy(self.VENCIMENTO_REC, 4, 2) + copy(self.VENCIMENTO_REC, 7, 4);
+    lCaixaModel.objeto.Acao := tacIncluir;
+    lCaixaModel.objeto.USUARIO_CAI     := self.vIConexao.getUSer.ID;
+    lCaixaModel.objeto.DATA_CAI        := DateToStr(vIConexao.DataServer);
+    lCaixaModel.objeto.HORA_CAI        := TimeToStr(vIConexao.HoraServer);
+    lCaixaModel.objeto.TIPO            := 'S';
+    lCaixaModel.objeto.CODIGO_CTA      := '222222';
+    lCaixaModel.objeto.CLIENTE_CAI     := self.FCODIGO_CLI;
+    lCaixaModel.objeto.TIPO_CAI        := cTIPO_CREDITO;
+    lCaixaModel.objeto.FATURA_CAI      := self.FFATURA_REC;
+    lCaixaModel.objeto.PARCELA_CAI     := self.FPACELA_REC;
+    lCaixaModel.objeto.STATUS          := 'A';
+    lCaixaModel.objeto.LOJA_REMOTO     := self.FLOJA;
+    lCaixaModel.objeto.PORTADOR_CAI    := pPortador;
+    lCaixaModel.objeto.VALOR_CAI       := pJuros;
+    lCaixaModel.objeto.HISTORICO_CAI   := pHistorico;
+    lCaixaModel.objeto.COMPETENCIA     := copy(self.VENCIMENTO_REC, 4, 2) + copy(self.VENCIMENTO_REC, 7, 4);
 
-    Result := lCaixaModel.Salvar;
+    Result := lCaixaModel.objeto.Salvar;
 
   finally
-    lCaixaModel.Free;
+    lCaixaModel:=nil;
   end;
 end;
 
@@ -535,26 +535,26 @@ end;
 
 procedure TContasReceberItensModel.excluirBaixa;
 var
-  lCaixaModel: TCaixaModel;
+  lCaixaModel,p: ITCaixaModel;
   lVendaCartaoModel, lVendaCartaoExclusao: TVendaCartaoModel;
   lRecebimentoCartaoModel, lRecebimentoExclusao: ITRecebimentoCartaoModel;
   i: Integer;
 begin
-  lCaixaModel             := TCaixaModel.Create(vIConexao);
+  lCaixaModel             := TCaixaModel.getNewIface(vIConexao);
   lVendaCartaoModel       := TVendaCartaoModel.Create(vIConexao);
   lVendaCartaoExclusao    := TVendaCartaoModel.Create(vIConexao);
   lRecebimentoCartaoModel := TRecebimentoCartaoModel.getNewIface(vIConexao);
   lRecebimentoExclusao    := TRecebimentoCartaoModel.getNewIface(vIConexao);
 
   try
-    lCaixaModel.WhereView := ' and caixa.status <> ''X'' '+
+    lCaixaModel.objeto.WhereView := ' and caixa.status <> ''X'' '+
                              ' and caixa.fatura_cai = '+QuotedStr(self.FFATURA_REC) +
                              ' and caixa.parcela_cai = '+ self.FPACELA_REC;
-    lCaixaModel.obterLista;
+    lCaixaModel.objeto.obterLista;
 
-    for i := 0 to lCaixaModel.CaixasLista.Count -1 do
+    for p in lCaixaModel.objeto.CaixasLista do
     begin
-      lCaixaModel.excluirRegistro(lCaixaModel.CaixasLista[i].NUMERO_CAI);
+      lCaixaModel.objeto.excluirRegistro(p.objeto.NUMERO_CAI);
     end;
 
     lVendaCartaoModel.WhereView := ' and vendacartao.numero_venda = ' + QuotedStr(self.FPEDIDO_REC) +
@@ -584,7 +584,7 @@ begin
     lRecebimentoCartaoModel:=nil;
     lRecebimentoExclusao:=nil;
     lVendaCartaoModel.Free;
-    lCaixaModel.Free;
+    lCaixaModel:=nil;
   end;
 end;
 

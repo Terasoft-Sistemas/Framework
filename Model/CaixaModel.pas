@@ -5,15 +5,18 @@ interface
 uses
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao, FireDAC.Comp.Client;
 
 type
+  TCaixaModel = class;
+  ITCaixaModel=IObject<TCaixaModel>;
   TCaixaModel = class
-
   private
+    [wek] mySelf: ITCaixaModel;
     vIConexao : IConexao;
 
-    FCaixasLista: IList<TCaixaModel>;
+    FCaixasLista: IList<ITCaixaModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -62,7 +65,7 @@ type
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetDATA_CADASTRO(const Value: Variant);
-    procedure SetCaixasLista(const Value: IList<TCaixaModel>);
+    procedure SetCaixasLista(const Value: IList<ITCaixaModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -145,20 +148,22 @@ type
     property PEDIDO_ID: Variant read FPEDIDO_ID write SetPEDIDO_ID;
     property ID: Variant read FID write SetID;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITCaixaModel;
 
     function Incluir: String;
     function Salvar: String;
     procedure obterLista;
     function obterSaldo(pUsario: String): IFDDataset;
 
-    function carregaClasse(pIdCaixa: String): TCaixaModel;
-    function carregaClasseIndexOf(pIndex: Integer): TCaixaModel;
+    function carregaClasse(pIdCaixa: String): ITCaixaModel;
+    function carregaClasseIndexOf(pIndex: Integer): ITCaixaModel;
 
     procedure excluirRegistro(pIdRegistro: String);
 
-    property CaixasLista: IList<TCaixaModel> read FCaixasLista write SetCaixasLista;
+    property CaixasLista: IList<ITCaixaModel> read FCaixasLista write SetCaixasLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -177,25 +182,25 @@ uses
 
 { TCaixaModel }
 
-function TCaixaModel.carregaClasse(pIdCaixa: String): TCaixaModel;
+function TCaixaModel.carregaClasse(pIdCaixa: String): ITCaixaModel;
 var
-  lCaixaDao: TCaixaDao;
+  lCaixaDao: ITCaixaDao;
 begin
-  lCaixaDao := TCaixaDao.Create(vIConexao);
+  lCaixaDao := TCaixaDao.getNewIface(vIConexao);
 
   try
-    Result := lCaixaDao.carregaClasse(pIdCaixa);
+    Result := lCaixaDao.objeto.carregaClasse(pIdCaixa);
   finally
-    lCaixaDao.Free;
+    lCaixaDao:=nil;
   end;
 end;
 
-function TCaixaModel.carregaClasseIndexOf(pIndex: Integer): TCaixaModel;
+function TCaixaModel.carregaClasseIndexOf(pIndex: Integer): ITCaixaModel;
 begin
   Result := self.FCaixasLista[pIndex];
 end;
 
-constructor TCaixaModel.Create(pIConexao : IConexao);
+constructor TCaixaModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -208,29 +213,35 @@ end;
 
 procedure TCaixaModel.excluirRegistro(pIdRegistro: String);
 var
-  lCaixaAlterar, lCaixaExclusao: TCaixaModel;
+  lCaixaAlterar, lCaixaExclusao: ITCaixaModel;
 begin
 
-  lCaixaAlterar  := TCaixaModel.Create(vIConexao);
-  lCaixaExclusao := TCaixaModel.Create(vIConexao);
+  lCaixaAlterar  := TCaixaModel.getNewIface(vIConexao);
+  lCaixaExclusao := TCaixaModel.getNewIface(vIConexao);
 
   try
     lCaixaAlterar  := self.carregaClasse(pIdRegistro);
     lCaixaExclusao := lCaixaAlterar;
 
-    lCaixaAlterar.Acao := tacAlterar;
-    lCaixaAlterar.STATUS := 'X';
-    lCaixaAlterar.Salvar;
+    lCaixaAlterar.objeto.Acao := tacAlterar;
+    lCaixaAlterar.objeto.STATUS := 'X';
+    lCaixaAlterar.objeto.Salvar;
 
-    lCaixaExclusao.Acao := tacIncluir;
-    lCaixaExclusao.STATUS        := 'X';
-    lCaixaExclusao.TIPO_CAI      := 'D';
-    lCaixaExclusao.HISTORICO_CAI := 'Estorno lançamento: ' + lCaixaAlterar.NUMERO_CAI;
-    lCaixaExclusao.Salvar;
+    lCaixaExclusao.objeto.Acao := tacIncluir;
+    lCaixaExclusao.objeto.STATUS        := 'X';
+    lCaixaExclusao.objeto.TIPO_CAI      := 'D';
+    lCaixaExclusao.objeto.HISTORICO_CAI := 'Estorno lançamento: ' + lCaixaAlterar.objeto.NUMERO_CAI;
+    lCaixaExclusao.objeto.Salvar;
 
   finally
-    lCaixaAlterar.Free;
+    lCaixaAlterar:=nil;
   end;
+end;
+
+class function TCaixaModel.getNewIface(pIConexao: IConexao): ITCaixaModel;
+begin
+  Result := TImplObjetoOwner<TCaixaModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TCaixaModel.Incluir: String;
@@ -241,58 +252,58 @@ end;
 
 procedure TCaixaModel.obterLista;
 var
-  lCaixaLista: TCaixaDao;
+  lCaixaLista: ITCaixaDao;
 begin
-  lCaixaLista := TCaixaDao.Create(vIConexao);
+  lCaixaLista := TCaixaDao.getNewIface(vIConexao);
 
   try
-    lCaixaLista.TotalRecords    := FTotalRecords;
-    lCaixaLista.WhereView       := FWhereView;
-    lCaixaLista.CountView       := FCountView;
-    lCaixaLista.OrderView       := FOrderView;
-    lCaixaLista.StartRecordView := FStartRecordView;
-    lCaixaLista.LengthPageView  := FLengthPageView;
-    lCaixaLista.IDRecordView    := FIDRecordView;
+    lCaixaLista.objeto.TotalRecords    := FTotalRecords;
+    lCaixaLista.objeto.WhereView       := FWhereView;
+    lCaixaLista.objeto.CountView       := FCountView;
+    lCaixaLista.objeto.OrderView       := FOrderView;
+    lCaixaLista.objeto.StartRecordView := FStartRecordView;
+    lCaixaLista.objeto.LengthPageView  := FLengthPageView;
+    lCaixaLista.objeto.IDRecordView    := FIDRecordView;
 
-    lCaixaLista.obterLista;
+    lCaixaLista.objeto.obterLista;
 
-    FTotalRecords   := lCaixaLista.TotalRecords;
-    FCaixasLista    := lCaixaLista.CaixasLista;
+    FTotalRecords   := lCaixaLista.objeto.TotalRecords;
+    FCaixasLista    := lCaixaLista.objeto.CaixasLista;
 
   finally
-    lCaixaLista.Free;
+    lCaixaLista:=nil;
   end;
 end;
 
 function TCaixaModel.obterSaldo(pUsario: String): IFDDataset;
 var
-  lCaixaLista: TCaixaDao;
+  lCaixaLista: ITCaixaDao;
 begin
-  lCaixaLista := TCaixaDao.Create(vIConexao);
+  lCaixaLista := TCaixaDao.getNewIface(vIConexao);
   try
-    Result := lCaixaLista.obterSaldo(pUsario);
+    Result := lCaixaLista.objeto.obterSaldo(pUsario);
   finally
-    lCaixaLista.Free;
+    lCaixaLista:=nil;
   end;
 end;
 
 function TCaixaModel.Salvar: String;
 var
-  lCaixaDao: TCaixaDao;
+  lCaixaDao: ITCaixaDao;
 begin
-  lCaixaDao := TCaixaDao.Create(vIConexao);
+  lCaixaDao := TCaixaDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lCaixaDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lCaixaDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lCaixaDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lCaixaDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lCaixaDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lCaixaDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lCaixaDao.Free;
+    lCaixaDao:=nil;
   end;
 end;
 
