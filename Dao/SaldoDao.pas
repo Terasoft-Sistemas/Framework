@@ -12,17 +12,21 @@ uses
   LojasModel,
   Terasoft.FuncoesTexto,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao,
   Terasoft.Utils;
 
 type
-  TSaldoDao = class
+  TSaldoDao = class;
+  ITSaldoDao=IObject<TSaldoDao>;
 
+  TSaldoDao = class
   private
+    [weak] mySelf: ITSaldoDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FSaldosLista: IList<TSaldoModel>;
+    FSaldosLista: IList<ITSaldoModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -32,7 +36,7 @@ type
     FWhereView: String;
     FTotalRecords: Integer;
     procedure SetCountView(const Value: String);
-    procedure SetSaldosLista(const Value: IList<TSaldoModel>);
+    procedure SetSaldosLista(const Value: IList<ITSaldoModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -42,10 +46,12 @@ type
     procedure SetWhereView(const Value: String);
 
   public
-    constructor Create(pIConexao: IConexao);
+    constructor _Create(pIConexao: IConexao);
     destructor Destroy; override;
 
-    property SaldosLista: IList<TSaldoModel> read FSaldosLista write SetSaldosLista;
+    class function getNewIface(pIConexao: IConexao): ITSaldoDao;
+
+    property SaldosLista: IList<ITSaldoModel> read FSaldosLista write SetSaldosLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -67,7 +73,7 @@ uses
 
 { TSaldo }
 
-constructor TSaldoDao.Create(pIConexao: IConexao);
+constructor TSaldoDao._Create(pIConexao: IConexao);
 begin
   vIConexao  := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -79,6 +85,12 @@ begin
   FreeAndNil(vConstrutor);
   vIConexao := nil;
   inherited;
+end;
+
+class function TSaldoDao.getNewIface(pIConexao: IConexao): ITSaldoDao;
+begin
+  Result := TImplObjetoOwner<TSaldoDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TSaldoDao.obterReservasCD(pProduto: String): IFDDataset;

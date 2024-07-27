@@ -17,7 +17,6 @@ type
   ITEmpresaDao = IObject<TEmpresaDao>;
 
   TEmpresaDao = class
-
   private
     [weak] mySelf: ITEmpresaDao;
     vIConexao   : IConexao;

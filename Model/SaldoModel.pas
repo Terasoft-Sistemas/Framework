@@ -6,9 +6,13 @@ uses
   FireDAC.Comp.Client,
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
+  TSaldoModel = class;
+  ITSaldoModel=IObject<TSaldoModel>;
+
   TParametrosSaldo = record
     PRODUTO,
     LOJA       : String;
@@ -16,10 +20,10 @@ type
   end;
 
   TSaldoModel = class
-
   private
+    [weak] mySelf: ITSaldoModel;
     vIConexao : IConexao;
-    FSaldosLista: IList<TSaldoModel>;
+    FSaldosLista: IList<ITSaldoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -34,7 +38,7 @@ type
     FCD: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetSaldosLista(const Value: IList<TSaldoModel>);
+    procedure SetSaldosLista(const Value: IList<ITSaldoModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -52,14 +56,16 @@ type
     property SALDO_FISICO: Variant read FSALDO_FISICO write SetSALDO_FISICO;
     property SALDO_DISPONIVEL: Variant read FSALDO_DISPONIVEL write SetSALDO_DISPONIVEL;
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITSaldoModel;
 
     function obterSaldoLojas(pParametros : TParametrosSaldo): IFDDataset;
     function obterSaldo(pProduto : String): IFDDataset;
     function obterReservasCD(pProduto : String) : IFDDataset;
 
-    property SaldosLista: IList<TSaldoModel> read FSaldosLista write SetSaldosLista;
+    property SaldosLista: IList<ITSaldoModel> read FSaldosLista write SetSaldosLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -76,7 +82,7 @@ uses
   SaldoDao, Data.DB;
 
 { TSaldoModel }
-constructor TSaldoModel.Create(pIConexao : IConexao);
+constructor TSaldoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -86,16 +92,17 @@ begin
   inherited;
 end;
 
+class function TSaldoModel.getNewIface(pIConexao: IConexao): ITSaldoModel;
+begin
+  Result := TImplObjetoOwner<TSaldoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TSaldoModel.obterReservasCD(pProduto: String): IFDDataset;
 var
-  lSaldoDao : TSaldoDao;
+  lSaldoDao : ITSaldoDao;
 begin
-  lSaldoDao := TSaldoDao.Create(vIConexao);
-  try
-    Result := lSaldoDao.obterReservasCD(pProduto);
-  finally
-    lSaldoDao.Free;
-  end;
+  Result := TSaldoDao.getNewIface(vIConexao).objeto.obterReservasCD(pProduto);
 end;
 
 function TSaldoModel.obterSaldo(pProduto: String): IFDDataset;
@@ -145,15 +152,8 @@ begin
 end;
 
 function TSaldoModel.obterSaldoLojas(pParametros : TParametrosSaldo): IFDDataset;
-var
-  lSaldoDao : TSaldoDao;
 begin
-  lSaldoDao := TSaldoDao.Create(vIConexao);
-  try
-    Result := lSaldoDao.obterSaldoLojas(pParametros);
-  finally
-    lSaldoDao.Free;
-  end;
+  Result := TSaldoDao.getNewIface(vIConexao).objeto.obterSaldoLojas(pParametros);
 end;
 
 procedure TSaldoModel.SetAcao(const Value: TAcao);

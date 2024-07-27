@@ -162,7 +162,7 @@ end;
 
 function TCaixaControleModel.vendaCaixaFechado(pDataHora: String): boolean;
 begin
-  TCaixaControleDao.getNewIface(vIConexao).objeto.vendaCaixaFechado(pDataHora);
+  Result := TCaixaControleDao.getNewIface(vIConexao).objeto.vendaCaixaFechado(pDataHora);
 end;
 
 destructor TCaixaControleModel.Destroy;
