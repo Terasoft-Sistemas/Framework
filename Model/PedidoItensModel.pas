@@ -639,34 +639,34 @@ end;
 
 function TPedidoItensModel.cancelarEstoque: String;
 var
-  lMovimentoModel, lModel: TMovimentoModel;
+  lMovimentoModel, lModel: ITMovimentoModel;
   lProdutosModel: ITProdutosModel;
   lUsuarioModel : ITUsuarioModel;
 begin
-  lMovimentoModel := TMovimentoModel.Create(vIConexao);
+  lMovimentoModel := TMovimentoModel.getNewIface(vIConexao);
   lProdutosModel  := TProdutosModel.getNewIface(vIConexao);
   lUsuarioModel   := TUsuarioModel.getNewIface(vIConexao);
 
   try
-    lMovimentoModel.WhereView := ' and movimento.status <> ''X''                 '+
+    lMovimentoModel.objeto.WhereView := ' and movimento.status <> ''X''                 '+
                                  ' and movimento.tipo_doc = ''P''                '+
                                  ' and movimento.tabela_origem = ''PEDIDOITENS'' '+
                                  ' and movimento.id_origem = '+ QuotedStr(self.FID);
 
-    lMovimentoModel.obterLista;
+    lMovimentoModel.objeto.obterLista;
 
-    for lModel in lMovimentoModel.MovimentosLista do
+    for lModel in lMovimentoModel.objeto.MovimentosLista do
     begin
-      lModel.Acao := tacAlterar;
-      lModel.STATUS  := 'X';
-      lModel.OBS_MOV := 'Alt.Ped.Usuário: '+ lUsuarioModel.objeto.nomeUsuario(self.vIConexao.getUSer.NOME) + DateToStr(vIConexao.DataServer) + ' ' + TimeToStr(vIConexao.HoraServer);
-      lModel.Salvar;
+      lModel.objeto.Acao := tacAlterar;
+      lModel.objeto.STATUS  := 'X';
+      lModel.objeto.OBS_MOV := 'Alt.Ped.Usuário: '+ lUsuarioModel.objeto.nomeUsuario(self.vIConexao.getUSer.NOME) + DateToStr(vIConexao.DataServer) + ' ' + TimeToStr(vIConexao.HoraServer);
+      lModel.objeto.Salvar;
 
-      lProdutosModel.objeto.adicionarSaldo(lModel.CODIGO_PRO, lModel.QUANTIDADE_MOV);
+      lProdutosModel.objeto.adicionarSaldo(lModel.objeto.CODIGO_PRO, lModel.objeto.QUANTIDADE_MOV);
     end;
 
   finally
-    lMovimentoModel.Free;
+    lMovimentoModel:=nil;
     lProdutosModel:=nil;
   end;
 end;
@@ -697,31 +697,31 @@ end;
 
 function TPedidoItensModel.gerarEstoque: String;
 var
-  lMovimentoModel   : TMovimentoModel;
+  lMovimentoModel   : ITMovimentoModel;
   lProdutosModel    : ITProdutosModel;
 begin
-  lMovimentoModel   := TMovimentoModel.Create(vIConexao);
+  lMovimentoModel   := TMovimentoModel.getNewIface(vIConexao);
   lProdutosModel    := TProdutosModel.getNewIface(vIConexao);
 
   try
-    lMovimentoModel.Acao := tacIncluir;
+    lMovimentoModel.objeto.Acao := tacIncluir;
 
-    lMovimentoModel.DOCUMENTO_MOV   := self.FNUMERO_PED;
-    lMovimentoModel.CODIGO_PRO      := self.FCODIGO_PRO;
-    lMovimentoModel.CODIGO_FOR      := self.FCODIGO_CLI;
-    lMovimentoModel.OBS_MOV         := 'Venda N: ' + self.FNUMERO_PED;
-    lMovimentoModel.TIPO_DOC        := 'P';
-    lMovimentoModel.DATA_MOV        := DateToStr(vIConexao.DataServer);
-    lMovimentoModel.DATA_DOC        := DateToStr(vIConexao.DataServer);
-    lMovimentoModel.QUANTIDADE_MOV  := self.FQUANTIDADE_PED;
-    lMovimentoModel.VALOR_MOV       := self.FVALORUNITARIO_PED;
-    lMovimentoModel.CUSTO_ATUAL     := self.FVLRCUSTO_PRO;
-    lMovimentoModel.VENDA_ATUAL     := self.FVLRVENDA_PRO;
-    lMovimentoModel.STATUS          := '0';
-    lMovimentoModel.LOJA            := self.FLOJA;
-    lMovimentoModel.tabela_origem   := 'PEDIDOITENS';
-    lMovimentoModel.id_origem       := self.FID;
-    Result := lMovimentoModel.Salvar;
+    lMovimentoModel.objeto.DOCUMENTO_MOV   := self.FNUMERO_PED;
+    lMovimentoModel.objeto.CODIGO_PRO      := self.FCODIGO_PRO;
+    lMovimentoModel.objeto.CODIGO_FOR      := self.FCODIGO_CLI;
+    lMovimentoModel.objeto.OBS_MOV         := 'Venda N: ' + self.FNUMERO_PED;
+    lMovimentoModel.objeto.TIPO_DOC        := 'P';
+    lMovimentoModel.objeto.DATA_MOV        := DateToStr(vIConexao.DataServer);
+    lMovimentoModel.objeto.DATA_DOC        := DateToStr(vIConexao.DataServer);
+    lMovimentoModel.objeto.QUANTIDADE_MOV  := self.FQUANTIDADE_PED;
+    lMovimentoModel.objeto.VALOR_MOV       := self.FVALORUNITARIO_PED;
+    lMovimentoModel.objeto.CUSTO_ATUAL     := self.FVLRCUSTO_PRO;
+    lMovimentoModel.objeto.VENDA_ATUAL     := self.FVLRVENDA_PRO;
+    lMovimentoModel.objeto.STATUS          := '0';
+    lMovimentoModel.objeto.LOJA            := self.FLOJA;
+    lMovimentoModel.objeto.tabela_origem   := 'PEDIDOITENS';
+    lMovimentoModel.objeto.id_origem       := self.FID;
+    Result := lMovimentoModel.objeto.Salvar;
 
     try
       lProdutosModel.objeto.subtrairSaldo(self.FCODIGO_PRO, self.FQUANTIDADE_PED);
@@ -730,7 +730,7 @@ begin
 
   finally
     lProdutosModel:=nil;
-    lMovimentoModel.Free;
+    lMovimentoModel:=nil;
   end;
 end;
 

@@ -5,15 +5,19 @@ interface
 uses
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao,
   FireDAC.Comp.Client;
 
 type
-  TMovimentoModel = class
+  TMovimentoModel = class;
+  ITMovimentoModel=IObject<TMovimentoModel>;
 
+  TMovimentoModel = class
   private
+    [wek] mySelf: ITMovimentoModel;
     vIConexao : IConexao;
-    FMovimentosLista: IList<TMovimentoModel>;
+    FMovimentosLista: IList<ITMovimentoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -46,7 +50,7 @@ type
     FDataInicialView: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetMovimentosLista(const Value: IList<TMovimentoModel>);
+    procedure SetMovimentosLista(const Value: IList<ITMovimentoModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -98,15 +102,17 @@ type
     property TABELA_ORIGEM: Variant read FTABELA_ORIGEM write SetTABELA_ORIGEM;
     property ID_ORIGEM: Variant read FID_ORIGEM write SetID_ORIGEM;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITMovimentoModel;
 
     function Salvar: String;
     procedure obterLista;
-    function carregaClasse(pId: String): TMovimentoModel;
+    function carregaClasse(pId: String): ITMovimentoModel;
     function obterListaMemTable : IFDDataset;
 
-    property MovimentosLista: IList<TMovimentoModel> read FMovimentosLista write SetMovimentosLista;
+    property MovimentosLista: IList<ITMovimentoModel> read FMovimentosLista write SetMovimentosLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -127,19 +133,19 @@ uses
 
 { TMovimentoModel }
 
-function TMovimentoModel.carregaClasse(pId: String): TMovimentoModel;
+function TMovimentoModel.carregaClasse(pId: String): ITMovimentoModel;
 var
-  lMovimentoDao: TMovimentoDao;
+  lMovimentoDao: ITMovimentoDao;
 begin
-  lMovimentoDao := TMovimentoDao.Create(vIConexao);
+  lMovimentoDao := TMovimentoDao.getNewIface(vIConexao);
   try
-    Result := lMovimentoDao.carregaClasse(pId);
+    Result := lMovimentoDao.objeto.carregaClasse(pId);
   finally
-    lMovimentoDao.Free;
+    lMovimentoDao:=nil;
   end;
 end;
 
-constructor TMovimentoModel.Create(pIConexao : IConexao);
+constructor TMovimentoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -151,75 +157,81 @@ begin
   inherited;
 end;
 
+class function TMovimentoModel.getNewIface(pIConexao: IConexao): ITMovimentoModel;
+begin
+  Result := TImplObjetoOwner<TMovimentoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 procedure TMovimentoModel.obterLista;
 var
-  lMovimentoLista: TMovimentoDao;
+  lMovimentoLista: ITMovimentoDao;
 begin
-  lMovimentoLista := TMovimentoDao.Create(vIConexao);
+  lMovimentoLista := TMovimentoDao.getNewIface(vIConexao);
 
   try
-    lMovimentoLista.TotalRecords    := FTotalRecords;
-    lMovimentoLista.WhereView       := FWhereView;
-    lMovimentoLista.CountView       := FCountView;
-    lMovimentoLista.OrderView       := FOrderView;
-    lMovimentoLista.StartRecordView := FStartRecordView;
-    lMovimentoLista.LengthPageView  := FLengthPageView;
-    lMovimentoLista.IDRecordView    := FIDRecordView;
+    lMovimentoLista.objeto.TotalRecords    := FTotalRecords;
+    lMovimentoLista.objeto.WhereView       := FWhereView;
+    lMovimentoLista.objeto.CountView       := FCountView;
+    lMovimentoLista.objeto.OrderView       := FOrderView;
+    lMovimentoLista.objeto.StartRecordView := FStartRecordView;
+    lMovimentoLista.objeto.LengthPageView  := FLengthPageView;
+    lMovimentoLista.objeto.IDRecordView    := FIDRecordView;
 
-    lMovimentoLista.obterLista;
+    lMovimentoLista.objeto.obterLista;
 
-    FTotalRecords  := lMovimentoLista.TotalRecords;
-    FMovimentosLista := lMovimentoLista.MovimentosLista;
+    FTotalRecords  := lMovimentoLista.objeto.TotalRecords;
+    FMovimentosLista := lMovimentoLista.objeto.MovimentosLista;
 
   finally
-    lMovimentoLista.Free;
+    lMovimentoLista:=nil;
   end;
 end;
 
 function TMovimentoModel.obterListaMemTable: IFDDataset;
 var
-  lMovimento: TMovimentoDao;
+  lMovimento: ITMovimentoDao;
 begin
-  lMovimento := TMovimentoDao.Create(vIConexao);
+  lMovimento := TMovimentoDao.getNewIface(vIConexao);
 
   try
-    lMovimento.TotalRecords    := FTotalRecords;
-    lMovimento.WhereView       := FWhereView;
-    lMovimento.CountView       := FCountView;
-    lMovimento.OrderView       := FOrderView;
-    lMovimento.StartRecordView := FStartRecordView;
-    lMovimento.LengthPageView  := FLengthPageView;
-    lMovimento.IDRecordView    := FIDRecordView;
-    lMovimento.IDProduto       := FIDProduto;
-    lMovimento.DataInicialView := FDataInicialView;
-    lMovimento.DataFinalView   := FDataFinalView;
+    lMovimento.objeto.TotalRecords    := FTotalRecords;
+    lMovimento.objeto.WhereView       := FWhereView;
+    lMovimento.objeto.CountView       := FCountView;
+    lMovimento.objeto.OrderView       := FOrderView;
+    lMovimento.objeto.StartRecordView := FStartRecordView;
+    lMovimento.objeto.LengthPageView  := FLengthPageView;
+    lMovimento.objeto.IDRecordView    := FIDRecordView;
+    lMovimento.objeto.IDProduto       := FIDProduto;
+    lMovimento.objeto.DataInicialView := FDataInicialView;
+    lMovimento.objeto.DataFinalView   := FDataFinalView;
 
-    Result := lMovimento.obterListaMemTable;
+    Result := lMovimento.objeto.obterListaMemTable;
 
-    FTotalRecords := lMovimento.TotalRecords;
+    FTotalRecords := lMovimento.objeto.TotalRecords;
 
   finally
-    lMovimento.Free;
+    lMovimento:=nil;
   end;
 end;
 
 function TMovimentoModel.Salvar: String;
 var
-  lMovimentoDao: TMovimentoDao;
+  lMovimentoDao: ITMovimentoDao;
 begin
-  lMovimentoDao := TMovimentoDao.Create(vIConexao);
+  lMovimentoDao := TMovimentoDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lMovimentoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lMovimentoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lMovimentoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lMovimentoDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lMovimentoDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lMovimentoDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lMovimentoDao.Free;
+    lMovimentoDao:=nil;
   end;
 end;
 

@@ -11,17 +11,20 @@ uses
   Spring.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
+  Terasoft.Framework.ObjectIface,
   Terasoft.Utils,
   Interfaces.Conexao;
 
 type
+  TMovimentoDao = class;
+  ITMovimentoDao=IObject<TMovimentoDao>;
   TMovimentoDao = class
-
   private
+    [weak] mySelf: ITMovimentoDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FMovimentosLista: IList<TMovimentoModel>;
+    FMovimentosLista: IList<ITMovimentoModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -35,7 +38,7 @@ type
     FDataInicialView: Variant;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetMovimentosLista(const Value: IList<TMovimentoModel>);
+    procedure SetMovimentosLista(const Value: IList<ITMovimentoModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -50,10 +53,12 @@ type
     procedure SetDataInicialView(const Value: Variant);
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property MovimentosLista: IList<TMovimentoModel> read FMovimentosLista write SetMovimentosLista;
+    class function getNewIface(pIConexao: IConexao): ITMovimentoDao;
+
+    property MovimentosLista: IList<ITMovimentoModel> read FMovimentosLista write SetMovimentosLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -66,14 +71,14 @@ type
     property DataInicialView : Variant read FDataInicialView write SetDataInicialView;
     property DataFinalView : Variant read FDataFinalView write SetDataFinalView;
 
-    function incluir(pMovimentoModel: TMovimentoModel): String;
-    function alterar(pMovimentoModel: TMovimentoModel): String;
-    function excluir(pMovimentoModel: TMovimentoModel): String;
+    function incluir(pMovimentoModel: ITMovimentoModel): String;
+    function alterar(pMovimentoModel: ITMovimentoModel): String;
+    function excluir(pMovimentoModel: ITMovimentoModel): String;
 
     procedure obterLista;
     function obterListaMemTable : IFDDataset;
-    function carregaClasse(pId: String): TMovimentoModel;
-    procedure setParams(var pQry: TFDQuery; pMovimentoModel: TMovimentoModel);
+    function carregaClasse(pId: String): ITMovimentoModel;
+    procedure setParams(var pQry: TFDQuery; pMovimentoModel: ITMovimentoModel);
 
 end;
 
@@ -84,13 +89,13 @@ uses
 
 { TMovimento }
 
-function TMovimentoDao.carregaClasse(pId: String): TMovimentoModel;
+function TMovimentoDao.carregaClasse(pId: String): ITMovimentoModel;
 var
   lQry: TFDQuery;
-  lModel: TMovimentoModel;
+  lModel: ITMovimentoModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TMovimentoModel.Create(vIConexao);
+  lModel   := TMovimentoModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -99,25 +104,25 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.DOCUMENTO_MOV  := lQry.FieldByName('DOCUMENTO_MOV').AsString;
-    lModel.CODIGO_PRO     := lQry.FieldByName('CODIGO_PRO').AsString;
-    lModel.CODIGO_FOR     := lQry.FieldByName('CODIGO_FOR').AsString;
-    lModel.OBS_MOV        := lQry.FieldByName('OBS_MOV').AsString;
-    lModel.TIPO_DOC       := lQry.FieldByName('TIPO_DOC').AsString;
-    lModel.DATA_MOV       := lQry.FieldByName('DATA_MOV').AsString;
-    lModel.DATA_DOC       := lQry.FieldByName('DATA_DOC').AsString;
-    lModel.QUANTIDADE_MOV := lQry.FieldByName('QUANTIDADE_MOV').AsString;
-    lModel.VALOR_MOV      := lQry.FieldByName('VALOR_MOV').AsString;
-    lModel.CUSTO_ATUAL    := lQry.FieldByName('CUSTO_ATUAL').AsString;
-    lModel.VENDA_ATUAL    := lQry.FieldByName('VENDA_ATUAL').AsString;
-    lModel.STATUS         := lQry.FieldByName('STATUS').AsString;
-    lModel.LOJA           := lQry.FieldByName('LOJA').AsString;
-    lModel.ID             := lQry.FieldByName('ID').AsString;
-    lModel.USUARIO_ID     := lQry.FieldByName('USUARIO_ID').AsString;
-    lModel.DATAHORA       := lQry.FieldByName('DATAHORA').AsString;
-    lModel.SYSTIME        := lQry.FieldByName('SYSTIME').AsString;
-    lModel.TABELA_ORIGEM  := lQry.FieldByName('TABELA_ORIGEM').AsString;
-    lModel.ID_ORIGEM      := lQry.FieldByName('ID_ORIGEM').AsString;
+    lModel.objeto.DOCUMENTO_MOV  := lQry.FieldByName('DOCUMENTO_MOV').AsString;
+    lModel.objeto.CODIGO_PRO     := lQry.FieldByName('CODIGO_PRO').AsString;
+    lModel.objeto.CODIGO_FOR     := lQry.FieldByName('CODIGO_FOR').AsString;
+    lModel.objeto.OBS_MOV        := lQry.FieldByName('OBS_MOV').AsString;
+    lModel.objeto.TIPO_DOC       := lQry.FieldByName('TIPO_DOC').AsString;
+    lModel.objeto.DATA_MOV       := lQry.FieldByName('DATA_MOV').AsString;
+    lModel.objeto.DATA_DOC       := lQry.FieldByName('DATA_DOC').AsString;
+    lModel.objeto.QUANTIDADE_MOV := lQry.FieldByName('QUANTIDADE_MOV').AsString;
+    lModel.objeto.VALOR_MOV      := lQry.FieldByName('VALOR_MOV').AsString;
+    lModel.objeto.CUSTO_ATUAL    := lQry.FieldByName('CUSTO_ATUAL').AsString;
+    lModel.objeto.VENDA_ATUAL    := lQry.FieldByName('VENDA_ATUAL').AsString;
+    lModel.objeto.STATUS         := lQry.FieldByName('STATUS').AsString;
+    lModel.objeto.LOJA           := lQry.FieldByName('LOJA').AsString;
+    lModel.objeto.ID             := lQry.FieldByName('ID').AsString;
+    lModel.objeto.USUARIO_ID     := lQry.FieldByName('USUARIO_ID').AsString;
+    lModel.objeto.DATAHORA       := lQry.FieldByName('DATAHORA').AsString;
+    lModel.objeto.SYSTIME        := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.TABELA_ORIGEM  := lQry.FieldByName('TABELA_ORIGEM').AsString;
+    lModel.objeto.ID_ORIGEM      := lQry.FieldByName('ID_ORIGEM').AsString;
 
     Result := lModel;
 
@@ -126,7 +131,7 @@ begin
   end;
 end;
 
-constructor TMovimentoDao.Create(pIConexao : IConexao);
+constructor TMovimentoDao._Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -140,7 +145,7 @@ begin
   inherited;
 end;
 
-function TMovimentoDao.incluir(pMovimentoModel: TMovimentoModel): String;
+function TMovimentoDao.incluir(pMovimentoModel: ITMovimentoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -162,7 +167,7 @@ begin
   end;
 end;
 
-function TMovimentoDao.alterar(pMovimentoModel: TMovimentoModel): String;
+function TMovimentoDao.alterar(pMovimentoModel: ITMovimentoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -176,7 +181,7 @@ begin
     setParams(lQry, pMovimentoModel);
     lQry.ExecSQL;
 
-    Result := pMovimentoModel.ID;
+    Result := pMovimentoModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -184,20 +189,26 @@ begin
   end;
 end;
 
-function TMovimentoDao.excluir(pMovimentoModel: TMovimentoModel): String;
+function TMovimentoDao.excluir(pMovimentoModel: ITMovimentoModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from MOVIMENTO where ID = :ID',[pMovimentoModel.ID]);
+   lQry.ExecSQL('delete from MOVIMENTO where ID = :ID',[pMovimentoModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pMovimentoModel.ID;
+   Result := pMovimentoModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TMovimentoDao.getNewIface(pIConexao: IConexao): ITMovimentoDao;
+begin
+  Result := TImplObjetoOwner<TMovimentoDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TMovimentoDao.where: String;
@@ -245,11 +256,11 @@ procedure TMovimentoDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TMovimentoModel;
+  modelo: ITMovimentoModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FMovimentosLista := TCollections.CreateList<TMovimentoModel>(true);
+  FMovimentosLista := TCollections.CreateList<ITMovimentoModel>;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -272,28 +283,28 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TMovimentoModel.Create(vIConexao);
+      modelo := TMovimentoModel.getNewIface(vIConexao);
       FMovimentosLista.Add(modelo);
 
-      modelo.DOCUMENTO_MOV   := lQry.FieldByName('DOCUMENTO_MOV').AsString;
-      modelo.CODIGO_PRO      := lQry.FieldByName('CODIGO_PRO').AsString;
-      modelo.CODIGO_FOR      := lQry.FieldByName('CODIGO_FOR').AsString;
-      modelo.OBS_MOV         := lQry.FieldByName('OBS_MOV').AsString;
-      modelo.TIPO_DOC        := lQry.FieldByName('TIPO_DOC').AsString;
-      modelo.DATA_MOV        := lQry.FieldByName('DATA_MOV').AsString;
-      modelo.DATA_DOC        := lQry.FieldByName('DATA_DOC').AsString;
-      modelo.QUANTIDADE_MOV  := lQry.FieldByName('QUANTIDADE_MOV').AsString;
-      modelo.VALOR_MOV       := lQry.FieldByName('VALOR_MOV').AsString;
-      modelo.CUSTO_ATUAL     := lQry.FieldByName('CUSTO_ATUAL').AsString;
-      modelo.VENDA_ATUAL     := lQry.FieldByName('VENDA_ATUAL').AsString;
-      modelo.STATUS          := lQry.FieldByName('STATUS').AsString;
-      modelo.LOJA            := lQry.FieldByName('LOJA').AsString;
-      modelo.ID              := lQry.FieldByName('ID').AsString;
-      modelo.USUARIO_ID      := lQry.FieldByName('USUARIO_ID').AsString;
-      modelo.DATAHORA        := lQry.FieldByName('DATAHORA').AsString;
-      modelo.SYSTIME         := lQry.FieldByName('SYSTIME').AsString;
-      modelo.TABELA_ORIGEM   := lQry.FieldByName('TABELA_ORIGEM').AsString;
-      modelo.ID_ORIGEM       := lQry.FieldByName('ID_ORIGEM').AsString;
+      modelo.objeto.DOCUMENTO_MOV   := lQry.FieldByName('DOCUMENTO_MOV').AsString;
+      modelo.objeto.CODIGO_PRO      := lQry.FieldByName('CODIGO_PRO').AsString;
+      modelo.objeto.CODIGO_FOR      := lQry.FieldByName('CODIGO_FOR').AsString;
+      modelo.objeto.OBS_MOV         := lQry.FieldByName('OBS_MOV').AsString;
+      modelo.objeto.TIPO_DOC        := lQry.FieldByName('TIPO_DOC').AsString;
+      modelo.objeto.DATA_MOV        := lQry.FieldByName('DATA_MOV').AsString;
+      modelo.objeto.DATA_DOC        := lQry.FieldByName('DATA_DOC').AsString;
+      modelo.objeto.QUANTIDADE_MOV  := lQry.FieldByName('QUANTIDADE_MOV').AsString;
+      modelo.objeto.VALOR_MOV       := lQry.FieldByName('VALOR_MOV').AsString;
+      modelo.objeto.CUSTO_ATUAL     := lQry.FieldByName('CUSTO_ATUAL').AsString;
+      modelo.objeto.VENDA_ATUAL     := lQry.FieldByName('VENDA_ATUAL').AsString;
+      modelo.objeto.STATUS          := lQry.FieldByName('STATUS').AsString;
+      modelo.objeto.LOJA            := lQry.FieldByName('LOJA').AsString;
+      modelo.objeto.ID              := lQry.FieldByName('ID').AsString;
+      modelo.objeto.USUARIO_ID      := lQry.FieldByName('USUARIO_ID').AsString;
+      modelo.objeto.DATAHORA        := lQry.FieldByName('DATAHORA').AsString;
+      modelo.objeto.SYSTIME         := lQry.FieldByName('SYSTIME').AsString;
+      modelo.objeto.TABELA_ORIGEM   := lQry.FieldByName('TABELA_ORIGEM').AsString;
+      modelo.objeto.ID_ORIGEM       := lQry.FieldByName('ID_ORIGEM').AsString;
 
       lQry.Next;
     end;
@@ -390,28 +401,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TMovimentoDao.setParams(var pQry: TFDQuery; pMovimentoModel: TMovimentoModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TMovimentoDao.setParams(var pQry: TFDQuery; pMovimentoModel: ITMovimentoModel);
 begin
-  lTabela := vConstrutor.getColumns('MOVIMENTO');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TMovimentoModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pMovimentoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pMovimentoModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('MOVIMENTO',pQry,pMovimentoModel.objeto);
 end;
 
 procedure TMovimentoDao.SetStartRecordView(const Value: String);

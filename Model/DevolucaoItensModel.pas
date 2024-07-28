@@ -159,68 +159,68 @@ end;
 
 procedure TDevolucaoItensModel.excluirEstoque;
 var
-  lMovimentoModel   : TMovimentoModel;
+  lMovimentoModel   : ITMovimentoModel;
   lProdutosModel    : ITProdutosModel;
 begin
-  lMovimentoModel   := TMovimentoModel.Create(vIConexao);
+  lMovimentoModel   := TMovimentoModel.getNewIface(vIConexao);
   lProdutosModel    := TProdutosModel.getNewIface(vIConexao);
 
   try
-    lMovimentoModel.WhereView := ' and movimento.documento_mov = '+ QuotedStr(self.FID) +
+    lMovimentoModel.objeto.WhereView := ' and movimento.documento_mov = '+ QuotedStr(self.FID) +
                                  ' and movimento.codigo_pro = ' + QuotedStr(self.FPRODUTO) +
                                  ' and movimento.tabela_origem = ''DEVOLUCAOITENS'' ' +
                                  ' and movimento.tipo_doc = ''D'' ';
-    lMovimentoModel.obterLista;
+    lMovimentoModel.objeto.obterLista;
 
-    for lMovimentoModel in lMovimentoModel.MovimentosLista do
+    for lMovimentoModel in lMovimentoModel.objeto.MovimentosLista do
     begin
-      lMovimentoModel.Acao := tacExcluir;
-      lMovimentoModel.Salvar;
+      lMovimentoModel.objeto.Acao := tacExcluir;
+      lMovimentoModel.objeto.Salvar;
       lProdutosModel.objeto.subtrairSaldo(self.FPRODUTO, self.FQUANTIDADE);
     end;
 
   finally
-    lMovimentoModel.Free;
+    lMovimentoModel:=nil;
     lProdutosModel:=nil;
   end;
 end;
 
 procedure TDevolucaoItensModel.gerarEstoque;
 var
-  lMovimentoModel   : TMovimentoModel;
+  lMovimentoModel   : ITMovimentoModel;
   lProdutosModel    : ITProdutosModel;
   lDevolucaoModel   : ITDevolucaoModel;
 begin
-  lMovimentoModel   := TMovimentoModel.Create(vIConexao);
+  lMovimentoModel   := TMovimentoModel.getNewIface(vIConexao);
   lProdutosModel    := TProdutosModel.getNewIface(vIConexao);
   lDevolucaoModel   := TDevolucaoModel.getNewIface(vIConexao);
 
   try
     lDevolucaoModel := lDevolucaoModel.objeto.carregaClasse(self.ID);
 
-    lMovimentoModel.Acao := tacIncluir;
-    lMovimentoModel.DOCUMENTO_MOV   := lDevolucaoModel.objeto.ID;
-    lMovimentoModel.CODIGO_PRO      := self.FPRODUTO;
-    lMovimentoModel.CODIGO_FOR      := lDevolucaoModel.objeto.CLIENTE;
-    lMovimentoModel.OBS_MOV         := 'Troca Venda: ' + lDevolucaoModel.objeto.PEDIDO;
-    lMovimentoModel.TIPO_DOC        := 'D';
-    lMovimentoModel.DATA_MOV        := DateToStr(vIConexao.DataServer);
-    lMovimentoModel.DATA_DOC        := DateToStr(vIConexao.DataServer);
-    lMovimentoModel.QUANTIDADE_MOV  := self.FQUANTIDADE;
-    lMovimentoModel.VALOR_MOV       := self.FVALOR_UNITARIO;
-    lMovimentoModel.CUSTO_ATUAL     := '0';
-    lMovimentoModel.VENDA_ATUAL     := '0';
-    lMovimentoModel.STATUS          := '0';
-    lMovimentoModel.LOJA            := lDevolucaoModel.objeto.LOJA;
-    lMovimentoModel.tabela_origem   := 'DEVOLUCAOITENS';
-    lMovimentoModel.id_origem       := self.FID;
-    lMovimentoModel.Salvar;
+    lMovimentoModel.objeto.Acao := tacIncluir;
+    lMovimentoModel.objeto.DOCUMENTO_MOV   := lDevolucaoModel.objeto.ID;
+    lMovimentoModel.objeto.CODIGO_PRO      := self.FPRODUTO;
+    lMovimentoModel.objeto.CODIGO_FOR      := lDevolucaoModel.objeto.CLIENTE;
+    lMovimentoModel.objeto.OBS_MOV         := 'Troca Venda: ' + lDevolucaoModel.objeto.PEDIDO;
+    lMovimentoModel.objeto.TIPO_DOC        := 'D';
+    lMovimentoModel.objeto.DATA_MOV        := DateToStr(vIConexao.DataServer);
+    lMovimentoModel.objeto.DATA_DOC        := DateToStr(vIConexao.DataServer);
+    lMovimentoModel.objeto.QUANTIDADE_MOV  := self.FQUANTIDADE;
+    lMovimentoModel.objeto.VALOR_MOV       := self.FVALOR_UNITARIO;
+    lMovimentoModel.objeto.CUSTO_ATUAL     := '0';
+    lMovimentoModel.objeto.VENDA_ATUAL     := '0';
+    lMovimentoModel.objeto.STATUS          := '0';
+    lMovimentoModel.objeto.LOJA            := lDevolucaoModel.objeto.LOJA;
+    lMovimentoModel.objeto.tabela_origem   := 'DEVOLUCAOITENS';
+    lMovimentoModel.objeto.id_origem       := self.FID;
+    lMovimentoModel.objeto.Salvar;
 
     lProdutosModel.objeto.adicionarSaldo(self.FPRODUTO, self.FQUANTIDADE);
 
   finally
     lProdutosModel:=nil;
-    lMovimentoModel.Free;
+    lMovimentoModel:=nil;
   end;
 end;
 
