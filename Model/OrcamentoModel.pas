@@ -5,6 +5,7 @@ interface
 uses
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao,
   FireDAC.Comp.Client,
   PedidoVendaModel,
@@ -15,10 +16,12 @@ uses
   Terasoft.Utils;
 
 type
+  TOrcamentoModel = class;
+  ITOrcamentoModel=IObject<TOrcamentoModel>;
 
   TOrcamentoModel = class
-
   private
+    [weak] mySelf: ITOrcamentoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -247,17 +250,19 @@ type
     property  LOCALOBRA             : Variant read FLOCALOBRA             write SetFLOCALOBRA;
 
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITOrcamentoModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TOrcamentoModel;
+    function Alterar(pID : String): ITOrcamentoModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
     function finalizarOrcamento(pNumeroOrc: String): String;
 
-    function carregaClasse(pId : String): TOrcamentoModel;
+    function carregaClasse(pId : String): ITOrcamentoModel;
 
     function ObterLista: IFDDataset; overload;
 
@@ -282,14 +287,14 @@ uses
 
 { TOrcamentoModel }
 
-function TOrcamentoModel.Alterar(pID: String): TOrcamentoModel;
+function TOrcamentoModel.Alterar(pID: String): ITOrcamentoModel;
 var
-  lOrcamentoModel : TOrcamentoModel;
+  lOrcamentoModel : ITOrcamentoModel;
 begin
-  lOrcamentoModel := TOrcamentoModel.Create(vIConexao);
+  lOrcamentoModel := TOrcamentoModel.getNewIface(vIConexao);
   try
-    lOrcamentoModel       := lOrcamentoModel.carregaClasse(pID);
-    lOrcamentoModel.Acao  := tacAlterar;
+    lOrcamentoModel       := lOrcamentoModel.objeto.carregaClasse(pID);
+    lOrcamentoModel.objeto.Acao  := tacAlterar;
     Result                := lOrcamentoModel;
   finally
   end;
@@ -308,20 +313,20 @@ begin
     Result    := self.Salvar;
 end;
 
-function TOrcamentoModel.carregaClasse(pId : String): TOrcamentoModel;
+function TOrcamentoModel.carregaClasse(pId : String): ITOrcamentoModel;
 var
-  lOrcamentoDao: TOrcamentoDao;
+  lOrcamentoDao: ITOrcamentoDao;
 begin
-  lOrcamentoDao := TOrcamentoDao.Create(vIConexao);
+  lOrcamentoDao := TOrcamentoDao.getNewIface(vIConexao);
 
   try
-    Result := lOrcamentoDao.carregaClasse(pId);
+    Result := lOrcamentoDao.objeto.carregaClasse(pId);
   finally
-    lOrcamentoDao.Free;
+    lOrcamentoDao:=nil;
   end;
 end;
 
-constructor TOrcamentoModel.Create(pIConexao : IConexao);
+constructor TOrcamentoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -334,42 +339,42 @@ end;
 
 function TOrcamentoModel.obterLista: IFDDataset;
 var
-  lOrcamentoLista: TOrcamentoDao;
+  lOrcamentoLista: ITOrcamentoDao;
 begin
-  lOrcamentoLista := TOrcamentoDao.Create(vIConexao);
+  lOrcamentoLista := TOrcamentoDao.getNewIface(vIConexao);
 
   try
-    lOrcamentoLista.TotalRecords    := FTotalRecords;
-    lOrcamentoLista.WhereView       := FWhereView;
-    lOrcamentoLista.CountView       := FCountView;
-    lOrcamentoLista.OrderView       := FOrderView;
-    lOrcamentoLista.StartRecordView := FStartRecordView;
-    lOrcamentoLista.LengthPageView  := FLengthPageView;
-    lOrcamentoLista.IDRecordView    := FIDRecordView;
+    lOrcamentoLista.objeto.TotalRecords    := FTotalRecords;
+    lOrcamentoLista.objeto.WhereView       := FWhereView;
+    lOrcamentoLista.objeto.CountView       := FCountView;
+    lOrcamentoLista.objeto.OrderView       := FOrderView;
+    lOrcamentoLista.objeto.StartRecordView := FStartRecordView;
+    lOrcamentoLista.objeto.LengthPageView  := FLengthPageView;
+    lOrcamentoLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lOrcamentoLista.obterLista;
+    Result := lOrcamentoLista.objeto.obterLista;
 
-    FTotalRecords := lOrcamentoLista.TotalRecords;
+    FTotalRecords := lOrcamentoLista.objeto.TotalRecords;
 
   finally
-    lOrcamentoLista.Free;
+    lOrcamentoLista:=nil;
   end;
 end;
 
 function TOrcamentoModel.Salvar: String;
 var
-  lOrcamentoDao: TOrcamentoDao;
+  lOrcamentoDao: ITOrcamentoDao;
 begin
-  lOrcamentoDao := TOrcamentoDao.Create(vIConexao);
+  lOrcamentoDao := TOrcamentoDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lOrcamentoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lOrcamentoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lOrcamentoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lOrcamentoDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lOrcamentoDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lOrcamentoDao.objeto.excluir(mySelf);
     end;
   finally
-    lOrcamentoDao.Free;
+    lOrcamentoDao:=nil;
   end;
 end;
 
@@ -378,7 +383,7 @@ var
   lPedidoVendaModel        : ITPedidoVendaModel;
   lPedidoItensModel        : ITPedidoItensModel;
   lOrcamentoItensModel     : TOrcamentoItensModel;
-  lOrcamentoModel          : TOrcamentoModel;
+  lOrcamentoModel          : ITOrcamentoModel;
   lClientesModel           : TClienteModel;
   lEmpresaModel            : ITEmpresaModel;
   lProdutosModel           : ITProdutosModel;
@@ -391,7 +396,7 @@ begin
   if pNumeroOrc = '' then
     exit;
 
-  lOrcamentoModel      := TOrcamentoModel.Create(vIConexao);
+  lOrcamentoModel      := TOrcamentoModel.getNewIface(vIConexao);
   lOrcamentoItensModel := TOrcamentoItensModel.Create(vIConexao);
   lPedidoVendaModel    := TPedidoVendaModel.getNewIface(vIConexao);
   lPedidoItensModel    := TPedidoItensModel.getNewIface(vIConexao);
@@ -431,45 +436,45 @@ begin
       end;
     end;
 
-    lOrcamentoModel := lOrcamentoModel.carregaClasse(pNumeroOrc);
+    lOrcamentoModel := lOrcamentoModel.objeto.carregaClasse(pNumeroOrc);
 
-    if lOrcamentoModel.VALOR_IPI > 0 then
+    if lOrcamentoModel.objeto.VALOR_IPI > 0 then
       CriaException('Orçamento contém valor de IPI.'+#13+'Não é possível finalizar orçamento pelo frente de caixa.');
 
-    lClientesModel.IDRecordView := lOrcamentoModel.CODIGO_CLI;
+    lClientesModel.IDRecordView := lOrcamentoModel.objeto.CODIGO_CLI;
     lTableCliente := lClientesModel.ObterListaMemTable;
 
     lPedidoVendaModel.objeto.Acao                 := tacIncluir;
-    lPedidoVendaModel.objeto.LOJA                 := lOrcamentoModel.LOJA;
+    lPedidoVendaModel.objeto.LOJA                 := lOrcamentoModel.objeto.LOJA;
     lPedidoVendaModel.objeto.DATA_PED             := DateToStr(vIConexao.DataServer);
     lPedidoVendaModel.objeto.HORA_PED             := TimeToStr(vIConexao.HoraServer);
-    lPedidoVendaModel.objeto.PRIMEIROVENC_PED     := lOrcamentoModel.PRIMEIROVCTO_ORC;
-    lPedidoVendaModel.objeto.ACRES_PED            := lOrcamentoModel.ACRES_ORC;
-    lPedidoVendaModel.objeto.DESC_PED             := lOrcamentoModel.DESCONTO_ORC;
-    lPedidoVendaModel.objeto.DESCONTO_PED         := lOrcamentoModel.DESC_ORC;
-    lPedidoVendaModel.objeto.VALOR_PED            := FloatToStr((StrToFloat(lOrcamentoModel.TOTAL_ORC)+StrToFloat(lOrcamentoModel.DESCONTO_ORC))-StrToFloat(lOrcamentoModel.ACRES_ORC));
-    lPedidoVendaModel.objeto.TOTAL_PED            := lOrcamentoModel.TOTAL_ORC;
-    lPedidoVendaModel.objeto.VALORENTADA_PED      := lOrcamentoModel.VLRENTRADA_ORC;
-    lPedidoVendaModel.objeto.PARCELAS_PED         := lOrcamentoModel.PARCELAS_ORC;
-    lPedidoVendaModel.objeto.PARCELA_PED          := lOrcamentoModel.VLRPARCELA_ORC;
+    lPedidoVendaModel.objeto.PRIMEIROVENC_PED     := lOrcamentoModel.objeto.PRIMEIROVCTO_ORC;
+    lPedidoVendaModel.objeto.ACRES_PED            := lOrcamentoModel.objeto.ACRES_ORC;
+    lPedidoVendaModel.objeto.DESC_PED             := lOrcamentoModel.objeto.DESCONTO_ORC;
+    lPedidoVendaModel.objeto.DESCONTO_PED         := lOrcamentoModel.objeto.DESC_ORC;
+    lPedidoVendaModel.objeto.VALOR_PED            := FloatToStr((StrToFloat(lOrcamentoModel.objeto.TOTAL_ORC)+StrToFloat(lOrcamentoModel.objeto.DESCONTO_ORC))-StrToFloat(lOrcamentoModel.objeto.ACRES_ORC));
+    lPedidoVendaModel.objeto.TOTAL_PED            := lOrcamentoModel.objeto.TOTAL_ORC;
+    lPedidoVendaModel.objeto.VALORENTADA_PED      := lOrcamentoModel.objeto.VLRENTRADA_ORC;
+    lPedidoVendaModel.objeto.PARCELAS_PED         := lOrcamentoModel.objeto.PARCELAS_ORC;
+    lPedidoVendaModel.objeto.PARCELA_PED          := lOrcamentoModel.objeto.VLRPARCELA_ORC;
     lPedidoVendaModel.objeto.CTR_IMPRESSAO_PED    := '0';
     lPedidoVendaModel.objeto.RESERVADO            := 'N';
-    lPedidoVendaModel.objeto.TIPO_FRETE           := lOrcamentoModel.TIPO_FRETE;
+    lPedidoVendaModel.objeto.TIPO_FRETE           := lOrcamentoModel.objeto.TIPO_FRETE;
     lPedidoVendaModel.objeto.SMS                  := 'N';
     lPedidoVendaModel.objeto.ENTREGA              := 'N';
     lPedidoVendaModel.objeto.STATUS_PED           := 'P';
     lPedidoVendaModel.objeto.STATUS               := 'O';
     lPedidoVendaModel.objeto.TIPO_PED             := 'P';
     lPedidoVendaModel.objeto.TABJUROS_PED         := 'N';
-    lPedidoVendaModel.objeto.NUMERO_ORC           := lOrcamentoModel.NUMERO_ORC;
-    lPedidoVendaModel.objeto.CODIGO_CLI           := lOrcamentoModel.CODIGO_CLI;
+    lPedidoVendaModel.objeto.NUMERO_ORC           := lOrcamentoModel.objeto.NUMERO_ORC;
+    lPedidoVendaModel.objeto.CODIGO_CLI           := lOrcamentoModel.objeto.CODIGO_CLI;
     lPedidoVendaModel.objeto.CNPJ_CPF_CONSUMIDOR  := lTableCliente.objeto.fieldByName('CNPJ_CPF_CLI').AsString;
-    lPedidoVendaModel.objeto.CODIGO_PORT          := lOrcamentoModel.CODIGO_PORT;
-    lPedidoVendaModel.objeto.CODIGO_VEN           := lOrcamentoModel.CODIGO_VEN;
-    lPedidoVendaModel.objeto.CODIGO_TIP           := lOrcamentoModel.CODIGO_TIP;
-    lPedidoVendaModel.objeto.FRETE_PED            := lOrcamentoModel.FRETE;
-    lPedidoVendaModel.objeto.INFORMACOES_PED      := lOrcamentoModel.INFORMACOES_ORC;
-    lPedidoVendaModel.objeto.PRECO_VENDA_ID       := lOrcamentoModel.PRECO_VENDA_ID;
+    lPedidoVendaModel.objeto.CODIGO_PORT          := lOrcamentoModel.objeto.CODIGO_PORT;
+    lPedidoVendaModel.objeto.CODIGO_VEN           := lOrcamentoModel.objeto.CODIGO_VEN;
+    lPedidoVendaModel.objeto.CODIGO_TIP           := lOrcamentoModel.objeto.CODIGO_TIP;
+    lPedidoVendaModel.objeto.FRETE_PED            := lOrcamentoModel.objeto.FRETE;
+    lPedidoVendaModel.objeto.INFORMACOES_PED      := lOrcamentoModel.objeto.INFORMACOES_ORC;
+    lPedidoVendaModel.objeto.PRECO_VENDA_ID       := lOrcamentoModel.objeto.PRECO_VENDA_ID;
     lPedidoVendaModel.objeto.USUARIO_PED          := self.vIConexao.getUSer.ID;
     lPedidoVendaModel.objeto.IDUsuario            := self.vIConexao.getUSer.ID;
 
@@ -492,8 +497,8 @@ begin
       inc(lItem);
 
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.NUMERO_PED             := lPedido;
-      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.CODIGO_CLI             := lOrcamentoModel.CODIGO_CLI;
-      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.LOJA                   := lOrcamentoModel.LOJA;
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.CODIGO_CLI             := lOrcamentoModel.objeto.CODIGO_CLI;
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.LOJA                   := lOrcamentoModel.objeto.LOJA;
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.BALANCA                := 'S';
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.QUANTIDADE_PED         := lMemtable.objeto.FieldByName('QUANTIDADE_ORC').AsString;
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.QUANTIDADE_NEW         := lMemtable.objeto.FieldByName('QUANTIDADE_ORC').AsString;
@@ -522,15 +527,15 @@ begin
 
     lPedidoVendaModel.objeto.gerarContasReceberPedido;
 
-    lOrcamentoModel.FAcao := tacAlterar;
-    lOrcamentoModel.FSITUACAO_ORC := 'A';
-    lOrcamentoModel.Salvar;
+    lOrcamentoModel.objeto.FAcao := tacAlterar;
+    lOrcamentoModel.objeto.FSITUACAO_ORC := 'A';
+    lOrcamentoModel.objeto.Salvar;
 
     lOrcamentoItensModel.quantidadeAtendida(pNumeroOrc);
 
     Result := lPedido;
   finally
-    lOrcamentoModel.Free;
+    lOrcamentoModel:=nil;
     lPedidoVendaModel:=nil;
     lOrcamentoItensModel.Free;
     lPedidoItensModel:=nil;
@@ -538,6 +543,12 @@ begin
     lEmpresaModel := nil;
     lProdutosModel:=nil;
   end;
+end;
+
+class function TOrcamentoModel.getNewIface(pIConexao: IConexao): ITOrcamentoModel;
+begin
+  Result := TImplObjetoOwner<TOrcamentoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 procedure TOrcamentoModel.SetAcao(const Value: TAcao);

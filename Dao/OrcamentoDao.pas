@@ -14,14 +14,18 @@ uses
   Terasoft.FuncoesTexto,
   Terasoft.Framework.ListaSimples,
   Terasoft.Framework.SimpleTypes,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao,
   Terasoft.ConstrutorDao,
   OrcamentoModel;
 
 type
-  TOrcamentoDao = class
+  TOrcamentoDao = class;
+  ITOrcamentoDao=IObject<TOrcamentoDao>;
 
+  TOrcamentoDao = class
   private
+    [weak] mySelf: ITOrcamentoDao;
     vIConexao : IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -46,8 +50,10 @@ type
     function where: String;
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITOrcamentoDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -58,15 +64,15 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView : String read FIDRecordView write SetIDRecordView;
 
-    function incluir(pOrcamentoModel: TOrcamentoModel): String;
-    function alterar(pOrcamentoModel: TOrcamentoModel): String;
-    function excluir(pOrcamentoModel: TOrcamentoModel): String;
+    function incluir(pOrcamentoModel: ITOrcamentoModel): String;
+    function alterar(pOrcamentoModel: ITOrcamentoModel): String;
+    function excluir(pOrcamentoModel: ITOrcamentoModel): String;
 
-    function carregaClasse(pID : String): TOrcamentoModel;
+    function carregaClasse(pID : String): ITOrcamentoModel;
 
     function obterLista: IFDDataset;
 
-    procedure setParams(var pQry: TFDQuery; pOrcamentoModel: TOrcamentoModel);
+    procedure setParams(var pQry: TFDQuery; pOrcamentoModel: ITOrcamentoModel);
 
 end;
 
@@ -77,7 +83,7 @@ uses
 
 { TOrcamento }
 
-function TOrcamentoDao.alterar(pOrcamentoModel: TOrcamentoModel): String;
+function TOrcamentoDao.alterar(pOrcamentoModel: ITOrcamentoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -91,7 +97,7 @@ begin
     setParams(lQry, pOrcamentoModel);
     lQry.ExecSQL;
 
-    Result := pOrcamentoModel.NUMERO_ORC;
+    Result := pOrcamentoModel.objeto.NUMERO_ORC;
 
   finally
     lSQL := '';
@@ -99,13 +105,13 @@ begin
   end;
 end;
 
-function TOrcamentoDao.carregaClasse(pID: String): TOrcamentoModel;
+function TOrcamentoDao.carregaClasse(pID: String): ITOrcamentoModel;
 var
   lQry: TFDQuery;
-  lModel: TOrcamentoModel;
+  lModel: ITOrcamentoModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TOrcamentoModel.Create(vIConexao);
+  lModel   := TOrcamentoModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -114,81 +120,81 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.NUMERO_ORC            := lQry.FieldByName('NUMERO_ORC').AsString;
-    lModel.CODIGO_CLI            := lQry.FieldByName('CODIGO_CLI').AsString;
-    lModel.CODIGO_VEN            := lQry.FieldByName('CODIGO_VEN').AsString;
-    lModel.CODIGO_PORT           := lQry.FieldByName('CODIGO_PORT').AsString;
-    lModel.DATA_ORC              := lQry.FieldByName('DATA_ORC').AsString;
-    lModel.CONDICAO_ORC          := lQry.FieldByName('CONDICAO_ORC').AsString;
-    lModel.VALOR_ORC             := lQry.FieldByName('VALOR_ORC').AsString;
-    lModel.DESC_ORC              := lQry.FieldByName('DESC_ORC').AsString;
-    lModel.ACRES_ORC             := lQry.FieldByName('ACRES_ORC').AsString;
-    lModel.TOTAL_ORC             := lQry.FieldByName('TOTAL_ORC').AsString;
-    lModel.INFORMACOES_ORC       := lQry.FieldByName('INFORMACOES_ORC').AsString;
-    lModel.USUARIO_ORC           := lQry.FieldByName('USUARIO_ORC').AsString;
-    lModel.CONTATO_ORC           := lQry.FieldByName('CONTATO_ORC').AsString;
-    lModel.CODIGO_TIP            := lQry.FieldByName('CODIGO_TIP').AsString;
-    lModel.LOJA                  := lQry.FieldByName('LOJA').AsString;
-    lModel.NUMERO_CF             := lQry.FieldByName('NUMERO_CF').AsString;
-    lModel.NUMERO_SERIE_ECF      := lQry.FieldByName('NUMERO_SERIE_ECF').AsString;
-    lModel.SERIE_CF              := lQry.FieldByName('SERIE_CF').AsString;
-    lModel.VLRENTRADA_ORC        := lQry.FieldByName('VLRENTRADA_ORC').AsString;
-    lModel.PRIMEIROVCTO_ORC      := lQry.FieldByName('PRIMEIROVCTO_ORC').AsString;
-    lModel.SEGURO_ORC            := lQry.FieldByName('SEGURO_ORC').AsString;
-    lModel.FATURA_ORC            := lQry.FieldByName('FATURA_ORC').AsString;
-    lModel.VLRPARCELA_ORC        := lQry.FieldByName('VLRPARCELA_ORC').AsString;
-    lModel.SITUACAO_ORC          := lQry.FieldByName('SITUACAO_ORC').AsString;
-    lModel.QTDEPARCELAS_ORC      := lQry.FieldByName('QTDEPARCELAS_ORC').AsString;
-    lModel.HORA                  := lQry.FieldByName('HORA').AsString;
-    lModel.DATAFECHAMENTO        := lQry.FieldByName('DATAFECHAMENTO').AsString;
-    lModel.HORAFECHAMENTO        := lQry.FieldByName('HORAFECHAMENTO').AsString;
-    lModel.PAGAMENTO_STATUS      := lQry.FieldByName('PAGAMENTO_STATUS').AsString;
-    lModel.ENTREGA_LOCAL         := lQry.FieldByName('ENTREGA_LOCAL').AsString;
-    lModel.OBS_PEDIDO_VINCULADO  := lQry.FieldByName('OBS_PEDIDO_VINCULADO').AsString;
-    lModel.DATA_CONCRETIZADO     := lQry.FieldByName('DATA_CONCRETIZADO').AsString;
-    lModel.HORA_CONCRETIZADO     := lQry.FieldByName('HORA_CONCRETIZADO').AsString;
-    lModel.DATA_CANCELAMENTO     := lQry.FieldByName('DATA_CANCELAMENTO').AsString;
-    lModel.USUARIO_CONCRETIZADO  := lQry.FieldByName('USUARIO_CONCRETIZADO').AsString;
-    lModel.VALOR_IPI             := lQry.FieldByName('VALOR_IPI').AsString;
-    lModel.BASE_IPI              := lQry.FieldByName('BASE_IPI').AsString;
-    lModel.VALOR_ST              := lQry.FieldByName('VALOR_ST').AsString;
-    lModel.BASE_ST               := lQry.FieldByName('BASE_ST').AsString;
-    lModel.ID                    := lQry.FieldByName('ID').AsString;
-    lModel.PARCELAS_ORC          := lQry.FieldByName('PARCELAS_ORC').AsString;
-    lModel.FRETE                 := lQry.FieldByName('FRETE').AsString;
-    lModel.SYSTIME               := lQry.FieldByName('SYSTIME').AsString;
-    lModel.TRANPORTADORA_ID      := lQry.FieldByName('TRANPORTADORA_ID').AsString;
-    lModel.RNTRC                 := lQry.FieldByName('RNTRC').AsString;
-    lModel.PLACA                 := lQry.FieldByName('PLACA').AsString;
-    lModel.PESO_LIQUIDO          := lQry.FieldByName('PESO_LIQUIDO').AsString;
-    lModel.PESO_BRUTO            := lQry.FieldByName('PESO_BRUTO').AsString;
-    lModel.QTDE_VOLUME           := lQry.FieldByName('QTDE_VOLUME').AsString;
-    lModel.ESPECIE_VOLUME        := lQry.FieldByName('ESPECIE_VOLUME').AsString;
-    lModel.TIPO_FRETE            := lQry.FieldByName('TIPO_FRETE').AsString;
-    lModel.UF_TRANSPORTADORA     := lQry.FieldByName('UF_TRANSPORTADORA').AsString;
-    lModel.PRECO_VENDA_ID        := lQry.FieldByName('PRECO_VENDA_ID').AsString;
-    lModel.PEDIDO_COMPRA         := lQry.FieldByName('PEDIDO_COMPRA').AsString;
-    lModel.TABJUROS_ORC          := lQry.FieldByName('TABJUROS_ORC').AsString;
-    lModel.STATUS_ID             := lQry.FieldByName('STATUS_ID').AsString;
-    lModel.DESCONTO_ORC          := lQry.FieldByName('DESCONTO_ORC').AsString;
-    lModel.OBS_GERAL             := lQry.FieldByName('OBS_GERAL').AsString;
-    lModel.VFCPUFDEST            := lQry.FieldByName('VFCPUFDEST').AsString;
-    lModel.VICMSUFDEST           := lQry.FieldByName('VICMSUFDEST').AsString;
-    lModel.VICMSUFREMET          := lQry.FieldByName('VICMSUFREMET').AsString;
-    lModel.ZERAR_ST              := lQry.FieldByName('ZERAR_ST').AsString;
-    lModel.PRODUTO_TIPO_ID       := lQry.FieldByName('PRODUTO_TIPO_ID').AsString;
-    lModel.PREVISAO_EM_DIAS      := lQry.FieldByName('PREVISAO_EM_DIAS').AsString;
-    lModel.HORAENTREGA           := lQry.FieldByName('HORAENTREGA').AsString;
-    lModel.CONCLUIDO             := lQry.FieldByName('CONCLUIDO').AsString;
-    lModel.ENVIADO               := lQry.FieldByName('ENVIADO').AsString;
-    lModel.LOCALOBRA             := lQry.FieldByName('LOCALOBRA').AsString;
+    lModel.objeto.NUMERO_ORC            := lQry.FieldByName('NUMERO_ORC').AsString;
+    lModel.objeto.CODIGO_CLI            := lQry.FieldByName('CODIGO_CLI').AsString;
+    lModel.objeto.CODIGO_VEN            := lQry.FieldByName('CODIGO_VEN').AsString;
+    lModel.objeto.CODIGO_PORT           := lQry.FieldByName('CODIGO_PORT').AsString;
+    lModel.objeto.DATA_ORC              := lQry.FieldByName('DATA_ORC').AsString;
+    lModel.objeto.CONDICAO_ORC          := lQry.FieldByName('CONDICAO_ORC').AsString;
+    lModel.objeto.VALOR_ORC             := lQry.FieldByName('VALOR_ORC').AsString;
+    lModel.objeto.DESC_ORC              := lQry.FieldByName('DESC_ORC').AsString;
+    lModel.objeto.ACRES_ORC             := lQry.FieldByName('ACRES_ORC').AsString;
+    lModel.objeto.TOTAL_ORC             := lQry.FieldByName('TOTAL_ORC').AsString;
+    lModel.objeto.INFORMACOES_ORC       := lQry.FieldByName('INFORMACOES_ORC').AsString;
+    lModel.objeto.USUARIO_ORC           := lQry.FieldByName('USUARIO_ORC').AsString;
+    lModel.objeto.CONTATO_ORC           := lQry.FieldByName('CONTATO_ORC').AsString;
+    lModel.objeto.CODIGO_TIP            := lQry.FieldByName('CODIGO_TIP').AsString;
+    lModel.objeto.LOJA                  := lQry.FieldByName('LOJA').AsString;
+    lModel.objeto.NUMERO_CF             := lQry.FieldByName('NUMERO_CF').AsString;
+    lModel.objeto.NUMERO_SERIE_ECF      := lQry.FieldByName('NUMERO_SERIE_ECF').AsString;
+    lModel.objeto.SERIE_CF              := lQry.FieldByName('SERIE_CF').AsString;
+    lModel.objeto.VLRENTRADA_ORC        := lQry.FieldByName('VLRENTRADA_ORC').AsString;
+    lModel.objeto.PRIMEIROVCTO_ORC      := lQry.FieldByName('PRIMEIROVCTO_ORC').AsString;
+    lModel.objeto.SEGURO_ORC            := lQry.FieldByName('SEGURO_ORC').AsString;
+    lModel.objeto.FATURA_ORC            := lQry.FieldByName('FATURA_ORC').AsString;
+    lModel.objeto.VLRPARCELA_ORC        := lQry.FieldByName('VLRPARCELA_ORC').AsString;
+    lModel.objeto.SITUACAO_ORC          := lQry.FieldByName('SITUACAO_ORC').AsString;
+    lModel.objeto.QTDEPARCELAS_ORC      := lQry.FieldByName('QTDEPARCELAS_ORC').AsString;
+    lModel.objeto.HORA                  := lQry.FieldByName('HORA').AsString;
+    lModel.objeto.DATAFECHAMENTO        := lQry.FieldByName('DATAFECHAMENTO').AsString;
+    lModel.objeto.HORAFECHAMENTO        := lQry.FieldByName('HORAFECHAMENTO').AsString;
+    lModel.objeto.PAGAMENTO_STATUS      := lQry.FieldByName('PAGAMENTO_STATUS').AsString;
+    lModel.objeto.ENTREGA_LOCAL         := lQry.FieldByName('ENTREGA_LOCAL').AsString;
+    lModel.objeto.OBS_PEDIDO_VINCULADO  := lQry.FieldByName('OBS_PEDIDO_VINCULADO').AsString;
+    lModel.objeto.DATA_CONCRETIZADO     := lQry.FieldByName('DATA_CONCRETIZADO').AsString;
+    lModel.objeto.HORA_CONCRETIZADO     := lQry.FieldByName('HORA_CONCRETIZADO').AsString;
+    lModel.objeto.DATA_CANCELAMENTO     := lQry.FieldByName('DATA_CANCELAMENTO').AsString;
+    lModel.objeto.USUARIO_CONCRETIZADO  := lQry.FieldByName('USUARIO_CONCRETIZADO').AsString;
+    lModel.objeto.VALOR_IPI             := lQry.FieldByName('VALOR_IPI').AsString;
+    lModel.objeto.BASE_IPI              := lQry.FieldByName('BASE_IPI').AsString;
+    lModel.objeto.VALOR_ST              := lQry.FieldByName('VALOR_ST').AsString;
+    lModel.objeto.BASE_ST               := lQry.FieldByName('BASE_ST').AsString;
+    lModel.objeto.ID                    := lQry.FieldByName('ID').AsString;
+    lModel.objeto.PARCELAS_ORC          := lQry.FieldByName('PARCELAS_ORC').AsString;
+    lModel.objeto.FRETE                 := lQry.FieldByName('FRETE').AsString;
+    lModel.objeto.SYSTIME               := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.TRANPORTADORA_ID      := lQry.FieldByName('TRANPORTADORA_ID').AsString;
+    lModel.objeto.RNTRC                 := lQry.FieldByName('RNTRC').AsString;
+    lModel.objeto.PLACA                 := lQry.FieldByName('PLACA').AsString;
+    lModel.objeto.PESO_LIQUIDO          := lQry.FieldByName('PESO_LIQUIDO').AsString;
+    lModel.objeto.PESO_BRUTO            := lQry.FieldByName('PESO_BRUTO').AsString;
+    lModel.objeto.QTDE_VOLUME           := lQry.FieldByName('QTDE_VOLUME').AsString;
+    lModel.objeto.ESPECIE_VOLUME        := lQry.FieldByName('ESPECIE_VOLUME').AsString;
+    lModel.objeto.TIPO_FRETE            := lQry.FieldByName('TIPO_FRETE').AsString;
+    lModel.objeto.UF_TRANSPORTADORA     := lQry.FieldByName('UF_TRANSPORTADORA').AsString;
+    lModel.objeto.PRECO_VENDA_ID        := lQry.FieldByName('PRECO_VENDA_ID').AsString;
+    lModel.objeto.PEDIDO_COMPRA         := lQry.FieldByName('PEDIDO_COMPRA').AsString;
+    lModel.objeto.TABJUROS_ORC          := lQry.FieldByName('TABJUROS_ORC').AsString;
+    lModel.objeto.STATUS_ID             := lQry.FieldByName('STATUS_ID').AsString;
+    lModel.objeto.DESCONTO_ORC          := lQry.FieldByName('DESCONTO_ORC').AsString;
+    lModel.objeto.OBS_GERAL             := lQry.FieldByName('OBS_GERAL').AsString;
+    lModel.objeto.VFCPUFDEST            := lQry.FieldByName('VFCPUFDEST').AsString;
+    lModel.objeto.VICMSUFDEST           := lQry.FieldByName('VICMSUFDEST').AsString;
+    lModel.objeto.VICMSUFREMET          := lQry.FieldByName('VICMSUFREMET').AsString;
+    lModel.objeto.ZERAR_ST              := lQry.FieldByName('ZERAR_ST').AsString;
+    lModel.objeto.PRODUTO_TIPO_ID       := lQry.FieldByName('PRODUTO_TIPO_ID').AsString;
+    lModel.objeto.PREVISAO_EM_DIAS      := lQry.FieldByName('PREVISAO_EM_DIAS').AsString;
+    lModel.objeto.HORAENTREGA           := lQry.FieldByName('HORAENTREGA').AsString;
+    lModel.objeto.CONCLUIDO             := lQry.FieldByName('CONCLUIDO').AsString;
+    lModel.objeto.ENVIADO               := lQry.FieldByName('ENVIADO').AsString;
+    lModel.objeto.LOCALOBRA             := lQry.FieldByName('LOCALOBRA').AsString;
 
     Result := lModel;
   finally
     lQry.Free;
   end;
 end;
-constructor TOrcamentoDao.Create(pIConexao : IConexao);
+constructor TOrcamentoDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -201,22 +207,29 @@ begin
   inherited;
 end;
 
-function TOrcamentoDao.excluir(pOrcamentoModel: TOrcamentoModel): String;
+function TOrcamentoDao.excluir(pOrcamentoModel: ITOrcamentoModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from ORCAMENTO where NUMERO_ORC = :ID' ,[pOrcamentoModel.NUMERO_ORC]);
+   lQry.ExecSQL('delete from ORCAMENTO where NUMERO_ORC = :ID' ,[pOrcamentoModel.objeto.NUMERO_ORC]);
    lQry.ExecSQL;
-   Result := pOrcamentoModel.ID;
+   Result := pOrcamentoModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
 end;
-function TOrcamentoDao.incluir(pOrcamentoModel: TOrcamentoModel): String;
+
+class function TOrcamentoDao.getNewIface(pIConexao: IConexao): ITOrcamentoDao;
+begin
+  Result := TImplObjetoOwner<TOrcamentoDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TOrcamentoDao.incluir(pOrcamentoModel: ITOrcamentoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -227,7 +240,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pOrcamentoModel.NUMERO_ORC := vIConexao.Generetor('GEN_ORCAMENTO');
+    pOrcamentoModel.objeto.NUMERO_ORC := vIConexao.Generetor('GEN_ORCAMENTO');
     setParams(lQry, pOrcamentoModel);
     lQry.Open;
 
@@ -327,28 +340,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TOrcamentoDao.setParams(var pQry: TFDQuery; pOrcamentoModel: TOrcamentoModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TOrcamentoDao.setParams(var pQry: TFDQuery; pOrcamentoModel: ITOrcamentoModel);
 begin
-  lTabela := vConstrutor.getColumns('ORCAMENTO');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TOrcamentoModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pOrcamentoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pOrcamentoModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('ORCAMENTO',pQry,pOrcamentoModel.objeto);
 end;
 
 procedure TOrcamentoDao.SetStartRecordView(const Value: String);
