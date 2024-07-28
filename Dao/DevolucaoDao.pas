@@ -9,14 +9,17 @@ uses
   System.StrUtils,
   Spring.Collections,
   System.Variants,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao,
   Terasoft.Utils,
   Terasoft.ConstrutorDao;
 
 type
+  TDevolucaoDao = class;
+  ITDevolucaoDao=IObject<TDevolucaoDao>;
   TDevolucaoDao = class
-
   private
+    [weak] mySelf: ITDevolucaoDao;
     vIConexao 	: IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -42,8 +45,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITDevolucaoDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -54,15 +59,15 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
 
-    function incluir(pDevolucaoModel: TDevolucaoModel): String;
-    function alterar(pDevolucaoModel: TDevolucaoModel): String;
-    function excluir(pDevolucaoModel: TDevolucaoModel): String;
+    function incluir(pDevolucaoModel: ITDevolucaoModel): String;
+    function alterar(pDevolucaoModel: ITDevolucaoModel): String;
+    function excluir(pDevolucaoModel: ITDevolucaoModel): String;
 
-    function carregaClasse(pID : String): TDevolucaoModel;
+    function carregaClasse(pID : String): ITDevolucaoModel;
 
     function obterLista: IFDDataset;
 
-    procedure setParams(var pQry: TFDQuery; pDevolucaoModel: TDevolucaoModel);
+    procedure setParams(var pQry: TFDQuery; pDevolucaoModel: ITDevolucaoModel);
 
 end;
 
@@ -73,13 +78,13 @@ uses
 
 { TDevolucao }
 
-function TDevolucaoDao.carregaClasse(pID : String): TDevolucaoModel;
+function TDevolucaoDao.carregaClasse(pID : String): ITDevolucaoModel;
 var
   lQry: TFDQuery;
-  lModel: TDevolucaoModel;
+  lModel: ITDevolucaoModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TDevolucaoModel.Create(vIConexao);
+  lModel   := TDevolucaoModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -88,31 +93,31 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID               := lQry.FieldByName('ID').AsString;
-    lModel.PEDIDO           := lQry.FieldByName('PEDIDO').AsString;
-    lModel.CLIENTE          := lQry.FieldByName('CLIENTE').AsString;
-    lModel.DATA             := lQry.FieldByName('DATA').AsString;
-    lModel.VALOR_TOTAL      := lQry.FieldByName('VALOR_TOTAL').AsString;
-    lModel.USUARIO          := lQry.FieldByName('USUARIO').AsString;
-    lModel.OBS              := lQry.FieldByName('OBS').AsString;
-    lModel.LOJA             := lQry.FieldByName('LOJA').AsString;
-    lModel.VALE             := lQry.FieldByName('VALE').AsString;
-    lModel.DATA_USO_VALE    := lQry.FieldByName('DATA_USO_VALE').AsString;
-    lModel.USO_VALE         := lQry.FieldByName('USO_VALE').AsString;
-    lModel.NF_ENTRADA       := lQry.FieldByName('NF_ENTRADA').AsString;
-    lModel.DESCONTO         := lQry.FieldByName('DESCONTO').AsString;
-    lModel.VENDEDOR         := lQry.FieldByName('VENDEDOR').AsString;
-    lModel.CODIGO_TIP       := lQry.FieldByName('CODIGO_TIP').AsString;
-    lModel.HORA             := lQry.FieldByName('HORA').AsString;
-    lModel.VALOR_IPI        := lQry.FieldByName('VALOR_IPI').AsString;
-    lModel.VALOR_ST         := lQry.FieldByName('VALOR_ST').AsString;
-    lModel.FRETE            := lQry.FieldByName('FRETE').AsString;
-    lModel.VALOR_SUFRAMA    := lQry.FieldByName('VALOR_SUFRAMA').AsString;
-    lModel.STATUS_ID        := lQry.FieldByName('STATUS_ID').AsString;
-    lModel.PORTADOR_ID      := lQry.FieldByName('PORTADOR_ID').AsString;
-    lModel.SYSTIME          := lQry.FieldByName('SYSTIME').AsString;
-    lModel.VALOR_ACRESCIMO  := lQry.FieldByName('VALOR_ACRESCIMO').AsString;
-    lModel.VFCPST           := lQry.FieldByName('VFCPST').AsString;
+    lModel.objeto.ID               := lQry.FieldByName('ID').AsString;
+    lModel.objeto.PEDIDO           := lQry.FieldByName('PEDIDO').AsString;
+    lModel.objeto.CLIENTE          := lQry.FieldByName('CLIENTE').AsString;
+    lModel.objeto.DATA             := lQry.FieldByName('DATA').AsString;
+    lModel.objeto.VALOR_TOTAL      := lQry.FieldByName('VALOR_TOTAL').AsString;
+    lModel.objeto.USUARIO          := lQry.FieldByName('USUARIO').AsString;
+    lModel.objeto.OBS              := lQry.FieldByName('OBS').AsString;
+    lModel.objeto.LOJA             := lQry.FieldByName('LOJA').AsString;
+    lModel.objeto.VALE             := lQry.FieldByName('VALE').AsString;
+    lModel.objeto.DATA_USO_VALE    := lQry.FieldByName('DATA_USO_VALE').AsString;
+    lModel.objeto.USO_VALE         := lQry.FieldByName('USO_VALE').AsString;
+    lModel.objeto.NF_ENTRADA       := lQry.FieldByName('NF_ENTRADA').AsString;
+    lModel.objeto.DESCONTO         := lQry.FieldByName('DESCONTO').AsString;
+    lModel.objeto.VENDEDOR         := lQry.FieldByName('VENDEDOR').AsString;
+    lModel.objeto.CODIGO_TIP       := lQry.FieldByName('CODIGO_TIP').AsString;
+    lModel.objeto.HORA             := lQry.FieldByName('HORA').AsString;
+    lModel.objeto.VALOR_IPI        := lQry.FieldByName('VALOR_IPI').AsString;
+    lModel.objeto.VALOR_ST         := lQry.FieldByName('VALOR_ST').AsString;
+    lModel.objeto.FRETE            := lQry.FieldByName('FRETE').AsString;
+    lModel.objeto.VALOR_SUFRAMA    := lQry.FieldByName('VALOR_SUFRAMA').AsString;
+    lModel.objeto.STATUS_ID        := lQry.FieldByName('STATUS_ID').AsString;
+    lModel.objeto.PORTADOR_ID      := lQry.FieldByName('PORTADOR_ID').AsString;
+    lModel.objeto.SYSTIME          := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.VALOR_ACRESCIMO  := lQry.FieldByName('VALOR_ACRESCIMO').AsString;
+    lModel.objeto.VFCPST           := lQry.FieldByName('VFCPST').AsString;
 
     Result := lModel;
   finally
@@ -120,7 +125,7 @@ begin
   end;
 end;
 
-constructor TDevolucaoDao.Create(pIConexao : IConexao);
+constructor TDevolucaoDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -133,7 +138,7 @@ begin
   inherited;
 end;
 
-function TDevolucaoDao.incluir(pDevolucaoModel: TDevolucaoModel): String;
+function TDevolucaoDao.incluir(pDevolucaoModel: ITDevolucaoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -144,7 +149,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pDevolucaoModel.ID := vIConexao.Generetor('GEN_DEVOLUCAO');
+    pDevolucaoModel.objeto.ID := vIConexao.Generetor('GEN_DEVOLUCAO');
     setParams(lQry, pDevolucaoModel);
     lQry.Open;
 
@@ -156,7 +161,7 @@ begin
   end;
 end;
 
-function TDevolucaoDao.alterar(pDevolucaoModel: TDevolucaoModel): String;
+function TDevolucaoDao.alterar(pDevolucaoModel: ITDevolucaoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -170,7 +175,7 @@ begin
     setParams(lQry, pDevolucaoModel);
     lQry.ExecSQL;
 
-    Result := pDevolucaoModel.ID;
+    Result := pDevolucaoModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -178,20 +183,26 @@ begin
   end;
 end;
 
-function TDevolucaoDao.excluir(pDevolucaoModel: TDevolucaoModel): String;
+function TDevolucaoDao.excluir(pDevolucaoModel: ITDevolucaoModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from devolucao where id = :id' ,[pDevolucaoModel.ID]);
+   lQry.ExecSQL('delete from devolucao where id = :id' ,[pDevolucaoModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pDevolucaoModel.ID;
+   Result := pDevolucaoModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TDevolucaoDao.getNewIface(pIConexao: IConexao): ITDevolucaoDao;
+begin
+  Result := TImplObjetoOwner<TDevolucaoDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TDevolucaoDao.where: String;
@@ -309,28 +320,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TDevolucaoDao.setParams(var pQry: TFDQuery; pDevolucaoModel: TDevolucaoModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TDevolucaoDao.setParams(var pQry: TFDQuery; pDevolucaoModel: ITDevolucaoModel);
 begin
-  lTabela := vConstrutor.getColumns('DEVOLUCAO');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TDevolucaoModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pDevolucaoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pDevolucaoModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('DEVOLUCAO',pQry,pDevolucaoModel.objeto);
 end;
 
 procedure TDevolucaoDao.SetStartRecordView(const Value: String);

@@ -189,20 +189,20 @@ procedure TDevolucaoItensModel.gerarEstoque;
 var
   lMovimentoModel   : TMovimentoModel;
   lProdutosModel    : ITProdutosModel;
-  lDevolucaoModel   : TDevolucaoModel;
+  lDevolucaoModel   : ITDevolucaoModel;
 begin
   lMovimentoModel   := TMovimentoModel.Create(vIConexao);
   lProdutosModel    := TProdutosModel.getNewIface(vIConexao);
-  lDevolucaoModel   := TDevolucaoModel.Create(vIConexao);
+  lDevolucaoModel   := TDevolucaoModel.getNewIface(vIConexao);
 
   try
-    lDevolucaoModel := lDevolucaoModel.carregaClasse(self.ID);
+    lDevolucaoModel := lDevolucaoModel.objeto.carregaClasse(self.ID);
 
     lMovimentoModel.Acao := tacIncluir;
-    lMovimentoModel.DOCUMENTO_MOV   := lDevolucaoModel.ID;
+    lMovimentoModel.DOCUMENTO_MOV   := lDevolucaoModel.objeto.ID;
     lMovimentoModel.CODIGO_PRO      := self.FPRODUTO;
-    lMovimentoModel.CODIGO_FOR      := lDevolucaoModel.CLIENTE;
-    lMovimentoModel.OBS_MOV         := 'Troca Venda: ' + lDevolucaoModel.PEDIDO;
+    lMovimentoModel.CODIGO_FOR      := lDevolucaoModel.objeto.CLIENTE;
+    lMovimentoModel.OBS_MOV         := 'Troca Venda: ' + lDevolucaoModel.objeto.PEDIDO;
     lMovimentoModel.TIPO_DOC        := 'D';
     lMovimentoModel.DATA_MOV        := DateToStr(vIConexao.DataServer);
     lMovimentoModel.DATA_DOC        := DateToStr(vIConexao.DataServer);
@@ -211,7 +211,7 @@ begin
     lMovimentoModel.CUSTO_ATUAL     := '0';
     lMovimentoModel.VENDA_ATUAL     := '0';
     lMovimentoModel.STATUS          := '0';
-    lMovimentoModel.LOJA            := lDevolucaoModel.LOJA;
+    lMovimentoModel.LOJA            := lDevolucaoModel.objeto.LOJA;
     lMovimentoModel.tabela_origem   := 'DEVOLUCAOITENS';
     lMovimentoModel.id_origem       := self.FID;
     lMovimentoModel.Salvar;
