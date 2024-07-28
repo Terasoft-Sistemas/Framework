@@ -386,23 +386,23 @@ end;
 
 procedure TContasReceberModel.excluirVendaCartao;
 var
-  lVendaCartaoModel: TVendaCartaoModel;
+  lVendaCartaoModel: ITVendaCartaoModel;
 begin
   if self.FFATURA_REC = '' then
     CriaException('Fatura não informada.');
 
-  lVendaCartaoModel := TVendaCartaoModel.Create(vIConexao);
+  lVendaCartaoModel := TVendaCartaoModel.getNewIface(vIConexao);
   try
-    lVendaCartaoModel.WhereView := ' and vendacartao.fatura_id = ' + QuotedStr(self.FFATURA_REC);
-    lVendaCartaoModel.obterLista;
+    lVendaCartaoModel.objeto.WhereView := ' and vendacartao.fatura_id = ' + QuotedStr(self.FFATURA_REC);
+    lVendaCartaoModel.objeto.obterLista;
 
-    for lVendaCartaoModel in lVendaCartaoModel.VendaCartaosLista do
+    for lVendaCartaoModel in lVendaCartaoModel.objeto.VendaCartaosLista do
     begin
-      lVendaCartaoModel.Acao := tacExcluir;
-      lVendaCartaoModel.Salvar;
+      lVendaCartaoModel.objeto.Acao := tacExcluir;
+      lVendaCartaoModel.objeto.Salvar;
     end;
   finally
-    lVendaCartaoModel.Free;
+    lVendaCartaoModel:=nil;
   end;
 end;
 

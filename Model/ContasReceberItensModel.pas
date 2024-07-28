@@ -536,13 +536,13 @@ end;
 procedure TContasReceberItensModel.excluirBaixa;
 var
   lCaixaModel,p: ITCaixaModel;
-  lVendaCartaoModel, lVendaCartaoExclusao: TVendaCartaoModel;
+  lVendaCartaoModel, lVendaCartaoExclusao: ITVendaCartaoModel;
   lRecebimentoCartaoModel, lRecebimentoExclusao: ITRecebimentoCartaoModel;
   i: Integer;
 begin
   lCaixaModel             := TCaixaModel.getNewIface(vIConexao);
-  lVendaCartaoModel       := TVendaCartaoModel.Create(vIConexao);
-  lVendaCartaoExclusao    := TVendaCartaoModel.Create(vIConexao);
+  lVendaCartaoModel       := TVendaCartaoModel.getNewIface(vIConexao);
+  lVendaCartaoExclusao    := TVendaCartaoModel.getNewIface(vIConexao);
   lRecebimentoCartaoModel := TRecebimentoCartaoModel.getNewIface(vIConexao);
   lRecebimentoExclusao    := TRecebimentoCartaoModel.getNewIface(vIConexao);
 
@@ -557,14 +557,13 @@ begin
       lCaixaModel.objeto.excluirRegistro(p.objeto.NUMERO_CAI);
     end;
 
-    lVendaCartaoModel.WhereView := ' and vendacartao.numero_venda = ' + QuotedStr(self.FPEDIDO_REC) +
+    lVendaCartaoModel.objeto.WhereView := ' and vendacartao.numero_venda = ' + QuotedStr(self.FPEDIDO_REC) +
                                    ' and vendacartao.parcela_car = '+ self.FPACELA_REC;
-    lVendaCartaoModel.obterLista;
-    for i := 0 to lVendaCartaoModel.VendaCartaosLista.Count -1 do
+    lVendaCartaoModel.objeto.obterLista;
+    for lVendaCartaoExclusao in lVendaCartaoModel.objeto.VendaCartaosLista do
     begin
-      lVendaCartaoExclusao := lVendaCartaoModel.VendaCartaosLista[i];
-      lVendaCartaoExclusao.Acao := tacExcluir;
-      lVendaCartaoExclusao.Salvar;
+      lVendaCartaoExclusao.objeto.Acao := tacExcluir;
+      lVendaCartaoExclusao.objeto.Salvar;
     end;
 
     lRecebimentoCartaoModel.objeto.WhereView := ' and recebimento_cartao.fatura  = ' + QuotedStr(self.FFATURA_REC) +
@@ -583,7 +582,8 @@ begin
   finally
     lRecebimentoCartaoModel:=nil;
     lRecebimentoExclusao:=nil;
-    lVendaCartaoModel.Free;
+    lVendaCartaoModel:=nil;
+    lVendaCartaoExclusao:=nil;
     lCaixaModel:=nil;
   end;
 end;
@@ -762,32 +762,32 @@ end;
 
 procedure TContasReceberItensModel.gerarVendaCartao;
 var
-  lVendaCartaoModel : TVendaCartaoModel;
+  lVendaCartaoModel : ITVendaCartaoModel;
 begin
   if self.FIDAdmCartao = '' then
     CriaException('ID do cartão não informado');
   if self.FIDPedidoCartao = '' then
     CriaException('ID do pedido não informado');
-  lVendaCartaoModel := TVendaCartaoModel.Create(vIConexao);
+  lVendaCartaoModel := TVendaCartaoModel.getNewIface(vIConexao);
   try
-    lVendaCartaoModel.Acao := tacIncluir;
-    lVendaCartaoModel.NUMERO_CAR      := '1';
-    lVendaCartaoModel.AUTORIZACAO_CAR := '1';
-    lVendaCartaoModel.FATURA_ID       := self.FFATURA_REC;
-    lVendaCartaoModel.PARCELA_CAR     := self.FPACELA_REC;
-    lVendaCartaoModel.PARCELAS_CAR    := self.FTOTALPARCELAS_REC;
-    lVendaCartaoModel.PARCELA_TEF     := self.FPACELA_REC;
-    lVendaCartaoModel.PARCELAS_TEF    := self.FTOTALPARCELAS_REC;
-    lVendaCartaoModel.VALOR_CAR       := self.FVLRPARCELA_REC;
-    lVendaCartaoModel.CODIGO_CLI      := self.FCODIGO_CLI;
-    lVendaCartaoModel.NUMERO_VENDA    := self.FIDPedidoCartao;
-    lVendaCartaoModel.ADM_CAR         := self.FIDAdmCartao;
-    lVendaCartaoModel.VENCIMENTO_CAR  := self.FVENCIMENTO_REC;
-    lVendaCartaoModel.VENDA_CAR       := DateToStr(vIConexao.DataServer);
-    lVendaCartaoModel.LOJA            := self.FLOJA;
-    lVendaCartaoModel.Salvar;
+    lVendaCartaoModel.objeto.Acao := tacIncluir;
+    lVendaCartaoModel.objeto.NUMERO_CAR      := '1';
+    lVendaCartaoModel.objeto.AUTORIZACAO_CAR := '1';
+    lVendaCartaoModel.objeto.FATURA_ID       := self.FFATURA_REC;
+    lVendaCartaoModel.objeto.PARCELA_CAR     := self.FPACELA_REC;
+    lVendaCartaoModel.objeto.PARCELAS_CAR    := self.FTOTALPARCELAS_REC;
+    lVendaCartaoModel.objeto.PARCELA_TEF     := self.FPACELA_REC;
+    lVendaCartaoModel.objeto.PARCELAS_TEF    := self.FTOTALPARCELAS_REC;
+    lVendaCartaoModel.objeto.VALOR_CAR       := self.FVLRPARCELA_REC;
+    lVendaCartaoModel.objeto.CODIGO_CLI      := self.FCODIGO_CLI;
+    lVendaCartaoModel.objeto.NUMERO_VENDA    := self.FIDPedidoCartao;
+    lVendaCartaoModel.objeto.ADM_CAR         := self.FIDAdmCartao;
+    lVendaCartaoModel.objeto.VENCIMENTO_CAR  := self.FVENCIMENTO_REC;
+    lVendaCartaoModel.objeto.VENDA_CAR       := DateToStr(vIConexao.DataServer);
+    lVendaCartaoModel.objeto.LOJA            := self.FLOJA;
+    lVendaCartaoModel.objeto.Salvar;
   finally
-    lVendaCartaoModel.Free;
+    lVendaCartaoModel:=nil;
   end;
 end;
 

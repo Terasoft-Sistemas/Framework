@@ -10,18 +10,22 @@ uses
   Spring.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao,
   Terasoft.ConstrutorDao,
   Terasoft.Utils;
 
 type
-  TVendaCartaoDao = class
+  TVendaCartaoDao = class;
+  ITVendaCartaoDao=IObject<TVendaCartaoDao>;
 
+  TVendaCartaoDao = class
   private
+    [weak] mySelf: ITVendaCartaoDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FVendaCartaosLista: IList<TVendaCartaoModel>;
+    FVendaCartaosLista: IList<ITVendaCartaoModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -32,7 +36,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetVendaCartaosLista(const Value: IList<TVendaCartaoModel>);
+    procedure SetVendaCartaosLista(const Value: IList<ITVendaCartaoModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -43,13 +47,15 @@ type
 
     function montaCondicaoQuery: String;
 
-    procedure setParams(var pQry: TFDQuery; pVendaCartaoModel: TVendaCartaoModel);
+    procedure setParams(var pQry: TFDQuery; pVendaCartaoModel: ITVendaCartaoModel);
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property VendaCartaosLista: IList<TVendaCartaoModel> read FVendaCartaosLista write SetVendaCartaosLista;
+    class function getNewIface(pIConexao: IConexao): ITVendaCartaoDao;
+
+    property VendaCartaosLista: IList<ITVendaCartaoModel> read FVendaCartaosLista write SetVendaCartaosLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -59,11 +65,11 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(AVendaCartaoModel: TVendaCartaoModel): String;
-    function alterar(AVendaCartaoModel: TVendaCartaoModel): String;
-    function excluir(AVendaCartaoModel: TVendaCartaoModel): String;
+    function incluir(AVendaCartaoModel: ITVendaCartaoModel): String;
+    function alterar(AVendaCartaoModel: ITVendaCartaoModel): String;
+    function excluir(AVendaCartaoModel: ITVendaCartaoModel): String;
 
-    function carregaClasse(pID : String) : TVendaCartaoModel;
+    function carregaClasse(pID : String) : ITVendaCartaoModel;
 
     procedure obterLista;
 
@@ -76,13 +82,13 @@ uses
 
 { TVendaCartao }
 
-function TVendaCartaoDao.carregaClasse(pID: String): TVendaCartaoModel;
+function TVendaCartaoDao.carregaClasse(pID: String): ITVendaCartaoModel;
 var
   lQry: TFDQuery;
-  lModel: TVendaCartaoModel;
+  lModel: ITVendaCartaoModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TVendaCartaoModel.Create(vIConexao);
+  lModel   := TVendaCartaoModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -91,27 +97,27 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID                   := lQry.FieldByName('ID').AsString;
-    lModel.NUMERO_CAR           := lQry.FieldByName('NUMERO_CAR').AsString;
-    lModel.AUTORIZACAO_CAR      := lQry.FieldByName('AUTORIZACAO_CAR').AsString;
-    lModel.PARCELA_CAR          := lQry.FieldByName('PARCELA_CAR').AsString;
-    lModel.PARCELAS_CAR         := lQry.FieldByName('PARCELAS_CAR').AsString;
-    lModel.VALOR_CAR            := lQry.FieldByName('VALOR_CAR').AsString;
-    lModel.CODIGO_CLI           := lQry.FieldByName('CODIGO_CLI').AsString;
-    lModel.ADM_CAR              := lQry.FieldByName('ADM_CAR').AsString;
-    lModel.VENDA_CAR            := lQry.FieldByName('VENDA_CAR').AsString;
-    lModel.PARCELADO_CAR        := lQry.FieldByName('PARCELADO_CAR').AsString;
-    lModel.VENCIMENTO_CAR       := lQry.FieldByName('VENCIMENTO_CAR').AsString;
-    lModel.NUMERO_VENDA         := lQry.FieldByName('NUMERO_VENDA').AsString;
-    lModel.LOJA                 := lQry.FieldByName('LOJA').AsString;
-    lModel.NUMERO_OS            := lQry.FieldByName('NUMERO_OS').AsString;
-    lModel.FATURA_ID            := lQry.FieldByName('FATURA_ID').AsString;
-    lModel.CANCELAMENTO_DATA    := lQry.FieldByName('CANCELAMENTO_DATA').AsString;
-    lModel.CANCELAMENTO_CODIGO  := lQry.FieldByName('CANCELAMENTO_CODIGO').AsString;
-    lModel.SYSTIME              := lQry.FieldByName('SYSTIME').AsString;
-    lModel.TAXA                 := lQry.FieldByName('TAXA').AsString;
-    lModel.PARCELA_TEF          := lQry.FieldByName('PARCELA_TEF').AsString;
-    lModel.PARCELAS_TEF         := lQry.FieldByName('PARCELAS_TEF').AsString;
+    lModel.objeto.ID                   := lQry.FieldByName('ID').AsString;
+    lModel.objeto.NUMERO_CAR           := lQry.FieldByName('NUMERO_CAR').AsString;
+    lModel.objeto.AUTORIZACAO_CAR      := lQry.FieldByName('AUTORIZACAO_CAR').AsString;
+    lModel.objeto.PARCELA_CAR          := lQry.FieldByName('PARCELA_CAR').AsString;
+    lModel.objeto.PARCELAS_CAR         := lQry.FieldByName('PARCELAS_CAR').AsString;
+    lModel.objeto.VALOR_CAR            := lQry.FieldByName('VALOR_CAR').AsString;
+    lModel.objeto.CODIGO_CLI           := lQry.FieldByName('CODIGO_CLI').AsString;
+    lModel.objeto.ADM_CAR              := lQry.FieldByName('ADM_CAR').AsString;
+    lModel.objeto.VENDA_CAR            := lQry.FieldByName('VENDA_CAR').AsString;
+    lModel.objeto.PARCELADO_CAR        := lQry.FieldByName('PARCELADO_CAR').AsString;
+    lModel.objeto.VENCIMENTO_CAR       := lQry.FieldByName('VENCIMENTO_CAR').AsString;
+    lModel.objeto.NUMERO_VENDA         := lQry.FieldByName('NUMERO_VENDA').AsString;
+    lModel.objeto.LOJA                 := lQry.FieldByName('LOJA').AsString;
+    lModel.objeto.NUMERO_OS            := lQry.FieldByName('NUMERO_OS').AsString;
+    lModel.objeto.FATURA_ID            := lQry.FieldByName('FATURA_ID').AsString;
+    lModel.objeto.CANCELAMENTO_DATA    := lQry.FieldByName('CANCELAMENTO_DATA').AsString;
+    lModel.objeto.CANCELAMENTO_CODIGO  := lQry.FieldByName('CANCELAMENTO_CODIGO').AsString;
+    lModel.objeto.SYSTIME              := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.TAXA                 := lQry.FieldByName('TAXA').AsString;
+    lModel.objeto.PARCELA_TEF          := lQry.FieldByName('PARCELA_TEF').AsString;
+    lModel.objeto.PARCELAS_TEF         := lQry.FieldByName('PARCELAS_TEF').AsString;
 
     Result := lModel;
   finally
@@ -119,7 +125,7 @@ begin
   end;
 end;
 
-constructor TVendaCartaoDao.Create(pIConexao : IConexao);
+constructor TVendaCartaoDao._Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -133,7 +139,7 @@ begin
   inherited;
 end;
 
-function TVendaCartaoDao.incluir(AVendaCartaoModel: TVendaCartaoModel): String;
+function TVendaCartaoDao.incluir(AVendaCartaoModel: ITVendaCartaoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -144,7 +150,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    AVendaCartaoModel.id := vIConexao.Generetor('GEN_VENDACARTAO');
+    AVendaCartaoModel.objeto.id := vIConexao.Generetor('GEN_VENDACARTAO');
     setParams(lQry, AVendaCartaoModel);
     lQry.Open;
 
@@ -156,7 +162,7 @@ begin
   end;
 end;
 
-function TVendaCartaoDao.alterar(AVendaCartaoModel: TVendaCartaoModel): String;
+function TVendaCartaoDao.alterar(AVendaCartaoModel: ITVendaCartaoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -170,7 +176,7 @@ begin
     setParams(lQry, AVendaCartaoModel);
     lQry.ExecSQL;
 
-    Result := AVendaCartaoModel.ID;
+    Result := AVendaCartaoModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -178,20 +184,25 @@ begin
   end;
 end;
 
-function TVendaCartaoDao.excluir(AVendaCartaoModel: TVendaCartaoModel): String;
+function TVendaCartaoDao.excluir(AVendaCartaoModel: ITVendaCartaoModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from vendacartao where ID = :ID',[AVendaCartaoModel.ID]);
+   lQry.ExecSQL('delete from vendacartao where ID = :ID',[AVendaCartaoModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := AVendaCartaoModel.ID;
+   Result := AVendaCartaoModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TVendaCartaoDao.getNewIface(pIConexao: IConexao): ITVendaCartaoDao;
+begin
+
 end;
 
 function TVendaCartaoDao.montaCondicaoQuery: String;
@@ -234,11 +245,11 @@ procedure TVendaCartaoDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TVendaCartaoModel;
+  modelo: ITVendaCartaoModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FVendaCartaosLista := TCollections.CreateList<TVendaCartaoModel>(true);
+  FVendaCartaosLista := TCollections.CreateList<ITVendaCartaoModel>;
 
   try
 
@@ -262,30 +273,30 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TVendaCartaoModel.Create(vIConexao);
+      modelo := TVendaCartaoModel.getNewIface(vIConexao);
       FVendaCartaosLista.Add(modelo);
 
-      modelo.ID                  := lQry.FieldByName('ID').AsString;
-      modelo.NUMERO_CAR          := lQry.FieldByName('NUMERO_CAR').AsString;
-      modelo.AUTORIZACAO_CAR     := lQry.FieldByName('AUTORIZACAO_CAR').AsString;
-      modelo.PARCELA_CAR         := lQry.FieldByName('PARCELA_CAR').AsString;
-      modelo.PARCELAS_CAR        := lQry.FieldByName('PARCELAS_CAR').AsString;
-      modelo.VALOR_CAR           := lQry.FieldByName('VALOR_CAR').AsString;
-      modelo.CODIGO_CLI          := lQry.FieldByName('CODIGO_CLI').AsString;
-      modelo.ADM_CAR             := lQry.FieldByName('ADM_CAR').AsString;
-      modelo.VENDA_CAR           := lQry.FieldByName('VENDA_CAR').AsString;
-      modelo.PARCELADO_CAR       := lQry.FieldByName('PARCELADO_CAR').AsString;
-      modelo.VENCIMENTO_CAR      := lQry.FieldByName('VENCIMENTO_CAR').AsString;
-      modelo.NUMERO_VENDA        := lQry.FieldByName('NUMERO_VENDA').AsString;
-      modelo.LOJA                := lQry.FieldByName('LOJA').AsString;
-      modelo.NUMERO_OS           := lQry.FieldByName('NUMERO_OS').AsString;
-      modelo.FATURA_ID           := lQry.FieldByName('FATURA_ID').AsString;
-      modelo.CANCELAMENTO_DATA   := lQry.FieldByName('CANCELAMENTO_DATA').AsString;
-      modelo.CANCELAMENTO_CODIGO := lQry.FieldByName('CANCELAMENTO_CODIGO').AsString;
-      modelo.SYSTIME             := lQry.FieldByName('SYSTIME').AsString;
-      modelo.TAXA                := lQry.FieldByName('TAXA').AsString;
-      modelo.PARCELA_TEF         := lQry.FieldByName('PARCELA_TEF').AsString;
-      modelo.PARCELAS_TEF        := lQry.FieldByName('PARCELAS_TEF').AsString;
+      modelo.objeto.ID                  := lQry.FieldByName('ID').AsString;
+      modelo.objeto.NUMERO_CAR          := lQry.FieldByName('NUMERO_CAR').AsString;
+      modelo.objeto.AUTORIZACAO_CAR     := lQry.FieldByName('AUTORIZACAO_CAR').AsString;
+      modelo.objeto.PARCELA_CAR         := lQry.FieldByName('PARCELA_CAR').AsString;
+      modelo.objeto.PARCELAS_CAR        := lQry.FieldByName('PARCELAS_CAR').AsString;
+      modelo.objeto.VALOR_CAR           := lQry.FieldByName('VALOR_CAR').AsString;
+      modelo.objeto.CODIGO_CLI          := lQry.FieldByName('CODIGO_CLI').AsString;
+      modelo.objeto.ADM_CAR             := lQry.FieldByName('ADM_CAR').AsString;
+      modelo.objeto.VENDA_CAR           := lQry.FieldByName('VENDA_CAR').AsString;
+      modelo.objeto.PARCELADO_CAR       := lQry.FieldByName('PARCELADO_CAR').AsString;
+      modelo.objeto.VENCIMENTO_CAR      := lQry.FieldByName('VENCIMENTO_CAR').AsString;
+      modelo.objeto.NUMERO_VENDA        := lQry.FieldByName('NUMERO_VENDA').AsString;
+      modelo.objeto.LOJA                := lQry.FieldByName('LOJA').AsString;
+      modelo.objeto.NUMERO_OS           := lQry.FieldByName('NUMERO_OS').AsString;
+      modelo.objeto.FATURA_ID           := lQry.FieldByName('FATURA_ID').AsString;
+      modelo.objeto.CANCELAMENTO_DATA   := lQry.FieldByName('CANCELAMENTO_DATA').AsString;
+      modelo.objeto.CANCELAMENTO_CODIGO := lQry.FieldByName('CANCELAMENTO_CODIGO').AsString;
+      modelo.objeto.SYSTIME             := lQry.FieldByName('SYSTIME').AsString;
+      modelo.objeto.TAXA                := lQry.FieldByName('TAXA').AsString;
+      modelo.objeto.PARCELA_TEF         := lQry.FieldByName('PARCELA_TEF').AsString;
+      modelo.objeto.PARCELAS_TEF        := lQry.FieldByName('PARCELAS_TEF').AsString;
 
       lQry.Next;
     end;
@@ -327,29 +338,11 @@ begin
   FOrderView := Value;
 end;
 
-procedure TVendaCartaoDao.setParams(var pQry: TFDQuery; pVendaCartaoModel: TVendaCartaoModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TVendaCartaoDao.setParams(var pQry: TFDQuery; pVendaCartaoModel: ITVendaCartaoModel);
 begin
-  lTabela := vConstrutor.getColumns('VENDACARTAO');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TVendaCartaoModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pVendaCartaoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pVendaCartaoModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('VENDACARTAO',pQry,pVendaCartaoModel.objeto);
 end;
+
 procedure TVendaCartaoDao.SetStartRecordView(const Value: String);
 begin
   FStartRecordView := Value;
