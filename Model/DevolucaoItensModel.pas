@@ -5,14 +5,17 @@ interface
 uses
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao,
   FireDAC.Comp.Client;
 
 type
+  TDevolucaoItensModel = class;
+  ITDevolucaoItensModel=IObject<TDevolucaoItensModel>;
 
   TDevolucaoItensModel = class
-
   private
+    [weak] mySelf: ITDevolucaoItensModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -101,15 +104,17 @@ type
     property VALOR_ACRESCIMO: Variant read FVALOR_ACRESCIMO write SetVALOR_ACRESCIMO;
     property VFCPST: Variant read FVFCPST write SetVFCPST;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITDevolucaoItensModel;
+
     function Incluir: String;
-    function Alterar(pID, pProduto, pITEM : String): TDevolucaoItensModel;
+    function Alterar(pID, pProduto, pITEM : String): ITDevolucaoItensModel;
     function Excluir(pID, pProduto, pITEM : String): String;
     function Salvar : String;
 
-    function carregaClasse(pID, pProduto, pItem : String): TDevolucaoItensModel;
+    function carregaClasse(pID, pProduto, pItem : String): ITDevolucaoItensModel;
     function obterLista: IFDDataset;
     function proximoItem(pDevolucao : String): String;
     function calculaTotais(pDevolucao : String): IFDDataset;
@@ -135,14 +140,14 @@ uses
 
 { TDevolucaoItensModel }
 
-function TDevolucaoItensModel.Alterar(pID, pProduto, pITEM: String): TDevolucaoItensModel;
+function TDevolucaoItensModel.Alterar(pID, pProduto, pITEM: String): ITDevolucaoItensModel;
 var
-  lDevolucaoItensModel : TDevolucaoItensModel;
+  lDevolucaoItensModel : ITDevolucaoItensModel;
 begin
-  lDevolucaoItensModel := TDevolucaoItensModel.Create(vIConexao);
+  lDevolucaoItensModel := TDevolucaoItensModel.getNewIface(vIConexao);
   try
-    lDevolucaoItensModel       := lDevolucaoItensModel.carregaClasse(pID, pProduto, pITEM);
-    lDevolucaoItensModel.Acao  := tacAlterar;
+    lDevolucaoItensModel       := lDevolucaoItensModel.objeto.carregaClasse(pID, pProduto, pITEM);
+    lDevolucaoItensModel.objeto.Acao  := tacAlterar;
     Result            := lDevolucaoItensModel;
   finally
   end;
@@ -224,6 +229,12 @@ begin
   end;
 end;
 
+class function TDevolucaoItensModel.getNewIface(pIConexao: IConexao): ITDevolucaoItensModel;
+begin
+  Result := TImplObjetoOwner<TDevolucaoItensModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TDevolucaoItensModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
@@ -232,30 +243,30 @@ end;
 
 function TDevolucaoItensModel.calculaTotais(pDevolucao: String): IFDDataset;
 var
-  lDevolucaoItensDao : TDevolucaoItensDao;
+  lDevolucaoItensDao : ITDevolucaoItensDao;
 begin
-  lDevolucaoItensDao := TDevolucaoItensDao.Create(vIConexao);
+  lDevolucaoItensDao := TDevolucaoItensDao.getNewIface(vIConexao);
   try
-    Result := lDevolucaoItensDao.calculaTotais(pDevolucao);
+    Result := lDevolucaoItensDao.objeto.calculaTotais(pDevolucao);
   finally
-    lDevolucaoItensDao.Free;
+    lDevolucaoItensDao:=nil;
   end;
 end;
 
-function TDevolucaoItensModel.carregaClasse(pID, pProduto, pItem : String): TDevolucaoItensModel;
+function TDevolucaoItensModel.carregaClasse(pID, pProduto, pItem : String): ITDevolucaoItensModel;
 var
-  lDevolucaoItensDao: TDevolucaoItensDao;
+  lDevolucaoItensDao: ITDevolucaoItensDao;
 begin
-  lDevolucaoItensDao := TDevolucaoItensDao.Create(vIConexao);
+  lDevolucaoItensDao := TDevolucaoItensDao.getNewIface(vIConexao);
 
   try
-    Result := lDevolucaoItensDao.carregaClasse(pID, pProduto, pItem);
+    Result := lDevolucaoItensDao.objeto.carregaClasse(pID, pProduto, pItem);
   finally
-    lDevolucaoItensDao.Free;
+    lDevolucaoItensDao:=nil;
   end;
 end;
 
-constructor TDevolucaoItensModel.Create(pIConexao : IConexao);
+constructor TDevolucaoItensModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -268,54 +279,54 @@ end;
 
 function TDevolucaoItensModel.obterLista: IFDDataset;
 var
-  lDevolucaoItensLista: TDevolucaoItensDao;
+  lDevolucaoItensLista: ITDevolucaoItensDao;
 begin
-  lDevolucaoItensLista := TDevolucaoItensDao.Create(vIConexao);
+  lDevolucaoItensLista := TDevolucaoItensDao.getNewIface(vIConexao);
 
   try
-    lDevolucaoItensLista.TotalRecords    := FTotalRecords;
-    lDevolucaoItensLista.WhereView       := FWhereView;
-    lDevolucaoItensLista.CountView       := FCountView;
-    lDevolucaoItensLista.OrderView       := FOrderView;
-    lDevolucaoItensLista.StartRecordView := FStartRecordView;
-    lDevolucaoItensLista.LengthPageView  := FLengthPageView;
-    lDevolucaoItensLista.IDRecordView    := FIDRecordView;
+    lDevolucaoItensLista.objeto.TotalRecords    := FTotalRecords;
+    lDevolucaoItensLista.objeto.WhereView       := FWhereView;
+    lDevolucaoItensLista.objeto.CountView       := FCountView;
+    lDevolucaoItensLista.objeto.OrderView       := FOrderView;
+    lDevolucaoItensLista.objeto.StartRecordView := FStartRecordView;
+    lDevolucaoItensLista.objeto.LengthPageView  := FLengthPageView;
+    lDevolucaoItensLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lDevolucaoItensLista.obterLista;
+    Result := lDevolucaoItensLista.objeto.obterLista;
 
-    FTotalRecords := lDevolucaoItensLista.TotalRecords;
+    FTotalRecords := lDevolucaoItensLista.objeto.TotalRecords;
 
   finally
-    lDevolucaoItensLista.Free;
+    lDevolucaoItensLista:=nil;
   end;
 end;
 
 function TDevolucaoItensModel.proximoItem(pDevolucao: String): String;
 var
-  lDevolucaoItensDao : TDevolucaoItensDao;
+  lDevolucaoItensDao : ITDevolucaoItensDao;
 begin
-  lDevolucaoItensDao := TDevolucaoItensDao.Create(vIConexao);
+  lDevolucaoItensDao := TDevolucaoItensDao.getNewIface(vIConexao);
   try
-    Result := lDevolucaoItensDao.proximoItem(pDevolucao);
+    Result := lDevolucaoItensDao.objeto.proximoItem(pDevolucao);
   finally
-    lDevolucaoItensDao.Free;
+    lDevolucaoItensDao:=nil;
   end;
 end;
 
 function TDevolucaoItensModel.Salvar: String;
 var
-  lDevolucaoItensDao: TDevolucaoItensDao;
+  lDevolucaoItensDao: ITDevolucaoItensDao;
 begin
-  lDevolucaoItensDao := TDevolucaoItensDao.Create(vIConexao);
+  lDevolucaoItensDao := TDevolucaoItensDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lDevolucaoItensDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lDevolucaoItensDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lDevolucaoItensDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lDevolucaoItensDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lDevolucaoItensDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lDevolucaoItensDao.objeto.excluir(mySelf);
     end;
   finally
-    lDevolucaoItensDao.Free;
+    lDevolucaoItensDao:=nil;
   end;
 end;
 
