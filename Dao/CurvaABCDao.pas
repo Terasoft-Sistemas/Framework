@@ -38,7 +38,7 @@ type
 
     class function getNewIface(pIConexao: IConexao): ITCurvaABCDao;
 
-    function ObterCurvaABC(pCurvaABC_Parametros: TCurvaABC_Parametros): TFDMemTable;
+    function ObterCurvaABC(pCurvaABC_Parametros: TCurvaABC_Parametros): IFDDataset;
 
 end;
 
@@ -67,7 +67,7 @@ begin
   Result.objeto.myself := Result;
 end;
 
-function TCurvaABCDao.ObterCurvaABC(pCurvaABC_Parametros: TCurvaABC_Parametros): TFDMemTable;
+function TCurvaABCDao.ObterCurvaABC(pCurvaABC_Parametros: TCurvaABC_Parametros): IFDDataset;
 var
   lQry              : TFDQuery;
   lSQL              : String;
@@ -369,7 +369,7 @@ begin
 
     lMemTable.IndexName := 'OrdenacaoRateio';
     lMemTable.Open;
-    Result := lMemTable;
+    Result := criaIFDDataset(lMemTable);
 
   finally
     lQry.Free;

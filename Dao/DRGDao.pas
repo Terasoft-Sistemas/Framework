@@ -13,21 +13,27 @@ uses
   Terasoft.Framework.ListaSimples.Impl,
   Terasoft.Framework.ListaSimples,
   Terasoft.Framework.SimpleTypes,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao,
   Terasoft.FuncoesTexto,
   LojasModel;
 
 type
-  TDRGDao = class
+  TDRGDao = class;
+  ITDRGDao=IObject<TDRGDao>;
 
+  TDRGDao = class
   private
+    [weak] mySelf:ITDRGDao;
     vIConexao : IConexao;
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function ObterLista(pDRG_Parametros: TDRG_Parametros): TFDMemTable;
-    function ObterDRG_Detalhes(pDRG_Detalhes_Parametros: TDRG_Detalhes_Parametros): TFDMemTable;
+    class function getNewIface(pIConexao: IConexao): ITDRGDao;
+
+    function ObterLista(pDRG_Parametros: TDRG_Parametros): IFDDataset;
+    function ObterDRG_Detalhes(pDRG_Detalhes_Parametros: TDRG_Detalhes_Parametros): IFDDataset;
 
 end;
 
@@ -38,7 +44,7 @@ uses
 
 { TDRG }
 
-constructor TDRGDao.Create(pIConexao : IConexao);
+constructor TDRGDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -49,16 +55,22 @@ begin
   inherited;
 end;
 
-function TDRGDao.ObterDRG_Detalhes(pDRG_Detalhes_Parametros: TDRG_Detalhes_Parametros): TFDMemTable;
+class function TDRGDao.getNewIface(pIConexao: IConexao): ITDRGDao;
+begin
+  Result := TImplObjetoOwner<TDRGDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TDRGDao.ObterDRG_Detalhes(pDRG_Detalhes_Parametros: TDRG_Detalhes_Parametros): IFDDataset;
 var
   lQry: TFDQuery;
   lSQL:String;
   lLojasModel, lLojas_Dados: ITLojasModel;
-  lMemTable: TFDMemTable;
+  lMemTable: IFDDataset;
 begin
   lLojasModel := TLojasModel.getNewIface(vIConexao);
 
-  lMemTable := TFDMemTable.Create(nil);
+  lMemTable := criaIFDDataset(TFDMemTable.Create(nil));
 
   try
     lSQL := ' select *                                                               '+#13+
@@ -113,26 +125,26 @@ begin
 
     gravaSQL(lSQL, 'DRGDao_ObterDRG_Detalhes_' + FormatDateTime('yyyymmddhhnnsszzz', now));
 
-    with lMemTable.IndexDefs.AddIndexDef do
+    with TFDMemTable(lMemTable.objeto).IndexDefs.AddIndexDef do
     begin
       Name := 'OrdenacaoLojaData';
       Fields := 'LOJA;DATA';
       Options := [TIndexOption.ixCaseInsensitive];
     end;
 
-    lMemTable.IndexName := 'OrdenacaoLojaData';
+    TFDMemTable(lMemTable.objeto).IndexName := 'OrdenacaoLojaData';
     // Filial, Lançamento, Data, Histórico, Conta Corrente, Valor
 
-    lMemTable.FieldDefs.Add('LOJA',          ftString, 3);
-    lMemTable.FieldDefs.Add('LANCAMENTO',    ftString, 100);
-    lMemTable.FieldDefs.Add('DATA',          ftDate);
-    lMemTable.FieldDefs.Add('HISTORICO',     ftString, 200);
-    lMemTable.FieldDefs.Add('CONTACORRENTE', ftString, 100);
-    lMemTable.FieldDefs.Add('SUBGRUPO',      ftString, 100);
-    lMemTable.FieldDefs.Add('OBSERVACAO',    ftString, 100);
-    lMemTable.FieldDefs.Add('VALOR',         ftFloat);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('LOJA',          ftString, 3);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('LANCAMENTO',    ftString, 100);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('DATA',          ftDate);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('HISTORICO',     ftString, 200);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('CONTACORRENTE', ftString, 100);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('SUBGRUPO',      ftString, 100);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('OBSERVACAO',    ftString, 100);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('VALOR',         ftFloat);
 
-    lMemTable.CreateDataSet;
+    TFDMemTable(lMemTable.objeto).CreateDataSet;
 
     lLojasModel.objeto.LojaView := pDRG_Detalhes_Parametros.Lojas;
     lLojasModel.objeto.ObterLista;
@@ -146,7 +158,7 @@ begin
       lQry.First;
       while not lQry.Eof do
       begin
-        lMemTable.InsertRecord([
+        lMemTable.objeto.InsertRecord([
                                 lLojas_Dados.objeto.LOJA,
                                 lQry.FieldByName('LANCAMENTO').AsString,
                                 lQry.FieldByName('DATA').AsDateTime,
@@ -161,7 +173,7 @@ begin
       end;
     end;
 
-    lMemTable.Open;
+    lMemTable.objeto.Open;
 
     Result := lMemTable;
 
@@ -171,7 +183,7 @@ begin
   end;
 end;
 
-function TDRGDao.ObterLista(pDRG_Parametros: TDRG_Parametros): TFDMemTable;
+function TDRGDao.ObterLista(pDRG_Parametros: TDRG_Parametros): IFDDataset;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -638,7 +650,7 @@ begin
 
     lMemTable.Open;
 
-    Result := lMemTable;
+    Result := criaIFDDataset(lMemTable);
 
   finally
     lQry.Free;

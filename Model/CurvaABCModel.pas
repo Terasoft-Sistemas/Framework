@@ -25,7 +25,7 @@ type
 
     class function getNewIface(pIConexao: IConexao): ITCurvaABCModel;
 
-    function ObterCurvaABC(pCurvaABC_Parametros: TCurvaABC_Parametros): TFDMemTable;
+    function ObterCurvaABC(pCurvaABC_Parametros: TCurvaABC_Parametros): IFDDataset;
 
   end;
 
@@ -53,7 +53,7 @@ begin
   Result.objeto.myself := Result;
 end;
 
-function TCurvaABCModel.ObterCurvaABC(pCurvaABC_Parametros: TCurvaABC_Parametros): TFDMemTable;
+function TCurvaABCModel.ObterCurvaABC(pCurvaABC_Parametros: TCurvaABC_Parametros): IFDDataset;
 var
   lCurvaABCDao: ITCurvaABCDao;
   lCurvaABC_Parametros: TCurvaABC_Parametros;
