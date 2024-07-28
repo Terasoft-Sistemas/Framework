@@ -6,18 +6,24 @@ uses
   Terasoft.Types,
   CurvaABCDao,
   FireDAC.Comp.Client,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TCurvaABCModel = class
+  TCurvaABCModel = class;
+  ITCurvaABCModel=IObject<TCurvaABCModel>;
 
+  TCurvaABCModel = class
   private
+    [weak] mySelf: ITCurvaABCModel;
     vIConexao : IConexao;
 
   public
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITCurvaABCModel;
 
     function ObterCurvaABC(pCurvaABC_Parametros: TCurvaABC_Parametros): TFDMemTable;
 
@@ -30,7 +36,7 @@ uses
 
 { TCurvaABCModel }
 
-constructor TCurvaABCModel.Create(pIConexao : IConexao);
+constructor TCurvaABCModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -41,12 +47,18 @@ begin
   inherited;
 end;
 
+class function TCurvaABCModel.getNewIface(pIConexao: IConexao): ITCurvaABCModel;
+begin
+  Result := TImplObjetoOwner<TCurvaABCModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TCurvaABCModel.ObterCurvaABC(pCurvaABC_Parametros: TCurvaABC_Parametros): TFDMemTable;
 var
-  lCurvaABCDao: TCurvaABCDao;
+  lCurvaABCDao: ITCurvaABCDao;
   lCurvaABC_Parametros: TCurvaABC_Parametros;
 begin
-  lCurvaABCDao := TCurvaABCDao.Create(vIConexao);
+  lCurvaABCDao := TCurvaABCDao.getNewIface(vIConexao);
 
   try
     lCurvaABC_Parametros.TipoData                := pCurvaABC_Parametros.TipoData;
@@ -73,10 +85,10 @@ begin
     lCurvaABC_Parametros.Cidade                  := pCurvaABC_Parametros.Cidade;
     lCurvaABC_Parametros.UF                      := pCurvaABC_Parametros.UF;
 
-    Result := lCurvaABCDao.ObterCurvaABC(lCurvaABC_Parametros);
+    Result := lCurvaABCDao.objeto.ObterCurvaABC(lCurvaABC_Parametros);
 
   finally
-    lCurvaABCDao.Free;
+    lCurvaABCDao:=nil;
   end;
 end;
 
