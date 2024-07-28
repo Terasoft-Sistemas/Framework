@@ -5,14 +5,18 @@ interface
 uses
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TCreditoClienteUsoModel = class
+  TCreditoClienteUsoModel = class;
+  ITCreditoClienteUsoModel=IObject<TCreditoClienteUsoModel>;
 
+  TCreditoClienteUsoModel = class
   private
+    [weak] mySelf:ITCreditoClienteUsoModel;
     vIConexao : IConexao;
-    FCreditoClienteUsosLista: IList<TCreditoClienteUsoModel>;
+    FCreditoClienteUsosLista: IList<ITCreditoClienteUsoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -33,7 +37,7 @@ type
     FCREDITO_CLIENTE_ID: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetCreditoClienteUsosLista(const Value: IList<TCreditoClienteUsoModel>);
+    procedure SetCreditoClienteUsosLista(const Value: IList<ITCreditoClienteUsoModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -62,16 +66,19 @@ type
     property DATAHORA: Variant read FDATAHORA write SetDATAHORA;
     property SYSTIME: Variant read FSYSTIME write SetSYSTIME;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITCreditoClienteUsoModel;
+
     function Incluir : String;
-    function Alterar(pID : String) : TCreditoClienteUsoModel;
+    function Alterar(pID : String) : ITCreditoClienteUsoModel;
     function Excluir(pID : String) : String;
     function Salvar: String;
-    function carregaClasse(pID : String) : TCreditoClienteUsoModel;
+    function carregaClasse(pID : String) : ITCreditoClienteUsoModel;
     procedure obterLista;
 
-    property CreditoClienteUsosLista: IList<TCreditoClienteUsoModel> read FCreditoClienteUsosLista write SetCreditoClienteUsosLista;
+    property CreditoClienteUsosLista: IList<ITCreditoClienteUsoModel> read FCreditoClienteUsosLista write SetCreditoClienteUsosLista;
 
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -91,34 +98,34 @@ uses
 
 { TCreditoClienteUsoModel }
 
-function TCreditoClienteUsoModel.Alterar(pID: String): TCreditoClienteUsoModel;
+function TCreditoClienteUsoModel.Alterar(pID: String): ITCreditoClienteUsoModel;
 var
-  lCreditoClienteUsoModel : TCreditoClienteUsoModel;
+  lCreditoClienteUsoModel : ITCreditoClienteUsoModel;
 begin
-  lCreditoClienteUsoModel := TCreditoClienteUsoModel.Create(vIConexao);
+  lCreditoClienteUsoModel := TCreditoClienteUsoModel.getNewIface(vIConexao);
   try
-    lCreditoClienteUsoModel      := lCreditoClienteUsoModel.carregaClasse(pID);
-    lCreditoClienteUsoModel.Acao := tacAlterar;
+    lCreditoClienteUsoModel      := lCreditoClienteUsoModel.objeto.carregaClasse(pID);
+    lCreditoClienteUsoModel.objeto.Acao := tacAlterar;
     Result                       := lCreditoClienteUsoModel;
   finally
 
   end;
 end;
 
-function TCreditoClienteUsoModel.carregaClasse(pID: String): TCreditoClienteUsoModel;
+function TCreditoClienteUsoModel.carregaClasse(pID: String): ITCreditoClienteUsoModel;
 var
-  lCreditoClienteUsoDao: TCreditoClienteUsoDao;
+  lCreditoClienteUsoDao: ITCreditoClienteUsoDao;
 begin
 
-  lCreditoClienteUsoDao := TCreditoClienteUsoDao.Create(vIConexao);
+  lCreditoClienteUsoDao := TCreditoClienteUsoDao.getNewIface(vIConexao);
   try
-    Result := lCreditoClienteUsoDao.carregaClasse(pId);
+    Result := lCreditoClienteUsoDao.objeto.carregaClasse(pId);
   finally
-    lCreditoClienteUsoDao.Free;
+    lCreditoClienteUsoDao:=nil;
   end;
 end;
 
-constructor TCreditoClienteUsoModel.Create(pIConexao : IConexao);
+constructor TCreditoClienteUsoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -137,6 +144,12 @@ begin
   Result    := self.Salvar;
 end;
 
+class function TCreditoClienteUsoModel.getNewIface(pIConexao: IConexao): ITCreditoClienteUsoModel;
+begin
+  Result := TImplObjetoOwner<TCreditoClienteUsoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TCreditoClienteUsoModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
@@ -145,46 +158,46 @@ end;
 
 procedure TCreditoClienteUsoModel.obterLista;
 var
-  lCreditoClienteUsoLista: TCreditoClienteUsoDao;
+  lCreditoClienteUsoLista: ITCreditoClienteUsoDao;
 begin
-  lCreditoClienteUsoLista := TCreditoClienteUsoDao.Create(vIConexao);
+  lCreditoClienteUsoLista := TCreditoClienteUsoDao.getNewIface(vIConexao);
 
   try
-    lCreditoClienteUsoLista.TotalRecords    := FTotalRecords;
-    lCreditoClienteUsoLista.WhereView       := FWhereView;
-    lCreditoClienteUsoLista.CountView       := FCountView;
-    lCreditoClienteUsoLista.OrderView       := FOrderView;
-    lCreditoClienteUsoLista.StartRecordView := FStartRecordView;
-    lCreditoClienteUsoLista.LengthPageView  := FLengthPageView;
-    lCreditoClienteUsoLista.IDRecordView    := FIDRecordView;
+    lCreditoClienteUsoLista.objeto.TotalRecords    := FTotalRecords;
+    lCreditoClienteUsoLista.objeto.WhereView       := FWhereView;
+    lCreditoClienteUsoLista.objeto.CountView       := FCountView;
+    lCreditoClienteUsoLista.objeto.OrderView       := FOrderView;
+    lCreditoClienteUsoLista.objeto.StartRecordView := FStartRecordView;
+    lCreditoClienteUsoLista.objeto.LengthPageView  := FLengthPageView;
+    lCreditoClienteUsoLista.objeto.IDRecordView    := FIDRecordView;
 
-    lCreditoClienteUsoLista.obterLista;
+    lCreditoClienteUsoLista.objeto.obterLista;
 
-    FTotalRecords  := lCreditoClienteUsoLista.TotalRecords;
-    FCreditoClienteUsosLista := lCreditoClienteUsoLista.CreditoClienteUsosLista;
+    FTotalRecords  := lCreditoClienteUsoLista.objeto.TotalRecords;
+    FCreditoClienteUsosLista := lCreditoClienteUsoLista.objeto.CreditoClienteUsosLista;
 
   finally
-    lCreditoClienteUsoLista.Free;
+    lCreditoClienteUsoLista:=nil;
   end;
 end;
 
 function TCreditoClienteUsoModel.Salvar: String;
 var
-  lCreditoClienteUsoDao: TCreditoClienteUsoDao;
+  lCreditoClienteUsoDao: ITCreditoClienteUsoDao;
 begin
-  lCreditoClienteUsoDao := TCreditoClienteUsoDao.Create(vIConexao);
+  lCreditoClienteUsoDao := TCreditoClienteUsoDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lCreditoClienteUsoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lCreditoClienteUsoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lCreditoClienteUsoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lCreditoClienteUsoDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lCreditoClienteUsoDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lCreditoClienteUsoDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lCreditoClienteUsoDao.Free;
+    lCreditoClienteUsoDao:=nil;
   end;
 end;
 

@@ -362,13 +362,13 @@ end;
 
 function TContasReceberItensModel.baixarCreditoCliente(pValor: Double): Boolean;
 var
-  lCreditoClienteUsoModel : TCreditoClienteUsoModel;
+  lCreditoClienteUsoModel : ITCreditoClienteUsoModel;
   lCreditoClienteModel,
   lCreditos               : ITCreditoClienteModel;
   lRestante,
   lBaixa                  : Double;
 begin
-  lCreditoClienteUsoModel := TCreditoClienteUsoModel.Create(vIConexao);
+  lCreditoClienteUsoModel := TCreditoClienteUsoModel.getNewIface(vIConexao);
   lCreditoClienteModel    := TCreditoClienteModel.getNewIface(vIConexao);
   lRestante := pValor;
 
@@ -393,21 +393,21 @@ begin
 
       if lBaixa > 0 then
       begin
-        lCreditoClienteUsoModel.Acao := tacIncluir;
-        lCreditoClienteUsoModel.USUARIO_ID           := self.vIConexao.getUSer.ID;
-        lCreditoClienteUsoModel.DATAHORA             := DateToStr(vIConexao.DataServer) + ' ' + TimeToStr(vIConexao.HoraServer);
-        lCreditoClienteUsoModel.CREDITO_CLIENTE_ID   := lCreditos.objeto.id;
-        lCreditoClienteUsoModel.DATA                 := DateToStr(vIConexao.DataServer);
-        lCreditoClienteUsoModel.PARCELA              := self.PACELA_REC;
-        lCreditoClienteUsoModel.RECEBER_ID           := self.FATURA_REC;
-        lCreditoClienteUsoModel.VALOR                := FloatToStr(lBaixa);
-        lCreditoClienteUsoModel.Salvar;
+        lCreditoClienteUsoModel.objeto.Acao := tacIncluir;
+        lCreditoClienteUsoModel.objeto.USUARIO_ID           := self.vIConexao.getUSer.ID;
+        lCreditoClienteUsoModel.objeto.DATAHORA             := DateToStr(vIConexao.DataServer) + ' ' + TimeToStr(vIConexao.HoraServer);
+        lCreditoClienteUsoModel.objeto.CREDITO_CLIENTE_ID   := lCreditos.objeto.id;
+        lCreditoClienteUsoModel.objeto.DATA                 := DateToStr(vIConexao.DataServer);
+        lCreditoClienteUsoModel.objeto.PARCELA              := self.PACELA_REC;
+        lCreditoClienteUsoModel.objeto.RECEBER_ID           := self.FATURA_REC;
+        lCreditoClienteUsoModel.objeto.VALOR                := FloatToStr(lBaixa);
+        lCreditoClienteUsoModel.objeto.Salvar;
         self.baixar(lBaixa.ToString);
       end;
     end;
 
   finally
-    lCreditoClienteUsoModel.Free;
+    lCreditoClienteUsoModel:=nil;
     lCreditoClienteModel:=nil;
   end;
 end;
