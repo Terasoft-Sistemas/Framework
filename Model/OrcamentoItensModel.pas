@@ -5,14 +5,17 @@ interface
 uses
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao,
   FireDAC.Comp.Client;
 
 type
+  TOrcamentoItensModel = class;
+  ITOrcamentoItensModel=IObject<TOrcamentoItensModel>;
 
   TOrcamentoItensModel = class
-
   private
+    [weak] mySelf: ITOrcamentoItensModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -180,15 +183,17 @@ type
     property  COMBO_ITEM            : Variant read FCOMBO_ITEM            write SetFCOMBO_ITEM;
     property  QTD_CHECAGEM          : Variant read FQTD_CHECAGEM          write SetFQTD_CHECAGEM;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITOrcamentoItensModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TOrcamentoItensModel;
+    function Alterar(pID : String): ITOrcamentoItensModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId : String): TOrcamentoItensModel;
+    function carregaClasse(pId : String): ITOrcamentoItensModel;
 
     function ObterLista: IFDDataset; overload;
 
@@ -214,14 +219,14 @@ uses
 
 { TOrcamentoItensModel }
 
-function TOrcamentoItensModel.Alterar(pID: String): TOrcamentoItensModel;
+function TOrcamentoItensModel.Alterar(pID: String): ITOrcamentoItensModel;
 var
-  lOrcamentoItensModel : TOrcamentoItensModel;
+  lOrcamentoItensModel : ITOrcamentoItensModel;
 begin
-  lOrcamentoItensModel := TOrcamentoItensModel.Create(vIConexao);
+  lOrcamentoItensModel := TOrcamentoItensModel.getNewIface(vIConexao);
   try
-    lOrcamentoItensModel       := lOrcamentoItensModel.carregaClasse(pID);
-    lOrcamentoItensModel.Acao  := tacAlterar;
+    lOrcamentoItensModel       := lOrcamentoItensModel.objeto.carregaClasse(pID);
+    lOrcamentoItensModel.objeto.Acao  := tacAlterar;
     Result            := lOrcamentoItensModel;
   finally
   end;
@@ -234,26 +239,31 @@ begin
   Result       := self.Salvar;
 end;
 
+class function TOrcamentoItensModel.getNewIface(pIConexao: IConexao): ITOrcamentoItensModel;
+begin
+
+end;
+
 function TOrcamentoItensModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
     Result    := self.Salvar;
 end;
 
-function TOrcamentoItensModel.carregaClasse(pId : String): TOrcamentoItensModel;
+function TOrcamentoItensModel.carregaClasse(pId : String): ITOrcamentoItensModel;
 var
-  lOrcamentoItensDao: TOrcamentoItensDao;
+  lOrcamentoItensDao: ITOrcamentoItensDao;
 begin
-  lOrcamentoItensDao := TOrcamentoItensDao.Create(vIConexao);
+  lOrcamentoItensDao := TOrcamentoItensDao.getNewIface(vIConexao);
 
   try
-    Result := lOrcamentoItensDao.carregaClasse(pId);
+    Result := lOrcamentoItensDao.objeto.carregaClasse(pId);
   finally
-    lOrcamentoItensDao.Free;
+    lOrcamentoItensDao:=nil;
   end;
 end;
 
-constructor TOrcamentoItensModel.Create(pIConexao : IConexao);
+constructor TOrcamentoItensModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -266,54 +276,54 @@ end;
 
 function TOrcamentoItensModel.obterLista: IFDDataset;
 var
-  lOrcamentoItensLista: TOrcamentoItensDao;
+  lOrcamentoItensLista: ITOrcamentoItensDao;
 begin
-  lOrcamentoItensLista := TOrcamentoItensDao.Create(vIConexao);
+  lOrcamentoItensLista := TOrcamentoItensDao.getNewIface(vIConexao);
 
   try
-    lOrcamentoItensLista.TotalRecords    := FTotalRecords;
-    lOrcamentoItensLista.WhereView       := FWhereView;
-    lOrcamentoItensLista.CountView       := FCountView;
-    lOrcamentoItensLista.OrderView       := FOrderView;
-    lOrcamentoItensLista.StartRecordView := FStartRecordView;
-    lOrcamentoItensLista.LengthPageView  := FLengthPageView;
-    lOrcamentoItensLista.IDRecordView    := FIDRecordView;
+    lOrcamentoItensLista.objeto.TotalRecords    := FTotalRecords;
+    lOrcamentoItensLista.objeto.WhereView       := FWhereView;
+    lOrcamentoItensLista.objeto.CountView       := FCountView;
+    lOrcamentoItensLista.objeto.OrderView       := FOrderView;
+    lOrcamentoItensLista.objeto.StartRecordView := FStartRecordView;
+    lOrcamentoItensLista.objeto.LengthPageView  := FLengthPageView;
+    lOrcamentoItensLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lOrcamentoItensLista.obterLista;
+    Result := lOrcamentoItensLista.objeto.obterLista;
 
-    FTotalRecords := lOrcamentoItensLista.TotalRecords;
+    FTotalRecords := lOrcamentoItensLista.objeto.TotalRecords;
 
   finally
-    lOrcamentoItensLista.Free;
+    lOrcamentoItensLista:=nil;
   end;
 end;
 
 procedure TOrcamentoItensModel.quantidadeAtendida(pNumeroOrc: String);
 var
-  lOrcamentoItensLista: TOrcamentoItensDao;
+  lOrcamentoItensLista: ITOrcamentoItensDao;
 begin
-  lOrcamentoItensLista := TOrcamentoItensDao.Create(vIConexao);
+  lOrcamentoItensLista := TOrcamentoItensDao.getNewIface(vIConexao);
   try
-    lOrcamentoItensLista.quantidadeAtendida(pNumeroOrc);
+    lOrcamentoItensLista.objeto.quantidadeAtendida(pNumeroOrc);
   finally
-    lOrcamentoItensLista.Free;
+    lOrcamentoItensLista:=nil;
   end;
 end;
 
 function TOrcamentoItensModel.Salvar: String;
 var
-  lOrcamentoItensDao: TOrcamentoItensDao;
+  lOrcamentoItensDao: ITOrcamentoItensDao;
 begin
-  lOrcamentoItensDao := TOrcamentoItensDao.Create(vIConexao);
+  lOrcamentoItensDao := TOrcamentoItensDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lOrcamentoItensDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lOrcamentoItensDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lOrcamentoItensDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lOrcamentoItensDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lOrcamentoItensDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lOrcamentoItensDao.objeto.excluir(mySelf);
     end;
   finally
-    lOrcamentoItensDao.Free;
+    lOrcamentoItensDao:=nil;
   end;
 end;
 

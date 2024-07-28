@@ -382,7 +382,7 @@ function TOrcamentoModel.finalizarOrcamento(pNumeroOrc: String): String;
 var
   lPedidoVendaModel        : ITPedidoVendaModel;
   lPedidoItensModel        : ITPedidoItensModel;
-  lOrcamentoItensModel     : TOrcamentoItensModel;
+  lOrcamentoItensModel     : ITOrcamentoItensModel;
   lOrcamentoModel          : ITOrcamentoModel;
   lClientesModel           : TClienteModel;
   lEmpresaModel            : ITEmpresaModel;
@@ -397,7 +397,7 @@ begin
     exit;
 
   lOrcamentoModel      := TOrcamentoModel.getNewIface(vIConexao);
-  lOrcamentoItensModel := TOrcamentoItensModel.Create(vIConexao);
+  lOrcamentoItensModel := TOrcamentoItensModel.getNewIface(vIConexao);
   lPedidoVendaModel    := TPedidoVendaModel.getNewIface(vIConexao);
   lPedidoItensModel    := TPedidoItensModel.getNewIface(vIConexao);
   lClientesModel       := TClienteModel.Create(vIConexao);
@@ -418,8 +418,8 @@ begin
 
     if lEmpresaModel.objeto.AVISARNEGATIVO_EMP = 'S' then
     begin
-      lOrcamentoItensModel.WhereView := ' AND I.NUMERO_ORC = '+QuotedStr(pNumeroOrc)+' ';
-      lMemtable := lOrcamentoItensModel.obterLista;
+      lOrcamentoItensModel.objeto.WhereView := ' AND I.NUMERO_ORC = '+QuotedStr(pNumeroOrc)+' ';
+      lMemtable := lOrcamentoItensModel.objeto.obterLista;
 
       lMemtable.objeto.First;
       while not lMemtable.objeto.Eof do
@@ -482,8 +482,8 @@ begin
 
     lPedidoVendaModel.objeto.NUMERO_PED := lPedido;
 
-    lOrcamentoItensModel.WhereView := ' AND I.NUMERO_ORC = '+QuotedStr(pNumeroOrc)+' ';
-    lMemtable := lOrcamentoItensModel.obterLista;
+    lOrcamentoItensModel.objeto.WhereView := ' AND I.NUMERO_ORC = '+QuotedStr(pNumeroOrc)+' ';
+    lMemtable := lOrcamentoItensModel.objeto.obterLista;
 
     lPedidoItensModel.objeto.PedidoItenssLista := TCollections.createList<ITPedidoItensModel>;
 
@@ -531,13 +531,13 @@ begin
     lOrcamentoModel.objeto.FSITUACAO_ORC := 'A';
     lOrcamentoModel.objeto.Salvar;
 
-    lOrcamentoItensModel.quantidadeAtendida(pNumeroOrc);
+    lOrcamentoItensModel.objeto.quantidadeAtendida(pNumeroOrc);
 
     Result := lPedido;
   finally
     lOrcamentoModel:=nil;
     lPedidoVendaModel:=nil;
-    lOrcamentoItensModel.Free;
+    lOrcamentoItensModel:=nil;
     lPedidoItensModel:=nil;
     lClientesModel.Free;
     lEmpresaModel := nil;
