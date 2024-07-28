@@ -9,14 +9,18 @@ uses
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao,
   Terasoft.Utils,
   Terasoft.ConstrutorDao;
 
 type
-  TContasPagarDao = class
+  TContasPagarDao = class;
+  ITContasPagarDao=IObject<TContasPagarDao>;
 
+  TContasPagarDao = class
   private
+    [weak] mySelf: ITContasPagarDao;
     vIConexao : IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -46,8 +50,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITContasPagarDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -59,15 +65,15 @@ type
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property FornecedorView :Variant read FFornecedorView write SetFornecedorView;
     property DuplicataView :Variant read FDuplicataView write SetDuplicataView;
-    function incluir(AContasPagarModel: TContasPagarModel): String;
-    function alterar(AContasPagarModel: TContasPagarModel): String;
-    function excluir(AContasPagarModel: TContasPagarModel): String;
+    function incluir(AContasPagarModel: ITContasPagarModel): String;
+    function alterar(AContasPagarModel: ITContasPagarModel): String;
+    function excluir(AContasPagarModel: ITContasPagarModel): String;
 
-    function carregaClasse(pID, pFornecedor : String): TContasPagarModel;
+    function carregaClasse(pID, pFornecedor : String): ITContasPagarModel;
     function obterLista: IFDDataset;
     function FinanceiroEntrada(pEntrada, pFornecedor: String): Double;
 
-    procedure setParams(var pQry: TFDQuery; pContasPagarModel: TContasPagarModel);
+    procedure setParams(var pQry: TFDQuery; pContasPagarModel: ITContasPagarModel);
 
 end;
 
@@ -78,13 +84,13 @@ uses
 
 { TContasPagar }
 
-function TContasPagarDao.carregaClasse(pID, pFornecedor: String): TContasPagarModel;
+function TContasPagarDao.carregaClasse(pID, pFornecedor: String): ITContasPagarModel;
 var
   lQry: TFDQuery;
-  lModel: TContasPagarModel;
+  lModel: ITContasPagarModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TContasPagarModel.Create(vIConexao);
+  lModel   := TContasPagarModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -93,42 +99,42 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.DUPLICATA_PAG                    := lQry.FieldByName('DUPLICATA_PAG').AsString;
-    lModel.CODIGO_FOR                       := lQry.FieldByName('CODIGO_FOR').AsString;
-    lModel.DATAEMI_PAG                      := lQry.FieldByName('DATAEMI_PAG').AsString;
-    lModel.DATACOM_PAG                      := lQry.FieldByName('DATACOM_PAG').AsString;
-    lModel.VALOR_PAG                        := lQry.FieldByName('VALOR_PAG').AsString;
-    lModel.OBS_PAG                          := lQry.FieldByName('OBS_PAG').AsString;
-    lModel.SITUACAO_PAG                     := lQry.FieldByName('SITUACAO_PAG').AsString;
-    lModel.USUARIO_PAG                      := lQry.FieldByName('USUARIO_PAG').AsString;
-    lModel.TIPO_PAG                         := lQry.FieldByName('TIPO_PAG').AsString;
-    lModel.CODIGO_CTA                       := lQry.FieldByName('CODIGO_CTA').AsString;
-    lModel.LOJA                             := lQry.FieldByName('LOJA').AsString;
-    lModel.TIPO                             := lQry.FieldByName('TIPO').AsString;
-    lModel.ID                               := lQry.FieldByName('ID').AsString;
-    lModel.LOCAL_BAIXA                      := lQry.FieldByName('LOCAL_BAIXA').AsString;
-    lModel.PORTADOR_ID                      := lQry.FieldByName('PORTADOR_ID').AsString;
-    lModel.OBS_COMPLEMENTAR                 := lQry.FieldByName('OBS_COMPLEMENTAR').AsString;
-    lModel.SYSTIME                          := lQry.FieldByName('SYSTIME').AsString;
-    lModel.DUPLICATA_ANTIGA                 := lQry.FieldByName('DUPLICATA_ANTIGA').AsString;
-    lModel.SUB_ID                           := lQry.FieldByName('SUB_ID').AsString;
-    lModel.LOCACAO_ID                       := lQry.FieldByName('LOCACAO_ID').AsString;
-    lModel.CENTRO_CUSTO                     := lQry.FieldByName('CENTRO_CUSTO').AsString;
-    lModel.EMPRESTIMO_RECEBER_ID            := lQry.FieldByName('EMPRESTIMO_RECEBER_ID').AsString;
-    lModel.FUNCIONARIO_ID                   := lQry.FieldByName('FUNCIONARIO_ID').AsString;
-    lModel.CONDICOES_PAG                    := lQry.FieldByName('CONDICOES_PAG').AsString;
-    lModel.PRIMEIRO_VENC                    := lQry.FieldByName('PRIMEIRO_VENC').AsString;
-    lModel.PREVISAO                         := lQry.FieldByName('PREVISAO').AsString;
-    lModel.COMPETENCIA                      := lQry.FieldByName('COMPETENCIA').AsString;
-    lModel.OS_ID                            := lQry.FieldByName('OS_ID').AsString;
-    lModel.GESTAO_PAGAMENTO_FORMA_ID        := lQry.FieldByName('GESTAO_PAGAMENTO_FORMA_ID').AsString;
-    lModel.GESTAO_PAGAMENTO_TIPO_ID         := lQry.FieldByName('GESTAO_PAGAMENTO_TIPO_ID').AsString;
-    lModel.GESTAO_PAGAMENTO                 := lQry.FieldByName('GESTAO_PAGAMENTO').AsString;
-    lModel.GESTAO_PAGAMENTO_BANCO_FAVORECI  := lQry.FieldByName('GESTAO_PAGAMENTO_BANCO_FAVORECI').AsString;
-    lModel.GESTAO_PAGAMENTO_AGENCIA_FAVORE  := lQry.FieldByName('GESTAO_PAGAMENTO_AGENCIA_FAVORE').AsString;
-    lModel.GESTAO_PAGAMENTO_NOME_FAVORECID  := lQry.FieldByName('GESTAO_PAGAMENTO_NOME_FAVORECID').AsString;
-    lModel.GESTAO_PAGAMENTO_CONTA_FAVORECI  := lQry.FieldByName('GESTAO_PAGAMENTO_CONTA_FAVORECI').AsString;
-    lModel.DUPLICATA_REP                    := lQry.FieldByName('DUPLICATA_REP').AsString;
+    lModel.objeto.DUPLICATA_PAG                    := lQry.FieldByName('DUPLICATA_PAG').AsString;
+    lModel.objeto.CODIGO_FOR                       := lQry.FieldByName('CODIGO_FOR').AsString;
+    lModel.objeto.DATAEMI_PAG                      := lQry.FieldByName('DATAEMI_PAG').AsString;
+    lModel.objeto.DATACOM_PAG                      := lQry.FieldByName('DATACOM_PAG').AsString;
+    lModel.objeto.VALOR_PAG                        := lQry.FieldByName('VALOR_PAG').AsString;
+    lModel.objeto.OBS_PAG                          := lQry.FieldByName('OBS_PAG').AsString;
+    lModel.objeto.SITUACAO_PAG                     := lQry.FieldByName('SITUACAO_PAG').AsString;
+    lModel.objeto.USUARIO_PAG                      := lQry.FieldByName('USUARIO_PAG').AsString;
+    lModel.objeto.TIPO_PAG                         := lQry.FieldByName('TIPO_PAG').AsString;
+    lModel.objeto.CODIGO_CTA                       := lQry.FieldByName('CODIGO_CTA').AsString;
+    lModel.objeto.LOJA                             := lQry.FieldByName('LOJA').AsString;
+    lModel.objeto.TIPO                             := lQry.FieldByName('TIPO').AsString;
+    lModel.objeto.ID                               := lQry.FieldByName('ID').AsString;
+    lModel.objeto.LOCAL_BAIXA                      := lQry.FieldByName('LOCAL_BAIXA').AsString;
+    lModel.objeto.PORTADOR_ID                      := lQry.FieldByName('PORTADOR_ID').AsString;
+    lModel.objeto.OBS_COMPLEMENTAR                 := lQry.FieldByName('OBS_COMPLEMENTAR').AsString;
+    lModel.objeto.SYSTIME                          := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.DUPLICATA_ANTIGA                 := lQry.FieldByName('DUPLICATA_ANTIGA').AsString;
+    lModel.objeto.SUB_ID                           := lQry.FieldByName('SUB_ID').AsString;
+    lModel.objeto.LOCACAO_ID                       := lQry.FieldByName('LOCACAO_ID').AsString;
+    lModel.objeto.CENTRO_CUSTO                     := lQry.FieldByName('CENTRO_CUSTO').AsString;
+    lModel.objeto.EMPRESTIMO_RECEBER_ID            := lQry.FieldByName('EMPRESTIMO_RECEBER_ID').AsString;
+    lModel.objeto.FUNCIONARIO_ID                   := lQry.FieldByName('FUNCIONARIO_ID').AsString;
+    lModel.objeto.CONDICOES_PAG                    := lQry.FieldByName('CONDICOES_PAG').AsString;
+    lModel.objeto.PRIMEIRO_VENC                    := lQry.FieldByName('PRIMEIRO_VENC').AsString;
+    lModel.objeto.PREVISAO                         := lQry.FieldByName('PREVISAO').AsString;
+    lModel.objeto.COMPETENCIA                      := lQry.FieldByName('COMPETENCIA').AsString;
+    lModel.objeto.OS_ID                            := lQry.FieldByName('OS_ID').AsString;
+    lModel.objeto.GESTAO_PAGAMENTO_FORMA_ID        := lQry.FieldByName('GESTAO_PAGAMENTO_FORMA_ID').AsString;
+    lModel.objeto.GESTAO_PAGAMENTO_TIPO_ID         := lQry.FieldByName('GESTAO_PAGAMENTO_TIPO_ID').AsString;
+    lModel.objeto.GESTAO_PAGAMENTO                 := lQry.FieldByName('GESTAO_PAGAMENTO').AsString;
+    lModel.objeto.GESTAO_PAGAMENTO_BANCO_FAVORECI  := lQry.FieldByName('GESTAO_PAGAMENTO_BANCO_FAVORECI').AsString;
+    lModel.objeto.GESTAO_PAGAMENTO_AGENCIA_FAVORE  := lQry.FieldByName('GESTAO_PAGAMENTO_AGENCIA_FAVORE').AsString;
+    lModel.objeto.GESTAO_PAGAMENTO_NOME_FAVORECID  := lQry.FieldByName('GESTAO_PAGAMENTO_NOME_FAVORECID').AsString;
+    lModel.objeto.GESTAO_PAGAMENTO_CONTA_FAVORECI  := lQry.FieldByName('GESTAO_PAGAMENTO_CONTA_FAVORECI').AsString;
+    lModel.objeto.DUPLICATA_REP                    := lQry.FieldByName('DUPLICATA_REP').AsString;
 
     Result := lModel;
   finally
@@ -136,7 +142,7 @@ begin
   end;
 end;
 
-constructor TContasPagarDao.Create(pIConexao : IConexao);
+constructor TContasPagarDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -147,7 +153,7 @@ begin
   inherited;
 end;
 
-function TContasPagarDao.incluir(AContasPagarModel: TContasPagarModel): String;
+function TContasPagarDao.incluir(AContasPagarModel: ITContasPagarModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -169,7 +175,7 @@ begin
   end;
 end;
 
-function TContasPagarDao.alterar(AContasPagarModel: TContasPagarModel): String;
+function TContasPagarDao.alterar(AContasPagarModel: ITContasPagarModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -183,7 +189,7 @@ begin
     setParams(lQry, AContasPagarModel);
     lQry.ExecSQL;
 
-    Result := AContasPagarModel.DUPLICATA_PAG;
+    Result := AContasPagarModel.objeto.DUPLICATA_PAG;
 
   finally
     lSQL := '';
@@ -191,16 +197,16 @@ begin
   end;
 end;
 
-function TContasPagarDao.excluir(AContasPagarModel: TContasPagarModel): String;
+function TContasPagarDao.excluir(AContasPagarModel: ITContasPagarModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from CONTASPAGAR where DUPLICATA_PAG = ' + QuotedStr(AContasPagarModel.DUPLICATA_PAG) + 'and CODIGO_FOR = ' + QuotedStr(AContasPagarModel.CODIGO_FOR));
+   lQry.ExecSQL('delete from CONTASPAGAR where DUPLICATA_PAG = ' + QuotedStr(AContasPagarModel.objeto.DUPLICATA_PAG) + 'and CODIGO_FOR = ' + QuotedStr(AContasPagarModel.objeto.CODIGO_FOR));
    lQry.ExecSQL;
-   Result := AContasPagarModel.DUPLICATA_PAG;
+   Result := AContasPagarModel.objeto.DUPLICATA_PAG;
 
   finally
     lQry.Free;
@@ -223,6 +229,11 @@ begin
   finally
     lQry.Free;
   end;
+end;
+
+class function TContasPagarDao.getNewIface(pIConexao: IConexao): ITContasPagarDao;
+begin
+
 end;
 
 function TContasPagarDao.where: String;
@@ -336,28 +347,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TContasPagarDao.setParams(var pQry: TFDQuery; pContasPagarModel: TContasPagarModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TContasPagarDao.setParams(var pQry: TFDQuery; pContasPagarModel: ITContasPagarModel);
 begin
-  lTabela := vConstrutor.getColumns('CONTASPAGAR');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TContasPagarModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pContasPagarModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pContasPagarModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('CONTASPAGAR',pQry,pContasPagarModel.objeto);
 end;
 
 procedure TContasPagarDao.SetStartRecordView(const Value: String);
