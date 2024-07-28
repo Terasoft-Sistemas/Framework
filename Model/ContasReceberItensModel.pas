@@ -364,30 +364,30 @@ function TContasReceberItensModel.baixarCreditoCliente(pValor: Double): Boolean;
 var
   lCreditoClienteUsoModel : TCreditoClienteUsoModel;
   lCreditoClienteModel,
-  lCreditos               : TCreditoClienteModel;
+  lCreditos               : ITCreditoClienteModel;
   lRestante,
   lBaixa                  : Double;
 begin
   lCreditoClienteUsoModel := TCreditoClienteUsoModel.Create(vIConexao);
-  lCreditoClienteModel    := TCreditoClienteModel.Create(vIConexao);
+  lCreditoClienteModel    := TCreditoClienteModel.getNewIface(vIConexao);
   lRestante := pValor;
 
   try
-    lCreditoClienteModel.creditosAbertos(self.FCODIGO_CLI);
+    lCreditoClienteModel.objeto.creditosAbertos(self.FCODIGO_CLI);
 
-    for lCreditos in lCreditoClienteModel.CreditoClientesLista do
+    for lCreditos in lCreditoClienteModel.objeto.CreditoClientesLista do
     begin
       if lRestante = 0 then
         Break;
 
-      if lCreditos.valor > lRestante then
+      if lCreditos.objeto.valor > lRestante then
       begin
         lBaixa    := lRestante;
         lRestante := 0;
       end
       else
       begin
-        lBaixa    := lCreditos.valor;
+        lBaixa    := lCreditos.objeto.valor;
         lRestante := lRestante - lBaixa;
       end;
 
@@ -396,7 +396,7 @@ begin
         lCreditoClienteUsoModel.Acao := tacIncluir;
         lCreditoClienteUsoModel.USUARIO_ID           := self.vIConexao.getUSer.ID;
         lCreditoClienteUsoModel.DATAHORA             := DateToStr(vIConexao.DataServer) + ' ' + TimeToStr(vIConexao.HoraServer);
-        lCreditoClienteUsoModel.CREDITO_CLIENTE_ID   := lCreditos.id;
+        lCreditoClienteUsoModel.CREDITO_CLIENTE_ID   := lCreditos.objeto.id;
         lCreditoClienteUsoModel.DATA                 := DateToStr(vIConexao.DataServer);
         lCreditoClienteUsoModel.PARCELA              := self.PACELA_REC;
         lCreditoClienteUsoModel.RECEBER_ID           := self.FATURA_REC;
@@ -408,7 +408,7 @@ begin
 
   finally
     lCreditoClienteUsoModel.Free;
-    lCreditoClienteModel.Free;
+    lCreditoClienteModel:=nil;
   end;
 end;
 

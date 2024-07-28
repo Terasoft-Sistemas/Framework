@@ -10,18 +10,21 @@ uses
   Spring.Collections,
   System.Variants,
   Terasoft.FuncoesTexto,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao,
   Terasoft.Utils,
   Interfaces.Conexao;
 
 type
+  TCreditoClienteDao = class;
+  ITCreditoClienteDao=IObject<TCreditoClienteDao>;
   TCreditoClienteDao = class
-
   private
+    [weak] mySelf: ITCreditoClienteDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FCreditoClientesLista: IList<TCreditoClienteModel>;
+    FCreditoClientesLista: IList<ITCreditoClienteModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -32,7 +35,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetCreditoClientesLista(const Value: IList<TCreditoClienteModel>);
+    procedure SetCreditoClientesLista(const Value: IList<ITCreditoClienteModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -41,13 +44,13 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
 
-
-
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    property CreditoClientesLista: IList<TCreditoClienteModel> read FCreditoClientesLista write SetCreditoClientesLista;
+    class function getNewIface(pIConexao: IConexao): ITCreditoClienteDao;
+
+    property CreditoClientesLista: IList<ITCreditoClienteModel> read FCreditoClientesLista write SetCreditoClientesLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -57,15 +60,15 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(ACreditoClienteModel: TCreditoClienteModel): String;
-    function alterar(ACreditoClienteModel: TCreditoClienteModel): String;
-    function excluir(ACreditoClienteModel: TCreditoClienteModel): String;
-    function carregaClasse(pID : String) : TCreditoClienteModel;
+    function incluir(ACreditoClienteModel: ITCreditoClienteModel): String;
+    function alterar(ACreditoClienteModel: ITCreditoClienteModel): String;
+    function excluir(ACreditoClienteModel: ITCreditoClienteModel): String;
+    function carregaClasse(pID : String) : ITCreditoClienteModel;
     function where: String;
 
     procedure obterLista;
     procedure creditosAbertos(pCliente : String);
-    procedure setParams(var pQry: TFDQuery; pCreditoClienteModel: TCreditoClienteModel);
+    procedure setParams(var pQry: TFDQuery; pCreditoClienteModel: ITCreditoClienteModel);
 
 end;
 
@@ -76,13 +79,13 @@ uses
 
 { TCreditoCliente }
 
-function TCreditoClienteDao.carregaClasse(pID: String): TCreditoClienteModel;
+function TCreditoClienteDao.carregaClasse(pID: String): ITCreditoClienteModel;
 var
   lQry: TFDQuery;
-  lModel: TCreditoClienteModel;
+  lModel: ITCreditoClienteModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TCreditoClienteModel.Create(vIConexao);
+  lModel   := TCreditoClienteModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -91,21 +94,21 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-      lModel.ID                   := lQry.FieldByName('ID').AsString;
-      lModel.CLIENTE_ID           := lQry.FieldByName('CLIENTE_ID').AsString;
-      lModel.DEVOLUCAO_ID         := lQry.FieldByName('DEVOLUCAO_ID').AsString;
-      lModel.DATA                 := lQry.FieldByName('DATA').AsString;
-      lModel.VALOR                := lQry.FieldByName('VALOR').AsString;
-      lModel.TIPO                 := lQry.FieldByName('TIPO').AsString;
-      lModel.OBS                  := lQry.FieldByName('OBS').AsString;
-      lModel.ENTRADA_ID           := lQry.FieldByName('ENTRADA_ID').AsString;
-      lModel.FORNECEDOR_ID        := lQry.FieldByName('FORNECEDOR_ID').AsString;
-      lModel.FATURA_ID            := lQry.FieldByName('FATURA_ID').AsString;
-      lModel.SYSTIME              := lQry.FieldByName('SYSTIME').AsString;
-      lModel.PEDIDO_SITE          := lQry.FieldByName('PEDIDO_SITE').AsString;
-      lModel.CONTACORRENTE_ID     := lQry.FieldByName('CONTACORRENTE_ID').AsString;
-      lModel.CLIENTE_ANTERIOR_ID  := lQry.FieldByName('CLIENTE_ANTERIOR_ID').AsString;
-      lModel.VENDA_CASADA         := lQry.FieldByName('VENDA_CASADA').AsString;
+      lModel.objeto.ID                   := lQry.FieldByName('ID').AsString;
+      lModel.objeto.CLIENTE_ID           := lQry.FieldByName('CLIENTE_ID').AsString;
+      lModel.objeto.DEVOLUCAO_ID         := lQry.FieldByName('DEVOLUCAO_ID').AsString;
+      lModel.objeto.DATA                 := lQry.FieldByName('DATA').AsString;
+      lModel.objeto.VALOR                := lQry.FieldByName('VALOR').AsString;
+      lModel.objeto.TIPO                 := lQry.FieldByName('TIPO').AsString;
+      lModel.objeto.OBS                  := lQry.FieldByName('OBS').AsString;
+      lModel.objeto.ENTRADA_ID           := lQry.FieldByName('ENTRADA_ID').AsString;
+      lModel.objeto.FORNECEDOR_ID        := lQry.FieldByName('FORNECEDOR_ID').AsString;
+      lModel.objeto.FATURA_ID            := lQry.FieldByName('FATURA_ID').AsString;
+      lModel.objeto.SYSTIME              := lQry.FieldByName('SYSTIME').AsString;
+      lModel.objeto.PEDIDO_SITE          := lQry.FieldByName('PEDIDO_SITE').AsString;
+      lModel.objeto.CONTACORRENTE_ID     := lQry.FieldByName('CONTACORRENTE_ID').AsString;
+      lModel.objeto.CLIENTE_ANTERIOR_ID  := lQry.FieldByName('CLIENTE_ANTERIOR_ID').AsString;
+      lModel.objeto.VENDA_CASADA         := lQry.FieldByName('VENDA_CASADA').AsString;
 
     Result := lModel;
 
@@ -114,7 +117,7 @@ begin
   end;
 end;
 
-constructor TCreditoClienteDao.Create(pIConexao : IConexao);
+constructor TCreditoClienteDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -124,12 +127,12 @@ procedure TCreditoClienteDao.creditosAbertos(pCliente: String);
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TCreditoClienteModel;
+  modelo: ITCreditoClienteModel;
 begin
 
   lQry := vIConexao.CriarQuery;
 
-  FCreditoClientesLista := TCollections.CreateList<TCreditoClienteModel>(true);
+  FCreditoClientesLista := TCollections.CreateList<ITCreditoClienteModel>;
 
   try
     lSQL := '  select c.*,                                                                                '+
@@ -148,25 +151,25 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TCreditoClienteModel.Create(vIConexao);
+      modelo := TCreditoClienteModel.getNewIface(vIConexao);
       FCreditoClientesLista.Add(modelo);
 
-      modelo.ID                  := lQry.FieldByName('ID').AsString;
-      modelo.CLIENTE_ID          := lQry.FieldByName('CLIENTE_ID').AsString;
-      modelo.DEVOLUCAO_ID        := lQry.FieldByName('DEVOLUCAO_ID').AsString;
-      modelo.DATA                := lQry.FieldByName('DATA').AsString;
-      modelo.VALOR               := lQry.FieldByName('VALOR').AsString;
-      modelo.TIPO                := lQry.FieldByName('TIPO').AsString;
-      modelo.OBS                 := lQry.FieldByName('OBS').AsString;
-      modelo.ENTRADA_ID          := lQry.FieldByName('ENTRADA_ID').AsString;
-      modelo.FORNECEDOR_ID       := lQry.FieldByName('FORNECEDOR_ID').AsString;
-      modelo.FATURA_ID           := lQry.FieldByName('FATURA_ID').AsString;
-      modelo.SYSTIME             := lQry.FieldByName('SYSTIME').AsString;
-      modelo.PEDIDO_SITE         := lQry.FieldByName('PEDIDO_SITE').AsString;
-      modelo.CONTACORRENTE_ID    := lQry.FieldByName('CONTACORRENTE_ID').AsString;
-      modelo.CLIENTE_ANTERIOR_ID := lQry.FieldByName('CLIENTE_ANTERIOR_ID').AsString;
-      modelo.VENDA_CASADA        := lQry.FieldByName('VENDA_CASADA').AsString;
-      modelo.VALOR_ABERTO        := lQry.FieldByName('VALOR_ABERTO').AsString;
+      modelo.objeto.ID                  := lQry.FieldByName('ID').AsString;
+      modelo.objeto.CLIENTE_ID          := lQry.FieldByName('CLIENTE_ID').AsString;
+      modelo.objeto.DEVOLUCAO_ID        := lQry.FieldByName('DEVOLUCAO_ID').AsString;
+      modelo.objeto.DATA                := lQry.FieldByName('DATA').AsString;
+      modelo.objeto.VALOR               := lQry.FieldByName('VALOR').AsString;
+      modelo.objeto.TIPO                := lQry.FieldByName('TIPO').AsString;
+      modelo.objeto.OBS                 := lQry.FieldByName('OBS').AsString;
+      modelo.objeto.ENTRADA_ID          := lQry.FieldByName('ENTRADA_ID').AsString;
+      modelo.objeto.FORNECEDOR_ID       := lQry.FieldByName('FORNECEDOR_ID').AsString;
+      modelo.objeto.FATURA_ID           := lQry.FieldByName('FATURA_ID').AsString;
+      modelo.objeto.SYSTIME             := lQry.FieldByName('SYSTIME').AsString;
+      modelo.objeto.PEDIDO_SITE         := lQry.FieldByName('PEDIDO_SITE').AsString;
+      modelo.objeto.CONTACORRENTE_ID    := lQry.FieldByName('CONTACORRENTE_ID').AsString;
+      modelo.objeto.CLIENTE_ANTERIOR_ID := lQry.FieldByName('CLIENTE_ANTERIOR_ID').AsString;
+      modelo.objeto.VENDA_CASADA        := lQry.FieldByName('VENDA_CASADA').AsString;
+      modelo.objeto.VALOR_ABERTO        := lQry.FieldByName('VALOR_ABERTO').AsString;
 
       lQry.Next;
     end;
@@ -184,7 +187,7 @@ begin
   inherited;
 end;
 
-function TCreditoClienteDao.incluir(ACreditoClienteModel: TCreditoClienteModel): String;
+function TCreditoClienteDao.incluir(ACreditoClienteModel: ITCreditoClienteModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -208,7 +211,7 @@ begin
   end;
 end;
 
-function TCreditoClienteDao.alterar(ACreditoClienteModel: TCreditoClienteModel): String;
+function TCreditoClienteDao.alterar(ACreditoClienteModel: ITCreditoClienteModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -224,7 +227,7 @@ begin
     setParams(lQry, ACreditoClienteModel);
     lQry.ExecSQL;
 
-    Result := ACreditoClienteModel.ID;
+    Result := ACreditoClienteModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -232,7 +235,7 @@ begin
   end;
 end;
 
-function TCreditoClienteDao.excluir(ACreditoClienteModel: TCreditoClienteModel): String;
+function TCreditoClienteDao.excluir(ACreditoClienteModel: ITCreditoClienteModel): String;
 var
   lQry: TFDQuery;
 begin
@@ -240,13 +243,19 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from CREDITO_CLIENTE where ID = :ID',[ACreditoClienteModel.ID]);
+   lQry.ExecSQL('delete from CREDITO_CLIENTE where ID = :ID',[ACreditoClienteModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := ACreditoClienteModel.ID;
+   Result := ACreditoClienteModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TCreditoClienteDao.getNewIface(pIConexao: IConexao): ITCreditoClienteDao;
+begin
+  Result := TImplObjetoOwner<TCreditoClienteDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TCreditoClienteDao.where: String;
@@ -290,11 +299,11 @@ procedure TCreditoClienteDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo : TCreditoClienteModel;
+  modelo : ITCreditoClienteModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FCreditoClientesLista := TCollections.CreateList<TCreditoClienteModel>(true);
+  FCreditoClientesLista := TCollections.CreateList<ITCreditoClienteModel>;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -317,24 +326,24 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TCreditoClienteModel.Create(vIConexao);
+      modelo := TCreditoClienteModel.getNewIface(vIConexao);
       FCreditoClientesLista.Add(modelo);
 
-      modelo.ID                  := lQry.FieldByName('ID').AsString;
-      modelo.CLIENTE_ID          := lQry.FieldByName('CLIENTE_ID').AsString;
-      modelo.DEVOLUCAO_ID        := lQry.FieldByName('DEVOLUCAO_ID').AsString;
-      modelo.DATA                := lQry.FieldByName('DATA').AsString;
-      modelo.VALOR               := lQry.FieldByName('VALOR').AsString;
-      modelo.TIPO                := lQry.FieldByName('TIPO').AsString;
-      modelo.OBS                 := lQry.FieldByName('OBS').AsString;
-      modelo.ENTRADA_ID          := lQry.FieldByName('ENTRADA_ID').AsString;
-      modelo.FORNECEDOR_ID       := lQry.FieldByName('FORNECEDOR_ID').AsString;
-      modelo.FATURA_ID           := lQry.FieldByName('FATURA_ID').AsString;
-      modelo.SYSTIME             := lQry.FieldByName('SYSTIME').AsString;
-      modelo.PEDIDO_SITE         := lQry.FieldByName('PEDIDO_SITE').AsString;
-      modelo.CONTACORRENTE_ID    := lQry.FieldByName('CONTACORRENTE_ID').AsString;
-      modelo.CLIENTE_ANTERIOR_ID := lQry.FieldByName('CLIENTE_ANTERIOR_ID').AsString;
-      modelo.VENDA_CASADA        := lQry.FieldByName('VENDA_CASADA').AsString;
+      modelo.objeto.ID                  := lQry.FieldByName('ID').AsString;
+      modelo.objeto.CLIENTE_ID          := lQry.FieldByName('CLIENTE_ID').AsString;
+      modelo.objeto.DEVOLUCAO_ID        := lQry.FieldByName('DEVOLUCAO_ID').AsString;
+      modelo.objeto.DATA                := lQry.FieldByName('DATA').AsString;
+      modelo.objeto.VALOR               := lQry.FieldByName('VALOR').AsString;
+      modelo.objeto.TIPO                := lQry.FieldByName('TIPO').AsString;
+      modelo.objeto.OBS                 := lQry.FieldByName('OBS').AsString;
+      modelo.objeto.ENTRADA_ID          := lQry.FieldByName('ENTRADA_ID').AsString;
+      modelo.objeto.FORNECEDOR_ID       := lQry.FieldByName('FORNECEDOR_ID').AsString;
+      modelo.objeto.FATURA_ID           := lQry.FieldByName('FATURA_ID').AsString;
+      modelo.objeto.SYSTIME             := lQry.FieldByName('SYSTIME').AsString;
+      modelo.objeto.PEDIDO_SITE         := lQry.FieldByName('PEDIDO_SITE').AsString;
+      modelo.objeto.CONTACORRENTE_ID    := lQry.FieldByName('CONTACORRENTE_ID').AsString;
+      modelo.objeto.CLIENTE_ANTERIOR_ID := lQry.FieldByName('CLIENTE_ANTERIOR_ID').AsString;
+      modelo.objeto.VENDA_CASADA        := lQry.FieldByName('VENDA_CASADA').AsString;
 
       lQry.Next;
     end;
@@ -376,28 +385,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TCreditoClienteDao.setParams(var pQry: TFDQuery; pCreditoClienteModel: TCreditoClienteModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TCreditoClienteDao.setParams(var pQry: TFDQuery; pCreditoClienteModel: ITCreditoClienteModel);
 begin
-  lTabela := vConstrutor.getColumns('CREDITO_CLIENTE');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TCreditoClienteModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pCreditoClienteModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pCreditoClienteModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('CREDITO_CLIENTE',pQry,pCreditoClienteModel.objeto);
 end;
 
 procedure TCreditoClienteDao.SetStartRecordView(const Value: String);
