@@ -6,6 +6,7 @@ uses
   Spring.Collections,
   Interfaces.Conexao,
   Terasoft.Framework.Texto,
+  Terasoft.Framework.Types,
   Terasoft.Model.Base,
   FireDAC.Comp.Client;
 
@@ -335,6 +336,7 @@ type
     Fcpf_conjuge_cli: Variant;
     Fnome_contador_cli: Variant;
     Ftelefone_contador_cli: Variant;
+    FCamposInvalidos: TStringlist;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetClientesLista(const Value: IList<TClienteModel>);
@@ -657,6 +659,7 @@ type
     procedure Setcpf_conjuge_cli(const Value: Variant);
     procedure Setnome_contador_cli(const Value: Variant);
     procedure Settelefone_contador_cli(const Value: Variant);
+    procedure SetCamposInvalidos(const Value: TStringlist);
   protected
     procedure doCreate; override;
     procedure doDestroy; override;
@@ -995,6 +998,7 @@ type
     function ObterListaMemTable: IFDDataset;
     function ObterBairros: IFDDataset;
     procedure bloquearCNPJCPF(pCliente, pCNPJCPF: String);
+    procedure camposObrigatorios(pTag: String; pClienteModel : TClienteModel);
 
     property ClientesLista: IList<TClienteModel> read FClientesLista write SetClientesLista;
 
@@ -1006,6 +1010,7 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
+    property CamposInvalidos: TStringlist read FCamposInvalidos write SetCamposInvalidos;
   end;
 
 implementation
@@ -1018,6 +1023,50 @@ uses
   Terasoft.Configuracoes;
 
 { TClienteModel }
+
+procedure TClienteModel.camposObrigatorios(pTag: String; pClienteModel : TClienteModel);
+var
+  i        : Integer;
+  lValor   : String;
+  lCampo   : String;
+  lNome    : String;
+  lMsg     : String;
+  lField   : TStringList;
+  lCtx     : TRttiContext;
+  lProp    : TRttiProperty;
+  lConfiguracoes : TerasoftConfiguracoes;
+begin
+  CamposInvalidos := TStringList.Create;
+  lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+  lMsg   := '';
+  lValor := lConfiguracoes.valorTag(pTag, '', tvMemo);
+  if Trim(lValor) = '' then
+    exit;
+  lField      := TStringList.Create;
+  lField.Text := lValor;
+  lCtx := TRttiContext.Create;
+  for i := 0 to lField.Count - 1 do
+  begin
+    lCampo := Trim(Copy(lField.Strings[i], 1, (Pos(';', lField.Strings[i])) - 1));
+    lNome  := Trim(Copy(lField.Strings[i], (Pos(';', lField.Strings[i])) + 1, 60));
+    lProp  := lCtx.GetType(TClienteModel).GetProperty(lCampo);
+    if not Assigned(lProp) then
+    begin
+      CriaException(' Configurações de campos obrigatórios inválido.');
+      abort;
+    end;
+    if lProp.GetValue(pClienteModel).AsString = '' then
+    begin
+      CamposInvalidos.Add(lCampo);
+      lMsg := lMsg + lNome + ',';
+    end;
+  end;
+//  if Trim(lMsg) <> '' then
+//  begin
+//    CriaException(' Campo(s) obrigatório(s): ' + copy(lMsg, 1, Length(lMsg) -1) + '.');
+//    abort;
+//  end;
+end;
 
 function TClienteModel.Incluir: String;
 begin
@@ -1367,6 +1416,11 @@ end;
 procedure TClienteModel.Setcalcado_mais_usado(const Value: Variant);
 begin
   Fcalcado_mais_usado := Value;
+end;
+
+procedure TClienteModel.SetCamposInvalidos(const Value: TStringlist);
+begin
+  FCamposInvalidos := Value;
 end;
 
 procedure TClienteModel.Setcardiopatias(const Value: Variant);
