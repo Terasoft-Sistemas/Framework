@@ -323,18 +323,18 @@ end;
 
 procedure TImpressaoVendaAssistida.fetchFinanceiro;
 var
-  lFinanceiroPedidoModel : TFinanceiroPedidoModel;
+  lFinanceiroPedidoModel : ITFinanceiroPedidoModel;
   lMemtable              : IFDDataset;
   lParcela               : Integer;
 begin
 
-  lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(CONEXAO);
+  lFinanceiroPedidoModel := TFinanceiroPedidoModel.getNewIface(CONEXAO);
 
   try
-    lFinanceiroPedidoModel.WhereView := 'AND FINANCEIRO_PEDIDO.WEB_PEDIDO_ID ='+ Self.FIDPEDIDO;
-    lFinanceiroPedidoModel.OrderView := 'FINANCEIRO_PEDIDO.ID_FINANCEIRO, FINANCEIRO_PEDIDO.PARCELA';
+    lFinanceiroPedidoModel.objeto.WhereView := 'AND FINANCEIRO_PEDIDO.WEB_PEDIDO_ID ='+ Self.FIDPEDIDO;
+    lFinanceiroPedidoModel.objeto.OrderView := 'FINANCEIRO_PEDIDO.ID_FINANCEIRO, FINANCEIRO_PEDIDO.PARCELA';
 
-    lMemtable := lFinanceiroPedidoModel.obterLista;
+    lMemtable := lFinanceiroPedidoModel.objeto.obterLista;
     if (lMemtable.objeto.RecordCount > 0) then begin
       lParcela := 0;
       lMemtable.objeto.First;
@@ -363,7 +363,7 @@ begin
     else
       rlBandFatura.Visible := false;
   finally
-    lFinanceiroPedidoModel.Free;
+    lFinanceiroPedidoModel:=nil;
   end;
 end;
 

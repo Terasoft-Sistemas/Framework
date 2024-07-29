@@ -338,21 +338,21 @@ end;
 
 function TWebPedidoItensModel.Excluir(pID : String): String;
   var
-  lFinanceiroPedidoModel : TFinanceiroPedidoModel;
+  lFinanceiroPedidoModel : ITFinanceiroPedidoModel;
 begin
   if pID = '' then
     CriaException('ID é obrigatório.');
 
-  lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
+  lFinanceiroPedidoModel := TFinanceiroPedidoModel.getNewIface(vIConexao);
 
   try
     self.FID  := pID;
     self.Acao := tacExcluir;
     Result := self.Salvar;
 
-    lFinanceiroPedidoModel.ExcluirPromocao(pID);
+    lFinanceiroPedidoModel.objeto.ExcluirPromocao(pID);
   finally
-    lFinanceiroPedidoModel.Free;
+    lFinanceiroPedidoModel:=nil;
   end;
 end;
 

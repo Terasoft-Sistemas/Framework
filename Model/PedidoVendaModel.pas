@@ -777,7 +777,7 @@ var
   lContasReceberModel      : TContasReceberModel;
   lContasReceberItensModel : TContasReceberItensModel;
   lEmpresaModel            : ITEmpresaModel;
-  lFinanceiroPedidoModel   : TFinanceiroPedidoModel;
+  lFinanceiroPedidoModel   : ITFinanceiroPedidoModel;
   lFaturaReceber,
   lFinanceiro              : String;
   lIndex                   : Integer;
@@ -786,15 +786,15 @@ begin
   lContasReceberModel      := TContasReceberModel.Create(vIConexao);
   lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
   lEmpresaModel            := TEmpresaModel.getNewIface(vIConexao);
-  lFinanceiroPedidoModel   := TFinanceiroPedidoModel.Create(vIConexao);
+  lFinanceiroPedidoModel   := TFinanceiroPedidoModel.getNewIface(vIConexao);
 
   try
     lFinanceiro := '';
     lEmpresaModel.objeto.Carregar;
 
-    lFinanceiroPedidoModel.WhereView := ' and financeiro_pedido.web_pedido_id = ' + pVendaAssistida;
-    lFinanceiroPedidoModel.OrderView := ' id_financeiro, parcela';
-    lMemTable := lFinanceiroPedidoModel.obterLista;
+    lFinanceiroPedidoModel.objeto.WhereView := ' and financeiro_pedido.web_pedido_id = ' + pVendaAssistida;
+    lFinanceiroPedidoModel.objeto.OrderView := ' id_financeiro, parcela';
+    lMemTable := lFinanceiroPedidoModel.objeto.obterLista;
 
     lContasReceberItensModel.ContasReceberItenssLista := TCollections.CreateList<TContasReceberItensModel>(true);
 
@@ -855,7 +855,7 @@ begin
 
   finally
     lContasReceberItensModel.Free;
-    lFinanceiroPedidoModel.Free;
+    lFinanceiroPedidoModel:=nil;
     lContasReceberModel.Free;
   end;
 end;

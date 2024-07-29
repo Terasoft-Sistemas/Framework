@@ -10,12 +10,16 @@ uses
   System.SysUtils,
   System.StrUtils,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   System.Rtti, WebPedidoModel, Terasoft.Types;
 
 type
-  TFinanceiroPedidoDao = class
+  TFinanceiroPedidoDao = class;
+  ITFinanceiroPedidoDao=IObject<TFinanceiroPedidoDao>;
 
+  TFinanceiroPedidoDao = class
   private
+    [weak] mySelf: ITFinanceiroPedidoDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -40,8 +44,10 @@ type
 
   public
 
-    constructor Create(pIConexao: IConexao);
+    constructor _Create(pIConexao: IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITFinanceiroPedidoDao;
 
     property TotalRecords      : Integer      read FTotalRecords        write SetTotalRecords;
     property IDRecordView      : Integer      read FIDRecordView        write SetIDRecordView;
@@ -51,13 +57,13 @@ type
     property StartRecordView   : String       read FStartRecordView     write SetStartRecordView;
     property LengthPageView    : String       read FLengthPageView      write SetLengthPageView;
 
-    function incluir(pFinanceiroPedidoModel: TFinanceiroPedidoModel): String;
-    function alterar(pFinanceiroPedidoModel: TFinanceiroPedidoModel): String;
-    function excluir(pFinanceiroPedidoModel: TFinanceiroPedidoModel): String;
+    function incluir(pFinanceiroPedidoModel: ITFinanceiroPedidoModel): String;
+    function alterar(pFinanceiroPedidoModel: ITFinanceiroPedidoModel): String;
+    function excluir(pFinanceiroPedidoModel: ITFinanceiroPedidoModel): String;
     function excluirPromocao(pID: String): String;
 
-    procedure setParams(var pQry : TFDQuery; pFinanceiroPedidoModel: TFinanceiroPedidoModel);
-    function carregaClasse(pID: String): TFinanceiroPedidoModel;
+    procedure setParams(var pQry : TFDQuery; pFinanceiroPedidoModel: ITFinanceiroPedidoModel);
+    function carregaClasse(pID: String): ITFinanceiroPedidoModel;
     function obterResumo(pIDPedido : String) : IFDDataset;
     function obterResumoFinanceiro: IFDDataset;
     function ObterLista: IFDDataset;
@@ -112,13 +118,13 @@ begin
 
 end;
 
-function TFinanceiroPedidoDao.carregaClasse(pID: String): TFinanceiroPedidoModel;
+function TFinanceiroPedidoDao.carregaClasse(pID: String): ITFinanceiroPedidoModel;
 var
   lQry: TFDQuery;
-  lModel: TFinanceiroPedidoModel;
+  lModel: ITFinanceiroPedidoModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TFinanceiroPedidoModel.Create(vIConexao);
+  lModel   := TFinanceiroPedidoModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -127,29 +133,29 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID                     := lQry.FieldByName('ID').AsString;
-    lModel.SYSTIME                := lQry.FieldByName('SYSTIME').AsString;
-    lModel.DATA_CADASTRO          := lQry.FieldByName('DATA_CADASTRO').AsString;
-    lModel.WEB_PEDIDO_ID          := lQry.FieldByName('WEB_PEDIDO_ID').AsString;
-    lModel.PEDIDO_VENDA_ID        := lQry.FieldByName('PEDIDO_VENDA_ID').AsString;
-    lModel.WEB_PEDIDOITENS_ID     := lQry.FieldByName('WEB_PEDIDOITENS_ID').AsString;
-    lModel.PORTADOR_ID            := lQry.FieldByName('PORTADOR_ID').AsString;
-    lModel.VALOR_TOTAL            := lQry.FieldByName('VALOR_TOTAL').AsString;
-    lModel.QUANTIDADE_PARCELAS    := lQry.FieldByName('QUANTIDADE_PARCELAS').AsString;
-    lModel.PARCELA                := lQry.FieldByName('PARCELA').AsString;
-    lModel.VALOR_PARCELA          := lQry.FieldByName('VALOR_PARCELA').AsString;
-    lModel.VENCIMENTO             := lQry.FieldByName('VENCIMENTO').AsString;
-    lModel.CONDICAO_PAGAMENTO     := lQry.FieldByName('CONDICAO_PAGAMENTO').AsString;
-    lModel.OBSERVACAO             := lQry.FieldByName('OBSERVACAO').AsString;
-    lModel.INDCE_APLICADO         := lQry.FieldByName('INDCE_APLICADO').AsString;
-    lModel.VALOR_ACRESCIMO        := lQry.FieldByName('VALOR_ACRESCIMO').AsString;
-    lModel.VALOR_LIQUIDO          := lQry.FieldByName('VALOR_LIQUIDO').AsString;
-    lModel.ID_FINANCEIRO          := lQry.FieldByName('ID_FINANCEIRO').AsString;
-    lModel.VALOR_SEG_PRESTAMISTA  := lQry.FieldByName('VALOR_SEG_PRESTAMISTA').AsString;
-    lModel.PER_SEG_PRESTAMSTA     := lQry.FieldByName('PER_SEG_PRESTAMSTA').AsString;
-    lModel.VALOR_ACRESCIMO_SEG_PRESTAMISTA := lQry.FieldByName('VALOR_ACRESCIMO_SEG_PRESTAMISTA').AsString;
-    lModel.ORIGINAL_VALOR_PARCELA  := lQry.FieldByName('ORIGINAL_VALOR_PARCELA').AsString;
-    lModel.ORIGINAL_INDCE_APLICADO := lQry.FieldByName('ORIGINAL_INDCE_APLICADO').AsString;
+    lModel.objeto.ID                     := lQry.FieldByName('ID').AsString;
+    lModel.objeto.SYSTIME                := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.DATA_CADASTRO          := lQry.FieldByName('DATA_CADASTRO').AsString;
+    lModel.objeto.WEB_PEDIDO_ID          := lQry.FieldByName('WEB_PEDIDO_ID').AsString;
+    lModel.objeto.PEDIDO_VENDA_ID        := lQry.FieldByName('PEDIDO_VENDA_ID').AsString;
+    lModel.objeto.WEB_PEDIDOITENS_ID     := lQry.FieldByName('WEB_PEDIDOITENS_ID').AsString;
+    lModel.objeto.PORTADOR_ID            := lQry.FieldByName('PORTADOR_ID').AsString;
+    lModel.objeto.VALOR_TOTAL            := lQry.FieldByName('VALOR_TOTAL').AsString;
+    lModel.objeto.QUANTIDADE_PARCELAS    := lQry.FieldByName('QUANTIDADE_PARCELAS').AsString;
+    lModel.objeto.PARCELA                := lQry.FieldByName('PARCELA').AsString;
+    lModel.objeto.VALOR_PARCELA          := lQry.FieldByName('VALOR_PARCELA').AsString;
+    lModel.objeto.VENCIMENTO             := lQry.FieldByName('VENCIMENTO').AsString;
+    lModel.objeto.CONDICAO_PAGAMENTO     := lQry.FieldByName('CONDICAO_PAGAMENTO').AsString;
+    lModel.objeto.OBSERVACAO             := lQry.FieldByName('OBSERVACAO').AsString;
+    lModel.objeto.INDCE_APLICADO         := lQry.FieldByName('INDCE_APLICADO').AsString;
+    lModel.objeto.VALOR_ACRESCIMO        := lQry.FieldByName('VALOR_ACRESCIMO').AsString;
+    lModel.objeto.VALOR_LIQUIDO          := lQry.FieldByName('VALOR_LIQUIDO').AsString;
+    lModel.objeto.ID_FINANCEIRO          := lQry.FieldByName('ID_FINANCEIRO').AsString;
+    lModel.objeto.VALOR_SEG_PRESTAMISTA  := lQry.FieldByName('VALOR_SEG_PRESTAMISTA').AsString;
+    lModel.objeto.PER_SEG_PRESTAMSTA     := lQry.FieldByName('PER_SEG_PRESTAMSTA').AsString;
+    lModel.objeto.VALOR_ACRESCIMO_SEG_PRESTAMISTA := lQry.FieldByName('VALOR_ACRESCIMO_SEG_PRESTAMISTA').AsString;
+    lModel.objeto.ORIGINAL_VALOR_PARCELA  := lQry.FieldByName('ORIGINAL_VALOR_PARCELA').AsString;
+    lModel.objeto.ORIGINAL_INDCE_APLICADO := lQry.FieldByName('ORIGINAL_INDCE_APLICADO').AsString;
 
     Result := lModel;
   finally
@@ -157,7 +163,7 @@ begin
   end;
 end;
 
-constructor TFinanceiroPedidoDao.Create(pIConexao: IConexao);
+constructor TFinanceiroPedidoDao._Create(pIConexao: IConexao);
 begin
   vIConexao       := pIConexao;
   vConstrutor  := TConstrutorDao.Create(vIConexao);
@@ -170,7 +176,7 @@ begin
   inherited;
 end;
 
-function TFinanceiroPedidoDao.incluir(pFinanceiroPedidoModel: TFinanceiroPedidoModel): String;
+function TFinanceiroPedidoDao.incluir(pFinanceiroPedidoModel: ITFinanceiroPedidoModel): String;
 var
   lQry  : TFDQuery;
   lSQL  : String;
@@ -180,10 +186,10 @@ begin
   try
     lSQL := vConstrutor.gerarInsert('FINANCEIRO_PEDIDO', 'ID', true);
 
-    pFinanceiroPedidoModel.ID := vIConexao.Generetor('GEN_FINANCEIRO_PEDIDO_ID');
+    pFinanceiroPedidoModel.objeto.ID := vIConexao.Generetor('GEN_FINANCEIRO_PEDIDO_ID');
 
-    if pFinanceiroPedidoModel.ID_FINANCEIRO = '' then
-      pFinanceiroPedidoModel.ID_FINANCEIRO := pFinanceiroPedidoModel.ID;
+    if pFinanceiroPedidoModel.objeto.ID_FINANCEIRO = '' then
+      pFinanceiroPedidoModel.objeto.ID_FINANCEIRO := pFinanceiroPedidoModel.objeto.ID;
 
     lQry.SQL.Add(lSQL);
     setParams(lQry, pFinanceiroPedidoModel);
@@ -230,7 +236,7 @@ begin
   end;
 end;
 
-function TFinanceiroPedidoDao.alterar(pFinanceiroPedidoModel: TFinanceiroPedidoModel): String;
+function TFinanceiroPedidoDao.alterar(pFinanceiroPedidoModel: ITFinanceiroPedidoModel): String;
 var
   lQry      : TFDQuery;
   lSQL      : String;
@@ -245,23 +251,23 @@ begin
     setParams(lQry, pFinanceiroPedidoModel);
     lQry.ExecSQL;
 
-    Result := pFinanceiroPedidoModel.ID;
+    Result := pFinanceiroPedidoModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
 end;
 
-function TFinanceiroPedidoDao.excluir(pFinanceiroPedidoModel: TFinanceiroPedidoModel): String;
+function TFinanceiroPedidoDao.excluir(pFinanceiroPedidoModel: ITFinanceiroPedidoModel): String;
 var
   lQry     : TFDQuery;
 begin
   lQry     := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from FINANCEIRO_PEDIDO where ID_FINANCEIRO = :ID_FINANCEIRO',[pFinanceiroPedidoModel.ID_FINANCEIRO]);
+   lQry.ExecSQL('delete from FINANCEIRO_PEDIDO where ID_FINANCEIRO = :ID_FINANCEIRO',[pFinanceiroPedidoModel.objeto.ID_FINANCEIRO]);
 
-   Result := pFinanceiroPedidoModel.ID_FINANCEIRO;
+   Result := pFinanceiroPedidoModel.objeto.ID_FINANCEIRO;
   finally
     lQry.Free;
   end;
@@ -280,6 +286,12 @@ begin
   finally
     lQry.Free;
   end;
+end;
+
+class function TFinanceiroPedidoDao.getNewIface(pIConexao: IConexao): ITFinanceiroPedidoDao;
+begin
+  Result := TImplObjetoOwner<TFinanceiroPedidoDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TFinanceiroPedidoDao.where: String;
@@ -477,28 +489,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TFinanceiroPedidoDao.setParams(var pQry: TFDQuery; pFinanceiroPedidoModel: TFinanceiroPedidoModel);
-var
-  lTabela  : IFDDataset;
-  lCtx     : TRttiContext;
-  lProp    : TRttiProperty;
-  i        : Integer;
+procedure TFinanceiroPedidoDao.setParams(var pQry: TFDQuery; pFinanceiroPedidoModel: ITFinanceiroPedidoModel);
 begin
-  lTabela := vConstrutor.getColumns('FINANCEIRO_PEDIDO');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TFinanceiroPedidoModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pFinanceiroPedidoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pFinanceiroPedidoModel).AsString));
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('FINANCEIRO_PEDIDO',pQry,pFinanceiroPedidoModel.objeto);
 end;
 
 procedure TFinanceiroPedidoDao.SetStartRecordView(const Value: String);
