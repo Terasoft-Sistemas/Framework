@@ -5,14 +5,17 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao,
   FireDAC.Comp.Client;
 
 type
+  TContasPagarModel = class;
+  ITContasPagarModel=IObject<TContasPagarModel>;
 
   TContasPagarModel = class
-
   private
+    [weak] mySelf:  ITContasPagarModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -148,15 +151,17 @@ type
     property GESTAO_PAGAMENTO_CONTA_FAVORECI    : Variant  read FGESTAO_PAGAMENTO_CONTA_FAVORECI write SetGESTAO_PAGAMENTO_CONTA_FAVORECI;
     property DUPLICATA_REP                      : Variant  read FDUPLICATA_REP write SetDUPLICATA_REP;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITContasPagarModel;
+
     function Incluir: String;
-    function Alterar(pID, pFornecedor : String): TContasPagarModel;
+    function Alterar(pID, pFornecedor : String): ITContasPagarModel;
     function Excluir(pID, pFornecedor : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId, pFornecedor: String): TContasPagarModel;
+    function carregaClasse(pId, pFornecedor: String): ITContasPagarModel;
     function obterLista: IFDDataset;
     function obterValorEntrada(pEntrada, pFornecedor: String): IFDDataset;
     procedure gerarDuplicatas(pID, pFornecedor : String);
@@ -182,14 +187,14 @@ uses
 
 { TContasPagarModel }
 
-function TContasPagarModel.Alterar(pID, pFornecedor: String): TContasPagarModel;
+function TContasPagarModel.Alterar(pID, pFornecedor: String): ITContasPagarModel;
 var
-  lContasPagarModel : TContasPagarModel;
+  lContasPagarModel : ITContasPagarModel;
 begin
-  lContasPagarModel := TContasPagarModel.Create(vIConexao);
+  lContasPagarModel := TContasPagarModel.getNewIface(vIConexao);
   try
-    lContasPagarModel       := lContasPagarModel.carregaClasse(pID, pFornecedor);
-    lContasPagarModel.Acao  := tacAlterar;
+    lContasPagarModel       := lContasPagarModel.objeto.carregaClasse(pID, pFornecedor);
+    lContasPagarModel.objeto.Acao  := tacAlterar;
     Result              	  := lContasPagarModel;
   finally
   end;
@@ -211,6 +216,7 @@ var
   lCondicoes        : TStringList;
   lVencimento       : TDate;
   i                 : Integer;
+  p: ITContasPagarModel;
   lContasPagarItensModel : TContasPagarItensModel;
 begin
 
@@ -218,12 +224,12 @@ begin
   lCondicoes             := TStringList.Create;
 
   try
-    self := self.carregaClasse(pID, pFornecedor);
-    lValorTotal := self.FVALOR_PAG;
+    p := p.objeto.carregaClasse(pID, pFornecedor);
+    lValorTotal := p.objeto.FVALOR_PAG;
 
     lCondicoes.Delimiter := '/';
     lCondicoes.StrictDelimiter := True;
-    lCondicoes.DelimitedText := self.FCONDICOES_PAG;
+    lCondicoes.DelimitedText := p.objeto.FCONDICOES_PAG;
 
     lParcelas := lCondicoes.Count;
 
@@ -231,17 +237,17 @@ begin
 
     for i := 0 to lParcelas -1 do
     begin
-      lVencimento := StrToDate(self.DATAEMI_PAG) + StrToInt(lCondicoes.Strings[i]);
+      lVencimento := StrToDate(p.objeto.DATAEMI_PAG) + StrToInt(lCondicoes.Strings[i]);
 
-      lContasPagarItensModel.DUPLIACATA_PAG    := self.DUPLICATA_PAG;
-      lContasPagarItensModel.CODIGO_FOR        := self.CODIGO_FOR;
+      lContasPagarItensModel.DUPLIACATA_PAG    := p.objeto.DUPLICATA_PAG;
+      lContasPagarItensModel.CODIGO_FOR        := p.objeto.CODIGO_FOR;
       lContasPagarItensModel.VENC_PAG          := DateToStr(lVencimento);
       lContasPagarItensModel.PACELA_PAG        := (i+1).ToString;
       lContasPagarItensModel.TOTALPARCELAS     := lParcelas.ToString;
       lContasPagarItensModel.VALORPARCELA_PAG  := lValorParcela.ToString;
       lContasPagarItensModel.SITUACAO_PAG      := 'A';
-      lContasPagarItensModel.LOJA              := self.LOJA;
-      lContasPagarItensModel.PORTADOR_ID       := self.PORTADOR_ID;
+      lContasPagarItensModel.LOJA              := p.objeto.LOJA;
+      lContasPagarItensModel.PORTADOR_ID       := p.objeto.PORTADOR_ID;
       lContasPagarItensModel.VALORPARCELA_BASE := lValorParcela.ToString;
       lContasPagarItensModel.Incluir;
     end;
@@ -263,6 +269,7 @@ var
   lVencimento       : TDate;
   i                 : Integer;
   lContasPagarItensModel : TContasPagarItensModel;
+  p: ITContasPagarModel;
 begin
 
   lContasPagarItensModel := TContasPagarItensModel.Create(vIConexao);
@@ -285,8 +292,8 @@ begin
     self.TIPO           := 'N';
     self.Incluir;
 
-    self := self.carregaClasse(Self.DUPLICATA_PAG, Self.CODIGO_FOR);
-    lValorTotal := self.FVALOR_PAG;
+    p := self.carregaClasse(Self.DUPLICATA_PAG, Self.CODIGO_FOR);
+    lValorTotal := p.objeto.FVALOR_PAG;
 
     lCondicoes.Delimiter := '/';
     lCondicoes.StrictDelimiter := True;
@@ -298,23 +305,23 @@ begin
 
     for i := 0 to lParcelas -1 do
     begin
-      lVencimento := StrToDate(self.DATAEMI_PAG) + StrToInt(lCondicoes.Strings[i]);
+      lVencimento := StrToDate(p.objeto.DATAEMI_PAG) + StrToInt(lCondicoes.Strings[i]);
 
-      lContasPagarItensModel.DUPLIACATA_PAG    := self.DUPLICATA_PAG;
-      lContasPagarItensModel.CODIGO_FOR        := self.CODIGO_FOR;
+      lContasPagarItensModel.DUPLIACATA_PAG    := p.objeto.DUPLICATA_PAG;
+      lContasPagarItensModel.CODIGO_FOR        := p.objeto.CODIGO_FOR;
       lContasPagarItensModel.VENC_PAG          := DateToStr(lVencimento);
       lContasPagarItensModel.PACELA_PAG        := (i+1).ToString;
       lContasPagarItensModel.TOTALPARCELAS     := lParcelas.ToString;
       lContasPagarItensModel.VALORPARCELA_PAG  := lValorParcela.ToString;
       lContasPagarItensModel.SITUACAO_PAG      := 'A';
-      lContasPagarItensModel.LOJA              := self.LOJA;
-      lContasPagarItensModel.PORTADOR_ID       := self.PORTADOR_ID;
+      lContasPagarItensModel.LOJA              := p.objeto.LOJA;
+      lContasPagarItensModel.PORTADOR_ID       := p.objeto.PORTADOR_ID;
       lContasPagarItensModel.VALORPARCELA_BASE := lValorParcela.ToString;
 
       lSoma := RoundTo(lSoma + StrToFloat(lValorParcela.ToString),-2);
 
       if i = lContasPagarItensModel.TOTALPARCELAS -1 then
-       lContasPagarItensModel.VALORPARCELA_PAG := FloatToStr(StrToFloat(lValorParcela.ToString) + (self.VALOR_PAG - lSoma));
+       lContasPagarItensModel.VALORPARCELA_PAG := FloatToStr(StrToFloat(lValorParcela.ToString) + (p.objeto.VALOR_PAG - lSoma));
 
 
       lContasPagarItensModel.Incluir;
@@ -327,26 +334,32 @@ begin
 
 end;
 
+class function TContasPagarModel.getNewIface(
+  pIConexao: IConexao): ITContasPagarModel;
+begin
+
+end;
+
 function TContasPagarModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
     Result    := self.Salvar;
 end;
 
-function TContasPagarModel.carregaClasse(pId, pFornecedor: String): TContasPagarModel;
+function TContasPagarModel.carregaClasse(pId, pFornecedor: String): ITContasPagarModel;
 var
-  lContasPagarDao: TContasPagarDao;
+  lContasPagarDao: ITContasPagarDao;
 begin
-  lContasPagarDao := TContasPagarDao.Create(vIConexao);
+  lContasPagarDao := TContasPagarDao.getNewIface(vIConexao);
 
   try
-    Result := lContasPagarDao.carregaClasse(pId, pFornecedor);
+    Result := lContasPagarDao.objeto.carregaClasse(pId, pFornecedor);
   finally
-    lContasPagarDao.Free;
+    lContasPagarDao:=nil;
   end;
 end;
 
-constructor TContasPagarModel.Create(pIConexao : IConexao);
+constructor TContasPagarModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -358,60 +371,60 @@ end;
 
 function TContasPagarModel.obterLista: IFDDataset;
 var
-  lContasPagarLista: TContasPagarDao;
+  lContasPagarLista: ITContasPagarDao;
 begin
-  lContasPagarLista := TContasPagarDao.Create(vIConexao);
+  lContasPagarLista := TContasPagarDao.getNewIface(vIConexao);
 
   try
-    lContasPagarLista.TotalRecords    := FTotalRecords;
-    lContasPagarLista.WhereView       := FWhereView;
-    lContasPagarLista.CountView       := FCountView;
-    lContasPagarLista.OrderView       := FOrderView;
-    lContasPagarLista.StartRecordView := FStartRecordView;
-    lContasPagarLista.LengthPageView  := FLengthPageView;
-    lContasPagarLista.IDRecordView    := FIDRecordView;
-    lContasPagarLista.FornecedorView  := FFornecedorView;
-    lContasPagarLista.DuplicataView   := FDuplicataView;
+    lContasPagarLista.objeto.TotalRecords    := FTotalRecords;
+    lContasPagarLista.objeto.WhereView       := FWhereView;
+    lContasPagarLista.objeto.CountView       := FCountView;
+    lContasPagarLista.objeto.OrderView       := FOrderView;
+    lContasPagarLista.objeto.StartRecordView := FStartRecordView;
+    lContasPagarLista.objeto.LengthPageView  := FLengthPageView;
+    lContasPagarLista.objeto.IDRecordView    := FIDRecordView;
+    lContasPagarLista.objeto.FornecedorView  := FFornecedorView;
+    lContasPagarLista.objeto.DuplicataView   := FDuplicataView;
 
-    Result := lContasPagarLista.obterLista;
+    Result := lContasPagarLista.objeto.obterLista;
 
-    FTotalRecords := lContasPagarLista.TotalRecords;
+    FTotalRecords := lContasPagarLista.objeto.TotalRecords;
 
   finally
-    lContasPagarLista.Free;
+    lContasPagarLista:=nil;
   end;
 end;
 
 function TContasPagarModel.Salvar: String;
 var
-  lContasPagarDao: TContasPagarDao;
+  lContasPagarDao: ITContasPagarDao;
 begin
-  lContasPagarDao := TContasPagarDao.Create(vIConexao);
+  lContasPagarDao := TContasPagarDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lContasPagarDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lContasPagarDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lContasPagarDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lContasPagarDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lContasPagarDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lContasPagarDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lContasPagarDao.Free;
+    lContasPagarDao:=nil;
   end;
 end;
 
 function TContasPagarModel.obterValorEntrada(pEntrada, pFornecedor: String): IFDDataset;
 var
-  lContasPagarDao: TContasPagarDao;
+  lContasPagarDao: ITContasPagarDao;
   lEntradaModel: TEntradaModel;
   lTotalFinanceiro: Double;
   lTotalEntradaFornecedor: Double;
   lMemTable : IFDDataset;
 begin
 
-  lContasPagarDao := TContasPagarDao.Create(vIConexao);
+  lContasPagarDao := TContasPagarDao.getNewIface(vIConexao);
   lEntradaModel   := TEntradaModel.Create(vIConexao);
   lMemTable       := criaIFDDataset(TFDMemTable.Create(nil));
 
@@ -420,7 +433,7 @@ begin
     lEntradaModel.FornecedorView := pFornecedor;
 
     lTotalEntradaFornecedor := lEntradaModel.obterTotalizador.objeto.fieldByName('TOTAL_ENTRADA').AsFloat;
-    lTotalFinanceiro        := lContasPagarDao.FinanceiroEntrada(pEntrada, pFornecedor);
+    lTotalFinanceiro        := lContasPagarDao.objeto.FinanceiroEntrada(pEntrada, pFornecedor);
 
     TFDMemTable(lMemTable.objeto).FieldDefs.Add('VALOR', ftFloat);
     TFDMemTable(lMemTable.objeto).CreateDataSet;
@@ -430,7 +443,7 @@ begin
     Result := lMemTable;
 
   finally
-    lContasPagarDao.Free;
+    lContasPagarDao:=nil;
     lEntradaModel.Free;
   end;
 end;

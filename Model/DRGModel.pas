@@ -5,19 +5,25 @@ interface
 uses
   Terasoft.Types,
   FireDAC.Comp.Client,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TDRGModel = class
+  TDRGModel = class;
+  ITDRGModel=IObject<TDRGModel>;
 
+  TDRGModel = class
   private
+    [weak] mySelf:ITDRGModel;
     vIConexao : IConexao;
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function ObterLista(pDRG_Parametros: TDRG_Parametros): TFDMemTable;
-    function ObterListaDetalhes(pDRG_Detalhes_Parametros: TDRG_Detalhes_Parametros): TFDMemTable;
+    class function getNewIface(pIConexao: IConexao): ITDRGModel;
+
+    function ObterLista(pDRG_Parametros: TDRG_Parametros): IFDDataset;
+    function ObterListaDetalhes(pDRG_Detalhes_Parametros: TDRG_Detalhes_Parametros): IFDDataset;
 
   end;
 
@@ -28,7 +34,7 @@ uses
 
 { TDRGModel }
 
-constructor TDRGModel.Create(pIConexao : IConexao);
+constructor TDRGModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -39,12 +45,18 @@ begin
   inherited;
 end;
 
-function TDRGModel.ObterLista(pDRG_Parametros: TDRG_Parametros): TFDMemTable;
+class function TDRGModel.getNewIface(pIConexao: IConexao): ITDRGModel;
+begin
+  Result := TImplObjetoOwner<TDRGModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TDRGModel.ObterLista(pDRG_Parametros: TDRG_Parametros): IFDDataset;
 var
-  lDRGDao: TDRGDao;
+  lDRGDao: ITDRGDao;
   lDRG_Parametros: TDRG_Parametros;
 begin
-  lDRGDao := TDRGDao.Create(vIConexao);
+  lDRGDao := TDRGDao.getNewIface(vIConexao);
 
   try
     lDRG_Parametros.DataInicio              := pDRG_Parametros.DataInicio;
@@ -69,20 +81,20 @@ begin
     lDRG_Parametros.ValorPrincipal          := pDRG_Parametros.ValorPrincipal;
     lDRG_Parametros.DataPadrao              := pDRG_Parametros.DataPadrao;
 
-    Result := lDRGDao.obterLista(lDRG_Parametros);
+    Result := lDRGDao.objeto.obterLista(lDRG_Parametros);
 
   finally
-    lDRGDao.Free;
+    lDRGDao:=nil;
   end;
 end;
 
 
-function TDRGModel.ObterListaDetalhes(pDRG_Detalhes_Parametros: TDRG_Detalhes_Parametros): TFDMemTable;
+function TDRGModel.ObterListaDetalhes(pDRG_Detalhes_Parametros: TDRG_Detalhes_Parametros): IFDDataset;
 var
-  lDRGDao: TDRGDao;
+  lDRGDao: ITDRGDao;
   lDRG_Detalhes_Parametros: TDRG_Detalhes_Parametros;
 begin
-  lDRGDao := TDRGDao.Create(vIConexao);
+  lDRGDao := TDRGDao.getNewIface(vIConexao);
 
   try
     lDRG_Detalhes_Parametros.DataInicio              := pDRG_Detalhes_Parametros.DataInicio;
@@ -92,10 +104,10 @@ begin
     lDRG_Detalhes_Parametros.Conta                   := pDRG_Detalhes_Parametros.Conta;
     lDRG_Detalhes_Parametros.Lojas                   := pDRG_Detalhes_Parametros.Lojas;
 
-    Result := lDRGDao.ObterDRG_Detalhes(lDRG_Detalhes_Parametros);
+    Result := lDRGDao.objeto.ObterDRG_Detalhes(lDRG_Detalhes_Parametros);
 
   finally
-    lDRGDao.Free;
+    lDRGDao:=nil;
   end;
 end;
 

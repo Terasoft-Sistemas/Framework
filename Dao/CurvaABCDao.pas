@@ -13,13 +13,17 @@ uses
   Terasoft.Framework.ListaSimples,
   Terasoft.Framework.SimpleTypes,
   Terasoft.FuncoesTexto,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao,
   LojasModel;
 
 type
-  TCurvaABCDao = class
+  TCurvaABCDao = class;
+  ITCurvaABCDao=IObject<TCurvaABCDao>;
 
+  TCurvaABCDao = class
   private
+    [weak] mySelf: ITCurvaABCDao;
     vIConexao : IConexao;
 
     lNomeCampo, lNomeCampoOS, lNomeCampoDev, lNomeCampoEntrada : String;
@@ -29,22 +33,25 @@ type
     procedure DefineDadosSelect(Acao: TTipoAnaliseCurvaABC; pCurvaABC_Parametros: TCurvaABC_Parametros);
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function ObterCurvaABC(pCurvaABC_Parametros: TCurvaABC_Parametros): TFDMemTable;
+    class function getNewIface(pIConexao: IConexao): ITCurvaABCDao;
+
+    function ObterCurvaABC(pCurvaABC_Parametros: TCurvaABC_Parametros): IFDDataset;
 
 end;
 
 implementation
 
 uses
+  CurvaABCModel,
   Data.DB,
   Clipbrd;
 
 { TCurvaABC }
 
-constructor TCurvaABCDao.Create(pIConexao : IConexao);
+constructor TCurvaABCDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -54,7 +61,13 @@ begin
   inherited;
 end;
 
-function TCurvaABCDao.ObterCurvaABC(pCurvaABC_Parametros: TCurvaABC_Parametros): TFDMemTable;
+class function TCurvaABCDao.getNewIface(pIConexao: IConexao): ITCurvaABCDao;
+begin
+  Result := TImplObjetoOwner<TCurvaABCDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TCurvaABCDao.ObterCurvaABC(pCurvaABC_Parametros: TCurvaABC_Parametros): IFDDataset;
 var
   lQry              : TFDQuery;
   lSQL              : String;
@@ -356,7 +369,7 @@ begin
 
     lMemTable.IndexName := 'OrdenacaoRateio';
     lMemTable.Open;
-    Result := lMemTable;
+    Result := criaIFDDataset(lMemTable);
 
   finally
     lQry.Free;

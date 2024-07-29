@@ -11,17 +11,21 @@ uses
   System.Variants,
   Terasoft.ConstrutorDao,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Spring.Collections,
   Interfaces.Conexao;
 
 type
-  TConfiguracoesDao = class
+  TConfiguracoesDao = class;
+  ITConfiguracoesDao=IObject<TConfiguracoesDao>;
 
+  TConfiguracoesDao = class
   private
+    [weak] mySelf: ITConfiguracoesDao;
     vIConexao : IConexao;
     vConstrutor : TConstrutorDao;
 
-    FConfiguracoessLista: IList<TConfiguracoesModel>;
+    FConfiguracoessLista: IList<ITConfiguracoesModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
     FStartRecordView: String;
@@ -32,7 +36,7 @@ type
     FTotalRecords: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
-    procedure SetConfiguracoessLista(const Value: IList<TConfiguracoesModel>);
+    procedure SetConfiguracoessLista(const Value: IList<ITConfiguracoesModel>);
     procedure SetID(const Value: Variant);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
@@ -44,10 +48,12 @@ type
     function where: String;
 
   public
-    constructor Create(pIConexao : Iconexao);
+    constructor _Create(pIConexao : Iconexao);
     destructor Destroy; override;
 
-    property ConfiguracoessLista: IList<TConfiguracoesModel> read FConfiguracoessLista write SetConfiguracoessLista;
+    class function getNewIface(pIConexao: IConexao): ITConfiguracoesDao;
+
+    property ConfiguracoessLista: IList<ITConfiguracoesModel> read FConfiguracoessLista write SetConfiguracoessLista;
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -57,12 +63,12 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(AConfiguracoesModel: TConfiguracoesModel): String;
-    function alterar(AConfiguracoesModel: TConfiguracoesModel): String;
-    function excluir(AConfiguracoesModel: TConfiguracoesModel): String;
+    function incluir(AConfiguracoesModel: ITConfiguracoesModel): String;
+    function alterar(AConfiguracoesModel: ITConfiguracoesModel): String;
+    function excluir(AConfiguracoesModel: ITConfiguracoesModel): String;
 
     procedure obterLista;
-    procedure setParams(var pQry: TFDQuery; pConfiguracoesModel: TConfiguracoesModel);
+    procedure setParams(var pQry: TFDQuery; pConfiguracoesModel: ITConfiguracoesModel);
 
 end;
 
@@ -73,7 +79,7 @@ uses
 
 { TConfiguracoes }
 
-constructor TConfiguracoesDao.Create(pIConexao : IConexao);
+constructor TConfiguracoesDao._Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
@@ -87,7 +93,7 @@ begin
   inherited;
 end;
 
-function TConfiguracoesDao.incluir(AConfiguracoesModel: TConfiguracoesModel): String;
+function TConfiguracoesDao.incluir(AConfiguracoesModel: ITConfiguracoesModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -111,7 +117,7 @@ begin
   end;
 end;
 
-function TConfiguracoesDao.alterar(AConfiguracoesModel: TConfiguracoesModel): String;
+function TConfiguracoesDao.alterar(AConfiguracoesModel: ITConfiguracoesModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -126,7 +132,7 @@ begin
     setParams(lQry, AConfiguracoesModel);
     lQry.ExecSQL;
 
-    Result := AConfiguracoesModel.ID;
+    Result := AConfiguracoesModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -134,7 +140,7 @@ begin
   end;
 end;
 
-function TConfiguracoesDao.excluir(AConfiguracoesModel: TConfiguracoesModel): String;
+function TConfiguracoesDao.excluir(AConfiguracoesModel: ITConfiguracoesModel): String;
 var
   lQry: TFDQuery;
 begin
@@ -142,13 +148,19 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from configuracoes where ID = :ID',[AConfiguracoesModel.ID]);
+   lQry.ExecSQL('delete from configuracoes where ID = :ID',[AConfiguracoesModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := AConfiguracoesModel.ID;
+   Result := AConfiguracoesModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TConfiguracoesDao.getNewIface(pIConexao: IConexao): ITConfiguracoesDao;
+begin
+  Result := TImplObjetoOwner<TConfiguracoesDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TConfiguracoesDao.where: String;
@@ -191,11 +203,11 @@ procedure TConfiguracoesDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
-  modelo: TConfiguracoesModel;
+  modelo: ITConfiguracoesModel;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FConfiguracoessLista := TCollections.CreateList<TConfiguracoesModel>(true);
+  FConfiguracoessLista := TCollections.CreateList<ITConfiguracoesModel>;
 
   try
     lSQL := ' select  *                '+
@@ -212,21 +224,21 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
-      modelo := TConfiguracoesModel.Create(vIConexao);
+      modelo := TConfiguracoesModel.getNewIface(vIConexao);
       FConfiguracoessLista.Add(modelo);
-      modelo.ID             := lQry.FieldByName('ID').AsString;
-      modelo.TAG            := lQry.FieldByName('TAG').AsString;
-      modelo.F_ID           := lQry.FieldByName('FID').AsString;
-      modelo.PERFIL_ID      := lQry.FieldByName('PERFIL_ID').AsString;
-      modelo.VALORINTEIRO   := lQry.FieldByName('VALORINTEIRO').AsString;
-      modelo.VALORSTRING    := lQry.FieldByName('VALORSTRING').AsString;
-      modelo.VALORMEMO      := lQry.FieldByName('VALORMEMO').AsString;
-      modelo.VALORNUMERICO  := lQry.FieldByName('VALORNUMERICO').AsString;
-      modelo.VALORCHAR      := lQry.FieldByName('VALORCHAR').AsString;
-      modelo.VALORDATA      := lQry.FieldByName('VALORDATA').AsString;
-      modelo.VALORHORA      := lQry.FieldByName('VALORHORA').AsString;
-      modelo.VALORDATAHORA  := lQry.FieldByName('VALORDATAHORA').AsString;
-      modelo.SYSTIME        := lQry.FieldByName('SYSTIME').AsString;
+      modelo.objeto.ID             := lQry.FieldByName('ID').AsString;
+      modelo.objeto.TAG            := lQry.FieldByName('TAG').AsString;
+      modelo.objeto.F_ID           := lQry.FieldByName('FID').AsString;
+      modelo.objeto.PERFIL_ID      := lQry.FieldByName('PERFIL_ID').AsString;
+      modelo.objeto.VALORINTEIRO   := lQry.FieldByName('VALORINTEIRO').AsString;
+      modelo.objeto.VALORSTRING    := lQry.FieldByName('VALORSTRING').AsString;
+      modelo.objeto.VALORMEMO      := lQry.FieldByName('VALORMEMO').AsString;
+      modelo.objeto.VALORNUMERICO  := lQry.FieldByName('VALORNUMERICO').AsString;
+      modelo.objeto.VALORCHAR      := lQry.FieldByName('VALORCHAR').AsString;
+      modelo.objeto.VALORDATA      := lQry.FieldByName('VALORDATA').AsString;
+      modelo.objeto.VALORHORA      := lQry.FieldByName('VALORHORA').AsString;
+      modelo.objeto.VALORDATAHORA  := lQry.FieldByName('VALORDATAHORA').AsString;
+      modelo.objeto.SYSTIME        := lQry.FieldByName('SYSTIME').AsString;
       lQry.Next;
     end;
     obterTotalRegistros;
@@ -265,28 +277,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TConfiguracoesDao.setParams(var pQry: TFDQuery; pConfiguracoesModel: TConfiguracoesModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TConfiguracoesDao.setParams(var pQry: TFDQuery; pConfiguracoesModel: ITConfiguracoesModel);
 begin
-  lTabela := vConstrutor.getColumns('CONFIGURACOES');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TConfiguracoesModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pConfiguracoesModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pConfiguracoesModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('CONFIGURACOES',pQry,pConfiguracoesModel.objeto);
 end;
 
 procedure TConfiguracoesDao.SetStartRecordView(const Value: String);

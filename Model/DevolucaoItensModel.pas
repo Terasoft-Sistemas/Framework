@@ -5,14 +5,17 @@ interface
 uses
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao,
   FireDAC.Comp.Client;
 
 type
+  TDevolucaoItensModel = class;
+  ITDevolucaoItensModel=IObject<TDevolucaoItensModel>;
 
   TDevolucaoItensModel = class
-
   private
+    [weak] mySelf: ITDevolucaoItensModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -101,15 +104,17 @@ type
     property VALOR_ACRESCIMO: Variant read FVALOR_ACRESCIMO write SetVALOR_ACRESCIMO;
     property VFCPST: Variant read FVFCPST write SetVFCPST;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITDevolucaoItensModel;
+
     function Incluir: String;
-    function Alterar(pID, pProduto, pITEM : String): TDevolucaoItensModel;
+    function Alterar(pID, pProduto, pITEM : String): ITDevolucaoItensModel;
     function Excluir(pID, pProduto, pITEM : String): String;
     function Salvar : String;
 
-    function carregaClasse(pID, pProduto, pItem : String): TDevolucaoItensModel;
+    function carregaClasse(pID, pProduto, pItem : String): ITDevolucaoItensModel;
     function obterLista: IFDDataset;
     function proximoItem(pDevolucao : String): String;
     function calculaTotais(pDevolucao : String): IFDDataset;
@@ -135,14 +140,14 @@ uses
 
 { TDevolucaoItensModel }
 
-function TDevolucaoItensModel.Alterar(pID, pProduto, pITEM: String): TDevolucaoItensModel;
+function TDevolucaoItensModel.Alterar(pID, pProduto, pITEM: String): ITDevolucaoItensModel;
 var
-  lDevolucaoItensModel : TDevolucaoItensModel;
+  lDevolucaoItensModel : ITDevolucaoItensModel;
 begin
-  lDevolucaoItensModel := TDevolucaoItensModel.Create(vIConexao);
+  lDevolucaoItensModel := TDevolucaoItensModel.getNewIface(vIConexao);
   try
-    lDevolucaoItensModel       := lDevolucaoItensModel.carregaClasse(pID, pProduto, pITEM);
-    lDevolucaoItensModel.Acao  := tacAlterar;
+    lDevolucaoItensModel       := lDevolucaoItensModel.objeto.carregaClasse(pID, pProduto, pITEM);
+    lDevolucaoItensModel.objeto.Acao  := tacAlterar;
     Result            := lDevolucaoItensModel;
   finally
   end;
@@ -159,69 +164,75 @@ end;
 
 procedure TDevolucaoItensModel.excluirEstoque;
 var
-  lMovimentoModel   : TMovimentoModel;
+  lMovimentoModel   : ITMovimentoModel;
   lProdutosModel    : ITProdutosModel;
 begin
-  lMovimentoModel   := TMovimentoModel.Create(vIConexao);
+  lMovimentoModel   := TMovimentoModel.getNewIface(vIConexao);
   lProdutosModel    := TProdutosModel.getNewIface(vIConexao);
 
   try
-    lMovimentoModel.WhereView := ' and movimento.documento_mov = '+ QuotedStr(self.FID) +
+    lMovimentoModel.objeto.WhereView := ' and movimento.documento_mov = '+ QuotedStr(self.FID) +
                                  ' and movimento.codigo_pro = ' + QuotedStr(self.FPRODUTO) +
                                  ' and movimento.tabela_origem = ''DEVOLUCAOITENS'' ' +
                                  ' and movimento.tipo_doc = ''D'' ';
-    lMovimentoModel.obterLista;
+    lMovimentoModel.objeto.obterLista;
 
-    for lMovimentoModel in lMovimentoModel.MovimentosLista do
+    for lMovimentoModel in lMovimentoModel.objeto.MovimentosLista do
     begin
-      lMovimentoModel.Acao := tacExcluir;
-      lMovimentoModel.Salvar;
+      lMovimentoModel.objeto.Acao := tacExcluir;
+      lMovimentoModel.objeto.Salvar;
       lProdutosModel.objeto.subtrairSaldo(self.FPRODUTO, self.FQUANTIDADE);
     end;
 
   finally
-    lMovimentoModel.Free;
+    lMovimentoModel:=nil;
     lProdutosModel:=nil;
   end;
 end;
 
 procedure TDevolucaoItensModel.gerarEstoque;
 var
-  lMovimentoModel   : TMovimentoModel;
+  lMovimentoModel   : ITMovimentoModel;
   lProdutosModel    : ITProdutosModel;
-  lDevolucaoModel   : TDevolucaoModel;
+  lDevolucaoModel   : ITDevolucaoModel;
 begin
-  lMovimentoModel   := TMovimentoModel.Create(vIConexao);
+  lMovimentoModel   := TMovimentoModel.getNewIface(vIConexao);
   lProdutosModel    := TProdutosModel.getNewIface(vIConexao);
-  lDevolucaoModel   := TDevolucaoModel.Create(vIConexao);
+  lDevolucaoModel   := TDevolucaoModel.getNewIface(vIConexao);
 
   try
-    lDevolucaoModel := lDevolucaoModel.carregaClasse(self.ID);
+    lDevolucaoModel := lDevolucaoModel.objeto.carregaClasse(self.ID);
 
-    lMovimentoModel.Acao := tacIncluir;
-    lMovimentoModel.DOCUMENTO_MOV   := lDevolucaoModel.ID;
-    lMovimentoModel.CODIGO_PRO      := self.FPRODUTO;
-    lMovimentoModel.CODIGO_FOR      := lDevolucaoModel.CLIENTE;
-    lMovimentoModel.OBS_MOV         := 'Troca Venda: ' + lDevolucaoModel.PEDIDO;
-    lMovimentoModel.TIPO_DOC        := 'D';
-    lMovimentoModel.DATA_MOV        := DateToStr(vIConexao.DataServer);
-    lMovimentoModel.DATA_DOC        := DateToStr(vIConexao.DataServer);
-    lMovimentoModel.QUANTIDADE_MOV  := self.FQUANTIDADE;
-    lMovimentoModel.VALOR_MOV       := self.FVALOR_UNITARIO;
-    lMovimentoModel.CUSTO_ATUAL     := '0';
-    lMovimentoModel.VENDA_ATUAL     := '0';
-    lMovimentoModel.STATUS          := '0';
-    lMovimentoModel.LOJA            := lDevolucaoModel.LOJA;
-    lMovimentoModel.tabela_origem   := 'DEVOLUCAOITENS';
-    lMovimentoModel.id_origem       := self.FID;
-    lMovimentoModel.Salvar;
+    lMovimentoModel.objeto.Acao := tacIncluir;
+    lMovimentoModel.objeto.DOCUMENTO_MOV   := lDevolucaoModel.objeto.ID;
+    lMovimentoModel.objeto.CODIGO_PRO      := self.FPRODUTO;
+    lMovimentoModel.objeto.CODIGO_FOR      := lDevolucaoModel.objeto.CLIENTE;
+    lMovimentoModel.objeto.OBS_MOV         := 'Troca Venda: ' + lDevolucaoModel.objeto.PEDIDO;
+    lMovimentoModel.objeto.TIPO_DOC        := 'D';
+    lMovimentoModel.objeto.DATA_MOV        := DateToStr(vIConexao.DataServer);
+    lMovimentoModel.objeto.DATA_DOC        := DateToStr(vIConexao.DataServer);
+    lMovimentoModel.objeto.QUANTIDADE_MOV  := self.FQUANTIDADE;
+    lMovimentoModel.objeto.VALOR_MOV       := self.FVALOR_UNITARIO;
+    lMovimentoModel.objeto.CUSTO_ATUAL     := '0';
+    lMovimentoModel.objeto.VENDA_ATUAL     := '0';
+    lMovimentoModel.objeto.STATUS          := '0';
+    lMovimentoModel.objeto.LOJA            := lDevolucaoModel.objeto.LOJA;
+    lMovimentoModel.objeto.tabela_origem   := 'DEVOLUCAOITENS';
+    lMovimentoModel.objeto.id_origem       := self.FID;
+    lMovimentoModel.objeto.Salvar;
 
     lProdutosModel.objeto.adicionarSaldo(self.FPRODUTO, self.FQUANTIDADE);
 
   finally
     lProdutosModel:=nil;
-    lMovimentoModel.Free;
+    lMovimentoModel:=nil;
   end;
+end;
+
+class function TDevolucaoItensModel.getNewIface(pIConexao: IConexao): ITDevolucaoItensModel;
+begin
+  Result := TImplObjetoOwner<TDevolucaoItensModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TDevolucaoItensModel.Incluir: String;
@@ -232,30 +243,30 @@ end;
 
 function TDevolucaoItensModel.calculaTotais(pDevolucao: String): IFDDataset;
 var
-  lDevolucaoItensDao : TDevolucaoItensDao;
+  lDevolucaoItensDao : ITDevolucaoItensDao;
 begin
-  lDevolucaoItensDao := TDevolucaoItensDao.Create(vIConexao);
+  lDevolucaoItensDao := TDevolucaoItensDao.getNewIface(vIConexao);
   try
-    Result := lDevolucaoItensDao.calculaTotais(pDevolucao);
+    Result := lDevolucaoItensDao.objeto.calculaTotais(pDevolucao);
   finally
-    lDevolucaoItensDao.Free;
+    lDevolucaoItensDao:=nil;
   end;
 end;
 
-function TDevolucaoItensModel.carregaClasse(pID, pProduto, pItem : String): TDevolucaoItensModel;
+function TDevolucaoItensModel.carregaClasse(pID, pProduto, pItem : String): ITDevolucaoItensModel;
 var
-  lDevolucaoItensDao: TDevolucaoItensDao;
+  lDevolucaoItensDao: ITDevolucaoItensDao;
 begin
-  lDevolucaoItensDao := TDevolucaoItensDao.Create(vIConexao);
+  lDevolucaoItensDao := TDevolucaoItensDao.getNewIface(vIConexao);
 
   try
-    Result := lDevolucaoItensDao.carregaClasse(pID, pProduto, pItem);
+    Result := lDevolucaoItensDao.objeto.carregaClasse(pID, pProduto, pItem);
   finally
-    lDevolucaoItensDao.Free;
+    lDevolucaoItensDao:=nil;
   end;
 end;
 
-constructor TDevolucaoItensModel.Create(pIConexao : IConexao);
+constructor TDevolucaoItensModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -268,54 +279,54 @@ end;
 
 function TDevolucaoItensModel.obterLista: IFDDataset;
 var
-  lDevolucaoItensLista: TDevolucaoItensDao;
+  lDevolucaoItensLista: ITDevolucaoItensDao;
 begin
-  lDevolucaoItensLista := TDevolucaoItensDao.Create(vIConexao);
+  lDevolucaoItensLista := TDevolucaoItensDao.getNewIface(vIConexao);
 
   try
-    lDevolucaoItensLista.TotalRecords    := FTotalRecords;
-    lDevolucaoItensLista.WhereView       := FWhereView;
-    lDevolucaoItensLista.CountView       := FCountView;
-    lDevolucaoItensLista.OrderView       := FOrderView;
-    lDevolucaoItensLista.StartRecordView := FStartRecordView;
-    lDevolucaoItensLista.LengthPageView  := FLengthPageView;
-    lDevolucaoItensLista.IDRecordView    := FIDRecordView;
+    lDevolucaoItensLista.objeto.TotalRecords    := FTotalRecords;
+    lDevolucaoItensLista.objeto.WhereView       := FWhereView;
+    lDevolucaoItensLista.objeto.CountView       := FCountView;
+    lDevolucaoItensLista.objeto.OrderView       := FOrderView;
+    lDevolucaoItensLista.objeto.StartRecordView := FStartRecordView;
+    lDevolucaoItensLista.objeto.LengthPageView  := FLengthPageView;
+    lDevolucaoItensLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lDevolucaoItensLista.obterLista;
+    Result := lDevolucaoItensLista.objeto.obterLista;
 
-    FTotalRecords := lDevolucaoItensLista.TotalRecords;
+    FTotalRecords := lDevolucaoItensLista.objeto.TotalRecords;
 
   finally
-    lDevolucaoItensLista.Free;
+    lDevolucaoItensLista:=nil;
   end;
 end;
 
 function TDevolucaoItensModel.proximoItem(pDevolucao: String): String;
 var
-  lDevolucaoItensDao : TDevolucaoItensDao;
+  lDevolucaoItensDao : ITDevolucaoItensDao;
 begin
-  lDevolucaoItensDao := TDevolucaoItensDao.Create(vIConexao);
+  lDevolucaoItensDao := TDevolucaoItensDao.getNewIface(vIConexao);
   try
-    Result := lDevolucaoItensDao.proximoItem(pDevolucao);
+    Result := lDevolucaoItensDao.objeto.proximoItem(pDevolucao);
   finally
-    lDevolucaoItensDao.Free;
+    lDevolucaoItensDao:=nil;
   end;
 end;
 
 function TDevolucaoItensModel.Salvar: String;
 var
-  lDevolucaoItensDao: TDevolucaoItensDao;
+  lDevolucaoItensDao: ITDevolucaoItensDao;
 begin
-  lDevolucaoItensDao := TDevolucaoItensDao.Create(vIConexao);
+  lDevolucaoItensDao := TDevolucaoItensDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lDevolucaoItensDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lDevolucaoItensDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lDevolucaoItensDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lDevolucaoItensDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lDevolucaoItensDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lDevolucaoItensDao.objeto.excluir(mySelf);
     end;
   finally
-    lDevolucaoItensDao.Free;
+    lDevolucaoItensDao:=nil;
   end;
 end;
 

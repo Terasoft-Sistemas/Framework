@@ -777,7 +777,7 @@ var
   lContasReceberModel      : TContasReceberModel;
   lContasReceberItensModel : TContasReceberItensModel;
   lEmpresaModel            : ITEmpresaModel;
-  lFinanceiroPedidoModel   : TFinanceiroPedidoModel;
+  lFinanceiroPedidoModel   : ITFinanceiroPedidoModel;
   lFaturaReceber,
   lFinanceiro              : String;
   lIndex                   : Integer;
@@ -786,15 +786,15 @@ begin
   lContasReceberModel      := TContasReceberModel.Create(vIConexao);
   lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
   lEmpresaModel            := TEmpresaModel.getNewIface(vIConexao);
-  lFinanceiroPedidoModel   := TFinanceiroPedidoModel.Create(vIConexao);
+  lFinanceiroPedidoModel   := TFinanceiroPedidoModel.getNewIface(vIConexao);
 
   try
     lFinanceiro := '';
     lEmpresaModel.objeto.Carregar;
 
-    lFinanceiroPedidoModel.WhereView := ' and financeiro_pedido.web_pedido_id = ' + pVendaAssistida;
-    lFinanceiroPedidoModel.OrderView := ' id_financeiro, parcela';
-    lMemTable := lFinanceiroPedidoModel.obterLista;
+    lFinanceiroPedidoModel.objeto.WhereView := ' and financeiro_pedido.web_pedido_id = ' + pVendaAssistida;
+    lFinanceiroPedidoModel.objeto.OrderView := ' id_financeiro, parcela';
+    lMemTable := lFinanceiroPedidoModel.objeto.obterLista;
 
     lContasReceberItensModel.ContasReceberItenssLista := TCollections.CreateList<TContasReceberItensModel>(true);
 
@@ -855,7 +855,7 @@ begin
 
   finally
     lContasReceberItensModel.Free;
-    lFinanceiroPedidoModel.Free;
+    lFinanceiroPedidoModel:=nil;
     lContasReceberModel.Free;
   end;
 end;
@@ -954,7 +954,7 @@ var
   lPedidoItensModel,
   lItens            : ITPedidoItensModel;
   lNFModel          : ITNFModel;
-  lNFItensModel     : TNFItensModel;
+  lNFItensModel     : ITNFItensModel;
   lEmpresaModel     : ITEmpresaModel;
   lNumeroNFe,
   lNomeVendedor     : String;
@@ -973,7 +973,7 @@ begin
     CriaException('Modelo não informado');
 
   lPedidoItensModel := TPedidoItensModel.getNewIface(vIConexao);
-  lNFItensModel     := TNFItensModel.Create(vIConexao);
+  lNFItensModel     := TNFItensModel.getNewIface(vIConexao);
   lNFModel          := TNFModel.getNewIface(vIConexao);
   lEmpresaModel     := TEmpresaModel.getNewIface(vIConexao);
   lFuncionarioModel := TFuncionarioModel.getNewIface(vIConexao);
@@ -1081,110 +1081,110 @@ begin
     for lItens in lPedidoItensModel.objeto.PedidoItenssLista do begin
       inc(lItem);
 
-      lNFItensModel.Acao := tacIncluir;
-      lNFItensModel.NUMERO_NF             := lNumeroNFe;
-      lNFItensModel.SERIE_NF              := pSerie;
-      lNFItensModel.LOJA                  := self.LOJA;
-      lNFItensModel.ITEM_NF               := Format('%3.3d', [lItem]);
-      lNFItensModel.MODBCST_N18           := '4';
-      lNFItensModel.INDESCALA             := 'S';
+      lNFItensModel.objeto.Acao := tacIncluir;
+      lNFItensModel.objeto.NUMERO_NF             := lNumeroNFe;
+      lNFItensModel.objeto.SERIE_NF              := pSerie;
+      lNFItensModel.objeto.LOJA                  := self.LOJA;
+      lNFItensModel.objeto.ITEM_NF               := Format('%3.3d', [lItem]);
+      lNFItensModel.objeto.MODBCST_N18           := '4';
+      lNFItensModel.objeto.INDESCALA             := 'S';
       //Não encontrado no fonte
-      lNFItensModel.PREDBCEFET            := FloatToStr(0);
-      lNFItensModel.VBCEFET               := FloatToStr(0);
-      lNFItensModel.PICMSEFET             := FloatToStr(0);
-      lNFItensModel.VICMSEFET             := FloatToStr(0);
-      lNFItensModel.BASE_IPI2             := FloatToStr(0);
+      lNFItensModel.objeto.PREDBCEFET            := FloatToStr(0);
+      lNFItensModel.objeto.VBCEFET               := FloatToStr(0);
+      lNFItensModel.objeto.PICMSEFET             := FloatToStr(0);
+      lNFItensModel.objeto.VICMSEFET             := FloatToStr(0);
+      lNFItensModel.objeto.BASE_IPI2             := FloatToStr(0);
       //
       //Não tem na tabela de pedidoitens
-      lNFItensModel.VBC_IPI               := FloatToStr(0);
-      lNFItensModel.VSEG                  := FloatToStr(0);
-      lNFItensModel.VICMSSUBISTITUTORET   := FloatToStr(0);
-      lNFItensModel.VBCSTRET              := FloatToStr(0);
-      lNFItensModel.VICMSSTRET            := FloatToStr(0);
-      lNFItensModel.PICMSSTRET            := FloatToStr(0);
-      lNFItensModel.VICMSUFDEST           := FloatToStr(0);
-      lNFItensModel.VFCP                  := FloatToStr(0);
-      lNFItensModel.PFCP                  := FloatToStr(0);
-      lNFItensModel.VBCCFP                := FloatToStr(0);
-      lNFItensModel.PPRCOMP               := FloatToStr(0);
-      lNFItensModel.VPRCOMP               := FloatToStr(0);
-      lNFItensModel.CSOSN                 := '';
-      lNFItensModel.CFOP                  := '';
-      lNFItensModel.PCREDSN               := FloatToStr(0);
-      lNFItensModel.VCREDICMSSN           := FloatToStr(0);
-      lNFItensModel.VALIQPROD_S10         := FloatToStr(0);
+      lNFItensModel.objeto.VBC_IPI               := FloatToStr(0);
+      lNFItensModel.objeto.VSEG                  := FloatToStr(0);
+      lNFItensModel.objeto.VICMSSUBISTITUTORET   := FloatToStr(0);
+      lNFItensModel.objeto.VBCSTRET              := FloatToStr(0);
+      lNFItensModel.objeto.VICMSSTRET            := FloatToStr(0);
+      lNFItensModel.objeto.PICMSSTRET            := FloatToStr(0);
+      lNFItensModel.objeto.VICMSUFDEST           := FloatToStr(0);
+      lNFItensModel.objeto.VFCP                  := FloatToStr(0);
+      lNFItensModel.objeto.PFCP                  := FloatToStr(0);
+      lNFItensModel.objeto.VBCCFP                := FloatToStr(0);
+      lNFItensModel.objeto.PPRCOMP               := FloatToStr(0);
+      lNFItensModel.objeto.VPRCOMP               := FloatToStr(0);
+      lNFItensModel.objeto.CSOSN                 := '';
+      lNFItensModel.objeto.CFOP                  := '';
+      lNFItensModel.objeto.PCREDSN               := FloatToStr(0);
+      lNFItensModel.objeto.VCREDICMSSN           := FloatToStr(0);
+      lNFItensModel.objeto.VALIQPROD_S10         := FloatToStr(0);
 
-      lNFItensModel.PFCPSTRET             := FloatToStr(0);
-      lNFItensModel.VFCPSTRET             := FloatToStr(0);
+      lNFItensModel.objeto.PFCPSTRET             := FloatToStr(0);
+      lNFItensModel.objeto.VFCPSTRET             := FloatToStr(0);
 
       //
 
-      lNFItensModel.VTOTTRIB_FEDERAL      := lItens.objeto.VTOTTRIB_FEDERAL;
-      lNFItensModel.VTOTTRIB_ESTADUAL     := lItens.objeto.VTOTTRIB_ESTADUAL;
-      lNFItensModel.VTOTTRIB_MUNICIPAL    := lItens.objeto.VTOTTRIB_MUNICIPAL;
-      lNFItensModel.VTOTTRIB              := FloatToStr(StrToFloat(lItens.objeto.VTOTTRIB_FEDERAL) + StrToFloat(lItens.objeto.VTOTTRIB_ESTADUAL) + StrToFloat(lItens.objeto.VTOTTRIB_MUNICIPAL));
+      lNFItensModel.objeto.VTOTTRIB_FEDERAL      := lItens.objeto.VTOTTRIB_FEDERAL;
+      lNFItensModel.objeto.VTOTTRIB_ESTADUAL     := lItens.objeto.VTOTTRIB_ESTADUAL;
+      lNFItensModel.objeto.VTOTTRIB_MUNICIPAL    := lItens.objeto.VTOTTRIB_MUNICIPAL;
+      lNFItensModel.objeto.VTOTTRIB              := FloatToStr(StrToFloat(lItens.objeto.VTOTTRIB_FEDERAL) + StrToFloat(lItens.objeto.VTOTTRIB_ESTADUAL) + StrToFloat(lItens.objeto.VTOTTRIB_MUNICIPAL));
 
       lTribFederal   := lTribFederal   + lItens.objeto.VTOTTRIB_FEDERAL;
       lTribEstadual  := lTribEstadual  + lItens.objeto.VTOTTRIB_ESTADUAL;
       lTribMunicipal := lTribMunicipal + lItens.objeto.VTOTTRIB_MUNICIPAL;
 
-      lNFItensModel.CODIGO_PRO            := lItens.objeto.CODIGO_PRO;
-      lNFItensModel.VALORUNITARIO_NF      := lItens.objeto.VALORUNITARIO_PED;
-      lNFItensModel.QUANTIDADE_NF         := lItens.objeto.QTDE_CALCULADA;
-      lNFItensModel.VLRVENDA_NF           := lItens.objeto.VLRVENDA_PRO;
-      lNFItensModel.VLRCUSTO_NF           := lItens.objeto.VLRCUSTO_PRO;
-      lNFItensModel.CFOP_ID               := lItens.objeto.CFOP_ID;
-      lNFItensModel.CFOP                  := lItens.objeto.CFOP;
-      lNFItensModel.VFCPST                := lItens.objeto.VFCPST;
-      lNFItensModel.VICMSDESON            := lItens.objeto.VICMSDESON;
-      lNFItensModel.MOTDESICMS            := lItens.objeto.MOTDESICMS;
-      lNFItensModel.PCRED_PRESUMIDO       := lItens.objeto.PCRED_PRESUMIDO;
-      lNFItensModel.CST_Q06               := lItens.objeto.PIS_CST;
-      lNFItensModel.CST_IPI               := lItens.objeto.PIS_CST;
-      lNFItensModel.PPIS_Q08              := lItens.objeto.ALIQ_PIS;
-      lNFItensModel.CST_S06               := lItens.objeto.COFINS_CST;
-      lNFItensModel.PCOFINS_S08           := lItens.objeto.ALIQ_COFINS;
-      lNFItensModel.QBCPROD_S09           := lItens.objeto.QTDE_CALCULADA;
-      lNFItensModel.MOTDESICMS            := lItens.objeto.MOTDESICMS;
-      lNFItensModel.VICMSDESON            := lItens.objeto.VICMSDESON;
-      lNFItensModel.VDESC                 := lItens.objeto.VDESC;
-      lNFItensModel.VALOR_SUFRAMA_ITEM    := lItens.objeto.VALOR_SUFRAMA_ITEM;
-      lNFItensModel.VBCFCPST              := lItens.objeto.VBCFCPST;
-      lNFItensModel.PFCPST                := lItens.objeto.PFCPST;
-      lNFItensModel.VICMSUFDEST           := lItens.objeto.VICMSUFDEST;
-      lNFItensModel.VICMSUFREMET          := lItens.objeto.VICMSUFREMET;
-      lNFItensModel.REDUCAO_NF            := lItens.objeto.REDUCAO_ICMS;
-      lNFItensModel.VOUTROS               := lItens.objeto.VOUTROS;
-      lNFItensModel.FRETE                 := lItens.objeto.VFRETE;
-      lNFItensModel.VALOR_IPI             := lItens.objeto.VALOR_IPI;
-      lNFItensModel.CSOSN                 := lItens.objeto.CSOSN;
-      lNFItensModel.IPI_NF                := lItens.objeto.ALIQ_IPI;
-      lNFItensModel.CST_N12               := lItens.objeto.CST;
-      lNFItensModel.PREDBC_N14            := lItens.objeto.REDUCAO_ICMS;
-      lNFItensModel.VBC_N15               := lItens.objeto.BASE_ICMS;
-      lNFItensModel.ICMS_NF               := lItens.objeto.ALIQ_ICMS;
-      lNFItensModel.VICMS_N17             := lItens.objeto.VALOR_ICMS;
-      lNFItensModel.PMVAST_N19            := lItens.objeto.MVA;
-      lNFItensModel.PREDBCST_N20          := lItens.objeto.REDUCAO_ST;
-      lNFItensModel.VBCST_N21             := lItens.objeto.BASE_ST;
-      lNFItensModel.PICMSST_N22           := lItens.objeto.ALIQ_ICMS_ST;
-      lNFItensModel.VICMSST_N23           := lItens.objeto.VALOR_ST;
-      lNFItensModel.VPIS_Q09              := lItens.objeto.VALOR_PIS;
-      lNFItensModel.VCOFINS_S11           := lItens.objeto.VALOR_COFINS;
-      lNFItensModel.VBC_Q07               := lItens.objeto.BASE_PIS;
-      lNFItensModel.VBC_S07               := lItens.objeto.BASE_COFINS;
-      lNFItensModel.PIS_SUFRAMA           := lItens.objeto.PIS_SUFRAMA;
-      lNFItensModel.COFINS_SUFRAMA        := lItens.objeto.COFINS_SUFRAMA;
-      lNFItensModel.ICMS_SUFRAMA          := lItens.objeto.ICMS_SUFRAMA;
-      lNFItensModel.IPI_SUFRAMA           := lItens.objeto.IPI_SUFRAMA;
-      lNFItensModel.XPED                  := lItens.objeto.XPED;
-      lNFItensModel.NITEMPED2             := lItens.objeto.NITEMPED2;
-      lNFItensModel.LOTE                  := lItens.objeto.OBSERVACAO;
+      lNFItensModel.objeto.CODIGO_PRO            := lItens.objeto.CODIGO_PRO;
+      lNFItensModel.objeto.VALORUNITARIO_NF      := lItens.objeto.VALORUNITARIO_PED;
+      lNFItensModel.objeto.QUANTIDADE_NF         := lItens.objeto.QTDE_CALCULADA;
+      lNFItensModel.objeto.VLRVENDA_NF           := lItens.objeto.VLRVENDA_PRO;
+      lNFItensModel.objeto.VLRCUSTO_NF           := lItens.objeto.VLRCUSTO_PRO;
+      lNFItensModel.objeto.CFOP_ID               := lItens.objeto.CFOP_ID;
+      lNFItensModel.objeto.CFOP                  := lItens.objeto.CFOP;
+      lNFItensModel.objeto.VFCPST                := lItens.objeto.VFCPST;
+      lNFItensModel.objeto.VICMSDESON            := lItens.objeto.VICMSDESON;
+      lNFItensModel.objeto.MOTDESICMS            := lItens.objeto.MOTDESICMS;
+      lNFItensModel.objeto.PCRED_PRESUMIDO       := lItens.objeto.PCRED_PRESUMIDO;
+      lNFItensModel.objeto.CST_Q06               := lItens.objeto.PIS_CST;
+      lNFItensModel.objeto.CST_IPI               := lItens.objeto.PIS_CST;
+      lNFItensModel.objeto.PPIS_Q08              := lItens.objeto.ALIQ_PIS;
+      lNFItensModel.objeto.CST_S06               := lItens.objeto.COFINS_CST;
+      lNFItensModel.objeto.PCOFINS_S08           := lItens.objeto.ALIQ_COFINS;
+      lNFItensModel.objeto.QBCPROD_S09           := lItens.objeto.QTDE_CALCULADA;
+      lNFItensModel.objeto.MOTDESICMS            := lItens.objeto.MOTDESICMS;
+      lNFItensModel.objeto.VICMSDESON            := lItens.objeto.VICMSDESON;
+      lNFItensModel.objeto.VDESC                 := lItens.objeto.VDESC;
+      lNFItensModel.objeto.VALOR_SUFRAMA_ITEM    := lItens.objeto.VALOR_SUFRAMA_ITEM;
+      lNFItensModel.objeto.VBCFCPST              := lItens.objeto.VBCFCPST;
+      lNFItensModel.objeto.PFCPST                := lItens.objeto.PFCPST;
+      lNFItensModel.objeto.VICMSUFDEST           := lItens.objeto.VICMSUFDEST;
+      lNFItensModel.objeto.VICMSUFREMET          := lItens.objeto.VICMSUFREMET;
+      lNFItensModel.objeto.REDUCAO_NF            := lItens.objeto.REDUCAO_ICMS;
+      lNFItensModel.objeto.VOUTROS               := lItens.objeto.VOUTROS;
+      lNFItensModel.objeto.FRETE                 := lItens.objeto.VFRETE;
+      lNFItensModel.objeto.VALOR_IPI             := lItens.objeto.VALOR_IPI;
+      lNFItensModel.objeto.CSOSN                 := lItens.objeto.CSOSN;
+      lNFItensModel.objeto.IPI_NF                := lItens.objeto.ALIQ_IPI;
+      lNFItensModel.objeto.CST_N12               := lItens.objeto.CST;
+      lNFItensModel.objeto.PREDBC_N14            := lItens.objeto.REDUCAO_ICMS;
+      lNFItensModel.objeto.VBC_N15               := lItens.objeto.BASE_ICMS;
+      lNFItensModel.objeto.ICMS_NF               := lItens.objeto.ALIQ_ICMS;
+      lNFItensModel.objeto.VICMS_N17             := lItens.objeto.VALOR_ICMS;
+      lNFItensModel.objeto.PMVAST_N19            := lItens.objeto.MVA;
+      lNFItensModel.objeto.PREDBCST_N20          := lItens.objeto.REDUCAO_ST;
+      lNFItensModel.objeto.VBCST_N21             := lItens.objeto.BASE_ST;
+      lNFItensModel.objeto.PICMSST_N22           := lItens.objeto.ALIQ_ICMS_ST;
+      lNFItensModel.objeto.VICMSST_N23           := lItens.objeto.VALOR_ST;
+      lNFItensModel.objeto.VPIS_Q09              := lItens.objeto.VALOR_PIS;
+      lNFItensModel.objeto.VCOFINS_S11           := lItens.objeto.VALOR_COFINS;
+      lNFItensModel.objeto.VBC_Q07               := lItens.objeto.BASE_PIS;
+      lNFItensModel.objeto.VBC_S07               := lItens.objeto.BASE_COFINS;
+      lNFItensModel.objeto.PIS_SUFRAMA           := lItens.objeto.PIS_SUFRAMA;
+      lNFItensModel.objeto.COFINS_SUFRAMA        := lItens.objeto.COFINS_SUFRAMA;
+      lNFItensModel.objeto.ICMS_SUFRAMA          := lItens.objeto.ICMS_SUFRAMA;
+      lNFItensModel.objeto.IPI_SUFRAMA           := lItens.objeto.IPI_SUFRAMA;
+      lNFItensModel.objeto.XPED                  := lItens.objeto.XPED;
+      lNFItensModel.objeto.NITEMPED2             := lItens.objeto.NITEMPED2;
+      lNFItensModel.objeto.LOTE                  := lItens.objeto.OBSERVACAO;
 
-      lNFItensModel.Salvar;
+      lNFItensModel.objeto.Salvar;
     end;
 
-    lTableTotais := lNFItensModel.obterTotais(lNumeroNFe);
+    lTableTotais := lNFItensModel.objeto.obterTotais(lNumeroNFe);
 
     lNFModel.objeto.Acao := tacAlterar;
 
@@ -1218,7 +1218,7 @@ begin
     Result := lNumeroNFe;
   finally
     lPedidoItensModel:=nil;
-    lNFItensModel.Free;
+    lNFItensModel:=nil;
     lNFModel:=nil;
     lEmpresaModel := nil;
   end;

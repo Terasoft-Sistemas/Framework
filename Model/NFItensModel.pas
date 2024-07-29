@@ -6,14 +6,18 @@ uses
   Terasoft.Types,
   Spring.Collections,
   FireDAC.Comp.Client,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TNFItensModel = class
+  TNFItensModel = class;
+  ITNFItensModel=IObject<TNFItensModel>;
 
+  TNFItensModel = class
   private
+    [weak] mySelf: ITNFItensModel;
     vIConexao : IConexao;
-    FNFItenssLista: IList<TNFItensModel>;
+    FNFItenssLista: IList<ITNFItensModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -172,7 +176,7 @@ type
     FIPI_NF: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetNFItenssLista(const Value: IList<TNFItensModel>);
+    procedure SetNFItenssLista(const Value: IList<ITNFItensModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -478,16 +482,18 @@ type
     property QEXPORT: Variant read FQEXPORT write SetQEXPORT;
     property EXTIPI: Variant read FEXTIPI write SetEXTIPI;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITNFItensModel;
 
     function Salvar: String;
     procedure obterLista;
     function obterTotais(pNF : String): IFDDataset;
 
-    function carregaClasse(pId: String): TNFItensModel;
+    function carregaClasse(pId: String): ITNFItensModel;
 
-    property NFItenssLista: IList<TNFItensModel> read FNFItenssLista write SetNFItenssLista;
+    property NFItenssLista: IList<ITNFItensModel> read FNFItenssLista write SetNFItenssLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -506,19 +512,19 @@ uses
 
 { TNFItensModel }
 
-function TNFItensModel.carregaClasse(pId: String): TNFItensModel;
+function TNFItensModel.carregaClasse(pId: String): ITNFItensModel;
 var
-  lNFItensDao: TNFItensDao;
+  lNFItensDao: ITNFItensDao;
 begin
-  lNFItensDao := TNFItensDao.Create(vIConexao);
+  lNFItensDao := TNFItensDao.getNewIface(vIConexao);
   try
-    Result := lNFItensDao.carregaClasse(pId);
+    Result := lNFItensDao.objeto.carregaClasse(pId);
   finally
-    lNFItensDao.Free;
+    lNFItensDao:=nil;
   end;
 end;
 
-constructor TNFItensModel.Create(pIConexao : IConexao);
+constructor TNFItensModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -530,60 +536,65 @@ begin
   inherited;
 end;
 
+class function TNFItensModel.getNewIface(pIConexao: IConexao): ITNFItensModel;
+begin
+
+end;
+
 procedure TNFItensModel.obterLista;
 var
-  lNFItensLista: TNFItensDao;
+  lNFItensLista: ITNFItensDao;
 begin
-  lNFItensLista := TNFItensDao.Create(vIConexao);
+  lNFItensLista := TNFItensDao.getNewIface(vIConexao);
 
   try
-    lNFItensLista.TotalRecords    := FTotalRecords;
-    lNFItensLista.WhereView       := FWhereView;
-    lNFItensLista.CountView       := FCountView;
-    lNFItensLista.OrderView       := FOrderView;
-    lNFItensLista.StartRecordView := FStartRecordView;
-    lNFItensLista.LengthPageView  := FLengthPageView;
-    lNFItensLista.IDRecordView    := FIDRecordView;
+    lNFItensLista.objeto.TotalRecords    := FTotalRecords;
+    lNFItensLista.objeto.WhereView       := FWhereView;
+    lNFItensLista.objeto.CountView       := FCountView;
+    lNFItensLista.objeto.OrderView       := FOrderView;
+    lNFItensLista.objeto.StartRecordView := FStartRecordView;
+    lNFItensLista.objeto.LengthPageView  := FLengthPageView;
+    lNFItensLista.objeto.IDRecordView    := FIDRecordView;
 
-    lNFItensLista.obterLista;
+    lNFItensLista.objeto.obterLista;
 
-    FTotalRecords  := lNFItensLista.TotalRecords;
-    FNFItenssLista := lNFItensLista.NFItenssLista;
+    FTotalRecords  := lNFItensLista.objeto.TotalRecords;
+    FNFItenssLista := lNFItensLista.objeto.NFItenssLista;
 
   finally
-    lNFItensLista.Free;
+    lNFItensLista:=nil;
   end;
 end;
 
 function TNFItensModel.obterTotais(pNF: String): IFDDataset;
 var
-  lNFItensDao : TNFItensDao;
+  lNFItensDao : ITNFItensDao;
 begin
-  lNFItensDao := TNFItensDao.Create(vIConexao);
+  lNFItensDao := TNFItensDao.getNewIface(vIConexao);
   try
-    Result := lNFItensDao.obterTotais(pNF);
+    Result := lNFItensDao.objeto.obterTotais(pNF);
   finally
-    lNFItensDao.Free;
+    lNFItensDao:=nil;
   end;
 end;
 
 function TNFItensModel.Salvar: String;
 var
-  lNFItensDao: TNFItensDao;
+  lNFItensDao: ITNFItensDao;
 begin
-  lNFItensDao := TNFItensDao.Create(vIConexao);
+  lNFItensDao := TNFItensDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lNFItensDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lNFItensDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lNFItensDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lNFItensDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lNFItensDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lNFItensDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lNFItensDao.Free;
+    lNFItensDao:=nil;
   end;
 end;
 

@@ -9,14 +9,18 @@ uses
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao,
   Terasoft.Utils,
   Terasoft.ConstrutorDao;
 
 type
-  TChequeDao = class
+  TChequeDao = class;
+  ITChequeDao=IObject<TChequeDao>;
 
+  TChequeDao = class
   private
+    [weak] mySelf: ITChequeDao;
     vIConexao 	: IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -42,8 +46,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITChequeDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -54,14 +60,14 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(pChequeModel: TChequeModel): String;
-    function alterar(pChequeModel: TChequeModel): String;
-    function excluir(pChequeModel: TChequeModel): String;
+    function incluir(pChequeModel: ITChequeModel): String;
+    function alterar(pChequeModel: ITChequeModel): String;
+    function excluir(pChequeModel: ITChequeModel): String;
 
-    function carregaClasse(pID : String): TChequeModel;
+    function carregaClasse(pID : String): ITChequeModel;
     function obterLista: IFDDataset;
 
-    procedure setParams(var pQry: TFDQuery; pChequeModel: TChequeModel);
+    procedure setParams(var pQry: TFDQuery; pChequeModel: ITChequeModel);
 
 end;
 
@@ -72,13 +78,13 @@ uses
 
 { TCheque }
 
-function TChequeDao.carregaClasse(pID : String): TChequeModel;
+function TChequeDao.carregaClasse(pID : String): ITChequeModel;
 var
   lQry: TFDQuery;
-  lModel: TChequeModel;
+  lModel: ITChequeModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TChequeModel.Create(vIConexao);
+  lModel   := TChequeModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -87,32 +93,32 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.NUMERO_CHQ         := lQry.FieldByName('NUMERO_CHQ').AsString;
-    lModel.BANCO_CHQ          := lQry.FieldByName('BANCO_CHQ').AsString;
-    lModel.EMITENTE_CHQ       := lQry.FieldByName('EMITENTE_CHQ').AsString;
-    lModel.EMISSAO_CHQ        := lQry.FieldByName('EMISSAO_CHQ').AsString;
-    lModel.VALOR_CHQ          := lQry.FieldByName('VALOR_CHQ').AsString;
-    lModel.HISTORICO_CHQ      := lQry.FieldByName('HISTORICO_CHQ').AsString;
-    lModel.VENCIMENTO_CHQ     := lQry.FieldByName('VENCIMENTO_CHQ').AsString;
-    lModel.BAIXA_CHQ          := lQry.FieldByName('BAIXA_CHQ').AsString;
-    lModel.DEVOLVIDO_CHQ      := lQry.FieldByName('DEVOLVIDO_CHQ').AsString;
-    lModel.DEVOLVIDO2_CHQ     := lQry.FieldByName('DEVOLVIDO2_CHQ').AsString;
-    lModel.CODIGO_CLI         := lQry.FieldByName('CODIGO_CLI').AsString;
-    lModel.DESTINO_CHQ        := lQry.FieldByName('DESTINO_CHQ').AsString;
-    lModel.AGENCIA_CHQ        := lQry.FieldByName('AGENCIA_CHQ').AsString;
-    lModel.CONTA_CHQ          := lQry.FieldByName('CONTA_CHQ').AsString;
-    lModel.USUARIO_CHQ        := lQry.FieldByName('USUARIO_CHQ').AsString;
-    lModel.OBS_CHQ            := lQry.FieldByName('OBS_CHQ').AsString;
-    lModel.TIPO               := lQry.FieldByName('TIPO').AsString;
-    lModel.NUMERO_DOC         := lQry.FieldByName('NUMERO_DOC').AsString;
-    lModel.NUMERO             := lQry.FieldByName('NUMERO').AsString;
-    lModel.LOJA               := lQry.FieldByName('LOJA').AsString;
-    lModel.CNPJ_CPF_CHEQUE    := lQry.FieldByName('CNPJ_CPF_CHEQUE').AsString;
-    lModel.ID                 := lQry.FieldByName('ID').AsString;
-    lModel.CMC7               := lQry.FieldByName('CMC7').AsString;
-    lModel.FORMA_PAGAMENTO_ID := lQry.FieldByName('FORMA_PAGAMENTO_ID').AsString;
-    lModel.DATAHORA           := lQry.FieldByName('DATAHORA').AsString;
-    lModel.SYSTIME            := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.NUMERO_CHQ         := lQry.FieldByName('NUMERO_CHQ').AsString;
+    lModel.objeto.BANCO_CHQ          := lQry.FieldByName('BANCO_CHQ').AsString;
+    lModel.objeto.EMITENTE_CHQ       := lQry.FieldByName('EMITENTE_CHQ').AsString;
+    lModel.objeto.EMISSAO_CHQ        := lQry.FieldByName('EMISSAO_CHQ').AsString;
+    lModel.objeto.VALOR_CHQ          := lQry.FieldByName('VALOR_CHQ').AsString;
+    lModel.objeto.HISTORICO_CHQ      := lQry.FieldByName('HISTORICO_CHQ').AsString;
+    lModel.objeto.VENCIMENTO_CHQ     := lQry.FieldByName('VENCIMENTO_CHQ').AsString;
+    lModel.objeto.BAIXA_CHQ          := lQry.FieldByName('BAIXA_CHQ').AsString;
+    lModel.objeto.DEVOLVIDO_CHQ      := lQry.FieldByName('DEVOLVIDO_CHQ').AsString;
+    lModel.objeto.DEVOLVIDO2_CHQ     := lQry.FieldByName('DEVOLVIDO2_CHQ').AsString;
+    lModel.objeto.CODIGO_CLI         := lQry.FieldByName('CODIGO_CLI').AsString;
+    lModel.objeto.DESTINO_CHQ        := lQry.FieldByName('DESTINO_CHQ').AsString;
+    lModel.objeto.AGENCIA_CHQ        := lQry.FieldByName('AGENCIA_CHQ').AsString;
+    lModel.objeto.CONTA_CHQ          := lQry.FieldByName('CONTA_CHQ').AsString;
+    lModel.objeto.USUARIO_CHQ        := lQry.FieldByName('USUARIO_CHQ').AsString;
+    lModel.objeto.OBS_CHQ            := lQry.FieldByName('OBS_CHQ').AsString;
+    lModel.objeto.TIPO               := lQry.FieldByName('TIPO').AsString;
+    lModel.objeto.NUMERO_DOC         := lQry.FieldByName('NUMERO_DOC').AsString;
+    lModel.objeto.NUMERO             := lQry.FieldByName('NUMERO').AsString;
+    lModel.objeto.LOJA               := lQry.FieldByName('LOJA').AsString;
+    lModel.objeto.CNPJ_CPF_CHEQUE    := lQry.FieldByName('CNPJ_CPF_CHEQUE').AsString;
+    lModel.objeto.ID                 := lQry.FieldByName('ID').AsString;
+    lModel.objeto.CMC7               := lQry.FieldByName('CMC7').AsString;
+    lModel.objeto.FORMA_PAGAMENTO_ID := lQry.FieldByName('FORMA_PAGAMENTO_ID').AsString;
+    lModel.objeto.DATAHORA           := lQry.FieldByName('DATAHORA').AsString;
+    lModel.objeto.SYSTIME            := lQry.FieldByName('SYSTIME').AsString;
 	
     Result := lModel;
   finally
@@ -120,7 +126,7 @@ begin
   end;
 end;
 
-constructor TChequeDao.Create(pIConexao : IConexao);
+constructor TChequeDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -133,7 +139,7 @@ begin
   inherited;
 end;
 
-function TChequeDao.incluir(pChequeModel: TChequeModel): String;
+function TChequeDao.incluir(pChequeModel: ITChequeModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -153,7 +159,7 @@ begin
   end;
 end;
 
-function TChequeDao.alterar(pChequeModel: TChequeModel): String;
+function TChequeDao.alterar(pChequeModel: ITChequeModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -167,7 +173,7 @@ begin
     setParams(lQry, pChequeModel);
     lQry.ExecSQL;
 
-    Result := pChequeModel.ID;
+    Result := pChequeModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -175,22 +181,28 @@ begin
   end;
 end;
 
-function TChequeDao.excluir(pChequeModel: TChequeModel): String;
+function TChequeDao.excluir(pChequeModel: ITChequeModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from CHEQUE where ID = :ID' ,[pChequeModel.ID]);
+   lQry.ExecSQL('delete from CHEQUE where ID = :ID' ,[pChequeModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pChequeModel.ID;
+   Result := pChequeModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
 end;
 
+
+class function TChequeDao.getNewIface(pIConexao: IConexao): ITChequeDao;
+begin
+  Result := TImplObjetoOwner<TChequeDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
 
 function TChequeDao.where: String;
 var
@@ -286,28 +298,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TChequeDao.setParams(var pQry: TFDQuery; pChequeModel: TChequeModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TChequeDao.setParams(var pQry: TFDQuery; pChequeModel: ITChequeModel);
 begin
-  lTabela := vConstrutor.getColumns('CHEQUE');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TChequeModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pChequeModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pChequeModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('CHEQUE',pQry,pChequeModel.objeto);
 end;
 
 procedure TChequeDao.SetStartRecordView(const Value: String);

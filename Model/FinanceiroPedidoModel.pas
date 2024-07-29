@@ -6,10 +6,14 @@ uses
   System.Math,
   Terasoft.Types,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao,
   FireDAC.Comp.Client, WebPedidoModel;
 
 type
+  TFinanceiroPedidoModel = class;
+  ITFinanceiroPedidoModel=IObject<TFinanceiroPedidoModel>;
+
   TFinanceiroParams = record
     WEB_PEDIDO_ID,
     WEB_PEDIDOITENS_ID,
@@ -26,8 +30,8 @@ type
   end;
 
   TFinanceiroPedidoModel = class
-
   private
+    [weak] mySelf: ITFinanceiroPedidoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -130,17 +134,19 @@ type
     property IDRecordView       : Integer     read FIDRecordView       write SetIDRecordView;
 
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITFinanceiroPedidoModel;
 
     function Salvar  : String;
 
     function Incluir : String;
-    function Alterar(pID: String): TFinanceiroPedidoModel;
+    function Alterar(pID: String): ITFinanceiroPedidoModel;
     function Excluir(pID: String) : String;
     function ExcluirPromocao(pID: String): String;
 
-    function carregaClasse(pId: String): TFinanceiroPedidoModel;
+    function carregaClasse(pId: String): ITFinanceiroPedidoModel;
     function obterLista: IFDDataset;
     function obterResumo(pIDPedido : String) : IFDDataset;
     function qtdePagamentoPrazo(pWebPedido : String): Integer;
@@ -164,35 +170,35 @@ uses
 
 procedure TFinanceiroPedidoModel.ArredondaParcela(pNovaParcela: Extended; pID_Financeiro: String);
 var
-  lFinanceiroPedidoModel : TFinanceiroPedidoModel;
-  lFinanceiroPedidoDao : TFinanceiroPedidoDao;
+  lFinanceiroPedidoModel : ITFinanceiroPedidoModel;
+  lFinanceiroPedidoDao : ITFinanceiroPedidoDao;
 
   lTotal, lValorParcelaNew, lIndiceNew, lIndiceOriginal, lValorAcrescimoNew, lValorLiquido, lParcelaOriginal : Extended;
 
 begin
-    lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
-    lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
+    lFinanceiroPedidoModel := TFinanceiroPedidoModel.getNewIface(vIConexao);
+    lFinanceiroPedidoDao := TFinanceiroPedidoDao.getNewIface(vIConexao);
 
   try
-    lFinanceiroPedidoModel := lFinanceiroPedidoModel.carregaClasse(pID_Financeiro);
+    lFinanceiroPedidoModel := lFinanceiroPedidoModel.objeto.carregaClasse(pID_Financeiro);
 
-    if pNovaParcela < (lFinanceiroPedidoModel.ORIGINAL_VALOR_PARCELA-0.99) then
+    if pNovaParcela < (lFinanceiroPedidoModel.objeto.ORIGINAL_VALOR_PARCELA-0.99) then
       CriaException('Arredondamento da parcela não pode ser superior a R$ 0.99');
 
-    lIndiceOriginal  := StrToFloat(lFinanceiroPedidoModel.ORIGINAL_INDCE_APLICADO);
-    lParcelaOriginal := StrToFloat(lFinanceiroPedidoModel.ORIGINAL_VALOR_PARCELA);
-    lValorLiquido    := (StrToFloat(lFinanceiroPedidoModel.VALOR_LIQUIDO) + StrToFloat(lFinanceiroPedidoModel.VALOR_SEG_PRESTAMISTA));
+    lIndiceOriginal  := StrToFloat(lFinanceiroPedidoModel.objeto.ORIGINAL_INDCE_APLICADO);
+    lParcelaOriginal := StrToFloat(lFinanceiroPedidoModel.objeto.ORIGINAL_VALOR_PARCELA);
+    lValorLiquido    := (StrToFloat(lFinanceiroPedidoModel.objeto.VALOR_LIQUIDO) + StrToFloat(lFinanceiroPedidoModel.objeto.VALOR_SEG_PRESTAMISTA));
 
     lIndiceNew         := (pNovaParcela * lIndiceOriginal)/lParcelaOriginal;
     lValorParcelaNew   := lValorLiquido * lIndiceNew;
-    lTotal             := lValorParcelaNew * StrToInt(lFinanceiroPedidoModel.QUANTIDADE_PARCELAS);
+    lTotal             := lValorParcelaNew * StrToInt(lFinanceiroPedidoModel.objeto.QUANTIDADE_PARCELAS);
     lValorAcrescimoNew := lTotal - lValorLiquido;
 
-    lFinanceiroPedidoDao.UpdateArredondaParcela(lTotal, lValorParcelaNew, lIndiceNew, lValorAcrescimoNew, pID_Financeiro);
+    lFinanceiroPedidoDao.objeto.UpdateArredondaParcela(lTotal, lValorParcelaNew, lIndiceNew, lValorAcrescimoNew, pID_Financeiro);
 
   finally
-    lFinanceiroPedidoModel.Free;
-    lFinanceiroPedidoDao.Free;
+    lFinanceiroPedidoModel:=nil;
+    lFinanceiroPedidoDao:=nil;
   end;
 
 end;
@@ -221,17 +227,17 @@ begin
   Result    := self.Salvar;
 end;
 
-function TFinanceiroPedidoModel.Alterar(pID: String): TFinanceiroPedidoModel;
+function TFinanceiroPedidoModel.Alterar(pID: String): ITFinanceiroPedidoModel;
 var
-  lFinanceiroPedidoModel : TFinanceiroPedidoModel;
+  lFinanceiroPedidoModel : ITFinanceiroPedidoModel;
 begin
   if pID = '' then
     CriaException('ID é obrigatório.');
 
-  lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
+  lFinanceiroPedidoModel := TFinanceiroPedidoModel.getNewIface(vIConexao);
   try
-    lFinanceiroPedidoModel := lFinanceiroPedidoModel.carregaClasse(pID);
-    lFinanceiroPedidoModel.Acao := tacAlterar;
+    lFinanceiroPedidoModel := lFinanceiroPedidoModel.objeto.carregaClasse(pID);
+    lFinanceiroPedidoModel.objeto.Acao := tacAlterar;
     Result := lFinanceiroPedidoModel;
   finally
   end;
@@ -249,16 +255,16 @@ end;
 
 function TFinanceiroPedidoModel.ExcluirPromocao(pID: String): String;
 var
-  lFinanceiroPedidoDao : TFinanceiroPedidoDao;
+  lFinanceiroPedidoDao : ITFinanceiroPedidoDao;
 begin
   if pID = '' then
     CriaException('ID é obrigatório.');
 
-  lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
+  lFinanceiroPedidoDao := TFinanceiroPedidoDao.getNewIface(vIConexao);
   try
-    Result := lFinanceiroPedidoDao.excluirPromocao(pId);
+    Result := lFinanceiroPedidoDao.objeto.excluirPromocao(pId);
   finally
-    lFinanceiroPedidoDao.Free;
+    lFinanceiroPedidoDao:=nil;
   end;
 
 end;
@@ -320,19 +326,25 @@ begin
 
 end;
 
-function TFinanceiroPedidoModel.carregaClasse(pId: String): TFinanceiroPedidoModel;
-var
-  lFinanceiroPedidoDao : TFinanceiroPedidoDao;
+class function TFinanceiroPedidoModel.getNewIface(pIConexao: IConexao): ITFinanceiroPedidoModel;
 begin
-  lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
+  Result := TImplObjetoOwner<TFinanceiroPedidoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TFinanceiroPedidoModel.carregaClasse(pId: String): ITFinanceiroPedidoModel;
+var
+  lFinanceiroPedidoDao : ITFinanceiroPedidoDao;
+begin
+  lFinanceiroPedidoDao := TFinanceiroPedidoDao.getNewIface(vIConexao);
   try
-    Result := lFinanceiroPedidoDao.carregaClasse(pId);
+    Result := lFinanceiroPedidoDao.objeto.carregaClasse(pId);
   finally
-    lFinanceiroPedidoDao.Free;
+    lFinanceiroPedidoDao:=nil;
   end;
 end;
 
-constructor TFinanceiroPedidoModel.Create(pIConexao : IConexao);
+constructor TFinanceiroPedidoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -345,88 +357,88 @@ end;
 
 function TFinanceiroPedidoModel.obterResumo(pIDPedido : String): IFDDataset;
 var
-  lFinanceiroPedidoDao : TFinanceiroPedidoDao;
+  lFinanceiroPedidoDao : ITFinanceiroPedidoDao;
 begin
-  lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
+  lFinanceiroPedidoDao := TFinanceiroPedidoDao.getNewIface(vIConexao);
   try
-    Result := lFinanceiroPedidoDao.obterResumo(pIDPedido);
+    Result := lFinanceiroPedidoDao.objeto.obterResumo(pIDPedido);
   finally
-    lFinanceiroPedidoDao.Free;
+    lFinanceiroPedidoDao:=nil;
   end;
 end;
 
 function TFinanceiroPedidoModel.obterResumoFinanceiro: IFDDataset;
 var
-  lFinanceiroPedidoDao : TFinanceiroPedidoDao;
+  lFinanceiroPedidoDao : ITFinanceiroPedidoDao;
 begin
-  lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
+  lFinanceiroPedidoDao := TFinanceiroPedidoDao.getNewIface(vIConexao);
   try
-    lFinanceiroPedidoDao.WhereView := FWhereView;
+    lFinanceiroPedidoDao.objeto.WhereView := FWhereView;
 
-    Result := lFinanceiroPedidoDao.obterResumoFinanceiro;
+    Result := lFinanceiroPedidoDao.objeto.obterResumoFinanceiro;
   finally
-    lFinanceiroPedidoDao.Free;
+    lFinanceiroPedidoDao:=nil;
   end;
 end;
 
 function TFinanceiroPedidoModel.qtdePagamentoPrazo(pWebPedido: String): Integer;
 var
-  lFinanceiroPedidoDao: TFinanceiroPedidoDao;
+  lFinanceiroPedidoDao: ITFinanceiroPedidoDao;
 begin
-  lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
+  lFinanceiroPedidoDao := TFinanceiroPedidoDao.getNewIface(vIConexao);
   try
-    Result := lFinanceiroPedidoDao.qtdePagamentoPrazo(pWebPedido);
+    Result := lFinanceiroPedidoDao.objeto.qtdePagamentoPrazo(pWebPedido);
   finally
-    lFinanceiroPedidoDao.Free;
+    lFinanceiroPedidoDao:=nil;
   end;
 end;
 
 function TFinanceiroPedidoModel.obterLista: IFDDataset;
 var
-  lFinanceiroPedidoLista: TFinanceiroPedidoDao;
+  lFinanceiroPedidoLista: ITFinanceiroPedidoDao;
 begin
-  lFinanceiroPedidoLista := TFinanceiroPedidoDao.Create(vIConexao);
+  lFinanceiroPedidoLista := TFinanceiroPedidoDao.getNewIface(vIConexao);
   try
-    lFinanceiroPedidoLista.TotalRecords    := FTotalRecords;
-    lFinanceiroPedidoLista.WhereView       := FWhereView;
-    lFinanceiroPedidoLista.CountView       := FCountView;
-    lFinanceiroPedidoLista.OrderView       := FOrderView;
-    lFinanceiroPedidoLista.StartRecordView := FStartRecordView;
-    lFinanceiroPedidoLista.LengthPageView  := FLengthPageView;
-    lFinanceiroPedidoLista.IDRecordView    := FIDRecordView;
+    lFinanceiroPedidoLista.objeto.TotalRecords    := FTotalRecords;
+    lFinanceiroPedidoLista.objeto.WhereView       := FWhereView;
+    lFinanceiroPedidoLista.objeto.CountView       := FCountView;
+    lFinanceiroPedidoLista.objeto.OrderView       := FOrderView;
+    lFinanceiroPedidoLista.objeto.StartRecordView := FStartRecordView;
+    lFinanceiroPedidoLista.objeto.LengthPageView  := FLengthPageView;
+    lFinanceiroPedidoLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result        := lFinanceiroPedidoLista.obterLista;
-    FTotalRecords := lFinanceiroPedidoLista.TotalRecords;
+    Result        := lFinanceiroPedidoLista.objeto.obterLista;
+    FTotalRecords := lFinanceiroPedidoLista.objeto.TotalRecords;
   finally
-    lFinanceiroPedidoLista.Free;
+    lFinanceiroPedidoLista:=nil;
   end;
 end;
 
 function TFinanceiroPedidoModel.Salvar: String;
 var
-  lFinanceiroPedidoDao : TFinanceiroPedidoDao;
+  lFinanceiroPedidoDao : ITFinanceiroPedidoDao;
 begin
-  lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
+  lFinanceiroPedidoDao := TFinanceiroPedidoDao.getNewIface(vIConexao);
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lFinanceiroPedidoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lFinanceiroPedidoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lFinanceiroPedidoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lFinanceiroPedidoDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lFinanceiroPedidoDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lFinanceiroPedidoDao.objeto.excluir(mySelf);
     end;
   finally
-    lFinanceiroPedidoDao.Free;
+    lFinanceiroPedidoDao:=nil;
   end;
 end;
 
 procedure TFinanceiroPedidoModel.UpdateDadosFinanceiro(pWebPedidoModel: TWebPedidoModel);
 var
-  lFinanceiroPedidoDao : TFinanceiroPedidoDao;
+  lFinanceiroPedidoDao : ITFinanceiroPedidoDao;
 begin
-  lFinanceiroPedidoDao := TFinanceiroPedidoDao.Create(vIConexao);
+  lFinanceiroPedidoDao := TFinanceiroPedidoDao.getNewIface(vIConexao);
   try
-    lFinanceiroPedidoDao.UpdateDadosFinanceiro(pWebPedidoModel);
+    lFinanceiroPedidoDao.objeto.UpdateDadosFinanceiro(pWebPedidoModel);
   finally
-    lFinanceiroPedidoDao.Free;
+    lFinanceiroPedidoDao:=nil;
   end;
 end;
 

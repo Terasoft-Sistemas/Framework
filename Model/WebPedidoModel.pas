@@ -460,7 +460,7 @@ var
   lWebPedidoItensModel     : TWebPedidoItensModel;
   lWebPedidoModel          : TWebPedidoModel;
   lClientesModel           : TClienteModel;
-  lFinanceiroPedidoModel   : TFinanceiroPedidoModel;
+  lFinanceiroPedidoModel   : ITFinanceiroPedidoModel;
   lPedido                  : String;
   lItem, lIndex            : Integer;
   lTableCliente,
@@ -477,7 +477,7 @@ begin
   lPedidoItensModel      := TPedidoItensModel.getNewIface(vIConexao);
 
   lClientesModel         := TClienteModel.Create(vIConexao);
-  lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
+  lFinanceiroPedidoModel := TFinanceiroPedidoModel.getNewIface(vIConexao);
 
   try
     lPedidoVendaModel.objeto.WhereView := ' and pedidovenda.web_pedido_id = '+ IntToStr(pIdVendaAssistida);
@@ -486,8 +486,8 @@ begin
     if lPedidoVendaModel.objeto.TotalRecords > 0 then
       CriaException('Já existe um pedido gerado para esse registro');
 
-    lFinanceiroPedidoModel.WhereView := ' and financeiro_pedido.web_pedido_id = ' + pIdVendaAssistida.ToString;
-    lTableFinanceiro := lFinanceiroPedidoModel.obterLista;
+    lFinanceiroPedidoModel.objeto.WhereView := ' and financeiro_pedido.web_pedido_id = ' + pIdVendaAssistida.ToString;
+    lTableFinanceiro := lFinanceiroPedidoModel.objeto.obterLista;
 
     lWebPedidoModel := lWebPedidoModel.carregaClasse(pIdVendaAssistida.ToString);
 
@@ -520,7 +520,7 @@ begin
     lPedidoVendaModel.objeto.CODIGO_CLI           := lWebPedidoModel.CLIENTE_ID;
     lPedidoVendaModel.objeto.CNPJ_CPF_CONSUMIDOR  := lTableCliente.objeto.fieldByName('CNPJ_CPF_CLI').AsString;
 
-    if lFinanceiroPedidoModel.TotalRecords > 0 then
+    if lFinanceiroPedidoModel.objeto.TotalRecords > 0 then
       lPedidoVendaModel.objeto.CODIGO_PORT        := lTableFinanceiro.objeto.FieldByName('PORTADOR_ID').AsString
     else
       lPedidoVendaModel.objeto.CODIGO_PORT        := lWebPedidoModel.PORTADOR_ID;
@@ -602,7 +602,7 @@ begin
 
     lPedidoVendaModel.objeto.calcularTotais;
 
-    if lFinanceiroPedidoModel.TotalRecords > 0 then
+    if lFinanceiroPedidoModel.objeto.TotalRecords > 0 then
       lPedidoVendaModel.objeto.gerarContasReceberFinanceiroPedido(pIdVendaAssistida.ToString)
     else
       lPedidoVendaModel.objeto.gerarContasReceberPedido;
@@ -615,7 +615,7 @@ begin
     Result := lPedido;
 
   finally
-    lFinanceiroPedidoModel.Free;
+    lFinanceiroPedidoModel:=nil;
     lWebPedidoModel.Free;
     lPedidoVendaModel:=nil;
     lWebPedidoItensModel.Free;
@@ -1687,13 +1687,13 @@ end;
 
 function TWebPedidoModel.Autorizar(pID : String): Boolean;
 var
-  lFinanceiroPedidoModel : TFinanceiroPedidoModel;
+  lFinanceiroPedidoModel : ITFinanceiroPedidoModel;
   lWebPedidoModel        : TWebPedidoModel;
 begin
   if pID = '' then
     CriaException('ID não informado');
 
-  lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
+  lFinanceiroPedidoModel := TFinanceiroPedidoModel.getNewIface(vIConexao);
   lWebPedidoModel        := TWebPedidoModel.Create(vIConexao);
 
   try
@@ -1702,7 +1702,7 @@ begin
     if (lWebPedidoModel.STATUS <> 'E') and (lWebPedidoModel.STATUS <> 'P') then
       CriaException('Permissão já negada ou autorizada.');
 
-    if (lFinanceiroPedidoModel.qtdePagamentoPrazo(pID) = 0) then
+    if (lFinanceiroPedidoModel.objeto.qtdePagamentoPrazo(pID) = 0) then
     begin
       if lWebPedidoModel.STATUS <> 'E' then
         lWebPedidoModel.STATUS            := 'C';
@@ -1721,19 +1721,19 @@ begin
 
     Result := true;
   finally
-    lFinanceiroPedidoModel.Free;
+    lFinanceiroPedidoModel:=nil;
     lWebPedidoModel.Free;
   end;
 end;
 
 function TWebPedidoModel.AutorizarDesconto(pID: String): Boolean;
 var
-  lFinanceiroPedidoModel : TFinanceiroPedidoModel;
+  lFinanceiroPedidoModel : ITFinanceiroPedidoModel;
   lWebPedidoModel        : TWebPedidoModel;
   lPermissaoRemota       : TPermissaoRemotaModel;
   lTablePermissao        : IFDDataset;
 begin
-  lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
+  lFinanceiroPedidoModel := TFinanceiroPedidoModel.getNewIface(vIConexao);
   lWebPedidoModel        := TWebPedidoModel.Create(vIConexao);
   lPermissaoRemota       := TPermissaoRemotaModel.Create(vIConexao);
 
@@ -1752,7 +1752,7 @@ begin
     if lTablePermissao.objeto.RecordCount > 0 then
       lWebPedidoModel.STATUS := 'P'
 
-    else if (lFinanceiroPedidoModel.qtdePagamentoPrazo(pID) = 0) then
+    else if (lFinanceiroPedidoModel.objeto.qtdePagamentoPrazo(pID) = 0) then
       lWebPedidoModel.STATUS := 'C'
 
     else
@@ -1764,7 +1764,7 @@ begin
     Result := True;
 
   finally
-    lFinanceiroPedidoModel.Free;
+    lFinanceiroPedidoModel:=nil;
     lPermissaoRemota.Free;
     lWebPedidoModel.Free;
   end;

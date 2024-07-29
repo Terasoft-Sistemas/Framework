@@ -5,14 +5,18 @@ interface
 uses
   Terasoft.Types,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TVendaCartaoModel = class
+  TVendaCartaoModel = class;
+  ITVendaCartaoModel=IObject<TVendaCartaoModel>;
 
+  TVendaCartaoModel = class
   private
+    [weak] mySelf: ITVendaCartaoModel;
     vIConexao : IConexao;
-    FVendaCartaosLista: IList<TVendaCartaoModel>;
+    FVendaCartaosLista: IList<ITVendaCartaoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -44,7 +48,7 @@ type
     FPARCELA_CAR: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetVendaCartaosLista(const Value: IList<TVendaCartaoModel>);
+    procedure SetVendaCartaosLista(const Value: IList<ITVendaCartaoModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -95,17 +99,19 @@ type
     property PARCELA_TEF: Variant read FPARCELA_TEF write SetPARCELA_TEF;
     property PARCELAS_TEF: Variant read FPARCELAS_TEF write SetPARCELAS_TEF;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITVendaCartaoModel;
+
     function Incluir: String;
-    function Alterar(pID : String) : TVendaCartaoModel;
+    function Alterar(pID : String) : ITVendaCartaoModel;
     function Excluir(pID : String) : String;
     function Salvar: String;
-    function carregaClasse(pID: String): TVendaCartaoModel;
+    function carregaClasse(pID: String): ITVendaCartaoModel;
     procedure obterLista;
 
-    property VendaCartaosLista: IList<TVendaCartaoModel> read FVendaCartaosLista write SetVendaCartaosLista;
+    property VendaCartaosLista: IList<ITVendaCartaoModel> read FVendaCartaosLista write SetVendaCartaosLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -124,14 +130,14 @@ uses
 
 { TVendaCartaoModel }
 
-function TVendaCartaoModel.Alterar(pID: String): TVendaCartaoModel;
+function TVendaCartaoModel.Alterar(pID: String): ITVendaCartaoModel;
 var
-  lVendaCartaoModel : TVendaCartaoModel;
+  lVendaCartaoModel : ITVendaCartaoModel;
 begin
-  lVendaCartaoModel := TVendaCartaoModel.Create(vIConexao);
+  lVendaCartaoModel := TVendaCartaoModel.getNewIface(vIConexao);
   try
-    lVendaCartaoModel       := lVendaCartaoModel.carregaClasse(pID);
-    lVendaCartaoModel.Acao  := tacAlterar;
+    lVendaCartaoModel       := lVendaCartaoModel.objeto.carregaClasse(pID);
+    lVendaCartaoModel.objeto.Acao  := tacAlterar;
     Result                  := lVendaCartaoModel;
   finally
 
@@ -145,25 +151,31 @@ begin
   Result    := self.Salvar;
 end;
 
+class function TVendaCartaoModel.getNewIface(pIConexao: IConexao): ITVendaCartaoModel;
+begin
+  Result := TImplObjetoOwner<TVendaCartaoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TVendaCartaoModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
   Result    := self.Salvar;
 end;
 
-function TVendaCartaoModel.carregaClasse(pID: String): TVendaCartaoModel;
+function TVendaCartaoModel.carregaClasse(pID: String): ITVendaCartaoModel;
 var
-  lVendaCartaoDao: TVendaCartaoDao;
+  lVendaCartaoDao: ITVendaCartaoDao;
 begin
-  lVendaCartaoDao := TVendaCartaoDao.Create(vIConexao);
+  lVendaCartaoDao := TVendaCartaoDao.getNewIface(vIConexao);
   try
-    Result  := lVendaCartaoDao.carregaClasse(pId);
+    Result  := lVendaCartaoDao.objeto.carregaClasse(pId);
   finally
-    lVendaCartaoDao.Free;
+    lVendaCartaoDao:=nil;
   end;
 end;
 
-constructor TVendaCartaoModel.Create(pIConexao : IConexao);
+constructor TVendaCartaoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -177,46 +189,46 @@ end;
 
 procedure TVendaCartaoModel.obterLista;
 var
-  lVendaCartaoLista: TVendaCartaoDao;
+  lVendaCartaoLista: ITVendaCartaoDao;
 begin
-  lVendaCartaoLista := TVendaCartaoDao.Create(vIConexao);
+  lVendaCartaoLista := TVendaCartaoDao.getNewIface(vIConexao);
 
   try
-    lVendaCartaoLista.TotalRecords    := FTotalRecords;
-    lVendaCartaoLista.WhereView       := FWhereView;
-    lVendaCartaoLista.CountView       := FCountView;
-    lVendaCartaoLista.OrderView       := FOrderView;
-    lVendaCartaoLista.StartRecordView := FStartRecordView;
-    lVendaCartaoLista.LengthPageView  := FLengthPageView;
-    lVendaCartaoLista.IDRecordView    := FIDRecordView;
+    lVendaCartaoLista.objeto.TotalRecords    := FTotalRecords;
+    lVendaCartaoLista.objeto.WhereView       := FWhereView;
+    lVendaCartaoLista.objeto.CountView       := FCountView;
+    lVendaCartaoLista.objeto.OrderView       := FOrderView;
+    lVendaCartaoLista.objeto.StartRecordView := FStartRecordView;
+    lVendaCartaoLista.objeto.LengthPageView  := FLengthPageView;
+    lVendaCartaoLista.objeto.IDRecordView    := FIDRecordView;
 
-    lVendaCartaoLista.obterLista;
+    lVendaCartaoLista.objeto.obterLista;
 
-    FTotalRecords  := lVendaCartaoLista.TotalRecords;
-    FVendaCartaosLista := lVendaCartaoLista.VendaCartaosLista;
+    FTotalRecords  := lVendaCartaoLista.objeto.TotalRecords;
+    FVendaCartaosLista := lVendaCartaoLista.objeto.VendaCartaosLista;
 
   finally
-    lVendaCartaoLista.Free;
+    lVendaCartaoLista:=nil;
   end;
 end;
 
 function TVendaCartaoModel.Salvar: String;
 var
-  lVendaCartaoDao: TVendaCartaoDao;
+  lVendaCartaoDao: ITVendaCartaoDao;
 begin
-  lVendaCartaoDao := TVendaCartaoDao.Create(vIConexao);
+  lVendaCartaoDao := TVendaCartaoDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lVendaCartaoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lVendaCartaoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lVendaCartaoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lVendaCartaoDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lVendaCartaoDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lVendaCartaoDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lVendaCartaoDao.Free;
+    lVendaCartaoDao:=nil;
   end;
 end;
 

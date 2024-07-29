@@ -51,30 +51,30 @@ uses
 procedure TerasoftConfiguracoes.carregarConfiguracoes;
 var
   lConfiguracoesModel,
-  lModel               : TConfiguracoesModel;
+  lModel               : ITConfiguracoesModel;
 begin
-  lConfiguracoesModel := TConfiguracoesModel.Create(vIConexao);
+  lConfiguracoesModel := TConfiguracoesModel.getNewIface(vIConexao);
   try
-    lConfiguracoesModel.obterLista;
+    lConfiguracoesModel.objeto.obterLista;
 
-    for lModel in lConfiguracoesModel.ConfiguracoessLista do
+    for lModel in lConfiguracoesModel.objeto.ConfiguracoessLista do
     begin
       vmtConfiguracoes.objeto.Append;
-      vmtConfiguracoes.objeto.FieldByName('ID').Value             := IIF(lModel.ID             = '', Unassigned, lModel.ID);
-      vmtConfiguracoes.objeto.FieldByName('TAG').Value            := IIF(lModel.TAG            = '', Unassigned, lModel.TAG);
-      vmtConfiguracoes.objeto.FieldByName('PERFIL_ID').Value      := IIF(lModel.PERFIL_ID      = '', Unassigned, lModel.PERFIL_ID);
-      vmtConfiguracoes.objeto.FieldByName('VALORINTEIRO').Value   := IIF(lModel.VALORINTEIRO   = '', Unassigned, lModel.VALORINTEIRO);
-      vmtConfiguracoes.objeto.FieldByName('VALORSTRING').Value    := IIF(lModel.VALORSTRING    = '', Unassigned, lModel.VALORSTRING);
-      vmtConfiguracoes.objeto.FieldByName('VALORNUMERICO').Value  := IIF(lModel.VALORNUMERICO  = '', Unassigned, lModel.VALORNUMERICO);
-      vmtConfiguracoes.objeto.FieldByName('VALORCHAR').Value      := IIF(lModel.VALORCHAR      = '', Unassigned, lModel.VALORCHAR);
-      vmtConfiguracoes.objeto.FieldByName('VALORDATA').Value      := IIF(lModel.VALORDATA      = '', Unassigned, lModel.VALORDATA);
-      vmtConfiguracoes.objeto.FieldByName('VALORHORA').Value      := IIF(lModel.VALORHORA      = '', Unassigned, lModel.VALORHORA);
-      vmtConfiguracoes.objeto.FieldByName('VALORDATAHORA').Value  := IIF(lModel.VALORDATAHORA  = '', Unassigned, lModel.VALORDATAHORA);
-      vmtConfiguracoes.objeto.FieldByName('VALORMEMO').Value      := IIF(lModel.VALORMEMO      = '', Unassigned, lModel.VALORMEMO);
+      vmtConfiguracoes.objeto.FieldByName('ID').Value             := IIF(lModel.objeto.ID             = '', Unassigned, lModel.objeto.ID);
+      vmtConfiguracoes.objeto.FieldByName('TAG').Value            := IIF(lModel.objeto.TAG            = '', Unassigned, lModel.objeto.TAG);
+      vmtConfiguracoes.objeto.FieldByName('PERFIL_ID').Value      := IIF(lModel.objeto.PERFIL_ID      = '', Unassigned, lModel.objeto.PERFIL_ID);
+      vmtConfiguracoes.objeto.FieldByName('VALORINTEIRO').Value   := IIF(lModel.objeto.VALORINTEIRO   = '', Unassigned, lModel.objeto.VALORINTEIRO);
+      vmtConfiguracoes.objeto.FieldByName('VALORSTRING').Value    := IIF(lModel.objeto.VALORSTRING    = '', Unassigned, lModel.objeto.VALORSTRING);
+      vmtConfiguracoes.objeto.FieldByName('VALORNUMERICO').Value  := IIF(lModel.objeto.VALORNUMERICO  = '', Unassigned, lModel.objeto.VALORNUMERICO);
+      vmtConfiguracoes.objeto.FieldByName('VALORCHAR').Value      := IIF(lModel.objeto.VALORCHAR      = '', Unassigned, lModel.objeto.VALORCHAR);
+      vmtConfiguracoes.objeto.FieldByName('VALORDATA').Value      := IIF(lModel.objeto.VALORDATA      = '', Unassigned, lModel.objeto.VALORDATA);
+      vmtConfiguracoes.objeto.FieldByName('VALORHORA').Value      := IIF(lModel.objeto.VALORHORA      = '', Unassigned, lModel.objeto.VALORHORA);
+      vmtConfiguracoes.objeto.FieldByName('VALORDATAHORA').Value  := IIF(lModel.objeto.VALORDATAHORA  = '', Unassigned, lModel.objeto.VALORDATAHORA);
+      vmtConfiguracoes.objeto.FieldByName('VALORMEMO').Value      := IIF(lModel.objeto.VALORMEMO      = '', Unassigned, lModel.objeto.VALORMEMO);
       vmtConfiguracoes.objeto.Post;
     end;
   finally
-    lConfiguracoesModel.Free;
+    lConfiguracoesModel:=nil;
   end;
 end;
 
