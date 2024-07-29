@@ -5,14 +5,17 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao,
   FireDAC.Comp.Client;
 
 type
+  TChequeModel = class;
+  ITChequeModel=IObject<TChequeModel>;
 
   TChequeModel = class
-
   private
+    [weak] mySelf: ITChequeModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -114,15 +117,17 @@ type
     property DATAHORA : Variant read FDATAHORA write SetDATAHORA;
     property SYSTIME : Variant read FSYSTIME write SetSYSTIME;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITChequeModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TChequeModel;
+    function Alterar(pID : String): ITChequeModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pID : String): TChequeModel;
+    function carregaClasse(pID : String): ITChequeModel;
     function obterLista: IFDDataset;
 
     property Acao :TAcao read FAcao write SetAcao;
@@ -145,14 +150,14 @@ uses
 
 { TChequeModel }
 
-function TChequeModel.Alterar(pID: String): TChequeModel;
+function TChequeModel.Alterar(pID: String): ITChequeModel;
 var
-  lChequeModel : TChequeModel;
+  lChequeModel : ITChequeModel;
 begin
-  lChequeModel := TChequeModel.Create(vIConexao);
+  lChequeModel := TChequeModel.getNewIface(vIConexao);
   try
-    lChequeModel      := lChequeModel.carregaClasse(pID);
-    lChequeModel.Acao := tacAlterar;
+    lChequeModel      := lChequeModel.objeto.carregaClasse(pID);
+    lChequeModel.objeto.Acao := tacAlterar;
     Result            := lChequeModel;
   finally
 
@@ -166,25 +171,31 @@ begin
   Result     := self.Salvar;
 end;
 
+class function TChequeModel.getNewIface(pIConexao: IConexao): ITChequeModel;
+begin
+  Result := TImplObjetoOwner<TChequeModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TChequeModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
   Result    := self.Salvar;
 end;
 
-function TChequeModel.carregaClasse(pId : String): TChequeModel;
+function TChequeModel.carregaClasse(pId : String): ITChequeModel;
 var
-  lChequeDao: TChequeDao;
+  lChequeDao: ITChequeDao;
 begin
-  lChequeDao := TChequeDao.Create(vIConexao);
+  lChequeDao := TChequeDao.getNewIface(vIConexao);
   try
-    Result := lChequeDao.carregaClasse(pID);
+    Result := lChequeDao.objeto.carregaClasse(pID);
   finally
-    lChequeDao.Free;
+    lChequeDao:=nil;
   end;
 end;
 
-constructor TChequeModel.Create(pIConexao : IConexao);
+constructor TChequeModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -197,42 +208,42 @@ end;
 
 function TChequeModel.obterLista: IFDDataset;
 var
-  lCheque: TChequeDao;
+  lCheque: ITChequeDao;
 begin
-  lCheque := TChequeDao.Create(vIConexao);
+  lCheque := TChequeDao.getNewIface(vIConexao);
 
   try
-    lCheque.TotalRecords    := FTotalRecords;
-    lCheque.WhereView       := FWhereView;
-    lCheque.CountView       := FCountView;
-    lCheque.OrderView       := FOrderView;
-    lCheque.StartRecordView := FStartRecordView;
-    lCheque.LengthPageView  := FLengthPageView;
-    lCheque.IDRecordView    := FIDRecordView;
+    lCheque.objeto.TotalRecords    := FTotalRecords;
+    lCheque.objeto.WhereView       := FWhereView;
+    lCheque.objeto.CountView       := FCountView;
+    lCheque.objeto.OrderView       := FOrderView;
+    lCheque.objeto.StartRecordView := FStartRecordView;
+    lCheque.objeto.LengthPageView  := FLengthPageView;
+    lCheque.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lCheque.obterLista;
+    Result := lCheque.objeto.obterLista;
 
-    FTotalRecords := lCheque.TotalRecords;
+    FTotalRecords := lCheque.objeto.TotalRecords;
 
   finally
-    lCheque.Free;
+    lCheque:=nil;
   end;
 end;
 
 function TChequeModel.Salvar: String;
 var
-  lChequeDao: TChequeDao;
+  lChequeDao: ITChequeDao;
 begin
-  lChequeDao := TChequeDao.Create(vIConexao);
+  lChequeDao := TChequeDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lChequeDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lChequeDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lChequeDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lChequeDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lChequeDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lChequeDao.objeto.excluir(mySelf);
     end;
   finally
-    lChequeDao.Free;
+    lChequeDao:=nil;
   end;
 end;
 
