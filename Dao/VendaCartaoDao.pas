@@ -202,7 +202,8 @@ end;
 
 class function TVendaCartaoDao.getNewIface(pIConexao: IConexao): ITVendaCartaoDao;
 begin
-
+  Result := TImplObjetoOwner<TVendaCartaoDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TVendaCartaoDao.montaCondicaoQuery: String;
