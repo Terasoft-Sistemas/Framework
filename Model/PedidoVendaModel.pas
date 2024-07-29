@@ -700,7 +700,7 @@ begin
       lModel.objeto.calcularComissao(lPedidoVendaModel.objeto.CODIGO_VEN, lPedidoVendaModel.objeto.CODIGO_TIP, lComissaoCliente, lPedidoVendaModel.objeto.GERENTE_ID);
 
       if (lPedidoVendaModel.objeto.WEB_PEDIDO_ID <> '') and ((lModel.objeto.TIPO_VENDA = 'CD') or (lModel.objeto.ENTREGA = 'S')) then
-        lReservaModel.concluirReserva(IIF(lModel.objeto.TIPO_VENDA = 'CD', '2', 'L'), lPedidoVendaModel.objeto.NUMERO_PED, lModel.objeto.WEB_PEDIDOITENS_ID, vIConexao.getEmpresa.LOJA);
+        lReservaModel.concluirReserva(IIF(lModel.objeto.TIPO_VENDA = 'CD', '2', 'L'), lPedidoVendaModel.objeto.NUMERO_PED, lModel.objeto.WEB_PEDIDOITENS_ID, vIConexao.getEmpresa.LOJA, lPedidoVendaModel.objeto.TOTAL_PED, lPedidoVendaModel.objeto.ACRES_PED);
     end;
 
   finally

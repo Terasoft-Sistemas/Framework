@@ -131,10 +131,10 @@ begin
   inherited;
 end;
 
-class function TImpressoraModel.getNewIface(
-  pIConexao: IConexao): ITImpressoraModel;
+class function TImpressoraModel.getNewIface(pIConexao: IConexao): ITImpressoraModel;
 begin
-
+  Result := TImplObjetoOwner<TImpressoraModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 procedure TImpressoraModel.obterLista;

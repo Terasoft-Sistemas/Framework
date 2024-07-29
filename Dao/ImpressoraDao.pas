@@ -192,7 +192,8 @@ end;
 
 class function TImpressoraDao.getNewIface(pIConexao: IConexao): ITImpressoraDao;
 begin
-
+  Result := TImplObjetoOwner<TImpressoraDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TImpressoraDao.where: String;
