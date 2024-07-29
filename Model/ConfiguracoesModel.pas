@@ -7,15 +7,19 @@ uses
   System.Generics.Collections,
   FireDAC.Comp.Client,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TConfiguracoesModel = class
+  TConfiguracoesModel = class;
+  ITConfiguracoesModel=IObject<TConfiguracoesModel>;
 
+  TConfiguracoesModel = class
   private
+    [weak] mySelf: ITConfiguracoesModel;
     vIConexao : IConexao;
 
-    FConfiguracoessLista: IList<TConfiguracoesModel>;
+    FConfiguracoessLista: IList<ITConfiguracoesModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -39,7 +43,7 @@ type
     FVALORNUMERICO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetConfiguracoessLista(const Value: IList<TConfiguracoesModel>);
+    procedure SetConfiguracoessLista(const Value: IList<ITConfiguracoesModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -74,13 +78,15 @@ type
     property VALORDATAHORA: Variant read FVALORDATAHORA write SetVALORDATAHORA;
     property SYSTIME: Variant read FSYSTIME write SetSYSTIME;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITConfiguracoesModel;
 
     function Salvar: String;
     procedure obterLista;
 
-    property ConfiguracoessLista: IList<TConfiguracoesModel> read FConfiguracoessLista write SetConfiguracoessLista;
+    property ConfiguracoessLista: IList<ITConfiguracoesModel> read FConfiguracoessLista write SetConfiguracoessLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -99,7 +105,7 @@ uses
 
 { TConfiguracoesModel }
 
-constructor TConfiguracoesModel.Create(pIConexao : IConexao);
+constructor TConfiguracoesModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -111,48 +117,54 @@ begin
   inherited;
 end;
 
+class function TConfiguracoesModel.getNewIface(pIConexao: IConexao): ITConfiguracoesModel;
+begin
+  Result := TImplObjetoOwner<TConfiguracoesModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 procedure TConfiguracoesModel.obterLista;
 var
-  lConfiguracoesLista: TConfiguracoesDao;
+  lConfiguracoesLista: ITConfiguracoesDao;
 begin
-  lConfiguracoesLista := TConfiguracoesDao.Create(vIConexao);
+  lConfiguracoesLista := TConfiguracoesDao.getNewIface(vIConexao);
 
   try
-    lConfiguracoesLista.TotalRecords    := FTotalRecords;
-    lConfiguracoesLista.WhereView       := FWhereView;
-    lConfiguracoesLista.CountView       := FCountView;
-    lConfiguracoesLista.OrderView       := FOrderView;
-    lConfiguracoesLista.StartRecordView := FStartRecordView;
-    lConfiguracoesLista.LengthPageView  := FLengthPageView;
-    lConfiguracoesLista.IDRecordView    := FIDRecordView;
+    lConfiguracoesLista.objeto.TotalRecords    := FTotalRecords;
+    lConfiguracoesLista.objeto.WhereView       := FWhereView;
+    lConfiguracoesLista.objeto.CountView       := FCountView;
+    lConfiguracoesLista.objeto.OrderView       := FOrderView;
+    lConfiguracoesLista.objeto.StartRecordView := FStartRecordView;
+    lConfiguracoesLista.objeto.LengthPageView  := FLengthPageView;
+    lConfiguracoesLista.objeto.IDRecordView    := FIDRecordView;
 
-    lConfiguracoesLista.obterLista;
+    lConfiguracoesLista.objeto.obterLista;
 
-    FTotalRecords := lConfiguracoesLista.TotalRecords;
-    FConfiguracoessLista := lConfiguracoesLista.ConfiguracoessLista;
+    FTotalRecords := lConfiguracoesLista.objeto.TotalRecords;
+    FConfiguracoessLista := lConfiguracoesLista.objeto.ConfiguracoessLista;
 
   finally
-    lConfiguracoesLista.Free;
+    lConfiguracoesLista:=nil;
   end;
 end;
 
 function TConfiguracoesModel.Salvar: String;
 var
-  lConfiguracoesDao: TConfiguracoesDao;
+  lConfiguracoesDao: ITConfiguracoesDao;
 begin
-  lConfiguracoesDao := TConfiguracoesDao.Create(vIConexao);
+  lConfiguracoesDao := TConfiguracoesDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lConfiguracoesDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lConfiguracoesDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lConfiguracoesDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lConfiguracoesDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lConfiguracoesDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lConfiguracoesDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lConfiguracoesDao.Free;
+    lConfiguracoesDao:=nil;
   end;
 end;
 
@@ -171,7 +183,7 @@ begin
   FF_ID := Value;
 end;
 
-procedure TConfiguracoesModel.SetConfiguracoessLista(const Value: IList<TConfiguracoesModel>);
+procedure TConfiguracoesModel.SetConfiguracoessLista;
 begin
   FConfiguracoessLista := Value;
 end;
