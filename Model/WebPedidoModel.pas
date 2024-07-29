@@ -156,6 +156,7 @@ type
     FSEGURO_PRESTAMISTA_CUSTO: Variant;
     FSEGURO_PRESTAMISTA_VALOR: Variant;
     FVALOR_FINANCIADO: Variant;
+    FAVALISTA_ID: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetWebPedidosLista(const Value: IList<TWebPedidoModel>);
@@ -269,6 +270,7 @@ type
     procedure SetSEGURO_PRESTAMISTA_CUSTO(const Value: Variant);
     procedure SetSEGURO_PRESTAMISTA_VALOR(const Value: Variant);
     procedure SetVALOR_FINANCIADO(const Value: Variant);
+    procedure SetAVALISTA_ID(const Value: Variant);
 
   public
     procedure AfterConstruction; override;
@@ -375,6 +377,7 @@ type
     property SEGURO_PRESTAMISTA_VALOR : Variant read FSEGURO_PRESTAMISTA_VALOR write SetSEGURO_PRESTAMISTA_VALOR;
     property SEGURO_PRESTAMISTA_CUSTO : Variant read FSEGURO_PRESTAMISTA_CUSTO write SetSEGURO_PRESTAMISTA_CUSTO;
     property VALOR_FINANCIADO: Variant read FVALOR_FINANCIADO write SetVALOR_FINANCIADO;
+    property AVALISTA_ID: Variant read FAVALISTA_ID write SetAVALISTA_ID;
 
 
 
@@ -781,6 +784,11 @@ end;
 procedure TWebPedidoModel.SetACRESCIMO(const Value: Variant);
 begin
   FACRESCIMO := Value;
+end;
+
+procedure TWebPedidoModel.SetAVALISTA_ID(const Value: Variant);
+begin
+  FAVALISTA_ID := Value;
 end;
 
 procedure TWebPedidoModel.SetCAMINHO_BOLETO(const Value: Variant);

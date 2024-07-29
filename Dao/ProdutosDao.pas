@@ -861,8 +861,6 @@ begin
     lQryCD := vIConexao.criarQueryExterna;
     lQryCD.Open(lSQL);
 
-    Clipboard.AsText := lSql;
-
     lQry.First;
     while not lQry.Eof do
     begin

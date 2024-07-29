@@ -211,7 +211,7 @@ begin
     lValorEntrada := lQry.FieldByName('VALOR_ENTRADA').AsFloat;
 
     lSQL :=
-    ' select f.valor_liquido valor_financiado, count(*) QUANTIDADE_PARCELAS, min(f.vencimento) PRIMEIRO_VENCIMENTO '+#13+
+    ' select f.VALOR_TOTAL valor_financiado, count(*) QUANTIDADE_PARCELAS, min(f.vencimento) PRIMEIRO_VENCIMENTO '+#13+
     ' from financeiro_pedido f'+#13+
     ' inner join portador p on p.codigo_port = f.portador_id'+#13+
     ' where f.web_pedido_id = '+pWebPedidoModel.ID+''+#13+

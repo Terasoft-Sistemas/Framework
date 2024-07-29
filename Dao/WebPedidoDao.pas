@@ -208,9 +208,7 @@ begin
     lModel.SEGURO_PRESTAMISTA_VALOR        := lQry.FieldByName('SEGURO_PRESTAMISTA_VALOR').AsString;
     lModel.SEGURO_PRESTAMISTA_CUSTO        := lQry.FieldByName('SEGURO_PRESTAMISTA_CUSTO').AsString;
     lModel.VALOR_FINANCIADO                := lQry.FieldByName('VALOR_FINANCIADO').AsString;
-
-
-
+    lModel.AVALISTA_ID                     := lQry.FieldByName('AVALISTA_ID').AsString;
 
     Result := lModel;
   finally
@@ -541,7 +539,7 @@ begin
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
 
-    ClipBoard.AsText := lSQL;
+
     lQry.Open(lSQL);
 
     Result := vConstrutor.atribuirRegistros(lQry);

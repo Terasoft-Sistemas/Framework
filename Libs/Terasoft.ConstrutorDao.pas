@@ -228,8 +228,6 @@ begin
     lSql := StringReplace(lSql, ':'+pSource.Params[i].Name+',', QuotedStr(pSource.Params[i].Value)+',', []);
   end;
 
-  Clipboard.AsText := lSql;
-
   Result := lSql;
 end;
 
