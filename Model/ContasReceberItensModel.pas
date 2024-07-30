@@ -5,7 +5,7 @@ uses
   //System.Generics.Collections,
   Spring.Collections,
   Terasoft.Utils, FireDAC.Comp.Client,
-  Interfaces.Conexao;
+  Interfaces.Conexao, System.Classes;
 
 type
   TRecebimentoContasReceber = class
@@ -226,6 +226,7 @@ type
     function parcelasAberta(pFatura: String): Boolean;
 
     function gerarContasReceberRecebimento(pValor, pParcela, pPortador, pConta, pObs : String) : String;
+    function gerarContasReceberRecebimentoCheque(pPortador : String; pDadosCheque : TStringList) : String;
 
     function valorAberto(pCliente : String) : Double;
 
@@ -264,7 +265,7 @@ uses
   ContasReceberModel,
   ContaCorrenteModel,
   CreditoClienteModel,
-  CreditoClienteUsoModel;
+  CreditoClienteUsoModel, ChequeModel;
 
 { TContasReceberItensModel }
 
@@ -757,6 +758,89 @@ begin
   finally
     lContasReceberItensInserir.Free;
     lContasReceberModel.Free;
+  end;
+end;
+
+function TContasReceberItensModel.gerarContasReceberRecebimentoCheque(pPortador : String; pDadosCheque: TStringList): String;
+var
+  lContasReceberItensInserir : TContasReceberItensModel;
+  lContasReceberModel        : TContasReceberModel;
+  lChequeModel               : ITChequeModel;
+  i                          : Integer;
+  lChequesTable              : IFDDataset;
+  lFaturaReceber             : String;
+  lValorTotal                : Double;
+
+begin
+  lContasReceberItensInserir := TContasReceberItensModel.Create(vIConexao);
+  lContasReceberModel        := TContasReceberModel.Create(vIConexao);
+  lChequeModel               := TChequeModel.getNewIface(vIConexao);
+  i := -1;
+
+  try
+    pDadosCheque.Delimiter := ',';
+
+    lChequeModel.objeto.WhereView := ' and cheque.id in ('+pDadosCheque.DelimitedText+')';
+    lChequesTable := lChequeModel.objeto.obterLista;
+
+    lContasReceberModel.Acao              := tacIncluir;
+    lContasReceberModel.LOJA              := vIConexao.getEmpresa.LOJA;
+    lContasReceberModel.PEDIDO_REC        := '999999';
+    lContasReceberModel.CODIGO_CLI        := lChequesTable.objeto.FieldByName('CODIGO_CLI').AsString;
+    lContasReceberModel.DATAEMI_REC       := DateToStr(vIConexao.DataServer);
+    lContasReceberModel.VALOR_REC         := '0';
+    lContasReceberModel.SITUACAO_REC      := 'A';
+    lContasReceberModel.TIPO_REC          := 'R';
+    lContasReceberModel.CODIGO_POR        := pPortador;
+    lContasReceberModel.JUROS_FIXO        := lContasReceberModel.JUROS_FIXO;
+    lContasReceberModel.CENTRO_CUSTO      := '000030';
+    lContasReceberModel.CODIGO_CTA        := '555555';
+    lContasReceberModel.OBS_REC           := 'CONTA CLIENTE';
+    lContasReceberModel.OBS_COMPLEMENTAR  := 'Recebimento';
+
+    lFaturaReceber := lContasReceberModel.Salvar;
+
+    lContasReceberItensInserir.ContasReceberItenssLista := TCollections.CreateList<TContasReceberItensModel>(true);
+    lContasReceberItensInserir.Acao := tacIncluir;
+
+    lChequesTable.objeto.First;
+    while not lChequesTable.objeto.Eof do
+    begin
+
+      lContasReceberItensInserir.ContasReceberItenssLista.Add(TContasReceberItensModel.Create(vIConexao));
+
+      inc(i);
+
+      lContasReceberItensInserir.ContasReceberItenssLista[i].FATURA_REC          := lFaturaReceber;
+      lContasReceberItensInserir.ContasReceberItenssLista[i].CODIGO_POR          := pPortador;
+      lContasReceberItensInserir.ContasReceberItenssLista[i].CODIGO_CLI          := lChequesTable.objeto.FieldByName('CODIGO_CLI').AsString;
+      lContasReceberItensInserir.ContasReceberItenssLista[i].SITUACAO_REC        := 'A';
+      lContasReceberItensInserir.ContasReceberItenssLista[i].VALORREC_REC        := '0';
+      lContasReceberItensInserir.ContasReceberItenssLista[i].VALOR_PAGO          := lChequesTable.objeto.FieldByName('VALOR_CHQ').AsString;
+      lContasReceberItensInserir.ContasReceberItenssLista[i].LOJA                := vIConexao.getEmpresa.LOJA;
+      lContasReceberItensInserir.ContasReceberItenssLista[i].VLRPARCELA_REC      := lChequesTable.objeto.FieldByName('VALOR_CHQ').AsString;
+      lContasReceberItensInserir.ContasReceberItenssLista[i].PACELA_REC          := lChequesTable.objeto.recNo.toString;
+      lContasReceberItensInserir.ContasReceberItenssLista[i].TOTALPARCELAS_REC   := lChequesTable.objeto.recordCount.toString;
+      lContasReceberItensInserir.ContasReceberItenssLista[i].VENCIMENTO_REC      := lChequesTable.objeto.FieldByName('VENCIMENTO_CHQ').AsString;
+
+      lValorTotal := lValorTotal + lChequesTable.objeto.FieldByName('VALOR_CHQ').AsFloat;
+
+      lChequesTable.objeto.Next;
+    end;
+
+    lContasReceberItensInserir.Salvar;
+
+    lContasReceberModel.Acao := tacAlterar;
+    lContasReceberModel.Alterar(lFaturaReceber);
+    lContasReceberModel.VALOR_REC := lValorTotal.ToString;
+    lContasReceberModel.Salvar;
+
+    Result := lFaturaReceber;
+  finally
+    lContasReceberItensInserir.Free;
+    lContasReceberModel.Free;
+    lChequeModel := nil;
+    lChequesTable := nil;
   end;
 end;
 
