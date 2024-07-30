@@ -550,9 +550,10 @@ begin
   try
     lPedidoItensModel := lPedidoItensModel.objeto.carregaClasse(pID);
     lPedidoItensModel.objeto.Acao := tacExcluir;
-    Result    := self.Salvar;
 
-    lPedidoItensModel.objeto.IDPedidoVendaView := self.FNUMERO_PED;
+    Result := lPedidoItensModel.objeto.Salvar;
+
+    lPedidoItensModel.objeto.IDPedidoVendaView := lPedidoItensModel.objeto.NUMERO_PED;
     lPedidoItensModel.objeto.obterLista;
 
     lItem := 1;
