@@ -1,4 +1,4 @@
-unit ContasReceberItensModel;
+ï»¿unit ContasReceberItensModel;
 interface
 uses
   Terasoft.Types,
@@ -215,17 +215,18 @@ type
 
     function baixarCaixa(pValor, pPortador, pConta, pHistorico : String): String;
     function baixarJurosCaixa(pJuros, pPortador, pHistorico : String) : String;
+    function baixarDescontoCaixa(pDesconto, pPortador, pHistorico: String): String;
 
     function baixarContaCorrente(pValor, pPortador, pContaCorrente, pHistorico: String): String;
     function baixarPix(pValor, pPortador, pContaCorrente, pValorTaxa, pContaTaxa: String): String;
     function baixar(pValor: String): String;
     function baixarCreditoCliente(pValor: Double) : Boolean;
 
-    function recebimentoCartao(pValor, pIdAdmCartao, pVencimento: String; pIdTef: String = ''): String;
-    function gerarContasReceberCartao(pValor, pPortador, pIdAdmCartao, pObs, pObsComprementar: String; pParcelas: Integer): String;
+    function recebimentoCartao(pValor, pDesconto, pIdAdmCartao, pVencimento: String; pIdTef: String = ''): String;
+    function gerarContasReceberCartao(pValor, pDesconto, pPortador, pIdAdmCartao, pObs, pObsComprementar: String; pParcelas: Integer): String;
     function parcelasAberta(pFatura: String): Boolean;
 
-    function gerarContasReceberRecebimento(pValor, pParcela, pPortador, pConta, pObs : String) : String;
+    function gerarContasReceberRecebimento(pValor, pDesconto, pParcela, pPortador, pConta, pObs : String) : String;
     function gerarContasReceberRecebimentoCheque(pPortador : String; pDadosCheque : TStringList) : String;
 
     function valorAberto(pCliente : String) : Double;
@@ -443,6 +444,36 @@ begin
   end;
 end;
 
+function TContasReceberItensModel.baixarDescontoCaixa(pDesconto, pPortador, pHistorico: String): String;
+var
+  lCaixaModel: ITCaixaModel;
+begin
+  lCaixaModel := TCaixaModel.getNewIface(vIConexao);
+  try
+    lCaixaModel.objeto.Acao := tacIncluir;
+    lCaixaModel.objeto.USUARIO_CAI     := self.vIConexao.getUSer.ID;
+    lCaixaModel.objeto.DATA_CAI        := DateToStr(vIConexao.DataServer);
+    lCaixaModel.objeto.HORA_CAI        := TimeToStr(vIConexao.HoraServer);
+    lCaixaModel.objeto.TIPO            := 'S';
+    lCaixaModel.objeto.CODIGO_CTA      := '300000';
+    lCaixaModel.objeto.CLIENTE_CAI     := self.FCODIGO_CLI;
+    lCaixaModel.objeto.TIPO_CAI        := cTIPO_DEBITO;
+    lCaixaModel.objeto.FATURA_CAI      := self.FFATURA_REC;
+    lCaixaModel.objeto.PARCELA_CAI     := self.FPACELA_REC;
+    lCaixaModel.objeto.STATUS          := 'A';
+    lCaixaModel.objeto.LOJA_REMOTO     := self.FLOJA;
+    lCaixaModel.objeto.PORTADOR_CAI    := pPortador;
+    lCaixaModel.objeto.VALOR_CAI       := pDesconto;
+    lCaixaModel.objeto.HISTORICO_CAI   := pHistorico;
+    lCaixaModel.objeto.COMPETENCIA     := copy(self.VENCIMENTO_REC, 4, 2) + copy(self.VENCIMENTO_REC, 7, 4);
+
+    Result := lCaixaModel.objeto.Salvar;
+
+  finally
+    lCaixaModel:=nil;
+  end;
+end;
+
 function TContasReceberItensModel.lancarJurosContaCorrente(pJuros, pPortador : String) : String;
 var
   lContaCorrenteModel : ITContaCorrenteModel;
@@ -517,7 +548,7 @@ end;
 function TContasReceberItensModel.carregaClasseIndexOf(pIndex: Integer): TContasReceberItensModel;
 begin
   if pIndex < 0 then
-    CriaException('Index não definido');
+    CriaException('Index nï¿½o definido');
   Result := FContasReceberItenssLista[pIndex];
 end;
 
@@ -589,7 +620,7 @@ begin
   end;
 end;
 
-function TContasReceberItensModel.gerarContasReceberCartao(pValor, pPortador, pIdAdmCartao, pObs, pObsComprementar: String; pParcelas: Integer): String;
+function TContasReceberItensModel.gerarContasReceberCartao(pValor, pDesconto, pPortador, pIdAdmCartao, pObs, pObsComprementar: String; pParcelas: Integer): String;
 var
   lContasReceberModel: TContasReceberModel;
   lContasReceberItensInserir, lModel: TContasReceberItensModel;
@@ -614,7 +645,7 @@ begin
     lContasReceberModel.PEDIDO_REC        := '999999';
     lContasReceberModel.CODIGO_CLI        := self.FCODIGO_CLI;
     lContasReceberModel.DATAEMI_REC       := DateToStr(vIConexao.DataServer);
-    lContasReceberModel.VALOR_REC         := pValor;
+    lContasReceberModel.VALOR_REC         := StrToFloat(pValor) - StrToFloat(pDesconto);
     lContasReceberModel.SITUACAO_REC      := 'A';
     lContasReceberModel.VENDEDOR_REC      := lContasReceberModel.VENDEDOR_REC;
     lContasReceberModel.USUARIO_REC       := self.vIConexao.getUSer.ID;
@@ -625,9 +656,11 @@ begin
     lContasReceberModel.OBS_REC           := pObs;
     lContasReceberModel.OBS_COMPLEMENTAR  := pObsComprementar;
     lFaturaReceber := lContasReceberModel.Salvar;
-    lValorParcela  := StrToFloat(pValor) / pParcelas;
+
+    lValorParcela  := lContasReceberModel.VALOR_REC / pParcelas;
     lVencimento    := vIConexao.DataServer + lAdmCartaoModel.objeto.AdmCartaosLista[0].objeto.PARCELADO_ADM;
     lContasReceberItensInserir.ContasReceberItenssLista := TCollections.CreateList<TContasReceberItensModel>(true);
+
     lContasReceberItensInserir.Acao := tacIncluir;
 
     for i := 0 to Pred(pParcelas) do
@@ -659,22 +692,6 @@ begin
       lModel.gerarVendaCartao;
     end;
 
-    self.Acao := tacAlterar;
-
-    if (self.FVALORREC_REC + StrToFloat(pValor)) > self.VLRPARCELA_REC then
-      self.FVALORREC_REC         := self.VLRPARCELA_REC
-    else
-      self.FVALORREC_REC         := FloatToStr(self.FVALORREC_REC + StrToFloat(pValor));
-
-    self.FVALOR_RECEBIDO_CARTAO  := pValor;
-    self.FFATURA_RECEBIDA_CARTAO := lFaturaReceber;
-    self.FDATABAIXA_REC          := DateToStr(vIConexao.DataServer);
-
-    if StrToFloat(self.FVALORREC_REC) >= StrToFloat(self.VLRPARCELA_REC) then
-      self.FSITUACAO_REC := 'B';
-
-    self.Salvar;
-
     Result := lFaturaReceber;
   finally
     lContasReceberItensInserir.Free;
@@ -683,7 +700,7 @@ begin
   end;
 end;
 
-function TContasReceberItensModel.gerarContasReceberRecebimento(pValor, pParcela, pPortador, pConta, pObs : String): String;
+function TContasReceberItensModel.gerarContasReceberRecebimento(pValor, pDesconto, pParcela, pPortador, pConta, pObs : String): String;
 var
   lContasReceberModel : TContasReceberModel;
   lContasReceberItensInserir,
@@ -704,7 +721,7 @@ begin
     lContasReceberModel.PEDIDO_REC        := '999999';
     lContasReceberModel.CODIGO_CLI        := self.FCODIGO_CLI;
     lContasReceberModel.DATAEMI_REC       := DateToStr(vIConexao.DataServer);
-    lContasReceberModel.VALOR_REC         := pValor;
+    lContasReceberModel.VALOR_REC         := StrToFloat(pValor) - StrToFloat(pDesconto);
     lContasReceberModel.SITUACAO_REC      := 'A';
     lContasReceberModel.TIPO_REC          := 'R';
     lContasReceberModel.CODIGO_POR        := pPortador;
@@ -715,7 +732,7 @@ begin
     lContasReceberModel.OBS_COMPLEMENTAR  := pObs;
 
     lFaturaReceber := lContasReceberModel.Salvar;
-    lValorParcela  := StrToFloat(pValor) / pParcela.ToInteger;
+    lValorParcela  := lContasReceberModel.VALOR_REC / pParcela.ToInteger;
     lVencimento    := vIConexao.DataServer;
 
     lContasReceberItensInserir.ContasReceberItenssLista := TCollections.CreateList<TContasReceberItensModel>(true);
@@ -849,9 +866,9 @@ var
   lVendaCartaoModel : ITVendaCartaoModel;
 begin
   if self.FIDAdmCartao = '' then
-    CriaException('ID do cartão não informado');
+    CriaException('ID do cartï¿½o nï¿½o informado');
   if self.FIDPedidoCartao = '' then
-    CriaException('ID do pedido não informado');
+    CriaException('ID do pedido nï¿½o informado');
   lVendaCartaoModel := TVendaCartaoModel.getNewIface(vIConexao);
   try
     lVendaCartaoModel.objeto.Acao := tacIncluir;
@@ -988,7 +1005,7 @@ begin
   end;
 end;
 
-function TContasReceberItensModel.recebimentoCartao(pValor, pIdAdmCartao, pVencimento: String; pIdTef: String = ''): String;
+function TContasReceberItensModel.recebimentoCartao(pValor, pDesconto, pIdAdmCartao, pVencimento: String; pIdTef: String = ''): String;
 var
   lRecebimentoCartaoModel: ITRecebimentoCartaoModel;
 begin
@@ -1003,7 +1020,7 @@ begin
     lRecebimentoCartaoModel.objeto.CLIENTE_ID     := self.FCODIGO_CLI;
     lRecebimentoCartaoModel.objeto.FATURA         := self.FFATURA_REC;
     lRecebimentoCartaoModel.objeto.PARCELA        := self.FPACELA_REC;
-    lRecebimentoCartaoModel.objeto.VALOR          := pValor;
+    lRecebimentoCartaoModel.objeto.VALOR          := StrToFloat(pValor) - StrToFloat(pDesconto);
     lRecebimentoCartaoModel.objeto.BANDEIRA_ID    := pIdAdmCartao;
     lRecebimentoCartaoModel.objeto.VENCIMENTO     := pVencimento;
     Result := lRecebimentoCartaoModel.objeto.Salvar;
