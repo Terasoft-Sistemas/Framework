@@ -328,7 +328,8 @@ end;
 
 class function TNFItensDao.getNewIface(pIConexao: IConexao): ITNFItensDao;
 begin
-
+  Result := TImplObjetoOwner<TNFItensDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TNFItensDao.where: String;
