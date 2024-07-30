@@ -65,6 +65,32 @@ interface
       NFE_TIPO_EMISSAO                     : Integer;
     end;
 
+    TDadosFields = record
+      tabela,
+      listaNames,
+      listaValues: TipoWideStringFramework;
+      listaUpdate: TipoWideStringFramework;
+      listaCampos: IListaString;
+    end;
+
+    IConstrutorDao = interface
+    ['{B57D1A1D-1220-49A2-BA20-15BD9079C1AC}']
+      function gerarInsert(pTabela, pFieldReturning: String; pGerarID: Boolean = false): String;
+      function gerarUpdateOrInsert(pTabela, pMatch, pFieldReturning: String; pGerarID: Boolean = false): String;
+      function gerarUpdate(pTabela, pFieldWhere: String): String;
+      function queryTabela(pTabela: String): String;
+      function carregaFields(pQry: TDataset; pTabela: String; pGerarID: Boolean): TDadosFields;
+      procedure copiarEstruturaCampos(pSource: TDataSet; var pDest: TFDMemTable);
+      procedure atribuirRegistros(pSource: TDataSet; var pDest: TFDMemTable); overload;
+      function atribuirRegistros(pSource: TDataSet): IFDDataset; overload;
+      function getColumns(pTabela: String): IFDDataset;
+      function getValue(pTabela: TDataset; pColumn: String; pValue: String ): String;
+      function getSQL(pSource: TFDQuery): String;
+      procedure setParams(pTabela: String; pQry: TFDQuery; pModel: TObject);
+      procedure setDatasetToModel(pTabela: String; pDataset: TDataset; pModel: TObject);
+      function expandIn(pCampo: String; pValues: IListaString): String;
+    end;
+
     IConexao = interface
       ['{66A98734-B254-4482-A4EA-8D3D1CD8C974}']
 
@@ -82,7 +108,6 @@ interface
       function DataServer                                                  : TDate;
       function HoraServer                                                  : TTime;
       function DataHoraServer                                              : TDateTime;
-
       function getUSer                                                     : TUsuario;
       function setUser(pUser : TUsuario)                                   : Boolean;
 
@@ -101,15 +126,23 @@ interface
       function getGDB: IGDB;
       function getValidador: IValidadorDatabase;
 
-      property gdb: IGDB read getGDB;
-      property validador: IValidadorDatabase read getValidador;
+      property gdb: IGDB                       read getGDB;
+      property validador: IValidadorDatabase   read getValidador;
       property terasoftConfiguracoes: IUnknown read getTerasoftConfiguracoes write setTerasoftConfiguracoes;
 
     end;
 
     function criaIFDDataset(const obj: TDataSet): IFDDataset;
+    function criaConstrutorDao(pIConexao: IConexao): IConstrutorDao;
 
 implementation
+  uses
+    Terasoft.ConstrutorDao;
+
+function criaConstrutorDao(pIConexao: IConexao): IConstrutorDao;
+begin
+  Result := TConstrutorDao.Create(pIConexao);
+end;
 
 function criaIFDDataset(const obj: TDataSet): IFDDataset;
 begin
