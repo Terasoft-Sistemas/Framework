@@ -14,15 +14,7 @@ uses
   Interfaces.Conexao;
 
 type
-  TDadosFields = record
-    tabela,
-    listaNames,
-    listaValues: TipoWideStringFramework;
-    listaUpdate: TipoWideStringFramework;
-    listaCampos: IListaString;
-  end;
-
-  TConstrutorDao = class
+  TConstrutorDao = class(TInterfacedObject, IConstrutorDao)
 
   private
     vIConexao : IConexao;
@@ -39,10 +31,13 @@ type
     function getColumns(pTabela: String): IFDDataset;
     function getValue(pTabela: TDataset; pColumn: String; pValue: String ): String;
     function getSQL(pSource: TFDQuery): String;
-    procedure setParams(pTabela: String; var pQry: TFDQuery; pModel: TObject);
+    procedure setParams(pTabela: String; pQry: TFDQuery; pModel: TObject);
+    procedure setDatasetToModel(pTabela: String; pDataset: TDataset; pModel: TObject);
+    function expandIn(pCampo: String; pValues: IListaString): String;
 
   	constructor Create(pIConexao: IConexao);
     destructor Destroy; override;
+
   end;
 
 implementation
@@ -50,6 +45,7 @@ implementation
 uses
   System.Rtti,
   System.Variants,
+  TypInfo,
   Terasoft.Utils,
   System.SysUtils, System.StrUtils, Vcl.Dialogs;
 
@@ -76,8 +72,8 @@ var
   lTable : TFDMemTable;
 begin
   lTable := TFDMemTable.Create(nil);
-  atribuirRegistros(pSource, lTable);
   Result := TImplObjetoOwner<TDataset>.CreateOwner(lTable);
+  atribuirRegistros(pSource, lTable);
 end;
 
 function TConstrutorDao.carregaFields(pQry: TDataSet; pTabela: String; pGerarID: Boolean): TDadosFields;
@@ -138,6 +134,34 @@ destructor TConstrutorDao.Destroy;
 begin
   vIConexao := nil;
   inherited;
+end;
+
+function TConstrutorDao.expandIn(pCampo: String; pValues: IListaString): String;
+  var
+    s: TipoWideStringFramework;
+    tmp: String;
+begin
+  Result := '';
+  if(pCampo='') or (pValues=nil) or (pValues.Count=0) then
+    exit;
+  if(pValues.count=1) then
+  begin
+    tmp := uppercase(trim(pValues.first));
+    if(tmp='') then
+      exit;
+    Result := format(' and %s = %s ', [ pCampo, quotedStr(tmp) ]);
+  end else begin
+    for s in pValues do
+    begin
+      tmp := uppercase(trim(s));
+      if(tmp='') then continue;
+      if(Result<>'') then
+        Result := Result+','+#13;
+      Result:=Result+QuotedStr(tmp);
+    end;
+    if(Result<>'') then
+      Result := format(' and %s in (%s) ', [ pCampo, Result ]);
+  end;
 end;
 
 function TConstrutorDao.gerarInsert(pTabela, pFieldReturning: String; pGerarID: Boolean = false): String;
@@ -274,12 +298,41 @@ begin
             '   ORDER BY R.RDB$FIELD_POSITION';
 end;
 
-procedure TConstrutorDao.setParams(pTabela: String; var pQry: TFDQuery; pModel: TObject);
+procedure TConstrutorDao.setDatasetToModel;
   var
     lTabela : IFDDataset;
     lCtx    : TRttiContext;
     lProp   : TRttiProperty;
-  i       : Integer;
+    i       : Integer;
+    f       : TField;
+    v       : TValue;
+begin
+  if(pModel=nil) or (pDataset=nil) then
+    exit;
+  lCtx := TRttiContext.Create;
+  try
+    lTabela := getColumns(pTabela);
+    for i := 0 to pDataset.FieldCount - 1 do
+    begin
+      f := pDataset.Fields.Fields[i];
+      lProp := lCtx.GetType(pModel.ClassType).GetProperty(f.FieldName);
+      if Assigned(lProp) and (lProp.IsWritable) then
+      begin
+        v := TValue.FromVariant(getValue(lTabela.objeto, f.FieldName, f.AsString));
+        lProp.SetValue(pModel,v);
+      end;
+    end;
+  finally
+    lCtx.Free;
+  end;
+end;
+
+procedure TConstrutorDao.setParams(pTabela: String; pQry: TFDQuery; pModel: TObject);
+  var
+    lTabela : IFDDataset;
+    lCtx    : TRttiContext;
+    lProp   : TRttiProperty;
+    i       : Integer;
 begin
   if(pModel=nil) or (pTabela='') then
     exit;
