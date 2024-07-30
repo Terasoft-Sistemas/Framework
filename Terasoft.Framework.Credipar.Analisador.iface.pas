@@ -60,6 +60,10 @@ interface
       function cancelarProposta(pID: Int64; pMotivo: TipoWideStringFramework ; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function statusProposta(pID: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function anexarDocumentoAnalise(pProposta: Int64; pTipoDocumento: TipoWideStringFramework; pFormatoArquivo: TipoWideStringFramework; pDados: TBytes; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function anexarDocumentoProcessamento(pProposta: Int64; pTipoDocumento: TipoWideStringFramework; pFormatoArquivo: TipoWideStringFramework; pDados: TBytes; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function statusProcessamento(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+
+      function boleto(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
 
       function getDiretorioArquivos: tipoWideStringFramework;
       procedure setDiretorioArquivos(const pValue: tipoWideStringFramework);

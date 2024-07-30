@@ -538,7 +538,8 @@ end;
 
 class function TNFItensModel.getNewIface(pIConexao: IConexao): ITNFItensModel;
 begin
-
+  Result := TImplObjetoOwner<TNFItensModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 procedure TNFItensModel.obterLista;

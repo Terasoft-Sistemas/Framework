@@ -206,7 +206,8 @@ end;
 
 class function TOrcamentoItensDao.getNewIface(pIConexao: IConexao): ITOrcamentoItensDao;
 begin
-
+  Result := TImplObjetoOwner<TOrcamentoItensDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TOrcamentoItensDao.incluir(pOrcamentoItensModel: ITOrcamentoItensModel): String;
