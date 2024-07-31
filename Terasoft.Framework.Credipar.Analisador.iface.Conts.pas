@@ -22,6 +22,8 @@ interface
     RETORNO_CREDIPAR_DADOSPROPOSTA  = 'Proposta.dados';
 
     RETORNO_CREDIPAR_RESULTADO      = 'Proposta.resultado';
+    RETORNO_CREDIPAR_CONCILIACAO    = 'Proposta.conciliacao';
+    RETORNO_CREDIPAR_SIMULACAO      = 'Proposta.simulacao';
 
     CREDIPAR_TIPODOC_CCB            = 'ADI';
     CREDIPAR_TIPODOC_INFPESSOAL     = 'IP';

@@ -63,8 +63,8 @@ interface
       function anexarDocumentoProcessamento(pProposta: Int64; pTipoDocumento: TipoWideStringFramework; pFormatoArquivo: TipoWideStringFramework; pDados: TBytes; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function statusProcessamento(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function conciliacao(pData: TDate; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-
       function boleto(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function simulacao(vlrCompra: Extended; VlrEntrada: Extended; qtdParcela: Integer; dtPriVcto: TDate; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
 
       function getDiretorioArquivos: tipoWideStringFramework;
       procedure setDiretorioArquivos(const pValue: tipoWideStringFramework);
