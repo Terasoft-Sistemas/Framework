@@ -337,6 +337,7 @@ type
     Fnome_contador_cli: Variant;
     Ftelefone_contador_cli: Variant;
     FCamposInvalidos: TStringlist;
+    FCamposInvalidosTitulos: TStringlist;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetClientesLista(const Value: IList<TClienteModel>);
@@ -660,6 +661,7 @@ type
     procedure Setnome_contador_cli(const Value: Variant);
     procedure Settelefone_contador_cli(const Value: Variant);
     procedure SetCamposInvalidos(const Value: TStringlist);
+    procedure SetCamposInvalidosTitulos(const Value: TStringlist);
   protected
     procedure doCreate; override;
     procedure doDestroy; override;
@@ -1011,6 +1013,7 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
     property CamposInvalidos: TStringlist read FCamposInvalidos write SetCamposInvalidos;
+    property CamposInvalidosTitulos: TStringlist read FCamposInvalidosTitulos write SetCamposInvalidosTitulos;
   end;
 
 implementation
@@ -1036,14 +1039,19 @@ var
   lProp    : TRttiProperty;
   lConfiguracoes : TerasoftConfiguracoes;
 begin
-  CamposInvalidos := TStringList.Create;
-  lConfiguracoes := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+  CamposInvalidos        := TStringList.Create;
+  CamposInvalidosTitulos := TStringList.Create;
+  lConfiguracoes         := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+
   lMsg   := '';
+
   lValor := lConfiguracoes.valorTag(pTag, '', tvMemo);
   if Trim(lValor) = '' then
     exit;
+
   lField      := TStringList.Create;
   lField.Text := lValor;
+
   lCtx := TRttiContext.Create;
   for i := 0 to lField.Count - 1 do
   begin
@@ -1058,6 +1066,8 @@ begin
     if lProp.GetValue(pClienteModel).AsString = '' then
     begin
       CamposInvalidos.Add(lCampo);
+      CamposInvalidosTitulos.Add(lNome);
+
       lMsg := lMsg + lNome + ',';
     end;
   end;
@@ -1421,6 +1431,11 @@ end;
 procedure TClienteModel.SetCamposInvalidos(const Value: TStringlist);
 begin
   FCamposInvalidos := Value;
+end;
+
+procedure TClienteModel.SetCamposInvalidosTitulos(const Value: TStringlist);
+begin
+  FCamposInvalidosTitulos := Value;
 end;
 
 procedure TClienteModel.Setcardiopatias(const Value: Variant);
