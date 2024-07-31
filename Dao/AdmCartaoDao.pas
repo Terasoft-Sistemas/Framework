@@ -14,6 +14,7 @@ uses
   Terasoft.ConstrutorDao,
   Terasoft.Framework.ObjectIface,
   Spring.Collections,
+  Terasoft.Types,
   Terasoft.Utils;
 
 type
@@ -24,9 +25,9 @@ type
   TAdmCartaoDao = class
 
   private
-    [weak] myself: ITAdmCartaoDao;
-    vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    [weak] myself : ITAdmCartaoDao;
+    vIConexao     : IConexao;
+    vConstrutor   : TConstrutorDao;
 
     FAdmCartaosLista: IList<ITAdmCartaoModel>;
     FLengthPageView: String;
@@ -69,6 +70,8 @@ type
     function alterar(AAdmCartaoModel: ITAdmCartaoModel): String;
     function excluir(AAdmCartaoModel: ITAdmCartaoModel): String;
 
+    function sincronizarDados(AAdmCartaoModel: ITAdmCartaoModel): String;
+
 	  procedure obterTotalRegistros;
     procedure obterLista;
     procedure setParams(var pQry: TFDQuery; pAdmCartaoModel: ITAdmCartaoModel);
@@ -80,7 +83,7 @@ end;
 implementation
 
 uses
-  System.Rtti;
+  System.Rtti, LojasModel, Terasoft.Configuracoes;
 
 { TAdmCartao }
 
@@ -144,18 +147,22 @@ end;
 
 function TAdmCartaoDao.incluir(AAdmCartaoModel: ITAdmCartaoModel): String;
 var
-  lQry: TFDQuery;
-  lSQL:String;
+  lQry : TFDQuery;
+  lSQL : String;
+  lConfiguracoes : ITerasoftConfiguracoes;
 begin
   lQry := vIConexao.CriarQuery;
-
   lSQL := vConstrutor.gerarInsert('ADMCARTAO', 'ID', true);
-
   try
+    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
+
     lQry.SQL.Add(lSQL);
     AAdmCartaoModel.objeto.ID := vIConexao.Generetor('GEN_ADMCARTAO', true);
     setParams(lQry, AAdmCartaoModel);
     lQry.Open;
+
+    if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
+      sincronizarDados(AAdmCartaoModel);
 
     Result := lQry.FieldByName('ID').AsString;
 
@@ -368,6 +375,43 @@ end;
 procedure TAdmCartaoDao.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
+end;
+
+function TAdmCartaoDao.sincronizarDados(AAdmCartaoModel: ITAdmCartaoModel): String;
+var
+  lLojasModel,
+  lLojas      : ITLojasModel;
+  lQry        : TFDQuery;
+  lSQL        : String;
+begin
+
+  lLojasModel := TLojasModel.getNewIface(vIConexao);
+
+  try
+    lLojasModel.objeto.obterHosts;
+
+    lSQL := vConstrutor.gerarUpdateOrInsert('ADMCARTAO','ID', 'ID', true);
+
+    for lLojas in lLojasModel.objeto.LojassLista do
+    begin
+      if lLojas.objeto.LOJA <> vIConexao.getEmpresa.LOJA then
+      begin
+        vIConexao.ConfigConexaoExterna('', lLojas.objeto.STRING_CONEXAO);
+        lQry := vIConexao.criarQueryExterna;
+
+        lQry.SQL.Clear;
+        lQry.SQL.Add(lSQL);
+        setParams(lQry, AAdmCartaoModel);
+        lQry.Open(lSQL);
+
+        Result := lQry.FieldByName('ID').AsString;
+      end;
+    end;
+
+  finally
+    lLojasModel := nil;
+    lQry.Free;
+  end;
 end;
 
 end.
