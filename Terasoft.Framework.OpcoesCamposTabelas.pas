@@ -54,6 +54,8 @@ implementation
       function getGDB: IGDB;
       procedure setGDB(const pValue: IGDB);
 
+      function valorOpcaoPorDescricao(pOpcao, pDescricao: String; pDefault: String = ''): String;
+
     //property opcoesDefaultRegistradas getter/setter
       function getOpcoesDefaultRegistradas: boolean;
       procedure setOpcoesDefaultRegistradas(const pValue: boolean);
@@ -162,246 +164,6 @@ implementation
     public
       destructor Destroy; override;
     end;
-{
-  var
-    dicionarioRegrasDadosCamposValidacoesInicializado: boolean;
-    dicionarioRegrasDadosCamposValidacoes: TDicionarioRegrasDadosCamposValidacoes;
-
-    dicionarioSetValores: TDicionarioSetValores;
-    dicionarioSetValoresInicializado: boolean;
-
-function getDicionarioRegrasDadosCamposValidacoes(pRegra: TipoWideStringFramework = ''): TDicionarioDadosCamposValidacoes;
-begin
-  if(pRegra='') then
-    pRegra := 'padrao';
-  pRegra := uppercase(trim(pRegra));
-  if(dicionarioRegrasDadosCamposValidacoes=nil) then
-    dicionarioRegrasDadosCamposValidacoes:=TCollections.CreateDictionary<TipoWideStringFramework,TDicionarioDadosCamposValidacoes>(getComparadorOrdinalTipoWideStringFramework);
-  if(dicionarioRegrasDadosCamposValidacoesInicializado=false) and (gdbPadrao<>nil) and (gOpcoesDefaultRegistradas=true) then
-    loadDicionarioCamposValidacoes;
-  if not dicionarioRegrasDadosCamposValidacoes.TryGetValue(pRegra,Result) then
-  begin
-    Result := TCollections.CreateDictionary<TipoWideStringFramework,TDicionarioDadosCamposValidacoesTabela>(getComparadorOrdinalTipoWideStringFramework);
-    dicionarioRegrasDadosCamposValidacoes.AddOrSetValue(pRegra,Result);
-  end;
-end;
-
-function registraOpcoesCampos;
-  var
-    dic: TDicionarioSetValores;
-begin
-  if(pOpcaoDescricao='') then
-    pOpcaoDescricao:=pOpcao;
-  pNome := UpperCase(trim(pNome));
-  if(pNome='') then exit;
-  dic := getDicionarioSetValores;
-  if not dic.TryGetValue(pNome,Result) then
-  begin
-    Result := TDadosSetOpcoesImpl.Create;
-    Result.nome := pNome;
-    Result.descricao := pDescricao;
-    //Result.listaValores := novaListaTexto;
-    //Result.listaDescricoes := novaListaTexto;
-    //Result.dataset := getGenericID_DescricaoDataset;
-    dic.AddOrSetValue(pNome,Result);
-  end;
-
-  Result.adicionaID_Descricao(pOpcao,pOpcaoDescricao);
-
-end;
-
-function registraValidacaoCampoTabela;//(pTabela, pCampo, pOpcoes: String; pDescricao: String = ''; pObrigatorio: boolean = false): IDadosSetOpcoes;
-  var
-    dic: TDicionarioDadosCamposValidacoes;
-    dadosTabela: TDicionarioDadosCamposValidacoesTabela;
-    //dadosCampo: IDadosCamposValidacoes;
-begin
-  if(pRegra='') then
-    pRegra:='padrao';
-  pRegra := uppercase(trim(pRegra));
-  dic := getDicionarioRegrasDadosCamposValidacoes(pRegra);
-  pTabela := UpperCase(trim(pTabela));
-  pCampo := UpperCase(trim(pCampo));
-  if(pTabela='') then exit;
-  if(pCampo='') then exit;
-
-  logaByTagSeNivel(TAGLOG_VALIDACOES,format('registraValidacaoCampoTabela: Regra: [%s], Tabela [%s], Campo [%s], Opções [%s], Descrição [%s], Obrigatório [%s].',[pRegra,pTabela,pCampo,pOpcoes,pDescricao,ifThen(pObrigatorio,'S','N')]),LOG_LEVEL_DEBUG );
-
-  if not dic.TryGetValue(pTabela,dadosTabela) then
-  begin
-    dadosTabela := TCollections.CreateDictionary<TipoWideStringFramework,IDadosCamposValidacoes>(getComparadorOrdinalTipoWideStringFramework);
-    dic.AddOrSetValue(pTabela,dadosTabela);
-  end;
-  if not dadosTabela.TryGetValue(pCampo,Result) then
-  begin
-    Result := TDadosCamposValidacoesImpl.Create;
-    dadosTabela.AddOrSetValue(pCampo,Result);
-  end else if pIgnoraExistente=true then
-  begin
-    logaByTagSeNivel(TAGLOG_VALIDACOES,format('registraValidacaoCampoTabela: Configuração ja existe e sendo ignorada sua inclusão: Tabela [%s], Campo [%s], Opções [%s], Descrição [%s], Obrigatório [%s].',[pTabela,pCampo,pOpcoes,pDescricao,ifThen(pObrigatorio,'S','N')]),LOG_LEVEL_DEBUG,ls_Warning );
-    exit;
-  end;
-  Result.regra := pRegra;
-  Result.tabela := pTabela;
-  Result.campo := pCampo;
-  Result.descricao := pDescricao;
-  Result.opcoes := UpperCase(trim(pOpcoes));
-  Result.obrigatorio := pObrigatorio;
-end;
-
-
-function validaDataset;
-  var
-    i: Integer;
-    lValor, p1, lNomeCampo: TipoWideStringFramework;
-    dic: TDicionarioDadosCamposValidacoes;
-    dadosTabela: TDicionarioDadosCamposValidacoesTabela;
-    dadosCampo: IDadosCamposValidacoes;
-    lDependenciaMatch: boolean;
-    opcoes: IDadosSetOpcoes;
-    f: TField;
-    save: Integer;
-begin
-  Result := CheckResultadoOperacao(pResultado);
-  if(usaValidacoesNovas=false) then exit;
-  save := pResultado.erros;
-  if(pRegra='') then
-    pRegra := 'padrao';
-  if(pTabela='') then
-  begin
-    pResultado.adicionaErro('validaDataset: Nome da tabela inválida.');
-    exit;
-  end;
-
-  if( (pDataset=nil) or (pDataset.Active=false) ) then
-  begin
-    pResultado.adicionaErro('validaDataset: Não informou um dataset válido');
-    exit;
-  end;
-  if( not pDataset.RecordCount=0) and (pDataset.State = dsBrowse) then
-  begin
-    pResultado.adicionaErro('validaDataset: Não possui registros para serem validados');
-    exit;
-  end;
-
-  if(pListaCampos=nil) then
-    pListaCampos := getStringList;
-
-  pRegra := uppercase(trim(pRegra));
-  pTabela := uppercase(trim(pTabela));
-
-  if(pListaCampos.Count=0) then
-  begin
-    for i := 0 to pDataset.Fields.Count - 1 do
-      pListaCampos.Add(pDataset.Fields[i].FieldName);
-  end;
-
-  dic := getDicionarioRegrasDadosCamposValidacoes(pRegra);
-  if not dic.TryGetValue(pTabela,dadosTabela) then
-    exit;
-
-  for p1 in pListaCampos do
-  begin
-    lNomeCampo := uppercase(trim(p1));
-    if(lNomeCampo='') then continue;
-    if not dadosTabela.TryGetValue(lNomeCampo,dadosCampo) then continue;
-    if(dadosCampo.obrigatorio=false) then continue;
-
-    f := pDataset.FindField(lNomeCampo);
-    if(f=nil) then
-    begin
-      pResultado.formataErro('validaDataset: Campo [%s] [%s] não fornecido', [lNomeCampo, dadosCampo.descricao ]);
-      continue;
-    end;
-    opcoes := dadosCampo.dadosOpcoes;
-    if(opcoes=nil) then
-    begin
-      pResultado.formataErro('validaDataset: Campo [%s] [%s] não configurado lista de opções', [lNomeCampo, dadosCampo.descricao ]);
-      continue;
-    end;
-
-    lDependenciaMatch := dadosCampo.verificaDependencias(pDataset,pResultado);
-    //Implementar dependencias
-
-    if(lDependenciaMatch=false) then continue;
-
-    lDependenciaMatch := opcoes.match(f.AsString);// false;
-    if(lDependenciaMatch=false) then begin
-      if(pResultado.propriedade['campo.erro'].asString='') then
-        pResultado.propriedade['campo.erro'].asString := dadosCampo.campo;
-      pResultado.formataErro('Valor do Campo [%s] inválido', [ dadosCampo.descricao ]);
-    end;
-  end;
-end;
-
-function setFocoControleDataField;//(pCampo: String; pDatasource: TDataSource): TWinControl;
-  var
-    controle: TWinControl;
-begin
-  controle := retornaControleDataField(pCampo, pDatasource, pParent);
-  if(assigned(controle)) then
-  begin
-    controle.Show;
-    if(controle.CanFocus) then
-      controle.SetFocus;
-  end;
-
-end;
-
-function retornaControleDataField(pCampo: String; pDatasource: TDataSource; pParent: TWinControl): TWinControl;
-  var
-    i: Integer;
-
-  procedure testa(cmp: TControl);
-  begin
-    if(cmp=nil) then
-      exit;
-    if(cmp is TDBEdit) then
-    begin
-      with TDBEdit(cmp) do
-      begin
-        if(DataSource=pDatasource) and (DataField=pCampo) then
-          Result := TDBEdit(cmp);
-      end;
-    end else if(cmp is TDBRadioGroup) then
-    begin
-      with TDBRadioGroup(cmp) do
-      begin
-        if(DataSource=pDatasource) and (DataField=pCampo) then
-          Result := TDBRadioGroup(cmp);
-      end;
-    end else if(cmp is TDBComboBox) then
-    begin
-      with TDBComboBox(cmp) do
-      begin
-        if(DataSource=pDatasource) and (DataField=pCampo) then
-          Result := TDBComboBox(cmp);
-      end;
-    end else if(cmp is TDBLookupComboBox) then
-    begin
-      with TDBLookupComboBox(cmp) do
-      begin
-        if(DataSource=pDatasource) and (DataField=pCampo) then
-          Result := TDBLookupComboBox(cmp);
-      end;
-    end;
-  end;
-
-begin
-  Result := nil;
-  testa(pParent);
-  if(Result<>nil) then exit;
-  if(pParent<>nil) then
-    for i := 0 to pParent.ControlCount - 1 do
-    begin
-      if not (pParent.Controls[i] is TWinControl) then continue;
-
-      Result := retornaControleDataField(pCampo,pDataSource,TWinControl(pParent.Controls[i]));
-      //testa(pParent.Controls[i]);
-      if(Result<>nil) then exit;
-    end;
-end;
-}
 
 { TDadosCamposValidacoesImpl }
 
@@ -927,6 +689,20 @@ begin
   finally
     lCtx.Free;
   end;
+
+end;
+
+function TValidadorDatabaseImpl.valorOpcaoPorDescricao(pOpcao, pDescricao,  pDefault: String): String;
+  var
+    p: IDadosSetOpcoes;
+begin
+  Result := pDefault;
+  getDicionarioSetValores;
+
+  if not dicionarioSetValores.TryGetValue(pOpcao,p) then exit;
+
+  if(p.dataset.dataset.Locate('descricao',pDescricao,[])) then
+    Result := p.dataset.dataset.FieldByName('id').AsString;
 
 end;
 
