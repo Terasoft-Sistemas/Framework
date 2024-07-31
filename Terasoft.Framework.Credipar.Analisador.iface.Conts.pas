@@ -49,6 +49,10 @@ interface
     CONTROLE_FINANCEIRA_STATUS           = 'Status';
 
 
+    ANEXO_ANALISE       = 'DOC_ANALISE_CREDIPAR';
+    ANEXO_PROCESSAMENTO = 'DOC_PROC_CREDIPAR';
+
+
 implementation
 
 end.

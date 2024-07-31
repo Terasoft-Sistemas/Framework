@@ -62,6 +62,7 @@ interface
       function anexarDocumentoAnalise(pProposta: Int64; pTipoDocumento: TipoWideStringFramework; pFormatoArquivo: TipoWideStringFramework; pDados: TBytes; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function anexarDocumentoProcessamento(pProposta: Int64; pTipoDocumento: TipoWideStringFramework; pFormatoArquivo: TipoWideStringFramework; pDados: TBytes; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function statusProcessamento(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function conciliacao(pData: TDate; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
 
       function boleto(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
 
@@ -108,6 +109,11 @@ interface
       function getStatusProposta(const pID: Int64): TipoWideStringFramework;
       procedure setStatusProposta(const pID: Int64; const pStatus: TipoWideStringFramework );
 
+    //property codigoLojista getter/setter
+      function getcodigoLojista: TipoWideStringFramework;
+      procedure setcodigoLojista(const pValue: TipoWideStringFramework);
+
+      property codigoLojista: TipoWideStringFramework read getcodigoLojista write setcodigoLojista;
       property nome: TipoWideStringFramework read getNome;
       property propriedades: IPropriedade read getPropriedades write setPropriedades;
       property filial: TipoWideStringFramework read getFilial write setFilial;
@@ -161,6 +167,7 @@ begin
     Result.codigoLojaCredipar := cfg.ValorTagConfig(tagConfig_CREDIPAR_CODIGO_LOJA,0,tvInteiro);
     Result.codigoProdutoCredipar := cfg.ValorTagConfig(tagConfig_CREDIPAR_PRODUTO,0,tvInteiro);
     Result.controleAlteracoes := criaControleAlteracoes(FINANCEIRA_CREDIPAR_NOME,pGDB,true);
+    Result.codigoLojista := cfg.ValorTagConfig(tagConfig_CREDIPAR_CODIGO_LOJISTA,0,tvString);
     Result.filial := pFilial;
   end;
 end;
