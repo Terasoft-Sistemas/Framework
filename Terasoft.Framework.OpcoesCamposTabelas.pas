@@ -55,6 +55,7 @@ implementation
       procedure setGDB(const pValue: IGDB);
 
       function valorOpcaoPorDescricao(pOpcao, pDescricao: String; pDefault: String = ''): String;
+      function valorDescricaoOpcao(pOpcao, pValor: String; pDefault: String=''): String;
 
     //property opcoesDefaultRegistradas getter/setter
       function getOpcoesDefaultRegistradas: boolean;
@@ -692,7 +693,21 @@ begin
 
 end;
 
-function TValidadorDatabaseImpl.valorOpcaoPorDescricao(pOpcao, pDescricao,  pDefault: String): String;
+function TValidadorDatabaseImpl.valorDescricaoOpcao;
+  var
+    p: IDadosSetOpcoes;
+begin
+  Result := pDefault;
+  getDicionarioSetValores;
+
+  if not dicionarioSetValores.TryGetValue(pOpcao,p) then exit;
+
+  if(p.dataset.dataset.Locate('id',pValor,[])) then
+    Result := p.dataset.dataset.FieldByName('descricao').AsString;
+
+end;
+
+function TValidadorDatabaseImpl.valorOpcaoPorDescricao;
   var
     p: IDadosSetOpcoes;
 begin
