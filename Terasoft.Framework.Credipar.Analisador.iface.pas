@@ -8,11 +8,116 @@ interface
     Classes,
     Terasoft.Framework.Texto,
     SysUtils,
+    Spring.Collections,
     Terasoft.Framework.DB,
     Terasoft.Framework.ControleAlteracoes,
     Terasoft.Framework.Types;
 
   type
+    IFinanaceira_ConciliacaoItem = interface
+    ['{31A850DB-1286-4BE0-B47D-BE4DF4295FA7}']
+    //property data getter/setter
+      function getData: TDate;
+      procedure setData(const pValue: TDate);
+
+    //property dados getter/setter
+      function getDados: TipoWideStringFramework;
+      procedure setDados(const pValue: TipoWideStringFramework);
+
+    //property resultado getter/setter
+      function getResultado: IResultadoOperacao;
+      procedure setResultado(const pValue: IResultadoOperacao);
+
+    //property contrato getter/setter
+      function getContrato: TipoWideStringFramework;
+      procedure setContrato(const pValue: TipoWideStringFramework);
+
+    //property valor_credito getter/setter
+      function getValor_credito: Extended;
+      procedure setValor_credito(const pValue: Extended);
+
+    //property cliente_nome getter/setter
+      function getCliente_nome: TipoWideStringFramework;
+      procedure setCliente_nome(const pValue: TipoWideStringFramework);
+
+      property cliente_nome: TipoWideStringFramework read getCliente_nome write setCliente_nome;
+    //property cpf getter/setter
+      function getCpf: TipoWideStringFramework;
+      procedure setCpf(const pValue: TipoWideStringFramework);
+
+    //property banco getter/setter
+      function getBanco: TipoWideStringFramework;
+      procedure setBanco(const pValue: TipoWideStringFramework);
+
+    //property agencia getter/setter
+      function getAgencia: TipoWideStringFramework;
+      procedure setAgencia(const pValue: TipoWideStringFramework);
+
+    //property cc getter/setter
+      function getCc: TipoWideStringFramework;
+      procedure setCc(const pValue: TipoWideStringFramework);
+
+    //property previsao getter/setter
+      function getPrevisao: TDate;
+      procedure setPrevisao(const pValue: TDate);
+
+    //property codigoLoja getter/setter
+      function getCodigoLoja: Integer;
+      procedure setCodigoLoja(const pValue: Integer);
+
+    //property proposta getter/setter
+      function getProposta: TipoWideStringFramework;
+      procedure setProposta(const pValue: TipoWideStringFramework);
+
+    //property valorTotal getter/setter
+      function getValorTotal: Extended;
+      procedure setValorTotal(const pValue: Extended);
+
+    //property valorRetencao getter/setter
+      function getValorRetencao: Extended;
+      procedure setValorRetencao(const pValue: Extended);
+
+      property valorRetencao: Extended read getValorRetencao write setValorRetencao;
+      property valorTotal: Extended read getValorTotal write setValorTotal;
+      property proposta: TipoWideStringFramework read getProposta write setProposta;
+      property codigoLoja: Integer read getCodigoLoja write setCodigoLoja;
+      property previsao: TDate read getPrevisao write setPrevisao;
+      property cc: TipoWideStringFramework read getCc write setCc;
+      property agencia: TipoWideStringFramework read getAgencia write setAgencia;
+      property banco: TipoWideStringFramework read getBanco write setBanco;
+      property cpf: TipoWideStringFramework read getCpf write setCpf;
+      property valor_credito: Extended read getValor_credito write setValor_credito;
+      property contrato: TipoWideStringFramework read getContrato write setContrato;
+      property resultado: IResultadoOperacao read getResultado write setResultado;
+      property dados: TipoWideStringFramework read getDados write setDados;
+      property data: TDate read getData write setData;
+    end;
+
+    TListaItemsConciliacao = IList<IFinanaceira_ConciliacaoItem>;
+
+    IFinanaceira_Conciliacao = interface
+    ['{0FA526FE-6E60-4EA2-8B93-E48A84561560}']
+    //property data getter/setter
+      function getData: TDate;
+      procedure setData(const pValue: TDate);
+
+    //property resultado getter/setter
+      function getResultado: IResultadoOperacao;
+      procedure setResultado(const pValue: IResultadoOperacao);
+
+    //property dados getter/setter
+      function getDados: TipoWideStringFramework;
+      procedure setDados(const pValue: TipoWideStringFramework);
+
+    //property items getter/setter
+      function getItems: TListaItemsConciliacao;
+      procedure setItems(const pValue: TListaItemsConciliacao);
+
+      property items: TListaItemsConciliacao read getItems write setItems;
+      property dados: TipoWideStringFramework read getDados write setDados;
+      property resultado: IResultadoOperacao read getResultado write setResultado;
+      property data: TDate read getData write setData;
+    end;
 
     ICredipar_PessoaFisica = interface
     ['{B2D41380-46B9-4937-B8BE-926813959765}']
@@ -62,7 +167,7 @@ interface
       function anexarDocumentoAnalise(pProposta: Int64; pTipoDocumento: TipoWideStringFramework; pFormatoArquivo: TipoWideStringFramework; pDados: TBytes; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function anexarDocumentoProcessamento(pProposta: Int64; pTipoDocumento: TipoWideStringFramework; pFormatoArquivo: TipoWideStringFramework; pDados: TBytes; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function statusProcessamento(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-      function conciliacao(pData: TDate; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function conciliacao(pData: TDate; pResultado: IResultadoOperacao=nil): IFinanaceira_Conciliacao;
       function boleto(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function simulacao(vlrCompra: Extended; VlrEntrada: Extended; qtdParcela: Integer; dtPriVcto: TDate; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
 
@@ -140,7 +245,6 @@ interface
 implementation
   uses
     strUtils,
-    Spring.Collections,
     Terasoft.Framework.Conversoes,
     Terasoft.Framework.Validacoes,
     FuncoesConfig, Terasoft.Framework.Credipar.Analisador.iface.Conts;

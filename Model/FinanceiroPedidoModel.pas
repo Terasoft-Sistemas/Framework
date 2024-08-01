@@ -164,7 +164,8 @@ type
 implementation
 
 uses
-  FinanceiroPedidoDao, System.Classes, System.SysUtils;
+  FinanceiroPedidoDao, System.Classes, System.SysUtils, PortadorModel,
+  System.StrUtils;
 
 { TFinanceiroPedidoModel }
 
@@ -277,53 +278,68 @@ var
   lPrimeiroVencimento : TDate;
   lIDFinanceiro       : String;
   lRetorno            : String;
+  lPortadorModel      : ITPortadorModel;
 begin
 
-  lPrimeiroVencimento   := pFinanceiroParams.PRIMEIRO_VENCIMENTO;
-  lIDFinanceiro := '';
-  lSoma         := 0;
-  lValorParcela := RoundTo(pFinanceiroParams.VALOR_TOTAL / pFinanceiroParams.QUANTIDADE_PARCELAS, -2);
+  lPortadorModel := TPortadorModel.getNewIface(vIConexao);
 
-  for i := 0 to pFinanceiroParams.QUANTIDADE_PARCELAS -1 do
-  begin
-    self.WEB_PEDIDO_ID        := pFinanceiroParams.WEB_PEDIDO_ID;
-    self.PORTADOR_ID          := pFinanceiroParams.PORTADOR_ID;
-    self.VALOR_LIQUIDO        := FloatToStr(pFinanceiroParams.VALOR_LIQUIDO);
-    self.VALOR_TOTAL          := FloatToStr(pFinanceiroParams.VALOR_TOTAL);
-    self.QUANTIDADE_PARCELAS  := IntToStr(pFinanceiroParams.QUANTIDADE_PARCELAS);
-    self.PARCELA              := IntToStr(i+1);
-    self.VALOR_PARCELA        := FloatToStr(lValorParcela);
-    self.INDCE_APLICADO       := FloatToStr(pFinanceiroParams.INDCE_APLICADO);
-    self.VALOR_ACRESCIMO      := FloatToStr(pFinanceiroParams.VALOR_ACRESCIMO);
-    self.ID_FINANCEIRO        := lIDFinanceiro;
-    self.WEB_PEDIDOITENS_ID   := pFinanceiroParams.WEB_PEDIDOITENS_ID;
+  try
+    lPortadorModel.objeto.IDRecordView := pFinanceiroParams.PORTADOR_ID;
+    lPortadorModel.objeto.obterLista;
 
-    self.VALOR_SEG_PRESTAMISTA           := pFinanceiroParams.VALOR_SEG_PRESTAMISTA;
-    self.PER_SEG_PRESTAMSTA              := pFinanceiroParams.PER_SEG_PRESTAMSTA;
-    self.VALOR_ACRESCIMO_SEG_PRESTAMISTA := pFinanceiroParams.VALOR_ACRESCIMO_SEG_PRESTAMISTA;
-
-    self.ORIGINAL_VALOR_PARCELA  := self.VALOR_PARCELA;
-    self.ORIGINAL_INDCE_APLICADO := self.INDCE_APLICADO;
-
-    if i = 0 then
-      self.VENCIMENTO := DateToStr(lPrimeiroVencimento)
-    else
+    if not AnsiMatchStr(lPortadorModel.objeto.PortadorsLista[0].objeto.TPAG_NFE, ['01', '03', '04', '99']) and (lPortadorModel.objeto.PortadorsLista[0].objeto.CODIGO_PORT <> '777777') then
     begin
-      self.VENCIMENTO := DateToStr(IncMonth(lPrimeiroVencimento, i));
+      if self.qtdePagamentoPrazo(pFinanceiroParams.WEB_PEDIDO_ID) > 0 then
+        CriaException('Pagamento similar já realizado. Por favor, refazer o pagamento.');
     end;
 
-    lSoma := lSoma + self.VALOR_PARCELA;
+    lPrimeiroVencimento   := pFinanceiroParams.PRIMEIRO_VENCIMENTO;
+    lIDFinanceiro := '';
+    lSoma         := 0;
+    lValorParcela := RoundTo(pFinanceiroParams.VALOR_TOTAL / pFinanceiroParams.QUANTIDADE_PARCELAS, -2);
 
-    if self.PARCELA = pFinanceiroParams.QUANTIDADE_PARCELAS then
-      self.VALOR_PARCELA := FloatToStr(self.VALOR_PARCELA + (pFinanceiroParams.VALOR_TOTAL - lSoma));
+    for i := 0 to pFinanceiroParams.QUANTIDADE_PARCELAS -1 do
+    begin
+      self.WEB_PEDIDO_ID        := pFinanceiroParams.WEB_PEDIDO_ID;
+      self.PORTADOR_ID          := pFinanceiroParams.PORTADOR_ID;
+      self.VALOR_LIQUIDO        := FloatToStr(pFinanceiroParams.VALOR_LIQUIDO);
+      self.VALOR_TOTAL          := FloatToStr(pFinanceiroParams.VALOR_TOTAL);
+      self.QUANTIDADE_PARCELAS  := IntToStr(pFinanceiroParams.QUANTIDADE_PARCELAS);
+      self.PARCELA              := IntToStr(i+1);
+      self.VALOR_PARCELA        := FloatToStr(lValorParcela);
+      self.INDCE_APLICADO       := FloatToStr(pFinanceiroParams.INDCE_APLICADO);
+      self.VALOR_ACRESCIMO      := FloatToStr(pFinanceiroParams.VALOR_ACRESCIMO);
+      self.ID_FINANCEIRO        := lIDFinanceiro;
+      self.WEB_PEDIDOITENS_ID   := pFinanceiroParams.WEB_PEDIDOITENS_ID;
 
-    lRetorno := self.Incluir;
+      self.VALOR_SEG_PRESTAMISTA           := pFinanceiroParams.VALOR_SEG_PRESTAMISTA;
+      self.PER_SEG_PRESTAMSTA              := pFinanceiroParams.PER_SEG_PRESTAMSTA;
+      self.VALOR_ACRESCIMO_SEG_PRESTAMISTA := pFinanceiroParams.VALOR_ACRESCIMO_SEG_PRESTAMISTA;
 
-    if i = 0 then
-      lIDFinanceiro := lRetorno;
+      self.ORIGINAL_VALOR_PARCELA  := self.VALOR_PARCELA;
+      self.ORIGINAL_INDCE_APLICADO := self.INDCE_APLICADO;
 
+      if i = 0 then
+        self.VENCIMENTO := DateToStr(lPrimeiroVencimento)
+      else
+      begin
+        self.VENCIMENTO := DateToStr(IncMonth(lPrimeiroVencimento, i));
+      end;
+
+      lSoma := lSoma + self.VALOR_PARCELA;
+
+      if self.PARCELA = pFinanceiroParams.QUANTIDADE_PARCELAS then
+        self.VALOR_PARCELA := FloatToStr(self.VALOR_PARCELA + (pFinanceiroParams.VALOR_TOTAL - lSoma));
+
+      lRetorno := self.Incluir;
+
+      if i = 0 then
+        lIDFinanceiro := lRetorno;
+
+    end;
+  finally
+    lPortadorModel := nil;
   end;
-
 end;
 
 class function TFinanceiroPedidoModel.getNewIface(pIConexao: IConexao): ITFinanceiroPedidoModel;

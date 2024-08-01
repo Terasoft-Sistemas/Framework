@@ -164,7 +164,7 @@ type
     function obterLista: IFDDataset;
 
     function AtualizaReservaVendaAssistida(pAtualizaReserva_Parametros: TAtualizaReserva_Parametros): String;
-    function concluirReserva(pStatus, pPedido, pWebPedidoItensId, pFilial: String; pTotal, pAcrescimo: Double): Boolean;
+    function concluirReserva(pStatus, pPedido, pWebPedidoItensId, pFilial: String): Boolean;
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -240,7 +240,7 @@ begin
   end;
 end;
 
-function TReservaModel.concluirReserva(pStatus, pPedido, pWebPedidoItensId, pFilial: String; pTotal, pAcrescimo: Double): Boolean;
+function TReservaModel.concluirReserva(pStatus, pPedido, pWebPedidoItensId, pFilial: String): Boolean;
 var
   lTableReserva: IFDDataset;
 begin
@@ -251,8 +251,6 @@ begin
 
   self.STATUS             := pStatus;
   self.PEDIDO_ID          := pPedido;
-  self.VALOR_ACRESCIMO    := FloatToStr(pAcrescimo);
-  self.VALOR_TOTAL        := FloatToStr(pTotal);
   self.DATAHORA_EFETIVADA := DateTimeToStr(vIConexao.DataHoraServer);
   self.Salvar;
 end;
