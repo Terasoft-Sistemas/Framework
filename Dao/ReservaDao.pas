@@ -127,6 +127,8 @@ begin
     lModel.ENTREGA_UF             := lQry.FieldByName('ENTREGA_UF').AsString;
     lModel.ENTREGA_CEP            := lQry.FieldByName('ENTREGA_CEP').AsString;
     lModel.ENTREGA_COD_MUNICIPIO  := lQry.FieldByName('ENTREGA_COD_MUNICIPIO').AsString;
+    lModel.VALOR_ACRESCIMO        := lQry.FieldByName('VALOR_ACRESCIMO').AsString;
+    lModel.VALOR_TOTAL            := lQry.FieldByName('VALOR_TOTAL').AsString;
 
     Result := lModel;
   finally
