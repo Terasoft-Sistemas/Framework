@@ -180,10 +180,11 @@ end;
 
 function TNotaFiscal.cobranca(pidNF: String): Boolean;
 var
- lSQL        : String;
- lQry        : TFDQuery;
+ lSQL         : String;
+ lQry         : TFDQuery;
  lPercentual,
- lTotalDup   : Double;
+ lTotalDup,
+ lSomaDup     : Double;
 
 begin
   try
@@ -207,6 +208,7 @@ begin
       lQry.Open(lSQL);
 
       lTotalDup := 0;
+      lSomaDup  := 0;
 
       lQry.First;
       while not lQry.Eof do
@@ -216,6 +218,7 @@ begin
       end;
 
       lPercentual := lQry.FieldByName('vOrig').AsFloat / lTotalDup;
+      lTotalDup   := lPercentual * lTotalDup;
 
       if lQry.FieldByName('modeloNF').AsInteger = 55 then
       begin
@@ -266,11 +269,18 @@ begin
         InfoPgto.indPag := ipPrazo;
         InfoPgto.tPag   := vConfiguracoesNotaFiscal.tPag(lQry.FieldByName('tPag').AsString);
         InfoPgto.vPag   := lPercentual * lQry.FieldByName('vDup').AsFloat;
+        lSomaDup        := lSomaDup + lPercentual * lQry.FieldByName('vDup').AsFloat;
 
         if InfoPgto.tPag in [fpCartaoCredito, fpCartaoDebito, fpPagamentoInstantaneo] then
           InfoPgto.tpIntegra := tiPagNaoIntegrado;
 
         lQry.Next;
+
+        if lQry.Eof then
+        begin
+          if lTotalDup <> lSomaDup then
+            InfoPgto.vPag := InfoPgto.vPag + (lTotalDup - lTotalDup);
+        end;
       end;
 
     except
