@@ -14,7 +14,7 @@ type
   TTipoMensagem = (tmInfo, tmSuccess, tmNotice, tmError, tmSimple);
   TPosicaoHorizontal = (tphLeft, tphCenter, tphRight);
   TPosicaoVertical = (tpvTop, tpvBottom);
-  TConclusaoContasReceber = (tcPedirBandeira, tcReceberEntrada, tcReceberCartao, tcConcluido, tcReceberTef, tcReceberPix, tcNull);
+  TConclusaoContasReceber = (tcPedirBandeira, tcReceberEntrada, tcReceberCartao, tcConcluido, tcReceberTef, tcReceberPix, tcCheque, tcNull);
   TPortador = (tpDinheiro, tpCredito, tpDebito, tpPix, tpPixAvulso, tpTef, tpCarteira, tpBoleto, tpCreditoCliente, tpAvista, tpReceber, tpCheque, tpNull);
   TTabela = (ttPedidoVenda, ttRecibo, ttFechamentoCaixa, ttCreditoCliente, ttExtratoCaixa, ttNull);
   TBubina = (tb40, tb30, tbNull);

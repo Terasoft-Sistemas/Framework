@@ -227,7 +227,7 @@ type
     function parcelasAberta(pFatura: String): Boolean;
 
     function gerarContasReceberRecebimento(pValor, pDesconto, pParcela, pPortador, pConta, pObs : String) : String;
-    function gerarContasReceberRecebimentoCheque(pPortador : String; pDadosCheque : TStringList) : String;
+    function gerarContasReceberRecebimentoCheque(pPortador, pPedido, pTipo : String; pDadosCheque : TStringList) : String;
 
     function valorAberto(pCliente : String) : Double;
 
@@ -778,7 +778,7 @@ begin
   end;
 end;
 
-function TContasReceberItensModel.gerarContasReceberRecebimentoCheque(pPortador : String; pDadosCheque: TStringList): String;
+function TContasReceberItensModel.gerarContasReceberRecebimentoCheque(pPortador, pPedido, pTipo : String; pDadosCheque: TStringList): String;
 var
   lContasReceberItensInserir : TContasReceberItensModel;
   lContasReceberModel        : TContasReceberModel;
@@ -802,7 +802,7 @@ begin
 
     lContasReceberModel.Acao              := tacIncluir;
     lContasReceberModel.LOJA              := vIConexao.getEmpresa.LOJA;
-    lContasReceberModel.PEDIDO_REC        := '999999';
+    lContasReceberModel.PEDIDO_REC        := pPedido;
     lContasReceberModel.CODIGO_CLI        := lChequesTable.objeto.FieldByName('CODIGO_CLI').AsString;
     lContasReceberModel.DATAEMI_REC       := DateToStr(vIConexao.DataServer);
     lContasReceberModel.VALOR_REC         := '0';
@@ -812,7 +812,7 @@ begin
     lContasReceberModel.JUROS_FIXO        := lContasReceberModel.JUROS_FIXO;
     lContasReceberModel.CENTRO_CUSTO      := '000030';
     lContasReceberModel.CODIGO_CTA        := '555555';
-    lContasReceberModel.OBS_REC           := 'CONTA CLIENTE';
+    lContasReceberModel.OBS_REC           := pTipo;
     lContasReceberModel.OBS_COMPLEMENTAR  := 'Recebimento';
 
     lFaturaReceber := lContasReceberModel.Salvar;
@@ -949,7 +949,7 @@ begin
     lContasReceberItensLista.IDRecordView         := FIDRecordView;
     lContasReceberItensLista.IDContasReceberView  := FIDContasReceberView;
     lContasReceberItensLista.obterLista;
-    FTotalRecords  := lContasReceberItensLista.TotalRecords;
+    FTotalRecords := lContasReceberItensLista.TotalRecords;
     FContasReceberItenssLista := lContasReceberItensLista.ContasReceberItenssLista;
   finally
     lContasReceberItensLista.Free;

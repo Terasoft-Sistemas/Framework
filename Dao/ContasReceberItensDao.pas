@@ -625,8 +625,15 @@ begin
             '   union all                                                                                                                      '+SLineBreak+
             '  select u.id, ''RECEBIMENTO CREDITO CLIENTE'' tipo, u.valor valor, ''CREDITO_CLIENTE'' ORIGEM                                    '+SLineBreak+
             '    from credito_cliente_uso u                                                                                                    '+SLineBreak+
-            '   where u.receber_id = ' + QuotedStr(FIDContasReceberView)                                                                        +SLineBreak+
-            '     and u.parcela = '+ FParcelaView;
+            '   where u.receber_id = '+ QuotedStr(FIDContasReceberView)                                                                        +SLineBreak+
+            '     and u.parcela = '+ FParcelaView                                                                                               +SLineBreak+
+            '   union all                                                                                                                      '+SLineBreak+
+            '  select chq.id,                                                                                                                  '+SLineBreak+
+            '         ''CHEQUE'' tipo,                                                                                                         '+SLineBreak+
+            '         chq.valor_chq valor,                                                                                                     '+SLineBreak+
+            '         ''RECEBIMENTO_CHEQUE'' ORIGEM                                                                                            '+SLineBreak+
+            '    from cheque chq                                                                                                               '+SLineBreak+
+            '   where chq.numero_doc = '+ QuotedStr(FIDContasReceberView);
 
     lQry.Open(lSQL);
 

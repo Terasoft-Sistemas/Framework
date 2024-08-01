@@ -295,6 +295,13 @@ begin
         Result := tcReceberPix;
         exit;
       end;
+
+      if lPortadorModel.objeto.CODIGO_PORT = '000003' then
+      begin
+        Result := tcCheque;
+        exit;
+      end;
+
     end;
 
     if self.FCODIGO_POR = '777777' then
