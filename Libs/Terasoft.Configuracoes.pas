@@ -73,6 +73,7 @@ begin
       vmtConfiguracoes.objeto.FieldByName('VALORMEMO').Value      := IIF(lModel.objeto.VALORMEMO      = '', Unassigned, lModel.objeto.VALORMEMO);
       vmtConfiguracoes.objeto.Post;
     end;
+
   finally
     lConfiguracoesModel:=nil;
   end;

@@ -162,7 +162,9 @@ uses
   GrupoGarantiaModel in '..\Model\GrupoGarantiaModel.pas',
   GrupoGarantiaDao in '..\Dao\GrupoGarantiaDao.pas',
   TabelaJurosPromocaoModel in '..\Model\TabelaJurosPromocaoModel.pas',
-  TabelaJurosPromocaoDao in '..\Dao\TabelaJurosPromocaoDao.pas';
+  TabelaJurosPromocaoDao in '..\Dao\TabelaJurosPromocaoDao.pas',
+  ConfiguracoesLocaisModel in '..\Model\ConfiguracoesLocaisModel.pas',
+  ConfiguracoesLocaisDao in '..\Dao\ConfiguracoesLocaisDao.pas';
 
 {$R *.res}
 

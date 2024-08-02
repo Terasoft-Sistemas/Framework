@@ -8,7 +8,11 @@ uses
   FireDAC.Comp.Client,
   Spring.Collections,
   Terasoft.Framework.ObjectIface,
-  Interfaces.Conexao;
+  Interfaces.Conexao,
+  System.StrUtils,
+  System.SysUtils,
+  Terasoft.Utils,
+  ConfiguracoesLocaisModel;
 
 type
   TConfiguracoesModel = class;
@@ -63,6 +67,7 @@ type
     procedure SetVALORMEMO(const Value: Variant);
     procedure SetVALORNUMERICO(const Value: Variant);
     procedure SetVALORSTRING(const Value: Variant);
+
   public
     property ID: Variant read FID write SetID;
     property TAG: Variant read FTAG write SetTAG;
@@ -83,8 +88,11 @@ type
 
     class function getNewIface(pIConexao: IConexao): ITConfiguracoesModel;
 
+    function carregaClasse(pId : String): ITConfiguracoesModel;
+
     function Salvar: String;
     procedure obterLista;
+    procedure gravaValorTagConfig(pTag: String; pTipoValor: TTipoValorConfiguracao; pValor: Variant; pPerfil: String = ''; pLocal: boolean = True);
 
     property ConfiguracoessLista: IList<ITConfiguracoesModel> read FConfiguracoessLista write SetConfiguracoessLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -108,6 +116,18 @@ uses
 constructor TConfiguracoesModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
+end;
+
+function TConfiguracoesModel.carregaClasse(pId: String): ITConfiguracoesModel;
+var
+  lConfiguracoesDao: ITConfiguracoesDao;
+begin
+  lConfiguracoesDao := TConfiguracoesDao.getNewIface(vIConexao);
+  try
+    Result := lConfiguracoesDao.objeto.carregaClasse(pId);
+  finally
+    lConfiguracoesDao := nil;
+  end;
 end;
 
 destructor TConfiguracoesModel.Destroy;
@@ -166,6 +186,89 @@ begin
   finally
     lConfiguracoesDao:=nil;
   end;
+end;
+
+procedure TConfiguracoesModel.gravaValorTagConfig(pTag: String; pTipoValor: TTipoValorConfiguracao; pValor: Variant; pPerfil: String = ''; pLocal: boolean = True);
+var
+  lNomeCampo, lPerf: String;
+  lConfiguracoesLocaisModel : ITConfiguracoesLocaisModel;
+  lConfiguracoesModel : ITConfiguracoesModel;
+  lDataSet : IFDDataset;
+begin
+
+  lConfiguracoesLocaisModel := TConfiguracoesLocaisModel.getNewIface(vIConexao);
+  lConfiguracoesModel       := TConfiguracoesModel.getNewIface(vIConexao);
+
+  try
+    lPerf := ifThen(pPerfil = '', 'ZZZZZZ', pPerfil);
+    pTag  := UpperCase(trim(pTag));
+
+    if pLocal then
+    begin
+      lConfiguracoesLocaisModel.objeto.WhereView := 'AND CONFIGURACOESLOCAIS.TAG = '+ QuotedStr(pTag);
+      lDataSet := lConfiguracoesLocaisModel.objeto.ObterLista;
+
+      if lDataSet.objeto.RecordCount > 0 then
+        lConfiguracoesLocaisModel := lConfiguracoesLocaisModel.objeto.Alterar(QuotedStr(lDataSet.objeto.FieldByName('ID').AsString));
+
+      case pTipoValor of
+        tvInteiro  : lConfiguracoesLocaisModel.objeto.VALORINTEIRO  := pValor;
+        tvNumero   : lConfiguracoesLocaisModel.objeto.VALORNUMERICO := CurrToStr(pValor);
+        tvString   : lConfiguracoesLocaisModel.objeto.VALORSTRING   := pValor;
+        tvMemo     : lConfiguracoesLocaisModel.objeto.VALORMEMO     := pValor;
+        tvData     : lConfiguracoesLocaisModel.objeto.VALORDATA     := pValor;
+        tvHora     : lConfiguracoesLocaisModel.objeto.VALORHORA     := pValor;
+        tvDataHora : lConfiguracoesLocaisModel.objeto.VALORDATAHORA := pValor;
+        tvChar,
+        tvBool     : lConfiguracoesLocaisModel.objeto.VALORCHAR     := pValor;
+      end;
+
+      if lDataSet.objeto.RecordCount > 0 then
+        lConfiguracoesLocaisModel.objeto.Salvar
+      else begin
+        lConfiguracoesLocaisModel.objeto.TAG       := pTag;
+        lConfiguracoesLocaisModel.objeto.F_ID      := lPerf;
+        lConfiguracoesLocaisModel.objeto.PERFIL_ID := pPerfil;
+        lConfiguracoesLocaisModel.objeto.Incluir;
+      end;
+    end
+    else
+    begin
+      lConfiguracoesModel.objeto.WhereView := 'AND CONFIGURACOES.TAG = '+ QuotedStr(pTag);
+      lConfiguracoesModel.objeto.ObterLista;
+
+      if lConfiguracoesModel.objeto.ConfiguracoessLista.Count > 0 then
+        lConfiguracoesModel := lConfiguracoesModel.objeto.carregaClasse(QuotedStr(lConfiguracoesModel.objeto.ConfiguracoessLista[0].objeto.ID));
+
+      case pTipoValor of
+        tvInteiro  : lConfiguracoesModel.objeto.VALORINTEIRO  := pValor;
+        tvNumero   : lConfiguracoesModel.objeto.VALORNUMERICO := CurrToStr(pValor);
+        tvString   : lConfiguracoesModel.objeto.VALORSTRING   := pValor;
+        tvMemo     : lConfiguracoesModel.objeto.VALORMEMO     := pValor;
+        tvData     : lConfiguracoesModel.objeto.VALORDATA     := pValor;
+        tvHora     : lConfiguracoesModel.objeto.VALORHORA     := pValor;
+        tvDataHora : lConfiguracoesModel.objeto.VALORDATAHORA := pValor;
+        tvChar,
+        tvBool     : lConfiguracoesModel.objeto.VALORCHAR     := pValor;
+      end;
+
+      if lConfiguracoesModel.objeto.ID <> '' then
+        lConfiguracoesModel.objeto.Acao := tacAlterar
+      else begin
+        lConfiguracoesModel.objeto.TAG       := pTag;
+        lConfiguracoesModel.objeto.F_ID      := lPerf;
+        lConfiguracoesModel.objeto.PERFIL_ID := pPerfil;
+        lConfiguracoesModel.objeto.Acao      := tacIncluir;
+      end;
+
+      lConfiguracoesModel.objeto.Salvar;
+    end;
+
+  finally
+    lConfiguracoesLocaisModel := nil;
+    lConfiguracoesModel := nil;
+  end;
+
 end;
 
 procedure TConfiguracoesModel.SetAcao(const Value: TAcao);

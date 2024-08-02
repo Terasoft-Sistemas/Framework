@@ -30,7 +30,8 @@ uses
   NFControl,
   NFModel,
   Terasoft.Types,
-  Interfaces.Conexao;
+  Interfaces.Conexao,
+  ConfiguracoesLocaisModel;
 
 type
   TNotaFiscal = class
@@ -58,6 +59,7 @@ type
     FimprimirDANF: Boolean;
     FidNotaFiscal: String;
     FImpressoraNFC: String;
+    vTransmitir : String;
     function identificacao(pidNF: String): Boolean;
     function referenciada: Boolean;
     function emitente: Boolean;
@@ -79,7 +81,6 @@ type
     procedure SetPathPDF(const Value: String);
     procedure SetImpressoraNFC(const Value: String);
 
-
   public
     property idNotaFiscal  : String read FidNotaFiscal write SetidNotaFiscal;
     property idPedido      : String read FidPedido write SetidPedido;
@@ -97,6 +98,7 @@ type
     function imprimir: String;
     function gerarXML(idNotaFiscal, pPath: String): String;
     function VencimentoCertificado: TDateTime;
+
   end;
 implementation
 
@@ -483,7 +485,12 @@ function TNotaFiscal.identificacao(pidNF: String): Boolean;
 var
  lSQL: String;
  lQry: TFDQuery;
+ lConfiguracoesLocaisModel : ITConfiguracoesLocaisModel;
+ lDataSet : IFDDataset;
 begin
+
+  lConfiguracoesLocaisModel := TConfiguracoesLocaisModel.getNewIface(vIConexao);
+
   try
     try
     lQry := vIConexao.CriarQuery;
@@ -542,6 +549,20 @@ begin
         dhCont := vConfiguracoesNotaFiscal.dhCont;
         xJust  := 'Problemas no WebService';
       end;
+
+      lConfiguracoesLocaisModel.objeto.WhereView := 'AND CONFIGURACOESLOCAIS.TAG = ''STATUS_NFCE'' ';
+      lDataSet := lConfiguracoesLocaisModel.objeto.obterLista;
+
+      if lDataSet.objeto.RecordCount > 0 then
+        vTransmitir := lDataSet.objeto.FieldByName('VALORSTRING').AsString;
+
+      if (vTransmitir = 'F') and (modelo = 65) then
+      begin
+        tpEmis := teOffLine;
+        dhCont := vIConexao.DataServer;
+        xJust  :='Entrada em contingência por falhas na conexão com o web service.';
+      end;
+
     end;
     with ACBrNFe.Configuracoes.Geral do
     begin
@@ -559,6 +580,7 @@ begin
   finally
     lSQL := '';
     lQry.Free;
+    lConfiguracoesLocaisModel := nil;
   end;
 end;
 function TNotaFiscal.imprimir: String;
@@ -593,7 +615,7 @@ begin
 
       lQry.Open(lSQL);
 
-      if copy(Trim(lQry.FieldByName('nome_xml').AsString),1,10) <> 'Autorizado' then
+      if (copy(Trim(lQry.FieldByName('nome_xml').AsString),1,10) <> 'Autorizado') and (lQry.FieldByName('nome_xml').AsString <> 'Emitido em Off-Line') then
         CriaException('Não é possível imprimir uma nota não autorizada.');
 
       if lQry.FieldByName('status_nf').AsString = 'X' then
@@ -1178,9 +1200,7 @@ constructor TNotaFiscal.Create(pIConexao: IConexao);
 begin
   vIConexao := pIConexao;
   ACBrNFe   := TACBrNFe.Create(nil);
-
   vConfiguracoesNotaFiscal := TConfiguracoesNotaFiscal.Create(vIConexao);
-
   configuraComponenteNFe;
   FidNotaFiscal  := '';
   FidPedido      := '';
@@ -1251,7 +1271,8 @@ begin
       else
       begin
         try
-          ACBrNFe.Enviar(loteEnvio, false, True);
+          if vTransmitir = 'L' then
+            ACBrNFe.Enviar(loteEnvio, false, True);
         finally
           lchavenfe  := ACBrNFe.NotasFiscais[0].NFe.procNFe.chNFe;
           lprotocolo := ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.nProt;
@@ -1261,16 +1282,17 @@ begin
         end;
       end;
 
-      if lCSTAT <> '100' then
+      if (lCSTAT <> '100') and (vTransmitir = 'L') then
         lxMotivo := 'NOTA NAO AUTORIZADA: ' + lxMotivo;
 
-      lNFContol.objeto.NFModel.objeto.Acao          := Terasoft.Types.tacAlterar;
-      lNFContol.objeto.NFModel.objeto.NOME_XML      := copy(lxMotivo, 1, 500);
-      lNFContol.objeto.NFModel.objeto.ID_NF3        := lchavenfe;
-      lNFContol.objeto.NFModel.objeto.PROTOCOLO_NFE := lprotocolo;
-      lNFContol.objeto.NFModel.objeto.RECIBO_NFE    := lrecibo;
-      lNFContol.objeto.NFModel.objeto.XML_NFE       := ACBrNFe.NotasFiscais.Items[0].GerarXML;
-      lNFContol.objeto.NFModel.objeto.NUMERO_NF     := idNotaFiscal;
+      lNFContol.objeto.NFModel.objeto.Acao               := Terasoft.Types.tacAlterar;
+      lNFContol.objeto.NFModel.objeto.STATUS_TRANSMISSAO := IIF((vTransmitir = 'F') and (ACBrNFe.NotasFiscais.Items[0].NFe.Ide.modelo = 65), '7', '8');
+      lNFContol.objeto.NFModel.objeto.NOME_XML           := IIF((vTransmitir = 'F') and (ACBrNFe.NotasFiscais.Items[0].NFe.Ide.modelo = 65), 'Emitido em Off-Line', copy(lxMotivo, 1, 500));
+      lNFContol.objeto.NFModel.objeto.ID_NF3             := lchavenfe;
+      lNFContol.objeto.NFModel.objeto.PROTOCOLO_NFE      := lprotocolo;
+      lNFContol.objeto.NFModel.objeto.RECIBO_NFE         := lrecibo;
+      lNFContol.objeto.NFModel.objeto.XML_NFE            := ACBrNFe.NotasFiscais.Items[0].GerarXML;
+      lNFContol.objeto.NFModel.objeto.NUMERO_NF          := idNotaFiscal;
       lNFContol.objeto.Salvar;
 
       if lNFContol.objeto.NFModel.objeto.NUMERO_PED <> '' then
@@ -1287,10 +1309,10 @@ begin
 
     except on E: Exception do
       begin
-        lNFContol.objeto.NFModel.objeto.Acao       := Terasoft.Types.tacAlterar;
-        lNFContol.objeto.NFModel.objeto.NOME_XML   := copy('NOTA NAO AUTORIZADA: '+e.Message, 1, 500);
-        lNFContol.objeto.NFModel.objeto.XML_NFE    := ACBrNFe.NotasFiscais.Items[0].GerarXML;
-        lNFContol.objeto.NFModel.objeto.NUMERO_NF  := idNotaFiscal;
+        lNFContol.objeto.NFModel.objeto.Acao               := Terasoft.Types.tacAlterar;
+        lNFContol.objeto.NFModel.objeto.NOME_XML           := copy('NOTA NAO AUTORIZADA: '+e.Message, 1, 500);
+        lNFContol.objeto.NFModel.objeto.XML_NFE            := ACBrNFe.NotasFiscais.Items[0].GerarXML;
+        lNFContol.objeto.NFModel.objeto.NUMERO_NF          := idNotaFiscal;
         lNFContol.objeto.Salvar;
 
         lRetorno.Add(lCSTAT);

@@ -1000,7 +1000,7 @@ begin
     lNFModel.objeto.STATUS_NF             := '0';
     lNFModel.objeto.INDPRES               := '1';
     lNFModel.objeto.STATUS_TRANSMISSAO    := '8';
-    lNFModel.objeto.NOME_XML              := 'Em processamento';
+    lNFModel.objeto.NOME_XML              := '';
     lNFModel.objeto.MODELO                := pModelo;
     lNFModel.objeto.SERIE_NF              := pSerie;
     lNFModel.objeto.ESPECIE_VOLUME        := self.ESPECIE_VOLUME;

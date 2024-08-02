@@ -67,6 +67,8 @@ type
     function alterar(AConfiguracoesModel: ITConfiguracoesModel): String;
     function excluir(AConfiguracoesModel: ITConfiguracoesModel): String;
 
+    function carregaClasse(pID : String): ITConfiguracoesModel;
+
     procedure obterLista;
     procedure setParams(var pQry: TFDQuery; pConfiguracoesModel: ITConfiguracoesModel);
 
@@ -83,6 +85,40 @@ constructor TConfiguracoesDao._Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDao.Create(vIConexao);
+end;
+
+function TConfiguracoesDao.carregaClasse(pID: String): ITConfiguracoesModel;
+var
+  lQry: TFDQuery;
+  lModel: ITConfiguracoesModel;
+begin
+  lQry     := vIConexao.CriarQuery;
+  lModel   := TConfiguracoesModel.getNewIface(vIConexao);
+  Result   := lModel;
+
+  try
+    lQry.Open('select * from CONFIGURACOES where ID = ' +pId);
+
+    if lQry.IsEmpty then
+      Exit;
+
+      lModel.objeto.ID             := lQry.FieldByName('ID').AsString;
+      lModel.objeto.TAG            := lQry.FieldByName('TAG').AsString;
+      lModel.objeto.F_ID           := lQry.FieldByName('FID').AsString;
+      lModel.objeto.PERFIL_ID      := lQry.FieldByName('PERFIL_ID').AsString;
+      lModel.objeto.VALORINTEIRO   := lQry.FieldByName('VALORINTEIRO').AsString;
+      lModel.objeto.VALORSTRING    := lQry.FieldByName('VALORSTRING').AsString;
+      lModel.objeto.VALORMEMO      := lQry.FieldByName('VALORMEMO').AsString;
+      lModel.objeto.VALORNUMERICO  := lQry.FieldByName('VALORNUMERICO').AsString;
+      lModel.objeto.VALORCHAR      := lQry.FieldByName('VALORCHAR').AsString;
+      lModel.objeto.VALORDATA      := lQry.FieldByName('VALORDATA').AsString;
+      lModel.objeto.VALORHORA      := lQry.FieldByName('VALORHORA').AsString;
+      lModel.objeto.VALORDATAHORA  := lQry.FieldByName('VALORDATAHORA').AsString;
+
+    Result := lModel;
+  finally
+    lQry.Free;
+  end;
 end;
 
 destructor TConfiguracoesDao.Destroy;
