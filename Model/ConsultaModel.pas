@@ -91,7 +91,8 @@ end;
 
 class function TConsultaModel.getNewIface(pIConexao: IConexao): ITConsultaModel;
 begin
-
+  Result := TImplObjetoOwner<TConsultaModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 procedure TConsultaModel.obterLista;
