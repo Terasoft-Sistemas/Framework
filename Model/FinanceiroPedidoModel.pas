@@ -191,7 +191,7 @@ begin
     lValorLiquido    := (StrToFloat(lFinanceiroPedidoModel.objeto.VALOR_LIQUIDO) + StrToFloat(lFinanceiroPedidoModel.objeto.VALOR_SEG_PRESTAMISTA));
 
     lIndiceNew         := (pNovaParcela * lIndiceOriginal)/lParcelaOriginal;
-    lValorParcelaNew   := lValorLiquido * lIndiceNew;
+    lValorParcelaNew   :=  RoundTo(lValorLiquido * lIndiceNew,-2);
     lTotal             := lValorParcelaNew * StrToInt(lFinanceiroPedidoModel.objeto.QUANTIDADE_PARCELAS);
     lValorAcrescimoNew := lTotal - lValorLiquido;
 
@@ -290,7 +290,7 @@ begin
     if not AnsiMatchStr(lPortadorModel.objeto.PortadorsLista[0].objeto.TPAG_NFE, ['01', '03', '04', '99']) and (lPortadorModel.objeto.PortadorsLista[0].objeto.CODIGO_PORT <> '777777') then
     begin
       if self.qtdePagamentoPrazo(pFinanceiroParams.WEB_PEDIDO_ID) > 0 then
-        CriaException('Pagamento similar já realizado. Por favor, refazer o pagamento.');
+        CriaException('Já existe uma forma de pagamento similar, refazer o pagamento.');
     end;
 
     lPrimeiroVencimento   := pFinanceiroParams.PRIMEIRO_VENCIMENTO;
