@@ -217,11 +217,11 @@ begin
     lValorEntrada := lQry.FieldByName('VALOR_ENTRADA').AsFloat;
 
     lSQL :=
-    ' select f.VALOR_TOTAL valor_financiado, count(*) QUANTIDADE_PARCELAS, min(f.vencimento) PRIMEIRO_VENCIMENTO '+#13+
+    ' select avg(f.VALOR_PARCELA) valor_financiado, count(*) QUANTIDADE_PARCELAS, min(f.vencimento) PRIMEIRO_VENCIMENTO '+#13+
     ' from financeiro_pedido f'+#13+
     ' inner join portador p on p.codigo_port = f.portador_id'+#13+
     ' where f.web_pedido_id = '+pWebPedidoModel.ID+''+#13+
-    ' and p.tpag_nfe not in (''01'', ''03'', ''04'', ''99'') group by 1 ';
+    ' and p.tpag_nfe not in (''01'', ''03'', ''04'', ''99'') ';//group by 1 ';
 
     lQry.Open(lSQL);
 
