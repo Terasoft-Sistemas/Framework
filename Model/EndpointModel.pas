@@ -1,3 +1,5 @@
+{$i definicoes.inc}
+
 unit EndpointModel;
 
 interface
@@ -7,6 +9,7 @@ uses
   Spring.Collections,
   Terasoft.Framework.ObjectIface,
   FiltroModel,
+  Terasoft.Framework.DB,
   FiltroController,
   Interfaces.Conexao;
 
@@ -35,6 +38,8 @@ type
   public
     const
       _TABELA_ = 'ENDPOINT';
+
+  protected
 
   //property DESCRICAO getter/setter
     function getDESCRICAO: TipoWideStringFramework;
@@ -79,10 +84,17 @@ type
     property PROPRIEDADES: TipoWideStringFramework read getPROPRIEDADES write setPROPRIEDADES;
     property DESCRICAO: TipoWideStringFramework read getDESCRICAO write setDESCRICAO;
     property FILTROS: TListaFiltroModel read getFILTROS write setFILTROS;
+
+  public
+    function executaQuery: IDatasetSimples;
+
   end;
 
 implementation
   uses
+    {$if defined(DEBUG)}
+      ClipBrd,
+    {$endif}
     Terasoft.Framework.MultiConfig,
     Terasoft.Framework.Texto;
 
@@ -147,6 +159,45 @@ begin
   Result := fQUERY;
 end;
 
+function TEndpointModel.executaQuery: IDatasetSimples;
+  var
+    lSql: String;
+    lDS: IDataset;
+    fFiltro: ITFiltroModel;
+    lIn: String;
+    lWhere: String;
+
+begin
+  lDS := vIConexao.gdb.criaDataset;
+  lSql := fQUERY;
+  lWhere:='';
+  for fFiltro in getFILTROS do
+  begin
+    lIn := fFiltro.objeto.query;
+    if(lIn <> '') then
+    begin
+      if(lWhere<>'') then
+        lWhere := lWhere + #13 + ' and ';
+      lWhere := lWhere + lIn;
+    end;
+  end;
+
+  if(lWhere <>'') then
+    lWhere := 'where'+#13 + '   ' +lWhere;
+
+  lSql := lSql +#13+ lWhere;
+
+  {$if defined(DEBUG)}
+    //Clipboard.AsText := lSql;
+  {$endif}
+
+
+  lDS.query(lSql,'',[]);
+
+  Supports(lDS,IDatasetSimples,Result);
+
+end;
+
 procedure TEndpointModel.carregaFiltros;
   var
     cfg: IMultiConfig;
@@ -168,7 +219,10 @@ begin
   begin
     sName := uppercase(trim( lTxt.strings.Names[i]));
     if(sName='') then continue;
+    sValue := uppercase(trim( lTxt.strings.ValueFromIndex[i]));
     lFiltro := fFiltroController.getByName(sName);
+    lFiltro.objeto.campo := sValue;
+
     fFILTROS.Add(lFiltro);
   end;
 end;

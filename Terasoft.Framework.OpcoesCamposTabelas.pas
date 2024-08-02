@@ -46,6 +46,8 @@ implementation
       fOpcoesDefaultRegistradas: boolean;
       fListaValidacoes: IListaStringLock;
 
+      function getValoresByName(pName: String): IDatasetSimples;
+
     //property listaValidacoes getter/setter
       function getListaValidacoes: IListaStringLock;
       procedure setListaValidacoes(const pValue: IListaStringLock);
@@ -704,6 +706,18 @@ begin
 
   if(p.dataset.dataset.Locate('id',pValor,[])) then
     Result := p.dataset.dataset.FieldByName('descricao').AsString;
+
+end;
+
+function TValidadorDatabaseImpl.getValoresByName(pName: String): IDatasetSimples;
+  var
+    p: IDadosSetOpcoes;
+begin
+  Result :=nil;
+  getDicionarioSetValores;
+
+  if not dicionarioSetValores.TryGetValue(pName,p) then exit;
+  Result := p.dataset;
 
 end;
 

@@ -5,6 +5,7 @@ uses
   Terasoft.Framework.Types,
   System.SysUtils,
   EndpointModel,
+  Terasoft.Framework.DB,
   Interfaces.Conexao;
 
 type
@@ -12,7 +13,9 @@ type
   IController_Endpoint = interface
   ['{A1E3DBAB-512C-46E3-82C5-773443E8F779}']
     function getByName(pName: TipoWideStringFramework): ITEndpointModel;
-    function getLista(pNames: IListaString=nil): TListaEndpointModel;
+    function getNovaLista(pNames: IListaString=nil): TListaEndpointModel;
+    function getLista: TListaEndpointModel;
+    property lista: TListaEndpointModel read getLista;
   end;
 
   function getEndpointController(pIConexao:IConexao):IController_Endpoint;
@@ -27,7 +30,8 @@ type
     fModel: ITEndpointModel;
     fLista: TListaEndpointModel;
     function getByName(pName: TipoWideStringFramework): ITEndpointModel;
-    function getLista(pNames: IListaString): TListaEndpointModel;
+    function getNovaLista(pNames: IListaString=nil): TListaEndpointModel;
+    function getLista: TListaEndpointModel;
   public
     vIConexao : IConexao;
     constructor Create(pIConexao : IConexao);
@@ -63,8 +67,16 @@ end;
 
 function TControllerEndpoint.getLista;
 begin
-  fLista := TEndpointDao.getNewIface(vIConexao).objeto.getLista(pNames);
+  if(fLista=nil) then
+    fLista := getNovaLista;
   Result := fLista;
+end;
+
+function TControllerEndpoint.getNovaLista;
+begin
+  Result := TEndpointDao.getNewIface(vIConexao).objeto.getLista(pNames);
+  if(fLista=nil) then
+    fLista := Result;
 end;
 
 end.

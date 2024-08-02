@@ -234,6 +234,7 @@ begin
     lQry.Open(queryTabela(pTabela));
 
     Result :=  atribuirRegistros(lQry);
+    Result.objeto.First;
   finally
     lQry.Free;
   end;

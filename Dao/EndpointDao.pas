@@ -88,6 +88,7 @@ begin
   begin
     lModel := TEndpointModel.getNewIface(vIConexao);
     vIConstrutorDao.setDatasetToModel(lModel.objeto._TABELA_,lQry.dataset,lModel.objeto);
+    Result.add(lModel);
 
     lQry.dataset.Next;
   end;
