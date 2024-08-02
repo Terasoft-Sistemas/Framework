@@ -191,7 +191,7 @@ begin
     lValorLiquido    := (StrToFloat(lFinanceiroPedidoModel.objeto.VALOR_LIQUIDO) + StrToFloat(lFinanceiroPedidoModel.objeto.VALOR_SEG_PRESTAMISTA));
 
     lIndiceNew         := (pNovaParcela * lIndiceOriginal)/lParcelaOriginal;
-    lValorParcelaNew   := lValorLiquido * lIndiceNew;
+    lValorParcelaNew   :=  RoundTo(lValorLiquido * lIndiceNew,-2);
     lTotal             := lValorParcelaNew * StrToInt(lFinanceiroPedidoModel.objeto.QUANTIDADE_PARCELAS);
     lValorAcrescimoNew := lTotal - lValorLiquido;
 
