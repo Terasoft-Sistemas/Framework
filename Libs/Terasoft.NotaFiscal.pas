@@ -220,8 +220,7 @@ begin
       end;
 
       lPercentual := lQry.FieldByName('vOrig').AsFloat / lTotalDup;
-      lTotalDup   := lPercentual * lTotalDup;
-
+      
       if lQry.FieldByName('modeloNF').AsInteger = 55 then
       begin
 
@@ -271,7 +270,8 @@ begin
         InfoPgto.indPag := ipPrazo;
         InfoPgto.tPag   := vConfiguracoesNotaFiscal.tPag(lQry.FieldByName('tPag').AsString);
         InfoPgto.vPag   := lPercentual * lQry.FieldByName('vDup').AsFloat;
-        lSomaDup        := lSomaDup + lPercentual * lQry.FieldByName('vDup').AsFloat;
+
+        lSomaDup        := lSomaDup + InfoPgto.vPag;
 
         if InfoPgto.tPag in [fpCartaoCredito, fpCartaoDebito, fpPagamentoInstantaneo] then
           InfoPgto.tpIntegra := tiPagNaoIntegrado;
@@ -280,8 +280,8 @@ begin
 
         if lQry.Eof then
         begin
-          if lTotalDup <> lSomaDup then
-            InfoPgto.vPag := InfoPgto.vPag + (lTotalDup - lTotalDup);
+          if lQry.FieldByName('vOrig').AsFloat <> lSomaDup then
+            InfoPgto.vPag := InfoPgto.vPag + (lQry.FieldByName('vOrig').AsFloat - lSomaDup);
         end;
       end;
 
@@ -864,7 +864,7 @@ begin
         vTotTrib := lQry.FieldByName('vTotTrib').AsFloat;
         with ICMS do
         begin
-          orig :=  vConfiguracoesNotaFiscal.orig(lQry.FieldByName('orig').Value);
+          orig :=  vConfiguracoesNotaFiscal.orig(lQry.FieldByName('orig').AsString);
           if NotaF.NFe.Emit.CRT in [crtSimplesExcessoReceita, crtRegimeNormal] then
           begin
             CST     := vConfiguracoesNotaFiscal.CST(lQry.FieldByName('CST').AsString);
