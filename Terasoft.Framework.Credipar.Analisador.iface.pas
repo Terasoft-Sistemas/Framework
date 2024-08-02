@@ -14,6 +14,60 @@ interface
     Terasoft.Framework.Types;
 
   type
+    IFinanceiraSimulacao = interface
+    ['{73A996FC-A303-4D8A-B9B4-29E76E687D45}']
+    //property data getter/setter
+      function getData: TDate;
+      procedure setData(const pValue: TDate);
+
+    //property resultado getter/setter
+      function getResultado: IREsultadoOperacao;
+      procedure setResultado(const pValue: IREsultadoOperacao);
+
+    //property valorCompra getter/setter
+      function getValorCompra: Extended;
+      procedure setValorCompra(const pValue: Extended);
+
+    //property valorEntrada getter/setter
+      function getValorEntrada: Extended;
+      procedure setValorEntrada(const pValue: Extended);
+
+    //property parcelas getter/setter
+      function getParcelas: Integer;
+      procedure setParcelas(const pValue: Integer);
+
+    //property vencimento getter/setter
+      function getVencimento: TDate;
+      procedure setVencimento(const pValue: TDate);
+
+    //property valorParcela getter/setter
+      function getValorParcela: Extended;
+      procedure setValorParcela(const pValue: Extended);
+
+    //property coeficiente getter/setter
+      function getCoeficiente: Extended;
+      procedure setCoeficiente(const pValue: Extended);
+
+    //property valorIOF getter/setter
+      function getValorIOF: Extended;
+      procedure setValorIOF(const pValue: Extended);
+
+    //property valorCET getter/setter
+      function getValorCET: Extended;
+      procedure setValorCET(const pValue: Extended);
+
+      property valorCET: Extended read getValorCET write setValorCET;
+      property valorIOF: Extended read getValorIOF write setValorIOF;
+      property coeficiente: Extended read getCoeficiente write setCoeficiente;
+      property valorParcela: Extended read getValorParcela write setValorParcela;
+      property vencimento: TDate read getVencimento write setVencimento;
+      property parcelas: Integer read getParcelas write setParcelas;
+      property valorEntrada: Extended read getValorEntrada write setValorEntrada;
+      property valorCompra: Extended read getValorCompra write setValorCompra;
+      property resultado: IREsultadoOperacao read getResultado write setResultado;
+      property data: TDate read getData write setData;
+    end;
+
     IFinanaceira_ConciliacaoItem = interface
     ['{31A850DB-1286-4BE0-B47D-BE4DF4295FA7}']
     //property data getter/setter
@@ -169,7 +223,7 @@ interface
       function statusProcessamento(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function conciliacao(pData: TDate; pResultado: IResultadoOperacao=nil): IFinanaceira_Conciliacao;
       function boleto(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-      function simulacao(vlrCompra: Extended; VlrEntrada: Extended; qtdParcela: Integer; dtPriVcto: TDate; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function simulacao(vlrCompra: Extended; VlrEntrada: Extended; qtdParcela: Integer; dtPriVcto: TDate; pResultado: IResultadoOperacao=nil): IFinanceiraSimulacao;
 
       function getDiretorioArquivos: tipoWideStringFramework;
       procedure setDiretorioArquivos(const pValue: tipoWideStringFramework);
