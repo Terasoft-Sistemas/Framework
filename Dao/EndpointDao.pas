@@ -57,7 +57,7 @@ var
   lQry: IDataset;
 begin
   lQry := vIConexao.gdb.criaDataset;
-  Result := TEndpointModel.getNewIface(vIConexao);
+  Result := getNewEndpointModel(vIConexao);
   pName := UpperCase(trim(pName));
   lQry.query(
       'select ep.* from endpoint ep where ep.metodo = :metodo and ep.nome = :nome ',
@@ -86,7 +86,7 @@ begin
       'metodo', [ 'RELATORIO' ]);
   while not lQry.dataset.eof do
   begin
-    lModel := TEndpointModel.getNewIface(vIConexao);
+    lModel := getNewEndpointModel(vIConexao);
     vIConstrutorDao.setDatasetToModel(lModel.objeto._TABELA_,lQry.dataset,lModel.objeto);
     Result.add(lModel);
 

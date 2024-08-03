@@ -31,6 +31,16 @@ type
     fCHAVE: TipoWideStringFramework;
     fCampo: TipoWideStringFramework;
     fOpcoesSelecionadas: IListaTextoEx;
+    fRegistros: Integer;
+    fPrimeiro: Integer;
+
+  //property primeiro getter/setter
+    function getPrimeiro: Integer;
+    procedure setPrimeiro(const pValue: Integer);
+
+  //property registros getter/setter
+    function getRegistros: Integer;
+    procedure setRegistros(const pValue: Integer);
 
   //property opcoesSelecionadas getter/setter
     function getOpcoesSelecionadas: IListaTextoEx;
@@ -78,6 +88,9 @@ type
     // Contém a lista de valores que serão usados no query
     property opcoesSelecionadas: IListaTextoEx read getOpcoesSelecionadas write setOpcoesSelecionadas;
 
+    property registros: Integer read getRegistros write setRegistros;
+    property primeiro: Integer read getPrimeiro write setPrimeiro;
+
   protected
     function getCFG: IMultiConfig;
     function listaOpcoes: IListaTextoEX;
@@ -90,7 +103,7 @@ type
 
     class function getNewIface(pIConexao: IConexao): ITFiltroModel;
 
-    function getOpcoes: IDatasetSimples;
+    function getOpcoes(pBusca: TipoWideStringFramework=''): IDatasetSimples;
     function query: TipoWideStringFramework;
 
   end;
@@ -98,12 +111,18 @@ type
 
 implementation
   uses
+    {$if defined(DEBUG)}
+      ClipBrd,
+    {$endif}
+    FuncoesPesquisaDB,
     DBClient;
 { TFiltroModel }
 
 constructor TFiltroModel.Create(pIConexao: IConexao);
 begin
   inherited Create;
+//  fRegistros := 1000;
+//  fPrimeiro := 0;
   vIConexao := pIConexao;
 end;
 
@@ -164,7 +183,7 @@ begin
   Result := (fPROPRIEDADES<>'')// and (textoEntreTags(lName,'@','')<>'');
 end;
 
-function TFiltroModel.getOpcoes: IDatasetSimples;
+function TFiltroModel.getOpcoes;///: IDatasetSimples;
   var
     lOpcoesTxt: IListaTextoEx;
     i: Integer;
@@ -178,10 +197,15 @@ function TFiltroModel.getOpcoes: IDatasetSimples;
     lFieldNames: String;
     s: TipoWideStringFramework;
     f: TField;
+    lAdicional: String;
+    lWhere: String;
+    lSQL: String;
+
 begin
   Result := nil;
   if not valido then
     exit;
+  pBusca := trim(pBusca);
 
   lOpcoesTxt := listaOpcoes;
 
@@ -238,8 +262,23 @@ begin
           lFieldNames := lFieldNames + s;
         end;
 
+      lAdicional := '';
+      if(fRegistros>0) then
+        lAdicional := format('%sfirst %d ', [ lAdicional, fRegistros ]);
+      if(fPrimeiro>0) then
+        lAdicional := format('%sskip %d ', [ lAdicional, fPrimeiro ]);
 
-      lDS.query(format('select %s %s from %s', [fChave,lFieldNames, lName]),
+      lWhere := '';
+      if(pBusca<>'') then
+        lWhere := ExpandeWhere(format('%s;%s', [ fChave,lFieldNames]),pBusca,tewcprefixodata_And,false );
+
+      if(lWhere<>'') then
+        lWhere := ' where 1=1 ' + lWhere;
+      lSQL := format('select %s %s %s from %s %s', [lAdicional, fChave,lFieldNames, lName, lWhere]);
+
+      Clipboard.AsText := lSQL;
+
+      lDS.query(lSQL,
                 '', []);
       Supports(lDS,IDatasetSimples,Result);
 
@@ -325,6 +364,26 @@ begin
   if(fOpcoesSelecionadas=nil) then
     fOpcoesSelecionadas := novaListaTexto;
   Result := fOpcoesSelecionadas;
+end;
+
+procedure TFiltroModel.setRegistros(const pValue: Integer);
+begin
+  fRegistros := pValue;
+end;
+
+function TFiltroModel.getRegistros: Integer;
+begin
+  Result := fRegistros;
+end;
+
+procedure TFiltroModel.setPrimeiro(const pValue: Integer);
+begin
+  fPrimeiro := pValue;
+end;
+
+function TFiltroModel.getPrimeiro: Integer;
+begin
+  Result := fPrimeiro;
 end;
 
 end.

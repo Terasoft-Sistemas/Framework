@@ -13,6 +13,12 @@ uses
   FiltroController,
   Interfaces.Conexao;
 
+//type
+//  IEndpointModel = interface
+//  ['{C8DB3B6C-DE03-4E96-9168-C2A1E61DAA7B}']
+
+//  end;
+
 type
   TEndpointModel=class;
   ITEndpointModel=IObject<TEndpointModel>;
@@ -28,7 +34,7 @@ type
     fID: TipoWideStringFramework;
     fMETODO: TipoWideStringFramework;
     fNOME: TipoWideStringFramework;
-    fQUERY: TipoWideStringFramework;
+    fQUERYInterno: TipoWideStringFramework;
     fPROPRIEDADES: TipoWideStringFramework;
     fDESCRICAO: TipoWideStringFramework;
     fFILTROS: TListaFiltroModel;
@@ -40,6 +46,16 @@ type
       _TABELA_ = 'ENDPOINT';
 
   protected
+    fRegistros: Integer;
+    fPrimeiro: Integer;
+
+  //property primeiro getter/setter
+    function getPrimeiro: Integer;
+    procedure setPrimeiro(const pValue: Integer);
+
+  //property registros getter/setter
+    function getRegistros: Integer;
+    procedure setRegistros(const pValue: Integer);
 
   //property DESCRICAO getter/setter
     function getDESCRICAO: TipoWideStringFramework;
@@ -50,8 +66,8 @@ type
     procedure setPROPRIEDADES(const pValue: TipoWideStringFramework);
 
   //property QUERY getter/setter
-    function getQUERY: TipoWideStringFramework;
-    procedure setQUERY(const pValue: TipoWideStringFramework);
+    function getQUERYInterno: TipoWideStringFramework;
+    procedure setQUERYInterno(const pValue: TipoWideStringFramework);
 
   //property NOME getter/setter
     function getNOME: TipoWideStringFramework;
@@ -80,15 +96,21 @@ type
     property ID: TipoWideStringFramework read getID write setID;
     property METODO: TipoWideStringFramework read getMETODO write setMETODO;
     property NOME: TipoWideStringFramework read getNOME write setNOME;
-    property QUERY: TipoWideStringFramework read getQUERY write setQUERY;
+    property QUERY: TipoWideStringFramework read getQUERYInterno write setQUERYInterno;
     property PROPRIEDADES: TipoWideStringFramework read getPROPRIEDADES write setPROPRIEDADES;
     property DESCRICAO: TipoWideStringFramework read getDESCRICAO write setDESCRICAO;
     property FILTROS: TListaFiltroModel read getFILTROS write setFILTROS;
 
+    property registros: Integer read getRegistros write setRegistros;
+    property primeiro: Integer read getPrimeiro write setPrimeiro;
+
   public
+    function getQuery: TipoWideStringFramework;
     function executaQuery: IDatasetSimples;
 
   end;
+
+  function getNewEndpointModel(pIConexao : IConexao): ITEndpointModel;
 
 implementation
   uses
@@ -98,11 +120,18 @@ implementation
     Terasoft.Framework.MultiConfig,
     Terasoft.Framework.Texto;
 
+function getNewEndpointModel(pIConexao : IConexao): ITEndpointModel;
+begin
+  Result := TEndpointModel.getNewIface(pIConexao);
+end;
+
 { TEndpointModel }
 
 constructor TEndpointModel.Create(pIConexao: IConexao);
 begin
   inherited Create;
+//  fRegistros := 1000;
+//  fPrimeiro := 0;
   vIConexao := pIConexao;
 end;
 
@@ -149,27 +178,32 @@ begin
   Result := fNOME;
 end;
 
-procedure TEndpointModel.setQUERY(const pValue: TipoWideStringFramework);
+procedure TEndpointModel.setQUERYInterno(const pValue: TipoWideStringFramework);
 begin
-  fQUERY := pValue;
+  fQUERYInterno := pValue;
 end;
 
-function TEndpointModel.getQUERY: TipoWideStringFramework;
+function TEndpointModel.getQUERYInterno: TipoWideStringFramework;
 begin
-  Result := fQUERY;
+  Result := fQUERYInterno;
 end;
 
-function TEndpointModel.executaQuery: IDatasetSimples;
+function TEndpointModel.getQuery: TipoWideStringFramework;
   var
-    lSql: String;
-    lDS: IDataset;
     fFiltro: ITFiltroModel;
-    lIn: String;
-    lWhere: String;
-
+    lSql, lWhere, lIn: String;
+    lAdicional: String;
 begin
-  lDS := vIConexao.gdb.criaDataset;
-  lSql := fQUERY;
+  lSql := fQUERYInterno;
+  lAdicional := '';
+  if(fRegistros>0) then
+    lAdicional := format('%sfirst %d ', [ lAdicional, fRegistros ]);
+  if(fPrimeiro>0) then
+    lAdicional := format('%sskip %d ', [ lAdicional, fPrimeiro ]);
+
+  if(lAdicional<>'') then
+    lSql := StringReplace(lSql, 'select', format('select %s', [ lAdicional ]), [rfIgnoreCase]);
+
   lWhere:='';
   for fFiltro in getFILTROS do
   begin
@@ -185,17 +219,18 @@ begin
   if(lWhere <>'') then
     lWhere := 'where'+#13 + '   ' +lWhere;
 
-  lSql := lSql +#13+ lWhere;
+  Result := lSql +#13+ lWhere;
+end;
 
-  {$if defined(DEBUG)}
-    //Clipboard.AsText := lSql;
-  {$endif}
-
-
+function TEndpointModel.executaQuery: IDatasetSimples;
+  var
+    lSql: String;
+    lDS: IDataset;
+begin
+  lDS := vIConexao.gdb.criaDataset;
+  lSQL := getQuery;
   lDS.query(lSql,'',[]);
-
   Supports(lDS,IDatasetSimples,Result);
-
 end;
 
 procedure TEndpointModel.carregaFiltros;
@@ -241,6 +276,26 @@ end;
 procedure TEndpointModel.setDESCRICAO(const pValue: TipoWideStringFramework);
 begin
   fDESCRICAO := pValue;
+end;
+
+procedure TEndpointModel.setPrimeiro(const pValue: Integer);
+begin
+  fPrimeiro := pValue;
+end;
+
+function TEndpointModel.getPrimeiro: Integer;
+begin
+  Result := fPrimeiro;
+end;
+
+procedure TEndpointModel.setRegistros(const pValue: Integer);
+begin
+  fRegistros := pValue;
+end;
+
+function TEndpointModel.getRegistros: Integer;
+begin
+  Result := fRegistros;
 end;
 
 function TEndpointModel.getDESCRICAO: TipoWideStringFramework;
