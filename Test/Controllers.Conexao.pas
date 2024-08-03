@@ -263,7 +263,7 @@ end;
 
 function TControllersConexao.getGDB: IGDB;
 begin
-
+  Result := fGDB;
 end;
 
 function TControllersConexao.getLojaConectada: String;

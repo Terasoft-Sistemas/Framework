@@ -12,6 +12,7 @@ object formEP: TformEP
   Font.Style = []
   Position = poScreenCenter
   OnCreate = FormCreate
+  PixelsPerInch = 96
   TextHeight = 15
   object sbAbrir: TSpeedButton
     Left = 503

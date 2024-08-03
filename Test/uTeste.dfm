@@ -12,6 +12,7 @@ object Form1: TForm1
   Font.Style = []
   Position = poDesigned
   OnCreate = FormCreate
+  PixelsPerInch = 96
   TextHeight = 15
   object PageControl: TPageControl
     Left = 0

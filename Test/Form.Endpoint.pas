@@ -117,6 +117,13 @@ procedure TformEP.sbValoresFiltroClick(Sender: TObject);
 begin
   if(fFiltroSelecionado=nil) then exit;
 
+  //Podemos filtros quantos registos são retornados e a partir de qual...
+  //fFiltroSelecionado.objeto.registros := 100;
+  //fFiltroSelecionado.objeto.primeiro := 500;
+
+  //Podemos passar a lista de palavras de pesquisa de id, descricao...
+  //ds := fFiltroSelecionado.objeto.getOpcoes('ODERCO');
+
   ds := fFiltroSelecionado.objeto.getOpcoes;
 
   if(ds=nil) then
