@@ -72,6 +72,7 @@ implementation
 
 uses
   uTeste,
+  Terasoft.Framework.DB.DAO,
   System.SysUtils,
   LojasModel, Terasoft.Types, GeneratorNewDao, System.IniFiles, Vcl.Forms;
 
@@ -79,52 +80,53 @@ uses
 
 function TControllersConexao.ConfigConexaoExterna(pLoja: String; pHost : String = ''): Boolean;
 var
-  lLojaModel : TLojasModel;
+  lLojaModel : ITLojasModel;
 begin
-  lLojaModel := TLojasModel.Create(self);
+  lLojaModel := TLojasModel.getNewIface(self);
   try
-    lLojaModel.LojaView := pLoja;
-    lLojaModel.obterLista;
+    lLojaModel.objeto.LojaView := pLoja;
+    lLojaModel.objeto.obterLista;
 
-    lLojaModel := lLojaModel.LojassLista[0];
+    lLojaModel := lLojaModel.objeto.LojassLista[0];
 
     vLoja  := pLoja;
 
     FConexaoExterna := TFDConnection.Create(nil);
-    FConexaoExterna.Params.Add('Server='+lLojaModel.SERVER);
+    FConexaoExterna.Params.Add('Server='+lLojaModel.objeto.SERVER);
     FConexaoExterna.Params.Add('user_name='+ 'SYSDBA');
     FConexaoExterna.Params.Add('password='+ 'masterkey');
-    FConexaoExterna.Params.Add('port='+lLojaModel.PORT);
-    FConexaoExterna.Params.Add('Database='+ lLojaModel.DATABASE);
+    FConexaoExterna.Params.Add('port='+lLojaModel.objeto.PORT);
+    FConexaoExterna.Params.Add('Database='+ lLojaModel.objeto.DATABASE);
     FConexaoExterna.Params.Add('DriverID='+ 'FB');
     FConexaoExterna.Params.Add('Protocol='+ 'TCPIP');
     FConexaoExterna.Params.Add('LoginPrompt='+ 'False');
 
     Result := true;
   finally
-    lLojaModel.Free;
   end;
 end;
 
 function TControllersConexao.connection(pLoja, pHost: String): IConexao;
 var
-  lLojaModel : TLojasModel;
+  lLojaModel : ITLojasModel;
   lHost      : THost;
 begin
-  lLojaModel := TLojasModel.Create(Form1.vIConexao);
+  lLojaModel := TLojasModel.getNewIface(Form1.vIConexao);
+  fGDB := nil;
+
   try
     if pHost <> '' then
       lHost := Terasoft.FuncoesTexto.WriteConexao(pHost)
     else
     begin
-      lLojaModel.LojaView := pLoja;
-      lLojaModel.obterLista;
+      lLojaModel.objeto.LojaView := pLoja;
+      lLojaModel.objeto.obterLista;
 
-      lLojaModel := lLojaModel.LojassLista[0];
+      lLojaModel := lLojaModel.objeto.LojassLista.First;
 
-      lHost.Server   := lLojaModel.SERVER;
-      lHost.Port     := lLojaModel.PORT;
-      lHost.DataBase := lLojaModel.DATABASE;
+      lHost.Server   := lLojaModel.objeto.SERVER;
+      lHost.Port     := lLojaModel.objeto.PORT;
+      lHost.DataBase := lLojaModel.objeto.DATABASE;
     end;
 
     FConexao.Params.Add('Pooling=True');
@@ -143,7 +145,6 @@ begin
 
     Result := Self;
   finally
-    lLojaModel.Free;
   end;
 end;
 
@@ -263,6 +264,11 @@ end;
 
 function TControllersConexao.getGDB: IGDB;
 begin
+  if(fGDB=nil) then
+  begin
+    fGDB := criaGDB(GDBDRIVER_FIREDAC,GDBPARAM_USEPOINTER,Integer(FConexao));
+    executeAfterConnectDatabase(fGDB);
+  end;
   Result := fGDB;
 end;
 
@@ -283,7 +289,7 @@ end;
 
 function TControllersConexao.getValidador: IValidadorDatabase;
 begin
-
+  Supports(getGDB.validador, IValidadorDatabase, Result);
 end;
 
 function TControllersConexao.HoraServer: TTime;

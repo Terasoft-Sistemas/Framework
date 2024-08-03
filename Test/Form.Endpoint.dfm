@@ -1,4 +1,4 @@
-object formEP: TformEP
+object FormEP: TFormEP
   Left = 0
   Top = 0
   Caption = 'Endpoint'

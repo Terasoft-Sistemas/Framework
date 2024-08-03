@@ -1,3 +1,6 @@
+
+{$i definicoes.inc}
+
 unit uTeste;
 
 interface
@@ -211,6 +214,7 @@ type
     dbGridTabelaJuros: TXDBGrid;
     dsJuros: TDataSource;
     SpeedButton2: TSpeedButton;
+    SpeedButton3: TSpeedButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -361,6 +365,8 @@ type
     procedure btnObterJurosPromocaoClick(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure SpeedButton2Click(Sender: TObject);
+    procedure SpeedButton3Click(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
 
   private
     { Private declarations }
@@ -370,7 +376,7 @@ type
   public
     { Public declarations }
     vIConexao : IConexao;
-    vConfiguracoes : TerasoftConfiguracoes;
+    vConfiguracoes : ITerasoftConfiguracoes;
   end;
 
 var
@@ -2269,25 +2275,25 @@ end;
 
 procedure TForm1.Button73Click(Sender: TObject);
 var
-  lContasPagarModel : TContasPagarModel;
+  lContasPagarModel : ITContasPagarModel;
 begin
-  lContasPagarModel := TContasPagarModel.Create(vIConexao);
+  lContasPagarModel := TContasPagarModel.getNewIface(vIConexao);
 
   try
     try
 
-      lContasPagarModel.DUPLICATA_PAG  := '9000002024'; //Numero NFe
-      lContasPagarModel.CODIGO_FOR     := '500005'; //Fornecedor NFe
-      lContasPagarModel.PORTADOR_ID    := '000001';
-      lContasPagarModel.DATAEMI_PAG    := '27.02.2024'; //Data do MOvimento
-      lContasPagarModel.VALOR_PAG      := '1000'; //Total da nota
-      lContasPagarModel.CONDICOES_PAG  := '30/60/90';
-      lContasPagarModel.USUARIO_PAG    := '000001';
-      lContasPagarModel.OBS_PAG        := 'NUMERO DA NOTA E NOME DO FORNECEDOR';
-      lContasPagarModel.CODIGO_CTA     := '444444';
-      lContasPagarModel.LOJA           := '001';
+      lContasPagarModel.objeto.DUPLICATA_PAG  := '9000002024'; //Numero NFe
+      lContasPagarModel.objeto.CODIGO_FOR     := '500005'; //Fornecedor NFe
+      lContasPagarModel.objeto.PORTADOR_ID    := '000001';
+      lContasPagarModel.objeto.DATAEMI_PAG    := '27.02.2024'; //Data do MOvimento
+      lContasPagarModel.objeto.VALOR_PAG      := '1000'; //Total da nota
+      lContasPagarModel.objeto.CONDICOES_PAG  := '30/60/90';
+      lContasPagarModel.objeto.USUARIO_PAG    := '000001';
+      lContasPagarModel.objeto.OBS_PAG        := 'NUMERO DA NOTA E NOME DO FORNECEDOR';
+      lContasPagarModel.objeto.CODIGO_CTA     := '444444';
+      lContasPagarModel.objeto.LOJA           := '001';
 
-      lContasPagarModel.GerarFinanceiroEntrada;
+      lContasPagarModel.objeto.GerarFinanceiroEntrada;
 
       ShowMessage('Inserido com Sucesso');
     Except
@@ -2295,7 +2301,7 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lContasPagarModel.Free;
+    lContasPagarModel:=nil;
   end;
 end;
 
@@ -2655,14 +2661,14 @@ end;
 
 procedure TForm1.Button86Click(Sender: TObject);
 var
-  lProdutoModel : TProdutosModel;
+  lProdutoModel : ITProdutosModel;
   lValoresGarantia: TProdutoGarantia;
 begin
-  lProdutoModel := TProdutosModel.Create(vIConexao);
+  lProdutoModel := TProdutosModel.getNewIface(vIConexao);
 
   try
     try
-      lValoresGarantia := lProdutoModel.ValorGarantia('000014',10);
+      lValoresGarantia := lProdutoModel.objeto.ValorGarantia('000014',10);
 
       memoResultado.Lines.Clear;
 
@@ -2686,7 +2692,6 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lProdutoModel.Free;
   end;
 end;
 
@@ -2883,26 +2888,24 @@ end;
 
 procedure TForm1.Button90Click(Sender: TObject);
 var
-  lProdutosModel : TProdutosModel;
+  lProdutosModel : ITProdutosModel;
 begin
-  lProdutosModel := TProdutosModel.Create(vIConexao);
+  lProdutosModel := TProdutosModel.getNewIface(vIConexao);
   try
-    dsProdutos.DataSet := lProdutosModel.obterPromocao('000444').objeto;
+    dsProdutos.DataSet := lProdutosModel.objeto.obterPromocao('000444').objeto;
   finally
-    lProdutosModel.Free;
   end;
 end;
 
 procedure TForm1.Button91Click(Sender: TObject);
 var
-  lProduto : TProdutosModel;
+  lProduto : ITProdutosModel;
 begin
-  lProduto := TProdutosModel.Create(vIConexao);
+  lProduto := TProdutosModel.getNewIface(vIConexao);
   try
-    lProduto.IDRecordView := '000005';
-    dsProdutos.DataSet    := lProduto.ObterTabelaPreco.objeto;
+    lProduto.objeto.IDRecordView := '000005';
+    dsProdutos.DataSet    := lProduto.objeto.ObterTabelaPreco.objeto;
   finally
-    lProduto.Free;
   end;
 end;
 
@@ -3138,20 +3141,20 @@ end;
 
 procedure TForm1.btnSaldoClick(Sender: TObject);
 var
-  lSaldoModel : TSaldoModel;
+  lSaldoModel : ITSaldoModel;
   lMemTable   : IFDDataset;
   lProduto    : String;
   lParametros : TParametrosSaldo;
 
 begin
-  lSaldoModel := TSaldoModel.Create(vIConexao);
+  lSaldoModel := TSaldoModel.getNewIface(vIConexao);
   try
     lProduto  := InputBox('Consulta de Saldo', 'Digite o código do produto:', '');
 
     lParametros.PRODUTO := lProduto;
     lParametros.CD      := true;
 
-    lMemTable := lSaldoModel.obterSaldoLojas(lParametros);
+    lMemTable := lSaldoModel.objeto.obterSaldoLojas(lParametros);
 
     memoResultado.Lines.Clear;
 
@@ -3166,20 +3169,19 @@ begin
     end;
 
   finally
-    lSaldoModel.Free;
   end;
 end;
 
 procedure TForm1.btnTabelaPrecoClick(Sender: TObject);
 var
-  lTabelaJurosModel: TTabelaJurosModel;
+  lTabelaJurosModel: ITTabelaJurosModel;
   lPortador : String;
   lMemTable : TFDMemTable;
 begin
-  lTabelaJurosModel := TTabelaJurosModel.Create(vIConexao);
+  lTabelaJurosModel := TTabelaJurosModel.getNewIface(vIConexao);
   try
     lPortador := InputBox('WebPedido', 'Digite o ID do portador:', '');
-    lMemTable := lTabelaJurosModel.obterLista(lPortador, 1000, true, vIConexao.DataServer);
+    lMemTable := lTabelaJurosModel.objeto.obterLista(lPortador, 1000, true, vIConexao.DataServer);
 
     lMemTable.first;
     while not lMemTable.eof do
@@ -3202,7 +3204,6 @@ begin
     end;
 
   finally
-    lTabelaJurosModel.Free;
   end;
 end;
 
@@ -3427,15 +3428,14 @@ end;
 
 procedure TForm1.Button109Click(Sender: TObject);
 var
-  lLojasModel : TLojasModel;
+  lLojasModel : ITLojasModel;
   lResultado  : IFDDataset;
 begin
-  lLojasModel := TLojasModel.Create(vIConexao);
+  lLojasModel := TLojasModel.getNewIface(vIConexao);
   try
-    lResultado := lLojasModel.obterFiliais;
+    lResultado := lLojasModel.objeto.obterFiliais;
     dsSaidas.DataSet := lResultado.objeto;
   finally
-    lLojasModel.Free;
   end;
 end;
 
@@ -3558,21 +3558,20 @@ end;
 
 procedure TForm1.Button116Click(Sender: TObject);
 var
-  lUsuarioModel : TUsuarioModel;
+  lUsuarioModel : ITUsuarioModel;
   lIDUsuario,
   lSenhaAtual,
   lNovaSenha    : String;
 begin
-  lUsuarioModel := TUsuarioModel.Create(vIConexao);
+  lUsuarioModel := TUsuarioModel.getNewIface(vIConexao);
   try
     lIDUsuario := '000002';
     lSenhaAtual := InputBox('Senha', 'Digite a senha atual:', '');
     lNovaSenha := InputBox('Senha', 'Digite a nova senha:', '');
 
-    lUsuarioModel.alterarSenha(lIDUsuario, lSenhaAtual, lNovaSenha);
+    lUsuarioModel.objeto.alterarSenha(lIDUsuario, lSenhaAtual, lNovaSenha);
 
   finally
-    lUsuarioModel.Free;
   end;
 end;
 
@@ -3620,15 +3619,15 @@ end;
 
 procedure TForm1.Button12Click(Sender: TObject);
 var
-  lSaldoModel : TSaldoModel;
+  lSaldoModel : ITSaldoModel;
   lMemTable   : IFDDataset;
   lProduto    : String;
 begin
-  lSaldoModel := TSaldoModel.Create(vIConexao);
+  lSaldoModel := TSaldoModel.getNewIface(vIConexao);
   try
     lProduto  := InputBox('Consulta de Saldo', 'Digite o código do produto:', '');
 
-    lMemTable := lSaldoModel.obterSaldo(lProduto);
+    lMemTable := lSaldoModel.objeto.obterSaldo(lProduto);
 
     memoResultado.Lines.Clear;
     memoResultado.Lines.Add('SALDO_FISICO: '+lMemTable.objeto.FieldByName('SALDO_FISICO').AsString);
@@ -3636,7 +3635,6 @@ begin
     memoResultado.Lines.Add('SALDO_CD: '+lMemTable.objeto.FieldByName('SALDO_CD').AsString);
     memoResultado.Lines.Add('===============================================');
   finally
-    lSaldoModel.Free;
   end;
 end;
 
@@ -3665,12 +3663,12 @@ end;
 
 procedure TForm1.Button13Click(Sender: TObject);
 var
-  lProdutoModel : TProdutosModel;
+  lProdutoModel : ITProdutosModel;
   lProduto      : String;
   lParametros   : TProdutoPreco;
   lValor        : Double;
 begin
-  lProdutoModel := TProdutosModel.Create(vIConexao);
+  lProdutoModel := TProdutosModel.getNewIface(vIConexao);
   try
      lProduto  := InputBox('Consulta de Saldo', 'Digite o código do produto:', '');
 
@@ -3678,27 +3676,26 @@ begin
      lParametros.TabelaPreco := true;
      lParametros.Promocao    := true;
 
-     lValor := lProdutoModel.ValorUnitario(lParametros);
+     lValor := lProdutoModel.objeto.ValorUnitario(lParametros);
 
      memoResultado.Lines.Clear;
      memoResultado.Lines.Add('VALOR DE VENDA: '+ lValor.ToString);
      memoResultado.Lines.Add('===============================================');
   finally
-    lProdutoModel.Free;
   end;
 end;
 
 procedure TForm1.Button14Click(Sender: TObject);
 var
-  lSaldoModel : TSaldoModel;
+  lSaldoModel : ITSaldoModel;
   lProduto    : String;
   lMemTable   : IFDDataset;
 begin
-  lSaldoModel := TSaldoModel.Create(vIConexao);
+  lSaldoModel := TSaldoModel.getNewIface(vIConexao);
   try
     lProduto  := InputBox('Reservas CD', 'Digite o código do produto:', '');
 
-    lMemTable := lSaldoModel.obterReservasCD(lProduto);
+    lMemTable := lSaldoModel.objeto.obterReservasCD(lProduto);
 
     memoResultado.Lines.Clear;
 
@@ -3716,7 +3713,6 @@ begin
     end;
 
   finally
-    lSaldoModel.Free;
   end;
 end;
 
@@ -3750,28 +3746,27 @@ end;
 
 procedure TForm1.Button16Click(Sender: TObject);
 var
-  lContasPagarModel : TContasPagarModel;
+  lContasPagarModel : ITContasPagarModel;
 begin
-  lContasPagarModel := TContasPagarModel.Create(vIConexao);
+  lContasPagarModel := TContasPagarModel.getNewIface(vIConexao);
   try
     try
 
-      lContasPagarModel.DUPLICATA_PAG  := '9000002024';
-      lContasPagarModel.CODIGO_FOR     := '500005';
-      lContasPagarModel.PORTADOR_ID    := '000001';
-      lContasPagarModel.DATAEMI_PAG    := '27.02.2024';
-      lContasPagarModel.TIPO_PAG       := 'M';
-      lContasPagarModel.VALOR_PAG      := '1000';
-      lContasPagarModel.CONDICOES_PAG  := '30/60/90';
+      lContasPagarModel.objeto.DUPLICATA_PAG  := '9000002024';
+      lContasPagarModel.objeto.CODIGO_FOR     := '500005';
+      lContasPagarModel.objeto.PORTADOR_ID    := '000001';
+      lContasPagarModel.objeto.DATAEMI_PAG    := '27.02.2024';
+      lContasPagarModel.objeto.TIPO_PAG       := 'M';
+      lContasPagarModel.objeto.VALOR_PAG      := '1000';
+      lContasPagarModel.objeto.CONDICOES_PAG  := '30/60/90';
 
-      lContasPagarModel.Incluir;
+      lContasPagarModel.objeto.Incluir;
       ShowMessage('Inserido com Sucesso');
     Except
       on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lContasPagarModel.Free;
   end;
 end;
 
@@ -3865,6 +3860,7 @@ end;
 
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  vIConexao := nil;
   Form1.Release;
   Form1 := nil;
   Application.Terminate;
@@ -3874,13 +3870,13 @@ procedure TForm1.FormCreate(Sender: TObject);
 var
   lUsuario      : TUsuario;
   lEmpresa      : TEmpresa;
-  lEmpresaModel : TEmpresaModel;
-  lConfiguracoes : TerasoftConfiguracoes;
+  lEmpresaModel : ITEmpresaModel;
+  lConfiguracoes : ITerasoftConfiguracoes;
 begin
   vIConexao := TControllersConexao.New;
   vIConexao.connection;
 
-  vConfiguracoes := TerasoftConfiguracoes.Create(vIConexao);
+  vConfiguracoes := TerasoftConfiguracoes.getNewIface(vIConexao);
 
   vIConexao.setTerasoftConfiguracoes(vConfiguracoes);
 
@@ -3890,17 +3886,25 @@ begin
 
   vIConexao.setUser(lUsuario);
 
-  lEmpresaModel := TEmpresaModel.Create(vIConexao);
-  lEmpresaModel.Carregar;
+  lEmpresaModel := TEmpresaModel.getNewIface(vIConexao);
+  lEmpresaModel.objeto.Carregar;
 
-  lEmpresa.ID                     := lEmpresaModel.ID;
-  lEmpresa.LOJA                   := lEmpresaModel.LOJA;
-  lEmpresa.STRING_CONEXAO_RESERVA := lEmpresaModel.STRING_CONEXAO_RESERVA;
+  lEmpresa.ID                     := lEmpresaModel.objeto.ID;
+  lEmpresa.LOJA                   := lEmpresaModel.objeto.LOJA;
+  lEmpresa.STRING_CONEXAO_RESERVA := lEmpresaModel.objeto.STRING_CONEXAO_RESERVA;
 
   vIConexao.setEmpresa(lEmpresa);
 
   vQtdeRegistros := 10;
   vPagina        := 0;
+end;
+
+procedure TForm1.FormDestroy(Sender: TObject);
+begin
+  vIConexao := nil;
+  {$if defined(__RELEASE__) or defined(__HIDE_MEMORY_LEAK__)}
+    TerminateProcess(GetCurrentProcess, exitCode );
+  {$endif}
 end;
 
 procedure TForm1.imprimirGarantidaEstendidaClick(Sender: TObject);
@@ -3961,39 +3965,38 @@ end;
 
 procedure TForm1.OrcamentoAlterarClick(Sender: TObject);
 var
-  lOrcamentoModel : TOrcamentoModel;
+  lOrcamentoModel : ITOrcamentoModel;
   ID : String;
 begin
-  lOrcamentoModel := TOrcamentoModel.Create(vIConexao);
+  lOrcamentoModel := TOrcamentoModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('ORCAMENTO', 'Digite o ID do ORCAMENTO que deseja Alterar:', '');
       if ID.IsEmpty then
         exit;
 
-      lOrcamentoModel := lOrcamentoModel.Alterar(ID);
-      lOrcamentoModel.CODIGO_VEN := '000002';
+      lOrcamentoModel := lOrcamentoModel.objeto.Alterar(ID);
+      lOrcamentoModel.objeto.CODIGO_VEN := '000002';
 
-      lOrcamentoModel.Salvar;
+      lOrcamentoModel.objeto.Salvar;
       ShowMessage('Alterado com Sucesso');
     Except
       on E:Exception do
       ShowMessage('Erro: ' +E.Message);
     end;
   finally
-    lOrcamentoModel.Free;
   end;
 end;
 
 procedure TForm1.OrcamentoConsultarClick(Sender: TObject);
 var
-  lOrcamentoModel : TOrcamentoModel;
+  lOrcamentoModel : ITOrcamentoModel;
   lMemTable       : IFDDataset;
 begin
-  lOrcamentoModel := TOrcamentoModel.Create(vIConexao);
+  lOrcamentoModel := TOrcamentoModel.getNewIface(vIConexao);
   try
     try
-      lMemTable := lOrcamentoModel.ObterLista;
+      lMemTable := lOrcamentoModel.objeto.ObterLista;
 
       memoResultado.Lines.Clear;
 
@@ -4010,91 +4013,87 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lOrcamentoModel.Free;
   end;
 
 end;
 
 procedure TForm1.OrcamentoExcluirClick(Sender: TObject);
 var
-  lOrcamentoModel : TOrcamentoModel;
+  lOrcamentoModel : ITOrcamentoModel;
   ID : String;
 begin
-  lOrcamentoModel := TOrcamentoModel.Create(vIConexao);
+  lOrcamentoModel := TOrcamentoModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('ORCAMENTO', 'Digite o ID do ORCAMENTO que deseja excluir:', '');
       if ID.IsEmpty then
           Exit;
 
-      lOrcamentoModel.Excluir(ID);
+      lOrcamentoModel.objeto.Excluir(ID);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lOrcamentoModel.Free;
   end;
 end;
 
 procedure TForm1.OrcamentoIncluirClick(Sender: TObject);
 var
-  lOrcamentoModel : TOrcamentoModel;
+  lOrcamentoModel : ITOrcamentoModel;
 begin
-  lOrcamentoModel := TOrcamentoModel.Create(vIConexao);
+  lOrcamentoModel := TOrcamentoModel.getNewIface(vIConexao);
   try
     try
-      lOrcamentoModel.CODIGO_CLI  := '000001';
-      lOrcamentoModel.CODIGO_VEN  := '000001';
-      lOrcamentoModel.TOTAL_ORC   := 1000;
+      lOrcamentoModel.objeto.CODIGO_CLI  := '000001';
+      lOrcamentoModel.objeto.CODIGO_VEN  := '000001';
+      lOrcamentoModel.objeto.TOTAL_ORC   := 1000;
 
-      lOrcamentoModel.Incluir;
+      lOrcamentoModel.objeto.Incluir;
       ShowMessage('Incluido com Sucesso!');
     except
       on E:Exception do
       ShowMessage('Erro: ' + E.Message);
     end
   finally
-    lOrcamentoModel.Free;
   end;
 end;
 
 procedure TForm1.OrcamentoItensAlterarClick(Sender: TObject);
 var
-  lOrcamentoItensModel : TOrcamentoItensModel;
+  lOrcamentoItensModel : ITOrcamentoItensModel;
   ID : String;
 begin
-  lOrcamentoItensModel := TOrcamentoItensModel.Create(vIConexao);
+  lOrcamentoItensModel := TOrcamentoItensModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('ORCAMENTOITENS', 'Digite o ID do ORCAMENTOITENS que deseja Alterar:', '');
       if ID.IsEmpty then
         exit;
 
-      lOrcamentoItensModel := lOrcamentoItensModel.Alterar(ID);
-      lOrcamentoItensModel.CODIGO_PRO := '000345';
+      lOrcamentoItensModel := lOrcamentoItensModel.objeto.Alterar(ID);
+      lOrcamentoItensModel.objeto.CODIGO_PRO := '000345';
 
-      lOrcamentoItensModel.Salvar;
+      lOrcamentoItensModel.objeto.Salvar;
       ShowMessage('Alterado com Sucesso');
     Except
       on E:Exception do
       ShowMessage('Erro: ' +E.Message);
     end;
   finally
-    lOrcamentoItensModel.Free;
   end;
 end;
 
 procedure TForm1.OrcamentoItensConsultarClick(Sender: TObject);
 var
-  lOrcamentoItensModel : TOrcamentoItensModel;
+  lOrcamentoItensModel : ITOrcamentoItensModel;
   lMemTable            : IFDDataset;
 begin
-  lOrcamentoItensModel := TOrcamentoItensModel.Create(vIConexao);
+  lOrcamentoItensModel := TOrcamentoItensModel.getNewIface(vIConexao);
   try
     try
-      lMemTable := lOrcamentoItensModel.ObterLista;
+      lMemTable := lOrcamentoItensModel.objeto.ObterLista;
 
       memoResultado.Lines.Clear;
 
@@ -4111,53 +4110,50 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lOrcamentoItensModel.Free;
   end;
 end;
 
 procedure TForm1.OrcamentoItensExcluirClick(Sender: TObject);
 var
-  lOrcamentoItensModel : TOrcamentoItensModel;
+  lOrcamentoItensModel : ITOrcamentoItensModel;
   ID : String;
 begin
-  lOrcamentoItensModel := TOrcamentoItensModel.Create(vIConexao);
+  lOrcamentoItensModel := TOrcamentoItensModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('ORCAMENTO', 'Digite o ID do ORCAMENTO que deseja excluir:', '');
       if ID.IsEmpty then
           Exit;
 
-      lOrcamentoItensModel.Excluir(ID);
+      lOrcamentoItensModel.objeto.Excluir(ID);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lOrcamentoItensModel.Free;
   end;
 
 end;
 
 procedure TForm1.OrcamentoItensIncluirClick(Sender: TObject);
 var
-  lOrcamentoItensModel : TOrcamentoItensModel;
+  lOrcamentoItensModel : ITOrcamentoItensModel;
 begin
-  lOrcamentoItensModel := TOrcamentoItensModel.Create(vIConexao);
+  lOrcamentoItensModel := TOrcamentoItensModel.getNewIface(vIConexao);
   try
     try
-      lOrcamentoItensModel.NUMERO_ORC         := '000015';
-      lOrcamentoItensModel.CODIGO_PRO         := '000001';
-      lOrcamentoItensModel.VALORUNITARIO_ORC  := 1000;
+      lOrcamentoItensModel.objeto.NUMERO_ORC         := '000015';
+      lOrcamentoItensModel.objeto.CODIGO_PRO         := '000001';
+      lOrcamentoItensModel.objeto.VALORUNITARIO_ORC  := 1000;
 
-      lOrcamentoItensModel.Incluir;
+      lOrcamentoItensModel.objeto.Incluir;
       ShowMessage('Incluido com Sucesso!');
     except
       on E:Exception do
       ShowMessage('Erro: ' + E.Message);
     end
   finally
-    lOrcamentoItensModel.Free;
   end;
 end;
 
@@ -4181,10 +4177,10 @@ end;
 
 procedure TForm1.SpeedButton2Click(Sender: TObject);
 var
-  lFinanceiroPedidoModel : TFinanceiroPedidoModel;
+  lFinanceiroPedidoModel : ITFinanceiroPedidoModel;
   IDRegistro             : String;
 begin
-  lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
+  lFinanceiroPedidoModel := TFinanceiroPedidoModel.getNewIface(vIConexao);
 
   try
     try
@@ -4193,15 +4189,19 @@ begin
       if IDRegistro.IsEmpty then
         exit;
 
-      lFinanceiroPedidoModel.ArredondaParcela(160,IDRegistro);
+      lFinanceiroPedidoModel.objeto.ArredondaParcela(160,IDRegistro);
 
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lFinanceiroPedidoModel.Free;
   end;
+end;
+
+procedure TForm1.SpeedButton3Click(Sender: TObject);
+begin
+  Form.Endpoint.criaViewEndpoint(vIConexao).objeto.ShowModal;
 end;
 
 end.

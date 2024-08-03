@@ -9,11 +9,17 @@ uses
   Interfaces.Conexao,
   FiltroModel,
   Terasoft.Framework.DB,
+  Terasoft.Framework.ObjectIface,
   EndpointController, EndpointModel, Vcl.StdCtrls, Vcl.DBCtrls,
   Terasoft.VCL.ComboBox, Vcl.Grids, XDBGrids, Vcl.Buttons;
 
 type
-  TformEP = class(TForm)
+
+  TFormEP = class;
+  ITFormEP=IObject<TFormEP>;
+
+
+  TFormEP = class(TForm)
     cbEP: TTeraComboBox;
     grid: TXDBGrid;
     sbAbrir: TSpeedButton;
@@ -29,6 +35,7 @@ type
     procedure cbFiltrosChange(Sender: TObject);
     procedure sbValoresFiltroClick(Sender: TObject);
   private
+    [weak] mySelf: ITFormEP;
     vIConexao:IConexao;
     epControl: IController_Endpoint;
     fSelecionado: ITEndpointModel;
@@ -39,13 +46,14 @@ type
     { Private declarations }
   public
     constructor Create(pIConexao:IConexao);
+    class function getNewIface(pIConexao: IConexao): ITFormEP;
     { Public declarations }
   end;
 
 var
-  formEP: TformEP;
+  FormEP: TFormEP;
 
-  function criaViewEndpoint(pIConexao: IConexao):TformEP;
+  function criaViewEndpoint(pIConexao: IConexao):ITFormEP;
 
 implementation
   uses
@@ -53,7 +61,7 @@ implementation
 
 {$R *.dfm}
 
-procedure TformEP.cbEPChange(Sender: TObject);
+procedure TFormEP.cbEPChange(Sender: TObject);
 begin
   sbValoresFiltro.Enabled:=false;
   sbAbrir.Enabled:=false;
@@ -63,7 +71,7 @@ begin
   selecionaEP(fLista.Items[cbEP.ItemIndex]);
 end;
 
-procedure TformEP.cbFiltrosChange(Sender: TObject);
+procedure TFormEP.cbFiltrosChange(Sender: TObject);
 begin
   sbValoresFiltro.Enabled:=false;
   if(fSelecionado=nil) then exit;
@@ -72,13 +80,13 @@ begin
   fFiltroSelecionado := fSelecionado.objeto.FILTROS.Items[cbFiltros.ItemIndex];
 end;
 
-constructor TformEP.Create(pIConexao: IConexao);
+constructor TFormEP.Create(pIConexao: IConexao);
 begin
   inherited Create(nil);
   vIConexao := pIConexao;
 end;
 
-procedure TformEP.FormCreate(Sender: TObject);
+procedure TFormEP.FormCreate(Sender: TObject);
   var
     m: ITEndpointModel;
 begin
@@ -96,13 +104,19 @@ begin
 
 end;
 
-procedure TformEP.sbAbrirClick(Sender: TObject);
+class function TFormEP.getNewIface(pIConexao: IConexao): ITFormEP;
+begin
+  Result := TImplObjetoOwner<TFormEP>.CreateOwner(self.Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+procedure TFormEP.sbAbrirClick(Sender: TObject);
 begin
   fDS := fSelecionado.objeto.executaQuery;
   grid.DataSource := fDS.dataSource;
 end;
 
-procedure TformEP.sbLImparFiltrosClick(Sender: TObject);
+procedure TFormEP.sbLImparFiltrosClick(Sender: TObject);
   var
     p: ITFiltroModel;
 begin
@@ -111,7 +125,7 @@ begin
     p.objeto.opcoesSelecionadas:=nil;
 end;
 
-procedure TformEP.sbValoresFiltroClick(Sender: TObject);
+procedure TFormEP.sbValoresFiltroClick(Sender: TObject);
   var
     ds: IDatasetSimples;
 begin
@@ -139,7 +153,7 @@ begin
 
 end;
 
-procedure TformEP.selecionaEP(ep: ITEndpointModel);
+procedure TFormEP.selecionaEP(ep: ITEndpointModel);
   var
     p: ITFiltroModel;
 begin
@@ -157,9 +171,9 @@ begin
 
 end;
 
-function criaViewEndpoint(pIConexao: IConexao):TformEP;
+function criaViewEndpoint(pIConexao: IConexao):ITFormEP;
 begin
-  Result := TformEP.Create(pIConexao);
+  Result := TformEP.getNewIface(pIConexao);
 end;
 
 

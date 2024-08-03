@@ -11,7 +11,9 @@ object Form1: TForm1
   Font.Name = 'Segoe UI'
   Font.Style = []
   Position = poDesigned
+  OnClose = FormClose
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 15
   object PageControl: TPageControl
@@ -31,6 +33,14 @@ object Form1: TForm1
         Height = 42
         Caption = 'Arredonda Parcela'
         OnClick = SpeedButton2Click
+      end
+      object SpeedButton3: TSpeedButton
+        Left = 755
+        Top = 63
+        Width = 143
+        Height = 42
+        Caption = 'Consultas'
+        OnClick = SpeedButton3Click
       end
       object memoResultado: TMemo
         Left = 904

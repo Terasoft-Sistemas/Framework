@@ -165,7 +165,7 @@ uses
   ConfiguracoesLocaisModel in '..\Model\ConfiguracoesLocaisModel.pas',
   ConfiguracoesLocaisDao in '..\Dao\ConfiguracoesLocaisDao.pas',
   uTeste in 'uTeste.pas' {Form1},
-  Form.Endpoint in 'Form.Endpoint.pas' {formEP};
+  Form.Endpoint in 'Form.Endpoint.pas' {FormEP};
 
 {$R *.res}
 
@@ -173,9 +173,8 @@ begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TForm1, Form1);
-  Application.CreateForm(TImpressaoVendaAssistida, ImpressaoVendaAssistida);
-  Application.CreateForm(TImpressaoContratos, ImpressaoContratos);
-  Application.CreateForm(TForm1, Form1);
-  Application.CreateForm(TformEP, formEP);
+  //  Application.CreateForm(TImpressaoVendaAssistida, ImpressaoVendaAssistida);
+//  Application.CreateForm(TImpressaoContratos, ImpressaoContratos);
+//  Application.CreateForm(TForm1, Form1);
   Application.Run;
 end.
