@@ -98,9 +98,6 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="uTeste.pas">
-            <Form>Form1</Form>
-        </DCCReference>
         <DCCReference Include="..\Dao\FinanceiroPedidoDao.pas"/>
         <DCCReference Include="..\Model\FinanceiroPedidoModel.pas"/>
         <DCCReference Include="..\Types\Terasoft.Types.pas"/>
@@ -268,6 +265,14 @@
         <DCCReference Include="..\Dao\TabelaJurosPromocaoDao.pas"/>
         <DCCReference Include="..\Model\ConfiguracoesLocaisModel.pas"/>
         <DCCReference Include="..\Dao\ConfiguracoesLocaisDao.pas"/>
+        <DCCReference Include="uTeste.pas">
+            <Form>Form1</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="Form.Endpoint.pas">
+            <Form>formEP</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

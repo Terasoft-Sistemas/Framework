@@ -21,7 +21,6 @@ object Form1: TForm1
     ActivePage = TabSheet1
     Align = alClient
     TabOrder = 0
-    ExplicitHeight = 749
     object TabSheet1: TTabSheet
       Caption = 'Diversos'
       object SpeedButton2: TSpeedButton
@@ -1506,7 +1505,6 @@ object Form1: TForm1
         Align = alBottom
         ScrollBars = ssVertical
         TabOrder = 1
-        ExplicitTop = 548
       end
     end
     object TabelaJurosPromocao: TTabSheet

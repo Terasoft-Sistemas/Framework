@@ -19,7 +19,7 @@ interface
         vUser            : TUsuario;
         vEmpresa         : TEmpresa;
         vConfiguracoesNF : TConfiguracoesNF;
-        vTerasoftConfiguracao : TObject;
+        vTerasoftConfiguracao : IUnknown;
 
         function criarQuery                                                : TFDQuery;
         function criaIfaceQuery                                            : IFDQuery;
@@ -47,8 +47,8 @@ interface
         function setConfiguracoesNF(pConfiguracoes : TConfiguracoesNF)     : Boolean;
         function getConfiguracoes                                          : TConfiguracoesNF;
 
-        procedure setTerasoftConfiguracoes(const pConfiguracoes : TObject);
-        function getTerasoftConfiguracoes                                  : TObject;
+        procedure setTerasoftConfiguracoes(const pConfiguracoes : IUnknown);
+        function getTerasoftConfiguracoes                                  : IUnknown;
 
         procedure setContextModoSistema(pSistema: String);
         procedure setContext(pUsuario: String);
@@ -271,7 +271,7 @@ begin
   Result := vLoja;
 end;
 
-function TControllersConexao.getTerasoftConfiguracoes: TObject;
+function TControllersConexao.getTerasoftConfiguracoes: IUnknown;
 begin
   Result := vTerasoftConfiguracao;
 end;
@@ -330,7 +330,7 @@ begin
   vEmpresa := pEmpresa;
 end;
 
-procedure TControllersConexao.setTerasoftConfiguracoes(const pConfiguracoes: TObject);
+procedure TControllersConexao.setTerasoftConfiguracoes(const pConfiguracoes: IUnknown);
 begin
   vTerasoftConfiguracao := pConfiguracoes;
 end;

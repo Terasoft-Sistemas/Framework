@@ -381,6 +381,7 @@ implementation
 uses
   FinanceiroPedidoModel,
   WebPedidoModel,
+  Form.Endpoint,
   Controllers.Conexao,
   WebPedidoItensModel,
   TabelaJurosModel,
@@ -527,13 +528,13 @@ end;
 
 procedure TForm1.btnFinanceiroPedidoClick(Sender: TObject);
 var
-  lFinanceiroPedidoModel : TFinanceiroPedidoModel;
+  lFinanceiroPedidoModel : ITFinanceiroPedidoModel;
   lMemTable : IFDDataset;
 begin
-  lFinanceiroPedidoModel := TFinanceiroPedidoModel.Create(vIConexao);
+  lFinanceiroPedidoModel := TFinanceiroPedidoModel.getNewIface(vIConexao);
   try
     try
-      lMemTable := lFinanceiroPedidoModel.obterLista;
+      lMemTable := lFinanceiroPedidoModel.objeto.obterLista;
 
       memoResultado.Lines.Clear;
 
@@ -556,7 +557,7 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lFinanceiroPedidoModel.Free;
+    lFinanceiroPedidoModel:=nil;
   end;
 end;
 

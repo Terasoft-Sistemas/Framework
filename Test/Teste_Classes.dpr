@@ -3,7 +3,6 @@ program Teste_Classes;
 uses
   FastMM4,
   Vcl.Forms,
-  uTeste in 'uTeste.pas' {Form1},
   FinanceiroPedidoDao in '..\Dao\FinanceiroPedidoDao.pas',
   FinanceiroPedidoModel in '..\Model\FinanceiroPedidoModel.pas',
   Terasoft.Types in '..\Types\Terasoft.Types.pas',
@@ -164,7 +163,9 @@ uses
   TabelaJurosPromocaoModel in '..\Model\TabelaJurosPromocaoModel.pas',
   TabelaJurosPromocaoDao in '..\Dao\TabelaJurosPromocaoDao.pas',
   ConfiguracoesLocaisModel in '..\Model\ConfiguracoesLocaisModel.pas',
-  ConfiguracoesLocaisDao in '..\Dao\ConfiguracoesLocaisDao.pas';
+  ConfiguracoesLocaisDao in '..\Dao\ConfiguracoesLocaisDao.pas',
+  uTeste in 'uTeste.pas' {Form1},
+  Form.Endpoint in 'Form.Endpoint.pas' {formEP};
 
 {$R *.res}
 
@@ -174,5 +175,7 @@ begin
   Application.CreateForm(TForm1, Form1);
   Application.CreateForm(TImpressaoVendaAssistida, ImpressaoVendaAssistida);
   Application.CreateForm(TImpressaoContratos, ImpressaoContratos);
+  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TformEP, formEP);
   Application.Run;
 end.
