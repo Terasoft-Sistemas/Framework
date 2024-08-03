@@ -62,6 +62,8 @@ type
     function alterar(pClientesEnderecoModel: TClientesEnderecoModel): String;
     function excluir(pClientesEnderecoModel: TClientesEnderecoModel): String;
 
+    function sincronizarDados(pClientesEnderecoModel: TClientesEnderecoModel): String;
+
     function carregaClasse(pID : String): TClientesEnderecoModel;
 
     function obterLista: IFDDataset;
@@ -73,14 +75,15 @@ end;
 implementation
 
 uses
-  System.Rtti, Data.DB;
+  System.Rtti, Data.DB, Terasoft.Configuracoes, LojasModel;
 
 { TClientesEndereco }
 
 function TClientesEnderecoDao.alterar(pClientesEnderecoModel: TClientesEnderecoModel): String;
 var
-  lQry: TFDQuery;
-  lSQL:String;
+  lQry : TFDQuery;
+  lSQL : String;
+  lConfiguracoes : ITerasoftConfiguracoes;
 begin
   lQry := vIConexao.CriarQuery;
 
@@ -90,6 +93,11 @@ begin
     lQry.SQL.Add(lSQL);
     setParams(lQry, pClientesEnderecoModel);
     lQry.ExecSQL;
+
+    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
+
+    if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
+      sincronizarDados(pClientesEnderecoModel);
 
     Result := pClientesEnderecoModel.ID;
 
@@ -149,13 +157,20 @@ end;
 
 function TClientesEnderecoDao.excluir(pClientesEnderecoModel: TClientesEnderecoModel): String;
 var
-  lQry: TFDQuery;
+  lQry : TFDQuery;
+  lConfiguracoes : ITerasoftConfiguracoes;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
    lQry.ExecSQL('delete from CLIENTES_ENDERECO where ID = :ID' ,[pClientesEnderecoModel.ID]);
    lQry.ExecSQL;
+
+   Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
+
+   if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
+     sincronizarDados(pClientesEnderecoModel);
+
    Result := pClientesEnderecoModel.ID;
 
   finally
@@ -164,18 +179,24 @@ begin
 end;
 function TClientesEnderecoDao.incluir(pClientesEnderecoModel: TClientesEnderecoModel): String;
 var
-  lQry: TFDQuery;
-  lSQL:String;
+  lQry : TFDQuery;
+  lSQL : String;
+  lConfiguracoes : ITerasoftConfiguracoes;
 begin
   lQry := vIConexao.CriarQuery;
 
   lSQL := vConstrutor.gerarInsert('CLIENTES_ENDERECO', 'ID', true);
 
   try
+    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
+
     lQry.SQL.Add(lSQL);
     pClientesEnderecoModel.ID := vIConexao.Generetor('GEN_CLIENTES_ENDERECO');
     setParams(lQry, pClientesEnderecoModel);
     lQry.Open;
+
+    if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
+      sincronizarDados(pClientesEnderecoModel);
 
     Result := lQry.FieldByName('ID').AsString;
 
@@ -312,6 +333,56 @@ end;
 procedure TClientesEnderecoDao.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
+end;
+
+function TClientesEnderecoDao.sincronizarDados(pClientesEnderecoModel: TClientesEnderecoModel): String;
+var
+  lLojasModel,
+  lLojas      : ITLojasModel;
+  lQry        : TFDQuery;
+  lSQL        : String;
+begin
+
+  lLojasModel := TLojasModel.getNewIface(vIConexao);
+
+  try
+    lLojasModel.objeto.obterHosts;
+
+    if pClientesEnderecoModel.Acao in [tacIncluir, tacAlterar] then
+      lSQL := vConstrutor.gerarUpdateOrInsert('CLIENTES_ENDERECO','ID', 'ID', true)
+
+    else if pClientesEnderecoModel.Acao in [tacExcluir] then
+      lSQL := ('delete from CLIENTES_ENDERECO where ID = :ID');
+
+    for lLojas in lLojasModel.objeto.LojassLista do
+    begin
+
+      if lLojas.objeto.LOJA <> vIConexao.getEmpresa.LOJA then
+      begin
+
+        vIConexao.ConfigConexaoExterna('', lLojas.objeto.STRING_CONEXAO);
+        lQry := vIConexao.criarQueryExterna;
+
+        if pClientesEnderecoModel.Acao = tacExcluir then
+        begin
+          lQry.ExecSQL(lSQL, [pClientesEnderecoModel.ID]);
+          lQry.ExecSQL;
+        end
+        else
+        begin
+          lQry.SQL.Clear;
+          lQry.SQL.Add(lSQL);
+          setParams(lQry, pClientesEnderecoModel);
+          lQry.Open(lSQL);
+        end;
+
+      end;
+    end;
+
+  finally
+    lLojasModel := nil;
+    lQry.Free;
+  end;
 end;
 
 function TClientesEnderecoDao.where: String;

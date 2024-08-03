@@ -541,6 +541,7 @@ begin
     lPedidoVendaModel.objeto.IDUsuario                := self.vIConexao.getUSer.ID;
     lPedidoVendaModel.objeto.TIPO_COMISSAO            := self.TIPO_COMISSAO;
     lPedidoVendaModel.objeto.GERENTE_ID               := self.GERENTE_ID;
+    lPedidoVendaModel.objeto.CONDICOES2_PAG           := lWebPedidoModel.AVALISTA_ID;
 
     lPedidoVendaModel.objeto.SEGURO_PRESTAMISTA_CUSTO := lWebPedidoModel.SEGURO_PRESTAMISTA_CUSTO;
     lPedidoVendaModel.objeto.SEGURO_PRESTAMISTA_VALOR := lWebPedidoModel.SEGURO_PRESTAMISTA_VALOR;
