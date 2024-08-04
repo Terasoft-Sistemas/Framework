@@ -93,7 +93,7 @@ type
 
     function Salvar: String;
     procedure obterLista; overload;
-    function obterLista(pPortador: String; pValor: Double; pSeguroPrestamista: Boolean; pPrimeiroVencimento: TDate): TFDMemTable; overload;
+    function obterLista(pPortador: String; pValor: Double; pSeguroPrestamista: Boolean; pPrimeiroVencimento: TDate): IFDDataset; overload;
 
     function carregaClasse(pId: Integer): ITTabelaJurosModel;
 
@@ -147,7 +147,7 @@ begin
   Result.objeto.myself := Result;
 end;
 
-function TTabelaJurosModel.obterLista(pPortador: String; pValor: Double; pSeguroPrestamista: Boolean; pPrimeiroVencimento: TDate): TFDMemTable;
+function TTabelaJurosModel.obterLista(pPortador: String; pValor: Double; pSeguroPrestamista: Boolean; pPrimeiroVencimento: TDate): IFDDataset;
 var
   lModel : ITTabelaJurosModel;
   lTabelaJurosDia : TTabelaJurosDiaModel;
@@ -160,7 +160,7 @@ var
 
   lCoeficienteJurosDias, lCoeficienteJuros : Extended;
 
-  lMemTable      : TFDMemTable;
+  lMemTable      : IFDDataset;
   lPortadorModel : ITPortadorModel;
   lConfiguracoes : ITerasoftConfiguracoes;
   lTagPercentual : String;
@@ -171,7 +171,7 @@ begin
   lPortadorModel := TPortadorModel.getNewIface(vIConexao);
   lTabelaJurosDia := TTabelaJurosDiaModel.Create(vIConexao);
 
-  lMemTable := TFDMemTable.Create(nil);
+  lMemTable := criaIFDDataset(TFDMemTable.Create(nil));
   lModel    := TTabelaJurosModel.getNewIface(vIConexao);
   lTotal    := pValor;
 
@@ -284,29 +284,29 @@ begin
       end;
     end;
 
-    with lMemTable.IndexDefs.AddIndexDef do
+    with TFDMemTable(lMemTable.objeto).IndexDefs.AddIndexDef do
     begin
       Name := 'OrdenacaoCodigo';
       Fields := 'CODIGO';
       Options := [TIndexOption.ixCaseInsensitive];
     end;
 
-    lMemTable.IndexName := 'OrdenacaoCodigo';
+    TFDMemTable(lMemTable.objeto).IndexName := 'OrdenacaoCodigo';
 
-    lMemTable.FieldDefs.Add('ID', ftInteger);
-    lMemTable.FieldDefs.Add('CODIGO', ftString, 3);
-    lMemTable.FieldDefs.Add('PERCENTUAL', ftFloat);
-    lMemTable.FieldDefs.Add('JUROS_TEXTO', ftString, 20);
-    lMemTable.FieldDefs.Add('VALOR_JUROS', ftFloat);
-    lMemTable.FieldDefs.Add('VALOR_PARCELA', ftFloat);
-    lMemTable.FieldDefs.Add('VALOR_TOTAL', ftString, 100);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('ID', ftInteger);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('CODIGO', ftString, 3);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('PERCENTUAL', ftFloat);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('JUROS_TEXTO', ftString, 20);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('VALOR_JUROS', ftFloat);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('VALOR_PARCELA', ftFloat);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('VALOR_TOTAL', ftString, 100);
 
-    lMemTable.FieldDefs.Add('VALOR_SEG_PRESTAMISTA', ftFloat);
-    lMemTable.FieldDefs.Add('PER_SEG_PRESTAMSTA', ftFloat);
-    lMemTable.FieldDefs.Add('VALOR_ACRESCIMO_SEG_PRESTAMISTA', ftFloat);
-    lMemTable.FieldDefs.Add('COEFICIENTE', ftFloat);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('VALOR_SEG_PRESTAMISTA', ftFloat);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('PER_SEG_PRESTAMSTA', ftFloat);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('VALOR_ACRESCIMO_SEG_PRESTAMISTA', ftFloat);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('COEFICIENTE', ftFloat);
 
-    lMemTable.CreateDataSet;
+    TFDMemTable(lMemTable.objeto).CreateDataSet;
 
     for i := 0 to self.TabelaJurossLista.Count -1 do
     begin
@@ -327,7 +327,7 @@ begin
       end;
 
 
-      lMemTable.InsertRecord([
+      lMemTable.objeto.InsertRecord([
                               self.TabelaJurossLista[i].objeto.ID,
                               self.TabelaJurossLista[i].objeto.CODIGO,
                               IIF(lTagPercentual = 'S', self.TabelaJurossLista[i].objeto.PERCENTUAL, lPercentualJuros),
@@ -344,7 +344,7 @@ begin
 
     end;
 
-    lMemTable.Open;
+    lMemTable.objeto.Open;
 
     Result := lMemTable;
 

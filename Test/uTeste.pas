@@ -633,7 +633,7 @@ var
   lFinanceiroPedidoModel : ITFinanceiroPedidoModel;
   lFinanceiroParams      : TFinanceiroParams;
   lTabelaJurosModel      : ITTabelaJurosModel;
-  lMemJuros              : TFDMemTable;
+  lMemJuros              : IFDDataset;
   lJuros,
   lValorPago             : Double;
 begin
@@ -649,11 +649,11 @@ begin
       lFinanceiroParams.PRIMEIRO_VENCIMENTO := Date + 30;
       lFinanceiroParams.QUANTIDADE_PARCELAS := 5;
 
-      lMemJuros.first;
-      lMemJuros.locate('CODIGO', '005', []);
+      lMemJuros.objeto.first;
+      lMemJuros.objeto.locate('CODIGO', '005', []);
 
-      lJuros := lMemJuros.FieldByName('VALOR_JUROS').AsFloat;
-      lFinanceiroParams.INDCE_APLICADO      := lMemJuros.FieldByName('PERCENTUAL').AsFloat;
+      lJuros := lMemJuros.objeto.FieldByName('VALOR_JUROS').AsFloat;
+      lFinanceiroParams.INDCE_APLICADO      := lMemJuros.objeto.FieldByName('PERCENTUAL').AsFloat;
       lFinanceiroParams.VALOR_ACRESCIMO     := lJuros;
 
       lFinanceiroParams.VALOR_LIQUIDO       := lValorPago;
@@ -3189,31 +3189,31 @@ procedure TForm1.btnTabelaPrecoClick(Sender: TObject);
 var
   lTabelaJurosModel: ITTabelaJurosModel;
   lPortador : String;
-  lMemTable : TFDMemTable;
+  lMemTable : IFDDataset;
 begin
   lTabelaJurosModel := TTabelaJurosModel.getNewIface(vIConexao);
   try
     lPortador := InputBox('WebPedido', 'Digite o ID do portador:', '');
     lMemTable := lTabelaJurosModel.objeto.obterLista(lPortador, 1000, true, vIConexao.DataServer);
 
-    lMemTable.first;
-    while not lMemTable.eof do
+    lMemTable.objeto.first;
+    while not lMemTable.objeto.eof do
     begin
-      memoResultado.Lines.Add('ID: '+lMemTable.FieldByName('ID').AsString);
-      memoResultado.Lines.Add('PARCELA: '+lMemTable.FieldByName('CODIGO').AsString);
-      memoResultado.Lines.Add('PERCENTUAL: '+lMemTable.FieldByName('PERCENTUAL').AsString);
-      memoResultado.Lines.Add('JUROS: '+lMemTable.FieldByName('JUROS_TEXTO').AsString);
-      memoResultado.Lines.Add('VALOR_JUROS: '+lMemTable.FieldByName('VALOR_JUROS').AsString);
-      memoResultado.Lines.Add('VALOR_PARCELA: '+lMemTable.FieldByName('VALOR_PARCELA').AsString);
-      memoResultado.Lines.Add('VALOR_TOTAL: '+lMemTable.FieldByName('VALOR_TOTAL').AsString);
+      memoResultado.Lines.Add('ID: '+lMemTable.objeto.FieldByName('ID').AsString);
+      memoResultado.Lines.Add('PARCELA: '+lMemTable.objeto.FieldByName('CODIGO').AsString);
+      memoResultado.Lines.Add('PERCENTUAL: '+lMemTable.objeto.FieldByName('PERCENTUAL').AsString);
+      memoResultado.Lines.Add('JUROS: '+lMemTable.objeto.FieldByName('JUROS_TEXTO').AsString);
+      memoResultado.Lines.Add('VALOR_JUROS: '+lMemTable.objeto.FieldByName('VALOR_JUROS').AsString);
+      memoResultado.Lines.Add('VALOR_PARCELA: '+lMemTable.objeto.FieldByName('VALOR_PARCELA').AsString);
+      memoResultado.Lines.Add('VALOR_TOTAL: '+lMemTable.objeto.FieldByName('VALOR_TOTAL').AsString);
       memoResultado.Lines.Add('===============================================');
-      memoResultado.Lines.Add('VALOR_SEG_PRESTAMISTA: '+lMemTable.FieldByName('VALOR_SEG_PRESTAMISTA').AsString);
-      memoResultado.Lines.Add('PER_SEG_PRESTAMSTA: '+lMemTable.FieldByName('PER_SEG_PRESTAMSTA').AsString);
-      memoResultado.Lines.Add('VALOR_ACRESCIMO_SEG_PRESTAMISTA: '+lMemTable.FieldByName('VALOR_ACRESCIMO_SEG_PRESTAMISTA').AsString);
+      memoResultado.Lines.Add('VALOR_SEG_PRESTAMISTA: '+lMemTable.objeto.FieldByName('VALOR_SEG_PRESTAMISTA').AsString);
+      memoResultado.Lines.Add('PER_SEG_PRESTAMSTA: '+lMemTable.objeto.FieldByName('PER_SEG_PRESTAMSTA').AsString);
+      memoResultado.Lines.Add('VALOR_ACRESCIMO_SEG_PRESTAMISTA: '+lMemTable.objeto.FieldByName('VALOR_ACRESCIMO_SEG_PRESTAMISTA').AsString);
       memoResultado.Lines.Add('===============================================');
       memoResultado.Lines.Add('');
 
-      lMemTable.Next;
+      lMemTable.objeto.Next;
     end;
 
   finally
