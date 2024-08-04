@@ -5,14 +5,18 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao,
   FireDAC.Comp.Client;
 
 type
 
-  TSolicitacaoDescontoModel = class
+  TSolicitacaoDescontoModel = class;
+  ITSolicitacaoDescontoModel = IObject<TSolicitacaoDescontoModel>;
 
+  TSolicitacaoDescontoModel = class
   private
+    [weak] mySelf: ITSolicitacaoDescontoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -68,15 +72,17 @@ type
     property TABELA_ORIGEM: Variant read FTABELA_ORIGEM write SetTABELA_ORIGEM;
     property SYSTIME: Variant read FSYSTIME write SetSYSTIME;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITSolicitacaoDescontoModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TSolicitacaoDescontoModel;
+    function Alterar(pID : String): ITSolicitacaoDescontoModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId : String): TSolicitacaoDescontoModel;
+    function carregaClasse(pId : String): ITSolicitacaoDescontoModel;
     function obterLista: IFDDataset;
 
     function Autorizar(pID : String): Boolean;
@@ -103,14 +109,14 @@ uses
 
 { TSolicitacaoDescontoModel }
 
-function TSolicitacaoDescontoModel.Alterar(pID: String): TSolicitacaoDescontoModel;
+function TSolicitacaoDescontoModel.Alterar(pID: String): ITSolicitacaoDescontoModel;
 var
-  lSolicitacaoDescontoModel : TSolicitacaoDescontoModel;
+  lSolicitacaoDescontoModel : ITSolicitacaoDescontoModel;
 begin
-  lSolicitacaoDescontoModel := TSolicitacaoDescontoModel.Create(vIConexao);
+  lSolicitacaoDescontoModel := TSolicitacaoDescontoModel.getNewIface(vIConexao);
   try
-    lSolicitacaoDescontoModel       := lSolicitacaoDescontoModel.carregaClasse(pID);
-    lSolicitacaoDescontoModel.Acao  := tacAlterar;
+    lSolicitacaoDescontoModel       := lSolicitacaoDescontoModel.objeto.carregaClasse(pID);
+    lSolicitacaoDescontoModel.objeto.Acao  := tacAlterar;
     Result            := lSolicitacaoDescontoModel;
   finally
   end;
@@ -123,6 +129,12 @@ begin
   Result       := self.Salvar;
 end;
 
+class function TSolicitacaoDescontoModel.getNewIface(pIConexao: IConexao): ITSolicitacaoDescontoModel;
+begin
+  Result := TImplObjetoOwner<TSolicitacaoDescontoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TSolicitacaoDescontoModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
@@ -131,7 +143,7 @@ end;
 
 function TSolicitacaoDescontoModel.Autorizar(pID: String): Boolean;
 var
-  lSolicitacaoDesconto : TSolicitacaoDescontoModel;
+  lSolicitacaoDesconto : ITSolicitacaoDescontoModel;
   lWebPedidoModel      : TWebPedidoModel;
   lDescontoModel       : TDescontoModel;
   lTableDesconto       : IFDDataset;
@@ -140,36 +152,36 @@ begin
   if pID = '' then
     CriaException('ID não informado.');
 
-  lSolicitacaoDesconto := TSolicitacaoDescontoModel.Create(vIConexao);
+  lSolicitacaoDesconto := TSolicitacaoDescontoModel.getNewIface(vIConexao);
   lDescontoModel       := TDescontoModel.Create(vIConexao);
   lWebPedidoModel      := TWebPedidoModel.Create(vIConexao);
 
   try
-    lSolicitacaoDesconto := lSolicitacaoDesconto.carregaClasse(pID);
+    lSolicitacaoDesconto := lSolicitacaoDesconto.objeto.carregaClasse(pID);
 
     lDescontoModel.IDUsuarioView   := vIConexao.getUSer.ID;
-    lDescontoModel.IDTipoVendaView := lSolicitacaoDesconto.TIPOVENDA_ID;
+    lDescontoModel.IDTipoVendaView := lSolicitacaoDesconto.objeto.TIPOVENDA_ID;
 
     lTableDesconto := lDescontoModel.ObterLista;
 
-    lPercentual := lSolicitacaoDesconto.VALOR_DESCONTO / lSolicitacaoDesconto.VALOR_PEDIDO * 100;
+    lPercentual := lSolicitacaoDesconto.objeto.VALOR_DESCONTO / lSolicitacaoDesconto.objeto.VALOR_PEDIDO * 100;
 
     if (lPercentual > lTableDesconto.objeto.FieldByName('VALOR_DES').AsFloat) then
       CriaException('Desconto não autorizado');
 
-    lSolicitacaoDesconto.USUARIO_CEDENTE := vIConexao.getUSer.ID;
-    lSolicitacaoDesconto.STATUS          := 'A';
+    lSolicitacaoDesconto.objeto.USUARIO_CEDENTE := vIConexao.getUSer.ID;
+    lSolicitacaoDesconto.objeto.STATUS          := 'A';
 
-    lSolicitacaoDesconto.Acao := tacAlterar;
-    lSolicitacaoDesconto.Salvar;
+    lSolicitacaoDesconto.objeto.Acao := tacAlterar;
+    lSolicitacaoDesconto.objeto.Salvar;
 
-    if lSolicitacaoDesconto.TABELA_ORIGEM = 'WEB_PEDIDO' then
-      lWebPedidoModel.AutorizarDesconto(lSolicitacaoDesconto.PEDIDO_ID);
+    if lSolicitacaoDesconto.objeto.TABELA_ORIGEM = 'WEB_PEDIDO' then
+      lWebPedidoModel.AutorizarDesconto(lSolicitacaoDesconto.objeto.PEDIDO_ID);
 
     Result := True;
 
   finally
-    lSolicitacaoDesconto.Free;
+    lSolicitacaoDesconto:=nil;
     lWebPedidoModel.Free;
     lDescontoModel.Free;
   end;
@@ -177,46 +189,46 @@ end;
 
 function TSolicitacaoDescontoModel.Negar(pID: String): Boolean;
 var
-  lSolicitacaoDesconto : TSolicitacaoDescontoModel;
+  lSolicitacaoDesconto : ITSolicitacaoDescontoModel;
   lWebPedidoModel      : TWebPedidoModel;
 begin
-  lSolicitacaoDesconto := TSolicitacaoDescontoModel.Create(vIConexao);
+  lSolicitacaoDesconto := TSolicitacaoDescontoModel.getNewIface(vIConexao);
   lWebPedidoModel      := TWebPedidoModel.Create(vIConexao);
 
   try
-    lSolicitacaoDesconto := lSolicitacaoDesconto.carregaClasse(pID);
+    lSolicitacaoDesconto := lSolicitacaoDesconto.objeto.carregaClasse(pID);
 
-    lSolicitacaoDesconto.USUARIO_CEDENTE := vIConexao.getUSer.ID;
-    lSolicitacaoDesconto.STATUS          := 'N';
+    lSolicitacaoDesconto.objeto.USUARIO_CEDENTE := vIConexao.getUSer.ID;
+    lSolicitacaoDesconto.objeto.STATUS          := 'N';
 
-    lSolicitacaoDesconto.Acao := tacAlterar;
-    lSolicitacaoDesconto.Salvar;
+    lSolicitacaoDesconto.objeto.Acao := tacAlterar;
+    lSolicitacaoDesconto.objeto.Salvar;
 
-    if lSolicitacaoDesconto.TABELA_ORIGEM = 'WEB_PEDIDO' then
-      lWebPedidoModel.NegarDesconto(lSolicitacaoDesconto.PEDIDO_ID);
+    if lSolicitacaoDesconto.objeto.TABELA_ORIGEM = 'WEB_PEDIDO' then
+      lWebPedidoModel.NegarDesconto(lSolicitacaoDesconto.objeto.PEDIDO_ID);
 
     Result := True;
 
   finally
-    lSolicitacaoDesconto.Free;
+    lSolicitacaoDesconto:=nil;
     lWebPedidoModel.Free;
   end;
 end;
 
-function TSolicitacaoDescontoModel.carregaClasse(pId : String): TSolicitacaoDescontoModel;
+function TSolicitacaoDescontoModel.carregaClasse(pId : String): ITSolicitacaoDescontoModel;
 var
-  lSolicitacaoDescontoDao: TSolicitacaoDescontoDao;
+  lSolicitacaoDescontoDao: ITSolicitacaoDescontoDao;
 begin
-  lSolicitacaoDescontoDao := TSolicitacaoDescontoDao.Create(vIConexao);
+  lSolicitacaoDescontoDao := TSolicitacaoDescontoDao.getNewIface(vIConexao);
 
   try
-    Result := lSolicitacaoDescontoDao.carregaClasse(pId);
+    Result := lSolicitacaoDescontoDao.objeto.carregaClasse(pId);
   finally
-    lSolicitacaoDescontoDao.Free;
+    lSolicitacaoDescontoDao:=nil;
   end;
 end;
 
-constructor TSolicitacaoDescontoModel.Create(pIConexao : IConexao);
+constructor TSolicitacaoDescontoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -228,42 +240,42 @@ end;
 
 function TSolicitacaoDescontoModel.obterLista: IFDDataset;
 var
-  lSolicitacaoDescontoLista: TSolicitacaoDescontoDao;
+  lSolicitacaoDescontoLista: ITSolicitacaoDescontoDao;
 begin
-  lSolicitacaoDescontoLista := TSolicitacaoDescontoDao.Create(vIConexao);
+  lSolicitacaoDescontoLista := TSolicitacaoDescontoDao.getNewIface(vIConexao);
 
   try
-    lSolicitacaoDescontoLista.TotalRecords    := FTotalRecords;
-    lSolicitacaoDescontoLista.WhereView       := FWhereView;
-    lSolicitacaoDescontoLista.CountView       := FCountView;
-    lSolicitacaoDescontoLista.OrderView       := FOrderView;
-    lSolicitacaoDescontoLista.StartRecordView := FStartRecordView;
-    lSolicitacaoDescontoLista.LengthPageView  := FLengthPageView;
-    lSolicitacaoDescontoLista.IDRecordView    := FIDRecordView;
+    lSolicitacaoDescontoLista.objeto.TotalRecords    := FTotalRecords;
+    lSolicitacaoDescontoLista.objeto.WhereView       := FWhereView;
+    lSolicitacaoDescontoLista.objeto.CountView       := FCountView;
+    lSolicitacaoDescontoLista.objeto.OrderView       := FOrderView;
+    lSolicitacaoDescontoLista.objeto.StartRecordView := FStartRecordView;
+    lSolicitacaoDescontoLista.objeto.LengthPageView  := FLengthPageView;
+    lSolicitacaoDescontoLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lSolicitacaoDescontoLista.obterLista;
+    Result := lSolicitacaoDescontoLista.objeto.obterLista;
 
-    FTotalRecords := lSolicitacaoDescontoLista.TotalRecords;
+    FTotalRecords := lSolicitacaoDescontoLista.objeto.TotalRecords;
 
   finally
-    lSolicitacaoDescontoLista.Free;
+    lSolicitacaoDescontoLista:=nil;
   end;
 end;
 
 function TSolicitacaoDescontoModel.Salvar: String;
 var
-  lSolicitacaoDescontoDao: TSolicitacaoDescontoDao;
+  lSolicitacaoDescontoDao: ITSolicitacaoDescontoDao;
 begin
-  lSolicitacaoDescontoDao := TSolicitacaoDescontoDao.Create(vIConexao);
+  lSolicitacaoDescontoDao := TSolicitacaoDescontoDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lSolicitacaoDescontoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lSolicitacaoDescontoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lSolicitacaoDescontoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lSolicitacaoDescontoDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lSolicitacaoDescontoDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lSolicitacaoDescontoDao.objeto.excluir(mySelf);
     end;
   finally
-    lSolicitacaoDescontoDao.Free;
+    lSolicitacaoDescontoDao:=nil;
   end;
 end;
 

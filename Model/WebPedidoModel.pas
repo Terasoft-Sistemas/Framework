@@ -1558,13 +1558,13 @@ end;
 function TWebPedidoModel.Negar(pID: String): Boolean;
 var
   lWebPedidoModel : TWebPedidoModel;
-  lSolicitacaoDescontoModel : TSolicitacaoDescontoModel;
+  lSolicitacaoDescontoModel : ITSolicitacaoDescontoModel;
   lMemTableSolicitacao : IFDDataset;
 begin
   if pID = '' then
     CriaException('ID não informado');
 
-  lSolicitacaoDescontoModel := TSolicitacaoDescontoModel.Create(vIConexao);
+  lSolicitacaoDescontoModel := TSolicitacaoDescontoModel.getNewIface(vIConexao);
   lWebPedidoModel           := TWebPedidoModel.Create(vIConexao);
   try
     lWebPedidoModel := lWebPedidoModel.carregaClasse(pID);
@@ -1574,19 +1574,19 @@ begin
 
     if lWebPedidoModel.STATUS = 'E' then
     begin
-      lSolicitacaoDescontoModel.WhereView := ' and solicitacao_desconto.tabela_origem = ''WEB_PEDIDO'' '+
+      lSolicitacaoDescontoModel.objeto.WhereView := ' and solicitacao_desconto.tabela_origem = ''WEB_PEDIDO'' '+
                                              ' and solicitacao_desconto.pedido_id = '+lWebPedidoModel.ID +
                                              ' and solicitacao_desconto.status is null ';
 
-      lMemTableSolicitacao := lSolicitacaoDescontoModel.obterLista;
+      lMemTableSolicitacao := lSolicitacaoDescontoModel.objeto.obterLista;
 
-      lSolicitacaoDescontoModel := lSolicitacaoDescontoModel.carregaClasse(lMemTableSolicitacao.objeto.FieldByName('ID').AsString);
+      lSolicitacaoDescontoModel := lSolicitacaoDescontoModel.objeto.carregaClasse(lMemTableSolicitacao.objeto.FieldByName('ID').AsString);
 
-      lSolicitacaoDescontoModel.USUARIO_CEDENTE := vIConexao.getUser.ID;
-      lSolicitacaoDescontoModel.STATUS          := 'N';
+      lSolicitacaoDescontoModel.objeto.USUARIO_CEDENTE := vIConexao.getUser.ID;
+      lSolicitacaoDescontoModel.objeto.STATUS          := 'N';
 
-      lSolicitacaoDescontoModel.Acao := tacAlterar;
-      lSolicitacaoDescontoModel.Salvar;
+      lSolicitacaoDescontoModel.objeto.Acao := tacAlterar;
+      lSolicitacaoDescontoModel.objeto.Salvar;
     end;
 
     lWebPedidoModel.STATUS := 'D';
@@ -1596,7 +1596,7 @@ begin
     Result := true;
 
   finally
-    lSolicitacaoDescontoModel.Free;
+    lSolicitacaoDescontoModel:=nil;
     lWebPedidoModel.Free;
   end;
 end;

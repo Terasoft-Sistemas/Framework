@@ -372,6 +372,7 @@ type
     { Private declarations }
     vQtdeRegistros,
     vPagina         : Integer;
+    dsTmp: IFDDataset;
 
   public
     { Public declarations }
@@ -405,14 +406,17 @@ uses
 
 procedure TForm1.btnConsultaDescontoClick(Sender: TObject);
 var
-  lSolicitacaoDescontoModel : TSolicitacaoDescontoModel;
+  lSolicitacaoDescontoModel : ITSolicitacaoDescontoModel;
 begin
-  lSolicitacaoDescontoModel := TSolicitacaoDescontoModel.Create(vIConexao);
+  lSolicitacaoDescontoModel := TSolicitacaoDescontoModel.getNewIface(vIConexao);
   try
-    lSolicitacaoDescontoModel.WhereView := ' and solicitacao_desconto.tabela_origem = ''WEB_PEDIDO'' ';
-    dLiberacao.DataSet := lSolicitacaoDescontoModel.obterLista.objeto;
+    lSolicitacaoDescontoModel.objeto.WhereView := ' and solicitacao_desconto.tabela_origem = ''WEB_PEDIDO'' ';
+      //Aki o dataset será zerado apos sair da função.
+      //Precisa deixar este contexto ativo...                  a
+    dsTmp := lSolicitacaoDescontoModel.objeto.obterLista;
+    dLiberacao.DataSet := dsTmp.objeto;
   finally
-    lSolicitacaoDescontoModel.Free;
+    lSolicitacaoDescontoModel:=nil;
   end;
 end;
 
@@ -426,9 +430,12 @@ begin
     lVendaAssistida := '4343';
 
     lPermissaoRemotaModel.WhereView := ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' and permissao_remota.pedido_id = '+lVendaAssistida;
-    dLiberacao.DataSet := lPermissaoRemotaModel.obterLista.objeto;
+      //Aki o dataset será zerado apos sair da função.
+      //Precisa deixar este contexto ativo...                  a
+    dsTmp := lPermissaoRemotaModel.obterLista;
+    dLiberacao.DataSet := dsTmp.objeto;
   finally
-    lPermissaoRemotaModel.Free;
+    lPermissaoRemotaModel:=nil;
   end;
 end;
 
@@ -576,7 +583,10 @@ begin
   try
     lMemTable := lTabelaJurosPromocaoModel.obterLista;
 
-    dsJuros.DataSet := lMemTable.objeto;
+      //Aki o dataset será zerado apos sair da função.
+      //Precisa deixar este contexto ativo...                  a
+    dsTmp := lMemTable;
+    dsJuros.DataSet := dsTmp.objeto;
 
   finally
     lTabelaJurosPromocaoModel.Free;
@@ -1529,6 +1539,9 @@ begin
 //      lFluxoCaixaModel.LojaView        := '001';
 
       lMemTable := lFluxoCaixaModel.objeto.obterFluxoCaixaSintetico;
+      //Aki o dataset será zerado apos sair da função.
+      //Precisa deixar este contexto ativo...                  a
+      //dsTmp := lMemTable...
       dsTeste2.DataSet := lMemTable;
     except
      on E:Exception do
@@ -2774,14 +2787,14 @@ end;
 
 procedure TForm1.btnDescontoAutorizarClick(Sender: TObject);
 var
-  lSolicitacaoDescontoModel : TSolicitacaoDescontoModel;
+  lSolicitacaoDescontoModel : ITSolicitacaoDescontoModel;
 begin
-  lSolicitacaoDescontoModel := TSolicitacaoDescontoModel.Create(vIConexao);
+  lSolicitacaoDescontoModel := TSolicitacaoDescontoModel.getNewIface(vIConexao);
 
   try
-    lSolicitacaoDescontoModel.Autorizar('4176');
+    lSolicitacaoDescontoModel.objeto.Autorizar('4176');
   finally
-    lSolicitacaoDescontoModel.Free;
+    lSolicitacaoDescontoModel:=nil;
   end;
 end;
 
@@ -2809,14 +2822,14 @@ end;
 
 procedure TForm1.btnDescontoNegarClick(Sender: TObject);
 var
-  lSolicitacaoDescontoModel : TSolicitacaoDescontoModel;
+  lSolicitacaoDescontoModel : ITSolicitacaoDescontoModel;
 begin
-  lSolicitacaoDescontoModel := TSolicitacaoDescontoModel.Create(vIConexao);
+  lSolicitacaoDescontoModel := TSolicitacaoDescontoModel.getNewIface(vIConexao);
 
   try
-    lSolicitacaoDescontoModel.Negar('4176');
+    lSolicitacaoDescontoModel.objeto.Negar('4176');
   finally
-    lSolicitacaoDescontoModel.Free;
+    lSolicitacaoDescontoModel:=nil;
   end;
 end;
 
