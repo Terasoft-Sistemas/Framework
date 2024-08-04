@@ -43,11 +43,10 @@ type
     fFiltroSelecionado: ITFiltroModel;
     fDS: IDatasetSimples;
     procedure selecionaEP(ep: ITEndpointModel);
-    { Private declarations }
   public
+    //constructor Create(pIConexao:IConexao);
     constructor Create(pIConexao:IConexao);
     class function getNewIface(pIConexao: IConexao): ITFormEP;
-    { Public declarations }
   end;
 
 var
@@ -57,6 +56,7 @@ var
 
 implementation
   uses
+    Terasoft.Framework.FuncoesDiversas,
     FuncoesSelecaoLista;
 
 {$R *.dfm}
@@ -112,6 +112,11 @@ end;
 
 procedure TFormEP.sbAbrirClick(Sender: TObject);
 begin
+  if(fSelecionado=nil) then exit;
+  //Podemos filtrar quantos registos são retornados e a partir de qual...
+  //fSelecionado.objeto.registros := 100;
+  //fSelecionado.objeto.primeiro := 500;
+
   fDS := fSelecionado.objeto.executaQuery;
   grid.DataSource := fDS.dataSource;
 end;
@@ -138,17 +143,29 @@ begin
   //Podemos passar a lista de palavras de pesquisa de id, descricao...
   //ds := fFiltroSelecionado.objeto.getOpcoes('ODERCO');
 
-  ds := fFiltroSelecionado.objeto.getOpcoes;
+  case fFiltroSelecionado.objeto.TIPO of
 
-  if(ds=nil) then
-  begin
-    fFiltroSelecionado.objeto.opcoesSelecionadas.text:=
+    tipoFiltro_Busca:
+      fFiltroSelecionado.objeto.opcoesSelecionadas.text:=
           InputBox('Busca avançada','Texto', fFiltroSelecionado.objeto.opcoesSelecionadas.text);
-    exit;
-  end else
-  begin
-    fFiltroSelecionado.objeto.opcoesSelecionadas.text :=
+
+    tipoFiltro_Set:
+    begin
+      ds := fFiltroSelecionado.objeto.getOpcoes;
+      fFiltroSelecionado.objeto.opcoesSelecionadas.text :=
           FuncoesSelecaoLista.SelecionaItems(fFiltroSelecionado.objeto.opcoesSelecionadas.text,ds.dataset,false,'',ds.dataset.Fields[0].FieldName);
+    end;
+
+    tipoFiltro_DataPeriodo:
+    begin
+//        fFiltroSelecionado.objeto.dhInicial := selecionaData(fFiltroSelecionado.objeto.dhInicial,'Data Inicial');
+        fFiltroSelecionado.objeto.dhFinal := selecionaData(fFiltroSelecionado.objeto.dhFinal,'Data Final');
+    end;
+    tipoFiltro_HoraPeriodo: ;
+
+    tipoFiltro_DataHoraPeriodo:
+        fFiltroSelecionado.objeto.dhInicial := selecionaData(fFiltroSelecionado.objeto.dhInicial);
+
   end;
 
 end;

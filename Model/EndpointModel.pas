@@ -257,7 +257,7 @@ begin
     sValue := uppercase(trim( lTxt.strings.ValueFromIndex[i]));
     lFiltro := fFiltroController.getByName(sName);
     lFiltro.objeto.campo := sValue;
-
+    lFiltro.objeto.setTipoPorNome(sName);
     fFILTROS.Add(lFiltro);
   end;
 end;

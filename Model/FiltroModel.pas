@@ -13,6 +13,15 @@ uses
   Interfaces.Conexao;
 
 type
+  TTipoFiltro = (
+      tipoFiltro_Desconhecido,
+      tipoFiltro_Busca,
+      tipoFiltro_Set,
+      tipoFiltro_DataPeriodo,
+      tipoFiltro_HoraPeriodo,
+      tipoFiltro_DataHoraPeriodo
+    );
+
   TFiltroModel=class;
   ITFiltroModel=IObject<TFiltroModel>;
   TListaFiltroModel=IList<ITFiltroModel>;
@@ -33,6 +42,21 @@ type
     fOpcoesSelecionadas: IListaTextoEx;
     fRegistros: Integer;
     fPrimeiro: Integer;
+    fTipo: TTipoFiltro;
+
+  //property dhInicial getter/setter
+    function getDHInicial: Variant;
+    procedure setDHInicial(const pValue: Variant);
+
+    function getDHFinal: Variant;
+    procedure setDHFinal(const pValue: Variant);
+
+    procedure setDhPorIndice(const indice: Integer; const pValue: Variant);
+    function getDhPorIndice(const indice: Integer): Variant;
+
+  //property tipo getter/setter
+    function getTipo: TTipoFiltro;
+    procedure setTipo(const pValue: TTipoFiltro);
 
   //property primeiro getter/setter
     function getPrimeiro: Integer;
@@ -78,6 +102,7 @@ type
     property DESCRICAO: TipoWideStringFramework read getDESCRICAO write setDESCRICAO;
     property PROPRIEDADES: TipoWideStringFramework read getPROPRIEDADES write setPROPRIEDADES;
     property CHAVE: TipoWideStringFramework read getCHAVE write setCHAVE;
+    property TIPO: TTipoFiltro read getTipo write setTipo;
 
     //Nome do campo utilizado na tabela pesquisada. Inicializado pelo endpoint
     property campo: TipoWideStringFramework read getCampo write setCampo;
@@ -90,6 +115,8 @@ type
 
     property registros: Integer read getRegistros write setRegistros;
     property primeiro: Integer read getPrimeiro write setPrimeiro;
+    property dhInicial: Variant read getDHInicial write setDHInicial;
+    property dhFinal: Variant read getDHFinal write setDHFinal;
 
   protected
     function getCFG: IMultiConfig;
@@ -105,6 +132,7 @@ type
 
     function getOpcoes(pBusca: TipoWideStringFramework=''): IDatasetSimples;
     function query: TipoWideStringFramework;
+    function setTipoPorNome(pNome: TipoWideStringFramework): TTipoFiltro;
 
   end;
 
@@ -114,6 +142,9 @@ implementation
     {$if defined(DEBUG)}
       ClipBrd,
     {$endif}
+    Terasoft.FuncoesTexto,
+    Variants,
+    Terasoft.Framework.FuncoesDiversas,
     FuncoesPesquisaDB,
     DBClient;
 { TFiltroModel }
@@ -203,8 +234,14 @@ function TFiltroModel.getOpcoes;///: IDatasetSimples;
 
 begin
   Result := nil;
-  if not valido then
-    exit;
+  case getTipo of
+    tipoFiltro_Busca,tipoFiltro_DataPeriodo,tipoFiltro_HoraPeriodo,tipoFiltro_DataHoraPeriodo:
+      exit;
+    tipoFiltro_Set:
+    else
+      Exception.CreateFmt('TFiltroModel.getOpcoes: Tipo [%d] desconhecido.', [ Ord(fTipo)] );
+  end;
+
   pBusca := trim(pBusca);
 
   lOpcoesTxt := listaOpcoes;
@@ -270,7 +307,7 @@ begin
 
       lWhere := '';
       if(pBusca<>'') then
-        lWhere := ExpandeWhere(format('%s;%s', [ fChave,lFieldNames]),pBusca,tewcprefixodata_And,false );
+        lWhere := ExpandeWhere(format('%s;%s', [ fChave,lFieldNames]),UpperCase(retiraAcentos(pBusca)),tewcprefixodata_And,false );
 
       if(lWhere<>'') then
         lWhere := ' where 1=1 ' + lWhere;
@@ -309,27 +346,103 @@ begin
 end;
 
 function TFiltroModel.query: TipoWideStringFramework;
-  var
-    s: TipoWideStringFramework;
-    lIn: String;
+  function getTipoBusca: String;
+    var
+      lIn: String;
+      s: TipoWideStringFramework;
+  begin
+    Result := '';
+    lIn := '';
+    if(getOpcoesSelecionadas.strings.Count=0) then exit;
+
+    Result := ExpandeWhere(fCampo,uppercase(retiraAcentos(fOpcoesSelecionadas.text)),tewcprefixodata_None,false);
+  end;
+
+  function getTipoSet: String;
+    var
+      lIn: String;
+      s: TipoWideStringFramework;
+  begin
+    Result := '';
+    lIn := '';
+    if(getOpcoesSelecionadas.strings.Count=0) then exit;
+
+    if(fOpcoesSelecionadas.strings.Count=1) then
+      Result := fCampo + '=' + QuotedStr(fOpcoesSelecionadas.strings.Strings[0])
+    else
+    begin
+      for s in fOpcoesSelecionadas do
+      begin
+        if(lIn<>'') then
+          lIn:=lIn+','+#13;
+        lIn := lIn + quotedStr(trim(s));
+      end;
+      lIn := '('+#13 + lIn + #13 + ')'+#13;
+      Result := format('%s in %s', [fCampo, lIn]);
+    end;
+  end;
+
+  function formata_Data(dt: TDateTime): String;
+  begin
+    case fTipo of
+
+      tipoFiltro_DataPeriodo:
+        Result := Terasoft.FuncoesTexto.transformaDataFireBird(dt);
+
+      tipoFiltro_HoraPeriodo:
+        Result := TimeToStr(dt);
+
+      tipoFiltro_DataHoraPeriodo:
+        Result := Terasoft.FuncoesTexto.transformaDataHoraFireBird(dt);
+    end;
+
+  end;
+
+  function getTipoPeriodo: String;
+    var
+      di,df: Variant;
+      lIn: String;
+      s: TipoWideStringFramework;
+  begin
+    Result := '';
+    lIn := '';
+    di := getDhInicial;
+    df := getDHFinal;
+
+    if(VarIsNull(di) and VarIsNull(df)) then exit;
+
+    if(VarIsNull(df)) then
+      Result := fCampo + '>=' + QuotedStr(formata_Data(di))
+    else if(VarIsNull(di)) then
+      Result := fCampo + '<=' + QuotedStr(formata_Data(df))
+    else
+      Result := format( '%s between %s and %s ', [ fCampo, QuotedStr(formata_Data(di)), QuotedStr(formata_Data(df))])
+  end;
+
 begin
   Result := '';
-  lIn := '';
+  case getTipo of
 
-  if(getOpcoesSelecionadas.strings.Count=0) then exit;
-
-  if(fOpcoesSelecionadas.strings.Count=1) then
-    Result := fCampo + '=' + QuotedStr(fOpcoesSelecionadas.strings.Strings[0])
-  else
-  begin
-    for s in fOpcoesSelecionadas do
+    tipoFiltro_Set:
     begin
-      if(lIn<>'') then
-        lIn:=lIn+','+#13;
-      lIn := lIn + quotedStr(trim(s));
+      Result := getTipoSet;
     end;
-    lIn := '('+#13 + lIn + #13 + ')'+#13;
-    Result := format('%s in %s', [fCampo, lIn]);
+
+    tipoFiltro_Busca:
+    begin
+      Result := getTipoBusca;
+    end;
+
+    tipoFiltro_DataPeriodo,tipoFiltro_HoraPeriodo,tipoFiltro_DataHoraPeriodo:
+    begin
+      Result := getTipoPeriodo;
+    end
+
+    else
+    begin
+      raise Exception.CreateFmt('Tipo desconhecido: [%d]', [Ord(fTipo)]);
+    end;
+
   end;
 
 end;
@@ -384,6 +497,109 @@ end;
 function TFiltroModel.getPrimeiro: Integer;
 begin
   Result := fPrimeiro;
+end;
+
+procedure TFiltroModel.setTipo(const pValue: TTipoFiltro);
+begin
+  fTipo := pValue;
+end;
+
+function TFiltroModel.setTipoPorNome;
+begin
+  if(stringNoArray(pNome, ['@periodo','@periodo.data'],[osna_CaseInsensitive,osna_SemAcento])) then
+  begin
+    setTipo(tipoFiltro_DataPeriodo);
+    fDESCRICAO := 'Período de DATA de ' + fCampo;
+
+  end else if(stringNoArray(pNome, ['@busca'],[osna_CaseInsensitive,osna_SemAcento])) then
+  begin
+    fDESCRICAO := 'Busca em Campos';
+    setTipo(tipoFiltro_Busca);
+
+  end else if(stringNoArray(pNome, ['@hora','@periodo.hora'],[osna_CaseInsensitive,osna_SemAcento])) then
+  begin
+    fDESCRICAO := 'Período de HORA de ' + fCampo;
+    setTipo(tipoFiltro_HoraPeriodo);
+
+  end else if(stringNoArray(pNome, ['@datahora','@periodo.datahora'],[osna_CaseInsensitive,osna_SemAcento])) then
+  begin
+    fDESCRICAO := 'Período de DATA/HORA de ' + fCampo;
+    setTipo(tipoFiltro_DataHoraPeriodo);
+  end;
+  Result := getTipo;
+end;
+
+function TFiltroModel.getTipo: TTipoFiltro;
+  var
+    cfg: IMultiConfig;
+    lName, lRegrasValores: String;
+begin
+  try
+    if(fTipo=tipoFiltro_Desconhecido) then
+    begin
+      //Precisamos inicializar...
+      if(getValido=false) then
+      begin
+        fTipo := tipoFiltro_Busca;
+        exit;
+      end else
+      begin
+        cfg := getCFG;
+        lName  := cfg.ReadString('query','tabela',fNOME);
+        lRegrasValores:=textoEntreTags(lName,'@','');
+        fTipo := tipoFiltro_Set;
+      end;
+    end;
+  finally
+    Result := fTipo;
+  end;
+end;
+
+procedure TFiltroModel.setDhInicial(const pValue: Variant);
+begin
+  setDhPorIndice(0,pValue);
+end;
+
+procedure TFiltroModel.setDhPorIndice(const indice: Integer;
+  const pValue: Variant);
+begin
+  if(indice<0) then exit;
+  while  getOpcoesSelecionadas.strings.Count <= indice do
+    fOpcoesSelecionadas.strings.Add('');
+
+  if VarIsNull(pValue) then
+    fOpcoesSelecionadas.strings.Strings[indice]:=''
+  else
+    fOpcoesSelecionadas.strings.Strings[indice]:=pValue;
+
+end;
+
+function TFiltroModel.getDhPorIndice(const indice: Integer): Variant;
+  var
+    d: TDateTime;
+begin
+  Result := Null;
+  if(getOpcoesSelecionadas.strings.Count>indice) then
+  begin
+    d := StrToDateTimeDef(fOpcoesSelecionadas.strings.Strings[indice],-1);
+    if(d>-1) then
+      Result := d;
+  end;
+end;
+
+function TFiltroModel.getDhInicial: Variant;
+begin
+  Result := getDhPorIndice(0);
+end;
+
+function TFiltroModel.getDHFinal: Variant;
+begin
+  Result := getDhPorIndice(1);
+end;
+
+procedure TFiltroModel.setDHFinal(const pValue: Variant);
+begin
+  setDhPorIndice(1,pValue);
 end;
 
 end.
