@@ -65,10 +65,10 @@ type
     property TipoView: String read FTipoView write SetTipoView;
     property LojaView : Variant read FLojaView write SetLojaView;
 
-    function obterFluxoCaixaSintetico : TFDMemTable;
-    function obterFluxoCaixaAnalitico : TFDMemTable;
-    function obterResumo              : TFDMemTable;
-    function obterResultadoFluxoCaixa : TFDMemTable;
+    function obterFluxoCaixaSintetico : IFDDataset;
+    function obterFluxoCaixaAnalitico : IFDDataset;
+    function obterResumo              : IFDDataset;
+    function obterResultadoFluxoCaixa : IFDDataset;
 end;
 
 implementation
@@ -96,7 +96,7 @@ begin
   Result.objeto.myself := Result;
 end;
 
-function TFluxoCaixaDao.obterFluxoCaixaSintetico : TFDMemTable;
+function TFluxoCaixaDao.obterFluxoCaixaSintetico : IFDDataset;
 var
   lQry        : TFDQuery;
   lSql        : String;
@@ -107,6 +107,7 @@ begin
   lQry        := vIConexao.CriarQuery;
   lLojasModel := TLojasModel.getNewIface(vIConexao);
   lMemTable   := TFDMemTable.Create(nil);
+  Result := criaIFDDataset(lMemTable);
 
   try
     lSql := '  select                                                                                                                                     '+sLineBreak+
@@ -243,14 +244,13 @@ begin
     end;
 
     lMemTable.Open;
-    Result := lMemTable;
 
   finally
     lQry.Free;
   end;
 end;
 
-function TFluxoCaixaDao.obterFluxoCaixaAnalitico : TFDMemTable;
+function TFluxoCaixaDao.obterFluxoCaixaAnalitico : IFDDataset;
 var
   lQry        : TFDQuery;
   lSql        : String;
@@ -261,6 +261,7 @@ begin
   lQry        := vIConexao.CriarQuery;
   lLojasModel := TLojasModel.getNewIface(vIConexao);
   lMemTable   := TFDMemTable.Create(nil);
+  Result := criaIFDDataset(lMemTable);
 
   try
     lSql := '  select                                                                                                                                     '+sLineBreak+
@@ -407,14 +408,13 @@ begin
     end;
 
     lMemTable.Open;
-    Result := lMemTable;
 
   finally
     lQry.Free;
   end;
 end;
 
-function TFluxoCaixaDao.obterResumo: TFDMemTable;
+function TFluxoCaixaDao.obterResumo: IFDDataset;
 var
   lQry        : TFDQuery;
   lSql        : String;
@@ -425,6 +425,8 @@ begin
   lQry        := vIConexao.CriarQuery;
   lLojasModel := TLojasModel.getNewIface(vIConexao);
   lMemTable   := TFDMemTable.Create(nil);
+
+  Result := criaIFDDataset(lMemTable);
 
   try
     lSql := '   select                                                                                                                    '+sLineBreak+
@@ -508,14 +510,13 @@ begin
     end;
 
     lMemTable.Open;
-    Result := lMemTable;
 
   finally
     lQry.Free;
   end;
 end;
 
-function TFluxoCaixaDao.obterResultadoFluxoCaixa : TFDMemTable;
+function TFluxoCaixaDao.obterResultadoFluxoCaixa : IFDDataset;
 var
   lQry : TFDQuery;
   lSql : String;
@@ -531,6 +532,7 @@ var
 
 begin
   lMemTable   := TFDMemTable.Create(nil);
+  Result := criaIFDDataset(lMemTable);
   lLojasModel := TLojasModel.getNewIface(vIConexao);
 
   try
@@ -657,8 +659,6 @@ begin
                               FormatFloat('####0.00', lSaldoBanco),
                               FormatFloat('####0.00', lTotal)
                              ]);
-
-      Result := lMemTable;
 
     end;
 

@@ -47,10 +47,10 @@ type
 
     class function getNewIface(pIConexao: IConexao): ITFluxoCaixaModel;
 
-    function obterFluxoCaixaSintetico : TFDMemTable;
-    function obterFluxoCaixaAnalitico : TFDMemTable;
-    function obterResumo              : TFDMemTable;
-    function obterResultadoFluxoCaixa : TFDMemTable;
+    function obterFluxoCaixaSintetico : IFDDataset;
+    function obterFluxoCaixaAnalitico : IFDDataset;
+    function obterResumo              : IFDDataset;
+    function obterResultadoFluxoCaixa : IFDDataset;
 
     property WhereView: String read FWhereView write SetWhereView;
     property OrderView: String read FOrderView write SetOrderView;
@@ -88,7 +88,7 @@ begin
   Result.objeto.myself := Result;
 end;
 
-function TFluxoCaixaModel.obterResultadoFluxoCaixa : TFDMemTable;
+function TFluxoCaixaModel.obterResultadoFluxoCaixa : IFDDataset;
 var
   lFluxoCaixa: ITFluxoCaixaDao;
 begin
@@ -111,7 +111,7 @@ begin
   end;
 end;
 
-function TFluxoCaixaModel.obterResumo: TFDMemTable;
+function TFluxoCaixaModel.obterResumo: IFDDataset;
 var
   lFluxoCaixa: ITFluxoCaixaDao;
 begin
@@ -134,7 +134,7 @@ begin
   end;
 end;
 
-function TFluxoCaixaModel.obterFluxoCaixaSintetico: TFDMemTable;
+function TFluxoCaixaModel.obterFluxoCaixaSintetico: IFDDataset;
 var
   lFluxoCaixaLista: ITFluxoCaixaDao;
 
@@ -160,7 +160,7 @@ begin
   end;
 end;
 
-function TFluxoCaixaModel.obterFluxoCaixaAnalitico: TFDMemTable;
+function TFluxoCaixaModel.obterFluxoCaixaAnalitico: IFDDataset;
 var
   lFluxoCaixaLista: ITFluxoCaixaDao;
 begin

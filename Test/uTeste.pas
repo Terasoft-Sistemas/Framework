@@ -1527,7 +1527,7 @@ end;
 procedure TForm1.Button48Click(Sender: TObject);
 var
   lFluxoCaixaModel : ITFluxoCaixaModel;
-  lMemTable        : TFDMemTable;
+  lMemTable        : IFDDataset;
 begin
   lFluxoCaixaModel := TFluxoCaixaModel.getNewIface(vIConexao);
   try
@@ -1541,8 +1541,8 @@ begin
       lMemTable := lFluxoCaixaModel.objeto.obterFluxoCaixaSintetico;
       //Aki o dataset será zerado apos sair da função.
       //Precisa deixar este contexto ativo...                  a
-      //dsTmp := lMemTable...
-      dsTeste2.DataSet := lMemTable;
+      dsTmp := lMemTable;
+      dsTeste2.DataSet := dsTmp.objeto;
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
@@ -1554,7 +1554,7 @@ end;
 procedure TForm1.Button49Click(Sender: TObject);
 var
   lFluxoCaixaModel : ITFluxoCaixaModel;
-  lMemTable        : TFDMemTable;
+  lMemTable        : IFDDataset;
 begin
   lFluxoCaixaModel := TFluxoCaixaModel.getNewIface(vIConexao);
   try
@@ -1567,7 +1567,12 @@ begin
       lFluxoCaixaModel.objeto.TipoView        := 'RECEBER';
 
       lMemTable := lFluxoCaixaModel.objeto.obterFluxoCaixaAnalitico;
-      dsTeste2.DataSet := lMemTable;
+
+      //Aki o dataset será zerado apos sair da função.
+      //Precisa deixar este contexto ativo...                  a
+      dsTmp := lMemTable;
+
+      dsTeste2.DataSet := lMemTable.objeto;
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
@@ -1642,7 +1647,7 @@ end;
 procedure TForm1.Button50Click(Sender: TObject);
 var
   lFluxoCaixaModel : ITFluxoCaixaModel;
-  lMemTable        : TFDMemTable;
+  lMemTable        : IFDDataset;
 begin
   lFluxoCaixaModel := TFluxoCaixaModel.getNewIface(vIConexao);
   try
@@ -1651,7 +1656,11 @@ begin
       lFluxoCaixaModel.objeto.DataFinalView   := '29/02/2024';
 
       lMemTable := lFluxoCaixaModel.objeto.obterResumo;
-      dsTeste2.DataSet := lMemTable;
+      //Aki o dataset será zerado apos sair da função.
+      //Precisa deixar este contexto ativo...                  a
+      dsTmp := lMemTable;
+
+      dsTeste2.DataSet := lMemTable.objeto;
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
@@ -1663,7 +1672,7 @@ end;
 procedure TForm1.Button51Click(Sender: TObject);
 var
   lFluxoCaixaModel : ITFluxoCaixaModel;
-  lMemTable        : TFDMemTable;
+  lMemTable        : IFDDataset;
 begin
   lFluxoCaixaModel := TFluxoCaixaModel.getNewIface(vIConexao);
   try
@@ -1675,7 +1684,11 @@ begin
       lFluxoCaixaModel.objeto.PorcentagemInadimplenciaView := 10;
       lMemTable := lFluxoCaixaModel.objeto.obterResultadoFluxoCaixa;
 
-      dsTeste2.DataSet := lMemTable;
+      //Aki o dataset será zerado apos sair da função.
+      //Precisa deixar este contexto ativo...                  a
+      dsTmp := lMemTable;
+
+      dsTeste2.DataSet := lMemTable.objeto;
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
