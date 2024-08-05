@@ -859,7 +859,7 @@ type
     FcodTabelaCred: Integer;
     FcodProdutoCredipar: Integer;
     FPedido: Integer;
-    FvlrCompra: Double;
+    FvlrCompra: Extended;
     FvlrEntrada: Double;
     FvlrParcela: Double;
     FdtCompra: TXSDate;
@@ -924,7 +924,7 @@ type
     property codTabelaCred:      Integer      read FcodTabelaCred write FcodTabelaCred;
     property codProdutoCredipar: Integer      read FcodProdutoCredipar write FcodProdutoCredipar;
     property Pedido:             Integer      read FPedido write FPedido;
-    property vlrCompra:          Double       read FvlrCompra write FvlrCompra;
+    property vlrCompra:          Extended       read FvlrCompra write FvlrCompra;
     property vlrEntrada:         Double       read FvlrEntrada write FvlrEntrada;
     property vlrParcela:         Double       read FvlrParcela write FvlrParcela;
     property dtCompra:           TXSDate  read FdtCompra write FdtCompra;

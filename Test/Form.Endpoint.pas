@@ -39,7 +39,6 @@ type
     vIConexao:IConexao;
     epControl: IController_Endpoint;
     fSelecionado: ITEndpointModel;
-    //fLista: TListaEndpointModel;
     fFiltroSelecionado: ITFiltroModel;
     fDS: IDatasetSimples;
     procedure selecionaEP(ep: ITEndpointModel);
@@ -56,6 +55,7 @@ var
 
 implementation
   uses
+    Terasoft.Framework.SCI.ValidacaoPadraoCamposTabelas,
     Terasoft.Framework.FuncoesDiversas,
     FuncoesSelecaoLista;
 
@@ -94,9 +94,8 @@ begin
   cbEP.values.Clear;
   cbEP.Text := '';
   epControl := getEndpointController(vIConexao);
-  for m in epControl.lista do
+  for m in epControl.getNovaLista(nil,2) do
   begin
-    //
     cbEp.items.add(m.objeto.DESCRICAO);
     cbEp.values.add(m.objeto.NOME);
   end;
@@ -157,7 +156,7 @@ begin
 
     tipoFiltro_DataPeriodo:
     begin
-//        fFiltroSelecionado.objeto.dhInicial := selecionaData(fFiltroSelecionado.objeto.dhInicial,'Data Inicial');
+        fFiltroSelecionado.objeto.dhInicial := selecionaData(fFiltroSelecionado.objeto.dhInicial,'Data Inicial');
         fFiltroSelecionado.objeto.dhFinal := selecionaData(fFiltroSelecionado.objeto.dhFinal,'Data Final');
     end;
     tipoFiltro_HoraPeriodo: ;
