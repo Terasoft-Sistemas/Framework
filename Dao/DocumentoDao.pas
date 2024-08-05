@@ -11,12 +11,16 @@ uses
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao;
 
 type
-  TDocumentoDao = class
+  TDocumentoDao = class;
+  ITDocumentoDao=IObject<TDocumentoDao>;
 
+  TDocumentoDao = class
   private
+    [weak] mySelf: ITDocumentoDao;
     vIConexao : IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -42,8 +46,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITDocumentoDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -54,15 +60,15 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(pDocumentoModel: TDocumentoModel): String;
-    function alterar(pDocumentoModel: TDocumentoModel): String;
-    function excluir(pDocumentoModel: TDocumentoModel): String;
+    function incluir(pDocumentoModel: ITDocumentoModel): String;
+    function alterar(pDocumentoModel: ITDocumentoModel): String;
+    function excluir(pDocumentoModel: ITDocumentoModel): String;
 
-    function carregaClasse(pID : String): TDocumentoModel;
+    function carregaClasse(pID : String): ITDocumentoModel;
 
     function obterLista: IFDDataset;
 
-    procedure setParams(var pQry: TFDQuery; pDocumentoModel: TDocumentoModel);
+    procedure setParams(var pQry: TFDQuery; pDocumentoModel: ITDocumentoModel);
 
 end;
 
@@ -73,13 +79,13 @@ uses
 
 { TDocumento }
 
-function TDocumentoDao.carregaClasse(pID : String): TDocumentoModel;
+function TDocumentoDao.carregaClasse(pID : String): ITDocumentoModel;
 var
   lQry: TFDQuery;
-  lModel: TDocumentoModel;
+  lModel: ITDocumentoModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TDocumentoModel.Create(vIConexao);
+  lModel   := TDocumentoModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -88,9 +94,9 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID       := lQry.FieldByName('ID').AsString;
-    lModel.NOME     := lQry.FieldByName('NOME').AsString;
-    lModel.SYSTIME  := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.ID       := lQry.FieldByName('ID').AsString;
+    lModel.objeto.NOME     := lQry.FieldByName('NOME').AsString;
+    lModel.objeto.SYSTIME  := lQry.FieldByName('SYSTIME').AsString;
 
     Result := lModel;
   finally
@@ -98,7 +104,7 @@ begin
   end;
 end;
 
-constructor TDocumentoDao.Create(pIConexao : IConexao);
+constructor TDocumentoDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -109,7 +115,7 @@ begin
   inherited;
 end;
 
-function TDocumentoDao.incluir(pDocumentoModel: TDocumentoModel): String;
+function TDocumentoDao.incluir(pDocumentoModel: ITDocumentoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -120,7 +126,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pDocumentoModel.ID := vIConexao.Generetor('GEN_DOCUMENTO');
+    pDocumentoModel.objeto.ID := vIConexao.Generetor('GEN_DOCUMENTO');
     setParams(lQry, pDocumentoModel);
     lQry.Open;
 
@@ -132,7 +138,7 @@ begin
   end;
 end;
 
-function TDocumentoDao.alterar(pDocumentoModel: TDocumentoModel): String;
+function TDocumentoDao.alterar(pDocumentoModel: ITDocumentoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -146,7 +152,7 @@ begin
     setParams(lQry, pDocumentoModel);
     lQry.ExecSQL;
 
-    Result := pDocumentoModel.ID;
+    Result := pDocumentoModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -154,20 +160,26 @@ begin
   end;
 end;
 
-function TDocumentoDao.excluir(pDocumentoModel: TDocumentoModel): String;
+function TDocumentoDao.excluir(pDocumentoModel: ITDocumentoModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from DOCUMENTO where ID = :ID' ,[pDocumentoModel.ID]);
+   lQry.ExecSQL('delete from DOCUMENTO where ID = :ID' ,[pDocumentoModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pDocumentoModel.ID;
+   Result := pDocumentoModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TDocumentoDao.getNewIface(pIConexao: IConexao): ITDocumentoDao;
+begin
+  Result := TImplObjetoOwner<TDocumentoDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TDocumentoDao.where: String;
@@ -262,28 +274,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TDocumentoDao.setParams(var pQry: TFDQuery; pDocumentoModel: TDocumentoModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TDocumentoDao.setParams(var pQry: TFDQuery; pDocumentoModel: ITDocumentoModel);
 begin
-  lTabela := vConstrutor.getColumns('DOCUMENTO');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TDocumentoModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pDocumentoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pDocumentoModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('DOCUMENTO',pQry,pDocumentoModel.objeto);
 end;
 
 procedure TDocumentoDao.SetStartRecordView(const Value: String);

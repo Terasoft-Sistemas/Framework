@@ -1253,18 +1253,18 @@ end;
 
 procedure TForm1.Button39Click(Sender: TObject);
 var
-  lDocumentoModel : TDocumentoModel;
+  lDocumentoModel : ITDocumentoModel;
   lDescricao      : String;
 begin
-  lDocumentoModel := TDocumentoModel.Create(vIConexao);
+  lDocumentoModel := TDocumentoModel.getNewIface(vIConexao);
   try
     try
       lDescricao := InputBox('Documento','Digite a descricao: ','');
       if lDescricao.IsEmpty then
       Exit;
 
-      lDocumentoModel.NOME := lDescricao;
-      lDocumentoModel.Incluir;
+      lDocumentoModel.objeto.NOME := lDescricao;
+      lDocumentoModel.objeto.Incluir;
 
       ShowMessage('Documento incluido com sucesso');
     except
@@ -1272,7 +1272,7 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lDocumentoModel.Free;
+    lDocumentoModel:=nil;
   end;
 end;
 
@@ -1303,13 +1303,13 @@ end;
 
 procedure TForm1.Button40Click(Sender: TObject);
 var
-  lDocumentoModel : TDocumentoModel;
+  lDocumentoModel : ITDocumentoModel;
   lMemTable : IFDDataset;
 begin
-  lDocumentoModel := TDocumentoModel.Create(vIConexao);
+  lDocumentoModel := TDocumentoModel.getNewIface(vIConexao);
   try
     try
-      lMemTable := lDocumentoModel.obterLista;
+      lMemTable := lDocumentoModel.objeto.obterLista;
       memoResultado.Lines.Clear;
 
       lMemTable.objeto.First;
@@ -1325,56 +1325,56 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lDocumentoModel.Free;
+    lDocumentoModel:=nil;
   end;
 end;
 
 procedure TForm1.Button41Click(Sender: TObject);
 var
-  lDocumentoModel : TDocumentoModel;
+  lDocumentoModel : ITDocumentoModel;
   ID              : String;
 begin
-  lDocumentoModel := TDocumentoModel.Create(vIConexao);
+  lDocumentoModel := TDocumentoModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('Documento', 'Digite o ID que deseja Alterar:', '');
       if ID.IsEmpty then
         exit;
 
-      lDocumentoModel := lDocumentoModel.Alterar(ID);
-      lDocumentoModel.NOME := 'TESTE DOC NOME';
+      lDocumentoModel := lDocumentoModel.objeto.Alterar(ID);
+      lDocumentoModel.objeto.NOME := 'TESTE DOC NOME';
 
-      lDocumentoModel.Salvar;
+      lDocumentoModel.objeto.Salvar;
       ShowMessage('Alterado com Sucesso');
     Except
       on E:Exception do
       ShowMessage('Erro: ' +E.Message);
     end;
   finally
-    lDocumentoModel.Free;
+    lDocumentoModel:=nil;
   end;
 end;
 
 procedure TForm1.Button42Click(Sender: TObject);
 var
-  lDocumentoModel : TDocumentoModel;
+  lDocumentoModel : ITDocumentoModel;
   ID        : String;
 begin
-  lDocumentoModel := TDocumentoModel.Create(vIConexao);
+  lDocumentoModel := TDocumentoModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('Documento', 'Digite o ID do Documento que deseja excluir:', '');
       if ID.IsEmpty then
           Exit;
 
-      lDocumentoModel.Excluir(ID);
+      lDocumentoModel.objeto.Excluir(ID);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lDocumentoModel.Free;
+    lDocumentoModel:=nil;
   end;
 end;
 

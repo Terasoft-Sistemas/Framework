@@ -6,13 +6,17 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
 
-  TDocumentoModel = class
+  TDocumentoModel = class;
+  ITDocumentoModel=IObject<TDocumentoModel>;
 
+  TDocumentoModel = class
   private
+    [weak] mySelf: ITDocumentoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -45,15 +49,17 @@ type
     property NOME     : Variant read FNOME write SetNOME;
     property SYSTIME  : Variant read FSYSTIME write SetSYSTIME;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITDocumentoModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TDocumentoModel;
+    function Alterar(pID : String): ITDocumentoModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId : String): TDocumentoModel;
+    function carregaClasse(pId : String): ITDocumentoModel;
     function obterLista: IFDDataset;
 
     property Acao :TAcao read FAcao write SetAcao;
@@ -76,14 +82,14 @@ uses
 
 { TDocumentoModel }
 
-function TDocumentoModel.Alterar(pID: String): TDocumentoModel;
+function TDocumentoModel.Alterar(pID: String): ITDocumentoModel;
 var
-  lDocumentoModel : TDocumentoModel;
+  lDocumentoModel : ITDocumentoModel;
 begin
-  lDocumentoModel := TDocumentoModel.Create(vIConexao);
+  lDocumentoModel := TDocumentoModel.getNewIface(vIConexao);
   try
-    lDocumentoModel       := lDocumentoModel.carregaClasse(pID);
-    lDocumentoModel.Acao  := tacAlterar;
+    lDocumentoModel       := lDocumentoModel.objeto.carregaClasse(pID);
+    lDocumentoModel.objeto.Acao  := tacAlterar;
     Result                := lDocumentoModel;
   finally
   end;
@@ -96,26 +102,32 @@ begin
   Result       := self.Salvar;
 end;
 
+class function TDocumentoModel.getNewIface(pIConexao: IConexao): ITDocumentoModel;
+begin
+  Result := TImplObjetoOwner<TDocumentoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TDocumentoModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
     Result    := self.Salvar;
 end;
 
-function TDocumentoModel.carregaClasse(pId : String): TDocumentoModel;
+function TDocumentoModel.carregaClasse(pId : String): ITDocumentoModel;
 var
-  lDocumentoDao: TDocumentoDao;
+  lDocumentoDao: ITDocumentoDao;
 begin
-  lDocumentoDao := TDocumentoDao.Create(vIConexao);
+  lDocumentoDao := TDocumentoDao.getNewIface(vIConexao);
 
   try
-    Result := lDocumentoDao.carregaClasse(pId);
+    Result := lDocumentoDao.objeto.carregaClasse(pId);
   finally
-    lDocumentoDao.Free;
+    lDocumentoDao:=nil;
   end;
 end;
 
-constructor TDocumentoModel.Create(pIConexao : IConexao);
+constructor TDocumentoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -127,42 +139,42 @@ end;
 
 function TDocumentoModel.obterLista: IFDDataset;
 var
-  lDocumentoLista: TDocumentoDao;
+  lDocumentoLista: ITDocumentoDao;
 begin
-  lDocumentoLista := TDocumentoDao.Create(vIConexao);
+  lDocumentoLista := TDocumentoDao.getNewIface(vIConexao);
 
   try
-    lDocumentoLista.TotalRecords    := FTotalRecords;
-    lDocumentoLista.WhereView       := FWhereView;
-    lDocumentoLista.CountView       := FCountView;
-    lDocumentoLista.OrderView       := FOrderView;
-    lDocumentoLista.StartRecordView := FStartRecordView;
-    lDocumentoLista.LengthPageView  := FLengthPageView;
-    lDocumentoLista.IDRecordView    := FIDRecordView;
+    lDocumentoLista.objeto.TotalRecords    := FTotalRecords;
+    lDocumentoLista.objeto.WhereView       := FWhereView;
+    lDocumentoLista.objeto.CountView       := FCountView;
+    lDocumentoLista.objeto.OrderView       := FOrderView;
+    lDocumentoLista.objeto.StartRecordView := FStartRecordView;
+    lDocumentoLista.objeto.LengthPageView  := FLengthPageView;
+    lDocumentoLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lDocumentoLista.obterLista;
+    Result := lDocumentoLista.objeto.obterLista;
 
-    FTotalRecords := lDocumentoLista.TotalRecords;
+    FTotalRecords := lDocumentoLista.objeto.TotalRecords;
 
   finally
-    lDocumentoLista.Free;
+    lDocumentoLista:=nil;
   end;
 end;
 
 function TDocumentoModel.Salvar: String;
 var
-  lDocumentoDao: TDocumentoDao;
+  lDocumentoDao: ITDocumentoDao;
 begin
-  lDocumentoDao := TDocumentoDao.Create(vIConexao);
+  lDocumentoDao := TDocumentoDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lDocumentoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lDocumentoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lDocumentoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lDocumentoDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lDocumentoDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lDocumentoDao.objeto.excluir(mySelf);
     end;
   finally
-    lDocumentoDao.Free;
+    lDocumentoDao:=nil;
   end;
 end;
 
