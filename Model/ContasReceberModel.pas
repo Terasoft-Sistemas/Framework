@@ -181,7 +181,7 @@ type
     function Salvar: String;
     procedure obterLista;
     procedure obterContasReceberPedido;
-    function carregaClasse(pFatura: String): TContasReceberModel;
+    function carregaClasse(pFatura: String; pLoja: String = ''): TContasReceberModel;
     function concluirContasReceber(pFatura: String): TConclusaoContasReceber;
     function gerarChamadaTEF(pTefModalidade, pTefParcelamento, pTefAdquirente: String): String;
     function pedidoContasReceber(pFatura: String): String;
@@ -249,13 +249,13 @@ begin
   Result    := self.Salvar;
 end;
 
-function TContasReceberModel.carregaClasse(pFatura: String): TContasReceberModel;
+function TContasReceberModel.carregaClasse(pFatura: String; pLoja: String = ''): TContasReceberModel;
 var
   lContasReceberDao: TContasReceberDao;
 begin
   lContasReceberDao := TContasReceberDao.Create(vIConexao);
   try
-    Result := lContasReceberDao.carregaClasse(pFatura);
+    Result := lContasReceberDao.carregaClasse(pFatura, pLoja);
   finally
     lContasReceberDao.Free;
   end;

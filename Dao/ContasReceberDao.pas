@@ -67,7 +67,7 @@ type
     procedure setParams(var pQry: TFDQuery; pContasReceberModel: TContasReceberModel);
 
     function where: String;
-    function carregaClasse(pFatura: String): TContasReceberModel;
+    function carregaClasse(pFatura: String; pLoja: String = ''): TContasReceberModel;
     function pedidoContasReceber(pFatura: String): String;
 
 end;
@@ -79,12 +79,21 @@ uses
 
 { TContasReceber }
 
-function TContasReceberDao.carregaClasse(pFatura: String): TContasReceberModel;
+function TContasReceberDao.carregaClasse(pFatura: String; pLoja: String = ''): TContasReceberModel;
 var
   lQry: TFDQuery;
   lModel: TContasReceberModel;
 begin
-  lQry     := vIConexao.CriarQuery;
+  if not pLoja.IsEmpty then
+  begin
+    if vIConexao.getLojaConectada <> pLoja then
+      vIConexao.ConfigConexaoExterna(pLoja);
+
+    lQry := vIConexao.criarQueryExterna;
+  end
+  else
+    lQry := vIConexao.CriarQuery;
+
   lModel   := TContasReceberModel.Create(vIConexao);
 
   try
