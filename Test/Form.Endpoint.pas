@@ -55,6 +55,7 @@ var
 
 implementation
   uses
+    Terasoft.Framework.SCI.ValidacaoPadraoCamposTabelas,
     Terasoft.Framework.FuncoesDiversas,
     FuncoesSelecaoLista;
 
