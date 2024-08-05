@@ -554,8 +554,13 @@ uses
   ProdutosModel,
   CFOPModel,
   EmpresaModel,
-  ClienteModel, FuncionarioModel, Terasoft.Configuracoes,
-  PixModel, FinanceiroPedidoModel, VendaCartaoModel, ReservaModel, CaixaControleModel;
+  ClienteModel,
+  FuncionarioModel,
+  Terasoft.Configuracoes,
+  PixModel, FinanceiroPedidoModel,
+  VendaCartaoModel,
+  ReservaModel,
+  CaixaControleModel;
 
 { TPedidoVendaModel }
 
@@ -876,6 +881,9 @@ begin
     CriaException('Para o cliente consumidor o portador não pode ser carteira.');
 
   if (self.FCODIGO_CLI = '000000') and (pPortador = '000005') then
+    CriaException('Para o cliente consumidor o portador não pode ser boleto.');
+
+  if (self.FCODIGO_CLI = '000000') and (pPortador = '000003' ) then
     CriaException('Para o cliente consumidor o portador não pode ser boleto.');
 
   validaBloqueioPortador(pPortador, self.FCODIGO_CLI);
