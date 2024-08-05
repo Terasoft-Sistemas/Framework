@@ -29,7 +29,7 @@ type
     class function getNewIface(pIConexao: IConexao): ITEndpointDao;
 
     function getByName(pName: TipoWideStringFramework): ITEndpointModel;
-    function getLista(pNames: IListaString): TListaEndpointModel;
+    function getLista(pNames: IListaString; pOrdem: Integer = 2): TListaEndpointModel;
 
   end;
 
@@ -67,9 +67,10 @@ begin
 
 end;
 
-function TEndpointDao.getLista(pNames: IListaString): TListaEndpointModel;
+function TEndpointDao.getLista;//
 var
   lQry: IDataset;
+  lSQL: String;
   s: TipoWideStringFramework;
   tmp: String;
   lIn: String;
@@ -80,9 +81,14 @@ begin
   if(pNames=nil) then
     pNames:=getStringList;
   lIn := vIConstrutorDao.expandIn('ep.nome',pNames);
+  lSQL := 'select ep.* from endpoint ep where ep.metodo = :metodo '+#13
+          + lIn;
+  if(pOrdem = 1) then
+    lSQL := lSQL + ' order by ep.nome '
+  else if(pOrdem = 2) then
+    lSQL := lSQL + ' order by cast(ep.descricao as varchar(256)) ';
   lQry.query(
-      'select ep.* from endpoint ep where ep.metodo = :metodo '+#13
-          + lIn,
+      lSQL,
       'metodo', [ 'RELATORIO' ]);
   while not lQry.dataset.eof do
   begin

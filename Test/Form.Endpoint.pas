@@ -39,7 +39,6 @@ type
     vIConexao:IConexao;
     epControl: IController_Endpoint;
     fSelecionado: ITEndpointModel;
-    //fLista: TListaEndpointModel;
     fFiltroSelecionado: ITFiltroModel;
     fDS: IDatasetSimples;
     procedure selecionaEP(ep: ITEndpointModel);
@@ -94,9 +93,8 @@ begin
   cbEP.values.Clear;
   cbEP.Text := '';
   epControl := getEndpointController(vIConexao);
-  for m in epControl.lista do
+  for m in epControl.getNovaLista(nil,2) do
   begin
-    //
     cbEp.items.add(m.objeto.DESCRICAO);
     cbEp.values.add(m.objeto.NOME);
   end;
