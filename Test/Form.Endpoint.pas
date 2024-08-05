@@ -39,7 +39,7 @@ type
     vIConexao:IConexao;
     epControl: IController_Endpoint;
     fSelecionado: ITEndpointModel;
-    fLista: TListaEndpointModel;
+    //fLista: TListaEndpointModel;
     fFiltroSelecionado: ITFiltroModel;
     fDS: IDatasetSimples;
     procedure selecionaEP(ep: ITEndpointModel);
@@ -68,7 +68,7 @@ begin
   cbFiltros.Enabled := false;
   sbAbrir.Enabled := cbEP.ItemIndex<>-1;
   if(sbAbrir.Enabled=false) then exit;
-  selecionaEP(fLista.Items[cbEP.ItemIndex]);
+  selecionaEP(epControl.lista.Items[cbEP.ItemIndex]);
 end;
 
 procedure TFormEP.cbFiltrosChange(Sender: TObject);
@@ -94,8 +94,7 @@ begin
   cbEP.values.Clear;
   cbEP.Text := '';
   epControl := getEndpointController(vIConexao);
-  fLista := epControl.getLista;
-  for m in fLista do
+  for m in epControl.lista do
   begin
     //
     cbEp.items.add(m.objeto.DESCRICAO);
