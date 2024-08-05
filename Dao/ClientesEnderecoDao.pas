@@ -16,12 +16,16 @@ uses
   Terasoft.Framework.SimpleTypes,
   Interfaces.Conexao,
   Terasoft.ConstrutorDao,
+  Terasoft.Framework.ObjectIface,
   ClientesEnderecoModel;
 
 type
-  TClientesEnderecoDao = class
+  TClientesEnderecoDao = class;
+  ITClientesEnderecoDao=IObject<TClientesEnderecoDao>;
 
+  TClientesEnderecoDao = class
   private
+    [weak] mySelf: ITClientesEnderecoDao;
     vIConexao : IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -46,8 +50,10 @@ type
     function where: String;
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITClientesEnderecoDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -58,17 +64,17 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView : String read FIDRecordView write SetIDRecordView;
 
-    function incluir(pClientesEnderecoModel: TClientesEnderecoModel): String;
-    function alterar(pClientesEnderecoModel: TClientesEnderecoModel): String;
-    function excluir(pClientesEnderecoModel: TClientesEnderecoModel): String;
+    function incluir(pClientesEnderecoModel: ITClientesEnderecoModel): String;
+    function alterar(pClientesEnderecoModel: ITClientesEnderecoModel): String;
+    function excluir(pClientesEnderecoModel: ITClientesEnderecoModel): String;
 
-    function sincronizarDados(pClientesEnderecoModel: TClientesEnderecoModel): String;
+    function sincronizarDados(pClientesEnderecoModel: ITClientesEnderecoModel): String;
 
-    function carregaClasse(pID : String): TClientesEnderecoModel;
+    function carregaClasse(pID : String): ITClientesEnderecoModel;
 
     function obterLista: IFDDataset;
 
-    procedure setParams(var pQry: TFDQuery; pClientesEnderecoModel: TClientesEnderecoModel);
+    procedure setParams(var pQry: TFDQuery; pClientesEnderecoModel: ITClientesEnderecoModel);
 
 end;
 
@@ -79,7 +85,7 @@ uses
 
 { TClientesEndereco }
 
-function TClientesEnderecoDao.alterar(pClientesEnderecoModel: TClientesEnderecoModel): String;
+function TClientesEnderecoDao.alterar(pClientesEnderecoModel: ITClientesEnderecoModel): String;
 var
   lQry : TFDQuery;
   lSQL : String;
@@ -99,7 +105,7 @@ begin
     if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
       sincronizarDados(pClientesEnderecoModel);
 
-    Result := pClientesEnderecoModel.ID;
+    Result := pClientesEnderecoModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -107,13 +113,13 @@ begin
   end;
 end;
 
-function TClientesEnderecoDao.carregaClasse(pID: String): TClientesEnderecoModel;
+function TClientesEnderecoDao.carregaClasse(pID: String): ITClientesEnderecoModel;
 var
   lQry: TFDQuery;
-  lModel: TClientesEnderecoModel;
+  lModel: ITClientesEnderecoModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TClientesEnderecoModel.Create(vIConexao);
+  lModel   := TClientesEnderecoModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -122,29 +128,29 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID            := lQry.FieldByName('ID').AsString;
-    lModel.CLIENTE_ID    := lQry.FieldByName('CLIENTE_ID').AsString;
-    lModel.ENDERECO      := lQry.FieldByName('ENDERECO').AsString;
-    lModel.NUMERO        := lQry.FieldByName('NUMERO').AsString;
-    lModel.COMPLEMENTO   := lQry.FieldByName('COMPLEMENTO').AsString;
-    lModel.BAIRRO        := lQry.FieldByName('BAIRRO').AsString;
-    lModel.CIDADE        := lQry.FieldByName('CIDADE').AsString;
-    lModel.UF            := lQry.FieldByName('UF').AsString;
-    lModel.CEP           := lQry.FieldByName('CEP').AsString;
-    lModel.COD_MUNICIPIO := lQry.FieldByName('COD_MUNICIPIO').AsString;
-    lModel.OBS           := lQry.FieldByName('OBS').AsString;
-    lModel.TIPO          := lQry.FieldByName('TIPO').AsString;
-    lModel.REGIAO_ID     := lQry.FieldByName('REGIAO_ID').AsString;
-    lModel.TELEFONE      := lQry.FieldByName('TELEFONE').AsString;
-    lModel.CONTATO       := lQry.FieldByName('CONTATO').AsString;
-    lModel.SYSTIME       := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.ID            := lQry.FieldByName('ID').AsString;
+    lModel.objeto.CLIENTE_ID    := lQry.FieldByName('CLIENTE_ID').AsString;
+    lModel.objeto.ENDERECO      := lQry.FieldByName('ENDERECO').AsString;
+    lModel.objeto.NUMERO        := lQry.FieldByName('NUMERO').AsString;
+    lModel.objeto.COMPLEMENTO   := lQry.FieldByName('COMPLEMENTO').AsString;
+    lModel.objeto.BAIRRO        := lQry.FieldByName('BAIRRO').AsString;
+    lModel.objeto.CIDADE        := lQry.FieldByName('CIDADE').AsString;
+    lModel.objeto.UF            := lQry.FieldByName('UF').AsString;
+    lModel.objeto.CEP           := lQry.FieldByName('CEP').AsString;
+    lModel.objeto.COD_MUNICIPIO := lQry.FieldByName('COD_MUNICIPIO').AsString;
+    lModel.objeto.OBS           := lQry.FieldByName('OBS').AsString;
+    lModel.objeto.TIPO          := lQry.FieldByName('TIPO').AsString;
+    lModel.objeto.REGIAO_ID     := lQry.FieldByName('REGIAO_ID').AsString;
+    lModel.objeto.TELEFONE      := lQry.FieldByName('TELEFONE').AsString;
+    lModel.objeto.CONTATO       := lQry.FieldByName('CONTATO').AsString;
+    lModel.objeto.SYSTIME       := lQry.FieldByName('SYSTIME').AsString;
 
     Result := lModel;
   finally
     lQry.Free;
   end;
 end;
-constructor TClientesEnderecoDao.Create(pIConexao : IConexao);
+constructor TClientesEnderecoDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -155,7 +161,7 @@ begin
   inherited;
 end;
 
-function TClientesEnderecoDao.excluir(pClientesEnderecoModel: TClientesEnderecoModel): String;
+function TClientesEnderecoDao.excluir(pClientesEnderecoModel: ITClientesEnderecoModel): String;
 var
   lQry : TFDQuery;
   lConfiguracoes : ITerasoftConfiguracoes;
@@ -163,7 +169,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from CLIENTES_ENDERECO where ID = :ID' ,[pClientesEnderecoModel.ID]);
+   lQry.ExecSQL('delete from CLIENTES_ENDERECO where ID = :ID' ,[pClientesEnderecoModel.objeto.ID]);
    lQry.ExecSQL;
 
    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
@@ -171,13 +177,19 @@ begin
    if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
      sincronizarDados(pClientesEnderecoModel);
 
-   Result := pClientesEnderecoModel.ID;
+   Result := pClientesEnderecoModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
 end;
-function TClientesEnderecoDao.incluir(pClientesEnderecoModel: TClientesEnderecoModel): String;
+class function TClientesEnderecoDao.getNewIface(pIConexao: IConexao): ITClientesEnderecoDao;
+begin
+  Result := TImplObjetoOwner<TClientesEnderecoDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TClientesEnderecoDao.incluir(pClientesEnderecoModel: ITClientesEnderecoModel): String;
 var
   lQry : TFDQuery;
   lSQL : String;
@@ -191,7 +203,7 @@ begin
     Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
     lQry.SQL.Add(lSQL);
-    pClientesEnderecoModel.ID := vIConexao.Generetor('GEN_CLIENTES_ENDERECO');
+    pClientesEnderecoModel.objeto.ID := vIConexao.Generetor('GEN_CLIENTES_ENDERECO');
     setParams(lQry, pClientesEnderecoModel);
     lQry.Open;
 
@@ -296,28 +308,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TClientesEnderecoDao.setParams(var pQry: TFDQuery; pClientesEnderecoModel: TClientesEnderecoModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TClientesEnderecoDao.setParams(var pQry: TFDQuery; pClientesEnderecoModel: ITClientesEnderecoModel);
 begin
-  lTabela := vConstrutor.getColumns('CLIENTES_ENDERECO');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TClientesEnderecoModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pClientesEnderecoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pClientesEnderecoModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('CLIENTES_ENDERECO',pQry,pClientesEnderecoModel.objeto);
 end;
 
 procedure TClientesEnderecoDao.SetStartRecordView(const Value: String);
@@ -335,7 +328,7 @@ begin
   FWhereView := Value;
 end;
 
-function TClientesEnderecoDao.sincronizarDados(pClientesEnderecoModel: TClientesEnderecoModel): String;
+function TClientesEnderecoDao.sincronizarDados(pClientesEnderecoModel: ITClientesEnderecoModel): String;
 var
   lLojasModel,
   lLojas      : ITLojasModel;
@@ -348,10 +341,10 @@ begin
   try
     lLojasModel.objeto.obterHosts;
 
-    if pClientesEnderecoModel.Acao in [tacIncluir, tacAlterar] then
+    if pClientesEnderecoModel.objeto.Acao in [tacIncluir, tacAlterar] then
       lSQL := vConstrutor.gerarUpdateOrInsert('CLIENTES_ENDERECO','ID', 'ID', true)
 
-    else if pClientesEnderecoModel.Acao in [tacExcluir] then
+    else if pClientesEnderecoModel.objeto.Acao in [tacExcluir] then
       lSQL := ('delete from CLIENTES_ENDERECO where ID = :ID');
 
     for lLojas in lLojasModel.objeto.LojassLista do
@@ -363,9 +356,9 @@ begin
         vIConexao.ConfigConexaoExterna('', lLojas.objeto.STRING_CONEXAO);
         lQry := vIConexao.criarQueryExterna;
 
-        if pClientesEnderecoModel.Acao = tacExcluir then
+        if pClientesEnderecoModel.objeto.Acao = tacExcluir then
         begin
-          lQry.ExecSQL(lSQL, [pClientesEnderecoModel.ID]);
+          lQry.ExecSQL(lSQL, [pClientesEnderecoModel.objeto.ID]);
           lQry.ExecSQL;
         end
         else

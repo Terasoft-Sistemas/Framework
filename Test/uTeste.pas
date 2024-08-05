@@ -441,35 +441,35 @@ end;
 
 procedure TForm1.BtnEndereco1Click(Sender: TObject);
 var
-  lClientesEnderecoModel : TClientesEnderecoModel;
+  lClientesEnderecoModel : ITClientesEnderecoModel;
 begin
-  lClientesEnderecoModel := TClientesEnderecoModel.Create(vIConexao);
+  lClientesEnderecoModel := TClientesEnderecoModel.getNewIface(vIConexao);
   try
     try
-      lClientesEnderecoModel.ID          := 10;
-      lClientesEnderecoModel.CLIENTE_ID  := '000001';
-      lClientesEnderecoModel.ENDERECO     := 'TESTE TERASOFT';
+      lClientesEnderecoModel.objeto.ID          := 10;
+      lClientesEnderecoModel.objeto.CLIENTE_ID  := '000001';
+      lClientesEnderecoModel.objeto.ENDERECO     := 'TESTE TERASOFT';
 
-      lClientesEnderecoModel.Incluir;
+      lClientesEnderecoModel.objeto.Incluir;
       ShowMessage('Incluido com Sucesso!');
     except
       on E:Exception do
       ShowMessage('Erro: ' + E.Message);
     end
   finally
-    lClientesEnderecoModel.Free;
+    lClientesEnderecoModel:=nil;
   end;
 end;
 
 procedure TForm1.BtnEndereco2Click(Sender: TObject);
 var
-  lClientesEnderecoModel : TClientesEnderecoModel;
+  lClientesEnderecoModel : ITClientesEnderecoModel;
   lMemTable   : IFDDataset;
 begin
-  lClientesEnderecoModel := TClientesEnderecoModel.Create(vIConexao);
+  lClientesEnderecoModel := TClientesEnderecoModel.getNewIface(vIConexao);
   try
     try
-      lMemTable := lClientesEnderecoModel.ObterLista;
+      lMemTable := lClientesEnderecoModel.objeto.ObterLista;
 
       memoResultado.Lines.Clear;
 
@@ -486,56 +486,56 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lClientesEnderecoModel.Free;
+    lClientesEnderecoModel:=nil;
   end;
 end;
 
 procedure TForm1.BtnEndereco3Click(Sender: TObject);
 var
-  lClientesEnderecoModel : TClientesEnderecoModel;
+  lClientesEnderecoModel : ITClientesEnderecoModel;
   ID          : String;
 begin
-  lClientesEnderecoModel := TClientesEnderecoModel.Create(vIConexao);
+  lClientesEnderecoModel := TClientesEnderecoModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('CLIENTES_ENDERECO', 'Digite o ID do Contato que deseja Alterar:', '');
       if ID.IsEmpty then
         exit;
 
-      lClientesEnderecoModel := lClientesEnderecoModel.Alterar(ID);
-      lClientesEnderecoModel.ENDERECO := 'TESTE ALTERAR';
+      lClientesEnderecoModel := lClientesEnderecoModel.objeto.Alterar(ID);
+      lClientesEnderecoModel.objeto.ENDERECO := 'TESTE ALTERAR';
 
-      lClientesEnderecoModel.Salvar;
+      lClientesEnderecoModel.objeto.Salvar;
       ShowMessage('Alterado com Sucesso');
     Except
       on E:Exception do
       ShowMessage('Erro: ' +E.Message);
     end;
   finally
-    lClientesEnderecoModel.Free;
+    lClientesEnderecoModel:=nil;
   end;
 end;
 
 procedure TForm1.BtnEndereco4Click(Sender: TObject);
 var
-  lClientesEnderecoModel : TClientesEnderecoModel;
+  lClientesEnderecoModel : ITClientesEnderecoModel;
   ID        : String;
 begin
-  lClientesEnderecoModel := TClientesEnderecoModel.Create(vIConexao);
+  lClientesEnderecoModel := TClientesEnderecoModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('CLIENTES_ENDERECO', 'Digite o ID do Contato que deseja excluir:', '');
       if ID.IsEmpty then
           Exit;
 
-      lClientesEnderecoModel.Excluir(ID);
+      lClientesEnderecoModel.objeto.Excluir(ID);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lClientesEnderecoModel.Free;
+    lClientesEnderecoModel:=nil;
   end;
 end;
 

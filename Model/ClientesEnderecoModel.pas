@@ -6,13 +6,17 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
 
-  TClientesEnderecoModel = class
+  TClientesEnderecoModel = class;
+  ITClientesEnderecoModel=IObject<TClientesEnderecoModel>;
 
+  TClientesEnderecoModel = class
   private
+    [weak] mySelf: ITClientesEnderecoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -86,15 +90,17 @@ type
     property  SYSTIME        : Variant  read FSYSTIME        write SetSYSTIME;
 
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITClientesEnderecoModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TClientesEnderecoModel;
+    function Alterar(pID : String): ITClientesEnderecoModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId : String): TClientesEnderecoModel;
+    function carregaClasse(pId : String): ITClientesEnderecoModel;
 
     function ObterLista: IFDDataset; overload;
 
@@ -118,14 +124,14 @@ uses
 
 { TClientesEnderecoModel }
 
-function TClientesEnderecoModel.Alterar(pID: String): TClientesEnderecoModel;
+function TClientesEnderecoModel.Alterar(pID: String): ITClientesEnderecoModel;
 var
-  lClientesEnderecoModel : TClientesEnderecoModel;
+  lClientesEnderecoModel : ITClientesEnderecoModel;
 begin
-  lClientesEnderecoModel := TClientesEnderecoModel.Create(vIConexao);
+  lClientesEnderecoModel := TClientesEnderecoModel.getNewIface(vIConexao);
   try
-    lClientesEnderecoModel       := lClientesEnderecoModel.carregaClasse(pID);
-    lClientesEnderecoModel.Acao  := tacAlterar;
+    lClientesEnderecoModel       := lClientesEnderecoModel.objeto.carregaClasse(pID);
+    lClientesEnderecoModel.objeto.Acao  := tacAlterar;
     Result            := lClientesEnderecoModel;
   finally
   end;
@@ -138,26 +144,32 @@ begin
   Result       := self.Salvar;
 end;
 
+class function TClientesEnderecoModel.getNewIface(pIConexao: IConexao): ITClientesEnderecoModel;
+begin
+  Result := TImplObjetoOwner<TClientesEnderecoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TClientesEnderecoModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
     Result    := self.Salvar;
 end;
 
-function TClientesEnderecoModel.carregaClasse(pId : String): TClientesEnderecoModel;
+function TClientesEnderecoModel.carregaClasse(pId : String): ITClientesEnderecoModel;
 var
-  lClientesEnderecoDao: TClientesEnderecoDao;
+  lClientesEnderecoDao: ITClientesEnderecoDao;
 begin
-  lClientesEnderecoDao := TClientesEnderecoDao.Create(vIConexao);
+  lClientesEnderecoDao := TClientesEnderecoDao.getNewIface(vIConexao);
 
   try
-    Result := lClientesEnderecoDao.carregaClasse(pId);
+    Result := lClientesEnderecoDao.objeto.carregaClasse(pId);
   finally
-    lClientesEnderecoDao.Free;
+    lClientesEnderecoDao:=nil;
   end;
 end;
 
-constructor TClientesEnderecoModel.Create(pIConexao : IConexao);
+constructor TClientesEnderecoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -169,42 +181,42 @@ end;
 
 function TClientesEnderecoModel.obterLista: IFDDataset;
 var
-  lClientesEnderecoLista: TClientesEnderecoDao;
+  lClientesEnderecoLista: ITClientesEnderecoDao;
 begin
-  lClientesEnderecoLista := TClientesEnderecoDao.Create(vIConexao);
+  lClientesEnderecoLista := TClientesEnderecoDao.getNewIface(vIConexao);
 
   try
-    lClientesEnderecoLista.TotalRecords    := FTotalRecords;
-    lClientesEnderecoLista.WhereView       := FWhereView;
-    lClientesEnderecoLista.CountView       := FCountView;
-    lClientesEnderecoLista.OrderView       := FOrderView;
-    lClientesEnderecoLista.StartRecordView := FStartRecordView;
-    lClientesEnderecoLista.LengthPageView  := FLengthPageView;
-    lClientesEnderecoLista.IDRecordView    := FIDRecordView;
+    lClientesEnderecoLista.objeto.TotalRecords    := FTotalRecords;
+    lClientesEnderecoLista.objeto.WhereView       := FWhereView;
+    lClientesEnderecoLista.objeto.CountView       := FCountView;
+    lClientesEnderecoLista.objeto.OrderView       := FOrderView;
+    lClientesEnderecoLista.objeto.StartRecordView := FStartRecordView;
+    lClientesEnderecoLista.objeto.LengthPageView  := FLengthPageView;
+    lClientesEnderecoLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lClientesEnderecoLista.obterLista;
+    Result := lClientesEnderecoLista.objeto.obterLista;
 
-    FTotalRecords := lClientesEnderecoLista.TotalRecords;
+    FTotalRecords := lClientesEnderecoLista.objeto.TotalRecords;
 
   finally
-    lClientesEnderecoLista.Free;
+    lClientesEnderecoLista:=nil;
   end;
 end;
 
 function TClientesEnderecoModel.Salvar: String;
 var
-  lClientesEnderecoDao: TClientesEnderecoDao;
+  lClientesEnderecoDao: ITClientesEnderecoDao;
 begin
-  lClientesEnderecoDao := TClientesEnderecoDao.Create(vIConexao);
+  lClientesEnderecoDao := TClientesEnderecoDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lClientesEnderecoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lClientesEnderecoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lClientesEnderecoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lClientesEnderecoDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lClientesEnderecoDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lClientesEnderecoDao.objeto.excluir(mySelf);
     end;
   finally
-    lClientesEnderecoDao.Free;
+    lClientesEnderecoDao:=nil;
   end;
 end;
 
