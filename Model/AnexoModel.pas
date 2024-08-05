@@ -6,13 +6,17 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
 
-  TAnexoModel = class
+  TAnexoModel = class;
+  ITAnexoModel=IObject<TAnexoModel>;
 
+  TAnexoModel = class
   private
+    [weak] mySelf:ITAnexoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -54,15 +58,17 @@ type
     property SYSTIME        : Variant read FSYSTIME write SetSYSTIME;
     property EXTENSAO       : Variant read FEXTENSAO write SetEXTENSAO;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITAnexoModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TAnexoModel;
+    function Alterar(pID : String): ITAnexoModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId : String): TAnexoModel;
+    function carregaClasse(pId : String): ITAnexoModel;
     function obterLista: IFDDataset;
 
     property Acao :TAcao read FAcao write SetAcao;
@@ -85,14 +91,14 @@ uses
 
 { TAnexoModel }
 
-function TAnexoModel.Alterar(pID: String): TAnexoModel;
+function TAnexoModel.Alterar(pID: String): ITAnexoModel;
 var
-  lAnexoModel : TAnexoModel;
+  lAnexoModel : ITAnexoModel;
 begin
-  lAnexoModel := TAnexoModel.Create(vIConexao);
+  lAnexoModel := TAnexoModel.getNewIface(vIConexao);
   try
-    lAnexoModel       := lAnexoModel.carregaClasse(pID);
-    lAnexoModel.Acao  := tacAlterar;
+    lAnexoModel       := lAnexoModel.objeto.carregaClasse(pID);
+    lAnexoModel.objeto.Acao  := tacAlterar;
     Result            := lAnexoModel;
   finally
   end;
@@ -105,26 +111,32 @@ begin
   Result       := self.Salvar;
 end;
 
+class function TAnexoModel.getNewIface(pIConexao: IConexao): ITAnexoModel;
+begin
+  Result := TImplObjetoOwner<TAnexoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TAnexoModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
     Result    := self.Salvar;
 end;
 
-function TAnexoModel.carregaClasse(pId : String): TAnexoModel;
+function TAnexoModel.carregaClasse(pId : String): ITAnexoModel;
 var
-  lAnexoDao: TAnexoDao;
+  lAnexoDao: ITAnexoDao;
 begin
-  lAnexoDao := TAnexoDao.Create(vIConexao);
+  lAnexoDao := TAnexoDao.getNewIface(vIConexao);
 
   try
-    Result := lAnexoDao.carregaClasse(pId);
+    Result := lAnexoDao.objeto.carregaClasse(pId);
   finally
-    lAnexoDao.Free;
+    lAnexoDao:=nil;
   end;
 end;
 
-constructor TAnexoModel.Create(pIConexao : IConexao);
+constructor TAnexoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -136,42 +148,42 @@ end;
 
 function TAnexoModel.obterLista: IFDDataset;
 var
-  lAnexoLista: TAnexoDao;
+  lAnexoLista: ITAnexoDao;
 begin
-  lAnexoLista := TAnexoDao.Create(vIConexao);
+  lAnexoLista := TAnexoDao.getNewIface(vIConexao);
 
   try
-    lAnexoLista.TotalRecords    := FTotalRecords;
-    lAnexoLista.WhereView       := FWhereView;
-    lAnexoLista.CountView       := FCountView;
-    lAnexoLista.OrderView       := FOrderView;
-    lAnexoLista.StartRecordView := FStartRecordView;
-    lAnexoLista.LengthPageView  := FLengthPageView;
-    lAnexoLista.IDRecordView    := FIDRecordView;
+    lAnexoLista.objeto.TotalRecords    := FTotalRecords;
+    lAnexoLista.objeto.WhereView       := FWhereView;
+    lAnexoLista.objeto.CountView       := FCountView;
+    lAnexoLista.objeto.OrderView       := FOrderView;
+    lAnexoLista.objeto.StartRecordView := FStartRecordView;
+    lAnexoLista.objeto.LengthPageView  := FLengthPageView;
+    lAnexoLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lAnexoLista.obterLista;
+    Result := lAnexoLista.objeto.obterLista;
 
-    FTotalRecords := lAnexoLista.TotalRecords;
+    FTotalRecords := lAnexoLista.objeto.TotalRecords;
 
   finally
-    lAnexoLista.Free;
+    lAnexoLista:=nil;
   end;
 end;
 
 function TAnexoModel.Salvar: String;
 var
-  lAnexoDao: TAnexoDao;
+  lAnexoDao: ITAnexoDao;
 begin
-  lAnexoDao := TAnexoDao.Create(vIConexao);
+  lAnexoDao := TAnexoDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lAnexoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lAnexoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lAnexoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lAnexoDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lAnexoDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lAnexoDao.objeto.excluir(mySelf);
     end;
   finally
-    lAnexoDao.Free;
+    lAnexoDao:=nil;
   end;
 end;
 

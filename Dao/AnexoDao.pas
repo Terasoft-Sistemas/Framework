@@ -11,12 +11,16 @@ uses
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao;
 
 type
-  TAnexoDao = class
+  TAnexoDao = class;
+  ITAnexoDao=IObject<TAnexoDao>;
 
+  TAnexoDao = class
   private
+    [weak] mySelf: ITAnexoDao;
     vIConexao 	: IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -42,8 +46,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITAnexoDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -54,17 +60,17 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(pAnexoModel: TAnexoModel): String;
-    function alterar(pAnexoModel: TAnexoModel): String;
-    function excluir(pAnexoModel: TAnexoModel): String;
+    function incluir(pAnexoModel: ITAnexoModel): String;
+    function alterar(pAnexoModel: ITAnexoModel): String;
+    function excluir(pAnexoModel: ITAnexoModel): String;
 
-    function carregaClasse(pID : String): TAnexoModel;
+    function carregaClasse(pID : String): ITAnexoModel;
 
     function obterLista: IFDDataset;
 
-    function sincronizarDados(pAnexoModel: TAnexoModel): String;
+    function sincronizarDados(pAnexoModel: ITAnexoModel): String;
 
-    procedure setParams(var pQry: TFDQuery; pAnexoModel: TAnexoModel);
+    procedure setParams(var pQry: TFDQuery; pAnexoModel: ITAnexoModel);
 
 end;
 
@@ -75,13 +81,13 @@ uses
 
 { TAnexo }
 
-function TAnexoDao.carregaClasse(pID : String): TAnexoModel;
+function TAnexoDao.carregaClasse(pID : String): ITAnexoModel;
 var
   lQry: TFDQuery;
-  lModel: TAnexoModel;
+  lModel: ITAnexoModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TAnexoModel.Create(vIConexao);
+  lModel   := TAnexoModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -90,12 +96,12 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID               := lQry.FieldByName('ID').AsString;
-    lModel.TABELA           := lQry.FieldByName('TABELA').AsString;
-    lModel.REGISTRO_ID      := lQry.FieldByName('REGISTRO_ID').AsString;
-    lModel.DOCUMENTO_ID     := lQry.FieldByName('DOCUMENTO_ID').AsString;
-    lModel.SYSTIME          := lQry.FieldByName('SYSTIME').AsString;
-    lModel.EXTENSAO         := lQry.FieldByName('EXTENSAO').AsString;
+    lModel.objeto.ID               := lQry.FieldByName('ID').AsString;
+    lModel.objeto.TABELA           := lQry.FieldByName('TABELA').AsString;
+    lModel.objeto.REGISTRO_ID      := lQry.FieldByName('REGISTRO_ID').AsString;
+    lModel.objeto.DOCUMENTO_ID     := lQry.FieldByName('DOCUMENTO_ID').AsString;
+    lModel.objeto.SYSTIME          := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.EXTENSAO         := lQry.FieldByName('EXTENSAO').AsString;
 
     Result := lModel;
   finally
@@ -103,7 +109,7 @@ begin
   end;
 end;
 
-constructor TAnexoDao.Create(pIConexao : IConexao);
+constructor TAnexoDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -114,7 +120,7 @@ begin
   inherited;
 end;
 
-function TAnexoDao.incluir(pAnexoModel: TAnexoModel): String;
+function TAnexoDao.incluir(pAnexoModel: ITAnexoModel): String;
 var
   lQry   : TFDQuery;
   lSQL   : String;
@@ -128,7 +134,7 @@ begin
     Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
     lQry.SQL.Add(lSQL);
-    pAnexoModel.ID := vIConexao.Generetor('GEN_ANEXO');
+    pAnexoModel.objeto.ID := vIConexao.Generetor('GEN_ANEXO');
     setParams(lQry, pAnexoModel);
     lQry.Open;
 
@@ -143,7 +149,7 @@ begin
   end;
 end;
 
-function TAnexoDao.alterar(pAnexoModel: TAnexoModel): String;
+function TAnexoDao.alterar(pAnexoModel: ITAnexoModel): String;
 var
   lQry : TFDQuery;
   lSQL : String;
@@ -163,7 +169,7 @@ begin
     if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
      sincronizarDados(pAnexoModel);
 
-    Result := pAnexoModel.ID;
+    Result := pAnexoModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -171,7 +177,7 @@ begin
   end;
 end;
 
-function TAnexoDao.excluir(pAnexoModel: TAnexoModel): String;
+function TAnexoDao.excluir(pAnexoModel: ITAnexoModel): String;
 var
   lQry : TFDQuery;
   lConfiguracoes : ITerasoftConfiguracoes;
@@ -179,7 +185,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from ANEXO where ID = :ID' ,[pAnexoModel.ID]);
+   lQry.ExecSQL('delete from ANEXO where ID = :ID' ,[pAnexoModel.objeto.ID]);
    lQry.ExecSQL;
 
    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
@@ -187,11 +193,17 @@ begin
    if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
      sincronizarDados(pAnexoModel);
 
-   Result := pAnexoModel.ID;
+   Result := pAnexoModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TAnexoDao.getNewIface(pIConexao: IConexao): ITAnexoDao;
+begin
+  Result := TImplObjetoOwner<TAnexoDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TAnexoDao.where: String;
@@ -290,28 +302,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TAnexoDao.setParams(var pQry: TFDQuery; pAnexoModel: TAnexoModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TAnexoDao.setParams(var pQry: TFDQuery; pAnexoModel: ITAnexoModel);
 begin
-  lTabela := vConstrutor.getColumns('ANEXO');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TAnexoModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pAnexoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pAnexoModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('ANEXO',pQry,pAnexoModel.objeto);
 end;
 
 procedure TAnexoDao.SetStartRecordView(const Value: String);
@@ -329,7 +322,7 @@ begin
   FWhereView := Value;
 end;
 
-function TAnexoDao.sincronizarDados(pAnexoModel: TAnexoModel): String;
+function TAnexoDao.sincronizarDados(pAnexoModel: ITAnexoModel): String;
 var
   lLojasModel,
   lLojas      : ITLojasModel;
@@ -340,10 +333,10 @@ begin
   try
     lLojasModel.objeto.obterHosts;
 
-    if pAnexoModel.Acao in [tacIncluir, tacAlterar] then
+    if pAnexoModel.objeto.Acao in [tacIncluir, tacAlterar] then
       lSQL := vConstrutor.gerarUpdateOrInsert('ANEXO','ID', 'ID', true)
 
-    else if pAnexoModel.Acao in [tacExcluir] then
+    else if pAnexoModel.objeto.Acao in [tacExcluir] then
       lSQL := ('delete from ANEXO where ID = :ID');
 
     for lLojas in lLojasModel.objeto.LojassLista do
@@ -353,9 +346,9 @@ begin
         vIConexao.ConfigConexaoExterna('', lLojas.objeto.STRING_CONEXAO);
         lQry := vIConexao.criarQueryExterna;
 
-        if pAnexoModel.Acao = tacExcluir then
+        if pAnexoModel.objeto.Acao = tacExcluir then
         begin
-          lQry.ExecSQL(lSQL, [pAnexoModel.ID]);
+          lQry.ExecSQL(lSQL, [pAnexoModel.objeto.ID]);
           lQry.ExecSQL;
         end
         else

@@ -1380,40 +1380,40 @@ end;
 
 procedure TForm1.Button43Click(Sender: TObject);
 var
-  lAnexoModel : TAnexoModel;
+  lAnexoModel : ITAnexoModel;
   lIDCli    : String;
 begin
-  lAnexoModel := TAnexoModel.Create(vIConexao);
+  lAnexoModel := TAnexoModel.getNewIface(vIConexao);
   try
     try
       lIDCli :=  InputBox('ANEXO','Digite ID do Cliente:','');
       if lIDCli.IsEmpty then
       Exit;
 
-      lAnexoModel.REGISTRO_ID   := lIDCli;
-      lAnexoModel.TABELA        := 'CLIENTES';
-      lAnexoModel.DOCUMENTO_ID  := '2';
+      lAnexoModel.objeto.REGISTRO_ID   := lIDCli;
+      lAnexoModel.objeto.TABELA        := 'CLIENTES';
+      lAnexoModel.objeto.DOCUMENTO_ID  := '2';
 
-      lAnexoModel.Incluir;
+      lAnexoModel.objeto.Incluir;
       ShowMessage('Incluido com sucesso');
     except
        on E:Exception do
          ShowMessage('Erro: ' + E.Message);
       end;
   finally
-    lAnexoModel.Free;
+    lAnexoModel:=nil;
   end;
 end;
 
 procedure TForm1.Button44Click(Sender: TObject);
 var
-  lAnexoModel : TAnexoModel;
+  lAnexoModel : ITAnexoModel;
   lMemTable : IFDDataset;
 begin
-  lAnexoModel := TAnexoModel.Create(vIConexao);
+  lAnexoModel := TAnexoModel.getNewIface(vIConexao);
   try
     try
-      lMemTable := lAnexoModel.obterLista;
+      lMemTable := lAnexoModel.objeto.obterLista;
       memoResultado.Lines.Clear;
 
       lMemTable.objeto.First;
@@ -1432,56 +1432,56 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lAnexoModel.Free;
+    lAnexoModel:=nil;
   end;
 end;
 
 procedure TForm1.Button45Click(Sender: TObject);
 var
-  lAnexoModel : TAnexoModel;
+  lAnexoModel : ITAnexoModel;
   ID          : String;
 begin
-  lAnexoModel := TAnexoModel.Create(vIConexao);
+  lAnexoModel := TAnexoModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('ANEXO', 'Digite o ID que deseja Alterar:', '');
       if ID.IsEmpty then
         exit;
 
-      lAnexoModel := lAnexoModel.Alterar(ID);
-      lAnexoModel.REGISTRO_ID := '3';
+      lAnexoModel := lAnexoModel.objeto.Alterar(ID);
+      lAnexoModel.objeto.REGISTRO_ID := '3';
 
-      lAnexoModel.Salvar;
+      lAnexoModel.objeto.Salvar;
       ShowMessage('Alterado com Sucesso');
     Except
       on E:Exception do
       ShowMessage('Erro: ' +E.Message);
     end;
   finally
-    lAnexoModel.Free;
+    lAnexoModel:=nil;
   end;
 end;
 
 procedure TForm1.Button46Click(Sender: TObject);
 var
-  lAnexoModel : TAnexoModel;
+  lAnexoModel : ITAnexoModel;
   ID        : String;
 begin
-  lAnexoModel := TAnexoModel.Create(vIConexao);
+  lAnexoModel := TAnexoModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('ANEXO', 'Digite o ID do Anexo que deseja excluir:', '');
       if ID.IsEmpty then
           Exit;
 
-      lAnexoModel.Excluir(ID);
+      lAnexoModel.objeto.Excluir(ID);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lAnexoModel.Free;
+    lAnexoModel:=nil;
   end;
 end;
 
