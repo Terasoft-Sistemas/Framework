@@ -119,6 +119,7 @@ type
     property dhFinal: Variant read getDHFinal write setDHFinal;
 
   protected
+    fCfg: IMultiConfig;
     function getCFG: IMultiConfig;
     function listaOpcoes: IListaTextoEX;
 
@@ -337,7 +338,9 @@ end;
 
 function TFiltroModel.getCFG: IMultiConfig;
 begin
-  Result := criaMultiConfig.adicionaInterface(criaConfigIniString(fPROPRIEDADES));
+  if(fCfg=nil) then
+    fCFG := criaMultiConfig.adicionaInterface(criaConfigIniString(fPROPRIEDADES));
+  Result := fCFG;
 end;
 
 function TFiltroModel.listaOpcoes: IListaTextoEX;
@@ -525,6 +528,16 @@ begin
   begin
     fDESCRICAO := 'Período de DATA/HORA de ' + fCampo;
     setTipo(tipoFiltro_DataHoraPeriodo);
+  end else if(Copy(pNome,1,1)='@') then
+  begin
+    setTipo(tipoFiltro_Set);
+    getCFG;
+    if(fCfg.ReadString('query','tabela','')='') then
+    begin
+      fCfg.WriteString('query','tabela',pNome);
+      if(fDESCRICAO='') then
+        fDESCRICAO := textoEntreTags(pNome,'@','');
+    end;
   end;
   Result := getTipo;
 end;

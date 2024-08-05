@@ -13,12 +13,6 @@ uses
   FiltroController,
   Interfaces.Conexao;
 
-//type
-//  IEndpointModel = interface
-//  ['{C8DB3B6C-DE03-4E96-9168-C2A1E61DAA7B}']
-
-//  end;
-
 type
   TEndpointModel=class;
   ITEndpointModel=IObject<TEndpointModel>;
