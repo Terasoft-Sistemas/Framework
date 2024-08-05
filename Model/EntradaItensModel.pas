@@ -7,12 +7,16 @@ uses
   Terasoft.Utils,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
-  TEntradaItensModel = class
+  TEntradaItensModel = class;
+  ITEntradaItensModel=IObject<TEntradaItensModel>;
 
+  TEntradaItensModel = class
   private
+    [weak] mySelf: ITEntradaItensModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -458,15 +462,17 @@ type
     procedure ConciliaItemEntrada;
     procedure getDadosProduto;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITEntradaItensModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TEntradaItensModel;
+    function Alterar(pID : String): ITEntradaItensModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId: String): TEntradaItensModel;
+    function carregaClasse(pId: String): ITEntradaItensModel;
     function obterLista : IFDDataset;
 
    	property Acao :TAcao read FAcao write SetAcao;
@@ -491,36 +497,36 @@ uses
 
 procedure TEntradaItensModel.ConciliaItemEntrada;
 var
-  lEntradaItensLista: TEntradaItensDao;
+  lEntradaItensLista: ITEntradaItensDao;
 begin
-  lEntradaItensLista := TEntradaItensDao.Create(vIConexao);
+  lEntradaItensLista := TEntradaItensDao.getNewIface(vIConexao);
 
   try
-    lEntradaItensLista.IDRecordView := FIDRecordView;
-    lEntradaItensLista.ConciliaItemEntrada;
+    lEntradaItensLista.objeto.IDRecordView := FIDRecordView;
+    lEntradaItensLista.objeto.ConciliaItemEntrada;
 
-    FCONCILIACAO_ID_PRODUTO      := lEntradaItensLista.CONCILIACAO_ID_PRODUTO;
-    FCONCILIACAO_NOME_PRODUTO    := lEntradaItensLista.CONCILIACAO_NOME_PRODUTO;
-    FCONCILIACAO_ORIGEM          := lEntradaItensLista.CONCILIACAO_ORIGEM;
-    FCONCILIACAO_UNIDADE_PRODUTO := lEntradaItensLista.CONCILIACAO_UNIDADE_PRODUTO;
-    FCONCILIACAO_DIVISOR         := lEntradaItensLista.CONCILIACAO_DIVISOR;
-    FCONCILIACAO_MULTIPLICADOR   := lEntradaItensLista.CONCILIACAO_MULTIPLICADOR;
+    FCONCILIACAO_ID_PRODUTO      := lEntradaItensLista.objeto.CONCILIACAO_ID_PRODUTO;
+    FCONCILIACAO_NOME_PRODUTO    := lEntradaItensLista.objeto.CONCILIACAO_NOME_PRODUTO;
+    FCONCILIACAO_ORIGEM          := lEntradaItensLista.objeto.CONCILIACAO_ORIGEM;
+    FCONCILIACAO_UNIDADE_PRODUTO := lEntradaItensLista.objeto.CONCILIACAO_UNIDADE_PRODUTO;
+    FCONCILIACAO_DIVISOR         := lEntradaItensLista.objeto.CONCILIACAO_DIVISOR;
+    FCONCILIACAO_MULTIPLICADOR   := lEntradaItensLista.objeto.CONCILIACAO_MULTIPLICADOR;
 
   finally
-    lEntradaItensLista.Free;
+    lEntradaItensLista:=nil;
   end;
 end;
 
 
 
-function TEntradaItensModel.Alterar(pID : String): TEntradaItensModel;
+function TEntradaItensModel.Alterar(pID : String): ITEntradaItensModel;
 var
-  lEntradaItensModel : TEntradaItensModel;
+  lEntradaItensModel : ITEntradaItensModel;
 begin
-  lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
+  lEntradaItensModel := TEntradaItensModel.getNewIface(vIConexao);
   try
-    lEntradaItensModel       := lEntradaItensModel.carregaClasse(pID);
-    lEntradaItensModel.Acao  := tacAlterar;
+    lEntradaItensModel       := lEntradaItensModel.objeto.carregaClasse(pID);
+    lEntradaItensModel.objeto.Acao  := tacAlterar;
     Result                   := lEntradaItensModel;
   finally
   end;
@@ -563,26 +569,32 @@ begin
   end;
 end;
 
+class function TEntradaItensModel.getNewIface(pIConexao: IConexao): ITEntradaItensModel;
+begin
+  Result := TImplObjetoOwner<TEntradaItensModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TEntradaItensModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
   Result    := self.Salvar;
 end;
 
-function TEntradaItensModel.carregaClasse(pId: String): TEntradaItensModel;
+function TEntradaItensModel.carregaClasse(pId: String): ITEntradaItensModel;
 var
-  lEntradaItensDao: TEntradaItensDao;
+  lEntradaItensDao: ITEntradaItensDao;
 begin
-  lEntradaItensDao := TEntradaItensDao.Create(vIConexao);
+  lEntradaItensDao := TEntradaItensDao.getNewIface(vIConexao);
 
   try
-    Result := lEntradaItensDao.carregaClasse(pId);
+    Result := lEntradaItensDao.objeto.carregaClasse(pId);
   finally
-    lEntradaItensDao.Free;
+    lEntradaItensDao:=nil
   end;
 end;
 
-constructor TEntradaItensModel.Create(pIConexao : IConexao);
+constructor TEntradaItensModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -595,46 +607,46 @@ end;
 
 function TEntradaItensModel.obterLista: IFDDataset;
 var
-  lEntradaItensLista: TEntradaItensDao;
+  lEntradaItensLista: ITEntradaItensDao;
 begin
-  lEntradaItensLista := TEntradaItensDao.Create(vIConexao);
+  lEntradaItensLista := TEntradaItensDao.getNewIface(vIConexao);
   try
-    lEntradaItensLista.TotalRecords    := FTotalRecords;
-    lEntradaItensLista.WhereView       := FWhereView;
-    lEntradaItensLista.CountView       := FCountView;
-    lEntradaItensLista.OrderView       := FOrderView;
-    lEntradaItensLista.StartRecordView := FStartRecordView;
-    lEntradaItensLista.LengthPageView  := FLengthPageView;
-    lEntradaItensLista.IDRecordView    := FIDRecordView;
-    lEntradaItensLista.NumeroView      := FNumeroView;
-    lEntradaItensLista.FornecedorView  := FFornecedorView;
+    lEntradaItensLista.objeto.TotalRecords    := FTotalRecords;
+    lEntradaItensLista.objeto.WhereView       := FWhereView;
+    lEntradaItensLista.objeto.CountView       := FCountView;
+    lEntradaItensLista.objeto.OrderView       := FOrderView;
+    lEntradaItensLista.objeto.StartRecordView := FStartRecordView;
+    lEntradaItensLista.objeto.LengthPageView  := FLengthPageView;
+    lEntradaItensLista.objeto.IDRecordView    := FIDRecordView;
+    lEntradaItensLista.objeto.NumeroView      := FNumeroView;
+    lEntradaItensLista.objeto.FornecedorView  := FFornecedorView;
 
-    Result := lEntradaItensLista.obterLista;
+    Result := lEntradaItensLista.objeto.obterLista;
 
-    FTotalRecords  := lEntradaItensLista.TotalRecords;
+    FTotalRecords  := lEntradaItensLista.objeto.TotalRecords;
 
   finally
-    lEntradaItensLista.Free;
+    lEntradaItensLista:=nil;
   end;
 end;
 
 function TEntradaItensModel.Salvar: String;
 var
-  lEntradaItensDao: TEntradaItensDao;
+  lEntradaItensDao: ITEntradaItensDao;
 begin
-  lEntradaItensDao := TEntradaItensDao.Create(vIConexao);
+  lEntradaItensDao := TEntradaItensDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lEntradaItensDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lEntradaItensDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lEntradaItensDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lEntradaItensDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lEntradaItensDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lEntradaItensDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lEntradaItensDao.Free;
+    lEntradaItensDao:=nil;
   end;
 end;
 

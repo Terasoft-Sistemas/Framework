@@ -447,12 +447,12 @@ end;
 
 function TEntradaModel.EntradaItens(pEntradaItensParams: TEntradaItensParams): String;
 var
-  lEntradaItensModel  : TEntradaItensModel;
+  lEntradaItensModel  : ITEntradaItensModel;
   p,lEntradaModel       : ITEntradaModel;
   lProdutosModel      : ITProdutosModel;
 
 begin
-  lEntradaItensModel  := TEntradaItensModel.Create(vIConexao);
+  lEntradaItensModel  := TEntradaItensModel.getNewIface(vIConexao);
   lEntradaModel       := TEntradaModel.getNewIface(vIConexao);
   lProdutosModel      := TProdutosModel.getNewIface(vIConexao);
 
@@ -472,19 +472,19 @@ begin
     lProdutosModel.objeto.obterLista;
     lProdutosModel := lProdutosModel.objeto.ProdutossLista.First;
 
-    lEntradaItensModel.CFOP_ID        := p.objeto.FCFOP_ID;
-    lEntradaItensModel.NUMERO_ENT     := p.objeto.FNUMERO_ENT;
-    lEntradaItensModel.CODIGO_FOR     := p.objeto.FCODIGO_FOR;
-    lEntradaItensModel.CODIGO_PRO     := pEntradaItensParams.CODIGO_PRO;
-    lEntradaItensModel.QUANTIDADE_ENT := pEntradaItensParams.QUANTIDADE_ENT;
-    lEntradaItensModel.VALORUNI_ENT   := pEntradaItensParams.VALORUNI_ENT;
-    lEntradaItensModel.STATUS         := '0';
-    lEntradaItensModel.CST_ENT        := '00';
+    lEntradaItensModel.objeto.CFOP_ID        := p.objeto.FCFOP_ID;
+    lEntradaItensModel.objeto.NUMERO_ENT     := p.objeto.FNUMERO_ENT;
+    lEntradaItensModel.objeto.CODIGO_FOR     := p.objeto.FCODIGO_FOR;
+    lEntradaItensModel.objeto.CODIGO_PRO     := pEntradaItensParams.CODIGO_PRO;
+    lEntradaItensModel.objeto.QUANTIDADE_ENT := pEntradaItensParams.QUANTIDADE_ENT;
+    lEntradaItensModel.objeto.VALORUNI_ENT   := pEntradaItensParams.VALORUNI_ENT;
+    lEntradaItensModel.objeto.STATUS         := '0';
+    lEntradaItensModel.objeto.CST_ENT        := '00';
 
-    Result := lEntradaItensModel.Incluir;
+    Result := lEntradaItensModel.objeto.Incluir;
 
   finally
-    lEntradaItensModel.Free;
+    lEntradaItensModel:=nil;
     lProdutosModel:=nil;
   end;
 end;
@@ -566,11 +566,11 @@ end;
 
 procedure TEntradaModel.ImportarItens(pEntrada, pFornecedor: String);
 var
- lEntradaItensModel : TEntradaItensModel;
+ lEntradaItensModel : ITEntradaItensModel;
  lProdutoModel      : ITProdutosModel;
  i: Integer;
 begin
-  lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
+  lEntradaItensModel := TEntradaItensModel.getNewIface(vIConexao);
   lProdutoModel      := TProdutosModel.getNewIface(vIConexao);
 
   try
@@ -593,33 +593,33 @@ begin
 
       for i := 0 to Det.Count - 1 do
       begin
-        lEntradaItensModel.Acao       := tacIncluir;
-        lEntradaItensModel.NUMERO_ENT := pEntrada;
+        lEntradaItensModel.objeto.Acao       := tacIncluir;
+        lEntradaItensModel.objeto.NUMERO_ENT := pEntrada;
 
         with Det.Items[i] do
         begin
-          lEntradaItensModel.LOJA := self.FLOJA;
+          lEntradaItensModel.objeto.LOJA := self.FLOJA;
 
-          lEntradaItensModel.STATUS            := '0';
-          lEntradaItensModel.ITEM_ENT          := Prod.nItem.ToString;
-          lEntradaItensModel.CODIGO_PRO        := '999999';
-          lEntradaItensModel.CODIGO_FOR        := self.FCODIGO_FOR;
-          lEntradaItensModel.NUMERO_ENT        := self.FNUMERO_ENT;
-          lEntradaItensModel.CPROD             := Prod.cProd;
-          lEntradaItensModel.CEAN              := Prod.cEAN;
-          lEntradaItensModel.CBARRA            := Prod.cBarra;
-          lEntradaItensModel.XPROD             := Prod.xProd;
-          lEntradaItensModel.CEST              := Prod.CEST;
-          lEntradaItensModel.UCOM              := Prod.uCom;
-          lEntradaItensModel.NCM_I05           := Prod.NCM;
-          lEntradaItensModel.CFOP              := Prod.CFOP;
-          lEntradaItensModel.QUANTIDADE_ENT    := FloatToStr(Prod.qCom);
-          lEntradaItensModel.VALORUNI_ENT      := FloatToStr(Prod.vUnCom);
-          lEntradaItensModel.QUANTIDADE_NF     := FloatToStr(Prod.qCom);
-          lEntradaItensModel.VALOR_UNITARIO_NF := FloatToStr(Prod.vUnCom);
-          lEntradaItensModel.DESC_I17          := FloatToStr(Prod.vDesc);
-          lEntradaItensModel.VSEG_I16          := FloatToStr(Prod.vSeg + Prod.vOutro);
-          lEntradaItensModel.VFRETE_I15        := FloatToStr(Prod.vFrete);
+          lEntradaItensModel.objeto.STATUS            := '0';
+          lEntradaItensModel.objeto.ITEM_ENT          := Prod.nItem.ToString;
+          lEntradaItensModel.objeto.CODIGO_PRO        := '999999';
+          lEntradaItensModel.objeto.CODIGO_FOR        := self.FCODIGO_FOR;
+          lEntradaItensModel.objeto.NUMERO_ENT        := self.FNUMERO_ENT;
+          lEntradaItensModel.objeto.CPROD             := Prod.cProd;
+          lEntradaItensModel.objeto.CEAN              := Prod.cEAN;
+          lEntradaItensModel.objeto.CBARRA            := Prod.cBarra;
+          lEntradaItensModel.objeto.XPROD             := Prod.xProd;
+          lEntradaItensModel.objeto.CEST              := Prod.CEST;
+          lEntradaItensModel.objeto.UCOM              := Prod.uCom;
+          lEntradaItensModel.objeto.NCM_I05           := Prod.NCM;
+          lEntradaItensModel.objeto.CFOP              := Prod.CFOP;
+          lEntradaItensModel.objeto.QUANTIDADE_ENT    := FloatToStr(Prod.qCom);
+          lEntradaItensModel.objeto.VALORUNI_ENT      := FloatToStr(Prod.vUnCom);
+          lEntradaItensModel.objeto.QUANTIDADE_NF     := FloatToStr(Prod.qCom);
+          lEntradaItensModel.objeto.VALOR_UNITARIO_NF := FloatToStr(Prod.vUnCom);
+          lEntradaItensModel.objeto.DESC_I17          := FloatToStr(Prod.vDesc);
+          lEntradaItensModel.objeto.VSEG_I16          := FloatToStr(Prod.vSeg + Prod.vOutro);
+          lEntradaItensModel.objeto.VFRETE_I15        := FloatToStr(Prod.vFrete);
         end;
 
         with Det.Items[i].Imposto.ICMS do
@@ -627,77 +627,77 @@ begin
 
           // Verificar sobre os ifs que tem no legado para tratar os cst e csosn
           if CSTICMSToStr(CST) <> '' then
-            lEntradaItensModel.CST_ENT         := CSTICMSToStr(CST)
+            lEntradaItensModel.objeto.CST_ENT         := CSTICMSToStr(CST)
           else
-            lEntradaItensModel.CST_ENT         := CSOSNIcmsToStr(CSOSN);
+            lEntradaItensModel.objeto.CST_ENT         := CSOSNIcmsToStr(CSOSN);
 
-          lEntradaItensModel.ORIG_N11          := OrigToStr(orig);
-          lEntradaItensModel.MOBIBC_N13        := modBCToStr(modBC);
-          lEntradaItensModel.ICMS_ENT          := FloatToStr(pICMS);
-          lEntradaItensModel.PREDBC_N14        := FloatToStr(pRedBC);
-          lEntradaItensModel.BASE_ICMS_ENT     := FloatToStr(vBC);
-          lEntradaItensModel.VICMS_N17         := FloatToStr(vICMS);
-          lEntradaItensModel.MDBCST_N18        := modBCSTToStr(modBCST);
-          lEntradaItensModel.ICMS_ST_ENT       := FloatToStr(pICMSST);
-          lEntradaItensModel.ICMS_ST_ORIGINAL  := FloatToStr(pICMSST);
-          lEntradaItensModel.PMVAST_N19        := FloatToStr(pMVAST);
-          lEntradaItensModel.PREDBCST_N20      := FloatToStr(pRedBCST);
-          lEntradaItensModel.BASE_ST_ENT       := FloatToStr(vBCST);
-          lEntradaItensModel.BASE_ST_ORIGINAL  := FloatToStr(vBCST);
-          lEntradaItensModel.VICMS_ST_ENT      := FloatToStr(vICMSST);
-          lEntradaItensModel.VICMS_ST_ORIGINAL := FloatToStr(vICMSST);
-
-          // Não encontrado
-          // lEntradaItensModel.PCREDSN           := FloatToStr(pCredSN);
-          // lEntradaItensModel.VCREDICMSSN       := FloatToStr(vCredICMSSN);
-
-          lEntradaItensModel.VBCSTRET          := FloatToStr(vBCSTRet);
-          lEntradaItensModel.VICMSSTRET        := FloatToStr(vICMSSTRet);
-          lEntradaItensModel.PFCPST            := FloatToStr(pFCPST);
-          lEntradaItensModel.VFCPST            := FloatToStr(vFCPST);
-          lEntradaItensModel.VBCFPC            := FloatToStr(vBCFCP);
-          lEntradaItensModel.PFCP              := FloatToStr(pFCP);
-          lEntradaItensModel.VFCP              := FloatToStr(vFCP);
-          lEntradaItensModel.VBCFCPSTRET       := FloatToStr(vBCFCPSTRet);
-          lEntradaItensModel.PFCPSTRET         := FloatToStr(pFCPSTRet);
-          lEntradaItensModel.VFCPSTRET         := FloatToStr(vFCPSTRet);
+          lEntradaItensModel.objeto.ORIG_N11          := OrigToStr(orig);
+          lEntradaItensModel.objeto.MOBIBC_N13        := modBCToStr(modBC);
+          lEntradaItensModel.objeto.ICMS_ENT          := FloatToStr(pICMS);
+          lEntradaItensModel.objeto.PREDBC_N14        := FloatToStr(pRedBC);
+          lEntradaItensModel.objeto.BASE_ICMS_ENT     := FloatToStr(vBC);
+          lEntradaItensModel.objeto.VICMS_N17         := FloatToStr(vICMS);
+          lEntradaItensModel.objeto.MDBCST_N18        := modBCSTToStr(modBCST);
+          lEntradaItensModel.objeto.ICMS_ST_ENT       := FloatToStr(pICMSST);
+          lEntradaItensModel.objeto.ICMS_ST_ORIGINAL  := FloatToStr(pICMSST);
+          lEntradaItensModel.objeto.PMVAST_N19        := FloatToStr(pMVAST);
+          lEntradaItensModel.objeto.PREDBCST_N20      := FloatToStr(pRedBCST);
+          lEntradaItensModel.objeto.BASE_ST_ENT       := FloatToStr(vBCST);
+          lEntradaItensModel.objeto.BASE_ST_ORIGINAL  := FloatToStr(vBCST);
+          lEntradaItensModel.objeto.VICMS_ST_ENT      := FloatToStr(vICMSST);
+          lEntradaItensModel.objeto.VICMS_ST_ORIGINAL := FloatToStr(vICMSST);
 
           // Não encontrado
-          // lEntradaItensModel.PREDBCEFET        := FloatToStr(pRedBCEfet);
-          // lEntradaItensModel.VBCEFET           := FloatToStr(vBCEfet);
-          // lEntradaItensModel.PICMSEFET         := FloatToStr(pICMSEfet);
-          // lEntradaItensModel.VICMSEFET         := FloatToStr(vICMSEfet);
-          // lEntradaItensModel.VICMSDESON        := FloatToStr(vICMSDeson);
-          // lEntradaItensModel.MOTDESICMS        := motDesICMSToStr(motDesICMS);
+          // lEntradaItensModel.objeto.PCREDSN           := FloatToStr(pCredSN);
+          // lEntradaItensModel.objeto.VCREDICMSSN       := FloatToStr(vCredICMSSN);
+
+          lEntradaItensModel.objeto.VBCSTRET          := FloatToStr(vBCSTRet);
+          lEntradaItensModel.objeto.VICMSSTRET        := FloatToStr(vICMSSTRet);
+          lEntradaItensModel.objeto.PFCPST            := FloatToStr(pFCPST);
+          lEntradaItensModel.objeto.VFCPST            := FloatToStr(vFCPST);
+          lEntradaItensModel.objeto.VBCFPC            := FloatToStr(vBCFCP);
+          lEntradaItensModel.objeto.PFCP              := FloatToStr(pFCP);
+          lEntradaItensModel.objeto.VFCP              := FloatToStr(vFCP);
+          lEntradaItensModel.objeto.VBCFCPSTRET       := FloatToStr(vBCFCPSTRet);
+          lEntradaItensModel.objeto.PFCPSTRET         := FloatToStr(pFCPSTRet);
+          lEntradaItensModel.objeto.VFCPSTRET         := FloatToStr(vFCPSTRet);
+
+          // Não encontrado
+          // lEntradaItensModel.objeto.PREDBCEFET        := FloatToStr(pRedBCEfet);
+          // lEntradaItensModel.objeto.VBCEFET           := FloatToStr(vBCEfet);
+          // lEntradaItensModel.objeto.PICMSEFET         := FloatToStr(pICMSEfet);
+          // lEntradaItensModel.objeto.VICMSEFET         := FloatToStr(vICMSEfet);
+          // lEntradaItensModel.objeto.VICMSDESON        := FloatToStr(vICMSDeson);
+          // lEntradaItensModel.objeto.MOTDESICMS        := motDesICMSToStr(motDesICMS);
         end;
 
         with Det.Items[i].Imposto.PIS do
         begin
-          lEntradaItensModel.CST_Q06      := CSTPISToStr(CST);
-          lEntradaItensModel.PPIS_Q08     := FloatToStr(pPIS);
-          lEntradaItensModel.vBC_Q07      := FloatToStr(vBC);
-          lEntradaItensModel.VPIS_Q09     := FloatToStr(vPIS);
-          lEntradaItensModel.PIS          := FloatToStr(vPIS);
+          lEntradaItensModel.objeto.CST_Q06      := CSTPISToStr(CST);
+          lEntradaItensModel.objeto.PPIS_Q08     := FloatToStr(pPIS);
+          lEntradaItensModel.objeto.vBC_Q07      := FloatToStr(vBC);
+          lEntradaItensModel.objeto.VPIS_Q09     := FloatToStr(vPIS);
+          lEntradaItensModel.objeto.PIS          := FloatToStr(vPIS);
         end;
 
         with Det.Items[i].Imposto.COFINS do
         begin
-          lEntradaItensModel.CST_S06      := CSTCOFINSToStr(CST);
-          lEntradaItensModel.PCOFINS_S08  := FloatToStr(pCOFINS);
-          lEntradaItensModel.vBC_S07      := FloatToStr(vBC);
-          lEntradaItensModel.COFINS       := FloatToStr(vCOFINS);
+          lEntradaItensModel.objeto.CST_S06      := CSTCOFINSToStr(CST);
+          lEntradaItensModel.objeto.PCOFINS_S08  := FloatToStr(pCOFINS);
+          lEntradaItensModel.objeto.vBC_S07      := FloatToStr(vBC);
+          lEntradaItensModel.objeto.COFINS       := FloatToStr(vCOFINS);
         end;
 
         with Det.Items[i].Imposto.IPI do
         begin
-          lEntradaItensModel.CST_O09      := CSTIPIToStr(CST);
-          lEntradaItensModel.CIENQ_O02    := clEnq;
-          lEntradaItensModel.CENQ_O06     := cEnq;
-          lEntradaItensModel.VBC_O10      := FloatToStr(vBC);
-          lEntradaItensModel.QUNID_O11    := FloatToStr(qUnid);
-          lEntradaItensModel.VUNID_O12    := FloatToStr(vUnid);
-          lEntradaItensModel.IPI_ENT      := FloatToStr(pIPI);
-          lEntradaItensModel.VIPI_014     := FloatToStr(vIPI);
+          lEntradaItensModel.objeto.CST_O09      := CSTIPIToStr(CST);
+          lEntradaItensModel.objeto.CIENQ_O02    := clEnq;
+          lEntradaItensModel.objeto.CENQ_O06     := cEnq;
+          lEntradaItensModel.objeto.VBC_O10      := FloatToStr(vBC);
+          lEntradaItensModel.objeto.QUNID_O11    := FloatToStr(qUnid);
+          lEntradaItensModel.objeto.VUNID_O12    := FloatToStr(vUnid);
+          lEntradaItensModel.objeto.IPI_ENT      := FloatToStr(pIPI);
+          lEntradaItensModel.objeto.VIPI_014     := FloatToStr(vIPI);
         end;
 
         // with Det.Items[i].Imposto.ICMSUFDest do
@@ -712,12 +712,12 @@ begin
         //   lEntradaItensModel.VICMSUFREMET   := FormataFloatFireBird(FloatToStr(vICMSUFRemet));
         // end;
 
-        lEntradaItensModel.Salvar;
+        lEntradaItensModel.objeto.Salvar;
       end;
     end;
 
   finally
-    lEntradaItensModel.Free;
+    lEntradaItensModel:=nil;
     lProdutoModel:=nil;
   end;
 end;

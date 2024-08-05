@@ -1054,21 +1054,21 @@ end;
 
 procedure TForm1.Button32Click(Sender: TObject);
 var
-  lEntradaItensModel : TEntradaItensModel;
+  lEntradaItensModel : ITEntradaItensModel;
   NumEntrada         : String;
   i                  : Integer;
   lMemTable          : IFDDataset;
 begin
-  lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
+  lEntradaItensModel := TEntradaItensModel.getNewIface(vIConexao);
   try
     try
       NumEntrada := InputBox('Constulta EntradaItens','Digite o número da Entrada:','');
         if NumEntrada.IsEmpty then
           Exit;
 
-      lEntradaItensModel.NumeroView := NumEntrada;
-      lEntradaItensModel.FornecedorView := '500007';
-      lMemTable := lEntradaItensModel.obterLista;
+      lEntradaItensModel.objeto.NumeroView := NumEntrada;
+      lEntradaItensModel.objeto.FornecedorView := '500007';
+      lMemTable := lEntradaItensModel.objeto.obterLista;
 
       lMemTable.objeto.First;
       while not lMemTable.objeto.Eof do
@@ -1086,50 +1086,50 @@ begin
         ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lEntradaItensModel.Free;
+    lEntradaItensModel:=nil;
   end;
 end;
 
 procedure TForm1.Button33Click(Sender: TObject);
 var
-  lEntradaItensModel : TEntradaItensModel;
+  lEntradaItensModel : ITEntradaItensModel;
   pIDItem            : String;
 begin
-  lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
+  lEntradaItensModel := TEntradaItensModel.getNewIface(vIConexao);
   try
     try
       pIDItem        := '1916';
 
-      lEntradaItensModel := lEntradaItensModel.Alterar(pIDItem);
-      lEntradaItensModel.QUANTIDADE_ENT := '5';
-      lEntradaItensModel.Salvar;
+      lEntradaItensModel := lEntradaItensModel.objeto.Alterar(pIDItem);
+      lEntradaItensModel.objeto.QUANTIDADE_ENT := '5';
+      lEntradaItensModel.objeto.Salvar;
       ShowMessage('Alterado com sucesso');
     except
       on E:Exception do
         ShowMessage('Erro: ' + E.Message);
     end;
     finally
-      lEntradaItensModel.Free;
+      lEntradaItensModel:=nil;
   end;
 end;
 
 procedure TForm1.Button34Click(Sender: TObject);
 var
-  lEntradaItensModel : TEntradaItensModel;
+  lEntradaItensModel : ITEntradaItensModel;
   ID                 : String;
 begin
-  lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
+  lEntradaItensModel := TEntradaItensModel.getNewIface(vIConexao);
   try
     try
       ID := '1916';
-      lEntradaItensModel.Excluir(ID);
+      lEntradaItensModel.objeto.Excluir(ID);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
       ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lEntradaItensModel.Free;
+    lEntradaItensModel:=nil;
   end;
 end;
 
@@ -1805,13 +1805,13 @@ end;
 procedure TForm1.Button56Click(Sender: TObject);
 var
   lEntradaModel      : ITEntradaModel;
-  lEntradaItensModel : TEntradaItensModel;
+  lEntradaItensModel : ITEntradaItensModel;
   lEntrada           : TEntradaResultado;
   lTableEntrada,
   lTableItens        : IFDDataset;
 begin
   lEntradaModel      := TEntradaModel.getNewIface(vIConexao);
-  lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
+  lEntradaItensModel := TEntradaItensModel.getNewIface(vIConexao);
 
   try
     try
@@ -1836,8 +1836,8 @@ begin
 
           dsEntrada.DataSet        := dsTmp.objeto;
 
-          lEntradaItensModel.NumeroView := lEntrada.NUMERO_ENT;
-          lTableItens                  := lEntradaItensModel.obterLista;
+          lEntradaItensModel.objeto.NumeroView := lEntrada.NUMERO_ENT;
+          lTableItens                  := lEntradaItensModel.objeto.obterLista;
           dsTmp2 := lTableItens;
           dsEntradaItens.DataSet       := lTableitens.objeto;
         end;
@@ -1848,7 +1848,7 @@ begin
     end;
   finally
     lEntradaModel:=nil;
-    lEntradaItensModel.Free;
+    lEntradaItensModel:=nil;
   end;
 end;
 
@@ -1883,13 +1883,13 @@ end;
 procedure TForm1.Button58Click(Sender: TObject);
 var
   lEntradaModel      : ITEntradaModel;
-  lEntradaItensModel : TEntradaItensModel;
+  lEntradaItensModel : ITEntradaItensModel;
   lEntrada           : String;
   lTableEntrada,
   lTableItens        : IFDDataset;
 begin
   lEntradaModel      := TEntradaModel.getNewIface(vIConexao);
-  lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
+  lEntradaItensModel := TEntradaItensModel.getNewIface(vIConexao);
   try
 
     lEntrada := InputBox('Constultar Entrada','Digite o número da Entrada:','');
@@ -1901,14 +1901,14 @@ begin
     dsTmp := lTableEntrada;
     dsEntrada.DataSet        := lTableEntrada.objeto;
 
-    lEntradaItensModel.NumeroView := lEntrada;
-    lTableItens                  := lEntradaItensModel.obterLista;
+    lEntradaItensModel.objeto.NumeroView := lEntrada;
+    lTableItens                  := lEntradaItensModel.objeto.obterLista;
     dsEntradaItens.DataSet       := lTableitens.objeto;
 
 
   finally
     lEntradaModel:=nil;
-    lEntradaItensModel.Free;
+    lEntradaItensModel:=nil;
   end;
 end;
 
@@ -1916,11 +1916,11 @@ end;
 procedure TForm1.Button59Click(Sender: TObject);
 var
   lEntradaModel      : ITEntradaModel;
-  lEntradaItensModel : TEntradaItensModel;
+  lEntradaItensModel : ITEntradaItensModel;
 
 begin
   lEntradaModel      := TEntradaModel.getNewIface(vIConexao);
-  lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
+  lEntradaItensModel := TEntradaItensModel.getNewIface(vIConexao);
   try
     try
       lEntradaModel.objeto.NUMERO_ENT    := '55555555';
@@ -1940,7 +1940,7 @@ begin
     end;
   finally
     lEntradaModel:=nil;
-    lEntradaItensModel.Free;
+    lEntradaItensModel:=nil;
   end;
 end;
 
