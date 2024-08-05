@@ -372,7 +372,7 @@ type
     { Private declarations }
     vQtdeRegistros,
     vPagina         : Integer;
-    dsTmp: IFDDataset;
+    dsTmp,dsTmp2: IFDDataset;
 
   public
     { Public declarations }
@@ -1027,10 +1027,10 @@ end;
 procedure TForm1.Button31Click(Sender: TObject);
 var
   lEntradaItensParams : TEntradaItensParams;
-  lEntradaModel       : TEntradaModel;
+  lEntradaModel       : ITEntradaModel;
   lNumEntrada         : String;
 begin
-  lEntradaModel  := TEntradaModel.Create(vIConexao);
+  lEntradaModel  := TEntradaModel.getNewIface(vIConexao);
   try
     try
       lNumEntrada := InputBox('EntradaItens','Digite o número da Entrada:','');
@@ -1041,14 +1041,14 @@ begin
       lEntradaItensParams.QUANTIDADE_ENT  := '1';
       lEntradaItensParams.VALORUNI_ENT    := '30';
 
-      lEntradaModel.EntradaItens(lEntradaItensParams);
+      lEntradaModel.objeto.EntradaItens(lEntradaItensParams);
       ShowMessage('Item adicionado a Entrada: ' + lNumEntrada);
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lEntradaModel.Free;
+    lEntradaModel:=nil;
   end;
 end;
 
@@ -1804,13 +1804,13 @@ end;
 
 procedure TForm1.Button56Click(Sender: TObject);
 var
-  lEntradaModel      : TEntradaModel;
+  lEntradaModel      : ITEntradaModel;
   lEntradaItensModel : TEntradaItensModel;
   lEntrada           : TEntradaResultado;
   lTableEntrada,
   lTableItens        : IFDDataset;
 begin
-  lEntradaModel      := TEntradaModel.Create(vIConexao);
+  lEntradaModel      := TEntradaModel.getNewIface(vIConexao);
   lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
 
   try
@@ -1825,17 +1825,20 @@ begin
 
       if FileExists(OpenDialog.FileName) then
       begin
-        lEntradaModel.PathXML := OpenDialog.FileName;
-        lEntrada := lEntradaModel.importaXML;
+        lEntradaModel.objeto.PathXML := OpenDialog.FileName;
+        lEntrada := lEntradaModel.objeto.importaXML;
 
         if lEntrada.NUMERO_ENT <> '' then
         begin
-          lEntradaModel.NumeroView := lEntrada.NUMERO_ENT;
-          lTableEntrada            := lEntradaModel.obterLista;
-          dsEntrada.DataSet        := lTableEntrada.objeto;
+          lEntradaModel.objeto.NumeroView := lEntrada.NUMERO_ENT;
+          lTableEntrada            := lEntradaModel.objeto.obterLista;
+          dsTmp := lTableEntrada;
+
+          dsEntrada.DataSet        := dsTmp.objeto;
 
           lEntradaItensModel.NumeroView := lEntrada.NUMERO_ENT;
           lTableItens                  := lEntradaItensModel.obterLista;
+          dsTmp2 := lTableItens;
           dsEntradaItens.DataSet       := lTableitens.objeto;
         end;
       end;
@@ -1844,7 +1847,7 @@ begin
         ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lEntradaModel.Free;
+    lEntradaModel:=nil;
     lEntradaItensModel.Free;
   end;
 end;
@@ -1879,13 +1882,13 @@ end;
 
 procedure TForm1.Button58Click(Sender: TObject);
 var
-  lEntradaModel      : TEntradaModel;
+  lEntradaModel      : ITEntradaModel;
   lEntradaItensModel : TEntradaItensModel;
   lEntrada           : String;
   lTableEntrada,
   lTableItens        : IFDDataset;
 begin
-  lEntradaModel      := TEntradaModel.Create(vIConexao);
+  lEntradaModel      := TEntradaModel.getNewIface(vIConexao);
   lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
   try
 
@@ -1893,8 +1896,9 @@ begin
      if lEntrada.IsEmpty then
      Exit;
 
-    lEntradaModel.NumeroView := lEntrada;
-    lTableEntrada            := lEntradaModel.obterLista;
+    lEntradaModel.objeto.NumeroView := lEntrada;
+    lTableEntrada            := lEntradaModel.objeto.obterLista;
+    dsTmp := lTableEntrada;
     dsEntrada.DataSet        := lTableEntrada.objeto;
 
     lEntradaItensModel.NumeroView := lEntrada;
@@ -1903,7 +1907,7 @@ begin
 
 
   finally
-    lEntradaModel.Free;
+    lEntradaModel:=nil;
     lEntradaItensModel.Free;
   end;
 end;
@@ -1911,23 +1915,23 @@ end;
 
 procedure TForm1.Button59Click(Sender: TObject);
 var
-  lEntradaModel      : TEntradaModel;
+  lEntradaModel      : ITEntradaModel;
   lEntradaItensModel : TEntradaItensModel;
 
 begin
-  lEntradaModel      := TEntradaModel.Create(vIConexao);
+  lEntradaModel      := TEntradaModel.getNewIface(vIConexao);
   lEntradaItensModel := TEntradaItensModel.Create(vIConexao);
   try
     try
-      lEntradaModel.NUMERO_ENT    := '55555555';
-      lEntradaModel.CODIGO_FOR    := '500005';
-      lEntradaModel.SERIE_ENT     := '001';
-      lEntradaModel.PARCELAS_ENT  := '3';
-      lEntradaModel.CONDICOES_PAG := '30';
-      lEntradaModel.TOTAL_ENT     := '500';
-      lEntradaModel.DATANOTA_ENT  := DateToStr(vIConexao.DataServer);
+      lEntradaModel.objeto.NUMERO_ENT    := '55555555';
+      lEntradaModel.objeto.CODIGO_FOR    := '500005';
+      lEntradaModel.objeto.SERIE_ENT     := '001';
+      lEntradaModel.objeto.PARCELAS_ENT  := '3';
+      lEntradaModel.objeto.CONDICOES_PAG := '30';
+      lEntradaModel.objeto.TOTAL_ENT     := '500';
+      lEntradaModel.objeto.DATANOTA_ENT  := DateToStr(vIConexao.DataServer);
 
-      lEntradaModel.Incluir;
+      lEntradaModel.objeto.Incluir;
 
       ShowMessage('Cabeçalho Entrada Cadastrado');
       except
@@ -1935,7 +1939,7 @@ begin
          ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lEntradaModel.Free;
+    lEntradaModel:=nil;
     lEntradaItensModel.Free;
   end;
 end;
@@ -1967,10 +1971,10 @@ end;
 procedure TForm1.Button60Click(Sender: TObject);
 var
   lEntradaItensParams : TEntradaItensParams;
-  lEntradaModel       : TEntradaModel;
+  lEntradaModel       : ITEntradaModel;
   lNumEntrada         : String;
 begin
-  lEntradaModel  := TEntradaModel.Create(vIConexao);
+  lEntradaModel  := TEntradaModel.getNewIface(vIConexao);
   try
     try
       lNumEntrada := InputBox('Entrada Item','Digite o número da Entrada:','');
@@ -1983,7 +1987,7 @@ begin
       lEntradaItensParams.QUANTIDADE_ENT  := '10';
       lEntradaItensParams.VALORUNI_ENT    := '50';
 
-      lEntradaModel.EntradaItens(lEntradaItensParams);
+      lEntradaModel.objeto.EntradaItens(lEntradaItensParams);
       ShowMessage('Item adicionado a Entrada: ' + lNumEntrada);
 
     except
@@ -1991,29 +1995,29 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lEntradaModel.Free;
+    lEntradaModel:=nil;
   end;
 end;
 
 procedure TForm1.Button61Click(Sender: TObject);
 var
-  lEntradaModel : TEntradaModel;
+  lEntradaModel : ITEntradaModel;
 
 begin
-  lEntradaModel := TEntradaModel.Create(vIConexao);
+  lEntradaModel := TEntradaModel.getNewIface(vIConexao);
   try
     try
-      lEntradaModel.NumeroView     := '0001018217';
-      lEntradaModel.FornecedorView := '500009';
+      lEntradaModel.objeto.NumeroView     := '0001018217';
+      lEntradaModel.objeto.FornecedorView := '500009';
 
-      dsEntrada.DataSet := lEntradaModel.obterTotalizador.objeto;
+      dsEntrada.DataSet := lEntradaModel.objeto.obterTotalizador.objeto;
 
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lEntradaModel.Free;
+    lEntradaModel:=nil;
   end;
 end;
 
@@ -2473,12 +2477,12 @@ end;
 
 procedure TForm1.Button79Click(Sender: TObject);
 var
-  lEntradaModel: TEntradaModel;
+  lEntradaModel: ITEntradaModel;
   lNomePDF: String;
   lIDEntrada, lCodigoFornecedor, lPathPDF: String;
   lImprimir, lMostraPreview, lGerarPDF: Boolean;
 begin
-  lEntradaModel   := TEntradaModel.Create(vIConexao);
+  lEntradaModel   := TEntradaModel.getNewIface(vIConexao);
 
   try
     lIDEntrada         := '0000015340';
@@ -2489,7 +2493,7 @@ begin
     lPathPDF           := 'c:\temp';
 
     try
-     lNomePDF := lEntradaModel.VisualizarXML(lIDEntrada,lCodigoFornecedor,lImprimir,lMostraPreview,lGerarPDF,lPathPDF)+'-nfe.pdf';
+     lNomePDF := lEntradaModel.objeto.VisualizarXML(lIDEntrada,lCodigoFornecedor,lImprimir,lMostraPreview,lGerarPDF,lPathPDF)+'-nfe.pdf';
     except on E: Exception do
       begin
         ShowMessage('Erro: '+e.Message);
@@ -2498,7 +2502,7 @@ begin
     end;
 
   finally
-    lEntradaModel.Free;
+    lEntradaModel:=nil;
   end;
 end;
 
@@ -2525,11 +2529,11 @@ end;
 
 procedure TForm1.Button80Click(Sender: TObject);
 var
-  lEntradaModel: TEntradaModel;
+  lEntradaModel: ITEntradaModel;
   lNomeXML: String;
   lPathXML, lIDEntrada, lCodigoFornecedor: String;
 begin
-  lEntradaModel   := TEntradaModel.Create(vIConexao);
+  lEntradaModel   := TEntradaModel.getNewIface(vIConexao);
 
   try
     lIDEntrada         := '0000015340';
@@ -2537,7 +2541,7 @@ begin
     lPathXML := 'c:\temp\';
 
     try
-      lNomeXML := lEntradaModel.SalvarXML(lIDEntrada, lCodigoFornecedor,lPathXML);
+      lNomeXML := lEntradaModel.objeto.SalvarXML(lIDEntrada, lCodigoFornecedor,lPathXML);
     except on E: Exception do
       begin
         ShowMessage('Erro: '+e.Message);
@@ -2552,7 +2556,7 @@ begin
     end;
 
   finally
-    lEntradaModel.Free;
+    lEntradaModel:=nil;
   end;
 end;
 
@@ -3744,10 +3748,10 @@ end;
 
 procedure TForm1.Button15Click(Sender: TObject);
 var
-  lEntradaModel : TEntradaModel;
+  lEntradaModel : ITEntradaModel;
   NumEntrada    : String;
 begin
-  lEntradaModel := TEntradaModel.Create(vIConexao);
+  lEntradaModel := TEntradaModel.getNewIface(vIConexao);
   try
     try
       NumEntrada := InputBox('Entrada','Digite o número da Entrada (9 Digitos):','');
@@ -3755,18 +3759,18 @@ begin
       if NumEntrada.IsEmpty then
         Exit;
 
-      lEntradaModel.NUMERO_ENT  := NumEntrada;
-      lEntradaModel.CODIGO_FOR  := '500005';
-      lEntradaModel.SERIE_ENT   := '001';
+      lEntradaModel.objeto.NUMERO_ENT  := NumEntrada;
+      lEntradaModel.objeto.CODIGO_FOR  := '500005';
+      lEntradaModel.objeto.SERIE_ENT   := '001';
 
-      lEntradaModel.Incluir;
+      lEntradaModel.objeto.Incluir;
       ShowMessage('Inserido com Sucesso');
     Except
       on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lEntradaModel.Free;
+    lEntradaModel:=nil;
   end;
 end;
 
@@ -3798,13 +3802,13 @@ end;
 
 procedure TForm1.Button17Click(Sender: TObject);
 var
-  lEntradaModel : TEntradaModel;
+  lEntradaModel : ITEntradaModel;
   lMemTable : IFDDataset;
 begin
-  lEntradaModel := TEntradaModel.Create(vIConexao);
+  lEntradaModel := TEntradaModel.getNewIface(vIConexao);
   try
     try
-      lMemTable := lEntradaModel.obterLista;
+      lMemTable := lEntradaModel.objeto.obterLista;
 
       memoResultado.Lines.Clear;
 
@@ -3831,56 +3835,56 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lEntradaModel.Free;
+    lEntradaModel:=nil;
   end;
 end;
 
 procedure TForm1.Button18Click(Sender: TObject);
 var
-  lEntradaModel     : TEntradaModel;
+  lEntradaModel     : ITEntradaModel;
   lNumeroEntrada,
   lCodigoFornecedor : String;
 begin
-  lEntradaModel := TEntradaModel.Create(vIConexao);
+  lEntradaModel := TEntradaModel.getNewIface(vIConexao);
   try
     try
       lNumeroEntrada    := '9999999999';
       lCodigoFornecedor := '500005';
 
-      lEntradaModel := lEntradaModel.Alterar(lNumeroEntrada, lCodigoFornecedor);
-      lEntradaModel.OBSERVACAO_ENT := 'TESTE ALTERACAO';
+      lEntradaModel := lEntradaModel.objeto.Alterar(lNumeroEntrada, lCodigoFornecedor);
+      lEntradaModel.objeto.OBSERVACAO_ENT := 'TESTE ALTERACAO';
 
-      lEntradaModel.Salvar;
+      lEntradaModel.objeto.Salvar;
       ShowMessage('Alterado com Sucesso');
     Except
       on E:Exception do
       ShowMessage('Erro: ' +E.Message);
     end;
   finally
-    lEntradaModel.Free;
+    lEntradaModel:=nil;
   end;
 end;
 
 procedure TForm1.Button19Click(Sender: TObject);
 var
-  lEntradaModel     : TEntradaModel;
+  lEntradaModel     : ITEntradaModel;
   lNumeroEntrada,
   lCodigoFornecedor : String;
 begin
-  lEntradaModel := TEntradaModel.Create(vIConexao);
+  lEntradaModel := TEntradaModel.getNewIface(vIConexao);
   try
     try
       lNumeroEntrada    := '9999999999';
       lCodigoFornecedor := '500005';
 
-      lEntradaModel.Excluir(lNumeroEntrada, lCodigoFornecedor);
+      lEntradaModel.objeto.Excluir(lNumeroEntrada, lCodigoFornecedor);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lEntradaModel.Free;
+    lEntradaModel:=nil;
   end;
 end;
 

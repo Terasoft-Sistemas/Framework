@@ -14,6 +14,7 @@ uses
   ACBrNFeDANFeRLClass,
   pcnConversao,
   pcnConversaoNFe,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
@@ -30,9 +31,12 @@ type
     CODIGO_FOR : String;
   end;
 
-  TEntradaModel = class
+  TEntradaModel = class;
+  ITEntradaModel=IObject<TEntradaModel>;
 
+  TEntradaModel = class
   private
+    [weak] mySelf: ITEntradaModel;
     vIConexao : IConexao;
     ACBrNFe: TACBrNFe;
     ACBrNFeDANFeRL: TACBrNFeDANFeRL;
@@ -294,16 +298,18 @@ type
     property INFADFISCO: Variant read FINFADFISCO write SetINFADFISCO;
     property INFCPL: Variant read FINFCPL write SetINFCPL;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITEntradaModel;
+
     function Incluir: String;
-    function Alterar(pID, pFornecedor : String): TEntradaModel;
+    function Alterar(pID, pFornecedor : String): ITEntradaModel;
     function Excluir(pID, pFornecedor : String): String;
     function Salvar : String;
 
     function EntradaItens(pEntradaItensParams : TEntradaItensParams) : String;
-    function carregaClasse(pId, pFornecedor : String): TEntradaModel;
+    function carregaClasse(pId, pFornecedor : String): ITEntradaModel;
 
     function ValidaCFOP(pCFOP: String): String;
 
@@ -351,39 +357,41 @@ uses
 function TEntradaModel.SalvarXML(pIDEntrada, pCodigoFornecedor, pPath: String): String;
 var
  lXML: TStringList;
- lEntradaModel: TEntradaModel;
+ lEntradaModel: ITEntradaModel;
 begin
-  lEntradaModel   := TEntradaModel.Create(vIConexao);
+  lXMl :=  nil;
+  lEntradaModel   := TEntradaModel.getNewIface(vIConexao);
 
   try
-    lEntradaModel := lEntradaModel.carregaClasse(pIDEntrada, pCodigoFornecedor);
+    lEntradaModel := lEntradaModel.objeto.carregaClasse(pIDEntrada, pCodigoFornecedor);
     lXML := TStringList.Create;
 
-    if lEntradaModel.ARQ_NFE = '' then
-      CriaException('NF não localizada '+lEntradaModel.ID_A03);
+    if lEntradaModel.objeto.ARQ_NFE = '' then
+      CriaException('NF não localizada '+lEntradaModel.objeto.ID_A03);
 
-    lXML.Text := lEntradaModel.ARQ_NFE;
+    lXML.Text := lEntradaModel.objeto.ARQ_NFE;
 
     if not DirectoryExists (pPath) then
       ForceDirectories(pPath);
     if DirectoryExists (pPath) then
-      lXML.SaveToFile(pPath+'\'+lEntradaModel.ID_A03+'.xml');
+      lXML.SaveToFile(pPath+'\'+lEntradaModel.objeto.ID_A03+'.xml');
 
-    Result := lEntradaModel.ID_A03+'.xml';
+    Result := lEntradaModel.objeto.ID_A03+'.xml';
   finally
-    lEntradaModel.Free;
+    lEntradaModel:=nil;
+    FreeAndNil(lXML);
   end;
 end;
 
 
 function TEntradaModel.VisualizarXML(pIDEntrada, pCodigoFornecedor: String; pImprimir, pMostraPreview, pGerarPDF: Boolean; pPathPDF: String = ''): String;
 var
- lEntradaModel: TEntradaModel;
+ lEntradaModel: ITEntradaModel;
 begin
-  lEntradaModel   := TEntradaModel.Create(vIConexao);
+  lEntradaModel   := TEntradaModel.getNewIface(vIConexao);
 
   try
-    lEntradaModel := lEntradaModel.carregaClasse(pIDEntrada, pCodigoFornecedor);
+    lEntradaModel := lEntradaModel.objeto.carregaClasse(pIDEntrada, pCodigoFornecedor);
 
     ACBrNFeDANFeRL := TACBrNFeDANFeRL.Create(nil);
     ACBrNFe.DANFE  := ACBrNFeDANFeRL;
@@ -401,7 +409,7 @@ begin
     end;
 
     ACBrNFe.NotasFiscais.Clear;
-    ACBrNFe.NotasFiscais.LoadFromString(lEntradaModel.ARQ_NFE);
+    ACBrNFe.NotasFiscais.LoadFromString(lEntradaModel.objeto.ARQ_NFE);
 
 
     if pGerarPDF then begin
@@ -415,23 +423,23 @@ begin
       ACBrNFe.DANFE.ImprimirDANFE;
     end;
 
-    Result := lEntradaModel.ID_A03;
+    Result := lEntradaModel.objeto.ID_A03;
 
   finally
-    lEntradaModel.Free;
+    lEntradaModel:=nil;
   end;
 
 end;
 
 
-function TEntradaModel.Alterar(pID, pFornecedor: String): TEntradaModel;
+function TEntradaModel.Alterar(pID, pFornecedor: String): ITEntradaModel;
 var
-  lEntradaModel : TEntradaModel;
+  lEntradaModel : ITEntradaModel;
 begin
-  lEntradaModel := TEntradaModel.Create(vIConexao);
+  lEntradaModel := TEntradaModel.getNewIface(vIConexao);
   try
-    lEntradaModel       := lEntradaModel.carregaClasse(pID, pFornecedor);
-    lEntradaModel.Acao  := tacAlterar;
+    lEntradaModel       := lEntradaModel.objeto.carregaClasse(pID, pFornecedor);
+    lEntradaModel.objeto.Acao  := tacAlterar;
     Result              := lEntradaModel;
   finally
   end;
@@ -440,11 +448,12 @@ end;
 function TEntradaModel.EntradaItens(pEntradaItensParams: TEntradaItensParams): String;
 var
   lEntradaItensModel  : TEntradaItensModel;
-  lEntradaModel       : TEntradaModel;
+  p,lEntradaModel       : ITEntradaModel;
   lProdutosModel      : ITProdutosModel;
+
 begin
   lEntradaItensModel  := TEntradaItensModel.Create(vIConexao);
-  lEntradaModel       := TEntradaModel.Create(vIConexao);
+  lEntradaModel       := TEntradaModel.getNewIface(vIConexao);
   lProdutosModel      := TProdutosModel.getNewIface(vIConexao);
 
   if pEntradaItensParams.CODIGO_FOR = '' then
@@ -457,15 +466,15 @@ begin
     CriaException('Quantidade não informada');
 
   try
-    self := self.carregaClasse(pEntradaItensParams.NUMERO_ENT, pEntradaItensParams.CODIGO_FOR);
+    p := self.carregaClasse(pEntradaItensParams.NUMERO_ENT, pEntradaItensParams.CODIGO_FOR);
 
     lProdutosModel.objeto.IDRecordView := pEntradaItensParams.CODIGO_PRO;
     lProdutosModel.objeto.obterLista;
     lProdutosModel := lProdutosModel.objeto.ProdutossLista.First;
 
-    lEntradaItensModel.CFOP_ID        := self.FCFOP_ID;
-    lEntradaItensModel.NUMERO_ENT     := self.FNUMERO_ENT;
-    lEntradaItensModel.CODIGO_FOR     := self.FCODIGO_FOR;
+    lEntradaItensModel.CFOP_ID        := p.objeto.FCFOP_ID;
+    lEntradaItensModel.NUMERO_ENT     := p.objeto.FNUMERO_ENT;
+    lEntradaItensModel.CODIGO_FOR     := p.objeto.FCODIGO_FOR;
     lEntradaItensModel.CODIGO_PRO     := pEntradaItensParams.CODIGO_PRO;
     lEntradaItensModel.QUANTIDADE_ENT := pEntradaItensParams.QUANTIDADE_ENT;
     lEntradaItensModel.VALORUNI_ENT   := pEntradaItensParams.VALORUNI_ENT;
@@ -488,26 +497,32 @@ begin
   Result            := self.Salvar;
 end;
 
+class function TEntradaModel.getNewIface(pIConexao: IConexao): ITEntradaModel;
+begin
+  Result := TImplObjetoOwner<TEntradaModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TEntradaModel.importaCabecalho: TEntradaResultado;
 var
  i: Integer;
  lEntrada,
  lFornecedor: String;
- lEntradaModel: TEntradaModel;
+ lEntradaModel: ITEntradaModel;
 begin
 
-  lEntradaModel := TEntradaModel.Create(vIConexao);
+  lEntradaModel := TEntradaModel.getNewIface(vIConexao);
 
   try
     with ACBrNFe.NotasFiscais.Items[0] do
     begin
       lFornecedor := Self.ObterFornecedor(NFe.Emit.CNPJCPF);
 
-      lEntradaModel.NumeroView     := Format('%10.10d', [NFe.Ide.nNF]);
-      lEntradaModel.FornecedorView := lFornecedor;
-      lEntradaModel.obterLista;
+      lEntradaModel.objeto.NumeroView     := Format('%10.10d', [NFe.Ide.nNF]);
+      lEntradaModel.objeto.FornecedorView := lFornecedor;
+      lEntradaModel.objeto.obterLista;
 
-      if lEntradaModel.TotalRecords > 0 then
+      if lEntradaModel.objeto.TotalRecords > 0 then
         CriaException('Nota fiscal '+Format('%10.10d', [NFe.Ide.nNF])+', do fornecedor '+lFornecedor+' já importada');
 
       self.FSTATUS                      := '0';
@@ -545,7 +560,7 @@ begin
       result.CODIGO_FOR := lFornecedor;
     end;
   finally
-    lEntradaModel.Free;
+    lEntradaModel:=nil;
   end;
 end;
 
@@ -724,19 +739,19 @@ begin
   Result    := self.Salvar;
 end;
 
-function TEntradaModel.carregaClasse(pId, pFornecedor: String): TEntradaModel;
+function TEntradaModel.carregaClasse(pId, pFornecedor: String): ITEntradaModel;
 var
-  lEntradaDao: TEntradaDao;
+  lEntradaDao: ITEntradaDao;
 begin
-  lEntradaDao := TEntradaDao.Create(vIConexao);
+  lEntradaDao := TEntradaDao.getNewIface(vIConexao);
   try
-    Result := lEntradaDao.carregaClasse(pId, pFornecedor);
+    Result := lEntradaDao.objeto.carregaClasse(pId, pFornecedor);
   finally
-    lEntradaDao.Free;
+    lEntradaDao:=nil;
   end;
 end;
 
-constructor TEntradaModel.Create(pIConexao : IConexao);
+constructor TEntradaModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   ACBrNFe   := TACBrNFe.Create(nil);
@@ -794,61 +809,61 @@ end;
 
 function TEntradaModel.obterLista: IFDDataset;
 var
-  lEntradaLista: TEntradaDao;
+  lEntradaLista: ITEntradaDao;
 begin
-  lEntradaLista := TEntradaDao.Create(vIConexao);
+  lEntradaLista := TEntradaDao.getNewIface(vIConexao);
   try
-    lEntradaLista.TotalRecords    := FTotalRecords;
-    lEntradaLista.WhereView       := FWhereView;
-    lEntradaLista.CountView       := FCountView;
-    lEntradaLista.OrderView       := FOrderView;
-    lEntradaLista.StartRecordView := FStartRecordView;
-    lEntradaLista.LengthPageView  := FLengthPageView;
-    lEntradaLista.IDRecordView    := FIDRecordView;
-    lEntradaLista.NumeroView      := FNumeroView;
-    lEntradaLista.FornecedorView  := FFornecedorView;
+    lEntradaLista.objeto.TotalRecords    := FTotalRecords;
+    lEntradaLista.objeto.WhereView       := FWhereView;
+    lEntradaLista.objeto.CountView       := FCountView;
+    lEntradaLista.objeto.OrderView       := FOrderView;
+    lEntradaLista.objeto.StartRecordView := FStartRecordView;
+    lEntradaLista.objeto.LengthPageView  := FLengthPageView;
+    lEntradaLista.objeto.IDRecordView    := FIDRecordView;
+    lEntradaLista.objeto.NumeroView      := FNumeroView;
+    lEntradaLista.objeto.FornecedorView  := FFornecedorView;
 
-    Result        := lEntradaLista.obterLista;
-    FTotalRecords := lEntradaLista.TotalRecords;
+    Result        := lEntradaLista.objeto.obterLista;
+    FTotalRecords := lEntradaLista.objeto.TotalRecords;
   finally
-    lEntradaLista.Free;
+    lEntradaLista:=nil;
   end;
 end;
 
 function TEntradaModel.obterTotalizador: IFDDataset;
 var
-  lEntradaDao: TEntradaDao;
+  lEntradaDao: ITEntradaDao;
 begin
-  lEntradaDao := TEntradaDao.Create(vIConexao);
+  lEntradaDao := TEntradaDao.getNewIface(vIConexao);
 
   try
-    lEntradaDao.NumeroView     := FNumeroView;
-    lEntradaDao.FornecedorView := FFornecedorView;
+    lEntradaDao.objeto.NumeroView     := FNumeroView;
+    lEntradaDao.objeto.FornecedorView := FFornecedorView;
 
-    Result := lEntradaDao.obterTotalizador;
+    Result := lEntradaDao.objeto.obterTotalizador;
 
   finally
-    lEntradaDao.Free;
+    lEntradaDao:=nil;
   end;
 end;
 
 function TEntradaModel.Salvar: String;
 var
-  lEntradaDao: TEntradaDao;
+  lEntradaDao: ITEntradaDao;
 begin
-  lEntradaDao := TEntradaDao.Create(vIConexao);
+  lEntradaDao := TEntradaDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lEntradaDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lEntradaDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lEntradaDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lEntradaDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lEntradaDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lEntradaDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lEntradaDao.Free;
+    lEntradaDao:=nil;
   end;
 end;
 

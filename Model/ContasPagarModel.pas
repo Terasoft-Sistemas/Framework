@@ -418,21 +418,21 @@ end;
 function TContasPagarModel.obterValorEntrada(pEntrada, pFornecedor: String): IFDDataset;
 var
   lContasPagarDao: ITContasPagarDao;
-  lEntradaModel: TEntradaModel;
+  lEntradaModel: ITEntradaModel;
   lTotalFinanceiro: Double;
   lTotalEntradaFornecedor: Double;
   lMemTable : IFDDataset;
 begin
 
   lContasPagarDao := TContasPagarDao.getNewIface(vIConexao);
-  lEntradaModel   := TEntradaModel.Create(vIConexao);
+  lEntradaModel   := TEntradaModel.getNewIface(vIConexao);
   lMemTable       := criaIFDDataset(TFDMemTable.Create(nil));
 
   try
-    lEntradaModel.NumeroView     := pEntrada;
-    lEntradaModel.FornecedorView := pFornecedor;
+    lEntradaModel.objeto.NumeroView     := pEntrada;
+    lEntradaModel.objeto.FornecedorView := pFornecedor;
 
-    lTotalEntradaFornecedor := lEntradaModel.obterTotalizador.objeto.fieldByName('TOTAL_ENTRADA').AsFloat;
+    lTotalEntradaFornecedor := lEntradaModel.objeto.obterTotalizador.objeto.fieldByName('TOTAL_ENTRADA').AsFloat;
     lTotalFinanceiro        := lContasPagarDao.objeto.FinanceiroEntrada(pEntrada, pFornecedor);
 
     TFDMemTable(lMemTable.objeto).FieldDefs.Add('VALOR', ftFloat);
@@ -444,7 +444,7 @@ begin
 
   finally
     lContasPagarDao:=nil;
-    lEntradaModel.Free;
+    lEntradaModel:=nil;
   end;
 end;
 
