@@ -884,7 +884,7 @@ begin
     CriaException('Para o cliente consumidor o portador não pode ser boleto.');
 
   if (self.FCODIGO_CLI = '000000') and (pPortador = '000003' ) then
-    CriaException('Para o cliente consumidor o portador não pode ser boleto.');
+    CriaException('Para o cliente consumidor o portador não pode ser cheque.');
 
   validaBloqueioPortador(pPortador, self.FCODIGO_CLI);
 
