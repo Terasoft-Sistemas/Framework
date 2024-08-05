@@ -11,12 +11,16 @@ uses
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao;
 
 type
-  TTabelaJurosPromocaoDao = class
+  TTabelaJurosPromocaoDao = class;
+  ITTabelaJurosPromocaoDao=IObject<TTabelaJurosPromocaoDao>;
 
+  TTabelaJurosPromocaoDao = class
   private
+    [weak] mySelf: ITTabelaJurosPromocaoDao;
     vIConexao 	: IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -42,8 +46,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITTabelaJurosPromocaoDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -54,14 +60,14 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(pTabelaJurosPromocaoModel: TTabelaJurosPromocaoModel): String;
-    function alterar(pTabelaJurosPromocaoModel: TTabelaJurosPromocaoModel): String;
-    function excluir(pTabelaJurosPromocaoModel: TTabelaJurosPromocaoModel): String;
+    function incluir(pTabelaJurosPromocaoModel: ITTabelaJurosPromocaoModel): String;
+    function alterar(pTabelaJurosPromocaoModel: ITTabelaJurosPromocaoModel): String;
+    function excluir(pTabelaJurosPromocaoModel: ITTabelaJurosPromocaoModel): String;
 
-    function carregaClasse(pID : String): TTabelaJurosPromocaoModel;
+    function carregaClasse(pID : String): ITTabelaJurosPromocaoModel;
     function obterLista: IFDDataset;
     function obterTabelaJurosProduto(pProduto : String): IFDDataset;
-    procedure setParams(var pQry: TFDQuery; pTabelaJurosPromocaoModel: TTabelaJurosPromocaoModel);
+    procedure setParams(var pQry: TFDQuery; pTabelaJurosPromocaoModel: ITTabelaJurosPromocaoModel);
 
 end;
 
@@ -72,13 +78,13 @@ uses
 
 { TTabelaJurosPromocao }
 
-function TTabelaJurosPromocaoDao.carregaClasse(pID : String): TTabelaJurosPromocaoModel;
+function TTabelaJurosPromocaoDao.carregaClasse(pID : String): ITTabelaJurosPromocaoModel;
 var
   lQry: TFDQuery;
-  lModel: TTabelaJurosPromocaoModel;
+  lModel: ITTabelaJurosPromocaoModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TTabelaJurosPromocaoModel.Create(vIConexao);
+  lModel   := TTabelaJurosPromocaoModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -87,14 +93,14 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID                := lQry.FieldByName('ID').AsString;
-    lModel.PROMOCAO_ID       := lQry.FieldByName('PROMOCAO_ID').AsString;
-    lModel.PORTADOR_ID       := lQry.FieldByName('PORTADOR_ID').AsString;
-    lModel.PARCELA           := lQry.FieldByName('PARCELA').AsString;
-    lModel.TAXA_JUROS        := lQry.FieldByName('TAXA_JUROS').AsString;
-    lModel.SYSTIME           := lQry.FieldByName('SYSTIME').AsString;
-    lModel.COM_ENTRADA       := lQry.FieldByName('COM_ENTRADA').AsString;
-    lModel.LIMITADO_PARCELA  := lQry.FieldByName('LIMITADO_PARCELA').AsString;
+    lModel.objeto.ID                := lQry.FieldByName('ID').AsString;
+    lModel.objeto.PROMOCAO_ID       := lQry.FieldByName('PROMOCAO_ID').AsString;
+    lModel.objeto.PORTADOR_ID       := lQry.FieldByName('PORTADOR_ID').AsString;
+    lModel.objeto.PARCELA           := lQry.FieldByName('PARCELA').AsString;
+    lModel.objeto.TAXA_JUROS        := lQry.FieldByName('TAXA_JUROS').AsString;
+    lModel.objeto.SYSTIME           := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.COM_ENTRADA       := lQry.FieldByName('COM_ENTRADA').AsString;
+    lModel.objeto.LIMITADO_PARCELA  := lQry.FieldByName('LIMITADO_PARCELA').AsString;
 
     Result := lModel;
   finally
@@ -102,7 +108,7 @@ begin
   end;
 end;
 
-constructor TTabelaJurosPromocaoDao.Create(pIConexao : IConexao);
+constructor TTabelaJurosPromocaoDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -113,7 +119,7 @@ begin
   inherited;
 end;
 
-function TTabelaJurosPromocaoDao.incluir(pTabelaJurosPromocaoModel: TTabelaJurosPromocaoModel): String;
+function TTabelaJurosPromocaoDao.incluir(pTabelaJurosPromocaoModel: ITTabelaJurosPromocaoModel): String;
 var
   lQry : TFDQuery;
   lSQL : String;
@@ -134,7 +140,7 @@ begin
   end;
 end;
 
-function TTabelaJurosPromocaoDao.alterar(pTabelaJurosPromocaoModel: TTabelaJurosPromocaoModel): String;
+function TTabelaJurosPromocaoDao.alterar(pTabelaJurosPromocaoModel: ITTabelaJurosPromocaoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -148,7 +154,7 @@ begin
     setParams(lQry, pTabelaJurosPromocaoModel);
     lQry.ExecSQL;
 
-    Result := pTabelaJurosPromocaoModel.ID;
+    Result := pTabelaJurosPromocaoModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -156,20 +162,26 @@ begin
   end;
 end;
 
-function TTabelaJurosPromocaoDao.excluir(pTabelaJurosPromocaoModel: TTabelaJurosPromocaoModel): String;
+function TTabelaJurosPromocaoDao.excluir(pTabelaJurosPromocaoModel: ITTabelaJurosPromocaoModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from TABELAJUROS_PROMOCAO where ID = :ID' ,[pTabelaJurosPromocaoModel.ID]);
+   lQry.ExecSQL('delete from TABELAJUROS_PROMOCAO where ID = :ID' ,[pTabelaJurosPromocaoModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pTabelaJurosPromocaoModel.ID;
+   Result := pTabelaJurosPromocaoModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TTabelaJurosPromocaoDao.getNewIface(pIConexao: IConexao): ITTabelaJurosPromocaoDao;
+begin
+  Result := TImplObjetoOwner<TTabelaJurosPromocaoDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TTabelaJurosPromocaoDao.where: String;
@@ -306,28 +318,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TTabelaJurosPromocaoDao.setParams(var pQry: TFDQuery; pTabelaJurosPromocaoModel: TTabelaJurosPromocaoModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TTabelaJurosPromocaoDao.setParams(var pQry: TFDQuery; pTabelaJurosPromocaoModel: ITTabelaJurosPromocaoModel);
 begin
-  lTabela := vConstrutor.getColumns('TABELAJUROS_PROMOCAO');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TTabelaJurosPromocaoModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pTabelaJurosPromocaoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pTabelaJurosPromocaoModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('TABELAJUROS_PROMOCAO',pQry,pTabelaJurosPromocaoModel.objeto);
 end;
 
 procedure TTabelaJurosPromocaoDao.SetStartRecordView(const Value: String);

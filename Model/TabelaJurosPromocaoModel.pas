@@ -6,13 +6,17 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
 
-  TTabelaJurosPromocaoModel = class
+  TTabelaJurosPromocaoModel = class;
+  ITTabelaJurosPromocaoModel=IObject<TTabelaJurosPromocaoModel>;
 
+  TTabelaJurosPromocaoModel = class
   private
+    [weak] mySelf: ITTabelaJurosPromocaoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -59,15 +63,17 @@ type
     property COM_ENTRADA       : Variant read FCOM_ENTRADA write SetCOM_ENTRADA;
     property LIMITADO_PARCELA  : Variant read FLIMITADO_PARCELA write SetLIMITADO_PARCELA;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITTabelaJurosPromocaoModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TTabelaJurosPromocaoModel;
+    function Alterar(pID : String): ITTabelaJurosPromocaoModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId : String): TTabelaJurosPromocaoModel;
+    function carregaClasse(pId : String): ITTabelaJurosPromocaoModel;
     function obterLista: IFDDataset;
     function obterTabelaJurosProduto(pProduto : String): IFDDataset;
 
@@ -91,14 +97,14 @@ uses
 
 { TTabelaJurosPromocaoModel }
 
-function TTabelaJurosPromocaoModel.Alterar(pID: String): TTabelaJurosPromocaoModel;
+function TTabelaJurosPromocaoModel.Alterar(pID: String): ITTabelaJurosPromocaoModel;
 var
-  lTabelaJurosPromocaoModel : TTabelaJurosPromocaoModel;
+  lTabelaJurosPromocaoModel : ITTabelaJurosPromocaoModel;
 begin
-  lTabelaJurosPromocaoModel := TTabelaJurosPromocaoModel.Create(vIConexao);
+  lTabelaJurosPromocaoModel := TTabelaJurosPromocaoModel.getNewIface(vIConexao);
   try
-    lTabelaJurosPromocaoModel       := lTabelaJurosPromocaoModel.carregaClasse(pID);
-    lTabelaJurosPromocaoModel.Acao  := tacAlterar;
+    lTabelaJurosPromocaoModel       := lTabelaJurosPromocaoModel.objeto.carregaClasse(pID);
+    lTabelaJurosPromocaoModel.objeto.Acao  := tacAlterar;
     Result            	   := lTabelaJurosPromocaoModel;
   finally
   end;
@@ -111,26 +117,32 @@ begin
   Result       := self.Salvar;
 end;
 
+class function TTabelaJurosPromocaoModel.getNewIface(pIConexao: IConexao): ITTabelaJurosPromocaoModel;
+begin
+  Result := TImplObjetoOwner<TTabelaJurosPromocaoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TTabelaJurosPromocaoModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
     Result    := self.Salvar;
 end;
 
-function TTabelaJurosPromocaoModel.carregaClasse(pId : String): TTabelaJurosPromocaoModel;
+function TTabelaJurosPromocaoModel.carregaClasse(pId : String): ITTabelaJurosPromocaoModel;
 var
-  lTabelaJurosPromocaoDao: TTabelaJurosPromocaoDao;
+  lTabelaJurosPromocaoDao: ITTabelaJurosPromocaoDao;
 begin
-  lTabelaJurosPromocaoDao := TTabelaJurosPromocaoDao.Create(vIConexao);
+  lTabelaJurosPromocaoDao := TTabelaJurosPromocaoDao.getNewIface(vIConexao);
 
   try
-    Result := lTabelaJurosPromocaoDao.carregaClasse(pID);
+    Result := lTabelaJurosPromocaoDao.objeto.carregaClasse(pID);
   finally
-    lTabelaJurosPromocaoDao.Free;
+    lTabelaJurosPromocaoDao:=nil;
   end;
 end;
 
-constructor TTabelaJurosPromocaoModel.Create(pIConexao : IConexao);
+constructor TTabelaJurosPromocaoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -142,55 +154,55 @@ end;
 
 function TTabelaJurosPromocaoModel.obterLista: IFDDataset;
 var
-  lTabelaJurosPromocaoLista: TTabelaJurosPromocaoDao;
+  lTabelaJurosPromocaoLista: ITTabelaJurosPromocaoDao;
 begin
-  lTabelaJurosPromocaoLista := TTabelaJurosPromocaoDao.Create(vIConexao);
+  lTabelaJurosPromocaoLista := TTabelaJurosPromocaoDao.getNewIface(vIConexao);
 
   try
-    lTabelaJurosPromocaoLista.TotalRecords    := FTotalRecords;
-    lTabelaJurosPromocaoLista.WhereView       := FWhereView;
-    lTabelaJurosPromocaoLista.CountView       := FCountView;
-    lTabelaJurosPromocaoLista.OrderView       := FOrderView;
-    lTabelaJurosPromocaoLista.StartRecordView := FStartRecordView;
-    lTabelaJurosPromocaoLista.LengthPageView  := FLengthPageView;
-    lTabelaJurosPromocaoLista.IDRecordView    := FIDRecordView;
+    lTabelaJurosPromocaoLista.objeto.TotalRecords    := FTotalRecords;
+    lTabelaJurosPromocaoLista.objeto.WhereView       := FWhereView;
+    lTabelaJurosPromocaoLista.objeto.CountView       := FCountView;
+    lTabelaJurosPromocaoLista.objeto.OrderView       := FOrderView;
+    lTabelaJurosPromocaoLista.objeto.StartRecordView := FStartRecordView;
+    lTabelaJurosPromocaoLista.objeto.LengthPageView  := FLengthPageView;
+    lTabelaJurosPromocaoLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lTabelaJurosPromocaoLista.obterLista;
+    Result := lTabelaJurosPromocaoLista.objeto.obterLista;
 
-    FTotalRecords := lTabelaJurosPromocaoLista.TotalRecords;
+    FTotalRecords := lTabelaJurosPromocaoLista.objeto.TotalRecords;
 
   finally
-    lTabelaJurosPromocaoLista.Free;
+    lTabelaJurosPromocaoLista:=nil;
   end;
 end;
 
 function TTabelaJurosPromocaoModel.obterTabelaJurosProduto(pProduto: String): IFDDataset;
 var
-  lTabelaJurosPromocaoDao : TTabelaJurosPromocaoDao;
+  lTabelaJurosPromocaoDao : ITTabelaJurosPromocaoDao;
 begin
-  lTabelaJurosPromocaoDao := TTabelaJurosPromocaoDao.Create(vIConexao);
+  lTabelaJurosPromocaoDao := TTabelaJurosPromocaoDao.getNewIface(vIConexao);
 
   try
-    Result := lTabelaJurosPromocaoDao.obterTabelaJurosProduto(pProduto);
+    Result := lTabelaJurosPromocaoDao.objeto.obterTabelaJurosProduto(pProduto);
   finally
-    lTabelaJurosPromocaoDao.Free;
+    lTabelaJurosPromocaoDao:=nil;
   end;
 end;
 
 function TTabelaJurosPromocaoModel.Salvar: String;
 var
-  lTabelaJurosPromocaoDao: TTabelaJurosPromocaoDao;
+  lTabelaJurosPromocaoDao: ITTabelaJurosPromocaoDao;
 begin
-  lTabelaJurosPromocaoDao := TTabelaJurosPromocaoDao.Create(vIConexao);
+  lTabelaJurosPromocaoDao := TTabelaJurosPromocaoDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lTabelaJurosPromocaoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lTabelaJurosPromocaoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lTabelaJurosPromocaoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lTabelaJurosPromocaoDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lTabelaJurosPromocaoDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lTabelaJurosPromocaoDao.objeto.excluir(mySelf);
     end;
   finally
-    lTabelaJurosPromocaoDao.Free;
+    lTabelaJurosPromocaoDao:=nil;
   end;
 end;
 

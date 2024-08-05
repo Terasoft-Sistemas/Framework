@@ -576,12 +576,12 @@ end;
 
 procedure TForm1.btnObterJurosPromocaoClick(Sender: TObject);
 var
-  lTabelaJurosPromocaoModel : TTabelaJurosPromocaoModel;
+  lTabelaJurosPromocaoModel : ITTabelaJurosPromocaoModel;
   lMemTable                 : IFDDataset;
 begin
-  lTabelaJurosPromocaoModel := TTabelaJurosPromocaoModel.Create(vIConexao);
+  lTabelaJurosPromocaoModel := TTabelaJurosPromocaoModel.getNewIface(vIConexao);
   try
-    lMemTable := lTabelaJurosPromocaoModel.obterLista;
+    lMemTable := lTabelaJurosPromocaoModel.objeto.obterLista;
 
       //Aki o dataset será zerado apos sair da função.
       //Precisa deixar este contexto ativo...                  a
@@ -589,7 +589,7 @@ begin
     dsJuros.DataSet := dsTmp.objeto;
 
   finally
-    lTabelaJurosPromocaoModel.Free;
+    lTabelaJurosPromocaoModel:=nil;
   end;
 end;
 
@@ -4185,18 +4185,18 @@ end;
 
 procedure TForm1.SpeedButton1Click(Sender: TObject);
 var
-  lTabelaJurosPromocaoModel : TTabelaJurosPromocaoModel;
+  lTabelaJurosPromocaoModel : ITTabelaJurosPromocaoModel;
   lTableJuros               : IFDDataset;
 begin
-  lTabelaJurosPromocaoModel := TTabelaJurosPromocaoModel.Create(vIConexao);
+  lTabelaJurosPromocaoModel := TTabelaJurosPromocaoModel.getNewIface(vIConexao);
   try
-    lTableJuros := lTabelaJurosPromocaoModel.obterTabelaJurosProduto('006165');
+    lTableJuros := lTabelaJurosPromocaoModel.objeto.obterTabelaJurosProduto('006165');
 
     if lTableJuros.objeto.RecordCount > 0 then
       dsJuros.DataSet := RetornaCoeficiente(lTableJuros.objeto.FieldByName('TAXA_JUROS').AsFloat, lTableJuros.objeto.FieldByName('PARCELA').AsInteger);
 
   finally
-    lTabelaJurosPromocaoModel.Free;
+    lTabelaJurosPromocaoModel:=nil;
   end;
 
 end;
