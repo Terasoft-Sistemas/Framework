@@ -12,7 +12,6 @@ object FormEP: TFormEP
   Font.Style = []
   Position = poScreenCenter
   OnCreate = FormCreate
-  PixelsPerInch = 96
   TextHeight = 15
   object sbAbrir: TSpeedButton
     Left = 503
@@ -46,8 +45,8 @@ object FormEP: TFormEP
     OnClick = sbLImparFiltrosClick
   end
   object sbValoresFiltro: TSpeedButton
-    Left = 288
-    Top = 96
+    Left = 297
+    Top = 94
     Width = 145
     Height = 22
     Caption = 'Itens do Filtro'

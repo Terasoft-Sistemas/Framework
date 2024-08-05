@@ -156,7 +156,7 @@ begin
 
     tipoFiltro_DataPeriodo:
     begin
-//        fFiltroSelecionado.objeto.dhInicial := selecionaData(fFiltroSelecionado.objeto.dhInicial,'Data Inicial');
+        fFiltroSelecionado.objeto.dhInicial := selecionaData(fFiltroSelecionado.objeto.dhInicial,'Data Inicial');
         fFiltroSelecionado.objeto.dhFinal := selecionaData(fFiltroSelecionado.objeto.dhFinal,'Data Final');
     end;
     tipoFiltro_HoraPeriodo: ;

@@ -233,7 +233,8 @@ end;
 
 class function TContasPagarDao.getNewIface(pIConexao: IConexao): ITContasPagarDao;
 begin
-
+  Result := TImplObjetoOwner<TContasPagarDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TContasPagarDao.where: String;

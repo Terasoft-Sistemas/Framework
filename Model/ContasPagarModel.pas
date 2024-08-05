@@ -334,10 +334,10 @@ begin
 
 end;
 
-class function TContasPagarModel.getNewIface(
-  pIConexao: IConexao): ITContasPagarModel;
+class function TContasPagarModel.getNewIface(pIConexao: IConexao): ITContasPagarModel;
 begin
-
+  Result := TImplObjetoOwner<TContasPagarModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TContasPagarModel.Incluir: String;
