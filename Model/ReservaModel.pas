@@ -6,13 +6,17 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
 
-  TReservaModel = class
+  TReservaModel = class;
+  ITReservaModel=IObject<TReservaModel>;
 
+  TReservaModel = class
   private
+    [weak] mySelf: ITReservaModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -152,15 +156,17 @@ type
     property VALOR_TOTAL          : Variant read FVALOR_TOTAL write SetVALOR_TOTAL;
 
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITReservaModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TReservaModel;
+    function Alterar(pID : String): ITReservaModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId : String): TReservaModel;
+    function carregaClasse(pId : String): ITReservaModel;
     function obterLista: IFDDataset;
 
     function AtualizaReservaVendaAssistida(pAtualizaReserva_Parametros: TAtualizaReserva_Parametros): String;
@@ -185,14 +191,14 @@ uses
 
 { TReservaModel }
 
-function TReservaModel.Alterar(pID: String): TReservaModel;
+function TReservaModel.Alterar(pID: String): ITReservaModel;
 var
-  lReservaModel : TReservaModel;
+  lReservaModel : ITReservaModel;
 begin
-  lReservaModel := TReservaModel.Create(vIConexao);
+  lReservaModel := TReservaModel.getNewIface(vIConexao);
   try
-    lReservaModel       := lReservaModel.carregaClasse(pID);
-    lReservaModel.Acao  := tacAlterar;
+    lReservaModel       := lReservaModel.objeto.carregaClasse(pID);
+    lReservaModel.objeto.Acao  := tacAlterar;
     Result              := lReservaModel;
   finally
   end;
@@ -200,13 +206,13 @@ end;
 
 function TReservaModel.AtualizaReservaVendaAssistida(pAtualizaReserva_Parametros: TAtualizaReserva_Parametros): String;
 var
-  lReservaDao : TReservaDao;
+  lReservaDao : ITReservaDao;
 begin
-  lReservaDao := TReservaDao.Create(vIConexao);
+  lReservaDao := TReservaDao.getNewIface(vIConexao);
   try
-    Result := lReservaDao.AtualizaReservaVendaAssistida(pAtualizaReserva_Parametros);
+    Result := lReservaDao.objeto.AtualizaReservaVendaAssistida(pAtualizaReserva_Parametros);
   finally
-    lReservaDao.Free;
+    lReservaDao:=nil;
   end;
 end;
 
@@ -215,6 +221,12 @@ begin
   self.ID       := pID;
   self.FAcao    := tacExcluir;
   Result        := self.Salvar;
+end;
+
+class function TReservaModel.getNewIface(pIConexao: IConexao): ITReservaModel;
+begin
+  Result := TImplObjetoOwner<TReservaModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TReservaModel.Incluir: String;
@@ -227,35 +239,37 @@ begin
   Result    := self.Salvar;
 end;
 
-function TReservaModel.carregaClasse(pId : String): TReservaModel;
+function TReservaModel.carregaClasse(pId : String): ITReservaModel;
 var
-  lReservaDao: TReservaDao;
+  lReservaDao: ITReservaDao;
 begin
-  lReservaDao := TReservaDao.Create(vIConexao);
+  lReservaDao := TReservaDao.getNewIface(vIConexao);
 
   try
-    Result := lReservaDao.carregaClasse(pId);
+    Result := lReservaDao.objeto.carregaClasse(pId);
   finally
-    lReservaDao.Free;
+    lReservaDao:=nil;
   end;
 end;
 
 function TReservaModel.concluirReserva(pStatus, pPedido, pWebPedidoItensId, pFilial: String): Boolean;
 var
   lTableReserva: IFDDataset;
+  p: ITReservaModel;
 begin
   self.WhereView := ' and reserva.web_pedidoitens_id = ' + pWebPedidoItensId + ' and reserva.filial = ' + QuotedStr(pFilial);
   lTableReserva := self.obterLista;
 
-  self := self.Alterar(lTableReserva.objeto.FieldByName('ID').AsString);
-
-  self.STATUS             := pStatus;
-  self.PEDIDO_ID          := pPedido;
-  self.DATAHORA_EFETIVADA := DateTimeToStr(vIConexao.DataHoraServer);
-  self.Salvar;
+  with self.Alterar(lTableReserva.objeto.FieldByName('ID').AsString) do
+  begin
+    objeto.STATUS             := pStatus;
+    objeto.PEDIDO_ID          := pPedido;
+    objeto.DATAHORA_EFETIVADA := DateTimeToStr(vIConexao.DataHoraServer);
+    objeto.Salvar;
+  end;
 end;
 
-constructor TReservaModel.Create(pIConexao : IConexao);
+constructor TReservaModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -267,45 +281,45 @@ end;
 
 function TReservaModel.obterLista: IFDDataset;
 var
-  lReservaLista: TReservaDao;
+  lReservaLista: ITReservaDao;
 begin
-  lReservaLista := TReservaDao.Create(vIConexao);
+  lReservaLista := TReservaDao.getNewIface(vIConexao);
 
   try
-    lReservaLista.TotalRecords    := FTotalRecords;
-    lReservaLista.WhereView       := FWhereView;
-    lReservaLista.CountView       := FCountView;
-    lReservaLista.OrderView       := FOrderView;
-    lReservaLista.StartRecordView := FStartRecordView;
-    lReservaLista.LengthPageView  := FLengthPageView;
-    lReservaLista.IDRecordView    := FIDRecordView;
+    lReservaLista.objeto.TotalRecords    := FTotalRecords;
+    lReservaLista.objeto.WhereView       := FWhereView;
+    lReservaLista.objeto.CountView       := FCountView;
+    lReservaLista.objeto.OrderView       := FOrderView;
+    lReservaLista.objeto.StartRecordView := FStartRecordView;
+    lReservaLista.objeto.LengthPageView  := FLengthPageView;
+    lReservaLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lReservaLista.obterLista;
+    Result := lReservaLista.objeto.obterLista;
 
-    FTotalRecords := lReservaLista.TotalRecords;
+    FTotalRecords := lReservaLista.objeto.TotalRecords;
 
   finally
-    lReservaLista.Free;
+    lReservaLista:=nil;
   end;
 end;
 
 function TReservaModel.Salvar: String;
 var
-  lReservaDao: TReservaDao;
+  lReservaDao: ITReservaDao;
 begin
-  lReservaDao := TReservaDao.Create(vIConexao);
+  lReservaDao := TReservaDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lReservaDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lReservaDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lReservaDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lReservaDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lReservaDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lReservaDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lReservaDao.Free;
+    lReservaDao:=nil;
   end;
 end;
 

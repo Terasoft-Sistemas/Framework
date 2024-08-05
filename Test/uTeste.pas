@@ -595,36 +595,36 @@ end;
 
 procedure TForm1.btnReservaClick(Sender: TObject);
 var
-  lReservaModel : TReservaModel;
+  lReservaModel : ITReservaModel;
   lWebPedidoItensModel : TWebPedidoItensModel;
 begin
-  lReservaModel        := TReservaModel.Create(vIConexao.NovaConexao('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA));
+  lReservaModel        := TReservaModel.getNewIface(vIConexao.NovaConexao('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA));
   lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
 
   try
     lWebPedidoItensModel := lWebPedidoItensModel.carregaClasse('1091');
 
-    lReservaModel.PRODUTO_ID          := lWebPedidoItensModel.PRODUTO_ID;
-    lReservaModel.QUANTIDADE          :=lWebPedidoItensModel.QUANTIDADE;
-    lReservaModel.VALOR_UNITARIO      := lWebPedidoItensModel.VALOR_UNITARIO;
-    lReservaModel.OBSERVACAO          := 'Reservar realizada pela venda assistida N '+lWebPedidoItensModel.WEB_PEDIDO_ID;
-    lReservaModel.WEB_PEDIDOITENS_ID  := lWebPedidoItensModel.ID;
-    lReservaModel.WEB_PEDIDO_ID       := lWebPedidoItensModel.WEB_PEDIDO_ID;
-    lReservaModel.TIPO                := lWebPedidoItensModel.TIPO;
-    lReservaModel.ENTREGA             := lWebPedidoItensModel.ENTREGA;
-    lReservaModel.RETIRA_LOJA         := IIF(lWebPedidoItensModel.TIPO_ENTREGA = 'LJ','S','N');;
-    lReservaModel.STATUS              := IIF(lWebPedidoItensModel.TIPO_ENTREGA = 'LJ','L','1');
-    lReservaModel.CLIENTE_ID          := '000000';
-    lReservaModel.VENDEDOR_ID         := '000000';
-    lReservaModel.FILIAL              := '000';
+    lReservaModel.objeto.PRODUTO_ID          := lWebPedidoItensModel.PRODUTO_ID;
+    lReservaModel.objeto.QUANTIDADE          :=lWebPedidoItensModel.QUANTIDADE;
+    lReservaModel.objeto.VALOR_UNITARIO      := lWebPedidoItensModel.VALOR_UNITARIO;
+    lReservaModel.objeto.OBSERVACAO          := 'Reservar realizada pela venda assistida N '+lWebPedidoItensModel.WEB_PEDIDO_ID;
+    lReservaModel.objeto.WEB_PEDIDOITENS_ID  := lWebPedidoItensModel.ID;
+    lReservaModel.objeto.WEB_PEDIDO_ID       := lWebPedidoItensModel.WEB_PEDIDO_ID;
+    lReservaModel.objeto.TIPO                := lWebPedidoItensModel.TIPO;
+    lReservaModel.objeto.ENTREGA             := lWebPedidoItensModel.ENTREGA;
+    lReservaModel.objeto.RETIRA_LOJA         := IIF(lWebPedidoItensModel.TIPO_ENTREGA = 'LJ','S','N');;
+    lReservaModel.objeto.STATUS              := IIF(lWebPedidoItensModel.TIPO_ENTREGA = 'LJ','L','1');
+    lReservaModel.objeto.CLIENTE_ID          := '000000';
+    lReservaModel.objeto.VENDEDOR_ID         := '000000';
+    lReservaModel.objeto.FILIAL              := '000';
 
-    lReservaModel.Incluir;
+    lReservaModel.objeto.Incluir;
 
     lWebPedidoItensModel := lWebPedidoItensModel.carregaClasse('1091');
 
   finally
     lWebPedidoItensModel.Free;
-    lReservaModel.Free;
+    lReservaModel:=nil;
   end;
 end;
 
@@ -1135,24 +1135,24 @@ end;
 
 procedure TForm1.Button35Click(Sender: TObject);
 var
-  lReservaModel : TReservaModel;
+  lReservaModel : ITReservaModel;
   lCodPro       : String;
 begin
-  lReservaModel := TReservaModel.Create(vIConexao);
+  lReservaModel := TReservaModel.getNewIface(vIConexao);
   try
     try
     lCodPro := InputBox('Reservar','Digite o código do Produto:','');
       if lCodPro.IsEmpty then
         Exit;
 
-    lReservaModel.PRODUTO_ID   := lCodPro;
-    lReservaModel.CLIENTE_ID   := '700504';
-    lReservaModel.VENDEDOR_ID  := '000007';
-    lReservaModel.QUANTIDADE   := '10';
-    lReservaModel.STATUS       := 'L';
-    lReservaModel.FILIAL       := '002';
+    lReservaModel.objeto.PRODUTO_ID   := lCodPro;
+    lReservaModel.objeto.CLIENTE_ID   := '700504';
+    lReservaModel.objeto.VENDEDOR_ID  := '000007';
+    lReservaModel.objeto.QUANTIDADE   := '10';
+    lReservaModel.objeto.STATUS       := 'L';
+    lReservaModel.objeto.FILIAL       := '002';
 
-    lReservaModel.Incluir;
+    lReservaModel.objeto.Incluir;
 
     ShowMessage('Produto: '+ lCodPro +', reservado! ');
     except
@@ -1160,19 +1160,19 @@ begin
       ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lReservaModel.Free;
+    lReservaModel:=nil;
   end;
 end;
 
 procedure TForm1.Button36Click(Sender: TObject);
 var
-  lReservaModel : TReservaModel;
+  lReservaModel : ITReservaModel;
   lMemTable     : IFDDataset;
 begin
-  lReservaModel := TReservaModel.Create(vIConexao);
+  lReservaModel := TReservaModel.getNewIface(vIConexao);
   try
     try
-      lMemTable := lReservaModel.obterLista;
+      lMemTable := lReservaModel.objeto.obterLista;
       memoResultado.Lines.Clear;
 
       lMemTable.objeto.First;
@@ -1196,16 +1196,16 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lReservaModel.Free;
+    lReservaModel:=nil;
   end;
 end;
 
 procedure TForm1.Button37Click(Sender: TObject);
 var
-  lReservaModel : TReservaModel;
+  lReservaModel : ITReservaModel;
   ID            : String;
 begin
-  lReservaModel := TReservaModel.Create(vIConexao);
+  lReservaModel := TReservaModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('Reserva', 'Digite o ID que deseja Alterar:', '');
@@ -1213,41 +1213,41 @@ begin
       if ID.IsEmpty then
         exit;
 
-      lReservaModel := lReservaModel.Alterar(ID);
-      lReservaModel.PRODUTO_ID := '000007';
-      lReservaModel.VENDEDOR_ID := '000007';
+      lReservaModel := lReservaModel.objeto.Alterar(ID);
+      lReservaModel.objeto.PRODUTO_ID := '000007';
+      lReservaModel.objeto.VENDEDOR_ID := '000007';
 
-      lReservaModel.Salvar;
+      lReservaModel.objeto.Salvar;
       ShowMessage('Alterado com Sucesso');
     Except
       on E:Exception do
       ShowMessage('Erro: ' +E.Message);
     end;
   finally
-    lReservaModel.Free;
+    lReservaModel:=nil;
   end;
 end;
 
 procedure TForm1.Button38Click(Sender: TObject);
 var
-  lReservaModel : TReservaModel;
+  lReservaModel : ITReservaModel;
   ID        : String;
 begin
-  lReservaModel := TReservaModel.Create(vIConexao);
+  lReservaModel := TReservaModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('Reserva', 'Digite o ID da Reserva que deseja excluir:', '');
       if ID.IsEmpty then
           Exit;
 
-      lReservaModel.Excluir(ID);
+      lReservaModel.objeto.Excluir(ID);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lReservaModel.Free;
+    lReservaModel:=nil;
   end;
 end;
 

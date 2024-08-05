@@ -662,21 +662,21 @@ end;
 
 procedure TWebPedidoModel.ExcluirReservaCD(pWebPedidoItensID, pFilial: String);
 var
-  lReservaModel : TReservaModel;
+  lReservaModel : ITReservaModel;
   lTableReserva : IFDDataset;
 begin
-  lReservaModel := TReservaModel.Create(vIConexao.NovaConexao('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA));
+  lReservaModel := TReservaModel.getNewIface(vIConexao.NovaConexao('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA));
 
   try
-    lReservaModel.WhereView := ' and reserva.web_pedidoitens_id = ' + pWebPedidoItensID + ' and reserva.filial = ' + QuotedStr(pFilial);
-    lTableReserva := lReservaModel.obterLista;
+    lReservaModel.objeto.WhereView := ' and reserva.web_pedidoitens_id = ' + pWebPedidoItensID + ' and reserva.filial = ' + QuotedStr(pFilial);
+    lTableReserva := lReservaModel.objeto.obterLista;
 
     if lTableReserva.objeto.FieldByName('ID').AsString = '' then
       CriaException('Reserva n�o localizada');
 
-    lReservaModel.Excluir(lTableReserva.objeto.FieldByName('ID').AsString);
+    lReservaModel.objeto.Excluir(lTableReserva.objeto.FieldByName('ID').AsString);
   finally
-    lReservaModel.Free;
+    lReservaModel:=nil;
   end;
 end;
 
@@ -1516,10 +1516,10 @@ end;
 
 procedure TWebPedidoModel.IncluiReservaCD(pWebPedidoItensModel: TWebPedidoItensModel);
 var
-  lReservaModel        : TReservaModel;
+  lReservaModel        : ITReservaModel;
   lWebPedidoItensModel : TWebPedidoItensModel;
 begin
-  lReservaModel        := TReservaModel.Create(vIConexao.NovaConexao('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA));
+  lReservaModel        := TReservaModel.getNewIface(vIConexao.NovaConexao('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA));
   lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
 
   try
@@ -1528,30 +1528,30 @@ begin
 
       with lWebPedidoItensModel do
       begin
-        lReservaModel.PRODUTO_ID          := PRODUTO_ID;
-        lReservaModel.QUANTIDADE          := QUANTIDADE;
-        lReservaModel.VALOR_UNITARIO      := VALOR_VENDIDO;
-        lReservaModel.OBSERVACAO          := 'Reserva realizada pela venda assistida N '+WEB_PEDIDO_ID;
-        lReservaModel.WEB_PEDIDOITENS_ID  := ID;
-        lReservaModel.WEB_PEDIDO_ID       := WEB_PEDIDO_ID;
-        lReservaModel.TIPO                := TIPO;
-        lReservaModel.ENTREGA             := ENTREGA;
-        lReservaModel.RETIRA_LOJA         := IIF(TIPO_ENTREGA = 'LJ','S','N');;
-        lReservaModel.STATUS              := IIF(TIPO_ENTREGA = 'LJ','L','1');
-        lReservaModel.CLIENTE_ID          := '000000';
-        lReservaModel.VENDEDOR_ID         := '000000';
-        lReservaModel.FILIAL              := vIConexao.getEmpresa.LOJA;
+        lReservaModel.objeto.PRODUTO_ID          := PRODUTO_ID;
+        lReservaModel.objeto.QUANTIDADE          := QUANTIDADE;
+        lReservaModel.objeto.VALOR_UNITARIO      := VALOR_VENDIDO;
+        lReservaModel.objeto.OBSERVACAO          := 'Reserva realizada pela venda assistida N '+WEB_PEDIDO_ID;
+        lReservaModel.objeto.WEB_PEDIDOITENS_ID  := ID;
+        lReservaModel.objeto.WEB_PEDIDO_ID       := WEB_PEDIDO_ID;
+        lReservaModel.objeto.TIPO                := TIPO;
+        lReservaModel.objeto.ENTREGA             := ENTREGA;
+        lReservaModel.objeto.RETIRA_LOJA         := IIF(TIPO_ENTREGA = 'LJ','S','N');;
+        lReservaModel.objeto.STATUS              := IIF(TIPO_ENTREGA = 'LJ','L','1');
+        lReservaModel.objeto.CLIENTE_ID          := '000000';
+        lReservaModel.objeto.VENDEDOR_ID         := '000000';
+        lReservaModel.objeto.FILIAL              := vIConexao.getEmpresa.LOJA;
       end;
 
-      lReservaModel.Incluir;
+      lReservaModel.objeto.Incluir;
 
     except
      on E:Exception do
        CriaException('Erro: '+ E.Message);
     end;
   finally
-    lReservaModel.Free;
-//    lWebPedidoItensModel.Free;
+    lReservaModel:=nil;
+    lWebPedidoItensModel:=nil;
   end;
 end;
 
@@ -1648,10 +1648,10 @@ end;
 
 procedure TWebPedidoModel.AtualizaReservaCD(pWebPedidoModel: TWebPedidoModel);
 var
-  lReservaModel : TReservaModel;
+  lReservaModel : ITReservaModel;
   lWebPedidoModel : TWebPedidoModel;
 begin
-  lReservaModel        := TReservaModel.Create(vIConexao.NovaConexao('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA));
+  lReservaModel        := TReservaModel.getNewIface(vIConexao.NovaConexao('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA));
 //  lReservaModel := TReservaModel.Create(vIConexao);
   lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
 
@@ -1659,28 +1659,28 @@ begin
     try
       lWebPedidoModel := pWebPedidoModel;
 
-      lReservaModel := lReservaModel.Alterar(lWebPedidoModel.ID); //Precisa alterar "todas" reservas do peiddo
+      lReservaModel := lReservaModel.objeto.Alterar(lWebPedidoModel.ID); //Precisa alterar "todas" reservas do peiddo
 
       with lWebPedidoModel do
       begin
-        lReservaModel.ENTREGA_DATA       := ENTREGA_DATA;
-        lReservaModel.ENTREGA_HORA       := ENTREGA_HORA;
-        lReservaModel.MONTAGEM_DATA      := MONTAGEM_DATA;
-        lReservaModel.MONTAGEM_HORA      := MONTAGEM_HORA;
-        lReservaModel.CLIENTE_ID         := CLIENTE_ID;
-        lReservaModel.VENDEDOR_ID        := VENDEDOR_ID;
-        lReservaModel.FILIAL             := LOJA;
-        lReservaModel.INFORMACOES_PED    := OBSERVACAO;
+        lReservaModel.objeto.ENTREGA_DATA       := ENTREGA_DATA;
+        lReservaModel.objeto.ENTREGA_HORA       := ENTREGA_HORA;
+        lReservaModel.objeto.MONTAGEM_DATA      := MONTAGEM_DATA;
+        lReservaModel.objeto.MONTAGEM_HORA      := MONTAGEM_HORA;
+        lReservaModel.objeto.CLIENTE_ID         := CLIENTE_ID;
+        lReservaModel.objeto.VENDEDOR_ID        := VENDEDOR_ID;
+        lReservaModel.objeto.FILIAL             := LOJA;
+        lReservaModel.objeto.INFORMACOES_PED    := OBSERVACAO;
       end;
 
-      lReservaModel.Salvar;
+      lReservaModel.objeto.Salvar;
 
     except
      on E:Exception do
        CriaException('Erro: '+ E.Message);
     end;
   finally
-    lReservaModel.Free;
+    lReservaModel:=nil;
     lWebPedidoModel.Free;
   end;
 end;

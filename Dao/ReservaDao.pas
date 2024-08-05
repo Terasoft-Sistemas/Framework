@@ -12,12 +12,16 @@ uses
   Interfaces.Conexao,
   Terasoft.Utils,
   Terasoft.Types,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao;
 
 type
-  TReservaDao = class
+  TReservaDao = class;
+  ITReservaDao=IObject<TReservaDao>;
 
+  TReservaDao = class
   private
+    [weak] mySelf: ITReservaDao;
     vIConexao : IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -44,8 +48,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITReservaDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -56,17 +62,17 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(pReservaModel: TReservaModel): String;
-    function alterar(pReservaModel: TReservaModel): String;
-    function excluir(pReservaModel: TReservaModel): String;
+    function incluir(pReservaModel: ITReservaModel): String;
+    function alterar(pReservaModel: ITReservaModel): String;
+    function excluir(pReservaModel: ITReservaModel): String;
 
     function AtualizaReservaVendaAssistida(pAtualizaReserva_Parametros: TAtualizaReserva_Parametros): String;
 
-    function carregaClasse(pID : String): TReservaModel;
+    function carregaClasse(pID : String): ITReservaModel;
 
     function obterLista: IFDDataset;
 
-    procedure setParams(var pQry: TFDQuery; pReservaModel: TReservaModel);
+    procedure setParams(var pQry: TFDQuery; pReservaModel: ITReservaModel);
 
 end;
 
@@ -77,13 +83,13 @@ uses
 
 { TReserva }
 
-function TReservaDao.carregaClasse(pID : String): TReservaModel;
+function TReservaDao.carregaClasse(pID : String): ITReservaModel;
 var
   lQry: TFDQuery;
-  lModel: TReservaModel;
+  lModel: ITReservaModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TReservaModel.Create(vIConexao);
+  lModel   := TReservaModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -92,43 +98,43 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID                     := lQry.FieldByName('ID').AsString;
-    lModel.PRODUTO_ID             := lQry.FieldByName('PRODUTO_ID').AsString;
-    lModel.CLIENTE_ID             := lQry.FieldByName('CLIENTE_ID').AsString;
-    lModel.VENDEDOR_ID            := lQry.FieldByName('VENDEDOR_ID').AsString;
-    lModel.QUANTIDADE             := lQry.FieldByName('QUANTIDADE').AsString;
-    lModel.VALOR_UNITARIO         := lQry.FieldByName('VALOR_UNITARIO').AsString;
-    lModel.DESCONTO               := lQry.FieldByName('DESCONTO').AsString;
-    lModel.DATA                   := lQry.FieldByName('DATA').AsString;
-    lModel.HORAS_BAIXA            := lQry.FieldByName('HORAS_BAIXA').AsString;
-    lModel.STATUS                 := lQry.FieldByName('STATUS').AsString;
-    lModel.HORA                   := lQry.FieldByName('HORA').AsString;
-    lModel.FILIAL                 := lQry.FieldByName('FILIAL').AsString;
-    lModel.PEDIDO_ID              := lQry.FieldByName('PEDIDO_ID').AsString;
-    lModel.INFORMACOES_PED        := lQry.FieldByName('INFORMACOES_PED').AsString;
-    lModel.OBSERVACAO             := lQry.FieldByName('OBSERVACAO').AsString;
-    lModel.WEB_PEDIDOITENS_ID     := lQry.FieldByName('WEB_PEDIDOITENS_ID').AsString;
-    lModel.TIPO                   := lQry.FieldByName('TIPO').AsString;
-    lModel.DATAHORA_EFETIVADA     := lQry.FieldByName('DATAHORA_EFETIVADA').AsString;
-    lModel.RETIRA_LOJA            := lQry.FieldByName('RETIRA_LOJA').AsString;
-    lModel.ENTREGA                := lQry.FieldByName('ENTREGA').AsString;
-    lModel.ENTREGA_DATA           := lQry.FieldByName('ENTREGA_DATA').AsString;
-    lModel.ENTREGA_HORA           := lQry.FieldByName('ENTREGA_HORA').AsString;
-    lModel.MONTAGEM_DATA          := lQry.FieldByName('MONTAGEM_DATA').AsString;
-    lModel.MONTAGEM_HORA          := lQry.FieldByName('MONTAGEM_HORA').AsString;
-    lModel.SYSTIME                := lQry.FieldByName('SYSTIME').AsString;
-    lModel.PRODUCAO_ID            := lQry.FieldByName('PRODUCAO_ID').AsString;
-    lModel.PRODUCAO_LOJA          := lQry.FieldByName('PRODUCAO_LOJA').AsString;
-    lModel.ENTREGA_ENDERECO       := lQry.FieldByName('ENTREGA_ENDERECO').AsString;
-    lModel.ENTREGA_COMPLEMENTO    := lQry.FieldByName('ENTREGA_COMPLEMENTO').AsString;
-    lModel.ENTREGA_NUMERO         := lQry.FieldByName('ENTREGA_NUMERO').AsString;
-    lModel.ENTREGA_BAIRRO         := lQry.FieldByName('ENTREGA_BAIRRO').AsString;
-    lModel.ENTREGA_CIDADE         := lQry.FieldByName('ENTREGA_CIDADE').AsString;;
-    lModel.ENTREGA_UF             := lQry.FieldByName('ENTREGA_UF').AsString;
-    lModel.ENTREGA_CEP            := lQry.FieldByName('ENTREGA_CEP').AsString;
-    lModel.ENTREGA_COD_MUNICIPIO  := lQry.FieldByName('ENTREGA_COD_MUNICIPIO').AsString;
-    lModel.VALOR_ACRESCIMO        := lQry.FieldByName('VALOR_ACRESCIMO').AsString;
-    lModel.VALOR_TOTAL            := lQry.FieldByName('VALOR_TOTAL').AsString;
+    lModel.objeto.ID                     := lQry.FieldByName('ID').AsString;
+    lModel.objeto.PRODUTO_ID             := lQry.FieldByName('PRODUTO_ID').AsString;
+    lModel.objeto.CLIENTE_ID             := lQry.FieldByName('CLIENTE_ID').AsString;
+    lModel.objeto.VENDEDOR_ID            := lQry.FieldByName('VENDEDOR_ID').AsString;
+    lModel.objeto.QUANTIDADE             := lQry.FieldByName('QUANTIDADE').AsString;
+    lModel.objeto.VALOR_UNITARIO         := lQry.FieldByName('VALOR_UNITARIO').AsString;
+    lModel.objeto.DESCONTO               := lQry.FieldByName('DESCONTO').AsString;
+    lModel.objeto.DATA                   := lQry.FieldByName('DATA').AsString;
+    lModel.objeto.HORAS_BAIXA            := lQry.FieldByName('HORAS_BAIXA').AsString;
+    lModel.objeto.STATUS                 := lQry.FieldByName('STATUS').AsString;
+    lModel.objeto.HORA                   := lQry.FieldByName('HORA').AsString;
+    lModel.objeto.FILIAL                 := lQry.FieldByName('FILIAL').AsString;
+    lModel.objeto.PEDIDO_ID              := lQry.FieldByName('PEDIDO_ID').AsString;
+    lModel.objeto.INFORMACOES_PED        := lQry.FieldByName('INFORMACOES_PED').AsString;
+    lModel.objeto.OBSERVACAO             := lQry.FieldByName('OBSERVACAO').AsString;
+    lModel.objeto.WEB_PEDIDOITENS_ID     := lQry.FieldByName('WEB_PEDIDOITENS_ID').AsString;
+    lModel.objeto.TIPO                   := lQry.FieldByName('TIPO').AsString;
+    lModel.objeto.DATAHORA_EFETIVADA     := lQry.FieldByName('DATAHORA_EFETIVADA').AsString;
+    lModel.objeto.RETIRA_LOJA            := lQry.FieldByName('RETIRA_LOJA').AsString;
+    lModel.objeto.ENTREGA                := lQry.FieldByName('ENTREGA').AsString;
+    lModel.objeto.ENTREGA_DATA           := lQry.FieldByName('ENTREGA_DATA').AsString;
+    lModel.objeto.ENTREGA_HORA           := lQry.FieldByName('ENTREGA_HORA').AsString;
+    lModel.objeto.MONTAGEM_DATA          := lQry.FieldByName('MONTAGEM_DATA').AsString;
+    lModel.objeto.MONTAGEM_HORA          := lQry.FieldByName('MONTAGEM_HORA').AsString;
+    lModel.objeto.SYSTIME                := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.PRODUCAO_ID            := lQry.FieldByName('PRODUCAO_ID').AsString;
+    lModel.objeto.PRODUCAO_LOJA          := lQry.FieldByName('PRODUCAO_LOJA').AsString;
+    lModel.objeto.ENTREGA_ENDERECO       := lQry.FieldByName('ENTREGA_ENDERECO').AsString;
+    lModel.objeto.ENTREGA_COMPLEMENTO    := lQry.FieldByName('ENTREGA_COMPLEMENTO').AsString;
+    lModel.objeto.ENTREGA_NUMERO         := lQry.FieldByName('ENTREGA_NUMERO').AsString;
+    lModel.objeto.ENTREGA_BAIRRO         := lQry.FieldByName('ENTREGA_BAIRRO').AsString;
+    lModel.objeto.ENTREGA_CIDADE         := lQry.FieldByName('ENTREGA_CIDADE').AsString;;
+    lModel.objeto.ENTREGA_UF             := lQry.FieldByName('ENTREGA_UF').AsString;
+    lModel.objeto.ENTREGA_CEP            := lQry.FieldByName('ENTREGA_CEP').AsString;
+    lModel.objeto.ENTREGA_COD_MUNICIPIO  := lQry.FieldByName('ENTREGA_COD_MUNICIPIO').AsString;
+    lModel.objeto.VALOR_ACRESCIMO        := lQry.FieldByName('VALOR_ACRESCIMO').AsString;
+    lModel.objeto.VALOR_TOTAL            := lQry.FieldByName('VALOR_TOTAL').AsString;
 
     Result := lModel;
   finally
@@ -136,7 +142,7 @@ begin
   end;
 end;
 
-constructor TReservaDao.Create(pIConexao : IConexao);
+constructor TReservaDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -147,7 +153,7 @@ begin
   inherited;
 end;
 
-function TReservaDao.incluir(pReservaModel: TReservaModel): String;
+function TReservaDao.incluir(pReservaModel: ITReservaModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -158,7 +164,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pReservaModel.ID := vIConexao.Generetor('GEN_RESERVA');
+    pReservaModel.objeto.ID := vIConexao.Generetor('GEN_RESERVA');
     setParams(lQry, pReservaModel);
     lQry.Open;
 
@@ -170,7 +176,7 @@ begin
   end;
 end;
 
-function TReservaDao.alterar(pReservaModel: TReservaModel): String;
+function TReservaDao.alterar(pReservaModel: ITReservaModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -184,7 +190,7 @@ begin
     setParams(lQry, pReservaModel);
     lQry.ExecSQL;
 
-    Result := pReservaModel.ID;
+    Result := pReservaModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -259,18 +265,24 @@ begin
   end;
 end;
 
-function TReservaDao.excluir(pReservaModel: TReservaModel): String;
+function TReservaDao.excluir(pReservaModel: ITReservaModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
   try
-   lQry.ExecSQL('delete from RESERVA where ID = :ID ', [pReservaModel.ID]);
+   lQry.ExecSQL('delete from RESERVA where ID = :ID ', [pReservaModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pReservaModel.ID;
+   Result := pReservaModel.objeto.ID;
   finally
     lQry.Free;
   end;
+end;
+
+class function TReservaDao.getNewIface(pIConexao: IConexao): ITReservaDao;
+begin
+  Result := TImplObjetoOwner<TReservaDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TReservaDao.where: String;
@@ -371,28 +383,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TReservaDao.setParams(var pQry: TFDQuery; pReservaModel: TReservaModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TReservaDao.setParams(var pQry: TFDQuery; pReservaModel: ITReservaModel);
 begin
-  lTabela := vConstrutor.getColumns('RESERVA');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TReservaModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pReservaModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pReservaModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('RESERVA',pQry,pReservaModel.objeto);
 end;
 
 procedure TReservaDao.SetStartRecordView(const Value: String);

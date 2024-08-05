@@ -639,7 +639,7 @@ var
   lModel                   : ITPedidoItensModel;
   lContasReceberModel      : TContasReceberModel;
   lContasReceberItensModel : TContasReceberItensModel;
-  lReservaModel            : TReservaModel;
+  lReservaModel            : ITReservaModel;
   lClienteModel            : TClienteModel;
   lPixModel                : ITPixModel;
   lComissaoCliente         : Double;
@@ -655,7 +655,7 @@ begin
     lPedidoVendaModel := lPedidoVendaModel.objeto.carregaClasse(self.FNUMERO_PED);
 
     if lPedidoVendaModel.objeto.WEB_PEDIDO_ID <> '' then
-      lReservaModel := TReservaModel.Create(vIConexao.NovaConexao('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA));
+      lReservaModel := TReservaModel.getNewIface(vIConexao.NovaConexao('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA));
 
     lContasReceberModel.IDPedidoView := lPedidoVendaModel.objeto.NUMERO_PED;
     lContasReceberModel.WhereView    := ' and portador.tpag_nfe = ''17'' and portador.pix_chave is not null';
@@ -700,7 +700,7 @@ begin
       lModel.objeto.calcularComissao(lPedidoVendaModel.objeto.CODIGO_VEN, lPedidoVendaModel.objeto.CODIGO_TIP, lComissaoCliente, lPedidoVendaModel.objeto.GERENTE_ID);
 
       if (lPedidoVendaModel.objeto.WEB_PEDIDO_ID <> '') and ((lModel.objeto.TIPO_VENDA = 'CD') or (lModel.objeto.ENTREGA = 'S')) then
-        lReservaModel.concluirReserva(IIF(lModel.objeto.TIPO_VENDA = 'CD', '2', 'L'), lPedidoVendaModel.objeto.NUMERO_PED, lModel.objeto.WEB_PEDIDOITENS_ID, vIConexao.getEmpresa.LOJA);
+        lReservaModel.objeto.concluirReserva(IIF(lModel.objeto.TIPO_VENDA = 'CD', '2', 'L'), lPedidoVendaModel.objeto.NUMERO_PED, lModel.objeto.WEB_PEDIDOITENS_ID, vIConexao.getEmpresa.LOJA);
     end;
 
   finally
@@ -711,8 +711,7 @@ begin
     lClienteModel.Free;
     lPixModel:=nil;
 
-    if lReservaModel <> nil then
-      lReservaModel.Free;
+    lReservaModel:=nil;
   end;
 end;
 
