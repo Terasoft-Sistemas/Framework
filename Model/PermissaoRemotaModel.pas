@@ -6,13 +6,17 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
 
-  TPermissaoRemotaModel = class
+  TPermissaoRemotaModel = class;
+  ITPermissaoRemotaModel=IObject<TPermissaoRemotaModel>;
 
+  TPermissaoRemotaModel = class
   private
+    [weak] mySelf:ITPermissaoRemotaModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -65,15 +69,17 @@ type
     property REGISTRO_ID           : Variant read FREGISTRO_ID write SetREGISTRO_ID;
     property PEDIDO_ID             : Variant read FPEDIDO_ID write SetPEDIDO_ID;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITPermissaoRemotaModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TPermissaoRemotaModel;
+    function Alterar(pID : String): ITPermissaoRemotaModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId : String): TPermissaoRemotaModel;
+    function carregaClasse(pId : String): ITPermissaoRemotaModel;
     function obterLista: IFDDataset;
 
     function Autorizar(pID : String): Boolean;
@@ -102,14 +108,14 @@ uses
 
 { TPermissaoRemotaModel }
 
-function TPermissaoRemotaModel.Alterar(pID: String): TPermissaoRemotaModel;
+function TPermissaoRemotaModel.Alterar(pID: String): ITPermissaoRemotaModel;
 var
-  lPermissaoRemotaModel : TPermissaoRemotaModel;
+  lPermissaoRemotaModel : ITPermissaoRemotaModel;
 begin
-  lPermissaoRemotaModel := TPermissaoRemotaModel.Create(vIConexao);
+  lPermissaoRemotaModel := TPermissaoRemotaModel.getNewIface(vIConexao);
   try
-    lPermissaoRemotaModel       := lPermissaoRemotaModel.carregaClasse(pID);
-    lPermissaoRemotaModel.Acao  := tacAlterar;
+    lPermissaoRemotaModel       := lPermissaoRemotaModel.objeto.carregaClasse(pID);
+    lPermissaoRemotaModel.objeto.Acao  := tacAlterar;
     Result            := lPermissaoRemotaModel;
   finally
   end;
@@ -122,6 +128,12 @@ begin
   Result       := self.Salvar;
 end;
 
+class function TPermissaoRemotaModel.getNewIface(pIConexao: IConexao): ITPermissaoRemotaModel;
+begin
+  Result := TImplObjetoOwner<TPermissaoRemotaModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TPermissaoRemotaModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
@@ -130,53 +142,53 @@ end;
 
 function TPermissaoRemotaModel.Autorizar(pID: String): Boolean;
 var
-  lPermissaoRemotaModel : TPermissaoRemotaModel;
+  lPermissaoRemotaModel : ITPermissaoRemotaModel;
   lWebPedidoModel       : TWebPedidoModel;
   lConfiguracoes        : ITerasoftConfiguracoes;
 begin
   if pID = '' then
     CriaException('ID não informado');
 
-  lPermissaoRemotaModel := TPermissaoRemotaModel.Create(vIConexao);
+  lPermissaoRemotaModel := TPermissaoRemotaModel.getNewIface(vIConexao);
   lWebPedidoModel       := TWebPedidoModel.Create(vIConexao);
 
   try
-    lPermissaoRemotaModel := lPermissaoRemotaModel.carregaClasse(pID);
+    lPermissaoRemotaModel := lPermissaoRemotaModel.objeto.carregaClasse(pID);
 
     Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
-    if not lConfiguracoes.objeto.verificaPerfil(lPermissaoRemotaModel.OPERACAO) then
+    if not lConfiguracoes.objeto.verificaPerfil(lPermissaoRemotaModel.objeto.OPERACAO) then
       CriaException('Usuário sem permissão para autorizar essa solicitação.');
 
-    lPermissaoRemotaModel.Acao := tacAlterar;
-    lPermissaoRemotaModel.USUARIO_CEDENTE := vIConexao.getUSer.ID;
-    lPermissaoRemotaModel.STATUS          := 'A';
-    lPermissaoRemotaModel.Salvar;
+    lPermissaoRemotaModel.objeto.Acao := tacAlterar;
+    lPermissaoRemotaModel.objeto.USUARIO_CEDENTE := vIConexao.getUSer.ID;
+    lPermissaoRemotaModel.objeto.STATUS          := 'A';
+    lPermissaoRemotaModel.objeto.Salvar;
 
-    if (lPermissaoRemotaModel.TABELA = 'WEB_PEDIDOITENS') and
-       ((lPermissaoRemotaModel.OPERACAO = 'VENDA_FUTURA_AUTORIZAR') or (lPermissaoRemotaModel.OPERACAO = 'VENDA_NEGATIVA')) then
+    if (lPermissaoRemotaModel.objeto.TABELA = 'WEB_PEDIDOITENS') and
+       ((lPermissaoRemotaModel.objeto.OPERACAO = 'VENDA_FUTURA_AUTORIZAR') or (lPermissaoRemotaModel.objeto.OPERACAO = 'VENDA_NEGATIVA')) then
     begin
-      lPermissaoRemotaModel.WhereView := ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' '+
-                                         ' and permissao_remota.pedido_id = '+lPermissaoRemotaModel.PEDIDO_ID +
+      lPermissaoRemotaModel.objeto.WhereView := ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' '+
+                                         ' and permissao_remota.pedido_id = '+lPermissaoRemotaModel.objeto.PEDIDO_ID +
                                          ' and coalesce(permissao_remota.status, '''') = ''''';
-      lPermissaoRemotaModel.obterLista;
+      lPermissaoRemotaModel.objeto.obterLista;
 
-      if lPermissaoRemotaModel.TotalRecords = 0 then
-        lWebPedidoModel.Autorizar(lPermissaoRemotaModel.PEDIDO_ID);
+      if lPermissaoRemotaModel.objeto.TotalRecords = 0 then
+        lWebPedidoModel.Autorizar(lPermissaoRemotaModel.objeto.PEDIDO_ID);
 
     end;
 
     Result := true;
 
   finally
-    lPermissaoRemotaModel.Free;
+    lPermissaoRemotaModel:=nil;
     lWebPedidoModel.Free;
   end;
 end;
 
 function TPermissaoRemotaModel.Negar(pID: String): Boolean;
 var
-  lPermissaoRemotaModel : TPermissaoRemotaModel;
+  lPermissaoRemotaModel : ITPermissaoRemotaModel;
   lWebPedidoModel       : TWebPedidoModel;
   lConfiguracoes        : ITerasoftConfiguracoes;
   lTablePermissao       : IFDDataset;
@@ -184,61 +196,61 @@ begin
   if pID = '' then
     CriaException('ID não informado');
 
-  lPermissaoRemotaModel := TPermissaoRemotaModel.Create(vIConexao);
+  lPermissaoRemotaModel := TPermissaoRemotaModel.getNewIface(vIConexao);
   lWebPedidoModel       := TWebPedidoModel.Create(vIConexao);
 
   try
-    lPermissaoRemotaModel := lPermissaoRemotaModel.carregaClasse(pID);
+    lPermissaoRemotaModel := lPermissaoRemotaModel.objeto.carregaClasse(pID);
 
     Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
-    if not lConfiguracoes.objeto.verificaPerfil(lPermissaoRemotaModel.OPERACAO) then
+    if not lConfiguracoes.objeto.verificaPerfil(lPermissaoRemotaModel.objeto.OPERACAO) then
       CriaException('Usuário sem permissão para autorizar essa solicitação.');
 
-    lPermissaoRemotaModel.Acao := tacExcluir;
-    lPermissaoRemotaModel.Salvar;
+    lPermissaoRemotaModel.objeto.Acao := tacExcluir;
+    lPermissaoRemotaModel.objeto.Salvar;
 
-    if (lPermissaoRemotaModel.TABELA = 'WEB_PEDIDOITENS') and
-       ((lPermissaoRemotaModel.OPERACAO = 'VENDA_FUTURA_AUTORIZAR') or (lPermissaoRemotaModel.OPERACAO = 'VENDA_NEGATIVA')) then
+    if (lPermissaoRemotaModel.objeto.TABELA = 'WEB_PEDIDOITENS') and
+       ((lPermissaoRemotaModel.objeto.OPERACAO = 'VENDA_FUTURA_AUTORIZAR') or (lPermissaoRemotaModel.objeto.OPERACAO = 'VENDA_NEGATIVA')) then
     begin
-      lPermissaoRemotaModel.WhereView := ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' '+
-                                         ' and permissao_remota.pedido_id = '+lPermissaoRemotaModel.PEDIDO_ID;
+      lPermissaoRemotaModel.objeto.WhereView := ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' '+
+                                         ' and permissao_remota.pedido_id = '+lPermissaoRemotaModel.objeto.PEDIDO_ID;
 
-      lTablePermissao := lPermissaoRemotaModel.obterLista;
+      lTablePermissao := lPermissaoRemotaModel.objeto.obterLista;
 
       lTablePermissao.objeto.First;
       while not lTablePermissao.objeto.eof do
       begin
-        lPermissaoRemotaModel.Excluir(lTablePermissao.objeto.FieldByName('ID').AsString);
+        lPermissaoRemotaModel.objeto.Excluir(lTablePermissao.objeto.FieldByName('ID').AsString);
         lTablePermissao.objeto.Next;
       end;
 
-      lWebPedidoModel.Negar(lPermissaoRemotaModel.PEDIDO_ID);
+      lWebPedidoModel.Negar(lPermissaoRemotaModel.objeto.PEDIDO_ID);
     end;
 
     Result := true;
 
   finally
-    lPermissaoRemotaModel.Free;
+    lPermissaoRemotaModel:=nil;
     lWebPedidoModel.Free;
   end;
 
 end;
 
-function TPermissaoRemotaModel.carregaClasse(pId : String): TPermissaoRemotaModel;
+function TPermissaoRemotaModel.carregaClasse(pId : String): ITPermissaoRemotaModel;
 var
-  lPermissaoRemotaDao: TPermissaoRemotaDao;
+  lPermissaoRemotaDao: ITPermissaoRemotaDao;
 begin
-  lPermissaoRemotaDao := TPermissaoRemotaDao.Create(vIConexao);
+  lPermissaoRemotaDao := TPermissaoRemotaDao.getNewIface(vIConexao);
 
   try
-    Result := lPermissaoRemotaDao.carregaClasse(pId);
+    Result := lPermissaoRemotaDao.objeto.carregaClasse(pId);
   finally
-    lPermissaoRemotaDao.Free;
+    lPermissaoRemotaDao:=nil;
   end;
 end;
 
-constructor TPermissaoRemotaModel.Create(pIConexao : IConexao);
+constructor TPermissaoRemotaModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -250,42 +262,42 @@ end;
 
 function TPermissaoRemotaModel.obterLista: IFDDataset;
 var
-  lPermissaoRemotaLista: TPermissaoRemotaDao;
+  lPermissaoRemotaLista: ITPermissaoRemotaDao;
 begin
-  lPermissaoRemotaLista := TPermissaoRemotaDao.Create(vIConexao);
+  lPermissaoRemotaLista := TPermissaoRemotaDao.getNewIface(vIConexao);
 
   try
-    lPermissaoRemotaLista.TotalRecords    := FTotalRecords;
-    lPermissaoRemotaLista.WhereView       := FWhereView;
-    lPermissaoRemotaLista.CountView       := FCountView;
-    lPermissaoRemotaLista.OrderView       := FOrderView;
-    lPermissaoRemotaLista.StartRecordView := FStartRecordView;
-    lPermissaoRemotaLista.LengthPageView  := FLengthPageView;
-    lPermissaoRemotaLista.IDRecordView    := FIDRecordView;
+    lPermissaoRemotaLista.objeto.TotalRecords    := FTotalRecords;
+    lPermissaoRemotaLista.objeto.WhereView       := FWhereView;
+    lPermissaoRemotaLista.objeto.CountView       := FCountView;
+    lPermissaoRemotaLista.objeto.OrderView       := FOrderView;
+    lPermissaoRemotaLista.objeto.StartRecordView := FStartRecordView;
+    lPermissaoRemotaLista.objeto.LengthPageView  := FLengthPageView;
+    lPermissaoRemotaLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lPermissaoRemotaLista.obterLista;
+    Result := lPermissaoRemotaLista.objeto.obterLista;
 
-    FTotalRecords := lPermissaoRemotaLista.TotalRecords;
+    FTotalRecords := lPermissaoRemotaLista.objeto.TotalRecords;
 
   finally
-    lPermissaoRemotaLista.Free;
+    lPermissaoRemotaLista:=nil;
   end;
 end;
 
 function TPermissaoRemotaModel.Salvar: String;
 var
-  lPermissaoRemotaDao: TPermissaoRemotaDao;
+  lPermissaoRemotaDao: ITPermissaoRemotaDao;
 begin
-  lPermissaoRemotaDao := TPermissaoRemotaDao.Create(vIConexao);
+  lPermissaoRemotaDao := TPermissaoRemotaDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lPermissaoRemotaDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lPermissaoRemotaDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lPermissaoRemotaDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lPermissaoRemotaDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lPermissaoRemotaDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lPermissaoRemotaDao.objeto.excluir(mySelf);
     end;
   finally
-    lPermissaoRemotaDao.Free;
+    lPermissaoRemotaDao:=nil;
   end;
 end;
 

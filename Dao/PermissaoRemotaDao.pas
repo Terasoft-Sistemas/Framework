@@ -11,12 +11,16 @@ uses
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao;
 
 type
-  TPermissaoRemotaDao = class
+  TPermissaoRemotaDao = class;
+  ITPermissaoRemotaDao=IObject<TPermissaoRemotaDao>;
 
+  TPermissaoRemotaDao = class
   private
+    [weak] mySelf: ITPermissaoRemotaDao;
     vIConexao 	: IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -42,8 +46,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITPermissaoRemotaDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -54,15 +60,15 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(pPermissaoRemotaModel: TPermissaoRemotaModel): String;
-    function alterar(pPermissaoRemotaModel: TPermissaoRemotaModel): String;
-    function excluir(pPermissaoRemotaModel: TPermissaoRemotaModel): String;
+    function incluir(pPermissaoRemotaModel: ITPermissaoRemotaModel): String;
+    function alterar(pPermissaoRemotaModel: ITPermissaoRemotaModel): String;
+    function excluir(pPermissaoRemotaModel: ITPermissaoRemotaModel): String;
 
-    function carregaClasse(pID : String): TPermissaoRemotaModel;
+    function carregaClasse(pID : String): ITPermissaoRemotaModel;
 
     function obterLista: IFDDataset;
 
-    procedure setParams(var pQry: TFDQuery; pPermissaoRemotaModel: TPermissaoRemotaModel);
+    procedure setParams(var pQry: TFDQuery; pPermissaoRemotaModel: ITPermissaoRemotaModel);
 
 end;
 
@@ -73,13 +79,13 @@ uses
 
 { TPermissaoRemota }
 
-function TPermissaoRemotaDao.carregaClasse(pID : String): TPermissaoRemotaModel;
+function TPermissaoRemotaDao.carregaClasse(pID : String): ITPermissaoRemotaModel;
 var
   lQry: TFDQuery;
-  lModel: TPermissaoRemotaModel;
+  lModel: ITPermissaoRemotaModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TPermissaoRemotaModel.Create(vIConexao);
+  lModel   := TPermissaoRemotaModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -88,16 +94,16 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID                   := lQry.FieldByName('ID').AsString;
-    lModel.USUARIO_SOLICITANTE  := lQry.FieldByName('USUARIO_SOLICITANTE').AsString;
-    lModel.USUARIO_CEDENTE      := lQry.FieldByName('USUARIO_CEDENTE').AsString;
-    lModel.OPERACAO             := lQry.FieldByName('OPERACAO').AsString;
-    lModel.MSG_SOLICITACAO      := lQry.FieldByName('MSG_SOLICITACAO').AsString;
-    lModel.STATUS               := lQry.FieldByName('STATUS').AsString;
-    lModel.SYSTIME              := lQry.FieldByName('SYSTIME').AsString;
-    lModel.TABELA               := lQry.FieldByName('TABELA').AsString;
-    lModel.REGISTRO_ID          := lQry.FieldByName('REGISTRO_ID').AsString;
-    lModel.PEDIDO_ID            := lQry.FieldByName('PEDIDO_ID').AsString;
+    lModel.objeto.ID                   := lQry.FieldByName('ID').AsString;
+    lModel.objeto.USUARIO_SOLICITANTE  := lQry.FieldByName('USUARIO_SOLICITANTE').AsString;
+    lModel.objeto.USUARIO_CEDENTE      := lQry.FieldByName('USUARIO_CEDENTE').AsString;
+    lModel.objeto.OPERACAO             := lQry.FieldByName('OPERACAO').AsString;
+    lModel.objeto.MSG_SOLICITACAO      := lQry.FieldByName('MSG_SOLICITACAO').AsString;
+    lModel.objeto.STATUS               := lQry.FieldByName('STATUS').AsString;
+    lModel.objeto.SYSTIME              := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.TABELA               := lQry.FieldByName('TABELA').AsString;
+    lModel.objeto.REGISTRO_ID          := lQry.FieldByName('REGISTRO_ID').AsString;
+    lModel.objeto.PEDIDO_ID            := lQry.FieldByName('PEDIDO_ID').AsString;
 
     Result := lModel;
   finally
@@ -105,7 +111,7 @@ begin
   end;
 end;
 
-constructor TPermissaoRemotaDao.Create(pIConexao : IConexao);
+constructor TPermissaoRemotaDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -116,7 +122,7 @@ begin
   inherited;
 end;
 
-function TPermissaoRemotaDao.incluir(pPermissaoRemotaModel: TPermissaoRemotaModel): String;
+function TPermissaoRemotaDao.incluir(pPermissaoRemotaModel: ITPermissaoRemotaModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -138,7 +144,7 @@ begin
   end;
 end;
 
-function TPermissaoRemotaDao.alterar(pPermissaoRemotaModel: TPermissaoRemotaModel): String;
+function TPermissaoRemotaDao.alterar(pPermissaoRemotaModel: ITPermissaoRemotaModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -152,7 +158,7 @@ begin
     setParams(lQry, pPermissaoRemotaModel);
     lQry.ExecSQL;
 
-    Result := pPermissaoRemotaModel.ID;
+    Result := pPermissaoRemotaModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -160,19 +166,25 @@ begin
   end;
 end;
 
-function TPermissaoRemotaDao.excluir(pPermissaoRemotaModel: TPermissaoRemotaModel): String;
+function TPermissaoRemotaDao.excluir(pPermissaoRemotaModel: ITPermissaoRemotaModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from permissao_remota where ID = :ID' ,[pPermissaoRemotaModel.ID]);
-   Result := pPermissaoRemotaModel.ID;
+   lQry.ExecSQL('delete from permissao_remota where ID = :ID' ,[pPermissaoRemotaModel.objeto.ID]);
+   Result := pPermissaoRemotaModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TPermissaoRemotaDao.getNewIface(pIConexao: IConexao): ITPermissaoRemotaDao;
+begin
+  Result := TImplObjetoOwner<TPermissaoRemotaDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TPermissaoRemotaDao.where: String;
@@ -287,28 +299,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TPermissaoRemotaDao.setParams(var pQry: TFDQuery; pPermissaoRemotaModel: TPermissaoRemotaModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TPermissaoRemotaDao.setParams(var pQry: TFDQuery; pPermissaoRemotaModel: ITPermissaoRemotaModel);
 begin
-  lTabela := vConstrutor.getColumns('PERMISSAO_REMOTA');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TPermissaoRemotaModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPermissaoRemotaModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPermissaoRemotaModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('PERMISSAO_REMOTA',pQry,pPermissaoRemotaModel.objeto);
 end;
 
 procedure TPermissaoRemotaDao.SetStartRecordView(const Value: String);

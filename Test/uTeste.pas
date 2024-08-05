@@ -422,17 +422,17 @@ end;
 
 procedure TForm1.btnConsultaPermissaoClick(Sender: TObject);
 var
-  lPermissaoRemotaModel : TPermissaoRemotaModel;
+  lPermissaoRemotaModel : ITPermissaoRemotaModel;
   lVendaAssistida       : String;
 begin
-  lPermissaoRemotaModel := TPermissaoRemotaModel.Create(vIConexao);
+  lPermissaoRemotaModel := TPermissaoRemotaModel.getNewIface(vIConexao);
   try
     lVendaAssistida := '4343';
 
-    lPermissaoRemotaModel.WhereView := ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' and permissao_remota.pedido_id = '+lVendaAssistida;
+    lPermissaoRemotaModel.objeto.WhereView := ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' and permissao_remota.pedido_id = '+lVendaAssistida;
       //Aki o dataset será zerado apos sair da função.
       //Precisa deixar este contexto ativo...                  a
-    dsTmp := lPermissaoRemotaModel.obterLista;
+    dsTmp := lPermissaoRemotaModel.objeto.obterLista;
     dLiberacao.DataSet := dsTmp.objeto;
   finally
     lPermissaoRemotaModel:=nil;
@@ -2723,13 +2723,13 @@ end;
 
 procedure TForm1.Button87Click(Sender: TObject);
 var
-  lPermissaoRemotaModel : TPermissaoRemotaModel;
+  lPermissaoRemotaModel : ITPermissaoRemotaModel;
 begin
-  lPermissaoRemotaModel := TPermissaoRemotaModel.Create(vIConexao);
+  lPermissaoRemotaModel := TPermissaoRemotaModel.getNewIface(vIConexao);
   try
-    lPermissaoRemotaModel.Negar('789');
+    lPermissaoRemotaModel.objeto.Negar('789');
   finally
-    lPermissaoRemotaModel.Free;
+    lPermissaoRemotaModel:=nil;
   end;
 end;
 
@@ -2788,13 +2788,13 @@ end;
 
 procedure TForm1.btnPermissaoRemotaClick(Sender: TObject);
 var
-  lPermissaoRemotaModel : TPermissaoRemotaModel;
+  lPermissaoRemotaModel : ITPermissaoRemotaModel;
 begin
-  lPermissaoRemotaModel := TPermissaoRemotaModel.Create(vIConexao);
+  lPermissaoRemotaModel := TPermissaoRemotaModel.getNewIface(vIConexao);
   try
-    lPermissaoRemotaModel.Autorizar('789');
+    lPermissaoRemotaModel.objeto.Autorizar('789');
   finally
-    lPermissaoRemotaModel.Free;
+    lPermissaoRemotaModel:=nil;
   end;
 end;
 

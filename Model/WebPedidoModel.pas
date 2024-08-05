@@ -1604,14 +1604,14 @@ end;
 function TWebPedidoModel.NegarDesconto(pID: String): Boolean;
 var
   lWebPedidoModel  : TWebPedidoModel;
-  lPermissaoRemota : TPermissaoRemotaModel;
+  lPermissaoRemota : ITPermissaoRemotaModel;
   lTablePermissa   : IFDDataset;
 begin
   if pID = '' then
     CriaException('ID não informado.');
 
   lWebPedidoModel  := TWebPedidoModel.Create(vIConexao);
-  lPermissaoRemota := TPermissaoRemotaModel.Create(vIConexao);
+  lPermissaoRemota := TPermissaoRemotaModel.getNewIface(vIConexao);
 
   try
     lWebPedidoModel := lWebPedidoModel.carregaClasse(pID);
@@ -1619,16 +1619,16 @@ begin
     if lWebPedidoModel.STATUS <> 'E' then
       CriaException('Desconto já negado ou autorizado.');
 
-    lPermissaoRemota.WhereView := ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' '+
+    lPermissaoRemota.objeto.WhereView := ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' '+
 		                              ' and permissao_remota.pedido_id = '+pID +
 		                              ' and coalesce(permissao_remota.status,'''') = '''' ';
 
-    lTablePermissa := lPermissaoRemota.obterLista;
+    lTablePermissa := lPermissaoRemota.objeto.obterLista;
 
     lTablePermissa.objeto.First;
     while not lTablePermissa.objeto.Eof do
     begin
-      lPermissaoRemota.Excluir(lTablePermissa.objeto.FieldByName('ID').AsString);
+      lPermissaoRemota.objeto.Excluir(lTablePermissa.objeto.FieldByName('ID').AsString);
       lTablePermissa.objeto.Next;
     end;
 
@@ -1641,7 +1641,7 @@ begin
 
     Result := True;
   finally
-    lPermissaoRemota.Free;
+    lPermissaoRemota:=nil;
     lWebPedidoModel.Free;
   end;
 end;
@@ -1731,12 +1731,12 @@ function TWebPedidoModel.AutorizarDesconto(pID: String): Boolean;
 var
   lFinanceiroPedidoModel : ITFinanceiroPedidoModel;
   lWebPedidoModel        : TWebPedidoModel;
-  lPermissaoRemota       : TPermissaoRemotaModel;
+  lPermissaoRemota       : ITPermissaoRemotaModel;
   lTablePermissao        : IFDDataset;
 begin
   lFinanceiroPedidoModel := TFinanceiroPedidoModel.getNewIface(vIConexao);
   lWebPedidoModel        := TWebPedidoModel.Create(vIConexao);
-  lPermissaoRemota       := TPermissaoRemotaModel.Create(vIConexao);
+  lPermissaoRemota       := TPermissaoRemotaModel.getNewIface(vIConexao);
 
   try
     lWebPedidoModel := lWebPedidoModel.carregaClasse(pID);
@@ -1744,11 +1744,11 @@ begin
     if lWebPedidoModel.STATUS <> 'E' then
       CriaException('Desconto já negado ou autorizado.');
 
-    lPermissaoRemota.WhereView := ' and permissao_remota.pedido_id = ' + pID +
+    lPermissaoRemota.objeto.WhereView := ' and permissao_remota.pedido_id = ' + pID +
                                   ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' '+
                                   ' and coalesce(permissao_remota.status,'''') = '''' ';
 
-    lTablePermissao := lPermissaoRemota.obterLista;
+    lTablePermissao := lPermissaoRemota.objeto.obterLista;
 
     if lTablePermissao.objeto.RecordCount > 0 then
       lWebPedidoModel.STATUS := 'P'
@@ -1766,7 +1766,7 @@ begin
 
   finally
     lFinanceiroPedidoModel:=nil;
-    lPermissaoRemota.Free;
+    lPermissaoRemota:=nil;
     lWebPedidoModel.Free;
   end;
 end;
