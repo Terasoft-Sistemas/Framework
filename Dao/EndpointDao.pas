@@ -84,7 +84,7 @@ begin
   if(pFiltro=nil) then
     pFiltro:=novaListaTexto;
   pFiltro.text := uppercase(retiraAcentos(pFiltro.text));
-  lIn := FuncoesPesquisaDB.ExpandeWhere('ep.nome,ep.descricao',pFiltro.text,tewcprefixodata_And,false);
+  lIn := FuncoesPesquisaDB.ExpandeWhere('upper(ep.nome),upper(ep.descricao)',pFiltro.text,tewcprefixodata_And,false);
   lSQL := 'select ep.* from endpoint ep where ep.metodo = :metodo '+#13
           + lIn;
   if(pOrdem = 1) then
