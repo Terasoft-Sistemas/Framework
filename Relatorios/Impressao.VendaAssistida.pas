@@ -408,36 +408,36 @@ end;
 
 procedure TImpressaoVendaAssistida.fetchPedidoItens;
 var
-  lWebPedidoItensModel : TWebPedidoItensModel;
+  lWebPedidoItensModel : ITWebPedidoItensModel;
 begin
-  lWebPedidoItensModel := TWebPedidoItensModel.Create(CONEXAO);
+  lWebPedidoItensModel := TWebPedidoItensModel.getNewIface(CONEXAO);
   try
-    lWebPedidoItensModel.IDWebPedidoView := Self.FIDPEDIDO;
-    lWebPedidoItensModel.obterLista;
+    lWebPedidoItensModel.objeto.IDWebPedidoView := Self.FIDPEDIDO;
+    lWebPedidoItensModel.objeto.obterLista;
     mtItens.Open;
-    for lWebPedidoItensModel in lWebPedidoItensModel.WebPedidoItenssLista do begin
+    for lWebPedidoItensModel in lWebPedidoItensModel.objeto.WebPedidoItenssLista do begin
       mtItens.Append;
-      mtItensID.Value               := lWebPedidoItensModel.ID;
-      mtItensUNIDADE_PRO.Value      := lWebPedidoItensModel.UNIDADE_PRO;
-      mtItensPRODUTO_ID.Value       := lWebPedidoItensModel.PRODUTO_ID;
-      mtItensPRODUTO.Value          := lWebPedidoItensModel.PRODUTO_NOME;
-      mtItensQUANTIDADE.Value       := lWebPedidoItensModel.QUANTIDADE;
-      mtItensVALOR_UNITARIO.Value   := lWebPedidoItensModel.VALOR_UNITARIO;
-      mtItensVLR_GARANTIA.Value     := lWebPedidoItensModel.TOTAL_GARANTIA;
-      mtItensENTREGA.AsString       := IIF(lWebPedidoItensModel.ENTREGA = 'N', 'NÃO', 'SIM');
-      mtItensMONTAGEM.AsString      := IIF(lWebPedidoItensModel.MONTAGEM = 'N', 'NÃO', 'SIM');
-      mtItensTIPO.AsString          := IIF(lWebPedidoItensModel.TIPO = 'FUTURA', 'SIM', 'NÃO');
-      mtItensTIPO_ENTREGA.AsString  := IIF(lWebPedidoItensModel.TIPO_ENTREGA = 'LJ', 'LOJA', 'CD');
-      mtItensTIPO_GARANTIA.Value    := lWebPedidoItensModel.TIPO_GARANTIA;
-      mtItensTIPO_GARANTIA_FR.Value := lWebPedidoItensModel.TIPO_GARANTIA_FR;
-      mtItensVALOR_TOTAL.Value      := lWebPedidoItensModel.VALOR_TOTALITENS;
-      mtItensOBSERVACAO.Value       := lWebPedidoItensModel.OBSERVACAO;
+      mtItensID.Value               := lWebPedidoItensModel.objeto.ID;
+      mtItensUNIDADE_PRO.Value      := lWebPedidoItensModel.objeto.UNIDADE_PRO;
+      mtItensPRODUTO_ID.Value       := lWebPedidoItensModel.objeto.PRODUTO_ID;
+      mtItensPRODUTO.Value          := lWebPedidoItensModel.objeto.PRODUTO_NOME;
+      mtItensQUANTIDADE.Value       := lWebPedidoItensModel.objeto.QUANTIDADE;
+      mtItensVALOR_UNITARIO.Value   := lWebPedidoItensModel.objeto.VALOR_UNITARIO;
+      mtItensVLR_GARANTIA.Value     := lWebPedidoItensModel.objeto.TOTAL_GARANTIA;
+      mtItensENTREGA.AsString       := IIF(lWebPedidoItensModel.objeto.ENTREGA = 'N', 'NÃO', 'SIM');
+      mtItensMONTAGEM.AsString      := IIF(lWebPedidoItensModel.objeto.MONTAGEM = 'N', 'NÃO', 'SIM');
+      mtItensTIPO.AsString          := IIF(lWebPedidoItensModel.objeto.TIPO = 'FUTURA', 'SIM', 'NÃO');
+      mtItensTIPO_ENTREGA.AsString  := IIF(lWebPedidoItensModel.objeto.TIPO_ENTREGA = 'LJ', 'LOJA', 'CD');
+      mtItensTIPO_GARANTIA.Value    := lWebPedidoItensModel.objeto.TIPO_GARANTIA;
+      mtItensTIPO_GARANTIA_FR.Value := lWebPedidoItensModel.objeto.TIPO_GARANTIA_FR;
+      mtItensVALOR_TOTAL.Value      := lWebPedidoItensModel.objeto.VALOR_TOTALITENS;
+      mtItensOBSERVACAO.Value       := lWebPedidoItensModel.objeto.OBSERVACAO;
 
       mtItens.Post;
     end;
 
   finally
-    lWebPedidoItensModel.Free;
+    lWebPedidoItensModel:=nil;
   end;
 end;
 

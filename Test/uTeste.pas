@@ -596,34 +596,34 @@ end;
 procedure TForm1.btnReservaClick(Sender: TObject);
 var
   lReservaModel : ITReservaModel;
-  lWebPedidoItensModel : TWebPedidoItensModel;
+  lWebPedidoItensModel : ITWebPedidoItensModel;
 begin
   lReservaModel        := TReservaModel.getNewIface(vIConexao.NovaConexao('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA));
-  lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
+  lWebPedidoItensModel := TWebPedidoItensModel.getNewIface(vIConexao);
 
   try
-    lWebPedidoItensModel := lWebPedidoItensModel.carregaClasse('1091');
+    lWebPedidoItensModel := lWebPedidoItensModel.objeto.carregaClasse('1091');
 
-    lReservaModel.objeto.PRODUTO_ID          := lWebPedidoItensModel.PRODUTO_ID;
-    lReservaModel.objeto.QUANTIDADE          :=lWebPedidoItensModel.QUANTIDADE;
-    lReservaModel.objeto.VALOR_UNITARIO      := lWebPedidoItensModel.VALOR_UNITARIO;
-    lReservaModel.objeto.OBSERVACAO          := 'Reservar realizada pela venda assistida N '+lWebPedidoItensModel.WEB_PEDIDO_ID;
-    lReservaModel.objeto.WEB_PEDIDOITENS_ID  := lWebPedidoItensModel.ID;
-    lReservaModel.objeto.WEB_PEDIDO_ID       := lWebPedidoItensModel.WEB_PEDIDO_ID;
-    lReservaModel.objeto.TIPO                := lWebPedidoItensModel.TIPO;
-    lReservaModel.objeto.ENTREGA             := lWebPedidoItensModel.ENTREGA;
-    lReservaModel.objeto.RETIRA_LOJA         := IIF(lWebPedidoItensModel.TIPO_ENTREGA = 'LJ','S','N');;
-    lReservaModel.objeto.STATUS              := IIF(lWebPedidoItensModel.TIPO_ENTREGA = 'LJ','L','1');
+    lReservaModel.objeto.PRODUTO_ID          := lWebPedidoItensModel.objeto.PRODUTO_ID;
+    lReservaModel.objeto.QUANTIDADE          :=lWebPedidoItensModel.objeto.QUANTIDADE;
+    lReservaModel.objeto.VALOR_UNITARIO      := lWebPedidoItensModel.objeto.VALOR_UNITARIO;
+    lReservaModel.objeto.OBSERVACAO          := 'Reservar realizada pela venda assistida N '+lWebPedidoItensModel.objeto.WEB_PEDIDO_ID;
+    lReservaModel.objeto.WEB_PEDIDOITENS_ID  := lWebPedidoItensModel.objeto.ID;
+    lReservaModel.objeto.WEB_PEDIDO_ID       := lWebPedidoItensModel.objeto.WEB_PEDIDO_ID;
+    lReservaModel.objeto.TIPO                := lWebPedidoItensModel.objeto.TIPO;
+    lReservaModel.objeto.ENTREGA             := lWebPedidoItensModel.objeto.ENTREGA;
+    lReservaModel.objeto.RETIRA_LOJA         := IIF(lWebPedidoItensModel.objeto.TIPO_ENTREGA = 'LJ','S','N');;
+    lReservaModel.objeto.STATUS              := IIF(lWebPedidoItensModel.objeto.TIPO_ENTREGA = 'LJ','L','1');
     lReservaModel.objeto.CLIENTE_ID          := '000000';
     lReservaModel.objeto.VENDEDOR_ID         := '000000';
     lReservaModel.objeto.FILIAL              := '000';
 
     lReservaModel.objeto.Incluir;
 
-    lWebPedidoItensModel := lWebPedidoItensModel.carregaClasse('1091');
+    lWebPedidoItensModel := lWebPedidoItensModel.objeto.carregaClasse('1091');
 
   finally
-    lWebPedidoItensModel.Free;
+    lWebPedidoItensModel:=nil;
     lReservaModel:=nil;
   end;
 end;
@@ -3132,11 +3132,11 @@ end;
 
 procedure TForm1.Button9Click(Sender: TObject);
 var
-  lWebPedidoItensModel  : TWebPedidoItensModel;
+  lWebPedidoItensModel  : ITWebPedidoItensModel;
   lWebPedidoItens       : String;
   i                     : Integer;
 begin
-  lWebPedidoItensModel  := TWebPedidoItensModel.Create(vIConexao);
+  lWebPedidoItensModel  := TWebPedidoItensModel.getNewIface(vIConexao);
   try
     try
       lWebPedidoItens := InputBox('WebPedido', 'Digite o número do Web Pedido para consultar os itens:', '');
@@ -3144,19 +3144,19 @@ begin
         exit;
 
 
-      lWebPedidoItensModel.IDWebPedidoView := StrToInt(lWebPedidoItens);
-      lWebPedidoItensModel.obterLista;
+      lWebPedidoItensModel.objeto.IDWebPedidoView := StrToInt(lWebPedidoItens);
+      lWebPedidoItensModel.objeto.obterLista;
 
       memoResultado.Lines.Clear;
-      for i := 0 to lWebPedidoItensModel.WebPedidoItenssLista.Count -1 do
+      for i := 0 to lWebPedidoItensModel.objeto.WebPedidoItenssLista.Count -1 do
       begin
-          memoResultado.Lines.Add('ID: ' +lWebPedidoItensModel.WebPedidoItenssLista[i].ID);
-          memoResultado.Lines.Add('QUANTIDADE: ' +lWebPedidoItensModel.WebPedidoItenssLista[i].QUANTIDADE);
-          memoResultado.Lines.Add('PRODUTO_ID: ' +lWebPedidoItensModel.WebPedidoItenssLista[i].PRODUTO_ID);
-          memoResultado.Lines.Add('PRODUTO_NOME: ' +lWebPedidoItensModel.WebPedidoItenssLista[i].PRODUTO_NOME);
-          memoResultado.Lines.Add('VALOR_UNITARIO: ' +lWebPedidoItensModel.WebPedidoItenssLista[i].VALOR_UNITARIO);
-          memoResultado.Lines.Add('TIPO_GARANTIA: ' +lWebPedidoItensModel.WebPedidoItenssLista[i].TIPO_GARANTIA);
-          memoResultado.Lines.Add('TIPO: ' +lWebPedidoItensModel.WebPedidoItenssLista[i].TIPO);
+          memoResultado.Lines.Add('ID: ' +lWebPedidoItensModel.objeto.WebPedidoItenssLista[i].objeto.ID);
+          memoResultado.Lines.Add('QUANTIDADE: ' +lWebPedidoItensModel.objeto.WebPedidoItenssLista[i].objeto.QUANTIDADE);
+          memoResultado.Lines.Add('PRODUTO_ID: ' +lWebPedidoItensModel.objeto.WebPedidoItenssLista[i].objeto.PRODUTO_ID);
+          memoResultado.Lines.Add('PRODUTO_NOME: ' +lWebPedidoItensModel.objeto.WebPedidoItenssLista[i].objeto.PRODUTO_NOME);
+          memoResultado.Lines.Add('VALOR_UNITARIO: ' +lWebPedidoItensModel.objeto.WebPedidoItenssLista[i].objeto.VALOR_UNITARIO);
+          memoResultado.Lines.Add('TIPO_GARANTIA: ' +lWebPedidoItensModel.objeto.WebPedidoItenssLista[i].objeto.TIPO_GARANTIA);
+          memoResultado.Lines.Add('TIPO: ' +lWebPedidoItensModel.objeto.WebPedidoItenssLista[i].objeto.TIPO);
           memoResultado.Lines.Add('===============================================');
       end;
       ShowMessage('Consultou itens');
@@ -3165,7 +3165,7 @@ begin
        ShowMessage('Erro consultar itens' + E.Message);
     end;
   finally
-    lWebPedidoItensModel.Free;
+    lWebPedidoItensModel:=nil;
   end;
 end;
 
@@ -3471,10 +3471,10 @@ end;
 
 procedure TForm1.Button10Click(Sender: TObject);
 var
-  lWebPedidoItensModel : TWebPedidoItensModel;
+  lWebPedidoItensModel : ITWebPedidoItensModel;
   ID                   : String;
 begin
-  lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
+  lWebPedidoItensModel := TWebPedidoItensModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('WebPedido', 'Digite o ID que deseja alterar:', '');
@@ -3482,11 +3482,11 @@ begin
       if ID.IsEmpty then
         exit;
 
-      lWebPedidoItensModel := lWebPedidoItensModel.Alterar(ID);
-      lWebPedidoItensModel.PRODUTO_ID := '000001';
-      lWebPedidoItensModel.QUANTIDADE := '25';
-      lWebPedidoItensModel.VLR_GARANTIA := '10';
-      lWebPedidoItensModel.Salvar;
+      lWebPedidoItensModel := lWebPedidoItensModel.objeto.Alterar(ID);
+      lWebPedidoItensModel.objeto.PRODUTO_ID := '000001';
+      lWebPedidoItensModel.objeto.QUANTIDADE := '25';
+      lWebPedidoItensModel.objeto.VLR_GARANTIA := '10';
+      lWebPedidoItensModel.objeto.Salvar;
 
       ShowMessage('Alterado o item com sucesso!');
     except
@@ -3494,7 +3494,7 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lWebPedidoItensModel.Free;
+    lWebPedidoItensModel:=nil;
   end;
 end;
 
@@ -3624,18 +3624,18 @@ end;
 
 procedure TForm1.Button11Click(Sender: TObject);
 var
-  lWebPedidoItensModel : TWebPedidoItensModel;
+  lWebPedidoItensModel : ITWebPedidoItensModel;
   lNumeroItem          : String;
 
 begin
-  lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
+  lWebPedidoItensModel := TWebPedidoItensModel.getNewIface(vIConexao);
 
   try
     try
       lNumeroItem := InputBox('WebPedido', 'Digite o ID que deseja excluir:', '');
 
-      lWebPedidoItensModel.ID := lNumeroItem;
-      lWebPedidoItensModel.Excluir(lNumeroItem);
+      lWebPedidoItensModel.objeto.ID := lNumeroItem;
+      lWebPedidoItensModel.objeto.Excluir(lNumeroItem);
 
       ShowMessage('Excluido com sucesso!');
     except
@@ -3643,7 +3643,7 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lWebPedidoItensModel.Free;
+    lWebPedidoItensModel:=nil;
   end;
 end;
 

@@ -607,14 +607,14 @@ procedure TImpressaoContratos.fetchPedidoItens(pID : String);
 var
   lPedidoItensModel    : ITPedidoItensModel;
   lProdutosModel       : ITProdutosModel;
-  lWebPedidoItensModel : TWebPedidoItensModel;
+  lWebPedidoItensModel : ITWebPedidoItensModel;
   lConfiguracoes       : ITerasoftConfiguracoes;
   lTipoGarantia,
   lTipoGarantiaFR      : String;
 begin
   lPedidoItensModel    := TPedidoItensModel.getNewIface(CONEXAO);
   lProdutosModel       := TProdutosModel.getNewIface(CONEXAO);
-  lWebPedidoItensModel := TWebPedidoItensModel.Create(CONEXAO);
+  lWebPedidoItensModel := TWebPedidoItensModel.getNewIface(CONEXAO);
   lConfiguracoes       := TerasoftConfiguracoes.getNewIface(CONEXAO);
 
   try
@@ -624,8 +624,8 @@ begin
     lProdutosModel.objeto.IDRecordView := lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.CODIGO_PRO;
     lProdutosModel.objeto.obterLista;
 
-    lWebPedidoItensModel.IDRecordView := lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.WEB_PEDIDOITENS_ID;
-    lWebPedidoItensModel.obterLista;
+    lWebPedidoItensModel.objeto.IDRecordView := lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.WEB_PEDIDOITENS_ID;
+    lWebPedidoItensModel.objeto.obterLista;
 
     mtItens.Edit;
     mtItensID.Value                    := lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.ID;
@@ -633,7 +633,7 @@ begin
     mtItensQUANTIDADE.Value            := lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.QTDE_CALCULADA;
     mtItensVALOR_UNITARIO.Value        := lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.VLRVENDA_PRO;
     mtItensVLR_GARANTIA.Value          := lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.QUANTIDADE_TIPO;
-    mtItensTIPO_GARANTIA_FR.Value      := Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA_FR,3,2) + ' Meses';
+    mtItensTIPO_GARANTIA_FR.Value      := Copy(lWebPedidoItensModel.objeto.WebPedidoItenssLista[0].objeto.TIPO_GARANTIA_FR,3,2) + ' Meses';
     mtItensVALOR_TOTAL.Value           := lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.VALOR_TOTAL_ITENS;
     mtItensVALOR_NOTA_FISCAL.Value     := lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.VALORUNITARIO_PED * (1 - (lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.DESCONTO_PED / 100));
     mtItensPREMIO_LIQUIDO.Value        := mtItensVLR_GARANTIA.Value / 1.0738;
@@ -647,8 +647,8 @@ begin
     mtItensOBSERVACAO.Value            := lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.OBSERVACAO;
     mtItensINICIO_VIGENCIA.Value       := retornaInicioVigencia(mtPedidoEMISSAO.Value, lProdutosModel.objeto.ProdutossLista.First.objeto.GARANTIA_PRO);
 
-    lTipoGarantia   := Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA,3,2);
-    lTipoGarantiaFR := Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA_FR,3,2);
+    lTipoGarantia   := Copy(lWebPedidoItensModel.objeto.WebPedidoItenssLista.First.objeto.TIPO_GARANTIA,3,2);
+    lTipoGarantiaFR := Copy(lWebPedidoItensModel.objeto.WebPedidoItenssLista.First.objeto.TIPO_GARANTIA_FR,3,2);
 
     mtItensFIM_VIGENCIA.Value := mtItensINICIO_VIGENCIA.Value;
 
@@ -674,7 +674,7 @@ begin
   finally
     lPedidoItensModel:=nil;
     lProdutosModel:=nil;
-    lWebPedidoItensModel.Free;
+    lWebPedidoItensModel:=nil;
   end;
 
 end;
@@ -745,10 +745,10 @@ end;
 procedure TImpressaoContratos.imprimirGarantiaEstendida;
 var
   lPedidoItensModel : ITPedidoItensModel;
-  lWebPedidoItensModel : TWebPedidoItensModel;
+  lWebPedidoItensModel : ITWebPedidoItensModel;
 begin
   lPedidoItensModel := TPedidoItensModel.getNewIface(CONEXAO);
-  lWebPedidoItensModel := TWebPedidoItensModel.Create(CONEXAO);
+  lWebPedidoItensModel := TWebPedidoItensModel.getNewIface(CONEXAO);
   try
     try
       lPedidoItensModel.objeto.IDPedidoVendaView := IDPEDIDO;
@@ -758,15 +758,15 @@ begin
       begin
         for lPedidoItensModel in lPedidoItensModel.objeto.PedidoItenssLista do
         begin
-          lWebPedidoItensModel.IDRecordView := lPedidoItensModel.objeto.WEB_PEDIDOITENS_ID;
-          lWebPedidoItensModel.obterLista;
+          lWebPedidoItensModel.objeto.IDRecordView := lPedidoItensModel.objeto.WEB_PEDIDOITENS_ID;
+          lWebPedidoItensModel.objeto.obterLista;
 
           mtItens.EmptyDataSet;
           mtItens.Append;
           mtItensNUMERO_BILHETE.Value := retornaNumeroBilhete('9', CONEXAO.getEmpresa.LOJA, lPedidoItensModel.objeto.ID);
           mtItens.Post;
 
-          if (Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA,3,2) = '12') or (Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA,3,2) = '24') then
+          if (Copy(lWebPedidoItensModel.objeto.WebPedidoItenssLista[0].objeto.TIPO_GARANTIA,3,2) = '12') or (Copy(lWebPedidoItensModel.objeto.WebPedidoItenssLista[0].objeto.TIPO_GARANTIA,3,2) = '24') then
             reportPreview(RLReport1, lPedidoItensModel.objeto.ID)
         end;
         RLReport3.Preview;
@@ -778,7 +778,7 @@ begin
     end;
   finally
     lPedidoItensModel:=nil;
-    lWebPedidoItensModel.Free;
+    lWebPedidoItensModel:=nil;
   end;
 end;
 
@@ -861,10 +861,10 @@ end;
 procedure TImpressaoContratos.imprimirRF;
 var
   lPedidoItensModel : ITPedidoItensModel;
-  lWebPedidoItensModel : TWebPedidoItensModel;
+  lWebPedidoItensModel : ITWebPedidoItensModel;
 begin
   lPedidoItensModel := TPedidoItensModel.getNewIface(CONEXAO);
-  lWebPedidoItensModel := TWebPedidoItensModel.Create(CONEXAO);
+  lWebPedidoItensModel := TWebPedidoItensModel.getNewIface(CONEXAO);
   try
     try
       lPedidoItensModel.objeto.IDPedidoVendaView := IDPEDIDO;
@@ -874,15 +874,15 @@ begin
       begin
         for lPedidoItensModel in lPedidoItensModel.objeto.PedidoItenssLista do
         begin
-          lWebPedidoItensModel.IDRecordView := lPedidoItensModel.objeto.WEB_PEDIDOITENS_ID;
-          lWebPedidoItensModel.obterLista;
+          lWebPedidoItensModel.objeto.IDRecordView := lPedidoItensModel.objeto.WEB_PEDIDOITENS_ID;
+          lWebPedidoItensModel.objeto.obterLista;
 
           mtItens.EmptyDataSet;
           mtItens.Append;
           mtItensNUMERO_BILHETE.Value := retornaNumeroBilhete('8', CONEXAO.getEmpresa.LOJA, lPedidoItensModel.objeto.ID);
           mtItens.Post;
 
-          if (Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA_FR,3,2) = '12') or (Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA_FR,3,2) = '24') then
+          if (Copy(lWebPedidoItensModel.objeto.WebPedidoItenssLista[0].objeto.TIPO_GARANTIA_FR,3,2) = '12') or (Copy(lWebPedidoItensModel.objeto.WebPedidoItenssLista[0].objeto.TIPO_GARANTIA_FR,3,2) = '24') then
             reportPreview(RLReport5, lPedidoItensModel.objeto.ID)
         end;
         RLReport6.Preview;
@@ -894,17 +894,17 @@ begin
     end;
   finally
     lPedidoItensModel:=nil;
-    lWebPedidoItensModel.Free;
+    lWebPedidoItensModel:=nil;
   end;
 end;
 
 procedure TImpressaoContratos.imprimirRFD;
 var
   lPedidoItensModel : ITPedidoItensModel;
-  lWebPedidoItensModel : TWebPedidoItensModel;
+  lWebPedidoItensModel : ITWebPedidoItensModel;
 begin
   lPedidoItensModel := TPedidoItensModel.getNewIface(CONEXAO);
-  lWebPedidoItensModel := TWebPedidoItensModel.Create(CONEXAO);
+  lWebPedidoItensModel := TWebPedidoItensModel.getNewIface(CONEXAO);
   try
     try
       lPedidoItensModel.objeto.IDPedidoVendaView := IDPEDIDO;
@@ -914,15 +914,15 @@ begin
       begin
         for lPedidoItensModel in lPedidoItensModel.objeto.PedidoItenssLista do
         begin
-          lWebPedidoItensModel.IDRecordView := lPedidoItensModel.objeto.WEB_PEDIDOITENS_ID;
-          lWebPedidoItensModel.obterLista;
+          lWebPedidoItensModel.objeto.IDRecordView := lPedidoItensModel.objeto.WEB_PEDIDOITENS_ID;
+          lWebPedidoItensModel.objeto.obterLista;
 
           mtItens.EmptyDataSet;
           mtItens.Append;
           mtItensNUMERO_BILHETE.Value := retornaNumeroBilhete('8', CONEXAO.getEmpresa.LOJA, lPedidoItensModel.objeto.ID);
           mtItens.Post;
 
-          if (Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA_FR,3,2) = '12') or (Copy(lWebPedidoItensModel.WebPedidoItenssLista[0].TIPO_GARANTIA_FR,3,2) = '24') then
+          if (Copy(lWebPedidoItensModel.objeto.WebPedidoItenssLista[0].objeto.TIPO_GARANTIA_FR,3,2) = '12') or (Copy(lWebPedidoItensModel.objeto.WebPedidoItenssLista[0].objeto.TIPO_GARANTIA_FR,3,2) = '24') then
           reportPreview(RLReport10, lPedidoItensModel.objeto.ID)
         end;
         RLReport11.Preview;
@@ -934,7 +934,7 @@ begin
     end;
   finally
     lPedidoItensModel:=nil;
-    lWebPedidoItensModel.Free;
+    lWebPedidoItensModel:=nil;
   end;
 end;
 

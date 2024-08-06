@@ -7,6 +7,7 @@ uses
   Terasoft.Types,
   Terasoft.Utils,
   Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
@@ -22,11 +23,14 @@ type
     TOTAL_PAGAR : Double;
   end;
 
-  TWebPedidoItensModel = class
+  TWebPedidoItensModel = class;
+  ITWebPedidoItensModel=IObject<TWebPedidoItensModel>;
 
+  TWebPedidoItensModel = class
   private
+    [weak] mySelf: ITWebPedidoItensModel;
     vIConexao : IConexao;
-    FWebPedidoItenssLista: IList<TWebPedidoItensModel>;
+    FWebPedidoItenssLista: IList<ITWebPedidoItensModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -114,7 +118,7 @@ type
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetDATA_CADASTRO(const Value: Variant);
-    procedure SetWebPedidoItenssLista(const Value: IList<TWebPedidoItensModel>);
+    procedure SetWebPedidoItenssLista(const Value: IList<ITWebPedidoItensModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -280,19 +284,21 @@ type
     property VALOR_FRETE_SUBTRAIR: Variant read FVALOR_FRETE_SUBTRAIR write SetVALOR_FRETE_SUBTRAIR;
 
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITWebPedidoItensModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TWebPedidoItensModel;
+    function Alterar(pID : String): ITWebPedidoItensModel;
     Function Excluir (pID : String) : String;
     function Salvar   : String;
 
     procedure obterLista;
-    function carregaClasse(pId: String): TWebPedidoItensModel;
+    function carregaClasse(pId: String): ITWebPedidoItensModel;
     function obterTotais(pId: String): TTotais;
 
-    property WebPedidoItenssLista: IList<TWebPedidoItensModel> read FWebPedidoItenssLista write SetWebPedidoItenssLista;
+    property WebPedidoItenssLista: IList<ITWebPedidoItensModel> read FWebPedidoItenssLista write SetWebPedidoItenssLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -320,17 +326,17 @@ begin
   Result    := self.Salvar;
 end;
 
-function TWebPedidoItensModel.Alterar(pID : String): TWebPedidoItensModel;
+function TWebPedidoItensModel.Alterar(pID : String): ITWebPedidoItensModel;
 var
-  lWebPedidoItensModel : TWebPedidoItensModel;
+  lWebPedidoItensModel : ITWebPedidoItensModel;
 begin
   if pID = '' then
     CriaException('ID é obrigatório.');
 
-    lWebPedidoItensModel := TWebPedidoItensModel.Create(vIConexao);
+    lWebPedidoItensModel := TWebPedidoItensModel.getNewIface(vIConexao);
   try
-    lWebPedidoItensModel := lWebPedidoItensModel.carregaClasse(pID);
-    lWebPedidoItensModel.Acao := tacAlterar;
+    lWebPedidoItensModel := lWebPedidoItensModel.objeto.carregaClasse(pID);
+    lWebPedidoItensModel.objeto.Acao := tacAlterar;
     Result := lWebPedidoItensModel;
   finally
   end;
@@ -356,18 +362,24 @@ begin
   end;
 end;
 
-function TWebPedidoItensModel.carregaClasse(pId: String): TWebPedidoItensModel;
-var
-  lWebPedidoItensDao: TWebPedidoItensDao;
+class function TWebPedidoItensModel.getNewIface(pIConexao: IConexao): ITWebPedidoItensModel;
 begin
-  lWebPedidoItensDao := TWebPedidoItensDao.Create(vIConexao);
+  Result := TImplObjetoOwner<TWebPedidoItensModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TWebPedidoItensModel.carregaClasse(pId: String): ITWebPedidoItensModel;
+var
+  lWebPedidoItensDao: ITWebPedidoItensDao;
+begin
+  lWebPedidoItensDao := TWebPedidoItensDao.getNewIface(vIConexao);
   try
-    Result := lWebPedidoItensDao.carregaClasse(pId);
+    Result := lWebPedidoItensDao.objeto.carregaClasse(pId);
   finally
-    lWebPedidoItensDao.Free;
+    lWebPedidoItensDao:=nil;
   end;
 end;
-constructor TWebPedidoItensModel.Create(pIConexao : IConexao);
+constructor TWebPedidoItensModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -381,58 +393,58 @@ end;
 
 procedure TWebPedidoItensModel.obterLista;
 var
-  lWebPedidoItensLista: TWebPedidoItensDao;
+  lWebPedidoItensLista: ITWebPedidoItensDao;
 begin
-  lWebPedidoItensLista := TWebPedidoItensDao.Create(vIConexao);
+  lWebPedidoItensLista := TWebPedidoItensDao.getNewIface(vIConexao);
 
   try
-    lWebPedidoItensLista.TotalRecords    := FTotalRecords;
-    lWebPedidoItensLista.WhereView       := FWhereView;
-    lWebPedidoItensLista.CountView       := FCountView;
-    lWebPedidoItensLista.OrderView       := FOrderView;
-    lWebPedidoItensLista.StartRecordView := FStartRecordView;
-    lWebPedidoItensLista.LengthPageView  := FLengthPageView;
-    lWebPedidoItensLista.IDRecordView    := FIDRecordView;
-    lWebPedidoItensLista.IDWebPedidoView := FIDWebPedidoView;
+    lWebPedidoItensLista.objeto.TotalRecords    := FTotalRecords;
+    lWebPedidoItensLista.objeto.WhereView       := FWhereView;
+    lWebPedidoItensLista.objeto.CountView       := FCountView;
+    lWebPedidoItensLista.objeto.OrderView       := FOrderView;
+    lWebPedidoItensLista.objeto.StartRecordView := FStartRecordView;
+    lWebPedidoItensLista.objeto.LengthPageView  := FLengthPageView;
+    lWebPedidoItensLista.objeto.IDRecordView    := FIDRecordView;
+    lWebPedidoItensLista.objeto.IDWebPedidoView := FIDWebPedidoView;
 
-    lWebPedidoItensLista.obterLista;
+    lWebPedidoItensLista.objeto.obterLista;
 
-    FTotalRecords         := lWebPedidoItensLista.TotalRecords;
-    FWebPedidoItenssLista := lWebPedidoItensLista.WebPedidoItenssLista;
+    FTotalRecords         := lWebPedidoItensLista.objeto.TotalRecords;
+    FWebPedidoItenssLista := lWebPedidoItensLista.objeto.WebPedidoItenssLista;
 
   finally
-    lWebPedidoItensLista.Free;
+    lWebPedidoItensLista:=nil;
   end;
 end;
 
 function TWebPedidoItensModel.obterTotais(pId: String): TTotais;
 var
-  lWebPedidoItensDao : TWebPedidoItensDao;
+  lWebPedidoItensDao : ITWebPedidoItensDao;
 begin
-  lWebPedidoItensDao := TWebPedidoItensDao.Create(vIConexao);
+  lWebPedidoItensDao := TWebPedidoItensDao.getNewIface(vIConexao);
   try
-    Result := lWebPedidoItensDao.obterTotais(pId);
+    Result := lWebPedidoItensDao.objeto.obterTotais(pId);
   finally
-    lWebPedidoItensDao.Free;
+    lWebPedidoItensDao:=nil;
   end;
 end;
 
 function TWebPedidoItensModel.Salvar: String;
 var
-  lWebPedidoItensDao: TWebPedidoItensDao;
+  lWebPedidoItensDao: ITWebPedidoItensDao;
 begin
-  lWebPedidoItensDao := TWebPedidoItensDao.Create(vIConexao);
+  lWebPedidoItensDao := TWebPedidoItensDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lWebPedidoItensDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lWebPedidoItensDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lWebPedidoItensDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lWebPedidoItensDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lWebPedidoItensDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lWebPedidoItensDao.objeto.excluir(mySelf);
     end;
   finally
-    lWebPedidoItensDao.Free;
+    lWebPedidoItensDao:=nil;
   end;
 end;
 
