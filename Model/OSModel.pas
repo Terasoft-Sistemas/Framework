@@ -6,12 +6,16 @@ uses
   Terasoft.Types,
   FireDAC.Comp.Client,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TOSModel = class
+  TOSModel = class;
+  ITOSModel=IObject<TOSModel>;
 
+  TOSModel = class
   private
+    [weak] mySelf: ITOSModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -275,14 +279,16 @@ type
     property LengthPageView     : String      read FLengthPageView     write SetLengthPageView;
     property IDRecordView       : String read FIDRecordView write SetIDRecordView;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITOSModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TOSModel;
+    function Alterar(pID : String): ITOSModel;
     function Excluir(pID : String): String;
 
-    function carregaClasse(pId : String): TOSModel;
+    function carregaClasse(pId : String): ITOSModel;
 
     function Salvar: String;
     function obterLista: IFDDataset;
@@ -296,33 +302,33 @@ uses
 
 { TOSModel }
 
-function TOSModel.Alterar(pID: String): TOSModel;
+function TOSModel.Alterar(pID: String): ITOSModel;
 var
-  lOSModel : TOSModel;
+  lOSModel : ITOSModel;
 begin
-  lOSModel := TOSModel.Create(vIConexao);
+  lOSModel := TOSModel.getNewIface(vIConexao);
   try
-    lOSModel       := lOSModel.carregaClasse(pID);
-    lOSModel.Acao  := tacAlterar;
+    lOSModel       := lOSModel.objeto.carregaClasse(pID);
+    lOSModel.objeto.Acao  := tacAlterar;
     Result         := lOSModel;
   finally
   end
 end;
 
-function TOSModel.carregaClasse(pId: String): TOSModel;
+function TOSModel.carregaClasse(pId: String): ITOSModel;
 var
-  lOSDao: TOSDao;
+  lOSDao: ITOSDao;
 begin
-  lOSDao := TOSDao.Create(vIConexao);
+  lOSDao := TOSDao.getNewIface(vIConexao);
 
   try
-    Result := lOSDao.carregaClasse(pId);
+    Result := lOSDao.objeto.carregaClasse(pId);
   finally
-    lOSDao.Free;
+    lOSDao:=nil;
   end;
 end;
 
-constructor TOSModel.Create(pIConexao : IConexao);
+constructor TOSModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -344,6 +350,12 @@ begin
   Result          := self.Salvar;
 end;
 
+class function TOSModel.getNewIface(pIConexao: IConexao): ITOSModel;
+begin
+  Result := TImplObjetoOwner<TOSModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TOSModel.Incluir: String;
 begin
    self.Acao := tacIncluir;
@@ -352,42 +364,42 @@ end;
 
 function TOSModel.obterLista: IFDDataset;
 var
-  lOSLista: TOSDao;
+  lOSLista: ITOSDao;
 begin
-  lOSLista := TOSDao.Create(vIConexao);
+  lOSLista := TOSDao.getNewIface(vIConexao);
   try
-    lOSLista.TotalRecords    := FTotalRecords;
-    lOSLista.WhereView       := FWhereView;
-    lOSLista.CountView       := FCountView;
-    lOSLista.OrderView       := FOrderView;
-    lOSLista.StartRecordView := FStartRecordView;
-    lOSLista.LengthPageView  := FLengthPageView;
-    lOSLista.IDRecordView    := FIDRecordView;
+    lOSLista.objeto.TotalRecords    := FTotalRecords;
+    lOSLista.objeto.WhereView       := FWhereView;
+    lOSLista.objeto.CountView       := FCountView;
+    lOSLista.objeto.OrderView       := FOrderView;
+    lOSLista.objeto.StartRecordView := FStartRecordView;
+    lOSLista.objeto.LengthPageView  := FLengthPageView;
+    lOSLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result        := lOSLista.obterLista;
-    FTotalRecords := lOSLista.TotalRecords;
+    Result        := lOSLista.objeto.obterLista;
+    FTotalRecords := lOSLista.objeto.TotalRecords;
   finally
-    lOSLista.Free;
+    lOSLista:=nil;
   end;
 end;
 
 function TOSModel.Salvar: String;
 var
-  lOSDao: TOSDao;
+  lOSDao: ITOSDao;
 begin
-  lOSDao := TOSDao.Create(vIConexao);
+  lOSDao := TOSDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lOSDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lOSDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lOSDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lOSDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lOSDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lOSDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lOSDao.Free;
+    lOSDao:=nil;
   end;
 end;
 

@@ -2045,64 +2045,65 @@ end;
 
 procedure TForm1.Button63Click(Sender: TObject);
 var
-  lOsModel : TOSModel;
+  lOsModel : ITOSModel;
 begin
-  lOsModel := TOSModel.Create(vIConexao);
+  lOsModel := TOSModel.getNewIface(vIConexao);
 
   try
-    lOsModel.CODIGO_CLI := '000001';
-    lOsModel.TOTAL_OS   := '1000';
-    lOsModel.Incluir;
+    lOsModel.objeto.CODIGO_CLI := '000001';
+    lOsModel.objeto.TOTAL_OS   := '1000';
+    lOsModel.objeto.Incluir;
 
     ShowMessage('Inserido com Sucesso');
 
   finally
-    lOsModel.Free;
+    lOsModel:=nil;
   end;
 end;
 
 procedure TForm1.Button64Click(Sender: TObject);
 var
-  lOsModel  : TOSModel;
+  lOsModel  : ITOSModel;
 begin
 
-  lOsModel := TOSModel.Create(vIConexao);
+  lOsModel := TOSModel.getNewIface(vIConexao);
 
   try
-    dsOS.DataSet := lOsModel.obterLista.objeto;
+    dsTmp := lOSModel.objeto.obterLista;
+    dsOS.DataSet := dsTmp.objeto;
   finally
-    lOsModel.Free;
+    lOsModel:=nil;
   end;
 
 end;
 
 procedure TForm1.Button65Click(Sender: TObject);
 var
-  lOsModel : TOSModel;
+  lOsModel : ITOSModel;
 begin
-  lOsModel := TOSModel.Create(vIConexao);
+  lOsModel := TOSModel.getNewIface(vIConexao);
 
   try
-    lOsModel := lOsModel.Alterar('000045');
-    lOsModel.TOTAL_OS   := '500';
-    lOsModel.Salvar;
+    lOsModel := lOsModel.objeto.Alterar('000045');
+    lOsModel.objeto.TOTAL_OS   := '500';
+    lOsModel.objeto.Salvar;
 
     ShowMessage('Alterado com Sucesso');
 
   finally
-    lOsModel.Free;
+    lOsModel:=nil;
   end;
 end;
 
 procedure TForm1.Button66Click(Sender: TObject);
 var
-  lOsModel : TOSModel;
+  lOsModel :ITOSModel;
 begin
-  lOsModel := TOSModel.Create(vIConexao);
+  lOsModel := TOSModel.getNewIface(vIConexao);
 
   try
     try
-      lOsModel.Excluir('000045');
+      lOsModel.objeto.Excluir('000045');
       ShowMessage('Excluido com Sucesso');
 
     except
@@ -2110,7 +2111,7 @@ begin
         ShowMessage('Erro ao excluir: '+ E.Message);
     end;
   finally
-    lOsModel.Free;
+    lOsModel:=nil;
   end;
 end;
 
