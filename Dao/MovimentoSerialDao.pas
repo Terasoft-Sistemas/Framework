@@ -11,12 +11,16 @@ uses
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao;
 
 type
-  TMovimentoSerialDao = class
+  TMovimentoSerialDao = class;
+  ITMovimentoSerialDao=IObject<TMovimentoSerialDao>;
 
+  TMovimentoSerialDao = class
   private
+    [weak] mySelf: ITMovimentoSerialDao;
     vIConexao 	: IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -42,8 +46,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITMovimentoSerialDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -54,11 +60,11 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(pMovimentoSerialModel: TMovimentoSerialModel): String;
-    function alterar(pMovimentoSerialModel: TMovimentoSerialModel): String;
-    function excluir(pMovimentoSerialModel: TMovimentoSerialModel): String;
+    function incluir(pMovimentoSerialModel: ITMovimentoSerialModel): String;
+    function alterar(pMovimentoSerialModel: ITMovimentoSerialModel): String;
+    function excluir(pMovimentoSerialModel: ITMovimentoSerialModel): String;
 
-    function carregaClasse(pID : String): TMovimentoSerialModel;
+    function carregaClasse(pID : String): ITMovimentoSerialModel;
     function obterLista: IFDDataset;
     function ConsultaSerial: IFDDataset;
 
@@ -67,7 +73,7 @@ type
     function RetornaSerialVenda(pProduto: String): String;
     function EstornaMovimentoSerial(pTipoDoc, pID_Doc, pSubId: String): String;
 
-    procedure setParams(var pQry: TFDQuery; pMovimentoSerialModel: TMovimentoSerialModel);
+    procedure setParams(var pQry: TFDQuery; pMovimentoSerialModel: ITMovimentoSerialModel);
 
 end;
 
@@ -178,13 +184,13 @@ begin
 
 end;
 
-function TMovimentoSerialDao.carregaClasse(pID : String): TMovimentoSerialModel;
+function TMovimentoSerialDao.carregaClasse(pID : String): ITMovimentoSerialModel;
 var
   lQry: TFDQuery;
-  lModel: TMovimentoSerialModel;
+  lModel: ITMovimentoSerialModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TMovimentoSerialModel.Create(vIConexao);
+  lModel   := TMovimentoSerialModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -193,17 +199,17 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID                := lQry.FieldByName('ID').AsString;
-    lModel.LOGISTICA         := lQry.FieldByName('LOGISTICA').AsString;
-    lModel.TIPO_SERIAL       := lQry.FieldByName('TIPO_SERIAL').AsString;
-    lModel.NUMERO            := lQry.FieldByName('NUMERO').AsString;
-    lModel.PRODUTO           := lQry.FieldByName('PRODUTO').AsString;
-    lModel.DH_MOVIMENTO      := lQry.FieldByName('DH_MOVIMENTO').AsString;
-    lModel.TIPO_DOCUMENTO    := lQry.FieldByName('TIPO_DOCUMENTO').AsString;
-    lModel.ID_DOCUMENTO      := lQry.FieldByName('ID_DOCUMENTO').AsString;
-    lModel.SUB_ID            := lQry.FieldByName('SUB_ID').AsString;
-    lModel.TIPO_MOVIMENTO    := lQry.FieldByName('TIPO_MOVIMENTO').AsString;
-    lModel.SYSTIME           := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.ID                := lQry.FieldByName('ID').AsString;
+    lModel.objeto.LOGISTICA         := lQry.FieldByName('LOGISTICA').AsString;
+    lModel.objeto.TIPO_SERIAL       := lQry.FieldByName('TIPO_SERIAL').AsString;
+    lModel.objeto.NUMERO            := lQry.FieldByName('NUMERO').AsString;
+    lModel.objeto.PRODUTO           := lQry.FieldByName('PRODUTO').AsString;
+    lModel.objeto.DH_MOVIMENTO      := lQry.FieldByName('DH_MOVIMENTO').AsString;
+    lModel.objeto.TIPO_DOCUMENTO    := lQry.FieldByName('TIPO_DOCUMENTO').AsString;
+    lModel.objeto.ID_DOCUMENTO      := lQry.FieldByName('ID_DOCUMENTO').AsString;
+    lModel.objeto.SUB_ID            := lQry.FieldByName('SUB_ID').AsString;
+    lModel.objeto.TIPO_MOVIMENTO    := lQry.FieldByName('TIPO_MOVIMENTO').AsString;
+    lModel.objeto.SYSTIME           := lQry.FieldByName('SYSTIME').AsString;
 
     Result := lModel;
   finally
@@ -272,7 +278,7 @@ begin
   end;
 end;
 
-constructor TMovimentoSerialDao.Create(pIConexao : IConexao);
+constructor TMovimentoSerialDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -283,7 +289,7 @@ begin
   inherited;
 end;
 
-function TMovimentoSerialDao.incluir(pMovimentoSerialModel: TMovimentoSerialModel): String;
+function TMovimentoSerialDao.incluir(pMovimentoSerialModel: ITMovimentoSerialModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -303,7 +309,7 @@ begin
   end;
 end;
 
-function TMovimentoSerialDao.alterar(pMovimentoSerialModel: TMovimentoSerialModel): String;
+function TMovimentoSerialDao.alterar(pMovimentoSerialModel: ITMovimentoSerialModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -317,7 +323,7 @@ begin
     setParams(lQry, pMovimentoSerialModel);
     lQry.ExecSQL;
 
-    Result := pMovimentoSerialModel.ID;
+    Result := pMovimentoSerialModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -325,22 +331,28 @@ begin
   end;
 end;
 
-function TMovimentoSerialDao.excluir(pMovimentoSerialModel: TMovimentoSerialModel): String;
+function TMovimentoSerialDao.excluir(pMovimentoSerialModel: ITMovimentoSerialModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from movimento_serial where ID = :ID' ,[pMovimentoSerialModel.ID]);
+   lQry.ExecSQL('delete from movimento_serial where ID = :ID' ,[pMovimentoSerialModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pMovimentoSerialModel.ID;
+   Result := pMovimentoSerialModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
 end;
 
+
+class function TMovimentoSerialDao.getNewIface(pIConexao: IConexao): ITMovimentoSerialDao;
+begin
+  Result := TImplObjetoOwner<TMovimentoSerialDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
 
 function TMovimentoSerialDao.where: String;
 var
@@ -437,28 +449,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TMovimentoSerialDao.setParams(var pQry: TFDQuery; pMovimentoSerialModel: TMovimentoSerialModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TMovimentoSerialDao.setParams(var pQry: TFDQuery; pMovimentoSerialModel: ITMovimentoSerialModel);
 begin
-  lTabela := vConstrutor.getColumns('movimento_serial');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TMovimentoSerialModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pMovimentoSerialModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pMovimentoSerialModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('movimento_serial',pQry,pMovimentoSerialModel.objeto);
 end;
 
 procedure TMovimentoSerialDao.SetStartRecordView(const Value: String);

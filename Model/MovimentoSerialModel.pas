@@ -6,13 +6,17 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
 
-  TMovimentoSerialModel = class
+  TMovimentoSerialModel = class;
+  ITMovimentoSerialModel=IObject<TMovimentoSerialModel>;
 
+  TMovimentoSerialModel = class
   private
+    [weak] mySelf:ITMovimentoSerialModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -70,15 +74,17 @@ type
     property TIPO_MOVIMENTO : Variant read FTIPO_MOVIMENTO write SetTIPO_MOVIMENTO;
     property SYSTIME : Variant read FSYSTIME write SetSYSTIME;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITMovimentoSerialModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TMovimentoSerialModel;
+    function Alterar(pID : String): ITMovimentoSerialModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pID : String): TMovimentoSerialModel;
+    function carregaClasse(pID : String): ITMovimentoSerialModel;
     function obterLista: IFDDataset;
     function ConsultaSerial: IFDDataset;
 
@@ -110,24 +116,24 @@ uses
 
 function TMovimentoSerialModel.ValidaVendaSerial(pProduto: String): Boolean;
 var
-  lMovimentoSerialDao: TMovimentoSerialDao;
+  lMovimentoSerialDao: ITMovimentoSerialDao;
 begin
-  lMovimentoSerialDao := TMovimentoSerialDao.Create(vIConexao);
+  lMovimentoSerialDao := TMovimentoSerialDao.getNewIface(vIConexao);
   try
-    Result := lMovimentoSerialDao.ValidaVendaSerial(pProduto);
+    Result := lMovimentoSerialDao.objeto.ValidaVendaSerial(pProduto);
   finally
-    lMovimentoSerialDao.Free;
+    lMovimentoSerialDao:=nil;
   end;
 end;
 
-function TMovimentoSerialModel.Alterar(pID: String): TMovimentoSerialModel;
+function TMovimentoSerialModel.Alterar(pID: String): ITMovimentoSerialModel;
 var
-  lMovimentoSerialModel : TMovimentoSerialModel;
+  lMovimentoSerialModel : ITMovimentoSerialModel;
 begin
-  lMovimentoSerialModel := TMovimentoSerialModel.Create(vIConexao);
+  lMovimentoSerialModel := TMovimentoSerialModel.getNewIface(vIConexao);
   try
-    lMovimentoSerialModel      := lMovimentoSerialModel.carregaClasse(pID);
-    lMovimentoSerialModel.Acao := tacAlterar;
+    lMovimentoSerialModel      := lMovimentoSerialModel.objeto.carregaClasse(pID);
+    lMovimentoSerialModel.objeto.Acao := tacAlterar;
     Result            	       := lMovimentoSerialModel;
   finally
 
@@ -141,44 +147,50 @@ begin
   Result     := self.Salvar;
 end;
 
+class function TMovimentoSerialModel.getNewIface(pIConexao: IConexao): ITMovimentoSerialModel;
+begin
+  Result := TImplObjetoOwner<TMovimentoSerialModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TMovimentoSerialModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
   Result    := self.Salvar;
 end;
 
-function TMovimentoSerialModel.carregaClasse(pId : String): TMovimentoSerialModel;
+function TMovimentoSerialModel.carregaClasse(pId : String): ITMovimentoSerialModel;
 var
-  lMovimentoSerialDao: TMovimentoSerialDao;
+  lMovimentoSerialDao: ITMovimentoSerialDao;
 begin
-  lMovimentoSerialDao := TMovimentoSerialDao.Create(vIConexao);
+  lMovimentoSerialDao := TMovimentoSerialDao.getNewIface(vIConexao);
   try
-    Result := lMovimentoSerialDao.carregaClasse(pID);
+    Result := lMovimentoSerialDao.objeto.carregaClasse(pID);
   finally
-    lMovimentoSerialDao.Free;
+    lMovimentoSerialDao:=nil;
   end;
 end;
 
 function TMovimentoSerialModel.ConsultaSerial: IFDDataset;
 var
-  lMovimentoSerial: TMovimentoSerialDao;
+  lMovimentoSerial: ITMovimentoSerialDao;
 begin
-  lMovimentoSerial := TMovimentoSerialDao.Create(vIConexao);
+  lMovimentoSerial := TMovimentoSerialDao.getNewIface(vIConexao);
   try
-    lMovimentoSerial.WhereView       := FWhereView;
-    lMovimentoSerial.CountView       := FCountView;
-    lMovimentoSerial.OrderView       := FOrderView;
-    lMovimentoSerial.StartRecordView := FStartRecordView;
-    lMovimentoSerial.LengthPageView  := FLengthPageView;
-    lMovimentoSerial.IDRecordView    := FIDRecordView;
+    lMovimentoSerial.objeto.WhereView       := FWhereView;
+    lMovimentoSerial.objeto.CountView       := FCountView;
+    lMovimentoSerial.objeto.OrderView       := FOrderView;
+    lMovimentoSerial.objeto.StartRecordView := FStartRecordView;
+    lMovimentoSerial.objeto.LengthPageView  := FLengthPageView;
+    lMovimentoSerial.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lMovimentoSerial.ConsultaSerial;
+    Result := lMovimentoSerial.objeto.ConsultaSerial;
   finally
-    lMovimentoSerial.Free;
+    lMovimentoSerial:=nil;
   end;
 end;
 
-constructor TMovimentoSerialModel.Create(pIConexao : IConexao);
+constructor TMovimentoSerialModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -190,79 +202,79 @@ end;
 
 function TMovimentoSerialModel.obterLista: IFDDataset;
 var
-  lMovimentoSerialLista: TMovimentoSerialDao;
+  lMovimentoSerialLista: ITMovimentoSerialDao;
 begin
-  lMovimentoSerialLista := TMovimentoSerialDao.Create(vIConexao);
+  lMovimentoSerialLista := TMovimentoSerialDao.getNewIface(vIConexao);
 
   try
-    lMovimentoSerialLista.TotalRecords    := FTotalRecords;
-    lMovimentoSerialLista.WhereView       := FWhereView;
-    lMovimentoSerialLista.CountView       := FCountView;
-    lMovimentoSerialLista.OrderView       := FOrderView;
-    lMovimentoSerialLista.StartRecordView := FStartRecordView;
-    lMovimentoSerialLista.LengthPageView  := FLengthPageView;
-    lMovimentoSerialLista.IDRecordView    := FIDRecordView;
+    lMovimentoSerialLista.objeto.TotalRecords    := FTotalRecords;
+    lMovimentoSerialLista.objeto.WhereView       := FWhereView;
+    lMovimentoSerialLista.objeto.CountView       := FCountView;
+    lMovimentoSerialLista.objeto.OrderView       := FOrderView;
+    lMovimentoSerialLista.objeto.StartRecordView := FStartRecordView;
+    lMovimentoSerialLista.objeto.LengthPageView  := FLengthPageView;
+    lMovimentoSerialLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lMovimentoSerialLista.obterLista;
+    Result := lMovimentoSerialLista.objeto.obterLista;
 
-    FTotalRecords := lMovimentoSerialLista.TotalRecords;
+    FTotalRecords := lMovimentoSerialLista.objeto.TotalRecords;
 
   finally
-    lMovimentoSerialLista.Free;
+    lMovimentoSerialLista:=nil;
   end;
 end;
 
 function TMovimentoSerialModel.RetornaSerialVenda(pProduto: String): String;
 var
-  lMovimentoSerialDao: TMovimentoSerialDao;
+  lMovimentoSerialDao: ITMovimentoSerialDao;
 begin
-  lMovimentoSerialDao := TMovimentoSerialDao.Create(vIConexao);
+  lMovimentoSerialDao := TMovimentoSerialDao.getNewIface(vIConexao);
   try
-    Result := lMovimentoSerialDao.RetornaSerialVenda(pProduto);
+    Result := lMovimentoSerialDao.objeto.RetornaSerialVenda(pProduto);
   finally
-    lMovimentoSerialDao.Free;
+    lMovimentoSerialDao:=nil;
   end;
 end;
 
 
 function TMovimentoSerialModel.EstornaMovimentoSerial(pTipoDoc, pID_Doc, pSubId: String): String;
 var
-  lMovimentoSerialDao: TMovimentoSerialDao;
+  lMovimentoSerialDao: ITMovimentoSerialDao;
 begin
-  lMovimentoSerialDao := TMovimentoSerialDao.Create(vIConexao);
+  lMovimentoSerialDao := TMovimentoSerialDao.getNewIface(vIConexao);
   try
-    Result := lMovimentoSerialDao.EstornaMovimentoSerial(pTipoDoc,pID_Doc,pSubId);
+    Result := lMovimentoSerialDao.objeto.EstornaMovimentoSerial(pTipoDoc,pID_Doc,pSubId);
   finally
-    lMovimentoSerialDao.Free;
+    lMovimentoSerialDao:=nil;
   end;
 end;
 
 function TMovimentoSerialModel.SaldoProdutoSerial(pProduto: String): Real;
 var
-  lMovimentoSerialDao: TMovimentoSerialDao;
+  lMovimentoSerialDao: ITMovimentoSerialDao;
 begin
-  lMovimentoSerialDao := TMovimentoSerialDao.Create(vIConexao);
+  lMovimentoSerialDao := TMovimentoSerialDao.getNewIface(vIConexao);
   try
-    Result := lMovimentoSerialDao.SaldoProdutoSerial(pProduto);
+    Result := lMovimentoSerialDao.objeto.SaldoProdutoSerial(pProduto);
   finally
-    lMovimentoSerialDao.Free;
+    lMovimentoSerialDao:=nil;
   end;
 end;
 
 function TMovimentoSerialModel.Salvar: String;
 var
-  lMovimentoSerialDao: TMovimentoSerialDao;
+  lMovimentoSerialDao: ITMovimentoSerialDao;
 begin
-  lMovimentoSerialDao := TMovimentoSerialDao.Create(vIConexao);
+  lMovimentoSerialDao := TMovimentoSerialDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lMovimentoSerialDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lMovimentoSerialDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lMovimentoSerialDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lMovimentoSerialDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lMovimentoSerialDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lMovimentoSerialDao.objeto.excluir(mySelf);
     end;
   finally
-    lMovimentoSerialDao.Free;
+    lMovimentoSerialDao:=nil;
   end;
 end;
 

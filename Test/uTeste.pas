@@ -2739,31 +2739,31 @@ end;
 
 procedure TForm1.Button88Click(Sender: TObject);
 var
-  lMovimentoSerial : TMovimentoSerialModel;
+  lMovimentoSerial : ITMovimentoSerialModel;
 begin
-  lMovimentoSerial := TMovimentoSerialModel.Create(vIConexao);
+  lMovimentoSerial := TMovimentoSerialModel.getNewIface(vIConexao);
   try
     try
-      lMovimentoSerial.Acao := tacIncluir;
+      lMovimentoSerial.objeto.Acao := tacIncluir;
 
-      lMovimentoSerial.DH_MOVIMENTO   :=  FormatDateTime('dd.mm.yyyy', vIConexao.DataHoraServer) + ' ' + TimeToStr(vIConexao.HoraServer);
-		  lMovimentoSerial.LOGISTICA      := 'FEDEX';
-      lMovimentoSerial.TIPO_SERIAL    := 'I';
-      lMovimentoSerial.NUMERO         := '123456789789789';
-      lMovimentoSerial.PRODUTO        := '000001';
-      lMovimentoSerial.TIPO_DOCUMENTO := 'P';
-      lMovimentoSerial.ID_DOCUMENTO   := '000001';
-      lMovimentoSerial.SUB_ID         := '000001';
-      lMovimentoSerial.TIPO_MOVIMENTO := 'E';
+      lMovimentoSerial.objeto.DH_MOVIMENTO   :=  FormatDateTime('dd.mm.yyyy', vIConexao.DataHoraServer) + ' ' + TimeToStr(vIConexao.HoraServer);
+		  lMovimentoSerial.objeto.LOGISTICA      := 'FEDEX';
+      lMovimentoSerial.objeto.TIPO_SERIAL    := 'I';
+      lMovimentoSerial.objeto.NUMERO         := '123456789789789';
+      lMovimentoSerial.objeto.PRODUTO        := '000001';
+      lMovimentoSerial.objeto.TIPO_DOCUMENTO := 'P';
+      lMovimentoSerial.objeto.ID_DOCUMENTO   := '000001';
+      lMovimentoSerial.objeto.SUB_ID         := '000001';
+      lMovimentoSerial.objeto.TIPO_MOVIMENTO := 'E';
 
-      lMovimentoSerial.Salvar;
+      lMovimentoSerial.objeto.Salvar;
       ShowMessage('Inserido com Sucesso');
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lMovimentoSerial.Free;
+    lMovimentoSerial:=nil;
   end;
 end;
 
@@ -3547,15 +3547,15 @@ end;
 procedure TForm1.Button113Click(Sender: TObject);
 var
   lID : String;
-  lMovimentoSerial : TMovimentoSerialModel;
+  lMovimentoSerial : ITMovimentoSerialModel;
 begin
-  lMovimentoSerial := TMovimentoSerialModel.Create(vIConexao);
+  lMovimentoSerial := TMovimentoSerialModel.getNewIface(vIConexao);
   try
     try
       lID := InputBox('MovimentoSerial', 'Digite o ID que deseja excluir:', '');
 
-      lMovimentoSerial.ID := lID;
-      lMovimentoSerial.Excluir(lID);
+      lMovimentoSerial.objeto.ID := lID;
+      lMovimentoSerial.objeto.Excluir(lID);
 
       ShowMessage('Excluido com sucesso!');
     except
@@ -3563,24 +3563,25 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lMovimentoSerial.Free;
+    lMovimentoSerial:=nil;
   end;
 end;
 
 procedure TForm1.Button114Click(Sender: TObject);
 var
-  lMovimentoSerial : TMovimentoSerialModel;
+  lMovimentoSerial : ITMovimentoSerialModel;
 begin
-  lMovimentoSerial := TMovimentoSerialModel.Create(vIConexao);
+  lMovimentoSerial := TMovimentoSerialModel.getNewIface(vIConexao);
   try
     try
-      dMovimentoSerial.DataSet := lMovimentoSerial.ObterLista.objeto;
+      dsTmp := lMovimentoSerial.objeto.ObterLista;
+      dMovimentoSerial.DataSet := dsTmp.objeto;
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lMovimentoSerial.Free;
+    lMovimentoSerial:=nil;
   end;
 end;
 
@@ -3605,18 +3606,19 @@ end;
 
 procedure TForm1.Button117Click(Sender: TObject);
 var
-  lMovimentoSerial : TMovimentoSerialModel;
+  lMovimentoSerial : ITMovimentoSerialModel;
 begin
-  lMovimentoSerial := TMovimentoSerialModel.Create(vIConexao);
+  lMovimentoSerial := TMovimentoSerialModel.getNewIface(vIConexao);
   try
     try
-      dMovimentoSerial.DataSet := lMovimentoSerial.ConsultaSerial.objeto;
+      dsTmp := lMovimentoSerial.objeto.ConsultaSerial;
+      dMovimentoSerial.DataSet := dsTmp.objeto;
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lMovimentoSerial.Free;
+    lMovimentoSerial:=nil;
   end;
 end;
 

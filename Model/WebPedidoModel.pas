@@ -1362,7 +1362,7 @@ function TWebPedidoModel.VenderItem(pVenderItemParametros: TVenderItemParametros
 var
   lWebPedidoItensModel : ITWebPedidoItensModel;
   lProdutoModel        : ITProdutosModel;
-  lMovimentoSerialModel: TMovimentoSerialModel;
+  lMovimentoSerialModel: ITMovimentoSerialModel;
   lPrecoParamentros    : TProdutoPreco;
   lProdutoPreco        : TProdutoPreco;
   lValorUnitario,
@@ -1376,7 +1376,7 @@ begin
 
   lWebPedidoItensModel  := TWebPedidoItensModel.getNewIface(vIConexao);
   lProdutoModel         := TProdutosModel.getNewIface(vIConexao);
-  lMovimentoSerialModel := TMovimentoSerialModel.Create(vIConexao);
+  lMovimentoSerialModel := TMovimentoSerialModel.getNewIface(vIConexao);
 
   if pVenderItemParametros.PRODUTO = '' then
     CriaException('Produto não informado');
@@ -1384,9 +1384,9 @@ begin
   if StrToFloatDef(pVenderItemParametros.QUANTIDADE, 0) = 0 then
     CriaException('Quantidade não informada');
 
-  if (PVenderItemParametros.TIPO_ENTREGA <> 'CD') and (lMovimentoSerialModel.ValidaVendaSerial(pVenderItemParametros.PRODUTO)) then
+  if (PVenderItemParametros.TIPO_ENTREGA <> 'CD') and (lMovimentoSerialModel.objeto.ValidaVendaSerial(pVenderItemParametros.PRODUTO)) then
   begin
-    if lMovimentoSerialModel.SaldoProdutoSerial(pVenderItemParametros.PRODUTO) <  StrToFloat(pVenderItemParametros.QUANTIDADE) then
+    if lMovimentoSerialModel.objeto.SaldoProdutoSerial(pVenderItemParametros.PRODUTO) <  StrToFloat(pVenderItemParametros.QUANTIDADE) then
       CriaException('Produto com venda obrigatória de serial e com saldo de serial inferior a quantidade solicitada para venda.')
     else
       lVendaComSerial := True;
@@ -1457,18 +1457,18 @@ begin
       begin
 
 
-        lMovimentoSerialModel.LOGISTICA         := 'FEDEX';
-        lMovimentoSerialModel.TIPO_SERIAL       := 'I';
-        lMovimentoSerialModel.NUMERO            := lMovimentoSerialModel.RetornaSerialVenda(pVenderItemParametros.PRODUTO);
-        lMovimentoSerialModel.PRODUTO           := pVenderItemParametros.PRODUTO;
-        lMovimentoSerialModel.TIPO_DOCUMENTO    := 'V';
-        lMovimentoSerialModel.ID_DOCUMENTO      := pVenderItemParametros.WEB_PEDIDO;
-        lMovimentoSerialModel.SUB_ID            := Result;
-        lMovimentoSerialModel.TIPO_MOVIMENTO    := 'S';
+        lMovimentoSerialModel.objeto.LOGISTICA         := 'FEDEX';
+        lMovimentoSerialModel.objeto.TIPO_SERIAL       := 'I';
+        lMovimentoSerialModel.objeto.NUMERO            := lMovimentoSerialModel.objeto.RetornaSerialVenda(pVenderItemParametros.PRODUTO);
+        lMovimentoSerialModel.objeto.PRODUTO           := pVenderItemParametros.PRODUTO;
+        lMovimentoSerialModel.objeto.TIPO_DOCUMENTO    := 'V';
+        lMovimentoSerialModel.objeto.ID_DOCUMENTO      := pVenderItemParametros.WEB_PEDIDO;
+        lMovimentoSerialModel.objeto.SUB_ID            := Result;
+        lMovimentoSerialModel.objeto.TIPO_MOVIMENTO    := 'S';
 
-        lSerialItem := lSerialItem + lMovimentoSerialModel.NUMERO + ' ';
+        lSerialItem := lSerialItem + lMovimentoSerialModel.objeto.NUMERO + ' ';
 
-        lMovimentoSerialModel.Incluir;
+        lMovimentoSerialModel.objeto.Incluir;
       end;
 
       lWebPedidoItensModel := lWebPedidoItensModel.objeto.Alterar(Result);
@@ -1480,7 +1480,7 @@ begin
   finally
     lWebPedidoItensModel:=nil;
     lProdutoModel:=nil;
-    lMovimentoSerialModel.Free;
+    lMovimentoSerialModel:=nil;
   end;
 end;
 
