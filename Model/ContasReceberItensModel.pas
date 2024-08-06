@@ -519,7 +519,7 @@ begin
   lContaCorrenteModel := TContaCorrenteModel.getNewIface(vIConexao);
   lContasReceberModel := TContasReceberModel.Create(vIConexao);
   try
-    lContasReceberModel := lContasReceberModel.carregaClasse(self.FFATURA_REC);
+    lContasReceberModel := lContasReceberModel.carregaClasse(self.FFATURA_REC, self.LOJA);
 
     lHistorico := 'FC PIX: '+ self.FPACELA_REC+'/'+self.FTOTALPARCELAS_REC+' PED: '+lContasReceberModel.PEDIDO_REC;
 
@@ -635,7 +635,7 @@ begin
   lAdmCartaoModel            := TAdmCartaoModel.getNewIface(vIConexao);
 
   try
-    lContasReceberModel := lContasReceberModel.carregaClasse(self.FFATURA_REC);
+    lContasReceberModel := lContasReceberModel.carregaClasse(self.FFATURA_REC, self.FLOJA);
 
     lAdmCartaoModel.objeto.IDRecordView := StrToInt(pIdAdmCartao);
     lAdmCartaoModel.objeto.obterLista;

@@ -1105,10 +1105,13 @@ begin
       //Não tem na tabela de pedidoitens
       lNFItensModel.objeto.VBC_IPI               := FloatToStr(0);
       lNFItensModel.objeto.VSEG                  := FloatToStr(0);
+
+      //ICMS Recolhido por ST
       lNFItensModel.objeto.VICMSSUBISTITUTORET   := FloatToStr(0);
       lNFItensModel.objeto.VBCSTRET              := FloatToStr(0);
       lNFItensModel.objeto.VICMSSTRET            := FloatToStr(0);
       lNFItensModel.objeto.PICMSSTRET            := FloatToStr(0);
+
       lNFItensModel.objeto.VICMSUFDEST           := FloatToStr(0);
       lNFItensModel.objeto.VFCP                  := FloatToStr(0);
       lNFItensModel.objeto.PFCP                  := FloatToStr(0);
