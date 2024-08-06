@@ -111,7 +111,10 @@ begin
           '     c.cfop,                                                      '+#13+
           '     coalesce(c1.cfop, c.cfop) cfop_consumidor,                   '+#13+
           '     p.tipo_pro,                                                  '+#13+
-          '     p.codigo_fornecedor ncm                                      '+#13+
+          '     p.codigo_fornecedor ncm,                                     '+#13+
+          '     base_st_recolhido,                                           '+#13+
+          '     valor_icms_substituto,                                       '+#13+
+          '     percentual_st_recolhido                                      '+#13+
           '                                                                  '+#13+
           ' from                                                             '+#13+
           '     produto p                                                    '+#13+
@@ -167,6 +170,9 @@ begin
     lCalcularImpostosModel.COFINS_ALIQUOTA             := lQry.FieldByName('aliquota_cofins').AsFloat;
     lCalcularImpostosModel.IPI_CST                     := lQry.FieldByName('cst_ipi').AsString;
     lCalcularImpostosModel.IPI_ALIQUOTA                := lQry.FieldByName('ipi_sai').AsFloat;
+    lCalcularImpostosModel.BASE_ST_RECOLHIDO           := lQry.FieldByName('BASE_ST_RECOLHIDO').AsFloat;
+    lCalcularImpostosModel.VALOR_ICMS_SUBSTITUTO       := lQry.FieldByName('VALOR_ICMS_SUBSTITUTO').AsFloat;
+    lCalcularImpostosModel.PERCENTUAL_ST_RECOLHIDO     := lQry.FieldByName('PERCENTUAL_ST_RECOLHIDO').AsFloat;
 
     lTipoProduto := lQry.FieldByName('tipo_pro').AsString;
     lNCM         := lQry.FieldByName('ncm').AsString;

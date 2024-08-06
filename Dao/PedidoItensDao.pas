@@ -233,6 +233,10 @@ begin
     lModel.objeto.VDESC                        := lQry.FieldByName('VDESC').AsString;
     lModel.objeto.CSOSN                        := lQry.FieldByName('CSOSN').AsString;
     lModel.objeto.CFOP                         := lQry.FieldByName('CFOP').AsString;
+    lModel.objeto.VBCSTRET                     := lQry.FieldByName('VBCSTRET').AsString;
+    lModel.objeto.PICMSSTRET                   := lQry.FieldByName('PICMSSTRET').AsString;
+    lModel.objeto.VICMSSTRET                   := lQry.FieldByName('VICMSSTRET').AsString;
+    lModel.objeto.VICMSSUBISTITUTORET          := lQry.FieldByName('VICMSSUBISTITUTORET').AsString;
 
     Result := lModel;
   finally

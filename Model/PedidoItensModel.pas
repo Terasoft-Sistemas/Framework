@@ -179,6 +179,10 @@ type
     FVTOTTRIB_MUNICIPAL: Variant;
     FVTOTTRIB_ESTADUAL: Variant;
     FSEGURO_PRESTAMISTA_VALOR: Variant;
+    FVBCSTRET: Variant;
+    FPICMSSTRET: Variant;
+    FVICMSSTRET: Variant;
+    FVICMSSUBISTITUTORET: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetPedidoItenssLista(const Value: IList<ITPedidoItensModel>);
@@ -329,6 +333,10 @@ type
     procedure SetVTOTTRIB_FEDERAL(const Value: Variant);
     procedure SetVTOTTRIB_MUNICIPAL(const Value: Variant);
     procedure SetSEGURO_PRESTAMISTA_VALOR(const Value: Variant);
+    procedure SetPICMSSTRET(const Value: Variant);
+    procedure SetVBCSTRET(const Value: Variant);
+    procedure SetVICMSSTRET(const Value: Variant);
+    procedure SetVICMSSUBISTITUTORET(const Value: Variant);
 
   public
     property ID: Variant read FID write SetID;
@@ -467,6 +475,11 @@ type
     property VTOTTRIB_FEDERAL: Variant read FVTOTTRIB_FEDERAL write SetVTOTTRIB_FEDERAL;
     property VTOTTRIB_MUNICIPAL: Variant read FVTOTTRIB_MUNICIPAL write SetVTOTTRIB_MUNICIPAL;
     property SEGURO_PRESTAMISTA_VALOR: Variant read FSEGURO_PRESTAMISTA_VALOR write SetSEGURO_PRESTAMISTA_VALOR;
+
+    property VBCSTRET: Variant read FVBCSTRET write SetVBCSTRET;
+    property PICMSSTRET: Variant read FPICMSSTRET write SetPICMSSTRET;
+    property VICMSSTRET: Variant read FVICMSSTRET write SetVICMSSTRET;
+    property VICMSSUBISTITUTORET: Variant read FVICMSSUBISTITUTORET write SetVICMSSUBISTITUTORET;
 
   	constructor _Create(pConexao: IConexao);
     destructor Destroy; override;
@@ -1129,6 +1142,11 @@ begin
   FPICMSINTERPART := Value;
 end;
 
+procedure TPedidoItensModel.SetPICMSSTRET(const Value: Variant);
+begin
+  FPICMSSTRET := Value;
+end;
+
 procedure TPedidoItensModel.SetPICMSUFDEST(const Value: Variant);
 begin
   FPICMSUFDEST := Value;
@@ -1484,6 +1502,11 @@ begin
   FVBCFCPST := Value;
 end;
 
+procedure TPedidoItensModel.SetVBCSTRET(const Value: Variant);
+begin
+  FVBCSTRET := Value;
+end;
+
 procedure TPedidoItensModel.SetVBCUFDEST(const Value: Variant);
 begin
   FVBCUFDEST := Value;
@@ -1512,6 +1535,16 @@ end;
 procedure TPedidoItensModel.SetVICMSDESON(const Value: Variant);
 begin
   FVICMSDESON := Value;
+end;
+
+procedure TPedidoItensModel.SetVICMSSTRET(const Value: Variant);
+begin
+  FVICMSSTRET := Value;
+end;
+
+procedure TPedidoItensModel.SetVICMSSUBISTITUTORET(const Value: Variant);
+begin
+  FVICMSSUBISTITUTORET := Value;
 end;
 
 procedure TPedidoItensModel.SetVICMSUFDEST(const Value: Variant);

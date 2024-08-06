@@ -1107,10 +1107,10 @@ begin
       lNFItensModel.objeto.VSEG                  := FloatToStr(0);
 
       //ICMS Recolhido por ST
-      lNFItensModel.objeto.VICMSSUBISTITUTORET   := FloatToStr(0);
-      lNFItensModel.objeto.VBCSTRET              := FloatToStr(0);
-      lNFItensModel.objeto.VICMSSTRET            := FloatToStr(0);
-      lNFItensModel.objeto.PICMSSTRET            := FloatToStr(0);
+      lNFItensModel.objeto.VICMSSUBISTITUTORET   := lItens.objeto.VICMSSUBISTITUTORET;
+      lNFItensModel.objeto.VBCSTRET              := lItens.objeto.VBCSTRET;
+      lNFItensModel.objeto.VICMSSTRET            := lItens.objeto.VICMSSTRET;
+      lNFItensModel.objeto.PICMSSTRET            := lItens.objeto.PICMSSTRET;
 
       lNFItensModel.objeto.VICMSUFDEST           := FloatToStr(0);
       lNFItensModel.objeto.VFCP                  := FloatToStr(0);
@@ -1584,6 +1584,10 @@ begin
       lPedidoItensModal.objeto.VTOTTRIB_ESTADUAL   := lCalcularImpostosModel.VTOTTRIB_ESTADUAL;
       lPedidoItensModal.objeto.VTOTTRIB_FEDERAL    := lCalcularImpostosModel.VTOTTRIB_FEDERAL;
       lPedidoItensModal.objeto.VTOTTRIB_MUNICIPAL  := lCalcularImpostosModel.VTOTTRIB_MUNICIPAL;
+      lPedidoItensModal.objeto.VBCSTRET            := lCalcularImpostosModel.VBCSTRET;
+      lPedidoItensModal.objeto.PICMSSTRET          := lCalcularImpostosModel.PICMSSTRET;
+      lPedidoItensModal.objeto.VICMSSTRET          := lCalcularImpostosModel.VICMSSTRET;
+      lPedidoItensModal.objeto.VICMSSUBISTITUTORET := lCalcularImpostosModel.VICMSSUBISTITUTORET;
 
       lPedidoItensModal.objeto.Salvar;
     end;

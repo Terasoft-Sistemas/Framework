@@ -91,6 +91,13 @@ type
     FALIQUOTA_FEDERAL: Real;
     FALIQUOTA_MUNICIPAL: Real;
     FALIQUOTA_ESTADUAL: Real;
+    FVALOR_ICMS_SUBSTITUTO: Real;
+    FPERCENTUAL_ST_RECOLHIDO: Real;
+    FBASE_ST_RECOLHIDO: Real;
+    FVBCSTRET: Real;
+    FPICMSSTRET: Real;
+    FVICMSSTRET: Real;
+    FVICMSSUBISTITUTORET: Real;
     procedure SetABATEDESCONTO_IPI(const Value: String);
     procedure SetCFOP(const Value: String);
     procedure SetCOFINS_ALIQUOTA(const Value: Real);
@@ -161,6 +168,13 @@ type
     procedure SetALIQUOTA_ESTADUAL(const Value: Real);
     procedure SetALIQUOTA_FEDERAL(const Value: Real);
     procedure SetALIQUOTA_MUNICIPAL(const Value: Real);
+    procedure SetBASE_ST_RECOLHIDO(const Value: Real);
+    procedure SetPERCENTUAL_ST_RECOLHIDO(const Value: Real);
+    procedure SetVALOR_ICMS_SUBSTITUTO(const Value: Real);
+    procedure SetPICMSSTRET(const Value: Real);
+    procedure SetVBCSTRET(const Value: Real);
+    procedure SetVICMSSTRET(const Value: Real);
+    procedure SetVICMSSUBISTITUTORET(const Value: Real);
 
   public
     property CFOP_ID                     : String read FCFOP_ID write SetCFOP_ID;
@@ -239,6 +253,15 @@ type
     property ALIQUOTA_FEDERAL: Real read FALIQUOTA_FEDERAL write SetALIQUOTA_FEDERAL;
     property ALIQUOTA_ESTADUAL: Real read FALIQUOTA_ESTADUAL write SetALIQUOTA_ESTADUAL;
     property ALIQUOTA_MUNICIPAL: Real read FALIQUOTA_MUNICIPAL write SetALIQUOTA_MUNICIPAL;
+
+    property BASE_ST_RECOLHIDO: Real read FBASE_ST_RECOLHIDO write SetBASE_ST_RECOLHIDO;
+    property VALOR_ICMS_SUBSTITUTO: Real read FVALOR_ICMS_SUBSTITUTO write SetVALOR_ICMS_SUBSTITUTO;
+    property PERCENTUAL_ST_RECOLHIDO: Real read FPERCENTUAL_ST_RECOLHIDO write SetPERCENTUAL_ST_RECOLHIDO;
+
+    property VBCSTRET: Real read FVBCSTRET write SetVBCSTRET;
+    property PICMSSTRET: Real read FPICMSSTRET write SetPICMSSTRET;
+    property VICMSSTRET: Real read FVICMSSTRET write SetVICMSSTRET;
+    property VICMSSUBISTITUTORET: Real read FVICMSSUBISTITUTORET write SetVICMSSUBISTITUTORET;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -401,12 +424,16 @@ begin
     lMotor.NotaFiscal.Produto.IBPT.AliquotaEstadual  := self.ALIQUOTA_ESTADUAL;
     lMotor.NotaFiscal.Produto.IBPT.AliquotaNacional  := self.ALIQUOTA_FEDERAL;
 
+    //CST60 Sub
+    lMotor.NotaFiscal.Produto.ICMS.ICMSST.ICMSSub.BaseCalculo         := self.BASE_ST_RECOLHIDO;
+    lMotor.NotaFiscal.Produto.ICMS.ICMSST.ICMSSub.Aliquota            := self.PERCENTUAL_ST_RECOLHIDO;
+    lMotor.NotaFiscal.Produto.ICMS.ICMSST.ICMSSub.ValorICMSSubstituto := self.VALOR_ICMS_SUBSTITUTO;
+
     lMotor.Processar;
 
     //======= Rateio =======
     Self.FDESCONTO_ITEM  := lMotor.NotaFiscal.Produto.AsDescontoRateio;
     Self.FACRESCIMO_ITEM := lMotor.NotaFiscal.Produto.AsAcrescimoRateio;
-
 
 
     //======= ICMS =======
@@ -442,6 +469,11 @@ begin
       Self.Fpicmsinterpart  := 0;
     end;
 
+    //======= ICMS RET =======
+    self.FVBCSTRET            := lMotor.NotaFiscal.Produto.ICMS.ICMSST.ICMSSub.AsValorBase;
+    self.FPICMSSTRET          := lMotor.NotaFiscal.Produto.ICMS.ICMSST.ICMSSub.Aliquota;
+    self.FVICMSSTRET          := lMotor.NotaFiscal.Produto.ICMS.ICMSST.ICMSSub.AsValor;
+    self.FVICMSSUBISTITUTORET := lMotor.NotaFiscal.Produto.ICMS.ICMSST.ICMSSub.ValorICMSSubstituto;
 
     //======= PIS =======
     Self.FPIS_BASE     := lMotor.NotaFiscal.Produto.PIS.AsValorBase;
@@ -546,6 +578,11 @@ end;
 procedure TCalcularImpostosModel.SetALIQUOTA_MUNICIPAL(const Value: Real);
 begin
   FALIQUOTA_MUNICIPAL := Value;
+end;
+
+procedure TCalcularImpostosModel.SetBASE_ST_RECOLHIDO(const Value: Real);
+begin
+  FBASE_ST_RECOLHIDO := Value;
 end;
 
 procedure TCalcularImpostosModel.SetCFOP(const Value: String);
@@ -735,6 +772,11 @@ begin
   FMODELO_NF := Value;
 end;
 
+procedure TCalcularImpostosModel.SetPERCENTUAL_ST_RECOLHIDO(const Value: Real);
+begin
+  FPERCENTUAL_ST_RECOLHIDO := Value;
+end;
+
 procedure TCalcularImpostosModel.SetPFCP(const Value: Real);
 begin
   FPFCP := Value;
@@ -753,6 +795,11 @@ end;
 procedure TCalcularImpostosModel.SetPICMSINTERPART(const Value: Real);
 begin
   FPICMSINTERPART := Value;
+end;
+
+procedure TCalcularImpostosModel.SetPICMSSTRET(const Value: Real);
+begin
+  FPICMSSTRET := Value;
 end;
 
 procedure TCalcularImpostosModel.SetPICMSUFDEST(const Value: Real);
@@ -816,6 +863,11 @@ begin
   FVALOR_DESCONTO_TOTAL := Value;
 end;
 
+procedure TCalcularImpostosModel.SetVALOR_ICMS_SUBSTITUTO(const Value: Real);
+begin
+  FVALOR_ICMS_SUBSTITUTO := Value;
+end;
+
 procedure TCalcularImpostosModel.SetVBCCFP(const Value: Real);
 begin
   FVBCCFP := Value;
@@ -824,6 +876,11 @@ end;
 procedure TCalcularImpostosModel.SetVBCFCPST(const Value: Real);
 begin
   FVBCFCPST := Value;
+end;
+
+procedure TCalcularImpostosModel.SetVBCSTRET(const Value: Real);
+begin
+  FVBCSTRET := Value;
 end;
 
 procedure TCalcularImpostosModel.SetVBCUFDEST(const Value: Real);
@@ -839,6 +896,16 @@ end;
 procedure TCalcularImpostosModel.SetVFCPST(const Value: Real);
 begin
   FVFCPST := Value;
+end;
+
+procedure TCalcularImpostosModel.SetVICMSSTRET(const Value: Real);
+begin
+  FVICMSSTRET := Value;
+end;
+
+procedure TCalcularImpostosModel.SetVICMSSUBISTITUTORET(const Value: Real);
+begin
+  FVICMSSUBISTITUTORET := Value;
 end;
 
 procedure TCalcularImpostosModel.SetVICMSUFDEST(const Value: Real);
