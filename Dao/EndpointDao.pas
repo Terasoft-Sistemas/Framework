@@ -7,6 +7,7 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   Interfaces.Conexao,
+  Terasoft.Framework.Texto,
   Terasoft.Utils,
   Spring.Collections,
   Terasoft.Framework.DB,
@@ -29,11 +30,13 @@ type
     class function getNewIface(pIConexao: IConexao): ITEndpointDao;
 
     function getByName(pName: TipoWideStringFramework): ITEndpointModel;
-    function getLista(pNames: IListaString; pOrdem: Integer = 2): TListaEndpointModel;
+    function getLista(pFiltro: IListaTexto=nil; pOrdem: Integer = 2): TListaEndpointModel;
 
   end;
 
 implementation
+  uses
+    FuncoesPesquisaDB;
 
 { TEndpointDao }
 const
@@ -78,9 +81,10 @@ var
 begin
   Result := TCollections.CreateList<ITEndpointModel>;
   lQry := vIConexao.gdb.criaDataset;
-  if(pNames=nil) then
-    pNames:=getStringList;
-  lIn := vIConstrutorDao.expandIn('ep.nome',pNames);
+  if(pFiltro=nil) then
+    pFiltro:=novaListaTexto;
+  pFiltro.text := uppercase(retiraAcentos(pFiltro.text));
+  lIn := FuncoesPesquisaDB.ExpandeWhere('ep.nome,ep.descricao',pFiltro.text,tewcprefixodata_And,false);
   lSQL := 'select ep.* from endpoint ep where ep.metodo = :metodo '+#13
           + lIn;
   if(pOrdem = 1) then

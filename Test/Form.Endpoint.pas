@@ -55,6 +55,7 @@ var
 
 implementation
   uses
+    Terasoft.Framework.Texto,
     Terasoft.Framework.SCI.ValidacaoPadraoCamposTabelas,
     Terasoft.Framework.FuncoesDiversas,
     FuncoesSelecaoLista;
@@ -94,7 +95,8 @@ begin
   cbEP.values.Clear;
   cbEP.Text := '';
   epControl := getEndpointController(vIConexao);
-  for m in epControl.getNovaLista(nil,2) do
+  //Retorna a lista com busca no termo 'PROD'
+  for m in epControl.getNovaLista('prod',2) do
   begin
     cbEp.items.add(m.objeto.DESCRICAO);
     cbEp.values.add(m.objeto.NOME);
