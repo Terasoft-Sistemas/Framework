@@ -73,7 +73,7 @@ type
     function carregaClasse(pId : String): TPrevisaoPedidoCompraModel;
     function SaldoFinanceiro(pNumeroPedido, pCodigoFornecedor: String): Double;
     function ObterLista: IFDDataset; overload;
-    procedure gerarFinanceiro(pPedidoCompraModel : TPedidoCompraModel);
+    procedure gerarFinanceiro(pPedidoCompraModel : ITPedidoCompraModel);
     procedure ValidaTotalFinanceiro(pValor: Double);
 
     property Acao :TAcao read FAcao write SetAcao;
@@ -117,7 +117,7 @@ begin
   Result          := self.Salvar;
 end;
 
-procedure TPrevisaoPedidoCompraModel.gerarFinanceiro(pPedidoCompraModel : TPedidoCompraModel);
+procedure TPrevisaoPedidoCompraModel.gerarFinanceiro(pPedidoCompraModel : ITPedidoCompraModel);
 var
   lVencimentos : TStringList;
   i            : Integer;
@@ -125,23 +125,23 @@ var
 begin
   lVencimentos := TStringList.create;
 
-  StringForStringList(pPedidoCompraModel.CONDICOES_PAG, '/', lVencimentos);
+  StringForStringList(pPedidoCompraModel.objeto.CONDICOES_PAG, '/', lVencimentos);
 
   lSoma := 0;
   i     := 0;
 
   for i := 0 to lVencimentos.Count - 1 do
   begin
-    self.FVENCIMENTO     := DateToStr(IncDay(StrToDate(pPedidoCompraModel.DATA_PED), StrToInt(lVencimentos.Strings[i])) );
-    self.FVALOR_PARCELA  := RoundTo(pPedidoCompraModel.TOTAL_PED / lVencimentos.Count, -2);
+    self.FVENCIMENTO     := DateToStr(IncDay(StrToDate(pPedidoCompraModel.objeto.DATA_PED), StrToInt(lVencimentos.Strings[i])) );
+    self.FVALOR_PARCELA  := RoundTo(pPedidoCompraModel.objeto.TOTAL_PED / lVencimentos.Count, -2);
     self.FPARCELA        := (i + 1).ToString;
-    self.FNUMERO_PED     := pPedidoCompraModel.NUMERO_PED;
-    self.FCODIGO_FOR     := pPedidoCompraModel.CODIGO_FOR;
+    self.FNUMERO_PED     := pPedidoCompraModel.objeto.NUMERO_PED;
+    self.FCODIGO_FOR     := pPedidoCompraModel.objeto.CODIGO_FOR;
 
     lSoma := lSoma + self.FVALOR_PARCELA;
 
     if self.FPARCELA = lVencimentos.Count then
-      self.FVALOR_PARCELA := self.FVALOR_PARCELA + (pPedidoCompraModel.TOTAL_PED - lSoma);
+      self.FVALOR_PARCELA := self.FVALOR_PARCELA + (pPedidoCompraModel.objeto.TOTAL_PED - lSoma);
 
     Self.incluir;
   end;
@@ -203,19 +203,19 @@ end;
 function TPrevisaoPedidoCompraModel.SaldoFinanceiro(pNumeroPedido, pCodigoFornecedor: String): Double;
 var
   lPrevisaoPedidoCompraDao: TPrevisaoPedidoCompraDao;
-  lPedidoCompraModel: TPedidoCompraModel;
+  lPedidoCompraModel: ITPedidoCompraModel;
   lTotalizador: IFDDataset;
   lTotalFinanceiro: Double;
   lTotalPedido: Double;
 begin
   lPrevisaoPedidoCompraDao := TPrevisaoPedidoCompraDao.Create(vIConexao);
-  lPedidoCompraModel := TPedidoCompraModel.Create(vIConexao);
+  lPedidoCompraModel := TPedidoCompraModel.getNewIface(vIConexao);
   try
 
-    lPedidoCompraModel.NumeroView     := pNumeroPedido;
-    lPedidoCompraModel.FornecedorView := pCodigoFornecedor;
+    lPedidoCompraModel.objeto.NumeroView     := pNumeroPedido;
+    lPedidoCompraModel.objeto.FornecedorView := pCodigoFornecedor;
 
-    lTotalizador := lPedidoCompraModel.ObterTotalizador;
+    lTotalizador := lPedidoCompraModel.objeto.ObterTotalizador;
 
     lTotalPedido     := RoundTo(StrToFloat(FloatToStr(lTotalizador.objeto.FieldByName('valor_total_pedido').AsFloat)), -2);
     lTotalFinanceiro := RoundTo(lPrevisaoPedidoCompraDao.TotalFinanceiro(pNumeroPedido), -2);
@@ -224,23 +224,23 @@ begin
 
   finally
     lPrevisaoPedidoCompraDao.Free;
-    lPedidoCompraModel.Free;
+    lPedidoCompraModel:=nil;
   end;
 end;
 
 procedure TPrevisaoPedidoCompraModel.ValidaTotalFinanceiro(pValor: Double);
 var
   lPrevisaoPedidoCompraDao: TPrevisaoPedidoCompraDao;
-  lPedidoCompraModel: TPedidoCompraModel;
+  lPedidoCompraModel: ITPedidoCompraModel;
   lTotalizador  : IFDDataset;
   lTotalFinanceiro: Double;
 begin
   lPrevisaoPedidoCompraDao := TPrevisaoPedidoCompraDao.Create(vIConexao);
-  lPedidoCompraModel := TPedidoCompraModel.Create(vIConexao);
+  lPedidoCompraModel := TPedidoCompraModel.getNewIface(vIConexao);
   try
 
-     lPedidoCompraModel.NumeroView   := FNUMERO_PED;
-     lTotalizador                    := lPedidoCompraModel.obterTotalizador;
+     lPedidoCompraModel.objeto.NumeroView   := FNUMERO_PED;
+     lTotalizador                    := lPedidoCompraModel.objeto.obterTotalizador;
      lTotalFinanceiro                := lPrevisaoPedidoCompraDao.TotalFinanceiro(FNUMERO_PED);
 
      if (Round(lTotalFinanceiro + pValor )) > (Round(lTotalizador.objeto.FieldByName('valor_total_pedido').AsFloat)) then
@@ -248,7 +248,7 @@ begin
 
   finally
     lPrevisaoPedidoCompraDao.Free;
-    lPedidoCompraModel.Free;
+    lPedidoCompraModel:=nil;
   end;
 end;
 

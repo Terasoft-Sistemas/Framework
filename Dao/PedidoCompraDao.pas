@@ -12,12 +12,15 @@ uses
   Interfaces.Conexao,
   Terasoft.Utils,
   Terasoft.ConstrutorDao,
-  ClipBRD;
+  Terasoft.Framework.ObjectIface;
 
 type
-  TPedidoCompraDao = class
+  TPedidoCompraDao = class;
+  ITPedidoCompraDao=IObject<TPedidoCompraDao>;
 
+  TPedidoCompraDao = class
   private
+    [weak] mySelf: ITPedidoCompraDao;
     vIConexao 	: IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -45,8 +48,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITPedidoCompraDao;
 
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -58,14 +63,14 @@ type
     property FornecedorVew: String read FFornecedorVew write SetFornecedorVew;
     property NumeroView: String read FNumeroView write SetNumeroView;
 
-    function incluir(pPedidoCompraModel : TPedidoCompraModel): String;
-    function alterar(pPedidoCompraModel : TPedidoCompraModel): String;
-    function excluir(pPedidoCompraModel : TPedidoCompraModel): String;
+    function incluir(pPedidoCompraModel : ITPedidoCompraModel): String;
+    function alterar(pPedidoCompraModel : ITPedidoCompraModel): String;
+    function excluir(pPedidoCompraModel : ITPedidoCompraModel): String;
 
-    function carregaClasse(pID : String): TPedidoCompraModel;
+    function carregaClasse(pID : String): ITPedidoCompraModel;
     function obterLista: IFDDataset;
     function ObterTotalizador : IFDDataset;
-    procedure setParams(var pQry: TFDQuery; pPedidoCompraModel: TPedidoCompraModel);
+    procedure setParams(var pQry: TFDQuery; pPedidoCompraModel: ITPedidoCompraModel);
 
 end;
 
@@ -76,13 +81,13 @@ uses
 
 { TPedidoCompra }
 
-function TPedidoCompraDao.carregaClasse(pID : String): TPedidoCompraModel;
+function TPedidoCompraDao.carregaClasse(pID : String): ITPedidoCompraModel;
 var
   lQry: TFDQuery;
-  lModel: TPedidoCompraModel;
+  lModel: ITPedidoCompraModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TPedidoCompraModel.Create(vIConexao);
+  lModel   := TPedidoCompraModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -91,59 +96,59 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.NUMERO_PED                      := lQry.FieldByName('NUMERO_PED').AsString;
-    lModel.CODIGO_FOR                      := lQry.FieldByName('CODIGO_FOR').AsString;
-    lModel.DATA_PED                        := lQry.FieldByName('DATA_PED').AsString;
-    lModel.DATAPREV_PED                    := lQry.FieldByName('DATAPREV_PED').AsString;
-    lModel.PARCELAS_PED                    := lQry.FieldByName('PARCELAS_PED').AsString;
-    lModel.PRIMEIROVENC_PED                := lQry.FieldByName('PRIMEIROVENC_PED').AsString;
-    lModel.FRETE_PED                       := lQry.FieldByName('FRETE_PED').AsString;
-    lModel.ICMS_PED                        := lQry.FieldByName('ICMS_PED').AsString;
-    lModel.OUTROS_PED                      := lQry.FieldByName('OUTROS_PED').AsString;
-    lModel.DESC_PED                        := lQry.FieldByName('DESC_PED').AsString;
-    lModel.TOTAL_PED                       := lQry.FieldByName('TOTAL_PED').AsString;
-    lModel.OBSERVACAO_PED                  := lQry.FieldByName('OBSERVACAO_PED').AsString;
-    lModel.USUARIO_PED                     := lQry.FieldByName('USUARIO_PED').AsString;
-    lModel.STATUS_PED                      := lQry.FieldByName('STATUS_PED').AsString;
-    lModel.TOTALPRODUTOS_PED               := lQry.FieldByName('TOTALPRODUTOS_PED').AsString;
-    lModel.TIPO_PRO                        := lQry.FieldByName('TIPO_PRO').AsString;
-    lModel.CTR_IMPRESSAO_PED               := lQry.FieldByName('CTR_IMPRESSAO_PED').AsString;
-    lModel.LOJA                            := lQry.FieldByName('LOJA').AsString;
-    lModel.DOLAR                           := lQry.FieldByName('DOLAR').AsString;
-    lModel.CONDICOES_PAG                   := lQry.FieldByName('CONDICOES_PAG').AsString;
-    lModel.ID                              := lQry.FieldByName('ID').AsString;
-    lModel.TRANSPORTADORA_ID               := lQry.FieldByName('TRANSPORTADORA_ID').AsString;
-    lModel.STATUS_ID                       := lQry.FieldByName('STATUS_ID').AsString;
-    lModel.AUTORIZADO                      := lQry.FieldByName('AUTORIZADO').AsString;
-    lModel.ENVIADO                         := lQry.FieldByName('ENVIADO').AsString;
-    lModel.IPI_PED                         := lQry.FieldByName('IPI_PED').AsString;
-    lModel.ST_PED                          := lQry.FieldByName('ST_PED').AsString;
-    lModel.TIPO_MOEDA_ESTRANGEIRA          := lQry.FieldByName('TIPO_MOEDA_ESTRANGEIRA').AsString;
-    lModel.PEDIDO_FORNECEDOR               := lQry.FieldByName('PEDIDO_FORNECEDOR').AsString;
-    lModel.DATA_ACEITE                     := lQry.FieldByName('DATA_ACEITE').AsString;
-    lModel.AUTORIZACAO_ESTOQUE_STATUS      := lQry.FieldByName('AUTORIZACAO_ESTOQUE_STATUS').AsString;
-    lModel.AUTORIZACAO_ESTOQUE_USUARIO     := lQry.FieldByName('AUTORIZACAO_ESTOQUE_USUARIO').AsString;
-    lModel.AUTORIZACAO_ESTOQUE_DATAHORA    := lQry.FieldByName('AUTORIZACAO_ESTOQUE_DATAHORA').AsString;
-    lModel.AUTORIZACAO_ESTOQUE_OBS         := lQry.FieldByName('AUTORIZACAO_ESTOQUE_OBS').AsString;
-    lModel.AUTORIZACAO_FINANCEIRO_STATUS   := lQry.FieldByName('AUTORIZACAO_FINANCEIRO_STATUS').AsString;
-    lModel.AUTORIZACAO_FINANCEIRO_USUARIO  := lQry.FieldByName('AUTORIZACAO_FINANCEIRO_USUARIO').AsString;
-    lModel.AUTORIZACAO_FINANCEIRO_DATAHORA := lQry.FieldByName('AUTORIZACAO_FINANCEIRO_DATAHORA').AsString;
-    lModel.AUTORIZACAO_FINANCEIRO_OBS      := lQry.FieldByName('AUTORIZACAO_FINANCEIRO_OBS').AsString;
-    lModel.TIPO_FRETE                      := lQry.FieldByName('TIPO_FRETE').AsString;
-    lModel.BASE_ICMS                       := lQry.FieldByName('BASE_ICMS').AsString;
-    lModel.BASE_ST                         := lQry.FieldByName('BASE_ST').AsString;
-    lModel.VFCP                            := lQry.FieldByName('VFCP').AsString;
-    lModel.VFCPST                          := lQry.FieldByName('VFCPST').AsString;
-    lModel.HORAPREV_PED                    := lQry.FieldByName('HORAPREV_PED').AsString;
-    lModel.CONTATOPREV_PED                 := lQry.FieldByName('CONTATOPREV_PED').AsString;
-    lModel.TELEFONEPREV_PED                := lQry.FieldByName('TELEFONEPREV_PED').AsString;
-    lModel.CALCULAR_VALORES                := lQry.FieldByName('CALCULAR_VALORES').AsString;
-    lModel.USO_CONSUMO                     := lQry.FieldByName('USO_CONSUMO').AsString;
-    lModel.FRETE_NO_IPI                    := lQry.FieldByName('FRETE_NO_IPI').AsString;
-    lModel.PORTADOR_ID                     := lQry.FieldByName('PORTADOR_ID').AsString;
-    lModel.SYSTIME                         := lQry.FieldByName('SYSTIME').AsString;
-    lModel.ENVIO_WHATSAPP                  := lQry.FieldByName('ENVIO_WHATSAPP').AsString;
-    lModel.DATA_COTACAO                    := lQry.FieldByName('DATA_COTACAO').AsString;
+    lModel.objeto.NUMERO_PED                      := lQry.FieldByName('NUMERO_PED').AsString;
+    lModel.objeto.CODIGO_FOR                      := lQry.FieldByName('CODIGO_FOR').AsString;
+    lModel.objeto.DATA_PED                        := lQry.FieldByName('DATA_PED').AsString;
+    lModel.objeto.DATAPREV_PED                    := lQry.FieldByName('DATAPREV_PED').AsString;
+    lModel.objeto.PARCELAS_PED                    := lQry.FieldByName('PARCELAS_PED').AsString;
+    lModel.objeto.PRIMEIROVENC_PED                := lQry.FieldByName('PRIMEIROVENC_PED').AsString;
+    lModel.objeto.FRETE_PED                       := lQry.FieldByName('FRETE_PED').AsString;
+    lModel.objeto.ICMS_PED                        := lQry.FieldByName('ICMS_PED').AsString;
+    lModel.objeto.OUTROS_PED                      := lQry.FieldByName('OUTROS_PED').AsString;
+    lModel.objeto.DESC_PED                        := lQry.FieldByName('DESC_PED').AsString;
+    lModel.objeto.TOTAL_PED                       := lQry.FieldByName('TOTAL_PED').AsString;
+    lModel.objeto.OBSERVACAO_PED                  := lQry.FieldByName('OBSERVACAO_PED').AsString;
+    lModel.objeto.USUARIO_PED                     := lQry.FieldByName('USUARIO_PED').AsString;
+    lModel.objeto.STATUS_PED                      := lQry.FieldByName('STATUS_PED').AsString;
+    lModel.objeto.TOTALPRODUTOS_PED               := lQry.FieldByName('TOTALPRODUTOS_PED').AsString;
+    lModel.objeto.TIPO_PRO                        := lQry.FieldByName('TIPO_PRO').AsString;
+    lModel.objeto.CTR_IMPRESSAO_PED               := lQry.FieldByName('CTR_IMPRESSAO_PED').AsString;
+    lModel.objeto.LOJA                            := lQry.FieldByName('LOJA').AsString;
+    lModel.objeto.DOLAR                           := lQry.FieldByName('DOLAR').AsString;
+    lModel.objeto.CONDICOES_PAG                   := lQry.FieldByName('CONDICOES_PAG').AsString;
+    lModel.objeto.ID                              := lQry.FieldByName('ID').AsString;
+    lModel.objeto.TRANSPORTADORA_ID               := lQry.FieldByName('TRANSPORTADORA_ID').AsString;
+    lModel.objeto.STATUS_ID                       := lQry.FieldByName('STATUS_ID').AsString;
+    lModel.objeto.AUTORIZADO                      := lQry.FieldByName('AUTORIZADO').AsString;
+    lModel.objeto.ENVIADO                         := lQry.FieldByName('ENVIADO').AsString;
+    lModel.objeto.IPI_PED                         := lQry.FieldByName('IPI_PED').AsString;
+    lModel.objeto.ST_PED                          := lQry.FieldByName('ST_PED').AsString;
+    lModel.objeto.TIPO_MOEDA_ESTRANGEIRA          := lQry.FieldByName('TIPO_MOEDA_ESTRANGEIRA').AsString;
+    lModel.objeto.PEDIDO_FORNECEDOR               := lQry.FieldByName('PEDIDO_FORNECEDOR').AsString;
+    lModel.objeto.DATA_ACEITE                     := lQry.FieldByName('DATA_ACEITE').AsString;
+    lModel.objeto.AUTORIZACAO_ESTOQUE_STATUS      := lQry.FieldByName('AUTORIZACAO_ESTOQUE_STATUS').AsString;
+    lModel.objeto.AUTORIZACAO_ESTOQUE_USUARIO     := lQry.FieldByName('AUTORIZACAO_ESTOQUE_USUARIO').AsString;
+    lModel.objeto.AUTORIZACAO_ESTOQUE_DATAHORA    := lQry.FieldByName('AUTORIZACAO_ESTOQUE_DATAHORA').AsString;
+    lModel.objeto.AUTORIZACAO_ESTOQUE_OBS         := lQry.FieldByName('AUTORIZACAO_ESTOQUE_OBS').AsString;
+    lModel.objeto.AUTORIZACAO_FINANCEIRO_STATUS   := lQry.FieldByName('AUTORIZACAO_FINANCEIRO_STATUS').AsString;
+    lModel.objeto.AUTORIZACAO_FINANCEIRO_USUARIO  := lQry.FieldByName('AUTORIZACAO_FINANCEIRO_USUARIO').AsString;
+    lModel.objeto.AUTORIZACAO_FINANCEIRO_DATAHORA := lQry.FieldByName('AUTORIZACAO_FINANCEIRO_DATAHORA').AsString;
+    lModel.objeto.AUTORIZACAO_FINANCEIRO_OBS      := lQry.FieldByName('AUTORIZACAO_FINANCEIRO_OBS').AsString;
+    lModel.objeto.TIPO_FRETE                      := lQry.FieldByName('TIPO_FRETE').AsString;
+    lModel.objeto.BASE_ICMS                       := lQry.FieldByName('BASE_ICMS').AsString;
+    lModel.objeto.BASE_ST                         := lQry.FieldByName('BASE_ST').AsString;
+    lModel.objeto.VFCP                            := lQry.FieldByName('VFCP').AsString;
+    lModel.objeto.VFCPST                          := lQry.FieldByName('VFCPST').AsString;
+    lModel.objeto.HORAPREV_PED                    := lQry.FieldByName('HORAPREV_PED').AsString;
+    lModel.objeto.CONTATOPREV_PED                 := lQry.FieldByName('CONTATOPREV_PED').AsString;
+    lModel.objeto.TELEFONEPREV_PED                := lQry.FieldByName('TELEFONEPREV_PED').AsString;
+    lModel.objeto.CALCULAR_VALORES                := lQry.FieldByName('CALCULAR_VALORES').AsString;
+    lModel.objeto.USO_CONSUMO                     := lQry.FieldByName('USO_CONSUMO').AsString;
+    lModel.objeto.FRETE_NO_IPI                    := lQry.FieldByName('FRETE_NO_IPI').AsString;
+    lModel.objeto.PORTADOR_ID                     := lQry.FieldByName('PORTADOR_ID').AsString;
+    lModel.objeto.SYSTIME                         := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.ENVIO_WHATSAPP                  := lQry.FieldByName('ENVIO_WHATSAPP').AsString;
+    lModel.objeto.DATA_COTACAO                    := lQry.FieldByName('DATA_COTACAO').AsString;
 
     Result := lModel;
   finally
@@ -151,7 +156,7 @@ begin
   end;
 end;
 
-constructor TPedidoCompraDao.Create(pIConexao : IConexao);
+constructor TPedidoCompraDao._Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -162,7 +167,7 @@ begin
   inherited;
 end;
 
-function TPedidoCompraDao.incluir(pPedidoCompraModel: TPedidoCompraModel): String;
+function TPedidoCompraDao.incluir(pPedidoCompraModel: ITPedidoCompraModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -173,7 +178,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pPedidoCompraModel.NUMERO_PED := vIConexao.Generetor('GEN_PEDIDOCOMPRA');
+    pPedidoCompraModel.objeto.NUMERO_PED := vIConexao.Generetor('GEN_PEDIDOCOMPRA');
     setParams(lQry, pPedidoCompraModel);
     lQry.Open;
 
@@ -185,7 +190,7 @@ begin
   end;
 end;
 
-function TPedidoCompraDao.alterar(pPedidoCompraModel: TPedidoCompraModel): String;
+function TPedidoCompraDao.alterar(pPedidoCompraModel: ITPedidoCompraModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -199,7 +204,7 @@ begin
     setParams(lQry, pPedidoCompraModel);
     lQry.ExecSQL;
 
-    Result := pPedidoCompraModel.ID;
+    Result := pPedidoCompraModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -207,20 +212,26 @@ begin
   end;
 end;
 
-function TPedidoCompraDao.excluir(pPedidoCompraModel: TPedidoCompraModel): String;
+function TPedidoCompraDao.excluir(pPedidoCompraModel: ITPedidoCompraModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from PEDIDOCOMPRA where NUMERO_PED = ' + QuotedStr(pPedidoCompraModel.NUMERO_PED) + ' and CODIGO_FOR = ' + QuotedStr(pPedidoCompraModel.CODIGO_FOR));
+   lQry.ExecSQL('delete from PEDIDOCOMPRA where NUMERO_PED = ' + QuotedStr(pPedidoCompraModel.objeto.NUMERO_PED) + ' and CODIGO_FOR = ' + QuotedStr(pPedidoCompraModel.objeto.CODIGO_FOR));
    lQry.ExecSQL;
-   Result := pPedidoCompraModel.NUMERO_PED;
+   Result := pPedidoCompraModel.objeto.NUMERO_PED;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TPedidoCompraDao.getNewIface(pIConexao: IConexao): ITPedidoCompraDao;
+begin
+  Result := TImplObjetoOwner<TPedidoCompraDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TPedidoCompraDao.where: String;
@@ -442,28 +453,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TPedidoCompraDao.setParams(var pQry: TFDQuery; pPedidoCompraModel: TPedidoCompraModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TPedidoCompraDao.setParams(var pQry: TFDQuery; pPedidoCompraModel: ITPedidoCompraModel);
 begin
-  lTabela := vConstrutor.getColumns('PEDIDOCOMPRA');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TPedidoCompraModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPedidoCompraModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPedidoCompraModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('PEDIDOCOMPRA',pQry,pPedidoCompraModel.objeto);
 end;
 
 procedure TPedidoCompraDao.SetStartRecordView(const Value: String);

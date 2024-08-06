@@ -2385,53 +2385,52 @@ end;
 
 procedure TForm1.Button76Click(Sender: TObject);
 var
-  lPedidoCompra : TPedidoCompraModel;
+  lPedidoCompra : ITPedidoCompraModel;
 begin
-  lPedidoCompra := TPedidoCompraModel.Create(vIConexao);
+  lPedidoCompra := TPedidoCompraModel.getNewIface(vIConexao);
   try
     try
 
-      lPedidoCompra.DATA_PED := DateToStr(vIConexao.DataServer);
-      lPedidoCompra.DATAPREV_PED := DateToStr(vIConexao.DataServer);
-      lPedidoCompra.CODIGO_FOR := '000059';
-      lPedidoCompra.PARCELAS_PED := 1;
-      lPedidoCompra.PRIMEIROVENC_PED := DateToStr(vIConexao.DataServer);
-      lPedidoCompra.TOTAL_PED := '1000';
-      lPedidoCompra.USUARIO_PED := '000001';
-      lPedidoCompra.STATUS_PED := 'A';
-      lPedidoCompra.TOTALPRODUTOS_PED := '1000';
-      lPedidoCompra.TIPO_PRO := 'N';
+      lPedidoCompra.objeto.DATA_PED := DateToStr(vIConexao.DataServer);
+      lPedidoCompra.objeto.DATAPREV_PED := DateToStr(vIConexao.DataServer);
+      lPedidoCompra.objeto.CODIGO_FOR := '000059';
+      lPedidoCompra.objeto.PARCELAS_PED := 1;
+      lPedidoCompra.objeto.PRIMEIROVENC_PED := DateToStr(vIConexao.DataServer);
+      lPedidoCompra.objeto.TOTAL_PED := '1000';
+      lPedidoCompra.objeto.USUARIO_PED := '000001';
+      lPedidoCompra.objeto.STATUS_PED := 'A';
+      lPedidoCompra.objeto.TOTALPRODUTOS_PED := '1000';
+      lPedidoCompra.objeto.TIPO_PRO := 'N';
 
-      lPedidoCompra.Incluir;
+      lPedidoCompra.objeto.Incluir;
       ShowMessage('Inserido com Sucesso');
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lPedidoCompra.Free;
+    lPedidoCompra:=nil;
   end;
 end;
 
 procedure TForm1.Button77Click(Sender: TObject);
 var
-  lPedidoCompraModel : TPedidoCompraModel;
+  lPedidoCompraModel : ITPedidoCompraModel;
   lPedidoItensModel  : TPedidoCompraItensModel;
-  TablePedidoCompra,
   TablePedItens      : IFDDataset;
   lNumeroView,
   lFornecedorView    : String;
 begin
-  lPedidoCompraModel := TPedidoCompraModel.Create(vIConexao);
+  lPedidoCompraModel := TPedidoCompraModel.getNewIface(vIConexao);
   lPedidoItensModel  := TPedidoCompraItensModel.Create(vIConexao);
   try
     try
       lNumeroView     := '000008';
       lFornecedorView := '000000';
 
-      lPedidoCompraModel.NumeroView    := lNumeroView;
-      TablePedidoCompra                := lPedidoCompraModel.obterLista;
-      dsPedidoCompra.DataSet           := TablePedidoCompra.objeto;
+      lPedidoCompraModel.objeto.NumeroView    := lNumeroView;
+      dsTmp                := lPedidoCompraModel.objeto.obterLista;
+      dsPedidoCompra.DataSet           := dsTmp.objeto;
 
       lPedidoItensModel.NumeroView     := lNumeroView;
       lPedidoItensModel.FornecedorView := lFornecedorView;
@@ -2443,18 +2442,18 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lPedidoCompraModel.Free;
+    lPedidoCompraModel:=nil;
     lPedidoItensModel.Free;
   end;
 end;
 
 procedure TForm1.Button78Click(Sender: TObject);
 var
-  lPedidoCompraModel : TPedidoCompraModel;
+  lPedidoCompraModel : ITPedidoCompraModel;
   lPedidoItensModel  : TPedidoCompraItensModel;
   lPedidoParams      : TPedidoItensParams;
 begin
-  lPedidoCompraModel := TPedidoCompraModel.Create(vIConexao);
+  lPedidoCompraModel := TPedidoCompraModel.getNewIface(vIConexao);
   lPedidoItensModel  := TPedidoCompraItensModel.Create(vIConexao);
   try
     try
@@ -2464,14 +2463,14 @@ begin
       lPedidoParams.QUANTIDADE_PED := '5';
       lPedidoParams.VALORUNI_PED   := '100';
 
-      lPedidoCompraModel.AdicionarItens(lPedidoParams);
+      lPedidoCompraModel.objeto.AdicionarItens(lPedidoParams);
       ShowMessage('Item adicionado ao Pedido: ' +lPedidoParams.NUMERO_PED)
     except
       on E:Exception do
       ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lPedidoCompraModel.Free;
+    lPedidoCompraModel:=nil;
     lPedidoItensModel.Free;
   end;
 end;
@@ -3013,17 +3012,16 @@ end;
 
 procedure TForm1.Button95Click(Sender: TObject);
 var
-  lPedidoCompra : TPedidoCompraModel;
-  lTotalizador  : IFDDataset;
+  lPedidoCompra : ITPedidoCompraModel;
 begin
-  lPedidoCompra := TPedidoCompraModel.Create(vIConexao);
+  lPedidoCompra := TPedidoCompraModel.getNewIface(vIConexao);
   try
-  lPedidoCompra.NumeroView     := '000008';
-  lPedidoCompra.FornecedorView := '000000';
-  lTotalizador             := lPedidoCompra.ObterTotalizador;
-  dsPedidoCompra.DataSet   := lTotalizador.objeto;
+  lPedidoCompra.objeto.NumeroView     := '000008';
+  lPedidoCompra.objeto.FornecedorView := '000000';
+  dsTmp             := lPedidoCompra.objeto.ObterTotalizador;
+  dsPedidoCompra.DataSet   := dsTmp.objeto;
   finally
-    lPedidoCompra.Free;
+    lPedidoCompra:=nil;
   end;
 end;
 
@@ -3280,39 +3278,38 @@ end;
 
 procedure TForm1.Button101Click(Sender: TObject);
 var
-  lPedidoCompra : TPedidoCompraModel;
-  lTable  : IFDDataset;
+  lPedidoCompra : ITPedidoCompraModel;
 begin
-  lPedidoCompra := TPedidoCompraModel.Create(vIConexao);
+  lPedidoCompra := TPedidoCompraModel.getNewIface(vIConexao);
   try
-    lPedidoCompra.NumeroView     := '000008';
-    lPedidoCompra.FornecedorView := '000000';
-    lTable                   := lPedidoCompra.obterLista;
-    dsPedidoCompra.DataSet   := lTable.objeto;
+    lPedidoCompra.objeto.NumeroView     := '000008';
+    lPedidoCompra.objeto.FornecedorView := '000000';
+    dsTmp                   := lPedidoCompra.objeto.obterLista;
+    dsPedidoCompra.DataSet   := dsTmp.objeto;
   finally
-    lPedidoCompra.Free;
+    lPedidoCompra:=nil;
   end;
 end;
 
 procedure TForm1.Button102Click(Sender: TObject);
 var
   lPrevisaoPedidoCompraModel : TPrevisaoPedidoCompraModel;
-  lPedidoCompra : TPedidoCompraModel;
+  lPedidoCompra : ITPedidoCompraModel;
   pPed,
   pFornc : String;
 begin
-  lPedidoCompra := TPedidoCompraModel.Create(vIConexao);
+  lPedidoCompra := TPedidoCompraModel.getNewIface(vIConexao);
   lPrevisaoPedidoCompraModel := TPrevisaoPedidoCompraModel.Create(vIConexao);
   try
     pPed   := '000013';
     pFornc := '000137';
 
-    lPedidoCompra := lPedidoCompra.carregaClasse(pPed, pFornc);
+    lPedidoCompra := lPedidoCompra.objeto.carregaClasse(pPed, pFornc);
 
     lPrevisaoPedidoCompraModel.gerarFinanceiro(lPedidoCompra);
 
   finally
-    lPedidoCompra.Free;
+    lPedidoCompra:=nil;
   end;
 end;
 
