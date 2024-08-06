@@ -108,7 +108,7 @@ uses
   Terasoft.Utils,
   System.Variants,
   PedidoVendaModel,
-  Terasoft.FuncoesTexto, System.StrUtils;
+  Terasoft.FuncoesTexto, System.StrUtils, System.Math;
 
 function TNotaFiscal.configuraComponenteNFe: Boolean;
 begin
@@ -186,7 +186,7 @@ var
  lQry         : TFDQuery;
  lPercentual,
  lTotalDup,
- lSomaDup     : Double;
+ lSomaDup     : Extended;
 
 begin
   try
@@ -269,7 +269,7 @@ begin
         InfoPgto := NotaF.NFe.pag.New;
         InfoPgto.indPag := ipPrazo;
         InfoPgto.tPag   := vConfiguracoesNotaFiscal.tPag(lQry.FieldByName('tPag').AsString);
-        InfoPgto.vPag   := lPercentual * lQry.FieldByName('vDup').AsFloat;
+        InfoPgto.vPag   := RoundTo(lPercentual * lQry.FieldByName('vDup').AsFloat, -2);
 
         lSomaDup        := lSomaDup + InfoPgto.vPag;
 

@@ -1090,7 +1090,7 @@ begin
 
       lNFItensModel.objeto.Acao := tacIncluir;
       lNFItensModel.objeto.NUMERO_NF             := lNumeroNFe;
-      lNFItensModel.objeto.SERIE_NF              := pSerie;
+      lNFItensModel.objeto.SERIE_NF              := lNFModel.objeto.SERIE_NF;
       lNFItensModel.objeto.LOJA                  := self.LOJA;
       lNFItensModel.objeto.ITEM_NF               := Format('%3.3d', [lItem]);
       lNFItensModel.objeto.MODBCST_N18           := '4';
