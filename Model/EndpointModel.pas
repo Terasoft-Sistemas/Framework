@@ -9,6 +9,7 @@ uses
   Spring.Collections,
   Terasoft.Framework.ObjectIface,
   FiltroModel,
+  DB,
   Terasoft.Framework.DB,
   FiltroController,
   Interfaces.Conexao;
@@ -100,7 +101,8 @@ type
 
   public
     function getQuery: TipoWideStringFramework;
-    function executaQuery: IDatasetSimples;
+    function executaQuery(const pFormatar: boolean = true): IDatasetSimples;
+    procedure formatarDataset(pDataset: TDataset);
 
   end;
 
@@ -216,7 +218,7 @@ begin
   Result := lSql +#13+ lWhere;
 end;
 
-function TEndpointModel.executaQuery: IDatasetSimples;
+function TEndpointModel.executaQuery;
   var
     lSql: String;
     lDS: IDataset;
@@ -225,6 +227,36 @@ begin
   lSQL := getQuery;
   lDS.query(lSql,'',[]);
   Supports(lDS,IDatasetSimples,Result);
+  if assigned(Result) and pFormatar then
+    formatarDataset(Result.dataset);
+end;
+
+procedure TEndpointModel.formatarDataset(pDataset: TDataset);
+  var
+    l: IListaTextoEX;
+    i: Integer;
+    f: TField;
+    sNome,sFormato: String;
+begin
+  if(pDataset=nil) then
+    exit;
+  l := criaMultiConfig.adicionaInterface(criaConfigIniString(fPROPRIEDADES)).ReadSectionValuesLista('formatos');
+  for i := 0 to l.strings.Count-1 do
+  begin
+    sNome := l.strings.Names[i];
+    sFormato := l.strings.ValueFromIndex[i];
+    f:= pDataset.findField(sNome);
+    if(f=nil) then continue;
+    if(f is TNumericField) then
+      TNumericField(f).DisplayFormat := sFormato
+    else if f is TDateTimeField then
+      TDateTimeField(f).DisplayFormat := sFormato
+    else if f is TSQLTimeStampField then
+      TSQLTimeStampField(f).DisplayFormat := sformato
+    else if f is TAggregateField then
+      TAggregateField(f).DisplayFormat := sFormato;
+  end;
+
 end;
 
 procedure TEndpointModel.carregaFiltros;
