@@ -210,8 +210,18 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
+    lSQL :=
+    ' select                               '+#13+
+    '   sum(f.VALOR_PARCELA) VALOR_ENTRADA '+#13+
+    '                                      '+#13+
+    ' from                                 '+#13+
+    '   financeiro_pedido f                '+#13+
+    '                                      '+#13+
+    ' inner join portador p on p.codigo_port = f.portador_id '+#13+
+    '                                                        '+#13+
+    ' where                                                  '+#13+
+    '   f.web_pedido_id = '+pWebPedidoModel.objeto.ID+' and p.tpag_nfe in (''01'', ''03'', ''04'', ''99'', ''17'',''20'') '+#13;
 
-    lSQL := ' select sum(f.valor_total) VALOR_ENTRADA from financeiro_pedido f where f.web_pedido_id = '+pWebPedidoModel.objeto.ID+' and f.portador_id = ''777777'' ';
     lQry.Open(lSQL);
 
     lValorEntrada := lQry.FieldByName('VALOR_ENTRADA').AsFloat;
@@ -221,7 +231,7 @@ begin
     ' from financeiro_pedido f'+#13+
     ' inner join portador p on p.codigo_port = f.portador_id'+#13+
     ' where f.web_pedido_id = '+pWebPedidoModel.objeto.ID+''+#13+
-    ' and p.tpag_nfe not in (''01'', ''03'', ''04'', ''99'') ';//group by 1 ';
+    ' and p.tpag_nfe not in (''01'', ''03'', ''04'', ''17'',''20'', ''99'') ';
 
     lQry.Open(lSQL);
 
