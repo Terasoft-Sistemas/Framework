@@ -215,6 +215,7 @@ type
     dsJuros: TDataSource;
     SpeedButton2: TSpeedButton;
     SpeedButton3: TSpeedButton;
+    imprimirContratoCarteira: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -367,6 +368,7 @@ type
     procedure SpeedButton2Click(Sender: TObject);
     procedure SpeedButton3Click(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure imprimirContratoCarteiraClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -3935,6 +3937,20 @@ begin
   {$if defined(__RELEASE__) or defined(__HIDE_MEMORY_LEAK__)}
     TerminateProcess(GetCurrentProcess, exitCode );
   {$endif}
+end;
+
+procedure TForm1.imprimirContratoCarteiraClick(Sender: TObject);
+var
+  lImpressaoContratos : TImpressaoContratos;
+begin
+  lImpressaoContratos := TImpressaoContratos.Create(lImpressaoContratos);
+  try
+      lImpressaoContratos.IDPEDIDO    := InputBox('Imprimir Contrato Carteira', 'Digite o pedido de venda:', '040997');
+      lImpressaoContratos.CONEXAO     := vIConexao;
+      lImpressaoContratos.imprimirCarteira;
+  finally
+    lImpressaoContratos.Free;
+  end;
 end;
 
 procedure TForm1.imprimirGarantidaEstendidaClick(Sender: TObject);

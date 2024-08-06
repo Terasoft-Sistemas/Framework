@@ -231,6 +231,8 @@ type
 
     function valorAberto(pCliente : String) : Double;
 
+    function qtdePagamentoPrazo(pPedidoVenda: String): Integer;
+
     property ContasReceberItenssLista: IList<TContasReceberItensModel> read FContasReceberItenssLista write SetContasReceberItenssLista;
     property RecebimentoContasReceberLista: IList<TRecebimentoContasReceber> read FRecebimentoContasReceberLista write SetRecebimentoContasReceberLista;
 
@@ -963,6 +965,18 @@ begin
   lContasReceberItensDao := TContasReceberItensDao.Create(vIConexao);
   try
     Result := lContasReceberItensDao.obterReceberPixCobranca(pPedido);
+  finally
+    lContasReceberItensDao.Free;
+  end;
+end;
+
+function TContasReceberItensModel.qtdePagamentoPrazo(pPedidoVenda: String): Integer;
+var
+  lContasReceberItensDao : TContasReceberItensDao;
+begin
+  lContasReceberItensDao := TContasReceberItensDao.Create(vIConexao);
+  try
+    Result := lContasReceberItensDao.qtdePagamentoPrazo(pPedidoVenda);
   finally
     lContasReceberItensDao.Free;
   end;
