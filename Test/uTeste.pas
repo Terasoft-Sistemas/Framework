@@ -2852,13 +2852,13 @@ end;
 
 procedure TForm1.Button89Click(Sender: TObject);
 var
-  lTransportadoraModel : TTransportadoraModel;
+  lTransportadoraModel : ITTransportadoraModel;
   lMemTable   : IFDDataset;
 begin
-  lTransportadoraModel := TTransportadoraModel.Create(vIConexao);
+  lTransportadoraModel := TTransportadoraModel.getNewIface(vIConexao);
   try
     try
-      lMemTable := lTransportadoraModel.ObterLista;
+      lMemTable := lTransportadoraModel.objeto.ObterLista;
 
       memoResultado.Lines.Clear;
 
@@ -2875,7 +2875,7 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lTransportadoraModel.Free;
+    lTransportadoraModel:=nil;
   end;
 end;
 
@@ -2941,72 +2941,72 @@ end;
 
 procedure TForm1.Button92Click(Sender: TObject);
 var
-  lTransportadoraModel : TTransportadoraModel;
+  lTransportadoraModel : ITTransportadoraModel;
   ID : String;
 begin
-  lTransportadoraModel := TTransportadoraModel.Create(vIConexao);
+  lTransportadoraModel := TTransportadoraModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('TRANSPORTADORA', 'Digite o código da transportadora que deseja Alterar:', '');
       if ID.IsEmpty then
         exit;
 
-      lTransportadoraModel := lTransportadoraModel.Alterar(ID);
-      lTransportadoraModel.FANTASIA_TRA := 'TESTE ALTERAÇÃO';
+      lTransportadoraModel := lTransportadoraModel.objeto.Alterar(ID);
+      lTransportadoraModel.objeto.FANTASIA_TRA := 'TESTE ALTERAÇÃO';
 
-      lTransportadoraModel.Salvar;
+      lTransportadoraModel.objeto.Salvar;
       ShowMessage('Alterado com Sucesso');
     Except
       on E:Exception do
       ShowMessage('Erro: ' +E.Message);
     end;
   finally
-    lTransportadoraModel.Free;
+    lTransportadoraModel:=nil;
   end;
 end;
 
 procedure TForm1.Button93Click(Sender: TObject);
 var
-  lTransportadoraModel : TTransportadoraModel;
+  lTransportadoraModel : ITTransportadoraModel;
   codigo        : String;
 begin
-  lTransportadoraModel := TTransportadoraModel.Create(vIConexao);
+  lTransportadoraModel := TTransportadoraModel.getNewIface(vIConexao);
   try
     try
       codigo := InputBox('TRANSPORTADORA', 'Digite o código da transportadora que deseja excluir:', '');
       if codigo.IsEmpty then
           Exit;
 
-      lTransportadoraModel.Excluir(codigo);
+      lTransportadoraModel.objeto.Excluir(codigo);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lTransportadoraModel.Free;
+    lTransportadoraModel:=nil;
   end;
 end;
 
 procedure TForm1.Button94Click(Sender: TObject);
 var
-  lTransportadoraModel : TTransportadoraModel;
+  lTransportadoraModel : ITTransportadoraModel;
 begin
-  lTransportadoraModel := TTransportadoraModel.Create(vIConexao);
+  lTransportadoraModel := TTransportadoraModel.getNewIface(vIConexao);
   try
     try
-      lTransportadoraModel.FANTASIA_TRA := 'FANTASIA TRANSPORTADORA TESTE';
-      lTransportadoraModel.RAZAO_TRA    := 'RAZÃO TRANSPORTADORA TESTE';
-      lTransportadoraModel.STATUS       := 'A';
+      lTransportadoraModel.objeto.FANTASIA_TRA := 'FANTASIA TRANSPORTADORA TESTE';
+      lTransportadoraModel.objeto.RAZAO_TRA    := 'RAZÃO TRANSPORTADORA TESTE';
+      lTransportadoraModel.objeto.STATUS       := 'A';
 
-      lTransportadoraModel.Incluir;
+      lTransportadoraModel.objeto.Incluir;
       ShowMessage('Incluido com Sucesso!');
     except
       on E:Exception do
       ShowMessage('Erro: ' + E.Message);
     end
   finally
-    lTransportadoraModel.Free;
+    lTransportadoraModel:=nil;
   end;
 end;
 

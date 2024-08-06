@@ -6,13 +6,17 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
 
-  TTransportadoraModel = class
+  TTransportadoraModel = class;
+  ITTransportadoraModel=IObject<TTransportadoraModel>;
 
+  TTransportadoraModel = class
   private
+    [weak] mySelf:ITTransportadoraModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -133,15 +137,17 @@ type
     property FRENET_COD          : Variant read FFRENET_COD         write SetFRENET_COD;
     property TIPO_FRETE          : Variant read FTIPO_FRETE         write SetTIPO_FRETE;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITTransportadoraModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TTransportadoraModel;
+    function Alterar(pID : String): ITTransportadoraModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId : String): TTransportadoraModel;
+    function carregaClasse(pId : String): ITTransportadoraModel;
 
     function ObterLista: IFDDataset; overload;
 
@@ -165,14 +171,14 @@ uses
 
 { TTransportadoraModel }
 
-function TTransportadoraModel.Alterar(pID: String): TTransportadoraModel;
+function TTransportadoraModel.Alterar(pID: String): ITTransportadoraModel;
 var
-  lTransportadoraModel : TTransportadoraModel;
+  lTransportadoraModel : ITTransportadoraModel;
 begin
-  lTransportadoraModel := TTransportadoraModel.Create(vIConexao);
+  lTransportadoraModel := TTransportadoraModel.getNewIface(vIConexao);
   try
-    lTransportadoraModel       := lTransportadoraModel.carregaClasse(pID);
-    lTransportadoraModel.Acao  := tacAlterar;
+    lTransportadoraModel       := lTransportadoraModel.objeto.carregaClasse(pID);
+    lTransportadoraModel.objeto.Acao  := tacAlterar;
     Result                     := lTransportadoraModel;
   finally
   end;
@@ -185,26 +191,32 @@ begin
   Result       := self.Salvar;
 end;
 
+class function TTransportadoraModel.getNewIface(pIConexao: IConexao): ITTransportadoraModel;
+begin
+  Result := TImplObjetoOwner<TTransportadoraModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TTransportadoraModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
     Result    := self.Salvar;
 end;
 
-function TTransportadoraModel.carregaClasse(pId : String): TTransportadoraModel;
+function TTransportadoraModel.carregaClasse(pId : String): ITTransportadoraModel;
 var
-  lTransportadoraDao: TTransportadoraDao;
+  lTransportadoraDao: ITTransportadoraDao;
 begin
-  lTransportadoraDao := TTransportadoraDao.Create(vIConexao);
+  lTransportadoraDao := TTransportadoraDao.getNewIface(vIConexao);
 
   try
-    Result := lTransportadoraDao.carregaClasse(pId);
+    Result := lTransportadoraDao.objeto.carregaClasse(pId);
   finally
-    lTransportadoraDao.Free;
+    lTransportadoraDao:=nil;
   end;
 end;
 
-constructor TTransportadoraModel.Create(pIConexao : IConexao);
+constructor TTransportadoraModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -216,42 +228,42 @@ end;
 
 function TTransportadoraModel.obterLista: IFDDataset;
 var
-  lTransportadoraLista: TTransportadoraDao;
+  lTransportadoraLista: ITTransportadoraDao;
 begin
-  lTransportadoraLista := TTransportadoraDao.Create(vIConexao);
+  lTransportadoraLista := TTransportadoraDao.getNewIface(vIConexao);
 
   try
-    lTransportadoraLista.TotalRecords    := FTotalRecords;
-    lTransportadoraLista.WhereView       := FWhereView;
-    lTransportadoraLista.CountView       := FCountView;
-    lTransportadoraLista.OrderView       := FOrderView;
-    lTransportadoraLista.StartRecordView := FStartRecordView;
-    lTransportadoraLista.LengthPageView  := FLengthPageView;
-    lTransportadoraLista.IDRecordView    := FIDRecordView;
+    lTransportadoraLista.objeto.TotalRecords    := FTotalRecords;
+    lTransportadoraLista.objeto.WhereView       := FWhereView;
+    lTransportadoraLista.objeto.CountView       := FCountView;
+    lTransportadoraLista.objeto.OrderView       := FOrderView;
+    lTransportadoraLista.objeto.StartRecordView := FStartRecordView;
+    lTransportadoraLista.objeto.LengthPageView  := FLengthPageView;
+    lTransportadoraLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lTransportadoraLista.obterLista;
+    Result := lTransportadoraLista.objeto.obterLista;
 
-    FTotalRecords := lTransportadoraLista.TotalRecords;
+    FTotalRecords := lTransportadoraLista.objeto.TotalRecords;
 
   finally
-    lTransportadoraLista.Free;
+    lTransportadoraLista:=nil;
   end;
 end;
 
 function TTransportadoraModel.Salvar: String;
 var
-  lTransportadoraDao: TTransportadoraDao;
+  lTransportadoraDao: ITTransportadoraDao;
 begin
-  lTransportadoraDao := TTransportadoraDao.Create(vIConexao);
+  lTransportadoraDao := TTransportadoraDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lTransportadoraDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lTransportadoraDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lTransportadoraDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lTransportadoraDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lTransportadoraDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lTransportadoraDao.objeto.excluir(mySelf);
     end;
   finally
-    lTransportadoraDao.Free;
+    lTransportadoraDao:=nil;
   end;
 end;
 

@@ -16,12 +16,16 @@ uses
   Terasoft.Framework.SimpleTypes,
   Interfaces.Conexao,
   Terasoft.ConstrutorDao,
+  Terasoft.Framework.ObjectIface,
   TransportadoraModel;
 
 type
-  TTransportadoraDao = class
+  TTransportadoraDao = class;
+  ITTransportadoraDao=IObject<TTransportadoraDao>;
 
+  TTransportadoraDao = class
   private
+    [weak] mySelf: ITTransportadoraDao;
     vIConexao : IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -50,8 +54,10 @@ type
     procedure SetIDUsuarioView(const Value: String);
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITTransportadoraDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -64,15 +70,15 @@ type
     property IDUsuarioView : String read FIDUsuarioView write SetIDUsuarioView;
     property IDTipoVendaView : String read FIDTipoVendaView write SetIDTipoVendaView;
 
-    function incluir(pTransportadoraModel: TTransportadoraModel): String;
-    function alterar(pTransportadoraModel: TTransportadoraModel): String;
-    function excluir(pTransportadoraModel: TTransportadoraModel): String;
+    function incluir(pTransportadoraModel: ITTransportadoraModel): String;
+    function alterar(pTransportadoraModel: ITTransportadoraModel): String;
+    function excluir(pTransportadoraModel: ITTransportadoraModel): String;
 
-    function carregaClasse(pCodigo : String): TTransportadoraModel;
+    function carregaClasse(pCodigo : String): ITTransportadoraModel;
 
     function obterLista: IFDDataset;
 
-    procedure setParams(var pQry: TFDQuery; pTransportadoraModel: TTransportadoraModel);
+    procedure setParams(var pQry: TFDQuery; pTransportadoraModel: ITTransportadoraModel);
 
 end;
 
@@ -83,7 +89,7 @@ uses
 
 { TTransportadora }
 
-function TTransportadoraDao.alterar(pTransportadoraModel: TTransportadoraModel): String;
+function TTransportadoraDao.alterar(pTransportadoraModel: ITTransportadoraModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -97,7 +103,7 @@ begin
     setParams(lQry, pTransportadoraModel);
     lQry.ExecSQL;
 
-    Result := pTransportadoraModel.CODIGO_TRA;
+    Result := pTransportadoraModel.objeto.CODIGO_TRA;
 
   finally
     lSQL := '';
@@ -105,13 +111,13 @@ begin
   end;
 end;
 
-function TTransportadoraDao.carregaClasse(pCodigo: String): TTransportadoraModel;
+function TTransportadoraDao.carregaClasse(pCodigo: String): ITTransportadoraModel;
 var
   lQry: TFDQuery;
-  lModel: TTransportadoraModel;
+  lModel: ITTransportadoraModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TTransportadoraModel.Create(vIConexao);
+  lModel   := TTransportadoraModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -120,45 +126,45 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-      lModel.CODIGO_TRA         := lQry.FieldByName('CODIGO_TRA').AsString;
-      lModel.ENDERECO_TRA       := lQry.FieldByName('ENDERECO_TRA').AsString;
-      lModel.BAIRRO_TRA         := lQry.FieldByName('BAIRRO_TRA').AsString;
-      lModel.CIDADE_TRA         := lQry.FieldByName('CIDADE_TRA').AsString;
-      lModel.UF_TRA             := lQry.FieldByName('UF_TRA').AsString;
-      lModel.TELEFONE_TRA       := lQry.FieldByName('TELEFONE_TRA').AsString;
-      lModel.TELEFONE2_TRA      := lQry.FieldByName('TELEFONE2_TRA').AsString;
-      lModel.FAX_TRA            := lQry.FieldByName('FAX_TRA').AsString;
-      lModel.CONTATO_TRA        := lQry.FieldByName('CONTATO_TRA').AsString;
-      lModel.CELULARCONTATO_TRA := lQry.FieldByName('CELULARCONTATO_TRA').AsString;
-      lModel.EMAIL_TRA          := lQry.FieldByName('EMAIL_TRA').AsString;
-      lModel.URL_TRA            := lQry.FieldByName('URL_TRA').AsString;
-      lModel.CEP_TRA            := lQry.FieldByName('CEP_TRA').AsString;
-      lModel.CNPJ_CPF_TRA       := lQry.FieldByName('CNPJ_CPF_TRA').AsString;
-      lModel.INSCRICAO_RG_TRA   := lQry.FieldByName('INSCRICAO_RG_TRA').AsString;
-      lModel.FANTASIA_TRA       := lQry.FieldByName('FANTASIA_TRA').AsString;
-      lModel.RAZAO_TRA          := lQry.FieldByName('RAZAO_TRA').AsString;
-      lModel.OBSERVACAO_TRA     := lQry.FieldByName('OBSERVACAO_TRA').AsString;
-      lModel.USUARIO_ENT        := lQry.FieldByName('USUARIO_ENT').AsString;
-      lModel.ID                 := lQry.FieldByName('ID').AsString;
-      lModel.SUFRAMA            := lQry.FieldByName('SUFRAMA').AsString;
-      lModel.NUMERO_END         := lQry.FieldByName('NUMERO_END').AsString;
-      lModel.COMPLEMENTO        := lQry.FieldByName('COMPLEMENTO').AsString;
-      lModel.PLACA              := lQry.FieldByName('PLACA').AsString;
-      lModel.RNTC               := lQry.FieldByName('RNTC').AsString;
-      lModel.RASTREIO           := lQry.FieldByName('RASTREIO').AsString;
-      lModel.CODIGO_ANTERIOR    := lQry.FieldByName('CODIGO_ANTERIOR').AsString;
-      lModel.SYSTIME            := lQry.FieldByName('SYSTIME').AsString;
-      lModel.STATUS             := lQry.FieldByName('STATUS').AsString;
-      lModel.NOME_ECOMMERCE     := lQry.FieldByName('NOME_ECOMMERCE').AsString;
-      lModel.FRENET_COD         := lQry.FieldByName('FRENET_COD').AsString;
-      lModel.TIPO_FRETE         := lQry.FieldByName('TIPO_FRETE').AsString;
+      lModel.objeto.CODIGO_TRA         := lQry.FieldByName('CODIGO_TRA').AsString;
+      lModel.objeto.ENDERECO_TRA       := lQry.FieldByName('ENDERECO_TRA').AsString;
+      lModel.objeto.BAIRRO_TRA         := lQry.FieldByName('BAIRRO_TRA').AsString;
+      lModel.objeto.CIDADE_TRA         := lQry.FieldByName('CIDADE_TRA').AsString;
+      lModel.objeto.UF_TRA             := lQry.FieldByName('UF_TRA').AsString;
+      lModel.objeto.TELEFONE_TRA       := lQry.FieldByName('TELEFONE_TRA').AsString;
+      lModel.objeto.TELEFONE2_TRA      := lQry.FieldByName('TELEFONE2_TRA').AsString;
+      lModel.objeto.FAX_TRA            := lQry.FieldByName('FAX_TRA').AsString;
+      lModel.objeto.CONTATO_TRA        := lQry.FieldByName('CONTATO_TRA').AsString;
+      lModel.objeto.CELULARCONTATO_TRA := lQry.FieldByName('CELULARCONTATO_TRA').AsString;
+      lModel.objeto.EMAIL_TRA          := lQry.FieldByName('EMAIL_TRA').AsString;
+      lModel.objeto.URL_TRA            := lQry.FieldByName('URL_TRA').AsString;
+      lModel.objeto.CEP_TRA            := lQry.FieldByName('CEP_TRA').AsString;
+      lModel.objeto.CNPJ_CPF_TRA       := lQry.FieldByName('CNPJ_CPF_TRA').AsString;
+      lModel.objeto.INSCRICAO_RG_TRA   := lQry.FieldByName('INSCRICAO_RG_TRA').AsString;
+      lModel.objeto.FANTASIA_TRA       := lQry.FieldByName('FANTASIA_TRA').AsString;
+      lModel.objeto.RAZAO_TRA          := lQry.FieldByName('RAZAO_TRA').AsString;
+      lModel.objeto.OBSERVACAO_TRA     := lQry.FieldByName('OBSERVACAO_TRA').AsString;
+      lModel.objeto.USUARIO_ENT        := lQry.FieldByName('USUARIO_ENT').AsString;
+      lModel.objeto.ID                 := lQry.FieldByName('ID').AsString;
+      lModel.objeto.SUFRAMA            := lQry.FieldByName('SUFRAMA').AsString;
+      lModel.objeto.NUMERO_END         := lQry.FieldByName('NUMERO_END').AsString;
+      lModel.objeto.COMPLEMENTO        := lQry.FieldByName('COMPLEMENTO').AsString;
+      lModel.objeto.PLACA              := lQry.FieldByName('PLACA').AsString;
+      lModel.objeto.RNTC               := lQry.FieldByName('RNTC').AsString;
+      lModel.objeto.RASTREIO           := lQry.FieldByName('RASTREIO').AsString;
+      lModel.objeto.CODIGO_ANTERIOR    := lQry.FieldByName('CODIGO_ANTERIOR').AsString;
+      lModel.objeto.SYSTIME            := lQry.FieldByName('SYSTIME').AsString;
+      lModel.objeto.STATUS             := lQry.FieldByName('STATUS').AsString;
+      lModel.objeto.NOME_ECOMMERCE     := lQry.FieldByName('NOME_ECOMMERCE').AsString;
+      lModel.objeto.FRENET_COD         := lQry.FieldByName('FRENET_COD').AsString;
+      lModel.objeto.TIPO_FRETE         := lQry.FieldByName('TIPO_FRETE').AsString;
 
     Result := lModel;
   finally
     lQry.Free;
   end;
 end;
-constructor TTransportadoraDao.Create(pIConexao : IConexao);
+constructor TTransportadoraDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -169,22 +175,29 @@ begin
   inherited;
 end;
 
-function TTransportadoraDao.excluir(pTransportadoraModel: TTransportadoraModel): String;
+function TTransportadoraDao.excluir(pTransportadoraModel: ITTransportadoraModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from TRANSPORTADORA where CODIGO_TRA = :CODIGO_TRA' ,[pTransportadoraModel.ID]);
+   lQry.ExecSQL('delete from TRANSPORTADORA where CODIGO_TRA = :CODIGO_TRA' ,[pTransportadoraModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pTransportadoraModel.ID;
+   Result := pTransportadoraModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
 end;
-function TTransportadoraDao.incluir(pTransportadoraModel: TTransportadoraModel): String;
+
+class function TTransportadoraDao.getNewIface(pIConexao: IConexao): ITTransportadoraDao;
+begin
+  Result := TImplObjetoOwner<TTransportadoraDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TTransportadoraDao.incluir(pTransportadoraModel: ITTransportadoraModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -195,7 +208,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pTransportadoraModel.CODIGO_TRA := vIConexao.Generetor('GEN_TRANSPORTADORA');
+    pTransportadoraModel.objeto.CODIGO_TRA := vIConexao.Generetor('GEN_TRANSPORTADORA');
     setParams(lQry, pTransportadoraModel);
     lQry.Open;
 
@@ -318,28 +331,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TTransportadoraDao.setParams(var pQry: TFDQuery; pTransportadoraModel: TTransportadoraModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TTransportadoraDao.setParams(var pQry: TFDQuery; pTransportadoraModel: ITTransportadoraModel);
 begin
-  lTabela := vConstrutor.getColumns('TRANSPORTADORA');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TTransportadoraModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pTransportadoraModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pTransportadoraModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('TRANSPORTADORA',pQry,pTransportadoraModel.objeto);
 end;
 
 procedure TTransportadoraDao.SetStartRecordView(const Value: String);
