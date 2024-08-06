@@ -150,7 +150,7 @@ end;
 function TTabelaJurosModel.obterLista(pPortador: String; pValor: Double; pSeguroPrestamista: Boolean; pPrimeiroVencimento: TDate): IFDDataset;
 var
   lModel : ITTabelaJurosModel;
-  lTabelaJurosDia : TTabelaJurosDiaModel;
+  lTabelaJurosDia : ITTabelaJurosDiaModel;
   i      : Integer;
   lTotal,
   lJuros,
@@ -169,7 +169,7 @@ var
   lTagLimitadorVencimento: Integer;
 begin
   lPortadorModel := TPortadorModel.getNewIface(vIConexao);
-  lTabelaJurosDia := TTabelaJurosDiaModel.Create(vIConexao);
+  lTabelaJurosDia := TTabelaJurosDiaModel.getNewIface(vIConexao);
 
   lMemTable := criaIFDDataset(TFDMemTable.Create(nil));
   lModel    := TTabelaJurosModel.getNewIface(vIConexao);
@@ -197,7 +197,7 @@ begin
 
 
     if Terasoft.Utils.DiferencaEntreDatas(Date,pPrimeiroVencimento)  > 30 then
-      lCoeficienteJurosDias := lTabelaJurosDia.obterIndice(IntToStr(Terasoft.Utils.DiferencaEntreDatas(Date,pPrimeiroVencimento)-30), pPortador)
+      lCoeficienteJurosDias := lTabelaJurosDia.objeto.obterIndice(IntToStr(Terasoft.Utils.DiferencaEntreDatas(Date,pPrimeiroVencimento)-30), pPortador)
     else
       lCoeficienteJurosDias := 1;
 
@@ -350,7 +350,7 @@ begin
 
   finally
     lModel:=nil;
-    lTabelaJurosDia.Free;
+    lTabelaJurosDia:=nil;
   end;
 
 end;

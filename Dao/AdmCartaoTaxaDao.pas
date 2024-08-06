@@ -313,27 +313,8 @@ begin
 end;
 
 procedure TAdmCartaoTaxaDao.setParams(var pQry: TFDQuery; pCartaoTaxaModel: ITAdmCartaoTaxaModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
 begin
-  lTabela := vConstrutor.getColumns('ADMCARTAO_TAXA');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TAdmCartaoTaxaModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pCartaoTaxaModel.objeto).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pCartaoTaxaModel.objeto).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('ADMCARTAO_TAXA',pQry,pCartaoTaxaModel.objeto);
 end;
 
 procedure TAdmCartaoTaxaDao.SetStartRecordView(const Value: String);

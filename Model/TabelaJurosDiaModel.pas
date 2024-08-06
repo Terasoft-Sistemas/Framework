@@ -6,13 +6,17 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
 
-  TTabelaJurosDiaModel = class
+  TTabelaJurosDiaModel = class;
+  ITTabelaJurosDiaModel=IObject<TTabelaJurosDiaModel>;
 
+  TTabelaJurosDiaModel = class
   private
+    [weak] mySelf: ITTabelaJurosDiaModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -51,15 +55,17 @@ type
     property PORTADOR_ID : Variant read FPORTADOR_ID write SetPORTADOR_ID;
     property SYSTIME     : Variant read FSYSTIME write SetSYSTIME;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITTabelaJurosDiaModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TTabelaJurosDiaModel;
+    function Alterar(pID : String): ITTabelaJurosDiaModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId : String): TTabelaJurosDiaModel;
+    function carregaClasse(pId : String): ITTabelaJurosDiaModel;
     function obterLista: IFDDataset;
     function obterIndice (pDia, pPortador_id : String) : Double;
 
@@ -83,14 +89,14 @@ uses
 
 { TTabelaJurosDiaModel }
 
-function TTabelaJurosDiaModel.Alterar(pID: String): TTabelaJurosDiaModel;
+function TTabelaJurosDiaModel.Alterar(pID: String): ITTabelaJurosDiaModel;
 var
-  lTabelaJurosDiaModel : TTabelaJurosDiaModel;
+  lTabelaJurosDiaModel : ITTabelaJurosDiaModel;
 begin
-  lTabelaJurosDiaModel := TTabelaJurosDiaModel.Create(vIConexao);
+  lTabelaJurosDiaModel := TTabelaJurosDiaModel.getNewIface(vIConexao);
   try
-    lTabelaJurosDiaModel       := lTabelaJurosDiaModel.carregaClasse(pID);
-    lTabelaJurosDiaModel.Acao  := tacAlterar;
+    lTabelaJurosDiaModel       := lTabelaJurosDiaModel.objeto.carregaClasse(pID);
+    lTabelaJurosDiaModel.objeto.Acao  := tacAlterar;
     Result            	       := lTabelaJurosDiaModel;
   finally
   end;
@@ -103,26 +109,32 @@ begin
   Result       := self.Salvar;
 end;
 
+class function TTabelaJurosDiaModel.getNewIface(pIConexao: IConexao): ITTabelaJurosDiaModel;
+begin
+  Result := TImplObjetoOwner<TTabelaJurosDiaModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TTabelaJurosDiaModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
     Result    := self.Salvar;
 end;
 
-function TTabelaJurosDiaModel.carregaClasse(pId : String): TTabelaJurosDiaModel;
+function TTabelaJurosDiaModel.carregaClasse(pId : String): ITTabelaJurosDiaModel;
 var
-  lTabelaJurosDiaDao: TTabelaJurosDiaDao;
+  lTabelaJurosDiaDao: ITTabelaJurosDiaDao;
 begin
-  lTabelaJurosDiaDao := TTabelaJurosDiaDao.Create(vIConexao);
+  lTabelaJurosDiaDao := TTabelaJurosDiaDao.getNewIface(vIConexao);
 
   try
-    Result := lTabelaJurosDiaDao.carregaClasse(pID);
+    Result := lTabelaJurosDiaDao.objeto.carregaClasse(pID);
   finally
-    lTabelaJurosDiaDao.Free;
+    lTabelaJurosDiaDao:=nil;
   end;
 end;
 
-constructor TTabelaJurosDiaModel.Create(pIConexao : IConexao);
+constructor TTabelaJurosDiaModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -134,55 +146,55 @@ end;
 
 function TTabelaJurosDiaModel.obterIndice(pDia, pPortador_id: String): Double;
 var
-  lTabelaJurosDia: TTabelaJurosDiaDao;
+  lTabelaJurosDia: ITTabelaJurosDiaDao;
 begin
-  lTabelaJurosDia := TTabelaJurosDiaDao.Create(vIConexao);
+  lTabelaJurosDia := TTabelaJurosDiaDao.getNewIface(vIConexao);
   try
-    lTabelaJurosDia.WhereView := 'and tabelajuros_dia.dia = '+pDia+' and tabelajuros_dia.portador_id = '+pPortador_id+' ';
-    result := lTabelaJurosDia.obterLista.objeto.FieldByName('INDICE').AsFloat;
+    lTabelaJurosDia.objeto.WhereView := 'and tabelajuros_dia.dia = '+pDia+' and tabelajuros_dia.portador_id = '+pPortador_id+' ';
+    result := lTabelaJurosDia.objeto.obterLista.objeto.FieldByName('INDICE').AsFloat;
   finally
-    lTabelaJurosDia.Free;
+    lTabelaJurosDia:=nil;
   end;
 end;
 
 function TTabelaJurosDiaModel.obterLista: IFDDataset;
 var
-  lTabelaJurosDiaLista: TTabelaJurosDiaDao;
+  lTabelaJurosDiaLista: ITTabelaJurosDiaDao;
 begin
-  lTabelaJurosDiaLista := TTabelaJurosDiaDao.Create(vIConexao);
+  lTabelaJurosDiaLista := TTabelaJurosDiaDao.getNewIface(vIConexao);
 
   try
-    lTabelaJurosDiaLista.TotalRecords    := FTotalRecords;
-    lTabelaJurosDiaLista.WhereView       := FWhereView;
-    lTabelaJurosDiaLista.CountView       := FCountView;
-    lTabelaJurosDiaLista.OrderView       := FOrderView;
-    lTabelaJurosDiaLista.StartRecordView := FStartRecordView;
-    lTabelaJurosDiaLista.LengthPageView  := FLengthPageView;
-    lTabelaJurosDiaLista.IDRecordView    := FIDRecordView;
+    lTabelaJurosDiaLista.objeto.TotalRecords    := FTotalRecords;
+    lTabelaJurosDiaLista.objeto.WhereView       := FWhereView;
+    lTabelaJurosDiaLista.objeto.CountView       := FCountView;
+    lTabelaJurosDiaLista.objeto.OrderView       := FOrderView;
+    lTabelaJurosDiaLista.objeto.StartRecordView := FStartRecordView;
+    lTabelaJurosDiaLista.objeto.LengthPageView  := FLengthPageView;
+    lTabelaJurosDiaLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lTabelaJurosDiaLista.obterLista;
+    Result := lTabelaJurosDiaLista.objeto.obterLista;
 
-    FTotalRecords := lTabelaJurosDiaLista.TotalRecords;
+    FTotalRecords := lTabelaJurosDiaLista.objeto.TotalRecords;
 
   finally
-    lTabelaJurosDiaLista.Free;
+    lTabelaJurosDiaLista:=nil;
   end;
 end;
 
 function TTabelaJurosDiaModel.Salvar: String;
 var
-  lTabelaJurosDiaDao: TTabelaJurosDiaDao;
+  lTabelaJurosDiaDao: ITTabelaJurosDiaDao;
 begin
-  lTabelaJurosDiaDao := TTabelaJurosDiaDao.Create(vIConexao);
+  lTabelaJurosDiaDao := TTabelaJurosDiaDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lTabelaJurosDiaDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lTabelaJurosDiaDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lTabelaJurosDiaDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lTabelaJurosDiaDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lTabelaJurosDiaDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lTabelaJurosDiaDao.objeto.excluir(mySelf);
     end;
   finally
-    lTabelaJurosDiaDao.Free;
+    lTabelaJurosDiaDao:=nil;
   end;
 end;
 

@@ -375,27 +375,8 @@ begin
 end;
 
 procedure TTEFDao.setParams(var pQry: TFDQuery; pTEFModel: ITTEFModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
 begin
-  lTabela := vConstrutor.getColumns('TEF');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TTEFModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pTEFModel.objeto).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pTEFModel.objeto).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('TEF',pQry,pTEFModel.objeto);
 end;
 
 procedure TTEFDao.SetStartRecordView(const Value: String);

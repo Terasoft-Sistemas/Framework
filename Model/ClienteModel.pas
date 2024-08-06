@@ -1076,7 +1076,7 @@ begin
       CriaException(' Configurações de campos obrigatórios inválido.');
       abort;
     end;
-    if lProp.GetValue(pClienteModel).AsString = '' then
+    if lProp.GetValue(pClienteModel.objeto).AsString = '' then
     begin
       CamposInvalidos.Add(lCampo);
       CamposInvalidosTitulos.Add(lNome);

@@ -11,12 +11,16 @@ uses
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao;
 
 type
-  TTabelaJurosDiaDao = class
+  TTabelaJurosDiaDao = class;
+  ITTabelaJurosDiaDao=IObject<TTabelaJurosDiaDao>;
 
+  TTabelaJurosDiaDao = class
   private
+    [weak] mySelf: ITTabelaJurosDiaDao;
     vIConexao 	: IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -42,8 +46,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITTabelaJurosDiaDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -54,14 +60,14 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(pTabelaJurosDiaModel: TTabelaJurosDiaModel): String;
-    function alterar(pTabelaJurosDiaModel: TTabelaJurosDiaModel): String;
-    function excluir(pTabelaJurosDiaModel: TTabelaJurosDiaModel): String;
+    function incluir(pTabelaJurosDiaModel: ITTabelaJurosDiaModel): String;
+    function alterar(pTabelaJurosDiaModel: ITTabelaJurosDiaModel): String;
+    function excluir(pTabelaJurosDiaModel: ITTabelaJurosDiaModel): String;
 
-    function carregaClasse(pID : String): TTabelaJurosDiaModel;
+    function carregaClasse(pID : String): ITTabelaJurosDiaModel;
     function obterLista: IFDDataset;
 
-    procedure setParams(var pQry: TFDQuery; pTabelaJurosDiaModel: TTabelaJurosDiaModel);
+    procedure setParams(var pQry: TFDQuery; pTabelaJurosDiaModel: ITTabelaJurosDiaModel);
 
 end;
 
@@ -72,13 +78,13 @@ uses
 
 { TTabelaJurosDia }
 
-function TTabelaJurosDiaDao.carregaClasse(pID : String): TTabelaJurosDiaModel;
+function TTabelaJurosDiaDao.carregaClasse(pID : String): ITTabelaJurosDiaModel;
 var
   lQry: TFDQuery;
-  lModel: TTabelaJurosDiaModel;
+  lModel: ITTabelaJurosDiaModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TTabelaJurosDiaModel.Create(vIConexao);
+  lModel   := TTabelaJurosDiaModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -87,7 +93,7 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID      := lQry.FieldByName('ID').AsString;
+    lModel.objeto.ID      := lQry.FieldByName('ID').AsString;
 
     Result := lModel;
   finally
@@ -95,7 +101,7 @@ begin
   end;
 end;
 
-constructor TTabelaJurosDiaDao.Create(pIConexao : IConexao);
+constructor TTabelaJurosDiaDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -106,7 +112,7 @@ begin
   inherited;
 end;
 
-function TTabelaJurosDiaDao.incluir(pTabelaJurosDiaModel: TTabelaJurosDiaModel): String;
+function TTabelaJurosDiaDao.incluir(pTabelaJurosDiaModel: ITTabelaJurosDiaModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -127,7 +133,7 @@ begin
   end;
 end;
 
-function TTabelaJurosDiaDao.alterar(pTabelaJurosDiaModel: TTabelaJurosDiaModel): String;
+function TTabelaJurosDiaDao.alterar(pTabelaJurosDiaModel: ITTabelaJurosDiaModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -141,7 +147,7 @@ begin
     setParams(lQry, pTabelaJurosDiaModel);
     lQry.ExecSQL;
 
-    Result := pTabelaJurosDiaModel.ID;
+    Result := pTabelaJurosDiaModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -149,20 +155,26 @@ begin
   end;
 end;
 
-function TTabelaJurosDiaDao.excluir(pTabelaJurosDiaModel: TTabelaJurosDiaModel): String;
+function TTabelaJurosDiaDao.excluir(pTabelaJurosDiaModel: ITTabelaJurosDiaModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from Tabelajuros_dia where ID = :ID' ,[pTabelaJurosDiaModel.ID]);
+   lQry.ExecSQL('delete from Tabelajuros_dia where ID = :ID' ,[pTabelaJurosDiaModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pTabelaJurosDiaModel.ID;
+   Result := pTabelaJurosDiaModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TTabelaJurosDiaDao.getNewIface(pIConexao: IConexao): ITTabelaJurosDiaDao;
+begin
+  Result := TImplObjetoOwner<TTabelaJurosDiaDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TTabelaJurosDiaDao.where: String;
@@ -256,28 +268,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TTabelaJurosDiaDao.setParams(var pQry: TFDQuery; pTabelaJurosDiaModel: TTabelaJurosDiaModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TTabelaJurosDiaDao.setParams(var pQry: TFDQuery; pTabelaJurosDiaModel: ITTabelaJurosDiaModel);
 begin
-  lTabela := vConstrutor.getColumns('Tabelajuros_dia');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TTabelaJurosDiaModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pTabelaJurosDiaModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pTabelaJurosDiaModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('Tabelajuros_dia',pQry,pTabelaJurosDiaModel.objeto);
 end;
 
 procedure TTabelaJurosDiaDao.SetStartRecordView(const Value: String);
