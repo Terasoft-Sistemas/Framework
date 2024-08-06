@@ -96,6 +96,7 @@ begin
   cbEP.Text := '';
   epControl := getEndpointController(vIConexao);
   //Retorna a lista com busca no termo 'PROD'
+  //Ordenado pelo campo DESCRICAO
   for m in epControl.getNovaLista('prod',2) do
   begin
     cbEp.items.add(m.objeto.DESCRICAO);
