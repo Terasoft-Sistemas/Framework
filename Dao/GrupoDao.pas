@@ -12,17 +12,20 @@ uses
   Terasoft.Types,
   Terasoft.Framework.ListaSimples.Impl,
   Terasoft.FuncoesTexto,
-  Terasoft.Framework.ObjectIface,
   Terasoft.Framework.ListaSimples,
   Terasoft.Framework.SimpleTypes,
   Interfaces.Conexao,
   Terasoft.ConstrutorDao,
+  Terasoft.Framework.ObjectIface,
   GrupoModel;
 
 type
-  TGrupoDao = class
+  TGrupoDao = class;
+  ITGrupoDao=IObject<TGrupoDao>;
 
+  TGrupoDao = class
   private
+    [weak] mySelf: ITGrupoDao;
     vIConexao : IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -47,8 +50,10 @@ type
     function where: String;
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITGrupoDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -59,16 +64,16 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView : String read FIDRecordView write SetIDRecordView;
 
-    function incluir(pGrupoModel: TGrupoModel): String;
-    function alterar(pGrupoModel: TGrupoModel): String;
-    function excluir(pGrupoModel: TGrupoModel): String;
+    function incluir(pGrupoModel: ITGrupoModel): String;
+    function alterar(pGrupoModel: ITGrupoModel): String;
+    function excluir(pGrupoModel: ITGrupoModel): String;
 
-    function carregaClasse(pID : String): TGrupoModel;
+    function carregaClasse(pID : String): ITGrupoModel;
 
     function ObterLista(pGrupo_Parametros: TGrupo_Parametros): IFDDataset; overload;
     function ObterLista: IFDDataset; overload;
 
-    procedure setParams(var pQry: TFDQuery; pGrupoModel: TGrupoModel);
+    procedure setParams(var pQry: TFDQuery; pGrupoModel: ITGrupoModel);
 
 end;
 
@@ -79,7 +84,7 @@ uses
 
 { TGrupo }
 
-function TGrupoDao.alterar(pGrupoModel: TGrupoModel): String;
+function TGrupoDao.alterar(pGrupoModel: ITGrupoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -93,7 +98,7 @@ begin
     setParams(lQry, pGrupoModel);
     lQry.ExecSQL;
 
-    Result := pGrupoModel.ID;
+    Result := pGrupoModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -101,13 +106,13 @@ begin
   end;
 end;
 
-function TGrupoDao.carregaClasse(pID: String): TGrupoModel;
+function TGrupoDao.carregaClasse(pID: String): ITGrupoModel;
 var
   lQry: TFDQuery;
-  lModel: TGrupoModel;
+  lModel: ITGrupoModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TGrupoModel.Create(vIConexao);
+  lModel   := TGrupoModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -116,33 +121,33 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-      lModel.CODIGO_GRU             := lQry.FieldByName('CODIGO_GRU').AsString;
-      lModel.NOME_GRU               := lQry.FieldByName('NOME_GRU').AsString;
-      lModel.USUARIO_GRU            := lQry.FieldByName('USUARIO_GRU').AsString;
-      lModel.LOJA                   := lQry.FieldByName('LOJA').AsString;
-      lModel.ECF                    := lQry.FieldByName('ECF').AsString;
-      lModel.ICMS                   := lQry.FieldByName('ICMS').AsString;
-      lModel.REDUTOR_ICMS_ST        := lQry.FieldByName('REDUTOR_ICMS_ST').AsString;
-      lModel.ID                     := lQry.FieldByName('ID').AsString;
-      lModel.ARREDONDAMENTO         := lQry.FieldByName('ARREDONDAMENTO').AsString;
-      lModel.DESTAQUE_PRE_VENDA     := lQry.FieldByName('DESTAQUE_PRE_VENDA').AsString;
-      lModel.IMAGEM                 := lQry.FieldByName('IMAGEM').AsString;
-      lModel.SIGLA                  := lQry.FieldByName('SIGLA').AsString;
-      lModel.REFERENCIA             := lQry.FieldByName('REFERENCIA').AsString;
-      lModel.COR                    := lQry.FieldByName('COR').AsString;
-      lModel.ORDEM                  := lQry.FieldByName('ORDEM').AsString;
-      lModel.MARGEM_IMPOSTO         := lQry.FieldByName('MARGEM_IMPOSTO').AsString;
-      lModel.MARGERM_PRODUTO        := lQry.FieldByName('MARGERM_PRODUTO').AsString;
-      lModel.ID_ECOMMERCE           := lQry.FieldByName('ID_ECOMMERCE').AsString;
-      lModel.DESCRICAO_ECOMMERCE    := lQry.FieldByName('DESCRICAO_ECOMMERCE').AsString;
-      lModel.STATUS                 := lQry.FieldByName('STATUS').AsString;
+      lModel.objeto.CODIGO_GRU             := lQry.FieldByName('CODIGO_GRU').AsString;
+      lModel.objeto.NOME_GRU               := lQry.FieldByName('NOME_GRU').AsString;
+      lModel.objeto.USUARIO_GRU            := lQry.FieldByName('USUARIO_GRU').AsString;
+      lModel.objeto.LOJA                   := lQry.FieldByName('LOJA').AsString;
+      lModel.objeto.ECF                    := lQry.FieldByName('ECF').AsString;
+      lModel.objeto.ICMS                   := lQry.FieldByName('ICMS').AsString;
+      lModel.objeto.REDUTOR_ICMS_ST        := lQry.FieldByName('REDUTOR_ICMS_ST').AsString;
+      lModel.objeto.ID                     := lQry.FieldByName('ID').AsString;
+      lModel.objeto.ARREDONDAMENTO         := lQry.FieldByName('ARREDONDAMENTO').AsString;
+      lModel.objeto.DESTAQUE_PRE_VENDA     := lQry.FieldByName('DESTAQUE_PRE_VENDA').AsString;
+      lModel.objeto.IMAGEM                 := lQry.FieldByName('IMAGEM').AsString;
+      lModel.objeto.SIGLA                  := lQry.FieldByName('SIGLA').AsString;
+      lModel.objeto.REFERENCIA             := lQry.FieldByName('REFERENCIA').AsString;
+      lModel.objeto.COR                    := lQry.FieldByName('COR').AsString;
+      lModel.objeto.ORDEM                  := lQry.FieldByName('ORDEM').AsString;
+      lModel.objeto.MARGEM_IMPOSTO         := lQry.FieldByName('MARGEM_IMPOSTO').AsString;
+      lModel.objeto.MARGERM_PRODUTO        := lQry.FieldByName('MARGERM_PRODUTO').AsString;
+      lModel.objeto.ID_ECOMMERCE           := lQry.FieldByName('ID_ECOMMERCE').AsString;
+      lModel.objeto.DESCRICAO_ECOMMERCE    := lQry.FieldByName('DESCRICAO_ECOMMERCE').AsString;
+      lModel.objeto.STATUS                 := lQry.FieldByName('STATUS').AsString;
 
     Result := lModel;
   finally
     lQry.Free;
   end;
 end;
-constructor TGrupoDao.Create(pIConexao : IConexao);
+constructor TGrupoDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -153,22 +158,29 @@ begin
   inherited;
 end;
 
-function TGrupoDao.excluir(pGrupoModel: TGrupoModel): String;
+function TGrupoDao.excluir(pGrupoModel: ITGrupoModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from GRUPOPRODUTO where CODIGO_GRU = :CODIGO_GRU' ,[pGrupoModel.CODIGO_GRU]);
+   lQry.ExecSQL('delete from GRUPOPRODUTO where CODIGO_GRU = :CODIGO_GRU' ,[pGrupoModel.objeto.CODIGO_GRU]);
    lQry.ExecSQL;
-   Result := pGrupoModel.CODIGO_GRU;
+   Result := pGrupoModel.objeto.CODIGO_GRU;
 
   finally
     lQry.Free;
   end;
 end;
-function TGrupoDao.incluir(pGrupoModel: TGrupoModel): String;
+
+class function TGrupoDao.getNewIface(pIConexao: IConexao): ITGrupoDao;
+begin
+  Result := TImplObjetoOwner<TGrupoDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TGrupoDao.incluir(pGrupoModel: ITGrupoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -179,7 +191,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pGrupoModel.CODIGO_GRU := vIConexao.Generetor('GEN_GRUPOPRODUTO');
+    pGrupoModel.objeto.CODIGO_GRU := vIConexao.Generetor('GEN_GRUPOPRODUTO');
     setParams(lQry, pGrupoModel);
     lQry.Open;
 
@@ -323,28 +335,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TGrupoDao.setParams(var pQry: TFDQuery; pGrupoModel: TGrupoModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TGrupoDao.setParams(var pQry: TFDQuery; pGrupoModel: ITGrupoModel);
 begin
-  lTabela := vConstrutor.getColumns('ANEXO');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TGrupoModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pGrupoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pGrupoModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('ANEXO',pQry,pGrupoModel.objeto);
 end;
 
 procedure TGrupoDao.SetStartRecordView(const Value: String);

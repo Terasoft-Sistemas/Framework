@@ -2148,10 +2148,10 @@ end;
 
 procedure TForm1.Button68Click(Sender: TObject);
 var
-  lGrupoModel : TGrupoModel;
+  lGrupoModel : ITGrupoModel;
   lNomeGrupo  : String;
 begin
-  lGrupoModel := TGrupoModel.create(vIConexao);
+  lGrupoModel := TGrupoModel.getNewIface(vIConexao);
   try
     try
       lNomeGrupo :=  InputBox('GRUPOPRODUTO','Digite o Nome do Grupo:','');
@@ -2159,10 +2159,10 @@ begin
       if lNomeGrupo.IsEmpty then
         Exit;
 
-      lGrupoModel.NOME_GRU    := lNomeGrupo;
-      lGrupoModel.USUARIO_GRU := '000001';
+      lGrupoModel.objeto.NOME_GRU    := lNomeGrupo;
+      lGrupoModel.objeto.USUARIO_GRU := '000001';
 
-      lGrupoModel.Incluir;
+      lGrupoModel.objeto.Incluir;
 
       ShowMessage('Incluido com sucesso');
     except
@@ -2170,18 +2170,18 @@ begin
          ShowMessage('Erro: ' + E.Message);
       end;
   finally
-    lGrupoModel.Free;
+    lGrupoModel:=nil;
   end;
 end;
 procedure TForm1.Button69Click(Sender: TObject);
 var
-  lGrupoModel : TGrupoModel;
+  lGrupoModel : ITGrupoModel;
   lMemTable   : IFDDataset;
 begin
-  lGrupoModel := TGrupoModel.Create(vIConexao);
+  lGrupoModel := TGrupoModel.getNewIface(vIConexao);
   try
     try
-      lMemTable := lGrupoModel.ObterLista;
+      lMemTable := lGrupoModel.objeto.ObterLista;
 
       memoResultado.Lines.Clear;
 
@@ -2198,7 +2198,7 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lGrupoModel.Free;
+    lGrupoModel:=nil;
   end;
 end;
 
@@ -2231,49 +2231,49 @@ end;
 
 procedure TForm1.Button70Click(Sender: TObject);
 var
-  lGrupoModel : TGrupoModel;
+  lGrupoModel : ITGrupoModel;
   ID          : String;
 begin
-  lGrupoModel := TGrupoModel.Create(vIConexao);
+  lGrupoModel := TGrupoModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('GRUPOPRODUTO', 'Digite o ID do GRUPO que deseja Alterar:', '');
       if ID.IsEmpty then
         exit;
 
-      lGrupoModel := lGrupoModel.Alterar(ID);
-      lGrupoModel.NOME_GRU := 'TESTE ALTERAR';
+      lGrupoModel := lGrupoModel.objeto.Alterar(ID);
+      lGrupoModel.objeto.NOME_GRU := 'TESTE ALTERAR';
 
-      lGrupoModel.Salvar;
+      lGrupoModel.objeto.Salvar;
       ShowMessage('Alterado com Sucesso');
     Except
       on E:Exception do
       ShowMessage('Erro: ' +E.Message);
     end;
   finally
-    lGrupoModel.Free;
+    lGrupoModel:=nil;
   end;
 end;
 procedure TForm1.Button71Click(Sender: TObject);
 var
-  lGrupoModel : TGrupoModel;
+  lGrupoModel : ITGrupoModel;
   ID        : String;
 begin
-  lGrupoModel := TGrupoModel.Create(vIConexao);
+  lGrupoModel := TGrupoModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('GRUPOPRODUTO', 'Digite o ID do GRUPO que deseja excluir:', '');
       if ID.IsEmpty then
           Exit;
 
-      lGrupoModel.Excluir(ID);
+      lGrupoModel.objeto.Excluir(ID);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lGrupoModel.Free;
+    lGrupoModel:=nil;
   end;
 end;
 

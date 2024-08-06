@@ -6,12 +6,16 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   FireDAC.Comp.Client,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TGrupoModel = class
+  TGrupoModel = class;
+  ITGrupoModel=IObject<TGrupoModel>;
 
+  TGrupoModel = class
   private
+    [weak] mySelf: ITGrupoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -97,19 +101,21 @@ type
     property status                   :Variant read Fstatus write Setstatus;
 
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITGrupoModel;
 
     function ObterLista(pGrupo_Parametros: TGrupo_Parametros): IFDDataset; overload;
     function ObterLista: IFDDataset; overload;
 
 
     function Incluir: String;
-    function Alterar(pID : String): TGrupoModel;
+    function Alterar(pID : String): ITGrupoModel;
     function Excluir(CODIGO_GRU : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId : String): TGrupoModel;
+    function carregaClasse(pId : String): ITGrupoModel;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -130,32 +136,32 @@ uses
 
 { TGrupoModel }
 
-function TGrupoModel.Alterar(pID: String): TGrupoModel;
+function TGrupoModel.Alterar(pID: String): ITGrupoModel;
 var
-  lGrupoModel : TGrupoModel;
+  lGrupoModel : ITGrupoModel;
 begin
-  lGrupoModel := TGrupoModel.Create(vIConexao);
+  lGrupoModel := TGrupoModel.getNewIface(vIConexao);
   try
-    lGrupoModel       := lGrupoModel.carregaClasse(pID);
-    lGrupoModel.FAcao := tacAlterar;
+    lGrupoModel       := lGrupoModel.objeto.carregaClasse(pID);
+    lGrupoModel.objeto.FAcao := tacAlterar;
     Result            := lGrupoModel;
   finally
   end;
 end;
-function TGrupoModel.carregaClasse(pId: String): TGrupoModel;
+function TGrupoModel.carregaClasse(pId: String): ITGrupoModel;
 var
-  lGrupoDao: TGrupoDao;
+  lGrupoDao: ITGrupoDao;
 begin
-  lGrupoDao := TGrupoDao.Create(vIConexao);
+  lGrupoDao := TGrupoDao.getNewIface(vIConexao);
 
   try
-    Result := lGrupoDao.carregaClasse(pId);
+    Result := lGrupoDao.objeto.carregaClasse(pId);
   finally
-    lGrupoDao.Free;
+    lGrupoDao:=nil;
   end;
 end;
 
-constructor TGrupoModel.Create(pIConexao : IConexao);
+constructor TGrupoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -173,6 +179,12 @@ begin
   Result            := self.Salvar;
 end;
 
+class function TGrupoModel.getNewIface(pIConexao: IConexao): ITGrupoModel;
+begin
+  Result := TImplObjetoOwner<TGrupoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TGrupoModel.Incluir: String;
 begin
     self.FAcao := tacIncluir;
@@ -182,57 +194,57 @@ end;
 
 function TGrupoModel.ObterLista: IFDDataset;
 var
-  lGrupoLista: TGrupoDao;
+  lGrupoLista: ITGrupoDao;
 begin
-  lGrupoLista := TGrupoDao.Create(vIConexao);
+  lGrupoLista := TGrupoDao.getNewIface(vIConexao);
 
   try
-    lGrupoLista.TotalRecords    := FTotalRecords;
-    lGrupoLista.WhereView       := FWhereView;
-    lGrupoLista.CountView       := FCountView;
-    lGrupoLista.OrderView       := FOrderView;
-    lGrupoLista.StartRecordView := FStartRecordView;
-    lGrupoLista.LengthPageView  := FLengthPageView;
-    lGrupoLista.IDRecordView    := FIDRecordView;
+    lGrupoLista.objeto.TotalRecords    := FTotalRecords;
+    lGrupoLista.objeto.WhereView       := FWhereView;
+    lGrupoLista.objeto.CountView       := FCountView;
+    lGrupoLista.objeto.OrderView       := FOrderView;
+    lGrupoLista.objeto.StartRecordView := FStartRecordView;
+    lGrupoLista.objeto.LengthPageView  := FLengthPageView;
+    lGrupoLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lGrupoLista.obterLista;
+    Result := lGrupoLista.objeto.obterLista;
 
-    FTotalRecords := lGrupoLista.TotalRecords;
+    FTotalRecords := lGrupoLista.objeto.TotalRecords;
 
   finally
-    lGrupoLista.Free;
+    lGrupoLista:=nil;
   end;
 end;
 function TGrupoModel.ObterLista(pGrupo_Parametros: TGrupo_Parametros): IFDDataset;
 var
-  lGrupoDao: TGrupoDao;
+  lGrupoDao: ITGrupoDao;
   lGrupo_Parametros: TGrupo_Parametros;
 begin
-  lGrupoDao := TGrupoDao.Create(vIConexao);
+  lGrupoDao := TGrupoDao.getNewIface(vIConexao);
   try
     lGrupo_Parametros.Grupos := pGrupo_Parametros.Grupos;
 
-    Result := lGrupoDao.ObterLista(lGrupo_Parametros);
+    Result := lGrupoDao.objeto.ObterLista(lGrupo_Parametros);
 
   finally
-    lGrupoDao.Free;
+    lGrupoDao:=nil;
   end;
 end;
 
 function TGrupoModel.Salvar: String;
 var
-  lGrupoDao : TGrupoDao;
+  lGrupoDao : ITGrupoDao;
 begin
-  lGrupoDao := TGrupoDao.Create(vIConexao);
+  lGrupoDao := TGrupoDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lGrupoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lGrupoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lGrupoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lGrupoDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lGrupoDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lGrupoDao.objeto.excluir(mySelf);
     end;
   finally
-    lGrupoDao.Free;
+    lGrupoDao:=nil;
   end;
 end;
 

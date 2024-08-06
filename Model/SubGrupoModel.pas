@@ -139,19 +139,19 @@ end;
 
 function TSubGrupoModel.Incluir: String;
 var
-  lGrupoModel : TGrupoModel;
+  lGrupoModel : ITGrupoModel;
 begin
-  lGrupoModel := TGrupoModel.Create(vIConexao);
+  lGrupoModel := TGrupoModel.getNewIface(vIConexao);
   try
-    lGrupoModel.StartRecordView := '0';
-    lGrupoModel.LengthPageView  := '1';
-    lGrupoModel.OrderView       := 'CODIGO_GRU';
-    self.CODIGO_GRU := lGrupoModel.ObterLista.objeto.FieldByName('CODIGO_GRU').AsString;
+    lGrupoModel.objeto.StartRecordView := '0';
+    lGrupoModel.objeto.LengthPageView  := '1';
+    lGrupoModel.objeto.OrderView       := 'CODIGO_GRU';
+    self.CODIGO_GRU := lGrupoModel.objeto.ObterLista.objeto.FieldByName('CODIGO_GRU').AsString;
 
     self.Acao := tacIncluir;
     Result    := self.Salvar;
   finally
-    lGrupoModel.Free;
+    lGrupoModel:=nil;
   end;
 end;
 

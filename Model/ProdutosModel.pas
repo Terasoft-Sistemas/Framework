@@ -1005,13 +1005,13 @@ end;
 
 function TProdutosModel.Incluir: String;
 var
-  lGrupoModel      : TGrupoModel;
+  lGrupoModel      : ITGrupoModel;
   lSubGrupoModel   : TSubGrupoModel;
   lMarcaModel      : TMarcaModel;
   lFornecedorModel : TFornecedorModel;
 begin
 
-  lGrupoModel      := TGrupoModel.Create(vIConexao);
+  lGrupoModel      := TGrupoModel.getNewIface(vIConexao);
   lSubGrupoModel   := TSubGrupoModel.Create(vIConexao);
   lMarcaModel      := TMarcaModel.Create(vIConexao);
   lFornecedorModel := TFornecedorModel.Create(vIConexao);
@@ -1019,10 +1019,10 @@ begin
 
     if self.CODIGO_GRU = '' then
     begin
-      lGrupoModel.StartRecordView := '0';
-      lGrupoModel.LengthPageView  := '1';
-      lGrupoModel.OrderView       := 'CODIGO_GRU';
-      self.CODIGO_GRU := lGrupoModel.ObterLista.objeto.FieldByName('CODIGO_GRU').AsString;
+      lGrupoModel.objeto.StartRecordView := '0';
+      lGrupoModel.objeto.LengthPageView  := '1';
+      lGrupoModel.objeto.OrderView       := 'CODIGO_GRU';
+      self.CODIGO_GRU := lGrupoModel.objeto.ObterLista.objeto.FieldByName('CODIGO_GRU').AsString;
     end;
 
     if self.CODIGO_FOR = '' then
@@ -1072,7 +1072,7 @@ begin
     self.Acao := tacIncluir;
     Result    := self.Salvar;
   finally
-    lGrupoModel.Free;
+    lGrupoModel:=nil;
   end;
 end;
 
