@@ -6,13 +6,17 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
 
-  TClientesContatoModel = class
+  TClientesContatoModel = class;
+  ITClientesContatoModel=IObject<TClientesContatoModel>;
 
+  TClientesContatoModel = class
   private
+    [weak] mySelf: ITClientesContatoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -70,15 +74,17 @@ type
     property  USUARIO_ID    : Variant  read FUSUARIO_ID    write SetFUSUARIO_ID;
 
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITClientesContatoModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TClientesContatoModel;
+    function Alterar(pID : String): ITClientesContatoModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId : String): TClientesContatoModel;
+    function carregaClasse(pId : String): ITClientesContatoModel;
 
     function ObterLista: IFDDataset; overload;
 
@@ -102,14 +108,14 @@ uses
 
 { TClientesContatoModel }
 
-function TClientesContatoModel.Alterar(pID: String): TClientesContatoModel;
+function TClientesContatoModel.Alterar(pID: String): ITClientesContatoModel;
 var
-  lClientesContatoModel : TClientesContatoModel;
+  lClientesContatoModel : ITClientesContatoModel;
 begin
-  lClientesContatoModel := TClientesContatoModel.Create(vIConexao);
+  lClientesContatoModel := TClientesContatoModel.getNewIface(vIConexao);
   try
-    lClientesContatoModel       := lClientesContatoModel.carregaClasse(pID);
-    lClientesContatoModel.Acao  := tacAlterar;
+    lClientesContatoModel       := lClientesContatoModel.objeto.carregaClasse(pID);
+    lClientesContatoModel.objeto.Acao  := tacAlterar;
     Result            := lClientesContatoModel;
   finally
   end;
@@ -122,26 +128,32 @@ begin
   Result       := self.Salvar;
 end;
 
+class function TClientesContatoModel.getNewIface(pIConexao: IConexao): ITClientesContatoModel;
+begin
+  Result := TImplObjetoOwner<TClientesContatoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TClientesContatoModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
     Result    := self.Salvar;
 end;
 
-function TClientesContatoModel.carregaClasse(pId : String): TClientesContatoModel;
+function TClientesContatoModel.carregaClasse(pId : String): ITClientesContatoModel;
 var
-  lClientesContatoDao: TClientesContatoDao;
+  lClientesContatoDao: ITClientesContatoDao;
 begin
-  lClientesContatoDao := TClientesContatoDao.Create(vIConexao);
+  lClientesContatoDao := TClientesContatoDao.getNewIface(vIConexao);
 
   try
-    Result := lClientesContatoDao.carregaClasse(pId);
+    Result := lClientesContatoDao.objeto.carregaClasse(pId);
   finally
-    lClientesContatoDao.Free;
+    lClientesContatoDao:=nil;
   end;
 end;
 
-constructor TClientesContatoModel.Create(pIConexao : IConexao);
+constructor TClientesContatoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -153,42 +165,42 @@ end;
 
 function TClientesContatoModel.obterLista: IFDDataset;
 var
-  lClientesContatoLista: TClientesContatoDao;
+  lClientesContatoLista: ITClientesContatoDao;
 begin
-  lClientesContatoLista := TClientesContatoDao.Create(vIConexao);
+  lClientesContatoLista := TClientesContatoDao.getNewIface(vIConexao);
 
   try
-    lClientesContatoLista.TotalRecords    := FTotalRecords;
-    lClientesContatoLista.WhereView       := FWhereView;
-    lClientesContatoLista.CountView       := FCountView;
-    lClientesContatoLista.OrderView       := FOrderView;
-    lClientesContatoLista.StartRecordView := FStartRecordView;
-    lClientesContatoLista.LengthPageView  := FLengthPageView;
-    lClientesContatoLista.IDRecordView    := FIDRecordView;
+    lClientesContatoLista.objeto.TotalRecords    := FTotalRecords;
+    lClientesContatoLista.objeto.WhereView       := FWhereView;
+    lClientesContatoLista.objeto.CountView       := FCountView;
+    lClientesContatoLista.objeto.OrderView       := FOrderView;
+    lClientesContatoLista.objeto.StartRecordView := FStartRecordView;
+    lClientesContatoLista.objeto.LengthPageView  := FLengthPageView;
+    lClientesContatoLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lClientesContatoLista.obterLista;
+    Result := lClientesContatoLista.objeto.obterLista;
 
-    FTotalRecords := lClientesContatoLista.TotalRecords;
+    FTotalRecords := lClientesContatoLista.objeto.TotalRecords;
 
   finally
-    lClientesContatoLista.Free;
+    lClientesContatoLista:=nil;
   end;
 end;
 
 function TClientesContatoModel.Salvar: String;
 var
-  lClientesContatoDao: TClientesContatoDao;
+  lClientesContatoDao: ITClientesContatoDao;
 begin
-  lClientesContatoDao := TClientesContatoDao.Create(vIConexao);
+  lClientesContatoDao := TClientesContatoDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lClientesContatoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lClientesContatoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lClientesContatoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lClientesContatoDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lClientesContatoDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lClientesContatoDao.objeto.excluir(mySelf);
     end;
   finally
-    lClientesContatoDao.Free;
+    lClientesContatoDao:=nil;
   end;
 end;
 

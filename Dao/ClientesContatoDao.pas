@@ -16,12 +16,16 @@ uses
   Terasoft.Framework.SimpleTypes,
   Interfaces.Conexao,
   Terasoft.ConstrutorDao,
+  Terasoft.Framework.ObjectIface,
   ClientesContatoModel;
 
 type
-  TClientesContatoDao = class
+  TClientesContatoDao = class;
+  ITClientesContatoDao=IObject<TClientesContatoDao>;
 
+  TClientesContatoDao = class
   private
+    [weak] mySelf: ITClientesContatoDao;
     vIConexao : IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -46,8 +50,10 @@ type
     function where: String;
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITClientesContatoDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -58,15 +64,15 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView : String read FIDRecordView write SetIDRecordView;
 
-    function incluir(pClientesContatoModel: TClientesContatoModel): String;
-    function alterar(pClientesContatoModel: TClientesContatoModel): String;
-    function excluir(pClientesContatoModel: TClientesContatoModel): String;
+    function incluir(pClientesContatoModel: ITClientesContatoModel): String;
+    function alterar(pClientesContatoModel: ITClientesContatoModel): String;
+    function excluir(pClientesContatoModel: ITClientesContatoModel): String;
 
-    function carregaClasse(pID : String): TClientesContatoModel;
+    function carregaClasse(pID : String): ITClientesContatoModel;
 
     function obterLista: IFDDataset;
 
-    procedure setParams(var pQry: TFDQuery; pClientesContatoModel: TClientesContatoModel);
+    procedure setParams(var pQry: TFDQuery; pClientesContatoModel: ITClientesContatoModel);
 
 end;
 
@@ -77,7 +83,7 @@ uses
 
 { TClientesContato }
 
-function TClientesContatoDao.alterar(pClientesContatoModel: TClientesContatoModel): String;
+function TClientesContatoDao.alterar(pClientesContatoModel: ITClientesContatoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -91,7 +97,7 @@ begin
     setParams(lQry, pClientesContatoModel);
     lQry.ExecSQL;
 
-    Result := pClientesContatoModel.ID;
+    Result := pClientesContatoModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -99,13 +105,13 @@ begin
   end;
 end;
 
-function TClientesContatoDao.carregaClasse(pID: String): TClientesContatoModel;
+function TClientesContatoDao.carregaClasse(pID: String): ITClientesContatoModel;
 var
   lQry: TFDQuery;
-  lModel: TClientesContatoModel;
+  lModel: ITClientesContatoModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TClientesContatoModel.Create(vIConexao);
+  lModel   := TClientesContatoModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -114,23 +120,23 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-      lModel.ID             := lQry.FieldByName('ID').AsString;
-      lModel.CLIENTE_ID     := lQry.FieldByName('CLIENTE_ID').AsString;
-      lModel.CONTATO        := lQry.FieldByName('CONTATO').AsString;
-      lModel.DEPARTAMENTO   := lQry.FieldByName('DEPARTAMENTO').AsString;
-      lModel.CELULAR        := lQry.FieldByName('CELULAR').AsString;
-      lModel.TELEFONE       := lQry.FieldByName('TELEFONE').AsString;
-      lModel.EMAIL          := lQry.FieldByName('EMAIL').AsString;
-      lModel.OBS            := lQry.FieldByName('OBS').AsString;
-      lModel.SYSTIME        := lQry.FieldByName('SYSTIME').AsString;
-      lModel.USUARIO_ID     := lQry.FieldByName('USUARIO_ID').AsString;
+      lModel.objeto.ID             := lQry.FieldByName('ID').AsString;
+      lModel.objeto.CLIENTE_ID     := lQry.FieldByName('CLIENTE_ID').AsString;
+      lModel.objeto.CONTATO        := lQry.FieldByName('CONTATO').AsString;
+      lModel.objeto.DEPARTAMENTO   := lQry.FieldByName('DEPARTAMENTO').AsString;
+      lModel.objeto.CELULAR        := lQry.FieldByName('CELULAR').AsString;
+      lModel.objeto.TELEFONE       := lQry.FieldByName('TELEFONE').AsString;
+      lModel.objeto.EMAIL          := lQry.FieldByName('EMAIL').AsString;
+      lModel.objeto.OBS            := lQry.FieldByName('OBS').AsString;
+      lModel.objeto.SYSTIME        := lQry.FieldByName('SYSTIME').AsString;
+      lModel.objeto.USUARIO_ID     := lQry.FieldByName('USUARIO_ID').AsString;
 
     Result := lModel;
   finally
     lQry.Free;
   end;
 end;
-constructor TClientesContatoDao.Create(pIConexao : IConexao);
+constructor TClientesContatoDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -141,22 +147,29 @@ begin
   inherited;
 end;
 
-function TClientesContatoDao.excluir(pClientesContatoModel: TClientesContatoModel): String;
+function TClientesContatoDao.excluir(pClientesContatoModel: ITClientesContatoModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from CLIENTES_CONTATO where ID = :ID' ,[pClientesContatoModel.ID]);
+   lQry.ExecSQL('delete from CLIENTES_CONTATO where ID = :ID' ,[pClientesContatoModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pClientesContatoModel.ID;
+   Result := pClientesContatoModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
 end;
-function TClientesContatoDao.incluir(pClientesContatoModel: TClientesContatoModel): String;
+
+class function TClientesContatoDao.getNewIface(pIConexao: IConexao): ITClientesContatoDao;
+begin
+  Result := TImplObjetoOwner<TClientesContatoDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TClientesContatoDao.incluir(pClientesContatoModel: ITClientesContatoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -167,7 +180,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pClientesContatoModel.ID := vIConexao.Generetor('GEN_CLIENTES_CONTATO');
+    pClientesContatoModel.objeto.ID := vIConexao.Generetor('GEN_CLIENTES_CONTATO');
     setParams(lQry, pClientesContatoModel);
     lQry.Open;
 
@@ -265,28 +278,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TClientesContatoDao.setParams(var pQry: TFDQuery; pClientesContatoModel: TClientesContatoModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TClientesContatoDao.setParams(var pQry: TFDQuery; pClientesContatoModel: ITClientesContatoModel);
 begin
-  lTabela := vConstrutor.getColumns('CLIENTES_CONTATO');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TClientesContatoModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pClientesContatoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pClientesContatoModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('CLIENTES_CONTATO',pQry,pClientesContatoModel.objeto);
 end;
 
 procedure TClientesContatoDao.SetStartRecordView(const Value: String);

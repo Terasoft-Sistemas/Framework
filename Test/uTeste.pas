@@ -2562,13 +2562,13 @@ end;
 
 procedure TForm1.Button81Click(Sender: TObject);
 var
-  lClientesContatoModel : TClientesContatoModel;
+  lClientesContatoModel : ITClientesContatoModel;
   lMemTable   : IFDDataset;
 begin
-  lClientesContatoModel := TClientesContatoModel.Create(vIConexao);
+  lClientesContatoModel := TClientesContatoModel.getNewIface(vIConexao);
   try
     try
-      lMemTable := lClientesContatoModel.ObterLista;
+      lMemTable := lClientesContatoModel.objeto.ObterLista;
 
       memoResultado.Lines.Clear;
 
@@ -2585,78 +2585,78 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lClientesContatoModel.Free;
+    lClientesContatoModel:=nil;
   end;
 end;
 
 procedure TForm1.Button82Click(Sender: TObject);
 var
-  lClientesContatoModel : TClientesContatoModel;
+  lClientesContatoModel : ITClientesContatoModel;
   ID          : String;
 begin
-  lClientesContatoModel := TClientesContatoModel.Create(vIConexao);
+  lClientesContatoModel := TClientesContatoModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('CLIENTES_CONTATO', 'Digite o ID do Contato que deseja Alterar:', '');
       if ID.IsEmpty then
         exit;
 
-      lClientesContatoModel := lClientesContatoModel.Alterar(ID);
-      lClientesContatoModel.Contato := 'TESTE ALTERAR';
+      lClientesContatoModel := lClientesContatoModel.objeto.Alterar(ID);
+      lClientesContatoModel.objeto.Contato := 'TESTE ALTERAR';
 
-      lClientesContatoModel.Salvar;
+      lClientesContatoModel.objeto.Salvar;
       ShowMessage('Alterado com Sucesso');
     Except
       on E:Exception do
       ShowMessage('Erro: ' +E.Message);
     end;
   finally
-    lClientesContatoModel.Free;
+    lClientesContatoModel:=nil;
   end;
 end;
 
 procedure TForm1.Button83Click(Sender: TObject);
 var
-  lClientesContatoModel : TClientesContatoModel;
+  lClientesContatoModel : ITClientesContatoModel;
   ID        : String;
 begin
-  lClientesContatoModel := TClientesContatoModel.Create(vIConexao);
+  lClientesContatoModel := TClientesContatoModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('CLIENTES_CONTATO', 'Digite o ID do Contato que deseja excluir:', '');
       if ID.IsEmpty then
           Exit;
 
-      lClientesContatoModel.Excluir(ID);
+      lClientesContatoModel.objeto.Excluir(ID);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lClientesContatoModel.Free;
+    lClientesContatoModel:=nil;
   end;
 end;
 
 procedure TForm1.Button84Click(Sender: TObject);
 var
-  lClientesContatoModel : TClientesContatoModel;
+  lClientesContatoModel : ITClientesContatoModel;
 begin
-  lClientesContatoModel := TClientesContatoModel.Create(vIConexao);
+  lClientesContatoModel := TClientesContatoModel.getNewIface(vIConexao);
   try
     try
-      lClientesContatoModel.ID          := 10;
-      lClientesContatoModel.CLIENTE_ID  := '000001';
-      lClientesContatoModel.CONTATO     := 'TESTE TERASOFT';
+      lClientesContatoModel.objeto.ID          := 10;
+      lClientesContatoModel.objeto.CLIENTE_ID  := '000001';
+      lClientesContatoModel.objeto.CONTATO     := 'TESTE TERASOFT';
 
-      lClientesContatoModel.Incluir;
+      lClientesContatoModel.objeto.Incluir;
       ShowMessage('Incluido com Sucesso!');
     except
       on E:Exception do
       ShowMessage('Erro: ' + E.Message);
     end
   finally
-    lClientesContatoModel.Free;
+    lClientesContatoModel:=nil;
   end;
 end;
 
