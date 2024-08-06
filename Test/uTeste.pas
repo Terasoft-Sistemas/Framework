@@ -1583,22 +1583,22 @@ end;
 
 procedure TForm1.Button4Click(Sender: TObject);
 var
-  lWebPedidoModel : TWebPedidoModel;
+  lWebPedidoModel : ITWebPedidoModel;
   i               : Integer;
   lMemTable       : IFDDataset;
   lPedidoWeb      : String;
 begin
-  lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
+  lWebPedidoModel := TWebPedidoModel.getNewIface(vIConexao);
   try
 
     lPedidoWeb := InputBox('ObterResumo','Digite o número do Web Pedido para consultar:','');
 
-    lWebPedidoModel.LengthPageView  := vQtdeRegistros.ToString;
-    lWebPedidoModel.StartRecordView := vPagina.ToString;
-    lWebPedidoModel.OrderView       := 'id';
-    lWebPedidoModel.IDRecordView    := StrToInt(lPedidoWeb);
+    lWebPedidoModel.objeto.LengthPageView  := vQtdeRegistros.ToString;
+    lWebPedidoModel.objeto.StartRecordView := vPagina.ToString;
+    lWebPedidoModel.objeto.OrderView       := 'id';
+    lWebPedidoModel.objeto.IDRecordView    := StrToInt(lPedidoWeb);
 
-    lMemTable := lWebPedidoModel.obterLista;
+    lMemTable := lWebPedidoModel.objeto.obterLista;
 
     inc(vPagina, 10);
 
@@ -1639,7 +1639,7 @@ begin
     end;
 
   finally
-    lWebPedidoModel.Free;
+    lWebPedidoModel:=nil;
   end;
 
 end;
@@ -1946,25 +1946,25 @@ end;
 
 procedure TForm1.Button5Click(Sender: TObject);
 var
-  lWebPedidoModel : TWebPedidoModel;
+  lWebPedidoModel : ITWebPedidoModel;
 begin
-  lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
+  lWebPedidoModel := TWebPedidoModel.getNewIface(vIConexao);
   try
     try
 
-      lWebPedidoModel.CLIENTE_ID          := '000000';
-      lWebPedidoModel.VENDEDOR_ID         := '000001';
-      lWebPedidoModel.TIPOVENDA_ID        := '000004';
-      lWebPedidoModel.PORTADOR_ID         := '000001';
+      lWebPedidoModel.objeto.CLIENTE_ID          := '000000';
+      lWebPedidoModel.objeto.VENDEDOR_ID         := '000001';
+      lWebPedidoModel.objeto.TIPOVENDA_ID        := '000004';
+      lWebPedidoModel.objeto.PORTADOR_ID         := '000001';
 
-      lWebPedidoModel.Incluir;
+      lWebPedidoModel.objeto.Incluir;
       ShowMessage('Inserido com sucesso!');
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lWebPedidoModel.Free;
+    lWebPedidoModel:=nil;
   end;
 end;
 
@@ -2203,10 +2203,10 @@ end;
 
 procedure TForm1.Button6Click(Sender: TObject);
 var
-  lWebPedidoModel : TWebPedidoModel;
+  lWebPedidoModel : ITWebPedidoModel;
   lID             : String;
 begin
-  lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
+  lWebPedidoModel := TWebPedidoModel.getNewIface(vIConexao);
   try
     try
       lID := InputBox('WebPedido', 'Digite o ID do WebPedido:', '');
@@ -2214,9 +2214,9 @@ begin
       if lID.IsEmpty then
         exit;
 
-      lWebPedidoModel := lWebPedidoModel.Alterar(lID);
-      lWebPedidoModel.CLIENTE_ID := '000001';
-      lWebPedidoModel.Salvar;
+      lWebPedidoModel := lWebPedidoModel.objeto.Alterar(lID);
+      lWebPedidoModel.objeto.CLIENTE_ID := '000001';
+      lWebPedidoModel.objeto.Salvar;
 
       ShowMessage('Alterado com sucesso!');
     except
@@ -2224,7 +2224,7 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lWebPedidoModel.Free;
+    lWebPedidoModel:=nil;
   end;
 end;
 
@@ -2508,22 +2508,22 @@ end;
 
 procedure TForm1.Button7Click(Sender: TObject);
 var
-  lWebPedidoModel : TWebPedidoModel;
+  lWebPedidoModel : ITWebPedidoModel;
   PedidoWeb       : String;
 begin
-  lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
+  lWebPedidoModel := TWebPedidoModel.getNewIface(vIConexao);
   try
     try
       PedidoWeb := InputBox('WebPedido', 'Digite o ID do Item que deseja excluir:', '');
 
-      lWebPedidoModel.Excluir(PedidoWeb);
+      lWebPedidoModel.objeto.Excluir(PedidoWeb);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lWebPedidoModel.Free;
+    lWebPedidoModel:=nil;
   end;
 end;
 
@@ -2881,11 +2881,11 @@ end;
 
 procedure TForm1.Button8Click(Sender: TObject);
 var
-  lWebPedidoModel : TWebPedidoModel;
+  lWebPedidoModel : ITWebPedidoModel;
   lVenderItemParametros: TVenderItemParametros;
   lWebPedido : String;
 begin
-  lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
+  lWebPedidoModel := TWebPedidoModel.getNewIface(vIConexao);
   try
     try
       lWebPedido := InputBox('WebPedido', 'Digite o número do Web Pedido:', '');
@@ -2905,14 +2905,14 @@ begin
       lVenderItemParametros.TIPO_GARANTIA    := '0000';
       lVenderItemParametros.VLR_GARANTIA     := '0';
 
-      lWebPedidoModel.VenderItem(lVenderItemParametros);
+      lWebPedidoModel.objeto.VenderItem(lVenderItemParametros);
       ShowMessage('Item adicionado ao WebPedido: ' +lWebPedido);
     except
     on E:Exception do
        ShowMessage('Erro vender item: ' + E.Message);
     end;
   finally
-    lWebPedidoModel.Free;
+    lWebPedidoModel:=nil;
   end;
 end;
 
@@ -3239,26 +3239,26 @@ end;
 
 procedure TForm1.btnTotaisClick(Sender: TObject);
 var
-  lWebPedidoModel : TWebPedidoModel;
+  lWebPedidoModel : ITWebPedidoModel;
   lID : String;
 begin
-  lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
+  lWebPedidoModel := TWebPedidoModel.getNewIface(vIConexao);
   try
     lID := InputBox('WebPedido', 'Digite o ID do Web Pedido:', '');
     if lID.IsEmpty then
       Exit;
 
-    lWebPedidoModel.ID := lID;
-    lWebPedidoModel.obterTotais;
+    lWebPedidoModel.objeto.ID := lID;
+    lWebPedidoModel.objeto.obterTotais;
 
-    memoResultado.Lines.Add('VALOR_ACRESCIMO: '+lWebPedidoModel.ACRESCIMO);
-    memoResultado.Lines.Add('VALOR_FRETE: '+lWebPedidoModel.VALOR_FRETE);
-    memoResultado.Lines.Add('VALOR_DESCONTO: '+lWebPedidoModel.VALOR_CUPOM_DESCONTO);
-    memoResultado.Lines.Add('VALOR_ITENS: '+lWebPedidoModel.VALOR_ITENS);
-    memoResultado.Lines.Add('VALOR_TOTAL: '+lWebPedidoModel.VALOR_TOTAL);
+    memoResultado.Lines.Add('VALOR_ACRESCIMO: '+lWebPedidoModel.objeto.ACRESCIMO);
+    memoResultado.Lines.Add('VALOR_FRETE: '+lWebPedidoModel.objeto.VALOR_FRETE);
+    memoResultado.Lines.Add('VALOR_DESCONTO: '+lWebPedidoModel.objeto.VALOR_CUPOM_DESCONTO);
+    memoResultado.Lines.Add('VALOR_ITENS: '+lWebPedidoModel.objeto.VALOR_ITENS);
+    memoResultado.Lines.Add('VALOR_TOTAL: '+lWebPedidoModel.objeto.VALOR_TOTAL);
     memoResultado.Lines.Add('===============================================');
   finally
-    lWebPedidoModel.Free;
+    lWebPedidoModel:=nil;
   end;
 end;
 

@@ -20,9 +20,13 @@ uses
   ProdutosModel,
   EmpresaModel,
   WebPedidoItensDao,
+  Terasoft.Framework.ObjectIface,
   MovimentoSerialModel;
 
 type
+  TWebPedidoModel = class;
+  ITWebPedidoModel=IObject<TWebPedidoModel>;
+
   TVenderItemParametros = record
     WEB_PEDIDO,
     PRODUTO,
@@ -40,10 +44,10 @@ type
   end;
 
   TWebPedidoModel = class
-
   private
+    [weak] mySelf: ITWebPedidoModel;
     vIConexao : IConexao;
-    FWebPedidosLista: IList<TWebPedidoModel>;
+    FWebPedidosLista: IList<ITWebPedidoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -159,7 +163,7 @@ type
     FAVALISTA_ID: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetWebPedidosLista(const Value: IList<TWebPedidoModel>);
+    procedure SetWebPedidosLista(const Value: IList<ITWebPedidoModel>);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -379,14 +383,14 @@ type
     property VALOR_FINANCIADO: Variant read FVALOR_FINANCIADO write SetVALOR_FINANCIADO;
     property AVALISTA_ID: Variant read FAVALISTA_ID write SetAVALISTA_ID;
 
-
-
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITWebPedidoModel;
 
     function Salvar: String;
     function obterLista : IFDDataset;
-    function carregaClasse(pId: String): TWebPedidoModel;
+    function carregaClasse(pId: String): ITWebPedidoModel;
 
     function aprovarVendaAssistida(pIdVendaAssistida: Integer): String;
     function VenderItem(pVenderItemParametros: TVenderItemParametros): String;
@@ -395,7 +399,7 @@ type
     procedure obterTotais;
 
     function Incluir : String;
-    function Alterar(pID: String): TWebPedidoModel;
+    function Alterar(pID: String): ITWebPedidoModel;
     function Excluir(pID: String) : String;
 
     function Autorizar(pID : String) : Boolean;
@@ -403,7 +407,7 @@ type
     function Negar(pID: String): Boolean;
     function NegarDesconto(pID: String): Boolean;
 
-    property WebPedidosLista: IList<TWebPedidoModel> read FWebPedidosLista write SetWebPedidosLista;
+    property WebPedidosLista: IList<ITWebPedidoModel> read FWebPedidosLista write SetWebPedidosLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -416,7 +420,7 @@ type
 
     procedure IncluiReservaCD(pWebPedidoItensModel: ITWebPedidoItensModel);
     procedure ExcluirReservaCD(pWebPedidoItensID, pFilial : String);
-    procedure AtualizaReservaCD(pWebPedidoModel: TWebPedidoModel);
+    procedure AtualizaReservaCD(pWebPedidoModel: ITWebPedidoModel);
 
   end;
 
@@ -437,17 +441,17 @@ begin
 
 end;
 
-function TWebPedidoModel.Alterar(pID : String): TWebPedidoModel;
+function TWebPedidoModel.Alterar(pID : String): ITWebPedidoModel;
 var
-  lWebPedidoModel : TWebPedidoModel;
+  lWebPedidoModel : ITWebPedidoModel;
 begin
   if pID = '' then
     CriaException('ID � obrigat�rio.');
 
-  lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
+  lWebPedidoModel := TWebPedidoModel.getNewIface(vIConexao);
   try
-    lWebPedidoModel := lWebPedidoModel.carregaClasse(pID);
-    lWebPedidoModel.Acao := tacAlterar;
+    lWebPedidoModel := lWebPedidoModel.objeto.carregaClasse(pID);
+    lWebPedidoModel.objeto.Acao := tacAlterar;
     Result := lWebPedidoModel;
   finally
   end;
@@ -458,7 +462,7 @@ var
   lPedidoVendaModel        : ITPedidoVendaModel;
   lPedidoItensModel        : ITPedidoItensModel;
   lWebPedidoItensModel     : ITWebPedidoItensModel;
-  lWebPedidoModel          : TWebPedidoModel;
+  lWebPedidoModel          : ITWebPedidoModel;
   lClientesModel           : ITClienteModel;
   lFinanceiroPedidoModel   : ITFinanceiroPedidoModel;
   lPedido                  : String;
@@ -470,7 +474,7 @@ begin
   if not (pIdVendaAssistida <> 0) then
     exit;
 
-  lWebPedidoModel        := TWebPedidoModel.Create(vIConexao);
+  lWebPedidoModel        := TWebPedidoModel.getNewIface(vIConexao);
   lWebPedidoItensModel   := TWebPedidoItensModel.getNewIface(vIConexao);
 
   lPedidoVendaModel      := TPedidoVendaModel.getNewIface(vIConexao);
@@ -489,23 +493,23 @@ begin
     lFinanceiroPedidoModel.objeto.WhereView := ' and financeiro_pedido.web_pedido_id = ' + pIdVendaAssistida.ToString;
     lTableFinanceiro := lFinanceiroPedidoModel.objeto.obterLista;
 
-    lWebPedidoModel := lWebPedidoModel.carregaClasse(pIdVendaAssistida.ToString);
+    lWebPedidoModel := lWebPedidoModel.objeto.carregaClasse(pIdVendaAssistida.ToString);
 
-    lClientesModel.objeto.IDRecordView := lWebPedidoModel.CLIENTE_ID;
+    lClientesModel.objeto.IDRecordView := lWebPedidoModel.objeto.CLIENTE_ID;
     lTableCliente := lClientesModel.objeto.ObterListaMemTable;
 
     lPedidoVendaModel.objeto.Acao                 := tacIncluir;
-    lPedidoVendaModel.objeto.LOJA                 := lWebPedidoModel.LOJA;
+    lPedidoVendaModel.objeto.LOJA                 := lWebPedidoModel.objeto.LOJA;
     lPedidoVendaModel.objeto.DATA_PED             := DateToStr(vIConexao.DataServer);
     lPedidoVendaModel.objeto.HORA_PED             := TimeToStr(vIConexao.HoraServer);
-    lPedidoVendaModel.objeto.PRIMEIROVENC_PED     := lWebPedidoModel.PRIMEIRO_VENCIMENTO;
-    lPedidoVendaModel.objeto.ACRES_PED            := lWebPedidoModel.ACRESCIMO;
-    lPedidoVendaModel.objeto.DESC_PED             := lWebPedidoModel.VALOR_CUPOM_DESCONTO;
-    lPedidoVendaModel.objeto.DESCONTO_PED         := lWebPedidoModel.PERCENTUAL_DESCONTO;
-    lPedidoVendaModel.objeto.VALOR_PED            := FloatToStr((StrToFloat(lWebPedidoModel.VALOR_TOTAL)+StrToFloat(lWebPedidoModel.VALOR_CUPOM_DESCONTO))-StrToFloat(lWebPedidoModel.ACRESCIMO));
-    lPedidoVendaModel.objeto.TOTAL_PED            := lWebPedidoModel.VALOR_TOTAL;
-    lPedidoVendaModel.objeto.VALORENTADA_PED      := lWebPedidoModel.VALOR_ENTRADA;
-    lPedidoVendaModel.objeto.PARCELAS_PED         := lWebPedidoModel.PARCELAS;
+    lPedidoVendaModel.objeto.PRIMEIROVENC_PED     := lWebPedidoModel.objeto.PRIMEIRO_VENCIMENTO;
+    lPedidoVendaModel.objeto.ACRES_PED            := lWebPedidoModel.objeto.ACRESCIMO;
+    lPedidoVendaModel.objeto.DESC_PED             := lWebPedidoModel.objeto.VALOR_CUPOM_DESCONTO;
+    lPedidoVendaModel.objeto.DESCONTO_PED         := lWebPedidoModel.objeto.PERCENTUAL_DESCONTO;
+    lPedidoVendaModel.objeto.VALOR_PED            := FloatToStr((StrToFloat(lWebPedidoModel.objeto.VALOR_TOTAL)+StrToFloat(lWebPedidoModel.objeto.VALOR_CUPOM_DESCONTO))-StrToFloat(lWebPedidoModel.objeto.ACRESCIMO));
+    lPedidoVendaModel.objeto.TOTAL_PED            := lWebPedidoModel.objeto.VALOR_TOTAL;
+    lPedidoVendaModel.objeto.VALORENTADA_PED      := lWebPedidoModel.objeto.VALOR_ENTRADA;
+    lPedidoVendaModel.objeto.PARCELAS_PED         := lWebPedidoModel.objeto.PARCELAS;
     lPedidoVendaModel.objeto.PARCELA_PED          := '0'; //Valor da parcela
     lPedidoVendaModel.objeto.CTR_IMPRESSAO_PED    := '0';
     lPedidoVendaModel.objeto.RESERVADO            := 'N';
@@ -516,35 +520,35 @@ begin
     lPedidoVendaModel.objeto.STATUS               := 'O';
     lPedidoVendaModel.objeto.TIPO_PED             := 'P';
     lPedidoVendaModel.objeto.TABJUROS_PED         := 'N';
-    lPedidoVendaModel.objeto.WEB_PEDIDO_ID        := lWebPedidoModel.ID;
-    lPedidoVendaModel.objeto.CODIGO_CLI           := lWebPedidoModel.CLIENTE_ID;
+    lPedidoVendaModel.objeto.WEB_PEDIDO_ID        := lWebPedidoModel.objeto.ID;
+    lPedidoVendaModel.objeto.CODIGO_CLI           := lWebPedidoModel.objeto.CLIENTE_ID;
     lPedidoVendaModel.objeto.CNPJ_CPF_CONSUMIDOR  := lTableCliente.objeto.fieldByName('CNPJ_CPF_CLI').AsString;
 
     if lFinanceiroPedidoModel.objeto.TotalRecords > 0 then
       lPedidoVendaModel.objeto.CODIGO_PORT        := lTableFinanceiro.objeto.FieldByName('PORTADOR_ID').AsString
     else
-      lPedidoVendaModel.objeto.CODIGO_PORT        := lWebPedidoModel.PORTADOR_ID;
+      lPedidoVendaModel.objeto.CODIGO_PORT        := lWebPedidoModel.objeto.PORTADOR_ID;
 
-    lPedidoVendaModel.objeto.CODIGO_VEN               := lWebPedidoModel.VENDEDOR_ID;
-    lPedidoVendaModel.objeto.CODIGO_TIP               := lWebPedidoModel.TIPOVENDA_ID;
-    lPedidoVendaModel.objeto.FRETE_PED                := lWebPedidoModel.VALOR_FRETE;
-    lPedidoVendaModel.objeto.INFORMACOES_PED          := lWebPedidoModel.OBSERVACAO;
-    lPedidoVendaModel.objeto.ENTREGA_ENDERECO         := lWebPedidoModel.ENTREGA_ENDERECO;
-    lPedidoVendaModel.objeto.ENTREGA_NUMERO           := lWebPedidoModel.ENTREGA_NUMERO;
-    lPedidoVendaModel.objeto.ENTREGA_BAIRRO           := lWebPedidoModel.ENTREGA_BAIRRO;
-    lPedidoVendaModel.objeto.ENTREGA_CIDADE           := lWebPedidoModel.ENTREGA_CIDADE;
-    lPedidoVendaModel.objeto.ENTREGA_UF               := lWebPedidoModel.ENTREGA_UF;
-    lPedidoVendaModel.objeto.ENTREGA_CEP              := lWebPedidoModel.ENTREGA_CEP;
-    lPedidoVendaModel.objeto.ENTREGA_COMPLEMENTO      := lWebPedidoModel.ENTREGA_COMPLEMENTO;
-    lPedidoVendaModel.objeto.MONTAGEM_DATA            := lWebPedidoModel.MONTAGEM_DATA;
+    lPedidoVendaModel.objeto.CODIGO_VEN               := lWebPedidoModel.objeto.VENDEDOR_ID;
+    lPedidoVendaModel.objeto.CODIGO_TIP               := lWebPedidoModel.objeto.TIPOVENDA_ID;
+    lPedidoVendaModel.objeto.FRETE_PED                := lWebPedidoModel.objeto.VALOR_FRETE;
+    lPedidoVendaModel.objeto.INFORMACOES_PED          := lWebPedidoModel.objeto.OBSERVACAO;
+    lPedidoVendaModel.objeto.ENTREGA_ENDERECO         := lWebPedidoModel.objeto.ENTREGA_ENDERECO;
+    lPedidoVendaModel.objeto.ENTREGA_NUMERO           := lWebPedidoModel.objeto.ENTREGA_NUMERO;
+    lPedidoVendaModel.objeto.ENTREGA_BAIRRO           := lWebPedidoModel.objeto.ENTREGA_BAIRRO;
+    lPedidoVendaModel.objeto.ENTREGA_CIDADE           := lWebPedidoModel.objeto.ENTREGA_CIDADE;
+    lPedidoVendaModel.objeto.ENTREGA_UF               := lWebPedidoModel.objeto.ENTREGA_UF;
+    lPedidoVendaModel.objeto.ENTREGA_CEP              := lWebPedidoModel.objeto.ENTREGA_CEP;
+    lPedidoVendaModel.objeto.ENTREGA_COMPLEMENTO      := lWebPedidoModel.objeto.ENTREGA_COMPLEMENTO;
+    lPedidoVendaModel.objeto.MONTAGEM_DATA            := lWebPedidoModel.objeto.MONTAGEM_DATA;
     lPedidoVendaModel.objeto.USUARIO_PED              := self.vIConexao.getUSer.ID;
     lPedidoVendaModel.objeto.IDUsuario                := self.vIConexao.getUSer.ID;
     lPedidoVendaModel.objeto.TIPO_COMISSAO            := self.TIPO_COMISSAO;
     lPedidoVendaModel.objeto.GERENTE_ID               := self.GERENTE_ID;
-    lPedidoVendaModel.objeto.CONDICOES2_PAG           := lWebPedidoModel.AVALISTA_ID;
+    lPedidoVendaModel.objeto.CONDICOES2_PAG           := lWebPedidoModel.objeto.AVALISTA_ID;
 
-    lPedidoVendaModel.objeto.SEGURO_PRESTAMISTA_CUSTO := lWebPedidoModel.SEGURO_PRESTAMISTA_CUSTO;
-    lPedidoVendaModel.objeto.SEGURO_PRESTAMISTA_VALOR := lWebPedidoModel.SEGURO_PRESTAMISTA_VALOR;
+    lPedidoVendaModel.objeto.SEGURO_PRESTAMISTA_CUSTO := lWebPedidoModel.objeto.SEGURO_PRESTAMISTA_CUSTO;
+    lPedidoVendaModel.objeto.SEGURO_PRESTAMISTA_VALOR := lWebPedidoModel.objeto.SEGURO_PRESTAMISTA_VALOR;
 
     lPedido := lPedidoVendaModel.objeto.Salvar;
 
@@ -564,8 +568,8 @@ begin
       lPedidoItensModel.objeto.PedidoItenssLista.Add(TPedidoItensModel.getNewIface(vIConexao));
 
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.NUMERO_PED             := lPedido;
-      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.CODIGO_CLI             := lWebPedidoModel.CLIENTE_ID;
-      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.LOJA                   := lWebPedidoModel.LOJA;
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.CODIGO_CLI             := lWebPedidoModel.objeto.CLIENTE_ID;
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.LOJA                   := lWebPedidoModel.objeto.LOJA;
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.QUANTIDADE_PED         := FloatToStr(lWebPedidoItensModel.objeto.QUANTIDADE);
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.QUANTIDADE_NEW         := FloatToStr(lWebPedidoItensModel.objeto.QUANTIDADE);
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.WEB_PEDIDOITENS_ID     := lWebPedidoItensModel.objeto.ID;
@@ -608,16 +612,16 @@ begin
     else
       lPedidoVendaModel.objeto.gerarContasReceberPedido;
 
-    lWebPedidoModel.FAcao      := tacAlterar;
-    lWebPedidoModel.FSTATUS    := 'F';
-    lWebPedidoModel.FPEDIDO_ID := lPedido;
-    lWebPedidoModel.Salvar;
+    lWebPedidoModel.objeto.FAcao      := tacAlterar;
+    lWebPedidoModel.objeto.FSTATUS    := 'F';
+    lWebPedidoModel.objeto.FPEDIDO_ID := lPedido;
+    lWebPedidoModel.objeto.Salvar;
 
     Result := lPedido;
 
   finally
     lFinanceiroPedidoModel:=nil;
-    lWebPedidoModel.Free;
+    lWebPedidoModel:=nil;
     lPedidoVendaModel:=nil;
     lWebPedidoItensModel:=nil;
     lPedidoItensModel:=nil;
@@ -626,19 +630,19 @@ begin
 
 end;
 
-function TWebPedidoModel.carregaClasse(pId: String): TWebPedidoModel;
+function TWebPedidoModel.carregaClasse(pId: String): ITWebPedidoModel;
 var
-  lWebPedidoDao: TWebPedidoDao;
+  lWebPedidoDao: ITWebPedidoDao;
 begin
-  lWebPedidoDao := TWebPedidoDao.Create(vIConexao);
+  lWebPedidoDao := TWebPedidoDao.getNewIface(vIConexao);
   try
-    Result := lWebPedidoDao.carregaClasse(pId);
+    Result := lWebPedidoDao.objeto.carregaClasse(pId);
   finally
-    lWebPedidoDao.Free;
+    lWebPedidoDao:=nil;
   end;
 end;
 
-constructor TWebPedidoModel.Create(pIConexao : IConexao);
+constructor TWebPedidoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -680,6 +684,12 @@ begin
   end;
 end;
 
+class function TWebPedidoModel.getNewIface(pIConexao: IConexao): ITWebPedidoModel;
+begin
+  Result := TImplObjetoOwner<TWebPedidoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TWebPedidoModel.Incluir: String;
 begin
   self.FDATAHORA              := DateTimeToStr(vIConexao.DataHoraServer);
@@ -692,23 +702,23 @@ end;
 
 function TWebPedidoModel.obterLista: IFDDataset;
 var
-  lWebPedidoLista: TWebPedidoDao;
+  lWebPedidoLista: ITWebPedidoDao;
 begin
-  lWebPedidoLista := TWebPedidoDao.Create(vIConexao);
+  lWebPedidoLista := TWebPedidoDao.getNewIface(vIConexao);
 
   try
-    lWebPedidoLista.TotalRecords    := FTotalRecords;
-    lWebPedidoLista.WhereView       := FWhereView;
-    lWebPedidoLista.CountView       := FCountView;
-    lWebPedidoLista.OrderView       := FOrderView;
-    lWebPedidoLista.StartRecordView := FStartRecordView;
-    lWebPedidoLista.LengthPageView  := FLengthPageView;
-    lWebPedidoLista.IDRecordView    := FIDRecordView;
+    lWebPedidoLista.objeto.TotalRecords    := FTotalRecords;
+    lWebPedidoLista.objeto.WhereView       := FWhereView;
+    lWebPedidoLista.objeto.CountView       := FCountView;
+    lWebPedidoLista.objeto.OrderView       := FOrderView;
+    lWebPedidoLista.objeto.StartRecordView := FStartRecordView;
+    lWebPedidoLista.objeto.LengthPageView  := FLengthPageView;
+    lWebPedidoLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lWebPedidoLista.obterLista;
-    FTotalRecords := lWebPedidoLista.TotalRecords;
+    Result := lWebPedidoLista.objeto.obterLista;
+    FTotalRecords := lWebPedidoLista.objeto.TotalRecords;
   finally
-    lWebPedidoLista.Free;
+    lWebPedidoLista:=nil;
   end;
 end;
 
@@ -763,17 +773,17 @@ end;
 
 function TWebPedidoModel.Salvar: String;
 var
-  lWebPedidoDao : TWebPedidoDao;
+  lWebPedidoDao : ITWebPedidoDao;
 begin
-  lWebPedidoDao := TWebPedidoDao.Create(vIConexao);
+  lWebPedidoDao := TWebPedidoDao.getNewIface(vIConexao);
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lWebPedidoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lWebPedidoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lWebPedidoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lWebPedidoDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lWebPedidoDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lWebPedidoDao.objeto.excluir(mySelf);
     end;
   finally
-    lWebPedidoDao.Free;
+    lWebPedidoDao:=nil;
   end;
 end;
 
@@ -1357,6 +1367,7 @@ var
   lProdutoPreco        : TProdutoPreco;
   lValorUnitario,
   lValorVendido        : Double;
+  p: ITWebPedidoModel;
   i : Integer;
   lVendaComSerial: Boolean;
   lSerialItem: String;
@@ -1382,14 +1393,14 @@ begin
   end;
 
   try
-    self := self.carregaClasse(pVenderItemParametros.WEB_PEDIDO);
+    p := self.carregaClasse(pVenderItemParametros.WEB_PEDIDO);
 
     lProdutoModel.objeto.IDRecordView := pVenderItemParametros.PRODUTO;
     lProdutoModel.objeto.obterLista;
 
     lProdutoModel := lProdutoModel.objeto.ProdutossLista.First;
 
-    lWebPedidoItensModel.objeto.WEB_PEDIDO_ID       := self.ID;
+    lWebPedidoItensModel.objeto.WEB_PEDIDO_ID       := p.objeto.ID;
     lWebPedidoItensModel.objeto.PRODUTO_ID          := pVenderItemParametros.PRODUTO;
     lWebPedidoItensModel.objeto.QUANTIDADE          := pVenderItemParametros.QUANTIDADE;
 
@@ -1435,7 +1446,7 @@ begin
     if (PVenderItemParametros.TIPO_ENTREGA = 'CD') or ((PVenderItemParametros.TIPO_ENTREGA = 'LJ') and (PVenderItemParametros.ENTREGA = 'S')) then
     begin
       lWebPedidoItensModel.objeto.ID := Result;
-      Self.IncluiReservaCD(lWebPedidoItensModel);
+      p.objeto.IncluiReservaCD(lWebPedidoItensModel);
     end;
 
     if lVendaComSerial then
@@ -1465,7 +1476,7 @@ begin
       lWebPedidoItensModel.objeto.Salvar;
     end;
 
-    Self.calcularTotais;
+    p.objeto.calcularTotais;
   finally
     lWebPedidoItensModel:=nil;
     lProdutoModel:=nil;
@@ -1557,7 +1568,7 @@ end;
 
 function TWebPedidoModel.Negar(pID: String): Boolean;
 var
-  lWebPedidoModel : TWebPedidoModel;
+  lWebPedidoModel : ITWebPedidoModel;
   lSolicitacaoDescontoModel : ITSolicitacaoDescontoModel;
   lMemTableSolicitacao : IFDDataset;
 begin
@@ -1565,17 +1576,17 @@ begin
     CriaException('ID não informado');
 
   lSolicitacaoDescontoModel := TSolicitacaoDescontoModel.getNewIface(vIConexao);
-  lWebPedidoModel           := TWebPedidoModel.Create(vIConexao);
+  lWebPedidoModel           := TWebPedidoModel.getNewIface(vIConexao);
   try
-    lWebPedidoModel := lWebPedidoModel.carregaClasse(pID);
+    lWebPedidoModel := lWebPedidoModel.objeto.carregaClasse(pID);
 
-    if (lWebPedidoModel.STATUS <> 'E') and (lWebPedidoModel.STATUS <> 'P') then
+    if (lWebPedidoModel.objeto.STATUS <> 'E') and (lWebPedidoModel.objeto.STATUS <> 'P') then
       CriaException('Permissão já negada ou autorizada.');
 
-    if lWebPedidoModel.STATUS = 'E' then
+    if lWebPedidoModel.objeto.STATUS = 'E' then
     begin
       lSolicitacaoDescontoModel.objeto.WhereView := ' and solicitacao_desconto.tabela_origem = ''WEB_PEDIDO'' '+
-                                             ' and solicitacao_desconto.pedido_id = '+lWebPedidoModel.ID +
+                                             ' and solicitacao_desconto.pedido_id = '+lWebPedidoModel.objeto.ID +
                                              ' and solicitacao_desconto.status is null ';
 
       lMemTableSolicitacao := lSolicitacaoDescontoModel.objeto.obterLista;
@@ -1589,34 +1600,34 @@ begin
       lSolicitacaoDescontoModel.objeto.Salvar;
     end;
 
-    lWebPedidoModel.STATUS := 'D';
-    lWebPedidoModel.Acao := tacAlterar;
-    lWebPedidoModel.Salvar;
+    lWebPedidoModel.objeto.STATUS := 'D';
+    lWebPedidoModel.objeto.Acao := tacAlterar;
+    lWebPedidoModel.objeto.Salvar;
 
     Result := true;
 
   finally
     lSolicitacaoDescontoModel:=nil;
-    lWebPedidoModel.Free;
+    lWebPedidoModel:=nil;
   end;
 end;
 
 function TWebPedidoModel.NegarDesconto(pID: String): Boolean;
 var
-  lWebPedidoModel  : TWebPedidoModel;
+  lWebPedidoModel  : ITWebPedidoModel;
   lPermissaoRemota : ITPermissaoRemotaModel;
   lTablePermissa   : IFDDataset;
 begin
   if pID = '' then
     CriaException('ID não informado.');
 
-  lWebPedidoModel  := TWebPedidoModel.Create(vIConexao);
+  lWebPedidoModel  := TWebPedidoModel.getNewIface(vIConexao);
   lPermissaoRemota := TPermissaoRemotaModel.getNewIface(vIConexao);
 
   try
-    lWebPedidoModel := lWebPedidoModel.carregaClasse(pID);
+    lWebPedidoModel := lWebPedidoModel.objeto.carregaClasse(pID);
 
-    if lWebPedidoModel.STATUS <> 'E' then
+    if lWebPedidoModel.objeto.STATUS <> 'E' then
       CriaException('Desconto já negado ou autorizado.');
 
     lPermissaoRemota.objeto.WhereView := ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' '+
@@ -1632,34 +1643,34 @@ begin
       lTablePermissa.objeto.Next;
     end;
 
-    lWebPedidoModel.STATUS              := 'D';
-		lWebPedidoModel.DATA_HORA_APROVACAO := '';
-		lWebPedidoModel.USUARIO_APROVACAO   := '';
+    lWebPedidoModel.objeto.STATUS              := 'D';
+		lWebPedidoModel.objeto.DATA_HORA_APROVACAO := '';
+		lWebPedidoModel.objeto.USUARIO_APROVACAO   := '';
 
-    lWebPedidoModel.Acao := tacAlterar;
-    lWebPedidoModel.Salvar;
+    lWebPedidoModel.objeto.Acao := tacAlterar;
+    lWebPedidoModel.objeto.Salvar;
 
     Result := True;
   finally
     lPermissaoRemota:=nil;
-    lWebPedidoModel.Free;
+    lWebPedidoModel:=nil;
   end;
 end;
 
-procedure TWebPedidoModel.AtualizaReservaCD(pWebPedidoModel: TWebPedidoModel);
+procedure TWebPedidoModel.AtualizaReservaCD(pWebPedidoModel: ITWebPedidoModel);
 var
   lReservaModel : ITReservaModel;
-  lWebPedidoModel : TWebPedidoModel;
+  lWebPedidoModel : ITWebPedidoModel;
 begin
   lReservaModel        := TReservaModel.getNewIface(vIConexao.NovaConexao('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA));
 //  lReservaModel := TReservaModel.Create(vIConexao);
-  lWebPedidoModel := TWebPedidoModel.Create(vIConexao);
+  lWebPedidoModel := TWebPedidoModel.getNewIface(vIConexao);
 
   try
     try
       lWebPedidoModel := pWebPedidoModel;
 
-      lReservaModel := lReservaModel.objeto.Alterar(lWebPedidoModel.ID); //Precisa alterar "todas" reservas do peiddo
+      lReservaModel := lReservaModel.objeto.Alterar(lWebPedidoModel.objeto.ID); //Precisa alterar "todas" reservas do peiddo
 
       with lWebPedidoModel do
       begin
@@ -1681,7 +1692,7 @@ begin
     end;
   finally
     lReservaModel:=nil;
-    lWebPedidoModel.Free;
+    lWebPedidoModel:=nil;
   end;
 end;
 
@@ -1689,59 +1700,59 @@ end;
 function TWebPedidoModel.Autorizar(pID : String): Boolean;
 var
   lFinanceiroPedidoModel : ITFinanceiroPedidoModel;
-  lWebPedidoModel        : TWebPedidoModel;
+  lWebPedidoModel        : ITWebPedidoModel;
 begin
   if pID = '' then
     CriaException('ID não informado');
 
   lFinanceiroPedidoModel := TFinanceiroPedidoModel.getNewIface(vIConexao);
-  lWebPedidoModel        := TWebPedidoModel.Create(vIConexao);
+  lWebPedidoModel        := TWebPedidoModel.getNewIface(vIConexao);
 
   try
-    lWebPedidoModel := lWebPedidoModel.carregaClasse(pID);
+    lWebPedidoModel := lWebPedidoModel.objeto.carregaClasse(pID);
 
-    if (lWebPedidoModel.STATUS <> 'E') and (lWebPedidoModel.STATUS <> 'P') then
+    if (lWebPedidoModel.objeto.STATUS <> 'E') and (lWebPedidoModel.objeto.STATUS <> 'P') then
       CriaException('Permissão já negada ou autorizada.');
 
     if (lFinanceiroPedidoModel.objeto.qtdePagamentoPrazo(pID) = 0) then
     begin
-      if lWebPedidoModel.STATUS <> 'E' then
-        lWebPedidoModel.STATUS            := 'C';
+      if lWebPedidoModel.objeto.STATUS <> 'E' then
+        lWebPedidoModel.objeto.STATUS            := 'C';
 
-      lWebPedidoModel.DATA_HORA_APROVACAO := DateTimeToStr(vIConexao.DataHoraServer);
-      lWebPedidoModel.USUARIO_APROVACAO   := vIConexao.getUSer.ID;
+      lWebPedidoModel.objeto.DATA_HORA_APROVACAO := DateTimeToStr(vIConexao.DataHoraServer);
+      lWebPedidoModel.objeto.USUARIO_APROVACAO   := vIConexao.getUSer.ID;
     end
     else
     begin
-      if lWebPedidoModel.STATUS <> 'E' then
-        lWebPedidoModel.STATUS := 'A';
+      if lWebPedidoModel.objeto.STATUS <> 'E' then
+        lWebPedidoModel.objeto.STATUS := 'A';
     end;
 
-    lWebPedidoModel.Acao := tacAlterar;
-    lWebPedidoModel.Salvar;
+    lWebPedidoModel.objeto.Acao := tacAlterar;
+    lWebPedidoModel.objeto.Salvar;
 
     Result := true;
   finally
     lFinanceiroPedidoModel:=nil;
-    lWebPedidoModel.Free;
+    lWebPedidoModel:=nil;
   end;
 end;
 
 function TWebPedidoModel.AutorizarDesconto(pID: String): Boolean;
 var
   lFinanceiroPedidoModel : ITFinanceiroPedidoModel;
-  lWebPedidoModel        : TWebPedidoModel;
+  lWebPedidoModel        : ITWebPedidoModel;
   lPermissaoRemota       : ITPermissaoRemotaModel;
   lTablePermissao        : IFDDataset;
 begin
   lFinanceiroPedidoModel := TFinanceiroPedidoModel.getNewIface(vIConexao);
-  lWebPedidoModel        := TWebPedidoModel.Create(vIConexao);
+  lWebPedidoModel        := TWebPedidoModel.getNewIface(vIConexao);
   lPermissaoRemota       := TPermissaoRemotaModel.getNewIface(vIConexao);
 
   try
-    lWebPedidoModel := lWebPedidoModel.carregaClasse(pID);
+    lWebPedidoModel := lWebPedidoModel.objeto.carregaClasse(pID);
 
-    if lWebPedidoModel.STATUS <> 'E' then
+    if lWebPedidoModel.objeto.STATUS <> 'E' then
       CriaException('Desconto já negado ou autorizado.');
 
     lPermissaoRemota.objeto.WhereView := ' and permissao_remota.pedido_id = ' + pID +
@@ -1751,23 +1762,23 @@ begin
     lTablePermissao := lPermissaoRemota.objeto.obterLista;
 
     if lTablePermissao.objeto.RecordCount > 0 then
-      lWebPedidoModel.STATUS := 'P'
+      lWebPedidoModel.objeto.STATUS := 'P'
 
     else if (lFinanceiroPedidoModel.objeto.qtdePagamentoPrazo(pID) = 0) then
-      lWebPedidoModel.STATUS := 'C'
+      lWebPedidoModel.objeto.STATUS := 'C'
 
     else
-      lWebPedidoModel.STATUS := 'A';
+      lWebPedidoModel.objeto.STATUS := 'A';
 
-    lWebPedidoModel.Acao := tacAlterar;
-    lWebPedidoModel.Salvar;
+    lWebPedidoModel.objeto.Acao := tacAlterar;
+    lWebPedidoModel.objeto.Salvar;
 
     Result := True;
 
   finally
     lFinanceiroPedidoModel:=nil;
     lPermissaoRemota:=nil;
-    lWebPedidoModel.Free;
+    lWebPedidoModel:=nil;
   end;
 end;
 

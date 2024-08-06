@@ -152,7 +152,7 @@ type
     function qtdePagamentoPrazo(pWebPedido : String): Integer;
     function obterResumoFinanceiro : IFDDataset;
 
-    procedure UpdateDadosFinanceiro(pWebPedidoModel: TWebPedidoModel);
+    procedure UpdateDadosFinanceiro(pWebPedidoModel: ITWebPedidoModel);
 
     procedure gerarFinanceiro(pFinanceiroParams: TFinanceiroParams);
 
@@ -446,7 +446,7 @@ begin
   end;
 end;
 
-procedure TFinanceiroPedidoModel.UpdateDadosFinanceiro(pWebPedidoModel: TWebPedidoModel);
+procedure TFinanceiroPedidoModel.UpdateDadosFinanceiro(pWebPedidoModel: ITWebPedidoModel);
 var
   lFinanceiroPedidoDao : ITFinanceiroPedidoDao;
 begin

@@ -143,14 +143,14 @@ end;
 function TPermissaoRemotaModel.Autorizar(pID: String): Boolean;
 var
   lPermissaoRemotaModel : ITPermissaoRemotaModel;
-  lWebPedidoModel       : TWebPedidoModel;
+  lWebPedidoModel       : ITWebPedidoModel;
   lConfiguracoes        : ITerasoftConfiguracoes;
 begin
   if pID = '' then
     CriaException('ID não informado');
 
   lPermissaoRemotaModel := TPermissaoRemotaModel.getNewIface(vIConexao);
-  lWebPedidoModel       := TWebPedidoModel.Create(vIConexao);
+  lWebPedidoModel       := TWebPedidoModel.getNewIface(vIConexao);
 
   try
     lPermissaoRemotaModel := lPermissaoRemotaModel.objeto.carregaClasse(pID);
@@ -174,7 +174,7 @@ begin
       lPermissaoRemotaModel.objeto.obterLista;
 
       if lPermissaoRemotaModel.objeto.TotalRecords = 0 then
-        lWebPedidoModel.Autorizar(lPermissaoRemotaModel.objeto.PEDIDO_ID);
+        lWebPedidoModel.objeto.Autorizar(lPermissaoRemotaModel.objeto.PEDIDO_ID);
 
     end;
 
@@ -182,14 +182,14 @@ begin
 
   finally
     lPermissaoRemotaModel:=nil;
-    lWebPedidoModel.Free;
+    lWebPedidoModel:=nil;
   end;
 end;
 
 function TPermissaoRemotaModel.Negar(pID: String): Boolean;
 var
   lPermissaoRemotaModel : ITPermissaoRemotaModel;
-  lWebPedidoModel       : TWebPedidoModel;
+  lWebPedidoModel       : ITWebPedidoModel;
   lConfiguracoes        : ITerasoftConfiguracoes;
   lTablePermissao       : IFDDataset;
 begin
@@ -197,7 +197,7 @@ begin
     CriaException('ID não informado');
 
   lPermissaoRemotaModel := TPermissaoRemotaModel.getNewIface(vIConexao);
-  lWebPedidoModel       := TWebPedidoModel.Create(vIConexao);
+  lWebPedidoModel       := TWebPedidoModel.getNewIface(vIConexao);
 
   try
     lPermissaoRemotaModel := lPermissaoRemotaModel.objeto.carregaClasse(pID);
@@ -225,14 +225,14 @@ begin
         lTablePermissao.objeto.Next;
       end;
 
-      lWebPedidoModel.Negar(lPermissaoRemotaModel.objeto.PEDIDO_ID);
+      lWebPedidoModel.objeto.Negar(lPermissaoRemotaModel.objeto.PEDIDO_ID);
     end;
 
     Result := true;
 
   finally
     lPermissaoRemotaModel:=nil;
-    lWebPedidoModel.Free;
+    lWebPedidoModel:=nil;
   end;
 
 end;

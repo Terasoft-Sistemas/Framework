@@ -144,7 +144,7 @@ end;
 function TSolicitacaoDescontoModel.Autorizar(pID: String): Boolean;
 var
   lSolicitacaoDesconto : ITSolicitacaoDescontoModel;
-  lWebPedidoModel      : TWebPedidoModel;
+  lWebPedidoModel      : ITWebPedidoModel;
   lDescontoModel       : TDescontoModel;
   lTableDesconto       : IFDDataset;
   lPercentual          : Double;
@@ -154,7 +154,7 @@ begin
 
   lSolicitacaoDesconto := TSolicitacaoDescontoModel.getNewIface(vIConexao);
   lDescontoModel       := TDescontoModel.Create(vIConexao);
-  lWebPedidoModel      := TWebPedidoModel.Create(vIConexao);
+  lWebPedidoModel      := TWebPedidoModel.getNewIface(vIConexao);
 
   try
     lSolicitacaoDesconto := lSolicitacaoDesconto.objeto.carregaClasse(pID);
@@ -176,13 +176,13 @@ begin
     lSolicitacaoDesconto.objeto.Salvar;
 
     if lSolicitacaoDesconto.objeto.TABELA_ORIGEM = 'WEB_PEDIDO' then
-      lWebPedidoModel.AutorizarDesconto(lSolicitacaoDesconto.objeto.PEDIDO_ID);
+      lWebPedidoModel.objeto.AutorizarDesconto(lSolicitacaoDesconto.objeto.PEDIDO_ID);
 
     Result := True;
 
   finally
     lSolicitacaoDesconto:=nil;
-    lWebPedidoModel.Free;
+    lWebPedidoModel:=nil;
     lDescontoModel.Free;
   end;
 end;
@@ -190,10 +190,10 @@ end;
 function TSolicitacaoDescontoModel.Negar(pID: String): Boolean;
 var
   lSolicitacaoDesconto : ITSolicitacaoDescontoModel;
-  lWebPedidoModel      : TWebPedidoModel;
+  lWebPedidoModel      : ITWebPedidoModel;
 begin
   lSolicitacaoDesconto := TSolicitacaoDescontoModel.getNewIface(vIConexao);
-  lWebPedidoModel      := TWebPedidoModel.Create(vIConexao);
+  lWebPedidoModel      := TWebPedidoModel.getNewIface(vIConexao);
 
   try
     lSolicitacaoDesconto := lSolicitacaoDesconto.objeto.carregaClasse(pID);
@@ -205,13 +205,13 @@ begin
     lSolicitacaoDesconto.objeto.Salvar;
 
     if lSolicitacaoDesconto.objeto.TABELA_ORIGEM = 'WEB_PEDIDO' then
-      lWebPedidoModel.NegarDesconto(lSolicitacaoDesconto.objeto.PEDIDO_ID);
+      lWebPedidoModel.objeto.NegarDesconto(lSolicitacaoDesconto.objeto.PEDIDO_ID);
 
     Result := True;
 
   finally
     lSolicitacaoDesconto:=nil;
-    lWebPedidoModel.Free;
+    lWebPedidoModel:=nil;
   end;
 end;
 

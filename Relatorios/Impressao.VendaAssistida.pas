@@ -369,16 +369,16 @@ end;
 
 procedure TImpressaoVendaAssistida.fetchPedido;
 var
-  lWebPedidoModel : TWebPedidoModel;
+  lWebPedidoModel : ITWebPedidoModel;
   lMemtable       : IFDDataset;
 begin
-  lWebPedidoModel := TWebPedidoModel.Create(CONEXAO);
+  lWebPedidoModel := TWebPedidoModel.getNewIface(CONEXAO);
   try
 
-    lWebPedidoModel.IDRecordView := Self.FIDPEDIDO;
-    lMemtable := lWebPedidoModel.Obterlista;
-    lWebPedidoModel.ID := Self.FIDPEDIDO;
-    lWebPedidoModel.ObterTotais;
+    lWebPedidoModel.objeto.IDRecordView := Self.FIDPEDIDO;
+    lMemtable := lWebPedidoModel.objeto.Obterlista;
+    lWebPedidoModel.objeto.ID := Self.FIDPEDIDO;
+    lWebPedidoModel.objeto.ObterTotais;
 
     if lMemtable.objeto.RecordCount = 0 then
       raise Exception.Create('Pedido de venda '+Self.FIDPEDIDO+' não localizado');
@@ -388,21 +388,21 @@ begin
     mtPedidoNUMERO.Value              := lMemtable.objeto.FieldByName('ID').AsString;
     mtPedidoEMISSAO.Value             := lMemtable.objeto.FieldByName('DATAHORA').AsString;
     mtPedidoOBSERVACAO.Value          := lMemtable.objeto.FieldByName('OBSERVACAO').AsString;
-    mtPedidoVALOR_PRODUTOS.Value      := lWebPedidoModel.VALOR_ITENS;
-    mtPedidoVALOR_DESCONTO.Value      := lWebPedidoModel.VALOR_CUPOM_DESCONTO;
-    lblDescPercentual.Caption         := 'Desconto ('+FormatFloat(',0.000',lWebPedidoModel.VALOR_CUPOM_DESCONTO*100/lWebPedidoModel.VALOR_ITENS)+'%)';
-    mtPedidoTOTAL_GARANTIA.Value      := lWebPedidoModel.TOTAL_GARANTIA;
-    mtPedidoSEGURO_PRESTAMISTA.Value  := lWebPedidoModel.SEGURO_PRESTAMISTA_VALOR;
-    mtPedidoVALOR_ACRESCIMO.Value     := lWebPedidoModel.ACRESCIMO;
-    mtPedidoVALOR_FRETE.Value         := lWebPedidoModel.VALOR_FRETE;
-    mtPedidoVALOR_TOTAL.Value         := lWebPedidoModel.VALOR_TOTAL;
+    mtPedidoVALOR_PRODUTOS.Value      := lWebPedidoModel.objeto.VALOR_ITENS;
+    mtPedidoVALOR_DESCONTO.Value      := lWebPedidoModel.objeto.VALOR_CUPOM_DESCONTO;
+    lblDescPercentual.Caption         := 'Desconto ('+FormatFloat(',0.000',lWebPedidoModel.objeto.VALOR_CUPOM_DESCONTO*100/lWebPedidoModel.objeto.VALOR_ITENS)+'%)';
+    mtPedidoTOTAL_GARANTIA.Value      := lWebPedidoModel.objeto.TOTAL_GARANTIA;
+    mtPedidoSEGURO_PRESTAMISTA.Value  := lWebPedidoModel.objeto.SEGURO_PRESTAMISTA_VALOR;
+    mtPedidoVALOR_ACRESCIMO.Value     := lWebPedidoModel.objeto.ACRESCIMO;
+    mtPedidoVALOR_FRETE.Value         := lWebPedidoModel.objeto.VALOR_FRETE;
+    mtPedidoVALOR_TOTAL.Value         := lWebPedidoModel.objeto.VALOR_TOTAL;
     mtPedidoVENDEDOR.Value            := lMemtable.objeto.FieldByName('VENDEDOR').AsString;
     mtPedidoCLIENTE_ID.Value          := lMemtable.objeto.FieldByName('CLIENTE_ID').AsString;
     mtPedido.Post;
 
     IMPRESSO.Text := FormatDateTime('dd/mm/yyyy hh:nn:ss', CONEXAO.DataHoraServer);
   finally
-    lWebPedidoModel.Free;
+    lWebPedidoModel:=nil;
   end;
 end;
 

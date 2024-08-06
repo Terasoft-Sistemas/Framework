@@ -820,20 +820,20 @@ end;
 procedure TImpressaoContratos.imprimirPrestamista;
 var
   lPedidoVendaModel : ITPedidoVendaModel;
-  lWebPedidoModel   : TWebPedidoModel;
+  lWebPedidoModel   : ITWebPedidoModel;
   lMemtable         : TFDMemtable;
 begin
   lPedidoVendaModel := TPedidoVendaModel.getNewIface(CONEXAO);
-  lWebPedidoModel   := TWebPedidoModel.Create(CONEXAO);
+  lWebPedidoModel   := TWebPedidoModel.getNewIface(CONEXAO);
   try
     try
       lPedidoVendaModel.objeto.IDRecordView := IDPEDIDO;
       lPedidoVendaModel.objeto.obterLista;
 
-      lWebPedidoModel.ID := lPedidoVendaModel.objeto.PedidoVendasLista.First.objeto.WEB_PEDIDO_ID;
-      lWebPedidoModel.obterTotais;
+      lWebPedidoModel.objeto.ID := lPedidoVendaModel.objeto.PedidoVendasLista.First.objeto.WEB_PEDIDO_ID;
+      lWebPedidoModel.objeto.obterTotais;
 
-      if lWebPedidoModel.SEGURO_PRESTAMISTA_VALOR <> 0 then
+      if lWebPedidoModel.objeto.SEGURO_PRESTAMISTA_VALOR <> 0 then
       begin
         mtItens.EmptyDataSet;
 
@@ -854,7 +854,7 @@ begin
     end;
   finally
     lPedidoVendaModel:=nil;
-    lWebPedidoModel.Free;
+    lWebPedidoModel:=nil;
   end;
 end;
 

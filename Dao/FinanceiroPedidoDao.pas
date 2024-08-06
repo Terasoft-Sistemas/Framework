@@ -69,7 +69,7 @@ type
     function ObterLista: IFDDataset;
     function qtdePagamentoPrazo(pWebPedido : String): Integer;
 
-    procedure UpdateDadosFinanceiro(pWebPedidoModel: TWebPedidoModel);
+    procedure UpdateDadosFinanceiro(pWebPedidoModel: ITWebPedidoModel);
 
     procedure UpdateArredondaParcela(pTotal, pValorParcela, pIndice, pValorAcrescimo : Extended; pID_Financeiro: String);
 
@@ -201,7 +201,7 @@ begin
   end;
 end;
 
-procedure TFinanceiroPedidoDao.UpdateDadosFinanceiro(pWebPedidoModel: TWebPedidoModel);
+procedure TFinanceiroPedidoDao.UpdateDadosFinanceiro(pWebPedidoModel: ITWebPedidoModel);
 var
   lQry: TFDQuery;
   lSQL: String;
@@ -211,7 +211,7 @@ begin
 
   try
 
-    lSQL := ' select sum(f.valor_total) VALOR_ENTRADA from financeiro_pedido f where f.web_pedido_id = '+pWebPedidoModel.ID+' and f.portador_id = ''777777'' ';
+    lSQL := ' select sum(f.valor_total) VALOR_ENTRADA from financeiro_pedido f where f.web_pedido_id = '+pWebPedidoModel.objeto.ID+' and f.portador_id = ''777777'' ';
     lQry.Open(lSQL);
 
     lValorEntrada := lQry.FieldByName('VALOR_ENTRADA').AsFloat;
@@ -220,17 +220,17 @@ begin
     ' select avg(f.VALOR_PARCELA) valor_financiado, count(*) QUANTIDADE_PARCELAS, min(f.vencimento) PRIMEIRO_VENCIMENTO '+#13+
     ' from financeiro_pedido f'+#13+
     ' inner join portador p on p.codigo_port = f.portador_id'+#13+
-    ' where f.web_pedido_id = '+pWebPedidoModel.ID+''+#13+
+    ' where f.web_pedido_id = '+pWebPedidoModel.objeto.ID+''+#13+
     ' and p.tpag_nfe not in (''01'', ''03'', ''04'', ''99'') ';//group by 1 ';
 
     lQry.Open(lSQL);
 
-    pWebPedidoModel.Acao                := tacAlterar;
-    pWebPedidoModel.VALOR_ENTRADA       := lValorEntrada;
-    pWebPedidoModel.PRIMEIRO_VENCIMENTO := DateToStr(lQry.FieldByName('PRIMEIRO_VENCIMENTO').AsDateTime);
-    pWebPedidoModel.PARCELAS            := lQry.FieldByName('QUANTIDADE_PARCELAS').AsInteger;
-    pWebPedidoModel.VALOR_FINANCIADO    := lQry.FieldByName('valor_financiado').AsString;
-    pWebPedidoModel.Salvar;
+    pWebPedidoModel.objeto.Acao                := tacAlterar;
+    pWebPedidoModel.objeto.VALOR_ENTRADA       := lValorEntrada;
+    pWebPedidoModel.objeto.PRIMEIRO_VENCIMENTO := DateToStr(lQry.FieldByName('PRIMEIRO_VENCIMENTO').AsDateTime);
+    pWebPedidoModel.objeto.PARCELAS            := lQry.FieldByName('QUANTIDADE_PARCELAS').AsInteger;
+    pWebPedidoModel.objeto.VALOR_FINANCIADO    := lQry.FieldByName('valor_financiado').AsString;
+    pWebPedidoModel.objeto.Salvar;
   finally
     lQry.Free;
   end;
