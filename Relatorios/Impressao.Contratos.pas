@@ -9,7 +9,8 @@ uses
   FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
   RLXLSXFilter, RLFilters, RLPDFFilter, Data.DB, FireDAC.Comp.DataSet,
   FireDAC.Comp.Client, Terasoft.Utils, Interfaces.Conexao, xPNGimage,
-  Vcl.Imaging.jpeg, PedidoVendaModel, Terasoft.FuncoesTexto, Terasoft.Configuracoes, System.Math;
+  Vcl.Imaging.jpeg, PedidoVendaModel, Terasoft.FuncoesTexto, Terasoft.Configuracoes, System.Math,
+  Vcl.StdCtrls;
 
 type
   TImpressaoContratos = class(TForm)
@@ -435,6 +436,132 @@ type
     mtPedidoPREMIO_UNICO_2: TFloatField;
     mtPedidoPREMIO_UNICO_3: TFloatField;
     mtItensFIM_VIGENCIA_FR: TStringField;
+    TabSheet25: TTabSheet;
+    RLReport23: TRLReport;
+    Label1: TLabel;
+    RLBand1: TRLBand;
+    RLLabel126: TRLLabel;
+    RLLabel140: TRLLabel;
+    RLLabel124: TRLLabel;
+    RLDraw19: TRLDraw;
+    RLDraw21: TRLDraw;
+    RLDraw22: TRLDraw;
+    RLLabel125: TRLLabel;
+    RLLabel127: TRLLabel;
+    RLLabel128: TRLLabel;
+    RLLabel129: TRLLabel;
+    RLLabel130: TRLLabel;
+    RLLabel131: TRLLabel;
+    RLLabel132: TRLLabel;
+    RLLabel133: TRLLabel;
+    RLLabel134: TRLLabel;
+    RLLabel135: TRLLabel;
+    RLLabel136: TRLLabel;
+    RLLabel137: TRLLabel;
+    RLLabel138: TRLLabel;
+    RLLabel139: TRLLabel;
+    RLLabel141: TRLLabel;
+    RLLabel142: TRLLabel;
+    RLLabel143: TRLLabel;
+    RLLabel144: TRLLabel;
+    RLLabel145: TRLLabel;
+    RLLabel146: TRLLabel;
+    RLLabel147: TRLLabel;
+    RLBand2: TRLBand;
+    RLBand3: TRLBand;
+    rlBandFatura: TRLBand;
+    RLLabel156: TRLLabel;
+    RLDraw29: TRLDraw;
+    RLDraw30: TRLDraw;
+    drawFaturasT1: TRLDraw;
+    drawFaturasT3: TRLDraw;
+    RLLabel158: TRLLabel;
+    RLDraw33: TRLDraw;
+    RLDraw34: TRLDraw;
+    drawFaturasT2: TRLDraw;
+    drawFaturasT4: TRLDraw;
+    drawFaturasC1: TRLDraw;
+    drawFaturasC2: TRLDraw;
+    drawFaturasC3: TRLDraw;
+    drawFaturasC4: TRLDraw;
+    rlMemoParcelaC1: TRLMemo;
+    rlMemoVencimentoC1: TRLMemo;
+    rlMemoValorC1: TRLMemo;
+    rlMemoParcelaC2: TRLMemo;
+    rlMemoVencimentoC2: TRLMemo;
+    rlMemoValorC2: TRLMemo;
+    rlMemoParcelaC3: TRLMemo;
+    rlMemoVencimentoC3: TRLMemo;
+    rlMemoValorC3: TRLMemo;
+    rlMemoParcelaC4: TRLMemo;
+    rlMemoVencimentoC4: TRLMemo;
+    rlMemoValorC4: TRLMemo;
+    RLLabel162: TRLLabel;
+    RLLabel167: TRLLabel;
+    RLLabel168: TRLLabel;
+    RLLabel169: TRLLabel;
+    RLLabel170: TRLLabel;
+    RLLabel171: TRLLabel;
+    RLLabel172: TRLLabel;
+    RLDraw31: TRLDraw;
+    RLLabel173: TRLLabel;
+    RLDraw32: TRLDraw;
+    RLDBText93: TRLDBText;
+    RLDBText94: TRLDBText;
+    RLDBText95: TRLDBText;
+    RLDBText96: TRLDBText;
+    RLDBText97: TRLDBText;
+    RLDBText98: TRLDBText;
+    RLDBText99: TRLDBText;
+    RLLabel153: TRLLabel;
+    RLLabel152: TRLLabel;
+    RLDraw28: TRLDraw;
+    RLLabel150: TRLLabel;
+    RLDraw25: TRLDraw;
+    RLLabel149: TRLLabel;
+    RLDraw24: TRLDraw;
+    RLDraw23: TRLDraw;
+    RLLabel148: TRLLabel;
+    RLDraw26: TRLDraw;
+    RLLabel151: TRLLabel;
+    RLDraw27: TRLDraw;
+    RLLabel154: TRLLabel;
+    RLLabel155: TRLLabel;
+    RLMemo6: TRLMemo;
+    RLMemo5: TRLMemo;
+    RLDraw35: TRLDraw;
+    rlMemoNome: TRLMemo;
+    rlMemoCodigo: TRLMemo;
+    dsFiador: TDataSource;
+    mtFiador: TFDMemTable;
+    mtFiadorFIADOR: TStringField;
+    mtFiadorCNPJ_CPF_FIADOR: TStringField;
+    mtFiadorRG_FIADOR: TStringField;
+    mtFiadorENDERECO_FIADOR: TStringField;
+    mtFiadorBAIRRO_FIADOR: TStringField;
+    mtFiadorCIDADE_FIADOR: TStringField;
+    mtFiadorUF_FIADOR: TStringField;
+    mtPedidoCODIGO_FIADOR: TStringField;
+    RLDBText91: TRLDBText;
+    RLDBText92: TRLDBText;
+    RLDBText100: TRLDBText;
+    RLDBText101: TRLDBText;
+    RLDBText102: TRLDBText;
+    RLDBText103: TRLDBText;
+    RLDBText104: TRLDBText;
+    mtClienteMAE_CLI: TStringField;
+    RLDBText105: TRLDBText;
+    RLDBText106: TRLDBText;
+    RLDBText107: TRLDBText;
+    lblNotaPedido: TRLLabel;
+    lblFilial: TRLLabel;
+    lblParcelas: TRLLabel;
+    lblEmpresa: TRLLabel;
+    RLLabel157: TRLLabel;
+    RLLabel159: TRLLabel;
+    RLLabel160: TRLLabel;
+    RLLabel161: TRLLabel;
+    lblData: TRLLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
@@ -473,11 +600,14 @@ type
     procedure imprimirRF;
     procedure imprimirRFD;
     procedure imprimirPrestamista;
+    procedure imprimirCarteira;
     procedure fetchPedido;
     procedure fetchCliente;
+    procedure fetchFiador;
     procedure fetchPedidoItens(pID : String);
     procedure fetchMemo;
     procedure fetchEmpresa;
+    procedure fetchFinanceiro;
     procedure reportPreview(pReportItem: TRLReport; pItem: String);
     function retornaInicioVigencia(pInicio: String; pMesesGarantia: Integer) : String;
 
@@ -507,6 +637,7 @@ begin
   mtProdutos.Open;
   mtEmpresa.Open;
   mtReceberItens.Open;
+  mtFiador.Open;
 end;
 
 procedure TImpressaoContratos.FormDestroy(Sender: TObject);
@@ -516,16 +647,17 @@ end;
 
 procedure TImpressaoContratos.fetchPedido;
 var
-  lPedidoVendaModel : ITPedidoVendaModel;
-  lContasReceberModel : TContasReceberModel;
+  lPedidoVendaModel        : ITPedidoVendaModel;
+  lContasReceberModel      : TContasReceberModel;
   lContasReceberItensModel : TContasReceberItensModel;
-  lConfiguracoes : ITerasoftConfiguracoes;
-  lPrimeiraParcela, lTotalPremio : Double;
+  lConfiguracoes           : ITerasoftConfiguracoes;
+  lPrimeiraParcela,
+  lTotalPremio             : Double;
 begin
-  lPedidoVendaModel := TPedidoVendaModel.getNewIface(CONEXAO);
-  lContasReceberModel := TContasReceberModel.Create(CONEXAO);
+  lPedidoVendaModel        := TPedidoVendaModel.getNewIface(CONEXAO);
+  lContasReceberModel      := TContasReceberModel.Create(CONEXAO);
   lContasReceberItensModel := TContasReceberItensModel.Create(CONEXAO);
-  lConfiguracoes := TerasoftConfiguracoes.getNewIface(CONEXAO);
+  lConfiguracoes           := TerasoftConfiguracoes.getNewIface(CONEXAO);
   try
 
     lPedidoVendaModel.objeto.IDRecordView := Self.IDPEDIDO;
@@ -545,7 +677,7 @@ begin
     mtPedidoOBSERVACAO.Value          := lPedidoVendaModel.objeto.OBS_GERAL;
     mtPedidoVALOR_PRODUTOS.Value      := lPedidoVendaModel.objeto.VALOR_PED;
     mtPedidoVALOR_DESCONTO.Value      := lPedidoVendaModel.objeto.DESC_PED;
-    mtPedidoSEGURO_PRESTAMISTA.Value  := RoundTo(lPedidoVendaModel.objeto.SEGURO_PRESTAMISTA_VALOR, -2);
+    mtPedidoSEGURO_PRESTAMISTA.Value  := RoundTo(StrToFloatDef(lPedidoVendaModel.objeto.SEGURO_PRESTAMISTA_VALOR, 0), -2);
     mtPedidoRR_PRESTAMISTA.Value      := (lConfiguracoes.objeto.valorTag('PERCENTUAL_RR_PRESTAMISTA', '0', tvNumero));
 
     mtPedidoPREMIO_UNICO_1.Value      := RoundTo((mtPedidoSEGURO_PRESTAMISTA.Value / 100 * 6.23), -2);
@@ -561,6 +693,8 @@ begin
     mtPedidoVALOR_TOTAL.Value         := lPedidoVendaModel.objeto.TOTAL_PED;
     mtPedidoVENDEDOR.Value            := lPedidoVendaModel.objeto.NOME_VENDEDOR;
     mtPedidoCLIENTE_ID.Value          := lPedidoVendaModel.objeto.CODIGO_CLI;
+    mtPedidoCODIGO_FIADOR.Value       := lPedidoVendaModel.objeto.CONDICOES2_PAG;
+    mtPedidoNUMERO_NF.Value           := lPedidoVendaModel.objeto.NUMERO_NF;
     mtPedido.Post;
 
     lContasReceberModel.IDPedidoView := lPedidoVendaModel.objeto.NUMERO_PED;
@@ -616,7 +750,6 @@ begin
   lProdutosModel       := TProdutosModel.getNewIface(CONEXAO);
   lWebPedidoItensModel := TWebPedidoItensModel.getNewIface(CONEXAO);
   lConfiguracoes       := TerasoftConfiguracoes.getNewIface(CONEXAO);
-
   try
     lPedidoItensModel.objeto.IDRecordView := pID;
     lPedidoItensModel.objeto.obterLista;
@@ -624,7 +757,7 @@ begin
     lProdutosModel.objeto.IDRecordView := lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.CODIGO_PRO;
     lProdutosModel.objeto.obterLista;
 
-    lWebPedidoItensModel.objeto.IDRecordView := lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.WEB_PEDIDOITENS_ID;
+    lWebPedidoItensModel.objeto.IDRecordView := StrToIntDef(lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.WEB_PEDIDOITENS_ID, 0);
     lWebPedidoItensModel.objeto.obterLista;
 
     mtItens.Edit;
@@ -632,7 +765,7 @@ begin
     mtItensPRODUTO_ID.Value            := lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.CODIGO_PRO;
     mtItensQUANTIDADE.Value            := lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.QTDE_CALCULADA;
     mtItensVALOR_UNITARIO.Value        := lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.VLRVENDA_PRO;
-    mtItensVLR_GARANTIA.Value          := lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.QUANTIDADE_TIPO;
+    mtItensVLR_GARANTIA.Value          := StrToFloatDef(lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.QUANTIDADE_TIPO, 0);
     mtItensTIPO_GARANTIA_FR.Value      := Copy(lWebPedidoItensModel.objeto.WebPedidoItenssLista[0].objeto.TIPO_GARANTIA_FR,3,2) + ' Meses';
     mtItensVALOR_TOTAL.Value           := lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.VALOR_TOTAL_ITENS;
     mtItensVALOR_NOTA_FISCAL.Value     := lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.VALORUNITARIO_PED * (1 - (lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.DESCONTO_PED / 100));
@@ -642,7 +775,7 @@ begin
     mtItensRR_RF.Value                 := (lConfiguracoes.objeto.valorTag('PERCENTUAL_RR_RF', '0', tvNumero));
     mtItensRR_RFD.Value                := (lConfiguracoes.objeto.valorTag('PERCENTUAL_RR_RFD', '0', tvNumero));
     mtItensVALOR_FRANQUIA.Value        := mtItensVALOR_UNITARIO.Value * (20 / 100);
-    mtItensPREMIO_UNICO_FR.Value       := lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.VLR_GARANTIA_FR;
+    mtItensPREMIO_UNICO_FR.Value       := StrToFloatDef(lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.VLR_GARANTIA_FR, 0);
     mtItensIOF_FR.Value                := mtItensPREMIO_UNICO_FR.Value - (mtItensPREMIO_UNICO_FR.Value / 1.0738);
     mtItensOBSERVACAO.Value            := lPedidoItensModel.objeto.PedidoItenssLista[0].objeto.OBSERVACAO;
     mtItensINICIO_VIGENCIA.Value       := retornaInicioVigencia(mtPedidoEMISSAO.Value, lProdutosModel.objeto.ProdutossLista.First.objeto.GARANTIA_PRO);
@@ -666,6 +799,9 @@ begin
     mtProdutosNOME_MAR.Value := lProdutosModel.objeto.ProdutossLista.First.objeto.NOME_MAR;
     mtProdutosNOME_PRO.Value := lProdutosModel.objeto.ProdutossLista.First.objeto.NOME_PRO;
     mtProdutos.Post;
+
+    rlMemoCodigo.Lines.Add(mtItensPRODUTO_ID.Value + ' -');
+    rlMemoNome.Lines.Add(mtProdutosNOME_PRO.Value);
 
     lblRRGarantiaEstendida.Caption := '*RR: '+ FormataFloat(mtItensRR_GARANTIA_ESTENDIDA.Value) +'%  (R$ '+ FormataFloat(mtItensPREMIO_LIQUIDO.Value * (mtItensRR_GARANTIA_ESTENDIDA.Value / 100)) +')';
     lblRRRouboFurto.Caption        := '*RR: '+ FormataFloat(mtItensRR_RF.Value) +'%  (R$ '+ FormataFloat((mtItensPREMIO_UNICO_FR.Value / 1.0738) * (mtItensRR_RF.Value / 100)) +')';
@@ -708,6 +844,7 @@ begin
     mtClienteCELULAR.Value      := lClienteModel.objeto.ClientesLista[0].objeto.CELULAR_CLI;
     mtClienteEMAIL.Value        := lClienteModel.objeto.ClientesLista[0].objeto.EMAIL_CLI;
     mtClienteCONTATO.Value      := lClienteModel.objeto.ClientesLista[0].objeto.CONTATO_CLI;
+    mtClienteMAE_CLI.Value      := lClienteModel.objeto.ClientesLista[0].objeto.MAE_CLI;
     mtCliente.Post;
 
     if (lClienteModel.objeto.ClientesLista[0].objeto.CODIGO_OCUPACAO_CLI = '2') or (lClienteModel.objeto.ClientesLista[0].objeto.CODIGO_OCUPACAO_CLI = '8') or (lClienteModel.objeto.ClientesLista[0].objeto.CODIGO_OCUPACAO_CLI = 'M') then
@@ -723,31 +860,185 @@ begin
   finally
     lClienteModel:=nil;
   end;
+end;
 
+procedure TImpressaoContratos.fetchFiador;
+var
+  lClienteModel : ITClienteModel;
+begin
+  lClienteModel := TClienteModel.getNewIface(CONEXAO);
+  try
+
+    lblNotaPedido.Caption := IIF(mtPedidoNUMERO_NF.AsString = '', '0', mtPedidoNUMERO_NF.AsString) +' - '+ mtPedidoNUMERO.AsString;
+
+    if mtPedidoCODIGO_FIADOR.Value = '' then
+      exit;
+
+    lClienteModel.objeto.IDRecordView := mtPedidoCODIGO_FIADOR.Value;
+    lClienteModel.objeto.obterLista;
+
+    mtFiador.Append;
+    mtFiadorFIADOR.Value          := lClienteModel.objeto.ClientesLista[0].objeto.FANTASIA_CLI;
+    mtFiadorCNPJ_CPF_FIADOR.Value := lClienteModel.objeto.ClientesLista[0].objeto.CNPJ_CPF_CLI;
+    mtFiadorRG_FIADOR.Value       := lClienteModel.objeto.ClientesLista[0].objeto.INSCRICAO_RG_CLI;
+    mtFiadorENDERECO_FIADOR.Value := lClienteModel.objeto.ClientesLista[0].objeto.ENDERECO;
+    mtFiadorCIDADE_FIADOR.Value   := lClienteModel.objeto.ClientesLista[0].objeto.CIDADE_CLI;
+    mtFiadorBAIRRO_FIADOR.Value   := lClienteModel.objeto.ClientesLista[0].objeto.BAIRRO_CLI;
+    mtFiadorUF_FIADOR.Value       := lClienteModel.objeto.ClientesLista[0].objeto.UF_CLI;
+    mtFiador.Post;
+
+  finally
+    lClienteModel:=nil;
+  end;
 end;
 
 procedure TImpressaoContratos.fetchEmpresa;
 var
   lEmpresaModel : ITEmpresaModel;
+  lLojasModel   : ITLojasModel;
 begin
   lEmpresaModel := TEmpresaModel.getNewIface(CONEXAO);
+  lLojasModel   := TLojasModel.getNewIface(CONEXAO);
   try
     lEmpresaModel.objeto.Carregar;
     mtEmpresa.Append;
     mtEmpresaCNPJ.Value := lEmpresaModel.objeto.CNPJ;
     mtEmpresaLOCAL_DATA.Value := VarToStr(lEmpresaModel.objeto.CIDADE) +'/'+ VarToStr(lEmpresaModel.objeto.UF) + '  ' + DateToStr(CONEXAO.DataServer);
     mtEmpresa.Post;
+
+    lLojasModel.objeto.LojaView := lEmpresaModel.objeto.LOJA;
+    lLojasModel.objeto.obterLista;
+
+    lblFilial.Caption := lLojasModel.objeto.LojassLista.First.objeto.LOJA +' - '+ lLojasModel.objeto.LojassLista.First.objeto.DESCRICAO;
+
+    lblEmpresa.Caption := lEmpresaModel.objeto.RAZAO_SOCIAL;
+
+    lblData.Caption := lEmpresaModel.objeto.CIDADE +', '+ FormatDateTime('dd "de" mmmm "de" yyyy', mtPedidoEMISSAO.AsDateTime);
+
+    RLMemo6.Lines.Text := 'A empresa '+lEmpresaModel.objeto.RAZAO_SOCIAL+', estabelecida na '+lEmpresaModel.objeto.ENDERECO+', '+lEmpresaModel.objeto.NUMERO+', inscrita no CNPJ No. '+removeCaracteresGraficos(lEmpresaModel.objeto.CNPJ)+', ' +
+                          'doravante denominada simplesmente VENDEDORA e de outro lado o(a) COMPRADOR(A) e seu fiador(a) já anteriormente qualificados, ' +
+                          'tem entre si justo e contratado o presente INSTRUMENTO PARTICULAR DE COMPRA E VENDA DE BENS MÓVEIS COM RESERVA DE DOMÍNIO, cujas cláusulas e condições são as seguintes:';
+
   finally
     lEmpresaModel := nil;
   end;
 end;
 
+procedure TImpressaoContratos.fetchFinanceiro;
+var
+  lContasReceberModel      : TContasReceberModel;
+  lContasReceberItensModel : TContasReceberItensModel;
+  lContadorColunas         : Integer;
+begin
+  lContasReceberModel      := TContasReceberModel.Create(CONEXAO);
+  lContasReceberItensModel := TContasReceberItensModel.Create(CONEXAO);
+  try
+    lContasReceberModel.IDPedidoView := Self.IDPEDIDO;
+    lContasReceberModel.obterLista;
+
+    if lContasReceberModel.TotalRecords = 0 then
+     begin
+       rlBandFatura.Visible := false;
+       Exit;
+     end;
+
+    lContadorColunas := 0;
+
+    for lContasReceberModel in lContasReceberModel.ContasRecebersLista do
+    begin
+
+      lContasReceberItensModel.IDContasReceberView := lContasReceberModel.FATURA_REC;
+      lContasReceberItensModel.WhereView := ' AND PORTADOR.TIPO = ''R'' AND PORTADOR.TPAG_NFE NOT IN (''01'', ''03'', ''04'', ''99'') ';
+      lContasReceberItensModel.OrderView := 'CONTASRECEBERITENS.ID, CONTASRECEBERITENS.PACELA_REC';
+      lContasReceberItensModel.obterLista;
+
+      if lContasReceberItensModel.TotalRecords > 0 then
+        lblParcelas.Caption := FloatToStr(StrToFloatDef(lblParcelas.Caption, 0) + lContasReceberItensModel.ContasReceberItenssLista[0].TOTALPARCELAS_REC);
+
+      for lContasReceberItensModel in lContasReceberItensModel.ContasReceberItenssLista do
+      begin
+
+        case (lContadorColunas mod 4) of
+          0:
+          begin
+            rlMemoParcelaC1.Lines.Add(lContasReceberItensModel.PACELA_REC + 'ª');
+            rlMemoVencimentoC1.Lines.Add(lContasReceberItensModel.VENCIMENTO_REC);
+            rlMemoValorC1.Lines.Add(FormatCurr('#,###0.00', lContasReceberItensModel.VLRPARCELA_REC));
+          end;
+          1:
+          begin
+            rlMemoParcelaC2.Lines.Add(lContasReceberItensModel.PACELA_REC + 'ª');
+            rlMemoVencimentoC2.Lines.Add(lContasReceberItensModel.VENCIMENTO_REC);
+            rlMemoValorC2.Lines.Add(FormatCurr('#,###0.00', lContasReceberItensModel.VLRPARCELA_REC));
+          end;
+          2:
+          begin
+            rlMemoParcelaC3.Lines.Add(lContasReceberItensModel.PACELA_REC + 'ª');
+            rlMemoVencimentoC3.Lines.Add(lContasReceberItensModel.VENCIMENTO_REC);
+            rlMemoValorC3.Lines.Add(FormatCurr('#,###0.00', lContasReceberItensModel.VLRPARCELA_REC));
+          end;
+          3:
+          begin
+            rlMemoParcelaC4.Lines.Add(lContasReceberItensModel.PACELA_REC + 'ª');
+            rlMemoVencimentoC4.Lines.Add(lContasReceberItensModel.VENCIMENTO_REC);
+            rlMemoValorC4.Lines.Add(FormatCurr('#,###0.00', lContasReceberItensModel.VLRPARCELA_REC));
+          end;
+        end;
+
+        Inc(lContadorColunas);
+
+        drawFaturasC1.Height := rlMemoVencimentoC1.Height+5;
+        drawFaturasC2.Height := rlMemoVencimentoC1.Height+5;
+        drawFaturasC3.Height := drawFaturasC1.Height;
+        drawFaturasC4.Height := drawFaturasC1.Height;
+        rlBandFatura.Height  := drawFaturasT1.Height + drawFaturasC1.Height + 10;
+      end;
+    end;
+
+  finally
+    lContasReceberModel.Free;
+    lContasReceberItensModel.Free;
+  end;
+end;
+
+procedure TImpressaoContratos.imprimirCarteira;
+var
+  lPedidoItensModel,
+  lItens : ITPedidoItensModel;
+  i      : Integer;
+begin
+
+  Self.fetchPedido;
+  Self.fetchCliente;
+  Self.fetchFiador;
+  Self.fetchEmpresa;
+  Self.fetchFinanceiro;
+
+  lPedidoItensModel := TPedidoItensModel.getNewIface(CONEXAO);
+  try
+    lPedidoItensModel.objeto.IDPedidoVendaView := Self.IDPEDIDO;
+    lPedidoItensModel.objeto.obterLista;
+
+    mtItens.EmptyDataSet;
+
+    for lItens in lPedidoItensModel.objeto.PedidoItenssLista do
+    begin
+      fetchPedidoItens(lItens.objeto.ID);
+    end;
+
+    RLReport23.Preview;
+
+  finally
+    lPedidoItensModel:=nil;
+  end;
+end;
+
 procedure TImpressaoContratos.imprimirGarantiaEstendida;
 var
-  lPedidoItensModel : ITPedidoItensModel;
+  lPedidoItensModel    : ITPedidoItensModel;
   lWebPedidoItensModel : ITWebPedidoItensModel;
 begin
-  lPedidoItensModel := TPedidoItensModel.getNewIface(CONEXAO);
+  lPedidoItensModel    := TPedidoItensModel.getNewIface(CONEXAO);
   lWebPedidoItensModel := TWebPedidoItensModel.getNewIface(CONEXAO);
   try
     try
@@ -860,10 +1151,10 @@ end;
 
 procedure TImpressaoContratos.imprimirRF;
 var
-  lPedidoItensModel : ITPedidoItensModel;
+  lPedidoItensModel    : ITPedidoItensModel;
   lWebPedidoItensModel : ITWebPedidoItensModel;
 begin
-  lPedidoItensModel := TPedidoItensModel.getNewIface(CONEXAO);
+  lPedidoItensModel    := TPedidoItensModel.getNewIface(CONEXAO);
   lWebPedidoItensModel := TWebPedidoItensModel.getNewIface(CONEXAO);
   try
     try
@@ -900,10 +1191,10 @@ end;
 
 procedure TImpressaoContratos.imprimirRFD;
 var
-  lPedidoItensModel : ITPedidoItensModel;
+  lPedidoItensModel    : ITPedidoItensModel;
   lWebPedidoItensModel : ITWebPedidoItensModel;
 begin
-  lPedidoItensModel := TPedidoItensModel.getNewIface(CONEXAO);
+  lPedidoItensModel    := TPedidoItensModel.getNewIface(CONEXAO);
   lWebPedidoItensModel := TWebPedidoItensModel.getNewIface(CONEXAO);
   try
     try

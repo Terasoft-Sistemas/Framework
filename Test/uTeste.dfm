@@ -20,7 +20,7 @@ object Form1: TForm1
     Top = 0
     Width = 1250
     Height = 753
-    ActivePage = TabSheet1
+    ActivePage = TabSheet10
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -1480,6 +1480,15 @@ object Form1: TForm1
         Caption = 'Imprimir RFD'
         TabOrder = 3
         OnClick = imprimirRFDClick
+      end
+      object imprimirContratoCarteira: TButton
+        Left = 3
+        Top = 63
+        Width = 182
+        Height = 46
+        Caption = 'Imprimir Contrato Carteira'
+        TabOrder = 4
+        OnClick = imprimirContratoCarteiraClick
       end
     end
     object Usuario: TTabSheet

@@ -9,13 +9,17 @@ uses
   Interfaces.Conexao,
   FireDAC.Comp.Client,
   Terasoft.FuncoesTexto,
+  Terasoft.Framework.ObjectIface,
   PedidoCompraModel;
 
 type
 
-  TPrevisaoPedidoCompraModel = class
+  TPrevisaoPedidoCompraModel = class;
+  ITPrevisaoPedidoCompraModel=IObject<TPrevisaoPedidoCompraModel>;
 
+  TPrevisaoPedidoCompraModel = class
   private
+    [weak] mySelf: ITPrevisaoPedidoCompraModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -62,15 +66,17 @@ type
     property SYSTIME        : Variant read FSYSTIME        write SetSYSTIME;
 
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITPrevisaoPedidoCompraModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TPrevisaoPedidoCompraModel;
+    function Alterar(pID : String): ITPrevisaoPedidoCompraModel;
     function Excluir(pNumeroPed, pCodigoFor : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId : String): TPrevisaoPedidoCompraModel;
+    function carregaClasse(pId : String): ITPrevisaoPedidoCompraModel;
     function SaldoFinanceiro(pNumeroPedido, pCodigoFornecedor: String): Double;
     function ObterLista: IFDDataset; overload;
     procedure gerarFinanceiro(pPedidoCompraModel : ITPedidoCompraModel);
@@ -96,14 +102,14 @@ uses
 
 { TPrevisaoPedidoCompraModel }
 
-function TPrevisaoPedidoCompraModel.Alterar(pID: String): TPrevisaoPedidoCompraModel;
+function TPrevisaoPedidoCompraModel.Alterar(pID: String): ITPrevisaoPedidoCompraModel;
 var
-  lPrevisaoPedidoCompraModel : TPrevisaoPedidoCompraModel;
+  lPrevisaoPedidoCompraModel : ITPrevisaoPedidoCompraModel;
 begin
-  lPrevisaoPedidoCompraModel := TPrevisaoPedidoCompraModel.Create(vIConexao);
+  lPrevisaoPedidoCompraModel := TPrevisaoPedidoCompraModel.getNewIface(vIConexao);
   try
-    lPrevisaoPedidoCompraModel       := lPrevisaoPedidoCompraModel.carregaClasse(pID);
-    lPrevisaoPedidoCompraModel.Acao  := tacAlterar;
+    lPrevisaoPedidoCompraModel       := lPrevisaoPedidoCompraModel.objeto.carregaClasse(pID);
+    lPrevisaoPedidoCompraModel.objeto.Acao  := tacAlterar;
     Result            := lPrevisaoPedidoCompraModel;
   finally
   end;
@@ -147,26 +153,32 @@ begin
   end;
 end;
 
+class function TPrevisaoPedidoCompraModel.getNewIface(pIConexao: IConexao): ITPrevisaoPedidoCompraModel;
+begin
+  Result := TImplObjetoOwner<TPrevisaoPedidoCompraModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TPrevisaoPedidoCompraModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
   Result    := self.Salvar;
 end;
 
-function TPrevisaoPedidoCompraModel.carregaClasse(pId : String): TPrevisaoPedidoCompraModel;
+function TPrevisaoPedidoCompraModel.carregaClasse(pId : String): ITPrevisaoPedidoCompraModel;
 var
-  lPrevisaoPedidoCompraDao: TPrevisaoPedidoCompraDao;
+  lPrevisaoPedidoCompraDao: ITPrevisaoPedidoCompraDao;
 begin
-  lPrevisaoPedidoCompraDao := TPrevisaoPedidoCompraDao.Create(vIConexao);
+  lPrevisaoPedidoCompraDao := TPrevisaoPedidoCompraDao.getNewIface(vIConexao);
 
   try
-    Result := lPrevisaoPedidoCompraDao.carregaClasse(pId);
+    Result := lPrevisaoPedidoCompraDao.objeto.carregaClasse(pId);
   finally
-    lPrevisaoPedidoCompraDao.Free;
+    lPrevisaoPedidoCompraDao:=nil;
   end;
 end;
 
-constructor TPrevisaoPedidoCompraModel.Create(pIConexao : IConexao);
+constructor TPrevisaoPedidoCompraModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -178,37 +190,37 @@ end;
 
 function TPrevisaoPedidoCompraModel.obterLista: IFDDataset;
 var
-  lPrevisaoPedidoCompraDao: TPrevisaoPedidoCompraDao;
+  lPrevisaoPedidoCompraDao: ITPrevisaoPedidoCompraDao;
 begin
-  lPrevisaoPedidoCompraDao:= TPrevisaoPedidoCompraDao.Create(vIConexao);
+  lPrevisaoPedidoCompraDao:= TPrevisaoPedidoCompraDao.getNewIface(vIConexao);
 
   try
-    lPrevisaoPedidoCompraDao.TotalRecords    := FTotalRecords;
-    lPrevisaoPedidoCompraDao.WhereView       := FWhereView;
-    lPrevisaoPedidoCompraDao.CountView       := FCountView;
-    lPrevisaoPedidoCompraDao.OrderView       := FOrderView;
-    lPrevisaoPedidoCompraDao.StartRecordView := FStartRecordView;
-    lPrevisaoPedidoCompraDao.LengthPageView  := FLengthPageView;
-    lPrevisaoPedidoCompraDao.IDRecordView    := FIDRecordView;
+    lPrevisaoPedidoCompraDao.objeto.TotalRecords    := FTotalRecords;
+    lPrevisaoPedidoCompraDao.objeto.WhereView       := FWhereView;
+    lPrevisaoPedidoCompraDao.objeto.CountView       := FCountView;
+    lPrevisaoPedidoCompraDao.objeto.OrderView       := FOrderView;
+    lPrevisaoPedidoCompraDao.objeto.StartRecordView := FStartRecordView;
+    lPrevisaoPedidoCompraDao.objeto.LengthPageView  := FLengthPageView;
+    lPrevisaoPedidoCompraDao.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lPrevisaoPedidoCompraDao.obterLista;
+    Result := lPrevisaoPedidoCompraDao.objeto.obterLista;
 
-    FTotalRecords := lPrevisaoPedidoCompraDao.TotalRecords;
+    FTotalRecords := lPrevisaoPedidoCompraDao.objeto.TotalRecords;
 
   finally
-    lPrevisaoPedidoCompraDao.Free;
+    lPrevisaoPedidoCompraDao:=nil;
   end;
 end;
 
 function TPrevisaoPedidoCompraModel.SaldoFinanceiro(pNumeroPedido, pCodigoFornecedor: String): Double;
 var
-  lPrevisaoPedidoCompraDao: TPrevisaoPedidoCompraDao;
+  lPrevisaoPedidoCompraDao: ITPrevisaoPedidoCompraDao;
   lPedidoCompraModel: ITPedidoCompraModel;
   lTotalizador: IFDDataset;
   lTotalFinanceiro: Double;
   lTotalPedido: Double;
 begin
-  lPrevisaoPedidoCompraDao := TPrevisaoPedidoCompraDao.Create(vIConexao);
+  lPrevisaoPedidoCompraDao := TPrevisaoPedidoCompraDao.getNewIface(vIConexao);
   lPedidoCompraModel := TPedidoCompraModel.getNewIface(vIConexao);
   try
 
@@ -218,54 +230,54 @@ begin
     lTotalizador := lPedidoCompraModel.objeto.ObterTotalizador;
 
     lTotalPedido     := RoundTo(StrToFloat(FloatToStr(lTotalizador.objeto.FieldByName('valor_total_pedido').AsFloat)), -2);
-    lTotalFinanceiro := RoundTo(lPrevisaoPedidoCompraDao.TotalFinanceiro(pNumeroPedido), -2);
+    lTotalFinanceiro := RoundTo(lPrevisaoPedidoCompraDao.objeto.TotalFinanceiro(pNumeroPedido), -2);
 
     Result :=  lTotalPedido - lTotalFinanceiro;
 
   finally
-    lPrevisaoPedidoCompraDao.Free;
+    lPrevisaoPedidoCompraDao:=nil;
     lPedidoCompraModel:=nil;
   end;
 end;
 
 procedure TPrevisaoPedidoCompraModel.ValidaTotalFinanceiro(pValor: Double);
 var
-  lPrevisaoPedidoCompraDao: TPrevisaoPedidoCompraDao;
+  lPrevisaoPedidoCompraDao: ITPrevisaoPedidoCompraDao;
   lPedidoCompraModel: ITPedidoCompraModel;
   lTotalizador  : IFDDataset;
   lTotalFinanceiro: Double;
 begin
-  lPrevisaoPedidoCompraDao := TPrevisaoPedidoCompraDao.Create(vIConexao);
+  lPrevisaoPedidoCompraDao := TPrevisaoPedidoCompraDao.getNewIface(vIConexao);
   lPedidoCompraModel := TPedidoCompraModel.getNewIface(vIConexao);
   try
 
      lPedidoCompraModel.objeto.NumeroView   := FNUMERO_PED;
      lTotalizador                    := lPedidoCompraModel.objeto.obterTotalizador;
-     lTotalFinanceiro                := lPrevisaoPedidoCompraDao.TotalFinanceiro(FNUMERO_PED);
+     lTotalFinanceiro                := lPrevisaoPedidoCompraDao.objeto.TotalFinanceiro(FNUMERO_PED);
 
      if (Round(lTotalFinanceiro + pValor )) > (Round(lTotalizador.objeto.FieldByName('valor_total_pedido').AsFloat)) then
        raise Exception.Create('Financeiro já informado ou valor informado maior que o saldo a informar (Total já informado: '+FormatFloat(',0.00', lTotalFinanceiro)+')');
 
   finally
-    lPrevisaoPedidoCompraDao.Free;
+    lPrevisaoPedidoCompraDao:=nil;
     lPedidoCompraModel:=nil;
   end;
 end;
 
 function TPrevisaoPedidoCompraModel.Salvar: String;
 var
-  lPrevisaoPedidoCompraDao: TPrevisaoPedidoCompraDao;
+  lPrevisaoPedidoCompraDao: ITPrevisaoPedidoCompraDao;
 begin
-  lPrevisaoPedidoCompraDao := TPrevisaoPedidoCompraDao.Create(vIConexao);
+  lPrevisaoPedidoCompraDao := TPrevisaoPedidoCompraDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lPrevisaoPedidoCompraDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lPrevisaoPedidoCompraDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lPrevisaoPedidoCompraDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lPrevisaoPedidoCompraDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lPrevisaoPedidoCompraDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lPrevisaoPedidoCompraDao.objeto.excluir(mySelf);
     end;
   finally
-    lPrevisaoPedidoCompraDao.Free;
+    lPrevisaoPedidoCompraDao:=nil;
   end;
 end;
 

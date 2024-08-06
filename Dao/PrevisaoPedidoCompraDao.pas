@@ -16,12 +16,16 @@ uses
   Terasoft.Framework.SimpleTypes,
   Interfaces.Conexao,
   Terasoft.ConstrutorDao,
+  Terasoft.Framework.ObjectIface,
   PrevisaoPedidoCompraModel;
 
 type
-  TPrevisaoPedidoCompraDao = class
+  TPrevisaoPedidoCompraDao = class;
+  ITPrevisaoPedidoCompraDao=IObject<TPrevisaoPedidoCompraDao>;
 
+  TPrevisaoPedidoCompraDao = class
   private
+    [weak] mySelf: ITPrevisaoPedidoCompraDao;
     vIConexao : IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -46,8 +50,10 @@ type
     function where: String;
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITPrevisaoPedidoCompraDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -58,14 +64,14 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView : String read FIDRecordView write SetIDRecordView;
 
-    function incluir(pPrevisaoPedidoCompraModel: TPrevisaoPedidoCompraModel): String;
-    function alterar(pPrevisaoPedidoCompraModel: TPrevisaoPedidoCompraModel): String;
-    function excluir(pPrevisaoPedidoCompraModel: TPrevisaoPedidoCompraModel): String;
+    function incluir(pPrevisaoPedidoCompraModel: ITPrevisaoPedidoCompraModel): String;
+    function alterar(pPrevisaoPedidoCompraModel: ITPrevisaoPedidoCompraModel): String;
+    function excluir(pPrevisaoPedidoCompraModel: ITPrevisaoPedidoCompraModel): String;
 
-    function carregaClasse(pID : String): TPrevisaoPedidoCompraModel;
+    function carregaClasse(pID : String): ITPrevisaoPedidoCompraModel;
     function TotalFinanceiro(pNumeroPedido: String): Double;
     function obterLista: IFDDataset;
-    procedure setParams(var pQry: TFDQuery; pPrevisaoPedidoCompraModel: TPrevisaoPedidoCompraModel);
+    procedure setParams(var pQry: TFDQuery; pPrevisaoPedidoCompraModel: ITPrevisaoPedidoCompraModel);
 
 end;
 
@@ -76,7 +82,7 @@ uses
 
 { TPrevisaoPedidoCompra }
 
-function TPrevisaoPedidoCompraDao.alterar(pPrevisaoPedidoCompraModel: TPrevisaoPedidoCompraModel): String;
+function TPrevisaoPedidoCompraDao.alterar(pPrevisaoPedidoCompraModel: ITPrevisaoPedidoCompraModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -90,7 +96,7 @@ begin
     setParams(lQry, pPrevisaoPedidoCompraModel);
     lQry.ExecSQL;
 
-    Result := pPrevisaoPedidoCompraModel.ID;
+    Result := pPrevisaoPedidoCompraModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -98,13 +104,13 @@ begin
   end;
 end;
 
-function TPrevisaoPedidoCompraDao.carregaClasse(pID: String): TPrevisaoPedidoCompraModel;
+function TPrevisaoPedidoCompraDao.carregaClasse(pID: String): ITPrevisaoPedidoCompraModel;
 var
   lQry: TFDQuery;
-  lModel: TPrevisaoPedidoCompraModel;
+  lModel: ITPrevisaoPedidoCompraModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TPrevisaoPedidoCompraModel.Create(vIConexao);
+  lModel   := TPrevisaoPedidoCompraModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -113,20 +119,20 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-      lModel.ID             := lQry.FieldByName('ID').AsString;
-      lModel.VENCIMENTO     := lQry.FieldByName('VENCIMENTO').AsString;
-      lModel.VALOR_PARCELA  := lQry.FieldByName('VALOR_PARCELA').AsString;
-      lModel.PARCELA        := lQry.FieldByName('PARCELA').AsString;
-      lModel.NUMERO_PED     := lQry.FieldByName('NUMERO_PED').AsString;
-      lModel.CODIGO_FOR     := lQry.FieldByName('CODIGO_FOR').AsString;
-      lModel.SYSTIME        := lQry.FieldByName('SYSTIME').AsString;
+      lModel.objeto.ID             := lQry.FieldByName('ID').AsString;
+      lModel.objeto.VENCIMENTO     := lQry.FieldByName('VENCIMENTO').AsString;
+      lModel.objeto.VALOR_PARCELA  := lQry.FieldByName('VALOR_PARCELA').AsString;
+      lModel.objeto.PARCELA        := lQry.FieldByName('PARCELA').AsString;
+      lModel.objeto.NUMERO_PED     := lQry.FieldByName('NUMERO_PED').AsString;
+      lModel.objeto.CODIGO_FOR     := lQry.FieldByName('CODIGO_FOR').AsString;
+      lModel.objeto.SYSTIME        := lQry.FieldByName('SYSTIME').AsString;
 
     Result := lModel;
   finally
     lQry.Free;
   end;
 end;
-constructor TPrevisaoPedidoCompraDao.Create(pIConexao : IConexao);
+constructor TPrevisaoPedidoCompraDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -137,23 +143,29 @@ begin
   inherited;
 end;
 
-function TPrevisaoPedidoCompraDao.excluir(pPrevisaoPedidoCompraModel: TPrevisaoPedidoCompraModel): String;
+function TPrevisaoPedidoCompraDao.excluir(pPrevisaoPedidoCompraModel: ITPrevisaoPedidoCompraModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from PREVISAO_PEDIDOCOMPRA where NUMERO_PED = :NUMERO_PED and CODIGO_FOR = :CODIGO_FOR', [pPrevisaoPedidoCompraModel.NUMERO_PED, pPrevisaoPedidoCompraModel.CODIGO_FOR]);
+   lQry.ExecSQL('delete from PREVISAO_PEDIDOCOMPRA where NUMERO_PED = :NUMERO_PED and CODIGO_FOR = :CODIGO_FOR', [pPrevisaoPedidoCompraModel.objeto.NUMERO_PED, pPrevisaoPedidoCompraModel.objeto.CODIGO_FOR]);
    lQry.ExecSQL;
-   Result := pPrevisaoPedidoCompraModel.ID;
+   Result := pPrevisaoPedidoCompraModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
 end;
 
-function TPrevisaoPedidoCompraDao.incluir(pPrevisaoPedidoCompraModel: TPrevisaoPedidoCompraModel): String;
+class function TPrevisaoPedidoCompraDao.getNewIface(pIConexao: IConexao): ITPrevisaoPedidoCompraDao;
+begin
+  Result := TImplObjetoOwner<TPrevisaoPedidoCompraDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TPrevisaoPedidoCompraDao.incluir(pPrevisaoPedidoCompraModel: ITPrevisaoPedidoCompraModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -164,7 +176,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pPrevisaoPedidoCompraModel.ID := vIConexao.Generetor('GEN_PREVISAO_PEDIDOCOMPRA');
+    pPrevisaoPedidoCompraModel.objeto.ID := vIConexao.Generetor('GEN_PREVISAO_PEDIDOCOMPRA');
     setParams(lQry, pPrevisaoPedidoCompraModel);
     lQry.Open;
 
@@ -280,28 +292,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TPrevisaoPedidoCompraDao.setParams(var pQry: TFDQuery; pPrevisaoPedidoCompraModel: TPrevisaoPedidoCompraModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TPrevisaoPedidoCompraDao.setParams(var pQry: TFDQuery; pPrevisaoPedidoCompraModel: ITPrevisaoPedidoCompraModel);
 begin
-  lTabela := vConstrutor.getColumns('PREVISAO_PEDIDOCOMPRA');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TPrevisaoPedidoCompraModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPrevisaoPedidoCompraModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPrevisaoPedidoCompraModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('PREVISAO_PEDIDOCOMPRA',pQry,pPrevisaoPedidoCompraModel.objeto);
 end;
 
 procedure TPrevisaoPedidoCompraDao.SetStartRecordView(const Value: String);

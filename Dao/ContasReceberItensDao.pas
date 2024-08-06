@@ -81,6 +81,8 @@ type
     function where: String;
     function valorAberto(pCliente : String) : Double;
 
+    function qtdePagamentoPrazo(pPedidoVenda: String): Integer;
+
     function gerarChamadaTEF(pFatura, pTefModalidade, pTefParcelamento, pTefAdquirente: String): String;
     procedure setParams(var pQry: TFDQuery; pContasReceberItensModel: TContasReceberItensModel);
     procedure setParamsArray(var pQry: TFDQuery; pContasReceberItensModel: TContasReceberItensModel);
@@ -275,6 +277,32 @@ begin
     Result := lChamada;
   finally
     lSQL := '';
+    lQry.Free;
+  end;
+end;
+
+function TContasReceberItensDao.qtdePagamentoPrazo(pPedidoVenda: String): Integer;
+var
+  lQry       : TFDQuery;
+  lSQL       : String;
+  lPaginacao : String;
+begin
+
+  lQry := vIConexao.CriarQuery;
+
+  try
+      lSQL :=
+      '   select count(*) qtde                                           '+SLineBreak+
+      '     from contasreceberitens r                                    '+SLineBreak+
+      '    inner join contasreceber cr on cr.fatura_rec = r.fatura_rec   '+SLineBreak+
+      '    inner join portador p on p.codigo_port = r.codigo_por         '+SLineBreak+
+      '    where cr.pedido_rec = '+pPedidoVenda+'                        '+SLineBreak+
+      '      and p.tpag_nfe not in (''01'', ''03'', ''04'', ''99'')      '+SLineBreak;
+
+    lQry.Open(lSQL);
+
+    Result := vConstrutor.atribuirRegistros(lQry).objeto.FieldByName('QTDE').AsInteger;
+  finally
     lQry.Free;
   end;
 end;
