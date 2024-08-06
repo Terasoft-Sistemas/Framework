@@ -904,21 +904,21 @@ end;
 
 procedure TForm1.Button28Click(Sender: TObject);
 var
-  lContasPagarItensModel  : TContasPagarItensModel;
+  lContasPagarItensModel  : ITContasPagarItensModel;
   Duplicata               : String;
   i                       : Integer;
   lMemTable               : IFDDataset;
 begin
-  lContasPagarItensModel := TContasPagarItensModel.Create(vIConexao);
+  lContasPagarItensModel := TContasPagarItensModel.getNewIface(vIConexao);
   try
     try
       Duplicata := InputBox('ContasPagar', 'Digite a Duplicata para consultar os itens:', '');
       if Duplicata.IsEmpty then
         exit;
 
-      lContasPagarItensModel.DuplicataView := Duplicata;
+      lContasPagarItensModel.objeto.DuplicataView := Duplicata;
 
-      lMemTable := lContasPagarItensModel.obterLista;
+      lMemTable := lContasPagarItensModel.objeto.obterLista;
 
       lMemTable.objeto.First;
       while not lMemTable.objeto.Eof do
@@ -939,33 +939,33 @@ begin
        ShowMessage('Erro consultar itens' + E.Message);
     end;
   finally
-    lContasPagarItensModel.Free;
+    lContasPagarItensModel:=nil;
   end;
 end;
 
 procedure TForm1.Button29Click(Sender: TObject);
 var
-  lContasPagarItensModel : TContasPagarItensModel;
+  lContasPagarItensModel : ITContasPagarItensModel;
   pDuplicata,
   pIDItem        : String;
 begin
-  lContasPagarItensModel := TContasPagarItensModel.Create(vIConexao);
+  lContasPagarItensModel := TContasPagarItensModel.getNewIface(vIConexao);
   try
     try
       pDuplicata := 'R00006';
       pIDItem    := '20198';
 
-      lContasPagarItensModel := lContasPagarItensModel.Alterar(pDuplicata, pIDItem);
-      lContasPagarItensModel.VENC_PAG := '10.05.2024';
+      lContasPagarItensModel := lContasPagarItensModel.objeto.Alterar(pDuplicata, pIDItem);
+      lContasPagarItensModel.objeto.VENC_PAG := '10.05.2024';
 
-      lContasPagarItensModel.Salvar;
+      lContasPagarItensModel.objeto.Salvar;
 
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-  lContasPagarItensModel.Free;
+  lContasPagarItensModel:=nil;
   end;
 end;
 
@@ -1003,24 +1003,24 @@ end;
 
 procedure TForm1.Button30Click(Sender: TObject);
 var
-  lContasPagarItensModel : TContasPagarItensModel;
+  lContasPagarItensModel : ITContasPagarItensModel;
   NumParcela             : String;
 begin
-  lContasPagarItensModel := TContasPagarItensModel.Create(vIConexao);
+  lContasPagarItensModel := TContasPagarItensModel.getNewIface(vIConexao);
   try
     try
       NumParcela := InputBox('ContasPagarItens','Digite o ID da parcela','');
       if NumParcela.IsEmpty then
         Exit;
 
-      lContasPagarItensModel.Excluir(NumParcela);
+      lContasPagarItensModel.objeto.Excluir(NumParcela);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lContasPagarItensModel.Free;
+    lContasPagarItensModel:=nil;
   end;
 end;
 

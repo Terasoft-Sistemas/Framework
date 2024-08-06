@@ -6,12 +6,16 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao, 
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
-  TContasPagarItensModel = class
+  TContasPagarItensModel = class;
+  ITContasPagarItensModel=IObject<TContasPagarItensModel>;
 
+  TContasPagarItensModel = class
   private
+    [weak] mySelf: ITContasPagarItensModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -112,15 +116,17 @@ type
     property REMESSA_GESTAO_PAGAMENTO: Variant  read FREMESSA_GESTAO_PAGAMENTO write SetREMESSA_GESTAO_PAGAMENTO;
     property DOCUMENTO               : Variant  read FDOCUMENTO write SetDOCUMENTO;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITContasPagarItensModel;
+
     function Incluir: String;
-    function Alterar(pID, pIDItem : String): TContasPagarItensModel;
+    function Alterar(pID, pIDItem : String): ITContasPagarItensModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId, pIDItem: String): TContasPagarItensModel;
+    function carregaClasse(pId, pIDItem: String): ITContasPagarItensModel;
     function obterLista: IFDDataset;
 
     property Acao :TAcao read FAcao write SetAcao;
@@ -143,14 +149,14 @@ uses
 
 { TContasPagarItensModel }
 
-function TContasPagarItensModel.Alterar(pID, pIDItem: String): TContasPagarItensModel;
+function TContasPagarItensModel.Alterar(pID, pIDItem: String): ITContasPagarItensModel;
 var
-  lContasPagarItensModel : TContasPagarItensModel;
+  lContasPagarItensModel : ITContasPagarItensModel;
 begin
-  lContasPagarItensModel := TContasPagarItensModel.Create(vIConexao);
+  lContasPagarItensModel := TContasPagarItensModel.getNewIface(vIConexao);
   try
-    lContasPagarItensModel       := lContasPagarItensModel.carregaClasse(pID, pIDItem);
-    lContasPagarItensModel.Acao  := tacAlterar;
+    lContasPagarItensModel       := lContasPagarItensModel.objeto.carregaClasse(pID, pIDItem);
+    lContasPagarItensModel.objeto.Acao  := tacAlterar;
     Result              		     := lContasPagarItensModel;
   finally
   end;
@@ -163,26 +169,32 @@ begin
   Result     := self.Salvar;
 end;
 
+class function TContasPagarItensModel.getNewIface(pIConexao: IConexao): ITContasPagarItensModel;
+begin
+  Result := TImplObjetoOwner<TContasPagarItensModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TContasPagarItensModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
     self.Salvar;
 end;
 
-function TContasPagarItensModel.carregaClasse(pId, pIDItem: String): TContasPagarItensModel;
+function TContasPagarItensModel.carregaClasse(pId, pIDItem: String): ITContasPagarItensModel;
 var
-  lContasPagarItensDao: TContasPagarItensDao;
+  lContasPagarItensDao: ITContasPagarItensDao;
 begin
-  lContasPagarItensDao := TContasPagarItensDao.Create(vIConexao);
+  lContasPagarItensDao := TContasPagarItensDao.getNewIface(vIConexao);
 
   try
-    Result := lContasPagarItensDao.carregaClasse(pId, pIDItem);
+    Result := lContasPagarItensDao.objeto.carregaClasse(pId, pIDItem);
   finally
-    lContasPagarItensDao.Free;
+    lContasPagarItensDao:=nil;
   end;
 end;
 
-constructor TContasPagarItensModel.Create(pIConexao : IConexao);
+constructor TContasPagarItensModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -195,47 +207,47 @@ end;
 
 function TContasPagarItensModel.obterLista: IFDDataset;
 var
-  lContasPagarDao: TContasPagarItensDao;
+  lContasPagarDao: ITContasPagarItensDao;
 begin
-  lContasPagarDao := TContasPagarItensDao.Create(vIConexao);
+  lContasPagarDao := TContasPagarItensDao.getNewIface(vIConexao);
 
   try
-    lContasPagarDao.TotalRecords    := self.FTotalRecords;
-    lContasPagarDao.WhereView       := self.FWhereView;
-    lContasPagarDao.CountView       := self.FCountView;
-    lContasPagarDao.OrderView       := self.FOrderView;
-    lContasPagarDao.StartRecordView := self.FStartRecordView;
-    lContasPagarDao.LengthPageView  := self.FLengthPageView;
-    lContasPagarDao.IDRecordView    := self.FIDRecordView;
-    lContasPagarDao.DuplicataView   := self.DuplicataView;
-    lContasPagarDao.FornecedorView  := self.FornecedorView;
+    lContasPagarDao.objeto.TotalRecords    := self.FTotalRecords;
+    lContasPagarDao.objeto.WhereView       := self.FWhereView;
+    lContasPagarDao.objeto.CountView       := self.FCountView;
+    lContasPagarDao.objeto.OrderView       := self.FOrderView;
+    lContasPagarDao.objeto.StartRecordView := self.FStartRecordView;
+    lContasPagarDao.objeto.LengthPageView  := self.FLengthPageView;
+    lContasPagarDao.objeto.IDRecordView    := self.FIDRecordView;
+    lContasPagarDao.objeto.DuplicataView   := self.DuplicataView;
+    lContasPagarDao.objeto.FornecedorView  := self.FornecedorView;
 
-    Result := lContasPagarDao.obterLista;
+    Result := lContasPagarDao.objeto.obterLista;
 
-    FTotalRecords := lContasPagarDao.TotalRecords;
+    FTotalRecords := lContasPagarDao.objeto.TotalRecords;
 
   finally
-    lContasPagarDao.Free;
+    lContasPagarDao:=nil;
   end;
 end;
 
 function TContasPagarItensModel.Salvar: String;
 var
-  lContasPagarItensDao: TContasPagarItensDao;
+  lContasPagarItensDao: ITContasPagarItensDao;
 begin
-  lContasPagarItensDao := TContasPagarItensDao.Create(vIConexao);
+  lContasPagarItensDao := TContasPagarItensDao.getNewIface(vIConexao);
 
   Result := '';
 
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lContasPagarItensDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lContasPagarItensDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lContasPagarItensDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lContasPagarItensDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lContasPagarItensDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lContasPagarItensDao.objeto.excluir(mySelf);
     end;
 
   finally
-    lContasPagarItensDao.Free;
+    lContasPagarItensDao:=nil;
   end;
 end;
 

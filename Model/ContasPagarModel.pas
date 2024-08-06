@@ -217,10 +217,10 @@ var
   lVencimento       : TDate;
   i                 : Integer;
   p: ITContasPagarModel;
-  lContasPagarItensModel : TContasPagarItensModel;
+  lContasPagarItensModel : ITContasPagarItensModel;
 begin
 
-  lContasPagarItensModel := TContasPagarItensModel.Create(vIConexao);
+  lContasPagarItensModel := TContasPagarItensModel.getNewIface(vIConexao);
   lCondicoes             := TStringList.Create;
 
   try
@@ -239,21 +239,21 @@ begin
     begin
       lVencimento := StrToDate(p.objeto.DATAEMI_PAG) + StrToInt(lCondicoes.Strings[i]);
 
-      lContasPagarItensModel.DUPLIACATA_PAG    := p.objeto.DUPLICATA_PAG;
-      lContasPagarItensModel.CODIGO_FOR        := p.objeto.CODIGO_FOR;
-      lContasPagarItensModel.VENC_PAG          := DateToStr(lVencimento);
-      lContasPagarItensModel.PACELA_PAG        := (i+1).ToString;
-      lContasPagarItensModel.TOTALPARCELAS     := lParcelas.ToString;
-      lContasPagarItensModel.VALORPARCELA_PAG  := lValorParcela.ToString;
-      lContasPagarItensModel.SITUACAO_PAG      := 'A';
-      lContasPagarItensModel.LOJA              := p.objeto.LOJA;
-      lContasPagarItensModel.PORTADOR_ID       := p.objeto.PORTADOR_ID;
-      lContasPagarItensModel.VALORPARCELA_BASE := lValorParcela.ToString;
-      lContasPagarItensModel.Incluir;
+      lContasPagarItensModel.objeto.DUPLIACATA_PAG    := p.objeto.DUPLICATA_PAG;
+      lContasPagarItensModel.objeto.CODIGO_FOR        := p.objeto.CODIGO_FOR;
+      lContasPagarItensModel.objeto.VENC_PAG          := DateToStr(lVencimento);
+      lContasPagarItensModel.objeto.PACELA_PAG        := (i+1).ToString;
+      lContasPagarItensModel.objeto.TOTALPARCELAS     := lParcelas.ToString;
+      lContasPagarItensModel.objeto.VALORPARCELA_PAG  := lValorParcela.ToString;
+      lContasPagarItensModel.objeto.SITUACAO_PAG      := 'A';
+      lContasPagarItensModel.objeto.LOJA              := p.objeto.LOJA;
+      lContasPagarItensModel.objeto.PORTADOR_ID       := p.objeto.PORTADOR_ID;
+      lContasPagarItensModel.objeto.VALORPARCELA_BASE := lValorParcela.ToString;
+      lContasPagarItensModel.objeto.Incluir;
     end;
 
   finally
-    lContasPagarItensModel.Free;
+    lContasPagarItensModel:=nil;
     lCondicoes.Free;
   end;
 
@@ -268,11 +268,11 @@ var
   lCondicoes        : TStringList;
   lVencimento       : TDate;
   i                 : Integer;
-  lContasPagarItensModel : TContasPagarItensModel;
+  lContasPagarItensModel : ITContasPagarItensModel;
   p: ITContasPagarModel;
 begin
 
-  lContasPagarItensModel := TContasPagarItensModel.Create(vIConexao);
+  lContasPagarItensModel := TContasPagarItensModel.getNewIface(vIConexao);
   lCondicoes             := TStringList.Create;
 
   try
@@ -307,28 +307,28 @@ begin
     begin
       lVencimento := StrToDate(p.objeto.DATAEMI_PAG) + StrToInt(lCondicoes.Strings[i]);
 
-      lContasPagarItensModel.DUPLIACATA_PAG    := p.objeto.DUPLICATA_PAG;
-      lContasPagarItensModel.CODIGO_FOR        := p.objeto.CODIGO_FOR;
-      lContasPagarItensModel.VENC_PAG          := DateToStr(lVencimento);
-      lContasPagarItensModel.PACELA_PAG        := (i+1).ToString;
-      lContasPagarItensModel.TOTALPARCELAS     := lParcelas.ToString;
-      lContasPagarItensModel.VALORPARCELA_PAG  := lValorParcela.ToString;
-      lContasPagarItensModel.SITUACAO_PAG      := 'A';
-      lContasPagarItensModel.LOJA              := p.objeto.LOJA;
-      lContasPagarItensModel.PORTADOR_ID       := p.objeto.PORTADOR_ID;
-      lContasPagarItensModel.VALORPARCELA_BASE := lValorParcela.ToString;
+      lContasPagarItensModel.objeto.DUPLIACATA_PAG    := p.objeto.DUPLICATA_PAG;
+      lContasPagarItensModel.objeto.CODIGO_FOR        := p.objeto.CODIGO_FOR;
+      lContasPagarItensModel.objeto.VENC_PAG          := DateToStr(lVencimento);
+      lContasPagarItensModel.objeto.PACELA_PAG        := (i+1).ToString;
+      lContasPagarItensModel.objeto.TOTALPARCELAS     := lParcelas.ToString;
+      lContasPagarItensModel.objeto.VALORPARCELA_PAG  := lValorParcela.ToString;
+      lContasPagarItensModel.objeto.SITUACAO_PAG      := 'A';
+      lContasPagarItensModel.objeto.LOJA              := p.objeto.LOJA;
+      lContasPagarItensModel.objeto.PORTADOR_ID       := p.objeto.PORTADOR_ID;
+      lContasPagarItensModel.objeto.VALORPARCELA_BASE := lValorParcela.ToString;
 
       lSoma := RoundTo(lSoma + StrToFloat(lValorParcela.ToString),-2);
 
-      if i = lContasPagarItensModel.TOTALPARCELAS -1 then
-       lContasPagarItensModel.VALORPARCELA_PAG := FloatToStr(StrToFloat(lValorParcela.ToString) + (p.objeto.VALOR_PAG - lSoma));
+      if i = lContasPagarItensModel.objeto.TOTALPARCELAS -1 then
+       lContasPagarItensModel.objeto.VALORPARCELA_PAG := FloatToStr(StrToFloat(lValorParcela.ToString) + (p.objeto.VALOR_PAG - lSoma));
 
 
-      lContasPagarItensModel.Incluir;
+      lContasPagarItensModel.objeto.Incluir;
     end;
 
   finally
-    lContasPagarItensModel.Free;
+    lContasPagarItensModel:=nil;
     lCondicoes.Free;
   end;
 

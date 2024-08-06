@@ -11,12 +11,16 @@ uses
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao;
 
 type
-  TContasPagarItensDao = class
+  TContasPagarItensDao = class;
+  ITContasPagarItensDao=IObject<TContasPagarItensDao>;
 
+  TContasPagarItensDao = class
   private
+    [weak] mySelf: ITContasPagarItensDao;
     vIConexao : IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -46,8 +50,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITContasPagarItensDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -60,15 +66,15 @@ type
     property DuplicataView: String read FDuplicataView write SetDuplicataView;
     property FornecedorView: String read FFornecedorView write SetFornecedorView;
 
-    function incluir(AContasPagarItensModel: TContasPagarItensModel): String;
-    function alterar(AContasPagarItensModel: TContasPagarItensModel): String;
-    function excluir(AContasPagarItensModel: TContasPagarItensModel): String;
+    function incluir(AContasPagarItensModel: ITContasPagarItensModel): String;
+    function alterar(AContasPagarItensModel: ITContasPagarItensModel): String;
+    function excluir(AContasPagarItensModel: ITContasPagarItensModel): String;
 
-    function carregaClasse(pID, pIDItem : String): TContasPagarItensModel;
+    function carregaClasse(pID, pIDItem : String): ITContasPagarItensModel;
 
     function obterLista: IFDDataset;
 
-    procedure setParams(var pQry: TFDQuery; pContasPagarItensModel: TContasPagarItensModel);
+    procedure setParams(var pQry: TFDQuery; pContasPagarItensModel: ITContasPagarItensModel);
 
 end;
 
@@ -79,13 +85,13 @@ uses
 
 { TContasPagarItens }
 
-function TContasPagarItensDao.carregaClasse(pID, pIDItem: String): TContasPagarItensModel;
+function TContasPagarItensDao.carregaClasse(pID, pIDItem: String): ITContasPagarItensModel;
 var
   lQry: TFDQuery;
-  lModel: TContasPagarItensModel;
+  lModel: ITContasPagarItensModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TContasPagarItensModel.Create(vIConexao);
+  lModel   := TContasPagarItensModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -94,30 +100,30 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID                        := lQry.FieldByName('ID').AsString;
-    lModel.DUPLIACATA_PAG            := lQry.FieldByName('DUPLIACATA_PAG').AsString;
-    lModel.CODIGO_FOR                := lQry.FieldByName('CODIGO_FOR').AsString;
-    lModel.VENC_PAG                  := lQry.FieldByName('VENC_PAG').AsString;
-    lModel.PACELA_PAG                := lQry.FieldByName('PACELA_PAG').AsString;
-    lModel.TOTALPARCELAS             := lQry.FieldByName('TOTALPARCELAS').AsString;
-    lModel.VALORPARCELA_PAG          := lQry.FieldByName('VALORPARCELA_PAG').AsString;
-    lModel.VALORPAGO_PAG             := lQry.FieldByName('VALORPAGO_PAG').AsString;
-    lModel.DATABAIXA_PAG             := lQry.FieldByName('DATABAIXA_PAG').AsString;
-    lModel.SITUACAO_PAG              := lQry.FieldByName('SITUACAO_PAG').AsString;
-    lModel.BOLETO_PAG                := lQry.FieldByName('BOLETO_PAG').AsString;
-    lModel.DATA_ACEITE               := lQry.FieldByName('DATA_ACEITE').AsString;
-    lModel.USUARIO_ACEITE            := lQry.FieldByName('USUARIO_ACEITE').AsString;
-    lModel.LOJA                      := lQry.FieldByName('LOJA').AsString;
-    lModel.PORTADOR_ID               := lQry.FieldByName('PORTADOR_ID').AsString;
-    lModel.OBS                       := lQry.FieldByName('OBS').AsString;
-    lModel.SYSTIME                   := lQry.FieldByName('SYSTIME').AsString;
-    lModel.CTR_CHEQUE_ID             := lQry.FieldByName('CTR_CHEQUE_ID').AsString;
-    lModel.LIMITE_ATRAZO             := lQry.FieldByName('LIMITE_ATRAZO').AsString;
-    lModel.DESCONTO                  := lQry.FieldByName('DESCONTO').AsString;
-    lModel.VALORPARCELA_BASE         := lQry.FieldByName('VALORPARCELA_BASE').AsString;
-    lModel.BARRAS_BOLETO             := lQry.FieldByName('BARRAS_BOLETO').AsString;
-    lModel.REMESSA_GESTAO_PAGAMENTO  := lQry.FieldByName('REMESSA_GESTAO_PAGAMENTO').AsString;
-    lModel.DOCUMENTO                 := lQry.FieldByName('DOCUMENTO').AsString;
+    lModel.objeto.ID                        := lQry.FieldByName('ID').AsString;
+    lModel.objeto.DUPLIACATA_PAG            := lQry.FieldByName('DUPLIACATA_PAG').AsString;
+    lModel.objeto.CODIGO_FOR                := lQry.FieldByName('CODIGO_FOR').AsString;
+    lModel.objeto.VENC_PAG                  := lQry.FieldByName('VENC_PAG').AsString;
+    lModel.objeto.PACELA_PAG                := lQry.FieldByName('PACELA_PAG').AsString;
+    lModel.objeto.TOTALPARCELAS             := lQry.FieldByName('TOTALPARCELAS').AsString;
+    lModel.objeto.VALORPARCELA_PAG          := lQry.FieldByName('VALORPARCELA_PAG').AsString;
+    lModel.objeto.VALORPAGO_PAG             := lQry.FieldByName('VALORPAGO_PAG').AsString;
+    lModel.objeto.DATABAIXA_PAG             := lQry.FieldByName('DATABAIXA_PAG').AsString;
+    lModel.objeto.SITUACAO_PAG              := lQry.FieldByName('SITUACAO_PAG').AsString;
+    lModel.objeto.BOLETO_PAG                := lQry.FieldByName('BOLETO_PAG').AsString;
+    lModel.objeto.DATA_ACEITE               := lQry.FieldByName('DATA_ACEITE').AsString;
+    lModel.objeto.USUARIO_ACEITE            := lQry.FieldByName('USUARIO_ACEITE').AsString;
+    lModel.objeto.LOJA                      := lQry.FieldByName('LOJA').AsString;
+    lModel.objeto.PORTADOR_ID               := lQry.FieldByName('PORTADOR_ID').AsString;
+    lModel.objeto.OBS                       := lQry.FieldByName('OBS').AsString;
+    lModel.objeto.SYSTIME                   := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.CTR_CHEQUE_ID             := lQry.FieldByName('CTR_CHEQUE_ID').AsString;
+    lModel.objeto.LIMITE_ATRAZO             := lQry.FieldByName('LIMITE_ATRAZO').AsString;
+    lModel.objeto.DESCONTO                  := lQry.FieldByName('DESCONTO').AsString;
+    lModel.objeto.VALORPARCELA_BASE         := lQry.FieldByName('VALORPARCELA_BASE').AsString;
+    lModel.objeto.BARRAS_BOLETO             := lQry.FieldByName('BARRAS_BOLETO').AsString;
+    lModel.objeto.REMESSA_GESTAO_PAGAMENTO  := lQry.FieldByName('REMESSA_GESTAO_PAGAMENTO').AsString;
+    lModel.objeto.DOCUMENTO                 := lQry.FieldByName('DOCUMENTO').AsString;
 
     Result := lModel;
   finally
@@ -125,7 +131,7 @@ begin
   end;
 end;
 
-constructor TContasPagarItensDao.Create(pIConexao : IConexao);
+constructor TContasPagarItensDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -136,7 +142,7 @@ begin
   inherited;
 end;
 
-function TContasPagarItensDao.incluir(AContasPagarItensModel: TContasPagarItensModel): String;
+function TContasPagarItensDao.incluir(AContasPagarItensModel: ITContasPagarItensModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -158,7 +164,7 @@ begin
   end;
 end;
 
-function TContasPagarItensDao.alterar(AContasPagarItensModel: TContasPagarItensModel): String;
+function TContasPagarItensDao.alterar(AContasPagarItensModel: ITContasPagarItensModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -172,7 +178,7 @@ begin
     setParams(lQry, AContasPagarItensModel);
     lQry.ExecSQL;
 
-    Result := AContasPagarItensModel.ID;
+    Result := AContasPagarItensModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -180,20 +186,26 @@ begin
   end;
 end;
 
-function TContasPagarItensDao.excluir(AContasPagarItensModel: TContasPagarItensModel): String;
+function TContasPagarItensDao.excluir(AContasPagarItensModel: ITContasPagarItensModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from CONTASPAGARITENS where ID = :ID',[AContasPagarItensModel.ID]);
+   lQry.ExecSQL('delete from CONTASPAGARITENS where ID = :ID',[AContasPagarItensModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := AContasPagarItensModel.ID;
+   Result := AContasPagarItensModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TContasPagarItensDao.getNewIface(pIConexao: IConexao): ITContasPagarItensDao;
+begin
+  Result := TImplObjetoOwner<TContasPagarItensDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TContasPagarItensDao.where: String;
@@ -310,28 +322,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TContasPagarItensDao.setParams(var pQry: TFDQuery; pContasPagarItensModel: TContasPagarItensModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TContasPagarItensDao.setParams(var pQry: TFDQuery; pContasPagarItensModel: ITContasPagarItensModel);
 begin
-  lTabela := vConstrutor.getColumns('CONTASPAGARITENS');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TContasPagarItensModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pContasPagarItensModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pContasPagarItensModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('CONTASPAGARITENS',pQry,pContasPagarItensModel.objeto);
 end;
 
 procedure TContasPagarItensDao.SetStartRecordView(const Value: String);
