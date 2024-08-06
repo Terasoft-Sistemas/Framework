@@ -3027,13 +3027,13 @@ end;
 
 procedure TForm1.Button96Click(Sender: TObject);
 var
-  lPrevisaoPedidoCompraModel : TPrevisaoPedidoCompraModel;
+  lPrevisaoPedidoCompraModel : ITPrevisaoPedidoCompraModel;
   lMemTable   : IFDDataset;
 begin
-  lPrevisaoPedidoCompraModel := TPrevisaoPedidoCompraModel.Create(vIConexao);
+  lPrevisaoPedidoCompraModel := TPrevisaoPedidoCompraModel.getNewIface(vIConexao);
   try
     try
-      lMemTable := lPrevisaoPedidoCompraModel.ObterLista;
+      lMemTable := lPrevisaoPedidoCompraModel.objeto.ObterLista;
 
       memoResultado.Lines.Clear;
 
@@ -3050,42 +3050,42 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lPrevisaoPedidoCompraModel.Free;
+    lPrevisaoPedidoCompraModel:=nil;
   end;
 end;
 
 procedure TForm1.Button97Click(Sender: TObject);
 var
-  lPrevisaoPedidoCompraModel : TPrevisaoPedidoCompraModel;
+  lPrevisaoPedidoCompraModel : ITPrevisaoPedidoCompraModel;
   ID : String;
 begin
-  lPrevisaoPedidoCompraModel := TPrevisaoPedidoCompraModel.Create(vIConexao);
+  lPrevisaoPedidoCompraModel := TPrevisaoPedidoCompraModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('PrevisaoPedidoCompra', 'Digite o código do PrevisaoPedidoCompra que deseja Alterar:', '');
       if ID.IsEmpty then
         exit;
 
-      lPrevisaoPedidoCompraModel := lPrevisaoPedidoCompraModel.Alterar(ID);
-      lPrevisaoPedidoCompraModel.VALOR_PARCELA := 888;
+      lPrevisaoPedidoCompraModel := lPrevisaoPedidoCompraModel.objeto.Alterar(ID);
+      lPrevisaoPedidoCompraModel.objeto.VALOR_PARCELA := 888;
 
-      lPrevisaoPedidoCompraModel.Salvar;
+      lPrevisaoPedidoCompraModel.objeto.Salvar;
       ShowMessage('Alterado com Sucesso');
     Except
       on E:Exception do
       ShowMessage('Erro: ' +E.Message);
     end;
   finally
-    lPrevisaoPedidoCompraModel.Free;
+    lPrevisaoPedidoCompraModel:=nil;
   end;
 end;
 
 procedure TForm1.Button98Click(Sender: TObject);
 var
-  lPrevisaoPedidoCompraModel : TPrevisaoPedidoCompraModel;
+  lPrevisaoPedidoCompraModel : ITPrevisaoPedidoCompraModel;
   Numero_Ped, Codigo_For : String;
 begin
-  lPrevisaoPedidoCompraModel := TPrevisaoPedidoCompraModel.Create(vIConexao);
+  lPrevisaoPedidoCompraModel := TPrevisaoPedidoCompraModel.getNewIface(vIConexao);
   try
     try
       Numero_Ped := InputBox('PrevisaoPedidoCompra', 'Digite o Numero Pedido da PrevisaoPedidoCompra que deseja excluir:', '');
@@ -3096,36 +3096,36 @@ begin
       if Codigo_For.IsEmpty then
           Exit;
 
-      lPrevisaoPedidoCompraModel.Excluir(Numero_Ped, Codigo_For);
+      lPrevisaoPedidoCompraModel.objeto.Excluir(Numero_Ped, Codigo_For);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lPrevisaoPedidoCompraModel.Free;
+    lPrevisaoPedidoCompraModel:=nil;
   end;
 end;
 
 procedure TForm1.Button99Click(Sender: TObject);
 var
-  lPrevisaoPedidoCompraModel : TPrevisaoPedidoCompraModel;
+  lPrevisaoPedidoCompraModel : ITPrevisaoPedidoCompraModel;
 begin
-  lPrevisaoPedidoCompraModel := TPrevisaoPedidoCompraModel.Create(vIConexao);
+  lPrevisaoPedidoCompraModel := TPrevisaoPedidoCompraModel.getNewIface(vIConexao);
   try
     try
-      lPrevisaoPedidoCompraModel.VALOR_PARCELA := 999;
-      lPrevisaoPedidoCompraModel.NUMERO_PED    := '000013';
-      lPrevisaoPedidoCompraModel.CODIGO_FOR    := '000137';
+      lPrevisaoPedidoCompraModel.objeto.VALOR_PARCELA := 999;
+      lPrevisaoPedidoCompraModel.objeto.NUMERO_PED    := '000013';
+      lPrevisaoPedidoCompraModel.objeto.CODIGO_FOR    := '000137';
 
-      lPrevisaoPedidoCompraModel.Incluir;
+      lPrevisaoPedidoCompraModel.objeto.Incluir;
       ShowMessage('Incluido com Sucesso!');
     except
       on E:Exception do
       ShowMessage('Erro: ' + E.Message);
     end
   finally
-    lPrevisaoPedidoCompraModel.Free;
+    lPrevisaoPedidoCompraModel:=nil;
   end;
 end;
 
@@ -3293,20 +3293,20 @@ end;
 
 procedure TForm1.Button102Click(Sender: TObject);
 var
-  lPrevisaoPedidoCompraModel : TPrevisaoPedidoCompraModel;
+  lPrevisaoPedidoCompraModel : ITPrevisaoPedidoCompraModel;
   lPedidoCompra : ITPedidoCompraModel;
   pPed,
   pFornc : String;
 begin
   lPedidoCompra := TPedidoCompraModel.getNewIface(vIConexao);
-  lPrevisaoPedidoCompraModel := TPrevisaoPedidoCompraModel.Create(vIConexao);
+  lPrevisaoPedidoCompraModel := TPrevisaoPedidoCompraModel.getNewIface(vIConexao);
   try
     pPed   := '000013';
     pFornc := '000137';
 
     lPedidoCompra := lPedidoCompra.objeto.carregaClasse(pPed, pFornc);
 
-    lPrevisaoPedidoCompraModel.gerarFinanceiro(lPedidoCompra);
+    lPrevisaoPedidoCompraModel.objeto.gerarFinanceiro(lPedidoCompra);
 
   finally
     lPedidoCompra:=nil;
