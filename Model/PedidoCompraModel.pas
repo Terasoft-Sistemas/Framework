@@ -274,11 +274,11 @@ uses
 function TPedidoCompraModel.AdicionarItens(pPedidoItensParams: TPedidoItensParams): String;
 var
   lPedidoCompraModel      : ITPedidoCompraModel;
-  lPedidoCompraItensModel : TPedidoCompraItensModel;
+  lPedidoCompraItensModel : ITPedidoCompraItensModel;
   p: ITPedidoCompraModel;
 begin
   lPedidoCompraModel      := TPedidoCompraModel.getNewIface(vIConexao);
-  lPedidoCompraItensModel := TPedidoCompraItensModel.Create(vIConexao);
+  lPedidoCompraItensModel := TPedidoCompraItensModel.getNewIface(vIConexao);
 
   if pPedidoItensParams.NUMERO_PED = '' then
      CriaException('Pedido não informado');
@@ -298,35 +298,35 @@ begin
   try
     p := self.carregaClasse(pPedidoItensParams.NUMERO_PED, pPedidoItensParams.CODIGO_FOR);
 
-    lPedidoCompraItensModel.NUMERO_PED           := p.objeto.FNUMERO_PED;
-    lPedidoCompraItensModel.CODIGO_FOR           := p.objeto.FCODIGO_FOR;
-    lPedidoCompraItensModel.CODIGO_PRO           := pPedidoItensParams.CODIGO_PRO;
-    lPedidoCompraItensModel.QUANTIDADE_PED       := pPedidoItensParams.QUANTIDADE_PED;
-    lPedidoCompraItensModel.VALORUNI_PED         := pPedidoItensParams.VALORUNI_PED;
-    lPedidoCompraItensModel.STATUS_PED           := 'A';
-    lPedidoCompraItensModel.PERCENTUAL_DESCONTO  := pPedidoItensParams.PERCENTUAL_DESCONTO;
-    lPedidoCompraItensModel.VLR_DESCONTO         := (lPedidoCompraItensModel.QUANTIDADE_PED  * lPedidoCompraItensModel.VALORUNI_PED) * ( StrToFloatDef(lPedidoCompraItensModel.PERCENTUAL_DESCONTO, 0) / 100);
-    lPedidoCompraItensModel.VLR_OUTRAS           := pPedidoItensParams.VALOR_OUTRAS_DESPESAS;
-    lPedidoCompraItensModel.OBSERVACAO           := pPedidoItensParams.OBSERVACAO;
-    lPedidoCompraItensModel.CFOP_ID              := pPedidoItensParams.CFOP;
-    lPedidoCompraItensModel.CST_N12              := pPedidoItensParams.CST;
-    lPedidoCompraItensModel.IPI_PED              := pPedidoItensParams.ALIQUOTA_IPI;
-    lPedidoCompraItensModel.VALOR_BASE_IPI       := pPedidoItensParams.VALOR_BASE_IPI;
-    lPedidoCompraItensModel.VIPI_014             := pPedidoItensParams.VALOR_IPI;
-    lPedidoCompraItensModel.PREDBC_N14           := pPedidoItensParams.PERCENTUAL_REDUCAO_ICMS;
-    lPedidoCompraItensModel.PICMS_N16            := pPedidoItensParams.ALIQUOTA_ICMS;
-    lPedidoCompraItensModel.VBCICMS_N15          := pPedidoItensParams.VALOR_BASE_ICMS;
-    lPedidoCompraItensModel.VICMS_N17            := pPedidoItensParams.VALOR_ICMS;
-    lPedidoCompraItensModel.PMVAST_N19           := pPedidoItensParams.PERCENTUAL_MVA;
-    lPedidoCompraItensModel.PREDBCST_N20         := pPedidoItensParams.PERCENTUAL_REDUCAO_ICMS_ST;
-    lPedidoCompraItensModel.PST_N22              := pPedidoItensParams.PERCENTUAL_ICMS_ST;
-    lPedidoCompraItensModel.VBCST_N21            := pPedidoItensParams.VALOR_BASE_ICMS_ST;
-    lPedidoCompraItensModel.VST_N23              := pPedidoItensParams.VALOR_ICMS_ST;
+    lPedidoCompraItensModel.objeto.NUMERO_PED           := p.objeto.FNUMERO_PED;
+    lPedidoCompraItensModel.objeto.CODIGO_FOR           := p.objeto.FCODIGO_FOR;
+    lPedidoCompraItensModel.objeto.CODIGO_PRO           := pPedidoItensParams.CODIGO_PRO;
+    lPedidoCompraItensModel.objeto.QUANTIDADE_PED       := pPedidoItensParams.QUANTIDADE_PED;
+    lPedidoCompraItensModel.objeto.VALORUNI_PED         := pPedidoItensParams.VALORUNI_PED;
+    lPedidoCompraItensModel.objeto.STATUS_PED           := 'A';
+    lPedidoCompraItensModel.objeto.PERCENTUAL_DESCONTO  := pPedidoItensParams.PERCENTUAL_DESCONTO;
+    lPedidoCompraItensModel.objeto.VLR_DESCONTO         := (lPedidoCompraItensModel.objeto.QUANTIDADE_PED  * lPedidoCompraItensModel.objeto.VALORUNI_PED) * ( StrToFloatDef(lPedidoCompraItensModel.objeto.PERCENTUAL_DESCONTO, 0) / 100);
+    lPedidoCompraItensModel.objeto.VLR_OUTRAS           := pPedidoItensParams.VALOR_OUTRAS_DESPESAS;
+    lPedidoCompraItensModel.objeto.OBSERVACAO           := pPedidoItensParams.OBSERVACAO;
+    lPedidoCompraItensModel.objeto.CFOP_ID              := pPedidoItensParams.CFOP;
+    lPedidoCompraItensModel.objeto.CST_N12              := pPedidoItensParams.CST;
+    lPedidoCompraItensModel.objeto.IPI_PED              := pPedidoItensParams.ALIQUOTA_IPI;
+    lPedidoCompraItensModel.objeto.VALOR_BASE_IPI       := pPedidoItensParams.VALOR_BASE_IPI;
+    lPedidoCompraItensModel.objeto.VIPI_014             := pPedidoItensParams.VALOR_IPI;
+    lPedidoCompraItensModel.objeto.PREDBC_N14           := pPedidoItensParams.PERCENTUAL_REDUCAO_ICMS;
+    lPedidoCompraItensModel.objeto.PICMS_N16            := pPedidoItensParams.ALIQUOTA_ICMS;
+    lPedidoCompraItensModel.objeto.VBCICMS_N15          := pPedidoItensParams.VALOR_BASE_ICMS;
+    lPedidoCompraItensModel.objeto.VICMS_N17            := pPedidoItensParams.VALOR_ICMS;
+    lPedidoCompraItensModel.objeto.PMVAST_N19           := pPedidoItensParams.PERCENTUAL_MVA;
+    lPedidoCompraItensModel.objeto.PREDBCST_N20         := pPedidoItensParams.PERCENTUAL_REDUCAO_ICMS_ST;
+    lPedidoCompraItensModel.objeto.PST_N22              := pPedidoItensParams.PERCENTUAL_ICMS_ST;
+    lPedidoCompraItensModel.objeto.VBCST_N21            := pPedidoItensParams.VALOR_BASE_ICMS_ST;
+    lPedidoCompraItensModel.objeto.VST_N23              := pPedidoItensParams.VALOR_ICMS_ST;
 
-    Result := lPedidoCompraItensModel.Incluir;
+    Result := lPedidoCompraItensModel.objeto.Incluir;
 
   finally
-    lPedidoCompraItensModel.Free;
+    lPedidoCompraItensModel:=nil;
   end;
 end;
 

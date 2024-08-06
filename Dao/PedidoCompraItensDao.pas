@@ -7,17 +7,20 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao;
 
 type
 
-  TPedidoCompraItensDao = class
+  TPedidoCompraItensDao = class;
+  ITPedidoCompraItensDao=IObject<TPedidoCompraItensDao>;
 
+  TPedidoCompraItensDao = class
   private
+    [weak] mySelf: ITPedidoCompraItensDao;
     vIConexao 	: IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -47,8 +50,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITPedidoCompraItensDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -61,13 +66,13 @@ type
     property NumeroView : String read FNumeroView write SetNumeroView;
     property FornecedorView : String read FFornecedorView write SetFornecedorView;
 
-    function incluir(pPedidoCompraItensModel: TPedidoCompraItensModel): String;
-    function alterar(pPedidoCompraItensModel: TPedidoCompraItensModel): String;
-    function excluir(pPedidoCompraItensModel: TPedidoCompraItensModel): String;
+    function incluir(pPedidoCompraItensModel: ITPedidoCompraItensModel): String;
+    function alterar(pPedidoCompraItensModel: ITPedidoCompraItensModel): String;
+    function excluir(pPedidoCompraItensModel: ITPedidoCompraItensModel): String;
 
-    function carregaClasse(pID : String): TPedidoCompraItensModel;
+    function carregaClasse(pID : String): ITPedidoCompraItensModel;
     function obterLista: IFDDataset;
-    procedure setParams(var pQry: TFDQuery; pPedidoCompraItensModel: TPedidoCompraItensModel);
+    procedure setParams(var pQry: TFDQuery; pPedidoCompraItensModel: ITPedidoCompraItensModel);
 
 end;
 
@@ -78,13 +83,13 @@ uses
 
 { TPedidoCompraItens }
 
-function TPedidoCompraItensDao.carregaClasse(pID : String): TPedidoCompraItensModel;
+function TPedidoCompraItensDao.carregaClasse(pID : String): ITPedidoCompraItensModel;
 var
   lQry: TFDQuery;
-  lModel: TPedidoCompraItensModel;
+  lModel: ITPedidoCompraItensModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TPedidoCompraItensModel.Create(vIConexao);
+  lModel   := TPedidoCompraItensModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -93,52 +98,52 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID                      := lQry.FieldByName('ID').AsString;
-    lModel.NUMERO_PED              := lQry.FieldByName('NUMERO_PED').AsString;
-    lModel.CODIGO_FOR              := lQry.FieldByName('CODIGO_FOR').AsString;
-    lModel.CODIGO_PRO              := lQry.FieldByName('CODIGO_PRO').AsString;
-    lModel.QUANTIDADE_PED          := lQry.FieldByName('QUANTIDADE_PED').AsString;
-    lModel.VALORUNI_PED            := lQry.FieldByName('VALORUNI_PED').AsString;
-    lModel.IPI_PED                 := lQry.FieldByName('IPI_PED').AsString;
-    lModel.FRETE_PED               := lQry.FieldByName('FRETE_PED').AsString;
-    lModel.MARGEM_PED              := lQry.FieldByName('MARGEM_PED').AsString;
-    lModel.VENDAANTERIOR_PED       := lQry.FieldByName('VENDAANTERIOR_PED').AsString;
-    lModel.QUANTIDADE_ATE          := lQry.FieldByName('QUANTIDADE_ATE').AsString;
-    lModel.STATUS_PED              := lQry.FieldByName('STATUS_PED').AsString;
-    lModel.VENDACALC_PED           := lQry.FieldByName('VENDACALC_PED').AsString;
-    lModel.LOJA                    := lQry.FieldByName('LOJA').AsString;
-    lModel.OBSERVACAO              := lQry.FieldByName('OBSERVACAO').AsString;
-    lModel.QUANTIDADE_ATE_ORIGINAL := lQry.FieldByName('QUANTIDADE_ATE_ORIGINAL').AsString;
-    lModel.CFOP_ID                 := lQry.FieldByName('CFOP_ID').AsString;
-    lModel.CST_N12                 := lQry.FieldByName('CST_N12').AsString;
-    lModel.VIPI_014                := lQry.FieldByName('VIPI_014').AsString;
-    lModel.VBCICMS_N15             := lQry.FieldByName('VBCICMS_N15').AsString;
-    lModel.VICMS_N17               := lQry.FieldByName('VICMS_N17').AsString;
-    lModel.PICMS_N16               := lQry.FieldByName('PICMS_N16').AsString;
-    lModel.VBCST_N21               := lQry.FieldByName('VBCST_N21').AsString;
-    lModel.VST_N23                 := lQry.FieldByName('VST_N23').AsString;
-    lModel.PST_N22                 := lQry.FieldByName('PST_N22').AsString;
-    lModel.VLR_DESCONTO            := lQry.FieldByName('VLR_DESCONTO').AsString;
-    lModel.VLR_OUTRAS              := lQry.FieldByName('VLR_OUTRAS').AsString;
-    lModel.VFCP                    := lQry.FieldByName('VFCP').AsString;
-    lModel.VFCPST                  := lQry.FieldByName('VFCPST').AsString;
-    lModel.VFCPSTRET               := lQry.FieldByName('VFCPSTRET').AsString;
-    lModel.PREDBC_N14              := lQry.FieldByName('PREDBC_N14').AsString;
-    lModel.PMVAST_N19              := lQry.FieldByName('PMVAST_N19').AsString;
-    lModel.PREDBCST_N20            := lQry.FieldByName('PREDBCST_N20').AsString;
-    lModel.ORCAMENTO_ID            := lQry.FieldByName('ORCAMENTO_ID').AsString;
-    lModel.SYSTIME                 := lQry.FieldByName('SYSTIME').AsString;
-    lModel.ALTURA_M                := lQry.FieldByName('ALTURA_M').AsString;
-    lModel.LARGURA_M               := lQry.FieldByName('LARGURA_M').AsString;
-    lModel.PROFUNDIDADE_M          := lQry.FieldByName('PROFUNDIDADE_M').AsString;
-    lModel.RESERVA_ID              := lQry.FieldByName('RESERVA_ID').AsString;
+    lModel.objeto.ID                      := lQry.FieldByName('ID').AsString;
+    lModel.objeto.NUMERO_PED              := lQry.FieldByName('NUMERO_PED').AsString;
+    lModel.objeto.CODIGO_FOR              := lQry.FieldByName('CODIGO_FOR').AsString;
+    lModel.objeto.CODIGO_PRO              := lQry.FieldByName('CODIGO_PRO').AsString;
+    lModel.objeto.QUANTIDADE_PED          := lQry.FieldByName('QUANTIDADE_PED').AsString;
+    lModel.objeto.VALORUNI_PED            := lQry.FieldByName('VALORUNI_PED').AsString;
+    lModel.objeto.IPI_PED                 := lQry.FieldByName('IPI_PED').AsString;
+    lModel.objeto.FRETE_PED               := lQry.FieldByName('FRETE_PED').AsString;
+    lModel.objeto.MARGEM_PED              := lQry.FieldByName('MARGEM_PED').AsString;
+    lModel.objeto.VENDAANTERIOR_PED       := lQry.FieldByName('VENDAANTERIOR_PED').AsString;
+    lModel.objeto.QUANTIDADE_ATE          := lQry.FieldByName('QUANTIDADE_ATE').AsString;
+    lModel.objeto.STATUS_PED              := lQry.FieldByName('STATUS_PED').AsString;
+    lModel.objeto.VENDACALC_PED           := lQry.FieldByName('VENDACALC_PED').AsString;
+    lModel.objeto.LOJA                    := lQry.FieldByName('LOJA').AsString;
+    lModel.objeto.OBSERVACAO              := lQry.FieldByName('OBSERVACAO').AsString;
+    lModel.objeto.QUANTIDADE_ATE_ORIGINAL := lQry.FieldByName('QUANTIDADE_ATE_ORIGINAL').AsString;
+    lModel.objeto.CFOP_ID                 := lQry.FieldByName('CFOP_ID').AsString;
+    lModel.objeto.CST_N12                 := lQry.FieldByName('CST_N12').AsString;
+    lModel.objeto.VIPI_014                := lQry.FieldByName('VIPI_014').AsString;
+    lModel.objeto.VBCICMS_N15             := lQry.FieldByName('VBCICMS_N15').AsString;
+    lModel.objeto.VICMS_N17               := lQry.FieldByName('VICMS_N17').AsString;
+    lModel.objeto.PICMS_N16               := lQry.FieldByName('PICMS_N16').AsString;
+    lModel.objeto.VBCST_N21               := lQry.FieldByName('VBCST_N21').AsString;
+    lModel.objeto.VST_N23                 := lQry.FieldByName('VST_N23').AsString;
+    lModel.objeto.PST_N22                 := lQry.FieldByName('PST_N22').AsString;
+    lModel.objeto.VLR_DESCONTO            := lQry.FieldByName('VLR_DESCONTO').AsString;
+    lModel.objeto.VLR_OUTRAS              := lQry.FieldByName('VLR_OUTRAS').AsString;
+    lModel.objeto.VFCP                    := lQry.FieldByName('VFCP').AsString;
+    lModel.objeto.VFCPST                  := lQry.FieldByName('VFCPST').AsString;
+    lModel.objeto.VFCPSTRET               := lQry.FieldByName('VFCPSTRET').AsString;
+    lModel.objeto.PREDBC_N14              := lQry.FieldByName('PREDBC_N14').AsString;
+    lModel.objeto.PMVAST_N19              := lQry.FieldByName('PMVAST_N19').AsString;
+    lModel.objeto.PREDBCST_N20            := lQry.FieldByName('PREDBCST_N20').AsString;
+    lModel.objeto.ORCAMENTO_ID            := lQry.FieldByName('ORCAMENTO_ID').AsString;
+    lModel.objeto.SYSTIME                 := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.ALTURA_M                := lQry.FieldByName('ALTURA_M').AsString;
+    lModel.objeto.LARGURA_M               := lQry.FieldByName('LARGURA_M').AsString;
+    lModel.objeto.PROFUNDIDADE_M          := lQry.FieldByName('PROFUNDIDADE_M').AsString;
+    lModel.objeto.RESERVA_ID              := lQry.FieldByName('RESERVA_ID').AsString;
     Result := lModel;
   finally
     lQry.Free;
   end;
 end;
 
-constructor TPedidoCompraItensDao.Create(pIConexao : IConexao);
+constructor TPedidoCompraItensDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -149,7 +154,7 @@ begin
   inherited;
 end;
 
-function TPedidoCompraItensDao.incluir(pPedidoCompraItensModel: TPedidoCompraItensModel): String;
+function TPedidoCompraItensDao.incluir(pPedidoCompraItensModel: ITPedidoCompraItensModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -171,7 +176,7 @@ begin
   end;
 end;
 
-function TPedidoCompraItensDao.alterar(pPedidoCompraItensModel: TPedidoCompraItensModel): String;
+function TPedidoCompraItensDao.alterar(pPedidoCompraItensModel: ITPedidoCompraItensModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -185,7 +190,7 @@ begin
     setParams(lQry, pPedidoCompraItensModel);
     lQry.ExecSQL;
 
-    Result := pPedidoCompraItensModel.ID;
+    Result := pPedidoCompraItensModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -193,20 +198,26 @@ begin
   end;
 end;
 
-function TPedidoCompraItensDao.excluir(pPedidoCompraItensModel: TPedidoCompraItensModel): String;
+function TPedidoCompraItensDao.excluir(pPedidoCompraItensModel: ITPedidoCompraItensModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from PEDIDOCOMPRAITENS where ID = :ID' ,[pPedidoCompraItensModel.ID]);
+   lQry.ExecSQL('delete from PEDIDOCOMPRAITENS where ID = :ID' ,[pPedidoCompraItensModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pPedidoCompraItensModel.ID;
+   Result := pPedidoCompraItensModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TPedidoCompraItensDao.getNewIface(pIConexao: IConexao): ITPedidoCompraItensDao;
+begin
+  Result := TImplObjetoOwner<TPedidoCompraItensDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TPedidoCompraItensDao.where: String;
@@ -424,28 +435,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TPedidoCompraItensDao.setParams(var pQry: TFDQuery; pPedidoCompraItensModel: TPedidoCompraItensModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TPedidoCompraItensDao.setParams(var pQry: TFDQuery; pPedidoCompraItensModel: ITPedidoCompraItensModel);
 begin
-  lTabela := vConstrutor.getColumns('PEDIDOCOMPRAITENS');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TPedidoCompraItensModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pPedidoCompraItensModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pPedidoCompraItensModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('PEDIDOCOMPRAITENS',pQry,pPedidoCompraItensModel.objeto);
 end;
 
 procedure TPedidoCompraItensDao.SetStartRecordView(const Value: String);

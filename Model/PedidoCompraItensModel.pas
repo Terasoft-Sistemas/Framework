@@ -6,13 +6,17 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
 
-  TPedidoCompraItensModel = class
+  TPedidoCompraItensModel = class;
+  ITPedidoCompraItensModel=IObject<TPedidoCompraItensModel>;
 
+  TPedidoCompraItensModel = class
   private
+    [weak] mySelf: ITPedidoCompraItensModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -165,15 +169,17 @@ type
     property PERCENTUAL_DESCONTO     : Variant read FPERCENTUAL_DESCONTO write SetPERCENTUAL_DESCONTO;
     property VALOR_BASE_IPI          : Variant read FVALOR_BASE_IPI write SetVALOR_BASE_IPI;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITPedidoCompraItensModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TPedidoCompraItensModel;
+    function Alterar(pID : String): ITPedidoCompraItensModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId : String): TPedidoCompraItensModel;
+    function carregaClasse(pId : String): ITPedidoCompraItensModel;
     function obterLista: IFDDataset;
 
     property Acao :TAcao read FAcao write SetAcao;
@@ -202,14 +208,14 @@ uses
 
 { TPedidoCompraItensModel }
 
-function TPedidoCompraItensModel.Alterar(pID: String): TPedidoCompraItensModel;
+function TPedidoCompraItensModel.Alterar(pID: String): ITPedidoCompraItensModel;
 var
-  lPedidoCompraItensModel : TPedidoCompraItensModel;
+  lPedidoCompraItensModel : ITPedidoCompraItensModel;
 begin
-  lPedidoCompraItensModel := TPedidoCompraItensModel.Create(vIConexao);
+  lPedidoCompraItensModel := TPedidoCompraItensModel.getNewIface(vIConexao);
   try
-    lPedidoCompraItensModel       := lPedidoCompraItensModel.carregaClasse(pID);
-    lPedidoCompraItensModel.Acao  := tacAlterar;
+    lPedidoCompraItensModel       := lPedidoCompraItensModel.objeto.carregaClasse(pID);
+    lPedidoCompraItensModel.objeto.Acao  := tacAlterar;
     Result            			      := lPedidoCompraItensModel;
   finally
   end;
@@ -259,26 +265,32 @@ begin
   end;
 end;
 
+class function TPedidoCompraItensModel.getNewIface(pIConexao: IConexao): ITPedidoCompraItensModel;
+begin
+  Result := TImplObjetoOwner<TPedidoCompraItensModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TPedidoCompraItensModel.Incluir: String;
 begin
   self.Acao := tacIncluir;
   Result    := self.Salvar;
 end;
 
-function TPedidoCompraItensModel.carregaClasse(pId : String): TPedidoCompraItensModel;
+function TPedidoCompraItensModel.carregaClasse(pId : String): ITPedidoCompraItensModel;
 var
-  lPedidoCompraItensDao: TPedidoCompraItensDao;
+  lPedidoCompraItensDao: ITPedidoCompraItensDao;
 begin
-  lPedidoCompraItensDao := TPedidoCompraItensDao.Create(vIConexao);
+  lPedidoCompraItensDao := TPedidoCompraItensDao.getNewIface(vIConexao);
 
   try
-    Result := lPedidoCompraItensDao.carregaClasse(pId);
+    Result := lPedidoCompraItensDao.objeto.carregaClasse(pId);
   finally
-    lPedidoCompraItensDao.Free;
+    lPedidoCompraItensDao:=nil;
   end;
 end;
 
-constructor TPedidoCompraItensModel.Create(pIConexao : IConexao);
+constructor TPedidoCompraItensModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -290,44 +302,44 @@ end;
 
 function TPedidoCompraItensModel.obterLista: IFDDataset;
 var
-  lPedidoCompraItensLista: TPedidoCompraItensDao;
+  lPedidoCompraItensLista: ITPedidoCompraItensDao;
 begin
-  lPedidoCompraItensLista := TPedidoCompraItensDao.Create(vIConexao);
+  lPedidoCompraItensLista := TPedidoCompraItensDao.getNewIface(vIConexao);
 
   try
-    lPedidoCompraItensLista.TotalRecords    := FTotalRecords;
-    lPedidoCompraItensLista.WhereView       := FWhereView;
-    lPedidoCompraItensLista.CountView       := FCountView;
-    lPedidoCompraItensLista.OrderView       := FOrderView;
-    lPedidoCompraItensLista.StartRecordView := FStartRecordView;
-    lPedidoCompraItensLista.LengthPageView  := FLengthPageView;
-    lPedidoCompraItensLista.IDRecordView    := FIDRecordView;
-    lPedidoCompraItensLista.FornecedorView  := FFornecedorView;
-    lPedidoCompraItensLista.NumeroView      := FNumeroView;
+    lPedidoCompraItensLista.objeto.TotalRecords    := FTotalRecords;
+    lPedidoCompraItensLista.objeto.WhereView       := FWhereView;
+    lPedidoCompraItensLista.objeto.CountView       := FCountView;
+    lPedidoCompraItensLista.objeto.OrderView       := FOrderView;
+    lPedidoCompraItensLista.objeto.StartRecordView := FStartRecordView;
+    lPedidoCompraItensLista.objeto.LengthPageView  := FLengthPageView;
+    lPedidoCompraItensLista.objeto.IDRecordView    := FIDRecordView;
+    lPedidoCompraItensLista.objeto.FornecedorView  := FFornecedorView;
+    lPedidoCompraItensLista.objeto.NumeroView      := FNumeroView;
 
-    Result := lPedidoCompraItensLista.obterLista;
+    Result := lPedidoCompraItensLista.objeto.obterLista;
 
-    FTotalRecords := lPedidoCompraItensLista.TotalRecords;
+    FTotalRecords := lPedidoCompraItensLista.objeto.TotalRecords;
 
   finally
-    lPedidoCompraItensLista.Free;
+    lPedidoCompraItensLista:=nil;
   end;
 end;
 
 function TPedidoCompraItensModel.Salvar: String;
 var
-  lPedidoCompraItensDao: TPedidoCompraItensDao;
+  lPedidoCompraItensDao: ITPedidoCompraItensDao;
 begin
-  lPedidoCompraItensDao := TPedidoCompraItensDao.Create(vIConexao);
+  lPedidoCompraItensDao := TPedidoCompraItensDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lPedidoCompraItensDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lPedidoCompraItensDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lPedidoCompraItensDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lPedidoCompraItensDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lPedidoCompraItensDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lPedidoCompraItensDao.objeto.excluir(mySelf);
     end;
   finally
-    lPedidoCompraItensDao.Free;
+    lPedidoCompraItensDao:=nil;
   end;
 end;
 

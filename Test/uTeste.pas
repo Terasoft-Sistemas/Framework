@@ -2416,13 +2416,13 @@ end;
 procedure TForm1.Button77Click(Sender: TObject);
 var
   lPedidoCompraModel : ITPedidoCompraModel;
-  lPedidoItensModel  : TPedidoCompraItensModel;
+  lPedidoItensModel  : ITPedidoCompraItensModel;
   TablePedItens      : IFDDataset;
   lNumeroView,
   lFornecedorView    : String;
 begin
   lPedidoCompraModel := TPedidoCompraModel.getNewIface(vIConexao);
-  lPedidoItensModel  := TPedidoCompraItensModel.Create(vIConexao);
+  lPedidoItensModel  := TPedidoCompraItensModel.getNewIface(vIConexao);
   try
     try
       lNumeroView     := '000008';
@@ -2432,9 +2432,9 @@ begin
       dsTmp                := lPedidoCompraModel.objeto.obterLista;
       dsPedidoCompra.DataSet           := dsTmp.objeto;
 
-      lPedidoItensModel.NumeroView     := lNumeroView;
-      lPedidoItensModel.FornecedorView := lFornecedorView;
-      TablePedItens                    := lPedidoItensModel.obterLista;
+      lPedidoItensModel.objeto.NumeroView     := lNumeroView;
+      lPedidoItensModel.objeto.FornecedorView := lFornecedorView;
+      TablePedItens                    := lPedidoItensModel.objeto.obterLista;
       dsPedidoCompraItens.DataSet      := TablePedItens.objeto;
 
     except
@@ -2443,18 +2443,18 @@ begin
     end;
   finally
     lPedidoCompraModel:=nil;
-    lPedidoItensModel.Free;
+    lPedidoItensModel:=nil;
   end;
 end;
 
 procedure TForm1.Button78Click(Sender: TObject);
 var
   lPedidoCompraModel : ITPedidoCompraModel;
-  lPedidoItensModel  : TPedidoCompraItensModel;
+  lPedidoItensModel  : ITPedidoCompraItensModel;
   lPedidoParams      : TPedidoItensParams;
 begin
   lPedidoCompraModel := TPedidoCompraModel.getNewIface(vIConexao);
-  lPedidoItensModel  := TPedidoCompraItensModel.Create(vIConexao);
+  lPedidoItensModel  := TPedidoCompraItensModel.getNewIface(vIConexao);
   try
     try
       lPedidoParams.NUMERO_PED     := '000017';
@@ -2471,7 +2471,7 @@ begin
     end;
   finally
     lPedidoCompraModel:=nil;
-    lPedidoItensModel.Free;
+    lPedidoItensModel:=nil;
   end;
 end;
 
@@ -3263,16 +3263,16 @@ end;
 
 procedure TForm1.Button100Click(Sender: TObject);
 var
-  lPedidoCompraItens : TPedidoCompraItensModel;
+  lPedidoCompraItens : ITPedidoCompraItensModel;
   lTable  : IFDDataset;
 begin
-  lPedidoCompraItens := TPedidoCompraItensModel.Create(vIConexao);
+  lPedidoCompraItens := TPedidoCompraItensModel.getNewIface(vIConexao);
   try
-  lPedidoCompraItens.NumeroView := '000011';
-  lTable                        := lPedidoCompraItens.obterLista;
+  lPedidoCompraItens.objeto.NumeroView := '000011';
+  lTable                        := lPedidoCompraItens.objeto.obterLista;
   dsPedidoCompra.DataSet        := lTable.objeto;
   finally
-    lPedidoCompraItens.Free;
+    lPedidoCompraItens:=nil;
   end;
 end;
 
