@@ -6,6 +6,7 @@ interface
 uses
   Terasoft.Framework.Types,
   System.SysUtils,
+  Terasoft.Framework.MultiConfig,
   Spring.Collections,
   Terasoft.Framework.ObjectIface,
   FiltroModel,
@@ -25,6 +26,7 @@ type
   protected
     vIConexao   : IConexao;
     fFiltroController: IController_Filtro;
+    fCfg: IMultiConfig;
 
     fID: TipoWideStringFramework;
     fMETODO: TipoWideStringFramework;
@@ -43,6 +45,10 @@ type
   protected
     fRegistros: Integer;
     fPrimeiro: Integer;
+
+
+    function getCfg: IMultiConfig;
+
 
   //property primeiro getter/setter
     function getPrimeiro: Integer;
@@ -113,7 +119,6 @@ implementation
     {$if defined(DEBUG)}
       ClipBrd,
     {$endif}
-    Terasoft.Framework.MultiConfig,
     Terasoft.Framework.Texto;
 
 function getNewEndpointModel(pIConexao : IConexao): ITEndpointModel;
@@ -184,14 +189,24 @@ begin
   Result := fQUERYInterno;
 end;
 
+function TEndpointModel.getCfg: IMultiConfig;
+begin
+  if(fcfg=nil) then
+    fCfg := criaMultiConfig.adicionaInterface(criaConfigIniString(fPROPRIEDADES));
+  Result := fCFG;
+end;
+
 function TEndpointModel.getQuery: TipoWideStringFramework;
   var
     fFiltro: ITFiltroModel;
     lSql, lWhere, lIn: String;
-    lAdicional: String;
+    l: IListaTextoEX;
+    lAdicional,lOrder: String;
+    i: Integer;
 begin
   lSql := fQUERYInterno;
   lAdicional := '';
+  lOrder := '';
   if(fRegistros>0) then
     lAdicional := format('%sfirst %d ', [ lAdicional, fRegistros ]);
   if(fPrimeiro>0) then
@@ -211,6 +226,26 @@ begin
       lWhere := lWhere + lIn;
     end;
   end;
+
+  l := getCfg.ReadSectionValuesLista('where');
+  lAdicional := '';
+
+  for i := 0 to l.strings.Count - 1 do
+  begin
+    lIn := l.strings.ValueFromIndex[i];
+    if(lIn='') then continue;
+    lAdicional := lAdicional + lIn + #13;
+  end;
+  if(lAdicional<>'') then
+  begin
+    if(lWhere <> '') then
+      lWhere := lWhere + #13 + '    and ';
+    lWhere :=  lWhere + lAdicional;
+  end;
+
+  lOrder := '';
+  l := getCfg.ReadSectionValuesLista('order');
+  lAdicional := '';
 
   if(lWhere <>'') then
     lWhere := 'where'+#13 + '   ' +lWhere;
@@ -240,7 +275,7 @@ procedure TEndpointModel.formatarDataset(pDataset: TDataset);
 begin
   if(pDataset=nil) then
     exit;
-  l := criaMultiConfig.adicionaInterface(criaConfigIniString(fPROPRIEDADES)).ReadSectionValuesLista('formatos');
+  l := getCfg.ReadSectionValuesLista('formatos');
   for i := 0 to l.strings.Count-1 do
   begin
     sNome := l.strings.Names[i];
@@ -261,7 +296,6 @@ end;
 
 procedure TEndpointModel.carregaFiltros;
   var
-    cfg: IMultiConfig;
     lTxt: IListaTextoEx;
     i: Integer;
     sName, sValue: String;
@@ -273,8 +307,7 @@ begin
   //Limpa os filtros anteriores
   getFILTROS.Clear;
 
-  cfg := criaMultiConfig.adicionaInterface(criaConfigIniString(fPROPRIEDADES));
-  lTxt := cfg.ReadSectionValuesLista('filtros');
+  lTxt := getcfg.ReadSectionValuesLista('filtros');
 
   for i := 0 to lTxt.strings.Count - 1 do
   begin
@@ -290,6 +323,7 @@ end;
 
 procedure TEndpointModel.setPROPRIEDADES(const pValue: TipoWideStringFramework);
 begin
+  fCFG := nil;
   fPROPRIEDADES := pValue;
   carregaFiltros;
 end;
