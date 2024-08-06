@@ -287,7 +287,7 @@ begin
     lPortadorModel.objeto.IDRecordView := pFinanceiroParams.PORTADOR_ID;
     lPortadorModel.objeto.obterLista;
 
-    if not AnsiMatchStr(lPortadorModel.objeto.PortadorsLista[0].objeto.TPAG_NFE, ['01', '03', '04', '99']) and (lPortadorModel.objeto.PortadorsLista[0].objeto.CODIGO_PORT <> '777777') then
+    if not AnsiMatchStr(lPortadorModel.objeto.PortadorsLista[0].objeto.TPAG_NFE, ['01', '03', '04', '99','17','20']) and (lPortadorModel.objeto.PortadorsLista[0].objeto.CODIGO_PORT <> '777777') then
     begin
       if self.qtdePagamentoPrazo(pFinanceiroParams.WEB_PEDIDO_ID) > 0 then
         CriaException('Já existe uma forma de pagamento similar, refazer o pagamento.');
