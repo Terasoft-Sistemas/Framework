@@ -3670,24 +3670,24 @@ end;
 
 procedure TForm1.Button133Click(Sender: TObject);
 var
-  lTabelaJurosDia : TTabelaJurosDiaModel;
+  lTabelaJurosDia : ITTabelaJurosDiaModel;
   lDia,
   lPortador       : String;
   lIndice         : Double;
 begin
-  lTabelaJurosDia := TTabelaJurosDiaModel.Create(vIConexao);
+  lTabelaJurosDia := TTabelaJurosDiaModel.getNewIface(vIConexao);
   try
     lDia := InputBox('TabelaJurosDia', 'Digite o dia:', '');
     lPortador := InputBox('TabelaJurosDia', 'Digite o código do portador:', '');
 
-    lIndice := lTabelaJurosDia.obterIndice(lDia, lPortador);
+    lIndice := lTabelaJurosDia.objeto.obterIndice(lDia, lPortador);
 
     Memo1.Lines.Clear;
     Memo1.Lines.Add('Indice: ' +FloatToStr(lIndice));
     Memo1.Lines.Add('===============================================');
 
   finally
-    lTabelaJurosDia.Free;
+    lTabelaJurosDia:=nil;
   end;
 end;
 
