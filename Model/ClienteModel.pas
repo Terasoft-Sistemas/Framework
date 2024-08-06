@@ -8,13 +8,17 @@ uses
   Terasoft.Framework.Texto,
   Terasoft.Framework.Types,
   Terasoft.Model.Base,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
-  TClienteModel = class(Terasoft.Model.Base.TModelBase)
+  TClienteModel = class;
+  ITClienteModel=IObject<TClienteModel>;
 
+  TClienteModel = class(Terasoft.Model.Base.TModelBase)
   private
-    FClientesLista: IList<TClienteModel>;
+    [weak] mySelf: ITClienteModel;
+    FClientesLista: IList<ITClienteModel>;
     FAcao: TAcao;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -340,7 +344,7 @@ type
     FCamposInvalidosTitulos: TStringlist;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetClientesLista(const Value: IList<TClienteModel>);
+    procedure SetClientesLista(const Value: IList<ITClienteModel>);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -665,6 +669,7 @@ type
   protected
     procedure doCreate; override;
     procedure doDestroy; override;
+
   public
     property codigo_cli: Variant read Fcodigo_cli write Setcodigo_cli;
     property fantasia_cli: Variant read Ffantasia_cli write Setfantasia_cli;
@@ -980,17 +985,19 @@ type
     property nome_contador_cli: Variant read Fnome_contador_cli write Setnome_contador_cli;
     property telefone_contador_cli: Variant read Ftelefone_contador_cli write Settelefone_contador_cli;
 
-    constructor Create(pIConexao: IConexao); override;
+    constructor _Create(pIConexao: IConexao); override;
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITClienteModel;
 
     function Incluir  : String;
     function Salvar   : String;
-    function Alterar(pID : String): TClienteModel;
+    function Alterar(pID : String): ITClienteModel;
     function Excluir(pID : String): String;
 
     procedure obterLista;
 
-    function carregaClasse(pId: String): TClienteModel;
+    function carregaClasse(pId: String): ITClienteModel;
     function ufCliente(pId: String): Variant;
     function nomeCliente(pId: String): Variant;
     function comissaoCliente(pId: String): Variant;
@@ -1000,9 +1007,9 @@ type
     function ObterListaMemTable: IFDDataset;
     function ObterBairros: IFDDataset;
     procedure bloquearCNPJCPF(pCliente, pCNPJCPF: String);
-    procedure camposObrigatorios(pTag: String; pClienteModel : TClienteModel);
+    procedure camposObrigatorios(pTag: String; pClienteModel : ITClienteModel);
 
-    property ClientesLista: IList<TClienteModel> read FClientesLista write SetClientesLista;
+    property ClientesLista: IList<ITClienteModel> read FClientesLista write SetClientesLista;
 
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -1013,7 +1020,7 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
     property CamposInvalidos: TStringlist read FCamposInvalidos write SetCamposInvalidos;
-    property CamposInvalidosTitulos: TStringlist read FCamposInvalidosTitulos write SetCamposInvalidosTitulos;
+    property CamposInvalidosTitulos: TStringlist read FCamposInvalidosTitulos;// write SetCamposInvalidosTitulos;
   end;
 
 implementation
@@ -1027,7 +1034,7 @@ uses
 
 { TClienteModel }
 
-procedure TClienteModel.camposObrigatorios(pTag: String; pClienteModel : TClienteModel);
+procedure TClienteModel.camposObrigatorios(pTag: String; pClienteModel : ITClienteModel);
 var
   i        : Integer;
   lValor   : String;
@@ -1039,8 +1046,14 @@ var
   lProp    : TRttiProperty;
   lConfiguracoes : TerasoftConfiguracoes;
 begin
-  CamposInvalidos        := TStringList.Create;
-  CamposInvalidosTitulos := TStringList.Create;
+  if(FCamposInvalidos=nil)then
+    fCamposInvalidos        := TStringList.Create;
+  if(FCamposInvalidosTitulos=nil) then
+    fCamposInvalidosTitulos := TStringList.Create;
+
+  fCamposInvalidos.Clear;
+  fCamposInvalidosTitulos.Clear;
+
   lConfiguracoes         := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
 
   lMsg   := '';
@@ -1094,44 +1107,50 @@ begin
   Result          := self.Salvar;
 end;
 
-function TClienteModel.Alterar(pID: String): TClienteModel;
-var
-  lClienteModel : TClienteModel;
+class function TClienteModel.getNewIface(pIConexao: IConexao): ITClienteModel;
 begin
-  lClienteModel := TClienteModel.Create(vIConexao);
+  Result := TImplObjetoOwner<TClienteModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TClienteModel.Alterar(pID: String): ITClienteModel;
+var
+  lClienteModel : ITClienteModel;
+begin
+  lClienteModel := TClienteModel.getNewIface(vIConexao);
   try
-    lClienteModel       := lClienteModel.carregaClasse(pID);
-    lClienteModel.Acao  := tacAlterar;
+    lClienteModel       := lClienteModel.objeto.carregaClasse(pID);
+    lClienteModel.objeto.Acao  := tacAlterar;
     Result              := lClienteModel;
   finally
   end;
 end;
 
-function TClienteModel.carregaClasse(pId: String): TClienteModel;
+function TClienteModel.carregaClasse(pId: String): ITClienteModel;
 var
-  lClienteDao: TClienteDao;
+  lClienteDao: ITClienteDao;
 begin
-  lClienteDao := TClienteDao.Create(vIConexao);
+  lClienteDao := TClienteDao.getNewIface(vIConexao);
   try
-    Result := lClienteDao.carregaClasse(pId);
+    Result := lClienteDao.objeto.carregaClasse(pId);
   finally
-    lClienteDao.Free;
+    lClienteDao:=nil;
   end;
 end;
 
 function TClienteModel.comissaoCliente(pId: String): Variant;
 var
-  lClienteDao: TClienteDao;
+  lClienteDao: ITClienteDao;
 begin
-  lClienteDao := TClienteDao.Create(vIConexao);
+  lClienteDao := TClienteDao.getNewIface(vIConexao);
   try
-    Result    := lClienteDao.comissaoCliente(pId);
+    Result    := lClienteDao.objeto.comissaoCliente(pId);
   finally
-    lClienteDao.Free;
+    lClienteDao:=nil;
   end;
 end;
 
-constructor TClienteModel.Create(pIConexao : IConexao);
+constructor TClienteModel._Create(pIConexao : IConexao);
 begin
   inherited;
 end;
@@ -1143,16 +1162,16 @@ end;
 
 function TClienteModel.diasAtraso(pCodigoCliente: String): Variant;
 var
-  lClienteDao: TClienteDao;
+  lClienteDao: ITClienteDao;
   lDataVencimento: TDate;
 begin
-  lClienteDao := TClienteDao.Create(vIConexao);
+  lClienteDao := TClienteDao.getNewIface(vIConexao);
 
   if pCodigoCliente = '000000' then
     exit;
 
   try
-    lDataVencimento := lClienteDao.diasAtraso(pCodigoCliente);
+    lDataVencimento := lClienteDao.objeto.diasAtraso(pCodigoCliente);
 
     if vIConexao.DataServer <= lDataVencimento then
     begin
@@ -1162,7 +1181,7 @@ begin
 
     Result := FormatFloat('####0', (vIConexao.DataServer - lDataVencimento) );
   finally
-    lClienteDao.Free;
+    lClienteDao:=nil;
   end;
 end;
 
@@ -1174,132 +1193,134 @@ end;
 
 procedure TClienteModel.doDestroy;
 begin
+  FreeAndNil(FCamposInvalidos);
+  FreeAndNil(FCamposInvalidosTitulos);
   FClientesLista := nil;
   inherited;
 end;
 
 function TClienteModel.nomeCliente(pId: String): Variant;
 var
-  lClienteDao: TClienteDao;
+  lClienteDao: ITClienteDao;
 begin
-  lClienteDao := TClienteDao.Create(vIConexao);
+  lClienteDao := TClienteDao.getNewIface(vIConexao);
   try
-    Result    := lClienteDao.nomeCliente(pId);
+    Result    := lClienteDao.objeto.nomeCliente(pId);
   finally
-    lClienteDao.Free;
+    lClienteDao:=nil;
   end;
 end;
 
 procedure TClienteModel.obterLista;
 var
-  lClienteLista: TClienteDao;
+  lClienteLista: ITClienteDao;
 begin
-  lClienteLista := TClienteDao.Create(vIConexao);
+  lClienteLista := TClienteDao.getNewIface(vIConexao);
   try
-    lClienteLista.TotalRecords    := FTotalRecords;
-    lClienteLista.WhereView       := FWhereView;
-    lClienteLista.CountView       := FCountView;
-    lClienteLista.OrderView       := FOrderView;
-    lClienteLista.StartRecordView := FStartRecordView;
-    lClienteLista.LengthPageView  := FLengthPageView;
-    lClienteLista.IDRecordView    := FIDRecordView;
-    lClienteLista.obterLista;
-    FTotalRecords                 := lClienteLista.TotalRecords;
-    FClientesLista                := lClienteLista.ClientesLista;
+    lClienteLista.objeto.TotalRecords    := FTotalRecords;
+    lClienteLista.objeto.WhereView       := FWhereView;
+    lClienteLista.objeto.CountView       := FCountView;
+    lClienteLista.objeto.OrderView       := FOrderView;
+    lClienteLista.objeto.StartRecordView := FStartRecordView;
+    lClienteLista.objeto.LengthPageView  := FLengthPageView;
+    lClienteLista.objeto.IDRecordView    := FIDRecordView;
+    lClienteLista.objeto.obterLista;
+    FTotalRecords                 := lClienteLista.objeto.TotalRecords;
+    FClientesLista                := lClienteLista.objeto.ClientesLista;
   finally
-    lClienteLista.Free;
+    lClienteLista:=nil;
   end;
 end;
 
 function TClienteModel.obterListaConsulta: IFDDataset;
 var
-  lClienteDao: TClienteDao;
+  lClienteDao: ITClienteDao;
 begin
-  lClienteDao := TClienteDao.Create(vIConexao);
+  lClienteDao := TClienteDao.getNewIface(vIConexao);
   try
-    lClienteDao.TotalRecords      := FTotalRecords;
-    lClienteDao.WhereView         := FWhereView;
-    lClienteDao.CountView         := FCountView;
-    lClienteDao.OrderView         := FOrderView;
-    lClienteDao.StartRecordView   := FStartRecordView;
-    lClienteDao.LengthPageView    := FLengthPageView;
-    lClienteDao.IDRecordView      := FIDRecordView;
+    lClienteDao.objeto.TotalRecords      := FTotalRecords;
+    lClienteDao.objeto.WhereView         := FWhereView;
+    lClienteDao.objeto.CountView         := FCountView;
+    lClienteDao.objeto.OrderView         := FOrderView;
+    lClienteDao.objeto.StartRecordView   := FStartRecordView;
+    lClienteDao.objeto.LengthPageView    := FLengthPageView;
+    lClienteDao.objeto.IDRecordView      := FIDRecordView;
 
-    Result := lClienteDao.obterListaConsulta;
-    FTotalRecords := lClienteDao.TotalRecords;
+    Result := lClienteDao.objeto.obterListaConsulta;
+    FTotalRecords := lClienteDao.objeto.TotalRecords;
   finally
-    lClienteDao.Free;
+    lClienteDao:=nil
   end;
 end;
 
 function TClienteModel.ObterListaMemTable: IFDDataset;
 var
-  lClienteDao: TClienteDao;
+  lClienteDao: ITClienteDao;
 begin
-  lClienteDao := TClienteDao.Create(vIConexao);
+  lClienteDao := TClienteDao.getNewIface(vIConexao);
 
-  lClienteDao.TotalRecords      := FTotalRecords;
-  lClienteDao.WhereView         := FWhereView;
-  lClienteDao.CountView         := FCountView;
-  lClienteDao.OrderView         := FOrderView;
-  lClienteDao.StartRecordView   := FStartRecordView;
-  lClienteDao.LengthPageView    := FLengthPageView;
-  lClienteDao.IDRecordView      := FIDRecordView;
+  lClienteDao.objeto.TotalRecords      := FTotalRecords;
+  lClienteDao.objeto.WhereView         := FWhereView;
+  lClienteDao.objeto.CountView         := FCountView;
+  lClienteDao.objeto.OrderView         := FOrderView;
+  lClienteDao.objeto.StartRecordView   := FStartRecordView;
+  lClienteDao.objeto.LengthPageView    := FLengthPageView;
+  lClienteDao.objeto.IDRecordView      := FIDRecordView;
 
   try
-    Result := lClienteDao.ObterListaMemTable;
-    FTotalRecords := lClienteDao.TotalRecords;
+    Result := lClienteDao.objeto.ObterListaMemTable;
+    FTotalRecords := lClienteDao.objeto.TotalRecords;
   finally
-    lClienteDao.Free;
+    lClienteDao:=nil;
   end;
 end;
 
 function TClienteModel.ObterBairros: IFDDataset;
 var
-  lClienteDao: TClienteDao;
+  lClienteDao: ITClienteDao;
 begin
-  lClienteDao := TClienteDao.Create(vIConexao);
+  lClienteDao := TClienteDao.getNewIface(vIConexao);
 
-  lClienteDao.TotalRecords      := FTotalRecords;
-  lClienteDao.WhereView         := FWhereView;
-  lClienteDao.CountView         := FCountView;
-  lClienteDao.OrderView         := FOrderView;
-  lClienteDao.IDRecordView      := FIDRecordView;
+  lClienteDao.objeto.TotalRecords      := FTotalRecords;
+  lClienteDao.objeto.WhereView         := FWhereView;
+  lClienteDao.objeto.CountView         := FCountView;
+  lClienteDao.objeto.OrderView         := FOrderView;
+  lClienteDao.objeto.IDRecordView      := FIDRecordView;
 
   try
-    Result := lClienteDao.ObterBairros;
-    FTotalRecords := lClienteDao.TotalRecords;
+    Result := lClienteDao.objeto.ObterBairros;
+    FTotalRecords := lClienteDao.objeto.TotalRecords;
   finally
-    lClienteDao.Free;
+    lClienteDao:=nil;
   end;
 end;
 
 procedure TClienteModel.bloquearCNPJCPF(pCliente, pCNPJCPF: String);
 var
-  lClienteDao: TClienteDao;
+  lClienteDao: ITClienteDao;
 begin
-  lClienteDao := TClienteDao.Create(vIConexao);
+  lClienteDao := TClienteDao.getNewIface(vIConexao);
   try
-    lClienteDao.bloquearCNPJCPF(pCliente,pCNPJCPF);
+    lClienteDao.objeto.bloquearCNPJCPF(pCliente,pCNPJCPF);
   finally
-    lClienteDao.Free;
+    lClienteDao:=nil;
   end;
 end;
 
 function TClienteModel.Salvar: String;
 var
-  lClienteDao: TClienteDao;
+  lClienteDao: ITClienteDao;
 begin
-  lClienteDao := TClienteDao.Create(vIConexao);
+  lClienteDao := TClienteDao.getNewIface(vIConexao);
   Result      := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lClienteDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lClienteDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lClienteDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lClienteDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lClienteDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lClienteDao.objeto.excluir(mySelf);
     end;
   finally
-    lClienteDao.Free;
+    lClienteDao:=nil;
   end;
 end;
 
@@ -2912,13 +2933,13 @@ begin
 end;
 function TClienteModel.ufCliente(pId: String): Variant;
 var
-  lClienteDao: TClienteDao;
+  lClienteDao: ITClienteDao;
 begin
-  lClienteDao := TClienteDao.Create(vIConexao);
+  lClienteDao := TClienteDao.getNewIface(vIConexao);
   try
-    Result := lClienteDao.ufCliente(pId);
+    Result := lClienteDao.objeto.ufCliente(pId);
   finally
-    lClienteDao.Free;
+    lClienteDao:=nil;
   end;
 end;
 end.

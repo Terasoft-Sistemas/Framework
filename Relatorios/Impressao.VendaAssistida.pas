@@ -254,45 +254,45 @@ uses
 
 procedure TImpressaoVendaAssistida.fetchCliente;
 var
-  lClienteModel : TClienteModel;
+  lClienteModel : ITClienteModel;
 begin
 
-  lClienteModel := TClienteModel.Create(CONEXAO);
+  lClienteModel := TClienteModel.getNewIface(CONEXAO);
   try
     if mtPedidoCLIENTE_ID.AsString = '' then
       raise Exception.Create('ID do Cliente não localizado');
 
-    lClienteModel.IDRecordView := mtPedidoCLIENTE_ID.AsString;
-    lClienteModel.obterLista;
+    lClienteModel.objeto.IDRecordView := mtPedidoCLIENTE_ID.AsString;
+    lClienteModel.objeto.obterLista;
 
-    if Length(lClienteModel.ClientesLista[0].CNPJ_CPF_CLI) = 14 then
+    if Length(lClienteModel.objeto.ClientesLista[0].objeto.CNPJ_CPF_CLI) = 14 then
       mtClienteCNPJ_CPF.EditMask := '99.999.999/9999-99;0;'
     else
       mtClienteCNPJ_CPF.EditMask := '999.999.999-99;0;';
 
     mtCliente.Open;
     mtCliente.Append;
-    mtClienteCLIENTE_NOME.Value := lClienteModel.ClientesLista[0].FANTASIA_CLI;
-    mtClienteRAZAO_SOCIAL.Value := lClienteModel.ClientesLista[0].RAZAO_CLI;
-    mtClienteCNPJ_CPF.Value     := lClienteModel.ClientesLista[0].CNPJ_CPF_CLI;
-    mtClienteRG.Value           := lClienteModel.ClientesLista[0].INSCRICAO_RG_CLI;
+    mtClienteCLIENTE_NOME.Value := lClienteModel.objeto.ClientesLista[0].objeto.FANTASIA_CLI;
+    mtClienteRAZAO_SOCIAL.Value := lClienteModel.objeto.ClientesLista[0].objeto.RAZAO_CLI;
+    mtClienteCNPJ_CPF.Value     := lClienteModel.objeto.ClientesLista[0].objeto.CNPJ_CPF_CLI;
+    mtClienteRG.Value           := lClienteModel.objeto.ClientesLista[0].objeto.INSCRICAO_RG_CLI;
 
-    mtClienteENDERECO.Value     := lClienteModel.ClientesLista[0].ENDERECO;
-    mtClienteNUMERO.Value       := lClienteModel.ClientesLista[0].NUMERO_END;
-    mtClienteCIDADE.Value       := lClienteModel.ClientesLista[0].CIDADE_CLI;
-    mtClienteBAIRRO.Value       := lClienteModel.ClientesLista[0].BAIRRO_CLI;
-    mtClienteCOMPLEMENTO.Value  := lClienteModel.ClientesLista[0].COMPLEMENTO;
-    mtClienteUF.Value           := lClienteModel.ClientesLista[0].UF_CLI;
-    mtClienteCEP.Value          := lClienteModel.ClientesLista[0].CEP_CLI;
+    mtClienteENDERECO.Value     := lClienteModel.objeto.ClientesLista[0].objeto.ENDERECO;
+    mtClienteNUMERO.Value       := lClienteModel.objeto.ClientesLista[0].objeto.NUMERO_END;
+    mtClienteCIDADE.Value       := lClienteModel.objeto.ClientesLista[0].objeto.CIDADE_CLI;
+    mtClienteBAIRRO.Value       := lClienteModel.objeto.ClientesLista[0].objeto.BAIRRO_CLI;
+    mtClienteCOMPLEMENTO.Value  := lClienteModel.objeto.ClientesLista[0].objeto.COMPLEMENTO;
+    mtClienteUF.Value           := lClienteModel.objeto.ClientesLista[0].objeto.UF_CLI;
+    mtClienteCEP.Value          := lClienteModel.objeto.ClientesLista[0].objeto.CEP_CLI;
 
-    mtClienteTELEFONE.Value     := lClienteModel.ClientesLista[0].TELEFONE_CLI;
-    mtClienteCELULAR.Value      := lClienteModel.ClientesLista[0].CELULAR_CLI;
-    mtClienteEMAIL.Value        := lClienteModel.ClientesLista[0].EMAIL_CLI;
-    mtClienteCONTATO.Value      := lClienteModel.ClientesLista[0].CONTATO_CLI;
+    mtClienteTELEFONE.Value     := lClienteModel.objeto.ClientesLista[0].objeto.TELEFONE_CLI;
+    mtClienteCELULAR.Value      := lClienteModel.objeto.ClientesLista[0].objeto.CELULAR_CLI;
+    mtClienteEMAIL.Value        := lClienteModel.objeto.ClientesLista[0].objeto.EMAIL_CLI;
+    mtClienteCONTATO.Value      := lClienteModel.objeto.ClientesLista[0].objeto.CONTATO_CLI;
     mtCliente.Post;
 
   finally
-    lClienteModel.Free;
+    lClienteModel:=nil;
   end;
 
 end;

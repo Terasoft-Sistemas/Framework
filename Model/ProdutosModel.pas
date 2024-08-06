@@ -2541,7 +2541,7 @@ end;
 
 function TProdutosModel.ValorUnitario(pProdutoPreco: TProdutoPreco): Double;
 var
-  lClienteModel           : TClienteModel;
+  lClienteModel           : ITClienteModel;
   lPrecoUFModel           : ITPrecoUFModel;
   lPromocaoItensModel     : ITPromocaoItensModel;
   lProdutosModel          : ITProdutosModel;
@@ -2551,7 +2551,7 @@ var
   lPrecoVendaProdutoModel : ITPrecoVendaProdutoModel;
   lPrecoClienteModel      : ITPrecoClienteModel;
 begin
-  lClienteModel           := TClienteModel.Create(vIConexao);
+  lClienteModel           := TClienteModel.getNewIface(vIConexao);
   lPrecoUFModel           := TPrecoUFModel.getNewIface(vIConexao);
   lPromocaoItensModel     := TPromocaoItensModel.getNewIface(vIConexao);
   lPrecoVendaModel        := TPrecoVendaModel.getNewIface(vIConexao);
@@ -2562,7 +2562,7 @@ begin
 
     if pProdutoPreco.PrecoUf then
     begin
-      lPrecoUFModel.objeto.WhereView := ' and preco_uf.uf = ' + QuotedStr(lClienteModel.ufCliente(pProdutoPreco.Cliente)) + ' and preco_uf.produto_id = '+ QuotedStr(pProdutoPreco.Produto);
+      lPrecoUFModel.objeto.WhereView := ' and preco_uf.uf = ' + QuotedStr(lClienteModel.objeto.ufCliente(pProdutoPreco.Cliente)) + ' and preco_uf.produto_id = '+ QuotedStr(pProdutoPreco.Produto);
       lPrecoUFModel.objeto.obterLista;
       if lPrecoUFModel.objeto.TotalRecords > 0 then
       begin
@@ -2619,10 +2619,10 @@ begin
 
     if pProdutoPreco.TabelaPreco then
     begin
-      lClienteModel := lClienteModel.carregaClasse(pProdutoPreco.Cliente);
-      if lClienteModel.preco_id <> '' then
+      lClienteModel := lClienteModel.objeto.carregaClasse(pProdutoPreco.Cliente);
+      if lClienteModel.objeto.preco_id <> '' then
       begin
-        lPrecoVendaModel.objeto.WhereView := ' and id = '+ QuotedStr(lClienteModel.preco_id);
+        lPrecoVendaModel.objeto.WhereView := ' and id = '+ QuotedStr(lClienteModel.objeto.preco_id);
         lPrecoVendaModel.objeto.obterLista;
       end;
       if pProdutoPreco.PrecoVenda <> '' then
@@ -2669,7 +2669,7 @@ begin
     lPrecoClienteModel:=nil;
     lPrecoVendaModel:=nil;
     lProdutosModel:=nil;
-    lClienteModel.Free;
+    lClienteModel:=nil;
     lPrecoUFModel:=nil;
   end;
 end;

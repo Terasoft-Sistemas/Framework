@@ -681,39 +681,39 @@ end;
 
 procedure TImpressaoContratos.fetchCliente;
 var
-  lClienteModel : TClienteModel;
+  lClienteModel : ITClienteModel;
 begin
 
-  lClienteModel := TClienteModel.Create(CONEXAO);
+  lClienteModel := TClienteModel.getNewIface(CONEXAO);
   try
-    lClienteModel.IDRecordView := mtPedidoCLIENTE_ID.Value;
-    lClienteModel.obterLista;
+    lClienteModel.objeto.IDRecordView := mtPedidoCLIENTE_ID.Value;
+    lClienteModel.objeto.obterLista;
 
     mtCliente.Append;
-    mtClienteCLIENTE_NOME.Value := lClienteModel.ClientesLista[0].FANTASIA_CLI;
-    mtClienteRAZAO_SOCIAL.Value := lClienteModel.ClientesLista[0].RAZAO_CLI;
-    mtClienteCNPJ_CPF.Value     := lClienteModel.ClientesLista[0].CNPJ_CPF_CLI;
-    mtClienteRG.Value           := lClienteModel.ClientesLista[0].INSCRICAO_RG_CLI;
-    mtClienteNASCIMENTO.Value   := lClienteModel.ClientesLista[0].NASCIMENTO_CLI;
+    mtClienteCLIENTE_NOME.Value := lClienteModel.objeto.ClientesLista[0].objeto.FANTASIA_CLI;
+    mtClienteRAZAO_SOCIAL.Value := lClienteModel.objeto.ClientesLista[0].objeto.RAZAO_CLI;
+    mtClienteCNPJ_CPF.Value     := lClienteModel.objeto.ClientesLista[0].objeto.CNPJ_CPF_CLI;
+    mtClienteRG.Value           := lClienteModel.objeto.ClientesLista[0].objeto.INSCRICAO_RG_CLI;
+    mtClienteNASCIMENTO.Value   := lClienteModel.objeto.ClientesLista[0].objeto.NASCIMENTO_CLI;
 
-    mtClienteENDERECO.Value     := lClienteModel.ClientesLista[0].ENDERECO;
-    mtClienteNUMERO.Value       := lClienteModel.ClientesLista[0].NUMERO_END;
-    mtClienteCIDADE.Value       := lClienteModel.ClientesLista[0].CIDADE_CLI;
-    mtClienteBAIRRO.Value       := lClienteModel.ClientesLista[0].BAIRRO_CLI;
-    mtClienteCOMPLEMENTO.Value  := lClienteModel.ClientesLista[0].COMPLEMENTO;
-    mtClienteUF.Value           := lClienteModel.ClientesLista[0].UF_CLI;
-    mtClienteCEP.Value          := lClienteModel.ClientesLista[0].CEP_CLI;
+    mtClienteENDERECO.Value     := lClienteModel.objeto.ClientesLista[0].objeto.ENDERECO;
+    mtClienteNUMERO.Value       := lClienteModel.objeto.ClientesLista[0].objeto.NUMERO_END;
+    mtClienteCIDADE.Value       := lClienteModel.objeto.ClientesLista[0].objeto.CIDADE_CLI;
+    mtClienteBAIRRO.Value       := lClienteModel.objeto.ClientesLista[0].objeto.BAIRRO_CLI;
+    mtClienteCOMPLEMENTO.Value  := lClienteModel.objeto.ClientesLista[0].objeto.COMPLEMENTO;
+    mtClienteUF.Value           := lClienteModel.objeto.ClientesLista[0].objeto.UF_CLI;
+    mtClienteCEP.Value          := lClienteModel.objeto.ClientesLista[0].objeto.CEP_CLI;
 
-    mtClienteTELEFONE.Value     := lClienteModel.ClientesLista[0].TELEFONE_CLI;
-    mtClienteCELULAR.Value      := lClienteModel.ClientesLista[0].CELULAR_CLI;
-    mtClienteEMAIL.Value        := lClienteModel.ClientesLista[0].EMAIL_CLI;
-    mtClienteCONTATO.Value      := lClienteModel.ClientesLista[0].CONTATO_CLI;
+    mtClienteTELEFONE.Value     := lClienteModel.objeto.ClientesLista[0].objeto.TELEFONE_CLI;
+    mtClienteCELULAR.Value      := lClienteModel.objeto.ClientesLista[0].objeto.CELULAR_CLI;
+    mtClienteEMAIL.Value        := lClienteModel.objeto.ClientesLista[0].objeto.EMAIL_CLI;
+    mtClienteCONTATO.Value      := lClienteModel.objeto.ClientesLista[0].objeto.CONTATO_CLI;
     mtCliente.Post;
 
-    if (lClienteModel.ClientesLista[0].CODIGO_OCUPACAO_CLI = '2') or (lClienteModel.ClientesLista[0].CODIGO_OCUPACAO_CLI = '8') or (lClienteModel.ClientesLista[0].CODIGO_OCUPACAO_CLI = 'M') then
+    if (lClienteModel.objeto.ClientesLista[0].objeto.CODIGO_OCUPACAO_CLI = '2') or (lClienteModel.objeto.ClientesLista[0].objeto.CODIGO_OCUPACAO_CLI = '8') or (lClienteModel.objeto.ClientesLista[0].objeto.CODIGO_OCUPACAO_CLI = 'M') then
       memoCoberturaPrestamista.Lines.Text := 'Desemprego Involuntário (DI)'
     else
-    if (lClienteModel.ClientesLista[0].CODIGO_OCUPACAO_CLI = '3') or (lClienteModel.ClientesLista[0].CODIGO_OCUPACAO_CLI = '4') or (lClienteModel.ClientesLista[0].CODIGO_OCUPACAO_CLI = '5') then
+    if (lClienteModel.objeto.ClientesLista[0].objeto.CODIGO_OCUPACAO_CLI = '3') or (lClienteModel.objeto.ClientesLista[0].objeto.CODIGO_OCUPACAO_CLI = '4') or (lClienteModel.objeto.ClientesLista[0].objeto.CODIGO_OCUPACAO_CLI = '5') then
       memoCoberturaPrestamista.Lines.Text := 'Incapacidade Física Total e Temporária por Acidente ou Doença'
     else
     begin
@@ -721,7 +721,7 @@ begin
       lblPlano3.Visible := true;
     end;
   finally
-    lClienteModel.Free;
+    lClienteModel:=nil;
   end;
 
 end;
@@ -784,21 +784,21 @@ end;
 
 procedure TImpressaoContratos.fetchMemo;
 var
-  lClienteModel : TClienteModel;
+  lClienteModel : ITClienteModel;
 begin
 
-  lClienteModel := TClienteModel.Create(CONEXAO);
+  lClienteModel := TClienteModel.getNewIface(CONEXAO);
   try
-    lClienteModel.IDRecordView := mtPedidoCLIENTE_ID.Value;
-    lClienteModel.obterLista;
+    lClienteModel.objeto.IDRecordView := mtPedidoCLIENTE_ID.Value;
+    lClienteModel.objeto.obterLista;
 
-    RLMemo1.Lines.Text := '    Eu, '+lClienteModel.ClientesLista[0].FANTASIA_CLI+', inscrito no CPF/MF sob o nº '+formatoCNPJCPFGenerico(nil,lClienteModel.ClientesLista[0].CNPJ_CPF_CLI, true)+', proponente do seguro Garantia Estendida, autorizo que o pagamento do prêmio de seguro no valor de R$'+FormataFloat(mtItensVLR_GARANTIA.Value)+' seja realizado em conjunto com o pagamento do(s) produto(s)/serviço(s) ora adquirido(s).';
+    RLMemo1.Lines.Text := '    Eu, '+lClienteModel.objeto.ClientesLista[0].objeto.FANTASIA_CLI+', inscrito no CPF/MF sob o nº '+formatoCNPJCPFGenerico(nil,lClienteModel.objeto.ClientesLista[0].objeto.CNPJ_CPF_CLI, true)+', proponente do seguro Garantia Estendida, autorizo que o pagamento do prêmio de seguro no valor de R$'+FormataFloat(mtItensVLR_GARANTIA.Value)+' seja realizado em conjunto com o pagamento do(s) produto(s)/serviço(s) ora adquirido(s).';
 
-    RLMemo2.Lines.Text := '    Eu, '+lClienteModel.ClientesLista[0].FANTASIA_CLI+', inscrito no CPF/MF sob o nº '+formatoCNPJCPFGenerico(nil,lClienteModel.ClientesLista[0].CNPJ_CPF_CLI, true)+', proponente do Seguro Proteção de Bens, autorizo que o pagamento do prêmio de seguro no valor de R$'+FormataFloat(mtItensPREMIO_UNICO_FR.Value)+' seja realizado em conjunto com o pagamento do(s) produto(s)/serviço(s) ora adquirido(s).';
+    RLMemo2.Lines.Text := '    Eu, '+lClienteModel.objeto.ClientesLista[0].objeto.FANTASIA_CLI+', inscrito no CPF/MF sob o nº '+formatoCNPJCPFGenerico(nil,lClienteModel.objeto.ClientesLista[0].objeto.CNPJ_CPF_CLI, true)+', proponente do Seguro Proteção de Bens, autorizo que o pagamento do prêmio de seguro no valor de R$'+FormataFloat(mtItensPREMIO_UNICO_FR.Value)+' seja realizado em conjunto com o pagamento do(s) produto(s)/serviço(s) ora adquirido(s).';
 
     RLMemo3.Lines.Text := RLMemo2.Lines.Text;
   finally
-    lClienteModel.Free;
+    lClienteModel:=nil;
   end;
 
 end;

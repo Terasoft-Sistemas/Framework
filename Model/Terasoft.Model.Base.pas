@@ -27,7 +27,7 @@ interface
       property listaValidacoes: IListaStringLock read getListaVaklidacoes;
 
     public
-    	constructor Create(pIConexao : IConexao); virtual;
+    	constructor _Create(pIConexao : IConexao); virtual;
       destructor Destroy; override;
       function validaRegrasModel(pListaCampos: IListaString=nil; pResultado: IResultadoOperacao=nil): IResultadoOperacao; virtual;
       function camposObrigatorios(pTag: String; pView: TComponent; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
@@ -41,7 +41,7 @@ implementation
 
 { TModelBase }
 
-constructor TModelBase.Create;
+constructor TModelBase._Create;
 begin
   vIConexao := pIConexao;
   doCreate;

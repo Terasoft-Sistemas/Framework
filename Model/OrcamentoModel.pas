@@ -384,7 +384,7 @@ var
   lPedidoItensModel        : ITPedidoItensModel;
   lOrcamentoItensModel     : ITOrcamentoItensModel;
   lOrcamentoModel          : ITOrcamentoModel;
-  lClientesModel           : TClienteModel;
+  lClientesModel           : ITClienteModel;
   lEmpresaModel            : ITEmpresaModel;
   lProdutosModel           : ITProdutosModel;
   lPedido                  : String;
@@ -400,7 +400,7 @@ begin
   lOrcamentoItensModel := TOrcamentoItensModel.getNewIface(vIConexao);
   lPedidoVendaModel    := TPedidoVendaModel.getNewIface(vIConexao);
   lPedidoItensModel    := TPedidoItensModel.getNewIface(vIConexao);
-  lClientesModel       := TClienteModel.Create(vIConexao);
+  lClientesModel       := TClienteModel.getNewIface(vIConexao);
   lEmpresaModel        := TEmpresaModel.getNewIface(vIConexao);
   lProdutosModel       := TProdutosModel.getNewIface(vIConexao);
 
@@ -441,8 +441,8 @@ begin
     if lOrcamentoModel.objeto.VALOR_IPI > 0 then
       CriaException('Orçamento contém valor de IPI.'+#13+'Não é possível finalizar orçamento pelo frente de caixa.');
 
-    lClientesModel.IDRecordView := lOrcamentoModel.objeto.CODIGO_CLI;
-    lTableCliente := lClientesModel.ObterListaMemTable;
+    lClientesModel.objeto.IDRecordView := lOrcamentoModel.objeto.CODIGO_CLI;
+    lTableCliente := lClientesModel.objeto.ObterListaMemTable;
 
     lPedidoVendaModel.objeto.Acao                 := tacIncluir;
     lPedidoVendaModel.objeto.LOJA                 := lOrcamentoModel.objeto.LOJA;
@@ -539,7 +539,7 @@ begin
     lPedidoVendaModel:=nil;
     lOrcamentoItensModel:=nil;
     lPedidoItensModel:=nil;
-    lClientesModel.Free;
+    lClientesModel:=nil;
     lEmpresaModel := nil;
     lProdutosModel:=nil;
   end;

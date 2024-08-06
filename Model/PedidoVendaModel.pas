@@ -645,13 +645,13 @@ var
   lContasReceberModel      : TContasReceberModel;
   lContasReceberItensModel : TContasReceberItensModel;
   lReservaModel            : ITReservaModel;
-  lClienteModel            : TClienteModel;
+  lClienteModel            : ITClienteModel;
   lPixModel                : ITPixModel;
   lComissaoCliente         : Double;
 begin
   lPedidoVendaModel        := TPedidoVendaModel.getNewIface(vIConexao);
   lPedidoItensModel        := TPedidoItensModel.getNewIface(vIConexao);
-  lClienteModel            := TClienteModel.Create(vIConexao);
+  lClienteModel            := TClienteModel.getNewIface(vIConexao);
   lContasReceberModel      := TContasReceberModel.Create(vIConexao);
   lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
   lPixModel                := TPixModel.getNewIface(vIConexao);
@@ -692,7 +692,7 @@ begin
     lPedidoItensModel.objeto.IDPedidoVendaView := lPedidoVendaModel.objeto.NUMERO_PED;
     lPedidoItensModel.objeto.obterLista;
 
-    lComissaoCliente := lClienteModel.comissaoCliente(self.FCODIGO_CLI);
+    lComissaoCliente := lClienteModel.objeto.comissaoCliente(self.FCODIGO_CLI);
 
     for lModel in lPedidoItensModel.objeto.PedidoItenssLista do
     begin
@@ -713,7 +713,7 @@ begin
     lContasReceberModel.Free;
     lPedidoVendaModel:=nil;
     lPedidoItensModel:=nil;
-    lClienteModel.Free;
+    lClienteModel:=nil;
     lPixModel:=nil;
 
     lReservaModel:=nil;
@@ -1266,28 +1266,28 @@ end;
 procedure TPedidoVendaModel.validaBloqueioPortador(pPortador, pCliente : String);
 var
   lPortadorModel : ITPortadorModel;
-  lClienteModel  : TClienteModel;
+  lClienteModel  : ITClienteModel;
 begin
   if (pPortador = '') or (pCliente = '') then
     exit;
 
   lPortadorModel := TPortadorModel.getNewIface(vIConexao);
-  lClienteModel  := TClienteModel.Create(vIConexao);
+  lClienteModel  := TClienteModel.getNewIface(vIConexao);
 
   try
     lPortadorModel := lPortadorModel.objeto.carregaClasse(pPortador);
 
     if lPortadorModel.objeto.VR_PORT = 'X' then
     begin
-      lClienteModel := lClienteModel.carregaClasse(pCliente);
+      lClienteModel := lClienteModel.objeto.carregaClasse(pCliente);
 
-      if lClienteModel.seprocado_cli <> 'N' then
+      if lClienteModel.objeto.seprocado_cli <> 'N' then
         CriaException('Cliente não está liberado para venda com este portador.');
 
     end;
   finally
     lPortadorModel:=nil;
-    lClienteModel.Free;
+    lClienteModel:=nil;
   end;
 
 end;

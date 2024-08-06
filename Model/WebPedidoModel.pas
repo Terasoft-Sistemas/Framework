@@ -459,7 +459,7 @@ var
   lPedidoItensModel        : ITPedidoItensModel;
   lWebPedidoItensModel     : ITWebPedidoItensModel;
   lWebPedidoModel          : TWebPedidoModel;
-  lClientesModel           : TClienteModel;
+  lClientesModel           : ITClienteModel;
   lFinanceiroPedidoModel   : ITFinanceiroPedidoModel;
   lPedido                  : String;
   lItem, lIndex            : Integer;
@@ -476,7 +476,7 @@ begin
   lPedidoVendaModel      := TPedidoVendaModel.getNewIface(vIConexao);
   lPedidoItensModel      := TPedidoItensModel.getNewIface(vIConexao);
 
-  lClientesModel         := TClienteModel.Create(vIConexao);
+  lClientesModel         := TClienteModel.getNewIface(vIConexao);
   lFinanceiroPedidoModel := TFinanceiroPedidoModel.getNewIface(vIConexao);
 
   try
@@ -491,8 +491,8 @@ begin
 
     lWebPedidoModel := lWebPedidoModel.carregaClasse(pIdVendaAssistida.ToString);
 
-    lClientesModel.IDRecordView := lWebPedidoModel.CLIENTE_ID;
-    lTableCliente := lClientesModel.ObterListaMemTable;
+    lClientesModel.objeto.IDRecordView := lWebPedidoModel.CLIENTE_ID;
+    lTableCliente := lClientesModel.objeto.ObterListaMemTable;
 
     lPedidoVendaModel.objeto.Acao                 := tacIncluir;
     lPedidoVendaModel.objeto.LOJA                 := lWebPedidoModel.LOJA;
@@ -621,7 +621,7 @@ begin
     lPedidoVendaModel:=nil;
     lWebPedidoItensModel:=nil;
     lPedidoItensModel:=nil;
-    lClientesModel.Free;
+    lClientesModel:=nil;
   end;
 
 end;

@@ -674,20 +674,20 @@ end;
 
 procedure TForm1.Button20Click(Sender: TObject);
 var
-  lClienteModel : TClienteModel;
+  lClienteModel : ITClienteModel;
   lMemTable     : IFDDataset;
   i             : Integer;
 begin
-  lClienteModel := TClienteModel.Create(vIConexao);
+  lClienteModel := TClienteModel.getNewIface(vIConexao);
     try
       try
-        lClienteModel.LengthPageView  := vQtdeRegistros.ToString;
-        lClienteModel.StartRecordView := vPagina.ToString;
-        lClienteModel.OrderView       := 'CODIGO_CLI';
+        lClienteModel.objeto.LengthPageView  := vQtdeRegistros.ToString;
+        lClienteModel.objeto.StartRecordView := vPagina.ToString;
+        lClienteModel.objeto.OrderView       := 'CODIGO_CLI';
 
         inc(vPagina, 10);
 
-        lMemTable := lClienteModel.ObterListaMemTable;
+        lMemTable := lClienteModel.objeto.ObterListaMemTable;
         memoResultado.Lines.Clear;
         lMemTable.objeto.First;
 
@@ -706,16 +706,16 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lClienteModel.Free;
+    lClienteModel:=nil;
   end;
 end;
 
 procedure TForm1.Button21Click(Sender: TObject);
 var
-  lClienteModel : TClienteModel;
+  lClienteModel : ITClienteModel;
   ID            : String;
 begin
-  lClienteModel := TClienteModel.Create(vIConexao);
+  lClienteModel := TClienteModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('Cliente', 'Digite o ID que deseja Alterar:', '');
@@ -723,47 +723,47 @@ begin
       if ID.IsEmpty then
         exit;
 
-      lClienteModel := lClienteModel.Alterar(ID);
-      lClienteModel.fantasia_cli := 'TESTE ALTERA FANTASIA';
+      lClienteModel := lClienteModel.objeto.Alterar(ID);
+      lClienteModel.objeto.fantasia_cli := 'TESTE ALTERA FANTASIA';
 
-      lClienteModel.Salvar;
+      lClienteModel.objeto.Salvar;
       ShowMessage('Alterado com Sucesso');
     Except
       on E:Exception do
       ShowMessage('Erro: ' +E.Message);
     end;
   finally
-    lClienteModel.Free;
+    lClienteModel:=nil;
   end;
 end;
 
 procedure TForm1.Button22Click(Sender: TObject);
 var
-  lClienteModel : TClienteModel;
+  lClienteModel : ITClienteModel;
   CodCli        : String;
 begin
-  lClienteModel := TClienteModel.Create(vIConexao);
+  lClienteModel := TClienteModel.getNewIface(vIConexao);
   try
     try
       CodCli := InputBox('Cliente', 'Digite o ID do Cliente que deseja excluir:', '');
 
-      lClienteModel.Excluir(CodCli);
+      lClienteModel.objeto.Excluir(CodCli);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lClienteModel.Free;
+    lClienteModel:=nil;
   end;
 end;
 
 procedure TForm1.Button23Click(Sender: TObject);
 var
-  lClienteModel : TClienteModel;
+  lClienteModel : ITClienteModel;
   NomeCli       : String;
 begin
-  lClienteModel := TClienteModel.Create(vIConexao);
+  lClienteModel := TClienteModel.getNewIface(vIConexao);
   try
     try
       NomeCli := InputBox('Cliente', 'Digite o Nome:', '');
@@ -771,21 +771,21 @@ begin
       if NomeCli.IsEmpty then
         exit;
 
-      lClienteModel.fantasia_cli    := NomeCli;
-      lClienteModel.tipo_cli        := 'F';
-      lClienteModel.seprocado_cli   := 'N';
-      lClienteModel.estadocivil_cli := 'O';
-      lClienteModel.status          := 'A';
-      lClienteModel.sexo_cli        := 'M';
+      lClienteModel.objeto.fantasia_cli    := NomeCli;
+      lClienteModel.objeto.tipo_cli        := 'F';
+      lClienteModel.objeto.seprocado_cli   := 'N';
+      lClienteModel.objeto.estadocivil_cli := 'O';
+      lClienteModel.objeto.status          := 'A';
+      lClienteModel.objeto.sexo_cli        := 'M';
 
-      lClienteModel.Incluir;
+      lClienteModel.objeto.Incluir;
       ShowMessage('Incluido com Sucesso!');
     except
       on E:Exception do
       ShowMessage('Erro: ' + E.Message);
     end
   finally
-    lClienteModel.Free;
+    lClienteModel:=nil;
   end;
 end;
 
