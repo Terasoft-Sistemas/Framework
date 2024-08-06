@@ -6,13 +6,17 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
 
-  TDescontoModel = class
+  TDescontoModel = class;
+  ITDescontoModel=IObject<TDescontoModel>;
 
+  TDescontoModel = class
   private
+    [weak] mySelf: ITDescontoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -57,15 +61,17 @@ type
     property SYSTIME       : Variant read FSYSTIME       write SetFSYSTIME;
 
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITDescontoModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TDescontoModel;
+    function Alterar(pID : String): ITDescontoModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId : String): TDescontoModel;
+    function carregaClasse(pId : String): ITDescontoModel;
 
     function ObterLista: IFDDataset; overload;
 
@@ -91,14 +97,14 @@ uses
 
 { TDescontoModel }
 
-function TDescontoModel.Alterar(pID: String): TDescontoModel;
+function TDescontoModel.Alterar(pID: String): ITDescontoModel;
 var
-  lDescontoModel : TDescontoModel;
+  lDescontoModel : ITDescontoModel;
 begin
-  lDescontoModel := TDescontoModel.Create(vIConexao);
+  lDescontoModel := TDescontoModel.getNewIface(vIConexao);
   try
-    lDescontoModel       := lDescontoModel.carregaClasse(pID);
-    lDescontoModel.Acao  := tacAlterar;
+    lDescontoModel       := lDescontoModel.objeto.carregaClasse(pID);
+    lDescontoModel.objeto.Acao  := tacAlterar;
     Result            := lDescontoModel;
   finally
   end;
@@ -111,26 +117,32 @@ begin
   Result       := self.Salvar;
 end;
 
+class function TDescontoModel.getNewIface(pIConexao: IConexao): ITDescontoModel;
+begin
+  Result := TImplObjetoOwner<TDescontoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TDescontoModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
     Result    := self.Salvar;
 end;
 
-function TDescontoModel.carregaClasse(pId : String): TDescontoModel;
+function TDescontoModel.carregaClasse(pId : String): ITDescontoModel;
 var
-  lDescontoDao: TDescontoDao;
+  lDescontoDao: ITDescontoDao;
 begin
-  lDescontoDao := TDescontoDao.Create(vIConexao);
+  lDescontoDao := TDescontoDao.getNewIface(vIConexao);
 
   try
-    Result := lDescontoDao.carregaClasse(pId);
+    Result := lDescontoDao.objeto.carregaClasse(pId);
   finally
-    lDescontoDao.Free;
+    lDescontoDao:=nil;
   end;
 end;
 
-constructor TDescontoModel.Create(pIConexao : IConexao);
+constructor TDescontoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -142,44 +154,44 @@ end;
 
 function TDescontoModel.obterLista: IFDDataset;
 var
-  lDescontoLista: TDescontoDao;
+  lDescontoLista: ITDescontoDao;
 begin
-  lDescontoLista := TDescontoDao.Create(vIConexao);
+  lDescontoLista := TDescontoDao.getNewIface(vIConexao);
 
   try
-    lDescontoLista.TotalRecords    := FTotalRecords;
-    lDescontoLista.WhereView       := FWhereView;
-    lDescontoLista.CountView       := FCountView;
-    lDescontoLista.OrderView       := FOrderView;
-    lDescontoLista.StartRecordView := FStartRecordView;
-    lDescontoLista.LengthPageView  := FLengthPageView;
-    lDescontoLista.IDRecordView    := FIDRecordView;
-    lDescontoLista.IDTipoVendaView := FIDTipoVendaView;
-    lDescontoLista.IDUsuarioView   := FIDUsuarioView;
+    lDescontoLista.objeto.TotalRecords    := FTotalRecords;
+    lDescontoLista.objeto.WhereView       := FWhereView;
+    lDescontoLista.objeto.CountView       := FCountView;
+    lDescontoLista.objeto.OrderView       := FOrderView;
+    lDescontoLista.objeto.StartRecordView := FStartRecordView;
+    lDescontoLista.objeto.LengthPageView  := FLengthPageView;
+    lDescontoLista.objeto.IDRecordView    := FIDRecordView;
+    lDescontoLista.objeto.IDTipoVendaView := FIDTipoVendaView;
+    lDescontoLista.objeto.IDUsuarioView   := FIDUsuarioView;
 
-    Result := lDescontoLista.obterLista;
+    Result := lDescontoLista.objeto.obterLista;
 
-    FTotalRecords := lDescontoLista.TotalRecords;
+    FTotalRecords := lDescontoLista.objeto.TotalRecords;
 
   finally
-    lDescontoLista.Free;
+    lDescontoLista:=nil;
   end;
 end;
 
 function TDescontoModel.Salvar: String;
 var
-  lDescontoDao: TDescontoDao;
+  lDescontoDao: ITDescontoDao;
 begin
-  lDescontoDao := TDescontoDao.Create(vIConexao);
+  lDescontoDao := TDescontoDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lDescontoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lDescontoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lDescontoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lDescontoDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lDescontoDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lDescontoDao.objeto.excluir(mySelf);
     end;
   finally
-    lDescontoDao.Free;
+    lDescontoDao:=nil;
   end;
 end;
 

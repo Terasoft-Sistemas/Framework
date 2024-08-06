@@ -145,7 +145,7 @@ function TSolicitacaoDescontoModel.Autorizar(pID: String): Boolean;
 var
   lSolicitacaoDesconto : ITSolicitacaoDescontoModel;
   lWebPedidoModel      : ITWebPedidoModel;
-  lDescontoModel       : TDescontoModel;
+  lDescontoModel       : ITDescontoModel;
   lTableDesconto       : IFDDataset;
   lPercentual          : Double;
 begin
@@ -153,16 +153,16 @@ begin
     CriaException('ID não informado.');
 
   lSolicitacaoDesconto := TSolicitacaoDescontoModel.getNewIface(vIConexao);
-  lDescontoModel       := TDescontoModel.Create(vIConexao);
+  lDescontoModel       := TDescontoModel.getNewIface(vIConexao);
   lWebPedidoModel      := TWebPedidoModel.getNewIface(vIConexao);
 
   try
     lSolicitacaoDesconto := lSolicitacaoDesconto.objeto.carregaClasse(pID);
 
-    lDescontoModel.IDUsuarioView   := vIConexao.getUSer.ID;
-    lDescontoModel.IDTipoVendaView := lSolicitacaoDesconto.objeto.TIPOVENDA_ID;
+    lDescontoModel.objeto.IDUsuarioView   := vIConexao.getUSer.ID;
+    lDescontoModel.objeto.IDTipoVendaView := lSolicitacaoDesconto.objeto.TIPOVENDA_ID;
 
-    lTableDesconto := lDescontoModel.ObterLista;
+    lTableDesconto := lDescontoModel.objeto.ObterLista;
 
     lPercentual := lSolicitacaoDesconto.objeto.VALOR_DESCONTO / lSolicitacaoDesconto.objeto.VALOR_PEDIDO * 100;
 
@@ -183,7 +183,7 @@ begin
   finally
     lSolicitacaoDesconto:=nil;
     lWebPedidoModel:=nil;
-    lDescontoModel.Free;
+    lDescontoModel:=nil;
   end;
 end;
 

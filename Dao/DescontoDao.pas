@@ -16,12 +16,16 @@ uses
   Terasoft.Framework.SimpleTypes,
   Interfaces.Conexao,
   Terasoft.ConstrutorDao,
+  Terasoft.Framework.ObjectIface,
   DescontoModel;
 
 type
-  TDescontoDao = class
+  TDescontoDao = class;
+  ITDescontoDao=IObject<TDescontoDao>;
 
+  TDescontoDao = class
   private
+    [weak] mySelf: ITDescontoDao;
     vIConexao : IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -50,8 +54,10 @@ type
     procedure SetIDUsuarioView(const Value: String);
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITDescontoDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -64,15 +70,15 @@ type
     property IDUsuarioView : String read FIDUsuarioView write SetIDUsuarioView;
     property IDTipoVendaView : String read FIDTipoVendaView write SetIDTipoVendaView;
 
-    function incluir(pDescontoModel: TDescontoModel): String;
-    function alterar(pDescontoModel: TDescontoModel): String;
-    function excluir(pDescontoModel: TDescontoModel): String;
+    function incluir(pDescontoModel: ITDescontoModel): String;
+    function alterar(pDescontoModel: ITDescontoModel): String;
+    function excluir(pDescontoModel: ITDescontoModel): String;
 
-    function carregaClasse(pID : String): TDescontoModel;
+    function carregaClasse(pID : String): ITDescontoModel;
 
     function obterLista: IFDDataset;
 
-    procedure setParams(var pQry: TFDQuery; pDescontoModel: TDescontoModel);
+    procedure setParams(var pQry: TFDQuery; pDescontoModel: ITDescontoModel);
 
 end;
 
@@ -83,7 +89,7 @@ uses
 
 { TDesconto }
 
-function TDescontoDao.alterar(pDescontoModel: TDescontoModel): String;
+function TDescontoDao.alterar(pDescontoModel: ITDescontoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -97,7 +103,7 @@ begin
     setParams(lQry, pDescontoModel);
     lQry.ExecSQL;
 
-    Result := pDescontoModel.ID;
+    Result := pDescontoModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -105,13 +111,13 @@ begin
   end;
 end;
 
-function TDescontoDao.carregaClasse(pID: String): TDescontoModel;
+function TDescontoDao.carregaClasse(pID: String): ITDescontoModel;
 var
   lQry: TFDQuery;
-  lModel: TDescontoModel;
+  lModel: ITDescontoModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TDescontoModel.Create(vIConexao);
+  lModel   := TDescontoModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -120,18 +126,18 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-      lModel.ID             := lQry.FieldByName('ID').AsString;
-      lModel.USUARIO_DES    := lQry.FieldByName('USUARIO_DES').AsString;
-      lModel.TIPOVENDA_DES  := lQry.FieldByName('TIPOVENDA_DES').AsString;
-      lModel.VALOR_DES      := lQry.FieldByName('VALOR_DES').AsString;
-      lModel.SYSTIME        := lQry.FieldByName('SYSTIME').AsString;
+      lModel.objeto.ID             := lQry.FieldByName('ID').AsString;
+      lModel.objeto.USUARIO_DES    := lQry.FieldByName('USUARIO_DES').AsString;
+      lModel.objeto.TIPOVENDA_DES  := lQry.FieldByName('TIPOVENDA_DES').AsString;
+      lModel.objeto.VALOR_DES      := lQry.FieldByName('VALOR_DES').AsString;
+      lModel.objeto.SYSTIME        := lQry.FieldByName('SYSTIME').AsString;
 
     Result := lModel;
   finally
     lQry.Free;
   end;
 end;
-constructor TDescontoDao.Create(pIConexao : IConexao);
+constructor TDescontoDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -142,22 +148,29 @@ begin
   inherited;
 end;
 
-function TDescontoDao.excluir(pDescontoModel: TDescontoModel): String;
+function TDescontoDao.excluir(pDescontoModel: ITDescontoModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from DESCONTO where ID = :ID' ,[pDescontoModel.ID]);
+   lQry.ExecSQL('delete from DESCONTO where ID = :ID' ,[pDescontoModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pDescontoModel.ID;
+   Result := pDescontoModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
 end;
-function TDescontoDao.incluir(pDescontoModel: TDescontoModel): String;
+
+class function TDescontoDao.getNewIface(pIConexao: IConexao): ITDescontoDao;
+begin
+  Result := TImplObjetoOwner<TDescontoDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TDescontoDao.incluir(pDescontoModel: ITDescontoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -168,7 +181,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pDescontoModel.ID := vIConexao.Generetor('GEN_DESCONTO_ID');
+    pDescontoModel.objeto.ID := vIConexao.Generetor('GEN_DESCONTO_ID');
     setParams(lQry, pDescontoModel);
     lQry.Open;
 
@@ -272,28 +285,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TDescontoDao.setParams(var pQry: TFDQuery; pDescontoModel: TDescontoModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TDescontoDao.setParams(var pQry: TFDQuery; pDescontoModel: ITDescontoModel);
 begin
-  lTabela := vConstrutor.getColumns('DESCONTO');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TDescontoModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pDescontoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pDescontoModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('DESCONTO',pQry,pDescontoModel.objeto);
 end;
 
 procedure TDescontoDao.SetStartRecordView(const Value: String);

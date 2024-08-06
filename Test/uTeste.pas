@@ -2662,13 +2662,13 @@ end;
 
 procedure TForm1.Button85Click(Sender: TObject);
 var
-  lDescontoModel : TDescontoModel;
+  lDescontoModel : ITDescontoModel;
   lMemTable   : IFDDataset;
 begin
-  lDescontoModel := TDescontoModel.Create(vIConexao);
+  lDescontoModel := TDescontoModel.getNewIface(vIConexao);
   try
     try
-      lMemTable := lDescontoModel.ObterLista;
+      lMemTable := lDescontoModel.objeto.ObterLista;
 
       memoResultado.Lines.Clear;
 
@@ -2685,7 +2685,7 @@ begin
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lDescontoModel.Free;
+    lDescontoModel:=nil;
   end;
 end;
 
@@ -2769,24 +2769,24 @@ end;
 
 procedure TForm1.btnPermissaoClick(Sender: TObject);
 var
-  lDescontoModel : TDescontoModel;
+  lDescontoModel : ITDescontoModel;
   ID        : String;
 begin
-  lDescontoModel := TDescontoModel.Create(vIConexao);
+  lDescontoModel := TDescontoModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('DESCONTO', 'Digite o ID do Contato que deseja excluir:', '');
       if ID.IsEmpty then
           Exit;
 
-      lDescontoModel.Excluir(ID);
+      lDescontoModel.objeto.Excluir(ID);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lDescontoModel.Free;
+    lDescontoModel:=nil;
   end;
 end;
 
@@ -2817,23 +2817,23 @@ end;
 
 procedure TForm1.btnDescontoClick(Sender: TObject);
 var
-  lDescontoModel : TDescontoModel;
+  lDescontoModel : ITDescontoModel;
 begin
-  lDescontoModel := TDescontoModel.Create(vIConexao);
+  lDescontoModel := TDescontoModel.getNewIface(vIConexao);
   try
     try
-      lDescontoModel.USUARIO_DES   := '000002';
-      lDescontoModel.TIPOVENDA_DES := '000004';
-      lDescontoModel.VALOR_DES     := 99;
+      lDescontoModel.objeto.USUARIO_DES   := '000002';
+      lDescontoModel.objeto.TIPOVENDA_DES := '000004';
+      lDescontoModel.objeto.VALOR_DES     := 99;
 
-      lDescontoModel.Incluir;
+      lDescontoModel.objeto.Incluir;
       ShowMessage('Incluido com Sucesso!');
     except
       on E:Exception do
       ShowMessage('Erro: ' + E.Message);
     end
   finally
-    lDescontoModel.Free;
+    lDescontoModel:=nil;
   end;
 end;
 
