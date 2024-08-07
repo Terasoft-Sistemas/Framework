@@ -375,7 +375,7 @@ begin
   begin
     Append;
     FieldByName('ID').AsString := pID;
-    FieldByName('descricao').AsString := pDescricao;
+    FieldByName('descricao').AsString := uppercase(retiraAcentos(pDescricao));
     CheckBrowseMode;
   end;
 end;
