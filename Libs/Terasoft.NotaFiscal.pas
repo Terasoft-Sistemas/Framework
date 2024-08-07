@@ -636,6 +636,7 @@ begin
         ACBrNFeDANFeRL := TACBrNFeDANFeRL.Create(nil);
         ACBrNFe.DANFE  := ACBrNFeDANFeRL;
         ACBrNFe.DANFE.TipoDANFE := vConfiguracoesNotaFiscal.DANFETipoDANFE;
+        MostraPreview := true;
       end;
 
       ACBrNFe.DANFE.Logo    := vConfiguracoesNotaFiscal.DANFEPathLogo(lQry.FieldByName('pmoNFe').AsInteger);
