@@ -153,7 +153,7 @@ begin
 
     tipoFiltro_Set,tipoFiltro_SetSincrono:
     begin
-      ds := fFiltroSelecionado.objeto.getOpcoes('alu');
+      ds := fFiltroSelecionado.objeto.getOpcoes();
       fFiltroSelecionado.objeto.opcoesSelecionadas.text :=
           FuncoesSelecaoLista.SelecionaItems(fFiltroSelecionado.objeto.opcoesSelecionadas.text,ds.dataset,false,'',ds.dataset.Fields[0].FieldName);
     end;

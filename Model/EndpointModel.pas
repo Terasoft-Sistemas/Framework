@@ -199,12 +199,20 @@ end;
 function TEndpointModel.getQuery: TipoWideStringFramework;
   var
     fFiltro: ITFiltroModel;
-    lSql, lWhere, lIn: String;
+    lSql, lWhere, lGroup, lIn: String;
     l: IListaTextoEX;
     lAdicional,lOrder: String;
     i: Integer;
 begin
   lSql := fQUERYInterno;
+  if(pos('<where>',lSql,1)=0) then
+    lSql := lSql + #13 + '<where>';
+  if(pos('<group>',lSql,1)=0) then
+    lSql := lSql + #13 + '<group>';
+
+  if(pos('<order>',lSql,1)=0) then
+    lSql := lSql + #13 + '<order>';
+
   lAdicional := '';
   lOrder := '';
   if(fRegistros>0) then
@@ -227,6 +235,7 @@ begin
     end;
   end;
 
+  //Where adicional
   l := getCfg.ReadSectionValuesLista('where');
   lAdicional := '';
 
@@ -243,14 +252,47 @@ begin
     lWhere :=  lWhere + lAdicional;
   end;
 
-  lOrder := '';
-  l := getCfg.ReadSectionValuesLista('order');
-  lAdicional := '';
-
   if(lWhere <>'') then
     lWhere := 'where'+#13 + '   ' +lWhere;
 
-  Result := lSql +#13+ lWhere;
+  //Group
+  lGroup := '';
+  l := getCfg.ReadSectionValuesLista('group');
+  lAdicional := '';
+
+  for i := 0 to l.strings.Count - 1 do
+  begin
+    lIn := l.strings.ValueFromIndex[i];
+    if(lIn='') then continue;
+    lAdicional := lAdicional + lIn + #13;
+  end;
+  if(lAdicional<>'') then
+  begin
+    lGroup := format('group by %s', [ lAdicional ]);
+  end;
+
+  //Order
+  lOrder := '';
+  l := getCfg.ReadSectionValuesLista('order');
+  lAdicional := '';
+  for i := 0 to l.strings.Count - 1 do
+  begin
+    lIn := l.strings.ValueFromIndex[i];
+    if(lIn='') then continue;
+    lAdicional := lAdicional + lIn + #13;
+  end;
+  if(lAdicional<>'') then
+  begin
+    lOrder := format('order by %s', [ lAdicional ]);
+  end;
+
+
+
+  Result := StringReplace(lSql, '<where>', lWhere,[rfReplaceAll,rfIgnoreCase]);
+  Result := StringReplace(Result, '<order>', lOrder,[rfReplaceAll,rfIgnoreCase]);
+  Result := StringReplace(Result, '<group>', lGroup,[rfReplaceAll,rfIgnoreCase]);
+
+  //Clipboard.AsText := Result;
 end;
 
 function TEndpointModel.executaQuery;
@@ -275,6 +317,14 @@ procedure TEndpointModel.formatarDataset(pDataset: TDataset);
 begin
   if(pDataset=nil) then
     exit;
+
+  for i := 0 to pDataset.FieldCount - 1 do
+  begin
+    f:=pDataset.Fields[i];
+    if(f is TNumericField) and not ( f.DataType in [ ftLargeint ] ) then
+      TNumericField(f).DisplayFormat := ',0.00';
+  end;
+
   l := getCfg.ReadSectionValuesLista('formatos');
   for i := 0 to l.strings.Count-1 do
   begin
