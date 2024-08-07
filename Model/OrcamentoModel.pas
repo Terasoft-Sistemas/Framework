@@ -459,7 +459,6 @@ begin
     lPedidoVendaModel.objeto.PARCELA_PED          := lOrcamentoModel.objeto.VLRPARCELA_ORC;
     lPedidoVendaModel.objeto.CTR_IMPRESSAO_PED    := '0';
     lPedidoVendaModel.objeto.RESERVADO            := 'N';
-    lPedidoVendaModel.objeto.TIPO_FRETE           := lOrcamentoModel.objeto.TIPO_FRETE;
     lPedidoVendaModel.objeto.SMS                  := 'N';
     lPedidoVendaModel.objeto.ENTREGA              := 'N';
     lPedidoVendaModel.objeto.STATUS_PED           := 'P';
@@ -477,6 +476,15 @@ begin
     lPedidoVendaModel.objeto.PRECO_VENDA_ID       := lOrcamentoModel.objeto.PRECO_VENDA_ID;
     lPedidoVendaModel.objeto.USUARIO_PED          := self.vIConexao.getUSer.ID;
     lPedidoVendaModel.objeto.IDUsuario            := self.vIConexao.getUSer.ID;
+    lPedidoVendaModel.objeto.ESPECIE_VOLUME       := lOrcamentoModel.objeto.ESPECIE_VOLUME;
+    lPedidoVendaModel.objeto.PESO_BRUTO           := lOrcamentoModel.objeto.PESO_BRUTO;
+    lPedidoVendaModel.objeto.PESO_LIQUIDO         := lOrcamentoModel.objeto.PESO_LIQUIDO;
+    lPedidoVendaModel.objeto.PLACA                := lOrcamentoModel.objeto.PLACA;
+    lPedidoVendaModel.objeto.TIPO_FRETE           := lOrcamentoModel.objeto.TIPO_FRETE;
+    lPedidoVendaModel.objeto.UF_TRANSPORTADORA    := lOrcamentoModel.objeto.UF_TRANSPORTADORA;
+    lPedidoVendaModel.objeto.RNTRC                := lOrcamentoModel.objeto.RNTRC;
+    lPedidoVendaModel.objeto.TELEVENDA_PED        := lOrcamentoModel.objeto.TRANPORTADORA_ID;
+    lPedidoVendaModel.objeto.QTDE_VOLUME          := lOrcamentoModel.objeto.QTDE_VOLUME;
 
     lPedido := lPedidoVendaModel.objeto.Salvar;
 
