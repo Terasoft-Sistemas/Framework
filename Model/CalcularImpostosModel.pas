@@ -396,9 +396,9 @@ begin
     lMotor.NotaFiscal.Produto.ICMS.ICMSST.Modalidade          := lMotorUtils.SelecionaModalidadeICMS(Self.FICMSST_MODALIDADE);
 
     //CST60 Sub
-    lMotor.NotaFiscal.Produto.ICMS.ICMSST.ICMSSub.BaseCalculo         := 0;
-    lMotor.NotaFiscal.Produto.ICMS.ICMSST.ICMSSub.Aliquota            := 0;
-    lMotor.NotaFiscal.Produto.ICMS.ICMSST.ICMSSub.ValorICMSSubstituto := 0;
+    lMotor.NotaFiscal.Produto.ICMS.ICMSST.ICMSSub.BaseCalculo         := self.BASE_ST_RECOLHIDO;
+    lMotor.NotaFiscal.Produto.ICMS.ICMSST.ICMSSub.Aliquota            := self.PERCENTUAL_ST_RECOLHIDO;
+    lMotor.NotaFiscal.Produto.ICMS.ICMSST.ICMSSub.ValorICMSSubstituto := self.VALOR_ICMS_SUBSTITUTO;
 
     //Dados do IPI do produto
     lMotor.NotaFiscal.Produto.IPI.Aliquota := Self.FIPI_ALIQUOTA;
