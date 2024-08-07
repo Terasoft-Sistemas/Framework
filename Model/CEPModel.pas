@@ -194,6 +194,9 @@ begin
 
   fRestRequest.Execute;
 
+  if fRestResponse.StatusCode = 401 then
+    CriaException('Token não autorizado para a consulta!');
+
   if fRestResponse.StatusCode >= 400 then
     CriaException('CEP invalido');
 
