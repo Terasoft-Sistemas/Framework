@@ -34,6 +34,8 @@ type
   protected
     vIConexao   : IConexao;
 
+    fAceitaNull: boolean;
+
     fID: TipoWideStringFramework;
     fNOME: TipoWideStringFramework;
     fDESCRICAO: TipoWideStringFramework;
@@ -132,7 +134,7 @@ type
 
     class function getNewIface(pIConexao: IConexao): ITFiltroModel;
 
-    function getOpcoes(pBusca: TipoWideStringFramework=''): IDatasetSimples;
+    function getOpcoes(pBusca: TipoWideStringFramework=''; pOrdem: Integer = 2): IDatasetSimples;
     function query: TipoWideStringFramework;
     function setTipoPorNome(pNome: TipoWideStringFramework): TTipoFiltro;
 
@@ -233,7 +235,10 @@ function TFiltroModel.getOpcoes;///: IDatasetSimples;
     lAdicional: String;
     lWhere: String;
     lSQL: String;
-
+    lBusca: IListaTextoEX;
+    txt: TipoWideStringFramework;
+    found: boolean;
+    lOrdem: String;
 begin
   Result := nil;
   case getTipo of
@@ -245,6 +250,8 @@ begin
   end;
 
   pBusca := trim(pBusca);
+
+  lRegrasValores:='';
 
   lOpcoesTxt := listaOpcoes;
 
@@ -263,6 +270,12 @@ begin
     end;
   end else
   begin
+    lOrdem:='';
+    if pOrdem in [ 1, 2 ] then
+    begin
+      lOrdem := format(' order by %d ', [ pOrdem ]);
+    end;
+
     cfg := getCFG;
     lName  := cfg.ReadString('query','tabela',fNOME);
     lRegrasValores:=textoEntreTags(lName,'@','');
@@ -305,7 +318,7 @@ begin
       if(fRegistros>0) then
         lAdicional := format('%sfirst %d ', [ lAdicional, fRegistros ]);
       if(fPrimeiro>0) then
-        lAdicional := format('%sskip %d ', [ lAdicional, fPrimeiro ]);
+        lAdicional := format('%sskip %d ', [ lAdicional, fPrimeiro-1 ]);
 
       lWhere := '';
       if(pBusca<>'') then
@@ -313,9 +326,11 @@ begin
 
       if(lWhere<>'') then
         lWhere := ' where 1=1 ' + lWhere;
-      lSQL := format('select %s %s %s from %s %s', [lAdicional, fChave,lFieldNames, lName, lWhere]);
+      lSQL := format('select %s %s %s from %s %s %s', [lAdicional, fChave,lFieldNames, lName, lWhere, lOrdem]);
 
-      Clipboard.AsText := lSQL;
+      {$if defined(DEBUG)}
+        Clipboard.AsText := lSQL;
+      {$endif}
 
       lDS.query(lSQL,
                 '', []);
@@ -333,6 +348,28 @@ begin
       Supports(vIConexao.gdb.validador,IValidadorDatabase,validador);
       Result := validador.getValoresByName(lRegrasValores);
       Supports(cloneDatasource(Result),IDatasetSimples,Result);
+      Result := criaDatasetSimples(cloneDataset(Result.dataset));
+      Result.dataset.First;
+      lBusca:=novaListaTexto;
+      lBusca.strings.Delimiter := ' ';
+      lBusca.strings.DelimitedText := UpperCase(retiraAcentos(pBusca));
+      if(pBusca<>'') then
+        while not Result.dataset.Eof do
+        begin
+          found := true;
+          for txt in lBusca do
+          begin
+            if( Pos(String(txt),UpperCase(retiraAcentos(Result.dataset.Fields[1].AsString)))=0) then
+            begin
+              found := false;
+              break;
+            end;
+          end;
+          if(found=false) then
+            Result.dataset.Delete
+          else
+            Result.dataset.Next;
+        end;
     end;
   end;
 end;
@@ -383,6 +420,11 @@ function TFiltroModel.query: TipoWideStringFramework;
       end;
       lIn := '('+#13 + lIn + #13 + ')'+#13;
       Result := format('%s in %s', [fCampo, lIn]);
+
+      if(fAceitaNull) and (Result<>'') then
+      begin
+        Result := format('(%s or %s is null)', [ Result, fCampo ]);
+      end;
     end;
   end;
 
@@ -420,7 +462,13 @@ function TFiltroModel.query: TipoWideStringFramework;
     else if(VarIsNull(di)) then
       Result := fCampo + '<=' + QuotedStr(formata_Data(df))
     else
-      Result := format( '%s between %s and %s ', [ fCampo, QuotedStr(formata_Data(di)), QuotedStr(formata_Data(df))])
+      Result := format( '%s between %s and %s ', [ fCampo, QuotedStr(formata_Data(di)), QuotedStr(formata_Data(df))]);
+
+    if(fAceitaNull) and (Result<>'') then
+    begin
+      Result := format('(%s or %s is null)', [ Result, fCampo ]);
+    end;
+
   end;
 
 begin
@@ -505,6 +553,7 @@ end;
 
 procedure TFiltroModel.setTipo(const pValue: TTipoFiltro);
 begin
+  fAceitaNull := false;
   fTipo := pValue;
 end;
 
@@ -514,6 +563,12 @@ begin
   begin
     setTipo(tipoFiltro_DataPeriodo);
     fDESCRICAO := 'Período de DATA de ' + fCampo;
+
+  end else if(stringNoArray(pNome, ['@periodo.null'],[osna_CaseInsensitive,osna_SemAcento])) then
+  begin
+    setTipo(tipoFiltro_DataPeriodo);
+    fDESCRICAO := 'Período de DATA de ' + fCampo;
+    fAceitaNull := true;
 
   end else if(stringNoArray(pNome, ['@busca'],[osna_CaseInsensitive,osna_SemAcento])) then
   begin
@@ -564,8 +619,6 @@ begin
         if(cfg.ReadBool('query','assincrono',false)=true) then
         begin
           fTipo := tipoFiltro_Set;
-          if(fPrimeiro=0) then
-            fPrimeiro:=1;
           if(fRegistros=0) then
             fRegistros := 100;
         end else

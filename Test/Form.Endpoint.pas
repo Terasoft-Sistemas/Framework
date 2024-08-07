@@ -97,7 +97,8 @@ begin
   epControl := getEndpointController(vIConexao);
   //Retorna a lista com busca no termo 'PROD'
   //Ordenado pelo campo DESCRICAO
-  for m in epControl.getNovaLista('prod',2) do
+//  for m in epControl.getNovaLista('prod',2) do
+  for m in epControl.getNovaLista(nil,2) do
   begin
     cbEp.items.add(m.objeto.DESCRICAO);
     cbEp.values.add(m.objeto.NOME);
@@ -143,6 +144,8 @@ begin
 
   //Podemos passar a lista de palavras de pesquisa de id, descricao...
   //ds := fFiltroSelecionado.objeto.getOpcoes('ODERCO');
+  //Segundo parâmetro, determina o campo de ordem: 1-ID 2_DESCRICAO
+  //ds := fFiltroSelecionado.objeto.getOpcoes('ODERCO',2);
 
   case fFiltroSelecionado.objeto.TIPO of
 
@@ -152,7 +155,7 @@ begin
 
     tipoFiltro_Set,tipoFiltro_SetSincrono:
     begin
-      ds := fFiltroSelecionado.objeto.getOpcoes;
+      ds := fFiltroSelecionado.objeto.getOpcoes();
       fFiltroSelecionado.objeto.opcoesSelecionadas.text :=
           FuncoesSelecaoLista.SelecionaItems(fFiltroSelecionado.objeto.opcoesSelecionadas.text,ds.dataset,false,'',ds.dataset.Fields[0].FieldName);
     end;

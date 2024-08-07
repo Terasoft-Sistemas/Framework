@@ -175,7 +175,7 @@ begin
   fRestRequest.Params.Clear;
 
   lDeviceToken := vConfiguracoes.objeto.valorTag('API_DEVICE_TOKEN_CEP','aab31101-b8a4-4d8e-8611-fce6bc4c5055', tvString);
-  lToken       := vConfiguracoes.objeto.valorTag('API_TOKEN','eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BsYXRhZm9ybWEuYXBpYnJhc2lsLmNvbS5ici9hdXRoL2xvZ2luIiwiaWF0IjoxNjkxNDI4NDE5LCJleHAiOjE3MjI5NjQ0MTksIm5iZiI6MTY5MTQyODQxOSwianRpIj'+'oiMGtKSXFUd2lXRnVlRlhmcSIsInN1YiI6IjQ0ODgiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.AWbyUffVXO7gEceuEFWVBklOWJyBnAdRyVlfpweSS0c', tvMemo);
+  lToken       := vConfiguracoes.objeto.valorTag('API_TOKEN','eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BsYXRhZm9ybWEuYXBpYnJhc2lsLmNvbS5ici9hdXRoL2xvZ2luIiwiaWF0IjoxNzIzMDM1MDQzLCJleHAiOjE3NTQ1NzEwNDMsIm5iZiI6MTcyMzAzNTA0MywianRpIjoiY0tQVHFhQWxr'+'Q3E5ZElkZSIsInN1YiI6IjQ0ODgiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.TYRqhMHjQPGqASa1qSxf1vLBIUzMaHxElOemjmFZTWE', tvMemo);
 
   fRestRequest.params.AddItem;
   fRestRequest.Params.Items[0].Value := '{"cep":"'+pCEP+'"}';
@@ -193,6 +193,9 @@ begin
   fRestRequest.Params.ParameterByName('Authorization').Options := [poDoNotEncode];
 
   fRestRequest.Execute;
+
+  if fRestResponse.StatusCode = 401 then
+    CriaException('Token não autorizado para a consulta!');
 
   if fRestResponse.StatusCode >= 400 then
     CriaException('CEP invalido');
