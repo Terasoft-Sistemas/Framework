@@ -11,6 +11,7 @@ uses
   Terasoft.Framework.ObjectIface,
   FiltroModel,
   DB,
+  DBClient,
   Terasoft.Framework.DB,
   FiltroController,
   Interfaces.Conexao;

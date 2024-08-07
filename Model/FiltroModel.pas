@@ -370,6 +370,9 @@ begin
           else
             Result.dataset.Next;
         end;
+
+      if(pOrdem in [1,2]) then
+        TClientDataSet(Result.dataset).IndexFieldNames := Result.dataset.Fields[pOrdem - 1].FieldName;
     end;
   end;
 end;
