@@ -150,7 +150,7 @@ begin
       fFiltroSelecionado.objeto.opcoesSelecionadas.text:=
           InputBox('Busca avançada','Texto', fFiltroSelecionado.objeto.opcoesSelecionadas.text);
 
-    tipoFiltro_Set:
+    tipoFiltro_Set,tipoFiltro_SetSincrono:
     begin
       ds := fFiltroSelecionado.objeto.getOpcoes;
       fFiltroSelecionado.objeto.opcoesSelecionadas.text :=

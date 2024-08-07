@@ -17,6 +17,7 @@ type
       tipoFiltro_Desconhecido,
       tipoFiltro_Busca,
       tipoFiltro_Set,
+      tipoFiltro_SetSincrono,
       tipoFiltro_DataPeriodo,
       tipoFiltro_HoraPeriodo,
       tipoFiltro_DataHoraPeriodo
@@ -238,7 +239,7 @@ begin
   case getTipo of
     tipoFiltro_Busca,tipoFiltro_DataPeriodo,tipoFiltro_HoraPeriodo,tipoFiltro_DataHoraPeriodo:
       exit;
-    tipoFiltro_Set:
+    tipoFiltro_Set,tipoFiltro_SetSincrono:
     else
       Exception.CreateFmt('TFiltroModel.getOpcoes: Tipo [%d] desconhecido.', [ Ord(fTipo)] );
   end;
@@ -426,7 +427,7 @@ begin
   Result := '';
   case getTipo of
 
-    tipoFiltro_Set:
+    tipoFiltro_Set,tipoFiltro_SetSincrono:
     begin
       Result := getTipoSet;
     end;
@@ -530,7 +531,7 @@ begin
     setTipo(tipoFiltro_DataHoraPeriodo);
   end else if(Copy(pNome,1,1)='@') then
   begin
-    setTipo(tipoFiltro_Set);
+    setTipo(tipoFiltro_SetSincrono);
     getCFG;
     if(fCfg.ReadString('query','tabela','')='') then
     begin
@@ -560,7 +561,15 @@ begin
         cfg := getCFG;
         lName  := cfg.ReadString('query','tabela',fNOME);
         lRegrasValores:=textoEntreTags(lName,'@','');
-        fTipo := tipoFiltro_Set;
+        if(cfg.ReadBool('query','assincrono',false)=true) then
+        begin
+          fTipo := tipoFiltro_Set;
+          if(fPrimeiro=0) then
+            fPrimeiro:=1;
+          if(fRegistros=0) then
+            fRegistros := 100;
+        end else
+          fTipo := tipoFiltro_SetSincrono;
       end;
     end;
   finally
