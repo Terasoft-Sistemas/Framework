@@ -97,7 +97,8 @@ begin
   epControl := getEndpointController(vIConexao);
   //Retorna a lista com busca no termo 'PROD'
   //Ordenado pelo campo DESCRICAO
-  for m in epControl.getNovaLista('prod',2) do
+//  for m in epControl.getNovaLista('prod',2) do
+  for m in epControl.getNovaLista(nil,2) do
   begin
     cbEp.items.add(m.objeto.DESCRICAO);
     cbEp.values.add(m.objeto.NOME);
@@ -152,7 +153,7 @@ begin
 
     tipoFiltro_Set,tipoFiltro_SetSincrono:
     begin
-      ds := fFiltroSelecionado.objeto.getOpcoes;
+      ds := fFiltroSelecionado.objeto.getOpcoes('alu');
       fFiltroSelecionado.objeto.opcoesSelecionadas.text :=
           FuncoesSelecaoLista.SelecionaItems(fFiltroSelecionado.objeto.opcoesSelecionadas.text,ds.dataset,false,'',ds.dataset.Fields[0].FieldName);
     end;

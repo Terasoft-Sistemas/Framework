@@ -233,7 +233,9 @@ function TFiltroModel.getOpcoes;///: IDatasetSimples;
     lAdicional: String;
     lWhere: String;
     lSQL: String;
-
+    lBusca: IListaTextoEX;
+    txt: TipoWideStringFramework;
+    found: boolean;
 begin
   Result := nil;
   case getTipo of
@@ -245,6 +247,8 @@ begin
   end;
 
   pBusca := trim(pBusca);
+
+  lRegrasValores:='';
 
   lOpcoesTxt := listaOpcoes;
 
@@ -333,6 +337,28 @@ begin
       Supports(vIConexao.gdb.validador,IValidadorDatabase,validador);
       Result := validador.getValoresByName(lRegrasValores);
       Supports(cloneDatasource(Result),IDatasetSimples,Result);
+      Result := criaDatasetSimples(cloneDataset(Result.dataset));
+      Result.dataset.First;
+      lBusca:=novaListaTexto;
+      lBusca.strings.Delimiter := ' ';
+      lBusca.strings.DelimitedText := UpperCase(retiraAcentos(pBusca));
+      if(pBusca<>'') then
+        while not Result.dataset.Eof do
+        begin
+          found := true;
+          for txt in lBusca do
+          begin
+            if( Pos(String(txt),UpperCase(retiraAcentos(Result.dataset.Fields[1].AsString)))=0) then
+            begin
+              found := false;
+              break;
+            end;
+          end;
+          if(found=false) then
+            Result.dataset.Delete
+          else
+            Result.dataset.Next;
+        end;
     end;
   end;
 end;
