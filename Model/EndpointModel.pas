@@ -362,9 +362,9 @@ begin
 
   for i := 0 to lTxt.strings.Count - 1 do
   begin
-    sName := uppercase(trim( lTxt.strings.Names[i]));
+    sName := trim( lTxt.strings.Names[i]);
     if(sName='') then continue;
-    sValue := uppercase(trim( lTxt.strings.ValueFromIndex[i]));
+    sValue := trim( lTxt.strings.ValueFromIndex[i]);
     lFiltro := fFiltroController.getByName(sName);
     lFiltro.objeto.campo := sValue;
     lFiltro.objeto.setTipoPorNome(sName);

@@ -35,6 +35,8 @@ uses
     end;
 
 implementation
+  uses
+    Terasoft.Framework.Texto;
 
 { TFiltroDao }
 
@@ -54,13 +56,18 @@ end;
 function TFiltroDao.getByName(pName: TipoWideStringFramework): ITFiltroModel;
 var
   lQry: IDataset;
+  lName: String;
 begin
   lQry := vIConexao.gdb.criaDataset;
   Result := TFiltroModel.getNewIface(vIConexao);
-  pName := UpperCase(trim(pName));
+  pName := trim(pName);
+  lName := textoEntreTags(pName,'','|');
+  if(lName='') then
+    lName := pName;
+  lName := UpperCase(retiraAcentos(lName));
   lQry.query(
       'select f.* from filtros f where f.nome = :nome ',
-      'nome', [ pName ]);
+      'nome', [ lName ]);
 
   vIConstrutorDao.setDatasetToModel(Result.objeto._TABELA_,lQry.dataset,Result.objeto);
 

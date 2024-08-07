@@ -561,41 +561,54 @@ begin
 end;
 
 function TFiltroModel.setTipoPorNome;
+  var
+    lNome, lDescricao: String;
 begin
-  if(stringNoArray(pNome, ['@periodo','@periodo.data'],[osna_CaseInsensitive,osna_SemAcento])) then
-  begin
-    setTipo(tipoFiltro_DataPeriodo);
-    fDESCRICAO := 'Período de DATA de ' + fCampo;
+  lNome := textoEntreTags(pNome,'','|');
+  if(lNome='') then
+    lNome := pNome;
+  lNome := UpperCase(retiraAcentos(lNome));
+  lDescricao:=textoEntreTags(pNome,'|','');
+  if(lDescricao='') then
+    lDescricao:=fCampo;
 
-  end else if(stringNoArray(pNome, ['@periodo.null'],[osna_CaseInsensitive,osna_SemAcento])) then
+  if(fDESCRICAO='') then
+    fDESCRICAO := lDescricao;
+
+  if(stringNoArray(lNome, ['@periodo','@periodo.data'],[osna_CaseInsensitive,osna_SemAcento])) then
   begin
     setTipo(tipoFiltro_DataPeriodo);
-    fDESCRICAO := 'Período de DATA de ' + fCampo;
+    fDESCRICAO := 'Período de DATA de ' + lDescricao;
+
+  end else if(stringNoArray(lNome, ['@periodo.null'],[osna_CaseInsensitive,osna_SemAcento])) then
+  begin
+    setTipo(tipoFiltro_DataPeriodo);
+    fDESCRICAO := 'Período de DATA de ' + lDescricao;
     fAceitaNull := true;
 
-  end else if(stringNoArray(pNome, ['@busca'],[osna_CaseInsensitive,osna_SemAcento])) then
+  end else if(stringNoArray(lNome, ['@busca'],[osna_CaseInsensitive,osna_SemAcento])) then
   begin
     fDESCRICAO := 'Busca em Campos';
     setTipo(tipoFiltro_Busca);
 
-  end else if(stringNoArray(pNome, ['@hora','@periodo.hora'],[osna_CaseInsensitive,osna_SemAcento])) then
+  end else if(stringNoArray(lNome, ['@hora','@periodo.hora'],[osna_CaseInsensitive,osna_SemAcento])) then
   begin
-    fDESCRICAO := 'Período de HORA de ' + fCampo;
+    fDESCRICAO := 'Período de HORA de ' + lDescricao;
     setTipo(tipoFiltro_HoraPeriodo);
 
-  end else if(stringNoArray(pNome, ['@datahora','@periodo.datahora'],[osna_CaseInsensitive,osna_SemAcento])) then
+  end else if(stringNoArray(lNome, ['@datahora','@periodo.datahora'],[osna_CaseInsensitive,osna_SemAcento])) then
   begin
-    fDESCRICAO := 'Período de DATA/HORA de ' + fCampo;
+    fDESCRICAO := 'Período de DATA/HORA de ' + lDescricao;
     setTipo(tipoFiltro_DataHoraPeriodo);
-  end else if(Copy(pNome,1,1)='@') then
+  end else if(Copy(lNome,1,1)='@') then
   begin
     setTipo(tipoFiltro_SetSincrono);
     getCFG;
     if(fCfg.ReadString('query','tabela','')='') then
     begin
-      fCfg.WriteString('query','tabela',pNome);
+      fCfg.WriteString('query','tabela',lNome);
       if(fDESCRICAO='') then
-        fDESCRICAO := textoEntreTags(pNome,'@','');
+        fDESCRICAO := textoEntreTags(lNome,'@','');
     end;
   end;
   Result := getTipo;
