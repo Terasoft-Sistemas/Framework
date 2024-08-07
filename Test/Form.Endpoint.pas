@@ -144,6 +144,8 @@ begin
 
   //Podemos passar a lista de palavras de pesquisa de id, descricao...
   //ds := fFiltroSelecionado.objeto.getOpcoes('ODERCO');
+  //Segundo parâmetro, determina o campo de ordem: 1-ID 2_DESCRICAO
+  //ds := fFiltroSelecionado.objeto.getOpcoes('ODERCO',2);
 
   case fFiltroSelecionado.objeto.TIPO of
 
