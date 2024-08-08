@@ -33,9 +33,9 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function ObterVendasResultado1(pPCG_Parametros: TPCG_Parametros): TFDMemTable;
-    function ObterVendasResultado2(pPCG_Parametros: TPCG_Parametros): TFDMemTable;
-    function ObterEstoqueResultado1(pPCG_Parametros: TPCG_Parametros): TFDMemTable;
+    function ObterVendasResultado1(pPCG_Parametros: TPCG_Parametros): IFDDataset;
+    function ObterVendasResultado2(pPCG_Parametros: TPCG_Parametros): IFDDataset;
+    function ObterEstoqueResultado1(pPCG_Parametros: TPCG_Parametros): IFDDataset;
 
 end;
 
@@ -57,7 +57,7 @@ begin
   inherited;
 end;
 
-function TPCGDao.ObterVendasResultado1(pPCG_Parametros: TPCG_Parametros): TFDMemTable;
+function TPCGDao.ObterVendasResultado1(pPCG_Parametros: TPCG_Parametros): IFDDataset;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -237,7 +237,7 @@ begin
 
     lMemTable.Open;
 
-    Result := lMemTable;
+    Result := criaIFDDataset(lMemTable);
 
   finally
     lQry.Free;
@@ -245,7 +245,7 @@ begin
   end;
 end;
 
-function TPCGDao.ObterVendasResultado2(pPCG_Parametros: TPCG_Parametros): TFDMemTable;
+function TPCGDao.ObterVendasResultado2(pPCG_Parametros: TPCG_Parametros): IFDDataset;
 var
   lQry              : TFDQuery;
   lSQL              : String;
@@ -529,7 +529,7 @@ begin
 
     lMemTable.Open;
 
-    Result := lMemTable;
+    Result := criaIFDDataset(lMemTable);
 
   finally
     lQry.Free;
@@ -691,7 +691,7 @@ begin
 end;
 
 
-function TPCGDao.ObterEstoqueResultado1(pPCG_Parametros: TPCG_Parametros): TFDMemTable;
+function TPCGDao.ObterEstoqueResultado1(pPCG_Parametros: TPCG_Parametros): IFDDataset;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -783,7 +783,7 @@ begin
 
     lMemTable.Open;
 
-    Result := lMemTable;
+    Result := criaIFDDataset(lMemTable);
 
   finally
     lQry.Free;

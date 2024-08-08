@@ -4210,7 +4210,10 @@ begin
     lTableJuros := lTabelaJurosPromocaoModel.objeto.obterTabelaJurosProduto('006165');
 
     if lTableJuros.objeto.RecordCount > 0 then
-      dsJuros.DataSet := RetornaCoeficiente(lTableJuros.objeto.FieldByName('TAXA_JUROS').AsFloat, lTableJuros.objeto.FieldByName('PARCELA').AsInteger);
+    begin
+      dsTmp := RetornaCoeficiente(lTableJuros.objeto.FieldByName('TAXA_JUROS').AsFloat, lTableJuros.objeto.FieldByName('PARCELA').AsInteger);
+      dsJuros.DataSet := dsTmp.objeto;
+    end;
 
   finally
     lTabelaJurosPromocaoModel:=nil;

@@ -18,9 +18,9 @@ type
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function ObterVendasResultado1(pPCG_Parametros: TPCG_Parametros): TFDMemTable;
-    function ObterVendasResultado2(pPCG_Parametros: TPCG_Parametros): TFDMemTable;
-    function ObterEstoqueResultado1(pPCG_Parametros: TPCG_Parametros): TFDMemTable;
+    function ObterVendasResultado1(pPCG_Parametros: TPCG_Parametros): IFDDataset;
+    function ObterVendasResultado2(pPCG_Parametros: TPCG_Parametros): IFDDataset;
+    function ObterEstoqueResultado1(pPCG_Parametros: TPCG_Parametros): IFDDataset;
 
   end;
 
@@ -42,7 +42,7 @@ begin
   inherited;
 end;
 
-function TPCGModel.ObterVendasResultado1(pPCG_Parametros: TPCG_Parametros): TFDMemTable;
+function TPCGModel.ObterVendasResultado1(pPCG_Parametros: TPCG_Parametros): IFDDataset;
 var
   lPCGDao: TPCGDao;
   lPCG_Parametros: TPCG_Parametros;
@@ -76,7 +76,7 @@ begin
   end;
 end;
 
-function TPCGModel.ObterVendasResultado2(pPCG_Parametros: TPCG_Parametros): TFDMemTable;
+function TPCGModel.ObterVendasResultado2(pPCG_Parametros: TPCG_Parametros): IFDDataset;
 var
   lPCGDao: TPCGDao;
   lPCG_Parametros: TPCG_Parametros;
@@ -110,7 +110,7 @@ begin
   end;
 end;
 
-function TPCGModel.ObterEstoqueResultado1(pPCG_Parametros: TPCG_Parametros): TFDMemTable;
+function TPCGModel.ObterEstoqueResultado1(pPCG_Parametros: TPCG_Parametros): IFDDataset;
 var
   lPCGDao: TPCGDao;
   lPCG_Parametros: TPCG_Parametros;

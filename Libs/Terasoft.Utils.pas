@@ -7,6 +7,7 @@ uses
   SysUtils,
   MaskUtils,
   Vcl.Imaging.pngimage,
+  Interfaces.Conexao,
   Vcl.ExtCtrls,
   Soap.EncdDecd,
   IdHTTP,
@@ -39,7 +40,7 @@ uses
   function DiferencaEntreValoresPercentual(valor1, Valor2: Real): Real;
   function CalculaPercentual(pValorItem, pValorTotal: Real): Real;
   function DiferencaEntreDatas(pDataInicial, pDataFinal: TDate ): Integer;
-  function RetornaCoeficiente(pTaxa: Double;  pQuantidadeParcelas: Integer): TFDMemTable;
+  function RetornaCoeficiente(pTaxa: Double;  pQuantidadeParcelas: Integer): IFDDataset;
   function corrigeValorExtended(p1: Extended; pCasasDecimais: Integer = 2): Extended;
 
 implementation
@@ -221,7 +222,7 @@ begin
   Result := lDia;
 end;
 
-function RetornaCoeficiente(pTaxa: Double;  pQuantidadeParcelas: Integer): TFDMemTable;
+function RetornaCoeficiente(pTaxa: Double;  pQuantidadeParcelas: Integer): IFDDataset;
 var
  lTaxa         : Double;
  lCoeficiente  : Double;
@@ -233,6 +234,7 @@ var
  lMemTable     : TFDMemTable;
 begin
   lMemTable := TFDMemTable.Create(nil);
+  Result := criaIFDDataset(lMemTable);
   lTaxa     := pTaxa / 100;
   lMSG      := '';
   lConta1   := 1 + ltaxa;
@@ -270,7 +272,6 @@ begin
 
   lMemTable.IndexName := 'OrdenacaoParcela';
   lMemTable.Open;
-  Result := lMemTable;
 end;
 
 function corrigeValorExtended(p1: Extended; pCasasDecimais: Integer = 2): Extended;
