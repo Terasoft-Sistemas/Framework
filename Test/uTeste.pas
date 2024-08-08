@@ -2366,15 +2366,15 @@ end;
 
 procedure TForm1.Button75Click(Sender: TObject);
 var
- lCEPModel : TCEPModel;
+ lCEPModel : ITCEPModel;
  Retorno : TRetornoCEP;
 begin
 
-  lCEPModel := TCEPModel.Create(vConfiguracoes);
+  lCEPModel := TCEPModel.getNewIface(vConfiguracoes);
 
 //lCEPModel.API := tApiViaCep;  Recebe o valor do ViaCep
 
-  Retorno := lCEPModel.consultarCEP('86185420');
+  Retorno := lCEPModel.objeto.consultarCEP('86185420');
 
   MemoAPI.Lines.Add(Retorno.CEP);
   MemoAPI.Lines.Add(Retorno.Logradouro);

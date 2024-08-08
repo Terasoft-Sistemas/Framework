@@ -15,9 +15,12 @@ uses
   ACBrSocket,
   ACBrCEP,
   Terasoft.FuncoesTexto,
+  Terasoft.Framework.ObjectIface,
   Data.DB;
 
 type
+  TCEPModel = class;
+  ITCEPModel=IObject<TCEPModel>;
 
   TRetornoCEP = record
     CEP: string;
@@ -33,8 +36,8 @@ type
   TApi = (tApiBrasil, tApiViaCep);
 
   TCEPModel = class
-
     private
+      [weak] mySelf: ITCEPModel;
       fRestClient          :  TRESTClient;
       fRestRequest         :  TRESTRequest;
       fRestResponse        :  TRESTResponse;
@@ -47,8 +50,10 @@ type
       procedure vACBrCEPBuscaEfetuada(Sender: TObject);
 
     public
-      constructor Create(pConfiguracoes : ITerasoftConfiguracoes);
+      constructor _Create(pConfiguracoes : ITerasoftConfiguracoes);
       destructor Destroy; override;
+
+      class function getNewIface(pConfiguracoes : ITerasoftConfiguracoes): ITCEPModel;
 
       function consultarCEP(pCEP: String): TRetornoCEP;
       function cepApiBrasil(pCep: String): TRetornoCEP;
@@ -67,7 +72,7 @@ System.JSON, System.SysUtils, Terasoft.Types;
 
 { TCEPModel }
 
-constructor TCEPModel.Create(pConfiguracoes : ITerasoftConfiguracoes);
+constructor TCEPModel._Create(pConfiguracoes : ITerasoftConfiguracoes);
 begin
   fRestClient    := TRESTClient.Create(nil);
   fRestRequest   := TRESTRequest.Create(nil);
@@ -138,7 +143,21 @@ end;
 
 destructor TCEPModel.Destroy;
 begin
-inherited;
+  inherited;
+  FreeAndNil(fRestClient);
+  FreeAndNil(fRestRequest);
+  FreeAndNil(fRestResponse);
+
+  vConfiguracoes := nil;
+
+  FreeAndNil(vACBrCEP);
+
+end;
+
+class function TCEPModel.getNewIface(pConfiguracoes: ITerasoftConfiguracoes): ITCEPModel;
+begin
+  Result := TImplObjetoOwner<TCEPModel>.CreateOwner(self._Create(pConfiguracoes));
+  Result.objeto.myself := Result;
 end;
 
 function TCEPModel.retornarCEP(pEndereco, pCidade, pUF: String): TFDMemtable;
