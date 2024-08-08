@@ -3893,9 +3893,6 @@ end;
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   vIConexao := nil;
-  Form1.Release;
-  Form1 := nil;
-  Application.Terminate;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
