@@ -421,7 +421,7 @@ begin
     begin
       lSql := lSql + ' and i.fatura_rec = ' + QuotedStr(pContaClienteParametros.Fatura);
 
-      if pContaClienteParametros.Parcela.IsEmpty then
+      if not pContaClienteParametros.Parcela.IsEmpty then
         lSql := lSql + ' and i.pacela_rec = ' + pContaClienteParametros.Parcela;
 
     end
