@@ -219,7 +219,7 @@ begin
   if(fRegistros>0) then
     lAdicional := format('%sfirst %d ', [ lAdicional, fRegistros ]);
   if(fPrimeiro>0) then
-    lAdicional := format('%sskip %d ', [ lAdicional, fPrimeiro ]);
+    lAdicional := format('%sskip %d ', [ lAdicional, fPrimeiro - 1 ]);
 
   if(lAdicional<>'') then
     lSql := StringReplace(lSql, 'select', format('select %s', [ lAdicional ]), [rfIgnoreCase]);
