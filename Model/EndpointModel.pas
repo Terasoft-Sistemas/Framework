@@ -10,6 +10,7 @@ uses
   Spring.Collections,
   Terasoft.Framework.ObjectIface,
   FiltroModel,
+  Terasoft.Framework.Conversoes,
   DB,
   DBClient,
   Terasoft.Framework.DB,
@@ -352,7 +353,7 @@ begin
   for i := 0 to pDataset.FieldCount - 1 do
   begin
     f:=pDataset.Fields[i];
-    f.DisplayLabel := f.DisplayName;
+    f.DisplayLabel := capitalizarTexto(StringReplace(f.DisplayName,'_',' ', [rfReplaceAll]));
     if(f is TNumericField) and not ( f.DataType in [ ftLargeint ] ) then
       TNumericField(f).DisplayFormat := ',0.00';
   end;
