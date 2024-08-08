@@ -4,6 +4,7 @@ interface
 
 uses
   Classes,
+  Terasoft.Framework.Texto,
   Terasoft.Types,
   DB;
 
@@ -26,7 +27,7 @@ uses
   function ConverteFloat(pMascara, pValor: String): String;
   function RemovePonto(pValor: String): Variant;
   function FormataFloatFireBird(pValor: String): String;
-  function StringForStringList(BaseString, BreakString: string; StringList: TStringList): TStringList;
+  function StringForStringList(BaseString, BreakString: string; StringList: IListaTextoEX): IListaTextoEX;
   function ZeroLeft(vZero: string; vQtd: integer): string;
   function FormatarTelefone(Telefone : String):String;
   function FormataFireBirdToFloat(pValor: String): Variant;
@@ -122,17 +123,20 @@ begin
   vAux   := vZero + vAux;
   result := vAux;
 end;
-function StringForStringList(BaseString, BreakString: string; StringList: TStringList): TStringList;
+function StringForStringList;//(BaseString, BreakString: string; StringList: TStrings): TStrings;
 var
   EndOfCurrentString: byte;
   TempStr: string;
 begin
+  Result := StringList;
+  if(Result=nil) then
+    exit;
   repeat
     EndOfCurrentString := Pos(BreakString, BaseString);
     if EndOfCurrentString = 0 then
-      StringList.Add(BaseString)
+      StringList.strings.Add(BaseString)
     else
-      StringList.Add(copy(BaseString, 1, EndOfCurrentString - 1));
+      StringList.strings.Add(copy(BaseString, 1, EndOfCurrentString - 1));
     BaseString := copy(BaseString, EndOfCurrentString + Length(BreakString),
       Length(BaseString) - EndOfCurrentString);
   until EndOfCurrentString = 0;

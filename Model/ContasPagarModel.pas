@@ -254,7 +254,7 @@ begin
 
   finally
     lContasPagarItensModel:=nil;
-    lCondicoes.Free;
+    FreeAndNil(lCondicoes);
   end;
 
 end;
@@ -329,7 +329,7 @@ begin
 
   finally
     lContasPagarItensModel:=nil;
-    lCondicoes.Free;
+    FreeAndNil(lCondicoes);
   end;
 
 end;
