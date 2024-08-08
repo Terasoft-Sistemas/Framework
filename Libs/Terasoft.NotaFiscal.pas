@@ -187,25 +187,28 @@ var
  lPercentual,
  lTotalDup,
  lSomaDup     : Extended;
-
+ lPortador    : String;
 begin
   try
     try
       lQry := vIConexao.CriarQuery;
 
       lSQL :=
-        ' select n.modelo            modeloNF,                                 '+#13+
-        '        n.numero_ecf        nFat,                                     '+#13+
-        '        n.total_nf          vOrig,                                    '+#13+
-        '        ci.pacela_rec       nDup,                                     '+#13+
-        '        ci.vlrparcela_rec   vDup,                                     '+#13+
-        '        ci.vencimento_rec   dVenc,                                    '+#13+
-        '        p.tpag_nfe          tPag                                      '+#13+
-        '   from nf n                                                          '+#13+
-        '  inner join contasreceber c on c.pedido_rec = n.pedido_id            '+#13+
-        '  inner join contasreceberitens ci on ci.fatura_rec = c.fatura_rec    '+#13+
-        '  inner join portador p on p.codigo_port = c.codigo_por               '+#13+
-        '  where n.numero_nf = '+QuotedStr(pidNF);
+        ' select n.modelo            modeloNF,                                      '+#13+
+        '        n.numero_ecf        nFat,                                          '+#13+
+        '        n.total_nf          vOrig,                                         '+#13+
+        '        c.codigo_por        codigo_por,                                    '+#13+
+        '        c.valor_rec         valor_rec,                                     '+#13+
+        '        ci.pacela_rec       nDup,                                          '+#13+
+        '        ci.vlrparcela_rec   vDup,                                          '+#13+
+        '        ci.vencimento_rec   dVenc,                                         '+#13+
+        '        p.tpag_nfe          tPag                                           '+#13+
+        '   from nf n                                                               '+#13+
+        '  inner join contasreceber c on c.pedido_rec = n.pedido_id                 '+#13+
+        '  inner join contasreceberitens ci on ci.fatura_rec = c.fatura_rec         '+#13+
+        '  inner join portador p on p.codigo_port = c.codigo_por                    '+#13+
+        '  where n.numero_nf = '+QuotedStr(pidNF) + '                               '+#13+
+        '  order by c.codigo_por ';
 
       lQry.Open(lSQL);
 
@@ -263,18 +266,26 @@ begin
 
       end;
 
+      lPortador := '';
+
       lQry.First;
       while not lQry.Eof do
       begin
-        InfoPgto := NotaF.NFe.pag.New;
-        InfoPgto.indPag := ipPrazo;
-        InfoPgto.tPag   := vConfiguracoesNotaFiscal.tPag(lQry.FieldByName('tPag').AsString);
-        InfoPgto.vPag   := RoundTo(lPercentual * lQry.FieldByName('vDup').AsFloat, -2);
 
-        lSomaDup        := lSomaDup + InfoPgto.vPag;
+        if lPortador <> lQry.FieldByName('codigo_por').AsString then
+        begin
+          lPortador := lQry.FieldByName('codigo_por').AsString;
 
-        if InfoPgto.tPag in [fpCartaoCredito, fpCartaoDebito, fpPagamentoInstantaneo] then
-          InfoPgto.tpIntegra := tiPagNaoIntegrado;
+          InfoPgto := NotaF.NFe.pag.New;
+          InfoPgto.indPag := ipPrazo;
+          InfoPgto.tPag   := vConfiguracoesNotaFiscal.tPag(lQry.FieldByName('tPag').AsString);
+          InfoPgto.vPag   := RoundTo(lPercentual * lQry.FieldByName('valor_rec').AsFloat, -2);
+
+          lSomaDup        := lSomaDup + InfoPgto.vPag;
+
+          if InfoPgto.tPag in [fpCartaoCredito, fpCartaoDebito, fpPagamentoInstantaneo] then
+            InfoPgto.tpIntegra := tiPagNaoIntegrado;
+        end;
 
         lQry.Next;
 
