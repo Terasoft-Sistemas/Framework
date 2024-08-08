@@ -182,16 +182,44 @@ end;
 
 function TNotaFiscal.cobranca(pidNF: String): Boolean;
 var
- lSQL         : String;
- lQry         : TFDQuery;
+ lSQL,
+ lSQLItens    : String;
+ lQry,
+ lQryItens    : TFDQuery;
  lPercentual,
- lTotalDup,
- lSomaDup     : Extended;
+ lTotalFinanceiro,
+ lSomaDup,
+ lTotalNF     : Extended;
  lPortador    : String;
 begin
   try
     try
-      lQry := vIConexao.CriarQuery;
+      lQryItens := vIConexao.CriarQuery;
+      lQry      := vIConexao.CriarQuery;
+
+      lSQLItens :=  ' select                                                     '+#13+
+                    '     sum(coalesce(n.vicmsst_n23,0)) vST,                    '+#13+
+                    '     sum(coalesce(n.v_prod2,0)) as vprod,                   '+#13+
+                    '     sum(coalesce(n.frete,0)) vFrete,                       '+#13+
+                    '     sum(coalesce(n.vseg,0)) as vseg,                       '+#13+
+                    '     sum(coalesce(cast(n.vdesc as numeric(18,2)),0)) vDesc, '+#13+
+                    '     sum(coalesce(n.valor_ipi,0)) vIPI,                     '+#13+
+                    '     sum(coalesce(n.voutros,0)) vOutro,                     '+#13+
+                    '     sum(coalesce(n.vfcpst,0)) vFCPST                       '+#13+
+                    ' from                                                       '+#13+
+                    '     nfitens n                                              '+#13+
+                    ' where                                                      '+#13+
+                    '      n.numero_nf = '+QuotedStr(pidNF);
+
+      lQryItens.Open(lSQLItens);
+
+      lTotalNF := (lQryItens.FieldByName('vProd').AsFloat  +
+                   lQryItens.FieldByName('vST').AsFloat    +
+                   lQryItens.FieldByName('vFrete').AsFloat +
+                   lQryItens.FieldByName('vSeg').AsFloat   +
+                   lQryItens.FieldByName('vIPI').AsFloat   +
+                   lQryItens.FieldByName('vOutro').AsFloat +
+                   lQryItens.FieldByName('vFCPST').AsFloat ) - lQryItens.FieldByName('vDesc').AsFloat;
 
       lSQL :=
         ' select n.modelo            modeloNF,                                      '+#13+
@@ -212,17 +240,17 @@ begin
 
       lQry.Open(lSQL);
 
-      lTotalDup := 0;
-      lSomaDup  := 0;
+      lTotalFinanceiro := 0;
+      lSomaDup         := 0;
 
       lQry.First;
       while not lQry.Eof do
       begin
-        lTotalDup := lTotalDup + lQry.FieldByName('vDup').AsFloat;
+        lTotalFinanceiro := lTotalFinanceiro + lQry.FieldByName('vDup').AsFloat;
         lQry.Next;
       end;
 
-      lPercentual := lQry.FieldByName('vOrig').AsFloat / lTotalDup;
+      lPercentual := lTotalNF / lTotalFinanceiro;
       
       if lQry.FieldByName('modeloNF').AsInteger = 55 then
       begin
@@ -291,8 +319,8 @@ begin
 
         if lQry.Eof then
         begin
-          if lQry.FieldByName('vOrig').AsFloat <> lSomaDup then
-            InfoPgto.vPag := InfoPgto.vPag + (lQry.FieldByName('vOrig').AsFloat - lSomaDup);
+          if lTotalNF <> lSomaDup then
+            InfoPgto.vPag := InfoPgto.vPag + (lTotalNF - lSomaDup);
         end;
       end;
 
@@ -302,10 +330,13 @@ begin
     end;
 
   finally
-    lSQL := '';
+    lSQLItens := '';
+    lSQL      := '';
+    lQryItens.Free;
     lQry.Free;
   end;
 end;
+
 function TNotaFiscal.destinatario(pidNF: String): Boolean;
 var
  lSQL: String;
