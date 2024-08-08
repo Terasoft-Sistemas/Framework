@@ -11,12 +11,16 @@ uses
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao;
 
 type
-  TSaidasItensDao = class
+  TSaidasItensDao = class;
+  ITSaidasItensDao=IObject<TSaidasItensDao>;
 
+  TSaidasItensDao = class
   private
+    [weak] mySelf: ITSaidasItensDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -44,8 +48,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITSaidasItensDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -57,14 +63,14 @@ type
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property NumeroSaidaView : String read FNumeroSaidaView write SetNumeroSaidaView;
 
-    function incluir(pSaidasItensModel: TSaidasItensModel): String;
-    function alterar(pSaidasItensModel: TSaidasItensModel): String;
-    function excluir(pSaidasItensModel: TSaidasItensModel): String;
-    function carregaClasse(pID : String): TSaidasItensModel;
+    function incluir(pSaidasItensModel: ITSaidasItensModel): String;
+    function alterar(pSaidasItensModel: ITSaidasItensModel): String;
+    function excluir(pSaidasItensModel: ITSaidasItensModel): String;
+    function carregaClasse(pID : String): ITSaidasItensModel;
     function obterLista: IFDDataset;
 
     function ObterTotais(pNumeroSaida : String) : IFDDataset;
-    procedure setParams(var pQry: TFDQuery; pSaidasItensModel: TSaidasItensModel);
+    procedure setParams(var pQry: TFDQuery; pSaidasItensModel: ITSaidasItensModel);
 
 end;
 
@@ -75,13 +81,13 @@ uses
 
 { TSaidasItens }
 
-function TSaidasItensDao.carregaClasse(pID : String): TSaidasItensModel;
+function TSaidasItensDao.carregaClasse(pID : String): ITSaidasItensModel;
 var
   lQry : TFDQuery;
-  lModel : TSaidasItensModel;
+  lModel : ITSaidasItensModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TSaidasItensModel.Create(vIConexao);
+  lModel   := TSaidasItensModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -90,29 +96,29 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.NUMERO_SAI     := lQry.FieldByName('NUMERO_SAI').AsString;
-    lModel.CODIGO_CLI     := lQry.FieldByName('CODIGO_CLI').AsString;
-    lModel.CODIGO_PRO     := lQry.FieldByName('CODIGO_PRO').AsString;
-    lModel.QUANTIDADE_SAI := lQry.FieldByName('QUANTIDADE_SAI').AsString;
-    lModel.QUANTIDADE_ATE := lQry.FieldByName('QUANTIDADE_ATE').AsString;
-    lModel.VALOR_UNI_SAI  := lQry.FieldByName('VALOR_UNI_SAI').AsString;
-    lModel.IPI_SAI        := lQry.FieldByName('IPI_SAI').AsString;
-    lModel.ICMS_SAI       := lQry.FieldByName('ICMS_SAI').AsString;
-    lModel.STATUS         := lQry.FieldByName('STATUS').AsString;
-    lModel.LOJA           := lQry.FieldByName('LOJA').AsString;
-    lModel.ID             := lQry.FieldByName('ID').AsString;
-    lModel.RESERVA_ID     := lQry.FieldByName('RESERVA_ID').AsString;
-    lModel.AVULSO         := lQry.FieldByName('AVULSO').AsString;
-    lModel.DESCONTO_PED   := lQry.FieldByName('DESCONTO_PED').AsString;
-    lModel.ALTURA_M       := lQry.FieldByName('ALTURA_M').AsString;
-    lModel.LARGURA_M      := lQry.FieldByName('LARGURA_M').AsString;
-    lModel.PROFUNDIDADE_M := lQry.FieldByName('PROFUNDIDADE_M').AsString;
-    lModel.DATA_CAD       := lQry.FieldByName('DATA_CAD').AsString;
-    lModel.QTD_CHECAGEM   := lQry.FieldByName('QTD_CHECAGEM').AsString;
-    lModel.REPOSICAO_ID   := lQry.FieldByName('REPOSICAO_ID').AsString;
-    lModel.PRODUCAO_ID    := lQry.FieldByName('PRODUCAO_ID').AsString;
-    lModel.SAIDA_ID       := lQry.FieldByName('SAIDA_ID').AsString;
-    lModel.SYSTIME        := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.NUMERO_SAI     := lQry.FieldByName('NUMERO_SAI').AsString;
+    lModel.objeto.CODIGO_CLI     := lQry.FieldByName('CODIGO_CLI').AsString;
+    lModel.objeto.CODIGO_PRO     := lQry.FieldByName('CODIGO_PRO').AsString;
+    lModel.objeto.QUANTIDADE_SAI := lQry.FieldByName('QUANTIDADE_SAI').AsString;
+    lModel.objeto.QUANTIDADE_ATE := lQry.FieldByName('QUANTIDADE_ATE').AsString;
+    lModel.objeto.VALOR_UNI_SAI  := lQry.FieldByName('VALOR_UNI_SAI').AsString;
+    lModel.objeto.IPI_SAI        := lQry.FieldByName('IPI_SAI').AsString;
+    lModel.objeto.ICMS_SAI       := lQry.FieldByName('ICMS_SAI').AsString;
+    lModel.objeto.STATUS         := lQry.FieldByName('STATUS').AsString;
+    lModel.objeto.LOJA           := lQry.FieldByName('LOJA').AsString;
+    lModel.objeto.ID             := lQry.FieldByName('ID').AsString;
+    lModel.objeto.RESERVA_ID     := lQry.FieldByName('RESERVA_ID').AsString;
+    lModel.objeto.AVULSO         := lQry.FieldByName('AVULSO').AsString;
+    lModel.objeto.DESCONTO_PED   := lQry.FieldByName('DESCONTO_PED').AsString;
+    lModel.objeto.ALTURA_M       := lQry.FieldByName('ALTURA_M').AsString;
+    lModel.objeto.LARGURA_M      := lQry.FieldByName('LARGURA_M').AsString;
+    lModel.objeto.PROFUNDIDADE_M := lQry.FieldByName('PROFUNDIDADE_M').AsString;
+    lModel.objeto.DATA_CAD       := lQry.FieldByName('DATA_CAD').AsString;
+    lModel.objeto.QTD_CHECAGEM   := lQry.FieldByName('QTD_CHECAGEM').AsString;
+    lModel.objeto.REPOSICAO_ID   := lQry.FieldByName('REPOSICAO_ID').AsString;
+    lModel.objeto.PRODUCAO_ID    := lQry.FieldByName('PRODUCAO_ID').AsString;
+    lModel.objeto.SAIDA_ID       := lQry.FieldByName('SAIDA_ID').AsString;
+    lModel.objeto.SYSTIME        := lQry.FieldByName('SYSTIME').AsString;
 
     Result := lModel;
 
@@ -121,7 +127,7 @@ begin
   end;
 end;
 
-constructor TSaidasItensDao.Create(pIConexao : IConexao);
+constructor TSaidasItensDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -132,7 +138,7 @@ begin
   inherited;
 end;
 
-function TSaidasItensDao.incluir(pSaidasItensModel: TSaidasItensModel): String;
+function TSaidasItensDao.incluir(pSaidasItensModel: ITSaidasItensModel): String;
 var
   lQry : TFDQuery;
   lSQL : String;
@@ -151,7 +157,7 @@ begin
   end;
 end;
 
-function TSaidasItensDao.alterar(pSaidasItensModel: TSaidasItensModel): String;
+function TSaidasItensDao.alterar(pSaidasItensModel: ITSaidasItensModel): String;
 var
   lQry : TFDQuery;
   lSQL : String;
@@ -164,7 +170,7 @@ begin
     setParams(lQry, pSaidasItensModel);
     lQry.ExecSQL;
 
-    Result := pSaidasItensModel.ID;
+    Result := pSaidasItensModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -172,20 +178,26 @@ begin
   end;
 end;
 
-function TSaidasItensDao.excluir(pSaidasItensModel: TSaidasItensModel): String;
+function TSaidasItensDao.excluir(pSaidasItensModel: ITSaidasItensModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from saidasitens where id = :id' ,[pSaidasItensModel.ID]);
+   lQry.ExecSQL('delete from saidasitens where id = :id' ,[pSaidasItensModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pSaidasItensModel.ID;
+   Result := pSaidasItensModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TSaidasItensDao.getNewIface(pIConexao: IConexao): ITSaidasItensDao;
+begin
+  Result := TImplObjetoOwner<TSaidasItensDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TSaidasItensDao.where: String;
@@ -346,28 +358,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TSaidasItensDao.setParams(var pQry: TFDQuery; pSaidasItensModel: TSaidasItensModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TSaidasItensDao.setParams(var pQry: TFDQuery; pSaidasItensModel: ITSaidasItensModel);
 begin
-  lTabela := vConstrutor.getColumns('SAIDASITENS');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TSaidasItensModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pSaidasItensModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pSaidasItensModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('SAIDASITENS',pQry,pSaidasItensModel.objeto);
 end;
 
 procedure TSaidasItensDao.SetStartRecordView(const Value: String);

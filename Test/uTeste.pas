@@ -3411,12 +3411,12 @@ end;
 procedure TForm1.Button107Click(Sender: TObject);
 var
   lSaidasModel      : ITSaidasModel;
-  lSaidasItensModel : TSaidasItensModel;
+  lSaidasItensModel : ITSaidasItensModel;
   lSaidaParams      : TSaidaItensParams;
   lNumeroSaida      : String;
 begin
   lSaidasModel      := TSaidasModel.getNewIface(vIConexao);
-  lSaidasItensModel := TSaidasItensModel.Create(vIConexao);
+  lSaidasItensModel := TSaidasItensModel.getNewIface(vIConexao);
   try
     try
       lNumeroSaida := InputBox('SaidaItens', 'Digite o Numero da Saida que deseja inserir os itens:', '');
@@ -3438,21 +3438,21 @@ begin
     end;
   finally
     lSaidasModel:=nil;
-    lSaidasItensModel.Free;
+    lSaidasItensModel:=nil;
   end;
 end;
 
 procedure TForm1.Button108Click(Sender: TObject);
 var
-  lSaidasItens : TSaidasitensModel;
+  lSaidasItens : ITSaidasitensModel;
   lResultado   : IFDDataset;
 begin
-  lSaidasItens := TSaidasitensModel.Create(vIConexao);
+  lSaidasItens := TSaidasitensModel.getNewIface(vIConexao);
   try
-    lResultado := lSaidasItens.ObterTotais('000260');
+    lResultado := lSaidasItens.objeto.ObterTotais('000260');
     dsSaidas.DataSet := lResultado.objeto;
   finally
-    lSaidasItens.Free;
+    lSaidasItens:=nil;
   end;
 end;
 
@@ -3521,13 +3521,13 @@ end;
 
 procedure TForm1.Button111Click(Sender: TObject);
 var
-  lSaidasItensModel : TSaidasItensModel;
+  lSaidasItensModel : ITSaidasItensModel;
 begin
-  lSaidasItensModel := TSaidasItensModel.Create(vIConexao);
+  lSaidasItensModel := TSaidasItensModel.getNewIface(vIConexao);
   try
-    lSaidasItensModel.Excluir('644');
+    lSaidasItensModel.objeto.Excluir('644');
   finally
-    lSaidasItensModel.Free;
+    lSaidasItensModel.objeto.Free;
   end;
 end;
 
