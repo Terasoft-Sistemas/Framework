@@ -6,17 +6,23 @@ uses
   Terasoft.Types,
   PCGDao,
   FireDAC.Comp.Client,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TPCGModel = class
+  TPCGModel = class;
+  ITPCGModel=IObject<TPCGModel>;
 
+  TPCGModel = class
   private
+    [weak] mySelf: ITPCGModel;
     vIConexao : IConexao;
   public
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITPCGModel;
 
     function ObterVendasResultado1(pPCG_Parametros: TPCG_Parametros): IFDDataset;
     function ObterVendasResultado2(pPCG_Parametros: TPCG_Parametros): IFDDataset;
@@ -31,7 +37,7 @@ uses
 
 { TPCGModel }
 
-constructor TPCGModel.Create(pIConexao : IConexao);
+constructor TPCGModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -42,12 +48,18 @@ begin
   inherited;
 end;
 
+class function TPCGModel.getNewIface(pIConexao: IConexao): ITPCGModel;
+begin
+  Result := TImplObjetoOwner<TPCGModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TPCGModel.ObterVendasResultado1(pPCG_Parametros: TPCG_Parametros): IFDDataset;
 var
-  lPCGDao: TPCGDao;
+  lPCGDao: ITPCGDao;
   lPCG_Parametros: TPCG_Parametros;
 begin
-  lPCGDao := TPCGDao.Create(vIConexao);
+  lPCGDao := TPCGDao.getNewIface(vIConexao);
 
   try
     lPCG_Parametros.TipoData                := pPCG_Parametros.TipoData;
@@ -69,19 +81,19 @@ begin
     lPCG_Parametros.ColunaOrdenacao         := pPCG_Parametros.ColunaOrdenacao;
     lPCG_Parametros.ColunaOrdenacaoOrdem    := pPCG_Parametros.ColunaOrdenacaoOrdem;
 
-    Result := lPCGDao.ObterVendasResultado1(lPCG_Parametros);
+    Result := lPCGDao.objeto.ObterVendasResultado1(lPCG_Parametros);
 
   finally
-    lPCGDao.Free;
+    lPCGDao:=nil;
   end;
 end;
 
 function TPCGModel.ObterVendasResultado2(pPCG_Parametros: TPCG_Parametros): IFDDataset;
 var
-  lPCGDao: TPCGDao;
+  lPCGDao: ITPCGDao;
   lPCG_Parametros: TPCG_Parametros;
 begin
-  lPCGDao := TPCGDao.Create(vIConexao);
+  lPCGDao := TPCGDao.getNewIface(vIConexao);
 
   try
     lPCG_Parametros.TipoData                := pPCG_Parametros.TipoData;
@@ -103,19 +115,19 @@ begin
     lPCG_Parametros.ColunaOrdenacao         := pPCG_Parametros.ColunaOrdenacao;
     lPCG_Parametros.ColunaOrdenacaoOrdem    := pPCG_Parametros.ColunaOrdenacaoOrdem;
 
-    Result := lPCGDao.ObterVendasResultado2(lPCG_Parametros);
+    Result := lPCGDao.objeto.ObterVendasResultado2(lPCG_Parametros);
 
   finally
-    lPCGDao.Free;
+    lPCGDao:=nil;
   end;
 end;
 
 function TPCGModel.ObterEstoqueResultado1(pPCG_Parametros: TPCG_Parametros): IFDDataset;
 var
-  lPCGDao: TPCGDao;
+  lPCGDao: ITPCGDao;
   lPCG_Parametros: TPCG_Parametros;
 begin
-  lPCGDao := TPCGDao.Create(vIConexao);
+  lPCGDao := TPCGDao.getNewIface(vIConexao);
 
   try
     lPCG_Parametros.TipoData                := pPCG_Parametros.TipoData;
@@ -137,10 +149,10 @@ begin
     lPCG_Parametros.ColunaOrdenacao         := pPCG_Parametros.ColunaOrdenacao;
     lPCG_Parametros.ColunaOrdenacaoOrdem    := pPCG_Parametros.ColunaOrdenacaoOrdem;
 
-    Result := lPCGDao.ObterEstoqueResultado1(lPCG_Parametros);
+    Result := lPCGDao.objeto.ObterEstoqueResultado1(lPCG_Parametros);
 
   finally
-    lPCGDao.Free;
+    lPCGDao:=nil;
   end;
 end;
 

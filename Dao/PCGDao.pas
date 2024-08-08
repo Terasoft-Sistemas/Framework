@@ -14,12 +14,16 @@ uses
   Terasoft.Framework.SimpleTypes,
   Terasoft.FuncoesTexto,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   LojasModel;
 
 type
-  TPCGDao = class
+  TPCGDao = class;
+  ITPCGDao=IObject<TPCGDao>;
 
+  TPCGDao = class
   private
+    [weak] mySelf: ITPCGDao;
     vIConexao : IConexao;
 
     vNomeCampo, vNomeCampoOS, vNomeCampoDev, vNomeCampoEntrada : String;
@@ -30,8 +34,10 @@ type
     procedure DefineDadosSelectEstoque(Acao: TTipoAnaliseEstoquePCG; pPCG_Parametros: TPCG_Parametros);
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITPCGDao;
 
     function ObterVendasResultado1(pPCG_Parametros: TPCG_Parametros): IFDDataset;
     function ObterVendasResultado2(pPCG_Parametros: TPCG_Parametros): IFDDataset;
@@ -43,11 +49,12 @@ implementation
 
 uses
   Data.DB,
+  PCGModel,
   Clipbrd;
 
 { TPCG }
 
-constructor TPCGDao.Create(pIConexao : IConexao);
+constructor TPCGDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -55,6 +62,12 @@ end;
 destructor TPCGDao.Destroy;
 begin
   inherited;
+end;
+
+class function TPCGDao.getNewIface(pIConexao: IConexao): ITPCGDao;
+begin
+  Result := TImplObjetoOwner<TPCGDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TPCGDao.ObterVendasResultado1(pPCG_Parametros: TPCG_Parametros): IFDDataset;

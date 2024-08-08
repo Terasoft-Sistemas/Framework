@@ -390,6 +390,7 @@ implementation
 uses
   FinanceiroPedidoModel,
   WebPedidoModel,
+  PCGDao,
   Form.Endpoint,
   Controllers.Conexao,
   WebPedidoItensModel,
