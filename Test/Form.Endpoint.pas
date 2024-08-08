@@ -119,6 +119,8 @@ begin
   //fSelecionado.objeto.registros := 100;
   //fSelecionado.objeto.primeiro := 500;
 
+  Caption := IntToStr(fSelecionado.objeto.contagem);
+
   fDS := fSelecionado.objeto.executaQuery;
   grid.DataSource := fDS.dataSource;
 end;

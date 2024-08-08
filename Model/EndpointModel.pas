@@ -25,6 +25,7 @@ type
   private
     [weak] mySelf: ITEndpointModel;
   protected
+
     vIConexao   : IConexao;
     fFiltroController: IController_Filtro;
     fCfg: IMultiConfig;
@@ -36,6 +37,7 @@ type
     fPROPRIEDADES: TipoWideStringFramework;
     fDESCRICAO: TipoWideStringFramework;
     fFILTROS: TListaFiltroModel;
+    fIgnoraPaginacao: boolean;
 
     procedure carregaFiltros;
 
@@ -46,10 +48,10 @@ type
   protected
     fRegistros: Integer;
     fPrimeiro: Integer;
-
+    fContagem: Integer;
+    fOldQuery: String;
 
     function getCfg: IMultiConfig;
-
 
   //property primeiro getter/setter
     function getPrimeiro: Integer;
@@ -87,6 +89,8 @@ type
     function getFILTROS: TListaFiltroModel;
     procedure setFILTROS(const pValue: TListaFiltroModel);
 
+    function getContagem: Integer;
+
   public
 
     constructor Create(pIConexao : IConexao);
@@ -106,7 +110,10 @@ type
     property registros: Integer read getRegistros write setRegistros;
     property primeiro: Integer read getPrimeiro write setPrimeiro;
 
+    property contagem: Integer read getContagem;
+
   public
+
     function getQuery: TipoWideStringFramework;
     function executaQuery(const pFormatar: boolean = true): IDatasetSimples;
     procedure formatarDataset(pDataset: TDataset);
@@ -197,6 +204,26 @@ begin
   Result := fCFG;
 end;
 
+function TEndpointModel.getContagem: Integer;
+  var
+    lQuery: String;
+begin
+  fIgnoraPaginacao := true;
+  try
+    lQuery := getQuery;
+    if (lQuery=fOldQuery) then
+    begin
+      Result := fContagem;
+      exit;
+    end;
+    fContagem := vIConexao.gdb.criaDataset.query(format('select count(*) c from (%s)', [ lQuery ]),'',[]).dataset.Fields[0].AsInteger;
+    Result := fContagem;
+    fOldQuery := lQuery;
+  finally
+    fIgnoraPaginacao := false;
+  end;
+end;
+
 function TEndpointModel.getQuery: TipoWideStringFramework;
   var
     fFiltro: ITFiltroModel;
@@ -216,10 +243,13 @@ begin
 
   lAdicional := '';
   lOrder := '';
-  if(fRegistros>0) then
-    lAdicional := format('%sfirst %d ', [ lAdicional, fRegistros ]);
-  if(fPrimeiro>0) then
-    lAdicional := format('%sskip %d ', [ lAdicional, fPrimeiro - 1 ]);
+  if(fIgnoraPaginacao=false) then
+  begin
+    if(fRegistros>0) then
+      lAdicional := format('%sfirst %d ', [ lAdicional, fRegistros ]);
+    if(fPrimeiro>0) then
+      lAdicional := format('%sskip %d ', [ lAdicional, fPrimeiro - 1 ]);
+  end;
 
   if(lAdicional<>'') then
     lSql := StringReplace(lSql, 'select', format('select %s', [ lAdicional ]), [rfIgnoreCase]);
