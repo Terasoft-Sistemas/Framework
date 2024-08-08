@@ -67,6 +67,7 @@ begin
       'metodo;nome', [ METODO, pName ]);
 
   vIConstrutorDao.setDatasetToModel(Result.objeto._TABELA_,lQry.dataset,Result.objeto);
+  Result.objeto.loaded;
 
 end;
 
@@ -98,6 +99,7 @@ begin
   begin
     lModel := getNewEndpointModel(vIConexao);
     vIConstrutorDao.setDatasetToModel(lModel.objeto._TABELA_,lQry.dataset,lModel.objeto);
+    lModel.objeto.loaded;
     Result.add(lModel);
 
     lQry.dataset.Next;

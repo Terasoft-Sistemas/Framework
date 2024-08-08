@@ -51,7 +51,6 @@ type
     fPrimeiro: Integer;
     fContagem: Integer;
     fOldQuery: String;
-    fBuscaAdicional: TipoWideStringFramework;
 
   //property filtroAdicional getter/setter
     function getBuscaAdicional: TipoWideStringFramework;
@@ -97,6 +96,8 @@ type
 
     function getContagem: Integer;
 
+    function getBuscaAvancada: ITFiltroModel;
+
   public
 
     constructor Create(pIConexao : IConexao);
@@ -118,8 +119,10 @@ type
 
     property contagem: Integer read getContagem;
     property buscaAdicional: TipoWideStringFramework read getBuscaAdicional write setBuscaAdicional;
+    property buscaAvanda: ITFiltroModel read getBuscaAvancada;
 
   public
+    procedure loaded;
 
     function getQuery: TipoWideStringFramework;
     function executaQuery(const pFormatar: boolean = true): IDatasetSimples;
@@ -324,8 +327,6 @@ begin
     lOrder := format('order by %s', [ lAdicional ]);
   end;
 
-
-
   Result := StringReplace(lSql, '<where>', lWhere,[rfReplaceAll,rfIgnoreCase]);
   Result := StringReplace(Result, '<order>', lOrder,[rfReplaceAll,rfIgnoreCase]);
   Result := StringReplace(Result, '<group>', lGroup,[rfReplaceAll,rfIgnoreCase]);
@@ -457,6 +458,11 @@ begin
   Result := fRegistros;
 end;
 
+procedure TEndpointModel.loaded;
+begin
+  getBuscaAdicional;
+end;
+
 function TEndpointModel.getDESCRICAO: TipoWideStringFramework;
 begin
   Result := fDESCRICAO;
@@ -475,24 +481,30 @@ begin
 end;
 
 procedure TEndpointModel.setBuscaAdicional(const pValue: TipoWideStringFramework);
-  var
-    p: ITFiltroModel;
 begin
-  fBuscaAdicional := pValue;
-  for p in FILTROS do
-  begin
-    if p.objeto.TIPO=tipoFiltro_Busca then
-    begin
-      p.objeto.buscaAdicional := fBuscaAdicional;
-      exit;
-    end;
-  end;
-
+  getBuscaAvancada.objeto.buscaAdicional := pValue;
 end;
 
 function TEndpointModel.getBuscaAdicional: TipoWideStringFramework;
 begin
-  Result := fBuscaAdicional;
+  Result := getBuscaAvancada.objeto.buscaAdicional;
+end;
+
+function TEndpointModel.getBuscaAvancada: ITFiltroModel;
+  var
+    p: ITFiltroModel;
+begin
+  for p in FILTROS do
+  begin
+    if p.objeto.TIPO=tipoFiltro_Busca then
+    begin
+      Result := p;
+      exit;
+    end;
+  end;
+
+  raise Exception.CreateFmt('Falta definir a busca adicional para [%s] ', [ fNOME]);
+
 end;
 
 end.
