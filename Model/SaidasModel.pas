@@ -7,9 +7,13 @@ uses
   Terasoft.Utils,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
+
+  TSaidasModel = class;
+  ITSaidasModel=IObject<TSaidasModel>;
 
   TSaidaItensParams = Record
     CODIGO_PRO,
@@ -23,8 +27,8 @@ type
   End;
 
   TSaidasModel = class
-
   private
+    [weak] mySelf: ITSaidasModel;
   
     vIConexao : IConexao;
 
@@ -190,8 +194,10 @@ type
     property CTR_IMPRESSAO_PED  : Variant read FCTR_IMPRESSAO_PED write SetCTR_IMPRESSAO_PED;
     property SYSTIME            : Variant read FSYSTIME write SetSYSTIME;
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITSaidasModel;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -207,10 +213,10 @@ type
 
     function Incluir: String;
     function IncluirTransferencia: String;
-    function Alterar(pID : String): TSaidasModel;
+    function Alterar(pID : String): ITSaidasModel;
     function Excluir(pNumero_Saida: String): String;
     function Salvar : String;
-    function carregaClasse(pID : String): TSaidasModel;
+    function carregaClasse(pID : String): ITSaidasModel;
     function obterLista: IFDDataset;
 
     function AdicionarItens(pSaidaItemParams : TSaidaItensParams) : String;
@@ -233,9 +239,9 @@ uses
 
 function TSaidasModel.AdicionarItens(pSaidaItemParams: TSaidaItensParams): string;
 var
-  lSaidasItensModel : TSaidasItensModel;
+  lSaidasItensModel : ITSaidasItensModel;
 begin
-  lSaidasItensModel := TSaidasItensModel.Create(vIConexao);
+  lSaidasItensModel := TSaidasItensModel.getNewIface(vIConexao);
 
   if pSaidaItemParams.CODIGO_PRO = '' then
     CriaException('Produto não informado');
@@ -244,32 +250,32 @@ begin
     CriaException('Quantidade não informado');
 
   try
-    lSaidasItensModel.NUMERO_SAI       := self.FNUMERO_SAI;
-    lSaidasItensModel.CODIGO_CLI       := self.FCODIGO_CLI;
-    lSaidasItensModel.LOJA             := self.FLOJA;
-    lSaidasItensModel.CODIGO_PRO       := pSaidaItemParams.CODIGO_PRO;
-    lSaidasItensModel.QUANTIDADE_SAI   := pSaidaItemParams.QUANTIDADE_SAI;
-    lSaidasItensModel.VALOR_UNI_SAI    := pSaidaItemParams.VALOR_UNI_SAI;
+    lSaidasItensModel.objeto.NUMERO_SAI       := self.FNUMERO_SAI;
+    lSaidasItensModel.objeto.CODIGO_CLI       := self.FCODIGO_CLI;
+    lSaidasItensModel.objeto.LOJA             := self.FLOJA;
+    lSaidasItensModel.objeto.CODIGO_PRO       := pSaidaItemParams.CODIGO_PRO;
+    lSaidasItensModel.objeto.QUANTIDADE_SAI   := pSaidaItemParams.QUANTIDADE_SAI;
+    lSaidasItensModel.objeto.VALOR_UNI_SAI    := pSaidaItemParams.VALOR_UNI_SAI;
 
-    Result := lSaidasItensModel.Incluir;
+    Result := lSaidasItensModel.objeto.Incluir;
 
     self.CalcularTotais;
 
   finally
-    lSaidasItensModel.Free;
+    lSaidasItensModel:=nil;
   end;
 end;
 
 function TSaidasModel.AdicionarItensTransferencia(pSaidaItemParams: TSaidaItensTransferenciaParams): String;
 var
-  lSaidasItensModel : TSaidasItensModel;
+  lSaidasItensModel : ITSaidasItensModel;
   lProdutosModel    : ITProdutosModel;
   lConfiguracoes    : ITerasoftConfiguracoes;
   lCtx              : TRttiContext;
   lProp             : TRttiProperty;
   lTagCusto         : String;
 begin
-  lSaidasItensModel := TSaidasItensModel.Create(vIConexao);
+  lSaidasItensModel := TSaidasItensModel.getNewIface(vIConexao);
   lProdutosModel    := TProdutosModel.getNewIface(vIConexao);
   lCtx              := TRttiContext.Create;
 
@@ -283,36 +289,36 @@ begin
     Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
     lProdutosModel := lProdutosModel.objeto.carregaClasse(pSaidaItemParams.CODIGO_PRO);
 
-    lSaidasItensModel.NUMERO_SAI       := self.FNUMERO_SAI;
-    lSaidasItensModel.CODIGO_CLI       := self.FCODIGO_CLI;
-    lSaidasItensModel.LOJA             := self.FLOJA;
-    lSaidasItensModel.CODIGO_PRO       := pSaidaItemParams.CODIGO_PRO;
-    lSaidasItensModel.QUANTIDADE_SAI   := pSaidaItemParams.QUANTIDADE_SAI;
+    lSaidasItensModel.objeto.NUMERO_SAI       := self.FNUMERO_SAI;
+    lSaidasItensModel.objeto.CODIGO_CLI       := self.FCODIGO_CLI;
+    lSaidasItensModel.objeto.LOJA             := self.FLOJA;
+    lSaidasItensModel.objeto.CODIGO_PRO       := pSaidaItemParams.CODIGO_PRO;
+    lSaidasItensModel.objeto.QUANTIDADE_SAI   := pSaidaItemParams.QUANTIDADE_SAI;
 
     lTagCusto      := lConfiguracoes.objeto.valorTag('BASE_CUSTO_PADRAO', 'CUSTOMEDIO_PRO', tvString);
     lProp          := lCtx.GetType(TProdutosModel).GetProperty(lTagCusto);
 
-    lSaidasItensModel.ICMS_SAI         := lProp.GetValue(lProdutosModel.objeto).AsString;
-    lSaidasItensModel.VALOR_UNI_SAI    := lProp.GetValue(lProdutosModel.objeto).AsString;
+    lSaidasItensModel.objeto.ICMS_SAI         := lProp.GetValue(lProdutosModel.objeto).AsString;
+    lSaidasItensModel.objeto.VALOR_UNI_SAI    := lProp.GetValue(lProdutosModel.objeto).AsString;
 
-    Result := lSaidasItensModel.Incluir;
+    Result := lSaidasItensModel.objeto.Incluir;
 
     self.CalcularTotais;
   finally
-    lSaidasItensModel.Free;
+    lSaidasItensModel:=nil;
     lProdutosModel:=nil;
     lCtx.Free;
   end;
 end;
 
-function TSaidasModel.Alterar(pID: String): TSaidasModel;
+function TSaidasModel.Alterar(pID: String): ITSaidasModel;
 var
-  lSaidasModel : TSaidasModel;
+  lSaidasModel : ITSaidasModel;
 begin
-  lSaidasModel := TSaidasModel.Create(vIConexao);
+  lSaidasModel := TSaidasModel.getNewIface(vIConexao);
   try
-    lSaidasModel       := lSaidasModel.carregaClasse(pID);
-    lSaidasModel.Acao  := tacAlterar;
+    lSaidasModel       := lSaidasModel.objeto.carregaClasse(pID);
+    lSaidasModel.objeto.Acao  := tacAlterar;
     Result             := lSaidasModel;
   finally
   end;
@@ -320,7 +326,7 @@ end;
 
 procedure TSaidasModel.CalcularPeso;
 var
-  lSaidasItensModel : TSaidasItensModel;
+  lSaidasItensModel : ITSaidasItensModel;
   lProdutosModel    : ITProdutosModel;
   lItens            : IFDDataset;
   lPesoBruto,
@@ -331,11 +337,11 @@ begin
   if self.FNUMERO_SAI = '' then
     CriaException('Saida não carregada');
 
-  lSaidasItensModel := TSaidasItensModel.Create(vIConexao);
+  lSaidasItensModel := TSaidasItensModel.getNewIface(vIConexao);
   lProdutosModel    := TProdutosModel.getNewIface(vIConexao);
   try
-    lSaidasItensModel.NumeroSaidaView := self.FNUMERO_SAI;
-    lItens := lSaidasItensModel.obterLista;
+    lSaidasItensModel.objeto.NumeroSaidaView := self.FNUMERO_SAI;
+    lItens := lSaidasItensModel.objeto.obterLista;
 
     lPesoBruto   := 0;
     lPesoLiquido := 0;
@@ -354,29 +360,30 @@ begin
     self.PESO_BRUTO   := lPesoLiquido.ToString;
 
   finally
-    lSaidasItensModel.Free;
+    lSaidasItensModel:=nil;
     lProdutosModel:=nil;
   end;
 end;
 
 procedure TSaidasModel.CalcularTotais;
 var
-  lSaidasItens : TSaidasItensModel;
+  lSaidasItens : ITSaidasItensModel;
   lMemTable    : IFDDataset;
+  p: ITSaidasModel;
 begin
-  lSaidasItens := TSaidasItensModel.Create(vIConexao);
+  lSaidasItens := TSaidasItensModel.getNewIface(vIConexao);
   try
-    lMemTable := lSaidasItens.ObterTotais(self.NUMERO_SAI);
+    lMemTable := lSaidasItens.objeto.ObterTotais(self.NUMERO_SAI);
 
-    self := self.Alterar(self.FNUMERO_SAI);
+    p := self.Alterar(self.FNUMERO_SAI);
 
-    self.FVALOR_ICMS_SAI     := lMemTable.objeto.FieldByName('custo').AsFloat;
-    self.FTOTAL_PRODUTOS_SAI := lMemTable.objeto.FieldByName('valor').AsFloat;
-    self.FTOTAL_SAI          := lMemTable.objeto.FieldByName('valor').AsFloat;
+    p.objeto.FVALOR_ICMS_SAI     := lMemTable.objeto.FieldByName('custo').AsFloat;
+    p.objeto.FTOTAL_PRODUTOS_SAI := lMemTable.objeto.FieldByName('valor').AsFloat;
+    p.objeto.FTOTAL_SAI          := lMemTable.objeto.FieldByName('valor').AsFloat;
 
-    self.Salvar;
+    p.objeto.Salvar;
   finally
-    lSaidasItens.Free;
+    lSaidasItens:=nil;
   end;
 end;
 
@@ -404,6 +411,12 @@ begin
   end;
 end;
 
+class function TSaidasModel.getNewIface(pIConexao: IConexao): ITSaidasModel;
+begin
+  Result := TImplObjetoOwner<TSaidasModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TSaidasModel.Incluir: String;
 begin
   self.FUSUARIO_SAI := vIConexao.getUSer.ID;
@@ -423,19 +436,19 @@ begin
   Result    := self.Salvar;
 end;
 
-function TSaidasModel.carregaClasse(pID : String): TSaidasModel;
+function TSaidasModel.carregaClasse(pID : String): ITSaidasModel;
 var
-  lSaidasDao: TSaidasDao;
+  lSaidasDao: ITSaidasDao;
 begin
-  lSaidasDao := TSaidasDao.Create(vIConexao);
+  lSaidasDao := TSaidasDao.getNewIface(vIConexao);
   try
-    Result := lSaidasDao.carregaClasse(pID);
+    Result := lSaidasDao.objeto.carregaClasse(pID);
   finally
-    lSaidasDao.Free;
+    lSaidasDao:=nil;
   end;
 end;
 
-constructor TSaidasModel.Create(pIConexao : IConexao);
+constructor TSaidasModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -447,45 +460,45 @@ end;
 
 function TSaidasModel.obterLista: IFDDataset;
 var
-  lSaidasDao: TSaidasDao;
+  lSaidasDao: ITSaidasDao;
 begin
-  lSaidasDao := TSaidasDao.Create(vIConexao);
+  lSaidasDao := TSaidasDao.getNewIface(vIConexao);
 
   try
-    lSaidasDao.TotalRecords       := FTotalRecords;
-    lSaidasDao.WhereView          := FWhereView;
-    lSaidasDao.CountView          := FCountView;
-    lSaidasDao.OrderView          := FOrderView;
-    lSaidasDao.StartRecordView    := FStartRecordView;
-    lSaidasDao.LengthPageView     := FLengthPageView;
-    lSaidasDao.IDRecordView       := FIDRecordView;
-    lSaidasDao.SaidaView          := FSaidaView;
-    lSaidasDao.LojaView           := FLojaView;
-    lSaidasDao.TransferenciaView  := FTransferenciaView;
+    lSaidasDao.objeto.TotalRecords       := FTotalRecords;
+    lSaidasDao.objeto.WhereView          := FWhereView;
+    lSaidasDao.objeto.CountView          := FCountView;
+    lSaidasDao.objeto.OrderView          := FOrderView;
+    lSaidasDao.objeto.StartRecordView    := FStartRecordView;
+    lSaidasDao.objeto.LengthPageView     := FLengthPageView;
+    lSaidasDao.objeto.IDRecordView       := FIDRecordView;
+    lSaidasDao.objeto.SaidaView          := FSaidaView;
+    lSaidasDao.objeto.LojaView           := FLojaView;
+    lSaidasDao.objeto.TransferenciaView  := FTransferenciaView;
 
-    Result := lSaidasDao.obterLista;
+    Result := lSaidasDao.objeto.obterLista;
 
-    FTotalRecords := lSaidasDao.TotalRecords;
+    FTotalRecords := lSaidasDao.objeto.TotalRecords;
 
   finally
-    lSaidasDao.Free;
+    lSaidasDao:=nil;
   end;
 end;
 
 function TSaidasModel.Salvar: String;
 var
-  lSaidasDao: TSaidasDao;
+  lSaidasDao: ITSaidasDao;
 begin
-  lSaidasDao := TSaidasDao.Create(vIConexao);
+  lSaidasDao := TSaidasDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lSaidasDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lSaidasDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lSaidasDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lSaidasDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lSaidasDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lSaidasDao.objeto.excluir(mySelf);
     end;
   finally
-    lSaidasDao.Free;
+    lSaidasDao:=nil;
   end;
 end;
 

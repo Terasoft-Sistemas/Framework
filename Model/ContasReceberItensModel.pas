@@ -227,7 +227,7 @@ type
     function parcelasAberta(pFatura: String): Boolean;
 
     function gerarContasReceberRecebimento(pValor, pDesconto, pParcela, pPortador, pConta, pObs : String) : String;
-    function gerarContasReceberRecebimentoCheque(pPortador, pPedido, pTipo : String; pDadosCheque : TStringList) : String;
+    function gerarContasReceberRecebimentoCheque(pPortador, pPedido, pTipo : String; pDadosCheque : TStrings) : String;
 
     function valorAberto(pCliente : String) : Double;
 
@@ -780,7 +780,7 @@ begin
   end;
 end;
 
-function TContasReceberItensModel.gerarContasReceberRecebimentoCheque(pPortador, pPedido, pTipo : String; pDadosCheque: TStringList): String;
+function TContasReceberItensModel.gerarContasReceberRecebimentoCheque(pPortador, pPedido, pTipo : String; pDadosCheque: TStrings): String;
 var
   lContasReceberItensInserir : TContasReceberItensModel;
   lContasReceberModel        : TContasReceberModel;

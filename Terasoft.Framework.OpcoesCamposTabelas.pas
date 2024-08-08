@@ -35,7 +35,7 @@ implementation
     TValidadorDatabaseImpl = class(TInterfacedObject, IValidadorDatabase)
     protected
 
-      fGDB: IGDB;
+      [weak] fGDB: IGDB;
 
       dicionarioRegrasDadosCamposValidacoesInicializado: boolean;
       dicionarioRegrasDadosCamposValidacoes: TDicionarioRegrasDadosCamposValidacoes;

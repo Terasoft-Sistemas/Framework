@@ -2,6 +2,7 @@
 interface
 uses
   Classes,
+  Terasoft.Framework.Texto,
   StrUtils,
   SysUtils,
   MaskUtils,
@@ -188,23 +189,18 @@ var
  lSQL: TStringList;
 begin
   try
-    if not DirectoryExists(ExtractFileDir(Application.ExeName) + '\temp') then
-    begin
-      if not CreateDir(ExtractFileDir(Application.ExeName) + '\temp') then
-      begin
-        ForceDirectories(ExtractFileDir(Application.ExeName) + '\temp');
-      end;
+    ForceDirectories(ExtractFileDir(Application.ExeName) + '\temp');
+    try
+      lSQL := TStringList.Create;
+
+      lSQL.Clear;
+      lSQL.Add(pSQL);
+      lSQL.SaveToFile(ExtractFileDir(Application.ExeName) + '\temp\'+pNome+'.sql');
+
+    finally
+      lSQL.Free;
     end;
-
-    lSQL := TStringList.Create;
-
-    lSQL.Clear;
-    lSQL.Add(pSQL);
-    lSQL.SaveToFile(ExtractFileDir(Application.ExeName) + '\temp\'+pNome+'.sql');
-
-    lSQL.Free;
   except
-    lSQL.Free;
   end;
 
 end;

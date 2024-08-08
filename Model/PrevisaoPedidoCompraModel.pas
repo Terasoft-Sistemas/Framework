@@ -96,6 +96,7 @@ type
 implementation
 
 uses
+  Terasoft.Framework.Texto,
   PrevisaoPedidoCompraDao,
   System.Classes,
   System.SysUtils, System.Math;
@@ -125,31 +126,34 @@ end;
 
 procedure TPrevisaoPedidoCompraModel.gerarFinanceiro(pPedidoCompraModel : ITPedidoCompraModel);
 var
-  lVencimentos : TStringList;
+  lVencimentos : IListaTextoEX;
   i            : Integer;
   lSoma        : Double;
 begin
-  lVencimentos := TStringList.create;
+  lVencimentos := novaListaTexto;
+  try
 
-  StringForStringList(pPedidoCompraModel.objeto.CONDICOES_PAG, '/', lVencimentos);
+    StringForStringList(pPedidoCompraModel.objeto.CONDICOES_PAG, '/', lVencimentos);
 
-  lSoma := 0;
-  i     := 0;
+    lSoma := 0;
+    i     := 0;
 
-  for i := 0 to lVencimentos.Count - 1 do
-  begin
-    self.FVENCIMENTO     := DateToStr(IncDay(StrToDate(pPedidoCompraModel.objeto.DATA_PED), StrToInt(lVencimentos.Strings[i])) );
-    self.FVALOR_PARCELA  := RoundTo(pPedidoCompraModel.objeto.TOTAL_PED / lVencimentos.Count, -2);
-    self.FPARCELA        := (i + 1).ToString;
-    self.FNUMERO_PED     := pPedidoCompraModel.objeto.NUMERO_PED;
-    self.FCODIGO_FOR     := pPedidoCompraModel.objeto.CODIGO_FOR;
+    for i := 0 to lVencimentos.strings.Count - 1 do
+    begin
+      self.FVENCIMENTO     := DateToStr(IncDay(StrToDate(pPedidoCompraModel.objeto.DATA_PED), StrToInt(lVencimentos.Strings[i])) );
+      self.FVALOR_PARCELA  := RoundTo(pPedidoCompraModel.objeto.TOTAL_PED / lVencimentos.strings.Count, -2);
+      self.FPARCELA        := (i + 1).ToString;
+      self.FNUMERO_PED     := pPedidoCompraModel.objeto.NUMERO_PED;
+      self.FCODIGO_FOR     := pPedidoCompraModel.objeto.CODIGO_FOR;
 
-    lSoma := lSoma + self.FVALOR_PARCELA;
+      lSoma := lSoma + self.FVALOR_PARCELA;
 
-    if self.FPARCELA = lVencimentos.Count then
-      self.FVALOR_PARCELA := self.FVALOR_PARCELA + (pPedidoCompraModel.objeto.TOTAL_PED - lSoma);
+      if self.FPARCELA = lVencimentos.strings.Count then
+        self.FVALOR_PARCELA := self.FVALOR_PARCELA + (pPedidoCompraModel.objeto.TOTAL_PED - lSoma);
 
-    Self.incluir;
+      Self.incluir;
+    end;
+  finally
   end;
 end;
 

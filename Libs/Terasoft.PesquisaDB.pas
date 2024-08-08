@@ -109,5 +109,11 @@ begin
 
 end;
 
+initialization
+
+finalization
+
+  FreeAndNil(fListaLocal_campos);
+  FreeAndNil(fListaLocal_valores);
 
 end.

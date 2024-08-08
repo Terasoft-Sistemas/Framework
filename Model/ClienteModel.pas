@@ -1061,34 +1061,32 @@ begin
   lValor := lConfiguracoes.valorTag(pTag, '', tvMemo);
   if Trim(lValor) = '' then
     exit;
-
   lField      := TStringList.Create;
+  try
   lField.Text := lValor;
-
   lCtx := TRttiContext.Create;
-  for i := 0 to lField.Count - 1 do
-  begin
-    lCampo := Trim(Copy(lField.Strings[i], 1, (Pos(';', lField.Strings[i])) - 1));
-    lNome  := Trim(Copy(lField.Strings[i], (Pos(';', lField.Strings[i])) + 1, 60));
-    lProp  := lCtx.GetType(TClienteModel).GetProperty(lCampo);
-    if not Assigned(lProp) then
+    for i := 0 to lField.Count - 1 do
     begin
-      CriaException(' Configurações de campos obrigatórios inválido.');
-      abort;
-    end;
-    if lProp.GetValue(pClienteModel.objeto).AsString = '' then
-    begin
-      CamposInvalidos.Add(lCampo);
-      CamposInvalidosTitulos.Add(lNome);
+      lCampo := Trim(Copy(lField.Strings[i], 1, (Pos(';', lField.Strings[i])) - 1));
+      lNome  := Trim(Copy(lField.Strings[i], (Pos(';', lField.Strings[i])) + 1, 60));
+      lProp  := lCtx.GetType(TClienteModel).GetProperty(lCampo);
+      if not Assigned(lProp) then
+      begin
+        CriaException(' Configurações de campos obrigatórios inválido.');
+        abort;
+      end;
+      if lProp.GetValue(pClienteModel.objeto).AsString = '' then
+      begin
+        CamposInvalidos.Add(lCampo);
+        CamposInvalidosTitulos.Add(lNome);
 
-      lMsg := lMsg + lNome + ',';
+        lMsg := lMsg + lNome + ',';
+      end;
     end;
+  finally
+    FreeAndNil(lField);
+    lCTX.Free;
   end;
-//  if Trim(lMsg) <> '' then
-//  begin
-//    CriaException(' Campo(s) obrigatório(s): ' + copy(lMsg, 1, Length(lMsg) -1) + '.');
-//    abort;
-//  end;
 end;
 
 function TClienteModel.Incluir: String;

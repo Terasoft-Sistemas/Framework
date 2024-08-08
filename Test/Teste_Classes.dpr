@@ -1,7 +1,9 @@
+{$i definicoes_testes.inc}
 program Teste_Classes;
 
 uses
   FastMM4,
+  Classes,
   Vcl.Forms,
   FinanceiroPedidoDao in '..\Dao\FinanceiroPedidoDao.pas',
   FinanceiroPedidoModel in '..\Model\FinanceiroPedidoModel.pas',
@@ -170,11 +172,14 @@ uses
 {$R *.res}
 
 begin
+
+  TStringList.Create;
+
+  ReportMemoryLeaksOnShutdown := true;
+  FastMM4.SuppressMessageBoxes := false;
+
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TForm1, Form1);
-  //  Application.CreateForm(TImpressaoVendaAssistida, ImpressaoVendaAssistida);
-//  Application.CreateForm(TImpressaoContratos, ImpressaoContratos);
-//  Application.CreateForm(TForm1, Form1);
   Application.Run;
 end.
