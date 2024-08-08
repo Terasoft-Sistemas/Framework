@@ -3317,15 +3317,15 @@ end;
 
 procedure TForm1.Button103Click(Sender: TObject);
 var
-  lSaidasModel : TSaidasModel;
+  lSaidasModel : ITSaidasModel;
 begin
-  lSaidasModel := TSaidasModel.Create(vIConexao);
+  lSaidasModel := TSaidasModel.getNewIface(vIConexao);
   try
     try
-      lSaidasModel.LOJA       := '003';
-      lSaidasModel.CODIGO_CLI := '000001';
+      lSaidasModel.objeto.LOJA       := '003';
+      lSaidasModel.objeto.CODIGO_CLI := '000001';
 
-      lSaidasModel.Incluir;
+      lSaidasModel.objeto.Incluir;
 
       ShowMessage('Incluido com Sucesso!');
     except
@@ -3333,89 +3333,89 @@ begin
       ShowMessage('Erro: ' + E.Message);
     end
   finally
-    lSaidasModel.Free;
+    lSaidasModel:=nil;
   end;
 end;
 
 procedure TForm1.Button104Click(Sender: TObject);
 var
-  lSaidasModel : TSaidasModel;
+  lSaidasModel : ITSaidasModel;
   ID : String;
 begin
-  lSaidasModel := TSaidasModel.Create(vIConexao);
+  lSaidasModel := TSaidasModel.getNewIface(vIConexao);
   try
     try
       ID := InputBox('Saidas', 'Digite o código da Saida que deseja Alterar:', '');
       if ID.IsEmpty then
         exit;
 
-      lSaidasModel := lSaidasModel.Alterar(ID);
-      lSaidasModel.TOTAL_SAI := 500;
+      lSaidasModel := lSaidasModel.objeto.Alterar(ID);
+      lSaidasModel.objeto.TOTAL_SAI := 500;
 
-      lSaidasModel.Salvar;
+      lSaidasModel.objeto.Salvar;
       ShowMessage('Alterado com Sucesso');
     Except
       on E:Exception do
       ShowMessage('Erro: ' +E.Message);
     end;
   finally
-    lSaidasModel.Free;
+    lSaidasModel:=nil;
   end;
 end;
 
 procedure TForm1.Button105Click(Sender: TObject);
 var
-  lSaidasModel : TSaidasModel;
+  lSaidasModel : ITSaidasModel;
   Numero_Saida : String;
 begin
-  lSaidasModel := TSaidasModel.Create(vIConexao);
+  lSaidasModel := TSaidasModel.getNewIface(vIConexao);
   try
     try
       Numero_Saida := InputBox('Saida', 'Digite o Numero da Saida que deseja excluir:', '');
       if Numero_Saida.IsEmpty then
           Exit;
 
-      lSaidasModel.Excluir(Numero_Saida);
+      lSaidasModel.objeto.Excluir(Numero_Saida);
       ShowMessage('Excluido com sucesso!');
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lSaidasModel.Free;
+    lSaidasModel:=nil;
   end;
 end;
 
 procedure TForm1.Button106Click(Sender: TObject);
 var
-  lSaidasModel : TSaidasModel;
+  lSaidasModel : ITSaidasModel;
   lTable       : IFDDataset;
 begin
-  lSaidasModel := TSaidasModel.Create(vIConexao);
+  lSaidasModel := TSaidasModel.getNewIface(vIConexao);
   try
     try
-      lSaidasModel.SaidaView := '000215';
-      lSaidasModel.LojaView  := '001';
+      lSaidasModel.objeto.SaidaView := '000215';
+      lSaidasModel.objeto.LojaView  := '001';
 
-      lTable           := lSaidasModel.obterLista;
+      lTable           := lSaidasModel.objeto.obterLista;
       dsSaidas.DataSet := lTable.objeto;
     except
      on E:Exception do
        ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lSaidasModel.Free;
+    lSaidasModel:=nil;
   end;
 end;
 
 procedure TForm1.Button107Click(Sender: TObject);
 var
-  lSaidasModel      : TSaidasModel;
+  lSaidasModel      : ITSaidasModel;
   lSaidasItensModel : TSaidasItensModel;
   lSaidaParams      : TSaidaItensParams;
   lNumeroSaida      : String;
 begin
-  lSaidasModel      := TSaidasModel.Create(vIConexao);
+  lSaidasModel      := TSaidasModel.getNewIface(vIConexao);
   lSaidasItensModel := TSaidasItensModel.Create(vIConexao);
   try
     try
@@ -3423,21 +3423,21 @@ begin
       if lNumeroSaida.IsEmpty then
         exit;
 
-      lSaidasModel := lSaidasModel.carregaClasse(lNumeroSaida);
+      lSaidasModel := lSaidasModel.objeto.carregaClasse(lNumeroSaida);
 
       lSaidaParams.CODIGO_PRO     := '000007';
       lSaidaParams.QUANTIDADE_SAI := '5';
       lSaidaParams.VALOR_UNI_SAI  := '100';
 
-      lSaidasModel.AdicionarItens(lSaidaParams);
-      ShowMessage('Item adicionado ao Pedido: '  + lSaidasModel.NUMERO_SAI)
+      lSaidasModel.objeto.AdicionarItens(lSaidaParams);
+      ShowMessage('Item adicionado ao Pedido: '  + lSaidasModel.objeto.NUMERO_SAI)
 
     except
       on E:Exception do
       ShowMessage('Erro: ' + E.Message);
     end;
   finally
-    lSaidasModel.Free;
+    lSaidasModel:=nil;
     lSaidasItensModel.Free;
   end;
 end;
@@ -3500,21 +3500,21 @@ end;
 
 procedure TForm1.Button110Click(Sender: TObject);
 var
-  lSaidasModel : TSaidasModel;
+  lSaidasModel : ITSaidasModel;
   lParams      : TSaidaItensTransferenciaParams;
 begin
-  lSaidasModel := TSaidasModel.Create(vIConexao);
+  lSaidasModel := TSaidasModel.getNewIface(vIConexao);
 
   try
-    lSaidasModel := lSaidasModel.carregaClasse('000224');
+    lSaidasModel := lSaidasModel.objeto.carregaClasse('000224');
 
     lParams.CODIGO_PRO      := '000006';
     lParams.QUANTIDADE_SAI  := '2';
 
-    lSaidasModel.AdicionarItensTransferencia(lParams);
+    lSaidasModel.objeto.AdicionarItensTransferencia(lParams);
 
   finally
-    lSaidasModel.Free;
+    lSaidasModel:=nil;
   end;
 
 end;
@@ -3533,16 +3533,16 @@ end;
 
 procedure TForm1.BuButton116Click(Sender: TObject);
 var
-  lSaidasModel : TSaidasModel;
+  lSaidasModel : ITSaidasModel;
 begin
-  lSaidasModel := TSaidasModel.Create(vIConexao);
+  lSaidasModel := TSaidasModel.getNewIface(vIConexao);
   try
-    lSaidasModel.NUMERO_SAI := '000262';
-    lSaidasModel := lSaidasModel.carregaClasse(lSaidasModel.NUMERO_SAI);
+    lSaidasModel.objeto.NUMERO_SAI := '000262';
+    lSaidasModel := lSaidasModel.objeto.carregaClasse(lSaidasModel.objeto.NUMERO_SAI);
 
-    lSaidasModel.CalcularPeso;
+    lSaidasModel.objeto.CalcularPeso;
   finally
-    lSaidasModel.Free;
+    lSaidasModel:=nil;
   end;
 end;
 

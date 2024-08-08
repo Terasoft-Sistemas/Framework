@@ -158,18 +158,18 @@ end;
 
 function TSaidasItensModel.Excluir(pID: String): String;
 var
-  lSaidasModel : TSaidasModel;
+  lSaidasModel : ITSaidasModel;
 begin
-  lSaidasModel := TSaidasModel.Create(vIConexao);
+  lSaidasModel := TSaidasModel.getNewIface(vIConexao);
   try
     self         := self.carregaClasse(pID);
     self.FAcao   := tacExcluir;
     Result       := self.Salvar;
 
-    lSaidasModel.NUMERO_SAI := self.FNUMERO_SAI;
-    lSaidasModel.CalcularTotais;
+    lSaidasModel.objeto.NUMERO_SAI := self.FNUMERO_SAI;
+    lSaidasModel.objeto.CalcularTotais;
   finally
-    lSaidasModel.Free;
+    lSaidasModel:=nil;
   end;
 end;
 

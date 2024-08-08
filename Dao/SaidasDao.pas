@@ -12,12 +12,15 @@ uses
   Interfaces.Conexao,
   Terasoft.Utils,
   Terasoft.ConstrutorDao,
-  CLIPBRD;
+  Terasoft.Framework.ObjectIface;
 
 type
-  TSaidasDao = class
+  TSaidasDao = class;
+  ITSaidasDao=IObject<TSaidasDao>;
 
+  TSaidasDao = class
   private
+    [weak] mySelf: ITSaidasDao;
     vIConexao : IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -48,8 +51,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITSaidasDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -63,13 +68,13 @@ type
     property LojaView : String read FLojaView write SetLojaView;
     property TransferenciaView: Boolean read FTransferenciaView write SetTransferenciaView;
 
-    function incluir(pSaidasModel: TSaidasModel): String;
-    function alterar(pSaidasModel: TSaidasModel): String;
-    function excluir(pSaidasModel: TSaidasModel): String;
-    function carregaClasse(pID : String): TSaidasModel;
+    function incluir(pSaidasModel: ITSaidasModel): String;
+    function alterar(pSaidasModel: ITSaidasModel): String;
+    function excluir(pSaidasModel: ITSaidasModel): String;
+    function carregaClasse(pID : String): ITSaidasModel;
     function obterLista: IFDDataset;
 
-    procedure setParams(var pQry: TFDQuery; pSaidasModel: TSaidasModel);
+    procedure setParams(var pQry: TFDQuery; pSaidasModel: ITSaidasModel);
 
 end;
 
@@ -80,13 +85,13 @@ uses
 
 { TSaidas }
 
-function TSaidasDao.carregaClasse(pID : String): TSaidasModel;
+function TSaidasDao.carregaClasse(pID : String): ITSaidasModel;
 var
   lQry: TFDQuery;
-  lModel: TSaidasModel;
+  lModel: ITSaidasModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TSaidasModel.Create(vIConexao);
+  lModel   := TSaidasModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -95,51 +100,51 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.NUMERO_SAI          := lQry.FieldByName('NUMERO_SAI').AsString;
-    lModel.CODIGO_CLI          := lQry.FieldByName('CODIGO_CLI').AsString;
-    lModel.DATA_SAI            := lQry.FieldByName('DATA_SAI').AsString;
-    lModel.IPI_SAI             := lQry.FieldByName('IPI_SAI').AsString;
-    lModel.VALOR_ICMS_SAI      := lQry.FieldByName('VALOR_ICMS_SAI').AsString;
-    lModel.BASE_ICMS_SAI       := lQry.FieldByName('BASE_ICMS_SAI').AsString;
-    lModel.OUTROS_SAI          := lQry.FieldByName('OUTROS_SAI').AsString;
-    lModel.DESC_SAI            := lQry.FieldByName('DESC_SAI').AsString;
-    lModel.TOTAL_SAI           := lQry.FieldByName('TOTAL_SAI').AsString;
-    lModel.OBSERVACAO_SAI      := lQry.FieldByName('OBSERVACAO_SAI').AsString;
-    lModel.USUARIO_SAI         := lQry.FieldByName('USUARIO_SAI').AsString;
-    lModel.STATUS_SAI          := lQry.FieldByName('STATUS_SAI').AsString;
-    lModel.TOTAL_PRODUTOS_SAI  := lQry.FieldByName('TOTAL_PRODUTOS_SAI').AsString;
-    lModel.CFOP_SAI            := lQry.FieldByName('CFOP_SAI').AsString;
-    lModel.PIS_SAI             := lQry.FieldByName('PIS_SAI').AsString;
-    lModel.COFINS_SAI          := lQry.FieldByName('COFINS_SAI').AsString;
-    lModel.TAXA_SAI            := lQry.FieldByName('TAXA_SAI').AsString;
-    lModel.LOJA                := lQry.FieldByName('LOJA').AsString;
-    lModel.ICMS_ST_SAI         := lQry.FieldByName('ICMS_ST_SAI').AsString;
-    lModel.BASE_ST_SAI         := lQry.FieldByName('BASE_ST_SAI').AsString;
-    lModel.NF_SAI              := lQry.FieldByName('NF_SAI').AsString;
-    lModel.CONCLUIDA           := lQry.FieldByName('CONCLUIDA').AsString;
-    lModel.ID                  := lQry.FieldByName('ID').AsString;
-    lModel.CARGA_ID            := lQry.FieldByName('CARGA_ID').AsString;
-    lModel.VENDEDOR_ID         := lQry.FieldByName('VENDEDOR_ID').AsString;
-    lModel.ORDEM               := lQry.FieldByName('ORDEM').AsString;
-    lModel.ORCAMENTO_ID        := lQry.FieldByName('ORCAMENTO_ID').AsString;
-    lModel.CODIGO_CTA          := lQry.FieldByName('CODIGO_CTA').AsString;
-    lModel.PREVISAO            := lQry.FieldByName('PREVISAO').AsString;
-    lModel.PRECO_VENDA_ID      := lQry.FieldByName('PRECO_VENDA_ID').AsString;
-    lModel.USUARIO_CHECAGEM    := lQry.FieldByName('USUARIO_CHECAGEM').AsString;
-    lModel.DATAHORA_CHECAGEM   := lQry.FieldByName('DATAHORA_CHECAGEM').AsString;
-    lModel.TRANSPORTADORA_ID   := lQry.FieldByName('TRANSPORTADORA_ID').AsString;
-    lModel.RNTRC               := lQry.FieldByName('RNTRC').AsString;
-    lModel.PLACA               := lQry.FieldByName('PLACA').AsString;
-    lModel.UF_TRANSPORTADORA   := lQry.FieldByName('UF_TRANSPORTADORA').AsString;
-    lModel.PESO_LIQUIDO        := lQry.FieldByName('PESO_LIQUIDO').AsString;
-    lModel.PESO_BRUTO          := lQry.FieldByName('PESO_BRUTO').AsString;
-    lModel.QTDE_VOLUME         := lQry.FieldByName('QTDE_VOLUME').AsString;
-    lModel.ESPECIE_VOLUME      := lQry.FieldByName('ESPECIE_VOLUME').AsString;
-    lModel.TRANSFERENCIA       := lQry.FieldByName('TRANSFERENCIA').AsString;
-    lModel.CFOP_ID             := lQry.FieldByName('CFOP_ID').AsString;
-    lModel.PEDIDO_COMPRA       := lQry.FieldByName('PEDIDO_COMPRA').AsString;
-    lModel.CTR_IMPRESSAO_PED   := lQry.FieldByName('CTR_IMPRESSAO_PED').AsString;
-    lModel.SYSTIME             := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.NUMERO_SAI          := lQry.FieldByName('NUMERO_SAI').AsString;
+    lModel.objeto.CODIGO_CLI          := lQry.FieldByName('CODIGO_CLI').AsString;
+    lModel.objeto.DATA_SAI            := lQry.FieldByName('DATA_SAI').AsString;
+    lModel.objeto.IPI_SAI             := lQry.FieldByName('IPI_SAI').AsString;
+    lModel.objeto.VALOR_ICMS_SAI      := lQry.FieldByName('VALOR_ICMS_SAI').AsString;
+    lModel.objeto.BASE_ICMS_SAI       := lQry.FieldByName('BASE_ICMS_SAI').AsString;
+    lModel.objeto.OUTROS_SAI          := lQry.FieldByName('OUTROS_SAI').AsString;
+    lModel.objeto.DESC_SAI            := lQry.FieldByName('DESC_SAI').AsString;
+    lModel.objeto.TOTAL_SAI           := lQry.FieldByName('TOTAL_SAI').AsString;
+    lModel.objeto.OBSERVACAO_SAI      := lQry.FieldByName('OBSERVACAO_SAI').AsString;
+    lModel.objeto.USUARIO_SAI         := lQry.FieldByName('USUARIO_SAI').AsString;
+    lModel.objeto.STATUS_SAI          := lQry.FieldByName('STATUS_SAI').AsString;
+    lModel.objeto.TOTAL_PRODUTOS_SAI  := lQry.FieldByName('TOTAL_PRODUTOS_SAI').AsString;
+    lModel.objeto.CFOP_SAI            := lQry.FieldByName('CFOP_SAI').AsString;
+    lModel.objeto.PIS_SAI             := lQry.FieldByName('PIS_SAI').AsString;
+    lModel.objeto.COFINS_SAI          := lQry.FieldByName('COFINS_SAI').AsString;
+    lModel.objeto.TAXA_SAI            := lQry.FieldByName('TAXA_SAI').AsString;
+    lModel.objeto.LOJA                := lQry.FieldByName('LOJA').AsString;
+    lModel.objeto.ICMS_ST_SAI         := lQry.FieldByName('ICMS_ST_SAI').AsString;
+    lModel.objeto.BASE_ST_SAI         := lQry.FieldByName('BASE_ST_SAI').AsString;
+    lModel.objeto.NF_SAI              := lQry.FieldByName('NF_SAI').AsString;
+    lModel.objeto.CONCLUIDA           := lQry.FieldByName('CONCLUIDA').AsString;
+    lModel.objeto.ID                  := lQry.FieldByName('ID').AsString;
+    lModel.objeto.CARGA_ID            := lQry.FieldByName('CARGA_ID').AsString;
+    lModel.objeto.VENDEDOR_ID         := lQry.FieldByName('VENDEDOR_ID').AsString;
+    lModel.objeto.ORDEM               := lQry.FieldByName('ORDEM').AsString;
+    lModel.objeto.ORCAMENTO_ID        := lQry.FieldByName('ORCAMENTO_ID').AsString;
+    lModel.objeto.CODIGO_CTA          := lQry.FieldByName('CODIGO_CTA').AsString;
+    lModel.objeto.PREVISAO            := lQry.FieldByName('PREVISAO').AsString;
+    lModel.objeto.PRECO_VENDA_ID      := lQry.FieldByName('PRECO_VENDA_ID').AsString;
+    lModel.objeto.USUARIO_CHECAGEM    := lQry.FieldByName('USUARIO_CHECAGEM').AsString;
+    lModel.objeto.DATAHORA_CHECAGEM   := lQry.FieldByName('DATAHORA_CHECAGEM').AsString;
+    lModel.objeto.TRANSPORTADORA_ID   := lQry.FieldByName('TRANSPORTADORA_ID').AsString;
+    lModel.objeto.RNTRC               := lQry.FieldByName('RNTRC').AsString;
+    lModel.objeto.PLACA               := lQry.FieldByName('PLACA').AsString;
+    lModel.objeto.UF_TRANSPORTADORA   := lQry.FieldByName('UF_TRANSPORTADORA').AsString;
+    lModel.objeto.PESO_LIQUIDO        := lQry.FieldByName('PESO_LIQUIDO').AsString;
+    lModel.objeto.PESO_BRUTO          := lQry.FieldByName('PESO_BRUTO').AsString;
+    lModel.objeto.QTDE_VOLUME         := lQry.FieldByName('QTDE_VOLUME').AsString;
+    lModel.objeto.ESPECIE_VOLUME      := lQry.FieldByName('ESPECIE_VOLUME').AsString;
+    lModel.objeto.TRANSFERENCIA       := lQry.FieldByName('TRANSFERENCIA').AsString;
+    lModel.objeto.CFOP_ID             := lQry.FieldByName('CFOP_ID').AsString;
+    lModel.objeto.PEDIDO_COMPRA       := lQry.FieldByName('PEDIDO_COMPRA').AsString;
+    lModel.objeto.CTR_IMPRESSAO_PED   := lQry.FieldByName('CTR_IMPRESSAO_PED').AsString;
+    lModel.objeto.SYSTIME             := lQry.FieldByName('SYSTIME').AsString;
 
     Result := lModel;
   finally
@@ -147,7 +152,7 @@ begin
   end;
 end;
 
-constructor TSaidasDao.Create(pIConexao : IConexao);
+constructor TSaidasDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -158,7 +163,7 @@ begin
   inherited;
 end;
 
-function TSaidasDao.incluir(pSaidasModel: TSaidasModel): String;
+function TSaidasDao.incluir(pSaidasModel: ITSaidasModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -169,7 +174,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pSaidasModel.NUMERO_SAI := vIConexao.Generetor('GEN_SAIDAS');
+    pSaidasModel.objeto.NUMERO_SAI := vIConexao.Generetor('GEN_SAIDAS');
     setParams(lQry, pSaidasModel);
     lQry.Open;
 
@@ -181,7 +186,7 @@ begin
   end;
 end;
 
-function TSaidasDao.alterar(pSaidasModel: TSaidasModel): String;
+function TSaidasDao.alterar(pSaidasModel: ITSaidasModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -195,7 +200,7 @@ begin
     setParams(lQry, pSaidasModel);
     lQry.ExecSQL;
 
-    Result := pSaidasModel.NUMERO_SAI;
+    Result := pSaidasModel.objeto.NUMERO_SAI;
 
   finally
     lSQL := '';
@@ -203,18 +208,24 @@ begin
   end;
 end;
 
-function TSaidasDao.excluir(pSaidasModel: TSaidasModel): String;
+function TSaidasDao.excluir(pSaidasModel: ITSaidasModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
   try
-   lQry.ExecSQL('delete from saidas where numero_sai = :numero_sai' ,[pSaidasModel.NUMERO_SAI]);
+   lQry.ExecSQL('delete from saidas where numero_sai = :numero_sai' ,[pSaidasModel.objeto.NUMERO_SAI]);
    lQry.ExecSQL;
-   Result := pSaidasModel.NUMERO_SAI;
+   Result := pSaidasModel.objeto.NUMERO_SAI;
   finally
     lQry.Free;
   end;
+end;
+
+class function TSaidasDao.getNewIface(pIConexao: IConexao): ITSaidasDao;
+begin
+  Result := TImplObjetoOwner<TSaidasDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TSaidasDao.where: String;
@@ -366,28 +377,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TSaidasDao.setParams(var pQry: TFDQuery; pSaidasModel: TSaidasModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TSaidasDao.setParams(var pQry: TFDQuery; pSaidasModel: ITSaidasModel);
 begin
-  lTabela := vConstrutor.getColumns('SAIDAS');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TSaidasModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pSaidasModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pSaidasModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('SAIDAS',pQry,pSaidasModel.objeto);
 end;
 
 procedure TSaidasDao.SetSaidaView(const Value: String);
