@@ -51,6 +51,11 @@ type
     fPrimeiro: Integer;
     fContagem: Integer;
     fOldQuery: String;
+    fBuscaAdicional: TipoWideStringFramework;
+
+  //property filtroAdicional getter/setter
+    function getBuscaAdicional: TipoWideStringFramework;
+    procedure setBuscaAdicional(const pValue: TipoWideStringFramework);
 
     function getCfg: IMultiConfig;
 
@@ -112,6 +117,7 @@ type
     property primeiro: Integer read getPrimeiro write setPrimeiro;
 
     property contagem: Integer read getContagem;
+    property buscaAdicional: TipoWideStringFramework read getBuscaAdicional write setBuscaAdicional;
 
   public
 
@@ -466,6 +472,27 @@ begin
   if(fFILTROS=nil) then
     fFILTROS := tCollections.CreateList<ITFiltroModel>;
   Result := fFILTROS;
+end;
+
+procedure TEndpointModel.setBuscaAdicional(const pValue: TipoWideStringFramework);
+  var
+    p: ITFiltroModel;
+begin
+  fBuscaAdicional := pValue;
+  for p in FILTROS do
+  begin
+    if p.objeto.TIPO=tipoFiltro_Busca then
+    begin
+      p.objeto.buscaAdicional := fBuscaAdicional;
+      exit;
+    end;
+  end;
+
+end;
+
+function TEndpointModel.getBuscaAdicional: TipoWideStringFramework;
+begin
+  Result := fBuscaAdicional;
 end;
 
 end.

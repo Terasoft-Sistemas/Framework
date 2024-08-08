@@ -46,6 +46,11 @@ type
     fRegistros: Integer;
     fPrimeiro: Integer;
     fTipo: TTipoFiltro;
+    fBuscaAdicional: TipoWideStringFramework;
+
+  //property filtroAdicional getter/setter
+    function getBuscaAdicional: TipoWideStringFramework;
+    procedure setBuscaAdicional(const pValue: TipoWideStringFramework);
 
   //property dhInicial getter/setter
     function getDHInicial: Variant;
@@ -120,6 +125,7 @@ type
     property primeiro: Integer read getPrimeiro write setPrimeiro;
     property dhInicial: Variant read getDHInicial write setDHInicial;
     property dhFinal: Variant read getDHFinal write setDHFinal;
+    property buscaAdicional: TipoWideStringFramework read getBuscaAdicional write setBuscaAdicional;
 
   protected
     fCfg: IMultiConfig;
@@ -397,9 +403,15 @@ function TFiltroModel.query: TipoWideStringFramework;
   begin
     Result := '';
     lIn := '';
-    if(getOpcoesSelecionadas.strings.Count=0) then exit;
-
-    Result := ExpandeWhere(fCampo,uppercase(retiraAcentos(fOpcoesSelecionadas.text)),tewcprefixodata_None,false);
+    if(getOpcoesSelecionadas.text<>'') then
+      Result := ExpandeWhere(fCampo,uppercase(retiraAcentos(fOpcoesSelecionadas.text)),tewcprefixodata_None,false);
+    lIn := ExpandeWhere(fCampo,UpperCase(fBuscaAdicional),tewcprefixodata_None,false);
+    if(lIn<>'') then
+    begin
+      if(Result <> '') then
+        Result := Result +#13+ '   and ';
+      Result := Result + lIn;
+    end;
   end;
 
   function getTipoSet: String;
@@ -691,6 +703,16 @@ end;
 procedure TFiltroModel.setDHFinal(const pValue: Variant);
 begin
   setDhPorIndice(1,pValue);
+end;
+
+procedure TFiltroModel.setBuscaAdicional(const pValue: TipoWideStringFramework);
+begin
+  fBuscaAdicional := pValue;
+end;
+
+function TFiltroModel.getBuscaAdicional: TipoWideStringFramework;
+begin
+  Result := fBuscaAdicional;
 end;
 
 end.

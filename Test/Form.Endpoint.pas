@@ -69,6 +69,7 @@ begin
   cbFiltros.Enabled := false;
   sbAbrir.Enabled := cbEP.ItemIndex<>-1;
   if(sbAbrir.Enabled=false) then exit;
+  epControl.lista.First.objeto.FILTROS.First.objeto.opcoesSelecionadas.strings.Add('mais este elemento');
   selecionaEP(epControl.lista.Items[cbEP.ItemIndex]);
 end;
 
@@ -115,6 +116,9 @@ end;
 procedure TFormEP.sbAbrirClick(Sender: TObject);
 begin
   if(fSelecionado=nil) then exit;
+
+  fSelecionado.objeto.buscaAdicional := 'SAMSU';
+
   //Podemos filtrar quantos registos são retornados e a partir de qual...
   //fSelecionado.objeto.registros := 100;
   //fSelecionado.objeto.primeiro := 500;
