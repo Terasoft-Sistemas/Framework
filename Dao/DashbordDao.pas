@@ -15,25 +15,31 @@ uses
   Terasoft.Framework.SimpleTypes,
   Terasoft.FuncoesTexto,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   LojasModel;
 
 type
-  TDashbordDao = class
+  TDashbordDao = class;
+  ITDashbordDao=IObject<TDashbordDao>;
 
+  TDashbordDao = class
   private
+    [weak] mySelf: ITDashbordDao;
     vIConexao : IConexao;
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function ObterQuery1_Totalizador(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
-    function ObterQuery2_VendaPorDia(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
-    function ObterQuery3_VendaPorAno(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
-    function ObterQuery4_VendaPorHora(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
-    function ObterQuery6_RankingVendedores(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
-    function ObterQuery7_RankingFiliais(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
+    class function getNewIface(pIConexao: IConexao): ITDashbordDao;
 
-    function ObterQuery_Anos(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
+    function ObterQuery1_Totalizador(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
+    function ObterQuery2_VendaPorDia(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
+    function ObterQuery3_VendaPorAno(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
+    function ObterQuery4_VendaPorHora(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
+    function ObterQuery6_RankingVendedores(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
+    function ObterQuery7_RankingFiliais(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
+
+    function ObterQuery_Anos(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
 
 end;
 
@@ -45,7 +51,7 @@ uses
 
 { TDashbord }
 
-constructor TDashbordDao.Create(pIConexao : IConexao);
+constructor TDashbordDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -55,7 +61,13 @@ begin
   inherited;
 end;
 
-function TDashbordDao.ObterQuery1_Totalizador(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
+class function TDashbordDao.getNewIface(pIConexao: IConexao): ITDashbordDao;
+begin
+  Result := TImplObjetoOwner<TDashbordDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TDashbordDao.ObterQuery1_Totalizador(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -66,6 +78,7 @@ var
 begin
   lLojasModel := TLojasModel.getNewIface(vIConexao);
   MemTable := TFDMemTable.Create(nil);
+  Result := criaIFDDataset(MemTable);
 
   try
     lSQL := 'select                                                                                                                             ' + #13 +
@@ -264,7 +277,7 @@ begin
         end;
 
       finally
-       lQry.Free;
+       FreeAndNil(lQry);
       end;
     end;
 
@@ -276,12 +289,11 @@ begin
     MemTable.FieldByName('MARKUP_2').Value         := -1*((MemTable.FieldByName('CUSTO').AsFloat*100/MemTable.FieldByName('VALOR_LIQUIDO').AsFloat)-100);
     MemTable.Post;
 
-    Result :=  MemTable;
   finally
   end;
 end;
 
-function TDashbordDao.ObterQuery2_VendaPorDia(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
+function TDashbordDao.ObterQuery2_VendaPorDia(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -292,6 +304,7 @@ var
 begin
   lLojasModel := TLojasModel.getNewIface(vIConexao);
   MemTable := TFDMemTable.Create(nil);
+  Result := criaIFDDataset(MemTable);
 
   try
     lSQL := 'select                                                                                                                             ' + #13 +
@@ -484,12 +497,11 @@ begin
     MemTable.IndexFieldNames := 'DATA_EMISSAO';
     MemTable.Open;
 
-    Result :=  MemTable;
   finally
   end;
 end;
 
-function TDashbordDao.ObterQuery3_VendaPorAno(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
+function TDashbordDao.ObterQuery3_VendaPorAno(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -501,6 +513,7 @@ var
   I, lojas: Integer;
 begin
   MemTable    := TFDMemTable.Create(nil);
+  Result := criaIFDDataset(MemTable);
   lLojasModel := TLojasModel.getNewIface(vIConexao);
   lQry        := vIConexao.CriarQuery;
 
@@ -720,7 +733,6 @@ begin
     MemTable.IndexFieldNames := 'MES';
     MemTable.Open;
 
-    Result :=  MemTable;
   finally
   end;
 end;
@@ -926,7 +938,7 @@ end;
 //  end;
 //end;
 
-function TDashbordDao.ObterQuery4_VendaPorHora(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
+function TDashbordDao.ObterQuery4_VendaPorHora(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -937,6 +949,7 @@ var
   lTotalValores: Real;
 begin
   MemTable := TFDMemTable.Create(nil);
+  Result := criaIFDDataset(MemTable);
   lLojasModel := TLojasModel.getNewIface(vIConexao);
 
   try
@@ -1079,12 +1092,11 @@ begin
     MemTable.IndexFieldNames := 'DESCRICAO';
     MemTable.Open;
 
-    Result :=  MemTable;
   finally
   end;
 end;
 
-function TDashbordDao.ObterQuery6_RankingVendedores(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
+function TDashbordDao.ObterQuery6_RankingVendedores(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -1095,6 +1107,7 @@ var
   lTotalValores: Real;
 begin
   MemTable := TFDMemTable.Create(nil);
+  Result := criaIFDDataset(MemTable);
   lLojasModel := TLojasModel.getNewIface(vIConexao);
 
   try
@@ -1321,12 +1334,11 @@ begin
     MemTable.IndexFieldNames := 'VENDEDOR';
     MemTable.Open;
 
-    Result :=  MemTable;
   finally
   end;
 end;
 
-function TDashbordDao.ObterQuery7_RankingFiliais(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
+function TDashbordDao.ObterQuery7_RankingFiliais(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -1336,6 +1348,7 @@ var
 begin
   lLojasModel := TLojasModel.getNewIface(vIConexao);
   MemTable := TFDMemTable.Create(nil);
+  Result := criaIFDDataset(MemTable);
 
   try
     lSQL :=
@@ -1469,12 +1482,11 @@ begin
       end;
     end;
 
-    Result :=  MemTable;
   finally
   end;
 end;
 
-function TDashbordDao.ObterQuery_Anos(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
+function TDashbordDao.ObterQuery_Anos(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -1484,6 +1496,7 @@ var
 begin
   lLojasModel := TLojasModel.getNewIface(vIConexao);
   lMemTable := TFDMemTable.Create(nil);
+  Result := criaIFDDataset(lMemTable);
 
   lSQL := '       select                                              ' + #13 +
           '          distinct extract(year from v.data_ped) ANO       ' + #13 +
@@ -1522,11 +1535,9 @@ begin
     end;
 
   finally
-    Result := lMemTable;
     lLojasModel:=nil;
 
-    if lQry <> nil then
-      lQry.Free;
+    FreeAndNil(lQry);
 
   end;
 

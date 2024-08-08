@@ -5,26 +5,32 @@ interface
 uses
   Terasoft.Types,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
-  TDashbordModel = class
+  TDashbordModel = class;
+  ITDashbordModel=IObject<TDashbordModel>;
 
+  TDashbordModel = class
   private
+    [weak] mySelf: ITDashbordModel;
     vIConexao : IConexao;
   public
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function ObterQuery1_Totalizador(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
-    function ObterQuery2_VendaPorDia(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
-    function ObterQuery3_VendaPorAno(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
-    function ObterQuery4_VendaPorHora(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
-    function ObterQuery6_RankingVendedores(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
-    function ObterQuery7_RankingFiliais(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
+    class function getNewIface(pIConexao: IConexao): ITDashbordModel;
 
-    function ObterQuery_Anos(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
+    function ObterQuery1_Totalizador(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
+    function ObterQuery2_VendaPorDia(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
+    function ObterQuery3_VendaPorAno(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
+    function ObterQuery4_VendaPorHora(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
+    function ObterQuery6_RankingVendedores(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
+    function ObterQuery7_RankingFiliais(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
+
+    function ObterQuery_Anos(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
   end;
 
 implementation
@@ -34,7 +40,7 @@ uses
 
 { TDashbordModel }
 
-constructor TDashbordModel.Create(pIConexao : IConexao);
+constructor TDashbordModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -45,12 +51,18 @@ begin
   inherited;
 end;
 
-function TDashbordModel.ObterQuery1_Totalizador(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
+class function TDashbordModel.getNewIface(pIConexao: IConexao): ITDashbordModel;
+begin
+  Result := TImplObjetoOwner<TDashbordModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TDashbordModel.ObterQuery1_Totalizador(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
 var
-  lDashbordDao: TDashbordDao;
+  lDashbordDao: ITDashbordDao;
   lDashbord_Parametros: TDashbord_Parametros;
 begin
-  lDashbordDao := TDashbordDao.Create(vIconexao);
+  lDashbordDao := TDashbordDao.getNewIface(vIconexao);
 
   try
     lDashbord_Parametros.TipoData       := pDashbord_Parametros.TipoData;
@@ -63,19 +75,19 @@ begin
     lDashbord_Parametros.SomarFrete     := pDashbord_Parametros.SomarFrete;
     lDashbord_Parametros.Vendedores     := pDashbord_Parametros.Vendedores;
 
-    Result := lDashbordDao.ObterQuery1_Totalizador(lDashbord_Parametros);
+    Result := lDashbordDao.objeto.ObterQuery1_Totalizador(lDashbord_Parametros);
 
   finally
-    lDashbordDao.Free;
+    lDashbordDao:=nil;
   end;
 end;
 
-function TDashbordModel.ObterQuery2_VendaPorDia(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
+function TDashbordModel.ObterQuery2_VendaPorDia(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
 var
-  lDashbordDao: TDashbordDao;
+  lDashbordDao: ITDashbordDao;
   lDashbord_Parametros: TDashbord_Parametros;
 begin
-  lDashbordDao := TDashbordDao.Create(vIConexao);
+  lDashbordDao := TDashbordDao.getNewIface(vIConexao);
 
   try
     lDashbord_Parametros.TipoData       := pDashbord_Parametros.TipoData;
@@ -88,19 +100,19 @@ begin
     lDashbord_Parametros.SomarFrete     := pDashbord_Parametros.SomarFrete;
     lDashbord_Parametros.Vendedores     := pDashbord_Parametros.Vendedores;
 
-    Result := lDashbordDao.ObterQuery2_VendaPorDia(lDashbord_Parametros);
+    Result := lDashbordDao.objeto.ObterQuery2_VendaPorDia(lDashbord_Parametros);
 
   finally
-    lDashbordDao.Free;
+    lDashbordDao:=nil;
   end;
 end;
 
-function TDashbordModel.ObterQuery3_VendaPorAno(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
+function TDashbordModel.ObterQuery3_VendaPorAno(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
 var
-  lDashbordDao: TDashbordDao;
+  lDashbordDao: ITDashbordDao;
   lDashbord_Parametros: TDashbord_Parametros;
 begin
-  lDashbordDao := TDashbordDao.Create(vIConexao);
+  lDashbordDao := TDashbordDao.getNewIface(vIConexao);
 
   try
     lDashbord_Parametros.TipoData       := pDashbord_Parametros.TipoData;
@@ -113,19 +125,19 @@ begin
     lDashbord_Parametros.SomarFrete     := pDashbord_Parametros.SomarFrete;
     lDashbord_Parametros.Vendedores     := pDashbord_Parametros.Vendedores;
 
-    Result := lDashbordDao.ObterQuery3_VendaPorAno(lDashbord_Parametros);
+    Result := lDashbordDao.objeto.ObterQuery3_VendaPorAno(lDashbord_Parametros);
 
   finally
-    lDashbordDao.Free;
+    lDashbordDao:=nil;
   end;
 end;
 
-function TDashbordModel.ObterQuery4_VendaPorHora(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
+function TDashbordModel.ObterQuery4_VendaPorHora(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
 var
-  lDashbordDao: TDashbordDao;
+  lDashbordDao: ITDashbordDao;
   lDashbord_Parametros: TDashbord_Parametros;
 begin
-  lDashbordDao := TDashbordDao.Create(vIConexao);
+  lDashbordDao := TDashbordDao.getNewIface(vIConexao);
 
   try
     lDashbord_Parametros.TipoData       := pDashbord_Parametros.TipoData;
@@ -138,19 +150,19 @@ begin
     lDashbord_Parametros.SomarFrete     := pDashbord_Parametros.SomarFrete;
     lDashbord_Parametros.Vendedores     := pDashbord_Parametros.Vendedores;
 
-    Result := lDashbordDao.ObterQuery4_VendaPorHora(lDashbord_Parametros);
+    Result := lDashbordDao.objeto.ObterQuery4_VendaPorHora(lDashbord_Parametros);
 
   finally
-    lDashbordDao.Free;
+    lDashbordDao:=nil;
   end;
 end;
 
-function TDashbordModel.ObterQuery6_RankingVendedores(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
+function TDashbordModel.ObterQuery6_RankingVendedores(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
 var
-  lDashbordDao: TDashbordDao;
+  lDashbordDao: ITDashbordDao;
   lDashbord_Parametros: TDashbord_Parametros;
 begin
-  lDashbordDao := TDashbordDao.Create(vIConexao);
+  lDashbordDao := TDashbordDao.getNewIface(vIConexao);
 
   try
     lDashbord_Parametros.TipoData       := pDashbord_Parametros.TipoData;
@@ -163,19 +175,19 @@ begin
     lDashbord_Parametros.SomarFrete     := pDashbord_Parametros.SomarFrete;
     lDashbord_Parametros.Vendedores     := pDashbord_Parametros.Vendedores;
 
-    Result := lDashbordDao.ObterQuery6_RankingVendedores(lDashbord_Parametros);
+    Result := lDashbordDao.objeto.ObterQuery6_RankingVendedores(lDashbord_Parametros);
 
   finally
-    lDashbordDao.Free;
+    lDashbordDao:=nil;
   end;
 end;
 
-function TDashbordModel.ObterQuery7_RankingFiliais(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
+function TDashbordModel.ObterQuery7_RankingFiliais(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
 var
-  lDashbordDao: TDashbordDao;
+  lDashbordDao: ITDashbordDao;
   lDashbord_Parametros: TDashbord_Parametros;
 begin
-  lDashbordDao := TDashbordDao.Create(vIConexao);
+  lDashbordDao := TDashbordDao.getNewIface(vIConexao);
 
   try
     lDashbord_Parametros.TipoData       := pDashbord_Parametros.TipoData;
@@ -188,27 +200,27 @@ begin
     lDashbord_Parametros.SomarFrete     := pDashbord_Parametros.SomarFrete;
     lDashbord_Parametros.Vendedores     := pDashbord_Parametros.Vendedores;
 
-    Result := lDashbordDao.ObterQuery7_RankingFiliais(lDashbord_Parametros);
+    Result := lDashbordDao.objeto.ObterQuery7_RankingFiliais(lDashbord_Parametros);
 
   finally
-    lDashbordDao.Free;
+    lDashbordDao:=nil;
   end;
 end;
 
-function TDashbordModel.ObterQuery_Anos(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
+function TDashbordModel.ObterQuery_Anos(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
 var
-  lDashbordDao: TDashbordDao;
+  lDashbordDao: ITDashbordDao;
   lDashbord_Parametros: TDashbord_Parametros;
 begin
-  lDashbordDao := TDashbordDao.Create(vIConexao);
+  lDashbordDao := TDashbordDao.getNewIface(vIConexao);
 
   try
     lDashbord_Parametros.Lojas := pDashbord_Parametros.Lojas;
 
-    Result := lDashbordDao.ObterQuery_Anos(lDashbord_Parametros);
+    Result := lDashbordDao.objeto.ObterQuery_Anos(lDashbord_Parametros);
 
   finally
-    lDashbordDao.Free;
+    lDashbordDao:=nil;
   end;
 end;
 
