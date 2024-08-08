@@ -578,12 +578,12 @@ begin
   if(stringNoArray(lNome, ['@periodo','@periodo.data'],[osna_CaseInsensitive,osna_SemAcento])) then
   begin
     setTipo(tipoFiltro_DataPeriodo);
-    fDESCRICAO := 'Período de DATA de ' + lDescricao;
+    fDESCRICAO := 'Período por data  ' + lDescricao;
 
   end else if(stringNoArray(lNome, ['@periodo.null'],[osna_CaseInsensitive,osna_SemAcento])) then
   begin
     setTipo(tipoFiltro_DataPeriodo);
-    fDESCRICAO := 'Período de DATA de ' + lDescricao;
+    fDESCRICAO := 'Período por data ' + lDescricao;
     fAceitaNull := true;
 
   end else if(stringNoArray(lNome, ['@busca'],[osna_CaseInsensitive,osna_SemAcento])) then
@@ -593,12 +593,12 @@ begin
 
   end else if(stringNoArray(lNome, ['@hora','@periodo.hora'],[osna_CaseInsensitive,osna_SemAcento])) then
   begin
-    fDESCRICAO := 'Período de HORA de ' + lDescricao;
+    fDESCRICAO := 'Período por hora ' + lDescricao;
     setTipo(tipoFiltro_HoraPeriodo);
 
   end else if(stringNoArray(lNome, ['@datahora','@periodo.datahora'],[osna_CaseInsensitive,osna_SemAcento])) then
   begin
-    fDESCRICAO := 'Período de DATA/HORA de ' + lDescricao;
+    fDESCRICAO := 'Período de data e hora ' + lDescricao;
     setTipo(tipoFiltro_DataHoraPeriodo);
   end else if(Copy(lNome,1,1)='@') then
   begin
