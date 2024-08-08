@@ -52,11 +52,11 @@ type
     procedure SetVALOR_TOTAL_GARANTIA(const Value: Variant);
     procedure SetVALOR_TOTAL_ITENS(const Value: Variant);
     procedure SetVALOR_TOTAL(const Value: Variant);
-
+    procedure SetSEGURO_PRESTAMISTA_VALOR(const Value: Variant);
     procedure setParams(var pQry: TFDQuery; pPedidoItensModel: ITPedidoItensModel);
     procedure setParamsArray(var pQry: TFDQuery; pPedidoItensModel: ITPedidoItensModel);
+
     function where: String;
-    procedure SetSEGURO_PRESTAMISTA_VALOR(const Value: Variant);
 
   public
     constructor _Create(pConexao : IConexao);

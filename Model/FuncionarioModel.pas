@@ -137,6 +137,9 @@ type
     FESTADO_CIVIL: Variant;
     FEND_FUN: Variant;
     FOBS_CARACTERISTICA: Variant;
+    FPER_COMISSAO_GARANTIA_FR: Variant;
+    FPER_COMISSAO_GARANTIA: Variant;
+    FPER_COMISSAO_PRESTAMISTA: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetFuncionariosLista(const Value: IList<ITFuncionarioModel>);
@@ -257,6 +260,9 @@ type
     procedure SetVALOR_VALE_TRANSPORTE(const Value: Variant);
     procedure SetVENC_EXPERIENCIA_FUN(const Value: Variant);
     procedure SetVENC_EXPERIENCIA_PRORROGADO(const Value: Variant);
+    procedure SetPER_COMISSAO_GARANTIA(const Value: Variant);
+    procedure SetPER_COMISSAO_GARANTIA_FR(const Value: Variant);
+    procedure SetPER_COMISSAO_PRESTAMISTA(const Value: Variant);
 
   public
 
@@ -372,6 +378,11 @@ type
     property  MSG_FINALIZAR_TAREFA          : Variant read FMSG_FINALIZAR_TAREFA         write SetMSG_FINALIZAR_TAREFA;
     property  TIPO_ESTOQUE                  : Variant read FTIPO_ESTOQUE                 write SetTIPO_ESTOQUE;
 
+    property PER_COMISSAO_GARANTIA : Variant read FPER_COMISSAO_GARANTIA write SetPER_COMISSAO_GARANTIA;
+    property PER_COMISSAO_PRESTAMISTA : Variant read FPER_COMISSAO_PRESTAMISTA write SetPER_COMISSAO_PRESTAMISTA;
+    property PER_COMISSAO_GARANTIA_FR : Variant read FPER_COMISSAO_GARANTIA_FR write SetPER_COMISSAO_GARANTIA_FR;
+
+
     constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
@@ -412,9 +423,9 @@ var
 begin
   lFuncionarioModel := TFuncionarioModel.getNewIface(vIConexao);
   try
-    lFuncionarioModel      := lFuncionarioModel.objeto.carregaClasse(pID);
+    lFuncionarioModel             := lFuncionarioModel.objeto.carregaClasse(pID);
     lFuncionarioModel.objeto.Acao := tacAlterar;
-    Result                 := lFuncionarioModel;
+    Result                        := lFuncionarioModel;
   finally
 
   end;
@@ -983,6 +994,21 @@ end;
 procedure TFuncionarioModel.SetPAI(const Value: Variant);
 begin
   FPAI := Value;
+end;
+
+procedure TFuncionarioModel.SetPER_COMISSAO_GARANTIA(const Value: Variant);
+begin
+  FPER_COMISSAO_GARANTIA := Value;
+end;
+
+procedure TFuncionarioModel.SetPER_COMISSAO_GARANTIA_FR(const Value: Variant);
+begin
+  FPER_COMISSAO_GARANTIA_FR := Value;
+end;
+
+procedure TFuncionarioModel.SetPER_COMISSAO_PRESTAMISTA(const Value: Variant);
+begin
+  FPER_COMISSAO_PRESTAMISTA := Value;
 end;
 
 procedure TFuncionarioModel.SetPESO(const Value: Variant);

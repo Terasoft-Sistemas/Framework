@@ -230,6 +230,9 @@ begin
     lModel.objeto.COMISSAO_MONTADOR              := lQry.FieldByName('COMISSAO_MONTADOR').AsString;
     lModel.objeto.MSG_FINALIZAR_TAREFA           := lQry.FieldByName('MSG_FINALIZAR_TAREFA').AsString;
     lModel.objeto.TIPO_ESTOQUE                   := lQry.FieldByName('TIPO_ESTOQUE').AsString;
+    lModel.objeto.PER_COMISSAO_GARANTIA          := lQry.FieldByName('PER_COMISSAO_GARANTIA').AsString;
+    lModel.objeto.PER_COMISSAO_PRESTAMISTA       := lQry.FieldByName('PER_COMISSAO_PRESTAMISTA').AsString;
+    lModel.objeto.PER_COMISSAO_GARANTIA_FR       := lQry.FieldByName('PER_COMISSAO_GARANTIA_FR').AsString;
 
     Result := lModel;
 

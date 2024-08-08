@@ -24,7 +24,17 @@ type
   TPedidoItensModel = class;
   ITPedidoItensModel=IObject<TPedidoItensModel>;
 
+  TParametrosComissao = record
+    VENDEDOR                 : String;
+    TIPOVENDA                : String;
+    COMISSAO_CLIENTE         : Double;
+    GERENETE                 : String;
+    PER_COMISSAO_GARANTIA    : String;
+    PER_COMISSAO_GARANTIA_FR : String;
+  end;
+
   TPedidoItensModel = class
+
   private
     [weak] mySelf: ITPedidoItensModel;
     vIConexao : IConexao;
@@ -183,6 +193,8 @@ type
     FPICMSSTRET: Variant;
     FVICMSSTRET: Variant;
     FVICMSSUBISTITUTORET: Variant;
+    FPER_COMISSAO_GARANTIA_FR: Variant;
+    FPER_COMISSAO_GARANTIA: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetPedidoItenssLista(const Value: IList<ITPedidoItensModel>);
@@ -337,6 +349,8 @@ type
     procedure SetVBCSTRET(const Value: Variant);
     procedure SetVICMSSTRET(const Value: Variant);
     procedure SetVICMSSUBISTITUTORET(const Value: Variant);
+    procedure SetPER_COMISSAO_GARANTIA(const Value: Variant);
+    procedure SetPER_COMISSAO_GARANTIA_FR(const Value: Variant);
 
   public
     property ID: Variant read FID write SetID;
@@ -481,6 +495,9 @@ type
     property VICMSSTRET: Variant read FVICMSSTRET write SetVICMSSTRET;
     property VICMSSUBISTITUTORET: Variant read FVICMSSUBISTITUTORET write SetVICMSSUBISTITUTORET;
 
+    property PER_COMISSAO_GARANTIA : Variant read FPER_COMISSAO_GARANTIA write SetPER_COMISSAO_GARANTIA;
+    property PER_COMISSAO_GARANTIA_FR : Variant read FPER_COMISSAO_GARANTIA_FR write SetPER_COMISSAO_GARANTIA_FR;
+
   	constructor _Create(pConexao: IConexao);
     destructor Destroy; override;
 
@@ -499,7 +516,7 @@ type
 
     function gerarEstoque: String;
     function cancelarEstoque: String;
-    procedure calcularComissao(pVendedor, pTipoVenda: String; pComissaoCliente: Double; pGerente: String = '');
+    procedure calcularComissao(pParametros : TParametrosComissao);
 
     procedure aplicarFreteItem(pFrete, pTotal: Double);
 
@@ -592,23 +609,22 @@ begin
   Result    := self.Salvar;
 end;
 
-procedure TPedidoItensModel.calcularComissao(pVendedor, pTipoVenda: String; pComissaoCliente: Double; pGerente: String = '');
+procedure TPedidoItensModel.calcularComissao(pParametros : TParametrosComissao);
 var
   lVendedorModel             : ITFuncionarioModel;
   lGrupoComissao             : TGrupoComissaoModel;
   lPercentualComissao,
   lPercentualComissaoGerente : Double;
-
 begin
   lVendedorModel := TFuncionarioModel.getNewIface(vIConexao);
   lGrupoComissao := TGrupoComissaoModel.Create(vIConexao);
 
   try
     if self.FTIPO_VENDA_COMISSAO_ID <> '' then
-      lPercentualComissao := lVendedorModel.objeto.comissaoPorTipo(pVendedor, self.FTIPO_VENDA_COMISSAO_ID)
+      lPercentualComissao := lVendedorModel.objeto.comissaoPorTipo(pParametros.VENDEDOR, self.FTIPO_VENDA_COMISSAO_ID)
 
-    else if pComissaoCliente > 0 then
-      lPercentualComissao := pComissaoCliente
+    else if pParametros.COMISSAO_CLIENTE > 0 then
+      lPercentualComissao := pParametros.COMISSAO_CLIENTE
 
     else if self.FCOMIS_PRO > 0 then
       lPercentualComissao := StrToFloat(self.FCOMIS_PRO)
@@ -618,29 +634,31 @@ begin
       lPercentualComissao := lGrupoComissao.ObterGrupoComissaoProduto(self.CODIGO_PRO);
 
       if lPercentualComissao = 0 then
-        lPercentualComissao := lVendedorModel.objeto.comissaoPorGrupo(pVendedor, self.FGRUPO_COMISSAO_ID);
+        lPercentualComissao := lVendedorModel.objeto.comissaoPorGrupo(pParametros.VENDEDOR, self.FGRUPO_COMISSAO_ID);
     end
     else
-      lPercentualComissao := lVendedorModel.objeto.comissaoPorTipo(pVendedor, pTipoVenda);
+      lPercentualComissao := lVendedorModel.objeto.comissaoPorTipo(pParametros.VENDEDOR, pParametros.TIPOVENDA);
 
     self.Acao := tacAlterar;
-    self.COMISSAO_PERCENTUAL := FloatToStr(lPercentualComissao);
+    self.COMISSAO_PERCENTUAL      := FloatToStr(lPercentualComissao);
+    self.PER_COMISSAO_GARANTIA    := pParametros.PER_COMISSAO_GARANTIA;
+    self.PER_COMISSAO_GARANTIA_FR := pParametros.PER_COMISSAO_GARANTIA_FR;
     self.Salvar;
 
-    if pGerente = '' then
+    if pParametros.GERENETE = '' then
       exit;
 
-    if pComissaoCliente > 0 then
-      lPercentualComissaoGerente := pComissaoCliente
+    if pParametros.COMISSAO_CLIENTE > 0 then
+      lPercentualComissaoGerente := pParametros.COMISSAO_CLIENTE
 
     else if self.FCOMIS_PRO <> '' then
       lPercentualComissaoGerente := StrToFloat(self.FCOMIS_PRO)
 
     else if self.FGRUPO_COMISSAO_ID <> '' then
-      lPercentualComissaoGerente := lVendedorModel.objeto.comissaoPorGrupo(pGerente, self.FGRUPO_COMISSAO_ID)
+      lPercentualComissaoGerente := lVendedorModel.objeto.comissaoPorGrupo(pParametros.GERENETE, self.FGRUPO_COMISSAO_ID)
 
     else
-      lPercentualComissaoGerente := lVendedorModel.objeto.comissaoPorTipo(pGerente, pTipoVenda);
+      lPercentualComissaoGerente := lVendedorModel.objeto.comissaoPorTipo(pParametros.GERENETE, pParametros.TIPOVENDA);
 
     self.Acao := tacAlterar;
     self.GERENTE_COMISSAO_PERCENTUAL := FloatToStr(lPercentualComissaoGerente);
@@ -662,10 +680,10 @@ begin
   lUsuarioModel   := TUsuarioModel.getNewIface(vIConexao);
 
   try
-    lMovimentoModel.objeto.WhereView := ' and movimento.status <> ''X''                 '+
-                                 ' and movimento.tipo_doc = ''P''                '+
-                                 ' and movimento.tabela_origem = ''PEDIDOITENS'' '+
-                                 ' and movimento.id_origem = '+ QuotedStr(self.FID);
+    lMovimentoModel.objeto.WhereView :=  ' and movimento.status <> ''X''                 '+
+                                         ' and movimento.tipo_doc = ''P''                '+
+                                         ' and movimento.tabela_origem = ''PEDIDOITENS'' '+
+                                         ' and movimento.id_origem = '+ QuotedStr(self.FID);
 
     lMovimentoModel.objeto.obterLista;
 
@@ -1115,6 +1133,16 @@ end;
 procedure TPedidoItensModel.SetPEDIDOITENS_ID(const Value: Variant);
 begin
   FPEDIDOITENS_ID := Value;
+end;
+
+procedure TPedidoItensModel.SetPER_COMISSAO_GARANTIA(const Value: Variant);
+begin
+  FPER_COMISSAO_GARANTIA := Value;
+end;
+
+procedure TPedidoItensModel.SetPER_COMISSAO_GARANTIA_FR(const Value: Variant);
+begin
+  FPER_COMISSAO_GARANTIA_FR := Value;
 end;
 
 procedure TPedidoItensModel.SetPER_GARANTIA_FR(const Value: Variant);

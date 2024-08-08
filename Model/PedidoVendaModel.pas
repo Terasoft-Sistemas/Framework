@@ -187,6 +187,7 @@ type
     FNOME_VENDEDOR: Variant;
     FSEGURO_PRESTAMISTA_CUSTO: Variant;
     FSEGURO_PRESTAMISTA_VALOR: Variant;
+    FPER_COMISSAO_PRESTAMISTA: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetPedidoVendasLista(const Value: IList<ITPedidoVendaModel>);
@@ -345,6 +346,7 @@ type
     procedure SetSEGURO_PRESTAMISTA_VALOR(const Value: Variant);
 
     procedure getDataVendedor;
+    procedure SetPER_COMISSAO_PRESTAMISTA(const Value: Variant);
 
   public
     property NUMERO_PED: Variant read FNUMERO_PED write SetNUMERO_PED;
@@ -492,6 +494,7 @@ type
     property VALORUNITARIO_PED :Variant read FVALORUNITARIO_PED write SetVALORUNITARIO_PED;
     property SEGURO_PRESTAMISTA_VALOR :Variant read FSEGURO_PRESTAMISTA_VALOR write SetSEGURO_PRESTAMISTA_VALOR;
     property SEGURO_PRESTAMISTA_CUSTO :Variant read FSEGURO_PRESTAMISTA_CUSTO write SetSEGURO_PRESTAMISTA_CUSTO;
+    property PER_COMISSAO_PRESTAMISTA : Variant read FPER_COMISSAO_PRESTAMISTA write SetPER_COMISSAO_PRESTAMISTA;
 
     property PedidoVendasLista: IList<ITPedidoVendaModel> read FPedidoVendasLista write SetPedidoVendasLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -644,10 +647,12 @@ var
   lModel                   : ITPedidoItensModel;
   lContasReceberModel      : TContasReceberModel;
   lContasReceberItensModel : TContasReceberItensModel;
+  lVendedorModel           : ITFuncionarioModel;
   lReservaModel            : ITReservaModel;
   lClienteModel            : ITClienteModel;
   lPixModel                : ITPixModel;
   lComissaoCliente         : Double;
+  lParametros              : TParametrosComissao;
 begin
   lPedidoVendaModel        := TPedidoVendaModel.getNewIface(vIConexao);
   lPedidoItensModel        := TPedidoItensModel.getNewIface(vIConexao);
@@ -655,9 +660,11 @@ begin
   lContasReceberModel      := TContasReceberModel.Create(vIConexao);
   lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
   lPixModel                := TPixModel.getNewIface(vIConexao);
+  lVendedorModel           := TFuncionarioModel.getNewIface(vIConexao);
 
   try
     lPedidoVendaModel := lPedidoVendaModel.objeto.carregaClasse(self.FNUMERO_PED);
+    lVendedorModel    := lVendedorModel.objeto.carregaClasse(lPedidoVendaModel.objeto.CODIGO_VEN);
 
     if lPedidoVendaModel.objeto.WEB_PEDIDO_ID <> '' then
       lReservaModel := TReservaModel.getNewIface(vIConexao.NovaConexao('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA));
@@ -673,9 +680,9 @@ begin
 
       for lContasReceberItensModel in lContasReceberItensModel.ContasReceberItenssLista do
       begin
-        lPixModel.objeto.WhereView := ' and pix.contasreceberitens_id = '+ lContasReceberItensModel.ID +
-                               ' and pix.valor_recebido > 0         '+
-                               ' and pix.data_pagamento is not null ';
+        lPixModel.objeto.WhereView :=  ' and pix.contasreceberitens_id =    '+ lContasReceberItensModel.ID +
+                                       ' and pix.valor_recebido > 0         '+
+                                       ' and pix.data_pagamento is not null ';
 
         lPixModel.objeto.obterLista;
 
@@ -685,6 +692,7 @@ begin
     end;
 
     lPedidoVendaModel.objeto.Acao := tacAlterar;
+    lPedidoVendaModel.objeto.PER_COMISSAO_PRESTAMISTA := lVendedorModel.objeto.PER_COMISSAO_PRESTAMISTA;
     lPedidoVendaModel.objeto.STATUS_PED := 'B';
     lPedidoVendaModel.objeto.STATUS     := 'P';
     lPedidoVendaModel.objeto.Salvar;
@@ -694,6 +702,13 @@ begin
 
     lComissaoCliente := lClienteModel.objeto.comissaoCliente(self.FCODIGO_CLI);
 
+    lParametros.VENDEDOR                 := self.CODIGO_VEN;
+    lParametros.TIPOVENDA                := self.CODIGO_TIP;
+    lParametros.GERENETE                 := self.GERENTE_ID;
+    lParametros.COMISSAO_CLIENTE         := lComissaoCliente;
+    lParametros.PER_COMISSAO_GARANTIA    := lVendedorModel.objeto.PER_COMISSAO_GARANTIA;
+    lParametros.PER_COMISSAO_GARANTIA_FR := lVendedorModel.objeto.PER_COMISSAO_GARANTIA_FR;
+
     for lModel in lPedidoItensModel.objeto.PedidoItenssLista do
     begin
       if lPedidoVendaModel.objeto.FRETE_PED > 0 then
@@ -702,7 +717,7 @@ begin
       if (lModel.objeto.TIPO_VENDA <> 'CD') then
         lModel.objeto.gerarEstoque;
 
-      lModel.objeto.calcularComissao(lPedidoVendaModel.objeto.CODIGO_VEN, lPedidoVendaModel.objeto.CODIGO_TIP, lComissaoCliente, lPedidoVendaModel.objeto.GERENTE_ID);
+      lModel.objeto.calcularComissao(lParametros);
 
       if (lPedidoVendaModel.objeto.WEB_PEDIDO_ID <> '') and ((lModel.objeto.TIPO_VENDA = 'CD') or (lModel.objeto.ENTREGA = 'S')) then
         lReservaModel.objeto.concluirReserva(IIF(lModel.objeto.TIPO_VENDA = 'CD', '2', 'L'), lPedidoVendaModel.objeto.NUMERO_PED, lModel.objeto.WEB_PEDIDOITENS_ID, vIConexao.getEmpresa.LOJA);
@@ -713,10 +728,10 @@ begin
     lContasReceberModel.Free;
     lPedidoVendaModel:=nil;
     lPedidoItensModel:=nil;
+    lVendedorModel:=nil;
     lClienteModel:=nil;
-    lPixModel:=nil;
-
     lReservaModel:=nil;
+    lPixModel:=nil;
   end;
 end;
 
@@ -1198,20 +1213,20 @@ begin
 
     lNFModel.objeto.Acao := tacAlterar;
 
-    lNFModel.objeto.VALOR_NF              := lTableTotais.objeto.FieldByName('TOTAL_ITENS').AsString;
-    lNFModel.objeto.ACRES_NF              := lTableTotais.objeto.FieldByName('TOTAL_OUTROS').AsString;
+    lNFModel.objeto.VALOR_NF := lTableTotais.objeto.FieldByName('TOTAL_ITENS').AsString;
+    lNFModel.objeto.ACRES_NF := lTableTotais.objeto.FieldByName('TOTAL_OUTROS').AsString;
 
-    lNFModel.objeto.TOTAL_NF              := FloatToStr(lTableTotais.objeto.FieldByName('TOTAL_ITENS').AsFloat +
-                                                 lTableTotais.objeto.FieldByName('TOTAL_OUTROS').AsFloat +
-                                                 lTableTotais.objeto.FieldByName('TOTAL_IPI').AsFloat +
-                                                 lTableTotais.objeto.FieldByName('TOTAL_VII').AsFloat +
-                                                 lTableTotais.objeto.FieldByName('TOTAL_VALOR_ICMS_ST').AsFloat +
-                                                 lTableTotais.objeto.FieldByName('TOTAL_SEG').AsFloat +
-                                                 lTableTotais.objeto.FieldByName('VFCPST').AsFloat +
-                                                 lTableTotais.objeto.FieldByName('TOTAL_FRETE').AsFloat -
-                                                 lTableTotais.objeto.FieldByName('TOTAL_DESCONTO').AsFloat -
-                                                 lTableTotais.objeto.FieldByName('VICMSDESON').AsFloat -
-                                                 lTableTotais.objeto.FieldByName('VSUFRAMA').AsFloat);
+    lNFModel.objeto.TOTAL_NF   := FloatToStr(lTableTotais.objeto.FieldByName('TOTAL_ITENS').AsFloat +
+                                             lTableTotais.objeto.FieldByName('TOTAL_OUTROS').AsFloat +
+                                             lTableTotais.objeto.FieldByName('TOTAL_IPI').AsFloat +
+                                             lTableTotais.objeto.FieldByName('TOTAL_VII').AsFloat +
+                                             lTableTotais.objeto.FieldByName('TOTAL_VALOR_ICMS_ST').AsFloat +
+                                             lTableTotais.objeto.FieldByName('TOTAL_SEG').AsFloat +
+                                             lTableTotais.objeto.FieldByName('VFCPST').AsFloat +
+                                             lTableTotais.objeto.FieldByName('TOTAL_FRETE').AsFloat -
+                                             lTableTotais.objeto.FieldByName('TOTAL_DESCONTO').AsFloat -
+                                             lTableTotais.objeto.FieldByName('VICMSDESON').AsFloat -
+                                             lTableTotais.objeto.FieldByName('VSUFRAMA').AsFloat);
 
     lNFModel.objeto.VALOR_PAGO            := lNFModel.objeto.TOTAL_NF;
     lNFModel.objeto.DESC_NF               := lTableTotais.objeto.FieldByName('TOTAL_DESCONTO').AsString;
@@ -1983,6 +1998,11 @@ end;
 procedure TPedidoVendaModel.SetPEDIDO_VIDRACARIA(const Value: Variant);
 begin
   FPEDIDO_VIDRACARIA := Value;
+end;
+
+procedure TPedidoVendaModel.SetPER_COMISSAO_PRESTAMISTA(const Value: Variant);
+begin
+  FPER_COMISSAO_PRESTAMISTA := Value;
 end;
 
 procedure TPedidoVendaModel.SetPESO_BRUTO(const Value: Variant);
