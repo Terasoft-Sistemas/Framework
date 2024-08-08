@@ -352,6 +352,7 @@ begin
   for i := 0 to pDataset.FieldCount - 1 do
   begin
     f:=pDataset.Fields[i];
+    f.DisplayLabel := f.DisplayName;
     if(f is TNumericField) and not ( f.DataType in [ ftLargeint ] ) then
       TNumericField(f).DisplayFormat := ',0.00';
   end;
@@ -371,6 +372,16 @@ begin
       TSQLTimeStampField(f).DisplayFormat := sformato
     else if f is TAggregateField then
       TAggregateField(f).DisplayFormat := sFormato;
+  end;
+
+  l := getCfg.ReadSectionValuesLista('label');
+  for i := 0 to l.strings.Count-1 do
+  begin
+    sNome := l.strings.Names[i];
+    sFormato := l.strings.ValueFromIndex[i];
+    f:= pDataset.findField(sNome);
+    if(f=nil) then continue;
+    f.DisplayLabel := sFormato;
   end;
 
 end;
