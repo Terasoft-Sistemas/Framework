@@ -562,6 +562,10 @@ type
     RLLabel160: TRLLabel;
     RLLabel161: TRLLabel;
     lblData: TRLLabel;
+    RLLabel163: TRLLabel;
+    RLLabel164: TRLLabel;
+    mtPedidoCONTRATO: TStringField;
+    RLDBText108: TRLDBText;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
@@ -695,6 +699,7 @@ begin
     mtPedidoCLIENTE_ID.Value          := lPedidoVendaModel.objeto.CODIGO_CLI;
     mtPedidoCODIGO_FIADOR.Value       := lPedidoVendaModel.objeto.CONDICOES2_PAG;
     mtPedidoNUMERO_NF.Value           := lPedidoVendaModel.objeto.NUMERO_NF;
+    mtPedidoCONTRATO.Value            := lPedidoVendaModel.objeto.LOJA +'.'+ mtPedidoNUMERO.Value;
     mtPedido.Post;
 
     lContasReceberModel.IDPedidoView := lPedidoVendaModel.objeto.NUMERO_PED;
