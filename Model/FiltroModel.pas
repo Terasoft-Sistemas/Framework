@@ -405,7 +405,7 @@ function TFiltroModel.query: TipoWideStringFramework;
     lIn := '';
     if(getOpcoesSelecionadas.text<>'') then
       Result := ExpandeWhere(fCampo,uppercase(retiraAcentos(fOpcoesSelecionadas.text)),tewcprefixodata_None,false);
-    lIn := ExpandeWhere(fCampo,UpperCase(fBuscaAdicional),tewcprefixodata_None,false);
+    lIn := ExpandeWhere(fCampo,UpperCase(retiraAcentos(fBuscaAdicional)),tewcprefixodata_None,false);
     if(lIn<>'') then
     begin
       if(Result <> '') then
