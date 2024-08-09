@@ -133,6 +133,7 @@ type
 
     function getQuery: TipoWideStringFramework;
     function executaQuery(const pFormatar: boolean = true): IDatasetSimples;
+    function sumario: IDatasetSimples;
     procedure formatarDataset(pDataset: TDataset);
 
   end;
@@ -470,6 +471,52 @@ end;
 procedure TEndpointModel.setRegistros(const pValue: Integer);
 begin
   fRegistros := pValue;
+end;
+
+function TEndpointModel.sumario: IDatasetSimples;
+  var
+    lQueryOriginal: TipoWideStringFramework;
+    lDS: IDataset;
+    f: TField;
+    i: Integer;
+    lCampos, lSql: String;
+begin
+  Result := nil;
+  lDS := vIConexao.gdb.criaDataset;
+  lQueryOriginal := getQuery;
+  if fDataset=nil then
+    executaQuery;
+  lCampos := '';
+
+  for i := 0 to fDataset.dataset.FieldCount - 1 do
+  begin
+    f := fDataset.dataset.Fields[i];
+    if not (f is TNumericField) then
+      continue;
+    if(lCampos<>'') then
+      lCampos := lCampos + ',' + #13;
+    lCampos := format('%s  sum(%s) %s', [ lCampos, f.FieldName, f.FieldName ]);
+  end;
+
+  if(lCampos='') then
+    exit;
+
+  lSql := format( 'select %s from (%s) ', [ lCampos, lQueryOriginal ]);
+  {$if defined(DEBUG)}
+    Clipboard.AsText := lSQL;
+  {$endif}
+
+
+  lDS.query(lSql,'',[]);
+  Supports(lDS,IDatasetSimples,Result);
+  formatarDataset(lDS.dataset);
+  getCfg;
+
+  for i := 0 to lDS.dataset.FieldCount - 1 do
+  begin
+    f := lDS.dataset.Fields[i];
+    f.Visible := fCfg.ReadBool('sumario',f.FieldName,true);
+  end;
 end;
 
 function TEndpointModel.getRegistros: Integer;
