@@ -614,6 +614,7 @@ type
     procedure fetchFinanceiro;
     procedure reportPreview(pReportItem: TRLReport; pItem: String);
     function retornaInicioVigencia(pInicio: String; pMesesGarantia: Integer) : String;
+    procedure clearAllMemo;
 
     function retornaNumeroBilhete(pTipo, pFilial, pNumero: String): String;
 
@@ -1012,7 +1013,7 @@ var
   lItens : ITPedidoItensModel;
   i      : Integer;
 begin
-
+  Self.clearAllMemo;
   Self.fetchPedido;
   Self.fetchCliente;
   Self.fetchFiador;
@@ -1036,6 +1037,24 @@ begin
   finally
     lPedidoItensModel:=nil;
   end;
+end;
+
+procedure TImpressaoContratos.clearAllMemo;
+begin
+  rlMemoCodigo.Lines.Clear;
+  rlMemoNome.Lines.Clear;
+  rlMemoParcelaC1.Lines.Clear;
+  rlMemoVencimentoC1.Lines.Clear;
+  rlMemoValorC1.Lines.Clear;
+  rlMemoParcelaC2.Lines.Clear;
+  rlMemoVencimentoC2.Lines.Clear;
+  rlMemoValorC2.Lines.Clear;
+  rlMemoParcelaC3.Lines.Clear;
+  rlMemoVencimentoC3.Lines.Clear;
+  rlMemoValorC3.Lines.Clear;
+  rlMemoParcelaC4.Lines.Clear;
+  rlMemoVencimentoC4.Lines.Clear;
+  rlMemoValorC4.Lines.Clear;
 end;
 
 procedure TImpressaoContratos.imprimirGarantiaEstendida;
