@@ -1213,6 +1213,7 @@ begin
       lNFItensModel.objeto.IPI_SUFRAMA           := lItens.objeto.IPI_SUFRAMA;
       lNFItensModel.objeto.XPED                  := lItens.objeto.XPED;
       lNFItensModel.objeto.NITEMPED2             := lItens.objeto.NITEMPED2;
+      lNFItensModel.objeto.OBS_ITEM              := lItens.objeto.OBS_ITEM;
 
       lNFItensModel.objeto.Salvar;
     end;

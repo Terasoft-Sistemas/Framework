@@ -47,10 +47,16 @@ type
       _TABELA_ = 'ENDPOINT';
 
   protected
+    fDataset: IDataset;
     fRegistros: Integer;
     fPrimeiro: Integer;
     fContagem: Integer;
     fOldQuery: String;
+    fOrdem: TipoWideStringFramework;
+
+  //property ordem getter/setter
+    function getOrdem: TipoWideStringFramework;
+    procedure setOrdem(const pValue: TipoWideStringFramework);
 
   //property filtroAdicional getter/setter
     function getBuscaAdicional: TipoWideStringFramework;
@@ -120,12 +126,14 @@ type
     property contagem: Integer read getContagem;
     property buscaAdicional: TipoWideStringFramework read getBuscaAdicional write setBuscaAdicional;
     property buscaAvanda: ITFiltroModel read getBuscaAvancada;
+    property ordem: TipoWideStringFramework read getOrdem write setOrdem;
 
   public
     procedure loaded;
 
     function getQuery: TipoWideStringFramework;
     function executaQuery(const pFormatar: boolean = true): IDatasetSimples;
+    function sumario: IDatasetSimples;
     procedure formatarDataset(pDataset: TDataset);
 
   end;
@@ -313,15 +321,19 @@ begin
   end;
 
   //Order
-  lOrder := '';
-  l := getCfg.ReadSectionValuesLista('order');
-  lAdicional := '';
-  for i := 0 to l.strings.Count - 1 do
+  if(fOrdem = '') then
   begin
-    lIn := l.strings.ValueFromIndex[i];
-    if(lIn='') then continue;
-    lAdicional := lAdicional + lIn + #13;
-  end;
+    lOrder := '';
+    l := getCfg.ReadSectionValuesLista('order');
+    lAdicional := '';
+    for i := 0 to l.strings.Count - 1 do
+    begin
+      lIn := l.strings.ValueFromIndex[i];
+      if(lIn='') then continue;
+      lAdicional := lAdicional + lIn + #13;
+    end;
+  end else
+    lAdicional := fOrdem;
   if(lAdicional<>'') then
   begin
     lOrder := format('order by %s', [ lAdicional ]);
@@ -345,6 +357,8 @@ begin
   {$if defined(DEBUG)}
     Clipboard.AsText := lSql;
   {$endif}
+
+  fDataset := lDS;
 
   Supports(lDS,IDatasetSimples,Result);
   if assigned(Result) and pFormatar then
@@ -459,6 +473,57 @@ begin
   fRegistros := pValue;
 end;
 
+function TEndpointModel.sumario: IDatasetSimples;
+  var
+    lQueryOriginal: TipoWideStringFramework;
+    lDS: IDataset;
+    f: TField;
+    i: Integer;
+    lCampos, lSql: String;
+begin
+  Result := nil;
+  lDS := vIConexao.gdb.criaDataset;
+  fIgnoraPaginacao := true;
+  try
+    lQueryOriginal := getQuery;
+  finally
+    fIgnoraPaginacao := false;
+  end;
+  if fDataset=nil then
+    executaQuery;
+  lCampos := '';
+
+  for i := 0 to fDataset.dataset.FieldCount - 1 do
+  begin
+    f := fDataset.dataset.Fields[i];
+    if not (f is TNumericField) then
+      continue;
+    if(lCampos<>'') then
+      lCampos := lCampos + ',' + #13;
+    lCampos := format('%s  sum(%s) %s', [ lCampos, f.FieldName, f.FieldName ]);
+  end;
+
+  if(lCampos='') then
+    exit;
+
+  lSql := format( 'select %s from (%s) ', [ lCampos, lQueryOriginal ]);
+  {$if defined(DEBUG)}
+    Clipboard.AsText := lSQL;
+  {$endif}
+
+
+  lDS.query(lSql,'',[]);
+  Supports(lDS,IDatasetSimples,Result);
+  formatarDataset(lDS.dataset);
+  getCfg;
+
+  for i := 0 to lDS.dataset.FieldCount - 1 do
+  begin
+    f := lDS.dataset.Fields[i];
+    f.Visible := fCfg.ReadBool('sumario',f.FieldName,true);
+  end;
+end;
+
 function TEndpointModel.getRegistros: Integer;
 begin
   Result := fRegistros;
@@ -511,6 +576,16 @@ begin
 
   raise Exception.CreateFmt('Falta definir a busca adicional para [%s] ', [ fNOME]);
 
+end;
+
+procedure TEndpointModel.setOrdem(const pValue: TipoWideStringFramework);
+begin
+  fOrdem := pValue;
+end;
+
+function TEndpointModel.getOrdem: TipoWideStringFramework;
+begin
+  Result := fOrdem;
 end;
 
 end.

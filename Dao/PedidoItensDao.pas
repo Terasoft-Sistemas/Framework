@@ -237,6 +237,13 @@ begin
     lModel.objeto.PICMSSTRET                   := lQry.FieldByName('PICMSSTRET').AsString;
     lModel.objeto.VICMSSTRET                   := lQry.FieldByName('VICMSSTRET').AsString;
     lModel.objeto.VICMSSUBISTITUTORET          := lQry.FieldByName('VICMSSUBISTITUTORET').AsString;
+    lModel.objeto.TIPO_GARANTIA_FR             := lQry.FieldByName('TIPO_GARANTIA_FR').AsString;
+    lModel.objeto.VLR_GARANTIA_FR              := lQry.FieldByName('VLR_GARANTIA_FR').AsString;
+    lModel.objeto.CUSTO_GARANTIA_FR            := lQry.FieldByName('CUSTO_GARANTIA_FR').AsString;
+    lModel.objeto.CUSTO_GARANTIA               := lQry.FieldByName('CUSTO_GARANTIA').AsString;
+    lModel.objeto.PER_GARANTIA_FR              := lQry.FieldByName('PER_GARANTIA_FR').AsString;
+    lModel.objeto.PER_COMISSAO_GARANTIA_FR     := lQry.FieldByName('PER_COMISSAO_GARANTIA_FR').AsString;
+    lModel.objeto.PER_COMISSAO_GARANTIA        := lQry.FieldByName('PER_COMISSAO_GARANTIA').AsString;
 
     Result := lModel;
   finally
