@@ -2,8 +2,8 @@ object FormEP: TFormEP
   Left = 0
   Top = 0
   Caption = 'Endpoint'
-  ClientHeight = 441
-  ClientWidth = 624
+  ClientHeight = 629
+  ClientWidth = 1039
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -12,6 +12,7 @@ object FormEP: TFormEP
   Font.Style = []
   Position = poScreenCenter
   OnCreate = FormCreate
+  PixelsPerInch = 96
   TextHeight = 15
   object sbAbrir: TSpeedButton
     Left = 503
@@ -71,8 +72,8 @@ object FormEP: TFormEP
   end
   object grid: TXDBGrid
     Left = 0
-    Top = 136
-    Width = 624
+    Top = 204
+    Width = 1039
     Height = 305
     Align = alBottom
     GridStyle.VisualStyle = vsXPStyle
@@ -87,5 +88,14 @@ object FormEP: TFormEP
     Enabled = False
     TabOrder = 2
     OnChange = cbFiltrosChange
+  end
+  object grid2: TXDBGrid
+    Left = 0
+    Top = 509
+    Width = 1039
+    Height = 120
+    Align = alBottom
+    GridStyle.VisualStyle = vsXPStyle
+    TabOrder = 3
   end
 end

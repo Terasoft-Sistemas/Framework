@@ -28,6 +28,7 @@ type
     Label1: TLabel;
     sbLImparFiltros: TSpeedButton;
     sbValoresFiltro: TSpeedButton;
+    grid2: TXDBGrid;
     procedure FormCreate(Sender: TObject);
     procedure cbEPChange(Sender: TObject);
     procedure sbAbrirClick(Sender: TObject);
@@ -40,7 +41,7 @@ type
     epControl: IController_Endpoint;
     fSelecionado: ITEndpointModel;
     fFiltroSelecionado: ITFiltroModel;
-    fDS: IDatasetSimples;
+    fDS,fDSSumario: IDatasetSimples;
     procedure selecionaEP(ep: ITEndpointModel);
   public
     //constructor Create(pIConexao:IConexao);
@@ -130,6 +131,9 @@ begin
   Caption := IntToStr(fSelecionado.objeto.contagem);
 
   fDS := fSelecionado.objeto.executaQuery;
+  fDSSumario := fSelecionado.objeto.sumario;
+  grid2.DataSource := fDSSumario.dataSource;
+
   grid.DataSource := fDS.dataSource;
 end;
 
