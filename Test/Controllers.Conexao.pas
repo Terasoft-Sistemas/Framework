@@ -7,6 +7,7 @@ interface
     FireDAC.Comp.Client,
     Terasoft.FuncoesTexto,
     Terasoft.Framework.DB,
+    FuncoesDB,
     Terasoft.Framework.Texto,
     Interfaces.Conexao;
 
@@ -187,6 +188,9 @@ end;
 
 constructor TControllersConexao.Create;
 begin
+  {$if defined(__USE_WIN1252__)}
+    ativaWINPTBR;
+  {$endif}
   FConexao := TFDConnection.Create(nil);
 end;
 
