@@ -423,8 +423,8 @@ begin
               '              web_pedidoitens.per_garantia_fr,                                                                                                                  '+SLineBreak+
               '              web_pedidoitens.valor_venda_atual,                                                                                                                '+SLineBreak+
               '              web_pedidoitens.vlrvenda_pro,                                                                                                                     '+SLineBreak+
-              '              coalesce(web_pedidoitens.quantidade, 0) * coalesce(web_pedidoitens.vlr_garantia, 0) vlr_garantia,                                                 '+SLineBreak+
-              '              coalesce(web_pedidoitens.quantidade, 0) * coalesce(web_pedidoitens.vlr_garantia_fr, 0) vlr_garantia_fr,                                           '+SLineBreak+
+              '              coalesce(web_pedidoitens.vlr_garantia, 0) vlr_garantia,                                                                                           '+SLineBreak+
+              '              coalesce(web_pedidoitens.vlr_garantia_fr, 0) vlr_garantia_fr,                                                                                     '+SLineBreak+
               '              coalesce(web_pedidoitens.quantidade, 0) * coalesce(web_pedidoitens.valor_unitario,0) valor_totalitens,                                            '+SLineBreak+
               '              coalesce(web_pedidoitens.quantidade,0) * (coalesce(web_pedidoitens.vlr_garantia,0)+coalesce(web_pedidoitens.vlr_garantia_fr,0)) total_garantia,   '+SLineBreak+
               '              coalesce(web_pedidoitens.valor_unitario * web_pedidoitens.quantidade, 0) * coalesce(web_pedidoitens.percentual_desconto,0) / 100 valor_desconto   '+SLineBreak+
