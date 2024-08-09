@@ -483,7 +483,12 @@ function TEndpointModel.sumario: IDatasetSimples;
 begin
   Result := nil;
   lDS := vIConexao.gdb.criaDataset;
-  lQueryOriginal := getQuery;
+  fIgnoraPaginacao := true;
+  try
+    lQueryOriginal := getQuery;
+  finally
+    fIgnoraPaginacao := false;
+  end;
   if fDataset=nil then
     executaQuery;
   lCampos := '';
