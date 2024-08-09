@@ -119,6 +119,8 @@ procedure TFormEP.sbAbrirClick(Sender: TObject);
 begin
   if(fSelecionado=nil) then exit;
 
+  fSelecionado.objeto.ordem := '2 desc';
+
   //fSelecionado.objeto.buscaAdicional := 'SAMSU';
 
   //Podemos filtrar quantos registos são retornados e a partir de qual...
