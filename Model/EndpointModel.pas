@@ -47,10 +47,16 @@ type
       _TABELA_ = 'ENDPOINT';
 
   protected
+    fDataset: IDataset;
     fRegistros: Integer;
     fPrimeiro: Integer;
     fContagem: Integer;
     fOldQuery: String;
+    fOrdem: TipoWideStringFramework;
+
+  //property ordem getter/setter
+    function getOrdem: TipoWideStringFramework;
+    procedure setOrdem(const pValue: TipoWideStringFramework);
 
   //property filtroAdicional getter/setter
     function getBuscaAdicional: TipoWideStringFramework;
@@ -120,6 +126,7 @@ type
     property contagem: Integer read getContagem;
     property buscaAdicional: TipoWideStringFramework read getBuscaAdicional write setBuscaAdicional;
     property buscaAvanda: ITFiltroModel read getBuscaAvancada;
+    property ordem: TipoWideStringFramework read getOrdem write setOrdem;
 
   public
     procedure loaded;
@@ -313,15 +320,19 @@ begin
   end;
 
   //Order
-  lOrder := '';
-  l := getCfg.ReadSectionValuesLista('order');
-  lAdicional := '';
-  for i := 0 to l.strings.Count - 1 do
+  if(fOrdem = '') then
   begin
-    lIn := l.strings.ValueFromIndex[i];
-    if(lIn='') then continue;
-    lAdicional := lAdicional + lIn + #13;
-  end;
+    lOrder := '';
+    l := getCfg.ReadSectionValuesLista('order');
+    lAdicional := '';
+    for i := 0 to l.strings.Count - 1 do
+    begin
+      lIn := l.strings.ValueFromIndex[i];
+      if(lIn='') then continue;
+      lAdicional := lAdicional + lIn + #13;
+    end;
+  end else
+    lAdicional := fOrdem;
   if(lAdicional<>'') then
   begin
     lOrder := format('order by %s', [ lAdicional ]);
@@ -345,6 +356,8 @@ begin
   {$if defined(DEBUG)}
     Clipboard.AsText := lSql;
   {$endif}
+
+  fDataset := lDS;
 
   Supports(lDS,IDatasetSimples,Result);
   if assigned(Result) and pFormatar then
@@ -511,6 +524,16 @@ begin
 
   raise Exception.CreateFmt('Falta definir a busca adicional para [%s] ', [ fNOME]);
 
+end;
+
+procedure TEndpointModel.setOrdem(const pValue: TipoWideStringFramework);
+begin
+  fOrdem := pValue;
+end;
+
+function TEndpointModel.getOrdem: TipoWideStringFramework;
+begin
+  Result := fOrdem;
 end;
 
 end.
