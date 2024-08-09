@@ -356,10 +356,12 @@ procedure TEndpointModel.formatarDataset(pDataset: TDataset);
 begin
   if(pDataset=nil) then
     exit;
+  getCfg;
 
   for i := 0 to pDataset.FieldCount - 1 do
   begin
     f:=pDataset.Fields[i];
+    f.Visible := fCfg.ReadBool('visible',f.DisplayName,true);
     f.DisplayLabel := capitalizarTexto(StringReplace(f.DisplayName,'_',' ', [rfReplaceAll]));
     if(f is TNumericField) and not ( f.DataType in [ ftLargeint ] ) then
       TNumericField(f).DisplayFormat := ',0.00';
