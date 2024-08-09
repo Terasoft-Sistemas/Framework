@@ -238,7 +238,7 @@ begin
     pWebPedidoModel.objeto.Acao                := tacAlterar;
     pWebPedidoModel.objeto.VALOR_ENTRADA       := lValorEntrada;
     pWebPedidoModel.objeto.PRIMEIRO_VENCIMENTO := DateToStr(lQry.FieldByName('PRIMEIRO_VENCIMENTO').AsDateTime);
-    pWebPedidoModel.objeto.PARCELAS            := IIF(lQry.FieldByName('QUANTIDADE_PARCELAS').AsInteger > 0,lQry.FieldByName('QUANTIDADE_PARCELAS').AsInteger,1);
+    pWebPedidoModel.objeto.PARCELAS            := IIF(lQry.FieldByName('QUANTIDADE_PARCELAS').AsInteger > 0, lQry.FieldByName('QUANTIDADE_PARCELAS').AsInteger, 1 );
     pWebPedidoModel.objeto.VALOR_FINANCIADO    := lQry.FieldByName('valor_financiado').AsString;
     pWebPedidoModel.objeto.Salvar;
   finally
