@@ -356,10 +356,11 @@ var
   lSQL     : String;
 begin
   lQry     := vIConexao.CriarQuery;
+
   try
     lSQL :=
       ' select coalesce(pedidovenda.seguro_prestamista_valor, 0) seguro_prestamista_valor,                                                                   '+
-      '        sum( valorunitario_ped * qtde_calculada ) VALOR_TOTAL_ITENS,                                                                                  '+
+      '        sum( round(valorunitario_ped * qtde_calculada,2)) VALOR_TOTAL_ITENS,                                                                          '+
       '        sum( (qtde_calculada * coalesce(quantidade_tipo,0)) + (qtde_calculada * coalesce(VLR_GARANTIA_FR,0)) ) VALOR_TOTAL_GARANTIA,                  '+
       '        sum(round(cast(((cast(VALORUNITARIO_PED  as float) * pedidoitens.desconto_ped / 100)) * qtde_calculada as float),2)) as VALOR_TOTAL_DESCONTO  '+
       '   from pedidoitens                                                                                                                                   '+
@@ -368,6 +369,7 @@ begin
       '  group by 1';
 
     lQry.Open(lSQL);
+
     self.FVALOR_TOTAL_ITENS            := lQry.FieldByName('VALOR_TOTAL_ITENS').AsFloat;
     self.FVALOR_TOTAL_GARANTIA         := lQry.FieldByName('VALOR_TOTAL_GARANTIA').AsFloat;
     self.FVALOR_TOTAL_DESCONTO         := lQry.FieldByName('VALOR_TOTAL_DESCONTO').AsFloat;
