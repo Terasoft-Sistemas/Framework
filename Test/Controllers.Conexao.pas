@@ -141,7 +141,7 @@ begin
     FConexao.Params.Add('DriverID='+ 'FB');
     FConexao.Params.Add('Protocol='+ 'TCPIP');
     FConexao.Params.Add('LoginPrompt='+ 'False');
-    {$if defined(__USE_WIN1251__)}
+    {$if defined(__USE_WIN1252__)}
       FConexao.Params.Values['CharacterSet'] := GDBFIB_CHARSETPTBR;
     {$endif}
 
@@ -172,7 +172,7 @@ begin
     FConexao.Params.Add('DriverID='+ 'FB');
     FConexao.Params.Add('Protocol='+ 'TCPIP');
     FConexao.Params.Add('LoginPrompt='+ 'False');
-    {$if defined(__USE_WIN1251__)}
+    {$if defined(__USE_WIN1252__)}
       FConexao.Params.Values['CharacterSet'] := GDBFIB_CHARSETPTBR;
     {$endif}
 
