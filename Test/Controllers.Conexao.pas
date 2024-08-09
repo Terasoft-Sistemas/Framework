@@ -1,3 +1,5 @@
+{$i definicoes.inc}
+
 unit Controllers.Conexao;
 
 interface
@@ -139,6 +141,9 @@ begin
     FConexao.Params.Add('DriverID='+ 'FB');
     FConexao.Params.Add('Protocol='+ 'TCPIP');
     FConexao.Params.Add('LoginPrompt='+ 'False');
+    {$if defined(__USE_WIN1251__)}
+      FConexao.Params.Values['CharacterSet'] := GDBFIB_CHARSETPTBR;
+    {$endif}
 
     FConexao.Connected := False;
     FConexao.Connected := True;
@@ -167,6 +172,9 @@ begin
     FConexao.Params.Add('DriverID='+ 'FB');
     FConexao.Params.Add('Protocol='+ 'TCPIP');
     FConexao.Params.Add('LoginPrompt='+ 'False');
+    {$if defined(__USE_WIN1251__)}
+      FConexao.Params.Values['CharacterSet'] := GDBFIB_CHARSETPTBR;
+    {$endif}
 
     FConexao.Connected := false;
     FConexao.Connected := true;

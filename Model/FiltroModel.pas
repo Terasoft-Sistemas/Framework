@@ -328,7 +328,7 @@ begin
 
       lWhere := '';
       if(pBusca<>'') then
-        lWhere := ExpandeWhere(format('%s;%s', [ fChave,lFieldNames]),UpperCase(retiraAcentos(pBusca)),tewcprefixodata_And,false );
+        lWhere := ExpandeWhere(format('%s;%s', [ fChave,lFieldNames]),UpperCase(retiraAcentos(pBusca)),tewcprefixodata_And,vIConexao.gdb.charset=GDBFIB_CHARSETPTBR );
 
       if(lWhere<>'') then
         lWhere := ' where 1=1 ' + lWhere;
@@ -404,8 +404,8 @@ function TFiltroModel.query: TipoWideStringFramework;
     Result := '';
     lIn := '';
     if(getOpcoesSelecionadas.text<>'') then
-      Result := ExpandeWhere(fCampo,uppercase(retiraAcentos(fOpcoesSelecionadas.text)),tewcprefixodata_None,false);
-    lIn := ExpandeWhere(fCampo,UpperCase(retiraAcentos(fBuscaAdicional)),tewcprefixodata_None,false);
+      Result := ExpandeWhere(fCampo,uppercase(retiraAcentos(fOpcoesSelecionadas.text)),tewcprefixodata_None,vIConexao.gdb.charset=GDBFIB_CHARSETPTBR);
+    lIn := ExpandeWhere(fCampo,UpperCase(retiraAcentos(fBuscaAdicional)),tewcprefixodata_None,vIConexao.gdb.charset=GDBFIB_CHARSETPTBR);
     if(lIn<>'') then
     begin
       if(Result <> '') then
