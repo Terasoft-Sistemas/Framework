@@ -342,6 +342,10 @@ begin
   lDS := vIConexao.gdb.criaDataset;
   lSQL := getQuery;
   lDS.query(lSql,'',[]);
+  {$if defined(DEBUG)}
+    Clipboard.AsText := lSql;
+  {$endif}
+
   Supports(lDS,IDatasetSimples,Result);
   if assigned(Result) and pFormatar then
     formatarDataset(Result.dataset);

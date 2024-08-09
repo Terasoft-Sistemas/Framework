@@ -974,7 +974,8 @@ end;
 function TPedidoVendaModel.GerarNF(pModelo, pSerie: String): String;
 var
   lPedidoItensModel,
-  lItens            : ITPedidoItensModel;
+  lItens,
+  lTipoVenda        : ITPedidoItensModel;
   lNFModel          : ITNFModel;
   lNFItensModel     : ITNFItensModel;
   lEmpresaModel     : ITEmpresaModel;
@@ -995,6 +996,7 @@ begin
     CriaException('Modelo não informado');
 
   lPedidoItensModel := TPedidoItensModel.getNewIface(vIConexao);
+  lTipoVenda        := TPedidoItensModel.getNewIface(vIConexao);
   lNFItensModel     := TNFItensModel.getNewIface(vIConexao);
   lNFModel          := TNFModel.getNewIface(vIConexao);
   lEmpresaModel     := TEmpresaModel.getNewIface(vIConexao);
@@ -1002,6 +1004,13 @@ begin
   lConfiguracoes    := TerasoftConfiguracoes.getNewIface(vIConexao);
 
   try
+    lTipoVenda.objeto.IDPedidoVendaView := self.NUMERO_PED;
+    lTipoVenda.objeto.WhereView         := ' and coalesce(pedidoitens.tipo_venda, ''LJ'') = ''LJ'' ';
+    lTipoVenda.objeto.obterLista;
+
+    if lTipoVenda.objeto.TotalRecords = 0 then //Não permitir a emissão de NF-e para o tipo de venda CD.
+      CriaException('Não é possível emitir NF-e para um pedido sem itens da loja.');
+
     if pModelo = '65' then
     begin
       lFuncionarioModel := lFuncionarioModel.objeto.carregaClasse(self.CODIGO_VEN);
@@ -1245,6 +1254,7 @@ begin
     lNFItensModel:=nil;
     lNFModel:=nil;
     lEmpresaModel := nil;
+    lTipoVenda := nil;
   end;
 end;
 
