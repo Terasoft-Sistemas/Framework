@@ -846,7 +846,8 @@ begin
     '    l.LOTE       nLote,                                                             '+SLineBreak+
     '    l.QUANTIDADE qLote,                                                             '+SLineBreak+
     '    l.FABRICACAO dFab,                                                              '+SLineBreak+
-    '    l.VENCIMENTO dVal                                                               '+SLineBreak+
+    '    l.VENCIMENTO dVal,                                                              '+SLineBreak+
+    '    n.OBS_ITEM                                                                      '+SLineBreak+
     ' from                                                                               '+SLineBreak+
     '     nfitens n                                                                      '+SLineBreak+
     '                                                                                    '+SLineBreak+
@@ -900,7 +901,11 @@ begin
         cBarra            := lQry.FieldByName('cBarra').AsString;
         cBarraTrib        := lQry.FieldByName('cBarraTrib').AsString;
         Produto.infAdProd := lQry.FieldByName('infAdProd').AsString;
+
+        if lQry.FieldByName('OBS_ITEM').AsString <> '' then
+          Produto.infAdProd := Produto.infAdProd + ' ' +lQry.FieldByName('OBS_ITEM').AsString;
       end;
+
 
       with Produto.Imposto do
       begin
