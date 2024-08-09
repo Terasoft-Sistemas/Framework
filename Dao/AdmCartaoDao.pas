@@ -381,11 +381,17 @@ begin
         lQry := vIConexao.criarQueryExterna;
 
         lQry.SQL.Clear;
-        lQry.SQL.Add(lSQL);
-        setParams(lQry, AAdmCartaoModel);
-        lQry.Open(lSQL);
+        lQry.Open('select ID from admcartao a where a.nome_adm = ' + QuotedStr(AAdmCartaoModel.objeto.NOME_ADM) + ' and a.id <> ' + AAdmCartaoModel.objeto.ID);
 
-        Result := lQry.FieldByName('ID').AsString;
+        if lQry.recordCount = 0 then
+        begin
+          lQry.SQL.Clear;
+          lQry.SQL.Add(lSQL);
+          setParams(lQry, AAdmCartaoModel);
+          lQry.Open;
+
+          Result := lQry.FieldByName('ID').AsString;
+        end;
       end;
     end;
 
