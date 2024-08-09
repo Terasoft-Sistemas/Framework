@@ -19,6 +19,7 @@ interface
 implementation
   uses
     SysUtils,
+    FuncoesDB,
     Terasoft.FuncoesTexto;
 
 
@@ -34,6 +35,10 @@ begin
   likeKeyword :=  ' like ';
 
   Result := '';
+
+  if ( pt_br and WINPTBRAtivo ) then
+    collate_str := 'collate win_ptbr';
+
 
   for iValor := 0 to listaValores.Count - 1 do begin
     valor := listaValores.Strings[iValor];
