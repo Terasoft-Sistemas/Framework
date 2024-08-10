@@ -371,6 +371,7 @@ procedure TEndpointModel.formatarDataset(pDataset: TDataset);
     i: Integer;
     f: TField;
     sNome,sFormato: String;
+    posicao: Integer;
 begin
   if(pDataset=nil) then
     exit;
@@ -411,6 +412,25 @@ begin
     if(f=nil) then continue;
     f.DisplayLabel := sFormato;
   end;
+
+{  i:=0;
+  posicao:=-1;
+  while i < pDataset.FieldCount do
+  begin
+    f:=pDataset.Fields[i];
+    inc(posicao);
+    if(f.Visible=true) then
+    begin
+      f.Tag := posicao;
+      inc(i);
+      continue;
+    end;
+    if(f.Tag=-1) then break;
+    f.Tag := -1;
+    f.Index := pDataset.FieldCount - 1;
+    inc(i);
+  end;
+}
 
 end;
 
