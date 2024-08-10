@@ -94,7 +94,10 @@ end;
 implementation
 
 uses
-  System.Rtti, ClipBRD;
+  {$if defined(DEBUG)}
+    ClipBrd,
+  {$endif}
+  System.Rtti;
 
 { TProdutos }
 function TProdutosDao.carregaClasse(pID: String): ITProdutosModel;
@@ -705,6 +708,10 @@ begin
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
+
+    {$if defined(DEBUG)}
+      Clipboard.AsText := lSQL;
+    {$endif}
 
     lQry.Open(lSQL);
 

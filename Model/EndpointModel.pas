@@ -142,7 +142,7 @@ type
 
 implementation
   uses
-    {$if defined(DEBUG)}
+    {$if defined(__DEBUG_ANTONIO__)}
       ClipBrd,
     {$endif}
     Terasoft.Framework.Texto;
@@ -354,7 +354,7 @@ begin
   lDS := vIConexao.gdb.criaDataset;
   lSQL := getQuery;
   lDS.query(lSql,'',[]);
-  {$if defined(DEBUG)}
+  {$if defined(__DEBUG_ANTONIO__)}
     Clipboard.AsText := lSql;
   {$endif}
 
@@ -527,8 +527,8 @@ begin
     exit;
 
   lSql := format( 'select %s from (%s) ', [ lCampos, lQueryOriginal ]);
-  {$if defined(DEBUG)}
-    Clipboard.AsText := lSQL;
+  {$if defined(__DEBUG_ANTONIO__)}
+    //Clipboard.AsText := lSQL;
   {$endif}
 
 
