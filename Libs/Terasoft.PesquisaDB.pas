@@ -31,13 +31,22 @@ function pesquisaAvancadaDB ( listaCampos, listaValores: TStrings; prefixo: TEWP
     collate_str: String;
     nega: String;
     likeKeyword: String;
+    upr: String;
 begin
   likeKeyword :=  ' like ';
 
   Result := '';
 
   if ( pt_br and WINPTBRAtivo ) then
+  begin
     collate_str := 'collate win_ptbr';
+    upr := '';
+  end else
+  begin
+    upr := 'upper(';
+    collate_str := ') ';
+  end;
+
 
 
   for iValor := 0 to listaValores.Count - 1 do begin
@@ -67,7 +76,7 @@ begin
       if ( ors <> '' ) then
         ors := ors + ' or ';
 
-      ors := ors + 'Upper(coalesce( ' + campo + ', '''')) ' + collate_str + likeKeyword + ' ''%' + valor + '%''' + #13;
+      ors := ors + upr + 'coalesce( ' + campo + ', '''') ' + collate_str + likeKeyword + ' ''%' + valor + '%''' + #13;
     end;
 
     if ( ors <> '' ) then begin
