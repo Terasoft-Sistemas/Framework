@@ -1116,6 +1116,7 @@ var
 begin
 
   lLojasModel := TLojasModel.getNewIface(vIConexao);
+  lQry:=nil;
 
   try
     lLojasModel.objeto.obterHosts;
@@ -1127,6 +1128,7 @@ begin
       if lLojas.objeto.LOJA <> vIConexao.getEmpresa.LOJA then
       begin
         vIConexao.ConfigConexaoExterna('', lLojas.objeto.STRING_CONEXAO);
+        FreeAndNil(lQry);
         lQry := vIConexao.criarQueryExterna;
 
         lQry.SQL.Clear;
@@ -1140,7 +1142,7 @@ begin
 
   finally
     lLojasModel:=nil;
-    lQry.Free;
+    FreeAndNil(lQry);
   end;
 end;
 

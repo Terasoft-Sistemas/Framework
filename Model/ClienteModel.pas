@@ -1155,6 +1155,7 @@ end;
 
 destructor TClienteModel.Destroy;
 begin
+  FClientesLista := nil;
   inherited;
 end;
 

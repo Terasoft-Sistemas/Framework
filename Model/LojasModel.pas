@@ -14,7 +14,7 @@ type
 
   TLojasModel = class
   private
-    [weaok] mySelf: ITLojasModel;
+    [weak] mySelf: ITLojasModel;
     vIConexao : IConexao;
     FLojassLista: IList<ITLojasModel>;
     FAcao: TAcao;
