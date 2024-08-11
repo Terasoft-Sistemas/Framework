@@ -392,8 +392,9 @@ begin
 
   try
     lEntradaModel := lEntradaModel.objeto.carregaClasse(pIDEntrada, pCodigoFornecedor);
+    FreeAndNil(ACBrNFeDANFeRL);
 
-    ACBrNFeDANFeRL := TACBrNFeDANFeRL.Create(nil);
+    ACBrNFeDANFeRL := TACBrNFeDANFeRL.Create(ACBrNFe);
     ACBrNFe.DANFE  := ACBrNFeDANFeRL;
 
     ACBrNFe.DANFE.TipoDANFE := tiRetrato;
@@ -759,20 +760,21 @@ end;
 
 destructor TEntradaModel.Destroy;
 begin
-
+    FreeAndNil(ACBrNFeDANFeRL);
+    FreeAndNil(ACBrNFe);
   inherited;
 end;
 
 function TEntradaModel.obterFornecedor(pCNPJCPF: String): String;
 var
- lFornecedorModel : TFornecedorModel;
+ lFornecedorModel : ITFornecedorModel;
  lTableFornecedor : IFDDataset;
 begin
-  lFornecedorModel := TFornecedorModel.Create(vIConexao);
+  lFornecedorModel := TFornecedorModel.getNewIface(vIConexao);
 
   try
-    lFornecedorModel.CNPJCPFRecordView := pCNPJCPF;
-    lTableFornecedor := lFornecedorModel.obterLista;
+    lFornecedorModel.objeto.CNPJCPFRecordView := pCNPJCPF;
+    lTableFornecedor := lFornecedorModel.objeto.obterLista;
 
     if lTableFornecedor.objeto.RecordCount > 0 then
     begin
@@ -782,28 +784,28 @@ begin
 
     with ACBrNFe.NotasFiscais.Items[0].NFe.Emit do
     begin
-      lFornecedorModel.TIPO_FOR          := 'J';
-      lFornecedorModel.STATUS            := '1';
-      lFornecedorModel.FANTASIA_FOR      := UpperCase(copy(IIF(xFant = '',xNome, xFant),1,40));
-      lFornecedorModel.RAZAO_FOR         := UpperCase(copy(xNome,1,40));
-      lFornecedorModel.CNPJ_CPF_FOR      := CNPJCPF;
-      lFornecedorModel.INSCRICAO_RG_FOR  := IE;
-      lFornecedorModel.CEP_FOR           := EnderEmit.CEP.ToString;
-      lFornecedorModel.ENDERECO_FOR      := UpperCase(EnderEmit.xLgr);
-      lFornecedorModel.NUMERO_END        := EnderEmit.nro;
-      lFornecedorModel.COD_MUNICIPIO     := EnderEmit.cMun.ToString;
-      lFornecedorModel.COMPLEMENTO       := UpperCase(EnderEmit.xCpl);
-      lFornecedorModel.BAIRRO_FOR        := UpperCase(EnderEmit.xBairro);
-      lFornecedorModel.CIDADE_FOR        := UpperCase(EnderEmit.xMun);
-      lFornecedorModel.UF_FOR            := UpperCase(EnderEmit.UF);
-      lFornecedorModel.TELEFONE_FOR      := EnderEmit.fone;
-      lFornecedorModel.OBSERVACAO_FOR    := 'CADASTRO PELA ENTRADA DE FORNECEDOR';
+      lFornecedorModel.objeto.TIPO_FOR          := 'J';
+      lFornecedorModel.objeto.STATUS            := '1';
+      lFornecedorModel.objeto.FANTASIA_FOR      := UpperCase(copy(IIF(xFant = '',xNome, xFant),1,40));
+      lFornecedorModel.objeto.RAZAO_FOR         := UpperCase(copy(xNome,1,40));
+      lFornecedorModel.objeto.CNPJ_CPF_FOR      := CNPJCPF;
+      lFornecedorModel.objeto.INSCRICAO_RG_FOR  := IE;
+      lFornecedorModel.objeto.CEP_FOR           := EnderEmit.CEP.ToString;
+      lFornecedorModel.objeto.ENDERECO_FOR      := UpperCase(EnderEmit.xLgr);
+      lFornecedorModel.objeto.NUMERO_END        := EnderEmit.nro;
+      lFornecedorModel.objeto.COD_MUNICIPIO     := EnderEmit.cMun.ToString;
+      lFornecedorModel.objeto.COMPLEMENTO       := UpperCase(EnderEmit.xCpl);
+      lFornecedorModel.objeto.BAIRRO_FOR        := UpperCase(EnderEmit.xBairro);
+      lFornecedorModel.objeto.CIDADE_FOR        := UpperCase(EnderEmit.xMun);
+      lFornecedorModel.objeto.UF_FOR            := UpperCase(EnderEmit.UF);
+      lFornecedorModel.objeto.TELEFONE_FOR      := EnderEmit.fone;
+      lFornecedorModel.objeto.OBSERVACAO_FOR    := 'CADASTRO PELA ENTRADA DE FORNECEDOR';
     end;
 
-    Result := lFornecedorModel.Incluir;
+    Result := lFornecedorModel.objeto.Incluir;
 
   finally
-    lFornecedorModel.Free;
+    lFornecedorModel:=nil;
   end;
 end;
 

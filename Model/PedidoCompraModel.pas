@@ -352,24 +352,24 @@ end;
 
 procedure TPedidoCompraModel.getDadosFornecedor;
 var
-  lFornecedorModel : TFornecedorModel;
+  lFornecedorModel : ITFornecedorModel;
 begin
   if self.FCODIGO_FOR = '' then
     Exit;
 
-  lFornecedorModel := TFornecedorModel.Create(vIConexao);
+  lFornecedorModel := TFornecedorModel.getNewIface(vIConexao);
   try
-    lFornecedorModel.IDRecordView := self.CODIGO_FOR;
-    lFornecedorModel.obterLista;
+    lFornecedorModel.objeto.IDRecordView := self.CODIGO_FOR;
+    lFornecedorModel.objeto.obterLista;
 
-    self.FCONDICOES_PAG     := lFornecedorModel.CONDICOES_PAG;
-    self.FTRANSPORTADORA_ID := lFornecedorModel.TRANSPORTADORA_ID;
+    self.FCONDICOES_PAG     := lFornecedorModel.objeto.CONDICOES_PAG;
+    self.FTRANSPORTADORA_ID := lFornecedorModel.objeto.TRANSPORTADORA_ID;
 
-    if lFornecedorModel.PREVISAO_ENTREGA <> '' then
-      self.FDATAPREV_PED := vIConexao.DataServer + lFornecedorModel.PREVISAO_ENTREGA;
+    if lFornecedorModel.objeto.PREVISAO_ENTREGA <> '' then
+      self.FDATAPREV_PED := vIConexao.DataServer + lFornecedorModel.objeto.PREVISAO_ENTREGA;
 
   finally
-    lFornecedorModel.Free;
+    lFornecedorModel:=nil;
   end;
 end;
 

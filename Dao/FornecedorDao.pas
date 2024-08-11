@@ -11,12 +11,16 @@ uses
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao;
 
 type
-  TFornecedorDao = class
+  TFornecedorDao = class;
+  ITFornecedorDao=IObject<TFornecedorDao>;
 
+  TFornecedorDao = class
   private
+    [weak] mySelf: ITFornecedorDao;
     vIConexao 	: IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -42,8 +46,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITFornecedorDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -55,15 +61,15 @@ type
     property CNPJCPFRecordView : Variant read FCNPJCPFRecordView write SetCNPJCPFRecordView;
     property IDRecordView: String read FIDRecordView write SetIDRecordView;
 
-    function incluir(pFornecedorModel: TFornecedorModel): String;
-    function alterar(pFornecedorModel: TFornecedorModel): String;
-    function excluir(pFornecedorModel: TFornecedorModel): String;
+    function incluir(pFornecedorModel: ITFornecedorModel): String;
+    function alterar(pFornecedorModel: ITFornecedorModel): String;
+    function excluir(pFornecedorModel: ITFornecedorModel): String;
 
     function where: String;
-    function carregaClasse(pID : String): TFornecedorModel;
+    function carregaClasse(pID : String): ITFornecedorModel;
     function obterLista: IFDDataset;
 
-    procedure setParams(var pQry: TFDQuery; pFornecedorModel: TFornecedorModel);
+    procedure setParams(var pQry: TFDQuery; pFornecedorModel: ITFornecedorModel);
 
 end;
 
@@ -74,13 +80,13 @@ uses
 
 { TFornecedor }
 
-function TFornecedorDao.carregaClasse(pID : String): TFornecedorModel;
+function TFornecedorDao.carregaClasse(pID : String): ITFornecedorModel;
 var
   lQry: TFDQuery;
-  lModel: TFornecedorModel;
+  lModel: ITFornecedorModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TFornecedorModel.Create(vIConexao);
+  lModel   := TFornecedorModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -89,64 +95,64 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.CODIGO_FOR                   := lQry.FieldByName('CODIGO_FOR').AsString;
-    lModel.ENDERECO_FOR                 := lQry.FieldByName('ENDERECO_FOR').AsString;
-    lModel.BAIRRO_FOR                   := lQry.FieldByName('BAIRRO_FOR').AsString;
-    lModel.CIDADE_FOR                   := lQry.FieldByName('CIDADE_FOR').AsString;
-    lModel.UF_FOR                       := lQry.FieldByName('UF_FOR').AsString;
-    lModel.TELEFONE_FOR                 := lQry.FieldByName('TELEFONE_FOR').AsString;
-    lModel.TELEFONE2_FOR                := lQry.FieldByName('TELEFONE2_FOR').AsString;
-    lModel.FAX_FOR                      := lQry.FieldByName('FAX_FOR').AsString;
-    lModel.CONTATO_FOR                  := lQry.FieldByName('CONTATO_FOR').AsString;
-    lModel.CELULARCONTATO_FOR           := lQry.FieldByName('CELULARCONTATO_FOR').AsString;
-    lModel.EMAIL_FOR                    := lQry.FieldByName('EMAIL_FOR').AsString;
-    lModel.URL_FOR                      := lQry.FieldByName('URL_FOR').AsString;
-    lModel.CEP_FOR                      := lQry.FieldByName('CEP_FOR').AsString;
-    lModel.CNPJ_CPF_FOR                 := lQry.FieldByName('CNPJ_CPF_FOR').AsString;
-    lModel.INSCRICAO_RG_FOR             := lQry.FieldByName('INSCRICAO_RG_FOR').AsString;
-    lModel.FANTASIA_FOR                 := lQry.FieldByName('FANTASIA_FOR').AsString;
-    lModel.RAZAO_FOR                    := lQry.FieldByName('RAZAO_FOR').AsString;
-    lModel.BANCO_FOR                    := lQry.FieldByName('BANCO_FOR').AsString;
-    lModel.AGENCIA_FOR                  := lQry.FieldByName('AGENCIA_FOR').AsString;
-    lModel.CONTA_FOR                    := lQry.FieldByName('CONTA_FOR').AsString;
-    lModel.OBSERVACAO_FOR               := lQry.FieldByName('OBSERVACAO_FOR').AsString;
-    lModel.LIMITE_CREDITO_FOR           := lQry.FieldByName('LIMITE_CREDITO_FOR').AsString;
-    lModel.TIPO_FOR                     := lQry.FieldByName('TIPO_FOR').AsString;
-    lModel.USUARIO_ENT                  := lQry.FieldByName('USUARIO_ENT').AsString;
-    lModel.LOJA                         := lQry.FieldByName('LOJA').AsString;
-    lModel.DESCRICAO                    := lQry.FieldByName('DESCRICAO').AsString;
-    lModel.FAVORECIDO                   := lQry.FieldByName('FAVORECIDO').AsString;
-    lModel.COD_MUNICIPIO                := lQry.FieldByName('COD_MUNICIPIO').AsString;
-    lModel.TELEFONE_EXTERIOR            := lQry.FieldByName('TELEFONE_EXTERIOR').AsString;
-    lModel.PAIS                         := lQry.FieldByName('PAIS').AsString;
-    lModel.BANCO_EXTERIOR               := lQry.FieldByName('BANCO_EXTERIOR').AsString;
-    lModel.SWIFT_CODE                   := lQry.FieldByName('SWIFT_CODE').AsString;
-    lModel.CONTA_EXTERIOR               := lQry.FieldByName('CONTA_EXTERIOR').AsString;
-    lModel.FAVORECIDO_EXTERIOR          := lQry.FieldByName('FAVORECIDO_EXTERIOR').AsString;
-    lModel.MODALIDADECONTA              := lQry.FieldByName('MODALIDADECONTA').AsString;
-    lModel.OPERACAOBANCO                := lQry.FieldByName('OPERACAOBANCO').AsString;
-    lModel.CELULARCONTATO_FOR2          := lQry.FieldByName('CELULARCONTATO_FOR2').AsString;
-    lModel.ID                           := lQry.FieldByName('ID').AsString;
-    lModel.SUFRAMA                      := lQry.FieldByName('SUFRAMA').AsString;
-    lModel.NUMERO_END                   := lQry.FieldByName('NUMERO_END').AsString;
-    lModel.COMPLEMENTO                  := lQry.FieldByName('COMPLEMENTO').AsString;
-    lModel.CONDICOES_PAG                := lQry.FieldByName('CONDICOES_PAG').AsString;
-    lModel.STATUS                       := lQry.FieldByName('STATUS').AsString;
-    lModel.TRANSPORTADORA_ID            := lQry.FieldByName('TRANSPORTADORA_ID').AsString;
-    lModel.TIPO_MOVIMENTO               := lQry.FieldByName('TIPO_MOVIMENTO').AsString;
-    lModel.TIPO_APURACAO                := lQry.FieldByName('TIPO_APURACAO').AsString;
-    lModel.CREDITO_IMPOSTO              := lQry.FieldByName('CREDITO_IMPOSTO').AsString;
-    lModel.COMPRA_PRAZO                 := lQry.FieldByName('COMPRA_PRAZO').AsString;
-    lModel.COMPRA_MINIMO                := lQry.FieldByName('COMPRA_MINIMO').AsString;
-    lModel.CONTA_ID                     := lQry.FieldByName('CONTA_ID').AsString;
-    lModel.CODIGO_CONTABIL              := lQry.FieldByName('CODIGO_CONTABIL').AsString;
-    lModel.NASCIMENTO_FOR               := lQry.FieldByName('NASCIMENTO_FOR').AsString;
-    lModel.PERIODICIDADE                := lQry.FieldByName('PERIODICIDADE').AsString;
-    lModel.PREVISAO_ENTREGA             := lQry.FieldByName('PREVISAO_ENTREGA').AsString;
-    lModel.MATRIZ_FORNECEDOR_ID         := lQry.FieldByName('MATRIZ_FORNECEDOR_ID').AsString;
-    lModel.VINCULAR_PRODUTOS_ENTRADA    := lQry.FieldByName('VINCULAR_PRODUTOS_ENTRADA').AsString;
-    lModel.CODIGO_ANTERIOR              := lQry.FieldByName('CODIGO_ANTERIOR').AsString;
-    lModel.SYSTIME                      := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.CODIGO_FOR                   := lQry.FieldByName('CODIGO_FOR').AsString;
+    lModel.objeto.ENDERECO_FOR                 := lQry.FieldByName('ENDERECO_FOR').AsString;
+    lModel.objeto.BAIRRO_FOR                   := lQry.FieldByName('BAIRRO_FOR').AsString;
+    lModel.objeto.CIDADE_FOR                   := lQry.FieldByName('CIDADE_FOR').AsString;
+    lModel.objeto.UF_FOR                       := lQry.FieldByName('UF_FOR').AsString;
+    lModel.objeto.TELEFONE_FOR                 := lQry.FieldByName('TELEFONE_FOR').AsString;
+    lModel.objeto.TELEFONE2_FOR                := lQry.FieldByName('TELEFONE2_FOR').AsString;
+    lModel.objeto.FAX_FOR                      := lQry.FieldByName('FAX_FOR').AsString;
+    lModel.objeto.CONTATO_FOR                  := lQry.FieldByName('CONTATO_FOR').AsString;
+    lModel.objeto.CELULARCONTATO_FOR           := lQry.FieldByName('CELULARCONTATO_FOR').AsString;
+    lModel.objeto.EMAIL_FOR                    := lQry.FieldByName('EMAIL_FOR').AsString;
+    lModel.objeto.URL_FOR                      := lQry.FieldByName('URL_FOR').AsString;
+    lModel.objeto.CEP_FOR                      := lQry.FieldByName('CEP_FOR').AsString;
+    lModel.objeto.CNPJ_CPF_FOR                 := lQry.FieldByName('CNPJ_CPF_FOR').AsString;
+    lModel.objeto.INSCRICAO_RG_FOR             := lQry.FieldByName('INSCRICAO_RG_FOR').AsString;
+    lModel.objeto.FANTASIA_FOR                 := lQry.FieldByName('FANTASIA_FOR').AsString;
+    lModel.objeto.RAZAO_FOR                    := lQry.FieldByName('RAZAO_FOR').AsString;
+    lModel.objeto.BANCO_FOR                    := lQry.FieldByName('BANCO_FOR').AsString;
+    lModel.objeto.AGENCIA_FOR                  := lQry.FieldByName('AGENCIA_FOR').AsString;
+    lModel.objeto.CONTA_FOR                    := lQry.FieldByName('CONTA_FOR').AsString;
+    lModel.objeto.OBSERVACAO_FOR               := lQry.FieldByName('OBSERVACAO_FOR').AsString;
+    lModel.objeto.LIMITE_CREDITO_FOR           := lQry.FieldByName('LIMITE_CREDITO_FOR').AsString;
+    lModel.objeto.TIPO_FOR                     := lQry.FieldByName('TIPO_FOR').AsString;
+    lModel.objeto.USUARIO_ENT                  := lQry.FieldByName('USUARIO_ENT').AsString;
+    lModel.objeto.LOJA                         := lQry.FieldByName('LOJA').AsString;
+    lModel.objeto.DESCRICAO                    := lQry.FieldByName('DESCRICAO').AsString;
+    lModel.objeto.FAVORECIDO                   := lQry.FieldByName('FAVORECIDO').AsString;
+    lModel.objeto.COD_MUNICIPIO                := lQry.FieldByName('COD_MUNICIPIO').AsString;
+    lModel.objeto.TELEFONE_EXTERIOR            := lQry.FieldByName('TELEFONE_EXTERIOR').AsString;
+    lModel.objeto.PAIS                         := lQry.FieldByName('PAIS').AsString;
+    lModel.objeto.BANCO_EXTERIOR               := lQry.FieldByName('BANCO_EXTERIOR').AsString;
+    lModel.objeto.SWIFT_CODE                   := lQry.FieldByName('SWIFT_CODE').AsString;
+    lModel.objeto.CONTA_EXTERIOR               := lQry.FieldByName('CONTA_EXTERIOR').AsString;
+    lModel.objeto.FAVORECIDO_EXTERIOR          := lQry.FieldByName('FAVORECIDO_EXTERIOR').AsString;
+    lModel.objeto.MODALIDADECONTA              := lQry.FieldByName('MODALIDADECONTA').AsString;
+    lModel.objeto.OPERACAOBANCO                := lQry.FieldByName('OPERACAOBANCO').AsString;
+    lModel.objeto.CELULARCONTATO_FOR2          := lQry.FieldByName('CELULARCONTATO_FOR2').AsString;
+    lModel.objeto.ID                           := lQry.FieldByName('ID').AsString;
+    lModel.objeto.SUFRAMA                      := lQry.FieldByName('SUFRAMA').AsString;
+    lModel.objeto.NUMERO_END                   := lQry.FieldByName('NUMERO_END').AsString;
+    lModel.objeto.COMPLEMENTO                  := lQry.FieldByName('COMPLEMENTO').AsString;
+    lModel.objeto.CONDICOES_PAG                := lQry.FieldByName('CONDICOES_PAG').AsString;
+    lModel.objeto.STATUS                       := lQry.FieldByName('STATUS').AsString;
+    lModel.objeto.TRANSPORTADORA_ID            := lQry.FieldByName('TRANSPORTADORA_ID').AsString;
+    lModel.objeto.TIPO_MOVIMENTO               := lQry.FieldByName('TIPO_MOVIMENTO').AsString;
+    lModel.objeto.TIPO_APURACAO                := lQry.FieldByName('TIPO_APURACAO').AsString;
+    lModel.objeto.CREDITO_IMPOSTO              := lQry.FieldByName('CREDITO_IMPOSTO').AsString;
+    lModel.objeto.COMPRA_PRAZO                 := lQry.FieldByName('COMPRA_PRAZO').AsString;
+    lModel.objeto.COMPRA_MINIMO                := lQry.FieldByName('COMPRA_MINIMO').AsString;
+    lModel.objeto.CONTA_ID                     := lQry.FieldByName('CONTA_ID').AsString;
+    lModel.objeto.CODIGO_CONTABIL              := lQry.FieldByName('CODIGO_CONTABIL').AsString;
+    lModel.objeto.NASCIMENTO_FOR               := lQry.FieldByName('NASCIMENTO_FOR').AsString;
+    lModel.objeto.PERIODICIDADE                := lQry.FieldByName('PERIODICIDADE').AsString;
+    lModel.objeto.PREVISAO_ENTREGA             := lQry.FieldByName('PREVISAO_ENTREGA').AsString;
+    lModel.objeto.MATRIZ_FORNECEDOR_ID         := lQry.FieldByName('MATRIZ_FORNECEDOR_ID').AsString;
+    lModel.objeto.VINCULAR_PRODUTOS_ENTRADA    := lQry.FieldByName('VINCULAR_PRODUTOS_ENTRADA').AsString;
+    lModel.objeto.CODIGO_ANTERIOR              := lQry.FieldByName('CODIGO_ANTERIOR').AsString;
+    lModel.objeto.SYSTIME                      := lQry.FieldByName('SYSTIME').AsString;
 
     Result := lModel;
   finally
@@ -154,7 +160,7 @@ begin
   end;
 end;
 
-constructor TFornecedorDao.Create(pIConexao : IConexao);
+constructor TFornecedorDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -165,7 +171,7 @@ begin
   inherited;
 end;
 
-function TFornecedorDao.incluir(pFornecedorModel: TFornecedorModel): String;
+function TFornecedorDao.incluir(pFornecedorModel: ITFornecedorModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -176,7 +182,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pFornecedorModel.CODIGO_FOR := vIConexao.Generetor('GEN_FORNECEDOR');
+    pFornecedorModel.objeto.CODIGO_FOR := vIConexao.Generetor('GEN_FORNECEDOR');
     setParams(lQry, pFornecedorModel);
     lQry.Open;
 
@@ -188,7 +194,7 @@ begin
   end;
 end;
 
-function TFornecedorDao.alterar(pFornecedorModel: TFornecedorModel): String;
+function TFornecedorDao.alterar(pFornecedorModel: ITFornecedorModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -202,7 +208,7 @@ begin
     setParams(lQry, pFornecedorModel);
     lQry.ExecSQL;
 
-    Result := pFornecedorModel.ID;
+    Result := pFornecedorModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -210,20 +216,26 @@ begin
   end;
 end;
 
-function TFornecedorDao.excluir(pFornecedorModel: TFornecedorModel): String;
+function TFornecedorDao.excluir(pFornecedorModel: ITFornecedorModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from FORNECEDOR where CODIGO_FOR = :CODIGO_FOR' ,[pFornecedorModel.CODIGO_FOR]);
+   lQry.ExecSQL('delete from FORNECEDOR where CODIGO_FOR = :CODIGO_FOR' ,[pFornecedorModel.objeto.CODIGO_FOR]);
    lQry.ExecSQL;
-   Result := pFornecedorModel.ID;
+   Result := pFornecedorModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TFornecedorDao.getNewIface(pIConexao: IConexao): ITFornecedorDao;
+begin
+  Result := TImplObjetoOwner<TFornecedorDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TFornecedorDao.where: String;
@@ -326,28 +338,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TFornecedorDao.setParams(var pQry: TFDQuery; pFornecedorModel: TFornecedorModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TFornecedorDao.setParams(var pQry: TFDQuery; pFornecedorModel: ITFornecedorModel);
 begin
-  lTabela := vConstrutor.getColumns('FORNECEDOR');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TFornecedorModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pFornecedorModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pFornecedorModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('FORNECEDOR',pQry,pFornecedorModel.objeto);
 end;
 
 procedure TFornecedorDao.SetStartRecordView(const Value: String);

@@ -1008,13 +1008,13 @@ var
   lGrupoModel      : ITGrupoModel;
   lSubGrupoModel   : TSubGrupoModel;
   lMarcaModel      : TMarcaModel;
-  lFornecedorModel : TFornecedorModel;
+  lFornecedorModel : ITFornecedorModel;
 begin
 
   lGrupoModel      := TGrupoModel.getNewIface(vIConexao);
   lSubGrupoModel   := TSubGrupoModel.Create(vIConexao);
   lMarcaModel      := TMarcaModel.Create(vIConexao);
-  lFornecedorModel := TFornecedorModel.Create(vIConexao);
+  lFornecedorModel := TFornecedorModel.getNewIface(vIConexao);
   try
 
     if self.CODIGO_GRU = '' then
@@ -1027,10 +1027,10 @@ begin
 
     if self.CODIGO_FOR = '' then
     begin
-      lFornecedorModel.StartRecordView := '0';
-      lFornecedorModel.LengthPageView  := '1';
-      lFornecedorModel.OrderView       := 'CODIGO_FOR';
-      self.CODIGO_FOR := lFornecedorModel.ObterLista.objeto.FieldByName('CODIGO_FOR').AsString;
+      lFornecedorModel.objeto.StartRecordView := '0';
+      lFornecedorModel.objeto.LengthPageView  := '1';
+      lFornecedorModel.objeto.OrderView       := 'CODIGO_FOR';
+      self.CODIGO_FOR := lFornecedorModel.objeto.ObterLista.objeto.FieldByName('CODIGO_FOR').AsString;
     end;
 
     if self.CODIGO_MAR = '' then
