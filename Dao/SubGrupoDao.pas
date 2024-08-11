@@ -19,9 +19,12 @@ uses
   Terasoft.ConstrutorDao;
 
 type
-  TSubGrupoDao = class
+  TSubGrupoDao = class;
+  ITSubGrupoDao=IObject<TSubGrupoDao>;
 
+  TSubGrupoDao = class
   private
+    [weak] mySelf: ITSubGrupoDao;
     vIConexao   : IConexao;
     vConstrutor : TConstrutorDao;
 
@@ -49,8 +52,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITSubGrupoDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -61,12 +66,12 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView : String  read FIDRecordView write SetIDRecordView;
 
-    function incluir(pSubGrupoModel: TSubGrupoModel): String;
-    function alterar(pSubGrupoModel: TSubGrupoModel): String;
-    function excluir(pSubGrupoModel: TSubGrupoModel): String;
-    function carregaClasse(pID : String): TSubGrupoModel;
+    function incluir(pSubGrupoModel: ITSubGrupoModel): String;
+    function alterar(pSubGrupoModel: ITSubGrupoModel): String;
+    function excluir(pSubGrupoModel: ITSubGrupoModel): String;
+    function carregaClasse(pID : String): ITSubGrupoModel;
 
-    procedure setParams(var pQry: TFDQuery; pSubGrupoModel: TSubGrupoModel);
+    procedure setParams(var pQry: TFDQuery; pSubGrupoModel: ITSubGrupoModel);
     function ObterLista(pSubGrupo_Parametros: TSubGrupo_Parametros): IFDDataset; overload;
     function ObterLista: IFDDataset; overload;
 
@@ -79,7 +84,7 @@ uses
 
 { TPCG }
 
-constructor TSubGrupoDao.Create(pIConexao : IConexao);
+constructor TSubGrupoDao._Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -90,13 +95,13 @@ begin
   inherited;
 end;
 
-function TSubGrupoDao.carregaClasse(pID: String): TSubGrupoModel;
+function TSubGrupoDao.carregaClasse(pID: String): ITSubGrupoModel;
 var
   lQry: TFDQuery;
-  lModel: TSubGrupoModel;
+  lModel: ITSubGrupoModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TSubGrupoModel.Create(vIConexao);
+  lModel   := TSubGrupoModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -105,10 +110,10 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.CODIGO_SUB       := lQry.FieldByName('CODIGO_SUB').AsString;
-    lModel.NOME_SUB         := lQry.FieldByName('NOME_SUB').AsString;
-    lModel.CODIGO_GRU       := lQry.FieldByName('CODIGO_GRU').AsString;
-    lModel.ID               := lQry.FieldByName('ID').AsString;
+    lModel.objeto.CODIGO_SUB       := lQry.FieldByName('CODIGO_SUB').AsString;
+    lModel.objeto.NOME_SUB         := lQry.FieldByName('NOME_SUB').AsString;
+    lModel.objeto.CODIGO_GRU       := lQry.FieldByName('CODIGO_GRU').AsString;
+    lModel.objeto.ID               := lQry.FieldByName('ID').AsString;
 
     Result := lModel;
   finally
@@ -167,7 +172,7 @@ begin
   end;
 end;
 
-function TSubGrupoDao.incluir(pSubGrupoModel: TSubGrupoModel): String;
+function TSubGrupoDao.incluir(pSubGrupoModel: ITSubGrupoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -178,7 +183,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pSubGrupoModel.CODIGO_SUB := vIConexao.Generetor('GEN_SUBGRUPOPRODUTO');
+    pSubGrupoModel.objeto.CODIGO_SUB := vIConexao.Generetor('GEN_SUBGRUPOPRODUTO');
     setParams(lQry, pSubGrupoModel);
     lQry.Open;
 
@@ -217,7 +222,7 @@ begin
   end;
 end;
 
-function TSubGrupoDao.alterar(pSubGrupoModel: TSubGrupoModel): String;
+function TSubGrupoDao.alterar(pSubGrupoModel: ITSubGrupoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -231,7 +236,7 @@ begin
     setParams(lQry, pSubGrupoModel);
     lQry.ExecSQL;
 
-    Result := pSubGrupoModel.CODIGO_SUB;
+    Result := pSubGrupoModel.objeto.CODIGO_SUB;
 
   finally
     lSQL := '';
@@ -239,20 +244,26 @@ begin
   end;
 end;
 
-function TSubGrupoDao.excluir(pSubGrupoModel: TSubGrupoModel): String;
+function TSubGrupoDao.excluir(pSubGrupoModel: ITSubGrupoModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from SUBGRUPOPRODUTO where CODIGO_SUB = :CODIGO_SUB' ,[pSubGrupoModel.CODIGO_SUB]);
+   lQry.ExecSQL('delete from SUBGRUPOPRODUTO where CODIGO_SUB = :CODIGO_SUB' ,[pSubGrupoModel.objeto.CODIGO_SUB]);
    lQry.ExecSQL;
-   Result := pSubGrupoModel.CODIGO_SUB;
+   Result := pSubGrupoModel.objeto.CODIGO_SUB;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TSubGrupoDao.getNewIface(pIConexao: IConexao): ITSubGrupoDao;
+begin
+  Result := TImplObjetoOwner<TSubGrupoDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TSubGrupoDao.where: String;
@@ -316,28 +327,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TSubGrupoDao.setParams(var pQry: TFDQuery; pSubGrupoModel: TSubGrupoModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TSubGrupoDao.setParams(var pQry: TFDQuery; pSubGrupoModel: ITSubGrupoModel);
 begin
-  lTabela := vConstrutor.getColumns('SubGrupoPRODUTO');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TSubGrupoModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pSubGrupoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pSubGrupoModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('SubGrupoPRODUTO',pQry,pSubGrupoModel.objeto);
 end;
 
 procedure TSubGrupoDao.SetStartRecordView(const Value: String);

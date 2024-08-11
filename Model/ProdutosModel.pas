@@ -1006,13 +1006,13 @@ end;
 function TProdutosModel.Incluir: String;
 var
   lGrupoModel      : ITGrupoModel;
-  lSubGrupoModel   : TSubGrupoModel;
+  lSubGrupoModel   : ITSubGrupoModel;
   lMarcaModel      : TMarcaModel;
   lFornecedorModel : ITFornecedorModel;
 begin
 
   lGrupoModel      := TGrupoModel.getNewIface(vIConexao);
-  lSubGrupoModel   := TSubGrupoModel.Create(vIConexao);
+  lSubGrupoModel   := TSubGrupoModel.getNewIface(vIConexao);
   lMarcaModel      := TMarcaModel.Create(vIConexao);
   lFornecedorModel := TFornecedorModel.getNewIface(vIConexao);
   try
@@ -1043,10 +1043,10 @@ begin
 
     if self.CODIGO_SUB = '' then
     begin
-      lSubGrupoModel.StartRecordView := '0';
-      lSubGrupoModel.LengthPageView  := '1';
-      lSubGrupoModel.OrderView       := 'CODIGO_SUB';
-      self.CODIGO_SUB := lSubGrupoModel.ObterLista.objeto.FieldByName('CODIGO_SUB').AsString;
+      lSubGrupoModel.objeto.StartRecordView := '0';
+      lSubGrupoModel.objeto.LengthPageView  := '1';
+      lSubGrupoModel.objeto.OrderView       := 'CODIGO_SUB';
+      self.CODIGO_SUB := lSubGrupoModel.objeto.ObterLista.objeto.FieldByName('CODIGO_SUB').AsString;
     end;
 
     self.ECF_PRO              := 'FF';
