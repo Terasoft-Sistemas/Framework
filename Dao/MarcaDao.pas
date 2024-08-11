@@ -16,14 +16,16 @@ uses
   Interfaces.Conexao,
   Terasoft.Framework.ObjectIface,
   Terasoft.FuncoesTexto,
-  System.Generics.Collections,
   Terasoft.ConstrutorDao,
   MarcaModel;
 
 type
-  TMarcaDao = class
+  TMarcaDao = class;
+  ITMarcaDao=IObject<TMarcaDao>;
 
+  TMarcaDao = class
   private
+    [weak] mySelf: ITMarcaDao;
     vIConexao : IConexao;
 
     vConstrutor : TConstrutorDao;
@@ -52,8 +54,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITMarcaDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -64,12 +68,12 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView : String read FIDRecordView write SetIDRecordView;
 
-    function incluir(pMarcaModel: TMarcaModel): String;
-    function alterar(pMarcaModel: TMarcaModel): String;
-    function excluir(pMarcaModel: TMarcaModel): String;
-    function carregaClasse(pID : String): TMarcaModel;
+    function incluir(pMarcaModel: ITMarcaModel): String;
+    function alterar(pMarcaModel: ITMarcaModel): String;
+    function excluir(pMarcaModel: ITMarcaModel): String;
+    function carregaClasse(pID : String): ITMarcaModel;
 
-    procedure setParams(var pQry: TFDQuery; pMarcaModel: TMarcaModel);
+    procedure setParams(var pQry: TFDQuery; pMarcaModel: ITMarcaModel);
     function ObterLista(pMarca_Parametros: TMarca_Parametros): IFDDataset; overload;
     function ObterLista: IFDDataset; overload;
 
@@ -82,13 +86,13 @@ uses
 
 { TPCG }
 
-function TMarcaDao.carregaClasse(pID: String): TMarcaModel;
+function TMarcaDao.carregaClasse(pID: String): ITMarcaModel;
 var
   lQry: TFDQuery;
-  lModel: TMarcaModel;
+  lModel: ITMarcaModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TMarcaModel.Create(vIConexao);
+  lModel   := TMarcaModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -97,11 +101,11 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.CODIGO_MAR       := lQry.FieldByName('CODIGO_MAR').AsString;
-    lModel.NOME_MAR         := lQry.FieldByName('NOME_MAR').AsString;
-    lModel.USUARIO_MAR      := lQry.FieldByName('USUARIO_MAR').AsString;
-    lModel.ID               := lQry.FieldByName('ID').AsString;
-    lModel.SIGLA            := lQry.FieldByName('SIGLA').AsString;
+    lModel.objeto.CODIGO_MAR       := lQry.FieldByName('CODIGO_MAR').AsString;
+    lModel.objeto.NOME_MAR         := lQry.FieldByName('NOME_MAR').AsString;
+    lModel.objeto.USUARIO_MAR      := lQry.FieldByName('USUARIO_MAR').AsString;
+    lModel.objeto.ID               := lQry.FieldByName('ID').AsString;
+    lModel.objeto.SIGLA            := lQry.FieldByName('SIGLA').AsString;
 
     Result := lModel;
   finally
@@ -109,7 +113,7 @@ begin
   end;
 end;
 
-constructor TMarcaDao.Create(pIConexao : IConexao);
+constructor TMarcaDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -171,7 +175,7 @@ begin
   end;
 end;
 
-function TMarcaDao.incluir(pMarcaModel: TMarcaModel): String;
+function TMarcaDao.incluir(pMarcaModel: ITMarcaModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -182,7 +186,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pMarcaModel.CODIGO_MAR := vIConexao.Generetor('GEN_MARCAPRODUTO');
+    pMarcaModel.objeto.CODIGO_MAR := vIConexao.Generetor('GEN_MARCAPRODUTO');
     setParams(lQry, pMarcaModel);
     lQry.Open;
 
@@ -222,7 +226,7 @@ begin
   end;
 end;
 
-function TMarcaDao.alterar(pMarcaModel: TMarcaModel): String;
+function TMarcaDao.alterar(pMarcaModel: ITMarcaModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -236,7 +240,7 @@ begin
     setParams(lQry, pMarcaModel);
     lQry.ExecSQL;
 
-    Result := pMarcaModel.CODIGO_MAR;
+    Result := pMarcaModel.objeto.CODIGO_MAR;
 
   finally
     lSQL := '';
@@ -244,20 +248,26 @@ begin
   end;
 end;
 
-function TMarcaDao.excluir(pMarcaModel: TMarcaModel): String;
+function TMarcaDao.excluir(pMarcaModel: ITMarcaModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from MARCAPRODUTO where ID = :ID' ,[pMarcaModel.CODIGO_MAR]);
+   lQry.ExecSQL('delete from MARCAPRODUTO where ID = :ID' ,[pMarcaModel.objeto.CODIGO_MAR]);
    lQry.ExecSQL;
-   Result := pMarcaModel.CODIGO_MAR;
+   Result := pMarcaModel.objeto.CODIGO_MAR;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TMarcaDao.getNewIface(pIConexao: IConexao): ITMarcaDao;
+begin
+  Result := TImplObjetoOwner<TMarcaDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TMarcaDao.where: String;
@@ -322,28 +332,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TMarcaDao.setParams(var pQry: TFDQuery; pMarcaModel: TMarcaModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TMarcaDao.setParams(var pQry: TFDQuery; pMarcaModel: ITMarcaModel);
 begin
-  lTabela := vConstrutor.getColumns('MARCAPRODUTO');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TMarcaModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pMarcaModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pMarcaModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('MARCAPRODUTO',pQry,pMarcaModel.objeto);
 end;
 
 procedure TMarcaDao.SetStartRecordView(const Value: String);

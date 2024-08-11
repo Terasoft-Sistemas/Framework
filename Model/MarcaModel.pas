@@ -6,12 +6,16 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
-  TMarcaModel = class
+  TMarcaModel = class;
+  ITMarcaModel=IObject<TMarcaModel>;
 
+  TMarcaModel = class
   private
+    [weak] mySelf: ITMarcaModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -43,8 +47,10 @@ type
 
     public
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITMarcaModel;
 
     property CODIGO_MAR  :Variant read FCODIGO_MAR write SetCODIGO_MAR;
     property NOME_MAR    :Variant read FNOME_MAR write SetNOME_MAR;
@@ -63,8 +69,8 @@ type
 
     function Salvar : String;
     function Incluir: String;
-    function carregaClasse(pId : String): TMarcaModel;
-    function Alterar(pID : String): TMarcaModel;
+    function carregaClasse(pId : String): ITMarcaModel;
+    function Alterar(pID : String): ITMarcaModel;
     function Excluir(pID : String): String;
 
     function ObterLista(pMarca_Parametros: TMarca_Parametros): IFDDataset; overload;
@@ -79,33 +85,33 @@ uses
 
 { TMarcaModel }
 
-function TMarcaModel.Alterar(pID: String): TMarcaModel;
+function TMarcaModel.Alterar(pID: String): ITMarcaModel;
 var
-  lMarcaModel : TMarcaModel;
+  lMarcaModel : ITMarcaModel;
 begin
-  lMarcaModel := TMarcaModel.Create(vIConexao);
+  lMarcaModel := TMarcaModel.getNewIface(vIConexao);
   try
-    lMarcaModel       := lMarcaModel.carregaClasse(pID);
-    lMarcaModel.Acao  := tacAlterar;
+    lMarcaModel       := lMarcaModel.objeto.carregaClasse(pID);
+    lMarcaModel.objeto.Acao  := tacAlterar;
     Result            := lMarcaModel;
   finally
   end;
 end;
 
-function TMarcaModel.carregaClasse(pId: String): TMarcaModel;
+function TMarcaModel.carregaClasse(pId: String): ITMarcaModel;
 var
-  lMarcaModel: TMarcaModel;
+  lMarcaModel: ITMarcaModel;
 begin
-  lMarcaModel := TMarcaModel.Create(vIConexao);
+  lMarcaModel := TMarcaModel.getNewIface(vIConexao);
 
   try
-    Result := lMarcaModel.carregaClasse(pId);
+    Result := lMarcaModel.objeto.carregaClasse(pId);
   finally
-    lMarcaModel.Free;
+    lMarcaModel:=nil;
   end;
 end;
 
-constructor TMarcaModel.Create(pIConexao : IConexao);
+constructor TMarcaModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -122,6 +128,12 @@ begin
   Result       := self.Salvar;
 end;
 
+class function TMarcaModel.getNewIface(pIConexao: IConexao): ITMarcaModel;
+begin
+  Result := TImplObjetoOwner<TMarcaModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TMarcaModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
@@ -130,56 +142,56 @@ end;
 
 function TMarcaModel.ObterLista: IFDDataset;
 var
-  lMarca: TMarcaDao;
+  lMarca: ITMarcaDao;
 begin
-  lMarca := TMarcaDao.Create(vIConexao);
+  lMarca := TMarcaDao.getNewIface(vIConexao);
   try
-    lMarca.TotalRecords    := FTotalRecords;
-    lMarca.WhereView       := FWhereView;
-    lMarca.CountView       := FCountView;
-    lMarca.OrderView       := FOrderView;
-    lMarca.StartRecordView := FStartRecordView;
-    lMarca.LengthPageView  := FLengthPageView;
-    lMarca.IDRecordView    := FIDRecordView;
+    lMarca.objeto.TotalRecords    := FTotalRecords;
+    lMarca.objeto.WhereView       := FWhereView;
+    lMarca.objeto.CountView       := FCountView;
+    lMarca.objeto.OrderView       := FOrderView;
+    lMarca.objeto.StartRecordView := FStartRecordView;
+    lMarca.objeto.LengthPageView  := FLengthPageView;
+    lMarca.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lMarca.obterLista;
-    FTotalRecords := lMarca.TotalRecords;
+    Result := lMarca.objeto.obterLista;
+    FTotalRecords := lMarca.objeto.TotalRecords;
   finally
-    lMarca.Free;
+    lMarca:=nil;
   end;
 end;
 
 function TMarcaModel.ObterLista(pMarca_Parametros: TMarca_Parametros): IFDDataset;
 var
-  lMarcaDao: TMarcaDao;
+  lMarcaDao: ITMarcaDao;
   lMarca_Parametros: TMarca_Parametros;
 begin
-  lMarcaDao := TMarcaDao.Create(vIConexao);
+  lMarcaDao := TMarcaDao.getNewIface(vIConexao);
 
   try
     lMarca_Parametros.Marcas := pMarca_Parametros.Marcas;
 
-    Result := lMarcaDao.ObterLista(lMarca_Parametros);
+    Result := lMarcaDao.objeto.ObterLista(lMarca_Parametros);
 
   finally
-    lMarcaDao.Free;
+    lMarcaDao:=nil;
   end;
 end;
 
 function TMarcaModel.Salvar: String;
 var
-  lMarcaDao: TMarcaDao;
+  lMarcaDao: ITMarcaDao;
 begin
-  lMarcaDao := TMarcaDao.Create(vIConexao);
+  lMarcaDao := TMarcaDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lMarcaDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lMarcaDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lMarcaDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lMarcaDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lMarcaDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lMarcaDao.objeto.excluir(mySelf);
     end;
   finally
-    lMarcaDao.Free;
+    lMarcaDao:=nil;
   end;
 end;
 

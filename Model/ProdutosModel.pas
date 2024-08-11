@@ -1007,13 +1007,13 @@ function TProdutosModel.Incluir: String;
 var
   lGrupoModel      : ITGrupoModel;
   lSubGrupoModel   : ITSubGrupoModel;
-  lMarcaModel      : TMarcaModel;
+  lMarcaModel      : ITMarcaModel;
   lFornecedorModel : ITFornecedorModel;
 begin
 
   lGrupoModel      := TGrupoModel.getNewIface(vIConexao);
   lSubGrupoModel   := TSubGrupoModel.getNewIface(vIConexao);
-  lMarcaModel      := TMarcaModel.Create(vIConexao);
+  lMarcaModel      := TMarcaModel.getNewIface(vIConexao);
   lFornecedorModel := TFornecedorModel.getNewIface(vIConexao);
   try
 
@@ -1035,10 +1035,10 @@ begin
 
     if self.CODIGO_MAR = '' then
     begin
-      lMarcaModel.StartRecordView := '0';
-      lMarcaModel.LengthPageView  := '1';
-      lMarcaModel.OrderView       := 'CODIGO_MAR';
-      self.CODIGO_MAR := lMarcaModel.ObterLista.objeto.FieldByName('CODIGO_MAR').AsString;
+      lMarcaModel.objeto.StartRecordView := '0';
+      lMarcaModel.objeto.LengthPageView  := '1';
+      lMarcaModel.objeto.OrderView       := 'CODIGO_MAR';
+      self.CODIGO_MAR := lMarcaModel.objeto.ObterLista.objeto.FieldByName('CODIGO_MAR').AsString;
     end;
 
     if self.CODIGO_SUB = '' then
