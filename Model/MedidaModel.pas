@@ -6,12 +6,16 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
-  TMedidaModel = class
+  TMedidaModel = class;
+  ITMedidaModel=IObject<TMedidaModel>;
 
+  TMedidaModel = class
   private
+    [weak] mySelf: ITMedidaModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -43,8 +47,10 @@ type
 
     public
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITMedidaModel;
 
     property CODIGO_MED      : Variant read FCODIGO_MED write SetCODIGO_MED;
     property DESCRICAO_MED   : Variant read FDESCRICAO_MED write SetDESCRICAO_MED;
@@ -61,8 +67,8 @@ type
 
     function Salvar : String;
     function Incluir: String;
-    function carregaClasse(pId : String): TMedidaModel;
-    function Alterar(pID : String): TMedidaModel;
+    function carregaClasse(pId : String): ITMedidaModel;
+    function Alterar(pID : String): ITMedidaModel;
     function Excluir(pID : String): String;
 
     function ObterLista : IFDDataset; overload;
@@ -76,33 +82,33 @@ uses
 
 { TMedidaModel }
 
-function TMedidaModel.Alterar(pID: String): TMedidaModel;
+function TMedidaModel.Alterar(pID: String): ITMedidaModel;
 var
-  lMedidaModel : TMedidaModel;
+  lMedidaModel : ITMedidaModel;
 begin
-  lMedidaModel := TMedidaModel.Create(vIConexao);
+  lMedidaModel := TMedidaModel.getNewIface(vIConexao);
   try
-    lMedidaModel       := lMedidaModel.carregaClasse(pID);
-    lMedidaModel.Acao  := tacAlterar;
+    lMedidaModel       := lMedidaModel.objeto.carregaClasse(pID);
+    lMedidaModel.objeto.Acao  := tacAlterar;
     Result            := lMedidaModel;
   finally
   end;
 end;
 
-function TMedidaModel.carregaClasse(pId: String): TMedidaModel;
+function TMedidaModel.carregaClasse(pId: String): ITMedidaModel;
 var
-  lMedidaModel: TMedidaModel;
+  lMedidaModel: ITMedidaModel;
 begin
-  lMedidaModel := TMedidaModel.Create(vIConexao);
+  lMedidaModel := TMedidaModel.getNewIface(vIConexao);
 
   try
-    Result := lMedidaModel.carregaClasse(pId);
+    Result := lMedidaModel.objeto.carregaClasse(pId);
   finally
-    lMedidaModel.Free;
+    lMedidaModel:=nil;
   end;
 end;
 
-constructor TMedidaModel.Create(pIConexao : IConexao);
+constructor TMedidaModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -119,6 +125,12 @@ begin
   Result       := self.Salvar;
 end;
 
+class function TMedidaModel.getNewIface(pIConexao: IConexao): ITMedidaModel;
+begin
+  Result := TImplObjetoOwner<TMedidaModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TMedidaModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
@@ -127,39 +139,39 @@ end;
 
 function TMedidaModel.ObterLista: IFDDataset;
 var
-  lMedida: TMedidaDao;
+  lMedida: ITMedidaDao;
 begin
-  lMedida := TMedidaDao.Create(vIConexao);
+  lMedida := TMedidaDao.getNewIface(vIConexao);
   try
-    lMedida.TotalRecords    := FTotalRecords;
-    lMedida.WhereView       := FWhereView;
-    lMedida.CountView       := FCountView;
-    lMedida.OrderView       := FOrderView;
-    lMedida.StartRecordView := FStartRecordView;
-    lMedida.LengthPageView  := FLengthPageView;
-    lMedida.IDRecordView    := FIDRecordView;
+    lMedida.objeto.TotalRecords    := FTotalRecords;
+    lMedida.objeto.WhereView       := FWhereView;
+    lMedida.objeto.CountView       := FCountView;
+    lMedida.objeto.OrderView       := FOrderView;
+    lMedida.objeto.StartRecordView := FStartRecordView;
+    lMedida.objeto.LengthPageView  := FLengthPageView;
+    lMedida.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lMedida.obterLista;
-    FTotalRecords := lMedida.TotalRecords;
+    Result := lMedida.objeto.obterLista;
+    FTotalRecords := lMedida.objeto.TotalRecords;
   finally
-    lMedida.Free;
+    lMedida:=nil;
   end;
 end;
 
 function TMedidaModel.Salvar: String;
 var
-  lMedidaDao: TMedidaDao;
+  lMedidaDao: ITMedidaDao;
 begin
-  lMedidaDao := TMedidaDao.Create(vIConexao);
+  lMedidaDao := TMedidaDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lMedidaDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lMedidaDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lMedidaDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lMedidaDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lMedidaDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lMedidaDao.objeto.excluir(mySelf);
     end;
   finally
-    lMedidaDao.Free;
+    lMedidaDao:=nil;
   end;
 end;
 

@@ -17,12 +17,16 @@ uses
   Terasoft.FuncoesTexto,
   System.Generics.Collections,
   Terasoft.ConstrutorDao,
+  Terasoft.Framework.ObjectIface,
   MedidaModel;
 
 type
-  TMedidaDao = class
+  TMedidaDao = class;
+  ITMedidaDao=IObject<TMedidaDao>;
 
+  TMedidaDao = class
   private
+    [weak] mySelf: ITMedidaDao;
     vIConexao : IConexao;
 
     vConstrutor : TConstrutorDao;
@@ -50,8 +54,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITMedidaDao;
 
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -61,12 +67,12 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView : String read FIDRecordView write SetIDRecordView;
 
-    function incluir(pMedidaModel: TMedidaModel): String;
-    function alterar(pMedidaModel: TMedidaModel): String;
-    function excluir(pMedidaModel: TMedidaModel): String;
-    function carregaClasse(pID : String): TMedidaModel;
+    function incluir(pMedidaModel: ITMedidaModel): String;
+    function alterar(pMedidaModel: ITMedidaModel): String;
+    function excluir(pMedidaModel: ITMedidaModel): String;
+    function carregaClasse(pID : String): ITMedidaModel;
 
-    procedure setParams(var pQry: TFDQuery; pMedidaModel: TMedidaModel);
+    procedure setParams(var pQry: TFDQuery; pMedidaModel: ITMedidaModel);
     function ObterLista: IFDDataset; overload;
 
 end;
@@ -78,13 +84,13 @@ uses
 
 { TPCG }
 
-function TMedidaDao.carregaClasse(pID: String): TMedidaModel;
+function TMedidaDao.carregaClasse(pID: String): ITMedidaModel;
 var
   lQry: TFDQuery;
-  lModel: TMedidaModel;
+  lModel: ITMedidaModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TMedidaModel.Create(vIConexao);
+  lModel   := TMedidaModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -93,9 +99,9 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.CODIGO_MED       := lQry.FieldByName('CODIGO_MED').AsString;
-    lModel.DESCRICAO_MED    := lQry.FieldByName('DESCRICAO_MED').AsString;
-    lModel.ID               := lQry.FieldByName('ID').AsString;
+    lModel.objeto.CODIGO_MED       := lQry.FieldByName('CODIGO_MED').AsString;
+    lModel.objeto.DESCRICAO_MED    := lQry.FieldByName('DESCRICAO_MED').AsString;
+    lModel.objeto.ID               := lQry.FieldByName('ID').AsString;
 
     Result := lModel;
   finally
@@ -103,7 +109,7 @@ begin
   end;
 end;
 
-constructor TMedidaDao.Create(pIConexao : IConexao);
+constructor TMedidaDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -115,7 +121,7 @@ begin
 end;
 
 
-function TMedidaDao.incluir(pMedidaModel: TMedidaModel): String;
+function TMedidaDao.incluir(pMedidaModel: ITMedidaModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -165,7 +171,7 @@ begin
   end;
 end;
 
-function TMedidaDao.alterar(pMedidaModel: TMedidaModel): String;
+function TMedidaDao.alterar(pMedidaModel: ITMedidaModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -179,7 +185,7 @@ begin
     setParams(lQry, pMedidaModel);
     lQry.ExecSQL;
 
-    Result := pMedidaModel.CODIGO_MED;
+    Result := pMedidaModel.objeto.CODIGO_MED;
 
   finally
     lSQL := '';
@@ -187,20 +193,26 @@ begin
   end;
 end;
 
-function TMedidaDao.excluir(pMedidaModel: TMedidaModel): String;
+function TMedidaDao.excluir(pMedidaModel: ITMedidaModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from MEDIDA where CODIGO_MED = :CODIGO_MED' ,[pMedidaModel.CODIGO_MED]);
+   lQry.ExecSQL('delete from MEDIDA where CODIGO_MED = :CODIGO_MED' ,[pMedidaModel.objeto.CODIGO_MED]);
    lQry.ExecSQL;
-   Result := pMedidaModel.CODIGO_MED;
+   Result := pMedidaModel.objeto.CODIGO_MED;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TMedidaDao.getNewIface(pIConexao: IConexao): ITMedidaDao;
+begin
+  Result := TImplObjetoOwner<TMedidaDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TMedidaDao.where: String;
@@ -260,28 +272,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TMedidaDao.setParams(var pQry: TFDQuery; pMedidaModel: TMedidaModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TMedidaDao.setParams(var pQry: TFDQuery; pMedidaModel: ITMedidaModel);
 begin
-  lTabela := vConstrutor.getColumns('MEDIDA');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TMedidaModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pMedidaModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pMedidaModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('MEDIDA',pQry,pMedidaModel.objeto);
 end;
 
 procedure TMedidaDao.SetStartRecordView(const Value: String);
