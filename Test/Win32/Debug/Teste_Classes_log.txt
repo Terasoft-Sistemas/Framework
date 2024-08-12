@@ -1,2 +1,0 @@
-<<<<17/06/2024 16:23:36.265: PID: 18104: Erro grave: Terasoft.SCI.Servico.Config.configura: EAccessViolation - Access violation at address 0064BFA0 in module 'Teste_Classes.exe'. Write of address 00000009
->>>>
