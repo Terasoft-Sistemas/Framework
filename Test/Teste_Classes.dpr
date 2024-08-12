@@ -173,10 +173,8 @@ uses
 
 begin
 
-  TStringList.Create;
-
   ReportMemoryLeaksOnShutdown := true;
-  FastMM4.SuppressMessageBoxes := false;
+  //FastMM4.SuppressMessageBoxes := false;
 
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
