@@ -102,7 +102,7 @@ begin
   //Retorna a lista com busca no termo 'PROD'
   //Ordenado pelo campo DESCRICAO
 //  for m in epControl.getNovaLista('prod',2) do
-  for m in epControl.getNovaLista(nil,2) do
+  for m in epControl.getNovaLista('GESTÃO;V',true,2) do
   begin
     cbEp.items.add(m.objeto.DESCRICAO);
     cbEp.values.add(m.objeto.NOME);

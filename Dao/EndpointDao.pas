@@ -30,7 +30,7 @@ type
     class function getNewIface(pIConexao: IConexao): ITEndpointDao;
 
     function getByName(pName: TipoWideStringFramework): ITEndpointModel;
-    function getLista(pFiltro: IListaTexto=nil; pOrdem: Integer = 2): TListaEndpointModel;
+    function getLista(pFiltro: IListaTexto=nil; pStartingWith: boolean = false; pOrdem: Integer = 2): TListaEndpointModel;
 
   end;
 
@@ -71,7 +71,7 @@ begin
 
 end;
 
-function TEndpointDao.getLista;//
+function TEndpointDao.getLista;
 var
   lQry: IDataset;
   lSQL: String;
@@ -88,9 +88,9 @@ begin
   pFiltro.text := uppercase(retiraAcentos(pFiltro.text));
   usePtBr := vIConexao.gdb.charset=GDBFIB_CHARSETPTBR;
   if(usePtbr) then
-    lIn := FuncoesPesquisaDB.ExpandeWhere('ep.nome,ep.descricao',pFiltro.text,tewcprefixodata_And,true)
+    lIn := FuncoesPesquisaDB.ExpandeWhere('ep.nome,ep.descricao',pFiltro.text,tewcprefixodata_And,true,pStartingWith)
   else
-    lIn := FuncoesPesquisaDB.ExpandeWhere('upper(ep.nome),upper(ep.descricao)',pFiltro.text,tewcprefixodata_And,false);
+    lIn := FuncoesPesquisaDB.ExpandeWhere('upper(ep.nome),upper(ep.descricao)',pFiltro.text,tewcprefixodata_And,false,pStartingWith);
   lSQL := 'select ep.* from endpoint ep where ep.metodo = :metodo '+#13
           + lIn;
   if(pOrdem = 1) then

@@ -14,8 +14,8 @@ type
   IController_Endpoint = interface
   ['{A1E3DBAB-512C-46E3-82C5-773443E8F779}']
     function getByName(pName: TipoWideStringFramework): ITEndpointModel;
-    function getNovaLista(pFiltro: IListaTexto=nil;pOrdem: Integer = 2): TListaEndpointModel; overload;
-    function getNovaLista(pFiltro: TipoWideStringFramework = ''; pOrdem: Integer = 2): TListaEndpointModel; overload;
+    function getNovaLista(pFiltro: IListaTexto=nil; pStartingWith: boolean = false; pOrdem: Integer = 2): TListaEndpointModel; overload;
+    function getNovaLista(pFiltro: TipoWideStringFramework = ''; pStartingWith: boolean = false; pOrdem: Integer = 2): TListaEndpointModel; overload;
     function getLista: TListaEndpointModel;
     property lista: TListaEndpointModel read getLista;
   end;
@@ -32,8 +32,8 @@ type
     fModel: ITEndpointModel;
     fLista: TListaEndpointModel;
     function getByName(pName: TipoWideStringFramework): ITEndpointModel;
-    function getNovaLista(pFiltro: IListaTexto=nil;pOrdem: Integer = 2): TListaEndpointModel; overload;
-    function getNovaLista(pFiltro: TipoWideStringFramework = ''; pOrdem: Integer = 2): TListaEndpointModel; overload;
+    function getNovaLista(pFiltro: IListaTexto=nil;pStartingWith:boolean=false;pOrdem: Integer = 2): TListaEndpointModel; overload;
+    function getNovaLista(pFiltro: TipoWideStringFramework = ''; pStartingWith: boolean = false; pOrdem: Integer = 2): TListaEndpointModel; overload;
     function getLista: TListaEndpointModel;
   public
     vIConexao : IConexao;
@@ -75,14 +75,14 @@ begin
   Result := fLista;
 end;
 
-function TControllerEndpoint.getNovaLista(pFiltro: TipoWideStringFramework; pOrdem: Integer): TListaEndpointModel;
+function TControllerEndpoint.getNovaLista(pFiltro: TipoWideStringFramework = ''; pStartingWith: boolean = false; pOrdem: Integer = 2): TListaEndpointModel;
 begin
-  Result := self.getNovaLista(novaListaTexto(false,pFiltro), pOrdem);
+  Result := self.getNovaLista(novaListaTexto(false,pFiltro),pStartingWith, pOrdem);
 end;
 
-function TControllerEndpoint.getNovaLista(pFiltro: IListaTexto=nil;pOrdem: Integer = 2): TListaEndpointModel;
+function TControllerEndpoint.getNovaLista(pFiltro: IListaTexto=nil;pStartingWith: boolean = false;pOrdem: Integer = 2): TListaEndpointModel;
 begin
-  Result := TEndpointDao.getNewIface(vIConexao).objeto.getLista(pFiltro,pOrdem);
+  Result := TEndpointDao.getNewIface(vIConexao).objeto.getLista(pFiltro,pStartingWith,pOrdem);
   if(fLista=nil) then
     fLista := Result;
 end;
