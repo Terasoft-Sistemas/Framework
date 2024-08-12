@@ -994,6 +994,7 @@ var
   lTipoVenda        : ITPedidoItensModel;
   lNFModel          : ITNFModel;
   lNFItensModel     : ITNFItensModel;
+  lCFOPModel        : ITCFOPModel;
   lEmpresaModel     : ITEmpresaModel;
   lNumeroNFe,
   lNomeVendedor     : String;
@@ -1015,6 +1016,7 @@ begin
   lTipoVenda        := TPedidoItensModel.getNewIface(vIConexao);
   lNFItensModel     := TNFItensModel.getNewIface(vIConexao);
   lNFModel          := TNFModel.getNewIface(vIConexao);
+  lCFOPModel        := TCFOPModel.getNewIface(vIConexao);
   lEmpresaModel     := TEmpresaModel.getNewIface(vIConexao);
   lFuncionarioModel := TFuncionarioModel.getNewIface(vIConexao);
   lConfiguracoes    := TerasoftConfiguracoes.getNewIface(vIConexao);
@@ -1104,6 +1106,15 @@ begin
     lNFModel.objeto.FRETE                 := FloatToStr(0);
     lNFModel.objeto.OUTROS_NF             := FloatToStr(0);
     lNFModel.objeto.TRANSPORTADORA        := self.FTELEVENDA_PED;
+
+    if self.FCFOP_ID <> '' then
+    begin
+      lCFOPModel := lCFOPModel.objeto.carregaClasse(self.FCFOP_ID);
+
+      if lCFOPModel.objeto.OBS <> '' then
+        lNFModel.objeto.OBS_NF := lCFOPModel.objeto.OBS;
+    end;
+
     lNFModel.objeto.OBS_NF                := lNFModel.objeto.OBS_NF + self.FINFORMACOES_PED;
     lNFModel.objeto.ESPECIE_VOLUME        := self.FESPECIE_VOLUME;
     lNFModel.objeto.TRA_UF                := self.FUF_TRANSPORTADORA;
@@ -1272,6 +1283,7 @@ begin
     lNFModel:=nil;
     lEmpresaModel := nil;
     lTipoVenda := nil;
+    lCFOPModel := nil;
   end;
 end;
 
