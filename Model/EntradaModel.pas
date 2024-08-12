@@ -760,8 +760,9 @@ end;
 
 destructor TEntradaModel.Destroy;
 begin
-    FreeAndNil(ACBrNFeDANFeRL);
-    FreeAndNil(ACBrNFe);
+  FreeAndNil(ACBrNFeDANFeRL);
+  FreeAndNil(ACBrNFe);
+  vIConexao := nil;
   inherited;
 end;
 

@@ -89,11 +89,11 @@ var
   lQry: TFDQuery;
   lModel: ITEntradaModel;
 begin
-  lQry     := vIConexao.CriarQuery;
   lModel   := TEntradaModel.getNewIface(vIConexao);
   Result   := lModel;
-
+  lQry := nil;
   try
+    lQry     := vIConexao.CriarQuery;
     lQry.Open('select * from ENTRADA where NUMERO_ENT = '+ QuotedStr(pEntrada) + ' and CODIGO_FOR = ' + QuotedStr(pFornecedor) );
 
     if lQry.IsEmpty then
@@ -178,7 +178,7 @@ begin
 
     Result := lModel;
   finally
-    lQry.Free;
+    FreeAndNil(lQry);
   end;
 end;
 
@@ -190,6 +190,8 @@ end;
 
 destructor TEntradaDao.Destroy;
 begin
+  vConstrutor := nil;
+  vIConexao := nil;
   inherited;
 end;
 
@@ -403,11 +405,11 @@ end;
 
 procedure TEntradaDao.obterTotalRegistros;
 var
-  lQry: TFDQuery;
+  lQry: IFDQuery;
   lSQL:String;
 begin
   try
-    lQry := vIConexao.CriarQuery;
+    lQry := vIConexao.criaIfaceQuery;
 
     lSql := 'select count(*) records                                                 ' +
             'from ENTRADA                                                            ' +
@@ -416,22 +418,22 @@ begin
 
     lSql := lSql + where;
 
-    lQry.Open(lSQL);
+    lQry.objeto.Open(lSQL);
 
-    FTotalRecords := lQry.FieldByName('records').AsInteger;
+    FTotalRecords := lQry.objeto.FieldByName('records').AsInteger;
 
   finally
-    lQry.Free;
+    lQry:=nil;
   end;
 end;
 
 function TEntradaDao.obterLista: IFDDataset;
 var
-  lQry       : TFDQuery;
+  lQry       : IFDQuery;
   lSQL       : String;
   lPaginacao : String;
 begin
-  lQry := vIConexao.CriarQuery;
+  lQry := vIConexao.criaIfaceQuery;
 
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
@@ -497,14 +499,14 @@ begin
     if not FOrderView.IsEmpty then
       lSql := lSQL + ' order by '+FOrderView;
 
-    lQry.Open(lSQL);
+    lQry.objeto.Open(lSQL);
 
-    Result := vConstrutor.atribuirRegistros(lQry);
+    Result := vConstrutor.atribuirRegistros(lQry.objeto);
 
     obterTotalRegistros;
 
   finally
-    lQry.Free;
+    lQry:=nil;
   end;
 end;
 

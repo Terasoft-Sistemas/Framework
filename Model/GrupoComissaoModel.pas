@@ -6,12 +6,16 @@ uses
   Terasoft.Types,
   Spring.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
-  TGrupoComissaoModel = class
+  TGrupoComissaoModel = class;
+  ITGrupoComissaoModel=IObject<TGrupoComissaoModel>;
 
+  TGrupoComissaoModel = class
   private
+    [weak] mySelf: ITGrupoComissaoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -43,9 +47,10 @@ type
 
     public
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITGrupoComissaoModel;
 
     property ID         :Variant read FID write SetID;
     property NOME       :Variant read FNOME write SetNOME;
@@ -63,8 +68,8 @@ type
 
     function Salvar : String;
     function Incluir: String;
-    function carregaClasse(pId : String): TGrupoComissaoModel;
-    function Alterar(pID : String): TGrupoComissaoModel;
+    function carregaClasse(pId : String): ITGrupoComissaoModel;
+    function Alterar(pID : String): ITGrupoComissaoModel;
     function Excluir(pID : String): String;
     function ObterGrupoComissaoProduto (pProduto : String) : Double;
 
@@ -79,33 +84,33 @@ uses
 
 { TGrupoComissaoModel }
 
-function TGrupoComissaoModel.Alterar(pID: String): TGrupoComissaoModel;
+function TGrupoComissaoModel.Alterar(pID: String): ITGrupoComissaoModel;
 var
-  lGrupoComissaoModel : TGrupoComissaoModel;
+  lGrupoComissaoModel : ITGrupoComissaoModel;
 begin
-  lGrupoComissaoModel := TGrupoComissaoModel.Create(vIConexao);
+  lGrupoComissaoModel := TGrupoComissaoModel.getNewIface(vIConexao);
   try
-    lGrupoComissaoModel       := lGrupoComissaoModel.carregaClasse(pID);
-    lGrupoComissaoModel.Acao  := tacAlterar;
+    lGrupoComissaoModel       := lGrupoComissaoModel.objeto.carregaClasse(pID);
+    lGrupoComissaoModel.objeto.Acao  := tacAlterar;
     Result                    := lGrupoComissaoModel;
   finally
   end;
 end;
 
-function TGrupoComissaoModel.carregaClasse(pId: String): TGrupoComissaoModel;
+function TGrupoComissaoModel.carregaClasse(pId: String): ITGrupoComissaoModel;
 var
-  lGrupoComissaoModel: TGrupoComissaoModel;
+  lGrupoComissaoModel: ITGrupoComissaoModel;
 begin
-  lGrupoComissaoModel := TGrupoComissaoModel.Create(vIConexao);
+  lGrupoComissaoModel := TGrupoComissaoModel.getNewIface(vIConexao);
 
   try
-    Result := lGrupoComissaoModel.carregaClasse(pId);
+    Result := lGrupoComissaoModel.objeto.carregaClasse(pId);
   finally
-    lGrupoComissaoModel.Free;
+    lGrupoComissaoModel:=nil;
   end;
 end;
 
-constructor TGrupoComissaoModel.Create(pIConexao : IConexao);
+constructor TGrupoComissaoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -123,6 +128,12 @@ begin
   Result     := self.Salvar;
 end;
 
+class function TGrupoComissaoModel.getNewIface(pIConexao: IConexao): ITGrupoComissaoModel;
+begin
+  Result := TImplObjetoOwner<TGrupoComissaoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TGrupoComissaoModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
@@ -131,51 +142,51 @@ end;
 
 function TGrupoComissaoModel.ObterGrupoComissaoProduto(pProduto: String): Double;
   var
-  lGrupoComissao: TGrupoComissaoDao;
+  lGrupoComissao: ITGrupoComissaoDao;
 begin
-  lGrupoComissao := TGrupoComissaoDao.Create(vIConexao);
+  lGrupoComissao := TGrupoComissaoDao.getNewIface(vIConexao);
   try
-    Result := lGrupoComissao.ObterGrupoComissaoProduto(pProduto);
+    Result := lGrupoComissao.objeto.ObterGrupoComissaoProduto(pProduto);
   finally
-    lGrupoComissao.Free;
+    lGrupoComissao:=nil;
   end;
 end;
 
 function TGrupoComissaoModel.ObterLista: IFDDataset;
 var
-  lGrupoComissao: TGrupoComissaoDao;
+  lGrupoComissao: ITGrupoComissaoDao;
 begin
-  lGrupoComissao := TGrupoComissaoDao.Create(vIConexao);
+  lGrupoComissao := TGrupoComissaoDao.getNewIface(vIConexao);
   try
-    lGrupoComissao.TotalRecords    := FTotalRecords;
-    lGrupoComissao.WhereView       := FWhereView;
-    lGrupoComissao.CountView       := FCountView;
-    lGrupoComissao.OrderView       := FOrderView;
-    lGrupoComissao.StartRecordView := FStartRecordView;
-    lGrupoComissao.LengthPageView  := FLengthPageView;
-    lGrupoComissao.IDRecordView    := FIDRecordView;
+    lGrupoComissao.objeto.TotalRecords    := FTotalRecords;
+    lGrupoComissao.objeto.WhereView       := FWhereView;
+    lGrupoComissao.objeto.CountView       := FCountView;
+    lGrupoComissao.objeto.OrderView       := FOrderView;
+    lGrupoComissao.objeto.StartRecordView := FStartRecordView;
+    lGrupoComissao.objeto.LengthPageView  := FLengthPageView;
+    lGrupoComissao.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lGrupoComissao.obterLista;
-    FTotalRecords := lGrupoComissao.TotalRecords;
+    Result := lGrupoComissao.objeto.obterLista;
+    FTotalRecords := lGrupoComissao.objeto.TotalRecords;
   finally
-    lGrupoComissao.Free;
+    lGrupoComissao:=nil;
   end;
 end;
 
 function TGrupoComissaoModel.Salvar: String;
 var
-  lGrupoComissaoDao: TGrupoComissaoDao;
+  lGrupoComissaoDao: ITGrupoComissaoDao;
 begin
-  lGrupoComissaoDao := TGrupoComissaoDao.Create(vIConexao);
+  lGrupoComissaoDao := TGrupoComissaoDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lGrupoComissaoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lGrupoComissaoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lGrupoComissaoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lGrupoComissaoDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lGrupoComissaoDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lGrupoComissaoDao.objeto.excluir(mySelf);
     end;
   finally
-    lGrupoComissaoDao.Free;
+    lGrupoComissaoDao:=nil;
   end;
 end;
 

@@ -17,12 +17,16 @@ uses
   Terasoft.FuncoesTexto,
   Spring.Collections,
   Terasoft.ConstrutorDao,
+  Terasoft.Framework.ObjectIface,
   GrupoComissaoModel;
 
 type
-  TGrupoComissaoDao = class
+  TGrupoComissaoDao = class;
+  ITGrupoComissaoDao=IObject<TGrupoComissaoDao>;
 
+  TGrupoComissaoDao = class
   private
+    [weak] mySelf: ITGrupoComissaoDao;
     vIConexao : IConexao;
 
     vConstrutor : TConstrutorDao;
@@ -50,8 +54,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITGrupoComissaoDao;
 
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -61,12 +67,12 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(pGrupoComissaoModel: TGrupoComissaoModel): String;
-    function alterar(pGrupoComissaoModel: TGrupoComissaoModel): String;
-    function excluir(pGrupoComissaoModel: TGrupoComissaoModel): String;
-    function carregaClasse(pID : String): TGrupoComissaoModel;
+    function incluir(pGrupoComissaoModel: ITGrupoComissaoModel): String;
+    function alterar(pGrupoComissaoModel: ITGrupoComissaoModel): String;
+    function excluir(pGrupoComissaoModel: ITGrupoComissaoModel): String;
+    function carregaClasse(pID : String): ITGrupoComissaoModel;
 
-    procedure setParams(var pQry: TFDQuery; pGrupoComissaoModel: TGrupoComissaoModel);
+    procedure setParams(var pQry: TFDQuery; pGrupoComissaoModel: ITGrupoComissaoModel);
     function ObterLista: IFDDataset; overload;
     function ObterGrupoComissaoProduto(pProduto: String) : Double;
 
@@ -79,13 +85,13 @@ uses
 
 { TPCG }
 
-function TGrupoComissaoDao.carregaClasse(pID: String): TGrupoComissaoModel;
+function TGrupoComissaoDao.carregaClasse(pID: String): ITGrupoComissaoModel;
 var
   lQry: TFDQuery;
-  lModel: TGrupoComissaoModel;
+  lModel: ITGrupoComissaoModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TGrupoComissaoModel.Create(vIConexao);
+  lModel   := TGrupoComissaoModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -94,9 +100,9 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID       		:= lQry.FieldByName('ID').AsString;
-    lModel.NOME    			:= lQry.FieldByName('NOME').AsString;
-    lModel.PERCENTUAL   := lQry.FieldByName('PERCENTUAL').AsString;
+    lModel.objeto.ID       		:= lQry.FieldByName('ID').AsString;
+    lModel.objeto.NOME    			:= lQry.FieldByName('NOME').AsString;
+    lModel.objeto.PERCENTUAL   := lQry.FieldByName('PERCENTUAL').AsString;
 
     Result := lModel;
   finally
@@ -104,7 +110,7 @@ begin
   end;
 end;
 
-constructor TGrupoComissaoDao.Create(pIConexao : IConexao);
+constructor TGrupoComissaoDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -117,7 +123,7 @@ begin
   inherited;
 end;
 
-function TGrupoComissaoDao.incluir(pGrupoComissaoModel: TGrupoComissaoModel): String;
+function TGrupoComissaoDao.incluir(pGrupoComissaoModel: ITGrupoComissaoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -128,7 +134,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pGrupoComissaoModel.ID := vIConexao.Generetor('GEN_GRUPO_COMISSAO');
+    pGrupoComissaoModel.objeto.ID := vIConexao.Generetor('GEN_GRUPO_COMISSAO');
     setParams(lQry, pGrupoComissaoModel);
     lQry.Open;
 
@@ -186,7 +192,7 @@ begin
   end;
 end;
 
-function TGrupoComissaoDao.alterar(pGrupoComissaoModel: TGrupoComissaoModel): String;
+function TGrupoComissaoDao.alterar(pGrupoComissaoModel: ITGrupoComissaoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -200,7 +206,7 @@ begin
     setParams(lQry, pGrupoComissaoModel);
     lQry.ExecSQL;
 
-    Result := pGrupoComissaoModel.ID;
+    Result := pGrupoComissaoModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -208,20 +214,26 @@ begin
   end;
 end;
 
-function TGrupoComissaoDao.excluir(pGrupoComissaoModel: TGrupoComissaoModel): String;
+function TGrupoComissaoDao.excluir(pGrupoComissaoModel: ITGrupoComissaoModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from GRUPO_COMISSAO where ID = :ID' ,[pGrupoComissaoModel.ID]);
+   lQry.ExecSQL('delete from GRUPO_COMISSAO where ID = :ID' ,[pGrupoComissaoModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pGrupoComissaoModel.ID;
+   Result := pGrupoComissaoModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TGrupoComissaoDao.getNewIface(pIConexao: IConexao): ITGrupoComissaoDao;
+begin
+  Result := TImplObjetoOwner<TGrupoComissaoDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TGrupoComissaoDao.where: String;
@@ -281,28 +293,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TGrupoComissaoDao.setParams(var pQry: TFDQuery; pGrupoComissaoModel: TGrupoComissaoModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TGrupoComissaoDao.setParams(var pQry: TFDQuery; pGrupoComissaoModel: ITGrupoComissaoModel);
 begin
-  lTabela := vConstrutor.getColumns('GRUPO_COMISSAO');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TGrupoComissaoModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pGrupoComissaoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pGrupoComissaoModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('GRUPO_COMISSAO',pQry,pGrupoComissaoModel.objeto);
 end;
 
 procedure TGrupoComissaoDao.SetStartRecordView(const Value: String);

@@ -391,6 +391,8 @@ uses
   FinanceiroPedidoModel,
   WebPedidoModel,
   PCGDao,
+  TipoVendadao,
+  TipoVendaModel,
   Form.Endpoint,
   Controllers.Conexao,
   WebPedidoItensModel,
