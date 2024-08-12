@@ -80,8 +80,8 @@ interface
       function gerarUpdate(pTabela, pFieldWhere: String): String;
       function queryTabela(pTabela: String): String;
       function carregaFields(pQry: TDataset; pTabela: String; pGerarID: Boolean): TDadosFields;
-      procedure copiarEstruturaCampos(pSource: TDataSet; var pDest: TFDMemTable);
-      procedure atribuirRegistros(pSource: TDataSet; var pDest: TFDMemTable); overload;
+      procedure copiarEstruturaCampos(pSource: TDataSet; pDest: TDataset);
+      procedure atribuirRegistros(pSource: TDataSet; pDest: TDataset); overload;
       function atribuirRegistros(pSource: TDataSet): IFDDataset; overload;
       function getColumns(pTabela: String): IFDDataset;
       function getValue(pTabela: TDataset; pColumn: String; pValue: String ): String;

@@ -25,8 +25,8 @@ type
     function gerarUpdate(pTabela, pFieldWhere: String): String;
     function queryTabela(pTabela: String): String;
     function carregaFields(pQry: TDataset; pTabela: String; pGerarID: Boolean): TDadosFields;
-    procedure copiarEstruturaCampos(pSource: TDataSet; var pDest: TFDMemTable);
-    procedure atribuirRegistros(pSource: TDataSet; var pDest: TFDMemTable); overload;
+    procedure copiarEstruturaCampos(pSource: TDataSet; pDest: TDataset);
+    procedure atribuirRegistros(pSource: TDataSet; pDest:TDataset); overload;
     function atribuirRegistros(pSource: TDataSet): IFDDataset; overload;
     function getColumns(pTabela: String): IFDDataset;
     function getValue(pTabela: TDataset; pColumn: String; pValue: String ): String;
@@ -44,6 +44,7 @@ implementation
 
 uses
   System.Rtti,
+  DBClient,
   System.Variants,
   TypInfo,
   Terasoft.Utils,
@@ -51,11 +52,19 @@ uses
 
 { TGeradorModel }
 
-procedure TConstrutorDao.atribuirRegistros(pSource: TDataSet; var pDest: TFDMemTable);
+procedure TConstrutorDao.atribuirRegistros(pSource: TDataSet; pDest: TDataset);
 begin
   copiarEstruturaCampos(pSource, pDest);
 
-  pDest.EmptyDataSet;
+  if(pDest is TFDMemTable) then
+    TFDMemTable(pDest).EmptyDataSet
+  else if(pDest is TClientDataset) then
+    TClientDataset(pDest).EmptyDataSet
+  else begin
+    pDest.First;
+    while not pDest.eof do
+      pDest.Delete;
+  end;
 
   pSource.First;
   while not pSource.Eof do
@@ -112,7 +121,7 @@ begin
 
 end;
 
-procedure TConstrutorDao.copiarEstruturaCampos(pSource: TDataSet; var pDest: TFDMemTable);
+procedure TConstrutorDao.copiarEstruturaCampos(pSource: TDataSet; pDest: TDataSet);
 var
   i: Integer;
 begin
@@ -122,7 +131,12 @@ begin
     pDest.FieldDefs.Add(pSource.FieldDefs[i].Name, pSource.FieldDefs[i].DataType,
       pSource.FieldDefs[i].Size, pSource.FieldDefs[i].Required);
 
-  pDest.CreateDataSet;
+  if(pDest is TFDMemTable) then
+    TFDMemTable(pDest).CreateDataSet
+  else if(pDest is TClientDataset) then
+    TClientDataset(pDest).CreateDataSet
+  else
+    raise Exception.Create('Dataset não suportada');
 end;
 
 constructor TConstrutorDao.Create(pIConexao : IConexao);

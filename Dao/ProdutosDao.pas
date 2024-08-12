@@ -605,7 +605,6 @@ function TProdutosDao.obterComissao(pCodProduto: String): IFDDataset;
 var
   lQry      : TFDQuery;
   lSql      : String;
-  lMemTable : TFDMemTable;
 begin
   try
     lQry := vIConexao.CriarQuery;
