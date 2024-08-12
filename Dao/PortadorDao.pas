@@ -22,7 +22,7 @@ type
   private
     [weak] mySelf: ITPortadorDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FPortadorsLista: IList<ITPortadorModel>;
     FLengthPageView: String;
@@ -148,7 +148,7 @@ end;
 destructor TPortadorDao.Destroy;
 begin
   FPortadorsLista := nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

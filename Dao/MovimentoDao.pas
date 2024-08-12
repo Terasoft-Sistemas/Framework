@@ -22,7 +22,7 @@ type
   private
     [weak] mySelf: ITMovimentoDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FMovimentosLista: IList<ITMovimentoModel>;
     FLengthPageView: String;
@@ -140,7 +140,7 @@ end;
 destructor TMovimentoDao.Destroy;
 begin
   FMovimentosLista:=nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

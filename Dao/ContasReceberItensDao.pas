@@ -23,7 +23,7 @@ type
 
   private
     vIConexao : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FContasReceberItenssLista: IList<TContasReceberItensModel>;
     FLengthPageView: String;
@@ -181,7 +181,7 @@ destructor TContasReceberItensDao.Destroy;
 begin
   FContasReceberItenssLista := nil;
   FRecebimentoContasReceberLista := nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

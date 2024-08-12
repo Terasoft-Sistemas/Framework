@@ -24,7 +24,7 @@ type
   private
     [weak] mySelf: ITWebPedidoItensDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FPedidoWebItenssLista: IList<ITWebPedidoItensModel>;
     FLengthPageView: String;
@@ -201,7 +201,7 @@ destructor TWebPedidoItensDao.Destroy;
 begin
   FPedidoWebItenssLista := nil;
   FWebPedidoItenssLista := nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

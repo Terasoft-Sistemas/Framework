@@ -27,7 +27,7 @@ type
   private
     [weak] mySelf: ITGrupoDao;
     vIConexao : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FLengthPageView: String;
     FIDRecordView: String;

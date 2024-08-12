@@ -22,7 +22,7 @@ type
   private
     [weak] mySelf:ITTabelaJurosDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FTabelaJurossLista: IList<ITTabelaJurosModel>;
     FLengthPageView: String;
@@ -119,7 +119,7 @@ end;
 destructor TTabelaJurosDao.Destroy;
 begin
   FTabelaJurossLista:=nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

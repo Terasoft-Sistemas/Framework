@@ -7,7 +7,6 @@ uses
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
-  System.Generics.Collections,
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
@@ -23,7 +22,7 @@ type
   private
     [weak] mySelf: ITEntradaDao;
     vIConexao : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FLengthPageView: String;
     FIDRecordView: Integer;

@@ -23,7 +23,7 @@ type
   private
     [weak] mySelf: ITRecebimentoCartaoDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FRecebimentoCartaosLista: IList<ITRecebimentoCartaoModel>;
     FLengthPageView: String;
@@ -124,7 +124,7 @@ end;
 destructor TRecebimentoCartaoDao.Destroy;
 begin
   FRecebimentoCartaosLista := nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

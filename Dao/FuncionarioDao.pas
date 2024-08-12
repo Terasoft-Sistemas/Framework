@@ -23,7 +23,7 @@ type
   private
     [weak] mySelf: ITFuncionarioDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FFuncionariosLista: IList<ITFuncionarioModel>;
     FLengthPageView: String;
@@ -275,7 +275,7 @@ end;
 destructor TFuncionarioDao.Destroy;
 begin
   FFuncionariosLista:=nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

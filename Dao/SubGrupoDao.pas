@@ -26,7 +26,7 @@ type
   private
     [weak] mySelf: ITSubGrupoDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FLengthPageView: String;
     FStartRecordView: String;
@@ -48,7 +48,7 @@ type
     procedure SetIDRecordView(const Value: String);
 
     var
-      vConstrutorDao : TConstrutorDao;
+      vConstrutorDao : IConstrutorDao;
 
   public
 

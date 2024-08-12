@@ -23,7 +23,7 @@ type
   private
     [weak] mySelf: ITTEFDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FTEFsLista: IList<ITTEFModel>;
     FLengthPageView: String;
@@ -152,7 +152,7 @@ end;
 destructor TTEFDao.Destroy;
 begin
   FTEFsLista := nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

@@ -20,7 +20,7 @@ type
   private
     [weak] mySelf:ITPrecoClienteDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FPrecoClientesLista: IList<ITPrecoClienteModel>;
     FLengthPageView: String;
@@ -82,7 +82,7 @@ end;
 destructor TPrecoClienteDao.Destroy;
 begin
   FPrecoClientesLista:=nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

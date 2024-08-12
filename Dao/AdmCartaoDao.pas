@@ -27,7 +27,7 @@ type
   private
     [weak] myself : ITAdmCartaoDao;
     vIConexao     : IConexao;
-    vConstrutor   : TConstrutorDao;
+    vConstrutor   : IConstrutorDao;
 
     FAdmCartaosLista: IList<ITAdmCartaoModel>;
     FLengthPageView: String;
@@ -134,7 +134,7 @@ end;
 destructor TAdmCartaoDao.Destroy;
 begin
   FAdmCartaosLista := nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

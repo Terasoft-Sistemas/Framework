@@ -22,7 +22,7 @@ type
   private
     [weak] mySelf: ITCreditoClienteDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FCreditoClientesLista: IList<ITCreditoClienteModel>;
     FLengthPageView: String;
@@ -182,7 +182,7 @@ end;
 destructor TCreditoClienteDao.Destroy;
 begin
   FCreditoClientesLista := nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

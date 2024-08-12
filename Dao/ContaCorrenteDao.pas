@@ -25,7 +25,7 @@ type
   private
     [weak] mySelf: ITContaCorrenteDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FContaCorrentesLista: IList<ITContaCorrenteModel>;
     FLengthPageView: String;
@@ -160,7 +160,7 @@ end;
 destructor TContaCorrenteDao.Destroy;
 begin
   FContaCorrentesLista := nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

@@ -22,7 +22,7 @@ type
   private
     [weak] mySelf: ITClienteDao;
     vIConexao : Iconexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FClientesLista: IList<ITClienteModel>;
     FLengthPageView: String;
@@ -434,7 +434,7 @@ end;
 
 destructor TClienteDao.Destroy;
 begin
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

@@ -28,7 +28,7 @@ type
     [weak] mySelf: ITMarcaDao;
     vIConexao : IConexao;
 
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FLengthPageView: String;
     FStartRecordView: String;
@@ -50,7 +50,7 @@ type
     function where: String;
 
     var
-      vConstrutorDao : TConstrutorDao;
+      vConstrutorDao : IConstrutorDao;
 
   public
 

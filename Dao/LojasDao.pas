@@ -21,7 +21,7 @@ type
   private
     [weak] mySelf:ITLojasDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FLojassLista: IList<ITLojasModel>;
     FLengthPageView: String;
@@ -83,7 +83,7 @@ end;
 destructor TLojasDao.Destroy;
 begin
   FLojassLista := nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;
