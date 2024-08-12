@@ -574,6 +574,11 @@ begin
       modelo.objeto.VTOTTRIB_ESTADUAL            := lQry.FieldByName('VTOTTRIB_ESTADUAL').AsString;
       modelo.objeto.VTOTTRIB_MUNICIPAL           := lQry.FieldByName('VTOTTRIB_MUNICIPAL').AsString;
 
+      modelo.objeto.VICMSSUBISTITUTORET          := lQry.FieldByName('VICMSSUBISTITUTORET').AsString;
+      modelo.objeto.VBCSTRET                     := lQry.FieldByName('VBCSTRET').AsString;
+      modelo.objeto.VICMSSTRET                   := lQry.FieldByName('VICMSSTRET').AsString;
+      modelo.objeto.PICMSSTRET                   := lQry.FieldByName('PICMSSTRET').AsString;
+
       lQry.Next;
     end;
 
