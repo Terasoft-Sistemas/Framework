@@ -23,7 +23,7 @@ type
   private
     [weak] mySelf: ITVendaCartaoDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FVendaCartaosLista: IList<ITVendaCartaoModel>;
     FLengthPageView: String;
@@ -134,7 +134,7 @@ end;
 destructor TVendaCartaoDao.Destroy;
 begin
   FVendaCartaosLista:=nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

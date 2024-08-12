@@ -20,7 +20,7 @@ type
   private
     [weak] mySelf: ITPromocaoItensDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
     FPromocaoItenssLista: IList<ITPromocaoItensModel>;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -111,7 +111,7 @@ end;
 destructor TPromocaoItensDao.Destroy;
 begin
   FPromocaoItenssLista:=nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

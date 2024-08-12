@@ -6,13 +6,17 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
 
-  TVoltagemProdutoModel = class
+  TVoltagemProdutoModel = class;
+  ITVoltagemProdutoModel=IObject<TVoltagemProdutoModel>;
 
+  TVoltagemProdutoModel = class
   private
+    [weak] mySelf: ITVoltagemProdutoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -51,15 +55,17 @@ type
     property DATA_CADASTRO  : Variant  read FDATA_CADASTRO write SetDATA_CADASTRO;
     propertY SYSTIME        : Variant  read FSYSTIME write SetSYSTIME;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITVoltagemProdutoModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TVoltagemProdutoModel;
+    function Alterar(pID : String): ITVoltagemProdutoModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId : String): TVoltagemProdutoModel;
+    function carregaClasse(pId : String): ITVoltagemProdutoModel;
     function obterLista: IFDDataset;
 
     property Acao :TAcao read FAcao write SetAcao;
@@ -82,14 +88,14 @@ uses
 
 { TVoltagemProdutoModel }
 
-function TVoltagemProdutoModel.Alterar(pID: String): TVoltagemProdutoModel;
+function TVoltagemProdutoModel.Alterar(pID: String): ITVoltagemProdutoModel;
 var
-  lVoltagemProdutoModel : TVoltagemProdutoModel;
+  lVoltagemProdutoModel : ITVoltagemProdutoModel;
 begin
-  lVoltagemProdutoModel := TVoltagemProdutoModel.Create(vIConexao);
+  lVoltagemProdutoModel := TVoltagemProdutoModel.getNewIface(vIConexao);
   try
-    lVoltagemProdutoModel       := lVoltagemProdutoModel.carregaClasse(pID);
-    lVoltagemProdutoModel.Acao  := tacAlterar;
+    lVoltagemProdutoModel       := lVoltagemProdutoModel.objeto.carregaClasse(pID);
+    lVoltagemProdutoModel.objeto.Acao  := tacAlterar;
     Result               		    := lVoltagemProdutoModel;
   finally
   end;
@@ -102,26 +108,32 @@ begin
   Result       := self.Salvar;
 end;
 
+class function TVoltagemProdutoModel.getNewIface(pIConexao: IConexao): ITVoltagemProdutoModel;
+begin
+  Result := TImplObjetoOwner<TVoltagemProdutoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TVoltagemProdutoModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
     Result    := self.Salvar;
 end;
 
-function TVoltagemProdutoModel.carregaClasse(pID : String): TVoltagemProdutoModel;
+function TVoltagemProdutoModel.carregaClasse(pID : String): ITVoltagemProdutoModel;
 var
-  lVoltagemProdutoDao: TVoltagemProdutoDao;
+  lVoltagemProdutoDao: ITVoltagemProdutoDao;
 begin
-  lVoltagemProdutoDao := TVoltagemProdutoDao.Create(vIConexao);
+  lVoltagemProdutoDao := TVoltagemProdutoDao.getNewIface(vIConexao);
 
   try
-    Result := lVoltagemProdutoDao.carregaClasse(pID);
+    Result := lVoltagemProdutoDao.objeto.carregaClasse(pID);
   finally
-    lVoltagemProdutoDao.Free;
+    lVoltagemProdutoDao:=nil;
   end;
 end;
 
-constructor TVoltagemProdutoModel.Create(pIConexao : IConexao);
+constructor TVoltagemProdutoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -133,42 +145,42 @@ end;
 
 function TVoltagemProdutoModel.obterLista: IFDDataset;
 var
-  lVoltagemProdutoLista: TVoltagemProdutoDao;
+  lVoltagemProdutoLista: ITVoltagemProdutoDao;
 begin
-  lVoltagemProdutoLista := TVoltagemProdutoDao.Create(vIConexao);
+  lVoltagemProdutoLista := TVoltagemProdutoDao.getNewIface(vIConexao);
 
   try
-    lVoltagemProdutoLista.TotalRecords    := FTotalRecords;
-    lVoltagemProdutoLista.WhereView       := FWhereView;
-    lVoltagemProdutoLista.CountView       := FCountView;
-    lVoltagemProdutoLista.OrderView       := FOrderView;
-    lVoltagemProdutoLista.StartRecordView := FStartRecordView;
-    lVoltagemProdutoLista.LengthPageView  := FLengthPageView;
-    lVoltagemProdutoLista.IDRecordView    := FIDRecordView;
+    lVoltagemProdutoLista.objeto.TotalRecords    := FTotalRecords;
+    lVoltagemProdutoLista.objeto.WhereView       := FWhereView;
+    lVoltagemProdutoLista.objeto.CountView       := FCountView;
+    lVoltagemProdutoLista.objeto.OrderView       := FOrderView;
+    lVoltagemProdutoLista.objeto.StartRecordView := FStartRecordView;
+    lVoltagemProdutoLista.objeto.LengthPageView  := FLengthPageView;
+    lVoltagemProdutoLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lVoltagemProdutoLista.obterLista;
+    Result := lVoltagemProdutoLista.objeto.obterLista;
 
-    FTotalRecords := lVoltagemProdutoLista.TotalRecords;
+    FTotalRecords := lVoltagemProdutoLista.objeto.TotalRecords;
 
   finally
-    lVoltagemProdutoLista.Free;
+    lVoltagemProdutoLista:=nil;
   end;
 end;
 
 function TVoltagemProdutoModel.Salvar: String;
 var
-  lVoltagemProdutoDao: TVoltagemProdutoDao;
+  lVoltagemProdutoDao: ITVoltagemProdutoDao;
 begin
-  lVoltagemProdutoDao := TVoltagemProdutoDao.Create(vIConexao);
+  lVoltagemProdutoDao := TVoltagemProdutoDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lVoltagemProdutoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lVoltagemProdutoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lVoltagemProdutoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lVoltagemProdutoDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lVoltagemProdutoDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lVoltagemProdutoDao.objeto.excluir(mySelf);
     end;
   finally
-    lVoltagemProdutoDao.Free;
+    lVoltagemProdutoDao:=nil;
   end;
 end;
 

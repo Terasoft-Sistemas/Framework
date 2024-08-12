@@ -22,7 +22,7 @@ type
   private
     [weak] mySelf: ITSaidasDao;
     vIConexao : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FLengthPageView: String;
     FIDRecordView: Integer;

@@ -6,12 +6,16 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
-  TProdutoTipoModel = class
+  TProdutoTipoModel = class;
+  ITProdutoTipoModel=IObject<TProdutoTipoModel>;
 
+  TProdutoTipoModel = class
   private
+    [weak] mySelf: ITProdutoTipoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -44,8 +48,10 @@ type
 
     public
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITProdutoTipoModel;
 
     property ID        :Variant read FID write SetID;
     property NOME      :Variant read FNOME write SetNOME;
@@ -64,8 +70,8 @@ type
 
     function Salvar : String;
     function Incluir: String;
-    function carregaClasse(pId : String): TProdutoTipoModel;
-    function Alterar(pID : String): TProdutoTipoModel;
+    function carregaClasse(pId : String): ITProdutoTipoModel;
+    function Alterar(pID : String): ITProdutoTipoModel;
     function Excluir(pID : String): String;
     function ObterLista : IFDDataset; overload;
 
@@ -78,33 +84,33 @@ uses
 
 { TProdutoTipoModel }
 
-function TProdutoTipoModel.Alterar(pID: String): TProdutoTipoModel;
+function TProdutoTipoModel.Alterar(pID: String): ITProdutoTipoModel;
 var
-  lProdutoTipoModel : TProdutoTipoModel;
+  lProdutoTipoModel : ITProdutoTipoModel;
 begin
-  lProdutoTipoModel := TProdutoTipoModel.Create(vIConexao);
+  lProdutoTipoModel := TProdutoTipoModel.getNewIface(vIConexao);
   try
-    lProdutoTipoModel       := lProdutoTipoModel.carregaClasse(pID);
-    lProdutoTipoModel.Acao  := tacAlterar;
+    lProdutoTipoModel       := lProdutoTipoModel.objeto.carregaClasse(pID);
+    lProdutoTipoModel.objeto.Acao  := tacAlterar;
     Result                  := lProdutoTipoModel;
   finally
   end;
 end;
 
-function TProdutoTipoModel.carregaClasse(pId: String): TProdutoTipoModel;
+function TProdutoTipoModel.carregaClasse(pId: String): ITProdutoTipoModel;
 var
-  lProdutoTipoModel: TProdutoTipoModel;
+  lProdutoTipoModel: ITProdutoTipoModel;
 begin
-  lProdutoTipoModel := TProdutoTipoModel.Create(vIConexao);
+  lProdutoTipoModel := TProdutoTipoModel.getNewIface(vIConexao);
 
   try
-    Result := lProdutoTipoModel.carregaClasse(pId);
+    Result := lProdutoTipoModel.objeto.carregaClasse(pId);
   finally
-    lProdutoTipoModel.Free;
+    lProdutoTipoModel:=nil;
   end;
 end;
 
-constructor TProdutoTipoModel.Create(pIConexao : IConexao);
+constructor TProdutoTipoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -121,6 +127,12 @@ begin
   Result       := self.Salvar;
 end;
 
+class function TProdutoTipoModel.getNewIface(pIConexao: IConexao): ITProdutoTipoModel;
+begin
+  Result := TImplObjetoOwner<TProdutoTipoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TProdutoTipoModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
@@ -129,39 +141,39 @@ end;
 
 function TProdutoTipoModel.ObterLista: IFDDataset;
 var
-  lProdutoTipo: TProdutoTipoDao;
+  lProdutoTipo: ITProdutoTipoDao;
 begin
-  lProdutoTipo := TProdutoTipoDao.Create(vIConexao);
+  lProdutoTipo := TProdutoTipoDao.getNewIface(vIConexao);
   try
-    lProdutoTipo.TotalRecords    := FTotalRecords;
-    lProdutoTipo.WhereView       := FWhereView;
-    lProdutoTipo.CountView       := FCountView;
-    lProdutoTipo.OrderView       := FOrderView;
-    lProdutoTipo.StartRecordView := FStartRecordView;
-    lProdutoTipo.LengthPageView  := FLengthPageView;
-    lProdutoTipo.IDRecordView    := FIDRecordView;
+    lProdutoTipo.objeto.TotalRecords    := FTotalRecords;
+    lProdutoTipo.objeto.WhereView       := FWhereView;
+    lProdutoTipo.objeto.CountView       := FCountView;
+    lProdutoTipo.objeto.OrderView       := FOrderView;
+    lProdutoTipo.objeto.StartRecordView := FStartRecordView;
+    lProdutoTipo.objeto.LengthPageView  := FLengthPageView;
+    lProdutoTipo.objeto.IDRecordView    := FIDRecordView;
 
-    Result := lProdutoTipo.obterLista;
-    FTotalRecords := lProdutoTipo.TotalRecords;
+    Result := lProdutoTipo.objeto.obterLista;
+    FTotalRecords := lProdutoTipo.objeto.TotalRecords;
   finally
-    lProdutoTipo.Free;
+    lProdutoTipo:=nil;
   end;
 end;
 
 function TProdutoTipoModel.Salvar: String;
 var
-  lProdutoTipoDao: TProdutoTipoDao;
+  lProdutoTipoDao: ITProdutoTipoDao;
 begin
-  lProdutoTipoDao := TProdutoTipoDao.Create(vIConexao);
+  lProdutoTipoDao := TProdutoTipoDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lProdutoTipoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lProdutoTipoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lProdutoTipoDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lProdutoTipoDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lProdutoTipoDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lProdutoTipoDao.objeto.excluir(mySelf);
     end;
   finally
-    lProdutoTipoDao.Free;
+    lProdutoTipoDao:=nil;
   end;
 end;
 

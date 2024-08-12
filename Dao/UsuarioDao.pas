@@ -24,7 +24,7 @@ type
   private
     [weak] mySelf: ITUsuarioDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FUsuariosLista: IList<ITUsuarioModel>;
     FLengthPageView: String;
@@ -153,7 +153,7 @@ end;
 destructor TUsuarioDao.Destroy;
 begin
   FUsuariosLista:=nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao   := nil;
   inherited;
 end;

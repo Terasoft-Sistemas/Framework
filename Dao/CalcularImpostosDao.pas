@@ -17,7 +17,7 @@ type
 
   private
     vIConexao : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FDESTINATARIO_UF: String;
     FCODIGO_CLIENTE: String;
@@ -60,7 +60,7 @@ end;
 
 destructor TCalcularImpostosDao.Destroy;
 begin
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

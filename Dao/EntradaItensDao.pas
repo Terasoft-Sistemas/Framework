@@ -22,7 +22,7 @@ type
   private
     [weak] mySelf: ITEntradaItensDao;
     vIConexao : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -336,6 +336,8 @@ end;
 
 destructor TEntradaItensDao.Destroy;
 begin
+  vConstrutor := nil;
+  vIConexao := nil;
   inherited;
 end;
 

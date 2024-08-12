@@ -563,7 +563,8 @@ uses
   PixModel, FinanceiroPedidoModel,
   VendaCartaoModel,
   ReservaModel,
-  CaixaControleModel;
+  CaixaControleModel,
+  CreditoClienteModel;
 
 { TPedidoVendaModel }
 
@@ -653,6 +654,8 @@ var
   lPixModel                : ITPixModel;
   lComissaoCliente         : Double;
   lParametros              : TParametrosComissao;
+  lCreditoClienteModel     : ITCreditoClienteModel;
+  lConfiguracoes           : ITerasoftConfiguracoes;
 begin
   lPedidoVendaModel        := TPedidoVendaModel.getNewIface(vIConexao);
   lPedidoItensModel        := TPedidoItensModel.getNewIface(vIConexao);
@@ -661,6 +664,8 @@ begin
   lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
   lPixModel                := TPixModel.getNewIface(vIConexao);
   lVendedorModel           := TFuncionarioModel.getNewIface(vIConexao);
+  lCreditoClienteModel     := TCreditoClienteModel.getNewIface(vIConexao);
+  lConfiguracoes           := TerasoftConfiguracoes.getNewIface(vIConexao);
 
   try
     lPedidoVendaModel := lPedidoVendaModel.objeto.carregaClasse(self.FNUMERO_PED);
@@ -709,6 +714,16 @@ begin
     lParametros.PER_COMISSAO_GARANTIA    := lVendedorModel.objeto.PER_COMISSAO_GARANTIA;
     lParametros.PER_COMISSAO_GARANTIA_FR := lVendedorModel.objeto.PER_COMISSAO_GARANTIA_FR;
 
+    if (lConfiguracoes.objeto.valorTag('PERCENTUAL_CREDITO_CLIENTE_VENDA', 0, tvNumero) > 0) and (lPedidoVendaModel.objeto.CODIGO_CLI <> '000000') then
+    begin
+      lCreditoClienteModel.objeto.CLIENTE_ID    := lPedidoVendaModel.objeto.CODIGO_CLI;
+      lCreditoClienteModel.objeto.DATA          := lPedidoVendaModel.objeto.DATA_PED;
+      lCreditoClienteModel.objeto.TIPO          := 'C';
+      lCreditoClienteModel.objeto.VALOR         := ((lConfiguracoes.objeto.valorTag('PERCENTUAL_CREDITO_CLIENTE_VENDA', 0, tvNumero)) / 100) * (lPedidoVendaModel.objeto.TOTAL_PED);
+      lCreditoClienteModel.objeto.OBS           := 'CRÉDITO DE '+FloatToStr(lConfiguracoes.objeto.valorTag('PERCENTUAL_CREDITO_CLIENTE_VENDA', 0, tvNumero))+'% GERADO PELA VENDA N: '+lPedidoVendaModel.objeto.NUMERO_PED+'.';
+      lCreditoClienteModel.objeto.Incluir;
+    end;
+
     for lModel in lPedidoItensModel.objeto.PedidoItenssLista do
     begin
       if lPedidoVendaModel.objeto.FRETE_PED > 0 then
@@ -732,6 +747,7 @@ begin
     lClienteModel:=nil;
     lReservaModel:=nil;
     lPixModel:=nil;
+    lCreditoClienteModel:=nil;
   end;
 end;
 

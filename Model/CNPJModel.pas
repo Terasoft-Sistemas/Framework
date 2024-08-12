@@ -84,6 +84,9 @@ end;
 
 destructor TCNPJModel.Destroy;
 begin
+  FreeAndNil(fRestRequest);
+  FreeAndNil(fRestResponse);
+  FreeAndNil(fRestClient);
 inherited;
 end;
 

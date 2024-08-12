@@ -11,14 +11,18 @@ uses
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao;
 
 type
-  TVoltagemProdutoDao = class
+  TVoltagemProdutoDao = class;
+  ITVoltagemProdutoDao=IObject<TVoltagemProdutoDao>;
 
+  TVoltagemProdutoDao = class
   private
+    [weak] mySelf: ITVoltagemProdutoDao;
     vIConexao 	: IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -41,8 +45,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITVoltagemProdutoDao;
 
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -53,14 +59,14 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(pVoltagemProdutoModel: TVoltagemProdutoModel): String;
-    function alterar(pVoltagemProdutoModel: TVoltagemProdutoModel): String;
-    function excluir(pVoltagemProdutoModel: TVoltagemProdutoModel): String;
+    function incluir(pVoltagemProdutoModel: ITVoltagemProdutoModel): String;
+    function alterar(pVoltagemProdutoModel: ITVoltagemProdutoModel): String;
+    function excluir(pVoltagemProdutoModel: ITVoltagemProdutoModel): String;
 
-    function carregaClasse(pID : String): TVoltagemProdutoModel;
+    function carregaClasse(pID : String): ITVoltagemProdutoModel;
     function obterLista: IFDDataset;
 
-    procedure setParams(var pQry: TFDQuery; pVoltagemProdutoModel: TVoltagemProdutoModel);
+    procedure setParams(var pQry: TFDQuery; pVoltagemProdutoModel: ITVoltagemProdutoModel);
 
 end;
 
@@ -71,13 +77,13 @@ uses
 
 { TVoltagemProduto }
 
-function TVoltagemProdutoDao.carregaClasse(pID : String): TVoltagemProdutoModel;
+function TVoltagemProdutoDao.carregaClasse(pID : String): ITVoltagemProdutoModel;
 var
   lQry: TFDQuery;
-  lModel: TVoltagemProdutoModel;
+  lModel: ITVoltagemProdutoModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TVoltagemProdutoModel.Create(vIConexao);
+  lModel   := TVoltagemProdutoModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -86,10 +92,10 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID               := lQry.FieldByName('ID').AsString;
-    lModel.DESCRICAO        := lQry.FieldByName('DESCRICAO').AsString;
-    lModel.DATA_CADASTRO    := lQry.FieldByName('DATA_CADASTRO').AsString;
-    lModel.SYSTIME          := lQry.FieldByName('SYSTIME').AsString;
+    lModel.objeto.ID               := lQry.FieldByName('ID').AsString;
+    lModel.objeto.DESCRICAO        := lQry.FieldByName('DESCRICAO').AsString;
+    lModel.objeto.DATA_CADASTRO    := lQry.FieldByName('DATA_CADASTRO').AsString;
+    lModel.objeto.SYSTIME          := lQry.FieldByName('SYSTIME').AsString;
 
     Result := lModel;
   finally
@@ -97,7 +103,7 @@ begin
   end;
 end;
 
-constructor TVoltagemProdutoDao.Create(pIConexao : IConexao);
+constructor TVoltagemProdutoDao._Create(pIConexao : IConexao);
 begin
   vIConexao   := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -108,7 +114,7 @@ begin
   inherited;
 end;
 
-function TVoltagemProdutoDao.incluir(pVoltagemProdutoModel: TVoltagemProdutoModel): String;
+function TVoltagemProdutoDao.incluir(pVoltagemProdutoModel: ITVoltagemProdutoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -129,7 +135,7 @@ begin
   end;
 end;
 
-function TVoltagemProdutoDao.alterar(pVoltagemProdutoModel: TVoltagemProdutoModel): String;
+function TVoltagemProdutoDao.alterar(pVoltagemProdutoModel: ITVoltagemProdutoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -143,7 +149,7 @@ begin
     setParams(lQry, pVoltagemProdutoModel);
     lQry.ExecSQL;
 
-    Result := pVoltagemProdutoModel.ID;
+    Result := pVoltagemProdutoModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -151,20 +157,26 @@ begin
   end;
 end;
 
-function TVoltagemProdutoDao.excluir(pVoltagemProdutoModel: TVoltagemProdutoModel): String;
+function TVoltagemProdutoDao.excluir(pVoltagemProdutoModel: ITVoltagemProdutoModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from voltagem_produto where ID = :ID' ,[pVoltagemProdutoModel.ID]);
+   lQry.ExecSQL('delete from voltagem_produto where ID = :ID' ,[pVoltagemProdutoModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pVoltagemProdutoModel.ID;
+   Result := pVoltagemProdutoModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TVoltagemProdutoDao.getNewIface(pIConexao: IConexao): ITVoltagemProdutoDao;
+begin
+  Result := TImplObjetoOwner<TVoltagemProdutoDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TVoltagemProdutoDao.where: String;
@@ -264,28 +276,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TVoltagemProdutoDao.setParams(var pQry: TFDQuery; pVoltagemProdutoModel: TVoltagemProdutoModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TVoltagemProdutoDao.setParams(var pQry: TFDQuery; pVoltagemProdutoModel: ITVoltagemProdutoModel);
 begin
-  lTabela := vConstrutor.getColumns('Voltagem_Produto');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TVoltagemProdutoModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pVoltagemProdutoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pVoltagemProdutoModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('Voltagem_Produto',pQry,pVoltagemProdutoModel.objeto);
 end;
 
 procedure TVoltagemProdutoDao.SetStartRecordView(const Value: String);

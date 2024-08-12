@@ -6,13 +6,17 @@ uses
   Terasoft.Types,
   System.Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   FireDAC.Comp.Client;
 
 type
 
-  TFornecedorModel = class
+  TFornecedorModel = class;
+  ITFornecedorModel=IObject<TFornecedorModel>;
 
+  TFornecedorModel = class
   private
+    [weak] mySelf: ITFornecedorModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -212,15 +216,17 @@ type
     property CODIGO_ANTERIOR            :Variant read FCODIGO_ANTERIOR write SetCODIGO_ANTERIOR;
     property SYSTIME                    :Variant read FSYSTIME write SetSYSTIME;
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITFornecedorModel;
+
     function Incluir: String;
-    function Alterar(pID : String): TFornecedorModel;
+    function Alterar(pID : String): ITFornecedorModel;
     function Excluir(pID : String): String;
     function Salvar : String;
 
-    function carregaClasse(pId : String): TFornecedorModel;
+    function carregaClasse(pId : String): ITFornecedorModel;
     function obterLista: IFDDataset;
 
     property Acao :TAcao read FAcao write SetAcao;
@@ -237,20 +243,20 @@ type
 implementation
 
 uses
-  FornecedorDao,  
+  FornecedorDao,
   System.Classes, 
   System.SysUtils;
 
 { TFornecedorModel }
 
-function TFornecedorModel.Alterar(pID: String): TFornecedorModel;
+function TFornecedorModel.Alterar(pID: String): ITFornecedorModel;
 var
-  lFornecedorModel : TFornecedorModel;
+  lFornecedorModel : ITFornecedorModel;
 begin
-  lFornecedorModel := TFornecedorModel.Create(vIConexao);
+  lFornecedorModel := TFornecedorModel.getNewIface(vIConexao);
   try
-    lFornecedorModel       := lFornecedorModel.carregaClasse(pID);
-    lFornecedorModel.Acao  := tacAlterar;
+    lFornecedorModel       := lFornecedorModel.objeto.carregaClasse(pID);
+    lFornecedorModel.objeto.Acao  := tacAlterar;
     Result                 := lFornecedorModel;
   finally
   end;
@@ -263,74 +269,81 @@ begin
   Result       := self.Salvar;
 end;
 
+class function TFornecedorModel.getNewIface(pIConexao: IConexao): ITFornecedorModel;
+begin
+  Result := TImplObjetoOwner<TFornecedorModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TFornecedorModel.Incluir: String;
 begin
     self.Acao := tacIncluir;
     Result    := self.Salvar;
 end;
 
-function TFornecedorModel.carregaClasse(pId : String): TFornecedorModel;
+function TFornecedorModel.carregaClasse(pId : String): ITFornecedorModel;
 var
-  lFornecedorDao: TFornecedorDao;
+  lFornecedorDao: ITFornecedorDao;
 begin
-  lFornecedorDao := TFornecedorDao.Create(vIConexao);
+  lFornecedorDao := TFornecedorDao.getNewIface(vIConexao);
 
   try
-    Result := lFornecedorDao.carregaClasse(pId);
+    Result := lFornecedorDao.objeto.carregaClasse(pId);
   finally
-    lFornecedorDao.Free;
+    lFornecedorDao:=nil;
   end;
 end;
 
-constructor TFornecedorModel.Create(pIConexao : IConexao);
+constructor TFornecedorModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
 
 destructor TFornecedorModel.Destroy;
 begin
+  vIConexao := nil;
   inherited;
 end;
 
 function TFornecedorModel.obterLista: IFDDataset;
 var
-  lFornecedorLista: TFornecedorDao;
+  lFornecedorLista: ITFornecedorDao;
 begin
-  lFornecedorLista := TFornecedorDao.Create(vIConexao);
+  lFornecedorLista := TFornecedorDao.getNewIface(vIConexao);
 
   try
-    lFornecedorLista.TotalRecords       := FTotalRecords;
-    lFornecedorLista.WhereView          := FWhereView;
-    lFornecedorLista.CountView          := FCountView;
-    lFornecedorLista.OrderView          := FOrderView;
-    lFornecedorLista.StartRecordView    := FStartRecordView;
-    lFornecedorLista.LengthPageView     := FLengthPageView;
-    lFornecedorLista.IDRecordView       := FIDRecordView;
-    lFornecedorLista.CNPJCPFRecordView  := FCNPJCPFRecordView;
+    lFornecedorLista.objeto.TotalRecords       := FTotalRecords;
+    lFornecedorLista.objeto.WhereView          := FWhereView;
+    lFornecedorLista.objeto.CountView          := FCountView;
+    lFornecedorLista.objeto.OrderView          := FOrderView;
+    lFornecedorLista.objeto.StartRecordView    := FStartRecordView;
+    lFornecedorLista.objeto.LengthPageView     := FLengthPageView;
+    lFornecedorLista.objeto.IDRecordView       := FIDRecordView;
+    lFornecedorLista.objeto.CNPJCPFRecordView  := FCNPJCPFRecordView;
 
-    Result := lFornecedorLista.obterLista;
+    Result := lFornecedorLista.objeto.obterLista;
 
-    FTotalRecords := lFornecedorLista.TotalRecords;
+    FTotalRecords := lFornecedorLista.objeto.TotalRecords;
 
   finally
-    lFornecedorLista.Free;
+    lFornecedorLista:=nil;
   end;
 end;
 
 function TFornecedorModel.Salvar: String;
 var
-  lFornecedorDao: TFornecedorDao;
+  lFornecedorDao: ITFornecedorDao;
 begin
-  lFornecedorDao := TFornecedorDao.Create(vIConexao);
+  lFornecedorDao := TFornecedorDao.getNewIface(vIConexao);
   Result := '';
   try
     case FAcao of
-      Terasoft.Types.tacIncluir: Result := lFornecedorDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lFornecedorDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lFornecedorDao.excluir(Self);
+      Terasoft.Types.tacIncluir: Result := lFornecedorDao.objeto.incluir(mySelf);
+      Terasoft.Types.tacAlterar: Result := lFornecedorDao.objeto.alterar(mySelf);
+      Terasoft.Types.tacExcluir: Result := lFornecedorDao.objeto.excluir(mySelf);
     end;
   finally
-    lFornecedorDao.Free;
+    lFornecedorDao:=nil;
   end;
 end;
 

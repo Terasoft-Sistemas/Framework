@@ -22,7 +22,7 @@ type
   private
     [weak] mySelf: ITPedidoCompraDao;
     vIConexao 	: IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -164,6 +164,8 @@ end;
 
 destructor TPedidoCompraDao.Destroy;
 begin
+  vConstrutor := nil;
+  vIConexao   := nil;
   inherited;
 end;
 

@@ -18,13 +18,18 @@ uses
   Terasoft.FuncoesTexto;
 
 type
-  TTipoVendaDao = class
+  TTipoVendaDao = class;
+  ITTipoVendaDao=IObject<TTipoVendaDao>;
 
+  TTipoVendaDao = class
   private
+    [weak] mySelf: ITTipoVendaDao;
      vConexao : IConexao;
   public
-    constructor Create(pConexao : IConexao);
+    constructor _Create(pConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITTipoVendaDao;
 
     function ObterLista(pTipoVenda_Parametros: TTipoVenda_Parametros): IFDDataset;
 
@@ -37,7 +42,7 @@ uses
 
 { TPCG }
 
-constructor TTipoVendaDao.Create(pConexao : IConexao);
+constructor TTipoVendaDao._Create(pConexao : IConexao);
 begin
   vConexao := pConexao;
 end;
@@ -45,6 +50,12 @@ end;
 destructor TTipoVendaDao.Destroy;
 begin
   inherited;
+end;
+
+class function TTipoVendaDao.getNewIface(pIConexao: IConexao): ITTipoVendaDao;
+begin
+  Result := TImplObjetoOwner<TTipoVendaDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TTipoVendaDao.ObterLista(pTipoVenda_Parametros: TTipoVenda_Parametros): IFDDataset;

@@ -17,12 +17,16 @@ uses
   Terasoft.FuncoesTexto,
   System.Generics.Collections,
   Terasoft.ConstrutorDao,
+  Terasoft.Framework.ObjectIface,
   ProdutoTipoModel;
 
 type
-  TProdutoTipoDao = class
+  TProdutoTipoDao = class;
+  ITProdutoTipoDao = IObject<TProdutoTipoDao>;
 
+  TProdutoTipoDao = class
   private
+    [weak] mySelf: ITProdutoTipoDao;
     vIConexao : IConexao;
 
     vConstrutor : TConstrutorDao;
@@ -50,8 +54,10 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITProdutoTipoDao;
 
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -61,12 +67,12 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
-    function incluir(pProdutoTipoModel: TProdutoTipoModel): String;
-    function alterar(pProdutoTipoModel: TProdutoTipoModel): String;
-    function excluir(pProdutoTipoModel: TProdutoTipoModel): String;
-    function carregaClasse(pID : String): TProdutoTipoModel;
+    function incluir(pProdutoTipoModel: ITProdutoTipoModel): String;
+    function alterar(pProdutoTipoModel: ITProdutoTipoModel): String;
+    function excluir(pProdutoTipoModel: ITProdutoTipoModel): String;
+    function carregaClasse(pID : String): ITProdutoTipoModel;
 
-    procedure setParams(var pQry: TFDQuery; pProdutoTipoModel: TProdutoTipoModel);
+    procedure setParams(var pQry: TFDQuery; pProdutoTipoModel: ITProdutoTipoModel);
     function ObterLista: IFDDataset; overload;
 
 end;
@@ -78,13 +84,13 @@ uses
 
 { TPCG }
 
-function TProdutoTipoDao.carregaClasse(pID: String): TProdutoTipoModel;
+function TProdutoTipoDao.carregaClasse(pID: String): ITProdutoTipoModel;
 var
   lQry: TFDQuery;
-  lModel: TProdutoTipoModel;
+  lModel: ITProdutoTipoModel;
 begin
   lQry     := vIConexao.CriarQuery;
-  lModel   := TProdutoTipoModel.Create(vIConexao);
+  lModel   := TProdutoTipoModel.getNewIface(vIConexao);
   Result   := lModel;
 
   try
@@ -93,10 +99,10 @@ begin
     if lQry.IsEmpty then
       Exit;
 
-    lModel.ID           := lQry.FieldByName('ID').AsString;
-    lModel.NOME    	  	:= lQry.FieldByName('NOME').AsString;
-    lModel.USA_PECA     := lQry.FieldByName('USA_PECA').AsString;
-	  lModel.COTACAO      := lQry.FieldByName('COTACAO').AsString;
+    lModel.objeto.ID           := lQry.FieldByName('ID').AsString;
+    lModel.objeto.NOME    	  	:= lQry.FieldByName('NOME').AsString;
+    lModel.objeto.USA_PECA     := lQry.FieldByName('USA_PECA').AsString;
+	  lModel.objeto.COTACAO      := lQry.FieldByName('COTACAO').AsString;
 
     Result := lModel;
   finally
@@ -104,7 +110,7 @@ begin
   end;
 end;
 
-constructor TProdutoTipoDao.Create(pIConexao : IConexao);
+constructor TProdutoTipoDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -116,7 +122,7 @@ begin
 end;
 
 
-function TProdutoTipoDao.incluir(pProdutoTipoModel: TProdutoTipoModel): String;
+function TProdutoTipoDao.incluir(pProdutoTipoModel: ITProdutoTipoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -126,7 +132,7 @@ begin
 
   try
     lQry.SQL.Add(lSQL);
-    pProdutoTipoModel.ID := vIConexao.Generetor('GEN_PRODUTO_TIPO');
+    pProdutoTipoModel.objeto.ID := vIConexao.Generetor('GEN_PRODUTO_TIPO');
     setParams(lQry, pProdutoTipoModel);
     lQry.Open;
 
@@ -163,7 +169,7 @@ begin
   end;
 end;
 
-function TProdutoTipoDao.alterar(pProdutoTipoModel: TProdutoTipoModel): String;
+function TProdutoTipoDao.alterar(pProdutoTipoModel: ITProdutoTipoModel): String;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -177,7 +183,7 @@ begin
     setParams(lQry, pProdutoTipoModel);
     lQry.ExecSQL;
 
-    Result := pProdutoTipoModel.ID;
+    Result := pProdutoTipoModel.objeto.ID;
 
   finally
     lSQL := '';
@@ -185,20 +191,26 @@ begin
   end;
 end;
 
-function TProdutoTipoDao.excluir(pProdutoTipoModel: TProdutoTipoModel): String;
+function TProdutoTipoDao.excluir(pProdutoTipoModel: ITProdutoTipoModel): String;
 var
   lQry: TFDQuery;
 begin
   lQry := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from PRODUTO_TIPO where ID = :ID' ,[pProdutoTipoModel.ID]);
+   lQry.ExecSQL('delete from PRODUTO_TIPO where ID = :ID' ,[pProdutoTipoModel.objeto.ID]);
    lQry.ExecSQL;
-   Result := pProdutoTipoModel.ID;
+   Result := pProdutoTipoModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
+end;
+
+class function TProdutoTipoDao.getNewIface(pIConexao: IConexao): ITProdutoTipoDao;
+begin
+  Result := TImplObjetoOwner<TProdutoTipoDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TProdutoTipoDao.where: String;
@@ -258,28 +270,9 @@ begin
   FOrderView := Value;
 end;
 
-procedure TProdutoTipoDao.setParams(var pQry: TFDQuery; pProdutoTipoModel: TProdutoTipoModel);
-var
-  lTabela : IFDDataset;
-  lCtx    : TRttiContext;
-  lProp   : TRttiProperty;
-  i       : Integer;
+procedure TProdutoTipoDao.setParams(var pQry: TFDQuery; pProdutoTipoModel: ITProdutoTipoModel);
 begin
-  lTabela := vConstrutor.getColumns('PRODUTO_TIPO');
-
-  lCtx := TRttiContext.Create;
-  try
-    for i := 0 to pQry.Params.Count - 1 do
-    begin
-      lProp := lCtx.GetType(TProdutoTipoModel).GetProperty(pQry.Params[i].Name);
-
-      if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pProdutoTipoModel).AsString = '',
-        Unassigned, vConstrutor.getValue(lTabela.objeto, pQry.Params[i].Name, lProp.GetValue(pProdutoTipoModel).AsString))
-    end;
-  finally
-    lCtx.Free;
-  end;
+  vConstrutor.setParams('PRODUTO_TIPO',pQry,pProdutoTipoModel.objeto);
 end;
 
 procedure TProdutoTipoDao.SetStartRecordView(const Value: String);

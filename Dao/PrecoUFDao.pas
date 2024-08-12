@@ -20,7 +20,7 @@ type
   private
     [weak] mySelf: ITPrecoUFDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FPrecoUFsLista: IList<ITPrecoUFModel>;
     FLengthPageView: String;
@@ -109,7 +109,7 @@ end;
 destructor TPrecoUFDao.Destroy;
 begin
   FPrecoUFsLista := nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

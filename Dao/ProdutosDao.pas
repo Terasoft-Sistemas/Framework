@@ -23,7 +23,7 @@ type
   private
     [weak] mySelf: ITProdutosDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FProdutossLista: IList<ITProdutosModel>;
     FLengthPageView: String;
@@ -94,7 +94,10 @@ end;
 implementation
 
 uses
-  System.Rtti, ClipBRD;
+  {$if defined(DEBUG)}
+    ClipBrd,
+  {$endif}
+  System.Rtti;
 
 { TProdutos }
 function TProdutosDao.carregaClasse(pID: String): ITProdutosModel;
@@ -419,7 +422,7 @@ end;
 destructor TProdutosDao.Destroy;
 begin
   FProdutossLista := nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;
@@ -602,7 +605,6 @@ function TProdutosDao.obterComissao(pCodProduto: String): IFDDataset;
 var
   lQry      : TFDQuery;
   lSql      : String;
-  lMemTable : TFDMemTable;
 begin
   try
     lQry := vIConexao.CriarQuery;
@@ -705,6 +707,10 @@ begin
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
+
+    {$if defined(DEBUG)}
+      Clipboard.AsText := lSQL;
+    {$endif}
 
     lQry.Open(lSQL);
 

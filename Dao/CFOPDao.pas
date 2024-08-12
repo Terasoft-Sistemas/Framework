@@ -22,7 +22,7 @@ type
   private
     [weak] mySelf: ITCFOPDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FCFOPsLista: IList<ITCFOPModel>;
     FLengthPageView: String;
@@ -159,7 +159,7 @@ end;
 destructor TCFOPDao.Destroy;
 begin
   FCFOPsLista := nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

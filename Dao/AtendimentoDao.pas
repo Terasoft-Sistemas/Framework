@@ -39,7 +39,7 @@ type
     function where: String;
 
     var
-      vConstrutorDao : TConstrutorDao;
+      vConstrutorDao : IConstrutorDao;
 
   public
     constructor Create(pIConexao : IConexao);
@@ -74,7 +74,7 @@ end;
 
 destructor TAtendimentoDao.Destroy;
 begin
-  vConstrutorDao.Free;
+  vConstrutorDao:=nil;
   inherited;
 end;
 

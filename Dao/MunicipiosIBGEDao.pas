@@ -18,7 +18,7 @@ type
 
   private
     vIConexao : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
   public
 
@@ -41,7 +41,7 @@ end;
 
 destructor TMunicipiosIBGEDao.Destroy;
 begin
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

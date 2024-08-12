@@ -20,7 +20,7 @@ type
   private
     [weak] mySelf: ITPrecoVendaProdutoDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
     FPrecoVendaProdutosLista: IList<ITPrecoVendaProdutoModel>;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -108,7 +108,7 @@ end;
 destructor TPrecoVendaProdutoDao.Destroy;
 begin
   FPrecoVendaProdutosLista:=nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

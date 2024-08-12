@@ -23,7 +23,7 @@ type
   private
     [weak] mySelf: ITNFItensDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FNFItenssLista: IList<ITNFItensModel>;
     FLengthPageView: String;
@@ -261,7 +261,7 @@ end;
 destructor TNFItensDao.Destroy;
 begin
   FNFItenssLista:=nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

@@ -612,12 +612,12 @@ end;
 procedure TPedidoItensModel.calcularComissao(pParametros : TParametrosComissao);
 var
   lVendedorModel             : ITFuncionarioModel;
-  lGrupoComissao             : TGrupoComissaoModel;
+  lGrupoComissao             : ITGrupoComissaoModel;
   lPercentualComissao,
   lPercentualComissaoGerente : Double;
 begin
   lVendedorModel := TFuncionarioModel.getNewIface(vIConexao);
-  lGrupoComissao := TGrupoComissaoModel.Create(vIConexao);
+  lGrupoComissao := TGrupoComissaoModel.getNewIface(vIConexao);
 
   try
     if self.FTIPO_VENDA_COMISSAO_ID <> '' then
@@ -631,7 +631,7 @@ begin
 
     else if self.FGRUPO_COMISSAO_ID <> '' then
     begin
-      lPercentualComissao := lGrupoComissao.ObterGrupoComissaoProduto(self.CODIGO_PRO);
+      lPercentualComissao := lGrupoComissao.objeto.ObterGrupoComissaoProduto(self.CODIGO_PRO);
 
       if lPercentualComissao = 0 then
         lPercentualComissao := lVendedorModel.objeto.comissaoPorGrupo(pParametros.VENDEDOR, self.FGRUPO_COMISSAO_ID);

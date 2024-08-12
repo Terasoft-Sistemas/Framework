@@ -16,6 +16,7 @@ uses
   Vcl.Dialogs,
   Vcl.ComCtrls,
   Vcl.StdCtrls,
+  ACBrMail,
   Terasoft.Types,
   Conexao,
   Interfaces.Conexao, EntradaModel, Vcl.Grids, XDBGrids, Data.DB,
@@ -391,6 +392,8 @@ uses
   FinanceiroPedidoModel,
   WebPedidoModel,
   PCGDao,
+  TipoVendadao,
+  TipoVendaModel,
   Form.Endpoint,
   Controllers.Conexao,
   WebPedidoItensModel,
@@ -3931,9 +3934,10 @@ end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
+  vConfiguracoes := nil;
   vIConexao := nil;
   {$if defined(__RELEASE__) or defined(__HIDE_MEMORY_LEAK__)}
-    TerminateProcess(GetCurrentProcess, exitCode );
+//    TerminateProcess(GetCurrentProcess, exitCode );
   {$endif}
 end;
 

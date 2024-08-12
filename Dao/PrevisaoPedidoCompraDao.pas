@@ -27,7 +27,7 @@ type
   private
     [weak] mySelf: ITPrevisaoPedidoCompraDao;
     vIConexao : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FLengthPageView: String;
     FIDRecordView: String;

@@ -1006,15 +1006,15 @@ end;
 function TProdutosModel.Incluir: String;
 var
   lGrupoModel      : ITGrupoModel;
-  lSubGrupoModel   : TSubGrupoModel;
-  lMarcaModel      : TMarcaModel;
-  lFornecedorModel : TFornecedorModel;
+  lSubGrupoModel   : ITSubGrupoModel;
+  lMarcaModel      : ITMarcaModel;
+  lFornecedorModel : ITFornecedorModel;
 begin
 
   lGrupoModel      := TGrupoModel.getNewIface(vIConexao);
-  lSubGrupoModel   := TSubGrupoModel.Create(vIConexao);
-  lMarcaModel      := TMarcaModel.Create(vIConexao);
-  lFornecedorModel := TFornecedorModel.Create(vIConexao);
+  lSubGrupoModel   := TSubGrupoModel.getNewIface(vIConexao);
+  lMarcaModel      := TMarcaModel.getNewIface(vIConexao);
+  lFornecedorModel := TFornecedorModel.getNewIface(vIConexao);
   try
 
     if self.CODIGO_GRU = '' then
@@ -1027,26 +1027,26 @@ begin
 
     if self.CODIGO_FOR = '' then
     begin
-      lFornecedorModel.StartRecordView := '0';
-      lFornecedorModel.LengthPageView  := '1';
-      lFornecedorModel.OrderView       := 'CODIGO_FOR';
-      self.CODIGO_FOR := lFornecedorModel.ObterLista.objeto.FieldByName('CODIGO_FOR').AsString;
+      lFornecedorModel.objeto.StartRecordView := '0';
+      lFornecedorModel.objeto.LengthPageView  := '1';
+      lFornecedorModel.objeto.OrderView       := 'CODIGO_FOR';
+      self.CODIGO_FOR := lFornecedorModel.objeto.ObterLista.objeto.FieldByName('CODIGO_FOR').AsString;
     end;
 
     if self.CODIGO_MAR = '' then
     begin
-      lMarcaModel.StartRecordView := '0';
-      lMarcaModel.LengthPageView  := '1';
-      lMarcaModel.OrderView       := 'CODIGO_MAR';
-      self.CODIGO_MAR := lMarcaModel.ObterLista.objeto.FieldByName('CODIGO_MAR').AsString;
+      lMarcaModel.objeto.StartRecordView := '0';
+      lMarcaModel.objeto.LengthPageView  := '1';
+      lMarcaModel.objeto.OrderView       := 'CODIGO_MAR';
+      self.CODIGO_MAR := lMarcaModel.objeto.ObterLista.objeto.FieldByName('CODIGO_MAR').AsString;
     end;
 
     if self.CODIGO_SUB = '' then
     begin
-      lSubGrupoModel.StartRecordView := '0';
-      lSubGrupoModel.LengthPageView  := '1';
-      lSubGrupoModel.OrderView       := 'CODIGO_SUB';
-      self.CODIGO_SUB := lSubGrupoModel.ObterLista.objeto.FieldByName('CODIGO_SUB').AsString;
+      lSubGrupoModel.objeto.StartRecordView := '0';
+      lSubGrupoModel.objeto.LengthPageView  := '1';
+      lSubGrupoModel.objeto.OrderView       := 'CODIGO_SUB';
+      self.CODIGO_SUB := lSubGrupoModel.objeto.ObterLista.objeto.FieldByName('CODIGO_SUB').AsString;
     end;
 
     self.ECF_PRO              := 'FF';

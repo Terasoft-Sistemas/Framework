@@ -23,7 +23,7 @@ type
   private
     [weak] mySelf: ITNFDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FNFLista: IList<ITNFModel>;
     FLengthPageView: String;
@@ -91,7 +91,7 @@ end;
 destructor TNFDao.Destroy;
 begin
   FNFLista := nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

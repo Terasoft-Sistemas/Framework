@@ -94,7 +94,9 @@ begin
 
     vLoja  := pLoja;
 
-    FConexaoExterna := TFDConnection.Create(nil);
+    if(FConexaoExterna=nil) then
+      FConexaoExterna := TFDConnection.Create(nil);
+    FConexaoExterna.Params.Clear;
     FConexaoExterna.Params.Add('Server='+lLojaModel.objeto.SERVER);
     FConexaoExterna.Params.Add('user_name='+ 'SYSDBA');
     FConexaoExterna.Params.Add('password='+ 'masterkey');
@@ -132,6 +134,7 @@ begin
       lHost.DataBase := lLojaModel.objeto.DATABASE;
     end;
 
+    FConexao.Params.clear;
     FConexao.Params.Add('Pooling=True');
     FConexao.Params.Add('MaxPoolSize=20');
     FConexao.Params.Add('Server='+lHost.Server);
@@ -209,7 +212,7 @@ var
   VQuery: TFDQuery;
 begin
    try
-     VQuery := TFDQuery.Create(nil);
+     VQuery := TFDQuery.Create(FConexao);
      VQuery.Connection := FConexao;
 
      Result := VQuery;
@@ -223,7 +226,7 @@ var
  VQuery: TFDQuery;
 begin
   try
-    VQuery             := TFDQuery.Create(nil);
+    VQuery             := TFDQuery.Create(FConexaoExterna);
     VQuery.Connection  := FConexaoExterna;
     Result             := VQuery;
   finally
@@ -242,6 +245,8 @@ end;
 
 destructor TControllersConexao.Destroy;
 begin
+  FreeAndNil(FConexaoExterna);
+  FreeAndNil(FConexao);
   inherited;
 end;
 
@@ -360,11 +365,12 @@ end;
 
 function TControllersConexao._AddRef: Integer;
 begin
-
+  inherited;
 end;
 
 function TControllersConexao._Release: Integer;
 begin
+  inherited;
 
 end;
 
