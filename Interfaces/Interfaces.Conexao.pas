@@ -126,6 +126,9 @@ interface
       function getGDB: IGDB;
       function getValidador: IValidadorDatabase;
 
+      function getGDBExterno: IGDB;
+
+      property gdbExterno: IGDB read getgdbExterno;
       property gdb: IGDB                       read getGDB;
       property validador: IValidadorDatabase   read getValidador;
       property terasoftConfiguracoes: IUnknown read getTerasoftConfiguracoes write setTerasoftConfiguracoes;

@@ -64,7 +64,7 @@ type
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property LojaView: String read FLojaView write SetLojaView;
 
-    procedure obterLista;
+    function obterLista: TILojasModelList;
     procedure obterHosts;
     function obterFiliais: IFDDataset;
 
@@ -201,7 +201,7 @@ begin
   end;
 end;
 
-procedure TLojasDao.obterLista;
+function TLojasDao.obterLista;
 var
   lQry: TFDQuery;
   lSQL:String;
@@ -210,6 +210,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   FLojassLista := TCollections.CreateList<ITLojasModel>;
+  Result := fLojassLista;
 
   try
     lSQL := ' select                           ' + #13 +

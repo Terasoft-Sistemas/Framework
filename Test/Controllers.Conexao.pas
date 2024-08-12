@@ -33,7 +33,7 @@ interface
 
         function NovaConexao(pLoja: String; pHost : String = '')           : IConexao;
         function criarQueryExterna                                         : TFDQuery;
-        function ConfigConexaoExterna(pLoja: String; pHost : String = '')  : Boolean;
+        function ConfigConexaoExterna(pLoja: String; _pHost : String = '')  : Boolean;
         function Generetor(pValue: String; pCtrGen : Boolean = false)      : String;
         function getConnection                                             : TFDConnection;
         function getLojaConectada                                          : String;
@@ -57,6 +57,11 @@ interface
         procedure setContext(pUsuario: String);
       protected
         fGDB: IGDB;
+        fGDBExterno: IGDB;
+
+      //property gdbExterno getter/setter
+        function getGDBExterno: IGDB;
+
         function getGDB: IGDB;
         function getValidador: IValidadorDatabase;
 
@@ -81,7 +86,7 @@ uses
 
 { TControllersConexao }
 
-function TControllersConexao.ConfigConexaoExterna(pLoja: String; pHost : String = ''): Boolean;
+function TControllersConexao.ConfigConexaoExterna(pLoja: String; _pHost : String = ''): Boolean;
 var
   lLojaModel : ITLojasModel;
 begin
@@ -90,9 +95,10 @@ begin
     lLojaModel.objeto.LojaView := pLoja;
     lLojaModel.objeto.obterLista;
 
-    lLojaModel := lLojaModel.objeto.LojassLista[0];
+    lLojaModel := lLojaModel.objeto.LojassLista.First;
 
     vLoja  := pLoja;
+    fGDBExterno := nil;
 
     if(FConexaoExterna=nil) then
       FConexaoExterna := TFDConnection.Create(nil);
@@ -105,6 +111,9 @@ begin
     FConexaoExterna.Params.Add('DriverID='+ 'FB');
     FConexaoExterna.Params.Add('Protocol='+ 'TCPIP');
     FConexaoExterna.Params.Add('LoginPrompt='+ 'False');
+    {$if defined(__USE_WIN1252__)}
+      FConexaoExterna.Params.Values['CharacterSet'] := GDBFIB_CHARSETPTBR;
+    {$endif}
 
     Result := true;
   finally
@@ -245,6 +254,8 @@ end;
 
 destructor TControllersConexao.Destroy;
 begin
+  fGDB := nil;
+  fGDBExterno := nil;
   FreeAndNil(FConexaoExterna);
   FreeAndNil(FConexao);
   inherited;
@@ -277,6 +288,16 @@ end;
 function TControllersConexao.getEmpresa: TEmpresa;
 begin
   Result := vEmpresa;
+end;
+
+function TControllersConexao.getGDBExterno: IGDB;
+begin
+  if(fGDBExterno=nil) then
+  begin
+    fGDBExterno := criaGDB(GDBDRIVER_FIREDAC,GDBPARAM_USEPOINTER,Integer(FConexaoExterna));
+    executeAfterConnectDatabase(fGDBExterno);
+  end;
+  Result := fGDBExterno;
 end;
 
 function TControllersConexao.getGDB: IGDB;

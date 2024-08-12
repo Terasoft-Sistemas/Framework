@@ -11,12 +11,13 @@ uses
 type
   TLojasModel = class;
   ITLojasModel=IObject<TLojasModel>;
+  TILojasModelList = IList<ITLojasModel>;
 
   TLojasModel = class
   private
     [weak] mySelf: ITLojasModel;
     vIConexao : IConexao;
-    FLojassLista: IList<ITLojasModel>;
+    FLojassLista: TILojasModelList;
     FAcao: TAcao;
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -36,7 +37,7 @@ type
     FSTRING_CONEXAO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
-    procedure SetLojassLista(const Value: IList<ITLojasModel>);
+    procedure SetLojassLista(const Value: TILojasModelList);
     procedure SetIDRecordView(const Value: Integer);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
@@ -68,11 +69,11 @@ type
     class function getNewIface(pIConexao: IConexao): ITLojasModel;
 
     function Salvar: String;
-    procedure obterLista;
+    function obterLista: TILojasModelList;
     procedure obterHosts;
     function obterFiliais: IFDDataset;
 
-    property LojassLista: IList<ITLojasModel> read FLojassLista write SetLojassLista;
+    property LojassLista: TILojasModelList read FLojassLista write SetLojassLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -149,7 +150,7 @@ begin
   end;
 end;
 
-procedure TLojasModel.obterLista;
+function TLojasModel.obterLista;
 var
   lLojasLista: ITLojasDao;
 begin
@@ -165,7 +166,7 @@ begin
     lLojasLista.objeto.IDRecordView    := FIDRecordView;
     lLojasLista.objeto.LojaView        := FLojaView;
 
-    lLojasLista.objeto.obterLista;
+    Result := lLojasLista.objeto.obterLista;
 
     FTotalRecords  := lLojasLista.objeto.TotalRecords;
     FLojassLista := lLojasLista.objeto.LojassLista;

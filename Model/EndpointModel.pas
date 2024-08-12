@@ -47,12 +47,14 @@ type
       _TABELA_ = 'ENDPOINT';
 
   protected
-    fDataset: IDataset;
+    fDataset: IDatasetSimples;
     fRegistros: Integer;
     fPrimeiro: Integer;
     fContagem: Integer;
     fOldQuery: String;
     fOrdem: TipoWideStringFramework;
+
+    function getFiltroLojas: ITFiltroModel;
 
   //property ordem getter/setter
     function getOrdem: TipoWideStringFramework;
@@ -125,8 +127,10 @@ type
 
     property contagem: Integer read getContagem;
     property buscaAdicional: TipoWideStringFramework read getBuscaAdicional write setBuscaAdicional;
-    property buscaAvanda: ITFiltroModel read getBuscaAvancada;
+    property buscaAvancadada: ITFiltroModel read getBuscaAvancada;
     property ordem: TipoWideStringFramework read getOrdem write setOrdem;
+
+    property filtroLojas: ITFiltroModel read getFiltroLojas;
 
   public
     procedure loaded;
@@ -145,6 +149,7 @@ implementation
     {$if defined(__DEBUG_ANTONIO__)}
       ClipBrd,
     {$endif}
+    LojasModel,
     Terasoft.Framework.Texto;
 
 function getNewEndpointModel(pIConexao : IConexao): ITEndpointModel;
@@ -350,19 +355,34 @@ function TEndpointModel.executaQuery;
   var
     lSql: String;
     lDS: IDataset;
+    lLojaModel: ITLojasModel;
 begin
-  lDS := vIConexao.gdb.criaDataset;
+  Result := nil;
+  lDS := nil;
   lSQL := getQuery;
-  lDS.query(lSql,'',[]);
   {$if defined(__DEBUG_ANTONIO__)}
     Clipboard.AsText := lSql;
   {$endif}
 
-  fDataset := lDS;
+  for lLojaModel in getFiltroLojas.objeto.listaLojas do
+  begin
+    vIConexao.ConfigConexaoExterna(lLojaModel.objeto.LOJA);
+    lDS := vIConexao.gdbExterno.criaDataset.query(lSQL,'',[]);
+    if(Result = nil) then
+      Result := criaDatasetSimples(cloneDataset(lDS.dataset))
+    else
+      atribuirRegistrosSoma(lDS.dataset,Result.dataset,filtroLojas.objeto.campo);
+  end;
 
-  Supports(lDS,IDatasetSimples,Result);
+
+//  lDS.query(lSql,'',[]);
+//  Supports(lDS,IDatasetSimples,Result);
+
+  fDataset := Result;
+
   if assigned(Result) and pFormatar then
     formatarDataset(Result.dataset);
+  Result.dataset.First;
 end;
 
 procedure TEndpointModel.formatarDataset(pDataset: TDataset);
@@ -439,7 +459,7 @@ procedure TEndpointModel.carregaFiltros;
     lTxt: IListaTextoEx;
     i: Integer;
     sName, sValue: String;
-    lFiltro: ITFiltroModel;
+    lFiltroLojas, lFiltro: ITFiltroModel;
 begin
   if fFiltroController=nil then
     fFiltroController := getFiltroController(vIConexao);
@@ -449,6 +469,13 @@ begin
 
   lTxt := getcfg.ReadSectionValuesLista('filtros');
 
+{  lFiltro := fFiltroController.getByName('');
+  lFiltro.objeto.setTipoPorNome('@loja');
+  lFiltro.objeto.campo := 'dummy';
+  fFILTROS.Add(lFiltro);}
+
+  lFiltroLojas := nil;
+
   for i := 0 to lTxt.strings.Count - 1 do
   begin
     sName := trim( lTxt.strings.Names[i]);
@@ -457,8 +484,19 @@ begin
     lFiltro := fFiltroController.getByName(sName);
     lFiltro.objeto.campo := sValue;
     lFiltro.objeto.setTipoPorNome(sName);
-    fFILTROS.Add(lFiltro);
+    if(lFiltro.objeto.tipo=tipoFiltro_Lojas) then
+    begin
+      lFiltroLojas := lFiltro;
+    end else
+      fFILTROS.Add(lFiltro);
   end;
+
+  if(lFiltroLojas=nil) then
+  begin
+    lFiltroLojas := fFiltroController.getByName(sName);
+    lFiltroLojas.objeto.setTipoPorNome('@lojas');
+  end;
+  fFILTROS.Insert(0,lFiltroLojas);
 end;
 
 procedure TEndpointModel.setPROPRIEDADES(const pValue: TipoWideStringFramework);
@@ -500,9 +538,10 @@ function TEndpointModel.sumario: IDatasetSimples;
     f: TField;
     i: Integer;
     lCampos, lSql: String;
+    lLojaModel: ITLojasModel;
 begin
   Result := nil;
-  lDS := vIConexao.gdb.criaDataset;
+//  lDS := vIConexao.gdb.criaDataset;
   fIgnoraPaginacao := true;
   try
     lQueryOriginal := getQuery;
@@ -532,9 +571,21 @@ begin
   {$endif}
 
 
-  lDS.query(lSql,'',[]);
-  Supports(lDS,IDatasetSimples,Result);
-  formatarDataset(lDS.dataset);
+  for lLojaModel in getFiltroLojas.objeto.listaLojas do
+  begin
+    vIConexao.ConfigConexaoExterna(lLojaModel.objeto.LOJA);
+    lDS := vIConexao.gdbexterno.criaDataset.query(lSQL,'',[]);
+    if(Result = nil) then
+      Result := criaDatasetSimples(cloneDataset(lDS.dataset))
+    else
+      atribuirRegistrosSoma(lDS.dataset,Result.dataset,'*');
+  end;
+
+
+
+//  lDS.query(lSql,'',[]);
+//  Supports(lDS,IDatasetSimples,Result);
+  formatarDataset(Result.dataset);
   getCfg;
 
   for i := 0 to lDS.dataset.FieldCount - 1 do
@@ -595,7 +646,22 @@ begin
   end;
 
   raise Exception.CreateFmt('Falta definir a busca adicional para [%s] ', [ fNOME]);
+end;
 
+function TEndpointModel.getFiltroLojas: ITFiltroModel;
+  var
+    p: ITFiltroModel;
+begin
+  for p in FILTROS do
+  begin
+    if p.objeto.TIPO=tipoFiltro_Lojas then
+    begin
+      Result := p;
+      exit;
+    end;
+  end;
+
+  raise Exception.CreateFmt('Falta definir o filtro de lojas para [%s] ', [ fNOME]);
 end;
 
 procedure TEndpointModel.setOrdem(const pValue: TipoWideStringFramework);
@@ -607,5 +673,6 @@ function TEndpointModel.getOrdem: TipoWideStringFramework;
 begin
   Result := fOrdem;
 end;
+
 
 end.

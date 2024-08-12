@@ -120,7 +120,7 @@ procedure TFormEP.sbAbrirClick(Sender: TObject);
 begin
   if(fSelecionado=nil) then exit;
 
-  fSelecionado.objeto.ordem := '2 desc';
+  fSelecionado.objeto.ordem := '2 asc';
 
   //fSelecionado.objeto.buscaAdicional := 'SAMSU';
 
@@ -167,7 +167,7 @@ begin
       fFiltroSelecionado.objeto.opcoesSelecionadas.text:=
           InputBox('Busca avançada','Texto', fFiltroSelecionado.objeto.opcoesSelecionadas.text);
 
-    tipoFiltro_Set,tipoFiltro_SetSincrono:
+    tipoFiltro_Set,tipoFiltro_SetSincrono,tipoFiltro_Lojas:
     begin
       ds := fFiltroSelecionado.objeto.getOpcoes();
       fFiltroSelecionado.objeto.opcoesSelecionadas.text :=

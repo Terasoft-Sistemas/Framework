@@ -10,6 +10,7 @@ uses
   Terasoft.Framework.ObjectIface,
   Terasoft.Framework.DB,
   DB,
+  LojasModel,
   Interfaces.Conexao;
 
 type
@@ -18,6 +19,7 @@ type
       tipoFiltro_Busca,
       tipoFiltro_Set,
       tipoFiltro_SetSincrono,
+      tipoFiltro_Lojas,
       tipoFiltro_DataPeriodo,
       tipoFiltro_HoraPeriodo,
       tipoFiltro_DataHoraPeriodo
@@ -47,6 +49,7 @@ type
     fPrimeiro: Integer;
     fTipo: TTipoFiltro;
     fBuscaAdicional: TipoWideStringFramework;
+    function getListaLojas: TILojasModelList;
 
   //property filtroAdicional getter/setter
     function getBuscaAdicional: TipoWideStringFramework;
@@ -126,6 +129,9 @@ type
     property dhInicial: Variant read getDHInicial write setDHInicial;
     property dhFinal: Variant read getDHFinal write setDHFinal;
     property buscaAdicional: TipoWideStringFramework read getBuscaAdicional write setBuscaAdicional;
+
+    property listaLojas: TILojasModelList read getListaLojas;
+
 
   protected
     fCfg: IMultiConfig;
@@ -245,12 +251,33 @@ function TFiltroModel.getOpcoes;///: IDatasetSimples;
     txt: TipoWideStringFramework;
     found: boolean;
     lOrdem: String;
+    lojaModel: ITLojasModel;
+    lojasLista: TILojasModelList;
 begin
   Result := nil;
   case getTipo of
     tipoFiltro_Busca,tipoFiltro_DataPeriodo,tipoFiltro_HoraPeriodo,tipoFiltro_DataHoraPeriodo:
       exit;
-    tipoFiltro_Set,tipoFiltro_SetSincrono:
+    tipoFiltro_Lojas:
+    begin
+      lojasLista := TLojasModel.getNewIface(vIConexao).objeto.obterLista;
+      Result := getGenericID_DescricaoDataset;
+      Result.dataset.fieldByName('ID').DisplayLabel := 'Loja';
+      Result.dataset.fieldByName('descricao').DisplayLabel := 'Descrição';
+      //fDatasetLojas := Result;
+      for lojaModel in lojasLista do
+      begin
+        if(lojaModel.objeto.DATABASE='')then
+          continue;
+        Result.dataset.Append;
+        Result.dataset.fieldByName('ID').AsString := lojaModel.objeto.LOJA;
+        Result.dataset.fieldByName('descricao').AsString := lojaModel.objeto.DESCRICAO;
+        Result.dataset.CheckBrowseMode;
+      end;
+      exit;
+    end;
+    tipoFiltro_Set,tipoFiltro_SetSincrono:;
+
     else
       Exception.CreateFmt('TFiltroModel.getOpcoes: Tipo [%d] desconhecido.', [ Ord(fTipo)] );
   end;
@@ -511,6 +538,8 @@ begin
       Result := getTipoBusca;
     end;
 
+    tipoFiltro_Lojas: ;// Não faz nada
+
     tipoFiltro_DataPeriodo,tipoFiltro_HoraPeriodo,tipoFiltro_DataHoraPeriodo:
     begin
       Result := getTipoPeriodo;
@@ -619,6 +648,17 @@ begin
     fDESCRICAO := 'Período por hora ' + lDescricao;
     setTipo(tipoFiltro_HoraPeriodo);
 
+  end else if(stringNoArray(lNome, ['@loja','@lojas'],[osna_CaseInsensitive,osna_SemAcento])) then
+  begin
+    if(fNome='') then
+      fNome := pNome;
+    setTipo(tipoFiltro_Lojas);
+    fCampo := fCampo;
+
+    fDESCRICAO:=textoEntreTags(pNome,'|','');
+    if(fDESCRICAO='') then
+      fDESCRICAO := 'Lojas';
+
   end else if(stringNoArray(lNome, ['@datahora','@periodo.datahora'],[osna_CaseInsensitive,osna_SemAcento])) then
   begin
     fDESCRICAO := 'Período de data e hora ' + lDescricao;
@@ -724,6 +764,39 @@ end;
 function TFiltroModel.getBuscaAdicional: TipoWideStringFramework;
 begin
   Result := fBuscaAdicional;
+end;
+
+function TFiltroModel.getListaLojas: TILojasModelList;
+  var
+    p: ITLojasModel;
+    i: Integer;
+begin
+  Result := TLojasModel.getNewIface(vIConexao).objeto.obterLista;
+  if(getOpcoesSelecionadas.strings.Count>0) then
+  begin
+    i := Result.Count;
+    while i>0 do
+    begin
+      dec(i);
+      p := Result[i];
+      if(getOpcoesSelecionadas.strings.IndexOf(p.objeto.LOJA)=-1) then
+      begin
+        Result.Remove(p);
+      end;
+    end;
+  end;
+
+  i := Result.Count;
+  while i>0 do
+  begin
+    dec(i);
+    p := Result[i];
+    if(p.objeto.DATABASE='') then
+      Result.Remove(p);
+  end;
+  if(Result.Count=0) then
+    Result := TLojasModel.getNewIface(vIConexao).objeto.obterLista;
+
 end;
 
 end.
