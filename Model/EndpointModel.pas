@@ -402,7 +402,7 @@ begin
     f := Result.dataset.FindField(sField);
     if(f = nil) then
     begin
-      i := StrToIntDef(sField,-1);
+      i := StrToIntDef(sField,0) - 1;
       if (i>-1) and (i<Result.dataset.FieldCount) then
         f := Result.dataset.Fields[i];
     end;
@@ -415,7 +415,10 @@ begin
         index.Options := [ixDescending,ixCaseInsensitive];
         TClientDataSet(Result.dataset).IndexName := f.FieldName;
       end else
+      begin
+        TClientDataSet(Result.dataset).IndexName := '';
         TClientDataSet(Result.dataset).IndexFieldNames := f.FieldName;
+      end;
     end;
   end;
 end;
