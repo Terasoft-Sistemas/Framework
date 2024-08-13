@@ -20,7 +20,6 @@ type
       tipoFiltro_Set,
       tipoFiltro_SetSincrono,
       tipoFiltro_Lojas,
-      tipoFiltro_Valor,
       tipoFiltro_DataPeriodo,
       tipoFiltro_HoraPeriodo,
       tipoFiltro_DataHoraPeriodo
@@ -50,6 +49,12 @@ type
     fPrimeiro: Integer;
     fTipo: TTipoFiltro;
     fBuscaAdicional: TipoWideStringFramework;
+    fMultiploValor: boolean;
+
+  //property multiploValor getter/setter
+    function getMultiploValor: boolean;
+    procedure setMultiploValor(const pValue: boolean);
+
     function getListaLojas: TILojasModelList;
 
   //property filtroAdicional getter/setter
@@ -132,6 +137,7 @@ type
     property buscaAdicional: TipoWideStringFramework read getBuscaAdicional write setBuscaAdicional;
 
     property listaLojas: TILojasModelList read getListaLojas;
+    property multiploValor: boolean read getMultiploValor write setMultiploValor;
 
 
   protected
@@ -169,6 +175,7 @@ implementation
 constructor TFiltroModel.Create(pIConexao: IConexao);
 begin
   inherited Create;
+  fMultiploValor := true;
 //  fRegistros := 1000;
 //  fPrimeiro := 0;
   vIConexao := pIConexao;
@@ -417,7 +424,10 @@ end;
 function TFiltroModel.getCFG: IMultiConfig;
 begin
   if(fCfg=nil) then
+  begin
     fCFG := criaMultiConfig.adicionaInterface(criaConfigIniString(fPROPRIEDADES));
+    fMultiploValor := fCFG.ReadBool('filtro.propriedades', format('%s.multiplo',[fNome]),fMultiploValor);
+  end;
   Result := fCFG;
 end;
 
@@ -798,6 +808,21 @@ begin
   if(Result.Count=0) then
     Result := TLojasModel.getNewIface(vIConexao).objeto.obterLista;
 
+  if(fMultiploValor=false) then
+    while Result.Count>1 do
+      Result.Delete(Result.Count-1);
+end;
+
+procedure TFiltroModel.setMultiploValor(const pValue: boolean);
+begin
+  fMultiploValor := pValue;
+end;
+
+function TFiltroModel.getMultiploValor: boolean;
+begin
+  //Força leitura
+  getCFG;
+  Result := fMultiploValor;
 end;
 
 end.
