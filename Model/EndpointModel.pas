@@ -13,6 +13,7 @@ uses
   Terasoft.Framework.Conversoes,
   DB,
   DBClient,
+  Terasoft.Framework.Texto,
   Terasoft.Framework.DB,
   FiltroController,
   Interfaces.Conexao;
@@ -145,6 +146,7 @@ type
     function getQuery: TipoWideStringFramework;
     function executaQuery(const pFormatar: boolean = true): IDatasetSimples;
     function sumario: IDatasetSimples;
+    function toTxt(const pVisiveis: boolean = true; pFormatado: boolean = true): IListaTextoEx;
     procedure formatarDataset(pDataset: TDataset);
 
   end;
@@ -156,8 +158,7 @@ implementation
     {$if defined(__DEBUG_ANTONIO__)}
       ClipBrd,
     {$endif}
-    LojasModel,
-    Terasoft.Framework.Texto;
+    LojasModel;
 
 function getNewEndpointModel(pIConexao : IConexao): ITEndpointModel;
 begin
@@ -238,7 +239,9 @@ end;
 function TEndpointModel.getContagem: Integer;
   var
     lQuery: String;
+    save: boolean;
 begin
+  save := fIgnoraPaginacao;
   fIgnoraPaginacao := true;
   try
     lQuery := getQuery;
@@ -251,7 +254,7 @@ begin
     Result := fContagem;
     fOldQuery := lQuery;
   finally
-    fIgnoraPaginacao := false;
+    fIgnoraPaginacao := save;
   end;
 end;
 
@@ -593,15 +596,17 @@ function TEndpointModel.sumario: IDatasetSimples;
     i: Integer;
     lCampos, lSql: String;
     lLojaModel: ITLojasModel;
+    save: boolean;
 begin
   Result := fDatasetSumario;
   if(Result<>nil) then exit;
 //  lDS := vIConexao.gdb.criaDataset;
+  save := fIgnoraPaginacao;
   fIgnoraPaginacao := true;
   try
     lQueryOriginal := getQuery;
   finally
-    fIgnoraPaginacao := false;
+    fIgnoraPaginacao := save;
   end;
   if fDataset=nil then
     executaQuery;
@@ -649,6 +654,21 @@ begin
     f.Visible := fCfg.ReadBool('sumario',f.FieldName,true);
   end;
   fDatasetSumario := Result;
+end;
+
+function TEndpointModel.toTxt;
+  var
+    save: boolean;
+begin
+  save := fIgnoraPaginacao;
+  fIgnoraPaginacao := true;
+  try
+    executaQuery;
+    Result := datasetToTXT(fDataset.dataset,pVisiveis,pFormatado);
+  finally
+    fIgnoraPaginacao := save;
+  end;
+
 end;
 
 function TEndpointModel.getRegistros: Integer;
