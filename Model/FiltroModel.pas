@@ -659,12 +659,19 @@ begin
     fDESCRICAO := 'Período por hora ' + lDescricao;
     setTipo(tipoFiltro_HoraPeriodo);
 
-  end else if(stringNoArray(lNome, ['@loja','@lojas'],[osna_CaseInsensitive,osna_SemAcento])) then
+  end else if(stringNoArray(lNome, ['@loja','@lojas','@filial','@filiais'],[osna_CaseInsensitive,osna_SemAcento])) then
   begin
     if(fNome='') then
       fNome := pNome;
     setTipo(tipoFiltro_Lojas);
-    fCampo := fCampo;
+    fMultiploValor:=stringForaArray(fNome, ['@loja','@filial'],[osna_CaseInsensitive,osna_SemAcento]);
+
+    if(stringNoArray(fCampo,['unica','simples'],[osna_CaseInsensitive,osna_SemAcento])) then
+    begin
+      fMultiploValor:=false;
+      fCampo := '';
+    end;
+
 
     fDESCRICAO:=textoEntreTags(pNome,'|','');
     if(fDESCRICAO='') then
