@@ -20,6 +20,7 @@ type
       tipoFiltro_Set,
       tipoFiltro_SetSincrono,
       tipoFiltro_Lojas,
+      tipoFiltro_Valor,
       tipoFiltro_DataPeriodo,
       tipoFiltro_HoraPeriodo,
       tipoFiltro_DataHoraPeriodo
