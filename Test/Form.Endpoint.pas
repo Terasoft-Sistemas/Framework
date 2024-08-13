@@ -29,12 +29,14 @@ type
     sbLImparFiltros: TSpeedButton;
     sbValoresFiltro: TSpeedButton;
     grid2: TXDBGrid;
+    sbExportar: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure cbEPChange(Sender: TObject);
     procedure sbAbrirClick(Sender: TObject);
     procedure sbLImparFiltrosClick(Sender: TObject);
     procedure cbFiltrosChange(Sender: TObject);
     procedure sbValoresFiltroClick(Sender: TObject);
+    procedure sbExportarClick(Sender: TObject);
   private
     [weak] mySelf: ITFormEP;
     vIConexao:IConexao;
@@ -68,8 +70,11 @@ procedure TFormEP.cbEPChange(Sender: TObject);
 begin
   sbValoresFiltro.Enabled:=false;
   sbAbrir.Enabled:=false;
+  sbExportar.Enabled := sbAbrir.Enabled;
   cbFiltros.Enabled := false;
   sbAbrir.Enabled := cbEP.ItemIndex<>-1;
+  sbExportar.Enabled := sbAbrir.Enabled;
+
   if(sbAbrir.Enabled=false) then exit;
 //  epControl.lista.First.objeto.FILTROS.First.objeto.opcoesSelecionadas.strings.Add('mais este elemento');
   selecionaEP(epControl.lista.Items[cbEP.ItemIndex]);
@@ -135,6 +140,13 @@ begin
   grid2.DataSource := fDSSumario.dataSource;
 
   grid.DataSource := fDS.dataSource;
+end;
+
+procedure TFormEP.sbExportarClick(Sender: TObject);
+begin
+  if(fSelecionado=nil) then exit;
+  fSelecionado.objeto.toTxt.strings.SaveToFile('c:\temp\teste.csv',
+        TEncoding.UTF8);
 end;
 
 procedure TFormEP.sbLImparFiltrosClick(Sender: TObject);

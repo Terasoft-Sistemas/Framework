@@ -15,7 +15,7 @@ object FormEP: TFormEP
   PixelsPerInch = 96
   TextHeight = 15
   object sbAbrir: TSpeedButton
-    Left = 503
+    Left = 375
     Top = 40
     Width = 113
     Height = 22
@@ -52,6 +52,15 @@ object FormEP: TFormEP
     Height = 22
     Caption = 'Itens do Filtro'
     OnClick = sbValoresFiltroClick
+  end
+  object sbExportar: TSpeedButton
+    Left = 512
+    Top = 40
+    Width = 104
+    Height = 23
+    Caption = 'Exportar'
+    Enabled = False
+    OnClick = sbExportarClick
   end
   object cbEP: TTeraComboBox
     Left = 24
