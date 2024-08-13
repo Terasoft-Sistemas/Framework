@@ -673,11 +673,12 @@ begin
       fMultiploValor:=false;
       fCampo := '';
     end;
+    getCFG;
 
 
     fDESCRICAO:=textoEntreTags(pNome,'|','');
     if(fDESCRICAO='') then
-      fDESCRICAO := 'Lojas';
+      fDESCRICAO := iif(fMultiploValor, 'Lojas', 'Loja');
 
   end else if(stringNoArray(lNome, ['@datahora','@periodo.datahora'],[osna_CaseInsensitive,osna_SemAcento])) then
   begin
