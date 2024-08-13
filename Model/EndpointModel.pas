@@ -433,8 +433,8 @@ begin
   end;
   if(fPercentagens) then
   begin
-    sumario;
-    configuraCamposSumarioGenerico(Result.Dataset, fDatasetSumario.Dataset);
+//    sumario;
+//    configuraCamposSumarioGenerico(Result.Dataset, fDatasetSumario.Dataset);
   end;
 
 end;
