@@ -120,7 +120,7 @@ procedure TFormEP.sbAbrirClick(Sender: TObject);
 begin
   if(fSelecionado=nil) then exit;
 
-  fSelecionado.objeto.ordem := '2 asc';
+  fSelecionado.objeto.ordem := '2 desc';
 
   //fSelecionado.objeto.buscaAdicional := 'SAMSU';
 

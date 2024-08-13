@@ -356,6 +356,11 @@ function TEndpointModel.executaQuery;
     lSql: String;
     lDS: IDataset;
     lLojaModel: ITLojasModel;
+    precisaOrder: boolean;
+    sField,sdir: String;
+    f: TField;
+    i: Integer;
+    index: TIndexDef;
 begin
   Result := nil;
   lDS := nil;
@@ -364,6 +369,8 @@ begin
     Clipboard.AsText := lSql;
   {$endif}
 
+  precisaOrder := false;
+
   for lLojaModel in getFiltroLojas.objeto.listaLojas do
   begin
     vIConexao.ConfigConexaoExterna(lLojaModel.objeto.LOJA);
@@ -371,7 +378,10 @@ begin
     if(Result = nil) then
       Result := criaDatasetSimples(cloneDataset(lDS.dataset))
     else
+    begin
       atribuirRegistrosSoma(lDS.dataset,Result.dataset,filtroLojas.objeto.campo);
+      precisaOrder := true;
+    end;
   end;
 
 
@@ -383,6 +393,31 @@ begin
   if assigned(Result) and pFormatar then
     formatarDataset(Result.dataset);
   Result.dataset.First;
+  if(precisaOrder) then
+  begin
+    sField := textoEntreTags(fOrdem,'',' ');
+    if(sField='') then
+      sField := fOrdem;
+    sDir := textoEntreTags(fOrdem,' ','');
+    f := Result.dataset.FindField(sField);
+    if(f = nil) then
+    begin
+      i := StrToIntDef(sField,-1);
+      if (i>-1) and (i<Result.dataset.FieldCount) then
+        f := Result.dataset.Fields[i];
+    end;
+    if (f<>nil)  then
+    begin
+      if(CompareText(sDir,'desc')=0) then
+      begin
+        index := TClientDataSet(Result.dataset).IndexDefs.AddIndexDef;
+        index.Name := f.FieldName;
+        index.Options := [ixDescending,ixCaseInsensitive];
+        TClientDataSet(Result.dataset).IndexName := f.FieldName;
+      end else
+        TClientDataSet(Result.dataset).IndexFieldNames := f.FieldName;
+    end;
+  end;
 end;
 
 procedure TEndpointModel.formatarDataset(pDataset: TDataset);
