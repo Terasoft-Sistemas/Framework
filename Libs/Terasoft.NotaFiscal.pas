@@ -183,7 +183,8 @@ end;
 function TNotaFiscal.cobranca(pidNF: String): Boolean;
 var
  lSQL,
- lSQLItens    : String;
+ lSQLItens,
+ lFatura      : String;
  lQry,
  lQryItens    : TFDQuery;
  lPercentual,
@@ -230,7 +231,8 @@ begin
         '        ci.pacela_rec       nDup,                                          '+#13+
         '        ci.vlrparcela_rec   vDup,                                          '+#13+
         '        ci.vencimento_rec   dVenc,                                         '+#13+
-        '        p.tpag_nfe          tPag                                           '+#13+
+        '        p.tpag_nfe          tPag,                                          '+#13+
+        '        c.fatura_rec        nFatura                                        '+#13+
         '   from nf n                                                               '+#13+
         '  inner join contasreceber c on c.pedido_rec = n.pedido_id                 '+#13+
         '  inner join contasreceberitens ci on ci.fatura_rec = c.fatura_rec         '+#13+
@@ -266,8 +268,15 @@ begin
         lQry.First;
         while not lQry.Eof do
         begin
-          if lQry.FieldByName('tPag').AsString = '15' then
+          if not AnsiMatchStr(lQry.FieldByName('tPag').AsString, ['01', '03', '04', '99']) then
           begin
+          
+            if lFatura = '' then
+              lFatura := lQry.FieldByName('nFatura').AsString
+            else
+            if lFatura <> lQry.FieldByName('nFatura').AsString then
+              Break;
+
             with NotaF.NFe.Cobr.Fat do
             begin
               nFat  := lQry.FieldByName('nFat').AsString;
@@ -275,19 +284,34 @@ begin
               vDesc := 0;
               vLiq  := vLiq + lQry.FieldByName('vDup').AsFloat;
             end;
+
+            lFatura := lQry.FieldByName('nFatura').AsString;
+            
           end;
           lQry.Next;
         end;
 
+        lFatura := '';
+
         lQry.First;
         while not lQry.Eof do
         begin
-          if lQry.FieldByName('tPag').AsString = '15'  then
+          if not AnsiMatchStr(lQry.FieldByName('tPag').AsString, ['01', '03', '04', '99']) then
           begin
+
+            if lFatura = '' then
+              lFatura := lQry.FieldByName('nFatura').AsString
+            else
+            if lFatura <> lQry.FieldByName('nFatura').AsString then
+              Break;
+
             Duplicata :=  NotaF.NFe.Cobr.Dup.New;
             Duplicata.nDup  := FormatFloat('000',lQry.FieldByName('nDup').AsInteger);
             Duplicata.dVenc := lQry.FieldByName('dVenc').Value;
             Duplicata.vDup  := lPercentual * lQry.FieldByName('vDup').AsFloat;
+
+            lFatura := lQry.FieldByName('nFatura').AsString;
+            
           end;
           lQry.Next;
         end;
