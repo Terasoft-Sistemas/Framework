@@ -47,12 +47,17 @@ type
       _TABELA_ = 'ENDPOINT';
 
   protected
-    fDataset: IDatasetSimples;
+    fDataset,fDatasetSumario: IDatasetSimples;
     fRegistros: Integer;
     fPrimeiro: Integer;
     fContagem: Integer;
     fOldQuery: String;
     fOrdem: TipoWideStringFramework;
+    fPercentagens: boolean;
+
+  //property percentagens getter/setter
+    function getPercentagens: boolean;
+    procedure setPercentagens(const pValue: boolean);
 
     function getFiltroLojas: ITFiltroModel;
 
@@ -108,7 +113,7 @@ type
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
     class function getNewIface(pIConexao: IConexao): ITEndpointModel;
@@ -131,6 +136,8 @@ type
     property ordem: TipoWideStringFramework read getOrdem write setOrdem;
 
     property filtroLojas: ITFiltroModel read getFiltroLojas;
+
+    property percentagens: boolean read getPercentagens write setPercentagens;
 
   public
     procedure loaded;
@@ -159,12 +166,13 @@ end;
 
 { TEndpointModel }
 
-constructor TEndpointModel.Create(pIConexao: IConexao);
+constructor TEndpointModel._Create(pIConexao: IConexao);
 begin
   inherited Create;
 //  fRegistros := 1000;
 //  fPrimeiro := 0;
   vIConexao := pIConexao;
+//  fPercentagens := true;
 end;
 
 destructor TEndpointModel.Destroy;
@@ -176,7 +184,7 @@ end;
 
 class function TEndpointModel.getNewIface(pIConexao: IConexao): ITEndpointModel;
 begin
-  Result := TImplObjetoOwner<TEndpointModel>.CreateOwner(self.Create(pIConexao));
+  Result := TImplObjetoOwner<TEndpointModel>.CreateOwner(self._Create(pIConexao));
   Result.objeto.myself := Result;
 end;
 
@@ -363,6 +371,8 @@ function TEndpointModel.executaQuery;
     index: TIndexDef;
 begin
   Result := nil;
+  fDataset := nil;
+  fDatasetSumario := nil;
   lDS := nil;
   lSQL := getQuery;
   {$if defined(__DEBUG_ANTONIO__)}
@@ -421,6 +431,12 @@ begin
       end;
     end;
   end;
+  if(fPercentagens) then
+  begin
+    sumario;
+    configuraCamposSumarioGenerico(Result.Dataset, fDatasetSumario.Dataset);
+  end;
+
 end;
 
 procedure TEndpointModel.formatarDataset(pDataset: TDataset);
@@ -578,7 +594,8 @@ function TEndpointModel.sumario: IDatasetSimples;
     lCampos, lSql: String;
     lLojaModel: ITLojasModel;
 begin
-  Result := nil;
+  Result := fDatasetSumario;
+  if(Result<>nil) then exit;
 //  lDS := vIConexao.gdb.criaDataset;
   fIgnoraPaginacao := true;
   try
@@ -593,8 +610,8 @@ begin
   for i := 0 to fDataset.dataset.FieldCount - 1 do
   begin
     f := fDataset.dataset.Fields[i];
-    if not (f is TNumericField) then
-      continue;
+    if (not (f is TNumericField)) or (fCfg.ReadBool('sumario',f.FieldName,true)=false) then continue;
+
     if(lCampos<>'') then
       lCampos := lCampos + ',' + #13;
     lCampos := format('%s  sum(%s) %s', [ lCampos, f.FieldName, f.FieldName ]);
@@ -631,6 +648,7 @@ begin
     f := lDS.dataset.Fields[i];
     f.Visible := fCfg.ReadBool('sumario',f.FieldName,true);
   end;
+  fDatasetSumario := Result;
 end;
 
 function TEndpointModel.getRegistros: Integer;
@@ -712,5 +730,14 @@ begin
   Result := fOrdem;
 end;
 
+procedure TEndpointModel.setPercentagens(const pValue: boolean);
+begin
+  fPercentagens := pValue;
+end;
+
+function TEndpointModel.getPercentagens: boolean;
+begin
+  Result := fPercentagens;
+end;
 
 end.
