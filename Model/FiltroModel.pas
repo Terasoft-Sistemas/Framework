@@ -391,6 +391,8 @@ begin
       //Valor em REGRASVALORES
       Supports(vIConexao.gdb.validador,IValidadorDatabase,validador);
       Result := validador.getValoresByName(lRegrasValores);
+      if(Result=nil) then
+        raise Exception.CreateFmt('Filtro [%s] não possui uma definição.', [fNome]);
       Supports(cloneDatasource(Result),IDatasetSimples,Result);
       Result := criaDatasetSimples(cloneDataset(Result.dataset));
       Result.dataset.First;
