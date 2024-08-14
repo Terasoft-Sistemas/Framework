@@ -107,7 +107,11 @@ begin
   //Retorna a lista com busca no termo 'PROD'
   //Ordenado pelo campo DESCRICAO
 //  for m in epControl.getNovaLista('prod',2) do
-  for m in epControl.getNovaLista('',true,2) do
+  for m in epControl.getNovaLista('CLI3',true,2) do
+
+  //m := epControl.getByName('CLI3');
+
+//  for m in epControl.getByName('CLI3') do
   begin
     cbEp.items.add(m.objeto.DESCRICAO);
     cbEp.values.add(m.objeto.NOME);
@@ -179,10 +183,15 @@ begin
       fFiltroSelecionado.objeto.opcoesSelecionadas.text:=
           InputBox('Busca avançada','Texto', fFiltroSelecionado.objeto.opcoesSelecionadas.text);
 
-    tipoFiltro_Set,tipoFiltro_SetSincrono,tipoFiltro_Lojas:
+    tipoFiltro_Set,tipoFiltro_SetSincrono,tipoFiltro_Lojas,tipoFiltro_Expressao:
     begin
       ds := fFiltroSelecionado.objeto.getOpcoes();
-      fFiltroSelecionado.objeto.opcoesSelecionadas.text :=
+      if(ds=nil) then
+      begin
+        fFiltroSelecionado.objeto.opcoesSelecionadas.text := InputBox('Digite o valor', 'Valor', fFiltroSelecionado.objeto.opcoesSelecionadas.text);
+
+      end else
+        fFiltroSelecionado.objeto.opcoesSelecionadas.text :=
           FuncoesSelecaoLista.SelecionaItems(fFiltroSelecionado.objeto.opcoesSelecionadas.text,ds.dataset,false,'',ds.dataset.Fields[0].FieldName);
     end;
 

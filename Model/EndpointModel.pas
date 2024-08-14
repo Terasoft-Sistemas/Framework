@@ -260,7 +260,7 @@ end;
 
 function TEndpointModel.getQuery: TipoWideStringFramework;
   var
-    fFiltro: ITFiltroModel;
+    lFiltro: ITFiltroModel;
     lSql, lWhere, lGroup, lIn: String;
     l: IListaTextoEX;
     lAdicional,lOrder: String;
@@ -289,15 +289,21 @@ begin
     lSql := StringReplace(lSql, 'select', format('select %s', [ lAdicional ]), [rfIgnoreCase]);
 
   lWhere:='';
-  for fFiltro in getFILTROS do
+  for lFiltro in getFILTROS do
   begin
-    lIn := fFiltro.objeto.query;
-    if(lIn <> '') then
+
+    lIn := lFiltro.objeto.query;
+
+    if(lFiltro.objeto.TIPO=tipoFiltro_Expressao) then
     begin
-      if(lWhere<>'') then
-        lWhere := lWhere + #13 + ' and ';
-      lWhere := lWhere + lIn;
-    end;
+      lSQL := StringReplace(lSQL,lFiltro.objeto.campo,lIn,[rfReplaceAll,rfIgnoreCase]);
+    end else
+      if(lIn <> '') then
+      begin
+        if(lWhere<>'') then
+          lWhere := lWhere + #13 + ' and ';
+        lWhere := lWhere + lIn;
+      end;
   end;
 
   //Where adicional

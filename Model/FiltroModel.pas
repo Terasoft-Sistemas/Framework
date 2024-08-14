@@ -20,10 +20,17 @@ type
       tipoFiltro_Set,
       tipoFiltro_SetSincrono,
       tipoFiltro_Lojas,
+      tipoFiltro_Expressao,
       tipoFiltro_DataPeriodo,
       tipoFiltro_HoraPeriodo,
       tipoFiltro_DataHoraPeriodo
     );
+
+  TSubTipoFiltro = (
+      subtipoFiltro_Nenhum,
+      subtipoFiltro_1
+    );
+
 
   TFiltroModel=class;
   ITFiltroModel=IObject<TFiltroModel>;
@@ -37,6 +44,7 @@ type
     vIConexao   : IConexao;
 
     fAceitaNull: boolean;
+    fValores: TipoWideStringFramework;
 
     fID: TipoWideStringFramework;
     fNOME: TipoWideStringFramework;
@@ -50,6 +58,11 @@ type
     fTipo: TTipoFiltro;
     fBuscaAdicional: TipoWideStringFramework;
     fMultiploValor: boolean;
+    fSubTipo: TSubTipoFiltro;
+
+  //property subTipo getter/setter
+    function getSubTipo: TSubTipoFiltro;
+    procedure setSubTipo(const pValue: TSubTipoFiltro);
 
   //property multiploValor getter/setter
     function getMultiploValor: boolean;
@@ -139,6 +152,7 @@ type
     property listaLojas: TILojasModelList read getListaLojas;
     property multiploValor: boolean read getMultiploValor write setMultiploValor;
 
+    property subTipo: TSubTipoFiltro read getSubTipo write setSubTipo;
 
   protected
     fCfg: IMultiConfig;
@@ -159,6 +173,8 @@ type
 
   end;
 
+  const expressao_subtipoFiltro_TipoInteiro = subtipoFiltro_1;
+
 
 implementation
   uses
@@ -176,6 +192,7 @@ constructor TFiltroModel.Create(pIConexao: IConexao);
 begin
   inherited Create;
   fMultiploValor := true;
+  fSubTipo := subtipoFiltro_Nenhum;
 //  fRegistros := 1000;
 //  fPrimeiro := 0;
   vIConexao := pIConexao;
@@ -261,6 +278,7 @@ function TFiltroModel.getOpcoes;///: IDatasetSimples;
     lOrdem: String;
     lojaModel: ITLojasModel;
     lojasLista: TILojasModelList;
+    lLista: IListaTextoEx;
 begin
   Result := nil;
   case getTipo of
@@ -284,6 +302,26 @@ begin
       end;
       exit;
     end;
+
+    tipoFiltro_Expressao:
+    begin
+      Result := getGenericID_DescricaoDataset;
+      lLista := novaListaTexto;
+      lLista.delimitador := ';';
+      lLista.textoDelimitado := fValores;
+      for i := 0 to lLista.strings.Count - 1 do begin
+        s := trim(lLista.strings.strings[i]);
+        if(s='') then continue;
+        Result.dataset.Append;
+        Result.dataset.Fields[0].AsString := s;
+        Result.dataset.Fields[1].AsString := s;
+        Result.dataset.CheckBrowseMode;
+      end;
+      if(Result.dataset.RecordCount=0) then
+        Result := nil;
+      exit;
+    end;
+
     tipoFiltro_Set,tipoFiltro_SetSincrono:;
 
     else
@@ -553,6 +591,15 @@ begin
 
     tipoFiltro_Lojas: ;// Não faz nada
 
+    tipoFiltro_Expressao:
+    begin
+      Result := trim(getOpcoesSelecionadas.text);
+      if(fSubTipo=expressao_subtipoFiltro_TipoInteiro) then // Inteiro
+      begin
+        Result := StrToIntDef(Result,0).ToString;
+      end;
+    end;
+
     tipoFiltro_DataPeriodo,tipoFiltro_HoraPeriodo,tipoFiltro_DataHoraPeriodo:
     begin
       Result := getTipoPeriodo;
@@ -627,7 +674,7 @@ end;
 
 function TFiltroModel.setTipoPorNome;
   var
-    lNome, lDescricao: String;
+    lNome, lDescricao, lValores: String;
 begin
   lNome := textoEntreTags(pNome,'','|');
   if(lNome='') then
@@ -636,6 +683,10 @@ begin
   lDescricao:=textoEntreTags(pNome,'|','');
   if(lDescricao='') then
     lDescricao:=fCampo;
+
+  lValores := textoEntreTags(lDescricao,'|','');
+  if(lValores<>'') then
+    lDescricao := textoEntreTags(lDescricao,'','|');
 
   if(fDESCRICAO='') then
     fDESCRICAO := lDescricao;
@@ -660,6 +711,14 @@ begin
   begin
     fDESCRICAO := 'Período por hora ' + lDescricao;
     setTipo(tipoFiltro_HoraPeriodo);
+
+  end else if(stringNoArray(lNome, ['@inteiro'],[osna_CaseInsensitive,osna_SemAcento])) then
+  begin
+    fDESCRICAO := lDescricao;
+    setTipo(tipoFiltro_Expressao);
+    fSubTipo := expressao_subtipoFiltro_TipoInteiro;
+    fMultiploValor := false;
+    fValores := lValores;
 
   end else if(stringNoArray(lNome, ['@loja','@lojas','@filial','@filiais'],[osna_CaseInsensitive,osna_SemAcento])) then
   begin
@@ -833,6 +892,16 @@ begin
   //Força leitura
   getCFG;
   Result := fMultiploValor;
+end;
+
+procedure TFiltroModel.setSubTipo(const pValue: TSubTipoFiltro);
+begin
+  fSubTipo := pValue;
+end;
+
+function TFiltroModel.getSubTipo: TSubTipoFiltro;
+begin
+  Result := fSubTipo;
 end;
 
 end.
