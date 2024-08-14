@@ -185,6 +185,7 @@ implementation
     {$if defined(DEBUG)}
       ClipBrd,
     {$endif}
+    EmpresaModel,
     Terasoft.FuncoesTexto,
     Variants,
     Terasoft.Framework.FuncoesDiversas,
@@ -678,7 +679,10 @@ begin
 
   Result := fOpcoesSelecionadas;
   if(fOpcoesSelecionadas.text = '') then
+  begin
     fOpcoesSelecionadas.text := trim(fValoresPadrao);
+  end;
+
 
 end;
 
@@ -780,6 +784,13 @@ begin
       fMultiploValor:=false;
       fCampo := '';
     end;
+    if(fMultiploValor=false) then
+      with TEmpresaModel.getNewIface(vIConexao) do
+      begin
+        objeto.Carregar;
+        fValoresPadrao := objeto.LOJA;
+      end;
+
     getCFG;
 
 
