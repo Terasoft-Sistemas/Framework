@@ -170,6 +170,7 @@ type
     FTotalRecords: Integer;
     FIDPedidoView: Integer;
     FNFLista: IList<ITNFModel>;
+    FHORA_NF: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetACRES_NF(const Value: Variant);
     procedure SetAGRUPAMENTO_FATURA(const Value: Variant);
@@ -322,6 +323,7 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
     procedure SetNFLista(const Value: IList<ITNFModel>);
+    procedure SetHORA_NF(const Value: Variant);
 
   public
     property  Acao                         :TAcao   read FAcao write SetAcao;
@@ -467,6 +469,7 @@ type
     property  WEB_PEDIDO_ID                :Variant read FWEB_PEDIDO_ID write SetWEB_PEDIDO_ID;
     property  TRANSFERENCIA_ID             :Variant read FTRANSFERENCIA_ID write SetTRANSFERENCIA_ID;
     property  CLIENTE_NF                   :Variant read FCLIENTE_NF write SetCLIENTE_NF;
+    property  HORA_NF                      :Variant read FHORA_NF write SetHORA_NF;
 
     property NFLista: IList<ITNFModel> read FNFLista write SetNFLista;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -842,6 +845,11 @@ end;
 procedure TNFModel.SetHEM(const Value: Variant);
 begin
   FHEM := Value;
+end;
+
+procedure TNFModel.SetHORA_NF(const Value: Variant);
+begin
+  FHORA_NF := Value;
 end;
 
 procedure TNFModel.SetHORA_SAIDA(const Value: Variant);

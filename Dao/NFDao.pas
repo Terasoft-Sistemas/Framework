@@ -275,6 +275,7 @@ begin
     ANFModel.objeto.ENTREGA_COD_MUNICIPIO        := lQry.FieldByName('ENTREGA_COD_MUNICIPIO').AsString;
     ANFModel.objeto.WEB_PEDIDO_ID                := lQry.FieldByName('WEB_PEDIDO_ID').AsString;
     ANFModel.objeto.TRANSFERENCIA_ID             := lQry.FieldByName('TRANSFERENCIA_ID').AsString;
+    ANFModel.objeto.HORA_NF                      := lQry.FieldByName('HORA_NF').AsString;
 
     Result := ANFModel;
 

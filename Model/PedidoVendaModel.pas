@@ -1082,6 +1082,7 @@ begin
     lNFModel.objeto.LOJA                  := self.LOJA;
     lNFModel.objeto.TIPO_FRETE            := self.FTIPO_FRETE;
     lNFModel.objeto.DATA_NF               := DateToStr(vIConexao.DataServer);
+    lNFModel.objeto.HORA_NF               := TimeToStr(vIConexao.HoraServer);
     lNFModel.objeto.DATA_SAIDA            := DateToStr(vIConexao.DataServer);
     lNFModel.objeto.HORA_SAIDA            := TimeToStr(vIConexao.HoraServer);
     lNFModel.objeto.UF_EMBARQUE           := lEmpresaModel.objeto.UF;
