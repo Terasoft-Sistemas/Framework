@@ -45,6 +45,7 @@ type
 
     fAceitaNull: boolean;
     fValores: TipoWideStringFramework;
+    fValoresPadrao: TipoWideStringFramework;
 
     fID: TipoWideStringFramework;
     fNOME: TipoWideStringFramework;
@@ -267,7 +268,7 @@ function TFiltroModel.getOpcoes;///: IDatasetSimples;
     lListaCampos: IListaTextoEX;
     validador: IValidadorDatabase;
     lFieldNames: String;
-    s: TipoWideStringFramework;
+    s,s1: TipoWideStringFramework;
     f: TField;
     lAdicional: String;
     lWhere: String;
@@ -305,16 +306,38 @@ begin
 
     tipoFiltro_Expressao:
     begin
+      fValoresPadrao := '';
       Result := getGenericID_DescricaoDataset;
       lLista := novaListaTexto;
+      lLista.strings.StrictDelimiter := true;
       lLista.delimitador := ';';
       lLista.textoDelimitado := fValores;
       for i := 0 to lLista.strings.Count - 1 do begin
         s := trim(lLista.strings.strings[i]);
         if(s='') then continue;
+        if(s[1]='*') then
+        begin
+          s := trim(Copy(s,2,MaxInt));
+          if(s='') then continue;
+          s1 := textoEntreTags(s,'','<');
+          if(s1='') then
+            s1 := s;
+          if fValoresPadrao<>'' then
+            fValoresPadrao := fValoresPadrao + #13;
+          fValoresPadrao := fValoresPadrao + s1;
+        end;
+
         Result.dataset.Append;
-        Result.dataset.Fields[0].AsString := s;
-        Result.dataset.Fields[1].AsString := s;
+
+        Result.dataset.Fields[0].AsString := textoEntreTags(s,'','<');
+        if(Result.dataset.Fields[0].AsString='') then
+          Result.dataset.Fields[0].AsString := s;
+
+        Result.dataset.Fields[1].AsString := textoEntreTags(s,'<','>');
+
+        if (Result.dataset.Fields[1].AsString = '') then
+          Result.dataset.Fields[1].AsString := s;
+
         Result.dataset.CheckBrowseMode;
       end;
       if(Result.dataset.RecordCount=0) then
@@ -594,6 +617,8 @@ begin
     tipoFiltro_Expressao:
     begin
       Result := trim(getOpcoesSelecionadas.text);
+      if(Result='') then
+        Result := fValoresPadrao;
       if(fSubTipo=expressao_subtipoFiltro_TipoInteiro) then // Inteiro
       begin
         Result := StrToIntDef(Result,0).ToString;
@@ -643,7 +668,11 @@ function TFiltroModel.getOpcoesSelecionadas: IListaTextoEx;
 begin
   if(fOpcoesSelecionadas=nil) then
     fOpcoesSelecionadas := novaListaTexto;
+
   Result := fOpcoesSelecionadas;
+  if(fOpcoesSelecionadas.text = '') then
+    fOpcoesSelecionadas.text := trim(fValoresPadrao);
+
 end;
 
 procedure TFiltroModel.setRegistros(const pValue: Integer);
@@ -719,6 +748,8 @@ begin
     fSubTipo := expressao_subtipoFiltro_TipoInteiro;
     fMultiploValor := false;
     fValores := lValores;
+    //Le as opções para inicializar...
+    getOpcoes;
 
   end else if(stringNoArray(lNome, ['@loja','@lojas','@filial','@filiais'],[osna_CaseInsensitive,osna_SemAcento])) then
   begin
