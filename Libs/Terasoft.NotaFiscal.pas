@@ -163,6 +163,7 @@ begin
     PathSalvar       := vConfiguracoesNotaFiscal.arquivosPathSalvar;
   end;
 end;
+
 function TNotaFiscal.consultarNota(pNota: ITNFModel): boolean;
 begin
   Result := False;
@@ -559,86 +560,90 @@ begin
 
   try
     try
-    lQry := vIConexao.CriarQuery;
-    lSQL :=
-    ' select                                    '+#13+
-    '    c.descricao natOp,                     '+#13+
-    '    substring(c.CFOP from 1 for 1) idDest, '+#13+
-    '    n.modelo modelo,                       '+#13+
-    '    n.serie_nf serie,                      '+#13+
-    '    n.numero_ecf nNF,                      '+#13+
-    '    n.numero_ecf cNF,                      '+#13+
-    '    n.data_nf dEmi,                        '+#13+
-    '    n.data_saida dSaiEnt,                  '+#13+
-    '    n.hora_saida hSaiEnt,                  '+#13+
-    '    c.tipo tpNF,                           '+#13+
-    '    n.EMAIL_NFE finNFe,                    '+#13+
-    '    n.INTERMEDIADOR_CNPJ indIntermed,      '+#13+
-    '    N.INDPRES,                             '+#13+
-    '    N.INTERMEDIADOR_CNPJ CNPJ,             '+#13+
-    '    N.INTERMEDIADOR_NOME idCadIntTran      '+#13+
-    ' from                                      '+#13+
-    '    nf n                                   '+#13+
-    '                                           '+#13+
-    ' left join cfop c on c.id = n.cfop_id      '+#13+
-    '                                           '+#13+
-    ' where                                     '+#13+
-    '     n.numero_nf = '+QuotedStr(pidNF);
-    lQry.Open(lSQL);
+      lQry := vIConexao.CriarQuery;
+      lSQL :=
+      ' select                                    '+#13+
+      '    c.descricao natOp,                     '+#13+
+      '    substring(c.CFOP from 1 for 1) idDest, '+#13+
+      '    n.modelo modelo,                       '+#13+
+      '    n.serie_nf serie,                      '+#13+
+      '    n.numero_ecf nNF,                      '+#13+
+      '    n.numero_ecf cNF,                      '+#13+
+      '    n.data_nf dEmi,                        '+#13+
+      '    n.hora_nf hEmi,                        '+#13+
+      '    n.data_saida dSaiEnt,                  '+#13+
+      '    n.hora_saida hSaiEnt,                  '+#13+
+      '    c.tipo tpNF,                           '+#13+
+      '    n.EMAIL_NFE finNFe,                    '+#13+
+      '    n.INTERMEDIADOR_CNPJ indIntermed,      '+#13+
+      '    N.INDPRES,                             '+#13+
+      '    N.INTERMEDIADOR_CNPJ CNPJ,             '+#13+
+      '    N.INTERMEDIADOR_NOME idCadIntTran      '+#13+
+      ' from                                      '+#13+
+      '    nf n                                   '+#13+
+      '                                           '+#13+
+      ' left join cfop c on c.id = n.cfop_id      '+#13+
+      '                                           '+#13+
+      ' where                                     '+#13+
+      '     n.numero_nf = '+QuotedStr(pidNF);
+      lQry.Open(lSQL);
 
-    NotaF := ACBrNFe.NotasFiscais.Add;
-    with NotaF.NFe.Ide do
-    begin
-      natOp       := lQry.FieldByName('natOp').AsString;
-      indPag      := ipOutras;
-      modelo      := lQry.FieldByName('modelo').AsInteger;
-      serie       := lQry.FieldByName('serie').AsInteger;
-      nNF         := lQry.FieldByName('nNF').AsInteger;
-      cNF         := GerarCodigoDFe(lQry.FieldByName('cNF').AsInteger);
-      dEmi        := Now;// lQry.FieldByName('dEmi').AsDateTime;
-      dSaiEnt     := Now;//lQry.FieldByName('dSaiEnt').AsDateTime;
-      hSaiEnt     := Now;//lQry.FieldByName('hSaiEnt').Value;
-      tpNF        := vConfiguracoesNotaFiscal.tpNF(lQry.FieldByName('tpNF').AsString);
-      verProc     := 'ERP_TERASOFT';
-      cUF         := UFtoCUF(vConfiguracoesNotaFiscal.emitUF);
-      cMunFG      := vConfiguracoesNotaFiscal.eEmitcMun.ToInteger;
-      finNFe      := vConfiguracoesNotaFiscal.finNFe(lQry.FieldByName('finNFe').AsString);
-      indIntermed := vConfiguracoesNotaFiscal.indIntermed(lQry.FieldByName('indIntermed').AsString);
-      indPres     := vConfiguracoesNotaFiscal.indPres(lQry.FieldByName('indPres').AsString);
-      idDest      := vConfiguracoesNotaFiscal.idDest(lQry.FieldByName('idDest').AsString);
+      NotaF := ACBrNFe.NotasFiscais.Add;
 
-      if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then
-       tpImp       := tiNFCe;
-
-      if tpEmis <> teNormal then
+      with NotaF.NFe.Ide do
       begin
-        dhCont := vConfiguracoesNotaFiscal.dhCont;
-        xJust  := 'Problemas no WebService';
+        natOp       := lQry.FieldByName('natOp').AsString;
+        indPag      := ipOutras;
+        modelo      := lQry.FieldByName('modelo').AsInteger;
+        serie       := lQry.FieldByName('serie').AsInteger;
+        nNF         := lQry.FieldByName('nNF').AsInteger;
+        cNF         := GerarCodigoDFe(lQry.FieldByName('cNF').AsInteger);
+        dEmi        := StrToDateTime(lQry.FieldByName('dEmi').AsString + ' ' + lQry.FieldByName('hEmi').AsString);
+        dSaiEnt     := lQry.FieldByName('dSaiEnt').AsDateTime;
+        hSaiEnt     := lQry.FieldByName('hSaiEnt').Value;
+        tpNF        := vConfiguracoesNotaFiscal.tpNF(lQry.FieldByName('tpNF').AsString);
+        verProc     := 'ERP_TERASOFT';
+        cUF         := UFtoCUF(vConfiguracoesNotaFiscal.emitUF);
+        cMunFG      := vConfiguracoesNotaFiscal.eEmitcMun.ToInteger;
+        finNFe      := vConfiguracoesNotaFiscal.finNFe(lQry.FieldByName('finNFe').AsString);
+        indIntermed := vConfiguracoesNotaFiscal.indIntermed(lQry.FieldByName('indIntermed').AsString);
+        indPres     := vConfiguracoesNotaFiscal.indPres(lQry.FieldByName('indPres').AsString);
+        idDest      := vConfiguracoesNotaFiscal.idDest(lQry.FieldByName('idDest').AsString);
+
+        if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then
+         tpImp       := tiNFCe;
+
+        if tpEmis <> teNormal then
+        begin
+          dhCont := vConfiguracoesNotaFiscal.dhCont;
+          xJust  := 'Problemas no WebService';
+        end;
+
+        lConfiguracoesLocaisModel.objeto.WhereView := 'AND CONFIGURACOESLOCAIS.TAG = ''STATUS_NFCE'' ';
+        lDataSet := lConfiguracoesLocaisModel.objeto.obterLista;
+
+        if lDataSet.objeto.RecordCount > 0 then
+          vTransmitir := lDataSet.objeto.FieldByName('VALORSTRING').AsString;
+
+        if (vTransmitir = 'F') and (modelo = 65) then
+        begin
+          tpEmis := teOffLine;
+          dhCont := vIConexao.DataServer;
+          xJust  :='Entrada em contingência por falhas na conexão com o web service.';
+        end;
       end;
 
-      lConfiguracoesLocaisModel.objeto.WhereView := 'AND CONFIGURACOESLOCAIS.TAG = ''STATUS_NFCE'' ';
-      lDataSet := lConfiguracoesLocaisModel.objeto.obterLista;
-
-      if lDataSet.objeto.RecordCount > 0 then
-        vTransmitir := lDataSet.objeto.FieldByName('VALORSTRING').AsString;
-
-      if (vTransmitir = 'F') and (modelo = 65) then
+      with ACBrNFe.Configuracoes.Geral do
       begin
-        tpEmis := teOffLine;
-        dhCont := vIConexao.DataServer;
-        xJust  :='Entrada em contingência por falhas na conexão com o web service.';
+        ModeloDF := vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger);
       end;
 
-    end;
-    with ACBrNFe.Configuracoes.Geral do
-    begin
-      ModeloDF := vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger);
-    end;
-    if NotaF.NFe.Ide.indIntermed = iiOperacaoComIntermediador then
-    begin
-      NotaF.NFe.infIntermed.CNPJ := lQry.FieldByName('CNPJ').AsString;
-      NotaF.NFe.infIntermed.idCadIntTran := lQry.FieldByName('idCadIntTran').AsString;
-    end;
+      if NotaF.NFe.Ide.indIntermed = iiOperacaoComIntermediador then
+      begin
+        NotaF.NFe.infIntermed.CNPJ := lQry.FieldByName('CNPJ').AsString;
+        NotaF.NFe.infIntermed.idCadIntTran := lQry.FieldByName('idCadIntTran').AsString;
+      end;
+
     except
     on E:Exception do
         CriaException('Erro: '+ E.Message);
