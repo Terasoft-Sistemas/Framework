@@ -575,6 +575,21 @@ function TFiltroModel.query: TipoWideStringFramework;
 
   end;
 
+  function getTipoExpressao: String;
+  begin
+    Result := trim(getOpcoesSelecionadas.text);
+    if(Result='') then
+      Result := fValoresPadrao;
+    if(fSubTipo=expressao_subtipoFiltro_TipoInteiro) then // Inteiro
+    begin
+      Result := StrToIntDef(Result,0).ToString;
+    end else if(fSubTipo=expressao_subtipoFiltro_TipoString) then // String
+    begin
+      //
+    end else
+      raise Exception.Create('Subtipo não reconhecido para o filtro EXPRESSAO');
+  end;
+
   function getTipoPeriodo: String;
     var
       di,df: Variant;
@@ -620,17 +635,7 @@ begin
 
     tipoFiltro_Expressao:
     begin
-      Result := trim(getOpcoesSelecionadas.text);
-      if(Result='') then
-        Result := fValoresPadrao;
-      if(fSubTipo=expressao_subtipoFiltro_TipoInteiro) then // Inteiro
-      begin
-        Result := StrToIntDef(Result,0).ToString;
-      end else if(fSubTipo=expressao_subtipoFiltro_TipoString) then // String
-      begin
-        //
-      end else
-        raise Exception.Create('Subtipo não reconhecido para o filtro EXPRESSAO');
+      Result := getTipoExpressao;
     end;
 
     tipoFiltro_DataPeriodo,tipoFiltro_HoraPeriodo,tipoFiltro_DataHoraPeriodo:
