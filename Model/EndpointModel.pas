@@ -292,6 +292,8 @@ begin
   for lFiltro in getFILTROS do
   begin
 
+    if(lFiltro.objeto.TIPO=tipoFiltro_Expressao) then continue;
+
     lIn := lFiltro.objeto.query;
 
     if(lFiltro.objeto.TIPO=tipoFiltro_Expressao) then
@@ -365,7 +367,16 @@ begin
   Result := StringReplace(Result, '<order>', lOrder,[rfReplaceAll,rfIgnoreCase]);
   Result := StringReplace(Result, '<group>', lGroup,[rfReplaceAll,rfIgnoreCase]);
 
-  //Clipboard.AsText := Result;
+  for lFiltro in getFILTROS do
+  begin
+
+    if(lFiltro.objeto.TIPO<>tipoFiltro_Expressao) then continue;
+
+    lIn := lFiltro.objeto.query;
+
+    Result := StringReplace(Result,lFiltro.objeto.campo,lIn,[rfReplaceAll,rfIgnoreCase]);
+  end;
+
 end;
 
 function TEndpointModel.executaQuery;

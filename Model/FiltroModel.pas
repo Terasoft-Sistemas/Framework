@@ -28,7 +28,8 @@ type
 
   TSubTipoFiltro = (
       subtipoFiltro_Nenhum,
-      subtipoFiltro_1
+      subtipoFiltro_1,
+      subtipoFiltro_2
     );
 
 
@@ -174,7 +175,9 @@ type
 
   end;
 
-  const expressao_subtipoFiltro_TipoInteiro = subtipoFiltro_1;
+  const
+    expressao_subtipoFiltro_TipoInteiro = subtipoFiltro_1;
+    expressao_subtipoFiltro_TipoString  = subtipoFiltro_2;
 
 
 implementation
@@ -319,7 +322,7 @@ begin
         begin
           s := trim(Copy(s,2,MaxInt));
           if(s='') then continue;
-          s1 := textoEntreTags(s,'','<');
+          s1 := textoEntreTags(s,'','\<');
           if(s1='') then
             s1 := s;
           if fValoresPadrao<>'' then
@@ -329,11 +332,11 @@ begin
 
         Result.dataset.Append;
 
-        Result.dataset.Fields[0].AsString := textoEntreTags(s,'','<');
+        Result.dataset.Fields[0].AsString := textoEntreTags(s,'','\<');
         if(Result.dataset.Fields[0].AsString='') then
           Result.dataset.Fields[0].AsString := s;
 
-        Result.dataset.Fields[1].AsString := textoEntreTags(s,'<','>');
+        Result.dataset.Fields[1].AsString := textoEntreTags(s,'\<','\>');
 
         if (Result.dataset.Fields[1].AsString = '') then
           Result.dataset.Fields[1].AsString := s;
@@ -622,7 +625,11 @@ begin
       if(fSubTipo=expressao_subtipoFiltro_TipoInteiro) then // Inteiro
       begin
         Result := StrToIntDef(Result,0).ToString;
-      end;
+      end else if(fSubTipo=expressao_subtipoFiltro_TipoString) then // String
+      begin
+        //
+      end else
+        raise Exception.Create('Subtipo não reconhecido para o filtro EXPRESSAO');
     end;
 
     tipoFiltro_DataPeriodo,tipoFiltro_HoraPeriodo,tipoFiltro_DataHoraPeriodo:
@@ -746,6 +753,16 @@ begin
     fDESCRICAO := lDescricao;
     setTipo(tipoFiltro_Expressao);
     fSubTipo := expressao_subtipoFiltro_TipoInteiro;
+    fMultiploValor := false;
+    fValores := lValores;
+    //Le as opções para inicializar...
+    getOpcoes;
+
+  end else if(stringNoArray(lNome, ['@string'],[osna_CaseInsensitive,osna_SemAcento])) then
+  begin
+    fDESCRICAO := lDescricao;
+    setTipo(tipoFiltro_Expressao);
+    fSubTipo := expressao_subtipoFiltro_TipoString;
     fMultiploValor := false;
     fValores := lValores;
     //Le as opções para inicializar...
