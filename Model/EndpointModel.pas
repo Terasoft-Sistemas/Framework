@@ -55,6 +55,11 @@ type
     fOldQuery: String;
     fOrdem: TipoWideStringFramework;
     fPercentagens: boolean;
+    fPermissao: TipoWideStringFramework;
+
+  //property permissao getter/setter
+    function getPermissao: TipoWideStringFramework;
+    procedure setPermissao(const pValue: TipoWideStringFramework);
 
   //property percentagens getter/setter
     function getPercentagens: boolean;
@@ -140,6 +145,8 @@ type
 
     property percentagens: boolean read getPercentagens write setPercentagens;
 
+    property permissao: TipoWideStringFramework read getPermissao write setPermissao;
+
   public
     procedure loaded;
 
@@ -158,6 +165,7 @@ implementation
     {$if defined(__DEBUG_ANTONIO__)}
       ClipBrd,
     {$endif}
+    FuncoesConfig,
     LojasModel;
 
 function getNewEndpointModel(pIConexao : IConexao): ITEndpointModel;
@@ -571,6 +579,8 @@ begin
     lFiltroLojas.objeto.setTipoPorNome('@lojas');
   end;
   fFILTROS.Insert(0,lFiltroLojas);
+
+  fPermissao := getCfg.ReadString('permissao','executar',tagConfig_GESTAO_RELATORIO_PERMISSAO);
 end;
 
 procedure TEndpointModel.setPROPRIEDADES(const pValue: TipoWideStringFramework);
@@ -775,6 +785,18 @@ end;
 function TEndpointModel.getPercentagens: boolean;
 begin
   Result := fPercentagens;
+end;
+
+procedure TEndpointModel.setPermissao(const pValue: TipoWideStringFramework);
+begin
+  fPermissao := pValue;
+end;
+
+function TEndpointModel.getPermissao: TipoWideStringFramework;
+begin
+  if(fPermissao='') then
+    fPermissao := tagConfig_GESTAO_RELATORIO_PERMISSAO;
+  Result := fPermissao;
 end;
 
 end.

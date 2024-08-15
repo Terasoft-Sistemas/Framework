@@ -389,6 +389,7 @@ var
 implementation
 
 uses
+  FuncoesArquivos,
   FinanceiroPedidoModel,
   WebPedidoModel,
   PCGDao,
@@ -3907,6 +3908,7 @@ var
   lConfiguracoes : ITerasoftConfiguracoes;
 begin
   vIConexao := TControllersConexao.New;
+//  vIConexao.terasoftConfiguracoes := vConfiguracoes;
   vIConexao.connection;
 
   vConfiguracoes := TerasoftConfiguracoes.getNewIface(vIConexao);
@@ -4254,5 +4256,10 @@ procedure TForm1.SpeedButton3Click(Sender: TObject);
 begin
   Form.Endpoint.criaViewEndpoint(vIConexao).objeto.ShowModal;
 end;
+
+initialization
+  config_DiretorioAtualizado := '\\192.168.20.30\Atualizado\';
+
+
 
 end.
