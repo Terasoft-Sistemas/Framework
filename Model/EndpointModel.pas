@@ -165,6 +165,7 @@ implementation
     {$if defined(__DEBUG_ANTONIO__)}
       ClipBrd,
     {$endif}
+    Terasoft.Framework.LOG,
     FuncoesConfig,
     LojasModel;
 
@@ -385,6 +386,8 @@ begin
     Result := StringReplace(Result,lFiltro.objeto.campo,lIn,[rfReplaceAll,rfIgnoreCase]);
   end;
 
+  Result := StringReplace(Result, '<igual>', '=',[rfReplaceAll,rfIgnoreCase]);
+
 end;
 
 function TEndpointModel.executaQuery;
@@ -404,8 +407,11 @@ begin
   lDS := nil;
   lSQL := getQuery;
   {$if defined(__DEBUG_ANTONIO__)}
-    Clipboard.AsText := lSql;
+//    Clipboard.AsText := lSql;
   {$endif}
+
+
+  logaByTagSeNivel('', format('TEndpointModel.executaQuery: [%s]',[lSql]),LOG_LEVEL_DEBUG);
 
   precisaOrder := false;
 
@@ -656,6 +662,7 @@ begin
   {$if defined(__DEBUG_ANTONIO__)}
     //Clipboard.AsText := lSQL;
   {$endif}
+  logaByTagSeNivel('', format('TEndpointModel.sumario: [%s]',[lSql]),LOG_LEVEL_DEBUG);
 
 
   for lLojaModel in getFiltroLojas.objeto.listaLojas do
