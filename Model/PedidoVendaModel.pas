@@ -1083,8 +1083,8 @@ begin
     lNFModel.objeto.TIPO_FRETE            := self.FTIPO_FRETE;
     lNFModel.objeto.DATA_NF               := DateToStr(vIConexao.DataServer);
     lNFModel.objeto.HORA_NF               := TimeToStr(vIConexao.HoraServer);
-    lNFModel.objeto.DATA_SAIDA            := DateToStr(vIConexao.DataServer);
-    lNFModel.objeto.HORA_SAIDA            := TimeToStr(vIConexao.HoraServer);
+    lNFModel.objeto.DATA_SAIDA            := lNFModel.objeto.DATA_NF;
+    lNFModel.objeto.HORA_SAIDA            := lNFModel.objeto.HORA_NF;
     lNFModel.objeto.UF_EMBARQUE           := lEmpresaModel.objeto.UF;
     lNFModel.objeto.LOCAL_EMBARQUE        := lEmpresaModel.objeto.CIDADE;
     lNFModel.objeto.CODIGO_CLI            := self.FCODIGO_CLI;
