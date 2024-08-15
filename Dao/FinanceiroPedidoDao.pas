@@ -429,7 +429,7 @@ begin
       '     from financeiro_pedido f                                     '+SLineBreak+
       '    inner join portador p on p.codigo_port = f.portador_id        '+SLineBreak+
       '    where f.web_pedido_id = '+pWebPedido+'                        '+SLineBreak+
-      '      and p.tpag_nfe not in (''01'', ''03'', ''04'', ''99'')      '+SLineBreak;
+      '      and p.tpag_nfe not in (''01'', ''03'', ''04'', ''17'', ''20'', ''99'')      '+SLineBreak;
 
     lQry.Open(lSQL);
 
