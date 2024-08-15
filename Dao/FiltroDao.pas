@@ -113,7 +113,7 @@ begin
   {$endif}
 
   if (local='') then
-    local := config_DiretorioAtualizado + 'tags';
+    local := config_DiretorioAtualizado + 'tags\';
 
   local := local + XMLFILTROS;
   if (not FileExists(local)) then exit;
