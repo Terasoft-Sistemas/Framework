@@ -182,12 +182,10 @@ type
 
 implementation
   uses
-    {$if defined(DEBUG)}
-      ClipBrd,
-    {$endif}
     EmpresaModel,
     Terasoft.FuncoesTexto,
     Variants,
+    Terasoft.Framework.LOG,
     Terasoft.Framework.FuncoesDiversas,
     FuncoesPesquisaDB,
     DBClient;
@@ -437,9 +435,7 @@ begin
         lWhere := ' where 1=1 ' + lWhere;
       lSQL := format('select %s %s %s from %s %s %s', [lAdicional, fChave,lFieldNames, lName, lWhere, lOrdem]);
 
-      {$if defined(DEBUG)}
-        Clipboard.AsText := lSQL;
-      {$endif}
+      logaByTagSeNivel('', format('TFiltroModel.getOpcoes: [%s]',[lSql]),LOG_LEVEL_DEBUG);
 
       lDS.query(lSQL,
                 '', []);
