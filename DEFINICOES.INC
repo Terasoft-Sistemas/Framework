@@ -591,6 +591,13 @@
 {$ENDIF}
 
 
+{$if not defined(DXE11_UP)}
+  {$if defined(__USE_WIN1252__)}
+    {$undef __USE_WIN1252__}
+  {$ifend}
+{$ifend}
+
+
 {$if not defined(VERSAODEFINIDA)}
   {$MESSAGE Error   'Versão não definida'}
 {$ifend}
