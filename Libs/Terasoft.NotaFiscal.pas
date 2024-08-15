@@ -94,7 +94,7 @@ type
     destructor Destroy; override;
 
     function transmitir(idNotaFiscal: String): TStringList;
-    function consultarNota(pNota: ITNFModel): boolean;
+    function consultarNota(idNotaFiscal: String): boolean;
     function imprimir: String;
     function gerarXML(idNotaFiscal, pPath: String): String;
     function VencimentoCertificado: TDateTime;
@@ -164,20 +164,32 @@ begin
   end;
 end;
 
-function TNotaFiscal.consultarNota(pNota: ITNFModel): boolean;
+function TNotaFiscal.consultarNota(idNotaFiscal: String): boolean;
+var
+  lNFContol : ITNFContol;
 begin
   Result := False;
 
-  ACBrNFe.Consultar(pNota.objeto.ID_NF3);
+  lNFContol := TNFContol.getNewIface(idNotaFiscal, vIConexao);
+  try
+    processar(idNotaFiscal);
+    ACBrNFe.NotasFiscais.Assinar;
+    ACBrNFe.Consultar;
 
-  if ACBrNFe.WebServices.Consulta.cStat = 100 then
-  begin
-    pNota.objeto.Acao := tacAlterar;
-    pNota.objeto.NOME_XML := ACBrNFe.WebServices.Consulta.XMotivo;
-    pNota.objeto.PROTOCOLO_NFE := ACBrNFe.WebServices.Consulta.Protocolo;
-    pNota.objeto.Salvar;
+    if ACBrNFe.WebServices.Consulta.cStat = 100 then
+    begin
+      lNFContol.objeto.NFModel.objeto.Acao                 := Terasoft.Types.tacAlterar;
+      lNFContol.objeto.NFModel.objeto.STATUS_TRANSMISSAO := '8';
+      lNFContol.objeto.NFModel.objeto.NOME_XML           := ACBrNFe.WebServices.Consulta.XMotivo;
+      lNFContol.objeto.NFModel.objeto.ID_NF3             := ACBrNFe.WebServices.Consulta.NFeChave;
+      lNFContol.objeto.NFModel.objeto.PROTOCOLO_NFE      := ACBrNFe.WebServices.Consulta.Protocolo;
+      lNFContol.objeto.NFModel.objeto.XML_NFE            := ACBrNFe.NotasFiscais.Items[0].GerarXML;
+      lNFContol.objeto.Salvar;
 
-    Result := True;
+      Result := True;
+    end;
+  finally
+    lNFContol := nil;
   end;
 end;
 
@@ -568,7 +580,7 @@ begin
       '    n.modelo modelo,                       '+#13+
       '    n.serie_nf serie,                      '+#13+
       '    n.numero_ecf nNF,                      '+#13+
-      '    n.numero_ecf cNF,                      '+#13+
+      '    n.cnf cNF,                             '+#13+
       '    n.data_nf dEmi,                        '+#13+
       '    n.hora_nf hEmi,                        '+#13+
       '    n.data_saida dSaiEnt,                  '+#13+
@@ -597,7 +609,7 @@ begin
         modelo      := lQry.FieldByName('modelo').AsInteger;
         serie       := lQry.FieldByName('serie').AsInteger;
         nNF         := lQry.FieldByName('nNF').AsInteger;
-        cNF         := GerarCodigoDFe(lQry.FieldByName('cNF').AsInteger);
+        cNF         := lQry.FieldByName('cNF').AsInteger;
         dEmi        := StrToDateTime(lQry.FieldByName('dEmi').AsString + ' ' + lQry.FieldByName('hEmi').AsString);
         dSaiEnt     := lQry.FieldByName('dSaiEnt').AsDateTime;
         hSaiEnt     := lQry.FieldByName('hSaiEnt').Value;
@@ -1295,6 +1307,8 @@ end;
 
 procedure TNotaFiscal.processar(idNotaFiscal: String);
 begin
+  ACBrNFe.NotasFiscais.Clear;
+
   identificacao(idNotaFiscal);
   referenciada;
   emitente;
@@ -1310,46 +1324,44 @@ end;
 
 function TNotaFiscal.transmitir(idNotaFiscal: String): TStringList;
 var
-  lRetorno   : TStringList;
-  lQry       : TFDQuery;
-  loteEnvio  : Integer;
-  lchavenfe  : String;
-  lprotocolo : String;
-  lrecibo    : String;
-  lxMotivo   : String;
-  lCSTAT     : String;
-  lNFContol  : ITNFContol;
-  lPedidoVendaModel: ITPedidoVendaModel;
+  lRetorno          : TStringList;
+  lQry              : TFDQuery;
+  loteEnvio         : Integer;
+  lchavenfe         : String;
+  lprotocolo        : String;
+  lrecibo           : String;
+  lxMotivo          : String;
+  lCSTAT            : String;
+  lNFContol         : ITNFContol;
+  lPedidoVendaModel : ITPedidoVendaModel;
 begin
 
-  try
-    lRetorno  := TStringList.Create;
-    lNFContol := TNFContol.getNewIface(idNotaFiscal, vIConexao);
-    loteEnvio := idNotaFiscal.ToInteger;
-    lPedidoVendaModel := TPedidoVendaModel.getNewIface(vIConexao);
+  lRetorno          := TStringList.Create;
+  lNFContol         := TNFContol.getNewIface(idNotaFiscal, vIConexao);
+  loteEnvio         := idNotaFiscal.ToInteger;
+  lPedidoVendaModel := TPedidoVendaModel.getNewIface(vIConexao);
 
+  try
     try
+      if consultarNota(idNotaFiscal) then
+      begin
+        lRetorno.Add(ACBrNFe.WebServices.Consulta.cStat.ToString);
+        lRetorno.Add(ACBrNFe.WebServices.Consulta.XMotivo);
+        lRetorno.Add('');
+        lRetorno.Add(ACBrNFe.WebServices.Consulta.Protocolo);
+        Result := lRetorno;
+
+        exit;
+      end;
+
       processar(idNotaFiscal);
       ACBrNFe.NotasFiscais.GerarNFe;
       ACBrNFe.NotasFiscais.Assinar;
 
-      if ACBrNFe.NotasFiscais.Items[0].NFe.Ide.modelo = 55 then
+      if (ACBrNFe.NotasFiscais.Items[0].NFe.Ide.modelo = 55) or (vTransmitir = 'L') then
       begin
         try
-          ACBrNFe.Enviar(loteEnvio, false);
-        finally
-          lchavenfe  := ACBrNFe.NotasFiscais[0].NFe.procNFe.chNFe;
-          lprotocolo := ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.nProt;
-          lrecibo    := ACBrNFe.WebServices.Enviar.Recibo;
-          lxMotivo   := ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.xMotivo;
-          lCSTAT     := IntToStr(ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.cStat);
-        end;
-      end
-      else
-      begin
-        try
-          if vTransmitir = 'L' then
-            ACBrNFe.Enviar(loteEnvio, false, True);
+          ACBrNFe.Enviar(loteEnvio, false, true);
         finally
           lchavenfe  := ACBrNFe.NotasFiscais[0].NFe.procNFe.chNFe;
           lprotocolo := ACBrNFe.NotasFiscais.Items[0].NFe.procNFe.nProt;
@@ -1386,10 +1398,10 @@ begin
 
     except on E: Exception do
       begin
-        lNFContol.objeto.NFModel.objeto.Acao               := Terasoft.Types.tacAlterar;
-        lNFContol.objeto.NFModel.objeto.NOME_XML           := copy('NOTA NAO AUTORIZADA: '+e.Message, 1, 500);
-        lNFContol.objeto.NFModel.objeto.XML_NFE            := ACBrNFe.NotasFiscais.Items[0].GerarXML;
-        lNFContol.objeto.NFModel.objeto.NUMERO_NF          := idNotaFiscal;
+        lNFContol.objeto.NFModel.objeto.Acao          := Terasoft.Types.tacAlterar;
+        lNFContol.objeto.NFModel.objeto.NOME_XML      := copy('NOTA NAO AUTORIZADA: '+e.Message, 1, 500);
+        lNFContol.objeto.NFModel.objeto.XML_NFE       := ACBrNFe.NotasFiscais.Items[0].GerarXML;
+        lNFContol.objeto.NFModel.objeto.NUMERO_NF     := idNotaFiscal;
         lNFContol.objeto.Salvar;
 
         lRetorno.Add(lCSTAT);

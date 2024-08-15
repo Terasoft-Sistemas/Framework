@@ -564,7 +564,7 @@ uses
   VendaCartaoModel,
   ReservaModel,
   CaixaControleModel,
-  CreditoClienteModel;
+  CreditoClienteModel, ACBrDFeUtil;
 
 { TPedidoVendaModel }
 
@@ -1083,8 +1083,8 @@ begin
     lNFModel.objeto.TIPO_FRETE            := self.FTIPO_FRETE;
     lNFModel.objeto.DATA_NF               := DateToStr(vIConexao.DataServer);
     lNFModel.objeto.HORA_NF               := TimeToStr(vIConexao.HoraServer);
-    lNFModel.objeto.DATA_SAIDA            := DateToStr(vIConexao.DataServer);
-    lNFModel.objeto.HORA_SAIDA            := TimeToStr(vIConexao.HoraServer);
+    lNFModel.objeto.DATA_SAIDA            := lNFModel.objeto.DATA_NF;
+    lNFModel.objeto.HORA_SAIDA            := lNFModel.objeto.HORA_NF;
     lNFModel.objeto.UF_EMBARQUE           := lEmpresaModel.objeto.UF;
     lNFModel.objeto.LOCAL_EMBARQUE        := lEmpresaModel.objeto.CIDADE;
     lNFModel.objeto.CODIGO_CLI            := self.FCODIGO_CLI;
@@ -1126,6 +1126,10 @@ begin
     lNumeroNFe := lNFModel.objeto.Salvar;
 
     lNFModel := lNFModel.objeto.carregaClasse(lNumeroNFe);
+
+    lNFModel.objeto.Acao := tacAlterar;
+    lNFModel.objeto.CNF  := GerarCodigoDFe(lNFModel.objeto.NUMERO_ECF);
+    lNFModel.objeto.Salvar;
 
     self.Acao       := tacAlterar;
     self.FNUMERO_NF := lNFModel.objeto.NUMERO_ECF;
