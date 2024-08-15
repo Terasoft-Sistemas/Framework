@@ -480,6 +480,7 @@ procedure TEndpointModel.formatarDataset(pDataset: TDataset);
     f: TField;
     sNome,sFormato: String;
     posicao: Integer;
+    lVisible: boolean;
 begin
   if(pDataset=nil) then
     exit;
@@ -488,7 +489,10 @@ begin
   for i := 0 to pDataset.FieldCount - 1 do
   begin
     f:=pDataset.Fields[i];
-    f.Visible := fCfg.ReadBool('visible',f.DisplayName,true);
+    lVisible := not (( f.DataType in [ftBytes])  or ((f is TBlobField) and (TBlobField(f).BlobType=ftBlob)) or
+                    (f is TByteField));
+
+    f.Visible := fCfg.ReadBool('visible',f.DisplayName, lVisible);
     f.DisplayLabel := capitalizarTexto(StringReplace(f.DisplayName,'_',' ', [rfReplaceAll]));
     if(f is TNumericField) and not ( f.DataType in [ ftLargeint ] ) then
       TNumericField(f).DisplayFormat := ',0.00';
