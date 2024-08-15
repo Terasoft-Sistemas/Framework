@@ -602,26 +602,28 @@ begin
   FPedidoItenssLista := TCollections.CreateList<ITPedidoItensModel>;
   try
     lSQL :=
-    ' select                                             '+#13+
-    '   i.id,                                            '+#13+
-    '   i.codigo_pro,                                    '+#13+
-    '   p.barras_pro,                                    '+#13+
-    '   p.nome_pro,                                      '+#13+
-    '   i.quantidade_ped,                                '+#13+
-    '   i.qtde_calculada,                                '+#13+
-    '   i.valorunitario_ped,                             '+#13+
-    '   i.desconto_ped,                                  '+#13+
-    '   i.vdesc,                                         '+#13+
-    '   i.item,                                          '+#13+
-    '   i.valorunitario_ped * i.qtde_calculada total     '+#13+
-    ' from                                               '+#13+
-    '     pedidoitens i                                  '+#13+
-    '                                                    '+#13+
-    ' left join produto p on p.codigo_pro = i.codigo_pro '+#13+
-    '                                                    '+#13+
-    ' where                                              '+#13+
+    ' select                                                                                                   '+#13+
+    '   i.id,                                                                                                  '+#13+
+    '   i.codigo_pro,                                                                                          '+#13+
+    '   p.barras_pro,                                                                                          '+#13+
+    '   p.nome_pro,                                                                                            '+#13+
+    '   i.quantidade_ped,                                                                                      '+#13+
+    '   i.qtde_calculada,                                                                                      '+#13+
+    '   i.valorunitario_ped,                                                                                   '+#13+
+    '   i.desconto_ped,                                                                                        '+#13+
+    '   cast(((cast(i.valorunitario_ped as float) * i.desconto_ped / 100)) * i.qtde_calculada as float) vdesc, '+#13+
+    '   i.item,                                                                                                '+#13+
+    '   i.valorunitario_ped * i.qtde_calculada total                                                           '+#13+
+    ' from                                                                                                     '+#13+
+    '     pedidoitens i                                                                                        '+#13+
+    '                                                                                                          '+#13+
+    ' left join produto p on p.codigo_pro = i.codigo_pro                                                       '+#13+
+    '                                                                                                          '+#13+
+    ' where                                                                                                    '+#13+
     '     i.numero_ped = '+QuotedStr(pNumeroPedido);
+
     lQry.Open(lSQL);
+
     lQry.First;
     while not lQry.Eof do
     begin
