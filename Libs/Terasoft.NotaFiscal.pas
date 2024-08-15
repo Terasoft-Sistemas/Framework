@@ -420,10 +420,19 @@ begin
       begin
 
         CNPJCPF           := IIF(lQry.FieldByName('CNPJCPF').AsString <> ''    , lQry.FieldByName('CNPJCPF').AsString,  Unassigned);
-        IE                := IIF(lQry.FieldByName('IE').AsString <> ''         , lQry.FieldByName('IE').AsString,       Unassigned);
         ISUF              := IIF(lQry.FieldByName('ISUF').AsString <> ''       , lQry.FieldByName('ISUF').AsString,     Unassigned);
         xNome             := IIF(lQry.FieldByName('xNome').AsString <> ''      , lQry.FieldByName('xNome').AsString,    Unassigned);
-        indIEDest         := IIF(lQry.FieldByName('indIEDest').AsString <> ''  , vConfiguracoesNotaFiscal.indIEDest(lQry.FieldByName('indIEDest').AsString),  Unassigned);
+
+        if StrToIntDef(lQry.FieldByName('IE').AsString, 0) = 0 then
+        begin
+          IE := '';
+          indIEDest := inIsento;
+        end
+        else
+        begin
+          IE        := IIF(lQry.FieldByName('IE').AsString <> ''         , lQry.FieldByName('IE').AsString,       Unassigned);
+          indIEDest := IIF(lQry.FieldByName('indIEDest').AsString <> ''  , vConfiguracoesNotaFiscal.indIEDest(lQry.FieldByName('indIEDest').AsString),  Unassigned);
+        end;
 
         if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then
         begin
@@ -611,7 +620,7 @@ begin
         nNF         := lQry.FieldByName('nNF').AsInteger;
         cNF         := lQry.FieldByName('cNF').AsInteger;
         dEmi        := StrToDateTime(lQry.FieldByName('dEmi').AsString + ' ' + lQry.FieldByName('hEmi').AsString);
-        dSaiEnt     := lQry.FieldByName('dSaiEnt').AsDateTime;
+        dSaiEnt     := StrToDateTime(lQry.FieldByName('dSaiEnt').AsString + ' ' +lQry.FieldByName('hSaiEnt').AsString);
         hSaiEnt     := lQry.FieldByName('hSaiEnt').Value;
         tpNF        := vConfiguracoesNotaFiscal.tpNF(lQry.FieldByName('tpNF').AsString);
         verProc     := 'ERP_TERASOFT';
@@ -623,7 +632,7 @@ begin
         idDest      := vConfiguracoesNotaFiscal.idDest(lQry.FieldByName('idDest').AsString);
 
         if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then
-         tpImp       := tiNFCe;
+         tpImp      := tiNFCe;
 
         if tpEmis <> teNormal then
         begin

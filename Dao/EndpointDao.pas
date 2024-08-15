@@ -196,18 +196,13 @@ begin
   ds.dataset.First;
   while not ds.dataset.eof do
   begin
-    {$if not defined(DEBUG)}
-      if(Pos('DEBUG', UpperCase(retiraAcentos(ds.dataset.FieldByName('nome').AsString)),1)=0) then
+     if (inDebugMode) or (Pos('DEBUG', UpperCase(retiraAcentos(ds.dataset.FieldByName('nome').AsString)),1)=0) then
       begin
-    {$endif}
-
         lModel := getNewEndpointModel(vIConexao);
         vIConstrutorDao.setDatasetToModel(lModel.objeto._TABELA_,ds.dataset,lModel.objeto);
         lModel.objeto.loaded;
         Result.add(lModel);
-    {$if not defined(DEBUG)}
       end;
-    {$endif}
 
     ds.dataset.Next;
   end;
