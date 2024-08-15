@@ -564,7 +564,7 @@ uses
   VendaCartaoModel,
   ReservaModel,
   CaixaControleModel,
-  CreditoClienteModel;
+  CreditoClienteModel, ACBrDFeUtil;
 
 { TPedidoVendaModel }
 
@@ -1126,6 +1126,10 @@ begin
     lNumeroNFe := lNFModel.objeto.Salvar;
 
     lNFModel := lNFModel.objeto.carregaClasse(lNumeroNFe);
+
+    lNFModel.objeto.Acao := tacAlterar;
+    lNFModel.objeto.CNF  := GerarCodigoDFe(lNFModel.objeto.NUMERO_ECF);
+    lNFModel.objeto.Salvar;
 
     self.Acao       := tacAlterar;
     self.FNUMERO_NF := lNFModel.objeto.NUMERO_ECF;

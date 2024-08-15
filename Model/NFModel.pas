@@ -491,6 +491,7 @@ type
 
     procedure obterLista;
     procedure obterListaNFe;
+    procedure AtualizarDataEmissao(pNotaFiscal : String);
 
  end;
 
@@ -500,6 +501,26 @@ uses
   NFDao;
 
 { TNFModel }
+
+procedure TNFModel.AtualizarDataEmissao(pNotaFiscal: String);
+var
+  lNFModel : ITNFModel;
+begin
+  lNFModel := TNFModel.getNewIface(vIConexao);
+
+  try
+    lNFModel := lNFModel.objeto.carregaClasse(pNotaFiscal);
+
+    lNFModel.objeto.Acao := tacAlterar;
+    lNFModel.objeto.DATA_NF    := DateToStr(vIConexao.DataServer);
+    lNFModel.objeto.HORA_NF    := TimeToStr(vIConexao.HoraServer);
+    lNFModel.objeto.DATA_SAIDA := lNFModel.objeto.DATA_NF;
+    lNFModel.objeto.HORA_SAIDA := lNFModel.objeto.HORA_NF;
+    lNFModel.objeto.Salvar;
+  finally
+    lNFModel := nil;
+  end;
+end;
 
 function TNFModel.carregaClasse(ID: String): ITNFModel;
 var

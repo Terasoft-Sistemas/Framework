@@ -55,6 +55,11 @@ type
     fOldQuery: String;
     fOrdem: TipoWideStringFramework;
     fPercentagens: boolean;
+    fPermissao: TipoWideStringFramework;
+
+  //property permissao getter/setter
+    function getPermissao: TipoWideStringFramework;
+    procedure setPermissao(const pValue: TipoWideStringFramework);
 
   //property percentagens getter/setter
     function getPercentagens: boolean;
@@ -140,6 +145,8 @@ type
 
     property percentagens: boolean read getPercentagens write setPercentagens;
 
+    property permissao: TipoWideStringFramework read getPermissao write setPermissao;
+
   public
     procedure loaded;
 
@@ -158,6 +165,8 @@ implementation
     {$if defined(__DEBUG_ANTONIO__)}
       ClipBrd,
     {$endif}
+    Terasoft.Framework.LOG,
+    FuncoesConfig,
     LojasModel;
 
 function getNewEndpointModel(pIConexao : IConexao): ITEndpointModel;
@@ -377,6 +386,8 @@ begin
     Result := StringReplace(Result,lFiltro.objeto.campo,lIn,[rfReplaceAll,rfIgnoreCase]);
   end;
 
+  Result := StringReplace(Result, '<igual>', '=',[rfReplaceAll,rfIgnoreCase]);
+
 end;
 
 function TEndpointModel.executaQuery;
@@ -396,8 +407,11 @@ begin
   lDS := nil;
   lSQL := getQuery;
   {$if defined(__DEBUG_ANTONIO__)}
-    Clipboard.AsText := lSql;
+//    Clipboard.AsText := lSql;
   {$endif}
+
+
+  logaByTagSeNivel('', format('TEndpointModel.executaQuery: [%s]',[lSql]),LOG_LEVEL_DEBUG);
 
   precisaOrder := false;
 
@@ -571,6 +585,8 @@ begin
     lFiltroLojas.objeto.setTipoPorNome('@lojas');
   end;
   fFILTROS.Insert(0,lFiltroLojas);
+
+  fPermissao := getCfg.ReadString('permissao','executar',tagConfig_GESTAO_RELATORIO_PERMISSAO);
 end;
 
 procedure TEndpointModel.setPROPRIEDADES(const pValue: TipoWideStringFramework);
@@ -646,6 +662,7 @@ begin
   {$if defined(__DEBUG_ANTONIO__)}
     //Clipboard.AsText := lSQL;
   {$endif}
+  logaByTagSeNivel('', format('TEndpointModel.sumario: [%s]',[lSql]),LOG_LEVEL_DEBUG);
 
 
   for lLojaModel in getFiltroLojas.objeto.listaLojas do
@@ -775,6 +792,18 @@ end;
 function TEndpointModel.getPercentagens: boolean;
 begin
   Result := fPercentagens;
+end;
+
+procedure TEndpointModel.setPermissao(const pValue: TipoWideStringFramework);
+begin
+  fPermissao := pValue;
+end;
+
+function TEndpointModel.getPermissao: TipoWideStringFramework;
+begin
+  if(fPermissao='') then
+    fPermissao := tagConfig_GESTAO_RELATORIO_PERMISSAO;
+  Result := fPermissao;
 end;
 
 end.
