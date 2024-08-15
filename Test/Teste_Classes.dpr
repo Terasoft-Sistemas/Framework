@@ -5,6 +5,7 @@ uses
   FastMM4,
   Classes,
   Vcl.Forms,
+  midaslib,
   FinanceiroPedidoDao in '..\Dao\FinanceiroPedidoDao.pas',
   FinanceiroPedidoModel in '..\Model\FinanceiroPedidoModel.pas',
   Terasoft.Types in '..\Types\Terasoft.Types.pas',
