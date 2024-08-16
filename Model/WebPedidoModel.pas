@@ -546,6 +546,7 @@ begin
     lPedidoVendaModel.objeto.TIPO_COMISSAO            := self.TIPO_COMISSAO;
     lPedidoVendaModel.objeto.GERENTE_ID               := self.GERENTE_ID;
     lPedidoVendaModel.objeto.CONDICOES2_PAG           := lWebPedidoModel.objeto.AVALISTA_ID;
+    lPedidoVendaModel.objeto.FORM                     := 'PDV';
 
     lPedidoVendaModel.objeto.SEGURO_PRESTAMISTA_CUSTO := lWebPedidoModel.objeto.SEGURO_PRESTAMISTA_CUSTO;
     lPedidoVendaModel.objeto.SEGURO_PRESTAMISTA_VALOR := lWebPedidoModel.objeto.SEGURO_PRESTAMISTA_VALOR;
