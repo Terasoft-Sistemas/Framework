@@ -438,7 +438,7 @@ begin
   dia  := copy(dataInformada, 1, 2);
   mes  := copy(dataInformada, 4, 2);
   ano  := copy(dataInformada, 7, 4);
-  hora := copy(dataInformada, 11, 8);
+  hora := copy(dataInformada, 12, 8);
   if dia = '' then
     Result := Unassigned
   else
