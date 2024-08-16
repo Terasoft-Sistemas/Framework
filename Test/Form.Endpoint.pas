@@ -107,7 +107,7 @@ begin
   //Retorna a lista com busca no termo 'PROD'
   //Ordenado pelo campo DESCRICAO
 //  for m in epControl.getNovaLista('prod',2) do
-  for m in epControl.getNovaLista('CLI3',true,2) do
+  for m in epControl.getNovaLista('',true,2) do
 
   //m := epControl.getByName('CLI3');
 
