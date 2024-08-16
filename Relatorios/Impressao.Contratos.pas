@@ -854,7 +854,10 @@ begin
     mtCliente.Post;
 
     if (lClienteModel.objeto.ClientesLista[0].objeto.CODIGO_OCUPACAO_CLI = '2') or (lClienteModel.objeto.ClientesLista[0].objeto.CODIGO_OCUPACAO_CLI = '8') or (lClienteModel.objeto.ClientesLista[0].objeto.CODIGO_OCUPACAO_CLI = 'M') then
-      memoCoberturaPrestamista.Lines.Text := 'Desemprego Involuntário (DI)'
+    begin
+      memoCoberturaPrestamista.Lines.Text := 'Desemprego Involuntário (DI)';
+      lblPlano3.Visible := true;
+    end
     else
     if (lClienteModel.objeto.ClientesLista[0].objeto.CODIGO_OCUPACAO_CLI = '3') or (lClienteModel.objeto.ClientesLista[0].objeto.CODIGO_OCUPACAO_CLI = '4') or (lClienteModel.objeto.ClientesLista[0].objeto.CODIGO_OCUPACAO_CLI = '5') then
       memoCoberturaPrestamista.Lines.Text := 'Incapacidade Física Total e Temporária por Acidente ou Doença'
