@@ -419,12 +419,13 @@ begin
       lSql := 'select ';
 
     lSQL := lSQL +
-      '       pedidoitens.*,                                               '+sLineBreak+
-      '       produto.tipo_venda_comissao_id,                              '+sLineBreak+
-      '       produto.comis_pro,                                           '+sLineBreak+
-      '       produto.grupo_comissao_id                                    '+sLineBreak+
-	    '  from pedidoitens                                                  '+sLineBreak+
-      '  left join produto on produto.codigo_pro = pedidoitens.codigo_pro  '+sLineBreak+
+      '       pedidoitens.*,                                                                                                                                     '+sLineBreak+
+      '       cast(((cast(pedidoitens.VALORUNITARIO_PED  as float) * pedidoitens.desconto_ped / 100)) * pedidoitens.qtde_calculada as float) as VALOR_DESCONTO,  '+sLineBreak+
+      '       produto.tipo_venda_comissao_id,                                                                                                                    '+sLineBreak+
+      '       produto.comis_pro,                                                                                                                                 '+sLineBreak+
+      '       produto.grupo_comissao_id                                                                                                                          '+sLineBreak+
+	    '  from pedidoitens                                                                                                                                        '+sLineBreak+
+      '  left join produto on produto.codigo_pro = pedidoitens.codigo_pro                                                                                        '+sLineBreak+
       ' where 1=1                    ';
 
     lSql := lSql + where;
@@ -559,7 +560,7 @@ begin
       modelo.objeto.IPI_CST                      := lQry.FieldByName('IPI_CST').AsString;
       modelo.objeto.CSOSN                        := lQry.FieldByName('CSOSN').AsString;
       modelo.objeto.CFOP                         := lQry.FieldByName('CFOP').AsString;
-      modelo.objeto.VDESC                        := lQry.FieldByName('VDESC').AsString;
+      modelo.objeto.VDESC                        := lQry.FieldByName('VALOR_DESCONTO').AsString;
       modelo.objeto.TIPO_VENDA_COMISSAO_ID       := lQry.FieldByName('TIPO_VENDA_COMISSAO_ID').AsString;
       modelo.objeto.COMIS_PRO                    := lQry.FieldByName('COMIS_PRO').AsString;
 

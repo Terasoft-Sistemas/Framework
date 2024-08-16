@@ -564,7 +564,7 @@ uses
   VendaCartaoModel,
   ReservaModel,
   CaixaControleModel,
-  CreditoClienteModel, ACBrDFeUtil;
+  CreditoClienteModel, ACBrDFeUtil, System.Math;
 
 { TPedidoVendaModel }
 
@@ -991,20 +991,23 @@ function TPedidoVendaModel.GerarNF(pModelo, pSerie: String): String;
 var
   lPedidoItensModel,
   lItens,
-  lTipoVenda        : ITPedidoItensModel;
-  lNFModel          : ITNFModel;
-  lNFItensModel     : ITNFItensModel;
-  lCFOPModel        : ITCFOPModel;
-  lEmpresaModel     : ITEmpresaModel;
+  lTipoVenda          : ITPedidoItensModel;
+  lNFModel            : ITNFModel;
+  lNFItensModel       : ITNFItensModel;
+  lCFOPModel          : ITCFOPModel;
+  lEmpresaModel       : ITEmpresaModel;
   lNumeroNFe,
-  lNomeVendedor     : String;
+  lNomeVendedor,
+  lIDItem             : String;
   lTribFederal,
   lTribEstadual,
-  lTribMunicipal    : Double;
-  lFuncionarioModel : ITFuncionarioModel;
-  lConfiguracoes    : ITerasoftConfiguracoes;
-  lTableTotais      : IFDDataset;
-  lItem             : Integer;
+  lTribMunicipal      : Double;
+  lFuncionarioModel   : ITFuncionarioModel;
+  lConfiguracoes      : ITerasoftConfiguracoes;
+  lTableTotais        : IFDDataset;
+  lItem               : Integer;
+  lTotalDesconto,
+  lDiferencaDesconto  : extended;
 begin
   if self.FNUMERO_PED = '' then
     CriaException('Pedido não informado');
@@ -1020,6 +1023,7 @@ begin
   lEmpresaModel     := TEmpresaModel.getNewIface(vIConexao);
   lFuncionarioModel := TFuncionarioModel.getNewIface(vIConexao);
   lConfiguracoes    := TerasoftConfiguracoes.getNewIface(vIConexao);
+  lTotalDesconto    := 0;
 
   try
     lTipoVenda.objeto.IDPedidoVendaView := self.NUMERO_PED;
@@ -1213,7 +1217,7 @@ begin
       lNFItensModel.objeto.QBCPROD_S09           := lItens.objeto.QTDE_CALCULADA;
       lNFItensModel.objeto.MOTDESICMS            := lItens.objeto.MOTDESICMS;
       lNFItensModel.objeto.VICMSDESON            := lItens.objeto.VICMSDESON;
-      lNFItensModel.objeto.VDESC                 := lItens.objeto.VDESC;
+      lNFItensModel.objeto.VDESC                 := roundTo(lItens.objeto.VDESC,-2).ToString;
       lNFItensModel.objeto.VALOR_SUFRAMA_ITEM    := lItens.objeto.VALOR_SUFRAMA_ITEM;
       lNFItensModel.objeto.VBCFCPST              := lItens.objeto.VBCFCPST;
       lNFItensModel.objeto.PFCPST                := lItens.objeto.PFCPST;
@@ -1247,27 +1251,41 @@ begin
       lNFItensModel.objeto.NITEMPED2             := lItens.objeto.NITEMPED2;
       lNFItensModel.objeto.OBS_ITEM              := lItens.objeto.OBS_ITEM;
 
-      lNFItensModel.objeto.Salvar;
+      lTotalDesconto := lTotalDesconto + lItens.objeto.VDESC;
+
+      lIDItem := lNFItensModel.objeto.Salvar;
     end;
 
     lTableTotais := lNFItensModel.objeto.obterTotais(lNumeroNFe);
+
+    if lTotalDesconto <> lTableTotais.objeto.FieldByName('TOTAL_DESCONTO').AsFloat then
+    begin
+      lDiferencaDesconto := lTotalDesconto - lTableTotais.objeto.FieldByName('TOTAL_DESCONTO').AsFloat;
+
+      lNFItensModel := lNFItensModel.objeto.carregaClasse(lIDItem);
+
+      lNFItensModel.objeto.Acao  := tacAlterar;
+      lNFItensModel.objeto.VDESC := roundTo(lNFItensModel.objeto.VDESC + lDiferencaDesconto, -2);
+      lNFItensModel.objeto.Salvar;
+
+      lTableTotais := lNFItensModel.objeto.obterTotais(lNumeroNFe);      
+    end;
 
     lNFModel.objeto.Acao := tacAlterar;
 
     lNFModel.objeto.VALOR_NF := lTableTotais.objeto.FieldByName('TOTAL_ITENS').AsString;
     lNFModel.objeto.ACRES_NF := lTableTotais.objeto.FieldByName('TOTAL_OUTROS').AsString;
-
-    lNFModel.objeto.TOTAL_NF   := FloatToStr(lTableTotais.objeto.FieldByName('TOTAL_ITENS').AsFloat +
-                                             lTableTotais.objeto.FieldByName('TOTAL_OUTROS').AsFloat +
-                                             lTableTotais.objeto.FieldByName('TOTAL_IPI').AsFloat +
-                                             lTableTotais.objeto.FieldByName('TOTAL_VII').AsFloat +
-                                             lTableTotais.objeto.FieldByName('TOTAL_VALOR_ICMS_ST').AsFloat +
-                                             lTableTotais.objeto.FieldByName('TOTAL_SEG').AsFloat +
-                                             lTableTotais.objeto.FieldByName('VFCPST').AsFloat +
-                                             lTableTotais.objeto.FieldByName('TOTAL_FRETE').AsFloat -
-                                             lTableTotais.objeto.FieldByName('TOTAL_DESCONTO').AsFloat -
-                                             lTableTotais.objeto.FieldByName('VICMSDESON').AsFloat -
-                                             lTableTotais.objeto.FieldByName('VSUFRAMA').AsFloat);
+    lNFModel.objeto.TOTAL_NF := FloatToStr(lTableTotais.objeto.FieldByName('TOTAL_ITENS').AsFloat +
+                                           lTableTotais.objeto.FieldByName('TOTAL_OUTROS').AsFloat +
+                                           lTableTotais.objeto.FieldByName('TOTAL_IPI').AsFloat +
+                                           lTableTotais.objeto.FieldByName('TOTAL_VII').AsFloat +
+                                           lTableTotais.objeto.FieldByName('TOTAL_VALOR_ICMS_ST').AsFloat +
+                                           lTableTotais.objeto.FieldByName('TOTAL_SEG').AsFloat +
+                                           lTableTotais.objeto.FieldByName('VFCPST').AsFloat +
+                                           lTableTotais.objeto.FieldByName('TOTAL_FRETE').AsFloat -
+                                           lTableTotais.objeto.FieldByName('TOTAL_DESCONTO').AsFloat -
+                                           lTableTotais.objeto.FieldByName('VICMSDESON').AsFloat -
+                                           lTableTotais.objeto.FieldByName('VSUFRAMA').AsFloat);
 
     lNFModel.objeto.VALOR_PAGO            := lNFModel.objeto.TOTAL_NF;
     lNFModel.objeto.DESC_NF               := lTableTotais.objeto.FieldByName('TOTAL_DESCONTO').AsString;
