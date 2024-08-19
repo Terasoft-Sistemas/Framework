@@ -763,7 +763,9 @@ begin
     self.VALOR_TOTAL           := lTotais.VALOR_TOTAL;
 
     if lTotais.VALOR_DESCONTO > 0 then
-      self.PERCENTUAL_DESCONTO := lTotais.VALOR_DESCONTO * 100 / (lTotais.VALOR_TOTAL + lTotais.VALOR_DESCONTO);
+      self.PERCENTUAL_DESCONTO := lTotais.VALOR_DESCONTO * 100 / (lTotais.VALOR_TOTAL + lTotais.VALOR_DESCONTO)
+    else
+      self.PERCENTUAL_DESCONTO := 0;
 
     self.Salvar;
   finally
