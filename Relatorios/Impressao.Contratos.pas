@@ -731,8 +731,8 @@ begin
       mtReceberItensFIM_VIGENCIA_VENCIMENTO.Value := lContasReceberItensModel.VENCIMENTO_REC;
       mtReceberItens.Post;
 
-      lblRRPrestamista.Caption  := 'RR: '+ FormataFloat(mtPedidoRR_PRESTAMISTA.Value) +'%  (R$ '+ FormataFloat((mtPedidoSEGURO_PRESTAMISTA.Value / 1.0738) * (mtPedidoRR_PRESTAMISTA.Value / 100)) +')';
-      lblIOFPrestamista.Caption := 'R$ '+FormataFloat(mtPedidoSEGURO_PRESTAMISTA.Value - (mtPedidoSEGURO_PRESTAMISTA.Value / 1.0738))+' ';
+      lblRRPrestamista.Caption  := 'RR: '+ FormataFloat(mtPedidoRR_PRESTAMISTA.Value) +'%  (R$ '+ FormataFloat((mtPedidoSEGURO_PRESTAMISTA.Value / 1.0038) * (mtPedidoRR_PRESTAMISTA.Value / 100)) +')';
+      lblIOFPrestamista.Caption := 'R$ '+FormataFloat(mtPedidoSEGURO_PRESTAMISTA.Value - (mtPedidoSEGURO_PRESTAMISTA.Value / 1.0038))+' ';
 
     end;
 
