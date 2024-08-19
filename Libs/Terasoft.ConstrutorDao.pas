@@ -99,7 +99,7 @@ begin
   while not pQry.eof do
   begin
     s := trim(pQry.FieldByName('NOME').AsString);
-    if not AnsiMatchStr(s, ['SYSTIME', 'FORM']) and
+    if not AnsiMatchStr(s, ['SYSTIME']) and
        (pQry.FieldByName('COMPUTED').AsString = 'N') and
        ((pQry.FieldByName('NOME').AsString <> 'ID') or (pGerarID = true)) then
     begin

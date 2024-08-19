@@ -485,6 +485,7 @@ begin
     lPedidoVendaModel.objeto.RNTRC                := lOrcamentoModel.objeto.RNTRC;
     lPedidoVendaModel.objeto.TELEVENDA_PED        := lOrcamentoModel.objeto.TRANPORTADORA_ID;
     lPedidoVendaModel.objeto.QTDE_VOLUME          := lOrcamentoModel.objeto.QTDE_VOLUME;
+    lPedidoVendaModel.objeto.FORM                 := 'PDV';
 
     lPedido := lPedidoVendaModel.objeto.Salvar;
 
