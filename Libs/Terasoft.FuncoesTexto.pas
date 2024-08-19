@@ -45,21 +45,45 @@ uses
   function formatarDataInvertida(const data: string): String;
   function codigoUF(pUF : String): Integer;
   function StringToBase64(const Input: string): string;
+  function DifDias2(DataVenc:TDateTime; DataAtual:TDateTime): String;
 
 implementation
 uses
   StrUtils,
   SysUtils,
   MaskUtils,
-  System.Variants, Soap.EncdDecd;
+  System.Variants,
+  Soap.EncdDecd;
+
 function FormataDinheiro(pValor: Real ; pCasasDecimais: String = '00'): String;
 begin
   Result := 'R$ '+ FormataFloat(pValor, pCasasDecimais);
 end;
+
 function FormataFloat(pValor: Real ; pCasasDecimais: String = '00'): String;
 begin
   Result := FormatFloat('#,##0.'+pCasasDecimais,pValor);
 end;
+
+function DifDias2(DataVenc:TDateTime; DataAtual:TDateTime): String;
+var
+  Data: TDateTime;
+  dia, mes, ano: Word;
+begin
+
+  if DataAtual < DataVenc then
+  begin
+    Result := '0';
+  end
+  else
+  begin
+    Data   := DataAtual - DataVenc;
+    DecodeDate( Data, ano, mes, dia);
+    Result := FormatFloat('####0',(Data));
+  end;
+
+end;
+
 function FormatarTelefone(Telefone : String):String;
   function SomenteNumero(snum : String) : String;
   VAR s1, s2: STRING;
@@ -180,6 +204,7 @@ begin
     else
       result := FloatToStr(lNovoValor);
 end;
+
 function removeEnter(texto: String): string;
 begin
   Result := StringReplace(StringReplace(StringReplace(texto, #13, ' ', [rfReplaceAll]), #10, ' ', [rfReplaceAll]), '\', '\\', [rfReplaceAll]);

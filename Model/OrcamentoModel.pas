@@ -283,6 +283,7 @@ uses
   OrcamentoDao,
   System.Classes,
   System.SysUtils,
+  Terasoft.FuncoesTexto,
   ClienteModel;
 
 { TOrcamentoModel }
@@ -388,7 +389,9 @@ var
   lEmpresaModel            : ITEmpresaModel;
   lProdutosModel           : ITProdutosModel;
   lPedido                  : String;
-  lItem, lIndex            : Integer;
+  lItem,
+  lIndex,
+  DiasVencimento           : Integer;
   lSaldoDisponivel         : Double;
   lMemtable, lTableCliente : IFDDataset;
 begin
@@ -448,7 +451,10 @@ begin
     lPedidoVendaModel.objeto.LOJA                 := lOrcamentoModel.objeto.LOJA;
     lPedidoVendaModel.objeto.DATA_PED             := DateToStr(vIConexao.DataServer);
     lPedidoVendaModel.objeto.HORA_PED             := TimeToStr(vIConexao.HoraServer);
-    lPedidoVendaModel.objeto.PRIMEIROVENC_PED     := lOrcamentoModel.objeto.PRIMEIROVCTO_ORC;
+
+    DiasVencimento := StrToInt(DifDias2(StrToDateTime(lOrcamentoModel.objeto.DATA_ORC), StrToDateTime(lOrcamentoModel.objeto.PRIMEIROVCTO_ORC) ));
+    lPedidoVendaModel.objeto.PRIMEIROVENC_PED     := DateToStr(vIConexao.DataServer + DiasVencimento);
+
     lPedidoVendaModel.objeto.ACRES_PED            := lOrcamentoModel.objeto.ACRES_ORC;
     lPedidoVendaModel.objeto.DESC_PED             := lOrcamentoModel.objeto.DESCONTO_ORC;
     lPedidoVendaModel.objeto.DESCONTO_PED         := lOrcamentoModel.objeto.DESC_ORC;
