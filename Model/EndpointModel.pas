@@ -491,7 +491,7 @@ begin
   if (fIgnoraPaginacao=false) then
   begin
     i := fPrimeiro;
-    while i > 0 do
+    while (Result.dataset.RecordCount>0) and (i > 0) do
     begin
       dec(i);
       Result.dataset.Delete;
