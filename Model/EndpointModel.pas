@@ -61,16 +61,11 @@ type
     fPrimeiro: Integer;
     fOldQuery: String;
     fOrdem: TipoWideStringFramework;
-    fPercentagens: boolean;
     fPermissao: TipoWideStringFramework;
 
   //property permissao getter/setter
     function getPermissao: TipoWideStringFramework;
     procedure setPermissao(const pValue: TipoWideStringFramework);
-
-  //property percentagens getter/setter
-    function getPercentagens: boolean;
-    procedure setPercentagens(const pValue: boolean);
 
     function getFiltroLojas: ITFiltroModel;
 
@@ -153,8 +148,6 @@ type
     property ordem: TipoWideStringFramework read getOrdem write setOrdem;
 
     property filtroLojas: ITFiltroModel read getFiltroLojas;
-
-    property percentagens: boolean read getPercentagens write setPercentagens;
 
     property permissao: TipoWideStringFramework read getPermissao write setPermissao;
 
@@ -483,11 +476,6 @@ begin
       end;
     end;
   end;
-  if(fPercentagens) then
-  begin
-//    sumario;
-//    configuraCamposSumarioGenerico(Result.Dataset, fDatasetSumario.Dataset);
-  end;
   if (fIgnoraPaginacao=false) then
   begin
     i := fPrimeiro;
@@ -814,16 +802,6 @@ end;
 function TEndpointModel.getOrdem: TipoWideStringFramework;
 begin
   Result := fOrdem;
-end;
-
-procedure TEndpointModel.setPercentagens(const pValue: boolean);
-begin
-  fPercentagens := pValue;
-end;
-
-function TEndpointModel.getPercentagens: boolean;
-begin
-  Result := fPercentagens;
 end;
 
 procedure TEndpointModel.setPermissao(const pValue: TipoWideStringFramework);
