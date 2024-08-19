@@ -271,14 +271,14 @@ begin
 
   lAdicional := '';
   lOrder := '';
-{  if(fIgnoraPaginacao=false) then
+  if(fIgnoraPaginacao=false) then
   begin
     if(fRegistros>0) then
       lAdicional := format('%sfirst %d ', [ lAdicional, fRegistros ]);
     if(fPrimeiro>0) then
       lAdicional := format('%sskip %d ', [ lAdicional, fPrimeiro - 1 ]);
   end;
-}
+
   if(lAdicional<>'') then
     lSql := StringReplace(lSql, 'select', format('select %s', [ lAdicional ]), [rfIgnoreCase]);
 
@@ -412,7 +412,8 @@ begin
     vEstadoConsulta.query := '';
 
     save := fIgnoraPaginacao;
-    fIgnoraPaginacao := true;
+    if(fRegistros<>1) then
+      fIgnoraPaginacao := true;
 
     try
       lDS := nil;
@@ -421,7 +422,8 @@ begin
       vEstadoConsulta.query := lSQL;
 
     finally
-      fIgnoraPaginacao:=save;
+      if(fRegistros<>1) then
+        fIgnoraPaginacao:=save;
     end;
 
     lPrecisaOrder := false;
@@ -436,6 +438,8 @@ begin
         atribuirRegistrosSoma(lDS.dataset,Result.dataset,filtroLojas.objeto.campo);
         lPrecisaOrder := true;
       end;
+      if(fRegistros=1) then
+        break;
     end;
   end else
     Result := vEstadoConsulta.datasetCompleta;
@@ -444,7 +448,8 @@ begin
     formatarDataset(Result.dataset);
 
   vEstadoConsulta.dataset := Result;
-  vEstadoConsulta.datasetCompleta := criaDatasetSimples(cloneDataset(Result.dataset));
+  if(fRegistros<>1) then
+    vEstadoConsulta.datasetCompleta := criaDatasetSimples(cloneDataset(Result.dataset));
   vEstadoConsulta.filiais := getFiltroLojas.objeto.opcoesSelecionadas.text;
 
   Result.dataset.First;
