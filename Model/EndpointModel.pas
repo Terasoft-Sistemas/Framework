@@ -199,6 +199,7 @@ uses
       function sumario: IDatasetSimples;
       function toTxt(const pVisiveis: boolean = true; pFormatado: boolean = true): IListaTextoEx;
       procedure formatarDataset(pDataset: TDataset);
+      function impressaoPorNome(const pNome: TipoWideStringFramework): IDadosImpressao;
 
     end;
 
@@ -833,6 +834,20 @@ end;
 function TEndpointModel.getRegistros: Integer;
 begin
   Result := fRegistros;
+end;
+
+function TEndpointModel.impressaoPorNome(const pNome: TipoWideStringFramework): IDadosImpressao;
+  var
+    p: IDadosImpressao;
+begin
+  for p in fListaImpressao do
+    if(CompareText(p.nome,uppercase(trim(pNome)))=0) then
+    begin
+      Result := p;
+      exit;
+    end;
+  if(Result=nil) then
+    Result := fListaImpressao.First;
 end;
 
 procedure TEndpointModel.loaded;
