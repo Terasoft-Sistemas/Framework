@@ -88,6 +88,7 @@ type
     FRecebimentoContasReceberLista: IList<TRecebimentoContasReceber>;
     FParcelaView: String;
     FNUMERO_PED: Variant;
+    FLOJA_ORIGEM: String;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetContasReceberItenssLista(const Value: IList<TContasReceberItensModel>);
@@ -146,6 +147,7 @@ type
     procedure SetRecebimentoContasReceberLista(const Value: IList<TRecebimentoContasReceber>);
     procedure SetParcelaView(const Value: String);
     procedure SetNUMERO_PED(const Value: Variant);
+    procedure SetLOJA_ORIGEM(const Value: String);
 
   public
     property ID: Variant read FID write SetID;
@@ -191,6 +193,7 @@ type
     property PEDIDO_REC: Variant read FPEDIDO_REC write SetPEDIDO_REC;
     property CLIENTE_NOME: Variant read FCLIENTE_NOME write SetCLIENTE_NOME;
     property NUMERO_PED: Variant read FNUMERO_PED write SetNUMERO_PED;
+    property LOJA_ORIGEM: String read FLOJA_ORIGEM write SetLOJA_ORIGEM;
 
   	constructor Create(pConexao: IConexao);
     destructor Destroy; override;
@@ -542,6 +545,7 @@ begin
   lContasReceberItensDao := TContasReceberItensDao.Create(vIConexao);
   try
     Result := lContasReceberItensDao.carregaClasse(pId, pLoja);
+    Result.LOJA_ORIGEM := pLoja;
   finally
     lContasReceberItensDao.Free;
   end;
@@ -1174,6 +1178,11 @@ end;
 procedure TContasReceberItensModel.SetLOJA(const Value: Variant);
 begin
   FLOJA := Value;
+end;
+
+procedure TContasReceberItensModel.SetLOJA_ORIGEM(const Value: String);
+begin
+  FLOJA_ORIGEM := Value;
 end;
 
 procedure TContasReceberItensModel.SetNF_FATURA(const Value: Variant);

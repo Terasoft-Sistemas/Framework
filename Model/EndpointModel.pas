@@ -9,19 +9,25 @@ uses
   Terasoft.Framework.MultiConfig,
   Spring.Collections,
   Terasoft.Framework.ObjectIface,
-  FiltroModel,
   Terasoft.Framework.Conversoes,
+  FiltroController,
+  FiltroModel,
+  LojasModel,
   DB,
   DBClient,
   Terasoft.Framework.Texto,
   Terasoft.Framework.DB,
-  FiltroController,
   Interfaces.Conexao;
 
 type
   TEndpointModel=class;
   ITEndpointModel=IObject<TEndpointModel>;
   TListaEndpointModel=IList<ITEndpointModel>;
+
+  TEstadoConsulta = record
+    filiais, query: String;
+    datasetCompleta, dataset, sumario: IDatasetSimples;
+  end;
 
   TEndpointModel=class
   private
@@ -31,6 +37,7 @@ type
     vIConexao   : IConexao;
     fFiltroController: IController_Filtro;
     fCfg: IMultiConfig;
+    vEstadoConsulta: TEstadoConsulta;
 
     fID: TipoWideStringFramework;
     fMETODO: TipoWideStringFramework;
@@ -48,22 +55,17 @@ type
       _TABELA_ = 'ENDPOINT';
 
   protected
-    fDataset,fDatasetSumario: IDatasetSimples;
+    //fContextoAtual: String;
+    //fDatasetCompleta, fDataset, fDatasetSumario: IDatasetSimples;
     fRegistros: Integer;
     fPrimeiro: Integer;
-    fContagem: Integer;
     fOldQuery: String;
     fOrdem: TipoWideStringFramework;
-    fPercentagens: boolean;
     fPermissao: TipoWideStringFramework;
 
   //property permissao getter/setter
     function getPermissao: TipoWideStringFramework;
     procedure setPermissao(const pValue: TipoWideStringFramework);
-
-  //property percentagens getter/setter
-    function getPercentagens: boolean;
-    procedure setPercentagens(const pValue: boolean);
 
     function getFiltroLojas: ITFiltroModel;
 
@@ -117,6 +119,10 @@ type
 
     function getBuscaAvancada: ITFiltroModel;
 
+    function queryLoja(pLojaModel: ITLojasModel; const pQuery: TipoWideStringFramework; pFields: TipoWideStringFramework; pParams: array of Variant): IDataset;
+
+    function precisaExecutar: boolean;
+
   public
 
     constructor _Create(pIConexao : IConexao);
@@ -143,8 +149,6 @@ type
 
     property filtroLojas: ITFiltroModel read getFiltroLojas;
 
-    property percentagens: boolean read getPercentagens write setPercentagens;
-
     property permissao: TipoWideStringFramework read getPermissao write setPermissao;
 
   public
@@ -166,8 +170,7 @@ implementation
       ClipBrd,
     {$endif}
     Terasoft.Framework.LOG,
-    FuncoesConfig,
-    LojasModel;
+    FuncoesConfig;
 
 function getNewEndpointModel(pIConexao : IConexao): ITEndpointModel;
 begin
@@ -179,10 +182,7 @@ end;
 constructor TEndpointModel._Create(pIConexao: IConexao);
 begin
   inherited Create;
-//  fRegistros := 1000;
-//  fPrimeiro := 0;
   vIConexao := pIConexao;
-//  fPercentagens := true;
 end;
 
 destructor TEndpointModel.Destroy;
@@ -246,25 +246,10 @@ begin
 end;
 
 function TEndpointModel.getContagem: Integer;
-  var
-    lQuery: String;
-    save: boolean;
 begin
-  save := fIgnoraPaginacao;
-  fIgnoraPaginacao := true;
-  try
-    lQuery := getQuery;
-    if (lQuery=fOldQuery) then
-    begin
-      Result := fContagem;
-      exit;
-    end;
-    fContagem := vIConexao.gdb.criaDataset.query(format('select count(*) c from (%s)', [ lQuery ]),'',[]).dataset.Fields[0].AsInteger;
-    Result := fContagem;
-    fOldQuery := lQuery;
-  finally
-    fIgnoraPaginacao := save;
-  end;
+  if(precisaExecutar) then
+    executaQuery;
+  Result := vEstadoConsulta.datasetCompleta.dataset.RecordCount;
 end;
 
 function TEndpointModel.getQuery: TipoWideStringFramework;
@@ -286,14 +271,14 @@ begin
 
   lAdicional := '';
   lOrder := '';
-  if(fIgnoraPaginacao=false) then
+{  if(fIgnoraPaginacao=false) then
   begin
     if(fRegistros>0) then
       lAdicional := format('%sfirst %d ', [ lAdicional, fRegistros ]);
     if(fPrimeiro>0) then
       lAdicional := format('%sskip %d ', [ lAdicional, fPrimeiro - 1 ]);
   end;
-
+}
   if(lAdicional<>'') then
     lSql := StringReplace(lSql, 'select', format('select %s', [ lAdicional ]), [rfIgnoreCase]);
 
@@ -390,54 +375,80 @@ begin
 
 end;
 
+function TEndpointModel.queryLoja(pLojaModel: ITLojasModel;
+    const pQuery: TipoWideStringFramework; pFields: TipoWideStringFramework;
+    pParams: array of Variant): IDataset;
+begin
+  if(pLojaModel=nil) or (pQuery='') then
+    exit;
+  vIConexao.ConfigConexaoExterna(pLojaModel.objeto.LOJA);
+  Result := vIConexao.gdbExterno.criaDataset.query(pQuery,pFields,pParams);
+end;
+
+function TEndpointModel.precisaExecutar: boolean;
+begin
+  Result := (vEstadoConsulta.query<>getQuery) or (vEstadoConsulta.filiais<>getFiltroLojas.objeto.opcoesSelecionadas.text)
+          or (vEstadoConsulta.datasetCompleta=nil);
+end;
+
 function TEndpointModel.executaQuery;
   var
     lSql: String;
     lDS: IDataset;
     lLojaModel: ITLojasModel;
-    precisaOrder: boolean;
+    lPrecisaOrder: boolean;
     sField,sdir: String;
     f: TField;
     i: Integer;
     index: TIndexDef;
+    save: boolean;
 begin
   Result := nil;
-  fDataset := nil;
-  fDatasetSumario := nil;
-  lDS := nil;
-  lSQL := getQuery;
-  {$if defined(__DEBUG_ANTONIO__)}
-//    Clipboard.AsText := lSql;
-  {$endif}
+  if(precisaExecutar) then begin
+    vEstadoConsulta.dataset := nil;
+    vEstadoConsulta.datasetCompleta := nil;
+    vEstadoConsulta.sumario := nil;
+    vEstadoConsulta.filiais := '';
+    vEstadoConsulta.query := '';
 
+    save := fIgnoraPaginacao;
+    fIgnoraPaginacao := true;
 
-  logaByTagSeNivel('', format('TEndpointModel.executaQuery: [%s]',[lSql]),LOG_LEVEL_DEBUG);
+    try
+      lDS := nil;
+      lSQL := getQuery;
+      logaByTagSeNivel('', format('TEndpointModel.executaQuery: [%s]',[lSql]),LOG_LEVEL_DEBUG);
+      vEstadoConsulta.query := lSQL;
 
-  precisaOrder := false;
-
-  for lLojaModel in getFiltroLojas.objeto.listaLojas do
-  begin
-    vIConexao.ConfigConexaoExterna(lLojaModel.objeto.LOJA);
-    lDS := vIConexao.gdbExterno.criaDataset.query(lSQL,'',[]);
-    if(Result = nil) then
-      Result := criaDatasetSimples(cloneDataset(lDS.dataset))
-    else
-    begin
-      atribuirRegistrosSoma(lDS.dataset,Result.dataset,filtroLojas.objeto.campo);
-      precisaOrder := true;
+    finally
+      fIgnoraPaginacao:=save;
     end;
-  end;
 
+    lPrecisaOrder := false;
 
-//  lDS.query(lSql,'',[]);
-//  Supports(lDS,IDatasetSimples,Result);
-
-  fDataset := Result;
+    for lLojaModel in getFiltroLojas.objeto.listaLojas do
+    begin
+      lDS := queryLoja(lLojaModel, lSQL,'',[]);
+      if(Result = nil) then
+        Result := criaDatasetSimples(cloneDataset(lDS.dataset))
+      else
+      begin
+        atribuirRegistrosSoma(lDS.dataset,Result.dataset,filtroLojas.objeto.campo);
+        lPrecisaOrder := true;
+      end;
+    end;
+  end else
+    Result := vEstadoConsulta.datasetCompleta;
 
   if assigned(Result) and pFormatar then
     formatarDataset(Result.dataset);
+
+  vEstadoConsulta.dataset := Result;
+  vEstadoConsulta.datasetCompleta := criaDatasetSimples(cloneDataset(Result.dataset));
+  vEstadoConsulta.filiais := getFiltroLojas.objeto.opcoesSelecionadas.text;
+
   Result.dataset.First;
-  if(precisaOrder) then
+  if(lPrecisaOrder) then
   begin
     sField := textoEntreTags(fOrdem,'',' ');
     if(sField='') then
@@ -465,12 +476,19 @@ begin
       end;
     end;
   end;
-  if(fPercentagens) then
+  if (fIgnoraPaginacao=false) then
   begin
-//    sumario;
-//    configuraCamposSumarioGenerico(Result.Dataset, fDatasetSumario.Dataset);
+    i := fPrimeiro;
+    while (Result.dataset.RecordCount>0) and (i > 0) do
+    begin
+      dec(i);
+      Result.dataset.Delete;
+    end;
+    Result.dataset.Last;
+    if(fRegistros>0) then
+      while (Result.dataset.RecordCount>fRegistros) do
+        Result.dataset.Delete;
   end;
-
 end;
 
 procedure TEndpointModel.formatarDataset(pDataset: TDataset);
@@ -635,9 +653,16 @@ function TEndpointModel.sumario: IDatasetSimples;
     lLojaModel: ITLojasModel;
     save: boolean;
 begin
-  Result := fDatasetSumario;
+  if(precisaExecutar) then
+  begin
+    vEstadoConsulta.sumario := nil;
+    vEstadoConsulta.datasetCompleta:=nil;
+    vEstadoConsulta.dataset:=nil;
+    executaQuery;
+  end;
+
+  Result := vEstadoConsulta.sumario;
   if(Result<>nil) then exit;
-//  lDS := vIConexao.gdb.criaDataset;
   save := fIgnoraPaginacao;
   fIgnoraPaginacao := true;
   try
@@ -645,13 +670,12 @@ begin
   finally
     fIgnoraPaginacao := save;
   end;
-  if fDataset=nil then
-    executaQuery;
+
   lCampos := '';
 
-  for i := 0 to fDataset.dataset.FieldCount - 1 do
+  for i := 0 to vEstadoConsulta.dataset.dataset.FieldCount - 1 do
   begin
-    f := fDataset.dataset.Fields[i];
+    f := vEstadoConsulta.dataset.dataset.Fields[i];
     if (not (f is TNumericField)) or (fCfg.ReadBool('sumario',f.FieldName,true)=false) then continue;
 
     if(lCampos<>'') then
@@ -663,26 +687,18 @@ begin
     exit;
 
   lSql := format( 'select %s from (%s) ', [ lCampos, lQueryOriginal ]);
-  {$if defined(__DEBUG_ANTONIO__)}
-    //Clipboard.AsText := lSQL;
-  {$endif}
   logaByTagSeNivel('', format('TEndpointModel.sumario: [%s]',[lSql]),LOG_LEVEL_DEBUG);
 
 
   for lLojaModel in getFiltroLojas.objeto.listaLojas do
   begin
-    vIConexao.ConfigConexaoExterna(lLojaModel.objeto.LOJA);
-    lDS := vIConexao.gdbexterno.criaDataset.query(lSQL,'',[]);
+    lDS := queryLoja(lLojaModel,lSQL,'',[]);
     if(Result = nil) then
       Result := criaDatasetSimples(cloneDataset(lDS.dataset))
     else
       atribuirRegistrosSoma(lDS.dataset,Result.dataset,'*');
   end;
 
-
-
-//  lDS.query(lSql,'',[]);
-//  Supports(lDS,IDatasetSimples,Result);
   formatarDataset(Result.dataset);
   getCfg;
 
@@ -691,22 +707,14 @@ begin
     f := lDS.dataset.Fields[i];
     f.Visible := fCfg.ReadBool('sumario',f.FieldName,true);
   end;
-  fDatasetSumario := Result;
+  vEstadoConsulta.sumario := Result;
 end;
 
 function TEndpointModel.toTxt;
-  var
-    save: boolean;
 begin
-  save := fIgnoraPaginacao;
-  fIgnoraPaginacao := true;
-  try
+  if(precisaExecutar) then
     executaQuery;
-    Result := datasetToTXT(fDataset.dataset,pVisiveis,pFormatado);
-  finally
-    fIgnoraPaginacao := save;
-  end;
-
+  Result := datasetToTXT(vEstadoConsulta.datasetCompleta.dataset,pVisiveis,pFormatado);
 end;
 
 function TEndpointModel.getRegistros: Integer;
@@ -786,16 +794,6 @@ end;
 function TEndpointModel.getOrdem: TipoWideStringFramework;
 begin
   Result := fOrdem;
-end;
-
-procedure TEndpointModel.setPercentagens(const pValue: boolean);
-begin
-  fPercentagens := pValue;
-end;
-
-function TEndpointModel.getPercentagens: boolean;
-begin
-  Result := fPercentagens;
 end;
 
 procedure TEndpointModel.setPermissao(const pValue: TipoWideStringFramework);

@@ -84,7 +84,8 @@ var
   lQry: TFDQuery;
   lModel: TContasReceberModel;
 begin
-  if not pLoja.IsEmpty then
+
+  if (pLoja <> '') and (vIConexao.getEmpresa.LOJA <> pLoja) then
   begin
     if vIConexao.getLojaConectada <> pLoja then
       vIConexao.ConfigConexaoExterna(pLoja);
