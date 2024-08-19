@@ -1117,7 +1117,7 @@ begin
       lCFOPModel := lCFOPModel.objeto.carregaClasse(self.FCFOP_ID);
 
       if lCFOPModel.objeto.OBS <> '' then
-        lNFModel.objeto.OBS_NF := lCFOPModel.objeto.OBS;
+        lNFModel.objeto.OBS_NF := lNFModel.objeto.OBS_NF +#13+ lCFOPModel.objeto.OBS;
     end;
 
     lNFModel.objeto.OBS_NF                := lNFModel.objeto.OBS_NF + self.FINFORMACOES_PED;
