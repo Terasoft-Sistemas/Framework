@@ -711,18 +711,10 @@ begin
 end;
 
 function TEndpointModel.toTxt;
-  var
-    save: boolean;
 begin
-  save := fIgnoraPaginacao;
-  fIgnoraPaginacao := true;
-  try
+  if(precisaExecutar) then
     executaQuery;
-    Result := datasetToTXT(vEstadoConsulta.dataset.dataset,pVisiveis,pFormatado);
-  finally
-    fIgnoraPaginacao := save;
-  end;
-
+  Result := datasetToTXT(vEstadoConsulta.datasetCompleta.dataset,pVisiveis,pFormatado);
 end;
 
 function TEndpointModel.getRegistros: Integer;
