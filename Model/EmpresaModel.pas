@@ -46,6 +46,7 @@ type
     FAVISARNEGATIVO_EMP: Variant;
     FLOGO: Variant;
     FMULTA_BOL: Variant;
+    FMENSAGEM_NF: Variant;
     procedure SetBAIRRO(const Value: Variant);
     procedure SetCEP(const Value: Variant);
     procedure SetCIDADE(const Value: Variant);
@@ -76,6 +77,7 @@ type
     procedure SetAVISARNEGATIVO_EMP(const Value: Variant);
     procedure SetLOGO(const Value: Variant);
     procedure SetMULTA_BOL(const Value: Variant);
+    procedure SetMENSAGEM_NF(const Value: Variant);
   public
     constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -110,6 +112,8 @@ type
     property AVISARNEGATIVO_EMP     :Variant read FAVISARNEGATIVO_EMP write SetAVISARNEGATIVO_EMP;
     property LOGO                   :Variant read FLOGO write SetLOGO;
     property MULTA_BOL              :Variant read FMULTA_BOL write SetMULTA_BOL;
+    property MENSAGEM_NF            :Variant read FMENSAGEM_NF write SetMENSAGEM_NF;
+
 
     procedure Carregar;
   end;
@@ -237,6 +241,11 @@ procedure TEmpresaModel.SetLOJA(const Value: Variant);
 begin
   FLOJA := Value;
 end;
+procedure TEmpresaModel.SetMENSAGEM_NF(const Value: Variant);
+begin
+  FMENSAGEM_NF := Value;
+end;
+
 procedure TEmpresaModel.SetMULTA_BOL(const Value: Variant);
 begin
   FMULTA_BOL := Value;

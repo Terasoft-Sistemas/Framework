@@ -768,9 +768,10 @@ begin
   try
     try
     lQry := vIConexao.CriarQuery;
+
     lSQL :=
     ' select                     '+#13+
-    '    n.obs_nf infCpl, '+#13+
+    '    n.obs_nf infCpl,        '+#13+
     '    n.fisco_nf infAdFisco   '+#13+
     '                            '+#13+
     ' from                       '+#13+
@@ -778,12 +779,14 @@ begin
     '                            '+#13+
     ' where                      '+#13+
     '     n.numero_nf = '+QuotedStr(pidNF);
+
     lQry.Open(lSQL);
     with NotaF.NFe.InfAdic do
     begin
       infCpl     :=  lQry.FieldByName('infCpl').AsString;
       infAdFisco :=  lQry.FieldByName('infAdFisco').AsString;
     end;
+
     except
     on E:Exception do
         CriaException('Erro: '+ E.Message);

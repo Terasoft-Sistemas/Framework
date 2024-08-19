@@ -99,6 +99,9 @@ type
     function carregaClasse(pId : String): ITIbptModel;
     function obterIBPT(pUf, pOrigem, pNCM : String): TIBPTRetorno;
 
+    function chaveIBPT: String;
+    function fonteIBPT: String;
+
     property Acao :TAcao read FAcao write SetAcao;
     property WhereView: String read FWhereView write SetWhereView;
     property OrderView: String read FOrderView write SetOrderView;
@@ -133,6 +136,19 @@ begin
   Result       := self.Salvar;
 end;
 
+function TIBPTModel.fonteIBPT: String;
+var
+  lIbptDao: ITIBPTDao;
+begin
+  lIbptDao := TIbptDao.getNewIface(vIConexao);
+
+  try
+    Result := lIbptDao.objeto.fonteIBPT;
+  finally
+    lIbptDao := nil;
+  end;
+end;
+
 class function TIBPTModel.getNewIface(pIConexao: IConexao): ITIBPTModel;
 begin
   Result := TImplObjetoOwner<TIBPTModel>.CreateOwner(self._Create(pIConexao));
@@ -153,6 +169,19 @@ begin
 
   try
     Result := lIbptDao.objeto.carregaClasse(pId);
+  finally
+    lIbptDao := nil;
+  end;
+end;
+
+function TIBPTModel.chaveIBPT: String;
+var
+  lIbptDao: ITIBPTDao;
+begin
+  lIbptDao := TIbptDao.getNewIface(vIConexao);
+
+  try
+    Result := lIbptDao.objeto.chaveIBPT;
   finally
     lIbptDao := nil;
   end;

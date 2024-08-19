@@ -564,7 +564,7 @@ uses
   VendaCartaoModel,
   ReservaModel,
   CaixaControleModel,
-  CreditoClienteModel, ACBrDFeUtil, System.Math;
+  CreditoClienteModel, ACBrDFeUtil, System.Math, IbptModel;
 
 { TPedidoVendaModel }
 
@@ -996,9 +996,10 @@ var
   lNFItensModel       : ITNFItensModel;
   lCFOPModel          : ITCFOPModel;
   lEmpresaModel       : ITEmpresaModel;
+  lPortadorModel      : ITPortadorModel;
   lNumeroNFe,
-  lNomeVendedor,
-  lIDItem             : String;
+  lIDItem,
+  lMsg                : String;
   lTribFederal,
   lTribEstadual,
   lTribMunicipal      : Double;
@@ -1008,6 +1009,7 @@ var
   lItem               : Integer;
   lTotalDesconto,
   lDiferencaDesconto  : extended;
+  lIBPTModel          : ITIBPTModel;
 begin
   if self.FNUMERO_PED = '' then
     CriaException('Pedido não informado');
@@ -1023,6 +1025,9 @@ begin
   lEmpresaModel     := TEmpresaModel.getNewIface(vIConexao);
   lFuncionarioModel := TFuncionarioModel.getNewIface(vIConexao);
   lConfiguracoes    := TerasoftConfiguracoes.getNewIface(vIConexao);
+  lPortadorModel    := TPortadorModel.getNewIface(vIConexao);
+  lIBPTModel        := TIBPTModel.getNewIface(vIConexao);
+
   lTotalDesconto    := 0;
 
   try
@@ -1033,16 +1038,7 @@ begin
     if lTipoVenda.objeto.TotalRecords = 0 then //Não permitir a emissão de NF-e para o tipo de venda CD.
       CriaException('Não é possível emitir NF-e para um pedido sem itens da loja.');
 
-    if pModelo = '65' then
-    begin
-      lFuncionarioModel := lFuncionarioModel.objeto.carregaClasse(self.CODIGO_VEN);
-      lNomeVendedor := lFuncionarioModel.objeto.NOME_FUN;
-
-      lNFModel.objeto.OBS_NF := 'Vendedor: '+lNomeVendedor+' '+sLineBreak;
-
-      if lConfiguracoes.objeto.valorTag('MOSTRAR_NUMERO_PEDIDO_NF', 'N', tvBool) = 'S' then
-        lNFModel.objeto.OBS_NF := lNFModel.objeto.OBS_NF + 'Pedido: '+self.NUMERO_PED+' '+sLineBreak;
-    end;
+    lFuncionarioModel := lFuncionarioModel.objeto.carregaClasse(self.CODIGO_VEN);
 
     self.RecalcularImpostos(self.NUMERO_PED);
     lEmpresaModel.objeto.Carregar;
@@ -1111,16 +1107,31 @@ begin
     lNFModel.objeto.FRETE                 := FloatToStr(0);
     lNFModel.objeto.OUTROS_NF             := FloatToStr(0);
     lNFModel.objeto.TRANSPORTADORA        := self.FTELEVENDA_PED;
+    lNFModel.objeto.OBS_NF                := self.FINFORMACOES_PED + lEmpresaModel.objeto.MENSAGEM_NF + sLineBreak;
 
     if self.FCFOP_ID <> '' then
     begin
       lCFOPModel := lCFOPModel.objeto.carregaClasse(self.FCFOP_ID);
 
       if lCFOPModel.objeto.OBS <> '' then
-        lNFModel.objeto.OBS_NF := lCFOPModel.objeto.OBS;
+        lNFModel.objeto.OBS_NF := lNFModel.objeto.OBS_NF + lCFOPModel.objeto.OBS + sLineBreak;
     end;
 
-    lNFModel.objeto.OBS_NF                := lNFModel.objeto.OBS_NF + self.FINFORMACOES_PED;
+    if pModelo = '65' then
+    begin
+      lNFModel.objeto.OBS_NF := 'Vendedor: '+lFuncionarioModel.objeto.NOME_FUN+' '+sLineBreak
+    end
+    else if lConfiguracoes.objeto.valorTag('MOSTRAR_VENDEDOR_CONTATO_PORTADOR_VENCIMENTO_NFE', 'N', tvBool) = 'S' then
+    begin
+      lPortadorModel := lPortadorModel.objeto.carregaClasse(self.FCODIGO_PORT);
+
+      lNFModel.objeto.OBS_NF := lNFModel.objeto.OBS_NF +
+        'Vendedor: ' + lFuncionarioModel.objeto.NOME_FUN + ' Portador: ' + lPortadorModel.objeto.NOME_PORT + ' Contato: '+self.CONTATO_PED + sLineBreak;
+    end;
+
+    if lConfiguracoes.objeto.valorTag('MOSTRAR_NUMERO_PEDIDO_NF', 'N', tvBool) = 'S' then
+      lNFModel.objeto.OBS_NF := lNFModel.objeto.OBS_NF + 'Pedido: '+self.NUMERO_PED+' '+sLineBreak;
+
     lNFModel.objeto.ESPECIE_VOLUME        := self.FESPECIE_VOLUME;
     lNFModel.objeto.TRA_UF                := self.FUF_TRANSPORTADORA;
     lNFModel.objeto.TRA_PLACA             := self.FPLACA;
@@ -1297,14 +1308,41 @@ begin
     lNFModel.objeto.VTOTTRIB_FEDERAL      := FloatToStr(lTribFederal);
     lNFModel.objeto.VTOTTRIB_ESTADUAL     := FloatToStr(lTribEstadual);
     lNFModel.objeto.VTOTTRIB_MUNICIPAL    := FloatToStr(lTribMunicipal);
+
+    if (lNFModel.objeto.VTOTTRIB > 0) and (pModelo = '55') then
+    begin
+      lTribFederal   := lNFModel.objeto.VTOTTRIB_FEDERAL * 100 / lNFModel.objeto.VALOR_NF;
+      lTribEstadual  := lNFModel.objeto.VTOTTRIB_ESTADUAL * 100 / lNFModel.objeto.VALOR_NF;
+      lTribMunicipal := lNFModel.objeto.VTOTTRIB_MUNICIPAL * 100 / lNFModel.objeto.VALOR_NF;
+
+      lMsg := lMsg + 'Trib. aprox.: ';
+
+      if (lNFModel.objeto.VTOTTRIB_FEDERAL > 0.0) then
+        lMsg := lMsg + FormataDinheiro(lNFModel.objeto.VTOTTRIB_FEDERAL) + ' (' + FormatFloat('0.00', lTribFederal) + '%) Federal';
+
+      if (lNFModel.objeto.VTOTTRIB_ESTADUAL > 0.0) then
+        lMsg := lMsg + ' / ' + formataDinheiro(lNFModel.objeto.VTOTTRIB_ESTADUAL) + ' (' + FormatFloat('0.00', lTribEstadual) + '%) Estadual';
+
+      if (lNFModel.objeto.VTOTTRIB_MUNICIPAL > 0.0) then
+        lMsg := lMsg + ' / ' + formataDinheiro(lNFModel.objeto.VTOTTRIB_MUNICIPAL) + ' (' + FormatFloat('0.00', lTribMunicipal) + '%) Municipal';
+
+      if (lConfiguracoes.objeto.valorTag('PERCENTUAL_IBPT_FEDERAL', '0', tvNumero) = 0) and (lConfiguracoes.objeto.valorTag('PERCENTUAL_IBPT_ESTADUAL', '0', tvNumero) = 0) then
+        lMsg := lMsg + ' - Fonte: ' + lIBPTModel.objeto.fonteIBPT + ' ' + lIBPTModel.objeto.chaveIBPT + ' ';
+
+      lNFModel.objeto.OBS_NF := lMSg + sLineBreak + lNFModel.objeto.OBS_NF;
+    end;
+
+
     lNFModel.objeto.Salvar;
 
     Result := lNumeroNFe;
   finally
     lPedidoItensModel:=nil;
+    lPortadorModel:=nil;
     lNFItensModel:=nil;
     lNFModel:=nil;
     lEmpresaModel := nil;
+    lIBPTModel := nil;
     lTipoVenda := nil;
     lCFOPModel := nil;
   end;

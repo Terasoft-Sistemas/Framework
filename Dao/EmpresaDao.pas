@@ -109,6 +109,7 @@ begin
         pEmpresaModel.objeto.STRING_CONEXAO_RESERVA   := lQry.fieldByName('STRING_CONEXAO_RESERVA').AsString;
         pEmpresaModel.objeto.AVISARNEGATIVO_EMP       := lQry.fieldByName('AVISARNEGATIVO_EMP').AsString;
         pEmpresaModel.objeto.MULTA_BOL                := lQry.fieldByName('MULTA_BOL').AsString;
+        pEmpresaModel.objeto.MENSAGEM_NF              := lQry.fieldByName('MENSAGEM_NF').AsString;
       finally
         lQry.Close;
       end;

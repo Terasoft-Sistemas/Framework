@@ -50,7 +50,8 @@ type
     function obterIBPT(pUf, pNCM : String): IFDDataset;
 
     procedure setParams(var pQry: TFDQuery; pIbptModel: ITIbptModel);
-
+    function fonteIBPT: String;
+    function chaveIBPT: String;
 end;
 
 implementation
@@ -93,6 +94,23 @@ begin
     lModel.objeto.SYSTIME              := lQry.FieldByName('SYSTIME').AsString;
 
     Result := lModel;
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TIBPTDao.chaveIBPT: String;
+var
+  lQry  : TFDQuery;
+  lSQL  : String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+    lSQL := 'select first 1 chave from ibpt2 i where current_date between i.vigencia_inicio and i.vigencia_fim  order by i.vigencia_inicio desc';
+    lQry.Open(lSQL);
+
+    Result := lQry.FieldByName('CHAVE').AsString;
   finally
     lQry.Free;
   end;
@@ -166,6 +184,23 @@ begin
    lQry.ExecSQL;
    Result := pIbptModel.objeto.ID;
 
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TIBPTDao.fonteIBPT: String;
+var
+  lQry  : TFDQuery;
+  lSQL  : String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+    lSQL := 'select first 1 fonte from ibpt2 i where current_date between i.vigencia_inicio and i.vigencia_fim  order by i.vigencia_inicio desc';
+    lQry.Open(lSQL);
+
+    Result := lQry.FieldByName('FONTE').AsString;
   finally
     lQry.Free;
   end;
