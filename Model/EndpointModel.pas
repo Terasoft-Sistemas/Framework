@@ -637,7 +637,7 @@ begin
       TNumericField(f).DisplayFormat := ',0.00';
   end;
 
-  l := getCfg.ReadSectionValuesLista('formatos');
+  l := getCfg.ReadSectionValuesLista('formato');
   for i := 0 to l.strings.Count-1 do
   begin
     sNome := l.strings.Names[i];
@@ -1048,10 +1048,24 @@ begin
     f.Visible := vModel.fCfg.ReadBool('impressao.'+fNome,f.FieldName,f.Visible);
     f.Visible := vModel.fCfg.ReadBool('impressao.sumario.'+fNome,f.FieldName,f.Visible);
     f.DisplayWidth := vModel.fCfg.ReadInteger('impressao.sumario.largura.'+fNome,f.FieldName,100);
-    j := vModel.fCfg.ReadInteger('impressao.sumario.alihamento.'+fNome,f.FieldName,0);
-    f.Alignment := TAlignment(j);
+    if f is TNumericField then
+      f.Alignment := taRightJustify
+    else
+      f.Alignment := taLeftJustify;
+    j := vModel.fCfg.ReadInteger('impressao.sumario.alihamento.'+fNome,f.FieldName,-1);
+    if(j<>-1) then
+      f.Alignment := TAlignment(j);
     if not (f.Alignment in [ taLeftJustify, taRightJustify, taCenter ]) then
       f.Alignment := taLeftJustify;
+
+    f.DisplayLabel := vModel.fCfg.ReadString('impressao.label.'+fNome,f.FieldName,f.DisplayLabel);
+    f.DisplayLabel := vModel.fCfg.ReadString('impressao.sumario.label.'+fNome,f.FieldName,f.DisplayLabel);
+    if(f is TNumericField) then
+    begin
+      TNumericField(f).DisplayFormat := vModel.fCfg.ReadString('impressao.formato.'+fNome,f.FieldName,TNumericField(f).DisplayFormat);
+      TNumericField(f).DisplayFormat := vModel.fCfg.ReadString('impressao.sumario.formato.'+fNome,f.FieldName,TNumericField(f).DisplayFormat);
+    end;
+
   end;
 end;
 
@@ -1077,9 +1091,20 @@ begin
       f.Visible := vModel.fCfg.ReadBool('impressao.'+fNome,f.FieldName,f.Visible);
       f.DisplayWidth := vModel.fCfg.ReadInteger('impressao.largura.'+fNome,f.FieldName,100);
       j := vModel.fCfg.ReadInteger('impressao.alihamento.'+fNome,f.FieldName,0);
-      f.Alignment := TAlignment(j);
+      if f is TNumericField then
+        f.Alignment := taRightJustify
+      else
+        f.Alignment := taLeftJustify;
+      if(j<>-1) then
+        f.Alignment := TAlignment(j);
+
       if not (f.Alignment in [ taLeftJustify, taRightJustify, taCenter ]) then
         f.Alignment := taLeftJustify;
+
+      f.DisplayLabel := vModel.fCfg.ReadString('impressao.label.'+fNome,f.FieldName,f.DisplayLabel);
+      if(f is TNumericField) then
+        TNumericField(f).DisplayFormat := vModel.fCfg.ReadString('impressao.formato.'+fNome,f.FieldName,TNumericField(f).DisplayFormat);
+
     end;
   finally
     vModel.fIgnoraPaginacao := save;
