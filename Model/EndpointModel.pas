@@ -4,6 +4,7 @@ unit EndpointModel;
 
 interface
 uses
+  Classes,
   Terasoft.Framework.Types,
   System.SysUtils,
   Terasoft.Framework.MultiConfig,
@@ -48,6 +49,8 @@ uses
       procedure setNome(const pValue: TipoWideStringFramework);
 
       function dataset: IDatasetSimples;
+
+      function sumario: IDatasetSimples;
 
     //property descricao getter/setter
       function getDescricao: TipoWideStringFramework;
@@ -223,6 +226,8 @@ implementation
       fDescricao: TipoWideStringFramework;
 
       function dataset: IDatasetSimples;
+      function sumario: IDatasetSimples;
+
       procedure liberaEndpoint;
 
     //property descricao getter/setter
@@ -1024,11 +1029,37 @@ begin
   fDescricao := pValue;
 end;
 
+function TDadosImpressaoImpl.sumario: IDatasetSimples;
+  var
+    f: TField;
+    i,j: Integer;
+begin
+  if(vModel=nil) then
+    raise Exception.Create('Modelo de relatório não existe mais.');
+
+  Result := vModel.sumario;
+  if(Result=nil) then exit;
+
+  //Força leitura da cfg;
+  vModel.getCfg;
+  for i := 0 to Result.dataset.Fields.Count - 1 do
+  begin
+    f := Result.dataset.Fields[i];
+    f.Visible := vModel.fCfg.ReadBool('impressao.'+fNome,f.FieldName,f.Visible);
+    f.Visible := vModel.fCfg.ReadBool('impressao.sumario.'+fNome,f.FieldName,f.Visible);
+    f.DisplayWidth := vModel.fCfg.ReadInteger('impressao.sumario.largura.'+fNome,f.FieldName,100);
+    j := vModel.fCfg.ReadInteger('impressao.sumario.alihamento.'+fNome,f.FieldName,0);
+    f.Alignment := TAlignment(j);
+    if not (f.Alignment in [ taLeftJustify, taRightJustify, taCenter ]) then
+      f.Alignment := taLeftJustify;
+  end;
+end;
+
 function TDadosImpressaoImpl.dataset: IDatasetSimples;
   var
     save: boolean;
     f: TField;
-    i: Integer;
+    i,j: Integer;
 begin
   if(vModel=nil) then
     raise Exception.Create('Modelo de relatório não existe mais.');
@@ -1044,6 +1075,11 @@ begin
     begin
       f := Result.dataset.Fields[i];
       f.Visible := vModel.fCfg.ReadBool('impressao.'+fNome,f.FieldName,f.Visible);
+      f.DisplayWidth := vModel.fCfg.ReadInteger('impressao.largura.'+fNome,f.FieldName,100);
+      j := vModel.fCfg.ReadInteger('impressao.alihamento.'+fNome,f.FieldName,0);
+      f.Alignment := TAlignment(j);
+      if not (f.Alignment in [ taLeftJustify, taRightJustify, taCenter ]) then
+        f.Alignment := taLeftJustify;
     end;
   finally
     vModel.fIgnoraPaginacao := save;
