@@ -209,13 +209,17 @@ end;
 
 function TContasReceberItensDao.alterar(AContasReceberItensModel: TContasReceberItensModel): String;
 var
-  lQry: TFDQuery;
-  lSQL:String;
+  lQry        : TFDQuery;
+  lSQL        : String;
+  lLojaOrigem : String;
 begin
-  if AContasReceberItensModel.LOJA <> vIConexao.getEmpresa.LOJA then
+
+  lLojaOrigem := IIF(AContasReceberItensModel.LOJA_ORIGEM <> '', AContasReceberItensModel.LOJA_ORIGEM, AContasReceberItensModel.LOJA);
+
+  if lLojaOrigem <> vIConexao.getEmpresa.LOJA then
   begin
-    if vIConexao.getLojaConectada <> AContasReceberItensModel.LOJA then
-      vIConexao.ConfigConexaoExterna(AContasReceberItensModel.LOJA);
+    if vIConexao.getLojaConectada <> lLojaOrigem then
+      vIConexao.ConfigConexaoExterna(lLojaOrigem);
 
     lQry := vIConexao.criarQueryExterna;
   end
@@ -447,7 +451,7 @@ begin
 
     for lLojas in lLojasModel.objeto.LojassLista do
     begin
-      vIConexao.ConfigConexaoExterna(llojas.objeto.LOJA);
+      vIConexao.ConfigConexaoExterna(llojas.objeto.LOJA); //Verificar situação da loja linha 217
       lQry := vIConexao.criarQueryExterna;
 
       lQry.Open(lSQL);
