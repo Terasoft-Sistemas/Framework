@@ -153,16 +153,17 @@ var
 begin
   lQry := vIConexao.CriarQuery;
   lSQL := vConstrutor.gerarInsert('ADMCARTAO', 'ID', true);
+
   try
-    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
+//    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
     lQry.SQL.Add(lSQL);
     AAdmCartaoModel.objeto.ID := vIConexao.Generetor('GEN_ADMCARTAO', true);
     setParams(lQry, AAdmCartaoModel);
     lQry.Open;
 
-    if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
-      sincronizarDados(AAdmCartaoModel);
+//    if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
+//      sincronizarDados(AAdmCartaoModel);
 
     Result := lQry.FieldByName('ID').AsString;
 

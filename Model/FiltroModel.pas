@@ -182,6 +182,7 @@ type
 
 implementation
   uses
+    FiltroDao,
     EmpresaModel,
     Terasoft.FuncoesTexto,
     Variants,
@@ -246,6 +247,7 @@ end;
 procedure TFiltroModel.setPROPRIEDADES(const pValue: TipoWideStringFramework);
 begin
   fPROPRIEDADES := pValue;
+  fCfg := nil;
 end;
 
 function TFiltroModel.getPROPRIEDADES: TipoWideStringFramework;
@@ -267,12 +269,12 @@ function TFiltroModel.getOpcoes;///: IDatasetSimples;
     lDao: IConstrutorDao;
     lCampos: IFDDataset;
     lDS: IDataset;
-    lListaCampos: IListaTextoEX;
+    l,lListaCampos: IListaTextoEX;
     validador: IValidadorDatabase;
-    lFieldNames: String;
+    lFieldNames,lIn: String;
     s,s1: TipoWideStringFramework;
     f: TField;
-    lAdicional: String;
+    lAdicional, lTmp: String;
     lWhere: String;
     lSQL: String;
     lBusca: IListaTextoEX;
@@ -431,9 +433,34 @@ begin
       else
         lWhere := ExpandeWhere(format('%s;%s', [ fChave,lFieldNames]),UpperCase(retiraAcentos(pBusca)),tewcprefixodata_And,false);
 
+      l := getCfg.ReadSectionValuesLista('where');
+      lTmp := '';
+
+      for i := 0 to l.strings.Count - 1 do
+      begin
+        lIn := l.strings.ValueFromIndex[i];
+        if(lIn='') then continue;
+        lTmp := lTmp + lIn + #13;
+      end;
+      if(lTmp<>'') then
+      begin
+        if(lWhere <> '') then
+          lWhere := lWhere + #13;
+        lWhere :=  lWhere + ' and ' + lTmp;
+      end;
+
       if(lWhere<>'') then
         lWhere := ' where 1=1 ' + lWhere;
-      lSQL := format('select %s %s %s from %s %s %s', [lAdicional, fChave,lFieldNames, lName, lWhere, lOrdem]);
+
+
+      lSQL := format('select %s %s %s from %s ', [lAdicional, fChave,lFieldNames, lName ]);
+      if(pos('<where>',lSql,1)=0) then
+        lSql := lSql + #13 + '<where>';
+
+      lSql := StringReplace(lSql, '<where>', lWhere,[rfReplaceAll,rfIgnoreCase]);
+      if(lOrdem<>'') then
+        lSql := lSql + ' ' + lOrdem;
+
 
       logaByTagSeNivel('', format('TFiltroModel.getOpcoes: [%s]',[lSql]),LOG_LEVEL_DEBUG);
 
