@@ -62,6 +62,14 @@ object FormEP: TFormEP
     Enabled = False
     OnClick = sbExportarClick
   end
+  object SpeedButton1: TSpeedButton
+    Left = 519
+    Top = 65
+    Width = 97
+    Height = 22
+    Caption = 'Impress'#227'o'
+    OnClick = SpeedButton1Click
+  end
   object cbEP: TTeraComboBox
     Left = 24
     Top = 40

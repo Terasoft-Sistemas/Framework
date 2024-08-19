@@ -30,6 +30,7 @@ type
     sbValoresFiltro: TSpeedButton;
     grid2: TXDBGrid;
     sbExportar: TSpeedButton;
+    SpeedButton1: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure cbEPChange(Sender: TObject);
     procedure sbAbrirClick(Sender: TObject);
@@ -37,6 +38,7 @@ type
     procedure cbFiltrosChange(Sender: TObject);
     procedure sbValoresFiltroClick(Sender: TObject);
     procedure sbExportarClick(Sender: TObject);
+    procedure SpeedButton1Click(Sender: TObject);
   private
     [weak] mySelf: ITFormEP;
     vIConexao:IConexao;
@@ -107,7 +109,7 @@ begin
   //Retorna a lista com busca no termo 'PROD'
   //Ordenado pelo campo DESCRICAO
 //  for m in epControl.getNovaLista('prod',2) do
-  for m in epControl.getNovaLista('',true,2) do
+  for m in epControl.getNovaLista('COMPLE',true,2) do
 
   //m := epControl.getByName('CLI3');
 
@@ -225,6 +227,12 @@ begin
     cbFiltros.Values.add(p.objeto.NOME);
   end;
 
+end;
+
+procedure TFormEP.SpeedButton1Click(Sender: TObject);
+begin
+  if(fSelecionado=nil) then exit;
+  fSelecionado.objeto.listaImpressao.First.dataset;
 end;
 
 function criaViewEndpoint(pIConexao: IConexao):ITFormEP;

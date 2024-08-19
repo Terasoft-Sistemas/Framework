@@ -19,148 +19,188 @@ uses
   Terasoft.Framework.DB,
   Interfaces.Conexao;
 
-type
-  TEndpointModel=class;
-  ITEndpointModel=IObject<TEndpointModel>;
-  TListaEndpointModel=IList<ITEndpointModel>;
+  type
+    TOrientacaoImpressao = ( oiRetrato, oiPaisagem );
 
-  TEstadoConsulta = record
-    filiais, query: String;
-    datasetCompleta, dataset, sumario: IDatasetSimples;
-  end;
+    TEndpointModel=class;
+    ITEndpointModel=IObject<TEndpointModel>;
+    TListaEndpointModel=IList<ITEndpointModel>;
 
-  TEndpointModel=class
-  private
-    [weak] mySelf: ITEndpointModel;
-  protected
+    TEstadoConsulta = record
+      filiais, query: String;
+      datasetCompleta, dataset, sumario: IDatasetSimples;
+    end;
 
-    vIConexao   : IConexao;
-    fFiltroController: IController_Filtro;
-    fCfg: IMultiConfig;
-    vEstadoConsulta: TEstadoConsulta;
+    IDadosImpressao = interface
+    ['{F3DE5DA9-78CD-4E18-B00F-5A7F2F394ABB}']
 
-    fID: TipoWideStringFramework;
-    fMETODO: TipoWideStringFramework;
-    fNOME: TipoWideStringFramework;
-    fQUERYInterno: TipoWideStringFramework;
-    fPROPRIEDADES: TipoWideStringFramework;
-    fDESCRICAO: TipoWideStringFramework;
-    fFILTROS: TListaFiltroModel;
-    fIgnoraPaginacao: boolean;
+      procedure liberaEndpoint;
+    //property titulo getter/setter
+      function getTitulo: TipoWideStringFramework;
+      procedure setTitulo(const pValue: TipoWideStringFramework);
 
-    procedure carregaFiltros;
+    //property orientacao getter/setter
+      function getOrientacao: TOrientacaoImpressao;
+      procedure setOrientacao(const pValue: TOrientacaoImpressao);
 
-  public
-    const
-      _TABELA_ = 'ENDPOINT';
+    //property nome getter/setter
+      function getNome: TipoWideStringFramework;
+      procedure setNome(const pValue: TipoWideStringFramework);
 
-  protected
-    //fContextoAtual: String;
-    //fDatasetCompleta, fDataset, fDatasetSumario: IDatasetSimples;
-    fRegistros: Integer;
-    fPrimeiro: Integer;
-    fOldQuery: String;
-    fOrdem: TipoWideStringFramework;
-    fPermissao: TipoWideStringFramework;
+      function dataset: IDatasetSimples;
 
-  //property permissao getter/setter
-    function getPermissao: TipoWideStringFramework;
-    procedure setPermissao(const pValue: TipoWideStringFramework);
+    //property descricao getter/setter
+      function getDescricao: TipoWideStringFramework;
+      procedure setDescricao(const pValue: TipoWideStringFramework);
 
-    function getFiltroLojas: ITFiltroModel;
+      property descricao: TipoWideStringFramework read getDescricao write setDescricao;
+      property nome: TipoWideStringFramework read getNome write setNome;
+      property orientacao: TOrientacaoImpressao read getOrientacao write setOrientacao;
+      property titulo: TipoWideStringFramework read getTitulo write setTitulo;
 
-  //property ordem getter/setter
-    function getOrdem: TipoWideStringFramework;
-    procedure setOrdem(const pValue: TipoWideStringFramework);
+    end;
 
-  //property filtroAdicional getter/setter
-    function getBuscaAdicional: TipoWideStringFramework;
-    procedure setBuscaAdicional(const pValue: TipoWideStringFramework);
+    IListaImpressao = IList<IDadosImpressao>;
 
-    function getCfg: IMultiConfig;
+    TEndpointModel=class
+    private
+      [weak] mySelf: ITEndpointModel;
+    protected
 
-  //property primeiro getter/setter
-    function getPrimeiro: Integer;
-    procedure setPrimeiro(const pValue: Integer);
+      vIConexao   : IConexao;
+      fFiltroController: IController_Filtro;
+      fCfg: IMultiConfig;
+      vEstadoConsulta: TEstadoConsulta;
 
-  //property registros getter/setter
-    function getRegistros: Integer;
-    procedure setRegistros(const pValue: Integer);
+      fID: TipoWideStringFramework;
+      fMETODO: TipoWideStringFramework;
+      fNOME: TipoWideStringFramework;
+      fQUERYInterno: TipoWideStringFramework;
+      fPROPRIEDADES: TipoWideStringFramework;
+      fDESCRICAO: TipoWideStringFramework;
+      fFILTROS: TListaFiltroModel;
+      fIgnoraPaginacao: boolean;
 
-  //property DESCRICAO getter/setter
-    function getDESCRICAO: TipoWideStringFramework;
-    procedure setDESCRICAO(const pValue: TipoWideStringFramework);
+      procedure carregaFiltros;
 
-  //property PROPRIEDADES getter/setter
-    function getPROPRIEDADES: TipoWideStringFramework;
-    procedure setPROPRIEDADES(const pValue: TipoWideStringFramework);
+    public
+      const
+        _TABELA_ = 'ENDPOINT';
 
-  //property QUERY getter/setter
-    function getQUERYInterno: TipoWideStringFramework;
-    procedure setQUERYInterno(const pValue: TipoWideStringFramework);
+    protected
+      //fContextoAtual: String;
+      //fDatasetCompleta, fDataset, fDatasetSumario: IDatasetSimples;
+      fRegistros: Integer;
+      fPrimeiro: Integer;
+      fOldQuery: String;
+      fOrdem: TipoWideStringFramework;
+      fPermissao: TipoWideStringFramework;
+      fListaImpressao: IListaImpressao;
 
-  //property NOME getter/setter
-    function getNOME: TipoWideStringFramework;
-    procedure setNOME(const pValue: TipoWideStringFramework);
+    //property listaImpressao getter/setter
+      function getListaImpressao: IListaImpressao;
+      procedure setListaImpressao(const pValue: IListaImpressao);
 
-  //property METODO getter/setter
-    function getMETODO: TipoWideStringFramework;
-    procedure setMETODO(const pValue: TipoWideStringFramework);
+    //property permissao getter/setter
+      function getPermissao: TipoWideStringFramework;
+      procedure setPermissao(const pValue: TipoWideStringFramework);
 
-    //property ID getter/setter
-    function getID: TipoWideStringFramework;
-    procedure setID(const pValue: TipoWideStringFramework);
+      function getFiltroLojas: ITFiltroModel;
 
-  //property LISTAFILTROMODEL getter/setter
-    function getFILTROS: TListaFiltroModel;
-    procedure setFILTROS(const pValue: TListaFiltroModel);
+    //property ordem getter/setter
+      function getOrdem: TipoWideStringFramework;
+      procedure setOrdem(const pValue: TipoWideStringFramework);
 
-    function getContagem: Integer;
+    //property filtroAdicional getter/setter
+      function getBuscaAdicional: TipoWideStringFramework;
+      procedure setBuscaAdicional(const pValue: TipoWideStringFramework);
 
-    function getBuscaAvancada: ITFiltroModel;
+      function getCfg: IMultiConfig;
 
-    function queryLoja(pLojaModel: ITLojasModel; const pQuery: TipoWideStringFramework; pFields: TipoWideStringFramework; pParams: array of Variant): IDataset;
+    //property primeiro getter/setter
+      function getPrimeiro: Integer;
+      procedure setPrimeiro(const pValue: Integer);
 
-    function precisaExecutar: boolean;
+    //property registros getter/setter
+      function getRegistros: Integer;
+      procedure setRegistros(const pValue: Integer);
 
-  public
+    //property DESCRICAO getter/setter
+      function getDESCRICAO: TipoWideStringFramework;
+      procedure setDESCRICAO(const pValue: TipoWideStringFramework);
 
-    constructor _Create(pIConexao : IConexao);
-    destructor Destroy; override;
+    //property PROPRIEDADES getter/setter
+      function getPROPRIEDADES: TipoWideStringFramework;
+      procedure setPROPRIEDADES(const pValue: TipoWideStringFramework);
 
-    class function getNewIface(pIConexao: IConexao): ITEndpointModel;
+    //property QUERY getter/setter
+      function getQUERYInterno: TipoWideStringFramework;
+      procedure setQUERYInterno(const pValue: TipoWideStringFramework);
 
-  public
-    property ID: TipoWideStringFramework read getID write setID;
-    property METODO: TipoWideStringFramework read getMETODO write setMETODO;
-    property NOME: TipoWideStringFramework read getNOME write setNOME;
-    property QUERY: TipoWideStringFramework read getQUERYInterno write setQUERYInterno;
-    property PROPRIEDADES: TipoWideStringFramework read getPROPRIEDADES write setPROPRIEDADES;
-    property DESCRICAO: TipoWideStringFramework read getDESCRICAO write setDESCRICAO;
-    property FILTROS: TListaFiltroModel read getFILTROS write setFILTROS;
+    //property NOME getter/setter
+      function getNOME: TipoWideStringFramework;
+      procedure setNOME(const pValue: TipoWideStringFramework);
 
-    property registros: Integer read getRegistros write setRegistros;
-    property primeiro: Integer read getPrimeiro write setPrimeiro;
+    //property METODO getter/setter
+      function getMETODO: TipoWideStringFramework;
+      procedure setMETODO(const pValue: TipoWideStringFramework);
 
-    property contagem: Integer read getContagem;
-    property buscaAdicional: TipoWideStringFramework read getBuscaAdicional write setBuscaAdicional;
-    property buscaAvancadada: ITFiltroModel read getBuscaAvancada;
-    property ordem: TipoWideStringFramework read getOrdem write setOrdem;
+      //property ID getter/setter
+      function getID: TipoWideStringFramework;
+      procedure setID(const pValue: TipoWideStringFramework);
 
-    property filtroLojas: ITFiltroModel read getFiltroLojas;
+    //property LISTAFILTROMODEL getter/setter
+      function getFILTROS: TListaFiltroModel;
+      procedure setFILTROS(const pValue: TListaFiltroModel);
 
-    property permissao: TipoWideStringFramework read getPermissao write setPermissao;
+      function getContagem: Integer;
 
-  public
-    procedure loaded;
+      function getBuscaAvancada: ITFiltroModel;
 
-    function getQuery: TipoWideStringFramework;
-    function executaQuery(const pFormatar: boolean = true): IDatasetSimples;
-    function sumario: IDatasetSimples;
-    function toTxt(const pVisiveis: boolean = true; pFormatado: boolean = true): IListaTextoEx;
-    procedure formatarDataset(pDataset: TDataset);
+      function queryLoja(pLojaModel: ITLojasModel; const pQuery: TipoWideStringFramework; pFields: TipoWideStringFramework; pParams: array of Variant): IDataset;
 
-  end;
+      function precisaExecutar: boolean;
+
+    public
+
+      constructor _Create(pIConexao : IConexao);
+      destructor Destroy; override;
+
+      class function getNewIface(pIConexao: IConexao): ITEndpointModel;
+
+    public
+      property ID: TipoWideStringFramework read getID write setID;
+      property METODO: TipoWideStringFramework read getMETODO write setMETODO;
+      property NOME: TipoWideStringFramework read getNOME write setNOME;
+      property QUERY: TipoWideStringFramework read getQUERYInterno write setQUERYInterno;
+      property PROPRIEDADES: TipoWideStringFramework read getPROPRIEDADES write setPROPRIEDADES;
+      property DESCRICAO: TipoWideStringFramework read getDESCRICAO write setDESCRICAO;
+      property FILTROS: TListaFiltroModel read getFILTROS write setFILTROS;
+
+      property registros: Integer read getRegistros write setRegistros;
+      property primeiro: Integer read getPrimeiro write setPrimeiro;
+
+      property contagem: Integer read getContagem;
+      property buscaAdicional: TipoWideStringFramework read getBuscaAdicional write setBuscaAdicional;
+      property buscaAvancadada: ITFiltroModel read getBuscaAvancada;
+      property ordem: TipoWideStringFramework read getOrdem write setOrdem;
+
+      property filtroLojas: ITFiltroModel read getFiltroLojas;
+
+      property permissao: TipoWideStringFramework read getPermissao write setPermissao;
+
+      property listaImpressao: IListaImpressao read getListaImpressao write setListaImpressao;
+
+    public
+      procedure loaded;
+
+      function getQuery: TipoWideStringFramework;
+      function executaQuery(const pFormatar: boolean = true): IDatasetSimples;
+      function sumario: IDatasetSimples;
+      function toTxt(const pVisiveis: boolean = true; pFormatado: boolean = true): IListaTextoEx;
+      procedure formatarDataset(pDataset: TDataset);
+
+    end;
 
   function getNewEndpointModel(pIConexao : IConexao): ITEndpointModel;
 
@@ -171,6 +211,35 @@ implementation
     {$endif}
     Terasoft.Framework.LOG,
     FuncoesConfig;
+
+  type
+    TDadosImpressaoImpl = class(TInterfacedObject, IDadosImpressao)
+    protected
+      vModel: TEndpointModel;
+      fTitulo: TipoWideStringFramework;
+      fOrientacao: TOrientacaoImpressao;
+      fNome: TipoWideStringFramework;
+      fDescricao: TipoWideStringFramework;
+
+      function dataset: IDatasetSimples;
+      procedure liberaEndpoint;
+
+    //property descricao getter/setter
+      function getDescricao: TipoWideStringFramework;
+      procedure setDescricao(const pValue: TipoWideStringFramework);
+
+    //property nome getter/setter
+      function getNome: TipoWideStringFramework;
+      procedure setNome(const pValue: TipoWideStringFramework);
+
+    //property orientacao getter/setter
+      function getOrientacao: TOrientacaoImpressao;
+      procedure setOrientacao(const pValue: TOrientacaoImpressao);
+
+    //property titulo getter/setter
+      function getTitulo: TipoWideStringFramework;
+      procedure setTitulo(const pValue: TipoWideStringFramework);
+    end;
 
 function getNewEndpointModel(pIConexao : IConexao): ITEndpointModel;
 begin
@@ -186,7 +255,13 @@ begin
 end;
 
 destructor TEndpointModel.Destroy;
+  var
+    p: IDadosImpressao;
 begin
+  if(fListaImpressao<>nil) then
+    for p in fListaImpressao do
+      p.liberaEndpoint;
+
   fFiltroController := nil;
   vIConexao:=nil;
   inherited;
@@ -572,9 +647,10 @@ end;
 procedure TEndpointModel.carregaFiltros;
   var
     lTxt: IListaTextoEx;
-    i: Integer;
-    sName, sValue: String;
+    i,j: Integer;
+    sName, sValue, lDescricao, lTitulo: String;
     lFiltroLojas, lFiltro: ITFiltroModel;
+    lImpressao: TDadosImpressaoImpl;
 begin
   if fFiltroController=nil then
     fFiltroController := getFiltroController(vIConexao);
@@ -582,14 +658,10 @@ begin
   //Limpa os filtros anteriores
   getFILTROS.Clear;
 
-  lTxt := getcfg.ReadSectionValuesLista('filtros');
-
-{  lFiltro := fFiltroController.getByName('');
-  lFiltro.objeto.setTipoPorNome('@loja');
-  lFiltro.objeto.campo := 'dummy';
-  fFILTROS.Add(lFiltro);}
+  fListaImpressao := TCollections.CreateList<IDadosImpressao>;
 
   lFiltroLojas := nil;
+  lTxt := getcfg.ReadSectionValuesLista('filtros');
 
   for i := 0 to lTxt.strings.Count - 1 do
   begin
@@ -599,6 +671,7 @@ begin
     lFiltro := fFiltroController.getByName(sName);
     lFiltro.objeto.campo := sValue;
     lFiltro.objeto.setTipoPorNome(sName);
+
     if(lFiltro.objeto.tipo=tipoFiltro_Lojas) then
     begin
       lFiltroLojas := lFiltro;
@@ -612,6 +685,41 @@ begin
     lFiltroLojas.objeto.setTipoPorNome('@lojas');
   end;
   fFILTROS.Insert(0,lFiltroLojas);
+
+  lTxt := getcfg.ReadSectionValuesLista('impressoes');
+  if(lTxt.strings.Count=0) then
+    lTxt.strings.Values['Padrao'] := 'Impressão Padrão';
+
+  for i := 0 to lTxt.strings.Count - 1 do
+  begin
+    sName := Uppercase(trim( lTxt.strings.Names[i]));
+    if(sName='') then continue;
+    sValue := trim( lTxt.strings.ValueFromIndex[i]);
+    lImpressao := TDadosImpressaoImpl.Create;
+    fListaImpressao.Add(lImpressao);
+    lImpressao.vModel := self;
+    lImpressao.fNome := sName;
+    lDescricao := textoEntreTags(sValue,'','|');
+    lTitulo := '';
+    if(lDescricao='') then
+    begin
+      lDescricao := sValue;
+    end else
+    begin
+      lTitulo := textoEntreTags(sValue,'|','');
+    end;
+    if(lDescricao='') then
+      lDescricao := fDESCRICAO;
+
+    if(lTitulo='') then
+      lTitulo := fDESCRICAO;
+    lImpressao.fTitulo := lTitulo;
+    lImpressao.fDescricao := lDescricao;
+    j := fCfg.ReadInteger('impressao.'+lImpressao.fNome,'pagina.orientacao',1);
+    lImpressao.fOrientacao := TOrientacaoImpressao(j);
+    if not (lImpressao.fOrientacao in [ oiRetrato, oiPaisagem ]) then
+      raise Exception.CreateFmt('Valor da Orientação [%d] inválido para a impressão [%s] de [%s]', [ i, lImpressao.fNome, fNOME ]);
+  end;
 
   fPermissao := getCfg.ReadString('permissao','executar',tagConfig_GESTAO_RELATORIO_PERMISSAO);
 end;
@@ -811,6 +919,90 @@ begin
   if(fPermissao='') then
     fPermissao := tagConfig_GESTAO_RELATORIO_PERMISSAO;
   Result := fPermissao;
+end;
+
+procedure TEndpointModel.setListaImpressao(const pValue: IListaImpressao);
+begin
+  fListaImpressao := pValue;
+end;
+
+function TEndpointModel.getListaImpressao: IListaImpressao;
+begin
+  Result := fListaImpressao;
+end;
+
+
+{ TDadosImpressaoImpl }
+
+procedure TDadosImpressaoImpl.setOrientacao(const pValue: TOrientacaoImpressao);
+begin
+  fOrientacao := pValue;
+end;
+
+function TDadosImpressaoImpl.getOrientacao: TOrientacaoImpressao;
+begin
+  Result := fOrientacao;
+end;
+
+procedure TDadosImpressaoImpl.setTitulo(const pValue: TipoWideStringFramework);
+begin
+  fTitulo := pValue;
+end;
+
+function TDadosImpressaoImpl.getTitulo: TipoWideStringFramework;
+begin
+  Result := fTitulo;
+end;
+
+procedure TDadosImpressaoImpl.liberaEndpoint;
+begin
+  vModel := nil;
+end;
+
+procedure TDadosImpressaoImpl.setNome(const pValue: TipoWideStringFramework);
+begin
+  fNome := pValue;
+end;
+
+function TDadosImpressaoImpl.getNome: TipoWideStringFramework;
+begin
+  Result := fNome;
+end;
+
+procedure TDadosImpressaoImpl.setDescricao(const pValue: TipoWideStringFramework);
+begin
+  fDescricao := pValue;
+end;
+
+function TDadosImpressaoImpl.dataset: IDatasetSimples;
+  var
+    save: boolean;
+    f: TField;
+    i: Integer;
+begin
+  if(vModel=nil) then
+    raise Exception.Create('Modelo de relatório não existe mais.');
+
+  save := vModel.fIgnoraPaginacao;
+  vModel.fIgnoraPaginacao := true;
+  try
+    Result := vModel.executaQuery(true);
+
+    //Força leitura da cfg;
+    vModel.getCfg;
+    for i := 0 to Result.dataset.Fields.Count - 1 do
+    begin
+      f := Result.dataset.Fields[i];
+      f.Visible := vModel.fCfg.ReadBool('impressao.'+fNome,f.FieldName,f.Visible);
+    end;
+  finally
+    vModel.fIgnoraPaginacao := save;
+  end;
+end;
+
+function TDadosImpressaoImpl.getDescricao: TipoWideStringFramework;
+begin
+  Result := fDescricao;
 end;
 
 end.
