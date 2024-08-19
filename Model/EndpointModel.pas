@@ -92,10 +92,10 @@ uses
       //fDatasetCompleta, fDataset, fDatasetSumario: IDatasetSimples;
       fRegistros: Integer;
       fPrimeiro: Integer;
-      fOldQuery: String;
       fOrdem: TipoWideStringFramework;
       fPermissao: TipoWideStringFramework;
       fListaImpressao: IListaImpressao;
+      fContagem: Integer;
 
     //property listaImpressao getter/setter
       function getListaImpressao: IListaImpressao;
@@ -253,6 +253,7 @@ constructor TEndpointModel._Create(pIConexao: IConexao);
 begin
   inherited Create;
   vIConexao := pIConexao;
+  fContagem := -1;
 end;
 
 destructor TEndpointModel.Destroy;
@@ -322,10 +323,40 @@ begin
 end;
 
 function TEndpointModel.getContagem: Integer;
+  var
+    lListaLojas:TILojasModelList;
+    lQuery: String;
+    save: boolean;
 begin
-  if(precisaExecutar) then
-    executaQuery;
-  Result := vEstadoConsulta.datasetCompleta.dataset.RecordCount;
+  lListaLojas:=getFiltroLojas.objeto.listaLojas;
+  if(lListaLojas.Count=1) then
+  begin
+    save := fIgnoraPaginacao;
+    fIgnoraPaginacao := true;
+    try
+      if(precisaExecutar) then
+        fContagem := -1;
+      if(fContagem <> -1) then
+      begin
+        Result := fContagem;
+        exit;
+      end;
+      lQuery := getQuery;
+    finally
+      fIgnoraPaginacao:=save;
+    end;
+
+    vIConexao.ConfigConexaoExterna(lListaLojas.First.objeto.LOJA);
+
+    fContagem := vIConexao.gdb.criaDataset.query(format('select count(*) c from (%s)', [ lQuery ]),'',[]).dataset.Fields[0].AsInteger;
+    Result := fContagem;
+
+  end else
+  begin
+    if(precisaExecutar) then
+      executaQuery;
+    Result := vEstadoConsulta.datasetCompleta.dataset.RecordCount;
+  end;
 end;
 
 function TEndpointModel.getQuery: TipoWideStringFramework;
@@ -478,17 +509,22 @@ function TEndpointModel.executaQuery;
     i: Integer;
     index: TIndexDef;
     save: boolean;
+    lListaLojas: TILojasModelList;
 begin
   Result := nil;
+
+  lListaLojas := getFiltroLojas.objeto.listaLojas;
+
   if(precisaExecutar) then begin
     vEstadoConsulta.dataset := nil;
     vEstadoConsulta.datasetCompleta := nil;
     vEstadoConsulta.sumario := nil;
     vEstadoConsulta.filiais := '';
     vEstadoConsulta.query := '';
+    fContagem := -1;
 
     save := fIgnoraPaginacao;
-    if(fRegistros<>1) then
+    if(fRegistros<>1) and (lListaLojas.Count<>1)  then
       fIgnoraPaginacao := true;
 
     try
@@ -498,8 +534,7 @@ begin
       vEstadoConsulta.query := lSQL;
 
     finally
-      if(fRegistros<>1) then
-        fIgnoraPaginacao:=save;
+      fIgnoraPaginacao:=save;
     end;
 
     lPrecisaOrder := false;
@@ -557,9 +592,9 @@ begin
       end;
     end;
   end;
-  if (fIgnoraPaginacao=false) then
+  if (fIgnoraPaginacao=false) and (lListaLojas.Count<>1) then
   begin
-    i := fPrimeiro;
+    i := fPrimeiro-1;
     while (Result.dataset.RecordCount>0) and (i > 0) do
     begin
       dec(i);

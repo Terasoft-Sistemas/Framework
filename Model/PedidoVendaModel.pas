@@ -692,7 +692,7 @@ begin
         lPixModel.objeto.obterLista;
 
         if lPixModel.objeto.TotalRecords = 0 then
-          CriaException('Pix não recebido. Realizar o recebimento');
+          CriaException('Pix nï¿½o recebido. Realizar o recebimento');
       end;
     end;
 
@@ -720,7 +720,7 @@ begin
       lCreditoClienteModel.objeto.DATA          := lPedidoVendaModel.objeto.DATA_PED;
       lCreditoClienteModel.objeto.TIPO          := 'C';
       lCreditoClienteModel.objeto.VALOR         := ((lConfiguracoes.objeto.valorTag('PERCENTUAL_CREDITO_CLIENTE_VENDA', 0, tvNumero)) / 100) * (lPedidoVendaModel.objeto.TOTAL_PED);
-      lCreditoClienteModel.objeto.OBS           := 'CRÉDITO DE '+FloatToStr(lConfiguracoes.objeto.valorTag('PERCENTUAL_CREDITO_CLIENTE_VENDA', 0, tvNumero))+'% GERADO PELA VENDA N: '+lPedidoVendaModel.objeto.NUMERO_PED+'.';
+      lCreditoClienteModel.objeto.OBS           := 'CRï¿½DITO DE '+FloatToStr(lConfiguracoes.objeto.valorTag('PERCENTUAL_CREDITO_CLIENTE_VENDA', 0, tvNumero))+'% GERADO PELA VENDA N: '+lPedidoVendaModel.objeto.NUMERO_PED+'.';
       lCreditoClienteModel.objeto.Incluir;
     end;
 
@@ -790,7 +790,7 @@ end;
 procedure TPedidoVendaModel.excluirPedido;
 begin
   if self.NUMERO_PED = '' then
-    CriaException('Pedido não informado.');
+    CriaException('Pedido nï¿½o informado.');
 
   self.excluirContasReceber;
 
@@ -909,13 +909,13 @@ var
 begin
 
   if (self.FCODIGO_CLI = '000000') and (pPortador = '000001') then
-    CriaException('Para o cliente consumidor o portador não pode ser carteira.');
+    CriaException('Para o cliente consumidor o portador nï¿½o pode ser carteira.');
 
   if (self.FCODIGO_CLI = '000000') and (pPortador = '000005') then
-    CriaException('Para o cliente consumidor o portador não pode ser boleto.');
+    CriaException('Para o cliente consumidor o portador nï¿½o pode ser boleto.');
 
   if (self.FCODIGO_CLI = '000000') and (pPortador = '000003' ) then
-    CriaException('Para o cliente consumidor o portador não pode ser cheque.');
+    CriaException('Para o cliente consumidor o portador nï¿½o pode ser cheque.');
 
   validaBloqueioPortador(pPortador, self.FCODIGO_CLI);
 
@@ -1012,10 +1012,10 @@ var
   lIBPTModel          : ITIBPTModel;
 begin
   if self.FNUMERO_PED = '' then
-    CriaException('Pedido não informado');
+    CriaException('Pedido nï¿½o informado');
 
   if pModelo = '' then
-    CriaException('Modelo não informado');
+    CriaException('Modelo nï¿½o informado');
 
   lPedidoItensModel := TPedidoItensModel.getNewIface(vIConexao);
   lTipoVenda        := TPedidoItensModel.getNewIface(vIConexao);
@@ -1035,8 +1035,8 @@ begin
     lTipoVenda.objeto.WhereView         := ' and coalesce(pedidoitens.tipo_venda, ''LJ'') = ''LJ'' ';
     lTipoVenda.objeto.obterLista;
 
-    if lTipoVenda.objeto.TotalRecords = 0 then //Não permitir a emissão de NF-e para o tipo de venda CD.
-      CriaException('Não é possível emitir NF-e para um pedido sem itens da loja.');
+    if lTipoVenda.objeto.TotalRecords = 0 then //Nï¿½o permitir a emissï¿½o de NF-e para o tipo de venda CD.
+      CriaException('Nï¿½o ï¿½ possï¿½vel emitir NF-e para um pedido sem itens da loja.');
 
     lFuncionarioModel := lFuncionarioModel.objeto.carregaClasse(self.CODIGO_VEN);
 
@@ -1166,14 +1166,14 @@ begin
       lNFItensModel.objeto.ITEM_NF               := Format('%3.3d', [lItem]);
       lNFItensModel.objeto.MODBCST_N18           := '4';
       lNFItensModel.objeto.INDESCALA             := 'S';
-      //Não encontrado no fonte
+      //Nï¿½o encontrado no fonte
       lNFItensModel.objeto.PREDBCEFET            := FloatToStr(0);
       lNFItensModel.objeto.VBCEFET               := FloatToStr(0);
       lNFItensModel.objeto.PICMSEFET             := FloatToStr(0);
       lNFItensModel.objeto.VICMSEFET             := FloatToStr(0);
       lNFItensModel.objeto.BASE_IPI2             := FloatToStr(0);
       //
-      //Não tem na tabela de pedidoitens
+      //Nï¿½o tem na tabela de pedidoitens
       lNFItensModel.objeto.VBC_IPI               := FloatToStr(0);
       lNFItensModel.objeto.VSEG                  := FloatToStr(0);
 
@@ -1399,7 +1399,7 @@ begin
       lClienteModel := lClienteModel.objeto.carregaClasse(pCliente);
 
       if lClienteModel.objeto.seprocado_cli <> 'N' then
-        CriaException('Cliente não está liberado para venda com este portador.');
+        CriaException('Cliente nï¿½o estï¿½ liberado para venda com este portador.');
 
     end;
   finally
@@ -1430,7 +1430,7 @@ begin
 
   try
     if pVenderItem.Quantidade = 0 then
-      CriaException('Quantidade inválida.');
+      CriaException('Quantidade invï¿½lida.');
 
     if lConfiguracoes.objeto.valorTag('BALANCA_COPY_INI_PRODUTO', '', tvString) <> '' then
       lCodBalanca := lPedidoVendaLista.objeto.obterProdutoBalanca(pVenderItem.BarrasProduto);
@@ -1462,14 +1462,14 @@ begin
     end;
 
     if lProdutosModel.objeto.TotalRecords = 0  then
-      CriaException('Produto não localizado.');
+      CriaException('Produto nï¿½o localizado.');
 
     if vIConexao.getEmpresa.BLOQUEAR_SALDO_NEGATIVO = 'S' then
     begin
       lSaldoDisponivel := lProdutosModel.objeto.ProdutossLista.First.objeto.SALDO_DISPONIVEL;
 
       if (lSaldoDisponivel <= 0) or (pVenderItem.Quantidade > lSaldoDisponivel) then
-        CriaException('Produto sem saldo disponível em estoque.')
+        CriaException('Produto sem saldo disponï¿½vel em estoque.')
     end;
 
     lIDItem := lPedidoItensModel.objeto.obterIDItem(self.FNUMERO_PED, lProdutosModel.objeto.ProdutossLista.First.objeto.CODIGO_PRO);
@@ -1567,13 +1567,13 @@ begin
     lPedidoVendaModel := lPedidoVendaModel.objeto.carregaClasse(self.FNUMERO_PED);
 
     if lPedidoVendaModel.objeto.NUMERO_NF <> '' then
-      CriaException('Não é possivel reabrir pedido com NF-e vinculada.');
+      CriaException('Nï¿½o ï¿½ possivel reabrir pedido com NF-e vinculada.');
 
     if lPedidoVendaModel.objeto.WEB_PEDIDO_ID <> '' then
-      CriaException('Venda originada de venda assistida, efetue o processo de devolução.');
+      CriaException('Venda originada de venda assistida, efetue o processo de devoluï¿½ï¿½o.');
 
     if lCaixaControleModel.objeto.vendaCaixaFechado(transformaDataHoraFireBird(lPedidoVendaModel.objeto.DATA_PED + lPedidoVendaModel.objeto.HORA_PED)) then
-      CriaException('Não é possível reabrir venda com o caixa já finalizado');
+      CriaException('Nï¿½o ï¿½ possï¿½vel reabrir venda com o caixa jï¿½ finalizado');
 
     lPedidoItensModel.objeto.IDPedidoVendaView := lPedidoVendaModel.objeto.NUMERO_PED;
     lPedidoItensModel.objeto.obterLista;
