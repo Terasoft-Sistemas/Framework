@@ -72,6 +72,7 @@ type
     function Observacoes(pidNF: String): Boolean;
     function responsavelTecnico: Boolean;
     function configuraComponenteNFe: Boolean;
+    function retornaIBPT(pNF : String): String;
     procedure processar(idNotaFiscal: String);
     procedure SetgerarPDF(const Value: Boolean);
     procedure SetidNotaFiscal(const Value: String);
@@ -108,7 +109,8 @@ uses
   Terasoft.Utils,
   System.Variants,
   PedidoVendaModel,
-  Terasoft.FuncoesTexto, System.StrUtils, System.Math;
+  Terasoft.FuncoesTexto, System.StrUtils, System.Math, Terasoft.Configuracoes,
+  IbptModel;
 
 function TNotaFiscal.configuraComponenteNFe: Boolean;
 begin
@@ -783,7 +785,7 @@ begin
     lQry.Open(lSQL);
     with NotaF.NFe.InfAdic do
     begin
-      infCpl     :=  lQry.FieldByName('infCpl').AsString;
+      infCpl     := retornaIBPT(pidNF) + lQry.FieldByName('infCpl').AsString;
       infAdFisco :=  lQry.FieldByName('infAdFisco').AsString;
     end;
 
@@ -1116,6 +1118,56 @@ begin
     fone     := '4332533958';
   end;
 end;
+
+function TNotaFiscal.retornaIBPT(pNF : String): String;
+var
+  lNFModel        : ITNFModel;
+  lTribFederal,
+  lTribEstadual,
+  lTribMunicipal  : extended;
+  lMsg            : String;
+  lConfiguracoes  : ITerasoftConfiguracoes;
+  lIBPTModel      : ITIBPTModel;
+begin
+  lConfiguracoes := TerasoftConfiguracoes.getNewIface(vIConexao);
+  lNFModel       := TNFModel.getNewIface(vIConexao);
+  lIBPTModel     := TIBPTModel.getNewIface(vIConexao);
+
+  try
+    lNFModel := lNFModel.objeto.carregaClasse(pNF);
+
+    if lNFModel.objeto.VTOTTRIB > 0 then
+    begin
+      lTribFederal   := lNFModel.objeto.VTOTTRIB_FEDERAL * 100 / lNFModel.objeto.VALOR_NF;
+      lTribEstadual  := lNFModel.objeto.VTOTTRIB_ESTADUAL * 100 / lNFModel.objeto.VALOR_NF;
+      lTribMunicipal := lNFModel.objeto.VTOTTRIB_MUNICIPAL * 100 / lNFModel.objeto.VALOR_NF;
+
+      lMsg := lMsg + 'Trib. aprox.: ';
+
+      if (lNFModel.objeto.VTOTTRIB_FEDERAL > 0.0) then
+        lMsg := lMsg + FormataDinheiro(lNFModel.objeto.VTOTTRIB_FEDERAL) + ' (' + FormatFloat('0.00', lTribFederal) + '%) Federal';
+
+      if (lNFModel.objeto.VTOTTRIB_ESTADUAL > 0.0) then
+        lMsg := lMsg + ' / ' + formataDinheiro(lNFModel.objeto.VTOTTRIB_ESTADUAL) + ' (' + FormatFloat('0.00', lTribEstadual) + '%) Estadual';
+
+      if (lNFModel.objeto.VTOTTRIB_MUNICIPAL > 0.0) then
+        lMsg := lMsg + ' / ' + formataDinheiro(lNFModel.objeto.VTOTTRIB_MUNICIPAL) + ' (' + FormatFloat('0.00', lTribMunicipal) + '%) Municipal';
+
+      if (lConfiguracoes.objeto.valorTag('PERCENTUAL_IBPT_FEDERAL', '0', tvNumero) = 0) and (lConfiguracoes.objeto.valorTag('PERCENTUAL_IBPT_ESTADUAL', '0', tvNumero) = 0) then
+        lMsg := lMsg + ' - Fonte: ' + lIBPTModel.objeto.fonteIBPT + ' ' + lIBPTModel.objeto.chaveIBPT + ' ';
+
+      lMSg := lMsg + sLineBreak;
+    end;
+
+    Result := lMsg;
+
+  finally
+    lConfiguracoes := nil;
+    lIBPTModel := nil;
+    lNFModel := nil;
+  end;
+end;
+
 procedure TNotaFiscal.SetgerarPDF(const Value: Boolean);
 begin
   FgerarPDF := Value;

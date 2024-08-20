@@ -1,4 +1,4 @@
-unit PedidoVendaModel;
+﻿unit PedidoVendaModel;
 
 interface
 
@@ -1308,43 +1308,19 @@ begin
     lNFModel.objeto.VTOTTRIB_FEDERAL      := FloatToStr(lTribFederal);
     lNFModel.objeto.VTOTTRIB_ESTADUAL     := FloatToStr(lTribEstadual);
     lNFModel.objeto.VTOTTRIB_MUNICIPAL    := FloatToStr(lTribMunicipal);
-
-    if (lNFModel.objeto.VTOTTRIB > 0) and (pModelo = '55') then
-    begin
-      lTribFederal   := lNFModel.objeto.VTOTTRIB_FEDERAL * 100 / lNFModel.objeto.VALOR_NF;
-      lTribEstadual  := lNFModel.objeto.VTOTTRIB_ESTADUAL * 100 / lNFModel.objeto.VALOR_NF;
-      lTribMunicipal := lNFModel.objeto.VTOTTRIB_MUNICIPAL * 100 / lNFModel.objeto.VALOR_NF;
-
-      lMsg := lMsg + 'Trib. aprox.: ';
-
-      if (lNFModel.objeto.VTOTTRIB_FEDERAL > 0.0) then
-        lMsg := lMsg + FormataDinheiro(lNFModel.objeto.VTOTTRIB_FEDERAL) + ' (' + FormatFloat('0.00', lTribFederal) + '%) Federal';
-
-      if (lNFModel.objeto.VTOTTRIB_ESTADUAL > 0.0) then
-        lMsg := lMsg + ' / ' + formataDinheiro(lNFModel.objeto.VTOTTRIB_ESTADUAL) + ' (' + FormatFloat('0.00', lTribEstadual) + '%) Estadual';
-
-      if (lNFModel.objeto.VTOTTRIB_MUNICIPAL > 0.0) then
-        lMsg := lMsg + ' / ' + formataDinheiro(lNFModel.objeto.VTOTTRIB_MUNICIPAL) + ' (' + FormatFloat('0.00', lTribMunicipal) + '%) Municipal';
-
-      if (lConfiguracoes.objeto.valorTag('PERCENTUAL_IBPT_FEDERAL', '0', tvNumero) = 0) and (lConfiguracoes.objeto.valorTag('PERCENTUAL_IBPT_ESTADUAL', '0', tvNumero) = 0) then
-        lMsg := lMsg + ' - Fonte: ' + lIBPTModel.objeto.fonteIBPT + ' ' + lIBPTModel.objeto.chaveIBPT + ' ';
-
-      lNFModel.objeto.OBS_NF := lMSg + sLineBreak + lNFModel.objeto.OBS_NF;
-    end;
-
-
     lNFModel.objeto.Salvar;
 
     Result := lNumeroNFe;
   finally
-    lPedidoItensModel:=nil;
-    lPortadorModel:=nil;
-    lNFItensModel:=nil;
-    lNFModel:=nil;
+    lPedidoItensModel := nil;
+    lPortadorModel := nil;
+    lConfiguracoes := nil;
+    lNFItensModel := nil;
     lEmpresaModel := nil;
     lIBPTModel := nil;
     lTipoVenda := nil;
     lCFOPModel := nil;
+    lNFModel := nil;
   end;
 end;
 
