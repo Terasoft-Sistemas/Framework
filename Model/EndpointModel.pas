@@ -615,7 +615,7 @@ end;
 procedure TEndpointModel.formatarDataset(pDataset: TDataset);
   var
     l: IListaTextoEX;
-    i: Integer;
+    i,j: Integer;
     f: TField;
     sNome,sFormato: String;
     posicao: Integer;
@@ -663,6 +663,31 @@ begin
     if(f=nil) then continue;
     f.DisplayLabel := sFormato;
   end;
+
+
+  l := getCfg.ReadSectionValuesLista('posicao');
+  for j := 0 to 5 do
+    for i := 0 to l.strings.Count-1 do
+    begin
+      sNome := trim(l.strings.Names[i]);
+      f:= pDataset.findField(sNome);
+      if(f=nil) then continue;
+      sFormato := l.strings.ValueFromIndex[i];
+      f.Index := StrToIntDef(sformato,f.Index);
+    end;
+
+  l := getCfg.ReadSectionValuesLista('alinhamento');
+  for i := 0 to l.strings.Count-1 do
+  begin
+    sNome := trim(l.strings.Names[i]);
+    f:= pDataset.findField(sNome);
+    if(f=nil) then continue;
+    sFormato := l.strings.ValueFromIndex[i];
+    j := StrToIntDef(sformato,Integer(f.Alignment));
+    if j in [ 0,1,2] then
+      f.Alignment := TAlignment(j);
+  end;
+
 
 {  i:=0;
   posicao:=-1;
@@ -1032,7 +1057,9 @@ end;
 function TDadosImpressaoImpl.sumario: IDatasetSimples;
   var
     f: TField;
-    i,j: Integer;
+    i,j,k: Integer;
+    l: IListaTextoEX;
+    sNome, sValue: String;
 begin
   if(vModel=nil) then
     raise Exception.Create('Modelo de relatório não existe mais.');
@@ -1069,6 +1096,29 @@ begin
       TNumericField(f).DisplayFormat := vModel.fCfg.ReadString('impressao.sumario.formato.'+fNome,f.FieldName,TNumericField(f).DisplayFormat);
     end;
 
+    l := vModel.getCfg.ReadSectionValuesLista('impressao.posicao.'+fNome);
+    for j := 0 to 5 do
+    begin
+      for k := 0 to l.strings.Count-1 do
+      begin
+        sNome := trim(l.strings.Names[k]);
+        f:= Result.dataset.findField(sNome);
+        if(f=nil) then continue;
+        sValue := l.strings.ValueFromIndex[k];
+        f.Index := StrToIntDef(sValue,f.Index);
+      end;
+
+      l := vModel.getCfg.ReadSectionValuesLista('impressao.sumario.posicao.'+fNome);
+      for k := 0 to l.strings.Count-1 do
+      begin
+        sNome := trim(l.strings.Names[k]);
+        f:= Result.dataset.findField(sNome);
+        if(f=nil) then continue;
+        sValue := l.strings.ValueFromIndex[k];
+        f.Index := StrToIntDef(sValue,f.Index);
+      end;
+    end;
+
   end;
 end;
 
@@ -1076,7 +1126,9 @@ function TDadosImpressaoImpl.dataset: IDatasetSimples;
   var
     save: boolean;
     f: TField;
-    i,j: Integer;
+    i,j,k: Integer;
+    l: IListaTextoEX;
+    sNome,sValue: String;
 begin
   if(vModel=nil) then
     raise Exception.Create('Modelo de relatório não existe mais.');
@@ -1107,6 +1159,18 @@ begin
       f.DisplayLabel := vModel.fCfg.ReadString('impressao.label.'+fNome,f.FieldName,f.DisplayLabel);
       if(f is TNumericField) then
         TNumericField(f).DisplayFormat := vModel.fCfg.ReadString('impressao.formato.'+fNome,f.FieldName,TNumericField(f).DisplayFormat);
+
+
+      l := vModel.getCfg.ReadSectionValuesLista('impressao.posicao.'+fNome);
+      for j := 0 to 5 do
+        for k := 0 to l.strings.Count-1 do
+        begin
+          sNome := trim(l.strings.Names[k]);
+          f:= Result.dataset.findField(sNome);
+          if(f=nil) then continue;
+          sValue := l.strings.ValueFromIndex[k];
+          f.Index := StrToIntDef(sValue,f.Index);
+        end;
 
     end;
   finally
