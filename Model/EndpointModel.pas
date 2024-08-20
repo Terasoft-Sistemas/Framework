@@ -631,6 +631,8 @@ begin
     lVisible := not (( f.DataType in [ftBytes])  or ((f is TBlobField) and (TBlobField(f).BlobType=ftBlob)) or
                     (f is TByteField));
 
+    f.DisplayWidth := 60;
+
     f.Visible := fCfg.ReadBool('visible',f.DisplayName, lVisible);
     f.DisplayLabel := capitalizarTexto(StringReplace(f.DisplayName,'_',' ', [rfReplaceAll]));
     if(f is TNumericField) and not ( f.DataType in [ ftLargeint ] ) then
@@ -1074,7 +1076,7 @@ begin
     f := Result.dataset.Fields[i];
     f.Visible := vModel.fCfg.ReadBool('impressao.'+fNome,f.FieldName,f.Visible);
     f.Visible := vModel.fCfg.ReadBool('impressao.sumario.'+fNome,f.FieldName,f.Visible);
-    f.DisplayWidth := vModel.fCfg.ReadInteger('impressao.largura.'+fNome,f.FieldName,100);
+    f.DisplayWidth := vModel.fCfg.ReadInteger('impressao.largura.'+fNome,f.FieldName,f.DisplayWidth);
     f.DisplayWidth := vModel.fCfg.ReadInteger('impressao.sumario.largura.'+fNome,f.FieldName,f.DisplayWidth);
 
     if f is TNumericField then
@@ -1144,7 +1146,7 @@ begin
     begin
       f := Result.dataset.Fields[i];
       f.Visible := vModel.fCfg.ReadBool('impressao.'+fNome,f.FieldName,f.Visible);
-      f.DisplayWidth := vModel.fCfg.ReadInteger('impressao.largura.'+fNome,f.FieldName,100);
+      f.DisplayWidth := vModel.fCfg.ReadInteger('impressao.largura.'+fNome,f.FieldName,f.DisplayWidth);
       j := vModel.fCfg.ReadInteger('impressao.alinhamento.'+fNome,f.FieldName,-1);
       if f is TNumericField then
         f.Alignment := taRightJustify
