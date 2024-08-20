@@ -631,7 +631,8 @@ begin
     lVisible := not (( f.DataType in [ftBytes])  or ((f is TBlobField) and (TBlobField(f).BlobType=ftBlob)) or
                     (f is TByteField));
 
-    f.DisplayWidth := 60;
+    // tamanho padrão
+    f.DisplayWidth := 1;
 
     f.Visible := fCfg.ReadBool('visible',f.DisplayName, lVisible);
     f.DisplayLabel := capitalizarTexto(StringReplace(f.DisplayName,'_',' ', [rfReplaceAll]));
