@@ -109,7 +109,7 @@ begin
   //Retorna a lista com busca no termo 'PROD'
   //Ordenado pelo campo DESCRICAO
 //  for m in epControl.getNovaLista('prod',2) do
-  for m in epControl.getNovaLista('COMPLE',true,2) do
+  for m in epControl.getNovaLista('DEBUG',false,2) do
 
   //m := epControl.getByName('CLI3');
 
@@ -232,7 +232,15 @@ end;
 procedure TFormEP.SpeedButton1Click(Sender: TObject);
 begin
   if(fSelecionado=nil) then exit;
-  fSelecionado.objeto.listaImpressao.First.dataset;
+  fDS := fSelecionado.objeto.listaImpressao.First.dataset;
+
+  Caption := IntToStr(fSelecionado.objeto.contagem);
+
+  fDSSumario := fSelecionado.objeto.listaImpressao.First.sumario;
+  grid2.DataSource := fDSSumario.dataSource;
+
+  grid.DataSource := fDS.dataSource;
+
 end;
 
 function criaViewEndpoint(pIConexao: IConexao):ITFormEP;

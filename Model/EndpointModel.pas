@@ -756,7 +756,7 @@ begin
       lTitulo := fDESCRICAO;
     lImpressao.fTitulo := lTitulo;
     lImpressao.fDescricao := lDescricao;
-    j := fCfg.ReadInteger('impressao.'+lImpressao.fNome,'pagina.orientacao',1);
+    j := fCfg.ReadInteger('impressao.'+lImpressao.fNome,'pagina.orientacao',0);
     lImpressao.fOrientacao := TOrientacaoImpressao(j);
     if not (lImpressao.fOrientacao in [ oiRetrato, oiPaisagem ]) then
       raise Exception.CreateFmt('Valor da Orientação [%d] inválido para a impressão [%s] de [%s]', [ i, lImpressao.fNome, fNOME ]);
@@ -1047,12 +1047,15 @@ begin
     f := Result.dataset.Fields[i];
     f.Visible := vModel.fCfg.ReadBool('impressao.'+fNome,f.FieldName,f.Visible);
     f.Visible := vModel.fCfg.ReadBool('impressao.sumario.'+fNome,f.FieldName,f.Visible);
-    f.DisplayWidth := vModel.fCfg.ReadInteger('impressao.sumario.largura.'+fNome,f.FieldName,100);
+    f.DisplayWidth := vModel.fCfg.ReadInteger('impressao.largura.'+fNome,f.FieldName,100);
+    f.DisplayWidth := vModel.fCfg.ReadInteger('impressao.sumario.largura.'+fNome,f.FieldName,f.DisplayWidth);
+
     if f is TNumericField then
       f.Alignment := taRightJustify
     else
       f.Alignment := taLeftJustify;
-    j := vModel.fCfg.ReadInteger('impressao.sumario.alihamento.'+fNome,f.FieldName,-1);
+    j := vModel.fCfg.ReadInteger('impressao.alinhamento.'+fNome,f.FieldName,-1);
+    j := vModel.fCfg.ReadInteger('impressao.sumario.alinhamento.'+fNome,f.FieldName,j);
     if(j<>-1) then
       f.Alignment := TAlignment(j);
     if not (f.Alignment in [ taLeftJustify, taRightJustify, taCenter ]) then
@@ -1090,7 +1093,7 @@ begin
       f := Result.dataset.Fields[i];
       f.Visible := vModel.fCfg.ReadBool('impressao.'+fNome,f.FieldName,f.Visible);
       f.DisplayWidth := vModel.fCfg.ReadInteger('impressao.largura.'+fNome,f.FieldName,100);
-      j := vModel.fCfg.ReadInteger('impressao.alihamento.'+fNome,f.FieldName,0);
+      j := vModel.fCfg.ReadInteger('impressao.alinhamento.'+fNome,f.FieldName,-1);
       if f is TNumericField then
         f.Alignment := taRightJustify
       else
