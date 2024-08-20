@@ -65,6 +65,7 @@ type
     FWEB_PEDIDOITENS_ID: Variant;
     FORIGINAL_VALOR_PARCELA: Variant;
     FORIGINAL_INDCE_APLICADO: Variant;
+    FSTATUS: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetIDRecordView(const Value: Integer);
@@ -96,6 +97,7 @@ type
     procedure SetWEB_PEDIDOITENS_ID(const Value: Variant);
     procedure SetORIGINAL_INDCE_APLICADO(const Value: Variant);
     procedure SetORIGINAL_VALOR_PARCELA(const Value: Variant);
+    procedure SetSTATUS(const Value: Variant);
 
   public
 
@@ -120,7 +122,7 @@ type
     property  VALOR_SEG_PRESTAMISTA : Variant read FVALOR_SEG_PRESTAMISTA write SetVALOR_SEG_PRESTAMISTA;
     property  PER_SEG_PRESTAMSTA    : Variant read FPER_SEG_PRESTAMSTA write SetPER_SEG_PRESTAMSTA;
     property  VALOR_ACRESCIMO_SEG_PRESTAMISTA : Variant read FVALOR_ACRESCIMO_SEG_PRESTAMISTA write SetVALOR_ACRESCIMO_SEG_PRESTAMISTA;
-
+    property  STATUS                : Variant read FSTATUS write SetSTATUS;
     property  ORIGINAL_VALOR_PARCELA : Variant read FORIGINAL_VALOR_PARCELA write SetORIGINAL_VALOR_PARCELA;
     property  ORIGINAL_INDCE_APLICADO : Variant read FORIGINAL_INDCE_APLICADO write SetORIGINAL_INDCE_APLICADO;
 
@@ -553,6 +555,11 @@ end;
 procedure TFinanceiroPedidoModel.SetStartRecordView(const Value: String);
 begin
   FStartRecordView := Value;
+end;
+
+procedure TFinanceiroPedidoModel.SetSTATUS(const Value: Variant);
+begin
+  FSTATUS := Value;
 end;
 
 procedure TFinanceiroPedidoModel.SetSYSTIME(const Value: Variant);

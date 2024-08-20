@@ -156,6 +156,7 @@ begin
     lModel.objeto.VALOR_ACRESCIMO_SEG_PRESTAMISTA := lQry.FieldByName('VALOR_ACRESCIMO_SEG_PRESTAMISTA').AsString;
     lModel.objeto.ORIGINAL_VALOR_PARCELA  := lQry.FieldByName('ORIGINAL_VALOR_PARCELA').AsString;
     lModel.objeto.ORIGINAL_INDCE_APLICADO := lQry.FieldByName('ORIGINAL_INDCE_APLICADO').AsString;
+    lModel.objeto.STATUS                  := lQry.FieldByName('STATUS').AsString;
 
     Result := lModel;
   finally
@@ -347,9 +348,9 @@ begin
     ' left join portador p on p.codigo_port = f.portador_id  '+SLineBreak+
     ' left join web_pedido w on w.id = f.web_pedido_id       '+SLineBreak+
     '                                                        '+SLineBreak+
-    ' where                                                  '+SLineBreak+
-    '     f.web_pedido_id = '+pIDPedido+' and                '+SLineBreak+
-    '     f.parcela = 1                                      '+SLineBreak;
+    ' where f.web_pedido_id = '+pIDPedido+'                  '+SLineBreak+
+    '   and f.parcela = 1                                    '+SLineBreak+
+    '   and coalesce(f.status,''A'') = ''A''                 '+SLineBreak;
 
     lQry.Open(lSQL);
 
@@ -380,7 +381,7 @@ begin
             ' from financeiro_pedido f                               '+SLineBreak+
             ' left join portador p on p.codigo_port = f.portador_id  '+SLineBreak+
             ' left join web_pedido w on w.id = f.web_pedido_id       '+SLineBreak+
-            'where 1=1                                               '+SLineBreak;
+            'where coalesce(f.status,''A'') = ''A''                  '+SLineBreak;
 
     lSQL := lSQL + where;
 
@@ -463,7 +464,7 @@ begin
       '                                                                              '+SLineBreak+
       ' left join portador on portador.codigo_port = financeiro_pedido.portador_id   '+SLineBreak+
       '                                                                              '+SLineBreak+
-      ' where 1=1                                                                    '+SLineBreak;
+      ' where coalesce(financeiro_pedido.status,''A'') = ''A''                       '+SLineBreak;
 
     lSQL := lSQL + where;
 
