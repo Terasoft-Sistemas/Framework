@@ -418,15 +418,15 @@ begin
     else
       lSql := 'select ';
 
-    lSQL := lSQL +
-      '       pedidoitens.*,                                                                                                                                     '+sLineBreak+
-      '       cast(((cast(pedidoitens.VALORUNITARIO_PED  as float) * pedidoitens.desconto_ped / 100)) * pedidoitens.qtde_calculada as float) as VALOR_DESCONTO,  '+sLineBreak+
-      '       produto.tipo_venda_comissao_id,                                                                                                                    '+sLineBreak+
-      '       produto.comis_pro,                                                                                                                                 '+sLineBreak+
-      '       produto.grupo_comissao_id                                                                                                                          '+sLineBreak+
-	    '  from pedidoitens                                                                                                                                        '+sLineBreak+
-      '  left join produto on produto.codigo_pro = pedidoitens.codigo_pro                                                                                        '+sLineBreak+
-      ' where 1=1                    ';
+    lSQL := lSQL +  '       pedidoitens.*,                                                                                                                                     '+sLineBreak+
+                    '       cast(((cast(pedidoitens.VALORUNITARIO_PED  as float) * pedidoitens.desconto_ped / 100)) * pedidoitens.qtde_calculada as float) as VALOR_DESCONTO,  '+sLineBreak+
+                    '       produto.tipo_venda_comissao_id,                                                                                                                    '+sLineBreak+
+                    '       produto.comis_pro,                                                                                                                                 '+sLineBreak+
+                    '       produto.grupo_comissao_id,                                                                                                                         '+sLineBreak+
+                    '       produto.combo                                                                                                                                      '+sLineBreak+
+                    '  from pedidoitens                                                                                                                                        '+sLineBreak+
+                    '  left join produto on produto.codigo_pro = pedidoitens.codigo_pro                                                                                        '+sLineBreak+
+                    ' where 1=1 ';
 
     lSql := lSql + where;
 
@@ -563,6 +563,7 @@ begin
       modelo.objeto.VDESC                        := lQry.FieldByName('VALOR_DESCONTO').AsString;
       modelo.objeto.TIPO_VENDA_COMISSAO_ID       := lQry.FieldByName('TIPO_VENDA_COMISSAO_ID').AsString;
       modelo.objeto.COMIS_PRO                    := lQry.FieldByName('COMIS_PRO').AsString;
+      modelo.objeto.COMBO                        := lQry.FieldByName('COMBO').AsString;
 
       modelo.objeto.GRUPO_COMISSAO_ID            := lQry.FieldByName('GRUPO_COMISSAO_ID').AsString;
       modelo.objeto.TIPO_GARANTIA_FR             := lQry.FieldByName('TIPO_GARANTIA_FR').AsString;

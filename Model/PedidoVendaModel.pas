@@ -730,24 +730,30 @@ begin
         lModel.objeto.aplicarFreteItem(lPedidoVendaModel.objeto.FRETE_PED, lPedidoVendaModel.objeto.VALOR_PED);
 
       if (lModel.objeto.TIPO_VENDA <> 'CD') then
-        lModel.objeto.gerarEstoque;
+      begin
+        if (lModel.objeto.COMBO = '3') then
+          lModel.objeto.BaixarItens
+        else
+          lModel.objeto.gerarEstoque;
+      end;
 
       lModel.objeto.calcularComissao(lParametros);
 
       if (lPedidoVendaModel.objeto.WEB_PEDIDO_ID <> '') and ((lModel.objeto.TIPO_VENDA = 'CD') or (lModel.objeto.ENTREGA = 'S')) then
         lReservaModel.objeto.concluirReserva(IIF(lModel.objeto.TIPO_VENDA = 'CD', '2', 'L'), lPedidoVendaModel.objeto.NUMERO_PED, lModel.objeto.WEB_PEDIDOITENS_ID, vIConexao.getEmpresa.LOJA);
+
     end;
 
   finally
     lContasReceberItensModel.Free;
     lContasReceberModel.Free;
+    lCreditoClienteModel:=nil;
     lPedidoVendaModel:=nil;
     lPedidoItensModel:=nil;
     lVendedorModel:=nil;
     lClienteModel:=nil;
     lReservaModel:=nil;
     lPixModel:=nil;
-    lCreditoClienteModel:=nil;
   end;
 end;
 
@@ -1472,14 +1478,14 @@ begin
       lPedidoItensModel.objeto.QUANTIDADE_NEW       := lQuantidade;
       lPedidoItensModel.objeto.BALANCA              := lProdutosModel.objeto.ProdutossLista.First.objeto.USAR_BALANCA;
 
-      lProdutoPreco.Produto                  := lProdutosModel.objeto.ProdutossLista.First.objeto.CODIGO_PRO;
-      lProdutoPreco.Cliente                  := self.FCODIGO_CLI;
-      lProdutoPreco.Portador                 := self.FCODIGO_PORT;
-      lProdutoPreco.Qtde                     := pVenderItem.Quantidade;
-      lProdutoPreco.PrecoUf                  := pVenderItem.PrecoUf;
-      lProdutoPreco.PrecoCliente             := pVenderItem.PrecoCliente;
-      lProdutoPreco.Promocao                 := pVenderItem.Promocao;
-      lProdutoPreco.TabelaPreco              := pVenderItem.TabelaPreco;
+      lProdutoPreco.Produto                         := lProdutosModel.objeto.ProdutossLista.First.objeto.CODIGO_PRO;
+      lProdutoPreco.Cliente                         := self.FCODIGO_CLI;
+      lProdutoPreco.Portador                        := self.FCODIGO_PORT;
+      lProdutoPreco.Qtde                            := pVenderItem.Quantidade;
+      lProdutoPreco.PrecoUf                         := pVenderItem.PrecoUf;
+      lProdutoPreco.PrecoCliente                    := pVenderItem.PrecoCliente;
+      lProdutoPreco.Promocao                        := pVenderItem.Promocao;
+      lProdutoPreco.TabelaPreco                     := pVenderItem.TabelaPreco;
 
       lPedidoItensModel.objeto.VALORUNITARIO_PED    := lProdutosModel.objeto.ValorUnitario(lProdutoPreco).ToString;
       lPedidoItensModel.objeto.VLRVENDA_PRO         := lProdutosModel.objeto.ProdutossLista.First.objeto.VENDA_PRO;

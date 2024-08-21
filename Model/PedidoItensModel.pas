@@ -195,6 +195,7 @@ type
     FVICMSSUBISTITUTORET: Variant;
     FPER_COMISSAO_GARANTIA_FR: Variant;
     FPER_COMISSAO_GARANTIA: Variant;
+    FCOMBO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetPedidoItenssLista(const Value: IList<ITPedidoItensModel>);
@@ -351,6 +352,7 @@ type
     procedure SetVICMSSUBISTITUTORET(const Value: Variant);
     procedure SetPER_COMISSAO_GARANTIA(const Value: Variant);
     procedure SetPER_COMISSAO_GARANTIA_FR(const Value: Variant);
+    procedure SetCOMBO(const Value: Variant);
 
   public
     property ID: Variant read FID write SetID;
@@ -498,6 +500,8 @@ type
     property PER_COMISSAO_GARANTIA : Variant read FPER_COMISSAO_GARANTIA write SetPER_COMISSAO_GARANTIA;
     property PER_COMISSAO_GARANTIA_FR : Variant read FPER_COMISSAO_GARANTIA_FR write SetPER_COMISSAO_GARANTIA_FR;
 
+    property COMBO:Variant read FCOMBO write SetCOMBO;
+
   	constructor _Create(pConexao: IConexao);
     destructor Destroy; override;
 
@@ -514,6 +518,7 @@ type
     function carregaClasse(pId: String): ITPedidoItensModel;
     function obterIDItem(pPedido, pProduto : String): String;
 
+    function BaixarItens: String;
     function gerarEstoque: String;
     function cancelarEstoque: String;
     procedure calcularComissao(pParametros : TParametrosComissao);
@@ -552,7 +557,7 @@ uses
   FireDAC.Comp.Client,
   ClienteModel,
   GrupoComissaoFuncionarioModel,
-  FuncionarioModel, GrupoComissaoModel;
+  FuncionarioModel, GrupoComissaoModel, ItensProdutoModel;
 
 { TPedidoItensModel }
 
@@ -779,6 +784,56 @@ begin
   Self.Salvar;
 end;
 
+function TPedidoItensModel.BaixarItens: String;
+var
+  lMovimentoModel    : ITMovimentoModel;
+  lProdutosModel     : ITProdutosModel;
+  lItensProdutoModel : ITItensProdutoModel;
+  lItensProduto      : IFDDataset;
+begin
+  lMovimentoModel    := TMovimentoModel.getNewIface(vIConexao);
+  lProdutosModel     := TProdutosModel.getNewIface(vIConexao);
+  lItensProdutoModel := TItensProdutoModel.getNewIface(vIConexao);
+  try
+
+    lItensProdutoModel.objeto.WhereView := ' and codigo_produto = ' +self.CODIGO_PRO;
+    lItensProduto := lItensProdutoModel.objeto.obterLista;
+
+    lItensProduto.objeto.First;
+    while not lItensProduto.objeto.Eof do
+    begin
+
+      lMovimentoModel.objeto.Acao := tacIncluir;
+
+      lMovimentoModel.objeto.DOCUMENTO_MOV   := self.FNUMERO_PED;
+      lMovimentoModel.objeto.CODIGO_PRO      := lItensProduto.objeto.fieldByName('CODIGO_MATERIA_PRIMA').AsString;
+      lMovimentoModel.objeto.CODIGO_FOR      := self.FCODIGO_CLI;
+      lMovimentoModel.objeto.OBS_MOV         := 'Venda N: ' + self.FNUMERO_PED;
+      lMovimentoModel.objeto.TIPO_DOC        := 'P';
+      lMovimentoModel.objeto.DATA_MOV        := DateToStr(vIConexao.DataServer);
+      lMovimentoModel.objeto.DATA_DOC        := DateToStr(vIConexao.DataServer);
+      lMovimentoModel.objeto.QUANTIDADE_MOV  := (self.QTDE_CALCULADA * lItensProduto.objeto.fieldByName('QTDE_MATERIA_PRIMA').AsFloat).ToString;
+      lMovimentoModel.objeto.VALOR_MOV       := '0';
+      lMovimentoModel.objeto.CUSTO_ATUAL     := '0';
+      lMovimentoModel.objeto.VENDA_ATUAL     := '0';
+      lMovimentoModel.objeto.STATUS          := '0';
+      lMovimentoModel.objeto.LOJA            := self.FLOJA;
+      lMovimentoModel.objeto.TABELA_ORIGEM   := '';
+      lMovimentoModel.objeto.ID_ORIGEM       := '';
+
+      Result := lMovimentoModel.objeto.Salvar;
+
+      lItensProduto.objeto.Next;
+
+    end;
+
+  finally
+    lProdutosModel := nil;
+    lMovimentoModel := nil;
+    lItensProdutoModel := nil;
+  end;
+end;
+
 procedure TPedidoItensModel.obterPedido(pNUmeroPedido: String);
 var
   lPedidoItensLista: ITPedidoItensDao;
@@ -993,6 +1048,11 @@ end;
 procedure TPedidoItensModel.SetCOFINS_SUFRAMA(const Value: Variant);
 begin
   FCOFINS_SUFRAMA := Value;
+end;
+
+procedure TPedidoItensModel.SetCOMBO(const Value: Variant);
+begin
+  FCOMBO := Value;
 end;
 
 procedure TPedidoItensModel.SetCOMBO_ITEM(const Value: Variant);
