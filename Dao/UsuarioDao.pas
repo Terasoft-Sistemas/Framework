@@ -37,6 +37,7 @@ type
     FStatus: String;
     FID: String;
     FPerfil: Variant;
+    FLOJA_ID: Variant;
     procedure SetUsuariosLista(const Value: IList<ITUsuarioModel>);
     procedure SetCountView(const Value: String);
     procedure SetIDRecordView(const Value: Integer);
@@ -53,6 +54,7 @@ type
     procedure SetPerfil(const Value: Variant);
 
     procedure setParams(var pQry: TFDQuery; pUsuarioModel: ITUsuarioModel);
+    procedure SetLOJA_ID(const Value: Variant);
 
   public
     constructor _Create(pIConexao : IConexao);
@@ -63,6 +65,8 @@ type
     property ID: String read FID write SetID;
     property Status: String read FStatus write SetStatus;
     property Perfil: Variant read FPerfil write SetPerfil;
+    property LOJA_ID: Variant read FLOJA_ID write SetLOJA_ID;
+
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
     property CountView: String read FCountView write SetCountView;
@@ -343,6 +347,11 @@ begin
   FLengthPageView := Value;
 end;
 
+procedure TUsuarioDao.SetLOJA_ID(const Value: Variant);
+begin
+  FLOJA_ID := Value;
+end;
+
 procedure TUsuarioDao.SetOrderView(const Value: String);
 begin
   FOrderView := Value;
@@ -445,7 +454,7 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-    lSQL := ' Select ID, FANTASIA, NOME, SENHA, STATUS, PERFIL_NEW_ID From Usuario Where FANTASIA = ' + QuotedStr(user) + ' and SENHA = ' + QuotedStr(pass);
+    lSQL := ' Select ID, FANTASIA, NOME, SENHA, STATUS, PERFIL_NEW_ID, LOJA_ID From Usuario Where FANTASIA = ' + QuotedStr(user) + ' and SENHA = ' + QuotedStr(pass);
 
     lQry.Open(lSQL);
 
@@ -454,12 +463,14 @@ begin
       FID      := '0';
       FStatus  := '0';
       FPerfil  := '';
+      FLOJA_ID := '';
     end
     else
     begin
       FID      := lQry.FieldByName('ID').Value;
       FStatus  := lQry.FieldByName('STATUS').Value;
       FPerfil  := lQry.FieldByName('PERFIL_NEW_ID').Value;
+      FLOJA_ID := lQry.FieldByName('LOJA_ID').Value;
     end;
 
   finally

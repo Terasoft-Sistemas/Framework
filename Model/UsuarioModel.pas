@@ -9,7 +9,8 @@ uses
   System.Generics.Collections,
   Spring.Collections,
   Terasoft.Framework.ObjectIface,
-  Interfaces.Conexao;
+  Interfaces.Conexao,
+  System.Variants;
 
 type
   TUsuarioModel = class;
@@ -177,7 +178,9 @@ implementation
 uses
   UsuarioDao,
   Terasoft.Utils,
-  Terasoft.Configuracoes;
+  Terasoft.Configuracoes,
+  EmpresaModel,
+  ConfiguracoesModel;
 
 { TUsuarioModel }
 
@@ -318,23 +321,33 @@ end;
 
 function TUsuarioModel.validaLogin(user, pass: String): Boolean;
 var
-  lUsuarioDao: ITUsuarioDao;
+  lUsuarioDao   : ITUsuarioDao;
+  lEmpresaModel : ITEmpresaModel;
 begin
   try
-    lUsuarioDao := TUsuarioDao.getNewIface(vIConexao);
+    lUsuarioDao   := TUsuarioDao.getNewIface(vIConexao);
+    lEmpresaModel := TEmpresaModel.getNewIface(vIConexao);
 
     lUsuarioDao.objeto.validaLogin(user,pass);
 
-    if lUsuarioDao.objeto.Status = 'S' then
-    begin
-      FID            := lUsuarioDao.objeto.ID;
-      FPERFIL_NEW_ID := lUsuarioDao.objeto.Perfil;
+    if lUsuarioDao.objeto.Status <> 'S' then
+      CriaException('Não foi possível efetuar seu login, entre em contato com o admistrador do sistema.');
 
-      Result := true;
-    end else
-      Result := False;
+    lEmpresaModel.objeto.Carregar;
+
+    if not VarIsNull(lUsuarioDao.objeto.LOJA_ID) and (lUsuarioDao.objeto.LOJA_ID <> '') and (lUsuarioDao.objeto.LOJA_ID <> lEmpresaModel.objeto.LOJA) then
+      CriaException('Usuário vinculado a loja '+lUsuarioDao.objeto.LOJA_ID+', não está autorizado para logar na loja '+lEmpresaModel.objeto.LOJA);
+
+    self.verificaServicoNuvem;
+
+    FID            := lUsuarioDao.objeto.ID;
+    FPERFIL_NEW_ID := lUsuarioDao.objeto.Perfil;
+    FLOJA_ID       := lUsuarioDao.objeto.LOJA_ID;
+    Result := true;
+
   finally
     lUsuarioDao := nil;
+    lEmpresaModel := nil;
   end;
 end;
 
@@ -352,19 +365,30 @@ end;
 
 function TUsuarioModel.verificaServicoNuvem: Boolean;
 var
-  lConfiguracoes : ITerasoftConfiguracoes;
+  lConfiguracoesModel : ITConfiguracoesModel;
 begin
-
   Result := true;
 
-  Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
+  lConfiguracoesModel := TConfiguracoesModel.getNewIface(vIConexao);
+  try
+    lConfiguracoesModel.objeto.WhereView := 'AND CONFIGURACOES.TAG = ''USA_SERVICO_NUVEM'' ';
+    lConfiguracoesModel.objeto.obterLista;
 
-  if lConfiguracoes.objeto.valorTag('USA_SERVICO_NUVEM', 'N', tvBool) = 'S' then
-  begin
-    if (self.FUSUARIO_WINDOWS = '') and (self.FID <> '000001') then
-      Result := false;
+    for lConfiguracoesModel in lConfiguracoesModel.objeto.ConfiguracoessLista do begin
+
+      if lConfiguracoesModel.objeto.VALORCHAR = 'S' then
+      begin
+        if (self.FUSUARIO_WINDOWS = '') and (self.FID <> '000001') then begin
+          CriaException('Este usuário não possui licença de acesso ao sistema em nuvem. Contate o administrador do sistema para liberar seu acesso.');
+          Result := false;
+        end;
+      end;
+
+    end;
+
+  finally
+    lConfiguracoesModel := nil;
   end;
-
 end;
 
 function TUsuarioModel.Salvar: String;
