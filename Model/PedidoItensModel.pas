@@ -787,12 +787,10 @@ end;
 function TPedidoItensModel.BaixarItens: String;
 var
   lMovimentoModel    : ITMovimentoModel;
-  lProdutosModel     : ITProdutosModel;
   lItensProdutoModel : ITItensProdutoModel;
   lItensProduto      : IFDDataset;
 begin
   lMovimentoModel    := TMovimentoModel.getNewIface(vIConexao);
-  lProdutosModel     := TProdutosModel.getNewIface(vIConexao);
   lItensProdutoModel := TItensProdutoModel.getNewIface(vIConexao);
   try
 
@@ -812,7 +810,7 @@ begin
       lMovimentoModel.objeto.TIPO_DOC        := 'P';
       lMovimentoModel.objeto.DATA_MOV        := DateToStr(vIConexao.DataServer);
       lMovimentoModel.objeto.DATA_DOC        := DateToStr(vIConexao.DataServer);
-      lMovimentoModel.objeto.QUANTIDADE_MOV  := (self.QTDE_CALCULADA * lItensProduto.objeto.fieldByName('QTDE_MATERIA_PRIMA').AsFloat).ToString;
+      lMovimentoModel.objeto.QUANTIDADE_MOV  := IntToStr(self.QTDE_CALCULADA * lItensProduto.objeto.fieldByName('QTDE_MATERIA_PRIMA').AsFloat);
       lMovimentoModel.objeto.VALOR_MOV       := '0';
       lMovimentoModel.objeto.CUSTO_ATUAL     := '0';
       lMovimentoModel.objeto.VENDA_ATUAL     := '0';
@@ -828,7 +826,6 @@ begin
     end;
 
   finally
-    lProdutosModel := nil;
     lMovimentoModel := nil;
     lItensProdutoModel := nil;
   end;
