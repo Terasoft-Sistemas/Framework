@@ -109,7 +109,7 @@ begin
   //Retorna a lista com busca no termo 'PROD'
   //Ordenado pelo campo DESCRICAO
 //  for m in epControl.getNovaLista('prod',2) do
-  for m in epControl.getNovaLista('DEBUG',false,2) do
+  for m in epControl.getNovaLista('Estoque',false,2) do
 
   //m := epControl.getByName('CLI3');
 
@@ -217,6 +217,7 @@ procedure TFormEP.selecionaEP(ep: ITEndpointModel);
 begin
   if(fSelecionado=ep) or (ep=nil) then
     exit;
+  ep.objeto.useVCL := true;
   cbFiltros.Enabled := true;
   fSelecionado := ep;
   cbFiltros.Items.Clear;

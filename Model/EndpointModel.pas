@@ -99,6 +99,11 @@ uses
       fPermissao: TipoWideStringFramework;
       fListaImpressao: IListaImpressao;
       fContagem: Integer;
+      fUseVCL: boolean;
+
+    //property useVCL getter/setter
+      function getUseVCL: boolean;
+      procedure setUseVCL(const pValue: boolean);
 
     //property listaImpressao getter/setter
       function getListaImpressao: IListaImpressao;
@@ -193,6 +198,7 @@ uses
       property permissao: TipoWideStringFramework read getPermissao write setPermissao;
 
       property listaImpressao: IListaImpressao read getListaImpressao write setListaImpressao;
+      property useVCL: boolean read getUseVCL write setUseVCL;
 
     public
       procedure loaded;
@@ -632,7 +638,8 @@ begin
                     (f is TByteField));
 
     // tamanho padrão
-    f.DisplayWidth := 1;
+    if(fUseVCL=false) then
+      f.DisplayWidth := 1;
 
     f.Visible := fCfg.ReadBool('visible',f.DisplayName, lVisible);
     f.DisplayLabel := capitalizarTexto(StringReplace(f.DisplayName,'_',' ', [rfReplaceAll]));
@@ -1014,6 +1021,15 @@ begin
   Result := fListaImpressao;
 end;
 
+procedure TEndpointModel.setUseVCL(const pValue: boolean);
+begin
+  fUseVCL := pValue;
+end;
+
+function TEndpointModel.getUseVCL: boolean;
+begin
+  Result := fUseVCL;
+end;
 
 { TDadosImpressaoImpl }
 
