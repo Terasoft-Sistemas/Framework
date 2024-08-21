@@ -38,6 +38,7 @@ type
     FID: String;
     FPerfil: Variant;
     FLOJA_ID: Variant;
+    FUSUARIO_WINDOWS: Variant;
     procedure SetUsuariosLista(const Value: IList<ITUsuarioModel>);
     procedure SetCountView(const Value: String);
     procedure SetIDRecordView(const Value: Integer);
@@ -55,6 +56,7 @@ type
 
     procedure setParams(var pQry: TFDQuery; pUsuarioModel: ITUsuarioModel);
     procedure SetLOJA_ID(const Value: Variant);
+    procedure SetUSUARIO_WINDOWS(const Value: Variant);
 
   public
     constructor _Create(pIConexao : IConexao);
@@ -66,6 +68,7 @@ type
     property Status: String read FStatus write SetStatus;
     property Perfil: Variant read FPerfil write SetPerfil;
     property LOJA_ID: Variant read FLOJA_ID write SetLOJA_ID;
+    property USUARIO_WINDOWS:Variant read FUSUARIO_WINDOWS write SetUSUARIO_WINDOWS;
 
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -406,6 +409,11 @@ begin
   FUsuariosLista := Value;
 end;
 
+procedure TUsuarioDao.SetUSUARIO_WINDOWS(const Value: Variant);
+begin
+  FUSUARIO_WINDOWS := Value;
+end;
+
 procedure TUsuarioDao.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
@@ -454,23 +462,28 @@ begin
   lQry := vIConexao.CriarQuery;
 
   try
-    lSQL := ' Select ID, FANTASIA, NOME, SENHA, STATUS, PERFIL_NEW_ID, LOJA_ID From Usuario Where FANTASIA = ' + QuotedStr(user) + ' and SENHA = ' + QuotedStr(pass);
+    lSQL := ' Select ID, FANTASIA, NOME, SENHA, STATUS, PERFIL_NEW_ID, LOJA_ID, USUARIO_WINDOWS '+
+            '   From Usuario '+
+            '  Where FANTASIA = ' + QuotedStr(user) +
+            '    and SENHA = ' + QuotedStr(pass);
 
     lQry.Open(lSQL);
 
     if lQry.FieldByName('ID').IsNull then
     begin
-      FID      := '0';
-      FStatus  := '0';
-      FPerfil  := '';
-      FLOJA_ID := '';
+      FID              := '0';
+      FStatus          := '0';
+      FPerfil          := '';
+      FLOJA_ID         := '';
+      FUSUARIO_WINDOWS := '';
     end
     else
     begin
-      FID      := lQry.FieldByName('ID').Value;
-      FStatus  := lQry.FieldByName('STATUS').Value;
-      FPerfil  := lQry.FieldByName('PERFIL_NEW_ID').Value;
-      FLOJA_ID := lQry.FieldByName('LOJA_ID').Value;
+      FID              := lQry.FieldByName('ID').AsString;
+      FStatus          := lQry.FieldByName('STATUS').AsString;
+      FPerfil          := lQry.FieldByName('PERFIL_NEW_ID').AsString;
+      FLOJA_ID         := lQry.FieldByName('LOJA_ID').AsString;
+      FUSUARIO_WINDOWS := lQry.FieldByName('USUARIO_WINDOWS').AsString;
     end;
 
   finally

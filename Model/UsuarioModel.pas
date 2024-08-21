@@ -338,11 +338,13 @@ begin
     if not VarIsNull(lUsuarioDao.objeto.LOJA_ID) and (lUsuarioDao.objeto.LOJA_ID <> '') and (lUsuarioDao.objeto.LOJA_ID <> lEmpresaModel.objeto.LOJA) then
       CriaException('Usuário vinculado a loja '+lUsuarioDao.objeto.LOJA_ID+', não está autorizado para logar na loja '+lEmpresaModel.objeto.LOJA);
 
+    FID              := lUsuarioDao.objeto.ID;
+    FPERFIL_NEW_ID   := lUsuarioDao.objeto.Perfil;
+    FLOJA_ID         := lUsuarioDao.objeto.LOJA_ID;
+    FUSUARIO_WINDOWS := lUsuarioDao.objeto.USUARIO_WINDOWS;
+
     self.verificaServicoNuvem;
 
-    FID            := lUsuarioDao.objeto.ID;
-    FPERFIL_NEW_ID := lUsuarioDao.objeto.Perfil;
-    FLOJA_ID       := lUsuarioDao.objeto.LOJA_ID;
     Result := true;
 
   finally
