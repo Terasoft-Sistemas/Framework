@@ -907,9 +907,16 @@ begin
 end;
 
 function TEndpointModel.toTxt;
+  var
+    save: boolean;
 begin
   if(precisaExecutar) then
+  try
+    save := fIgnoraPaginacao;
     executaQuery;
+  finally
+    fIgnoraPaginacao := save;
+  end;
   Result := datasetToTXT(vEstadoConsulta.datasetCompleta.dataset,pVisiveis,pFormatado);
 end;
 
