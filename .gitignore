@@ -10,3 +10,4 @@ Test/Teste_Classes.~dsk
 *.dsk
 Test/Win32/Debug/Teste_Classes_log.txt
 Test/Teste_Classes.res
+Test/Win32/Debug/Teste_Classes_MemoryManager_EventLog.txt

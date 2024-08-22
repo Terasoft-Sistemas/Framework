@@ -219,6 +219,7 @@ implementation
     {$if defined(__DEBUG_ANTONIO__)}
       ClipBrd,
     {$endif}
+    FireDAC.Comp.Client,
     Terasoft.Framework.LOG,
     FuncoesConfig;
 
@@ -554,9 +555,13 @@ begin
     begin
       lDS := queryLoja(lLojaModel, lSQL,'',[]);
       if(Result = nil) then
-        Result := criaDatasetSimples(cloneDataset(lDS.dataset))
-      else
       begin
+        Result := criaDatasetSimples(cloneDataset(lDS.dataset,false));
+        TFDMemTable(Result.dataset).IndexFieldNames := filtroLojas.objeto.campo;
+        TFDMemTable(Result.dataset).IndexesActive := true;
+      end else
+      begin
+
         atribuirRegistrosSoma(lDS.dataset,Result.dataset,filtroLojas.objeto.campo);
         lPrecisaOrder := true;
       end;
@@ -590,18 +595,18 @@ begin
     end;
     if (f<>nil)  then
     begin
+      TFDMemTable(Result.dataset).IndexesActive := false;
       if(CompareText(sDir,'desc')=0) then
       begin
-        index := TClientDataSet(Result.dataset).IndexDefs.AddIndexDef;
-        index.Name := f.FieldName;
-        index.Options := [ixDescending,ixCaseInsensitive];
-        TClientDataSet(Result.dataset).IndexName := f.FieldName;
+        TFDMemTable(Result.dataset).IndexFieldNames := f.FieldName+':DN';
       end else
       begin
-        TClientDataSet(Result.dataset).IndexName := '';
-        TClientDataSet(Result.dataset).IndexFieldNames := f.FieldName;
+        TFDMemTable(Result.dataset).IndexFieldNames := f.FieldName+':AN';
       end;
-    end;
+      TFDMemTable(Result.dataset).IndexesActive := true;
+    end else
+      TFDMemTable(Result.dataset).IndexFieldNames := '';
+
   end;
   if (fIgnoraPaginacao=false) and (lListaLojas.Count<>1) then
   begin
@@ -616,6 +621,8 @@ begin
       while (Result.dataset.RecordCount>fRegistros) do
         Result.dataset.Delete;
   end;
+  if assigned(Result) then
+    Result.dataset.First;
 end;
 
 procedure TEndpointModel.formatarDataset(pDataset: TDataset);
