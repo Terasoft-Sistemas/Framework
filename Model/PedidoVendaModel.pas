@@ -539,7 +539,7 @@ type
     procedure venderItem(pVenderItem: TVenderItem);
     function obterComprasRealizadas(pCliente: String): IFDDataset;
     function retornaGarantia(pNumeroPedido: String) : Boolean;
-
+    procedure DevolverVenda(pVenda : String);
   end;
 
 implementation
@@ -564,15 +564,15 @@ uses
   VendaCartaoModel,
   ReservaModel,
   CaixaControleModel,
-  CreditoClienteModel, ACBrDFeUtil, System.Math, IbptModel;
+  CreditoClienteModel, ACBrDFeUtil, System.Math, IbptModel, WebPedidoModel;
 
 { TPedidoVendaModel }
 
 function TPedidoVendaModel.Excluir(pID: String): String;
 begin
-  self.FID  := pID;
-  self.Acao := tacExcluir;
-  Result    := Salvar;
+  self.FNUMERO_PED := pID;
+  self.Acao        := tacExcluir;
+  Result           := Salvar;
 end;
 
 function TPedidoVendaModel.Incluir: String;
@@ -767,6 +767,52 @@ begin
   FPedidoVendasLista := nil;
   vIConexao := nil;
   inherited;
+end;
+
+procedure TPedidoVendaModel.DevolverVenda(pVenda: String);
+var
+  lPedidoVendaModel        : ITPedidoVendaModel;
+  lContasReceberItensModel,
+  lModel                   : TContasReceberItensModel;
+  lWebPedidoModel          : ITWebPedidoModel;
+begin
+  lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
+  lWebPedidoModel          := TWebPedidoModel.getNewIface(vIConexao);
+  lPedidoVendaModel        := TPedidoVendaModel.getNewIface(vIConexao);
+
+  try
+    lPedidoVendaModel := lPedidoVendaModel.objeto.carregaClasse(pVenda);
+
+    if lPedidoVendaModel.objeto.WEB_PEDIDO_ID = '' then
+      CriaException('Pedido não derivado de venda assistida');
+
+    lContasReceberItensModel.WhereView := ' and contasreceber.pedido_rec = ' + QuotedStr(pVenda) +
+                                          ' and ((coalesce(contasreceberitens.valor_pago, 0) > 0) or (coalesce(contasreceberitens.valorrec_rec,0) > 0))  ' ;
+    lContasReceberItensModel.obterLista;
+
+    if lContasReceberItensModel.TotalRecords > 0 then
+      CriaException('Não for possível devolver o pedido, pois existem recebimentos finalizados. Por favor, reabra-os antes de prosseguir');
+
+    lContasReceberItensModel.WhereView := ' and contasreceber.pedido_rec = ' + QuotedStr(pVenda);
+    lContasReceberItensModel.obterLista;
+
+    for lModel in lContasReceberItensModel.ContasReceberItenssLista do
+    begin
+      lModel.Excluir(lModel.ID);
+    end;
+
+    lPedidoVendaModel.objeto.Excluir(pVenda);
+
+    lWebPedidoModel := lWebPedidoModel.objeto.carregaClasse(lPedidoVendaModel.objeto.WEB_PEDIDO_ID);
+    lWebPedidoModel.objeto.PEDIDO_ID := '';
+    lWebPedidoModel.objeto.STATUS    := 'D';
+    lWebPedidoModel.objeto.Salvar;
+
+  finally
+    lContasReceberItensModel.Free;
+    lPedidoVendaModel := nil;
+    lWebPedidoModel := nil;
+  end;
 end;
 
 procedure TPedidoVendaModel.excluirContasReceber;
