@@ -29,7 +29,7 @@ uses
 
     TEstadoConsulta = record
       filiais, query: String;
-      datasetCompleta, dataset, sumario: IDatasetSimples;
+      datasetCompleta, datasetPaginada: IDatasetSimples;
     end;
 
     IDadosImpressao = interface
@@ -73,7 +73,7 @@ uses
       vIConexao   : IConexao;
       fFiltroController: IController_Filtro;
       fCfg: IMultiConfig;
-      vEstadoConsulta: TEstadoConsulta;
+      vEstadoConsulta, vEstadoConsultaSumario: TEstadoConsulta;
 
       fID: TipoWideStringFramework;
       fMETODO: TipoWideStringFramework;
@@ -93,6 +93,8 @@ uses
     protected
       //fContextoAtual: String;
       //fDatasetCompleta, fDataset, fDatasetSumario: IDatasetSimples;
+      fOperacoes: IListaTextoEx;
+
       fRegistros: Integer;
       fPrimeiro: Integer;
       fOrdem: TipoWideStringFramework;
@@ -167,7 +169,9 @@ uses
 
       function queryLoja(pLojaModel: ITLojasModel; const pQuery: TipoWideStringFramework; pFields: TipoWideStringFramework; pParams: array of Variant): IDataset;
 
-      function precisaExecutar: boolean;
+      function precisaExecutar(var pEstadoConsulta: TEstadoConsulta): boolean;
+
+      function getOperacoes: IListaTextoEx;
 
     public
 
@@ -199,6 +203,7 @@ uses
 
       property listaImpressao: IListaImpressao read getListaImpressao write setListaImpressao;
       property useVCL: boolean read getUseVCL write setUseVCL;
+      property operacoes: IListaTextoEX read getOperacoes;
 
     public
       procedure loaded;
@@ -216,9 +221,7 @@ uses
 
 implementation
   uses
-    {$if defined(__DEBUG_ANTONIO__)}
-      ClipBrd,
-    {$endif}
+    Terasoft.Framework.FuncoesDiversas,
     FireDAC.Comp.Client,
     Terasoft.Framework.LOG,
     FuncoesConfig;
@@ -346,7 +349,7 @@ begin
     save := fIgnoraPaginacao;
     fIgnoraPaginacao := true;
     try
-      if(precisaExecutar) then
+      if precisaExecutar(vEstadoConsulta) then
         fContagem := -1;
       if(fContagem <> -1) then
       begin
@@ -365,7 +368,7 @@ begin
 
   end else
   begin
-    if(precisaExecutar) then
+    if precisaExecutar(vEstadoConsulta) then
       executaQuery;
     Result := vEstadoConsulta.datasetCompleta.dataset.RecordCount;
   end;
@@ -504,10 +507,26 @@ begin
   Result := vIConexao.gdbExterno.criaDataset.query(pQuery,pFields,pParams);
 end;
 
-function TEndpointModel.precisaExecutar: boolean;
+function TEndpointModel.precisaExecutar;
 begin
-  Result := (vEstadoConsulta.query<>getQuery) or (vEstadoConsulta.filiais<>getFiltroLojas.objeto.opcoesSelecionadas.text)
-          or (vEstadoConsulta.datasetCompleta=nil);
+  Result := (pEstadoConsulta.query<>getQuery) or (pEstadoConsulta.filiais<>getFiltroLojas.objeto.opcoesSelecionadas.text)
+          or (pEstadoConsulta.datasetCompleta=nil);
+  if(Result) then
+  begin
+    pEstadoConsulta.datasetPaginada := nil;
+    pEstadoConsulta.datasetCompleta := nil;
+    pEstadoConsulta.filiais := '';
+    pEstadoConsulta.query := '';
+  end;
+
+end;
+
+
+function TEndpointModel.getOperacoes: IListaTextoEx;
+begin
+  if(fOperacoes=nil) then
+    fOperacoes := getCfg.ReadSectionValuesLista('operacoes');
+  Result := fOperacoes;
 end;
 
 function TEndpointModel.executaQuery;
@@ -527,12 +546,7 @@ begin
 
   lListaLojas := getFiltroLojas.objeto.listaLojas;
 
-  if(precisaExecutar) then begin
-    vEstadoConsulta.dataset := nil;
-    vEstadoConsulta.datasetCompleta := nil;
-    vEstadoConsulta.sumario := nil;
-    vEstadoConsulta.filiais := '';
-    vEstadoConsulta.query := '';
+  if precisaExecutar(vEstadoConsulta) then begin
     fContagem := -1;
 
     save := fIgnoraPaginacao;
@@ -556,27 +570,29 @@ begin
       lDS := queryLoja(lLojaModel, lSQL,'',[]);
       if(Result = nil) then
       begin
-        Result := criaDatasetSimples(cloneDataset(lDS.dataset,false));
+        Result := criaDatasetSimples(cloneDataset(lDS.dataset,false,filtroLojas.objeto.campo<>''));
         TFDMemTable(Result.dataset).IndexFieldNames := filtroLojas.objeto.campo;
         TFDMemTable(Result.dataset).IndexesActive := true;
       end else
       begin
 
-        atribuirRegistrosSoma(lDS.dataset,Result.dataset,filtroLojas.objeto.campo);
+        atribuirRegistrosSoma(lDS.dataset,Result.dataset,filtroLojas.objeto.campo,'','',operacoes);
         lPrecisaOrder := true;
       end;
       if(fRegistros=1) then
         break;
     end;
-  end else
+  end else begin
     Result := vEstadoConsulta.datasetCompleta;
+    lPrecisaOrder := true;
+  end;
 
   if assigned(Result) and pFormatar then
     formatarDataset(Result.dataset);
 
-  vEstadoConsulta.dataset := Result;
+  vEstadoConsulta.datasetPaginada := Result;
   if(fRegistros<>1) then
-    vEstadoConsulta.datasetCompleta := criaDatasetSimples(cloneDataset(Result.dataset));
+    vEstadoConsulta.datasetCompleta := criaDatasetSimples(cloneDataset(Result.dataset,false));
   vEstadoConsulta.filiais := getFiltroLojas.objeto.opcoesSelecionadas.text;
 
   Result.dataset.First;
@@ -641,15 +657,15 @@ begin
   for i := 0 to pDataset.FieldCount - 1 do
   begin
     f:=pDataset.Fields[i];
-    lVisible := not (( f.DataType in [ftBytes])  or ((f is TBlobField) and (TBlobField(f).BlobType=ftBlob)) or
-                    (f is TByteField));
+    lVisible := f.Visible and not (( f.DataType in [ftBytes])  or ((f is TBlobField) and  (TBlobField(f).BlobType=ftBlob)) or
+                    (f is TByteField)) and (pos('$$', f.FieldName,1)=0);
 
     // tamanho padrão
     if(fUseVCL=false) then
       f.DisplayWidth := 1;
 
-    f.Visible := fCfg.ReadBool('visible',f.DisplayName, lVisible);
-    f.DisplayLabel := capitalizarTexto(StringReplace(f.DisplayName,'_',' ', [rfReplaceAll]));
+    f.Visible := fCfg.ReadBool('visible',f.FieldName, lVisible);
+    f.DisplayLabel := capitalizarTexto(StringReplace(f.FieldName,'_',' ', [rfReplaceAll]));
     if(f is TNumericField) and not ( f.DataType in [ ftLargeint ] ) then
       TNumericField(f).DisplayFormat := ',0.00';
   end;
@@ -848,16 +864,14 @@ function TEndpointModel.sumario: IDatasetSimples;
     lCampos, lSql: String;
     lLojaModel: ITLojasModel;
     save: boolean;
+    op: String;
+    lTmp: IDatasetSimples;
 begin
-  if(precisaExecutar) then
-  begin
-    vEstadoConsulta.sumario := nil;
-    vEstadoConsulta.datasetCompleta:=nil;
-    vEstadoConsulta.dataset:=nil;
+  lTmp := vEstadoConsulta.datasetPaginada;
+  if precisaExecutar(vEstadoConsultaSumario) and (lTmp=nil) then
     executaQuery;
-  end;
 
-  Result := vEstadoConsulta.sumario;
+  Result := vEstadoConsultaSumario.datasetCompleta;
   if(Result<>nil) then exit;
   save := fIgnoraPaginacao;
   fIgnoraPaginacao := true;
@@ -868,15 +882,20 @@ begin
   end;
 
   lCampos := '';
+  getOperacoes;
 
-  for i := 0 to vEstadoConsulta.dataset.dataset.FieldCount - 1 do
+  for i := 0 to lTmp.dataset.FieldCount - 1 do
   begin
-    f := vEstadoConsulta.dataset.dataset.Fields[i];
-    if (not (f is TNumericField)) or (fCfg.ReadBool('sumario',f.FieldName,true)=false) then continue;
+    f := lTmp.dataset.Fields[i];
+    if (not (f is TNumericField)) or (Pos('$$', f.FieldName, 1)>0) or (fCfg.ReadBool('sumario',f.FieldName,true)=false) then continue;
+
+    op := opFieldToStr(strToOpField(operacoes.strings.Values[f.FieldName]));
+    if stringNoArray(op,['','n'],[osna_CaseInsensitive]) then continue;
+
 
     if(lCampos<>'') then
       lCampos := lCampos + ',' + #13;
-    lCampos := format('%s  sum(%s) %s', [ lCampos, f.FieldName, f.FieldName ]);
+    lCampos := format('%s %s(coalesce(%s,0.0)) %s', [ lCampos, op, f.FieldName, f.FieldName ]);
   end;
 
   if(lCampos='') then
@@ -890,9 +909,9 @@ begin
   begin
     lDS := queryLoja(lLojaModel,lSQL,'',[]);
     if(Result = nil) then
-      Result := criaDatasetSimples(cloneDataset(lDS.dataset))
+      Result := criaDatasetSimples(cloneDataset(lDS.dataset,false,true))
     else
-      atribuirRegistrosSoma(lDS.dataset,Result.dataset,'*');
+      atribuirRegistrosSoma(lDS.dataset,Result.dataset,'*','','',operacoes);
   end;
 
   formatarDataset(Result.dataset);
@@ -901,16 +920,18 @@ begin
   for i := 0 to lDS.dataset.FieldCount - 1 do
   begin
     f := lDS.dataset.Fields[i];
-    f.Visible := fCfg.ReadBool('sumario',f.FieldName,true);
+    f.Visible := f.Visible and fCfg.ReadBool('sumario',f.FieldName,true);
   end;
-  vEstadoConsulta.sumario := Result;
+  vEstadoConsultaSumario.datasetCompleta := Result;
+  vEstadoConsultaSumario.query:=getQuery;
+  vEstadoConsultaSumario.filiais := getFiltroLojas.objeto.opcoesSelecionadas.text;
 end;
 
 function TEndpointModel.toTxt;
   var
     save: boolean;
 begin
-  if(precisaExecutar) then
+  if precisaExecutar(vEstadoConsulta) then
   try
     save := fIgnoraPaginacao;
     executaQuery;
