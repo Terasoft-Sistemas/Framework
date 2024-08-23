@@ -830,6 +830,11 @@ begin
   begin
     fDESCRICAO := 'Período de data e hora ' + lDescricao;
     setTipo(tipoFiltro_DataHoraPeriodo);
+  end else if(stringNoArray(lNome, ['@datahora.null','@periodo.datahora.null'],[osna_CaseInsensitive,osna_SemAcento])) then
+  begin
+    fDESCRICAO := 'Período de data e hora ' + lDescricao;
+    setTipo(tipoFiltro_DataHoraPeriodo);
+    fAceitaNull := true;
   end else if(Copy(lNome,1,1)='@') then
   begin
     setTipo(tipoFiltro_SetSincrono);
