@@ -233,6 +233,7 @@ uses
 
 implementation
   uses
+    Terasoft.Eval,
     Terasoft.Framework.FuncoesDiversas,
     FireDAC.Comp.Client,
     Terasoft.Framework.LOG,
@@ -544,7 +545,10 @@ end;
 function TEndpointModel.getOperacoes: IListaTextoEx;
 begin
   if(fOperacoes=nil) then
+  begin
     fOperacoes := getCfg.ReadSectionValuesLista('operacoes');
+    TStringList(fOperacoes.strings).OwnsObjects := true;
+  end;
   Result := fOperacoes;
 end;
 
@@ -602,14 +606,13 @@ begin
       begin
         if(Result = nil) then
         begin
-          Result := lLojaAsync.dataset;
+          Result := criadatasetSimples(cloneDataset(lLojaAsync.dataset.dataset,false,false,true));
+          //Result := lLojaAsync.dataset;
           TFDMemTable(Result.dataset).IndexFieldNames := campoAgrupamento;
           TFDMemTable(Result.dataset).IndexesActive := true;
-        end else
-        begin
-          atribuirRegistrosSoma(lLojaAsync.dataset.dataset,Result.dataset,campoAgrupamento,'','',operacoes);
-          lPrecisaOrder := true;
         end;
+        atribuirRegistrosSoma(lLojaAsync.dataset.dataset,Result.dataset,campoAgrupamento,'','',operacoes);
+        lPrecisaOrder := true;
       end else
         raise Exception.CreateFmt('Erro ao consultar loja [%s]: [%s]', [lLojaModel.objeto.LOJA, lLojaAsync.resultado.toString ]);
       if(fRegistros=1) then
@@ -694,7 +697,7 @@ begin
   begin
     f:=pDataset.Fields[i];
     lVisible := f.Visible and not (( f.DataType in [ftBytes])  or ((f is TBlobField) and  (TBlobField(f).BlobType=ftBlob)) or
-                    (f is TByteField)) and (pos('$$', f.FieldName,1)=0);
+                    (f is TByteField)) and (pos(DBFIELDINTERNO, f.FieldName,1)=0);
 
     // tamanho padrão
     if(fUseVCL=false) then
@@ -928,10 +931,12 @@ begin
   for i := 0 to lTmp.dataset.FieldCount - 1 do
   begin
     f := lTmp.dataset.Fields[i];
-    if (not (f is TNumericField)) or (Pos('$$', f.FieldName, 1)>0) or (fCfg.ReadBool('sumario',f.FieldName,true)=false) then continue;
+    if (not (f is TNumericField)) or (Pos(DBFIELDINTERNO, f.FieldName, 1)>0) or (fCfg.ReadBool('sumario',f.FieldName,true)=false) then continue;
 
     op := opFieldToStr(strToOpField(operacoes.strings.Values[f.FieldName]));
     if stringNoArray(op,['','n'],[osna_CaseInsensitive]) then continue;
+    if(op='expr') then
+      op := 'sum';
 
     if(lCampos<>'') then
       lCampos := lCampos + ',' + #13;
@@ -961,9 +966,8 @@ begin
     if(lLojaAsync.resultado.erros=0) then
     begin
       if(Result = nil) then
-        Result := lLojaAsync.dataset
-      else
-        atribuirRegistrosSoma(lLojaAsync.dataset.dataset,Result.dataset,'*','','',operacoes);
+        Result := criadatasetSimples(cloneDataset(lLojaAsync.dataset.dataset,false,false,true));
+      atribuirRegistrosSoma(lLojaAsync.dataset.dataset,Result.dataset,'*','','',operacoes);
     end else
       raise Exception.CreateFmt('Erro ao consultar loja [%s]: [%s]', [lLojaModel.objeto.LOJA, lLojaAsync.resultado.toString ]);
   end;
