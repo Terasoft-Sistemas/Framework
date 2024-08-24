@@ -49,7 +49,6 @@ interface
 
     //property status getter/setter
       function getStatus: TStatusQueryAsyncLoja;
-      procedure setStatus(const pValue: TStatusQueryAsyncLoja);
 
       procedure espera;
 
@@ -62,7 +61,7 @@ interface
 
       property criaOperacoes: boolean read getCriaOperacoes write setCriaOperacoes;
       property dataset: IDatasetSimples read getDataset;
-      property status: TStatusQueryAsyncLoja read getStatus write setStatus;
+      property status: TStatusQueryAsyncLoja read getStatus;
       property resultado: IResultadoOperacao read getResultado write setResultado;
       property parametros: TVariantArray read getParametros write setParametros;
       property campos: TipoWideStringFramework read getCampos write setCampos;
@@ -84,14 +83,13 @@ implementation
         IINterface,
         IAsyncRunnable)
     protected
-      vCall: IAsyncCall;
+      [volatile] vCall: IAsyncCall;
       fGDB: IGDB;
       fLoja: ITLojasModel;
       fQuery: TipoWideStringFramework;
       fCampos: TipoWideStringFramework;
       fParametros: TVariantArray;
       fResultado: IResultadoOperacao;
-      fStatus: TStatusQueryAsyncLoja;
       fDataset: IDatasetSimples;
       fCriaOperacoes: boolean;
 
@@ -111,7 +109,6 @@ implementation
 
     //property status getter/setter
       function getStatus: TStatusQueryAsyncLoja;
-      procedure setStatus(const pValue: TStatusQueryAsyncLoja);
 
     //property resultado getter/setter
       function getResultado: IResultadoOperacao;
@@ -164,27 +161,26 @@ begin
   Result := fDataset;
 end;
 
-procedure TQueryLojaAsync.setStatus(const pValue: TStatusQueryAsyncLoja);
-begin
-  fStatus := pValue;
-end;
-
 function TQueryLojaAsync._Release: Integer;
 begin
-  if(fStatus=sqal_Idle) then
-    vCall := nil;
+  getStatus;
   inherited;
 end;
 
 function TQueryLojaAsync.getStatus: TStatusQueryAsyncLoja;
 begin
-  Result := fStatus;
+  if(vCall<>nil) and (vCall.Finished=false) then
+    Result := sqal_Running
+  else
+  begin
+    vCall := nil;
+    Result := sqal_Idle;
+  end;
 end;
 
 procedure TQueryLojaAsync.run;
 begin
-  if(fStatus<>sqal_Idle) then
-    raise Exception.Create('TQueryLojaAsync.run: processo já está rodando');
+  espera;
   fResultado := nil;
   vCall:=AsyncCall(self);
 end;
@@ -218,29 +214,22 @@ procedure TQueryLojaAsync.AsyncRun;
   var
     ds: IDataset;
 begin
-  fStatus := sqal_Running;
   try
-    try
-      //xCall := vCall;
-      if(fQuery='') then
-        raise Exception.Create('TQueryLojaAsync.AsyncRun: Query não especificado.');
+    if(fQuery='') then
+      raise Exception.Create('TQueryLojaAsync.AsyncRun: Query não especificado.');
 
-      if(getGDB.ativo=false) then
-        raise Exception.Create('TQueryLojaAsync.AsyncRun: Banco de dados não conetado.');
+    if(getGDB.ativo=false) then
+      raise Exception.Create('TQueryLojaAsync.AsyncRun: Banco de dados não conetado.');
 
-      ds := fGDB.criaDataset.query(fQuery,fCampos,fParametros);
+    ds := fGDB.criaDataset.query(fQuery,fCampos,fParametros);
 
-      //clone como TFDMemTable e cria campos operações
-      fDataset := criaDatasetSimples(cloneDataset(ds.dataset,false,fCriaOperacoes));
-      fDataset.dataset.First;
+    //clone como TFDMemTable e cria campos operações
+    fDataset := criaDatasetSimples(cloneDataset(ds.dataset,false,fCriaOperacoes));
+    fDataset.dataset.First;
 
-    except
-      on e: Exception do
-        getResultado.formataErro('TQueryLojaAsync.AsyncRun: %s: %s', [ e.ClassName, e.Message ]);
-    end;
-
-  finally
-    fStatus := sqal_Idle;
+  except
+    on e: Exception do
+      getResultado.formataErro('TQueryLojaAsync.AsyncRun: %s: %s', [ e.ClassName, e.Message ]);
   end;
 end;
 
@@ -260,8 +249,9 @@ end;
 
 procedure TQueryLojaAsync.espera;
 begin
-  while fStatus<>sqal_Idle do
+  while getStatus<>sqal_Idle do
     sleep(50);
+  vCall := nil;
 end;
 
 procedure TQueryLojaAsync.execQuery(const pQuery, pCampos: TipoWideStringFramework; pParametros: TVariantArray);
