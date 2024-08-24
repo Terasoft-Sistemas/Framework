@@ -897,8 +897,12 @@ function TEndpointModel.sumario: IDatasetSimples;
     lLojaAsync: IQueryLojaAsync;
 begin
   lTmp := vEstadoConsulta.datasetPaginada;
-  if precisaExecutar(vEstadoConsultaSumario) and (lTmp=nil) then
+  precisaExecutar(vEstadoConsultaSumario);
+  if (lTmp=nil) then
+  begin
     executaQuery;
+    lTmp := vEstadoConsulta.datasetPaginada;
+  end;
 
   Result := vEstadoConsultaSumario.datasetCompleta;
   if(Result<>nil) then exit;
