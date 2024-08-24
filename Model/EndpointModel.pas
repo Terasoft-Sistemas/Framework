@@ -30,7 +30,7 @@ uses
     TListaEndpointModel=IList<ITEndpointModel>;
 
     TEstadoConsulta = record
-      filiais, query: String;
+      filiais,agrupamento, query: String;
       datasetCompleta, datasetPaginada: IDatasetSimples;
     end;
 
@@ -97,6 +97,9 @@ uses
       //fDatasetCompleta, fDataset, fDatasetSumario: IDatasetSimples;
       vAsync: IResultadoOperacao;
 
+      fFiltroLojas: ITFiltroModel;
+      fFiltroAgrupamentos: ITFiltroModel;
+
       fOperacoes: IListaTextoEx;
 
       fRegistros: Integer;
@@ -122,6 +125,8 @@ uses
       procedure setPermissao(const pValue: TipoWideStringFramework);
 
       function getFiltroLojas: ITFiltroModel;
+      function getFiltroAgrupamentos: ITFiltroModel;
+      function getCampoAgrupamento: TipoWideStringFramework;
 
     //property ordem getter/setter
       function getOrdem: TipoWideStringFramework;
@@ -210,6 +215,7 @@ uses
       property listaImpressao: IListaImpressao read getListaImpressao write setListaImpressao;
       property useVCL: boolean read getUseVCL write setUseVCL;
       property operacoes: IListaTextoEX read getOperacoes;
+      property campoAgrupamento: TipoWideStringFramework read getCampoAgrupamento;
 
     public
       procedure loaded;
@@ -521,11 +527,13 @@ end;
 function TEndpointModel.precisaExecutar;
 begin
   Result := (pEstadoConsulta.query<>getQuery) or (pEstadoConsulta.filiais<>getFiltroLojas.objeto.opcoesSelecionadas.text)
+          or (pEstadoConsulta.agrupamento<>campoAgrupamento)
           or (pEstadoConsulta.datasetCompleta=nil);
   if(Result) then
   begin
     pEstadoConsulta.datasetPaginada := nil;
     pEstadoConsulta.datasetCompleta := nil;
+    pEstadoConsulta.agrupamento := '';
     pEstadoConsulta.filiais := '';
     pEstadoConsulta.query := '';
   end;
@@ -595,12 +603,11 @@ begin
         if(Result = nil) then
         begin
           Result := lLojaAsync.dataset;
-          //Result := criaDatasetSimples(cloneDataset(lLojaAsync.dataset.dataset,false,filtroLojas.objeto.campo<>''));
-          TFDMemTable(Result.dataset).IndexFieldNames := filtroLojas.objeto.campo;
+          TFDMemTable(Result.dataset).IndexFieldNames := campoAgrupamento;
           TFDMemTable(Result.dataset).IndexesActive := true;
         end else
         begin
-          atribuirRegistrosSoma(lLojaAsync.dataset.dataset,Result.dataset,filtroLojas.objeto.campo,'','',operacoes);
+          atribuirRegistrosSoma(lLojaAsync.dataset.dataset,Result.dataset,campoAgrupamento,'','',operacoes);
           lPrecisaOrder := true;
         end;
       end else
@@ -622,6 +629,7 @@ begin
   if(fRegistros<>1) then
     vEstadoConsulta.datasetCompleta := criaDatasetSimples(cloneDataset(Result.dataset,false));
   vEstadoConsulta.filiais := getFiltroLojas.objeto.opcoesSelecionadas.text;
+  vEstadoConsulta.agrupamento := campoAgrupamento;
 
   Result.dataset.First;
   if(lPrecisaOrder) then
@@ -776,7 +784,7 @@ procedure TEndpointModel.carregaFiltros;
     lTxt: IListaTextoEx;
     i,j: Integer;
     sName, sValue, lDescricao, lTitulo: String;
-    lFiltroLojas, lFiltro: ITFiltroModel;
+    lFiltro: ITFiltroModel;
     lImpressao: TDadosImpressaoImpl;
 begin
   if fFiltroController=nil then
@@ -787,7 +795,7 @@ begin
 
   fListaImpressao := TCollections.CreateList<IDadosImpressao>;
 
-  lFiltroLojas := nil;
+  fFiltroLojas := nil;
   lTxt := getcfg.ReadSectionValuesLista('filtros');
 
   for i := 0 to lTxt.strings.Count - 1 do
@@ -801,17 +809,17 @@ begin
 
     if(lFiltro.objeto.tipo=tipoFiltro_Lojas) then
     begin
-      lFiltroLojas := lFiltro;
+      fFiltroLojas := lFiltro;
     end else
       fFILTROS.Add(lFiltro);
   end;
 
-  if(lFiltroLojas=nil) then
+  if(fFiltroLojas=nil) then
   begin
-    lFiltroLojas := fFiltroController.getByName(sName);
-    lFiltroLojas.objeto.setTipoPorNome('@lojas');
+    fFiltroLojas := fFiltroController.getByName(sName);
+    fFiltroLojas.objeto.setTipoPorNome('@lojas');
   end;
-  fFILTROS.Insert(0,lFiltroLojas);
+  fFILTROS.Insert(0,fFiltroLojas);
 
   lTxt := getcfg.ReadSectionValuesLista('impressoes');
   if(lTxt.strings.Count=0) then
@@ -971,6 +979,7 @@ begin
   vEstadoConsultaSumario.datasetCompleta := Result;
   vEstadoConsultaSumario.query:=getQuery;
   vEstadoConsultaSumario.filiais := getFiltroLojas.objeto.opcoesSelecionadas.text;
+  vEstadoConsultaSumario.agrupamento := campoAgrupamento;
 end;
 
 function TEndpointModel.toTxt;
@@ -1054,20 +1063,47 @@ begin
   raise Exception.CreateFmt('Falta definir a busca adicional para [%s] ', [ fNOME]);
 end;
 
+function TEndpointModel.getFiltroAgrupamentos: ITFiltroModel;
+  var
+    p: ITFiltroModel;
+begin
+  if(fFiltroAgrupamentos=nil) then
+    for p in FILTROS do
+    begin
+      if (p.objeto.TIPO=tipoFiltro_SetSincrono) and (p.objeto.subTipo=expressao_subtipoFiltro_Agrupamento) then
+      begin
+        fFiltroAgrupamentos := p;
+        break;
+      end;
+    end;
+  Result := fFiltroAgrupamentos;
+end;
+
+function TEndpointModel.getCampoAgrupamento: TipoWideStringFramework;
+begin
+  if(getFiltroAgrupamentos=nil) then
+    Result := ''
+  else
+    Result := trim(fFiltroAgrupamentos.objeto.opcoesSelecionadas.text);
+end;
+
 function TEndpointModel.getFiltroLojas: ITFiltroModel;
   var
     p: ITFiltroModel;
 begin
-  for p in FILTROS do
-  begin
-    if p.objeto.TIPO=tipoFiltro_Lojas then
+  if(fFiltroLojas=nil) then
+    for p in FILTROS do
     begin
-      Result := p;
-      exit;
+      if p.objeto.TIPO=tipoFiltro_Lojas then
+      begin
+        fFiltroLojas := p;
+        break;
+      end;
     end;
-  end;
+  Result := fFiltroLojas;
 
-  raise Exception.CreateFmt('Falta definir o filtro de lojas para [%s] ', [ fNOME]);
+  if(Result=nil) then
+    raise Exception.CreateFmt('Falta definir o filtro de lojas para [%s] ', [ fNOME]);
 end;
 
 procedure TEndpointModel.setOrdem(const pValue: TipoWideStringFramework);

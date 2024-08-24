@@ -176,6 +176,8 @@ type
   end;
 
   const
+    expressao_subtipoFiltro_Agrupamento = subtipoFiltro_1;
+
     expressao_subtipoFiltro_TipoInteiro = subtipoFiltro_1;
     expressao_subtipoFiltro_TipoString  = subtipoFiltro_2;
 
@@ -284,6 +286,8 @@ function TFiltroModel.getOpcoes;///: IDatasetSimples;
     lojaModel: ITLojasModel;
     lojasLista: TILojasModelList;
     lLista: IListaTextoEx;
+  label
+    lblTipoFiltro_Expressao;
 begin
   Result := nil;
   case getTipo of
@@ -310,6 +314,7 @@ begin
 
     tipoFiltro_Expressao:
     begin
+     lblTipoFiltro_Expressao:
       fValoresPadrao := '';
       Result := getGenericID_DescricaoDataset;
       lLista := novaListaTexto;
@@ -323,12 +328,13 @@ begin
         begin
           s := trim(Copy(s,2,MaxInt));
           if(s='') then continue;
+          s := StringReplace(s,'<vazio>','', [ rfReplaceAll, rfIgnoreCase ]);
           s1 := textoEntreTags(s,'','\<');
           if(s1='') then
             s1 := s;
           if fValoresPadrao<>'' then
             fValoresPadrao := fValoresPadrao + #13;
-          fValoresPadrao := fValoresPadrao + s1;
+          fValoresPadrao := fValoresPadrao + StringReplace(s1,'<vazio>','', [ rfReplaceAll, rfIgnoreCase ])
         end;
 
         Result.dataset.Append;
@@ -336,6 +342,8 @@ begin
         Result.dataset.Fields[0].AsString := textoEntreTags(s,'','\<');
         if(Result.dataset.Fields[0].AsString='') then
           Result.dataset.Fields[0].AsString := s;
+
+        Result.dataset.Fields[0].AsString := StringReplace(Result.dataset.Fields[0].AsString,'<vazio>','', [ rfReplaceAll, rfIgnoreCase ]);
 
         Result.dataset.Fields[1].AsString := textoEntreTags(s,'\<','\>');
 
@@ -349,7 +357,11 @@ begin
       exit;
     end;
 
-    tipoFiltro_Set,tipoFiltro_SetSincrono:;
+    tipoFiltro_Set,tipoFiltro_SetSincrono:
+    begin
+      if(fSubTipo=expressao_subtipoFiltro_Agrupamento) then
+        goto lblTipoFiltro_Expressao;
+    end
 
     else
       Exception.CreateFmt('TFiltroModel.getOpcoes: Tipo [%d] desconhecido.', [ Ord(fTipo)] );
@@ -646,7 +658,8 @@ begin
 
     tipoFiltro_Set,tipoFiltro_SetSincrono:
     begin
-      Result := getTipoSet;
+      if(getSubTipo<>expressao_subtipoFiltro_Agrupamento) then
+        Result := getTipoSet;
     end;
 
     tipoFiltro_Busca:
@@ -785,6 +798,16 @@ begin
     fDESCRICAO := lDescricao;
     setTipo(tipoFiltro_Expressao);
     fSubTipo := expressao_subtipoFiltro_TipoInteiro;
+    fMultiploValor := false;
+    fValores := lValores;
+    //Le as opções para inicializar...
+    getOpcoes;
+
+  end else if(stringNoArray(lNome, ['@agrupamento'],[osna_CaseInsensitive,osna_SemAcento])) then
+  begin
+    fDESCRICAO := lDescricao;
+    setTipo(tipoFiltro_SetSincrono);
+    fSubTipo := expressao_subtipoFiltro_Agrupamento;
     fMultiploValor := false;
     fValores := lValores;
     //Le as opções para inicializar...
