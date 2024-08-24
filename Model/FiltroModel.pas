@@ -328,13 +328,12 @@ begin
         begin
           s := trim(Copy(s,2,MaxInt));
           if(s='') then continue;
-          s := StringReplace(s,'<vazio>','', [ rfReplaceAll, rfIgnoreCase ]);
           s1 := textoEntreTags(s,'','\<');
           if(s1='') then
             s1 := s;
           if fValoresPadrao<>'' then
             fValoresPadrao := fValoresPadrao + #13;
-          fValoresPadrao := fValoresPadrao + StringReplace(s1,'<vazio>','', [ rfReplaceAll, rfIgnoreCase ])
+          fValoresPadrao := fValoresPadrao + s1;
         end;
 
         Result.dataset.Append;
@@ -342,8 +341,6 @@ begin
         Result.dataset.Fields[0].AsString := textoEntreTags(s,'','\<');
         if(Result.dataset.Fields[0].AsString='') then
           Result.dataset.Fields[0].AsString := s;
-
-        Result.dataset.Fields[0].AsString := StringReplace(Result.dataset.Fields[0].AsString,'<vazio>','', [ rfReplaceAll, rfIgnoreCase ]);
 
         Result.dataset.Fields[1].AsString := textoEntreTags(s,'\<','\>');
 
@@ -723,8 +720,7 @@ begin
   begin
     fOpcoesSelecionadas.text := trim(fValoresPadrao);
   end;
-
-
+  Result.text := StringReplace(Result.text,'<vazio>', '', [ rfReplaceAll, rfIgnoreCase ]);
 end;
 
 procedure TFiltroModel.setRegistros(const pValue: Integer);
@@ -760,7 +756,6 @@ begin
   lNome := textoEntreTags(pNome,'','|');
   if(lNome='') then
     lNome := pNome;
-  lNome := UpperCase(retiraAcentos(lNome));
   lDescricao:=textoEntreTags(pNome,'|','');
   if(lDescricao='') then
     lDescricao:=fCampo;
@@ -771,6 +766,8 @@ begin
 
   if(fDESCRICAO='') then
     fDESCRICAO := lDescricao;
+
+  lNome := UpperCase(retiraAcentos(lNome));
 
   if(stringNoArray(lNome, ['@periodo','@periodo.data'],[osna_CaseInsensitive,osna_SemAcento])) then
   begin
