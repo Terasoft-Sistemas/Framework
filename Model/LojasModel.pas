@@ -3,6 +3,7 @@ unit LojasModel;
 interface
 
 uses
+  Classes,SysUtils,
   Terasoft.Types,
   Terasoft.Framework.ObjectIface,
   Spring.Collections,
@@ -17,6 +18,7 @@ type
   private
     [weak] mySelf: ITLojasModel;
     vIConexao : IConexao;
+    fConexaoLoja: IConexao;
     FLojassLista: TILojasModelList;
     FAcao: TAcao;
     FLengthPageView: String;
@@ -53,6 +55,7 @@ type
     procedure SetCD(const Value: Variant);
     procedure SetCLIENTE_ID(const Value: Variant);
     procedure SetSTRING_CONEXAO(const Value: Variant);
+    function getConexaoLoja: IConexao;
   public
     property CD: Variant read FCD write SetCD;
     property LOJA: Variant read FLOJA write SetLOJA;
@@ -83,6 +86,7 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property LojaView: String read FLojaView write SetLojaView;
+    property conexaoLoja: IConexao read getConexaoLoja;
   end;
 
 implementation
@@ -99,9 +103,17 @@ end;
 
 destructor TLojasModel.Destroy;
 begin
+  fConexaoLoja := nil;
   FLojassLista := nil;
   vIConexao := nil;
   inherited;
+end;
+
+function TLojasModel.getConexaoLoja: IConexao;
+begin
+  if(fConexaoLoja=nil) then
+    fConexaoLoja := vIConexao.NovaConexao(LOJA,format('%s/%s:%s', [ SERVER,PORT,DATABASE ] ));
+  Result := fConexaoLoja;
 end;
 
 class function TLojasModel.getNewIface(pIConexao: IConexao): ITLojasModel;

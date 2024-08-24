@@ -9,6 +9,7 @@ uses
   System.SysUtils,
   Terasoft.Framework.MultiConfig,
   Spring.Collections,
+  Interfaces.QueryLojaAsync,
   Terasoft.Framework.ObjectIface,
   Terasoft.Framework.Conversoes,
   FiltroController,
@@ -16,6 +17,7 @@ uses
   LojasModel,
   DB,
   DBClient,
+  Terasoft.Framework.Processos,
   Terasoft.Framework.Texto,
   Terasoft.Framework.DB,
   Interfaces.Conexao;
@@ -93,6 +95,8 @@ uses
     protected
       //fContextoAtual: String;
       //fDatasetCompleta, fDataset, fDatasetSumario: IDatasetSimples;
+      vAsync: IResultadoOperacao;
+
       fOperacoes: IListaTextoEx;
 
       fRegistros: Integer;
@@ -102,6 +106,8 @@ uses
       fListaImpressao: IListaImpressao;
       fContagem: Integer;
       fUseVCL: boolean;
+
+      function getAsyncQueryFilial(const loja: ITLojasModel): IQueryLojaAsync;
 
     //property useVCL getter/setter
       function getUseVCL: boolean;
@@ -167,7 +173,7 @@ uses
 
       function getBuscaAvancada: ITFiltroModel;
 
-      function queryLoja(pLojaModel: ITLojasModel; const pQuery: TipoWideStringFramework; pFields: TipoWideStringFramework; pParams: array of Variant): IDataset;
+      procedure queryLoja(pLojaModel: ITLojasModel; const pQuery: TipoWideStringFramework; pCriaOperacoes: boolean);
 
       function precisaExecutar(var pEstadoConsulta: TEstadoConsulta): boolean;
 
@@ -275,9 +281,11 @@ destructor TEndpointModel.Destroy;
   var
     p: IDadosImpressao;
 begin
+  vAsync := nil;
   if(fListaImpressao<>nil) then
     for p in fListaImpressao do
       p.liberaEndpoint;
+  vAsync := nil;
 
   fFiltroController := nil;
   vIConexao:=nil;
@@ -497,14 +505,17 @@ begin
 
 end;
 
-function TEndpointModel.queryLoja(pLojaModel: ITLojasModel;
-    const pQuery: TipoWideStringFramework; pFields: TipoWideStringFramework;
-    pParams: array of Variant): IDataset;
+procedure TEndpointModel.queryLoja(pLojaModel: ITLojasModel; const pQuery: TipoWideStringFramework; pCriaOperacoes: boolean);
+  var
+    qAsync: IQueryLojaAsync;
 begin
   if(pLojaModel=nil) or (pQuery='') then
     exit;
-  vIConexao.ConfigConexaoExterna(pLojaModel.objeto.LOJA);
-  Result := vIConexao.gdbExterno.criaDataset.query(pQuery,pFields,pParams);
+
+  qAsync := getAsyncQueryFilial(pLojaModel);
+  qAsync.criaOperacoes := pCriaOperacoes;
+  qAsync.execQuery(pQuery,'',[]);
+
 end;
 
 function TEndpointModel.precisaExecutar;
@@ -532,7 +543,7 @@ end;
 function TEndpointModel.executaQuery;
   var
     lSql: String;
-    lDS: IDataset;
+    //lDS: IDataset;
     lLojaModel: ITLojasModel;
     lPrecisaOrder: boolean;
     sField,sdir: String;
@@ -541,6 +552,7 @@ function TEndpointModel.executaQuery;
     index: TIndexDef;
     save: boolean;
     lListaLojas: TILojasModelList;
+    lLojaAsync: IQueryLojaAsync;
 begin
   Result := nil;
 
@@ -554,7 +566,7 @@ begin
       fIgnoraPaginacao := true;
 
     try
-      lDS := nil;
+      //lDS := nil;
       lSQL := getQuery;
       logaByTagSeNivel('', format('TEndpointModel.executaQuery: [%s]',[lSql]),LOG_LEVEL_DEBUG);
       vEstadoConsulta.query := lSQL;
@@ -565,23 +577,39 @@ begin
 
     lPrecisaOrder := false;
 
+    i := 0;
     for lLojaModel in getFiltroLojas.objeto.listaLojas do
     begin
-      lDS := queryLoja(lLojaModel, lSQL,'',[]);
-      if(Result = nil) then
-      begin
-        Result := criaDatasetSimples(cloneDataset(lDS.dataset,false,filtroLojas.objeto.campo<>''));
-        TFDMemTable(Result.dataset).IndexFieldNames := filtroLojas.objeto.campo;
-        TFDMemTable(Result.dataset).IndexesActive := true;
-      end else
-      begin
+      queryLoja(lLojaModel, lSQL,i=0);
+      if(fRegistros=1) then
+        break;
+      inc(i);
+    end;
 
-        atribuirRegistrosSoma(lDS.dataset,Result.dataset,filtroLojas.objeto.campo,'','',operacoes);
-        lPrecisaOrder := true;
-      end;
+    for lLojaModel in getFiltroLojas.objeto.listaLojas do
+    begin
+      lLojaAsync := getAsyncQueryFilial(lLojaModel);
+      lLojaAsync.espera;
+      if(lLojaAsync.resultado.erros=0) then
+      begin
+        if(Result = nil) then
+        begin
+          Result := lLojaAsync.dataset;
+          //Result := criaDatasetSimples(cloneDataset(lLojaAsync.dataset.dataset,false,filtroLojas.objeto.campo<>''));
+          TFDMemTable(Result.dataset).IndexFieldNames := filtroLojas.objeto.campo;
+          TFDMemTable(Result.dataset).IndexesActive := true;
+        end else
+        begin
+          atribuirRegistrosSoma(lLojaAsync.dataset.dataset,Result.dataset,filtroLojas.objeto.campo,'','',operacoes);
+          lPrecisaOrder := true;
+        end;
+      end else
+        raise Exception.CreateFmt('Erro ao consultar loja [%s]: [%s]', [lLojaModel.objeto.LOJA, lLojaAsync.resultado.toString ]);
       if(fRegistros=1) then
         break;
     end;
+
+
   end else begin
     Result := vEstadoConsulta.datasetCompleta;
     lPrecisaOrder := true;
@@ -858,7 +886,7 @@ end;
 function TEndpointModel.sumario: IDatasetSimples;
   var
     lQueryOriginal: TipoWideStringFramework;
-    lDS: IDataset;
+    //lDS: IDataset;
     f: TField;
     i: Integer;
     lCampos, lSql: String;
@@ -866,6 +894,7 @@ function TEndpointModel.sumario: IDatasetSimples;
     save: boolean;
     op: String;
     lTmp: IDatasetSimples;
+    lLojaAsync: IQueryLojaAsync;
 begin
   lTmp := vEstadoConsulta.datasetPaginada;
   if precisaExecutar(vEstadoConsultaSumario) and (lTmp=nil) then
@@ -892,7 +921,6 @@ begin
     op := opFieldToStr(strToOpField(operacoes.strings.Values[f.FieldName]));
     if stringNoArray(op,['','n'],[osna_CaseInsensitive]) then continue;
 
-
     if(lCampos<>'') then
       lCampos := lCampos + ',' + #13;
     lCampos := format('%s %s(coalesce(%s,0.0)) %s', [ lCampos, op, f.FieldName, f.FieldName ]);
@@ -905,21 +933,35 @@ begin
   logaByTagSeNivel('', format('TEndpointModel.sumario: [%s]',[lSql]),LOG_LEVEL_DEBUG);
 
 
+  i:=0;
   for lLojaModel in getFiltroLojas.objeto.listaLojas do
   begin
-    lDS := queryLoja(lLojaModel,lSQL,'',[]);
-    if(Result = nil) then
-      Result := criaDatasetSimples(cloneDataset(lDS.dataset,false,true))
-    else
-      atribuirRegistrosSoma(lDS.dataset,Result.dataset,'*','','',operacoes);
+    queryLoja(lLojaModel,lSQL,i=0);
+    inc(i);
+  end;
+
+  for lLojaModel in getFiltroLojas.objeto.listaLojas do
+  begin
+    lLojaAsync := getAsyncQueryFilial(lLojaModel);
+
+    lLojaAsync.espera;
+
+    if(lLojaAsync.resultado.erros=0) then
+    begin
+      if(Result = nil) then
+        Result := lLojaAsync.dataset
+      else
+        atribuirRegistrosSoma(lLojaAsync.dataset.dataset,Result.dataset,'*','','',operacoes);
+    end else
+      raise Exception.CreateFmt('Erro ao consultar loja [%s]: [%s]', [lLojaModel.objeto.LOJA, lLojaAsync.resultado.toString ]);
   end;
 
   formatarDataset(Result.dataset);
   getCfg;
 
-  for i := 0 to lDS.dataset.FieldCount - 1 do
+  for i := 0 to Result.dataset.FieldCount - 1 do
   begin
-    f := lDS.dataset.Fields[i];
+    f := Result.dataset.Fields[i];
     f.Visible := f.Visible and fCfg.ReadBool('sumario',f.FieldName,true);
   end;
   vEstadoConsultaSumario.datasetCompleta := Result;
@@ -1065,6 +1107,20 @@ function TEndpointModel.getUseVCL: boolean;
 begin
   Result := fUseVCL;
 end;
+
+function TEndpointModel.getAsyncQueryFilial(const loja: ITLojasModel): IQueryLojaAsync;
+begin
+  checkResultadoOperacao(vAsync);
+  Result := nil;
+
+  supports(vAsync.propriedade[loja.objeto.LOJA].asInterface,IQueryLojaAsync, Result);
+
+  if(Result = nil)then begin
+    Result := getQueryLojaAsync(loja);
+    vAsync.propriedade[loja.objeto.LOJA].asInterface := Result;
+  end;
+end;
+
 
 { TDadosImpressaoImpl }
 
