@@ -1082,7 +1082,7 @@ end;
 function TEndpointModel.getCampoAgrupamento: TipoWideStringFramework;
 begin
   if(getFiltroAgrupamentos=nil) then
-    Result := fFiltroLojas.objeto.opcoesSelecionadas.Text
+    Result := fFiltroLojas.objeto.campo
   else
     Result := trim(fFiltroAgrupamentos.objeto.opcoesSelecionadas.text);
 
