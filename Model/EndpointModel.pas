@@ -816,7 +816,7 @@ begin
 
   if(fFiltroLojas=nil) then
   begin
-    fFiltroLojas := fFiltroController.getByName(sName);
+    fFiltroLojas := fFiltroController.getByName('');
     fFiltroLojas.objeto.setTipoPorNome('@lojas');
   end;
   fFILTROS.Insert(0,fFiltroLojas);
@@ -1082,9 +1082,10 @@ end;
 function TEndpointModel.getCampoAgrupamento: TipoWideStringFramework;
 begin
   if(getFiltroAgrupamentos=nil) then
-    Result := ''
+    Result := fFiltroLojas.objeto.opcoesSelecionadas.Text
   else
     Result := trim(fFiltroAgrupamentos.objeto.opcoesSelecionadas.text);
+
 end;
 
 function TEndpointModel.getFiltroLojas: ITFiltroModel;
