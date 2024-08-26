@@ -803,7 +803,7 @@ begin
 
     lPedidoVendaModel.objeto.Excluir(pVenda);
 
-    lWebPedidoModel := lWebPedidoModel.objeto.carregaClasse(lPedidoVendaModel.objeto.WEB_PEDIDO_ID);
+    lWebPedidoModel := lWebPedidoModel.objeto.Alterar(lPedidoVendaModel.objeto.WEB_PEDIDO_ID);
     lWebPedidoModel.objeto.PEDIDO_ID := '';
     lWebPedidoModel.objeto.STATUS    := 'D';
     lWebPedidoModel.objeto.Salvar;
