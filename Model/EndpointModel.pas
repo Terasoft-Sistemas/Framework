@@ -703,6 +703,8 @@ begin
     if(fUseVCL=false) then
       f.DisplayWidth := 1;
 
+    fCfg.ReadInteger('width',f.FieldName,f.DisplayWidth);
+
     f.Visible := fCfg.ReadBool('visible',f.FieldName, lVisible);
     f.DisplayLabel := capitalizarTexto(StringReplace(f.FieldName,'_',' ', [rfReplaceAll]));
     if(f is TNumericField) and not ( f.DataType in [ ftLargeint ] ) then
