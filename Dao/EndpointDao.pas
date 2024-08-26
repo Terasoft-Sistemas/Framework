@@ -7,6 +7,7 @@ interface
 uses
   Terasoft.Framework.Types,
   EndpointModel,
+  DB,
   FireDAC.Comp.Client,
   System.SysUtils,
   Interfaces.Conexao,
@@ -39,6 +40,8 @@ type
 
     function getByName(pName: TipoWideStringFramework): ITEndpointModel;
     function getLista(pFiltro: IListaTexto=nil; pStartingWith: boolean = false; pOrdem: Integer = 2): TListaEndpointModel;
+
+    function getFromRecord(pDataset: TDataset): ITEndpointModel;
 
   end;
 
@@ -246,6 +249,14 @@ begin
 
 end;
 
+function TEndpointDao.getFromRecord(pDataset: TDataset): ITEndpointModel;
+begin
+  Result := TEndpointModel.getNewIface(vIConexao);
+  if(pDataset=nil) or (pDataset.recordCount=0) then
+    exit;
+  vIConstrutorDao.setDatasetToModel(Result.objeto._TABELA_,pDataset,Result.objeto);
+  Result.objeto.loaded;
 
+end;
 
 end.
