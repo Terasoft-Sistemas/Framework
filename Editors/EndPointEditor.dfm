@@ -1,4 +1,4 @@
-object frmEditorConsultas: TfrmEditorConsultas
+﻿object frmEditorConsultas: TfrmEditorConsultas
   Left = 0
   Top = 0
   Caption = 'Editor de Consultas'
@@ -33,66 +33,58 @@ object frmEditorConsultas: TfrmEditorConsultas
     Height = 64
     Align = alTop
     TabOrder = 1
-    ExplicitLeft = 1
-    ExplicitTop = 260
-    ExplicitWidth = 1040
     DesignSize = (
       1111
       64)
     object btnNovo: TBitBtn
-      Left = 707
-      Top = 16
+      Left = 711
+      Top = 17
       Width = 75
       Height = 25
       Anchors = [akTop, akRight]
       Caption = 'Novo'
       TabOrder = 0
       OnClick = btnNovoClick
-      ExplicitLeft = 636
     end
     object btnEditar: TBitBtn
-      Left = 788
-      Top = 16
+      Left = 790
+      Top = 17
       Width = 75
       Height = 25
       Anchors = [akTop, akRight]
       Caption = 'Editar'
       TabOrder = 1
       OnClick = btnEditarClick
-      ExplicitLeft = 717
     end
     object btnCancelar: TBitBtn
       Left = 869
-      Top = 16
+      Top = 17
       Width = 75
       Height = 25
       Anchors = [akTop, akRight]
       Caption = 'Cancelar'
       TabOrder = 2
       OnClick = btnCancelarClick
-      ExplicitLeft = 798
     end
     object btnGravar: TBitBtn
       Left = 950
-      Top = 16
+      Top = 17
       Width = 75
       Height = 25
       Anchors = [akTop, akRight]
       Caption = 'Gravar'
       TabOrder = 3
       OnClick = btnGravarClick
-      ExplicitLeft = 879
     end
     object Testar: TBitBtn
       Left = 1031
-      Top = 16
+      Top = 17
       Width = 75
       Height = 25
       Anchors = [akTop, akRight]
       Caption = 'Testar'
       TabOrder = 4
       OnClick = TestarClick
-      ExplicitLeft = 960
     end
   end
   object pnEdicao: TPanel
@@ -104,20 +96,15 @@ object frmEditorConsultas: TfrmEditorConsultas
     Caption = 'pnEdicao'
     Enabled = False
     TabOrder = 2
-    ExplicitLeft = 320
-    ExplicitTop = 408
-    ExplicitWidth = 185
-    ExplicitHeight = 41
     object PC: TPageControl
       Left = 1
       Top = 1
       Width = 1109
       Height = 328
-      ActivePage = TabSheet1
+      ActivePage = tsFormatações
       Align = alClient
       TabOrder = 0
-      ExplicitWidth = 1038
-      ExplicitHeight = 283
+      OnChange = PCChange
       object tsDados: TTabSheet
         Caption = 'Dados'
         ImageIndex = 1
@@ -163,10 +150,6 @@ object frmEditorConsultas: TfrmEditorConsultas
           DataField = 'query'
           DataSource = dsEP
           TabOrder = 0
-          ExplicitLeft = 264
-          ExplicitTop = 64
-          ExplicitWidth = 185
-          ExplicitHeight = 89
         end
       end
       object TabSheet1: TTabSheet
@@ -189,7 +172,6 @@ object frmEditorConsultas: TfrmEditorConsultas
           Height = 298
           Align = alLeft
           TabOrder = 1
-          ExplicitHeight = 253
           object btnFiltroEditar: TBitBtn
             Left = 6
             Top = 55
@@ -244,9 +226,6 @@ object frmEditorConsultas: TfrmEditorConsultas
           Align = alClient
           TabOrder = 2
           Visible = False
-          ExplicitLeft = 414
-          ExplicitWidth = 613
-          ExplicitHeight = 253
           object lblNome: TLabel
             Left = 24
             Top = 8
@@ -310,6 +289,163 @@ object frmEditorConsultas: TfrmEditorConsultas
           end
         end
       end
+      object tsFormatações: TTabSheet
+        Caption = 'Formata'#231#245'es'
+        ImageIndex = 3
+        object gridCampos: TXDBGrid
+          Left = 0
+          Top = 0
+          Width = 249
+          Height = 298
+          Align = alLeft
+          DataSource = dsCampos
+          GridStyle.VisualStyle = vsXPStyle
+          ReadOnly = True
+          TabOrder = 0
+          OnCellClick = gridCamposCellClick
+        end
+        object pnGestaoFormatacoes: TPanel
+          Left = 249
+          Top = 0
+          Width = 88
+          Height = 298
+          Align = alLeft
+          TabOrder = 1
+          ExplicitLeft = 255
+          object btnGestaoformatacoesEditar: TBitBtn
+            Left = 7
+            Top = 55
+            Width = 75
+            Height = 25
+            Caption = 'Editar'
+            TabOrder = 0
+            OnClick = btnGestaoformatacoesEditarClick
+          end
+          object btnGestaoformatacoesCancelar: TBitBtn
+            Left = 6
+            Top = 117
+            Width = 75
+            Height = 25
+            Caption = 'Cancelar'
+            TabOrder = 1
+            OnClick = btnGestaoformatacoesCancelarClick
+          end
+          object btnGestaoformatacoesSalvar: TBitBtn
+            Left = 6
+            Top = 86
+            Width = 75
+            Height = 25
+            Caption = 'Salvar'
+            TabOrder = 2
+            OnClick = btnGestaoformatacoesSalvarClick
+          end
+        end
+        object pnPropCampo: TPanel
+          Left = 337
+          Top = 0
+          Width = 764
+          Height = 298
+          Align = alClient
+          TabOrder = 2
+          ExplicitLeft = 536
+          ExplicitTop = 120
+          ExplicitWidth = 185
+          ExplicitHeight = 41
+          object edtFormatacaoCampoFormato: TLabeledEdit
+            Left = 32
+            Top = 123
+            Width = 169
+            Height = 23
+            EditLabel.Width = 45
+            EditLabel.Height = 15
+            EditLabel.Caption = 'Formato'
+            TabOrder = 3
+            Text = ''
+          end
+          object edtFormatacaoCampoTamanho: TLabeledEdit
+            Left = 32
+            Top = 176
+            Width = 169
+            Height = 23
+            EditLabel.Width = 49
+            EditLabel.Height = 15
+            EditLabel.Caption = 'Tamanho'
+            TabOrder = 4
+            Text = ''
+          end
+          object edtFormatacaoCampoVisivel: TCheckBox
+            Left = 32
+            Top = 16
+            Width = 97
+            Height = 17
+            Caption = 'Vis'#237'vel'
+            TabOrder = 0
+          end
+          object edtFormatacaoCampoSumario: TCheckBox
+            Left = 232
+            Top = 16
+            Width = 97
+            Height = 17
+            Caption = 'Sum'#225'rio'
+            TabOrder = 1
+          end
+          object edtFormatacaoCampoTitulo: TLabeledEdit
+            Left = 32
+            Top = 70
+            Width = 169
+            Height = 23
+            EditLabel.Width = 30
+            EditLabel.Height = 15
+            EditLabel.Caption = 'T'#237'tulo'
+            TabOrder = 2
+            Text = ''
+          end
+          object edtFormatacaoCampoExpressao: TLabeledEdit
+            Left = 232
+            Top = 176
+            Width = 393
+            Height = 23
+            EditLabel.Width = 52
+            EditLabel.Height = 15
+            EditLabel.Caption = 'Express'#227'o'
+            TabOrder = 5
+            Text = ''
+          end
+          object edtFormatacaoCampoOperacoes: TRadioGroup
+            Left = 232
+            Top = 56
+            Width = 265
+            Height = 89
+            Caption = 'Opera'#231#245'es'
+            Columns = 2
+            Items.Strings = (
+              'Nada'
+              'Soma'
+              'M'#233'dia,'
+              'Min'
+              'Max'
+              'Count'
+              'Express'#227'o')
+            TabOrder = 6
+            OnClick = edtFormatacaoCampoOperacoesClick
+          end
+          object edtFormatacaoCampoPosicao: TLabeledEdit
+            Left = 32
+            Top = 232
+            Width = 169
+            Height = 23
+            EditLabel.Width = 41
+            EditLabel.Height = 15
+            EditLabel.Caption = 'Posi'#231#227'o'
+            TabOrder = 7
+            Text = ''
+          end
+        end
+      end
+      object tsImpressoes: TTabSheet
+        Caption = 'Impress'#245'es'
+        ImageIndex = 4
+      end
     end
   end
   object dsEP: TDataSource
@@ -322,5 +458,10 @@ object frmEditorConsultas: TfrmEditorConsultas
     AutoEdit = False
     Left = 360
     Top = 96
+  end
+  object dsCampos: TDataSource
+    AutoEdit = False
+    Left = 424
+    Top = 88
   end
 end

@@ -54,6 +54,23 @@ type
     btnFiltroExcluir: TBitBtn;
     edPropFiltroNome: TComboBox;
     lblNome: TLabel;
+    tsFormatações: TTabSheet;
+    gridCampos: TXDBGrid;
+    dsCampos: TDataSource;
+    pnGestaoFormatacoes: TPanel;
+    btnGestaoformatacoesEditar: TBitBtn;
+    btnGestaoformatacoesCancelar: TBitBtn;
+    btnGestaoformatacoesSalvar: TBitBtn;
+    pnPropCampo: TPanel;
+    edtFormatacaoCampoFormato: TLabeledEdit;
+    edtFormatacaoCampoTamanho: TLabeledEdit;
+    edtFormatacaoCampoVisivel: TCheckBox;
+    edtFormatacaoCampoSumario: TCheckBox;
+    edtFormatacaoCampoTitulo: TLabeledEdit;
+    edtFormatacaoCampoExpressao: TLabeledEdit;
+    edtFormatacaoCampoOperacoes: TRadioGroup;
+    edtFormatacaoCampoPosicao: TLabeledEdit;
+    tsImpressoes: TTabSheet;
     procedure FormShow(Sender: TObject);
     procedure btnNovoClick(Sender: TObject);
     procedure btnCancelarClick(Sender: TObject);
@@ -67,25 +84,36 @@ type
     procedure btnFiltroSalvarClick(Sender: TObject);
     procedure btnFiltroNovoClick(Sender: TObject);
     procedure btnFiltroExcluirClick(Sender: TObject);
+    procedure PCChange(Sender: TObject);
+    procedure btnGestaoformatacoesEditarClick(Sender: TObject);
+    procedure gridCamposCellClick(Column: TXColumn);
+    procedure btnGestaoformatacoesCancelarClick(Sender: TObject);
+    procedure btnGestaoformatacoesSalvarClick(Sender: TObject);
+    procedure edtFormatacaoCampoOperacoesClick(Sender: TObject);
   private
     { Private declarations }
   protected
+    vQuery: IDatasetSimples;
     vDatasetEndpoints: IDataset;
-    vDatasetFiltros,vDatasetFiltrosValores: IDatasetSimples;
+    vDatasetCampos, vDatasetFiltros,vDatasetFiltrosValores: IDatasetSimples;
+
 
     [weak] mySelf: ITfrmEditorConsultas;
     vIConexao:IConexao;
-    epControl: IController_Endpoint;
+    vEPControl: IController_Endpoint;
     procedure query;
     procedure beforePost(DataSet: TDataSet);
     procedure ajustaBotoes;
     procedure ajustaBotoesFiltros;
+    procedure ajustaBotoesCampos;
     function critica(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
     function getDatasetFiltros: IDatasetSimples;
     procedure preencheFiltros;
+    procedure preencheCampos;
     procedure geraConfiguracoesFiltro;
     function getMultiConfigPropriedades: IMultiConfig;
     procedure geraPropriedades001;
+    procedure openQuery;
   public
     constructor _Create(pIConexao:IConexao);
     class function getNewIface(pIConexao: IConexao): ITfrmEditorConsultas;
@@ -114,6 +142,24 @@ begin
     dataset.FieldByName('ID').AsString := vIConexao.Generetor('gen_endpoint');
     dataset.FieldByName('metodo').AsString := 'RELATORIO';
   end;
+end;
+
+procedure TfrmEditorConsultas.btnGestaoformatacoesCancelarClick(
+  Sender: TObject);
+begin
+  if not pergunta('Deseja cancelar a edição da formatação do campo selecionado?') then
+    exit;
+
+  vDatasetCampos.dataset.Cancel;
+  preencheCampos;
+  ajustaBotoes;
+end;
+
+procedure TfrmEditorConsultas.btnGestaoformatacoesEditarClick(Sender: TObject);
+begin
+  vDatasetCampos.dataset.Edit;
+  preencheCampos;
+  ajustaBotoes;
 end;
 
 procedure TfrmEditorConsultas.btnGravarClick(Sender: TObject);
@@ -235,6 +281,152 @@ begin
 
 end;
 
+procedure TfrmEditorConsultas.btnGestaoformatacoesSalvarClick(Sender: TObject);
+  var
+    lCFG: IMultiConfig;
+    campo,str: String;
+    op: TOperacoesField;
+    f: TField;
+    lOriginal: String;
+begin
+  lCFG := getMultiConfigPropriedades;
+
+  lOriginal := vDatasetEndpoints.fieldByName('propriedades').AsString;
+
+  campo := vDatasetCampos.dataset.Fields[0].AsString;
+  f := vQuery.dataset.FieldByName(campo);
+  if(f=nil) then
+    exit;
+
+  op := TOperacoesField(edtFormatacaoCampoOperacoes.ItemIndex);
+
+  edtFormatacaoCampoExpressao.Text := trim(edtFormatacaoCampoExpressao.Text);
+
+  //Críticas
+
+  if (op=tofExpressao) and (edtFormatacaoCampoExpressao.Text='') then
+    msgErro('Falta definir a expressão para a operação do campo.');
+
+  if(edtFormatacaoCampoTamanho.Text<>'') and (StrToIntDef(edtFormatacaoCampoTamanho.Text,-1)<0) then
+    msgErro('O valor TAMANHO especificado é inválido.');
+
+
+
+  //Fim das críticas
+
+
+  if(edtFormatacaoCampoVisivel.Checked) then
+    lCFG.deleteKey('visible',campo)
+  else
+    lCFG.WriteBool('visible',campo,false);
+
+  if(edtFormatacaoCampoSumario.Checked) then
+    lCFG.deleteKey('sumario',campo)
+  else
+    lCFG.WriteBool('sumario',campo,false);
+
+  if(edtFormatacaoCampoTitulo.Text='') then
+    lCFG.deleteKey('label',campo)
+  else
+    lCFG.WriteString('label',campo,edtFormatacaoCampoTitulo.Text);
+
+  if(edtFormatacaoCampoTamanho.Text='') then
+    lCFG.deleteKey('width',campo)
+  else
+    lCFG.WriteString('width',campo,edtFormatacaoCampoTamanho.Text);
+
+  if(edtFormatacaoCampoPosicao.Text='') then
+    lCFG.deleteKey('posicao',campo)
+  else
+    lCFG.WriteString('posicao',campo,edtFormatacaoCampoPosicao.Text);
+
+
+  if(edtFormatacaoCampoFormato.Text='') then
+    lCFG.deleteKey('formato',campo)
+  else
+    lCFG.WriteString('formato',campo,edtFormatacaoCampoFormato.Text);
+
+  if(op=tofSoma) then
+    lCFG.deleteKey('operacoes',campo)
+  else
+  begin
+    str := opFieldToStr(op);
+    if(op=tofExpressao) then
+      str := format('%s=%s',[str,trim(edtFormatacaoCampoExpressao.Text)]);
+    lCFG.WriteString('operacoes',campo,str);
+  end;
+
+  str := inputMemo('Verifique os valores','Propriedades', lCFG.toString);
+
+  vDatasetEndpoints.fieldByName('propriedades').AsString := str;
+
+  if (pergunta('Deseja salvar as alterações na formatação do campo?')=false) then
+  begin
+    vDatasetEndpoints.fieldByName('propriedades').AsString := lOriginal;
+    exit;
+  end;
+
+  vDatasetCampos.dataset.CheckBrowseMode;
+  preencheCampos;
+  ajustaBotoes;
+
+{
+
+  edtFormatacaoCampoPosicao.Text := lCFG.ReadString('posicao', campo, '');
+}
+
+end;
+
+
+
+procedure TfrmEditorConsultas.preencheCampos;
+  var
+    lCfg: IMultiConfig;
+    campo: String;
+    f: TField;
+    op: TOperacoesField;
+begin
+  if(vDatasetCampos=nil) then exit;
+  if(vQuery=nil) then exit;
+  campo := vDatasetCampos.dataset.Fields[0].AsString;
+  f := vQuery.dataset.FieldByName(campo);
+  if(f=nil) then
+    exit;
+  lCFG := getMultiConfigPropriedades;
+
+  op := strToOpField(lCFG.ReadString('operacoes', campo, ''));
+  edtFormatacaoCampoTitulo.Text := lCFG.ReadString('label', campo, '');
+  if(f is TNumericField) then
+  begin
+    edtFormatacaoCampoFormato.Enabled := true;
+    edtFormatacaoCampoFormato.Text := lCFG.ReadString('formato', campo, '');
+    edtFormatacaoCampoSumario.Enabled := true;
+    edtFormatacaoCampoSumario.Checked := lCFG.ReadBool('sumario', campo, true);
+    edtFormatacaoCampoSumario.Enabled := true;
+    edtFormatacaoCampoOperacoes.Enabled := true;
+    edtFormatacaoCampoOperacoes.ItemIndex := Integer(op);
+    edtFormatacaoCampoExpressao.Enabled := op=tofExpressao;
+  end else
+  begin
+    edtFormatacaoCampoFormato.Enabled := false;
+    edtFormatacaoCampoFormato.Text := '';
+    edtFormatacaoCampoSumario.Enabled := false;
+    edtFormatacaoCampoSumario.Checked := false;
+    edtFormatacaoCampoSumario.Enabled := false;
+    edtFormatacaoCampoExpressao.Text := '';
+    edtFormatacaoCampoOperacoes.Enabled := false;
+    edtFormatacaoCampoExpressao.Enabled := false;
+  end;
+  if(edtFormatacaoCampoExpressao.Enabled) then
+    edtFormatacaoCampoExpressao.Text := textoEntreTags(lCFG.ReadString('operacoes', campo, ''),'=','')
+  else
+    edtFormatacaoCampoExpressao.Text := '';
+
+  edtFormatacaoCampoTamanho.Text := lCFG.ReadString('width', campo,'');
+  edtFormatacaoCampoVisivel.Checked := lCFG.ReadBool('visible', campo, f.Visible);
+  edtFormatacaoCampoPosicao.Text := lCFG.ReadString('posicao', campo, '');
+end;
+
 procedure TfrmEditorConsultas.btnFiltroEditarClick(Sender: TObject);
 begin
   vDatasetFiltros.dataset.Edit;
@@ -298,6 +490,25 @@ begin
 
 end;
 
+procedure TfrmEditorConsultas.ajustaBotoesCampos;
+begin
+  if(vDatasetCampos=nil) then
+  begin
+    gridCampos.Enabled := false;
+    btnGestaoformatacoesEditar.Enabled := false;
+    btnGestaoformatacoesSalvar.Enabled := false;
+    btnGestaoformatacoesCancelar.Enabled := false;
+    pnPropCampo.Enabled := false;
+    exit;
+  end;
+  gridCampos.Enabled := vDatasetCampos.dataset.State=dsBrowse;
+  pnPropCampo.Enabled := vDatasetCampos.dataset.State<>dsBrowse;
+
+  btnGestaoformatacoesEditar.Enabled := (vDatasetCampos.dataset.State=dsBrowse) and (vDatasetCampos.dataset.RecordCount>0);
+  btnGestaoformatacoesCancelar.Enabled := vDatasetCampos.dataset.State<>dsBrowse;
+  btnGestaoformatacoesSalvar.Enabled := vDatasetCampos.dataset.State<>dsBrowse;
+end;
+
 procedure TfrmEditorConsultas.ajustaBotoesFiltros;
 begin
   if(vDatasetFiltros=nil) then
@@ -324,6 +535,7 @@ end;
 procedure TfrmEditorConsultas.ajustaBotoes;
 begin
   ajustaBotoesFiltros;
+  ajustaBotoesCampos;
   pnEdicao.Enabled := vDatasetEndpoints.dataset.State<>dsBrowse;
   gridEP.Enabled := vDatasetEndpoints.dataset.State=dsBrowse;
   btnNovo.Enabled := vDatasetEndpoints.dataset.State=dsBrowse;
@@ -340,6 +552,30 @@ begin
   edNome.SetFocus;
 end;
 
+procedure TfrmEditorConsultas.openQuery;
+  var
+    ep: ITEndpointModel;
+    i: Integer;
+begin
+  ep := vEPControl.getFromRecord(vDatasetEndpoints.dataset);
+  ep.objeto.registros := 1;
+  vQuery := ep.objeto.executaQuery;
+  vDatasetCampos := getGenericID_DescricaoDataset(32,0,true);
+  vDatasetCampos.dataset.Fields[0].DisplayLabel := 'Campo';
+  for i := 0 to vQuery.dataset.FieldCount - 1 do
+  begin
+    if (pos(DBFIELDINTERNO,vQuery.dataset.Fields[i].FieldName,1)>0) then continue;
+
+    vDatasetCampos.dataset.Append;
+    vDatasetCampos.dataset.Fields[0].AsString := vQuery.dataset.Fields[i].FieldName;
+    vDatasetCampos.dataset.CheckBrowseMode;
+  end;
+  dsCampos.DataSet := vDatasetCampos.dataset;
+  ajustaBotoes;
+  vDatasetCampos.dataset.First;
+  preencheCampos;
+end;
+
 procedure TfrmEditorConsultas.btnFiltroCancelarClick(Sender: TObject);
 begin
   if not pergunta('Deseja cancelar a edição do filtro selecionado?') then
@@ -351,7 +587,7 @@ end;
 
 procedure TfrmEditorConsultas.FormCreate(Sender: TObject);
 begin
-  epControl := getEndpointController(vIConexao);
+  vEPControl := getEndpointController(vIConexao);
 end;
 
 procedure TfrmEditorConsultas.FormShow(Sender: TObject);
@@ -381,6 +617,17 @@ class function TfrmEditorConsultas.getNewIface(pIConexao: IConexao): ITfrmEditor
 begin
   Result := TImplObjetoOwner<TfrmEditorConsultas>.CreateOwner(self._Create(pIConexao));
   Result.objeto.myself := Result;
+end;
+
+procedure TfrmEditorConsultas.gridCamposCellClick(Column: TXColumn);
+begin
+  preencheCampos;
+end;
+
+procedure TfrmEditorConsultas.PCChange(Sender: TObject);
+begin
+  if(PC.ActivePage=tsFormatações) then
+    openQuery;
 end;
 
 function TfrmEditorConsultas.critica(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
@@ -420,6 +667,11 @@ begin
     getDatasetFiltros;
 end;
 
+procedure TfrmEditorConsultas.edtFormatacaoCampoOperacoesClick(Sender: TObject);
+begin
+  edtFormatacaoCampoExpressao.Enabled := edtFormatacaoCampoOperacoes.ItemIndex=6;
+end;
+
 procedure TfrmEditorConsultas.query;
 begin
   if(vDatasetEndpoints=nil) then
@@ -440,7 +692,7 @@ end;
 
 procedure TfrmEditorConsultas.TestarClick(Sender: TObject);
 begin
-  epControl.getFromRecord(dsEP.DataSet);
+  openQuery;
 end;
 
 constructor TfrmEditorConsultas._Create(pIConexao: IConexao);
