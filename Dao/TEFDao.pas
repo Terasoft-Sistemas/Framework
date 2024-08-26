@@ -135,6 +135,7 @@ begin
     lModel.objeto.CHAMADA                    := lQry.FieldByName('CHAMADA').AsString;
     lModel.objeto.CNPJ_CREDENCIADORA         := lQry.FieldByName('CNPJ_CREDENCIADORA').AsString;
     lModel.objeto.CODIGO_CREDENCIADORA       := lQry.FieldByName('CODIGO_CREDENCIADORA').AsString;
+    lModel.objeto.MOTIVO_CANCELAMENTO        := lQry.FieldByName('MOTIVO_CANCELAMENTO').AsString;
 
     Result := lModel;
 

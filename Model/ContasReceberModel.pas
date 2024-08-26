@@ -188,6 +188,7 @@ type
     procedure excluirBaixa;
     procedure excluirVendaCartao;
     procedure validaExclusao;
+    procedure marcarAberto(pFatura : String);
 
     property ContasRecebersLista: IList<TContasReceberModel> read FContasRecebersLista write SetContasRecebersLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -222,6 +223,31 @@ function TContasReceberModel.Incluir: String;
 begin
   self.FAcao := tacIncluir;
   Result     := self.Salvar;
+end;
+
+procedure TContasReceberModel.marcarAberto(pFatura: String);
+var
+  lContasReceberItensModel,
+  lModel                     : TContasReceberItensModel;
+begin
+  lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
+
+  try
+    lContasReceberItensModel.IDContasReceberView := pFatura;
+    lContasReceberItensModel.obterLista;
+
+    for lModel in lContasReceberItensModel.ContasReceberItenssLista do
+    begin
+      lModel.Acao := tacAlterar;
+      lModel.VALOR_PAGO   := '0';
+      lModel.VALORREC_REC := '0';
+      lModel.SITUACAO_REC := 'A';
+      lModel.Salvar;
+    end;
+
+  finally
+    lContasReceberItensModel.Free;
+  end;
 end;
 
 function TContasReceberModel.Alterar(pID: String): TContasReceberModel;
@@ -302,15 +328,12 @@ begin
         exit;
       end;
 
-    end;
-
-    if self.FCODIGO_POR = '777777' then
-    begin
-      if lContasReceberItensModel.parcelasAberta(pFatura) then
+      if self.FCODIGO_POR = '777777' then
       begin
         Result := tcReceberEntrada;
         exit;
       end;
+
     end;
 
     lContasReceberItensModel.IDContasReceberView := pFatura;

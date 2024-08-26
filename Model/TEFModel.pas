@@ -65,6 +65,7 @@ type
     FPARCELA: Variant;
     FTIMESTAMP_HOST: Variant;
     FIDRecordView: String;
+    FMOTIVO_CANCELAMENTO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetTEFsLista(const Value: IList<ITTEFModel>);
@@ -114,6 +115,7 @@ type
     procedure SetVALOR_PARCELA(const Value: Variant);
     procedure SetVALORTOTAL(const Value: Variant);
     procedure SetIDRecordView(const Value: String);
+    procedure SetMOTIVO_CANCELAMENTO(const Value: Variant);
   public
     property ID: Variant read FID write SetID;
     property NOME_REDE: Variant read FNOME_REDE write SetNOME_REDE;
@@ -155,6 +157,7 @@ type
     property CHAMADA: Variant read FCHAMADA write SetCHAMADA;
     property CNPJ_CREDENCIADORA: Variant read FCNPJ_CREDENCIADORA write SetCNPJ_CREDENCIADORA;
     property CODIGO_CREDENCIADORA: Variant read FCODIGO_CREDENCIADORA write SetCODIGO_CREDENCIADORA;
+    property MOTIVO_CANCELAMENTO: Variant read FMOTIVO_CANCELAMENTO write SetMOTIVO_CANCELAMENTO;
 
   	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -408,6 +411,11 @@ end;
 procedure TTEFModel.SetMOEDA(const Value: Variant);
 begin
   FMOEDA := Value;
+end;
+
+procedure TTEFModel.SetMOTIVO_CANCELAMENTO(const Value: Variant);
+begin
+  FMOTIVO_CANCELAMENTO := Value;
 end;
 
 procedure TTEFModel.SetMSU(const Value: Variant);
