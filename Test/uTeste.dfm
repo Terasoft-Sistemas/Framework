@@ -14,6 +14,7 @@ object Form1: TForm1
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  PixelsPerInch = 96
   TextHeight = 15
   object PageControl: TPageControl
     Left = 0
@@ -38,8 +39,16 @@ object Form1: TForm1
         Top = 63
         Width = 143
         Height = 42
-        Caption = 'Consultas'
+        Caption = 'Editar Consultas'
         OnClick = SpeedButton3Click
+      end
+      object SpeedButton4: TSpeedButton
+        Left = 755
+        Top = 111
+        Width = 143
+        Height = 42
+        Caption = 'Consultas'
+        OnClick = SpeedButton4Click
       end
       object memoResultado: TMemo
         Left = 904
@@ -1605,5 +1614,17 @@ object Form1: TForm1
   object dsJuros: TDataSource
     Left = 1048
     Top = 208
+  end
+  object FDMemTable1: TFDMemTable
+    BeforePost = FDMemTable1BeforePost
+    FetchOptions.AssignedValues = [evMode]
+    FetchOptions.Mode = fmAll
+    ResourceOptions.AssignedValues = [rvSilentMode]
+    ResourceOptions.SilentMode = True
+    UpdateOptions.AssignedValues = [uvCheckRequired, uvAutoCommitUpdates]
+    UpdateOptions.CheckRequired = False
+    UpdateOptions.AutoCommitUpdates = True
+    Left = 948
+    Top = 538
   end
 end

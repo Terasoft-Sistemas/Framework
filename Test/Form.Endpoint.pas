@@ -49,7 +49,7 @@ type
     procedure selecionaEP(ep: ITEndpointModel);
   public
     //constructor Create(pIConexao:IConexao);
-    constructor Create(pIConexao:IConexao);
+    constructor _Create(pIConexao:IConexao);
     class function getNewIface(pIConexao: IConexao): ITFormEP;
   end;
 
@@ -91,7 +91,7 @@ begin
   fFiltroSelecionado := fSelecionado.objeto.FILTROS.Items[cbFiltros.ItemIndex];
 end;
 
-constructor TFormEP.Create(pIConexao: IConexao);
+constructor TFormEP._Create(pIConexao: IConexao);
 begin
   inherited Create(nil);
   vIConexao := pIConexao;
@@ -123,7 +123,7 @@ end;
 
 class function TFormEP.getNewIface(pIConexao: IConexao): ITFormEP;
 begin
-  Result := TImplObjetoOwner<TFormEP>.CreateOwner(self.Create(pIConexao));
+  Result := TImplObjetoOwner<TFormEP>.CreateOwner(self._Create(pIConexao));
   Result.objeto.myself := Result;
 end;
 

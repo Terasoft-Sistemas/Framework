@@ -168,7 +168,8 @@ uses
   ConfiguracoesLocaisModel in '..\Model\ConfiguracoesLocaisModel.pas',
   ConfiguracoesLocaisDao in '..\Dao\ConfiguracoesLocaisDao.pas',
   uTeste in 'uTeste.pas' {Form1},
-  Form.Endpoint in 'Form.Endpoint.pas' {FormEP};
+  Form.Endpoint in 'Form.Endpoint.pas' {FormEP},
+  EndPointEditor in '..\Editors\EndPointEditor.pas' {frmEditorConsultas};
 
 {$R *.res}
 

@@ -20,7 +20,10 @@ uses
   Terasoft.Types,
   Conexao,
   Interfaces.Conexao, EntradaModel, Vcl.Grids, XDBGrids, Data.DB,
-  Terasoft.Configuracoes, Terasoft.FuncoesTexto, Vcl.Buttons, FireDAC.Comp.Client;
+  Terasoft.Configuracoes, Terasoft.FuncoesTexto, Vcl.Buttons, FireDAC.Comp.Client,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Comp.DataSet;
 
 type
   TForm1 = class(TForm)
@@ -217,6 +220,8 @@ type
     SpeedButton2: TSpeedButton;
     SpeedButton3: TSpeedButton;
     imprimirContratoCarteira: TButton;
+    SpeedButton4: TSpeedButton;
+    FDMemTable1: TFDMemTable;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -367,9 +372,11 @@ type
     procedure btnObterJurosPromocaoClick(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure SpeedButton2Click(Sender: TObject);
-    procedure SpeedButton3Click(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure imprimirContratoCarteiraClick(Sender: TObject);
+    procedure SpeedButton4Click(Sender: TObject);
+    procedure SpeedButton3Click(Sender: TObject);
+    procedure FDMemTable1BeforePost(DataSet: TDataSet);
 
   private
     { Private declarations }
@@ -407,7 +414,7 @@ uses
   PromocaoModel, TransportadoraModel, PrevisaoPedidoCompraModel, SaidasModel,
   SaidasItensModel, ClientesEnderecoModel, OrcamentoModel, OrcamentoItensModel, Terasoft.Utils,
   SolicitacaoDescontoModel, PermissaoRemotaModel, MovimentoSerialModel, Impressao.Contratos,
-  UsuarioModel, TabelaJurosDiaModel, TabelaJurosPromocaoModel;
+  UsuarioModel, TabelaJurosDiaModel, TabelaJurosPromocaoModel, EndPointEditor;
 
 {$R *.dfm}
 
@@ -3895,6 +3902,11 @@ begin
   end;
 end;
 
+procedure TForm1.FDMemTable1BeforePost(DataSet: TDataSet);
+begin
+  //
+end;
+
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   vIConexao := nil;
@@ -4253,6 +4265,11 @@ begin
 end;
 
 procedure TForm1.SpeedButton3Click(Sender: TObject);
+begin
+  TfrmEditorConsultas.getNewIface(vIConexao).objeto.showModal;
+end;
+
+procedure TForm1.SpeedButton4Click(Sender: TObject);
 begin
   Form.Endpoint.criaViewEndpoint(vIConexao).objeto.ShowModal;
 end;
