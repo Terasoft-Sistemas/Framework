@@ -540,7 +540,7 @@ type
     procedure venderItensValorPrincipal(pProdutoPrincipal, pQuantidade : String);
     function obterComprasRealizadas(pCliente: String): IFDDataset;
     function retornaGarantia(pNumeroPedido: String) : Boolean;
-    procedure DevolverVenda(pVenda : String);
+    procedure DevolverVenda(pVenda, pHistorico : String);
   end;
 
 implementation
@@ -778,7 +778,7 @@ begin
   inherited;
 end;
 
-procedure TPedidoVendaModel.DevolverVenda(pVenda: String);
+procedure TPedidoVendaModel.DevolverVenda(pVenda, pHistorico: String);
 var
   lPedidoVendaModel        : ITPedidoVendaModel;
   lContasReceberItensModel,
@@ -813,6 +813,11 @@ begin
     lPedidoVendaModel.objeto.Excluir(pVenda);
 
     lWebPedidoModel := lWebPedidoModel.objeto.Alterar(lPedidoVendaModel.objeto.WEB_PEDIDO_ID);
+    lWebPedidoModel.objeto.MENSAGEM_ANALISE := '====================================================' + #13 +
+                                    'Análista: ' + self.vIConexao.getUSer.NOME + ' ' + DateToStr(vIConexao.DataServer) +
+                                    ' ' + TimeToStr(Time) + #13 +
+                                    '====================================================' + #13 +
+                                    pHistorico + #13 + #13 + lWebPedidoModel.objeto.MENSAGEM_ANALISE;
     lWebPedidoModel.objeto.PEDIDO_ID := '';
     lWebPedidoModel.objeto.STATUS    := 'D';
     lWebPedidoModel.objeto.Salvar;
