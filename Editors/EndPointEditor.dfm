@@ -95,7 +95,7 @@
       Align = alClient
       TabOrder = 0
       OnChange = PCChange
-      ExplicitLeft = 0
+      ExplicitLeft = 2
       ExplicitTop = 6
       object tsDados: TTabSheet
         Caption = 'Dados'
@@ -553,7 +553,6 @@
             TabOrder = 0
             OnChange = PCImpressoesChange
             ExplicitLeft = 6
-            ExplicitWidth = 721
             object tsImpressaoDados: TTabSheet
               Caption = 'Dados'
               object edtImpressaoNome: TLabeledEdit

@@ -142,6 +142,8 @@ type
     vDatasetEndpoints: IDataset;
     vDatasetImpressoes, vDatasetCampos, vDatasetFiltros,vDatasetFiltrosValores: IDatasetSimples;
 
+    vCFGImpressoes: IMultiConfig;
+
 
     [weak] mySelf: ITfrmEditorConsultas;
     vIConexao:IConexao;
@@ -275,7 +277,8 @@ begin
 
   if (not pergunta('Deseja salvar a formatação da impressão selecionada?')) then
   begin
-    vDatasetEndpoints.dataset.FieldByName('propriedades').AsString := save;
+    vCFGImpressoes:=criaMultiConfig.adicionaInterface(criaConfigIniString(save));
+    //vDatasetEndpoints.dataset.FieldByName('propriedades').AsString := save;
     exit;
   end;
 
@@ -446,7 +449,7 @@ begin
   if(sTitulo<>'') then
     sDescricao := sDescricao + '|'+sTitulo;
 
-  cfg := getMultiConfigPropriedades;
+  cfg := vCFGImpressoes;
   if (vDatasetImpressoes.dataset.fields[0].AsString<>'') and (CompareText(sName, vDatasetImpressoes.dataset.fields[0].AsString)<>0) then
   begin
     cfg.deleteKey('impressoes',vDatasetImpressoes.dataset.fields[0].AsString);
@@ -483,7 +486,7 @@ begin
   f := vQuery.dataset.FieldByName(campo);
   if(f=nil) then
     msgErro('Campo não existe.');
-  lCFG := getMultiConfigPropriedades;
+  lCFG := vCFGImpressoes;
 
   try
 
@@ -539,7 +542,8 @@ begin
     save := inputMemo('Verifique os valores','Propriedades', lCFG.toString);
 
   finally
-    vDatasetEndpoints.fieldByName('propriedades').AsString := save;
+    vCFGImpressoes := criaMultiConfig.adicionaInterface(criaConfigIniString(save));
+    //vDatasetEndpoints.fieldByName('propriedades').AsString := save;
   end;
 
   //
@@ -705,6 +709,7 @@ procedure TfrmEditorConsultas.preencheImpressoes;
 begin
   if(vDatasetImpressoes=nil) then exit;
   lCFG := getMultiConfigPropriedades;
+  vCFGImpressoes := lCFG;
 
   sNome := trim(vDatasetImpressoes.dataset.Fields[0].AsString);
   edtImpressaoNome.Text := sNome;
@@ -783,7 +788,7 @@ begin
   f := vQuery.dataset.FieldByName(campo);
   if(f=nil) then
     exit;
-  lCFG := getMultiConfigPropriedades;
+  lCFG := vCFGImpressoes;
 
   edtImpressaoFormatoVisivel.Checked := lCFG.ReadBool('impressao.'+lNome,campo,true);
 
