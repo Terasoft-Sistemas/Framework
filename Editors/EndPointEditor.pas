@@ -98,6 +98,15 @@ type
     edtImpressaoFormatoVisivel: TCheckBox;
     edtImpressaoFormatoSumário: TCheckBox;
     edtImpressaoFormatoLabel: TLabeledEdit;
+    edtImpressaoTituloSumario: TLabeledEdit;
+    edtImpressaoFormatoTamanho: TLabeledEdit;
+    edtImpressaoFormatoTamanhoSumario: TLabeledEdit;
+    edtImpressaoFormatoAlinhamento: TRadioGroup;
+    edtImpressaoFormatoAlinhamentoSumario: TRadioGroup;
+    edtImpressaoFormatoFormato: TLabeledEdit;
+    edtImpressaoFormatoFormatoSumario: TLabeledEdit;
+    edtImpressaoFormatoPosicao: TLabeledEdit;
+    edtImpressaoFormatoPosicaoSumario: TLabeledEdit;
     procedure FormShow(Sender: TObject);
     procedure btnNovoClick(Sender: TObject);
     procedure btnCancelarClick(Sender: TObject);
@@ -156,6 +165,7 @@ type
     procedure openQueryCampos;
     procedure openQueryImpressoes;
     procedure geraConfiguracoesImpressoes;
+    procedure geraConfiguracoesImpressoesFormatos;
   public
     constructor _Create(pIConexao:IConexao);
     class function getNewIface(pIConexao: IConexao): ITfrmEditorConsultas;
@@ -257,8 +267,24 @@ begin
 end;
 
 procedure TfrmEditorConsultas.btnImpressaoSalvarClick(Sender: TObject);
+  var
+    save: String;
 begin
-  raise Exception.Create('Error Message');
+  save := vDatasetEndpoints.dataset.FieldByName('propriedades').AsString;
+  geraConfiguracoesImpressoesFormatos;
+
+  if (not pergunta('Deseja salvar a formatação da impressão selecionada?')) then
+  begin
+    vDatasetEndpoints.dataset.FieldByName('propriedades').AsString := save;
+    exit;
+  end;
+
+  vDatasetCampos.dataset.CheckBrowseMode;
+
+  openQueryCampos;
+  ajustaBotoes;
+
+  gridImpressaoFormatacaoCampo.SetFocus;
 end;
 
 procedure TfrmEditorConsultas.btnImpressoesCancelarClick(Sender: TObject);
@@ -436,6 +462,87 @@ begin
   s := inputMemo('Verifique os valores','Propriedades', cfg.toString);
   vDatasetEndpoints.fieldByName('propriedades').AsString := s;
 
+end;
+
+procedure TfrmEditorConsultas.geraConfiguracoesImpressoesFormatos;
+  var
+    save: String;
+  var
+    lCfg: IMultiConfig;
+    campo: String;
+    lNome: String;
+    f: TField;
+begin
+  if(vDatasetImpressoes=nil) then exit;
+  if(vQuery=nil) then exit;
+
+  save := vDatasetEndpoints.fieldByName('propriedades').AsString;
+
+  lNome := vDatasetImpressoes.dataset.Fields[0].AsString;
+  campo := vDatasetCampos.dataset.Fields[0].AsString;
+  f := vQuery.dataset.FieldByName(campo);
+  if(f=nil) then
+    msgErro('Campo não existe.');
+  lCFG := getMultiConfigPropriedades;
+
+  try
+
+    //Criticas
+
+
+    //fim das críticas
+
+    //edtImpressaoFormatoSumário.Enabled := f is TNumericField;
+    lCFG.writeBool('impressao.'+lNome,campo,edtImpressaoFormatoVisivel.Checked);
+    lCFG.writeBool('impressao.sumario.'+lNome,campo,edtImpressaoFormatoSumário.Checked);
+
+    if(edtImpressaoFormatoLabel.Text='') then
+      lCFG.deleteKey('impressao.label.'+lnome,campo)
+    else
+      lCFG.WriteString('impressao.label.'+lnome,campo,edtImpressaoFormatoLabel.Text);
+
+    if (edtImpressaoTituloSumario.Text='') then
+      lCFG.deleteKey('impressao.sumario.label.'+lnome,campo)
+    else
+      lCFG.WriteString('impressao.sumario.label.'+lnome,campo,edtImpressaoTituloSumario.Text);
+
+    if (edtImpressaoFormatoTamanho.Text='') then
+      lCFG.deleteKey('impressao.largura.'+lnome,campo)
+    else
+      lCFG.WriteString('impressao.largura.'+lnome,campo,edtImpressaoFormatoTamanho.Text);
+
+    if (edtImpressaoFormatoTamanhoSumario.Text='') then
+      lCFG.deleteKey('impressao.sumario.largura.'+lnome,campo)
+    else
+      lCFG.WriteString('impressao.sumario.largura.'+lnome,campo,edtImpressaoFormatoTamanhoSumario.Text);
+
+    if(edtImpressaoFormatoAlinhamento.ItemIndex=0) then
+      lCFG.deleteKey('impressao.alinhamento.'+lNome,campo)
+    else
+      lCFG.WriteInteger('impressao.alinhamento.'+lNome,campo, edtImpressaoFormatoAlinhamento.ItemIndex-1);
+
+    if(edtImpressaoFormatoAlinhamentoSumario.ItemIndex=0) then
+      lCFG.deleteKey('impressao.sumario.alinhamento.'+lNome,campo)
+    else
+      lCFG.WriteInteger('impressao.sumario.alinhamento.'+lNome,campo, edtImpressaoFormatoAlinhamentoSumario.ItemIndex-1);
+
+    if (edtImpressaoFormatoFormato.Text='') then
+      lCFG.deleteKey('impressao.formato.'+lnome,campo)
+    else
+      lCFG.WriteString('impressao.formato.'+lnome,campo,edtImpressaoFormatoFormato.Text);
+
+    if (edtImpressaoFormatoFormatoSumario.Text='') then
+      lCFG.deleteKey('impressao.sumario.formato.'+lnome,campo)
+    else
+      lCFG.WriteString('impressao.sumario.formato.'+lnome,campo,edtImpressaoFormatoFormatoSumario.Text);
+
+    save := inputMemo('Verifique os valores','Propriedades', lCFG.toString);
+
+  finally
+    vDatasetEndpoints.fieldByName('propriedades').AsString := save;
+  end;
+
+  //
 end;
 
 procedure TfrmEditorConsultas.preencheFiltros;
@@ -669,7 +776,7 @@ procedure TfrmEditorConsultas.preencheCamposImpressao;
     lNome: String;
     f: TField;
 begin
-  if(vDatasetCampos=nil) then exit;
+  if(vDatasetImpressoes=nil) then exit;
   if(vQuery=nil) then exit;
   lNome := vDatasetImpressoes.dataset.Fields[0].AsString;
   campo := vDatasetCampos.dataset.Fields[0].AsString;
@@ -678,39 +785,22 @@ begin
     exit;
   lCFG := getMultiConfigPropriedades;
 
+  edtImpressaoFormatoVisivel.Checked := lCFG.ReadBool('impressao.'+lNome,campo,true);
+
+  edtImpressaoFormatoSumário.Enabled := f is TNumericField;
+  edtImpressaoFormatoSumário.Checked := lCFG.ReadBool('impressao.sumario.'+lNome,campo,true);
+
   edtImpressaoFormatoLabel.Text := lCFG.ReadString('impressao.label.'+lnome,campo,'');
-{  if(f is TNumericField) then
-  begin
-    edtFormatacaoCampoFormato.Enabled := true;
-    edtFormatacaoCampoFormato.Text := lCFG.ReadString('formato', campo, '');
-    edtFormatacaoCampoSumario.Enabled := true;
-    edtFormatacaoCampoSumario.Checked := lCFG.ReadBool('sumario', campo, true);
-    edtFormatacaoCampoSumario.Enabled := true;
-    edtFormatacaoCampoOperacoes.Enabled := true;
-    edtFormatacaoCampoOperacoes.ItemIndex := Integer(op);
-    edtFormatacaoCampoExpressao.Enabled := op=tofExpressao;
-  end else
-  begin
-    edtFormatacaoCampoFormato.Enabled := false;
-    edtFormatacaoCampoFormato.Text := '';
-    edtFormatacaoCampoSumario.Enabled := false;
-    edtFormatacaoCampoSumario.Checked := false;
-    edtFormatacaoCampoSumario.Enabled := false;
-    edtFormatacaoCampoExpressao.Text := '';
-    edtFormatacaoCampoOperacoes.Enabled := false;
-    edtFormatacaoCampoExpressao.Enabled := false;
-  end;
-  if(edtFormatacaoCampoExpressao.Enabled) then
-    edtFormatacaoCampoExpressao.Text := textoEntreTags(lCFG.ReadString('operacoes', campo, ''),'=','')
-  else
-    edtFormatacaoCampoExpressao.Text := '';
+  edtImpressaoTituloSumario.Text := lCFG.ReadString('impressao.sumario.label.'+lnome,campo,'');
+  edtImpressaoFormatoTamanho.Text := lCFG.ReadString('impressao.largura.'+lnome,campo,'');
+  edtImpressaoFormatoTamanhoSumario.Text := lCFG.ReadString('impressao.sumario.largura.'+lnome,campo,'');
 
-  edtFormatacaoCampoTamanho.Text := lCFG.ReadString('width', campo,'');
-  edtFormatacaoCampoVisivel.Checked := lCFG.ReadBool('visible', campo, f.Visible);
-  edtFormatacaoCampoPosicao.Text := lCFG.ReadString('posicao', campo, '');
+  edtImpressaoFormatoAlinhamento.ItemIndex := lCFG.ReadInteger('impressao.alinhamento.'+lNome,campo, -1)+1;
+  edtImpressaoFormatoAlinhamentoSumario.ItemIndex := lCFG.ReadInteger('impressao.sumario.alinhamento.'+lNome,campo, -1)+1;
 
-  edtFormatacaoCampoAlinhamento.ItemIndex := lCFG.ReadInteger('alinhamento', campo, -1)+1;
-}
+  edtImpressaoFormatoFormato.Text := lCFG.ReadString('impressao.formato.'+lnome,campo,'');
+  edtImpressaoFormatoFormatoSumario.Text := lCFG.ReadString('impressao.sumario.formato.'+lnome,campo,'');
+
 end;
 
 procedure TfrmEditorConsultas.btnFiltroEditarClick(Sender: TObject);

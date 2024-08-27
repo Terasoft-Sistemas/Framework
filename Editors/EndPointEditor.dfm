@@ -484,7 +484,7 @@
         object Panel1: TPanel
           Left = 281
           Top = 0
-          Width = 97
+          Width = 91
           Height = 338
           Align = alLeft
           TabOrder = 1
@@ -535,22 +535,25 @@
           end
         end
         object pnImpressoes: TPanel
-          Left = 378
+          Left = 372
           Top = 0
-          Width = 723
+          Width = 729
           Height = 338
           Align = alClient
           TabOrder = 2
+          ExplicitLeft = 378
+          ExplicitWidth = 723
           object PCImpressoes: TPageControl
             Left = 1
             Top = 1
-            Width = 721
+            Width = 727
             Height = 336
             ActivePage = tsImpressaoFormatacao
             Align = alClient
             TabOrder = 0
             OnChange = PCImpressoesChange
             ExplicitLeft = 6
+            ExplicitWidth = 721
             object tsImpressaoDados: TTabSheet
               Caption = 'Dados'
               object edtImpressaoNome: TLabeledEdit
@@ -652,39 +655,141 @@
               object pnImpressaoFormatacao: TPanel
                 Left = 337
                 Top = 0
-                Width = 376
+                Width = 382
                 Height = 306
                 Align = alClient
                 TabOrder = 2
-                ExplicitLeft = 343
-                ExplicitTop = 3
-                ExplicitWidth = 306
-                ExplicitHeight = 206
+                ExplicitLeft = 336
                 object edtImpressaoFormatoVisivel: TCheckBox
-                  Left = 24
-                  Top = 24
+                  Left = 6
+                  Top = 8
                   Width = 97
                   Height = 17
                   Caption = 'Vis'#237'vel'
                   TabOrder = 0
                 end
                 object edtImpressaoFormatoSumário: TCheckBox
-                  Left = 168
-                  Top = 24
+                  Left = 184
+                  Top = 8
                   Width = 97
                   Height = 17
                   Caption = 'Sum'#225'rio'
                   TabOrder = 1
                 end
                 object edtImpressaoFormatoLabel: TLabeledEdit
-                  Left = 24
-                  Top = 70
+                  Left = 6
+                  Top = 46
                   Width = 169
                   Height = 23
                   EditLabel.Width = 30
                   EditLabel.Height = 15
                   EditLabel.Caption = 'T'#237'tulo'
                   TabOrder = 2
+                  Text = ''
+                end
+                object edtImpressaoTituloSumario: TLabeledEdit
+                  Left = 181
+                  Top = 46
+                  Width = 169
+                  Height = 23
+                  EditLabel.Width = 93
+                  EditLabel.Height = 15
+                  EditLabel.Caption = 'Titulo no sum'#225'rio'
+                  TabOrder = 3
+                  Text = ''
+                end
+                object edtImpressaoFormatoTamanho: TLabeledEdit
+                  Left = 6
+                  Top = 94
+                  Width = 169
+                  Height = 23
+                  EditLabel.Width = 49
+                  EditLabel.Height = 15
+                  EditLabel.Caption = 'Tamanho'
+                  TabOrder = 4
+                  Text = ''
+                end
+                object edtImpressaoFormatoTamanhoSumario: TLabeledEdit
+                  Left = 181
+                  Top = 94
+                  Width = 169
+                  Height = 23
+                  EditLabel.Width = 112
+                  EditLabel.Height = 15
+                  EditLabel.Caption = 'Tamanho no sum'#225'rio'
+                  TabOrder = 5
+                  Text = ''
+                end
+                object edtImpressaoFormatoAlinhamento: TRadioGroup
+                  Left = 6
+                  Top = 221
+                  Width = 170
+                  Height = 60
+                  Caption = 'Alinhamento'
+                  Columns = 2
+                  Items.Strings = (
+                    'Padr'#227'o'
+                    'Esquerda'
+                    'Direita'
+                    'Centro')
+                  TabOrder = 8
+                end
+                object edtImpressaoFormatoAlinhamentoSumario: TRadioGroup
+                  Left = 182
+                  Top = 221
+                  Width = 171
+                  Height = 60
+                  Caption = 'Alinhamento Sum'#225'rio'
+                  Columns = 2
+                  Items.Strings = (
+                    'Padr'#227'o'
+                    'Esquerda'
+                    'Direita'
+                    'Centro')
+                  TabOrder = 9
+                end
+                object edtImpressaoFormatoFormato: TLabeledEdit
+                  Left = 6
+                  Top = 144
+                  Width = 169
+                  Height = 23
+                  EditLabel.Width = 45
+                  EditLabel.Height = 15
+                  EditLabel.Caption = 'Formato'
+                  TabOrder = 6
+                  Text = ''
+                end
+                object edtImpressaoFormatoFormatoSumario: TLabeledEdit
+                  Left = 181
+                  Top = 144
+                  Width = 169
+                  Height = 23
+                  EditLabel.Width = 108
+                  EditLabel.Height = 15
+                  EditLabel.Caption = 'Formato no sum'#225'rio'
+                  TabOrder = 7
+                  Text = ''
+                end
+                object edtImpressaoFormatoPosicao: TLabeledEdit
+                  Left = 6
+                  Top = 192
+                  Width = 169
+                  Height = 23
+                  EditLabel.Width = 41
+                  EditLabel.Height = 15
+                  EditLabel.Caption = 'Posi'#231#227'o'
+                  TabOrder = 10
+                  Text = ''
+                end
+                object edtImpressaoFormatoPosicaoSumario: TLabeledEdit
+                  Left = 182
+                  Top = 192
+                  Width = 169
+                  Height = 23
+                  EditLabel.Width = 104
+                  EditLabel.Height = 15
+                  EditLabel.Caption = 'Posi'#231#227'o no sum'#225'rio'
+                  TabOrder = 11
                   Text = ''
                 end
               end
