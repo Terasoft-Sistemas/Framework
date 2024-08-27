@@ -166,7 +166,7 @@ begin
 
     Result := lItensProdutoLista.objeto.obterLista;
 
-    FTotalRecords       := lItensProdutoLista.objeto.TotalRecords;
+    FTotalRecords := lItensProdutoLista.objeto.TotalRecords;
 
   finally
     lItensProdutoLista := nil;

@@ -148,7 +148,7 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records from itens_produto where 1=1 ';
+    lSql := 'select count(*) records from itens_produto i where 1=1 ';
 
     lSql := lSql + where;
 
@@ -161,7 +161,7 @@ begin
   end;
 end;
 
-function TItensProdutoDao.obterLista: IFDDataset;
+function TItensProdutoDao.obterLista : IFDDataset;
 var
   lQry       : TFDQuery;
   lSQL       : String;
@@ -173,27 +173,29 @@ begin
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
 
-    lSQL := ' select '+lPaginacao+'                      '+sLineBreak+
-            '        codigo_produto,                     '+sLineBreak+
-            '        codigo_materia_prima,               '+sLineBreak+
-            '        qtde_materia_prima,                 '+sLineBreak+
-            '        unidade_materia_prima,              '+sLineBreak+
-            '        valor_venda,                        '+sLineBreak+
-            '        ordem,                              '+sLineBreak+
-            '        id,                                 '+sLineBreak+
-            '        custo_produto,                      '+sLineBreak+
-            '        saldo,                              '+sLineBreak+
-            '        altura_m,                           '+sLineBreak+
-            '        largura_m,                          '+sLineBreak+
-            '        profundidade_m,                     '+sLineBreak+
-            '        vidro,                              '+sLineBreak+
-            '        mdf,                                '+sLineBreak+
-            '        padrao,                             '+sLineBreak+
-            '        unico,                              '+sLineBreak+
-            '        systime,                            '+sLineBreak+
-            '        listar                              '+sLineBreak+
-            '   from itens_produto                       '+sLineBreak+
-            '  where 1=1                                 '+sLineBreak;
+    lSQL := ' select '+lPaginacao+'                                           '+sLineBreak+
+            '        i.codigo_produto,                                        '+sLineBreak+
+            '        i.codigo_materia_prima,                                  '+sLineBreak+
+            '        i.unidade_materia_prima,                                 '+sLineBreak+
+            '        coalesce(i.qtde_materia_prima, 1) qtde_materia_prima,    '+sLineBreak+
+            '        coalesce(i.valor_venda, p.venda_pro) valor_venda,        '+sLineBreak+
+            '        coalesce(p.venda_pro, 0) venda_pro,                      '+sLineBreak+
+            '        i.ordem,                                                 '+sLineBreak+
+            '        i.id,                                                    '+sLineBreak+
+            '        i.custo_produto,                                         '+sLineBreak+
+            '        i.saldo,                                                 '+sLineBreak+
+            '        i.altura_m,                                              '+sLineBreak+
+            '        i.largura_m,                                             '+sLineBreak+
+            '        i.profundidade_m,                                        '+sLineBreak+
+            '        i.vidro,                                                 '+sLineBreak+
+            '        i.mdf,                                                   '+sLineBreak+
+            '        i.padrao,                                                '+sLineBreak+
+            '        i.unico,                                                 '+sLineBreak+
+            '        i.systime,                                               '+sLineBreak+
+            '        i.listar                                                 '+sLineBreak+
+            '   from itens_produto i                                          '+sLineBreak+
+            '   left join produto p on i.codigo_materia_prima = p.codigo_pro  '+sLineBreak+
+            '  where 1=1                                                      '+sLineBreak;
 
     lSql := lSql + where;
 

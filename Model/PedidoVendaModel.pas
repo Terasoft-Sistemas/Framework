@@ -537,6 +537,7 @@ type
     procedure excluirPedido;
     procedure verificarTagObservacao;
     procedure venderItem(pVenderItem: TVenderItem);
+    procedure venderItensValorPrincipal(pProdutoPrincipal, pQuantidade : String);
     function obterComprasRealizadas(pCliente: String): IFDDataset;
     function retornaGarantia(pNumeroPedido: String) : Boolean;
     procedure DevolverVenda(pVenda : String);
@@ -564,7 +565,14 @@ uses
   VendaCartaoModel,
   ReservaModel,
   CaixaControleModel,
-  CreditoClienteModel, ACBrDFeUtil, System.Math, IbptModel, WebPedidoModel;
+  CreditoClienteModel,
+  ACBrDFeUtil,
+  System.Math,
+  IbptModel,
+  WebPedidoModel,
+  ItensProdutoModel,
+  VariaveisGlobais,
+  System.Rtti;
 
 { TPedidoVendaModel }
 
@@ -600,7 +608,8 @@ end;
 procedure TPedidoVendaModel.calcularTotais;
 var
   lPedidoItensModel  : ITPedidoItensModel;
-  lAcrescimo, lFrete : Double;
+  lAcrescimo,
+  lFrete             : Double;
 begin
   lPedidoItensModel := TPedidoItensModel.getNewIface(vIConexao);
   try
@@ -1502,6 +1511,12 @@ begin
 
     lIDItem := lPedidoItensModel.objeto.obterIDItem(self.FNUMERO_PED, lProdutosModel.objeto.ProdutossLista.First.objeto.CODIGO_PRO);
 
+    if (lProdutosModel.objeto.ProdutossLista[0].objeto.COMBO = '1') then
+    begin
+      venderItensValorPrincipal(lProdutosModel.objeto.ProdutossLista.First.objeto.CODIGO_PRO, lQuantidade);
+      Exit;
+    end;
+
     if (lIDItem <> '') and (lConfiguracoes.objeto.valorTag('FRENTE_CAIXA_SOMAR_QTDE_ITENS', 'S', tvBool) = 'S')
     and (lProdutosModel.objeto.ProdutossLista.First.objeto.USAR_BALANCA <> 'S') then
     begin
@@ -1543,6 +1558,102 @@ begin
     lProdutosModel:=nil;
     lPedidoItensModel:=nil;
     lPedidoVendaLista:=nil;
+  end;
+end;
+
+procedure TPedidoVendaModel.venderItensValorPrincipal(pProdutoPrincipal, pQuantidade : String);
+var
+  ValorItem,
+  Diferenca,
+  Quantidade,
+  QuantidadeItem,
+  TotalItensItem,
+  ValorPrincipal,
+  MultiplicadorPreco : Double;
+  lItensProduto      : IFDDataset;
+  lItensProdutoModel : ITItensProdutoModel;
+  lProdutosModel     : ITProdutosModel;
+  lPrecoParametros   : TProdutoPreco;
+  lPedidoItensModel  : ITPedidoItensModel;
+  lBaseCusto,
+  lIDItens           : String;
+  lCtx               : TRttiContext;
+  lProp              : TRttiProperty;
+begin
+  lPedidoItensModel  := TPedidoItensModel.getNewIface(vIConexao);
+  lItensProdutoModel := TItensProdutoModel.getNewIface(vIConexao);
+  lProdutosModel     := TProdutosModel.getNewIface(vIConexao);
+  lCtx               := TRttiContext.Create;
+
+  try
+    Quantidade := StrToInt(pQuantidade);
+
+    TotalItensItem := 0;
+
+    lItensProdutoModel.objeto.WhereView := ' and i.codigo_produto = '+QuotedStr(pProdutoPrincipal);
+    lItensProduto := lItensProdutoModel.objeto.obterLista;
+
+    lItensProduto.objeto.First;
+    while not lItensProduto.objeto.Eof do
+    begin
+      TotalItensItem := TotalItensItem + lItensProduto.objeto.FieldByName('VALOR_VENDA').AsFloat * lItensProduto.objeto.FieldByName('QTDE_MATERIA_PRIMA').AsFloat;
+      lItensProduto.objeto.Next;
+    end;
+
+    lPrecoParametros.Produto  := pProdutoPrincipal;
+    lPrecoParametros.Cliente  := self.FCODIGO_CLI;
+    lPrecoParametros.Portador := self.FCODIGO_PORT;
+    lPrecoParametros.Qtde     := Quantidade;
+
+    ValorPrincipal := lProdutosModel.objeto.ValorUnitario(lPrecoParametros);
+
+    MultiplicadorPreco := ValorPrincipal / TotalItensItem;
+
+    TotalItensItem := 0;
+
+    lItensProduto.objeto.First;
+    while not lItensProduto.objeto.Eof do
+    begin
+
+      ValorItem      := lItensProduto.objeto.fieldByName('VALOR_VENDA').AsFloat * MultiplicadorPreco;
+      QuantidadeItem := lItensProduto.objeto.fieldByName('QTDE_MATERIA_PRIMA').AsFloat * Quantidade;
+
+      lPedidoItensModel.objeto.NUMERO_PED           := self.FNUMERO_PED;
+      lPedidoItensModel.objeto.CODIGO_PRO           := lItensProduto.objeto.fieldByName('CODIGO_MATERIA_PRIMA').AsString;
+      lPedidoItensModel.objeto.QUANTIDADE_PED       := QuantidadeItem;
+      lPedidoItensModel.objeto.QUANTIDADE_NEW       := QuantidadeItem;
+      lPedidoItensModel.objeto.COMISSAO_PED         := 0;
+      lPedidoItensModel.objeto.VALORUNITARIO_PED    := ValorItem;
+      lPedidoItensModel.objeto.VALOR_VENDA_CADASTRO := lItensProduto.objeto.fieldByName('VENDA_PRO').AsString;
+      lPedidoItensModel.objeto.LOJA                 := self.FLOJA;
+
+      lBaseCusto     := xConfiguracoes.objeto.ValorTag('BASE_CUSTO_PADRAO', 'CUSTOMEDIO_PRO', tvString);
+      lProdutosModel := lProdutosModel.objeto.carregaClasse(lItensProduto.objeto.fieldByName('CODIGO_MATERIA_PRIMA').AsString);
+      lProp          := lCtx.GetType(TProdutosModel).GetProperty(lBaseCusto);
+
+      lPedidoItensModel.objeto.VLRCUSTO_PRO := lProp.GetValue(lProdutosModel.objeto).AsString;
+
+      TotalItensItem := TotalItensItem + (QuantidadeItem * ValorItem);
+
+      lIDItens := lPedidoItensModel.objeto.Incluir;
+
+      lItensProduto.objeto.Next;
+
+    end;
+
+    Diferenca := (Quantidade * ValorPrincipal) - TotalItensItem;
+
+    if (diferenca <> 0) then begin
+      lPedidoItensModel := lPedidoItensModel.objeto.Alterar(lIDItens);
+      lPedidoItensModel.objeto.VALORUNITARIO_PED := lPedidoItensModel.objeto.VALORUNITARIO_PED + Diferenca / lPedidoItensModel.objeto.QUANTIDADE_NEW;
+      lPedidoItensModel.objeto.Salvar;
+    end;
+
+  finally
+    lItensProdutoModel := nil;
+    lPedidoItensModel := nil;
+    lProdutosModel := nil;
+    lCtx.Free;
   end;
 end;
 

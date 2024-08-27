@@ -557,7 +557,9 @@ uses
   FireDAC.Comp.Client,
   ClienteModel,
   GrupoComissaoFuncionarioModel,
-  FuncionarioModel, GrupoComissaoModel, ItensProdutoModel;
+  FuncionarioModel,
+  GrupoComissaoModel,
+  ItensProdutoModel;
 
 { TPedidoItensModel }
 
@@ -794,7 +796,7 @@ begin
   lItensProdutoModel := TItensProdutoModel.getNewIface(vIConexao);
   try
 
-    lItensProdutoModel.objeto.WhereView := ' and codigo_produto = ' +self.CODIGO_PRO;
+    lItensProdutoModel.objeto.WhereView := ' and i.codigo_produto = ' +self.CODIGO_PRO;
     lItensProduto := lItensProdutoModel.objeto.obterLista;
 
     lItensProduto.objeto.First;

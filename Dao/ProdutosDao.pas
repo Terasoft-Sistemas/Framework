@@ -557,6 +557,7 @@ begin
                     '        produto.usar_balanca,                                                                     '+SLineBreak+
                     '        produto.venda_pro,                                                                        '+SLineBreak+
                     '        produto.customedio_pro,                                                                   '+SLineBreak+
+                    '        produto.combo,                                                                            '+SLineBreak+
                     '        coalesce(produto.saldo_pro, 0) -                                                          '+SLineBreak+
                     '        coalesce((select sum(view_reservados.reservado)                                           '+SLineBreak+
                     '                    from view_reservados                                                          '+SLineBreak+
@@ -583,6 +584,7 @@ begin
       modelo.objeto.CUSTOMEDIO_PRO       := lQry.FieldByName('CUSTOMEDIO_PRO').AsString;
       modelo.objeto.USAR_BALANCA         := lQry.FieldByName('USAR_BALANCA').AsString;
       modelo.objeto.SALDO_DISPONIVEL     := lQry.FieldByName('SALDO_DISPONIVEL').AsString;
+      modelo.objeto.COMBO                := lQry.FieldByName('COMBO').AsString;
 
       lQry.Next;
     end;
