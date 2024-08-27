@@ -98,7 +98,7 @@ begin
   lModel   := TContasReceberModel.Create(vIConexao);
 
   try
-    lQry.Open('  select first 1 contasreceber.*, contasreceberitens.totalparcelas_rec                        '+
+    lQry.Open('  select first 1 contasreceber.*, contasreceberitens.totalparcelas_rec                       '+
               '    from contasreceber                                                                       '+
               '   inner join contasreceberitens on contasreceberitens.fatura_rec = contasreceber.fatura_rec '+
               '   where contasreceber.fatura_rec = '+QuotedStr(pFatura));

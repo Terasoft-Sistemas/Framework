@@ -2,7 +2,7 @@
   Left = 0
   Top = 0
   Caption = 'Editor de Consultas'
-  ClientHeight = 659
+  ClientHeight = 699
   ClientWidth = 1111
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -76,22 +76,12 @@
       TabOrder = 3
       OnClick = btnGravarClick
     end
-    object Testar: TBitBtn
-      Left = 1031
-      Top = 17
-      Width = 75
-      Height = 25
-      Anchors = [akTop, akRight]
-      Caption = 'Testar'
-      TabOrder = 4
-      OnClick = TestarClick
-    end
   end
   object pnEdicao: TPanel
     Left = 0
     Top = 329
     Width = 1111
-    Height = 330
+    Height = 370
     Align = alClient
     Caption = 'pnEdicao'
     Enabled = False
@@ -100,11 +90,13 @@
       Left = 1
       Top = 1
       Width = 1109
-      Height = 328
-      ActivePage = tsFormatações
+      Height = 368
+      ActivePage = tsImpressoes
       Align = alClient
       TabOrder = 0
       OnChange = PCChange
+      ExplicitLeft = 0
+      ExplicitTop = 6
       object tsDados: TTabSheet
         Caption = 'Dados'
         ImageIndex = 1
@@ -145,21 +137,44 @@
           Left = 0
           Top = 0
           Width = 1101
-          Height = 298
-          Align = alClient
+          Height = 217
+          Align = alTop
           DataField = 'query'
           DataSource = dsEP
+          ScrollBars = ssBoth
           TabOrder = 0
         end
+        object edGroupBy: TLabeledEdit
+          Left = 3
+          Top = 288
+          Width = 936
+          Height = 23
+          EditLabel.Width = 114
+          EditLabel.Height = 15
+          EditLabel.Caption = 'Cl'#225'usula "GROUP BY"'
+          TabOrder = 2
+          Text = ''
+        end
+        object edWhere: TLabeledEdit
+          Left = 3
+          Top = 240
+          Width = 936
+          Height = 23
+          EditLabel.Width = 97
+          EditLabel.Height = 15
+          EditLabel.Caption = 'Cl'#225'usula "WHERE"'
+          TabOrder = 1
+          Text = ''
+        end
       end
-      object TabSheet1: TTabSheet
+      object tsFiltros: TTabSheet
         Caption = 'Filtros'
         ImageIndex = 2
         object gridFiltros: TXDBGrid
           Left = 0
           Top = 0
           Width = 320
-          Height = 298
+          Height = 338
           Align = alLeft
           DataSource = dsFiltros
           GridStyle.VisualStyle = vsXPStyle
@@ -169,7 +184,7 @@
           Left = 320
           Top = 0
           Width = 97
-          Height = 298
+          Height = 338
           Align = alLeft
           TabOrder = 1
           object btnFiltroEditar: TBitBtn
@@ -222,16 +237,16 @@
           Left = 417
           Top = 0
           Width = 684
-          Height = 298
+          Height = 338
           Align = alClient
           TabOrder = 2
           Visible = False
           object lblNome: TLabel
             Left = 24
             Top = 8
-            Width = 46
+            Width = 33
             Height = 15
-            Caption = 'lblNome'
+            Caption = 'Nome'
             FocusControl = edPropFiltroNome
           end
           object edPropFiltroValor: TLabeledEdit
@@ -296,7 +311,7 @@
           Left = 0
           Top = 0
           Width = 249
-          Height = 298
+          Height = 338
           Align = alLeft
           DataSource = dsCampos
           GridStyle.VisualStyle = vsXPStyle
@@ -308,10 +323,9 @@
           Left = 249
           Top = 0
           Width = 88
-          Height = 298
+          Height = 338
           Align = alLeft
           TabOrder = 1
-          ExplicitLeft = 255
           object btnGestaoformatacoesEditar: TBitBtn
             Left = 7
             Top = 55
@@ -344,13 +358,9 @@
           Left = 337
           Top = 0
           Width = 764
-          Height = 298
+          Height = 338
           Align = alClient
           TabOrder = 2
-          ExplicitLeft = 536
-          ExplicitTop = 120
-          ExplicitWidth = 185
-          ExplicitHeight = 41
           object edtFormatacaoCampoFormato: TLabeledEdit
             Left = 32
             Top = 123
@@ -440,11 +450,352 @@
             TabOrder = 7
             Text = ''
           end
+          object edtFormatacaoCampoAlinhamento: TRadioGroup
+            Left = 232
+            Top = 205
+            Width = 321
+            Height = 60
+            Caption = 'Alinhamento'
+            Columns = 2
+            Items.Strings = (
+              'Padr'#227'o'
+              'Esquerda'
+              'Direita'
+              'Centro')
+            TabOrder = 8
+          end
         end
       end
       object tsImpressoes: TTabSheet
         Caption = 'Impress'#245'es'
         ImageIndex = 4
+        object gridImpressoes: TXDBGrid
+          Left = 0
+          Top = 0
+          Width = 281
+          Height = 338
+          Align = alLeft
+          DataSource = dsImpressoes
+          GridStyle.VisualStyle = vsXPStyle
+          ReadOnly = True
+          TabOrder = 0
+          OnCellClick = gridCamposCellClick
+        end
+        object Panel1: TPanel
+          Left = 281
+          Top = 0
+          Width = 91
+          Height = 338
+          Align = alLeft
+          TabOrder = 1
+          object btnImpressoesEditar: TBitBtn
+            Left = 6
+            Top = 55
+            Width = 75
+            Height = 25
+            Caption = 'Editar'
+            TabOrder = 0
+            OnClick = btnImpressoesEditarClick
+          end
+          object btnImpressoesCancelar: TBitBtn
+            Left = 6
+            Top = 117
+            Width = 75
+            Height = 25
+            Caption = 'Cancelar'
+            TabOrder = 1
+            OnClick = btnImpressoesCancelarClick
+          end
+          object btnImpressoesSalvar: TBitBtn
+            Left = 6
+            Top = 86
+            Width = 75
+            Height = 25
+            Caption = 'Salvar'
+            TabOrder = 2
+            OnClick = btnImpressoesSalvarClick
+          end
+          object btnImpressoesNovo: TBitBtn
+            Left = 6
+            Top = 24
+            Width = 75
+            Height = 25
+            Caption = 'Novo'
+            TabOrder = 3
+            OnClick = btnImpressoesNovoClick
+          end
+          object btnImpressoesExcluir: TBitBtn
+            Left = 6
+            Top = 148
+            Width = 75
+            Height = 25
+            Caption = 'Excluir'
+            TabOrder = 4
+            OnClick = btnImpressoesExcluirClick
+          end
+        end
+        object pnImpressoes: TPanel
+          Left = 372
+          Top = 0
+          Width = 729
+          Height = 338
+          Align = alClient
+          TabOrder = 2
+          ExplicitLeft = 378
+          ExplicitWidth = 723
+          object PCImpressoes: TPageControl
+            Left = 1
+            Top = 1
+            Width = 727
+            Height = 336
+            ActivePage = tsImpressaoFormatacao
+            Align = alClient
+            TabOrder = 0
+            OnChange = PCImpressoesChange
+            ExplicitLeft = 6
+            ExplicitWidth = 721
+            object tsImpressaoDados: TTabSheet
+              Caption = 'Dados'
+              object edtImpressaoNome: TLabeledEdit
+                Left = 32
+                Top = 32
+                Width = 369
+                Height = 23
+                EditLabel.Width = 33
+                EditLabel.Height = 15
+                EditLabel.Caption = 'Nome'
+                TabOrder = 0
+                Text = ''
+              end
+              object edtImpressaoDescricao: TLabeledEdit
+                Left = 32
+                Top = 88
+                Width = 369
+                Height = 23
+                EditLabel.Width = 51
+                EditLabel.Height = 15
+                EditLabel.Caption = 'Descri'#231#227'o'
+                TabOrder = 1
+                Text = ''
+              end
+              object edtImpressaoTitulo: TLabeledEdit
+                Left = 32
+                Top = 144
+                Width = 369
+                Height = 23
+                EditLabel.Width = 30
+                EditLabel.Height = 15
+                EditLabel.Caption = 'T'#237'tulo'
+                TabOrder = 2
+                Text = ''
+              end
+              object edImpressaoOrientacao: TRadioGroup
+                Left = 440
+                Top = 32
+                Width = 185
+                Height = 105
+                Caption = 'Orienta'#231#227'o'
+                Items.Strings = (
+                  'Retrato'
+                  'Paisagem')
+                TabOrder = 3
+              end
+            end
+            object tsImpressaoFormatacao: TTabSheet
+              Caption = 'Formata'#231#227'o'
+              ImageIndex = 1
+              object gridImpressaoFormatacaoCampo: TXDBGrid
+                Left = 0
+                Top = 0
+                Width = 249
+                Height = 306
+                Align = alLeft
+                DataSource = dsCampos
+                GridStyle.VisualStyle = vsXPStyle
+                ReadOnly = True
+                TabOrder = 0
+                OnCellClick = gridImpressaoFormatacaoCampoCellClick
+              end
+              object pnGestaoImpressao: TPanel
+                Left = 249
+                Top = 0
+                Width = 88
+                Height = 306
+                Align = alLeft
+                TabOrder = 1
+                ExplicitLeft = 257
+                object btnImpressaoEditar: TBitBtn
+                  Left = 6
+                  Top = 55
+                  Width = 75
+                  Height = 25
+                  Caption = 'Editar'
+                  TabOrder = 0
+                  OnClick = btnImpressaoEditarClick
+                end
+                object btnImpressaoCancelar: TBitBtn
+                  Left = 6
+                  Top = 117
+                  Width = 75
+                  Height = 25
+                  Caption = 'Cancelar'
+                  TabOrder = 1
+                  OnClick = btnImpressaoCancelarClick
+                end
+                object btnImpressaoSalvar: TBitBtn
+                  Left = 6
+                  Top = 86
+                  Width = 75
+                  Height = 25
+                  Caption = 'Salvar'
+                  TabOrder = 2
+                  OnClick = btnImpressaoSalvarClick
+                end
+              end
+              object pnImpressaoFormatacao: TPanel
+                Left = 337
+                Top = 0
+                Width = 382
+                Height = 306
+                Align = alClient
+                TabOrder = 2
+                ExplicitLeft = 336
+                object edtImpressaoFormatoVisivel: TCheckBox
+                  Left = 6
+                  Top = 8
+                  Width = 97
+                  Height = 17
+                  Caption = 'Vis'#237'vel'
+                  TabOrder = 0
+                end
+                object edtImpressaoFormatoSumário: TCheckBox
+                  Left = 184
+                  Top = 8
+                  Width = 97
+                  Height = 17
+                  Caption = 'Sum'#225'rio'
+                  TabOrder = 1
+                end
+                object edtImpressaoFormatoLabel: TLabeledEdit
+                  Left = 6
+                  Top = 46
+                  Width = 169
+                  Height = 23
+                  EditLabel.Width = 30
+                  EditLabel.Height = 15
+                  EditLabel.Caption = 'T'#237'tulo'
+                  TabOrder = 2
+                  Text = ''
+                end
+                object edtImpressaoTituloSumario: TLabeledEdit
+                  Left = 181
+                  Top = 46
+                  Width = 169
+                  Height = 23
+                  EditLabel.Width = 93
+                  EditLabel.Height = 15
+                  EditLabel.Caption = 'Titulo no sum'#225'rio'
+                  TabOrder = 3
+                  Text = ''
+                end
+                object edtImpressaoFormatoTamanho: TLabeledEdit
+                  Left = 6
+                  Top = 94
+                  Width = 169
+                  Height = 23
+                  EditLabel.Width = 49
+                  EditLabel.Height = 15
+                  EditLabel.Caption = 'Tamanho'
+                  TabOrder = 4
+                  Text = ''
+                end
+                object edtImpressaoFormatoTamanhoSumario: TLabeledEdit
+                  Left = 181
+                  Top = 94
+                  Width = 169
+                  Height = 23
+                  EditLabel.Width = 112
+                  EditLabel.Height = 15
+                  EditLabel.Caption = 'Tamanho no sum'#225'rio'
+                  TabOrder = 5
+                  Text = ''
+                end
+                object edtImpressaoFormatoAlinhamento: TRadioGroup
+                  Left = 6
+                  Top = 221
+                  Width = 170
+                  Height = 60
+                  Caption = 'Alinhamento'
+                  Columns = 2
+                  Items.Strings = (
+                    'Padr'#227'o'
+                    'Esquerda'
+                    'Direita'
+                    'Centro')
+                  TabOrder = 8
+                end
+                object edtImpressaoFormatoAlinhamentoSumario: TRadioGroup
+                  Left = 182
+                  Top = 221
+                  Width = 171
+                  Height = 60
+                  Caption = 'Alinhamento Sum'#225'rio'
+                  Columns = 2
+                  Items.Strings = (
+                    'Padr'#227'o'
+                    'Esquerda'
+                    'Direita'
+                    'Centro')
+                  TabOrder = 9
+                end
+                object edtImpressaoFormatoFormato: TLabeledEdit
+                  Left = 6
+                  Top = 144
+                  Width = 169
+                  Height = 23
+                  EditLabel.Width = 45
+                  EditLabel.Height = 15
+                  EditLabel.Caption = 'Formato'
+                  TabOrder = 6
+                  Text = ''
+                end
+                object edtImpressaoFormatoFormatoSumario: TLabeledEdit
+                  Left = 181
+                  Top = 144
+                  Width = 169
+                  Height = 23
+                  EditLabel.Width = 108
+                  EditLabel.Height = 15
+                  EditLabel.Caption = 'Formato no sum'#225'rio'
+                  TabOrder = 7
+                  Text = ''
+                end
+                object edtImpressaoFormatoPosicao: TLabeledEdit
+                  Left = 6
+                  Top = 192
+                  Width = 169
+                  Height = 23
+                  EditLabel.Width = 41
+                  EditLabel.Height = 15
+                  EditLabel.Caption = 'Posi'#231#227'o'
+                  TabOrder = 10
+                  Text = ''
+                end
+                object edtImpressaoFormatoPosicaoSumario: TLabeledEdit
+                  Left = 182
+                  Top = 192
+                  Width = 169
+                  Height = 23
+                  EditLabel.Width = 104
+                  EditLabel.Height = 15
+                  EditLabel.Caption = 'Posi'#231#227'o no sum'#225'rio'
+                  TabOrder = 11
+                  Text = ''
+                end
+              end
+            end
+          end
+        end
       end
     end
   end
@@ -463,5 +814,9 @@
     AutoEdit = False
     Left = 424
     Top = 88
+  end
+  object dsImpressoes: TDataSource
+    Left = 496
+    Top = 112
   end
 end

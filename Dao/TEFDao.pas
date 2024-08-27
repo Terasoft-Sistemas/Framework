@@ -90,7 +90,7 @@ begin
   Result   := lModel;
 
   try
-    lQry.Open('select * from tef where id = '+pId);
+    lQry.Open('select * from tef where id = '+ QuotedStr(pId));
 
     if lQry.IsEmpty then
       Exit;
