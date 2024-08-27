@@ -34,11 +34,10 @@ type
     tsDados: TTabSheet;
     DBMemo1: TDBMemo;
     dsEP: TDataSource;
-    Testar: TBitBtn;
     edNome: TDBLabeledEdit;
     edDescricao: TDBMemo;
     lblDescricao: TLabel;
-    TabSheet1: TTabSheet;
+    tsFiltros: TTabSheet;
     dsFiltros: TDataSource;
     gridFiltros: TXDBGrid;
     pnGestaoPropriedadesFiltro: TPanel;
@@ -71,12 +70,39 @@ type
     edtFormatacaoCampoOperacoes: TRadioGroup;
     edtFormatacaoCampoPosicao: TLabeledEdit;
     tsImpressoes: TTabSheet;
+    dsImpressoes: TDataSource;
+    gridImpressoes: TXDBGrid;
+    Panel1: TPanel;
+    btnImpressoesEditar: TBitBtn;
+    btnImpressoesCancelar: TBitBtn;
+    btnImpressoesSalvar: TBitBtn;
+    btnImpressoesNovo: TBitBtn;
+    btnImpressoesExcluir: TBitBtn;
+    pnImpressoes: TPanel;
+    edGroupBy: TLabeledEdit;
+    edWhere: TLabeledEdit;
+    edtFormatacaoCampoAlinhamento: TRadioGroup;
+    PCImpressoes: TPageControl;
+    tsImpressaoDados: TTabSheet;
+    edtImpressaoNome: TLabeledEdit;
+    edtImpressaoDescricao: TLabeledEdit;
+    edtImpressaoTitulo: TLabeledEdit;
+    edImpressaoOrientacao: TRadioGroup;
+    tsImpressaoFormatacao: TTabSheet;
+    gridImpressaoFormatacaoCampo: TXDBGrid;
+    pnGestaoImpressao: TPanel;
+    btnImpressaoEditar: TBitBtn;
+    btnImpressaoCancelar: TBitBtn;
+    btnImpressaoSalvar: TBitBtn;
+    pnImpressaoFormatacao: TPanel;
+    edtImpressaoFormatoVisivel: TCheckBox;
+    edtImpressaoFormatoSumário: TCheckBox;
+    edtImpressaoFormatoLabel: TLabeledEdit;
     procedure FormShow(Sender: TObject);
     procedure btnNovoClick(Sender: TObject);
     procedure btnCancelarClick(Sender: TObject);
     procedure btnGravarClick(Sender: TObject);
     procedure btnEditarClick(Sender: TObject);
-    procedure TestarClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure dsEPStateChange(Sender: TObject);
     procedure btnFiltroEditarClick(Sender: TObject);
@@ -90,12 +116,22 @@ type
     procedure btnGestaoformatacoesCancelarClick(Sender: TObject);
     procedure btnGestaoformatacoesSalvarClick(Sender: TObject);
     procedure edtFormatacaoCampoOperacoesClick(Sender: TObject);
+    procedure btnImpressoesNovoClick(Sender: TObject);
+    procedure btnImpressoesEditarClick(Sender: TObject);
+    procedure btnImpressoesSalvarClick(Sender: TObject);
+    procedure btnImpressoesCancelarClick(Sender: TObject);
+    procedure btnImpressoesExcluirClick(Sender: TObject);
+    procedure PCImpressoesChange(Sender: TObject);
+    procedure btnImpressaoEditarClick(Sender: TObject);
+    procedure gridImpressaoFormatacaoCampoCellClick(Column: TXColumn);
+    procedure btnImpressaoCancelarClick(Sender: TObject);
+    procedure btnImpressaoSalvarClick(Sender: TObject);
   private
     { Private declarations }
   protected
     vQuery: IDatasetSimples;
     vDatasetEndpoints: IDataset;
-    vDatasetCampos, vDatasetFiltros,vDatasetFiltrosValores: IDatasetSimples;
+    vDatasetImpressoes, vDatasetCampos, vDatasetFiltros,vDatasetFiltrosValores: IDatasetSimples;
 
 
     [weak] mySelf: ITfrmEditorConsultas;
@@ -103,17 +139,23 @@ type
     vEPControl: IController_Endpoint;
     procedure query;
     procedure beforePost(DataSet: TDataSet);
-    procedure ajustaBotoes;
-    procedure ajustaBotoesFiltros;
-    procedure ajustaBotoesCampos;
+    function ajustaBotoes: boolean;
+    function ajustaBotoesImpressoes: boolean;
+    function ajustaBotoesFiltros: boolean;
+    function ajustaBotoesCampos: boolean;
     function critica(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
     function getDatasetFiltros: IDatasetSimples;
     procedure preencheFiltros;
     procedure preencheCampos;
+    procedure preencheCamposImpressao;
+    procedure preencheImpressoes;
     procedure geraConfiguracoesFiltro;
     function getMultiConfigPropriedades: IMultiConfig;
     procedure geraPropriedades001;
-    procedure openQuery;
+    procedure geraPropriedades002;
+    procedure openQueryCampos;
+    procedure openQueryImpressoes;
+    procedure geraConfiguracoesImpressoes;
   public
     constructor _Create(pIConexao:IConexao);
     class function getNewIface(pIConexao: IConexao): ITfrmEditorConsultas;
@@ -163,29 +205,162 @@ begin
 end;
 
 procedure TfrmEditorConsultas.btnGravarClick(Sender: TObject);
+  var
+    m: IMultiConfig;
+    s: String;
 begin
-  msgErro('Gravação desabilitada ainda no momento.');
+  m := getMultiConfigPropriedades;
+  m.deleteKey('group');
+  edGroupBy.Text := trim(edGroupBy.Text);
+  if(edGroupBy.Text<>'') then
+    m.WriteString('group','1',edGroupBy.Text);
+
+  m.deleteKey('where');
+  edWhere.Text := trim(edWhere.Text);
+  if(edWhere.Text<>'') then
+    m.WriteString('where','1',edWhere.Text);
+
+
+  s :=  inputMemo('Verifique os valores','Propriedades', m.toString);
+
+  vDatasetEndpoints.dataset.FieldByName('propriedades').AsString := s;
+
   with critica do
     if erros>0 then
       msgErro(toString);
 
-//  if not podeGravar then
-//    msgErro('Você precisa fornecer os campos obrigatórios.');
+  if not pergunta('Deseja salvar a edição do relatório?') then
+    exit;
+
   vDatasetEndpoints.dataset.CheckBrowseMode;
   ajustaBotoes;
+  edNome.Show;
+end;
+
+procedure TfrmEditorConsultas.btnImpressaoCancelarClick(Sender: TObject);
+begin
+  if not pergunta('Deseja cancelar a edição da formatação da impressão selecionada?') then
+    exit;
+
+  vDatasetCampos.dataset.Cancel;
+  preencheCamposImpressao;
+  ajustaBotoes;
+  gridImpressaoFormatacaoCampo.SetFocus;
+end;
+
+procedure TfrmEditorConsultas.btnImpressaoEditarClick(Sender: TObject);
+begin
+  vDatasetCampos.dataset.Edit;
+  preencheCamposImpressao;
+  ajustaBotoes;
+  edtImpressaoFormatoLabel.SetFocus;
+end;
+
+procedure TfrmEditorConsultas.btnImpressaoSalvarClick(Sender: TObject);
+begin
+  raise Exception.Create('Error Message');
+end;
+
+procedure TfrmEditorConsultas.btnImpressoesCancelarClick(Sender: TObject);
+begin
+  if not pergunta('Deseja cancelar a edição da impressão selecionada?') then
+    exit;
+
+  vDatasetImpressoes.dataset.Cancel;
+  ajustaBotoes;
+  openQueryImpressoes;
+  gridImpressoes.SetFocus;
+end;
+
+procedure TfrmEditorConsultas.btnImpressoesEditarClick(Sender: TObject);
+begin
+  vDatasetImpressoes.dataset.Edit;
+  preencheImpressoes;
+  ajustaBotoes;
+  edtImpressaoNome.Show;
+  edtImpressaoNome.SetFocus;
+end;
+
+procedure TfrmEditorConsultas.btnImpressoesExcluirClick(Sender: TObject);
+  var
+    cfg: IMultiConfig;
+    s: String;
+begin
+  cfg := getMultiConfigPropriedades;
+  cfg.deleteKey('impressoes',vDatasetImpressoes.dataset.Fields[0].AsString);
+
+  s := inputMemo('Verifique os valores','Propriedades', cfg.toString);
+
+  if not pergunta('Deseja excluir a impressão selecionada?') then
+    exit;
+
+
+  vDatasetEndpoints.fieldByName('propriedades').AsString := s;
+
+  openQueryImpressoes;
+  //vDatasetImpressoes.dataset.Delete;
+  ajustaBotoes;
+  gridImpressoes.SetFocus;
+end;
+
+procedure TfrmEditorConsultas.btnImpressoesNovoClick(Sender: TObject);
+begin
+  vDatasetImpressoes.dataset.last;
+  vDatasetImpressoes.dataset.Append;
+  preencheImpressoes;
+  ajustaBotoes;
+  edtImpressaoNome.Show;
+  edtImpressaoNome.SetFocus;
+end;
+
+procedure TfrmEditorConsultas.btnImpressoesSalvarClick(Sender: TObject);
+  var
+    save: String;
+begin
+  save := vDatasetEndpoints.dataset.FieldByName('propriedades').AsString;
+  geraConfiguracoesImpressoes;
+
+  if (not pergunta('Deseja salvar a impressão selecionada?')) then
+  begin
+    vDatasetEndpoints.dataset.FieldByName('propriedades').AsString := save;
+    exit;
+  end;
+
+  vDatasetImpressoes.dataset.CheckBrowseMode;
+
+  ajustaBotoes;
+
+  openQueryImpressoes;
+  gridImpressoes.SetFocus;
 end;
 
 procedure TfrmEditorConsultas.btnCancelarClick(Sender: TObject);
 begin
+  if not pergunta('Deseja cancelar a edição do relatório?') then
+    exit;
   vDatasetEndpoints.dataset.Cancel;
+  edNome.Show;
   ajustaBotoes;
 end;
 
 procedure TfrmEditorConsultas.btnEditarClick(Sender: TObject);
+  var
+    l: IListaTexto;
 begin
   if(vDatasetEndpoints.dataset.State=dsBrowse) then
     vDatasetEndpoints.dataset.Edit;
   ajustaBotoes;
+  l := getMultiConfigPropriedades.ReadSectionValuesLista('group');
+  edGroupBy.Text := '';
+  if(l.strings.Count>0) then
+    edGroupBy.Text := l.strings.ValueFromIndex[0];
+
+  l := getMultiConfigPropriedades.ReadSectionValuesLista('where');
+  edWhere.Text := '';
+  if(l.strings.Count>0) then
+    edWhere.Text := l.strings.ValueFromIndex[0];
+
+
   edNome.Show;
   edNome.SetFocus;
 end;
@@ -226,6 +401,40 @@ begin
 
   vDatasetFiltros.dataset.Fields[0].AsString := sName;
   vDatasetFiltros.dataset.Fields[1].AsString := trim(edPropFiltroValor.Text);
+
+end;
+
+procedure TfrmEditorConsultas.geraConfiguracoesImpressoes;
+  var
+    sName,sDescricao,sTitulo,sValores,tmp1,tmp2: String;
+    i: Integer;
+    cfg: IMultiConfig;
+    s: String;
+begin
+
+  sName := trim(edtImpressaoNome.Text);
+  if(sName='') then
+    msgErro('Nome da impressão deve ser preenchido.');
+  sDescricao := trim(edtImpressaoDescricao.Text);
+  sTitulo := trim(edtImpressaoTitulo.Text);
+  if(sTitulo<>'') then
+    sDescricao := sDescricao + '|'+sTitulo;
+
+  cfg := getMultiConfigPropriedades;
+  if (vDatasetImpressoes.dataset.fields[0].AsString<>'') and (CompareText(sName, vDatasetImpressoes.dataset.fields[0].AsString)<>0) then
+  begin
+    cfg.deleteKey('impressoes',vDatasetImpressoes.dataset.fields[0].AsString);
+    //apagar demais??
+  end;
+  cfg.WriteString('impressoes',sName,sDescricao);
+
+  if(edImpressaoOrientacao.ItemIndex=0) then
+    CFG.deleteKey('impressao.'+sName,'pagina.orientacao')
+  else
+    CFG.WriteInteger('impressao.'+sName,'pagina.orientacao',1);
+
+  s := inputMemo('Verifique os valores','Propriedades', cfg.toString);
+  vDatasetEndpoints.fieldByName('propriedades').AsString := s;
 
 end;
 
@@ -314,6 +523,11 @@ begin
 
   //Fim das críticas
 
+  if(edtFormatacaoCampoAlinhamento.ItemIndex=0) then
+    lCFG.deleteKey('alinhamento', campo)
+  else
+    lCFG.WriteInteger('alinhamento', campo, edtFormatacaoCampoAlinhamento.ItemIndex-1);
+
 
   if(edtFormatacaoCampoVisivel.Checked) then
     lCFG.deleteKey('visible',campo)
@@ -377,7 +591,26 @@ begin
 
 end;
 
+procedure TfrmEditorConsultas.preencheImpressoes;
+  var
+    lCfg: IMultiConfig;
+    sNome, s: String;
+begin
+  if(vDatasetImpressoes=nil) then exit;
+  lCFG := getMultiConfigPropriedades;
 
+  sNome := trim(vDatasetImpressoes.dataset.Fields[0].AsString);
+  edtImpressaoNome.Text := sNome;
+
+  s := lCfg.ReadString('impressoes',sNome,'');
+  edtImpressaoDescricao.Text := textoEntreTags(s,'','|');
+  if(edtImpressaoDescricao.Text='') then
+    edtImpressaoDescricao.Text := s;
+  edtImpressaoTitulo.Text := textoEntreTags(s,'|','');
+
+  edImpressaoOrientacao.ItemIndex := lCFG.ReadInteger('impressao.'+sNome,'pagina.orientacao',0);
+
+end;
 
 procedure TfrmEditorConsultas.preencheCampos;
   var
@@ -425,6 +658,59 @@ begin
   edtFormatacaoCampoTamanho.Text := lCFG.ReadString('width', campo,'');
   edtFormatacaoCampoVisivel.Checked := lCFG.ReadBool('visible', campo, f.Visible);
   edtFormatacaoCampoPosicao.Text := lCFG.ReadString('posicao', campo, '');
+
+  edtFormatacaoCampoAlinhamento.ItemIndex := lCFG.ReadInteger('alinhamento', campo, -1)+1;
+end;
+
+procedure TfrmEditorConsultas.preencheCamposImpressao;
+  var
+    lCfg: IMultiConfig;
+    campo: String;
+    lNome: String;
+    f: TField;
+begin
+  if(vDatasetCampos=nil) then exit;
+  if(vQuery=nil) then exit;
+  lNome := vDatasetImpressoes.dataset.Fields[0].AsString;
+  campo := vDatasetCampos.dataset.Fields[0].AsString;
+  f := vQuery.dataset.FieldByName(campo);
+  if(f=nil) then
+    exit;
+  lCFG := getMultiConfigPropriedades;
+
+  edtImpressaoFormatoLabel.Text := lCFG.ReadString('impressao.label.'+lnome,campo,'');
+{  if(f is TNumericField) then
+  begin
+    edtFormatacaoCampoFormato.Enabled := true;
+    edtFormatacaoCampoFormato.Text := lCFG.ReadString('formato', campo, '');
+    edtFormatacaoCampoSumario.Enabled := true;
+    edtFormatacaoCampoSumario.Checked := lCFG.ReadBool('sumario', campo, true);
+    edtFormatacaoCampoSumario.Enabled := true;
+    edtFormatacaoCampoOperacoes.Enabled := true;
+    edtFormatacaoCampoOperacoes.ItemIndex := Integer(op);
+    edtFormatacaoCampoExpressao.Enabled := op=tofExpressao;
+  end else
+  begin
+    edtFormatacaoCampoFormato.Enabled := false;
+    edtFormatacaoCampoFormato.Text := '';
+    edtFormatacaoCampoSumario.Enabled := false;
+    edtFormatacaoCampoSumario.Checked := false;
+    edtFormatacaoCampoSumario.Enabled := false;
+    edtFormatacaoCampoExpressao.Text := '';
+    edtFormatacaoCampoOperacoes.Enabled := false;
+    edtFormatacaoCampoExpressao.Enabled := false;
+  end;
+  if(edtFormatacaoCampoExpressao.Enabled) then
+    edtFormatacaoCampoExpressao.Text := textoEntreTags(lCFG.ReadString('operacoes', campo, ''),'=','')
+  else
+    edtFormatacaoCampoExpressao.Text := '';
+
+  edtFormatacaoCampoTamanho.Text := lCFG.ReadString('width', campo,'');
+  edtFormatacaoCampoVisivel.Checked := lCFG.ReadBool('visible', campo, f.Visible);
+  edtFormatacaoCampoPosicao.Text := lCFG.ReadString('posicao', campo, '');
+
+  edtFormatacaoCampoAlinhamento.ItemIndex := lCFG.ReadInteger('alinhamento', campo, -1)+1;
+}
 end;
 
 procedure TfrmEditorConsultas.btnFiltroEditarClick(Sender: TObject);
@@ -474,6 +760,26 @@ begin
   getDatasetFiltros;
 end;
 
+procedure TfrmEditorConsultas.geraPropriedades002;
+  var
+    m: IMultiConfig;
+    s: String;
+begin
+  m := getMultiConfigPropriedades;
+  m.deleteKey('filtros');
+  vDatasetFiltros.dataset.First;
+  while not vDatasetFiltros.dataset.Eof do
+  begin
+    m.writeString('filtros',trim(vDatasetFiltros.dataset.fields[0].AsString),trim(vDatasetFiltros.dataset.fields[1].AsString));
+    vDatasetFiltros.dataset.Next;
+  end;
+  s := inputMemo('Verifique os valores','Propriedades', m.toString);
+
+  vDatasetEndpoints.fieldByName('propriedades').AsString := s;
+
+  getDatasetFiltros;
+end;
+
 procedure TfrmEditorConsultas.btnFiltroSalvarClick(Sender: TObject);
 begin
 
@@ -490,29 +796,78 @@ begin
 
 end;
 
-procedure TfrmEditorConsultas.ajustaBotoesCampos;
+function TfrmEditorConsultas.ajustaBotoesCampos;
 begin
   if(vDatasetCampos=nil) then
   begin
+    Result := true;
     gridCampos.Enabled := false;
+    gridImpressaoFormatacaoCampo.Enabled := false;
+
     btnGestaoformatacoesEditar.Enabled := false;
+    btnImpressaoEditar.Enabled := false;
+
     btnGestaoformatacoesSalvar.Enabled := false;
+    btnImpressaoSalvar.Enabled := false;
+
     btnGestaoformatacoesCancelar.Enabled := false;
+    btnImpressaoCancelar.Enabled := false;
+
     pnPropCampo.Enabled := false;
+    pnImpressaoFormatacao.Enabled := false;
     exit;
   end;
+  Result :=vDatasetCampos.dataset.State=dsBrowse;
+
   gridCampos.Enabled := vDatasetCampos.dataset.State=dsBrowse;
+  gridImpressaoFormatacaoCampo.Enabled := vDatasetCampos.dataset.State=dsBrowse;
+
   pnPropCampo.Enabled := vDatasetCampos.dataset.State<>dsBrowse;
+  pnImpressaoFormatacao.Enabled := vDatasetCampos.dataset.State<>dsBrowse;
 
   btnGestaoformatacoesEditar.Enabled := (vDatasetCampos.dataset.State=dsBrowse) and (vDatasetCampos.dataset.RecordCount>0);
+  btnImpressaoEditar.Enabled := btnGestaoformatacoesEditar.Enabled;
+
   btnGestaoformatacoesCancelar.Enabled := vDatasetCampos.dataset.State<>dsBrowse;
+  btnImpressaoCancelar.Enabled := btnGestaoformatacoesCancelar.Enabled;
+
   btnGestaoformatacoesSalvar.Enabled := vDatasetCampos.dataset.State<>dsBrowse;
+  btnImpressaoSalvar.Enabled := btnGestaoformatacoesSalvar.Enabled;
 end;
 
-procedure TfrmEditorConsultas.ajustaBotoesFiltros;
+function TfrmEditorConsultas.ajustaBotoesImpressoes;
+  var
+    rCampo: boolean;
+begin
+  rCampo := (vDatasetCampos=nil) or (vDatasetCampos.dataset.State=dsBrowse);
+  if(vDatasetImpressoes=nil) then
+  begin
+    Result := true;
+    gridImpressoes.enabled := false;
+    btnImpressoesEditar.Enabled := false;
+    btnImpressoesCancelar.Enabled := false;
+    btnImpressoesSalvar.Enabled := false;
+    btnImpressoesNovo.Enabled := false;
+    btnImpressoesExcluir.Enabled := false;
+    pnImpressoes.Enabled := false;
+    exit;
+  end;
+  Result := vDatasetImpressoes.dataset.State=dsBrowse;
+  gridImpressoes.Enabled := vDatasetImpressoes.dataset.State=dsBrowse;
+  pnImpressoes.Enabled := vDatasetImpressoes.dataset.State<>dsBrowse;
+  btnImpressoesEditar.Enabled := rCampo and (vDatasetImpressoes.dataset.State=dsBrowse) and (vDatasetImpressoes.dataset.RecordCount>0);
+  btnImpressoesCancelar.Enabled := rCampo and (vDatasetImpressoes.dataset.State<>dsBrowse);
+  btnImpressoesSalvar.Enabled := rCampo and (vDatasetImpressoes.dataset.State<>dsBrowse);
+  btnImpressoesNovo.Enabled := rCampo and (vDatasetImpressoes.dataset.State=dsBrowse);
+  btnImpressoesExcluir.Enabled := rCampo and ((vDatasetImpressoes.dataset.RecordCount>0) or (vDatasetImpressoes.dataset.State = dsInsert));
+
+end;
+
+function TfrmEditorConsultas.ajustaBotoesFiltros;
 begin
   if(vDatasetFiltros=nil) then
   begin
+    Result := true;
     gridFiltros.Enabled := false;
     pnPropFiltro.Visible := false;
     btnFiltroEditar.Enabled := false;
@@ -522,20 +877,33 @@ begin
     btnFiltroSalvar.Enabled := false;
     exit;
   end;
+  Result := vDatasetFiltros.dataset.State=dsBrowse;
   gridFiltros.Enabled := vDatasetFiltros.dataset.State=dsBrowse;
   pnPropFiltro.Visible := vDatasetFiltros.dataset.State<>dsBrowse;
 
-  btnFiltroNovo.Enabled := vDatasetFiltros.dataset.State=dsBrowse;
   btnFiltroEditar.Enabled := (vDatasetFiltros.dataset.State=dsBrowse) and (vDatasetFiltros.dataset.RecordCount>0);
   btnFiltroCancelar.Enabled := vDatasetFiltros.dataset.State<>dsBrowse;
   btnFiltroSalvar.Enabled := vDatasetFiltros.dataset.State<>dsBrowse;
+  btnFiltroNovo.Enabled := vDatasetFiltros.dataset.State=dsBrowse;
   btnFiltroExcluir.Enabled := (vDatasetFiltros.dataset.RecordCount>0) or (vDatasetFiltros.dataset.State = dsInsert);
 end;
 
-procedure TfrmEditorConsultas.ajustaBotoes;
+function TfrmEditorConsultas.ajustaBotoes;
 begin
-  ajustaBotoesFiltros;
-  ajustaBotoesCampos;
+{$B+}
+  Result := ajustaBotoesFiltros and ajustaBotoesCampos and ajustaBotoesImpressoes;
+{$B-}
+  if(Result=false) then
+  begin
+    pnEdicao.Enabled := true;
+    gridEP.Enabled := false;
+    btnNovo.Enabled := false;
+    btnEditar.Enabled := false;
+    btnCancelar.Enabled := false;
+    btnGravar.Enabled := false;
+    exit;
+  end;
+  Result := vDatasetEndpoints.dataset.State=dsBrowse;
   pnEdicao.Enabled := vDatasetEndpoints.dataset.State<>dsBrowse;
   gridEP.Enabled := vDatasetEndpoints.dataset.State=dsBrowse;
   btnNovo.Enabled := vDatasetEndpoints.dataset.State=dsBrowse;
@@ -552,7 +920,7 @@ begin
   edNome.SetFocus;
 end;
 
-procedure TfrmEditorConsultas.openQuery;
+procedure TfrmEditorConsultas.openQueryCampos;
   var
     ep: ITEndpointModel;
     i: Integer;
@@ -574,7 +942,30 @@ begin
   ajustaBotoes;
   vDatasetCampos.dataset.First;
   preencheCampos;
+  preencheCamposImpressao;
 end;
+
+procedure TfrmEditorConsultas.openQueryImpressoes;
+  var
+    i: Integer;
+    l: IListaTexto;
+begin
+  vDatasetImpressoes := getGenericID_DescricaoDataset(50,0,true);
+  vDatasetImpressoes.dataset.Fields[0].DisplayLabel := 'Impressão';
+  vDatasetImpressoes.dataset.Fields[0].DisplayWidth := 35;
+  l := getMultiConfigPropriedades.ReadSectionValuesLista('impressoes');
+  for i := 0 to l.strings.Count - 1 do
+  begin
+    vDatasetImpressoes.dataset.Append;
+    vDatasetImpressoes.dataset.Fields[0].AsString := l.strings.Names[i];
+    vDatasetImpressoes.dataset.CheckBrowseMode;
+  end;
+  dsImpressoes.DataSet := vDatasetImpressoes.dataset;
+  ajustaBotoes;
+  vDatasetImpressoes.dataset.First;
+  preencheImpressoes;
+end;
+
 
 procedure TfrmEditorConsultas.btnFiltroCancelarClick(Sender: TObject);
 begin
@@ -588,6 +979,8 @@ end;
 procedure TfrmEditorConsultas.FormCreate(Sender: TObject);
 begin
   vEPControl := getEndpointController(vIConexao);
+  PC.ActivePageIndex := 0;
+  PCImpressoes.ActivePageIndex := 0;
 end;
 
 procedure TfrmEditorConsultas.FormShow(Sender: TObject);
@@ -597,7 +990,16 @@ begin
 end;
 
 function TfrmEditorConsultas.getDatasetFiltros: IDatasetSimples;
+  var
+    cfg: IMultiConfig;
 begin
+  cfg := getMultiConfigPropriedades;
+  if(cfg.ReadSectionValuesLista('filtros').Strings.Count= 0) then
+  begin
+    cfg.WriteString('filtros','@filiais','');
+    cfg.WriteString('filtros','@busca','');
+    vDatasetEndpoints.dataset.FieldByName('propriedades').AsString := cfg.toString;
+  end;
 
   Result := getMultiConfigPropriedades.ReadSectionValuesLista('filtros').toDataset([],1000,1000);
   Result.dataset.Fields[1].Visible := false;
@@ -606,6 +1008,7 @@ begin
 
   vDatasetFiltros := Result;
   dsFiltros.DataSet := vDatasetFiltros.dataset;
+  ajustaBotoesFiltros;
 end;
 
 function TfrmEditorConsultas.getMultiConfigPropriedades: IMultiConfig;
@@ -624,10 +1027,26 @@ begin
   preencheCampos;
 end;
 
+procedure TfrmEditorConsultas.gridImpressaoFormatacaoCampoCellClick(Column: TXColumn);
+begin
+  preencheCamposImpressao;
+end;
+
 procedure TfrmEditorConsultas.PCChange(Sender: TObject);
 begin
   if(PC.ActivePage=tsFormatações) then
-    openQuery;
+    openQueryCampos
+  else if(PC.ActivePage=tsImpressoes) then
+    openQueryImpressoes
+  else if(PC.ActivePage = tsFiltros) then
+    getDatasetFiltros;
+
+end;
+
+procedure TfrmEditorConsultas.PCImpressoesChange(Sender: TObject);
+begin
+  if(PCImpressoes.ActivePage=tsImpressaoFormatacao) then
+    openQueryCampos
 end;
 
 function TfrmEditorConsultas.critica(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
@@ -664,7 +1083,7 @@ end;
 procedure TfrmEditorConsultas.dsEPStateChange(Sender: TObject);
 begin
   if(vDatasetEndpoints.dataset.RecordCount>0) then
-    getDatasetFiltros;
+//    getDatasetFiltros;
 end;
 
 procedure TfrmEditorConsultas.edtFormatacaoCampoOperacoesClick(Sender: TObject);
@@ -688,11 +1107,6 @@ begin
 
   ajustaBotoes;
 
-end;
-
-procedure TfrmEditorConsultas.TestarClick(Sender: TObject);
-begin
-  openQuery;
 end;
 
 constructor TfrmEditorConsultas._Create(pIConexao: IConexao);
