@@ -571,7 +571,6 @@ uses
   IbptModel,
   WebPedidoModel,
   ItensProdutoModel,
-  VariaveisGlobais,
   System.Rtti;
 
 { TPedidoVendaModel }
@@ -1584,13 +1583,15 @@ var
   lIDItens           : String;
   lCtx               : TRttiContext;
   lProp              : TRttiProperty;
+  lConfiguracoes     : ITerasoftConfiguracoes;
 begin
   lPedidoItensModel  := TPedidoItensModel.getNewIface(vIConexao);
   lItensProdutoModel := TItensProdutoModel.getNewIface(vIConexao);
   lProdutosModel     := TProdutosModel.getNewIface(vIConexao);
   lCtx               := TRttiContext.Create;
-
   try
+    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
+
     Quantidade := StrToInt(pQuantidade);
 
     TotalItensItem := 0;
@@ -1632,7 +1633,7 @@ begin
       lPedidoItensModel.objeto.VALOR_VENDA_CADASTRO := lItensProduto.objeto.fieldByName('VENDA_PRO').AsString;
       lPedidoItensModel.objeto.LOJA                 := self.FLOJA;
 
-      lBaseCusto     := xConfiguracoes.objeto.ValorTag('BASE_CUSTO_PADRAO', 'CUSTOMEDIO_PRO', tvString);
+      lBaseCusto     := lConfiguracoes.objeto.ValorTag('BASE_CUSTO_PADRAO', 'CUSTOMEDIO_PRO', tvString);
       lProdutosModel := lProdutosModel.objeto.carregaClasse(lItensProduto.objeto.fieldByName('CODIGO_MATERIA_PRIMA').AsString);
       lProp          := lCtx.GetType(TProdutosModel).GetProperty(lBaseCusto);
 
