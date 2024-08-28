@@ -12,6 +12,7 @@ uses
   Terasoft.ConstrutorDao,
   Terasoft.Utils,
   Terasoft.Framework.ObjectIface,
+  Interfaces.QueryLojaAsync,
   Interfaces.Conexao;
 
 type
@@ -43,7 +44,7 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
     procedure SetIDRecordView(const Value: String);
-    procedure setParams(var pQry: TFDQuery; pClienteModel: ITClienteModel);
+    procedure setParams(pQry: TFDQuery; pClienteModel: ITClienteModel);
 
   public
     const
@@ -1087,7 +1088,7 @@ begin
   FOrderView := Value;
 end;
 
-procedure TClienteDao.setParams(var pQry: TFDQuery; pClienteModel: ITClienteModel);
+procedure TClienteDao.setParams(pQry: TFDQuery; pClienteModel: ITClienteModel);
 begin
   vConstrutor.setParams(NomeTabela,pQry,pClienteModel.objeto);
 end;
@@ -1109,40 +1110,42 @@ end;
 
 function TClienteDao.sincronizarDados(pClienteModel: ITClienteModel): String;
 var
-  lLojasModel,
-  lLojas      : ITLojasModel;
-  lQry        : TFDQuery;
+//  lLojasModel,
+//  lLojas      : ITLojasModel;
+  lQry        : IFDQuery;
   lSQL        : String;
+  lAsyncList: IListaQueryAsync;
+  lQA: IQueryLojaAsync;
 begin
-
-  lLojasModel := TLojasModel.getNewIface(vIConexao);
-  lQry:=nil;
-
+  Result := '';
+  lAsyncList := getQueryLojaAsyncList(vIConexao);
   try
-    lLojasModel.objeto.obterHosts;
-
     lSQL := vConstrutor.gerarUpdateOrInsert('CLIENTES','CODIGO_CLI', 'CODIGO_CLI', true);
 
-    for lLojas in lLojasModel.objeto.LojassLista do
+    for lQA in lAsyncList do
     begin
-      if lLojas.objeto.LOJA <> vIConexao.getEmpresa.LOJA then
+      if lQA.loja.objeto.LOJA <> vIConexao.getEmpresa.LOJA then
       begin
-        vIConexao.ConfigConexaoExterna('', lLojas.objeto.STRING_CONEXAO);
-        FreeAndNil(lQry);
-        lQry := vIConexao.criarQueryExterna;
+        lQry := lQA.loja.objeto.conexaoLoja.criaIfaceQuery;
 
-        lQry.SQL.Clear;
-        lQry.SQL.Add(lSQL);
-        setParams(lQry, pClienteModel);
-        lQry.Open(lSQL);
+        lQry.objeto.SQL.Clear;
+        lQry.objeto.SQL.Add(lSQL);
+        setParams(lQry.objeto, pClienteModel);
+        lQA.openQuery(lQry);
 
-        Result := lQry.FieldByName('CODIGO_CLI').AsString;
       end;
     end;
 
   finally
-    lLojasModel:=nil;
-    FreeAndNil(lQry);
+    for lQA in lAsyncList do
+    begin
+      lQA.espera;
+      if(lQA.FDQuery=nil) or (lQA.FDQuery.objeto.Active=false) then continue;
+
+      if(Result='') then
+        Result := lQA.FDQuery.objeto.FieldByName('CODIGO_CLI').AsString;
+
+    end;
   end;
 end;
 
