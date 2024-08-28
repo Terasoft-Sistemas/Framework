@@ -664,6 +664,7 @@ var
   lParametros              : TParametrosComissao;
   lCreditoClienteModel     : ITCreditoClienteModel;
   lConfiguracoes           : ITerasoftConfiguracoes;
+  lTotalReceber            : Extended;
 begin
   lPedidoVendaModel        := TPedidoVendaModel.getNewIface(vIConexao);
   lPedidoItensModel        := TPedidoItensModel.getNewIface(vIConexao);
@@ -681,6 +682,17 @@ begin
 
     if lPedidoVendaModel.objeto.WEB_PEDIDO_ID <> '' then
       lReservaModel := TReservaModel.getNewIface(vIConexao.NovaConexao('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA));
+
+    lContasReceberModel.IDPedidoView := lPedidoVendaModel.objeto.NUMERO_PED;
+    lContasReceberModel.obterContasReceberPedido;
+
+    for lContasReceberModel in lContasReceberModel.ContasRecebersLista do
+    begin
+      lTotalReceber := lTotalReceber + lContasReceberModel.VALOR_REC;
+    end;
+
+    if roundTo(self.TOTAL_PED, -2) <> roundTo(lTotalReceber, -2) then
+      CriaException('Total do contas a receber divergente do total do pedido');
 
     lContasReceberModel.IDPedidoView := lPedidoVendaModel.objeto.NUMERO_PED;
     lContasReceberModel.WhereView    := ' and portador.tpag_nfe = ''17'' and portador.pix_chave is not null';
