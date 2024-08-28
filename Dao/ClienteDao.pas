@@ -1136,7 +1136,7 @@ begin
   finally
     for lQA in lAsyncList do
     begin
-      lQA.espera;
+      //lQA.espera;
       if(lQA.FDQuery=nil) or (lQA.FDQuery.objeto.Active=false) then continue;
 
       if(Result='') then

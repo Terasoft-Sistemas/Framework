@@ -13,6 +13,7 @@ interface
     Variants,
     Interfaces.Conexao,
     Spring.Collections,
+    Terasoft.Framework.Collections,
     LojasModel;
 
   type
@@ -94,7 +95,7 @@ implementation
   type
     TQueryLojaAsync = class(TInterfacedObject,
         IQueryLojaAsync,
-        IINterface,
+        IInterface,
         IAsyncRunnable)
     protected
       [volatile] vCall: IAsyncCall;
@@ -158,6 +159,31 @@ implementation
     end;
 
 
+  TThreadMonitoramento = class(TThread)
+  protected
+    terminar: boolean;
+    procedure Execute; override;
+  public
+    destructor Destroy; override;
+  end;
+
+  var
+    gListaLocal: ILockList<IQueryLojaAsync>;
+    th: TThreadMonitoramento;
+
+
+procedure monitora(pQuery: IQueryLojaAsync);
+begin
+  if(gListaLocal=nil) then
+    gListaLocal := TLockListImpl<IQueryLojaAsync>.Create;
+  gListaLocal.add(pQuery);
+  if(th=nil) then
+  begin
+    th := TThreadMonitoramento.Create;
+    th.FreeOnTerminate:=true;
+  end;
+end;
+
 function getQueryLojaAsyncList;
   var
     lLojas,lLoja: ITLojasModel;
@@ -201,7 +227,8 @@ end;
 
 function TQueryLojaAsync._Release: Integer;
 begin
-  getStatus;
+  if(getStatus=sqal_Running) and (FRefCount=2) then
+    monitora(self);
   inherited;
 end;
 
@@ -380,5 +407,39 @@ begin
   end;
   Result := fGDB;
 end;
+
+{ TThreadMonitoramento }
+
+destructor TThreadMonitoramento.Destroy;
+begin
+  terminar := true;
+  WaitFor;
+  inherited;
+end;
+
+procedure TThreadMonitoramento.Execute;
+  var
+    p: IQueryLojaAsync;
+begin
+  inherited;
+  while not terminar do
+    while gListaLocal.count>0 do
+      try
+        sleep(50);
+        if(gListaLocal.dequeue(p)) then
+        begin
+          p.espera
+        end;
+      except
+
+      end;
+
+end;
+
+initialization
+
+
+finalization
+  FreeAndNil(th);
 
 end.
