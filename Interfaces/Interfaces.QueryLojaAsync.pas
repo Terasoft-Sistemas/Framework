@@ -161,7 +161,6 @@ implementation
 
   TThreadMonitoramento = class(TThread)
   protected
-    terminar: boolean;
     procedure Execute; override;
   public
     destructor Destroy; override;
@@ -412,8 +411,9 @@ end;
 
 destructor TThreadMonitoramento.Destroy;
 begin
-  terminar := true;
+  Terminate;
   WaitFor;
+  th := nil;
   inherited;
 end;
 
@@ -422,7 +422,7 @@ procedure TThreadMonitoramento.Execute;
     p: IQueryLojaAsync;
 begin
   inherited;
-  while not terminar do
+  while not Terminated do
     while gListaLocal.count>0 do
       try
         sleep(50);
