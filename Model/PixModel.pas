@@ -48,6 +48,7 @@ type
     Fpix_tipo: Variant;
     Fdesconto_valor: Variant;
     Fpix_data: Variant;
+    FMOTIVO_CANCELAMENTO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetPixsLista(const Value: IList<ITPixModel>);
@@ -80,6 +81,7 @@ type
     procedure Setvalor(const Value: Variant);
     procedure Setvalor_recebido(const Value: Variant);
     procedure Setvencimento(const Value: Variant);
+    procedure SetMOTIVO_CANCELAMENTO(const Value: Variant);
   public
     property id: Variant read Fid write Setid;
     property data_cadastro: Variant read Fdata_cadastro write Setdata_cadastro;
@@ -104,6 +106,7 @@ type
     property valor_recebido: Variant read Fvalor_recebido write Setvalor_recebido;
     property data_pagamento: Variant read Fdata_pagamento write Setdata_pagamento;
     property contasreceberitens_id: Variant read Fcontasreceberitens_id write Setcontasreceberitens_id;
+    property MOTIVO_CANCELAMENTO: Variant read FMOTIVO_CANCELAMENTO write SetMOTIVO_CANCELAMENTO;
 
   	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -359,6 +362,11 @@ end;
 procedure TPixModel.Setmensagem(const Value: Variant);
 begin
   Fmensagem := Value;
+end;
+
+procedure TPixModel.SetMOTIVO_CANCELAMENTO(const Value: Variant);
+begin
+  FMOTIVO_CANCELAMENTO := Value;
 end;
 
 procedure TPixModel.Setmulta_tipo(const Value: Variant);
