@@ -170,7 +170,6 @@ begin
 
   for lLoja in lLojas.objeto.LojassLista do
   begin
-    //if(lLoja.objeto.DATABASE='') then continue;
     lQLA := getQueryLojaAsync(lLoja);
     Result.Add(lQLA);
   end;

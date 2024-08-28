@@ -1110,11 +1110,9 @@ end;
 
 function TClienteDao.sincronizarDados(pClienteModel: ITClienteModel): String;
 var
-//  lLojasModel,
-//  lLojas      : ITLojasModel;
   lQry        : IFDQuery;
   lSQL        : String;
-  lAsyncList: IListaQueryAsync;
+  lAsyncList  : IListaQueryAsync;
   lQA: IQueryLojaAsync;
 begin
   Result := '';
@@ -1132,7 +1130,6 @@ begin
         lQry.objeto.SQL.Add(lSQL);
         setParams(lQry.objeto, pClienteModel);
         lQA.openQuery(lQry);
-
       end;
     end;
 
