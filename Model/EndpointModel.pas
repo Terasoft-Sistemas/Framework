@@ -1049,8 +1049,14 @@ begin
 end;
 
 function TEndpointModel.getBuscaAdicional: TipoWideStringFramework;
+  var
+    m: ITFiltroModel;
 begin
-  Result := getBuscaAvancada.objeto.buscaAdicional;
+  m := getBuscaAvancada;
+  if(m<>nil) then
+    Result := getBuscaAvancada.objeto.buscaAdicional
+  else
+    Result := '';
 end;
 
 function TEndpointModel.getBuscaAvancada: ITFiltroModel;
@@ -1066,7 +1072,7 @@ begin
     end;
   end;
 
-  raise Exception.CreateFmt('Falta definir a busca adicional para [%s] ', [ fNOME]);
+//  raise Exception.CreateFmt('Falta definir a busca adicional para [%s] ', [ fNOME]);
 end;
 
 function TEndpointModel.getFiltroAgrupamentos: ITFiltroModel;
