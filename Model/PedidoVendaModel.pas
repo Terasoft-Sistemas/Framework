@@ -1300,8 +1300,8 @@ begin
       lNFItensModel.objeto.VICMSUFDEST           := lItens.objeto.VICMSUFDEST;
       lNFItensModel.objeto.VICMSUFREMET          := lItens.objeto.VICMSUFREMET;
       lNFItensModel.objeto.REDUCAO_NF            := lItens.objeto.REDUCAO_ICMS;
-      lNFItensModel.objeto.VOUTROS               := lItens.objeto.VOUTROS;
-      lNFItensModel.objeto.FRETE                 := lItens.objeto.VFRETE;
+      lNFItensModel.objeto.VOUTROS               := IIF(pModelo = '65', StrToFloatDef(lItens.objeto.VFRETE, 0) + StrToFloatDef(lItens.objeto.VOUTROS, 0), lItens.objeto.VOUTROS);
+      lNFItensModel.objeto.FRETE                 := IIF(pModelo = '65', 0, lItens.objeto.VFRETE);
       lNFItensModel.objeto.VALOR_IPI             := lItens.objeto.VALOR_IPI;
       lNFItensModel.objeto.CSOSN                 := lItens.objeto.CSOSN;
       lNFItensModel.objeto.IPI_NF                := lItens.objeto.ALIQ_IPI;
