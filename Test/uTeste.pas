@@ -396,6 +396,7 @@ var
 implementation
 
 uses
+  Terasoft.Framework.Bytes,
   FuncoesArquivos,
   FinanceiroPedidoModel,
   WebPedidoModel,
@@ -738,7 +739,7 @@ begin
         exit;
 
       lClienteModel := lClienteModel.objeto.Alterar(ID);
-      lClienteModel.objeto.fantasia_cli := 'TESTE ALTERA FANTASIA';
+      lClienteModel.objeto.fantasia_cli := 'TESTE ALTERA FANTASIA - ' + randomBase32(10);
 
       lClienteModel.objeto.Salvar;
       ShowMessage('Alterado com Sucesso');

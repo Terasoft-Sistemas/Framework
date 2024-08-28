@@ -11,9 +11,16 @@ interface
     Terasoft.Framework.DB,
     Terasoft.Framework.Texto,
     Variants,
+    Interfaces.Conexao,
+    Spring.Collections,
+    Terasoft.Framework.Collections,
     LojasModel;
 
   type
+    IQueryLojaAsync=interface;
+
+    IListaQueryAsync=IList<IQueryLojaAsync>;
+
     TVariantArray = array of Variant;
 
     TStatusQueryAsyncLoja = (sqal_Idle, sqal_Running);
@@ -26,6 +33,7 @@ interface
 
       procedure run;
       procedure execQuery(const pQuery, pCampos: TipoWideStringFramework; pParametros: TVariantArray);
+      procedure openQuery(pQuery: IFDQuery);
 
     //property loja getter/setter
       function getLoja: ITLojasModel;
@@ -59,6 +67,11 @@ interface
       function getCriaOperacoes: boolean;
       procedure setCriaOperacoes(const pValue: boolean);
 
+    //property fdQuery getter/setter
+      function getFdQuery: IFDQuery;
+      procedure setFdQuery(const pValue: IFDQuery);
+
+      property FDQuery: IFDQuery read getFdQuery write setFdQuery;
       property criaOperacoes: boolean read getCriaOperacoes write setCriaOperacoes;
       property dataset: IDatasetSimples read getDataset;
       property status: TStatusQueryAsyncLoja read getStatus;
@@ -72,6 +85,8 @@ interface
 
     function getQueryLojaAsync(pLoja: ITLojasModel): IQueryLojaAsync;
 
+    function getQueryLojaAsyncList(pIConexao:IConexao): IListaQueryAsync;
+
 
 implementation
   uses
@@ -80,7 +95,7 @@ implementation
   type
     TQueryLojaAsync = class(TInterfacedObject,
         IQueryLojaAsync,
-        IINterface,
+        IInterface,
         IAsyncRunnable)
     protected
       [volatile] vCall: IAsyncCall;
@@ -92,6 +107,11 @@ implementation
       fResultado: IResultadoOperacao;
       fDataset: IDatasetSimples;
       fCriaOperacoes: boolean;
+      fFdQuery: IFDQuery;
+
+    //property fdQuery getter/setter
+      function getFdQuery: IFDQuery;
+      procedure setFdQuery(const pValue: IFDQuery);
 
       function _Release: Integer; stdcall;
 
@@ -106,6 +126,7 @@ implementation
       procedure espera;
       procedure AsyncRun;
       procedure execQuery(const pQuery, pCampos: TipoWideStringFramework; pParametros: TVariantArray);
+      procedure openQuery(pQuery: IFDQuery);
 
     //property status getter/setter
       function getStatus: TStatusQueryAsyncLoja;
@@ -138,6 +159,49 @@ implementation
     end;
 
 
+  TThreadMonitoramento = class(TThread)
+  protected
+    terminar: boolean;
+    procedure Execute; override;
+  public
+    destructor Destroy; override;
+  end;
+
+  var
+    gListaLocal: ILockList<IQueryLojaAsync>;
+    th: TThreadMonitoramento;
+
+
+procedure monitora(pQuery: IQueryLojaAsync);
+begin
+  if(gListaLocal=nil) then
+    gListaLocal := TLockListImpl<IQueryLojaAsync>.Create;
+  gListaLocal.add(pQuery);
+  if(th=nil) then
+  begin
+    th := TThreadMonitoramento.Create;
+    th.FreeOnTerminate:=true;
+  end;
+end;
+
+function getQueryLojaAsyncList;
+  var
+    lLojas,lLoja: ITLojasModel;
+    lQLA: IQueryLojaAsync;
+begin
+  Result := TCollections.CreateList<IQueryLojaAsync>;
+
+  lLojas := TLojasModel.getNewIface(pIConexao);
+  lLojas.objeto.obterHosts;
+
+  for lLoja in lLojas.objeto.LojassLista do
+  begin
+    lQLA := getQueryLojaAsync(lLoja);
+    Result.Add(lQLA);
+  end;
+
+end;
+
 function getQueryLojaAsync(pLoja: ITLojasModel): IQueryLojaAsync;
 begin
   Result := TQueryLojaAsync.Create;
@@ -163,8 +227,19 @@ end;
 
 function TQueryLojaAsync._Release: Integer;
 begin
-  getStatus;
+  if(getStatus=sqal_Running) and (FRefCount=2) then
+    monitora(self);
   inherited;
+end;
+
+procedure TQueryLojaAsync.setFdQuery(const pValue: IFDQuery);
+begin
+  fFdQuery := pValue;
+end;
+
+function TQueryLojaAsync.getFdQuery: IFDQuery;
+begin
+  Result := fFdQuery;
 end;
 
 function TQueryLojaAsync.getStatus: TStatusQueryAsyncLoja;
@@ -215,17 +290,36 @@ procedure TQueryLojaAsync.AsyncRun;
     ds: IDataset;
 begin
   try
-    if(fQuery='') then
+    if(fQuery<>'') and (fFdQuery=nil) then
+    begin
+
+      if(getGDB.ativo=false) then
+        raise Exception.Create('TQueryLojaAsync.AsyncRun: Banco de dados não conetado.');
+
+      ds := fGDB.criaDataset.query(fQuery,fCampos,fParametros);
+
+      //clone como TFDMemTable e cria campos operações
+      fDataset := criaDatasetSimples(cloneDataset(ds.dataset,false,fCriaOperacoes));
+      fDataset.dataset.First;
+
+    end else if (fQuery<>'') and (fFdQuery<>nil) then
+    begin
+      fFdQuery.objeto.Open(fQuery);
+      //clone como TFDMemTable e cria campos operações
+      fDataset := criaDatasetSimples(cloneDataset(fFdQuery.objeto,false,fCriaOperacoes));
+      fDataset.dataset.First;
+
+    end else if (fFdQuery<>nil) and (fFdQuery.objeto.SQL.Text<>'') then
+    begin
+      fFdQuery.objeto.Open;
+      //clone como TFDMemTable e cria campos operações
+      fDataset := criaDatasetSimples(cloneDataset(fFdQuery.objeto,false,fCriaOperacoes));
+      fDataset.dataset.First;
+
+
+    end else
       raise Exception.Create('TQueryLojaAsync.AsyncRun: Query não especificado.');
 
-    if(getGDB.ativo=false) then
-      raise Exception.Create('TQueryLojaAsync.AsyncRun: Banco de dados não conetado.');
-
-    ds := fGDB.criaDataset.query(fQuery,fCampos,fParametros);
-
-    //clone como TFDMemTable e cria campos operações
-    fDataset := criaDatasetSimples(cloneDataset(ds.dataset,false,fCriaOperacoes));
-    fDataset.dataset.First;
 
   except
     on e: Exception do
@@ -258,8 +352,18 @@ procedure TQueryLojaAsync.execQuery(const pQuery, pCampos: TipoWideStringFramewo
 begin
   espera;
   fQuery := pQuery;
+  fFdQuery:=nil;
   fCampos := pCampos;
   fParametros := pParametros;
+  run;
+end;
+
+procedure TQueryLojaAsync.openQuery(pQuery: IFDQuery);
+begin
+  espera;
+  fFdQuery := pQuery;
+  fCampos := '';
+  fParametros := [];
   run;
 end;
 
@@ -303,5 +407,39 @@ begin
   end;
   Result := fGDB;
 end;
+
+{ TThreadMonitoramento }
+
+destructor TThreadMonitoramento.Destroy;
+begin
+  terminar := true;
+  WaitFor;
+  inherited;
+end;
+
+procedure TThreadMonitoramento.Execute;
+  var
+    p: IQueryLojaAsync;
+begin
+  inherited;
+  while not terminar do
+    while gListaLocal.count>0 do
+      try
+        sleep(50);
+        if(gListaLocal.dequeue(p)) then
+        begin
+          p.espera
+        end;
+      except
+
+      end;
+
+end;
+
+initialization
+
+
+finalization
+  FreeAndNil(th);
 
 end.

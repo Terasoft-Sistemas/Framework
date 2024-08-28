@@ -110,9 +110,17 @@ begin
 end;
 
 function TLojasModel.getConexaoLoja: IConexao;
+  var
+    s: String;
 begin
   if(fConexaoLoja=nil) then
-    fConexaoLoja := vIConexao.NovaConexao(LOJA,format('%s/%s:%s', [ SERVER,PORT,DATABASE ] ));
+  begin
+    if(DATABASE='') then
+      s := STRING_CONEXAO
+    else
+      s := format('%s/%s:%s', [ SERVER,PORT,DATABASE ] );
+    fConexaoLoja := vIConexao.NovaConexao(LOJA,s);
+  end;
   Result := fConexaoLoja;
 end;
 

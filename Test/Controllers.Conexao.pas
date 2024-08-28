@@ -81,6 +81,7 @@ implementation
 uses
   uTeste,
   Terasoft.Framework.DB.DAO,
+  Terasoft.Framework.ObjectIface,
   System.SysUtils,
   LojasModel, Terasoft.Types, GeneratorNewDao, System.IniFiles, Vcl.Forms;
 
@@ -208,12 +209,14 @@ end;
 
 function TControllersConexao.criaIfaceQuery: IFDQuery;
 begin
-
+  Result:=TImplObjetoOwner<TFDQuery>.CreateOwner(TFDQuery.Create(nil));
+  Result.objeto.Connection := FConexao;
 end;
 
 function TControllersConexao.criaIfaceQueryExterna: IFDQuery;
 begin
-
+  Result:=TImplObjetoOwner<TFDQuery>.CreateOwner(TFDQuery.Create(nil));
+  Result.objeto.Connection := FConexaoExterna;
 end;
 
 function TControllersConexao.criarQuery: TFDQuery;
