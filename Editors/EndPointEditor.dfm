@@ -11,6 +11,7 @@
   Font.Name = 'Segoe UI'
   Font.Style = []
   Position = poScreenCenter
+  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnShow = FormShow
   PixelsPerInch = 96
@@ -91,7 +92,7 @@
       Top = 1
       Width = 1109
       Height = 368
-      ActivePage = tsImpressoes
+      ActivePage = tsFormatações
       Align = alClient
       TabOrder = 0
       OnChange = PCChange
@@ -295,11 +296,21 @@
             Top = 29
             Width = 353
             Height = 23
+            DropDownCount = 20
             TabOrder = 4
             Text = 'edPropFiltroNome'
             Items.Strings = (
               '@loja'
-              '@lojas')
+              '@lojas'
+              '@busca'
+              '@periodo.data'
+              '@periodo.null'
+              '@periodo.hora'
+              '@inteiro'
+              '@agrupamento'
+              '@string'
+              '@periodo.datahora'
+              '@periodo.datahora.null')
           end
         end
       end
@@ -351,6 +362,15 @@
             Caption = 'Salvar'
             TabOrder = 2
             OnClick = btnGestaoformatacoesSalvarClick
+          end
+          object cbOrdenarCampos: TCheckBox
+            Left = 8
+            Top = 160
+            Width = 97
+            Height = 17
+            Caption = 'Ordenar'
+            TabOrder = 3
+            OnClick = cbOrdenarCamposClick
           end
         end
         object pnPropCampo: TPanel
@@ -549,6 +569,7 @@
             Align = alClient
             TabOrder = 0
             OnChange = PCImpressoesChange
+            ExplicitLeft = 6
             object tsImpressaoDados: TTabSheet
               Caption = 'Dados'
               object edtImpressaoNome: TLabeledEdit
@@ -644,6 +665,15 @@
                   Caption = 'Salvar'
                   TabOrder = 2
                   OnClick = btnImpressaoSalvarClick
+                end
+                object cbOrdenarCampos2: TCheckBox
+                  Left = 11
+                  Top = 160
+                  Width = 71
+                  Height = 17
+                  Caption = 'Ordenar'
+                  TabOrder = 3
+                  OnClick = cbOrdenarCampos2Click
                 end
               end
               object pnImpressaoFormatacao: TPanel

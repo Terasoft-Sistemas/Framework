@@ -107,6 +107,8 @@ type
     edtImpressaoFormatoFormatoSumario: TLabeledEdit;
     edtImpressaoFormatoPosicao: TLabeledEdit;
     edtImpressaoFormatoPosicaoSumario: TLabeledEdit;
+    cbOrdenarCampos: TCheckBox;
+    cbOrdenarCampos2: TCheckBox;
     procedure FormShow(Sender: TObject);
     procedure btnNovoClick(Sender: TObject);
     procedure btnCancelarClick(Sender: TObject);
@@ -135,6 +137,9 @@ type
     procedure gridImpressaoFormatacaoCampoCellClick(Column: TXColumn);
     procedure btnImpressaoCancelarClick(Sender: TObject);
     procedure btnImpressaoSalvarClick(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure cbOrdenarCamposClick(Sender: TObject);
+    procedure cbOrdenarCampos2Click(Sender: TObject);
   private
     { Private declarations }
   protected
@@ -179,6 +184,8 @@ var
 
 implementation
   uses
+    FireDAC.Comp.Client,
+    Terasoft.Framework.Bytes,
     Terasoft.Framework.MensagemVisual;
 
 {$R *.dfm}
@@ -221,6 +228,11 @@ procedure TfrmEditorConsultas.btnGravarClick(Sender: TObject);
     m: IMultiConfig;
     s: String;
 begin
+
+  with critica do
+    if erros>0 then
+      msgErro(toString);
+
   m := getMultiConfigPropriedades;
   m.deleteKey('group');
   edGroupBy.Text := trim(edGroupBy.Text);
@@ -236,10 +248,6 @@ begin
   s :=  inputMemo('Verifique os valores','Propriedades', m.toString);
 
   vDatasetEndpoints.dataset.FieldByName('propriedades').AsString := s;
-
-  with critica do
-    if erros>0 then
-      msgErro(toString);
 
   if not pergunta('Deseja salvar a edição do relatório?') then
     exit;
@@ -898,6 +906,9 @@ begin
     gridCampos.Enabled := false;
     gridImpressaoFormatacaoCampo.Enabled := false;
 
+    cbOrdenarCampos.Enabled := false;
+    cbOrdenarCampos2.Enabled := false;
+
     btnGestaoformatacoesEditar.Enabled := false;
     btnImpressaoEditar.Enabled := false;
 
@@ -911,7 +922,10 @@ begin
     pnImpressaoFormatacao.Enabled := false;
     exit;
   end;
+
   Result :=vDatasetCampos.dataset.State=dsBrowse;
+  cbOrdenarCampos.Enabled := Result;
+  cbOrdenarCampos2.Enabled := Result;
 
   gridCampos.Enabled := vDatasetCampos.dataset.State=dsBrowse;
   gridImpressaoFormatacaoCampo.Enabled := vDatasetCampos.dataset.State=dsBrowse;
@@ -1043,6 +1057,7 @@ procedure TfrmEditorConsultas.btnNovoClick(Sender: TObject);
 begin
   vDatasetEndpoints.dataset.Append;
   ajustaBotoes;
+  vDatasetEndpoints.fieldByName('nome').AsString := randomBase32(6);
   edNome.Show;
   edNome.SetFocus;
 end;
@@ -1056,6 +1071,10 @@ begin
   ep.objeto.registros := 1;
   vQuery := ep.objeto.executaQuery;
   vDatasetCampos := getGenericID_DescricaoDataset(32,0,true);
+
+  if(cbOrdenarCampos.Checked) then
+    TFDMemTable(vDatasetCampos.dataset).IndexFieldNames:='id';
+
   vDatasetCampos.dataset.Fields[0].DisplayLabel := 'Campo';
   for i := 0 to vQuery.dataset.FieldCount - 1 do
   begin
@@ -1101,6 +1120,13 @@ begin
 
   vDatasetFiltros.dataset.Cancel;
   ajustaBotoes;
+end;
+
+procedure TfrmEditorConsultas.FormCloseQuery(Sender: TObject;
+  var CanClose: Boolean);
+begin
+  if(vDatasetEndpoints.dataset.State<>dsBrowse) and (pergunta('As alterações serão perdidas. Fechar a janela?' )=false) then
+    CanClose := false;
 end;
 
 procedure TfrmEditorConsultas.FormCreate(Sender: TObject);
@@ -1176,6 +1202,18 @@ begin
     openQueryCampos
 end;
 
+procedure TfrmEditorConsultas.cbOrdenarCampos2Click(Sender: TObject);
+begin
+  cbOrdenarCampos.Checked := cbOrdenarCampos2.Checked;
+  openQueryCampos;
+end;
+
+procedure TfrmEditorConsultas.cbOrdenarCamposClick(Sender: TObject);
+begin
+  cbOrdenarCampos2.Checked := cbOrdenarCampos.Checked;
+  openQueryCampos;
+end;
+
 function TfrmEditorConsultas.critica(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
   var
     q: String;
@@ -1204,6 +1242,13 @@ begin
   if (l.text='') or (l.strings.Count<>1) then
     Result.adicionaErro('Falta definir a DESCRIÇÂO corretamente com apena 1 linha.');
 
+  l := getMultiConfigPropriedades.ReadSectionValuesLista('filtros');
+  q := uppercase(l.text);
+  if pos('@FILIA', q,1)=0 then
+    Result.adicionaErro('Falta definir o filtro FILIAL ou FILIAIS.');
+
+  if pos('@BUSCA', q,1)=0 then
+    Result.adicionaErro('Falta definir o filtro BUSCA.');
 
 end;
 
