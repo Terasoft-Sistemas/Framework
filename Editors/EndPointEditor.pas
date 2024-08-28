@@ -389,7 +389,6 @@ begin
   if(l.strings.Count>0) then
     edWhere.Text := l.strings.ValueFromIndex[0];
 
-
   edNome.Show;
   edNome.SetFocus;
 end;
@@ -812,7 +811,7 @@ procedure TfrmEditorConsultas.btnFiltroEditarClick(Sender: TObject);
 begin
   vDatasetFiltros.dataset.Edit;
   preencheFiltros;
-  ajustaBotoesFiltros;
+  ajustaBotoes;
 end;
 
 procedure TfrmEditorConsultas.btnFiltroExcluirClick(Sender: TObject);
@@ -821,7 +820,7 @@ begin
     exit;
 
   vDatasetFiltros.dataset.Delete;
-  ajustaBotoesFiltros;
+  ajustaBotoes;
 
   geraPropriedades001;
 
@@ -832,7 +831,7 @@ begin
   vDatasetFiltros.dataset.last;
   vDatasetFiltros.dataset.Append;
   preencheFiltros;
-  ajustaBotoesFiltros;
+  ajustaBotoes;
 end;
 
 procedure TfrmEditorConsultas.geraPropriedades001;
@@ -885,7 +884,7 @@ begin
 
   vDatasetFiltros.dataset.CheckBrowseMode;
 
-  ajustaBotoesFiltros;
+  ajustaBotoes;
 
   geraPropriedades001;
 
@@ -988,6 +987,35 @@ begin
 {$B+}
   Result := ajustaBotoesFiltros and ajustaBotoesCampos and ajustaBotoesImpressoes;
 {$B-}
+
+  //tsDados.TabVisible := (vDatasetEndpoints<>nil);
+  tsDados.TabVisible := ((vDatasetFiltros=nil) or (vDatasetFiltros.dataset.State=dsBrowse))
+            and ((vDatasetCampos=nil) or (vDatasetCampos.dataset.State=dsBrowse))
+            and ((vDatasetImpressoes=nil) or (vDatasetImpressoes.dataset.State=dsBrowse));
+
+  tsQuery.TabVisible := tsDados.TabVisible;
+
+  //vDatasetImpressoes
+
+  tsFiltros.TabVisible := ((vDatasetCampos=nil) or (vDatasetCampos.dataset.State=dsBrowse))
+        and ((vDatasetImpressoes=nil) or (vDatasetImpressoes.dataset.State=dsBrowse));
+
+  tsFormatações.TabVisible := ((vDatasetFiltros=nil) or (vDatasetFiltros.dataset.State=dsBrowse))
+        and ((vDatasetImpressoes=nil) or (vDatasetImpressoes.dataset.State=dsBrowse));
+
+  tsImpressoes.TabVisible := ((vDatasetFiltros=nil) or (vDatasetFiltros.dataset.State=dsBrowse))
+        and ((vDatasetCampos=nil) or (vDatasetCampos.dataset.State=dsBrowse));
+
+  if((vDatasetImpressoes<>nil) and (vDatasetImpressoes.dataset.State<>dsBrowse)) then
+    tsImpressoes.TabVisible := true;
+
+  if(tsImpressoes.TabVisible) then
+  begin
+    tsImpressaoDados.TabVisible := ((vDatasetCampos=nil) or (vDatasetCampos.dataset.State=dsBrowse));
+    tsImpressaoFormatacao.TabVisible := true;
+  end;
+
+
   if(Result=false) then
   begin
     pnEdicao.Enabled := true;
@@ -998,6 +1026,10 @@ begin
     btnGravar.Enabled := false;
     exit;
   end;
+
+//  tsDados.Enabled := (vDatasetEndpoints=nil) or (vDatasetEndpoints.dataset.State=dsBrowse);
+//  tsFiltros.Enabled := (vDatasetFiltros=nil) or (vDatasetEndpoints.dataset.State=dsBrowse);
+
   Result := vDatasetEndpoints.dataset.State=dsBrowse;
   pnEdicao.Enabled := vDatasetEndpoints.dataset.State<>dsBrowse;
   gridEP.Enabled := vDatasetEndpoints.dataset.State=dsBrowse;
@@ -1068,7 +1100,7 @@ begin
     exit;
 
   vDatasetFiltros.dataset.Cancel;
-  ajustaBotoesFiltros;
+  ajustaBotoes;
 end;
 
 procedure TfrmEditorConsultas.FormCreate(Sender: TObject);
@@ -1103,7 +1135,7 @@ begin
 
   vDatasetFiltros := Result;
   dsFiltros.DataSet := vDatasetFiltros.dataset;
-  ajustaBotoesFiltros;
+  ajustaBotoes;
 end;
 
 function TfrmEditorConsultas.getMultiConfigPropriedades: IMultiConfig;

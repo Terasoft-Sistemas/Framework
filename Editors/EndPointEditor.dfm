@@ -95,8 +95,6 @@
       Align = alClient
       TabOrder = 0
       OnChange = PCChange
-      ExplicitLeft = 2
-      ExplicitTop = 6
       object tsDados: TTabSheet
         Caption = 'Dados'
         ImageIndex = 1
@@ -143,6 +141,7 @@
           DataSource = dsEP
           ScrollBars = ssBoth
           TabOrder = 0
+          ExplicitLeft = 3
         end
         object edGroupBy: TLabeledEdit
           Left = 3
@@ -541,8 +540,6 @@
           Height = 338
           Align = alClient
           TabOrder = 2
-          ExplicitLeft = 378
-          ExplicitWidth = 723
           object PCImpressoes: TPageControl
             Left = 1
             Top = 1
@@ -552,7 +549,6 @@
             Align = alClient
             TabOrder = 0
             OnChange = PCImpressoesChange
-            ExplicitLeft = 6
             object tsImpressaoDados: TTabSheet
               Caption = 'Dados'
               object edtImpressaoNome: TLabeledEdit
@@ -622,7 +618,6 @@
                 Height = 306
                 Align = alLeft
                 TabOrder = 1
-                ExplicitLeft = 257
                 object btnImpressaoEditar: TBitBtn
                   Left = 6
                   Top = 55
@@ -658,7 +653,6 @@
                 Height = 306
                 Align = alClient
                 TabOrder = 2
-                ExplicitLeft = 336
                 object edtImpressaoFormatoVisivel: TCheckBox
                   Left = 6
                   Top = 8
