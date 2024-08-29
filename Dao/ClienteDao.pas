@@ -1114,6 +1114,7 @@ var
   lSQL        : String;
   lAsyncList  : IListaQueryAsync;
   lQA: IQueryLojaAsync;
+  conexao: IConexao;
 begin
   Result := '';
   lAsyncList := getQueryLojaAsyncList(vIConexao);
@@ -1124,7 +1125,10 @@ begin
     begin
       if lQA.loja.objeto.LOJA <> vIConexao.getEmpresa.LOJA then
       begin
-        lQry := lQA.loja.objeto.conexaoLoja.criaIfaceQuery;
+        conexao := lQA.loja.objeto.conexaoLoja;
+        if(conexao=nil) then continue;
+
+        lQry := conexao.criaIfaceQuery;
 
         lQry.objeto.SQL.Clear;
         lQry.objeto.SQL.Add(lSQL);
