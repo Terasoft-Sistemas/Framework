@@ -170,7 +170,7 @@ type
     function obterLista: IFDDataset;
 
     function AtualizaReservaVendaAssistida(pAtualizaReserva_Parametros: TAtualizaReserva_Parametros): String;
-    function concluirReserva(pStatus, pPedido, pWebPedidoItensId, pFilial: String): Boolean;
+    function concluirReserva(pStatus, pPedido, pWebPedidoItensId, pFilial: String; pAcrescimo, pDesconto : Double): Boolean;
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -187,7 +187,7 @@ implementation
 uses
   ReservaDao,
   System.Classes, 
-  System.SysUtils;
+  System.SysUtils, WebPedidoItensModel, WebPedidoModel;
 
 { TReservaModel }
 
@@ -252,10 +252,10 @@ begin
   end;
 end;
 
-function TReservaModel.concluirReserva(pStatus, pPedido, pWebPedidoItensId, pFilial: String): Boolean;
+function TReservaModel.concluirReserva(pStatus, pPedido, pWebPedidoItensId, pFilial: String; pAcrescimo, pDesconto : Double): Boolean;
 var
-  lTableReserva: IFDDataset;
-  p: ITReservaModel;
+  lTableReserva  : IFDDataset;
+  p              : ITReservaModel;
 begin
   self.WhereView := ' and reserva.web_pedidoitens_id = ' + pWebPedidoItensId + ' and reserva.filial = ' + QuotedStr(pFilial);
   lTableReserva := self.obterLista;
@@ -264,6 +264,8 @@ begin
   begin
     objeto.STATUS             := pStatus;
     objeto.PEDIDO_ID          := pPedido;
+    objeto.VALOR_ACRESCIMO    := pAcrescimo;
+    objeto.DESCONTO           := pDesconto;
     objeto.DATAHORA_EFETIVADA := DateTimeToStr(vIConexao.DataHoraServer);
     objeto.Salvar;
   end;

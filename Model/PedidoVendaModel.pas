@@ -571,7 +571,7 @@ uses
   IbptModel,
   WebPedidoModel,
   ItensProdutoModel,
-  System.Rtti;
+  System.Rtti, WebPedidoItensModel;
 
 { TPedidoVendaModel }
 
@@ -660,11 +660,15 @@ var
   lReservaModel            : ITReservaModel;
   lClienteModel            : ITClienteModel;
   lPixModel                : ITPixModel;
-  lComissaoCliente         : Double;
+  lComissaoCliente,
+  lAcrescimo,
+  lDesconto                : Double;
   lParametros              : TParametrosComissao;
   lCreditoClienteModel     : ITCreditoClienteModel;
   lConfiguracoes           : ITerasoftConfiguracoes;
   lTotalReceber            : Extended;
+  lWebPedidoModel          : ITWebPedidoModel;
+  lWebPedidoItensModel     : ITWebPedidoItensModel;
 begin
   lPedidoVendaModel        := TPedidoVendaModel.getNewIface(vIConexao);
   lPedidoItensModel        := TPedidoItensModel.getNewIface(vIConexao);
@@ -675,6 +679,8 @@ begin
   lVendedorModel           := TFuncionarioModel.getNewIface(vIConexao);
   lCreditoClienteModel     := TCreditoClienteModel.getNewIface(vIConexao);
   lConfiguracoes           := TerasoftConfiguracoes.getNewIface(vIConexao);
+  lWebPedidoModel          := TWebPedidoModel.getNewIface(vIConexao);
+  lWebPedidoItensModel     := TWebPedidoItensModel.getNewIface(vIConexao);
 
   try
     lPedidoVendaModel := lPedidoVendaModel.objeto.carregaClasse(self.FNUMERO_PED);
@@ -740,7 +746,7 @@ begin
       lCreditoClienteModel.objeto.DATA          := lPedidoVendaModel.objeto.DATA_PED;
       lCreditoClienteModel.objeto.TIPO          := 'C';
       lCreditoClienteModel.objeto.VALOR         := ((lConfiguracoes.objeto.valorTag('PERCENTUAL_CREDITO_CLIENTE_VENDA', 0, tvNumero)) / 100) * (lPedidoVendaModel.objeto.TOTAL_PED);
-      lCreditoClienteModel.objeto.OBS           := 'CR�DITO DE '+FloatToStr(lConfiguracoes.objeto.valorTag('PERCENTUAL_CREDITO_CLIENTE_VENDA', 0, tvNumero))+'% GERADO PELA VENDA N: '+lPedidoVendaModel.objeto.NUMERO_PED+'.';
+      lCreditoClienteModel.objeto.OBS           := 'CRÉDITO DE '+FloatToStr(lConfiguracoes.objeto.valorTag('PERCENTUAL_CREDITO_CLIENTE_VENDA', 0, tvNumero))+'% GERADO PELA VENDA N: '+lPedidoVendaModel.objeto.NUMERO_PED+'.';
       lCreditoClienteModel.objeto.Incluir;
     end;
 
@@ -760,16 +766,30 @@ begin
       lModel.objeto.calcularComissao(lParametros);
 
       if (lPedidoVendaModel.objeto.WEB_PEDIDO_ID <> '') and ((lModel.objeto.TIPO_VENDA = 'CD') or (lModel.objeto.ENTREGA = 'S')) then
-        lReservaModel.objeto.concluirReserva(IIF(lModel.objeto.TIPO_VENDA = 'CD', '2', 'L'), lPedidoVendaModel.objeto.NUMERO_PED, lModel.objeto.WEB_PEDIDOITENS_ID, vIConexao.getEmpresa.LOJA);
+      begin
+        lWebPedidoItensModel := lWebPedidoItensModel.objeto.carregaClasse(lPedidoVendaModel.objeto.WEB_PEDIDO_ID);
+        lWebPedidoModel      := lWebPedidoModel.objeto.carregaClasse(lWebPedidoItensModel.objeto.WEB_PEDIDO_ID);
 
+        lAcrescimo           := lWebPedidoModel.objeto.ACRESCIMO;
+        lDesconto            := lWebPedidoItensModel.objeto.PERCENTUAL_DESCONTO / 100 * (lWebPedidoItensModel.objeto.QUANTIDADE * lWebPedidoItensModel.objeto.VALOR_UNITARIO);
+
+        lReservaModel.objeto.concluirReserva(IIF(lModel.objeto.TIPO_VENDA = 'CD', '2', 'L'),
+                                             lPedidoVendaModel.objeto.NUMERO_PED,
+                                             lModel.objeto.WEB_PEDIDOITENS_ID,
+                                             vIConexao.getEmpresa.LOJA,
+                                             lAcrescimo,
+                                             lDesconto);
+      end;
     end;
 
   finally
     lContasReceberItensModel.Free;
     lContasReceberModel.Free;
+    lWebPedidoItensModel := nil;
     lCreditoClienteModel:=nil;
     lPedidoVendaModel:=nil;
     lPedidoItensModel:=nil;
+    lWebPedidoModel := nil;
     lVendedorModel:=nil;
     lClienteModel:=nil;
     lReservaModel:=nil;
