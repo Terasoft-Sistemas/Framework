@@ -417,8 +417,11 @@ begin
   for i := 0 to mmProFiltroValores.Lines.Count - 1 do
   begin
     tmp1 := trim(mmProFiltroValores.Lines.Names[i]);
-    if(tmp1='') then
-      tmp1 := '<vazio>';
+    if(tmp1='') then begin
+      tmp1 := trim(mmProFiltroValores.Lines.Strings[i]);
+      if(pos('=',tmp1,1)>0) then
+        tmp1 := '<vazio>';
+    end;
     tmp2 := trim(mmProFiltroValores.Lines.ValueFromIndex[i]);
     if(tmp2<>'') then
     begin

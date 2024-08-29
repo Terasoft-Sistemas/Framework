@@ -9,6 +9,7 @@ uses
   Terasoft.Framework.Texto,
   Terasoft.Framework.ObjectIface,
   Terasoft.Framework.DB,
+  Dateutils,
   DB,
   LojasModel,
   Interfaces.Conexao;
@@ -160,6 +161,7 @@ type
     fCfg: IMultiConfig;
     function getCFG: IMultiConfig;
     function listaOpcoes: IListaTextoEX;
+    procedure setPeriodo(pValores: String);
 
   public
     const
@@ -259,10 +261,10 @@ end;
 
 function TFiltroModel.getValido: boolean;
 begin
-  Result := (fPROPRIEDADES<>'')// and (textoEntreTags(lName,'@','')<>'');
+  Result := (fPROPRIEDADES<>'')
 end;
 
-function TFiltroModel.getOpcoes;///: IDatasetSimples;
+function TFiltroModel.getOpcoes;
   var
     lOpcoesTxt: IListaTextoEx;
     i: Integer;
@@ -749,6 +751,22 @@ begin
   fTipo := pValue;
 end;
 
+procedure TFiltroModel.setPeriodo(pValores: String);
+begin
+  if(CompareText(pvalores,'hoje')=0) then begin
+    if(fTipo=tipoFiltro_DataPeriodo) then
+    begin
+      setDHInicial(Date);
+      setDHFinal(Date);
+    end else if(fTipo=tipoFiltro_DataHoraPeriodo) then
+    begin
+      setDHInicial(StartOfTheDay(Now));
+      setDHFinal(DateTimeToStr(EndOfTheDay(Now)));
+    end;
+  end;
+
+end;
+
 function TFiltroModel.setTipoPorNome;
   var
     lNome, lDescricao, lValores: String;
@@ -773,12 +791,14 @@ begin
   begin
     setTipo(tipoFiltro_DataPeriodo);
     fDESCRICAO := 'Período por data  ' + lDescricao;
+    setPeriodo(lValores);
 
   end else if(stringNoArray(lNome, ['@periodo.null'],[osna_CaseInsensitive,osna_SemAcento])) then
   begin
     setTipo(tipoFiltro_DataPeriodo);
     fDESCRICAO := 'Período por data ' + lDescricao;
     fAceitaNull := true;
+    setPeriodo(lValores);
 
   end else if(stringNoArray(lNome, ['@busca'],[osna_CaseInsensitive,osna_SemAcento])) then
   begin
@@ -789,6 +809,7 @@ begin
   begin
     fDESCRICAO := 'Período por hora ' + lDescricao;
     setTipo(tipoFiltro_HoraPeriodo);
+    setPeriodo(lValores);
 
   end else if(stringNoArray(lNome, ['@inteiro'],[osna_CaseInsensitive,osna_SemAcento])) then
   begin
@@ -841,7 +862,6 @@ begin
 
     getCFG;
 
-
     fDESCRICAO:=textoEntreTags(pNome,'|','');
     if(fDESCRICAO='') then
       fDESCRICAO := iif(fMultiploValor, 'Lojas', 'Loja');
@@ -850,11 +870,13 @@ begin
   begin
     fDESCRICAO := 'Período de data e hora ' + lDescricao;
     setTipo(tipoFiltro_DataHoraPeriodo);
+    setPeriodo(lValores);
   end else if(stringNoArray(lNome, ['@datahora.null','@periodo.datahora.null'],[osna_CaseInsensitive,osna_SemAcento])) then
   begin
     fDESCRICAO := 'Período de data e hora ' + lDescricao;
     setTipo(tipoFiltro_DataHoraPeriodo);
     fAceitaNull := true;
+    setPeriodo(lValores);
   end else if(Copy(lNome,1,1)='@') then
   begin
     setTipo(tipoFiltro_SetSincrono);

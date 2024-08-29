@@ -4272,8 +4272,8 @@ end;
 
 procedure TForm1.SpeedButton4Click(Sender: TObject);
 begin
-  BtnEndereco3.Click;
-  //Form.Endpoint.criaViewEndpoint(vIConexao).objeto.ShowModal;
+  //BtnEndereco3.Click;
+  Form.Endpoint.criaViewEndpoint(vIConexao).objeto.ShowModal;
 end;
 
 initialization
