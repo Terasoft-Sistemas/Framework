@@ -32,7 +32,21 @@ interface
       procedure setGDB(const pValue: IGDB);
 
       procedure run;
+
+      {
+        execQuery executa pQuery com os campos e parametros fornecidos.
+        Ao Executar, transfere os registros para uma memtable,
+        na propriedade dataset: IDatasetSimples abaixo.
+        Erros são reportados na propriedade resultado: IResultadoOperacao
+      }
       procedure execQuery(const pQuery, pCampos: TipoWideStringFramework; pParametros: TVariantArray);
+
+      {
+        openQuery faz o OPEN simplesmente do objeto IFDQuery.
+        Ao abrir, transfere os registros para uma memtable,
+        na propriedade dataset: IDatasetSimples abaixo.
+        Erros são reportados na propriedade resultado: IResultadoOperacao
+      }
       procedure openQuery(pQuery: IFDQuery);
 
     //property loja getter/setter

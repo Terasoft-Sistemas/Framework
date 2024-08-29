@@ -1129,20 +1129,29 @@ begin
         lQry.objeto.SQL.Clear;
         lQry.objeto.SQL.Add(lSQL);
         setParams(lQry.objeto, pClienteModel);
+
+          {
+            openQuery faz o OPEN simplesmente do objeto IFDQuery.
+            Ao abrir, transfere os registros para uma memtable,
+            na propriedade dataset: IDatasetSimples abaixo.
+            Erros são reportados na propriedade lQA.resultado: IResultadoOperacao
+          }
         lQA.openQuery(lQry);
       end;
     end;
 
   finally
-    for lQA in lAsyncList do
-    begin
-      //lQA.espera;
-      if(lQA.FDQuery=nil) or (lQA.FDQuery.objeto.Active=false) then continue;
+  //Desabilitado a espera, mas comentado para exemplificação
+    {
+      for lQA in lAsyncList do
+      begin
+        lQA.espera;
+        if(lQA.FDQuery=nil) or (lQA.FDQuery.objeto.Active=false) then continue;
 
-      if(Result='') then
-        Result := lQA.FDQuery.objeto.FieldByName('CODIGO_CLI').AsString;
-
-    end;
+        if(Result='') then
+          Result := lQA.FDQuery.objeto.FieldByName('CODIGO_CLI').AsString;
+      end;
+    }
   end;
 end;
 
