@@ -662,7 +662,8 @@ var
   lPixModel                : ITPixModel;
   lComissaoCliente,
   lAcrescimo,
-  lDesconto                : Double;
+  lDesconto,
+  lDiferenca               : Double;
   lParametros              : TParametrosComissao;
   lCreditoClienteModel     : ITCreditoClienteModel;
   lConfiguracoes           : ITerasoftConfiguracoes;
@@ -697,7 +698,12 @@ begin
       lTotalReceber := lTotalReceber + lContasReceberModel.VALOR_REC;
     end;
 
-    if roundTo(self.TOTAL_PED, -2) <> roundTo(lTotalReceber, -2) then
+    lDiferenca := roundTo(self.TOTAL_PED, -2) - roundTo(lTotalReceber, -2);
+
+    if lDiferenca < 0 then
+      lDiferenca := lDiferenca * -1;
+
+    if (lDiferenca > 0.50) then
       CriaException('Total do contas a receber divergente do total do pedido');
 
     lContasReceberModel.IDPedidoView := lPedidoVendaModel.objeto.NUMERO_PED;
