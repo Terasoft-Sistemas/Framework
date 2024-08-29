@@ -1113,8 +1113,8 @@ var
   lQry        : IFDQuery;
   lSQL        : String;
   lAsyncList  : IListaQueryAsync;
-  lQA: IQueryLojaAsync;
-  conexao: IConexao;
+  lQA         : IQueryLojaAsync;
+  conexao     : IConexao;
 begin
   Result := '';
   lAsyncList := getQueryLojaAsyncList(vIConexao);
@@ -1125,6 +1125,7 @@ begin
     begin
       if lQA.loja.objeto.LOJA <> vIConexao.getEmpresa.LOJA then
       begin
+        //Se a conexão é inválida, ou não consegui conectar, parte para a próxima
         conexao := lQA.loja.objeto.conexaoLoja;
         if(conexao=nil) then continue;
 

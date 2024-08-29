@@ -74,13 +74,14 @@ type
 
     function obterLista: IFDDataset;
 
-    procedure setParams(var pQry: TFDQuery; pClientesEnderecoModel: ITClientesEnderecoModel);
+    procedure setParams(pQry: TFDQuery; pClientesEnderecoModel: ITClientesEnderecoModel);
 
 end;
 
 implementation
 
 uses
+  Interfaces.QueryLojaAsync,
   System.Rtti, Data.DB, Terasoft.Configuracoes, LojasModel;
 
 { TClientesEndereco }
@@ -308,7 +309,7 @@ begin
   FOrderView := Value;
 end;
 
-procedure TClientesEnderecoDao.setParams(var pQry: TFDQuery; pClientesEnderecoModel: ITClientesEnderecoModel);
+procedure TClientesEnderecoDao.setParams(pQry: TFDQuery; pClientesEnderecoModel: ITClientesEnderecoModel);
 begin
   vConstrutor.setParams('CLIENTES_ENDERECO',pQry,pClientesEnderecoModel.objeto);
 end;
@@ -330,51 +331,45 @@ end;
 
 function TClientesEnderecoDao.sincronizarDados(pClientesEnderecoModel: ITClientesEnderecoModel): String;
 var
-  lLojasModel,
-  lLojas      : ITLojasModel;
-  lQry        : TFDQuery;
+  lQry        : IFDQuery;
   lSQL        : String;
+  lAsyncList  : IListaQueryAsync;
+  lQA         : IQueryLojaAsync;
+  conexao     : IConexao;
 begin
+  Result := '';
+  lAsyncList := getQueryLojaAsyncList(vIConexao);
 
-  lLojasModel := TLojasModel.getNewIface(vIConexao);
+  lSQL := '';
 
-  try
-    lLojasModel.objeto.obterHosts;
+  if pClientesEnderecoModel.objeto.Acao in [tacIncluir, tacAlterar] then
+    lSQL := vConstrutor.gerarUpdateOrInsert('CLIENTES_ENDERECO','ID', 'ID', true)
 
-    if pClientesEnderecoModel.objeto.Acao in [tacIncluir, tacAlterar] then
-      lSQL := vConstrutor.gerarUpdateOrInsert('CLIENTES_ENDERECO','ID', 'ID', true)
+  else if pClientesEnderecoModel.objeto.Acao in [tacExcluir] then
+    lSQL := ('delete from CLIENTES_ENDERECO where ID = :ID');
 
-    else if pClientesEnderecoModel.objeto.Acao in [tacExcluir] then
-      lSQL := ('delete from CLIENTES_ENDERECO where ID = :ID');
-
-    for lLojas in lLojasModel.objeto.LojassLista do
+  if(lSQL<>'') then
+    for lQA in lAsyncList do
     begin
-
-      if lLojas.objeto.LOJA <> vIConexao.getEmpresa.LOJA then
+      if lQA.loja.objeto.LOJA <> vIConexao.getEmpresa.LOJA then
       begin
+        //Se a conexão é inválida, ou não consegui conectar, parte para a próxima
+        conexao := lQA.loja.objeto.conexaoLoja;
+        if(conexao=nil) then continue;
 
-        vIConexao.ConfigConexaoExterna('', lLojas.objeto.STRING_CONEXAO);
-        lQry := vIConexao.criarQueryExterna;
+        lQry := conexao.criaIfaceQuery;
 
         if pClientesEnderecoModel.objeto.Acao = tacExcluir then
         begin
-          lQry.ExecSQL(lSQL, [pClientesEnderecoModel.objeto.ID]);
-          lQry.ExecSQL;
-        end
-        else
+          lQry.objeto.ParamByName('id').AsString := pClientesEnderecoModel.objeto.ID;
+        end else
         begin
-          lQry.SQL.Clear;
-          lQry.SQL.Add(lSQL);
-          setParams(lQry, pClientesEnderecoModel);
-          lQry.Open(lSQL);
+          lQry.objeto.SQL.Clear;
+          lQry.objeto.SQL.Add(lSQL);
+          setParams(lQry.objeto, pClientesEnderecoModel);
         end;
-
-      end;
+        lQA.openQuery(lQry);
     end;
-
-  finally
-    lLojasModel := nil;
-    lQry.Free;
   end;
 end;
 
