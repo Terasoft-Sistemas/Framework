@@ -68,8 +68,6 @@ type
     function alterar(pClientesEnderecoModel: ITClientesEnderecoModel): String;
     function excluir(pClientesEnderecoModel: ITClientesEnderecoModel): String;
 
-    function sincronizarDados(pClientesEnderecoModel: ITClientesEnderecoModel): String;
-
     function carregaClasse(pID : String): ITClientesEnderecoModel;
 
     function obterLista: IFDDataset;
@@ -90,7 +88,6 @@ function TClientesEnderecoDao.alterar(pClientesEnderecoModel: ITClientesEndereco
 var
   lQry : TFDQuery;
   lSQL : String;
-  lConfiguracoes : ITerasoftConfiguracoes;
 begin
   lQry := vIConexao.CriarQuery;
 
@@ -101,10 +98,7 @@ begin
     setParams(lQry, pClientesEnderecoModel);
     lQry.ExecSQL;
 
-    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
-
-    if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
-      sincronizarDados(pClientesEnderecoModel);
+    vConstrutor.sincronizarDados('CLIENTES_ENDERECO','ID',pClientesEnderecoModel.objeto,tacAlterar);
 
     Result := pClientesEnderecoModel.objeto.ID;
 
@@ -165,7 +159,6 @@ end;
 function TClientesEnderecoDao.excluir(pClientesEnderecoModel: ITClientesEnderecoModel): String;
 var
   lQry : TFDQuery;
-  lConfiguracoes : ITerasoftConfiguracoes;
 begin
   lQry := vIConexao.CriarQuery;
 
@@ -173,10 +166,7 @@ begin
    lQry.ExecSQL('delete from CLIENTES_ENDERECO where ID = :ID' ,[pClientesEnderecoModel.objeto.ID]);
    lQry.ExecSQL;
 
-   Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
-
-   if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
-     sincronizarDados(pClientesEnderecoModel);
+   vConstrutor.sincronizarDados('CLIENTES_ENDERECO','ID',pClientesEnderecoModel.objeto,tacExcluir);
 
    Result := pClientesEnderecoModel.objeto.ID;
 
@@ -194,22 +184,18 @@ function TClientesEnderecoDao.incluir(pClientesEnderecoModel: ITClientesEndereco
 var
   lQry : TFDQuery;
   lSQL : String;
-  lConfiguracoes : ITerasoftConfiguracoes;
 begin
   lQry := vIConexao.CriarQuery;
 
   lSQL := vConstrutor.gerarInsert('CLIENTES_ENDERECO', 'ID', true);
 
   try
-    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
-
     lQry.SQL.Add(lSQL);
     pClientesEnderecoModel.objeto.ID := vIConexao.Generetor('GEN_CLIENTES_ENDERECO');
     setParams(lQry, pClientesEnderecoModel);
     lQry.Open;
 
-    if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
-      sincronizarDados(pClientesEnderecoModel);
+    vConstrutor.sincronizarDados('CLIENTES_ENDERECO','ID',pClientesEnderecoModel.objeto,tacIncluir);
 
     Result := lQry.FieldByName('ID').AsString;
 
@@ -327,50 +313,6 @@ end;
 procedure TClientesEnderecoDao.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
-end;
-
-function TClientesEnderecoDao.sincronizarDados(pClientesEnderecoModel: ITClientesEnderecoModel): String;
-var
-  lQry        : IFDQuery;
-  lSQL        : String;
-  lAsyncList  : IListaQueryAsync;
-  lQA         : IQueryLojaAsync;
-  conexao     : IConexao;
-begin
-  Result := '';
-  lAsyncList := getQueryLojaAsyncList(vIConexao);
-
-  lSQL := '';
-
-  if pClientesEnderecoModel.objeto.Acao in [tacIncluir, tacAlterar] then
-    lSQL := vConstrutor.gerarUpdateOrInsert('CLIENTES_ENDERECO','ID', 'ID', true)
-
-  else if pClientesEnderecoModel.objeto.Acao in [tacExcluir] then
-    lSQL := ('delete from CLIENTES_ENDERECO where ID = :ID');
-
-  if(lSQL<>'') then
-    for lQA in lAsyncList do
-    begin
-      if lQA.loja.objeto.LOJA <> vIConexao.getEmpresa.LOJA then
-      begin
-        //Se a conexão é inválida, ou não consegui conectar, parte para a próxima
-        conexao := lQA.loja.objeto.conexaoLoja;
-        if(conexao=nil) then continue;
-
-        lQry := conexao.criaIfaceQuery;
-
-        if pClientesEnderecoModel.objeto.Acao = tacExcluir then
-        begin
-          lQry.objeto.ParamByName('id').AsString := pClientesEnderecoModel.objeto.ID;
-        end else
-        begin
-          lQry.objeto.SQL.Clear;
-          lQry.objeto.SQL.Add(lSQL);
-          setParams(lQry.objeto, pClientesEnderecoModel);
-        end;
-        lQA.openQuery(lQry);
-    end;
-  end;
 end;
 
 function TClientesEnderecoDao.where: String;

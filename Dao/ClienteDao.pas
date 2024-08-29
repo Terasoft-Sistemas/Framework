@@ -69,8 +69,6 @@ type
     function alterar(pClienteModel: ITClienteModel): String;
     function excluir(pClienteModel: ITClienteModel): String;
 
-    function sincronizarDados(pClienteModel: ITClienteModel): String;
-
     procedure obterLista;
 
     function where: String;
@@ -474,7 +472,6 @@ var
   lQry           : TFDQuery;
   lSQL,
   lResult        : String;
-  lConfiguracoes : ITerasoftConfiguracoes;
   lLojasModel,
   lLojas         : ITLojasModel;
 begin
@@ -484,8 +481,6 @@ begin
   try
     lSQL := vConstrutor.gerarInsert(self.NomeTabela, 'CODIGO_CLI', true);
 
-    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
-
     lQry.SQL.Add(lSQL);
     pClienteModel.objeto.CODIGO_CLI := vIConexao.Generetor('GEN_CLIENTE', true);
     setParams(lQry, pClienteModel);
@@ -493,8 +488,7 @@ begin
 
     Result := lQry.FieldByName('CODIGO_CLI').AsString;
 
-    if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
-      sincronizarDados(pClienteModel);
+    vConstrutor.sincronizarDados('CLIENTES','ID',pClienteModel.objeto,tacIncluir);
 
   finally
     lLojasModel:=nil;
@@ -507,7 +501,6 @@ function TClienteDao.alterar(pClienteModel: ITClienteModel): String;
 var
   lQry           : TFDQuery;
   lSQL           : String;
-  lConfiguracoes : ITerasoftConfiguracoes;
 begin
   lQry := vIConexao.CriarQuery;
 
@@ -520,10 +513,7 @@ begin
 
     Result := pClienteModel.objeto.CODIGO_CLI;
 
-    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
-
-    if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) = 'S' then
-      sincronizarDados(pClienteModel);
+    vConstrutor.sincronizarDados('CLIENTES','ID',pClienteModel.objeto,tacAlterar);
 
   finally
     lSQL := '';
@@ -540,6 +530,11 @@ begin
    lQry.ExecSQL('delete from ' + self.NomeTabela + ' where CODIGO_CLI = :CODIGO_CLI',[pClienteModel.objeto.CODIGO_CLI]);
    lQry.ExecSQL;
    Result := pClienteModel.objeto.CODIGO_CLI;
+
+   //por Antonio:
+   //    Exclusão não replica??
+   //vConstrutor.sincronizarDados('CLIENTES','ID',pClienteModel.objeto,tacExcluir);
+
   finally
     lQry.Free;
   end;
@@ -1106,58 +1101,6 @@ end;
 procedure TClienteDao.SetWhereView(const Value: String);
 begin
   FWhereView := Value;
-end;
-
-function TClienteDao.sincronizarDados(pClienteModel: ITClienteModel): String;
-var
-  lQry        : IFDQuery;
-  lSQL        : String;
-  lAsyncList  : IListaQueryAsync;
-  lQA         : IQueryLojaAsync;
-  conexao     : IConexao;
-begin
-  Result := '';
-  lAsyncList := getQueryLojaAsyncList(vIConexao);
-  try
-    lSQL := vConstrutor.gerarUpdateOrInsert('CLIENTES','CODIGO_CLI', 'CODIGO_CLI', true);
-
-    for lQA in lAsyncList do
-    begin
-      if lQA.loja.objeto.LOJA <> vIConexao.getEmpresa.LOJA then
-      begin
-        //Se a conexão é inválida, ou não consegui conectar, parte para a próxima
-        conexao := lQA.loja.objeto.conexaoLoja;
-        if(conexao=nil) then continue;
-
-        lQry := conexao.criaIfaceQuery;
-
-        lQry.objeto.SQL.Clear;
-        lQry.objeto.SQL.Add(lSQL);
-        setParams(lQry.objeto, pClienteModel);
-
-          {
-            openQuery faz o OPEN simplesmente do objeto IFDQuery.
-            Ao abrir, transfere os registros para uma memtable,
-            na propriedade dataset: IDatasetSimples abaixo.
-            Erros são reportados na propriedade lQA.resultado: IResultadoOperacao
-          }
-        lQA.openQuery(lQry);
-      end;
-    end;
-
-  finally
-  //Desabilitado a espera, mas comentado para exemplificação
-    {
-      for lQA in lAsyncList do
-      begin
-        lQA.espera;
-        if(lQA.FDQuery=nil) or (lQA.FDQuery.objeto.Active=false) then continue;
-
-        if(Result='') then
-          Result := lQA.FDQuery.objeto.FieldByName('CODIGO_CLI').AsString;
-      end;
-    }
-  end;
 end;
 
 function TClienteDao.ufCliente(pId: String): Variant;

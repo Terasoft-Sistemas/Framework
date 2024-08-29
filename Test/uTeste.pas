@@ -518,7 +518,7 @@ begin
         exit;
 
       lClientesEnderecoModel := lClientesEnderecoModel.objeto.Alterar(ID);
-      lClientesEnderecoModel.objeto.ENDERECO := 'TESTE ALTERAR';
+      lClientesEnderecoModel.objeto.ENDERECO := 'TESTE ALTERAR - ' + randomBase32(10);
 
       lClientesEnderecoModel.objeto.Salvar;
       ShowMessage('Alterado com Sucesso');
@@ -4272,7 +4272,8 @@ end;
 
 procedure TForm1.SpeedButton4Click(Sender: TObject);
 begin
-  Form.Endpoint.criaViewEndpoint(vIConexao).objeto.ShowModal;
+  BtnEndereco3.Click;
+  //Form.Endpoint.criaViewEndpoint(vIConexao).objeto.ShowModal;
 end;
 
 initialization

@@ -3,9 +3,12 @@ unit Terasoft.Types;
 interface
 
 uses
+  Variants,
   Terasoft.Framework.ListaSimples;
 
 type
+  TVariantArray = array of Variant;
+
   TAcao = (tacIndefinido, tacIncluir, tacIncluirLote, tacAlterar, tacExcluir);
   TTipoApuracao = (tapVencimento, tapEmissao);
   TEscolhaSimples = (tesSim, tesNao);

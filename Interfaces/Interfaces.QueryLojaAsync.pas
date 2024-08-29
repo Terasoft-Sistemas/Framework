@@ -11,6 +11,7 @@ interface
     Terasoft.Framework.DB,
     Terasoft.Framework.Texto,
     Variants,
+    Terasoft.Types,
     Interfaces.Conexao,
     Spring.Collections,
     Terasoft.Framework.Collections,
@@ -20,8 +21,6 @@ interface
     IQueryLojaAsync=interface;
 
     IListaQueryAsync=IList<IQueryLojaAsync>;
-
-    TVariantArray = array of Variant;
 
     TStatusQueryAsyncLoja = (sqal_Idle, sqal_Running);
 
@@ -312,24 +311,31 @@ begin
       ds := fGDB.criaDataset.query(fQuery,fCampos,fParametros);
 
       //clone como TFDMemTable e cria campos operações
-      fDataset := criaDatasetSimples(cloneDataset(ds.dataset,false,fCriaOperacoes));
-      fDataset.dataset.First;
+      if(ds.dataset.Active) then
+      begin
+        fDataset := criaDatasetSimples(cloneDataset(ds.dataset,false,fCriaOperacoes));
+        fDataset.dataset.First;
+      end;
 
     end else if (fQuery<>'') and (fFdQuery<>nil) then
     begin
       fFdQuery.objeto.Open(fQuery);
       //clone como TFDMemTable e cria campos operações
-      fDataset := criaDatasetSimples(cloneDataset(fFdQuery.objeto,false,fCriaOperacoes));
-      fDataset.dataset.First;
+      if(fFdQuery.objeto.Active) then
+      begin
+        fDataset := criaDatasetSimples(cloneDataset(fFdQuery.objeto,false,fCriaOperacoes));
+        fDataset.dataset.First;
+      end;
 
     end else if (fFdQuery<>nil) and (fFdQuery.objeto.SQL.Text<>'') then
     begin
       fFdQuery.objeto.Open;
       //clone como TFDMemTable e cria campos operações
-      fDataset := criaDatasetSimples(cloneDataset(fFdQuery.objeto,false,fCriaOperacoes));
-      fDataset.dataset.First;
-
-
+      if(fFdQuery.objeto.Active) then
+      begin
+        fDataset := criaDatasetSimples(cloneDataset(fFdQuery.objeto,false,fCriaOperacoes));
+        fDataset.dataset.First;
+      end;
     end else
       raise Exception.Create('TQueryLojaAsync.AsyncRun: Query não especificado.');
 
