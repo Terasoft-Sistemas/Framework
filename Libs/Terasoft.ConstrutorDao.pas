@@ -5,12 +5,14 @@ interface
 uses
   FireDAC.Comp.Client,
   Clipbrd,
+  SysUtils,
   System.Classes,
   Data.DB,
   Terasoft.Framework.Types,
   Terasoft.FuncoesTexto,
   Terasoft.Framework.Texto,
   Terasoft.Framework.ObjectIface,
+  Terasoft.Types,
   Interfaces.Conexao;
 
 type
@@ -34,6 +36,8 @@ type
     procedure setParams(pTabela: String; pQry: TFDQuery; pModel: TObject);
     procedure setDatasetToModel(pTabela: String; pDataset: TDataset; pModel: TObject);
     function expandIn(pCampo: String; pValues: IListaString): String;
+    procedure sincronizarDados(pTabela: String; pChave: String; pModelo: TObject; pAcao: TAcao; pEspera: boolean = false);
+    function getValuesFromModel(pCampos: String; pModel: TObject): TVariantArray;
 
   	constructor Create(pIConexao: IConexao);
     destructor Destroy; override;
@@ -43,12 +47,14 @@ type
 implementation
 
 uses
+  Terasoft.Configuracoes,
   System.Rtti,
   DBClient,
   System.Variants,
   TypInfo,
   Terasoft.Utils,
-  System.SysUtils, System.StrUtils, Vcl.Dialogs;
+  Interfaces.QueryLojaAsync,
+  System.StrUtils, Vcl.Dialogs;
 
 { TGeradorModel }
 
@@ -342,6 +348,37 @@ begin
   end;
 end;
 
+function TConstrutorDao.getValuesFromModel;
+  var
+    l: IListaTextoEx;
+    i: Integer;
+    lCtx    : TRttiContext;
+    lProp   : TRttiProperty;
+    s: TipoWideStringFramework;
+begin
+  SetLength(Result,0);
+  if(pModel=nil) then exit;
+  l := novaListaTexto;
+  l.strings.Delimiter := ';';
+  l.strings.StrictDelimiter := true;
+  l.strings.DelimitedText := trim(pCampos);
+  SetLength(Result,l.strings.Count);
+  lCtx := TRttiContext.Create;
+  i:=0;
+  try
+    for s in l do
+    begin
+      inc(i);
+      lProp := lCtx.GetType(pModel.ClassType).GetProperty(s);
+      Result[i-1]:=null;
+      if(lProp=nil) then continue;
+      Result[i-1]:=lProp.GetValue(pModel).AsString;
+    end;
+  finally
+    lCtx.Free;
+  end;
+end;
+
 procedure TConstrutorDao.setParams(pTabela: String; pQry: TFDQuery; pModel: TObject);
   var
     lTabela : IFDDataset;
@@ -367,6 +404,72 @@ begin
     lTabela := nil;
     lCtx.Free;
   end;
+end;
+
+procedure TConstrutorDao.sincronizarDados(pTabela: String; pChave: String; pModelo: TObject; pAcao: TAcao; pEspera: boolean = false);
+var
+  lQry        : IFDQuery;
+  lSQL        : String;
+  lAsyncList  : IListaQueryAsync;
+  lQA         : IQueryLojaAsync;
+  conexao     : IConexao;
+  lConfiguracoes : ITerasoftConfiguracoes;
+
+begin
+  Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
+  if(lConfiguracoes=nil) then
+    exit;
+
+  if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) <> 'S' then
+    exit;
+
+  lAsyncList := getQueryLojaAsyncList(vIConexao);
+  if(pTabela='') then
+    raise Exception.Create('TConstrutorDao.sincronizarDados: Nome da tabela não especificada.');
+
+  if trim(pChave)='' then
+    pChave := 'ID';
+
+  lSQL := '';
+
+  if pAcao in [tacIncluir, tacAlterar] then
+    lSQL := self.gerarUpdateOrInsert(pTabela, pChave, '', true)
+
+  else if pAcao in [tacExcluir] then
+    lSQL := format('delete from %s where %s = :%s', [ pTabela, pChave, pChave ])
+  else
+    exit;
+
+  try
+  if(lSQL<>'') then
+    for lQA in lAsyncList do
+    begin
+      if lQA.loja.objeto.LOJA <> vIConexao.getEmpresa.LOJA then
+      begin
+        //Se a conexão é inválida, ou não consegue conectar, parte para a próxima
+        conexao := lQA.loja.objeto.conexaoLoja;
+        if(conexao=nil) then continue;
+
+        lQry := conexao.criaIfaceQuery;
+
+        if pAcao = tacExcluir then
+        begin
+          lQA.execQuery(lSQL, pChave, self.getValuesFromModel(pChave,pModelo));
+        end else
+        begin
+          lQry.objeto.SQL.Text := lSQL;
+          setParams(pTabela, lQry.objeto, pModelo);
+          lQA.openQuery(lQry,true);
+        end;
+
+      end;
+    end;
+  finally
+    if(pEspera) then
+      for lQA in lAsyncList do
+        lQA.espera;
+  end;
+
 end;
 
 end.

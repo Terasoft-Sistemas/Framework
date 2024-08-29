@@ -10,6 +10,7 @@ interface
     System.Classes,
     DB,
     Terasoft.Framework.ObjectIface,
+    Terasoft.Types,
     System.Generics.Defaults;
 
   type
@@ -89,6 +90,8 @@ interface
       procedure setParams(pTabela: String; pQry: TFDQuery; pModel: TObject);
       procedure setDatasetToModel(pTabela: String; pDataset: TDataset; pModel: TObject);
       function expandIn(pCampo: String; pValues: IListaString): String;
+      procedure sincronizarDados(pTabela: String; pChave: String; pModelo: TObject; pAcao: TAcao; pEspera: boolean = false);
+      function getValuesFromModel(pCampos: String; pModel: TObject): TVariantArray;
     end;
 
     IConexao = interface
