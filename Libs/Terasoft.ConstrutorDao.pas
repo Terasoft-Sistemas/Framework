@@ -433,7 +433,7 @@ begin
   lSQL := '';
 
   if pAcao in [tacIncluir, tacAlterar] then
-    lSQL := self.gerarUpdateOrInsert(pTabela,pChave, pChave, true)
+    lSQL := self.gerarUpdateOrInsert(pTabela, pChave, '', true)
 
   else if pAcao in [tacExcluir] then
     lSQL := format('delete from %s where %s = :%s', [ pTabela, pChave, pChave ])
@@ -459,7 +459,7 @@ begin
         begin
           lQry.objeto.SQL.Text := lSQL;
           setParams(pTabela, lQry.objeto, pModelo);
-          lQA.openQuery(lQry);
+          lQA.openQuery(lQry,true);
         end;
 
       end;

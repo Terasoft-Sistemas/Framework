@@ -488,7 +488,7 @@ begin
 
     Result := lQry.FieldByName('CODIGO_CLI').AsString;
 
-    vConstrutor.sincronizarDados('CLIENTES','ID',pClienteModel.objeto,tacIncluir);
+    vConstrutor.sincronizarDados('CLIENTES','CODIGO_CLI',pClienteModel.objeto,tacIncluir);
 
   finally
     lLojasModel:=nil;
@@ -513,7 +513,7 @@ begin
 
     Result := pClienteModel.objeto.CODIGO_CLI;
 
-    vConstrutor.sincronizarDados('CLIENTES','ID',pClienteModel.objeto,tacAlterar);
+    vConstrutor.sincronizarDados('CLIENTES','CODIGO_CLI',pClienteModel.objeto,tacAlterar);
 
   finally
     lSQL := '';
@@ -533,7 +533,7 @@ begin
 
    //por Antonio:
    //    Exclusão não replica??
-   //vConstrutor.sincronizarDados('CLIENTES','ID',pClienteModel.objeto,tacExcluir);
+   //vConstrutor.sincronizarDados('CLIENTES','CODIGO_CLI',pClienteModel.objeto,tacExcluir);
 
   finally
     lQry.Free;

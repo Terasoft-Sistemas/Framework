@@ -46,7 +46,7 @@ interface
         na propriedade dataset: IDatasetSimples abaixo.
         Erros são reportados na propriedade resultado: IResultadoOperacao
       }
-      procedure openQuery(pQuery: IFDQuery);
+      procedure openQuery(pQuery: IFDQuery; pExecute: boolean =false);
 
     //property loja getter/setter
       function getLoja: ITLojasModel;
@@ -112,6 +112,7 @@ implementation
         IAsyncRunnable)
     protected
       [volatile] vCall: IAsyncCall;
+      vExecute: boolean;
       fGDB: IGDB;
       fLoja: ITLojasModel;
       fQuery: TipoWideStringFramework;
@@ -139,7 +140,7 @@ implementation
       procedure espera;
       procedure AsyncRun;
       procedure execQuery(const pQuery, pCampos: TipoWideStringFramework; pParametros: TVariantArray);
-      procedure openQuery(pQuery: IFDQuery);
+      procedure openQuery(pQuery: IFDQuery; pExecute: boolean =false);
 
     //property status getter/setter
       function getStatus: TStatusQueryAsyncLoja;
@@ -319,7 +320,11 @@ begin
 
     end else if (fQuery<>'') and (fFdQuery<>nil) then
     begin
-      fFdQuery.objeto.Open(fQuery);
+      fFdQuery.objeto.close;
+      if(vExecute) then
+        fFdQuery.objeto.ExecSQL(fQuery)
+      else
+        fFdQuery.objeto.Open(fQuery);
       //clone como TFDMemTable e cria campos operações
       if(fFdQuery.objeto.Active) then
       begin
@@ -329,7 +334,11 @@ begin
 
     end else if (fFdQuery<>nil) and (fFdQuery.objeto.SQL.Text<>'') then
     begin
-      fFdQuery.objeto.Open;
+      fFdQuery.objeto.close;
+      if(vExecute) then
+        fFdQuery.objeto.ExecSQL
+      else
+        fFdQuery.objeto.Open;
       //clone como TFDMemTable e cria campos operações
       if(fFdQuery.objeto.Active) then
       begin
@@ -377,9 +386,10 @@ begin
   run;
 end;
 
-procedure TQueryLojaAsync.openQuery(pQuery: IFDQuery);
+procedure TQueryLojaAsync.openQuery;
 begin
   espera;
+  vExecute := pExecute;
   fFdQuery := pQuery;
   fCampos := '';
   fParametros := [];
