@@ -877,7 +877,8 @@ begin
     if(fNome='') then
       fNome := pNome;
     setTipo(tipoFiltro_Lojas);
-    fMultiploValor:=stringForaArray(fNome, ['@loja','@filial'],[osna_CaseInsensitive,osna_SemAcento]);
+    fMultiploValor:=(Pos('@lojas',LowerCase(fNome),1)>0) or (Pos('@filiais',LowerCase(fNome),1)>0);
+    //fMultiploValor:=stringForaArray(fNome, ['@loja','@filial'],[osna_CaseInsensitive,osna_SemAcento]);
 
     if(stringNoArray(fCampo,['unica','simples'],[osna_CaseInsensitive,osna_SemAcento])) then
     begin
