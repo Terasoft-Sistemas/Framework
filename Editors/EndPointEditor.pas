@@ -608,6 +608,8 @@ begin
 
   //mmProFiltroValores.Lines.Text := StringReplace(mmProFiltroValores.Lines.Text,'<vazio>','',[rfReplaceAll,rfIgnoreCase]);
   edPropFiltroValor.Text := vDatasetFiltros.dataset.fields[1].asString;
+  if(mmProFiltroValores.Text='') then
+    mmProFiltroValores.Text := edPropFiltroValores.Text;
 
 end;
 
@@ -1247,8 +1249,8 @@ begin
 
   l := getMultiConfigPropriedades.ReadSectionValuesLista('filtros');
   q := uppercase(l.text);
-  if pos('@FILIA', q,1)=0 then
-    Result.adicionaErro('Falta definir o filtro FILIAL ou FILIAIS.');
+  if (pos('@FILIA', q,1)=0) and (pos('@LOJA', q,1)=0) then
+    Result.adicionaErro('Falta definir o filtro FILIAL/FILIAIS/LOJA/LOJAS.');
 
   if pos('@BUSCA', q,1)=0 then
     Result.adicionaErro('Falta definir o filtro BUSCA.');
