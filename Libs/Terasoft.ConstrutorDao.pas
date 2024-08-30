@@ -423,7 +423,7 @@ begin
   if lConfiguracoes.objeto.valorTag('ENVIA_SINCRONIZA', 'N', tvBool) <> 'S' then
     exit;
 
-  lAsyncList := getQueryLojaAsyncList(vIConexao);
+  lAsyncList := getQueryLojaAsyncHostsList(vIConexao);
   if(pTabela='') then
     raise Exception.Create('TConstrutorDao.sincronizarDados: Nome da tabela não especificada.');
 

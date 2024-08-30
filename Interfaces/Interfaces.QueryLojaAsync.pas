@@ -46,7 +46,7 @@ interface
         na propriedade dataset: IDatasetSimples abaixo.
         Erros são reportados na propriedade resultado: IResultadoOperacao
       }
-      procedure openQuery(pQuery: IFDQuery; pExecute: boolean =false);
+      procedure openQuery(pQuery: IFDQuery; pExecute: boolean =false; pSQL: TipoWideStringFramework='');
 
     //property loja getter/setter
       function getLoja: ITLojasModel;
@@ -98,11 +98,13 @@ interface
 
     function getQueryLojaAsync(pLoja: ITLojasModel): IQueryLojaAsync;
 
-    function getQueryLojaAsyncList(pIConexao:IConexao): IListaQueryAsync;
+    function getQueryLojaAsyncList(pIConexao:IConexao; pView: String=''): IListaQueryAsync;
+    function getQueryLojaAsyncHostsList(pIConexao:IConexao; pView: String=''): IListaQueryAsync;
 
 
 implementation
   uses
+    terasoft.Framework.LOG,
     AsyncCalls;
 
   type
@@ -140,7 +142,7 @@ implementation
       procedure espera;
       procedure AsyncRun;
       procedure execQuery(const pQuery, pCampos: TipoWideStringFramework; pParametros: TVariantArray);
-      procedure openQuery(pQuery: IFDQuery; pExecute: boolean =false);
+      procedure openQuery(pQuery: IFDQuery; pExecute: boolean; pSQL: TipoWideStringFramework);
 
     //property status getter/setter
       function getStatus: TStatusQueryAsyncLoja;
@@ -205,6 +207,28 @@ begin
   Result := TCollections.CreateList<IQueryLojaAsync>;
 
   lLojas := TLojasModel.getNewIface(pIConexao);
+
+  lLojas.objeto.LojaView := pView;
+  //lLojas.objeto.obterHosts;
+
+  for lLoja in lLojas.objeto.obterLista do
+  begin
+    lQLA := getQueryLojaAsync(lLoja);
+    Result.Add(lQLA);
+  end;
+
+end;
+
+function getQueryLojaAsyncHostsList;
+  var
+    lLojas,lLoja: ITLojasModel;
+    lQLA: IQueryLojaAsync;
+begin
+  Result := TCollections.CreateList<IQueryLojaAsync>;
+
+  lLojas := TLojasModel.getNewIface(pIConexao);
+
+  lLojas.objeto.LojaView := pView;
   lLojas.objeto.obterHosts;
 
   for lLoja in lLojas.objeto.LojassLista do
@@ -303,24 +327,31 @@ procedure TQueryLojaAsync.AsyncRun;
     ds: IDataset;
 begin
   try
-    if(fQuery<>'') and (fFdQuery=nil) then
+
+    logaByTagSeNivel('',format('Executando query async para a loja [%s] em [%s]: [%s]',[fLoja.objeto.LOJA, getGDB.databaseName, fQuery] ), LOG_LEVEL_DEBUG);
+
+    if(self.fQuery<>'') and (self.fFdQuery=nil) then
     begin
 
       if(getGDB.ativo=false) then
         raise Exception.Create('TQueryLojaAsync.AsyncRun: Banco de dados não conetado.');
 
-      ds := fGDB.criaDataset.query(fQuery,fCampos,fParametros);
+      logaByTagSeNivel('',format('Executando query async para a loja [%s] em [%s]: [%s]',[fLoja.objeto.LOJA, getGDB.databaseName, fQuery] ), LOG_LEVEL_DEBUG);
+
+      ds := self.fGDB.criaDataset.query(self.fQuery,self.fCampos,self.fParametros);
 
       //clone como TFDMemTable e cria campos operações
       if(ds.dataset.Active) then
       begin
         fDataset := criaDatasetSimples(cloneDataset(ds.dataset,false,fCriaOperacoes));
         fDataset.dataset.First;
+        logaByTagSeNivel('',format('Executando query async para a loja [%s] retornou [%d / %d] registros:',[fLoja.objeto.LOJA, ds.dataset.recordcount, fDataset.dataset.recordCount] ), LOG_LEVEL_DEBUG);
       end;
 
     end else if (fQuery<>'') and (fFdQuery<>nil) then
     begin
       fFdQuery.objeto.close;
+      logaByTagSeNivel('',format('Executando query async para a loja [%s] em [%s]: [%s]',[fLoja.objeto.LOJA, getGDB.databaseName, fQuery] ), LOG_LEVEL_DEBUG);
       if(vExecute) then
         fFdQuery.objeto.ExecSQL(fQuery)
       else
@@ -330,11 +361,13 @@ begin
       begin
         fDataset := criaDatasetSimples(cloneDataset(fFdQuery.objeto,false,fCriaOperacoes));
         fDataset.dataset.First;
+        logaByTagSeNivel('',format('Executando query async para a loja [%s] retornou [%d / %d] registros:',[fLoja.objeto.LOJA, fFdQuery.objeto.recordcount, fDataset.dataset.recordCount] ), LOG_LEVEL_DEBUG);
       end;
 
     end else if (fFdQuery<>nil) and (fFdQuery.objeto.SQL.Text<>'') then
     begin
       fFdQuery.objeto.close;
+      logaByTagSeNivel('',format('Executando query async para a loja [%s] em [%s]: [%s]',[fLoja.objeto.LOJA, getGDB.databaseName, fFdQuery.objeto.SQL.Text] ), LOG_LEVEL_DEBUG);
       if(vExecute) then
         fFdQuery.objeto.ExecSQL
       else
@@ -344,6 +377,7 @@ begin
       begin
         fDataset := criaDatasetSimples(cloneDataset(fFdQuery.objeto,false,fCriaOperacoes));
         fDataset.dataset.First;
+        logaByTagSeNivel('',format('Executando query async para a loja [%s] retornou [%d / %d] registros:',[fLoja.objeto.LOJA, fFdQuery.objeto.recordcount, fDataset.dataset.recordCount] ), LOG_LEVEL_DEBUG);
       end;
     end else
       raise Exception.Create('TQueryLojaAsync.AsyncRun: Query não especificado.');
@@ -391,6 +425,7 @@ begin
   espera;
   vExecute := pExecute;
   fFdQuery := pQuery;
+  fQuery := pSQL;
   fCampos := '';
   fParametros := [];
   run;

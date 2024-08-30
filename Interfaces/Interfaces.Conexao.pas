@@ -140,6 +140,7 @@ interface
 
     function criaIFDDataset(const obj: TDataSet): IFDDataset;
     function criaConstrutorDao(pIConexao: IConexao): IConstrutorDao;
+    function criaIFDMemTable(const obj: TFDMemTable): IFDMemTable;
 
 implementation
   uses
@@ -153,6 +154,11 @@ end;
 function criaIFDDataset(const obj: TDataSet): IFDDataset;
 begin
   Result := TImplObjetoOwner<TDataset>.CreateOwner(obj);
+end;
+
+function criaIFDMemTable(const obj: TFDMemTable): IFDMemTable;
+begin
+  Result := TImplObjetoOwner<TFDMemTable>.CreateOwner(obj);
 end;
 
 end.
