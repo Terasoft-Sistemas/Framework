@@ -657,7 +657,7 @@ begin
   else
     lCFG.WriteBool('visible',campo,false);
 
-  if(edtFormatacaoCampoSumario.Checked) then
+  if(edtFormatacaoCampoSumario.Checked) and (edtFormatacaoCampoVisivel.Checked) then
     lCFG.deleteKey('sumario',campo)
   else
     lCFG.WriteBool('sumario',campo,false);
