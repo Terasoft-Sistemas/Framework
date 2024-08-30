@@ -508,222 +508,169 @@ end;
 
 function TDashbordDao.ObterQuery3_VendaPorAno(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
 var
-  lQry: TFDQuery;
   lSQL:String;
-  lLojasModel,
-  lLojas_Dados: ITLojasModel;
   MemTable: TFDMemTable;
   Options: TLocateOptions;
   lTotalValores: Real;
   I, lojas: Integer;
+
+  lAsyncList  : IListaQueryAsync;
+  lQA         : IQueryLojaAsync;
+  conexao     : IConexao;
+
 begin
+  lAsyncList := getQueryLojaAsyncList(vIConexao,pDashbord_Parametros.Lojas);
   MemTable    := TFDMemTable.Create(nil);
   Result := criaIFDDataset(MemTable);
-  lLojasModel := TLojasModel.getNewIface(vIConexao);
-  lQry        := vIConexao.CriarQuery;
+  lSQL :=
+          '    select                                                                                                                     ' + #13 +
+          '        extract(month from ' + ifThen(pDashbord_Parametros.TipoData = 'EMISSÃO', 'data_emissao', 'data_faturado') + ') MES,    ' + #13 +
+          '        sum(valor_produto-desconto) VALOR_LIQUIDO,                                                                             ' + #13 +
+          '        sum(valor_produto) VALOR_PRODUTO,                                                                                      ' + #13 +
+          '        sum(desconto) DESCONTO,                                                                                                ' + #13 +
+          '        sum(acrescimo) ACRESCIMO,                                                                                              ' + #13 +
+          '        sum(frete) FRETE,                                                                                                      ' + #13 +
+          '        sum(ipi) IPI,                                                                                                          ' + #13 +
+          '        sum(st) ST,                                                                                                            ' + #13 +
+          '        sum(custo) CUSTO                                                                                                       ' + #13 +
+          '                                                                                                                               ' + #13 +
+          '    from                                                                                                                       ' + #13 +
+          '    (                                                                                                                          ' + #13 +
+          '    select                                                                                                                     ' + #13 +
+          '        v.data_ped DATA_EMISSAO,                                                                                               ' + #13 +
+          '        v.data_faturado DATA_FATURADO,                                                                                         ' + #13 +
+          '        (i.valorunitario_ped * i.qtde_calculada) VALOR_PRODUTO,                                                                ' + #13 +
+          '        ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.desc_ped as float),0) DESCONTO,                 ' + #13 +
+          '        ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.acres_ped as float),0) ACRESCIMO,               ' + #13 +
+          '        ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.frete_ped as float),0) FRETE,                   ' + #13 +
+          '        i.valor_ipi IPI,                                                                                                       ' + #13 +
+          '        i.valor_st ST,                                                                                                         ' + #13 +
+          '        coalesce(i.vlrcusto_pro,0) * coalesce(i.qtde_calculada,0) CUSTO,                                                       ' + #13 +
+          '        '' '' ITEM                                                                                                         ' + #13 +
+          '                                                                                                                               ' + #13 +
+          '    from                                                                                                                       ' + #13 +
+          '         pedidovenda v                                                                                                         ' + #13 +
+          '           inner join pedidoitens i on v.numero_ped = i.numero_ped                                                             ' + #13 +
+          '    where                                                                                                                      ' + #13 +
+          '        coalesce(v.valor_ped,0) > 0                                                                                            ' + #13 +
+          '        and coalesce(v.status,''P'') in (''P'',''F'')                                                              ' + #13 +
+          '        ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and v.CODIGO_VEN in (' + pDashbord_Parametros.Vendedores + ') ', '') + #13 +
+          '                                                                                                                               ' + #13 +
+          '    union all                                                                                                                  ' + #13 +
+          '                                                                                                                               ' + #13 +
+          '    select                                                                                                                     ' + #13 +
+          '        distinct                                                                                                               ' + #13 +
+          '        d.data DATA_EMISSAO,                                                                                                   ' + #13 +
+          '        d.data DATA_FATURADO,                                                                                                  ' + #13 +
+          '        (di.valor_unitario*di.quantidade) *-1 VALOR_PRODUTO,                                                                   ' + #13 +
+          '        ((di.quantidade*di.valor_unitario)/(d.valor_total+d.desconto-d.valor_acrescimo))*coalesce(cast(d.desconto as float),0) *-1 DESCONTO,           ' + #13 +
+          '        ((di.quantidade*di.valor_unitario)/(d.valor_total+d.desconto-d.valor_acrescimo))*coalesce(cast(d.valor_acrescimo as float),0) *-1 ACRESCIMO,   ' + #13 +
+          '        0 FRETE,                                                                                                               ' + #13 +
+          '        0 IPI,                                                                                                                 ' + #13 +
+          '        0 ST,                                                                                                                  ' + #13 +
+          '        0 CUSTO,                                                                                                               ' + #13 +
+          '        di.item ITEM                                                                                                           ' + #13 +
+          '    from                                                                                                                       ' + #13 +
+          '         devolucao d                                                                                                           ' + #13 +
+          '           left join funcionario f     on f.codigo_fun  = d.vendedor                                                           ' + #13 +
+          '           left join devolucaoitens di on di.id         = d.id                                                                 ' + #13 +
+          '           left join pedidovenda v     on v.numero_ped  = d.pedido                                                             ' + #13 +
+          '           left join pedidoitens vi    on vi.numero_ped = v.numero_ped and vi.codigo_pro = di.produto                          ' + #13 +
+          '    where                                                                                                                      ' + #13 +
+          '        coalesce(d.valor_total,0) > 0                                                                                          ' + #13 +
+          '        ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and v.CODIGO_VEN in (' + pDashbord_Parametros.Vendedores + ') ', '') + #13 +
+          '                                                                                                                               ' + #13 +
+          '    union all                                                                                                                  ' + #13 +
+          '                                                                                                                               ' + #13 +
+          '    select                                                                                                                     ' + #13 +
+          '        e.datamovi_ent DATA_EMISSAO,                                                                                           ' + #13 +
+          '        e.datamovi_ent DATA_FATURADO,                                                                                          ' + #13 +
+          '        coalesce(e.TOTAL_ENT,0)*-1 VALOR_LIQUIDO,                                                                              ' + #13 +
+          '        0 DESCONTO,                                                                                                            ' + #13 +
+          '        0 ACRESCIMO,                                                                                                           ' + #13 +
+          '        0 FRETE,                                                                                                               ' + #13 +
+          '        0 IPI,                                                                                                                 ' + #13 +
+          '        0 ST,                                                                                                                  ' + #13 +
+          '        0 CUSTO,                                                                                                               ' + #13 +
+          '        '' '' ITEM                                                                                                         ' + #13 +
+          '    from                                                                                                                       ' + #13 +
+          '         entrada e                                                                                                             ' + #13 +
+          '           inner join pedidovenda v on e.devolucao_pedido_id = v.numero_ped                                                    ' + #13 +
+          '    where                                                                                                                      ' + #13 +
+          '        coalesce(e.TOTAL_ENT,0) > 0                                                                                            ' + #13 +
+          '        ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and v.CODIGO_VEN in (' + pDashbord_Parametros.Vendedores + ') ', '') + #13 +
+          '    																														                                                              	' + #13 +
+          '    union all                                                                                                                  ' + #13 +
+          '                                                                                                                               ' + #13 +
+          '    select                                                                                                                     ' + #13 +
+          '        v.fechamento_os DATA_EMISSAO,                                                                                          ' + #13 +
+          '        v.fechamento_os DATA_FATURADO,                                                                                         ' + #13 +
+          '        (i.valorunitario_os*i.quantidade_pro) VALOR_PRODUTO,                                                                   ' + #13 +
+          '        ((i.valorunitario_os*i.quantidade_pro)/(v.total_os+v.desc_os-v.acrescimo_os))*cast(v.desc_os as float) DESCONTO,       ' + #13 +
+          '        ((i.valorunitario_os*i.quantidade_pro)/(v.total_os+v.desc_os-v.acrescimo_os))*cast(v.acrescimo_os as float) ACRESCIMO, ' + #13 +
+          '        0 FRETE,                                                                                                               ' + #13 +
+          '        0 IPI,                                                                                                                 ' + #13 +
+          '        0 ST,                                                                                                                  ' + #13 +
+          '        coalesce(i.quantidade_pro,0) * coalesce(i.custo_pro,0) CUSTO,                                                          ' + #13 +
+          '        '' '' ITEM                                                                                                         ' + #13 +
+          '    from                                                                                                                       ' + #13 +
+          '         os v                                                                                                                  ' + #13 +
+          '           inner join ositens i  on v.numero_os  = i.numero_os                                                                 ' + #13 +
+          '           left  join produto pr on i.codigo_pro = pr.codigo_pro                                                               ' + #13 +
+          '    where                                                                                                                      ' + #13 +
+          '        coalesce(v.status_os,''F'') = ''F''                                                                            ' + #13 +
+          '        and coalesce(v.total_os, 0) > 0                                                                                        ' + #13 +
+          '        ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and i.vendedor_id in (' + pDashbord_Parametros.Vendedores + ') ','') + #13 +
+          '                                                                                                                               ' + #13 +
+          ') resultado                                                                                                                    ' + #13 +
+          '                                                                                                                               ' + #13 +
+          'where                                                                                                                          ' + #13 +
+          '      resultado.' + ifThen(pDashbord_Parametros.TipoData = 'EMISSÃO', 'data_emissao', 'data_faturado') + ' between ' + QuotedStr(transformaDataFireBirdWhere(pDashbord_Parametros.DataInicio)) + ' and '+ QuotedStr(transformaDataFireBirdWhere(pDashbord_Parametros.DataFim)) + #13 +
+          '                                                                                                                               ' + #13 +
+          'group by 1                                                                                                                     ' + #13 +
+          'order by 1                                                                                                                     ' + #13;
 
-  try
-    lSQL := '  execute block                                                                                                                ' + #13 +
-            '    returns (                                                                                                                  ' + #13 +
-            '      MES                    varchar(2),                                                                                       ' + #13 +
-            '      VALOR_LIQUIDO          numeric(15,2),                                                                                    ' + #13 +
-            '      DESCONTO               numeric(15,2),                                                                                    ' + #13 +
-            '      ACRESCIMO              numeric(15,2),                                                                                    ' + #13 +
-            '      FRETE                  numeric(15,2),                                                                                    ' + #13 +
-            '      IPI                    numeric(15,2),                                                                                    ' + #13 +
-            '      ST                     numeric(15,2),                                                                                    ' + #13 +
-            '      CUSTO                  numeric(15,2))                                                                                    ' + #13 +
-            '    as                                                                                                                         ' + #13 +
-            '  declare variable vsql varchar(20000);                                                                                        ' + #13 +
-            '  declare variable vservidor varchar(150);                                                                                     ' + #13 +
-            '  begin                                                                                                                        ' + #13 +
-            '    vsql = ''select                                                                                                            ' + #13 +
-            '	    MES,                                                                                                                      ' + #13 +
-            '	    VALOR_LIQUIDO,                                                                                                            ' + #13 +
-            '	    DESCONTO,                                                                                                                 ' + #13 +
-            '	    ACRESCIMO,                                                                                                                ' + #13 +
-            '	    FRETE,                                                                                                                    ' + #13 +
-            '	    IPI,                                                                                                                      ' + #13 +
-            '	    ST,                                                                                                                       ' + #13 +
-            '	    CUSTO                                                                                                                     ' + #13 +
-            'from                                                                                                                           ' + #13 +
-            '(                                                                                                                              ' + #13 +
-            '    select                                                                                                                     ' + #13 +
-            '        extract(month from ' + ifThen(pDashbord_Parametros.TipoData = 'EMISSÃO', 'data_emissao', 'data_faturado') + ') MES,    ' + #13 +
-            '        sum(valor_produto-desconto) VALOR_LIQUIDO,                                                                             ' + #13 +
-            '        sum(valor_produto) VALOR_PRODUTO,                                                                                      ' + #13 +
-            '        sum(desconto) DESCONTO,                                                                                                ' + #13 +
-            '        sum(acrescimo) ACRESCIMO,                                                                                              ' + #13 +
-            '        sum(frete) FRETE,                                                                                                      ' + #13 +
-            '        sum(ipi) IPI,                                                                                                          ' + #13 +
-            '        sum(st) ST,                                                                                                            ' + #13 +
-            '        sum(custo) CUSTO                                                                                                       ' + #13 +
-            '                                                                                                                               ' + #13 +
-            '    from                                                                                                                       ' + #13 +
-            '    (                                                                                                                          ' + #13 +
-            '    select                                                                                                                     ' + #13 +
-            '        v.data_ped DATA_EMISSAO,                                                                                               ' + #13 +
-            '        v.data_faturado DATA_FATURADO,                                                                                         ' + #13 +
-            '        (i.valorunitario_ped * i.qtde_calculada) VALOR_PRODUTO,                                                                ' + #13 +
-            '        ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.desc_ped as float),0) DESCONTO,                 ' + #13 +
-            '        ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.acres_ped as float),0) ACRESCIMO,               ' + #13 +
-            '        ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.frete_ped as float),0) FRETE,                   ' + #13 +
-            '        i.valor_ipi IPI,                                                                                                       ' + #13 +
-            '        i.valor_st ST,                                                                                                         ' + #13 +
-            '        coalesce(i.vlrcusto_pro,0) * coalesce(i.qtde_calculada,0) CUSTO,                                                       ' + #13 +
-            '        '''' '''' ITEM                                                                                                         ' + #13 +
-            '                                                                                                                               ' + #13 +
-            '    from                                                                                                                       ' + #13 +
-            '         pedidovenda v                                                                                                         ' + #13 +
-            '           inner join pedidoitens i on v.numero_ped = i.numero_ped                                                             ' + #13 +
-            '    where                                                                                                                      ' + #13 +
-            '        coalesce(v.valor_ped,0) > 0                                                                                            ' + #13 +
-            '        and coalesce(v.status,''''P'''') in (''''P'''',''''F'''')                                                              ' + #13 +
-            '        ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and v.CODIGO_VEN in (' + pDashbord_Parametros.Vendedores + ') ', '') + #13 +
-            '                                                                                                                               ' + #13 +
-            '    union all                                                                                                                  ' + #13 +
-            '                                                                                                                               ' + #13 +
-            '    select                                                                                                                     ' + #13 +
-            '        distinct                                                                                                               ' + #13 +
-            '        d.data DATA_EMISSAO,                                                                                                   ' + #13 +
-            '        d.data DATA_FATURADO,                                                                                                  ' + #13 +
-            '        (di.valor_unitario*di.quantidade) *-1 VALOR_PRODUTO,                                                                   ' + #13 +
-            '        ((di.quantidade*di.valor_unitario)/(d.valor_total+d.desconto-d.valor_acrescimo))*coalesce(cast(d.desconto as float),0) *-1 DESCONTO,           ' + #13 +
-            '        ((di.quantidade*di.valor_unitario)/(d.valor_total+d.desconto-d.valor_acrescimo))*coalesce(cast(d.valor_acrescimo as float),0) *-1 ACRESCIMO,   ' + #13 +
-            '        0 FRETE,                                                                                                               ' + #13 +
-            '        0 IPI,                                                                                                                 ' + #13 +
-            '        0 ST,                                                                                                                  ' + #13 +
-            '        0 CUSTO,                                                                                                               ' + #13 +
-            '        di.item ITEM                                                                                                           ' + #13 +
-            '    from                                                                                                                       ' + #13 +
-            '         devolucao d                                                                                                           ' + #13 +
-            '           left join funcionario f     on f.codigo_fun  = d.vendedor                                                           ' + #13 +
-            '           left join devolucaoitens di on di.id         = d.id                                                                 ' + #13 +
-            '           left join pedidovenda v     on v.numero_ped  = d.pedido                                                             ' + #13 +
-            '           left join pedidoitens vi    on vi.numero_ped = v.numero_ped and vi.codigo_pro = di.produto                          ' + #13 +
-            '    where                                                                                                                      ' + #13 +
-            '        coalesce(d.valor_total,0) > 0                                                                                          ' + #13 +
-            '        ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and v.CODIGO_VEN in (' + pDashbord_Parametros.Vendedores + ') ', '') + #13 +
-            '                                                                                                                               ' + #13 +
-            '    union all                                                                                                                  ' + #13 +
-            '                                                                                                                               ' + #13 +
-            '    select                                                                                                                     ' + #13 +
-            '        e.datamovi_ent DATA_EMISSAO,                                                                                           ' + #13 +
-            '        e.datamovi_ent DATA_FATURADO,                                                                                          ' + #13 +
-            '        coalesce(e.TOTAL_ENT,0)*-1 VALOR_LIQUIDO,                                                                              ' + #13 +
-            '        0 DESCONTO,                                                                                                            ' + #13 +
-            '        0 ACRESCIMO,                                                                                                           ' + #13 +
-            '        0 FRETE,                                                                                                               ' + #13 +
-            '        0 IPI,                                                                                                                 ' + #13 +
-            '        0 ST,                                                                                                                  ' + #13 +
-            '        0 CUSTO,                                                                                                               ' + #13 +
-            '        '''' '''' ITEM                                                                                                         ' + #13 +
-            '    from                                                                                                                       ' + #13 +
-            '         entrada e                                                                                                             ' + #13 +
-            '           inner join pedidovenda v on e.devolucao_pedido_id = v.numero_ped                                                    ' + #13 +
-            '    where                                                                                                                      ' + #13 +
-            '        coalesce(e.TOTAL_ENT,0) > 0                                                                                            ' + #13 +
-            '        ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and v.CODIGO_VEN in (' + pDashbord_Parametros.Vendedores + ') ', '') + #13 +
-            '    																														                                                              	' + #13 +
-            '    union all                                                                                                                  ' + #13 +
-            '                                                                                                                               ' + #13 +
-            '    select                                                                                                                     ' + #13 +
-            '        v.fechamento_os DATA_EMISSAO,                                                                                          ' + #13 +
-            '        v.fechamento_os DATA_FATURADO,                                                                                         ' + #13 +
-            '        (i.valorunitario_os*i.quantidade_pro) VALOR_PRODUTO,                                                                   ' + #13 +
-            '        ((i.valorunitario_os*i.quantidade_pro)/(v.total_os+v.desc_os-v.acrescimo_os))*cast(v.desc_os as float) DESCONTO,       ' + #13 +
-            '        ((i.valorunitario_os*i.quantidade_pro)/(v.total_os+v.desc_os-v.acrescimo_os))*cast(v.acrescimo_os as float) ACRESCIMO, ' + #13 +
-            '        0 FRETE,                                                                                                               ' + #13 +
-            '        0 IPI,                                                                                                                 ' + #13 +
-            '        0 ST,                                                                                                                  ' + #13 +
-            '        coalesce(i.quantidade_pro,0) * coalesce(i.custo_pro,0) CUSTO,                                                          ' + #13 +
-            '        '''' '''' ITEM                                                                                                         ' + #13 +
-            '    from                                                                                                                       ' + #13 +
-            '         os v                                                                                                                  ' + #13 +
-            '           inner join ositens i  on v.numero_os  = i.numero_os                                                                 ' + #13 +
-            '           left  join produto pr on i.codigo_pro = pr.codigo_pro                                                               ' + #13 +
-            '    where                                                                                                                      ' + #13 +
-            '        coalesce(v.status_os,''''F'''') = ''''F''''                                                                            ' + #13 +
-            '        and coalesce(v.total_os, 0) > 0                                                                                        ' + #13 +
-            '        ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and i.vendedor_id in (' + pDashbord_Parametros.Vendedores + ') ','') + #13 +
-            '                                                                                                                               ' + #13 +
-            ') resultado                                                                                                                    ' + #13 +
-            '                                                                                                                               ' + #13 +
-            'where                                                                                                                          ' + #13 +
-            '      resultado.' + ifThen(pDashbord_Parametros.TipoData = 'EMISSÃO', 'data_emissao', 'data_faturado') + ' between ''' + QuotedStr(transformaDataFireBirdWhere(pDashbord_Parametros.DataInicio)) + ''' and ''' + QuotedStr(transformaDataFireBirdWhere(pDashbord_Parametros.DataFim)) + ''''+ #13 +
-            '                                                                                                                               ' + #13 +
-            'group by 1                                                                                                                     ' + #13 +
-            'order by 1                                                                                                                     ' + #13 +
-            ')'';                                                                                                                           ' + #13 +
-            '    for                                                                                                                        ' + #13 ;
+  gravaSQL(lSQL, 'DashbordDao_ObterQuery3_VendaPorAno_' + FormatDateTime('yyyymmddhhnnsszzz', now));
 
-    lLojasModel.objeto.LojaView := pDashbord_Parametros.Lojas;
-    lLojasModel.objeto.ObterLista;
+  MemTable.FieldDefs.Add('MES', ftInteger);
+  MemTable.FieldDefs.Add('VALOR_LIQUIDO', ftFloat);
+  MemTable.CreateDataSet;
+  Options := [loCaseInsensitive];
 
-    lojas := 0;
+  for I := 1 to 12 do
+  begin
+    MemTable.InsertRecord([ I, 0 ]);
+  end;
 
-    for lLojas_Dados in lLojasModel.objeto.LojassLista do
+  for lQA in lAsyncList do
+  begin
+    conexao := lQA.loja.objeto.conexaoLoja;
+    if(conexao=nil) then
+      raise Exception.CreateFmt('TDashbordDao.ObterQuery3_VendaPorAno: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);
+
+    lQA.execQuery(lSQL,'',[]);
+  end;
+
+  for lQA in lAsyncList do
+  begin
+    lQA.espera;
+    if(lQA.resultado.erros>0) then
+      raise Exception.CreateFmt('TDashbordDao.ObterQuery3_VendaPorAno: Loja [%s] com problemas: [%s]',[lQA.loja.objeto.LOJA,lQA.resultado.toString]);
+
+    lQA.dataset.dataset.First;
+    while not lQA.dataset.dataset.Eof do
     begin
-      inc(lojas);
+      lTotalValores := lQA.dataset.dataset.FieldByName('VALOR_LIQUIDO').AsFloat;
 
-      if lojas = 1 then
-        lSQL := lSQL +
-          '        select '''+lLojas_Dados.objeto.Server+'/'+lLojas_Dados.objeto.Port+':'+lLojas_Dados.objeto.DataBase+''' from rdb$database       ' + #13
-      else
-        lSQL := lSQL +
-          '        union all                                                                                                  ' + #13+
-          '        select '''+lLojas_Dados.objeto.Server+'/'+lLojas_Dados.objeto.Port+':'+lLojas_Dados.objeto.DataBase+''' from rdb$database       ' + #13;
-    end;
+      if pDashbord_Parametros.SomarST        = 'SIM' then lTotalValores := lTotalValores + lQA.dataset.dataset.FieldByName('ST').AsFloat;
+      if pDashbord_Parametros.SomarAcrescimo = 'SIM' then lTotalValores := lTotalValores + lQA.dataset.dataset.FieldByName('ACRESCIMO').AsFloat;
+      if pDashbord_Parametros.SomarIPI       = 'SIM' then lTotalValores := lTotalValores + lQA.dataset.dataset.FieldByName('IPI').AsFloat;
+      if pDashbord_Parametros.SomarFRETE     = 'SIM' then lTotalValores := lTotalValores + lQA.dataset.dataset.FieldByName('FRETE').AsFloat;
 
-    lSQL := lSQL +
-            '        into vservidor                                                                                                         ' + #13 +
-            '      do                                                                                                                       ' + #13 +
-            '      begin                                                                                                                    ' + #13 +
-            '        for execute statement vsql                                                                                             ' + #13 +
-            '        on external vservidor                                                                                                  ' + #13 +
-            '        as user ''SYSDBA'' password ''masterkey''                                                                              ' + #13 +
-            '        into                                                                                                                   ' + #13 +
-            '          MES,                                                                                                                 ' + #13 +
-            '          VALOR_LIQUIDO,                                                                                                       ' + #13 +
-            '          DESCONTO,                                                                                                            ' + #13 +
-            '          ACRESCIMO,                                                                                                           ' + #13 +
-            '          FRETE,                                                                                                               ' + #13 +
-            '         IPI,                                                                                                                  ' + #13 +
-            '          ST,                                                                                                                  ' + #13 +
-            '          CUSTO                                                                                                                ' + #13 +
-            '        do                                                                                                                     ' + #13 +
-            '          suspend;                                                                                                             ' + #13 +
-            '      end                                                                                                                      ' + #13 +
-            '    end                                                                                                                        ' + #13;
-
-    gravaSQL(lSQL, 'DashbordDao_ObterQuery3_VendaPorAno_' + FormatDateTime('yyyymmddhhnnsszzz', now));
-
-    MemTable.FieldDefs.Add('MES', ftInteger);
-    MemTable.FieldDefs.Add('VALOR_LIQUIDO', ftFloat);
-    MemTable.CreateDataSet;
-    Options := [loCaseInsensitive];
-
-    for I := 1 to 12 do
-    begin
-      MemTable.InsertRecord([ I, 0 ]);
-    end;
-
-    lQry.Open(lSQL);
-
-    lQry.First;
-    while not lQry.Eof do
-    begin
-      lTotalValores := lQry.FieldByName('VALOR_LIQUIDO').AsFloat;
-
-      if pDashbord_Parametros.SomarST        = 'SIM' then lTotalValores := lTotalValores + lQry.FieldByName('ST').AsFloat;
-      if pDashbord_Parametros.SomarAcrescimo = 'SIM' then lTotalValores := lTotalValores + lQry.FieldByName('ACRESCIMO').AsFloat;
-      if pDashbord_Parametros.SomarIPI       = 'SIM' then lTotalValores := lTotalValores + lQry.FieldByName('IPI').AsFloat;
-      if pDashbord_Parametros.SomarFRETE     = 'SIM' then lTotalValores := lTotalValores + lQry.FieldByName('FRETE').AsFloat;
-
-      if not MemTable.Locate('MES', lQry.FieldByName('MES').AsInteger, Options) then
+      if not MemTable.Locate('MES', lQA.dataset.dataset.FieldByName('MES').AsInteger, Options) then
       begin
         MemTable.InsertRecord([
-                                lQry.FieldByName('MES').AsInteger,
+                                lQA.dataset.dataset.FieldByName('MES').AsInteger,
                                 lTotalValores
                                 ]);
       end else
@@ -732,216 +679,14 @@ begin
         MemTable.FieldByName('VALOR_LIQUIDO').Value := MemTable.FieldByName('VALOR_LIQUIDO').Value + lTotalValores;
         MemTable.Post;
       end;
-      lQry.Next;
+      lQA.dataset.dataset.Next;
     end;
-
-    MemTable.IndexFieldNames := 'MES';
-    MemTable.Open;
-
-  finally
   end;
-end;
 
-//function TDashbordDao.ObterQuery3_VendaPorAno(pDashbord_Parametros: TDashbord_Parametros): TFDMemTable;
-//var
-//  lQry: TFDQuery;
-//  lSQL:String;
-//  lConexao: TConexao;
-//  lListaLojas: TLista_Lojas_Dados;
-//  lLojas_Dados: TLojas_Dados;
-//  lLojas_Parametros: TLojas_Parametros;
-//  lLojasModel: TLojasModel;
-//  MemTable: TFDMemTable;
-//  Options: TLocateOptions;
-//  lTotalValores: Real;
-//  I: Integer;
-//begin
-//  MemTable := TFDMemTable.Create(nil);
-//  lConexao := TConexao.Create;
-//  lLojasModel := TLojasModel.Create;
-//
-//  try
-//    lSQL := 'select                                                                                                                         ' + #13 +
-//            '	    MES,                                                                                                                      ' + #13 +
-//            '	    VALOR_LIQUIDO,                                                                                                            ' + #13 +
-//            '	    DESCONTO,                                                                                                                 ' + #13 +
-//            '	    ACRESCIMO,                                                                                                                ' + #13 +
-//            '	    FRETE,                                                                                                                    ' + #13 +
-//            '	    IPI,                                                                                                                      ' + #13 +
-//            '	    ST,                                                                                                                       ' + #13 +
-//            '	    CUSTO                                                                                                                     ' + #13 +
-//            'from                                                                                                                           ' + #13 +
-//            '(                                                                                                                              ' + #13 +
-//            '    select                                                                                                                     ' + #13 +
-//            '        extract(month from ' + ifThen(pDashbord_Parametros.TipoData = 'EMISSÃO', 'data_emissao', 'data_faturado') + ') MES,    ' + #13 +
-//            '        sum(valor_produto-desconto) VALOR_LIQUIDO,                                                                             ' + #13 +
-//            '        sum(valor_produto) VALOR_PRODUTO,                                                                                      ' + #13 +
-//            '        sum(desconto) DESCONTO,                                                                                                ' + #13 +
-//            '        sum(acrescimo) ACRESCIMO,                                                                                              ' + #13 +
-//            '        sum(frete) FRETE,                                                                                                      ' + #13 +
-//            '        sum(ipi) IPI,                                                                                                          ' + #13 +
-//            '        sum(st) ST,                                                                                                            ' + #13 +
-//            '        sum(custo) CUSTO                                                                                                       ' + #13 +
-//            '                                                                                                                               ' + #13 +
-//            '    from                                                                                                                       ' + #13 +
-//            '    (                                                                                                                          ' + #13 +
-//            '    select                                                                                                                     ' + #13 +
-//            '        v.data_ped DATA_EMISSAO,                                                                                               ' + #13 +
-//            '        v.data_faturado DATA_FATURADO,                                                                                         ' + #13 +
-//            '        (i.valorunitario_ped * i.qtde_calculada) VALOR_PRODUTO,                                                                ' + #13 +
-//            '        ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.desc_ped as float),0) DESCONTO,                 ' + #13 +
-//            '        ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.acres_ped as float),0) ACRESCIMO,               ' + #13 +
-//            '        ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.frete_ped as float),0) FRETE,                   ' + #13 +
-//            '        i.valor_ipi IPI,                                                                                                       ' + #13 +
-//            '        i.valor_st ST,                                                                                                         ' + #13 +
-//            '        coalesce(i.vlrcusto_pro,0) * coalesce(i.qtde_calculada,0) CUSTO,                                                       ' + #13 +
-//            '        '' '' ITEM                                                                                                             ' + #13 +
-//            '                                                                                                                               ' + #13 +
-//            '    from                                                                                                                       ' + #13 +
-//            '         pedidovenda v                                                                                                         ' + #13 +
-//            '           inner join pedidoitens i on v.numero_ped = i.numero_ped                                                             ' + #13 +
-//            '    where                                                                                                                      ' + #13 +
-//            '        coalesce(v.valor_ped,0) > 0                                                                                            ' + #13 +
-//            '        and coalesce(v.status,''P'') in (''P'',''F'')                                                                          ' + #13 +
-//            '        ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and v.CODIGO_VEN in (' + pDashbord_Parametros.Vendedores + ') ', '') + #13 +
-//            '                                                                                                                               ' + #13 +
-//            '    union all                                                                                                                  ' + #13 +
-//            '                                                                                                                               ' + #13 +
-//            '    select                                                                                                                     ' + #13 +
-//            '        distinct                                                                                                               ' + #13 +
-//            '        d.data DATA_EMISSAO,                                                                                                   ' + #13 +
-//            '        d.data DATA_FATURADO,                                                                                                  ' + #13 +
-//            '        (di.valor_unitario*di.quantidade) *-1 VALOR_PRODUTO,                                                                   ' + #13 +
-//            '        ((di.quantidade*di.valor_unitario)/(d.valor_total+d.desconto-d.valor_acrescimo))*coalesce(cast(d.desconto as float),0) *-1 DESCONTO,           ' + #13 +
-//            '        ((di.quantidade*di.valor_unitario)/(d.valor_total+d.desconto-d.valor_acrescimo))*coalesce(cast(d.valor_acrescimo as float),0) *-1 ACRESCIMO,   ' + #13 +
-//            '        0 FRETE,                                                                                                               ' + #13 +
-//            '        0 IPI,                                                                                                                 ' + #13 +
-//            '        0 ST,                                                                                                                  ' + #13 +
-//            '        0 CUSTO,                                                                                                               ' + #13 +
-//            '        di.item ITEM                                                                                                           ' + #13 +
-//            '    from                                                                                                                       ' + #13 +
-//            '         devolucao d                                                                                                           ' + #13 +
-//            '           left join funcionario f     on f.codigo_fun  = d.vendedor                                                           ' + #13 +
-//            '           left join devolucaoitens di on di.id         = d.id                                                                 ' + #13 +
-//            '           left join pedidovenda v     on v.numero_ped  = d.pedido                                                             ' + #13 +
-//            '           left join pedidoitens vi    on vi.numero_ped = v.numero_ped and vi.codigo_pro = di.produto                          ' + #13 +
-//            '    where                                                                                                                      ' + #13 +
-//            '        coalesce(d.valor_total,0) > 0                                                                                          ' + #13 +
-//            '        ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and v.CODIGO_VEN in (' + pDashbord_Parametros.Vendedores + ') ', '') + #13 +
-//            '                                                                                                                               ' + #13 +
-//            '    union all                                                                                                                  ' + #13 +
-//            '                                                                                                                               ' + #13 +
-//            '    select                                                                                                                     ' + #13 +
-//            '        e.datamovi_ent DATA_EMISSAO,                                                                                           ' + #13 +
-//            '        e.datamovi_ent DATA_FATURADO,                                                                                          ' + #13 +
-//            '        coalesce(e.TOTAL_ENT,0)*-1 VALOR_LIQUIDO,                                                                              ' + #13 +
-//            '        0 DESCONTO,                                                                                                            ' + #13 +
-//            '        0 ACRESCIMO,                                                                                                           ' + #13 +
-//            '        0 FRETE,                                                                                                               ' + #13 +
-//            '        0 IPI,                                                                                                                 ' + #13 +
-//            '        0 ST,                                                                                                                  ' + #13 +
-//            '        0 CUSTO,                                                                                                               ' + #13 +
-//            '        '' '' ITEM                                                                                                             ' + #13 +
-//            '    from                                                                                                                       ' + #13 +
-//            '         entrada e                                                                                                             ' + #13 +
-//            '           inner join pedidovenda v on e.devolucao_pedido_id = v.numero_ped                                                    ' + #13 +
-//            '    where                                                                                                                      ' + #13 +
-//            '        coalesce(e.TOTAL_ENT,0) > 0                                                                                            ' + #13 +
-//            '        ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and v.CODIGO_VEN in (' + pDashbord_Parametros.Vendedores + ') ', '') + #13 +
-//            '    																														                                                              	' + #13 +
-//            '    union all                                                                                                                  ' + #13 +
-//            '                                                                                                                               ' + #13 +
-//            '    select                                                                                                                     ' + #13 +
-//            '        v.fechamento_os DATA_EMISSAO,                                                                                          ' + #13 +
-//            '        v.fechamento_os DATA_FATURADO,                                                                                         ' + #13 +
-//            '        (i.valorunitario_os*i.quantidade_pro) VALOR_PRODUTO,                                                                   ' + #13 +
-//            '        ((i.valorunitario_os*i.quantidade_pro)/(v.total_os+v.desc_os-v.acrescimo_os))*cast(v.desc_os as float) DESCONTO,       ' + #13 +
-//            '        ((i.valorunitario_os*i.quantidade_pro)/(v.total_os+v.desc_os-v.acrescimo_os))*cast(v.acrescimo_os as float) ACRESCIMO, ' + #13 +
-//            '        0 FRETE,                                                                                                               ' + #13 +
-//            '        0 IPI,                                                                                                                 ' + #13 +
-//            '        0 ST,                                                                                                                  ' + #13 +
-//            '        coalesce(i.quantidade_pro,0) * coalesce(i.custo_pro,0) CUSTO,                                                          ' + #13 +
-//            '        '' '' ITEM                                                                                                             ' + #13 +
-//            '    from                                                                                                                       ' + #13 +
-//            '         os v                                                                                                                  ' + #13 +
-//            '           inner join ositens i  on v.numero_os  = i.numero_os                                                                 ' + #13 +
-//            '           left  join produto pr on i.codigo_pro = pr.codigo_pro                                                               ' + #13 +
-//            '    where                                                                                                                      ' + #13 +
-//            '        coalesce(v.status_os,''F'') = ''F''                                                                                    ' + #13 +
-//            '        and coalesce(v.total_os, 0) > 0                                                                                        ' + #13 +
-//            '        ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and i.vendedor_id in (' + pDashbord_Parametros.Vendedores + ') ','') + #13 +
-//            '                                                                                                                               ' + #13 +
-//            ') resultado                                                                                                                    ' + #13 +
-//            '                                                                                                                               ' + #13 +
-//            'where                                                                                                                          ' + #13 +
-//            '      resultado.' + ifThen(pDashbord_Parametros.TipoData = 'EMISSÃO', 'data_emissao', 'data_faturado') + ' between ' + QuotedStr(transformaDataFireBirdWhere(pDashbord_Parametros.DataInicio)) + ' and ' + QuotedStr(transformaDataFireBirdWhere(pDashbord_Parametros.DataFim)) + #13 +
-//            '                                                                                                                               ' + #13 +
-//            'group by 1                                                                                                                     ' + #13 +
-//            'order by 1                                                                                                                     ' + #13 +
-//            ')                                                                                                                              ';
-//
-//    gravaSQL(lSQL, 'DashbordDao_ObterQuery3_VendaPorAno_' + FormatDateTime('yyyymmddhhnnsszzz', now));
-//
-//    MemTable.FieldDefs.Add('MES', ftInteger);
-//    MemTable.FieldDefs.Add('VALOR_LIQUIDO', ftFloat);
-//    MemTable.CreateDataSet;
-//    Options := [loCaseInsensitive];
-//
-//    for I := 1 to 12 do
-//    begin
-//      MemTable.InsertRecord([ I, 0 ]);
-//    end;
-//
-//
-//    lLojas_Parametros.Numero := pDashbord_Parametros.Lojas;
-//    lListaLojas := lLojasModel.ObterLista(lLojas_Parametros);
-//
-//    for lLojas_Dados in lListaLojas do
-//    begin
-//      try
-//        lConexao.ConfigConexaoExterna(lLojas_Dados.Server,lLojas_Dados.Port,lLojas_Dados.DataBase);
-//        lQry := lConexao.CriarQueryExterna;
-//
-//        lQry.Open(lSQL);
-//
-//        lQry.First;
-//        while not lQry.Eof do
-//        begin
-//          lTotalValores := lQry.FieldByName('VALOR_LIQUIDO').AsFloat;
-//
-//          if pDashbord_Parametros.SomarST        = 'SIM' then lTotalValores := lTotalValores + lQry.FieldByName('ST').AsFloat;
-//          if pDashbord_Parametros.SomarAcrescimo = 'SIM' then lTotalValores := lTotalValores + lQry.FieldByName('ACRESCIMO').AsFloat;
-//          if pDashbord_Parametros.SomarIPI       = 'SIM' then lTotalValores := lTotalValores + lQry.FieldByName('IPI').AsFloat;
-//          if pDashbord_Parametros.SomarFRETE     = 'SIM' then lTotalValores := lTotalValores + lQry.FieldByName('FRETE').AsFloat;
-//
-//          if not MemTable.Locate('MES', lQry.FieldByName('MES').AsInteger, Options) then
-//          begin
-//            MemTable.InsertRecord([
-//                                    lQry.FieldByName('MES').AsInteger,
-//                                    lTotalValores
-//                                    ]);
-//          end else
-//          begin
-//            MemTable.Edit;
-//            MemTable.FieldByName('VALOR_LIQUIDO').Value := MemTable.FieldByName('VALOR_LIQUIDO').Value + lTotalValores;
-//            MemTable.Post;
-//          end;
-//          lQry.Next;
-//        end;
-//
-//      finally
-//        lQry.Free;
-//      end;
-//    end;
-//
-//    MemTable.IndexFieldNames := 'MES';
-//    MemTable.Open;
-//
-//    Result :=  MemTable;
-//  finally
-//    lConexao.Free;
-//  end;
-//end;
+  MemTable.IndexFieldNames := 'MES';
+  MemTable.Open;
+
+end;
 
 function TDashbordDao.ObterQuery4_VendaPorHora(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
 var
