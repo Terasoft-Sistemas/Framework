@@ -135,6 +135,7 @@ begin
     lModel.objeto.ENTREGA_COD_MUNICIPIO  := lQry.FieldByName('ENTREGA_COD_MUNICIPIO').AsString;
     lModel.objeto.VALOR_ACRESCIMO        := lQry.FieldByName('VALOR_ACRESCIMO').AsString;
     lModel.objeto.VALOR_TOTAL            := lQry.FieldByName('VALOR_TOTAL').AsString;
+    lModel.objeto.WEB_PEDIDO_ID          := lQry.FieldByName('WEB_PEDIDO_ID').AsString;
 
     Result := lModel;
   finally

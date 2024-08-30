@@ -773,8 +773,8 @@ begin
 
       if (lPedidoVendaModel.objeto.WEB_PEDIDO_ID <> '') and ((lModel.objeto.TIPO_VENDA = 'CD') or (lModel.objeto.ENTREGA = 'S')) then
       begin
-        lWebPedidoItensModel := lWebPedidoItensModel.objeto.carregaClasse(lPedidoVendaModel.objeto.WEB_PEDIDO_ID);
-        lWebPedidoModel      := lWebPedidoModel.objeto.carregaClasse(lWebPedidoItensModel.objeto.WEB_PEDIDO_ID);
+        lWebPedidoItensModel := lWebPedidoItensModel.objeto.carregaClasse(lModel.objeto.WEB_PEDIDOITENS_ID);
+        lWebPedidoModel      := lWebPedidoModel.objeto.carregaClasse(lPedidoVendaModel.objeto.WEB_PEDIDO_ID);
 
         lAcrescimo           := lWebPedidoModel.objeto.ACRESCIMO;
         lDesconto            := lWebPedidoItensModel.objeto.PERCENTUAL_DESCONTO / 100 * (lWebPedidoItensModel.objeto.QUANTIDADE * lWebPedidoItensModel.objeto.VALOR_UNITARIO);
