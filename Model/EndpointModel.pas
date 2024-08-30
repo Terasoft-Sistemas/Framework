@@ -980,7 +980,7 @@ begin
   for i := 0 to Result.dataset.FieldCount - 1 do
   begin
     f := Result.dataset.Fields[i];
-    f.Visible := f.Visible and fCfg.ReadBool('sumario',f.FieldName,true);
+    f.Visible := fCfg.ReadBool('sumario',f.FieldName,f.Visible);
   end;
   vEstadoConsultaSumario.datasetCompleta := Result;
   vEstadoConsultaSumario.query:=getQuery;
