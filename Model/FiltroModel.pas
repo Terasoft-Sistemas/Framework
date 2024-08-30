@@ -752,16 +752,47 @@ begin
 end;
 
 procedure TFiltroModel.setPeriodo(pValores: String);
+  var
+    inicio, fim, agora: TDateTime;
+    i: Integer;
 begin
+  inicio:=-1;
+  fim := -1;
+  agora:=Now;
+  pValores:=retiraAcentos(trim(pValores));
+  i := StrToIntDef(pValores,0);
   if(CompareText(pvalores,'hoje')=0) then begin
+    inicio := StartOfTheDay(agora);
+    fim := EndOfTheDay(agora);
+  end else if(CompareText(pvalores,'ontem')=0) then begin
+    inicio := StartOfTheDay(agora-1);
+    fim := EndOfTheDay(agora-1);
+  end else if(CompareText(pvalores,'ontem.hoje')=0) then begin
+    inicio := StartOfTheDay(agora-1);
+    fim := EndOfTheDay(agora);
+  end else if(CompareText(pvalores,'mes')=0) then begin
+    inicio := StartOfTheMonth(agora);
+    fim := EndOfTheDay(agora);
+  end else if(CompareText(pvalores,'ano')=0) then begin
+    inicio := StartOfTheYear(agora);
+    fim := EndOfTheDay(agora);
+  end else if(CompareText(pvalores,'semana')=0) then begin
+    inicio := StartOfTheWeek(agora);
+    fim := EndOfTheDay(agora);
+  end else if(i<>0) then begin
+    inicio := StartOfTheDay(agora-i);
+    fim := EndOfTheDay(agora);
+  end;
+  if(inicio>0) then
+  begin
     if(fTipo=tipoFiltro_DataPeriodo) then
     begin
-      setDHInicial(Date);
-      setDHFinal(Date);
+      setDHInicial(StartOfTheDay(inicio));
+      setDHFinal(StartOfTheDay(fim));
     end else if(fTipo=tipoFiltro_DataHoraPeriodo) then
     begin
-      setDHInicial(StartOfTheDay(Now));
-      setDHFinal(DateTimeToStr(EndOfTheDay(Now)));
+      setDHInicial(DateTimeToStr(Inicio));
+      setDHFinal(DateTimeToStr(fim));
     end;
   end;
 
