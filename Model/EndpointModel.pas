@@ -705,7 +705,7 @@ begin
 
     fCfg.ReadInteger('width',f.FieldName,f.DisplayWidth);
 
-    f.Visible := fCfg.ReadBool('visible',f.FieldName, lVisible);
+    f.Visible := lVisible and fCfg.ReadBool('visible',f.FieldName, lVisible);
     f.DisplayLabel := capitalizarTexto(StringReplace(f.FieldName,'_',' ', [rfReplaceAll]));
     if(f is TNumericField) and not ( f.DataType in [ ftLargeint ] ) then
       TNumericField(f).DisplayFormat := ',0.00';
@@ -761,26 +761,6 @@ begin
     if j in [ 0,1,2] then
       f.Alignment := TAlignment(j);
   end;
-
-
-{  i:=0;
-  posicao:=-1;
-  while i < pDataset.FieldCount do
-  begin
-    f:=pDataset.Fields[i];
-    inc(posicao);
-    if(f.Visible=true) then
-    begin
-      f.Tag := posicao;
-      inc(i);
-      continue;
-    end;
-    if(f.Tag=-1) then break;
-    f.Tag := -1;
-    f.Index := pDataset.FieldCount - 1;
-    inc(i);
-  end;
-}
 
 end;
 
@@ -1306,7 +1286,8 @@ begin
     for i := 0 to Result.dataset.Fields.Count - 1 do
     begin
       f := Result.dataset.Fields[i];
-      f.Visible := vModel.fCfg.ReadBool('impressao.'+fNome,f.FieldName,f.Visible);
+      if(f.Visible=true) or ((f.tag and $8000)=0) then
+        f.Visible := vModel.fCfg.ReadBool('impressao.'+fNome,f.FieldName,f.Visible);
       f.DisplayWidth := vModel.fCfg.ReadInteger('impressao.largura.'+fNome,f.FieldName,f.DisplayWidth);
       j := vModel.fCfg.ReadInteger('impressao.alinhamento.'+fNome,f.FieldName,-1);
       if f is TNumericField then
