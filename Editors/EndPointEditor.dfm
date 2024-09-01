@@ -14,7 +14,6 @@
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 15
   object gridEP: TXDBGrid
     Left = 0
@@ -77,6 +76,14 @@
       TabOrder = 3
       OnClick = btnGravarClick
     end
+    object btnReconsultar: TBitBtn
+      Left = 632
+      Top = 16
+      Width = 75
+      Height = 25
+      Caption = 'Reconsultar'
+      TabOrder = 4
+    end
   end
   object pnEdicao: TPanel
     Left = 0
@@ -118,6 +125,7 @@
           EditLabel.Width = 100
           EditLabel.Height = 15
           EditLabel.Caption = 'Nome do Relat'#243'rio'
+          EditLabel.Layout = tlCenter
         end
         object edDescricao: TDBMemo
           Left = 16
@@ -142,7 +150,6 @@
           DataSource = dsEP
           ScrollBars = ssBoth
           TabOrder = 0
-          ExplicitLeft = 3
         end
         object edGroupBy: TLabeledEdit
           Left = 3
@@ -569,7 +576,6 @@
             Align = alClient
             TabOrder = 0
             OnChange = PCImpressoesChange
-            ExplicitLeft = 6
             object tsImpressaoDados: TTabSheet
               Caption = 'Dados'
               object edtImpressaoNome: TLabeledEdit

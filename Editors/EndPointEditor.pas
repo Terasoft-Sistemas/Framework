@@ -109,6 +109,7 @@ type
     edtImpressaoFormatoPosicaoSumario: TLabeledEdit;
     cbOrdenarCampos: TCheckBox;
     cbOrdenarCampos2: TCheckBox;
+    btnReconsultar: TBitBtn;
     procedure FormShow(Sender: TObject);
     procedure btnNovoClick(Sender: TObject);
     procedure btnCancelarClick(Sender: TObject);
@@ -1043,6 +1044,7 @@ begin
     btnEditar.Enabled := false;
     btnCancelar.Enabled := false;
     btnGravar.Enabled := false;
+    btnReconsultar.Enabled := false;
     exit;
   end;
 
@@ -1050,6 +1052,7 @@ begin
 //  tsFiltros.Enabled := (vDatasetFiltros=nil) or (vDatasetEndpoints.dataset.State=dsBrowse);
 
   Result := vDatasetEndpoints.dataset.State=dsBrowse;
+  btnReconsultar.Enabled := Result;
   pnEdicao.Enabled := vDatasetEndpoints.dataset.State<>dsBrowse;
   gridEP.Enabled := vDatasetEndpoints.dataset.State=dsBrowse;
   btnNovo.Enabled := vDatasetEndpoints.dataset.State=dsBrowse;
