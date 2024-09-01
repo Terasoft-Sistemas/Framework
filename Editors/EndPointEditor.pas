@@ -661,7 +661,7 @@ begin
   if(edtFormatacaoCampoSumario.Checked) and (edtFormatacaoCampoVisivel.Checked) then
     lCFG.deleteKey('sumario',campo)
   else
-    lCFG.WriteBool('sumario',campo,false);
+    lCFG.WriteBool('sumario',campo,edtFormatacaoCampoSumario.Checked);
 
   if(edtFormatacaoCampoTitulo.Text='') then
     lCFG.deleteKey('label',campo)
