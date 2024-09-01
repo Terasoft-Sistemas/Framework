@@ -316,7 +316,7 @@ implementation
 
 function TDashbord_Parametros.compare(pOther: TDashbord_Parametros): boolean;
 begin
-  Result := self.hash=pOther.hash;
+  Result := compareBytes(self.hash,pOther.hash)=0;
 end;
 
 function TDashbord_Parametros.hash: TBytes;
