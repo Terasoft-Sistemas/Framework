@@ -289,11 +289,31 @@ begin
   end;
 
   MemTable.Edit;
-  MemTable.FieldByName('TICKET_MEDIO').Value     := MemTable.FieldByName('VALOR_LIQUIDO').AsFloat/MemTable.FieldByName('QUANTIDADE_VENDA').AsInteger;
-  MemTable.FieldByName('QUANTIDADE_MEDIA').Value := MemTable.FieldByName('TOTAL_ITENS').AsInteger / MemTable.FieldByName('QUANTIDADE_VENDA').AsInteger;
-  MemTable.FieldByName('VALOR_ITEM_MEDIO').Value := MemTable.FieldByName('VALOR_LIQUIDO').AsFloat / MemTable.FieldByName('TOTAL_ITENS').AsInteger;
-  MemTable.FieldByName('MARKUP_1').Value         := (MemTable.FieldByName('VALOR_LIQUIDO').AsFloat/MemTable.FieldByName('CUSTO').AsFloat*100)-100;
-  MemTable.FieldByName('MARKUP_2').Value         := -1*((MemTable.FieldByName('CUSTO').AsFloat*100/MemTable.FieldByName('VALOR_LIQUIDO').AsFloat)-100);
+  if(MemTable.FieldByName('QUANTIDADE_VENDA').AsInteger<>0) then
+  begin
+    MemTable.FieldByName('TICKET_MEDIO').Value     := MemTable.FieldByName('VALOR_LIQUIDO').AsFloat/MemTable.FieldByName('QUANTIDADE_VENDA').AsInteger;
+    MemTable.FieldByName('QUANTIDADE_MEDIA').Value := MemTable.FieldByName('TOTAL_ITENS').AsInteger / MemTable.FieldByName('QUANTIDADE_VENDA').AsInteger;
+  end else
+  begin
+    MemTable.FieldByName('TICKET_MEDIO').Value     := 0;
+    MemTable.FieldByName('QUANTIDADE_MEDIA').Value := 0;
+  end;
+
+  if(MemTable.FieldByName('TOTAL_ITENS').AsInteger<>0) then
+    MemTable.FieldByName('VALOR_ITEM_MEDIO').Value := MemTable.FieldByName('VALOR_LIQUIDO').AsFloat / MemTable.FieldByName('TOTAL_ITENS').AsInteger
+  else
+   MemTable.FieldByName('VALOR_ITEM_MEDIO').Value := 0;
+
+  if(MemTable.FieldByName('CUSTO').AsFloat<>0.0) then
+    MemTable.FieldByName('MARKUP_1').Value         := (MemTable.FieldByName('VALOR_LIQUIDO').AsFloat/MemTable.FieldByName('CUSTO').AsFloat*100)-100
+  else
+    MemTable.FieldByName('MARKUP_1').Value         := 0;
+
+  if(MemTable.FieldByName('VALOR_LIQUIDO').AsFloat<>0.0) then
+    MemTable.FieldByName('MARKUP_2').Value         := -1*((MemTable.FieldByName('CUSTO').AsFloat*100/MemTable.FieldByName('VALOR_LIQUIDO').AsFloat)-100)
+  else
+    MemTable.FieldByName('MARKUP_2').Value         := 0;
+
   MemTable.Post;
 
 end;
