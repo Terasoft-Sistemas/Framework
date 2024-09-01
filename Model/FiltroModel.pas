@@ -3,6 +3,7 @@ unit FiltroModel;
 interface
 uses
   Terasoft.Framework.Types,
+  Terasoft.Configuracoes,
   System.SysUtils,
   Spring.Collections,
   Terasoft.Framework.MultiConfig,
@@ -44,6 +45,7 @@ type
     //function getValores: IDatasetSimples;
   protected
     vIConexao   : IConexao;
+    vConfiguracoes: ITerasoftConfiguracoes;
 
     fAceitaNull: boolean;
     fValores: TipoWideStringFramework;
@@ -62,6 +64,8 @@ type
     fBuscaAdicional: TipoWideStringFramework;
     fMultiploValor: boolean;
     fSubTipo: TSubTipoFiltro;
+
+    function getPermitidoLojas: boolean;
 
   //property subTipo getter/setter
     function getSubTipo: TSubTipoFiltro;
@@ -201,9 +205,10 @@ begin
   inherited Create;
   fMultiploValor := true;
   fSubTipo := subtipoFiltro_Nenhum;
-//  fRegistros := 1000;
-//  fPrimeiro := 0;
   vIConexao := pIConexao;
+  Supports(vIConexao.terasoftConfiguracoes,ITerasoftConfiguracoes,vConfiguracoes);
+  if(vConfiguracoes=nil) then
+    raise Exception.Create('Não existe configuração disponível');
 end;
 
 destructor TFiltroModel.Destroy;
@@ -288,6 +293,7 @@ function TFiltroModel.getOpcoes;
     lojaModel: ITLojasModel;
     lojasLista: TILojasModelList;
     lLista: IListaTextoEx;
+    lPermitidoLojas: boolean;
   label
     lblTipoFiltro_Expressao;
 begin
@@ -297,6 +303,7 @@ begin
       exit;
     tipoFiltro_Lojas:
     begin
+      lPermitidoLojas:=getPermitidoLojas;
       lojasLista := TLojasModel.getNewIface(vIConexao).objeto.obterLista;
       Result := getGenericID_DescricaoDataset;
       Result.dataset.fieldByName('ID').DisplayLabel := 'Loja';
@@ -304,8 +311,7 @@ begin
       //fDatasetLojas := Result;
       for lojaModel in lojasLista do
       begin
-        if(lojaModel.objeto.DATABASE='')then
-          continue;
+        if(lojaModel.objeto.DATABASE='') or ((lPermitidoLojas=false) and (lojaModel.objeto.LOJA<>vIConexao.empresa.LOJA)) then continue;
         Result.dataset.Append;
         Result.dataset.fieldByName('ID').AsString := lojaModel.objeto.LOJA;
         Result.dataset.fieldByName('descricao').AsString := lojaModel.objeto.DESCRICAO;
@@ -1012,11 +1018,20 @@ begin
   Result := fBuscaAdicional;
 end;
 
+function TFiltroModel.getPermitidoLojas: boolean;
+begin
+  Result := vConfiguracoes.objeto.verificaPerfil('GESTAO_RELATORIO_LOJAS');
+end;
+
 function TFiltroModel.getListaLojas: TILojasModelList;
   var
     p: ITLojasModel;
     i: Integer;
+    lPermitidoLojas: boolean;
 begin
+
+  lPermitidoLojas := getPermitidoLojas;
+
   Result := TLojasModel.getNewIface(vIConexao).objeto.obterLista;
   if(getOpcoesSelecionadas.strings.Count>0) then
   begin
@@ -1025,7 +1040,8 @@ begin
     begin
       dec(i);
       p := Result[i];
-      if(getOpcoesSelecionadas.strings.IndexOf(p.objeto.LOJA)=-1) then
+
+      if (getOpcoesSelecionadas.strings.IndexOf(p.objeto.LOJA)=-1) or ((lPermitidoLojas=false) and (p.objeto.LOJA<>vIConexao.empresa.LOJA)) then
       begin
         Result.Remove(p);
       end;
@@ -1037,11 +1053,22 @@ begin
   begin
     dec(i);
     p := Result[i];
-    if(p.objeto.DATABASE='') then
+
+    if(p.objeto.DATABASE='') or ((lPermitidoLojas=false) and (p.objeto.LOJA<>vIConexao.empresa.LOJA)) then
       Result.Remove(p);
   end;
-  if(Result.Count=0) then
+  if(Result.Count=0) then begin
     Result := TLojasModel.getNewIface(vIConexao).objeto.obterLista;
+    i := Result.Count;
+    while i>0 do
+    begin
+      dec(i);
+      p := Result[i];
+
+      if(p.objeto.DATABASE='') or ((lPermitidoLojas=false) and (p.objeto.LOJA<>vIConexao.empresa.LOJA)) then
+        Result.Remove(p);
+    end;
+  end;
 
   if(fMultiploValor=false) then
     while Result.Count>1 do

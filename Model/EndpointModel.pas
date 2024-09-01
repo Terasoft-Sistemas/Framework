@@ -5,8 +5,9 @@ unit EndpointModel;
 interface
 uses
   Classes,
+  SysUtils,
+  Terasoft.Configuracoes,
   Terasoft.Framework.Types,
-  System.SysUtils,
   Terasoft.Framework.MultiConfig,
   Spring.Collections,
   Interfaces.QueryLojaAsync,
@@ -71,8 +72,9 @@ uses
     private
       [weak] mySelf: ITEndpointModel;
     protected
-
       vIConexao   : IConexao;
+      vConfiguracoes: ITerasoftConfiguracoes;
+
       fFiltroController: IController_Filtro;
       fCfg: IMultiConfig;
       vEstadoConsulta, vEstadoConsultaSumario: TEstadoConsulta;
@@ -282,6 +284,10 @@ begin
   inherited Create;
   vIConexao := pIConexao;
   fContagem := -1;
+  Supports(vIConexao.terasoftConfiguracoes,ITerasoftConfiguracoes,vConfiguracoes);
+  if(vConfiguracoes=nil) then
+    raise Exception.Create('Não existe configuração disponível');
+
 end;
 
 destructor TEndpointModel.Destroy;
