@@ -136,6 +136,10 @@ type
     Valor_Liquido, Custo           : Real;
   end;
 
+  TOperacoesDashboardAsync = (od_totalizador, od_pordia, od_porano,od_porhora,od_vendedores,od_filiais{,od_anos});
+  TOperacoesDashboardAsyncSet  = set of TOperacoesDashboardAsync;
+
+
   TListaCurvaABC = IListaSimples<TCurvaABC_Dados>;
   // FIM Curva ABC
 
@@ -152,6 +156,7 @@ type
     SomarIPI,
     SomarFrete,
     Vendedores : String;
+    expandeAsync: TOperacoesDashboardAsyncSet;
     identificador: TBytes;
     function hash: TBytes;
     function compare(pOther: TDashbord_Parametros): boolean;

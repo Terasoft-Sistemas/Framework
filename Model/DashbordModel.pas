@@ -16,7 +16,6 @@ uses
 
 type
   TStatusDashboardAsync = (sda_Idle, sda_Running, sda_Done);
-  TOperacoesDashboard = (od_totalizador, od_pordia, od_porano,od_porhora,od_vendedores,od_filiais{,od_anos});
 
   TDashbordModel = class;
   ITDashbordModel=IObject<TDashbordModel>;
@@ -45,8 +44,8 @@ type
       procedure run(pModel: ITDashbordModel; pProc: TDashboardProc; pParam: TDashbord_Parametros);
 
     //property operacao getter/setter
-      function getOperacao: TOperacoesDashboard;
-      procedure setOperacao(const pValue: TOperacoesDashboard);
+      function getOperacao: TOperacoesDashboardAsync;
+      procedure setOperacao(const pValue: TOperacoesDashboardAsync);
 
     //property conexao getter/setter
       function getConexao: IConexao;
@@ -58,14 +57,14 @@ type
 
       property proc: TDashboardProc read getProc write setProc;
       property conexao: IConexao read getConexao write setConexao;
-      property operacao: TOperacoesDashboard read getOperacao write setOperacao;
+      property operacao: TOperacoesDashboardAsync read getOperacao write setOperacao;
       property status: TStatusDashboardAsync read getStatus write setStatus;
       property dataset: IFDDataset read getDataset write setDataset;
       property parametros: TDashbord_Parametros read getParametros write setParametros;
       property resultado: IResultadoOperacao read getResultado write setResultado;
   end;
 
-  TLockDictionaryImplDashBoard = ILockDictionary<TOperacoesDashboard,IResultadoDashboard>;
+  TLockDictionaryImplDashBoard = ILockDictionary<TOperacoesDashboardAsync,IResultadoDashboard>;
 
   TDashbordModel = class
   private
@@ -108,7 +107,7 @@ uses
       fStatus: TStatusDashboardAsync;
       vTh: TThread;
       vModel: ITDashbordModel;
-      fOperacao: TOperacoesDashboard;
+      fOperacao: TOperacoesDashboardAsync;
       fConexao: IConexao;
       fProc: TDashboardProc;
 
@@ -121,8 +120,8 @@ uses
       procedure setConexao(const pValue: IConexao);
 
     //property operacao getter/setter
-      function getOperacao: TOperacoesDashboard;
-      procedure setOperacao(const pValue: TOperacoesDashboard);
+      function getOperacao: TOperacoesDashboardAsync;
+      procedure setOperacao(const pValue: TOperacoesDashboardAsync);
 
       procedure doIt;
 
@@ -327,23 +326,23 @@ end;
 
 procedure TDashbordModel.checkAsync(pDashbord_Parametros: TDashbord_Parametros);
   var
-    par: TPair<TOperacoesDashboard,IResultadoDashboard>;
     res: IResultadoDashboard;
 
-    op: TOperacoesDashboard;
+    op: TOperacoesDashboardAsync;
     i: Integer;
 begin
   if(vLista=nil) then
-    vLista := TLockDictionaryImpl<TOperacoesDashboard,IResultadoDashboard>.Create;
+    vLista := TLockDictionaryImpl<TOperacoesDashboardAsync,IResultadoDashboard>.Create;
 
-  for op := low(TOperacoesDashboard) to high(TOperacoesDashboard) do
+  for op := low(TOperacoesDashboardAsync) to high(TOperacoesDashboardAsync) do
   begin
     if not vLista.TryGetValue(op,res) then
     begin
       res := TResultadoDashboardImpl.Create;
       res.operacao := op;
 
-      res.run(myself,vOperacoes[op],pDashbord_Parametros);
+      if(pDashbord_Parametros.expandeAsync=[]) or (op in pDashbord_Parametros.expandeAsync) then
+        res.run(myself,vOperacoes[op],pDashbord_Parametros);
       vLista.addOrSetValue(op,res);
     end;
   end;
@@ -469,12 +468,12 @@ begin
   Result := fConexao;
 end;
 
-procedure TResultadoDashboardImpl.setOperacao(const pValue: TOperacoesDashboard);
+procedure TResultadoDashboardImpl.setOperacao(const pValue: TOperacoesDashboardAsync);
 begin
   fOperacao := pValue;
 end;
 
-function TResultadoDashboardImpl.getOperacao: TOperacoesDashboard;
+function TResultadoDashboardImpl.getOperacao: TOperacoesDashboardAsync;
 begin
   Result := fOperacao;
 end;
