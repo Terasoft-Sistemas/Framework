@@ -131,6 +131,7 @@ interface
 
       function getGDBExterno: IGDB;
 
+      property empresa: TEmpresa read getEmpresa;
       property gdbExterno: IGDB read getgdbExterno;
       property gdb: IGDB                       read getGDB;
       property validador: IValidadorDatabase   read getValidador;

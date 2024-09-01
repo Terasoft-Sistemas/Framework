@@ -244,6 +244,7 @@ begin
 
   for lQA in lAsyncList do
   begin
+    lQA.tag := 'ObterQuery1_Totalizador';
     conexao := lQA.loja.objeto.conexaoLoja;
     if(conexao=nil) then
       raise Exception.CreateFmt('TDashbordDao.ObterQuery1_Totalizador: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);
@@ -442,6 +443,7 @@ begin
 
     for lQA in lAsyncList do
     begin
+      lQA.tag := 'ObterQuery2_VendaPorDia';
       conexao := lQA.loja.objeto.conexaoLoja;
       if(conexao=nil) then
         raise Exception.CreateFmt('TDashbordDao.ObterQuery2_VendaPorDia: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);
@@ -644,6 +646,7 @@ begin
 
   for lQA in lAsyncList do
   begin
+    lQA.tag := 'ObterQuery3_VendaPorAno';
     conexao := lQA.loja.objeto.conexaoLoja;
     if(conexao=nil) then
       raise Exception.CreateFmt('TDashbordDao.ObterQuery3_VendaPorAno: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);
@@ -790,9 +793,10 @@ begin
 
   for lQA in lAsyncList do
   begin
+    lQA.tag := 'ObterQuery4_VendaPorHora';
     conexao := lQA.loja.objeto.conexaoLoja;
     if(conexao=nil) then
-      raise Exception.CreateFmt('TDashbordDao.ObterQuery2_VendaPorDia: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);
+      raise Exception.CreateFmt('TDashbordDao.ObterQuery4_VendaPorHora: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);
 
     lQA.execQuery(lSQL,'',[]);
   end;
@@ -801,7 +805,7 @@ begin
   begin
     lQA.espera;
     if(lQA.resultado.erros>0) then
-      raise Exception.CreateFmt('TDashbordDao.ObterQuery2_VendaPorDia: Loja [%s] com problemas: [%s]',[lQA.loja.objeto.LOJA,lQA.resultado.toString]);
+      raise Exception.CreateFmt('TDashbordDao.ObterQuery4_VendaPorHora: Loja [%s] com problemas: [%s]',[lQA.loja.objeto.LOJA,lQA.resultado.toString]);
 
     lQA.dataset.dataset.First;
     while not lQA.dataset.dataset.Eof do
@@ -1029,6 +1033,7 @@ begin
 
   for lQA in lAsyncList do
   begin
+    lQA.tag := 'ObterQuery6_RankingVendedores';
     conexao := lQA.loja.objeto.conexaoLoja;
     if(conexao=nil) then
       raise Exception.CreateFmt('TDashbordDao.ObterQuery6_RankingVendedores: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);
@@ -1212,6 +1217,7 @@ begin
 
   for lQA in lAsyncList do
   begin
+    lQA.tag := 'ObterQuery7_RankingFiliais';
     conexao := lQA.loja.objeto.conexaoLoja;
     if(conexao=nil) then
       raise Exception.CreateFmt('TDashbordDao.ObterQuery7_RankingFiliais: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);
@@ -1265,6 +1271,7 @@ begin
 
   for lQA in lAsyncList do
   begin
+    lQA.tag := 'ObterQuery_Anos';
     conexao := lQA.loja.objeto.conexaoLoja;
     if(conexao=nil) then
       raise Exception.CreateFmt('TDashbordDao.ObterQuery_Anos: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);

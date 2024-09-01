@@ -4,6 +4,7 @@ interface
 
 uses
   Variants,
+  SysUtils,
   Terasoft.Framework.ListaSimples;
 
 type
@@ -151,6 +152,9 @@ type
     SomarIPI,
     SomarFrete,
     Vendedores : String;
+    identificador: TBytes;
+    function hash: TBytes;
+    function compare(pOther: TDashbord_Parametros): boolean;
   end;
 
   TDashbord_Dados = record
@@ -305,4 +309,31 @@ type
   // FIM TIPO ESTOQUE
 
 implementation
+  uses
+    Terasoft.Framework.Bytes;
+
+{ TDashbord_Parametros }
+
+function TDashbord_Parametros.compare(pOther: TDashbord_Parametros): boolean;
+begin
+  Result := self.hash=pOther.hash;
+end;
+
+function TDashbord_Parametros.hash: TBytes;
+begin
+  Result := sha256Bytes(concatBytes([
+      self.identificador,
+      BytesOf(self.TipoData),
+      BytesOf(self.DataInicio),
+      BytesOf(self.DataFim),
+      BytesOf(self.Lojas),
+      BytesOf(self.SomarST),
+      BytesOf(self.SomarAcrescimo),
+      BytesOf(self.SomarIPI),
+      BytesOf(self.SomarFrete),
+      BytesOf(self.Vendedores),
+      BytesOf(self.SomarAcrescimo)
+      ]));
+end;
+
 end.
