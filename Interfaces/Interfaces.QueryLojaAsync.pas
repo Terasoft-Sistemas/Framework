@@ -109,16 +109,17 @@ interface
 
 implementation
   uses
-    terasoft.Framework.LOG,
-    AsyncCalls;
+    Terasoft.Framework.LOG;
 
   type
     TQueryLojaAsync = class(TInterfacedObject,
         IQueryLojaAsync,
-        IInterface,
-        IAsyncRunnable)
+        IInterface
+        //IAsyncRunnable
+        )
     protected
-      [volatile] vCall: IAsyncCall;
+      //[volatile] vCall: IAsyncCall;
+      [volatile] vTh: TThread;
       vExecute: boolean;
       fGDB: IGDB;
       fLoja: ITLojasModel;
@@ -150,7 +151,7 @@ implementation
 
       procedure run;
       procedure espera;
-      procedure AsyncRun;
+      procedure doIt;
       procedure execQuery(const pQuery, pCampos: TipoWideStringFramework; pParametros: TVariantArray);
       procedure openQuery(pQuery: IFDQuery; pExecute: boolean; pSQL: TipoWideStringFramework);
 
@@ -291,11 +292,13 @@ end;
 
 function TQueryLojaAsync.getStatus: TStatusQueryAsyncLoja;
 begin
-  if(vCall<>nil) and (vCall.Finished=false) then
+//  if(vCall<>nil) and (vCall.Finished=false) then
+  if(vTh<>nil) and (vTh.Finished=false) then
     Result := sqal_Running
   else
   begin
-    vCall := nil;
+//    vCall := nil;
+    FreeAndNil(vTh);
     Result := sqal_Idle;
   end;
 end;
@@ -304,7 +307,10 @@ procedure TQueryLojaAsync.run;
 begin
   espera;
   fResultado := nil;
-  vCall:=AsyncCall(self);
+  vTh := TThread.CreateAnonymousThread(doIt);
+  vTH.FreeOnTerminate := false;
+  vTH.Start;
+  //vCall:=AsyncCall(self);
 end;
 
 procedure TQueryLojaAsync.setResultado(const pValue: IResultadoOperacao);
@@ -332,7 +338,7 @@ begin
   fCampos := pValue;
 end;
 
-procedure TQueryLojaAsync.AsyncRun;
+procedure TQueryLojaAsync.doIt;
   var
     ds: IDataset;
 begin
@@ -407,14 +413,17 @@ end;
 
 destructor TQueryLojaAsync.Destroy;
 begin
-  if(vCall<>nil) then
+  espera;
+{  //if(vCall<>nil) then
+  if(vTh<>nil) then
   begin
     //espera acabar...
     espera;
     //espera mais um pouco...
     sleep(100);
-    vCall := nil;
-  end;
+    //vCall := nil;
+    vTh := nil;
+  end;}
 
   inherited;
 end;
@@ -423,7 +432,8 @@ procedure TQueryLojaAsync.espera;
 begin
   while getStatus<>sqal_Idle do
     sleep(50);
-  vCall := nil;
+  FreeAndNil(vTh);
+  //vCall := nil;
 end;
 
 procedure TQueryLojaAsync.execQuery(const pQuery, pCampos: TipoWideStringFramework; pParametros: TVariantArray);
