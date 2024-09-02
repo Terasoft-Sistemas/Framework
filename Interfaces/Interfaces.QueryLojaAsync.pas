@@ -109,6 +109,7 @@ interface
 
 implementation
   uses
+    System.SyncObjs,
     Terasoft.Framework.LOG;
 
   type
@@ -131,6 +132,7 @@ implementation
       fCriaOperacoes: boolean;
       fFdQuery: IFDQuery;
       fTag: TipoWideStringFramework;
+      vCS: TCriticalSection;
 
     //property tag getter/setter
       function getTag: TipoWideStringFramework;
@@ -182,6 +184,7 @@ implementation
       function getGDB: IGDB;
       procedure setGDB(const pValue: IGDB);
     public
+      constructor Create;
       destructor Destroy; override;
     end;
 
@@ -292,14 +295,18 @@ end;
 
 function TQueryLojaAsync.getStatus: TStatusQueryAsyncLoja;
 begin
-//  if(vCall<>nil) and (vCall.Finished=false) then
-  if(vTh<>nil) and (vTh.Finished=false) then
-    Result := sqal_Running
-  else
-  begin
-//    vCall := nil;
-    FreeAndNil(vTh);
-    Result := sqal_Idle;
+  //vTH pode ser finalizada em outra thread, então precisamos do semáforo
+  vCS.Enter;
+  try
+    if(vTh<>nil) and (vTh.Finished=false) then
+      Result := sqal_Running
+    else
+    begin
+      FreeAndNil(vTh);
+      Result := sqal_Idle;
+    end;
+  finally
+    vCS.Leave;
   end;
 end;
 
@@ -411,19 +418,17 @@ begin
   end;
 end;
 
+constructor TQueryLojaAsync.Create;
+begin
+  inherited;
+  vCS := TCriticalSection.Create;
+end;
+
 destructor TQueryLojaAsync.Destroy;
 begin
   espera;
-{  //if(vCall<>nil) then
-  if(vTh<>nil) then
-  begin
-    //espera acabar...
-    espera;
-    //espera mais um pouco...
-    sleep(100);
-    //vCall := nil;
-    vTh := nil;
-  end;}
+
+  FreeAndNil(vCS);
 
   inherited;
 end;
@@ -432,8 +437,13 @@ procedure TQueryLojaAsync.espera;
 begin
   while getStatus<>sqal_Idle do
     sleep(50);
-  FreeAndNil(vTh);
-  //vCall := nil;
+{   //Não precisa finalizar, pois getStatus já faz isso
+vCS.Enter;
+  try
+    FreeAndNil(vTh);
+  finally
+    vCS.Leave;
+  end;}
 end;
 
 procedure TQueryLojaAsync.execQuery(const pQuery, pCampos: TipoWideStringFramework; pParametros: TVariantArray);
