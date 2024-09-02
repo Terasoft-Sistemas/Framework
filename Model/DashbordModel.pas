@@ -70,6 +70,7 @@ type
   private
     [weak] mySelf: ITDashbordModel;
     vIConexao : IConexao;
+    vListaOld: ILockList<IResultadoDashboard>;
     vLista: TLockDictionaryImplDashBoard;
     vOperacoes: array [od_totalizador..od_filiais] of TDashboardProc;
 
@@ -80,6 +81,9 @@ type
 
   	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    procedure clear;
+    procedure clearOld;
 
     class function getNewIface(pIConexao: IConexao): ITDashbordModel;
 
@@ -334,6 +338,8 @@ begin
   if(vLista=nil) then
     vLista := TLockDictionaryImpl<TOperacoesDashboardAsync,IResultadoDashboard>.Create;
 
+  clearOld;
+
   for op := low(TOperacoesDashboardAsync) to high(TOperacoesDashboardAsync) do
   begin
     if not vLista.TryGetValue(op,res) then
@@ -348,9 +354,60 @@ begin
   end;
 end;
 
+procedure TDashbordModel.clear;
+  var
+    par: TPair<TOperacoesDashboardAsync,IResultadoDashboard>;
+    i: Integer;
+    p: IResultadoDashboard;
+begin
+  if(vLista<>nil) and (vLista.count>0) then
+  begin
+    if(vListaOld=nil) then
+      vListaOld := TLockListImpl<IResultadoDashboard>.Create;
+      while vLista.unstack(par) do
+        if(par.Value.status=sda_Running) then
+          vListaOld.add(par.Value);
+    i := vListaOld.count;
+
+    while i > 0 do
+    begin
+      dec(i);
+      vListaOld.get(i,p);
+      if(p.status<>sda_Running) then
+        vListaOld.delete(i);
+    end;
+
+    if(vListaOld.count=0) then
+      vListaOld:=nil;
+  end;
+end;
+
+procedure TDashbordModel.clearOld;
+  var
+    i: Integer;
+    p: IResultadoDashboard;
+begin
+  if(vListaOld<>nil) then
+  begin
+    i := vListaOld.count;
+
+    while i > 0 do
+    begin
+      dec(i);
+      vListaOld.get(i,p);
+      if(p.status<>sda_Running) then
+        vListaOld.delete(i);
+    end;
+
+    if(vListaOld.count=0) then
+      vListaOld:=nil;
+  end;
+end;
+
 destructor TDashbordModel.Destroy;
 begin
   vLista := nil;
+  vListaOld := nil;
   inherited;
 end;
 
