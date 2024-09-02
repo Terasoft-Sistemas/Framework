@@ -22,7 +22,7 @@ type
     FAdmCartaosLista: IList<ITAdmCartaoModel>;
     FAcao: TAcao;
     FLengthPageView: String;
-    FIDRecordView: Integer;
+    FIDRecordView: String;
     FStartRecordView: String;
     FCountView: String;
     FOrderView: String;
@@ -47,7 +47,7 @@ type
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetAdmCartaosLista(const Value: IList<ITAdmCartaoModel>);
-    procedure SetIDRecordView(const Value: Integer);
+    procedure SetIDRecordView(const Value: String);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -108,7 +108,7 @@ type
     property OrderView: String read FOrderView write SetOrderView;
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
-    property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
+    property IDRecordView: String read FIDRecordView write SetIDRecordView;
 
   end;
 
@@ -275,7 +275,7 @@ begin
   FID := Value;
 end;
 
-procedure TAdmCartaoModel.SetIDRecordView(const Value: Integer);
+procedure TAdmCartaoModel.SetIDRecordView(const Value: String);
 begin
   FIDRecordView := Value;
 end;

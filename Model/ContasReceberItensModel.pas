@@ -643,7 +643,7 @@ begin
   try
     lContasReceberModel := lContasReceberModel.carregaClasse(self.FFATURA_REC, self.FLOJA);
 
-    lAdmCartaoModel.objeto.IDRecordView := StrToInt(pIdAdmCartao);
+    lAdmCartaoModel.objeto.IDRecordView := QuotedStr(pIdAdmCartao);
     lAdmCartaoModel.objeto.obterLista;
 
     lContasReceberModel.Acao              := tacIncluir;

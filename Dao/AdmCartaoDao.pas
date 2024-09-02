@@ -31,7 +31,7 @@ type
 
     FAdmCartaosLista: IList<ITAdmCartaoModel>;
     FLengthPageView: String;
-    FIDRecordView: Integer;
+    FIDRecordView: String;
     FStartRecordView: String;
     FID: Variant;
     FCountView: String;
@@ -41,7 +41,7 @@ type
     procedure SetCountView(const Value: String);
     procedure SetAdmCartaosLista(const Value: IList<ITAdmCartaoModel>);
     procedure SetID(const Value: Variant);
-    procedure SetIDRecordView(const Value: Integer);
+    procedure SetIDRecordView(const Value: String);
     procedure SetLengthPageView(const Value: String);
     procedure SetOrderView(const Value: String);
     procedure SetStartRecordView(const Value: String);
@@ -64,7 +64,7 @@ type
     property OrderView: String read FOrderView write SetOrderView;
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
-    property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
+    property IDRecordView: String read FIDRecordView write SetIDRecordView;
 
     function incluir(AAdmCartaoModel: ITAdmCartaoModel): String;
     function alterar(AAdmCartaoModel: ITAdmCartaoModel): String;
@@ -97,7 +97,7 @@ begin
   Result   := lModel;
 
   try
-    lQry.Open('select * from admcartao where id = '+pId);
+    lQry.Open('select * from admcartao where id = '+QuotedStr(pId));
 
     if lQry.IsEmpty then
       Exit;
@@ -220,8 +220,8 @@ begin
   if not FWhereView.IsEmpty then
     lSQL := lSQL + FWhereView;
 
-  if FIDRecordView <> 0  then
-    lSQL := lSQL + ' and admcartao.id = '+IntToStr(FIDRecordView);
+  if FIDRecordView <> ''  then
+    lSQL := lSQL + ' and admcartao.id = '+ FIDRecordView;
 
   Result := lSQL;
 end;
@@ -324,7 +324,7 @@ begin
   FID := Value;
 end;
 
-procedure TAdmCartaoDao.SetIDRecordView(const Value: Integer);
+procedure TAdmCartaoDao.SetIDRecordView(const Value: String);
 begin
   FIDRecordView := Value;
 end;
