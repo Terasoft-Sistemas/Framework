@@ -214,7 +214,7 @@ type
     procedure excluirBaixa;
 
     function lancarContaCorrente(pValor, pPortador, pConta, pContaCorrente, pHistorico, pTipo: String) : String;
-    function lancarJurosContaCorrente(pJuros, pPortador : String) : String;
+    function lancarJurosContaCorrente(pJuros, pPortador, pContaCorrente : String) : String;
 
     function baixarCaixa(pValor, pPortador, pConta, pHistorico : String): String;
     function baixarJurosCaixa(pJuros, pPortador, pHistorico : String) : String;
@@ -479,7 +479,7 @@ begin
   end;
 end;
 
-function TContasReceberItensModel.lancarJurosContaCorrente(pJuros, pPortador : String) : String;
+function TContasReceberItensModel.lancarJurosContaCorrente(pJuros, pPortador, pContaCorrente : String) : String;
 var
   lContaCorrenteModel : ITContaCorrenteModel;
   lContasReceberModel : TContasReceberModel;
@@ -505,6 +505,7 @@ begin
     lContaCorrenteModel.objeto.TIPO_CTA       := cTIPO_CREDITO;
     lContaCorrenteModel.objeto.LOJA           := self.FLOJA;
     lContaCorrenteModel.objeto.PORTADOR_COR   := pPortador;
+    lContaCorrenteModel.objeto.CODIGO_BAN     := pContaCorrente;
     lContaCorrenteModel.objeto.STATUS         := 'I';
     lContaCorrenteModel.objeto.TIPO           := 'S';
 
@@ -517,9 +518,9 @@ end;
 
 function TContasReceberItensModel.baixarPix(pValor, pPortador, pContaCorrente, pValorTaxa, pContaTaxa: String): String;
 var
-  lHistorico: String;
-  lContaCorrenteModel: ITContaCorrenteModel;
-  lContasReceberModel: TContasReceberModel;
+  lHistorico          : String;
+  lContaCorrenteModel : ITContaCorrenteModel;
+  lContasReceberModel : TContasReceberModel;
 begin
   lContaCorrenteModel := TContaCorrenteModel.getNewIface(vIConexao);
   lContasReceberModel := TContasReceberModel.Create(vIConexao);
@@ -529,7 +530,9 @@ begin
     lHistorico := 'FC PIX: '+ self.FPACELA_REC+'/'+self.FTOTALPARCELAS_REC+' PED: '+lContasReceberModel.PEDIDO_REC;
 
     Result := self.lancarContaCorrente(pValor, pPortador, lContasReceberModel.CODIGO_CTA, pContaCorrente, lHistorico, 'C');
-              self.lancarContaCorrente(pValorTaxa, pPortador, pContaTaxa, pContaCorrente, 'TAXA '+lHistorico, 'D');
+
+    if StrToFloatDef(pValorTaxa, 0) > 0 then
+      self.lancarContaCorrente(pValorTaxa, pPortador, pContaTaxa, pContaCorrente, 'TAXA '+lHistorico, 'D');
 
     self.baixar(pValor);
   finally
