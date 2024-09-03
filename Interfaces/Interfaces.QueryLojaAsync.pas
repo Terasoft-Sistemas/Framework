@@ -209,6 +209,7 @@ begin
   if(th=nil) then
   begin
     th := TThreadMonitoramento.Create;
+    th.Priority := tpIdle;
     th.FreeOnTerminate:=true;
   end;
 end;
@@ -524,9 +525,10 @@ procedure TThreadMonitoramento.Execute;
 begin
   inherited;
   while not Terminated do
+  begin
+    sleep(100);
     while gListaLocal.count>0 do
       try
-        sleep(50);
         if(gListaLocal.dequeue(p)) then
         begin
           p.espera
@@ -534,6 +536,7 @@ begin
       except
 
       end;
+  end;
 
 end;
 
