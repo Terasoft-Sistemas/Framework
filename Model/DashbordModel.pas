@@ -548,16 +548,22 @@ end;
 procedure TResultadoDashboardImpl.run;
 begin
   espera;
-  vModel := pModel;
-  fConexao := pModel.objeto.vIConexao;
-  fResultado := nil;
+  try
+    vModel := pModel;
+    fConexao := pModel.objeto.vIConexao;
+    fResultado := nil;
 
-  fProc := pProc;
-  fParametros := pParam;
+    fProc := pProc;
+    fParametros := pParam;
 
-  fConexao := fConexao.NovaConexao(fConexao.empresa.loja);
-  fStatus := sda_Running;
-  {vTH := }TThread.CreateAnonymousThread(doIt).Start;
+    fConexao := fConexao.NovaConexao(fConexao.empresa.loja);
+    fStatus := sda_Running;
+    TThread.CreateAnonymousThread(doIt).Start;
+  except
+    on
+      e: exception do
+        getResultado.formataErro('TResultadoDashboardImpl.run: %s: %s', [ e.ClassName, e.Message ] );
+  end;
 
 end;
 
