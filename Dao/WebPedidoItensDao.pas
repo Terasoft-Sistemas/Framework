@@ -389,6 +389,7 @@ begin
               '      PERCENTUAL_DESCONTO,                                                                                                                                      '+SLineBreak+
               '      VALOR_UNITARIO,                                                                                                                                           '+SLineBreak+
               '      NOME_PRO,                                                                                                                                                 '+SLineBreak+
+              '      VALOR_CUSTO_ATUAL,                                                                                                                                        '+SLineBreak+
               '      TIPO_GARANTIA_FR,                                                                                                                                         '+SLineBreak+
               '      CUSTO_GARANTIA_FR,                                                                                                                                        '+SLineBreak+
               '      CUSTO_GARANTIA,                                                                                                                                           '+SLineBreak+
@@ -417,6 +418,7 @@ begin
               '              web_pedidoitens.percentual_desconto,                                                                                                              '+SLineBreak+
               '              web_pedidoitens.valor_unitario,                                                                                                                   '+SLineBreak+
               '              produto.nome_pro,                                                                                                                                 '+SLineBreak+
+              '              web_pedidoitens.valor_custo_atual,                                                                                                                '+SLineBreak+
               '              web_pedidoitens.tipo_garantia_fr,                                                                                                                 '+SLineBreak+
               '              web_pedidoitens.custo_garantia_fr,                                                                                                                '+SLineBreak+
               '              web_pedidoitens.custo_garantia,                                                                                                                   '+SLineBreak+
@@ -468,8 +470,8 @@ begin
       modelo.objeto.CUSTO_GARANTIA       := lQry.FieldByName('CUSTO_GARANTIA').AsString;
       modelo.objeto.PER_GARANTIA_FR      := lQry.FieldByName('PER_GARANTIA_FR').AsString;
       modelo.objeto.VALOR_VENDA_ATUAL    := lQry.FieldByName('VALOR_VENDA_ATUAL').AsString;
+      modelo.objeto.VALOR_CUSTO_ATUAL    := lQry.FieldByName('VALOR_CUSTO_ATUAL').AsString;
       modelo.objeto.VLRVENDA_PRO         := lQry.FieldByName('VLRVENDA_PRO').AsString;
-
       modelo.objeto.TOTAL_GARANTIA       := lQry.FieldByName('TOTAL_GARANTIA').AsString;
       modelo.objeto.VALOR_TOTALITENS     := lQry.FieldByName('VALOR_TOTALITENS').AsString;
       modelo.objeto.VALOR_DESCONTO       := lQry.FieldByName('VALOR_DESCONTO').AsString;
