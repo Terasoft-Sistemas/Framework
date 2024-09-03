@@ -585,7 +585,7 @@ begin
     fContagem := -1;
 
     save := fIgnoraPaginacao;
-    if(fRegistros<>1) and (lListaLojas.Count<>1)  then
+    if(fRegistros<>1) {and (lListaLojas.Count<>1)}  then
       fIgnoraPaginacao := true;
 
     try
