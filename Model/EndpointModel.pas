@@ -674,7 +674,7 @@ begin
       TFDMemTable(Result.dataset).IndexFieldNames := '';
 
   end;
-  if (fIgnoraPaginacao=false) and (lListaLojas.Count<>1) then
+  if (fIgnoraPaginacao=false) {and (lListaLojas.Count<>1)} then
   begin
     i := fPrimeiro-1;
     while (Result.dataset.RecordCount>0) and (i > 0) do
