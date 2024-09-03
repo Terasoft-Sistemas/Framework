@@ -279,8 +279,8 @@ end;
 
 function TQueryLojaAsync._Release: Integer;
 begin
-  if(getStatus=sqal_Running) and (FRefCount=2) then
-    monitora(self);
+//  if(getStatus=sqal_Running) and (FRefCount=2) then
+//    monitora(self);
   inherited;
 end;
 
@@ -318,7 +318,9 @@ begin
   vTh := TThread.CreateAnonymousThread(doIt);
   vTH.FreeOnTerminate := false;
   vTH.Start;
-  //vCall:=AsyncCall(self);
+
+  monitora(self);
+
 end;
 
 procedure TQueryLojaAsync.setResultado(const pValue: IResultadoOperacao);
@@ -419,15 +421,21 @@ begin
   end;
 end;
 
+  var
+    gContagem: Int64;
+
 constructor TQueryLojaAsync.Create;
 begin
   inherited;
+  AtomicIncrement(gContagem);
   vCS := TCriticalSection.Create;
 end;
 
 destructor TQueryLojaAsync.Destroy;
 begin
   espera;
+
+  AtomicDecrement(gContagem);
 
   FreeAndNil(vCS);
 
@@ -531,8 +539,9 @@ begin
       try
         if(gListaLocal.dequeue(p)) then
         begin
-          p.espera
+          p.espera;
         end;
+        p:=nil;
       except
 
       end;
