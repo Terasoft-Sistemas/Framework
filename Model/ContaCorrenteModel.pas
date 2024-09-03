@@ -66,6 +66,7 @@ type
     FIDRecordView: String;
     FIDBancoView: String;
     FSaldo: Real;
+    FPIX_TRANSACAOID: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetContaCorrentesLista(const Value: IList<ITContaCorrenteModel>);
@@ -115,6 +116,7 @@ type
     procedure SetIDRecordView(const Value: String);
     procedure SetIDBancoView(const Value: String);
     procedure SetSaldo(const Value: Real);
+    procedure SetPIX_TRANSACAOID(const Value: Variant);
 
   public
 
@@ -156,6 +158,7 @@ type
     property LOJA_REMOTO: Variant read FLOJA_REMOTO write SetLOJA_REMOTO;
     property PEDIDO_ID: Variant read FPEDIDO_ID write SetPEDIDO_ID;
     property IUGU_ID: Variant read FIUGU_ID write SetIUGU_ID;
+    property PIX_TRANSACAOID : Variant read FPIX_TRANSACAOID write SetPIX_TRANSACAOID;
 
   	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -504,6 +507,11 @@ end;
 procedure TContaCorrenteModel.SetPEDIDO_ID(const Value: Variant);
 begin
   FPEDIDO_ID := Value;
+end;
+
+procedure TContaCorrenteModel.SetPIX_TRANSACAOID(const Value: Variant);
+begin
+  FPIX_TRANSACAOID := Value;
 end;
 
 procedure TContaCorrenteModel.SetPLACA(const Value: Variant);

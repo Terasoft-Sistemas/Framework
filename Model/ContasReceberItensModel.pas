@@ -213,15 +213,15 @@ type
     procedure gerarVendaCartao;
     procedure excluirBaixa;
 
-    function lancarContaCorrente(pValor, pPortador, pConta, pContaCorrente, pHistorico, pTipo: String) : String;
-    function lancarJurosContaCorrente(pJuros, pPortador, pContaCorrente : String) : String;
+    function lancarContaCorrente(pValor, pPortador, pConta, pContaCorrente, pHistorico, pTipo: String; pPixID : String = '') : String;
+    function lancarJurosContaCorrente(pJuros, pPortador, pContaCorrente : String; pPixID : String = '') : String;
 
     function baixarCaixa(pValor, pPortador, pConta, pHistorico : String): String;
     function baixarJurosCaixa(pJuros, pPortador, pHistorico : String) : String;
     function baixarDescontoCaixa(pDesconto, pPortador, pHistorico: String): String;
 
     function baixarContaCorrente(pValor, pPortador, pContaCorrente, pHistorico: String): String;
-    function baixarPix(pValor, pPortador, pContaCorrente, pValorTaxa, pContaTaxa: String): String;
+    function baixarPix(pValor, pPortador, pContaCorrente, pValorTaxa, pContaTaxa: String; pPixID : String = ''): String;
     function baixar(pValor: String): String;
     function baixarCreditoCliente(pValor: Double) : Boolean;
 
@@ -271,7 +271,7 @@ uses
   ContasReceberModel,
   ContaCorrenteModel,
   CreditoClienteModel,
-  CreditoClienteUsoModel, ChequeModel;
+  CreditoClienteUsoModel, ChequeModel, PixModel;
 
 { TContasReceberItensModel }
 
@@ -479,7 +479,7 @@ begin
   end;
 end;
 
-function TContasReceberItensModel.lancarJurosContaCorrente(pJuros, pPortador, pContaCorrente : String) : String;
+function TContasReceberItensModel.lancarJurosContaCorrente(pJuros, pPortador, pContaCorrente : String; pPixID : String = '') : String;
 var
   lContaCorrenteModel : ITContaCorrenteModel;
   lContasReceberModel : TContasReceberModel;
@@ -490,24 +490,25 @@ begin
   try
     lContasReceberModel := lContasReceberModel.carregaClasse(self.FFATURA_REC);
 
-    lContaCorrenteModel.objeto.Acao           := tacIncluir;
-    lContaCorrenteModel.objeto.CONCILIADO_COR := '.';
-    lContaCorrenteModel.objeto.USUARIO_COR    := self.vIConexao.getUSer.ID;
-    lContaCorrenteModel.objeto.CENTRO_CUSTO   := cCENTRO_CUSTO_PADRAO;
-    lContaCorrenteModel.objeto.DR             := 'N';
-    lContaCorrenteModel.objeto.DATA_COR       := DateToStr(vIConexao.DataServer);
-    lContaCorrenteModel.objeto.CODIGO_CTA     := '222222';
-    lContaCorrenteModel.objeto.VALOR_COR      := pJuros;
-    lContaCorrenteModel.objeto.OBSERVACAO_COR := 'Juros: '+ self.PACELA_REC+'/'+self.TOTALPARCELAS_REC+' PED: '+lContasReceberModel.PEDIDO_REC;
-    lContaCorrenteModel.objeto.CLIENTE_COR    := self.FCODIGO_CLI;
-    lContaCorrenteModel.objeto.FATURA_COR     := self.FFATURA_REC;
-    lContaCorrenteModel.objeto.PARCELA_COR    := self.FPACELA_REC;
-    lContaCorrenteModel.objeto.TIPO_CTA       := cTIPO_CREDITO;
-    lContaCorrenteModel.objeto.LOJA           := self.FLOJA;
-    lContaCorrenteModel.objeto.PORTADOR_COR   := pPortador;
-    lContaCorrenteModel.objeto.CODIGO_BAN     := pContaCorrente;
-    lContaCorrenteModel.objeto.STATUS         := 'I';
-    lContaCorrenteModel.objeto.TIPO           := 'S';
+    lContaCorrenteModel.objeto.Acao             := tacIncluir;
+    lContaCorrenteModel.objeto.CONCILIADO_COR   := '.';
+    lContaCorrenteModel.objeto.USUARIO_COR      := self.vIConexao.getUSer.ID;
+    lContaCorrenteModel.objeto.CENTRO_CUSTO     := cCENTRO_CUSTO_PADRAO;
+    lContaCorrenteModel.objeto.DR               := 'N';
+    lContaCorrenteModel.objeto.DATA_COR         := DateToStr(vIConexao.DataServer);
+    lContaCorrenteModel.objeto.CODIGO_CTA       := '222222';
+    lContaCorrenteModel.objeto.VALOR_COR        := pJuros;
+    lContaCorrenteModel.objeto.OBSERVACAO_COR   := 'Juros: '+ self.PACELA_REC+'/'+self.TOTALPARCELAS_REC+' PED: '+lContasReceberModel.PEDIDO_REC;
+    lContaCorrenteModel.objeto.CLIENTE_COR      := self.FCODIGO_CLI;
+    lContaCorrenteModel.objeto.FATURA_COR       := self.FFATURA_REC;
+    lContaCorrenteModel.objeto.PARCELA_COR      := self.FPACELA_REC;
+    lContaCorrenteModel.objeto.TIPO_CTA         := cTIPO_CREDITO;
+    lContaCorrenteModel.objeto.LOJA             := self.FLOJA;
+    lContaCorrenteModel.objeto.PORTADOR_COR     := pPortador;
+    lContaCorrenteModel.objeto.CODIGO_BAN       := pContaCorrente;
+    lContaCorrenteModel.objeto.STATUS           := 'I';
+    lContaCorrenteModel.objeto.TIPO             := 'S';
+    lContaCorrenteModel.objeto.PIX_TRANSACAOID  := pPixID;
 
     Result := lContaCorrenteModel.objeto.Salvar;
   finally
@@ -516,23 +517,27 @@ begin
   end;
 end;
 
-function TContasReceberItensModel.baixarPix(pValor, pPortador, pContaCorrente, pValorTaxa, pContaTaxa: String): String;
+function TContasReceberItensModel.baixarPix(pValor, pPortador, pContaCorrente, pValorTaxa, pContaTaxa: String; pPixID : String = ''): String;
 var
-  lHistorico          : String;
+  lHistorico,
+  lPix_ID             : String;
   lContaCorrenteModel : ITContaCorrenteModel;
   lContasReceberModel : TContasReceberModel;
+
 begin
   lContaCorrenteModel := TContaCorrenteModel.getNewIface(vIConexao);
   lContasReceberModel := TContasReceberModel.Create(vIConexao);
+
   try
+
     lContasReceberModel := lContasReceberModel.carregaClasse(self.FFATURA_REC, self.LOJA);
 
     lHistorico := 'FC PIX: '+ self.FPACELA_REC+'/'+self.FTOTALPARCELAS_REC+' PED: '+lContasReceberModel.PEDIDO_REC;
 
-    Result := self.lancarContaCorrente(pValor, pPortador, lContasReceberModel.CODIGO_CTA, pContaCorrente, lHistorico, 'C');
+    Result := self.lancarContaCorrente(pValor, pPortador, lContasReceberModel.CODIGO_CTA, pContaCorrente, lHistorico, 'C', pPixID);
 
     if StrToFloatDef(pValorTaxa, 0) > 0 then
-      self.lancarContaCorrente(pValorTaxa, pPortador, pContaTaxa, pContaCorrente, 'TAXA '+lHistorico, 'D');
+      self.lancarContaCorrente(pValorTaxa, pPortador, pContaTaxa, pContaCorrente, 'TAXA '+lHistorico, 'D', pPixID);
 
     self.baixar(pValor);
   finally
@@ -901,33 +906,35 @@ begin
   end;
 end;
 
-function TContasReceberItensModel.lancarContaCorrente(pValor, pPortador, pConta, pContaCorrente, pHistorico, pTipo: String): String;
+function TContasReceberItensModel.lancarContaCorrente(pValor, pPortador, pConta, pContaCorrente, pHistorico, pTipo: String; pPixID : String = '' ): String;
 var
   lContaCorrenteModel: ITContaCorrenteModel;
 begin
   lContaCorrenteModel := TContaCorrenteModel.getNewIface(vIConexao);
   try
-    lContaCorrenteModel.objeto.Acao           := tacIncluir;
-    lContaCorrenteModel.objeto.CONCILIADO_COR := '.';
-    lContaCorrenteModel.objeto.USUARIO_COR    := self.vIConexao.getUSer.ID;
-    lContaCorrenteModel.objeto.CENTRO_CUSTO   := cCENTRO_CUSTO_PADRAO;
-    lContaCorrenteModel.objeto.DR             := 'N';
-    lContaCorrenteModel.objeto.DATA_COR       := DateToStr(vIConexao.DataServer);
-    lContaCorrenteModel.objeto.CODIGO_CTA     := pConta;
-    lContaCorrenteModel.objeto.VALOR_COR      := pValor;
-    lContaCorrenteModel.objeto.OBSERVACAO_COR := pHistorico;
-    lContaCorrenteModel.objeto.CLIENTE_COR    := self.FCODIGO_CLI;
-    lContaCorrenteModel.objeto.FATURA_COR     := self.FFATURA_REC;
-    lContaCorrenteModel.objeto.PARCELA_COR    := self.FPACELA_REC;
-    lContaCorrenteModel.objeto.TIPO_CTA       := pTipo;
-    lContaCorrenteModel.objeto.CODIGO_BAN     := pContaCorrente;
-    lContaCorrenteModel.objeto.LOJA           := self.FLOJA;
-    lContaCorrenteModel.objeto.PORTADOR_COR   := pPortador;
-    lContaCorrenteModel.objeto.STATUS         := 'I';
-    lContaCorrenteModel.objeto.TIPO           := 'S';
+    lContaCorrenteModel.objeto.Acao             := tacIncluir;
+    lContaCorrenteModel.objeto.CONCILIADO_COR   := '.';
+    lContaCorrenteModel.objeto.USUARIO_COR      := self.vIConexao.getUSer.ID;
+    lContaCorrenteModel.objeto.CENTRO_CUSTO     := cCENTRO_CUSTO_PADRAO;
+    lContaCorrenteModel.objeto.DR               := 'N';
+    lContaCorrenteModel.objeto.DATA_COR         := DateToStr(vIConexao.DataServer);
+    lContaCorrenteModel.objeto.CODIGO_CTA       := pConta;
+    lContaCorrenteModel.objeto.VALOR_COR        := pValor;
+    lContaCorrenteModel.objeto.OBSERVACAO_COR   := pHistorico;
+    lContaCorrenteModel.objeto.CLIENTE_COR      := self.FCODIGO_CLI;
+    lContaCorrenteModel.objeto.FATURA_COR       := self.FFATURA_REC;
+    lContaCorrenteModel.objeto.PARCELA_COR      := self.FPACELA_REC;
+    lContaCorrenteModel.objeto.TIPO_CTA         := pTipo;
+    lContaCorrenteModel.objeto.CODIGO_BAN       := pContaCorrente;
+    lContaCorrenteModel.objeto.LOJA             := self.FLOJA;
+    lContaCorrenteModel.objeto.PORTADOR_COR     := pPortador;
+    lContaCorrenteModel.objeto.STATUS           := 'I';
+    lContaCorrenteModel.objeto.TIPO             := 'S';
+    lContaCorrenteModel.objeto.PIX_TRANSACAOID  := pPixID;
+
     Result := lContaCorrenteModel.objeto.Salvar;
   finally
-    lContaCorrenteModel:=nil;
+    lContaCorrenteModel := nil;
   end;
 end;
 

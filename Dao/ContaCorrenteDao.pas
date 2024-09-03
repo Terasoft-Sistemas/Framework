@@ -143,6 +143,7 @@ begin
     lModel.objeto.LOJA_REMOTO           := lQry.FieldByName('LOJA_REMOTO').AsString;
     lModel.objeto.PEDIDO_ID             := lQry.FieldByName('PEDIDO_ID').AsString;
     lModel.objeto.IUGU_ID               := lQry.FieldByName('IUGU_ID').AsString;
+    lModel.objeto.PIX_TRANSACAOID       := lQry.FieldByName('PIX_TRANSACAOID').AsString;
 
     Result := lModel;
 
@@ -341,6 +342,7 @@ begin
       modelo.objeto.LOJA_REMOTO           := lQry.FieldByName('LOJA_REMOTO').AsString;
       modelo.objeto.PEDIDO_ID             := lQry.FieldByName('PEDIDO_ID').AsString;
       modelo.objeto.IUGU_ID               := lQry.FieldByName('IUGU_ID').AsString;
+      modelo.objeto.PIX_TRANSACAOID       := lQry.FieldByName('PIX_TRANSACAOID').AsString;
 
       lQry.Next;
     end;
