@@ -586,7 +586,7 @@ begin
     try
       //lDS := nil;
       lSQL := getQuery;
-      logaByTagSeNivel('', format('TEndpointModel.executaQuery: [%s]',[lSql]),LOG_LEVEL_DEBUG);
+      logaByTagSeNivel('', format('TEndpointModel(%s).executaQuery: [%s]',[fNOME, lSql]),LOG_LEVEL_DEBUG);
       vEstadoConsulta.query := lSQL;
 
     finally
@@ -935,7 +935,7 @@ begin
     exit;
 
   lSql := format( 'select %s from (%s) ', [ lCampos, lQueryOriginal ]);
-  logaByTagSeNivel('', format('TEndpointModel.sumario: [%s]',[lSql]),LOG_LEVEL_DEBUG);
+  logaByTagSeNivel('', format('TEndpointModel(%s).sumario: [%s]',[fNOME, lSql]),LOG_LEVEL_DEBUG);
 
 
   i:=0;
