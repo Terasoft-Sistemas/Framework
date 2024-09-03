@@ -362,9 +362,10 @@ function TEndpointModel.getContagem: Integer;
   var
     lListaLojas:TILojasModelList;
     lQuery: String;
+    lQueryMain: String;
     save: boolean;
 begin
-  lListaLojas:=getFiltroLojas.objeto.listaLojas;
+{  lListaLojas:=getFiltroLojas.objeto.listaLojas;
   if(lListaLojas.Count=1) then
   begin
     save := fIgnoraPaginacao;
@@ -384,10 +385,14 @@ begin
 
     vIConexao.ConfigConexaoExterna(lListaLojas.First.objeto.LOJA);
 
-    fContagem := vIConexao.gdb.criaDataset.query(format('select count(*) c from (%s)', [ lQuery ]),'',[]).dataset.Fields[0].AsInteger;
+    lQueryMain  := 'select count(*) c from (%s) ';
+    if(campoAgrupamento<>'') then
+      lQueryMain := 'group by ' + campoAgrupamento;
+
+    fContagem := vIConexao.gdb.criaDataset.query(format(lQueryMain, [ lQuery ]),'',[]).dataset.Fields[0].AsInteger;
     Result := fContagem;
 
-  end else
+  end else}
   begin
     if precisaExecutar(vEstadoConsulta) then
       executaQuery;
