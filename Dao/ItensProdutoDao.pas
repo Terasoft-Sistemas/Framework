@@ -177,22 +177,21 @@ begin
             '        i.codigo_produto,                                        '+sLineBreak+
             '        i.codigo_materia_prima,                                  '+sLineBreak+
             '        i.unidade_materia_prima,                                 '+sLineBreak+
-            '        coalesce(i.qtde_materia_prima, 1) qtde_materia_prima,    '+sLineBreak+
-            '        coalesce(i.valor_venda, p.venda_pro) valor_venda,        '+sLineBreak+
-            '        coalesce(p.venda_pro, 0) venda_pro,                      '+sLineBreak+
             '        i.ordem,                                                 '+sLineBreak+
             '        i.id,                                                    '+sLineBreak+
             '        i.custo_produto,                                         '+sLineBreak+
             '        i.saldo,                                                 '+sLineBreak+
-            '        i.altura_m,                                              '+sLineBreak+
-            '        i.largura_m,                                             '+sLineBreak+
-            '        i.profundidade_m,                                        '+sLineBreak+
-            '        i.vidro,                                                 '+sLineBreak+
-            '        i.mdf,                                                   '+sLineBreak+
-            '        i.padrao,                                                '+sLineBreak+
-            '        i.unico,                                                 '+sLineBreak+
-            '        i.systime,                                               '+sLineBreak+
-            '        i.listar                                                 '+sLineBreak+
+            '        i.listar,                                                '+sLineBreak+
+            '        p.nome_pro,                                              '+sLineBreak+
+            '        p.saldo_pro,                                             '+sLineBreak+
+            '        p.venda_pro,                                             '+sLineBreak+
+            '        p.codigo_pro,                                            '+sLineBreak+
+            '        p.customedio_pro,                                        '+sLineBreak+
+            '        p.barras_pro,                                            '+sLineBreak+
+            '        p.codlista_cod,                                          '+sLineBreak+
+            '        coalesce(i.qtde_materia_prima, 1) qtde_materia_prima,    '+sLineBreak+
+            '        coalesce(i.valor_venda, p.venda_pro) valor_venda,        '+sLineBreak+
+            '        coalesce(p.venda_pro, 0) venda_pro                       '+sLineBreak+
             '   from itens_produto i                                          '+sLineBreak+
             '   left join produto p on i.codigo_materia_prima = p.codigo_pro  '+sLineBreak+
             '  where 1=1                                                      '+sLineBreak;
@@ -200,7 +199,7 @@ begin
     lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
-      lSQL := lSQL + ' order by '+FOrderView;
+      lSQL := lSQL + ' order by i.ordem '+FOrderView;
 
     lQry.Open(lSQL);
 

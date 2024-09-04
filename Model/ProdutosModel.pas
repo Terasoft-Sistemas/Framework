@@ -916,8 +916,10 @@ type
     function obterListaConsulta: IFDDataset;
     function obterListaMemTable: IFDDataset;
     function obterCodigoBarras(pIdProduto: String): String;
-    function obterSaldo(pIdProduto: String): Double;
-    function obterSaldoDisponivel(pIdProduto: String): Double;
+    function obterSaldo(pIDProduto: String): Double;
+    function obterSaldoDisponivel(pIDProduto: String): Double;
+    function obterCombo(pIDProduto : String) : String;
+    function obterCodigoPorBarras(pBarras : String) : String;
 
     function carregaClasse(pId: String): ITProdutosModel;
     function valorVenda(pIdProduto: String): Variant;
@@ -1117,9 +1119,33 @@ var
 begin
   lProdutosDao := TProdutosDao.getNewIface(vIConexao);
   try
-    Result := lProdutosDao.objeto.obterCodigoBarras(pIdProduto);
+    Result := lProdutosDao.objeto.obterCodigoBarras(pIDProduto);
   finally
     lProdutosDao:=nil;
+  end;
+end;
+
+function TProdutosModel.obterCodigoPorBarras(pBarras: String): String;
+var
+  lProdutosDao: ITProdutosDao;
+begin
+  lProdutosDao := TProdutosDao.getNewIface(vIConexao);
+  try
+    Result := lProdutosDao.objeto.obterCodigoPorBarras(pBarras);
+  finally
+    lProdutosDao := nil;
+  end;
+end;
+
+function TProdutosModel.obterCombo(pIDProduto: String): String;
+var
+  lProdutosDao: ITProdutosDao;
+begin
+  lProdutosDao := TProdutosDao.getNewIface(vIConexao);
+  try
+    Result := lProdutosDao.objeto.obterCombo(pIDProduto);
+  finally
+    lProdutosDao := nil;
   end;
 end;
 

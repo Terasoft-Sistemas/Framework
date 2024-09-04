@@ -76,6 +76,9 @@ type
     procedure obterVenderItem;
     procedure obterListaCatalogo;
 
+    function obterCombo(pIDProduto : String) : String;
+    function obterCodigoPorBarras(pBarras : String) : String;
+
     function obterComissao(pCodProduto: String): IFDDataset;
     function obterSaldo(pIdProduto: String): Double;
     function obterSaldoDisponivel(pIdProduto: String): Double;
@@ -596,11 +599,18 @@ begin
 end;
 
 function TProdutosDao.obterCodigobarras(pIdProduto: String): String;
-var
-  lConexao: TFDConnection;
 begin
-  lConexao := vIConexao.getConnection;
-  Result   := lConexao.ExecSQLScalar('select barras_pro from produto where codigo_pro = '+ QuotedStr(pIdProduto));
+  Result := vIConexao.getConnection.ExecSQLScalar('select barras_pro from produto where codigo_pro = ' +QuotedStr(pIDProduto));
+end;
+
+function TProdutosDao.obterCodigoPorBarras(pBarras: String): String;
+begin
+  Result := vIConexao.getConnection.ExecSQLScalar('select codigo_pro from produto where barras_pro = ' +QuotedStr(pBarras));
+end;
+
+function TProdutosDao.obterCombo(pIDProduto: String): String;
+begin
+  Result := vIConexao.getConnection.ExecSQLScalar('select coalesce(combo, ''0'') from produto where codigo_pro = ' +QuotedStr(pIDProduto));
 end;
 
 function TProdutosDao.obterComissao(pCodProduto: String): IFDDataset;
