@@ -155,10 +155,10 @@ begin
   inherited;
 end;
 
-class function TAtendimentoModel.getNewIface(
-  pIConexao: IConexao): ITAtendimentoModel;
+class function TAtendimentoModel.getNewIface(pIConexao: IConexao): ITAtendimentoModel;
 begin
-
+  Result := TImplObjetoOwner<TAtendimentoModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TAtendimentoModel.obterLista: IFDDataset;

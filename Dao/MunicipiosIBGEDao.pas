@@ -11,19 +11,25 @@ uses
   System.Variants,
   Interfaces.Conexao,
   Terasoft.Utils,
+  Terasoft.Framework.ObjectIface,
   Terasoft.ConstrutorDao;
 
 type
-  TMunicipiosIBGEDao = class
+  TMunicipiosIBGEDao=class;
+  ITMunicipiosIBGEDao=IObject<TMunicipiosIBGEDao>;
 
+  TMunicipiosIBGEDao = class
   private
+    [weak] mySelf: ITMunicipiosIBGEDao;
     vIConexao : IConexao;
     vConstrutor : IConstrutorDao;
 
   public
 
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITMunicipiosIBGEDao;
 
     function obterLista(pMunicipio : String; pUF : Integer): IFDDataset;
 end;
@@ -33,7 +39,7 @@ implementation
 { TMunicipiosIBGE }
 
 
-constructor TMunicipiosIBGEDao.Create(pIConexao : IConexao);
+constructor TMunicipiosIBGEDao._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
   vConstrutor := TConstrutorDAO.Create(vIConexao);
@@ -44,6 +50,12 @@ begin
   vConstrutor:=nil;
   vIConexao := nil;
   inherited;
+end;
+
+class function TMunicipiosIBGEDao.getNewIface(pIConexao: IConexao): ITMunicipiosIBGEDao;
+begin
+  Result := TImplObjetoOwner<TMunicipiosIBGEDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TMunicipiosIBGEDao.obterLista(pMunicipio : String; pUF : Integer): IFDDataset;

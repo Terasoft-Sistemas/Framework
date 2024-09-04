@@ -2353,15 +2353,15 @@ end;
 
 procedure TForm1.Button74Click(Sender: TObject);
 var
- lCNPJModel : TCNPJModel;
+ lCNPJModel : ITCNPJModel;
  Retorno : TRetornoCnpj;
 begin
 
-  lCNPJModel := TCNPJModel.Create(vConfiguracoes);
+  lCNPJModel := TCNPJModel.getNewIface(vConfiguracoes);
 
 //lCNPJModel.API := tApiReceita;  Recebe o valor do Receita
 
-  Retorno := lCNPJModel.consultarCnpj('09020312000131');
+  Retorno := lCNPJModel.objeto.consultarCnpj('09020312000131');
 
   MemoAPI.Lines.Add(Retorno.Nome);
   MemoAPI.Lines.Add(Retorno.Fantasia);
@@ -4272,6 +4272,7 @@ end;
 
 procedure TForm1.SpeedButton4Click(Sender: TObject);
 begin
+  //Button75Click(sender);
   //BtnEndereco3.Click;
   Form.Endpoint.criaViewEndpoint(vIConexao).objeto.ShowModal;
 end;

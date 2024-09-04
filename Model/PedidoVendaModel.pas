@@ -1103,6 +1103,7 @@ var
   lCFOPModel          : ITCFOPModel;
   lEmpresaModel       : ITEmpresaModel;
   lPortadorModel      : ITPortadorModel;
+  lProdutosModel      : ITProdutosModel;
   lNumeroNFe,
   lIDItem,
   lMsg                : String;
@@ -1132,6 +1133,7 @@ begin
   lFuncionarioModel := TFuncionarioModel.getNewIface(vIConexao);
   lConfiguracoes    := TerasoftConfiguracoes.getNewIface(vIConexao);
   lPortadorModel    := TPortadorModel.getNewIface(vIConexao);
+  lProdutosModel    := TProdutosModel.getNewIface(vIConexao);
   lIBPTModel        := TIBPTModel.getNewIface(vIConexao);
 
   lTotalDesconto    := 0;
@@ -1265,6 +1267,8 @@ begin
     for lItens in lPedidoItensModel.objeto.PedidoItenssLista do begin
       inc(lItem);
 
+      lProdutosModel := lProdutosModel.objeto.carregaClasse(lItens.objeto.CODIGO_PRO);
+
       lNFItensModel.objeto.Acao := tacIncluir;
       lNFItensModel.objeto.NUMERO_NF             := lNumeroNFe;
       lNFItensModel.objeto.SERIE_NF              := lNFModel.objeto.SERIE_NF;
@@ -1346,6 +1350,18 @@ begin
       lNFItensModel.objeto.CSOSN                 := lItens.objeto.CSOSN;
       lNFItensModel.objeto.IPI_NF                := lItens.objeto.ALIQ_IPI;
       lNFItensModel.objeto.CST_N12               := lItens.objeto.CST;
+
+      // Código de benefício
+      if lNFItensModel.objeto.CST_N12 = '40' then
+      begin
+        if lProdutosModel.objeto.CBENEF <> '' then
+          lNFItensModel.objeto.CBENEF := lProdutosModel.objeto.CBENEF;
+
+        if lCFOPModel.objeto.CBENEF <> '' then
+          lNFItensModel.objeto.CBENEF := lCFOPModel.objeto.CBENEF;
+      end;
+      //
+
       lNFItensModel.objeto.PREDBC_N14            := lItens.objeto.REDUCAO_ICMS;
       lNFItensModel.objeto.VBC_N15               := lItens.objeto.BASE_ICMS;
       lNFItensModel.objeto.ICMS_NF               := lItens.objeto.ALIQ_ICMS;
@@ -1419,6 +1435,7 @@ begin
   finally
     lPedidoItensModel := nil;
     lPortadorModel := nil;
+    lProdutosModel := nil;
     lConfiguracoes := nil;
     lNFItensModel := nil;
     lEmpresaModel := nil;
