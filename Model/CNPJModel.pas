@@ -49,8 +49,11 @@ type
   procedure SetAPI(const Value: TApi);
  public
 
-    constructor Create(pConfiguracoes : ITerasoftConfiguracoes);
+    constructor _Create(pConfiguracoes : ITerasoftConfiguracoes);
     destructor Destroy; override;
+
+    class function getNewIface(pConfiguracoes: ITerasoftConfiguracoes): ITCNPJModel;
+
 
     function consultarCnpj(pCnpj: String): TRetornoCnpj;
     function cnpjApiBrasil(pCnpj: String): TRetornoCnpj;
@@ -67,7 +70,7 @@ System.JSON, System.SysUtils, Terasoft.Types, Terasoft.FuncoesTexto;
 
 { TCNPJModel }
 
-constructor TCNPJModel.Create(pConfiguracoes : ITerasoftConfiguracoes);
+constructor TCNPJModel._Create(pConfiguracoes : ITerasoftConfiguracoes);
 begin
   fRestClient    := TRESTClient.Create(nil);
   fRestRequest   := TRESTRequest.Create(nil);
@@ -91,6 +94,12 @@ begin
   vConfiguracoes:=nil;
 
   inherited;
+end;
+
+class function TCNPJModel.getNewIface(pConfiguracoes: ITerasoftConfiguracoes): ITCNPJModel;
+begin
+  Result := TImplObjetoOwner<TCNPJModel>.CreateOwner(self._Create(pConfiguracoes));
+  Result.objeto.myself := Result;
 end;
 
 procedure TCNPJModel.SetAPI(const Value: TApi);
