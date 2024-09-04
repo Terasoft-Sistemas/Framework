@@ -127,8 +127,8 @@ end;
 procedure TPrevisaoPedidoCompraModel.gerarFinanceiro(pPedidoCompraModel : ITPedidoCompraModel);
 var
   lVencimentos : IListaTextoEX;
-  i            : Integer;
   lSoma        : Double;
+  i            : Integer;
 begin
   lVencimentos := novaListaTexto;
   try
@@ -136,7 +136,6 @@ begin
     StringForStringList(pPedidoCompraModel.objeto.CONDICOES_PAG, '/', lVencimentos);
 
     lSoma := 0;
-    i     := 0;
 
     for i := 0 to lVencimentos.strings.Count - 1 do
     begin

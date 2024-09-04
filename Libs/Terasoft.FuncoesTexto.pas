@@ -150,7 +150,6 @@ end;
 function StringForStringList;//(BaseString, BreakString: string; StringList: TStrings): TStrings;
 var
   EndOfCurrentString: byte;
-  TempStr: string;
 begin
   Result := StringList;
   if(Result=nil) then
@@ -190,12 +189,14 @@ function ConverteFloat(pMascara, pValor: String): String;
 var
   lNovoValor : real;
 begin
-  lNovoValor := 0;
   try
     lNovoValor := StrToFloatDef(pValor, 0);
+
   except
     lNovoValor := 0;
+
   end;
+
   if lNovoValor = 0 then
     result := ''
   else
@@ -311,7 +312,6 @@ function ValidaGTIN(codigo: string): boolean;
 var
   i, j, total, digitoVerificador, auxiliar, prefixo:Integer;
   arrayChar:array[1..14] of Char;
-  resultado :String;
 begin
 
   try
