@@ -142,10 +142,10 @@ begin
   end;
 end;
 
-class function TAtendimentoDao.getNewIface(
-  pIConexao: IConexao): ITAtendimentoDao;
+class function TAtendimentoDao.getNewIface(pIConexao: IConexao): ITAtendimentoDao;
 begin
-
+  Result := TImplObjetoOwner<TAtendimentoDao>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TAtendimentoDao.where: String;
