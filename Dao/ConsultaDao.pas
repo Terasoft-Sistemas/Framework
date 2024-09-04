@@ -21,7 +21,7 @@ type
   private
     [weak] mySelf: ITConsultaDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FConsultasLista: IList<ITConsultaModel>;
     FLengthPageView: String;
@@ -87,7 +87,7 @@ end;
 destructor TConsultaDao.Destroy;
 begin
   FConsultasLista := nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

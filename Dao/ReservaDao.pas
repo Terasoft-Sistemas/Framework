@@ -23,7 +23,7 @@ type
   private
     [weak] mySelf: ITReservaDao;
     vIConexao : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FLengthPageView: String;
     FIDRecordView: Integer;

@@ -20,7 +20,7 @@ type
 
   private
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -112,7 +112,7 @@ end;
 
 destructor TComissaoVendedorDao.Destroy;
 begin
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

@@ -27,7 +27,7 @@ type
   private
     [weak] mySelf: ITOrcamentoDao;
     vIConexao : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FLengthPageView: String;
     FIDRecordView: String;
@@ -202,7 +202,7 @@ end;
 
 destructor TOrcamentoDao.Destroy;
 begin
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

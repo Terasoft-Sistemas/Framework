@@ -23,7 +23,7 @@ type
   private
     [weak] mYSelf: ITPixDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FPixsLista: IList<ITPixModel>;
     FLengthPageView: String;
@@ -135,7 +135,7 @@ end;
 destructor TPixDao.Destroy;
 begin
   FPixsLista := nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

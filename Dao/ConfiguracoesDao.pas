@@ -23,7 +23,7 @@ type
   private
     [weak] mySelf: ITConfiguracoesDao;
     vIConexao : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FConfiguracoessLista: IList<ITConfiguracoesModel>;
     FLengthPageView: String;
@@ -124,7 +124,7 @@ end;
 destructor TConfiguracoesDao.Destroy;
 begin
   FConfiguracoessLista := nil;
-  freeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao   := nil;
   inherited;
 end;

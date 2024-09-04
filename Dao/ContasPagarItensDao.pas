@@ -22,7 +22,7 @@ type
   private
     [weak] mySelf: ITContasPagarItensDao;
     vIConexao : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FLengthPageView: String;
     FIDRecordView: Integer;

@@ -27,7 +27,7 @@ type
   private
     [weak] myself : ITConfiguracoesLocaisDao;
     vIConexao     : IConexao;
-    vConstrutor   : TConstrutorDao;
+    vConstrutor   : IConstrutorDao;
 
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -124,7 +124,7 @@ end;
 
 destructor TConfiguracoesLocaisDao.Destroy;
 begin
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

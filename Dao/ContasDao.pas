@@ -22,7 +22,7 @@ type
   private
     [weak] mySelf: ITContasDao;
     vIConexao   : IConexao;
-    vConstrutor  : TConstrutorDao;
+    vConstrutor  : IConstrutorDao;
 
     FContassLista: IList<ITContasModel>;
     FLengthPageView: String;
@@ -133,7 +133,7 @@ end;
 destructor TContasDao.Destroy;
 begin
   FContassLista := nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

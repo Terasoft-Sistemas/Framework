@@ -24,7 +24,7 @@ type
   private
     [weak] mySelf: ITSaldoDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FSaldosLista: IList<ITSaldoModel>;
     FLengthPageView: String;
@@ -82,7 +82,7 @@ end;
 destructor TSaldoDao.Destroy;
 begin
   FSaldosLista := nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

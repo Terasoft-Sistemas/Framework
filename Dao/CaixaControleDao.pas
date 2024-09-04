@@ -24,7 +24,7 @@ type
   private
     [weak] mySelf: ITCaixaControleDao;
     vIConexao : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
     FCaixaControlesLista: IList<ITCaixaControleModel>;
     FLengthPageView: String;
     FStartRecordView: String;
@@ -118,7 +118,7 @@ end;
 destructor TCaixaControleDao.Destroy;
 begin
   FCaixaControlesLista := nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

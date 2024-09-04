@@ -29,7 +29,7 @@ type
     [weak] mySelf: ITProdutoTipoDao;
     vIConexao : IConexao;
 
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -48,9 +48,6 @@ type
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
     function where: String;
-
-    var
-      vConstrutorDao : TConstrutorDao;
 
   public
 
@@ -162,7 +159,7 @@ begin
 
     lQry.Open(lSQL);
 
-    Result := vConstrutorDao.atribuirRegistros(lQry);
+    Result := vConstrutor.atribuirRegistros(lQry);
     obterTotalRegistros;
   finally
     lQry.Free;

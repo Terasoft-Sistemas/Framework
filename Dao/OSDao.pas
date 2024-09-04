@@ -41,7 +41,7 @@ type
     procedure SetIDRecordView(const Value: String);
 
     var
-      vConstrutorDao : TConstrutorDao;
+      vConstrutorDao : IConstrutorDao;
 
   public
     constructor _Create(pIConexao : IConexao);
@@ -180,7 +180,7 @@ end;
 
 destructor TOSDao.Destroy;
 begin
-  vConstrutorDao.Free;
+  vConstrutorDao:=nil;
   inherited;
 end;
 

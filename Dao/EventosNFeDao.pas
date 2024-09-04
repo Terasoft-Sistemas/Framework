@@ -20,7 +20,7 @@ type
   private
   [weak] mySelf: ITEventosNFeDao;
   vIConexao   : IConexao;
-  vConstrutor : TConstrutorDao;
+  vConstrutor : IConstrutorDao;
 
   public
     constructor _Create(pIConexao : IConexao);
@@ -76,7 +76,7 @@ end;
 
 destructor TEventosNFeDao.Destroy;
 begin
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

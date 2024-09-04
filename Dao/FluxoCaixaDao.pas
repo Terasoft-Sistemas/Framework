@@ -22,7 +22,7 @@ type
   private
     [weak] mySelf: ITFluxoCaixaDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FWhereView: String;
     FPorcentagemInadimplenciaView: Real;

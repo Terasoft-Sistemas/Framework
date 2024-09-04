@@ -22,7 +22,7 @@ type
   private
     [weak] mySelf: ITDevolucaoItensDao;
     vIConexao 	: IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FLengthPageView: String;
     FStartRecordView: String;
@@ -155,7 +155,7 @@ end;
 
 destructor TDevolucaoItensDao.Destroy;
 begin
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

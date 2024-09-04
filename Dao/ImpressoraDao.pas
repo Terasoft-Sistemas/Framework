@@ -22,7 +22,7 @@ type
   private
     [weak] mySelf: ITImpressoraDao;
     vIConexao   : IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FImpressorasLista: IList<ITImpressoraModel>;
     FLengthPageView: String;
@@ -124,7 +124,7 @@ end;
 destructor TImpressoraDao.Destroy;
 begin
   FImpressorasLista:=nil;
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

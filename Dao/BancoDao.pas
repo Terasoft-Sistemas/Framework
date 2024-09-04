@@ -22,7 +22,7 @@ type
   private
     [weak] mySelf: ITBancoDao;
     vIConexao 	: IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FLengthPageView: String;
     FIDRecordView: Integer;
@@ -177,7 +177,7 @@ end;
 
 destructor TBancoDao.Destroy;
 begin
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;

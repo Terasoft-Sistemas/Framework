@@ -25,7 +25,7 @@ type
   private
     vIConexao : IConexao;
 
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FLengthPageView: String;
     FStartRecordView: String;
@@ -45,8 +45,8 @@ type
     function where: String;
     procedure SetIDRecordView(const Value: String);
 
-    var
-      vConstrutorDao : TConstrutorDao;
+//    var
+//      vConstrutorDao : TConstrutorDao;
 
   public
 
@@ -157,7 +157,7 @@ begin
 
     lQry.Open(lSQL);
 
-    Result := vConstrutorDao.atribuirRegistros(lQry);
+    Result := vConstrutor.atribuirRegistros(lQry);
     obterTotalRegistros;
   finally
     lQry.Free;

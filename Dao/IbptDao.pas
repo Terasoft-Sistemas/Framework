@@ -22,7 +22,7 @@ type
   private
     [weak] mySelf: ITIbptDao;
     vIConexao 	: IConexao;
-    vConstrutor : TConstrutorDao;
+    vConstrutor : IConstrutorDao;
 
     FOrderView: String;
     FWhereView: String;
@@ -124,7 +124,7 @@ end;
 
 destructor TIBPTDao.Destroy;
 begin
-  FreeAndNil(vConstrutor);
+  vConstrutor:=nil;
   vIConexao := nil;
   inherited;
 end;
