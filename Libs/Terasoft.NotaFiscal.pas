@@ -819,6 +819,7 @@ begin
     '    n.quantidade_nf qCom,                                                           '+SLineBreak+
     '    n.valorunitario_nf vUnCom,                                                      '+SLineBreak+
     '    n.v_prod2 vProd,                                                                '+SLineBreak+
+    '    n.cbenef cBenef,                                                                '+SLineBreak+
     '    p.barras_pro cEANTrib,                                                          '+SLineBreak+
     '    substring(p.unidade_pro from 1 for 3) uTrib,                                    '+SLineBreak+
     '    n.quantidade_nf qTrib,                                                          '+SLineBreak+
@@ -936,6 +937,7 @@ begin
         qCom              := lQry.FieldByName('qCom').AsFloat;
         vUnCom            := lQry.FieldByName('vUnCom').AsFloat;
         vProd             := lQry.FieldByName('vProd').AsFloat;
+        cBenef            := lQry.FieldByName('cBenef').AsString;
 
         if ValidaGTIN(lQry.FieldByName('cEANTrib').AsString) then
           cEANTrib        := lQry.FieldByName('cEANTrib').AsString
