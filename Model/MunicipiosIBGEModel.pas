@@ -8,18 +8,23 @@ uses
   Spring.Collections,
   Interfaces.Conexao,
   FireDAC.Comp.Client,
+  Terasoft.Framework.ObjectIface,
   Terasoft.FuncoesTexto;
 
 type
+  TMunicipiosIBGEModel=class;
+  ITMunicipiosIBGEModel=IObject<TMunicipiosIBGEModel>;
 
   TMunicipiosIBGEModel = class
-
   private
+    [weak] mySelf: ITMunicipiosIBGEModel;
     vIConexao : IConexao;
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITMunicipiosIBGEModel;
 
     function obterLista(pMunicipio, pUF : String): IFDDataset;
 
@@ -34,7 +39,7 @@ uses
 
 { TMunicipiosIBGEModel }
 
-constructor TMunicipiosIBGEModel.Create(pIConexao : IConexao);
+constructor TMunicipiosIBGEModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -45,17 +50,19 @@ begin
   inherited;
 end;
 
+class function TMunicipiosIBGEModel.getNewIface(pIConexao: IConexao): ITMunicipiosIBGEModel;
+begin
+  Result := TImplObjetoOwner<TMunicipiosIBGEModel>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TMunicipiosIBGEModel.obterLista(pMunicipio, pUF : String): IFDDataset;
 var
-  lMunicipiosIBGELista: TMunicipiosIBGEDao;
+  lMunicipiosIBGELista: ITMunicipiosIBGEDao;
 begin
-  lMunicipiosIBGELista := TMunicipiosIBGEDao.Create(vIConexao);
+  lMunicipiosIBGELista := TMunicipiosIBGEDao.getNewIface(vIConexao);
 
-  try
-    Result := lMunicipiosIBGELista.obterLista(pMunicipio, codigoUF(pUF));
-  finally
-    lMunicipiosIBGELista.Free;
-  end;
+  Result := lMunicipiosIBGELista.objeto.obterLista(pMunicipio, codigoUF(pUF));
 end;
 
 end.
