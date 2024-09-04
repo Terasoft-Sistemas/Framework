@@ -196,6 +196,7 @@ type
     FPER_COMISSAO_GARANTIA_FR: Variant;
     FPER_COMISSAO_GARANTIA: Variant;
     FCOMBO: Variant;
+    FVALOR_ACRESCIMO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetPedidoItenssLista(const Value: IList<ITPedidoItensModel>);
@@ -353,6 +354,7 @@ type
     procedure SetPER_COMISSAO_GARANTIA(const Value: Variant);
     procedure SetPER_COMISSAO_GARANTIA_FR(const Value: Variant);
     procedure SetCOMBO(const Value: Variant);
+    procedure SetVALOR_ACRESCIMO(const Value: Variant);
 
   public
     property ID: Variant read FID write SetID;
@@ -491,16 +493,14 @@ type
     property VTOTTRIB_FEDERAL: Variant read FVTOTTRIB_FEDERAL write SetVTOTTRIB_FEDERAL;
     property VTOTTRIB_MUNICIPAL: Variant read FVTOTTRIB_MUNICIPAL write SetVTOTTRIB_MUNICIPAL;
     property SEGURO_PRESTAMISTA_VALOR: Variant read FSEGURO_PRESTAMISTA_VALOR write SetSEGURO_PRESTAMISTA_VALOR;
-
     property VBCSTRET: Variant read FVBCSTRET write SetVBCSTRET;
     property PICMSSTRET: Variant read FPICMSSTRET write SetPICMSSTRET;
     property VICMSSTRET: Variant read FVICMSSTRET write SetVICMSSTRET;
     property VICMSSUBISTITUTORET: Variant read FVICMSSUBISTITUTORET write SetVICMSSUBISTITUTORET;
-
     property PER_COMISSAO_GARANTIA : Variant read FPER_COMISSAO_GARANTIA write SetPER_COMISSAO_GARANTIA;
     property PER_COMISSAO_GARANTIA_FR : Variant read FPER_COMISSAO_GARANTIA_FR write SetPER_COMISSAO_GARANTIA_FR;
-
     property COMBO:Variant read FCOMBO write SetCOMBO;
+    property VALOR_ACRESCIMO: Variant read FVALOR_ACRESCIMO write SetVALOR_ACRESCIMO;
 
   	constructor _Create(pConexao: IConexao);
     destructor Destroy; override;
@@ -1502,6 +1502,11 @@ end;
 procedure TPedidoItensModel.SetVALORUNITARIO_PED(const Value: Variant);
 begin
   FVALORUNITARIO_PED := Value;
+end;
+
+procedure TPedidoItensModel.SetVALOR_ACRESCIMO(const Value: Variant);
+begin
+  FVALOR_ACRESCIMO := Value;
 end;
 
 procedure TPedidoItensModel.SetVALOR_BONUS_SERVICO(const Value: Variant);

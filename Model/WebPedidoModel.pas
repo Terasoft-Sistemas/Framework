@@ -431,7 +431,7 @@ uses
   ClienteModel,
   FinanceiroPedidoModel,
   PortadorModel,
-  SolicitacaoDescontoModel, PermissaoRemotaModel;
+  SolicitacaoDescontoModel, PermissaoRemotaModel, Terasoft.Configuracoes;
 
 { TWebPedidoModel }
 
@@ -465,6 +465,7 @@ var
   lWebPedidoModel          : ITWebPedidoModel;
   lClientesModel           : ITClienteModel;
   lFinanceiroPedidoModel   : ITFinanceiroPedidoModel;
+  lConfiguracoes           : ITerasoftConfiguracoes;
   lPedido                  : String;
   lItem, lIndex            : Integer;
   lTableCliente,
@@ -482,6 +483,8 @@ begin
 
   lClientesModel         := TClienteModel.getNewIface(vIConexao);
   lFinanceiroPedidoModel := TFinanceiroPedidoModel.getNewIface(vIConexao);
+
+  Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
   try
     lPedidoVendaModel.objeto.WhereView := ' and pedidovenda.web_pedido_id = '+ IntToStr(pIdVendaAssistida);
@@ -506,7 +509,7 @@ begin
     lPedidoVendaModel.objeto.ACRES_PED            := lWebPedidoModel.objeto.ACRESCIMO;
     lPedidoVendaModel.objeto.DESC_PED             := lWebPedidoModel.objeto.VALOR_CUPOM_DESCONTO;
     lPedidoVendaModel.objeto.DESCONTO_PED         := lWebPedidoModel.objeto.PERCENTUAL_DESCONTO;
-    lPedidoVendaModel.objeto.VALOR_PED            := FloatToStr((StrToFloat(lWebPedidoModel.objeto.VALOR_TOTAL)+StrToFloat(lWebPedidoModel.objeto.VALOR_CUPOM_DESCONTO))-StrToFloat(lWebPedidoModel.objeto.ACRESCIMO));
+    lPedidoVendaModel.objeto.VALOR_PED            := FloatToStr((StrToFloat(lWebPedidoModel.objeto.VALOR_TOTAL) + StrToFloat(lWebPedidoModel.objeto.VALOR_CUPOM_DESCONTO)));
     lPedidoVendaModel.objeto.TOTAL_PED            := lWebPedidoModel.objeto.VALOR_TOTAL;
     lPedidoVendaModel.objeto.VALORENTADA_PED      := lWebPedidoModel.objeto.VALOR_ENTRADA;
     lPedidoVendaModel.objeto.PARCELAS_PED         := lWebPedidoModel.objeto.PARCELAS;
@@ -593,6 +596,12 @@ begin
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VALOR_MONTADOR         := FloatToStr(lWebPedidoItensModel.objeto.VALOR_MONTADOR);
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.COMISSAO_PERCENTUAL    := FloatToStr(lWebPedidoItensModel.objeto.PERCENTUAL_COMISSAO);
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.COMISSAO_PED           := '0';
+
+      if lConfiguracoes.objeto.valorTag('RATEAR_ACRESIMO_NF', 'N', tvBool) = 'S' then
+        lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VALOR_ACRESCIMO :=
+          FloatToStr((lPedidoVendaModel.objeto.ACRES_PED  / lPedidoVendaModel.objeto.VALOR_PED) * lWebPedidoItensModel.objeto.VALOR_UNITARIO)
+      else
+        lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VALOR_ACRESCIMO := '0';
 
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.TIPO_GARANTIA_FR       := lWebPedidoItensModel.objeto.TIPO_GARANTIA_FR;
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VLR_GARANTIA_FR        := lWebPedidoItensModel.objeto.VLR_GARANTIA_FR;

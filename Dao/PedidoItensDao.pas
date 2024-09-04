@@ -244,6 +244,7 @@ begin
     lModel.objeto.PER_GARANTIA_FR              := lQry.FieldByName('PER_GARANTIA_FR').AsString;
     lModel.objeto.PER_COMISSAO_GARANTIA_FR     := lQry.FieldByName('PER_COMISSAO_GARANTIA_FR').AsString;
     lModel.objeto.PER_COMISSAO_GARANTIA        := lQry.FieldByName('PER_COMISSAO_GARANTIA').AsString;
+    lModel.objeto.VALOR_ACRESCIMO              := lQry.FieldByName('VALOR_ACRESCIMO').AsString;
 
     Result := lModel;
   finally
@@ -580,6 +581,7 @@ begin
       modelo.objeto.VBCSTRET                     := lQry.FieldByName('VBCSTRET').AsString;
       modelo.objeto.VICMSSTRET                   := lQry.FieldByName('VICMSSTRET').AsString;
       modelo.objeto.PICMSSTRET                   := lQry.FieldByName('PICMSSTRET').AsString;
+      modelo.objeto.VALOR_ACRESCIMO              := lQry.FieldByName('VALOR_ACRESCIMO').AsString;
 
       lQry.Next;
     end;
@@ -834,6 +836,7 @@ begin
     pQry.ParamByName('custo_garantia_fr').Values[lCount]            := IIF(modelo.objeto.CUSTO_GARANTIA_FR             = '', Unassigned, FormataFloatFireBird(modelo.objeto.CUSTO_GARANTIA_FR));
     pQry.ParamByName('custo_garantia').Values[lCount]               := IIF(modelo.objeto.CUSTO_GARANTIA                = '', Unassigned, FormataFloatFireBird(modelo.objeto.CUSTO_GARANTIA));
     pQry.ParamByName('per_garantia_fr').Values[lCount]              := IIF(modelo.objeto.PER_GARANTIA_FR               = '', Unassigned, FormataFloatFireBird(modelo.objeto.PER_GARANTIA_FR));
+    pQry.ParamByName('valor_acrescimo').Values[lCount]              := IIF(modelo.objeto.VALOR_ACRESCIMO               = '', Unassigned, FormataFloatFireBird(modelo.objeto.VALOR_ACRESCIMO));
     inc(lCount);
   end;
 end;

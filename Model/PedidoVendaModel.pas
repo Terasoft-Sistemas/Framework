@@ -188,6 +188,7 @@ type
     FSEGURO_PRESTAMISTA_CUSTO: Variant;
     FSEGURO_PRESTAMISTA_VALOR: Variant;
     FPER_COMISSAO_PRESTAMISTA: Variant;
+    FVALOR_ACRESCIMO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetPedidoVendasLista(const Value: IList<ITPedidoVendaModel>);
@@ -347,6 +348,7 @@ type
 
     procedure getDataVendedor;
     procedure SetPER_COMISSAO_PRESTAMISTA(const Value: Variant);
+    procedure SetVALOR_ACRESCIMO(const Value: Variant);
 
   public
     property NUMERO_PED: Variant read FNUMERO_PED write SetNUMERO_PED;
@@ -495,6 +497,7 @@ type
     property SEGURO_PRESTAMISTA_VALOR :Variant read FSEGURO_PRESTAMISTA_VALOR write SetSEGURO_PRESTAMISTA_VALOR;
     property SEGURO_PRESTAMISTA_CUSTO :Variant read FSEGURO_PRESTAMISTA_CUSTO write SetSEGURO_PRESTAMISTA_CUSTO;
     property PER_COMISSAO_PRESTAMISTA : Variant read FPER_COMISSAO_PRESTAMISTA write SetPER_COMISSAO_PRESTAMISTA;
+    property VALOR_ACRESCIMO: Variant read FVALOR_ACRESCIMO write SetVALOR_ACRESCIMO;
 
     property PedidoVendasLista: IList<ITPedidoVendaModel> read FPedidoVendasLista write SetPedidoVendasLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -1115,10 +1118,10 @@ var
   lIBPTModel          : ITIBPTModel;
 begin
   if self.FNUMERO_PED = '' then
-    CriaException('Pedido n�o informado');
+    CriaException('Pedido não informado');
 
   if pModelo = '' then
-    CriaException('Modelo n�o informado');
+    CriaException('Modelo não informado');
 
   lPedidoItensModel := TPedidoItensModel.getNewIface(vIConexao);
   lTipoVenda        := TPedidoItensModel.getNewIface(vIConexao);
@@ -1138,8 +1141,8 @@ begin
     lTipoVenda.objeto.WhereView         := ' and coalesce(pedidoitens.tipo_venda, ''LJ'') = ''LJ'' ';
     lTipoVenda.objeto.obterLista;
 
-    if lTipoVenda.objeto.TotalRecords = 0 then //N�o permitir a emiss�o de NF-e para o tipo de venda CD.
-      CriaException('N�o � poss�vel emitir NF-e para um pedido sem itens da loja.');
+    if lTipoVenda.objeto.TotalRecords = 0 then //Não permitir a emissão de NF-e para o tipo de venda CD.
+      CriaException('Não é possível emitir NF-e para um pedido sem itens da loja.');
 
     lFuncionarioModel := lFuncionarioModel.objeto.carregaClasse(self.CODIGO_VEN);
 
@@ -1269,14 +1272,15 @@ begin
       lNFItensModel.objeto.ITEM_NF               := Format('%3.3d', [lItem]);
       lNFItensModel.objeto.MODBCST_N18           := '4';
       lNFItensModel.objeto.INDESCALA             := 'S';
-      //N�o encontrado no fonte
+
+      //Não encontrado no fonte
       lNFItensModel.objeto.PREDBCEFET            := FloatToStr(0);
       lNFItensModel.objeto.VBCEFET               := FloatToStr(0);
       lNFItensModel.objeto.PICMSEFET             := FloatToStr(0);
       lNFItensModel.objeto.VICMSEFET             := FloatToStr(0);
       lNFItensModel.objeto.BASE_IPI2             := FloatToStr(0);
-      //
-      //N�o tem na tabela de pedidoitens
+
+      //Não tem na tabela de pedidoitens
       lNFItensModel.objeto.VBC_IPI               := FloatToStr(0);
       lNFItensModel.objeto.VSEG                  := FloatToStr(0);
 
@@ -1301,8 +1305,6 @@ begin
       lNFItensModel.objeto.PFCPSTRET             := FloatToStr(0);
       lNFItensModel.objeto.VFCPSTRET             := FloatToStr(0);
 
-      //
-
       lNFItensModel.objeto.VTOTTRIB_FEDERAL      := lItens.objeto.VTOTTRIB_FEDERAL;
       lNFItensModel.objeto.VTOTTRIB_ESTADUAL     := lItens.objeto.VTOTTRIB_ESTADUAL;
       lNFItensModel.objeto.VTOTTRIB_MUNICIPAL    := lItens.objeto.VTOTTRIB_MUNICIPAL;
@@ -1313,7 +1315,7 @@ begin
       lTribMunicipal := lTribMunicipal + lItens.objeto.VTOTTRIB_MUNICIPAL;
 
       lNFItensModel.objeto.CODIGO_PRO            := lItens.objeto.CODIGO_PRO;
-      lNFItensModel.objeto.VALORUNITARIO_NF      := lItens.objeto.VALORUNITARIO_PED;
+      lNFItensModel.objeto.VALORUNITARIO_NF      := FloatToStr( StrToFloatDef(lItens.objeto.VALORUNITARIO_PED, 0) + StrToFloatDef(lItens.objeto.VALOR_ACRESCIMO, 0));
       lNFItensModel.objeto.QUANTIDADE_NF         := lItens.objeto.QTDE_CALCULADA;
       lNFItensModel.objeto.VLRVENDA_NF           := lItens.objeto.VLRVENDA_PRO;
       lNFItensModel.objeto.VLRCUSTO_NF           := lItens.objeto.VLRCUSTO_PRO;
@@ -1541,14 +1543,14 @@ begin
     end;
 
     if lProdutosModel.objeto.TotalRecords = 0  then
-      CriaException('Produto n�o localizado.');
+      CriaException('Produto não localizado.');
 
     if vIConexao.getEmpresa.BLOQUEAR_SALDO_NEGATIVO = 'S' then
     begin
       lSaldoDisponivel := lProdutosModel.objeto.ProdutossLista.First.objeto.SALDO_DISPONIVEL;
 
       if (lSaldoDisponivel <= 0) or (pVenderItem.Quantidade > lSaldoDisponivel) then
-        CriaException('Produto sem saldo dispon�vel em estoque.')
+        CriaException('Produto sem saldo disponível em estoque.')
     end;
 
     lIDItem := lPedidoItensModel.objeto.obterIDItem(self.FNUMERO_PED, lProdutosModel.objeto.ProdutossLista.First.objeto.CODIGO_PRO);
@@ -1750,13 +1752,13 @@ begin
     lPedidoVendaModel := lPedidoVendaModel.objeto.carregaClasse(self.FNUMERO_PED);
 
     if lPedidoVendaModel.objeto.NUMERO_NF <> '' then
-      CriaException('N�o � possivel reabrir pedido com NF-e vinculada.');
+      CriaException('Não é possivel reabrir pedido com NF-e vinculada.');
 
     if lPedidoVendaModel.objeto.WEB_PEDIDO_ID <> '' then
-      CriaException('Venda originada de venda assistida, efetue o processo de devolu��o.');
+      CriaException('Venda originada de venda assistida, efetue o processo de devolução.');
 
     if lCaixaControleModel.objeto.vendaCaixaFechado(transformaDataHoraFireBird(lPedidoVendaModel.objeto.DATA_PED + lPedidoVendaModel.objeto.HORA_PED)) then
-      CriaException('N�o � poss�vel reabrir venda com o caixa j� finalizado');
+      CriaException('Não é possível reabrir venda com o caixa já finalizado');
 
     lPedidoItensModel.objeto.IDPedidoVendaView := lPedidoVendaModel.objeto.NUMERO_PED;
     lPedidoItensModel.objeto.obterLista;
@@ -1812,11 +1814,14 @@ var
   lPedidoItensModal      : ITPedidoItensModel;
   lPedidoVendaModel      : ITPedidoVendaModel;
   lEmpresaModel          : ITEmpresaModel;
+  lConfiguracoes         : ITerasoftConfiguracoes;
 begin
   lPedidoVendaLista      := TPedidoVendaDao.getNewIface(vIConexao);
   lCalcularImpostosModel := TCalcularImpostosModel.Create(vIConexao);
   lPedidoItensModal      := TPedidoItensModel.getNewIface(vIConexao);
   lEmpresaModel          := TEmpresaModel.getNewIface(vIConexao);
+
+  Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
   try
     lPedidoVendaLista.objeto.obterUpdateImpostos(pNumeroPedido);
@@ -1833,8 +1838,7 @@ begin
       lCalcularImpostosModel.DESTINATARIO_UF      := IIF(lPedidoVendaModel.objeto.UF_CLI <> '', lPedidoVendaModel.objeto.UF_CLI, lEmpresaModel.objeto.UF);
       lCalcularImpostosModel.CODIGO_PRODUTO       := lPedidoVendaModel.objeto.CODIGO_PRO;
       lCalcularImpostosModel.QUANTIDADE           := lPedidoVendaModel.objeto.QUANTIDADE_PED;
-      lCalcularImpostosModel.VALORUNITARIO        := lPedidoVendaModel.objeto.VALORUNITARIO_PED;
-
+      lCalcularImpostosModel.VALORUNITARIO        := StrToFloatDef(lPedidoVendaModel.objeto.VALORUNITARIO_PED, 0) + StrToFloatDef(lPedidoVendaModel.objeto.VALOR_ACRESCIMO, 0);
 
       lCalcularImpostosModel := lCalcularImpostosModel.Processar;
 
@@ -1876,7 +1880,10 @@ begin
       lPedidoItensModal.objeto.CFOP_ID             := lCalcularImpostosModel.CFOP_ID;
       lPedidoItensModal.objeto.CFOP                := lCalcularImpostosModel.CFOP;
       lPedidoItensModal.objeto.VDESC               := FloatToStr(lCalcularImpostosModel.DESCONTO_ITEM);
-      lPedidoItensModal.objeto.VOUTROS             := FloatToStr(lCalcularImpostosModel.ACRESCIMO_ITEM);
+
+      if lConfiguracoes.objeto.valorTag('RATEAR_ACRESIMO_NF', 'N', tvBool) = 'N' then
+        lPedidoItensModal.objeto.VOUTROS           := FloatToStr(lCalcularImpostosModel.ACRESCIMO_ITEM);
+
       lPedidoItensModal.objeto.CSOSN               := lCalcularImpostosModel.ICMS_CSOSN;
       lPedidoItensModal.objeto.VTOTTRIB_ESTADUAL   := lCalcularImpostosModel.VTOTTRIB_ESTADUAL;
       lPedidoItensModal.objeto.VTOTTRIB_FEDERAL    := lCalcularImpostosModel.VTOTTRIB_FEDERAL;
@@ -2580,6 +2587,11 @@ end;
 procedure TPedidoVendaModel.SetVALORUNITARIO_PED(const Value: Variant);
 begin
   FVALORUNITARIO_PED := Value;
+end;
+
+procedure TPedidoVendaModel.SetVALOR_ACRESCIMO(const Value: Variant);
+begin
+  FVALOR_ACRESCIMO := Value;
 end;
 
 procedure TPedidoVendaModel.SetVALOR_DESPESA_VENDA(const Value: Variant);
