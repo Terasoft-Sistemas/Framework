@@ -15,7 +15,7 @@ type
 
   TMovimentoModel = class
   private
-    [wek] mySelf: ITMovimentoModel;
+    [weak] mySelf: ITMovimentoModel;
     vIConexao : IConexao;
     FMovimentosLista: IList<ITMovimentoModel>;
     FAcao: TAcao;
