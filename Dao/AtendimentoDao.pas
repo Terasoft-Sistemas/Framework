@@ -12,12 +12,16 @@ uses
   System.StrUtils,
   System.Variants,
   System.Rtti,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TAtendimentoDao = class
+  TAtendimentoDao=class;
+  ITAtendimentoDao=IObject<TAtendimentoDao>;
 
+  TAtendimentoDao = class
   private
+    [weak] mySelf: ITAtendimentoDao;
     vIConexao : IConexao;
 
     FLengthPageView: String;
@@ -42,8 +46,10 @@ type
       vConstrutorDao : IConstrutorDao;
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITAtendimentoDao;
 
     property TotalRecords      : Integer      read FTotalRecords        write SetTotalRecords;
     property IDRecordView      : Integer      read FIDRecordView        write SetIDRecordView;
@@ -53,11 +59,11 @@ type
     property StartRecordView   : String       read FStartRecordView     write SetStartRecordView;
     property LengthPageView    : String       read FLengthPageView      write SetLengthPageView;
 
-    function incluir(pAtendimentoModel: TAtendimentoModel): String;
-    function alterar(pAtendimentoModel: TAtendimentoModel): String;
-    function excluir(pAtendimentoModel: TAtendimentoModel): String;
+    function incluir(pAtendimentoModel: ITAtendimentoModel): String;
+    function alterar(pAtendimentoModel: ITAtendimentoModel): String;
+    function excluir(pAtendimentoModel: ITAtendimentoModel): String;
 
-    procedure setParams(var pQry : TFDQuery; pAtendimentoModel: TAtendimentoModel);
+    procedure setParams(var pQry : TFDQuery; pAtendimentoModel: ITAtendimentoModel);
 
     function ObterLista: IFDDataset;
 end;
@@ -66,7 +72,7 @@ implementation
 
 { TAtendimento }
 
-constructor TAtendimentoDao.Create(pIConexao : IConexao);
+constructor TAtendimentoDao._Create(pIConexao : IConexao);
 begin
   vIConexao      := pIConexao;
   vConstrutorDao := TConstrutorDao.Create(vIConexao);
@@ -75,10 +81,11 @@ end;
 destructor TAtendimentoDao.Destroy;
 begin
   vConstrutorDao:=nil;
+  vIConexao := nil;
   inherited;
 end;
 
-function TAtendimentoDao.incluir(pAtendimentoModel: TAtendimentoModel): String;
+function TAtendimentoDao.incluir(pAtendimentoModel: ITAtendimentoModel): String;
 var
   lQry    : TFDQuery;
   lSQL    : String;
@@ -98,7 +105,7 @@ begin
   end;
 end;
 
-function TAtendimentoDao.alterar(pAtendimentoModel: TAtendimentoModel): String;
+function TAtendimentoDao.alterar(pAtendimentoModel: ITAtendimentoModel): String;
 var
   lQry      : TFDQuery;
   lSQL      : String;
@@ -112,27 +119,33 @@ begin
     setParams(lQry, pAtendimentoModel);
     lQry.ExecSQL;
 
-    Result := pAtendimentoModel.ID;
+    Result := pAtendimentoModel.objeto.ID;
 
   finally
     lQry.Free;
   end;
 end;
 
-function TAtendimentoDao.excluir(pAtendimentoModel: TAtendimentoModel): String;
+function TAtendimentoDao.excluir(pAtendimentoModel: ITAtendimentoModel): String;
 var
   lQry     : TFDQuery;
 begin
   lQry     := vIConexao.CriarQuery;
 
   try
-   lQry.ExecSQL('delete from atendimento where ID = :ID',[pAtendimentoModel.ID]);
+   lQry.ExecSQL('delete from atendimento where ID = :ID',[pAtendimentoModel.objeto.ID]);
    lQry.ExecSQL;
 
-   Result := pAtendimentoModel.ID;
+   Result := pAtendimentoModel.objeto.ID;
   finally
     lQry.Free;
   end;
+end;
+
+class function TAtendimentoDao.getNewIface(
+  pIConexao: IConexao): ITAtendimentoDao;
+begin
+
 end;
 
 function TAtendimentoDao.where: String;
@@ -238,7 +251,7 @@ begin
   FOrderView := Value;
 end;
 
-procedure TAtendimentoDao.setParams(var pQry: TFDQuery; pAtendimentoModel: TAtendimentoModel);
+procedure TAtendimentoDao.setParams(var pQry: TFDQuery; pAtendimentoModel: ITAtendimentoModel);
 var
   lCtx  : TRttiContext;
   lProp : TRttiProperty;
@@ -251,7 +264,7 @@ begin
       lProp := lCtx.GetType(TAtendimentoModel).GetProperty(pQry.Params[i].Name);
 
       if Assigned(lProp) then
-        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pAtendimentoModel).AsString = '', Unassigned, lProp.GetValue(pAtendimentoModel).AsString);
+        pQry.ParamByName(pQry.Params[i].Name).Value := IIF(lProp.GetValue(pAtendimentoModel.objeto).AsString = '', Unassigned, lProp.GetValue(pAtendimentoModel.objeto).AsString);
     end;
   finally
     lCtx.Free;

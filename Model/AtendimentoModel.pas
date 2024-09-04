@@ -5,12 +5,16 @@ interface
 uses
   Terasoft.Types,
   FireDAC.Comp.Client,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
-  TAtendimentoModel = class
+  TAtendimentoModel=class;
+  ITAtendimentoModel=IObject<TAtendimentoModel>;
 
+  TAtendimentoModel = class
   private
+    [weak] mySelf: ITAtendimentoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -123,8 +127,10 @@ type
     property IDRecordView       : Integer     read FIDRecordView        write SetIDRecordView;
 
 
-  	constructor Create(pIConexao : IConexao);
+  	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
+
+    class function getNewIface(pIConexao: IConexao): ITAtendimentoModel;
 
     function Salvar: String;
     function obterLista: IFDDataset;
@@ -138,7 +144,7 @@ uses
 
 { TAtendimentoModel }
 
-constructor TAtendimentoModel.Create(pIConexao : IConexao);
+constructor TAtendimentoModel._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -149,45 +155,43 @@ begin
   inherited;
 end;
 
+class function TAtendimentoModel.getNewIface(
+  pIConexao: IConexao): ITAtendimentoModel;
+begin
+
+end;
+
 function TAtendimentoModel.obterLista: IFDDataset;
 var
-  lAtendimentoLista: TAtendimentoDao;
+  lAtendimentoLista: ITAtendimentoDao;
 begin
-  lAtendimentoLista := TAtendimentoDao.Create(vIConexao);
-  try
-    lAtendimentoLista.TotalRecords    := FTotalRecords;
-    lAtendimentoLista.WhereView       := FWhereView;
-    lAtendimentoLista.CountView       := FCountView;
-    lAtendimentoLista.OrderView       := FOrderView;
-    lAtendimentoLista.StartRecordView := FStartRecordView;
-    lAtendimentoLista.LengthPageView  := FLengthPageView;
-    lAtendimentoLista.IDRecordView    := FIDRecordView;
+  lAtendimentoLista := TAtendimentoDao.getNewIface(vIConexao);
+  lAtendimentoLista.objeto.TotalRecords    := FTotalRecords;
+  lAtendimentoLista.objeto.WhereView       := FWhereView;
+  lAtendimentoLista.objeto.CountView       := FCountView;
+  lAtendimentoLista.objeto.OrderView       := FOrderView;
+  lAtendimentoLista.objeto.StartRecordView := FStartRecordView;
+  lAtendimentoLista.objeto.LengthPageView  := FLengthPageView;
+  lAtendimentoLista.objeto.IDRecordView    := FIDRecordView;
 
-    Result        := lAtendimentoLista.obterLista;
-    FTotalRecords := lAtendimentoLista.TotalRecords;
-  finally
-    lAtendimentoLista.Free;
-  end;
+  Result        := lAtendimentoLista.objeto.obterLista;
+  FTotalRecords := lAtendimentoLista.objeto.TotalRecords;
 end;
 
 function TAtendimentoModel.Salvar: String;
 var
-  lAtendimentoDao: TAtendimentoDao;
+  lAtendimentoDao: ITAtendimentoDao;
 begin
-  lAtendimentoDao := TAtendimentoDao.Create(vIConexao);
+  lAtendimentoDao := TAtendimentoDao.getNewIface(vIConexao);
 
   Result := '';
 
-  try
-    case FAcao of
-      Terasoft.Types.tacIncluir: Result := lAtendimentoDao.incluir(Self);
-      Terasoft.Types.tacAlterar: Result := lAtendimentoDao.alterar(Self);
-      Terasoft.Types.tacExcluir: Result := lAtendimentoDao.excluir(Self);
-    end;
-
-  finally
-    lAtendimentoDao.Free;
+  case FAcao of
+    Terasoft.Types.tacIncluir: Result := lAtendimentoDao.objeto.incluir(mySelf);
+    Terasoft.Types.tacAlterar: Result := lAtendimentoDao.objeto.alterar(mySelf);
+    Terasoft.Types.tacExcluir: Result := lAtendimentoDao.objeto.excluir(mySelf);
   end;
+
 end;
 
 procedure TAtendimentoModel.SetAcao(const Value: TAcao);
