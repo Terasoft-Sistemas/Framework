@@ -764,6 +764,9 @@ begin
       if lPedidoVendaModel.objeto.FRETE_PED > 0 then
         lModel.objeto.aplicarFreteItem(lPedidoVendaModel.objeto.FRETE_PED, lPedidoVendaModel.objeto.VALOR_PED);
 
+      if (lConfiguracoes.objeto.valorTag('RATEAR_ACRESIMO_NF', 'N', tvBool) = 'S') and (lPedidoVendaModel.objeto.ACRES_PED > 0) then
+        lModel.objeto.aplicarAcrescimoItem(lPedidoVendaModel.objeto.ACRES_PED, lPedidoVendaModel.objeto.VALOR_PED);
+
       if (lModel.objeto.TIPO_VENDA <> 'CD') then
       begin
         if (lModel.objeto.COMBO = '3') then
@@ -1139,17 +1142,17 @@ begin
   lTotalDesconto    := 0;
 
   try
+    lFuncionarioModel := lFuncionarioModel.objeto.carregaClasse(self.CODIGO_VEN);
+
+    self.RecalcularImpostos(self.NUMERO_PED);
+    lEmpresaModel.objeto.Carregar;
+
     lTipoVenda.objeto.IDPedidoVendaView := self.NUMERO_PED;
     lTipoVenda.objeto.WhereView         := ' and coalesce(pedidoitens.tipo_venda, ''LJ'') = ''LJ'' ';
     lTipoVenda.objeto.obterLista;
 
     if lTipoVenda.objeto.TotalRecords = 0 then //Não permitir a emissão de NF-e para o tipo de venda CD.
-      CriaException('Não é possível emitir NF-e para um pedido sem itens da loja.');
-
-    lFuncionarioModel := lFuncionarioModel.objeto.carregaClasse(self.CODIGO_VEN);
-
-    self.RecalcularImpostos(self.NUMERO_PED);
-    lEmpresaModel.objeto.Carregar;
+      CriaException('Não é possível emitir NF-e para um pedido sem itens da loja. O pedido foi recalculado.');
 
     lNFModel.objeto.Acao := tacIncluir;
     lNFModel.objeto.TIPO_NF               := 'N';
@@ -1898,7 +1901,7 @@ begin
       lPedidoItensModal.objeto.CFOP                := lCalcularImpostosModel.CFOP;
       lPedidoItensModal.objeto.VDESC               := FloatToStr(lCalcularImpostosModel.DESCONTO_ITEM);
 
-      if lConfiguracoes.objeto.valorTag('RATEAR_ACRESIMO_NF', 'N', tvBool) = 'N' then
+      if (lConfiguracoes.objeto.valorTag('RATEAR_ACRESIMO_NF', 'N', tvBool) = 'N') then
         lPedidoItensModal.objeto.VOUTROS           := FloatToStr(lCalcularImpostosModel.ACRESCIMO_ITEM);
 
       lPedidoItensModal.objeto.CSOSN               := lCalcularImpostosModel.ICMS_CSOSN;

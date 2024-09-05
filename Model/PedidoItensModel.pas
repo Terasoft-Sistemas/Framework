@@ -524,6 +524,7 @@ type
     procedure calcularComissao(pParametros : TParametrosComissao);
 
     procedure aplicarFreteItem(pFrete, pTotal: Double);
+    procedure aplicarAcrescimoItem(pAcrescimo, pTotal: Double);
 
     property PedidoItenssLista: IList<ITPedidoItensModel> read FPedidoItenssLista write SetPedidoItenssLista;
 
@@ -777,6 +778,13 @@ class function TPedidoItensModel.getNewIface(pIConexao: IConexao): ITPedidoItens
 begin
   Result := TImplObjetoOwner<TPedidoItensModel>.CreateOwner(self._Create(pIConexao));
   Result.objeto.myself := Result;
+end;
+
+procedure TPedidoItensModel.aplicarAcrescimoItem(pAcrescimo, pTotal: Double);
+begin
+  Self.Acao   := tacAlterar;
+  Self.VALOR_ACRESCIMO := FloatToStr((pAcrescimo / pTotal) * self.VALORUNITARIO_PED);
+  Self.Salvar;
 end;
 
 procedure TPedidoItensModel.aplicarFreteItem(pFrete, pTotal: Double);
