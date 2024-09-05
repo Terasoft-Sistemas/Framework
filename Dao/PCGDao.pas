@@ -321,9 +321,9 @@ begin
           '        (valor_liquido+acrescimo) VALOR_TOTAL,                                                                                         ' + #13 +
           '        (valor_liquido/quantidade_venda) TICKET_MEDIO,                                                                                 ' + #13 +
           '        (total_itens/quantidade_venda) QUANTIDADE_MEDIA_ITENS,                                                                         ' + #13 +
-          '        (valor_liquido/total_itens) VALOR_MEDIA_ITENS,                                                                                 ' + #13 +
+          '        case when total_itens = 0 then (valor_liquido/ 1) else (valor_liquido/ total_itens) end VALOR_MEDIA_ITENS,                     ' + #13 +
+//          '        (valor_liquido/total_itens) VALOR_MEDIA_ITENS,                                                                                 ' + #13 +
           '        (valor_liquido-valor_possivel) DIFERENCA,                                                                                      ' + #13 +
-          '        --((valor_liquido/valor_possivel)*100)-100 PERCENTUAL,                                                                         ' + #13 +
           '        QUANTIDADE_VENDA,                                                                                                              ' + #13 +
           '        CLIENTE                                                                                                                        ' + #13 +
           '    from                                                                                                                               ' + #13 +
