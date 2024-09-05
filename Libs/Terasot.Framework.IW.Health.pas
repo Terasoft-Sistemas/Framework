@@ -38,7 +38,7 @@ begin
   if Assigned(aReply) then
   begin
     aReply.ContentType := MIME_TXT;
-    aReply.WriteString(format('ALLOK=%s',[DateTimeToStr(gUltimoTick)]));
+    aReply.WriteString(format('TICKS=%d',[AtomicIncrement(gTicks)]));
     gUltimoTick := Now;
   end;
   aSession.Terminate;
