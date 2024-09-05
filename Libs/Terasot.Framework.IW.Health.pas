@@ -42,8 +42,8 @@ begin
   if Assigned(aReply) then
   begin
     aReply.ContentType := MIME_TXT;
-    if(CompareText(aRequest.PathInfo,'/health-dump')=0) then
-    begin
+//    if(CompareText(aRequest.PathInfo,'/health-dump')=0) then
+//    begin
       lStream := TStringStream.Create;
       try
         dumpToStream(lStream);
@@ -52,13 +52,13 @@ begin
       finally
         FreeAndNil(lStream);
       end;
-    end else
+{    end else
     begin
       aReply.WriteString(format('TICKS=%d'+#10,[AtomicIncrement(gTicks)]));
       aReply.WriteString(format('BUILD=%s'+#10,[RC_BUILD_Terasoft_Gestao_Web_DATETIME]));
       aReply.WriteString(format('VERSAO=%s'+#10,[VERSAORC_Terasoft_Gestao_Web]));
       aReply.WriteString(format('SESSOES=%d'+#10,[gListaSessoes.count]));
-    end;
+    end;}
   end;
   aSession.Terminate;
 end;
