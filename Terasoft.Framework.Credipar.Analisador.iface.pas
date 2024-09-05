@@ -435,6 +435,7 @@ begin
        '      3- SUPERIOR'+#13+
        '    */'+#13+
        '    c.telefone_cli,'+#13+
+       '    c.celular_cli,'+#13+
        '    c.cep_cli,'+#13+
        '    c.endereco_cli,'+#13+
        '    c.numero_end,'+#13+
