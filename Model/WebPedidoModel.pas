@@ -596,13 +596,6 @@ begin
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VALOR_MONTADOR         := FloatToStr(lWebPedidoItensModel.objeto.VALOR_MONTADOR);
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.COMISSAO_PERCENTUAL    := FloatToStr(lWebPedidoItensModel.objeto.PERCENTUAL_COMISSAO);
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.COMISSAO_PED           := '0';
-
-      if lConfiguracoes.objeto.valorTag('RATEAR_ACRESIMO_NF', 'N', tvBool) = 'S' then
-        lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VALOR_ACRESCIMO :=
-          FloatToStr((lPedidoVendaModel.objeto.ACRES_PED  / lPedidoVendaModel.objeto.VALOR_PED) * lWebPedidoItensModel.objeto.VALOR_UNITARIO)
-      else
-        lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VALOR_ACRESCIMO := '0';
-
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.TIPO_GARANTIA_FR       := lWebPedidoItensModel.objeto.TIPO_GARANTIA_FR;
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VLR_GARANTIA_FR        := lWebPedidoItensModel.objeto.VLR_GARANTIA_FR;
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.CUSTO_GARANTIA_FR      := lWebPedidoItensModel.objeto.CUSTO_GARANTIA_FR;

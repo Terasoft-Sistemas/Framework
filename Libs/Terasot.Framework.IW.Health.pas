@@ -21,6 +21,7 @@ type
 implementation
 
 uses
+  __versaoautomaticaTerasoft_Gestao_Web,
   ServerController,
   UserSessionUnit,
   IW.Content.Handlers,
@@ -33,13 +34,31 @@ begin
 end;
 
 function TContentHealth.Execute(aRequest: THttpRequest; aReply: THttpReply; const aPathname: string; aSession: TIWApplication; aParams: TStrings): boolean;
+  var
+    p: TIWUserSession;
+    lStream: TStringStream;
 begin
   Result := True;
   if Assigned(aReply) then
   begin
     aReply.ContentType := MIME_TXT;
-    aReply.WriteString(format('TICKS=%d',[AtomicIncrement(gTicks)]));
-    gUltimoTick := Now;
+//    if(CompareText(aRequest.PathInfo,'/health-dump')=0) then
+//    begin
+      lStream := TStringStream.Create;
+      try
+        dumpToStream(lStream);
+        //lStream.Position := 0;
+        aReply.WriteString(lStream.DataString);
+      finally
+        FreeAndNil(lStream);
+      end;
+{    end else
+    begin
+      aReply.WriteString(format('TICKS=%d'+#10,[AtomicIncrement(gTicks)]));
+      aReply.WriteString(format('BUILD=%s'+#10,[RC_BUILD_Terasoft_Gestao_Web_DATETIME]));
+      aReply.WriteString(format('VERSAO=%s'+#10,[VERSAORC_Terasoft_Gestao_Web]));
+      aReply.WriteString(format('SESSOES=%d'+#10,[gListaSessoes.count]));
+    end;}
   end;
   aSession.Terminate;
 end;

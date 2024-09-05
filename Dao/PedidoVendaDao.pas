@@ -119,8 +119,7 @@ begin
       '   from pedidovenda p                                                                              '+SLineBreak+
       '   left join pedidoitens i on i.numero_ped = p.numero_ped                                          '+SLineBreak+
       '   left join clientes c on c.codigo_cli = p.codigo_cli                                             '+SLineBreak+
-      '  where coalesce(i.tipo_venda, ''LJ'') = ''LJ''                                                    '+SLineBreak+
-      '    and p.numero_ped = '+QuotedStr(pNumeroPedido);
+      '  where p.numero_ped = '+QuotedStr(pNumeroPedido);
 
     lQry.Open(lSQL);
 
@@ -139,19 +138,20 @@ begin
       modelo.objeto.QUANTIDADE_PED    := lQry.FieldByName('QUANTIDADE_PED').AsString;
       modelo.objeto.VALORUNITARIO_PED := lQry.FieldByName('VALORUNITARIO_PED').AsString;
       modelo.objeto.VALOR_ACRESCIMO   := lQry.FieldByName('VALOR_ACRESCIMO').AsString;
-      lValor_ped := lValor_ped   + lQry.FieldByName('TOTAL_PRODUTO').AsFloat;
-      lDesc_ped  := lDesc_ped    + lQry.FieldByName('DESCONTO_ITEM').AsFloat;
-      lAcres_ped := lAcres_ped   + lQry.FieldByName('ACRESCIMO_ITEM').AsFloat;
+
+//      lValor_ped := lValor_ped   + lQry.FieldByName('TOTAL_PRODUTO').AsFloat;
+//      lDesc_ped  := lDesc_ped    + lQry.FieldByName('DESCONTO_ITEM').AsFloat;
+//      lAcres_ped := lAcres_ped   + lQry.FieldByName('ACRESCIMO_ITEM').AsFloat;
 
       lQry.Next;
     end;
 
-    for modelo in fPedidoVendasLista do
-    begin
-      modelo.objeto.VALOR_PED         := FloatToStr(lValor_ped);
-      modelo.objeto.DESC_PED          := FloatToStr(lDesc_ped);
-      modelo.objeto.ACRES_PED         := FloatToStr(lAcres_ped);
-    end;
+//    for modelo in fPedidoVendasLista do
+//    begin
+//      modelo.objeto.VALOR_PED         := FloatToStr(lValor_ped);
+//      modelo.objeto.DESC_PED          := FloatToStr(lDesc_ped);
+//      modelo.objeto.ACRES_PED         := FloatToStr(lAcres_ped);
+//    end;
 
   finally
     lQry.Free;
