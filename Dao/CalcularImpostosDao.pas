@@ -193,7 +193,8 @@ begin
         '     c.aliquota_cofins cfop_cofins_aliquota, '+#13+
         '     c.aliquota_ipi cfop_ipi_aliquota,       '+#13+
         '     c.cst_ipi cfop_cst_ipi,                 '+#13+
-        '     c.ibpt                                  '+#13+
+        '     c.ibpt,                                 '+#13+
+        '     c.desconto_icms_base_pis_cofins         '+#13+
         '                                             '+#13+
         ' from                                        '+#13+
         '     cfop c                                  '+#13+
@@ -233,6 +234,8 @@ begin
     else
       lCalcularImpostosModel.IPI_ALIQUOTA := lCalcularImpostosModel.IPI_ALIQUOTA;
 
+    lCalcularImpostosModel.COFINS_VALOR_BASE_EXCLUIR_VALOR_ICMS := lQry.FieldByName('desconto_icms_base_pis_cofins').AsString = 'S';
+    lCalcularImpostosModel.PIS_VALOR_BASE_EXCLUIR_VALOR_ICMS    := lQry.FieldByName('desconto_icms_base_pis_cofins').AsString = 'S';
 
     if lQry.FieldByName('ibpt').AsString <> 'N' then
     begin

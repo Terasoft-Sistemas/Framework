@@ -26,8 +26,8 @@ type
     FDESTINATARIO_UF: String;
     FICMS_SOMA_FRETE_BASE: String;
     FICMS_REDUCAO: Real;
-    FPIS_VALOR_BASE_EXCLUIR_VALOR_ICMS: String;
-    FCOFINS_VALOR_BASE_EXCLUIR_VALOR_ICMS: String;
+    FPIS_VALOR_BASE_EXCLUIR_VALOR_ICMS: Boolean;
+    FCOFINS_VALOR_BASE_EXCLUIR_VALOR_ICMS: Boolean;
     FPIS_CST: String;
     FIPI_ALIQUOTA: Real;
     FCOFINS_CST: String;
@@ -102,7 +102,7 @@ type
     procedure SetCFOP(const Value: String);
     procedure SetCOFINS_ALIQUOTA(const Value: Real);
     procedure SetCOFINS_CST(const Value: String);
-    procedure SetCOFINS_VALOR_BASE_EXCLUIR_VALOR_ICMS(const Value: String);
+    procedure SetCOFINS_VALOR_BASE_EXCLUIR_VALOR_ICMS(const Value: Boolean);
     procedure SetCONSUMIDOR_FINAL(const Value: String);
     procedure SetCONTRIBUINTE_ICMS(const Value: String);
     procedure SetCONTRIBUINTE_IPI(const Value: String);
@@ -124,7 +124,7 @@ type
     procedure SetPFCP(const Value: Real);
     procedure SetPIS_ALIQUOTA(const Value: Real);
     procedure SetPIS_CST(const Value: String);
-    procedure SetPIS_VALOR_BASE_EXCLUIR_VALOR_ICMS(const Value: String);
+    procedure SetPIS_VALOR_BASE_EXCLUIR_VALOR_ICMS(const Value: Boolean);
     procedure SetREGIME_TRIBUTARIO(const Value: String);
     procedure SetCODIGO_PRODUTO(const Value: String);
     procedure SetCODIGO_CLIENTE(const Value: String);
@@ -233,8 +233,8 @@ type
     property ABATEDESCONTO_IPI           : String read FABATEDESCONTO_IPI write SetABATEDESCONTO_IPI;
 
     property ICMS_SOMA_FRETE_BASE                 : String read FICMS_SOMA_FRETE_BASE write SetICMS_SOMA_FRETE_BASE;
-    property COFINS_VALOR_BASE_EXCLUIR_VALOR_ICMS : String read FCOFINS_VALOR_BASE_EXCLUIR_VALOR_ICMS write SetCOFINS_VALOR_BASE_EXCLUIR_VALOR_ICMS;
-    property PIS_VALOR_BASE_EXCLUIR_VALOR_ICMS    : String read FPIS_VALOR_BASE_EXCLUIR_VALOR_ICMS write SetPIS_VALOR_BASE_EXCLUIR_VALOR_ICMS;
+    property COFINS_VALOR_BASE_EXCLUIR_VALOR_ICMS : Boolean read FCOFINS_VALOR_BASE_EXCLUIR_VALOR_ICMS write SetCOFINS_VALOR_BASE_EXCLUIR_VALOR_ICMS;
+    property PIS_VALOR_BASE_EXCLUIR_VALOR_ICMS    : Boolean read FPIS_VALOR_BASE_EXCLUIR_VALOR_ICMS write SetPIS_VALOR_BASE_EXCLUIR_VALOR_ICMS;
 
     property CODIGO_PRODUTO  : String read FCODIGO_PRODUTO write SetCODIGO_PRODUTO;
     property CODIGO_CLIENTE  : String read FCODIGO_CLIENTE write SetCODIGO_CLIENTE;
@@ -356,8 +356,6 @@ begin
 
     lMotor.NotaFiscal.Destinatario.ConsumidorFinal             := True;
     lMotor.NotaFiscal.Destinatario.SomaFreteBaseICMS           := True;
-    lMotor.NotaFiscal.Produto.COFINS.ValorBaseExcluirValorICMS := True;
-    lMotor.NotaFiscal.Produto.PIS.ValorBaseExcluirValorICMS    := True;
     lMotor.NotaFiscal.Destinatario.AbateDescontoIPI            := True;
 
      //Dados da nota
@@ -373,6 +371,10 @@ begin
 
     //Dados do produto
     lMotor.NotaFiscal.Produto.ZerarValores;
+
+    lMotor.NotaFiscal.Produto.COFINS.ValorBaseExcluirValorICMS := self.FCOFINS_VALOR_BASE_EXCLUIR_VALOR_ICMS;
+    lMotor.NotaFiscal.Produto.PIS.ValorBaseExcluirValorICMS    := self.FPIS_VALOR_BASE_EXCLUIR_VALOR_ICMS;
+
     lMotor.NotaFiscal.Produto.CFOP          := StrToIntDef(Self.FCFOP,0);
     lMotor.NotaFiscal.Produto.Quantidade    := lQUANTIDADE;
     lMotor.NotaFiscal.Produto.PrecoUnitario := lVALORUNITARIO;
@@ -626,7 +628,7 @@ begin
 end;
 
 procedure TCalcularImpostosModel.SetCOFINS_VALOR_BASE_EXCLUIR_VALOR_ICMS(
-  const Value: String);
+  const Value: Boolean);
 begin
   FCOFINS_VALOR_BASE_EXCLUIR_VALOR_ICMS := Value;
 end;
@@ -828,7 +830,7 @@ begin
 end;
 
 procedure TCalcularImpostosModel.SetPIS_VALOR_BASE_EXCLUIR_VALOR_ICMS(
-  const Value: String);
+  const Value: Boolean);
 begin
   FPIS_VALOR_BASE_EXCLUIR_VALOR_ICMS := Value;
 end;
