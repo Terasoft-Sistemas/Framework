@@ -181,7 +181,7 @@ begin
   lModel   := TPedidoVendaModel.getNewIface(vIConexao);
   Result   := lModel;
   try
-    lQry.Open('select * from pedidovenda where numero_ped = '+pId);
+    lQry.Open('select * from pedidovenda where numero_ped = '+ QuotedStr(pId));
     if lQry.IsEmpty then
       Exit;
     lModel.objeto.NUMERO_PED               := lQry.FieldByName('NUMERO_PED').AsString;
