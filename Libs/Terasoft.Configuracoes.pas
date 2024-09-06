@@ -44,6 +44,7 @@ uses
 implementation
 
 uses
+  Terasoft.Framework.LOG,
   Terasoft.Utils, ConfiguracoesModel, System.Variants;
 
 { TerasoftSistemaConfigura }
@@ -53,8 +54,10 @@ var
   lConfiguracoesModel,
   lModel               : ITConfiguracoesModel;
 begin
+  logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TerasoftConfiguracoes.carregarConfiguracoes: Criando TConfiguracoesModel',LOG_LEVEL_DEBUG);
   lConfiguracoesModel := TConfiguracoesModel.getNewIface(vIConexao);
   try
+    logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TerasoftConfiguracoes.carregarConfiguracoes: TConfiguracoesModel.obterLista',LOG_LEVEL_DEBUG);
     lConfiguracoesModel.objeto.obterLista;
 
     for lModel in lConfiguracoesModel.objeto.ConfiguracoessLista do
@@ -81,10 +84,12 @@ end;
 
 constructor TerasoftConfiguracoes._Create(pIConexao : IConexao);
 begin
+  logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TerasoftConfiguracoes._Create: Criando Configurações',LOG_LEVEL_DEBUG);
   vIConexao        := pIConexao;
   if(vIConexao.terasoftConfiguracoes=nil) then
     vIConexao.terasoftConfiguracoes := myself;
 
+  logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TerasoftConfiguracoes._Create: Crianto vmtConfiguracoes',LOG_LEVEL_DEBUG);
   vmtConfiguracoes := criaIFDDataset(TFDMemTable.Create(nil));
 
   preparaTabela;
@@ -105,6 +110,7 @@ begin
 
 procedure TerasoftConfiguracoes.preparaTabela;
 begin
+  logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TerasoftConfiguracoes.preparaTabela:',LOG_LEVEL_DEBUG);
   with TFDMemTable(vmtConfiguracoes.objeto).FieldDefs do begin
     with AddFieldDef do begin
       Name      := 'ID';

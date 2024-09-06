@@ -109,6 +109,7 @@ type
 implementation
 
 uses
+  Terasoft.Framework.LOG,
   ConfiguracoesDao;
 
 { TConfiguracoesModel }
@@ -147,6 +148,7 @@ procedure TConfiguracoesModel.obterLista;
 var
   lConfiguracoesLista: ITConfiguracoesDao;
 begin
+  logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TerasoftConfiguracoes.carregarConfiguracoes: Criando TConfiguracoesDao',LOG_LEVEL_DEBUG);
   lConfiguracoesLista := TConfiguracoesDao.getNewIface(vIConexao);
 
   try

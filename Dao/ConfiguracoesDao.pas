@@ -77,6 +77,7 @@ end;
 implementation
 
 uses
+  Terasoft.Framework.LOG,
   System.Rtti;
 
 { TConfiguracoes }
@@ -220,6 +221,7 @@ var
   lSQL:String;
 begin
   try
+    logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TConfiguracoesDao.obterTotalRegistros',LOG_LEVEL_DEBUG);
     lQry := vIConexao.CriarQuery;
 
     lSql := 'select count(*) records From configuracoes where 1=1 ';
@@ -241,6 +243,7 @@ var
   lSQL:String;
   modelo: ITConfiguracoesModel;
 begin
+  logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TConfiguracoesDao.obterLista',LOG_LEVEL_DEBUG);
   lQry := vIConexao.CriarQuery;
 
   FConfiguracoessLista := TCollections.CreateList<ITConfiguracoesModel>;
@@ -258,6 +261,7 @@ begin
     lQry.Open(lSQL);
 
     lQry.First;
+    logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TConfiguracoesDao.obterLista: Criando TConfiguracoesModel',LOG_LEVEL_DEBUG);
     while not lQry.Eof do
     begin
       modelo := TConfiguracoesModel.getNewIface(vIConexao);
