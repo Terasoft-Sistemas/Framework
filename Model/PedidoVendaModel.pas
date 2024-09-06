@@ -790,7 +790,8 @@ begin
                                              lModel.objeto.WEB_PEDIDOITENS_ID,
                                              vIConexao.getEmpresa.LOJA,
                                              lAcrescimo,
-                                             lDesconto);
+                                             lDesconto,
+                                             lModel.objeto.VALORUNITARIO_PED);
       end;
     end;
 
