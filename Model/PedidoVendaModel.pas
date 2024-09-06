@@ -1858,7 +1858,7 @@ begin
       lCalcularImpostosModel.DESTINATARIO_UF      := IIF(lPedidoVendaModel.objeto.UF_CLI <> '', lPedidoVendaModel.objeto.UF_CLI, lEmpresaModel.objeto.UF);
       lCalcularImpostosModel.CODIGO_PRODUTO       := lPedidoVendaModel.objeto.CODIGO_PRO;
       lCalcularImpostosModel.QUANTIDADE           := lPedidoVendaModel.objeto.QUANTIDADE_PED;
-      lCalcularImpostosModel.VALORUNITARIO        := StrToFloatDef(lPedidoVendaModel.objeto.VALORUNITARIO_PED, 0) + StrToFloatDef(lPedidoVendaModel.objeto.VALOR_ACRESCIMO, 0);
+      lCalcularImpostosModel.VALORUNITARIO        := StrToFloatDef(lPedidoVendaModel.objeto.VALORUNITARIO_PED, 0);
 
       lCalcularImpostosModel := lCalcularImpostosModel.Processar;
 
