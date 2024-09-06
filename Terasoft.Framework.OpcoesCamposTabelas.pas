@@ -285,17 +285,21 @@ begin
 
   lLista := novaListaTexto;
 
+  Result := True;
+
   for p in fDependencias do
   begin
     regra := pValidador.getValidacaoPorNome(p.Key);
     if(regra=nil) then continue;
     if(regra.tabela<>fTabela) then begin
+      Result := false;
       pResultado.formataErro('TDadosCamposValidacoesImpl.verificaDependencias: Tabela da dependencia [%s.%s] diferente da tabela dependente[%s.%s].', [regra.nome, regra.tabela,fNome,fTabela]);
       exit;
     end;
     f := pContexto.FindField(regra.campo);
     if(f=nil) then
     begin
+      Result := false;
       pResultado.formataErro('TDadosCamposValidacoesImpl.verificaDependencias: Campo da regra [%s.%s] não existe no contexto fornecido.', [regra.nome, regra.campo]);
       exit;
     end;
@@ -309,7 +313,7 @@ begin
       lLista.text := lValor;
       Result := lLista.strings.IndexOf(f.AsString)<>-1;
     end;
-    if(Result) then exit;
+    if(Result=false) then exit;
   end;
 end;
 
