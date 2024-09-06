@@ -147,6 +147,12 @@ type
   // DASHBOARD
   //
   TDashbord_Parametros = record
+    ////////////////////////////////////////////////////////////////
+    ///                                                          ///
+    /// Ao Ao incluir novo campo, colcoar ele na função HASH,    ///
+    /// para que seja detectada a mudança no conteudo do record  ///
+    ///                                                          ///
+    ////////////////////////////////////////////////////////////////
     TipoData,
     DataInicio,
     DataFim,
@@ -338,6 +344,7 @@ begin
       BytesOf(self.SomarIPI),
       BytesOf(self.SomarFrete),
       BytesOf(self.Vendedores),
+      BytesOf(self.TipoAnalise),
       BytesOf(self.SomarAcrescimo)
       ]));
 end;

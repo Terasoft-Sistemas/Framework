@@ -1133,8 +1133,8 @@ begin
   MemTable := TFDMemTable.Create(nil);
   Result := criaIFDDataset(MemTable);
 
-    lTipoAnalise        := ' gc.id CODIGO_VEN, gc.nome VENDEDOR, ';
-    lTipoAnaliseEntrada :=  QuotedStr('000000')+' CODIGO_VEN, '+QuotedStr('DEV ENTRADA')+' VENDEDOR, ';
+//    lTipoAnalise        := ' gc.id CODIGO_VEN, gc.nome VENDEDOR, ';
+//    lTipoAnaliseEntrada :=  QuotedStr('000000')+' CODIGO_VEN, '+QuotedStr('DEV ENTRADA')+' VENDEDOR, ';
 
   if pDashbord_Parametros.TipoAnalise = 'VENDEDOR' then
   begin

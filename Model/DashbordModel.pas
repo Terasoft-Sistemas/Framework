@@ -203,6 +203,7 @@ begin
     lDashbord_Parametros.SomarIPI       := pDashbord_Parametros.SomarIPI;
     lDashbord_Parametros.SomarFrete     := pDashbord_Parametros.SomarFrete;
     lDashbord_Parametros.Vendedores     := pDashbord_Parametros.Vendedores;
+    lDashbord_Parametros.TipoAnalise    := pDashbord_Parametros.TipoAnalise;
 
     Result := lDashbordDao.objeto.ObterQuery6_RankingVendedores(lDashbord_Parametros);
 
