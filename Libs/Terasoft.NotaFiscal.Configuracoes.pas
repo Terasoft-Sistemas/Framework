@@ -638,6 +638,8 @@ begin
     39: Result := fpProgramaFidelidade;
     90: Result := fpSemPagamento;
     99: Result := fpOutro;
+  else
+    Result := fpDinheiro;
   end;
 
 end;
