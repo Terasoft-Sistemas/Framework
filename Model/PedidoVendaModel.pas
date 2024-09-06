@@ -707,7 +707,10 @@ begin
       lDiferenca := lDiferenca * -1;
 
     if (lDiferenca > 0.50) then
-      CriaException('Total do contas a receber divergente do total do pedido');
+      CriaException('Total do contas a receber divergente do total do pedido' + #13 +
+                    'Contas a receber: ' + FloatToStr(lTotalReceber) + #13 +
+                    'Total do pedido: ' + FloatToStr(self.TOTAL_PED));
+
 
     lContasReceberModel.IDPedidoView := lPedidoVendaModel.objeto.NUMERO_PED;
     lContasReceberModel.WhereView    := ' and portador.tpag_nfe = ''17'' and portador.pix_chave is not null';
