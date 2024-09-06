@@ -155,7 +155,8 @@ type
     SomarAcrescimo,
     SomarIPI,
     SomarFrete,
-    Vendedores : String;
+    Vendedores,
+    TipoAnalise : String;
     expandeAsync: TOperacoesDashboardAsyncSet;
     identificador: TBytes;
     function hash: TBytes;

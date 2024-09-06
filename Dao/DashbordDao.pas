@@ -39,7 +39,6 @@ type
     function ObterQuery4_VendaPorHora(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
     function ObterQuery6_RankingVendedores(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
     function ObterQuery7_RankingFiliais(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
-
     function ObterQuery3_VendaPorAno(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
 
   end;
@@ -871,9 +870,255 @@ begin
 
 end;
 
+//function TDashbordDao.ObterQuery6_RankingVendedores(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
+//var
+//  lSQL:String;
+//  MemTable: TFDMemTable;
+//  Options: TLocateOptions;
+//  lTotalValores: Real;
+//
+//  lAsyncList  : IListaQueryAsync;
+//  lQA         : IQueryLojaAsync;
+//  conexao     : IConexao;
+//
+//begin
+//  lAsyncList := getQueryLojaAsyncList(vIConexao,pDashbord_Parametros.Lojas);
+//
+//  MemTable := TFDMemTable.Create(nil);
+//  Result := criaIFDDataset(MemTable);
+//  lSQL := 'select                                                                                                                             ' + #13 +
+//          '    CODIGO_VEN,                                                                                                                    ' + #13 +
+//          '    VENDEDOR,                                                                                                                      ' + #13 +
+//          '    VALOR_LIQUIDO,                                                                                                                 ' + #13 +
+//          '    VALOR_PRODUTO,                                                                                                                 ' + #13 +
+//          '    DESCONTO,                                                                                                                      ' + #13 +
+//          '    ACRESCIMO,                                                                                                                     ' + #13 +
+//          '    FRETE,                                                                                                                         ' + #13 +
+//          '    IPI,                                                                                                                           ' + #13 +
+//          '    ST,                                                                                                                            ' + #13 +
+//          '    CUSTO,                                                                                                                         ' + #13 +
+//          '    TOTAL_ITENS,                                                                                                                   ' + #13 +
+//          '    QUANTIDADE_VENDA,                                                                                                              ' + #13 +
+//          '    CLIENTE                                                                                                                        ' + #13 +
+//          'from                                                                                                                               ' + #13 +
+//          '(                                                                                                                                  ' + #13 +
+//          '    select                                                                                                                         ' + #13 +
+//          '        CODIGO_VEN,                                                                                                                ' + #13 +
+//          '        VENDEDOR,                                                                                                                  ' + #13 +
+//          '        sum(valor_produto-desconto) VALOR_LIQUIDO,                                                                                 ' + #13 +
+//          '        sum(valor_produto) VALOR_PRODUTO,                                                                                          ' + #13 +
+//          '        sum(desconto) DESCONTO,                                                                                                    ' + #13 +
+//          '        sum(acrescimo) ACRESCIMO,                                                                                                  ' + #13 +
+//          '        sum(frete) FRETE,                                                                                                          ' + #13 +
+//          '        sum(ipi) IPI,                                                                                                              ' + #13 +
+//          '        sum(st) ST,                                                                                                                ' + #13 +
+//          '        sum(custo) CUSTO,                                                                                                          ' + #13 +
+//          '        sum(total_itens) TOTAL_ITENS,                                                                                              ' + #13 +
+//          '        count(distinct(quantidade_venda)) QUANTIDADE_VENDA,                                                                        ' + #13 +
+//          '        count(distinct(cliente))-1 CLIENTE                                                                                         ' + #13 +
+//          '    from                                                                                                                           ' + #13 +
+//          '    (                                                                                                                              ' + #13 +
+//          '       select                                                                                                                      ' + #13 +
+//          '            v.data_ped DATA_EMISSAO,                                                                                               ' + #13 +
+//          '            v.data_faturado DATA_FATURADO,                                                                                         ' + #13 +
+//          '            f.codigo_fun CODIGO_VEN,                                                                                               ' + #13 +
+//          '            f.nome_fun VENDEDOR,                                                                                                   ' + #13 +
+//          '            (i.valorunitario_ped * i.qtde_calculada) VALOR_PRODUTO,                                                                ' + #13 +
+//          '            ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.desc_ped as float),0) DESCONTO,                 ' + #13 +
+//          '            ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.acres_ped as float),0) ACRESCIMO,               ' + #13 +
+//          '            ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.frete_ped as float),0) FRETE,                   ' + #13 +
+//          '            i.valor_ipi IPI,                                                                                                       ' + #13 +
+//          '            i.valor_st ST,                                                                                                         ' + #13 +
+//          '            coalesce(i.vlrcusto_pro,0) * coalesce(i.qtde_calculada,0) CUSTO,                                                       ' + #13 +
+//          '            coalesce(i.qtde_calculada, 0) TOTAL_ITENS,                                                                             ' + #13 +
+//          '            v.numero_ped || ''P'' QUANTIDADE_VENDA,                                                                                ' + #13 +
+//          '            v.codigo_cli CLIENTE,                                                                                                  ' + #13 +
+//          '            '' '' ITEM                                                                                                             ' + #13 +
+//          '        from                                                                                                                       ' + #13 +
+//          '             pedidovenda v                                                                                                         ' + #13 +
+//          '			          inner join pedidoitens i on v.numero_ped = i.numero_ped                                                             ' + #13 +
+//          '               left  join funcionario f on f.codigo_fun = v.codigo_ven                                                             ' + #13 +
+//          '        where                                                                                                                      ' + #13 +
+//          '            coalesce(v.valor_ped,0) > 0                                                                                            ' + #13 +
+//          '            and coalesce(v.status, ''P'') in (''P'', ''F'')                                                                        ' + #13 +
+//          '            ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and f.codigo_fun in (' + pDashbord_Parametros.Vendedores + ') ', '') + #13 +
+//          '                                                                                                                                   ' + #13 +
+//          '        union all                                                                                                                  ' + #13 +
+//          '                                                                                                                                   ' + #13 +
+//          '        select                                                                                                                     ' + #13 +
+//          '            distinct                                                                                                               ' + #13 +
+//          '            d.data DATA_EMISSAO,                                                                                                   ' + #13 +
+//          '            d.data DATA_FATURADO,                                                                                                  ' + #13 +
+//          '            f.codigo_fun CODIGO_VEN,                                                                                               ' + #13 +
+//          '            f.nome_fun VENDEDOR,                                                                                                   ' + #13 +
+//          '            (di.valor_unitario*di.quantidade) *-1 VALOR_PRODUTO,                                                                   ' + #13 +
+//          '            ((di.quantidade*di.valor_unitario)/(d.valor_total+d.desconto-d.valor_acrescimo))*coalesce(cast(d.desconto as float),0) *-1 DESCONTO,           ' + #13 +
+//          '            ((di.quantidade*di.valor_unitario)/(d.valor_total+d.desconto-d.valor_acrescimo))*coalesce(cast(d.valor_acrescimo as float),0) *-1 ACRESCIMO,   ' + #13 +
+//          '            0 FRETE,                                                                                                               ' + #13 +
+//          '            0 IPI,                                                                                                                 ' + #13 +
+//          '            0 ST,                                                                                                                  ' + #13 +
+//          '            0 CUSTO,                                                                                                               ' + #13 +
+//          '            di.quantidade * -1 TOTAL_ITENS,                                                                                        ' + #13 +
+//          '            null QUANTIDADE_VENDA,                                                                                                 ' + #13 +
+//          '            null CLIENTE,                                                                                                          ' + #13 +
+//          '            di.item ITEM                                                                                                           ' + #13 +
+//          '        from                                                                                                                       ' + #13 +
+//          '             devolucao d                                                                                                           ' + #13 +
+//          '               left join funcionario f     on f.codigo_fun  = d.vendedor                                                           ' + #13 +
+//          '               left join devolucaoitens di on di.id         = d.id                                                                 ' + #13 +
+//          '               left join pedidovenda v     on v.numero_ped  = d.pedido                                                             ' + #13 +
+//          '               left join pedidoitens vi    on vi.numero_ped = v.numero_ped and                                                     ' + #13 +
+//          '			                                         vi.codigo_pro = di.produto                                                           ' + #13 +
+//          '        where                                                                                                                      ' + #13 +
+//          '            coalesce(d.valor_total,0) > 0                                                                                          ' + #13 +
+//          '            ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and f.codigo_fun in (' + pDashbord_Parametros.Vendedores + ') ', '') + #13 +
+//          '                                                                                                                                   ' + #13 +
+//          '        union all                                                                                                                  ' + #13 +
+//          '                                                                                                                                   ' + #13 +
+//          '        select                                                                                                                     ' + #13 +
+//          '            e.datamovi_ent DATA_EMISSAO,                                                                                           ' + #13 +
+//          '            e.datamovi_ent DATA_FATURADO,                                                                                          ' + #13 +
+//          '            f.codigo_fun CODIGO_VEN,                                                                                               ' + #13 +
+//          '            f.nome_fun VENDEDOR,                                                                                                   ' + #13 +
+//          '            coalesce(e.TOTAL_ENT,0)*-1 VALOR_PRODUTO,                                                                              ' + #13 +
+//          '            0 DESCONTO,                                                                                                            ' + #13 +
+//          '            0 ACRESCIMO,                                                                                                           ' + #13 +
+//          '            0 FRETE,                                                                                                               ' + #13 +
+//          '            0 IPI,                                                                                                                 ' + #13 +
+//          '            0 ST,                                                                                                                  ' + #13 +
+//          '            0 CUSTO,                                                                                                               ' + #13 +
+//          '            0 TOTAL_ITENS,                                                                                                         ' + #13 +
+//          '            null QUANTIDADE_VENDA,                                                                                                 ' + #13 +
+//          '            null CLIENTE,                                                                                                          ' + #13 +
+//          '            '' '' ITEM                                                                                                             ' + #13 +
+//          '        from                                                                                                                       ' + #13 +
+//          '             entrada e                                                                                                             ' + #13 +
+//          '               inner join pedidovenda v on e.devolucao_pedido_id = v.numero_ped                                                    ' + #13 +
+//          '               left  join funcionario f on f.codigo_fun          = v.codigo_ven                                                    ' + #13 +
+//          '        where                                                                                                                      ' + #13 +
+//          '            coalesce(e.TOTAL_ENT,0) > 0                                                                                            ' + #13 +
+//          '            ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and f.codigo_fun in (' + pDashbord_Parametros.Vendedores + ') ', '') + #13 +
+//          '                                                                                                                                   ' + #13 +
+//          '        union all                                                                                                                  ' + #13 +
+//          '                                                                                                                                   ' + #13 +
+//          '        select                                                                                                                     ' + #13 +
+//          '            v.fechamento_os DATA_EMISSAO,                                                                                          ' + #13 +
+//          '            v.fechamento_os DATA_FATURADO,                                                                                         ' + #13 +
+//          '            f.codigo_fun CODIGO_VEN,                                                                                               ' + #13 +
+//          '            f.nome_fun VENDEDOR,                                                                                                   ' + #13 +
+//          '            (i.valorunitario_os*i.quantidade_pro) VALOR_PRODUTO,                                                                   ' + #13 +
+//          '            ((i.valorunitario_os*i.quantidade_pro)/(v.total_os+v.desc_os-v.acrescimo_os))*cast(v.desc_os as float) DESCONTO,       ' + #13 +
+//          '            ((i.valorunitario_os*i.quantidade_pro)/(v.total_os+v.desc_os-v.acrescimo_os))*cast(v.acrescimo_os as float) ACRESCIMO, ' + #13 +
+//          '            0 FRETE,                                                                                                               ' + #13 +
+//          '            0 IPI,                                                                                                                 ' + #13 +
+//          '            0 ST,                                                                                                                  ' + #13 +
+//          '            coalesce(i.quantidade_pro,0) * coalesce(i.custo_pro,0) CUSTO,                                                          ' + #13 +
+//          '            coalesce(i.quantidade_pro,0) TOTAL_ITENS,                                                                              ' + #13 +
+//          '            v.numero_os || ''O'' QUANTIDADE_VENDA,                                                                                 ' + #13 +
+//          '            v.codigo_cli CLIENTE,                                                                                                  ' + #13 +
+//          '            '' '' ITEM                                                                                                             ' + #13 +
+//          '        from                                                                                                                       ' + #13 +
+//          '             os v                                                                                                                  ' + #13 +
+//          '               inner join ositens i     on v.numero_os  = i.numero_os                                                              ' + #13 +
+//          '               inner join funcionario f on f.codigo_fun = i.vendedor_id                                                            ' + #13 +
+//          '        where                                                                                                                      ' + #13 +
+//          '            coalesce(v.status_os, ''F'') = ''F''                                                                                   ' + #13 +
+//          '            and coalesce(v.total_os, 0) > 0                                                                                        ' + #13 +
+//          '            ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and f.codigo_fun in (' + pDashbord_Parametros.Vendedores + ') ', '') + #13 +
+//          '    ) resultado                                                                                                                    ' + #13 +
+//          '                                                                                                                                   ' + #13 +
+//          '    where                                                                                                                          ' + #13 +
+//          '        resultado.' + ifThen(pDashbord_Parametros.TipoData = 'EMISSÃO', 'data_emissao', 'data_faturado') + ' between ' + QuotedStr(transformaDataFireBirdWhere(pDashbord_Parametros.DataInicio)) + ' and ' + QuotedStr(transformaDataFireBirdWhere(pDashbord_Parametros.DataFim)) + #13 +
+//          '                                                                                                                                   ' + #13 +
+//          '    group by 1, 2                                                                                                                     ' + #13 +
+//          '    order by 2 desc                                                                                                                ' + #13 +
+//          ')                                                                                                                                  ';
+//
+//  gravaSQL(lSQL, 'DashbordDao_ObterQuery6_RankingVendedores_' + FormatDateTime('yyyymmddhhnnsszzz', now));
+//
+//  MemTable.FieldDefs.Add('CODIGO_VEN',    ftString,  10);
+//  MemTable.FieldDefs.Add('VENDEDOR',      ftString, 100);
+//  MemTable.FieldDefs.Add('VALOR_LIQUIDO', ftFloat);
+//  MemTable.FieldDefs.Add('CUSTO',         ftFloat);
+//  MemTable.FieldDefs.Add('CLIENTE',       ftInteger);
+//  MemTable.FieldDefs.Add('DOCUMENTO',     ftInteger);
+//  MemTable.FieldDefs.Add('ITENS',         ftInteger);
+//  MemTable.FieldDefs.Add('DESCONTO',      ftFloat);
+//  MemTable.FieldDefs.Add('ACRESCIMO',     ftFloat);
+//  MemTable.FieldDefs.Add('FRETE',         ftFloat);
+//  MemTable.FieldDefs.Add('IPI',           ftFloat);
+//  MemTable.FieldDefs.Add('ST',            ftFloat);
+//  MemTable.CreateDataSet;
+//
+//  for lQA in lAsyncList do
+//  begin
+//    lQA.tag := 'ObterQuery6_RankingVendedores';
+//    conexao := lQA.loja.objeto.conexaoLoja;
+//    if(conexao=nil) then
+//      raise Exception.CreateFmt('TDashbordDao.ObterQuery6_RankingVendedores: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);
+//
+//    lQA.execQuery(lSQL,'',[]);
+//  end;
+//
+//  for lQA in lAsyncList do
+//  begin
+//    lQA.espera;
+//    if(lQA.resultado.erros>0) then
+//      raise Exception.CreateFmt('TDashbordDao.ObterQuery6_RankingVendedores: Loja [%s] com problemas: [%s]',[lQA.loja.objeto.LOJA,lQA.resultado.toString]);
+//
+//    lQA.dataset.dataset.First;
+//    while not lQA.dataset.dataset.Eof do
+//    begin
+//      lTotalValores := lQA.dataset.dataset.FieldByName('VALOR_LIQUIDO').AsFloat;
+//
+//      if pDashbord_Parametros.SomarST        = 'SIM' then lTotalValores := lTotalValores + lQA.dataset.dataset.FieldByName('ST').AsFloat;
+//      if pDashbord_Parametros.SomarAcrescimo = 'SIM' then lTotalValores := lTotalValores + lQA.dataset.dataset.FieldByName('ACRESCIMO').AsFloat;
+//      if pDashbord_Parametros.SomarIPI       = 'SIM' then lTotalValores := lTotalValores + lQA.dataset.dataset.FieldByName('IPI').AsFloat;
+//      if pDashbord_Parametros.SomarFRETE     = 'SIM' then lTotalValores := lTotalValores + lQA.dataset.dataset.FieldByName('FRETE').AsFloat;
+//
+//      if not MemTable.Locate('VENDEDOR', trim(lQA.dataset.dataset.FieldByName('VENDEDOR').AsString)) then
+//      begin
+//        MemTable.InsertRecord([
+//                                lQA.dataset.dataset.FieldByName('CODIGO_VEN').AsString,
+//                                trim(lQA.dataset.dataset.FieldByName('VENDEDOR').AsString),
+//                                lTotalValores,
+//                                lQA.dataset.dataset.FieldByName('CUSTO').AsFloat,
+//                                lQA.dataset.dataset.FieldByName('CLIENTE').AsInteger,
+//                                lQA.dataset.dataset.FieldByName('DESCONTO').AsFloat,
+//                                lQA.dataset.dataset.FieldByName('ACRESCIMO').AsFloat,
+//                                lQA.dataset.dataset.FieldByName('FRETE').AsFloat,
+//                                lQA.dataset.dataset.FieldByName('IPI').AsFloat,
+//                                lQA.dataset.dataset.FieldByName('ST').AsFloat
+//                                ]);
+//      end else
+//      begin
+//        MemTable.Edit;
+//        MemTable.FieldByName('VALOR_LIQUIDO').Value := MemTable.FieldByName('VALOR_LIQUIDO').Value + lTotalValores;
+//        MemTable.FieldByName('CUSTO').Value         := MemTable.FieldByName('CUSTO').Value + lQA.dataset.dataset.FieldByName('CUSTO').AsFloat;
+//        MemTable.FieldByName('CLIENTE').Value       := MemTable.FieldByName('CLIENTE').Value + lQA.dataset.dataset.FieldByName('CLIENTE').AsInteger;
+//        MemTable.FieldByName('DESCONTO').Value      := MemTable.FieldByName('DESCONTO').Value + lQA.dataset.dataset.FieldByName('DESCONTO').AsFloat;
+//        MemTable.FieldByName('ACRESCIMO').Value     := MemTable.FieldByName('ACRESCIMO').Value + lQA.dataset.dataset.FieldByName('ACRESCIMO').AsFloat;
+//        MemTable.FieldByName('FRETE').Value         := MemTable.FieldByName('FRETE').Value + lQA.dataset.dataset.FieldByName('FRETE').AsFloat;
+//        MemTable.FieldByName('IPI').Value           := MemTable.FieldByName('IPI').Value + lQA.dataset.dataset.FieldByName('IPI').AsFloat;
+//        MemTable.FieldByName('ST').Value            := MemTable.FieldByName('ST').Value + lQA.dataset.dataset.FieldByName('ST').AsFloat;
+//        MemTable.Post;
+//      end;
+//      lQA.dataset.dataset.Next;
+//    end;
+//  end;
+//
+//  MemTable.IndexFieldNames := 'VENDEDOR';
+//  MemTable.Open;
+//
+//end;
+//
+
+
+
+
 function TDashbordDao.ObterQuery6_RankingVendedores(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
 var
-  lSQL:String;
+  lSQL, lTipoAnalise, lTipoAnaliseEntrada:String;
   MemTable: TFDMemTable;
   Options: TLocateOptions;
   lTotalValores: Real;
@@ -887,6 +1132,46 @@ begin
 
   MemTable := TFDMemTable.Create(nil);
   Result := criaIFDDataset(MemTable);
+
+    lTipoAnalise        := ' gc.id CODIGO_VEN, gc.nome VENDEDOR, ';
+    lTipoAnaliseEntrada :=  QuotedStr('000000')+' CODIGO_VEN, '+QuotedStr('DEV ENTRADA')+' VENDEDOR, ';
+
+  if pDashbord_Parametros.TipoAnalise = 'VENDEDOR' then
+  begin
+    lTipoAnalise        := ' f.codigo_fun CODIGO_VEN,  f.nome_fun VENDEDOR, ';
+    lTipoAnaliseEntrada := ' f.codigo_fun CODIGO_VEN,  f.nome_fun VENDEDOR, ';
+  end else
+  if pDashbord_Parametros.TipoAnalise = 'FORNECEDOR' then
+  begin
+    lTipoAnalise        := '  fo.codigo_for CODIGO_VEN, fo.fantasia_for VENDEDOR, ';
+    lTipoAnaliseEntrada :=  QuotedStr('000000')+' CODIGO_VEN, '+QuotedStr('DEV ENTRADA')+' VENDEDOR, ';
+  end else
+  if pDashbord_Parametros.TipoAnalise = 'GRUPOPRODUTO' then
+  begin
+    lTipoAnalise        := '  g.codigo_gru CODIGO_VEN, g.nome_gru VENDEDOR, ';
+    lTipoAnaliseEntrada :=  QuotedStr('000000')+' CODIGO_VEN, '+QuotedStr('DEV ENTRADA')+' VENDEDOR, ';
+  end else
+  if pDashbord_Parametros.TipoAnalise = 'SUBGRUPOPRODUTO' then
+  begin
+    lTipoAnalise        := '  s.codigo_sub CODIGO_VEN, s.nome_sub VENDEDOR, ';
+    lTipoAnaliseEntrada :=  QuotedStr('000000')+' CODIGO_VEN, '+QuotedStr('DEV ENTRADA')+' VENDEDOR, ';
+  end else
+  if pDashbord_Parametros.TipoAnalise = 'MARCAPRODUTO' then
+  begin
+    lTipoAnalise        := '  m.codigo_mar CODIGO_VEN, m.nome_mar VENDEDOR, ';
+    lTipoAnaliseEntrada :=  QuotedStr('000000')+' CODIGO_VEN, '+QuotedStr('DEV ENTRADA')+' VENDEDOR, ';
+  end else
+  if pDashbord_Parametros.TipoAnalise = 'PRODUTO_TIPO' then
+  begin
+    lTipoAnalise        := ' coalesce(pt.id, 999999) CODIGO_VEN, coalesce(pt.nome, ''NAO INFORMADO'') VENDEDOR, ';
+    lTipoAnaliseEntrada :=  QuotedStr('000000')+' CODIGO_VEN, '+QuotedStr('DEV ENTRADA')+' VENDEDOR, ';
+  end else
+  if pDashbord_Parametros.TipoAnalise = 'GRUPO_COMISSAO' then
+  begin
+    lTipoAnalise        := ' gc.id CODIGO_VEN, gc.nome VENDEDOR, ';
+    lTipoAnaliseEntrada :=  QuotedStr('000000')+' CODIGO_VEN, '+QuotedStr('DEV ENTRADA')+' VENDEDOR, ';
+  end;
+
   lSQL := 'select                                                                                                                             ' + #13 +
           '    CODIGO_VEN,                                                                                                                    ' + #13 +
           '    VENDEDOR,                                                                                                                      ' + #13 +
@@ -922,8 +1207,12 @@ begin
           '       select                                                                                                                      ' + #13 +
           '            v.data_ped DATA_EMISSAO,                                                                                               ' + #13 +
           '            v.data_faturado DATA_FATURADO,                                                                                         ' + #13 +
-          '            f.codigo_fun CODIGO_VEN,                                                                                               ' + #13 +
-          '            f.nome_fun VENDEDOR,                                                                                                   ' + #13 +
+//          '            f.codigo_fun CODIGO_VEN,                                                                                               ' + #13 +
+//          '            f.nome_fun VENDEDOR,                                                                                                   ' + #13 +
+          lTipoAnalise +
+
+
+
           '            (i.valorunitario_ped * i.qtde_calculada) VALOR_PRODUTO,                                                                ' + #13 +
           '            ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.desc_ped as float),0) DESCONTO,                 ' + #13 +
           '            ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.acres_ped as float),0) ACRESCIMO,               ' + #13 +
@@ -937,8 +1226,16 @@ begin
           '            '' '' ITEM                                                                                                             ' + #13 +
           '        from                                                                                                                       ' + #13 +
           '             pedidovenda v                                                                                                         ' + #13 +
-          '			          inner join pedidoitens i on v.numero_ped = i.numero_ped                                                             ' + #13 +
-          '               left  join funcionario f on f.codigo_fun = v.codigo_ven                                                             ' + #13 +
+          '            inner join pedidoitens i     on v.numero_ped = i.numero_ped                                                            ' + #13 +
+          '            left  join funcionario f     on f.codigo_fun = v.codigo_ven                                                            ' + #13 +
+          '            left  join produto p         on p.codigo_pro = i.codigo_pro                                                            ' + #13 +
+          '            left  join grupoproduto g    on g.codigo_gru = p.codigo_gru                                                            ' + #13 +
+          '            left  join subgrupoproduto s on s.codigo_sub = p.codigo_sub                                                            ' + #13 +
+          '            left  join marcaproduto m    on m.codigo_mar = p.codigo_mar                                                            ' + #13 +
+          '            left  join produto_tipo pt   on pt.id = p.tipo_id                                                                      ' + #13 +
+          '            left  join grupo_comissao gc on gc.id = p.grupo_comissao_id                                                            ' + #13 +
+          '            left  join fornecedor fo     on fo.codigo_for = p.codigo_for                                                           ' + #13 +
+
           '        where                                                                                                                      ' + #13 +
           '            coalesce(v.valor_ped,0) > 0                                                                                            ' + #13 +
           '            and coalesce(v.status, ''P'') in (''P'', ''F'')                                                                        ' + #13 +
@@ -950,8 +1247,9 @@ begin
           '            distinct                                                                                                               ' + #13 +
           '            d.data DATA_EMISSAO,                                                                                                   ' + #13 +
           '            d.data DATA_FATURADO,                                                                                                  ' + #13 +
-          '            f.codigo_fun CODIGO_VEN,                                                                                               ' + #13 +
-          '            f.nome_fun VENDEDOR,                                                                                                   ' + #13 +
+//          '            f.codigo_fun CODIGO_VEN,                                                                                               ' + #13 +
+//          '            f.nome_fun VENDEDOR,                                                                                                   ' + #13 +
+          lTipoAnalise +
           '            (di.valor_unitario*di.quantidade) *-1 VALOR_PRODUTO,                                                                   ' + #13 +
           '            ((di.quantidade*di.valor_unitario)/(d.valor_total+d.desconto-d.valor_acrescimo))*coalesce(cast(d.desconto as float),0) *-1 DESCONTO,           ' + #13 +
           '            ((di.quantidade*di.valor_unitario)/(d.valor_total+d.desconto-d.valor_acrescimo))*coalesce(cast(d.valor_acrescimo as float),0) *-1 ACRESCIMO,   ' + #13 +
@@ -965,11 +1263,20 @@ begin
           '            di.item ITEM                                                                                                           ' + #13 +
           '        from                                                                                                                       ' + #13 +
           '             devolucao d                                                                                                           ' + #13 +
-          '               left join funcionario f     on f.codigo_fun  = d.vendedor                                                           ' + #13 +
-          '               left join devolucaoitens di on di.id         = d.id                                                                 ' + #13 +
-          '               left join pedidovenda v     on v.numero_ped  = d.pedido                                                             ' + #13 +
-          '               left join pedidoitens vi    on vi.numero_ped = v.numero_ped and                                                     ' + #13 +
-          '			                                         vi.codigo_pro = di.produto                                                           ' + #13 +
+          '               left join funcionario f      on f.codigo_fun  = d.vendedor                                                          ' + #13 +
+          '               left join devolucaoitens di  on di.id         = d.id                                                                ' + #13 +
+          '               left join pedidovenda v      on v.numero_ped  = d.pedido                                                            ' + #13 +
+          '               left join pedidoitens vi     on vi.numero_ped = v.numero_ped and vi.codigo_pro = di.produto                         ' + #13 +
+          '               left  join produto p         on p.codigo_pro = di.produto                                                           ' + #13 +
+          '               left  join grupoproduto g    on g.codigo_gru = p.codigo_gru                                                         ' + #13 +
+          '               left  join subgrupoproduto s on s.codigo_sub = p.codigo_sub                                                         ' + #13 +
+          '               left  join marcaproduto m    on m.codigo_mar = p.codigo_mar                                                         ' + #13 +
+          '               left  join produto_tipo pt   on pt.id = p.tipo_id                                                                   ' + #13 +
+          '               left  join grupo_comissao gc on gc.id = p.grupo_comissao_id                                                         ' + #13 +
+          '               left  join fornecedor fo     on fo.codigo_for = p.codigo_for                                                        ' + #13 +
+
+
+ 		      '                                                                                                                                   ' + #13 +
           '        where                                                                                                                      ' + #13 +
           '            coalesce(d.valor_total,0) > 0                                                                                          ' + #13 +
           '            ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and f.codigo_fun in (' + pDashbord_Parametros.Vendedores + ') ', '') + #13 +
@@ -979,8 +1286,9 @@ begin
           '        select                                                                                                                     ' + #13 +
           '            e.datamovi_ent DATA_EMISSAO,                                                                                           ' + #13 +
           '            e.datamovi_ent DATA_FATURADO,                                                                                          ' + #13 +
-          '            f.codigo_fun CODIGO_VEN,                                                                                               ' + #13 +
-          '            f.nome_fun VENDEDOR,                                                                                                   ' + #13 +
+//          '            f.codigo_fun CODIGO_VEN,                                                                                               ' + #13 +
+//          '            f.nome_fun VENDEDOR,                                                                                                   ' + #13 +
+          lTipoAnaliseEntrada +
           '            coalesce(e.TOTAL_ENT,0)*-1 VALOR_PRODUTO,                                                                              ' + #13 +
           '            0 DESCONTO,                                                                                                            ' + #13 +
           '            0 ACRESCIMO,                                                                                                           ' + #13 +
@@ -1005,8 +1313,9 @@ begin
           '        select                                                                                                                     ' + #13 +
           '            v.fechamento_os DATA_EMISSAO,                                                                                          ' + #13 +
           '            v.fechamento_os DATA_FATURADO,                                                                                         ' + #13 +
-          '            f.codigo_fun CODIGO_VEN,                                                                                               ' + #13 +
-          '            f.nome_fun VENDEDOR,                                                                                                   ' + #13 +
+//          '            f.codigo_fun CODIGO_VEN,                                                                                               ' + #13 +
+//          '            f.nome_fun VENDEDOR,                                                                                                   ' + #13 +
+          lTipoAnalise +
           '            (i.valorunitario_os*i.quantidade_pro) VALOR_PRODUTO,                                                                   ' + #13 +
           '            ((i.valorunitario_os*i.quantidade_pro)/(v.total_os+v.desc_os-v.acrescimo_os))*cast(v.desc_os as float) DESCONTO,       ' + #13 +
           '            ((i.valorunitario_os*i.quantidade_pro)/(v.total_os+v.desc_os-v.acrescimo_os))*cast(v.acrescimo_os as float) ACRESCIMO, ' + #13 +
@@ -1022,6 +1331,15 @@ begin
           '             os v                                                                                                                  ' + #13 +
           '               inner join ositens i     on v.numero_os  = i.numero_os                                                              ' + #13 +
           '               inner join funcionario f on f.codigo_fun = i.vendedor_id                                                            ' + #13 +
+          '               left  join produto p on p.codigo_pro = i.codigo_pro                                                                 ' + #13 +
+          '               left  join grupoproduto g    on g.codigo_gru = p.codigo_gru                                                         ' + #13 +
+          '               left  join subgrupoproduto s on s.codigo_sub = p.codigo_sub                                                         ' + #13 +
+          '               left  join marcaproduto m    on m.codigo_mar = p.codigo_mar                                                         ' + #13 +
+          '               left  join produto_tipo pt   on pt.id = p.tipo_id                                                                   ' + #13 +
+          '               left  join grupo_comissao gc on gc.id = p.grupo_comissao_id                                                         ' + #13 +
+          '               left  join fornecedor fo     on fo.codigo_for = p.codigo_for                                                        ' + #13 +
+
+
           '        where                                                                                                                      ' + #13 +
           '            coalesce(v.status_os, ''F'') = ''F''                                                                                   ' + #13 +
           '            and coalesce(v.total_os, 0) > 0                                                                                        ' + #13 +
@@ -1112,6 +1430,9 @@ begin
   MemTable.Open;
 
 end;
+
+
+
 
 function TDashbordDao.ObterQuery7_RankingFiliais(pDashbord_Parametros: TDashbord_Parametros): IFDDataset;
 var
