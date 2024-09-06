@@ -72,6 +72,8 @@ type
     FRECEBIMENTO_CONCLUIDO: Boolean;
     FACRESCIMO: Variant;
     FIDUsuarioOperacao: String;
+    FFATURA_PIX: Variant;
+    FRECEBIMENTO_CARTAO_ID: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetContasRecebersLista(const Value: IList<TContasReceberModel>);
@@ -127,6 +129,8 @@ type
     procedure SetRECEBIMENTO_CONCLUIDO(const Value: Boolean);
     procedure SetACRESCIMO(const Value: Variant);
     procedure SetIDUsuarioOperacao(const Value: String);
+    procedure SetFATURA_PIX(const Value: Variant);
+    procedure SetRECEBIMENTO_CARTAO_ID(const Value: Variant);
   public
     property FATURA_REC: Variant read FFATURA_REC write SetFATURA_REC;
     property CODIGO_CLI: Variant read FCODIGO_CLI write SetCODIGO_CLI;
@@ -171,6 +175,8 @@ type
     property TOTAL_PARCELAS: Variant read FTOTAL_PARCELAS write SetTOTAL_PARCELAS;
     property RECEBIMENTO_CONCLUIDO: Boolean read FRECEBIMENTO_CONCLUIDO write SetRECEBIMENTO_CONCLUIDO;
     property ACRESCIMO: Variant read FACRESCIMO write SetACRESCIMO;
+    property FATURA_PIX: Variant read FFATURA_PIX write SetFATURA_PIX;
+    property RECEBIMENTO_CARTAO_ID: Variant read FRECEBIMENTO_CARTAO_ID write SetRECEBIMENTO_CARTAO_ID;
 
   	constructor Create(pConexao : IConexao);
     destructor Destroy; override;
@@ -599,6 +605,11 @@ begin
   FDESENVOLVIMENTO_ID := Value;
 end;
 
+procedure TContasReceberModel.SetFATURA_PIX(const Value: Variant);
+begin
+  FFATURA_PIX := Value;
+end;
+
 procedure TContasReceberModel.SetFATURA_REC(const Value: Variant);
 begin
   FFATURA_REC := Value;
@@ -697,6 +708,11 @@ end;
 procedure TContasReceberModel.SetOS_REC(const Value: Variant);
 begin
   FOS_REC := Value;
+end;
+
+procedure TContasReceberModel.SetRECEBIMENTO_CARTAO_ID(const Value: Variant);
+begin
+  FRECEBIMENTO_CARTAO_ID := Value;
 end;
 
 procedure TContasReceberModel.SetRECEBIMENTO_CONCLUIDO(const Value: Boolean);

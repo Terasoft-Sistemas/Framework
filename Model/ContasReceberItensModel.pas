@@ -226,10 +226,10 @@ type
     function baixarCreditoCliente(pValor: Double) : Boolean;
 
     function recebimentoCartao(pValor, pDesconto, pIdAdmCartao, pVencimento: String; pIdTef: String = ''): String;
-    function gerarContasReceberCartao(pValor, pDesconto, pPortador, pIdAdmCartao, pObs, pObsComprementar: String; pParcelas: Integer): String;
+    function gerarContasReceberCartao(pValor, pDesconto, pPortador, pIdAdmCartao, pObs, pObsComprementar: String; pParcelas: Integer; pRecebimentoCartaoId: String): String;
     function parcelasAberta(pFatura: String): Boolean;
 
-    function gerarContasReceberRecebimento(pValor, pDesconto, pParcela, pPortador, pConta, pObs : String) : String;
+    function gerarContasReceberRecebimento(pValor, pDesconto, pParcela, pPortador, pConta, pObs: String; pFaturaPix: Boolean) : String;
     function gerarContasReceberRecebimentoCheque(pPortador, pPedido, pTipo : String; pDadosCheque : TStrings) : String;
 
     function valorAberto(pCliente : String) : Double;
@@ -634,7 +634,7 @@ begin
   end;
 end;
 
-function TContasReceberItensModel.gerarContasReceberCartao(pValor, pDesconto, pPortador, pIdAdmCartao, pObs, pObsComprementar: String; pParcelas: Integer): String;
+function TContasReceberItensModel.gerarContasReceberCartao(pValor, pDesconto, pPortador, pIdAdmCartao, pObs, pObsComprementar: String; pParcelas: Integer; pRecebimentoCartaoId: String): String;
 var
   lContasReceberModel: TContasReceberModel;
   lContasReceberItensInserir, lModel: TContasReceberItensModel;
@@ -659,7 +659,7 @@ begin
     lContasReceberModel.PEDIDO_REC        := '999999';
     lContasReceberModel.CODIGO_CLI        := self.FCODIGO_CLI;
     lContasReceberModel.DATAEMI_REC       := DateToStr(vIConexao.DataServer);
-    lContasReceberModel.VALOR_REC         := StrToFloat(pValor) - StrToFloat(pDesconto);
+    lContasReceberModel.VALOR_REC         := StrToFloatDef(pValor, 0) - StrToFloatDef(pDesconto, 0);
     lContasReceberModel.SITUACAO_REC      := 'A';
     lContasReceberModel.VENDEDOR_REC      := lContasReceberModel.VENDEDOR_REC;
     lContasReceberModel.USUARIO_REC       := self.vIConexao.getUSer.ID;
@@ -669,6 +669,10 @@ begin
     lContasReceberModel.CODIGO_CTA        := '555555';
     lContasReceberModel.OBS_REC           := pObs;
     lContasReceberModel.OBS_COMPLEMENTAR  := pObsComprementar;
+
+    if pRecebimentoCartaoId <> '' then
+      lContasReceberModel.RECEBIMENTO_CARTAO_ID := pRecebimentoCartaoId;
+
     lFaturaReceber := lContasReceberModel.Salvar;
 
     lValorParcela  := lContasReceberModel.VALOR_REC / pParcelas;
@@ -714,7 +718,7 @@ begin
   end;
 end;
 
-function TContasReceberItensModel.gerarContasReceberRecebimento(pValor, pDesconto, pParcela, pPortador, pConta, pObs : String): String;
+function TContasReceberItensModel.gerarContasReceberRecebimento(pValor, pDesconto, pParcela, pPortador, pConta, pObs : String; pFaturaPix: Boolean): String;
 var
   lContasReceberModel : TContasReceberModel;
   lContasReceberItensInserir,
@@ -744,6 +748,9 @@ begin
     lContasReceberModel.CODIGO_CTA        := '555555';
     lContasReceberModel.OBS_REC           := 'CONTA CLIENTE';
     lContasReceberModel.OBS_COMPLEMENTAR  := pObs;
+
+    if pFaturaPix = true then
+      lContasReceberModel.FATURA_PIX      := self.FFATURA_REC;
 
     lFaturaReceber := lContasReceberModel.Salvar;
     lValorParcela  := lContasReceberModel.VALOR_REC / pParcela.ToInteger;

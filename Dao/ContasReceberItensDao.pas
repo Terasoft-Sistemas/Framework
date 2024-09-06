@@ -655,6 +655,11 @@ begin
             '     and c.status <> ''X''                                                                                                        '+SLineBreak+
             '     and c.tipo_cta = ''C''                                                                                                       '+SLineBreak+
             '   union all                                                                                                                      '+SLineBreak+
+            '  select c.fatura_rec, coalesce(p.nome_port, ''PIX AVULSO'') tipo, c.valor_rec valor, ''RECEBIMENTO_PIX_AVULSO'' ORIGEM           '+SLineBreak+
+            '    from contasreceber c                                                                                                          '+SLineBreak+
+            '    left join portador p on p.codigo_port = c.codigo_por                                                                          '+SLineBreak+
+            '   where c.fatura_pix = ' + QuotedStr(FIDContasReceberView)                                                                        +SLineBreak+
+            '   union all                                                                                                                      '+SLineBreak+
             '  select u.id, ''RECEBIMENTO CREDITO CLIENTE'' tipo, u.valor valor, ''CREDITO_CLIENTE'' ORIGEM                                    '+SLineBreak+
             '    from credito_cliente_uso u                                                                                                    '+SLineBreak+
             '   where u.receber_id = '+ QuotedStr(FIDContasReceberView)                                                                        +SLineBreak+
