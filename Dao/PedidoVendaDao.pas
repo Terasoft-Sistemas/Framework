@@ -139,19 +139,8 @@ begin
       modelo.objeto.VALORUNITARIO_PED := lQry.FieldByName('VALORUNITARIO_PED').AsString;
       modelo.objeto.VALOR_ACRESCIMO   := lQry.FieldByName('VALOR_ACRESCIMO').AsString;
 
-//      lValor_ped := lValor_ped   + lQry.FieldByName('TOTAL_PRODUTO').AsFloat;
-//      lDesc_ped  := lDesc_ped    + lQry.FieldByName('DESCONTO_ITEM').AsFloat;
-//      lAcres_ped := lAcres_ped   + lQry.FieldByName('ACRESCIMO_ITEM').AsFloat;
-
       lQry.Next;
     end;
-
-//    for modelo in fPedidoVendasLista do
-//    begin
-//      modelo.objeto.VALOR_PED         := FloatToStr(lValor_ped);
-//      modelo.objeto.DESC_PED          := FloatToStr(lDesc_ped);
-//      modelo.objeto.ACRES_PED         := FloatToStr(lAcres_ped);
-//    end;
 
   finally
     lQry.Free;

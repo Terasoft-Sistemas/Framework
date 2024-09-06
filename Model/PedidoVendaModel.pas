@@ -1850,16 +1850,16 @@ begin
 
     for lPedidoVendaModel in lPedidoVendaLista.objeto.PedidoVendasLista do
     begin
-      lCalcularImpostosModel.EMITENTE_UF          := lEmpresaModel.objeto.UF;
-      lCalcularImpostosModel.REGIME_TRIBUTARIO    := lEmpresaModel.objeto.REGIME_TRIBUTARIO;
-      lCalcularImpostosModel.MODELO_NF            := '65';
-      lCalcularImpostosModel.VALOR_DESCONTO_TOTAL := lPedidoVendaModel.objeto.DESC_PED;
-      lCalcularImpostosModel.VALOR_ACRESCIMO      := lPedidoVendaModel.objeto.ACRES_PED;
-      lCalcularImpostosModel.TOTAL_PRODUTO        := lPedidoVendaModel.objeto.VALOR_PED;
-      lCalcularImpostosModel.DESTINATARIO_UF      := IIF(lPedidoVendaModel.objeto.UF_CLI <> '', lPedidoVendaModel.objeto.UF_CLI, lEmpresaModel.objeto.UF);
-      lCalcularImpostosModel.CODIGO_PRODUTO       := lPedidoVendaModel.objeto.CODIGO_PRO;
-      lCalcularImpostosModel.QUANTIDADE           := lPedidoVendaModel.objeto.QUANTIDADE_PED;
-      lCalcularImpostosModel.VALORUNITARIO        := StrToFloatDef(lPedidoVendaModel.objeto.VALORUNITARIO_PED, 0);
+      lCalcularImpostosModel.EMITENTE_UF                 := lEmpresaModel.objeto.UF;
+      lCalcularImpostosModel.REGIME_TRIBUTARIO           := lEmpresaModel.objeto.REGIME_TRIBUTARIO;
+      lCalcularImpostosModel.MODELO_NF                   := '65';
+      lCalcularImpostosModel.VALOR_DESCONTO_TOTAL        := lPedidoVendaModel.objeto.DESC_PED;
+      lCalcularImpostosModel.VALOR_ACRESCIMO             := lPedidoVendaModel.objeto.ACRES_PED;
+      lCalcularImpostosModel.TOTAL_PRODUTO               := lPedidoVendaModel.objeto.VALOR_PED;
+      lCalcularImpostosModel.DESTINATARIO_UF             := IIF(lPedidoVendaModel.objeto.UF_CLI <> '', lPedidoVendaModel.objeto.UF_CLI, lEmpresaModel.objeto.UF);
+      lCalcularImpostosModel.CODIGO_PRODUTO              := lPedidoVendaModel.objeto.CODIGO_PRO;
+      lCalcularImpostosModel.QUANTIDADE                  := lPedidoVendaModel.objeto.QUANTIDADE_PED;
+      lCalcularImpostosModel.VALORUNITARIO               := StrToFloatDef(lPedidoVendaModel.objeto.VALORUNITARIO_PED, 0);
 
       lCalcularImpostosModel := lCalcularImpostosModel.Processar;
 
