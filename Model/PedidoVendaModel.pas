@@ -1904,6 +1904,13 @@ begin
       if (lConfiguracoes.objeto.valorTag('RATEAR_ACRESIMO_NF', 'N', tvBool) = 'N') then
         lPedidoItensModal.objeto.VOUTROS           := FloatToStr(lCalcularImpostosModel.ACRESCIMO_ITEM);
 
+      if (lConfiguracoes.objeto.valorTag('USAR_CUSTO_CONTABIL', 'N', tvBool) = 'S') then
+        lPedidoItensModal.objeto.VLRCUSTO_PRO       := FloatToStr(StrToFloatDef(lPedidoItensModal.objeto.VLRCUSTO_PRO, 0) +
+                                                                  StrToFloatDef(lPedidoItensModal.objeto.VALOR_ICMS, 0)   +
+                                                                  StrToFloatDef(lPedidoItensModal.objeto.VALOR_ST, 0)     +
+                                                                  StrToFloatDef(lPedidoItensModal.objeto.VALOR_PIS, 0)    +
+                                                                  StrToFloatDef(lPedidoItensModal.objeto.VALOR_COFINS, 0));
+
       lPedidoItensModal.objeto.CSOSN               := lCalcularImpostosModel.ICMS_CSOSN;
       lPedidoItensModal.objeto.VTOTTRIB_ESTADUAL   := lCalcularImpostosModel.VTOTTRIB_ESTADUAL;
       lPedidoItensModal.objeto.VTOTTRIB_FEDERAL    := lCalcularImpostosModel.VTOTTRIB_FEDERAL;
