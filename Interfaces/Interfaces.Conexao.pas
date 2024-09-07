@@ -131,6 +131,11 @@ interface
 
       function getGDBExterno: IGDB;
 
+    //property ultimoAcessoDB getter/setter
+      function getUltimoAcessoDB: TDateTime;
+      procedure setUltimoAcessoDB(const pValue: TDateTime);
+
+      property ultimoAcessoDB: TDateTime read getUltimoAcessoDB write setUltimoAcessoDB;
       property empresa: TEmpresa read getEmpresa;
       property gdbExterno: IGDB read getgdbExterno;
       property gdb: IGDB                       read getGDB;
