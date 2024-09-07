@@ -10,6 +10,7 @@ uses
   System.StrUtils,
   System.Variants,
   Terasoft.Types,
+  Terasoft.Framework.Texto,
   Terasoft.Framework.ListaSimples.Impl,
   Terasoft.Framework.ListaSimples,
   Terasoft.Framework.SimpleTypes,
@@ -40,6 +41,7 @@ end;
 implementation
 
 uses
+  Terasoft.Framework.LOG,
   Interfaces.QueryLojaAsync,
   Data.DB;
 
@@ -639,6 +641,10 @@ begin
             lConta    := lQA.dataset.dataset.FieldByName('CONTA').AsString;
           end;
 
+      end;
+      if(lGrupo='') then
+      begin
+        logaByTagSeNivel(TAGLOG_CONDICIONAL,format('TDRGDao.ObterLista: Query [%s] para a loja [%s] retornou um grupo inválido', [ lSql ,lQA.loja.objeto.LOJA ]), LOG_LEVEL_ATENCAO);
       end;
 
       if not lMemTable.Locate('GRUPO;SUBGRUPO;CONTA', VarArrayOf([lGrupo, lSubGrupo, lConta])) then
