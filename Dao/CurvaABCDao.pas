@@ -45,9 +45,10 @@ end;
 implementation
 
 uses
+  Interfaces.QueryLojaAsync,
   CurvaABCModel,
-  Data.DB,
-  Clipbrd;
+  Terasoft.Framework.LOG,
+  Data.DB;
 
 { TCurvaABC }
 
@@ -69,10 +70,7 @@ end;
 
 function TCurvaABCDao.ObterCurvaABC(pCurvaABC_Parametros: TCurvaABC_Parametros): IFDDataset;
 var
-  lQry              : TFDQuery;
   lSQL              : String;
-  lLojasModel,
-  lLojas_Dados      : ITLojasModel;
   lMemTable         : TFDMemTable;
   Options           : TLocateOptions;
 
@@ -82,299 +80,307 @@ var
   lTotalCusto       : Real;
   lTotalLucro       : Real;
   lTotalItens       : Real;
+
+  lAsyncList  : IListaQueryAsync;
+  lQA         : IQueryLojaAsync;
+  conexao     : IConexao;
+
 begin
-  lLojasModel := TLojasModel.getNewIface(vIConexao);
+  lAsyncList := getQueryLojaAsyncList(vIConexao,pCurvaABC_Parametros.Lojas);
+
   lMemTable := TFDMemTable.Create(nil);
 
-  try
-    Self.DefineDadosSelect(pCurvaABC_Parametros.TipoAnalise, pCurvaABC_Parametros);
+  Self.DefineDadosSelect(pCurvaABC_Parametros.TipoAnalise, pCurvaABC_Parametros);
 
-    lSQL := 'select                                                                                                                                 ' + #13 +
-            '    DESCRICAO,                                                                                                                         ' + #13 +
-            '    VALOR_LIQUIDO,                                                                                                                     ' + #13 +
-            '    QUANTIDADE_VENDA,                                                                                                                  ' + #13 +
-            '    CLIENTE,                                                                                                                           ' + #13 +
-            '    CUSTO,                                                                                                                             ' + #13 +
-            '    TOTAL_ITENS                                                                                                                        ' + #13 +
-            'from                                                                                                                                   ' + #13 +
-            '(                                                                                                                                      ' + #13 +
-            '    select                                                                                                                             ' + #13 +
-            '        DESCRICAO,                                                                                                                     ' + #13 +
-            '        VALOR_LIQUIDO,                                                                                                                 ' + #13 +
-            '        VALOR_PRODUTO,                                                                                                                 ' + #13 +
-            '        DESCONTO,                                                                                                                      ' + #13 +
-            '        ACRESCIMO,                                                                                                                     ' + #13 +
-            '        FRETE,                                                                                                                         ' + #13 +
-            '        IPI,                                                                                                                           ' + #13 +
-            '        ST,                                                                                                                            ' + #13 +
-            '        CUSTO,                                                                                                                         ' + #13 +
-            '        TOTAL_ITENS,                                                                                                                   ' + #13 +
-            '        (valor_liquido+acrescimo) VALOR_TOTAL,                                                                                         ' + #13 +
-            '        QUANTIDADE_VENDA,                                                                                                              ' + #13 +
-            '        CLIENTE                                                                                                                        ' + #13 +
-            '                                                                                                                                       ' + #13 +
-            '    from                                                                                                                               ' + #13 +
-            '    (                                                                                                                                  ' + #13 +
-            '                                                                                                                                       ' + #13 +
-            '        select                                                                                                                         ' + #13 +
-            '            DESCRICAO,                                                                                                                 ' + #13 +
-            '            sum(valor_produto-desconto) VALOR_LIQUIDO,                                                                                 ' + #13 +
-            '            sum(valor_produto) VALOR_PRODUTO,                                                                                          ' + #13 +
-            '            sum(valor_possivel) VALOR_POSSIVEL,                                                                                        ' + #13 +
-            '            sum(desconto) DESCONTO,                                                                                                    ' + #13 +
-            '            sum(acrescimo) ACRESCIMO,                                                                                                  ' + #13 +
-            '            sum(frete) FRETE,                                                                                                          ' + #13 +
-            '            sum(ipi) IPI,                                                                                                              ' + #13 +
-            '            sum(st) ST,                                                                                                                ' + #13 +
-            '            sum(custo) CUSTO,                                                                                                          ' + #13 +
-            '            sum(total_itens) TOTAL_ITENS,                                                                                              ' + #13 +
-            '            count(distinct(quantidade_venda)) QUANTIDADE_VENDA,                                                                      ' + #13 +
-            '            count(distinct(cliente)) CLIENTE                                                                                         ' + #13 +
-            '                                                                                                                                       ' + #13 +
-            '        from                                                                                                                           ' + #13 +
-            '        (                                                                                                                              ' + #13 +
-            '                                                                                                                                       ' + #13 +
-            '           select                                                                                                                      ' + #13 +
-            '                ' + lNomeCampo + ',                                                                                                    ' + #13 +
-            '                v.data_ped DATA_EMISSAO,                                                                                               ' + #13 +
-            '                v.data_faturado DATA_FATURADO,                                                                                         ' + #13 +
-            '                (i.valorunitario_ped * i.qtde_calculada) VALOR_PRODUTO,                                                                ' + #13 +
-            '                (i.vlrvenda_pro * i.qtde_calculada) VALOR_POSSIVEL,                                                                    ' + #13 +
-            '                ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.desc_ped as float),0) DESCONTO,                 ' + #13 +
-            '                ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.acres_ped as float),0) ACRESCIMO,               ' + #13 +
-            '                ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.frete_ped as float),0) FRETE,                   ' + #13 +
-            '                i.valor_ipi IPI,                                                                                                       ' + #13 +
-            '                i.valor_st ST,                                                                                                         ' + #13 +
-            '                coalesce(i.vlrcusto_pro,0) * coalesce(i.qtde_calculada,0) CUSTO,                                                       ' + #13 +
-            '                coalesce(i.qtde_calculada, 0) TOTAL_ITENS,                                                                             ' + #13 +
-            '                v.numero_ped || ''P'' QUANTIDADE_VENDA,                                                                                ' + #13 +
-            '                v.codigo_cli CLIENTE,                                                                                                  ' + #13 +
-            '                '' '' ITEM                                                                                                             ' + #13 +
-            '                                                                                                                                       ' + #13 +
-            '            from                                                                                                                       ' + #13 +
-            '            ' + lTabelaPedido + '                                                                                                      ' + #13 +
-            '                                                                                                                                       ' + #13 +
-            '            where                                                                                                                      ' + #13 +
-            '                coalesce(v.valor_ped,0) > 0                                                                                            ' + #13 +
-            '                and coalesce(v.status,''P'') in (''P'',''F'')                                                                          ' + #13 +
-            '            ' + lFiltro + '                                                                                                            ' + #13 +
-            '                                                                                                                                       ' + #13 +
-            '            union all                                                                                                                  ' + #13 +
-            '                                                                                                                                       ' + #13 +
-            '            select                                                                                                                     ' + #13 +
-            '                distinct                                                                                                               ' + #13 +
-            '                ' + IIF(lNomeCampoDev <> '', lNomeCampoDev, lNomeCampo) + ',                                                           ' + #13 +
-            '                v.data DATA_EMISSAO,                                                                                                   ' + #13 +
-            '                v.data DATA_FATURADO,                                                                                                  ' + #13 +
-            '                (i.valor_unitario * i.quantidade) *-1 VALOR_PRODUTO,                                                                   ' + #13 +
-            '                (pi.vlrvenda_pro * i.quantidade) *-1 VALOR_CADASTRO,                                                                    ' + #13 +
-            '                0 DESCONTO,                                                                                                            ' + #13 +
-            '                0 ACRESCIMO,                                                                                                           ' + #13 +
-            '                0 FRETE,                                                                                                               ' + #13 +
-            '                0 IPI,                                                                                                                 ' + #13 +
-            '                0 ST,                                                                                                                  ' + #13 +
-            '                0 CUSTO,                                                                                                               ' + #13 +
-            '                i.quantidade * -1 TOTAL_ITENS,                                                                                        ' + #13 +
-            '                null QUANTIDADE_VENDA,                                                                                                 ' + #13 +
-            '                null CLIENTE,                                                                                                          ' + #13 +
-            '                i.item ITEM                                                                                                           ' + #13 +
-            '                                                                                                                                       ' + #13 +
-            '            from                                                                                                                       ' + #13 +
-            '            ' + lTabelaDevolucao + '                                                                                                   ' + #13 +
-            '                                                                                                                                       ' + #13 +
-            '            where                                                                                                                      ' + #13 +
-            '                coalesce(v.valor_total,0) > 0                                                                                          ' + #13 +
-            '            ' + lFiltro + '                                                                                                            ' + #13 +
-            '                                                                                                                                       ' + #13 +
-            '            union all                                                                                                                  ' + #13 +
-            '                                                                                                                                       ' + #13 +
-            '            select                                                                                                                     ' + #13 +
-            '                ' + IIF(lNomeCampoEntrada <> '', lNomeCampoEntrada, lNomeCampo) + ',                                                   ' + #13 +
-            '                e.datamovi_ent DATA_EMISSAO,                                                                                           ' + #13 +
-            '                e.datamovi_ent DATA_FATURADO,                                                                                          ' + #13 +
-            '                coalesce(e.TOTAL_ENT,0)*-1 VALOR_PRODUTO,                                                                              ' + #13 +
-            '                0 VALOR_CADASTRO,                                                                                                      ' + #13 +
-            '                0 DESCONTO,                                                                                                            ' + #13 +
-            '                0 ACRESCIMO,                                                                                                           ' + #13 +
-            '                0 FRETE,                                                                                                               ' + #13 +
-            '                0 IPI,                                                                                                                 ' + #13 +
-            '                0 ST,                                                                                                                  ' + #13 +
-            '                0 CUSTO,                                                                                                               ' + #13 +
-            '                0 TOTAL_ITENS,                                                                                                         ' + #13 +
-            '                null QUANTIDADE_VENDA,                                                                                                 ' + #13 +
-            '                null CLIENTE,                                                                                                          ' + #13 +
-            '                '' '' ITEM                                                                                                             ' + #13 +
-            '                                                                                                                                       ' + #13 +
-            '            from                                                                                                                       ' + #13 +
-            '            ' + lTabelaEntrada + '                                                                                                     ' + #13 +
-            '                                                                                                                                       ' + #13 +
-            '            where                                                                                                                      ' + #13 +
-            '                coalesce(e.TOTAL_ENT,0) > 0                                                                                            ' + #13 +
-            '            ' + lFiltro + '                                                                                                            ' + #13 +
-            '                                                                                                                                       ' + #13 +
-            '            union all                                                                                                                  ' + #13 +
-            '                                                                                                                                       ' + #13 +
-            '            select                                                                                                                     ' + #13 +
-            '                ' + IIF(lNomeCampoOS <> '', lNomeCampoOS, lNomeCampo) + ',                                                             ' + #13 +
-            '                v.fechamento_os DATA_EMISSAO,                                                                                          ' + #13 +
-            '                v.fechamento_os DATA_FATURADO,                                                                                         ' + #13 +
-            '                (i.valorunitario_os*i.quantidade_pro) VALOR_PRODUTO,                                                                   ' + #13 +
-            '                (i.venda_pro * i.quantidade_pro) VALOR_CADASTRO,                                                                       ' + #13 +
-            '                ((i.valorunitario_os*i.quantidade_pro)/(v.total_os+v.desc_os-v.acrescimo_os))*cast(v.desc_os as float) DESCONTO,       ' + #13 +
-            '                ((i.valorunitario_os*i.quantidade_pro)/(v.total_os+v.desc_os-v.acrescimo_os))*cast(v.acrescimo_os as float) ACRESCIMO, ' + #13 +
-            '                0 FRETE,                                                                                                               ' + #13 +
-            '                0 IPI,                                                                                                                 ' + #13 +
-            '                0 ST,                                                                                                                  ' + #13 +
-            '                coalesce(i.quantidade_pro,0) * coalesce(i.custo_pro,0) CUSTO,                                                          ' + #13 +
-            '                coalesce(i.quantidade_pro,0) TOTAL_ITENS,                                                                              ' + #13 +
-            '                v.numero_os || ''O'' QUANTIDADE_VENDA,                                                                                 ' + #13 +
-            '                v.codigo_cli CLIENTE,                                                                                                  ' + #13 +
-            '                '' '' ITEM                                                                                                             ' + #13 +
-            '                                                                                                                                       ' + #13 +
-            '            from                                                                                                                       ' + #13 +
-            '            ' + lTabelaOS + '                                                                                                          ' + #13 +
-            '                                                                                                                                       ' + #13 +
-            '            where                                                                                                                      ' + #13 +
-            '                coalesce(v.status_os,''F'') = ''F''                                                                                    ' + #13 +
-            '                and coalesce(v.total_os, 0) > 0                                                                                        ' + #13 +
-            '            ' + lFiltro + '                                                                                                            ' + #13 +
-            '                                                                                                                                       ' + #13 +
-            '        ) resultado                                                                                                                    ' + #13 +
-            '                                                                                                                                       ' + #13 +
-            '        where                                                                                                                          ' + #13 +
-            '            resultado.' + ifThen(pCurvaABC_Parametros.TipoData = 'EMISSÃO', 'data_emissao', 'data_faturado') + ' between ' + QuotedStr(transformaDataFireBirdWhere(pCurvaABC_Parametros.DataInicio)) + ' and ' + QuotedStr(transformaDataFireBirdWhere(pCurvaABC_Parametros.DataFim)) + #13 +
-            '                                                                                                                                       ' + #13 +
-            '        group by 1                                                                                                                     ' + #13 +
-            '    )                                                                                                                                  ' + #13 +
-            ')                                                                                                                                      ' + #13;
+  lSQL := 'select                                                                                                                                 ' + #13 +
+          '    DESCRICAO,                                                                                                                         ' + #13 +
+          '    VALOR_LIQUIDO,                                                                                                                     ' + #13 +
+          '    QUANTIDADE_VENDA,                                                                                                                  ' + #13 +
+          '    CLIENTE,                                                                                                                           ' + #13 +
+          '    CUSTO,                                                                                                                             ' + #13 +
+          '    TOTAL_ITENS                                                                                                                        ' + #13 +
+          'from                                                                                                                                   ' + #13 +
+          '(                                                                                                                                      ' + #13 +
+          '    select                                                                                                                             ' + #13 +
+          '        DESCRICAO,                                                                                                                     ' + #13 +
+          '        VALOR_LIQUIDO,                                                                                                                 ' + #13 +
+          '        VALOR_PRODUTO,                                                                                                                 ' + #13 +
+          '        DESCONTO,                                                                                                                      ' + #13 +
+          '        ACRESCIMO,                                                                                                                     ' + #13 +
+          '        FRETE,                                                                                                                         ' + #13 +
+          '        IPI,                                                                                                                           ' + #13 +
+          '        ST,                                                                                                                            ' + #13 +
+          '        CUSTO,                                                                                                                         ' + #13 +
+          '        TOTAL_ITENS,                                                                                                                   ' + #13 +
+          '        (valor_liquido+acrescimo) VALOR_TOTAL,                                                                                         ' + #13 +
+          '        QUANTIDADE_VENDA,                                                                                                              ' + #13 +
+          '        CLIENTE                                                                                                                        ' + #13 +
+          '                                                                                                                                       ' + #13 +
+          '    from                                                                                                                               ' + #13 +
+          '    (                                                                                                                                  ' + #13 +
+          '                                                                                                                                       ' + #13 +
+          '        select                                                                                                                         ' + #13 +
+          '            DESCRICAO,                                                                                                                 ' + #13 +
+          '            sum(valor_produto-desconto) VALOR_LIQUIDO,                                                                                 ' + #13 +
+          '            sum(valor_produto) VALOR_PRODUTO,                                                                                          ' + #13 +
+          '            sum(valor_possivel) VALOR_POSSIVEL,                                                                                        ' + #13 +
+          '            sum(desconto) DESCONTO,                                                                                                    ' + #13 +
+          '            sum(acrescimo) ACRESCIMO,                                                                                                  ' + #13 +
+          '            sum(frete) FRETE,                                                                                                          ' + #13 +
+          '            sum(ipi) IPI,                                                                                                              ' + #13 +
+          '            sum(st) ST,                                                                                                                ' + #13 +
+          '            sum(custo) CUSTO,                                                                                                          ' + #13 +
+          '            sum(total_itens) TOTAL_ITENS,                                                                                              ' + #13 +
+          '            count(distinct(quantidade_venda)) QUANTIDADE_VENDA,                                                                      ' + #13 +
+          '            count(distinct(cliente)) CLIENTE                                                                                         ' + #13 +
+          '                                                                                                                                       ' + #13 +
+          '        from                                                                                                                           ' + #13 +
+          '        (                                                                                                                              ' + #13 +
+          '                                                                                                                                       ' + #13 +
+          '           select                                                                                                                      ' + #13 +
+          '                ' + lNomeCampo + ',                                                                                                    ' + #13 +
+          '                v.data_ped DATA_EMISSAO,                                                                                               ' + #13 +
+          '                v.data_faturado DATA_FATURADO,                                                                                         ' + #13 +
+          '                (i.valorunitario_ped * i.qtde_calculada) VALOR_PRODUTO,                                                                ' + #13 +
+          '                (i.vlrvenda_pro * i.qtde_calculada) VALOR_POSSIVEL,                                                                    ' + #13 +
+          '                ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.desc_ped as float),0) DESCONTO,                 ' + #13 +
+          '                ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.acres_ped as float),0) ACRESCIMO,               ' + #13 +
+          '                ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.frete_ped as float),0) FRETE,                   ' + #13 +
+          '                i.valor_ipi IPI,                                                                                                       ' + #13 +
+          '                i.valor_st ST,                                                                                                         ' + #13 +
+          '                coalesce(i.vlrcusto_pro,0) * coalesce(i.qtde_calculada,0) CUSTO,                                                       ' + #13 +
+          '                coalesce(i.qtde_calculada, 0) TOTAL_ITENS,                                                                             ' + #13 +
+          '                v.numero_ped || ''P'' QUANTIDADE_VENDA,                                                                                ' + #13 +
+          '                v.codigo_cli CLIENTE,                                                                                                  ' + #13 +
+          '                '' '' ITEM                                                                                                             ' + #13 +
+          '                                                                                                                                       ' + #13 +
+          '            from                                                                                                                       ' + #13 +
+          '            ' + lTabelaPedido + '                                                                                                      ' + #13 +
+          '                                                                                                                                       ' + #13 +
+          '            where                                                                                                                      ' + #13 +
+          '                coalesce(v.valor_ped,0) > 0                                                                                            ' + #13 +
+          '                and coalesce(v.status,''P'') in (''P'',''F'')                                                                          ' + #13 +
+          '            ' + lFiltro + '                                                                                                            ' + #13 +
+          '                                                                                                                                       ' + #13 +
+          '            union all                                                                                                                  ' + #13 +
+          '                                                                                                                                       ' + #13 +
+          '            select                                                                                                                     ' + #13 +
+          '                distinct                                                                                                               ' + #13 +
+          '                ' + IIF(lNomeCampoDev <> '', lNomeCampoDev, lNomeCampo) + ',                                                           ' + #13 +
+          '                v.data DATA_EMISSAO,                                                                                                   ' + #13 +
+          '                v.data DATA_FATURADO,                                                                                                  ' + #13 +
+          '                (i.valor_unitario * i.quantidade) *-1 VALOR_PRODUTO,                                                                   ' + #13 +
+          '                (pi.vlrvenda_pro * i.quantidade) *-1 VALOR_CADASTRO,                                                                    ' + #13 +
+          '                0 DESCONTO,                                                                                                            ' + #13 +
+          '                0 ACRESCIMO,                                                                                                           ' + #13 +
+          '                0 FRETE,                                                                                                               ' + #13 +
+          '                0 IPI,                                                                                                                 ' + #13 +
+          '                0 ST,                                                                                                                  ' + #13 +
+          '                0 CUSTO,                                                                                                               ' + #13 +
+          '                i.quantidade * -1 TOTAL_ITENS,                                                                                        ' + #13 +
+          '                null QUANTIDADE_VENDA,                                                                                                 ' + #13 +
+          '                null CLIENTE,                                                                                                          ' + #13 +
+          '                i.item ITEM                                                                                                           ' + #13 +
+          '                                                                                                                                       ' + #13 +
+          '            from                                                                                                                       ' + #13 +
+          '            ' + lTabelaDevolucao + '                                                                                                   ' + #13 +
+          '                                                                                                                                       ' + #13 +
+          '            where                                                                                                                      ' + #13 +
+          '                coalesce(v.valor_total,0) > 0                                                                                          ' + #13 +
+          '            ' + lFiltro + '                                                                                                            ' + #13 +
+          '                                                                                                                                       ' + #13 +
+          '            union all                                                                                                                  ' + #13 +
+          '                                                                                                                                       ' + #13 +
+          '            select                                                                                                                     ' + #13 +
+          '                ' + IIF(lNomeCampoEntrada <> '', lNomeCampoEntrada, lNomeCampo) + ',                                                   ' + #13 +
+          '                e.datamovi_ent DATA_EMISSAO,                                                                                           ' + #13 +
+          '                e.datamovi_ent DATA_FATURADO,                                                                                          ' + #13 +
+          '                coalesce(e.TOTAL_ENT,0)*-1 VALOR_PRODUTO,                                                                              ' + #13 +
+          '                0 VALOR_CADASTRO,                                                                                                      ' + #13 +
+          '                0 DESCONTO,                                                                                                            ' + #13 +
+          '                0 ACRESCIMO,                                                                                                           ' + #13 +
+          '                0 FRETE,                                                                                                               ' + #13 +
+          '                0 IPI,                                                                                                                 ' + #13 +
+          '                0 ST,                                                                                                                  ' + #13 +
+          '                0 CUSTO,                                                                                                               ' + #13 +
+          '                0 TOTAL_ITENS,                                                                                                         ' + #13 +
+          '                null QUANTIDADE_VENDA,                                                                                                 ' + #13 +
+          '                null CLIENTE,                                                                                                          ' + #13 +
+          '                '' '' ITEM                                                                                                             ' + #13 +
+          '                                                                                                                                       ' + #13 +
+          '            from                                                                                                                       ' + #13 +
+          '            ' + lTabelaEntrada + '                                                                                                     ' + #13 +
+          '                                                                                                                                       ' + #13 +
+          '            where                                                                                                                      ' + #13 +
+          '                coalesce(e.TOTAL_ENT,0) > 0                                                                                            ' + #13 +
+          '            ' + lFiltro + '                                                                                                            ' + #13 +
+          '                                                                                                                                       ' + #13 +
+          '            union all                                                                                                                  ' + #13 +
+          '                                                                                                                                       ' + #13 +
+          '            select                                                                                                                     ' + #13 +
+          '                ' + IIF(lNomeCampoOS <> '', lNomeCampoOS, lNomeCampo) + ',                                                             ' + #13 +
+          '                v.fechamento_os DATA_EMISSAO,                                                                                          ' + #13 +
+          '                v.fechamento_os DATA_FATURADO,                                                                                         ' + #13 +
+          '                (i.valorunitario_os*i.quantidade_pro) VALOR_PRODUTO,                                                                   ' + #13 +
+          '                (i.venda_pro * i.quantidade_pro) VALOR_CADASTRO,                                                                       ' + #13 +
+          '                ((i.valorunitario_os*i.quantidade_pro)/(v.total_os+v.desc_os-v.acrescimo_os))*cast(v.desc_os as float) DESCONTO,       ' + #13 +
+          '                ((i.valorunitario_os*i.quantidade_pro)/(v.total_os+v.desc_os-v.acrescimo_os))*cast(v.acrescimo_os as float) ACRESCIMO, ' + #13 +
+          '                0 FRETE,                                                                                                               ' + #13 +
+          '                0 IPI,                                                                                                                 ' + #13 +
+          '                0 ST,                                                                                                                  ' + #13 +
+          '                coalesce(i.quantidade_pro,0) * coalesce(i.custo_pro,0) CUSTO,                                                          ' + #13 +
+          '                coalesce(i.quantidade_pro,0) TOTAL_ITENS,                                                                              ' + #13 +
+          '                v.numero_os || ''O'' QUANTIDADE_VENDA,                                                                                 ' + #13 +
+          '                v.codigo_cli CLIENTE,                                                                                                  ' + #13 +
+          '                '' '' ITEM                                                                                                             ' + #13 +
+          '                                                                                                                                       ' + #13 +
+          '            from                                                                                                                       ' + #13 +
+          '            ' + lTabelaOS + '                                                                                                          ' + #13 +
+          '                                                                                                                                       ' + #13 +
+          '            where                                                                                                                      ' + #13 +
+          '                coalesce(v.status_os,''F'') = ''F''                                                                                    ' + #13 +
+          '                and coalesce(v.total_os, 0) > 0                                                                                        ' + #13 +
+          '            ' + lFiltro + '                                                                                                            ' + #13 +
+          '                                                                                                                                       ' + #13 +
+          '        ) resultado                                                                                                                    ' + #13 +
+          '                                                                                                                                       ' + #13 +
+          '        where                                                                                                                          ' + #13 +
+          '            resultado.' + ifThen(pCurvaABC_Parametros.TipoData = 'EMISSÃO', 'data_emissao', 'data_faturado') + ' between ' + QuotedStr(transformaDataFireBirdWhere(pCurvaABC_Parametros.DataInicio)) + ' and ' + QuotedStr(transformaDataFireBirdWhere(pCurvaABC_Parametros.DataFim)) + #13 +
+          '                                                                                                                                       ' + #13 +
+          '        group by 1                                                                                                                     ' + #13 +
+          '    )                                                                                                                                  ' + #13 +
+          ')                                                                                                                                      ' + #13;
 
-    gravaSQL(lSQL, 'CurvaABCDao_ObterCurvaABC_' + FormatDateTime('yyyymmddhhnnsszzz', now));
+  gravaSQL(lSQL, 'CurvaABCDao_ObterCurvaABC_' + FormatDateTime('yyyymmddhhnnsszzz', now));
 
-    with lMemTable.IndexDefs.AddIndexDef do
-    begin
-      Name := 'OrdenacaoRateio';
-      Fields := 'RATEIO';
-      Options := [TIndexOption.ixDescending, TIndexOption.ixCaseInsensitive];
-    end;
-
-    lMemTable.IndexName := '';
-
-    lMemTable.FieldDefs.Add('DESCRICAO', ftString, 100);
-    lMemTable.FieldDefs.Add('RATEIO', ftFloat);
-    lMemTable.FieldDefs.Add('QUANTIDADE_VENDA', ftInteger);
-    lMemTable.FieldDefs.Add('QUANTIDADE_CLIENTE', ftInteger);
-    lMemTable.FieldDefs.Add('TOTAL_ITENS', ftFloat);
-    lMemTable.FieldDefs.Add('VALOR_LIQUIDO', ftFloat);
-    lMemTable.FieldDefs.Add('CUSTO', ftFloat);
-    lMemTable.FieldDefs.Add('LUCRO', ftFloat);
-    lMemTable.FieldDefs.Add('MARGEM', ftFloat);
-    lMemTable.CreateDataSet;
-
-    lTotalVendas := 0;
-    lTotalQtde   := 0;
-    lTotalCusto  := 0;
-    lTotalLucro  := 0;
-    lTotalItens  := 0;
-
-    lLojasModel.objeto.LojaView := pCurvaABC_Parametros.Lojas;
-    lLojasModel.objeto.ObterLista;
-
-    for lLojas_Dados in lLojasModel.objeto.LojassLista do
-    begin
-      vIConexao.ConfigConexaoExterna(lLojas_Dados.objeto.LOJA);
-      lQry := vIConexao.CriarQueryExterna;
-      lQry.Open(lSQL);
-
-      lQry.First;
-      while not lQry.Eof do
-      begin
-        if not lMemTable.Locate('DESCRICAO', Trim(lQry.FieldByName('DESCRICAO').AsString), Options) then
-        begin
-          lMemTable.InsertRecord([
-                                  Trim(lQry.FieldByName('DESCRICAO').AsString),
-                                  0,
-                                  lQry.FieldByName('QUANTIDADE_VENDA').AsFloat,
-                                  lQry.FieldByName('CLIENTE').AsFloat,
-                                  lQry.FieldByName('TOTAL_ITENS').AsFloat,
-                                  lQry.FieldByName('VALOR_LIQUIDO').AsFloat,
-                                  lQry.FieldByName('CUSTO').AsFloat,
-                                  lQry.FieldByName('VALOR_LIQUIDO').AsFloat - lQry.FieldByName('CUSTO').AsFloat,
-                                  0
-                                 ]);
-        end
-        else
-        begin
-          lMemTable.Edit;
-          lMemTable.FieldByName('VALOR_LIQUIDO').AsFloat      := lMemTable.FieldByName('VALOR_LIQUIDO').AsFloat      + lQry.FieldByName('VALOR_LIQUIDO').AsFloat;
-          lMemTable.FieldByName('CUSTO').AsFloat              := lMemTable.FieldByName('CUSTO').AsFloat              + lQry.FieldByName('CUSTO').AsFloat;
-          lMemTable.FieldByName('LUCRO').AsFloat              := lMemTable.FieldByName('VALOR_LIQUIDO').AsFloat      - lMemTable.FieldByName('CUSTO').Value;
-          lMemTable.FieldByName('QUANTIDADE_VENDA').AsFloat   := lMemTable.FieldByName('QUANTIDADE_VENDA').AsFloat   + lQry.FieldByName('QUANTIDADE_VENDA').AsInteger;
-          lMemTable.FieldByName('QUANTIDADE_CLIENTE').AsFloat := lMemTable.FieldByName('QUANTIDADE_CLIENTE').AsFloat + lQry.FieldByName('CLIENTE').AsInteger;
-          lMemTable.FieldByName('TOTAL_ITENS').AsFloat        := lMemTable.FieldByName('TOTAL_ITENS').AsFloat        + lQry.FieldByName('TOTAL_ITENS').AsInteger;
-          lMemTable.Post;
-        end;
-
-        lTotalVendas  := lTotalVendas  + lQry.FieldByName('VALOR_LIQUIDO').AsFloat;
-        lTotalQtde    := lTotalQtde    + lQry.FieldByName('QUANTIDADE_VENDA').AsInteger;
-        lTotalItens   := lTotalItens   + lQry.FieldByName('TOTAL_ITENS').AsInteger;
-        lTotalQtdeCli := lTotalQtdeCli + lQry.FieldByName('CLIENTE').AsInteger;
-        lTotalCusto   := lTotalCusto   + lQry.FieldByName('CUSTO').AsFloat;
-        lTotalLucro   := lTotalLucro   + lQry.FieldByName('VALOR_LIQUIDO').AsFloat - lQry.FieldByName('CUSTO').AsFloat;
-
-        lQry.Next;
-      end;
-
-    end;
-
-    // Calculando RATEIO e MARGEM
-    lMemTable.First;
-    while not lMemTable.Eof do
-    begin
-      lMemTable.Edit;
-
-      if (pCurvaABC_Parametros.ClassificarPor = tpABCQuantidade) and (lTotalQtde <> 0) then
-        lMemTable.FieldByName('RATEIO').AsFloat := (lMemTable.FieldByName('QUANTIDADE_VENDA').AsFloat / lTotalQtde) * 100
-      else
-      if (pCurvaABC_Parametros.ClassificarPor = tpABCQtdeCliente) and (lTotalQtdeCli <> 0) then
-        lMemTable.FieldByName('RATEIO').AsFloat := (lMemTable.FieldByName('QUANTIDADE_CLIENTE').AsFloat / lTotalQtdeCli) * 100
-      else
-      if (pCurvaABC_Parametros.ClassificarPor = tpABCVenda) and (lTotalVendas <> 0) then
-        lMemTable.FieldByName('RATEIO').AsFloat := (lMemTable.FieldByName('VALOR_LIQUIDO').AsFloat / lTotalVendas) * 100
-      else
-      if (pCurvaABC_Parametros.ClassificarPor = tpABCCusto) and (lTotalCusto <> 0) then
-        lMemTable.FieldByName('RATEIO').AsFloat := (lMemTable.FieldByName('CUSTO').AsFloat / lTotalCusto) * 100
-      else
-      if (pCurvaABC_Parametros.ClassificarPor = tpABCLucro) and (lTotalLucro <> 0) then
-        lMemTable.FieldByName('RATEIO').AsFloat := (lMemTable.FieldByName('LUCRO').AsFloat / lTotalLucro) * 100
-      else
-        lMemTable.FieldByName('RATEIO').AsFloat := 0;
-
-
-      if (pCurvaABC_Parametros.TipoMargem = 'S') then
-      begin
-        if (lMemTable.FieldByName('CUSTO').AsFloat <> 0) then
-          lMemTable.FieldByName('MARGEM').AsFloat := (lMemTable.FieldByName('VALOR_LIQUIDO').AsFloat / lMemTable.FieldByName('CUSTO').AsFloat*100)-100
-        else
-          lMemTable.FieldByName('MARGEM').AsFloat := 0;
-      end else
-      begin
-        if (lMemTable.FieldByName('VALOR_LIQUIDO').AsFloat <> 0) then
-          lMemTable.FieldByName('MARGEM').AsFloat := -1 * ((lMemTable.FieldByName('CUSTO').AsFloat * 100 / lMemTable.FieldByName('VALOR_LIQUIDO').AsFloat) - 100)
-        else
-          lMemTable.FieldByName('MARGEM').AsFloat := 0;
-      end;
-
-      lMemTable.Next;
-    end;
-
-    lMemTable.IndexName := 'OrdenacaoRateio';
-    lMemTable.Open;
-    Result := criaIFDDataset(lMemTable);
-
-  finally
-    lQry.Free;
-    lLojasModel:=nil;
+  with lMemTable.IndexDefs.AddIndexDef do
+  begin
+    Name := 'OrdenacaoRateio';
+    Fields := 'RATEIO';
+    Options := [TIndexOption.ixDescending, TIndexOption.ixCaseInsensitive];
   end;
+
+  lMemTable.IndexName := '';
+
+  lMemTable.FieldDefs.Add('DESCRICAO', ftString, 100);
+  lMemTable.FieldDefs.Add('RATEIO', ftFloat);
+  lMemTable.FieldDefs.Add('QUANTIDADE_VENDA', ftInteger);
+  lMemTable.FieldDefs.Add('QUANTIDADE_CLIENTE', ftInteger);
+  lMemTable.FieldDefs.Add('TOTAL_ITENS', ftFloat);
+  lMemTable.FieldDefs.Add('VALOR_LIQUIDO', ftFloat);
+  lMemTable.FieldDefs.Add('CUSTO', ftFloat);
+  lMemTable.FieldDefs.Add('LUCRO', ftFloat);
+  lMemTable.FieldDefs.Add('MARGEM', ftFloat);
+  lMemTable.CreateDataSet;
+
+  lTotalVendas := 0;
+  lTotalQtde   := 0;
+  lTotalCusto  := 0;
+  lTotalLucro  := 0;
+  lTotalItens  := 0;
+
+  for lQA in lAsyncList do
+  begin
+    lQA.tag := 'ObterQuery_Anos';
+    conexao := lQA.loja.objeto.conexaoLoja;
+    if(conexao=nil) then
+      raise Exception.CreateFmt('TCurvaABCDao.ObterCurvaABC: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);
+
+    lQA.execQuery(lSQL,'',[]);
+  end;
+
+  for lQA in lAsyncList do
+  begin
+    lQA.espera;
+    if(lQA.resultado.erros>0) then
+      raise Exception.CreateFmt('TCurvaABCDao.ObterCurvaABC: Loja [%s] com problemas: [%s]',[lQA.loja.objeto.LOJA,lQA.resultado.toString]);
+
+    lQA.dataset.dataset.first;
+    while not lQA.dataset.dataset.Eof do
+    begin
+      if not lMemTable.Locate('DESCRICAO', Trim(lQA.dataset.dataset.FieldByName('DESCRICAO').AsString), Options) then
+      begin
+        lMemTable.InsertRecord([
+                                Trim(lQA.dataset.dataset.FieldByName('DESCRICAO').AsString),
+                                0,
+                                lQA.dataset.dataset.FieldByName('QUANTIDADE_VENDA').AsFloat,
+                                lQA.dataset.dataset.FieldByName('CLIENTE').AsFloat,
+                                lQA.dataset.dataset.FieldByName('TOTAL_ITENS').AsFloat,
+                                lQA.dataset.dataset.FieldByName('VALOR_LIQUIDO').AsFloat,
+                                lQA.dataset.dataset.FieldByName('CUSTO').AsFloat,
+                                lQA.dataset.dataset.FieldByName('VALOR_LIQUIDO').AsFloat - lQA.dataset.dataset.FieldByName('CUSTO').AsFloat,
+                                0
+                               ]);
+      end
+      else
+      begin
+        lMemTable.Edit;
+        lMemTable.FieldByName('VALOR_LIQUIDO').AsFloat      := lMemTable.FieldByName('VALOR_LIQUIDO').AsFloat      + lQA.dataset.dataset.FieldByName('VALOR_LIQUIDO').AsFloat;
+        lMemTable.FieldByName('CUSTO').AsFloat              := lMemTable.FieldByName('CUSTO').AsFloat              + lQA.dataset.dataset.FieldByName('CUSTO').AsFloat;
+        lMemTable.FieldByName('LUCRO').AsFloat              := lMemTable.FieldByName('VALOR_LIQUIDO').AsFloat      - lMemTable.FieldByName('CUSTO').Value;
+        lMemTable.FieldByName('QUANTIDADE_VENDA').AsFloat   := lMemTable.FieldByName('QUANTIDADE_VENDA').AsFloat   + lQA.dataset.dataset.FieldByName('QUANTIDADE_VENDA').AsInteger;
+        lMemTable.FieldByName('QUANTIDADE_CLIENTE').AsFloat := lMemTable.FieldByName('QUANTIDADE_CLIENTE').AsFloat + lQA.dataset.dataset.FieldByName('CLIENTE').AsInteger;
+        lMemTable.FieldByName('TOTAL_ITENS').AsFloat        := lMemTable.FieldByName('TOTAL_ITENS').AsFloat        + lQA.dataset.dataset.FieldByName('TOTAL_ITENS').AsInteger;
+        lMemTable.Post;
+      end;
+
+      lTotalVendas  := lTotalVendas  + lQA.dataset.dataset.FieldByName('VALOR_LIQUIDO').AsFloat;
+      lTotalQtde    := lTotalQtde    + lQA.dataset.dataset.FieldByName('QUANTIDADE_VENDA').AsInteger;
+      lTotalItens   := lTotalItens   + lQA.dataset.dataset.FieldByName('TOTAL_ITENS').AsInteger;
+      lTotalQtdeCli := lTotalQtdeCli + lQA.dataset.dataset.FieldByName('CLIENTE').AsInteger;
+      lTotalCusto   := lTotalCusto   + lQA.dataset.dataset.FieldByName('CUSTO').AsFloat;
+      lTotalLucro   := lTotalLucro   + lQA.dataset.dataset.FieldByName('VALOR_LIQUIDO').AsFloat - lQA.dataset.dataset.FieldByName('CUSTO').AsFloat;
+
+      lQA.dataset.dataset.Next;
+    end;
+
+  end;
+
+  // Calculando RATEIO e MARGEM
+  lMemTable.First;
+  while not lMemTable.Eof do
+  begin
+    lMemTable.Edit;
+
+    if (pCurvaABC_Parametros.ClassificarPor = tpABCQuantidade) and (lTotalQtde <> 0) then
+      lMemTable.FieldByName('RATEIO').AsFloat := (lMemTable.FieldByName('QUANTIDADE_VENDA').AsFloat / lTotalQtde) * 100
+    else
+    if (pCurvaABC_Parametros.ClassificarPor = tpABCQtdeCliente) and (lTotalQtdeCli <> 0) then
+      lMemTable.FieldByName('RATEIO').AsFloat := (lMemTable.FieldByName('QUANTIDADE_CLIENTE').AsFloat / lTotalQtdeCli) * 100
+    else
+    if (pCurvaABC_Parametros.ClassificarPor = tpABCVenda) and (lTotalVendas <> 0) then
+      lMemTable.FieldByName('RATEIO').AsFloat := (lMemTable.FieldByName('VALOR_LIQUIDO').AsFloat / lTotalVendas) * 100
+    else
+    if (pCurvaABC_Parametros.ClassificarPor = tpABCCusto) and (lTotalCusto <> 0) then
+      lMemTable.FieldByName('RATEIO').AsFloat := (lMemTable.FieldByName('CUSTO').AsFloat / lTotalCusto) * 100
+    else
+    if (pCurvaABC_Parametros.ClassificarPor = tpABCLucro) and (lTotalLucro <> 0) then
+      lMemTable.FieldByName('RATEIO').AsFloat := (lMemTable.FieldByName('LUCRO').AsFloat / lTotalLucro) * 100
+    else
+      lMemTable.FieldByName('RATEIO').AsFloat := 0;
+
+
+    if (pCurvaABC_Parametros.TipoMargem = 'S') then
+    begin
+      if (lMemTable.FieldByName('CUSTO').AsFloat <> 0) then
+        lMemTable.FieldByName('MARGEM').AsFloat := (lMemTable.FieldByName('VALOR_LIQUIDO').AsFloat / lMemTable.FieldByName('CUSTO').AsFloat*100)-100
+      else
+        lMemTable.FieldByName('MARGEM').AsFloat := 0;
+    end else
+    begin
+      if (lMemTable.FieldByName('VALOR_LIQUIDO').AsFloat <> 0) then
+        lMemTable.FieldByName('MARGEM').AsFloat := -1 * ((lMemTable.FieldByName('CUSTO').AsFloat * 100 / lMemTable.FieldByName('VALOR_LIQUIDO').AsFloat) - 100)
+      else
+        lMemTable.FieldByName('MARGEM').AsFloat := 0;
+    end;
+
+    lMemTable.Next;
+  end;
+
+  lMemTable.IndexName := 'OrdenacaoRateio';
+  lMemTable.Open;
+  Result := criaIFDDataset(lMemTable);
+
 end;
 
 procedure TCurvaABCDao.DefineDadosSelect(Acao: TTipoAnaliseCurvaABC; pCurvaABC_Parametros: TCurvaABC_Parametros);
