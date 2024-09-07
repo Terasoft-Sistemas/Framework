@@ -44,7 +44,7 @@ begin
     aReply.ContentType := MIME_TXT;
       lStream := TStringStream.Create;
       try
-        dumpToStream(lStream);
+        dumpToStream(lStream,true);
         aReply.WriteString(lStream.DataString);
       finally
         FreeAndNil(lStream);
