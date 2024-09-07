@@ -58,6 +58,11 @@ interface
       protected
         fGDB: IGDB;
         fGDBExterno: IGDB;
+        fUltimoAcessoDB: TDateTime;
+
+      //property ultimoAcessoDB getter/setter
+        function getUltimoAcessoDB: TDateTime;
+        procedure setUltimoAcessoDB(const pValue: TDateTime);
 
       //property gdbExterno getter/setter
         function getGDBExterno: IGDB;
@@ -389,13 +394,24 @@ end;
 
 function TControllersConexao._AddRef: Integer;
 begin
+  setUltimoAcessoDB(Now);
   inherited;
 end;
 
 function TControllersConexao._Release: Integer;
 begin
+  setUltimoAcessoDB(Now);
   inherited;
+end;
 
+procedure TControllersConexao.setUltimoAcessoDB(const pValue: TDateTime);
+begin
+  fUltimoAcessoDB := pValue;
+end;
+
+function TControllersConexao.getUltimoAcessoDB: TDateTime;
+begin
+  Result := fUltimoAcessoDB;
 end;
 
 end.
