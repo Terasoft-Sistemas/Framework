@@ -51,6 +51,8 @@ begin
       aReply.ContentType := MIME_TXT;
     lStream := TStringStream.Create;
     try
+      TIWUserSession(aSession.Data).xOmitirDump:=true;
+      dumpToFile;
       dumpToStream(lStream,'.'+ext);
       aReply.WriteString(lStream.DataString);
     finally
