@@ -45,15 +45,17 @@ begin
     ext := aRequest.GetQueryFieldValue('tipo');
     if(ext='') then
       ext := 'json';
-
-    aReply.ContentType := MIME_TXT;
-      lStream := TStringStream.Create;
-      try
-        dumpToStream(lStream,'.'+ext);
-        aReply.WriteString(lStream.DataString);
-      finally
-        FreeAndNil(lStream);
-      end;
+    if(ext='json') then
+      aReply.ContentType := MIME_JSON
+    else
+      aReply.ContentType := MIME_TXT;
+    lStream := TStringStream.Create;
+    try
+      dumpToStream(lStream,'.'+ext);
+      aReply.WriteString(lStream.DataString);
+    finally
+      FreeAndNil(lStream);
+    end;
   end;
   aSession.Terminate;
 end;
