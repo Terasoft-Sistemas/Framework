@@ -488,7 +488,7 @@ begin
   lContasReceberModel := TContasReceberModel.Create(vIConexao);
 
   try
-    lContasReceberModel := lContasReceberModel.carregaClasse(self.FFATURA_REC);
+    lContasReceberModel := lContasReceberModel.carregaClasse(self.FFATURA_REC, IIF(self.LOJA_ORIGEM <> '', self.LOJA_ORIGEM, self.LOJA));
 
     lContaCorrenteModel.objeto.Acao             := tacIncluir;
     lContaCorrenteModel.objeto.CONCILIADO_COR   := '.';
@@ -530,7 +530,7 @@ begin
 
   try
 
-    lContasReceberModel := lContasReceberModel.carregaClasse(self.FFATURA_REC, self.LOJA);
+    lContasReceberModel := lContasReceberModel.carregaClasse(self.FFATURA_REC, IIF(self.LOJA_ORIGEM <> '', self.LOJA_ORIGEM, self.LOJA));
 
     lHistorico := 'FC PIX: '+ self.FPACELA_REC+'/'+self.FTOTALPARCELAS_REC+' PED: '+lContasReceberModel.PEDIDO_REC;
 
