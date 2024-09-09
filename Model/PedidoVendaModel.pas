@@ -1910,10 +1910,10 @@ begin
 
       if (lConfiguracoes.objeto.valorTag('USAR_CUSTO_CONTABIL', 'N', tvBool) = 'S') then
         lPedidoItensModal.objeto.VLRCUSTO_PRO       := FloatToStr(StrToFloatDef(lPedidoItensModal.objeto.VLRCUSTO_PRO, 0) +
-                                                                  StrToFloatDef(lPedidoItensModal.objeto.VALOR_ICMS, 0)   +
-                                                                  StrToFloatDef(lPedidoItensModal.objeto.VALOR_ST, 0)     +
-                                                                  StrToFloatDef(lPedidoItensModal.objeto.VALOR_PIS, 0)    +
-                                                                  StrToFloatDef(lPedidoItensModal.objeto.VALOR_COFINS, 0));
+                                                                  StrToFloatDef(lPedidoItensModal.objeto.VALOR_ICMS / lCalcularImpostosModel.QUANTIDADE, 0)   +
+                                                                  StrToFloatDef(lPedidoItensModal.objeto.VALOR_ST / lCalcularImpostosModel.QUANTIDADE, 0)     +
+                                                                  StrToFloatDef(lPedidoItensModal.objeto.VALOR_PIS / lCalcularImpostosModel.QUANTIDADE, 0)    +
+                                                                  StrToFloatDef(lPedidoItensModal.objeto.VALOR_COFINS / lCalcularImpostosModel.QUANTIDADE, 0));
 
       lPedidoItensModal.objeto.CSOSN               := lCalcularImpostosModel.ICMS_CSOSN;
       lPedidoItensModal.objeto.VTOTTRIB_ESTADUAL   := lCalcularImpostosModel.VTOTTRIB_ESTADUAL;
