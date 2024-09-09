@@ -60,6 +60,8 @@ begin
     logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TerasoftConfiguracoes.carregarConfiguracoes: TConfiguracoesModel.obterLista',LOG_LEVEL_DEBUG);
     lConfiguracoesModel.objeto.obterLista;
 
+    logaMemoriaEmUso;
+    logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TerasoftConfiguracoes.carregarConfiguracoes: Atribuindo registros para vmtConfiguracoes',LOG_LEVEL_DEBUG);
     for lModel in lConfiguracoesModel.objeto.ConfiguracoessLista do
     begin
       vmtConfiguracoes.objeto.Append;
@@ -76,6 +78,8 @@ begin
       vmtConfiguracoes.objeto.FieldByName('VALORMEMO').Value      := IIF(lModel.objeto.VALORMEMO      = '', Unassigned, lModel.objeto.VALORMEMO);
       vmtConfiguracoes.objeto.Post;
     end;
+    logaByTagSeNivel(TAGLOG_CONDICIONAL, 'Registros atribuidos para vmtConfiguracoes',LOG_LEVEL_DEBUG);
+    logaMemoriaEmUso;
 
   finally
     lConfiguracoesModel:=nil;

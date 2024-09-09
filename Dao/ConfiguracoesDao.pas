@@ -285,6 +285,7 @@ begin
   finally
     lQry.Free;
   end;
+  logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TConfiguracoesDao.obterLista: Saindo da procedure',LOG_LEVEL_DEBUG);
 end;
 
 procedure TConfiguracoesDao.SetCountView(const Value: String);
