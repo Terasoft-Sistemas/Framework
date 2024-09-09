@@ -150,7 +150,7 @@ begin
           '            0 FRETE,                                                                                                               ' + #13 +
           '            0 IPI,                                                                                                                 ' + #13 +
           '            0 ST,                                                                                                                  ' + #13 +
-          '            0 CUSTO,                                                                                                               ' + #13 +
+          '            (di.quantidade*di.custo)*-1 CUSTO ,                                                                                                               ' + #13 +
           '            0 TOTAL_ITENS,                                                                                                         ' + #13 +
           '            null QUANTIDADE_VENDA,                                                                                                 ' + #13 +
           '            null CLIENTE,                                                                                                          ' + #13 +
@@ -390,7 +390,7 @@ begin
             '            0 FRETE,                                                                                                               ' + #13 +
             '            0 IPI,                                                                                                                 ' + #13 +
             '            0 ST,                                                                                                                  ' + #13 +
-            '            0 CUSTO,                                                                                                               ' + #13 +
+            '            (di.quantidade*di.custo)*-1 CUSTO,                                                                                                               ' + #13 +
             '			       di.item ITEM                                                                                                           ' + #13 +
             '        from                                                                                                                       ' + #13 +
             '             devolucao d                                                                                                           ' + #13 +
@@ -589,7 +589,7 @@ begin
           '        0 FRETE,                                                                                                               ' + #13 +
           '        0 IPI,                                                                                                                 ' + #13 +
           '        0 ST,                                                                                                                  ' + #13 +
-          '        0 CUSTO,                                                                                                               ' + #13 +
+          '        (di.quantidade*di.custo)*-1 CUSTO,                                                                                                               ' + #13 +
           '        di.item ITEM                                                                                                           ' + #13 +
           '    from                                                                                                                       ' + #13 +
           '         devolucao d                                                                                                           ' + #13 +
@@ -1256,7 +1256,7 @@ begin
           '            0 FRETE,                                                                                                               ' + #13 +
           '            0 IPI,                                                                                                                 ' + #13 +
           '            0 ST,                                                                                                                  ' + #13 +
-          '            0 CUSTO,                                                                                                               ' + #13 +
+          '            (di.quantidade*di.custo)*-1 CUSTO,                                                                                                               ' + #13 +
           '            di.quantidade * -1 TOTAL_ITENS,                                                                                        ' + #13 +
           '            null QUANTIDADE_VENDA,                                                                                                 ' + #13 +
           '            null CLIENTE,                                                                                                          ' + #13 +
@@ -1502,7 +1502,7 @@ begin
       '            0 FRETE,                                                                                                               ' + #13 +
       '            0 IPI,                                                                                                                 ' + #13 +
       '            0 ST,                                                                                                                  ' + #13 +
-      '            0 CUSTO,                                                                                                               ' + #13 +
+      '            (di.quantidade*di.custo)*-1 CUSTO,                                                                                                               ' + #13 +
       '            0 TOTAL_ITENS,                                                                                                         ' + #13 +
       '            null QUANTIDADE_VENDA,                                                                                                 ' + #13 +
       '            null CLIENTE,                                                                                                          ' + #13 +
