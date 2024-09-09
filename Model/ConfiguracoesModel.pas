@@ -165,6 +165,9 @@ begin
     FTotalRecords := lConfiguracoesLista.objeto.TotalRecords;
     FConfiguracoessLista := lConfiguracoesLista.objeto.ConfiguracoessLista;
 
+    logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TConfiguracoesModel.obterLista: %d registros',[FTotalRecords]),LOG_LEVEL_DEBUG);
+    logaMemoriaEmUso;
+
   finally
     lConfiguracoesLista:=nil;
   end;
