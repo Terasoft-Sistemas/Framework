@@ -43,6 +43,9 @@ uses
   function RetornaCoeficiente(pTaxa: Double;  pQuantidadeParcelas: Integer): IFDDataset;
   function corrigeValorExtended(p1: Extended; pCasasDecimais: Integer = 2): Extended;
 
+  function memoriaEmUso(var blocos: Int64; var bytes: Int64): Int64;
+  procedure logaMemoriaEmUso;
+
 implementation
 
 uses
@@ -50,6 +53,8 @@ uses
     LbString,
   {$ENDIF}
   Math,
+  Terasoft.Framework.LOG,
+  FastMM4,
   Terasoft.Types;
 
 
@@ -280,6 +285,41 @@ function corrigeValorExtended(p1: Extended; pCasasDecimais: Integer = 2): Extend
 begin
   p := Power(10,pCasasDecimais);
   Result := Trunc(((p1)* p) / p);
+end;
+
+function memoriaEmUso;
+ var
+   Estado: FastMM4.TMemoryManagerState;
+   I: Integer;
+begin
+   Blocos := 0;
+   Bytes := 0;
+
+   FastMM4.GetMemoryManagerState(Estado);
+
+   for I := 0 to High(Estado.SmallBlockTypeStates) do begin
+
+     Inc(Blocos, Estado.SmallBlockTypeStates[I].AllocatedBlockCount);
+     Inc(Bytes, Estado.SmallBlockTypeStates[I].AllocatedBlockCount
+       * Estado.SmallBlockTypeStates[I].UseableBlockSize);
+   end;
+
+   Inc(Blocos, Estado.AllocatedMediumBlockCount);
+   Inc(Bytes, Estado.TotalAllocatedMediumBlockSize);
+
+   Inc(Blocos, Estado.AllocatedLargeBlockCount);
+   Inc(Bytes, Estado.TotalAllocatedLargeBlockSize);
+
+   Result := Bytes;
+
+end;
+
+procedure logaMemoriaEmUso;
+  var
+    blocos,bytes: Int64;
+begin
+  memoriaEmUso(blocos,bytes);
+  logaByTagSeNivel(TAGLOG_CONDICIONAL, format('Blocos de memória: [%d]: Bytes: [%d]', [blocos,bytes]),LOG_LEVEL_DEBUG);
 end;
 
 
