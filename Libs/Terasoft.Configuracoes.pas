@@ -61,7 +61,7 @@ begin
     lConfiguracoesModel.objeto.obterLista;
 
     logaMemoriaEmUso;
-    logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TerasoftConfiguracoes.carregarConfiguracoes: Atribuindo registros para vmtConfiguracoes',LOG_LEVEL_DEBUG);
+    logaByTagSeNivel(TAGLOG_CONDICIONAL, Format('TerasoftConfiguracoes.carregarConfiguracoes: Atribuindo [%d] registros para vmtConfiguracoes',[lConfiguracoesModel.objeto.ConfiguracoessLista.Count]),LOG_LEVEL_DEBUG);
     for lModel in lConfiguracoesModel.objeto.ConfiguracoessLista do
     begin
       vmtConfiguracoes.objeto.Append;
@@ -76,9 +76,9 @@ begin
       vmtConfiguracoes.objeto.FieldByName('VALORHORA').Value      := IIF(lModel.objeto.VALORHORA      = '', Unassigned, lModel.objeto.VALORHORA);
       vmtConfiguracoes.objeto.FieldByName('VALORDATAHORA').Value  := IIF(lModel.objeto.VALORDATAHORA  = '', Unassigned, lModel.objeto.VALORDATAHORA);
       vmtConfiguracoes.objeto.FieldByName('VALORMEMO').Value      := IIF(lModel.objeto.VALORMEMO      = '', Unassigned, lModel.objeto.VALORMEMO);
-      vmtConfiguracoes.objeto.Post;
+      vmtConfiguracoes.objeto.CheckBrowseMode;
     end;
-    logaByTagSeNivel(TAGLOG_CONDICIONAL, 'Registros atribuidos para vmtConfiguracoes',LOG_LEVEL_DEBUG);
+    logaByTagSeNivel(TAGLOG_CONDICIONAL, format('[%d] Registros atribuidos para vmtConfiguracoes',[lConfiguracoesModel.objeto.ConfiguracoessLista.Count]),LOG_LEVEL_DEBUG);
     logaMemoriaEmUso;
 
   finally
