@@ -99,7 +99,7 @@
       Top = 1
       Width = 1109
       Height = 368
-      ActivePage = tsFormatações
+      ActivePage = tsDados
       Align = alClient
       TabOrder = 0
       OnChange = PCChange
@@ -134,8 +134,19 @@
           Height = 137
           DataField = 'descricao'
           DataSource = dsEP
-          TabOrder = 1
+          TabOrder = 2
           WordWrap = False
+        end
+        object edPermissao: TLabeledEdit
+          Left = 376
+          Top = 30
+          Width = 377
+          Height = 23
+          EditLabel.Width = 54
+          EditLabel.Height = 15
+          EditLabel.Caption = 'Permiss'#227'o'
+          TabOrder = 1
+          Text = ''
         end
       end
       object tsQuery: TTabSheet

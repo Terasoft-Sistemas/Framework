@@ -110,6 +110,7 @@ type
     cbOrdenarCampos: TCheckBox;
     cbOrdenarCampos2: TCheckBox;
     btnReconsultar: TBitBtn;
+    edPermissao: TLabeledEdit;
     procedure FormShow(Sender: TObject);
     procedure btnNovoClick(Sender: TObject);
     procedure btnCancelarClick(Sender: TObject);
@@ -245,6 +246,10 @@ begin
   if(edWhere.Text<>'') then
     m.WriteString('where','1',edWhere.Text);
 
+  if(edPermissao.Text='') then
+    m.deleteKey('permissao','executar')
+  else
+    m.writeString('permissao','executar',edPermissao.Text);
 
   s :=  inputMemo('Verifique os valores','Propriedades', m.toString);
 
@@ -388,10 +393,13 @@ begin
   if(vDatasetEndpoints.dataset.State=dsBrowse) then
     vDatasetEndpoints.dataset.Edit;
   ajustaBotoes;
+
   l := getMultiConfigPropriedades.ReadSectionValuesLista('group');
   edGroupBy.Text := '';
   if(l.strings.Count>0) then
     edGroupBy.Text := l.strings.ValueFromIndex[0];
+
+  edPermissao.Text := getMultiConfigPropriedades.ReadString('permissao','executar','');
 
   l := getMultiConfigPropriedades.ReadSectionValuesLista('where');
   edWhere.Text := '';
@@ -1038,6 +1046,7 @@ begin
 
   if(Result=false) then
   begin
+    edPermissao.Visible := false;
     pnEdicao.Enabled := true;
     gridEP.Enabled := false;
     btnNovo.Enabled := false;
@@ -1052,6 +1061,7 @@ begin
 //  tsFiltros.Enabled := (vDatasetFiltros=nil) or (vDatasetEndpoints.dataset.State=dsBrowse);
 
   Result := vDatasetEndpoints.dataset.State=dsBrowse;
+  edPermissao.Visible := vDatasetEndpoints.dataset.State<>dsBrowse;
   btnReconsultar.Enabled := Result;
   pnEdicao.Enabled := vDatasetEndpoints.dataset.State<>dsBrowse;
   gridEP.Enabled := vDatasetEndpoints.dataset.State=dsBrowse;

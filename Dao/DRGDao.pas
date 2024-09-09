@@ -211,6 +211,7 @@ begin
     CriaException('Data padrão não definida');
 
   lMemTable := TFDMemTable.Create(nil);
+  Result := criaIFDDataset(lMemTable);
 
   lSQL := 'select '+#13;
 
@@ -566,13 +567,13 @@ begin
   case pDRG_Parametros.NivelVisualizacao of
     tpNivel1 :
       lSQL := lSQL + 'group by 1 '+#13+
-                     'order by 1 ';
+                     'order by 1 nulls last';
     tpNivel2 :
       lSQL := lSQL + 'group by 1, 2 '+#13+
-                     'order by 1, 2 ';
+                     'order by 1 nulls last, 2 ';
     tpNivel3 :
       lSQL := lSQL + 'group by 1, 2, 3 '+#13+
-                     'order by 1, 2, 3 ';
+                     'order by 1 nulls last, 2, 3 ';
   end;
 
   gravaSQL(lSQL, 'DRGDao_ObterLista_' + FormatDateTime('yyyymmddhhnnsszzz', now));
@@ -613,9 +614,6 @@ begin
 
     lQA.dataset.dataset.first;
 
-    if pDRG_Parametros.ValorPrincipal = 0 then
-      pDRG_Parametros.ValorPrincipal := lQA.dataset.dataset.FieldByName('Valor').AsFloat;
-
     while not lQA.dataset.dataset.Eof do
     begin
 
@@ -654,23 +652,43 @@ begin
                                 lSubGrupo,
                                 lConta,
                                 lQA.dataset.dataset.FieldByName('VALOR').AsFloat,
-                                lQA.dataset.dataset.FieldByName('VALOR').AsFloat / pDRG_Parametros.ValorPrincipal * 100
+                                0//  lQA.dataset.dataset.FieldByName('VALOR').AsFloat / pDRG_Parametros.ValorPrincipal * 100
                               ]);
       end else
       begin
         lMemTable.Edit;
         lMemTable.FieldByName('VALOR').AsFloat       := lMemTable.FieldByName('VALOR').AsFloat + lQA.dataset.dataset.FieldByName('VALOR').AsFloat;
-        lMemTable.FieldByName('PORCENTAGEM').AsFloat := lMemTable.FieldByName('VALOR').AsFloat / pDRG_Parametros.ValorPrincipal * 100;
-        lMemTable.Post;
+        //lMemTable.FieldByName('PORCENTAGEM').AsFloat := lMemTable.FieldByName('VALOR').AsFloat / pDRG_Parametros.ValorPrincipal * 100;
+        lMemTable.CheckBrowseMode;
       end;
 
       lQA.dataset.dataset.Next;
     end;
   end;
 
-  lMemTable.Open;
+  lMemTable.first;
+  if pDRG_Parametros.ValorPrincipal = 0 then
+  begin
+    while not lMemTable.Eof do
+    begin
+      if(lMemTable.FieldByName('GRUPO').AsString<>'') then
+        break;
+      lMemTable.Next;
+    end;
+  end;
+  pDRG_Parametros.ValorPrincipal := lMemTable.FieldByName('Valor').AsFloat;
 
-  Result := criaIFDDataset(lMemTable);
+  lMemTable.first;
+
+  while not lMemTable.Eof do
+  begin
+    lMemTable.edit;
+    lMemTable.FieldByName('PORCENTAGEM').AsFloat := lMemTable.FieldByName('VALOR').AsFloat / pDRG_Parametros.ValorPrincipal * 100.0;
+    lMemTable.CheckBrowseMode;
+    lMemTable.Next;
+  end;
+
+  lMemTable.Open;
 
 end;
 

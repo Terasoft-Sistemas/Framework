@@ -148,6 +148,7 @@ end;
 constructor TConstrutorDao.Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
+  vIConexao.ultimoAcessoDB := Now;
 end;
 
 destructor TConstrutorDao.Destroy;

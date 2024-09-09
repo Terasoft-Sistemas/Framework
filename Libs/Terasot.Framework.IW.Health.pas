@@ -37,18 +37,27 @@ function TContentHealth.Execute(aRequest: THttpRequest; aReply: THttpReply; cons
   var
     p: TIWUserSession;
     lStream: TStringStream;
+    ext: String;
 begin
   Result := True;
   if Assigned(aReply) then
   begin
-    aReply.ContentType := MIME_TXT;
-      lStream := TStringStream.Create;
-      try
-        dumpToStream(lStream,true);
-        aReply.WriteString(lStream.DataString);
-      finally
-        FreeAndNil(lStream);
-      end;
+    ext := aRequest.GetQueryFieldValue('tipo');
+    if(ext='') then
+      ext := 'json';
+    if(ext='json') then
+      aReply.ContentType := MIME_JSON
+    else
+      aReply.ContentType := MIME_TXT;
+    lStream := TStringStream.Create;
+    try
+      TIWUserSession(aSession.Data).xOmitirDump:=true;
+      dumpToFile;
+      dumpToStream(lStream,'.'+ext);
+      aReply.WriteString(lStream.DataString);
+    finally
+      FreeAndNil(lStream);
+    end;
   end;
   aSession.Terminate;
 end;
