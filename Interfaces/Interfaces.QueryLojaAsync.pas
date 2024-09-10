@@ -14,6 +14,8 @@ interface
     Terasoft.Types,
     Interfaces.Conexao,
     Spring.Collections,
+    Terasoft.Framework.PoolThreads,
+
     Terasoft.Framework.Collections,
     LojasModel;
 
@@ -22,15 +24,13 @@ interface
 
     IListaQueryAsync=IList<IQueryLojaAsync>;
 
-    TStatusQueryAsyncLoja = (sqal_Idle, sqal_Running);
-
-    IQueryLojaAsync = interface
+    IQueryLojaAsync = interface(IProcesso)
     ['{AD9398AF-B0B4-4FAD-A65E-68B8D7C0D9CF}']
     //property GDB getter/setter
       function getGDB: IGDB;
       procedure setGDB(const pValue: IGDB);
 
-      procedure run;
+      //procedure run;
 
       {
         execQuery executa pQuery com os campos e parametros fornecidos.
@@ -64,15 +64,6 @@ interface
       function getParametros: TVariantArray;
       procedure setParametros(const pValue: TVariantArray);
 
-    //property resultado getter/setter
-      function getResultado: IResultadoOperacao;
-      procedure setResultado(const pValue: IResultadoOperacao);
-
-    //property status getter/setter
-      function getStatus: TStatusQueryAsyncLoja;
-
-      procedure espera;
-
     //property dataset getter/setter
       function getDataset: IDatasetSimples;
 
@@ -84,16 +75,9 @@ interface
       function getFdQuery: IFDQuery;
       procedure setFdQuery(const pValue: IFDQuery);
 
-    //property tag getter/setter
-      function getTag: TipoWideStringFramework;
-      procedure setTag(const pValue: TipoWideStringFramework);
-
-      property tag: TipoWideStringFramework read getTag write setTag;
       property FDQuery: IFDQuery read getFdQuery write setFdQuery;
       property criaOperacoes: boolean read getCriaOperacoes write setCriaOperacoes;
       property dataset: IDatasetSimples read getDataset;
-      property status: TStatusQueryAsyncLoja read getStatus;
-      property resultado: IResultadoOperacao read getResultado write setResultado;
       property parametros: TVariantArray read getParametros write setParametros;
       property campos: TipoWideStringFramework read getCampos write setCampos;
       property query: TipoWideStringFramework read getQuery write setQuery;
@@ -101,7 +85,7 @@ interface
       property GDB: IGDB read getGDB write setGDB;
     end;
 
-    function getQueryLojaAsync(pLoja: ITLojasModel): IQueryLojaAsync;
+    function getQueryLojaAsync(pLoja: ITLojasModel; pRotulo: TipoWideStringFramework = ''; pResultado: IResultadoOperacao = nil): IQueryLojaAsync;
 
     function getQueryLojaAsyncList(pIConexao:IConexao; pView: String=''): IListaQueryAsync;
     function getQueryLojaAsyncHostsList(pIConexao:IConexao; pView: String=''): IListaQueryAsync;
@@ -113,30 +97,21 @@ implementation
     Terasoft.Framework.LOG;
 
   type
-    TQueryLojaAsync = class(TInterfacedObject,
+    TQueryLojaAsync = class(TBaseProcessoThread,
         IQueryLojaAsync,
         IInterface
-        //IAsyncRunnable
         )
     protected
-      //[volatile] vCall: IAsyncCall;
-      [volatile] vTh: TThread;
       vExecute: boolean;
       fGDB: IGDB;
       fLoja: ITLojasModel;
       fQuery: TipoWideStringFramework;
       fCampos: TipoWideStringFramework;
       fParametros: TVariantArray;
-      fResultado: IResultadoOperacao;
       fDataset: IDatasetSimples;
       fCriaOperacoes: boolean;
       fFdQuery: IFDQuery;
-      fTag: TipoWideStringFramework;
-      vCS: TCriticalSection;
-
-    //property tag getter/setter
-      function getTag: TipoWideStringFramework;
-      procedure setTag(const pValue: TipoWideStringFramework);
+      procedure doExecutar; override;
 
     //property fdQuery getter/setter
       function getFdQuery: IFDQuery;
@@ -151,18 +126,8 @@ implementation
     //property dataset getter/setter
       function getDataset: IDatasetSimples;
 
-      procedure run;
-      procedure espera;
-      procedure doIt;
       procedure execQuery(const pQuery, pCampos: TipoWideStringFramework; pParametros: TVariantArray);
       procedure openQuery(pQuery: IFDQuery; pExecute: boolean; pSQL: TipoWideStringFramework);
-
-    //property status getter/setter
-      function getStatus: TStatusQueryAsyncLoja;
-
-    //property resultado getter/setter
-      function getResultado: IResultadoOperacao;
-      procedure setResultado(const pValue: IResultadoOperacao);
 
     //property parametros getter/setter
       function getParametros: TVariantArray;
@@ -184,35 +149,10 @@ implementation
       function getGDB: IGDB;
       procedure setGDB(const pValue: IGDB);
     public
-      constructor Create;
+      constructor Create(pRotulo: TipoWideStringFramework; pResultado: IResultadoOperacao);
       destructor Destroy; override;
     end;
 
-
-  TThreadMonitoramento = class(TThread)
-  protected
-    procedure Execute; override;
-  public
-    destructor Destroy; override;
-  end;
-
-  var
-    gListaLocal: ILockList<IQueryLojaAsync>;
-    th: TThreadMonitoramento;
-
-
-procedure monitora(pQuery: IQueryLojaAsync);
-begin
-  if(gListaLocal=nil) then
-    gListaLocal := TLockListImpl<IQueryLojaAsync>.Create;
-  gListaLocal.add(pQuery);
-  if(th=nil) then
-  begin
-    th := TThreadMonitoramento.Create;
-    th.Priority := tpIdle;
-    th.FreeOnTerminate:=true;
-  end;
-end;
 
 function getQueryLojaAsyncList;
   var
@@ -254,9 +194,9 @@ begin
 
 end;
 
-function getQueryLojaAsync(pLoja: ITLojasModel): IQueryLojaAsync;
+function getQueryLojaAsync;
 begin
-  Result := TQueryLojaAsync.Create;
+  Result := TQueryLojaAsync.Create(pRotulo,pResultado);
   Result.loja := pLoja;
 end;
 
@@ -294,45 +234,6 @@ begin
   Result := fFdQuery;
 end;
 
-function TQueryLojaAsync.getStatus: TStatusQueryAsyncLoja;
-begin
-  //vTH pode ser finalizada em outra thread, então precisamos do semáforo
-  vCS.Enter;
-  try
-    if(vTh<>nil) and (vTh.Finished=false) then
-      Result := sqal_Running
-    else
-    begin
-      FreeAndNil(vTh);
-      Result := sqal_Idle;
-    end;
-  finally
-    vCS.Leave;
-  end;
-end;
-
-procedure TQueryLojaAsync.run;
-begin
-  espera;
-  fResultado := nil;
-  vTh := TThread.CreateAnonymousThread(doIt);
-  vTH.FreeOnTerminate := false;
-  vTH.Start;
-
-  monitora(self);
-
-end;
-
-procedure TQueryLojaAsync.setResultado(const pValue: IResultadoOperacao);
-begin
-  fResultado := pValue;
-end;
-
-function TQueryLojaAsync.getResultado: IResultadoOperacao;
-begin
-  Result := checkResultadoOperacao(fResultado);
-end;
-
 procedure TQueryLojaAsync.setParametros;
 begin
   fParametros := pValue;
@@ -348,13 +249,13 @@ begin
   fCampos := pValue;
 end;
 
-procedure TQueryLojaAsync.doIt;
+procedure TQueryLojaAsync.doExecutar;
   var
     ds: IDataset;
 begin
   try
 
-    logaByTagSeNivel('',format('Executando query [%s] async para a loja [%s] em [%s]: [%s]',[fTag, fLoja.objeto.LOJA, getGDB.databaseName, fQuery] ), LOG_LEVEL_DEBUG);
+    logaByTagSeNivel('',format('Executando query [%s] async para a loja [%s] em [%s]: [%s]',[fRotulo, fLoja.objeto.LOJA, getGDB.databaseName, fQuery] ), LOG_LEVEL_DEBUG);
 
     if(self.fQuery<>'') and (self.fFdQuery=nil) then
     begin
@@ -362,7 +263,7 @@ begin
       if(getGDB.ativo=false) then
         raise Exception.Create('TQueryLojaAsync.AsyncRun: Banco de dados não conetado.');
 
-      logaByTagSeNivel('',format('Executando query [%s] async para a loja [%s] em [%s]: [%s]',[fTag,fLoja.objeto.LOJA, getGDB.databaseName, fQuery] ), LOG_LEVEL_DEBUG);
+      logaByTagSeNivel('',format('Executando query [%s] async para a loja [%s] em [%s]: [%s]',[fRotulo,fLoja.objeto.LOJA, getGDB.databaseName, fQuery] ), LOG_LEVEL_DEBUG);
 
       ds := self.fGDB.criaDataset.query(self.fQuery,self.fCampos,self.fParametros);
 
@@ -371,13 +272,13 @@ begin
       begin
         fDataset := criaDatasetSimples(cloneDataset(ds.dataset,false,fCriaOperacoes));
         fDataset.dataset.First;
-        logaByTagSeNivel('',format('Executando query [%s] async para a loja [%s] retornou [%d / %d] registros:',[fTag,fLoja.objeto.LOJA, ds.dataset.recordcount, fDataset.dataset.recordCount] ), LOG_LEVEL_DEBUG);
+        logaByTagSeNivel('',format('Executando query [%s] async para a loja [%s] retornou [%d / %d] registros:',[fRotulo,fLoja.objeto.LOJA, ds.dataset.recordcount, fDataset.dataset.recordCount] ), LOG_LEVEL_DEBUG);
       end;
 
     end else if (fQuery<>'') and (fFdQuery<>nil) then
     begin
       fFdQuery.objeto.close;
-      logaByTagSeNivel('',format('Executando query [%s] async para a loja [%s] em [%s]: [%s]',[fTag,fLoja.objeto.LOJA, getGDB.databaseName, fQuery] ), LOG_LEVEL_DEBUG);
+      logaByTagSeNivel('',format('Executando query [%s] async para a loja [%s] em [%s]: [%s]',[fRotulo,fLoja.objeto.LOJA, getGDB.databaseName, fQuery] ), LOG_LEVEL_DEBUG);
       if(vExecute) then
         fFdQuery.objeto.ExecSQL(fQuery)
       else
@@ -387,13 +288,13 @@ begin
       begin
         fDataset := criaDatasetSimples(cloneDataset(fFdQuery.objeto,false,fCriaOperacoes));
         fDataset.dataset.First;
-        logaByTagSeNivel('',format('Executando query [%s] async para a loja [%s] retornou [%d / %d] registros:',[fTag,fLoja.objeto.LOJA, fFdQuery.objeto.recordcount, fDataset.dataset.recordCount] ), LOG_LEVEL_DEBUG);
+        logaByTagSeNivel('',format('Executando query [%s] async para a loja [%s] retornou [%d / %d] registros:',[fRotulo,fLoja.objeto.LOJA, fFdQuery.objeto.recordcount, fDataset.dataset.recordCount] ), LOG_LEVEL_DEBUG);
       end;
 
     end else if (fFdQuery<>nil) and (fFdQuery.objeto.SQL.Text<>'') then
     begin
       fFdQuery.objeto.close;
-      logaByTagSeNivel('',format('Executando query [%s] async para a loja [%s] em [%s]: [%s]',[fTag,fLoja.objeto.LOJA, getGDB.databaseName, fFdQuery.objeto.SQL.Text] ), LOG_LEVEL_DEBUG);
+      logaByTagSeNivel('',format('Executando query [%s] async para a loja [%s] em [%s]: [%s]',[fRotulo,fLoja.objeto.LOJA, getGDB.databaseName, fFdQuery.objeto.SQL.Text] ), LOG_LEVEL_DEBUG);
       if(vExecute) then
         fFdQuery.objeto.ExecSQL
       else
@@ -403,7 +304,7 @@ begin
       begin
         fDataset := criaDatasetSimples(cloneDataset(fFdQuery.objeto,false,fCriaOperacoes));
         fDataset.dataset.First;
-        logaByTagSeNivel('',format('Executando query [%s] async para a loja [%s] retornou [%d / %d] registros:',[fTag,fLoja.objeto.LOJA, fFdQuery.objeto.recordcount, fDataset.dataset.recordCount] ), LOG_LEVEL_DEBUG);
+        logaByTagSeNivel('',format('Executando query [%s] async para a loja [%s] retornou [%d / %d] registros:',[fRotulo,fLoja.objeto.LOJA, fFdQuery.objeto.recordcount, fDataset.dataset.recordCount] ), LOG_LEVEL_DEBUG);
       end;
     end else
       raise Exception.Create('TQueryLojaAsync.AsyncRun: Query não especificado.');
@@ -412,68 +313,44 @@ begin
   except
     on e: Exception do
     begin
-      getResultado.formataErro('TQueryLojaAsync.AsyncRun [%s]: %s: %s', [ fTag, e.ClassName, e.Message ]);
+      getResultado.formataErro('TQueryLojaAsync.AsyncRun [%s]: %s: %s', [ fRotulo, e.ClassName, e.Message ]);
       if(self.fQuery<>'') then
-        logaByTagSeNivel('',format('TQueryLojaAsync.AsyncRun: Exception query [%s] async para a loja [%s] query [%s]: %s: %s',[fTag,fLoja.objeto.LOJA, fQuery, e.className, e.message ] ), LOG_LEVEL_DEBUG)
+        logaByTagSeNivel('',format('TQueryLojaAsync.AsyncRun: Exception query [%s] async para a loja [%s] query [%s]: %s: %s',[fRotulo,fLoja.objeto.LOJA, fQuery, e.className, e.message ] ), LOG_LEVEL_DEBUG)
       else if(self.fQuery<>'') then
-        logaByTagSeNivel('',format('TQueryLojaAsync.AsyncRun: Exception query [%s] async para a loja [%s] query [%s]: %s: %s',[fTag,fLoja.objeto.LOJA, fFdQuery.objeto.sql.text, e.className, e.message ] ), LOG_LEVEL_DEBUG);
+        logaByTagSeNivel('',format('TQueryLojaAsync.AsyncRun: Exception query [%s] async para a loja [%s] query [%s]: %s: %s',[fRotulo,fLoja.objeto.LOJA, fFdQuery.objeto.sql.text, e.className, e.message ] ), LOG_LEVEL_DEBUG);
     end;
   end;
 end;
 
-  var
-    gContagem: Int64;
-
 constructor TQueryLojaAsync.Create;
 begin
   inherited;
-  AtomicIncrement(gContagem);
-  vCS := TCriticalSection.Create;
 end;
 
 destructor TQueryLojaAsync.Destroy;
 begin
-  espera;
-
-  AtomicDecrement(gContagem);
-
-  FreeAndNil(vCS);
-
   inherited;
-end;
-
-procedure TQueryLojaAsync.espera;
-begin
-  while getStatus<>sqal_Idle do
-    sleep(50);
-{   //Não precisa finalizar, pois getStatus já faz isso
-vCS.Enter;
-  try
-    FreeAndNil(vTh);
-  finally
-    vCS.Leave;
-  end;}
 end;
 
 procedure TQueryLojaAsync.execQuery(const pQuery, pCampos: TipoWideStringFramework; pParametros: TVariantArray);
 begin
-  espera;
+  esperar;
   fQuery := pQuery;
   fFdQuery:=nil;
   fCampos := pCampos;
   fParametros := pParametros;
-  run;
+  runAsync;
 end;
 
 procedure TQueryLojaAsync.openQuery;
 begin
-  espera;
+  esperar;
   vExecute := pExecute;
   fFdQuery := pQuery;
   fQuery := pSQL;
   fCampos := '';
   fParametros := [];
-  run;
+  runAsync;
 end;
 
 function TQueryLojaAsync.getCampos: TipoWideStringFramework;
@@ -517,53 +394,8 @@ begin
   Result := fGDB;
 end;
 
-{ TThreadMonitoramento }
-
-destructor TThreadMonitoramento.Destroy;
-begin
-  Terminate;
-  WaitFor;
-  th := nil;
-  inherited;
-end;
-
-procedure TThreadMonitoramento.Execute;
-  var
-    p: IQueryLojaAsync;
-begin
-  inherited;
-  while not Terminated do
-  begin
-    sleep(100);
-    while gListaLocal.count>0 do
-      try
-        if(gListaLocal.dequeue(p)) then
-        begin
-          p.espera;
-        end;
-        p:=nil;
-      except
-
-      end;
-  end;
-
-end;
-
-procedure TQueryLojaAsync.setTag(const pValue: TipoWideStringFramework);
-begin
-  fTag := pValue;
-end;
-
-function TQueryLojaAsync.getTag: TipoWideStringFramework;
-begin
-  Result := fTag;
-end;
-
-
 initialization
 
-
 finalization
-  FreeAndNil(th);
 
 end.

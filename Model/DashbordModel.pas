@@ -10,6 +10,7 @@ uses
   Generics.Defaults,
   Generics.Collections,
   Interfaces.Conexao,
+  Terasoft.Framework.PoolThreads,
   Terasoft.Framework.ObjectIface,
   Terasoft.Framework.Texto,
   FireDAC.Comp.Client;
@@ -22,11 +23,8 @@ type
 
   TDashboardProc = reference to function(pConexao: IConexao; pParam: TDashbord_Parametros): IFDDataset;
 
-  IResultadoDashboard = interface
+  IResultadoDashboard = interface(IProcesso)
   ['{6844797F-81E2-43A2-A229-1B0F04F042BA}']
-    //property resultado getter/setter
-      function getResultado: IResultadoOperacao;
-      procedure setResultado(const pValue: IResultadoOperacao);
 
     //property parametros getter/setter
       function getParametros: TDashbord_Parametros;
@@ -36,11 +34,6 @@ type
       function getDataset: IFDDataset;
       procedure setDataset(const pValue: IFDDataset);
 
-    //property status getter/setter
-      function getStatus: TStatusDashboardAsync;
-      procedure setStatus(const pValue: TStatusDashboardAsync);
-
-      function espera: TStatusDashboardAsync;
       procedure run(pModel: ITDashbordModel; pProc: TDashboardProc; pParam: TDashbord_Parametros);
 
     //property operacao getter/setter
@@ -58,10 +51,8 @@ type
       property proc: TDashboardProc read getProc write setProc;
       property conexao: IConexao read getConexao write setConexao;
       property operacao: TOperacoesDashboardAsync read getOperacao write setOperacao;
-      property status: TStatusDashboardAsync read getStatus write setStatus;
       property dataset: IFDDataset read getDataset write setDataset;
       property parametros: TDashbord_Parametros read getParametros write setParametros;
-      property resultado: IResultadoOperacao read getResultado write setResultado;
   end;
 
   TLockDictionaryImplDashBoard = ILockDictionary<TOperacoesDashboardAsync,IResultadoDashboard>;
@@ -103,7 +94,7 @@ uses
 
   type
 
-    TResultadoDashboardImpl=class(TInterfacedObject, IResultadoDashboard)
+    TResultadoDashboardImpl=class(TBaseProcessoThread, IResultadoDashboard)
     protected
       fResultado: IResultadoOperacao;
       fParametros: TDashbord_Parametros;
@@ -127,11 +118,9 @@ uses
       function getOperacao: TOperacoesDashboardAsync;
       procedure setOperacao(const pValue: TOperacoesDashboardAsync);
 
-      procedure doIt;
+      procedure doExecutar; override;
 
       procedure run(pModel: ITDashbordModel; pProc: TDashboardProc; pParam: TDashbord_Parametros);
-
-      function espera: TStatusDashboardAsync;
 
     //property status getter/setter
       function getStatus: TStatusDashboardAsync;
@@ -149,8 +138,6 @@ uses
       function getResultado: IResultadoOperacao;
       procedure setResultado(const pValue: IResultadoOperacao);
     public
-      destructor Destroy; override;
-
     end;
 
 
@@ -345,7 +332,7 @@ begin
   begin
     if not vLista.TryGetValue(op,res) then
     begin
-      res := TResultadoDashboardImpl.Create;
+      res := TResultadoDashboardImpl.Create('',nil);
       res.operacao := op;
 
       if(pDashbord_Parametros.expandeAsync=[]) or (op in pDashbord_Parametros.expandeAsync) then
@@ -366,7 +353,7 @@ begin
     if(vListaOld=nil) then
       vListaOld := TLockListImpl<IResultadoDashboard>.Create;
       while vLista.unstack(par) do
-        if(par.Value.status=sda_Running) then
+        if(par.Value.status<>spOcioso) then
           vListaOld.add(par.Value);
     i := vListaOld.count;
 
@@ -374,7 +361,7 @@ begin
     begin
       dec(i);
       vListaOld.get(i,p);
-      if(p.status<>sda_Running) then
+      if(p.status=spOcioso) then
         vListaOld.delete(i);
     end;
 
@@ -396,7 +383,7 @@ begin
     begin
       dec(i);
       vListaOld.get(i,p);
-      if(p.status<>sda_Running) then
+      if(p.status=spOcioso) then
         vListaOld.delete(i);
     end;
 
@@ -422,72 +409,73 @@ function TDashbordModel.ObterQuery1_Totalizador;
 begin
   checkAsync(pDashbord_Parametros);
   vLista.TryGetValue(od_totalizador,Result);
-  Result.espera;
-  if(Result.status=sda_Idle) or (Result.parametros.compare(pDashbord_Parametros)=false) then
+  Result.esperar;
+  if (Result.parametros.compare(pDashbord_Parametros)=false) then
   begin
     Result.run(myself,doObterQuery1_Totalizador,pDashbord_Parametros);
+    Result.esperar;
   end;
-  Result.espera;
 end;
 
 function TDashbordModel.ObterQuery2_VendaPorDia;
 begin
   checkAsync(pDashbord_Parametros);
   vLista.TryGetValue(od_pordia,Result);
-  Result.espera;
-  if(Result.status=sda_Idle) or (Result.parametros.compare(pDashbord_Parametros)=false) then
+  Result.esperar;
+  if (Result.parametros.compare(pDashbord_Parametros)=false) then
   begin
     Result.run(myself,doObterQuery2_VendaPorDia,pDashbord_Parametros);
+    Result.esperar;
   end;
-  Result.espera;
 end;
 
 function TDashbordModel.ObterQuery3_VendaPorAno;
 begin
   checkAsync(pDashbord_Parametros);
   vLista.TryGetValue(od_porano,Result);
-  Result.espera;
-  if(Result.status=sda_Idle) or (Result.parametros.compare(pDashbord_Parametros)=false) then
+  Result.esperar;
+  if (Result.parametros.compare(pDashbord_Parametros)=false) then
   begin
     Result.run(myself,doObterQuery3_VendaPorAno,pDashbord_Parametros);
+    Result.esperar;
   end;
-  Result.espera;
 end;
 
 function TDashbordModel.ObterQuery4_VendaPorHora;
 begin
   checkAsync(pDashbord_Parametros);
   vLista.TryGetValue(od_porhora,Result);
-  Result.espera;
-  if(Result.status=sda_Idle) or (Result.parametros.compare(pDashbord_Parametros)=false) then
+  Result.esperar;
+  if(Result.parametros.compare(pDashbord_Parametros)=false) then
   begin
     Result.run(myself,doObterQuery4_VendaPorHora,pDashbord_Parametros);
+    Result.esperar;
   end;
-  Result.espera;
+  Result.esperar;
 end;
 
 function TDashbordModel.ObterQuery6_RankingVendedores;
 begin
   checkAsync(pDashbord_Parametros);
   vLista.TryGetValue(od_vendedores,Result);
-  Result.espera;
-  if(Result.status=sda_Idle) or (Result.parametros.compare(pDashbord_Parametros)=false) then
+  Result.esperar;
+  if(Result.parametros.compare(pDashbord_Parametros)=false) then
   begin
     Result.run(myself,doObterQuery6_RankingVendedores,pDashbord_Parametros);
+    Result.esperar;
   end;
-  Result.espera;
 end;
 
 function TDashbordModel.ObterQuery7_RankingFiliais;
 begin
   checkAsync(pDashbord_Parametros);
   vLista.TryGetValue(od_filiais,Result);
-  Result.espera;
-  if(Result.status=sda_Idle) or (Result.parametros.compare(pDashbord_Parametros)=false) then
+  Result.esperar;
+  if(Result.parametros.compare(pDashbord_Parametros)=false) then
   begin
     Result.run(myself,doObterQuery7_RankingFiliais,pDashbord_Parametros);
+    Result.esperar;
   end;
-  Result.espera;
 end;
 
 function TDashbordModel.ObterQuery_Anos;
@@ -548,7 +536,7 @@ end;
 
 procedure TResultadoDashboardImpl.run;
 begin
-  espera;
+  esperar;
   try
     vModel := pModel;
     fConexao := pModel.objeto.vIConexao;
@@ -558,8 +546,8 @@ begin
     fParametros := pParam;
 
     fConexao := fConexao.NovaConexao(fConexao.empresa.loja);
+    runAsync;
     fStatus := sda_Running;
-    TThread.CreateAnonymousThread(doIt).Start;
   except
     on
       e: exception do
@@ -573,38 +561,14 @@ begin
   fDataset := pValue;
 end;
 
-destructor TResultadoDashboardImpl.Destroy;
+procedure TResultadoDashboardImpl.doExecutar;
 begin
-  espera;
-  inherited;
-end;
-
-procedure TResultadoDashboardImpl.doIt;
-begin
-  fStatus := sda_Running;
   try
-    try
-      if assigned(fProc) then
-        fDataset := fProc(fConexao, fParametros);
-    except
-      on e: Exception do
-      begin
-        getResultado.formataErro('Resultado dashboard async: [%s] %s: %s', [ gTagStr[fOperacao], e.ClassName, e.Message ]);
-      end;
-    end;
-
+    if assigned(fProc) then
+      fDataset := fProc(fConexao, fParametros);
   finally
-    fStatus := sda_Done;
     vModel := nil;
   end;
-end;
-
-function TResultadoDashboardImpl.espera;
-begin
-  while fStatus=sda_Running do
-    sleep(10);
-  //vTh := nil;
-  Result := fStatus;
 end;
 
 function TResultadoDashboardImpl.getDataset: IFDDataset;

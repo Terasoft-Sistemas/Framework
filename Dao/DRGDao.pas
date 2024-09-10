@@ -153,7 +153,7 @@ begin
 
   for lQA in lAsyncList do
   begin
-    lQA.tag := 'ObterVendasResultado1';
+    lQA.rotulo := 'ObterVendasResultado1';
     conexao := lQA.loja.objeto.conexaoLoja;
     if(conexao=nil) then
       raise Exception.CreateFmt('TDashbordDao.ObterVendasResultado1: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);
@@ -163,7 +163,7 @@ begin
 
   for lQA in lAsyncList do
   begin
-    lQA.espera;
+    lQA.esperar;
     if(lQA.resultado.erros>0) then
       raise Exception.CreateFmt('TDashbordDao.ObterVendasResultado1: Loja [%s] com problemas: [%s]',[lQA.loja.objeto.LOJA,lQA.resultado.toString]);
 
@@ -598,7 +598,7 @@ begin
 
   for lQA in lAsyncList do
   begin
-    lQA.tag := 'ObterVendasResultado1';
+    lQA.rotulo := 'ObterVendasResultado1';
     conexao := lQA.loja.objeto.conexaoLoja;
     if(conexao=nil) then
       raise Exception.CreateFmt('TDRGDao.ObterLista: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);
@@ -608,7 +608,7 @@ begin
 
   for lQA in lAsyncList do
   begin
-    lQA.espera;
+    lQA.esperar;
     if(lQA.resultado.erros>0) then
       raise Exception.CreateFmt('TDRGDao.ObterLista: Loja [%s] com problemas: [%s]',[lQA.loja.objeto.LOJA,lQA.resultado.toString]);
 

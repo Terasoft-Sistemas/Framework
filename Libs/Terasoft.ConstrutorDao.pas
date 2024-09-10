@@ -468,7 +468,7 @@ begin
   finally
     if(pEspera) then
       for lQA in lAsyncList do
-        lQA.espera;
+        lQA.esperar;
   end;
 
 end;

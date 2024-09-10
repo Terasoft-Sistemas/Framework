@@ -281,7 +281,7 @@ begin
 
   for lQA in lAsyncList do
   begin
-    lQA.tag := 'ObterQuery_Anos';
+    lQA.rotulo := 'ObterQuery_Anos';
     conexao := lQA.loja.objeto.conexaoLoja;
     if(conexao=nil) then
       raise Exception.CreateFmt('TCurvaABCDao.ObterCurvaABC: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);
@@ -291,7 +291,7 @@ begin
 
   for lQA in lAsyncList do
   begin
-    lQA.espera;
+    lQA.esperar;
     if(lQA.resultado.erros>0) then
       raise Exception.CreateFmt('TCurvaABCDao.ObterCurvaABC: Loja [%s] com problemas: [%s]',[lQA.loja.objeto.LOJA,lQA.resultado.toString]);
 

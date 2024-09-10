@@ -612,7 +612,7 @@ begin
     for lLojaModel in getFiltroLojas.objeto.listaLojas do
     begin
       lLojaAsync := getAsyncQueryFilial(lLojaModel);
-      lLojaAsync.espera;
+      lLojaAsync.esperar;
       if(lLojaAsync.resultado.erros=0) then
       begin
         if(Result = nil) then
@@ -954,7 +954,7 @@ begin
   begin
     lLojaAsync := getAsyncQueryFilial(lLojaModel);
 
-    lLojaAsync.espera;
+    lLojaAsync.esperar;
 
     if(lLojaAsync.resultado.erros=0) then
     begin

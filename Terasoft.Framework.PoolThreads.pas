@@ -148,8 +148,7 @@ implementation
     vListaThreads: ILockList<TThreadLocal>;
 
   const
-    MAXIMO = 2;
-
+    MAXIMO = 100;
 
 procedure executaProcesso(pProcesso: IProcesso);
   var
@@ -248,9 +247,14 @@ begin
   fRotulo := pValue;
 end;
 
+  var
+    gContagem: Int64;
+
+
 constructor TBaseProcessoThread.Create;
 begin
   inherited Create;
+  AtomicIncrement(gContagem);
   fStatus := spOcioso;
   fRotulo := pRotulo;
   fResultado := pResultado;
@@ -260,6 +264,7 @@ end;
 destructor TBaseProcessoThread.Destroy;
 begin
   esperar;
+  AtomicDecrement(gContagem);
   inherited;
 end;
 
