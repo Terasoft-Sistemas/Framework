@@ -283,6 +283,7 @@ begin
       modelo.objeto.VALORHORA      := lQry.FieldByName('VALORHORA').AsString;
       modelo.objeto.VALORDATAHORA  := lQry.FieldByName('VALORDATAHORA').AsString;
       modelo.objeto.SYSTIME        := lQry.FieldByName('SYSTIME').AsString;
+      logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TConfiguracoesDao.obterLista: ítem [%d] de [%d]: - Próximo registro',[i,lQry.RecordCount]),LOG_LEVEL_DEBUG);
       lQry.Next;
     end;
     obterTotalRegistros;
