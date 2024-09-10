@@ -36,7 +36,6 @@ end;
 function TContentHealth.Execute(aRequest: THttpRequest; aReply: THttpReply; const aPathname: string; aSession: TIWApplication; aParams: TStrings): boolean;
   var
     p: TIWUserSession;
-//    lStream: TStringStream;
     ext: String;
 begin
   Result := True;
@@ -49,15 +48,9 @@ begin
       aReply.ContentType := MIME_JSON
     else
       aReply.ContentType := MIME_TXT;
-  //  lStream := TStringStream.Create;
-    try
-      TIWUserSession(aSession.Data).xOmitirDump:=true;
-      dumpToFile;
-      //dumpToStream(lStream,'.'+ext);
-      aReply.WriteString(dumpToString(ext));// lStream.DataString);
-    finally
-    //  FreeAndNil(lStream);
-    end;
+    TIWUserSession(aSession.Data).xOmitirDump:=true;
+    dumpToFile;
+    aReply.WriteString(dumpToString(ext));
   end;
   aSession.Terminate;
 end;
