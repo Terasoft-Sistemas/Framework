@@ -109,6 +109,8 @@ interface
       destructor Destroy; override;
     end;
 
+  function getContagemExecucoesAssincronas: Int64;
+  function getContagemProcessos: Int64;
 
   procedure executaProcesso(pProcesso: IProcesso);
   function criaProcessoAnonimo(pProcesso: TProcessoAnonimoProc; pRotulo: TipoWideStringFramework; pResultado: IResultadoOperacao=nil): IProcesso;
@@ -146,9 +148,23 @@ implementation
   var
     vListaProcessos: ILockList<IProcesso>;
     vListaThreads: ILockList<TThreadLocal>;
+    gContagem: Int64;
+    gContagemProcessos: Int64;
 
   const
     MAXIMO = 100;
+
+
+function getContagemExecucoesAssincronas: Int64;
+begin
+  Result := gContagem;
+end;
+
+function getContagemProcessos: Int64;
+begin
+  Result := gContagemProcessos;
+end;
+
 
 procedure executaProcesso(pProcesso: IProcesso);
   var
@@ -212,6 +228,7 @@ begin
     end;
     try
       p.status := spRodando;
+      AtomicIncrement(gContagem);
       p.executar;
       p.status := spOcioso;
 
@@ -247,14 +264,10 @@ begin
   fRotulo := pValue;
 end;
 
-  var
-    gContagem: Int64;
-
-
 constructor TBaseProcessoThread.Create;
 begin
   inherited Create;
-  AtomicIncrement(gContagem);
+  AtomicIncrement(gContagemProcessos);
   fStatus := spOcioso;
   fRotulo := pRotulo;
   fResultado := pResultado;
@@ -264,7 +277,7 @@ end;
 destructor TBaseProcessoThread.Destroy;
 begin
   esperar;
-  AtomicDecrement(gContagem);
+  AtomicDecrement(gContagemProcessos);
   inherited;
 end;
 
@@ -417,7 +430,7 @@ end;
 
 initialization
   cria;
-  testaProcessos;
+//  testaProcessos;
 
 finalization
   finaliza;
