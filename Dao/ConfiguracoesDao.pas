@@ -242,6 +242,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
   modelo: ITConfiguracoesModel;
+  i: Integer;
 begin
   logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TConfiguracoesDao.obterLista',LOG_LEVEL_DEBUG);
   lQry := vIConexao.CriarQuery;
@@ -261,9 +262,12 @@ begin
     lQry.Open(lSQL);
 
     lQry.First;
-    logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TConfiguracoesDao.obterLista: Criando TConfiguracoesModel',LOG_LEVEL_DEBUG);
+    logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TConfiguracoesDao.obterLista: Criando [%d] TConfiguracoesModel',[lQry.RecordCount]),LOG_LEVEL_DEBUG);
+    i := 0;
     while not lQry.Eof do
     begin
+      inc(i);
+      logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TConfiguracoesDao.obterLista: ítem [%d] de [%d]',[i,lQry.RecordCount]),LOG_LEVEL_DEBUG);
       modelo := TConfiguracoesModel.getNewIface(vIConexao);
       FConfiguracoessLista.Add(modelo);
       modelo.objeto.ID             := lQry.FieldByName('ID').AsString;
@@ -279,6 +283,7 @@ begin
       modelo.objeto.VALORHORA      := lQry.FieldByName('VALORHORA').AsString;
       modelo.objeto.VALORDATAHORA  := lQry.FieldByName('VALORDATAHORA').AsString;
       modelo.objeto.SYSTIME        := lQry.FieldByName('SYSTIME').AsString;
+      logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TConfiguracoesDao.obterLista: ítem [%d] de [%d]: - Próximo registro',[i,lQry.RecordCount]),LOG_LEVEL_DEBUG);
       lQry.Next;
     end;
     obterTotalRegistros;

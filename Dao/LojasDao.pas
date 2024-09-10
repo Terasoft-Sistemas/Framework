@@ -226,7 +226,7 @@ begin
 
     lSql := lSql + where;
 
-    lSQL := lSQL + ' order by 1';
+    lSQL := lSQL + ' order by 2';
 
     lQry.Open(lSQL);
 
