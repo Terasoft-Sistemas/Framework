@@ -103,7 +103,7 @@ begin
           '(                                                                                                                                      ' + #13 +
           '    select                                                                                                                             ' + #13 +
           '        DESCRICAO,                                                                                                                     ' + #13 +
-          '        VALOR_LIQUIDO,                                                                                                                 ' + #13 +
+          '        (valor_liquido+acrescimo) VALOR_LIQUIDO,                                                                                       ' + #13 +
           '        VALOR_PRODUTO,                                                                                                                 ' + #13 +
           '        DESCONTO,                                                                                                                      ' + #13 +
           '        ACRESCIMO,                                                                                                                     ' + #13 +
