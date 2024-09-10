@@ -118,7 +118,7 @@ begin
           '            v.data_ped DATA_EMISSAO,                                                                                               ' + #13 +
           '            v.data_faturado DATA_FATURADO,                                                                                         ' + #13 +
           '            (i.valorunitario_ped * i.qtde_calculada) VALOR_PRODUTO,                                                                ' + #13 +
-          '            ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.desc_ped as float),0) DESCONTO,                 ' + #13 +
+          '            (i.valorunitario_ped*(i.desconto_ped/100))*i.qtde_calculada DESCONTO,                 ' + #13 +
           '            ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.acres_ped as float),0) ACRESCIMO,               ' + #13 +
           '            ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.frete_ped as float),0) FRETE,                   ' + #13 +
           '            i.valor_ipi IPI,                                                                                                       ' + #13 +
@@ -363,7 +363,7 @@ begin
             '            v.data_ped DATA_EMISSAO,                                                                                               ' + #13 +
             '            v.data_faturado DATA_FATURADO,                                                                                         ' + #13 +
             '            (i.valorunitario_ped * i.qtde_calculada) VALOR_PRODUTO,                                                                ' + #13 +
-            '            ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.desc_ped as float),0) DESCONTO,                 ' + #13 +
+            '            (i.valorunitario_ped*(i.desconto_ped/100))*i.qtde_calculada DESCONTO,                 ' + #13 +
             '            ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.acres_ped as float),0) ACRESCIMO,               ' + #13 +
             '            ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.frete_ped as float),0) FRETE,                   ' + #13 +
             '            i.valor_ipi IPI,                                                                                                       ' + #13 +
@@ -561,7 +561,7 @@ begin
           '        v.data_ped DATA_EMISSAO,                                                                                               ' + #13 +
           '        v.data_faturado DATA_FATURADO,                                                                                         ' + #13 +
           '        (i.valorunitario_ped * i.qtde_calculada) VALOR_PRODUTO,                                                                ' + #13 +
-          '        ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.desc_ped as float),0) DESCONTO,                 ' + #13 +
+          '        (i.valorunitario_ped*(i.desconto_ped/100))*i.qtde_calculada DESCONTO,                 ' + #13 +
           '        ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.acres_ped as float),0) ACRESCIMO,               ' + #13 +
           '        ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.frete_ped as float),0) FRETE,                   ' + #13 +
           '        i.valor_ipi IPI,                                                                                                       ' + #13 +
@@ -754,7 +754,7 @@ begin
           '            v.data_ped DATA_EMISSAO,                                                                                                                       ' + #13 +
           '            v.data_faturado DATA_FATURADO,                                                                                                                 ' + #13 +
           '    		     (i.valorunitario_ped * i.qtde_calculada) VALOR_PRODUTO,                                                                                        ' + #13 +
-          '    	       ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.desc_ped as float),0) DESCONTO,                                         ' + #13 +
+          '    	       (i.valorunitario_ped*(i.desconto_ped/100))*i.qtde_calculada DESCONTO,                                         ' + #13 +
           '    		     ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.acres_ped as float),0) ACRESCIMO,                                       ' + #13 +
           '    		     ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.frete_ped as float),0) FRETE,                                           ' + #13 +
           '    		     i.valor_ipi IPI,                                                                                                                               ' + #13 +
@@ -1214,7 +1214,7 @@ begin
 
 
           '            (i.valorunitario_ped * i.qtde_calculada) VALOR_PRODUTO,                                                                ' + #13 +
-          '            ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.desc_ped as float),0) DESCONTO,                 ' + #13 +
+          '            (i.valorunitario_ped*(i.desconto_ped/100))*i.qtde_calculada DESCONTO,                 ' + #13 +
           '            ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.acres_ped as float),0) ACRESCIMO,               ' + #13 +
           '            ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.frete_ped as float),0) FRETE,                   ' + #13 +
           '            i.valor_ipi IPI,                                                                                                       ' + #13 +
@@ -1442,7 +1442,7 @@ var
   lAsyncList  : IListaQueryAsync;
   lQA         : IQueryLojaAsync;
   conexao     : IConexao;
-
+  lTotalValores: Real;
 begin
   lAsyncList := getQueryLojaAsyncList(vIConexao,pDashbord_Parametros.Lojas);
   MemTable := TFDMemTable.Create(nil);
@@ -1453,15 +1453,26 @@ begin
       '     VALOR_LIQUIDO,                                                                                                                                ' + #13 +
       '     CUSTO,                                                                                                                                        ' + #13 +
       '     TOTAL_ITENS,                                                                                                                                  ' + #13 +
+      '         DESCONTO,                                                                                                                                 ' + #13 +
+      '         ACRESCIMO,                                                                                                                                ' + #13 +
+      '         FRETE,                                                                                                                                    ' + #13 +
+      '         IPI,                                                                                                                                      ' + #13 +
+      '         ST,                                                                                                                                       ' + #13 +
+
       '     QUANTIDADE_VENDA,                                                                                                                             ' + #13 +
       '     QUANTIDADE_CLIENTE                                                                                                                            ' + #13 +
       '                                                                                                                                                   ' + #13 +
       ' from                                                                                                                                              ' + #13 +
       ' (                                                                                                                                                 ' + #13 +
       '     select                                                                                                                                        ' + #13 +
-      '         sum(valor_produto-desconto) VALOR_LIQUIDO,                                                                                                ' + #13 +
-      '         sum(custo) CUSTO,                                                                                                                         ' + #13 +
-      '         sum(total_itens) TOTAL_ITENS,                                                                                                             ' + #13 +
+      '        sum(valor_produto-desconto) VALOR_LIQUIDO,                                                                                                 ' + #13 +
+      '        sum(custo) CUSTO,                                                                                                                          ' + #13 +
+      '        sum(total_itens) TOTAL_ITENS,                                                                                                              ' + #13 +
+      '        sum(desconto) DESCONTO,                                                                                                                    ' + #13 +
+      '        sum(acrescimo) ACRESCIMO,                                                                                                                  ' + #13 +
+      '        sum(frete) FRETE,                                                                                                                          ' + #13 +
+      '        sum(ipi) IPI,                                                                                                                              ' + #13 +
+      '        sum(st) ST,                                                                                                                                ' + #13 +
       '         count(distinct(quantidade_venda)) QUANTIDADE_VENDA,                                                                                       ' + #13 +
       '         count(distinct(QUANTIDADE_CLIENTE))-1 QUANTIDADE_CLIENTE                                                                                  ' + #13 +
       '     from                                                                                                                                          ' + #13 +
@@ -1554,6 +1565,11 @@ begin
   MemTable.FieldDefs.Add('NOME_LOJA', ftString,100);
   MemTable.FieldDefs.Add('VALOR_LIQUIDO', ftFloat);
   MemTable.FieldDefs.Add('CUSTO', ftFloat);
+  MemTable.FieldDefs.Add('DESCONTO',      ftFloat);
+  MemTable.FieldDefs.Add('ACRESCIMO',     ftFloat);
+  MemTable.FieldDefs.Add('FRETE',         ftFloat);
+  MemTable.FieldDefs.Add('IPI',           ftFloat);
+  MemTable.FieldDefs.Add('ST',            ftFloat);
 
   MemTable.CreateDataSet;
 
@@ -1573,12 +1589,25 @@ begin
     if(lQA.resultado.erros>0) then
       raise Exception.CreateFmt('TDashbordDao.ObterQuery7_RankingFiliais: Loja [%s] com problemas: [%s]',[lQA.loja.objeto.LOJA,lQA.resultado.toString]);
 
+      lTotalValores := lQA.dataset.dataset.FieldByName('VALOR_LIQUIDO').AsFloat;
+
+      if pDashbord_Parametros.SomarST        = 'SIM' then lTotalValores := lTotalValores + lQA.dataset.dataset.FieldByName('ST').AsFloat;
+      if pDashbord_Parametros.SomarAcrescimo = 'SIM' then lTotalValores := lTotalValores + lQA.dataset.dataset.FieldByName('ACRESCIMO').AsFloat;
+      if pDashbord_Parametros.SomarIPI       = 'SIM' then lTotalValores := lTotalValores + lQA.dataset.dataset.FieldByName('IPI').AsFloat;
+      if pDashbord_Parametros.SomarFRETE     = 'SIM' then lTotalValores := lTotalValores + lQA.dataset.dataset.FieldByName('FRETE').AsFloat;
+
+
     lQA.dataset.dataset.First;
     MemTable.InsertRecord([
                             lQA.loja.objeto.LOJA,
                             lQA.loja.objeto.DESCRICAO,
-                            lQA.dataset.dataset.FieldByName('VALOR_LIQUIDO').AsFloat,
-                            lQA.dataset.dataset.FieldByName('CUSTO').AsFloat
+                            lTotalValores, //lQA.dataset.dataset.FieldByName('VALOR_LIQUIDO').AsFloat,
+                            lQA.dataset.dataset.FieldByName('CUSTO').AsFloat,
+                            lQA.dataset.dataset.FieldByName('DESCONTO').AsFloat,
+                            lQA.dataset.dataset.FieldByName('ACRESCIMO').AsFloat,
+                            lQA.dataset.dataset.FieldByName('FRETE').AsFloat,
+                            lQA.dataset.dataset.FieldByName('IPI').AsFloat,
+                            lQA.dataset.dataset.FieldByName('ST').AsFloat
                             ]);
 
 
