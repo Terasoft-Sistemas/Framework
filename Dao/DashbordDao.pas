@@ -1553,6 +1553,7 @@ begin
   MemTable.FieldDefs.Add('LOJA', ftString,3);
   MemTable.FieldDefs.Add('NOME_LOJA', ftString,100);
   MemTable.FieldDefs.Add('VALOR_LIQUIDO', ftFloat);
+  MemTable.FieldDefs.Add('CUSTO', ftFloat);
 
   MemTable.CreateDataSet;
 
@@ -1576,7 +1577,8 @@ begin
     MemTable.InsertRecord([
                             lQA.loja.objeto.LOJA,
                             lQA.loja.objeto.DESCRICAO,
-                            lQA.dataset.dataset.FieldByName('VALOR_LIQUIDO').AsFloat
+                            lQA.dataset.dataset.FieldByName('VALOR_LIQUIDO').AsFloat,
+                            lQA.dataset.dataset.FieldByName('CUSTO').AsFloat
                             ]);
 
 
