@@ -364,7 +364,7 @@ begin
 
     lMotor.NotaFiscal.FreteEmbutidoNF      := 0;
     lMotor.NotaFiscal.AcrescimoNF          := lVALOR_ACRESCIMO_TOTAL;
-    lMotor.NotaFiscal.DescontoNF           := lVALOR_DESCONTO_TOTAL;
+    lMotor.NotaFiscal.DescontoNF           := 0;
     lMotor.NotaFiscal.SeguroNF             := 0;
     lMotor.NotaFiscal.DespesasAcessoriasNF := 0;
     lMotor.NotaFiscal.ServicosNF           := 0;
@@ -379,7 +379,7 @@ begin
     lMotor.NotaFiscal.Produto.Quantidade    := lQUANTIDADE;
     lMotor.NotaFiscal.Produto.PrecoUnitario := lVALORUNITARIO;
     lMotor.NotaFiscal.Produto.Acrescimo     := 0;
-    lMotor.NotaFiscal.Produto.Desconto      := 0;
+    lMotor.NotaFiscal.Produto.Desconto      := lVALOR_DESCONTO_TOTAL;
 
     //Dados do ICMS do produto
     lMotor.NotaFiscal.Produto.ICMS.AliquotaInterna     := Self.FICMS_ALIQUOTA;
@@ -434,7 +434,7 @@ begin
     lMotor.Processar;
 
     //======= Rateio =======
-    Self.FDESCONTO_ITEM  := lMotor.NotaFiscal.Produto.AsDescontoRateio;
+    Self.FDESCONTO_ITEM  := lVALOR_DESCONTO_TOTAL;
     Self.FACRESCIMO_ITEM := lMotor.NotaFiscal.Produto.AsAcrescimoRateio;
 
 

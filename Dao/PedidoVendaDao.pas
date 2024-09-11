@@ -133,7 +133,7 @@ begin
 
       modelo.objeto.PEDIDOITENS_ID    := lQry.FieldByName('PEDIDOITENS_ID').AsString;
       modelo.objeto.VALOR_PED         := lQry.FieldByName('VALOR_PED').AsString;
-      modelo.objeto.DESC_PED          := lQry.FieldByName('DESC_PED').AsString;
+      modelo.objeto.DESC_PED          := lQry.FieldByName('DESCONTO_ITEM').AsString;
       modelo.objeto.ACRES_PED         := lQry.FieldByName('ACRES_PED').AsString;
       modelo.objeto.UF_CLI            := lQry.FieldByName('UF_CLI').AsString;
       modelo.objeto.CODIGO_PRO        := lQry.FieldByName('CODIGO_PRO').AsString;
