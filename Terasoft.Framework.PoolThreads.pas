@@ -51,6 +51,27 @@ interface
       // tempo de execução em milisecs
       function tempoExecucao: Int64;
 
+    //property quantidadeExecutar getter/setter
+      function getQuantidadeExecutar: Integer;
+      procedure setQuantidadeExecutar(const pValue: Integer);
+
+    //property tempoEntreExecucoes getter/setter
+      function getTempoEntreExecucoes: Integer;
+      procedure setTempoEntreExecucoes(const pValue: Integer);
+
+    //property proximaExecucao getter/setter
+      function getProximaExecucao: TDateTime;
+      procedure setProximaExecucao(const pValue: TDateTime);
+
+    //property quantidadeExecucoes getter/setter
+      function getQuantidadeExecucoes: Integer;
+      procedure setQuantidadeExecucoes(const pValue: Integer);
+
+      property quantidadeExecucoes: Integer read getQuantidadeExecucoes write setQuantidadeExecucoes;
+      property proximaExecucao: TDateTime read getProximaExecucao write setProximaExecucao;
+      //Tempo em milisecs
+      property tempoEntreExecucoes: Integer read getTempoEntreExecucoes write setTempoEntreExecucoes;
+      property quantidadeExecutar: Integer read getQuantidadeExecutar write setQuantidadeExecutar;
       property tempoFim: PTRTimerData read getTempoFim write setTempoFim;
       property tempoCriacao: PTRTimerData read getTempoCriacao write setTempoCriacao;
       property tempoInicio: PTRTimerData read getTempoInicio write setTempoInicio;
@@ -70,6 +91,26 @@ interface
       fTempoCriacao: TRTimerData;
       fTempoInicio: TRTimerData;
       fTempoFim: TRTimerData;
+      fQuantidadeExecutar: Integer;
+      fTempoEntreExecucoes: Integer;
+      fProximaExecucao: TDateTime;
+      fQuantidadeExecucoes: Integer;
+
+    //property quantidadeExecucoes getter/setter
+      function getQuantidadeExecucoes: Integer;
+      procedure setQuantidadeExecucoes(const pValue: Integer);
+
+    //property proximaExecucao getter/setter
+      function getProximaExecucao: TDateTime;
+      procedure setProximaExecucao(const pValue: TDateTime);
+
+    //property tempoEntreExecucoes getter/setter
+      function getTempoEntreExecucoes: Integer;
+      procedure setTempoEntreExecucoes(const pValue: Integer);
+
+    //property quantidadeExecutar getter/setter
+      function getQuantidadeExecutar: Integer;
+      procedure setQuantidadeExecutar(const pValue: Integer);
 
     //property tempoFim getter/setter
       function getTempoFim: PTRTimerData;
@@ -118,6 +159,7 @@ interface
 
 implementation
   uses
+    DateUtils,
     Spring.Collections;
 
   type
@@ -217,6 +259,7 @@ end;
 procedure TThreadLocal.Execute;
   var
     p: IProcesso;
+    tmr: TDateTime;
 begin
   inherited;
   while not Terminated do
@@ -227,10 +270,22 @@ begin
       continue;
     end;
     try
+      tmr := Now;
+      if(p.proximaExecucao>tmr) then
+      begin
+        executaProcesso(p);
+        sleep(10);
+        continue;
+      end;
+
+      if(p.quantidadeExecutar>0) then
+        p.quantidadeExecutar := p.quantidadeExecutar - 1;
+
       p.status := spRodando;
       AtomicIncrement(gContagem);
+      p.quantidadeExecucoes:=p.quantidadeExecucoes+1;
+
       p.executar;
-      p.status := spOcioso;
 
     except
       on e: Exception do
@@ -239,6 +294,13 @@ begin
         p.status := spOcioso;
       end;
     end;
+    if(p.quantidadeExecutar>0) then
+    begin
+      tmr := IncMilliSecond(Now,p.tempoEntreExecucoes);
+      p.proximaExecucao := tmr;
+      executaProcesso(p);
+    end else
+      p.status := spOcioso;
     p := nil;
     sleep(10);
   end;
@@ -267,6 +329,10 @@ end;
 constructor TBaseProcessoThread.Create;
 begin
   inherited Create;
+  fQuantidadeExecutar := 1;
+  fQuantidadeExecucoes := 0;
+  fTempoEntreExecucoes := 1000;
+
   AtomicIncrement(gContagemProcessos);
   fStatus := spOcioso;
   fRotulo := pRotulo;
@@ -353,6 +419,46 @@ begin
   Result := @fTempoFim;
 end;
 
+procedure TBaseProcessoThread.setQuantidadeExecutar(const pValue: Integer);
+begin
+  fQuantidadeExecutar := pValue;
+end;
+
+function TBaseProcessoThread.getQuantidadeExecutar: Integer;
+begin
+  Result := fQuantidadeExecutar;
+end;
+
+procedure TBaseProcessoThread.setTempoEntreExecucoes(const pValue: Integer);
+begin
+  fTempoEntreExecucoes := pValue;
+end;
+
+function TBaseProcessoThread.getTempoEntreExecucoes: Integer;
+begin
+  Result := fTempoEntreExecucoes;
+end;
+
+procedure TBaseProcessoThread.setProximaExecucao(const pValue: TDateTime);
+begin
+  fProximaExecucao := pValue;
+end;
+
+function TBaseProcessoThread.getProximaExecucao: TDateTime;
+begin
+  Result := fProximaExecucao;
+end;
+
+procedure TBaseProcessoThread.setQuantidadeExecucoes(const pValue: Integer);
+begin
+  fQuantidadeExecucoes := pValue;
+end;
+
+function TBaseProcessoThread.getQuantidadeExecucoes: Integer;
+begin
+  Result := fQuantidadeExecucoes;
+end;
+
 { TProcessoAnonimo }
 
 constructor TProcessoAnonimo.Create(pProcesso: TProcessoAnonimoProc; pRotulo: TipoWideStringFramework; pResultado: IResultadoOperacao);
@@ -381,7 +487,7 @@ end;
 
 function testeSimples(pResultado: IResultadoOperacao): IResultadoOperacao;
 begin
-  sleep(10000);
+  sleep(2000);
 end;
 
 procedure testaProcessos;
@@ -392,10 +498,11 @@ procedure testaProcessos;
 begin
 //  exit;
   l := TCollections.CreateList<IProcesso>;
-  for I:= 1 to 100 do
+  for I:= 1 to 5 do
   begin
     p := criaProcessoAnonimo(testeSimples,IntToStr(i));
     l.Add(p);
+    p.quantidadeExecutar := 10;
     p.runAsync;
     //executaProcesso(p);
   end;
@@ -430,7 +537,9 @@ end;
 
 initialization
   cria;
-//  testaProcessos;
+  {$if defined(DEBUG)}
+    //testaProcessos;
+  {$endif}
 
 finalization
   finaliza;
