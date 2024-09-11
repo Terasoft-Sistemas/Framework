@@ -262,23 +262,23 @@ begin
     lQry.Open(lSQL);
 
     lQry.First;
-    logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TConfiguracoesDao.obterLista: Criando [%d] TConfiguracoesModel',[lQry.RecordCount]),LOG_LEVEL_DEBUG);
+    logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TConfiguracoesDao.obterLista: Criando lista de TConfiguracoesModel',[lQry.RecordCount]),LOG_LEVEL_DEBUG);
     i := 0;
     while not lQry.Eof do
     begin
       inc(i);
-      logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TConfiguracoesDao.obterLista: ítem [%d] de [%d]',[i,lQry.RecordCount]),LOG_LEVEL_DEBUG);
+      //logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TConfiguracoesDao.obterLista: ítem [%d] de [%d]',[i,lQry.RecordCount]),LOG_LEVEL_DEBUG);
       modelo := TConfiguracoesModel.getNewIface(vIConexao);
-      logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TConfiguracoesDao.obterLista: ítem [%d] : Modelo criado',[i]),LOG_LEVEL_DEBUG);
+      //logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TConfiguracoesDao.obterLista: ítem [%d] : Modelo criado',[i]),LOG_LEVEL_DEBUG);
       FConfiguracoessLista.Add(modelo);
-      logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TConfiguracoesDao.obterLista: ítem [%d] : Modelo adicionado na lista',[i]),LOG_LEVEL_DEBUG);
+      //logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TConfiguracoesDao.obterLista: ítem [%d] : Modelo adicionado na lista',[i]),LOG_LEVEL_DEBUG);
       modelo.objeto.ID             := lQry.FieldByName('ID').AsString;
       modelo.objeto.TAG            := lQry.FieldByName('TAG').AsString;
       modelo.objeto.F_ID           := lQry.FieldByName('FID').AsString;
       modelo.objeto.PERFIL_ID      := lQry.FieldByName('PERFIL_ID').AsString;
       modelo.objeto.VALORINTEIRO   := lQry.FieldByName('VALORINTEIRO').AsString;
       modelo.objeto.VALORSTRING    := lQry.FieldByName('VALORSTRING').AsString;
-      logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TConfiguracoesDao.obterLista: ítem [%d] : Atribuindo VALORMEMO ao Modelo',[i]),LOG_LEVEL_DEBUG);
+      //logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TConfiguracoesDao.obterLista: ítem [%d] : Atribuindo VALORMEMO ao Modelo',[i]),LOG_LEVEL_DEBUG);
       modelo.objeto.VALORMEMO      := lQry.FieldByName('VALORMEMO').AsString;
       modelo.objeto.VALORNUMERICO  := lQry.FieldByName('VALORNUMERICO').AsString;
       modelo.objeto.VALORCHAR      := lQry.FieldByName('VALORCHAR').AsString;
@@ -286,7 +286,7 @@ begin
       modelo.objeto.VALORHORA      := lQry.FieldByName('VALORHORA').AsString;
       modelo.objeto.VALORDATAHORA  := lQry.FieldByName('VALORDATAHORA').AsString;
       modelo.objeto.SYSTIME        := lQry.FieldByName('SYSTIME').AsString;
-      logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TConfiguracoesDao.obterLista: ítem [%d] de [%d]: - Próximo registro',[i,lQry.RecordCount]),LOG_LEVEL_DEBUG);
+      //logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TConfiguracoesDao.obterLista: ítem [%d] de [%d]: - Próximo registro',[i,lQry.RecordCount]),LOG_LEVEL_DEBUG);
       lQry.Next;
     end;
     obterTotalRegistros;
