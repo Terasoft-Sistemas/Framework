@@ -165,7 +165,7 @@ begin
           '                                                                                                                                   ' + #13 +
           '        where                                                                                                                      ' + #13 +
           '            coalesce(d.valor_total,0) > 0                                                                                          ' + #13 +
-          '            ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and v.CODIGO_VEN in (' + pDashbord_Parametros.Vendedores + ') ', '') + #13 +
+          '            ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and f.codigo_fun in (' + pDashbord_Parametros.Vendedores + ') ', '') + #13 +
           '                                                                                                                                   ' + #13 +
           '        union all                                                                                                                  ' + #13 +
           '                                                                                                                                   ' + #13 +
@@ -401,7 +401,7 @@ begin
             '                                              vi.codigo_pro = di.produto                                                           ' + #13 +
             '        where                                                                                                                      ' + #13 +
             '            coalesce(d.valor_total,0) > 0                                                                                          ' + #13 +
-            '            ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and v.CODIGO_VEN in (' + pDashbord_Parametros.Vendedores + ') ', '') + #13 +
+            '            ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and f.codigo_fun in (' + pDashbord_Parametros.Vendedores + ') ', '') + #13 +
             '                                                                                                                                   ' + #13 +
             '        union all                                                                                                                  ' + #13 +
             '                                                                                                                                   ' + #13 +
@@ -599,7 +599,7 @@ begin
           '           left join pedidoitens vi    on vi.numero_ped = v.numero_ped and vi.codigo_pro = di.produto                          ' + #13 +
           '    where                                                                                                                      ' + #13 +
           '        coalesce(d.valor_total,0) > 0                                                                                          ' + #13 +
-          '        ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and v.CODIGO_VEN in (' + pDashbord_Parametros.Vendedores + ') ', '') + #13 +
+          '        ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and f.codigo_fun in (' + pDashbord_Parametros.Vendedores + ') ', '') + #13 +
           '                                                                                                                               ' + #13 +
           '    union all                                                                                                                  ' + #13 +
           '                                                                                                                               ' + #13 +
@@ -1528,7 +1528,7 @@ begin
       '                                                                                                                                   ' + #13 +
       '        where                                                                                                                      ' + #13 +
       '            coalesce(d.valor_total,0) > 0                                                                                          ' + #13 +
-      '            ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and v.CODIGO_VEN in (' + pDashbord_Parametros.Vendedores + ') ', '')                 + #13 +
+      '            ' + ifThen(pDashbord_Parametros.Vendedores <> '', ' and f.codigo_fun in (' + pDashbord_Parametros.Vendedores + ') ', '')                 + #13 +
       '                                                                                                                                                   ' + #13 +
       '         union all                                                                                                                                 ' + #13 +
       '                                                                                                                                                   ' + #13 +
