@@ -115,9 +115,11 @@ begin
       '        (i.quantidade_ped * i.valorunitario_ped) total_produto,                                    '+SLineBreak+
       '         i.vdesc desconto_item,                                                                    '+SLineBreak+
       '         i.quantidade_ped * i.valorunitario_ped / p.valor_ped * p.acres_ped acrescimo_item,        '+SLineBreak+
-      '         i.valor_acrescimo                                                                         '+SLineBreak+
+      '         i.valor_acrescimo,                                                                        '+SLineBreak+
+      '         pro.customedio_pro                                                                        '+SLineBreak+
       '   from pedidovenda p                                                                              '+SLineBreak+
       '   left join pedidoitens i on i.numero_ped = p.numero_ped                                          '+SLineBreak+
+      '   left join produto pro on pro.codigo_pro = i.codigo_pro                                          '+SLineBreak+
       '   left join clientes c on c.codigo_cli = p.codigo_cli                                             '+SLineBreak+
       '  where p.numero_ped = '+QuotedStr(pNumeroPedido);
 
@@ -138,6 +140,7 @@ begin
       modelo.objeto.QUANTIDADE_PED    := lQry.FieldByName('QUANTIDADE_PED').AsString;
       modelo.objeto.VALORUNITARIO_PED := lQry.FieldByName('VALORUNITARIO_PED').AsString;
       modelo.objeto.VALOR_ACRESCIMO   := lQry.FieldByName('VALOR_ACRESCIMO').AsString;
+      modelo.objeto.CUSTOMEDIO_PRO    := lQry.FieldByName('CUSTOMEDIO_PRO').AsString;
 
       lQry.Next;
     end;

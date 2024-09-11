@@ -189,6 +189,7 @@ type
     FSEGURO_PRESTAMISTA_VALOR: Variant;
     FPER_COMISSAO_PRESTAMISTA: Variant;
     FVALOR_ACRESCIMO: Variant;
+    FCUSTOMEDIO_PRO: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetPedidoVendasLista(const Value: IList<ITPedidoVendaModel>);
@@ -349,6 +350,7 @@ type
     procedure getDataVendedor;
     procedure SetPER_COMISSAO_PRESTAMISTA(const Value: Variant);
     procedure SetVALOR_ACRESCIMO(const Value: Variant);
+    procedure SetCUSTOMEDIO_PRO(const Value: Variant);
 
   public
     property NUMERO_PED: Variant read FNUMERO_PED write SetNUMERO_PED;
@@ -498,6 +500,7 @@ type
     property SEGURO_PRESTAMISTA_CUSTO :Variant read FSEGURO_PRESTAMISTA_CUSTO write SetSEGURO_PRESTAMISTA_CUSTO;
     property PER_COMISSAO_PRESTAMISTA : Variant read FPER_COMISSAO_PRESTAMISTA write SetPER_COMISSAO_PRESTAMISTA;
     property VALOR_ACRESCIMO: Variant read FVALOR_ACRESCIMO write SetVALOR_ACRESCIMO;
+    property CUSTOMEDIO_PRO: Variant read FCUSTOMEDIO_PRO write SetCUSTOMEDIO_PRO;
 
     property PedidoVendasLista: IList<ITPedidoVendaModel> read FPedidoVendasLista write SetPedidoVendasLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -1909,7 +1912,7 @@ begin
         lPedidoItensModal.objeto.VOUTROS           := FloatToStr(lCalcularImpostosModel.ACRESCIMO_ITEM);
 
       if (lConfiguracoes.objeto.valorTag('USAR_CUSTO_CONTABIL', 'N', tvBool) = 'S') then
-        lPedidoItensModal.objeto.VLRCUSTO_PRO       := FloatToStr(StrToFloatDef(lPedidoItensModal.objeto.VLRCUSTO_PRO, 0) +
+        lPedidoItensModal.objeto.VLRCUSTO_PRO       := FloatToStr(StrToFloatDef(lPedidoVendaModel.objeto.CUSTOMEDIO_PRO, 0) +
                                                                   StrToFloatDef(lPedidoItensModal.objeto.VALOR_ICMS / lCalcularImpostosModel.QUANTIDADE, 0)   +
                                                                   StrToFloatDef(lPedidoItensModal.objeto.VALOR_ST / lCalcularImpostosModel.QUANTIDADE, 0)     +
                                                                   StrToFloatDef(lPedidoItensModal.objeto.VALOR_PIS / lCalcularImpostosModel.QUANTIDADE, 0)    +
@@ -2113,6 +2116,11 @@ procedure TPedidoVendaModel.SetCTR_IMPRESSAO_PED(const Value: Variant);
 begin
   FCTR_IMPRESSAO_PED := Value;
 end;
+procedure TPedidoVendaModel.SetCUSTOMEDIO_PRO(const Value: Variant);
+begin
+  FCUSTOMEDIO_PRO := Value;
+end;
+
 procedure TPedidoVendaModel.SetDATAHORA_COLETA(const Value: Variant);
 begin
   FDATAHORA_COLETA := Value;
