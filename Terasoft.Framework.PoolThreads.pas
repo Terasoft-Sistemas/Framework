@@ -12,9 +12,11 @@ interface
     Terasoft.Framework.Collections;
 
   type
+    IProcesso = interface;
+
     TStatusProcesso = (spOcioso,spEsperando,spRodando);
 
-    TProcessoAnonimoProc = reference to function (pResultado: IResultadoOperacao): IResultadoOperacao;
+    TProcessoAnonimoProc = reference to function (pProcesso: IProcesso; pResultado: IResultadoOperacao): IResultadoOperacao;
 
     IProcesso = interface
     ['{153A322D-221D-4339-BD54-E48975CA7F71}']
@@ -213,8 +215,11 @@ procedure executaProcesso(pProcesso: IProcesso);
     th: TThreadLocal;
 begin
   if(pProcesso=nil) then exit;
-  if(pProcesso.status<>spOcioso) then
+  if not (pProcesso.status in [spOcioso,spEsperando]) then
     raise Exception.CreateFmt('executaProcesso: Processo [%s] não está ocioso', [ pProcesso.rotulo ]);
+
+  if(pProcesso.status=spEsperando) and (vListaProcessos.indexOf(pProcesso)<>-1) then
+    exit;
 
   pProcesso.status := spEsperando;
 
@@ -278,10 +283,6 @@ begin
         continue;
       end;
 
-      if(p.quantidadeExecutar>0) then
-        p.quantidadeExecutar := p.quantidadeExecutar - 1;
-
-      p.status := spRodando;
       AtomicIncrement(gContagem);
       p.quantidadeExecucoes:=p.quantidadeExecucoes+1;
 
@@ -291,7 +292,7 @@ begin
       on e: Exception do
       begin
         p.resultado.formataErro('TThreadLocal.Execute: [%s]: %s: %s', [p.rotulo, e.ClassName,e.Message]);
-        p.status := spOcioso;
+        //p.status := spOcioso;
       end;
     end;
     if(p.quantidadeExecutar>0) then
@@ -350,9 +351,14 @@ end;
 procedure TBaseProcessoThread.executar;
 begin
   fTempoInicio := lrTimerGlobal.mark;
+  fStatus := spRodando;
   try
+    if(fQuantidadeExecutar>0) then
+      fQuantidadeExecutar := fQuantidadeExecutar - 1;
+
     doExecutar;
   finally
+    fStatus := spOcioso;
     fTempoFim := lrTimerGlobal.mark;
   end;
 end;
@@ -470,7 +476,7 @@ end;
 procedure TProcessoAnonimo.doExecutar;
 begin
   inherited;
-  vProcessoAnonimo(getResultado);
+  vProcessoAnonimo(self,getResultado);
 end;
 
 { TProcessoAnonimo }
@@ -485,7 +491,7 @@ begin
   Result := fStatus;
 end;
 
-function testeSimples(pResultado: IResultadoOperacao): IResultadoOperacao;
+function testeSimples(pProcesso: IProcesso; pResultado: IResultadoOperacao): IResultadoOperacao;
 begin
   sleep(2000);
 end;
