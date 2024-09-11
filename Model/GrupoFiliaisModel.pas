@@ -67,6 +67,8 @@ type
 
     function carregaClasse(pId : String): ITGrupoFiliaisModel;
     function obterLista: IFDDataset;
+    function obterListaComFiliais: IFDDataset;
+
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -161,6 +163,20 @@ begin
     Result := lGrupoFiliaisLista.objeto.obterLista;
 
     FTotalRecords := lGrupoFiliaisLista.objeto.TotalRecords;
+
+  finally
+    lGrupoFiliaisLista := nil;
+  end;
+end;
+
+function TGrupoFiliaisModel.obterListaComFiliais: IFDDataset;
+var
+  lGrupoFiliaisLista: ITGrupoFiliaisDao;
+begin
+  lGrupoFiliaisLista := TGrupoFiliaisDao.getNewIface(vIConexao);
+
+  try
+    Result := lGrupoFiliaisLista.objeto.obterListaComFiliais;
 
   finally
     lGrupoFiliaisLista := nil;

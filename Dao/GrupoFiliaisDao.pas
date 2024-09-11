@@ -66,6 +66,7 @@ type
 
     function carregaClasse(pID : String): ITGrupoFiliaisModel;
     function obterLista: IFDDataset;
+    function obterListaComFiliais: IFDDataset;
 
     procedure setParams(var pQry: TFDQuery; pGrupoFiliaisModel: ITGrupoFiliaisModel);
 
@@ -74,7 +75,7 @@ end;
 implementation
 
 uses
-  System.Rtti;
+  System.Rtti, Data.DB;
 
 { TGrupoFiliais }
 
@@ -250,6 +251,77 @@ begin
 
   finally
     lQry.Free;
+  end;
+end;
+
+function TGrupoFiliaisDao.obterListaComFiliais: IFDDataset;
+var
+  lQry       : TFDQuery;
+  lSQL       : String;
+  lPaginacao : String;
+  lMemTable  : IFDDataset;
+  lDescrAnt  : String;
+  lLojas     : String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+    lSQL := 'Select gf.descricao, gfi.loja                                   ' +
+            'From grupo_filiais_itens gfi                                    ' +
+            '     left join grupo_filiais gf on gf.id = gfi.grupo_filiais_id ' +
+            'Order by gf.descricao, gfi.loja                                 ';
+
+    lQry.Open(lSQL);
+
+    lMemTable := criaIFDDataset(TFDMemTable.Create(nil));
+
+    with TFDMemTable(lMemTable.objeto).IndexDefs.AddIndexDef do
+    begin
+      Name := 'OrdenacaoDescricao';
+      Fields := 'descricao';
+      Options := [TIndexOption.ixCaseInsensitive];
+    end;
+
+    TFDMemTable(lMemTable.objeto).IndexName := 'OrdenacaoDescricao';
+
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('DESCRICAO', ftString, 100);
+    TFDMemTable(lMemTable.objeto).FieldDefs.Add('LOJAS',     ftString, 400);
+    TFDMemTable(lMemTable.objeto).CreateDataSet;
+
+    lLojas := '';
+
+    lQry.first;
+    lDescrAnt := lQry.FieldByName('descricao').AsString;
+    while not lQry.Eof do
+    begin
+      if lDescrAnt <> lQry.FieldByName('descricao').AsString then
+      begin
+        lMemTable.objeto.InsertRecord([ lDescrAnt, lLojas ]);
+        lLojas := '';
+        lDescrAnt := lQry.FieldByName('descricao').AsString;
+      end;
+
+      if lLojas <> '' then
+        lLojas := lLojas + ',';
+
+      lLojas := lLojas + lQry.FieldByName('loja').AsString;
+
+      lQry.Next;
+    end;
+
+    if lLojas <> '' then
+    begin
+      lMemTable.objeto.InsertRecord([ lDescrAnt, lLojas ]);
+      lLojas := '';
+    end;
+
+    lMemTable.objeto.Open;
+
+    Result := lMemTable;
+
+  finally
+    lQry.Free;
+
   end;
 end;
 
