@@ -217,7 +217,7 @@ begin
     CriaException('Token não autorizado para a consulta!');
 
   if fRestResponse.StatusCode >= 400 then
-    CriaException('CEP invalido');
+    Abort;
 
   lJsonObj := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(fRestRequest.Response.Content), 0) as TJSONObject;
   try
@@ -267,8 +267,8 @@ begin
 
   fRestRequest.Execute;
 
-  if fRestResponse.StatusCode = 400 then
-    CriaException('CEP invalido');
+  if fRestResponse.StatusCode >= 400 then
+    Abort;
 
   lJsonObj := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(fRestRequest.Response.Content), 0) as TJSONObject;
 
@@ -303,10 +303,14 @@ end;
 
 function TCEPModel.consultarCEP(pCEP: String): TRetornoCEP;
 begin
+
   case self.FAPI of
-   tApiBrasil : Result := cepApiBrasil(pCEP);
-   tApiViaCep : Result := cepApiViaCep(pCEP);
+
+    tApiBrasil : Result := cepApiBrasil(pCEP);
+    tApiViaCep : Result := cepApiViaCep(pCEP);
+
   end;
+
 end;
 
 end.
