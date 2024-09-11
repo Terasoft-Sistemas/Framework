@@ -118,6 +118,7 @@ constructor TConfiguracoesModel._Create(pIConexao : IConexao);
 begin
   logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TConfiguracoesModel._Create',LOG_LEVEL_DEBUG);
   vIConexao := pIConexao;
+  logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TConfiguracoesModel._Create: Saindo do _Create',LOG_LEVEL_DEBUG);
 end;
 
 function TConfiguracoesModel.carregaClasse(pId: String): ITConfiguracoesModel;
@@ -143,6 +144,7 @@ class function TConfiguracoesModel.getNewIface(pIConexao: IConexao): ITConfigura
 begin
   Result := TImplObjetoOwner<TConfiguracoesModel>.CreateOwner(self._Create(pIConexao));
   Result.objeto.myself := Result;
+  logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TConfiguracoesModel.getNewIface: Saindo do getNewIface',LOG_LEVEL_DEBUG);
 end;
 
 procedure TConfiguracoesModel.obterLista;
