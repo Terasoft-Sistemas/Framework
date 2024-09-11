@@ -275,7 +275,8 @@ begin
 
       ACBrNFe.WebServices.Inutiliza(vIConexao.getEmpresa.EMPRESA_CNPJ, Justificativa, StrToInt(lAno), lNFContol.objeto.NFModel.objeto.MODELO, lNFContol.objeto.NFModel.objeto.SERIE_NF, StrToInt(idNotaFiscal), StrToInt(idNotaFiscal));
 
-      if ACBrNFe.WebServices.Inutilizacao.cStat = 102 then begin
+      if ACBrNFe.WebServices.Inutilizacao.cStat = 102 then
+      begin
 
         lEventosNFeControl.EventosNFeModel.objeto.Acao              := Terasoft.Types.tacIncluir;
         lEventosNFeControl.EventosNFeModel.objeto.ID_NFE            := idNotaFiscal;
@@ -303,8 +304,9 @@ begin
         lNFContol.objeto.Salvar;
 
         lRetorno.Add('Inutilização de Número homologado');
-      end else
-      lRetorno.Add(ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.xMotivo);
+      end
+      else
+        lRetorno.Add(ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.xMotivo);
 
       lRetorno.Add(IntToStr(ACBrNFe.WebServices.Inutilizacao.cStat));
       lRetorno.Add(ACBrNFe.WebServices.Inutilizacao.Protocolo);
@@ -312,7 +314,6 @@ begin
       Result := lRetorno;
 
     finally
-      freeAndNil(lRetorno);
       lEventosNFeControl.Free;
       lNFContol:=nil;
     end;

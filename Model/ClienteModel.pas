@@ -1044,7 +1044,7 @@ var
   lField   : TStringList;
   lCtx     : TRttiContext;
   lProp    : TRttiProperty;
-  lConfiguracoes : TerasoftConfiguracoes;
+  lConfiguracoes : ITerasoftConfiguracoes;
 begin
   if(FCamposInvalidos=nil)then
     fCamposInvalidos        := TStringList.Create;
@@ -1054,11 +1054,11 @@ begin
   fCamposInvalidos.Clear;
   fCamposInvalidosTitulos.Clear;
 
-  lConfiguracoes         := vIConexao.getTerasoftConfiguracoes as TerasoftConfiguracoes;
+  Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
   lMsg   := '';
 
-  lValor := lConfiguracoes.valorTag(pTag, '', tvMemo);
+  lValor := lConfiguracoes.objeto.valorTag(pTag, '', tvMemo);
   if Trim(lValor) = '' then
     exit;
   lField      := TStringList.Create;
