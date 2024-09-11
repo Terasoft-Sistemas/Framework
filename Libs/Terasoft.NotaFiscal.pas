@@ -715,7 +715,8 @@ begin
       if lQry.FieldByName('status_nf').AsString = 'X' then
         CriaException('Não foi possível imprimir uma nota cancelada ou inutilizada.');
 
-      if lQry.FieldByName('pmoNFe').AsInteger = 65 then begin
+      if lQry.FieldByName('pmoNFe').AsInteger = 65 then
+      begin
         ACBrNFeDANFCeFortes := TACBrNFeDANFCeFortes.Create(nil);
         ACBrNFe.DANFE       := ACBrNFeDANFCeFortes;
 
