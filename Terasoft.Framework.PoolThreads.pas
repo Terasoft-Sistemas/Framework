@@ -159,6 +159,8 @@ interface
   function criaProcessoAnonimo(pProcesso: TProcessoAnonimoProc; pRotulo: TipoWideStringFramework; pResultado: IResultadoOperacao=nil): IProcesso;
   procedure testaProcessos;
 
+  function getContagemThreadsExecutando: Int64;
+
 implementation
   uses
     DateUtils,
@@ -261,6 +263,14 @@ begin
   inherited;
 end;
 
+  var
+    gThreadsExecutando: Int64;
+
+function getContagemThreadsExecutando: Int64;
+begin
+  Result := gThreadsExecutando;
+end;
+
 procedure TThreadLocal.Execute;
   var
     p: IProcesso;
@@ -284,6 +294,7 @@ begin
       end;
 
       AtomicIncrement(gContagem);
+      AtomicIncrement(gThreadsExecutando);
       p.quantidadeExecucoes:=p.quantidadeExecucoes+1;
 
       p.executar;
@@ -295,6 +306,7 @@ begin
         //p.status := spOcioso;
       end;
     end;
+    AtomicDecrement(gThreadsExecutando);
     if(p.quantidadeExecutar>0) then
     begin
       tmr := IncMilliSecond(Now,p.tempoEntreExecucoes);
