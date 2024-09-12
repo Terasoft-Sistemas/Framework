@@ -104,7 +104,7 @@ begin
     lSQL := lSQL + FWhereView;
 
   if not FLojaView.IsEmpty then
-    lSQL := lSQL + 'and loja2.loja = '+ QuotedStr(FLojaView);
+    lSQL := lSQL + format( 'and loja2.loja in (%s)', [FLojaView]);
 
   Result := lSQL;
 end;
