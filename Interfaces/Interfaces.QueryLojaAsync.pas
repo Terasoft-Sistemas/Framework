@@ -315,9 +315,9 @@ begin
     begin
       getResultado.formataErro('TQueryLojaAsync.AsyncRun [%s]: %s: %s', [ fRotulo, e.ClassName, e.Message ]);
       if(self.fQuery<>'') then
-        logaByTagSeNivel('',format('TQueryLojaAsync.AsyncRun: Exception query [%s] async para a loja [%s] query [%s]: %s: %s',[fRotulo,fLoja.objeto.LOJA, fQuery, e.className, e.message ] ), LOG_LEVEL_DEBUG)
+        logaByTagSeNivel(TAGLOG_EXCEPTIONS,format('TQueryLojaAsync.AsyncRun: Exception query [%s] async para a loja [%s (%s)] query [%s]: %s: %s',[fRotulo,fLoja.objeto.LOJA, fLoja.objeto.DESCRICAO, fQuery, e.className, e.message ] ), LOG_LEVEL_GRAVE, ls_Erro)
       else if(self.fQuery<>'') then
-        logaByTagSeNivel('',format('TQueryLojaAsync.AsyncRun: Exception query [%s] async para a loja [%s] query [%s]: %s: %s',[fRotulo,fLoja.objeto.LOJA, fFdQuery.objeto.sql.text, e.className, e.message ] ), LOG_LEVEL_DEBUG);
+        logaByTagSeNivel(TAGLOG_EXCEPTIONS,format('TQueryLojaAsync.AsyncRun: Exception query [%s] async para a loja [%s (%s)] query [%s]: %s: %s',[fRotulo,fLoja.objeto.LOJA, fLoja.objeto.DESCRICAO, fFdQuery.objeto.sql.text, e.className, e.message ] ), LOG_LEVEL_GRAVE, ls_Erro);
     end;
   end;
 end;
