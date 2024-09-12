@@ -116,7 +116,7 @@ begin
           '            v.data_faturado DATA_FATURADO,                                                                                                             ' + #13 +
           '            ' + vNomeCampo + ',                                                                                                                        ' + #13 +
           '            (i.valorunitario_ped * i.qtde_calculada) VALOR_PRODUTO,                                                                                    ' + #13 +
-          '            (i.valorunitario_ped*(i.desconto_ped/100))*i.qtde_calculada DESCONTO,                                     ' + #13 +
+          '            (i.valorunitario_ped*(cast(i.desconto_ped as float)/100))*i.qtde_calculada DESCONTO,                                     ' + #13 +
           '            ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.acres_ped as float),0) ACRESCIMO,                                   ' + #13 +
           '            ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.frete_ped as float),0) FRETE,                                       ' + #13 +
           '            i.valor_ipi IPI,                                                                                                                           ' + #13 +
@@ -351,7 +351,7 @@ begin
           '                v.data_faturado DATA_FATURADO,                                                                                         ' + #13 +
           '                (i.valorunitario_ped * i.qtde_calculada) VALOR_PRODUTO,                                                                ' + #13 +
           '                (i.vlrvenda_pro * i.qtde_calculada) VALOR_POSSIVEL,                                                                    ' + #13 +
-          '                (i.valorunitario_ped*(i.desconto_ped/100))*i.qtde_calculada DESCONTO,                 ' + #13 +
+          '                (i.valorunitario_ped*(cast(i.desconto_ped as float)/100))*i.qtde_calculada DESCONTO,                 ' + #13 +
           '                ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.acres_ped as float),0) ACRESCIMO,               ' + #13 +
           '                ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.frete_ped as float),0) FRETE,                   ' + #13 +
           '                i.valor_ipi IPI,                                                                                                       ' + #13 +
