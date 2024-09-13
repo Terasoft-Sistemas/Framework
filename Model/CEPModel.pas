@@ -85,7 +85,7 @@ begin
 
   fRestRequest.Timeout := 120000;
 
-  self.FAPI := tApiBrasil;
+  self.FAPI := tApiViaCep; // tApiBrasil;
 
   vACBrCEP := TACBrCEP.Create(nil);
   vACBrCEP.URL;
