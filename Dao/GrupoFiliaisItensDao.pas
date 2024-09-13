@@ -191,7 +191,7 @@ begin
     lSQL := lSQL + FWhereView;
 
   if FIDRecordView <> 0  then
-    lSQL := lSQL + ' and g.id = '+IntToStr(FIDRecordView);
+    lSQL := lSQL + ' and grupo_filiais.id = '+IntToStr(FIDRecordView);
 
   Result := lSQL;
 end;
@@ -204,7 +204,11 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records from GRUPO_FILIAIS_ITENS G where 1=1 ';
+    lSql := ' select count(*) records '+
+            '   from grupo_filiais_itens                                                             '+SLineBreak+
+            '   left join grupo_filiais on grupo_filiais_itens.grupo_filiais_id = grupo_filiais.id   '+SLineBreak+
+            '   left join loja2 on loja2.loja = grupo_filiais_itens.loja                             '+SLineBreak+
+            '  where 1=1 ';
 
     lSql := lSql + where;
 
@@ -229,24 +233,24 @@ begin
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
 
-    lSQL := ' select '+lPaginacao+'                                            '+SLineBreak+
-            '        g.id,                                                     '+SLineBreak+
-            '        g.descricao,                                              '+SLineBreak+
-            '        g.status,                                                 '+SLineBreak+
-            '        gi.id id_item,                                            '+SLineBreak+
-            '        gi.loja,                                                  '+SLineBreak+
-            '        gi.grupo_filiais_id,                                      '+SLineBreak+
-            '        gi.data_cadastro,                                         '+SLineBreak+
-            '        l.descricao as nome_loja                                  '+SLineBreak+
-            '   from grupo_filiais_itens gi                                    '+SLineBreak+
-            '   left join grupo_filiais g on gi.grupo_filiais_id = g.id        '+SLineBreak+
-            '   left join loja2 l on l.loja = gi.loja                          '+SLineBreak+
-            '  where 1=1                                                       '+SLineBreak;
+    lSQL := ' select '+lPaginacao+'                                                                  '+SLineBreak+
+            '        grupo_filiais.id,                                                               '+SLineBreak+
+            '        grupo_filiais.descricao,                                                        '+SLineBreak+
+            '        grupo_filiais.status,                                                           '+SLineBreak+
+            '        grupo_filiais_itens.id id_item,                                                 '+SLineBreak+
+            '        grupo_filiais_itens.loja,                                                       '+SLineBreak+
+            '        grupo_filiais_itens.grupo_filiais_id,                                           '+SLineBreak+
+            '        grupo_filiais_itens.data_cadastro,                                              '+SLineBreak+
+            '        loja2.descricao as nome_loja                                                    '+SLineBreak+
+            '   from grupo_filiais_itens                                                             '+SLineBreak+
+            '   left join grupo_filiais on grupo_filiais_itens.grupo_filiais_id = grupo_filiais.id   '+SLineBreak+
+            '   left join loja2 on loja2.loja = grupo_filiais_itens.loja                             '+SLineBreak+
+            '  where 1=1                                                                             '+SLineBreak;
 
     lSql := lSql + where;
 
     if not FOrderView.IsEmpty then
-      lSQL := lSQL + ' order by g.id desc '+FOrderView;
+      lSQL := lSQL + ' order by grupo_filiais.id desc '+FOrderView;
 
     lQry.Open(lSQL);
 
