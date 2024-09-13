@@ -8,6 +8,7 @@ interface
     Terasoft.FuncoesTexto,
     Terasoft.Framework.DB,
     FuncoesDB,
+    Terasoft.Framework.Types,
     Terasoft.Framework.Texto,
     Terasoft.Framework.EstatisticaUso,
     Interfaces.Conexao;
@@ -65,6 +66,8 @@ interface
       //property estatistica getter/setter
         function getEstatistica: IUnknown;
         procedure setEstatistica(const pValue: IUnknown);
+
+        procedure registraAcao(const pAcao: TipoWideStringFramework; pParametros: array of TipoWideStringFramework);
 
       //property ultimoAcessoDB getter/setter
         function getUltimoAcessoDB: TDateTime;
@@ -428,6 +431,12 @@ end;
 function TControllersConexao.getEstatistica: IUnknown;
 begin
   Result := fEstatistica;
+end;
+
+procedure TControllersConexao.registraAcao;
+begin
+  if assigned(fEstatistica) then
+    fEstatistica.registraAcao(pAcao,pParametros);
 end;
 
 end.

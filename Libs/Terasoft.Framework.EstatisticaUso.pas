@@ -19,13 +19,18 @@ interface
 
       function toJSON: ITlkJSONObject;
 
-      procedure dump;
+      procedure registraAcao(pAcao: TipoWideStringFramework; pParametros: array of TipoWideStringFramework);
 
       function getIDStr: TipoWideStringFramework;
 
     //property conexao getter/setter
       function getConexao: IConexao;
 
+    //property mobile getter/setter
+      function getMobile: boolean;
+      procedure setMobile(const pValue: boolean);
+
+      property mobile: boolean read getMobile write setMobile;
       property conexao: IConexao read getConexao;
       property identificador: TBytes read getIdentificador write setIdentificador;
 
@@ -35,6 +40,10 @@ interface
 
 implementation
   uses
+    Terasoft.Framework.Texto,
+    Terasoft.Framework.FuncoesDiversas,
+    Terasoft.Framework.EstatisticaUso.consts,
+    Terasoft.Framework.LOG,
     FuncoesConfig,
     Terasoft.Framework.FuncoesArquivos,
     Terasoft.Framework.Bytes;
@@ -45,15 +54,21 @@ implementation
       fIdentificador: TBytes;
       fConexao: IConexao;
       fDH: TDateTime;
+      fMobile: boolean;
+
+    //property mobile getter/setter
+      function getMobile: boolean;
+      procedure setMobile(const pValue: boolean);
 
     //property conexao getter/setter
       function getConexao: IConexao;
 
       function toJSON: ITlkJSONObject;
 
-      procedure dump;
+      procedure registraAcao(pAcao: TipoWideStringFramework; pParametros: array of TipoWideStringFramework);
 
       function getIDStr: TipoWideStringFramework;
+
 
     //property identificador getter/setter
       function getIdentificador: TBytes;
@@ -78,15 +93,22 @@ begin
   fDH := Now;
 end;
 
-procedure TEstatisticaUsoImpl.dump;
+procedure TEstatisticaUsoImpl.registraAcao;
   var
     s: String;
 begin
   s := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)) + 'Stats\' + gNomeInstanciaSistema);
   ForceDirectories(s);
-  s := s + getIDStr + '.conexao.json';
-  fDH := Now;
-  stringToFile(GenerateText(toJSON.json,false),s);
+  pAcao:=retiraACENTOS(trim(uppercase(pAcao)));
+  s := s + getIDStr + format('.%s.json',[pAcao]);
+
+  logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TEstatisticaUsoImpl.dump: Registra ação [%s]', [pAcao]), LOG_LEVEL_DEBUG);
+  if(pAcao=ESTATISTICAUSO_ACAO_CONEXAO) then
+  begin
+    fDH := Now;
+    stringToFile(GenerateText(toJSON.json,false),s);
+  end else
+    raise Exception.CreateFmt('TEstatisticaUsoImpl.registraAcao: Ação [%s] não implementada.',[pAcao]);
 end;
 
 function TEstatisticaUsoImpl.getConexao: IConexao;
@@ -106,8 +128,10 @@ begin
   Result := TlkJSON.cria;
   Result.json.Add('id',getIDStr);
   Result.json.Add('dh',DateTimeToStr(Now));
+  Result.json.Add('acao',ESTATISTICAUSO_ACAO_CONEXAO);
 
   Result.json.Add('instancia',gNomeInstanciaSistema);
+  Result.json.Add('mobile',fMobile);
   lEmpresa := TlkJSONobject.Generate;
   Result.json.Add('empresa',lEmpresa);
   lEmpresa.Add('id',fConexao.empresa.ID);
@@ -117,11 +141,21 @@ begin
 
 end;
 
+procedure TEstatisticaUsoImpl.setMobile(const pValue: boolean);
+begin
+  fMobile := pValue;
+end;
+
+function TEstatisticaUsoImpl.getMobile: boolean;
+begin
+  Result := fMobile;
+end;
+
 function TEstatisticaUsoImpl.getIdentificador: TBytes;
 begin
-  if(length(fIdentificador)=0) then
+  if(length(fIdentificador)<>TAMANHOENTROPIA_BYTES) then
   begin
-    fIdentificador := randomBytes(32);
+    fIdentificador := randomBytes(TAMANHOENTROPIA_BYTES);
   end;
   Result := fIdentificador;
 end;

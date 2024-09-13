@@ -131,6 +131,8 @@ interface
 
       function getGDBExterno: IGDB;
 
+      procedure registraAcao(const pAcao: TipoWideStringFramework; pParametros: array of TipoWideStringFramework);
+
     //property ultimoAcessoDB getter/setter
       function getUltimoAcessoDB: TDateTime;
       procedure setUltimoAcessoDB(const pValue: TDateTime);
