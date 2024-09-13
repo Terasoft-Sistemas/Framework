@@ -9,6 +9,7 @@ interface
     Terasoft.Framework.DB,
     FuncoesDB,
     Terasoft.Framework.Texto,
+    Terasoft.Framework.EstatisticaUso,
     Interfaces.Conexao;
 
   type
@@ -59,6 +60,11 @@ interface
         fGDB: IGDB;
         fGDBExterno: IGDB;
         fUltimoAcessoDB: TDateTime;
+        fEstatistica: IEstatisticaUsoSessao;
+
+      //property estatistica getter/setter
+        function getEstatistica: IUnknown;
+        procedure setEstatistica(const pValue: IUnknown);
 
       //property ultimoAcessoDB getter/setter
         function getUltimoAcessoDB: TDateTime;
@@ -412,6 +418,16 @@ end;
 function TControllersConexao.getUltimoAcessoDB: TDateTime;
 begin
   Result := fUltimoAcessoDB;
+end;
+
+procedure TControllersConexao.setEstatistica(const pValue: IUnknown);
+begin
+  Supports(pValue,IEstatisticaUsoSessao,fEstatistica);
+end;
+
+function TControllersConexao.getEstatistica: IUnknown;
+begin
+  Result := fEstatistica;
 end;
 
 end.

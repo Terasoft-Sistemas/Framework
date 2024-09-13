@@ -135,6 +135,11 @@ interface
       function getUltimoAcessoDB: TDateTime;
       procedure setUltimoAcessoDB(const pValue: TDateTime);
 
+    //property estatistica getter/setter
+      function getEstatistica: IUnknown;
+      procedure setEstatistica(const pValue: IUnknown);
+
+      property estatistica: IUnknown read getEstatistica write setEstatistica;
       property ultimoAcessoDB: TDateTime read getUltimoAcessoDB write setUltimoAcessoDB;
       property empresa: TEmpresa read getEmpresa;
       property gdbExterno: IGDB read getgdbExterno;
