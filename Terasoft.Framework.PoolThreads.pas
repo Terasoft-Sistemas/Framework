@@ -163,6 +163,7 @@ interface
 
 implementation
   uses
+    Terasoft.Framework.Log,
     DateUtils,
     Spring.Collections;
 
@@ -275,6 +276,7 @@ procedure TThreadLocal.Execute;
   var
     p: IProcesso;
     tmr: TDateTime;
+    msg: String;
 begin
   inherited;
   while not Terminated do
@@ -302,7 +304,9 @@ begin
     except
       on e: Exception do
       begin
-        p.resultado.formataErro('TThreadLocal.Execute: [%s]: %s: %s', [p.rotulo, e.ClassName,e.Message]);
+        msg := format('TThreadLocal.Execute: [%s]: %s: %s', [p.rotulo, e.ClassName,e.Message]);
+        p.resultado.adicionaErro(msg);
+        logaByTagSeNivel(TAGLOG_EXCEPTIONS,msg,LOG_LEVEL_ATENCAO,ls_Erro);
         //p.status := spOcioso;
       end;
     end;
