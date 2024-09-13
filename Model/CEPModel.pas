@@ -85,7 +85,10 @@ begin
 
   fRestRequest.Timeout := 120000;
 
-  self.FAPI := tApiBrasil;
+  if vConfiguracoes.objeto.valorTag('API_CEP_PADRAO','N', tvBool) = 'S' then
+    self.FAPI := tApiBrasil
+  else
+    self.FAPI := tApiViaCep;
 
   vACBrCEP := TACBrCEP.Create(nil);
   vACBrCEP.URL;
