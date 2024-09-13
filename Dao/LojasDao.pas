@@ -148,6 +148,8 @@ begin
             '        loja2.server,                 ' + sLineBreak +
             '        loja2.port,                   ' + sLineBreak +
             '        loja2.database,               ' + sLineBreak +
+            '        loja2.endereco_emp,           ' + sLineBreak +
+            '        loja2.bairro_emp,             ' + sLineBreak +
             '        loja2.cliente_id              ' + sLineBreak +
             '   from loja2                         ' + sLineBreak +
             '  where loja2.cliente_id is not null  ' + sLineBreak;
