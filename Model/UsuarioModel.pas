@@ -176,6 +176,7 @@ type
 implementation
 
 uses
+  Terasoft.Framework.EstatisticaUso.consts,
   UsuarioDao,
   Terasoft.Utils,
   Terasoft.Configuracoes,
@@ -331,12 +332,18 @@ begin
     lUsuarioDao.objeto.validaLogin(user,pass);
 
     if lUsuarioDao.objeto.Status <> 'S' then
+    begin
+      vIConexao.registraAcao(ESTATISTICAUSO_ERRO_LOGIN,['Erro na tentativa de login.',user]);
       CriaException('Não foi possível efetuar seu login, entre em contato com o admistrador do sistema.');
+    end;
 
     lEmpresaModel.objeto.Carregar;
 
     if not VarIsNull(lUsuarioDao.objeto.LOJA_ID) and (lUsuarioDao.objeto.LOJA_ID <> '') and (lUsuarioDao.objeto.LOJA_ID <> lEmpresaModel.objeto.LOJA) then
+    begin
+      vIConexao.registraAcao(ESTATISTICAUSO_ERRO_LOGIN,['Usuário vinculado a loja '+lUsuarioDao.objeto.LOJA_ID+', não está autorizado para logar na loja '+lEmpresaModel.objeto.LOJA,user]);
       CriaException('Usuário vinculado a loja '+lUsuarioDao.objeto.LOJA_ID+', não está autorizado para logar na loja '+lEmpresaModel.objeto.LOJA);
+    end;
 
     FID              := lUsuarioDao.objeto.ID;
     FPERFIL_NEW_ID   := lUsuarioDao.objeto.Perfil;
@@ -344,6 +351,8 @@ begin
     FUSUARIO_WINDOWS := lUsuarioDao.objeto.USUARIO_WINDOWS;
 
     self.verificaServicoNuvem;
+
+    vIConexao.registraAcao(ESTATISTICAUSO_ACAO_LOGIN,['Usuário logado com sucesso.', user]);
 
     Result := true;
 
@@ -368,6 +377,7 @@ end;
 function TUsuarioModel.verificaServicoNuvem: Boolean;
 var
   lConfiguracoesModel : ITConfiguracoesModel;
+  msg: String;
 begin
   Result := true;
 
@@ -381,7 +391,9 @@ begin
       if lConfiguracoesModel.objeto.VALORCHAR = 'S' then
       begin
         if (self.FUSUARIO_WINDOWS = '') and (self.FID <> '000001') then begin
-          CriaException('Este usuário não possui licença de acesso ao sistema em nuvem. Contate o administrador do sistema para liberar seu acesso.');
+          msg := 'Este usuário não possui licença de acesso ao sistema em nuvem. Contate o administrador do sistema para liberar seu acesso.';
+          vIConexao.registraAcao(ESTATISTICAUSO_ERRO_LOGIN,[msg, NOME]);
+          CriaException(msg);
           Result := false;
         end;
       end;

@@ -103,7 +103,7 @@ var
   I : Integer;
 begin
   if vACBrCEP.Enderecos.Count < 1 then begin
-    criaException('Nenhum Endereço encontrado');
+    criaException('Nenhum Endereï¿½o encontrado');
   end
   else
   begin
@@ -217,7 +217,7 @@ begin
   fRestRequest.Execute;
 
   if fRestResponse.StatusCode = 401 then
-    CriaException('Token não autorizado para a consulta!');
+    CriaException('Token nï¿½o autorizado para a consulta!');
 
   if fRestResponse.StatusCode >= 400 then
     Abort;

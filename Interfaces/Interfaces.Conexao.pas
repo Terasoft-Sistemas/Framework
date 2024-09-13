@@ -131,10 +131,17 @@ interface
 
       function getGDBExterno: IGDB;
 
+      procedure registraAcao(const pAcao: TipoWideStringFramework; pParametros: array of TipoWideStringFramework);
+
     //property ultimoAcessoDB getter/setter
       function getUltimoAcessoDB: TDateTime;
       procedure setUltimoAcessoDB(const pValue: TDateTime);
 
+    //property estatistica getter/setter
+      function getEstatistica: IUnknown;
+      procedure setEstatistica(const pValue: IUnknown);
+
+      property estatistica: IUnknown read getEstatistica write setEstatistica;
       property ultimoAcessoDB: TDateTime read getUltimoAcessoDB write setUltimoAcessoDB;
       property empresa: TEmpresa read getEmpresa;
       property gdbExterno: IGDB read getgdbExterno;
