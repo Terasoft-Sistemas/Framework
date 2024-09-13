@@ -71,12 +71,14 @@ type
 
     function obterLista: IFDDataset;
     function carregaClasse(pId: String): ITWebPedidoModel;
+
+    function bloquearVenda(pId, pVendedor, pDataHora: String): Boolean;
 end;
 
 implementation
 
 uses
-  System.Rtti, Clipbrd;
+  System.Rtti, Clipbrd, Terasoft.Configuracoes, Terasoft.Types;
 
 { TWebPedido }
 
@@ -563,6 +565,40 @@ begin
 
     Result := vConstrutor.atribuirRegistros(lQry);
     obterTotalRegistros;
+
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TWebPedidoDao.bloquearVenda(pId, pVendedor, pDataHora: String): Boolean;
+var
+  lQry           : TFDQuery;
+  lSQL           : String;
+  lConfiguracoes : ITerasoftConfiguracoes;
+begin
+  lQry := vIConexao.CriarQuery;
+  Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
+
+  Result := False;
+
+  if lConfiguracoes.objeto.valorTag('QTDE_HORAS_BLOQUEAR_VENDA', 0, tvInteiro) = 0 then
+    exit;
+
+  try
+      lSQL :=
+      '    SELECT count(*)                                                                                                                                          '+SLineBreak+
+      '    FROM web_pedido                                                                                                                                          '+SLineBreak+
+      '    WHERE web_pedido.status IN (''I'', ''D'')                                                                                                                '+SLineBreak+
+      '      AND web_pedido.vendedor_id = '+QuotedStr(pVendedor)                                                                                                     +SLineBreak+
+      '      AND web_pedido.id <> '+QuotedStr(pId)                                                                                                                   +SLineBreak+
+      '      AND web_pedido.datahora < DATEADD(-'+IntToStr(lConfiguracoes.objeto.valorTag('QTDE_HORAS_BLOQUEAR_VENDA', 0, tvInteiro))+' HOUR TO CURRENT_TIMESTAMP)  '+SLineBreak+
+      '      AND web_pedido.datahora < '+QuotedStr(transformaDataHoraFireBird(pDataHora))                                                                            +SLineBreak;
+
+    lQry.Open(lSQL);
+
+    if lQry.FieldByName('count').AsInteger > 0 then
+      Result := true;
 
   finally
     lQry.Free;

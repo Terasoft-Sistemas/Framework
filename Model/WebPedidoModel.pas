@@ -407,6 +407,8 @@ type
     function Negar(pID: String): Boolean;
     function NegarDesconto(pID: String): Boolean;
 
+    function bloquearVenda(pId, pVendedor, pDataHora: String): Boolean;
+
     property WebPedidosLista: IList<ITWebPedidoModel> read FWebPedidosLista write SetWebPedidosLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -1784,6 +1786,18 @@ begin
     lFinanceiroPedidoModel:=nil;
     lPermissaoRemota:=nil;
     lWebPedidoModel:=nil;
+  end;
+end;
+
+function TWebPedidoModel.bloquearVenda(pId, pVendedor, pDataHora: String): Boolean;
+var
+  lWebPedidoDao: ITWebPedidoDao;
+begin
+  lWebPedidoDao := TWebPedidoDao.getNewIface(vIConexao);
+  try
+    Result := lWebPedidoDao.objeto.bloquearVenda(pId, pVendedor, pDataHora);
+  finally
+    lWebPedidoDao := nil;
   end;
 end;
 
