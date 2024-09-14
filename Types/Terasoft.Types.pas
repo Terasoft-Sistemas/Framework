@@ -5,10 +5,13 @@ interface
 uses
   Variants,
   SysUtils,
+  Terasoft.Framework.Types,
   Terasoft.Framework.ListaSimples;
 
 type
   TVariantArray = array of Variant;
+
+  TParametrosEventoUso = IListaString;
 
   TAcao = (tacIndefinido, tacIncluir, tacIncluirLote, tacAlterar, tacExcluir);
   TTipoApuracao = (tapVencimento, tapEmissao);

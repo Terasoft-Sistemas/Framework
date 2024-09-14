@@ -176,8 +176,9 @@ type
 implementation
 
 uses
-  Terasoft.Framework.EstatisticaUso.consts,
+  Terasoft.Framework.EventosUso.consts,
   UsuarioDao,
+  Terasoft.Framework.Types,
   Terasoft.Utils,
   Terasoft.Configuracoes,
   EmpresaModel,
@@ -333,7 +334,7 @@ begin
 
     if lUsuarioDao.objeto.Status <> 'S' then
     begin
-      vIConexao.registraAcao(ESTATISTICAUSO_ERRO_LOGIN,['Erro na tentativa de login.',user]);
+      vIConexao.registraEvento( EVENTOUSO_ERRO_LOGIN,user,'Erro na tentativa de login.');
       CriaException('Não foi possível efetuar seu login, entre em contato com o admistrador do sistema.');
     end;
 
@@ -341,7 +342,7 @@ begin
 
     if not VarIsNull(lUsuarioDao.objeto.LOJA_ID) and (lUsuarioDao.objeto.LOJA_ID <> '') and (lUsuarioDao.objeto.LOJA_ID <> lEmpresaModel.objeto.LOJA) then
     begin
-      vIConexao.registraAcao(ESTATISTICAUSO_ERRO_LOGIN,['Usuário vinculado a loja '+lUsuarioDao.objeto.LOJA_ID+', não está autorizado para logar na loja '+lEmpresaModel.objeto.LOJA,user]);
+      vIConexao.registraEvento(EVENTOUSO_ERRO_LOGIN,user, 'Usuário vinculado a loja '+lUsuarioDao.objeto.LOJA_ID+', não está autorizado para logar na loja '+lEmpresaModel.objeto.LOJA);
       CriaException('Usuário vinculado a loja '+lUsuarioDao.objeto.LOJA_ID+', não está autorizado para logar na loja '+lEmpresaModel.objeto.LOJA);
     end;
 
@@ -352,7 +353,7 @@ begin
 
     self.verificaServicoNuvem;
 
-    vIConexao.registraAcao(ESTATISTICAUSO_ACAO_LOGIN,['Usuário logado com sucesso.', user]);
+    vIConexao.registraEvento(EVENTOUSO_ACAO_LOGIN,user,'Usuário logado com sucesso.');
 
     Result := true;
 
@@ -392,7 +393,7 @@ begin
       begin
         if (self.FUSUARIO_WINDOWS = '') and (self.FID <> '000001') then begin
           msg := 'Este usuário não possui licença de acesso ao sistema em nuvem. Contate o administrador do sistema para liberar seu acesso.';
-          vIConexao.registraAcao(ESTATISTICAUSO_ERRO_LOGIN,[msg, NOME]);
+          vIConexao.registraEvento(EVENTOUSO_ERRO_LOGIN,nome,msg);
           CriaException(msg);
           Result := false;
         end;

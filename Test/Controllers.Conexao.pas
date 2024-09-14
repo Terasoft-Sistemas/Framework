@@ -6,11 +6,12 @@ interface
   uses
     FireDAC.Comp.Client,
     Terasoft.FuncoesTexto,
+    Terasoft.Types,
     Terasoft.Framework.DB,
     FuncoesDB,
     Terasoft.Framework.Types,
     Terasoft.Framework.Texto,
-    Terasoft.Framework.EstatisticaUso,
+    Terasoft.Framework.EventosUso,
     Interfaces.Conexao;
 
   type
@@ -61,13 +62,13 @@ interface
         fGDB: IGDB;
         fGDBExterno: IGDB;
         fUltimoAcessoDB: TDateTime;
-        fEstatistica: IEstatisticaUsoSessao;
+        fEventosUsoSessao: IEventosUsoSessao;
 
       //property estatistica getter/setter
-        function getEstatistica: IUnknown;
-        procedure setEstatistica(const pValue: IUnknown);
+        function getEventosUsoSessao: IUnknown;
+        procedure setEventosUsoSessao(const pValue: IUnknown);
 
-        procedure registraAcao(const pAcao: TipoWideStringFramework; pParametros: array of TipoWideStringFramework);
+        procedure registraEvento(const pEvento: TipoWideStringFramework; pObjeto: TipoWideStringFramework=''; pDescricao: TipoWideStringFramework = '');
 
       //property ultimoAcessoDB getter/setter
         function getUltimoAcessoDB: TDateTime;
@@ -97,7 +98,7 @@ uses
   Terasoft.Framework.DB.DAO,
   Terasoft.Framework.ObjectIface,
   System.SysUtils,
-  LojasModel, Terasoft.Types, GeneratorNewDao, System.IniFiles, Vcl.Forms;
+  LojasModel, GeneratorNewDao, System.IniFiles, Vcl.Forms;
 
 { TControllersConexao }
 
@@ -271,6 +272,8 @@ end;
 
 destructor TControllersConexao.Destroy;
 begin
+  if assigned(fEventosUsoSessao) then
+    fEventosUsoSessao.conexao := nil;
   fGDB := nil;
   fGDBExterno := nil;
   FreeAndNil(FConexaoExterna);
@@ -423,20 +426,20 @@ begin
   Result := fUltimoAcessoDB;
 end;
 
-procedure TControllersConexao.setEstatistica(const pValue: IUnknown);
+procedure TControllersConexao.setEventosUsoSessao(const pValue: IUnknown);
 begin
-  Supports(pValue,IEstatisticaUsoSessao,fEstatistica);
+  Supports(pValue,IEventosUsoSessao,fEventosUsoSessao);
 end;
 
-function TControllersConexao.getEstatistica: IUnknown;
+function TControllersConexao.getEventosUsoSessao: IUnknown;
 begin
-  Result := fEstatistica;
+  Result := fEventosUsoSessao;
 end;
 
-procedure TControllersConexao.registraAcao;
+procedure TControllersConexao.registraEvento;
 begin
-  if assigned(fEstatistica) then
-    fEstatistica.registraAcao(pAcao,pParametros);
+  if assigned(fEventosUsoSessao) then
+    fEventosUsoSessao.registraEvento(Now,pEvento,getStringListFromItens([pDescricao,pObjeto]));
 end;
 
 end.
