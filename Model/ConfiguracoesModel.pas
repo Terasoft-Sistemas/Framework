@@ -116,9 +116,8 @@ uses
 
 constructor TConfiguracoesModel._Create(pIConexao : IConexao);
 begin
-  logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TConfiguracoesModel._Create',LOG_LEVEL_DEBUG);
+  inherited Create;
   vIConexao := pIConexao;
-  logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TConfiguracoesModel._Create: Saindo do _Create',LOG_LEVEL_DEBUG);
 end;
 
 function TConfiguracoesModel.carregaClasse(pId: String): ITConfiguracoesModel;
