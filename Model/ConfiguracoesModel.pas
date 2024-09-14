@@ -86,7 +86,7 @@ type
   	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    class function getNewIface(pIConexao: IConexao): ITConfiguracoesModel;
+    class function getNewIface(pIConexao: IConexao): ITConfiguracoesModel; overload; static;
 
     function carregaClasse(pId : String): ITConfiguracoesModel;
 
@@ -141,7 +141,7 @@ end;
 
 class function TConfiguracoesModel.getNewIface(pIConexao: IConexao): ITConfiguracoesModel;
 begin
-  Result := TImplObjetoOwner<TConfiguracoesModel>.CreateOwner(self._Create(pIConexao));
+  Result := TImplObjetoOwner<TConfiguracoesModel>.CreateOwner(TConfiguracoesModel._Create(pIConexao));
   logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TConfiguracoesModel.getNewIface: Atribuindo Result para myself',LOG_LEVEL_DEBUG);
   Result.objeto.mySelf := Result;
   logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TConfiguracoesModel.getNewIface: Saindo do getNewIface',LOG_LEVEL_DEBUG);
