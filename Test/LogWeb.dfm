@@ -12,7 +12,6 @@ object fromLogWeb: TfromLogWeb
   Font.Style = []
   Position = poScreenCenter
   OnCreate = FormCreate
-  PixelsPerInch = 96
   TextHeight = 15
   object SpeedButton2: TSpeedButton
     Left = 0
@@ -42,7 +41,6 @@ object fromLogWeb: TfromLogWeb
     Align = alTop
     Caption = 'Panel1'
     TabOrder = 0
-    ExplicitTop = 35
     object Splitter2: TSplitter
       Left = 372
       Top = 1
@@ -118,20 +116,17 @@ object fromLogWeb: TfromLogWeb
     Height = 41
     Align = alTop
     TabOrder = 2
-    ExplicitLeft = 216
-    ExplicitTop = -6
-    ExplicitWidth = 185
-    DesignSize = (
-      624
-      41)
     object SpeedButton1: TSpeedButton
-      Left = 552
-      Top = 6
+      Left = 551
+      Top = 1
       Width = 72
-      Height = 35
-      Anchors = [akTop, akRight]
+      Height = 39
+      Align = alRight
       Caption = '>>'
       OnClick = SpeedButton1Click
+      ExplicitLeft = 552
+      ExplicitTop = 6
+      ExplicitHeight = 35
     end
     object cbDeadlock: TCheckBox
       Left = 32
