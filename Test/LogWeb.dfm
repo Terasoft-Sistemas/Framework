@@ -12,18 +12,11 @@ object fromLogWeb: TfromLogWeb
   Font.Style = []
   Position = poScreenCenter
   OnCreate = FormCreate
+  PixelsPerInch = 96
   TextHeight = 15
-  object SpeedButton1: TSpeedButton
-    Left = 0
-    Top = 0
-    Width = 624
-    Height = 35
-    Align = alTop
-    OnClick = SpeedButton1Click
-  end
   object SpeedButton2: TSpeedButton
     Left = 0
-    Top = 175
+    Top = 181
     Width = 624
     Height = 22
     Align = alTop
@@ -33,7 +26,7 @@ object fromLogWeb: TfromLogWeb
   end
   object Splitter1: TSplitter
     Left = 0
-    Top = 172
+    Top = 178
     Width = 624
     Height = 3
     Cursor = crVSplit
@@ -43,12 +36,13 @@ object fromLogWeb: TfromLogWeb
   end
   object Panel1: TPanel
     Left = 0
-    Top = 35
+    Top = 41
     Width = 624
     Height = 137
     Align = alTop
     Caption = 'Panel1'
     TabOrder = 0
+    ExplicitTop = 35
     object Splitter2: TSplitter
       Left = 372
       Top = 1
@@ -107,15 +101,47 @@ object fromLogWeb: TfromLogWeb
   end
   object gridEventos: TXDBGrid
     Left = 0
-    Top = 197
+    Top = 203
     Width = 624
-    Height = 244
+    Height = 238
     Align = alClient
     DataSource = dsEv
     GridStyle.VisualStyle = vsXPStyle
     ReadOnly = True
     TabOrder = 1
     OnCellDblClick = gridEventosCellDblClick
+  end
+  object Panel2: TPanel
+    Left = 0
+    Top = 0
+    Width = 624
+    Height = 41
+    Align = alTop
+    TabOrder = 2
+    ExplicitLeft = 216
+    ExplicitTop = -6
+    ExplicitWidth = 185
+    DesignSize = (
+      624
+      41)
+    object SpeedButton1: TSpeedButton
+      Left = 552
+      Top = 6
+      Width = 72
+      Height = 35
+      Anchors = [akTop, akRight]
+      Caption = '>>'
+      OnClick = SpeedButton1Click
+    end
+    object cbDeadlock: TCheckBox
+      Left = 32
+      Top = 13
+      Width = 97
+      Height = 17
+      Caption = 'Deadlock'
+      TabOrder = 0
+      OnClick = cbDeadlockClick
+    end
   end
   object dsInst: TDataSource
     AutoEdit = False

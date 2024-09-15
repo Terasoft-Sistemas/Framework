@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Terasoft.Framework.DB,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids, XDBGrids, Vcl.ExtCtrls,
-  Data.DB, Vcl.Buttons;
+  Data.DB, Vcl.Buttons, Vcl.StdCtrls;
 
 type
   TfromLogWeb = class(TForm)
@@ -15,7 +15,6 @@ type
     gridExecucao: TXDBGrid;
     dsInst: TDataSource;
     dsExec: TDataSource;
-    SpeedButton1: TSpeedButton;
     dsCon: TDataSource;
     gridConexoes: TXDBGrid;
     gridEventos: TXDBGrid;
@@ -24,6 +23,9 @@ type
     Splitter1: TSplitter;
     Splitter2: TSplitter;
     Splitter3: TSplitter;
+    Panel2: TPanel;
+    SpeedButton1: TSpeedButton;
+    cbDeadlock: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure dsInstDataChange(Sender: TObject; Field: TField);
     procedure SpeedButton1Click(Sender: TObject);
@@ -37,6 +39,7 @@ type
     procedure gridInstanciasCellClick(Column: TXColumn);
     procedure gridExecucaoCellClick(Column: TXColumn);
     procedure gridConexoesCellClick(Column: TXColumn);
+    procedure cbDeadlockClick(Sender: TObject);
   private
     { Private declarations }
   protected
@@ -115,15 +118,24 @@ end;
 
 
 procedure TfromLogWeb.abrirExecucao;
+  var
+    queryWhere: String;
 begin
   if(dsExecucao=nil) then
   begin
     dsExecucao := gdb.criaDataset;
   end;
+
+  queryWhere :=  ' c.instancia = :id and c.evento=''SISTEMA'' ' ;
+
+//  if(cbDeadlock.Checked) then
+ //   queryWhere := queryWhere + ' and c.chave in ' +
+  //      ' ( select conexao from webcoleta_eventos e where e.evento in (''DEADLOCK'',''USERDEADLOCK'') ) ';
+
   dsExecucao.query(
       'select c.dh,c.execucao,c.chave'+#13+
          'from webcoleta_conexoes c'+#13+
-         'where c.instancia = :id and c.evento=''SISTEMA'' '+#13+
+         'where ' + queryWhere + //c.instancia = :id and c.evento=''SISTEMA'' '+#13+
          'order by 1 desc',
      'id',[dsInstancias.dataset.fieldByName('instancia').AsString]);
   dsExecucao.dataset.FieldByName('execucao').Visible := false;
@@ -135,18 +147,29 @@ begin
 end;
 
 procedure TfromLogWeb.abrirInstancias;
+  var
+    queryWhere: String;
 begin
   if(dsInstancias=nil) then
     dsInstancias := gdb.criaDataset;
+  queryWhere := ' 1=1 ';//c.evento = ''SISTEMA'' ' +#13;
+  if(cbDeadlock.Checked) then
+    queryWhere := queryWhere + ' and c.chave in ' +
+        ' ( select conexao from webcoleta_eventos e where e.evento in (''DEADLOCK'',''USERDEADLOCK'') ) ';
   dsInstancias.query('select distinct c.instancia'+#13+
        'from webcoleta_conexoes c'+#13+
-       'where c.evento = ''SISTEMA'''+#13+
+       'where ' + queryWhere +
        'order by 1',
      '',[]);
 
   if(dsInst.DataSet=nil) then
     dsInst.DataSet := dsInstancias.dataset;
 
+end;
+
+procedure TfromLogWeb.cbDeadlockClick(Sender: TObject);
+begin
+  abrirInstancias;
 end;
 
 procedure TfromLogWeb.dsConDataChange(Sender: TObject; Field: TField);
