@@ -128,9 +128,9 @@ begin
 
   queryWhere :=  ' c.instancia = :id and c.evento=''SISTEMA'' ' ;
 
-//  if(cbDeadlock.Checked) then
- //   queryWhere := queryWhere + ' and c.chave in ' +
-  //      ' ( select conexao from webcoleta_eventos e where e.evento in (''DEADLOCK'',''USERDEADLOCK'') ) ';
+  if(cbDeadlock.Checked) then
+    queryWhere := queryWhere + ' and c.chave in ' +
+        ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''DEADLOCK'',''USERDDEADLOCK'') and c.chave=e.conexao ) ';
 
   dsExecucao.query(
       'select c.dh,c.execucao,c.chave'+#13+
@@ -152,10 +152,10 @@ procedure TfromLogWeb.abrirInstancias;
 begin
   if(dsInstancias=nil) then
     dsInstancias := gdb.criaDataset;
-  queryWhere := ' 1=1 ';//c.evento = ''SISTEMA'' ' +#13;
+  queryWhere := ' c.evento = ''SISTEMA'' ' +#13;
   if(cbDeadlock.Checked) then
     queryWhere := queryWhere + ' and c.chave in ' +
-        ' ( select conexao from webcoleta_eventos e where e.evento in (''DEADLOCK'',''USERDEADLOCK'') ) ';
+        ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''DEADLOCK'',''USERDDEADLOCK'') and c.chave=e.conexao ) ';
   dsInstancias.query('select distinct c.instancia'+#13+
        'from webcoleta_conexoes c'+#13+
        'where ' + queryWhere +
