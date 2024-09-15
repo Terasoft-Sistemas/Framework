@@ -76,7 +76,7 @@ implementation
       fIdentificador: TBytes;
       fDH: TDateTime;
       fMobile: boolean;
-      vSeq: Integer;
+      vSeq,vSeqConexao: Integer;
 
     //property mobile getter/setter
       function getMobile: boolean;
@@ -268,8 +268,8 @@ begin
   Result := TlkJSON.cria;
   Result.json.Add('id',getIDStr);
   Result.json.Add('dh',DateTimeToStr(Now));
-  AtomicIncrement(vSeq);
-  Result.json.Add('seq',vSeq);
+  AtomicIncrement(vSeqConexao);
+  Result.json.Add('seq',vSeqConexao);
   Result.json.Add('evento',pEvento);
 
   Result.json.Add('instancia',gNomeInstanciaSistema);
