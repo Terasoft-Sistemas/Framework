@@ -23,14 +23,23 @@ object fromLogWeb: TfromLogWeb
   end
   object SpeedButton2: TSpeedButton
     Left = 0
-    Top = 172
+    Top = 175
     Width = 624
     Height = 22
     Align = alTop
     OnClick = SpeedButton2Click
-    ExplicitLeft = 360
-    ExplicitTop = 344
-    ExplicitWidth = 23
+    ExplicitLeft = -8
+    ExplicitTop = 203
+  end
+  object Splitter1: TSplitter
+    Left = 0
+    Top = 172
+    Width = 624
+    Height = 3
+    Cursor = crVSplit
+    Align = alTop
+    ExplicitTop = 194
+    ExplicitWidth = 247
   end
   object Panel1: TPanel
     Left = 0
@@ -40,6 +49,22 @@ object fromLogWeb: TfromLogWeb
     Align = alTop
     Caption = 'Panel1'
     TabOrder = 0
+    object Splitter2: TSplitter
+      Left = 372
+      Top = 1
+      Height = 135
+      ExplicitLeft = 376
+      ExplicitTop = 72
+      ExplicitHeight = 100
+    end
+    object Splitter3: TSplitter
+      Left = 153
+      Top = 1
+      Height = 135
+      ExplicitLeft = 152
+      ExplicitTop = 72
+      ExplicitHeight = 100
+    end
     object gridInstancias: TXDBGrid
       Left = 1
       Top = 1
@@ -54,7 +79,7 @@ object fromLogWeb: TfromLogWeb
       OnCellDblClick = gridInstanciasCellDblClick
     end
     object gridExecucao: TXDBGrid
-      Left = 153
+      Left = 156
       Top = 1
       Width = 216
       Height = 135
@@ -67,9 +92,9 @@ object fromLogWeb: TfromLogWeb
       OnCellDblClick = gridExecucaoCellDblClick
     end
     object gridConexoes: TXDBGrid
-      Left = 369
+      Left = 375
       Top = 1
-      Width = 254
+      Width = 248
       Height = 135
       Align = alClient
       DataSource = dsCon
@@ -82,9 +107,9 @@ object fromLogWeb: TfromLogWeb
   end
   object gridEventos: TXDBGrid
     Left = 0
-    Top = 194
+    Top = 197
     Width = 624
-    Height = 247
+    Height = 244
     Align = alClient
     DataSource = dsEv
     GridStyle.VisualStyle = vsXPStyle

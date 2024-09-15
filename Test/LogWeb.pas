@@ -21,6 +21,9 @@ type
     gridEventos: TXDBGrid;
     dsEv: TDataSource;
     SpeedButton2: TSpeedButton;
+    Splitter1: TSplitter;
+    Splitter2: TSplitter;
+    Splitter3: TSplitter;
     procedure FormCreate(Sender: TObject);
     procedure dsInstDataChange(Sender: TObject; Field: TField);
     procedure SpeedButton1Click(Sender: TObject);
