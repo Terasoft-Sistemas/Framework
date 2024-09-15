@@ -222,6 +222,7 @@ type
     imprimirContratoCarteira: TButton;
     SpeedButton4: TSpeedButton;
     FDMemTable1: TFDMemTable;
+    SpeedButton5: TSpeedButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -377,6 +378,7 @@ type
     procedure SpeedButton4Click(Sender: TObject);
     procedure SpeedButton3Click(Sender: TObject);
     procedure FDMemTable1BeforePost(DataSet: TDataSet);
+    procedure SpeedButton5Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -415,7 +417,8 @@ uses
   PromocaoModel, TransportadoraModel, PrevisaoPedidoCompraModel, SaidasModel,
   SaidasItensModel, ClientesEnderecoModel, OrcamentoModel, OrcamentoItensModel, Terasoft.Utils,
   SolicitacaoDescontoModel, PermissaoRemotaModel, MovimentoSerialModel, Impressao.Contratos,
-  UsuarioModel, TabelaJurosDiaModel, TabelaJurosPromocaoModel, EndPointEditor;
+  UsuarioModel, TabelaJurosDiaModel, TabelaJurosPromocaoModel, EndPointEditor,
+  LogWeb;
 
 {$R *.dfm}
 
@@ -4275,6 +4278,15 @@ begin
   //Button75Click(sender);
   //BtnEndereco3.Click;
   Form.Endpoint.criaViewEndpoint(vIConexao).objeto.ShowModal;
+end;
+
+procedure TForm1.SpeedButton5Click(Sender: TObject);
+begin
+  with TFromLogWeb.Create(nil) do
+  begin
+    ShowModal;
+    Free;
+  end;
 end;
 
 initialization

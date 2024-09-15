@@ -169,7 +169,8 @@ uses
   ConfiguracoesLocaisDao in '..\Dao\ConfiguracoesLocaisDao.pas',
   uTeste in 'uTeste.pas' {Form1},
   Form.Endpoint in 'Form.Endpoint.pas' {FormEP},
-  EndPointEditor in '..\Editors\EndPointEditor.pas' {frmEditorConsultas};
+  EndPointEditor in '..\Editors\EndPointEditor.pas' {frmEditorConsultas},
+  LogWeb in 'LogWeb.pas' {fromLogWeb};
 
 {$R *.res}
 

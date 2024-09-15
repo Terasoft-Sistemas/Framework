@@ -14,7 +14,6 @@ object Form1: TForm1
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  PixelsPerInch = 96
   TextHeight = 15
   object PageControl: TPageControl
     Left = 0
@@ -36,7 +35,7 @@ object Form1: TForm1
       end
       object SpeedButton3: TSpeedButton
         Left = 755
-        Top = 63
+        Top = 111
         Width = 143
         Height = 42
         Caption = 'Editar Consultas'
@@ -44,11 +43,19 @@ object Form1: TForm1
       end
       object SpeedButton4: TSpeedButton
         Left = 755
-        Top = 111
+        Top = 159
         Width = 143
         Height = 42
         Caption = 'Consultas'
         OnClick = SpeedButton4Click
+      end
+      object SpeedButton5: TSpeedButton
+        Left = 755
+        Top = 63
+        Width = 143
+        Height = 42
+        Caption = 'Logs '
+        OnClick = SpeedButton5Click
       end
       object memoResultado: TMemo
         Left = 904
