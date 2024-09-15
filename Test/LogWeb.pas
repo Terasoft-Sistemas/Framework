@@ -108,7 +108,7 @@ begin
            '    webcoleta_eventos c'+#13+
            'where'+#13+
            '    c.conexao = :id'+#13+
-           'order by seq desc',
+           'order by conexao desc, seq desc',
      'id',[dsConexoes.dataset.fieldByName('chave').AsString]);
 
   if(dsEv.DataSet=nil) then

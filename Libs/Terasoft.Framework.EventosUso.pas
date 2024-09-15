@@ -21,6 +21,8 @@ interface
       //function toJSON: ITlkJSONObject;
 
       procedure registraEvento(pDH: TDateTime; pEvento: TipoWideStringFramework; pParametros: TParametrosEventoUso);
+      procedure registraEventoParams(pDH: TDateTime; pEvento: TipoWideStringFramework; pObjeto: TipoWideStringFramework = ''; pDescricao: TipoWideStringFramework = ''; pParam02: TipoWideStringFramework = ''; pParam03: TipoWideStringFramework = '' );
+
 
       procedure gravaEvento(pDH: TDateTime; pEvento: TipoWideStringFramework; pParametros: TParametrosEventoUso);
 
@@ -71,6 +73,7 @@ implementation
     end;
 
     TEstatisticaUsoImpl = class(TInterfacedObject, IEventosUsoSessao)
+  private
     protected
       [weak] fConexao: IConexao;
       fIdentificador: TBytes;
@@ -89,6 +92,8 @@ implementation
       function toJSON(pEvento: TipoWideStringFramework): ITlkJSONObject;
 
       procedure registraEvento(pDH: TDateTime; pEvento: TipoWideStringFramework; pParametros: TParametrosEventoUso);
+      procedure registraEventoParams(pDH: TDateTime; pEvento: TipoWideStringFramework; pObjeto: TipoWideStringFramework = ''; pDescricao: TipoWideStringFramework = ''; pParam02: TipoWideStringFramework = ''; pParam03: TipoWideStringFramework = '' );
+
       procedure gravaEvento(pDH: TDateTime; pEvento: TipoWideStringFramework; pParametros: TParametrosEventoUso);
       procedure _gravaEvento(pEvento: TipoWideStringFramework; pJSON: ITlkJSONObject);
 
@@ -217,6 +222,17 @@ begin
   begin
     fDH := pDH;
     js := toJSON(pEvento);
+    if(fConexao<>nil) then
+    begin
+      if(fConexao.gdb.conectado) then
+        registraEventoParams(pDH, EVENTOUSO_PROPRIEDADE_CONEXAO,'database','',fConexao.gdb.databaseName);
+      if(fConexao.empresa.LOJA<>'') then
+        registraEventoParams(pDH, EVENTOUSO_PROPRIEDADE_CONEXAO,'empresa','',fConexao.empresa.LOJA);
+      if(fConexao.empresa.EMPRESA_CNPJ<>'') then
+        registraEventoParams(pDH, EVENTOUSO_PROPRIEDADE_CONEXAO,'cnpj','',fConexao.empresa.EMPRESA_CNPJ);
+      if(fConexao.empresa.ID<>'') then
+        registraEventoParams(pDH, EVENTOUSO_PROPRIEDADE_CONEXAO,'id','',fConexao.empresa.ID);
+    end;
   end else
   begin
     js := TlkJSON.cria;
@@ -237,6 +253,11 @@ begin
 
   if(js<>nil) then
     _gravaEvento(pEvento,js);
+end;
+
+procedure TEstatisticaUsoImpl.registraEventoParams(pDH: TDateTime; pEvento, pObjeto, pDescricao, pParam02, pParam03: TipoWideStringFramework);
+begin
+  self.registraEvento(pDH,pEvento,getStringListFromItens([pDescricao,pObjeto,pParam02,pParam03]));
 end;
 
 destructor TEstatisticaUsoImpl.Destroy;
