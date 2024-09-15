@@ -131,7 +131,7 @@ interface
 
       function getGDBExterno: IGDB;
 
-      procedure registraEvento(const pEvento: TipoWideStringFramework; pObjeto: TipoWideStringFramework=''; pDescricao: TipoWideStringFramework = '');
+      procedure registraEvento(const pEvento: TipoWideStringFramework; pObjeto: TipoWideStringFramework=''; pDescricao: TipoWideStringFramework = ''; pParam2: TipoWideStringFramework = ''; pParam3: TipoWideStringFramework = '');
 
     //property ultimoAcessoDB getter/setter
       function getUltimoAcessoDB: TDateTime;

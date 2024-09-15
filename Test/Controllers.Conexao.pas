@@ -68,7 +68,7 @@ interface
         function getEventosUsoSessao: IUnknown;
         procedure setEventosUsoSessao(const pValue: IUnknown);
 
-        procedure registraEvento(const pEvento: TipoWideStringFramework; pObjeto: TipoWideStringFramework=''; pDescricao: TipoWideStringFramework = '');
+        procedure registraEvento(const pEvento: TipoWideStringFramework; pObjeto: TipoWideStringFramework=''; pDescricao: TipoWideStringFramework = ''; pParam2: TipoWideStringFramework = ''; pParam3: TipoWideStringFramework = '');
 
       //property ultimoAcessoDB getter/setter
         function getUltimoAcessoDB: TDateTime;
@@ -439,7 +439,7 @@ end;
 procedure TControllersConexao.registraEvento;
 begin
   if assigned(fEventosUsoSessao) then
-    fEventosUsoSessao.registraEvento(Now,pEvento,getStringListFromItens([pDescricao,pObjeto]));
+    fEventosUsoSessao.registraEvento(Now,pEvento,getStringListFromItens([pDescricao,pObjeto,pParam2,pParam3]));
 end;
 
 end.
