@@ -65,6 +65,7 @@ begin
     ds.dataset.FieldByName('dh').AsDateTime := dh;
     ds.dataset.FieldByName('evento').AsString := evento;
     ds.dataset.FieldByName('instancia').AsString := js.json.variantByPath('instancia','');
+    ds.dataset.FieldByName('seq').AsString := js.json.variantByPath('seq','0');
     ds.dataset.FieldByName('execucao').AsString := js.json.variantByPath('execucao','');
     ds.dataset.FieldByName('mobile').AsString := ifthen(js.json.variantByPath('mobile',false),'S','N');
     ds.dataset.FieldByName('empresa_id').AsString := js.json.variantByPath('empresa\id','');
@@ -82,6 +83,7 @@ begin
     ds.dataset.FieldByName('id').AsInteger := 0;
     ds.dataset.FieldByName('conexao').AsString := conexao;
     ds.dataset.FieldByName('dh').AsDateTime := dh;
+    ds.dataset.FieldByName('seq').AsString := js.json.variantByPath('seq','0');
     ds.dataset.FieldByName('identificador').AsString := chave;
     ds.dataset.FieldByName('evento').AsString := js.json.variantByPath('evento','');
     ds.dataset.FieldByName('descricao').AsString := js.json.variantByPath('parametros\0','');

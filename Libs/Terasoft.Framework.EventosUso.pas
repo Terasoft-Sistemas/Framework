@@ -76,6 +76,7 @@ implementation
       fIdentificador: TBytes;
       fDH: TDateTime;
       fMobile: boolean;
+      vSeq: Integer;
 
     //property mobile getter/setter
       function getMobile: boolean;
@@ -222,6 +223,8 @@ begin
     js.json.Add('conexao',getIDStr);
     js.json.Add('id',randomBase32(TAMANHOENTROPIA_BYTES));
     js.json.Add('dh',DateTimeToStr(pDH));
+    AtomicIncrement(vSeq);
+    js.json.Add('seq',pEvento);
     js.json.Add('evento',pEvento);
     if(pParametros<>nil) and (pParametros.Count > 0) then
     begin
@@ -265,6 +268,8 @@ begin
   Result := TlkJSON.cria;
   Result.json.Add('id',getIDStr);
   Result.json.Add('dh',DateTimeToStr(Now));
+  AtomicIncrement(vSeq);
+  Result.json.Add('seq',pEvento);
   Result.json.Add('evento',pEvento);
 
   Result.json.Add('instancia',gNomeInstanciaSistema);
