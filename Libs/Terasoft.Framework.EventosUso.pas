@@ -224,7 +224,7 @@ begin
     js.json.Add('id',randomBase32(TAMANHOENTROPIA_BYTES));
     js.json.Add('dh',DateTimeToStr(pDH));
     AtomicIncrement(vSeq);
-    js.json.Add('seq',pEvento);
+    js.json.Add('seq',vSeq);
     js.json.Add('evento',pEvento);
     if(pParametros<>nil) and (pParametros.Count > 0) then
     begin
@@ -269,7 +269,7 @@ begin
   Result.json.Add('id',getIDStr);
   Result.json.Add('dh',DateTimeToStr(Now));
   AtomicIncrement(vSeq);
-  Result.json.Add('seq',pEvento);
+  Result.json.Add('seq',vSeq);
   Result.json.Add('evento',pEvento);
 
   Result.json.Add('instancia',gNomeInstanciaSistema);
