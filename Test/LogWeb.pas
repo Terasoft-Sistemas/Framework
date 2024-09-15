@@ -92,6 +92,7 @@ begin
   dsEventos.query(
         'select'+#13+
            '    c.dh,'+#13+
+           '    c.seq,'+#13+
            '    c.evento,'+#13+
            '    c.descricao,'+#13+
            '    c.valor01,'+#13+
@@ -101,7 +102,7 @@ begin
            '    webcoleta_eventos c'+#13+
            'where'+#13+
            '    c.conexao = :id'+#13+
-           'order by 1',
+           'order by seq desc',
      'id',[dsConexoes.dataset.fieldByName('chave').AsString]);
 
   if(dsEv.DataSet=nil) then
