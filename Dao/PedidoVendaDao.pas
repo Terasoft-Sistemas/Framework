@@ -116,7 +116,8 @@ begin
       '         i.vdesc desconto_item,                                                                    '+SLineBreak+
       '         i.quantidade_ped * i.valorunitario_ped / p.valor_ped * p.acres_ped acrescimo_item,        '+SLineBreak+
       '         i.valor_acrescimo,                                                                        '+SLineBreak+
-      '         pro.customedio_pro                                                                        '+SLineBreak+
+      '         pro.customedio_pro,                                                                       '+SLineBreak+
+      '         i.tipo_venda                                                                              '+SLineBreak+
       '   from pedidovenda p                                                                              '+SLineBreak+
       '   left join pedidoitens i on i.numero_ped = p.numero_ped                                          '+SLineBreak+
       '   left join produto pro on pro.codigo_pro = i.codigo_pro                                          '+SLineBreak+
@@ -131,16 +132,17 @@ begin
       modelo := TPedidoVendaModel.getNewIface(vIConexao);
       FPedidoVendasLista.Add(modelo);
 
-      modelo.objeto.PEDIDOITENS_ID    := lQry.FieldByName('PEDIDOITENS_ID').AsString;
-      modelo.objeto.VALOR_PED         := lQry.FieldByName('VALOR_PED').AsString;
-      modelo.objeto.DESC_PED          := lQry.FieldByName('DESCONTO_ITEM').AsString;
-      modelo.objeto.ACRES_PED         := lQry.FieldByName('ACRES_PED').AsString;
-      modelo.objeto.UF_CLI            := lQry.FieldByName('UF_CLI').AsString;
-      modelo.objeto.CODIGO_PRO        := lQry.FieldByName('CODIGO_PRO').AsString;
-      modelo.objeto.QUANTIDADE_PED    := lQry.FieldByName('QUANTIDADE_PED').AsString;
-      modelo.objeto.VALORUNITARIO_PED := lQry.FieldByName('VALORUNITARIO_PED').AsString;
-      modelo.objeto.VALOR_ACRESCIMO   := lQry.FieldByName('VALOR_ACRESCIMO').AsString;
-      modelo.objeto.CUSTOMEDIO_PRO    := lQry.FieldByName('CUSTOMEDIO_PRO').AsString;
+      modelo.objeto.PEDIDOITENS_ID     := lQry.FieldByName('PEDIDOITENS_ID').AsString;
+      modelo.objeto.VALOR_PED          := lQry.FieldByName('VALOR_PED').AsString;
+      modelo.objeto.DESC_PED           := lQry.FieldByName('DESCONTO_ITEM').AsString;
+      modelo.objeto.ACRES_PED          := lQry.FieldByName('ACRES_PED').AsString;
+      modelo.objeto.UF_CLI             := lQry.FieldByName('UF_CLI').AsString;
+      modelo.objeto.CODIGO_PRO         := lQry.FieldByName('CODIGO_PRO').AsString;
+      modelo.objeto.QUANTIDADE_PED     := lQry.FieldByName('QUANTIDADE_PED').AsString;
+      modelo.objeto.VALORUNITARIO_PED  := lQry.FieldByName('VALORUNITARIO_PED').AsString;
+      modelo.objeto.VALOR_ACRESCIMO    := lQry.FieldByName('VALOR_ACRESCIMO').AsString;
+      modelo.objeto.CUSTOMEDIO_PRO     := lQry.FieldByName('CUSTOMEDIO_PRO').AsString;
+      modelo.objeto.TIPO_VENDA         := lQry.FieldByName('TIPO_VENDA').AsString;
 
       lQry.Next;
     end;

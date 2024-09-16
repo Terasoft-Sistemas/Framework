@@ -933,6 +933,8 @@ type
 
     procedure verificarCustoMedio;
 
+    function obterCustoCD(pProduto : String) : Double;
+
     property ProdutossLista: IList<ITProdutosModel> read FProdutossLista write SetProdutossLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -1158,6 +1160,18 @@ begin
     Result := lProdutosDao.objeto.obterComissao(pCodProduto);
   finally
     lProdutosDao:=nil;
+  end;
+end;
+
+function TProdutosModel.obterCustoCD(pProduto: String): Double;
+var
+  lProdutosDao : ITProdutosDao;
+begin
+  lProdutosDao := TProdutosDao.getNewIface(vIConexao);
+  try
+    Result := lProdutosDao.objeto.obterCustoCD(pProduto);
+  finally
+    lProdutosDao := nil;
   end;
 end;
 
