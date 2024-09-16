@@ -190,6 +190,7 @@ type
     FPER_COMISSAO_PRESTAMISTA: Variant;
     FVALOR_ACRESCIMO: Variant;
     FCUSTOMEDIO_PRO: Variant;
+    FTIPO_VENDA: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetPedidoVendasLista(const Value: IList<ITPedidoVendaModel>);
@@ -351,6 +352,7 @@ type
     procedure SetPER_COMISSAO_PRESTAMISTA(const Value: Variant);
     procedure SetVALOR_ACRESCIMO(const Value: Variant);
     procedure SetCUSTOMEDIO_PRO(const Value: Variant);
+    procedure SetTIPO_VENDA(const Value: Variant);
 
   public
     property NUMERO_PED: Variant read FNUMERO_PED write SetNUMERO_PED;
@@ -501,6 +503,7 @@ type
     property PER_COMISSAO_PRESTAMISTA : Variant read FPER_COMISSAO_PRESTAMISTA write SetPER_COMISSAO_PRESTAMISTA;
     property VALOR_ACRESCIMO: Variant read FVALOR_ACRESCIMO write SetVALOR_ACRESCIMO;
     property CUSTOMEDIO_PRO: Variant read FCUSTOMEDIO_PRO write SetCUSTOMEDIO_PRO;
+    property TIPO_VENDA: Variant read FTIPO_VENDA write SetTIPO_VENDA;
 
     property PedidoVendasLista: IList<ITPedidoVendaModel> read FPedidoVendasLista write SetPedidoVendasLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -1842,11 +1845,14 @@ var
   lPedidoVendaModel      : ITPedidoVendaModel;
   lEmpresaModel          : ITEmpresaModel;
   lConfiguracoes         : ITerasoftConfiguracoes;
+  lCusto                 : Double;
+  lProdutosModel         : ITProdutosModel;
 begin
   lPedidoVendaLista      := TPedidoVendaDao.getNewIface(vIConexao);
   lCalcularImpostosModel := TCalcularImpostosModel.Create(vIConexao);
   lPedidoItensModal      := TPedidoItensModel.getNewIface(vIConexao);
   lEmpresaModel          := TEmpresaModel.getNewIface(vIConexao);
+  lProdutosModel         := TProdutosModel.getNewIface(vIConexao);
 
   Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
 
@@ -1911,8 +1917,13 @@ begin
       if (lConfiguracoes.objeto.valorTag('RATEAR_ACRESIMO_NF', 'N', tvBool) = 'N') then
         lPedidoItensModal.objeto.VOUTROS           := FloatToStr(lCalcularImpostosModel.ACRESCIMO_ITEM);
 
+      if lPedidoVendaModel.objeto.TIPO_VENDA = 'CD' then
+        lCusto := lProdutosModel.objeto.obterCustoCD(lPedidoVendaModel.objeto.CODIGO_PRO)
+      else
+        lCusto := lPedidoVendaModel.objeto.CUSTOMEDIO_PRO;
+
       if (lConfiguracoes.objeto.valorTag('USAR_CUSTO_CONTABIL', 'N', tvBool) = 'S') then
-        lPedidoItensModal.objeto.VLRCUSTO_PRO       := FloatToStr(StrToFloatDef(lPedidoVendaModel.objeto.CUSTOMEDIO_PRO, 0) +
+        lPedidoItensModal.objeto.VLRCUSTO_PRO       := FloatToStr(lCusto +
                                                                   StrToFloatDef(lPedidoItensModal.objeto.VALOR_ICMS / lCalcularImpostosModel.QUANTIDADE, 0)   +
                                                                   StrToFloatDef(lPedidoItensModal.objeto.VALOR_ST / lCalcularImpostosModel.QUANTIDADE, 0)     +
                                                                   StrToFloatDef(lPedidoItensModal.objeto.VALOR_PIS / lCalcularImpostosModel.QUANTIDADE, 0)    +
@@ -1940,6 +1951,7 @@ begin
     lPedidoVendaLista:=nil;
     lCalcularImpostosModel.Free;
     lPedidoItensModal:=nil;
+    lProdutosModel:=nil;
   end;
 end;
 
@@ -2581,6 +2593,11 @@ end;
 procedure TPedidoVendaModel.SetTIPO_PED(const Value: Variant);
 begin
   FTIPO_PED := Value;
+end;
+
+procedure TPedidoVendaModel.SetTIPO_VENDA(const Value: Variant);
+begin
+  FTIPO_VENDA := Value;
 end;
 
 procedure TPedidoVendaModel.SetTOTAL1_PED(const Value: Variant);

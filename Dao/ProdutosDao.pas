@@ -91,6 +91,7 @@ type
 
     function ValorGarantia(pProduto: String; pValorFaixa: Double): TProdutoGarantia;
 
+    function obterCustoCD(pProduto : String): Double;
 
 end;
 
@@ -632,6 +633,26 @@ begin
     Result := vConstrutor.atribuirRegistros(lQry);
   finally
     lQry.Free;
+  end;
+end;
+
+function TProdutosDao.obterCustoCD(pProduto: String): Double;
+var
+  lQryCD : TFDQuery;
+  lSql   : String;
+begin
+  try
+    lSQL := ' select coalesce(p.customedio_pro, 0) customedio_pro from produto p where p.codigo_pro = ' + QuotedStr(pProduto);
+
+    vIConexao.ConfigConexaoExterna('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA);
+
+    lQryCD := vIConexao.criarQueryExterna;
+    lQryCD.Open(lSQL);
+
+    Result := lQryCD.FieldByName('CUSTOMEDIO_PRO').AsFloat;
+
+  finally
+    lQryCD.Free;
   end;
 end;
 
