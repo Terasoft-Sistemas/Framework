@@ -1,7 +1,7 @@
 
 {$i Credipar.inc}
 
-unit Terasoft.Framework.Credipar.Analisador.iface;
+unit Terasoft.Framework.Financeira.Analisador.iface;
 
 interface
   uses
