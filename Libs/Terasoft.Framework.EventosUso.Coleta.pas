@@ -39,6 +39,7 @@ function importaArquivo(pArquivo: String): boolean;
     js: ITlkJSONObject;
     evento,chave,conexao: String;
     dh: TDateTime;
+    seq: Integer;
 begin
   Result := false;
   js := TlkJSON.loadFromFile(pArquivo,true,true);
@@ -51,13 +52,18 @@ begin
 
   chave := js.json.variantByPath('id','');
   dh := StrToDateTimeDef(js.json.variantByPath('dh',''),0);
+  seq := StrToDateTimeDef(js.json.variantByPath('seq',''),0);
 
   if stringNoArray( evento, [EVENTOUSO_ACAO_CONEXAO, EVENTOUSO_ACAO_SISTEMA]) then
   begin
     ds.query('select * from webcoleta_conexoes w where w.chave=:chave',
              'chave', [chave]);
 
-    if(dh<ds.dataset.FieldByName('dh').AsDateTime) then exit;
+    if(seq<ds.dataset.FieldByName('seq').AsInteger) then
+    begin
+      Result := true;
+      exit;
+    end;
 
     ds.dataset.Edit;
     ds.dataset.FieldByName('id').AsInteger := 0;
