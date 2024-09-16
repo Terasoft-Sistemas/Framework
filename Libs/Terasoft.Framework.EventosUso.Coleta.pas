@@ -52,7 +52,7 @@ begin
 
   chave := js.json.variantByPath('id','');
   dh := StrToDateTimeDef(js.json.variantByPath('dh',''),0);
-  seq := StrToDateTimeDef(js.json.variantByPath('seq',''),0);
+  seq := js.json.variantByPath('seq',0);
 
   if stringNoArray( evento, [EVENTOUSO_ACAO_CONEXAO, EVENTOUSO_ACAO_SISTEMA]) then
   begin
