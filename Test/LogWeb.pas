@@ -26,6 +26,7 @@ type
     Panel2: TPanel;
     SpeedButton1: TSpeedButton;
     cbDeadlock: TCheckBox;
+    cbComConexoes: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure dsInstDataChange(Sender: TObject; Field: TField);
     procedure SpeedButton1Click(Sender: TObject);
@@ -40,6 +41,7 @@ type
     procedure gridExecucaoCellClick(Column: TXColumn);
     procedure gridConexoesCellClick(Column: TXColumn);
     procedure cbDeadlockClick(Sender: TObject);
+    procedure cbComConexoesClick(Sender: TObject);
   private
     { Private declarations }
   protected
@@ -120,6 +122,7 @@ end;
 procedure TfromLogWeb.abrirExecucao;
   var
     queryWhere: String;
+    cEventos: String;
 begin
   if(dsExecucao=nil) then
   begin
@@ -130,7 +133,10 @@ begin
 
   if(cbDeadlock.Checked) then
     queryWhere := queryWhere + ' and c.chave in ' +
-        ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''DEADLOCK'',''USERDDEADLOCK'') and c.chave=e.conexao ) ';
+        ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''DEADLOCK'',''USERDDEADLOCK'') and c.chave=e.conexao ) '
+  else if(cbComConexoes.Checked) then
+    queryWhere := queryWhere + ' and c.chave in ' +
+        ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''AUTENTICACAO'') and c.chave=e.conexao ) ';
 
   dsExecucao.query(
       'select c.dh,c.execucao,c.chave'+#13+
@@ -155,7 +161,11 @@ begin
   queryWhere := ' c.evento = ''SISTEMA'' ' +#13;
   if(cbDeadlock.Checked) then
     queryWhere := queryWhere + ' and c.chave in ' +
-        ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''DEADLOCK'',''USERDDEADLOCK'') and c.chave=e.conexao ) ';
+        ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''DEADLOCK'',''USERDDEADLOCK'') and c.chave=e.conexao ) '
+  else if(cbComConexoes.Checked) then
+    queryWhere := queryWhere + ' and c.chave in ' +
+        ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''AUTENTICACAO'') and c.chave=e.conexao ) ';
+
   dsInstancias.query('select distinct c.instancia'+#13+
        'from webcoleta_conexoes c'+#13+
        'where ' + queryWhere +
@@ -165,6 +175,11 @@ begin
   if(dsInst.DataSet=nil) then
     dsInst.DataSet := dsInstancias.dataset;
 
+end;
+
+procedure TfromLogWeb.cbComConexoesClick(Sender: TObject);
+begin
+  abrirInstancias;
 end;
 
 procedure TfromLogWeb.cbDeadlockClick(Sender: TObject);

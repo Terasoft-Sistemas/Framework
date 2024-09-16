@@ -137,6 +137,17 @@ object fromLogWeb: TfromLogWeb
       TabOrder = 0
       OnClick = cbDeadlockClick
     end
+    object cbComConexoes: TCheckBox
+      Left = 168
+      Top = 13
+      Width = 97
+      Height = 17
+      Caption = 'Com conex'#245'es'
+      Checked = True
+      State = cbChecked
+      TabOrder = 1
+      OnClick = cbComConexoesClick
+    end
   end
   object dsInst: TDataSource
     AutoEdit = False
