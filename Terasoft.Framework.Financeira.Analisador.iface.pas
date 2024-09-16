@@ -288,8 +288,15 @@ interface
       property proposta: ICredipar_Proposta read getProposta write setProposta;
     end;
 
+  ITopOne = interface
+  ['{4039606F-8D52-4849-888C-0A0E6E37FBD5}']
+    procedure dummy;
+  end;
+
   {$if not defined(__DLL__)}
-    //function createCredipar: ICredipar ; stdcall;
+    function getTopOne(pFilial: TipoWideStringFramework; pGDB: IGDB): ITopOne;
+
+
     function getCredipar(pFilial: TipoWideStringFramework; pGDB: IGDB): ICredipar;
     function carregaPedidoCredipar(const pID: Int64; pCredipar: ICredipar; pGDB: IGDB; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     function enviaPropostaCredipar(pCredipar: ICredipar; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
@@ -302,11 +309,16 @@ implementation
     strUtils,
     Terasoft.Framework.Conversoes,
     Terasoft.Framework.Validacoes,
-    FuncoesConfig, Terasoft.Framework.Credipar.Analisador.iface.Conts;
+    FuncoesConfig, Terasoft.Framework.Credipar.Analisador.iface.Consts;
 
 {$if not defined(__DLL__)}
 
     function createCredipar: ICredipar; stdcall; external 'Credipar_DLL' name 'createCredipar' delayed;
+    function createTopOne: ITopOne; stdcall; external 'TopOne_DLL' name 'createTopOne' delayed;
+
+function getTopOne;
+begin
+end;
 
 function getCredipar;//: ICredipar;
   var

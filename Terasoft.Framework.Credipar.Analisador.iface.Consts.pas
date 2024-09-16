@@ -1,4 +1,4 @@
-unit Terasoft.Framework.Credipar.Analisador.iface.Conts;
+unit Terasoft.Framework.Credipar.Analisador.iface.Consts;
 
 interface
 
