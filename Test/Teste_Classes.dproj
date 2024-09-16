@@ -88,6 +88,7 @@
         <DCC_Define>FullDebugMode;LogMemoryLeakDetailToFile;REGISTER_EXPECTED_MEMORY_LEAK;$(DCC_Define)</DCC_Define>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
+        <Debugger_RunParams>coleta.database=FB://192.168.20.30/10108:C:\SCI\Arquivos\Database\WEB0000.FDB</Debugger_RunParams>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>

@@ -60,6 +60,8 @@ var
   fromLogWeb: TfromLogWeb;
 
 implementation
+  uses
+    Terasoft.Framework.MultiConfig;
 
 {$R *.dfm}
 
@@ -212,7 +214,7 @@ begin
     gdb := criaGDB(GDBDRIVER_FIREDAC);
     gdb.testarPortaFirebird := false;
     gdb.charset := GDBFIB_CHARSETPTBR;
-    gdb.conectar('FB://licenca.ip.inf.br/12099:C:\SCI\Arquivos\Database\WEB0000.FDB');
+    gdb.conectar(instanciaMultiConfig.readString('coleta','database','FB://licenca.ip.inf.br/12099:C:\SCI\Arquivos\Database\WEB0000.FDB'));
   end;
   abrirInstancias;
   //abrirExecucao;
