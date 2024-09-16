@@ -66,6 +66,7 @@ type
     FTIMESTAMP_HOST: Variant;
     FIDRecordView: String;
     FMOTIVO_CANCELAMENTO: Variant;
+    FPARCELAS_BAIXADAS: String;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetTEFsLista(const Value: IList<ITTEFModel>);
@@ -116,6 +117,7 @@ type
     procedure SetVALORTOTAL(const Value: Variant);
     procedure SetIDRecordView(const Value: String);
     procedure SetMOTIVO_CANCELAMENTO(const Value: Variant);
+    procedure SetPARCELAS_BAIXADAS(const Value: String);
   public
     property ID: Variant read FID write SetID;
     property NOME_REDE: Variant read FNOME_REDE write SetNOME_REDE;
@@ -158,6 +160,7 @@ type
     property CNPJ_CREDENCIADORA: Variant read FCNPJ_CREDENCIADORA write SetCNPJ_CREDENCIADORA;
     property CODIGO_CREDENCIADORA: Variant read FCODIGO_CREDENCIADORA write SetCODIGO_CREDENCIADORA;
     property MOTIVO_CANCELAMENTO: Variant read FMOTIVO_CANCELAMENTO write SetMOTIVO_CANCELAMENTO;
+    property PARCELAS_BAIXADAS: String read FPARCELAS_BAIXADAS write SetPARCELAS_BAIXADAS;
 
   	constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -456,6 +459,11 @@ end;
 procedure TTEFModel.SetPARCELA(const Value: Variant);
 begin
   FPARCELA := Value;
+end;
+
+procedure TTEFModel.SetPARCELAS_BAIXADAS(const Value: String);
+begin
+  FPARCELAS_BAIXADAS := Value;
 end;
 
 procedure TTEFModel.SetPEDIDO_ID(const Value: Variant);
