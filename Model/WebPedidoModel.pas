@@ -592,7 +592,7 @@ begin
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.ITEM                   := lItem.ToString;
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VALOR_BONUS_SERVICO    := FloatToStr(lWebPedidoItensModel.objeto.VALOR_BONUS_SERVICO);
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.BALANCA                := lWebPedidoItensModel.objeto.USAR_BALANCA;
-      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VLRVENDA_PRO           := FloatToStr(lWebPedidoItensModel.objeto.VLRVENDA_PRO);
+      lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VLRVENDA_PRO           := FloatToStr(StrToFloatDef(lWebPedidoItensModel.objeto.VLRVENDA_PRO, 0));
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VALOR_VENDA_CADASTRO   := FloatToStr(lWebPedidoItensModel.objeto.VALOR_VENDA_ATUAL);
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VLRCUSTO_PRO           := FloatToStr(lWebPedidoItensModel.objeto.VALOR_CUSTO_ATUAL);
       lPedidoItensModel.objeto.PedidoItenssLista[lIndex].objeto.VALOR_MONTADOR         := FloatToStr(lWebPedidoItensModel.objeto.VALOR_MONTADOR);
@@ -1398,6 +1398,9 @@ begin
     else
       lVendaComSerial := True;
   end;
+
+  if (lVendaComSerial) and (StrToFloat(pVenderItemParametros.QUANTIDADE) > 1) then
+     CriaException('Produto com venda obrigatória de serial, não pode ter quantidade maior que 1.');
 
   try
     p := self.carregaClasse(pVenderItemParametros.WEB_PEDIDO);

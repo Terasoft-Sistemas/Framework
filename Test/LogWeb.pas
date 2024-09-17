@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Terasoft.Framework.DB,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids, XDBGrids, Vcl.ExtCtrls,
-  Data.DB, Vcl.Buttons, Vcl.StdCtrls;
+  Data.DB, Vcl.Buttons, Vcl.StdCtrls, querySelectData;
 
 type
   TfromLogWeb = class(TForm)
@@ -27,6 +27,8 @@ type
     SpeedButton1: TSpeedButton;
     cbDeadlock: TCheckBox;
     cbComConexoes: TCheckBox;
+    qsdPeriodo: TQuerySelectData;
+    cbExceptions: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure dsInstDataChange(Sender: TObject; Field: TField);
     procedure SpeedButton1Click(Sender: TObject);
@@ -42,6 +44,7 @@ type
     procedure gridConexoesCellClick(Column: TXColumn);
     procedure cbDeadlockClick(Sender: TObject);
     procedure cbComConexoesClick(Sender: TObject);
+    procedure cbExceptionsClick(Sender: TObject);
   private
     { Private declarations }
   protected
@@ -135,10 +138,17 @@ begin
 
   if(cbDeadlock.Checked) then
     queryWhere := queryWhere + ' and c.chave in ' +
-        ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''DEADLOCK'',''USERDDEADLOCK'') and c.chave=e.conexao ) '
+        ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''DEADLOCK'',''USERDEADLOCK'') and c.chave=e.conexao ) '
+
+  else if(cbExceptions.Checked) then
+    queryWhere := queryWhere + ' and c.chave in ' +
+        ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''EXCEPTION'')and c.chave=e.conexao ) '
+
   else if(cbComConexoes.Checked) then
     queryWhere := queryWhere + ' and c.chave in ' +
         ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''AUTENTICACAO'') and c.chave=e.conexao ) ';
+
+  queryWhere := queryWhere + qsdPeriodo.expandeWhere(tcprefixodata_And,true,0,StrToTime('23:59:59'));
 
   dsExecucao.query(
       'select c.dh,c.execucao,c.chave'+#13+
@@ -163,10 +173,17 @@ begin
   queryWhere := ' c.evento = ''SISTEMA'' ' +#13;
   if(cbDeadlock.Checked) then
     queryWhere := queryWhere + ' and c.chave in ' +
-        ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''DEADLOCK'',''USERDDEADLOCK'') and c.chave=e.conexao ) '
+        ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''DEADLOCK'',''USERDEADLOCK'') and c.chave=e.conexao ) '
+  else if(cbExceptions.Checked) then
+    queryWhere := queryWhere + ' and c.chave in ' +
+        ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''EXCEPTION'')and c.chave=e.conexao ) '
+
   else if(cbComConexoes.Checked) then
     queryWhere := queryWhere + ' and c.chave in ' +
         ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''AUTENTICACAO'') and c.chave=e.conexao ) ';
+
+
+  queryWhere := queryWhere + qsdPeriodo.expandeWhere(tcprefixodata_And,true,0,StrToTime('23:59:59'));
 
   dsInstancias.query('select distinct c.instancia'+#13+
        'from webcoleta_conexoes c'+#13+
@@ -185,6 +202,11 @@ begin
 end;
 
 procedure TfromLogWeb.cbDeadlockClick(Sender: TObject);
+begin
+  abrirInstancias;
+end;
+
+procedure TfromLogWeb.cbExceptionsClick(Sender: TObject);
 begin
   abrirInstancias;
 end;
@@ -208,6 +230,8 @@ procedure TfromLogWeb.FormCreate(Sender: TObject);
   var
     p: TDatabaseParts;
 begin
+  qsdPeriodo.dataInicio := date;
+  qsdPeriodo.dataFim := date;
   if(gdb=nil) then
   begin
     //p := getDatabaseParts('FB://licenca.ip.inf.br/12099:C:\SCI\Arquivos\Database\WEB0000.FDB');
