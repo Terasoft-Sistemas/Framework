@@ -1399,6 +1399,9 @@ begin
       lVendaComSerial := True;
   end;
 
+  if (lVendaComSerial) and (StrToFloat(pVenderItemParametros.QUANTIDADE) > 1) then
+     CriaException('Produto com venda obrigatória de serial, não pode ter quantidade maior que 1.');
+
   try
     p := self.carregaClasse(pVenderItemParametros.WEB_PEDIDO);
 
