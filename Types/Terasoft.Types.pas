@@ -270,6 +270,21 @@ type
   TListaPCG = IListaSimples<TPCG_Dados>;
   // FIM PCG
 
+  // GESTAO PIX
+  TPix_Parametros = record
+
+    ColunaOrdenacao,
+    ColunaOrdenacaoOrdem,
+
+    TipoData,
+    TipoAnalise,
+    DataInicio,
+    DataFim,
+    Cliente,
+    Lojas       : String;
+  end;
+  // FIM GESTAO PIX
+
   //
   // GRUPO PRODUTO
   //

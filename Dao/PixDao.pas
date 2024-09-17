@@ -10,6 +10,7 @@ uses
   System.StrUtils,
   Spring.Collections,
   System.Variants,
+  Terasoft.Types,
   Terasoft.Utils,
   Terasoft.FuncoesTexto,
   Terasoft.Framework.ObjectIface,
@@ -63,18 +64,21 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
 
+
     function incluir(pPixModel: ITPixModel): String;
     function alterar(pPixModel: ITPixModel): String;
     function excluir(pPixModel: ITPixModel): String;
-	
     procedure obterLista;
 
     function carregaClasse(pId: String): ITPixModel;
+    function ObterGestaoPix(pPix_Parametros: TPix_Parametros): IFDDataset;
 end;
 
 implementation
 
 uses
+  Interfaces.QueryLojaAsync,
+  Data.DB,
   System.Rtti;
 
 { TPix }
@@ -160,6 +164,109 @@ begin
     lSQL := '';
     lQry.Free;
   end;
+end;
+
+function TPixDao.ObterGestaoPix(pPix_Parametros: TPix_Parametros): IFDDataset;
+var
+  lSQL,
+  lPaginacao,
+  lDataWhere  : String;
+  lMemTable   : TFDMemTable;
+
+  lAsyncList  : IListaQueryAsync;
+  lQA         : IQueryLojaAsync;
+  conexao     : IConexao;
+begin
+
+  lAsyncList := getQueryLojaAsyncList(vIConexao, pPix_Parametros.Lojas);
+
+  lMemTable := TFDMemTable.Create(nil);
+  Result := criaIFDDataset(lMemTable);
+
+  if pPix_Parametros.TipoData = 'EMISSÃO' then
+    lDataWhere := ' cast(pix.data_cadastro as Date) between ' + QuotedStr(transformaDataFireBirdWhere(pPix_Parametros.DataInicio)) +' and '+ QuotedStr(transformaDataFireBirdWhere(pPix_Parametros.DataFim))
+  else if pPix_Parametros.TipoData = 'PAGAMENTO' then
+    lDataWhere := ' pix.data_pagamento between ' + QuotedStr(transformaDataFireBirdWhere(pPix_Parametros.DataInicio)) +' and '+ QuotedStr(transformaDataFireBirdWhere(pPix_Parametros.DataFim));
+
+  lSQL :=  ' select '+lPaginacao+'                                                        ' +sLineBreak+
+           '        pix.id,                                                               ' +sLineBreak+
+           '        pix.data_cadastro,                                                    ' +sLineBreak+
+           '        pix.data_pagamento,                                                   ' +sLineBreak+
+           '        pix.valor,                                                            ' +sLineBreak+
+           '        pix.valor_recebido,                                                   ' +sLineBreak+
+           '        pix.mensagem,                                                         ' +sLineBreak+
+           '        pix.pix_id,                                                           ' +sLineBreak+
+           '        empresa.loja,                                                         ' +sLineBreak+
+           '        empresa.fantasia_emp,                                                 ' +sLineBreak+
+           '        coalesce(clientes.fantasia_cli, clientes.razao_cli) as cliente        ' +sLineBreak+
+           '   from pix                                                                   ' +sLineBreak+
+           '  inner join empresa on 1=1                                                   ' +sLineBreak+
+           '   left join clientes on pix.cliente_id = clientes.codigo_cli                 ' +sLineBreak+
+           '  where pix.data_pagamento is not null                                        ' +sLineBreak+
+           '    and pix.valor_recebido > ''0''                                            ' +sLineBreak+
+           '    and ' + lDataWhere                                                          +sLineBreak;
+
+  lSQL := lSQL + Where;
+
+  if pPix_Parametros.Cliente <> '' then
+     lSQL := lSQL + ' and pix.cliente_id in (' +QuotedStr(pPix_Parametros.Cliente)+ ')';
+
+  with lMemTable.IndexDefs.AddIndexDef do
+  begin
+    Name    := 'OrdenacaoLoja';
+    Fields  := 'LOJA';
+    Options := [TIndexOption.ixCaseInsensitive];
+  end;
+
+  lMemTable.IndexName := 'OrdenacaoLoja';
+
+  lMemTable.FieldDefs.Add('LOJA', ftString, 3);
+  lMemTable.FieldDefs.Add('DATA_CADASTRO', ftString, 100);
+  lMemTable.FieldDefs.Add('CLIENTE', ftString, 100);
+  lMemTable.FieldDefs.Add('MENSAGEM', ftString, 255);
+  lMemTable.FieldDefs.Add('PIX_ID', ftString, 100);
+  lMemTable.FieldDefs.Add('VALOR', ftFloat);
+  lMemTable.FieldDefs.Add('VALOR_RECEBIDO', ftFloat);
+  lMemTable.FieldDefs.Add('DATA_PAGAMENTO', ftString, 100);
+  lMemTable.CreateDataSet;
+
+  for lQA in lAsyncList do
+  begin
+    lQA.rotulo := 'ObterGestaoPix';
+    conexao := lQA.loja.objeto.conexaoLoja;
+    if(conexao=nil) then
+      raise Exception.CreateFmt('TGestaoPixDao.ObterGestaoPix: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);
+
+    lQA.execQuery(lSQL,'',[]);
+  end;
+
+  for lQA in lAsyncList do
+  begin
+    lQA.esperar;
+    if(lQA.resultado.erros>0) then
+      raise Exception.CreateFmt('TGestaoPixDao.ObterGestaoPix: Loja [%s] com problemas: [%s]',[lQA.loja.objeto.LOJA,lQA.resultado.toString]);
+
+    lQA.dataset.dataset.first;
+    while not lQA.dataset.dataset.Eof do
+    begin
+      lMemTable.InsertRecord([
+                              lQA.loja.objeto.LOJA,
+                              lQA.dataset.dataset.FieldByName('DATA_CADASTRO').AsString,
+                              lQA.dataset.dataset.FieldByName('CLIENTE').AsString,
+                              lQA.dataset.dataset.FieldByName('MENSAGEM').AsString,
+                              lQA.dataset.dataset.FieldByName('PIX_ID').AsString,
+                              lQA.dataset.dataset.FieldByName('VALOR').AsFloat,
+                              lQA.dataset.dataset.FieldByName('VALOR_RECEBIDO').AsFloat,
+                              lQA.dataset.dataset.FieldByName('DATA_PAGAMENTO').AsString
+                             ]);
+
+      lQA.dataset.dataset.Next;
+
+    end;
+  end;
+
+  lMemTable.Open;
+
 end;
 
 function TPixDao.alterar(pPixModel: ITPixModel): String;
