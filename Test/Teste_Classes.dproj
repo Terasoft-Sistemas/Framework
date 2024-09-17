@@ -284,6 +284,8 @@
             <Form>fromLogWeb</Form>
             <FormType>dfm</FormType>
         </DCCReference>
+        <DCCReference Include="..\Model\VendasVendedorModel.pas"/>
+        <DCCReference Include="..\Dao\VendasVendedorDao.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

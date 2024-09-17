@@ -170,7 +170,9 @@ uses
   uTeste in 'uTeste.pas' {Form1},
   Form.Endpoint in 'Form.Endpoint.pas' {FormEP},
   EndPointEditor in '..\Editors\EndPointEditor.pas' {frmEditorConsultas},
-  LogWeb in 'LogWeb.pas' {fromLogWeb};
+  LogWeb in 'LogWeb.pas' {fromLogWeb},
+  VendasVendedorModel in '..\Model\VendasVendedorModel.pas',
+  VendasVendedorDao in '..\Dao\VendasVendedorDao.pas';
 
 {$R *.res}
 
