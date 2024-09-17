@@ -139,8 +139,8 @@ object fromLogWeb: TfromLogWeb
       OnClick = cbDeadlockClick
     end
     object cbComConexoes: TCheckBox
-      Left = 32
-      Top = 50
+      Left = 153
+      Top = 13
       Width = 97
       Height = 17
       Caption = 'Com conex'#245'es'
@@ -150,7 +150,7 @@ object fromLogWeb: TfromLogWeb
       OnClick = cbComConexoesClick
     end
     object qsdPeriodo: TQuerySelectData
-      Left = 156
+      Left = 420
       Top = 15
       Width = 241
       Height = 52
@@ -177,6 +177,15 @@ object fromLogWeb: TfromLogWeb
       CaptionFim = 'Data final'
       CheckedInicio = True
       CheckedFim = True
+    end
+    object cbExceptions: TCheckBox
+      Left = 291
+      Top = 13
+      Width = 97
+      Height = 17
+      Caption = 'Exceptions'
+      TabOrder = 3
+      OnClick = cbExceptionsClick
     end
   end
   object dsInst: TDataSource

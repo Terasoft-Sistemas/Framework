@@ -28,6 +28,7 @@ type
     cbDeadlock: TCheckBox;
     cbComConexoes: TCheckBox;
     qsdPeriodo: TQuerySelectData;
+    cbExceptions: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure dsInstDataChange(Sender: TObject; Field: TField);
     procedure SpeedButton1Click(Sender: TObject);
@@ -43,6 +44,7 @@ type
     procedure gridConexoesCellClick(Column: TXColumn);
     procedure cbDeadlockClick(Sender: TObject);
     procedure cbComConexoesClick(Sender: TObject);
+    procedure cbExceptionsClick(Sender: TObject);
   private
     { Private declarations }
   protected
@@ -137,6 +139,11 @@ begin
   if(cbDeadlock.Checked) then
     queryWhere := queryWhere + ' and c.chave in ' +
         ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''DEADLOCK'',''USERDEADLOCK'') and c.chave=e.conexao ) '
+
+  else if(cbExceptions.Checked) then
+    queryWhere := queryWhere + ' and c.chave in ' +
+        ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''EXCEPTION'')and c.chave=e.conexao ) '
+
   else if(cbComConexoes.Checked) then
     queryWhere := queryWhere + ' and c.chave in ' +
         ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''AUTENTICACAO'') and c.chave=e.conexao ) ';
@@ -167,6 +174,10 @@ begin
   if(cbDeadlock.Checked) then
     queryWhere := queryWhere + ' and c.chave in ' +
         ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''DEADLOCK'',''USERDEADLOCK'') and c.chave=e.conexao ) '
+  else if(cbExceptions.Checked) then
+    queryWhere := queryWhere + ' and c.chave in ' +
+        ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''EXCEPTION'')and c.chave=e.conexao ) '
+
   else if(cbComConexoes.Checked) then
     queryWhere := queryWhere + ' and c.chave in ' +
         ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''AUTENTICACAO'') and c.chave=e.conexao ) ';
@@ -191,6 +202,11 @@ begin
 end;
 
 procedure TfromLogWeb.cbDeadlockClick(Sender: TObject);
+begin
+  abrirInstancias;
+end;
+
+procedure TfromLogWeb.cbExceptionsClick(Sender: TObject);
 begin
   abrirInstancias;
 end;
