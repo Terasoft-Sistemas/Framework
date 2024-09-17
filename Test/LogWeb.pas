@@ -135,7 +135,7 @@ begin
 
   if(cbDeadlock.Checked) then
     queryWhere := queryWhere + ' and c.chave in ' +
-        ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''DEADLOCK'',''USERDDEADLOCK'') and c.chave=e.conexao ) '
+        ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''DEADLOCK'',''USERDEADLOCK'') and c.chave=e.conexao ) '
   else if(cbComConexoes.Checked) then
     queryWhere := queryWhere + ' and c.chave in ' +
         ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''AUTENTICACAO'') and c.chave=e.conexao ) ';
@@ -163,7 +163,7 @@ begin
   queryWhere := ' c.evento = ''SISTEMA'' ' +#13;
   if(cbDeadlock.Checked) then
     queryWhere := queryWhere + ' and c.chave in ' +
-        ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''DEADLOCK'',''USERDDEADLOCK'') and c.chave=e.conexao ) '
+        ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''DEADLOCK'',''USERDEADLOCK'') and c.chave=e.conexao ) '
   else if(cbComConexoes.Checked) then
     queryWhere := queryWhere + ' and c.chave in ' +
         ' ( select distinct c.execucao from webcoleta_eventos e, webcoleta_conexoes c where e.evento in (''AUTENTICACAO'') and c.chave=e.conexao ) ';
