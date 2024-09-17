@@ -136,6 +136,7 @@ begin
     lModel.objeto.CNPJ_CREDENCIADORA         := lQry.FieldByName('CNPJ_CREDENCIADORA').AsString;
     lModel.objeto.CODIGO_CREDENCIADORA       := lQry.FieldByName('CODIGO_CREDENCIADORA').AsString;
     lModel.objeto.MOTIVO_CANCELAMENTO        := lQry.FieldByName('MOTIVO_CANCELAMENTO').AsString;
+    lModel.objeto.PARCELAS_BAIXADAS          := lQry.FieldByName('PARCELAS_BAIXADAS').AsString;
 
     Result := lModel;
 
@@ -334,6 +335,7 @@ begin
       modelo.objeto.CHAMADA                     := lQry.FieldByName('CHAMADA').AsString;
       modelo.objeto.CNPJ_CREDENCIADORA          := lQry.FieldByName('CNPJ_CREDENCIADORA').AsString;
       modelo.objeto.CODIGO_CREDENCIADORA        := lQry.FieldByName('CODIGO_CREDENCIADORA').AsString;
+      modelo.objeto.PARCELAS_BAIXADAS           := lQry.FieldByName('PARCELAS_BAIXADAS').AsString;
 
       lQry.Next;
     end;

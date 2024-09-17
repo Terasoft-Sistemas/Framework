@@ -29,6 +29,8 @@ interface
 
     EVENTOUSO_ERRO_EMPRESABLOQ = 'EMPRESABLOQUEADA';
 
+    EVENTOUSO_ERRO_EXCEPTION   = 'EXCEPTION';
+
 implementation
 
 end.
