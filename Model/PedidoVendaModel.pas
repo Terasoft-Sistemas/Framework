@@ -1372,7 +1372,9 @@ begin
 
         if lCFOPModel.objeto.CBENEF <> '' then
           lNFItensModel.objeto.CBENEF := lCFOPModel.objeto.CBENEF;
-      end;
+      end
+      else
+        lNFItensModel.objeto.CBENEF := '';
       //
 
       lNFItensModel.objeto.PREDBC_N14            := lItens.objeto.REDUCAO_ICMS;
