@@ -85,7 +85,11 @@ end;
 implementation
 
 uses
-  System.Rtti, Terasoft.Configuracoes, LojasModel, Terasoft.Types;
+  Terasoft.Framework.LOG,
+  System.Rtti,
+  Terasoft.Configuracoes,
+  LojasModel,
+  Terasoft.Types;
 
 { TCliente }
 
@@ -605,6 +609,8 @@ begin
 
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
+
+    logaByTagSeNivel(TAGLOG_FRAMEWORK,format('TClienteDao.obterLista(%s): [%s]', [ vIConexao.empresa.ID, lSQL ] ), LOG_LEVEL_DEBUG);
 
     lQry.Open(lSQL);
 
