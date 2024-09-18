@@ -98,9 +98,7 @@ end;
 implementation
 
 uses
-  {$if defined(DEBUG)}
-    ClipBrd,
-  {$endif}
+  Terasoft.Framework.LOG,
   System.Rtti;
 
 { TProdutos }
@@ -893,6 +891,7 @@ begin
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
 
+    logaByTagSeNivel(TAGLOG_FRAMEWORK,format('TProdutosDao.obterListaCatalogo(%s): [%s]', [ vIConexao.empresa.ID, lSQL ] ), LOG_LEVEL_DEBUG);
     lQry.Open(lSQL);
 
     vIConexao.ConfigConexaoExterna('', vIConexao.getEmpresa.STRING_CONEXAO_RESERVA);
