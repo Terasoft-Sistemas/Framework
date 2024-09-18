@@ -223,6 +223,9 @@ type
     SpeedButton4: TSpeedButton;
     FDMemTable1: TFDMemTable;
     SpeedButton5: TSpeedButton;
+    TabSheet11: TTabSheet;
+    btnComissao: TButton;
+    XDBGrid10: TXDBGrid;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -379,6 +382,7 @@ type
     procedure SpeedButton3Click(Sender: TObject);
     procedure FDMemTable1BeforePost(DataSet: TDataSet);
     procedure SpeedButton5Click(Sender: TObject);
+    procedure btnComissaoClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -418,9 +422,28 @@ uses
   SaidasItensModel, ClientesEnderecoModel, OrcamentoModel, OrcamentoItensModel, Terasoft.Utils,
   SolicitacaoDescontoModel, PermissaoRemotaModel, MovimentoSerialModel, Impressao.Contratos,
   UsuarioModel, TabelaJurosDiaModel, TabelaJurosPromocaoModel, EndPointEditor,
-  LogWeb;
+  LogWeb, VendasVendedorModel;
 
 {$R *.dfm}
+
+procedure TForm1.btnComissaoClick(Sender: TObject);
+var
+  lVendasVendedorModel : ITVendasVendedorModel;
+  lParamentros         : TVendasVendedorParametros;
+begin
+
+  lVendasVendedorModel := TVendasVendedorModel.getNewIface(vIConexao);
+  try
+    lParamentros.TipoData   := 'E';
+    lParamentros.DataInicio := '01/01/2024';
+    lParamentros.DataFim    := '18/09/2024';
+
+    dsTmp := lVendasVendedorModel.objeto.obterComissao(lParamentros);
+    dsTeste2.DataSet := dsTmp.objeto;
+  finally
+    lVendasVendedorModel := nil;
+  end;
+end;
 
 procedure TForm1.btnConsultaDescontoClick(Sender: TObject);
 var

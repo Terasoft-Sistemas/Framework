@@ -2,8 +2,8 @@ object Form1: TForm1
   Left = 0
   Top = 270
   Caption = 'Form1'
-  ClientHeight = 753
-  ClientWidth = 1250
+  ClientHeight = 769
+  ClientWidth = 1254
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,11 +18,13 @@ object Form1: TForm1
   object PageControl: TPageControl
     Left = 0
     Top = 0
-    Width = 1250
-    Height = 753
-    ActivePage = TabSheet1
+    Width = 1254
+    Height = 769
+    ActivePage = TabSheet11
     Align = alClient
     TabOrder = 0
+    ExplicitWidth = 1252
+    ExplicitHeight = 761
     object TabSheet1: TTabSheet
       Caption = 'Diversos'
       object SpeedButton2: TSpeedButton
@@ -692,8 +694,8 @@ object Form1: TForm1
       ImageIndex = 1
       object dbTeste2: TXDBGrid
         Left = 0
-        Top = 100
-        Width = 1242
+        Top = 116
+        Width = 1246
         Height = 623
         Align = alBottom
         DataSource = dsTeste2
@@ -742,8 +744,8 @@ object Form1: TForm1
       ImageIndex = 2
       object XDBGrid1: TXDBGrid
         Left = 0
-        Top = 474
-        Width = 1242
+        Top = 490
+        Width = 1246
         Height = 249
         Align = alBottom
         DataSource = dsEntradaItens
@@ -752,8 +754,8 @@ object Form1: TForm1
       end
       object XDBGrid2: TXDBGrid
         Left = 0
-        Top = 312
-        Width = 1242
+        Top = 328
+        Width = 1246
         Height = 162
         Align = alBottom
         DataSource = dsEntrada
@@ -847,8 +849,8 @@ object Form1: TForm1
       ImageIndex = 3
       object XDBGrid3: TXDBGrid
         Left = 0
-        Top = 418
-        Width = 1242
+        Top = 434
+        Width = 1246
         Height = 305
         Align = alBottom
         DataSource = dsOS
@@ -957,8 +959,8 @@ object Form1: TForm1
       ImageIndex = 6
       object XDBGrid4: TXDBGrid
         Left = 0
-        Top = 281
-        Width = 1242
+        Top = 297
+        Width = 1246
         Height = 169
         Align = alBottom
         DataSource = dsPedidoCompra
@@ -985,8 +987,8 @@ object Form1: TForm1
       end
       object XDBGrid5: TXDBGrid
         Left = 0
-        Top = 450
-        Width = 1242
+        Top = 466
+        Width = 1246
         Height = 273
         Align = alBottom
         DataSource = dsPedidoCompraItens
@@ -1098,8 +1100,8 @@ object Form1: TForm1
       end
       object XDBGrid6: TXDBGrid
         Left = 0
-        Top = 314
-        Width = 1242
+        Top = 330
+        Width = 1246
         Height = 409
         Align = alBottom
         DataSource = dsProdutos
@@ -1188,8 +1190,8 @@ object Form1: TForm1
       end
       object XDBGrid7: TXDBGrid
         Left = 0
-        Top = 418
-        Width = 1242
+        Top = 434
+        Width = 1246
         Height = 305
         Align = alBottom
         DataSource = dsSaidas
@@ -1354,8 +1356,8 @@ object Form1: TForm1
       end
       object XDBGrid8: TXDBGrid
         Left = 0
-        Top = 418
-        Width = 1242
+        Top = 434
+        Width = 1246
         Height = 305
         Align = alBottom
         DataSource = dLiberacao
@@ -1413,8 +1415,8 @@ object Form1: TForm1
       ImageIndex = 13
       object XDBGrid9: TXDBGrid
         Left = 0
-        Top = 508
-        Width = 1242
+        Top = 524
+        Width = 1246
         Height = 215
         Align = alBottom
         DataSource = dMovimentoSerial
@@ -1534,12 +1536,14 @@ object Form1: TForm1
       end
       object Memo1: TMemo
         Left = 0
-        Top = 468
-        Width = 1242
+        Top = 484
+        Width = 1246
         Height = 255
         Align = alBottom
         ScrollBars = ssVertical
         TabOrder = 1
+        ExplicitTop = 476
+        ExplicitWidth = 1244
       end
     end
     object TabelaJurosPromocao: TTabSheet
@@ -1564,11 +1568,34 @@ object Form1: TForm1
       end
       object dbGridTabelaJuros: TXDBGrid
         Left = 0
-        Top = 508
-        Width = 1242
+        Top = 524
+        Width = 1246
         Height = 215
         Align = alBottom
         DataSource = dsJuros
+        GridStyle.VisualStyle = vsXPStyle
+        TabOrder = 1
+      end
+    end
+    object TabSheet11: TTabSheet
+      Caption = 'Vendas vendedor'
+      ImageIndex = 18
+      object btnComissao: TButton
+        Left = 19
+        Top = 19
+        Width = 182
+        Height = 46
+        Caption = 'Obter Comiss'#227'o'
+        TabOrder = 0
+        OnClick = btnComissaoClick
+      end
+      object XDBGrid10: TXDBGrid
+        Left = 0
+        Top = 524
+        Width = 1246
+        Height = 215
+        Align = alBottom
+        DataSource = dsTeste2
         GridStyle.VisualStyle = vsXPStyle
         TabOrder = 1
       end
