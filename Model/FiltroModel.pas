@@ -767,7 +767,9 @@ begin
   agora:=Now;
   pValores:=retiraAcentos(trim(pValores));
   i := StrToIntDef(pValores,0);
-  if(CompareText(pvalores,'hoje')=0) then begin
+  if(CompareText(pvalores,'nada')=0) then begin
+
+  end else if(CompareText(pvalores,'hoje')=0) or (pvalores='') then begin
     inicio := StartOfTheDay(agora);
     fim := EndOfTheDay(agora);
   end else if(CompareText(pvalores,'ontem')=0) then begin
