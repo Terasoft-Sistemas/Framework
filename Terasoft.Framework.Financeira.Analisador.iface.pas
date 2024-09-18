@@ -14,6 +14,63 @@ interface
     Terasoft.Framework.Types;
 
   type
+
+    IFinanceiraConfig = interface
+    ['{56619AF9-FB62-426C-B39A-94027E3D8592}']
+    //property token getter/setter
+      function getToken: TipoWideStringFramework;
+      procedure setToken(const pValue: TipoWideStringFramework);
+
+    //property modoProducao getter/setter
+      function getModoProducao: boolean;
+      procedure setModoProducao(const pValue: boolean);
+
+    //property urlWS getter/setter
+      function getUrlWS: TipoWideStringFramework;
+      procedure setUrlWS(const pValue: TipoWideStringFramework);
+
+    //property codLojaCred getter/setter
+      function getCodigoLojaFinanceira: Integer;
+      procedure setCodigoLojaFinanceira(const pValue: Integer);
+
+    //property codigoProdutoCredipar getter/setter
+      function getCodigoProdutoFinanceira: Integer;
+      procedure setCodigoProdutoFinanceira(const pValue: Integer);
+
+      function getDiretorioArquivos: tipoWideStringFramework;
+      procedure setDiretorioArquivos(const pValue: tipoWideStringFramework);
+
+    //property controleAlteracoes getter/setter
+      function getControleAlteracoes: IControleAlteracoes;
+      procedure setControleAlteracoes(const pValue: IControleAlteracoes);
+
+    //property filial getter/setter
+      function getFilial: TipoWideStringFramework;
+      procedure setFilial(const pValue: TipoWideStringFramework);
+
+    //property propriedades getter/setter
+      function getPropriedades: IPropriedade;
+      procedure setPropriedades(const pValue: IPropriedade);
+
+    //property codigoLojista getter/setter
+      function getCodigoLojista: TipoWideStringFramework;
+      procedure setCodigoLojista(const pValue: TipoWideStringFramework);
+
+      property codigoLojista: TipoWideStringFramework read getCodigoLojista write setCodigoLojista;
+      property propriedades: IPropriedade read getPropriedades write setPropriedades;
+      property filial: TipoWideStringFramework read getFilial write setFilial;
+      property controleAlteracoes: IControleAlteracoes read getControleAlteracoes write setControleAlteracoes;
+      property diretorioArquivos: tipoWideStringFramework read getDiretorioArquivos write setDiretorioArquivos;
+      property codigoProdutoFinanceira: Integer read getCodigoProdutoFinanceira write setCodigoProdutoFinanceira;
+      property codigoLojaFinanceira: Integer read getCodigoLojaFinanceira write setCodigoLojaFinanceira;
+      property urlWS: TipoWideStringFramework read getUrlWS write setUrlWS;
+      property token: TipoWideStringFramework read getToken write setToken;
+      property modoProducao: boolean read getModoProducao write setModoProducao;
+
+
+    end;
+
+
     IFinanceiraSimulacao = interface
     ['{73A996FC-A303-4D8A-B9B4-29E76E687D45}']
     //property data getter/setter
@@ -226,64 +283,17 @@ interface
       function simulacao(vlrCompra: Extended; VlrEntrada: Extended; qtdParcela: Integer; dtPriVcto: TDate; pResultado: IResultadoOperacao=nil): IFinanceiraSimulacao;
       function corrigeproposta(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
 
-      function getDiretorioArquivos: tipoWideStringFramework;
-      procedure setDiretorioArquivos(const pValue: tipoWideStringFramework);
-
-    //property modoProducao getter/setter
-      function getModoProducao: boolean;
-      procedure setModoProducao(const pValue: boolean);
-
-    //property urlWS getter/setter
-      function getUrlWS: TipoWideStringFramework;
-      procedure setUrlWS(const pValue: TipoWideStringFramework);
-
-    //property token getter/setter
-      function getToken: TipoWideStringFramework;
-      procedure setToken(const pValue: TipoWideStringFramework);
-
-    //property codLojaCred getter/setter
-      function getCodigoLojaCredipar: Integer;
-      procedure setCodigoLojaCredipar(const pValue: Integer);
-
-    //property codigoProdutoCredipar getter/setter
-      function getCodigoProdutoCredipar: Integer;
-      procedure setCodigoProdutoCredipar(const pValue: Integer);
-
-      //function editarDados(pDadosCliente, pDadosProposta: IUnknown; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-
-    //property controleAlteracoes getter/setter
-      function getControleAlteracoes: IControleAlteracoes;
-      procedure setControleAlteracoes(const pValue: IControleAlteracoes);
-
-    //property filial getter/setter
-      function getFilial: TipoWideStringFramework;
-      procedure setFilial(const pValue: TipoWideStringFramework);
-
-    //property propriedades getter/setter
-      function getPropriedades: IPropriedade;
-      procedure setPropriedades(const pValue: IPropriedade);
-
     //property nome getter/setter
       function getNome: TipoWideStringFramework;
 
       function getStatusProposta(const pID: Int64): TipoWideStringFramework;
       procedure setStatusProposta(const pID: Int64; const pStatus: TipoWideStringFramework );
 
-    //property codigoLojista getter/setter
-      function getcodigoLojista: TipoWideStringFramework;
-      procedure setcodigoLojista(const pValue: TipoWideStringFramework);
+    //property config getter/setter
+      function getConfig: IFinanceiraConfig;
 
-      property codigoLojista: TipoWideStringFramework read getcodigoLojista write setcodigoLojista;
+      property config: IFinanceiraConfig read getConfig;
       property nome: TipoWideStringFramework read getNome;
-      property propriedades: IPropriedade read getPropriedades write setPropriedades;
-      property filial: TipoWideStringFramework read getFilial write setFilial;
-      property controleAlteracoes: IControleAlteracoes read getControleAlteracoes write setControleAlteracoes;
-      property codigoProdutoCredipar: Integer read getCodigoProdutoCredipar write setCodigoProdutoCredipar;
-      property codigoLojaCredipar: Integer read getCodigoLojaCredipar write setCodigoLojaCredipar;
-      property token: TipoWideStringFramework read getToken write setToken;
-      property urlWS: TipoWideStringFramework read getUrlWS write setUrlWS;
-      property modoProducao: boolean read getModoProducao write setModoProducao;
-      property diretorioArquivos: tipoWideStringFramework read getDiretorioArquivos write setDiretorioArquivos;
       property pessoaFisica: ICredipar_PessoaFisica read getPessoaFisica write setPessoaFisica;
       property proposta: ICredipar_Proposta read getProposta write setProposta;
     end;
@@ -330,16 +340,16 @@ begin
   if(pGDB<>nil) then
   begin
     cfg := novoTagConfig(pGDB);
-    Result.propriedades.propriedade['GDB'].asInterface := pGDB;
-    Result.urlWS := cfg.ValorTagConfig(tagConfig_CREDIPAR_ENDERECO_WS,'',tvString);
-    Result.modoProducao := true;
-    Result.diretorioArquivos := cfg.ValorTagConfig(tagConfig_CREDIPAR_DIRETORIO_ARQUIVOS,'',tvString);
-    Result.token := cfg.ValorTagConfig(tagConfig_CREDIPAR_TOKEN,'',tvString);
-    Result.codigoLojaCredipar := cfg.ValorTagConfig(tagConfig_CREDIPAR_CODIGO_LOJA,0,tvInteiro);
-    Result.codigoProdutoCredipar := cfg.ValorTagConfig(tagConfig_CREDIPAR_PRODUTO,0,tvInteiro);
-    Result.controleAlteracoes := criaControleAlteracoes(FINANCEIRA_CREDIPAR_NOME,pGDB,true);
-    Result.codigoLojista := cfg.ValorTagConfig(tagConfig_CREDIPAR_CODIGO_LOJISTA,0,tvString);
-    Result.filial := pFilial;
+    Result.config.propriedades.propriedade['GDB'].asInterface := pGDB;
+    Result.config.urlWS := cfg.ValorTagConfig(tagConfig_CREDIPAR_ENDERECO_WS,'',tvString);
+    Result.config.modoProducao := true;
+    Result.config.diretorioArquivos := cfg.ValorTagConfig(tagConfig_CREDIPAR_DIRETORIO_ARQUIVOS,'',tvString);
+    Result.config.token := cfg.ValorTagConfig(tagConfig_CREDIPAR_TOKEN,'',tvString);
+    Result.config.codigoLojaFinanceira := cfg.ValorTagConfig(tagConfig_CREDIPAR_CODIGO_LOJA,0,tvInteiro);
+    Result.config.codigoProdutoFinanceira := cfg.ValorTagConfig(tagConfig_CREDIPAR_PRODUTO,0,tvInteiro);
+    Result.config.controleAlteracoes := criaControleAlteracoes(FINANCEIRA_CREDIPAR_NOME,pGDB,true);
+    Result.config.codigoLojista := cfg.ValorTagConfig(tagConfig_CREDIPAR_CODIGO_LOJISTA,0,tvString);
+    Result.config.filial := pFilial;
   end;
 end;
 
