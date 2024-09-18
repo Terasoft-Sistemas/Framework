@@ -231,7 +231,7 @@ type
     property DIRLOGO: Variant read FDIRLOGO write SetDIRLOGO;
     property CONEXAO: IConexao read FCONEXAO write SetCONEXAO;
 
-    procedure imprimir;
+    function imprimir: string;
     procedure fetchPedido;
     procedure fetchCliente;
     procedure fetchPedidoItens;
@@ -451,15 +451,13 @@ begin
  CoUninitialize;
 end;
 
-procedure TImpressaoVendaAssistida.imprimir;
-var
-  lNameArchive : string;
+function TImpressaoVendaAssistida.imprimir;
 begin
 
   if Self.FIDPEDIDO = '' then
     raise Exception.Create('Pedido não informado para impressão');
 
-  lNameArchive := '';
+  Result := '';
 
   try
     Self.fetchPedido;
@@ -489,14 +487,14 @@ begin
       if not DirectoryExists(Self.FDIR) then
         ForceDirectories(Self.FDIR);
 
-      lNameArchive := FloatToStr(Round(random(999999))) + Self.FIDPEDIDO + '.pdf';
+      Result := FloatToStr(Round(random(999999))) + Self.FIDPEDIDO + '.pdf';
       try
-        rlPadrao.SaveToFile(Self.FDIR+lNameArchive);
+        rlPadrao.SaveToFile(Self.FDIR+Result);
       except
         on E:Exception do
 
       end;
-      Self.SetNOMEARQUIVO(lNameArchive);
+      Self.SetNOMEARQUIVO(Result);
     end;
 
   finally
