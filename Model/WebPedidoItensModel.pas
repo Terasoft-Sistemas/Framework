@@ -314,6 +314,7 @@ type
 implementation
 
 uses
+  Terasoft.Framework.LOG,
   WebPedidoItensDao, FinanceiroPedidoModel;
 
 { TWebPedidoItensModel }
@@ -365,7 +366,9 @@ end;
 class function TWebPedidoItensModel.getNewIface(pIConexao: IConexao): ITWebPedidoItensModel;
 begin
   Result := TImplObjetoOwner<TWebPedidoItensModel>.CreateOwner(self._Create(pIConexao));
+  logaByTagSeNivel(TAGLOG_CONDICIONAL,'TWebPedidoItensModel.getNewIface: Atribuindo Result.objeto.myself',LOG_LEVEL_DEBUG);
   Result.objeto.myself := Result;
+  logaByTagSeNivel(TAGLOG_CONDICIONAL,'TWebPedidoItensModel.getNewIface: Saindo procedure',LOG_LEVEL_DEBUG);
 end;
 
 function TWebPedidoItensModel.carregaClasse(pId: String): ITWebPedidoItensModel;
