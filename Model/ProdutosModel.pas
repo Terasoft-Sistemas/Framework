@@ -950,6 +950,7 @@ type
 
 implementation
 uses
+  Terasoft.Framework.LOG,
   ProdutosDao,
   ClienteModel,
   PrecoUFModel,
@@ -1004,7 +1005,9 @@ end;
 class function TProdutosModel.getNewIface(pIConexao: IConexao): ITProdutosModel;
 begin
   Result := TImplObjetoOwner<TProdutosModel>.CreateOwner(self._Create(pIConexao));
+  logaByTagSeNivel(TAGLOG_CONDICIONAL,'TProdutosModel.getNewIface: Atribuindo Result.objeto.myself',LOG_LEVEL_DEBUG);
   Result.objeto.myself := Result;
+  logaByTagSeNivel(TAGLOG_CONDICIONAL,'TProdutosModel.getNewIface: Saindo procedure',LOG_LEVEL_DEBUG);
 end;
 
 function TProdutosModel.Incluir: String;
