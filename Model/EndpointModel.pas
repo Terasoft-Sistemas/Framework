@@ -859,7 +859,7 @@ begin
   end;
 
   fPermissao := getCfg.ReadString('permissao','executar',tagConfig_GESTAO_RELATORIO_PERMISSAO);
-  fPermissaoLoja := getCfg.ReadString('permissao','loja.executar',_tagConfig_GESTAO_RELATORIO_LOJAS);
+  fPermissaoLoja := getCfg.ReadString('permissao','loja.executar',tagConfig_GESTAO_RELATORIO_LOJAS);
   fFiltroLojas.objeto.permissaoLojas := vConfiguracoes.objeto.verificaPerfil(getPermissaoLoja);
 end;
 
@@ -1148,7 +1148,7 @@ end;
 function TEndpointModel.getPermissaoLoja: TipoWideStringFramework;
 begin
   if(fPermissaoLoja='') then
-    fPermissaoLoja := _tagConfig_GESTAO_RELATORIO_LOJAS;
+    fPermissaoLoja := tagConfig_GESTAO_RELATORIO_LOJAS;
   Result := fPermissaoLoja;
 end;
 
