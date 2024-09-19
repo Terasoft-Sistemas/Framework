@@ -800,12 +800,17 @@ begin
   fFiltroLojas := nil;
   lTxt := getcfg.ReadSectionValuesLista('filtros');
 
+  fPermissaoLoja := getCfg.ReadString('permissao','loja.executar',tagConfig_GESTAO_RELATORIO_LOJAS);
+
+
   for i := 0 to lTxt.strings.Count - 1 do
   begin
     sName := trim( lTxt.strings.Names[i]);
     if(sName='') then continue;
     sValue := trim( lTxt.strings.ValueFromIndex[i]);
     lFiltro := fFiltroController.getByName(sName);
+    lFiltro.objeto.permissaoLojas := vConfiguracoes.objeto.verificaPerfil(getPermissaoLoja);
+
     lFiltro.objeto.campo := sValue;
     lFiltro.objeto.setTipoPorNome(sName);
 
@@ -819,6 +824,7 @@ begin
   if(fFiltroLojas=nil) then
   begin
     fFiltroLojas := fFiltroController.getByName('');
+    fFiltroLojas.objeto.permissaoLojas := vConfiguracoes.objeto.verificaPerfil(getPermissaoLoja);
     fFiltroLojas.objeto.setTipoPorNome('@lojas');
   end;
   fFILTROS.Insert(0,fFiltroLojas);
@@ -859,8 +865,6 @@ begin
   end;
 
   fPermissao := getCfg.ReadString('permissao','executar',tagConfig_GESTAO_RELATORIO_PERMISSAO);
-  fPermissaoLoja := getCfg.ReadString('permissao','loja.executar',tagConfig_GESTAO_RELATORIO_LOJAS);
-  fFiltroLojas.objeto.permissaoLojas := vConfiguracoes.objeto.verificaPerfil(getPermissaoLoja);
 end;
 
 procedure TEndpointModel.setPROPRIEDADES(const pValue: TipoWideStringFramework);
