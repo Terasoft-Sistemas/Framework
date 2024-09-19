@@ -14,6 +14,7 @@
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnShow = FormShow
+  PixelsPerInch = 96
   TextHeight = 15
   object gridEP: TXDBGrid
     Left = 0
@@ -134,18 +135,29 @@
           Height = 137
           DataField = 'descricao'
           DataSource = dsEP
-          TabOrder = 2
+          TabOrder = 3
           WordWrap = False
         end
         object edPermissao: TLabeledEdit
           Left = 376
           Top = 30
-          Width = 377
+          Width = 217
           Height = 23
           EditLabel.Width = 54
           EditLabel.Height = 15
           EditLabel.Caption = 'Permiss'#227'o'
           TabOrder = 1
+          Text = ''
+        end
+        object edPermissaoLoja: TLabeledEdit
+          Left = 608
+          Top = 30
+          Width = 217
+          Height = 23
+          EditLabel.Width = 79
+          EditLabel.Height = 15
+          EditLabel.Caption = 'Permiss'#227'o Loja'
+          TabOrder = 2
           Text = ''
         end
       end

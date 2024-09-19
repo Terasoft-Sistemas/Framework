@@ -108,6 +108,7 @@ uses
       fPrimeiro: Integer;
       fOrdem: TipoWideStringFramework;
       fPermissao: TipoWideStringFramework;
+      fPermissaoLoja: TipoWideStringFramework;
       fListaImpressao: IListaImpressao;
       fContagem: Integer;
       fUseVCL: boolean;
@@ -125,6 +126,10 @@ uses
     //property permissao getter/setter
       function getPermissao: TipoWideStringFramework;
       procedure setPermissao(const pValue: TipoWideStringFramework);
+
+    //property permissao getter/setter
+      function getPermissaoLoja: TipoWideStringFramework;
+      procedure setPermissaoLoja(const pValue: TipoWideStringFramework);
 
       function getFiltroLojas: ITFiltroModel;
       function getFiltroAgrupamentos: ITFiltroModel;
@@ -213,6 +218,7 @@ uses
       property filtroLojas: ITFiltroModel read getFiltroLojas;
 
       property permissao: TipoWideStringFramework read getPermissao write setPermissao;
+      property permissaoLoja: TipoWideStringFramework read getPermissaoLoja write setPermissaoLoja;
 
       property listaImpressao: IListaImpressao read getListaImpressao write setListaImpressao;
       property useVCL: boolean read getUseVCL write setUseVCL;
@@ -853,6 +859,8 @@ begin
   end;
 
   fPermissao := getCfg.ReadString('permissao','executar',tagConfig_GESTAO_RELATORIO_PERMISSAO);
+  fPermissaoLoja := getCfg.ReadString('permissao','loja.executar',_tagConfig_GESTAO_RELATORIO_LOJAS);
+  fFiltroLojas.objeto.permissaoLojas := vConfiguracoes.objeto.verificaPerfil(getPermissaoLoja);
 end;
 
 procedure TEndpointModel.setPROPRIEDADES(const pValue: TipoWideStringFramework);
@@ -1130,6 +1138,18 @@ begin
   if(fPermissao='') then
     fPermissao := tagConfig_GESTAO_RELATORIO_PERMISSAO;
   Result := fPermissao;
+end;
+
+procedure TEndpointModel.setPermissaoLoja(const pValue: TipoWideStringFramework);
+begin
+  fPermissaoLoja := pValue;
+end;
+
+function TEndpointModel.getPermissaoLoja: TipoWideStringFramework;
+begin
+  if(fPermissaoLoja='') then
+    fPermissaoLoja := _tagConfig_GESTAO_RELATORIO_LOJAS;
+  Result := fPermissaoLoja;
 end;
 
 procedure TEndpointModel.setListaImpressao(const pValue: IListaImpressao);

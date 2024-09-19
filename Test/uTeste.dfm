@@ -14,17 +14,17 @@ object Form1: TForm1
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnShow = FormShow
+  PixelsPerInch = 96
   TextHeight = 15
   object PageControl: TPageControl
     Left = 0
     Top = 0
     Width = 1254
     Height = 769
-    ActivePage = TabSheet11
+    ActivePage = TabSheet1
     Align = alClient
     TabOrder = 0
-    ExplicitWidth = 1252
-    ExplicitHeight = 761
     object TabSheet1: TTabSheet
       Caption = 'Diversos'
       object SpeedButton2: TSpeedButton
@@ -1542,8 +1542,6 @@ object Form1: TForm1
         Align = alBottom
         ScrollBars = ssVertical
         TabOrder = 1
-        ExplicitTop = 476
-        ExplicitWidth = 1244
       end
     end
     object TabelaJurosPromocao: TTabSheet

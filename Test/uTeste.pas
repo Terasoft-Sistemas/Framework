@@ -383,6 +383,7 @@ type
     procedure FDMemTable1BeforePost(DataSet: TDataSet);
     procedure SpeedButton5Click(Sender: TObject);
     procedure btnComissaoClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
 
   private
     { Private declarations }
@@ -3980,6 +3981,11 @@ begin
   {$if defined(__RELEASE__) or defined(__HIDE_MEMORY_LEAK__)}
 //    TerminateProcess(GetCurrentProcess, exitCode );
   {$endif}
+end;
+
+procedure TForm1.FormShow(Sender: TObject);
+begin
+  PageControl.ActivePageIndex := 0;
 end;
 
 procedure TForm1.imprimirContratoCarteiraClick(Sender: TObject);
