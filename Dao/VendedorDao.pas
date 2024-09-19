@@ -26,7 +26,7 @@ type
     destructor Destroy; override;
 
     function ObterLista(pVendedor_Parametros: TVendedor_Parametros): IFDDataset;
-
+    function obterMeta(pVendedor : String; pDataInicial, pDataFinal : TDate): Double;
 end;
 
 implementation
@@ -97,5 +97,28 @@ begin
   end;
 end;
 
+
+function TVendedorDao.obterMeta(pVendedor: String; pDataInicial,pDataFinal: TDate): Double;
+var
+  lQry : TFDQuery;
+  lSQL : String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  try
+    lSQL := ' select sum(m.valor_meta) meta                                                                        '+SLineBreak+
+            '   from meta_vendedor m                                                                               '+SLineBreak+
+            '  where m.vendedor_id = '+QuotedStr(pVendedor)+'                                                      '+SLineBreak+
+            '    and m.ano || m.mes >= '+ copy(DateToStr(pDataInicial),7,4) + copy(DateToStr(pDataInicial),4,2)+'  '+SLineBreak+
+            '    and m.ano || m.mes <= '+ copy(DateToStr(pDataFinal),7,4) + copy(DateToStr(pDataFinal),4,2);
+
+    lQry.Open(lSQL);
+
+    Result := lQry.FieldByName('META').AsFloat;
+
+  finally
+    lQry.Free;
+  end;
+end;
 
 end.

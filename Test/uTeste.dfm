@@ -23,8 +23,6 @@ object Form1: TForm1
     ActivePage = TabSheet11
     Align = alClient
     TabOrder = 0
-    ExplicitWidth = 1252
-    ExplicitHeight = 761
     object TabSheet1: TTabSheet
       Caption = 'Diversos'
       object SpeedButton2: TSpeedButton
@@ -1542,8 +1540,6 @@ object Form1: TForm1
         Align = alBottom
         ScrollBars = ssVertical
         TabOrder = 1
-        ExplicitTop = 476
-        ExplicitWidth = 1244
       end
     end
     object TabelaJurosPromocao: TTabSheet
@@ -1581,8 +1577,8 @@ object Form1: TForm1
       Caption = 'Vendas vendedor'
       ImageIndex = 18
       object btnComissao: TButton
-        Left = 19
-        Top = 19
+        Left = 11
+        Top = 467
         Width = 182
         Height = 46
         Caption = 'Obter Comiss'#227'o'
@@ -1598,6 +1594,105 @@ object Form1: TForm1
         DataSource = dsTeste2
         GridStyle.VisualStyle = vsXPStyle
         TabOrder = 1
+      end
+      object btnDevolucao: TButton
+        Left = 199
+        Top = 467
+        Width = 182
+        Height = 46
+        Caption = 'Obter Devolucao'
+        TabOrder = 2
+        OnClick = btnDevolucaoClick
+      end
+      object btnConsultaItens: TButton
+        Left = 387
+        Top = 467
+        Width = 182
+        Height = 46
+        Caption = 'Obter Itens'
+        TabOrder = 3
+        OnClick = btnConsultaItensClick
+      end
+      object btnGrupoComissao: TButton
+        Left = 575
+        Top = 467
+        Width = 182
+        Height = 46
+        Caption = 'Obter Grupo'
+        TabOrder = 4
+        OnClick = btnGrupoComissaoClick
+      end
+      object btnObterConsultaComissao: TButton
+        Left = 11
+        Top = 19
+        Width = 182
+        Height = 46
+        Caption = 'Obter Consulta'
+        TabOrder = 5
+        OnClick = btnObterConsultaComissaoClick
+      end
+      object PageControl1: TPageControl
+        Left = 11
+        Top = 120
+        Width = 1222
+        Height = 265
+        ActivePage = TabSheet12
+        TabOrder = 6
+        object TabSheet12: TTabSheet
+          Caption = 'Venda'
+          object XDBGrid11: TXDBGrid
+            Left = 0
+            Top = 0
+            Width = 1214
+            Height = 235
+            Align = alClient
+            DataSource = dsTeste2
+            GridStyle.VisualStyle = vsXPStyle
+            TabOrder = 0
+          end
+        end
+        object TabSheet13: TTabSheet
+          Caption = 'Devolu'#231#227'o'
+          ImageIndex = 1
+          object XDBGrid12: TXDBGrid
+            Left = 0
+            Top = 0
+            Width = 1214
+            Height = 235
+            Align = alClient
+            DataSource = dDevolucao
+            GridStyle.VisualStyle = vsXPStyle
+            TabOrder = 0
+          end
+        end
+        object TabSheet14: TTabSheet
+          Caption = 'Itens'
+          ImageIndex = 2
+          object XDBGrid13: TXDBGrid
+            Left = 0
+            Top = 0
+            Width = 1214
+            Height = 235
+            Align = alClient
+            DataSource = dItens
+            GridStyle.VisualStyle = vsXPStyle
+            TabOrder = 0
+          end
+        end
+        object TabSheet15: TTabSheet
+          Caption = 'Grupo'
+          ImageIndex = 3
+          object XDBGrid14: TXDBGrid
+            Left = 0
+            Top = 0
+            Width = 1214
+            Height = 235
+            Align = alClient
+            DataSource = dGrupo
+            GridStyle.VisualStyle = vsXPStyle
+            TabOrder = 0
+          end
+        end
       end
     end
   end
@@ -1660,5 +1755,21 @@ object Form1: TForm1
     UpdateOptions.AutoCommitUpdates = True
     Left = 948
     Top = 538
+  end
+  object dItens: TDataSource
+    Left = 808
+    Top = 384
+  end
+  object dGrupo: TDataSource
+    Left = 880
+    Top = 384
+  end
+  object dDevolucao: TDataSource
+    Left = 880
+    Top = 320
+  end
+  object dVenda: TDataSource
+    Left = 808
+    Top = 320
   end
 end

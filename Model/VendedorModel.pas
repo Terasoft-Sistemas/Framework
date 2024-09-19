@@ -20,6 +20,7 @@ type
     destructor Destroy; override;
 
     function ObterLista(pVendedor_Parametros: TVendedor_Parametros): IFDDataset;
+    function obterMeta(pVendedor : String; pDataInicial, pDataFinal : TDate): Double;
 
   end;
 
@@ -53,6 +54,19 @@ begin
 
     Result := lVendedorDao.ObterLista(lVendedor_Parametros);
 
+  finally
+    lVendedorDao.Free;
+  end;
+end;
+
+function TVendedorModel.obterMeta(pVendedor: String; pDataInicial, pDataFinal: TDate): Double;
+var
+  lVendedorDao: TVendedorDao;
+begin
+  lVendedorDao := TVendedorDao.Create(vIConexao);
+
+  try
+    Result := lVendedorDao.obterMeta(pVendedor, pDataInicial, pDataFinal);
   finally
     lVendedorDao.Free;
   end;

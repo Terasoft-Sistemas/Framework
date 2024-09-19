@@ -226,6 +226,23 @@ type
     TabSheet11: TTabSheet;
     btnComissao: TButton;
     XDBGrid10: TXDBGrid;
+    btnDevolucao: TButton;
+    btnConsultaItens: TButton;
+    btnGrupoComissao: TButton;
+    btnObterConsultaComissao: TButton;
+    PageControl1: TPageControl;
+    TabSheet12: TTabSheet;
+    TabSheet13: TTabSheet;
+    TabSheet14: TTabSheet;
+    TabSheet15: TTabSheet;
+    XDBGrid11: TXDBGrid;
+    XDBGrid12: TXDBGrid;
+    XDBGrid13: TXDBGrid;
+    XDBGrid14: TXDBGrid;
+    dItens: TDataSource;
+    dGrupo: TDataSource;
+    dDevolucao: TDataSource;
+    dVenda: TDataSource;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -383,6 +400,10 @@ type
     procedure FDMemTable1BeforePost(DataSet: TDataSet);
     procedure SpeedButton5Click(Sender: TObject);
     procedure btnComissaoClick(Sender: TObject);
+    procedure btnDevolucaoClick(Sender: TObject);
+    procedure btnConsultaItensClick(Sender: TObject);
+    procedure btnGrupoComissaoClick(Sender: TObject);
+    procedure btnObterConsultaComissaoClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -458,6 +479,25 @@ begin
     dLiberacao.DataSet := dsTmp.objeto;
   finally
     lSolicitacaoDescontoModel:=nil;
+  end;
+end;
+
+procedure TForm1.btnConsultaItensClick(Sender: TObject);
+var
+  lVendasVendedorModel : ITVendasVendedorModel;
+  lParamentros         : TVendasVendedorParametros;
+begin
+
+  lVendasVendedorModel := TVendasVendedorModel.getNewIface(vIConexao);
+  try
+    lParamentros.TipoData   := 'E';
+    lParamentros.DataInicio := '01/01/2024';
+    lParamentros.DataFim    := '18/09/2024';
+
+    dsTmp := lVendasVendedorModel.objeto.obterItens(lParamentros);
+    dsTeste2.DataSet := dsTmp.objeto;
+  finally
+    lVendasVendedorModel := nil;
   end;
 end;
 
@@ -612,6 +652,53 @@ begin
     end;
   finally
     lFinanceiroPedidoModel:=nil;
+  end;
+end;
+
+procedure TForm1.btnGrupoComissaoClick(Sender: TObject);
+var
+  lVendasVendedorModel : ITVendasVendedorModel;
+  lParamentros         : TVendasVendedorParametros;
+begin
+
+  lVendasVendedorModel := TVendasVendedorModel.getNewIface(vIConexao);
+  try
+    lParamentros.TipoData   := 'E';
+    lParamentros.DataInicio := '01/01/2024';
+    lParamentros.DataFim    := '18/09/2024';
+
+    dsTmp := lVendasVendedorModel.objeto.obterGrupoComissao(lParamentros);
+    dsTeste2.DataSet := dsTmp.objeto;
+  finally
+    lVendasVendedorModel := nil;
+  end;
+end;
+
+procedure TForm1.btnObterConsultaComissaoClick(Sender: TObject);
+var
+  lVendasVendedorModel : ITVendasVendedorModel;
+  lParamentros         : TVendasVendedorParametros;
+  lResultado           : TVendasVendedorResultado;
+  tTemp1               : IFDDataset;
+begin
+
+  lVendasVendedorModel := TVendasVendedorModel.getNewIface(vIConexao);
+  try
+    lParamentros.TipoData   := 'E';
+    lParamentros.DataInicio := '01/01/2024';
+    lParamentros.DataFim    := '18/09/2024';
+
+    lResultado := lVendasVendedorModel.objeto.obterVendasVendedor(lParamentros);
+
+    tTemp1 := lResultado.fdComissao;
+
+    dVenda.DataSet     := tTemp1.objeto;
+    dDevolucao.DataSet := lResultado.fdDevolucao.objeto;
+    dItens.DataSet     := lResultado.fdItens.objeto;
+    dGrupo.DataSet     := lResultado.fdGrupo.objeto;
+
+  finally
+    lVendasVendedorModel := nil;
   end;
 end;
 
@@ -2888,6 +2975,25 @@ begin
     lSolicitacaoDescontoModel.objeto.Negar('4176');
   finally
     lSolicitacaoDescontoModel:=nil;
+  end;
+end;
+
+procedure TForm1.btnDevolucaoClick(Sender: TObject);
+var
+  lVendasVendedorModel : ITVendasVendedorModel;
+  lParamentros         : TVendasVendedorParametros;
+begin
+
+  lVendasVendedorModel := TVendasVendedorModel.getNewIface(vIConexao);
+  try
+    lParamentros.TipoData   := 'E';
+    lParamentros.DataInicio := '01/01/2024';
+    lParamentros.DataFim    := '18/09/2024';
+
+    dsTmp := lVendasVendedorModel.objeto.obterDevolucao(lParamentros);
+    dsTeste2.DataSet := dsTmp.objeto;
+  finally
+    lVendasVendedorModel := nil;
   end;
 end;
 
