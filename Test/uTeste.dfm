@@ -14,13 +14,15 @@ object Form1: TForm1
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnShow = FormShow
+  PixelsPerInch = 96
   TextHeight = 15
   object PageControl: TPageControl
     Left = 0
     Top = 0
     Width = 1254
     Height = 769
-    ActivePage = TabSheet11
+    ActivePage = TabSheet1
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet

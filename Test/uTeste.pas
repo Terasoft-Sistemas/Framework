@@ -404,7 +404,8 @@ type
     procedure btnConsultaItensClick(Sender: TObject);
     procedure btnGrupoComissaoClick(Sender: TObject);
     procedure btnObterConsultaComissaoClick(Sender: TObject);
-
+    procedure FormShow(Sender: TObject);
+    
   private
     { Private declarations }
     vQtdeRegistros,
@@ -473,7 +474,7 @@ begin
   lSolicitacaoDescontoModel := TSolicitacaoDescontoModel.getNewIface(vIConexao);
   try
     lSolicitacaoDescontoModel.objeto.WhereView := ' and solicitacao_desconto.tabela_origem = ''WEB_PEDIDO'' ';
-      //Aki o dataset será zerado apos sair da função.
+      //Aki o dataset serï¿½ zerado apos sair da funï¿½ï¿½o.
       //Precisa deixar este contexto ativo...                  a
     dsTmp := lSolicitacaoDescontoModel.objeto.obterLista;
     dLiberacao.DataSet := dsTmp.objeto;
@@ -511,7 +512,7 @@ begin
     lVendaAssistida := '4343';
 
     lPermissaoRemotaModel.objeto.WhereView := ' and permissao_remota.tabela = ''WEB_PEDIDOITENS'' and permissao_remota.pedido_id = '+lVendaAssistida;
-      //Aki o dataset será zerado apos sair da função.
+      //Aki o dataset serï¿½ zerado apos sair da funï¿½ï¿½o.
       //Precisa deixar este contexto ativo...                  a
     dsTmp := lPermissaoRemotaModel.objeto.obterLista;
     dLiberacao.DataSet := dsTmp.objeto;
@@ -711,7 +712,7 @@ begin
   try
     lMemTable := lTabelaJurosPromocaoModel.objeto.obterLista;
 
-      //Aki o dataset será zerado apos sair da função.
+      //Aki o dataset serï¿½ zerado apos sair da funï¿½ï¿½o.
       //Precisa deixar este contexto ativo...                  a
     dsTmp := lMemTable;
     dsJuros.DataSet := dsTmp.objeto;
@@ -1161,7 +1162,7 @@ begin
   lEntradaModel  := TEntradaModel.getNewIface(vIConexao);
   try
     try
-      lNumEntrada := InputBox('EntradaItens','Digite o número da Entrada:','');
+      lNumEntrada := InputBox('EntradaItens','Digite o nï¿½mero da Entrada:','');
 
       lEntradaItensParams.NUMERO_ENT      := lNumEntrada;
       lEntradaItensParams.CODIGO_FOR      := '500005';
@@ -1190,7 +1191,7 @@ begin
   lEntradaItensModel := TEntradaItensModel.getNewIface(vIConexao);
   try
     try
-      NumEntrada := InputBox('Constulta EntradaItens','Digite o número da Entrada:','');
+      NumEntrada := InputBox('Constulta EntradaItens','Digite o nï¿½mero da Entrada:','');
         if NumEntrada.IsEmpty then
           Exit;
 
@@ -1269,7 +1270,7 @@ begin
   lReservaModel := TReservaModel.getNewIface(vIConexao);
   try
     try
-    lCodPro := InputBox('Reservar','Digite o código do Produto:','');
+    lCodPro := InputBox('Reservar','Digite o cï¿½digo do Produto:','');
       if lCodPro.IsEmpty then
         Exit;
 
@@ -1622,7 +1623,7 @@ begin
   lFinanceiroPedidoModel := TFinanceiroPedidoModel.getNewIface(vIConexao);
   try
     try
-      lPedidoWeb := InputBox('ObterResumo','Digite o número do Web Pedido para consultar:','');
+      lPedidoWeb := InputBox('ObterResumo','Digite o nï¿½mero do Web Pedido para consultar:','');
       if lPedidoWeb.IsEmpty then
       Exit;
 
@@ -1667,7 +1668,7 @@ begin
 //      lFluxoCaixaModel.LojaView        := '001';
 
       lMemTable := lFluxoCaixaModel.objeto.obterFluxoCaixaSintetico;
-      //Aki o dataset será zerado apos sair da função.
+      //Aki o dataset serï¿½ zerado apos sair da funï¿½ï¿½o.
       //Precisa deixar este contexto ativo...                  a
       dsTmp := lMemTable;
       dsTeste2.DataSet := dsTmp.objeto;
@@ -1696,7 +1697,7 @@ begin
 
       lMemTable := lFluxoCaixaModel.objeto.obterFluxoCaixaAnalitico;
 
-      //Aki o dataset será zerado apos sair da função.
+      //Aki o dataset serï¿½ zerado apos sair da funï¿½ï¿½o.
       //Precisa deixar este contexto ativo...                  a
       dsTmp := lMemTable;
 
@@ -1719,7 +1720,7 @@ begin
   lWebPedidoModel := TWebPedidoModel.getNewIface(vIConexao);
   try
 
-    lPedidoWeb := InputBox('ObterResumo','Digite o número do Web Pedido para consultar:','');
+    lPedidoWeb := InputBox('ObterResumo','Digite o nï¿½mero do Web Pedido para consultar:','');
 
     lWebPedidoModel.objeto.LengthPageView  := vQtdeRegistros.ToString;
     lWebPedidoModel.objeto.StartRecordView := vPagina.ToString;
@@ -1784,7 +1785,7 @@ begin
       lFluxoCaixaModel.objeto.DataFinalView   := '29/02/2024';
 
       lMemTable := lFluxoCaixaModel.objeto.obterResumo;
-      //Aki o dataset será zerado apos sair da função.
+      //Aki o dataset serï¿½ zerado apos sair da funï¿½ï¿½o.
       //Precisa deixar este contexto ativo...                  a
       dsTmp := lMemTable;
 
@@ -1812,7 +1813,7 @@ begin
       lFluxoCaixaModel.objeto.PorcentagemInadimplenciaView := 10;
       lMemTable := lFluxoCaixaModel.objeto.obterResultadoFluxoCaixa;
 
-      //Aki o dataset será zerado apos sair da função.
+      //Aki o dataset serï¿½ zerado apos sair da funï¿½ï¿½o.
       //Precisa deixar este contexto ativo...                  a
       dsTmp := lMemTable;
 
@@ -2020,7 +2021,7 @@ begin
   lEntradaItensModel := TEntradaItensModel.getNewIface(vIConexao);
   try
 
-    lEntrada := InputBox('Constultar Entrada','Digite o número da Entrada:','');
+    lEntrada := InputBox('Constultar Entrada','Digite o nï¿½mero da Entrada:','');
      if lEntrada.IsEmpty then
      Exit;
 
@@ -2061,7 +2062,7 @@ begin
 
       lEntradaModel.objeto.Incluir;
 
-      ShowMessage('Cabeçalho Entrada Cadastrado');
+      ShowMessage('Cabeï¿½alho Entrada Cadastrado');
       except
        on E:Exception do
          ShowMessage('Erro: ' + E.Message);
@@ -2105,7 +2106,7 @@ begin
   lEntradaModel  := TEntradaModel.getNewIface(vIConexao);
   try
     try
-      lNumEntrada := InputBox('Entrada Item','Digite o número da Entrada:','');
+      lNumEntrada := InputBox('Entrada Item','Digite o nï¿½mero da Entrada:','');
         if lNumEntrada.IsEmpty then
           Exit;
 
@@ -2266,7 +2267,7 @@ begin
 
     memoSimulador.Lines.Clear;
 
-    memoSimulador.Lines.Add('Custo Líquido: '+ lResultado.CustoLiquido.ToString);
+    memoSimulador.Lines.Add('Custo Lï¿½quido: '+ lResultado.CustoLiquido.ToString);
     memoSimulador.Lines.Add('Custo Bruto: '+ lResultado.CustoBruto.ToString);
     memoSimulador.Lines.Add('Custo Compra: '+ lResultado.CustoCompra.ToString);
   finally
@@ -2424,7 +2425,7 @@ begin
 
     memoSimulador.Lines.Clear;
 
-    memoSimulador.Lines.Add('Custo Líquido: '+ lResultado.CustoLiquido.ToString);
+    memoSimulador.Lines.Add('Custo Lï¿½quido: '+ lResultado.CustoLiquido.ToString);
     memoSimulador.Lines.Add('Custo Bruto: '+ lResultado.CustoBruto.ToString);
     memoSimulador.Lines.Add('Custo Compra: '+ lResultado.CustoCompra.ToString);
   finally
@@ -2679,7 +2680,7 @@ begin
 
     if not FileExists(lPathXML + lNomeXML) then
     begin
-      ShowMessage('XML não localizado');
+      ShowMessage('XML nï¿½o localizado');
       Exit;
     end;
 
@@ -3035,7 +3036,7 @@ begin
   lWebPedidoModel := TWebPedidoModel.getNewIface(vIConexao);
   try
     try
-      lWebPedido := InputBox('WebPedido', 'Digite o número do Web Pedido:', '');
+      lWebPedido := InputBox('WebPedido', 'Digite o nï¿½mero do Web Pedido:', '');
 
       if lWebPedido.IsEmpty then
         exit;
@@ -3046,8 +3047,8 @@ begin
       lVenderItemParametros.DESCONTO         := '0';
       lVenderItemParametros.VALOR_UNITARIO   := '30';
       lVenderItemParametros.TIPO             := 'NORMAL';
-      lVenderItemParametros.ENTREGA          := 'S'; //S=Sim - N=Não
-      lVenderItemParametros.MONTAGEM         := 'S'; //S=Sim - N=Não
+      lVenderItemParametros.ENTREGA          := 'S'; //S=Sim - N=Nï¿½o
+      lVenderItemParametros.MONTAGEM         := 'S'; //S=Sim - N=Nï¿½o
       lVenderItemParametros.TIPO_ENTREGA     := 'LJ';
       lVenderItemParametros.TIPO_GARANTIA    := '0000';
       lVenderItemParametros.VLR_GARANTIA     := '0';
@@ -3094,12 +3095,12 @@ begin
   lTransportadoraModel := TTransportadoraModel.getNewIface(vIConexao);
   try
     try
-      ID := InputBox('TRANSPORTADORA', 'Digite o código da transportadora que deseja Alterar:', '');
+      ID := InputBox('TRANSPORTADORA', 'Digite o cï¿½digo da transportadora que deseja Alterar:', '');
       if ID.IsEmpty then
         exit;
 
       lTransportadoraModel := lTransportadoraModel.objeto.Alterar(ID);
-      lTransportadoraModel.objeto.FANTASIA_TRA := 'TESTE ALTERAÇÃO';
+      lTransportadoraModel.objeto.FANTASIA_TRA := 'TESTE ALTERAï¿½ï¿½O';
 
       lTransportadoraModel.objeto.Salvar;
       ShowMessage('Alterado com Sucesso');
@@ -3120,7 +3121,7 @@ begin
   lTransportadoraModel := TTransportadoraModel.getNewIface(vIConexao);
   try
     try
-      codigo := InputBox('TRANSPORTADORA', 'Digite o código da transportadora que deseja excluir:', '');
+      codigo := InputBox('TRANSPORTADORA', 'Digite o cï¿½digo da transportadora que deseja excluir:', '');
       if codigo.IsEmpty then
           Exit;
 
@@ -3143,7 +3144,7 @@ begin
   try
     try
       lTransportadoraModel.objeto.FANTASIA_TRA := 'FANTASIA TRANSPORTADORA TESTE';
-      lTransportadoraModel.objeto.RAZAO_TRA    := 'RAZÃO TRANSPORTADORA TESTE';
+      lTransportadoraModel.objeto.RAZAO_TRA    := 'RAZï¿½O TRANSPORTADORA TESTE';
       lTransportadoraModel.objeto.STATUS       := 'A';
 
       lTransportadoraModel.objeto.Incluir;
@@ -3209,7 +3210,7 @@ begin
   lPrevisaoPedidoCompraModel := TPrevisaoPedidoCompraModel.getNewIface(vIConexao);
   try
     try
-      ID := InputBox('PrevisaoPedidoCompra', 'Digite o código do PrevisaoPedidoCompra que deseja Alterar:', '');
+      ID := InputBox('PrevisaoPedidoCompra', 'Digite o cï¿½digo do PrevisaoPedidoCompra que deseja Alterar:', '');
       if ID.IsEmpty then
         exit;
 
@@ -3239,7 +3240,7 @@ begin
       if Numero_Ped.IsEmpty then
           Exit;
 
-      Codigo_For := InputBox('PrevisaoPedidoCompra', 'Digite o Código Fornecedor da PrevisaoPedidoCompra que deseja excluir:', '');
+      Codigo_For := InputBox('PrevisaoPedidoCompra', 'Digite o Cï¿½digo Fornecedor da PrevisaoPedidoCompra que deseja excluir:', '');
       if Codigo_For.IsEmpty then
           Exit;
 
@@ -3285,7 +3286,7 @@ begin
   lWebPedidoItensModel  := TWebPedidoItensModel.getNewIface(vIConexao);
   try
     try
-      lWebPedidoItens := InputBox('WebPedido', 'Digite o número do Web Pedido para consultar os itens:', '');
+      lWebPedidoItens := InputBox('WebPedido', 'Digite o nï¿½mero do Web Pedido para consultar os itens:', '');
       if lWebPedidoItens.IsEmpty then
         exit;
 
@@ -3325,7 +3326,7 @@ var
 begin
   lSaldoModel := TSaldoModel.getNewIface(vIConexao);
   try
-    lProduto  := InputBox('Consulta de Saldo', 'Digite o código do produto:', '');
+    lProduto  := InputBox('Consulta de Saldo', 'Digite o cï¿½digo do produto:', '');
 
     lParametros.PRODUTO := lProduto;
     lParametros.CD      := true;
@@ -3490,7 +3491,7 @@ begin
   lSaidasModel := TSaidasModel.getNewIface(vIConexao);
   try
     try
-      ID := InputBox('Saidas', 'Digite o código da Saida que deseja Alterar:', '');
+      ID := InputBox('Saidas', 'Digite o cï¿½digo da Saida que deseja Alterar:', '');
       if ID.IsEmpty then
         exit;
 
@@ -3802,7 +3803,7 @@ var
 begin
   lSaldoModel := TSaldoModel.getNewIface(vIConexao);
   try
-    lProduto  := InputBox('Consulta de Saldo', 'Digite o código do produto:', '');
+    lProduto  := InputBox('Consulta de Saldo', 'Digite o cï¿½digo do produto:', '');
 
     lMemTable := lSaldoModel.objeto.obterSaldo(lProduto);
 
@@ -3825,7 +3826,7 @@ begin
   lTabelaJurosDia := TTabelaJurosDiaModel.getNewIface(vIConexao);
   try
     lDia := InputBox('TabelaJurosDia', 'Digite o dia:', '');
-    lPortador := InputBox('TabelaJurosDia', 'Digite o código do portador:', '');
+    lPortador := InputBox('TabelaJurosDia', 'Digite o cï¿½digo do portador:', '');
 
     lIndice := lTabelaJurosDia.objeto.obterIndice(lDia, lPortador);
 
@@ -3847,7 +3848,7 @@ var
 begin
   lProdutoModel := TProdutosModel.getNewIface(vIConexao);
   try
-     lProduto  := InputBox('Consulta de Saldo', 'Digite o código do produto:', '');
+     lProduto  := InputBox('Consulta de Saldo', 'Digite o cï¿½digo do produto:', '');
 
      lParametros.Produto     := lProduto;
      lParametros.TabelaPreco := true;
@@ -3870,7 +3871,7 @@ var
 begin
   lSaldoModel := TSaldoModel.getNewIface(vIConexao);
   try
-    lProduto  := InputBox('Reservas CD', 'Digite o código do produto:', '');
+    lProduto  := InputBox('Reservas CD', 'Digite o cï¿½digo do produto:', '');
 
     lMemTable := lSaldoModel.objeto.obterReservasCD(lProduto);
 
@@ -3901,7 +3902,7 @@ begin
   lEntradaModel := TEntradaModel.getNewIface(vIConexao);
   try
     try
-      NumEntrada := InputBox('Entrada','Digite o número da Entrada (9 Digitos):','');
+      NumEntrada := InputBox('Entrada','Digite o nï¿½mero da Entrada (9 Digitos):','');
 
       if NumEntrada.IsEmpty then
         Exit;
@@ -4086,6 +4087,11 @@ begin
   {$if defined(__RELEASE__) or defined(__HIDE_MEMORY_LEAK__)}
 //    TerminateProcess(GetCurrentProcess, exitCode );
   {$endif}
+end;
+
+procedure TForm1.FormShow(Sender: TObject);
+begin
+  PageControl.ActivePageIndex := 0;
 end;
 
 procedure TForm1.imprimirContratoCarteiraClick(Sender: TObject);

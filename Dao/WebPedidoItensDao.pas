@@ -83,6 +83,7 @@ end;
 implementation
 
 uses
+  Terasoft.Framework.LOG,
   System.Rtti;
 
 { TWebPedidoItens }
@@ -441,6 +442,7 @@ begin
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
 
+    logaByTagSeNivel(TAGLOG_FRAMEWORK,format('TWebPedidoItensDao.obterLista(%s): [%s]', [ vIConexao.empresa.ID, lSQL ] ), LOG_LEVEL_DEBUG);
     lQry.Open(lSQL);
 
     lQry.First;

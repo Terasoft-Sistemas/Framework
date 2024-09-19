@@ -739,10 +739,6 @@ begin
     if not FOrderView.IsEmpty then
       lSQL := lSQL + ' order by '+FOrderView;
 
-    {$if defined(DEBUG)}
-      Clipboard.AsText := lSQL;
-    {$endif}
-
     lQry.Open(lSQL);
 
     lQry.First;

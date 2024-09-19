@@ -172,7 +172,6 @@ var
   lPaginacao,
   lDataWhere  : String;
   lMemTable   : TFDMemTable;
-
   lAsyncList  : IListaQueryAsync;
   lQA         : IQueryLojaAsync;
   conexao     : IConexao;
@@ -183,13 +182,7 @@ begin
   lMemTable := TFDMemTable.Create(nil);
   Result := criaIFDDataset(lMemTable);
 
-  if pPix_Parametros.TipoData = 'EMISSÃO' then
-    lDataWhere := ' cast(pix.data_cadastro as Date) between ' + QuotedStr(transformaDataFireBirdWhere(pPix_Parametros.DataInicio)) +' and '+ QuotedStr(transformaDataFireBirdWhere(pPix_Parametros.DataFim))
-  else if pPix_Parametros.TipoData = 'PAGAMENTO' then
-    lDataWhere := ' pix.data_pagamento between ' + QuotedStr(transformaDataFireBirdWhere(pPix_Parametros.DataInicio)) +' and '+ QuotedStr(transformaDataFireBirdWhere(pPix_Parametros.DataFim));
-
-  lSQL :=  ' select '+lPaginacao+'                                                        ' +sLineBreak+
-           '        pix.id,                                                               ' +sLineBreak+
+  lSQL :=  ' select pix.id,                                                               ' +sLineBreak+
            '        pix.data_cadastro,                                                    ' +sLineBreak+
            '        pix.data_pagamento,                                                   ' +sLineBreak+
            '        pix.valor,                                                            ' +sLineBreak+
@@ -203,8 +196,14 @@ begin
            '  inner join empresa on 1=1                                                   ' +sLineBreak+
            '   left join clientes on pix.cliente_id = clientes.codigo_cli                 ' +sLineBreak+
            '  where pix.data_pagamento is not null                                        ' +sLineBreak+
-           '    and pix.valor_recebido > ''0''                                            ' +sLineBreak+
-           '    and ' + lDataWhere                                                          +sLineBreak;
+           '    and pix.valor_recebido > ''0''                                            ' +sLineBreak;
+
+  if pPix_Parametros.TipoData = 'EMISSÃO' then
+    lDataWhere := ' cast(pix.data_cadastro as Date) between ' + QuotedStr(transformaDataFireBirdWhere(pPix_Parametros.DataInicio)) +' and '+ QuotedStr(transformaDataFireBirdWhere(pPix_Parametros.DataFim))
+  else if pPix_Parametros.TipoData = 'PAGAMENTO' then
+    lDataWhere := ' pix.data_pagamento between ' + QuotedStr(transformaDataFireBirdWhere(pPix_Parametros.DataInicio)) +' and '+ QuotedStr(transformaDataFireBirdWhere(pPix_Parametros.DataFim));
+
+  lSQL := lSQL +  ' and ' +lDataWhere;
 
   lSQL := lSQL + Where;
 

@@ -46,6 +46,7 @@ type
   protected
     vIConexao   : IConexao;
     vConfiguracoes: ITerasoftConfiguracoes;
+    fPermissaoLojas: boolean;
 
     fAceitaNull: boolean;
     fValores: TipoWideStringFramework;
@@ -65,7 +66,8 @@ type
     fMultiploValor: boolean;
     fSubTipo: TSubTipoFiltro;
 
-    function getPermitidoLojas: boolean;
+    function getPermissaoLojas: boolean;
+    procedure setPermissaoLojas(const pValue: boolean);
 
   //property subTipo getter/setter
     function getSubTipo: TSubTipoFiltro;
@@ -146,6 +148,7 @@ type
 
     //Se não é válido, deverá usar BUSCA AVNÇADA...
     property valido: boolean read getValido;
+    property permissaoLojas: boolean read getPermissaoLojas write setPermissaoLojas;
 
     // Contém a lista de valores que serão usados no query
     property opcoesSelecionadas: IListaTextoEx read getOpcoesSelecionadas write setOpcoesSelecionadas;
@@ -293,7 +296,6 @@ function TFiltroModel.getOpcoes;
     lojaModel: ITLojasModel;
     lojasLista: TILojasModelList;
     lLista: IListaTextoEx;
-    lPermitidoLojas: boolean;
   label
     lblTipoFiltro_Expressao;
 begin
@@ -303,7 +305,6 @@ begin
       exit;
     tipoFiltro_Lojas:
     begin
-      lPermitidoLojas:=getPermitidoLojas;
       lojasLista := TLojasModel.getNewIface(vIConexao).objeto.obterLista;
       Result := getGenericID_DescricaoDataset;
       Result.dataset.fieldByName('ID').DisplayLabel := 'Loja';
@@ -311,7 +312,7 @@ begin
       //fDatasetLojas := Result;
       for lojaModel in lojasLista do
       begin
-        if(lojaModel.objeto.DATABASE='') or ((lPermitidoLojas=false) and (lojaModel.objeto.LOJA<>vIConexao.empresa.LOJA)) then continue;
+        if(lojaModel.objeto.DATABASE='') or ((fPermissaoLojas=false) and (lojaModel.objeto.LOJA<>vIConexao.empresa.LOJA)) then continue;
         Result.dataset.Append;
         Result.dataset.fieldByName('ID').AsString := lojaModel.objeto.LOJA;
         Result.dataset.fieldByName('descricao').AsString := lojaModel.objeto.DESCRICAO;
@@ -767,7 +768,9 @@ begin
   agora:=Now;
   pValores:=retiraAcentos(trim(pValores));
   i := StrToIntDef(pValores,0);
-  if(CompareText(pvalores,'hoje')=0) then begin
+  if(CompareText(pvalores,'nada')=0) then begin
+
+  end else if(CompareText(pvalores,'hoje')=0) or (pvalores='') then begin
     inicio := StartOfTheDay(agora);
     fim := EndOfTheDay(agora);
   end else if(CompareText(pvalores,'ontem')=0) then begin
@@ -886,7 +889,7 @@ begin
     fMultiploValor:=(Pos('@lojas',LowerCase(fNome),1)>0) or (Pos('@filiais',LowerCase(fNome),1)>0);
     //fMultiploValor:=stringForaArray(fNome, ['@loja','@filial'],[osna_CaseInsensitive,osna_SemAcento]);
 
-    if(stringNoArray(fCampo,['unica','simples'],[osna_CaseInsensitive,osna_SemAcento])) then
+    if (fPermissaoLojas=false) or (stringNoArray(fCampo,['unica','simples'],[osna_CaseInsensitive,osna_SemAcento])) then
     begin
       fMultiploValor:=false;
       fCampo := '';
@@ -1018,19 +1021,23 @@ begin
   Result := fBuscaAdicional;
 end;
 
-function TFiltroModel.getPermitidoLojas: boolean;
+function TFiltroModel.getPermissaoLojas: boolean;
 begin
-  Result := vConfiguracoes.objeto.verificaPerfil('GESTAO_RELATORIO_LOJAS');
+//  Result := vConfiguracoes.objeto.verificaPerfil('GESTAO_RELATORIO_LOJAS');
+  Result := fPermissaoLojas;
+end;
+
+procedure TFiltroModel.setPermissaoLojas(const pValue: boolean);
+begin
+  fPermissaoLojas:=pValue;
+  //Result := vConfiguracoes.objeto.verificaPerfil('GESTAO_RELATORIO_LOJAS');
 end;
 
 function TFiltroModel.getListaLojas: TILojasModelList;
   var
     p: ITLojasModel;
     i: Integer;
-    lPermitidoLojas: boolean;
 begin
-
-  lPermitidoLojas := getPermitidoLojas;
 
   Result := TLojasModel.getNewIface(vIConexao).objeto.obterLista;
   if(getOpcoesSelecionadas.strings.Count>0) then
@@ -1041,7 +1048,7 @@ begin
       dec(i);
       p := Result[i];
 
-      if (getOpcoesSelecionadas.strings.IndexOf(p.objeto.LOJA)=-1) or ((lPermitidoLojas=false) and (p.objeto.LOJA<>vIConexao.empresa.LOJA)) then
+      if (getOpcoesSelecionadas.strings.IndexOf(p.objeto.LOJA)=-1) or ((fPermissaoLojas=false) and (p.objeto.LOJA<>vIConexao.empresa.LOJA)) then
       begin
         Result.Remove(p);
       end;
@@ -1054,7 +1061,7 @@ begin
     dec(i);
     p := Result[i];
 
-    if(p.objeto.DATABASE='') or ((lPermitidoLojas=false) and (p.objeto.LOJA<>vIConexao.empresa.LOJA)) then
+    if(p.objeto.DATABASE='') or ((fPermissaoLojas=false) and (p.objeto.LOJA<>vIConexao.empresa.LOJA)) then
       Result.Remove(p);
   end;
   if(Result.Count=0) then begin
@@ -1065,7 +1072,7 @@ begin
       dec(i);
       p := Result[i];
 
-      if(p.objeto.DATABASE='') or ((lPermitidoLojas=false) and (p.objeto.LOJA<>vIConexao.empresa.LOJA)) then
+      if(p.objeto.DATABASE='') or ((fPermissaoLojas=false) and (p.objeto.LOJA<>vIConexao.empresa.LOJA)) then
         Result.Remove(p);
     end;
   end;

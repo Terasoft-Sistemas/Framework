@@ -108,6 +108,7 @@ uses
       fPrimeiro: Integer;
       fOrdem: TipoWideStringFramework;
       fPermissao: TipoWideStringFramework;
+      fPermissaoLoja: TipoWideStringFramework;
       fListaImpressao: IListaImpressao;
       fContagem: Integer;
       fUseVCL: boolean;
@@ -125,6 +126,10 @@ uses
     //property permissao getter/setter
       function getPermissao: TipoWideStringFramework;
       procedure setPermissao(const pValue: TipoWideStringFramework);
+
+    //property permissao getter/setter
+      function getPermissaoLoja: TipoWideStringFramework;
+      procedure setPermissaoLoja(const pValue: TipoWideStringFramework);
 
       function getFiltroLojas: ITFiltroModel;
       function getFiltroAgrupamentos: ITFiltroModel;
@@ -213,6 +218,7 @@ uses
       property filtroLojas: ITFiltroModel read getFiltroLojas;
 
       property permissao: TipoWideStringFramework read getPermissao write setPermissao;
+      property permissaoLoja: TipoWideStringFramework read getPermissaoLoja write setPermissaoLoja;
 
       property listaImpressao: IListaImpressao read getListaImpressao write setListaImpressao;
       property useVCL: boolean read getUseVCL write setUseVCL;
@@ -794,12 +800,17 @@ begin
   fFiltroLojas := nil;
   lTxt := getcfg.ReadSectionValuesLista('filtros');
 
+  fPermissaoLoja := getCfg.ReadString('permissao','loja.executar',tagConfig_GESTAO_RELATORIO_LOJAS);
+
+
   for i := 0 to lTxt.strings.Count - 1 do
   begin
     sName := trim( lTxt.strings.Names[i]);
     if(sName='') then continue;
     sValue := trim( lTxt.strings.ValueFromIndex[i]);
     lFiltro := fFiltroController.getByName(sName);
+    lFiltro.objeto.permissaoLojas := vConfiguracoes.objeto.verificaPerfil(getPermissaoLoja);
+
     lFiltro.objeto.campo := sValue;
     lFiltro.objeto.setTipoPorNome(sName);
 
@@ -813,6 +824,7 @@ begin
   if(fFiltroLojas=nil) then
   begin
     fFiltroLojas := fFiltroController.getByName('');
+    fFiltroLojas.objeto.permissaoLojas := vConfiguracoes.objeto.verificaPerfil(getPermissaoLoja);
     fFiltroLojas.objeto.setTipoPorNome('@lojas');
   end;
   fFILTROS.Insert(0,fFiltroLojas);
@@ -1130,6 +1142,18 @@ begin
   if(fPermissao='') then
     fPermissao := tagConfig_GESTAO_RELATORIO_PERMISSAO;
   Result := fPermissao;
+end;
+
+procedure TEndpointModel.setPermissaoLoja(const pValue: TipoWideStringFramework);
+begin
+  fPermissaoLoja := pValue;
+end;
+
+function TEndpointModel.getPermissaoLoja: TipoWideStringFramework;
+begin
+  if(fPermissaoLoja='') then
+    fPermissaoLoja := tagConfig_GESTAO_RELATORIO_LOJAS;
+  Result := fPermissaoLoja;
 end;
 
 procedure TEndpointModel.setListaImpressao(const pValue: IListaImpressao);
