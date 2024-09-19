@@ -1162,7 +1162,14 @@ begin
     lTipoVenda.objeto.obterLista;
 
     if lTipoVenda.objeto.TotalRecords = 0 then //Não permitir a emissão de NF-e para o tipo de venda CD.
+    begin
+      self.FAcao := tacAlterar;
+      self.FSTATUS        := 'F';
+      self.FDATA_FATURADO := DateToStr(vIConexao.DataServer);
+      self.Salvar;
+
       CriaException('Não é possível emitir NF-e para um pedido sem itens da loja. O pedido foi recalculado.');
+    end;
 
     lNFModel.objeto.Acao := tacIncluir;
     lNFModel.objeto.TIPO_NF               := 'N';
