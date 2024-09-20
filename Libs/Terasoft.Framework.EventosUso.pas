@@ -217,7 +217,7 @@ procedure TEstatisticaUsoImpl.gravaEvento;
 begin
   js := nil;
 
-  logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TEstatisticaUsoImpl.dump: Registra ação [%s]', [pEvento]), LOG_LEVEL_DEBUG);
+  //logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TEstatisticaUsoImpl.dump: Registra ação [%s]', [pEvento]), LOG_LEVEL_DEBUG);
   if(stringNoArray(pEvento, [ EVENTOUSO_ACAO_CONEXAO, EVENTOUSO_ACAO_SISTEMA ])) then
   begin
     fDH := pDH;
