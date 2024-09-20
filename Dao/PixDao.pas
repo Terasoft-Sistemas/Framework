@@ -122,6 +122,7 @@ begin
     lModel.objeto.CONTASRECEBERITENS_ID  := lQry.FieldByName('CONTASRECEBERITENS_ID').AsString;
     lModel.objeto.DATA_PAGAMENTO         := lQry.FieldByName('DATA_PAGAMENTO').AsString;
     lModel.objeto.MOTIVO_CANCELAMENTO    := lQry.FieldByName('MOTIVO_CANCELAMENTO').AsString;
+    lModel.objeto.PARCELAS_BAIXADAS      := lQry.FieldByName('PARCELAS_BAIXADAS').AsString;
 
     Result := lModel;
 
@@ -406,6 +407,8 @@ begin
       modelo.objeto.DATA_PAGAMENTO        := lQry.FieldByName('DATA_PAGAMENTO').AsString;
       modelo.objeto.CONTASRECEBERITENS_ID := lQry.FieldByName('CONTASRECEBERITENS_ID').AsString;
       modelo.objeto.MOTIVO_CANCELAMENTO   := lQry.FieldByName('MOTIVO_CANCELAMENTO').AsString;
+      modelo.objeto.PARCELAS_BAIXADAS     := lQry.FieldByName('PARCELAS_BAIXADAS').AsString;
+
       lQry.Next;
     end;
 
