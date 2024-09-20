@@ -159,38 +159,39 @@ var
   lMeta,
   lMetaPercentual    : Double;
   lPedidos           : Integer;
+  lResultado         : TVendasVendedorResultado;
 begin
   lVendasVendedorDao := TVendasVendedorDao.getNewIface(vIConexao);
   lVendedorModel     := TVendedorModel.Create(vIConexao);
   lPedidos           := 0;
 
   try
-    Result.fdComissao  := lVendasVendedorDao.objeto.obterComissao(pVendasVendedorParametros);
-    Result.fdDevolucao := lVendasVendedorDao.objeto.obterDevolucao(pVendasVendedorParametros);
-    Result.fditens     := lVendasVendedorDao.objeto.obterItens(pVendasVendedorParametros);
-    Result.fdGrupo     := lVendasVendedorDao.objeto.obterGrupoComissao(pVendasVendedorParametros);
+    lResultado.fdComissao  := lVendasVendedorDao.objeto.obterComissao(pVendasVendedorParametros);
+    lResultado.fdDevolucao := lVendasVendedorDao.objeto.obterDevolucao(pVendasVendedorParametros);
+    lResultado.fditens     := lVendasVendedorDao.objeto.obterItens(pVendasVendedorParametros);
+    lResultado.fdGrupo     := lVendasVendedorDao.objeto.obterGrupoComissao(pVendasVendedorParametros);
 
-    Result.fdComissao.objeto.First;
-    while not Result.fdComissao.objeto.Eof do
+    lResultado.fdComissao.objeto.First;
+    while not lResultado.fdComissao.objeto.Eof do
     begin
-      lVenda    := lVenda    + Result.fdComissao.objeto.FieldByName('VALOR_VENDA').AsFloat;
-      lComissao := lComissao + Result.fdComissao.objeto.FieldByName('VALOR_COMISSAO').AsFloat;
+      lVenda    := lVenda    + lResultado.fdComissao.objeto.FieldByName('VALOR_VENDA').AsFloat;
+      lComissao := lComissao + lResultado.fdComissao.objeto.FieldByName('VALOR_COMISSAO').AsFloat;
       inc(lPedidos);
 
-      Result.fdComissao.objeto.Next;
+      lResultado.fdComissao.objeto.Next;
     end;
 
-    Result.fdDevolucao.objeto.First;
-    while not Result.fdDevolucao.objeto.Eof do
+    lResultado.fdDevolucao.objeto.First;
+    while not lResultado.fdDevolucao.objeto.Eof do
     begin
-      lDevolucao := lDevolucao + Result.fdDevolucao.objeto.FieldByName('VALOR_VENDA').AsFloat;
-      lComissao  := lComissao  - Result.fdDevolucao.objeto.FieldByName('VALOR_COMISSAO').AsFloat;
+      lDevolucao := lDevolucao + lResultado.fdDevolucao.objeto.FieldByName('VALOR_VENDA').AsFloat;
+      lComissao  := lComissao  - lResultado.fdDevolucao.objeto.FieldByName('VALOR_COMISSAO').AsFloat;
 
-      Result.fdDevolucao.objeto.Next;
+      lResultado.fdDevolucao.objeto.Next;
     end;
 
-    Result.percentualMeta := 0;
-    Result.meta           := 0;
+    lResultado.percentualMeta := 0;
+    lResultado.meta           := 0;
 
     if pVendasVendedorParametros.Vendedor <> '' then
     begin
@@ -199,17 +200,19 @@ begin
                                         StrToDate(pVendasVendedorParametros.DataFim));
 
       if lMeta > 0 then begin
-        Result.percentualMeta := lVenda * 100 / lMeta;
-        Result.meta           := lMeta;
+        lResultado.percentualMeta := lVenda * 100 / lMeta;
+        lResultado.meta           := lMeta;
       end;
     end;
 
-    Result.totalVenda     := lVenda;
-    Result.totalDevolucao := lDevolucao;
-    Result.total          := lVenda-lDevolucao;
-    Result.totalComissao  := lComissao;
-    Result.totalPedidos   := lPedidos;
-    Result.ticket         := lVenda/lPedidos;
+    lResultado.totalVenda     := lVenda;
+    lResultado.totalDevolucao := lDevolucao;
+    lResultado.total          := lVenda-lDevolucao;
+    lResultado.totalComissao  := lComissao;
+    lResultado.totalPedidos   := lPedidos;
+    lResultado.ticket         := lVenda/lPedidos;
+
+    Result := lResultado;
 
   finally
     lVendasVendedorDao := nil;

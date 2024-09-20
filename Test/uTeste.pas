@@ -1,4 +1,4 @@
-
+﻿
 {$i definicoes.inc}
 
 unit uTeste;
@@ -243,6 +243,27 @@ type
     dGrupo: TDataSource;
     dDevolucao: TDataSource;
     dVenda: TDataSource;
+    GroupBox5: TGroupBox;
+    Label3: TLabel;
+    lTicket: TLabel;
+    GroupBox6: TGroupBox;
+    Label7: TLabel;
+    lMeta: TLabel;
+    GroupBox7: TGroupBox;
+    Label9: TLabel;
+    lPedidos: TLabel;
+    GroupBox1: TGroupBox;
+    Label2: TLabel;
+    lTotal: TLabel;
+    GroupBox4: TGroupBox;
+    Label26: TLabel;
+    lComissao: TLabel;
+    GroupBox3: TGroupBox;
+    Label6: TLabel;
+    lVenda: TLabel;
+    GroupBox2: TGroupBox;
+    Label4: TLabel;
+    lDevolucao: TLabel;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -410,7 +431,7 @@ type
     { Private declarations }
     vQtdeRegistros,
     vPagina         : Integer;
-    dsTmp,dsTmp2: IFDDataset;
+    dsTmp,dsTmp2, tComissao, tDevolucao, tItens, tGrupo: IFDDataset;
 
   public
     { Public declarations }
@@ -680,7 +701,6 @@ var
   lVendasVendedorModel : ITVendasVendedorModel;
   lParamentros         : TVendasVendedorParametros;
   lResultado           : TVendasVendedorResultado;
-  tTemp1               : IFDDataset;
 begin
 
   lVendasVendedorModel := TVendasVendedorModel.getNewIface(vIConexao);
@@ -688,15 +708,28 @@ begin
     lParamentros.TipoData   := 'E';
     lParamentros.DataInicio := '01/01/2024';
     lParamentros.DataFim    := '18/09/2024';
+    lParamentros.Vendedor   := ''; //Passar essa informação se quiser filtrar um vendedor
+    lParamentros.Lojas      := ''; //Passar essa informação se quiser filtrar lojas
 
     lResultado := lVendasVendedorModel.objeto.obterVendasVendedor(lParamentros);
 
-    tTemp1 := lResultado.fdComissao;
+    tComissao  := lResultado.fdComissao;
+    tDevolucao := lResultado.fdDevolucao;
+    tItens     := lResultado.fdItens;
+    tGrupo     := lResultado.fdGrupo;
 
-    dVenda.DataSet     := tTemp1.objeto;
-    dDevolucao.DataSet := lResultado.fdDevolucao.objeto;
-    dItens.DataSet     := lResultado.fdItens.objeto;
-    dGrupo.DataSet     := lResultado.fdGrupo.objeto;
+    dVenda.DataSet     := tComissao.objeto;
+    dDevolucao.DataSet := tDevolucao.objeto;
+    dItens.DataSet     := tItens.objeto;
+    dGrupo.DataSet     := tGrupo.objeto;
+
+    lVenda.Caption     := FormatCurr('#,###0.00',lResultado.totalVenda);
+    lDevolucao.Caption := FormatCurr('#,###0.00',lResultado.totalDevolucao);
+    lTotal.Caption     := FormatCurr('#,###0.00',lResultado.total);
+    lComissao.Caption  := FormatCurr('#,###0.00',lResultado.totalComissao);
+    lPedidos.Caption   := FloatToStr(lResultado.totalPedidos);
+    lTicket.Caption    := FormatCurr('#,###0.00',lResultado.ticket);
+    lMeta.Caption      := FormatCurr('#,###0.00',lResultado.meta);
 
   finally
     lVendasVendedorModel := nil;

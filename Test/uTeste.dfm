@@ -10,19 +10,18 @@ object Form1: TForm1
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
-  Position = poDesigned
+  Position = poDesktopCenter
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 15
   object PageControl: TPageControl
     Left = 0
     Top = 0
     Width = 1254
     Height = 769
-    ActivePage = TabSheet1
+    ActivePage = TabSheet11
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -1635,7 +1634,7 @@ object Form1: TForm1
       end
       object PageControl1: TPageControl
         Left = 11
-        Top = 120
+        Top = 168
         Width = 1222
         Height = 265
         ActivePage = TabSheet12
@@ -1648,7 +1647,7 @@ object Form1: TForm1
             Width = 1214
             Height = 235
             Align = alClient
-            DataSource = dsTeste2
+            DataSource = dVenda
             GridStyle.VisualStyle = vsXPStyle
             TabOrder = 0
           end
@@ -1694,6 +1693,307 @@ object Form1: TForm1
             GridStyle.VisualStyle = vsXPStyle
             TabOrder = 0
           end
+        end
+      end
+      object GroupBox5: TGroupBox
+        Left = 165
+        Top = 89
+        Width = 160
+        Height = 57
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Verdana'
+        Font.Style = []
+        ParentFont = False
+        TabOrder = 7
+        object Label3: TLabel
+          Left = 3
+          Top = 3
+          Width = 154
+          Height = 16
+          Alignment = taCenter
+          AutoSize = False
+          Caption = 'Ticket m'#233'dio'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Verdana'
+          Font.Style = []
+          ParentFont = False
+        end
+        object lTicket: TLabel
+          Left = 3
+          Top = 30
+          Width = 154
+          Height = 19
+          Alignment = taCenter
+          AutoSize = False
+          Caption = '0.00'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clRed
+          Font.Height = -16
+          Font.Name = 'Arial'
+          Font.Style = []
+          ParentFont = False
+        end
+      end
+      object GroupBox6: TGroupBox
+        Left = 11
+        Top = 89
+        Width = 160
+        Height = 57
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Verdana'
+        Font.Style = []
+        ParentFont = False
+        TabOrder = 8
+        object Label7: TLabel
+          Left = 3
+          Top = 3
+          Width = 154
+          Height = 16
+          Alignment = taCenter
+          AutoSize = False
+          Caption = 'Meta'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Verdana'
+          Font.Style = []
+          ParentFont = False
+        end
+        object lMeta: TLabel
+          Left = 3
+          Top = 30
+          Width = 154
+          Height = 19
+          Alignment = taCenter
+          AutoSize = False
+          Caption = '0.00'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clRed
+          Font.Height = -16
+          Font.Name = 'Arial'
+          Font.Style = []
+          ParentFont = False
+        end
+      end
+      object GroupBox7: TGroupBox
+        Left = 311
+        Top = 89
+        Width = 160
+        Height = 57
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Verdana'
+        Font.Style = []
+        ParentFont = False
+        TabOrder = 9
+        object Label9: TLabel
+          Left = 3
+          Top = 3
+          Width = 154
+          Height = 16
+          Alignment = taCenter
+          AutoSize = False
+          Caption = 'Pedidos'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Verdana'
+          Font.Style = []
+          ParentFont = False
+        end
+        object lPedidos: TLabel
+          Left = 3
+          Top = 30
+          Width = 154
+          Height = 19
+          Alignment = taCenter
+          AutoSize = False
+          Caption = '0.00'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clRed
+          Font.Height = -16
+          Font.Name = 'Arial'
+          Font.Style = []
+          ParentFont = False
+        end
+      end
+      object GroupBox1: TGroupBox
+        Left = 765
+        Top = 89
+        Width = 160
+        Height = 57
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Verdana'
+        Font.Style = []
+        ParentFont = False
+        TabOrder = 10
+        object Label2: TLabel
+          Left = 3
+          Top = 3
+          Width = 154
+          Height = 16
+          Alignment = taCenter
+          AutoSize = False
+          Caption = 'Total'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Verdana'
+          Font.Style = []
+          ParentFont = False
+        end
+        object lTotal: TLabel
+          Left = 3
+          Top = 30
+          Width = 154
+          Height = 19
+          Alignment = taCenter
+          AutoSize = False
+          Caption = '0.00'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clRed
+          Font.Height = -16
+          Font.Name = 'Arial'
+          Font.Style = []
+          ParentFont = False
+        end
+      end
+      object GroupBox4: TGroupBox
+        Left = 911
+        Top = 89
+        Width = 160
+        Height = 57
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Verdana'
+        Font.Style = []
+        ParentFont = False
+        TabOrder = 11
+        object Label26: TLabel
+          Left = 3
+          Top = 3
+          Width = 154
+          Height = 16
+          Alignment = taCenter
+          AutoSize = False
+          Caption = 'Comiss'#227'o'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Verdana'
+          Font.Style = []
+          ParentFont = False
+        end
+        object lComissao: TLabel
+          Left = 3
+          Top = 30
+          Width = 154
+          Height = 19
+          Alignment = taCenter
+          AutoSize = False
+          Caption = '0.00'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clRed
+          Font.Height = -16
+          Font.Name = 'Arial'
+          Font.Style = []
+          ParentFont = False
+        end
+      end
+      object GroupBox3: TGroupBox
+        Left = 457
+        Top = 89
+        Width = 160
+        Height = 57
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Verdana'
+        Font.Style = []
+        ParentFont = False
+        TabOrder = 12
+        object Label6: TLabel
+          Left = 3
+          Top = 3
+          Width = 154
+          Height = 16
+          Alignment = taCenter
+          AutoSize = False
+          Caption = 'Vendas / O.S'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Verdana'
+          Font.Style = []
+          ParentFont = False
+        end
+        object lVenda: TLabel
+          Left = 3
+          Top = 30
+          Width = 154
+          Height = 19
+          Alignment = taCenter
+          AutoSize = False
+          Caption = '0.00'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clRed
+          Font.Height = -16
+          Font.Name = 'Arial'
+          Font.Style = []
+          ParentFont = False
+        end
+      end
+      object GroupBox2: TGroupBox
+        Left = 611
+        Top = 89
+        Width = 160
+        Height = 57
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Verdana'
+        Font.Style = []
+        ParentFont = False
+        TabOrder = 13
+        object Label4: TLabel
+          Left = 3
+          Top = 3
+          Width = 154
+          Height = 16
+          Alignment = taCenter
+          AutoSize = False
+          Caption = 'Devolu'#231#245'es'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Verdana'
+          Font.Style = []
+          ParentFont = False
+        end
+        object lDevolucao: TLabel
+          Left = 3
+          Top = 30
+          Width = 154
+          Height = 19
+          Alignment = taCenter
+          AutoSize = False
+          Caption = '0.00'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clRed
+          Font.Height = -16
+          Font.Name = 'Arial'
+          Font.Style = []
+          ParentFont = False
         end
       end
     end
