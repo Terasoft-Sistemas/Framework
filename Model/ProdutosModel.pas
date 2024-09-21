@@ -1005,9 +1005,9 @@ end;
 class function TProdutosModel.getNewIface(pIConexao: IConexao): ITProdutosModel;
 begin
   Result := TImplObjetoOwner<TProdutosModel>.CreateOwner(self._Create(pIConexao));
-  logaByTagSeNivel(TAGLOG_CONDICIONAL,format('TProdutosModel.getNewIface(%s): Atribuindo Result.objeto.myself',[ pIConexao.empresa.ID ]),LOG_LEVEL_DEBUG);
+  logaByTagSeNivel(TAGLOG_CONDICIONAL,format('TProdutosModel.getNewIface(%s): Atribuindo Result.objeto.myself',[ pIConexao.CSID ]),LOG_LEVEL_DEBUG);
   Result.objeto.myself := Result;
-  logaByTagSeNivel(TAGLOG_CONDICIONAL,format('TProdutosModel.getNewIface: Saindo procedure',[ pIConexao.empresa.ID ]),LOG_LEVEL_DEBUG);
+  logaByTagSeNivel(TAGLOG_CONDICIONAL,format('TProdutosModel.getNewIface(%s): Saindo procedure',[ pIConexao.CSID ]),LOG_LEVEL_DEBUG);
 end;
 
 function TProdutosModel.Incluir: String;
