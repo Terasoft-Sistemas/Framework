@@ -114,6 +114,8 @@ interface
       function getUSer                                                     : TUsuario;
       function setUser(pUser : TUsuario)                                   : Boolean;
 
+      function getCSID                                                     : TipoWideStringFramework;
+
       function setEmpresa(pEmpresa: TEmpresa)                              : Boolean;
       function getEmpresa                                                  : TEmpresa;
 
@@ -148,6 +150,7 @@ interface
       property gdb: IGDB                       read getGDB;
       property validador: IValidadorDatabase   read getValidador;
       property terasoftConfiguracoes: IUnknown read getTerasoftConfiguracoes write setTerasoftConfiguracoes;
+      property CSID: TipoWideStringFramework read getCSID;
 
     end;
 
@@ -155,9 +158,20 @@ interface
     function criaConstrutorDao(pIConexao: IConexao): IConstrutorDao;
     function criaIFDMemTable(const obj: TFDMemTable): IFDMemTable;
 
+    function getGCSID: TipoWideStringFramework;
+
 implementation
   uses
+    Terasoft.Framework.Bytes,
     Terasoft.ConstrutorDao;
+
+    var
+      gCSID: Int64;
+
+function getGCSID: TipoWideStringFramework;
+begin
+  Result := IntToStr(AtomicIncrement(gCSID,57));
+end;
 
 function criaConstrutorDao(pIConexao: IConexao): IConstrutorDao;
 begin
@@ -173,5 +187,8 @@ function criaIFDMemTable(const obj: TFDMemTable): IFDMemTable;
 begin
   Result := TImplObjetoOwner<TFDMemTable>.CreateOwner(obj);
 end;
+
+initialization
+  gCSID := Terasoft.Framework.Bytes.randomWord mod 1000;
 
 end.
