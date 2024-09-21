@@ -126,7 +126,7 @@ begin
                                      QuotedStr(transformaDataFireBirdWhere(pVendasVendedorParametros.DataFim));
 
   if pVendasVendedorParametros.Vendedor <> '' then
-    lSQL := lSQL + ' and t.codigo_vendedor = ' + QuotedStr(pVendasVendedorParametros.Vendedor);
+    lSQL := lSQL + ' and t.codigo_vendedor in (' + pVendasVendedorParametros.Vendedor + ')';
 
   lSQL := lSQL + ' group by 1,2,3,4,5,6,7 ';
 
