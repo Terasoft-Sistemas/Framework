@@ -388,14 +388,14 @@ begin
       if lRestante = 0 then
         Break;
 
-      if lCreditos.objeto.valor > lRestante then
+      if lCreditos.objeto.VALOR_ABERTO > lRestante then
       begin
         lBaixa    := lRestante;
         lRestante := 0;
       end
       else
       begin
-        lBaixa    := lCreditos.objeto.valor;
+        lBaixa    := lCreditos.objeto.VALOR_ABERTO;
         lRestante := lRestante - lBaixa;
       end;
 
