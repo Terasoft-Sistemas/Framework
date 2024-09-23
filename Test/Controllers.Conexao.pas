@@ -63,6 +63,9 @@ interface
         fGDBExterno: IGDB;
         fUltimoAcessoDB: TDateTime;
         fEventosUsoSessao: IEventosUsoSessao;
+        fCSID: TipoWideStringFramework;
+
+        function getCSID                                                     : TipoWideStringFramework;
 
       //property estatistica getter/setter
         function getEventosUsoSessao: IUnknown;
@@ -216,6 +219,7 @@ end;
 
 constructor TControllersConexao.Create;
 begin
+  fCSID := getGCSID;
   {$if defined(__USE_WIN1252__)}
     ativaWINPTBR;
   {$endif}
@@ -303,6 +307,11 @@ end;
 function TControllersConexao.getConnection: TFDConnection;
 begin
   Result := self.FConexao;
+end;
+
+function TControllersConexao.getCSID: TipoWideStringFramework;
+begin
+  Result := fCSID;
 end;
 
 function TControllersConexao.getEmpresa: TEmpresa;

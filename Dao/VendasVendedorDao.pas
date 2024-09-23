@@ -126,7 +126,7 @@ begin
                                      QuotedStr(transformaDataFireBirdWhere(pVendasVendedorParametros.DataFim));
 
   if pVendasVendedorParametros.Vendedor <> '' then
-    lSQL := lSQL + ' and t.codigo_vendedor = ' + QuotedStr(pVendasVendedorParametros.Vendedor);
+    lSQL := lSQL + ' and t.codigo_vendedor in (' + pVendasVendedorParametros.Vendedor + ')';
 
   lSQL := lSQL + ' group by 1,2,3,4,5,6,7 ';
 
@@ -346,6 +346,7 @@ begin
           '    DATA,                                       '+SLineBreak+
           '    LOJA,                                       '+SLineBreak+
           '    CODIGO_VENDEDOR,                            '+SLineBreak+
+          '    VENDEDOR,                                   '+SLineBreak+
           '    CODIGO_PRODUTO,                             '+SLineBreak+
           '    PRODUTO,                                    '+SLineBreak+
           '    VALOR_VENDA_BRUTO VALOR_VENDA,              '+SLineBreak+
@@ -368,6 +369,7 @@ begin
   lMemTable.FieldDefs.Add('DATA', ftDate);
   lMemTable.FieldDefs.Add('LOJA', ftString, 3);
   lMemTable.FieldDefs.Add('CODIGO_VENDEDOR', ftString, 6);
+  lMemTable.FieldDefs.Add('VENDEDOR', ftString, 100);
   lMemTable.FieldDefs.Add('CODIGO_PRODUTO', ftString, 50);
   lMemTable.FieldDefs.Add('PRODUTO', ftString, 100);
   lMemTable.FieldDefs.Add('VALOR_VENDA', ftFloat);
@@ -398,6 +400,7 @@ begin
                               lQA.dataset.dataset.FieldByName('DATA').AsString,
                               lQA.dataset.dataset.FieldByName('LOJA').AsString,
                               lQA.dataset.dataset.FieldByName('CODIGO_VENDEDOR').AsString,
+                              lQA.dataset.dataset.FieldByName('VENDEDOR').AsString,
                               lQA.dataset.dataset.FieldByName('CODIGO_PRODUTO').AsString,
                               lQA.dataset.dataset.FieldByName('PRODUTO').AsString,
                               lQA.dataset.dataset.FieldByName('VALOR_VENDA').AsString,
