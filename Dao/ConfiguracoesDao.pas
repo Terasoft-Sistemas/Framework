@@ -266,8 +266,9 @@ begin
     i := 0;
     while not lQry.Eof do
     begin
-      sleep(1);
       inc(i);
+      if( i mod 128 ) = 0 then
+        sleep(1);
       //logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TConfiguracoesDao.obterLista: ítem [%d] de [%d]',[i,lQry.RecordCount]),LOG_LEVEL_DEBUG);
       modelo := TConfiguracoesModel.getNewIface(vIConexao);
       //logaByTagSeNivel(TAGLOG_CONDICIONAL, format('TConfiguracoesDao.obterLista: ítem [%d] : Modelo criado',[i]),LOG_LEVEL_DEBUG);
