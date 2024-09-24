@@ -226,7 +226,6 @@ begin
     lPix_Parametros.DataFim               := pPix_Parametros.DataFim;
     lPix_Parametros.DataInicio            := pPix_Parametros.DataInicio;
     lPix_Parametros.ColunaOrdenacaoOrdem  := pPix_Parametros.ColunaOrdenacaoOrdem;
-    lPix.objeto.WhereView                 := FWhereView;
 
     Result := lPix.objeto.ObterGestaoPix(lPix_Parametros);
 
