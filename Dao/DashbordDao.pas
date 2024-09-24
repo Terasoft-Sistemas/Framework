@@ -145,7 +145,7 @@ begin
           '            d.data DATA_EMISSAO,                                                                                                   ' + #13 +
           '            d.data DATA_FATURADO,                                                                                                  ' + #13 +
           '            (di.valor_unitario * di.quantidade) * -1 VALOR_PRODUTO,                                                                ' + #13 +
-          '            (di.quantidade*di.valor_unitario)*(di.desconto_ped/100) * -1 DESCONTO,           ' + #13 +
+          '            (di.quantidade*di.valor_unitario)*(coalesce(cast(di.desconto_ped as float),0)/100) * -1 DESCONTO,           ' + #13 +
 //          '            ((di.quantidade*di.valor_unitario)/(d.valor_total+d.desconto-d.valor_acrescimo))*coalesce(cast(d.desconto as float),0) *-1 DESCONTO,           ' + #13 +
           '            ((di.quantidade*di.valor_unitario)/(d.valor_total+d.desconto-d.valor_acrescimo))*coalesce(cast(d.valor_acrescimo as float),0) *-1 ACRESCIMO,   ' + #13 +
           '            0 FRETE,                                                                                                               ' + #13 +
@@ -386,7 +386,7 @@ begin
             '            d.data DATA_EMISSAO,                                                                                                   ' + #13 +
             '            d.data DATA_FATURADO,                                                                                                  ' + #13 +
             '            (di.valor_unitario*di.quantidade) *-1 VALOR_PRODUTO,                                                                   ' + #13 +
-            '            (di.quantidade*di.valor_unitario)*(di.desconto_ped/100) * -1 DESCONTO,           ' + #13 +
+            '            (di.quantidade*di.valor_unitario)*(coalesce(cast(di.desconto_ped as float),0)/100) * -1 DESCONTO,           ' + #13 +
             '            ((di.quantidade*di.valor_unitario)/(d.valor_total+d.desconto-d.valor_acrescimo))*coalesce(cast(d.valor_acrescimo as float),0) *-1 ACRESCIMO,   ' + #13 +
             '            0 FRETE,                                                                                                               ' + #13 +
             '            0 IPI,                                                                                                                 ' + #13 +
@@ -585,7 +585,7 @@ begin
           '        d.data DATA_EMISSAO,                                                                                                   ' + #13 +
           '        d.data DATA_FATURADO,                                                                                                  ' + #13 +
           '        (di.valor_unitario*di.quantidade) *-1 VALOR_PRODUTO,                                                                   ' + #13 +
-          '        (di.quantidade*di.valor_unitario)*(di.desconto_ped/100) * -1 DESCONTO,           ' + #13 +
+          '        (di.quantidade*di.valor_unitario)*(coalesce(cast(di.desconto_ped as float),0)/100) * -1 DESCONTO,           ' + #13 +
           '        ((di.quantidade*di.valor_unitario)/(d.valor_total+d.desconto-d.valor_acrescimo))*coalesce(cast(d.valor_acrescimo as float),0) *-1 ACRESCIMO,   ' + #13 +
           '        0 FRETE,                                                                                                               ' + #13 +
           '        0 IPI,                                                                                                                 ' + #13 +
@@ -1252,7 +1252,7 @@ begin
 //          '            f.nome_fun VENDEDOR,                                                                                                   ' + #13 +
           lTipoAnalise +
           '            (di.valor_unitario*di.quantidade) *-1 VALOR_PRODUTO,                                                                   ' + #13 +
-          '            (di.quantidade*di.valor_unitario)*(di.desconto_ped/100) * -1 DESCONTO,           ' + #13 +
+          '            (di.quantidade*di.valor_unitario)*(coalesce(cast(di.desconto_ped as float),0)/100) * -1 DESCONTO,           ' + #13 +
           '            ((di.quantidade*di.valor_unitario)/(d.valor_total+d.desconto-d.valor_acrescimo))*coalesce(cast(d.valor_acrescimo as float),0) *-1 ACRESCIMO,   ' + #13 +
           '            0 FRETE,                                                                                                               ' + #13 +
           '            0 IPI,                                                                                                                 ' + #13 +
@@ -1509,7 +1509,7 @@ begin
       '            d.data DATA_EMISSAO,                                                                                                   ' + #13 +
       '            d.data DATA_FATURADO,                                                                                                  ' + #13 +
       '            (di.valor_unitario * di.quantidade) * -1 VALOR_PRODUTO,                                                                ' + #13 +
-      '            (di.quantidade*di.valor_unitario)*(di.desconto_ped/100) * -1 DESCONTO,           ' + #13 +
+      '            (di.quantidade*di.valor_unitario)*(coalesce(cast(di.desconto_ped as float),0)/100) * -1 DESCONTO,           ' + #13 +
       '            ((di.quantidade*di.valor_unitario)/(d.valor_total+d.desconto-d.valor_acrescimo))*coalesce(cast(d.valor_acrescimo as float),0) *-1 ACRESCIMO,   ' + #13 +
       '            0 FRETE,                                                                                                               ' + #13 +
       '            0 IPI,                                                                                                                 ' + #13 +

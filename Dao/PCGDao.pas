@@ -116,7 +116,7 @@ begin
           '            v.data_faturado DATA_FATURADO,                                                                                                             ' + #13 +
           '            ' + vNomeCampo + ',                                                                                                                        ' + #13 +
           '            (i.valorunitario_ped * i.qtde_calculada) VALOR_PRODUTO,                                                                                    ' + #13 +
-          '            (i.valorunitario_ped*(cast(i.desconto_ped as float)/100))*i.qtde_calculada DESCONTO,                                     ' + #13 +
+          '            (i.valorunitario_ped*(cast(coalesce(i.desconto_ped,0) as float)/100))*i.qtde_calculada DESCONTO,                                     ' + #13 +
           '            ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.acres_ped as float),0) ACRESCIMO,                                   ' + #13 +
           '            ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.frete_ped as float),0) FRETE,                                       ' + #13 +
           '            i.valor_ipi IPI,                                                                                                                           ' + #13 +
@@ -158,7 +158,7 @@ begin
           '            v.data DATA_FATURADO,                                                                                                                      ' + #13 +
           '            ' + IIF(vNomeCampoDev <> '', vNomeCampoDev, vNomeCampo) + ',                                                                               ' + #13 +
           '            (i.quantidade*i.valor_unitario) *-1 VALOR_PRODUTO,                                                                                         ' + #13 +
-          '            (i.quantidade*i.valor_unitario)*(i.desconto_ped/100) * -1 DESCONTO,         ' + #13 +
+          '            (i.quantidade*i.valor_unitario)*(coalesce(i.desconto_ped,0)/100) * -1 DESCONTO,         ' + #13 +
           '            ((i.quantidade*i.valor_unitario)/(v.valor_total+v.desconto-v.valor_acrescimo))*coalesce(cast(v.valor_acrescimo as float),0) *-1 ACRESCIMO, ' + #13 +
           '            0 FRETE,                                                                                                                                   ' + #13 +
           '            0 IPI,                                                                                                                                     ' + #13 +
@@ -351,7 +351,7 @@ begin
           '                v.data_faturado DATA_FATURADO,                                                                                         ' + #13 +
           '                (i.valorunitario_ped * i.qtde_calculada) VALOR_PRODUTO,                                                                ' + #13 +
           '                (i.vlrvenda_pro * i.qtde_calculada) VALOR_POSSIVEL,                                                                    ' + #13 +
-          '                (i.valorunitario_ped*(cast(i.desconto_ped as float)/100))*i.qtde_calculada DESCONTO,                 ' + #13 +
+          '                (i.valorunitario_ped*(cast(coalesce(i.desconto_ped,0) as float)/100))*i.qtde_calculada DESCONTO,                 ' + #13 +
           '                ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.acres_ped as float),0) ACRESCIMO,               ' + #13 +
           '                ((i.valorunitario_ped * i.qtde_calculada)/v.valor_ped)*coalesce(cast(v.frete_ped as float),0) FRETE,                   ' + #13 +
           '                i.valor_ipi IPI,                                                                                                       ' + #13 +
@@ -377,7 +377,7 @@ begin
           '                v.data DATA_FATURADO,                                                                                                  ' + #13 +
           '                (i.valor_unitario*i.quantidade) *-1 VALOR_PRODUTO,                                                                     ' + #13 +
           '                (pi.vlrvenda_pro*i.quantidade) *-1 VALOR_CADASTRO,                                                                     ' + #13 +
-          '                (i.quantidade*i.valor_unitario)*(i.desconto_ped/100) * -1 DESCONTO,         ' + #13 +
+          '                (i.quantidade*i.valor_unitario)*(coalesce(i.desconto_ped,0)/100) * -1 DESCONTO,         ' + #13 +
           '                ((i.quantidade*i.valor_unitario)/(v.valor_total+v.desconto-v.valor_acrescimo))*coalesce(cast(v.valor_acrescimo as float),0) *-1 ACRESCIMO, ' + #13 +
           '                0 FRETE,                                                                                                               ' + #13 +
           '                0 IPI,                                                                                                                 ' + #13 +
