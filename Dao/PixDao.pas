@@ -170,7 +170,6 @@ end;
 function TPixDao.ObterGestaoPix(pPix_Parametros: TPix_Parametros): IFDDataset;
 var
   lSQL,
-  lPaginacao,
   lDataWhere  : String;
   lMemTable   : TFDMemTable;
   lAsyncList  : IListaQueryAsync;
@@ -206,19 +205,8 @@ begin
 
   lSQL := lSQL +  ' and ' +lDataWhere;
 
-  lSQL := lSQL + Where;
-
   if pPix_Parametros.Cliente <> '' then
      lSQL := lSQL + ' and pix.cliente_id in (' +QuotedStr(pPix_Parametros.Cliente)+ ')';
-
-  with lMemTable.IndexDefs.AddIndexDef do
-  begin
-    Name    := 'OrdenacaoLoja';
-    Fields  := 'LOJA';
-    Options := [TIndexOption.ixCaseInsensitive];
-  end;
-
-  lMemTable.IndexName := 'OrdenacaoLoja';
 
   lMemTable.FieldDefs.Add('LOJA', ftString, 3);
   lMemTable.FieldDefs.Add('DATA_CADASTRO', ftString, 100);
