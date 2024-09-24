@@ -215,21 +215,17 @@ end;
 function TPixModel.ObterGestaoPix(pPix_Parametros: TPix_Parametros): IFDDataset;
 var
   lPix : ITPixDao;
-  lPix_Parametros: TPix_Parametros;
+  lPix_Parametros : TPix_Parametros;
 begin
   lPix := TPixDao.getNewIface(vIConexao);
-
   try
     lPix_Parametros.Lojas                 := pPix_Parametros.Lojas;
     lPix_Parametros.Cliente               := pPix_Parametros.Cliente;
     lPix_Parametros.TipoData              := pPix_Parametros.TipoData;
     lPix_Parametros.DataFim               := pPix_Parametros.DataFim;
     lPix_Parametros.DataInicio            := pPix_Parametros.DataInicio;
-    lPix_Parametros.ColunaOrdenacaoOrdem  := pPix_Parametros.ColunaOrdenacaoOrdem;
-    lPix.objeto.WhereView                 := FWhereView;
 
     Result := lPix.objeto.ObterGestaoPix(lPix_Parametros);
-
   finally
     lPix:=nil;
   end;
