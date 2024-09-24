@@ -898,6 +898,7 @@ begin
     lQry.First;
     while not lQry.Eof do
     begin
+      sleep(1);
       modelo := TProdutosModel.getNewIface(vIConexao);
       FProdutossLista.Add(modelo);
 
