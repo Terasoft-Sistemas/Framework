@@ -101,11 +101,9 @@ var
   lModel : TContasReceberItensModel;
 begin
 
-  if not pLoja.IsEmpty then
+  if (pLoja <> '') and (vIConexao.getEmpresa.LOJA <> pLoja) then
   begin
-    if vIConexao.getLojaConectada <> pLoja then
-      vIConexao.ConfigConexaoExterna(pLoja);
-
+    vIConexao.ConfigConexaoExterna(pLoja);
     lQry := vIConexao.criarQueryExterna;
   end
   else
