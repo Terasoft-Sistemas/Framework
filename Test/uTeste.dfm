@@ -1637,7 +1637,7 @@ object Form1: TForm1
         Top = 168
         Width = 1222
         Height = 265
-        ActivePage = TabSheet12
+        ActivePage = TabSheet17
         TabOrder = 6
         object TabSheet12: TTabSheet
           Caption = 'Venda'
@@ -1690,6 +1690,34 @@ object Form1: TForm1
             Height = 235
             Align = alClient
             DataSource = dGrupo
+            GridStyle.VisualStyle = vsXPStyle
+            TabOrder = 0
+          end
+        end
+        object TabSheet16: TTabSheet
+          Caption = 'Garantia'
+          ImageIndex = 4
+          object XDBGrid15: TXDBGrid
+            Left = 0
+            Top = 0
+            Width = 1214
+            Height = 235
+            Align = alClient
+            DataSource = dGarantia
+            GridStyle.VisualStyle = vsXPStyle
+            TabOrder = 0
+          end
+        end
+        object TabSheet17: TTabSheet
+          Caption = 'Prestamista'
+          ImageIndex = 5
+          object XDBGrid16: TXDBGrid
+            Left = 0
+            Top = 0
+            Width = 1214
+            Height = 235
+            Align = alClient
+            DataSource = dPrestamista
             GridStyle.VisualStyle = vsXPStyle
             TabOrder = 0
           end
@@ -1784,7 +1812,7 @@ object Form1: TForm1
       object GroupBox7: TGroupBox
         Left = 311
         Top = 89
-        Width = 160
+        Width = 122
         Height = 57
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -1794,9 +1822,9 @@ object Form1: TForm1
         ParentFont = False
         TabOrder = 9
         object Label9: TLabel
-          Left = 3
+          Left = 1
           Top = 3
-          Width = 154
+          Width = 125
           Height = 16
           Alignment = taCenter
           AutoSize = False
@@ -1809,9 +1837,9 @@ object Form1: TForm1
           ParentFont = False
         end
         object lPedidos: TLabel
-          Left = 3
+          Left = 1
           Top = 30
-          Width = 154
+          Width = 120
           Height = 19
           Alignment = taCenter
           AutoSize = False
@@ -1825,7 +1853,7 @@ object Form1: TForm1
         end
       end
       object GroupBox1: TGroupBox
-        Left = 765
+        Left = 717
         Top = 89
         Width = 160
         Height = 57
@@ -1868,9 +1896,9 @@ object Form1: TForm1
         end
       end
       object GroupBox4: TGroupBox
-        Left = 911
+        Left = 871
         Top = 89
-        Width = 160
+        Width = 114
         Height = 57
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -1880,7 +1908,7 @@ object Form1: TForm1
         ParentFont = False
         TabOrder = 11
         object Label26: TLabel
-          Left = 3
+          Left = -21
           Top = 3
           Width = 154
           Height = 16
@@ -1895,7 +1923,7 @@ object Form1: TForm1
           ParentFont = False
         end
         object lComissao: TLabel
-          Left = 3
+          Left = -21
           Top = 30
           Width = 154
           Height = 19
@@ -1911,9 +1939,9 @@ object Form1: TForm1
         end
       end
       object GroupBox3: TGroupBox
-        Left = 457
+        Left = 432
         Top = 89
-        Width = 160
+        Width = 137
         Height = 57
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -1923,7 +1951,7 @@ object Form1: TForm1
         ParentFont = False
         TabOrder = 12
         object Label6: TLabel
-          Left = 3
+          Left = -13
           Top = 3
           Width = 154
           Height = 16
@@ -1938,7 +1966,7 @@ object Form1: TForm1
           ParentFont = False
         end
         object lVenda: TLabel
-          Left = 3
+          Left = -13
           Top = 30
           Width = 154
           Height = 19
@@ -1954,7 +1982,7 @@ object Form1: TForm1
         end
       end
       object GroupBox2: TGroupBox
-        Left = 611
+        Left = 563
         Top = 89
         Width = 160
         Height = 57
@@ -1984,6 +2012,92 @@ object Form1: TForm1
           Left = 3
           Top = 30
           Width = 154
+          Height = 19
+          Alignment = taCenter
+          AutoSize = False
+          Caption = '0.00'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clRed
+          Font.Height = -16
+          Font.Name = 'Arial'
+          Font.Style = []
+          ParentFont = False
+        end
+      end
+      object GroupBox8: TGroupBox
+        Left = 983
+        Top = 89
+        Width = 123
+        Height = 57
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Verdana'
+        Font.Style = []
+        ParentFont = False
+        TabOrder = 14
+        object Label1: TLabel
+          Left = 3
+          Top = 3
+          Width = 110
+          Height = 16
+          Alignment = taCenter
+          AutoSize = False
+          Caption = 'Garantia'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Verdana'
+          Font.Style = []
+          ParentFont = False
+        end
+        object lGarantia: TLabel
+          Left = 3
+          Top = 30
+          Width = 118
+          Height = 19
+          Alignment = taCenter
+          AutoSize = False
+          Caption = '0.00'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clRed
+          Font.Height = -16
+          Font.Name = 'Arial'
+          Font.Style = []
+          ParentFont = False
+        end
+      end
+      object GroupBox9: TGroupBox
+        Left = 1104
+        Top = 89
+        Width = 123
+        Height = 57
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Verdana'
+        Font.Style = []
+        ParentFont = False
+        TabOrder = 15
+        object Label5: TLabel
+          Left = 3
+          Top = 3
+          Width = 110
+          Height = 16
+          Alignment = taCenter
+          AutoSize = False
+          Caption = 'Prestamista'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Verdana'
+          Font.Style = []
+          ParentFont = False
+        end
+        object lPrestamista: TLabel
+          Left = 3
+          Top = 30
+          Width = 118
           Height = 19
           Alignment = taCenter
           AutoSize = False
@@ -2072,6 +2186,14 @@ object Form1: TForm1
   end
   object dVenda: TDataSource
     Left = 808
+    Top = 320
+  end
+  object dGarantia: TDataSource
+    Left = 944
+    Top = 384
+  end
+  object dPrestamista: TDataSource
+    Left = 952
     Top = 320
   end
 end
