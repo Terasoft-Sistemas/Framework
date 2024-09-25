@@ -3,6 +3,7 @@ unit WebPedidoItensModel;
 interface
 
 uses
+  Terasoft.Framework.Types,
   SysUtils,
   Terasoft.Types,
   Terasoft.Utils,
@@ -365,10 +366,15 @@ end;
 
 class function TWebPedidoItensModel.getNewIface(pIConexao: IConexao): ITWebPedidoItensModel;
 begin
-  Result := TImplObjetoOwner<TWebPedidoItensModel>.CreateOwner(self._Create(pIConexao));
-  logaByTagSeNivel(TAGLOG_CONDICIONAL,format('TWebPedidoItensModel.getNewIface(%s): Atribuindo Result.objeto.myself',[ pIConexao.CSID ]),LOG_LEVEL_DEBUG);
-  Result.objeto.myself := Result;
-  logaByTagSeNivel(TAGLOG_CONDICIONAL,format('TWebPedidoItensModel.getNewIface(%s): Saindo procedure',[ pIConexao.CSID ]),LOG_LEVEL_DEBUG);
+  entraSecaoCriticaGlobal;
+  try
+    Result := TImplObjetoOwner<TWebPedidoItensModel>.CreateOwner(self._Create(pIConexao));
+    logaByTagSeNivel(TAGLOG_CONDICIONAL,format('TWebPedidoItensModel.getNewIface(%s): Atribuindo Result.objeto.myself',[ pIConexao.CSID ]),LOG_LEVEL_DEBUG);
+    Result.objeto.myself := Result;
+    logaByTagSeNivel(TAGLOG_CONDICIONAL,format('TWebPedidoItensModel.getNewIface(%s): Saindo procedure',[ pIConexao.CSID ]),LOG_LEVEL_DEBUG);
+  finally
+    saiSecaoCriticaGlobal;
+  end;
 end;
 
 function TWebPedidoItensModel.carregaClasse(pId: String): ITWebPedidoItensModel;
