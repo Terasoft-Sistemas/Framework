@@ -1436,7 +1436,7 @@ begin
       lWebPedidoItensModel.objeto.PERCENTUAL_DESCONTO := '0';
 
     lWebPedidoItensModel.objeto.VALOR_VENDA_ATUAL   := lProdutoModel.objeto.VENDA_PRO;
-		lWebPedidoItensModel.objeto.VALOR_CUSTO_ATUAL   := lProdutoModel.objeto.CUSTOMEDIO_PRO;
+		lWebPedidoItensModel.objeto.VALOR_CUSTO_ATUAL   := StrToFloatDef(lProdutoModel.objeto.CUSTOMEDIO_PRO, 0);
 
 		lWebPedidoItensModel.objeto.RESERVADO           := pVenderItemParametros.QUANTIDADE;
     lWebPedidoItensModel.objeto.TIPO                := PVenderItemParametros.TIPO;
