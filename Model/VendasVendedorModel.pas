@@ -22,7 +22,9 @@ type
     fdComissao,
     fdDevolucao,
     fditens,
-    fdGrupo          : IFDDataset;
+    fdGrupo,
+    fdGarantia,
+    fdPrestamista      : IFDDataset;
     totalVenda,
     totalDevolucao,
     total,
@@ -30,7 +32,9 @@ type
     totalPedidos,
     ticket,
     meta,
-    percentualMeta   : Double;
+    percentualMeta,
+    totalGarantia,
+    totalPrestamista   : Double;
   end;
 
   TVendasVendedorModel = class;
@@ -160,16 +164,24 @@ var
   lMetaPercentual    : Double;
   lPedidos           : Integer;
   lResultado         : TVendasVendedorResultado;
+  lResultadoServicos : TServicosResultado;
 begin
   lVendasVendedorDao := TVendasVendedorDao.getNewIface(vIConexao);
   lVendedorModel     := TVendedorModel.Create(vIConexao);
   lPedidos           := 0;
 
   try
-    lResultado.fdComissao  := lVendasVendedorDao.objeto.obterComissao(pVendasVendedorParametros);
-    lResultado.fdDevolucao := lVendasVendedorDao.objeto.obterDevolucao(pVendasVendedorParametros);
-    lResultado.fditens     := lVendasVendedorDao.objeto.obterItens(pVendasVendedorParametros);
-    lResultado.fdGrupo     := lVendasVendedorDao.objeto.obterGrupoComissao(pVendasVendedorParametros);
+    lResultado.fdComissao        := lVendasVendedorDao.objeto.obterComissao(pVendasVendedorParametros);
+    lResultado.fdDevolucao       := lVendasVendedorDao.objeto.obterDevolucao(pVendasVendedorParametros);
+    lResultado.fditens           := lVendasVendedorDao.objeto.obterItens(pVendasVendedorParametros);
+    lResultado.fdGrupo           := lVendasVendedorDao.objeto.obterGrupoComissao(pVendasVendedorParametros);
+
+    lResultadoServicos           := lVendasVendedorDao.objeto.obterServicos(pVendasVendedorParametros);
+
+    lResultado.fdGarantia        := lResultadoServicos.fdGarantia;
+    lResultado.fdPrestamista     := lResultadoServicos.fdPrestamista;
+    lResultado.totalGarantia     := lResultadoServicos.totalGarantia;
+    lResultado.totalPrestamista  := lResultadoServicos.totalPrestamista;
 
     lResultado.fdComissao.objeto.First;
     while not lResultado.fdComissao.objeto.Eof do

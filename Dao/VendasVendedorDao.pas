@@ -15,6 +15,13 @@ uses
   Terasoft.ConstrutorDao;
 
 type
+  TServicosResultado = record
+    fdGarantia,
+    fdPrestamista    : IFDDataset;
+    totalGarantia,
+    totalPrestamista : Double;
+  end;
+
   TVendasVendedorDao = class;
   ITVendasVendedorDao=IObject<TVendasVendedorDao>;
 
@@ -58,6 +65,7 @@ type
     function obterComissao(pVendasVendedorParametros : TVendasVendedorParametros): IFDDataset;
     function obterDevolucao(pVendasVendedorParametros: TVendasVendedorParametros): IFDDataset;
     function obterItens(pVendasVendedorParametros: TVendasVendedorParametros): IFDDataset;
+    function obterServicos(pVendasVendedorParametros: TVendasVendedorParametros): TServicosResultado;
     function obterGrupoComissao(pVendasVendedorParametros: TVendasVendedorParametros): IFDDataset;
 end;
 
@@ -340,20 +348,22 @@ begin
   lMemTable  := TFDMemTable.Create(nil);
   Result     := criaIFDDataset(lMemTable);
 
-  lSql := ' select                                         '+SLineBreak+
-          '    TIPO,                                       '+SLineBreak+
-          '    DOCUMENTO,                                  '+SLineBreak+
-          '    DATA,                                       '+SLineBreak+
-          '    LOJA,                                       '+SLineBreak+
-          '    CODIGO_VENDEDOR,                            '+SLineBreak+
-          '    VENDEDOR,                                   '+SLineBreak+
-          '    CODIGO_PRODUTO,                             '+SLineBreak+
-          '    PRODUTO,                                    '+SLineBreak+
-          '    VALOR_VENDA_BRUTO VALOR_VENDA,              '+SLineBreak+
-          '    QUANTIDADE                                  '+SLineBreak+
-          '   from                                         '+SLineBreak+
-          '     ( '+queryPedido+' ) t                      '+SLineBreak+
-          '  where 1=1                                     '+SLineBreak+
+  lSql := ' select                                                                                                           '+SLineBreak+
+          '    TIPO,                                                                                                         '+SLineBreak+
+          '    DOCUMENTO,                                                                                                    '+SLineBreak+
+          '    DATA,                                                                                                         '+SLineBreak+
+          '    LOJA,                                                                                                         '+SLineBreak+
+          '    CODIGO_VENDEDOR,                                                                                              '+SLineBreak+
+          '    VENDEDOR,                                                                                                     '+SLineBreak+
+          '    CODIGO_PRODUTO,                                                                                               '+SLineBreak+
+          '    PRODUTO,                                                                                                      '+SLineBreak+
+          '    VALOR_VENDA_BRUTO VALOR_VENDA,                                                                                '+SLineBreak+
+          '    QUANTIDADE,                                                                                                   '+SLineBreak+
+          '    PERCENTUAL_COMISSAO,                                                                                          '+SLineBreak+
+          '    cast( (VALOR_VENDA_BRUTO-VALOR_DESCONTO) as float) * cast(( PERCENTUAL_COMISSAO/100) as float) VALOR_COMISSAO '+SLineBreak+
+          '   from                                                                                                           '+SLineBreak+
+          '     ( '+queryPedido+' ) t                                                                                        '+SLineBreak+
+          '  where 1=1                                                                                                       '+SLineBreak+
           '    and t.data between ' + QuotedStr(transformaDataFireBirdWhere(pVendasVendedorParametros.DataInicio)) +
           '                   and ' + QuotedStr(transformaDataFireBirdWhere(pVendasVendedorParametros.DataFim));
 
@@ -374,6 +384,8 @@ begin
   lMemTable.FieldDefs.Add('PRODUTO', ftString, 100);
   lMemTable.FieldDefs.Add('VALOR_VENDA', ftFloat);
   lMemTable.FieldDefs.Add('QUANTIDADE', ftFloat);
+  lMemTable.FieldDefs.Add('PERCENTUAL_COMISSAO', ftFloat);
+  lMemTable.FieldDefs.Add('VALOR_COMISSAO', ftFloat);
   lMemTable.CreateDataSet;
 
   for lQA in lAsyncList do
@@ -404,11 +416,273 @@ begin
                               lQA.dataset.dataset.FieldByName('CODIGO_PRODUTO').AsString,
                               lQA.dataset.dataset.FieldByName('PRODUTO').AsString,
                               lQA.dataset.dataset.FieldByName('VALOR_VENDA').AsString,
-                              lQA.dataset.dataset.FieldByName('QUANTIDADE').AsString]);
+                              lQA.dataset.dataset.FieldByName('QUANTIDADE').AsString,
+                              lQA.dataset.dataset.FieldByName('PERCENTUAL_COMISSAO').AsString,
+                              lQA.dataset.dataset.FieldByName('VALOR_COMISSAO').AsString]);
 
       lQA.dataset.dataset.Next;
     end;
   end;
+end;
+
+function TVendasVendedorDao.obterServicos(pVendasVendedorParametros: TVendasVendedorParametros): TServicosResultado;
+var
+  lSql                  : String;
+  lMemTablePrestamista,
+  lMemTableGarantia     : TFDMemTable;
+  lAsyncList            : IListaQueryAsync;
+  lQA                   : IQueryLojaAsync;
+  conexao               : IConexao;
+  lTotalGarantia,
+  lTotalPrestamista     : Double;
+begin
+  lAsyncList           := getQueryLojaAsyncList(vIConexao, pVendasVendedorParametros.Lojas);
+
+  lMemTablePrestamista := TFDMemTable.Create(nil);
+  lMemTableGarantia    := TFDMemTable.Create(nil);
+
+  Result.fdPrestamista := criaIFDDataset(lMemTablePrestamista);
+  Result.fdGarantia    := criaIFDDataset(lMemTableGarantia);
+
+  lTotalGarantia       := 0;
+  lTotalPrestamista    := 0;
+
+  lSql := ' select                                                                                            '+SLineBreak+
+          '      TIPO,                                                                                        '+SLineBreak+
+          '      LOJA,                                                                                        '+SLineBreak+
+          '      DATA,                                                                                        '+SLineBreak+
+          '      CODIGO_VENDEDOR,                                                                             '+SLineBreak+
+          '      VENDEDOR,                                                                                    '+SLineBreak+
+          '      DOCUMENTO,                                                                                   '+SLineBreak+
+          '      CODIGO,                                                                                      '+SLineBreak+
+          '      PRODUTO_CLIENTE,                                                                             '+SLineBreak+
+          '      QUANTIDADE,                                                                                  '+SLineBreak+
+          '      VALOR_GARANTIA,                                                                              '+SLineBreak+
+          '      PERCENTUAL_COMISSAO,                                                                         '+SLineBreak+
+          '      cast((VALOR_GARANTIA) as float) * cast(( PERCENTUAL_COMISSAO/100) as float) VALOR_COMISSAO   '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '   from                                                                                            '+SLineBreak+
+          '      ( select                                                                                     '+SLineBreak+
+          '              ''ESTENDIDA'' TIPO,                                                                  '+SLineBreak+
+          '              i.loja LOJA,                                                                         '+SLineBreak+
+          '              p.data_ped DATA,                                                                     '+SLineBreak+
+          '              F.codigo_fun CODIGO_VENDEDOR,                                                        '+SLineBreak+
+          '              f.nome_fun VENDEDOR,                                                                 '+SLineBreak+
+          '              p.numero_ped DOCUMENTO,                                                              '+SLineBreak+
+          '              i.codigo_pro CODIGO,                                                                 '+SLineBreak+
+          '              pr.nome_pro PRODUTO_CLIENTE,                                                         '+SLineBreak+
+          '              i.quantidade_ped QUANTIDADE,                                                         '+SLineBreak+
+          '              i.quantidade_tipo*i.quantidade_ped VALOR_GARANTIA,                                   '+SLineBreak+
+          '              i.per_comissao_garantia PERCENTUAL_COMISSAO                                          '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '          from                                                                                     '+SLineBreak+
+          '             pedidovenda p                                                                         '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '          left join  pedidoitens i on p.numero_ped = i.numero_ped                                  '+SLineBreak+
+          '          left join  produto pr on pr.codigo_pro = i.codigo_pro                                    '+SLineBreak+
+          '          left join  funcionario f on f.codigo_fun = p.codigo_ven                                  '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '         where i.quantidade_tipo > 0                                                               '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '         union all                                                                                 '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '        select                                                                                     '+SLineBreak+
+          '              ''ESTENDIDA'' TIPO,                                                                  '+SLineBreak+
+          '              i.loja LOJA,                                                                         '+SLineBreak+
+          '              d.data DATA,                                                                         '+SLineBreak+
+          '              f.codigo_fun CODIGO_VENDEDOR,                                                        '+SLineBreak+
+          '              f.nome_fun VENDEDOR,                                                                 '+SLineBreak+
+          '              d.id DOCUMENTO,                                                                      '+SLineBreak+
+          '              i.produto CODIGO,                                                                    '+SLineBreak+
+          '              pr.nome_pro PRODUTO_CLIENTE,                                                         '+SLineBreak+
+          '              i.quantidade QUANTIDADE,                                                             '+SLineBreak+
+          '              -1*(i.vlr_garantia*i.quantidade) VALOR_GARANTIA,                                     '+SLineBreak+
+          '              i.per_comissao_garantia PERCENTUAL_COMISSAO                                          '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '          from                                                                                     '+SLineBreak+
+          '             devolucao d                                                                           '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '          left join  devolucaoitens i on d.id = i.id                                               '+SLineBreak+
+          '          left join  produto pr on pr.codigo_pro = i.produto                                       '+SLineBreak+
+          '          left join  funcionario f on f.codigo_fun = d.vendedor                                    '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '         where i.vlr_garantia > 0                                                                  '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '         union all                                                                                 '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '        select                                                                                     '+SLineBreak+
+          '              ''FURTO E ROUBO'' TIPO,                                                              '+SLineBreak+
+          '              i.loja LOJA,                                                                         '+SLineBreak+
+          '              p.data_ped DATA,                                                                     '+SLineBreak+
+          '              F.codigo_fun CODIGO_VENDEDOR,                                                        '+SLineBreak+
+          '              f.nome_fun VENDEDOR,                                                                 '+SLineBreak+
+          '              p.numero_ped DOCUMENTO,                                                              '+SLineBreak+
+          '              i.codigo_pro CODIGO,                                                                 '+SLineBreak+
+          '              pr.nome_pro PRODUTO_CLIENTE,                                                         '+SLineBreak+
+          '              i.quantidade_ped QUANTIDADE,                                                         '+SLineBreak+
+          '              i.vlr_garantia_fr*i.quantidade_ped VALOR_GARANTIA,                                   '+SLineBreak+
+          '              i.per_comissao_garantia_fr PERCENTUAL_COMISSAO                                       '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '          from                                                                                     '+SLineBreak+
+          '             pedidovenda p                                                                         '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '          left join  pedidoitens i on p.numero_ped = i.numero_ped                                  '+SLineBreak+
+          '          left join  produto pr on pr.codigo_pro = i.codigo_pro                                    '+SLineBreak+
+          '          left join  funcionario f on f.codigo_fun = p.codigo_ven                                  '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '         where i.vlr_garantia_fr > 0                                                               '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '         union all                                                                                 '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '        select                                                                                     '+SLineBreak+
+          '              ''FURTO E ROUBO'' TIPO,                                                              '+SLineBreak+
+          '              i.loja LOJA,                                                                         '+SLineBreak+
+          '              d.data DATA,                                                                         '+SLineBreak+
+          '              f.codigo_fun CODIGO_VENDEDOR,                                                        '+SLineBreak+
+          '              f.nome_fun VENDEDOR,                                                                 '+SLineBreak+
+          '              d.id DOCUMENTO,                                                                      '+SLineBreak+
+          '              i.produto CODIGO,                                                                    '+SLineBreak+
+          '              pr.nome_pro PRODUTO_CLIENTE,                                                         '+SLineBreak+
+          '              i.quantidade QUANTIDADE,                                                             '+SLineBreak+
+          '              -1*(i.vlr_garantia_fr*i.quantidade) VALOR_GARANTIA,                                  '+SLineBreak+
+          '              i.per_comissao_garantia_fr PERCENTUAL_COMISSAO                                       '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '          from                                                                                     '+SLineBreak+
+          '             devolucao d                                                                           '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '          left join  devolucaoitens i on d.id = i.id                                               '+SLineBreak+
+          '          left join  produto pr on pr.codigo_pro = i.produto                                       '+SLineBreak+
+          '          left join  funcionario f on f.codigo_fun = d.vendedor                                    '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '         where i.vlr_garantia_fr > 0                                                               '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '         union all                                                                                 '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '        select                                                                                     '+SLineBreak+
+          '              ''PRESTAMISTA'' TIPO,                                                                '+SLineBreak+
+          '              p.loja LOJA,                                                                         '+SLineBreak+
+          '              p.data_ped DATA,                                                                     '+SLineBreak+
+          '              f.codigo_fun CODIGO_VENDEDOR,                                                        '+SLineBreak+
+          '              f.nome_fun VENDEDOR,                                                                 '+SLineBreak+
+          '              p.numero_ped DOCUMENTO,                                                              '+SLineBreak+
+          '              c.codigo_cli CODIGO,                                                                 '+SLineBreak+
+          '              c.fantasia_cli PRODUTO_CLIENTE,                                                      '+SLineBreak+
+          '              1 QUANTIDADE,                                                                        '+SLineBreak+
+          '              p.seguro_prestamista_valor VALOR_GARANTIA,                                           '+SLineBreak+
+          '              p.per_comissao_prestamista PERCENTUAL_COMISSAO                                       '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '          from                                                                                     '+SLineBreak+
+          '             pedidovenda p                                                                         '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '          left join  funcionario f on f.codigo_fun = p.codigo_ven                                  '+SLineBreak+
+          '          left join  clientes c    on c.codigo_cli = p.codigo_cli                                  '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '         where p.seguro_prestamista_valor > 0                                                      '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '         union all                                                                                 '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '        select                                                                                     '+SLineBreak+
+          '              ''PRESTAMISTA'' TIPO,                                                                '+SLineBreak+
+          '              d.loja LOJA,                                                                         '+SLineBreak+
+          '              d.data DATA,                                                                         '+SLineBreak+
+          '              f.codigo_fun CODIGO_VENDEDOR,                                                        '+SLineBreak+
+          '              f.nome_fun VENDEDOR,                                                                 '+SLineBreak+
+          '              d.id DOCUMENTO,                                                                      '+SLineBreak+
+          '              c.codigo_cli CODIGO,                                                                 '+SLineBreak+
+          '              c.fantasia_cli PRODUTO_CLIENTE,                                                      '+SLineBreak+
+          '              1 QUANTIDADE,                                                                        '+SLineBreak+
+          '              -1*(d.seguro_prestamista_valor) VALOR_GARANTIA,                                      '+SLineBreak+
+          '              d.per_comissao_prestamista PERCENTUAL_COMISSAO                                       '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '          from                                                                                     '+SLineBreak+
+          '             devolucao d                                                                           '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '          left join  funcionario f on f.codigo_fun = d.vendedor                                    '+SLineBreak+
+          '          left join  clientes c    on c.codigo_cli = d.cliente                                     '+SLineBreak+
+          '                                                                                                   '+SLineBreak+
+          '         where d.seguro_prestamista_valor > 0                                                      '+SLineBreak+
+          '  ) t where t.data between ' + QuotedStr(transformaDataFireBirdWhere(pVendasVendedorParametros.DataInicio)) +
+          '                       and ' + QuotedStr(transformaDataFireBirdWhere(pVendasVendedorParametros.DataFim));
+
+  if pVendasVendedorParametros.Vendedor <> '' then
+    lSQL := lSQL + ' and t.codigo_vendedor = ' + QuotedStr(pVendasVendedorParametros.Vendedor);
+
+  lSQL := lSQL + ' order by 1 ';
+
+  gravaSQL(lSQL, 'VendasVendedorObterServicos_' + FormatDateTime('yyyymmddhhnnsszzz', now));
+
+  lMemTableGarantia.FieldDefs.Add('TIPO', ftString, 11);
+  lMemTableGarantia.FieldDefs.Add('DOCUMENTO', ftString, 6);
+  lMemTableGarantia.FieldDefs.Add('DATA', ftDate);
+  lMemTableGarantia.FieldDefs.Add('LOJA', ftString, 3);
+  lMemTableGarantia.FieldDefs.Add('CODIGO_VENDEDOR', ftString, 6);
+  lMemTableGarantia.FieldDefs.Add('VENDEDOR', ftString, 100);
+  lMemTableGarantia.FieldDefs.Add('CODIGO_PRODUTO', ftString, 50);
+  lMemTableGarantia.FieldDefs.Add('PRODUTO', ftString, 100);
+  lMemTableGarantia.FieldDefs.Add('VALOR_GARANTIA', ftFloat);
+  lMemTableGarantia.FieldDefs.Add('QUANTIDADE', ftFloat);
+  lMemTableGarantia.FieldDefs.Add('PERCENTUAL_COMISSAO', ftFloat);
+  lMemTableGarantia.FieldDefs.Add('VALOR_COMISSAO', ftFloat);
+  lMemTableGarantia.CreateDataSet;
+
+  lMemTablePrestamista.FieldDefs.Add('CLIENTE', ftString, 100);
+  lMemTablePrestamista.FieldDefs.Add('VALOR_PRESTAMISTA', ftFloat);
+  lMemTablePrestamista.FieldDefs.Add('PERCENTUAL_COMISSAO', ftFloat);
+  lMemTablePrestamista.FieldDefs.Add('VALOR_COMISSAO', ftFloat);
+  lMemTablePrestamista.CreateDataSet;
+
+  for lQA in lAsyncList do
+  begin
+    lQA.rotulo := 'ObterServicos';
+    conexao := lQA.loja.objeto.conexaoLoja;
+    if(conexao=nil) then
+      raise Exception.CreateFmt('TVendasVendedorDao.ObterServicos: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);
+
+    lQA.execQuery(lSQL,'',[]);
+  end;
+
+  for lQA in lAsyncList do
+  begin
+    lQA.esperar;
+    if(lQA.resultado.erros>0) then
+      raise Exception.CreateFmt('TVendasVendedorDao.ObterServicos: Loja [%s] com problemas: [%s]',[lQA.loja.objeto.LOJA, lQA.resultado.toString]);
+
+    lQA.dataset.dataset.first;
+    while not lQA.dataset.dataset.Eof do
+    begin
+      if lQA.dataset.dataset.FieldByName('TIPO').AsString = 'PRESTAMISTA' then
+      begin
+        lTotalGarantia := lTotalGarantia + lQA.dataset.dataset.FieldByName('VALOR_GARANTIA').AsFloat;
+
+        lMemTablePrestamista.InsertRecord([lQA.dataset.dataset.FieldByName('PRODUTO_CLIENTE').AsString,
+                                           lQA.dataset.dataset.FieldByName('VALOR_GARANTIA').AsString,
+                                           lQA.dataset.dataset.FieldByName('PERCENTUAL_COMISSAO').AsString,
+                                           lQA.dataset.dataset.FieldByName('VALOR_COMISSAO').AsString]);
+      end
+      else
+      begin
+        lTotalPrestamista := lTotalPrestamista + lQA.dataset.dataset.FieldByName('VALOR_GARANTIA').AsFloat;
+
+        lMemTableGarantia.InsertRecord([lQA.dataset.dataset.FieldByName('TIPO').AsString,
+                                        lQA.dataset.dataset.FieldByName('DOCUMENTO').AsString,
+                                        lQA.dataset.dataset.FieldByName('DATA').AsString,
+                                        lQA.dataset.dataset.FieldByName('LOJA').AsString,
+                                        lQA.dataset.dataset.FieldByName('CODIGO_VENDEDOR').AsString,
+                                        lQA.dataset.dataset.FieldByName('VENDEDOR').AsString,
+                                        lQA.dataset.dataset.FieldByName('CODIGO').AsString,
+                                        lQA.dataset.dataset.FieldByName('PRODUTO_CLIENTE').AsString,
+                                        lQA.dataset.dataset.FieldByName('VALOR_GARANTIA').AsString,
+                                        lQA.dataset.dataset.FieldByName('QUANTIDADE').AsString,
+                                        lQA.dataset.dataset.FieldByName('PERCENTUAL_COMISSAO').AsString,
+                                        lQA.dataset.dataset.FieldByName('VALOR_COMISSAO').AsString]);
+      end;
+
+      lQA.dataset.dataset.Next;
+    end;
+  end;
+
+  Result.totalGarantia    := lTotalGarantia;
+  Result.totalPrestamista := lTotalPrestamista;
 end;
 
 procedure TVendasVendedorDao.obterTotalRegistros;
