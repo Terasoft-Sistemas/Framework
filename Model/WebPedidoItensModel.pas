@@ -29,7 +29,7 @@ type
 
   TWebPedidoItensModel = class
   private
-    [weak] mySelf: ITWebPedidoItensModel;
+    [unsafe] mySelf: ITWebPedidoItensModel;
     vIConexao : IConexao;
     FWebPedidoItenssLista: IList<ITWebPedidoItensModel>;
     FAcao: TAcao;

@@ -21,7 +21,7 @@ type
 
   TConfiguracoesModel = class
   private
-    [weak] mySelf: ITConfiguracoesModel;
+    [unsafe] mySelf: ITConfiguracoesModel;
     vIConexao : IConexao;
 
     FConfiguracoessLista: IList<ITConfiguracoesModel>;

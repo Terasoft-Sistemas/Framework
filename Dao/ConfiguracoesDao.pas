@@ -21,7 +21,7 @@ type
 
   TConfiguracoesDao = class
   private
-    [weak] mySelf: ITConfiguracoesDao;
+    [unsafe] mySelf: ITConfiguracoesDao;
     vIConexao : IConexao;
     vConstrutor : IConstrutorDao;
 

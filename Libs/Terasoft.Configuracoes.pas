@@ -21,7 +21,7 @@ uses
 
     TerasoftConfiguracoes = class
     private
-      [weak] mySelf: ITerasoftConfiguracoes;
+      [unsafe] mySelf: ITerasoftConfiguracoes;
       [weak]vIConexao        : IConexao;
       vPerfil          : String;
       vmtConfiguracoes : IFDDataset;
