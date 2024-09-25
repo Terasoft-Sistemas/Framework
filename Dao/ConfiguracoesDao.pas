@@ -242,7 +242,6 @@ var
   lQry: TFDQuery;
   lSQL:String;
   modelo: ITConfiguracoesModel;
-  i: Integer;
 begin
   logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TConfiguracoesDao.obterLista',LOG_LEVEL_DEBUG);
   lQry := vIConexao.CriarQuery;
@@ -262,10 +261,8 @@ begin
     lQry.Open(lSQL);
 
     lQry.First;
-    i := 0;
     while not lQry.Eof do
     begin
-      inc(i);
       modelo := TConfiguracoesModel.getNewIface(vIConexao);
       FConfiguracoessLista.Add(modelo);
       modelo.objeto.ID             := lQry.FieldByName('ID').AsString;
