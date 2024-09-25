@@ -17,7 +17,7 @@ type
 
   TBancoModel = class
   private
-    [weak] mySelf: ITBancoModel;
+    [unsafe] mySelf: ITBancoModel;
     vIConexao : IConexao;
     FAcao: TAcao;
     FLengthPageView: String;

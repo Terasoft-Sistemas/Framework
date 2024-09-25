@@ -14,7 +14,7 @@ type
 
   TObtemAliquotasModel = class
   private
-    [weak] mySelf: ITObtemAliquotasModel;
+    [unsafe] mySelf: ITObtemAliquotasModel;
     vIConexao : IConexao;
     FDESTINATARIO_UF: String;
     FICMS_SOMA_FRETE_BASE: String;

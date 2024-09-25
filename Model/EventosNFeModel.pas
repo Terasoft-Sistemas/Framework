@@ -17,7 +17,7 @@ type
 
   TEventosNFeModel = class
   private
-    [weak] mySelf: ITEventosNFeModel;
+    [unsafe] mySelf: ITEventosNFeModel;
     vIConexao : IConexao;
     FAcao: TAcao;
     FRETORNO_SEFAZ: Variant;

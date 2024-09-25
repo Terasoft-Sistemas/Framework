@@ -14,7 +14,7 @@ type
 
   TPixModel = class
   private
-    [weak] mySelf: ITPixModel;
+    [unsafe] mySelf: ITPixModel;
     vIConexao : IConexao;
     FPixsLista: IList<ITPixModel>;
     FAcao: TAcao;

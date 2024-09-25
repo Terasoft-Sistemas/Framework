@@ -16,7 +16,7 @@ type
 
   TVoltagemProdutoModel = class
   private
-    [weak] mySelf: ITVoltagemProdutoModel;
+    [unsafe] mySelf: ITVoltagemProdutoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

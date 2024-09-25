@@ -15,7 +15,7 @@ type
 
   TFluxoCaixaModel = class
   private
-    [weak] mySelf: ITFluxoCaixaModel;
+    [unsafe] mySelf: ITFluxoCaixaModel;
     vIConexao : IConexao;
 
     FWhereView: String;

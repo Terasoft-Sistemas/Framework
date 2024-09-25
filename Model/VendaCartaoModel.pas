@@ -14,7 +14,7 @@ type
 
   TVendaCartaoModel = class
   private
-    [weak] mySelf: ITVendaCartaoModel;
+    [unsafe] mySelf: ITVendaCartaoModel;
     vIConexao : IConexao;
     FVendaCartaosLista: IList<ITVendaCartaoModel>;
     FAcao: TAcao;

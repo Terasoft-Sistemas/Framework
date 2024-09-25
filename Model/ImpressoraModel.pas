@@ -14,7 +14,7 @@ type
 
   TImpressoraModel = class
   private
-    [weak] mySelf: ITImpressoraModel;
+    [unsafe] mySelf: ITImpressoraModel;
     vIConexao : IConexao;
     FImpressorasLista: IList<ITImpressoraModel>;
     FAcao: TAcao;

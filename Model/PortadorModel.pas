@@ -17,7 +17,7 @@ type
 
   TPortadorModel = class
   private
-    [weak] mySelf: ITPortadorModel;
+    [unsafe] mySelf: ITPortadorModel;
     vIConexao : IConexao;
     FPortadorsLista: IList<ITPortadorModel>;
     FAcao: TAcao;

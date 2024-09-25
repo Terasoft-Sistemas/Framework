@@ -15,7 +15,7 @@ type
 
   TPCGModel = class
   private
-    [weak] mySelf: ITPCGModel;
+    [unsafe] mySelf: ITPCGModel;
     vIConexao : IConexao;
   public
 

@@ -31,7 +31,7 @@ type
 
   TFinanceiroPedidoModel = class
   private
-    [weak] mySelf: ITFinanceiroPedidoModel;
+    [unsafe] mySelf: ITFinanceiroPedidoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

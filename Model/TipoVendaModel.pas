@@ -15,7 +15,7 @@ type
 
   TTipoVendaModel = class
   private
-    [weak] mySelf: ITTipoVendaModel;
+    [unsafe] mySelf: ITTipoVendaModel;
     vConexao : IConexao;
   public
 

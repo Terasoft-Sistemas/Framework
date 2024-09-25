@@ -14,7 +14,7 @@ type
 
   TTEFModel = class
   private
-    [weak] mySelf: ITTEFModel;
+    [unsafe] mySelf: ITTEFModel;
     vIConexao : IConexao;
     FTEFsLista: IList<ITTEFModel>;
     FAcao: TAcao;

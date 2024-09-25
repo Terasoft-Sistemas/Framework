@@ -16,7 +16,7 @@ type
 
   TPermissaoRemotaModel = class
   private
-    [weak] mySelf:ITPermissaoRemotaModel;
+    [unsafe] mySelf:ITPermissaoRemotaModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

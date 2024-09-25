@@ -59,7 +59,7 @@ type
 
   TDashbordModel = class
   private
-    [weak] mySelf: ITDashbordModel;
+    [unsafe] mySelf: ITDashbordModel;
     vIConexao : IConexao;
     vListaOld: ILockList<IResultadoDashboard>;
     vLista: TLockDictionaryImplDashBoard;

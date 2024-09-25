@@ -13,7 +13,7 @@ type
   ITCaixaModel=IObject<TCaixaModel>;
   TCaixaModel = class
   private
-    [weak] mySelf: ITCaixaModel;
+    [unsafe] mySelf: ITCaixaModel;
     vIConexao : IConexao;
 
     FCaixasLista: IList<ITCaixaModel>;

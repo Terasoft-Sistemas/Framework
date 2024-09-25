@@ -14,7 +14,7 @@ type
 
   TPrecoVendaModel = class
   private
-    [weak] mySelf: ITPrecoVendaModel;
+    [unsafe] mySelf: ITPrecoVendaModel;
     vIConexao : IConexao;
     FPrecoVendasLista: IList<ITPrecoVendaModel>;
     FAcao: TAcao;

@@ -14,7 +14,7 @@ type
 
   TPrecoUFModel = class
   private
-    [weak] mySelf: ITPrecoUFModel;
+    [unsafe] mySelf: ITPrecoUFModel;
     vIConexao : IConexao;
     FPrecoUFsLista: IList<ITPrecoUFModel>;
     FAcao: TAcao;

@@ -16,7 +16,7 @@ type
 
   TAnexoModel = class
   private
-    [weak] mySelf:ITAnexoModel;
+    [unsafe] mySelf:ITAnexoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

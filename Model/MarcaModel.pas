@@ -15,7 +15,7 @@ type
 
   TMarcaModel = class
   private
-    [weak] mySelf: ITMarcaModel;
+    [unsafe] mySelf: ITMarcaModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

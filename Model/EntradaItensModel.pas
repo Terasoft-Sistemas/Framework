@@ -16,7 +16,7 @@ type
 
   TEntradaItensModel = class
   private
-    [weak] mySelf: ITEntradaItensModel;
+    [unsafe] mySelf: ITEntradaItensModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

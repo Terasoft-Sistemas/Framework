@@ -14,7 +14,7 @@ type
 
   TCreditoClienteModel = class
   private
-    [weak] mySelf: ITCreditoClienteModel;
+    [unsafe] mySelf: ITCreditoClienteModel;
     vIConexao : IConexao;
     FCreditoClientesLista: IList<ITCreditoClienteModel>;
     FAcao: TAcao;

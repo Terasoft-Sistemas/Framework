@@ -17,7 +17,7 @@ type
 
   TClienteModel = class(Terasoft.Model.Base.TModelBase)
   private
-    [weak] mySelf: ITClienteModel;
+    [unsafe] mySelf: ITClienteModel;
     FClientesLista: IList<ITClienteModel>;
     FAcao: TAcao;
     FLengthPageView: String;

@@ -41,8 +41,7 @@ type
 
   TFiltroModel=class
   private
-    [weak] mySelf: ITFiltroModel;
-    //function getValores: IDatasetSimples;
+    [unsafe] mySelf: ITFiltroModel;
   protected
     vIConexao   : IConexao;
     vConfiguracoes: ITerasoftConfiguracoes;

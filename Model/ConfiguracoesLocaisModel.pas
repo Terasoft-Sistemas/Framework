@@ -16,7 +16,7 @@ type
 
   TConfiguracoesLocaisModel = class
   private
-    [weak] myself: ITConfiguracoesLocaisModel;
+    [unsafe] myself: ITConfiguracoesLocaisModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

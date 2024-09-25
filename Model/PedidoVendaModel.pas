@@ -28,7 +28,7 @@ type
 
   TPedidoVendaModel = class
   private
-    [weak] mySelf: ITPedidoVendaModel;
+    [unsafe] mySelf: ITPedidoVendaModel;
 
     vIConexao : IConexao;
 

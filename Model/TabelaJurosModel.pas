@@ -18,7 +18,7 @@ type
 
   TTabelaJurosModel = class
   private
-    [weak] mySelf:ITTabelaJurosModel;
+    [unsafe] mySelf:ITTabelaJurosModel;
     vIConexao : IConexao;
     FTabelaJurossLista: IList<ITTabelaJurosModel>;
     FAcao: TAcao;

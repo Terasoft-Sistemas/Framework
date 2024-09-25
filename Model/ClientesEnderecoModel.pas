@@ -16,7 +16,7 @@ type
 
   TClientesEnderecoModel = class
   private
-    [weak] mySelf: ITClientesEnderecoModel;
+    [unsafe] mySelf: ITClientesEnderecoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

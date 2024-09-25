@@ -14,7 +14,7 @@ type
 
   TPromocaoModel = class
   private
-    [weak] mySelf: ITPromocaoModel;
+    [unsafe] mySelf: ITPromocaoModel;
     vIConexao : IConexao;
     FPromocaosLista: IList<ITPromocaoModel>;
     FAcao: TAcao;

@@ -16,7 +16,7 @@ type
 
   TClientesContatoModel = class
   private
-    [weak] mySelf: ITClientesContatoModel;
+    [unsafe] mySelf: ITClientesContatoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

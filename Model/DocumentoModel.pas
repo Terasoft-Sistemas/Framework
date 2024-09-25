@@ -16,7 +16,7 @@ type
 
   TDocumentoModel = class
   private
-    [weak] mySelf: ITDocumentoModel;
+    [unsafe] mySelf: ITDocumentoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

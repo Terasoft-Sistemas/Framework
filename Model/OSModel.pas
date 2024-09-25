@@ -15,7 +15,7 @@ type
 
   TOSModel = class
   private
-    [weak] mySelf: ITOSModel;
+    [unsafe] mySelf: ITOSModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

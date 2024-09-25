@@ -14,7 +14,7 @@ type
 
   TEmpresaModel = class
   private
-    [weak] mySelf: ITEmpresaModel;
+    [unsafe] mySelf: ITEmpresaModel;
     vIConexao : IConexao;
     FINSCRICAO_MUNICIPAL: Variant;
     FCNPJ: Variant;

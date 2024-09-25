@@ -14,7 +14,7 @@ type
 
   TCFOPModel = class
   private
-    [weak] mySelf: ITCFOPModel;
+    [unsafe] mySelf: ITCFOPModel;
     vIConexao : IConexao;
 
     FCFOPsLista: IList<ITCFOPModel>;

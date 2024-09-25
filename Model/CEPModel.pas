@@ -1,4 +1,4 @@
-unit CEPModel;
+﻿unit CEPModel;
 
 interface
 
@@ -37,7 +37,7 @@ type
 
   TCEPModel = class
     private
-      [weak] mySelf: ITCEPModel;
+      [unsafe] mySelf: ITCEPModel;
       fRestClient          :  TRESTClient;
       fRestRequest         :  TRESTRequest;
       fRestResponse        :  TRESTResponse;
