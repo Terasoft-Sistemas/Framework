@@ -19,7 +19,7 @@ type
 
   TConsultaDao = class
   private
-    [weak] mySelf: ITConsultaDao;
+    [unsafe] mySelf: ITConsultaDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

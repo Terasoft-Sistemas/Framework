@@ -25,7 +25,7 @@ type
   TAdmCartaoDao = class
 
   private
-    [weak] myself : ITAdmCartaoDao;
+    [unsafe] myself : ITAdmCartaoDao;
     vIConexao     : IConexao;
     vConstrutor   : IConstrutorDao;
 

@@ -21,7 +21,7 @@ type
 
   TClienteDao = class
   private
-    [weak] mySelf: ITClienteDao;
+    [unsafe] mySelf: ITClienteDao;
     vIConexao : Iconexao;
     vConstrutor : IConstrutorDao;
 

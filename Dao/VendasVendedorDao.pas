@@ -27,7 +27,7 @@ type
 
   TVendasVendedorDao = class
   private
-    [weak] mySelf : ITVendasVendedorDao;
+    [unsafe] mySelf : ITVendasVendedorDao;
     vIConexao 	  : IConexao;
     vConstrutor   : IConstrutorDao;
 

@@ -21,7 +21,7 @@ type
 
   TFuncionarioDao = class
   private
-    [weak] mySelf: ITFuncionarioDao;
+    [unsafe] mySelf: ITFuncionarioDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

@@ -23,7 +23,7 @@ type
 
   TCurvaABCDao = class
   private
-    [weak] mySelf: ITCurvaABCDao;
+    [unsafe] mySelf: ITCurvaABCDao;
     vIConexao : IConexao;
 
     lNomeCampo, lNomeCampoOS, lNomeCampoDev, lNomeCampoEntrada : String;

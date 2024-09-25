@@ -21,7 +21,7 @@ type
 
   TRecebimentoCartaoDao = class
   private
-    [weak] mySelf: ITRecebimentoCartaoDao;
+    [unsafe] mySelf: ITRecebimentoCartaoDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

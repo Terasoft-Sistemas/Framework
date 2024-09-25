@@ -21,7 +21,7 @@ type
 
   TReservaDao = class
   private
-    [weak] mySelf: ITReservaDao;
+    [unsafe] mySelf: ITReservaDao;
     vIConexao : IConexao;
     vConstrutor : IConstrutorDao;
 

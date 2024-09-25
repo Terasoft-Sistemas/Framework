@@ -21,7 +21,7 @@ type
 
   TNFDao = class
   private
-    [weak] mySelf: ITNFDao;
+    [unsafe] mySelf: ITNFDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

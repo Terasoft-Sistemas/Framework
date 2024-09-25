@@ -22,7 +22,7 @@ type
 
   TCaixaControleDao = class
   private
-    [weak] mySelf: ITCaixaControleDao;
+    [unsafe] mySelf: ITCaixaControleDao;
     vIConexao : IConexao;
     vConstrutor : IConstrutorDao;
     FCaixaControlesLista: IList<ITCaixaControleModel>;

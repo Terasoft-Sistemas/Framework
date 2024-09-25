@@ -25,7 +25,7 @@ type
 
   TEndpointDao=class
   protected
-    [weak] mySelf: ITEndpointDao;
+    [unsafe] mySelf: ITEndpointDao;
     vIConexao   : IConexao;
     vIConstrutorDao: IConstrutorDao;
     vConfiguracoes: ITerasoftConfiguracoes;

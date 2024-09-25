@@ -20,7 +20,7 @@ type
 
   TCorProdutoDao = class
   private
-    [weak] mySelf: ITCorProdutoDao;
+    [unsafe] mySelf: ITCorProdutoDao;
     vIConexao 	: IConexao;
     vConstrutor : IConstrutorDao;
 

@@ -20,7 +20,7 @@ type
 
   TBancoDao = class
   private
-    [weak] mySelf: ITBancoDao;
+    [unsafe] mySelf: ITBancoDao;
     vIConexao 	: IConexao;
     vConstrutor : IConstrutorDao;
 

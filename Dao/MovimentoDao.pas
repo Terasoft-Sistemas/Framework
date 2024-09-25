@@ -20,7 +20,7 @@ type
   ITMovimentoDao=IObject<TMovimentoDao>;
   TMovimentoDao = class
   private
-    [weak] mySelf: ITMovimentoDao;
+    [unsafe] mySelf: ITMovimentoDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

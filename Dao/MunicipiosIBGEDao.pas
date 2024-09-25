@@ -20,7 +20,7 @@ type
 
   TMunicipiosIBGEDao = class
   private
-    [weak] mySelf: ITMunicipiosIBGEDao;
+    [unsafe] mySelf: ITMunicipiosIBGEDao;
     vIConexao : IConexao;
     vConstrutor : IConstrutorDao;
 

@@ -18,7 +18,7 @@ type
 
   TPromocaoItensDao = class
   private
-    [weak] mySelf: ITPromocaoItensDao;
+    [unsafe] mySelf: ITPromocaoItensDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
     FPromocaoItenssLista: IList<ITPromocaoItensModel>;

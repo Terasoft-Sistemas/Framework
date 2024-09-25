@@ -20,7 +20,7 @@ type
 
   TFornecedorDao = class
   private
-    [weak] mySelf: ITFornecedorDao;
+    [unsafe] mySelf: ITFornecedorDao;
     vIConexao 	: IConexao;
     vConstrutor : IConstrutorDao;
 

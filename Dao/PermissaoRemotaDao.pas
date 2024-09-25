@@ -20,7 +20,7 @@ type
 
   TPermissaoRemotaDao = class
   private
-    [weak] mySelf: ITPermissaoRemotaDao;
+    [unsafe] mySelf: ITPermissaoRemotaDao;
     vIConexao 	: IConexao;
     vConstrutor : IConstrutorDao;
 

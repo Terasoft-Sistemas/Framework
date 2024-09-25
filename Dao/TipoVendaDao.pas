@@ -23,8 +23,8 @@ type
 
   TTipoVendaDao = class
   private
-    [weak] mySelf: ITTipoVendaDao;
-     vConexao : IConexao;
+    [unsafe] mySelf: ITTipoVendaDao;
+    vConexao : IConexao;
   public
     constructor _Create(pConexao : IConexao);
     destructor Destroy; override;

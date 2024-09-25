@@ -17,7 +17,7 @@ type
   ITPrecoVendaDao=IObject<TPrecoVendaDao>;
   TPrecoVendaDao = class
   private
-    [weak] mySelf: ITPrecoVendaDao;
+    [unsafe] mySelf: ITPrecoVendaDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

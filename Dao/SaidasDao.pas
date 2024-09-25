@@ -20,7 +20,7 @@ type
 
   TSaidasDao = class
   private
-    [weak] mySelf: ITSaidasDao;
+    [unsafe] mySelf: ITSaidasDao;
     vIConexao : IConexao;
     vConstrutor : IConstrutorDao;
 

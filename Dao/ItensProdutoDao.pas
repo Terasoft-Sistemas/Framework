@@ -20,7 +20,7 @@ type
 
   TItensProdutoDao = class
   private
-    [weak] mySelf :ITItensProdutoDao;
+    [unsafe] mySelf :ITItensProdutoDao;
     vIConexao     : IConexao;
     vConstrutor   : IConstrutorDao;
 

@@ -18,7 +18,7 @@ type
 
   TPrecoClienteDao = class
   private
-    [weak] mySelf:ITPrecoClienteDao;
+    [unsafe] mySelf:ITPrecoClienteDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

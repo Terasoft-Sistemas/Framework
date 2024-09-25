@@ -25,7 +25,7 @@ type
 
   TDashbordDao = class
   private
-    [weak] mySelf: ITDashbordDao;
+    [unsafe] mySelf: ITDashbordDao;
     vIConexao : IConexao;
   public
     constructor _Create(pIConexao : IConexao);

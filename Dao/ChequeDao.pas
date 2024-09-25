@@ -20,7 +20,7 @@ type
 
   TChequeDao = class
   private
-    [weak] mySelf: ITChequeDao;
+    [unsafe] mySelf: ITChequeDao;
     vIConexao 	: IConexao;
     vConstrutor : IConstrutorDao;
 

@@ -25,7 +25,7 @@ type
 
   TDRGDao = class
   private
-    [weak] mySelf:ITDRGDao;
+    [unsafe] mySelf:ITDRGDao;
     vIConexao : IConexao;
   public
     constructor _Create(pIConexao : IConexao);

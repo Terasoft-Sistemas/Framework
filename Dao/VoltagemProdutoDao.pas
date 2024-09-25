@@ -20,7 +20,7 @@ type
 
   TVoltagemProdutoDao = class
   private
-    [weak] mySelf: ITVoltagemProdutoDao;
+    [unsafe] mySelf: ITVoltagemProdutoDao;
     vIConexao 	: IConexao;
     vConstrutor : IConstrutorDao;
 

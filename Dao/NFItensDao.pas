@@ -21,7 +21,7 @@ type
 
   TNFItensDao = class
   private
-    [weak] mySelf: ITNFItensDao;
+    [unsafe] mySelf: ITNFItensDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

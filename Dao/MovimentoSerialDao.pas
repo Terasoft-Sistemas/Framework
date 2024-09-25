@@ -20,7 +20,7 @@ type
 
   TMovimentoSerialDao = class
   private
-    [weak] mySelf: ITMovimentoSerialDao;
+    [unsafe] mySelf: ITMovimentoSerialDao;
     vIConexao 	: IConexao;
     vConstrutor : IConstrutorDao;
 

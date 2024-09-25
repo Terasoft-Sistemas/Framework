@@ -18,7 +18,7 @@ type
 
   TPedidoItensDao = class
   private
-    [weak] mySelf: ITPedidoItensDao;
+    [unsafe] mySelf: ITPedidoItensDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

@@ -19,7 +19,7 @@ type
 
   TFinanceiroPedidoDao = class
   private
-    [weak] mySelf: ITFinanceiroPedidoDao;
+    [unsafe] mySelf: ITFinanceiroPedidoDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 
