@@ -199,7 +199,7 @@ implementation
     gContagemProcessos: Int64;
 
   const
-    MAXIMO = 50;
+    MAXIMO = 100;
 
 
 function getContagemExecucoesAssincronas: Int64;
