@@ -20,7 +20,7 @@ type
   ITCaixaDao=IObject<TCaixaDao>;
   TCaixaDao = class
   private
-    [weak] mySelf: ITCaixaDao;
+    [unsafe] mySelf: ITCaixaDao;
     vIconexao : Iconexao;
     vConstrutor : IConstrutorDao;
 

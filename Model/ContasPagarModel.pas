@@ -15,7 +15,7 @@ type
 
   TContasPagarModel = class
   private
-    [weak] mySelf:  ITContasPagarModel;
+    [unsafe] mySelf:  ITContasPagarModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

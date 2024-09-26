@@ -39,7 +39,7 @@ type
 
   TCNPJModel = class
  private
-  [weak] mySelf: ITCNPJModel;
+  [unsafe] mySelf: ITCNPJModel;
   fRestClient          :  TRESTClient;
   fRestRequest         :  TRESTRequest;
   fRestResponse        :  TRESTResponse;

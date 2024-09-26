@@ -20,7 +20,7 @@ uses
 
     TFiltroDao=class
     private
-      [weak] mySelf: ITFiltroDao;
+      [unsafe] mySelf: ITFiltroDao;
       vIConexao   : IConexao;
       vIConstrutorDao: IConstrutorDao;
     public

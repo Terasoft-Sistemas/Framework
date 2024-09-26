@@ -21,7 +21,7 @@ type
 
   TVendaCartaoDao = class
   private
-    [weak] mySelf: ITVendaCartaoDao;
+    [unsafe] mySelf: ITVendaCartaoDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

@@ -36,7 +36,7 @@ type
   TPedidoItensModel = class
 
   private
-    [weak] mySelf: ITPedidoItensModel;
+    [unsafe] mySelf: ITPedidoItensModel;
     vIConexao : IConexao;
 
     FPedidoItenssLista: IList<ITPedidoItensModel>;

@@ -16,7 +16,7 @@ type
 
   TLojasModel = class
   private
-    [weak] mySelf: ITLojasModel;
+    [unsafe] mySelf: ITLojasModel;
     vIConexao : IConexao;
     fConexaoLoja: IConexao;
     FLojassLista: TILojasModelList;

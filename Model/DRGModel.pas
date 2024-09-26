@@ -14,7 +14,7 @@ type
 
   TDRGModel = class
   private
-    [weak] mySelf:ITDRGModel;
+    [unsafe] mySelf:ITDRGModel;
     vIConexao : IConexao;
   public
     constructor _Create(pIConexao : IConexao);

@@ -25,7 +25,7 @@ type
 
   TClientesEnderecoDao = class
   private
-    [weak] mySelf: ITClientesEnderecoDao;
+    [unsafe] mySelf: ITClientesEnderecoDao;
     vIConexao : IConexao;
     vConstrutor : IConstrutorDao;
 

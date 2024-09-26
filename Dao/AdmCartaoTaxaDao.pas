@@ -22,7 +22,7 @@ type
 
   TAdmCartaoTaxaDao = class
   private
-    [weak] mySelf: ITAdmCartaoTaxaDao;
+    [unsafe] mySelf: ITAdmCartaoTaxaDao;
     vIConexao : IConexao;
     vConstrutor : IConstrutorDao;
 

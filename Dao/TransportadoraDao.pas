@@ -25,7 +25,7 @@ type
 
   TTransportadoraDao = class
   private
-    [weak] mySelf: ITTransportadoraDao;
+    [unsafe] mySelf: ITTransportadoraDao;
     vIConexao : IConexao;
     vConstrutor : IConstrutorDao;
 

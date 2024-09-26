@@ -19,7 +19,7 @@ type
 
   TPrevisaoPedidoCompraModel = class
   private
-    [weak] mySelf: ITPrevisaoPedidoCompraModel;
+    [unsafe] mySelf: ITPrevisaoPedidoCompraModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

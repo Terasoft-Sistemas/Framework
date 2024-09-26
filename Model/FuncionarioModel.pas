@@ -15,7 +15,7 @@ type
 
   TFuncionarioModel = class
   private
-    [weak] mySelf: ITFuncionarioModel;
+    [unsafe] mySelf: ITFuncionarioModel;
     vIConexao : IConexao;
     FFuncionariosLista: IList<ITFuncionarioModel>;
     FAcao: TAcao;

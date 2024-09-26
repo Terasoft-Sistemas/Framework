@@ -22,7 +22,7 @@ type
 
   TPixDao = class
   private
-    [weak] mYSelf: ITPixDao;
+    [unsafe] mYSelf: ITPixDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

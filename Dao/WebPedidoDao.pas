@@ -21,7 +21,7 @@ type
 
   TWebPedidoDao = class
   private
-    [weak] mySelf: ITWebPedidoDao;
+    [unsafe] mySelf: ITWebPedidoDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

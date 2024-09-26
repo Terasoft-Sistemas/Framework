@@ -16,7 +16,7 @@ type
 
   TFornecedorModel = class
   private
-    [weak] mySelf: ITFornecedorModel;
+    [unsafe] mySelf: ITFornecedorModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

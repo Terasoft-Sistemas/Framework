@@ -17,7 +17,7 @@ type
 
   TCaixaControleModel = class
   private
-    [weak] mySelf: ITCaixaControleModel;
+    [unsafe] mySelf: ITCaixaControleModel;
 
     vIConexao : IConexao;
     FCaixaControlesLista: IList<ITCaixaControleModel>;

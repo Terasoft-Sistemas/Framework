@@ -42,7 +42,7 @@ type
 
   TVendasVendedorModel = class
   private
-    [weak] mySelf: ITVendasVendedorModel;
+    [unsafe] mySelf: ITVendasVendedorModel;
     vIConexao : IConexao;
 
     FLengthPageView: String;

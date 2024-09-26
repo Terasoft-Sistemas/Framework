@@ -15,7 +15,7 @@ type
 
   TMedidaModel = class
   private
-    [weak] mySelf: ITMedidaModel;
+    [unsafe] mySelf: ITMedidaModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

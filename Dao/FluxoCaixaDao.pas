@@ -20,7 +20,7 @@ type
   ITFluxoCaixaDao=IObject<TFluxoCaixaDao>;
   TFluxoCaixaDao = class
   private
-    [weak] mySelf: ITFluxoCaixaDao;
+    [unsafe] mySelf: ITFluxoCaixaDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

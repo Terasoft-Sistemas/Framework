@@ -21,7 +21,7 @@ type
 
   TSaldoModel = class
   private
-    [weak] mySelf: ITSaldoModel;
+    [unsafe] mySelf: ITSaldoModel;
     vIConexao : IConexao;
     FSaldosLista: IList<ITSaldoModel>;
     FAcao: TAcao;

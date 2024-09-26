@@ -26,7 +26,7 @@ type
 
   TProdutoTipoDao = class
   private
-    [weak] mySelf: ITProdutoTipoDao;
+    [unsafe] mySelf: ITProdutoTipoDao;
     vIConexao : IConexao;
 
     vConstrutor : IConstrutorDao;

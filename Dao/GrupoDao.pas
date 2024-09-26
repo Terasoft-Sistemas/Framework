@@ -25,7 +25,7 @@ type
 
   TGrupoDao = class
   private
-    [weak] mySelf: ITGrupoDao;
+    [unsafe] mySelf: ITGrupoDao;
     vIConexao : IConexao;
     vConstrutor : IConstrutorDao;
 

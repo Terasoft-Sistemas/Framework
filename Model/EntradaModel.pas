@@ -36,7 +36,7 @@ type
 
   TEntradaModel = class
   private
-    [weak] mySelf: ITEntradaModel;
+    [unsafe] mySelf: ITEntradaModel;
     vIConexao : IConexao;
     ACBrNFe: TACBrNFe;
     ACBrNFeDANFeRL: TACBrNFeDANFeRL;

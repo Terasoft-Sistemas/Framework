@@ -20,7 +20,7 @@ type
 
   TIBPTDao = class
   private
-    [weak] mySelf: ITIbptDao;
+    [unsafe] mySelf: ITIbptDao;
     vIConexao 	: IConexao;
     vConstrutor : IConstrutorDao;
 

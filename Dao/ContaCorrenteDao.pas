@@ -23,7 +23,7 @@ type
 
   TContaCorrenteDao = class
   private
-    [weak] mySelf: ITContaCorrenteDao;
+    [unsafe] mySelf: ITContaCorrenteDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

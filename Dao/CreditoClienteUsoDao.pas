@@ -21,7 +21,7 @@ type
 
   TCreditoClienteUsoDao = class
   private
-    [weak] mySelf: ITCreditoClienteUsoDao;
+    [unsafe] mySelf: ITCreditoClienteUsoDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

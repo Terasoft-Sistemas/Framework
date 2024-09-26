@@ -14,7 +14,7 @@ type
 
   TAtendimentoModel = class
   private
-    [weak] mySelf: ITAtendimentoModel;
+    [unsafe] mySelf: ITAtendimentoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

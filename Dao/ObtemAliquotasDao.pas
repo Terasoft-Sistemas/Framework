@@ -18,7 +18,7 @@ type
 
   TObtemAliquotasDao = class
   private
-    [weak] mYSelf: ITObtemAliquotasDao;
+    [unsafe] mYSelf: ITObtemAliquotasDao;
     vIConexao : IConexao;
 
     FDESTINATARIO_UF: String;

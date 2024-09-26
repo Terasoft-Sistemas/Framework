@@ -25,7 +25,7 @@ type
 
   TIBPTModel = class
   private
-    [weak] mySelf: ITIBPTModel;
+    [unsafe] mySelf: ITIBPTModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

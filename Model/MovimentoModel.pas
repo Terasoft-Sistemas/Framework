@@ -15,7 +15,7 @@ type
 
   TMovimentoModel = class
   private
-    [weak] mySelf: ITMovimentoModel;
+    [unsafe] mySelf: ITMovimentoModel;
     vIConexao : IConexao;
     FMovimentosLista: IList<ITMovimentoModel>;
     FAcao: TAcao;

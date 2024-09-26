@@ -28,7 +28,7 @@ type
 
   TSaidasModel = class
   private
-    [weak] mySelf: ITSaidasModel;
+    [unsafe] mySelf: ITSaidasModel;
   
     vIConexao : IConexao;
 

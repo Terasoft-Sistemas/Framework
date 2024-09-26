@@ -16,7 +16,7 @@ type
 
   TMovimentoSerialModel = class
   private
-    [weak] mySelf:ITMovimentoSerialModel;
+    [unsafe] mySelf:ITMovimentoSerialModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

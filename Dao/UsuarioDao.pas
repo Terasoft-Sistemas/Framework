@@ -22,7 +22,7 @@ type
 
   TUsuarioDao=class
   private
-    [weak] mySelf: ITUsuarioDao;
+    [unsafe] mySelf: ITUsuarioDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

@@ -16,7 +16,7 @@ type
 
   TTabelaJurosPromocaoModel = class
   private
-    [weak] mySelf: ITTabelaJurosPromocaoModel;
+    [unsafe] mySelf: ITTabelaJurosPromocaoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

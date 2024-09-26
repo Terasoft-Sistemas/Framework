@@ -25,7 +25,7 @@ type
 
   TOrcamentoItensDao = class
   private
-    [weak] mySelf: ITOrcamentoItensDao;
+    [unsafe] mySelf: ITOrcamentoItensDao;
     vIConexao : IConexao;
     vConstrutor : IConstrutorDao;
 

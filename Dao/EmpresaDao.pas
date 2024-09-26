@@ -18,7 +18,7 @@ type
 
   TEmpresaDao = class
   private
-    [weak] mySelf: ITEmpresaDao;
+    [unsafe] mySelf: ITEmpresaDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

@@ -17,7 +17,7 @@ type
 
   TMunicipiosIBGEModel = class
   private
-    [weak] mySelf: ITMunicipiosIBGEModel;
+    [unsafe] mySelf: ITMunicipiosIBGEModel;
     vIConexao : IConexao;
 
   public

@@ -25,7 +25,7 @@ type
 
   TDescontoDao = class
   private
-    [weak] mySelf: ITDescontoDao;
+    [unsafe] mySelf: ITDescontoDao;
     vIConexao : IConexao;
     vConstrutor : IConstrutorDao;
 

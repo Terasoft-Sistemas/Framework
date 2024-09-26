@@ -20,7 +20,7 @@ type
 
   TImpressoraDao = class
   private
-    [weak] mySelf: ITImpressoraDao;
+    [unsafe] mySelf: ITImpressoraDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

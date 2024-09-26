@@ -20,7 +20,7 @@ type
 
   TPedidoCompraItensDao = class
   private
-    [weak] mySelf: ITPedidoCompraItensDao;
+    [unsafe] mySelf: ITPedidoCompraItensDao;
     vIConexao 	: IConexao;
     vConstrutor : IConstrutorDao;
 

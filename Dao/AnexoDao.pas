@@ -20,7 +20,7 @@ type
 
   TAnexoDao = class
   private
-    [weak] mySelf: ITAnexoDao;
+    [unsafe] mySelf: ITAnexoDao;
     vIConexao 	: IConexao;
     vConstrutor : IConstrutorDao;
 

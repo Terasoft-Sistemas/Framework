@@ -20,7 +20,7 @@ type
 
   TPromocaoDao = class
   private
-    [weak] mySelf: ITPromocaoDao;
+    [unsafe] mySelf: ITPromocaoDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

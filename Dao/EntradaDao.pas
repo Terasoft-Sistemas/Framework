@@ -20,7 +20,7 @@ type
 
   TEntradaDao = class
   private
-    [weak] mySelf: ITEntradaDao;
+    [unsafe] mySelf: ITEntradaDao;
     vIConexao : IConexao;
     vConstrutor : IConstrutorDao;
 

@@ -20,7 +20,7 @@ type
 
   TDevolucaoItensDao = class
   private
-    [weak] mySelf: ITDevolucaoItensDao;
+    [unsafe] mySelf: ITDevolucaoItensDao;
     vIConexao 	: IConexao;
     vConstrutor : IConstrutorDao;
 

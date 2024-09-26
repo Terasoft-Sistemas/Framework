@@ -20,7 +20,7 @@ type
 
   TCFOPDao = class
   private
-    [weak] mySelf: ITCFOPDao;
+    [unsafe] mySelf: ITCFOPDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

@@ -18,7 +18,7 @@ type
 
   TPrecoVendaProdutoDao = class
   private
-    [weak] mySelf: ITPrecoVendaProdutoDao;
+    [unsafe] mySelf: ITPrecoVendaProdutoDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
     FPrecoVendaProdutosLista: IList<ITPrecoVendaProdutoModel>;

@@ -22,7 +22,7 @@ type
 
   TSaldoDao = class
   private
-    [weak] mySelf: ITSaldoDao;
+    [unsafe] mySelf: ITSaldoDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

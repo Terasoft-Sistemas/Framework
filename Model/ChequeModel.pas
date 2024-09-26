@@ -15,7 +15,7 @@ type
 
   TChequeModel = class
   private
-    [weak] mySelf: ITChequeModel;
+    [unsafe] mySelf: ITChequeModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

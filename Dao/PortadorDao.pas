@@ -20,7 +20,7 @@ type
 
   TPortadorDao = class
   private
-    [weak] mySelf: ITPortadorDao;
+    [unsafe] mySelf: ITPortadorDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

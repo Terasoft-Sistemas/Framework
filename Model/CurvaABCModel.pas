@@ -15,7 +15,7 @@ type
 
   TCurvaABCModel = class
   private
-    [weak] mySelf: ITCurvaABCModel;
+    [unsafe] mySelf: ITCurvaABCModel;
     vIConexao : IConexao;
 
   public

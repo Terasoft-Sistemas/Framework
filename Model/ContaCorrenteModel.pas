@@ -15,7 +15,7 @@ type
 
   TContaCorrenteModel = class
   private
-    [weak] mySelf: ITContaCorrenteModel;
+    [unsafe] mySelf: ITContaCorrenteModel;
     vIConexao : IConexao;
     FContaCorrentesLista: IList<ITContaCorrenteModel>;
     FAcao: TAcao;

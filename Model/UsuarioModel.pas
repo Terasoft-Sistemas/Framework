@@ -18,7 +18,7 @@ type
 
   TUsuarioModel = class
   private
-    [weak] mySelf: ITUsuarioModel;
+    [unsafe] mySelf: ITUsuarioModel;
     vIConexao : IConexao;
     FUsuariosLista:IList<ITUsuarioModel>;
     FAcao: TAcao;

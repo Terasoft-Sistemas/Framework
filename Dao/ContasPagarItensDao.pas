@@ -20,7 +20,7 @@ type
 
   TContasPagarItensDao = class
   private
-    [weak] mySelf: ITContasPagarItensDao;
+    [unsafe] mySelf: ITContasPagarItensDao;
     vIConexao : IConexao;
     vConstrutor : IConstrutorDao;
 

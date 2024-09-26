@@ -14,7 +14,7 @@ type
 
   TPrecoClienteModel = class
   private
-    [weak] mySelf: ITPrecoClienteModel;
+    [unsafe] mySelf: ITPrecoClienteModel;
     vIConexao : IConexao;
     FPrecoClientesLista: IList<ITPrecoClienteModel>;
     FAcao: TAcao;

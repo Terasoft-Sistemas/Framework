@@ -16,7 +16,7 @@ type
 
   TDescontoModel = class
   private
-    [weak] mySelf: ITDescontoModel;
+    [unsafe] mySelf: ITDescontoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

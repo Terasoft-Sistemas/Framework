@@ -142,15 +142,10 @@ end;
 
 class function TConfiguracoesModel.getNewIface(pIConexao: IConexao): ITConfiguracoesModel;
 begin
-  entraSecaoCriticaGlobal;
-  try
-    Result := TImplObjetoOwner<TConfiguracoesModel>.CreateOwner(self._Create(pIConexao));
-    logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TConfiguracoesModel.getNewIface: Atribuindo Result para myself',LOG_LEVEL_DEBUG);
-    Result.objeto.mySelf := Result;
-    logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TConfiguracoesModel.getNewIface: Saindo do getNewIface',LOG_LEVEL_DEBUG);
-  finally
-    saiSecaoCriticaGlobal;
-  end;
+  Result := TImplObjetoOwner<TConfiguracoesModel>.CreateOwner(self._Create(pIConexao));
+  logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TConfiguracoesModel.getNewIface: Atribuindo Result para myself',LOG_LEVEL_DEBUG);
+  Result.objeto.mySelf := Result;
+  logaByTagSeNivel(TAGLOG_CONDICIONAL, 'TConfiguracoesModel.getNewIface: Saindo do getNewIface',LOG_LEVEL_DEBUG);
 end;
 
 procedure TConfiguracoesModel.obterLista;

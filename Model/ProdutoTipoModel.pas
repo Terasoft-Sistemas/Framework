@@ -15,7 +15,7 @@ type
 
   TProdutoTipoModel = class
   private
-    [weak] mySelf: ITProdutoTipoModel;
+    [unsafe] mySelf: ITProdutoTipoModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

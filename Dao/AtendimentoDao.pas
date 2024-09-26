@@ -21,7 +21,7 @@ type
 
   TAtendimentoDao = class
   private
-    [weak] mySelf: ITAtendimentoDao;
+    [unsafe] mySelf: ITAtendimentoDao;
     vIConexao : IConexao;
 
     FLengthPageView: String;

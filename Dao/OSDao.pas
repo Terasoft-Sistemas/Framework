@@ -20,7 +20,7 @@ type
 
   TOSDao = class
   private
-    [weak] mySelf: ITOSDao;
+    [unsafe] mySelf: ITOSDao;
     vIConexao : IConexao;
 
     FLengthPageView: String;

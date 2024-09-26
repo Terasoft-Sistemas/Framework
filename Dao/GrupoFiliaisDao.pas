@@ -20,7 +20,7 @@ type
 
   TGrupoFiliaisDao = class
   private
-    [weak] mySelf : ITGrupoFiliaisDao;
+    [unsafe] mySelf : ITGrupoFiliaisDao;
     vIConexao 	  : IConexao;
     vConstrutor   : IConstrutorDao;
 

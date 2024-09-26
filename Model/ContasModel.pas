@@ -14,7 +14,7 @@ type
 
   TContasModel = class
   private
-    [weak] mySelf: ITContasModel;
+    [unsafe] mySelf: ITContasModel;
     vIConexao : IConexao;
     FContassLista: IList<ITContasModel>;
     FAcao: TAcao;

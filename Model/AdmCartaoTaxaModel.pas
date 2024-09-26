@@ -15,7 +15,7 @@ type
 
   TAdmCartaoTaxaModel   = class
   private
-    [weak] mySelf: ITAdmCartaoTaxaModel;
+    [unsafe] mySelf: ITAdmCartaoTaxaModel;
     vIConexao : IConexao;
 
     FAdmCartaoTaxasLista: IList<ITAdmCartaoTaxaModel>;

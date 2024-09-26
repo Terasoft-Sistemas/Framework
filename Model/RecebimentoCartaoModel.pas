@@ -14,7 +14,7 @@ type
 
   TRecebimentoCartaoModel = class
   private
-    [weak] mySelf: ITRecebimentoCartaoModel;
+    [unsafe] mySelf: ITRecebimentoCartaoModel;
     vIConexao : IConexao;
     FRecebimentoCartaosLista: IList<ITRecebimentoCartaoModel>;
     FAcao: TAcao;

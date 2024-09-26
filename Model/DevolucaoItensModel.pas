@@ -15,7 +15,7 @@ type
 
   TDevolucaoItensModel = class
   private
-    [weak] mySelf: ITDevolucaoItensModel;
+    [unsafe] mySelf: ITDevolucaoItensModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

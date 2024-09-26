@@ -18,7 +18,7 @@ type
 
   TPrecoUFDao = class
   private
-    [weak] mySelf: ITPrecoUFDao;
+    [unsafe] mySelf: ITPrecoUFDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

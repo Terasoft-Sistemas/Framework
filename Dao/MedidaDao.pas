@@ -26,7 +26,7 @@ type
 
   TMedidaDao = class
   private
-    [weak] mySelf: ITMedidaDao;
+    [unsafe] mySelf: ITMedidaDao;
     vIConexao : IConexao;
 
     vConstrutor : IConstrutorDao;

@@ -16,7 +16,7 @@ type
 
   TNFModel = class
   private
-    [weak] mySelf: ITNFModel;
+    [unsafe] mySelf: ITNFModel;
     vIConexao : IConexao;
     FAcao: TAcao;
     FVFCPUFDEST: Variant;

@@ -25,7 +25,7 @@ type
 
   TClientesContatoDao = class
   private
-    [weak] mySelf: ITClientesContatoDao;
+    [unsafe] mySelf: ITClientesContatoDao;
     vIConexao : IConexao;
     vConstrutor : IConstrutorDao;
 

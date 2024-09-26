@@ -25,7 +25,7 @@ type
 
   TMarcaDao = class
   private
-    [weak] mySelf: ITMarcaDao;
+    [unsafe] mySelf: ITMarcaDao;
     vIConexao : IConexao;
 
     vConstrutor : IConstrutorDao;

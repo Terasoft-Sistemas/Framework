@@ -18,7 +18,7 @@ type
 
   TEventosNFeDao = class
   private
-  [weak] mySelf: ITEventosNFeDao;
+  [unsafe] mySelf: ITEventosNFeDao;
   vIConexao   : IConexao;
   vConstrutor : IConstrutorDao;
 

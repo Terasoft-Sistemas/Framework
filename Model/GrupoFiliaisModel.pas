@@ -16,7 +16,7 @@ type
 
   TGrupoFiliaisModel = class
   private
-    [weak] mySelf: ITGrupoFiliaisModel;
+    [unsafe] mySelf: ITGrupoFiliaisModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

@@ -15,7 +15,7 @@ type
 
   TNFItensModel = class
   private
-    [weak] mySelf: ITNFItensModel;
+    [unsafe] mySelf: ITNFItensModel;
     vIConexao : IConexao;
     FNFItenssLista: IList<ITNFItensModel>;
     FAcao: TAcao;

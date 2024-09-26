@@ -19,7 +19,7 @@ type
 
   TLojasDao = class
   private
-    [weak] mySelf:ITLojasDao;
+    [unsafe] mySelf:ITLojasDao;
     vIConexao   : IConexao;
     vConstrutor : IConstrutorDao;
 

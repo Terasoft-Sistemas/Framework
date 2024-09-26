@@ -16,7 +16,7 @@ type
 
   TReservaModel = class
   private
-    [weak] mySelf: ITReservaModel;
+    [unsafe] mySelf: ITReservaModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

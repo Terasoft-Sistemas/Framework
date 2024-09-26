@@ -20,7 +20,7 @@ type
 
   TTabelaJurosPromocaoDao = class
   private
-    [weak] mySelf: ITTabelaJurosPromocaoDao;
+    [unsafe] mySelf: ITTabelaJurosPromocaoDao;
     vIConexao 	: IConexao;
     vConstrutor : IConstrutorDao;
 

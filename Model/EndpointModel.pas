@@ -70,7 +70,7 @@ uses
 
     TEndpointModel=class
     private
-      [weak] mySelf: ITEndpointModel;
+      [unsafe] mySelf: ITEndpointModel;
     protected
       vIConexao   : IConexao;
       vConfiguracoes: ITerasoftConfiguracoes;

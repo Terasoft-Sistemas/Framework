@@ -23,7 +23,7 @@ type
 
   TPCGDao = class
   private
-    [weak] mySelf: ITPCGDao;
+    [unsafe] mySelf: ITPCGDao;
     vIConexao : IConexao;
 
     vNomeCampo, vNomeCampoOS, vNomeCampoDev, vNomeCampoEntrada : String;

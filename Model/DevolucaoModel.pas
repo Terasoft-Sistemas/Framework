@@ -14,7 +14,7 @@ type
   ITDevolucaoModel=IObject<TDevolucaoModel>;
   TDevolucaoModel = class
   private
-    [weak] mySelf: ITDevolucaoModel;
+    [unsafe] mySelf: ITDevolucaoModel;
     vIConexao : IConexao;
     FAcao: TAcao;
     FLengthPageView: String;

@@ -45,7 +45,7 @@ type
 
   TWebPedidoModel = class
   private
-    [weak] mySelf: ITWebPedidoModel;
+    [unsafe] mySelf: ITWebPedidoModel;
     vIConexao : IConexao;
     FWebPedidosLista: IList<ITWebPedidoModel>;
     FAcao: TAcao;

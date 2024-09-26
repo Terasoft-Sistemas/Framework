@@ -15,7 +15,7 @@ type
 
   TOrcamentoItensModel = class
   private
-    [weak] mySelf: ITOrcamentoItensModel;
+    [unsafe] mySelf: ITOrcamentoItensModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

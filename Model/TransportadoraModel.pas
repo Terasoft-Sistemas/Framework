@@ -16,7 +16,7 @@ type
 
   TTransportadoraModel = class
   private
-    [weak] mySelf:ITTransportadoraModel;
+    [unsafe] mySelf:ITTransportadoraModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;

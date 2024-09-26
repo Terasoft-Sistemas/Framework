@@ -14,7 +14,7 @@ type
 
   TConsultaModel = class
   private
-    [weak] mySelf: ITConsultaModel;
+    [unsafe] mySelf: ITConsultaModel;
     vIConexao : IConexao;
     FConsultasLista: IList<ITConsultaModel>;
     FAcao: TAcao;
