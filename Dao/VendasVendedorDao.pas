@@ -656,7 +656,7 @@ begin
     begin
       if lQA.dataset.dataset.FieldByName('TIPO').AsString = 'PRESTAMISTA' then
       begin
-        lTotalGarantia := lTotalGarantia + lQA.dataset.dataset.FieldByName('VALOR_GARANTIA').AsFloat;
+        lTotalPrestamista := lTotalPrestamista + lQA.dataset.dataset.FieldByName('VALOR_COMISSAO').AsFloat;
 
         lMemTablePrestamista.InsertRecord([lQA.dataset.dataset.FieldByName('DOCUMENTO').AsString,
                                            lQA.dataset.dataset.FieldByName('DATA').AsString,
@@ -669,7 +669,7 @@ begin
       end
       else
       begin
-        lTotalPrestamista := lTotalPrestamista + lQA.dataset.dataset.FieldByName('VALOR_GARANTIA').AsFloat;
+        lTotalGarantia := lTotalGarantia + lQA.dataset.dataset.FieldByName('VALOR_COMISSAO').AsFloat;
 
         lMemTableGarantia.InsertRecord([lQA.dataset.dataset.FieldByName('TIPO').AsString,
                                         lQA.dataset.dataset.FieldByName('DOCUMENTO').AsString,
