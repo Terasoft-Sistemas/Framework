@@ -366,15 +366,10 @@ end;
 
 class function TWebPedidoItensModel.getNewIface(pIConexao: IConexao): ITWebPedidoItensModel;
 begin
-  entraSecaoCriticaGlobal;
-  try
-    Result := TImplObjetoOwner<TWebPedidoItensModel>.CreateOwner(self._Create(pIConexao));
-    logaByTagSeNivel(TAGLOG_CONDICIONAL,format('TWebPedidoItensModel.getNewIface(%s): Atribuindo Result.objeto.myself',[ pIConexao.CSID ]),LOG_LEVEL_DEBUG);
-    Result.objeto.myself := Result;
-    logaByTagSeNivel(TAGLOG_CONDICIONAL,format('TWebPedidoItensModel.getNewIface(%s): Saindo procedure',[ pIConexao.CSID ]),LOG_LEVEL_DEBUG);
-  finally
-    saiSecaoCriticaGlobal;
-  end;
+  Result := TImplObjetoOwner<TWebPedidoItensModel>.CreateOwner(self._Create(pIConexao));
+  logaByTagSeNivel(TAGLOG_CONDICIONAL,format('TWebPedidoItensModel.getNewIface(%s): Atribuindo Result.objeto.myself',[ pIConexao.CSID ]),LOG_LEVEL_DEBUG);
+  Result.objeto.myself := Result;
+  logaByTagSeNivel(TAGLOG_CONDICIONAL,format('TWebPedidoItensModel.getNewIface(%s): Saindo procedure',[ pIConexao.CSID ]),LOG_LEVEL_DEBUG);
 end;
 
 function TWebPedidoItensModel.carregaClasse(pId: String): ITWebPedidoItensModel;
