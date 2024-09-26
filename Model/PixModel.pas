@@ -222,6 +222,7 @@ begin
     lPix_Parametros.Lojas                 := pPix_Parametros.Lojas;
     lPix_Parametros.Cliente               := pPix_Parametros.Cliente;
     lPix_Parametros.TipoData              := pPix_Parametros.TipoData;
+    lPix_Parametros.Situacao              := pPix_Parametros.Situacao;
     lPix_Parametros.DataFim               := pPix_Parametros.DataFim;
     lPix_Parametros.DataInicio            := pPix_Parametros.DataInicio;
 

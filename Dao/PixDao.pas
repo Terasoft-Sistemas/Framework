@@ -195,8 +195,7 @@ begin
            '   from pix                                                                   ' +sLineBreak+
            '  inner join empresa on 1=1                                                   ' +sLineBreak+
            '   left join clientes on pix.cliente_id = clientes.codigo_cli                 ' +sLineBreak+
-           '  where pix.data_pagamento is not null                                        ' +sLineBreak+
-           '    and pix.valor_recebido > ''0''                                            ' +sLineBreak;
+           '  where 1=1                                                                   ' +sLineBreak;
 
   if pPix_Parametros.TipoData = 'EMISSÃO' then
     lDataWhere := ' cast(pix.data_cadastro as Date) between ' + QuotedStr(transformaDataFireBirdWhere(pPix_Parametros.DataInicio)) +' and '+ QuotedStr(transformaDataFireBirdWhere(pPix_Parametros.DataFim))
@@ -204,6 +203,11 @@ begin
     lDataWhere := ' pix.data_pagamento between ' + QuotedStr(transformaDataFireBirdWhere(pPix_Parametros.DataInicio)) +' and '+ QuotedStr(transformaDataFireBirdWhere(pPix_Parametros.DataFim));
 
   lSQL := lSQL +  ' and ' +lDataWhere;
+
+  if pPix_Parametros.Situacao = 'BAIXADOS' then
+    lSQL := lSQL + ' and pix.data_pagamento is not null and pix.valor_recebido > ''0'''
+  else if pPix_Parametros.Situacao = 'ABERTOS' then
+    lSQL := lSQL + ' and pix.data_pagamento is null and pix.valor_recebido is null ';
 
   if pPix_Parametros.Cliente <> '' then
      lSQL := lSQL + ' and pix.cliente_id in (' +QuotedStr(pPix_Parametros.Cliente)+ ')';
