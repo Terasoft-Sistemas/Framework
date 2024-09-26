@@ -625,6 +625,10 @@ begin
   lMemTableGarantia.FieldDefs.Add('VALOR_COMISSAO', ftFloat);
   lMemTableGarantia.CreateDataSet;
 
+  lMemTablePrestamista.FieldDefs.Add('DOCUMENTO', ftString, 6);
+  lMemTablePrestamista.FieldDefs.Add('DATA', ftDate);
+  lMemTablePrestamista.FieldDefs.Add('LOJA', ftString, 3);
+  lMemTablePrestamista.FieldDefs.Add('VENDEDOR', ftString, 100);
   lMemTablePrestamista.FieldDefs.Add('CLIENTE', ftString, 100);
   lMemTablePrestamista.FieldDefs.Add('VALOR_PRESTAMISTA', ftFloat);
   lMemTablePrestamista.FieldDefs.Add('PERCENTUAL_COMISSAO', ftFloat);
@@ -654,7 +658,11 @@ begin
       begin
         lTotalGarantia := lTotalGarantia + lQA.dataset.dataset.FieldByName('VALOR_GARANTIA').AsFloat;
 
-        lMemTablePrestamista.InsertRecord([lQA.dataset.dataset.FieldByName('PRODUTO_CLIENTE').AsString,
+        lMemTablePrestamista.InsertRecord([lQA.dataset.dataset.FieldByName('DOCUMENTO').AsString,
+                                           lQA.dataset.dataset.FieldByName('DATA').AsString,
+                                           lQA.dataset.dataset.FieldByName('LOJA').AsString,
+                                           lQA.dataset.dataset.FieldByName('VENDEDOR').AsString,
+                                           lQA.dataset.dataset.FieldByName('PRODUTO_CLIENTE').AsString,
                                            lQA.dataset.dataset.FieldByName('VALOR_GARANTIA').AsString,
                                            lQA.dataset.dataset.FieldByName('PERCENTUAL_COMISSAO').AsString,
                                            lQA.dataset.dataset.FieldByName('VALOR_COMISSAO').AsString]);
