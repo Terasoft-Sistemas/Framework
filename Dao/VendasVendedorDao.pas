@@ -357,7 +357,7 @@ begin
           '    VENDEDOR,                                                                                                     '+SLineBreak+
           '    CODIGO_PRODUTO,                                                                                               '+SLineBreak+
           '    PRODUTO,                                                                                                      '+SLineBreak+
-          '    VALOR_VENDA_BRUTO VALOR_VENDA,                                                                                '+SLineBreak+
+          '    VALOR_VENDA_BRUTO-VALOR_DESCONTO VALOR_VENDA,                                                                 '+SLineBreak+
           '    QUANTIDADE,                                                                                                   '+SLineBreak+
           '    PERCENTUAL_COMISSAO,                                                                                          '+SLineBreak+
           '    cast( (VALOR_VENDA_BRUTO-VALOR_DESCONTO) as float) * cast(( PERCENTUAL_COMISSAO/100) as float) VALOR_COMISSAO '+SLineBreak+
