@@ -110,7 +110,8 @@ end;
 class function TerasoftConfiguracoes.getNewIface(pIConexao: IConexao): ITerasoftConfiguracoes;
 begin
   Result := TImplObjetoOwner<TerasoftConfiguracoes>.CreateOwner(self._Create(pIConexao));
-  Result.objeto.myself := Result;end;
+  Result.objeto.myself := Result;
+end;
 
 procedure TerasoftConfiguracoes.preparaTabela;
 begin
