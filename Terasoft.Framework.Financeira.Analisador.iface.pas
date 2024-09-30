@@ -14,6 +14,7 @@ interface
     Terasoft.Framework.Types;
 
   type
+    IFinanceira = interface;
 
     IFinanceiraConfig = interface
     ['{56619AF9-FB62-426C-B39A-94027E3D8592}']
@@ -239,7 +240,7 @@ interface
     ['{B2D41380-46B9-4937-B8BE-926813959765}']
       function critica(pResultado: IResultadoOperacao): boolean;
       function getAddr: Pointer;
-      function loadFromPathReaderWriter(const pPathRW: IUnknown; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+      function loadFromPathReaderWriter(const pPathRW: IUnknown; pFinanceira: IFinanceira; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     end;
 
     IFinanceira_Proposta = interface
@@ -247,7 +248,7 @@ interface
 
       function critica(pResultado: IResultadoOperacao): boolean;
       function getAddr: Pointer;
-      function loadFromPathReaderWriter(const pPathRW: IUnknown; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+      function loadFromPathReaderWriter(const pPathRW: IUnknown; pFinanceira: IFinanceira; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
     //property id getter/setter
       function getId: Int64;
@@ -269,25 +270,31 @@ interface
     //property config getter/setter
       function getConfig: IFinanceiraConfig;
 
-      property config: IFinanceiraConfig read getConfig;
-      property nome: TipoWideStringFramework read getNome;
-    end;
+      function critica(pResultado: IResultadoOperacao=nil): boolean;
 
-    ICredipar = interface
-    ['{5E234CAB-1B84-42F7-A94E-5F76F58B7901}']
+      function simulacao(vlrCompra: Extended; VlrEntrada: Extended; qtdParcela: Integer; dtPriVcto: TDate; pResultado: IResultadoOperacao=nil): IFinanceiraSimulacao;
+      function corrigeproposta(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+
     //property proposta getter/setter
-      function getAddr: Pointer;
-
       function getProposta: IFinanceira_Proposta;
       procedure setProposta(const pValue: IFinanceira_Proposta);
 
       function getNovaProposta: IFinanceira_Proposta;
 
-      function critica(pResultado: IResultadoOperacao): boolean;
-
     //property pessoaFisica getter/setter
       function getPessoaFisica: IFinanceira_PessoaFisica;
       procedure setPessoaFisica(const pValue: IFinanceira_PessoaFisica);
+
+      property pessoaFisica: IFinanceira_PessoaFisica read getPessoaFisica write setPessoaFisica;
+      property proposta: IFinanceira_Proposta read getProposta write setProposta;
+
+      property config: IFinanceiraConfig read getConfig;
+      property nome: TipoWideStringFramework read getNome;
+    end;
+
+    ICredipar = interface(IFinanceira)
+    ['{5E234CAB-1B84-42F7-A94E-5F76F58B7901}']
+      function getAddr: Pointer;
 
       function enviaProposta(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function cancelarProposta(pID: Int64; pMotivo: TipoWideStringFramework ; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
@@ -297,32 +304,17 @@ interface
       function statusProcessamento(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function conciliacao(pData: TDate; pResultado: IResultadoOperacao=nil): IFinanaceira_Conciliacao;
       function boleto(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-      function simulacao(vlrCompra: Extended; VlrEntrada: Extended; qtdParcela: Integer; dtPriVcto: TDate; pResultado: IResultadoOperacao=nil): IFinanceiraSimulacao;
-      function corrigeproposta(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-
-    //property nome getter/setter
-      function getNome: TipoWideStringFramework;
 
       function getStatusProposta(const pID: Int64): TipoWideStringFramework;
       procedure setStatusProposta(const pID: Int64; const pStatus: TipoWideStringFramework );
 
-    //property config getter/setter
-      function getConfig: IFinanceiraConfig;
-
-      property config: IFinanceiraConfig read getConfig;
-      property nome: TipoWideStringFramework read getNome;
-      property pessoaFisica: IFinanceira_PessoaFisica read getPessoaFisica write setPessoaFisica;
-      property proposta: IFinanceira_Proposta read getProposta write setProposta;
     end;
 
-  ITopOne = interface
+  ITopOne = interface(IFinanceira)
   ['{4039606F-8D52-4849-888C-0A0E6E37FBD5}']
 
-      function test(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      //function test(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
 
-    //property config getter/setter
-      function getConfig: IFinanceiraConfig;
-      property config: IFinanceiraConfig read getConfig;
   end;
 
   {$if not defined(__DLL__)}
@@ -330,11 +322,14 @@ interface
 
 
     function getCredipar(pFilial: TipoWideStringFramework; pGDB: IGDB): ICredipar;
-    function carregaPedidoCredipar(const pID: Int64; pCredipar: ICredipar; pGDB: IGDB; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+    function carregaPedidoCredipar(const pID: Int64; pFinanceira: ICredipar; pGDB: IGDB; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     function enviaPropostaCredipar(pCredipar: ICredipar; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     function getCrediparFilial(const pFilial: TipoWideStringFramework; pGDB: IGDB): ICredipar;
     function preValidarPropostaCredipar(const pID: Int64; pGDB: IGDB=nil; pResultado: IResultadoOperacao=nil):IResultadoOperacao;
   {$ifend}
+
+  function getSimulacaoFinanceiraIface:IFinanceiraSimulacao;
+
 
 implementation
   uses
@@ -342,6 +337,170 @@ implementation
     Terasoft.Framework.Conversoes,
     Terasoft.Framework.Validacoes,
     FuncoesConfig, Terasoft.Framework.Financeira.Analisador.iface.Consts;
+
+  type
+    TFinanceiraSimulacaoImpl = class(TInterfacedObject, IFinanceiraSimulacao)
+    protected
+      fData: TDate;
+      fResultado: IREsultadoOperacao;
+      fValorCompra: Extended;
+      fValorEntrada: Extended;
+      fParcelas: Integer;
+      fVencimento: TDate;
+      fValorParcela: Extended;
+      fCoeficiente: Extended;
+      fValorIOF: Extended;
+      fValorCET: Extended;
+
+    //property valorCET getter/setter
+      function getValorCET: Extended;
+      procedure setValorCET(const pValue: Extended);
+
+    //property valorIOF getter/setter
+      function getValorIOF: Extended;
+      procedure setValorIOF(const pValue: Extended);
+
+    //property coeficiente getter/setter
+      function getCoeficiente: Extended;
+      procedure setCoeficiente(const pValue: Extended);
+
+    //property valorParcela getter/setter
+      function getValorParcela: Extended;
+      procedure setValorParcela(const pValue: Extended);
+
+    //property vencimento getter/setter
+      function getVencimento: TDate;
+      procedure setVencimento(const pValue: TDate);
+
+    //property parcelas getter/setter
+      function getParcelas: Integer;
+      procedure setParcelas(const pValue: Integer);
+
+    //property valorEntrada getter/setter
+      function getValorEntrada: Extended;
+      procedure setValorEntrada(const pValue: Extended);
+
+    //property valorCompra getter/setter
+      function getValorCompra: Extended;
+      procedure setValorCompra(const pValue: Extended);
+
+    //property resultado getter/setter
+      function getResultado: IREsultadoOperacao;
+      procedure setResultado(const pValue: IREsultadoOperacao);
+
+    //property data getter/setter
+      function getData: TDate;
+      procedure setData(const pValue: TDate);
+    end;
+
+
+function getSimulacaoFinanceiraIface:IFinanceiraSimulacao;
+begin
+  Result := TFinanceiraSimulacaoImpl.Create;
+end;
+
+
+{ TFinanceiraSimulacaoImpl }
+
+procedure TFinanceiraSimulacaoImpl.setValorCET(const pValue: Extended);
+begin
+  fValorCET := pValue;
+end;
+
+function TFinanceiraSimulacaoImpl.getValorCET: Extended;
+begin
+  Result := fValorCET;
+end;
+
+procedure TFinanceiraSimulacaoImpl.setValorIOF(const pValue: Extended);
+begin
+  fValorIOF := pValue;
+end;
+
+function TFinanceiraSimulacaoImpl.getValorIOF: Extended;
+begin
+  Result := fValorIOF;
+end;
+
+procedure TFinanceiraSimulacaoImpl.setCoeficiente(const pValue: Extended);
+begin
+  fCoeficiente := pValue;
+end;
+
+function TFinanceiraSimulacaoImpl.getCoeficiente: Extended;
+begin
+  Result := fCoeficiente;
+end;
+
+procedure TFinanceiraSimulacaoImpl.setValorParcela(const pValue: Extended);
+begin
+  fValorParcela := pValue;
+end;
+
+function TFinanceiraSimulacaoImpl.getValorParcela: Extended;
+begin
+  Result := fValorParcela;
+end;
+
+procedure TFinanceiraSimulacaoImpl.setVencimento(const pValue: TDate);
+begin
+  fVencimento := pValue;
+end;
+
+function TFinanceiraSimulacaoImpl.getVencimento: TDate;
+begin
+  Result := fVencimento;
+end;
+
+procedure TFinanceiraSimulacaoImpl.setParcelas(const pValue: Integer);
+begin
+  fParcelas := pValue;
+end;
+
+function TFinanceiraSimulacaoImpl.getParcelas: Integer;
+begin
+  Result := fParcelas;
+end;
+
+procedure TFinanceiraSimulacaoImpl.setValorEntrada(const pValue: Extended);
+begin
+  fValorEntrada := pValue;
+end;
+
+function TFinanceiraSimulacaoImpl.getValorEntrada: Extended;
+begin
+  Result := fValorEntrada;
+end;
+
+procedure TFinanceiraSimulacaoImpl.setValorCompra(const pValue: Extended);
+begin
+  fValorCompra := pValue;
+end;
+
+function TFinanceiraSimulacaoImpl.getValorCompra: Extended;
+begin
+  Result := fValorCompra;
+end;
+
+procedure TFinanceiraSimulacaoImpl.setResultado(const pValue: IREsultadoOperacao);
+begin
+  fResultado := pValue;
+end;
+
+function TFinanceiraSimulacaoImpl.getResultado: IREsultadoOperacao;
+begin
+  Result := fResultado;
+end;
+
+procedure TFinanceiraSimulacaoImpl.setData(const pValue: TDate);
+begin
+  fData := pValue;
+end;
+
+function TFinanceiraSimulacaoImpl.getData: TDate;
+begin
+  Result := fData;
+end;
 
 {$if not defined(__DLL__)}
 
@@ -394,7 +553,7 @@ begin
   end;
 end;
 
-function carregaPedidoCredipar(const pID: Int64; pCredipar: ICredipar; pGDB: IGDB; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+function carregaPedidoCredipar(const pID: Int64; pFinanceira: ICredipar; pGDB: IGDB; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
   var
     lDSCliente,lDSProposta: IDataset;
     indice: Integer;
@@ -412,10 +571,10 @@ begin
     end;
   end;
 
-  if(pCredipar=nil) then
-    pCredipar :=  getCredipar('', pGDB);
+  if(pFinanceira=nil) then
+    pFinanceira :=  getCredipar('', pGDB);
 
-  pResultado.propriedade['credipar'].asInterface := pCredipar;
+  pResultado.propriedade['credipar'].asInterface := pFinanceira;
 
   lDSProposta := pGDB.criaDataset;
   lDSProposta.query(
@@ -612,10 +771,10 @@ begin
   end;
   lDSProposta.dataset.RecNo := indice;
 
-  pCredipar.pessoaFisica.loadFromPathReaderWriter(lDSCliente,pResultado);
-  pCredipar.proposta.loadFromPathReaderWriter(lDSProposta,pResultado);
+  pFinanceira.pessoaFisica.loadFromPathReaderWriter(lDSCliente,pFinanceira,pResultado);
+  pFinanceira.proposta.loadFromPathReaderWriter(lDSProposta,pFinanceira,pResultado);
 
-  pCredipar.corrigeproposta(pResultado);
+  pFinanceira.corrigeproposta(pResultado);
 
 end;
 
