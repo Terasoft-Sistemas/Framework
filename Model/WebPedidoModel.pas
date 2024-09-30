@@ -545,6 +545,7 @@ begin
     lPedidoVendaModel.objeto.ENTREGA_UF               := lWebPedidoModel.objeto.ENTREGA_UF;
     lPedidoVendaModel.objeto.ENTREGA_CEP              := lWebPedidoModel.objeto.ENTREGA_CEP;
     lPedidoVendaModel.objeto.ENTREGA_COMPLEMENTO      := lWebPedidoModel.objeto.ENTREGA_COMPLEMENTO;
+    lPedidoVendaModel.objeto.ENTREGA_COD_MUNICIPIO    := lWebPedidoModel.objeto.ENTREGA_COD_MUNICIPIO;
     lPedidoVendaModel.objeto.MONTAGEM_DATA            := lWebPedidoModel.objeto.MONTAGEM_DATA;
     lPedidoVendaModel.objeto.USUARIO_PED              := self.vIConexao.getUSer.ID;
     lPedidoVendaModel.objeto.IDUsuario                := self.vIConexao.getUSer.ID;
