@@ -56,6 +56,11 @@ interface
       function getCodigoLojista: TipoWideStringFramework;
       procedure setCodigoLojista(const pValue: TipoWideStringFramework);
 
+    //property usuario getter/setter
+      function getUsuario: TipoWideStringFramework;
+      procedure setUsuario(const pValue: TipoWideStringFramework);
+
+      property usuario: TipoWideStringFramework read getUsuario write setUsuario;
       property codigoLojista: TipoWideStringFramework read getCodigoLojista write setCodigoLojista;
       property propriedades: IPropriedade read getPropriedades write setPropriedades;
       property filial: TipoWideStringFramework read getFilial write setFilial;
@@ -230,14 +235,14 @@ interface
       property data: TDate read getData write setData;
     end;
 
-    ICredipar_PessoaFisica = interface
+    IFinanceira_PessoaFisica = interface
     ['{B2D41380-46B9-4937-B8BE-926813959765}']
       function critica(pResultado: IResultadoOperacao): boolean;
       function getAddr: Pointer;
       function loadFromPathReaderWriter(const pPathRW: IUnknown; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     end;
 
-    ICredipar_Proposta = interface
+    IFinanceira_Proposta = interface
     ['{7BFA61DA-E339-44BB-9AE1-BCDD55FBDF47}']
 
       function critica(pResultado: IResultadoOperacao): boolean;
@@ -256,21 +261,33 @@ interface
       property id: Int64 read getId write setId;
     end;
 
+    IFinanceira = interface
+    ['{0CFD13E2-C178-4365-8B39-44C573D1FB4A}']
+    //property nome getter/setter
+      function getNome: TipoWideStringFramework;
+
+    //property config getter/setter
+      function getConfig: IFinanceiraConfig;
+
+      property config: IFinanceiraConfig read getConfig;
+      property nome: TipoWideStringFramework read getNome;
+    end;
+
     ICredipar = interface
     ['{5E234CAB-1B84-42F7-A94E-5F76F58B7901}']
     //property proposta getter/setter
       function getAddr: Pointer;
 
-      function getProposta: ICredipar_Proposta;
-      procedure setProposta(const pValue: ICredipar_Proposta);
+      function getProposta: IFinanceira_Proposta;
+      procedure setProposta(const pValue: IFinanceira_Proposta);
 
-      function getNovaProposta: ICredipar_Proposta;
+      function getNovaProposta: IFinanceira_Proposta;
 
       function critica(pResultado: IResultadoOperacao): boolean;
 
     //property pessoaFisica getter/setter
-      function getPessoaFisica: ICredipar_PessoaFisica;
-      procedure setPessoaFisica(const pValue: ICredipar_PessoaFisica);
+      function getPessoaFisica: IFinanceira_PessoaFisica;
+      procedure setPessoaFisica(const pValue: IFinanceira_PessoaFisica);
 
       function enviaProposta(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function cancelarProposta(pID: Int64; pMotivo: TipoWideStringFramework ; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
@@ -294,13 +311,18 @@ interface
 
       property config: IFinanceiraConfig read getConfig;
       property nome: TipoWideStringFramework read getNome;
-      property pessoaFisica: ICredipar_PessoaFisica read getPessoaFisica write setPessoaFisica;
-      property proposta: ICredipar_Proposta read getProposta write setProposta;
+      property pessoaFisica: IFinanceira_PessoaFisica read getPessoaFisica write setPessoaFisica;
+      property proposta: IFinanceira_Proposta read getProposta write setProposta;
     end;
 
   ITopOne = interface
   ['{4039606F-8D52-4849-888C-0A0E6E37FBD5}']
-    procedure dummy;
+
+      function test(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+
+    //property config getter/setter
+      function getConfig: IFinanceiraConfig;
+      property config: IFinanceiraConfig read getConfig;
   end;
 
   {$if not defined(__DLL__)}
@@ -319,7 +341,7 @@ implementation
     strUtils,
     Terasoft.Framework.Conversoes,
     Terasoft.Framework.Validacoes,
-    FuncoesConfig, Terasoft.Framework.Credipar.Analisador.iface.Consts;
+    FuncoesConfig, Terasoft.Framework.Financeira.Analisador.iface.Consts;
 
 {$if not defined(__DLL__)}
 
@@ -327,7 +349,26 @@ implementation
     function createTopOne: ITopOne; stdcall; external 'TopOne_DLL' name 'createTopOne' delayed;
 
 function getTopOne;
+  var
+    cfg: ITagConfig;
 begin
+  Result := createTopOne;
+  if(pGDB=nil) then
+    pGDB := gdbPadrao;
+  if(pGDB<>nil) then
+  begin
+    cfg := novoTagConfig(pGDB);
+    Result.config.propriedades.propriedade['GDB'].asInterface := pGDB;
+    Result.config.urlWS := cfg.ValorTagConfig(tagConfig_TOPONE_ENDERECO_ENDPOINT,'',tvString);
+    Result.config.modoProducao := false;
+    Result.config.diretorioArquivos := cfg.ValorTagConfig(tagConfig_TOPONE_DIRETORIO_ARQUIVOS,'',tvString);
+    Result.config.usuario := cfg.ValorTagConfig(tagConfig_TOPONE_USUARIO_ENDPOINT,'',tvString);
+    Result.config.token := cfg.ValorTagConfig(tagConfig_TOPONE_SENHA_ENDPOINT,'',tvString);
+    //Result.config.codigoProdutoFinanceira := cfg.ValorTagConfig(tagConfig_CREDIPAR_PRODUTO,0,tvInteiro);
+    Result.config.controleAlteracoes := criaControleAlteracoes(FINANCEIRA_TOPONE_NOME,pGDB,true);
+    //Result.config.codigoLojista := cfg.ValorTagConfig(tagConfig_CREDIPAR_CODIGO_LOJISTA,0,tvString);
+    Result.config.filial := pFilial;
+  end;
 end;
 
 function getCredipar;//: ICredipar;

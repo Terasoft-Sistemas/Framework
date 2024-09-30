@@ -1,9 +1,11 @@
-unit Terasoft.Framework.Credipar.Analisador.iface.Consts;
+unit Terasoft.Framework.Financeira.Analisador.iface.Consts;
 
 interface
 
   const
     FINANCEIRA_CREDIPAR_NOME             = 'CREDIPAR';
+    FINANCEIRA_TOPONE_NOME               = 'TOPONE';
+
     CONTROLEALTERACOES_CREDIPAR_PROPOSTA = 'PROPOSTA';
     CONTROLEALTERACOES_CREDIPAR_CONTRATO = 'CONTRATO';
     CONTROLEALTERACOES_CREDIPAR_RESULTADOMENSAGEM = 'PROPOSTA.MSG';

@@ -12,7 +12,7 @@ interface
 
 implementation
   uses
-    Terasoft.Framework.Credipar.Analisador.iface.Consts,
+    Terasoft.Framework.Financeira.Analisador.iface.Consts,
     Terasoft.Framework.Log,
     strUtils,SysUtils,Classes,
     Terasoft.Framework.Texto,
