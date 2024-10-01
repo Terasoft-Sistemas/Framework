@@ -285,6 +285,9 @@ interface
       function getPessoaFisica: IFinanceira_PessoaFisica;
       procedure setPessoaFisica(const pValue: IFinanceira_PessoaFisica);
 
+      function getStatusProposta(const pID: Int64): TipoWideStringFramework;
+      procedure setStatusProposta(const pID: Int64; const pStatus: TipoWideStringFramework );
+
       property pessoaFisica: IFinanceira_PessoaFisica read getPessoaFisica write setPessoaFisica;
       property proposta: IFinanceira_Proposta read getProposta write setProposta;
 
@@ -305,9 +308,6 @@ interface
       function conciliacao(pData: TDate; pResultado: IResultadoOperacao=nil): IFinanaceira_Conciliacao;
       function boleto(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
 
-      function getStatusProposta(const pID: Int64): TipoWideStringFramework;
-      procedure setStatusProposta(const pID: Int64; const pStatus: TipoWideStringFramework );
-
     end;
 
   ITopOne = interface(IFinanceira)
@@ -322,7 +322,7 @@ interface
 
 
     function getCredipar(pFilial: TipoWideStringFramework; pGDB: IGDB): ICredipar;
-    function carregaPedidoCredipar(const pID: Int64; pFinanceira: ICredipar; pGDB: IGDB; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+    function carregaPedidoFinanceira(const pID: Int64; pFinanceira: IFinanceira; pGDB: IGDB; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     function enviaPropostaCredipar(pCredipar: ICredipar; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     function getCrediparFilial(const pFilial: TipoWideStringFramework; pGDB: IGDB): ICredipar;
     function preValidarPropostaCredipar(const pID: Int64; pGDB: IGDB=nil; pResultado: IResultadoOperacao=nil):IResultadoOperacao;
@@ -553,7 +553,7 @@ begin
   end;
 end;
 
-function carregaPedidoCredipar(const pID: Int64; pFinanceira: ICredipar; pGDB: IGDB; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+function carregaPedidoFinanceira(const pID: Int64; pFinanceira: IFinanceira; pGDB: IGDB; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
   var
     lDSCliente,lDSProposta: IDataset;
     indice: Integer;
