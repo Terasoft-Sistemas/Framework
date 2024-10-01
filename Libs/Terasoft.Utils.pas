@@ -42,6 +42,7 @@ uses
   function DiferencaEntreDatas(pDataInicial, pDataFinal: TDate ): Integer;
   function RetornaCoeficiente(pTaxa: Double;  pQuantidadeParcelas: Integer): IFDDataset;
   function corrigeValorExtended(p1: Extended; pCasasDecimais: Integer = 2): Extended;
+  function StringToBase64(pValue: String): String;
 
   function memoriaEmUso(var blocos: Int64; var bytes: Int64): Int64;
   procedure logaMemoriaEmUso;
@@ -55,6 +56,7 @@ uses
   Math,
   Terasoft.Framework.LOG,
   FastMM4,
+  System.NetEncoding,
   Terasoft.Types;
 
 
@@ -285,6 +287,11 @@ function corrigeValorExtended(p1: Extended; pCasasDecimais: Integer = 2): Extend
 begin
   p := Power(10,pCasasDecimais);
   Result := Trunc(((p1)* p) / p);
+end;
+
+function StringToBase64(pValue: String): String;
+begin
+  Result := TNetEncoding.Base64.Encode(AnsiString(pValue));
 end;
 
 function memoriaEmUso;
