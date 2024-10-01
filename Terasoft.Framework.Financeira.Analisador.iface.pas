@@ -240,7 +240,7 @@ interface
     ['{B2D41380-46B9-4937-B8BE-926813959765}']
       function critica(pResultado: IResultadoOperacao): boolean;
       function getAddr: Pointer;
-      function loadFromPathReaderWriter(const pPathRW: IUnknown; pFinanceira: IFinanceira; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+      function loadFromPathReaderWriter(const pPathRW: IUnknown; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     end;
 
     IFinanceira_Proposta = interface
@@ -248,7 +248,7 @@ interface
 
       function critica(pResultado: IResultadoOperacao): boolean;
       function getAddr: Pointer;
-      function loadFromPathReaderWriter(const pPathRW: IUnknown; pFinanceira: IFinanceira; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+      function loadFromPathReaderWriter(const pPathRW: IUnknown; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
     //property id getter/setter
       function getId: Int64;
@@ -264,6 +264,9 @@ interface
 
     IFinanceira = interface
     ['{0CFD13E2-C178-4365-8B39-44C573D1FB4A}']
+
+      function getAddr: Pointer;
+
     //property nome getter/setter
       function getNome: TipoWideStringFramework;
 
@@ -288,6 +291,8 @@ interface
       function getStatusProposta(const pID: Int64): TipoWideStringFramework;
       procedure setStatusProposta(const pID: Int64; const pStatus: TipoWideStringFramework );
 
+      function enviaProposta(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+
       property pessoaFisica: IFinanceira_PessoaFisica read getPessoaFisica write setPessoaFisica;
       property proposta: IFinanceira_Proposta read getProposta write setProposta;
 
@@ -299,7 +304,6 @@ interface
     ['{5E234CAB-1B84-42F7-A94E-5F76F58B7901}']
       function getAddr: Pointer;
 
-      function enviaProposta(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function cancelarProposta(pID: Int64; pMotivo: TipoWideStringFramework ; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function statusProposta(pID: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function anexarDocumentoAnalise(pProposta: Int64; pTipoDocumento: TipoWideStringFramework; pFormatoArquivo: TipoWideStringFramework; pDados: TBytes; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
@@ -323,7 +327,7 @@ interface
 
     function getCredipar(pFilial: TipoWideStringFramework; pGDB: IGDB): ICredipar;
     function carregaPedidoFinanceira(const pID: Int64; pFinanceira: IFinanceira; pGDB: IGDB; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-    function enviaPropostaCredipar(pCredipar: ICredipar; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+    function enviaPropostaFinanceira(pFinanceira: IFinanceira; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     function getCrediparFilial(const pFilial: TipoWideStringFramework; pGDB: IGDB): ICredipar;
     function preValidarPropostaCredipar(const pID: Int64; pGDB: IGDB=nil; pResultado: IResultadoOperacao=nil):IResultadoOperacao;
   {$ifend}
@@ -398,7 +402,6 @@ function getSimulacaoFinanceiraIface:IFinanceiraSimulacao;
 begin
   Result := TFinanceiraSimulacaoImpl.Create;
 end;
-
 
 { TFinanceiraSimulacaoImpl }
 
@@ -574,7 +577,7 @@ begin
   if(pFinanceira=nil) then
     pFinanceira :=  getCredipar('', pGDB);
 
-  pResultado.propriedade['credipar'].asInterface := pFinanceira;
+  pResultado.propriedade['financeira'].asInterface := pFinanceira;
 
   lDSProposta := pGDB.criaDataset;
   lDSProposta.query(
@@ -771,53 +774,51 @@ begin
   end;
   lDSProposta.dataset.RecNo := indice;
 
-  pFinanceira.pessoaFisica.loadFromPathReaderWriter(lDSCliente,pFinanceira,pResultado);
-  pFinanceira.proposta.loadFromPathReaderWriter(lDSProposta,pFinanceira,pResultado);
+  pFinanceira.pessoaFisica.loadFromPathReaderWriter(lDSCliente,pResultado);
+  pFinanceira.proposta.loadFromPathReaderWriter(lDSProposta,pResultado);
 
   pFinanceira.corrigeproposta(pResultado);
 
 end;
 
-function enviaPropostaCredipar(pCredipar: ICredipar; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+function enviaPropostaFinanceira(pFinanceira: IFinanceira; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
   var
     save: Integer;
 begin
   Result := checkResultadoOperacao(pResultado);
 
   save := pResultado.erros;
-  if(pCredipar=nil) then
+  if(pFinanceira=nil) then
   begin
-    pResultado.adicionaErro('enviaPedidoCredipar: Interface CREDIPAR não fornecida.');
+    pResultado.adicionaErro('enviaPropostaFinanceira: Interface FINANCEIRA não fornecida.');
     exit;
   end;
 
-  pResultado := pCredipar.enviaProposta(pResultado);
+  pResultado := pFinanceira.enviaProposta(pResultado);
 
-//  pCredipar.controleAlteracoes.setValor(RETORNO_CREDIPAR_RESULTADO,IntToStr(pCredipar.proposta.id), pResultado.toHTML(
-//            '', 'Resultado de ENVIO para a CREDIPAR @' + DateTimeToStr(Now), [ orosh_semHeader ]));
+  //if(pResultado.erros<>save) then exit;
 
-  if(pResultado.erros<>save) then exit;
 end;
 
   var
-    gListaFilial: IDictionary<TipoWideStringFramework, ICredipar>;
+    gListaFilialCredipar: IDictionary<TipoWideStringFramework, ICredipar>;
 
 function getCrediparFilial;//(const pFilial: TipoWideStringFramework): ICredipar;
 begin
   Result := nil;
   if(pFilial='') then
     exit;
-  if(gListaFilial=nil) then
-    gListaFilial := TCollections.CreateDictionary<TipoWideStringFramework, ICredipar>;
+  if(gListaFilialCredipar=nil) then
+    gListaFilialCredipar := TCollections.CreateDictionary<TipoWideStringFramework, ICredipar>;
 
-  if not gListaFilial.TryGetValue(pFilial,Result) then
+  if not gListaFilialCredipar.TryGetValue(pFilial,Result) then
   begin
     Result := getCredipar(pFilial,pGDB);
-    gListaFilial.AddOrSetValue(pFilial,Result);
+    gListaFilialCredipar.AddOrSetValue(pFilial,Result);
   end;
 end;
 
-function preValidarPropostaCredipar;//(const pID: Int64; pGDB: IGDB; pResultado: IResultadoOperacao):IResultadoOperacao;
+function preValidarPropostaCredipar;
   var
     save: Integer;
     dsWeb,dsCliente: IDataset;
@@ -825,16 +826,10 @@ begin
   Result := checkResultadoOperacao(pResultado);
   save := pResultado.erros;
   validaRegraTabela(FINANCEIRA_CREDIPAR_NOME,'web_pedido','id',[pID],pGDB,pResultado);
-  //if(pResultado.erros<>save) then exit;
   if supports(pResultado.propriedade['dataset'].asInterface,IDataset,dsWeb) then
   begin
     validaRegraTabela(FINANCEIRA_CREDIPAR_NOME,'clientes','CODIGO_CLI',[dsWeb.dataset.FieldByName('cliente_id').AsString],pGDB,pResultado);
-//    if supports(pResultado.propriedade['dataset'].asInterface,IDataset,dsCliente) then
-//    begin
-//      validaRegraTabela(FINANCEIRA_CREDIPAR_NOME,'CLIENTES_OCUPACAO','id',[dsCliente.dataset.FieldByName('ocupacao_id').AsString],pGDB,pResultado);
-//    end;
     validaRegraTabela(FINANCEIRA_CREDIPAR_NOME,'WEB_PEDIDOITENS','WEB_PEDIDO_ID',[pID],pGDB,pResultado);
-//    if(pResultado.erros<>save) then exit;
   end;
 end;
 
