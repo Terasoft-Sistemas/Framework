@@ -4,6 +4,7 @@ interface
 
 uses
   blcksock,
+  Terasoft.Framework.Texto,
   Clipbrd,
   System.Classes,
   System.SysUtils,
@@ -34,28 +35,34 @@ uses
   EventosNFeControl,
   Terasoft.Types,
   NFControl,
+  Terasoft.Framework.ObjectIface,
   NFModel;
 
 type
-  TEventosNotaFiscal = class
+  TEventosNotaFiscal = class;
+  ITEventosNotaFiscal=IObject<TEventosNotaFiscal>;
 
+  TEventosNotaFiscal=class
   private
+    [unsafe] mySelf: ITEventosNotaFiscal;
     vIConexao: IConexao;
     ACBrNFe: TACBrNFe;
-    Eventos: TEventosNotaFiscal;
-    vConfiguracoesNotaFiscal: TConfiguracoesNotaFiscal;
+    Eventos: ITEventosNotaFiscal;
+    vConfiguracoesNotaFiscal: ITConfiguracoesNotaFiscal;
 
     function configuraComponenteNFe: Boolean;
-    function enviarEvento(idNotaFiscal, justificativa: String; ptpEvento: TpcnTpEvento): TStringList;
+    function enviarEvento(idNotaFiscal, justificativa: String; ptpEvento: TpcnTpEvento): IListaTextoEx;
 
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
 
-    function cancelar(idNotaFiscal, justificativa: String): TStringList;
-    function inutilizar(idNotaFiscal, justificativa: String): TStringList;
-    function enviarCartaCorrecao(idNotaFiscal: String): TStringList;
-    function consultarPelaChave(pChave: String): TStringList;
+    class function getNewIface(pIConexao: IConexao): ITEventosNotaFiscal;
+
+    function cancelar(idNotaFiscal, justificativa: String): IListaTextoEx;
+    function inutilizar(idNotaFiscal, justificativa: String): IListaTextoEx;
+    function enviarCartaCorrecao(idNotaFiscal: String): IListaTextoEx;
+    function consultarPelaChave(pChave: String): IListaTextoEx;
 
   end;
 
@@ -68,12 +75,12 @@ begin
   ACBrNFe.NotasFiscais.Clear;
 
 
-  if(Length(vConfiguracoesNotaFiscal.certificadoArquivoPFX)>256) or not FileExists(vConfiguracoesNotaFiscal.certificadoArquivoPFX) then
-    ACBrNFe.Configuracoes.Certificados.DadosPFX  := vConfiguracoesNotaFiscal.certificadoArquivoPFX
+  if(Length(vConfiguracoesNotaFiscal.objeto.certificadoArquivoPFX)>256) or not FileExists(vConfiguracoesNotaFiscal.objeto.certificadoArquivoPFX) then
+    ACBrNFe.Configuracoes.Certificados.DadosPFX  := vConfiguracoesNotaFiscal.objeto.certificadoArquivoPFX
   else
-    ACBrNFe.Configuracoes.Certificados.ArquivoPFX  := vConfiguracoesNotaFiscal.certificadoArquivoPFX;
+    ACBrNFe.Configuracoes.Certificados.ArquivoPFX  := vConfiguracoesNotaFiscal.objeto.certificadoArquivoPFX;
 
-  ACBrNFe.Configuracoes.Certificados.Senha       := vConfiguracoesNotaFiscal.certificadoSenha;
+  ACBrNFe.Configuracoes.Certificados.Senha       := vConfiguracoesNotaFiscal.objeto.certificadoSenha;
   ACBrNFe.SSL.DescarregarCertificado;
 
 
@@ -87,14 +94,14 @@ begin
     Salvar           := True;
     ExibirErroSchema := true;
     RetirarAcentos   := True;
-    FormaEmissao     := vConfiguracoesNotaFiscal.tipoEmissao;
-    VersaoDF         := vConfiguracoesNotaFiscal.versaoDF;
+    FormaEmissao     := vConfiguracoesNotaFiscal.objeto.tipoEmissao;
+    VersaoDF         := vConfiguracoesNotaFiscal.objeto.versaoDF;
   end;
 
   with ACBrNFe.Configuracoes.WebServices do
   begin
-    UF         := vConfiguracoesNotaFiscal.ufEmissao;
-    Ambiente   := vConfiguracoesNotaFiscal.ambiente;
+    UF         := vConfiguracoesNotaFiscal.objeto.ufEmissao;
+    Ambiente   := vConfiguracoesNotaFiscal.objeto.ambiente;
     Visualizar := False;
     Salvar     := True;
   end;
@@ -103,79 +110,85 @@ begin
 
   with ACBrNFe.Configuracoes.Arquivos do
   begin
-    Salvar           := vConfiguracoesNotaFiscal.arquivosSalvar;
-    SepararPorMes    := vConfiguracoesNotaFiscal.arquivosSepararPorMes;
-    AdicionarLiteral := vConfiguracoesNotaFiscal.arquivosAdicionarLiteral;
-    EmissaoPathNFe   := vConfiguracoesNotaFiscal.arquivosEmissaoPathNFe;
-    SalvarEvento     := vConfiguracoesNotaFiscal.arquivosSalvarEvento;
-    SepararPorCNPJ   := vConfiguracoesNotaFiscal.arquivosSepararPorCNPJ;
-    SepararPorModelo := vConfiguracoesNotaFiscal.arquivosSepararPorModelo;
-    PathSchemas      := vConfiguracoesNotaFiscal.arquivosPathSchemas;
-    PathNFe          := vConfiguracoesNotaFiscal.arquivosPathNFe;
-    PathInu          := vConfiguracoesNotaFiscal.arquivosPathInu;
-    PathEvento       := vConfiguracoesNotaFiscal.arquivosPathEvento;
-    PathSalvar       := vConfiguracoesNotaFiscal.arquivosPathSalvar;
+    Salvar           := vConfiguracoesNotaFiscal.objeto.arquivosSalvar;
+    SepararPorMes    := vConfiguracoesNotaFiscal.objeto.arquivosSepararPorMes;
+    AdicionarLiteral := vConfiguracoesNotaFiscal.objeto.arquivosAdicionarLiteral;
+    EmissaoPathNFe   := vConfiguracoesNotaFiscal.objeto.arquivosEmissaoPathNFe;
+    SalvarEvento     := vConfiguracoesNotaFiscal.objeto.arquivosSalvarEvento;
+    SepararPorCNPJ   := vConfiguracoesNotaFiscal.objeto.arquivosSepararPorCNPJ;
+    SepararPorModelo := vConfiguracoesNotaFiscal.objeto.arquivosSepararPorModelo;
+    PathSchemas      := vConfiguracoesNotaFiscal.objeto.arquivosPathSchemas;
+    PathNFe          := vConfiguracoesNotaFiscal.objeto.arquivosPathNFe;
+    PathInu          := vConfiguracoesNotaFiscal.objeto.arquivosPathInu;
+    PathEvento       := vConfiguracoesNotaFiscal.objeto.arquivosPathEvento;
+    PathSalvar       := vConfiguracoesNotaFiscal.objeto.arquivosPathSalvar;
   end;
 
 end;
 
-function TEventosNotaFiscal.consultarPelaChave(pChave: String): TStringList;
+function TEventosNotaFiscal.consultarPelaChave(pChave: String): IListaTextoEx;
 var
-  lRetorno: TStringList;
+  lRetorno: IListaTextoEX;
 begin
-  lRetorno  := TStringList.Create;
+  lRetorno  := novaListaTexto;
 
   ACBrNFe.NotasFiscais.Clear;
   ACBrNFe.WebServices.Consulta.NFeChave := pChave;
   ACBrNFe.WebServices.Consulta.Executar;
 
-  lRetorno.Add(ACBrNFe.WebServices.Consulta.cStat.ToString);
-  lRetorno.Add(ACBrNFe.WebServices.Consulta.XMotivo);
-  lRetorno.Add(ACBrNFe.WebServices.Consulta.Protocolo);
-  lRetorno.Add(DateToStr(ACBrNFe.WebServices.Consulta.DhRecbto));
-  lRetorno.Add('CANCEL.: '+ACBrNFe.WebServices.Consulta.retCancNFe.xMotivo);
+  lRetorno.strings.Add(ACBrNFe.WebServices.Consulta.cStat.ToString);
+  lRetorno.strings.Add(ACBrNFe.WebServices.Consulta.XMotivo);
+  lRetorno.strings.Add(ACBrNFe.WebServices.Consulta.Protocolo);
+  lRetorno.strings.Add(DateToStr(ACBrNFe.WebServices.Consulta.DhRecbto));
+  lRetorno.strings.Add('CANCEL.: '+ACBrNFe.WebServices.Consulta.retCancNFe.xMotivo);
 
   Result := lRetorno;
 end;
 
-function TEventosNotaFiscal.cancelar(idNotaFiscal, justificativa: String): TStringList;
+function TEventosNotaFiscal.cancelar(idNotaFiscal, justificativa: String): IListaTextoEx;
 begin
   Result := enviarEvento(idNotaFiscal, justificativa, teCancelamento);
 end;
 
-constructor TEventosNotaFiscal.Create(pIConexao : IConexao);
+constructor TEventosNotaFiscal._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
-  vConfiguracoesNotaFiscal := TConfiguracoesNotaFiscal.Create(vIConexao);
+  vConfiguracoesNotaFiscal := TConfiguracoesNotaFiscal.getNewIface(vIConexao);
   ACBrNFe := TACBrNFe.Create(nil);
   configuraComponenteNFe;
 end;
 
 destructor TEventosNotaFiscal.Destroy;
 begin
-
+  FreeAndNil(ACBrNFe);
   inherited;
 end;
 
-function TEventosNotaFiscal.enviarCartaCorrecao(idNotaFiscal: String): TStringList;
+class function TEventosNotaFiscal.getNewIface(pIConexao: IConexao): ITEventosNotaFiscal;
+begin
+  Result := TImplObjetoOwner<TEventosNotaFiscal>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
+function TEventosNotaFiscal.enviarCartaCorrecao(idNotaFiscal: String): IListaTextoEX;
 begin
 
 end;
 
-function TEventosNotaFiscal.enviarEvento(idNotaFiscal, justificativa: String; ptpEvento: TpcnTpEvento): TStringList;
+function TEventosNotaFiscal.enviarEvento(idNotaFiscal, justificativa: String; ptpEvento: TpcnTpEvento): IListaTextoEX;
 var
   idLote: Integer;
-  lRetorno: TStringList;
+  lRetorno: IListaTextoEX;
   lprotocolo : String;
   lcStat : Integer;
-  lEventosNFeControl: TEventosNFeControl;
+  lEventosNFeControl: ITEventosNFeControl;
   lDescricaoEvendto: String;
   lTPEVENTO: String;
   lNFContol: ITNFContol;
 begin
-    lEventosNFeControl := TEventosNFeControl.Create(vIConexao);
+    lEventosNFeControl := TEventosNFeControl.getNewIface(vIConexao);
     lNFContol := TNFContol.getNewIface(idNotaFiscal, vIConexao);
-    lRetorno  := TStringList.Create;
+    lRetorno  := novaListaTexto;
 
     try
 
@@ -214,23 +227,23 @@ begin
 
       if lcStat = 135 then
       begin
-        lEventosNFeControl.EventosNFeModel.objeto.Acao              := Terasoft.Types.tacIncluir;
-        lEventosNFeControl.EventosNFeModel.objeto.ID_NFE            := idNotaFiscal;
-        lEventosNFeControl.EventosNFeModel.objeto.DATAHORA          := Now;
-        lEventosNFeControl.EventosNFeModel.objeto.EVENTO            := ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.tpEvento;
-        lEventosNFeControl.EventosNFeModel.objeto.ID_EVENTO         := lTPEVENTO;
-        lEventosNFeControl.EventosNFeModel.objeto.CHNFE             := lNFContol.objeto.NFModel.objeto.ID_NF3;
-        lEventosNFeControl.EventosNFeModel.objeto.TPEVENTO          := lTPEVENTO;
-        lEventosNFeControl.EventosNFeModel.objeto.NSEQEVENTO        := ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.nSeqEvento;
-        lEventosNFeControl.EventosNFeModel.objeto.VEREVENTO         := '1.00';
-        lEventosNFeControl.EventosNFeModel.objeto.DESCEVENTO        := lDescricaoEvendto;
-        lEventosNFeControl.EventosNFeModel.objeto.XML               := ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.XML;
-        lEventosNFeControl.EventosNFeModel.objeto.STATUS            := '0';
-        lEventosNFeControl.EventosNFeModel.objeto.PROTOCOLO_RETORNO := ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.nProt;
-        lEventosNFeControl.EventosNFeModel.objeto.RETORNO_SEFAZ     := 'Evento registrado e vinculado a NF-e';
-        lEventosNFeControl.EventosNFeModel.objeto.JUSTIFICATIVA     := ACBrNFe.EventoNFe.Evento.Items[0].infEvento.detEvento.xJust;
-        lEventosNFeControl.EventosNFeModel.objeto.XCORRECAO         := ACBrNFe.EventoNFe.Evento.Items[0].infEvento.detEvento.xCorrecao;
-        lEventosNFeControl.Salvar;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.Acao              := Terasoft.Types.tacIncluir;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.ID_NFE            := idNotaFiscal;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.DATAHORA          := Now;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.EVENTO            := ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.tpEvento;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.ID_EVENTO         := lTPEVENTO;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.CHNFE             := lNFContol.objeto.NFModel.objeto.ID_NF3;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.TPEVENTO          := lTPEVENTO;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.NSEQEVENTO        := ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.nSeqEvento;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.VEREVENTO         := '1.00';
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.DESCEVENTO        := lDescricaoEvendto;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.XML               := ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.XML;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.STATUS            := '0';
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.PROTOCOLO_RETORNO := ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.nProt;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.RETORNO_SEFAZ     := 'Evento registrado e vinculado a NF-e';
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.JUSTIFICATIVA     := ACBrNFe.EventoNFe.Evento.Items[0].infEvento.detEvento.xJust;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.XCORRECAO         := ACBrNFe.EventoNFe.Evento.Items[0].infEvento.detEvento.xCorrecao;
+        lEventosNFeControl.objeto.Salvar;
 
         if ptpEvento = teCancelamento then
         begin
@@ -242,30 +255,30 @@ begin
           lNFContol.objeto.Salvar;
         end;
 
-        lRetorno.Add('Cancelamento de NF-e homologado');
+        lRetorno.strings.Add('Cancelamento de NF-e homologado');
       end else
-        lRetorno.Add(ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.xMotivo);
+        lRetorno.strings.Add(ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.xMotivo);
 
-      lRetorno.Add(IntToStr(lcStat));
-      lRetorno.Add(lprotocolo);
+      lRetorno.strings.Add(IntToStr(lcStat));
+      lRetorno.strings.Add(lprotocolo);
 
       Result := lRetorno;
     finally
-      lEventosNFeControl.Free;
+      lEventosNFeControl:=nil;
       lNFContol := nil;
     end;
 end;
 
-function TEventosNotaFiscal.inutilizar(idNotaFiscal, justificativa: String): TStringList;
+function TEventosNotaFiscal.inutilizar(idNotaFiscal, justificativa: String): IListaTextoEX;
 var
-  lEventosNFeControl: TEventosNFeControl;
+  lEventosNFeControl: ITEventosNFeControl;
   lAno: String;
-  lRetorno: TStringList;
+  lRetorno: IListaTextoEX;
   lNFContol: ITNFContol;
 begin
-    lEventosNFeControl := TEventosNFeControl.Create(vIConexao);
+    lEventosNFeControl := TEventosNFeControl.getNewIface(vIConexao);
     lNFContol := TNFContol.getNewIface(idNotaFiscal, vIConexao);
-    lRetorno  := TStringList.Create;
+    lRetorno  := novaListaTexto;
     try
 
       ACBrNFe.NotasFiscais.Clear;
@@ -278,23 +291,23 @@ begin
       if ACBrNFe.WebServices.Inutilizacao.cStat = 102 then
       begin
 
-        lEventosNFeControl.EventosNFeModel.objeto.Acao              := Terasoft.Types.tacIncluir;
-        lEventosNFeControl.EventosNFeModel.objeto.ID_NFE            := idNotaFiscal;
-        lEventosNFeControl.EventosNFeModel.objeto.DATAHORA          := Now;
-        lEventosNFeControl.EventosNFeModel.objeto.EVENTO            := 2;
-        lEventosNFeControl.EventosNFeModel.objeto.ID_EVENTO         := '110111';
-        lEventosNFeControl.EventosNFeModel.objeto.CHNFE             := lNFContol.objeto.NFModel.objeto.ID_NF3;
-        lEventosNFeControl.EventosNFeModel.objeto.TPEVENTO          := '110111';
-        lEventosNFeControl.EventosNFeModel.objeto.NSEQEVENTO        := '';
-        lEventosNFeControl.EventosNFeModel.objeto.VEREVENTO         := '1.00';
-        lEventosNFeControl.EventosNFeModel.objeto.DESCEVENTO        := 'Inutilização';
-        lEventosNFeControl.EventosNFeModel.objeto.XML               := ACBrNFe.WebServices.Inutilizacao.RetornoWS;
-        lEventosNFeControl.EventosNFeModel.objeto.STATUS            := '0';
-        lEventosNFeControl.EventosNFeModel.objeto.PROTOCOLO_RETORNO := ACBrNFe.WebServices.Inutilizacao.Protocolo;
-        lEventosNFeControl.EventosNFeModel.objeto.RETORNO_SEFAZ     := 'Evento registrado e vinculado a NF-e';
-        lEventosNFeControl.EventosNFeModel.objeto.JUSTIFICATIVA     := Justificativa;
-        lEventosNFeControl.EventosNFeModel.objeto.XCORRECAO         := '';
-        lEventosNFeControl.Salvar;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.Acao              := Terasoft.Types.tacIncluir;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.ID_NFE            := idNotaFiscal;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.DATAHORA          := Now;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.EVENTO            := 2;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.ID_EVENTO         := '110111';
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.CHNFE             := lNFContol.objeto.NFModel.objeto.ID_NF3;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.TPEVENTO          := '110111';
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.NSEQEVENTO        := '';
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.VEREVENTO         := '1.00';
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.DESCEVENTO        := 'Inutilização';
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.XML               := ACBrNFe.WebServices.Inutilizacao.RetornoWS;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.STATUS            := '0';
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.PROTOCOLO_RETORNO := ACBrNFe.WebServices.Inutilizacao.Protocolo;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.RETORNO_SEFAZ     := 'Evento registrado e vinculado a NF-e';
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.JUSTIFICATIVA     := Justificativa;
+        lEventosNFeControl.objeto.EventosNFeModel.objeto.XCORRECAO         := '';
+        lEventosNFeControl.objeto.Salvar;
 
         lNFContol.objeto.NFModel.objeto.Acao              := Terasoft.Types.tacAlterar;
         lNFContol.objeto.NFModel.objeto.DATA_CANCELAMENTO := Now;
@@ -303,18 +316,18 @@ begin
         lNFContol.objeto.NFModel.objeto.NUMERO_NF         := idNotaFiscal;
         lNFContol.objeto.Salvar;
 
-        lRetorno.Add('Inutilização de Número homologado');
+        lRetorno.strings.Add('Inutilização de Número homologado');
       end
       else
-        lRetorno.Add(ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.xMotivo);
+        lRetorno.strings.Add(ACBrNFe.WebServices.EnvEvento.EventoRetorno.retEvento.Items[0].RetInfEvento.xMotivo);
 
-      lRetorno.Add(IntToStr(ACBrNFe.WebServices.Inutilizacao.cStat));
-      lRetorno.Add(ACBrNFe.WebServices.Inutilizacao.Protocolo);
+      lRetorno.strings.Add(IntToStr(ACBrNFe.WebServices.Inutilizacao.cStat));
+      lRetorno.strings.Add(ACBrNFe.WebServices.Inutilizacao.Protocolo);
 
       Result := lRetorno;
 
     finally
-      lEventosNFeControl.Free;
+      lEventosNFeControl:=nil;
       lNFContol:=nil;
     end;
 

@@ -1,6 +1,7 @@
 unit Terasoft.NotaFiscal;
 interface
 uses
+  Terasoft.Framework.Texto,
   blcksock,
   Clipbrd,
   System.Classes,
@@ -31,18 +32,22 @@ uses
   NFModel,
   Terasoft.Types,
   Interfaces.Conexao,
+  Terasoft.Framework.ObjectIface,
   ConfiguracoesLocaisModel;
 
 type
-  TNotaFiscal = class
+  TNotaFiscal = class;
+  ITNotaFiscal=IObject<TNotaFiscal>;
 
+  TNotaFiscal = class
   private
+    [unsafe] mySelf: ITNotaFiscal;
     vIConexao: IConexao;
     ACBrNFe: TACBrNFe;
     NotaF: NotaFiscal;
     ACBrNFeDANFeRL: TACBrNFeDANFeRL;
     ACBrNFeDANFCeFortes: TACBrNFeDANFCeFortes;
-    vConfiguracoesNotaFiscal: TConfiguracoesNotaFiscal;
+    vConfiguracoesNotaFiscal: ITConfiguracoesNotaFiscal;
     Duplicata: TDupCollectionItem;
     InfoPgto: TpagCollectionItem;
     Produto: TDetCollectionItem;
@@ -91,10 +96,12 @@ type
     property gerarPDF      : Boolean read FgerarPDF write SetgerarPDF;
     property ImpressoraNFC : String read FImpressoraNFC write SetImpressoraNFC;
 
-    constructor Create(pIConexao: IConexao);
+    constructor _Create(pIConexao: IConexao);
     destructor Destroy; override;
 
-    function transmitir(idNotaFiscal: String): TStringList;
+    class function getNewIface(pIConexao: IConexao): ITNotaFiscal;
+
+    function transmitir(idNotaFiscal: String): IListaTextoEx;
     function consultarNota(idNotaFiscal: String): boolean;
     function imprimir: String;
     function gerarXML(idNotaFiscal, pPath: String): String;
@@ -103,8 +110,6 @@ type
   end;
 implementation
 
-{ TNotaFiscal }
-
 uses
   Terasoft.Utils,
   System.Variants,
@@ -112,16 +117,18 @@ uses
   Terasoft.FuncoesTexto, System.StrUtils, System.Math, Terasoft.Configuracoes,
   IbptModel;
 
+{ TNotaFiscal }
+
 function TNotaFiscal.configuraComponenteNFe: Boolean;
 begin
   ACBrNFe.NotasFiscais.Clear;
 
-  if(Length(vConfiguracoesNotaFiscal.certificadoArquivoPFX)>256) or not FileExists(vConfiguracoesNotaFiscal.certificadoArquivoPFX) then
-    ACBrNFe.Configuracoes.Certificados.DadosPFX  := vConfiguracoesNotaFiscal.certificadoArquivoPFX
+  if(Length(vConfiguracoesNotaFiscal.objeto.certificadoArquivoPFX)>256) or not FileExists(vConfiguracoesNotaFiscal.objeto.certificadoArquivoPFX) then
+    ACBrNFe.Configuracoes.Certificados.DadosPFX  := vConfiguracoesNotaFiscal.objeto.certificadoArquivoPFX
   else
-    ACBrNFe.Configuracoes.Certificados.ArquivoPFX  := vConfiguracoesNotaFiscal.certificadoArquivoPFX;
+    ACBrNFe.Configuracoes.Certificados.ArquivoPFX  := vConfiguracoesNotaFiscal.objeto.certificadoArquivoPFX;
 
-  ACBrNFe.Configuracoes.Certificados.Senha       := vConfiguracoesNotaFiscal.certificadoSenha;
+  ACBrNFe.Configuracoes.Certificados.Senha       := vConfiguracoesNotaFiscal.objeto.certificadoSenha;
   ACBrNFe.SSL.DescarregarCertificado;
 
   with ACBrNFe.Configuracoes.Geral do
@@ -135,34 +142,34 @@ begin
     Salvar           := True;
     ExibirErroSchema := true;
     RetirarAcentos   := True;
-    FormaEmissao     := vConfiguracoesNotaFiscal.tipoEmissao;
-    VersaoDF         := vConfiguracoesNotaFiscal.versaoDF;
-    IdCSC            := vConfiguracoesNotaFiscal.IdCSC;
-    CSC              := vConfiguracoesNotaFiscal.CSC;
-    VersaoQRCode     := vConfiguracoesNotaFiscal.versaoQRCode;
+    FormaEmissao     := vConfiguracoesNotaFiscal.objeto.tipoEmissao;
+    VersaoDF         := vConfiguracoesNotaFiscal.objeto.versaoDF;
+    IdCSC            := vConfiguracoesNotaFiscal.objeto.IdCSC;
+    CSC              := vConfiguracoesNotaFiscal.objeto.CSC;
+    VersaoQRCode     := vConfiguracoesNotaFiscal.objeto.versaoQRCode;
   end;
   with ACBrNFe.Configuracoes.WebServices do
   begin
-    UF         := vConfiguracoesNotaFiscal.ufEmissao;
-    Ambiente   := vConfiguracoesNotaFiscal.ambiente;
+    UF         := vConfiguracoesNotaFiscal.objeto.ufEmissao;
+    Ambiente   := vConfiguracoesNotaFiscal.objeto.ambiente;
     Visualizar := False;
     Salvar     := True;
   end;
   ACBrNFe.SSL.SSLType := TSSLType(0);
   with ACBrNFe.Configuracoes.Arquivos do
   begin
-    Salvar           := vConfiguracoesNotaFiscal.arquivosSalvar;
-    SepararPorMes    := vConfiguracoesNotaFiscal.arquivosSepararPorMes;
-    AdicionarLiteral := vConfiguracoesNotaFiscal.arquivosAdicionarLiteral;
-    EmissaoPathNFe   := vConfiguracoesNotaFiscal.arquivosEmissaoPathNFe;
-    SalvarEvento     := vConfiguracoesNotaFiscal.arquivosSalvarEvento;
-    SepararPorCNPJ   := vConfiguracoesNotaFiscal.arquivosSepararPorCNPJ;
-    SepararPorModelo := vConfiguracoesNotaFiscal.arquivosSepararPorModelo;
-    PathSchemas      := vConfiguracoesNotaFiscal.arquivosPathSchemas;
-    PathNFe          := vConfiguracoesNotaFiscal.arquivosPathNFe;
-    PathInu          := vConfiguracoesNotaFiscal.arquivosPathInu;
-    PathEvento       := vConfiguracoesNotaFiscal.arquivosPathEvento;
-    PathSalvar       := vConfiguracoesNotaFiscal.arquivosPathSalvar;
+    Salvar           := vConfiguracoesNotaFiscal.objeto.arquivosSalvar;
+    SepararPorMes    := vConfiguracoesNotaFiscal.objeto.arquivosSepararPorMes;
+    AdicionarLiteral := vConfiguracoesNotaFiscal.objeto.arquivosAdicionarLiteral;
+    EmissaoPathNFe   := vConfiguracoesNotaFiscal.objeto.arquivosEmissaoPathNFe;
+    SalvarEvento     := vConfiguracoesNotaFiscal.objeto.arquivosSalvarEvento;
+    SepararPorCNPJ   := vConfiguracoesNotaFiscal.objeto.arquivosSepararPorCNPJ;
+    SepararPorModelo := vConfiguracoesNotaFiscal.objeto.arquivosSepararPorModelo;
+    PathSchemas      := vConfiguracoesNotaFiscal.objeto.arquivosPathSchemas;
+    PathNFe          := vConfiguracoesNotaFiscal.objeto.arquivosPathNFe;
+    PathInu          := vConfiguracoesNotaFiscal.objeto.arquivosPathInu;
+    PathEvento       := vConfiguracoesNotaFiscal.objeto.arquivosPathEvento;
+    PathSalvar       := vConfiguracoesNotaFiscal.objeto.arquivosPathSalvar;
   end;
 end;
 
@@ -345,7 +352,7 @@ begin
 
           InfoPgto := NotaF.NFe.pag.New;
           InfoPgto.indPag := ipPrazo;
-          InfoPgto.tPag   := vConfiguracoesNotaFiscal.tPag(lQry.FieldByName('tPag').AsString);
+          InfoPgto.tPag   := vConfiguracoesNotaFiscal.objeto.tPag(lQry.FieldByName('tPag').AsString);
           InfoPgto.vPag   := RoundTo(lPercentual * lQry.FieldByName('valor_rec').AsFloat, -2);
 
           lSomaDup        := lSomaDup + InfoPgto.vPag;
@@ -433,14 +440,14 @@ begin
         else
         begin
           IE        := IIF(lQry.FieldByName('IE').AsString <> ''         , lQry.FieldByName('IE').AsString,       Unassigned);
-          indIEDest := IIF(lQry.FieldByName('indIEDest').AsString <> ''  , vConfiguracoesNotaFiscal.indIEDest(lQry.FieldByName('indIEDest').AsString),  Unassigned);
+          indIEDest := IIF(lQry.FieldByName('indIEDest').AsString <> ''  , vConfiguracoesNotaFiscal.objeto.indIEDest(lQry.FieldByName('indIEDest').AsString),  Unassigned);
         end;
 
-        if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then
+        if vConfiguracoesNotaFiscal.objeto.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then
         begin
           if (lQry.FieldByName('xLgr').AsString <> '') and (lQry.FieldByName('xBairro').AsString <> '') and (lQry.FieldByName('cMun').AsString <> '') and (Length(IntToStr(lQry.FieldByName('cMun').AsInteger)) = 7) and
           (Length(lQry.FieldByName('CEP').AsString) = 8) and (Trim(lQry.FieldByName('Fone').AsString) <> '') and (lQry.FieldByName('xMun').AsString <> '') and
-          (Trim(lQry.FieldByName('UF').AsString) <> '') and (vConfiguracoesNotaFiscal.emitUF = Trim(lQry.FieldByName('UF').AsString)) then
+          (Trim(lQry.FieldByName('UF').AsString) <> '') and (vConfiguracoesNotaFiscal.objeto.emitUF = Trim(lQry.FieldByName('UF').AsString)) then
           begin
             EnderDest.xBairro := lQry.FieldByName('xBairro').AsString;
             EnderDest.cMun    := lQry.FieldByName('cMun').AsInteger;
@@ -470,7 +477,7 @@ begin
           EnderDest.UF      := IIF(lQry.FieldByName('UF').AsString <> ''         , lQry.FieldByName('UF').AsString,       Unassigned);
         end;
 
-        if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then
+        if vConfiguracoesNotaFiscal.objeto.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then
         begin
           indIEDest := inNaoContribuinte;
           IE        := '';
@@ -481,15 +488,15 @@ begin
 
       with NotaF.NFe.Ide do
       begin
-       if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then
+       if vConfiguracoesNotaFiscal.objeto.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then
          indFinal := cfConsumidorFinal
        else
-         indFinal := vConfiguracoesNotaFiscal.indFinal(lQry.FieldByName('indFinal').AsString);
+         indFinal := vConfiguracoesNotaFiscal.objeto.indFinal(lQry.FieldByName('indFinal').AsString);
       end;
        with NotaF.NFe.Emit do
       begin
-       if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) <> moNFCe then
-         IEST := vConfiguracoesNotaFiscal.emitIEST(NotaF.NFe.Dest.EnderDest.UF);
+       if vConfiguracoesNotaFiscal.objeto.modeloDF(lQry.FieldByName('modelo').AsInteger) <> moNFCe then
+         IEST := vConfiguracoesNotaFiscal.objeto.emitIEST(NotaF.NFe.Dest.EnderDest.UF);
       end
 
     except
@@ -506,22 +513,22 @@ function TNotaFiscal.emitente: Boolean;
 begin
   with NotaF.NFe.Emit do
   begin
-    CNPJCPF           := vConfiguracoesNotaFiscal.emitCNPJCPF;
-    IE                := vConfiguracoesNotaFiscal.emitIE;
-    xNome             := vConfiguracoesNotaFiscal.emitxNome;
-    xFant             := vConfiguracoesNotaFiscal.emitxFant;
-    EnderEmit.fone    := vConfiguracoesNotaFiscal.emitfone;
-    EnderEmit.CEP     := vConfiguracoesNotaFiscal.emitCEP.ToInteger;
-    EnderEmit.xLgr    := vConfiguracoesNotaFiscal.emitxLgr;
-    EnderEmit.nro     := vConfiguracoesNotaFiscal.eEmitnro;
-    EnderEmit.xCpl    := vConfiguracoesNotaFiscal.emitxCpl;
-    EnderEmit.xBairro := vConfiguracoesNotaFiscal.emitxBairro;
-    EnderEmit.cMun    := vConfiguracoesNotaFiscal.eEmitcMun.ToInteger;
-    EnderEmit.xMun    := vConfiguracoesNotaFiscal.emitxMun;
-    EnderEmit.UF      := vConfiguracoesNotaFiscal.emitUF;
-    enderEmit.cPais   := vConfiguracoesNotaFiscal.emitcPais;
-    enderEmit.xPais   := vConfiguracoesNotaFiscal.emitxPais;
-    CRT               := vConfiguracoesNotaFiscal.emitCRT;
+    CNPJCPF           := vConfiguracoesNotaFiscal.objeto.emitCNPJCPF;
+    IE                := vConfiguracoesNotaFiscal.objeto.emitIE;
+    xNome             := vConfiguracoesNotaFiscal.objeto.emitxNome;
+    xFant             := vConfiguracoesNotaFiscal.objeto.emitxFant;
+    EnderEmit.fone    := vConfiguracoesNotaFiscal.objeto.emitfone;
+    EnderEmit.CEP     := vConfiguracoesNotaFiscal.objeto.emitCEP.ToInteger;
+    EnderEmit.xLgr    := vConfiguracoesNotaFiscal.objeto.emitxLgr;
+    EnderEmit.nro     := vConfiguracoesNotaFiscal.objeto.eEmitnro;
+    EnderEmit.xCpl    := vConfiguracoesNotaFiscal.objeto.emitxCpl;
+    EnderEmit.xBairro := vConfiguracoesNotaFiscal.objeto.emitxBairro;
+    EnderEmit.cMun    := vConfiguracoesNotaFiscal.objeto.eEmitcMun.ToInteger;
+    EnderEmit.xMun    := vConfiguracoesNotaFiscal.objeto.emitxMun;
+    EnderEmit.UF      := vConfiguracoesNotaFiscal.objeto.emitUF;
+    enderEmit.cPais   := vConfiguracoesNotaFiscal.objeto.emitcPais;
+    enderEmit.xPais   := vConfiguracoesNotaFiscal.objeto.emitxPais;
+    CRT               := vConfiguracoesNotaFiscal.objeto.emitCRT;
   end;
 end;
 function TNotaFiscal.enderecoEntrega: Boolean;
@@ -544,33 +551,43 @@ var
  lQry: TFDQuery;
  lXML: TStringList;
 begin
+  lQry := nil;
+  lXML := nil;
   try
     try
-    lQry := vIConexao.CriarQuery;
-    lXML := TStringList.Create;
-    lSQL :=
-    ' select             '+#13+
-    '    n.xml_nfe xml,  '+#13+
-    '    n.id_nf3 chave  '+#13+
-    '                    '+#13+
-    ' from               '+#13+
-    '    nf n            '+#13+
-    '                    '+#13+
-    ' where              '+#13+
-    '     n.numero_nf = '+QuotedStr(idNotaFiscal);
-    lQry.Open(lSQL);
-    lXML.Text := lQry.FieldByName('xml').AsString;
-    lXML.SaveToFile(pPath+'\'+lQry.FieldByName('chave').AsString+'.xml');
-    Result := lQry.FieldByName('chave').AsString+'.xml';
+      lQry := vIConexao.CriarQuery;
+      lXML := TStringList.Create;
+      lSQL :=
+      ' select             '+#13+
+      '    n.xml_nfe xml,  '+#13+
+      '    n.id_nf3 chave  '+#13+
+      '                    '+#13+
+      ' from               '+#13+
+      '    nf n            '+#13+
+      '                    '+#13+
+      ' where              '+#13+
+      '     n.numero_nf = '+QuotedStr(idNotaFiscal);
+      lQry.Open(lSQL);
+      lXML.Text := lQry.FieldByName('xml').AsString;
+      lXML.SaveToFile(pPath+'\'+lQry.FieldByName('chave').AsString+'.xml');
+      Result := lQry.FieldByName('chave').AsString+'.xml';
     except
-    on E:Exception do
+      on E:Exception do
         CriaException('Erro: '+ E.Message);
     end;
   finally
     lSQL := '';
-    lQry.Free;
+    FreeAndNil(lQry);
+    freeAndNil(lXML);
   end;
 end;
+
+class function TNotaFiscal.getNewIface(pIConexao: IConexao): ITNotaFiscal;
+begin
+  Result := TImplObjetoOwner<TNotaFiscal>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 function TNotaFiscal.identificacao(pidNF: String): Boolean;
 var
  lSQL: String;
@@ -624,21 +641,21 @@ begin
         dEmi        := StrToDateTime(lQry.FieldByName('dEmi').AsString + ' ' + lQry.FieldByName('hEmi').AsString);
         dSaiEnt     := StrToDateTime(lQry.FieldByName('dSaiEnt').AsString + ' ' +lQry.FieldByName('hSaiEnt').AsString);
         hSaiEnt     := lQry.FieldByName('hSaiEnt').Value;
-        tpNF        := vConfiguracoesNotaFiscal.tpNF(lQry.FieldByName('tpNF').AsString);
+        tpNF        := vConfiguracoesNotaFiscal.objeto.tpNF(lQry.FieldByName('tpNF').AsString);
         verProc     := 'ERP_TERASOFT';
-        cUF         := UFtoCUF(vConfiguracoesNotaFiscal.emitUF);
-        cMunFG      := vConfiguracoesNotaFiscal.eEmitcMun.ToInteger;
-        finNFe      := vConfiguracoesNotaFiscal.finNFe(lQry.FieldByName('finNFe').AsString);
-        indIntermed := vConfiguracoesNotaFiscal.indIntermed(lQry.FieldByName('indIntermed').AsString);
-        indPres     := vConfiguracoesNotaFiscal.indPres(lQry.FieldByName('indPres').AsString);
-        idDest      := vConfiguracoesNotaFiscal.idDest(lQry.FieldByName('idDest').AsString);
+        cUF         := UFtoCUF(vConfiguracoesNotaFiscal.objeto.emitUF);
+        cMunFG      := vConfiguracoesNotaFiscal.objeto.eEmitcMun.ToInteger;
+        finNFe      := vConfiguracoesNotaFiscal.objeto.finNFe(lQry.FieldByName('finNFe').AsString);
+        indIntermed := vConfiguracoesNotaFiscal.objeto.indIntermed(lQry.FieldByName('indIntermed').AsString);
+        indPres     := vConfiguracoesNotaFiscal.objeto.indPres(lQry.FieldByName('indPres').AsString);
+        idDest      := vConfiguracoesNotaFiscal.objeto.idDest(lQry.FieldByName('idDest').AsString);
 
-        if vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then
+        if vConfiguracoesNotaFiscal.objeto.modeloDF(lQry.FieldByName('modelo').AsInteger) = moNFCe then
          tpImp      := tiNFCe;
 
         if tpEmis <> teNormal then
         begin
-          dhCont := vConfiguracoesNotaFiscal.dhCont;
+          dhCont := vConfiguracoesNotaFiscal.objeto.dhCont;
           xJust  := 'Problemas no WebService';
         end;
 
@@ -658,7 +675,7 @@ begin
 
       with ACBrNFe.Configuracoes.Geral do
       begin
-        ModeloDF := vConfiguracoesNotaFiscal.modeloDF(lQry.FieldByName('modelo').AsInteger);
+        ModeloDF := vConfiguracoesNotaFiscal.objeto.modeloDF(lQry.FieldByName('modelo').AsInteger);
       end;
 
       if NotaF.NFe.Ide.indIntermed = iiOperacaoComIntermediador then
@@ -717,7 +734,7 @@ begin
 
       if lQry.FieldByName('pmoNFe').AsInteger = 65 then
       begin
-        ACBrNFeDANFCeFortes := TACBrNFeDANFCeFortes.Create(nil);
+        ACBrNFeDANFCeFortes := TACBrNFeDANFCeFortes.Create(ACBrNFe);
         ACBrNFe.DANFE       := ACBrNFeDANFCeFortes;
 
         if ImpressoraNFC <> '' then
@@ -728,14 +745,14 @@ begin
       end
       else
       begin
-        ACBrNFeDANFeRL := TACBrNFeDANFeRL.Create(nil);
+        ACBrNFeDANFeRL := TACBrNFeDANFeRL.Create(ACBrNFe);
         ACBrNFe.DANFE  := ACBrNFeDANFeRL;
-        ACBrNFe.DANFE.TipoDANFE := vConfiguracoesNotaFiscal.DANFETipoDANFE;
+        ACBrNFe.DANFE.TipoDANFE := vConfiguracoesNotaFiscal.objeto.DANFETipoDANFE;
         MostraPreview := true;
       end;
 
-      ACBrNFe.DANFE.Logo    := vConfiguracoesNotaFiscal.DANFEPathLogo(lQry.FieldByName('pmoNFe').AsInteger);
-      ACBrNFe.DANFE.PathPDF := vConfiguracoesNotaFiscal.DANFEPathPDF(FPathPDF);
+      ACBrNFe.DANFE.Logo    := vConfiguracoesNotaFiscal.objeto.DANFEPathLogo(lQry.FieldByName('pmoNFe').AsInteger);
+      ACBrNFe.DANFE.PathPDF := vConfiguracoesNotaFiscal.objeto.DANFEPathPDF(FPathPDF);
       ACBrNFe.DANFE.Sistema := 'Emissão: ERP Terasoft';
       ACBrNFe.NotasFiscais.Clear;
       ACBrNFe.NotasFiscais.LoadFromString(lQry.FieldByName('xml').AsString);
@@ -970,21 +987,21 @@ begin
         vTotTrib := lQry.FieldByName('vTotTrib').AsFloat;
         with ICMS do
         begin
-          orig :=  vConfiguracoesNotaFiscal.orig(lQry.FieldByName('orig').AsString);
+          orig :=  vConfiguracoesNotaFiscal.objeto.orig(lQry.FieldByName('orig').AsString);
           if NotaF.NFe.Emit.CRT in [crtSimplesExcessoReceita, crtRegimeNormal] then
           begin
-            CST     := vConfiguracoesNotaFiscal.CST(lQry.FieldByName('CST').AsString);
+            CST     := vConfiguracoesNotaFiscal.objeto.CST(lQry.FieldByName('CST').AsString);
           end else
           begin
-            CSOSN       := vConfiguracoesNotaFiscal.CSOSN(lQry.FieldByName('CSOSN').AsString);
+            CSOSN       := vConfiguracoesNotaFiscal.objeto.CSOSN(lQry.FieldByName('CSOSN').AsString);
             pCredSN     := lQry.FieldByName('pCredSN').Value;
             vCredICMSSN := lQry.FieldByName('vCredICMSSN').Value;
           end;
-          modBC           := vConfiguracoesNotaFiscal.modBC(lQry.FieldByName('modBC').AsString);
+          modBC           := vConfiguracoesNotaFiscal.objeto.modBC(lQry.FieldByName('modBC').AsString);
           vBC             := lQry.FieldByName('vBC').AsFloat;
           pICMS           := lQry.FieldByName('pICMS').AsFloat;
           vICMS           := lQry.FieldByName('vICMS').AsFloat;
-          modBCST         := vConfiguracoesNotaFiscal.modBCST(lQry.FieldByName('modBCST').AsString);
+          modBCST         := vConfiguracoesNotaFiscal.objeto.modBCST(lQry.FieldByName('modBCST').AsString);
           pMVAST          := lQry.FieldByName('pMVAST').AsFloat;
           pRedBCST        := lQry.FieldByName('pRedBCST').AsFloat;
           vBCST           := lQry.FieldByName('vBCST').AsFloat;
@@ -1021,7 +1038,7 @@ begin
 
         with IPI do
         begin
-          CST      := vConfiguracoesNotaFiscal.cstipi(lQry.FieldByName('cstipi').AsString);
+          CST      := vConfiguracoesNotaFiscal.objeto.cstipi(lQry.FieldByName('cstipi').AsString);
           CNPJProd := lQry.FieldByName('CNPJProd').AsString;
           cSelo    := lQry.FieldByName('cSelo').AsString;
           qSelo    := lQry.FieldByName('qSelo').AsInteger;
@@ -1041,7 +1058,7 @@ begin
         end;
         with PIS do
         begin
-          CST       :=  vConfiguracoesNotaFiscal.cstpis(lQry.FieldByName('CSTPIS').AsString);
+          CST       :=  vConfiguracoesNotaFiscal.objeto.cstpis(lQry.FieldByName('CSTPIS').AsString);
           vBC       :=  lQry.FieldByName('vBCPIS').AsFloat;
           pPIS      :=  lQry.FieldByName('pPIS').AsFloat;
           vPIS      :=  lQry.FieldByName('vPIS').AsFloat;
@@ -1051,7 +1068,7 @@ begin
 
         with COFINS do
         begin
-          CST       := vConfiguracoesNotaFiscal.cstcof(lQry.FieldByName('CSTCOFINS').AsString); ;
+          CST       := vConfiguracoesNotaFiscal.objeto.cstcof(lQry.FieldByName('CSTCOFINS').AsString); ;
           vBC       := lQry.FieldByName('vBCCOFINS').AsFloat;
           pCOFINS   := lQry.FieldByName('pCOFINS').AsFloat;
           vCOFINS   := lQry.FieldByName('vCOFINS').AsFloat;
@@ -1319,7 +1336,7 @@ begin
      lQry.Open(lSQL);
       with NotaF.NFe.Transp do
       begin
-        modFrete := vConfiguracoesNotaFiscal.modFrete(lQry.FieldByName('modFrete').Value);
+        modFrete := vConfiguracoesNotaFiscal.objeto.modFrete(lQry.FieldByName('modFrete').Value);
         Transporta.CNPJCPF  := lQry.FieldByName('CNPJCPF').AsString;
         Transporta.xNome    := lQry.FieldByName('xNome').AsString;
         Transporta.IE       := lQry.FieldByName('IE').AsString;
@@ -1352,11 +1369,11 @@ begin
   Result := ACBrNFe.SSL.CertDataVenc;
 end;
 
-constructor TNotaFiscal.Create(pIConexao: IConexao);
+constructor TNotaFiscal._Create(pIConexao: IConexao);
 begin
   vIConexao := pIConexao;
   ACBrNFe   := TACBrNFe.Create(nil);
-  vConfiguracoesNotaFiscal := TConfiguracoesNotaFiscal.Create(vIConexao);
+  vConfiguracoesNotaFiscal := TConfiguracoesNotaFiscal.getNewIface(vIConexao);
   configuraComponenteNFe;
   FidNotaFiscal  := '';
   FidPedido      := '';
@@ -1368,7 +1385,7 @@ end;
 
 destructor TNotaFiscal.Destroy;
 begin
-  vConfiguracoesNotaFiscal.Free;
+  FreeAndNil(ACBrNFe);
   inherited;
 end;
 
@@ -1389,9 +1406,9 @@ begin
   responsavelTecnico;
 end;
 
-function TNotaFiscal.transmitir(idNotaFiscal: String): TStringList;
+function TNotaFiscal.transmitir(idNotaFiscal: String): IListaTextoEX;
 var
-  lRetorno          : TStringList;
+  lRetorno          : IListaTextoEX;
   lQry              : TFDQuery;
   loteEnvio         : Integer;
   lchavenfe         : String;
@@ -1403,19 +1420,18 @@ var
   lPedidoVendaModel : ITPedidoVendaModel;
 begin
 
-  lRetorno          := TStringList.Create;
   lNFContol         := TNFContol.getNewIface(idNotaFiscal, vIConexao);
   loteEnvio         := idNotaFiscal.ToInteger;
   lPedidoVendaModel := TPedidoVendaModel.getNewIface(vIConexao);
-
+  lRetorno := novaListaTexto;
   try
     try
       if consultarNota(idNotaFiscal) then
       begin
-        lRetorno.Add(ACBrNFe.WebServices.Consulta.cStat.ToString);
-        lRetorno.Add(ACBrNFe.WebServices.Consulta.XMotivo);
-        lRetorno.Add('');
-        lRetorno.Add(ACBrNFe.WebServices.Consulta.Protocolo);
+        lRetorno.strings.Add(ACBrNFe.WebServices.Consulta.cStat.ToString);
+        lRetorno.strings.Add(ACBrNFe.WebServices.Consulta.XMotivo);
+        lRetorno.strings.Add('');
+        lRetorno.strings.Add(ACBrNFe.WebServices.Consulta.Protocolo);
         Result := lRetorno;
 
         exit;
@@ -1457,10 +1473,10 @@ begin
         lPedidoVendaModel.objeto.faturado(lNFContol.objeto.NFModel.objeto.NUMERO_ECF);
       end;
 
-      lRetorno.Add(lCSTAT);
-      lRetorno.Add(lxMotivo);
-      lRetorno.Add(lrecibo);
-      lRetorno.Add(lprotocolo);
+      lRetorno.strings.Add(lCSTAT);
+      lRetorno.strings.Add(lxMotivo);
+      lRetorno.strings.Add(lrecibo);
+      lRetorno.strings.Add(lprotocolo);
       Result := lRetorno;
 
     except on E: Exception do
@@ -1471,17 +1487,17 @@ begin
         lNFContol.objeto.NFModel.objeto.NUMERO_NF     := idNotaFiscal;
         lNFContol.objeto.Salvar;
 
-        lRetorno.Add(lCSTAT);
-        lRetorno.Add(e.Message);
-        lRetorno.Add(lrecibo);
-        lRetorno.Add(lprotocolo);
+        lRetorno.strings.Add(lCSTAT);
+        lRetorno.strings.Add(e.Message);
+        lRetorno.strings.Add(lrecibo);
+        lRetorno.strings.Add(lprotocolo);
 
         Result := lRetorno;
       end;
     end;
 
    finally
-     lQry.Free;
+     FreeAndNil(lQry);
      lNFContol := nil;
      lPedidoVendaModel:=nil;
    end;

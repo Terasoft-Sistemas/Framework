@@ -6,21 +6,25 @@ uses
   pcnNFe,
   pcnConversao,
   pcnConversaoNFe,
-  //Terasoft.Sistema.Configura,
   System.SysUtils,
   ACBrUtil.Base,
   Terasoft.Types,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao;
 
 type
+  TConfiguracoesNotaFiscal = class;
+  ITConfiguracoesNotaFiscal=IObject<TConfiguracoesNotaFiscal>;
+
   TConfiguracoesNotaFiscal = class
-
   private
+    [unsafe] mySelf: ITConfiguracoesNotaFiscal;
     vIConexao : IConexao;
-
   public
-    constructor Create(pIConexao : IConexao);
+    constructor _Create(pIConexao : IConexao);
     destructor Destroy;
+
+    class function getNewIface(pIConexao: IConexao): ITConfiguracoesNotaFiscal;
 
     function tipoEmissao: TpcnTipoEmissao;
     function ambiente: TpcnTipoAmbiente;
@@ -88,7 +92,7 @@ implementation
 
 { TConfiguracoesNotaFiscal }
 
-constructor TConfiguracoesNotaFiscal.Create(pIConexao : IConexao);
+constructor TConfiguracoesNotaFiscal._Create(pIConexao : IConexao);
 begin
   vIConexao := pIConexao;
 end;
@@ -469,6 +473,12 @@ begin
     3: Result := fnAjuste;
     4: Result := fnDevolucao;
    end;
+end;
+
+class function TConfiguracoesNotaFiscal.getNewIface(pIConexao: IConexao): ITConfiguracoesNotaFiscal;
+begin
+  Result := TImplObjetoOwner<TConfiguracoesNotaFiscal>.CreateOwner(self._Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TConfiguracoesNotaFiscal.IdCSC: String;
