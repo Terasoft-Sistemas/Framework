@@ -171,6 +171,29 @@ type
     FIDPedidoView: Integer;
     FNFLista: IList<ITNFModel>;
     FHORA_NF: Variant;
+    FCidade_transp: Variant;
+    Fcnpj_cpf_cliente: Variant;
+    FEndereco_transp: Variant;
+    FEstado_transp: Variant;
+    Fbairro_cliente: Variant;
+    Frazao_social_cliente: Variant;
+    FNome_usuario: Variant;
+    FBairro_transp: Variant;
+    Fcep_cliente: Variant;
+    Fnumero_cliente: Variant;
+    FCep_transp: Variant;
+    Fcomplemento_cliente: Variant;
+    Fcontato_cliente: Variant;
+    Fcliente_nome_cliente: Variant;
+    Ftransportadora_nome_transp: Variant;
+    Fcidade_cliente: Variant;
+    FComplemento_transp: Variant;
+    Fendereco_cliente: Variant;
+    FContato_transp: Variant;
+    Ftelefone_cliente: Variant;
+    Festado_cliente: Variant;
+    FVendedor_Nome: Variant;
+    Fcelular_cliente: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetACRES_NF(const Value: Variant);
     procedure SetAGRUPAMENTO_FATURA(const Value: Variant);
@@ -324,6 +347,29 @@ type
     procedure SetWhereView(const Value: String);
     procedure SetNFLista(const Value: IList<ITNFModel>);
     procedure SetHORA_NF(const Value: Variant);
+    procedure Setbairro_cliente(const Value: Variant);
+    procedure SetBairro_transp(const Value: Variant);
+    procedure Setcelular_cliente(const Value: Variant);
+    procedure Setcep_cliente(const Value: Variant);
+    procedure SetCep_transp(const Value: Variant);
+    procedure Setcidade_cliente(const Value: Variant);
+    procedure SetCidade_transp(const Value: Variant);
+    procedure Setcliente_nome_cliente(const Value: Variant);
+    procedure Setcnpj_cpf_cliente(const Value: Variant);
+    procedure Setcomplemento_cliente(const Value: Variant);
+    procedure SetComplemento_transp(const Value: Variant);
+    procedure Setcontato_cliente(const Value: Variant);
+    procedure SetContato_transp(const Value: Variant);
+    procedure Setendereco_cliente(const Value: Variant);
+    procedure SetEndereco_transp(const Value: Variant);
+    procedure Setestado_cliente(const Value: Variant);
+    procedure SetEstado_transp(const Value: Variant);
+    procedure SetNome_usuario(const Value: Variant);
+    procedure Setnumero_cliente(const Value: Variant);
+    procedure Setrazao_social_cliente(const Value: Variant);
+    procedure Settelefone_cliente(const Value: Variant);
+    procedure Settransportadora_nome_transp(const Value: Variant);
+    procedure SetVendedor_Nome(const Value: Variant);
 
   public
     property  Acao                         :TAcao   read FAcao write SetAcao;
@@ -470,6 +516,32 @@ type
     property  TRANSFERENCIA_ID             :Variant read FTRANSFERENCIA_ID write SetTRANSFERENCIA_ID;
     property  CLIENTE_NF                   :Variant read FCLIENTE_NF write SetCLIENTE_NF;
     property  HORA_NF                      :Variant read FHORA_NF write SetHORA_NF;
+
+    property razao_social_cliente          : Variant read Frazao_social_cliente write Setrazao_social_cliente;
+    property cliente_nome_cliente          : Variant read Fcliente_nome_cliente write Setcliente_nome_cliente;
+    property cnpj_cpf_cliente              : Variant read Fcnpj_cpf_cliente write Setcnpj_cpf_cliente;
+    property cep_cliente                   : Variant read Fcep_cliente write Setcep_cliente;
+    property endereco_cliente              : Variant read Fendereco_cliente write Setendereco_cliente;
+    property numero_cliente                : Variant read Fnumero_cliente write Setnumero_cliente;
+    property complemento_cliente           : Variant read Fcomplemento_cliente write Setcomplemento_cliente;
+    property bairro_cliente                : Variant read Fbairro_cliente write Setbairro_cliente;
+    property cidade_cliente                : Variant read Fcidade_cliente write Setcidade_cliente;
+    property estado_cliente                : Variant read Festado_cliente write Setestado_cliente;
+    property telefone_cliente              : Variant read Ftelefone_cliente write Settelefone_cliente;
+    property celular_cliente               : Variant read Fcelular_cliente write Setcelular_cliente;
+    property contato_cliente               : Variant read Fcontato_cliente write Setcontato_cliente;
+
+    property Vendedor_Nome                 : Variant read FVendedor_Nome write SetVendedor_Nome;
+    property transportadora_nome_transp    : Variant read Ftransportadora_nome_transp write Settransportadora_nome_transp;
+    property Cep_transp                    : Variant read FCep_transp write SetCep_transp;
+    property Endereco_transp               : Variant read FEndereco_transp write SetEndereco_transp;
+    property Complemento_transp            : Variant read FComplemento_transp write SetComplemento_transp;
+    property Bairro_transp                 : Variant read FBairro_transp write SetBairro_transp;
+    property Cidade_transp                 : Variant read FCidade_transp write SetCidade_transp;
+    property Estado_transp                 : Variant read FEstado_transp write SetEstado_transp;
+    property Contato_transp                : Variant read FContato_transp write SetContato_transp;
+    property Nome_usuario                  : Variant read FNome_usuario write SetNome_usuario;
+
 
     property NFLista: IList<ITNFModel> read FNFLista write SetNFLista;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -648,6 +720,16 @@ begin
   FAUTORIZADA := Value;
 end;
 
+procedure TNFModel.Setbairro_cliente(const Value: Variant);
+begin
+  Fbairro_cliente := Value;
+end;
+
+procedure TNFModel.SetBairro_transp(const Value: Variant);
+begin
+  FBairro_transp := Value;
+end;
+
 procedure TNFModel.SetBASE_ST_NF(const Value: Variant);
 begin
   FBASE_ST_NF := Value;
@@ -668,6 +750,21 @@ begin
   FCCF_CUPOM := Value;
 end;
 
+procedure TNFModel.Setcelular_cliente(const Value: Variant);
+begin
+  Fcelular_cliente := Value;
+end;
+
+procedure TNFModel.Setcep_cliente(const Value: Variant);
+begin
+  Fcep_cliente := Value;
+end;
+
+procedure TNFModel.SetCep_transp(const Value: Variant);
+begin
+  FCep_transp := Value;
+end;
+
 procedure TNFModel.SetCFOP_ID(const Value: Variant);
 begin
   FCFOP_ID := Value;
@@ -678,14 +775,34 @@ begin
   FCFOP_NF := Value;
 end;
 
+procedure TNFModel.Setcidade_cliente(const Value: Variant);
+begin
+  Fcidade_cliente := Value;
+end;
+
+procedure TNFModel.SetCidade_transp(const Value: Variant);
+begin
+  FCidade_transp := Value;
+end;
+
 procedure TNFModel.SetCLIENTE_NF(const Value: Variant);
 begin
   FCLIENTE_NF := Value;
 end;
 
+procedure TNFModel.Setcliente_nome_cliente(const Value: Variant);
+begin
+  Fcliente_nome_cliente := Value;
+end;
+
 procedure TNFModel.SetCNF(const Value: Variant);
 begin
   FCNF := Value;
+end;
+
+procedure TNFModel.Setcnpj_cpf_cliente(const Value: Variant);
+begin
+  Fcnpj_cpf_cliente := Value;
 end;
 
 procedure TNFModel.SetCNPJ_CPF_CONSUMIDOR(const Value: Variant);
@@ -713,6 +830,16 @@ begin
   FCODIGO_VEN := Value;
 end;
 
+procedure TNFModel.Setcomplemento_cliente(const Value: Variant);
+begin
+  Fcomplemento_cliente := Value;
+end;
+
+procedure TNFModel.SetComplemento_transp(const Value: Variant);
+begin
+  FComplemento_transp := Value;
+end;
+
 procedure TNFModel.SetCONDICOES_PAGTO(const Value: Variant);
 begin
   FCONDICOES_PAGTO := Value;
@@ -726,6 +853,16 @@ end;
 procedure TNFModel.SetCONSIGNADO_STATUS(const Value: Variant);
 begin
   FCONSIGNADO_STATUS := Value;
+end;
+
+procedure TNFModel.Setcontato_cliente(const Value: Variant);
+begin
+  Fcontato_cliente := Value;
+end;
+
+procedure TNFModel.SetContato_transp(const Value: Variant);
+begin
+  FContato_transp := Value;
 end;
 
 procedure TNFModel.SetCONV(const Value: Variant);
@@ -793,6 +930,16 @@ begin
   FEMAIL_NFE := Value;
 end;
 
+procedure TNFModel.Setendereco_cliente(const Value: Variant);
+begin
+  Fendereco_cliente := Value;
+end;
+
+procedure TNFModel.SetEndereco_transp(const Value: Variant);
+begin
+  FEndereco_transp := Value;
+end;
+
 procedure TNFModel.SetENTRADA_ID(const Value: Variant);
 begin
   FENTRADA_ID := Value;
@@ -841,6 +988,16 @@ end;
 procedure TNFModel.SetESPECIE_VOLUME(const Value: Variant);
 begin
   FESPECIE_VOLUME := Value;
+end;
+
+procedure TNFModel.Setestado_cliente(const Value: Variant);
+begin
+  Festado_cliente := Value;
+end;
+
+procedure TNFModel.SetEstado_transp(const Value: Variant);
+begin
+  FEstado_transp := Value;
 end;
 
 procedure TNFModel.SetFISCO_NF(const Value: Variant);
@@ -978,9 +1135,19 @@ begin
   FNFLista := Value;
 end;
 
+procedure TNFModel.SetNome_usuario(const Value: Variant);
+begin
+  FNome_usuario := Value;
+end;
+
 procedure TNFModel.SetNOME_XML(const Value: Variant);
 begin
   FNOME_XML := Value;
+end;
+
+procedure TNFModel.Setnumero_cliente(const Value: Variant);
+begin
+  Fnumero_cliente := Value;
 end;
 
 procedure TNFModel.SetNUMERO_ECF(const Value: Variant);
@@ -1088,6 +1255,11 @@ begin
   FQTPARCELAS := Value;
 end;
 
+procedure TNFModel.Setrazao_social_cliente(const Value: Variant);
+begin
+  Frazao_social_cliente := Value;
+end;
+
 procedure TNFModel.SetRECIBO_NFE(const Value: Variant);
 begin
   FRECIBO_NFE := Value;
@@ -1163,6 +1335,11 @@ begin
   FSYSTIME := Value;
 end;
 
+procedure TNFModel.Settelefone_cliente(const Value: Variant);
+begin
+  Ftelefone_cliente := Value;
+end;
+
 procedure TNFModel.SetTIPO_FRETE(const Value: Variant);
 begin
   FTIPO_FRETE := Value;
@@ -1196,6 +1373,11 @@ end;
 procedure TNFModel.SetTRANSPORTADORA_ID(const Value: Variant);
 begin
   FTRANSPORTADORA_ID := Value;
+end;
+
+procedure TNFModel.Settransportadora_nome_transp(const Value: Variant);
+begin
+  Ftransportadora_nome_transp := Value;
 end;
 
 procedure TNFModel.SetTRANSPORTADORA_REDESPACHO_ID(const Value: Variant);
@@ -1276,6 +1458,11 @@ end;
 procedure TNFModel.SetVEND(const Value: Variant);
 begin
   FVEND := Value;
+end;
+
+procedure TNFModel.SetVendedor_Nome(const Value: Variant);
+begin
+  FVendedor_Nome := Value;
 end;
 
 procedure TNFModel.SetVFCP(const Value: Variant);
