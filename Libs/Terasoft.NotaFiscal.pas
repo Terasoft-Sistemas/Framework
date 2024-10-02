@@ -33,7 +33,8 @@ uses
   Terasoft.Types,
   Interfaces.Conexao,
   Terasoft.Framework.ObjectIface,
-  ConfiguracoesLocaisModel;
+  ConfiguracoesLocaisModel,
+  System.RegularExpressions;
 
 type
   TNotaFiscal = class;
@@ -432,7 +433,7 @@ begin
         ISUF              := IIF(lQry.FieldByName('ISUF').AsString <> ''       , lQry.FieldByName('ISUF').AsString,     Unassigned);
         xNome             := IIF(lQry.FieldByName('xNome').AsString <> ''      , lQry.FieldByName('xNome').AsString,    Unassigned);
 
-        if StrToIntDef(lQry.FieldByName('IE').AsString, 0) = 0 then
+        if TRegEx.IsMatch(lQry.FieldByName('IE').AsString, '[A-Za-z]') then
         begin
           IE := '';
           indIEDest := inIsento;
