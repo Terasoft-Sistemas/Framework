@@ -177,7 +177,7 @@ begin
           '            v.data DATA_FATURADO,                                                                                                                      ' + #13 +
           '            ' + IIF(vNomeCampoDev <> '', vNomeCampoDev, vNomeCampo) + ',                                                                               ' + #13 +
           '            (i.quantidade*i.valor_unitario) *-1 VALOR_PRODUTO,                                                                                         ' + #13 +
-          '            (i.quantidade*i.valor_unitario)*(coalesce(i.desconto_ped,0)/100) * -1 DESCONTO,         ' + #13 +
+          '            (i.quantidade*i.valor_unitario)*cast((coalesce(i.desconto_ped,0)/100)as float) * -1 DESCONTO,         ' + #13 +
           '            ((i.quantidade*i.valor_unitario)/(v.valor_total+v.desconto-v.valor_acrescimo))*coalesce(cast(v.valor_acrescimo as float),0) *-1 ACRESCIMO, ' + #13 +
           '            0 FRETE,                                                                                                                                   ' + #13 +
           '            0 IPI,                                                                                                                                     ' + #13 +
@@ -397,7 +397,7 @@ begin
           '                v.data DATA_FATURADO,                                                                                                  ' + #13 +
           '                (i.valor_unitario*i.quantidade) *-1 VALOR_PRODUTO,                                                                     ' + #13 +
           '                (pi.vlrvenda_pro*i.quantidade) *-1 VALOR_CADASTRO,                                                                     ' + #13 +
-          '                (i.quantidade*i.valor_unitario)*(coalesce(i.desconto_ped,0)/100) * -1 DESCONTO,         ' + #13 +
+          '                (i.quantidade*i.valor_unitario)*cast((coalesce(i.desconto_ped,0)/100)as float) * -1 DESCONTO,         ' + #13 +
           '                ((i.quantidade*i.valor_unitario)/(v.valor_total+v.desconto-v.valor_acrescimo))*coalesce(cast(v.valor_acrescimo as float),0) *-1 ACRESCIMO, ' + #13 +
           '                0 FRETE,                                                                                                               ' + #13 +
           '                0 IPI,                                                                                                                 ' + #13 +
