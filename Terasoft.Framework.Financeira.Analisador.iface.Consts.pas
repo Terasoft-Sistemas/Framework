@@ -21,7 +21,8 @@ interface
     RETORNO_CREDIPAR_PREVISAOPGTO   = 'PREVISAOPGTO';
     RETORNO_CREDIPAR_PROPOSTA       = 'Credipar.proposta';
     RETORNO_CREDIPAR_BOLETO         = 'Credipar.boleto';
-    RETORNO_CREDIPAR_ERRO           = 'Credipar.erro';
+
+    RETORNO_FINANCEIRA_ERRO           = 'Financeira.erro';
 
     RETORNO_CREDIPAR_DADOSCLIENTE   = 'Cliente.dados';
     RETORNO_CREDIPAR_DADOSPROPOSTA  = 'Proposta.dados';

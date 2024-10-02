@@ -61,6 +61,11 @@ interface
       function getUsuario: TipoWideStringFramework;
       procedure setUsuario(const pValue: TipoWideStringFramework);
 
+    //property responsavel getter/setter
+      function getResponsavel: TipoWideStringFramework;
+      procedure setResponsavel(const pValue: TipoWideStringFramework);
+
+      property responsavel: TipoWideStringFramework read getResponsavel write setResponsavel;
       property usuario: TipoWideStringFramework read getUsuario write setUsuario;
       property codigoLojista: TipoWideStringFramework read getCodigoLojista write setCodigoLojista;
       property propriedades: IPropriedade read getPropriedades write setPropriedades;
