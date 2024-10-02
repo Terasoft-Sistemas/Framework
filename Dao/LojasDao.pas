@@ -71,6 +71,8 @@ type
 end;
 
 implementation
+  uses
+    Terasoft.Framework.DB;
 
 { TLojas }
 
@@ -194,7 +196,7 @@ begin
       FLojassLista.Add(modelo);
 
       modelo.objeto.LOJA           := lQry.FieldByName('LOJA').AsString;
-      modelo.objeto.STRING_CONEXAO := lQry.FieldByName('STRING_CONEXAO').AsString;
+      modelo.objeto.STRING_CONEXAO := traduzirDatabaseName(lQry.FieldByName('STRING_CONEXAO').AsString);
 
       lQry.Next;
     end;
@@ -208,6 +210,7 @@ var
   lQry: TFDQuery;
   lSQL:String;
   modelo: ITLojasModel;
+  parts: TDatabaseParts;
 begin
   lQry := vIConexao.CriarQuery;
 
@@ -238,12 +241,17 @@ begin
       modelo := TLojasModel.getNewIface(vIConexao);
       FLojassLista.Add(modelo);
 
+      parts.host := lQry.FieldByName('SERVER').AsString;;
+      parts.port := strToIntDef(lQry.FieldByName('PORT').AsString,10108);
+      parts.path := lQry.FieldByName('DATABASE').AsString;
+      parts := traduzirDBParts(parts);
+
       modelo.objeto.CD           := lQry.FieldByName('CD').AsString;
       modelo.objeto.LOJA         := lQry.FieldByName('LOJA').AsString;
       modelo.objeto.DESCRICAO    := lQry.FieldByName('DESCRICAO').AsString;
-      modelo.objeto.SERVER       := lQry.FieldByName('SERVER').AsString;
-      modelo.objeto.PORT         := lQry.FieldByName('PORT').AsString;
-      modelo.objeto.DATABASE     := lQry.FieldByName('DATABASE').AsString;
+      modelo.objeto.SERVER       := parts.host;
+      modelo.objeto.PORT         := intToStr(parts.port);
+      modelo.objeto.DATABASE     := parts.path;
       modelo.objeto.CLIENTE_ID   := lQry.FieldByName('CLIENTE_ID').AsString;
 
       lQry.Next;
