@@ -329,8 +329,8 @@ interface
   {$if not defined(__DLL__)}
     function getTopOne(pFilial: TipoWideStringFramework; pGDB: IGDB): ITopOne;
 
-
     function getCredipar(pFilial: TipoWideStringFramework; pGDB: IGDB): ICredipar;
+
     function carregaPedidoFinanceira(const pID: Int64; pFinanceira: IFinanceira; pGDB: IGDB; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     function enviaPropostaFinanceira(pFinanceira: IFinanceira; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     function getCrediparFilial(const pFilial: TipoWideStringFramework; pGDB: IGDB): ICredipar;
@@ -531,6 +531,7 @@ begin
     Result.config.diretorioArquivos := cfg.ValorTagConfig(tagConfig_TOPONE_DIRETORIO_ARQUIVOS,'',tvString);
     Result.config.usuario := cfg.ValorTagConfig(tagConfig_TOPONE_USUARIO_ENDPOINT,'',tvString);
     Result.config.token := cfg.ValorTagConfig(tagConfig_TOPONE_SENHA_ENDPOINT,'',tvString);
+    Result.config.responsavel := cfg.ValorTagConfig(tagConfig_TOPONE_RESPONSAVEL,'',tvString);
     //Result.config.codigoProdutoFinanceira := cfg.ValorTagConfig(tagConfig_CREDIPAR_PRODUTO,0,tvInteiro);
     Result.config.controleAlteracoes := criaControleAlteracoes(FINANCEIRA_TOPONE_NOME,pGDB,true);
     //Result.config.codigoLojista := cfg.ValorTagConfig(tagConfig_CREDIPAR_CODIGO_LOJISTA,0,tvString);
