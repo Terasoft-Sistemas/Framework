@@ -3,6 +3,7 @@ unit PCGDao;
 interface
 
 uses
+  Terasoft.Framework.Texto,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
@@ -30,8 +31,14 @@ type
     vTabelaPedido, vTabelaOS, vTabelaDevolucao, vTabelaEntrada : String;
     vFiltro : String;
 
+    fResultadoOperacao: IResultadoOperacao;
+
     procedure DefineDadosSelectVendas(Acao: TTipoAnalisePCG; pPCG_Parametros: TPCG_Parametros);
     procedure DefineDadosSelectEstoque(Acao: TTipoAnaliseEstoquePCG; pPCG_Parametros: TPCG_Parametros);
+
+  //property resultadoOperacao getter/setter
+    function getResultadoOperacao: IResultadoOperacao;
+    procedure setResultadoOperacao(const pValue: IResultadoOperacao);
 
   public
     constructor _Create(pIConexao : IConexao);
@@ -43,7 +50,9 @@ type
     function ObterVendasResultado2(pPCG_Parametros: TPCG_Parametros): IFDDataset;
     function ObterEstoqueResultado1(pPCG_Parametros: TPCG_Parametros): IFDDataset;
 
-end;
+    property resultadoOperacao: IResultadoOperacao read getResultadoOperacao write setResultadoOperacao;
+
+  end;
 
 implementation
 
@@ -63,6 +72,16 @@ end;
 destructor TPCGDao.Destroy;
 begin
   inherited;
+end;
+
+procedure TPCGDao.setResultadoOperacao(const pValue: IResultadoOperacao);
+begin
+  fResultadoOperacao := pValue;
+end;
+
+function TPCGDao.getResultadoOperacao: IResultadoOperacao;
+begin
+  Result := checkResultadoOperacao(fResultadoOperacao);
 end;
 
 class function TPCGDao.getNewIface(pIConexao: IConexao): ITPCGDao;
@@ -227,6 +246,7 @@ begin
   for lQA in lAsyncList do
   begin
     lQA.rotulo := 'ObterVendasResultado1';
+    lQA.resultado := resultadoOperacao;
     conexao := lQA.loja.objeto.conexaoLoja;
     if(conexao=nil) then
       raise Exception.CreateFmt('TDashbordDao.ObterVendasResultado1: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);
@@ -238,7 +258,7 @@ begin
   begin
     lQA.esperar;
     if(lQA.resultado.erros>0) then
-      raise Exception.CreateFmt('TDashbordDao.ObterVendasResultado1: Loja [%s] com problemas: [%s]',[lQA.loja.objeto.LOJA,lQA.resultado.toString]);
+      exit;//raise Exception.CreateFmt('TDashbordDao.ObterVendasResultado1: Loja [%s] com problemas: [%s]',[lQA.loja.objeto.LOJA,lQA.resultado.toString]);
 
     lQA.dataset.dataset.first;
     while not lQA.dataset.dataset.Eof do
@@ -490,6 +510,7 @@ begin
   for lQA in lAsyncList do
   begin
     lQA.rotulo := 'TPCGDao.PCGDao_ObterVendasResultado2';
+    lQA.resultado := resultadoOperacao;
     conexao := lQA.loja.objeto.conexaoLoja;
     if(conexao=nil) then
       raise Exception.CreateFmt('TPCGDao.PCGDao_ObterVendasResultado2_: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);
@@ -785,6 +806,7 @@ begin
   for lQA in lAsyncList do
   begin
     lQA.rotulo := 'TPCGDao.ObterEstoqueResultado1';
+    lQA.resultado := resultadoOperacao;
     conexao := lQA.loja.objeto.conexaoLoja;
     if(conexao=nil) then
       raise Exception.CreateFmt('TPCGDao.ObterEstoqueResultado1: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);
