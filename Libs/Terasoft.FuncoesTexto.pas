@@ -881,10 +881,12 @@ begin
   Result.Server := parts.host;
   Result.Port := IntToStr(parts.port);
   Result.Database := parts.path;
-{  Result.Server   := Copy(pHost, 1, pos('/', pHost) -1);
+{
+  Result.Server   := Copy(pHost, 1, pos('/', pHost) -1);
   Result.Port     := Copy(pHost, pos('/', pHost) + 1, pos(':', pHost) - (pos('/', pHost) + 1));
   Result.DataBase := Copy(pHost, pos(':', pHost) + 1, pHost.Length);
-  Result.DataBase := StringReplace(Result.DataBase, '\\', '\', [rfReplaceAll]);}
+  Result.DataBase := StringReplace(Result.DataBase, '\\', '\', [rfReplaceAll]);
+}
 end;
 
 function formatarDataInvertida(const data: String): String;
