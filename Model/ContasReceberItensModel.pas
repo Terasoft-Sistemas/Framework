@@ -338,7 +338,7 @@ begin
     lCaixaModel.objeto.TIPO_CAI        := cTIPO_CREDITO;
     lCaixaModel.objeto.FATURA_CAI      := self.FFATURA_REC;
     lCaixaModel.objeto.PARCELA_CAI     := self.FPACELA_REC;
-    lCaixaModel.objeto.STATUS          := 'I';
+    lCaixaModel.objeto.STATUS          := 'A';
     lCaixaModel.objeto.LOJA_REMOTO     := self.FLOJA;
     lCaixaModel.objeto.CENTRO_CUSTO    := cCENTRO_CUSTO_PADRAO;
     lCaixaModel.objeto.PORTADOR_CAI    := pPortador;
