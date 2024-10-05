@@ -745,7 +745,7 @@ begin
        '    */'+#13+
        '    c.SALARIOCON_CLI,'+#13+
        '    c.pais_id,'+#13+
-       '    c.referencia1_cli,'+#13+
+       '    c.contato_cli,'+#13+
        '    c.foneref1_cli,'+#13+
        '    c.parentesco_ref1'+#13+
        ' from'+#13+
