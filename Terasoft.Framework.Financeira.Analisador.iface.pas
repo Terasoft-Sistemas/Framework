@@ -631,6 +631,7 @@ begin
        '    c.fantasia_cli,'+#13+
        '    c.nascimento_cli,'+#13+
        '    c.sexo_cli,'+#13+
+       '    c.email_cli,'+#13+
        '    c.tipodoc_cli tipodoc, --Criado'+#13+
        '    /*'+#13+
        '      1-RG'+#13+
@@ -644,17 +645,7 @@ begin
        '    c.inscricao_rg_cli,'+#13+
        '    c.inscricao_municipal EMISSOR_RG,'+#13+
        '    c.expedicao_rg,'+#13+
-       '    case c.estadocivil_cli'+#13+
-       '    /*'+#13+
-       '      0-Casado'+#13+
-       '      1-Solteiro'+#13+
-       '      2-Viuvo'+#13+
-       '    */'+#13+
-       '      when ''C'' then ''0'''+#13+
-       '      when ''S'' then ''1'''+#13+
-       '      when ''V'' then ''2'''+#13+
-       '      else ''9'''+#13+
-       '    end as estadocivil_cli,'+#13+
+       '    c.estadocivil_cli estadocivil_cli,'+#13+
        '    c.mae_cli,'+#13+
        '    c.pai_cli,'+#13+
        '    c.naturalidade_cli,'+#13+
@@ -752,7 +743,11 @@ begin
        '      6-PASSAPORTE'+#13+
        '      7-CERTIFICADO RESERVISTA'+#13+
        '    */'+#13+
-       '    c.SALARIOCON_CLI'+#13+
+       '    c.SALARIOCON_CLI,'+#13+
+       '    c.pais_id,'+#13+
+       '    c.referencia1_cli,'+#13+
+       '    c.foneref1_cli,'+#13+
+       '    c.parentesco_ref1'+#13+
        ' from'+#13+
        '    clientes c'+#13+
      '  where c.codigo_cli = :codigo',

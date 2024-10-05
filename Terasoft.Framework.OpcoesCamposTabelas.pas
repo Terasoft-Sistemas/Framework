@@ -473,6 +473,8 @@ begin
       Result := validaUF(pValue)
     else if(CompareText(lValor,'<imei>')=0) then
       Result := validaIMEI(pValue)
+    else if(CompareText(lValor,'<somentenumeros>')=0) then
+      Result := somenteNumeros(pValue)<>''
     else if(CompareText(lValor,'<naozero>')=0) then
       Result := StrToFloatDef(somenteNumeros(pValue),0)<>0.0
     else
