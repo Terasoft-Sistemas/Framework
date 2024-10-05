@@ -598,9 +598,11 @@ begin
        '    w.parcelas,'+#13+
        '    w.data,'+#13+
        '    w.primeiro_vencimento,'+#13+
-       '    p.nome_pro'+#13+
+       '    p.nome_pro,'+#13+
+       '    f.nome_fun nome_vendedor'+#13+
        'from'+#13+
        '    web_pedido w'+#13+
+       '    left join funcionario f on f.codigo_fun = w.vendedor_id '+#13+
        'inner join'+#13+
        '  web_pedidoitens i'+#13+
        '    on'+#13+
@@ -745,9 +747,12 @@ begin
        '    */'+#13+
        '    c.SALARIOCON_CLI,'+#13+
        '    c.pais_id,'+#13+
-       '    c.contato_cli,'+#13+
+       '    c.contato_cli referencia1_cli,'+#13+
        '    c.foneref1_cli,'+#13+
-       '    c.parentesco_ref1'+#13+
+       '    c.parentesco_ref1,'+#13+
+       '    c.referencia2_cli,'+#13+
+       '    c.foneref2_cli,'+#13+
+       '    c.parentesco_ref2'+#13+
        ' from'+#13+
        '    clientes c'+#13+
      '  where c.codigo_cli = :codigo',
