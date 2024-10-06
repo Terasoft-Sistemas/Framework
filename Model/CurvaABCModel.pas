@@ -4,6 +4,7 @@ interface
 
 uses
   Terasoft.Types,
+  Terasoft.Framework.Texto,
   CurvaABCDao,
   FireDAC.Comp.Client,
   Terasoft.Framework.ObjectIface,
@@ -17,6 +18,12 @@ type
   private
     [unsafe] mySelf: ITCurvaABCModel;
     vIConexao : IConexao;
+  protected
+      fResultadoOperacao: IResultadoOperacao;
+
+    //property resultadoOperacao getter/setter
+      function getResultadoOperacao: IResultadoOperacao;
+      procedure setResultadoOperacao(const pValue: IResultadoOperacao);
 
   public
 
@@ -26,6 +33,8 @@ type
     class function getNewIface(pIConexao: IConexao): ITCurvaABCModel;
 
     function ObterCurvaABC(pCurvaABC_Parametros: TCurvaABC_Parametros): IFDDataset;
+
+    property resultadoOperacao: IResultadoOperacao read getResultadoOperacao write setResultadoOperacao;
 
   end;
 
@@ -47,6 +56,18 @@ begin
   inherited;
 end;
 
+{ TCurvaABCModel }
+
+procedure TCurvaABCModel.setResultadoOperacao(const pValue: IResultadoOperacao);
+begin
+  fResultadoOperacao := pValue;
+end;
+
+function TCurvaABCModel.getResultadoOperacao: IResultadoOperacao;
+begin
+  Result := checkResultadoOperacao(fResultadoOperacao);
+end;
+
 class function TCurvaABCModel.getNewIface(pIConexao: IConexao): ITCurvaABCModel;
 begin
   Result := TImplObjetoOwner<TCurvaABCModel>.CreateOwner(self._Create(pIConexao));
@@ -61,6 +82,7 @@ begin
   lCurvaABCDao := TCurvaABCDao.getNewIface(vIConexao);
 
   try
+    fResultadoOperacao := nil;
     lCurvaABC_Parametros.TipoData                := pCurvaABC_Parametros.TipoData;
     lCurvaABC_Parametros.DataInicio              := pCurvaABC_Parametros.DataInicio;
     lCurvaABC_Parametros.DataFim                 := pCurvaABC_Parametros.DataFim;
@@ -84,6 +106,7 @@ begin
     lCurvaABC_Parametros.Gerente                 := pCurvaABC_Parametros.Gerente;
     lCurvaABC_Parametros.Cidade                  := pCurvaABC_Parametros.Cidade;
     lCurvaABC_Parametros.UF                      := pCurvaABC_Parametros.UF;
+    lCurvaABCDao.objeto.resultadoOperacao := getResultadoOperacao;
 
     Result := lCurvaABCDao.objeto.ObterCurvaABC(lCurvaABC_Parametros);
 

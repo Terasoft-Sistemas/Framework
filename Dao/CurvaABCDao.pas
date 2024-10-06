@@ -3,6 +3,7 @@ unit CurvaABCDao;
 interface
 
 uses
+  Terasoft.Framework.Texto,
   Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
@@ -32,6 +33,12 @@ type
 
     procedure DefineDadosSelect(Acao: TTipoAnaliseCurvaABC; pCurvaABC_Parametros: TCurvaABC_Parametros);
 
+  protected
+    fResultadoOperacao: IResultadoOperacao;
+    //property resultadoOperacao getter/setter
+      function getResultadoOperacao: IResultadoOperacao;
+      procedure setResultadoOperacao(const pValue: IResultadoOperacao);
+
   public
     constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -39,6 +46,7 @@ type
     class function getNewIface(pIConexao: IConexao): ITCurvaABCDao;
 
     function ObterCurvaABC(pCurvaABC_Parametros: TCurvaABC_Parametros): IFDDataset;
+    property resultadoOperacao: IResultadoOperacao read getResultadoOperacao write setResultadoOperacao;
 
 end;
 
@@ -60,6 +68,18 @@ end;
 destructor TCurvaABCDao.Destroy;
 begin
   inherited;
+end;
+
+{ TCurvaABCDao }
+
+procedure TCurvaABCDao.setResultadoOperacao(const pValue: IResultadoOperacao);
+begin
+  fResultadoOperacao := pValue;
+end;
+
+function TCurvaABCDao.getResultadoOperacao: IResultadoOperacao;
+begin
+  Result := checkResultadoOperacao(fResultadoOperacao);
 end;
 
 class function TCurvaABCDao.getNewIface(pIConexao: IConexao): ITCurvaABCDao;
@@ -282,6 +302,7 @@ begin
   for lQA in lAsyncList do
   begin
     lQA.rotulo := 'ObterQuery_Anos';
+    lQA.resultado := getResultadoOperacao;
     conexao := lQA.loja.objeto.conexaoLoja;
     if(conexao=nil) then
       raise Exception.CreateFmt('TCurvaABCDao.ObterCurvaABC: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);
@@ -293,7 +314,7 @@ begin
   begin
     lQA.esperar;
     if(lQA.resultado.erros>0) then
-      raise Exception.CreateFmt('TCurvaABCDao.ObterCurvaABC: Loja [%s] com problemas: [%s]',[lQA.loja.objeto.LOJA,lQA.resultado.toString]);
+      exit;
 
     lQA.dataset.dataset.first;
     while not lQA.dataset.dataset.Eof do
