@@ -109,6 +109,7 @@ begin
   lAsyncList := getQueryLojaAsyncList(vIConexao,pCurvaABC_Parametros.Lojas);
 
   lMemTable := TFDMemTable.Create(nil);
+  Result := criaIFDDataset(lMemTable);
 
   Self.DefineDadosSelect(pCurvaABC_Parametros.TipoAnalise, pCurvaABC_Parametros);
 
@@ -400,7 +401,6 @@ begin
 
   lMemTable.IndexName := 'OrdenacaoRateio';
   lMemTable.Open;
-  Result := criaIFDDataset(lMemTable);
 
 end;
 
