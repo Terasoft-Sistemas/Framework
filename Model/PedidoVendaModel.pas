@@ -1416,7 +1416,10 @@ begin
     begin
       lDiferencaDesconto := lTotalDesconto - lTableTotais.objeto.FieldByName('TOTAL_DESCONTO').AsFloat;
 
-      lNFItensModel := lNFItensModel.objeto.carregaClasse(lIDItem);
+      lNFItensModel.objeto.WhereView := ' and coalesce(nfitens.vdesc, 0) > 0 and nfitens.numero_nf = '+ QuotedStr(lNumeroNFe);
+      lNFItensModel.objeto.obterLista;
+
+      lNFItensModel := lNFItensModel.objeto.carregaClasse(lNFItensModel.objeto.NFItenssLista[0].objeto.ID);
 
       lNFItensModel.objeto.Acao  := tacAlterar;
       lNFItensModel.objeto.VDESC := roundTo(lNFItensModel.objeto.VDESC + lDiferencaDesconto, -2);
