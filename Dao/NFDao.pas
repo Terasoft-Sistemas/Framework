@@ -472,6 +472,7 @@ begin
       modelo := TNFModel.getNewIface(vIConexao);
       FNFLista.Add(modelo);
 
+      modelo.objeto.ID                            := lQry.FieldByName('ID').AsString;
       modelo.objeto.NUMERO_NF                     := lQry.FieldByName('NUMERO_NF').AsString;
       modelo.objeto.NUMERO_ECF                    := lQry.FieldByName('NUMERO_ECF').AsString;
       modelo.objeto.NUMERO_PED                    := lQry.FieldByName('NUMERO_PED').AsString;
