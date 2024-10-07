@@ -623,7 +623,7 @@ begin
       begin
         if(Result = nil) then
         begin
-          Result := criadatasetSimples(cloneDataset(lLojaAsync.dataset.dataset,false,false,true));
+          Result := criadatasetSimples(cloneDataset(lLojaAsync.dataset.dataset,false,false,true,true));
           //Result := lLojaAsync.dataset;
           TFDMemTable(Result.dataset).IndexFieldNames := campoAgrupamento;
           TFDMemTable(Result.dataset).IndexesActive := true;
@@ -647,7 +647,10 @@ begin
 
   vEstadoConsulta.datasetPaginada := Result;
   if(fRegistros<>1) then
+  begin
+    calculoFieldTotaisGenericoNew(Result.dataset,sumario.dataset,false);
     vEstadoConsulta.datasetCompleta := criaDatasetSimples(cloneDataset(Result.dataset,false));
+  end;
   vEstadoConsulta.filiais := getFiltroLojas.objeto.opcoesSelecionadas.text;
   vEstadoConsulta.agrupamento := campoAgrupamento;
 
@@ -705,6 +708,7 @@ procedure TEndpointModel.formatarDataset(pDataset: TDataset);
     sNome,sFormato: String;
     posicao: Integer;
     lVisible: boolean;
+    lSumario: boolean;
 begin
   if(pDataset=nil) then
     exit;
@@ -713,6 +717,7 @@ begin
   for i := 0 to pDataset.FieldCount - 1 do
   begin
     f:=pDataset.Fields[i];
+    lSumario := (pos('$_TOTAL_'+DBFIELDINTERNO, f.FieldName,1)>0) or (pos('$_%_'+DBFIELDINTERNO, f.FieldName,1)>0);
     lVisible := f.Visible and not (( f.DataType in [ftBytes])  or ((f is TBlobField) and  (TBlobField(f).BlobType=ftBlob)) or
                     (f is TByteField)) and (pos(DBFIELDINTERNO, f.FieldName,1)=0);
 
@@ -721,11 +726,18 @@ begin
       f.DisplayWidth := 1;
 
     fCfg.ReadInteger('width',f.FieldName,f.DisplayWidth);
-
-    f.Visible := lVisible and fCfg.ReadBool('visible',f.FieldName, lVisible);
-    f.DisplayLabel := capitalizarTexto(StringReplace(f.FieldName,'_',' ', [rfReplaceAll]));
-    if(f is TNumericField) and not ( f.DataType in [ ftLargeint ] ) then
-      TNumericField(f).DisplayFormat := ',0.00';
+    if(lSumario) then
+    begin
+      f.Visible := fCfg.ReadBool('visible',f.FieldName, false);
+      f.DisplayLabel := '%';
+      TNumericField(f).DisplayFormat := ',0.0000%';
+    end else
+    begin
+      f.Visible := lVisible and fCfg.ReadBool('visible',f.FieldName, lVisible);
+      f.DisplayLabel := capitalizarTexto(StringReplace(f.FieldName,'_',' ', [rfReplaceAll]));
+      if(f is TNumericField) and not ( f.DataType in [ ftLargeint ] ) then
+        TNumericField(f).DisplayFormat := ',0.00';
+    end;
   end;
 
   l := getCfg.ReadSectionValuesLista('formato');

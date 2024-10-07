@@ -669,8 +669,12 @@ begin
 
 
   if(edtFormatacaoCampoVisivel.Checked) then
-    lCFG.deleteKey('visible',campo)
-  else
+  begin
+    if (pos(DBFIELDINTERNO,campo)=0) then
+      lCFG.deleteKey('visible',campo)
+    else
+      lCFG.WriteBool('visible',campo,true);
+  end else
     lCFG.WriteBool('visible',campo,false);
 
   if(edtFormatacaoCampoSumario.Checked) and (edtFormatacaoCampoVisivel.Checked) then
@@ -1105,7 +1109,12 @@ begin
   vDatasetCampos.dataset.Fields[0].DisplayLabel := 'Campo';
   for i := 0 to vQuery.dataset.FieldCount - 1 do
   begin
-    if (pos(DBFIELDINTERNO,vQuery.dataset.Fields[i].FieldName,1)>0) then continue;
+    if (pos(DBFIELDINTERNO,vQuery.dataset.Fields[i].FieldName,1)>0) then
+    begin
+      if (pos('$_TOTAL_'+DBFIELDINTERNO,vQuery.dataset.Fields[i].FieldName)=0) and
+            (pos('$_%_'+DBFIELDINTERNO,vQuery.dataset.Fields[i].FieldName)=0) then
+      continue;
+    end;
 
     vDatasetCampos.dataset.Append;
     vDatasetCampos.dataset.Fields[0].AsString := vQuery.dataset.Fields[i].FieldName;
