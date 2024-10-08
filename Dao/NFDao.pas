@@ -560,30 +560,30 @@ begin
 
   try
     lSql :=
-            ' select                                                                              '+SLineBreak+
-            '     count(*) QUANTIDADE_ITENS,                                                      '+SLineBreak+
-            '     sum(i.quantidade) QUANTIDADE_PRODUTOS,                                          '+SLineBreak+
-            '     sum(i.valor_unitario* i.quantidade) TOTAL_PRODUTOS,                             '+SLineBreak+
-            '     sum(i.icms_base) TOTAL_BASE_ICMS,                                               '+SLineBreak+
-            '     sum(i.icms_valor) TOTAL_ICMS,                                                   '+SLineBreak+
-            '     sum(i.icmsst_base) TOTAL_BASE_ICMS_ST,                                          '+SLineBreak+
-            '     sum(i.icmsst_valor) TOTAL_ICMS_ST,                                              '+SLineBreak+
-            '     sum(0) TOTAL_ICMS_DESON,                                                        '+SLineBreak+
-            '     sum(i.ipi_base) TOTAL_BASE_IPI,                                                 '+SLineBreak+
-            '     sum(i.ipi_valor) TOTAL_IPI,                                                     '+SLineBreak+
-            '     sum(i.pis_base) TOTAL_BASE_PIS,                                                 '+SLineBreak+
-            '     sum(i.pis_valor) TOTAL_PIS,                                                     '+SLineBreak+
-            '     sum(i.cofins_base) TOTAL_BASE_COFINS,                                           '+SLineBreak+
-            '     sum(i.cofins_valor) TOTAL_COFINS,                                               '+SLineBreak+
-            '     sum(i.vfcp) TOTAL_FCP,                                                          '+SLineBreak+
-            '     sum(i.vfcpst) TOTAL_FCP_ST,                                                     '+SLineBreak+
-            '     sum(i.valor_frete) TOTAL_FRETE,                                                 '+SLineBreak+
-            '     sum(i.valor_outros) TOTAL_OUTROS,                                               '+SLineBreak+
-            '     sum(((0/100)*i.valor_unitario)* cast(i.quantidade as float)) TOTAL_DESCONTO     '+SLineBreak+
-            '                                                                                     '+SLineBreak+
-            ' from                                                                                '+SLineBreak+
-            '     nfitens i                                                                       '+SLineBreak+
-            '                                                                                     '+SLineBreak+
+            ' select                                                                                 '+SLineBreak+
+            '     count(*) QUANTIDADE_ITENS,                                                         '+SLineBreak+
+            '     sum(i.quantidade_nf) QUANTIDADE_PRODUTOS,                                          '+SLineBreak+
+            '     sum(i.valor_unitario_nf * i.quantidade_nf) TOTAL_PRODUTOS,                         '+SLineBreak+
+            '     sum(i.VBC_N15) TOTAL_BASE_ICMS,                                                    '+SLineBreak+
+            '     sum(i.VICMS_N17) TOTAL_ICMS,                                                       '+SLineBreak+
+            '     sum(i.VBCST_N21) TOTAL_BASE_ICMS_ST,                                               '+SLineBreak+
+            '     sum(i.VICMSST_N23) TOTAL_ICMS_ST,                                                  '+SLineBreak+
+            '     sum(0) TOTAL_ICMS_DESON,                                                           '+SLineBreak+
+            '     sum(i.VBC_IPI) TOTAL_BASE_IPI,                                                     '+SLineBreak+
+            '     sum(i.VALOR_IPI) TOTAL_IPI,                                                        '+SLineBreak+
+            '     sum(i.VBC_Q07) TOTAL_BASE_PIS,                                                     '+SLineBreak+
+            '     sum(i.VPIS_Q09) TOTAL_PIS,                                                         '+SLineBreak+
+            '     sum(i.VBC_S07) TOTAL_BASE_COFINS,                                                  '+SLineBreak+
+            '     sum(i.VCOFINS_S11) TOTAL_COFINS,                                                   '+SLineBreak+
+            '     sum(i.vfcp) TOTAL_FCP,                                                             '+SLineBreak+
+            '     sum(i.vfcpst) TOTAL_FCP_ST,                                                        '+SLineBreak+
+            '     sum(i.frete) TOTAL_FRETE,                                                          '+SLineBreak+
+            '     sum(i.voutros) TOTAL_OUTROS,                                                       '+SLineBreak+
+            '     sum(((0/100)*i.valor_unitario_nf) * cast(i.quantidade_nf as float)) TOTAL_DESCONTO '+SLineBreak+
+            '                                                                                        '+SLineBreak+
+            ' from                                                                                   '+SLineBreak+
+            '     nfitens i                                                                          '+SLineBreak+
+            '                                                                                        '+SLineBreak+
             ' where i.NF_ID = '+IntToStr(FIDRecordView);
 
 

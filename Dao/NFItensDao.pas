@@ -443,7 +443,7 @@ begin
       '       produto.nome_pro,                                            ' +
       '       produto.unidade_pro,                                         ' +
       '       produto.codigo_fornecedor ncm,                               ' +
-      '       produto.tipo__pro icms_origem                                ' +
+      '       produto.tipo$_pro icms_origem                                ' +
 	    '  from nfitens                                                      ' +
       '       left join produto on produto.codigo_pro = nfitens.codigo_pro ' +
       ' where 1=1                                                          ';
