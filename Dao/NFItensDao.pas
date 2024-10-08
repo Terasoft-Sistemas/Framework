@@ -34,6 +34,7 @@ type
     FOrderView: String;
     FWhereView: String;
     FTotalRecords: Integer;
+    FIDPedidoView: Integer;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
     procedure SetNFItenssLista(const Value: IList<ITNFItensModel>);
@@ -47,6 +48,7 @@ type
 
     procedure setParams(var pQry: TFDQuery; pNFItensModel: ITNFItensModel);
     function where: String;
+    procedure SetIDPedidoView(const Value: Integer);
 
   public
     constructor _Create(pIConexao : IConexao);
@@ -63,6 +65,7 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
+    property IDPedidoView: Integer read FIDPedidoView write SetIDPedidoView;
 
     function incluir(pNFItensModel: ITNFItensModel): String;
     function alterar(pNFItensModel: ITNFItensModel): String;
@@ -99,6 +102,8 @@ begin
     lModel.objeto.NUMERO_NF           := lQry.FieldByName('NUMERO_NF').AsString;
     lModel.objeto.SERIE_NF            := lQry.FieldByName('SERIE_NF').AsString;
     lModel.objeto.CODIGO_PRO          := lQry.FieldByName('CODIGO_PRO').AsString;
+    lModel.objeto.DESCRICAO_PRODUTO   := lQry.FieldByName('NOME_PRO').AsString;
+    lModel.objeto.UNIDADE_NF          := lQry.FieldByName('UNIDADE_PRO').AsString;
     lModel.objeto.VALORUNITARIO_NF    := lQry.FieldByName('VALORUNITARIO_NF').AsString;
     lModel.objeto.QUANTIDADE_NF       := lQry.FieldByName('QUANTIDADE_NF').AsString;
     lModel.objeto.VLRVENDA_NF         := lQry.FieldByName('VLRVENDA_NF').AsString;
@@ -344,6 +349,9 @@ begin
   if FIDRecordView <> 0  then
     lSQL := lSQL + ' and nfitens.id = '+IntToStr(FIDRecordView);
 
+  if FIDPedidoView <> 0  then
+    lSQL := lSQL + ' and nfitens.pedido_id = '+IntToStr(FIDPedidoView);
+
   Result := lSQL;
 end;
 
@@ -431,9 +439,14 @@ begin
       lSql := 'select ';
 
     lSQL := lSQL +
-      '       nfitens.*             '+
-	    '  from nfitens               '+
-      ' where 1=1                   ';
+      '       nfitens.*,                                                   ' +
+      '       produto.nome_pro,                                            ' +
+      '       produto.unidade_pro,                                         ' +
+      '       produto.codigo_fornecedor ncm,                               ' +
+      '       produto.tipo__pro icms_origem                                ' +
+	    '  from nfitens                                                      ' +
+      '       left join produto on produto.codigo_pro = nfitens.codigo_pro ' +
+      ' where 1=1                                                          ';
 
     lSql := lSql + where;
 
@@ -451,6 +464,10 @@ begin
       modelo.objeto.NUMERO_NF            := lQry.FieldByName('NUMERO_NF').AsString;
       modelo.objeto.SERIE_NF             := lQry.FieldByName('SERIE_NF').AsString;
       modelo.objeto.CODIGO_PRO           := lQry.FieldByName('CODIGO_PRO').AsString;
+      modelo.objeto.DESCRICAO_PRODUTO    := lQry.FieldByName('NOME_PRO').AsString;
+      modelo.objeto.NCM                  := lQry.FieldByName('NCM').AsString;
+      modelo.objeto.ICMS_ORIGEM          := lQry.FieldByName('ICMS_ORIGEM').AsString;
+      modelo.objeto.UNIDADE_NF           := lQry.FieldByName('UNIDADE_PRO').AsString;
       modelo.objeto.VALORUNITARIO_NF     := lQry.FieldByName('VALORUNITARIO_NF').AsString;
       modelo.objeto.QUANTIDADE_NF        := lQry.FieldByName('QUANTIDADE_NF').AsString;
       modelo.objeto.VLRVENDA_NF          := lQry.FieldByName('VLRVENDA_NF').AsString;
@@ -620,6 +637,11 @@ end;
 procedure TNFItensDao.SetID(const Value: Variant);
 begin
   FID := Value;
+end;
+
+procedure TNFItensDao.SetIDPedidoView(const Value: Integer);
+begin
+  FIDPedidoView := Value;
 end;
 
 procedure TNFItensDao.SetIDRecordView(const Value: Integer);

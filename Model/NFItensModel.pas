@@ -174,6 +174,9 @@ type
     FCST_Q06: Variant;
     FCSOSN: Variant;
     FIPI_NF: Variant;
+    FIDPedidoView: Integer;
+    FNCM: Variant;
+    FICMS_ORIGEM: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetNFItenssLista(const Value: IList<ITNFItensModel>);
@@ -331,11 +334,16 @@ type
     procedure SetVUNTRIB(const Value: Variant);
     procedure SetXLOCDESEMB_I21(const Value: Variant);
     procedure SetXPED(const Value: Variant);
+    procedure SetIDPedidoView(const Value: Integer);
+    procedure SetNCM(const Value: Variant);
+    procedure SetICMS_ORIGEM(const Value: Variant);
 
   public
     property NUMERO_NF: Variant read FNUMERO_NF write SetNUMERO_NF;
     property SERIE_NF: Variant read FSERIE_NF write SetSERIE_NF;
     property CODIGO_PRO: Variant read FCODIGO_PRO write SetCODIGO_PRO;
+    property NCM: Variant read FNCM write SetNCM;
+    property ICMS_ORIGEM: Variant read FICMS_ORIGEM write SetICMS_ORIGEM;
     property VALORUNITARIO_NF: Variant read FVALORUNITARIO_NF write SetVALORUNITARIO_NF;
     property QUANTIDADE_NF: Variant read FQUANTIDADE_NF write SetQUANTIDADE_NF;
     property VLRVENDA_NF: Variant read FVLRVENDA_NF write SetVLRVENDA_NF;
@@ -491,6 +499,8 @@ type
     procedure obterLista;
     function obterTotais(pNF : String): IFDDataset;
 
+    function VendeItem: String;
+
     function carregaClasse(pId: String): ITNFItensModel;
 
     property NFItenssLista: IList<ITNFItensModel> read FNFItenssLista write SetNFItenssLista;
@@ -502,6 +512,7 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
+    property IDPedidoView: Integer read FIDPedidoView write SetIDPedidoView;
 
   end;
 
@@ -511,6 +522,131 @@ uses
   NFItensDao;
 
 { TNFItensModel }
+
+
+function TNFItensModel.VendeItem: String;
+begin
+  FNUMERO_NF           := NUMERO_NF;
+  FCODIGO_PRO          := CODIGO_PRO;
+  FQUANTIDADE_NF       := QUANTIDADE_NF;
+  FVALORUNITARIO_NF    := VALORUNITARIO_NF;
+
+//  FVALOR_VENDACADASTRO := '';
+//  FVALOR_CUSTOCADASTRO := '';
+//  FICMS_ORIGEM         := '0';
+//
+//  FCFOP_ID             := CFOP_ID;
+//  FCOMISSAO_PERCENTUAL := '';
+//  FVALOR_SEGURO        := VALOR_SEGURO;
+//  FVALOR_FRETE         := VALOR_FRETE;
+//  FVALOR_OUTROS        := VALOR_OUTROS;
+//
+//  FICMS_MODADEDADE     := '99';
+//  FICMS_CST            := '00';
+//  FICMS_CSOSN          := '102';
+//  FICMS_ALIQUOTA       := ICMS_ALIQUOTA;
+//  FICMS_REDUCAO        := ICMS_REDUCAO;
+//  FICMS_BASE           := ICMS_BASE;
+//  FICMS_VALOR          := ICMS_VALOR;
+//
+//  FICMS_VCREDICMSSN    := '10';
+//  FICMS_PCREDSN        := '10';
+//
+//  FICMSST_MODALIDADE   := '99';
+//  FICMSST_ALIQUOTA     := ICMSST_ALIQUOTA;
+//  FICMSST_MVA          := ICMSST_MVA;
+//  FICMSST_REDUCAO      := ICMSST_REDUCAO;
+//  FICMSST_BASE         := ICMSST_BASE;
+//  FICMSST_VALOR        := ICMSST_VALOR;
+//
+//  FPIS_CST             := '99';
+//  FPIS_ALIQUOTA        := '1.65';
+//  FPIS_BASE            := '10';
+//  FPIS_VALOR           := '10';
+//
+//  FCOFINS_CST          := '99';
+//  FCOFINS_ALIQUOTA     := '7.60';
+//  FCOFINS_BASE         := '10';
+//  FCOFINS_VALOR        := '10';
+//
+//  FIPI_CST             := '99';
+//  FIPI_BASE            := IPI_BASE;
+//  FIPI_VALOR           := IPI_VALOR;
+//  FIPI_ALIQUOTA        := IPI_ALIQUOTA;
+//
+//  FOBSERVACAO_ITEM     := '';
+//
+//  FVTOTTRIB_FEDERAL    := '10';
+//  FVTOTTRIB_ESTADUAL   := '10';
+//  FVTOTTRIB_MUNICIPAL  := '10';
+//
+//  FDI_NUMERO           := DI_NUMERO;
+//  FDI_DATA             := DI_DATA;
+//  FDI_LOCDESEMB        := DI_LOCDESEMB;
+//  FDI_UFDESEMB         := DI_UFDESEMB;
+//  FDI_DDESEMB          := DI_DDESEMB;
+//  FDI_CEXPORTADOR      := DI_CEXPORTADOR;
+//  FDI_NADICAO          := DI_NADICAO;
+//  FDI_NSEQADIC         := DI_NSEQADIC;
+//  FDI_CFABRICANTE      := DI_CFABRICANTE;
+//  FDI_VDESCDI          := DI_VDESCDI;
+//  FDI_VDESPADU         := DI_VDESPADU;
+//  FDI_NDRAW            := DI_NDRAW;
+//  FII_BASE             := II_BASE;
+//  FII_VALOR            := II_VALOR;
+//  FII_ALIQUOTA         := II_ALIQUOTA;
+//  FIOF_VALOR           := IOF_VALOR;
+//  FDI_VAFRMM           := DI_VAFRMM;
+//
+//  FNITEMPED            := '';
+//  FXPED                := '';
+//  FTPVIATRANSP         := '';
+//  FTPINTERMEDIO        := '';
+//  FVAFRMM_OPC          := '';
+//  FVBCUFDEST           := '';
+//  FPFCPUFDEST          := '';
+//  FPICMSUFDEST         := '';
+//  FPICMSINTER          := '';
+//  FPICMSINTERPART      := '';
+//  FVFCPUFDEST          := '';
+//  FVICMSUFDEST         := '';
+//  FVICMSUFREMET        := '';
+//  FPCREDICMS           := '';
+//  FPCREDPIS            := '';
+//  FPCREDCOFINS         := '';
+//  FVBCFCPUFDEST        := '';
+//  FVBCFCPST            := '';
+//  FPFCPST              := '';
+//  FVFCPST              := '';
+//  FVBCCFP              := '';
+//  FPFCP                := '';
+//  FVFCP                := '';
+//  FVBCFCPSTRET         := '';
+//  FPFCPSTRET           := '';
+//  FVFCPSTRET           := '';
+//  FCBENEF              := '';
+//  FINDESCALA           := '';
+//  FCNPJFAB             := '';
+//  FPREDBCEFET          := '';
+//  FVBCEFET             := '';
+//  FPICMSEFET           := '';
+//  FVICMSEFET           := '';
+//  FVBCSTRET            := '';
+//  FVICMSSTRET          := '';
+//  FPICMSSTRET          := '';
+//  FVICMSSUBISTITUTORET := '';
+//  FVICMSDESON          := '';
+//  FMOTDESICMS          := '';
+//  FPCRED_PRESUMIDO     := '';
+//  FNDRAW               := '';
+//  FPPRCOMP             := '';
+//  FVPRCOMP             := '';
+//  FNRE                 := '';
+//  FCHNFE               := '';
+//  FQEXPORT             := '';
+
+  Result := Self.Salvar;
+end;
 
 function TNFItensModel.carregaClasse(pId: String): ITNFItensModel;
 var
@@ -556,6 +692,7 @@ begin
     lNFItensLista.objeto.StartRecordView := FStartRecordView;
     lNFItensLista.objeto.LengthPageView  := FLengthPageView;
     lNFItensLista.objeto.IDRecordView    := FIDRecordView;
+    lNFItensLista.objeto.IDPedidoView    := FIDPedidoView;
 
     lNFItensLista.objeto.obterLista;
 
@@ -754,6 +891,11 @@ begin
   FNADICAO_I26 := Value;
 end;
 
+procedure TNFItensModel.SetNCM(const Value: Variant);
+begin
+  FNCM := Value;
+end;
+
 procedure TNFItensModel.SetNDI_I19(const Value: Variant);
 begin
   FNDI_I19 := Value;
@@ -774,6 +916,11 @@ begin
   FICMS_NF := Value;
 end;
 
+procedure TNFItensModel.SetICMS_ORIGEM(const Value: Variant);
+begin
+  FICMS_ORIGEM := Value;
+end;
+
 procedure TNFItensModel.SetICMS_SUFRAMA(const Value: Variant);
 begin
   FICMS_SUFRAMA := Value;
@@ -782,6 +929,11 @@ end;
 procedure TNFItensModel.SetID(const Value: Variant);
 begin
   FID := Value;
+end;
+
+procedure TNFItensModel.SetIDPedidoView(const Value: Integer);
+begin
+  FIDPedidoView := Value;
 end;
 
 procedure TNFItensModel.SetNITEMPED(const Value: Variant);

@@ -194,6 +194,27 @@ type
     Festado_cliente: Variant;
     FVendedor_Nome: Variant;
     Fcelular_cliente: Variant;
+    FTOTAL_BASE_COFINS: Variant;
+    FQUANTIDADE_PRODUTOS: Variant;
+    FTOTAL_DESCONTO: Variant;
+    FTOTAL_BASE_IPI: Variant;
+    FTOTAL_ICMS: Variant;
+    FTOTAL_FCP: Variant;
+    FTOTAL_ICMS_ST: Variant;
+    FQUANTIDADE_ITENS: Variant;
+    FTOTAL_OUTROS: Variant;
+    FTOTAL_PIS: Variant;
+    FTOTAL_BASE_ICMS: Variant;
+    FTOTAL_COFINS: Variant;
+    FTOTAL_FCP_ST: Variant;
+    FTOTAL_ICMS_DESON: Variant;
+    FTOTAL_DESCONTO_PERCENTUAL: Variant;
+    FTOTAL_PRODUTOS: Variant;
+    FTOTAL_FRETE: Variant;
+    FTOTAL_BASE_ICMS_ST: Variant;
+    FTOTAL_IPI: Variant;
+    FTOTAL_BASE_PIS: Variant;
+    FTOTAL_TOTALNF: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetACRES_NF(const Value: Variant);
     procedure SetAGRUPAMENTO_FATURA(const Value: Variant);
@@ -370,6 +391,27 @@ type
     procedure Settelefone_cliente(const Value: Variant);
     procedure Settransportadora_nome_transp(const Value: Variant);
     procedure SetVendedor_Nome(const Value: Variant);
+    procedure SetQUANTIDADE_ITENS(const Value: Variant);
+    procedure SetQUANTIDADE_PRODUTOS(const Value: Variant);
+    procedure SetTOTAL_BASE_COFINS(const Value: Variant);
+    procedure SetTOTAL_BASE_ICMS(const Value: Variant);
+    procedure SetTOTAL_BASE_ICMS_ST(const Value: Variant);
+    procedure SetTOTAL_BASE_IPI(const Value: Variant);
+    procedure SetTOTAL_BASE_PIS(const Value: Variant);
+    procedure SetTOTAL_COFINS(const Value: Variant);
+    procedure SetTOTAL_DESCONTO(const Value: Variant);
+    procedure SetTOTAL_DESCONTO_PERCENTUAL(const Value: Variant);
+    procedure SetTOTAL_FCP(const Value: Variant);
+    procedure SetTOTAL_FCP_ST(const Value: Variant);
+    procedure SetTOTAL_FRETE(const Value: Variant);
+    procedure SetTOTAL_ICMS(const Value: Variant);
+    procedure SetTOTAL_ICMS_DESON(const Value: Variant);
+    procedure SetTOTAL_ICMS_ST(const Value: Variant);
+    procedure SetTOTAL_IPI(const Value: Variant);
+    procedure SetTOTAL_OUTROS(const Value: Variant);
+    procedure SetTOTAL_PIS(const Value: Variant);
+    procedure SetTOTAL_PRODUTOS(const Value: Variant);
+    procedure SetTOTAL_TOTALNF(const Value: Variant);
 
   public
     property  Acao                         :TAcao   read FAcao write SetAcao;
@@ -542,6 +584,28 @@ type
     property Contato_transp                : Variant read FContato_transp write SetContato_transp;
     property Nome_usuario                  : Variant read FNome_usuario write SetNome_usuario;
 
+    property QUANTIDADE_PRODUTOS       :Variant read FQUANTIDADE_PRODUTOS write SetQUANTIDADE_PRODUTOS;
+    property QUANTIDADE_ITENS          :Variant read FQUANTIDADE_ITENS write SetQUANTIDADE_ITENS;
+    property TOTAL_PRODUTOS            :Variant read FTOTAL_PRODUTOS write SetTOTAL_PRODUTOS;
+    property TOTAL_BASE_ICMS           :Variant read FTOTAL_BASE_ICMS write SetTOTAL_BASE_ICMS;
+    property TOTAL_ICMS                :Variant read FTOTAL_ICMS write SetTOTAL_ICMS;
+    property TOTAL_BASE_ICMS_ST        :Variant read FTOTAL_BASE_ICMS_ST write SetTOTAL_BASE_ICMS_ST;
+    property TOTAL_ICMS_ST             :Variant read FTOTAL_ICMS_ST write SetTOTAL_ICMS_ST;
+    property TOTAL_ICMS_DESON          :Variant read FTOTAL_ICMS_DESON write SetTOTAL_ICMS_DESON;
+    property TOTAL_BASE_IPI            :Variant read FTOTAL_BASE_IPI write SetTOTAL_BASE_IPI;
+    property TOTAL_IPI                 :Variant read FTOTAL_IPI write SetTOTAL_IPI;
+    property TOTAL_BASE_PIS            :Variant read FTOTAL_BASE_PIS write SetTOTAL_BASE_PIS;
+    property TOTAL_PIS                 :Variant read FTOTAL_PIS write SetTOTAL_PIS;
+    property TOTAL_BASE_COFINS         :Variant read FTOTAL_BASE_COFINS write SetTOTAL_BASE_COFINS;
+    property TOTAL_COFINS              :Variant read FTOTAL_COFINS write SetTOTAL_COFINS;
+    property TOTAL_FCP                 :Variant read FTOTAL_FCP write SetTOTAL_FCP;
+    property TOTAL_FCP_ST              :Variant read FTOTAL_FCP_ST write SetTOTAL_FCP_ST;
+    property TOTAL_FRETE               :Variant read FTOTAL_FRETE write SetTOTAL_FRETE;
+    property TOTAL_OUTROS              :Variant read FTOTAL_OUTROS write SetTOTAL_OUTROS;
+    property TOTAL_DESCONTO            :Variant read FTOTAL_DESCONTO write SetTOTAL_DESCONTO;
+    property TOTAL_TOTALNF             :Variant read FTOTAL_TOTALNF write SetTOTAL_TOTALNF;
+    property TOTAL_DESCONTO_PERCENTUAL :Variant read FTOTAL_DESCONTO_PERCENTUAL write SetTOTAL_DESCONTO_PERCENTUAL;
+
 
     property NFLista: IList<ITNFModel> read FNFLista write SetNFLista;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -564,6 +628,7 @@ type
     procedure obterLista;
     procedure obterListaNFe;
     procedure AtualizarDataEmissao(pNotaFiscal : String);
+    function obterTotalizador: TNFModel;
 
  end;
 
@@ -573,6 +638,22 @@ uses
   NFDao;
 
 { TNFModel }
+
+function TNFModel.obterTotalizador: TNFModel;
+var
+  lNFDao: TNFDao;
+begin
+  lNFDao := TNFDao.Create;
+
+  try
+    lNFDao.IDRecordView := FIDRecordView;
+
+    Result := lNFDao.obterTotalizador;
+
+  finally
+    lNFDao.Free;
+  end;
+end;
 
 procedure TNFModel.AtualizarDataEmissao(pNotaFiscal: String);
 var
@@ -1255,6 +1336,16 @@ begin
   FQTPARCELAS := Value;
 end;
 
+procedure TNFModel.SetQUANTIDADE_ITENS(const Value: Variant);
+begin
+  FQUANTIDADE_ITENS := Value;
+end;
+
+procedure TNFModel.SetQUANTIDADE_PRODUTOS(const Value: Variant);
+begin
+  FQUANTIDADE_PRODUTOS := Value;
+end;
+
 procedure TNFModel.Setrazao_social_cliente(const Value: Variant);
 begin
   Frazao_social_cliente := Value;
@@ -1355,9 +1446,104 @@ begin
   FTotalRecords := Value;
 end;
 
+procedure TNFModel.SetTOTAL_BASE_COFINS(const Value: Variant);
+begin
+  FTOTAL_BASE_COFINS := Value;
+end;
+
+procedure TNFModel.SetTOTAL_BASE_ICMS(const Value: Variant);
+begin
+  FTOTAL_BASE_ICMS := Value;
+end;
+
+procedure TNFModel.SetTOTAL_BASE_ICMS_ST(const Value: Variant);
+begin
+  FTOTAL_BASE_ICMS_ST := Value;
+end;
+
+procedure TNFModel.SetTOTAL_BASE_IPI(const Value: Variant);
+begin
+  FTOTAL_BASE_IPI := Value;
+end;
+
+procedure TNFModel.SetTOTAL_BASE_PIS(const Value: Variant);
+begin
+  FTOTAL_BASE_PIS := Value;
+end;
+
+procedure TNFModel.SetTOTAL_COFINS(const Value: Variant);
+begin
+  FTOTAL_COFINS := Value;
+end;
+
+procedure TNFModel.SetTOTAL_DESCONTO(const Value: Variant);
+begin
+  FTOTAL_DESCONTO := Value;
+end;
+
+procedure TNFModel.SetTOTAL_DESCONTO_PERCENTUAL(const Value: Variant);
+begin
+  FTOTAL_DESCONTO_PERCENTUAL := Value;
+end;
+
+procedure TNFModel.SetTOTAL_FCP(const Value: Variant);
+begin
+  FTOTAL_FCP := Value;
+end;
+
+procedure TNFModel.SetTOTAL_FCP_ST(const Value: Variant);
+begin
+  FTOTAL_FCP_ST := Value;
+end;
+
+procedure TNFModel.SetTOTAL_FRETE(const Value: Variant);
+begin
+  FTOTAL_FRETE := Value;
+end;
+
+procedure TNFModel.SetTOTAL_ICMS(const Value: Variant);
+begin
+  FTOTAL_ICMS := Value;
+end;
+
+procedure TNFModel.SetTOTAL_ICMS_DESON(const Value: Variant);
+begin
+  FTOTAL_ICMS_DESON := Value;
+end;
+
+procedure TNFModel.SetTOTAL_ICMS_ST(const Value: Variant);
+begin
+  FTOTAL_ICMS_ST := Value;
+end;
+
+procedure TNFModel.SetTOTAL_IPI(const Value: Variant);
+begin
+  FTOTAL_IPI := Value;
+end;
+
 procedure TNFModel.SetTOTAL_NF(const Value: Variant);
 begin
   FTOTAL_NF := Value;
+end;
+
+procedure TNFModel.SetTOTAL_OUTROS(const Value: Variant);
+begin
+  FTOTAL_OUTROS := Value;
+end;
+
+procedure TNFModel.SetTOTAL_PIS(const Value: Variant);
+begin
+  FTOTAL_PIS := Value;
+end;
+
+procedure TNFModel.SetTOTAL_PRODUTOS(const Value: Variant);
+begin
+  FTOTAL_PRODUTOS := Value;
+end;
+
+procedure TNFModel.SetTOTAL_TOTALNF(const Value: Variant);
+begin
+  FTOTAL_TOTALNF := Value;
 end;
 
 procedure TNFModel.SetTRANSFERENCIA_ID(const Value: Variant);

@@ -32,6 +32,7 @@ type
     FCountView: String;
     FOrderView: String;
     FWhereView: String;
+    FNFModel: TNFModel;
     FTotalRecords: Integer;
     FIDPedidoView: Integer;
     procedure SetNFLista(const Value: IList<ITNFModel>);
@@ -46,9 +47,11 @@ type
 
     function where: String;
     procedure obterTotalRegistros;
+    procedure SetNFModel(const Value: TNFModel);
 
   public
     property NFLista: IList<ITNFModel> read FNFLista write SetNFLista;
+    property NFModel: TNFModel read FNFModel write SetNFModel;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
     property CountView: String read FCountView write SetCountView;
@@ -70,6 +73,8 @@ type
     function carregaClasse(ID: String): ITNFModel;
     procedure obterLista;
     procedure obterListaNFe;
+
+    function obterTotalizador: TNFModel;
 
     procedure setParams(var pQry: TFDQuery; pNFModel: ITNFModel);
 
@@ -479,6 +484,7 @@ begin
       modelo.objeto.SERIE_NF                      := lQry.FieldByName('SERIE_NF').AsString;
       modelo.objeto.MODELO                        := lQry.FieldByName('MODELO').AsString;
       modelo.objeto.CODIGO_CLI                    := lQry.FieldByName('CODIGO_CLI').AsString;
+      modelo.objeto.CODIGO_VEN                    := lQry.FieldByName('CODIGO_VEN').AsString;
       modelo.objeto.DATA_NF                       := lQry.FieldByName('DATA_NF').AsString;
       modelo.objeto.DATA_SAIDA                    := lQry.FieldByName('DATA_SAIDA').AsString;
       modelo.objeto.CLIENTE_NF                    := lQry.FieldByName('cliente_nome_cliente').AsString;
@@ -543,6 +549,86 @@ begin
   end;
 end;
 
+function TNFDao.obterTotalizador: TNFModel;
+var
+  lQry: TFDQuery;
+  lSQL:String;
+begin
+  lQry := vIConexao.CriarQuery;
+
+  FNFModel := TNFModel.Create;
+
+  try
+    lSql :=
+            ' select                                                                              '+SLineBreak+
+            '     count(*) QUANTIDADE_ITENS,                                                      '+SLineBreak+
+            '     sum(i.quantidade) QUANTIDADE_PRODUTOS,                                          '+SLineBreak+
+            '     sum(i.valor_unitario* i.quantidade) TOTAL_PRODUTOS,                             '+SLineBreak+
+            '     sum(i.icms_base) TOTAL_BASE_ICMS,                                               '+SLineBreak+
+            '     sum(i.icms_valor) TOTAL_ICMS,                                                   '+SLineBreak+
+            '     sum(i.icmsst_base) TOTAL_BASE_ICMS_ST,                                          '+SLineBreak+
+            '     sum(i.icmsst_valor) TOTAL_ICMS_ST,                                              '+SLineBreak+
+            '     sum(0) TOTAL_ICMS_DESON,                                                        '+SLineBreak+
+            '     sum(i.ipi_base) TOTAL_BASE_IPI,                                                 '+SLineBreak+
+            '     sum(i.ipi_valor) TOTAL_IPI,                                                     '+SLineBreak+
+            '     sum(i.pis_base) TOTAL_BASE_PIS,                                                 '+SLineBreak+
+            '     sum(i.pis_valor) TOTAL_PIS,                                                     '+SLineBreak+
+            '     sum(i.cofins_base) TOTAL_BASE_COFINS,                                           '+SLineBreak+
+            '     sum(i.cofins_valor) TOTAL_COFINS,                                               '+SLineBreak+
+            '     sum(i.vfcp) TOTAL_FCP,                                                          '+SLineBreak+
+            '     sum(i.vfcpst) TOTAL_FCP_ST,                                                     '+SLineBreak+
+            '     sum(i.valor_frete) TOTAL_FRETE,                                                 '+SLineBreak+
+            '     sum(i.valor_outros) TOTAL_OUTROS,                                               '+SLineBreak+
+            '     sum(((0/100)*i.valor_unitario)* cast(i.quantidade as float)) TOTAL_DESCONTO     '+SLineBreak+
+            '                                                                                     '+SLineBreak+
+            ' from                                                                                '+SLineBreak+
+            '     nfitens i                                                                       '+SLineBreak+
+            '                                                                                     '+SLineBreak+
+            ' where i.NF_ID = '+IntToStr(FIDRecordView);
+
+
+    lQry.Open(lSQL);
+    FNFModel.QUANTIDADE_PRODUTOS := lQry.FieldByName('QUANTIDADE_PRODUTOS').AsFloat;
+    FNFModel.QUANTIDADE_ITENS    := lQry.FieldByName('QUANTIDADE_ITENS').AsInteger;
+    FNFModel.TOTAL_PRODUTOS      := lQry.FieldByName('TOTAL_PRODUTOS').AsFloat;
+    FNFModel.TOTAL_BASE_ICMS     := lQry.FieldByName('TOTAL_BASE_ICMS').AsFloat;
+    FNFModel.TOTAL_ICMS          := lQry.FieldByName('TOTAL_ICMS').AsFloat;
+    FNFModel.TOTAL_BASE_ICMS_ST  := lQry.FieldByName('TOTAL_BASE_ICMS_ST').AsFloat;
+    FNFModel.TOTAL_ICMS_ST       := lQry.FieldByName('TOTAL_ICMS_ST').AsFloat;
+    FNFModel.TOTAL_ICMS_DESON    := lQry.FieldByName('TOTAL_ICMS_DESON').AsFloat;
+    FNFModel.TOTAL_BASE_IPI      := lQry.FieldByName('TOTAL_BASE_IPI').AsFloat;
+    FNFModel.TOTAL_IPI           := lQry.FieldByName('TOTAL_IPI').AsFloat;
+    FNFModel.TOTAL_BASE_PIS      := lQry.FieldByName('TOTAL_BASE_PIS').AsFloat;
+    FNFModel.TOTAL_PIS           := lQry.FieldByName('TOTAL_PIS').AsFloat;
+    FNFModel.TOTAL_BASE_COFINS   := lQry.FieldByName('TOTAL_BASE_COFINS').AsFloat;
+    FNFModel.TOTAL_COFINS        := lQry.FieldByName('TOTAL_COFINS').AsFloat;
+    FNFModel.TOTAL_FCP           := lQry.FieldByName('TOTAL_FCP').AsFloat;
+    FNFModel.TOTAL_FCP_ST        := lQry.FieldByName('TOTAL_FCP_ST').AsFloat;
+    FNFModel.TOTAL_FRETE         := lQry.FieldByName('TOTAL_FRETE').AsFloat;
+    FNFModel.TOTAL_OUTROS        := lQry.FieldByName('TOTAL_OUTROS').AsFloat;
+    FNFModel.TOTAL_DESCONTO      := lQry.FieldByName('TOTAL_DESCONTO').AsFloat;
+
+    if lQry.FieldByName('TOTAL_PRODUTOS').AsFloat > 0 then
+      FNFModel.TOTAL_DESCONTO_PERCENTUAL  := (lQry.FieldByName('TOTAL_DESCONTO').AsFloat*100)/lQry.FieldByName('TOTAL_PRODUTOS').AsFloat
+    else
+      FNFModel.TOTAL_DESCONTO_PERCENTUAL  := 0;
+
+    FNFModel.TOTAL_TOTALNF        := (lQry.FieldByName('TOTAL_PRODUTOS').AsFloat +
+                                     lQry.FieldByName('TOTAL_ICMS_ST').AsFloat +
+                                     lQry.FieldByName('TOTAL_IPI').AsFloat +
+                                     lQry.FieldByName('TOTAL_FCP_ST').AsFloat +
+                                     lQry.FieldByName('TOTAL_FRETE').AsFloat +
+                                     lQry.FieldByName('TOTAL_OUTROS').AsFloat) -
+                                     lQry.FieldByName('TOTAL_DESCONTO').AsFloat;
+
+    Result := FNFModel;
+
+  finally
+    lQry.Free;
+
+  end;
+end;
+
 function TNFDao.where: String;
 var
   lSql: String;
@@ -585,6 +671,11 @@ end;
 procedure TNFDao.SetNFLista;
 begin
   FNFLista := Value;
+end;
+
+procedure TNFDao.SetNFModel(const Value: TNFModel);
+begin
+  FNFModel := Value;
 end;
 
 procedure TNFDao.SetOrderView(const Value: String);
