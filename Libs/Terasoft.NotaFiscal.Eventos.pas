@@ -286,7 +286,7 @@ begin
 
       lAno := FormatDateTime('yyyy', Date);
 
-      ACBrNFe.WebServices.Inutiliza(vIConexao.getEmpresa.EMPRESA_CNPJ, Justificativa, StrToInt(lAno), lNFContol.objeto.NFModel.objeto.MODELO, lNFContol.objeto.NFModel.objeto.SERIE_NF, StrToInt(idNotaFiscal), StrToInt(idNotaFiscal));
+      ACBrNFe.WebServices.Inutiliza(vIConexao.getEmpresa.EMPRESA_CNPJ, Justificativa, StrToInt(lAno), lNFContol.objeto.NFModel.objeto.MODELO, lNFContol.objeto.NFModel.objeto.SERIE_NF, lNFContol.objeto.NFModel.objeto.NUMERO_ECF, lNFContol.objeto.NFModel.objeto.NUMERO_ECF);
 
       if ACBrNFe.WebServices.Inutilizacao.cStat = 102 then
       begin
