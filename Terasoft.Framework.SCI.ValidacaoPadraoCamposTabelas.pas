@@ -272,7 +272,6 @@ begin
           end;
         end;
 
-
         ds.dataset.Next;
       end;
 
@@ -280,13 +279,23 @@ begin
       registraOpcoesCampos('credipar_tipodoc_analise', CREDIPAR_TIPODOC_INFPESSOAL, 'Informação Pessoal');
       registraOpcoesCampos('credipar_tipodoc_analise', CREDIPAR_TIPODOC_COMPRESIDENCIA, 'Comprovante de residência');
       registraOpcoesCampos('credipar_tipodoc_analise', CREDIPAR_TIPODOC_COMPRENDA, 'Comprovante de renda');
-      registraOpcoesCampos('credipar_tipodoc_analise', CREDIPAR_TIPODOC_COMPRENDA, 'Comprovante de renda');
       registraOpcoesCampos('credipar_tipodoc_analise', CREDIPAR_TIPODOC_EXPCREDITO, 'Experiência de Crédito');
       registraOpcoesCampos('credipar_tipodoc_analise', CREDIPAR_TIPODOC_CARTABACEN, 'Carta BACEN');
       registraOpcoesCampos('credipar_tipodoc_analise', CREDIPAR_TIPODOC_CONSREGIONAL, 'Conselho Regional');
       registraOpcoesCampos('credipar_tipodoc_analise', CREDIPAR_TIPODOC_CONTRATOSOCIAL, 'Contrato Social');
       registraOpcoesCampos('credipar_tipodoc_analise', CREDIPAR_TIPODOC_IR, 'Declaração de Imposto de Renda');
       registraOpcoesCampos('credipar_tipodoc_analise', CREDIPAR_TIPODOC_OUTROS, 'Outros');
+
+      registraOpcoesCampos('topone_tipodoc_analise', TOPONE_TIPODOC_RG, 'RG');
+      registraOpcoesCampos('topone_tipodoc_analise', TOPONE_TIPODOC_CPF, 'CPF');
+      registraOpcoesCampos('topone_tipodoc_analise', TOPONE_TIPODOC_CNH, 'CNH');
+      registraOpcoesCampos('topone_tipodoc_analise', TOPONE_TIPODOC_COMPRES, 'Comprovante de residência');
+      registraOpcoesCampos('topone_tipodoc_analise', TOPONE_TIPODOC_CCHQ, 'Comprovante de renda');
+      registraOpcoesCampos('topone_tipodoc_analise', TOPONE_TIPODOC_CONTRATO, 'Contrato');
+      registraOpcoesCampos('topone_tipodoc_analise', TOPONE_TIPODOC_CHEQUE, 'Cheque');
+      registraOpcoesCampos('topone_tipodoc_analise', TOPONE_TIPODOC_CCB, 'CCB - Cédula de c´redito bancário');
+      registraOpcoesCampos('topone_tipodoc_analise', TOPONE_TIPODOC_OUTROS, 'Outros');
+
     end;
 
   finally

@@ -77,10 +77,7 @@ interface
       property urlWS: TipoWideStringFramework read getUrlWS write setUrlWS;
       property token: TipoWideStringFramework read getToken write setToken;
       property modoProducao: boolean read getModoProducao write setModoProducao;
-
-
     end;
-
 
     IFinanceiraSimulacao = interface
     ['{73A996FC-A303-4D8A-B9B4-29E76E687D45}']
@@ -297,6 +294,12 @@ interface
       procedure setStatusProposta(const pID: Int64; const pStatus: TipoWideStringFramework );
 
       function enviaProposta(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function statusProposta(pPedido: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function alteraPropostaFinanceira(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function alteraPropostaCadastro(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function anexarDocumentoAnalise(pProposta: Int64; pTipoDocumento: TipoWideStringFramework; pFormatoArquivo: TipoWideStringFramework; pDados: TBytes; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function anexarDocumentoProcessamento(pProposta: Int64; pTipoDocumento: TipoWideStringFramework; pFormatoArquivo: TipoWideStringFramework; pDados: TBytes; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function boleto(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
 
       property pessoaFisica: IFinanceira_PessoaFisica read getPessoaFisica write setPessoaFisica;
       property proposta: IFinanceira_Proposta read getProposta write setProposta;
@@ -310,12 +313,8 @@ interface
       function getAddr: Pointer;
 
       function cancelarProposta(pID: Int64; pMotivo: TipoWideStringFramework ; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-      function statusProposta(pID: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-      function anexarDocumentoAnalise(pProposta: Int64; pTipoDocumento: TipoWideStringFramework; pFormatoArquivo: TipoWideStringFramework; pDados: TBytes; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-      function anexarDocumentoProcessamento(pProposta: Int64; pTipoDocumento: TipoWideStringFramework; pFormatoArquivo: TipoWideStringFramework; pDados: TBytes; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function statusProcessamento(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function conciliacao(pData: TDate; pResultado: IResultadoOperacao=nil): IFinanaceira_Conciliacao;
-      function boleto(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
 
     end;
 
@@ -782,8 +781,6 @@ begin
 
   pFinanceira.pessoaFisica.loadFromPathReaderWriter(lDSCliente,pResultado);
   pFinanceira.proposta.loadFromPathReaderWriter(lDSProposta,pResultado);
-
-  pFinanceira.corrigeproposta(pResultado);
 
 end;
 
