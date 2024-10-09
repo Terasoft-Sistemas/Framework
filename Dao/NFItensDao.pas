@@ -102,8 +102,6 @@ begin
     lModel.objeto.NUMERO_NF           := lQry.FieldByName('NUMERO_NF').AsString;
     lModel.objeto.SERIE_NF            := lQry.FieldByName('SERIE_NF').AsString;
     lModel.objeto.CODIGO_PRO          := lQry.FieldByName('CODIGO_PRO').AsString;
-    lModel.objeto.DESCRICAO_PRODUTO   := lQry.FieldByName('NOME_PRO').AsString;
-    lModel.objeto.UNIDADE_NF          := lQry.FieldByName('UNIDADE_PRO').AsString;
     lModel.objeto.VALORUNITARIO_NF    := lQry.FieldByName('VALORUNITARIO_NF').AsString;
     lModel.objeto.QUANTIDADE_NF       := lQry.FieldByName('QUANTIDADE_NF').AsString;
     lModel.objeto.VLRVENDA_NF         := lQry.FieldByName('VLRVENDA_NF').AsString;
