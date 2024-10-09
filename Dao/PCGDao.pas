@@ -789,8 +789,8 @@ begin
   with lMemTable.IndexDefs.AddIndexDef do
   begin
     Name := 'OrdenacaoCusto';
-    Fields := 'CUSTO';
-    Options := [TIndexOption.ixDescending, TIndexOption.ixCaseInsensitive];
+    Fields := 'DESCRICAO;LOJA';
+    Options := [TIndexOption.ixCaseInsensitive];
   end;
 
   lMemTable.IndexName := 'OrdenacaoCusto';
@@ -838,7 +838,6 @@ begin
   end;
 
   lMemTable.Open;
-
 end;
 
 procedure TPCGDao.DefineDadosSelectEstoque(Acao: TTipoAnaliseEstoquePCG; pPCG_Parametros: TPCG_Parametros);
