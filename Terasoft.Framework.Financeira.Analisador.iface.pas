@@ -332,6 +332,7 @@ interface
     function enviaPropostaFinanceira(pFinanceira: IFinanceira; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     function getCrediparFilial(const pFilial: TipoWideStringFramework; pGDB: IGDB): IFinanceira;
     function getTopOneFilial(const pFilial: TipoWideStringFramework; pGDB: IGDB): IFinanceira;
+    function getFinanceiraFilial(const pNome: TipoWideStringFramework; const pFilial: TipoWideStringFramework; pGDB: IGDB): IFinanceira;
     function preValidarPropostaCredipar(const pID: Int64; pGDB: IGDB=nil; pResultado: IResultadoOperacao=nil):IResultadoOperacao;
   {$ifend}
 
@@ -513,10 +514,19 @@ end;
     function createCredipar: IFinanceira; stdcall; external 'Credipar_DLL' name 'createCredipar' delayed;
     function createTopOne: IFinanceira; stdcall; external 'TopOne_DLL' name 'createTopOne' delayed;
 
+
+  var
+    gListaFinanceiras: IListaString;
+
+
+
 function listaFinanceiras(pGDB: IGDB): IListaString;
   var
     p: IFinanceira;
 begin
+  Result := gListaFinanceiras;
+  if(Result<>nil) then
+    exit;
   Result := getStringList;
   if(pGDB=nil) then
     pGDB := gdbPadrao;
@@ -529,7 +539,7 @@ begin
     if (p<>nil) and (p.critica=false) then
       Result.Add(p.nome);
   end;
-
+  gListaFinanceiras := Result;
 end;
 
 function createFinanceira;
@@ -835,6 +845,18 @@ end;
   var
     gListaFilialCredipar: IDictionary<TipoWideStringFramework, IFinanceira>;
     gListaFilialTopOne: IDictionary<TipoWideStringFramework, IFinanceira>;
+
+
+function getFinanceiraFilial(const pNome: TipoWideStringFramework; const pFilial: TipoWideStringFramework; pGDB: IGDB): IFinanceira;
+begin
+  if CompareText(pNome,FINANCEIRA_CREDIPAR_NOME)=0 then
+    Result := getCrediparFilial(pFilial,pGDB)
+  else if CompareText(pNome,FINANCEIRA_TOPONE_NOME)=0 then
+    Result := getTopOneFilial(pFilial,pGDB)
+  else
+    Result := nil;
+end;
+
 
 function getTopOneFilial;//(const pFilial: TipoWideStringFramework): ICredipar;
 begin
