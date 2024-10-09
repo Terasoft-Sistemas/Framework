@@ -35,7 +35,7 @@ type
 
     function ObterVendasResultado1(pPCG_Parametros: TPCG_Parametros): IFDDataset;
     function ObterVendasResultado2(pPCG_Parametros: TPCG_Parametros): IFDDataset;
-    function ObterEstoqueResultado1(pPCG_Parametros: TPCG_Parametros): IFDDataset;
+    function ObterEstoqueResultado1(pPCG_Parametros: TPCG_Parametros; pOrdenacao: String): IFDDataset;
 
     property resultadoOperacao: IResultadoOperacao read getResultadoOperacao write setResultadoOperacao;
 
@@ -152,7 +152,7 @@ begin
   end;
 end;
 
-function TPCGModel.ObterEstoqueResultado1(pPCG_Parametros: TPCG_Parametros): IFDDataset;
+function TPCGModel.ObterEstoqueResultado1(pPCG_Parametros: TPCG_Parametros; pOrdenacao: String): IFDDataset;
 var
   lPCGDao: ITPCGDao;
   lPCG_Parametros: TPCG_Parametros;
@@ -182,7 +182,7 @@ begin
 
     lPCGDao.objeto.resultadoOperacao := resultadoOperacao;
 
-    Result := lPCGDao.objeto.ObterEstoqueResultado1(lPCG_Parametros);
+    Result := lPCGDao.objeto.ObterEstoqueResultado1(lPCG_Parametros, pOrdenacao);
 
   finally
     lPCGDao:=nil;

@@ -48,7 +48,7 @@ type
 
     function ObterVendasResultado1(pPCG_Parametros: TPCG_Parametros): IFDDataset;
     function ObterVendasResultado2(pPCG_Parametros: TPCG_Parametros): IFDDataset;
-    function ObterEstoqueResultado1(pPCG_Parametros: TPCG_Parametros): IFDDataset;
+    function ObterEstoqueResultado1(pPCG_Parametros: TPCG_Parametros; pOrdenacao: String): IFDDataset;
 
     property resultadoOperacao: IResultadoOperacao read getResultadoOperacao write setResultadoOperacao;
 
@@ -735,7 +735,7 @@ begin
 end;
 
 
-function TPCGDao.ObterEstoqueResultado1(pPCG_Parametros: TPCG_Parametros): IFDDataset;
+function TPCGDao.ObterEstoqueResultado1(pPCG_Parametros: TPCG_Parametros; pOrdenacao: String): IFDDataset;
 var
   lSQL:String;
   lMemTable: TFDMemTable;
@@ -788,12 +788,15 @@ begin
 
   with lMemTable.IndexDefs.AddIndexDef do
   begin
-    Name := 'OrdenacaoCusto';
-    Fields := 'DESCRICAO;LOJA';
-    Options := [TIndexOption.ixCaseInsensitive];
+    Name := 'Ordenacao';
+    Fields := pOrdenacao;
+    if pOrdenacao = 'CUSTO' then
+      Options := [TIndexOption.ixDescending, TIndexOption.ixCaseInsensitive]
+    else
+      Options := [TIndexOption.ixCaseInsensitive];
   end;
 
-  lMemTable.IndexName := 'OrdenacaoCusto';
+  lMemTable.IndexName := 'Ordenacao';
 
   lMemTable.FieldDefs.Add('LOJA', ftString, 3);
   lMemTable.FieldDefs.Add('LOJA_NOME', ftString, 100);
