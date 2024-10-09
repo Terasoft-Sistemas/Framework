@@ -300,6 +300,9 @@ interface
       function anexarDocumentoAnalise(pProposta: Int64; pTipoDocumento: TipoWideStringFramework; pFormatoArquivo: TipoWideStringFramework; pDados: TBytes; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function anexarDocumentoProcessamento(pProposta: Int64; pTipoDocumento: TipoWideStringFramework; pFormatoArquivo: TipoWideStringFramework; pDados: TBytes; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function boleto(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function cancelarProposta(pID: Int64; pMotivo: TipoWideStringFramework ; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function statusProcessamento(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function conciliacao(pData: TDate; pResultado: IResultadoOperacao=nil): IFinanaceira_Conciliacao;
 
       property pessoaFisica: IFinanceira_PessoaFisica read getPessoaFisica write setPessoaFisica;
       property proposta: IFinanceira_Proposta read getProposta write setProposta;
@@ -308,31 +311,27 @@ interface
       property nome: TipoWideStringFramework read getNome;
     end;
 
-    ICredipar = interface(IFinanceira)
-    ['{5E234CAB-1B84-42F7-A94E-5F76F58B7901}']
-      function getAddr: Pointer;
+    //ICredipar = interface(IFinanceira)
+    //['{5E234CAB-1B84-42F7-A94E-5F76F58B7901}']
 
-      function cancelarProposta(pID: Int64; pMotivo: TipoWideStringFramework ; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-      function statusProcessamento(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-      function conciliacao(pData: TDate; pResultado: IResultadoOperacao=nil): IFinanaceira_Conciliacao;
+    //end;
 
-    end;
+    //ITopOne = interface(IFinanceira)
+    //['{4039606F-8D52-4849-888C-0A0E6E37FBD5}']
 
-  ITopOne = interface(IFinanceira)
-  ['{4039606F-8D52-4849-888C-0A0E6E37FBD5}']
-
-      //function test(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-
-  end;
+    //end;
 
   {$if not defined(__DLL__)}
-    function getTopOne(pFilial: TipoWideStringFramework; pGDB: IGDB): ITopOne;
+    function getTopOne(pFilial: TipoWideStringFramework; pGDB: IGDB): IFinanceira;
+    function getCredipar(pFilial: TipoWideStringFramework; pGDB: IGDB): IFinanceira;
 
-    function getCredipar(pFilial: TipoWideStringFramework; pGDB: IGDB): ICredipar;
+    function createFinanceira(pNome: TipoWideStringFramework; pFilial: TipoWideStringFramework; pGDB: IGDB): IFinanceira;
+    function listaFinanceiras(pGDB: IGDB): IListaString;
 
     function carregaPedidoFinanceira(const pID: Int64; pFinanceira: IFinanceira; pGDB: IGDB; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     function enviaPropostaFinanceira(pFinanceira: IFinanceira; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-    function getCrediparFilial(const pFilial: TipoWideStringFramework; pGDB: IGDB): ICredipar;
+    function getCrediparFilial(const pFilial: TipoWideStringFramework; pGDB: IGDB): IFinanceira;
+    function getTopOneFilial(const pFilial: TipoWideStringFramework; pGDB: IGDB): IFinanceira;
     function preValidarPropostaCredipar(const pID: Int64; pGDB: IGDB=nil; pResultado: IResultadoOperacao=nil):IResultadoOperacao;
   {$ifend}
 
@@ -511,8 +510,37 @@ end;
 
 {$if not defined(__DLL__)}
 
-    function createCredipar: ICredipar; stdcall; external 'Credipar_DLL' name 'createCredipar' delayed;
-    function createTopOne: ITopOne; stdcall; external 'TopOne_DLL' name 'createTopOne' delayed;
+    function createCredipar: IFinanceira; stdcall; external 'Credipar_DLL' name 'createCredipar' delayed;
+    function createTopOne: IFinanceira; stdcall; external 'TopOne_DLL' name 'createTopOne' delayed;
+
+function listaFinanceiras(pGDB: IGDB): IListaString;
+  var
+    p: IFinanceira;
+begin
+  Result := getStringList;
+  if(pGDB=nil) then
+    pGDB := gdbPadrao;
+  if(pGDB<>nil) then
+  begin
+    p := getCredipar('000',pGDB);
+    if (p<>nil) and (p.critica=false) then
+      Result.Add(p.nome);
+    p := getTopOne('000',pGDB);
+    if (p<>nil) and (p.critica=false) then
+      Result.Add(p.nome);
+  end;
+
+end;
+
+function createFinanceira;
+begin
+  if CompareText(pNome,FINANCEIRA_CREDIPAR_NOME)=0 then
+    Result := getCredipar(pFilial,pGDB)
+  else if CompareText(pNome,FINANCEIRA_TOPONE_NOME)=0 then
+    Result := getTopOne(pFilial,pGDB)
+  else
+    Result := nil;
+end;
 
 function getTopOne;
   var
@@ -531,7 +559,8 @@ begin
     Result.config.usuario := cfg.ValorTagConfig(tagConfig_TOPONE_USUARIO_ENDPOINT,'',tvString);
     Result.config.token := cfg.ValorTagConfig(tagConfig_TOPONE_SENHA_ENDPOINT,'',tvString);
     Result.config.responsavel := cfg.ValorTagConfig(tagConfig_TOPONE_RESPONSAVEL,'',tvString);
-    //Result.config.codigoProdutoFinanceira := cfg.ValorTagConfig(tagConfig_CREDIPAR_PRODUTO,0,tvInteiro);
+    Result.config.codigoProdutoFinanceira := cfg.ValorTagConfig(tagConfig_TOPONE_CODIGOPRODUTO,0,tvInteiro);
+    Result.config.codigoLojaFinanceira := cfg.ValorTagConfig(tagConfig_TOPONE_CODIGOLOJA,0,tvInteiro);
     Result.config.controleAlteracoes := criaControleAlteracoes(FINANCEIRA_TOPONE_NOME,pGDB,true);
     //Result.config.codigoLojista := cfg.ValorTagConfig(tagConfig_CREDIPAR_CODIGO_LOJISTA,0,tvString);
     Result.config.filial := pFilial;
@@ -804,7 +833,24 @@ begin
 end;
 
   var
-    gListaFilialCredipar: IDictionary<TipoWideStringFramework, ICredipar>;
+    gListaFilialCredipar: IDictionary<TipoWideStringFramework, IFinanceira>;
+    gListaFilialTopOne: IDictionary<TipoWideStringFramework, IFinanceira>;
+
+function getTopOneFilial;//(const pFilial: TipoWideStringFramework): ICredipar;
+begin
+  Result := nil;
+  if(pFilial='') then
+    exit;
+  if(gListaFilialTopOne=nil) then
+    gListaFilialTopOne := TCollections.CreateDictionary<TipoWideStringFramework, IFinanceira>;
+
+  if not gListaFilialTopOne.TryGetValue(pFilial,Result) then
+  begin
+    Result := getTopOne(pFilial,pGDB);
+    gListaFilialTopOne.AddOrSetValue(pFilial,Result);
+  end;
+end;
+
 
 function getCrediparFilial;//(const pFilial: TipoWideStringFramework): ICredipar;
 begin
@@ -812,7 +858,7 @@ begin
   if(pFilial='') then
     exit;
   if(gListaFilialCredipar=nil) then
-    gListaFilialCredipar := TCollections.CreateDictionary<TipoWideStringFramework, ICredipar>;
+    gListaFilialCredipar := TCollections.CreateDictionary<TipoWideStringFramework, IFinanceira>;
 
   if not gListaFilialCredipar.TryGetValue(pFilial,Result) then
   begin
