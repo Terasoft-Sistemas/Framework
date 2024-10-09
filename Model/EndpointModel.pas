@@ -505,7 +505,7 @@ begin
       lAdicional := lAdicional + lIn + #13;
     end;
   end else
-    lAdicional := fOrdem;
+    lAdicional := '';//fOrdem;
   if(lAdicional<>'') then
   begin
     lOrder := format('order by %s', [ lAdicional ]);

@@ -84,7 +84,7 @@ end;
 implementation
 
 uses
-  System.Rtti, Data.DB;
+  System.Rtti, Data.DB, EmpresaModel, ClienteModel;
 
 { TSituacaoFinanceira }
 
@@ -166,10 +166,18 @@ end;
 
 function TSituacaoFinanceiraDao.ObterResumoFinanceiro(pCliente: String): TFDMemTable;
 var
-  lQry       : TFDQuery;
-  lSQL       : String;
+  lQry, lQry2   : TFDQuery;
+  lSQL, lSQL2   : String;
+  lTotal, lTotalCompra, lPago, lDescontada, lJuros, lMulta, lTotalAtrasado, lTotalAberto, lJurosTotal : Double;
+  lDiasAtrasado,
+  lIndice       : Integer;
+  lEmpresaModel : ITEmpresaModel;
+  lClienteModel : ITClienteModel;
 begin
-  lQry := vIConexao.CriarQuery;
+  lQry          := vIConexao.CriarQuery;
+  lQry2         := vIConexao.CriarQuery;
+  lEmpresaModel := TEmpresaModel.getNewIface(vIConexao);
+  lClienteModel := TClienteModel.getNewIface(vIConexao);
 
   FValorEmAberto                := 0;
   FValorDeJuros                 := 0;
@@ -180,49 +188,141 @@ begin
 
   try
     lSQL :=
-      '    SELECT                                                                               '+SLineBreak+
-      '          CR.VENCIMENTO_REC,                                                             '+SLineBreak+
-      '          CR.VLRPARCELA_REC,                                                             '+SLineBreak+
-      '          CR.VALORREC_REC,                                                               '+SLineBreak+
-      '          CR.DATABAIXA_REC,                                                              '+SLineBreak+
-      '          CR.VENCIMENTO_REC - COALESCE(CR.DATABAIXA_REC,CURRENT_DATE) RECEBER_DIASATRASO '+SLineBreak+
-      '    FROM  CLIENTES C                                                                     '+SLineBreak+
-      '    INNER JOIN CONTASRECEBER R ON                                                        '+SLineBreak+
-      '          C.CODIGO_CLI = R.CODIGO_CLI                                                    '+SLineBreak+
-      '    INNER JOIN CONTASRECEBERITENS CR ON                                                  '+SLineBreak+
-      '          R.FATURA_REC = CR.FATURA_REC                                                   '+SLineBreak+
-      '    WHERE                                                                                '+SLineBreak+
-      '          C.CODIGO_CLI =' +QuotedStr(pCliente)                                            +SLineBreak;
+    '     SELECT                                                                '+SLineBreak+
+    '         C.CODIGO_CLI,                                                     '+SLineBreak+
+    '         C.FANTASIA_CLI,                                                   '+SLineBreak+
+    '         CR.FATURA_REC,                                                    '+SLineBreak+
+    '         R.DATAEMI_REC,                                                    '+SLineBreak+
+    '         CR.VENCIMENTO_REC,                                                '+SLineBreak+
+    '         CR.PACELA_REC || ''/'' || CR.TOTALPARCELAS_REC PACELA_REC,        '+SLineBreak+
+    '         CR.PACELA_REC PACELA_REC2,                                        '+SLineBreak+
+    '         CR.VLRPARCELA_REC,                                                '+SLineBreak+
+    '         CR.VALORREC_REC,                                                  '+SLineBreak+
+    '         CR.DATABAIXA_REC,                                                 '+SLineBreak+
+    '         R.PEDIDO_REC,                                                     '+SLineBreak+
+    '         R.OS_REC,                                                         '+SLineBreak+
+    '         CR.DESTITULO_REC,                                                 '+SLineBreak+
+    '         CR.CODIGO_POR,                                                    '+SLineBreak+
+    '         P.NOME_PORT,                                                      '+SLineBreak+
+    '         CR.SITUACAO_REC,                                                  '+SLineBreak+
+    '         CR.NOSSO_NUMERO,                                                  '+SLineBreak+
+    '         CR.OBSERVACAO AS "OBS",                                           '+SLineBreak+
+    '         CR.POSICAO_ID,                                                    '+SLineBreak+
+    '         R.AVALISTA,                                                       '+SLineBreak+
+    '         CR.ID,                                                            '+SLineBreak+
+    '         R.VENDEDOR_REC,                                                   '+SLineBreak+
+    '         CR.COMISSAO,                                                      '+SLineBreak+
+    '         V.NUMERO_NF,                                                      '+SLineBreak+
+    '         CR.TOTALPARCELAS_REC                                              '+SLineBreak+
+    '     FROM                                                                  '+SLineBreak+
+    '         CLIENTES C                                                        '+SLineBreak+
+    '         INNER JOIN CONTASRECEBER R ON C.CODIGO_CLI = R.CODIGO_CLI         '+SLineBreak+
+    '         INNER JOIN CONTASRECEBERITENS CR ON R.FATURA_REC = CR.FATURA_REC  '+SLineBreak+
+    '         LEFT JOIN PORTADOR P ON CR.CODIGO_POR = P.CODIGO_PORT             '+SLineBreak+
+    '         LEFT JOIN PEDIDOVENDA V ON R.PEDIDO_REC = V.NUMERO_PED            '+SLineBreak+
+    '     WHERE                                                                 '+SLineBreak+
+    '         C.CODIGO_CLI = '+QuotedStr(pCliente)                               +SLineBreak+
+    '     ORDER BY                                                              '+SLineBreak+
+    '         CR.VENCIMENTO_REC                                                 '+SLineBreak;
 
     lQry.Open(lSQL);
 
     if lQry.IsEmpty then
       Exit;
 
+    lClienteModel := lClienteModel.objeto.carregaClasse(lQry.FieldByName('CODIGO_CLI').AsString);
+
     lQry.First;
     while not lQry.Eof do
     begin
-      FValorEmAberto := FValorEmAberto + (lQry.FieldByName('VLRPARCELA_REC').AsFloat-lQry.FieldByName('VALORREC_REC').AsFloat);
-//      FValorDeJuros  := FValorDeJuros + Self.CalculaJurosAtraso(lQry.FieldByName('EMPRESA_PERCENTUALJUROS').AsFloat,
-//                                                                lQry.FieldByName('RECEBER_VALORPARCELA').AsFloat-lQry.FieldByName('RECEBER_VALORRECEBIDO').AsFloat,
-//                                                                lQry.FieldByName('EMPRESA_LIMITEATRASO').AsInteger,
-//                                                                lQry.FieldByName('RECEBER_VENCIMENTO').AsDateTime
-//                                                                );
-      FValorEmAbertoComJuros := FValorEmAberto+FValorDeJuros;
 
-      if lQry.FieldByName('VENCIMENTO_REC').AsDateTime < Now then
-        FValorEmAtraso := FValorEmAtraso + (lQry.FieldByName('VLRPARCELA_REC').AsFloat-lQry.FieldByName('VALORREC_REC').AsFloat);
+      if (lQry.FieldByName('SITUACAO_REC').AsString <> 'X') and (lQry.FieldByName('SITUACAO_REC').AsString <> 'R') then
+      begin
+        lJurosTotal := lJuros + lJurosTotal;
+        lTotal      := lTotal + lQry.FieldByName('VLRPARCELA_REC').AsFloat;
+        lPago       := lPago + lQry.FieldByName('VALORREC_REC').AsFloat;
+      end;
 
-      if lQry.FieldByName('VENCIMENTO_REC').AsDateTime >= Now then
-        FValorAVencer := FValorAVencer + (lQry.FieldByName('VLRPARCELA_REC').AsFloat-lQry.FieldByName('VALORREC_REC').AsFloat);
+      if lQry.FieldByName('DESTITULO_REC').AsString = 'S' then
+        lDescontada := lDescontada + lQry.FieldByName('VALORREC_REC').AsFloat;
 
-      FValorComprasRealizadasAPrazo := FValorComprasRealizadasAPrazo + lQry.FieldByName('VLRPARCELA_REC').AsFloat;
+      if (lQry.FieldByName('VENCIMENTO_REC').Value < vIConexao.DataServer) and (lQry.FieldByName('SITUACAO_REC').AsString <> 'X') and (lQry.FieldByName('SITUACAO_REC').AsString <> 'R') then
+      begin
+
+        if lQry.FieldByName('DESTITULO_REC').AsString = 'S' then
+          lTotalAtrasado := lTotalAtrasado + lQry.FieldByName('VLRPARCELA_REC').AsFloat
+        else
+          lTotalAtrasado := lTotalAtrasado + (lQry.FieldByName('VLRPARCELA_REC').AsFloat - lQry.FieldByName('VALORREC_REC').AsFloat);
+
+      end;
+
+      lTotalAberto := ((lQry.FieldByName('VLRPARCELA_REC').AsFloat - lQry.FieldByName('VALORREC_REC').AsFloat));
+
+      if lClienteModel.objeto.INDICE_JUROS_ID = '' then
+        lIndice := 0
+      else
+        lIndice := lClienteModel.objeto.INDICE_JUROS_ID;
+
+      lSQL2 := 'SELECT T.JUROS FROM TABELA_INDICE_JUROS T WHERE T.MES = SUBSTRING(CURRENT_DATE FROM 6 FOR 2) AND T.ANO = SUBSTRING(CURRENT_DATE FROM 1 FOR 4) AND T.INDICE_JUROS_ID = '+ IntToStr(lIndice);
+      lQry2.Open(lSQL2);
+
+      if lQry2.FieldByName('JUROS').AsFloat > 0 then
+        lTotalAberto := lTotalAberto * lQry2.FieldByName('JUROS').AsFloat; //deixar com duas casas
+
+      lJuros := 0;
+      lMulta := 0;
+
+      if (lQry.FieldByName('VENCIMENTO_REC').AsDateTime < vIConexao.DataServer) and (lQry.FieldByName('SITUACAO_REC').AsString <> 'R') then begin
+
+        if (lQry.FieldByName('DATABAIXA_REC').AsString <> '' ) and (lQry.FieldByName('DATABAIXA_REC').AsDateTime > lQry.FieldByName('VENCIMENTO_REC').AsDateTime ) then begin
+          lDiasAtrasado := StrToInt(DifDias2(lQry.FieldByName('DATABAIXA_REC').Value, vIConexao.DataServer));
+        end
+        else
+          lDiasAtrasado := StrToInt(DifDias2(lQry.FieldByName('VENCIMENTO_REC').Value, vIConexao.DataServer));
+
+        lEmpresaModel.objeto.Carregar;
+
+        if (lDiasAtrasado > lEmpresaModel.objeto.LIMITE_ATRASO) then begin
+
+          if lClienteModel.objeto.JUROS_BOL <> '' then
+            lJuros := ((lClienteModel.objeto.JUROS_BOL / 100) * (lTotalAberto) * lDiasAtrasado)
+          else
+            lJuros := ((lEmpresaModel.objeto.JUROS_BOL / 100) * (lTotalAberto) * lDiasAtrasado);
+
+          if lClienteModel.objeto.MULTA <> '' then
+            lMulta := (lClienteModel.objeto.MULTA / 100) * (lTotalAberto)
+          else
+            lMulta := (lEmpresaModel.objeto.MULTA_BOL / 100) * (lTotalAberto);
+
+          lJuros := lJuros + lMulta;
+        end;
+
+      end;
 
       lQry.Next;
     end;
 
+    lSQL := 'SELECT SUM(I.VLRPARCELA_REC) QT FROM CONTASRECEBERITENS I LEFT JOIN PORTADOR P ON I.CODIGO_POR = P.CODIGO_PORT WHERE I.CODIGO_CLI = '+QuotedStr(pCliente)+' AND COALESCE(I.SITUACAO_REC, ''A'') <> ''R'' ';
+    lQry.Open(lSQL);
+    lTotalCompra := lQry.FieldByName('QT').AsFloat;
+
+    lSQL := 'SELECT SUM(P.VALOR_TOTAL) QT FROM DEVOLUCAO P WHERE P.CLIENTE =  '+QuotedStr(pCliente);
+    lQry.Open(lSQL);
+    lTotalCompra := lTotalCompra - lQry.FieldByName('QT').AsFloat;
+
+    FValorEmAberto                := lTotal-lPago;
+    FValorDeJuros                 := lJurosTotal;
+    FValorEmAbertoComJuros        := lTotal-lPago+lJurosTotal;
+    FValorEmAtraso                := lTotalAtrasado;
+    FValorAVencer                 := lTotal-lPago-lTotalAtrasado;
+//  FValorTrocaDuplicata          := lDescontada;
+    FValorComprasRealizadasAPrazo := lTotalCompra;
+
   finally
     lQry.Free;
+    lQry2.Free;
+    lEmpresaModel := nil;
+    lClienteModel := nil;
   end;
 end;
 
