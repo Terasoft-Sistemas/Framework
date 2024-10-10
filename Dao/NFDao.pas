@@ -563,7 +563,7 @@ begin
             ' select                                                                                 '+SLineBreak+
             '     count(*) QUANTIDADE_ITENS,                                                         '+SLineBreak+
             '     sum(i.quantidade_nf) QUANTIDADE_PRODUTOS,                                          '+SLineBreak+
-            '     sum(i.valor_unitario_nf * i.quantidade_nf) TOTAL_PRODUTOS,                         '+SLineBreak+
+            '     sum(i.valorunitario_nf * i.quantidade_nf) TOTAL_PRODUTOS,                         '+SLineBreak+
             '     sum(i.VBC_N15) TOTAL_BASE_ICMS,                                                    '+SLineBreak+
             '     sum(i.VICMS_N17) TOTAL_ICMS,                                                       '+SLineBreak+
             '     sum(i.VBCST_N21) TOTAL_BASE_ICMS_ST,                                               '+SLineBreak+
@@ -579,12 +579,12 @@ begin
             '     sum(i.vfcpst) TOTAL_FCP_ST,                                                        '+SLineBreak+
             '     sum(i.frete) TOTAL_FRETE,                                                          '+SLineBreak+
             '     sum(i.voutros) TOTAL_OUTROS,                                                       '+SLineBreak+
-            '     sum(((0/100)*i.valor_unitario_nf) * cast(i.quantidade_nf as float)) TOTAL_DESCONTO '+SLineBreak+
+            '     sum(((0/100)*i.valorunitario_nf) * cast(i.quantidade_nf as float)) TOTAL_DESCONTO '+SLineBreak+
             '                                                                                        '+SLineBreak+
             ' from                                                                                   '+SLineBreak+
             '     nfitens i                                                                          '+SLineBreak+
             '                                                                                        '+SLineBreak+
-            ' where i.NF_ID = '+IntToStr(FIDRecordView);
+            ' where i.ID = '+IntToStr(FIDRecordView);
 
 
     lQry.Open(lSQL);
