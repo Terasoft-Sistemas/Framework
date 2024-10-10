@@ -113,6 +113,7 @@ var
 begin
   lSituacaoFinanceiraLista := TSituacaoFinanceiraDao.Create(vIConexao);
   try
+    lSituacaoFinanceiraLista.WhereView  := FWhereView;
     lSituacaoFinanceiraLista.ObterResumoFinanceiro(pCliente);
     FValorEmAberto                := lSituacaoFinanceiraLista.ValorEmAberto;
     FValorDeJuros                 := lSituacaoFinanceiraLista.ValorDeJuros;

@@ -221,9 +221,11 @@ begin
     '         LEFT JOIN PORTADOR P ON CR.CODIGO_POR = P.CODIGO_PORT             '+SLineBreak+
     '         LEFT JOIN PEDIDOVENDA V ON R.PEDIDO_REC = V.NUMERO_PED            '+SLineBreak+
     '     WHERE                                                                 '+SLineBreak+
-    '         C.CODIGO_CLI = '+QuotedStr(pCliente)                               +SLineBreak+
-    '     ORDER BY                                                              '+SLineBreak+
-    '         CR.VENCIMENTO_REC                                                 '+SLineBreak;
+    '         C.CODIGO_CLI = '+QuotedStr(pCliente)                               +SLineBreak;
+
+    lSQL := lSQL + Where;
+
+    lSQL := lSQL + ' ORDER BY CR.VENCIMENTO_REC';
 
     lQry.Open(lSQL);
 
