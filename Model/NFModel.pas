@@ -628,7 +628,7 @@ type
     procedure obterLista;
     procedure obterListaNFe;
     procedure AtualizarDataEmissao(pNotaFiscal : String);
-    function obterTotalizador: TNFModel;
+    function obterTotalizador: ITNFModel;
 
  end;
 
@@ -639,20 +639,16 @@ uses
 
 { TNFModel }
 
-function TNFModel.obterTotalizador: TNFModel;
+function TNFModel.obterTotalizador: ITNFModel;
 var
-  lNFDao: TNFDao;
+  lNFDao: ITNFDao;
 begin
-  lNFDao := TNFDao.Create;
+  lNFDao := TNFDao.getNewIface(vIConexao);
 
-  try
-    lNFDao.IDRecordView := FIDRecordView;
+  lNFDao.objeto.IDRecordView := FIDRecordView;
 
-    Result := lNFDao.obterTotalizador;
+  Result := lNFDao.objeto.obterTotalizador;
 
-  finally
-    lNFDao.Free;
-  end;
 end;
 
 procedure TNFModel.AtualizarDataEmissao(pNotaFiscal: String);

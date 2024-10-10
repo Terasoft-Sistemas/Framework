@@ -32,7 +32,7 @@ type
     FCountView: String;
     FOrderView: String;
     FWhereView: String;
-    FNFModel: TNFModel;
+    FNFModel: ITNFModel;
     FTotalRecords: Integer;
     FIDPedidoView: Integer;
     procedure SetNFLista(const Value: IList<ITNFModel>);
@@ -47,11 +47,11 @@ type
 
     function where: String;
     procedure obterTotalRegistros;
-    procedure SetNFModel(const Value: TNFModel);
+    procedure SetNFModel(const Value: ITNFModel);
 
   public
     property NFLista: IList<ITNFModel> read FNFLista write SetNFLista;
-    property NFModel: TNFModel read FNFModel write SetNFModel;
+    property NFModel: ITNFModel read FNFModel write SetNFModel;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
     property CountView: String read FCountView write SetCountView;
@@ -74,7 +74,7 @@ type
     procedure obterLista;
     procedure obterListaNFe;
 
-    function obterTotalizador: TNFModel;
+    function obterTotalizador: ITNFModel;
 
     procedure setParams(var pQry: TFDQuery; pNFModel: ITNFModel);
 
@@ -549,14 +549,14 @@ begin
   end;
 end;
 
-function TNFDao.obterTotalizador: TNFModel;
+function TNFDao.obterTotalizador: ITNFModel;
 var
   lQry: TFDQuery;
   lSQL:String;
 begin
   lQry := vIConexao.CriarQuery;
 
-  FNFModel := TNFModel.Create;
+  FNFModel := TNFModel.getNewIface(vIConexao);
 
   try
     lSql :=
@@ -588,32 +588,32 @@ begin
 
 
     lQry.Open(lSQL);
-    FNFModel.QUANTIDADE_PRODUTOS := lQry.FieldByName('QUANTIDADE_PRODUTOS').AsFloat;
-    FNFModel.QUANTIDADE_ITENS    := lQry.FieldByName('QUANTIDADE_ITENS').AsInteger;
-    FNFModel.TOTAL_PRODUTOS      := lQry.FieldByName('TOTAL_PRODUTOS').AsFloat;
-    FNFModel.TOTAL_BASE_ICMS     := lQry.FieldByName('TOTAL_BASE_ICMS').AsFloat;
-    FNFModel.TOTAL_ICMS          := lQry.FieldByName('TOTAL_ICMS').AsFloat;
-    FNFModel.TOTAL_BASE_ICMS_ST  := lQry.FieldByName('TOTAL_BASE_ICMS_ST').AsFloat;
-    FNFModel.TOTAL_ICMS_ST       := lQry.FieldByName('TOTAL_ICMS_ST').AsFloat;
-    FNFModel.TOTAL_ICMS_DESON    := lQry.FieldByName('TOTAL_ICMS_DESON').AsFloat;
-    FNFModel.TOTAL_BASE_IPI      := lQry.FieldByName('TOTAL_BASE_IPI').AsFloat;
-    FNFModel.TOTAL_IPI           := lQry.FieldByName('TOTAL_IPI').AsFloat;
-    FNFModel.TOTAL_BASE_PIS      := lQry.FieldByName('TOTAL_BASE_PIS').AsFloat;
-    FNFModel.TOTAL_PIS           := lQry.FieldByName('TOTAL_PIS').AsFloat;
-    FNFModel.TOTAL_BASE_COFINS   := lQry.FieldByName('TOTAL_BASE_COFINS').AsFloat;
-    FNFModel.TOTAL_COFINS        := lQry.FieldByName('TOTAL_COFINS').AsFloat;
-    FNFModel.TOTAL_FCP           := lQry.FieldByName('TOTAL_FCP').AsFloat;
-    FNFModel.TOTAL_FCP_ST        := lQry.FieldByName('TOTAL_FCP_ST').AsFloat;
-    FNFModel.TOTAL_FRETE         := lQry.FieldByName('TOTAL_FRETE').AsFloat;
-    FNFModel.TOTAL_OUTROS        := lQry.FieldByName('TOTAL_OUTROS').AsFloat;
-    FNFModel.TOTAL_DESCONTO      := lQry.FieldByName('TOTAL_DESCONTO').AsFloat;
+    FNFModel.objeto.QUANTIDADE_PRODUTOS := lQry.FieldByName('QUANTIDADE_PRODUTOS').AsFloat;
+    FNFModel.objeto.QUANTIDADE_ITENS    := lQry.FieldByName('QUANTIDADE_ITENS').AsInteger;
+    FNFModel.objeto.TOTAL_PRODUTOS      := lQry.FieldByName('TOTAL_PRODUTOS').AsFloat;
+    FNFModel.objeto.TOTAL_BASE_ICMS     := lQry.FieldByName('TOTAL_BASE_ICMS').AsFloat;
+    FNFModel.objeto.TOTAL_ICMS          := lQry.FieldByName('TOTAL_ICMS').AsFloat;
+    FNFModel.objeto.TOTAL_BASE_ICMS_ST  := lQry.FieldByName('TOTAL_BASE_ICMS_ST').AsFloat;
+    FNFModel.objeto.TOTAL_ICMS_ST       := lQry.FieldByName('TOTAL_ICMS_ST').AsFloat;
+    FNFModel.objeto.TOTAL_ICMS_DESON    := lQry.FieldByName('TOTAL_ICMS_DESON').AsFloat;
+    FNFModel.objeto.TOTAL_BASE_IPI      := lQry.FieldByName('TOTAL_BASE_IPI').AsFloat;
+    FNFModel.objeto.TOTAL_IPI           := lQry.FieldByName('TOTAL_IPI').AsFloat;
+    FNFModel.objeto.TOTAL_BASE_PIS      := lQry.FieldByName('TOTAL_BASE_PIS').AsFloat;
+    FNFModel.objeto.TOTAL_PIS           := lQry.FieldByName('TOTAL_PIS').AsFloat;
+    FNFModel.objeto.TOTAL_BASE_COFINS   := lQry.FieldByName('TOTAL_BASE_COFINS').AsFloat;
+    FNFModel.objeto.TOTAL_COFINS        := lQry.FieldByName('TOTAL_COFINS').AsFloat;
+    FNFModel.objeto.TOTAL_FCP           := lQry.FieldByName('TOTAL_FCP').AsFloat;
+    FNFModel.objeto.TOTAL_FCP_ST        := lQry.FieldByName('TOTAL_FCP_ST').AsFloat;
+    FNFModel.objeto.TOTAL_FRETE         := lQry.FieldByName('TOTAL_FRETE').AsFloat;
+    FNFModel.objeto.TOTAL_OUTROS        := lQry.FieldByName('TOTAL_OUTROS').AsFloat;
+    FNFModel.objeto.TOTAL_DESCONTO      := lQry.FieldByName('TOTAL_DESCONTO').AsFloat;
 
     if lQry.FieldByName('TOTAL_PRODUTOS').AsFloat > 0 then
-      FNFModel.TOTAL_DESCONTO_PERCENTUAL  := (lQry.FieldByName('TOTAL_DESCONTO').AsFloat*100)/lQry.FieldByName('TOTAL_PRODUTOS').AsFloat
+      FNFModel.objeto.TOTAL_DESCONTO_PERCENTUAL  := (lQry.FieldByName('TOTAL_DESCONTO').AsFloat*100)/lQry.FieldByName('TOTAL_PRODUTOS').AsFloat
     else
-      FNFModel.TOTAL_DESCONTO_PERCENTUAL  := 0;
+      FNFModel.objeto.TOTAL_DESCONTO_PERCENTUAL  := 0;
 
-    FNFModel.TOTAL_TOTALNF        := (lQry.FieldByName('TOTAL_PRODUTOS').AsFloat +
+    FNFModel.objeto.TOTAL_TOTALNF        := (lQry.FieldByName('TOTAL_PRODUTOS').AsFloat +
                                      lQry.FieldByName('TOTAL_ICMS_ST').AsFloat +
                                      lQry.FieldByName('TOTAL_IPI').AsFloat +
                                      lQry.FieldByName('TOTAL_FCP_ST').AsFloat +
@@ -673,7 +673,7 @@ begin
   FNFLista := Value;
 end;
 
-procedure TNFDao.SetNFModel(const Value: TNFModel);
+procedure TNFDao.SetNFModel(const Value: ITNFModel);
 begin
   FNFModel := Value;
 end;
