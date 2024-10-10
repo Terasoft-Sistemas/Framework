@@ -3,27 +3,31 @@ unit SituacaoFinanceiraDao;
 interface
 
 uses
-  Terasoft.Utils,
   FireDAC.Comp.Client,
   System.SysUtils,
   System.StrUtils,
   System.Generics.Collections,
   System.Variants,
-  Terasoft.Types,
-  Terasoft.Framework.ListaSimples.Impl,
   Terasoft.FuncoesTexto,
-  Terasoft.Framework.ListaSimples,
-  Terasoft.Framework.SimpleTypes,
   Interfaces.Conexao,
   Terasoft.ConstrutorDao,
+  Terasoft.Framework.ObjectIface,
+  Spring.Collections,
+  Terasoft.Types,
+  Terasoft.Utils,
   SituacaoFinanceiraModel;
 
 type
+  TSituacaoFinanceiraDao = class;
+
+  ITSituacaoFinanceiraDao = IObject<TSituacaoFinanceiraDao>;
+
   TSituacaoFinanceiraDao = class
 
   private
-    vIConexao : IConexao;
-    vConstrutor : IConstrutorDao;
+    [unsafe] myself : ITSituacaoFinanceiraDao;
+    vIConexao     : IConexao;
+    vConstrutor   : IConstrutorDao;
 
     FLengthPageView: String;
     FIDRecordView: String;
@@ -60,6 +64,8 @@ type
     constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
 
+    class function getNewIface(pIConexao: IConexao): ITSituacaoFinanceiraDao;
+
     property ID :Variant read FID write SetID;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
     property WhereView: String read FWhereView write SetWhereView;
@@ -90,13 +96,22 @@ uses
 
 constructor TSituacaoFinanceiraDao.Create(pIConexao : IConexao);
 begin
-  vIConexao := pIConexao;
-  vConstrutor := TConstrutorDAO.Create(vIConexao);
+  vIConexao  := pIConexao;
+  vConstrutor := TConstrutorDao.Create(vIConexao);
 end;
 
 destructor TSituacaoFinanceiraDao.Destroy;
 begin
   inherited;
+  vConstrutor:=nil;
+  vIConexao := nil;
+  inherited;
+end;
+
+class function TSituacaoFinanceiraDao.getNewIface(pIConexao: IConexao): ITSituacaoFinanceiraDao;
+begin
+  Result := TImplObjetoOwner<TSituacaoFinanceiraDao>.CreateOwner(self.Create(pIConexao));
+  Result.objeto.myself := Result;
 end;
 
 function TSituacaoFinanceiraDao.ObterLista(pCliente : String): IFDDataset;

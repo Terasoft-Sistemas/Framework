@@ -5,14 +5,21 @@ interface
 uses
   Terasoft.Types,
   System.Generics.Collections,
+  Spring.Collections,
+  Terasoft.Framework.ObjectIface,
   Interfaces.Conexao,
-  FireDAC.Comp.Client;
+  Terasoft.Utils,
+  Terasoft.FuncoesTexto;
 
 type
 
-  TSituacaoFinanceiraModel = class
+  TSituacaoFinanceiraModel = class;
 
+  ITSituacaoFinanceiraModel = IObject<TSituacaoFinanceiraModel>;
+
+  TSituacaoFinanceiraModel = class
   private
+    [unsafe] myself: ITSituacaoFinanceiraModel;
     vIConexao : IConexao;
 
     FAcao: TAcao;
@@ -48,6 +55,7 @@ type
 
   public
 
+    class function getNewIface(pIConexao : IConexao): ITSituacaoFinanceiraModel;
 
   	constructor Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -56,6 +64,8 @@ type
     procedure ObterResumoFinanceiro(pCliente : String);
     function ObterDetalhesBaixa(pFatura, pParcela : String): IFDDataset;
     function ObterCredito(pCliente: String): Double;
+
+    function realizarBaixa(pIdContasReceberItens, pIdBancoBaixa, pIdContaBaixa, pIdPortadorBaixar, pValorBaixa, pJurosDesconto, pTipoAdicional, pDataPagamento, pHistorico: String): Boolean;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -79,7 +89,9 @@ implementation
 uses
   SituacaoFinanceiraDao,
   System.Classes,
-  System.SysUtils;
+  System.SysUtils,
+  ContasReceberItensModel,
+  ContaCorrenteModel;
 
 { TSituacaoFinanceiraModel }
 
@@ -88,8 +100,16 @@ begin
   vIConexao := pIConexao;
 end;
 
+class function TSituacaoFinanceiraModel.getNewIface(pIConexao: IConexao): ITSituacaoFinanceiraModel;
+begin
+  Result := TImplObjetoOwner<TSituacaoFinanceiraModel>.CreateOwner(self.Create(pIConexao));
+  Result.objeto.myself := Result;
+end;
+
 destructor TSituacaoFinanceiraModel.Destroy;
 begin
+  inherited;
+  vIConexao := nil;
   inherited;
 end;
 
@@ -103,7 +123,7 @@ begin
 
     Result := lSituacaoFinanceiraLista.obterLista(pCliente);
   finally
-    lSituacaoFinanceiraLista.Free;
+    lSituacaoFinanceiraLista := nil;
   end;
 end;
 
@@ -122,7 +142,7 @@ begin
     FValorAVencer                 := lSituacaoFinanceiraLista.ValorAVencer;
     FValorComprasRealizadasAPrazo := lSituacaoFinanceiraLista.ValorComprasRealizadasAPrazo;
   finally
-    lSituacaoFinanceiraLista.Free;
+    lSituacaoFinanceiraLista := nil;
   end;
 end;
 
@@ -134,7 +154,7 @@ begin
   try
     Result := lSituacaoFinanceiraLista.ObterCredito(pCliente);
   finally
-    lSituacaoFinanceiraLista.Free;
+    lSituacaoFinanceiraLista := nil;
   end;
 end;
 
@@ -146,7 +166,87 @@ begin
   try
     Result := lSituacaoFinanceiraLista.ObterDetalhesBaixa(pFatura, pParcela);
   finally
-    lSituacaoFinanceiraLista.Free;
+    lSituacaoFinanceiraLista := nil;
+  end;
+end;
+
+function TSituacaoFinanceiraModel.realizarBaixa(pIdContasReceberItens, pIdBancoBaixa, pIdContaBaixa, pIdPortadorBaixar, pValorBaixa, pJurosDesconto, pTipoAdicional, pDataPagamento, pHistorico: String): Boolean;
+var
+  lContasReceberItensModel: TContasReceberItensModel;
+  lContaCorrenteModel: ITContaCorrenteModel;
+  lRetorno: String;
+  lValorAtualizar, lValorAberto, lValorParcela, lValorRecebido, lValorBaixa: Double;
+begin
+
+  if pIdContasReceberItens = '' then
+    CriaException('Contas a receber não informado para baixa');
+
+  if pIdBancoBaixa = '' then
+    CriaException('Banco não informado');
+
+  if pValorBaixa = '' then
+    CriaException('Valor pago não informado');
+
+  if StrToFloatDef(pValorBaixa, 0) <= 0 then
+    CriaException('Valor pago inválido');
+
+  lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
+  lContaCorrenteModel      := TContaCorrenteModel.getNewIface(vIConexao);
+
+  try
+    lContasReceberItensModel.IDRecordView := StrToIntDef(pIdContasReceberItens, 0);
+    lContasReceberItensModel.obterLista;
+
+    lContasReceberItensModel := lContasReceberItensModel.ContasReceberItenssLista[0];
+
+    lValorBaixa    := StrToFloat(pValorBaixa);
+    lValorParcela  := lContasReceberItensModel.VLRPARCELA_REC;
+    lValorRecebido := lContasReceberItensModel.VALORREC_REC;
+    lValorAberto   := lValorParcela - lValorRecebido;
+
+    if lValorBaixa > lValorAberto + 0.01 then
+      CriaException('Valor informado maior que o valor em aberto');
+
+    lValorAtualizar := lContasReceberItensModel.VALORREC_REC + StrToFloat(pValorBaixa);
+
+    lContasReceberItensModel.Alterar(pIdContasReceberItens);
+    lContasReceberItensModel.VALORREC_REC  := FormataFloatFireBird(lValorAtualizar.ToString);
+    lContasReceberItensModel.DATABAIXA_REC := transformaDataFireBird(pDataPagamento);
+    lContasReceberItensModel.SITUACAO_REC  := 'B';
+    lContasReceberItensModel.Salvar;
+
+    lContaCorrenteModel.objeto.Acao            := tacIncluir;
+    lContaCorrenteModel.objeto.DATA_COR        := transformaDataFireBird(pDataPagamento);
+    lContaCorrenteModel.objeto.TIPO_CTA        := 'C';
+    lContaCorrenteModel.objeto.CODIGO_CTA      := pIdContaBaixa;
+    lContaCorrenteModel.objeto.CODIGO_BAN      := pIdBancoBaixa;
+    lContaCorrenteModel.objeto.PORTADOR_COR    := pIdPortadorBaixar;
+    lContaCorrenteModel.objeto.FATURA_COR      := lContasReceberItensModel.FATURA_REC;
+    lContaCorrenteModel.objeto.OBSERVACAO_COR  := pHistorico;
+    lContaCorrenteModel.objeto.ID              := pIdContasReceberItens;
+    lContaCorrenteModel.objeto.COMPETENCIA     := copy(pDataPagamento,1,2)+copy(pDataPagamento,7,4);
+    lContaCorrenteModel.objeto.VALOR_COR       := FormataFloatFireBird(pValorBaixa);
+    lRetorno := lContaCorrenteModel.objeto.Salvar;
+
+    if StrToFloatDef(pJurosDesconto, 0) > 0 then begin
+      lContaCorrenteModel.objeto.Acao           := tacIncluir;
+      lContaCorrenteModel.objeto.DATA_COR       := transformaDataFireBird(pDataPagamento);
+      lContaCorrenteModel.objeto.TIPO_CTA       := IIF(pTipoAdicional = 'J', 'C', 'D');
+      lContaCorrenteModel.objeto.CODIGO_CTA     := '222222';
+      lContaCorrenteModel.objeto.OBSERVACAO_COR := IIF(pTipoAdicional = 'J', 'Rec.Juros fatura ' + lContasReceberItensModel.ID, 'Desconto fatura '+lContasReceberItensModel.ID);
+      lContaCorrenteModel.objeto.CODIGO_BAN     := pIdBancoBaixa;
+      lContaCorrenteModel.objeto.PORTADOR_COR   := pIdPortadorBaixar;
+      lContaCorrenteModel.objeto.ID             := pIdContasReceberItens;
+      lContaCorrenteModel.objeto.COMPETENCIA    := copy(pDataPagamento,1,2)+copy(pDataPagamento,7,4);
+      lContaCorrenteModel.objeto.VALOR_COR      := FormataFloatFireBird(pJurosDesconto);
+      lRetorno := lContaCorrenteModel.objeto.Salvar;
+    end;
+
+    Result := lRetorno <> '';
+
+  finally
+    lContasReceberItensModel.Free;
+    lContaCorrenteModel := nil;
   end;
 end;
 
