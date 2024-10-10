@@ -133,7 +133,7 @@ interface
       property data: TDate read getData write setData;
     end;
 
-    IFinanaceira_ConciliacaoItem = interface
+    IFinanceira_ConciliacaoItem = interface
     ['{31A850DB-1286-4BE0-B47D-BE4DF4295FA7}']
     //property data getter/setter
       function getData: TDate;
@@ -212,9 +212,9 @@ interface
       property data: TDate read getData write setData;
     end;
 
-    TListaItemsConciliacao = IList<IFinanaceira_ConciliacaoItem>;
+    TListaItemsConciliacao = IList<IFinanceira_ConciliacaoItem>;
 
-    IFinanaceira_Conciliacao = interface
+    IFinanceira_Conciliacao = interface
     ['{0FA526FE-6E60-4EA2-8B93-E48A84561560}']
     //property data getter/setter
       function getData: TDate;
@@ -302,7 +302,7 @@ interface
       function boleto(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function cancelarProposta(pID: Int64; pMotivo: TipoWideStringFramework ; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function statusProcessamento(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-      function conciliacao(pData: TDate; pResultado: IResultadoOperacao=nil): IFinanaceira_Conciliacao;
+      function conciliacao(pData: TDate; pResultado: IResultadoOperacao=nil): IFinanceira_Conciliacao;
 
       property pessoaFisica: IFinanceira_PessoaFisica read getPessoaFisica write setPessoaFisica;
       property proposta: IFinanceira_Proposta read getProposta write setProposta;
@@ -328,12 +328,14 @@ interface
     function createFinanceira(pNome: TipoWideStringFramework; pFilial: TipoWideStringFramework; pGDB: IGDB): IFinanceira;
     function listaFinanceiras(pGDB: IGDB): IListaString;
 
-    function carregaPedidoFinanceira(const pID: Int64; pFinanceira: IFinanceira; pGDB: IGDB; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+    function carregaPedidoFinanceira(const pPedido: Int64; pFinanceira: IFinanceira; pGDB: IGDB; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     function enviaPropostaFinanceira(pFinanceira: IFinanceira; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     function getCrediparFilial(const pFilial: TipoWideStringFramework; pGDB: IGDB): IFinanceira;
     function getTopOneFilial(const pFilial: TipoWideStringFramework; pGDB: IGDB): IFinanceira;
     function getFinanceiraFilial(const pNome: TipoWideStringFramework; const pFilial: TipoWideStringFramework; pGDB: IGDB): IFinanceira;
-    function preValidarPropostaCredipar(const pID: Int64; pGDB: IGDB=nil; pResultado: IResultadoOperacao=nil):IResultadoOperacao;
+    function preValidarPropostaCredipar(const pPedido: Int64; pGDB: IGDB=nil; pResultado: IResultadoOperacao=nil):IResultadoOperacao;
+    function financeiraPermitidaPedido(const pPedido: Int64; pFinanceira: TipoWideStringFramework; pFilial: TipoWideStringFramework; pGDB: IGDB; pResultado:IResultadoOperacao=nil): boolean;
+
   {$ifend}
 
   function getSimulacaoFinanceiraIface:IFinanceiraSimulacao;
@@ -342,6 +344,7 @@ interface
 implementation
   uses
     strUtils,
+    Terasoft.Framework.FuncoesDiversas,
     Terasoft.Framework.Conversoes,
     Terasoft.Framework.Validacoes,
     FuncoesConfig, Terasoft.Framework.Financeira.Analisador.iface.Consts;
@@ -515,18 +518,10 @@ end;
     function createTopOne: IFinanceira; stdcall; external 'TopOne_DLL' name 'createTopOne' delayed;
 
 
-  var
-    gListaFinanceiras: IListaString;
-
-
-
-function listaFinanceiras(pGDB: IGDB): IListaString;
+function listaFinanceiras;
   var
     p: IFinanceira;
 begin
-  Result := gListaFinanceiras;
-  if(Result<>nil) then
-    exit;
   Result := getStringList;
   if(pGDB=nil) then
     pGDB := gdbPadrao;
@@ -539,7 +534,6 @@ begin
     if (p<>nil) and (p.critica=false) then
       Result.Add(p.nome);
   end;
-  gListaFinanceiras := Result;
 end;
 
 function createFinanceira;
@@ -600,7 +594,57 @@ begin
   end;
 end;
 
-function carregaPedidoFinanceira(const pID: Int64; pFinanceira: IFinanceira; pGDB: IGDB; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+function financeiraPermitidaPedido;
+  var
+    lista,permitidas: IListaString;
+    s,status: TipoWideStringFramework;
+    lFinanceira: IFinanceira;
+    liberadas: Integer;
+begin
+  checkResultadoOperacao(pResultado);
+  if(pFinanceira='') then
+  begin
+    Result := false;
+    pResultado.adicionaErro('Não forneceu uma financeira válida.');
+    exit;
+  end;
+
+  Result := true;
+  lista := listaFinanceiras(pGDB);
+  permitidas := getStringList;
+  liberadas:=0;
+  for s in lista do
+  begin
+    lFinanceira := getFinanceiraFilial(s,pFilial,pGDB);
+    status := lFinanceira.getStatusProposta(pPedido);
+    if(status<>FINANCEIRA_STATUS_DESCONHECIDO) then
+    begin
+      if(s=pFinanceira) then exit;
+      permitidas.Add(s);
+    end;
+    if(stringNoArray(status,
+            [
+              FINANCEIRA_STATUS_FINALIZADO,
+              FINANCEIRA_STATUS_APROVADO,
+              FINANCEIRA_STATUS_PENDENTE,
+              FINANCEIRA_STATUS_ENVIADO,
+              FINANCEIRA_STATUS_PRE_ENVIADO,
+              FINANCEIRA_STATUS_MARCADO_PARA_ENVIO])) then
+    begin
+      Result := false;
+      pResultado.formataErro('O status [%s] do Pedido [%d] na financeira [%s] não permite trabalhar com a financeira [%s]',[status,pPedido,s,pFinanceira]);
+      exit;
+    end else
+      inc(liberadas);
+  end;
+
+  Result := (permitidas.Count=0) or (liberadas=lista.Count);
+  if(Result=false) then
+    pResultado.formataErro('Pedido [%d] não permitido para financeira [%s]',[pPedido,pFinanceira]);
+
+end;
+
+function carregaPedidoFinanceira;
   var
     lDSCliente,lDSProposta: IDataset;
     indice: Integer;
@@ -657,10 +701,10 @@ begin
        'order by'+#13+
        '  1,2',
 
-    'id',[pID]);
+    'id',[pPedido]);
   if(lDSProposta.dataset.RecordCount = 0 ) then
   begin
-    pResultado.formataErro('carregaPedidoCredipar: Pedido[%d] não existe.',[pID]);
+    pResultado.formataErro('carregaPedidoCredipar: Pedido[%d] não existe.',[pPedido]);
     exit;
   end;
 
@@ -798,7 +842,7 @@ begin
 
   if(lDSCliente.dataset.RecordCount = 0 ) then
   begin
-    pResultado.formataErro('carregaPedidoCredipar: Cliente [%s] do pedido [%d] não existe.',[lDSProposta.dataset.FieldByName('cliente_id').AsString, pID]);
+    pResultado.formataErro('carregaPedidoCredipar: Cliente [%s] do pedido [%d] não existe.',[lDSProposta.dataset.FieldByName('cliente_id').AsString, pPedido]);
     exit;
   end;
   valor := 0;
@@ -896,11 +940,11 @@ function preValidarPropostaCredipar;
 begin
   Result := checkResultadoOperacao(pResultado);
   save := pResultado.erros;
-  validaRegraTabela(FINANCEIRA_CREDIPAR_NOME,'web_pedido','id',[pID],pGDB,pResultado);
+  validaRegraTabela(FINANCEIRA_CREDIPAR_NOME,'web_pedido','id',[pPedido],pGDB,pResultado);
   if supports(pResultado.propriedade['dataset'].asInterface,IDataset,dsWeb) then
   begin
     validaRegraTabela(FINANCEIRA_CREDIPAR_NOME,'clientes','CODIGO_CLI',[dsWeb.dataset.FieldByName('cliente_id').AsString],pGDB,pResultado);
-    validaRegraTabela(FINANCEIRA_CREDIPAR_NOME,'WEB_PEDIDOITENS','WEB_PEDIDO_ID',[pID],pGDB,pResultado);
+    validaRegraTabela(FINANCEIRA_CREDIPAR_NOME,'WEB_PEDIDOITENS','WEB_PEDIDO_ID',[pPedido],pGDB,pResultado);
   end;
 end;
 
