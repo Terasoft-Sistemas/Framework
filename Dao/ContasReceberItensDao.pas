@@ -75,7 +75,7 @@ type
     procedure obterLista;
     procedure obterRecebimentoContasReceber;
     function obterReceberPixCobranca(pPedido : String) : IFDDataset;
-
+    function consultarJurosPixGestao(pID : String) : Double;
     function obterContaCliente(pContaClienteParametros: TContaClienteParametros): TListaContaClienteRetorno;
     function carregaClasse(pId: String; pLoja: String = ''): TContasReceberItensModel;
     function where: String;
@@ -164,6 +164,35 @@ begin
     lModel.NUMERO_PED             := lQry.FieldByName('PEDIDO_REC').AsString;
 
     Result := lModel;
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TContasReceberItensDao.consultarJurosPixGestao(pID: String): Double;
+var
+  lQry : TFDQuery;
+  lSQL : String;
+begin
+  lQry := vIConexao.CriarQuery;
+  try
+    lSQL := ' select case                                                                                                                                                                                              '+SLineBreak+
+            '        when dateadd ( coalesce(e.limite_atrazo,0) day to case when i.databaixa_rec > i.vencimento_rec then coalesce(i.databaixa_rec, i.vencimento_rec) else i.vencimento_rec end  ) < current_date then  '+SLineBreak+
+            '          coalesce(c.juros_bol, e.juros_bol) / 100 * (i.vlrparcela_rec - i.valorrec_rec) * (DATEDIFF( day, case when i.databaixa_rec > i.vencimento_rec then coalesce(i.databaixa_rec,i.vencimento_rec)   '+SLineBreak+
+            '          else i.vencimento_rec end, current_date )) + coalesce(c.multa, e.multa_bol) / 100 * (i.vlrparcela_rec - i.valorrec_rec)                                                                         '+SLineBreak+
+            '        else 0                                                                                                                                                                                            '+SLineBreak+
+            '        end juros                                                                                                                                                                                         '+SLineBreak+
+            '   from contasreceberitens i                                                                                                                                                                              '+SLineBreak+
+            '  inner join contasreceber r on i.fatura_rec = r.fatura_rec                                                                                                                                               '+SLineBreak+
+            '  inner join clientes c on c.codigo_cli = i.codigo_cli                                                                                                                                                    '+SLineBreak+
+            '   left join empresa e on 1=1                                                                                                                                                                             '+SLineBreak+
+            '  where i.id = '+pID+
+            '    and i.situacao_rec = ''A'' ';
+
+    lQry.Open(lSQL);
+
+    Result := vConstrutor.atribuirRegistros(lQry).objeto.FieldByName('juros').AsFloat;
+
   finally
     lQry.Free;
   end;

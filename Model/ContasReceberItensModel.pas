@@ -209,6 +209,7 @@ type
 
     function obterContaCliente(pContaClienteParametros: TContaClienteParametros): TListaContaClienteRetorno;
     function obterReceberPixCobranca(pPedido : String) : IFDDataset;
+    function consultarJurosPixGestao(pID : String) : Double;
 
     procedure gerarVendaCartao;
     procedure excluirBaixa;
@@ -253,6 +254,7 @@ type
     property IDAdmCartao: String read FIDAdmCartao write SetIDAdmCartao;
     property IDUsuarioOperacao: String read FIDUsuarioOperacao write SetIDUsuarioOperacao;
     property ParcelaView: String read FParcelaView write SetParcelaView;
+
   end;
 
   const
@@ -603,6 +605,18 @@ begin
   if pIndex < 0 then
     CriaException('Index n�o definido');
   Result := FContasReceberItenssLista[pIndex];
+end;
+
+function TContasReceberItensModel.consultarJurosPixGestao(pID: String): Double;
+var
+  lContasReceberItensDao: TContasReceberItensDao;
+begin
+  lContasReceberItensDao := TContasReceberItensDao.Create(vIConexao);
+  try
+    Result := lContasReceberItensDao.consultarJurosPixGestao(pID);
+  finally
+    lContasReceberItensDao.Free;
+  end;
 end;
 
 constructor TContasReceberItensModel.Create(pConexao : IConexao);
