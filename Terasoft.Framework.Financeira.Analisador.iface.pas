@@ -16,6 +16,8 @@ interface
   type
     IFinanceira = interface;
 
+    TCarregaPedidoFinanceira = reference to function(const pPedido: Int64; pFinanceira: IFinanceira; pGDB: IUnknown; pResultado: IResultadoOperacao): IResultadoOperacao;
+
     IFinanceiraConfig = interface
     ['{56619AF9-FB62-426C-B39A-94027E3D8592}']
     //property token getter/setter
@@ -65,6 +67,16 @@ interface
       function getResponsavel: TipoWideStringFramework;
       procedure setResponsavel(const pValue: TipoWideStringFramework);
 
+    //property gdb getter/setter
+      function getGdb: IUnknown;
+      procedure setGdb(const pValue: IUnknown);
+
+    //property carregaPedido getter/setter
+      function getCarregaPedido: TCarregaPedidoFinanceira;
+      procedure setCarregaPedido(const pValue: TCarregaPedidoFinanceira);
+
+      property carregaPedido: TCarregaPedidoFinanceira read getCarregaPedido write setCarregaPedido;
+      property gdb: IUnknown read getGdb write setGdb;
       property responsavel: TipoWideStringFramework read getResponsavel write setResponsavel;
       property usuario: TipoWideStringFramework read getUsuario write setUsuario;
       property codigoLojista: TipoWideStringFramework read getCodigoLojista write setCodigoLojista;
@@ -293,15 +305,15 @@ interface
       function getStatusProposta(const pID: Int64): TipoWideStringFramework;
       procedure setStatusProposta(const pID: Int64; const pStatus: TipoWideStringFramework );
 
-      function enviaProposta(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function enviaProposta(pPedido: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function statusProposta(pPedido: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-      function alteraPropostaFinanceira(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-      function alteraPropostaCadastro(pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-      function anexarDocumentoAnalise(pProposta: Int64; pTipoDocumento: TipoWideStringFramework; pFormatoArquivo: TipoWideStringFramework; pDados: TBytes; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-      function anexarDocumentoProcessamento(pProposta: Int64; pTipoDocumento: TipoWideStringFramework; pFormatoArquivo: TipoWideStringFramework; pDados: TBytes; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-      function boleto(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-      function cancelarProposta(pID: Int64; pMotivo: TipoWideStringFramework ; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
-      function statusProcessamento(pProposta: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function alteraPropostaFinanceira(pPedido: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function alteraPropostaCadastro(pPedido: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function anexarDocumentoAnalise(pPedido: Int64; pTipoDocumento: TipoWideStringFramework; pFormatoArquivo: TipoWideStringFramework; pDados: TBytes; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function anexarDocumentoProcessamento(pPedido: Int64; pTipoDocumento: TipoWideStringFramework; pFormatoArquivo: TipoWideStringFramework; pDados: TBytes; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function boleto(pPedido: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function cancelarProposta(pPedido: Int64; pMotivo: TipoWideStringFramework ; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
+      function statusProcessamento(pPedido: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function conciliacao(pData: TDate; pResultado: IResultadoOperacao=nil): IFinanceira_Conciliacao;
 
       property pessoaFisica: IFinanceira_PessoaFisica read getPessoaFisica write setPessoaFisica;
@@ -311,16 +323,6 @@ interface
       property nome: TipoWideStringFramework read getNome;
     end;
 
-    //ICredipar = interface(IFinanceira)
-    //['{5E234CAB-1B84-42F7-A94E-5F76F58B7901}']
-
-    //end;
-
-    //ITopOne = interface(IFinanceira)
-    //['{4039606F-8D52-4849-888C-0A0E6E37FBD5}']
-
-    //end;
-
   {$if not defined(__DLL__)}
     function getTopOne(pFilial: TipoWideStringFramework; pGDB: IGDB): IFinanceira;
     function getCredipar(pFilial: TipoWideStringFramework; pGDB: IGDB): IFinanceira;
@@ -328,13 +330,14 @@ interface
     function createFinanceira(pNome: TipoWideStringFramework; pFilial: TipoWideStringFramework; pGDB: IGDB): IFinanceira;
     function listaFinanceiras(pGDB: IGDB): IListaString;
 
-    function carregaPedidoFinanceira(const pPedido: Int64; pFinanceira: IFinanceira; pGDB: IGDB; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-    function enviaPropostaFinanceira(pFinanceira: IFinanceira; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+    //function carregaPedidoFinanceira(const pPedido: Int64; pFinanceira: IFinanceira; pGDB: IUnknown; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
     function getCrediparFilial(const pFilial: TipoWideStringFramework; pGDB: IGDB): IFinanceira;
     function getTopOneFilial(const pFilial: TipoWideStringFramework; pGDB: IGDB): IFinanceira;
     function getFinanceiraFilial(const pNome: TipoWideStringFramework; const pFilial: TipoWideStringFramework; pGDB: IGDB): IFinanceira;
     function preValidarPropostaCredipar(const pPedido: Int64; pGDB: IGDB=nil; pResultado: IResultadoOperacao=nil):IResultadoOperacao;
     function financeiraPermitidaPedido(const pPedido: Int64; pFinanceira: TipoWideStringFramework; pFilial: TipoWideStringFramework; pGDB: IGDB; pResultado:IResultadoOperacao=nil): boolean;
+
+    function carregaPedidoFinanceira(const pPedido: Int64; pFinanceira: IFinanceira; pGDB: IUnknown; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
 
   {$ifend}
 
@@ -404,6 +407,233 @@ implementation
       procedure setData(const pValue: TDate);
     end;
 
+function carregaPedidoFinanceira(const pPedido: Int64; pFinanceira: IFinanceira; pGDB: IUnknown; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
+  var
+    lDSCliente,lDSProposta: IDataset;
+    indice: Integer;
+    maiorValor,valor: Extended;
+    lGDB: IGDB;
+begin
+  Result := checkResultadoOperacao(pResultado);
+
+  if not supports(pGDB,IGDB,lGDB) then
+  begin
+    lGDB := gdbPadrao;
+    if(lGDB=nil) then
+    begin
+      pResultado.adicionaErro('carregaPedidoCredipar: Banco de dados não fornecido.');
+      exit;
+    end;
+  end;
+
+  if(pFinanceira=nil) then
+  begin
+    pResultado.adicionaErro('carregaPedidoCredipar: Falta especificar a financeira.');
+    exit;
+  end;
+
+  pResultado.propriedade['financeira'].asInterface := pFinanceira;
+
+  lDSProposta := lGDB.criaDataset;
+  lDSProposta.query(
+    'select'+#13+
+       '    w.id proposta,'+#13+
+       '    i.valor_unitario * i.quantidade vlitem,'+#13+
+       '    w.cliente_id,'+#13+
+       '    -- ''0'' loja, este está em TAG'+#13+
+       '    w.CODIGO_PRODUTO_FINANCIAMENTO codProdutoCredipar, --Criado'+#13+
+       '    w.VALOR_FINANCIADO valor_total,'+#13+
+       '    w.valor_entrada,'+#13+
+       '    w.parcelas,'+#13+
+       '    w.data,'+#13+
+       '    w.primeiro_vencimento,'+#13+
+       '    p.nome_pro,'+#13+
+       '    f.nome_fun nome_vendedor'+#13+
+       'from'+#13+
+       '    web_pedido w'+#13+
+       '    left join funcionario f on f.codigo_fun = w.vendedor_id '+#13+
+       'inner join'+#13+
+       '  web_pedidoitens i'+#13+
+       '    on'+#13+
+       '      i.web_pedido_id = w.id'+#13+
+       'inner join'+#13+
+       '  produto p'+#13+
+       '    on'+#13+
+       '      p.codigo_pro = i.produto_id'+#13+
+       'inner join'+#13+
+       '  clientes c'+#13+
+       '    on c.codigo_cli = w.cliente_id'+#13+
+       'where'+#13+
+       '  w.id=:id'+#13+
+       'order by'+#13+
+       '  1,2',
+
+    'id',[pPedido]);
+  if(lDSProposta.dataset.RecordCount = 0 ) then
+  begin
+    pResultado.formataErro('carregaPedidoCredipar: Pedido[%d] não existe.',[pPedido]);
+    exit;
+  end;
+
+  lDSCliente := lGDB.criaDataset;
+  lDSCliente.query('select'+#13+
+       '    c.codigo_cli ID,'+#13+
+       '    c.cnpj_cpf_cli,'+#13+
+       '    c.fantasia_cli,'+#13+
+       '    c.nascimento_cli,'+#13+
+       '    c.sexo_cli,'+#13+
+       '    c.email_cli,'+#13+
+       '    c.tipodoc_cli tipodoc, --Criado'+#13+
+       '    /*'+#13+
+       '      1-RG'+#13+
+       '      2-CNH'+#13+
+       '      3-CTPS'+#13+
+       '      4-Carteira Cons. Classe'+#13+
+       '      5- RNE (Registro Nacional de estrangeiro)'+#13+
+       '      6-Passaporte'+#13+
+       '      7-Certificado Reservista'+#13+
+       '    */'+#13+
+       '    c.inscricao_rg_cli,'+#13+
+       '    c.inscricao_municipal EMISSOR_RG,'+#13+
+       '    c.expedicao_rg,'+#13+
+       '    c.estadocivil_cli estadocivil_cli,'+#13+
+       '    c.mae_cli,'+#13+
+       '    c.pai_cli,'+#13+
+       '    c.naturalidade_cli,'+#13+
+       '    c.uf_naturalidade_cli, --Criado'+#13+
+       '    c.ESCOLARIDADE_CLI, --Criado'+#13+
+       '    /*'+#13+
+       '      1- ANALFABETO'+#13+
+       '      2- FUNDAMENTAL/MEDIO'+#13+
+       '      3- SUPERIOR'+#13+
+       '    */'+#13+
+       '    c.telefone_cli,'+#13+
+       '    c.celular_cli,'+#13+
+       '    c.cep_cli,'+#13+
+       '    c.endereco_cli,'+#13+
+       '    c.numero_end,'+#13+
+       '    c.complemento,'+#13+
+       '    c.bairro_cli,'+#13+
+       '    c.cidade_cli,'+#13+
+       '    c.uf_cli,'+#13+
+       '    c.tempo_residencia,'+#13+
+       '/*'+#13+
+       '      1- Até 1 ano'+#13+
+       '      2- de 1 a 3 anos'+#13+
+       '      3- de 3 a 5 anos'+#13+
+       '      4- Mais de 5 anos'+#13+
+       '*/'+#13+
+       '    c.tipo_residencia,'+#13+
+       '    /*'+#13+
+       '      Temos o campo TIPO_RESIDENCIA na tabela, porém ele permite os valores'+#13+
+       '          ''PR''#211''PRIA'''+#13+
+       '          ''CEDIDA'''+#13+
+       '          ''ALUGADA'''+#13+
+       '      0- Alugada'+#13+
+       '      1- Própria'+#13+
+       '      2- Financiada'+#13+
+       '      3- Parentes/Pais'+#13+
+       '    */'+#13+
+       '    c.CODIGO_OCUPACAO_CLI codigo_ocupacao, --criado'+#13+
+       '    /*'+#13+
+       '        0-APOSENTADO'+#13+
+       '        1-PENSIONISTA'+#13+
+       '        2-ASSALARIADO'+#13+
+       '        3-AUTÔNOMO'+#13+
+       '        4-LIBERAL'+#13+
+       '        5-PROPRIETÁRIO'+#13+
+       '        6-DO LAR'+#13+
+       '        8-FUNCIONÁRIO PÚBLICO'+#13+
+       '        7-OUTROS'+#13+
+       '        9-AUXÍLIO-DOENÇA'+#13+
+       '    */'+#13+
+       '    c.localtrabalho_cli,'+#13+
+       '    c.funcaotrabalho_cli ocupacao,'+#13+
+       '    c.trabalho_admissao,'+#13+
+       '    c.renda_cli,'+#13+
+       '    c.ENDTRABALHO_CLI EnderecoEmp,'+#13+
+       '    ''000'' NumeroEmp,'+#13+
+       '    '' '' ComplementoEmp,'+#13+
+       '    c.BAIRTRABALHO_CLI BairroEmp,'+#13+
+       '    c.CIDTRABALHO_CLI CidadeEmp,'+#13+
+       '    c.UFTRABALHO_CLI UFEmp,'+#13+
+       '    c.CEPTRABALHO_CLI CEPEmp,'+#13+
+       '    c.fonetrabalho_cli,'+#13+
+       '    c.TIPO_FUNCIONARIO_PUBLICO_CLI tipofuncionariopublico, --Criado'+#13+
+       '    /*'+#13+
+       '      1- Concursado'+#13+
+       '      2-Contratato'+#13+
+       '      3-Comissionado'+#13+
+       '    */'+#13+
+       '    c.NUMBENEFICIO_CLI, --Criado'+#13+
+       '    c.FONTE_BENEFICIO_CLI, --Criado'+#13+
+       '    /*'+#13+
+       '        1-INSS'+#13+
+       '        2-PREFEITURA'+#13+
+       '        3-AERONÁUTICA'+#13+
+       '        4-EXÉRCITO'+#13+
+       '        5-SIAPE'+#13+
+       '        6-MINISTÉRIO TRANSPORTES'+#13+
+       '        7-DEPART ESTRADAS E RODAGENS'+#13+
+       '        8-GOVERNO DO ESTADO'+#13+
+       '        9-OUTROS'+#13+
+       '    */'+#13+
+       '    c.CNPJ_trabalho_cli, --Criado'+#13+
+       '    c.nome_contador_cli as CONTADOR_TRABALHO_CLI,'+#13+
+       '    c.telefone_contador_cli as telefone_CONTADOR_TRABALHO_CLI,'+#13+
+       '    ''000'' as ramal_CONTADOR_TRABALHO_CLI,'+#13+
+       '    c.CPF_CONJUGE_CLI,  --Criado'+#13+
+       '    c.DOCIDENTIFICACAOCONJ_CLI, --Criado'+#13+
+       '    c.TIPODOCIDENTIFICACAOCONJ_CLI, --Criado'+#13+
+       '    /*'+#13+
+       '      1-RG'+#13+
+       '      2-CNH'+#13+
+       '      3-CTPS'+#13+
+       '      4-CARTEIRA CONSELHO CLASSE'+#13+
+       '      5-RNE (REGISTRO NACIONAL DE ESTRANGEIRO'+#13+
+       '      6-PASSAPORTE'+#13+
+       '      7-CERTIFICADO RESERVISTA'+#13+
+       '    */'+#13+
+       '    c.SALARIOCON_CLI,'+#13+
+       '    c.pais_id,'+#13+
+       '    c.contato_cli referencia1_cli,'+#13+
+       '    c.foneref1_cli,'+#13+
+       '    c.parentesco_ref1,'+#13+
+       '    c.referencia2_cli,'+#13+
+       '    c.foneref2_cli,'+#13+
+       '    c.parentesco_ref2'+#13+
+       ' from'+#13+
+       '    clientes c'+#13+
+     '  where c.codigo_cli = :codigo',
+    'codigo',[lDSProposta.dataset.FieldByName('cliente_id').AsString]);
+
+  if(lDSCliente.dataset.RecordCount = 0 ) then
+  begin
+    pResultado.formataErro('carregaPedidoCredipar: Cliente [%s] do pedido [%d] não existe.',[lDSProposta.dataset.FieldByName('cliente_id').AsString, pPedido]);
+    exit;
+  end;
+  valor := 0;
+
+  indice:=-1;
+
+  while not lDSProposta.dataset.Eof do
+  begin
+    valor := lDSProposta.dataset.FieldByName('vlitem').AsExtended;
+    if(valor>maiorValor) then
+    begin
+      maiorValor := valor;
+      indice := lDSProposta.dataset.RecNo;
+    end;
+
+    lDSProposta.dataset.Next;
+  end;
+  lDSProposta.dataset.RecNo := indice;
+
+  pFinanceira.pessoaFisica.loadFromPathReaderWriter(lDSCliente,pResultado);
+  pFinanceira.proposta.loadFromPathReaderWriter(lDSProposta,pResultado);
+
+  pFinanceira.corrigeproposta(pResultado);
+end;
 
 function getSimulacaoFinanceiraIface:IFinanceiraSimulacao;
 begin
@@ -568,6 +798,8 @@ begin
     Result.config.controleAlteracoes := criaControleAlteracoes(FINANCEIRA_TOPONE_NOME,pGDB,true);
     //Result.config.codigoLojista := cfg.ValorTagConfig(tagConfig_CREDIPAR_CODIGO_LOJISTA,0,tvString);
     Result.config.filial := pFilial;
+    Result.config.carregaPedido := carregaPedidoFinanceira;
+    Result.config.gdb := pGDB;
   end;
 end;
 
@@ -591,6 +823,8 @@ begin
     Result.config.controleAlteracoes := criaControleAlteracoes(FINANCEIRA_CREDIPAR_NOME,pGDB,true);
     Result.config.codigoLojista := cfg.ValorTagConfig(tagConfig_CREDIPAR_CODIGO_LOJISTA,0,tvString);
     Result.config.filial := pFilial;
+    Result.config.carregaPedido := carregaPedidoFinanceira;
+    Result.config.gdb := pGDB;
   end;
 end;
 
@@ -641,248 +875,6 @@ begin
   Result := (permitidas.Count=0) or (liberadas=lista.Count);
   if(Result=false) then
     pResultado.formataErro('Pedido [%d] não permitido para financeira [%s]',[pPedido,pFinanceira]);
-
-end;
-
-function carregaPedidoFinanceira;
-  var
-    lDSCliente,lDSProposta: IDataset;
-    indice: Integer;
-    maiorValor,valor: Extended;
-begin
-  Result := checkResultadoOperacao(pResultado);
-
-  if(pGDB=nil) then
-  begin
-    pGDB := gdbPadrao;
-    if(pGDB=nil) then
-    begin
-      pResultado.adicionaErro('carregaPedidoCredipar: Banco de dados não fornecido.');
-      exit;
-    end;
-  end;
-
-  if(pFinanceira=nil) then
-    pFinanceira :=  getCredipar('', pGDB);
-
-  pResultado.propriedade['financeira'].asInterface := pFinanceira;
-
-  lDSProposta := pGDB.criaDataset;
-  lDSProposta.query(
-    'select'+#13+
-       '    w.id proposta,'+#13+
-       '    i.valor_unitario * i.quantidade vlitem,'+#13+
-       '    w.cliente_id,'+#13+
-       '    -- ''0'' loja, este está em TAG'+#13+
-       '    w.CODIGO_PRODUTO_FINANCIAMENTO codProdutoCredipar, --Criado'+#13+
-       '    w.VALOR_FINANCIADO valor_total,'+#13+
-       '    w.valor_entrada,'+#13+
-       '    w.parcelas,'+#13+
-       '    w.data,'+#13+
-       '    w.primeiro_vencimento,'+#13+
-       '    p.nome_pro,'+#13+
-       '    f.nome_fun nome_vendedor'+#13+
-       'from'+#13+
-       '    web_pedido w'+#13+
-       '    left join funcionario f on f.codigo_fun = w.vendedor_id '+#13+
-       'inner join'+#13+
-       '  web_pedidoitens i'+#13+
-       '    on'+#13+
-       '      i.web_pedido_id = w.id'+#13+
-       'inner join'+#13+
-       '  produto p'+#13+
-       '    on'+#13+
-       '      p.codigo_pro = i.produto_id'+#13+
-       'inner join'+#13+
-       '  clientes c'+#13+
-       '    on c.codigo_cli = w.cliente_id'+#13+
-       'where'+#13+
-       '  w.id=:id'+#13+
-       'order by'+#13+
-       '  1,2',
-
-    'id',[pPedido]);
-  if(lDSProposta.dataset.RecordCount = 0 ) then
-  begin
-    pResultado.formataErro('carregaPedidoCredipar: Pedido[%d] não existe.',[pPedido]);
-    exit;
-  end;
-
-  lDSCliente := pGDB.criaDataset;
-  lDSCliente.query('select'+#13+
-       '    c.codigo_cli ID,'+#13+
-       '    c.cnpj_cpf_cli,'+#13+
-       '    c.fantasia_cli,'+#13+
-       '    c.nascimento_cli,'+#13+
-       '    c.sexo_cli,'+#13+
-       '    c.email_cli,'+#13+
-       '    c.tipodoc_cli tipodoc, --Criado'+#13+
-       '    /*'+#13+
-       '      1-RG'+#13+
-       '      2-CNH'+#13+
-       '      3-CTPS'+#13+
-       '      4-Carteira Cons. Classe'+#13+
-       '      5- RNE (Registro Nacional de estrangeiro)'+#13+
-       '      6-Passaporte'+#13+
-       '      7-Certificado Reservista'+#13+
-       '    */'+#13+
-       '    c.inscricao_rg_cli,'+#13+
-       '    c.inscricao_municipal EMISSOR_RG,'+#13+
-       '    c.expedicao_rg,'+#13+
-       '    c.estadocivil_cli estadocivil_cli,'+#13+
-       '    c.mae_cli,'+#13+
-       '    c.pai_cli,'+#13+
-       '    c.naturalidade_cli,'+#13+
-       '    c.uf_naturalidade_cli, --Criado'+#13+
-       '    c.ESCOLARIDADE_CLI, --Criado'+#13+
-       '    /*'+#13+
-       '      1- ANALFABETO'+#13+
-       '      2- FUNDAMENTAL/MEDIO'+#13+
-       '      3- SUPERIOR'+#13+
-       '    */'+#13+
-       '    c.telefone_cli,'+#13+
-       '    c.celular_cli,'+#13+
-       '    c.cep_cli,'+#13+
-       '    c.endereco_cli,'+#13+
-       '    c.numero_end,'+#13+
-       '    c.complemento,'+#13+
-       '    c.bairro_cli,'+#13+
-       '    c.cidade_cli,'+#13+
-       '    c.uf_cli,'+#13+
-       '    c.tempo_residencia,'+#13+
-       '/*'+#13+
-       '      1- Até 1 ano'+#13+
-       '      2- de 1 a 3 anos'+#13+
-       '      3- de 3 a 5 anos'+#13+
-       '      4- Mais de 5 anos'+#13+
-       '*/'+#13+
-       '    c.tipo_residencia,'+#13+
-       '    /*'+#13+
-       '      Temos o campo TIPO_RESIDENCIA na tabela, porém ele permite os valores'+#13+
-       '          ''PR''#211''PRIA'''+#13+
-       '          ''CEDIDA'''+#13+
-       '          ''ALUGADA'''+#13+
-       '      0- Alugada'+#13+
-       '      1- Própria'+#13+
-       '      2- Financiada'+#13+
-       '      3- Parentes/Pais'+#13+
-       '    */'+#13+
-       '    c.CODIGO_OCUPACAO_CLI codigo_ocupacao, --criado'+#13+
-       '    /*'+#13+
-       '        0-APOSENTADO'+#13+
-       '        1-PENSIONISTA'+#13+
-       '        2-ASSALARIADO'+#13+
-       '        3-AUTÔNOMO'+#13+
-       '        4-LIBERAL'+#13+
-       '        5-PROPRIETÁRIO'+#13+
-       '        6-DO LAR'+#13+
-       '        8-FUNCIONÁRIO PÚBLICO'+#13+
-       '        7-OUTROS'+#13+
-       '        9-AUXÍLIO-DOENÇA'+#13+
-       '    */'+#13+
-       '    c.localtrabalho_cli,'+#13+
-       '    c.funcaotrabalho_cli ocupacao,'+#13+
-       '    c.trabalho_admissao,'+#13+
-       '    c.renda_cli,'+#13+
-       '    c.ENDTRABALHO_CLI EnderecoEmp,'+#13+
-       '    ''000'' NumeroEmp,'+#13+
-       '    '' '' ComplementoEmp,'+#13+
-       '    c.BAIRTRABALHO_CLI BairroEmp,'+#13+
-       '    c.CIDTRABALHO_CLI CidadeEmp,'+#13+
-       '    c.UFTRABALHO_CLI UFEmp,'+#13+
-       '    c.CEPTRABALHO_CLI CEPEmp,'+#13+
-       '    c.fonetrabalho_cli,'+#13+
-       '    c.TIPO_FUNCIONARIO_PUBLICO_CLI tipofuncionariopublico, --Criado'+#13+
-       '    /*'+#13+
-       '      1- Concursado'+#13+
-       '      2-Contratato'+#13+
-       '      3-Comissionado'+#13+
-       '    */'+#13+
-       '    c.NUMBENEFICIO_CLI, --Criado'+#13+
-       '    c.FONTE_BENEFICIO_CLI, --Criado'+#13+
-       '    /*'+#13+
-       '        1-INSS'+#13+
-       '        2-PREFEITURA'+#13+
-       '        3-AERONÁUTICA'+#13+
-       '        4-EXÉRCITO'+#13+
-       '        5-SIAPE'+#13+
-       '        6-MINISTÉRIO TRANSPORTES'+#13+
-       '        7-DEPART ESTRADAS E RODAGENS'+#13+
-       '        8-GOVERNO DO ESTADO'+#13+
-       '        9-OUTROS'+#13+
-       '    */'+#13+
-       '    c.CNPJ_trabalho_cli, --Criado'+#13+
-       '    c.nome_contador_cli as CONTADOR_TRABALHO_CLI,'+#13+
-       '    c.telefone_contador_cli as telefone_CONTADOR_TRABALHO_CLI,'+#13+
-       '    ''000'' as ramal_CONTADOR_TRABALHO_CLI,'+#13+
-       '    c.CPF_CONJUGE_CLI,  --Criado'+#13+
-       '    c.DOCIDENTIFICACAOCONJ_CLI, --Criado'+#13+
-       '    c.TIPODOCIDENTIFICACAOCONJ_CLI, --Criado'+#13+
-       '    /*'+#13+
-       '      1-RG'+#13+
-       '      2-CNH'+#13+
-       '      3-CTPS'+#13+
-       '      4-CARTEIRA CONSELHO CLASSE'+#13+
-       '      5-RNE (REGISTRO NACIONAL DE ESTRANGEIRO'+#13+
-       '      6-PASSAPORTE'+#13+
-       '      7-CERTIFICADO RESERVISTA'+#13+
-       '    */'+#13+
-       '    c.SALARIOCON_CLI,'+#13+
-       '    c.pais_id,'+#13+
-       '    c.contato_cli referencia1_cli,'+#13+
-       '    c.foneref1_cli,'+#13+
-       '    c.parentesco_ref1,'+#13+
-       '    c.referencia2_cli,'+#13+
-       '    c.foneref2_cli,'+#13+
-       '    c.parentesco_ref2'+#13+
-       ' from'+#13+
-       '    clientes c'+#13+
-     '  where c.codigo_cli = :codigo',
-    'codigo',[lDSProposta.dataset.FieldByName('cliente_id').AsString]);
-
-  if(lDSCliente.dataset.RecordCount = 0 ) then
-  begin
-    pResultado.formataErro('carregaPedidoCredipar: Cliente [%s] do pedido [%d] não existe.',[lDSProposta.dataset.FieldByName('cliente_id').AsString, pPedido]);
-    exit;
-  end;
-  valor := 0;
-
-  indice:=-1;
-
-  while not lDSProposta.dataset.Eof do
-  begin
-    valor := lDSProposta.dataset.FieldByName('vlitem').AsExtended;
-    if(valor>maiorValor) then
-    begin
-      maiorValor := valor;
-      indice := lDSProposta.dataset.RecNo;
-    end;
-
-    lDSProposta.dataset.Next;
-  end;
-  lDSProposta.dataset.RecNo := indice;
-
-  pFinanceira.pessoaFisica.loadFromPathReaderWriter(lDSCliente,pResultado);
-  pFinanceira.proposta.loadFromPathReaderWriter(lDSProposta,pResultado);
-
-end;
-
-function enviaPropostaFinanceira(pFinanceira: IFinanceira; pResultado: IResultadoOperacao = nil): IResultadoOperacao;
-  var
-    save: Integer;
-begin
-  Result := checkResultadoOperacao(pResultado);
-
-  save := pResultado.erros;
-  if(pFinanceira=nil) then
-  begin
-    pResultado.adicionaErro('enviaPropostaFinanceira: Interface FINANCEIRA não fornecida.');
-    exit;
-  end;
-
-  pResultado := pFinanceira.enviaProposta(pResultado);
-
-  //if(pResultado.erros<>save) then exit;
 
 end;
 
