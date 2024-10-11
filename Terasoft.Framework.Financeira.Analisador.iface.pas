@@ -316,6 +316,8 @@ interface
       function statusProcessamento(pPedido: Int64; pResultado: IResultadoOperacao=nil): IResultadoOperacao;
       function conciliacao(pData: TDate; pResultado: IResultadoOperacao=nil): IFinanceira_Conciliacao;
 
+      function tagEnviarDocumento(pPedido: Int64): TipoWideStringFramework;
+
       property pessoaFisica: IFinanceira_PessoaFisica read getPessoaFisica write setPessoaFisica;
       property proposta: IFinanceira_Proposta read getProposta write setProposta;
 
