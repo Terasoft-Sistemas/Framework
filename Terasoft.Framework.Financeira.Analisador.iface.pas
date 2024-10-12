@@ -75,6 +75,11 @@ interface
       function getCarregaPedido: TCarregaPedidoFinanceira;
       procedure setCarregaPedido(const pValue: TCarregaPedidoFinanceira);
 
+    //property portador getter/setter
+      function getPortador: TipoWideStringFramework;
+      procedure setPortador(const pValue: TipoWideStringFramework);
+
+      property portador: TipoWideStringFramework read getPortador write setPortador;
       property carregaPedido: TCarregaPedidoFinanceira read getCarregaPedido write setCarregaPedido;
       property gdb: IUnknown read getGdb write setGdb;
       property responsavel: TipoWideStringFramework read getResponsavel write setResponsavel;
@@ -802,6 +807,7 @@ begin
     Result.config.filial := pFilial;
     Result.config.carregaPedido := carregaPedidoFinanceira;
     Result.config.gdb := pGDB;
+    Result.config.portador := tagConfig_COD_PORTADOR_TOPONE;
   end;
 end;
 
@@ -827,6 +833,7 @@ begin
     Result.config.filial := pFilial;
     Result.config.carregaPedido := carregaPedidoFinanceira;
     Result.config.gdb := pGDB;
+    Result.config.portador := tagConfig_COD_PORTADOR_CREDIPAR;
   end;
 end;
 
