@@ -623,6 +623,7 @@ type
     class function getNewIface(pIConexao: IConexao): ITNFModel;
 
     function Salvar: String;
+    function Incluir: String;
     function carregaClasse(ID: String): ITNFModel;
 
     procedure obterLista;
@@ -635,7 +636,7 @@ type
 implementation
 
 uses
-  NFDao;
+  Terasoft.Configuracoes, NFDao;
 
 { TNFModel }
 
@@ -699,6 +700,36 @@ class function TNFModel.getNewIface(pIConexao: IConexao): ITNFModel;
 begin
   Result := TImplObjetoOwner<TNFModel>.CreateOwner(self._Create(pIConexao));
   Result.objeto.myself := Result;
+end;
+
+function TNFModel.Incluir: String;
+var
+  lConfiguracoes : ITerasoftConfiguracoes;
+begin
+  lConfiguracoes := TerasoftConfiguracoes.getNewIface(vIConexao);
+
+  try
+    Self.DATA_NF               := vIConexao.DataServer;
+    Self.FNUMERO_PED.Value     := '000000';
+    Self.FUSUARIO_NF.Value     := vIConexao.getUSer.ID;
+    Self.FLOJA.Value           := vIConexao.getEmpresa.LOJA;
+    Self.FTIPO_NF.Value        := 'N';
+    Self.FTIPO_FRETE.Value     := '1';
+    Self.FESPECIE_VOLUME.Value := 'VOLUME(S)';
+    Self.FEMAIL_NFE.Value      := '1';
+    Self.FSTATUS_NF.Value      := '0';
+    Self.FDATA_SAIDA.Value     := vIConexao.DataServer;
+    Self.FDATA_SAIDA.Value     := vIConexao.DataServer;
+    Self.FHORA_SAIDA.Value     := vIConexao.HoraServer;
+    Self.FMODELO.Value         := '55';
+    Self.FINDPRES.Value        := '1';
+    Self.FSERIE_NF.Value       := lConfiguracoes.objeto.valorTag('SERIE_NFE', '001', tvString);
+
+    Self.FAcao := tacIncluir;
+    Result := Self.Salvar;
+  finally
+    lConfiguracoes := nil;
+  end;
 end;
 
 function TNFModel.Salvar: String;
