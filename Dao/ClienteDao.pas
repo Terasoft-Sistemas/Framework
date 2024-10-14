@@ -558,7 +558,7 @@ begin
   if not FWhereView.IsEmpty then
     lSQL := lSQL + FWhereView;
   if FIDRecordView <> '' then
-    lSQL := lSQL + ' and CLIENTES.CODIGO_CLI = '+ QuotedStr(FIDRecordView);
+    lSQL := lSQL + ' and CLIENTES.CODIGO_CLI = ' + QuotedStr(FIDRecordView);
   Result := lSQL;
 end;
 

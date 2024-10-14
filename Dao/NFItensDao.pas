@@ -94,7 +94,14 @@ begin
   Result   := lModel;
 
   try
-    lQry.Open(' select * from nfitens where id = '+pId);
+    lQry.Open(' select nfitens.*,                                                  ' +
+              '       produto.nome_pro,                                            ' +
+              '       produto.unidade_pro,                                         ' +
+              '       produto.codigo_fornecedor ncm,                               ' +
+              '       produto.tipo$_pro icms_origem                                ' +
+              ' from nfitens                                                       ' +
+              '       left join produto on produto.codigo_pro = nfitens.codigo_pro ' +
+              ' where id = ' + pId);
 
     if lQry.IsEmpty then
       Exit;
@@ -102,6 +109,10 @@ begin
     lModel.objeto.NUMERO_NF           := lQry.FieldByName('NUMERO_NF').AsString;
     lModel.objeto.SERIE_NF            := lQry.FieldByName('SERIE_NF').AsString;
     lModel.objeto.CODIGO_PRO          := lQry.FieldByName('CODIGO_PRO').AsString;
+    lModel.objeto.DESCRICAO_PRODUTO   := lQry.FieldByName('NOME_PRO').AsString;
+    lModel.objeto.NCM                 := lQry.FieldByName('NCM').AsString;
+    lModel.objeto.ICMS_ORIGEM         := lQry.FieldByName('ICMS_ORIGEM').AsString;
+    lModel.objeto.UNIDADE_NF          := lQry.FieldByName('UNIDADE_PRO').AsString;
     lModel.objeto.VALORUNITARIO_NF    := lQry.FieldByName('VALORUNITARIO_NF').AsString;
     lModel.objeto.QUANTIDADE_NF       := lQry.FieldByName('QUANTIDADE_NF').AsString;
     lModel.objeto.VLRVENDA_NF         := lQry.FieldByName('VLRVENDA_NF').AsString;
@@ -110,7 +121,6 @@ begin
     lModel.objeto.ICMS_NF             := lQry.FieldByName('ICMS_NF').AsString;
     lModel.objeto.IPI_NF              := lQry.FieldByName('IPI_NF').AsString;
     lModel.objeto.ITEM_NF             := lQry.FieldByName('ITEM_NF').AsString;
-    lModel.objeto.UNIDADE_NF          := lQry.FieldByName('UNIDADE_NF').AsString;
     lModel.objeto.LOJA                := lQry.FieldByName('LOJA').AsString;
     lModel.objeto.VALOR_ICMS          := lQry.FieldByName('VALOR_ICMS').AsString;
     lModel.objeto.BASE_ICMS_ST        := lQry.FieldByName('BASE_ICMS_ST').AsString;
@@ -177,7 +187,6 @@ begin
     lModel.objeto.COFINS_SUFRAMA      := lQry.FieldByName('COFINS_SUFRAMA').AsString;
     lModel.objeto.IPI_SUFRAMA         := lQry.FieldByName('IPI_SUFRAMA').AsString;
     lModel.objeto.VALOR_SUFRAMA_ITEM  := lQry.FieldByName('VALOR_SUFRAMA_ITEM').AsString;
-    lModel.objeto.DESCRICAO_PRODUTO   := lQry.FieldByName('DESCRICAO_PRODUTO').AsString;
     lModel.objeto.ESTOQUE_2           := lQry.FieldByName('ESTOQUE_2').AsString;
     lModel.objeto.VTOTTRIB_FEDERAL    := lQry.FieldByName('VTOTTRIB_FEDERAL').AsString;
     lModel.objeto.VTOTTRIB_ESTADUAL   := lQry.FieldByName('VTOTTRIB_ESTADUAL').AsString;
@@ -474,7 +483,6 @@ begin
       modelo.objeto.ICMS_NF              := lQry.FieldByName('ICMS_NF').AsString;
       modelo.objeto.IPI_NF               := lQry.FieldByName('IPI_NF').AsString;
       modelo.objeto.ITEM_NF              := lQry.FieldByName('ITEM_NF').AsString;
-      modelo.objeto.UNIDADE_NF           := lQry.FieldByName('UNIDADE_NF').AsString;
       modelo.objeto.LOJA                 := lQry.FieldByName('LOJA').AsString;
       modelo.objeto.VALOR_ICMS           := lQry.FieldByName('VALOR_ICMS').AsString;
       modelo.objeto.BASE_ICMS_ST         := lQry.FieldByName('BASE_ICMS_ST').AsString;
@@ -541,7 +549,6 @@ begin
       modelo.objeto.COFINS_SUFRAMA       := lQry.FieldByName('COFINS_SUFRAMA').AsString;
       modelo.objeto.IPI_SUFRAMA          := lQry.FieldByName('IPI_SUFRAMA').AsString;
       modelo.objeto.VALOR_SUFRAMA_ITEM   := lQry.FieldByName('VALOR_SUFRAMA_ITEM').AsString;
-      modelo.objeto.DESCRICAO_PRODUTO    := lQry.FieldByName('DESCRICAO_PRODUTO').AsString;
       modelo.objeto.ESTOQUE_2            := lQry.FieldByName('ESTOQUE_2').AsString;
       modelo.objeto.VTOTTRIB_FEDERAL     := lQry.FieldByName('VTOTTRIB_FEDERAL').AsString;
       modelo.objeto.VTOTTRIB_ESTADUAL    := lQry.FieldByName('VTOTTRIB_ESTADUAL').AsString;
