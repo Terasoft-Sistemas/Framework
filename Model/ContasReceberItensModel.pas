@@ -512,6 +512,7 @@ begin
     lContaCorrenteModel.objeto.STATUS           := 'I';
     lContaCorrenteModel.objeto.TIPO             := 'S';
     lContaCorrenteModel.objeto.PIX_TRANSACAOID  := pPixID;
+    lContaCorrenteModel.objeto.COMPETENCIA      := Copy(self.FVENCIMENTO_REC, 4, 2) + copy(self.FVENCIMENTO_REC, 7, 4);
 
     Result := lContaCorrenteModel.objeto.Salvar;
   finally
@@ -966,7 +967,7 @@ begin
   end;
 end;
 
-function TContasReceberItensModel.lancarContaCorrente(pValor, pPortador, pConta, pContaCorrente, pHistorico, pTipo: String; pPixID : String = '' ): String;
+function TContasReceberItensModel.lancarContaCorrente(pValor, pPortador, pConta, pContaCorrente, pHistorico, pTipo: String; pPixID : String = ''): String;
 var
   lContaCorrenteModel: ITContaCorrenteModel;
 begin
@@ -991,6 +992,7 @@ begin
     lContaCorrenteModel.objeto.STATUS           := 'I';
     lContaCorrenteModel.objeto.TIPO             := 'S';
     lContaCorrenteModel.objeto.PIX_TRANSACAOID  := pPixID;
+    lContaCorrenteModel.objeto.COMPETENCIA      := Copy(self.FVENCIMENTO_REC, 4, 2) + copy(self.FVENCIMENTO_REC, 7, 4);
 
     Result := lContaCorrenteModel.objeto.Salvar;
   finally
