@@ -209,6 +209,7 @@ type
 
     function obterContaCliente(pContaClienteParametros: TContaClienteParametros): TListaContaClienteRetorno;
     function obterReceberPixCobranca(pPedido : String) : IFDDataset;
+    function consultarJurosPixGestao(pID : String) : Double;
 
     procedure gerarVendaCartao;
     procedure excluirBaixa;
@@ -253,6 +254,7 @@ type
     property IDAdmCartao: String read FIDAdmCartao write SetIDAdmCartao;
     property IDUsuarioOperacao: String read FIDUsuarioOperacao write SetIDUsuarioOperacao;
     property ParcelaView: String read FParcelaView write SetParcelaView;
+
   end;
 
   const
@@ -510,6 +512,7 @@ begin
     lContaCorrenteModel.objeto.STATUS           := 'I';
     lContaCorrenteModel.objeto.TIPO             := 'S';
     lContaCorrenteModel.objeto.PIX_TRANSACAOID  := pPixID;
+    lContaCorrenteModel.objeto.COMPETENCIA      := Copy(self.FVENCIMENTO_REC, 4, 2) + copy(self.FVENCIMENTO_REC, 7, 4);
 
     Result := lContaCorrenteModel.objeto.Salvar;
   finally
@@ -603,6 +606,18 @@ begin
   if pIndex < 0 then
     CriaException('Index n�o definido');
   Result := FContasReceberItenssLista[pIndex];
+end;
+
+function TContasReceberItensModel.consultarJurosPixGestao(pID: String): Double;
+var
+  lContasReceberItensDao: TContasReceberItensDao;
+begin
+  lContasReceberItensDao := TContasReceberItensDao.Create(vIConexao);
+  try
+    Result := lContasReceberItensDao.consultarJurosPixGestao(pID);
+  finally
+    lContasReceberItensDao.Free;
+  end;
 end;
 
 constructor TContasReceberItensModel.Create(pConexao : IConexao);
@@ -952,7 +967,7 @@ begin
   end;
 end;
 
-function TContasReceberItensModel.lancarContaCorrente(pValor, pPortador, pConta, pContaCorrente, pHistorico, pTipo: String; pPixID : String = '' ): String;
+function TContasReceberItensModel.lancarContaCorrente(pValor, pPortador, pConta, pContaCorrente, pHistorico, pTipo: String; pPixID : String = ''): String;
 var
   lContaCorrenteModel: ITContaCorrenteModel;
 begin
@@ -977,6 +992,7 @@ begin
     lContaCorrenteModel.objeto.STATUS           := 'I';
     lContaCorrenteModel.objeto.TIPO             := 'S';
     lContaCorrenteModel.objeto.PIX_TRANSACAOID  := pPixID;
+    lContaCorrenteModel.objeto.COMPETENCIA      := Copy(self.FVENCIMENTO_REC, 4, 2) + copy(self.FVENCIMENTO_REC, 7, 4);
 
     Result := lContaCorrenteModel.objeto.Salvar;
   finally
