@@ -140,12 +140,15 @@ begin
 
   fRestRequest.Execute;
 
-  if fRestResponse.StatusCode = 400 then
-    CriaException('CNPJ invalido');
-
   lJsonObj := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(fRestRequest.Response.Content), 0) as TJSONObject;
 
   try
+    if fRestResponse.StatusCode = 400 then
+      CriaException('CNPJ invalido');
+
+    if fRestResponse.StatusCode = 404 then
+      CriaException('CNPJ não localizado na pesquisa web');
+
     if Assigned(lJsonObj.Get('response').JsonValue) then
       lJsonObjResponse := lJsonObj.Get('response').JsonValue as TJSONObject;
 

@@ -19,7 +19,7 @@ uses
   function formatoCNPJCPFGenerico(field: TField;  texto: String; displayText: Boolean): String;
   function formatoCEPGenerico(field: TField;  texto: String; displayText: Boolean): String;
   function removeCaracteresGraficos(texto: String): String;
-  function transformaDataFireBird(data:Variant; separador:String = '-'):Variant;
+  function transformaDataFireBird(data:Variant; separador:String = '-';formato: String = 'mda'):Variant;
   function transformaDataFireBirdWhere(data:Variant; separador:String = '.'):Variant;
   function transformaDataHoraFireBird(data:Variant):Variant;
   function formataResultado(valor: TField; tipoCampo: TTipoColunas = tcoString): string;
@@ -427,7 +427,7 @@ begin
   Result := l;
 end;
 
-Function transformaDataFireBird(data:Variant; separador:String = '-'):Variant;
+Function transformaDataFireBird(data:Variant; separador:String = '-';formato: String = 'mda'):Variant;
 var
  dataInformada, dia, mes, ano:string;
 begin
@@ -438,8 +438,12 @@ begin
 
   if dia = '' then
     Result := Unassigned
-  else
-    Result := mes + separador + dia + separador + ano;
+  else if formato = 'dma' then
+         Result := dia + separador + mes + separador + ano
+       else if formato = 'mda' then
+              Result := mes + separador + dia + separador + ano
+            else if formato = 'amd' then
+                   Result := ano + separador + mes + separador + dia;
 end;
 Function transformaDataFireBirdWhere(data:Variant; separador:String = '.'):Variant;
 var

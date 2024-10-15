@@ -83,7 +83,8 @@ end;
 implementation
 
 uses
-  System.Rtti;
+  System.Rtti,
+  ClipBrd;
 
 { TNFDao }
 
@@ -308,6 +309,8 @@ begin
       pNFModel.objeto.numero_ecf := vIConexao.Generetor('GEN_NF2');
 
     setParams(lQry, pNFModel);
+
+    ClipBoard.AsText := vConstrutor.getSQL(lQry);
 
     lQry.Open;
 
