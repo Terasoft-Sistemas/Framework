@@ -94,14 +94,14 @@ begin
   Result   := lModel;
 
   try
-    lQry.Open(' select nfitens.*,                                                  ' +
-              '       produto.nome_pro,                                            ' +
-              '       produto.unidade_pro,                                         ' +
-              '       produto.codigo_fornecedor ncm,                               ' +
-              '       produto.tipo$_pro icms_origem                                ' +
-              ' from nfitens                                                       ' +
-              '       left join produto on produto.codigo_pro = nfitens.codigo_pro ' +
-              ' where id = ' + pId);
+    lQry.Open(' select nfitens.*,                                              ' +
+              '        produto.nome_pro,                                       ' +
+              '        produto.unidade_pro,                                    ' +
+              '        produto.codigo_fornecedor ncm,                          ' +
+              '        produto.tipo$_pro icms_origem                           ' +
+              '   from nfitens                                                 ' +
+              '   left join produto on produto.codigo_pro = nfitens.codigo_pro ' +
+              '  where nfitens.id = ' + pId);
 
     if lQry.IsEmpty then
       Exit;
