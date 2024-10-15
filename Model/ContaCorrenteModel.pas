@@ -6,7 +6,8 @@ uses
   Terasoft.Types,
   Terasoft.Framework.ObjectIface,
   Spring.Collections,
-  Interfaces.Conexao;
+  Interfaces.Conexao,
+  Terasoft.Utils;
 
 type
   TContaCorrenteModel = class;
@@ -171,6 +172,9 @@ type
     function Salvar: String;
     procedure obterLista;
     procedure obterSaldo(pLoja: String = '');
+
+    procedure AlterarStatus(out pValor: Double; out pParcela: Integer; out pTipo, pBanco, pPortador, pDuplicata, pCliente, pLoja, pConciliado, pConta: String; pNumero, pStatus: String);
+    procedure RegistroEstorno(pConta, pBanco, pCliente, pNumero, pFatura, pLoja, pConciliado: String; pValor: Double);
 
     function carregaClasse(pId: String): ITContaCorrenteModel;
     procedure excluirRegistro(pIdRegistro: String);
@@ -341,6 +345,65 @@ begin
 
   finally
     lContaCorrenteDao:=nil;
+  end;
+end;
+
+procedure TContaCorrenteModel.AlterarStatus(out pValor: Double; out pParcela: Integer; out pTipo, pBanco, pPortador, pDuplicata, pCliente, pLoja, pConciliado, pConta: String; pNumero, pStatus: String);
+var
+  lContaCorrenteModel : ITContaCorrenteModel;
+begin
+  lContaCorrenteModel := TContaCorrenteModel.getNewIface(vIConexao);
+  try
+    try
+      lContaCorrenteModel := lContaCorrenteModel.objeto.Alterar(pNumero);
+      lContaCorrenteModel.objeto.STATUS := pStatus;
+
+      pValor      := lContaCorrenteModel.objeto.VALOR_COR;
+      pTipo       := lContaCorrenteModel.objeto.TIPO_CTA;
+      pBanco      := lContaCorrenteModel.objeto.CODIGO_BAN;
+      pPortador   := lContaCorrenteModel.objeto.PORTADOR_COR;
+      pParcela    := lContaCorrenteModel.objeto.PARCELA_COR;
+      pDuplicata  := lContaCorrenteModel.objeto.FATURA_COR;
+      pCliente    := lContaCorrenteModel.objeto.CLIENTE_COR;
+      pLoja       := lContaCorrenteModel.objeto.LOJA;
+      pConciliado := lContaCorrenteModel.objeto.CONCILIADO_COR;
+      pConta      := lContaCorrenteModel.objeto.CODIGO_CTA;
+      lContaCorrenteModel.objeto.Salvar;
+    except
+      on E:Exception do
+        CriaException('Erro: '+ E.Message);
+    end;
+  finally
+    lContaCorrenteModel := nil;
+  end;
+end;
+
+procedure TContaCorrenteModel.RegistroEstorno(pConta, pBanco, pCliente, pNumero, pFatura, pLoja, pConciliado: String; pValor: Double);
+var
+  lContaCorrenteModel : ITContaCorrenteModel;
+begin
+  lContaCorrenteModel := TContaCorrenteModel.getNewIface(vIConexao);
+  try
+    try
+      lContaCorrenteModel.objeto.CODIGO_CTA     := pConta;
+      lContaCorrenteModel.objeto.CODIGO_BAN     := pBanco;
+      lContaCorrenteModel.objeto.CLIENTE_COR    := pCliente;
+      lContaCorrenteModel.objeto.DATA_COR       := DateToStr(vIConexao.DataServer);
+      lContaCorrenteModel.objeto.DATA_CON       := DateToStr(vIConexao.DataServer);
+      lContaCorrenteModel.objeto.VALOR_COR      := pValor;
+      lContaCorrenteModel.objeto.OBSERVACAO_COR := 'Estorno lançamento: '+pNumero;
+      lContaCorrenteModel.objeto.STATUS         := 'X';
+      lContaCorrenteModel.objeto.FATURA_COR     := pFatura;
+      lContaCorrenteModel.objeto.LOJA           := pLoja;
+      lContaCorrenteModel.objeto.TIPO_CTA       := 'D';
+      lContaCorrenteModel.objeto.CONCILIADO_COR := pConciliado;
+      lContaCorrenteModel.objeto.Incluir;
+    except
+      on E:Exception do
+        CriaException('Erro: '+ E.Message);
+    end;
+  finally
+    lContaCorrenteModel := nil;
   end;
 end;
 

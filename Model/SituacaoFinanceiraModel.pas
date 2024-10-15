@@ -65,7 +65,13 @@ type
     function ObterDetalhesBaixa(pFatura, pParcela : String): IFDDataset;
     function ObterCredito(pCliente: String): Double;
 
+    function RegistroBanco(pFatura, pParcela: String): IFDDataset;
+    function RegistroBancoJuros(pFatura, pParcela: String): IFDDataset;
+
+    function EstornarBanco(pFatura, pParcela: String): Boolean;
+
     function realizarBaixa(pIdContasReceberItens, pIdBancoBaixa, pIdContaBaixa, pIdPortadorBaixar, pValorBaixa, pJurosDesconto, pTipoAdicional, pDataPagamento, pHistorico: String): Boolean;
+    function calcularJuros(pCliente, pSituacao: String; pValorParcela, pValorRecebido: Double; pVencimento, pDataBaixa: TDate): Double;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -122,6 +128,19 @@ begin
     lSituacaoFinanceiraLista.WhereView  := FWhereView;
 
     Result := lSituacaoFinanceiraLista.obterLista(pCliente);
+
+  finally
+    lSituacaoFinanceiraLista := nil;
+  end;
+end;
+
+function TSituacaoFinanceiraModel.calcularJuros(pCliente, pSituacao : String; pValorParcela, pValorRecebido : Double; pVencimento, pDataBaixa : TDate) : Double;
+var
+  lSituacaoFinanceiraLista: TSituacaoFinanceiraDao;
+begin
+  lSituacaoFinanceiraLista := TSituacaoFinanceiraDao.Create(vIConexao);
+  try
+    Result := lSituacaoFinanceiraLista.calcularJuros(pCliente, pSituacao, pValorParcela, pValorRecebido, pVencimento, pDataBaixa);
   finally
     lSituacaoFinanceiraLista := nil;
   end;
@@ -170,6 +189,30 @@ begin
   end;
 end;
 
+function TSituacaoFinanceiraModel.RegistroBanco(pFatura, pParcela: String): IFDDataset;
+var
+  lSituacaoFinanceiraLista: TSituacaoFinanceiraDao;
+begin
+  lSituacaoFinanceiraLista := TSituacaoFinanceiraDao.Create(vIConexao);
+  try
+    Result := lSituacaoFinanceiraLista.RegistroBanco(pFatura, pParcela);
+  finally
+    lSituacaoFinanceiraLista := nil;
+  end;
+end;
+
+function TSituacaoFinanceiraModel.RegistroBancoJuros(pFatura, pParcela: String): IFDDataset;
+var
+  lSituacaoFinanceiraLista: TSituacaoFinanceiraDao;
+begin
+  lSituacaoFinanceiraLista := TSituacaoFinanceiraDao.Create(vIConexao);
+  try
+    Result := lSituacaoFinanceiraLista.RegistroBancoJuros(pFatura, pParcela);
+  finally
+    lSituacaoFinanceiraLista := nil;
+  end;
+end;
+
 function TSituacaoFinanceiraModel.realizarBaixa(pIdContasReceberItens, pIdBancoBaixa, pIdContaBaixa, pIdPortadorBaixar, pValorBaixa, pJurosDesconto, pTipoAdicional, pDataPagamento, pHistorico: String): Boolean;
 var
   lContasReceberItensModel: TContasReceberItensModel;
@@ -209,36 +252,43 @@ begin
 
     lValorAtualizar := lContasReceberItensModel.VALORREC_REC + StrToFloat(pValorBaixa);
 
-    lContasReceberItensModel.Alterar(pIdContasReceberItens);
-    lContasReceberItensModel.VALORREC_REC  := FormataFloatFireBird(lValorAtualizar.ToString);
-    lContasReceberItensModel.DATABAIXA_REC := transformaDataFireBird(pDataPagamento);
+    lContasReceberItensModel := lContasReceberItensModel.Alterar(pIdContasReceberItens);
+    lContasReceberItensModel.VALORREC_REC  := lValorAtualizar;
+    lContasReceberItensModel.DATABAIXA_REC := pDataPagamento;
     lContasReceberItensModel.SITUACAO_REC  := 'B';
     lContasReceberItensModel.Salvar;
 
     lContaCorrenteModel.objeto.Acao            := tacIncluir;
-    lContaCorrenteModel.objeto.DATA_COR        := transformaDataFireBird(pDataPagamento);
+    lContaCorrenteModel.objeto.DATA_COR        := pDataPagamento;
     lContaCorrenteModel.objeto.TIPO_CTA        := 'C';
     lContaCorrenteModel.objeto.CODIGO_CTA      := pIdContaBaixa;
     lContaCorrenteModel.objeto.CODIGO_BAN      := pIdBancoBaixa;
+    lContaCorrenteModel.objeto.CLIENTE_COR     := lContasReceberItensModel.CODIGO_CLI;
+    lContaCorrenteModel.objeto.USUARIO_COR     := vIConexao.getUser.ID;
+    lContaCorrenteModel.objeto.LOJA            := vIConexao.getEmpresa.LOJA;
+    lContaCorrenteModel.objeto.STATUS          := 'A';
+    lContaCorrenteModel.objeto.CONCILIADO_COR  := '.';
+    lContaCorrenteModel.objeto.DR              := 'N';
     lContaCorrenteModel.objeto.PORTADOR_COR    := pIdPortadorBaixar;
     lContaCorrenteModel.objeto.FATURA_COR      := lContasReceberItensModel.FATURA_REC;
+    lContaCorrenteModel.objeto.PARCELA_COR     := lContasReceberItensModel.PACELA_REC;
     lContaCorrenteModel.objeto.OBSERVACAO_COR  := pHistorico;
     lContaCorrenteModel.objeto.ID              := pIdContasReceberItens;
     lContaCorrenteModel.objeto.COMPETENCIA     := copy(pDataPagamento,1,2)+copy(pDataPagamento,7,4);
-    lContaCorrenteModel.objeto.VALOR_COR       := FormataFloatFireBird(pValorBaixa);
+    lContaCorrenteModel.objeto.VALOR_COR       := pValorBaixa;
     lRetorno := lContaCorrenteModel.objeto.Salvar;
 
     if StrToFloatDef(pJurosDesconto, 0) > 0 then begin
       lContaCorrenteModel.objeto.Acao           := tacIncluir;
-      lContaCorrenteModel.objeto.DATA_COR       := transformaDataFireBird(pDataPagamento);
+      lContaCorrenteModel.objeto.DATA_COR       := pDataPagamento;
       lContaCorrenteModel.objeto.TIPO_CTA       := IIF(pTipoAdicional = 'J', 'C', 'D');
       lContaCorrenteModel.objeto.CODIGO_CTA     := '222222';
-      lContaCorrenteModel.objeto.OBSERVACAO_COR := IIF(pTipoAdicional = 'J', 'Rec.Juros fatura ' + lContasReceberItensModel.ID, 'Desconto fatura '+lContasReceberItensModel.ID);
+      lContaCorrenteModel.objeto.OBSERVACAO_COR := IIF(pTipoAdicional = 'J', 'Rec.Juros fatura: ' + lContasReceberItensModel.FATURA_REC, 'Desconto fatura: '+lContasReceberItensModel.FATURA_REC);
       lContaCorrenteModel.objeto.CODIGO_BAN     := pIdBancoBaixa;
       lContaCorrenteModel.objeto.PORTADOR_COR   := pIdPortadorBaixar;
       lContaCorrenteModel.objeto.ID             := pIdContasReceberItens;
       lContaCorrenteModel.objeto.COMPETENCIA    := copy(pDataPagamento,1,2)+copy(pDataPagamento,7,4);
-      lContaCorrenteModel.objeto.VALOR_COR      := FormataFloatFireBird(pJurosDesconto);
+      lContaCorrenteModel.objeto.VALOR_COR      := pJurosDesconto;
       lRetorno := lContaCorrenteModel.objeto.Salvar;
     end;
 
@@ -248,6 +298,59 @@ begin
     lContasReceberItensModel.Free;
     lContaCorrenteModel := nil;
   end;
+end;
+
+function TSituacaoFinanceiraModel.EstornarBanco(pFatura, pParcela: String) : Boolean;
+var
+  lContasReceberItensModel : TContasReceberItensModel;
+  lSituacaoFinanceira      : TSituacaoFinanceiraModel;
+  lContaCorrenteModel      : ITContaCorrenteModel;
+  lIFDDataset              : IFDDataset;
+  lValor   : Double;
+  lParcela : Integer;
+  lNumero, lTipo, lBanco, lPortador, lDuplicata, lCliente, lLoja, lConciliado, lConta : String;
+begin
+  lSituacaoFinanceira      := TSituacaoFinanceiraModel.Create(vIConexao);
+  lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
+  lContaCorrenteModel      := TContaCorrenteModel.getNewIface(vIConexao);
+
+  Result := False;
+
+  try
+    lContasReceberItensModel.WhereView := 'and contasreceberitens.pacela_rec = '+ pParcela +' and contasreceberitens.fatura_rec = '+ QuotedStr(pFatura);
+    lContasReceberItensModel.obterLista;
+    lContasReceberItensModel := lContasReceberItensModel.ContasReceberItenssLista[0];
+
+    lIFDDataset := lSituacaoFinanceira.RegistroBanco(pFatura, pParcela);
+
+    if ((not lIFDDataset.objeto.IsEmpty) and (lIFDDataset.objeto.FieldByName('LANCAMENTOVALOR').AsFloat <> lContasReceberItensModel.VALORREC_REC)) then
+      criaException('Não foi possível fazer o estorno.'+SLineBreak+'Baixa parcial deve ser estornado diretamente no banco');
+
+    if lIFDDataset.objeto.RecordCount > 0 then begin
+
+      lNumero := lIFDDataset.objeto.FieldByName('LANCAMENTONUMERO').AsString;
+      lContaCorrenteModel.objeto.AlterarStatus(lValor, lParcela, lTipo, lBanco, lPortador, lDuplicata, lCliente, lLoja, lConciliado, lConta, lNumero, 'X');
+      lContaCorrenteModel.objeto.RegistroEstorno('000000', lBanco, lCliente, lNumero, lDuplicata, lLoja, lConciliado, lValor);
+      lContasReceberItensModel.voltarParcela(lContasReceberItensModel.ID, lValor);
+
+      lIFDDataset := lSituacaoFinanceira.RegistroBancoJuros(pFatura, pParcela);
+
+      if lIFDDataset.objeto.RecordCount > 0 then begin
+
+        lNumero := lIFDDataset.objeto.FieldByName('LANCAMENTONUMERO').AsString;
+        lContaCorrenteModel.objeto.AlterarStatus(lValor, lParcela, lTipo, lBanco, lPortador, lDuplicata, lCliente, lLoja, lConciliado, lConta, lNumero, 'X');
+        lContaCorrenteModel.objeto.RegistroEstorno('000000', lBanco, lCliente, lNumero, lDuplicata, lLoja, lConciliado, lValor);
+
+      end;
+      Result := True;
+    end;
+  finally
+    lContasReceberItensModel.Free;
+    lSituacaoFinanceira := nil;
+    lContaCorrenteModel := nil;
+    lIFDDataset := nil;
+  end;
+
 end;
 
 procedure TSituacaoFinanceiraModel.SetAcao(const Value: TAcao);

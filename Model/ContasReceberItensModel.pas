@@ -214,6 +214,8 @@ type
     procedure gerarVendaCartao;
     procedure excluirBaixa;
 
+    procedure voltarParcela(pId: String; pValor: Double);
+
     function lancarContaCorrente(pValor, pPortador, pConta, pContaCorrente, pHistorico, pTipo: String; pPixID : String = '') : String;
     function lancarJurosContaCorrente(pJuros, pPortador, pContaCorrente : String; pPixID : String = '') : String;
     function lancarDescontoContaCorrente(pDesconto, pPortador, pContaCorrente : String; pPixID : String = '') : String;
@@ -1135,6 +1137,28 @@ begin
     lContasReceberItensDao.Free;
   end;
 end;
+
+procedure TContasReceberItensModel.voltarParcela(pId: String; pValor: Double);
+var
+  lContasReceberItensModel : TContasReceberItensModel;
+begin
+    lContasReceberItensModel := TContasReceberItensModel.Create(vIConexao);
+  try
+    try
+      lContasReceberItensModel := lContasReceberItensModel.Alterar(pId);
+      lContasReceberItensModel.VALORREC_REC  := lContasReceberItensModel.VALORREC_REC - pValor;
+      lContasReceberItensModel.DATABAIXA_REC := '';
+      lContasReceberItensModel.SITUACAO_REC  := 'A';
+      lContasReceberItensModel.Salvar;
+    except
+      on E:Exception do
+      CriaException('Erro: '+ E.Message);
+    end;
+  finally
+    lContasReceberItensModel.Free;
+  end;
+end;
+
 
 procedure TContasReceberItensModel.SetAcao(const Value: TAcao);
 begin
