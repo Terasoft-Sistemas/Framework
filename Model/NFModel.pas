@@ -709,7 +709,7 @@ begin
   lConfiguracoes := TerasoftConfiguracoes.getNewIface(vIConexao);
 
   try
-    Self.DATA_NF               := vIConexao.DataServer;
+    Self.DATA_NF               := DateToStr(vIConexao.DataServer);
     Self.FNUMERO_PED.Value     := '000000';
     Self.FUSUARIO_NF.Value     := vIConexao.getUSer.ID;
     Self.FLOJA.Value           := vIConexao.getEmpresa.LOJA;
@@ -718,9 +718,9 @@ begin
     Self.FESPECIE_VOLUME.Value := 'VOLUME(S)';
     Self.FEMAIL_NFE.Value      := '1';
     Self.FSTATUS_NF.Value      := '0';
-    Self.FDATA_SAIDA.Value     := vIConexao.DataServer;
-    Self.FDATA_SAIDA.Value     := vIConexao.DataServer;
-    Self.FHORA_SAIDA.Value     := vIConexao.HoraServer;
+    Self.FDATA_SAIDA.Value     := DateToStr(vIConexao.DataServer);
+    Self.FDATA_SAIDA.Value     := DateToStr(vIConexao.DataServer);
+    Self.FHORA_SAIDA.Value     := DateToStr(vIConexao.HoraServer);
     Self.FMODELO.Value         := '55';
     Self.FINDPRES.Value        := '1';
     Self.FSERIE_NF.Value       := lConfiguracoes.objeto.valorTag('SERIE_NFE', '001', tvString);
