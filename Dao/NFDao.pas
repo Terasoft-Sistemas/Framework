@@ -331,6 +331,9 @@ begin
   try
     lQry.SQL.Add(lSQL);
     setParams(lQry, pNFModel);
+
+    ClipBoard.AsText := vConstrutor.getSQL(lQry);
+
     lQry.ExecSQL;
 
     Result := pNFModel.objeto.NUMERO_NF;
