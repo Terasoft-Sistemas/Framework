@@ -124,9 +124,10 @@ var
   lQry       : TFDQuery;
   lSQL       : String;
   lPaginacao : String;
-  lJuros     : Double;
+  lMemTable  : IFDDataset;
 begin
   lQry := vIConexao.CriarQuery;
+  lMemTable := TImplObjetoOwner<TDataset>.CreateOwner(TFDMemTable.Create(nil));
 
   try
 
@@ -161,7 +162,8 @@ begin
       '          R.VENDEDOR_REC,                                                 '+SLineBreak+
       '          CR.COMISSAO,                                                    '+SLineBreak+
       '          V.NUMERO_NF,                                                    '+SLineBreak+
-      '          CR.TOTALPARCELAS_REC                                            '+SLineBreak+
+      '          CR.TOTALPARCELAS_REC,                                           '+SLineBreak+
+      '          0 JUROS                                                         '+SLineBreak+
       '    FROM  CLIENTES C                                                      '+SLineBreak+
       '    INNER JOIN CONTASRECEBER R ON                                         '+SLineBreak+
       '          C.CODIGO_CLI = R.CODIGO_CLI                                     '+SLineBreak+
@@ -176,31 +178,85 @@ begin
 
     lSql := lSql + where;
 
-    lSQL := lSQL + ' ORDER BY CR.VENCIMENTO_REC';
-//    lQry.FieldDefs.Add('JUROS', ftFloat);
+    TFDMemTable(lMemTable.objeto).IndexFieldNames := 'VENCIMENTO_REC';
+
+    with TFDMemTable(lMemTable.objeto) do
+      begin
+        FieldDefs.Add('CODIGO_CLI', ftString, 6);
+        FieldDefs.Add('FANTASIA_CLI', ftString, 40);
+        FieldDefs.Add('FATURA_REC', ftString, 6);
+        FieldDefs.Add('DATAEMI_REC', ftDateTime);
+        FieldDefs.Add('VENCIMENTO_REC', ftDateTime);
+        FieldDefs.Add('TOTALPARCELAS_REC', ftInteger);
+        FieldDefs.Add('PACELA_REC', ftInteger);
+        FieldDefs.Add('VLRPARCELA_REC', ftCurrency);
+        FieldDefs.Add('VALORREC_REC', ftCurrency);
+        FieldDefs.Add('DATABAIXA_REC', ftDateTime);
+        FieldDefs.Add('PEDIDO_REC', ftString, 6);
+        FieldDefs.Add('OS_REC', ftString, 6);
+        FieldDefs.Add('DESTITULO_REC', ftString, 1);
+        FieldDefs.Add('CODIGO_POR', ftString, 6);
+        FieldDefs.Add('CODIGO_CTA', ftString, 6);
+        FieldDefs.Add('NOME_PORT', ftString, 20);
+        FieldDefs.Add('SITUACAO_CLIENTE', ftString, 1);
+        FieldDefs.Add('SITUACAO_REC', ftString, 1);
+        FieldDefs.Add('NOSSO_NUMERO', ftString, 20);
+        FieldDefs.Add('OBSERVACAO', ftString, 100);
+        FieldDefs.Add('POSICAO_ID', ftInteger);
+        FieldDefs.Add('AVALISTA', ftString, 6);
+        FieldDefs.Add('ID', ftInteger);
+        FieldDefs.Add('VENDEDOR_REC', ftString, 6);
+        FieldDefs.Add('COMISSAO', ftCurrency);
+        FieldDefs.Add('NUMERO_NF', ftString, 6);
+        FieldDefs.Add('JUROS', ftCurrency);
+        CreateDataSet;
+      end;
+
     lQry.Open(lSQL);
 
-//    lQry.First;
-//    while not lQry.Eof do
-//    begin
-//      lJuros := calcularJuros(lQry.FieldByName('CODIGO_CLI').AsString,
-//                              lQry.FieldByName('SITUACAO_REC').AsString,
-//                              lQry.FieldByName('VLRPARCELA_REC').AsFloat,
-//                              lQry.FieldByName('VALORREC_REC').AsFloat,
-//                              lQry.FieldByName('VENCIMENTO_REC').AsDateTime,
-//                              lQry.FieldByName('DATABAIXA_REC').AsDateTime);
-//
-//      if lJuros > 0 then
-//      begin
-//        lQry.Edit;
-//        lQry.FieldByName('JUROS').AsFloat := lJuros;
-//        lQry.Post;
-//      end;
-//
-//      lQry.Next;
-//    end;
+    lQry.First;
+    while not lQry.Eof do
+    begin
+      lMemTable.objeto.InsertRecord([
+        lQry.FieldByName('CODIGO_CLI').AsString,
+        lQry.FieldByName('FANTASIA_CLI').AsString,
+        lQry.FieldByName('FATURA_REC').AsString,
+        lQry.FieldByName('DATAEMI_REC').AsDateTime,
+        lQry.FieldByName('VENCIMENTO_REC').AsDateTime,
+        lQry.FieldByName('TOTALPARCELAS_REC').AsInteger,
+        lQry.FieldByName('PACELA_REC').AsInteger,
+        lQry.FieldByName('VLRPARCELA_REC').AsCurrency,
+        lQry.FieldByName('VALORREC_REC').AsCurrency,
+        IIF(lQry.FieldByName('DATABAIXA_REC').IsNull, Null, lQry.FieldByName('DATABAIXA_REC').AsDateTime),
+        lQry.FieldByName('PEDIDO_REC').AsString,
+        lQry.FieldByName('OS_REC').AsString,
+        lQry.FieldByName('DESTITULO_REC').AsString,
+        lQry.FieldByName('CODIGO_POR').AsString,
+        lQry.FieldByName('CODIGO_CTA').AsString,
+        lQry.FieldByName('NOME_PORT').AsString,
+        lQry.FieldByName('SITUACAO_CLIENTE').AsString,
+        lQry.FieldByName('SITUACAO_REC').AsString,
+        lQry.FieldByName('NOSSO_NUMERO').AsString,
+        lQry.FieldByName('OBSERVACAO').AsString,
+        lQry.FieldByName('POSICAO_ID').AsInteger,
+        lQry.FieldByName('AVALISTA').AsString,
+        lQry.FieldByName('ID').AsInteger,
+        lQry.FieldByName('VENDEDOR_REC').AsString,
+        lQry.FieldByName('COMISSAO').AsCurrency,
+        lQry.FieldByName('NUMERO_NF').AsString,
+        calcularJuros(lQry.FieldByName('CODIGO_CLI').AsString,
+                      lQry.FieldByName('SITUACAO_REC').AsString,
+                      lQry.FieldByName('VLRPARCELA_REC').AsFloat,
+                      lQry.FieldByName('VALORREC_REC').AsFloat,
+                      lQry.FieldByName('VENCIMENTO_REC').AsDateTime,
+                      lQry.FieldByName('DATABAIXA_REC').AsDateTime)
+      ]);
+      lQry.Next;
+    end;
 
-    Result := vConstrutor.atribuirRegistros(lQry);
+    lMemTable.objeto.Open;
+
+    Result := lMemTable;
   finally
     lQry.Free;
   end;
