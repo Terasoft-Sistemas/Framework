@@ -357,7 +357,7 @@ begin
     lSQL := lSQL + ' and nfitens.id = '+IntToStr(FIDRecordView);
 
   if FIDPedidoView <> 0  then
-    lSQL := lSQL + ' and nfitens.pedido_id = '+IntToStr(FIDPedidoView);
+    lSQL := lSQL + ' and nfitens.numero_nf = '+IntToStr(FIDPedidoView);
 
   Result := lSQL;
 end;

@@ -487,6 +487,7 @@ begin
       modelo.objeto.NUMERO_PED                    := lQry.FieldByName('NUMERO_PED').AsString;
       modelo.objeto.SERIE_NF                      := lQry.FieldByName('SERIE_NF').AsString;
       modelo.objeto.MODELO                        := lQry.FieldByName('MODELO').AsString;
+      modelo.objeto.EMAIL_NFE                     := lQry.FieldByName('EMAIL_NFE').AsString;
       modelo.objeto.CODIGO_CLI                    := lQry.FieldByName('CODIGO_CLI').AsString;
       modelo.objeto.CODIGO_VEN                    := lQry.FieldByName('CODIGO_VEN').AsString;
       modelo.objeto.INDPRES                       := lQry.FieldByName('INDPRES').AsString;
@@ -505,6 +506,7 @@ begin
       modelo.objeto.ENTREGA_COD_MUNICIPIO         := lQry.FieldByName('ENTREGA_COD_MUNICIPIO').AsString;
       modelo.objeto.CFOP_ID                       := lQry.FieldByName('CFOP_ID').AsString;
       modelo.objeto.CFOP_NF                       := lQry.FieldByName('CFOP_NF').AsString;
+      modelo.objeto.TIPO_FRETE                    := lQry.FieldByName('TIPO_FRETE').AsString;
       modelo.objeto.PESO_LIQUIDO                  := lQry.FieldByName('PESO_LIQUIDO').AsString;
       modelo.objeto.PESO_BRUTO                    := lQry.FieldByName('PESO_BRUTO').AsString;
       modelo.objeto.QTDE_VOLUME                   := lQry.FieldByName('QTDE_VOLUME').AsString;
