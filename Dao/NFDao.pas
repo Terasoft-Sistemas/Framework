@@ -129,6 +129,7 @@ var
   lQry: TFDQuery;
   ANFModel: ITNFModel;
 begin
+
   lQry := vIConexao.CriarQuery;
   ANFModel := TNFModel.getNewIface(vIConexao);
   Result   := ANFModel;
@@ -307,11 +308,7 @@ begin
       pNFModel.objeto.numero_ecf := vIConexao.Generetor('GEN_NFCe')
     else if pNFModel.objeto.MODELO = '55' then
       pNFModel.objeto.numero_ecf := vIConexao.Generetor('GEN_NF2');
-
     setParams(lQry, pNFModel);
-
-    ClipBoard.AsText := vConstrutor.getSQL(lQry);
-
     lQry.Open;
 
     Result := lQry.FieldByName('NUMERO_NF').AsString;
@@ -319,6 +316,7 @@ begin
     lQry.Free;
   end;
 end;
+
 
 function TNFDao.alterar(pNFModel: ITNFModel): String;
 var
@@ -491,11 +489,36 @@ begin
       modelo.objeto.MODELO                        := lQry.FieldByName('MODELO').AsString;
       modelo.objeto.CODIGO_CLI                    := lQry.FieldByName('CODIGO_CLI').AsString;
       modelo.objeto.CODIGO_VEN                    := lQry.FieldByName('CODIGO_VEN').AsString;
+      modelo.objeto.INDPRES                       := lQry.FieldByName('INDPRES').AsString;
       modelo.objeto.DATA_NF                       := lQry.FieldByName('DATA_NF').AsString;
+      modelo.objeto.HORA_NF                       := lQry.FieldByName('HORA_NF').AsString;
       modelo.objeto.DATA_SAIDA                    := lQry.FieldByName('DATA_SAIDA').AsString;
       modelo.objeto.CLIENTE_NF                    := lQry.FieldByName('cliente_nome_cliente').AsString;
       modelo.objeto.NOME_XML                      := lQry.FieldByName('NOME_XML').AsString;
-      modelo.objeto.UF_EMBARQUE                   := lQry.FieldByName('estado_cliente').AsString;
+      modelo.objeto.ENTREGA_ENDERECO              := lQry.FieldByName('ENTREGA_ENDERECO').AsString;
+      modelo.objeto.ENTREGA_NUMERO                := lQry.FieldByName('ENTREGA_NUMERO').AsString;
+      modelo.objeto.ENTREGA_COMPLEMENTO           := lQry.FieldByName('ENTREGA_COMPLEMENTO').AsString;
+      modelo.objeto.ENTREGA_BAIRRO                := lQry.FieldByName('ENTREGA_BAIRRO').AsString;
+      modelo.objeto.ENTREGA_CIDADE                := lQry.FieldByName('ENTREGA_CIDADE').AsString;
+      modelo.objeto.ENTREGA_UF                    := lQry.FieldByName('ENTREGA_UF').AsString;
+      modelo.objeto.ENTREGA_CEP                   := lQry.FieldByName('ENTREGA_CEP').AsString;
+      modelo.objeto.ENTREGA_COD_MUNICIPIO         := lQry.FieldByName('ENTREGA_COD_MUNICIPIO').AsString;
+      modelo.objeto.CFOP_ID                       := lQry.FieldByName('CFOP_ID').AsString;
+      modelo.objeto.CFOP_NF                       := lQry.FieldByName('CFOP_NF').AsString;
+      modelo.objeto.PESO_LIQUIDO                  := lQry.FieldByName('PESO_LIQUIDO').AsString;
+      modelo.objeto.PESO_BRUTO                    := lQry.FieldByName('PESO_BRUTO').AsString;
+      modelo.objeto.QTDE_VOLUME                   := lQry.FieldByName('QTDE_VOLUME').AsString;
+      modelo.objeto.ESPECIE_VOLUME                := lQry.FieldByName('ESPECIE_VOLUME').AsString;
+      modelo.objeto.TRA_MARCA                     := lQry.FieldByName('TRA_MARCA').AsString;
+      modelo.objeto.TRA_NUMERACAO                 := lQry.FieldByName('TRA_NUMERACAO').AsString;
+      modelo.objeto.TRANSPORTADORA_ID             := lQry.FieldByName('TRANSPORTADORA_ID').AsString;
+      modelo.objeto.UF_EMBARQUE                   := lQry.FieldByName('UF_EMBARQUE').AsString;
+      modelo.objeto.LOCAL_EMBARQUE                := lQry.FieldByName('LOCAL_EMBARQUE').AsString;
+      modelo.objeto.INTERMEDIADOR_CNPJ            := lQry.FieldByName('INTERMEDIADOR_CNPJ').AsString;
+      modelo.objeto.INTERMEDIADOR_NOME            := lQry.FieldByName('INTERMEDIADOR_NOME').AsString;
+      modelo.objeto.DATA_SAIDA                    := lQry.FieldByName('DATA_SAIDA').AsString;
+      modelo.objeto.HORA_SAIDA                    := lQry.FieldByName('HORA_SAIDA').AsString;
+      modelo.objeto.VALOR_NF                      := lQry.FieldByName('VALOR_NF').AsString;
 
       modelo.objeto.razao_social_cliente          := lQry.FieldByName('razao_social_cliente').AsString;
       modelo.objeto.cliente_nome_cliente          := lQry.FieldByName('cliente_nome_cliente').AsString;
