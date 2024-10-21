@@ -3,6 +3,7 @@ unit IW.API.Engine;
 interface
   uses
     Sysutils,Classes,
+    IW.API.Context.Iface,
     Terasoft.Framework.Types,
     System.SyncObjs,
     Spring.Collections,
@@ -12,12 +13,13 @@ interface
     IWAPISERVER_PROCESSOPADRAO    = 'PADRAO';
 
   type
-    TProcessoIWAPI = reference to function(pDoc: TipoWideStringFramework;pResultado:IResultadoOperacao): IResultadoOperacao;
+    TProcessoIWAPI = reference to procedure(pCtx: IContextoAPIIW);
 
 
   procedure registraProcessoComandoAPIIW(comando: String; caminho: String; const processo: TProcessoIWAPI);
   procedure removeProcessoComandoAPIIW(const comando: String; caminho: String);
-  function retornaProcessoMiniServer(const comando: string;  caminho: String): TProcessoIWAPI;
+  function retornaProcessoAPIIW(const comando: string; caminho: String): TProcessoIWAPI;
+  function retornaProcessoAuthAPIIW(caminho: String): TProcessoIWAPI;
 
   procedure registraProcessoPatchAPIIW(const caminho: String; const processo: TProcessoIWAPI);
   procedure registraProcessoGetAPIIW(const caminho: String; const processo: TProcessoIWAPI);
@@ -85,7 +87,12 @@ begin
   end;
 end;
 
-function retornaProcessoMiniServer(const comando: string; caminho: String): TProcessoIWAPI;
+function retornaProcessoAuthAPIIW;
+begin
+  Result := retornaProcessoAPIIW('auth',caminho);
+end;
+
+function retornaProcessoAPIIW(const comando: string; caminho: String): TProcessoIWAPI;
   var
     lista: TDicionario;
 begin
