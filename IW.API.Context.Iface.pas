@@ -54,6 +54,11 @@ interface
       function getUsuarioModel: ITUsuarioModel;
       procedure setUsuarioModel(const pValue: ITUsuarioModel);
 
+    //property usuarioAPI getter/setter
+      function getUsuarioAPI: TipoWideStringFramework;
+      procedure setUsuarioAPI(const pValue: TipoWideStringFramework);
+
+      property usuarioAPI: TipoWideStringFramework read getUsuarioAPI write setUsuarioAPI;
       property usuarioModel: ITUsuarioModel read getUsuarioModel write setUsuarioModel;
       property cfg: IMultiConfig read getCfg write setCfg;
       property session: TIWApplication read getSession write setSession;
@@ -86,6 +91,11 @@ implementation
       fSession: TIWApplication;
       fCfg: IMultiConfig;
       fUsuarioModel: ITUsuarioModel;
+      fUsuarioAPI: TipoWideStringFramework;
+
+    //property usuarioAPI getter/setter
+      function getUsuarioAPI: TipoWideStringFramework;
+      procedure setUsuarioAPI(const pValue: TipoWideStringFramework);
 
     //property cfg getter/setter
       function getCfg: IMultiConfig;
@@ -132,6 +142,16 @@ begin
 end;
 
 { TContextoAPIIWImpl }
+
+procedure TContextoAPIIWImpl.setUsuarioAPI(const pValue: TipoWideStringFramework);
+begin
+  fUsuarioAPI := pValue;
+end;
+
+function TContextoAPIIWImpl.getUsuarioAPI: TipoWideStringFramework;
+begin
+  Result := fUsuarioAPI;
+end;
 
 procedure TContextoAPIIWImpl.setUsuarioModel(const pValue: ITUsuarioModel);
 begin
@@ -191,6 +211,7 @@ begin
   if fResultado.erros<>save then
     exit;
   proc(self);
+  Result := fResultado.erros=save;
 end;
 
 function TContextoAPIIWImpl.getParams: TStrings;

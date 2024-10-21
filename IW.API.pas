@@ -40,14 +40,14 @@ end;
 function getHTTPMethodStr(const pMetodo: THttpMethod): String;
 begin
   case pMetodo of
-    hmGet: Result := 'get';
-    hmPost: Result := 'post';
-    hmPut: Result := 'put';
-    hmHead: Result := 'head';
-    hmDelete: Result := 'delete';
-    hmOptions: Result := 'options';
+    hmGet: Result := 'GET';
+    hmPost: Result := 'POST';
+    hmPut: Result := 'PUT';
+    hmHead: Result := 'HEAD';
+    hmDelete: Result := 'DELETE';
+    hmOptions: Result := 'OPTIONS';
     else //{hmNone:
-      Result := 'none';
+      Result := 'NONE';
   end;
 end;
 
