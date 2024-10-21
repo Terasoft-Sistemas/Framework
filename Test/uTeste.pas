@@ -276,6 +276,11 @@ type
     GroupBox9: TGroupBox;
     Label5: TLabel;
     lPrestamista: TLabel;
+    Recibo: TTabSheet;
+    btnInserirRecibo: TButton;
+    btnConsultarRecibo: TButton;
+    btnUpdateRecibo: TButton;
+    btnExcluirRecibo: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -438,6 +443,10 @@ type
     procedure btnGrupoComissaoClick(Sender: TObject);
     procedure btnObterConsultaComissaoClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure btnInserirReciboClick(Sender: TObject);
+    procedure btnUpdateReciboClick(Sender: TObject);
+    procedure btnExcluirReciboClick(Sender: TObject);
+    procedure btnConsultarReciboClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -477,7 +486,7 @@ uses
   SaidasItensModel, ClientesEnderecoModel, OrcamentoModel, OrcamentoItensModel, Terasoft.Utils,
   SolicitacaoDescontoModel, PermissaoRemotaModel, MovimentoSerialModel, Impressao.Contratos,
   UsuarioModel, TabelaJurosDiaModel, TabelaJurosPromocaoModel, EndPointEditor,
-  LogWeb, VendasVendedorModel;
+  LogWeb, VendasVendedorModel, ReciboModel;
 
 {$R *.dfm}
 
@@ -551,6 +560,41 @@ begin
     dLiberacao.DataSet := dsTmp.objeto;
   finally
     lPermissaoRemotaModel:=nil;
+  end;
+end;
+
+procedure TForm1.btnConsultarReciboClick(Sender: TObject);
+var
+  lReciboModel : ITReciboModel;
+  lMemTable : IFDDataset;
+begin
+  lReciboModel := TReciboModel.getNewIface(vIConexao);
+  try
+    try
+      lMemTable := lReciboModel.objeto.obterLista;
+
+      memoResultado.Lines.Clear;
+
+      lMemTable.objeto.First;
+      while not lMemTable.objeto.Eof do
+      begin
+        memoResultado.Lines.Add('ID: '+lMemTable.objeto.FieldByName('ID').AsString);
+        memoResultado.Lines.Add('VALOR: '+lMemTable.objeto.FieldByName('VALOR').AsString);
+        memoResultado.Lines.Add('CLIENTE_ID: '+lMemTable.objeto.FieldByName('CLIENTE_ID').AsString);
+        memoResultado.Lines.Add('REFERENTE: '+lMemTable.objeto.FieldByName('REFERENTE').AsString);
+        memoResultado.Lines.Add('DOCUMENTO_ID: '+lMemTable.objeto.FieldByName('DOCUMENTO_ID').AsString);
+        memoResultado.Lines.Add('TIPO_DOCUMENTO: '+lMemTable.objeto.FieldByName('TIPO_DOCUMENTO').AsString);
+
+        memoResultado.Lines.Add('===============================================');
+        lMemTable.objeto.Next;
+      end;
+
+    except
+     on E:Exception do
+       ShowMessage('Erro: ' + E.Message);
+    end;
+  finally
+    lReciboModel:=nil;
   end;
 end;
 
@@ -654,6 +698,21 @@ begin
   end;
 end;
 
+procedure TForm1.btnExcluirReciboClick(Sender: TObject);
+var
+  lReciboModel : ITReciboModel;
+begin
+  lReciboModel := TReciboModel.getNewIface(vIConexao);
+
+  try
+    lReciboModel.objeto.Excluir('000001');
+    ShowMessage('Excluído com Sucesso');
+
+  finally
+    lReciboModel:=nil;
+  end;
+end;
+
 procedure TForm1.btnFinanceiroPedidoClick(Sender: TObject);
 var
   lFinanceiroPedidoModel : ITFinanceiroPedidoModel;
@@ -705,6 +764,27 @@ begin
     dsTeste2.DataSet := dsTmp.objeto;
   finally
     lVendasVendedorModel := nil;
+  end;
+end;
+
+procedure TForm1.btnInserirReciboClick(Sender: TObject);
+var
+  lReciboModel : ITReciboModel;
+begin
+  lReciboModel := TReciboModel.getNewIface(vIConexao);
+  try
+    try
+      lReciboModel.objeto.REFERENTE   := 'TESTE123';
+      lReciboModel.objeto.VALOR := 10;
+      lReciboModel.objeto.Incluir;
+
+      ShowMessage('Incluido com sucesso');
+    except
+       on E:Exception do
+         ShowMessage('Erro: ' + E.Message);
+      end;
+  finally
+    lReciboModel:=nil;
   end;
 end;
 
@@ -3457,6 +3537,24 @@ begin
     memoResultado.Lines.Add('===============================================');
   finally
     lWebPedidoModel:=nil;
+  end;
+end;
+
+procedure TForm1.btnUpdateReciboClick(Sender: TObject);
+var
+  lReciboModel : ITReciboModel;
+begin
+  lReciboModel := TReciboModel.getNewIface(vIConexao);
+
+  try
+    lReciboModel := lReciboModel.objeto.Alterar('000001');
+    lReciboModel.objeto.REFERENTE := 'TESTE321';
+    lReciboModel.objeto.Salvar;
+
+    ShowMessage('Alterado com Sucesso');
+
+  finally
+    lReciboModel:=nil;
   end;
 end;
 

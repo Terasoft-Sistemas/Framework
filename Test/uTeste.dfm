@@ -21,7 +21,7 @@ object Form1: TForm1
     Top = 0
     Width = 1254
     Height = 769
-    ActivePage = TabSheet11
+    ActivePage = Recibo
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -2109,6 +2109,46 @@ object Form1: TForm1
           Font.Style = []
           ParentFont = False
         end
+      end
+    end
+    object Recibo: TTabSheet
+      Caption = 'Recibo'
+      ImageIndex = 19
+      object btnInserirRecibo: TButton
+        Left = 11
+        Top = 15
+        Width = 182
+        Height = 42
+        Caption = 'Recibo Inserir'
+        TabOrder = 0
+        OnClick = btnInserirReciboClick
+      end
+      object btnConsultarRecibo: TButton
+        Left = 199
+        Top = 15
+        Width = 182
+        Height = 42
+        Caption = 'Recibo Consultar'
+        TabOrder = 1
+        OnClick = btnConsultarReciboClick
+      end
+      object btnUpdateRecibo: TButton
+        Left = 387
+        Top = 15
+        Width = 182
+        Height = 42
+        Caption = 'Recibo Update'
+        TabOrder = 2
+        OnClick = btnUpdateReciboClick
+      end
+      object btnExcluirRecibo: TButton
+        Left = 575
+        Top = 15
+        Width = 182
+        Height = 42
+        Caption = 'Recibo Excluir'
+        TabOrder = 3
+        OnClick = btnExcluirReciboClick
       end
     end
   end

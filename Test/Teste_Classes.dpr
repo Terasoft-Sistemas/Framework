@@ -172,7 +172,9 @@ uses
   EndPointEditor in '..\Editors\EndPointEditor.pas' {frmEditorConsultas},
   LogWeb in 'LogWeb.pas' {fromLogWeb},
   VendasVendedorModel in '..\Model\VendasVendedorModel.pas',
-  VendasVendedorDao in '..\Dao\VendasVendedorDao.pas';
+  VendasVendedorDao in '..\Dao\VendasVendedorDao.pas',
+  ReciboModel in '..\Model\ReciboModel.pas',
+  ReciboDao in '..\Dao\ReciboDao.pas';
 
 {$R *.res}
 
