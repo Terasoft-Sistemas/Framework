@@ -10,6 +10,7 @@ interface
     Terasoft.Framework.MultiConfig,
     Terasoft.Framework.JSON,
     Terasoft.Framework.Types,
+    Terasoft.Framework.DB,
     UsuarioModel,
     Terasoft.Framework.Texto;
 
@@ -58,6 +59,11 @@ interface
       function getUsuarioAPI: TipoWideStringFramework;
       procedure setUsuarioAPI(const pValue: TipoWideStringFramework);
 
+    //property gdb getter/setter
+      function getGdb: IGDB;
+      procedure setGdb(const pValue: IGDB);
+
+      property gdb: IGDB read getGdb write setGdb;
       property usuarioAPI: TipoWideStringFramework read getUsuarioAPI write setUsuarioAPI;
       property usuarioModel: ITUsuarioModel read getUsuarioModel write setUsuarioModel;
       property cfg: IMultiConfig read getCfg write setCfg;
@@ -76,6 +82,7 @@ interface
 
 implementation
   uses
+    Terasoft.Framework.DB.FIBPlus,
     UserSessionUnit,
     IW.API.Engine;
 
@@ -92,6 +99,11 @@ implementation
       fCfg: IMultiConfig;
       fUsuarioModel: ITUsuarioModel;
       fUsuarioAPI: TipoWideStringFramework;
+      fGdb: IGDB;
+
+    //property gdb getter/setter
+      function getGdb: IGDB;
+      procedure setGdb(const pValue: IGDB);
 
     //property usuarioAPI getter/setter
       function getUsuarioAPI: TipoWideStringFramework;
@@ -142,6 +154,25 @@ begin
 end;
 
 { TContextoAPIIWImpl }
+
+procedure TContextoAPIIWImpl.setGdb(const pValue: IGDB);
+begin
+  fGdb := pValue;
+end;
+
+function TContextoAPIIWImpl.getGdb: IGDB;
+  var
+    dbName: String;
+begin
+  if(fGDB=nil) then
+  begin
+    fGDB := criaDBFIBPlus;
+    fGDB.testarPortaFirebird := false;
+    dbName := TIWUserSession(fSession.Data).xConexao.gdb.databaseName;
+    fGDB.conectar(dbName);
+  end;
+  Result := fGdb;
+end;
 
 procedure TContextoAPIIWImpl.setUsuarioAPI(const pValue: TipoWideStringFramework);
 begin
@@ -203,8 +234,8 @@ function TContextoAPIIWImpl.auth: boolean;
     save: Integer;
 begin
   Result := false;
-  proc := retornaProcessoAuthAPIIW(IWAPISERVER_PROCESSOPADRAO);
   save := getResultado.erros;
+  proc := retornaProcessoAuthAPIIW(fPath,true);
   if assigned(proc)=false then
     fResultado.adicionaErro('Não existe processo de autenticação registrado');
 

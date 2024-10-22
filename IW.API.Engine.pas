@@ -18,8 +18,8 @@ interface
 
   procedure registraProcessoComandoAPIIW(comando: String; caminho: String; const processo: TProcessoIWAPI);
   procedure removeProcessoComandoAPIIW(const comando: String; caminho: String);
-  function retornaProcessoAPIIW(const comando: string; caminho: String): TProcessoIWAPI;
-  function retornaProcessoAuthAPIIW(caminho: String): TProcessoIWAPI;
+  function retornaProcessoAPIIW(const comando: string; caminho: String; pRetornaPadrao: boolean = true): TProcessoIWAPI;
+  function retornaProcessoAuthAPIIW(caminho: String; pRetornaPadrao: boolean = true): TProcessoIWAPI;
 
   procedure registraProcessoPatchAPIIW(const caminho: String; const processo: TProcessoIWAPI);
   procedure registraProcessoGetAPIIW(const caminho: String; const processo: TProcessoIWAPI);
@@ -89,10 +89,10 @@ end;
 
 function retornaProcessoAuthAPIIW;
 begin
-  Result := retornaProcessoAPIIW('auth',caminho);
+  Result := retornaProcessoAPIIW('auth',caminho,pRetornaPadrao);
 end;
 
-function retornaProcessoAPIIW(const comando: string; caminho: String): TProcessoIWAPI;
+function retornaProcessoAPIIW;
   var
     lista: TDicionario;
 begin
@@ -104,7 +104,7 @@ begin
   try
     if listaProcessos.TryGetValue(uppercase(trim(comando)), lista) then begin
       lista.TryGetValue(caminho,Result);
-      if not Assigned(Result) then
+      if (not Assigned(Result)) and pRetornaPadrao then
         lista.TryGetValue(IWAPISERVER_PROCESSOPADRAO,Result);
     end;
   finally

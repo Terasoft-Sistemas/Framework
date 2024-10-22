@@ -78,23 +78,24 @@ begin
     //aReply.CharSet := 'UTF-8';
     aReply.Headers.Add('Access-Control-Allow-Origin: *');
 
-    if not ctx.auth then
-      exit;
+    try
 
-    proc := retornaProcessoAPIIW(getHTTPMethodStr(aRequest.HttpMethod),lDoc);
-    if assigned(proc)=false then
-    begin
-      ctx.resultado.formataErro('Comando [%s] para o caminho [%s] não existe.', [ getHTTPMethodStr(aRequest.HttpMethod),lDoc ] );
-    end;
-    if(ctx.resultado.erros=0) then
+      proc := retornaProcessoAPIIW(getHTTPMethodStr(aRequest.HttpMethod),lDoc,false);
+      if assigned(proc)=false then
+      begin
+        ctx.resultado.formataErro('Comando [%s] para o caminho [%s] não existe.', [ getHTTPMethodStr(aRequest.HttpMethod),lDoc ] );
+        exit;
+      end;
+
+      if not ctx.auth then
+        exit;
+
       proc(ctx);
+    except
+      on e: Exception do
+        ctx.resultado.formataErro('%s; %s', [e.ClassName, e.Message ]);
+    end;
 
-
-    //test;
-    //login :=  TIWUserSession(aSession.Data).AcaoMenu('TfLogin', False) as TfLogin;
-    //login.testarDashboard;
-
-    //aReply.WriteString('Done');
   finally
     if(ctx.resultado.erros>0) then
     begin
