@@ -521,6 +521,8 @@ begin
       modelo.objeto.DATA_SAIDA                    := lQry.FieldByName('DATA_SAIDA').AsString;
       modelo.objeto.HORA_SAIDA                    := lQry.FieldByName('HORA_SAIDA').AsString;
       modelo.objeto.VALOR_NF                      := lQry.FieldByName('VALOR_NF').AsString;
+      modelo.objeto.OBS_NF                        := lQry.FieldByName('OBS_NF').AsString;
+      modelo.objeto.FISCO_NF                      := lQry.FieldByName('FISCO_NF').AsString;
 
       modelo.objeto.razao_social_cliente          := lQry.FieldByName('razao_social_cliente').AsString;
       modelo.objeto.cliente_nome_cliente          := lQry.FieldByName('cliente_nome_cliente').AsString;

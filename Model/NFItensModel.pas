@@ -526,124 +526,49 @@ uses
 
 function TNFItensModel.VendeItem: String;
 begin
-  FNUMERO_NF           := NUMERO_NF;
-  FCODIGO_PRO          := CODIGO_PRO;
-  FQUANTIDADE_NF       := QUANTIDADE_NF;
-  FVALORUNITARIO_NF    := VALORUNITARIO_NF;
+  FNUMERO_NF        := NUMERO_NF;
+  FCODIGO_PRO       := CODIGO_PRO;
+  FQUANTIDADE_NF    := QUANTIDADE_NF;
+  FVALORUNITARIO_NF := VALORUNITARIO_NF;
+  FICMS_ORIGEM      := ICMS_ORIGEM;
+  FCFOP_ID          := CFOP_ID;
+  FCFOP             := CFOP;
+  FCST_N12          := CST_N12;
+  FCSOSN            := CSOSN;
+  FVDESC            := VDESC;
+  FVSEG             := VSEG;
+  FFRETE            := FRETE;
+  FVOUTROS          := VOUTROS;
+  FVBC_IPI          := VBC_IPI;
+  FIPI_NF           := IPI_NF;
+  FVALOR_IPI        := VALOR_IPI;
 
-//  FVALOR_VENDACADASTRO := '';
-//  FVALOR_CUSTOCADASTRO := '';
-//  FICMS_ORIGEM         := '0';
-//
-//  FCFOP_ID             := CFOP_ID;
-//  FCOMISSAO_PERCENTUAL := '';
-//  FVALOR_SEGURO        := VALOR_SEGURO;
-//  FVALOR_FRETE         := VALOR_FRETE;
-//  FVALOR_OUTROS        := VALOR_OUTROS;
-//
-//  FICMS_MODADEDADE     := '99';
-//  FICMS_CST            := '00';
-//  FICMS_CSOSN          := '102';
-//  FICMS_ALIQUOTA       := ICMS_ALIQUOTA;
-//  FICMS_REDUCAO        := ICMS_REDUCAO;
-//  FICMS_BASE           := ICMS_BASE;
-//  FICMS_VALOR          := ICMS_VALOR;
-//
-//  FICMS_VCREDICMSSN    := '10';
-//  FICMS_PCREDSN        := '10';
-//
-//  FICMSST_MODALIDADE   := '99';
-//  FICMSST_ALIQUOTA     := ICMSST_ALIQUOTA;
-//  FICMSST_MVA          := ICMSST_MVA;
-//  FICMSST_REDUCAO      := ICMSST_REDUCAO;
-//  FICMSST_BASE         := ICMSST_BASE;
-//  FICMSST_VALOR        := ICMSST_VALOR;
-//
-//  FPIS_CST             := '99';
-//  FPIS_ALIQUOTA        := '1.65';
-//  FPIS_BASE            := '10';
-//  FPIS_VALOR           := '10';
-//
-//  FCOFINS_CST          := '99';
-//  FCOFINS_ALIQUOTA     := '7.60';
-//  FCOFINS_BASE         := '10';
-//  FCOFINS_VALOR        := '10';
-//
-//  FIPI_CST             := '99';
-//  FIPI_BASE            := IPI_BASE;
-//  FIPI_VALOR           := IPI_VALOR;
-//  FIPI_ALIQUOTA        := IPI_ALIQUOTA;
-//
-//  FOBSERVACAO_ITEM     := '';
-//
-//  FVTOTTRIB_FEDERAL    := '10';
-//  FVTOTTRIB_ESTADUAL   := '10';
-//  FVTOTTRIB_MUNICIPAL  := '10';
-//
-//  FDI_NUMERO           := DI_NUMERO;
-//  FDI_DATA             := DI_DATA;
-//  FDI_LOCDESEMB        := DI_LOCDESEMB;
-//  FDI_UFDESEMB         := DI_UFDESEMB;
-//  FDI_DDESEMB          := DI_DDESEMB;
-//  FDI_CEXPORTADOR      := DI_CEXPORTADOR;
-//  FDI_NADICAO          := DI_NADICAO;
-//  FDI_NSEQADIC         := DI_NSEQADIC;
-//  FDI_CFABRICANTE      := DI_CFABRICANTE;
-//  FDI_VDESCDI          := DI_VDESCDI;
-//  FDI_VDESPADU         := DI_VDESPADU;
-//  FDI_NDRAW            := DI_NDRAW;
-//  FII_BASE             := II_BASE;
-//  FII_VALOR            := II_VALOR;
-//  FII_ALIQUOTA         := II_ALIQUOTA;
-//  FIOF_VALOR           := IOF_VALOR;
-//  FDI_VAFRMM           := DI_VAFRMM;
-//
-//  FNITEMPED            := '';
-//  FXPED                := '';
-//  FTPVIATRANSP         := '';
-//  FTPINTERMEDIO        := '';
-//  FVAFRMM_OPC          := '';
-//  FVBCUFDEST           := '';
-//  FPFCPUFDEST          := '';
-//  FPICMSUFDEST         := '';
-//  FPICMSINTER          := '';
-//  FPICMSINTERPART      := '';
-//  FVFCPUFDEST          := '';
-//  FVICMSUFDEST         := '';
-//  FVICMSUFREMET        := '';
-//  FPCREDICMS           := '';
-//  FPCREDPIS            := '';
-//  FPCREDCOFINS         := '';
-//  FVBCFCPUFDEST        := '';
-//  FVBCFCPST            := '';
-//  FPFCPST              := '';
-//  FVFCPST              := '';
-//  FVBCCFP              := '';
-//  FPFCP                := '';
-//  FVFCP                := '';
-//  FVBCFCPSTRET         := '';
-//  FPFCPSTRET           := '';
-//  FVFCPSTRET           := '';
-//  FCBENEF              := '';
-//  FINDESCALA           := '';
-//  FCNPJFAB             := '';
-//  FPREDBCEFET          := '';
-//  FVBCEFET             := '';
-//  FPICMSEFET           := '';
-//  FVICMSEFET           := '';
-//  FVBCSTRET            := '';
-//  FVICMSSTRET          := '';
-//  FPICMSSTRET          := '';
-//  FVICMSSUBISTITUTORET := '';
-//  FVICMSDESON          := '';
-//  FMOTDESICMS          := '';
-//  FPCRED_PRESUMIDO     := '';
-//  FNDRAW               := '';
-//  FPPRCOMP             := '';
-//  FVPRCOMP             := '';
-//  FNRE                 := '';
-//  FCHNFE               := '';
-//  FQEXPORT             := '';
+  FPREDBC_N14       := PREDBC_N14;
+  FVBC_N15          := VBC_N15;
+  FICMS_NF          := ICMS_NF;
+  FVICMS_N17        := VICMS_N17;
+
+  FPMVAST_N19       := PMVAST_N19;
+  FPREDBCST_N20     := PREDBCST_N20;
+  FVBCST_N21        := VBCST_N21;
+  FPICMSST_N22      := PICMSST_N22;
+  FVICMSST_N23      := VICMSST_N23;
+
+  FNDI_I19          := NDI_I19;
+  FDDI_I20          := DDI_I20;
+  FNADICAO_I26      := NADICAO_I26;
+  FCEXPORTADOR_I24  := CEXPORTADOR_I24;
+  FCFABRICANTE_I28  := CFABRICANTE_I28;
+  FNDRAW            := NDRAW;
+  FVDESPADU_P03     := VDESPADU_P03;
+  FVDESCDI_I29      := VDESCDI_I29;
+
+  FALIQUOTA_II      := ALIQUOTA_II ;
+  FVBC_P02          := VBC_P02;
+  FVII_P04          := VII_P04;
+  FVIOF_P05         := VIOF_P05;
+
+  FEXTIPI           := EXTIPI;
 
   Result := Self.Salvar;
 end;
