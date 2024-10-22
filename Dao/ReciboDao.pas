@@ -211,8 +211,14 @@ begin
               '         RECIBO.DOCUMENTO_ID,                              '+SLineBreak+
               '         RECIBO.TIPO_DOCUMENTO,                            '+SLineBreak+
               '         RECIBO.DATA,                                      '+SLineBreak+
-              '         RECIBO.MATRICIAL                                  '+SLineBreak+
+              '         RECIBO.MATRICIAL,                                 '+SLineBreak+
+              '         CLIENTES.FANTASIA_CLI,                            '+SLineBreak+
+              '         CLIENTES.ENDERECO_CLI,                            '+SLineBreak+
+              '         CLIENTES.CIDADE_CLI,                              '+SLineBreak+
+              '         CLIENTES.UF_CLI                                   '+SLineBreak+
               '    from RECIBO                                            '+SLineBreak+
+              '    left join CLIENTES                                     '+SLineBreak+
+              '    on CLIENTES.CODIGO_CLI = RECIBO.CLIENTE_ID             '+SLineBreak+
               '   where 1=1                                               '+SLineBreak;
 
     lSql := lSql + where;
@@ -239,7 +245,10 @@ begin
   try
     lQry := vIConexao.CriarQuery;
 
-    lSql := 'select count(*) records From RECIBO where 1=1 ';
+    lSql := 'select count(*) records From RECIBO            '+
+            '    left join CLIENTES                         '+
+            '    on CLIENTES.CODIGO_CLI = RECIBO.CLIENTE_ID '+
+            'where 1=1 ';
 
     lSql := lSql + where;
 
