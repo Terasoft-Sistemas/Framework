@@ -215,6 +215,7 @@ type
     FTOTAL_IPI: Variant;
     FTOTAL_BASE_PIS: Variant;
     FTOTAL_TOTALNF: Variant;
+    FNumeroNFView: String;
     procedure SetAcao(const Value: TAcao);
     procedure SetACRES_NF(const Value: Variant);
     procedure SetAGRUPAMENTO_FATURA(const Value: Variant);
@@ -412,6 +413,7 @@ type
     procedure SetTOTAL_PIS(const Value: Variant);
     procedure SetTOTAL_PRODUTOS(const Value: Variant);
     procedure SetTOTAL_TOTALNF(const Value: Variant);
+    procedure SetNumeroNFView(const Value: String);
 
   public
     property  Acao                         :TAcao   read FAcao write SetAcao;
@@ -616,6 +618,7 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property IDPedidoView: Integer read FIDPedidoView write SetIDPedidoView;
+    property NumeroNFView: String read FNumeroNFView write SetNumeroNFView;
 
     constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -646,7 +649,7 @@ var
 begin
   lNFDao := TNFDao.getNewIface(vIConexao);
 
-  lNFDao.objeto.IDRecordView := FIDRecordView;
+  lNFDao.objeto.NumeroNFView := FNumeroNFView;
 
   Result := lNFDao.objeto.obterTotalizador;
 
@@ -1284,6 +1287,11 @@ end;
 procedure TNFModel.SetNOME_XML(const Value: Variant);
 begin
   FNOME_XML := Value;
+end;
+
+procedure TNFModel.SetNumeroNFView(const Value: String);
+begin
+  FNumeroNFView := Value;
 end;
 
 procedure TNFModel.Setnumero_cliente(const Value: Variant);

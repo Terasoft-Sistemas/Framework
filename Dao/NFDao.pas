@@ -5,7 +5,6 @@ interface
 uses
   FireDAC.Comp.Client,
   NFModel,
-  System.SysUtils,
   System.StrUtils,
   Spring.Collections,
   System.Variants,
@@ -35,6 +34,7 @@ type
     FNFModel: ITNFModel;
     FTotalRecords: Integer;
     FIDPedidoView: Integer;
+    FNumeroNFView: String;
     procedure SetNFLista(const Value: IList<ITNFModel>);
     procedure SetCountView(const Value: String);
     procedure SetIDPedidoView(const Value: Integer);
@@ -48,6 +48,7 @@ type
     function where: String;
     procedure obterTotalRegistros;
     procedure SetNFModel(const Value: ITNFModel);
+    procedure SetNumeroNFView(const Value: String);
 
   public
     property NFLista: IList<ITNFModel> read FNFLista write SetNFLista;
@@ -60,6 +61,7 @@ type
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
     property IDPedidoView: Integer read FIDPedidoView write SetIDPedidoView;
+    property NumeroNFView: String read FNumeroNFView write SetNumeroNFView;
 
     constructor _Create(pIConexao : IConexao);
     destructor Destroy; override;
@@ -84,7 +86,7 @@ implementation
 
 uses
   System.Rtti,
-  ClipBrd;
+  ClipBrd, System.SysUtils;
 
 { TNFDao }
 
@@ -596,7 +598,7 @@ begin
             ' select                                                                                 '+SLineBreak+
             '     count(*) QUANTIDADE_ITENS,                                                         '+SLineBreak+
             '     sum(i.quantidade_nf) QUANTIDADE_PRODUTOS,                                          '+SLineBreak+
-            '     sum(i.valorunitario_nf * i.quantidade_nf) TOTAL_PRODUTOS,                         '+SLineBreak+
+            '     sum(i.valorunitario_nf * i.quantidade_nf) TOTAL_PRODUTOS,                          '+SLineBreak+
             '     sum(i.VBC_N15) TOTAL_BASE_ICMS,                                                    '+SLineBreak+
             '     sum(i.VICMS_N17) TOTAL_ICMS,                                                       '+SLineBreak+
             '     sum(i.VBCST_N21) TOTAL_BASE_ICMS_ST,                                               '+SLineBreak+
@@ -612,12 +614,12 @@ begin
             '     sum(i.vfcpst) TOTAL_FCP_ST,                                                        '+SLineBreak+
             '     sum(i.frete) TOTAL_FRETE,                                                          '+SLineBreak+
             '     sum(i.voutros) TOTAL_OUTROS,                                                       '+SLineBreak+
-            '     sum(((0/100)*i.valorunitario_nf) * cast(i.quantidade_nf as float)) TOTAL_DESCONTO '+SLineBreak+
+            '     sum(((0/100)*i.valorunitario_nf) * cast(i.quantidade_nf as float)) TOTAL_DESCONTO  '+SLineBreak+
             '                                                                                        '+SLineBreak+
             ' from                                                                                   '+SLineBreak+
             '     nfitens i                                                                          '+SLineBreak+
             '                                                                                        '+SLineBreak+
-            ' where i.ID = '+IntToStr(FIDRecordView);
+            ' where i.Numero_NF = ' + QuotedStr(ifThen(FNumeroNFView <> '', FNumeroNFView, '-1'));
 
 
     lQry.Open(lSQL);
@@ -709,6 +711,11 @@ end;
 procedure TNFDao.SetNFModel(const Value: ITNFModel);
 begin
   FNFModel := Value;
+end;
+
+procedure TNFDao.SetNumeroNFView(const Value: String);
+begin
+  FNumeroNFView := Value;
 end;
 
 procedure TNFDao.SetOrderView(const Value: String);
