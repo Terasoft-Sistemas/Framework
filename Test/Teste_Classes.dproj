@@ -286,6 +286,8 @@
         </DCCReference>
         <DCCReference Include="..\Model\VendasVendedorModel.pas"/>
         <DCCReference Include="..\Dao\VendasVendedorDao.pas"/>
+        <DCCReference Include="..\Model\ReciboModel.pas"/>
+        <DCCReference Include="..\Dao\ReciboDao.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
