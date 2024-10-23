@@ -3,8 +3,8 @@ unit MovimentoModel;
 interface
 
 uses
-  Terasoft.Types,
   Spring.Collections,
+  Terasoft.Types,
   Terasoft.Framework.ObjectIface,
   Interfaces.Conexao,
   FireDAC.Comp.Client;
@@ -45,9 +45,6 @@ type
     FOBS_MOV: Variant;
     FUSUARIO_ID: Variant;
     FVALOR_MOV: Variant;
-    FIDProduto: String;
-    FDataFinalView: Variant;
-    FDataInicialView: Variant;
     procedure SetAcao(const Value: TAcao);
     procedure SetCountView(const Value: String);
     procedure SetMovimentosLista(const Value: IList<ITMovimentoModel>);
@@ -76,9 +73,6 @@ type
     procedure SetUSUARIO_ID(const Value: Variant);
     procedure SetVALOR_MOV(const Value: Variant);
     procedure SetVENDA_ATUAL(const Value: Variant);
-    procedure SetIDProduto(const Value: String);
-    procedure SetDataFinalView(const Value: Variant);
-    procedure SetDataInicialView(const Value: Variant);
 
   public
 
@@ -111,6 +105,7 @@ type
     procedure obterLista;
     function carregaClasse(pId: String): ITMovimentoModel;
     function obterListaMemTable : IFDDataset;
+    function obterFichaProduto(pFicha_Parametros : TFicha_Parametros) : IFDDataset;
 
     property MovimentosLista: IList<ITMovimentoModel> read FMovimentosLista write SetMovimentosLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -121,9 +116,7 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
-    property IDProduto : String read FIDProduto write SetIDProduto;
-    property DataInicialView : Variant read FDataInicialView write SetDataInicialView;
-    property DataFinalView : Variant read FDataFinalView write SetDataFinalView;
+
   end;
 
 implementation
@@ -163,6 +156,23 @@ begin
   Result.objeto.myself := Result;
 end;
 
+function TMovimentoModel.obterFichaProduto(pFicha_Parametros: TFicha_Parametros): IFDDataset;
+var
+  lMovimento : ITMovimentoDao;
+  lFichaParametros : TFicha_Parametros;
+begin
+  lMovimento := TMovimentoDao.getNewIface(vIConexao);
+  try
+    lFichaParametros.CodigoProduto := pFicha_Parametros.CodigoProduto;
+    lFichaParametros.DataInicio    := pFicha_Parametros.DataInicio;
+    lFichaParametros.DataFim       := pFicha_Parametros.DataFim;
+
+    Result := lMovimento.objeto.obterFichaProduto(lFichaParametros);
+  finally
+    lMovimento := nil;
+  end;
+end;
+
 procedure TMovimentoModel.obterLista;
 var
   lMovimentoLista: ITMovimentoDao;
@@ -193,7 +203,6 @@ var
   lMovimento: ITMovimentoDao;
 begin
   lMovimento := TMovimentoDao.getNewIface(vIConexao);
-
   try
     lMovimento.objeto.TotalRecords    := FTotalRecords;
     lMovimento.objeto.WhereView       := FWhereView;
@@ -202,14 +211,10 @@ begin
     lMovimento.objeto.StartRecordView := FStartRecordView;
     lMovimento.objeto.LengthPageView  := FLengthPageView;
     lMovimento.objeto.IDRecordView    := FIDRecordView;
-    lMovimento.objeto.IDProduto       := FIDProduto;
-    lMovimento.objeto.DataInicialView := FDataInicialView;
-    lMovimento.objeto.DataFinalView   := FDataFinalView;
 
     Result := lMovimento.objeto.obterListaMemTable;
 
     FTotalRecords := lMovimento.objeto.TotalRecords;
-
   finally
     lMovimento:=nil;
   end;
@@ -260,19 +265,9 @@ begin
   FCUSTO_ATUAL := Value;
 end;
 
-procedure TMovimentoModel.SetDataFinalView(const Value: Variant);
-begin
-  FDataFinalView := Value;
-end;
-
 procedure TMovimentoModel.SetDATAHORA(const Value: Variant);
 begin
   FDATAHORA := Value;
-end;
-
-procedure TMovimentoModel.SetDataInicialView(const Value: Variant);
-begin
-  FDataInicialView := Value;
 end;
 
 procedure TMovimentoModel.SetDATA_DOC(const Value: Variant);
@@ -298,11 +293,6 @@ end;
 procedure TMovimentoModel.SetID(const Value: Variant);
 begin
   FID := Value;
-end;
-
-procedure TMovimentoModel.SetIDProduto(const Value: String);
-begin
-  FIDProduto := Value;
 end;
 
 procedure TMovimentoModel.SetIDRecordView(const Value: Integer);

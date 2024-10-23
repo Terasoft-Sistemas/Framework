@@ -284,6 +284,16 @@ type
   // FIM GESTAO PIX
 
   //
+  // FICHA PRODUTO
+  //
+  TFicha_Parametros = record
+    CodigoProduto,
+    DataInicio,
+    DataFim : String;
+  end;
+  // FIM FICHA PRODUTO
+
+  //
   // GRUPO PRODUTO
   //
   TGrupo_Parametros = record
