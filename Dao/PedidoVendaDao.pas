@@ -81,7 +81,8 @@ end;
 implementation
 
 uses
-  Vcl.Dialogs, System.Rtti, Terasoft.Configuracoes, Terasoft.Types;
+  Vcl.Dialogs, System.Rtti, Terasoft.Configuracoes, Terasoft.Types,
+  System.Math;
 
 { TPedidoVenda }
 
@@ -113,7 +114,7 @@ begin
       '        i.quantidade_ped,                                                                          '+SLineBreak+
       '        i.valorunitario_ped,                                                                       '+SLineBreak+
       '        (i.quantidade_ped * i.valorunitario_ped) total_produto,                                    '+SLineBreak+
-      '         i.vdesc desconto_item,                                                                    '+SLineBreak+
+      '         i.desconto_ped / 100 * (i.qtde_calculada * i.valorunitario_ped) desconto_item,            '+SLineBreak+
       '         i.quantidade_ped * i.valorunitario_ped / p.valor_ped * p.acres_ped acrescimo_item,        '+SLineBreak+
       '         i.valor_acrescimo,                                                                        '+SLineBreak+
       '         pro.customedio_pro,                                                                       '+SLineBreak+
@@ -134,7 +135,7 @@ begin
 
       modelo.objeto.PEDIDOITENS_ID     := lQry.FieldByName('PEDIDOITENS_ID').AsString;
       modelo.objeto.VALOR_PED          := lQry.FieldByName('VALOR_PED').AsString;
-      modelo.objeto.DESC_PED           := lQry.FieldByName('DESCONTO_ITEM').AsString;
+      modelo.objeto.DESC_PED           := RoundTo(lQry.FieldByName('DESCONTO_ITEM').AsFloat, -2);
       modelo.objeto.ACRES_PED          := lQry.FieldByName('ACRES_PED').AsString;
       modelo.objeto.UF_CLI             := lQry.FieldByName('UF_CLI').AsString;
       modelo.objeto.CODIGO_PRO         := lQry.FieldByName('CODIGO_PRO').AsString;
