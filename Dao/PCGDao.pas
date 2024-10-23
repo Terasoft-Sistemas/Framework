@@ -873,6 +873,11 @@ begin
       begin
         vNomeCampo := 't.nome DESCRICAO';
       end;
+
+    tpEstProduto:
+      begin
+        vNomeCampo := 'p.nome_pro DESCRICAO';
+      end;
   end;
 
 

@@ -74,7 +74,7 @@ type
   TNivelVisualizacaoDRG = (tpNivel1, tpNivel2, tpNivel3);
 
   TTipoAnalisePCG = (tpVendedores, tpClientes, tpProdutos, tpGrupo, tpGrupoComissao, tpPortador, tpFornecedor, tpMes, tpCidade, tpDia, tpMarca, tpUF, tpFilial);
-  TTipoAnaliseEstoquePCG = (tpEstGrupo, tpEstSubGrupo, tpEstFornecedor, tpEstMarca, tpEstTipo);
+  TTipoAnaliseEstoquePCG = (tpEstGrupo, tpEstSubGrupo, tpEstFornecedor, tpEstMarca, tpEstTipo, tpEstProduto);
   TFiliasPorPCG = (tpDescricao, tpNumero);
 
   TTipoAnaliseCurvaABC = (tpABCVendedores, tpABCClientes, tpABCProdutos, tpABCGrupo, tpABCGrupoComissao, tpABCPortador, tpABCFornecedor, tpABCMes, tpABCCidade, tpABCDia, tpABCMarca, tpABCUF);
@@ -282,6 +282,16 @@ type
     Lojas : String;
   end;
   // FIM GESTAO PIX
+
+  //
+  // FICHA PRODUTO
+  //
+  TFicha_Parametros = record
+    CodigoProduto,
+    DataInicio,
+    DataFim : String;
+  end;
+  // FIM FICHA PRODUTO
 
   //
   // GRUPO PRODUTO

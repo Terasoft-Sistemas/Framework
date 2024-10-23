@@ -13,6 +13,7 @@ uses
   Terasoft.FuncoesTexto,
   Terasoft.Framework.ObjectIface,
   Terasoft.Utils,
+  Terasoft.Types,
   Interfaces.Conexao;
 
 type
@@ -33,9 +34,6 @@ type
     FOrderView: String;
     FWhereView: String;
     FTotalRecords: Integer;
-    FIDProduto: String;
-    FDataFinalView: Variant;
-    FDataInicialView: Variant;
     procedure obterTotalRegistros;
     procedure SetCountView(const Value: String);
     procedure SetMovimentosLista(const Value: IList<ITMovimentoModel>);
@@ -46,11 +44,7 @@ type
     procedure SetStartRecordView(const Value: String);
     procedure SetTotalRecords(const Value: Integer);
     procedure SetWhereView(const Value: String);
-
     function where: String;
-    procedure SetIDProduto(const Value: String);
-    procedure SetDataFinalView(const Value: Variant);
-    procedure SetDataInicialView(const Value: Variant);
 
   public
     constructor _Create(pIConexao : IConexao);
@@ -67,17 +61,17 @@ type
     property StartRecordView: String read FStartRecordView write SetStartRecordView;
     property LengthPageView: String read FLengthPageView write SetLengthPageView;
     property IDRecordView: Integer read FIDRecordView write SetIDRecordView;
-    property IDProduto : String read FIDProduto write SetIDProduto;
-    property DataInicialView : Variant read FDataInicialView write SetDataInicialView;
-    property DataFinalView : Variant read FDataFinalView write SetDataFinalView;
 
     function incluir(pMovimentoModel: ITMovimentoModel): String;
     function alterar(pMovimentoModel: ITMovimentoModel): String;
     function excluir(pMovimentoModel: ITMovimentoModel): String;
 
     procedure obterLista;
+
     function obterListaMemTable : IFDDataset;
     function carregaClasse(pId: String): ITMovimentoModel;
+    function obterFichaProduto(pFicha_Parametros : TFicha_Parametros): IFDDataset;
+
     procedure setParams(var pQry: TFDQuery; pMovimentoModel: ITMovimentoModel);
 
 end;
@@ -215,18 +209,11 @@ function TMovimentoDao.where: String;
 var
   lSql : String;
 begin
-
-  if (FDataInicialView <> '') and (FDataFinalView <> '') then
-    lSql := ' and data_mov between ''' + transformaDataFireBirdWhere(FDataInicialView) + ''' and ''' + transformaDataFireBirdWhere(FDataFinalView) + ''' ';
-
   if not FWhereView.IsEmpty then
     lSQL := lSQL + FWhereView;
 
   if FIDRecordView <> 0  then
     lSQL := lSQL + ' and ID = '+IntToStr(FIDRecordView);
-
-  if FIDProduto <> '' then
-    lSql :=  lSql + ' and CODIGO_PRO = ' +QuotedStr(FIDProduto);
 
   Result := lSQL;
 end;
@@ -247,6 +234,44 @@ begin
 
     FTotalRecords := lQry.FieldByName('records').AsInteger;
 
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TMovimentoDao.obterFichaProduto(pFicha_Parametros: TFicha_Parametros): IFDDataset;
+var
+  lQry : TFDQuery;
+  lSQL : String;
+begin
+  lQry := vIConexao.CriarQuery;
+  try
+    lSQL := ' select s.codigo_pro,                                                      '+sLinebreak+
+            '        s.codigo_for,                                                      '+sLinebreak+
+            '        s.datahora,                                                        '+sLinebreak+
+            '        s.data_movimento,                                                  '+sLinebreak+
+            '        s.documento,                                                       '+sLinebreak+
+            '        s.observacao,                                                      '+sLinebreak+
+            '        s.valor,                                                           '+sLinebreak+
+            '        s.entrada,                                                         '+sLinebreak+
+            '        s.saida,                                                           '+sLinebreak+
+            '        s.acumulado,                                                       '+sLinebreak+
+            '        s.status,                                                          '+sLinebreak+
+            '        case                                                               '+sLinebreak+
+            '          when s.tipo_documento = ''T-Transferencia'' then ''T''           '+sLinebreak+
+            '          when s.tipo_documento = ''P-Pedido'' then ''P''                  '+sLinebreak+
+            '          when s.tipo_documento = ''D-Devolucao'' then ''D''               '+sLinebreak+
+            '          when s.tipo_documento = ''E-Fornecedor'' then ''E''              '+sLinebreak+
+            '         else '' ''                                                        '+sLinebreak+
+            '        end as tipo_documento,                                             '+sLinebreak+
+            '        cast(coalesce(s.entrada, s.saida) as float) * s.valor as total     '+sLinebreak+
+            '   from SP_FICHA_PRODUTO ('+QuotedStr(pFicha_Parametros.CodigoProduto)+',  '+sLinebreak+
+                                         QuotedStr(pFicha_Parametros.DataInicio)+',     '+sLinebreak+
+                                         QuotedStr(pFicha_Parametros.DataFim)+') s      '+sLinebreak;
+
+    lQry.Open(lSQL);
+
+    Result := vConstrutor.atribuirRegistros(lQry);
   finally
     lQry.Free;
   end;
@@ -323,7 +348,6 @@ var
   lPaginacao : String;
 begin
   lQry := vIConexao.CriarQuery;
-
   try
     if (StrToIntDef(LengthPageView, 0) > 0) or (StrToIntDef(StartRecordView, 0) > 0) then
       lPaginacao := ' first ' + LengthPageView + ' SKIP ' + StartRecordView + '';
@@ -350,7 +374,6 @@ begin
     Result := vConstrutor.atribuirRegistros(lQry);
 
     obterTotalRegistros;
-
   finally
     lQry.Free;
   end;
@@ -361,16 +384,6 @@ begin
   FCountView := Value;
 end;
 
-procedure TMovimentoDao.SetDataFinalView(const Value: Variant);
-begin
-  FDataFinalView := Value;
-end;
-
-procedure TMovimentoDao.SetDataInicialView(const Value: Variant);
-begin
-  FDataInicialView := Value;
-end;
-
 procedure TMovimentoDao.SetMovimentosLista;
 begin
   FMovimentosLista := Value;
@@ -379,11 +392,6 @@ end;
 procedure TMovimentoDao.SetID(const Value: Variant);
 begin
   FID := Value;
-end;
-
-procedure TMovimentoDao.SetIDProduto(const Value: String);
-begin
-  FIDProduto := Value;
 end;
 
 procedure TMovimentoDao.SetIDRecordView(const Value: Integer);

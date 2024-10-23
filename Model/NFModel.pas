@@ -634,6 +634,8 @@ type
     procedure AtualizarDataEmissao(pNotaFiscal : String);
     function obterTotalizador: ITNFModel;
 
+    function verificarNotas: IFDDataset;
+
  end;
 
 implementation
@@ -836,6 +838,18 @@ begin
 
   finally
     lNFLista:=nil;
+  end;
+end;
+
+function TNFModel.verificarNotas: IFDDataset;
+var
+  lNFDao: ITNFDao;
+begin
+  lNFDao := TNFDao.getNewIface(vIConexao);
+  try
+    Result := lNFDao.objeto.verificarNotas;
+  finally
+    lNFDao := nil;
   end;
 end;
 

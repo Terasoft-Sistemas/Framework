@@ -78,6 +78,8 @@ type
 
     function obterTotalizador: ITNFModel;
 
+    function verificarNotas: IFDDataset;
+
     procedure setParams(var pQry: TFDQuery; pNFModel: ITNFModel);
 
 end;
@@ -661,6 +663,26 @@ begin
   finally
     lQry.Free;
 
+  end;
+end;
+
+function TNFDao.verificarNotas: IFDDataset;
+var
+  lQry       : TFDQuery;
+  lSQL       : String;
+begin
+  lQry := vIConexao.CriarQuery;
+  try
+      lSQL := ' select                                                                                              '+SLineBreak+
+              '         COUNT(CASE WHEN NF.DATA_NF < DATEADD (-48 HOUR TO CURRENT_DATE) THEN 1 ELSE 0 END) QTDE_24, '+SLineBreak+
+              '         COUNT(*) QTD                                                                                '+SLineBreak+
+              '    from NF                                                                                          '+SLineBreak+
+              '   where NF.STATUS_PENDENTE = ''S''                                                                  '+SLineBreak;
+
+    lQry.Open(lSQL);
+    Result := vConstrutor.atribuirRegistros(lQry);
+  finally
+    lQry.Free;
   end;
 end;
 
