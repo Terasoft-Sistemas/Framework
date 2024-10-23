@@ -228,6 +228,7 @@ type
 
     function carregaClasse(pId : String): ITFornecedorModel;
     function obterLista: IFDDataset;
+    function ConsultarFornecedoresProduto(pProduto : String): IFDDataset;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -286,11 +287,22 @@ var
   lFornecedorDao: ITFornecedorDao;
 begin
   lFornecedorDao := TFornecedorDao.getNewIface(vIConexao);
-
   try
     Result := lFornecedorDao.objeto.carregaClasse(pId);
   finally
     lFornecedorDao:=nil;
+  end;
+end;
+
+function TFornecedorModel.ConsultarFornecedoresProduto(pProduto: String): IFDDataset;
+var
+  lFornecedorProduto: ITFornecedorDao;
+begin
+  lFornecedorProduto := TFornecedorDao.getNewIface(vIConexao);
+  try
+    Result := lFornecedorProduto.objeto.ConsultarFornecedoresProduto(pProduto);
+  finally
+    lFornecedorProduto:=nil;
   end;
 end;
 

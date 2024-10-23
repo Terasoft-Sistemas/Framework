@@ -68,7 +68,7 @@ type
     function where: String;
     function carregaClasse(pID : String): ITFornecedorModel;
     function obterLista: IFDDataset;
-
+    function ConsultarFornecedoresProduto(pProduto : String): IFDDataset;
     procedure setParams(var pQry: TFDQuery; pFornecedorModel: ITFornecedorModel);
 
 end;
@@ -155,6 +155,76 @@ begin
     lModel.objeto.SYSTIME                      := lQry.FieldByName('SYSTIME').AsString;
 
     Result := lModel;
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TFornecedorDao.ConsultarFornecedoresProduto(pProduto: String): IFDDataset;
+var
+  lQry       : TFDQuery;
+  lSQL       : String;
+begin
+  lQry := vIConexao.CriarQuery;
+  try
+    lSQL := ' select                                                                                                                                  '+sLineBreak+
+            '        c.codigo_for,                                                                                                                    '+sLineBreak+
+            '        c.fantasia_for,                                                                                                                  '+sLineBreak+
+            '        c.razao_for,                                                                                                                     '+sLineBreak+
+            '        c.telefone_for,                                                                                                                  '+sLineBreak+
+            '        coalesce((                                                                                                                       '+sLineBreak+
+            '                  select first 1                                                                                                         '+sLineBreak+
+            '                         ((cast(i.quantidade_ent as float) * cast(i.valoruni_ent as float) -                                             '+sLineBreak+
+            '                         coalesce(i.desc_i17, 0) +                                                                                       '+sLineBreak+
+            '                         coalesce(i.vseg_i16, 0) +                                                                                       '+sLineBreak+
+            '                         coalesce(i.vipi_014, 0) +                                                                                       '+sLineBreak+
+            '                         coalesce(i.vfrete_i15, 0) +                                                                                     '+sLineBreak+
+            '                         coalesce(i.vicms_st_ent, 0)) / coalesce(i.quantidade_ent, 0))                                                   '+sLineBreak+
+            '                    from entrada e                                                                                                       '+sLineBreak+
+            '                    join entradaitens i on e.numero_ent = i.numero_ent and e.codigo_for = i.codigo_for                                   '+sLineBreak+
+            '                   where e.codigo_for = c.codigo_for                                                                                     '+sLineBreak+
+            '                     and i.codigo_pro = '+pProduto+'                                                                                     '+sLineBreak+
+            '                     and e.datamovi_ent = (select max(e2.datamovi_ent)                                                                   '+sLineBreak+
+            '                                             from entrada e2                                                                             '+sLineBreak+
+            '                                             join entradaitens ei on e2.numero_ent = ei.numero_ent and e2.codigo_for = ei.codigo_for     '+sLineBreak+
+            '                                            where e2.codigo_for = c.codigo_for and ei.codigo_pro = i.codigo_pro)                         '+sLineBreak+
+            '                  ), 0) as valoruni_ent,                                                                                                 '+sLineBreak+
+            '        coalesce((                                                                                                                       '+sLineBreak+
+            '                  select first 1 cast(i.quantidade_ent as float)                                                                         '+sLineBreak+
+            '                    from entrada e                                                                                                       '+sLineBreak+
+            '                    join entradaitens i on e.numero_ent = i.numero_ent and e.codigo_for = i.codigo_for                                   '+sLineBreak+
+            '                   where e.codigo_for = c.codigo_for                                                                                     '+sLineBreak+
+            '                     and i.codigo_pro = '+pProduto+'                                                                                     '+sLineBreak+
+            '                     and e.datamovi_ent = (select max(e2.datamovi_ent)                                                                   '+sLineBreak+
+            '                                             from entrada e2                                                                             '+sLineBreak+
+            '                                             join entradaitens ei on e2.numero_ent = ei.numero_ent and e2.codigo_for = ei.codigo_for     '+sLineBreak+
+            '                                            where e2.codigo_for = c.codigo_for and ei.codigo_pro = i.codigo_pro)                         '+sLineBreak+
+            '                   ), 0) as quantidade,                                                                                                  '+sLineBreak+
+            '                 (select first 1 e.datamovi_ent                                                                                          '+sLineBreak+
+            '                    from entrada e                                                                                                       '+sLineBreak+
+            '                    join entradaitens i on e.numero_ent = i.numero_ent and e.codigo_for = i.codigo_for                                   '+sLineBreak+
+            '                   where e.codigo_for = c.codigo_for                                                                                     '+sLineBreak+
+            '                     and i.codigo_pro = '+pProduto+'                                                                                     '+sLineBreak+
+            '                     and e.datamovi_ent = (select max(e2.datamovi_ent)                                                                   '+sLineBreak+
+            '                                            from entrada e2                                                                              '+sLineBreak+
+            '                                            join entradaitens ei on e2.numero_ent = ei.numero_ent and e2.codigo_for = ei.codigo_for      '+sLineBreak+
+            '                                           where e2.codigo_for = c.codigo_for and ei.codigo_pro = i.codigo_pro)                          '+sLineBreak+
+            '                 ) as data                                                                                                               '+sLineBreak+
+            '   from fornecedor c                                                                                                                     '+sLineBreak+
+            '  where (select first 1 coalesce(cast(sum(i.quantidade_ent) as float), 0)                                                                '+sLineBreak+
+            '   from entrada e                                                                                                                        '+sLineBreak+
+            '   join entradaitens i on e.numero_ent = i.numero_ent and e.codigo_for = i.codigo_for                                                    '+sLineBreak+
+            '  where e.codigo_for = c.codigo_for                                                                                                      '+sLineBreak+
+            '    and i.codigo_pro = '+pProduto+'                                                                                                      '+sLineBreak+
+            '    and e.datamovi_ent = (select max(e2.datamovi_ent)                                                                                    '+sLineBreak+
+            '                            from entrada e2                                                                                              '+sLineBreak+
+            '                            join entradaitens ei on e2.numero_ent = ei.numero_ent and e2.codigo_for = ei.codigo_for                      '+sLineBreak+
+            '                           where e2.codigo_for = c.codigo_for and ei.codigo_pro = i.codigo_pro)) > 0                                     '+sLineBreak+
+            '  order by data desc                                                                                                                     '+sLineBreak;
+
+    lQry.Open(lSQL);
+
+    Result := vConstrutor.atribuirRegistros(lQry);
   finally
     lQry.Free;
   end;
