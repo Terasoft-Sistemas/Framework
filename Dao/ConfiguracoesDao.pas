@@ -317,7 +317,6 @@ begin
     lQry := vIConexao.criarQueryExterna;
 
     lQry.ExecSQL('INSERT INTO atendimento (DATA, HORA, CLIENTE, HISTORIO, STATUS, TIPO, SOLICITANTE, RESPONSAVEL, SISTEMA_ID, DATA_ALTERACAO, USUARIO, OBS) VALUES (current_date, current_time, ' + QuotedStr(pEmpresa) + ', '+QuotedStr(pOcorrencia)+' , ''A'', ''A'', '+QuotedStr(pSolicitante)+', '+QuotedStr(pResponsavel)+', ''000002'', current_timestamp, '+QuotedStr(pUsuario)+', '+QuotedStr(pObs)+')');
-    lQry.ExecSQL;
   finally
     lQry.Free;
   end;
