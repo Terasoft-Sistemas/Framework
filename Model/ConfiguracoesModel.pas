@@ -95,6 +95,9 @@ type
     procedure obterLista;
     procedure gravaValorTagConfig(pTag: String; pTipoValor: TTipoValorConfiguracao; pValor: Variant; pPerfil: String = ''; pLocal: boolean = True);
 
+    procedure anotarTarefa(pEmpresa, pOcorrencia, pSolicitante, pResponsavel, pUsuario, pObs: String);
+    function verificarSenhaLiberacao: String;
+
     property ConfiguracoessLista: IList<ITConfiguracoesModel> read FConfiguracoessLista write SetConfiguracoessLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -278,6 +281,30 @@ begin
     lConfiguracoesModel := nil;
   end;
 
+end;
+
+procedure TConfiguracoesModel.anotarTarefa(pEmpresa, pOcorrencia, pSolicitante, pResponsavel, pUsuario, pObs: String);
+var
+  lConfiguracoesDao: ITConfiguracoesDao;
+begin
+  lConfiguracoesDao := TConfiguracoesDao.getNewIface(vIConexao);
+  try
+    lConfiguracoesDao.objeto.anotarTarefa(pEmpresa, pOcorrencia, pSolicitante, pResponsavel, pUsuario, pObs);
+  finally
+    lConfiguracoesDao := nil;
+  end;
+end;
+
+function TConfiguracoesModel.verificarSenhaLiberacao: String;
+var
+  lConfiguracoesDao: ITConfiguracoesDao;
+begin
+  lConfiguracoesDao := TConfiguracoesDao.getNewIface(vIConexao);
+  try
+    Result := lConfiguracoesDao.objeto.verificarSenhaLiberacao;
+  finally
+    lConfiguracoesDao := nil;
+  end;
 end;
 
 procedure TConfiguracoesModel.SetAcao(const Value: TAcao);

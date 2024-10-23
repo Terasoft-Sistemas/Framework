@@ -13,7 +13,13 @@ uses
   Terasoft.Utils,
   Terasoft.Framework.ObjectIface,
   Spring.Collections,
-  Interfaces.Conexao;
+  Interfaces.Conexao,
+  Terasoft.Framework.Texto,
+  Terasoft.Framework.MultiConfig,
+  Terasoft.Framework.Download,
+  Terasoft.Framework.DB,
+  Terasoft.Configuracoes,
+  Terasoft.Types;
 
 type
   TConfiguracoesDao = class;
@@ -68,6 +74,9 @@ type
     function excluir(AConfiguracoesModel: ITConfiguracoesModel): String;
 
     function carregaClasse(pID : String): ITConfiguracoesModel;
+
+    procedure anotarTarefa(pEmpresa, pOcorrencia, pSolicitante, pResponsavel, pUsuario, pObs: String);
+    function verificarSenhaLiberacao: String;
 
     procedure obterLista;
     procedure setParams(var pQry: TFDQuery; pConfiguracoesModel: ITConfiguracoesModel);
@@ -281,6 +290,53 @@ begin
       lQry.Next;
     end;
     obterTotalRegistros;
+  finally
+    lQry.Free;
+  end;
+end;
+
+procedure TConfiguracoesDao.anotarTarefa(pEmpresa, pOcorrencia, pSolicitante, pResponsavel, pUsuario, pObs: String);
+var
+  lLista : IListaTextoEX;
+  lMulti : IMultiConfig;
+  lConfiguracoes : ITerasoftConfiguracoes;
+  lUsuario,
+  lSenha : String;
+  lQry : TFDQuery;
+  lSQL : String;
+begin
+  try
+    lLista   := carregaListaValores('licencas.caminhos',nil);
+    lMulti   := criaMultiConfig.adicionaInterface(iniServidoresTerasoft);
+    lUsuario := lMulti.ReadString('licencas.auth','username', GDBFIB_DEFDBUSERNAME);
+    lSenha   := lMulti.ReadString('licencas.auth','password', GDBFIB_DEFDBUSERNAME,true);
+
+    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
+
+    vIConexao.ConfigConexaoExterna('', lConfiguracoes.objeto.valorTag('STRING_CONEXAO_LICENCA', 'licenca.ip.inf.br/12099:C:\SCI\Arquivos\DataBase\000509.FDB', tvString));
+    lQry := vIConexao.criarQueryExterna;
+
+    lQry.ExecSQL('INSERT INTO atendimento (DATA, HORA, CLIENTE, HISTORIO, STATUS, TIPO, SOLICITANTE, RESPONSAVEL, SISTEMA_ID, DATA_ALTERACAO, USUARIO, OBS) VALUES (current_date, current_time, ' + QuotedStr(pEmpresa) + ', '+QuotedStr(pOcorrencia)+' , ''A'', ''A'', '+QuotedStr(pSolicitante)+', '+QuotedStr(pResponsavel)+', ''000002'', current_timestamp, '+QuotedStr(pUsuario)+', '+QuotedStr(pObs)+')');
+    lQry.ExecSQL;
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TConfiguracoesDao.verificarSenhaLiberacao: String;
+var
+  lQry       : TFDQuery;
+  lSQL       : String;
+begin
+  lQry := vIConexao.CriarQuery;
+  try
+      lSQL := ' select                                                       '+SLineBreak+
+              '         CONFIGURACOES.VALORSTRING                            '+SLineBreak+
+              '    from CONFIGURACOES                                        '+SLineBreak+
+              '   where CONFIGURACOES.TAG = ''LIBERACAO_SENHA_PENDENCIA_NF'' '+SLineBreak;
+
+    lQry.Open(lSQL);
+    Result := lQry.FieldByName('VALORSTRING').AsString;
   finally
     lQry.Free;
   end;
