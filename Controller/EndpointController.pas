@@ -19,7 +19,9 @@ type
     function getNovaLista(pFiltro: TipoWideStringFramework = ''; pStartingWith: boolean = false; pOrdem: Integer = 2): TListaEndpointModel; overload;
     function getLista: TListaEndpointModel;
     function getFromRecord(pDataset: TDataset): ITEndpointModel;
+    function getEndpointModel: ITEndpointModel;
     property lista: TListaEndpointModel read getLista;
+    property endpointModel: ITEndpointModel read getEndpointModel;
   end;
 
   function getEndpointController(pIConexao:IConexao):IController_Endpoint;
@@ -31,13 +33,14 @@ implementation
 type
   TControllerEndpoint = class(TInterfacedObject, IController_Endpoint)
   protected
-    fModel: ITEndpointModel;
+    fEndpointModel: ITEndpointModel;
     fLista: TListaEndpointModel;
     function getFromRecord(pDataset: TDataset): ITEndpointModel;
     function getByName(pName: TipoWideStringFramework): ITEndpointModel;
     function getNovaLista(pFiltro: IListaTexto=nil;pStartingWith:boolean=false;pOrdem: Integer = 2): TListaEndpointModel; overload;
     function getNovaLista(pFiltro: TipoWideStringFramework = ''; pStartingWith: boolean = false; pOrdem: Integer = 2): TListaEndpointModel; overload;
     function getLista: TListaEndpointModel;
+    function getEndpointModel: ITEndpointModel;
   public
     vIConexao : IConexao;
     constructor Create(pIConexao : IConexao);
@@ -59,7 +62,7 @@ end;
 
 destructor TControllerEndpoint.Destroy;
 begin
-  fModel := nil;
+  fEndpointModel := nil;
   fLista := nil;
   vIConexao := nil;
   inherited;
@@ -67,8 +70,13 @@ end;
 
 function TControllerEndpoint.getByName(pName: TipoWideStringFramework): ITEndpointModel;
 begin
-  fModel := TEndpointDao.getNewIface(vIConexao).objeto.getByName(pName);
-  Result := fModel;
+  fEndpointModel := TEndpointDao.getNewIface(vIConexao).objeto.getByName(pName);
+  Result := fEndpointModel;
+end;
+
+function TControllerEndpoint.getEndpointModel: ITEndpointModel;
+begin
+  Result := fEndpointModel;
 end;
 
 function TControllerEndpoint.getFromRecord(pDataset: TDataset): ITEndpointModel;
