@@ -34,7 +34,8 @@ uses
   Interfaces.Conexao,
   Terasoft.Framework.ObjectIface,
   ConfiguracoesLocaisModel,
-  System.RegularExpressions;
+  System.RegularExpressions,
+  ActiveX;
 
 type
   TNotaFiscal = class;
@@ -1382,11 +1383,13 @@ begin
   FimprimirDANF  := True;
   FMostraPreview := True;
   FgerarPDF      := False;
+  CoInitialize(nil);
 end;
 
 destructor TNotaFiscal.Destroy;
 begin
   FreeAndNil(ACBrNFe);
+  CoUninitialize;
   inherited;
 end;
 
