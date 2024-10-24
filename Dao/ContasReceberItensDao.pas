@@ -627,6 +627,8 @@ begin
             '        c.uf_cli,                                                                            '+SLineBreak+
             '        c.cep_cli,                                                                           '+SLineBreak+
             '        i.id,                                                                                '+SLineBreak+
+            '        i.pacela_rec,                                                                        '+SLineBreak+
+            '        i.vlrparcela_rec,                                                                    '+SLineBreak+
             '        p.contasreceberitens_id, cr.pedido_rec,                                              '+SLineBreak+
             '        i.pacela_rec||''/''||i.totalparcelas_rec parcela,                                    '+SLineBreak+
             '        por.tpag_nfe                                                                         '+SLineBreak+
