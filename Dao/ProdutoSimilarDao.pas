@@ -67,6 +67,8 @@ type
     function carregaClasse(pID : String): ITProdutoSimilarModel;
     function obterLista: IFDDataset;
     function ConsultaProdutosSimilar(pProduto: String): IFDDataset;
+    function VerificarProduto(pProduto, pSimilar : String) : String;
+
     procedure setParams(var pQry: TFDQuery; pProdutoSimilarModel: ITProdutoSimilarModel);
 
 end;
@@ -296,6 +298,11 @@ begin
   finally
     lQry.Free;
   end;
+end;
+
+function TProdutoSimilarDao.VerificarProduto(pProduto, pSimilar: String): String;
+begin
+  Result := vIConexao.getConnection.ExecSQLScalar('select * from produto_similar s where s.produto_id = '+QuotedStr(pProduto)+' and s.produto_similar_id = '+QuotedStr(pSimilar));
 end;
 
 procedure TProdutoSimilarDao.SetCountView(const Value: String);

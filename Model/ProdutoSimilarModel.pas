@@ -67,6 +67,7 @@ type
     function carregaClasse(pID : String): ITProdutoSimilarModel;
     function obterLista: IFDDataset;
     function ConsultaProdutosSimilar(pProduto: String): IFDDataset;
+    function VerificarProduto(pProduto, pSimilar : String) : String;
 
     property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -154,6 +155,18 @@ destructor TProdutoSimilarModel.Destroy;
 begin
   vIConexao := nil;
   inherited;
+end;
+
+function TProdutoSimilarModel.VerificarProduto(pProduto, pSimilar: String): String;
+var
+  lProdutoSimilar: ITProdutoSimilarDao;
+begin
+  lProdutoSimilar := TProdutoSimilarDao.getNewIface(vIConexao);
+  try
+    Result := lProdutoSimilar.objeto.VerificarProduto(pProduto, pSimilar);
+  finally
+    lProdutoSimilar:=nil;
+  end;
 end;
 
 function TProdutoSimilarModel.obterLista: IFDDataset;
