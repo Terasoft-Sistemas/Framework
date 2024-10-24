@@ -9,7 +9,8 @@ uses
   CaixaModel,
   Terasoft.Framework.ObjectIface,
   sPRING.Collections,
-  Interfaces.Conexao;
+  Interfaces.Conexao,
+  Terasoft.Configuracoes;
 
 type
   TCaixaControleModel = class;
@@ -101,6 +102,9 @@ type
     function dataFechamento(pIdCaixa, pUsuario: String): String;
 
     function vendaCaixaFechado(pDataHora: String): boolean;
+
+    procedure validateCaixa24h(pData: String);
+    function validateCaixa: Boolean;
 
     property CaixaControlesLista: IList<ITCaixaControleModel> read FCaixaControlesLista write SetCaixaControlesLista;
    	property Acao :TAcao read FAcao write SetAcao;
@@ -394,6 +398,27 @@ begin
     lCaixaModel:=nil;
     lUsuarioModel := nil;
   end;
+end;
+
+procedure TCaixaControleModel.validateCaixa24h(pData: String);
+var
+  lConfiguracoes : ITerasoftConfiguracoes;
+begin
+  if not pData.IsEmpty then
+  begin
+    Supports(vIConexao.getTerasoftConfiguracoes, ITerasoftConfiguracoes, lConfiguracoes);
+    
+    if (lConfiguracoes.objeto.valorTag('FRENTECAIXA_BLOQUEIO_24HORAS_CAIXA', '', tvBool) = 'S') and (vIConexao.DataServer > StrToDate(pData)) then
+      CriaException('Caixa do dia: '+ pData +' aberto, favor encerrar.');
+  end;
+end;
+
+function TCaixaControleModel.validateCaixa: Boolean;
+begin
+  validateCaixa24h(self.CaixaAberto(vIConexao.getUSer.ID));
+  
+  if not self.CaixaAberto then
+    CriaException('Caixa ainda não inicializado');
 end;
 
 procedure TCaixaControleModel.SetAcao(const Value: TAcao);

@@ -173,8 +173,8 @@ type
     procedure obterLista;
     procedure obterSaldo(pLoja: String = '');
 
-    procedure AlterarStatus(out pValor: Double; out pParcela: Integer; out pTipo, pBanco, pPortador, pDuplicata, pCliente, pLoja, pConciliado, pConta: String; pNumero, pStatus: String);
-    procedure RegistroEstorno(pConta, pBanco, pCliente, pNumero, pFatura, pLoja, pConciliado: String; pValor: Double);
+    procedure AlterarStatus(out pValor: Double; out pParcela: Integer; out pTipo, pBanco, pPortador, pDuplicata, pCliente, pLoja, pConciliado, pConta: String; pNumero, pStatus: String; out pSubGrupo: String);
+    procedure RegistroEstorno(pConta, pBanco, pCliente, pNumero, pFatura, pLoja, pConciliado: String; pValor: Double; pSubGrupo: String);
 
     function carregaClasse(pId: String): ITContaCorrenteModel;
     procedure excluirRegistro(pIdRegistro: String);
@@ -348,7 +348,7 @@ begin
   end;
 end;
 
-procedure TContaCorrenteModel.AlterarStatus(out pValor: Double; out pParcela: Integer; out pTipo, pBanco, pPortador, pDuplicata, pCliente, pLoja, pConciliado, pConta: String; pNumero, pStatus: String);
+procedure TContaCorrenteModel.AlterarStatus(out pValor: Double; out pParcela: Integer; out pTipo, pBanco, pPortador, pDuplicata, pCliente, pLoja, pConciliado, pConta: String; pNumero, pStatus: String; out pSubGrupo: String);
 var
   lContaCorrenteModel : ITContaCorrenteModel;
 begin
@@ -368,6 +368,7 @@ begin
       pLoja       := lContaCorrenteModel.objeto.LOJA;
       pConciliado := lContaCorrenteModel.objeto.CONCILIADO_COR;
       pConta      := lContaCorrenteModel.objeto.CODIGO_CTA;
+      pSubGrupo   := lContaCorrenteModel.objeto.CENTRO_CUSTO;
       lContaCorrenteModel.objeto.Salvar;
     except
       on E:Exception do
@@ -378,7 +379,7 @@ begin
   end;
 end;
 
-procedure TContaCorrenteModel.RegistroEstorno(pConta, pBanco, pCliente, pNumero, pFatura, pLoja, pConciliado: String; pValor: Double);
+procedure TContaCorrenteModel.RegistroEstorno(pConta, pBanco, pCliente, pNumero, pFatura, pLoja, pConciliado: String; pValor: Double; pSubGrupo: String);
 var
   lContaCorrenteModel : ITContaCorrenteModel;
 begin
@@ -386,6 +387,7 @@ begin
   try
     try
       lContaCorrenteModel.objeto.CODIGO_CTA     := pConta;
+      lContaCorrenteModel.objeto.CENTRO_CUSTO   := pSubGrupo;
       lContaCorrenteModel.objeto.CODIGO_BAN     := pBanco;
       lContaCorrenteModel.objeto.CLIENTE_COR    := pCliente;
       lContaCorrenteModel.objeto.DATA_COR       := DateToStr(vIConexao.DataServer);

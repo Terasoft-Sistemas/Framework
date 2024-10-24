@@ -90,6 +90,8 @@ type
     function RegistroBanco(pFatura, pParcela: String): IFDDataset;
     function RegistroBancoJuros(pFatura, pParcela: String): IFDDataset;
 
+    function RegistroCaixa(pFatura, pParcela: String): IFDDataset;
+    function RegistroCaixaJuros(pFatura, pParcela: String): IFDDataset;
 end;
 
 implementation
@@ -553,6 +555,39 @@ begin
   end;
 end;
 
+function TSituacaoFinanceiraDao.RegistroCaixa(pFatura, pParcela: String): IFDDataset;
+var
+  lQry : TFDQuery;
+  lSQL : String;
+begin
+  lQry := vIConexao.CriarQuery;
+  try
+    lSQL :=
+      '    SELECT                                                                                         '+SLineBreak+
+      '        C.DATA_CAI AS LANCAMENTODATA,                                                              '+SLineBreak+
+      '        C.HISTORICO_CAI AS LANCAMENTOHISTORICO,                                                    '+SLineBreak+
+      '        C.VALOR_CAI AS LANCAMENTOVALOR,                                                            '+SLineBreak+
+      '        C.PARCELA_CAI AS LANCAMENTOPARCELA,                                                        '+SLineBreak+
+      '        C.NUMERO_CAI AS LANCAMENTONUMERO,                                                          '+SLineBreak+
+      '        C.CLIENTE_CAI AS LANCAMENTOCLIENTE,                                                        '+SLineBreak+
+      '        C.SYSTIME AS SYSTIME                                                                       '+SLineBreak+
+      '    FROM                                                                                           '+SLineBreak+
+      '        CAIXA C                                                                                    '+SLineBreak+
+      '    WHERE                                                                                          '+SLineBreak+
+      '        C.FATURA_CAI = '+QuotedStr(pFatura)+' AND C.PARCELA_CAI = '+QuotedStr(pParcela)+'          '+SLineBreak+
+      '        AND C.STATUS <> ''X''                                                                      '+SLineBreak+
+      '        AND C.CODIGO_CTA <> ''222222''                                                             '+SLineBreak+
+      '        AND C.CODIGO_CTA <> ''300000''                                                             '+SLineBreak+
+      '        AND C.CODIGO_CTA <> ''600000''                                                             '+SLineBreak+
+      '        AND C.CODIGO_CTA <> ''111111''                                                             '+SLineBreak;
+
+    lQry.Open(lSQL);
+    Result := vConstrutor.atribuirRegistros(lQry);
+  finally
+    lQry.Free;
+  end;
+end;
+
 function TSituacaoFinanceiraDao.RegistroBancoJuros(pFatura, pParcela: String): IFDDataset;
 var
   lQry : TFDQuery;
@@ -578,6 +613,46 @@ begin
          '  WHERE                                                '+SLineBreak+
          '      P.FATURA_COR = ' + QuotedStr(pFatura) + ' AND    '+SLineBreak+
          '      P.PARCELA_COR = ' + QuotedStr(pParcela) + ' AND  '+SLineBreak+
+         '      (                                                '+SLineBreak+
+         '          (P.CODIGO_CTA = ''222222'') OR               '+SLineBreak+
+         '          (P.CODIGO_CTA = ''300000'') OR               '+SLineBreak+
+         '          (P.CODIGO_CTA = ''600000'') OR               '+SLineBreak+
+         '          (P.CODIGO_CTA = ''111111'')                  '+SLineBreak+
+         '      ) AND                                            '+SLineBreak+
+         '      P.STATUS <> ''X''                                '+SLineBreak;
+
+    lQry.Open(lSQL);
+    Result := vConstrutor.atribuirRegistros(lQry);
+  finally
+    lQry.Free;
+  end;
+end;
+
+function TSituacaoFinanceiraDao.RegistroCaixaJuros(pFatura, pParcela: String): IFDDataset;
+var
+  lQry : TFDQuery;
+  lSQL : String;
+begin
+  lQry := vIConexao.CriarQuery;
+  try
+    lSQL :=
+         '  SELECT                                               '+SLineBreak+
+      '        P.DATA_CAI AS LANCAMENTODATA,                     '+SLineBreak+
+      '        P.HISTORICO_CAI AS LANCAMENTOHISTORICO,           '+SLineBreak+
+      '        P.VALOR_CAI AS LANCAMENTOVALOR,                   '+SLineBreak+
+      '        P.PARCELA_CAI AS LANCAMENTOPARCELA,               '+SLineBreak+
+      '        P.NUMERO_CAI AS LANCAMENTONUMERO,                 '+SLineBreak+
+      '        P.CLIENTE_CAI AS LANCAMENTOCLIENTE,               '+SLineBreak+
+      '        P.SYSTIME AS SYSTIME                              '+SLineBreak+
+         '  FROM                                                 '+SLineBreak+
+         '      CAIXA P                                          '+SLineBreak+
+         '  LEFT JOIN                                            '+SLineBreak+
+         '      CONTAS C ON C.CODIGO_CTA = P.CODIGO_CTA          '+SLineBreak+
+         '  LEFT JOIN                                            '+SLineBreak+
+         '      CENTROCUSTO_CTA T ON T.ID_CEN = P.CENTRO_CUSTO   '+SLineBreak+
+         '  WHERE                                                '+SLineBreak+
+         '      P.FATURA_CAI = ' + QuotedStr(pFatura) + ' AND    '+SLineBreak+
+         '      P.PARCELA_CAI = ' + QuotedStr(pParcela) + ' AND  '+SLineBreak+
          '      (                                                '+SLineBreak+
          '          (P.CODIGO_CTA = ''222222'') OR               '+SLineBreak+
          '          (P.CODIGO_CTA = ''300000'') OR               '+SLineBreak+
