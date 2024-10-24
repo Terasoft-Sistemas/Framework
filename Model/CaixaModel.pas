@@ -6,7 +6,7 @@ uses
   Terasoft.Types,
   Spring.Collections,
   Terasoft.Framework.ObjectIface,
-  Interfaces.Conexao, FireDAC.Comp.Client;
+  Interfaces.Conexao, FireDAC.Comp.Client, Terasoft.Utils, System.SysUtils;
 
 type
   TCaixaModel = class;
@@ -163,6 +163,9 @@ type
 
     procedure excluirRegistro(pIdRegistro: String);
 
+    procedure AlterarStatus(out pValor: Double; out pParcela: Integer; out pTipo, pPortador, pDuplicata, pCliente, pLoja, pConciliado, pConta: String; pNumero, pStatus: String; out pSubGrupo: String);
+    procedure RegistroEstorno(pConta, pCliente, pNumero, pFatura, pLoja, pConciliado: String; pValor: Double; pSubGrupo: String);
+
     property CaixasLista: IList<ITCaixaModel> read FCaixasLista write SetCaixasLista;
    	property Acao :TAcao read FAcao write SetAcao;
     property TotalRecords: Integer read FTotalRecords write SetTotalRecords;
@@ -304,6 +307,67 @@ begin
 
   finally
     lCaixaDao:=nil;
+  end;
+end;
+
+procedure TCaixaModel.AlterarStatus(out pValor: Double; out pParcela: Integer; out pTipo, pPortador, pDuplicata, pCliente, pLoja, pConciliado, pConta: String; pNumero, pStatus: String; out pSubGrupo: String);
+var
+  lCaixaModel : ITCaixaModel;
+begin
+  lCaixaModel := TCaixaModel.getNewIface(vIConexao);
+  try
+    try
+      lCaixaModel := lCaixaModel.objeto.carregaClasse(pNumero);
+      lCaixaModel.objeto.Acao := tacAlterar;
+
+      lCaixaModel.objeto.STATUS := pStatus;
+
+      pValor      := lCaixaModel.objeto.VALOR_CAI;
+      pTipo       := lCaixaModel.objeto.TIPO_CAI;
+      pPortador   := lCaixaModel.objeto.PORTADOR_CAI;
+      pParcela    := lCaixaModel.objeto.PARCELA_CAI;
+      pDuplicata  := lCaixaModel.objeto.FATURA_CAI;
+      pCliente    := lCaixaModel.objeto.CLIENTE_CAI;
+      pLoja       := lCaixaModel.objeto.LOJA;
+      pConciliado := lCaixaModel.objeto.CONCILIADO_CAI;
+      pConta      := lCaixaModel.objeto.CODIGO_CTA;
+      pSubGrupo   := lCaixaModel.objeto.CENTRO_CUSTO;
+      lCaixaModel.objeto.Salvar;
+    except
+      on E:Exception do
+        CriaException('Erro: '+ E.Message);
+    end;
+  finally
+    lCaixaModel := nil;
+  end;
+end;
+
+procedure TCaixaModel.RegistroEstorno(pConta, pCliente, pNumero, pFatura, pLoja, pConciliado: String; pValor: Double; pSubGrupo: String);
+var
+  lCaixaModel : ITCaixaModel;
+begin
+  lCaixaModel := TCaixaModel.getNewIface(vIConexao);
+  try
+    try
+      lCaixaModel.objeto.CODIGO_CTA     := pConta;
+      lCaixaModel.objeto.CENTRO_CUSTO   := pSubGrupo;
+      lCaixaModel.objeto.CLIENTE_CAI    := pCliente;
+      lCaixaModel.objeto.DATA_CAI       := DateToStr(vIConexao.DataServer);
+      lCaixaModel.objeto.DATA_CON       := DateToStr(vIConexao.DataServer);
+      lCaixaModel.objeto.VALOR_CAI      := pValor;
+      lCaixaModel.objeto.HISTORICO_CAI := 'Estorno lançamento: '+pNumero;
+      lCaixaModel.objeto.STATUS         := 'X';
+      lCaixaModel.objeto.FATURA_CAI     := pFatura;
+      lCaixaModel.objeto.LOJA           := pLoja;
+      lCaixaModel.objeto.TIPO_CAI       := 'D';
+      lCaixaModel.objeto.CONCILIADO_CAI := pConciliado;
+      lCaixaModel.objeto.Incluir;
+    except
+      on E:Exception do
+        CriaException('Erro: '+ E.Message);
+    end;
+  finally
+    lCaixaModel := nil;
   end;
 end;
 
