@@ -67,6 +67,7 @@ type
     function carregaClasse(pID : String): ITPermissaoRemotaModel;
 
     function obterLista: IFDDataset;
+    function obterPermissaoVendaAssistidaRemoto: TPermissaoResultado;
 
     procedure setParams(var pQry: TFDQuery; pPermissaoRemotaModel: ITPermissaoRemotaModel);
 
@@ -75,7 +76,7 @@ end;
 implementation
 
 uses
-  System.Rtti;
+  System.Rtti, Interfaces.QueryLojaAsync, Data.DB;
 
 { TPermissaoRemota }
 
@@ -271,6 +272,119 @@ begin
 
   finally
     lQry.Free;
+  end;
+end;
+
+function TPermissaoRemotaDao.obterPermissaoVendaAssistidaRemoto: TPermissaoResultado;
+var
+  lSQL        : String;
+  lRegistros,
+  lLojas      : TFDMemTable;
+  lAsyncList  : IListaQueryAsync;
+  lQA         : IQueryLojaAsync;
+  conexao     : IConexao;
+  lTotal      : Double;
+begin
+  lAsyncList   := getQueryLojaAsyncList(vIConexao);
+  lRegistros   := TFDMemTable.Create(nil);
+  lLojas       := TFDMemTable.Create(nil);
+  lTotal       := 0;
+
+  Result.fdRegistros    := criaIFDDataset(lRegistros);
+  Result.fdLojasRecords := criaIFDDataset(lLojas);
+
+  lSQL := '  select                                                                                    '+SLineBreak+
+          '          permissao_remota.id,                                                              '+SLineBreak+
+          '          permissao_remota.usuario_solicitante,                                             '+SLineBreak+
+          '          solicitante.fantasia usuario_solicitante_nome,                                    '+SLineBreak+
+          '          permissao_remota.usuario_cedente,                                                 '+SLineBreak+
+          '          cedente.fantasia usuario_cedente_nome,                                            '+SLineBreak+
+          '          permissao_remota.operacao,                                                        '+SLineBreak+
+          '          permissao_remota.msg_solicitacao,                                                 '+SLineBreak+
+          '          permissao_remota.status,                                                          '+SLineBreak+
+          '          permissao_remota.tabela,                                                          '+SLineBreak+
+          '          permissao_remota.registro_id,                                                     '+SLineBreak+
+          '          permissao_remota.pedido_id,                                                       '+SLineBreak+
+          '          permissao_remota.SYSTIME                                                          '+SLineBreak+
+          '    from permissao_remota                                                                   '+SLineBreak+
+          '    left join usuario solicitante on solicitante.id = permissao_remota.usuario_solicitante  '+SLineBreak+
+          '    left join usuario cedente on cedente.id = permissao_remota.usuario_cedente              '+SLineBreak+
+          '   where permissao_remota.tabela = ''WEB_PEDIDOITENS''                                      '+SLineBreak+
+          '     and permissao_remota.status is null ';
+
+  lSql := lSql + where;
+  lSQL := lSQL + ' order by permissao_remota.SYSTIME ';
+
+  lRegistros.FieldDefs.Add('ID', ftString, 10);
+  lRegistros.FieldDefs.Add('LOJA', ftString, 3);
+  lRegistros.FieldDefs.Add('USUARIO_SOLICITANTE', ftString, 20);
+  lRegistros.FieldDefs.Add('USUARIO_SOLICITANTE_NOME', ftString, 50);
+  lRegistros.FieldDefs.Add('USUARIO_CEDENTE', ftString, 20);
+  lRegistros.FieldDefs.Add('USUARIO_CEDENTE_NOME', ftString, 50);
+  lRegistros.FieldDefs.Add('OPERACAO', ftString, 30);
+  lRegistros.FieldDefs.Add('MSG_SOLICITACAO', ftString, 500);
+  lRegistros.FieldDefs.Add('STATUS', ftString, 10);
+  lRegistros.FieldDefs.Add('TABELA', ftString, 50);
+  lRegistros.FieldDefs.Add('REGISTRO_ID', ftString, 20);
+  lRegistros.FieldDefs.Add('PEDIDO_ID', ftString, 6);
+  lRegistros.FieldDefs.Add('SYSTIME', ftDateTime);
+  lRegistros.CreateDataSet;
+
+  lLojas.FieldDefs.Add('LOJA', ftString, 3);
+  lLojas.FieldDefs.Add('QUANTIDADE', ftFloat);
+  lLojas.CreateDataSet;
+
+  for lQA in lAsyncList do
+  begin
+    lQA.rotulo := 'ObterPermissaoVendaAssistida';
+    conexao := lQA.loja.objeto.conexaoLoja;
+    if(conexao=nil) then
+      raise Exception.CreateFmt('TPermissaoRemotaDao.ObterPermissaoVendaAssistida: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);
+
+    lQA.execQuery(lSQL,'',[]);
+  end;
+
+  for lQA in lAsyncList do
+  begin
+    lQA.esperar;
+    if(lQA.resultado.erros>0) then
+      raise Exception.CreateFmt('TPermissaoRemotaDao.ObterPermissaoVendaAssistida: Loja [%s] com problemas: [%s]',[lQA.loja.objeto.LOJA, lQA.resultado.toString]);
+
+    lQA.dataset.dataset.first;
+    while not lQA.dataset.dataset.Eof do
+    begin
+      lTotal := lTotal + 1;
+
+      lRegistros.FieldDefs.Add('OPERACAO', ftString, 30);
+      lRegistros.FieldDefs.Add('MSG_SOLICITACAO', ftString, 500);
+      lRegistros.FieldDefs.Add('STATUS', ftString, 10);
+      lRegistros.FieldDefs.Add('TABELA', ftString, 50);
+      lRegistros.FieldDefs.Add('REGISTRO_ID', ftString, 20);
+      lRegistros.FieldDefs.Add('PEDIDO_ID', ftString, 6);
+      lRegistros.FieldDefs.Add('SYSTIME', ftDateTime);
+
+      lRegistros.InsertRecord([lQA.dataset.dataset.FieldByName('ID').AsString,
+                               lQA.loja.objeto.LOJA,
+                               lQA.dataset.dataset.FieldByName('USUARIO_SOLICITANTE').AsString,
+                               lQA.dataset.dataset.FieldByName('USUARIO_SOLICITANTE_NOME').AsString,
+                               lQA.dataset.dataset.FieldByName('USUARIO_CEDENTE').AsString,
+                               lQA.dataset.dataset.FieldByName('USUARIO_CEDENTE_NOME').AsString,
+                               lQA.dataset.dataset.FieldByName('OPERACAO').AsString,
+                               lQA.dataset.dataset.FieldByName('MSG_SOLICITACAO').AsString,
+                               lQA.dataset.dataset.FieldByName('STATUS').AsString,
+                               lQA.dataset.dataset.FieldByName('TABELA').AsString,
+                               lQA.dataset.dataset.FieldByName('REGISTRO_ID').AsString,
+                               lQA.dataset.dataset.FieldByName('PEDIDO_ID').AsString,
+                               lQA.dataset.dataset.FieldByName('SYSTIME').AsDateTime]);
+
+      lQA.dataset.dataset.Next;
+    end;
+
+    if lTotal > 0 then
+    begin
+      lLojas.InsertRecord([lQA.loja.objeto.LOJA, lTotal]);
+      lTotal := 0;
+    end;
   end;
 end;
 

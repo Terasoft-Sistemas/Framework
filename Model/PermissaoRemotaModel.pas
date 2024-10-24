@@ -10,6 +10,10 @@ uses
   FireDAC.Comp.Client;
 
 type
+  TPermissaoResultado = record
+    fdLojasRecords,
+    fdRegistros      : IFDDataset;
+  end;
 
   TPermissaoRemotaModel = class;
   ITPermissaoRemotaModel=IObject<TPermissaoRemotaModel>;
@@ -81,6 +85,8 @@ type
 
     function carregaClasse(pId : String): ITPermissaoRemotaModel;
     function obterLista: IFDDataset;
+
+    function obterPermissaoVendaAssistidaRemoto: TPermissaoResultado;
 
     function Autorizar(pID : String): Boolean;
     function Negar(pID: String): Boolean;
@@ -281,6 +287,19 @@ begin
 
   finally
     lPermissaoRemotaLista:=nil;
+  end;
+end;
+
+function TPermissaoRemotaModel.obterPermissaoVendaAssistidaRemoto: TPermissaoResultado;
+var
+  lPermissaoRemotaDao: ITPermissaoRemotaDao;
+begin
+  lPermissaoRemotaDao := TPermissaoRemotaDao.getNewIface(vIConexao);
+
+  try
+    Result := lPermissaoRemotaDao.objeto.obterPermissaoVendaAssistidaRemoto;
+  finally
+    lPermissaoRemotaDao := nil;
   end;
 end;
 

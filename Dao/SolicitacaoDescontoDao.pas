@@ -67,6 +67,7 @@ type
     function carregaClasse(pID : String): ITSolicitacaoDescontoModel;
 
     function obterLista: IFDDataset;
+    function obterDescontoVendaAssistidaRemoto: TDescontoRemotoResultado;
 
     procedure setParams(var pQry: TFDQuery; pSolicitacaoDescontoModel: ITSolicitacaoDescontoModel);
 
@@ -75,7 +76,7 @@ end;
 implementation
 
 uses
-  System.Rtti;
+  System.Rtti, Interfaces.QueryLojaAsync, Data.DB;
 
 { TSolicitacaoDesconto }
 
@@ -226,6 +227,121 @@ begin
 
   finally
     lQry.Free;
+  end;
+end;
+
+function TSolicitacaoDescontoDao.obterDescontoVendaAssistidaRemoto: TDescontoRemotoResultado;
+var
+  lSQL        : String;
+  lRegistros,
+  lLojas      : TFDMemTable;
+  lAsyncList  : IListaQueryAsync;
+  lQA         : IQueryLojaAsync;
+  conexao     : IConexao;
+  lTotal      : Double;
+begin
+  lAsyncList   := getQueryLojaAsyncList(vIConexao);
+  lRegistros   := TFDMemTable.Create(nil);
+  lLojas       := TFDMemTable.Create(nil);
+  lTotal       := 0;
+
+  Result.fdRegistros    := criaIFDDataset(lRegistros);
+  Result.fdLojasRecords := criaIFDDataset(lLojas);
+  
+  lSQL := '  select                                                                                                          '+SLineBreak+
+          '         solicitacao_desconto.id,                                                                                 '+SLineBreak+
+          '         solicitacao_desconto.cliente_id,                                                                         '+SLineBreak+
+          '         coalesce(clientes.razao_cli, clientes.fantasia_cli) cliente_nome,                                       '+SLineBreak+
+          '         solicitacao_desconto.usuario_solicitante,                                                                '+SLineBreak+
+          '         solicitante.fantasia usuario_solicitante_nome,                                                           '+SLineBreak+
+          '         solicitacao_desconto.usuario_cedente,                                                                    '+SLineBreak+
+          '         cedente.fantasia usuario_cedente_nome,                                                                   '+SLineBreak+
+          '         solicitacao_desconto.pedido_id,                                                                          '+SLineBreak+
+          '         solicitacao_desconto.status,                                                                             '+SLineBreak+
+          '         solicitacao_desconto.tipovenda_id,                                                                       '+SLineBreak+
+          '         solicitacao_desconto.tabela_origem,                                                                      '+SLineBreak+
+          '         solicitacao_desconto.valor_desconto,                                                                     '+SLineBreak+
+          '         solicitacao_desconto.valor_desconto / solicitacao_desconto.valor_pedido * 100 percentual_desconto,       '+SLineBreak+
+          '         solicitacao_desconto.valor_pedido,                                                                       '+SLineBreak+
+          '         solicitacao_desconto.valor_pedido - solicitacao_desconto.valor_desconto valor_liquido                    '+SLineBreak+
+          '    from solicitacao_desconto                                                                                     '+SLineBreak+
+          '    left join clientes on clientes.codigo_cli = solicitacao_desconto.cliente_id                                   '+SLineBreak+
+          '    left join usuario solicitante on solicitante.id = solicitacao_desconto.usuario_solicitante                    '+SLineBreak+
+          '    left join usuario cedente on cedente.id = solicitacao_desconto.usuario_cedente                                '+SLineBreak+
+          '   where solicitacao_desconto.tabela_origem = ''WEB_PEDIDO''                                                      '+SLineBreak+
+          '     and solicitacao_desconto.status is null                                                                      '+SLineBreak;
+
+  lSql := lSql + where;
+  lSQL := lSQL + ' order by solicitacao_desconto.SYSTIME ';
+
+  lRegistros.FieldDefs.Add('ID', ftString, 10);
+  lRegistros.FieldDefs.Add('LOJA', ftString, 3);
+  lRegistros.FieldDefs.Add('CLIENTE_ID', ftString, 6);
+  lRegistros.FieldDefs.Add('CLIENTE_NOME', ftString, 100);
+  lRegistros.FieldDefs.Add('USUARIO_SOLICITANTE', ftString, 20);
+  lRegistros.FieldDefs.Add('USUARIO_SOLICITANTE_NOME', ftString, 50);
+  lRegistros.FieldDefs.Add('USUARIO_CEDENTE', ftString, 20);
+  lRegistros.FieldDefs.Add('USUARIO_CEDENTE_NOME', ftString, 50);
+  lRegistros.FieldDefs.Add('PEDIDO_ID', ftString, 6);
+  lRegistros.FieldDefs.Add('STATUS', ftString, 20);
+  lRegistros.FieldDefs.Add('TIPOVENDA_ID', ftString, 20);
+  lRegistros.FieldDefs.Add('TABELA_ORIGEM', ftString, 50);
+  lRegistros.FieldDefs.Add('VALOR_DESCONTO', ftFloat);
+  lRegistros.FieldDefs.Add('PERCENTUAL_DESCONTO', ftFloat);
+  lRegistros.FieldDefs.Add('VALOR_PEDIDO', ftFloat);
+  lRegistros.FieldDefs.Add('VALOR_LIQUIDO', ftFloat);
+  lRegistros.CreateDataSet;
+
+  lLojas.FieldDefs.Add('LOJA', ftString, 3);
+  lLojas.FieldDefs.Add('QUANTIDADE', ftFloat);
+  lLojas.CreateDataSet;
+
+  for lQA in lAsyncList do
+  begin
+    lQA.rotulo := 'ObterDescontoVendaAssistida';
+    conexao := lQA.loja.objeto.conexaoLoja;
+    if(conexao=nil) then
+      raise Exception.CreateFmt('TSolicitacaoDescontoDao.ObterDescontoVendaAssistida: Loja [%s] com problemas.',[lQA.loja.objeto.LOJA]);
+
+    lQA.execQuery(lSQL,'',[]);
+  end;
+
+  for lQA in lAsyncList do
+  begin
+    lQA.esperar;
+    if(lQA.resultado.erros>0) then
+      raise Exception.CreateFmt('TSolicitacaoDescontoDao.ObterDescontoVendaAssistida: Loja [%s] com problemas: [%s]',[lQA.loja.objeto.LOJA, lQA.resultado.toString]);
+
+    lQA.dataset.dataset.first;
+    while not lQA.dataset.dataset.Eof do
+    begin
+      lTotal := lTotal + 1;
+
+      lRegistros.InsertRecord([lQA.dataset.dataset.FieldByName('ID').AsString,
+                              lQA.loja.objeto.LOJA,
+                              lQA.dataset.dataset.FieldByName('CLIENTE_ID').AsString,
+                              lQA.dataset.dataset.FieldByName('CLIENTE_NOME').AsString,
+                              lQA.dataset.dataset.FieldByName('USUARIO_SOLICITANTE').AsString,
+                              lQA.dataset.dataset.FieldByName('USUARIO_SOLICITANTE_NOME').AsString,
+                              lQA.dataset.dataset.FieldByName('USUARIO_CEDENTE').AsString,
+                              lQA.dataset.dataset.FieldByName('USUARIO_CEDENTE_NOME').AsString,
+                              lQA.dataset.dataset.FieldByName('PEDIDO_ID').AsString,
+                              lQA.dataset.dataset.FieldByName('STATUS').AsString,
+                              lQA.dataset.dataset.FieldByName('TIPOVENDA_ID').AsString,
+                              lQA.dataset.dataset.FieldByName('TABELA_ORIGEM').AsString,
+                              lQA.dataset.dataset.FieldByName('VALOR_DESCONTO').AsFloat,
+                              lQA.dataset.dataset.FieldByName('PERCENTUAL_DESCONTO').AsFloat,
+                              lQA.dataset.dataset.FieldByName('VALOR_PEDIDO').AsFloat,
+                              lQA.dataset.dataset.FieldByName('VALOR_LIQUIDO').AsFloat]);
+
+      lQA.dataset.dataset.Next;
+    end;
+
+    if lTotal > 0 then
+    begin
+      lLojas.InsertRecord([lQA.loja.objeto.LOJA, lTotal]);
+      lTotal := 0;
+    end;
   end;
 end;
 

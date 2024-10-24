@@ -281,6 +281,16 @@ type
     btnConsultarRecibo: TButton;
     btnUpdateRecibo: TButton;
     btnExcluirRecibo: TButton;
+    tabLiberacoes: TTabSheet;
+    btnLiberacaoDesconto: TButton;
+    dGenerico1: TDataSource;
+    PageControl2: TPageControl;
+    TabSheet18: TTabSheet;
+    XDBGrid17: TXDBGrid;
+    TabSheet19: TTabSheet;
+    XDBGrid18: TXDBGrid;
+    dGenerico2: TDataSource;
+    btnPermissaoRemoto: TButton;
     procedure btnFinanceiroPedidoClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -447,12 +457,14 @@ type
     procedure btnUpdateReciboClick(Sender: TObject);
     procedure btnExcluirReciboClick(Sender: TObject);
     procedure btnConsultarReciboClick(Sender: TObject);
+    procedure btnLiberacaoDescontoClick(Sender: TObject);
+    procedure btnPermissaoRemotoClick(Sender: TObject);
 
   private
     { Private declarations }
     vQtdeRegistros,
     vPagina         : Integer;
-    dsTmp,dsTmp2, tComissao, tDevolucao, tItens, tGrupo, tGarantia, tPrestamista: IFDDataset;
+    dsTmp,dsTmp2, tComissao, tDevolucao, tItens, tGrupo, tGarantia, tPrestamista, tLojasRecords, tRegistrosDesconto: IFDDataset;
 
   public
     { Public declarations }
@@ -785,6 +797,26 @@ begin
       end;
   finally
     lReciboModel:=nil;
+  end;
+end;
+
+procedure TForm1.btnLiberacaoDescontoClick(Sender: TObject);
+var
+  lSolicitacaoDescontoModel : ITSolicitacaoDescontoModel;
+  lResultado                : TDescontoRemotoResultado;
+begin
+  lSolicitacaoDescontoModel := TSolicitacaoDescontoModel.getNewIface(vIConexao);
+
+  try
+    lResultado := lSolicitacaoDescontoModel.objeto.obterDescontoVendaAssistidaRemoto;
+
+    tLojasRecords      := lResultado.fdLojasRecords;
+    tRegistrosDesconto := lResultado.fdRegistros;
+
+    dGenerico1.DataSet := tLojasRecords.objeto;
+    dGenerico2.DataSet := tRegistrosDesconto.objeto;
+  finally
+    lSolicitacaoDescontoModel := nil;
   end;
 end;
 
@@ -3059,6 +3091,26 @@ begin
     lPermissaoRemotaModel.objeto.Autorizar('789');
   finally
     lPermissaoRemotaModel:=nil;
+  end;
+end;
+
+procedure TForm1.btnPermissaoRemotoClick(Sender: TObject);
+var
+  lPermissaoRemotaModel : ITPermissaoRemotaModel;
+  lResultado            : TPermissaoResultado;
+begin
+  lPermissaoRemotaModel := TPermissaoRemotaModel.getNewIface(vIConexao);
+
+  try
+    lResultado := lPermissaoRemotaModel.objeto.obterPermissaoVendaAssistidaRemoto;
+
+    tLojasRecords      := lResultado.fdLojasRecords;
+    tRegistrosDesconto := lResultado.fdRegistros;
+
+    dGenerico1.DataSet := tLojasRecords.objeto;
+    dGenerico2.DataSet := tRegistrosDesconto.objeto;
+  finally
+    lPermissaoRemotaModel := nil;
   end;
 end;
 

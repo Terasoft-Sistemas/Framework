@@ -2,7 +2,7 @@ object Form1: TForm1
   Left = 0
   Top = 270
   Caption = 'Form1'
-  ClientHeight = 769
+  ClientHeight = 749
   ClientWidth = 1254
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -20,8 +20,8 @@ object Form1: TForm1
     Left = 0
     Top = 0
     Width = 1254
-    Height = 769
-    ActivePage = Recibo
+    Height = 749
+    ActivePage = tabLiberacoes
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -693,7 +693,7 @@ object Form1: TForm1
       ImageIndex = 1
       object dbTeste2: TXDBGrid
         Left = 0
-        Top = 116
+        Top = 96
         Width = 1246
         Height = 623
         Align = alBottom
@@ -743,7 +743,7 @@ object Form1: TForm1
       ImageIndex = 2
       object XDBGrid1: TXDBGrid
         Left = 0
-        Top = 490
+        Top = 470
         Width = 1246
         Height = 249
         Align = alBottom
@@ -753,7 +753,7 @@ object Form1: TForm1
       end
       object XDBGrid2: TXDBGrid
         Left = 0
-        Top = 328
+        Top = 308
         Width = 1246
         Height = 162
         Align = alBottom
@@ -848,7 +848,7 @@ object Form1: TForm1
       ImageIndex = 3
       object XDBGrid3: TXDBGrid
         Left = 0
-        Top = 434
+        Top = 414
         Width = 1246
         Height = 305
         Align = alBottom
@@ -958,7 +958,7 @@ object Form1: TForm1
       ImageIndex = 6
       object XDBGrid4: TXDBGrid
         Left = 0
-        Top = 297
+        Top = 277
         Width = 1246
         Height = 169
         Align = alBottom
@@ -986,7 +986,7 @@ object Form1: TForm1
       end
       object XDBGrid5: TXDBGrid
         Left = 0
-        Top = 466
+        Top = 446
         Width = 1246
         Height = 273
         Align = alBottom
@@ -1099,7 +1099,7 @@ object Form1: TForm1
       end
       object XDBGrid6: TXDBGrid
         Left = 0
-        Top = 330
+        Top = 310
         Width = 1246
         Height = 409
         Align = alBottom
@@ -1189,7 +1189,7 @@ object Form1: TForm1
       end
       object XDBGrid7: TXDBGrid
         Left = 0
-        Top = 434
+        Top = 414
         Width = 1246
         Height = 305
         Align = alBottom
@@ -1355,7 +1355,7 @@ object Form1: TForm1
       end
       object XDBGrid8: TXDBGrid
         Left = 0
-        Top = 434
+        Top = 414
         Width = 1246
         Height = 305
         Align = alBottom
@@ -1414,7 +1414,7 @@ object Form1: TForm1
       ImageIndex = 13
       object XDBGrid9: TXDBGrid
         Left = 0
-        Top = 524
+        Top = 504
         Width = 1246
         Height = 215
         Align = alBottom
@@ -1535,7 +1535,7 @@ object Form1: TForm1
       end
       object Memo1: TMemo
         Left = 0
-        Top = 484
+        Top = 464
         Width = 1246
         Height = 255
         Align = alBottom
@@ -1565,7 +1565,7 @@ object Form1: TForm1
       end
       object dbGridTabelaJuros: TXDBGrid
         Left = 0
-        Top = 524
+        Top = 504
         Width = 1246
         Height = 215
         Align = alBottom
@@ -1588,7 +1588,7 @@ object Form1: TForm1
       end
       object XDBGrid10: TXDBGrid
         Left = 0
-        Top = 524
+        Top = 504
         Width = 1246
         Height = 215
         Align = alBottom
@@ -2151,6 +2151,63 @@ object Form1: TForm1
         OnClick = btnExcluirReciboClick
       end
     end
+    object tabLiberacoes: TTabSheet
+      Caption = 'Libera'#231#245'es remotas'
+      ImageIndex = 20
+      object btnLiberacaoDesconto: TButton
+        Left = 39
+        Top = 31
+        Width = 182
+        Height = 42
+        Caption = 'Desconto Remoto'
+        TabOrder = 0
+        OnClick = btnLiberacaoDescontoClick
+      end
+      object PageControl2: TPageControl
+        Left = 21
+        Top = 176
+        Width = 1222
+        Height = 265
+        ActivePage = TabSheet18
+        TabOrder = 1
+        object TabSheet18: TTabSheet
+          Caption = 'Lojas quantidade'
+          object XDBGrid17: TXDBGrid
+            Left = 0
+            Top = 0
+            Width = 1214
+            Height = 235
+            Align = alClient
+            DataSource = dGenerico1
+            GridStyle.VisualStyle = vsXPStyle
+            TabOrder = 0
+          end
+        end
+        object TabSheet19: TTabSheet
+          Caption = 'Registros'
+          ImageIndex = 1
+          object XDBGrid18: TXDBGrid
+            Left = 0
+            Top = 0
+            Width = 1214
+            Height = 235
+            Align = alClient
+            DataSource = dGenerico2
+            GridStyle.VisualStyle = vsXPStyle
+            TabOrder = 0
+          end
+        end
+      end
+      object btnPermissaoRemoto: TButton
+        Left = 255
+        Top = 31
+        Width = 182
+        Height = 42
+        Caption = 'Permissao Remota'
+        TabOrder = 2
+        OnClick = btnPermissaoRemotoClick
+      end
+    end
   end
   object dsTeste2: TDataSource
     Left = 1056
@@ -2235,5 +2292,13 @@ object Form1: TForm1
   object dPrestamista: TDataSource
     Left = 952
     Top = 320
+  end
+  object dGenerico1: TDataSource
+    Left = 864
+    Top = 456
+  end
+  object dGenerico2: TDataSource
+    Left = 944
+    Top = 464
   end
 end

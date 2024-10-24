@@ -10,6 +10,10 @@ uses
   FireDAC.Comp.Client;
 
 type
+  TDescontoRemotoResultado = record
+    fdLojasRecords,
+    fdRegistros      : IFDDataset;
+  end;
 
   TSolicitacaoDescontoModel = class;
   ITSolicitacaoDescontoModel = IObject<TSolicitacaoDescontoModel>;
@@ -84,6 +88,7 @@ type
 
     function carregaClasse(pId : String): ITSolicitacaoDescontoModel;
     function obterLista: IFDDataset;
+    function obterDescontoVendaAssistidaRemoto: TDescontoRemotoResultado;
 
     function Autorizar(pID : String): Boolean;
     function Negar(pID : String): Boolean;
@@ -102,6 +107,7 @@ type
 implementation
 
 uses
+  Data.DB,
   SolicitacaoDescontoDao,
   System.Classes,
   Terasoft.Utils,
@@ -236,6 +242,19 @@ end;
 destructor TSolicitacaoDescontoModel.Destroy;
 begin
   inherited;
+end;
+
+function TSolicitacaoDescontoModel.obterDescontoVendaAssistidaRemoto: TDescontoRemotoResultado;
+var
+  lSolicitacaoDescontoDao : ITSolicitacaoDescontoDao;
+begin
+
+  lSolicitacaoDescontoDao := TSolicitacaoDescontoDao.getNewIface(vIConexao);
+  try
+    Result := lSolicitacaoDescontoDao.objeto.obterDescontoVendaAssistidaRemoto;
+  finally
+    lSolicitacaoDescontoDao := nil;
+  end;
 end;
 
 function TSolicitacaoDescontoModel.obterLista: IFDDataset;
